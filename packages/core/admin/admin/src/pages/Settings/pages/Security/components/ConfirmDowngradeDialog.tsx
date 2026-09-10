@@ -23,7 +23,7 @@ interface ConfirmDowngradeDialogProps {
    */
   onConfirm: (credentials: DowngradeCredentials) => Promise<string | undefined>;
   /**
-   * Overrides the dialog's heading. Cycle 4 needs it: the default names *lowering two-factor
+   * Overrides the dialog's heading. Passkeys needs it: the default names *lowering two-factor
    * requirements*, and the passkeys card is not lowering a requirement -- it is deleting every
    * credential every administrator registered, which needs saying in those words. Defaults to
    * the string the enforcement and trusted-device cards have always shown, so neither changes.
@@ -39,7 +39,7 @@ interface ConfirmDowngradeDialogProps {
  * period (`isSecurityDowngrade`). The server (`PUT /admin/security-settings`) refuses such a
  * change without the caller's password, plus a current code when the caller is enrolled.
  *
- * Deliberately not cycle 1's `ReAuthDialog`: that one is bound to the regenerate/disable
+ * Deliberately not the base factor's `ReAuthDialog`: that one is bound to the regenerate/disable
  * mutations and always requires a code, while an *unenrolled* administrator may lower protection
  * with the password alone. This component owns no mutation; the card hands it the save.
  *
@@ -47,7 +47,7 @@ interface ConfirmDowngradeDialogProps {
  * `type="submit"` so Enter works with two blocking fields, and a synchronous `inFlightRef`
  * guards the click + native-submit double fire.
  *
- * Cycle 4 made the heading and the paragraph overridable (`title` / `description`), because the
+ * Passkeys made the heading and the paragraph overridable (`title` / `description`), because the
  * same re-authentication gate now also covers turning passkeys off, which lowers no requirement.
  */
 const ConfirmDowngradeDialog = ({

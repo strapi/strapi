@@ -26,7 +26,7 @@ const ASSERTION: AuthenticationResponseJSON = {
   type: 'public-key',
 };
 
-describe('auth service (cycle 4 passkey login)', () => {
+describe('auth service (passkey login)', () => {
   it('POSTs /admin/login/mfa/webauthn/options with the challenge token, and unwraps the request options', async () => {
     let method: string | undefined;
     let body: unknown;

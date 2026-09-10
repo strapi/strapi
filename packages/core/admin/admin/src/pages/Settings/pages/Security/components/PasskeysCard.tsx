@@ -19,7 +19,7 @@ interface PasskeysCardProps {
   /** `/admin/mfa/me` `enabled` for the caller: decides whether the off-transition needs a code. */
   callerEnrolled: boolean;
   /**
-   * `/admin/mfa/me` `hasLocalPassword` for the caller (fix-wave, final review finding 1): an
+   * `/admin/mfa/me` `hasLocalPassword` for the caller: an
    * SSO-only administrator has none, and the server exempts exactly that account from presenting
    * credentials to turn passkeys off. Defaults to `true` -- the pre-fix, always-ask behaviour --
    * so a caller that has not wired this prop through yet gets the safe direction.
@@ -30,7 +30,7 @@ interface PasskeysCardProps {
 }
 
 /**
- * The third card on the Security page (cycle 4). One checkbox, saved alone: `PUT
+ * The third card on the Security page. One checkbox, saved alone: `PUT
  * /admin/security-settings` is per object, so the body never carries `mfa` or `trustedDevices`.
  *
  * Only the **off**-transition collects credentials, and it is the only asymmetric card on the
@@ -43,7 +43,7 @@ interface PasskeysCardProps {
  * The dialog's copy is overridden for the same reason: the shared heading names "lowering
  * two-factor requirements", which is not what this save does.
  *
- * Fix-wave (final review finding 1): the off-transition's `requiresCredentials` also factors in
+ * the off-transition's `requiresCredentials` also factors in
  * `hasLocalPassword`, mirroring the server's password-less exemption -- otherwise an SSO-only
  * administrator could never complete this save from the UI at all, even though the server lets
  * them.

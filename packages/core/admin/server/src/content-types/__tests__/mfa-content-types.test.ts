@@ -70,7 +70,7 @@ describe('mfa content types', () => {
     expect(User.config.attributes.mfaSecret.hidden).toBe(true);
   });
 
-  describe('cycle 2 enforcement columns', () => {
+  describe('enforcement columns', () => {
     test('admin::user declares the three enforcement columns as private datetimes/strings', () => {
       const { attributes } = User;
       expect(attributes.mfaPendingSecret).toEqual({
@@ -102,7 +102,7 @@ describe('mfa content types', () => {
     });
   });
 
-  describe('cycle 3 trusted devices', () => {
+  describe('trusted devices', () => {
     test('is registered under mfa-trusted-device', () => {
       expect(contentTypes['mfa-trusted-device'].schema).toBe(trustedDevice);
     });
@@ -127,7 +127,7 @@ describe('mfa content types', () => {
     });
   });
 
-  describe('cycle 4 passkeys', () => {
+  describe('passkeys', () => {
     test('is registered under mfa-passkey', () => {
       expect(contentTypes['mfa-passkey'].schema).toBe(passkey);
     });

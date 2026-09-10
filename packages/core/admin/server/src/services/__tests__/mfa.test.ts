@@ -16,7 +16,7 @@ import { MFA_DEFAULTS } from '../../config/mfa';
 import { resetSecuritySettingsWarnings } from '../security-settings';
 
 /**
- * Cycle 4 mocks exactly the two verification functions and nothing else. What is under test here
+ * Passkeys mocks exactly the two verification functions and nothing else. What is under test here
  * is our wiring -- challenge consumption, owner scoping, marshalling, counters, charging,
  * cascades -- not `@simplewebauthn`'s cryptography, which has its own suite upstream and whose
  * call shapes are pinned in `webauthn-library-contract.test.ts`. `generateRegistrationOptions`
@@ -40,8 +40,8 @@ const CHALLENGE_TABLE = 'strapi_admin_mfa_challenges';
 const CHALLENGE_ATTEMPTS_COLUMN = 'attempts';
 const EVENT_UID = 'admin::mfa-event';
 const TRUSTED_UID = 'admin::mfa-trusted-device';
-// `PASSKEY_UID` is imported from `../mfa-passkeys` (M6): it used to be re-declared here as its
-// own literal, which let the two silently drift.
+// `PASSKEY_UID` is imported from `../mfa-passkeys` rather than re-declared here as its own
+// literal, which let the two silently drift.
 // The physical table name asserted against below, in the unique-constraint-translation test: the
 // dialect error names it, and the generic message the caller actually sees must not.
 const PASSKEY_TABLE = 'strapi_admin_mfa_passkeys';
@@ -258,7 +258,7 @@ const asComparable = (value: unknown): number => {
  * (logical combinators over nested `where` fragments), plain equality, and a bare `null`/
  * `undefined` condition (shorthand for "column is null"). Inside a per-field condition object it
  * understands `$in`/`$notIn` (membership, both sides compared with `String()`), `$ne`
- * (inequality), `$notNull`/`$null` (presence -- `admin::role`'s `mfaRequired` scan and cycle 2's
+ * (inequality), `$notNull`/`$null` (presence -- `admin::role`'s `mfaRequired` scan and enforcement's
  * enforcement queries), and the four ordering operators `$gt`/`$gte`/`$lt`/`$lte` (the challenge
  * and event queries, plus `lockAccount`'s `mfaGraceUntil` check) -- which fail closed (`false`,
  * never a thrown comparison) against a null/undefined column, mirroring how SQL treats a `NULL`
@@ -346,7 +346,7 @@ const matchesWhere = (row: Record<string, unknown>, where: Record<string, unknow
  * Pins `matchesWhere`'s own SQL fidelity directly, rather than only through whichever service
  * call happens to route through it: a null/undefined column must fail closed against `$notIn` and
  * every ordering operator, exactly as a real `NOT IN`/`<=` comparison against `NULL` excludes the
- * row instead of matching it. Task 7 runs `updateMany` with `$notIn` on roles through this same
+ * row instead of matching it. `updateMany` with `$notIn` on roles runs through this same
  * fixture, so a regression here would otherwise only surface there, several tasks later.
  */
 describe('matchesWhere fixture', () => {
@@ -520,7 +520,7 @@ interface FixtureOptions {
   challengeTableName?: string;
   challengeAttemptsColumn?: string;
   userPasskeyChallengeColumn?: string;
-  /** M7: the sibling expiry stamp, nulled alongside `mfaPasskeyChallenge` in the same statement. */
+  /** The sibling expiry stamp, nulled alongside `mfaPasskeyChallenge` in the same statement. */
   userPasskeyChallengeExpiresAtColumn?: string;
   /** Drops `mfaPasskeyChallenge` (and its sibling expiry column) from the USER_UID metadata
    * entirely, so a test can prove the `ApplicationError` guard for a missing physical column. */
@@ -634,7 +634,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
     // observed. Spreading into a new object is what makes a read-then-write mutant in
     // `consumeTotpStep` racy under `Promise.all` the way it would be against a real database;
     // returning the stored object directly let two racing reads silently share one mutable
-    // object and see each other's write, masking the exact bug Finding 1 exists to catch.
+    // object and see each other's write, masking the exact bug these tests exist to catch.
     // `populate: ['roles']` is honoured on top of that: `enforce` reloads the row itself and
     // always asks for roles, so a snapshot that silently dropped an unpopulated `roles` field
     // would let the enforcement suite pass without ever exercising the real shape.
@@ -657,12 +657,12 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
       // return value must not be left holding a window onto later writes.
       return { ...user };
     }),
-    // The conditional UPDATE every cycle 2 transition uses (`stampGrace`, `lockAccount`,
+    // The conditional UPDATE every enforcement transition uses (`stampGrace`, `lockAccount`,
     // `unlock`): evaluates `where` against live rows at the moment it runs and reports the true
     // affected count, so a read-then-write mutant is racy here exactly as against a real database.
     // `id` is compared as a string on both sides because the service passes `String(user.id)`.
     //
-    // Also `completeEnrolment`'s promotion (Finding 3): `where` there carries the
+    // Also `completeEnrolment`'s promotion: `where` there carries the
     // `mfaPendingSecret` value read at the top of the function alongside `id`, so a row that
     // changed underneath (a concurrent `disable`, or any other write) between that read and this
     // call matches nothing and `count` comes back 0.
@@ -845,7 +845,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
     }),
   };
 
-  // Cycle 3. Every row handed out is a snapshot, every write mutates the live array, exactly as
+  // Trusted devices. Every row handed out is a snapshot, every write mutates the live array, exactly as
   // the challenge and event stores above. `findMany` honours `where` and `orderBy` (the cap and
   // the list both order by `createdAt` desc, `id` desc); `select` is accepted and ignored.
   const trustedRows: TrustedRow[] = [];
@@ -895,7 +895,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
     ),
   };
 
-  // Cycle 4. Same two rules as every store above: every row handed out is a snapshot, every write
+  // Passkeys. Same two rules as every store above: every row handed out is a snapshot, every write
   // mutates the live array. `findMany` honours `where` and `orderBy` (the list orders by
   // `createdAt` desc, `id` desc); `select` is accepted and ignored.
   const passkeyRows: PasskeyRowFixture[] = [];
@@ -1004,7 +1004,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
         throw new Error(`Unexpected table in mock connection: ${table}`);
       }),
       metadata: { get: metadataGet },
-      // A real commit/rollback, not a bare pass-through: `disable` (Task 10 fix round 1) wraps
+      // A real commit/rollback, not a bare pass-through: `disable` wraps
       // three statements in one transaction specifically so a failure on the last one (the user
       // update) undoes the first two (the recovery-code and challenge deletes) rather than
       // stranding the account mid-teardown. Proving that requires the mock to actually roll back
@@ -1142,7 +1142,7 @@ describe('mfa service: enrolment', () => {
     expect(users.get('1')).toEqual(snapshot);
   });
 
-  // M1: `isEnrolled` requires both `mfaEnabledAt` AND `mfaSecret`, but `beginEnrolment` used to
+  // `isEnrolled` requires both `mfaEnabledAt` AND `mfaSecret`, but `beginEnrolment` used to
   // gate on `mfaEnabledAt` alone. A half-written row (`mfaEnabledAt` set, `mfaSecret` null --
   // reachable through direct DB tampering, a partial write elsewhere, or a hand-edited row) is not
   // enrolled for login purposes (`isEnrolled` would say false, so no challenge is ever issued) but
@@ -1357,7 +1357,7 @@ describe('mfa service: enrolment', () => {
     );
   });
 
-  // Finding 3: the promotion used to be read-then-write (`user` read at the top of
+  // The promotion used to be read-then-write (`user` read at the top of
   // `completeEnrolment`, its `mfaPendingSecret` written back as `mfaSecret` after
   // `issueRecoveryCodes` resolves). A `disable` racing in that window would be silently undone --
   // the account comes back enrolled on the very secret `disable` just abandoned. `createMany` is
@@ -1628,14 +1628,14 @@ describe('mfa service: isEnabled', () => {
 });
 
 describe('mfa service: recovery codes', () => {
-  const DEFAULT_RECOVERY_CODE_COUNT = 7; // deliberately not the MFA_DEFAULTS value (10) — see
-  // Finding 2: a fixture that matches the default can't distinguish "read the config" from
-  // "ignore it and use the default".
+  // Deliberately not the MFA_DEFAULTS value (10): a fixture that matches the default can't
+  // distinguish "read the config" from "ignore it and use the default".
+  const DEFAULT_RECOVERY_CODE_COUNT = 7;
 
   /**
    * Adapter onto the merged fixture at the top of this file. `tableName`/`columnName` default to
-   * the real physical names but can be overridden per test (Finding 3), and `recoveryCodeCount`
-   * defaults to a non-default value (Finding 2). Everything else — snapshot hand-outs, a live
+   * the real physical names but can be overridden per test, and `recoveryCodeCount` defaults
+   * to a non-default value. Everything else — snapshot hand-outs, a live
    * conditional UPDATE — is the shared fixture's job, so the recovery suite and the challenge
    * suite cannot drift into two different notions of the same store.
    */
@@ -2244,7 +2244,7 @@ describe('mfa service: challenge lifecycle', () => {
     expect(validatePassword).toHaveBeenCalled();
   });
 
-  // M2: the shape dispatch normalises the submitted code (via `normaliseRecoveryCode`) only to
+  // The shape dispatch normalises the submitted code (via `normaliseRecoveryCode`) only to
   // decide *which* branch to take -- it used to then hand the TOTP branch the raw, un-normalised
   // `code`, and `verifyTotp` only `.trim()`s (leading/trailing whitespace), not internal
   // whitespace. A display-formatted code like "123 456" (some authenticator apps group digits)
@@ -2495,7 +2495,7 @@ describe('mfa service: assertPasswordAndFactor and disable', () => {
       expect(events.filter((e) => e.type === 'challenge_failed')).toHaveLength(1);
     });
 
-    // M2: same fix as `verifyChallenge` -- the dispatch normalises the code to decide which branch
+    // Same fix as `verifyChallenge` -- the dispatch normalises the code to decide which branch
     // to take, but used to pass the raw, un-normalised code to `verifyTotpForUser`, so a
     // display-formatted code with an internal space failed `verifyTotp`'s digit check even though
     // it dispatched to the right branch.
@@ -2588,7 +2588,7 @@ describe('mfa service: assertPasswordAndFactor and disable', () => {
       expect(challenges.filter((c) => c.userId === '2')).toHaveLength(1);
     });
 
-    test('a failing user update rolls back the recovery-code and challenge deletes (Finding 1: no permanent lockout)', async () => {
+    test('a failing user update rolls back the recovery-code and challenge deletes, so there is no permanent lockout', async () => {
       // The third of `disable`'s three statements is made to reject. Without a transaction the
       // first two (the deletes) would already have committed by the time this throws, leaving
       // the account with `mfaEnabledAt`/`mfaSecret` still set (a code is still demanded) and zero
@@ -2596,7 +2596,7 @@ describe('mfa service: assertPasswordAndFactor and disable', () => {
       // that combination is a permanent lockout with no path back but the CLI reset.
       //
       // Also seeds one trusted-device row for this user: `disable` runs the trusted-device clear
-      // (Cycle 3) inside the same transaction as the recovery-code and challenge deletes, and this
+      // (Trusted devices) inside the same transaction as the recovery-code and challenge deletes, and this
       // is the only test that proves the rollback actually reaches it -- a failure of the user
       // update here must leave the trust in place, exactly as it leaves the recovery codes and
       // challenges in place. Seeded directly through `trustedMocks.create`, bypassing
@@ -2692,7 +2692,7 @@ describe('mfa service: assertPasswordAndFactor and disable', () => {
     });
 
     test('a failing user update rolls the passkey deletion back with everything else', async () => {
-      // Same reasoning cycle 1 gives for wrapping `disable`: all of it lands or none does.
+      // Same reasoning the base factor gives for wrapping `disable`: all of it lands or none does.
       const { strapi, passkeyRows } = buildMfaFixture({
         userOverrides: {
           update: jest.fn(async () => {
@@ -2739,10 +2739,10 @@ describe('mfa notifications', () => {
     });
 
     // Non-throwing and never rejecting: the caller (e.g. `verifyChallenge`) must never see this
-    // failure. `notify` now returns the email promise (F6, so a caller that needs to know the
-    // email settled -- the CLI reset, which must not `process.exit` before it does -- can await
-    // it), but the internal try/catch still guarantees that promise always resolves, never
-    // rejects, so every existing fire-and-forget call site keeps working unchanged.
+    // failure. `notify` returns the email promise so a caller that needs to know the email
+    // settled can await it (the CLI reset, which must not `process.exit` before it does), but
+    // the internal try/catch guarantees that promise always resolves, never rejects, so the
+    // fire-and-forget call sites keep working unchanged.
     expect(() => service.notify('1', 'enabled')).not.toThrow();
     await expect(service.notify('1', 'enabled')).resolves.toBeUndefined();
     await flushMicrotasks();
@@ -2754,7 +2754,7 @@ describe('mfa notifications', () => {
     );
   });
 
-  // F6: `notify`'s email used to be an untracked, detached async IIFE -- nothing about the
+  // `notify`'s email used to be an untracked, detached async IIFE -- nothing about the
   // returned value ever told a caller when (or whether) it had settled. The CLI reset command
   // calls `notify` and then `process.exit(0)` immediately after, which can tear the process down
   // before that detached promise ever resolves, so the reset email silently never sends. Awaiting
@@ -3779,7 +3779,7 @@ describe('mfa service: passkey registration', () => {
     jest.useRealTimers();
   });
 
-  // I2: both invariants used to live only in `controllers/mfa.ts`'s
+  // Both invariants used to live only in `controllers/mfa.ts`'s
   // `assertPasskeyRegistrationAllowed`. These four call the SERVICE directly -- the same surface
   // `strapi.service('admin::mfa')` exposes to any other caller -- to prove the guard now holds
   // there too, not only when the request happens to arrive through the controller.
@@ -3817,7 +3817,7 @@ describe('mfa service: passkey registration', () => {
     });
   });
 
-  // I1: `passkeysConfigured` is the boolean wrapper both `passkeysEnabled` on `/mfa/me`
+  // `passkeysConfigured` is the boolean wrapper both `passkeysEnabled` on `/mfa/me`
   // (`controllers/mfa.ts`) and `passkeyAvailable` on the challenge response
   // (`controllers/authentication.ts`) compose with the organisation policy, so a deployment whose
   // `admin.absoluteUrl` cannot resolve to an RP (the default production shape) stops advertising a
@@ -3991,7 +3991,7 @@ describe('mfa service: passkey registration', () => {
     );
   });
 
-  // M7: only `disable` used to clear `mfaPasskeyChallengeExpiresAt`; a successful registration
+  // Only `disable` used to clear `mfaPasskeyChallengeExpiresAt`; a successful registration
   // nulled the challenge column but left the stamp behind indefinitely.
   test('a successful registration clears the pending expiry stamp alongside the challenge', async () => {
     const { service, users } = setup();
@@ -4176,7 +4176,7 @@ describe('mfa service: passkey registration', () => {
     await expect(service.countPasskeys('1')).resolves.toBe(2);
   });
 
-  // M12: `toIso(row.lastUsedAt)` was already guarded (only called when truthy); `toIso(row.createdAt)`
+  // `toIso(row.lastUsedAt)` was already guarded (only called when truthy); `toIso(row.createdAt)`
   // was not, and `new Date(undefined).toISOString()` throws a `RangeError` -- a 500 on the list
   // route for a row a migration never backfilled.
   test('a row with no createdAt reads as the epoch instead of throwing', async () => {
@@ -4562,7 +4562,7 @@ describe('mfa service: passkey login', () => {
     expect(events.filter((e) => e.type === 'challenge_failed')).toHaveLength(0);
   });
 
-  // M3: the write is scoped by row id alone, contradicting the rule `deletePasskey` states and
+  // The write is scoped by row id alone, contradicting the rule `deletePasskey` states and
   // follows two hundred lines later in the same module -- a read and a write are two separate
   // statements, so only carrying the scope on the read is the hazard the factory doc-comment
   // names. This write matters more: it advances the clone-detection counter.
@@ -4638,7 +4638,7 @@ describe('mfa service: passkey login', () => {
     expect(challenges).toHaveLength(0);
   });
 
-  // M9: nothing pinned that the per-challenge attempt budget is SHARED across the TOTP/recovery
+  // Nothing pinned that the per-challenge attempt budget is SHARED across the TOTP/recovery
   // path (`verifyChallenge`) and the passkey path (`verifyAssertion`) -- every existing exhaustion
   // test only ever spends its own path's guesses against a cap sized for it. Both charge the same
   // `attempts` column on the same challenge row with the same `WHERE id = ? AND attempts < ?`

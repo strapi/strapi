@@ -31,7 +31,7 @@ export default [
   authenticated('POST', '/mfa/disable', 'mfa.disable'),
   authenticated('GET', '/mfa/notices', 'mfa.notices'),
   authenticated('POST', '/mfa/notices/seen', 'mfa.markNoticesSeen'),
-  // Cycle 3: the caller's own trusted browsers.
+  // Trusted devices: the caller's own trusted browsers.
   authenticated('GET', '/mfa/trusted-devices', 'mfa.listTrustedDevices'),
   authenticated('DELETE', '/mfa/trusted-devices', 'mfa.revokeAllTrustedDevices'),
   authenticated('DELETE', '/mfa/trusted-devices/:id', 'mfa.revokeTrustedDevice'),
@@ -49,7 +49,7 @@ export default [
     'mfa.revokeUserTrustedDevices',
     'admin::users.update'
   ),
-  // Cycle 4: the caller's own passkeys. `/mfa/passkeys/options` is listed before the `:id` route
+  // Passkeys: the caller's own passkeys. `/mfa/passkeys/options` is listed before the `:id` route
   // so the more specific path is registered first, even though the methods already differ.
   authenticated('POST', '/mfa/passkeys/options', 'mfa.passkeyRegistrationOptions'),
   authenticated('POST', '/mfa/passkeys', 'mfa.registerPasskey'),

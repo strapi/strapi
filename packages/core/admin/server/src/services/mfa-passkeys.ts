@@ -32,14 +32,12 @@ const CHALLENGE_UID = 'admin::mfa-challenge';
 export const PASSKEY_UID = 'admin::mfa-passkey';
 
 /**
- * Matching cycle 3's per-user cap for symmetry -- but this cycle *refuses* the eleventh
+ * Matching trusted devices's per-user cap for symmetry -- but this *refuses* the eleventh
  * registration instead of evicting the oldest. Deleting somebody's security key because they
  * registered an eleventh is destroying a credential they may be holding in their hand, and they
  * have a delete button.
  *
- * Fix-wave (finding 6): promoted to `shared/contracts/mfa.ts`, which the client now reads too, so
- * this is a re-export rather than the definition -- every existing caller in this file is
- * untouched.
+ * Defined in `shared/contracts/mfa.ts`, which the client reads too, so this is a re-export.
  */
 export { MAX_PASSKEYS_PER_USER };
 
@@ -56,8 +54,8 @@ export const MAX_CREDENTIAL_ID_LENGTH = 255;
 const RP_NAME = 'Strapi';
 
 /**
- * Every literal cycle 4 introduces, in one place. The first two are *shared*: each covers every
- * failure of its kind, so no caller can tell one cause from another -- cycle 1's reason,
+ * Every literal passkeys introduces, in one place. The first two are *shared*: each covers every
+ * failure of its kind, so no caller can tell one cause from another -- the base factor's reason,
  * unchanged, is that a caller must not be able to distinguish an expired challenge from a wrong
  * credential. The last four are route-specific and deliberately actionable, because each names
  * something the caller can fix about their own request.
@@ -79,7 +77,7 @@ export interface WebauthnRp {
 
 /**
  * A deliberate approximation of the public suffix list, not the list itself: shipping (or
- * fetching) the real PSL for one validation check is not a trade this cycle makes. A dotless
+ * fetching) the real PSL for one validation check is not a trade this check makes. A dotless
  * rpId other than `localhost` is refused outright (which covers `com`, `io`, `dev`), and the set
  * below names the second-level suffixes an operator is realistically likely to type.
  *
@@ -262,7 +260,7 @@ const isSecureOrigin = (url: URL): boolean =>
 
 /**
  * The relying-party identity every ceremony runs against: `admin.absoluteUrl`'s hostname and
- * origin (computed at boot by `packages/core/core/src/configuration/index.ts:122`, so the admin
+ * origin (computed at boot in `packages/core/core/src/configuration`, so the admin
  * server reads it with no import from `@strapi/core`), overridable by
  * `admin.auth.mfa.webauthn.rpId` and `admin.auth.mfa.webauthn.origins`.
  *
@@ -272,7 +270,7 @@ const isSecureOrigin = (url: URL): boolean =>
  * end up bound to a hostname the deployment never meant to serve.
  *
  * Derivation is not "works with no configuration at all". `getAbsoluteAdminUrl`
- * (`packages/core/core/src/configuration/urls.ts:70-95`) only rewrites the host to `localhost`
+ * (`packages/core/core/src/configuration/urls.ts`) only rewrites the host to `localhost`
  * when `config.environment === 'development'`; in production, with the default `server.url` of ''
  * and the `HOST=0.0.0.0` every `create-strapi-app` template writes, `admin.absoluteUrl` is
  * `http://0.0.0.0:1337/admin`. So every refusal below names the config key that fixes it, and the
@@ -418,8 +416,8 @@ export interface PasskeyDeps {
   recordEvent: (userId: string, type: MfaEventType, metadata?: MfaEventMetadata) => Promise<void>;
   notify: (
     userId: string,
-    // `challenge_failed` as well as the three passkey notices: Task 6's verify path charges
-    // cycle 1's account tier, and that notice is how `isAccountThrottled` sees it.
+    // `challenge_failed` as well as the three passkey notices: the verify path charges
+    // the base factor's account tier, and that notice is how `isAccountThrottled` sees it.
     type: PasskeyNotice | 'challenge_failed',
     extra?: { byUserId?: string; count?: number }
   ) => Promise<void>;
@@ -471,7 +469,7 @@ const readCeremonyChallenge = (registration: RegistrationResponseJSON): string |
 };
 
 /**
- * Cycle 4: passkeys. Both ceremonies, plus list / count / delete / clear. Composed into
+ * Passkeys: passkeys. Both ceremonies, plus list / count / delete / clear. Composed into
  * `createMfaService`, so callers reach it as `getService('mfa').registerPasskey` and friends.
  * Every function that decides anything keys on `userId`, and the credential lookup on the login
  * path is scoped to the challenge's owner in the `where` itself -- a global lookup followed by an
@@ -497,9 +495,9 @@ export const createPasskeys = ({
    * resolved from metadata for exactly the reasons `consumeTotpStep` gives: the raw connection
    * speaks columns, not attributes, and a schema or migration problem must surface as an
    * actionable error rather than as a `TypeError` or -- far worse -- as an UPDATE that silently
-   * affects nothing and therefore reads as "already consumed". Resolves both pending-ceremony
-   * columns: M7's fix nulls `mfaPasskeyChallengeExpiresAt` in the same conditional statement as
-   * `mfaPasskeyChallenge`, mirroring the mirror `disable` already keeps between the two.
+   * affects nothing and therefore reads as "already consumed". Both pending-ceremony columns
+   * are resolved: `mfaPasskeyChallengeExpiresAt` is nulled in the same conditional statement as
+   * `mfaPasskeyChallenge`, mirroring the pairing `disable` already keeps between the two.
    */
   const userChallengeTable = (): {
     tableName: string;
@@ -513,7 +511,7 @@ export const createPasskeys = ({
     // otherwise throw before the actionable ApplicationError below can be raised.
     const challengeColumn: string | undefined = metadata.attributes.mfaPasskeyChallenge?.columnName;
     const expiresAttr = metadata.attributes.mfaPasskeyChallengeExpiresAt;
-    // @ts-expect-error - same reasoning, for the sibling expiry stamp M7 now also nulls.
+    // @ts-expect-error - same reasoning, for the sibling expiry stamp nulled alongside it.
     const challengeExpiresAtColumn: string | undefined = expiresAttr?.columnName;
 
     if (!challengeColumn) {
@@ -536,7 +534,7 @@ export const createPasskeys = ({
    * Physical names for the three raw statements on the login path: the conditional attempt
    * increment, the challenge write, and the single-DELETE consume. Resolved from metadata for the
    * same reasons as `challengeTable()` in `mfa.ts` -- and resolved *here* rather than injected,
-   * so this module stays self-contained the way cycle 3's does.
+   * so this module stays self-contained the way trusted devices's does.
    */
   const challengeTable = (): {
     tableName: string;
@@ -548,7 +546,7 @@ export const createPasskeys = ({
     // attributes and attempts' static type is the full Attribute union. Optional chaining guards
     // a missing attribute so the actionable ApplicationError below is what surfaces.
     const attemptsColumn: string | undefined = metadata.attributes.attempts?.columnName;
-    // @ts-expect-error - same reasoning for the cycle 4 column.
+    // @ts-expect-error - same reasoning for the passkeys column.
     const webauthnColumn: string | undefined = metadata.attributes.webauthnChallenge?.columnName;
 
     if (!attemptsColumn) {
@@ -695,7 +693,7 @@ export const createPasskeys = ({
     // transaction, so the setting and the rows cannot diverge through it, and the tolerant read
     // falls back to `enabled: true`, so it cannot manufacture this state either. What this does
     // cover is a hand-edited `core_store` row and any future caller that clears the setting
-    // without the cascade -- the same class of reason cycle 1 gives for its fail-closed expiry
+    // without the cascade -- the same class of reason the base factor gives for its fail-closed expiry
     // checks. No attempt charged and no event: nothing was evaluated.
     if (!(await settings()).enabled) {
       throw new ValidationError(PASSKEY_VERIFY_FAILED);
@@ -707,7 +705,7 @@ export const createPasskeys = ({
     // attempts + 1 WHERE id = ? AND attempts < ?` -- whose affected-row count is the decision,
     // run *before* any verification so a request that crashes mid-verification has still cost an
     // attempt. Both tiers are charged on this path: charging one but not the other is a hole in
-    // the other, and a passkey path that charged neither would be the way around cycle 1's
+    // the other, and a passkey path that charged neither would be the way around the base factor's
     // throttle entirely.
     const accepted = await strapi.db
       .connection(tableName)
@@ -815,7 +813,7 @@ export const createPasskeys = ({
       },
     });
 
-    // Hub only, no row -- exactly like cycle 3's `trusted_device_used`.
+    // Hub only, no row -- exactly like trusted devices's `trusted_device_used`.
     notify(userId, 'passkey_used');
 
     return { userId };
@@ -871,9 +869,9 @@ export const createPasskeys = ({
       rpID: rpId,
       // The library throws on a string, and if `userID` is omitted it generates random bytes --
       // which would be unrecoverable, because the user handle is what a discoverable credential
-      // returns at login. Deriving it from the admin user id means a later passwordless cycle can
+      // returns at login. Deriving it from the admin user id means a later passwordless flow can
       // decode a returned `userHandle` straight back to the id with no stored column, which is
-      // the whole justification for requesting `residentKey: 'preferred'` in this cycle.
+      // the whole justification for requesting `residentKey: 'preferred'`.
       userID: isoUint8Array.fromUTF8String(String(user.id)),
       userName: user.email,
       userDisplayName: displayName,
@@ -891,7 +889,7 @@ export const createPasskeys = ({
       },
     });
 
-    // One pending registration per user; a new options call overwrites it, exactly as cycle 1's
+    // One pending registration per user; a new options call overwrites it, exactly as the base factor's
     // `mfaPendingSecret` carries a pending enrolment.
     await userQuery().update({
       where: { id: userId },
@@ -932,7 +930,7 @@ export const createPasskeys = ({
     // non-null string, so a response signed over a different challenge matches nothing and leaves
     // the genuine ceremony pending.
     const { tableName, challengeColumn, challengeExpiresAtColumn } = userChallengeTable();
-    // M7: nulls `mfaPasskeyChallengeExpiresAt` in the same statement, alongside the challenge
+    // Nulls `mfaPasskeyChallengeExpiresAt` in the same statement, alongside the challenge
     // itself -- the stamp used to survive a successful registration and only `disable` ever
     // cleared it, which is the mirror `disable`'s own comment already claims is kept.
     const affected = await strapi.db
@@ -945,7 +943,7 @@ export const createPasskeys = ({
       throw new ValidationError(PASSKEY_REGISTRATION_FAILED);
     }
 
-    // Expiry fails closed (cycle 1's rule): `new Date('nonsense') <= new Date()` is false for an
+    // Expiry fails closed (the base factor's rule): `new Date('nonsense') <= new Date()` is false for an
     // Invalid Date, so a missing or hand-edited stamp must not read as a ceremony that never
     // expires. The stamp itself decides nothing else -- the guard above is on the challenge
     // column alone -- and the next options call overwrites it. Read here before the row this
@@ -968,7 +966,7 @@ export const createPasskeys = ({
         expectedOrigin: origins,
         expectedRPID: rpId,
         // `requireUserVerification` defaults to **true** in both of the library's verifiers, so
-        // passing false is load-bearing, not decorative (spec: "Requiring user verification").
+        // passing false is load-bearing, not decorative.
         requireUserVerification: false,
       });
     } catch (error) {
@@ -1018,7 +1016,7 @@ export const createPasskeys = ({
           throw new ValidationError(PASSKEY_CAP_MESSAGE);
         }
 
-        // Inside the same transaction as the row, exactly as cycle 3 records `device_trusted`:
+        // Inside the same transaction as the row, exactly as trusted devices records `device_trusted`:
         // the credential and the audit trail that explains it must land or fail together.
         // `notify` stays outside -- it is the event hub, fire and forget.
         await recordEvent(userId, 'passkey_registered', { deviceName: name });
@@ -1113,7 +1111,7 @@ export const createPasskeys = ({
   const passkeySettings = (): Promise<PasskeySettings> => settings();
 
   /**
-   * I1: whether a webauthn ceremony can even be attempted in this deployment, without leaking why
+   * whether a webauthn ceremony can even be attempted in this deployment, without leaking why
    * not to whichever caller asks -- `resolveWebauthnRp`'s refusal is already logged at error level
    * (through `warnOnce`) where it happens, so this wrapper only ever needs to swallow it into a
    * boolean. Composed with the organisation policy by both `passkeysEnabled` on `/mfa/me`

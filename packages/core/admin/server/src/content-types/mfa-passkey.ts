@@ -65,7 +65,7 @@ export default {
       searchable: false,
     },
     // User-supplied in the registration dialog, 1..50 characters after trimming. There is no
-    // rename route (spec non-goal), so this is written once.
+    // rename route, so this is written once.
     name: {
       type: 'string',
       required: true,

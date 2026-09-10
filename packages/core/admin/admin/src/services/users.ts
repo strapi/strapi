@@ -7,7 +7,7 @@ import { adminApi } from './api';
 import type { Data } from '@strapi/types';
 
 /**
- * `GET /admin/users/:id` appends the cycle 2 enforcement state (`mfaEnabledAt`, `mfaGraceUntil`,
+ * `GET /admin/users/:id` appends the enforcement state (`mfaEnabledAt`, `mfaGraceUntil`,
  * `mfaLockedAt`) for callers holding `admin::users.update` while the feature is on; the list
  * endpoint never does. One item type covers both, with those three fields optional.
  */

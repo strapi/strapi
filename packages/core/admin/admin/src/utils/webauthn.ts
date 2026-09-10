@@ -1,7 +1,7 @@
 /**
  * How a WebAuthn ceremony failed, as far as the UI is concerned.
  *
- * - `dismissed`: the user closed the prompt or it timed out. Not an error at all -- cycle 4's
+ * - `dismissed`: the user closed the prompt or it timed out. Not an error at all -- passkeys's
  *   rule is a silent no-op with the control re-enabled, because the user is still looking at the
  *   screen and knows what they just did.
  * - `already-registered`: registration only. `excludeCredentials` did its job and this
@@ -39,7 +39,7 @@ const codeOf = (value: unknown): string | undefined => {
  * and the original error in `cause`, but `NotAllowedError` is deliberately passed through
  * untouched (platforms overload that name with their own messages, which the library does not
  * want to overwrite) -- so both `name` and `cause.name` and `code` have to be consulted. Second,
- * every component test in this cycle mocks `@simplewebauthn/browser` wholesale, which exports no
+ * every component test here mocks `@simplewebauthn/browser` wholesale, which exports no
  * `WebAuthnError` class for an `instanceof` check to use.
  *
  * Classifying in one place rather than at each entry point means one implementation and one test.

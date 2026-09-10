@@ -82,7 +82,7 @@ describe('authentication controller', () => {
       const sanitizeUser = jest.fn(() => sanitizedUser);
       const emit = jest.fn();
       const findOne = jest.fn(() => Promise.resolve(user));
-      // Cycle 3 defaults: trust offered at 30 days, no cookie ever matches, no grant. Tests that
+      // Trusted devices defaults: trust offered at 30 days, no cookie ever matches, no grant. Tests that
       // are about trust override these.
       const trustedDeviceSettings = jest.fn(() => Promise.resolve({ enabled: true, days: 30 }));
       const consumeTrustedDevice = jest.fn(() => Promise.resolve(false));
@@ -135,7 +135,7 @@ describe('authentication controller', () => {
           cookies: { set: cookiesSet, get: cookiesGet },
           notFound,
           internalServerError,
-          // createContext only builds `request: { query, body }`; issueSession also reads
+          // CreateContext only builds `request: { query, body }`; issueSession also reads
           // `request.headers` (session metadata) and `request.secure` (cookie options).
           request: { query: {}, body, headers: {}, secure: false },
         }
@@ -144,15 +144,15 @@ describe('authentication controller', () => {
       return { ctx, cookiesSet, cookiesGet, notFound };
     };
 
-    // Shared by 'trusted devices (cycle 3)' and 'passkeys (cycle 4)' below: both need an
-    // enrolled-and-challengeable mfa double, and cycle 4's tests otherwise have no access to a
-    // helper scoped inside the cycle 3 describe block.
+    // Shared by 'trusted devices' and 'passkeys' below: both need an
+    // enrolled-and-challengeable mfa double, and passkeys's tests otherwise have no access to a
+    // helper scoped inside the trusted devices describe block.
     const enrolledMfa = (overrides: Record<string, unknown> = {}) => ({
       isEnabled: jest.fn(() => true),
       isEnrolled: jest.fn(() => Promise.resolve(true)),
       createChallenge: jest.fn(() => Promise.resolve({ token: 'challenge-token', expiresIn: 300 })),
       countPasskeys: jest.fn(() => Promise.resolve(0)),
-      // I1: `passkeyAvailableFor` ANDs this with `countPasskeys > 0`, so it is only ever reached
+      // `passkeyAvailableFor` ANDs this with `countPasskeys > 0`, so it is only ever reached
       // (and only ever needs a stub) when a test overrides `countPasskeys` to something truthy.
       passkeysConfigured: jest.fn(() => true),
       ...overrides,
@@ -477,7 +477,7 @@ describe('authentication controller', () => {
       expect(emit).not.toHaveBeenCalledWith('admin.auth.mfa_required', expect.anything());
     });
 
-    // M3: the flag check must run before body validation, matching `controllers/mfa.ts`'s
+    // The flag check must run before body validation, matching `controllers/mfa.ts`'s
     // `requireEnabled` ordering -- otherwise flag-off returns 400 for a malformed body and 404 for
     // a well-formed one, which is itself a feature-presence tell (a 400 on a route that is
     // supposed to not exist reveals the validator behind it exists). A malformed body here (no
@@ -584,7 +584,7 @@ describe('authentication controller', () => {
       });
     });
 
-    describe('trusted devices (cycle 3)', () => {
+    describe('trusted devices', () => {
       test('an enrolled user with a live trust cookie gets a session and no challenge', async () => {
         mockPassportUser(user);
         const consumeTrustedDevice = jest.fn(() => Promise.resolve(true));
@@ -819,7 +819,7 @@ describe('authentication controller', () => {
       });
     });
 
-    describe('passkeys (cycle 4)', () => {
+    describe('passkeys', () => {
       const user = { id: 5, email: 'passkey-user@example.com', isActive: true };
 
       const webauthnMfa = (overrides: Record<string, unknown> = {}) => ({
@@ -846,7 +846,7 @@ describe('authentication controller', () => {
         expect((ctx.body as any).data.passkeyAvailable).toBe(true);
       });
 
-      // I1: `countPasskeys > 0` alone used to decide `passkeyAvailable`, so a deployment whose RP
+      // `countPasskeys > 0` alone used to decide `passkeyAvailable`, so a deployment whose RP
       // cannot resolve still offered a "use a passkey" button that every ceremony would refuse.
       // This pins the AND: holding a credential is not enough on its own.
       test('passkeyAvailable is false when the account holds a credential but the RP cannot be resolved', async () => {
@@ -944,7 +944,7 @@ describe('authentication controller', () => {
           body({ trustDevice: true, deviceId: '11111111-1111-4111-8111-111111111111' })
         );
         // A real header, exactly like the analogous `/login/mfa` trustDevice test -- and, per
-        // finding 5, asserted against below exactly rather than with `expect.anything()`, which
+        // Asserted against below exactly rather than with `expect.anything()`, which
         // would still pass if the controller hardcoded a literal `userAgent` instead of reading
         // it off the request.
         ctx.request.headers['user-agent'] = 'jest-agent';
@@ -955,7 +955,7 @@ describe('authentication controller', () => {
           deviceId: '11111111-1111-4111-8111-111111111111',
           userAgent: 'jest-agent',
         });
-        // Exact `expires`, not `expect.any(Object)` (finding 5): pins that the cookie carries the
+        // Exact `expires`, not `expect.any(Object)`: pins that the cookie carries the
         // service's own `expiresAt`, and `httpOnly`, byte for byte with the /login/mfa version of
         // this test.
         expect(cookiesSet).toHaveBeenCalledWith(
@@ -963,7 +963,7 @@ describe('authentication controller', () => {
           'raw-trust-token',
           expect.objectContaining({ httpOnly: true, expires: expiresAt })
         );
-        // Finding 5b: the submitted `deviceId` must reach `issueSession` itself (i.e.
+        // The submitted `deviceId` must reach `issueSession` itself (i.e.
         // `generateRefreshToken`'s device-id argument), not just `trustDevice` -- a handler that
         // minted its own fresh device id for the refresh token while still forwarding the
         // caller's to `trustDevice` would satisfy every assertion above but desynchronize the
@@ -1006,12 +1006,12 @@ describe('authentication controller', () => {
         );
       });
 
-      // F4: neither `mfaWebauthnOptionsSchema` nor `mfaWebauthnLoginSchema` had a single test --
+      // Neither `mfaWebauthnOptionsSchema` nor `mfaWebauthnLoginSchema` had a single test --
       // gutting either one (e.g. making `challengeToken`/`assertion` optional and unbounded) left
       // 48/48 green. These are controller-level, like the rest of this file's validator coverage
       // (e.g. `'a challengeToken over 64 characters is rejected...'` above): the schemas
       // themselves are not exported, only the wrapped `validate*` functions.
-      describe('webauthn validators (finding 4)', () => {
+      describe('webauthn validators', () => {
         test('loginMfaWebauthn: a missing assertion is rejected before verifyAssertion runs', async () => {
           const verifyAssertion = jest.fn();
           const doubles = buildIssuingStrapi(webauthnMfa({ verifyAssertion }));
@@ -1139,7 +1139,7 @@ describe('authentication controller', () => {
         expect(createChallenge).not.toHaveBeenCalled();
       });
 
-      // The whole point of finding 6: a trusted browser must not pay for a value it discards.
+      // A trusted browser must not pay for a value it discards.
       test('login: a live trust cookie never triggers countPasskeys at all', async () => {
         mockPassportUser(user);
         const countPasskeys = jest.fn(() => Promise.resolve(0));

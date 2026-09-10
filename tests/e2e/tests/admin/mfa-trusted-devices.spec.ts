@@ -46,7 +46,7 @@ test.describe('Trusted devices', () => {
 
     // 1. Shorten the trust period from the Security page. Shortening lowers nothing, so no
     //    re-authentication. Each card on that page is an accessible region named by its own
-    //    heading (cycle 4), so both the field and the Save button are scoped to this one.
+    //    heading, so both the field and the Save button are scoped to this one.
     await page.goto('/admin/settings/security');
     const trustCard = page.getByRole('region', { name: 'Trusted devices' });
     const days = trustCard.getByRole('spinbutton', { name: 'Trust period (days)' });

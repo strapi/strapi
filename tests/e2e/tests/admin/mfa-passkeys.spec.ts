@@ -12,7 +12,7 @@ test.use({ baseURL: `http://localhost:${process.env.PORT ?? 8000}` });
  * Attaches a virtual WebAuthn authenticator to this page over CDP, so a passkey can actually be
  * created and asserted. Platform-authenticator shaped (`internal` transport, user verification
  * already satisfied, presence simulated automatically), which is what a Touch ID / Windows Hello
- * passkey looks like to the page -- and what cycle 4 requests with
+ * passkey looks like to the page -- and what passkeys requests with
  * `residentKey: 'preferred', userVerification: 'preferred'`.
  *
  * The authenticator is bound to the CDP session, not to the cookie jar, so it survives
@@ -51,7 +51,7 @@ const addPasskey = async (page: Page, name: string, secret: string) => {
   const dialog = page.getByRole('dialog', { name: 'Add a passkey' });
   await dialog.getByLabel('Passkey name*').fill(name);
   await dialog.getByLabel('Current password*').fill(ADMIN_PASSWORD);
-  // the enrolment (or a previous login) consumed the current step account-wide
+  // The enrolment (or a previous login) consumed the current step account-wide
   await waitForNextTotpStep();
   await dialog.getByLabel('Authentication code*').fill(totpFor(secret));
   await dialog.getByRole('button', { name: 'Add passkey' }).click();
@@ -116,7 +116,7 @@ test.describe('Passkeys', () => {
     await login({ page });
     await expect(page.getByRole('heading', { name: 'Two-factor authentication' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Use a passkey' })).toHaveCount(0);
-    // the authenticator app still works, which is the whole reason removal costs nothing
+    // The authenticator app still works, which is the whole reason removal costs nothing
     await passChallenge(page, admin.secret);
   });
 

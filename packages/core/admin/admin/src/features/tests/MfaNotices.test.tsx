@@ -42,8 +42,8 @@ const NOTICES = [
 
 /**
  * `/admin/mfa/me` defaults to a 404 in the shared test server (`tests/server.ts`), matching the
- * future flag being off. Tests that need `useGetMfaStatusQuery` to actually resolve (so F3's skip
- * on `useGetMfaNoticesQuery` doesn't suppress the request) override it with a 200 here.
+ * future flag being off. Tests that need `useGetMfaStatusQuery` to actually resolve (so the
+ * notices query is not skipped) override it with a 200 here.
  */
 const status = (overrides = {}) =>
   http.get('/admin/mfa/me', () =>
@@ -93,7 +93,7 @@ describe('MfaNotices', () => {
   });
 
   /**
-   * F3: before this fix, `useGetMfaNoticesQuery` had no `skip` at all, so `/admin/mfa/notices` was
+   * before this fix, `useGetMfaNoticesQuery` had no `skip` at all, so `/admin/mfa/notices` was
    * requested on every authenticated app load regardless of the future flag -- a guaranteed 404 on
    * every default-off instance. `/admin/mfa/me` 404 (the same signal `TwoFactorSection` uses) is
    * the only thing this component is allowed to read to suppress the request; it must never read
@@ -118,7 +118,7 @@ describe('MfaNotices', () => {
   });
 
   /**
-   * F3 also guards against re-breaking F1: notices must still flow for a user who is not currently
+   * Guards against a regression the other way: notices must still flow for a user who is not currently
    * enrolled (e.g. after a self-disable or a CLI reset), so the skip must depend only on whether
    * the status query itself 404s -- never on `status.enabled`.
    */
@@ -161,7 +161,7 @@ describe('MfaNotices', () => {
    * the *same* two notices would keep the same `data` reference regardless of the guard -- that
    * would not exercise it. Instead, the mock simulates a third event (id 3) arriving after the
    * dismiss but before the refetch settles: different content forces a genuinely new `notices`
-   * reference. The spec is "one toast per app load", so even this new, still-unseen event must
+   * reference. One toast per app load, so even this new, still-unseen event must
    * not produce a second toast; without the `announced` ref, the effect's `notices` dependency
    * would have changed and it would fire again.
    */
@@ -214,7 +214,7 @@ describe('MfaNotices', () => {
   });
 
   /**
-   * F2: the toast is `blockTransition: true` (`duration: Infinity`), and the real app's `Toaster`
+   * the toast is `blockTransition: true` (`duration: Infinity`), and the real app's `Toaster`
    * lives above the router (rendered once by `NotificationsProvider` for the whole app), while
    * `MfaNotices` is mounted inside `AdminLayout`, below the router. An in-SPA logout unmounts
    * `AdminLayout` (and with it `MfaNotices`) without ever unmounting `Toaster`, so the toast used
@@ -261,7 +261,7 @@ describe('MfaNotices', () => {
   });
 });
 
-describe('formatMfaNotice (cycle 3 device notices)', () => {
+describe('formatMfaNotice (device notices)', () => {
   const intl = createIntl({ locale: 'en', messages: {} });
   const base = { id: 1, createdAt: '2026-09-08T10:00:00.000Z', seenAt: null } as const;
   const format = (notice: Parameters<typeof formatMfaNotice>[0]) =>
@@ -300,7 +300,7 @@ describe('formatMfaNotice (cycle 3 device notices)', () => {
   });
 });
 
-describe('formatMfaNotice (cycle 4 passkey notices)', () => {
+describe('formatMfaNotice (passkey notices)', () => {
   const intl = createIntl({ locale: 'en', messages: {} });
   const base = { id: 1, createdAt: '2026-09-09T10:00:00.000Z', seenAt: null } as const;
   const format = (notice: Parameters<typeof formatMfaNotice>[0]) =>

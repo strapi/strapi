@@ -882,7 +882,7 @@ describe('security-settings: service', () => {
   });
 
   test('a password-less (SSO-only) caller may disable passkeys, but not alongside a downgrade', async () => {
-    // In an SSO-only organisation every administrator is password-less, so the cycle 2 refusal
+    // In an SSO-only organisation every administrator is password-less, so the enforcement refusal
     // would make this a setting nobody could ever change, and the CLI offers no escape. Accepted
     // cost: a stolen SSO session can wipe the organisation's passkeys -- everything that session
     // could do instead (resetting each user's MFA through `admin::users.update`) is already worse.

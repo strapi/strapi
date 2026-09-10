@@ -63,8 +63,8 @@ const mfaService = adminApi
           return res.data;
         },
         // Also invalidates `MfaNotices`: the server raises an `enabled` notice for this event.
-        // And `TrustedDevices`: a replacement revokes every trusted device (cycle 3). Deliberately
-        // NOT `Passkeys`: cycle 4's `completeEnrolment` leaves passkeys in place -- a new
+        // And `TrustedDevices`: a replacement revokes every trusted device. Deliberately
+        // NOT `Passkeys`: passkeys's `completeEnrolment` leaves passkeys in place -- a new
         // authenticator app says nothing about the user's security keys.
         invalidatesTags: ['Mfa', 'MfaNotices', 'TrustedDevices'],
       }),
@@ -88,8 +88,8 @@ const mfaService = adminApi
       disableMfa: builder.mutation<void, Disable.Request['body']>({
         query: (body) => ({ method: 'POST', url: '/admin/mfa/disable', data: body }),
         // Also invalidates `MfaNotices` (a `disabled` notice), `TrustedDevices` (a disable
-        // revokes every trusted device, cycle 3) and `Passkeys` (a disable deletes every passkey
-        // inside the same transaction, cycle 4).
+        // revokes every trusted device, trusted devices) and `Passkeys` (a disable deletes every passkey
+        // inside the same transaction, passkeys).
         invalidatesTags: ['Mfa', 'MfaNotices', 'TrustedDevices', 'Passkeys'],
       }),
       getMfaNotices: builder.query<Notices.Response['data'], void>({
@@ -104,7 +104,7 @@ const mfaService = adminApi
         invalidatesTags: ['MfaNotices'],
       }),
       /**
-       * Cycle 2: clear another admin's lock. Invalidating that user's `User` tag makes the edit
+       * Enforcement: clear another admin's lock. Invalidating that user's `User` tag makes the edit
        * page (`useAdminUsers({ id })`) re-read `mfaLockedAt` / `mfaGraceUntil` without a reload.
        */
       unlockUserMfa: builder.mutation<void, UnlockUser.Params>({
@@ -112,7 +112,7 @@ const mfaService = adminApi
         invalidatesTags: (_res, _err, { id }) => [{ type: 'User', id }],
       }),
       /**
-       * Cycle 3: the caller's trusted browsers. The server marks `current` by hashing the httpOnly
+       * Trusted devices: the caller's trusted browsers. The server marks `current` by hashing the httpOnly
        * trust cookie the browser sends along; nothing here ever sees the token.
        */
       getTrustedDevices: builder.query<ListTrustedDevices.Response['data'], void>({
@@ -156,7 +156,7 @@ const mfaService = adminApi
         ],
       }),
       /**
-       * Cycle 4: the caller's own passkeys. The server answers an empty list -- not a 404 and not
+       * Passkeys: the caller's own passkeys. The server answers an empty list -- not a 404 and not
        * an error -- while the organisation has passkeys turned off, so the profile shows its empty
        * state rather than a failure. Only the four public fields come back.
        */
@@ -183,8 +183,8 @@ const mfaService = adminApi
       }),
       /**
        * Step two. Also invalidates `MfaNotices`: the server records a `passkey_registered` notice
-       * row, the precedent cycle 3 set for both trusted-device revocations. Deliberately does NOT
-       * invalidate `TrustedDevices` -- cycle 3's ledger recorded that trap; registering a passkey
+       * row, the precedent trusted devices set for both trusted-device revocations. Deliberately does NOT
+       * invalidate `TrustedDevices` -- trusted devices's ledger recorded that trap; registering a passkey
        * changes no trusted device, and only a *replacement* revokes trust.
        */
       registerPasskey: builder.mutation<
@@ -216,8 +216,8 @@ const mfaService = adminApi
       /**
        * Administrator removal (`admin::users.update`). Invalidates both passkey tags -- an
        * administrator may be on their *own* user page, which must refresh their own profile list
-       * too, the same correction cycle 3's review made to `revokeUserTrustedDevices` -- and
-       * `MfaNotices`, because the server records a `passkey_removed` notice for the target.
+       * too, the same as `revokeUserTrustedDevices` -- and `MfaNotices`, because the server
+       * records a `passkey_removed` notice for the target.
        */
       deleteUserPasskeys: builder.mutation<void, DeleteUserPasskeys.Params>({
         query: ({ id }) => ({ method: 'DELETE', url: `/admin/mfa/users/${id}/passkeys` }),

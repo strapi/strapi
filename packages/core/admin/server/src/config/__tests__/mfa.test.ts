@@ -90,7 +90,7 @@ describe('validateMfaConfig', () => {
     expect(logger.warnings.join(' ')).toContain('maxChallengeAttempts');
   });
 
-  // challengeTtl and userAttemptWindow are the same silent-lockout class the guards above exist
+  // ChallengeTtl and userAttemptWindow are the same silent-lockout class the guards above exist
   // for: `challengeTtl: NaN` makes `new Date(Date.now() + NaN * 1000)` an Invalid Date, so every
   // challenge is born already expired and nobody can ever complete a second factor, and
   // `userAttemptWindow: NaN` makes the account-scoped attempt counter match nothing, silently
@@ -141,7 +141,7 @@ describe('validateMfaConfig', () => {
     expect(logger.warnings.join(' ')).toContain('userAttemptWindow');
   });
 
-  // F1: `maxChallengeAttempts`/`maxUserAttempts` used to guard with `< 0`, so `0` passed through
+  // `maxChallengeAttempts`/`maxUserAttempts` used to guard with `< 0`, so `0` passed through
   // unwarned. `maxUserAttempts: 0` makes `isAccountThrottled` (`failures >= 0`) true for every
   // account before a single failure is ever recorded, so every challenge create returns 429 and
   // every verify reports `throttled`. `maxChallengeAttempts: 0` makes the per-challenge conditional
@@ -163,7 +163,7 @@ describe('validateMfaConfig', () => {
     expect(logger.warnings.join(' ')).toContain('maxUserAttempts');
   });
 
-  // F1: `raw` used to be cast straight to `Partial<MfaConfig>` and spread over the defaults with
+  // `raw` used to be cast straight to `Partial<MfaConfig>` and spread over the defaults with
   // no shape check, so a string or array (both truthy, both objects to `typeof`... except a string
   // isn't) got spread character-by-character / index-by-index into the result as extra indexed
   // keys instead of being read as settings -- silently producing a config that is neither the
@@ -203,7 +203,7 @@ describe('validateMfaConfig', () => {
     expect(MFA_DEFAULTS.window.back).toBe(originalBack);
   });
 
-  // M11: `MfaConfig` deliberately omits `webauthn` (it has no safe default and is validated
+  // `MfaConfig` deliberately omits `webauthn` (it has no safe default and is validated
   // separately by `resolveWebauthnRp`), but the naive `{ ...MFA_DEFAULTS, ...input }` spread used
   // to carry it through onto the returned object anyway -- a runtime value the type says cannot
   // exist. `toEqual` alone would not catch this (it treats a present-but-undefined key the same

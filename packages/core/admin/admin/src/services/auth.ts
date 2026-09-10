@@ -144,7 +144,7 @@ const authService = adminApi
         invalidatesTags: ['Me'],
       }),
       /**
-       * Cycle 4, step one of the passkey login. Lives here beside `loginMfa` rather than in
+       * Passkeys, step one of the passkey login. Lives here beside `loginMfa` rather than in
        * `services/mfa.ts` because it is an *unauthenticated* login endpoint: the challenge token
        * is its whole authority, and the challenge-token pair belongs with its sibling.
        *

@@ -72,7 +72,7 @@ export const getRefreshCookieOptions = (secureRequest?: boolean) => {
 };
 
 /**
- * Cycle 3: the "trust this device" cookie. A random 32-byte token whose sha256 is stored in
+ * Trusted devices: the "trust this device" cookie. A random 32-byte token whose sha256 is stored in
  * `admin::mfa-trusted-device`; presenting it on `/login` lets an enrolled user skip the second
  * factor until the row's effective expiry. It inherits every scope option of the refresh cookie
  * (httpOnly, path, domain, secure, sameSite) so any deployment where the refresh cookie already
@@ -197,7 +197,7 @@ export const issueSession = async (
   options: {
     deviceId?: string;
     rememberMe?: boolean;
-    /** Set by the controllers when cycle 2 enforcement returned a grace outcome. */
+    /** Set by the controllers when enforcement returned a grace outcome. */
     mfaEnrolment?: { graceUntil: Date };
   } = {}
 ): Promise<void> => {

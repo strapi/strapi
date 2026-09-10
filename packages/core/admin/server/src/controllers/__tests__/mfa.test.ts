@@ -48,8 +48,8 @@ const buildCtx = (
  * defaults to empty (nothing to invalidate) and `invalidateRefreshToken` resolves, matching
  * `OriginSessionManagerService`'s real shape (`shared/utils/session-auth.ts`'s
  * `getSessionManager` reads `strapi.sessionManager`). `disable` revokes by device
- * (`invalidateRefreshToken(userId, deviceId)`), not by session row -- see Finding 6: a session
- * row disappearing from `listSessions` (because its refresh token rotated) does not mean the
+ * (`invalidateRefreshToken(userId, deviceId)`), not by session row: a session row
+ * disappearing from `listSessions` (because its refresh token rotated) does not mean the
  * device is gone, only that its *active* row changed shape, and only invalidating by device
  * reaches the rotated row too.
  */
@@ -278,7 +278,7 @@ describe('mfa controller', () => {
       expect(ctx.body.data.passkeysEnabled).toBe(false);
     });
 
-    // I1: the org policy alone used to decide `passkeysEnabled`, so a deployment whose RP cannot
+    // The org policy alone used to decide `passkeysEnabled`, so a deployment whose RP cannot
     // resolve (the default production shape -- an IP-literal `admin.absoluteUrl`) still advertised
     // a passkey section with a button that could never work. This pins the AND: the policy being
     // on is not enough on its own.
@@ -306,7 +306,7 @@ describe('mfa controller', () => {
       expect(ctx.body.data.passkeysEnabled).toBe(false);
     });
 
-    // Fix-wave (final review finding 1): `PasskeysCard` reads this to know whether the server's
+    // `PasskeysCard` reads this to know whether the server's
     // password-less exemption in `updateSettings` could ever apply to the caller. `ctx.state.user`
     // is the raw `admin::user` row (see `strategies/admin.ts`), so a hashed password on the row
     // must be reported as `true`, and its absence (the SSO-only shape) as `false`.
@@ -370,7 +370,7 @@ describe('mfa controller', () => {
       data: { recoveryCodes: ['AAAAA-BBBBB', 'CCCCC-DDDDD'], replaced: false },
     });
     expect(recordEvent).toHaveBeenCalledWith('7', 'enabled', expect.any(Object));
-    // Notified after being recorded: `notify` is the eventHub/best-effort-email half (Task 11),
+    // Notified after being recorded: `notify` is the eventHub/best-effort-email half,
     // `recordEvent` is the in-app notice feed -- both run, in that order.
     expect(notify).toHaveBeenCalledWith('7', 'enabled');
     expect(recordEvent.mock.invocationCallOrder[0]).toBeLessThan(
@@ -381,7 +381,7 @@ describe('mfa controller', () => {
   test('a second call to enrol/verify does not return codes again', async () => {
     // A real second call fails: the account is already enrolled and the TOTP step was already
     // consumed on the first call, so `completeEnrolment` rejects exactly as it does at the
-    // service layer (Task 5). The controller must not paper over that with a second set of codes.
+    // service layer. The controller must not paper over that with a second set of codes.
     const completeEnrolment = jest
       .fn()
       .mockResolvedValueOnce({ recoveryCodes: ['AAAAA-BBBBB'], replaced: false })
@@ -589,9 +589,8 @@ describe('mfa controller', () => {
       Promise.resolve([
         sessionRow('current-session', 'device-current'),
         // Two distinct session rows, the same device -- exactly the shape a rotated-then-active
-        // pair would never produce (`listSessions` only ever returns the active one -- Finding
-        // 6), but this proves the de-duplication holds regardless of how two rows for one device
-        // arise.
+        // pair would never produce (`listSessions` only ever returns the active one), but this
+        // proves the de-duplication holds regardless of how two rows for one device arise.
         sessionRow('other-session-1', 'device-shared'),
         sessionRow('other-session-2', 'device-shared'),
       ])
@@ -778,7 +777,7 @@ describe('mfa controller', () => {
     });
   });
 
-  describe('trusted devices (cycle 3)', () => {
+  describe('trusted devices', () => {
     const enabledMfa = (overrides: Record<string, unknown> = {}) => ({
       isEnabled: jest.fn(() => true),
       ...overrides,
@@ -940,7 +939,7 @@ describe('mfa controller', () => {
     });
   });
 
-  describe('passkeys (cycle 4)', () => {
+  describe('passkeys', () => {
     const buildStrapiWithPasskeys = (overrides: Record<string, unknown> = {}) => {
       const passkeySettings = jest.fn(() => Promise.resolve({ enabled: true }));
       const isEnrolled = jest.fn(() => Promise.resolve(true));
@@ -1039,7 +1038,7 @@ describe('mfa controller', () => {
       expect(ctx.body.data).toMatchObject({ challenge: 'opts-challenge' });
     });
 
-    // F1: the single most important property of this handler -- a password alone must never
+    // The single most important property of this handler -- a password alone must never
     // authorise a brand-new second factor. The gate is `validatePasskeyOptionsInput` requiring
     // `code` plus `assertPasswordAndFactor` verifying it; both halves are pinned so neither can be
     // silently loosened (e.g. `code` becoming optional in the schema) without a red test here.
@@ -1081,7 +1080,7 @@ describe('mfa controller', () => {
     });
 
     test.each([[''], ['   '], ['x'.repeat(51)]])('register rejects the name %p', async (name) => {
-      // F4: a bare `rejects.toThrow()` passes on any rejection at all, including one caused by a
+      // a bare `rejects.toThrow()` passes on any rejection at all, including one caused by a
       // missing mock, and discarding the doubles meant nothing pinned that the refusal happens
       // *before* the service is reached. Both are asserted explicitly now.
       const doubles = buildStrapiWithPasskeys();
@@ -1122,7 +1121,7 @@ describe('mfa controller', () => {
       expect(first.notFound).toHaveBeenCalled();
       expect(missing.deletePasskey).toHaveBeenCalledWith('7', '9');
 
-      // F5: an empty body proves nothing about ownership -- a body (or param) that tries to
+      // An empty body proves nothing about ownership -- a body (or param) that tries to
       // supply its own owner must be ignored, and the handler must use only the session's user.
       const spoofed = buildStrapiWithPasskeys({
         deletePasskey: jest.fn(() => Promise.resolve(false)),

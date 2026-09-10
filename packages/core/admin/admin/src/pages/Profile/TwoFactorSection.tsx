@@ -19,7 +19,7 @@ import { TrustedDevices } from './TrustedDevices';
 
 import type { Me, MfaEventNotice } from '../../../../shared/contracts/mfa';
 
-/** Below this many unused recovery codes the section nags; matches the spec's low-codes warning. */
+/** Below this many unused recovery codes the section nags. */
 export const LOW_RECOVERY_CODES_THRESHOLD = 3;
 
 type MfaStatus = Me.Response['data'];
@@ -260,13 +260,13 @@ const TwoFactorSection = () => {
         )}
       </Flex>
       {/*
-       * Cycle 3. Only for an enrolled user (an unenrolled one has nothing to skip) and only while
+       * Trusted devices. Only for an enrolled user (an unenrolled one has nothing to skip) and only while
        * the organisation offers trust: `trustedDevicesEnabled` comes from `/mfa/me`, and the
        * server empties the table when the setting is turned off.
        */}
       {status.enabled && status.trustedDevicesEnabled ? <TrustedDevices /> : null}
       {/*
-       * Cycle 4. Same two gates as the trusted-devices block above and for the same reasons: only
+       * Passkeys. Same two gates as the trusted-devices block above and for the same reasons: only
        * an enrolled account can hold a passkey (a passkey is a second factor, never a replacement
        * for TOTP), and `passkeysEnabled` comes from `/mfa/me` -- the server deletes every passkey
        * when the setting is turned off. An SSO-only user never reaches either, because they are

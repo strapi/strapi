@@ -57,7 +57,7 @@ type WarnableKey =
   | 'trustedDevices.enabled'
   | 'trustedDevices.days'
   | 'passkeys.enabled'
-  /** Cycle 4: `resolveWebauthnRp`'s refusal cause, logged at error level from `mfa-passkeys.ts`. */
+  /** Passkeys: `resolveWebauthnRp`'s refusal cause, logged at error level from `mfa-passkeys.ts`. */
   | 'webauthn.rp';
 
 /**
@@ -68,7 +68,7 @@ type WarnableKey =
 const warnedKeys = new Set<WarnableKey>();
 
 /**
- * Exported for cycle 4: `resolveWebauthnRp` in `services/mfa-passkeys.ts` logs its refusal cause
+ * Exported for passkeys: `resolveWebauthnRp` in `services/mfa-passkeys.ts` logs its refusal cause
  * through this same helper, so there is still exactly one deduplication surface (and
  * `resetSecuritySettingsWarnings` below still gives the tests a clean slate). `level` exists for
  * that caller: an RP misconfiguration is an operator error with an action attached, so it is
@@ -134,7 +134,7 @@ export const readMfaEnforcement = async (strapi: Core.Strapi): Promise<MfaEnforc
 };
 
 /**
- * Cycle 3 policy: whether a browser may be trusted after a verified code, and for how many days.
+ * Trusted devices policy: whether a browser may be trusted after a verified code, and for how many days.
  * Same tolerance as `readMfaEnforcement`: read on every login, so a hand-edited or corrupt row
  * warns once and falls back per key rather than throwing. The fallback is the default
  * (`enabled: true`, 30 days) because a corrupt value is not a decision to turn the feature off.
@@ -170,7 +170,7 @@ export const readTrustedDeviceSettings = async (
 };
 
 /**
- * Cycle 4 policy: whether users may register and sign in with a passkey. Same tolerance as the
+ * Passkeys policy: whether users may register and sign in with a passkey. Same tolerance as the
  * other two readers -- it is read on every login (`passkeyAvailable`) and on every passkey route,
  * so a hand-edited or corrupt row warns once and falls back rather than throwing. The fallback is
  * the default (`enabled: true`) because a corrupt value is not a decision to turn a security
@@ -210,9 +210,9 @@ interface MfaServiceLike {
   }): Promise<boolean>;
   isEnrolled(userId: string): Promise<boolean>;
   assertPasswordAndFactor(userId: string, password: string, code: string): Promise<void>;
-  /** Cycle 3: every trusted-device row, every user. Called on the transition to `enabled: false`. */
+  /** Trusted devices: every trusted-device row, every user. Called on the transition to `enabled: false`. */
   clearAllTrustedDevices(): Promise<number>;
-  /** Cycle 4: every passkey row, every user. Called on the transition to `enabled: false`. */
+  /** Passkeys: every passkey row, every user. Called on the transition to `enabled: false`. */
   clearAllPasskeys(): Promise<number>;
 }
 
@@ -284,7 +284,7 @@ export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) 
     const actorExempt = await mfa().isExemptFromMfa(actorRow);
     const actorEnrolled = await mfa().isEnrolled(String(actorRow.id));
 
-    // The self-lockout guard (spec "Guard"): the one write that sets policy may not require a
+    // The self-lockout guard: the one write that sets policy may not require a
     // second factor of a caller who has none, unless the caller is exempt from local login. With
     // `mfa` absent from the body `nextMfa` is `previous.mfa`, so both conditions are false.
     const addedRoles = requiredRoles.filter((id) => !previous.mfa.requiredRoles.includes(id));
@@ -306,15 +306,15 @@ export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) 
       MODE_RANK[nextMfa.mode] < MODE_RANK[previous.mfa.mode] ||
       (nextMfa.mode !== 'required' && removedRoles.length > 0) ||
       nextMfa.graceDays > previous.mfa.graceDays;
-    // Cycle 3: offering trust where none was offered, or promising a longer trust, both let a
+    // Trusted devices: offering trust where none was offered, or promising a longer trust, both let a
     // browser skip the second factor for longer than before. Lowering `days` or disabling only
     // ever cuts trust short, so neither needs re-authentication.
     const widensTrust =
       (!previous.trustedDevices.enabled && nextTrusted.enabled) ||
       (nextTrusted.enabled && nextTrusted.days > previous.trustedDevices.days);
-    // Cycle 4: turning passkeys off is an organisation-wide, irreversible deletion of every
+    // Passkeys: turning passkeys off is an organisation-wide, irreversible deletion of every
     // phishing-resistant credential every administrator holds (the cascade runs in the
-    // transaction below), so it joins the branch on cycle 2's stated grounds -- a stolen session
+    // transaction below), so it joins the branch on enforcement's stated grounds -- a stolen session
     // must not be able to wipe every passkey with one unauthenticated PUT and a dialog the
     // attacker is not looking at. Turning them *on* needs nothing: it strengthens the second
     // factor and destroys nothing.
@@ -322,7 +322,7 @@ export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) 
 
     if (lowersEnforcement || widensTrust || disablesPasskeys) {
       // An account with no local password (SSO-only, the same condition `isExemptFromMfa` treats
-      // as exempt) has no local credential to present. Cycle 2 accepted that dead end for
+      // as exempt) has no local credential to present. Enforcement accepted that dead end for
       // *lowering enforcement*, where the caller is lowering the bar on their own account. It is
       // not acceptable for a feature toggle: in an SSO-only organisation every administrator is
       // password-less, so nobody could ever turn passkeys off. So a save whose only triggering
@@ -372,7 +372,7 @@ export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) 
       // Turning passkeys off means "no user may sign in with one". Leaving rows in place would
       // let a later re-enable silently revive credentials registered under the old policy, so the
       // transition deletes them, in the same transaction as the setting that forbids them --
-      // exactly cycle 3's trusted-device cascade, and the reason the `PUT` that does this carries
+      // exactly trusted devices's trusted-device cascade, and the reason the `PUT` that does this carries
       // credentials like a downgrade.
       if (previous.passkeys.enabled && !nextPasskeys.enabled) {
         await mfa().clearAllPasskeys();

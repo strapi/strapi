@@ -50,7 +50,7 @@ describe('resolveWebauthnRp', () => {
   });
 
   test('a configured rpId is case-normalised, so a same-case-mismatched origin still matches', () => {
-    // Finding 4: `EXAMPLE.com` used to be compared, unlowercased, against `URL.hostname` (which
+    // `EXAMPLE.com` used to be compared, unlowercased, against `URL.hostname` (which
     // the URL parser always lowercases), so a config that is correct in every way a browser cares
     // about was refused, blaming `.origins` for a `.rpId` casing problem.
     const { strapi, error } = buildStrapi({
@@ -66,7 +66,7 @@ describe('resolveWebauthnRp', () => {
   });
 
   test('a trailing dot on a configured rpId is stripped, and the dotless suffix it would reveal is still refused', () => {
-    // Finding 1: `com.` is the `com` public suffix plus the DNS root dot. The dotless check exists
+    // `com.` is the `com` public suffix plus the DNS root dot. The dotless check exists
     // precisely to catch `com`; a trailing dot must not be a way around it.
     const { strapi, error } = buildStrapi({
       'admin.absoluteUrl': 'https://cms.example.com/admin',
@@ -79,7 +79,7 @@ describe('resolveWebauthnRp', () => {
   });
 
   test('a trailing dot on a derived rpId no longer produces a browser-invalid rpId', () => {
-    // Finding 1: `admin.absoluteUrl: 'https://example.com./admin'` used to silently derive
+    // `admin.absoluteUrl: 'https://example.com./admin'` used to silently derive
     // `rpId: 'example.com.'`, which is not a hostname any browser accepts, with no refusal and no
     // log. Normalising means the module never returns that broken value; here it is refused
     // instead, because the (unmodified) derived origin still literally carries the root dot and no
@@ -91,7 +91,7 @@ describe('resolveWebauthnRp', () => {
   });
 
   test('a leading dot is not a valid host and is refused explicitly', () => {
-    // Finding 1: a leading dot defeats the dotless check the same way a trailing one does
+    // A leading dot defeats the dotless check the same way a trailing one does
     // (`.com`.includes('.') is true), so it needs its own explicit refusal.
     const { strapi, error } = buildStrapi({
       'admin.absoluteUrl': 'https://cms.example.com/admin',
@@ -103,7 +103,7 @@ describe('resolveWebauthnRp', () => {
   });
 
   test('two or more trailing dots on a configured rpId are all stripped, not just one', () => {
-    // Task 4 fix round 2: `normalizeHost`'s single-dot strip (`replace(/\.$/, '')`) turned
+    // `normalizeHost`'s single-dot strip (`replace(/\.$/, '')`) turned
     // `a.b..` into `a.b.` -- still not a valid host -- and because the *unnormalised* derived
     // origin (`https://a.b.`, one dot) then string-matched that leftover-dot rpId exactly, the
     // call was ACCEPTED with a browser-invalid `rpId: 'a.b.'` and no refusal, no log. Stripping the
@@ -151,7 +151,7 @@ describe('resolveWebauthnRp', () => {
   );
 
   test('a non-array origins config is refused rather than silently discarded', () => {
-    // Finding 5: a bare string typo for `origins` used to fall through `Array.isArray` unnoticed
+    // A bare string typo for `origins` used to fall through `Array.isArray` unnoticed
     // and fall back to the derived origin, with no refusal and no log -- the one misconfiguration
     // in this module that produced neither. Refusing (rather than accepting a one-element array)
     // matches the module's fail-closed-and-loud contract: this is a misconfiguration to name, not
@@ -166,9 +166,9 @@ describe('resolveWebauthnRp', () => {
   });
 
   test('an unparseable admin.absoluteUrl together with a configured rpId reaches "no expected origin could be derived"', () => {
-    // Finding 3: the previous report claimed this branch was unreachable. It is not: a configured
-    // rpId skips the derivability refusal entirely, so an unparseable admin.absoluteUrl reaches
-    // origin derivation with `derived === null` and no configured `origins` to fall back on.
+    // This branch looks unreachable but is not: a configured rpId skips the derivability
+    // refusal entirely, so an unparseable admin.absoluteUrl reaches origin derivation with
+    // `derived === null` and no configured `origins` to fall back on.
     const { strapi, error } = buildStrapi({
       'admin.absoluteUrl': 'not a url',
       'admin.auth.mfa.webauthn.rpId': 'example.com',
@@ -182,7 +182,7 @@ describe('resolveWebauthnRp', () => {
   });
 
   test('an origin candidate that cannot be parsed as a URL is refused', () => {
-    // Finding 7: deleting this try/catch would let a raw TypeError escape resolveWebauthnRp,
+    // Deleting this try/catch would let a raw TypeError escape resolveWebauthnRp,
     // turning a 400 into a 500 on an unauthenticated route, with the suite staying green.
     const { strapi, error } = buildStrapi({
       'admin.absoluteUrl': 'https://cms.example.com/admin',
@@ -197,7 +197,7 @@ describe('resolveWebauthnRp', () => {
   test.each([['https://127.0.0.1/admin'], ['https://[::1]/admin'], ['https://[::]/admin']])(
     'an IP literal (%s) behind a secure origin is refused specifically as an IP literal',
     (adminUrl) => {
-      // Finding 2: all four rows of the existing IP-literal table are `http://`, each refused by a
+      // All four rows of the existing IP-literal table are `http://`, each refused by a
       // *different* guard (non-secure-origin for the dotted-quad ones, bare-label for the bracketed
       // IPv6 ones) -- none of them fails only because of the isIP guard. These use `https:` so the
       // non-secure-origin refusal cannot fire, and assert the IP-literal message specifically so a
@@ -261,7 +261,7 @@ describe('resolveWebauthnRp', () => {
   });
 
   test('origins configured against a *derived* rpId are still checked against it', () => {
-    // The dangerous case the spec names: nothing else relates the two, so the check runs whenever
+    // The dangerous case: nothing else relates the two, so the check runs whenever
     // either key is set (it is trivially satisfied when both are derived).
     const { strapi, error } = buildStrapi({
       'admin.absoluteUrl': 'https://cms.example.com/admin',
@@ -269,7 +269,7 @@ describe('resolveWebauthnRp', () => {
     });
 
     expect(() => resolveWebauthnRp(strapi)).toThrow(PASSKEY_RP_NOT_CONFIGURED);
-    // Finding 6: every refusal throws the same shared message, so a bare `.toThrow` assertion
+    // Every refusal throws the same shared message, so a bare `.toThrow` assertion
     // cannot tell this branch (the rpId/origin relation check) from any other. Pin the branch by
     // asserting text only it produces.
     expect(error).toHaveBeenCalledWith(
@@ -288,8 +288,7 @@ describe('resolveWebauthnRp', () => {
       });
 
       expect(() => resolveWebauthnRp(strapi)).toThrow(PASSKEY_RP_NOT_CONFIGURED);
-      // Finding 6: pin the public-suffix/bare-label branch specifically, not just "something
-      // refused".
+      // Pin the public-suffix/bare-label branch specifically, not just "something refused".
       expect(error).toHaveBeenCalledWith(
         expect.stringContaining('public suffix (or a bare label)')
       );
@@ -297,10 +296,10 @@ describe('resolveWebauthnRp', () => {
   );
 
   test.each([['co.kr'], ['com.tr'], ['co.il'], ['net.au'], ['org.au'], ['gov.au']])(
-    'M4: a common second-level suffix under a ccTLD (%s) is refused even though it has no named entry',
+    'a common second-level suffix under a ccTLD (%s) is refused even though it has no named entry',
     (rpId) => {
-      // These were missing from `KNOWN_PUBLIC_SUFFIXES`'s original twelve entries, which is the
-      // gap M4 reports: each was accepted here and then failed in every browser with an opaque
+      // These were missing from `KNOWN_PUBLIC_SUFFIXES`'s original twelve entries: each was
+      // accepted here and then failed in every browser with an opaque
       // `SecurityError` and no server-side trace of why. They are named entries now.
       const { strapi, error } = buildStrapi({
         'admin.absoluteUrl': 'https://cms.example.com/admin',
@@ -315,7 +314,7 @@ describe('resolveWebauthnRp', () => {
   );
 
   test.each([['co.io'], ['org.io'], ['com.io'], ['net.de']])(
-    'M4: a real registrable two-label domain (%s) is accepted, not refused as a suffix',
+    'a real registrable two-label domain (%s) is accepted, not refused as a suffix',
     (rpId) => {
       // The regression this pins. An earlier revision refused on SHAPE -- any two-label host whose
       // first label was generic and whose second was two characters -- which caught all four of
@@ -333,7 +332,7 @@ describe('resolveWebauthnRp', () => {
     }
   );
 
-  test('M4: a genuine two-label domain that does not match the generic ccTLD shape is still accepted', () => {
+  test('a genuine two-label domain that does not match the generic ccTLD shape is still accepted', () => {
     // Guards the widened check against being so broad it starts refusing real registrable
     // domains: `example.com`'s first label is seven characters, nowhere near the generic
     // second-level label set, so it must not be caught by the new shape rule.
@@ -346,7 +345,7 @@ describe('resolveWebauthnRp', () => {
     expect(error).not.toHaveBeenCalled();
   });
 
-  test('M2: the refusal logs under [admin.auth.mfa], not [security-settings], and the trailing sentence is level-aware', () => {
+  test('the refusal logs under [admin.auth.mfa], not [security-settings], and the trailing sentence is level-aware', () => {
     const { strapi, error } = buildStrapi({ 'admin.absoluteUrl': 'http://0.0.0.0:1337/admin' });
 
     expect(() => resolveWebauthnRp(strapi)).toThrow(PASSKEY_RP_NOT_CONFIGURED);

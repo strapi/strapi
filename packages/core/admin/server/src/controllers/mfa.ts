@@ -55,10 +55,10 @@ const { ValidationError } = errors;
 type MfaService = NonNullable<ReturnType<typeof requireEnabled>>;
 
 /**
- * The two checks both registration routes make, in the spec's order: the organisation must offer
+ * The two checks both registration routes make, in order: the organisation must offer
  * passkeys at all, and the caller must already hold a TOTP factor -- a passkey is never a user's
- * only factor, and `isEnrolled` keeps its cycle 1 meaning. Run *before* body validation, for the
- * reason cycle 2's `disable` gives: no password or code attempt should be spent on a request that
+ * only factor, and `isEnrolled` keeps its the base factor meaning. Run *before* body validation, for the
+ * reason enforcement's `disable` gives: no password or code attempt should be spent on a request that
  * can never succeed.
  */
 const assertPasskeyRegistrationAllowed = async (mfa: MfaService, userId: string): Promise<void> => {
@@ -87,20 +87,20 @@ export default {
         enabledAt: enrolled ? user.mfaEnabledAt : null,
         recoveryCodesRemaining: enrolled ? await mfa.countUnusedRecoveryCodes(userId) : 0,
         codesAcknowledged: enrolled ? await mfa.areCodesAcknowledged(userId) : false,
-        // Cycle 2: whether policy requires this account to be enrolled, and the deadline stamped
+        // Enforcement: whether policy requires this account to be enrolled, and the deadline stamped
         // by `enforce` at the first session it applied to. The grace banner reads these.
         required: await mfa.isMfaRequiredFor(user),
         graceUntil: user.mfaGraceUntil ? new Date(user.mfaGraceUntil).toISOString() : null,
-        // Cycle 3: the profile renders its trusted-devices list only when the organisation
+        // Trusted devices: the profile renders its trusted-devices list only when the organisation
         // offers trust at all.
         trustedDevicesEnabled: (await mfa.trustedDeviceSettings()).enabled,
-        // Cycle 4: the profile decides whether to render the passkey section from this; the list
-        // endpoint stays the source of truth for the rows. I1: not the org policy alone -- the
+        // Passkeys: the profile decides whether to render the passkey section from this; the list
+        // endpoint stays the source of truth for the rows. Not the org policy alone: the
         // default production deployment (an IP-literal `admin.absoluteUrl`) would otherwise
         // advertise a section whose "Add a passkey" button cannot work. `passkeysConfigured`
         // swallows the RP refusal into a boolean, so this can never 500 on a misconfiguration.
         passkeysEnabled: (await mfa.passkeySettings()).enabled && mfa.passkeysConfigured(),
-        // Fix-wave (final review finding 1): `ctx.state.user` is the raw `admin::user` row the
+        // `ctx.state.user` is the raw `admin::user` row the
         // auth strategy loaded (`strategies/admin.ts`), so `password` is present whenever the
         // account has one -- an SSO-only administrator's is `null`/`undefined`. `PasskeysCard`
         // reads this to know whether the server's password-less exemption in `updateSettings`
@@ -177,7 +177,7 @@ export default {
       return ctx.internalServerError();
     }
 
-    // A required account cannot turn its second factor off (spec "Guard"): the profile section
+    // A required account cannot turn its second factor off: the profile section
     // hides the button, and this refusal is what makes that more than cosmetic. Checked before
     // validation so no password/code attempt is spent on a request that can never succeed.
     if (await mfa.isMfaRequiredFor(ctx.state.user as AdminUser)) {
@@ -275,7 +275,7 @@ export default {
   },
 
   /**
-   * Cycle 3. The caller's trusted browsers; the presented cookie (if any) marks the current one.
+   * Trusted devices. The caller's trusted browsers; the presented cookie (if any) marks the current one.
    * The service hashes it, the hash never reaches the response.
    */
   async listTrustedDevices(ctx: Context) {
@@ -377,8 +377,8 @@ export default {
   },
 
   /**
-   * Cycle 4. Start a registration ceremony. Costs the current password *and* a live second factor
-   * (the same gate `/mfa/disable` and `/mfa/recovery-codes` use): under this cycle's factor model
+   * Passkeys. Start a registration ceremony. Costs the current password *and* a live second factor
+   * (the same gate `/mfa/disable` and `/mfa/recovery-codes` use): under the factor model
    * the new credential satisfies every future challenge on its own, so an attacker holding a
    * stolen session plus the password would otherwise register their own authenticator and log in
    * forever, with the victim's TOTP still working so nothing looks wrong. Password-only would be
@@ -484,7 +484,7 @@ export default {
    * `clearPasskeys` is deliberately silent, so the event and the notice are recorded here; the
    * owner's own `deletePasskey` records its own inside the service because only it sees the row's
    * name. Recorded only when something was actually removed, so an administrator acting on an
-   * empty list leaves no notice behind (cycle 3's precedent).
+   * empty list leaves no notice behind (trusted devices's precedent).
    */
   async deleteUserPasskeys(ctx: Context) {
     const mfa = requireEnabled(ctx);

@@ -64,7 +64,7 @@ describe('security-settings service', () => {
     });
   });
 
-  it('updating security settings invalidates the passkeys list and a user passkey count (cycle 4)', async () => {
+  it('updating security settings invalidates the passkeys list and a user passkey count', async () => {
     let passkeysCalls = 0;
     let userPasskeysCalls = 0;
     server.use(

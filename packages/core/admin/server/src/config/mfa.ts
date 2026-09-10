@@ -61,8 +61,8 @@ export const validateMfaConfig = (raw: unknown, logger: Logger): MfaConfig => {
   // `webauthn` lives beside these settings on the same `admin.auth.mfa` config object, but is
   // validated separately by `resolveWebauthnRp` (`services/mfa-passkeys.ts`) and deliberately
   // typed away from `MfaConfig` above -- there is no safe default for a relying-party id. The
-  // spread above would otherwise carry it through untyped (M11), so it is deleted explicitly
-  // here to make the runtime object actually match what `MfaConfig` says it is.
+  // spread above would otherwise carry it through untyped, so it is deleted explicitly here to
+  // make the runtime object actually match what `MfaConfig` says it is.
   delete (result as MfaConfig & { webauthn?: unknown }).webauthn;
 
   // Interop breakers: warn and fall back.

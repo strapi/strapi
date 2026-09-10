@@ -5,7 +5,7 @@ import { Route, Routes, useLocation } from 'react-router-dom';
 
 import { MfaChallenge } from '../MfaChallenge';
 
-// jsdom defines no `window.PublicKeyCredential`, so the real `browserSupportsWebAuthn()` returns
+// Jsdom defines no `window.PublicKeyCredential`, so the real `browserSupportsWebAuthn()` returns
 // false and the passkey button would never render. Mocking the module also lets each test drive
 // the ceremony's outcome without a real authenticator. Hoisted above the imports by
 // `babel-plugin-jest-hoist`, despite sitting below them here.
@@ -274,7 +274,7 @@ describe('MfaChallenge', () => {
     renderChallenge({ ...STATE, passkeyAvailable: true });
 
     expect(screen.queryByRole('button', { name: 'Use a passkey' })).not.toBeInTheDocument();
-    // the code path is untouched
+    // The code path is untouched
     expect(screen.getByLabelText('Authentication code*')).toBeInTheDocument();
   });
 
@@ -305,7 +305,7 @@ describe('MfaChallenge', () => {
 
     await waitFor(() => expect(verifyBodies).toHaveLength(1));
     expect(optionBodies[0]).toEqual({ challengeToken: 'a'.repeat(64) });
-    // the options object reaches the browser helper verbatim, under `optionsJSON`
+    // The options object reaches the browser helper verbatim, under `optionsJSON`
     expect(jest.mocked(startAuthentication)).toHaveBeenCalledWith({ optionsJSON: OPTIONS });
     expect(verifyBodies[0]).toMatchObject({
       challengeToken: 'a'.repeat(64),
@@ -359,7 +359,7 @@ describe('MfaChallenge', () => {
     expect(
       screen.queryByText(/Your device could not complete the passkey check/)
     ).not.toBeInTheDocument();
-    // still on the challenge screen, with the code field usable
+    // Still on the challenge screen, with the code field usable
     expect(screen.getByLabelText('Authentication code*')).toBeInTheDocument();
   });
 
@@ -453,8 +453,8 @@ describe('MfaChallenge', () => {
     expect(screen.queryByRole('button', { name: 'Use a passkey' })).not.toBeInTheDocument();
   });
 
-  // Fix-wave (finding 8): Verify and Use a passkey both spend the same single-use challenge, so
-  // one must not be clickable while the other is in flight.
+  // Verify and Use a passkey both spend the same single-use challenge, so one must not be
+  // clickable while the other is in flight.
   it('disables Verify while a passkey ceremony is in flight, and re-enables it if the ceremony is dismissed', async () => {
     server.use(
       http.post('/admin/login/mfa/webauthn/options', () => HttpResponse.json({ data: OPTIONS }))

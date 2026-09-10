@@ -93,7 +93,7 @@ describe('admin:reset-user-mfa command', () => {
     consoleLog.mockRestore();
   });
 
-  // F6: `notify` emits the eventHub event synchronously then starts the email send. The command
+  // `notify` emits the eventHub event synchronously then starts the email send. The command
   // used to call `notify(...)` and immediately `process.exit(0)` without waiting for it, so the
   // process could tear down before the detached email promise ever settled and the reset email
   // would silently never send. `notify` now returns that promise, and the command must await it
@@ -143,7 +143,7 @@ describe('admin:reset-user-mfa command', () => {
   });
 
   test('invalidates the user sessions as well', async () => {
-    // otherwise an attacker holding a live session survives the reset meant to evict them
+    // Otherwise an attacker holding a live session survives the reset meant to evict them
     const email = 'kai@doe.com';
     findOne.mockResolvedValue({ id: 1, email });
 
@@ -209,7 +209,7 @@ describe('admin:reset-user-mfa command', () => {
       confirm: false,
     });
 
-    // throw so the code will stop executing, same as declining the prompt does in production
+    // Throw so the code will stop executing, same as declining the prompt does in production
     const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {
       throw new Error('exit');
     });

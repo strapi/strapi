@@ -34,7 +34,7 @@ describe('Admin MFA enforcement', () => {
     const me = await rq({ url: '/admin/users/me', method: 'GET' });
     superAdminId = me.body.data.id;
 
-    // M10: this suite IS cycle 1's original MFA API suite, and it is the only one of the three
+    // This suite IS the base factor's original MFA API suite, and it is the only one of the three
     // with no reset -- its `defaults` test's exact `toEqual` was safe only because both sibling
     // suites happen to call `resetSharedMfaState` in their own `afterAll`. `yarn test:api` runs
     // every admin suite --runInBand against one shared SQLite app, so start from the exact state
@@ -221,7 +221,7 @@ describe('Admin MFA enforcement', () => {
       expect(noAuth.statusCode).toBe(400);
 
       // A fresh TOTP step: the beforeAll enrolment verify already consumed the current one, and
-      // the account-wide replay guard (cycle 1) means the same step's code can't be accepted twice.
+      // the account-wide replay guard means the same step's code can't be accepted twice.
       await new Promise((resolve) =>
         setTimeout(resolve, (31 - (Math.floor(Date.now() / 1000) % 30)) * 1000)
       );

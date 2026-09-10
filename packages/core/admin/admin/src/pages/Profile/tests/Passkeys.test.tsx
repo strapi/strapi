@@ -70,7 +70,7 @@ describe('Passkeys', () => {
       await screen.findByText('No passkeys. Add one to sign in with your device instead of a code.')
     ).toBeInTheDocument();
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
-    // adding one is still the point of the empty state
+    // Adding one is still the point of the empty state
     expect(screen.getByRole('button', { name: 'Add a passkey' })).toBeInTheDocument();
   });
 
@@ -82,12 +82,12 @@ describe('Passkeys', () => {
     expect(await screen.findByRole('heading', { name: 'Passkeys' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Add a passkey' })).not.toBeInTheDocument();
     expect(screen.getByText('This browser does not support passkeys.')).toBeInTheDocument();
-    // existing rows are still listed and still removable from here
+    // Existing rows are still listed and still removable from here
     expect(screen.getByText('MacBook Touch ID')).toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: 'Remove passkey' })).toHaveLength(2);
   });
 
-  // Fix-wave (finding 6): the server spends the password AND a live TOTP code
+  // The server spends the password AND a live TOTP code
   // (`assertPasswordAndFactor`) before it ever checks the per-user cap, so offering a button that
   // can only be refused burns a factor attempt on a guaranteed rejection.
   it('replaces the Add button with a note at the passkey cap, without spending a factor attempt', async () => {
@@ -105,7 +105,7 @@ describe('Passkeys', () => {
     expect(
       screen.getByText('You have reached the limit of 10 passkeys. Remove one to add another.')
     ).toBeInTheDocument();
-    // existing rows are still listed and still removable from here
+    // Existing rows are still listed and still removable from here
     expect(screen.getAllByRole('button', { name: 'Remove passkey' })).toHaveLength(
       MAX_PASSKEYS_PER_USER
     );

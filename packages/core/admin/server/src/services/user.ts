@@ -40,7 +40,7 @@ const sanitizeUser = (user: AdminUser): SanitizedAdminUser => {
       'resetPasswordTokenExpiresAt',
       'registrationToken',
       'roles',
-      // Private two-factor-auth columns (Task 4 added them to the content-type schema; the
+      // Private two-factor-auth columns (declared in the content-type schema; the
       // `AdminUser` contract type declares them only so this omit list can name them). Omitting
       // the ciphertext, the enrolment timestamp and the last-used TOTP step keeps them out of
       // every sanitized payload -- login responses, `/users/me`, user listings, and the

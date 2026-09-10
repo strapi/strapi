@@ -27,7 +27,7 @@ interface MfaService {
     password?: string | null;
     roles?: unknown;
   }): Promise<boolean>;
-  /** Cycle 3: the user's live trusted browsers; only the count is printed. */
+  /** Trusted devices: the user's live trusted browsers; only the count is printed. */
   listTrustedDevices(userId: string): Promise<unknown[]>;
 }
 

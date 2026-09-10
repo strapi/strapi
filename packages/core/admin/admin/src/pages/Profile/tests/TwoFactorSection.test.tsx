@@ -240,7 +240,7 @@ describe('TwoFactorSection', () => {
   });
 
   /**
-   * F1: `disabled` and `reset` events are recorded exactly when the user stops being enrolled, so
+   * `disabled` and `reset` events are recorded exactly when the user stops being enrolled, so
    * gating the list on `status.enabled` hid it in precisely the case it exists for -- after a
    * self-disable or a CLI-driven reset, the section showed only "Not enabled" with no way to see
    * why, and "Mark all as seen" was unreachable.
@@ -405,10 +405,10 @@ describe('TwoFactorSection', () => {
   });
 
   it('hides the passkeys block for an UNENROLLED account even when the organisation allows them', async () => {
-    // The other half of the gate. TOTP is the mandatory base factor this cycle: a passkey is a
+    // The other half of the gate. TOTP is the mandatory base factor: a passkey is a
     // second factor, never a replacement for one, so an account with no authenticator must not be
     // offered a way to add a passkey. Without this case, dropping `status.enabled` from the gate
-    // passes every other test in this file -- the same blind spot cycle 3 left on
+    // passes every other test in this file -- the same blind spot trusted devices left on
     // `trustedDevicesEnabled`.
     server.use(
       status({

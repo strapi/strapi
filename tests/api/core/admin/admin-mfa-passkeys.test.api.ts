@@ -77,7 +77,7 @@ describe('Admin MFA passkeys', () => {
         s.config.set('admin.rateLimit.enabled', false);
         // The test app runs on HOST=0.0.0.0 with NODE_ENV=test, so `admin.absoluteUrl` is
         // `http://0.0.0.0:1337/admin` -- an IP literal, which is not a valid relying-party id.
-        // This is the production default the spec warns about, and setting the override here is
+        // This is the production default, and setting the override here is
         // exactly what such a deployment has to do. One test below clears it again.
         s.config.set('admin.auth.mfa.webauthn.rpId', RP_ID);
         s.config.set('admin.auth.mfa.webauthn.origins', [ORIGIN]);

@@ -37,9 +37,8 @@ const DECIDED_CALL_SITES = [
 ];
 
 /**
- * Recursive `.ts` file listing, shared by every static-scan test in this file (the registration
- * token guard below, and the F4/F5 call-site inventory) so all of them walk the tree the same way
- * rather than risking two subtly different notions of "every file".
+ * Recursive `.ts` file listing, shared by every static-scan test in this file so none of them
+ * end up with a subtly different notion of "every file".
  */
 const walk = (dir: string): string[] =>
   fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -52,8 +51,8 @@ const walk = (dir: string): string[] =>
 
 /**
  * The three source roots a session can be minted from. `server/src` is the CE package this file
- * lives in; `ee/server/src` carries the SSO callback (a documented exemption -- see the F4/F5
- * describe block below); `shared` carries `issueSession`'s own implementation, which every CE flow
+ * lives in; `ee/server/src` carries the SSO callback (a documented exemption -- see the
+ * call-site inventory below); `shared` carries `issueSession`'s own implementation, which every CE flow
  * funnels through. `admin/src` (the React app) is deliberately out of scope: nothing there can
  * mint a server-side session.
  */
@@ -255,8 +254,8 @@ describe('session issuing paths', () => {
 
     expect(callSites.length).toBe(DECIDED_CALL_SITES.length);
 
-    // `login` still funnels both its branches (challenge, session) through one call site: cycles
-    // 3 and 4 both fall through to it rather than adding a second.
+    // `login` still funnels both its branches (challenge, session) through one call site: the
+    // trusted-device and passkey paths fall through to it rather than adding a second.
     const loginBlock = controller.slice(
       controller.indexOf('login: compose('),
       controller.indexOf('loginMfa: compose(')
@@ -471,7 +470,7 @@ describe('session issuing paths', () => {
     );
   });
 
-  describe('cycle 2 enforcement runs before every session is minted', () => {
+  describe('enforcement runs before every session is minted', () => {
     const graceUntil = new Date('2026-09-11T10:00:00.000Z');
 
     test.each(['register', 'registerAdmin', 'resetPassword'] as const)(
@@ -505,7 +504,7 @@ describe('session issuing paths', () => {
 });
 
 /**
- * F4: the enumeration above (`no undecided call site mints an admin session`) only ever read
+ * the enumeration above (`no undecided call site mints an admin session`) only ever read
  * `controllers/authentication.ts`, so it could never see a mint site anywhere else in the admin
  * package -- including `ee/server/src/controllers/authentication-utils/middlewares.ts`'s SSO
  * callback, which calls the session manager's `generateRefreshToken` directly (it has already
@@ -517,11 +516,11 @@ describe('session issuing paths', () => {
  * own `generateRefreshToken(` call in `shared/utils/session-auth.ts`, and the EE SSO callback's
  * `generateRefreshToken(` call. A new call site anywhere in this surface -- a helper that mints a
  * session outside `issueSession`, or a second EE integration that mints one directly -- changes
- * this set and must fail here until a reviewer explicitly adds it with its own documented
+ * this set and must fail here until it is explicitly added with its own documented
  * decision, the same discipline `DECIDED_CALL_SITES` already applies to `controllers/authentication.ts`
  * alone.
  */
-describe('generateRefreshToken / issueSession call-site inventory (F4)', () => {
+describe('generateRefreshToken / issueSession call-site inventory', () => {
   const PATTERNS = ['issueSession(', 'generateRefreshToken('] as const;
 
   test('generateRefreshToken( and issueSession( occur only at the exact, decided sites', () => {
@@ -561,7 +560,7 @@ describe('generateRefreshToken / issueSession call-site inventory (F4)', () => {
 });
 
 /**
- * F5: API token and transfer token requests must succeed for an mfa-enrolled user presenting no
+ * API token and transfer token requests must succeed for an mfa-enrolled user presenting no
  * code at all -- those strategies authenticate a *token*, not an interactive admin session, and
  * there is nothing resembling a second factor to check. That is exactly the kind of property a
  * later refactor breaks silently: someone "helpfully" adding an mfa check to a shared auth
@@ -571,7 +570,7 @@ describe('generateRefreshToken / issueSession call-site inventory (F4)', () => {
  * it. Asserted structurally rather than behaviourally: no strategy file may mention `mfa` in any
  * form at all.
  */
-describe('programmatic-auth strategies stay mfa-free (F5)', () => {
+describe('programmatic-auth strategies stay mfa-free', () => {
   test('no file under server/src/strategies references mfa in any form', () => {
     const STRATEGIES_DIR = path.join(SERVER_SRC, 'strategies');
     const files = walk(STRATEGIES_DIR).filter(

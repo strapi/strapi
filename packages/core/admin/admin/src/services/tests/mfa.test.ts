@@ -198,7 +198,7 @@ describe('mfa service', () => {
     expect(body).toBe('');
   });
 
-  describe('passkeys (cycle 4)', () => {
+  describe('passkeys', () => {
     it('exposes the /mfa/passkeys list', async () => {
       let method: string | undefined;
       server.use(
@@ -260,10 +260,8 @@ describe('mfa service', () => {
     });
 
     /**
-     * The point of this suite (see the review that ordered these tests): registration must
-     * refetch the notices list and the passkeys list, and must NOT refetch trusted devices --
-     * cycle 3's ledger already recorded that trap once. All three are asserted from one
-     * subscription so the "does not invalidate" half has a real synchronisation point: by the
+     * Registration must refetch the notices list and the passkeys list, and must NOT refetch
+     * trusted devices. All three are asserted from one subscription so the "does not invalidate" half has a real synchronisation point: by the
      * time the two genuine refetches have landed, an erroneous trusted-devices refetch (mocked
      * with no artificial delay) would have landed too.
      */

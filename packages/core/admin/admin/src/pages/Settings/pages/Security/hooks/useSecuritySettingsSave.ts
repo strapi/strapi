@@ -55,11 +55,9 @@ interface UseSecuritySettingsSaveResult {
  * The save flow every card on the Security page shares: one per-object `PUT`, a "Saved" toast, an
  * inline refusal message, and the re-authentication dialog for a change that lowers protection.
  *
- * Extracted in cycle 4, when the third card would have been the third copy of the same
- * ~35 lines. Cycle 3's review recorded it as the parked follow-up with the third card as its
- * trigger. Nothing about the flow changed in the extraction: what varies between cards is the
- * body key, the validation, and which predicate decides "needs credentials", and all three are
- * inputs.
+ * Extracted once the third card would have been the third copy of the same ~35 lines. What
+ * varies between cards is the body key, the validation, and which predicate decides "needs
+ * credentials", and all three are inputs.
  */
 const useSecuritySettingsSave = ({
   patch,

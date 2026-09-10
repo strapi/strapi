@@ -221,7 +221,7 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
     // Housekeeping. Expired challenges are also rejected lazily on read, so this is only about
     // not letting the table grow — nothing about the security of the flow depends on it having
     // run, which is exactly why it is wrapped: a cleanup that cannot fail safely would otherwise
-    // be able to stop the admin from booting at all. Trusted-device rows (cycle 3) are swept here
+    // be able to stop the admin from booting at all. Trusted-device rows are swept here
     // for the same reason and with the same safety: a dead row is already refused, and deleted,
     // on read.
     //
@@ -240,7 +240,7 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
       );
     }
 
-    // Cycle 4 discoverability. A deployment whose `admin.absoluteUrl` yields no usable
+    // Passkeys discoverability. A deployment whose `admin.absoluteUrl` yields no usable
     // relying-party id hides every passkey surface -- correctly, since no ceremony could succeed --
     // and used to say so only lazily, on whichever `/mfa/me` happened first. Asking here puts the
     // cause and the config key that fixes it in the startup log, where an operator is actually

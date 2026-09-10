@@ -11,11 +11,11 @@ type RouteEntry = {
 const route = (method: string, path: string): RouteEntry =>
   (routes as unknown as RouteEntry[]).find((r) => r.method === method && r.path === path)!;
 
-// F2: neither administrator permission gate was asserted anywhere -- removing
+// Neither administrator permission gate was asserted anywhere -- removing
 // `admin::users.read` from the count route, or `admin::users.update` from the removal route,
-// left the whole admin package green. This pins the policies on all six cycle-4 passkey routes,
+// left the whole admin package green. This pins the policies on all six passkey routes,
 // and in particular the exact `hasPermissions` action each administrator route carries.
-describe('mfa routes (passkeys, cycle 4)', () => {
+describe('mfa routes (passkeys)', () => {
   test.each([
     ['POST', '/mfa/passkeys/options'],
     ['POST', '/mfa/passkeys'],

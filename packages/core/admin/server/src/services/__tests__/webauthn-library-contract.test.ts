@@ -6,7 +6,7 @@ import { generateRegistrationOptions } from '@simplewebauthn/server';
 import { isoBase64URL, isoUint8Array } from '@simplewebauthn/server/helpers';
 
 /**
- * Cycle 4 pins `@simplewebauthn/server` at exactly 14.0.1 and writes its marshalling against
+ * Passkeys pins `@simplewebauthn/server` at exactly 14.0.1 and writes its marshalling against
  * three shapes the library enforces at runtime or in its types. Both verify functions are mocked
  * in the service unit tests -- deliberately, since what is under test there is our wiring, not
  * upstream cryptography -- so this file is the only place those shapes are checked against the
@@ -82,7 +82,7 @@ describe('@simplewebauthn/server call contract', () => {
   });
 
   test("the engines range is inside Strapi's own", () => {
-    // The spec records `node >= 20`, inside Strapi's `>=22 <=26`. If the installed manifest
+    // The package declares `node >= 20`, inside Strapi's `>=22 <=26`. If the installed manifest
     // phrases it differently, assert the real string rather than deleting the check, and record
     // the value in the report -- an engines range above 22 would be a blocker, not a nit.
     expect(MANIFEST).toHaveProperty('engines');
@@ -110,8 +110,8 @@ describe('@simplewebauthn/server call contract', () => {
     });
 
     expect(typeof options.challenge).toBe('string');
-    // The whole justification for deriving the handle from the admin user id (spec: "The user
-    // handle is deterministic"): a later passwordless cycle decodes it back with no stored column.
+    // The whole justification for deriving the handle from the admin user id: a later
+    // passwordless flow decodes it back with no stored column.
     expect(Buffer.from(isoBase64URL.toBuffer(options.user.id)).toString('utf8')).toBe('7');
   });
 
@@ -147,7 +147,7 @@ describe('@simplewebauthn/server call contract', () => {
     expect(credential![0]).toMatch(/id\s*:\s*(Base64URLString|string)/);
   });
 
-  test('the four functions this cycle calls are exported from the root', () => {
+  test('the four functions this module calls are exported from the root', () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires, global-require
     const root = require('@simplewebauthn/server');
 

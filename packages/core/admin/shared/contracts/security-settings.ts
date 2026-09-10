@@ -1,7 +1,7 @@
 import type { errors } from '@strapi/utils';
 
 /**
- * Enforcement of admin two-factor authentication (cycle 2). Stored in `core_store` under the admin
+ * Enforcement of admin two-factor authentication. Stored in `core_store` under the admin
  * store key `security-settings` as `{ mfa: { mode, graceDays } }`; `requiredRoles` is not stored
  * here but on `admin::role.mfaRequired`, and is read and written through the same endpoint.
  *
@@ -22,7 +22,7 @@ export interface MfaEnforcementSettings extends MfaEnforcement {
 }
 
 /**
- * Cycle 3: whether a user may trust a browser after a verified code, and for how many days.
+ * Trusted devices: whether a user may trust a browser after a verified code, and for how many days.
  * Stored beside `mfa` in the same `security-settings` document. `days` is an integer 1..90.
  */
 export interface TrustedDeviceSettings {
@@ -31,7 +31,7 @@ export interface TrustedDeviceSettings {
 }
 
 /**
- * Cycle 4: whether users may register and sign in with a passkey. Stored beside `mfa` and
+ * Passkeys: whether users may register and sign in with a passkey. Stored beside `mfa` and
  * `trustedDevices` in the same `security-settings` document. Turning it off deletes every
  * registered passkey, which is why the `PUT` that does so carries credentials like a downgrade.
  */

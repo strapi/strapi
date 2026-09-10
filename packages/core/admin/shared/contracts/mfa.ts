@@ -19,20 +19,19 @@ export declare namespace Me {
       enabledAt: AdminUser['mfaEnabledAt'];
       recoveryCodesRemaining: number;
       codesAcknowledged: boolean;
-      /** Cycle 2: policy requires this account to be enrolled. */
+      /** Enforcement: policy requires this account to be enrolled. */
       required: boolean;
       /** ISO deadline of the running grace period, or null. */
       graceUntil: string | null;
-      /** Cycle 3: whether the organisation lets this user trust a browser after a code. */
+      /** Trusted devices: whether the organisation lets this user trust a browser after a code. */
       trustedDevicesEnabled: boolean;
-      /** Cycle 4: whether the organisation lets this user register and use passkeys. */
+      /** Passkeys: whether the organisation lets this user register and use passkeys. */
       passkeysEnabled: boolean;
       /**
-       * Fix-wave (final review finding 1): whether this account has a local password at all. An
-       * SSO-only administrator has none, and `updateSettings` (`security-settings.ts:326-335`)
-       * exempts exactly that account from presenting credentials to turn passkeys off -- the
-       * `PasskeysCard` reads this to decide whether to route the off-transition through a dialog
-       * that would otherwise be a dead end for them.
+       * Whether this account has a local password at all. An SSO-only administrator has none,
+       * and `updateSettings` exempts exactly that account from presenting credentials to turn
+       * passkeys off, so `PasskeysCard` reads this to avoid routing them into a dialog they
+       * cannot complete.
        */
       hasLocalPassword: boolean;
     };
@@ -115,11 +114,7 @@ export declare namespace AcknowledgeRecoveryCodes {
 
 /**
  * /mfa/disable - Turn two-factor authentication off. Requires the current password and a valid
- * second factor, and evicts every *other device* for the account -- by device rather than by
- * session row, so a device whose refresh token has since rotated is fully removed rather than
- * leaving its superseded row usable. The device making this request survives, so a successful
- * disable does not also log the caller out. Falls back to evicting every device if the current
- * one cannot be identified. No response body.
+ * second factor, and evicts every *other* device for the account. No response body.
  */
 export declare namespace Disable {
   export interface Request {
@@ -142,7 +137,7 @@ export declare namespace UnlockUser {
 }
 
 /**
- * One browser the caller has trusted to skip the second factor (cycle 3). Never carries the
+ * One browser the caller has trusted to skip the second factor. Never carries the
  * token or its hash: `id` is the row id, and `current` says whether this row is the browser
  * making the request (its trust cookie hashed to this row).
  */
@@ -203,15 +198,14 @@ export declare namespace RevokeUserTrustedDevices {
 }
 
 /**
- * The per-user registration cap (cycle 4). A contract constant, not a server secret: the client
- * needs it too, to stop offering "Add a passkey" once the server can only ever refuse (fix-wave
- * finding 6) rather than spending a password and a live code on a guaranteed rejection. Promoted
- * here from `server/src/services/mfa-passkeys.ts`, which re-exports it for its own call sites.
+ * The per-user registration cap. Lives here rather than on the server because the client needs
+ * it too, to stop offering "Add a passkey" once the server can only ever refuse, rather than
+ * spending a password and a live code on a guaranteed rejection.
  */
 export const MAX_PASSKEYS_PER_USER = 10;
 
 /**
- * One registered passkey, as the owner's list and the registration response render it (cycle 4).
+ * One registered passkey, as the owner's list and the registration response render it.
  * Exactly four fields: `publicKey`, `counter`, `credentialId` and `transports` never leave the
  * server.
  */
@@ -237,12 +231,10 @@ export declare namespace ListPasskeys {
 
 /**
  * POST /mfa/passkeys/options - Start a registration ceremony. Costs the current password *and* a
- * live second factor (`assertPasswordAndFactor`): under this cycle's factor model the new
- * credential satisfies every future challenge on its own, so password-only would be a weaker gate
- * on a stronger operation.
+ * live second factor (`assertPasswordAndFactor`).
  *
- * The response is passed through verbatim for `@simplewebauthn/browser`'s
- * `startRegistration({ optionsJSON })` to consume, typed from `@simplewebauthn/browser` (a
+ * The response is passed through verbatim to `@simplewebauthn/browser`'s
+ * `startRegistration({ optionsJSON })`, so it is typed from `@simplewebauthn/browser` (a
  * type-only import here) rather than from `@simplewebauthn/server`, which is a server-only
  * dependency this file must not pull in at runtime.
  */

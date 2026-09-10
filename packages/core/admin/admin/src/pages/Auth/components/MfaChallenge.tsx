@@ -31,7 +31,7 @@ import { getRedirectTo } from '../utils';
  * itself is not where the "refresh returns to login" guarantee comes from. `MfaChallenge` reads
  * it once on mount and immediately replaces that history entry with `state: null` (see the
  * effect below); that's what actually keeps a refresh, a direct visit, or a back/forward
- * navigation from resurrecting the challenge token. Cycle 4 adds a second factor to the same
+ * navigation from resurrecting the challenge token. Passkeys adds a second factor to the same
  * challenge — `Use a passkey` runs a WebAuthn ceremony instead of asking for a code, and
  * `trustDevice` therefore lives in component state rather than the form's, because both paths
  * read it.
@@ -41,13 +41,13 @@ export interface MfaChallengeLocationState {
   expiresIn: number;
   rememberMe: boolean;
   /**
-   * Cycle 3: the trust period the organisation offers ("Trust this device for {n} days"), or
+   * Trusted devices: the trust period the organisation offers ("Trust this device for {n} days"), or
    * null when it offers none. Missing in a state written by an older bundle mid-flight, which is
    * read as null.
    */
   trustedDeviceDays?: number | null;
   /**
-   * Cycle 4: whether this account can satisfy the challenge with a passkey (the organisation
+   * Passkeys: whether this account can satisfy the challenge with a passkey (the organisation
    * allows them and the account has at least one). Missing in a state written by an older bundle
    * mid-flight, which is read as false -- the code field always works.
    */
@@ -100,7 +100,7 @@ const MfaChallenge = () => {
   const trustedDeviceDays = challenge?.trustedDeviceDays ?? null;
 
   /**
-   * Cycle 4 lifted `trustDevice` out of the `<Form>`'s Formik state (where cycle 3 put it) into
+   * Passkeys lifted `trustDevice` out of the `<Form>`'s Formik state (where trusted devices put it) into
    * the component's own state: the passkey path is a button click, not a form submit, so it never
    * sees Formik's values, and leaving the flag in form state would silently drop "Trust this
    * device" for every passkey login. Both submit paths now read this one value.
@@ -108,8 +108,8 @@ const MfaChallenge = () => {
   const [trustDevice, setTrustDevice] = React.useState(false);
   const [passkeyBusy, setPasskeyBusy] = React.useState(false);
   /**
-   * Fix-wave (finding 8): lifted the same way `trustDevice` was, so both submit paths can read
-   * the other's busy flag. Without it, `Verify` and `Use a passkey` could both be in flight at
+   * Lifted the same way `trustDevice` was, so both submit paths can read the other's busy
+   * flag. Without it, `Verify` and `Use a passkey` could both be in flight at
    * once, racing the same single-use challenge -- whichever loses shows the same generic refusal
    * as a genuine failure, and the verify route charges an attempt against the challenge's budget
    * even for a self-inflicted race.

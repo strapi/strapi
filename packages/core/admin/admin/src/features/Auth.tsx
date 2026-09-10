@@ -54,7 +54,7 @@ interface AuthContextValue {
   /**
    * Completes a login that `login` answered with the challenge shape. Persists the resulting
    * session token exactly as `login` does; `rememberMe` decides between cookie and localStorage.
-   * `trustDevice` (cycle 3) asks the server to trust this browser; the trust itself arrives as an
+   * `trustDevice` asks the server to trust this browser; the trust itself arrives as an
    * httpOnly cookie the panel never sees.
    */
   loginMfa: (
@@ -63,7 +63,7 @@ interface AuthContextValue {
     }
   ) => Promise<Awaited<ReturnType<ReturnType<typeof useLoginMfaMutation>[0]>>>;
   /**
-   * Cycle 4's passkey twin of `loginMfa`: satisfies the *same* challenge with a WebAuthn
+   * Passkeys's passkey twin of `loginMfa`: satisfies the *same* challenge with a WebAuthn
    * assertion instead of a code, and persists the resulting session token identically.
    * `trustDevice` and `rememberMe` are carried for exactly the reasons they are carried on
    * `loginMfa` -- the trust grant is factor-agnostic, and `rememberMe` decides cookie vs

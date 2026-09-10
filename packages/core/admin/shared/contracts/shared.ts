@@ -39,13 +39,13 @@ export interface AdminUser extends Entity {
   mfaSecret?: string | null;
   mfaEnabledAt?: string | Date | null;
   mfaLastUsedStep?: number | null;
-  // Cycle 2 (enforcement). `mfaPendingSecret` is ciphertext for a not-yet-verified enrolment;
+  // Enforcement (enforcement). `mfaPendingSecret` is ciphertext for a not-yet-verified enrolment;
   // `mfaGraceUntil` / `mfaLockedAt` are the enforcement stamps. All three are private and are
   // exposed only by `GET /admin/users/:id` to callers holding `admin::users.update`.
   mfaPendingSecret?: string | null;
   mfaGraceUntil?: string | Date | null;
   mfaLockedAt?: string | Date | null;
-  // Cycle 4 (passkeys). The one pending registration ceremony and its deadline. Private, declared
+  // Passkeys (passkeys). The one pending registration ceremony and its deadline. Private, declared
   // here only so the two sanitizers can name them in their omit lists.
   mfaPasskeyChallenge?: string | null;
   mfaPasskeyChallengeExpiresAt?: string | Date | null;

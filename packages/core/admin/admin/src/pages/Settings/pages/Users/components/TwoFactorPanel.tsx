@@ -35,12 +35,12 @@ interface TwoFactorPanelProps {
  * period: the user's next login does, so an unlock while they are away cannot re-lock them
  * unseen. The mutation invalidates this user's `User` tag, so the panel refreshes itself.
  *
- * Cycle 3 adds, for an enrolled user, the number of trusted browsers and a "Revoke trusted
+ * Trusted devices adds, for an enrolled user, the number of trusted browsers and a "Revoke trusted
  * devices" action (`DELETE /admin/mfa/users/:id/trusted-devices`, behind `admin::users.update`).
  * Revoking trust is security-positive, it forces the second factor back on, so unlike a reset it
  * needs no re-authentication.
  *
- * Cycle 4 adds the same pair for passkeys: how many the user has registered and a "Remove
+ * Passkeys adds the same pair for passkeys: how many the user has registered and a "Remove
  * passkeys" action (`DELETE /admin/mfa/users/:id/passkeys`, behind the same `admin::users.update`).
  * Removing them is security-positive in the same way revoking trust is -- the account falls back
  * to its authenticator app -- so, like revocation and unlike a reset, it needs no
@@ -53,7 +53,7 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
   const [unlock, { isLoading }] = useUnlockUserMfaMutation();
   const [confirmOpen, setConfirmOpen] = React.useState(false);
 
-  // Cycle 3. Only an enrolled user can hold trusted browsers (disable and reset clear them), so
+  // Trusted devices. Only an enrolled user can hold trusted browsers (disable and reset clear them), so
   // the query is skipped otherwise. A failed read hides the line rather than showing a false zero,
   // and gating on `isSuccess` (rather than defaulting `data` to `[]`) keeps the line from flashing
   // "No trusted devices" while the request is still in flight.
@@ -66,7 +66,7 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
     useRevokeUserTrustedDevicesMutation();
   const [revokeTrustOpen, setRevokeTrustOpen] = React.useState(false);
 
-  // Cycle 4. Same two guards as the trusted-device query above, for the same two reasons: only an
+  // Passkeys. Same two guards as the trusted-device query above, for the same two reasons: only an
   // enrolled user can hold a passkey (a passkey is always a second factor, and `disable` deletes
   // them), and gating on `isSuccess` keeps the line from flashing "No passkeys" while the request
   // is in flight or from showing a false zero after a failed read. The response is a count, not a

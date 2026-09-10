@@ -8,22 +8,22 @@ import { NavLink } from 'react-router-dom';
 import { useGetMfaStatusQuery } from '../services/mfa';
 import { isNotFoundError } from '../utils/baseQuery';
 
-/** Spec: the banner re-reads `/admin/mfa/me` every 15 minutes so a long-lived tab notices a grace period stamped by a background token refresh. */
+/** Re-read every 15 minutes so a long-lived tab notices a grace period stamped by a background token refresh. */
 export const MFA_STATUS_POLL_INTERVAL_MS = 15 * 60 * 1000;
 
 /**
  * Non-dismissible warning shown at the top of the authenticated layout while `/admin/mfa/me`
  * reports `required && !enabled`: this account must enrol before `graceUntil` or it is locked
  * for password login. A `Box` rather than the design system `Alert` because `Alert` always
- * renders a close button, and the spec wants this one to stay until the user enrols.
+ * renders a close button, and this one must stay until the user enrols.
  *
  * `graceUntil` can be `null` while `required` is true: the session predates the requirement
  * (the grace clock starts at the first *session issue* after the requirement applies), so the
  * copy then says the deadline starts at the next login rather than inventing one.
  *
  * Polling and refetch-on-focus stop once the endpoint answers 404 (feature off): there is
- * nothing to watch, and cycle 1's review rightly objected to a guaranteed 404 per interval on
- * every default-off instance.
+ * nothing to watch, and a guaranteed 404 per interval on every default-off instance is pure
+ * noise.
  *
  * The options passed to the hook can only depend on the *previous* render's result (the hook's
  * own return value isn't available yet while building its own argument), so "is a 404 the

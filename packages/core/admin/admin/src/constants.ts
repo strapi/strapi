@@ -229,7 +229,7 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
       to: '/settings/admin-tokens',
       id: 'admin-tokens',
     },
-    // Cycle 2 of admin two-factor authentication. The one place the admin reads the future flag:
+    // Enforcement of admin two-factor authentication. The one place the admin reads the future flag:
     // the page itself, and everything behind it, keys off the API (404 = feature off) instead.
     ...(window.strapi.future.isEnabled('unstableAdminMfa')
       ? [

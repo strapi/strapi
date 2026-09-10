@@ -79,7 +79,7 @@ const NOTICE_COPY: Record<MfaEventNotice['type'], { id: string; defaultMessage: 
 };
 
 /**
- * `device_trust_revoked` carries `byUserId` when an administrator did it (cycle 3), and the
+ * `device_trust_revoked` carries `byUserId` when an administrator did it, and the
  * notice should say so. Chosen here from the metadata rather than by a fourth event type: the
  * server records one type for both and keeps the distinction in the event's metadata.
  */
@@ -89,7 +89,7 @@ const REVOKED_BY_ADMIN_COPY = {
 };
 
 /**
- * `device_trusted` carries `deviceName` and `days` (cycle 3) when the server could name the
+ * `device_trusted` carries `deviceName` and `days` when the server could name the
  * browser that was trusted, and the notice should say so instead of the generic static copy.
  */
 const DEVICE_TRUSTED_NAMED_COPY = {
@@ -140,7 +140,7 @@ export const formatMfaNotice = (
 };
 
 /**
- * The spec's primary notification channel: unseen `admin::mfa-event` rows become one warning
+ * The primary notification channel: unseen `admin::mfa-event` rows become one warning
  * toast on the next authenticated load. There is deliberately no link -- `Notifications` renders
  * `link` as an external `<Link isExternal>` (new tab / full navigation), which is wrong for an
  * in-app destination -- so the message just says where to look. Dismissing the toast marks

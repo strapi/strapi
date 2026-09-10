@@ -30,7 +30,7 @@ const isValidDays = (value: number | null) =>
   value !== null && Number.isInteger(value) && value >= DAYS_MIN && value <= DAYS_MAX;
 
 /**
- * The second card on the Security page (cycle 3). Owns a draft of the `trustedDevices` object and
+ * The second card on the Security page. Owns a draft of the `trustedDevices` object and
  * saves it alone: `PUT /admin/security-settings` is per-object, so the body never carries `mfa`.
  * Disabling or shortening saves directly; enabling, or lengthening while enabled, is a downgrade
  * (`isTrustedDevicesDowngrade`) and first collects the caller's password, plus a code when they

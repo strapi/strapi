@@ -37,12 +37,12 @@ export interface MfaChallengeResponse {
     challengeToken: string;
     expiresIn: number;
     /**
-     * Cycle 3: the trust period the challenge screen may offer ("Trust this device for {n}
+     * Trusted devices: the trust period the challenge screen may offer ("Trust this device for {n}
      * days"), or null when the organisation does not offer trusted devices. Never absent.
      */
     trustedDeviceDays: number | null;
     /**
-     * Cycle 4: whether the challenge screen may offer "Use a passkey" -- the organisation allows
+     * Passkeys: whether the challenge screen may offer "Use a passkey" -- the organisation allows
      * passkeys *and* this account holds at least one. Never absent. Telling a caller who already
      * proved the password that this account has passkeys is not a new disclosure: the challenge
      * itself already reveals that the account is enrolled.
@@ -73,7 +73,7 @@ export declare namespace LoginMfa {
       code: string;
       deviceId?: string;
       rememberMe?: boolean;
-      /** Cycle 3: trust this browser after the code verifies. Ignored when the organisation disallows it. */
+      /** Trusted devices: trust this browser after the code verifies. Ignored when the organisation disallows it. */
       trustDevice?: boolean;
     };
   }

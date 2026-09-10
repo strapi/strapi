@@ -49,7 +49,7 @@ import { AdminUser } from '../../../shared/contracts/shared';
 const { ApplicationError, RateLimitError, ValidationError } = errors;
 
 /**
- * Cycle 2 enforcement for a user about to receive a session. Throws `MfaLockedError` (403) on
+ * Enforcement for a user about to receive a session. Throws `MfaLockedError` (403) on
  * refusal, after emitting `admin.auth.error` like every other failed login; otherwise returns the
  * `issueSession` options carrying the grace deadline when one applies.
  */
@@ -68,7 +68,7 @@ const enforceMfaOrThrow = async (
 };
 
 /**
- * Cycle 3: what a challenge response advertises as the trust period, or null when the
+ * Trusted devices: what a challenge response advertises as the trust period, or null when the
  * organisation does not offer trusted devices. Read per challenge, never cached, so a settings
  * change shows on the very next login screen.
  */
@@ -78,7 +78,7 @@ const offeredTrustDays = async (): Promise<number | null> => {
 };
 
 /**
- * Cycle 4: whether the challenge screen may offer the passkey path. `countPasskeys` returns 0
+ * Passkeys: whether the challenge screen may offer the passkey path. `countPasskeys` returns 0
  * while the organisation has turned passkeys off, so this is "the policy allows them and this
  * account holds at least one" -- and I1 adds a third term: the RP must actually resolve, so a
  * misconfigured deployment (an IP-literal `admin.absoluteUrl`) never offers a button every
@@ -93,7 +93,7 @@ const passkeyAvailableFor = async (userId: string): Promise<boolean> =>
  * ordering: validating first would make flag-off return 400 for a malformed body and 404 for a
  * well-formed one, and that difference is itself a feature-presence tell on a route that is
  * supposed to behave as though it does not exist. Shared by all three challenge-completing
- * routes since cycle 4 added two more.
+ * routes since passkeys added two more.
  */
 const requireMfaEnabled = async (ctx: Context, next: Next) => {
   if (!getService('mfa').isEnabled()) {
@@ -154,7 +154,7 @@ export default {
         // Read once, before anything else in this block: `createChallenge` below already mints a
         // challenge row, so a store-read failure for the offered trust period must not risk a
         // 500 on a response whose challenge already exists (a retry would then mint a second,
-        // orphaned one). Cycle 3: a browser trusted after an earlier verified code skips the
+        // orphaned one). Trusted devices: a browser trusted after an earlier verified code skips the
         // challenge. Only here (never on reset-password), only after the password check and
         // `enforce`, only for an enrolled user, and only through `consumeTrustedDevice`, which
         // compares the row's owner to this user. A cookie that matches nothing live, belongs to a
@@ -252,7 +252,7 @@ export default {
         throw new ValidationError('Invalid code');
       }
 
-      // Cycle 3: any verified challenge may grant trust. The service returns null when the
+      // Trusted devices: any verified challenge may grant trust. The service returns null when the
       // organisation does not offer it, and a stale checkbox is not an error. The raw token
       // exists only here and in the Set-Cookie header.
       if (trustDevice) {
@@ -273,7 +273,7 @@ export default {
   ]),
 
   /**
-   * Cycle 4: start an authentication ceremony against a challenge `/login` or `/reset-password`
+   * Passkeys: start an authentication ceremony against a challenge `/login` or `/reset-password`
    * already minted. Unauthenticated and rate-limited; the challenge token is the only credential.
    * Charges no attempt -- it evaluates no factor -- but the service still checks the throttle and
    * the challenge's usability, so it cannot be used as an unmetered oracle.
@@ -328,7 +328,7 @@ export default {
         throw new ValidationError(PASSKEY_VERIFY_FAILED);
       }
 
-      // Cycle 3's seam: the grant is factor-agnostic, so this is byte for byte what `/login/mfa`
+      // Trusted devices's seam: the grant is factor-agnostic, so this is byte for byte what `/login/mfa`
       // does. The service returns null when the organisation does not offer trust, and a stale
       // checkbox is not an error. The raw token exists only here and in the Set-Cookie header.
       if (trustDevice) {
@@ -482,7 +482,7 @@ export default {
         return ctx.unauthorized('Invalid refresh token');
       }
 
-      // Cycle 2 enforcement on the refresh path: a required user whose grace expired mid-session
+      // Enforcement on the refresh path: a required user whose grace expired mid-session
       // is locked at their next refresh. Handled as a value, never thrown -- this try/catch turns a
       // throw into a 500. Refusal is a bare 401 (this client never renders a message); every
       // refresh token for the user is invalidated (the just-rotated one included) and the cookie

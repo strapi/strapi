@@ -27,7 +27,7 @@ import { useDeletePasskeyMutation, useGetPasskeysQuery } from '../../services/mf
 import { AddPasskeyDialog } from './AddPasskeyDialog';
 
 /**
- * Cycle 4: the WebAuthn credentials this user can sign in with instead of typing a code, inside
+ * Passkeys: the WebAuthn credentials this user can sign in with instead of typing a code, inside
  * the profile's Two-factor section. `TwoFactorSection` renders this only for an enrolled account
  * while the organisation allows passkeys, so nothing here re-checks either.
  *
@@ -39,8 +39,8 @@ import { AddPasskeyDialog } from './AddPasskeyDialog';
  * in a browser that cannot run a ceremony: a user who registered a passkey elsewhere must still
  * be able to take it away from here.
  *
- * Fix-wave (finding 6): the Add button is also hidden at `MAX_PASSKEYS_PER_USER`, with the same
- * one-line note shape as the unsupported-browser branch. Without this, the server spends the
+ * The Add button is also hidden at `MAX_PASSKEYS_PER_USER`, with the same one-line note shape
+ * as the unsupported-browser branch: the server spends the
  * password AND a live code (`assertPasswordAndFactor` in `passkeyRegistrationOptions`) before it
  * ever checks the cap, so offering a button that can only be refused burns a factor attempt on a
  * guaranteed rejection.
@@ -54,7 +54,7 @@ const Passkeys = () => {
   const [addOpen, setAddOpen] = React.useState(false);
 
   // Keeps the error, empty and table states mutually exclusive: a stale, previously-successful
-  // array must not render the table underneath an error (cycle 3's correction to this pattern).
+  // array must not render the table underneath an error (trusted devices's correction to this pattern).
   const hasPasskeys = !error && passkeys.length > 0;
   const supported = browserSupportsWebAuthn();
   const atCap = passkeys.length >= MAX_PASSKEYS_PER_USER;

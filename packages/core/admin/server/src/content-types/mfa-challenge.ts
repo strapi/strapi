@@ -59,7 +59,7 @@ export default {
       private: true,
       searchable: false,
     },
-    // Cycle 4: the WebAuthn challenge for a *login* ceremony, set by
+    // Passkeys: the WebAuthn challenge for a *login* ceremony, set by
     // `POST /admin/login/mfa/webauthn/options` and cleared by this row's deletion (the consume) or
     // its expiry sweep. Nullable, so every existing row and every TOTP-only challenge is
     // untouched.

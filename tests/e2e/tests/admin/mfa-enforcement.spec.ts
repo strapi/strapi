@@ -12,7 +12,7 @@ const twoFactorCard = (page: Page) =>
 
 /**
  * Sets the requirement to Required from the Security page (the caller must be enrolled). Each
- * card on that page is an accessible region named by its own heading (cycle 4), so its Save
+ * card on that page is an accessible region named by its own heading, so its Save
  * button is selected by card rather than by position.
  */
 const requireTwoFactorForEveryone = async (page: Page) => {
@@ -114,7 +114,7 @@ test.describe('Two-factor enforcement', () => {
     await dialog.getByRole('button', { name: 'Continue' }).click();
     const newSecret = (await dialog.getByTestId('mfa-manual-key').textContent())!.trim();
     expect(newSecret).not.toBe(editor.secret);
-    // the enrolment verify a moment ago consumed the current step account-wide
+    // The enrolment verify a moment ago consumed the current step account-wide
     await waitForNextTotpStep();
     await dialog.getByLabel('Authentication code*').fill(totpFor(newSecret));
     await dialog.getByRole('button', { name: 'Verify' }).click();

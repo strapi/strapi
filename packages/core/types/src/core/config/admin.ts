@@ -37,7 +37,7 @@ export interface MfaWindow {
 }
 
 /**
- * Cycle 4 WebAuthn relying-party overrides. Both optional: the server derives them from
+ * Passkeys WebAuthn relying-party overrides. Both optional: the server derives them from
  * `admin.absoluteUrl`. `rpId` is **required** for any deployment whose `admin.absoluteUrl`
  * resolves to an IP literal -- the default production shape -- because an IP literal is not a
  * valid relying-party id. `origins` exists for one deployment served on several hostnames.

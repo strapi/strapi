@@ -84,7 +84,7 @@ export type MfaEventType =
 /**
  * The shape `recordEvent`'s `metadata` is expected to carry -- what `buildSessionMetadataFromContext`
  * actually returns (`loginAt`, and `deviceName` when the user-agent maps to one; see
- * `@strapi/utils`'s `buildSessionMetadata`), plus `via: 'cli'`, how the CLI reset (Task 12) marks
+ * `@strapi/utils`'s `buildSessionMetadata`), plus `via: 'cli'`, how the CLI reset marks
  * an event it recorded outside any HTTP request. None of these can ever be a code, a secret or an
  * otpauth URI.
  *
@@ -123,7 +123,7 @@ export type VerifyChallengeResult =
   | { ok: false; reason: 'unusable' | 'exhausted' | 'invalid' | 'throttled' };
 
 /**
- * The result of `enforce`, cycle 2's session-issue evaluation. `none` covers every case where
+ * The result of `enforce`, enforcement's session-issue evaluation. `none` covers every case where
  * nothing further is required of the caller (feature or mode off, not required, already
  * enrolled). `grace` still issues the session, carrying the deadline for the admin panel to
  * display. `refused` means the caller must not receive a session: the account is locked, or the
@@ -168,42 +168,16 @@ export interface MfaServiceDeps {
 /**
  * Native TOTP two-factor authentication for admin users.
  *
- * Organised in several groups, extended by later tasks:
- *  - Config & status: `isEnabled`, `config`, `isEnrolled`.
- *  - Enrolment: `beginEnrolment`, `completeEnrolment`.
- *  - Verification primitives: `verifyTotpForUser`, `consumeTotpStep`, the atomic replay guard
- *    shared by enrolment and, later, challenge verification (Task 7).
- *  - Recovery codes (Task 6): `issueRecoveryCodes`, `consumeRecoveryCode`,
- *    `countUnusedRecoveryCodes` — the single-use fallback for when the authenticator app is
- *    unavailable, consumed with the same atomic replay-guard shape as `consumeTotpStep`.
- *  - Challenge lifecycle (Task 7): `createChallenge`, `verifyChallenge`, `recordEvent`,
- *    `isAccountThrottled`, `sweepExpiredChallenges` — the only code that decides whether a second
- *    factor was satisfied, and the two-tier attempt limiting that stops brute force.
- *  - Re-authentication gate: `assertFactor`, the second-factor check -- a still-working TOTP code
- *    or an unused recovery code, dispatched by the submitted code's own shape -- shared by
- *    `verifyChallenge`'s dispatch, a replacement enrolment (`beginEnrolment` with a code), and
- *    `assertPasswordAndFactor`, which layers the password check in front of it for `disable` and
- *    a security-settings downgrade.
- *  - Self-service management (Task 10): `unseenEvents`, `markEventsSeen`, `areCodesAcknowledged`,
- *    `acknowledgeCodes` — the in-app notice feed and recovery-code acknowledgement — plus
- *    `disable`, the one consumer of `assertPasswordAndFactor` that turns two-factor authentication
- *    off.
- *  - Outbound notices (Task 11): `notify` — the eventHub event and best-effort change email
- *    layered on top of `recordEvent` — and `pruneEvents`, the per-user retention cap on
- *    `admin::mfa-event` that `recordEvent` runs after every insert.
- *  - Enforcement (cycle 2): `isExemptFromMfa`, `isMfaRequiredFor`, `enforce`, `unlock` — the
- *    session-issue policy check, the grace/lock lifecycle it drives, and the administrator
- *    override that lifts a lock.
- *  - Trusted devices (cycle 3, `mfa-trusted-devices.ts`): `trustDevice`, `consumeTrustedDevice`,
- *    `listTrustedDevices`, `revokeTrustedDevice`, `revokeAllTrustedDevices`, `clearTrustedDevices`,
- *    `clearAllTrustedDevices`, `sweepExpiredTrustedDevices`, `trustedDeviceSettings` — a browser's
- *    right to skip the second factor for a bounded period.
- *  - Passkeys (cycle 4, `mfa-passkeys.ts`): `passkeyRegistrationOptions`, `registerPasskey`,
- *    `listPasskeys`, `countPasskeys`, `deletePasskey`, `clearPasskeys`, `clearAllPasskeys`,
- *    `authenticationOptions`, `verifyAssertion`, `passkeySettings`, `passkeysConfigured` --
- *    WebAuthn credentials as a second factor, origin-bound by the browser and therefore
- *    unphishable. The first two are wrapped here (not re-exported directly) so the policy and
- *    enrolment invariants hold for any caller, not only `controllers/mfa.ts`.
+ * Everything that decides whether a second factor was satisfied lives here: enrolment, the
+ * verification primitives and their atomic replay guards, recovery codes, the challenge
+ * lifecycle and its two-tier attempt limiting, the re-authentication gate `disable` and a
+ * security-settings downgrade share, the notice feed, and the grace/lock enforcement that runs
+ * on every session issue.
+ *
+ * Trusted devices (`mfa-trusted-devices.ts`) and passkeys (`mfa-passkeys.ts`) are composed in
+ * below. `passkeyRegistrationOptions` and `registerPasskey` are wrapped here rather than
+ * re-exported directly, so the policy and enrolment invariants hold for any caller, not only
+ * `controllers/mfa.ts`.
  */
 const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   let cachedConfig: MfaConfig | null = null;
@@ -328,7 +302,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     Boolean(user.mfaEnabledAt && user.mfaSecret);
 
   /**
-   * One conditional UPDATE each; the affected count is the decision (cycle 1's atomicity rule).
+   * One conditional UPDATE each; the affected count is the decision (the base factor's atomicity rule).
    * Read-then-write would let a refresh-path lock race an administrator's unlock and silently win.
    */
   const stampGrace = async (userId: string, graceUntil: Date): Promise<boolean> => {
@@ -376,9 +350,9 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   };
 
   /**
-   * Cycle 2 enforcement, run by every path that mints a session for a password-holding user.
+   * Enforcement, run by every path that mints a session for a password-holding user.
    * Reloads the row with roles itself so callers may pass a partial user. See the outcome table in
-   * the cycle 2 spec ("Enforcement evaluation"); `retried` bounds the single re-read taken when a
+   * the outcome table below; `retried` bounds the single re-read taken when a
    * conditional update finds its precondition gone.
    */
   const evaluateEnforcement = async (
@@ -682,7 +656,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
         throw new ValidationError('No enrolment in progress');
       }
 
-      // Cycle 3: the trusts on file were granted against the authenticator the user just retired.
+      // Trusted devices: the trusts on file were granted against the authenticator the user just retired.
       // Conservative by design -- the cost is one code per browser at its next login -- and only
       // on a replacement: a first enrolment has nothing to revoke.
       if (replaced) {
@@ -887,7 +861,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
    * served by `recordEvent` alone (the in-app notice feed, and the acknowledgement marker
    * respectively), and an emailed notice on every recovery-code use would mean an attacker who has
    * already stolen one credential now also learns, by email, that the account holder is about to
-   * find out. `locked` and `unlocked` are cycle 2's own additions -- see `EmailedNotice` below for
+   * find out. `locked` and `unlocked` are enforcement's own additions -- see `EmailedNotice` below for
    * why neither ever reaches an inbox. Keeping this union out of `notify`'s own signature, rather
    * than reusing `MfaEventType` and rejecting the excluded members at runtime, turns passing one of
    * them into a compile error.
@@ -909,16 +883,14 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
 
   /**
    * The subset of `MfaChangeNotice` that also sends a change email -- a change to the user's own
-   * second factor. `challenge_failed` is a notice, not a change; `locked`/`unlocked` are cycle 2's
+   * second factor. `challenge_failed` is a notice, not a change; `locked`/`unlocked` are enforcement's
    * own decision to keep enforcement hub-only (the in-app notice feed carries them instead). Kept
    * as its own type, rather than an `Exclude<MfaChangeNotice, ...>` of the ever-growing exclusion
    * list, so `CHANGE_NOTICE_TEXT` below stays exhaustive over exactly the emailed members and a
-   * newly added hub-only notice cannot silently start demanding an email phrase. The cycle 3
-   * device notices are hub-only for the same reason as lock events: the in-app feed carries
-   * `device_trusted` and `device_trust_revoked`, and `trusted_device_used` is audit-only. The
-   * cycle 4 passkey notices are hub-only on the same grounds: the in-app feed carries
-   * `passkey_registered` and `passkey_removed`, and `passkey_used` is audit-only with no row,
-   * exactly like `trusted_device_used`.
+   * newly added hub-only notice cannot silently start demanding an email phrase. The device and
+   * passkey notices are hub-only for the same reason as lock events: the in-app feed carries
+   * `device_trusted`, `device_trust_revoked`, `passkey_registered` and `passkey_removed`, and
+   * `trusted_device_used`/`passkey_used` are audit-only.
    */
   type EmailedNotice = 'enabled' | 'disabled' | 'reset' | 'authenticator_replaced';
 
@@ -962,16 +934,15 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
    * email is sent only for an actual change to the user's own factor (`EmailedNotice`): a failed
    * challenge is a notice, not a change, and mailing every wrong code would let anyone who merely
    * knows the password flood the account holder's inbox. `locked`/`unlocked` are hub-only by the
-   * same reasoning, and by cycle 2's own decision to send no lock emails at all -- the in-app
+   * same reasoning, and by enforcement's own decision to send no lock emails at all -- the in-app
    * notice feed is enough, and `extra.byUserId` (carried straight into the eventHub payload, never
    * emailed) lets `unlocked` name the administrator who acted.
    *
-   * Returns the email's promise rather than staying `void` (F6): a fire-and-forget caller can
-   * still ignore it exactly as before, but the CLI reset command needs to `await` it -- it calls
-   * `notify` and then `process.exit(0)`, which can tear the process down before a truly detached
-   * promise ever resolves, silently dropping the reset email. The internal try/catch still
-   * guarantees this promise never rejects, so nothing about the fire-and-forget call sites
-   * (`verifyChallenge`, `assertPasswordAndFactor`, `controllers/mfa.ts`) needs to change.
+   * The email's promise is returned rather than swallowed so the CLI reset command can `await`
+   * it: it calls `notify` and then `process.exit(0)`, which can tear the process down before a
+   * detached promise ever resolves, silently dropping the reset email. The internal try/catch
+   * guarantees the promise never rejects, so the fire-and-forget call sites can keep ignoring
+   * it.
    */
   const notify = (
     userId: string,
@@ -986,8 +957,8 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
 
     // Resolved outside the closure below while `type` is still narrowed to a `CHANGE_NOTICE_TEXT`
     // key (the `isEmailedNotice` guard above already returned for anything outside it) -- the
-    // template must never receive the raw enum value (Finding 1: "authenticator_replaced" is not
-    // a sentence).
+    // template must never receive the raw enum value ("authenticator_replaced" is not a
+    // sentence).
     const change = CHANGE_NOTICE_TEXT[type];
 
     return (async () => {
@@ -1092,7 +1063,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     });
   };
 
-  // --- Trusted devices (cycle 3) ------------------------------------------
+  // --- Trusted devices ------------------------------------------
   // Own module, composed here so callers keep one service. `settings` is the store reader from
   // `security-settings.ts`, injected rather than imported inside the module so its tests can hand
   // it any policy without a store double.
@@ -1160,8 +1131,8 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
    * alike -- records a fresh one): an older, already-acknowledged marker must never make a
    * just-regenerated set read as acknowledged. Ordered by `createdAt` then `id`, both descending:
    * two markers can share a millisecond-resolution timestamp, and `id` is the only thing that
-   * still orders them correctly when they do. No row at all (a pre-Task-10 account, or one that
-   * has never had codes issued) means "not acknowledged", not an error.
+   * still orders them correctly when they do. No row at all (an account that has never had
+   * codes issued) means "not acknowledged", not an error.
    */
   const areCodesAcknowledged = async (userId: string): Promise<boolean> => {
     const latest = await eventQuery().findOne({
@@ -1201,8 +1172,8 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     return failures >= maxUserAttempts;
   };
 
-  // --- Passkeys (cycle 4) -------------------------------------------------
-  // Own module, composed here so callers keep one service, exactly as cycle 3's trusted devices.
+  // --- Passkeys -------------------------------------------------
+  // Own module, composed here so callers keep one service, exactly as trusted devices's trusted devices.
   // `settings` is the store reader from `security-settings.ts`, injected rather than imported
   // inside the module so its tests can hand it any policy without a store double.
   //
@@ -1219,13 +1190,13 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   });
 
   /**
-   * I2: the same two invariants `controllers/mfa.ts`'s `assertPasskeyRegistrationAllowed` checks
+   * the same two invariants `controllers/mfa.ts`'s `assertPasskeyRegistrationAllowed` checks
    * before calling either of the functions below -- moved here too, so the service stays safe for
    * any caller reaching `strapi.service('admin::mfa')` and not only the controller. `isEnrolled`
    * is already in scope at this point in the file (no new dependency needed in `PasskeyDeps`), and
    * `readPasskeySettings` is the same tolerant store reader the passkey module itself is given.
    * The controller's own checks stay too -- a duplicated cheap check is the correct price for
-   * keeping the spec's ordering (flag, then policy, then enrolment, then body validation) so no
+   * keeping the ordering (flag, then policy, then enrolment, then body validation) so no
    * password/code attempt is spent on a request that could never succeed.
    */
   const assertPasskeyRegistrationAllowed = async (userId: string): Promise<void> => {
@@ -1253,7 +1224,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       data: {
         token,
         userId: String(userId),
-        // Cycle 4: this stopped being an honest `'totp'` the moment a passkey assertion could
+        // Passkeys: this stopped being an honest `'totp'` the moment a passkey assertion could
         // consume the same row -- `verifyChallenge` (TOTP/recovery code) and `verifyAssertion`
         // (passkey) both call `consumeChallenge` on whichever one the caller completes first, and
         // neither reads this column to decide anything (dispatch is on the submitted credential's
@@ -1458,7 +1429,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
    * is deliberately scoped to the unauthenticated challenge path, and here the actionable "secret
    * could not be read" error must keep propagating rather than collapse into "Invalid code". A
    * recovery-shaped code never reaches the TOTP branch at all (the shape dispatch below), so an
-   * account whose secret cannot be decrypted can still be disabled with a recovery code -- Task 5
+   * account whose secret cannot be decrypted can still be disabled with a recovery code --
    * noted that `mfaEnabledAt` set with `mfaSecret` null is otherwise un-enrollable except via the
    * CLI.
    */
@@ -1487,11 +1458,11 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
    * future request -- with the recovery codes already deleted, and a replacement enrolment demands
    * a current factor. That is a permanent lockout with no way back in short of the CLI reset.
    *
-   * Cycle 3 adds the trusted-device rows to the same transaction: a disabled account has no second
+   * Trusted devices adds the trusted-device rows to the same transaction: a disabled account has no second
    * factor for a trust to bypass, and the CLI reset (which calls `disable`) must leave none behind
    * either.
    *
-   * Cycle 4 adds the passkey rows and the pending registration ceremony to the same transaction,
+   * Passkeys adds the passkey rows and the pending registration ceremony to the same transaction,
    * for the same reason: the CLI reset (which calls `disable`) must leave neither behind.
    */
   const disable = async (userId: string): Promise<void> => {
@@ -1499,7 +1470,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       await recoveryQuery().deleteMany({ where: { userId: String(userId) } });
       await challengeQuery().deleteMany({ where: { userId: String(userId) } });
       await trustedDevices.clearTrustedDevices(userId);
-      // Cycle 4: a disabled account has no second factor at all, so a passkey that still
+      // Passkeys: a disabled account has no second factor at all, so a passkey that still
       // satisfied challenges would be one. The two pending-ceremony columns are nulled in the
       // same user update that already nulls `mfaPendingSecret` -- otherwise the stated mirror
       // breaks and a pending ceremony outlives the disable.
@@ -1573,7 +1544,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     clearAllTrustedDevices: trustedDevices.clearAllTrustedDevices,
     sweepExpiredTrustedDevices: trustedDevices.sweepExpiredTrustedDevices,
     trustedDeviceSettings: trustedDevices.trustedDeviceSettings,
-    // I2: wrapped, not re-exported directly -- `assertPasskeyRegistrationAllowed` runs first so
+    // wrapped, not re-exported directly -- `assertPasskeyRegistrationAllowed` runs first so
     // the invariant holds for any caller of the composed service, not only `controllers/mfa.ts`.
     async passkeyRegistrationOptions(userId: string) {
       await assertPasskeyRegistrationAllowed(userId);

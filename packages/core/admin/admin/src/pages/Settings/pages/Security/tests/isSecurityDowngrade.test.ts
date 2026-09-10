@@ -40,14 +40,10 @@ describe('isPasskeysDisable', () => {
   });
 });
 
-// Fix-wave (final review finding 1): mirrors the server's password-less exemption in
-// `updateSettings` (`security-settings.ts:326-335`) exactly --
-//   if (!actorRow.password && (lowersEnforcement || widensTrust)) { throw ...; }
-//   if (actorRow.password) { // demand credentials }
-// -- a password-less actor is exempted only when `disablesPasskeys` is the ONLY term that
-// tripped; combined with either of the other two, or for a password-holding actor, credentials
-// are still demanded.
-describe('requiresPasskeysCredentials (fix-wave finding 1: mirrors the server exemption)', () => {
+// Mirrors the server's password-less exemption in `updateSettings`: a password-less actor is
+// exempted only when `disablesPasskeys` is the ONLY term that tripped. Combined with either of
+// the other two, or for a password-holding actor, credentials are still demanded.
+describe('requiresPasskeysCredentials', () => {
   it('a password-less administrator turning passkeys off alone needs no credentials', () => {
     expect(requiresPasskeysCredentials(false, true)).toBe(false);
   });

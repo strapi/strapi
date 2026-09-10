@@ -1,7 +1,7 @@
 /* eslint-env jest */
 
 /**
- * Coverage for the cycle 4 `passkeysSchema` folded into `updateSecuritySettingsSchema`, and for
+ * Coverage for the passkeys `passkeysSchema` folded into `updateSecuritySettingsSchema`, and for
  * the validation layer's own copy of the `'Provide mfa, trustedDevices or passkeys'` message.
  *
  * `mfa` and `trustedDevices` never had validation-level tests either -- this file does not close
