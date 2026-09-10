@@ -75,6 +75,15 @@ const KNOWN_PUBLIC_SUFFIXES = new Set([
 /** `new URL('http://[::1]:1337').hostname` keeps the brackets; `isIP` does not want them. */
 const stripBrackets = (host: string): string => host.replace(/^\[/, '').replace(/\]$/, '');
 
+/**
+ * Lowercase and strip a single trailing DNS root dot before any check runs, so `EXAMPLE.com`,
+ * `example.com.` and `example.com` are all treated as the one host a browser treats them as.
+ * Applied once, at the point `rpId` is computed, so every later check (IP-literal, public-suffix,
+ * and the origin/rpId relation check) and the returned value all see the same normalised form. A
+ * leading dot is not stripped -- it is not a valid host, so it is refused explicitly instead.
+ */
+const normalizeHost = (host: string): string => host.toLowerCase().replace(/\.$/, '');
+
 const isPublicSuffix = (rpId: string): boolean => {
   if (rpId === 'localhost') {
     return false;
@@ -134,9 +143,9 @@ export const resolveWebauthnRp = (strapi: Core.Strapi): WebauthnRp => {
 
   let rpId: string;
   if (typeof configuredRpId === 'string' && configuredRpId.length > 0) {
-    rpId = configuredRpId;
+    rpId = normalizeHost(configuredRpId);
   } else if (derived) {
-    rpId = stripBrackets(derived.hostname);
+    rpId = normalizeHost(stripBrackets(derived.hostname));
   } else {
     rpId = '';
   }
@@ -144,6 +153,12 @@ export const resolveWebauthnRp = (strapi: Core.Strapi): WebauthnRp => {
   if (!rpId) {
     return refuse(
       `admin.absoluteUrl (${JSON.stringify(adminUrl ?? null)}) is not a URL a relying-party id can be derived from. Set admin.auth.mfa.webauthn.rpId.`
+    );
+  }
+
+  if (rpId.startsWith('.')) {
+    return refuse(
+      `rpId "${rpId}" starts with "." which is not a valid host. Set admin.auth.mfa.webauthn.rpId.`
     );
   }
 
@@ -156,6 +171,12 @@ export const resolveWebauthnRp = (strapi: Core.Strapi): WebauthnRp => {
   if (isPublicSuffix(rpId)) {
     return refuse(
       `rpId "${rpId}" is a public suffix (or a bare label), which browsers reject. Set admin.auth.mfa.webauthn.rpId to the registrable domain the admin panel is served from.`
+    );
+  }
+
+  if (configuredOrigins !== undefined && !Array.isArray(configuredOrigins)) {
+    return refuse(
+      `admin.auth.mfa.webauthn.origins (${JSON.stringify(configuredOrigins)}) must be an array of origin strings, not a ${typeof configuredOrigins}. Set admin.auth.mfa.webauthn.origins.`
     );
   }
 
