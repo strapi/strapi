@@ -191,6 +191,7 @@ describe('security-settings: service', () => {
       enrolled?: boolean;
       exempt?: boolean;
       passwordOk?: boolean;
+      transactionFails?: 'open' | 'commit';
     } = {}
   ) => {
     const roles: RoleRow[] = [
@@ -234,7 +235,16 @@ describe('security-settings: service', () => {
     const clearAllTrustedDevices = jest.fn(() => Promise.resolve(0));
     const clearAllPasskeys = jest.fn(() => Promise.resolve(0));
     const validatePassword = jest.fn(() => Promise.resolve(options.passwordOk ?? true));
-    const transaction = jest.fn(async (run: () => Promise<unknown>) => run());
+    // `transactionFails` gives this double failure semantics instead of rollback semantics: a
+    // callback that never runs cannot call anything ('open'), and a callback whose transaction
+    // fails on commit has already called everything inside it ('commit'). That lets a test pin a
+    // call to inside the transaction's scope without needing real rollback state to observe.
+    const transaction = jest.fn(async (run: () => Promise<unknown>) => {
+      if (options.transactionFails === 'open') throw new Error('could not open transaction');
+      const result = await run();
+      if (options.transactionFails === 'commit') throw new Error('commit failed');
+      return result;
+    });
 
     const roleQuery = {
       findMany: jest.fn(async ({ where }: any) => {
@@ -711,15 +721,69 @@ describe('security-settings: service', () => {
     expect(mfaOnly.clearAllTrustedDevices).not.toHaveBeenCalled();
   });
 
-  test('turning passkeys off deletes every passkey, inside the settings transaction', async () => {
-    const { service, clearAllPasskeys, transaction } = setup({
+  // `updateSettings` opens a transaction on every call, so `expect(transaction).toHaveBeenCalled()`
+  // is true whether a clear sits inside it, before it, or after it -- it proves nothing about
+  // membership. These two pin the trusted-device clear to the transaction's scope: a callback that
+  // never runs cannot have called it ('open'), and a callback whose transaction fails on commit has
+  // already called it ('commit').
+  test('no trusted device is cleared when the transaction cannot even be opened', async () => {
+    const { service, clearAllTrustedDevices } = setup({
+      stored: { trustedDevices: { enabled: true, days: 30 } },
+      transactionFails: 'open',
+    });
+
+    await expect(
+      service.updateSettings({ trustedDevices: { enabled: false, days: 30 } }, actor)
+    ).rejects.toThrow('could not open transaction');
+    expect(clearAllTrustedDevices).not.toHaveBeenCalled();
+  });
+
+  test('the trusted-device clear runs before the transaction resolves, not after it', async () => {
+    const { service, clearAllTrustedDevices } = setup({
+      stored: { trustedDevices: { enabled: true, days: 30 } },
+      transactionFails: 'commit',
+    });
+
+    await expect(
+      service.updateSettings({ trustedDevices: { enabled: false, days: 30 } }, actor)
+    ).rejects.toThrow('commit failed');
+    expect(clearAllTrustedDevices).toHaveBeenCalledTimes(1);
+  });
+
+  test('turning passkeys off deletes every passkey', async () => {
+    const { service, clearAllPasskeys } = setup({
       stored: { passkeys: { enabled: true } },
     });
 
     await service.updateSettings({ passkeys: { enabled: false }, password: 'pw' }, actor);
 
     expect(clearAllPasskeys).toHaveBeenCalledTimes(1);
-    expect(transaction).toHaveBeenCalled();
+  });
+
+  // Same reasoning as the trusted-device pair above: membership, not just "the double was
+  // eventually called somewhere in a function that also opens a transaction".
+  test('no passkey is deleted when the transaction cannot even be opened', async () => {
+    const { service, clearAllPasskeys } = setup({
+      stored: { passkeys: { enabled: true } },
+      transactionFails: 'open',
+    });
+
+    await expect(
+      service.updateSettings({ passkeys: { enabled: false }, password: 'pw' }, actor)
+    ).rejects.toThrow('could not open transaction');
+    expect(clearAllPasskeys).not.toHaveBeenCalled();
+  });
+
+  test('the passkey clear runs before the transaction resolves, not after it', async () => {
+    const { service, clearAllPasskeys } = setup({
+      stored: { passkeys: { enabled: true } },
+      transactionFails: 'commit',
+    });
+
+    await expect(
+      service.updateSettings({ passkeys: { enabled: false }, password: 'pw' }, actor)
+    ).rejects.toThrow('commit failed');
+    expect(clearAllPasskeys).toHaveBeenCalledTimes(1);
   });
 
   test('a save that leaves passkeys enabled, or turns them on, deletes nothing', async () => {

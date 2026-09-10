@@ -2641,7 +2641,7 @@ describe('mfa service: assertPasswordAndFactor and disable', () => {
       expect(fixture.trustedRows.map((r) => r.userId)).toEqual(['2']);
     });
 
-    test('disable deletes the account passkeys and the pending ceremony, inside the same transaction', async () => {
+    test('disable deletes the account passkeys and the pending ceremony', async () => {
       const { strapi, users, passkeyRows, recoveryRows, challenges } = buildMfaFixture();
       const service = createMfaService(defaultDeps(strapi));
       users.get('1')!.mfaPasskeyChallenge = 'pending-ceremony';
