@@ -18,7 +18,8 @@ import type {
   TransferFilterPreset,
 } from '../../types';
 
-import { extendExpectForDataTransferTests } from '../../__tests__/test-utils';
+import { extendExpectForDataTransferTests, getStrapiFactory } from '../../__tests__/test-utils';
+import { createLocalStrapiDestinationProvider } from '../../strapi/providers';
 import { TransferEngineValidationError } from '../errors';
 
 /**
@@ -518,6 +519,64 @@ describe('Transfer engine', () => {
       expect(rollback).toHaveBeenCalled();
       expect(source.close).toHaveBeenCalledTimes(1);
       expect(enableLifecycles).toHaveBeenCalledTimes(1);
+    });
+
+    test('re-enables local Strapi lifecycles when stage validation fails', async () => {
+      const validationError = new Error('invalid asset archive');
+      const source = {
+        ...completeSource,
+        getMetadata: jest.fn().mockResolvedValue(null),
+        getSchemas: jest.fn().mockResolvedValue(null),
+        validateStage: jest.fn().mockRejectedValue(validationError),
+      };
+      const enableLifecycles = jest.fn();
+      const disableLifecycles = jest.fn();
+      const rollback = jest.fn();
+      const transaction = jest.fn(async (handler) => {
+        await handler({ trx: {}, rollback });
+      });
+      const strapi = getStrapiFactory({
+        config: {
+          get(key: string) {
+            if (key === 'info.strapi') {
+              return '5.0.0';
+            }
+            if (key === 'plugin::upload') {
+              return { provider: 'local' };
+            }
+            return undefined;
+          },
+        },
+        db: {
+          transaction,
+          lifecycles: {
+            enable: enableLifecycles,
+            disable: disableLifecycles,
+          },
+        },
+        contentTypes: {},
+        components: {},
+      })();
+      const destination = createLocalStrapiDestinationProvider({
+        getStrapi: () => strapi,
+        autoDestroy: false,
+        strategy: 'restore',
+        restore: {},
+      });
+      const engine = createTransferEngine(source, destination, {
+        ...defaultOptions,
+        versionStrategy: 'ignore',
+        schemaStrategy: 'ignore',
+      });
+
+      await expect(engine.transfer()).rejects.toThrow(validationError);
+
+      expect(disableLifecycles).toHaveBeenCalledTimes(1);
+      expect(rollback).toHaveBeenCalledTimes(1);
+      expect(enableLifecycles).toHaveBeenCalledTimes(1);
+      expect(enableLifecycles.mock.invocationCallOrder[0]).toBeGreaterThan(
+        disableLifecycles.mock.invocationCallOrder[0]
+      );
     });
 
     test('reports but does not rethrow cleanup errors raised on the failure path', async () => {
