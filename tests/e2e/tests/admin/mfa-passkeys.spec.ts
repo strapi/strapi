@@ -81,7 +81,7 @@ test.describe('Passkeys', () => {
     //    never a replacement, so the profile section does not even render before this.
     const admin = await enrolViaUi(page, ADMIN_PASSWORD);
     await addPasskey(page, 'Virtual platform key', admin.secret);
-    await expect(page.getByRole('cell', { name: 'Virtual platform key' })).toBeVisible();
+    await expect(page.getByRole('gridcell', { name: 'Virtual platform key' })).toBeVisible();
     await expect(page.getByText('Not yet')).toBeVisible();
 
     // 2. Fresh session: the password is still required, and the challenge screen now offers the
@@ -98,7 +98,7 @@ test.describe('Passkeys', () => {
 
     // 4. The server stamped the use, and recorded a notice for the registration.
     await page.goto('/admin/me');
-    await expect(page.getByRole('cell', { name: 'Virtual platform key' })).toBeVisible();
+    await expect(page.getByRole('gridcell', { name: 'Virtual platform key' })).toBeVisible();
     await expect(page.getByText('Not yet')).toHaveCount(0);
     await expect(page.getByText(/A passkey was added to your account/)).toBeVisible();
 
