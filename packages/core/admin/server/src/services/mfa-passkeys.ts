@@ -76,75 +76,168 @@ export interface WebauthnRp {
 /**
  * A deliberate approximation of the public suffix list, not the list itself: shipping (or
  * fetching) the real PSL for one validation check is not a trade this cycle makes. A dotless
- * rpId other than `localhost` is refused outright (which covers `com`, `io`, `dev`); the named
- * set below covers the handful of second-level suffixes an operator is actually likely to type;
- * and `isGenericSecondLevelSuffix` below covers the *shape* almost every other second-level
- * suffix takes -- a short generic label (`co`, `com`, `net`, ...) plus a two-letter country code
- * (`co.kr`, `com.tr`, `net.au`, ...), which the named set does not enumerate. Between the two,
- * `co.*` and `com.*` are covered for every two-letter country code, not only the ones named
- * explicitly. This remains an approximation, not the Public Suffix List: a suffix that doesn't
- * fit either check still fails in the browser instead, with no server-side trace of why, which is
- * the pre-existing behaviour, not a regression.
+ * rpId other than `localhost` is refused outright (which covers `com`, `io`, `dev`), and the set
+ * below names the second-level suffixes an operator is realistically likely to type.
+ *
+ * The approximation errs in ONE direction on purpose. A suffix missing from the set is not caught
+ * here, and the ceremony then fails in the browser with its own `SecurityError` -- the behaviour
+ * that existed before this check, so a miss costs nothing new. Refusing a host that is NOT a
+ * public suffix would be the expensive mistake, because it locks a legitimate deployment out of
+ * the feature with no way to override. An earlier revision of this check refused on shape (a
+ * two-label host with a generic first label and a two-character second label) and did exactly
+ * that to real registrable domains such as `co.io` and `org.io`; the shape rule is gone.
  */
 const KNOWN_PUBLIC_SUFFIXES = new Set([
+  // The widely used ICANN second-level suffixes. This is an APPROXIMATION of the Public Suffix
+  // List, not the list itself: shipping or fetching the real PSL for one check is not worth it.
+  // The trade-off is deliberate and one-directional -- a suffix missing from this set is simply
+  // not caught here, and the browser refuses the ceremony with its own `SecurityError` exactly as
+  // it did before this check existed. An earlier revision instead refused on SHAPE (any two-label
+  // host whose first label was generic and whose second was two characters), which over-refused
+  // real registrable domains such as `co.io` and `org.io` and would have locked those deployments
+  // out of the feature entirely. Under-refusing degrades; over-refusing blocks.
   'co.uk',
   'org.uk',
   'ac.uk',
   'gov.uk',
+  'me.uk',
+  'net.uk',
+  'sch.uk',
   'co.jp',
+  'ne.jp',
+  'or.jp',
+  'ac.jp',
+  'go.jp',
+  'co.kr',
+  'or.kr',
+  'ne.kr',
+  'go.kr',
   'co.nz',
+  'net.nz',
+  'org.nz',
+  'ac.nz',
+  'govt.nz',
   'co.za',
+  'org.za',
+  'net.za',
+  'ac.za',
+  'gov.za',
   'co.in',
+  'net.in',
+  'org.in',
+  'gov.in',
+  'ac.in',
   'com.au',
+  'net.au',
+  'org.au',
+  'edu.au',
+  'gov.au',
   'com.br',
+  'net.br',
+  'org.br',
+  'gov.br',
+  'edu.br',
   'com.mx',
+  'org.mx',
+  'gob.mx',
   'com.cn',
+  'net.cn',
+  'org.cn',
+  'gov.cn',
+  'edu.cn',
+  'ac.cn',
+  'com.tr',
+  'net.tr',
+  'org.tr',
+  'gov.tr',
+  'edu.tr',
+  'co.il',
+  'org.il',
+  'net.il',
+  'ac.il',
+  'gov.il',
+  'com.sg',
+  'edu.sg',
+  'gov.sg',
+  'net.sg',
+  'org.sg',
+  'com.hk',
+  'edu.hk',
+  'gov.hk',
+  'net.hk',
+  'org.hk',
+  'com.tw',
+  'net.tw',
+  'org.tw',
+  'gov.tw',
+  'edu.tw',
+  'com.ar',
+  'net.ar',
+  'org.ar',
+  'gov.ar',
+  'edu.ar',
+  'com.pl',
+  'net.pl',
+  'org.pl',
+  'gov.pl',
+  'edu.pl',
+  'com.my',
+  'net.my',
+  'org.my',
+  'gov.my',
+  'edu.my',
+  'com.vn',
+  'net.vn',
+  'org.vn',
+  'gov.vn',
+  'edu.vn',
+  'com.ua',
+  'net.ua',
+  'org.ua',
+  'gov.ua',
+  'co.id',
+  'or.id',
+  'ac.id',
+  'go.id',
+  'net.id',
+  'web.id',
+  'co.th',
+  'ac.th',
+  'go.th',
+  'or.th',
+  'net.th',
+  'com.ph',
+  'net.ph',
+  'org.ph',
+  'gov.ph',
+  'com.pk',
+  'com.bd',
+  'com.sa',
+  'com.eg',
+  'com.ng',
+  'com.pe',
+  'com.ec',
+  'com.uy',
+  'com.ve',
+  'com.do',
+  'com.gt',
+  'com.py',
+  'com.bo',
+  'co.ke',
+  'co.tz',
+  'co.ug',
+  'co.zw',
+  'co.bw',
 ]);
 
-/**
- * The generic first label of nearly every second-level public suffix in current use (`co.uk`,
- * `com.br`, `org.uk`, `gov.uk`, `ac.uk`, and their equivalents across dozens of other ccTLDs).
- * Paired with a two-character second label in `isGenericSecondLevelSuffix`, this is the shape
- * check that widens M4's coverage past the twelve entries named above -- `co.kr`, `com.tr`,
- * `co.il`, `net.au` and similar all match it without needing their own entry.
- */
-const GENERIC_SECOND_LEVEL_LABELS = new Set([
-  'co',
-  'com',
-  'net',
-  'org',
-  'gov',
-  'edu',
-  'ac',
-  'or',
-  'ne',
-  'go',
-  'mil',
-  'int',
-]);
-
-/** A two-label host whose first label is one of the generic labels above and whose second label
- * is exactly two characters -- the shape of a second-level public suffix under a ccTLD. No
- * registrable domain looks like this, so refusing on shape alone costs nothing real. */
-const isGenericSecondLevelSuffix = (rpId: string): boolean => {
-  const labels = rpId.split('.');
-  return (
-    labels.length === 2 && GENERIC_SECOND_LEVEL_LABELS.has(labels[0]) && labels[1].length === 2
-  );
-};
-
-/** `new URL('http://[::1]:1337').hostname` keeps the brackets; `isIP` does not want them. */
+/** An IPv6 host arrives from `URL.hostname` bracketed; `isIP` needs it bare. */
 const stripBrackets = (host: string): string => host.replace(/^\[/, '').replace(/\]$/, '');
 
 /**
- * Lowercase and strip every trailing DNS root dot before any check runs, so `EXAMPLE.com`,
- * `example.com.`, `example.com..` and `example.com` are all treated as the one host a browser
- * treats them as. A single-dot strip (`replace(/\.$/, '')`) leaves a residual dot on any host with
- * two or more trailing dots (`a.b..` -> `a.b.`, still not a valid host), so this must strip the
- * whole trailing run (`replace(/\.+$/, '')`). Applied once, at the point `rpId` is computed, so
- * every later check (IP-literal, public-suffix, and the origin/rpId relation check) and the
- * returned value all see the same normalised form. A leading dot is not stripped -- it is not a
- * valid host, so it is refused explicitly instead.
+ * Lowercased, with every trailing DNS root dot stripped. Both matter: a configured rpId must
+ * compare equal to an origin's already-lowercase `URL.hostname`, and a host ending in one or more
+ * dots is not one a browser accepts as a relying-party id. The normalised value is what gets
+ * RETURNED, not merely what gets checked.
  */
 const normalizeHost = (host: string): string => host.toLowerCase().replace(/\.+$/, '');
 
@@ -155,7 +248,7 @@ const isPublicSuffix = (rpId: string): boolean => {
   if (!rpId.includes('.')) {
     return true;
   }
-  return KNOWN_PUBLIC_SUFFIXES.has(rpId) || isGenericSecondLevelSuffix(rpId);
+  return KNOWN_PUBLIC_SUFFIXES.has(rpId);
 };
 
 /** WebAuthn needs a secure context: https anywhere, or http on localhost. */
@@ -311,7 +404,7 @@ export interface PasskeyRow {
 }
 
 /** The three notices this module raises; a subset of the service's `MfaChangeNotice`. */
-export type PasskeyNotice = 'passkey_registered' | 'passkey_removed' | 'passkey_used';
+type PasskeyNotice = 'passkey_registered' | 'passkey_removed' | 'passkey_used';
 
 export interface PasskeyDeps {
   strapi: Core.Strapi;

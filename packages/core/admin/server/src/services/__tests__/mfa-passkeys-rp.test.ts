@@ -299,9 +299,9 @@ describe('resolveWebauthnRp', () => {
   test.each([['co.kr'], ['com.tr'], ['co.il'], ['net.au'], ['org.au'], ['gov.au']])(
     'M4: a common second-level suffix under a ccTLD (%s) is refused even though it has no named entry',
     (rpId) => {
-      // These are not in `KNOWN_PUBLIC_SUFFIXES`'s twelve named entries, which is exactly the gap
-      // M4 reports: before the widening, each of these was accepted here and then failed in every
-      // browser with an opaque `SecurityError` and no server-side trace of why.
+      // These were missing from `KNOWN_PUBLIC_SUFFIXES`'s original twelve entries, which is the
+      // gap M4 reports: each was accepted here and then failed in every browser with an opaque
+      // `SecurityError` and no server-side trace of why. They are named entries now.
       const { strapi, error } = buildStrapi({
         'admin.absoluteUrl': 'https://cms.example.com/admin',
         'admin.auth.mfa.webauthn.rpId': rpId,
@@ -311,6 +311,25 @@ describe('resolveWebauthnRp', () => {
       expect(error).toHaveBeenCalledWith(
         expect.stringContaining('public suffix (or a bare label)')
       );
+    }
+  );
+
+  test.each([['co.io'], ['org.io'], ['com.io'], ['net.de']])(
+    'M4: a real registrable two-label domain (%s) is accepted, not refused as a suffix',
+    (rpId) => {
+      // The regression this pins. An earlier revision refused on SHAPE -- any two-label host whose
+      // first label was generic and whose second was two characters -- which caught all four of
+      // these even though none is a public suffix, locking those deployments out of passkeys with
+      // no override. The approximation must only ever MISS a suffix (the browser then refuses, as
+      // it did before the check existed), never invent one.
+      const { strapi } = buildStrapi({
+        'admin.absoluteUrl': `https://${rpId}/admin`,
+      });
+
+      expect(resolveWebauthnRp(strapi)).toEqual({
+        rpId,
+        origins: [`https://${rpId}`],
+      });
     }
   );
 
