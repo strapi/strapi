@@ -240,6 +240,7 @@ const develop = async ({
           strapi,
           tsconfig,
           options,
+          dev: true,
         });
         const contextDuration = timer.end('createBuildContext');
         contextSpinner.text = `Building build context (${prettyTime(contextDuration)})`;
