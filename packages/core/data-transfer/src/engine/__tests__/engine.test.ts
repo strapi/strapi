@@ -502,15 +502,22 @@ describe('Transfer engine', () => {
         ...completeSource,
         validateStage: jest.fn().mockRejectedValue(validationError),
       };
+      const disableLifecycles = jest.fn();
+      const enableLifecycles = jest.fn();
       const rollback = jest.fn();
-      const destination = createDestination({ rollback });
+      const destination = createDestination({
+        bootstrap: disableLifecycles,
+        rollback,
+        close: enableLifecycles,
+      });
       const engine = createTransferEngine(source, destination, defaultOptions);
 
       await expect(engine.transfer()).rejects.toThrow(validationError);
 
+      expect(disableLifecycles).toHaveBeenCalledTimes(1);
       expect(rollback).toHaveBeenCalled();
       expect(source.close).toHaveBeenCalledTimes(1);
-      expect(destination.close).toHaveBeenCalledTimes(1);
+      expect(enableLifecycles).toHaveBeenCalledTimes(1);
     });
 
     test('reports but does not rethrow cleanup errors raised on the failure path', async () => {
@@ -533,13 +540,21 @@ describe('Transfer engine', () => {
       );
     });
 
-    test('does not close the providers twice when the transfer succeeds', async () => {
-      const engine = createTransferEngine(completeSource, completeDestination, defaultOptions);
+    test('does not retry provider cleanup when close itself fails', async () => {
+      const closeError = new Error('source close failed');
+      const source = {
+        ...completeSource,
+        close: jest.fn().mockRejectedValue(closeError),
+      };
+      const rollback = jest.fn();
+      const destination = createDestination({ rollback });
+      const engine = createTransferEngine(source, destination, defaultOptions);
 
-      await engine.transfer();
+      await expect(engine.transfer()).rejects.toThrow(closeError);
 
-      expect(completeSource.close).toHaveBeenCalledTimes(1);
-      expect(completeDestination.close).toHaveBeenCalledTimes(1);
+      expect(rollback).toHaveBeenCalledWith(closeError);
+      expect(source.close).toHaveBeenCalledTimes(1);
+      expect(destination.close).toHaveBeenCalledTimes(1);
     });
 
     test('does not validate an excluded source stage', async () => {
