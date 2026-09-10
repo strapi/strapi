@@ -13,6 +13,7 @@ import {
 import { isNotFoundError } from '../../utils/baseQuery';
 
 import { EnrolDialog } from './EnrolDialog';
+import { Passkeys } from './Passkeys';
 import { ReAuthDialog } from './ReAuthDialog';
 import { TrustedDevices } from './TrustedDevices';
 
@@ -264,6 +265,14 @@ const TwoFactorSection = () => {
        * server empties the table when the setting is turned off.
        */}
       {status.enabled && status.trustedDevicesEnabled ? <TrustedDevices /> : null}
+      {/*
+       * Cycle 4. Same two gates as the trusted-devices block above and for the same reasons: only
+       * an enrolled account can hold a passkey (a passkey is a second factor, never a replacement
+       * for TOTP), and `passkeysEnabled` comes from `/mfa/me` -- the server deletes every passkey
+       * when the setting is turned off. An SSO-only user never reaches either, because they are
+       * never enrolled.
+       */}
+      {status.enabled && status.passkeysEnabled ? <Passkeys /> : null}
       {notices && notices.length > 0 ? (
         <RecentSecurityEvents notices={notices} onMarkAllSeen={() => markNoticesSeen({})} />
       ) : null}

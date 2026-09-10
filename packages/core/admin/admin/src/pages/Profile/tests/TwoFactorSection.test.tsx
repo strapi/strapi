@@ -28,6 +28,7 @@ const status = (overrides = {}) =>
         required: false,
         graceUntil: null,
         trustedDevicesEnabled: false,
+        passkeysEnabled: false,
         ...overrides,
       },
     })
@@ -385,5 +386,37 @@ describe('TwoFactorSection', () => {
 
     expect(await screen.findByText(/^Enabled/)).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Trusted devices' })).not.toBeInTheDocument();
+  });
+
+  it('lists passkeys when enrolled and the organisation allows them', async () => {
+    server.use(
+      status({
+        enabled: true,
+        enabledAt: '2026-09-01T10:14:00.000Z',
+        recoveryCodesRemaining: 10,
+        codesAcknowledged: true,
+        passkeysEnabled: true,
+      }),
+      http.get('/admin/mfa/passkeys', () => HttpResponse.json({ data: [] }))
+    );
+    renderSection();
+
+    expect(await screen.findByRole('heading', { name: 'Passkeys' })).toBeInTheDocument();
+  });
+
+  it('hides the passkeys block when the organisation does not allow them', async () => {
+    server.use(
+      status({
+        enabled: true,
+        enabledAt: '2026-09-01T10:14:00.000Z',
+        recoveryCodesRemaining: 10,
+        codesAcknowledged: true,
+        passkeysEnabled: false,
+      })
+    );
+    renderSection();
+
+    expect(await screen.findByText(/^Enabled/)).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Passkeys' })).not.toBeInTheDocument();
   });
 });
