@@ -46,9 +46,10 @@
       "required": true,
       "configurable": false
     },
-    "capabilities": {
-      "type": "json",
-      "configurable": false
+    "previewBaseUrl": {
+      "type": "string",
+      "configurable": false,
+      "maxLength": 2048
     }
   }
 }

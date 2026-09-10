@@ -169,42 +169,66 @@
         <th>Definition</th>
       </tr>
       <tr>
-        <td><strong>Space</strong></td>
+        <td><strong>Workspace</strong></td>
         <td>
           A virtual tenant: <code>plugin::spaces.space</code> collection type with
           <code>slug</code> (unique), <code>name</code>, <code>color</code>,
-          <code>status</code> (<code>active</code>/<code>archived</code>). Hidden from the Content
-          Manager and CTB.
+          <code>status</code> (<code>active</code>/<code>archived</code>) and
+          <code>previewBaseUrl</code>. What a workspace may do is decided by its users' roles.
+          Hidden from the Content Manager and CTB.
         </td>
       </tr>
       <tr>
-        <td><strong>Space-scoped CT</strong></td>
+        <td><strong>Default workspace</strong></td>
         <td>
-          A content type opting in via <code>pluginOptions.spaces.scope: 'space'</code>
-          in its schema.json. Its entries are partitioned per space through an injected
-          <code>space</code> relation (a real <code>space_id</code> FK column).
+          "Strapi as it exists today": always present, undeletable, sees every entry, user, content
+          type and setting <em>unfiltered</em> (with a "Workspace" column and filter in the Content
+          Manager). Writes from default target a workspace. Publishing releases, editing the schema,
+          managing workspaces and bindings, and licence surfaces live there.
         </td>
       </tr>
       <tr>
-        <td><strong>Platform CT</strong></td>
+        <td><strong>Workspace-scoped CT</strong></td>
         <td>
-          Any CT without the opt-in (or <code>scope: 'platform'</code>). Shared across every space,
-          untouched by the plugin.
+          Every <code>api::</code> content type, by default: an injected <code>space</code> relation
+          (a real <code>space_id</code> column). Opt out with
+          <code>pluginOptions.spaces.enabled: false</code> (or <code>scope: 'none'</code>); a plugin
+          type opts in with <code>scope: 'space'</code> (the Media Library models do).
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Shared entry</strong></td>
+        <td>
+          A row with <code>space_id IS NULL</code>: visible in every workspace, editable from
+          default only. Per content type (<code>pluginOptions.spaces.sharedEntries</code>,
+          optionally <code>sharedEditable</code>) or per entry (share from the "Workspace" side
+          panel, or <code>POST /spaces/move</code> with <code>targetSpaceSlug: null</code>).
         </td>
       </tr>
       <tr>
         <td><strong>Visibility binding</strong></td>
         <td>
-          <code>pluginOptions.spaces.visibleIn: string[]</code> — which spaces a CT appears in.
-          <strong>Empty/missing = visible everywhere.</strong> The same convention applies to
-          settings resources (locales today) via a hidden <code>spaces</code> many-to-many.
+          <code>pluginOptions.spaces.visibleIn: string[]</code> — which workspaces a CT appears in.
+          <strong>Empty/missing = visible everywhere.</strong> Settings resources (roles, tokens,
+          webhooks, locales) use the same convention through a hidden <code>spaces</code>
+          many-to-many; a resource bound to several workspaces (or none) is
+          <em>read-only outside default</em>.
         </td>
       </tr>
       <tr>
-        <td><strong>Active space</strong></td>
+        <td><strong>Membership</strong></td>
+        <td>
+          A user belongs to a workspace when bound to it directly (<code>spaces</code> M2M on
+          <code>admin::user</code>), when a role of theirs is bound to it, or when they hold a
+          platform-wide role; super admins belong everywhere. A request carrying a workspace the
+          user is not a member of is refused.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Active workspace</strong></td>
         <td>
           Per-request state resolved from the <code>X-Strapi-Space-Id</code> header (slug). No
-          header = <em>platform view</em>: no tenant filter.
+          header = <em>platform view</em> (CLI, bootstrap, cron): no filter.
         </td>
       </tr>
     </table>
@@ -269,22 +293,35 @@ Request ──► resolve-space middleware (register.ts, strapi.server.use)
 
     <h2 id="storage">4. Storage model</h2>
     <ul>
-      <li><strong>Spaces table</strong> — <code>spaces</code> (from the plugin CT).</li>
+      <li><strong>Workspaces table</strong> — <code>spaces</code> (from the plugin CT).</li>
       <li>
         <strong>Scoped CTs</strong> — the injected relation is <code>manyToOne</code> with
         <code>useJoinTable: false</code>, so each scoped table gains a real
         <code>space_id</code> column (no join table). The attribute is <code>private</code>: API
         consumers never read or write it directly.
+        <strong><code>NULL</code> = shared with every workspace</strong>, after a one-time backfill
+        attached the rows that predate workspaces to default (idempotency tracked in the plugin
+        store, never re-derived from <code>IS NULL</code>).
       </li>
       <li>
-        <strong>Settings resources</strong> — a hidden <code>spaces</code>
+        <strong>Referencing rows</strong> — release actions, content history versions and audit logs
+        carry the same <code>space_id</code> column: the entry's workspace for the first two, the
+        workspace the action was performed in for audit logs.
+      </li>
+      <li>
+        <strong>Settings resources and users</strong> — a hidden <code>spaces</code>
         <code>manyToMany</code> per resource (link table), where
-        <em>zero link rows = platform-wide</em>.
+        <em>zero link rows = platform-wide</em>. Users have one too (direct membership).
       </li>
       <li>
-        <strong>Per-space default locale</strong> — i18n core store keys
+        <strong>Per-workspace default locale</strong> — i18n core store keys
         <code>default_locale_&lt;spaceSlug&gt;</code>, falling back to the global
-        <code>default_locale</code>.
+        <code>default_locale</code>. The last-used workspace of a user lives in the plugin store.
+      </li>
+      <li>
+        <strong>Uninstall</strong> — schema sync never drops columns or tables without
+        <code>forceMigration</code>, and the plugin tables are persisted (EE): default reverts to
+        full visibility, nothing is deleted.
       </li>
     </ul>
 
@@ -292,29 +329,36 @@ Request ──► resolve-space middleware (register.ts, strapi.server.use)
     <ol>
       <li>The admin (or an API consumer) sends <code>X-Strapi-Space-Id: acme</code>.</li>
       <li>
-        <code>resolve-space</code> loads the space row; 400 on unknown/archived; sets
+        <code>resolve-space</code> loads the workspace row; 400 on unknown/archived; sets
         <code>ctx.state.spaceId</code> + <code>ctx.state.spaceSlug</code>.
       </li>
       <li>
-        Controllers call the document service; the multitenancy middleware reads the request context
-        (<code>strapi.requestContext</code>) and injects the tenant dimension:
-        <ul>
-          <li>
-            <em>Reads</em> (<code>findMany/findOne/findFirst/findPage/count/clone</code>):
-            <code>params.filters.space = { id }</code> — deliberately
-            <strong>clobbering</strong> any user-supplied <code>space</code> filter.
-          </li>
-          <li>
-            <em>Writes</em> (<code>create/update</code>): <code>params.data.space = id</code> when
-            absent.
-          </li>
-        </ul>
+        Authentication wrappers: a bound API token only operates inside its workspaces; an admin who
+        is not a member of the workspace is refused (403), except on the self-service routes the
+        switcher needs to recover.
+      </li>
+      <li>
+        Koa integrations: default-only rules (schema writes, release publishing, workspace
+        management), content-type visibility, and the settings scoping / read-only rules.
+      </li>
+      <li>
+        The document-service middleware decides, per operation, which workspace the entry belongs
+        to: creates are stamped (forced to the caller's workspace outside default; from default the
+        body's <code>space</code> or default), updates/deletes/publishes look the entry up across
+        workspaces and refuse what the caller may not edit (403 for a shared entry, 404 for another
+        workspace's), then run inside <code>runScoped(workspace)</code>.
+      </li>
+      <li>
+        <strong>The DB read net</strong> filters every <code>findOne/findMany/count</code> on a
+        scoped model: a sub-workspace sees <code>space_id = X OR space_id IS NULL</code>; default,
+        headerless callers and <code>runUnscoped()</code> blocks are unfiltered. User filters are
+        ANDed underneath. Because writes run inside a scope, the validator's uniqueness query sees
+        the same rows: unique fields are unique per workspace.
       </li>
       <li>
         Raw <code>strapi.db.query()</code> writes that skip the document service are caught by the
-        <code>beforeCreate</code> lifecycle subscriber.
+        <code>beforeCreate</code> stamp and the <code>beforeUpdate/beforeDelete</code> refusal.
       </li>
-      <li>No header → steps 3–4 are no-ops (platform view).</li>
     </ol>
 
     <h2 id="visibility">6. The settings-visibility pattern</h2>
@@ -427,34 +471,59 @@ Request ──► resolve-space middleware (register.ts, strapi.server.use)
       </tr>
       <tr>
         <td>1</td>
-        <td>Reads through the document service never return another space's rows.</td>
+        <td>A sub-workspace never reads another workspace's rows, through any read path.</td>
         <td>
-          Multitenancy middleware force-merges the filter, clobbering user-supplied
-          <code>space</code> filters.
+          The DB read net on every scoped model (document service and raw <code>db.query</code>
+          alike); user filters are ANDed and cannot widen the view.
         </td>
       </tr>
       <tr>
         <td>2</td>
-        <td>Writes are stamped with the active space even on raw-DB bypass paths.</td>
+        <td>A sub-workspace never writes what it may not edit.</td>
         <td>
-          Middleware (canonical) + <code>beforeCreate</code> lifecycle subscriber (safety net).
+          Document-service middleware (403 shared entry / shared type, 404 other workspace) +
+          <code>beforeUpdate/beforeDelete</code> lifecycle refusal for raw single-row writes.
         </td>
       </tr>
       <tr>
         <td>3</td>
-        <td>An invalid tenant selector fails loudly.</td>
+        <td>Every row is stamped with the right workspace, even on raw-DB bypass paths.</td>
         <td>
-          <code>resolve-space</code> 400s on unknown/archived slugs instead of silently serving
-          platform data.
+          Middleware (canonical) + <code>beforeCreate</code> lifecycle (precedence: explicit value,
+          scope override, shared type, request workspace).
+        </td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>An invalid or unauthorised workspace selector fails loudly.</td>
+        <td>
+          <code>resolve-space</code> 400s on unknown/archived slugs; the membership guard 403s
+          non-members; bound API tokens cannot leave their workspaces.
+        </td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td>Shared settings cannot be altered from a sub-workspace.</td>
+        <td>
+          Platform-wide or multi-bound roles/tokens/webhooks/locales are read-only there
+          (permissions, regeneration and triggering included); bindings are edited from default
+          only.
+        </td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td>Grants are bounded by the grantor.</td>
+        <td>
+          The RBAC ceiling (core): no permission can be granted that the caller does not hold.
         </td>
       </tr>
       <tr>
         <td>—</td>
         <td class="warn" style="border: none; background: none; padding: 0">
           <div class="warn">
-            <strong>Not yet guaranteed:</strong> reads via raw <code>strapi.db.query()</code> (a
-            <code>beforeFindMany/beforeFindOne/beforeCount</code> net is deferred), GraphQL, and the
-            content API without a header (platform view by design in phase 1).
+            <strong>Not guaranteed:</strong> nested populates through inverse relations bypass the
+            lifecycles (a generic query-filter hook is the fix), GraphQL, and the content API
+            without a header (platform view by design).
           </div>
         </td>
         <td></td>
@@ -510,49 +579,83 @@ Request ──► resolve-space middleware (register.ts, strapi.server.use)
         <th>Status</th>
       </tr>
       <tr>
-        <td>1 — Vertical slice</td>
+        <td>1–3 — Vertical slice, settings visibility, admin UX</td>
         <td>
-          Header resolution, document-service filtering, lifecycle stamping, seeding, CT opt-in.
+          Header resolution, filtering, stamping, seeding, locales integration, switcher, move
+          actions, CTB fields.
         </td>
         <td>✅ built</td>
       </tr>
       <tr>
-        <td>2 — Settings visibility</td>
+        <td>v2 WS0 — RBAC ceiling (core)</td>
+        <td>No grant beyond the grantor's own permissions (CMS-1718).</td>
+        <td>✅ built</td>
+      </tr>
+      <tr>
+        <td>v2 WS1 — Data model</td>
         <td>
-          Reusable visibility pattern; i18n locales integration (visibility + per-space defaults).
+          Every <code>api::</code> type scoped, backfill, NULL = shared, single read net, scoped
+          writes, per-workspace uniqueness, share via move.
         </td>
         <td>✅ built</td>
       </tr>
       <tr>
-        <td>3 — Admin UX</td>
+        <td>v2 WS2 — Sharing surfaces</td>
+        <td>Entry states, edit-view lock, "Workspace" panel/column/filter, CTB sharing toggles.</td>
+        <td>✅ built</td>
+      </tr>
+      <tr>
+        <td>v2 WS3 — CTB read-only</td>
+        <td>Core <code>registerReadOnlyRule</code> seam; schema writes default-only.</td>
+        <td>✅ built</td>
+      </tr>
+      <tr>
+        <td>v2 WS4 — Users</td>
         <td>
-          Space switcher, move actions, CTB scope/visibility fields, locale form/table extensions.
+          Membership (M2M + roles), member-only lists, invite flow (existing account added),
+          membership guard, per-user <code>/spaces/mine</code>, last-used workspace, core user-form
+          seam.
         </td>
         <td>✅ built</td>
       </tr>
       <tr>
-        <td>4 — Access control</td>
+        <td>v2 WS5 — Shared settings read-only</td>
+        <td>Roles, tokens, webhooks, locales; bindings from default only; form read-only seams.</td>
+        <td>✅ built</td>
+      </tr>
+      <tr>
+        <td>v2 WS6 — Releases</td>
         <td>
-          Role → space mapping; <code>GET /spaces/mine</code> filtered per user; space-specific
-          roles/users/permissions.
+          Scope strategy + where fix (core), actions stamped, per-workspace status, publish
+          default-only.
         </td>
-        <td>⏳ next</td>
+        <td>✅ built</td>
       </tr>
       <tr>
-        <td>5 — Settings rollout</td>
-        <td>API tokens, transfer tokens, webhooks through the settings-visibility pattern.</td>
-        <td>⏳</td>
-      </tr>
-      <tr>
-        <td>6 — Media Library</td>
-        <td>Per-space upload folders/assets.</td>
-        <td>⏳</td>
-      </tr>
-      <tr>
-        <td>7 — Hardening</td>
+        <td>v2 WS7 — History &amp; audit logs</td>
         <td>
-          Raw-DB read net, GraphQL coverage, subdomain routing, <code>config/spaces.ts</code> sync,
-          components inheritance, releases/workflows compat, CLI.
+          Workspace on every version and log, scoped reads, audit logs column/filter seam (core).
+        </td>
+        <td>✅ built</td>
+      </tr>
+      <tr>
+        <td>v2 WS8 — Limits</td>
+        <td>
+          <code>maxSpaces</code> (licence or config), admin surfaces at the cap, billing hidden
+          outside default.
+        </td>
+        <td>✅ built</td>
+      </tr>
+      <tr>
+        <td>v2 WS9 — Live preview</td>
+        <td>Preview params provider seam (core); <code>previewBaseUrl</code> per workspace.</td>
+        <td>✅ built</td>
+      </tr>
+      <tr>
+        <td>Deferred</td>
+        <td>
+          Per-workspace SSO, AI key / MCP configuration, pricing; Media Library share action;
+          GraphQL; nested-populate hook; per-request preview CSP; partial release publishing (core).
         </td>
         <td>⏳</td>
       </tr>
@@ -561,32 +664,45 @@ Request ──► resolve-space middleware (register.ts, strapi.server.use)
     <h2 id="risks">12. Known risks &amp; gotchas</h2>
     <ul>
       <li>
-        <strong>i18n locale isolation</strong> — moving a localized entry to a space that can't
+        <strong>Backfill semantics</strong> — after v2, <code>NULL</code> means shared. The backfill
+        must never be re-derived from <code>IS NULL</code>: its idempotency marker lives in the
+        plugin store. Legacy Media Library assets end up in default (share them from there).
+      </li>
+      <li>
+        <strong>Turning <code>sharedEntries</code> off</strong> on a type with rows flips semantics
+        without a migration: stamped rows become exclusive again, NULL rows stay shared (the CTB
+        hint says so).
+      </li>
+      <li>
+        <strong>Edit-view lock is asynchronous</strong> — the admin RBAC middleware fetches the
+        entry state; the server refusal is the guarantee. The switcher leaves an edit view on a
+        workspace change because the RBAC hook does not re-run on pathname changes.
+      </li>
+      <li>
+        <strong>Nested populates</strong> bypass lifecycles: inverse relations from default can
+        surface other workspaces' rows to a sub-workspace through a nested populate.
+      </li>
+      <li>
+        <strong>Refusals must be <code>PolicyError</code>s</strong> — the endpoint composer masks
+        any other <code>ForbiddenError</code> thrown by a controller into a bare 403.
+      </li>
+      <li>
+        <strong>Bulk updates through relation filters</strong> — the query builder cannot
+        <code>updateMany</code> through a join; the backfill updates the column on the connection.
+      </li>
+      <li>
+        <strong>i18n locale isolation</strong> — moving a localized entry to a workspace that can't
         surface its locale would orphan it; guarded in the move service and in
         <code>validateRemoval</code>.
       </li>
       <li>
-        <strong>Sanitizer vs. populated bindings</strong> — the content-API sanitizer strips
-        <code>private</code> attributes; the locale <code>spaces</code> M2M is deliberately
-        <code>private: false</code> so the Settings UI can round-trip it.
-      </li>
-      <li>
         <strong>Bound controller references</strong> — bootstrap-time controller swaps are never
-        observed (see §6); always go through route middleware.
+        observed (see §6); always go through route middleware or patch the registered service
+        object.
       </li>
       <li>
-        <strong>Raw-DB reads</strong> — not yet filtered; plugins doing
-        <code>strapi.db.query().findMany()</code> on scoped CTs see every space until the read net
-        lands.
-      </li>
-      <li>
-        <strong>Per-request space resolution</strong> — one indexed DB lookup per request carrying
-        the header; add caching if it ever shows up in profiles.
-      </li>
-      <li>
-        <strong>Platform view is unauthenticated-by-design in phase 1</strong> — any admin (and any
-        content-API consumer omitting the header) sees all spaces until phase 4's role → space
-        mapping lands.
+        <strong>Preview origins</strong> — <code>frame-src</code> stays the static union of
+        <code>allowedOrigins</code>; list every workspace's origin there.
       </li>
     </ul>
   </body>

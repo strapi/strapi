@@ -13,15 +13,9 @@ import { Check } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
 
-import { CapabilitiesCard } from '../components/CapabilitiesCard';
 import { ColorSwatchPicker, SPACE_COLOR_PALETTE } from '../components/ColorSwatchPicker';
 import { PERMISSIONS } from '../constants';
-import {
-  DEFAULT_CAPABILITIES,
-  useGetAllSpacesQuery,
-  useUpdateSpaceMutation,
-  type SpaceCapabilities,
-} from '../services/spaces';
+import { useGetAllSpacesQuery, useUpdateSpaceMutation } from '../services/spaces';
 import { DEFAULT_SPACE_SLUG, getCurrentSpaceSlug } from '../utils/currentSpace';
 import { getTranslation } from '../utils/getTranslation';
 import { slugify } from '../utils/slugify';
@@ -51,14 +45,14 @@ const EditPage = () => {
   const [name, setName] = React.useState('');
   const [slug, setSlug] = React.useState('');
   const [color, setColor] = React.useState(SPACE_COLOR_PALETTE[0]);
-  const [capabilities, setCapabilities] = React.useState<SpaceCapabilities>(DEFAULT_CAPABILITIES);
+  const [previewBaseUrl, setPreviewBaseUrl] = React.useState('');
 
   React.useEffect(() => {
     if (space) {
       setName(space.name);
       setSlug(space.slug);
       setColor(space.color ?? SPACE_COLOR_PALETTE[0]);
-      setCapabilities({ ...DEFAULT_CAPABILITIES, ...(space.capabilities ?? {}) });
+      setPreviewBaseUrl(space.previewBaseUrl ?? '');
     }
   }, [space]);
 
@@ -76,8 +70,8 @@ const EditPage = () => {
         id: space.id,
         name: name.trim(),
         color,
+        previewBaseUrl: previewBaseUrl.trim() || null,
         ...(isDefault || slug === space.slug ? {} : { slug }),
-        ...(isDefault ? {} : { capabilities }),
       }).unwrap();
       toggleNotification({
         type: 'success',
@@ -235,19 +229,33 @@ const EditPage = () => {
                 <ColorSwatchPicker value={color} onChange={setColor} />
               </Box>
             </Field.Root>
+
+            <Field.Root
+              name="spaces-edit-preview-base-url"
+              hint={formatMessage({
+                id: getTranslation('settings.edit.previewBaseUrl.hint'),
+                defaultMessage:
+                  'Handed to the live preview handler as plugins.spaces.previewBaseUrl, so this workspace previews on its own domain. Add the origin to the preview allowedOrigins as well.',
+              })}
+            >
+              <Field.Label>
+                {formatMessage({
+                  id: getTranslation('settings.edit.previewBaseUrl.label'),
+                  defaultMessage: 'Preview origin',
+                })}
+              </Field.Label>
+              <TextInput
+                value={previewBaseUrl}
+                placeholder="https://preview.example.com"
+                disabled={!canUpdate}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setPreviewBaseUrl(e.target.value)
+                }
+              />
+              <Field.Hint />
+            </Field.Root>
           </Flex>
         </Box>
-
-        {/* The default workspace always sees everything — nothing to configure. */}
-        {!isDefault && (
-          <Box paddingTop={6}>
-            <CapabilitiesCard
-              value={capabilities}
-              onChange={setCapabilities}
-              disabled={!canUpdate}
-            />
-          </Box>
-        )}
       </Layouts.Content>
     </Page.Main>
   );

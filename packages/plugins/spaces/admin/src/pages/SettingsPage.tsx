@@ -37,6 +37,7 @@ import {
 } from '../services/spaces';
 import { DEFAULT_SPACE_SLUG } from '../utils/currentSpace';
 import { getTranslation } from '../utils/getTranslation';
+import { useSpaceLimits } from '../utils/useSpaceLimits';
 
 import { CreatePage } from './CreatePage';
 import { EditPage } from './EditPage';
@@ -70,6 +71,7 @@ const ListPage = () => {
   } = useRBAC(PERMISSIONS);
 
   const [deleting, setDeleting] = React.useState<ManagedSpace | null>(null);
+  const { limits, isAtLimit } = useSpaceLimits();
 
   if (isLoading) {
     return <Page.Loading />;
@@ -118,12 +120,31 @@ const ListPage = () => {
         })}
         primaryAction={
           canCreate && (
-            <Button startIcon={<Plus />} onClick={() => navigate('create')} size="S">
-              {formatMessage({
-                id: getTranslation('switcher.addWorkspace'),
-                defaultMessage: 'Add a workspace',
-              })}
-            </Button>
+            <Tooltip
+              label={
+                isAtLimit && limits
+                  ? formatMessage(
+                      {
+                        id: getTranslation('limits.reached.title'),
+                        defaultMessage: 'Workspace limit reached ({count}/{max}).',
+                      },
+                      { count: limits.count, max: limits.maxSpaces }
+                    )
+                  : undefined
+              }
+            >
+              <Button
+                startIcon={<Plus />}
+                onClick={() => navigate('create')}
+                size="S"
+                disabled={isAtLimit}
+              >
+                {formatMessage({
+                  id: getTranslation('switcher.addWorkspace'),
+                  defaultMessage: 'Add a workspace',
+                })}
+              </Button>
+            </Tooltip>
           )
         }
       />

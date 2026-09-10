@@ -1,6 +1,7 @@
 import type { Core } from '@strapi/types';
 
 import { getService } from './utils';
+import { DEFAULT_SPACE_SLUG } from './services/spaces';
 
 const CM_LIST_RE = /^\/content-manager\/content-types\/?$/;
 const CM_INIT_RE = /^\/content-manager\/init\/?$/;
@@ -18,8 +19,8 @@ const CM_DOCUMENT_RE = /^\/content-manager\/(?:collection|single)-types\/([^/?]+
  *     type are a 404 — API consumers scoped to a workspace can't probe content
  *     types that workspace doesn't have.
  *
- * The rule is uniform — the default workspace only sees what's visible in
- * `default` too. Headerless callers (no active workspace) stay unfiltered.
+ * The default workspace sees every content type (it is "Strapi as it exists
+ * today"); headerless callers (no active workspace) stay unfiltered too.
  *
  * Components are NOT covered yet: they carry no workspace binding of their own
  * (the CTB component modal isn't wired) — a follow-up slice.
@@ -56,7 +57,7 @@ export const registerContentVisibilityGuards = (strapi: Core.Strapi) => {
 
   strapi.server.use(async (ctx: any, next: () => Promise<any>) => {
     const spaceSlug = ctx.state?.spaceSlug as string | undefined;
-    if (!spaceSlug) {
+    if (!spaceSlug || spaceSlug === DEFAULT_SPACE_SLUG) {
       return next();
     }
 

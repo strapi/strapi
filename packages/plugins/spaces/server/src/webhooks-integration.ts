@@ -1,10 +1,16 @@
 import type { Core } from '@strapi/types';
 
 import { DEFAULT_SPACE_SLUG } from './services/spaces';
+import {
+  WORKSPACE_ACCESS_MESSAGES,
+  decideWritableInSpace,
+  describeWorkspaceAccess,
+} from './settings-visibility';
 
 const WEBHOOKS_LIST_RE = /^\/admin\/webhooks\/?$/;
 const WEBHOOK_DETAIL_RE = /^\/admin\/webhooks\/([^/]+)\/?$/;
 const WEBHOOKS_BATCH_DELETE_RE = /^\/admin\/webhooks\/batch-delete\/?$/;
+const WEBHOOK_TRIGGER_RE = /^\/admin\/webhooks\/([^/]+)\/trigger\/?$/;
 
 const STORE_KEY = 'webhook-bindings';
 
@@ -20,7 +26,8 @@ type WebhookBindings = Record<string, string[]>;
  *   - created from a workspace → bound to it; created from default →
  *     platform-wide;
  *   - outside default, the list only shows the workspace's webhooks (and
- *     platform-wide ones) and direct detail access to others is a 404;
+ *     platform-wide ones), direct detail access to others is a 404, and shared
+ *     webhooks (platform-wide or multi-bound) are read-only there;
  *   - default sees and manages everything.
  *
  * TODO(spaces): scoping webhook TRIGGERING per workspace (only firing for
@@ -41,6 +48,12 @@ export const patchWebhooksForSpaces = (strapi: Core.Strapi) => {
     return !Array.isArray(bound) || bound.length === 0 || bound.includes(spaceSlug);
   };
 
+  const boundSlugsOf = (bindings: WebhookBindings, id: string): string[] =>
+    Array.isArray(bindings[id]) ? bindings[id] : [];
+
+  const isWritable = (bindings: WebhookBindings, id: string, spaceSlug: string): boolean =>
+    decideWritableInSpace(boundSlugsOf(bindings, id), spaceSlug).writable;
+
   strapi.server.use(async (ctx: any, next: () => Promise<any>) => {
     const isWebhookRoute = ctx.path.startsWith('/admin/webhooks');
     if (!isWebhookRoute) {
@@ -53,25 +66,36 @@ export const patchWebhooksForSpaces = (strapi: Core.Strapi) => {
     const detailMatch = !WEBHOOKS_BATCH_DELETE_RE.test(ctx.path)
       ? ctx.path.match(WEBHOOK_DETAIL_RE)
       : null;
+    const triggerMatch = ctx.path.match(WEBHOOK_TRIGGER_RE);
 
     /* ---- Before the controller ---- */
 
     if (!isDefault) {
-      // Webhooks not visible in this workspace don't exist for it.
-      if (detailMatch && ['GET', 'PUT', 'DELETE'].includes(ctx.method)) {
+      // Webhooks not visible in this workspace don't exist for it; shared ones
+      // are read-only here (triggering included).
+      const targetId = detailMatch?.[1] ?? triggerMatch?.[1];
+      if (targetId && ['GET', 'PUT', 'DELETE', 'POST'].includes(ctx.method)) {
         const bindings = await getBindings();
-        if (!isVisible(bindings, detailMatch[1], spaceSlug)) {
+        if (!isVisible(bindings, targetId, spaceSlug)) {
           return ctx.notFound('Webhook not found in this workspace');
+        }
+        if (ctx.method !== 'GET') {
+          const decision = decideWritableInSpace(boundSlugsOf(bindings, targetId), spaceSlug);
+          if (!decision.writable) {
+            return ctx.forbidden(WORKSPACE_ACCESS_MESSAGES[decision.reason], {
+              reason: decision.reason,
+            });
+          }
         }
       }
 
-      // Batch delete: silently narrow to the webhooks this workspace can see.
+      // Batch delete: silently narrow to the webhooks this workspace may edit.
       if (ctx.method === 'POST' && WEBHOOKS_BATCH_DELETE_RE.test(ctx.path)) {
         const bindings = await getBindings();
         const ids: unknown[] = Array.isArray(ctx.request?.body?.ids) ? ctx.request.body.ids : [];
         ctx.request.body = {
           ...ctx.request.body,
-          ids: ids.filter((id) => isVisible(bindings, String(id), spaceSlug)),
+          ids: ids.filter((id) => isWritable(bindings, String(id), spaceSlug)),
         };
       }
     }
@@ -104,6 +128,16 @@ export const patchWebhooksForSpaces = (strapi: Core.Strapi) => {
         delete bindings[detailMatch[1]];
         await setBindings(bindings);
       }
+      return;
+    }
+
+    // Detail in a sub-workspace: say whether the webhook is editable from here.
+    if (!isDefault && ctx.method === 'GET' && detailMatch && ctx.body?.data?.id !== undefined) {
+      const bindings = await getBindings();
+      ctx.body.data.workspaceAccess = describeWorkspaceAccess(
+        boundSlugsOf(bindings, String(ctx.body.data.id)),
+        spaceSlug
+      );
       return;
     }
 

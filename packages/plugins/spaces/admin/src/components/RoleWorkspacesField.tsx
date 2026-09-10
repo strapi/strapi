@@ -1,6 +1,7 @@
 import { useIntl } from 'react-intl';
 
 import { getTranslation } from '../utils/getTranslation';
+import { getAttachedWorkspaceAccess } from '../utils/workspaceAccess';
 
 import { getWorkspacesBindingInitialValue, WorkspacesBindingCard } from './WorkspacesBindingCard';
 
@@ -12,6 +13,7 @@ import type { RoleFormExtensionComponentProps } from '@strapi/admin/strapi-admin
  * holding the role belong to the bound workspaces.
  */
 export const RoleWorkspacesField = ({
+  role,
   value,
   onChange,
   disabled,
@@ -23,6 +25,7 @@ export const RoleWorkspacesField = ({
       value={value}
       onChange={(next) => onChange(next)}
       disabled={disabled}
+      access={getAttachedWorkspaceAccess(role)}
       hint={formatMessage({
         id: getTranslation('roles.workspaces.hint'),
         defaultMessage:

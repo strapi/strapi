@@ -1,42 +1,8 @@
 import type { Core } from '@strapi/types';
 import { errors } from '@strapi/utils';
 
-import { normalizeCapabilities, type SpaceCapabilities } from '../services/spaces';
 import { runUnscoped } from '../settings-visibility';
 import { getService } from '../utils';
-
-const CAPABILITY_KEYS: Array<keyof SpaceCapabilities> = [
-  'apiTokens',
-  'transferTokens',
-  'webhooks',
-  'users',
-  'roles',
-  'internationalization',
-  'mediaLibrarySettings',
-  'publish',
-  'moveEntries',
-  'upload',
-  'contentApi',
-];
-
-const parseCapabilities = (raw: unknown): SpaceCapabilities | undefined => {
-  if (raw === undefined) {
-    return undefined;
-  }
-  if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) {
-    throw new ValidationError('`capabilities` must be an object of booleans');
-  }
-  const record = raw as Record<string, unknown>;
-  for (const key of Object.keys(record)) {
-    if (!CAPABILITY_KEYS.includes(key as keyof SpaceCapabilities)) {
-      throw new ValidationError(`Unknown capability "${key}"`);
-    }
-    if (typeof record[key] !== 'boolean') {
-      throw new ValidationError(`Capability "${key}" must be a boolean`);
-    }
-  }
-  return normalizeCapabilities(record);
-};
 
 const { ApplicationError, NotFoundError, ValidationError } = errors;
 
@@ -52,23 +18,42 @@ const slugify = (value: string): string =>
     .replace(/^-+|-+$/g, '')
     .slice(0, 64);
 
+/** `null` clears the preview origin; anything else must be an absolute http(s) URL. */
+const parsePreviewBaseUrl = (raw: unknown): string | null | undefined => {
+  if (raw === undefined) return undefined;
+  if (raw === null || raw === '') return null;
+  if (typeof raw !== 'string' || raw.length > 2048) {
+    throw new ValidationError('`previewBaseUrl` must be an absolute http(s) URL');
+  }
+  let parsed: URL;
+  try {
+    parsed = new URL(raw);
+  } catch {
+    throw new ValidationError('`previewBaseUrl` must be an absolute http(s) URL');
+  }
+  if (!['http:', 'https:'].includes(parsed.protocol)) {
+    throw new ValidationError('`previewBaseUrl` must be an absolute http(s) URL');
+  }
+  return raw.replace(/\/+$/, '');
+};
+
 const space = ({ strapi }: { strapi: Core.Strapi }) => ({
   /**
-   * GET /spaces/mine — returns all active spaces visible to the current
-   * admin user.
+   * GET /spaces/mine — the active workspaces the current admin belongs to
+   * (direct binding, roles' bindings, platform-wide roles; super admins see
+   * every workspace — see `services/membership.ts`).
    *
    * Query params:
-   * - `contentType` (optional): if provided, returns only spaces where the
-   *   given content type is visible per its `multiTenancy.visibleIn` binding.
-   *   Used by the CTB's "Visible in spaces" multi-select and (next slice)
-   *   by the move-to-space picker.
-   *
-   * For Phase 3 entry, every authenticated admin sees every active space
-   * (no per-user filtering yet). A follow-up slice will filter by role
-   * assignment.
+   * - `contentType` (optional): only the workspaces where the given content
+   *   type is visible per its `pluginOptions.spaces.visibleIn` binding (the
+   *   CTB's "Workspaces" multi-select and the move-to-workspace picker).
    */
   async listMine(ctx: any) {
-    const spaces = await getService('spaces').getAll();
+    const userId = ctx.state?.user?.id as number | undefined;
+    const spaces =
+      userId === undefined
+        ? await getService('spaces').getAll()
+        : await getService('membership').spacesForUser(userId);
     const contentType = ctx.query?.contentType as string | undefined;
 
     const filtered = contentType ? filterByContentType(strapi, spaces, contentType) : spaces;
@@ -78,8 +63,36 @@ const space = ({ strapi }: { strapi: Core.Strapi }) => ({
       slug: s.slug,
       name: s.name,
       color: s.color ?? null,
-      capabilities: normalizeCapabilities(s.capabilities),
     }));
+  },
+
+  /** GET /spaces/limits — the instance-level workspace cap and its usage (default workspace only). */
+  async limits(ctx: any) {
+    ctx.body = await getService('limits').getUsage();
+  },
+
+  /** GET /spaces/mine/current — the workspace the current admin was last in. */
+  async getCurrent(ctx: any) {
+    const userId = ctx.state?.user?.id as number | undefined;
+    const slug = userId === undefined ? null : await getService('membership').getLastSlug(userId);
+    ctx.body = { slug };
+  },
+
+  /** PUT /spaces/mine/current — remembers the workspace the admin switched to. */
+  async setCurrent(ctx: any) {
+    const userId = ctx.state?.user?.id as number | undefined;
+    const slug = ctx.request?.body?.slug;
+    if (userId === undefined) {
+      return ctx.unauthorized();
+    }
+    if (typeof slug !== 'string' || slug.length === 0) {
+      return ctx.badRequest('Missing or invalid `slug`');
+    }
+    if (!(await getService('membership').isMember(userId, slug))) {
+      return ctx.badRequest('You are not a member of this workspace');
+    }
+    await getService('membership').setLastSlug(userId, slug);
+    ctx.body = { slug };
   },
 
   /**
@@ -96,7 +109,7 @@ const space = ({ strapi }: { strapi: Core.Strapi }) => ({
       name: s.name,
       color: s.color ?? null,
       status: s.status,
-      capabilities: normalizeCapabilities(s.capabilities),
+      previewBaseUrl: s.previewBaseUrl ?? null,
     }));
   },
 
@@ -122,7 +135,7 @@ const space = ({ strapi }: { strapi: Core.Strapi }) => ({
       slug?: unknown;
       color?: unknown;
       status?: unknown;
-      capabilities?: unknown;
+      previewBaseUrl?: unknown;
     };
 
     const spacesService = getService('spaces');
@@ -136,12 +149,12 @@ const space = ({ strapi }: { strapi: Core.Strapi }) => ({
       slug?: string;
       color?: string | null;
       status?: 'active' | 'archived';
-      capabilities?: SpaceCapabilities;
+      previewBaseUrl?: string | null;
     } = {};
 
-    const capabilities = parseCapabilities(body.capabilities);
-    if (capabilities !== undefined) {
-      data.capabilities = capabilities;
+    const previewBaseUrl = parsePreviewBaseUrl(body.previewBaseUrl);
+    if (previewBaseUrl !== undefined) {
+      data.previewBaseUrl = previewBaseUrl;
     }
 
     if (body.slug !== undefined) {
@@ -211,7 +224,7 @@ const space = ({ strapi }: { strapi: Core.Strapi }) => ({
       name: updated.name,
       color: updated.color ?? null,
       status: updated.status,
-      capabilities: normalizeCapabilities(updated.capabilities),
+      previewBaseUrl: updated.previewBaseUrl ?? null,
     };
   },
 
@@ -269,7 +282,7 @@ const space = ({ strapi }: { strapi: Core.Strapi }) => ({
       name?: unknown;
       slug?: unknown;
       color?: unknown;
-      capabilities?: unknown;
+      previewBaseUrl?: unknown;
     };
 
     const name = typeof body.name === 'string' ? body.name.trim() : '';
@@ -300,11 +313,14 @@ const space = ({ strapi }: { strapi: Core.Strapi }) => ({
       throw new ApplicationError(`A space with the slug "${slug}" already exists`);
     }
 
+    // Instance-level cap (licence, or plugin config); counts archived workspaces too.
+    await getService('limits').assertCanCreate();
+
     const created = await spacesService.create({
       name,
       slug,
       color,
-      capabilities: parseCapabilities(body.capabilities) ?? normalizeCapabilities(undefined),
+      previewBaseUrl: parsePreviewBaseUrl(body.previewBaseUrl) ?? null,
     });
 
     ctx.body = {
@@ -312,7 +328,6 @@ const space = ({ strapi }: { strapi: Core.Strapi }) => ({
       slug: created.slug,
       name: created.name,
       color: created.color ?? null,
-      capabilities: normalizeCapabilities(created.capabilities),
     };
   },
 });

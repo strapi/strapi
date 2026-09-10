@@ -1,7 +1,11 @@
 import type { Core } from '@strapi/types';
 
+import { DEFAULT_SPACE_SLUG } from './services/spaces';
 import {
+  WORKSPACE_ACCESS_MESSAGES,
   attachServiceContentType,
+  decideWritableInSpace,
+  getBoundSlugs,
   runUnscoped,
   scopeReadByCurrentSpace,
   wrapControllerForVisibility,
@@ -28,6 +32,9 @@ import {
  */
 const I18N_LOCALE_UID = 'plugin::i18n.locale';
 const DEFAULT_LOCALE_STORE_KEY = 'default_locale';
+const LOCALE_DETAIL_RE = /^\/i18n\/locales\/(\d+)\/?$/;
+/** Body keys that never count as an edit of the locale itself. */
+const LOCALE_NON_EDIT_KEYS = new Set(['isDefault', 'spaces', 'defaultIn', 'code', 'id']);
 
 const perSpaceStoreKey = (spaceSlug: string | undefined) =>
   spaceSlug ? `${DEFAULT_LOCALE_STORE_KEY}_${spaceSlug}` : DEFAULT_LOCALE_STORE_KEY;
@@ -68,6 +75,45 @@ export const patchI18nForSpaces = async (strapi: Core.Strapi) => {
   // still work via lexical scoping — the binding resolves at call time — but
   // declaring before use makes the read order obvious.)
   const i18nStore = strapi.store({ type: 'plugin', name: 'i18n' });
+
+  // Shared locales (platform-wide or bound to several workspaces) are read-only
+  // outside default — except "set as default", which is a per-workspace choice:
+  // a PUT whose only effective change is `isDefault` stays allowed.
+  strapi.server.use(async (ctx: any, next: () => Promise<any>) => {
+    const spaceSlug = ctx.state?.spaceSlug as string | undefined;
+    const match = ctx.path.match(LOCALE_DETAIL_RE);
+    if (!spaceSlug || spaceSlug === DEFAULT_SPACE_SLUG || !match) {
+      return next();
+    }
+    if (!['PUT', 'DELETE'].includes(ctx.method)) {
+      return next();
+    }
+
+    const id = Number(match[1]);
+    const boundSlugs = await getBoundSlugs(strapi, I18N_LOCALE_UID, id);
+    if (boundSlugs === null) {
+      return next();
+    }
+    const decision = decideWritableInSpace(boundSlugs, spaceSlug);
+    if (decision.writable) {
+      return next();
+    }
+
+    if (ctx.method === 'PUT') {
+      const current = await strapi.db
+        .query(I18N_LOCALE_UID)
+        .findOne({ where: { id }, select: ['name', 'code'] });
+      const body = (ctx.request?.body ?? {}) as Record<string, unknown>;
+      const edits = Object.keys(body).filter(
+        (key) => !LOCALE_NON_EDIT_KEYS.has(key) && body[key] !== (current as any)?.[key]
+      );
+      if (edits.length === 0) {
+        return next();
+      }
+    }
+
+    return ctx.forbidden(WORKSPACE_ACCESS_MESSAGES[decision.reason], { reason: decision.reason });
+  });
 
   // Route-level Koa middleware that strips `spaces` from POST/PUT bodies before i18n's
   // Yup validation sees them, then writes the M2M link rows after the controller

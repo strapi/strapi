@@ -1,12 +1,18 @@
 import type { Core } from '@strapi/types';
 
 import { DEFAULT_SPACE_SLUG } from './services/spaces';
-import { visibilityFilter, wrapControllerForVisibility } from './settings-visibility';
+import {
+  attachWorkspaceAccess,
+  refuseUnlessWritableInSpace,
+  visibilityFilter,
+  wrapControllerForVisibility,
+} from './settings-visibility';
 
 const TRANSFER_TOKEN_UID = 'admin::transfer-token';
 
 const TOKENS_LIST_RE = /^\/admin\/transfer\/tokens\/?$/;
 const TOKEN_DETAIL_RE = /^\/admin\/transfer\/tokens\/(\d+)\/?$/;
+const TOKEN_REGENERATE_RE = /^\/admin\/transfer\/tokens\/(\d+)\/regenerate\/?$/;
 
 /**
  * Spaces × transfer tokens — the same management scoping as API tokens:
@@ -15,7 +21,8 @@ const TOKEN_DETAIL_RE = /^\/admin\/transfer\/tokens\/(\d+)\/?$/;
  *     body field on create/update (managed from the default workspace),
  *     auto-bound to the active workspace when created elsewhere;
  *   - outside default, the list only shows tokens bound to the active
- *     workspace (or platform-wide ones) and direct detail access is a 404.
+ *     workspace (or platform-wide ones), direct detail access is a 404, and
+ *     shared tokens (platform-wide or multi-bound) are read-only there.
  *
  * TODO(spaces): runtime enforcement — scoping what a transfer token can
  * actually PUSH/PULL to its workspaces — is a slice of its own: the transfer
@@ -31,7 +38,10 @@ export const patchTransferTokensForSpaces = (strapi: Core.Strapi) => {
   };
 
   strapi.server.use(async (ctx: any, next: () => Promise<any>) => {
-    const isTokenRoute = TOKENS_LIST_RE.test(ctx.path) || TOKEN_DETAIL_RE.test(ctx.path);
+    const isTokenRoute =
+      TOKENS_LIST_RE.test(ctx.path) ||
+      TOKEN_DETAIL_RE.test(ctx.path) ||
+      TOKEN_REGENERATE_RE.test(ctx.path);
     if (!isTokenRoute) {
       return next();
     }
@@ -52,10 +62,18 @@ export const patchTransferTokensForSpaces = (strapi: Core.Strapi) => {
         }
       }
 
-      if (detailMatch && ['GET', 'PUT', 'DELETE'].includes(ctx.method)) {
+      const regenerateMatch = ctx.path.match(TOKEN_REGENERATE_RE);
+      const targetId = detailMatch?.[1] ?? regenerateMatch?.[1];
+      if (targetId && ['GET', 'PUT', 'DELETE', 'POST'].includes(ctx.method)) {
         const ids = await visibleTokenIds(spaceSlug);
-        if (!ids.has(Number(detailMatch[1]))) {
+        if (!ids.has(Number(targetId))) {
           return ctx.notFound('Transfer token not found in this workspace');
+        }
+        if (
+          ctx.method !== 'GET' &&
+          (await refuseUnlessWritableInSpace(strapi, ctx, TRANSFER_TOKEN_UID, targetId, spaceSlug))
+        ) {
+          return;
         }
       }
     }
@@ -69,6 +87,11 @@ export const patchTransferTokensForSpaces = (strapi: Core.Strapi) => {
     if (!isDefault && TOKENS_LIST_RE.test(ctx.path) && Array.isArray(ctx.body?.data)) {
       const ids = await visibleTokenIds(spaceSlug);
       ctx.body.data = ctx.body.data.filter((token: { id: number }) => ids.has(token.id));
+      return;
+    }
+
+    if (!isDefault && detailMatch && ctx.body?.data?.id) {
+      await attachWorkspaceAccess(strapi, ctx, TRANSFER_TOKEN_UID, spaceSlug);
       return;
     }
 

@@ -1,46 +1,29 @@
-import { DEFAULT_CAPABILITIES, useGetMineSpacesQuery } from '../services/spaces';
-import { DEFAULT_SPACE_SLUG, getCurrentSpaceSlug } from './currentSpace';
+import { DEFAULT_SPACE_SLUG, useCurrentSpaceSlug } from './currentSpace';
 
 import type { SettingsMenu, SettingsMenuMutator } from '@strapi/admin/strapi-admin';
 
 /**
- * Hides the Settings menu entries a workspace isn't entitled to (per its
- * capabilities — see CapabilitiesCard). Registered through the admin's
- * `registerSettingsMenuMutator` seam; the server enforces the same rule by
- * 404ing the underlying routes. The default workspace sees everything.
+ * Settings entries that only exist in the default workspace: workspace
+ * management, and the licence / seats / upsell surfaces (instance-level).
+ * Everything else is decided by the users' roles, as anywhere in Strapi.
+ * Registered through the admin's `registerSettingsMenuMutator` seam; the
+ * server enforces the management rule too.
  */
 export const useWorkspaceSettingsMenuMutator = (): SettingsMenuMutator => {
-  const { data: spaces } = useGetMineSpacesQuery();
-  const currentSlug = getCurrentSpaceSlug();
+  const currentSlug = useCurrentSpaceSlug();
 
   return (menu: SettingsMenu): SettingsMenu => {
     if (currentSlug === DEFAULT_SPACE_SLUG) {
       return menu;
     }
 
-    const current = spaces?.find((s) => s.slug === currentSlug);
-    if (!current) {
-      return menu;
-    }
-
-    const capabilities = { ...DEFAULT_CAPABILITIES, ...(current.capabilities ?? {}) };
-    const hiddenLinkIds = new Set(
-      [
-        // Hard rule: workspaces are managed from the default workspace only.
-        'workspaces',
-        !capabilities.apiTokens && 'api-tokens',
-        !capabilities.transferTokens && 'transfer-tokens',
-        !capabilities.webhooks && 'webhooks',
-        !capabilities.users && 'users',
-        !capabilities.roles && 'roles',
-        !capabilities.internationalization && 'internationalization',
-        !capabilities.mediaLibrarySettings && 'media-library-settings',
-      ].filter((id): id is string => typeof id === 'string')
-    );
-
-    if (hiddenLinkIds.size === 0) {
-      return menu;
-    }
+    const hiddenLinkIds = new Set([
+      'workspaces',
+      '000-application-infos',
+      ...menu.flatMap((section) =>
+        section.links.map((link) => String(link.id)).filter((id) => id.endsWith('-purchase-page'))
+      ),
+    ]);
 
     return menu.map((section) => ({
       ...section,

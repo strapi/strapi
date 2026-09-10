@@ -9,7 +9,7 @@ const SPACE_HEADER = 'X-Strapi-Space-Id';
  * DB reset) instead of every request 400ing with no way out. Every other
  * `/spaces/*` route carries the header so the server knows the ACTIVE
  * workspace: management routes are default-workspace-only, and `/spaces/move`
- * is gated by the source workspace's `moveEntries` capability.
+ * checks what the source workspace may move.
  */
 const isUnscopedPath = (path: string) => path.startsWith('/spaces/mine');
 

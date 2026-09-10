@@ -1,47 +1,53 @@
 import type { Core, UID } from '@strapi/types';
 import { errors } from '@strapi/utils';
 
-import { runUnscoped } from '../settings-visibility';
+import { RELEASE_ACTION_UID } from '../releases-integration';
 import { getService } from '../utils';
+import { getRequestSpace, runUnscoped } from '../utils/space-scope';
+import { MESSAGES, WorkspaceAccessError, assertWritable } from './access';
+import { isSharedContentType } from './content-types';
 
 const { ApplicationError, NotFoundError, ValidationError } = errors;
 
 interface MoveInput {
   uid: UID.ContentType;
   documentIds: string[];
-  targetSpaceSlug: string;
+  /** Target workspace slug, or `null` to share the entries with every workspace. */
+  targetSpaceSlug: string | null;
 }
 
 interface MoveResult {
   movedCount: number;
-  targetSpaceId: number;
+  targetSpaceId: number | null;
   documentIds: string[];
 }
 
+interface SourceRow {
+  id: number;
+  documentId: string;
+  locale?: string;
+  spaceOverride?: boolean;
+  space?: { id: number } | null;
+}
+
 /**
- * Moves N entries of a content type to another space.
+ * Moves N entries of a content type to another workspace, or shares them
+ * (`targetSpaceSlug: null` → `space_id = NULL`, visible read-only everywhere).
  *
  * Validation order:
- *  1. CT must exist and be space-scoped (no-op otherwise — platform CTs have no space FK).
- *  2. Target space must exist and be active.
- *  3. Target space must be in the CT's `visibleIn` binding (or `visibleIn` empty/missing
- *     ⇒ visible in every space). This is the constraint the user asked for: an entry can
- *     only be moved to a space that's allowed to see the collection type.
- *  4. Source rows are looked up across every space (no filter), so the request context's
- *     own space doesn't accidentally exclude them. The caller's permission check is
- *     enforced one layer up by the controller.
+ *  1. CT must exist and carry a workspace; content types whose entries are all
+ *     shared (`sharedEntries`) have nothing to move.
+ *  2. Target workspace must exist, be active and be in the CT's `visibleIn`
+ *     binding (empty = every workspace). Sharing skips this step.
+ *  3. Source rows are looked up across every workspace. A sub-workspace caller
+ *     may only move its own rows and may not share (sharing is a default-only
+ *     decision); the default workspace and headerless callers may move anything.
+ *  4. For localized CTs every locale carried by the source rows must be
+ *     available in the target workspace (a move must not orphan a translation).
  *
- * Update strategy: bypass the document service entirely and write the `space` FK on the
- * relation join table via `strapi.db.query(uid).update`. The document-service middleware
- * (`document-service/multitenancy.ts`) would otherwise (a) force `params.filters.space`
- * to the current request's space (excluding the source rows we want to move), and
- * (b) leave `params.data.space` alone only if we set it explicitly — but the filter
- * blockage alone is enough to prevent the document-service path from working.
- *
- * Components and dynamic-zone rows aren't moved here: they live in their own tables but
- * are queried via their parent's link table, which still points at the moved row. The
- * parent's new space implicitly carries them along. (A future "components carry an own
- * space_id" feature would need a recursive walker; today they don't.)
+ * Update strategy: one bulk `updateMany` on the `space_id` join column, under
+ * `runUnscoped` so neither the read net nor the write net interferes.
+ * Components and dynamic-zone rows follow their parent through its link table.
  */
 export const moveToSpace = async (
   strapi: Core.Strapi,
@@ -60,56 +66,78 @@ export const moveToSpace = async (
   if (!isSpaceScopedContentType(contentType)) {
     throw new ValidationError(`${uid} is not space-scoped; moving between spaces is a no-op.`);
   }
-
-  const spacesService = getService('spaces');
-  const targetSpace = await spacesService.getBySlug(targetSpaceSlug);
-  if (!targetSpace || targetSpace.status !== 'active') {
-    throw new NotFoundError(`Unknown or inactive space: ${targetSpaceSlug}`);
+  if (isSharedContentType(contentType)) {
+    throw new WorkspaceAccessError(
+      `Entries of ${uid} are shared with every workspace and cannot be moved.`,
+      { reason: 'shared-content-type' }
+    );
   }
 
-  const { isCTVisibleInSpace } = getService('visibility');
-  if (!isCTVisibleInSpace(contentType, targetSpaceSlug)) {
-    throw new ApplicationError(
-      `${uid} is not visible in space "${targetSpaceSlug}". Add the space to the CT's visibleIn binding first.`
-    );
+  const request = getRequestSpace(strapi);
+  const isSharing = targetSpaceSlug === null;
+
+  if (isSharing && request && !request.isDefault) {
+    throw new WorkspaceAccessError(MESSAGES['default-only'], { reason: 'default-only' });
+  }
+
+  let targetSpaceId: number | null = null;
+  if (!isSharing) {
+    const targetSpace = await getService('spaces').getBySlug(targetSpaceSlug);
+    if (!targetSpace || targetSpace.status !== 'active') {
+      throw new NotFoundError(`Unknown or inactive space: ${targetSpaceSlug}`);
+    }
+    if (!getService('visibility').isCTVisibleInSpace(contentType, targetSpaceSlug)) {
+      throw new ApplicationError(
+        `${uid} is not visible in space "${targetSpaceSlug}". Add the space to the CT's visibleIn binding first.`
+      );
+    }
+    targetSpaceId = targetSpace.id;
   }
 
   const isLocalizedCT =
     !!strapi.plugin('i18n') && (contentType as any).pluginOptions?.i18n?.localized === true;
 
-  // Find every row matching any of the documentIds across every space (no filter).
-  // We use db.query directly to bypass the document-service multitenancy filter.
-  // For localized content types we also fetch `locale` so we can validate that the
-  // target space supports every locale carried by the source rows — otherwise the
-  // move would orphan a translation in a space that can't surface it. (See the
-  // "i18n locale isolation gotcha" risk in the design doc.)
-  // `runUnscoped`: the DB read net would otherwise filter this lookup to the
-  // caller's active workspace — the whole point is to find the rows wherever
-  // they live.
-  const rows = (await runUnscoped(() =>
-    strapi.db.query(uid).findMany({
-      where: { documentId: { $in: documentIds } },
-      select: isLocalizedCT ? ['id', 'documentId', 'locale'] : ['id', 'documentId'],
-    })
-  )) as Array<{ id: number; documentId: string; locale?: string }>;
+  /**
+   * Every row of every requested document, wherever it lives (`runUnscoped`:
+   * the read net would otherwise narrow the lookup to the caller's workspace).
+   *
+   * Copies of inherited entries are left out: they share the documentId of the
+   * entry being moved but are a different workspace's local version of it, and
+   * moving the original must not drag them along. What happens to them once the
+   * original stops being inherited is decided further down.
+   */
+  const rows = (
+    (await runUnscoped(() =>
+      strapi.db.query(uid).findMany({
+        where: { documentId: { $in: documentIds } },
+        select: isLocalizedCT
+          ? ['id', 'documentId', 'locale', 'spaceOverride']
+          : ['id', 'documentId', 'spaceOverride'],
+        populate: { space: { select: ['id'] } },
+      })
+    )) as SourceRow[]
+  ).filter((row) => row.spaceOverride !== true);
 
   if (rows.length === 0) {
-    return { movedCount: 0, targetSpaceId: targetSpace.id, documentIds };
+    return { movedCount: 0, targetSpaceId, documentIds };
   }
 
-  if (isLocalizedCT) {
+  // A sub-workspace may only move what it may edit: its own rows. Shared rows
+  // are refused (403), other workspaces' rows are invisible (404).
+  for (const row of rows) {
+    assertWritable({ model: contentType, request, entrySpaceId: row.space?.id ?? null });
+  }
+
+  if (isLocalizedCT && !isSharing) {
     const sourceLocales = [
       ...new Set(
-        rows
-          .map((r: { locale?: string }) => r.locale)
-          .filter((c): c is string => typeof c === 'string' && c.length > 0)
+        rows.map((r) => r.locale).filter((c): c is string => typeof c === 'string' && c.length > 0)
       ),
     ];
     if (sourceLocales.length > 0) {
-      // A locale is visible in the target space when (a) its `spaces` M2M includes the
-      // target slug, OR (b) its `spaces` is empty (= platform-wide). Hit `db.query`
-      // directly so we sidestep the request-context-scoped service patch — we want raw
-      // access keyed on `targetSpaceSlug`, not on the caller's active space.
+      // A locale is visible in the target workspace when its `spaces` M2M lists
+      // the target, or is empty (= platform-wide). Raw `db.query` on purpose:
+      // the request-scoped service patch keys on the caller's workspace.
       const availableInTarget = await strapi.db.query('plugin::i18n.locale').findMany({
         where: {
           code: { $in: sourceLocales },
@@ -132,23 +160,64 @@ export const moveToSpace = async (
     }
   }
 
+  /**
+   * A workspace that overrode one of these entries holds a copy under the same
+   * documentId. Moving the original into that workspace would put two rows of
+   * one document there — refuse, and say which workspace to clear first.
+   */
+  const movedDocumentIdsForCheck = [...new Set(rows.map((r) => r.documentId))];
+  if (targetSpaceId !== null) {
+    const overriding = await getService('inheritance').overridingSpaceIds(
+      uid,
+      movedDocumentIdsForCheck
+    );
+    if (overriding.includes(targetSpaceId)) {
+      throw new ApplicationError(
+        `Workspace "${targetSpaceSlug}" has its own copy of one of these entries. Reset it there first, then move.`
+      );
+    }
+  }
+
   // One bulk UPDATE inside a transaction. `updateMany` is safe for this
   // relation because `space` is a join-column FK (`useJoinTable: false` in
   // register.ts): the entity manager's `processData` maps `data.space`
-  // straight onto the `space_id` column. Join-table relations would NOT
-  // survive a bulk op — revisit if the storage model ever changes.
-  const rowIds = rows.map((row: { id: number }) => row.id);
-  await strapi.db.transaction(async () => {
-    await strapi.db.query(uid).updateMany({
-      where: { id: { $in: rowIds } },
-      data: { space: targetSpace.id },
-    });
-  });
+  // straight onto the `space_id` column.
+  const rowIds = rows.map((row) => row.id);
+  await runUnscoped(() =>
+    strapi.db.transaction(async () => {
+      await strapi.db.query(uid).updateMany({
+        where: { id: { $in: rowIds } },
+        data: { space: targetSpaceId },
+      });
+    })
+  );
+
+  const movedDocumentIds = [...new Set(rows.map((r) => r.documentId))];
+
+  /**
+   * The entry has stopped being inherited: whatever copies other workspaces
+   * took of it have nothing left to follow, so they become entries of their own.
+   */
+  if (targetSpaceId !== null) {
+    await getService('inheritance').promoteOverrides(uid, movedDocumentIds);
+  }
+
+  // Release actions follow the entries they target.
+  const releaseActionModel =
+    strapi.contentTypes[RELEASE_ACTION_UID as keyof typeof strapi.contentTypes];
+  if (releaseActionModel?.attributes?.space) {
+    await runUnscoped(() =>
+      strapi.db.query(RELEASE_ACTION_UID as never).updateMany({
+        where: { contentType: uid, entryDocumentId: { $in: movedDocumentIds } },
+        data: { space: targetSpaceId },
+      })
+    );
+  }
 
   return {
     movedCount: rows.length,
-    targetSpaceId: targetSpace.id,
-    documentIds: [...new Set(rows.map((r: { documentId: string }) => r.documentId))],
+    targetSpaceId,
+    documentIds: movedDocumentIds,
   };
 };
 

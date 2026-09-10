@@ -1,13 +1,19 @@
 import type { Core } from '@strapi/types';
 
-import { DEFAULT_SPACE_SLUG, normalizeCapabilities } from './services/spaces';
+import { DEFAULT_SPACE_SLUG } from './services/spaces';
 import { getService } from './utils';
-import { visibilityFilter, wrapControllerForVisibility } from './settings-visibility';
+import {
+  attachWorkspaceAccess,
+  refuseUnlessWritableInSpace,
+  visibilityFilter,
+  wrapControllerForVisibility,
+} from './settings-visibility';
 
 const API_TOKEN_UID = 'admin::api-token';
 
 const TOKENS_LIST_RE = /^\/admin\/api-tokens\/?$/;
 const TOKEN_DETAIL_RE = /^\/admin\/api-tokens\/(\d+)\/?$/;
+const TOKEN_REGENERATE_RE = /^\/admin\/api-tokens\/(\d+)\/regenerate\/?$/;
 
 type TokenAccessDecision =
   | { kind: 'allow' }
@@ -119,12 +125,6 @@ export const patchApiTokensForSpaces = (strapi: Core.Strapi) => {
               `This API token is bound to the inactive workspace "${decision.slug}"`
             );
           }
-          // The auto-scope happens AFTER the global capabilities guard ran
-          // (headerless request → no slug back then), so the `contentApi`
-          // capability must be re-checked here.
-          if (normalizeCapabilities(space.capabilities).contentApi === false) {
-            return ctx.notFound();
-          }
           ctx.state.spaceId = space.id;
           ctx.state.spaceSlug = space.slug;
         }
@@ -145,7 +145,10 @@ export const patchApiTokensForSpaces = (strapi: Core.Strapi) => {
   };
 
   strapi.server.use(async (ctx: any, next: () => Promise<any>) => {
-    const isTokenRoute = TOKENS_LIST_RE.test(ctx.path) || TOKEN_DETAIL_RE.test(ctx.path);
+    const isTokenRoute =
+      TOKENS_LIST_RE.test(ctx.path) ||
+      TOKEN_DETAIL_RE.test(ctx.path) ||
+      TOKEN_REGENERATE_RE.test(ctx.path);
     if (!isTokenRoute) {
       return next();
     }
@@ -172,11 +175,20 @@ export const patchApiTokensForSpaces = (strapi: Core.Strapi) => {
         }
       }
 
-      // Tokens not visible in this workspace don't exist for it.
-      if (detailMatch && ['GET', 'PUT', 'DELETE'].includes(ctx.method)) {
+      // Tokens not visible in this workspace don't exist for it; shared ones
+      // (platform-wide or multi-bound) are read-only here, regeneration included.
+      const regenerateMatch = ctx.path.match(TOKEN_REGENERATE_RE);
+      const targetId = detailMatch?.[1] ?? regenerateMatch?.[1];
+      if (targetId && ['GET', 'PUT', 'DELETE', 'POST'].includes(ctx.method)) {
         const ids = await visibleTokenIds(spaceSlug);
-        if (!ids.has(Number(detailMatch[1]))) {
+        if (!ids.has(Number(targetId))) {
           return ctx.notFound('API token not found in this workspace');
+        }
+        if (
+          ctx.method !== 'GET' &&
+          (await refuseUnlessWritableInSpace(strapi, ctx, API_TOKEN_UID, targetId, spaceSlug))
+        ) {
+          return;
         }
       }
     }
@@ -190,6 +202,11 @@ export const patchApiTokensForSpaces = (strapi: Core.Strapi) => {
     if (!isDefault && TOKENS_LIST_RE.test(ctx.path) && Array.isArray(ctx.body?.data)) {
       const ids = await visibleTokenIds(spaceSlug);
       ctx.body.data = ctx.body.data.filter((token: { id: number }) => ids.has(token.id));
+      return;
+    }
+
+    if (!isDefault && detailMatch && ctx.body?.data?.id) {
+      await attachWorkspaceAccess(strapi, ctx, API_TOKEN_UID, spaceSlug);
       return;
     }
 

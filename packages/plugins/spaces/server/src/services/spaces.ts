@@ -5,59 +5,14 @@ const SPACE_MODEL_UID = 'plugin::spaces.space';
 /** The system workspace: seeded first, undeletable, its slug is the client fallback. */
 const DEFAULT_SPACE_SLUG = 'default';
 
-/**
- * What a workspace is allowed to do. The default workspace ignores this — it
- * sees and manages everything, everywhere.
- *
- * Two families:
- *   - Settings sections (visible & manageable from the workspace's Settings):
- *     apiTokens, transferTokens, webhooks, users, roles, internationalization,
- *     mediaLibrarySettings.
- *   - Content behaviors: publish (documents can be published/unpublished),
- *     moveEntries (entries can be moved to another workspace), upload (new
- *     assets/folders can be added to the Media Library), contentApi (the
- *     public content API serves this workspace at all).
- */
-interface SpaceCapabilities {
-  apiTokens: boolean;
-  transferTokens: boolean;
-  webhooks: boolean;
-  users: boolean;
-  roles: boolean;
-  internationalization: boolean;
-  mediaLibrarySettings: boolean;
-  publish: boolean;
-  moveEntries: boolean;
-  upload: boolean;
-  contentApi: boolean;
-}
-
-const DEFAULT_CAPABILITIES: SpaceCapabilities = {
-  apiTokens: true,
-  transferTokens: true,
-  webhooks: true,
-  users: true,
-  roles: true,
-  internationalization: true,
-  mediaLibrarySettings: true,
-  publish: true,
-  moveEntries: true,
-  upload: true,
-  contentApi: true,
-};
-
-const normalizeCapabilities = (raw: unknown): SpaceCapabilities => ({
-  ...DEFAULT_CAPABILITIES,
-  ...(raw && typeof raw === 'object' ? (raw as Partial<SpaceCapabilities>) : {}),
-});
-
 interface Space {
   id: number;
   slug: string;
   name: string;
   color: string | null;
   status: 'active' | 'archived';
-  capabilities?: SpaceCapabilities | null;
+  /** Origin the workspace previews on (live preview), e.g. `https://acme.example.com`. */
+  previewBaseUrl?: string | null;
 }
 
 interface SpaceInput {
@@ -65,7 +20,7 @@ interface SpaceInput {
   name: string;
   color?: string | null;
   status?: Space['status'];
-  capabilities?: SpaceCapabilities;
+  previewBaseUrl?: string | null;
 }
 
 /**
@@ -160,5 +115,5 @@ const spacesService = ({ strapi }: { strapi: Core.Strapi }) => ({
 type SpacesService = typeof spacesService;
 
 export default spacesService;
-export { SpacesService, DEFAULT_SPACE_SLUG, DEFAULT_CAPABILITIES, normalizeCapabilities };
-export type { Space, SpaceInput, SpaceCapabilities };
+export { SpacesService, DEFAULT_SPACE_SLUG };
+export type { Space, SpaceInput };

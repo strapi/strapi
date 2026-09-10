@@ -7,41 +7,40 @@ import {
   useAPIErrorHandler,
   useNotification,
 } from '@strapi/admin/strapi-admin';
-import { Box, Button, Field, Flex, TextInput } from '@strapi/design-system';
+import { Alert, Box, Button, Field, Flex, TextInput } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 
-import { CapabilitiesCard } from '../components/CapabilitiesCard';
 import { ColorSwatchPicker, SPACE_COLOR_PALETTE } from '../components/ColorSwatchPicker';
-import {
-  DEFAULT_CAPABILITIES,
-  useCreateSpaceMutation,
-  type SpaceCapabilities,
-} from '../services/spaces';
+import { useCreateSpaceMutation } from '../services/spaces';
 import { getTranslation } from '../utils/getTranslation';
 import { slugify } from '../utils/slugify';
-import { useSwitchWorkspace } from '../utils/useSwitchWorkspace';
+import { useSpaceLimits } from '../utils/useSpaceLimits';
 
 /**
  * Settings → Workspaces → create page (`/settings/workspaces/create`) — a full
  * page like webhooks/API tokens, reached from the switcher's "Add a workspace"
- * entry and the list's CTA. On success the admin switches to the new workspace
- * (pure data swap, no reload) and lands back on the list.
+ * entry and the list's CTA. On success it lands back on the list, which now
+ * shows the new workspace.
+ *
+ * It deliberately does NOT switch into the workspace it just created: the whole
+ * Workspaces settings area is default-only (the server answers 404 for it
+ * anywhere else), so switching would drop the user on an error page instead of
+ * the list. Switching is the switcher's job.
  */
 const CreatePage = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const navigate = useNavigate();
-  const switchWorkspace = useSwitchWorkspace();
   const [createSpace, { isLoading }] = useCreateSpaceMutation();
+  const { limits, isAtLimit } = useSpaceLimits();
 
   const [name, setName] = React.useState('');
   const [slug, setSlug] = React.useState('');
   const [slugTouched, setSlugTouched] = React.useState(false);
   const [color, setColor] = React.useState(SPACE_COLOR_PALETTE[0]);
-  const [capabilities, setCapabilities] = React.useState<SpaceCapabilities>(DEFAULT_CAPABILITIES);
 
   const handleNameChange = (value: string) => {
     setName(value);
@@ -56,7 +55,6 @@ const CreatePage = () => {
         name: name.trim(),
         slug: slug || undefined,
         color,
-        capabilities,
       }).unwrap();
 
       toggleNotification({
@@ -64,13 +62,12 @@ const CreatePage = () => {
         message: formatMessage(
           {
             id: getTranslation('createModal.success'),
-            defaultMessage: 'Workspace {name} created. Switching to it…',
+            defaultMessage: 'Workspace {name} created. Switch to it from the workspace menu.',
           },
           { name: created.name }
         ),
       });
 
-      switchWorkspace(created.slug);
       navigate('..');
     } catch (err) {
       toggleNotification({
@@ -93,7 +90,7 @@ const CreatePage = () => {
             startIcon={<Check />}
             onClick={handleSubmit}
             loading={isLoading}
-            disabled={!name.trim() || isLoading}
+            disabled={!name.trim() || isLoading || isAtLimit}
           >
             {formatMessage({
               id: getTranslation('createModal.submit'),
@@ -103,6 +100,28 @@ const CreatePage = () => {
         }
       />
       <Layouts.Content>
+        {isAtLimit && limits ? (
+          <Box paddingBottom={4}>
+            <Alert
+              variant="warning"
+              closeLabel=""
+              onClose={() => undefined}
+              title={formatMessage(
+                {
+                  id: getTranslation('limits.reached.title'),
+                  defaultMessage: 'Workspace limit reached ({count}/{max}).',
+                },
+                { count: limits.count, max: limits.maxSpaces }
+              )}
+            >
+              {formatMessage({
+                id: getTranslation('limits.reached.hint'),
+                defaultMessage:
+                  'Your plan does not allow another workspace. Delete one, or contact your Strapi representative to raise the limit.',
+              })}
+            </Alert>
+          </Box>
+        ) : null}
         <Box background="neutral0" hasRadius shadow="filterShadow" padding={6}>
           <Flex direction="column" alignItems="stretch" gap={6}>
             <Flex gap={6} alignItems="flex-start">
@@ -165,10 +184,6 @@ const CreatePage = () => {
               </Box>
             </Field.Root>
           </Flex>
-        </Box>
-
-        <Box paddingTop={6}>
-          <CapabilitiesCard value={capabilities} onChange={setCapabilities} />
         </Box>
       </Layouts.Content>
     </Page.Main>

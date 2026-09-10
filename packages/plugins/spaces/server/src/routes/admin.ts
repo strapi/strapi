@@ -14,6 +14,30 @@ export default {
     },
     {
       method: 'GET',
+      path: '/mine/current',
+      handler: 'space.getCurrent',
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
+    {
+      method: 'PUT',
+      path: '/mine/current',
+      handler: 'space.setCurrent',
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/limits',
+      handler: 'space.limits',
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
+    {
+      method: 'GET',
       path: '/all',
       handler: 'space.listAll',
       config: {
@@ -60,6 +84,51 @@ export default {
             config: { actions: ['plugin::spaces.create'] },
           },
         ],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/entry-states',
+      handler: 'entry-state.list',
+      config: {
+        // Per-document read permission is checked in the controller.
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/inheritance',
+      handler: 'inheritance.summary',
+      config: {
+        // Per-content-type read permission is checked in the controller.
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
+    {
+      method: 'POST',
+      path: '/inheritance/override',
+      handler: 'inheritance.override',
+      config: {
+        // The Content Manager's update permission is checked in the controller:
+        // an override is this workspace's own content from the moment it exists.
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
+    {
+      method: 'POST',
+      path: '/inheritance/reset',
+      handler: 'inheritance.reset',
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/releases/:id/status',
+      handler: 'release-status.get',
+      config: {
+        // The releases read permission is checked in the controller.
+        policies: ['admin::isAuthenticatedAdmin'],
       },
     },
     {

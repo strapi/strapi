@@ -1,6 +1,7 @@
-import { AsyncLocalStorage } from 'async_hooks';
 import type { Core } from '@strapi/types';
 import _ from 'lodash';
+
+import { isUnscopedContext, runUnscoped } from '../utils/space-scope';
 
 /**
  * Reusable building blocks for the "settings visibility binding" pattern.
@@ -27,6 +28,7 @@ import _ from 'lodash';
  */
 
 const SPACES_CT_UID = 'plugin::spaces.space';
+const DEFAULT_SPACE_SLUG = 'default';
 const SCOPE_ALL_QUERY_KEY = 'scope';
 const SCOPE_ALL_VALUE = 'all';
 
@@ -42,20 +44,13 @@ const SCOPE_ALL_VALUE = 'all';
  * `count` call on a service patched by `scopeReadByCurrentSpace` skips the
  * visibility filter and returns the global list.
  *
- * Built on `AsyncLocalStorage` so the bypass survives async boundaries (awaited
- * DB queries, hook chains, etc.) without leaking across concurrent requests.
+ * Built on `AsyncLocalStorage` (see `utils/space-scope.ts`, shared with the DB
+ * read net) so the bypass survives async boundaries without leaking across
+ * concurrent requests.
  */
-const unscopedStorage = new AsyncLocalStorage<true>();
+const isUnscoped = isUnscopedContext;
 
-export const runUnscoped = <T>(fn: () => T | Promise<T>): T | Promise<T> => {
-  return unscopedStorage.run(true, fn);
-};
-
-const isUnscoped = (): boolean => unscopedStorage.getStore() === true;
-
-/** Whether the caller currently runs inside a `runUnscoped(...)` block — used
- * by the DB read net to skip its workspace filter. */
-export const isUnscopedContext = isUnscoped;
+export { runUnscoped, isUnscopedContext };
 
 /* -------------------------------------------------------------------------- */
 /*                          Register-time: CT schema                          */
@@ -204,6 +199,19 @@ export const wrapControllerForVisibility = (
   const middleware = async (ctx: any, next: () => Promise<any>) => {
     const matched = routes.find((r) => r.method === ctx.method && r.pathRegex.test(ctx.path));
     if (!matched) return next();
+
+    const activeSlug = ctx.state?.spaceSlug as string | undefined;
+    if (activeSlug && activeSlug !== DEFAULT_SPACE_SLUG && ctx.request?.body) {
+      // Bindings are decided from the default workspace: a sub-workspace
+      // cannot re-bind a resource (PUT), and what it creates belongs to it.
+      if (matched.isUpdate) {
+        const { spaces: _spaces, ...rest } = ctx.request.body;
+        for (const extra of extraBodyFields) delete (rest as any)[extra.name];
+        ctx.request.body = rest;
+      } else if (ctx.request.body.spaces === undefined) {
+        ctx.request.body = { ...ctx.request.body, spaces: [activeSlug] };
+      }
+    }
 
     const body = ctx.request?.body ?? {};
     const spacesSlug: string[] | undefined = Array.isArray(body.spaces) ? body.spaces : undefined;
@@ -384,10 +392,130 @@ const parseTrailingIdFromPath = (path: string): number | null => {
 const getCurrentSpaceSlug = (strapi: Core.Strapi): string | undefined =>
   strapi.requestContext.get()?.state?.spaceSlug as string | undefined;
 
+/**
+ * `?scope=all` lets the Settings pages of the default workspace list every row.
+ * It is honoured from default (or headerless) only: a sub-workspace stays scoped
+ * whatever it asks for.
+ */
 const isScopeAllRequest = (strapi: Core.Strapi): boolean => {
   const ctx = strapi.requestContext.get();
   const q = ctx?.request?.query as Record<string, unknown> | undefined;
-  return q?.[SCOPE_ALL_QUERY_KEY] === SCOPE_ALL_VALUE;
+  const spaceSlug = ctx?.state?.spaceSlug as string | undefined;
+  return (
+    q?.[SCOPE_ALL_QUERY_KEY] === SCOPE_ALL_VALUE && (!spaceSlug || spaceSlug === DEFAULT_SPACE_SLUG)
+  );
+};
+
+export const isScopeAllRequestForTests = isScopeAllRequest;
+
+/* -------------------------------------------------------------------------- */
+/*                 Read-only rules for shared settings resources              */
+/* -------------------------------------------------------------------------- */
+
+type WorkspaceAccessReason = 'platform-wide' | 'multi-bound';
+
+export interface WorkspaceAccess {
+  readOnly: boolean;
+  reason?: WorkspaceAccessReason;
+  /** The workspaces the resource is bound to (`[]` = every workspace). */
+  boundSlugs: string[];
+}
+
+/**
+ * A settings resource (role, token, webhook, locale) is editable from a
+ * sub-workspace only when it is bound to that workspace alone. Resources shared
+ * with other workspaces — platform-wide (no binding) or multi-bound — are
+ * read-only there and managed from the default workspace.
+ */
+export const decideWritableInSpace = (
+  boundSlugs: string[],
+  spaceSlug: string
+): { writable: true } | { writable: false; reason: WorkspaceAccessReason } => {
+  if (spaceSlug === DEFAULT_SPACE_SLUG) {
+    return { writable: true };
+  }
+  if (boundSlugs.length === 0) {
+    return { writable: false, reason: 'platform-wide' };
+  }
+  if (boundSlugs.length === 1 && boundSlugs[0] === spaceSlug) {
+    return { writable: true };
+  }
+  return { writable: false, reason: 'multi-bound' };
+};
+
+export const describeWorkspaceAccess = (
+  boundSlugs: string[],
+  spaceSlug: string
+): WorkspaceAccess => {
+  const decision = decideWritableInSpace(boundSlugs, spaceSlug);
+  return decision.writable
+    ? { readOnly: false, boundSlugs }
+    : { readOnly: true, reason: decision.reason, boundSlugs };
+};
+
+export const WORKSPACE_ACCESS_MESSAGES: Record<WorkspaceAccessReason, string> = {
+  'platform-wide':
+    'This item is shared with every workspace and can only be edited from the default workspace',
+  'multi-bound':
+    'This item is shared with other workspaces and can only be edited from the default workspace',
+};
+
+/** The slugs a content-type resource is bound to through its `spaces` M2M. */
+export const getBoundSlugs = async (
+  strapi: Core.Strapi,
+  contentTypeUid: string,
+  id: number | string
+): Promise<string[] | null> => {
+  const row = await strapi.db.query(contentTypeUid).findOne({
+    where: { id },
+    select: ['id'],
+    populate: { spaces: { select: ['slug'] } },
+  });
+  if (!row) {
+    return null;
+  }
+  return (row.spaces ?? []).map((space: { slug: string }) => space.slug);
+};
+
+/**
+ * Refuses, with a 403 carrying the reason, a write on a resource the active
+ * sub-workspace may not edit. Returns `true` when the request was answered.
+ */
+export const refuseUnlessWritableInSpace = async (
+  strapi: Core.Strapi,
+  ctx: any,
+  contentTypeUid: string,
+  id: number | string,
+  spaceSlug: string
+): Promise<boolean> => {
+  const boundSlugs = await getBoundSlugs(strapi, contentTypeUid, id);
+  if (boundSlugs === null) {
+    return false;
+  }
+  const decision = decideWritableInSpace(boundSlugs, spaceSlug);
+  if (decision.writable) {
+    return false;
+  }
+  ctx.forbidden(WORKSPACE_ACCESS_MESSAGES[decision.reason], { reason: decision.reason });
+  return true;
+};
+
+/** Attaches `data.workspaceAccess` to a detail response so the admin can lock the form. */
+export const attachWorkspaceAccess = async (
+  strapi: Core.Strapi,
+  ctx: any,
+  contentTypeUid: string,
+  spaceSlug: string
+): Promise<void> => {
+  const id = ctx.body?.data?.id;
+  if (id === undefined) {
+    return;
+  }
+  const boundSlugs = await getBoundSlugs(strapi, contentTypeUid, id);
+  if (boundSlugs === null) {
+    return;
+  }
+  ctx.body.data.workspaceAccess = describeWorkspaceAccess(boundSlugs, spaceSlug);
 };
 
 /**
@@ -438,7 +566,8 @@ export const scopeReadByCurrentSpace = (
       let where = params;
       if (!isUnscoped() && !isScopeAllRequest(strapi)) {
         const spaceSlug = getCurrentSpaceSlug(strapi);
-        if (spaceSlug) {
+        // The default workspace sees every row, like it does for entries.
+        if (spaceSlug && spaceSlug !== DEFAULT_SPACE_SLUG) {
           const filter = visibilityFilter(spaceSlug);
           where = params && Object.keys(params).length ? { $and: [params, filter] } : filter;
         }

@@ -1,10 +1,14 @@
 import { useField } from '@strapi/admin/strapi-admin';
 import { Flex } from '@strapi/design-system';
 
+import { DEFAULT_SPACE_SLUG, getCurrentSpaceSlug } from '../utils/currentSpace';
+import { describeWorkspaceAccess } from '../utils/workspaceAccess';
+
 import { DefaultInColumn } from './DefaultInColumn';
 import { SpaceChipColumn } from './SpaceChipColumn';
 import { SpaceDefaultPicker } from './SpaceDefaultPicker';
 import { SpaceVisibilityField } from './SpaceVisibilityField';
+import { LockedWorkspacesCard } from './WorkspacesBindingCard';
 
 /**
  * Glue between the spaces components and the extension points i18n's admin
@@ -59,6 +63,17 @@ export const LocaleSpacesFormSection = () => {
     }
   };
 
+  // Bindings are managed from default; elsewhere the section only explains a
+  // shared (read-only) locale. "Set as default" stays in the Advanced tab.
+  if (getCurrentSpaceSlug() !== DEFAULT_SPACE_SLUG) {
+    const access = describeWorkspaceAccess(spacesValue);
+    return access.readOnly ? (
+      <Flex direction="column" alignItems="stretch" paddingTop={6}>
+        <LockedWorkspacesCard access={access} />
+      </Flex>
+    ) : null;
+  }
+
   return (
     <Flex direction="column" alignItems="stretch" gap={4} paddingTop={6}>
       <SpaceVisibilityField value={spacesValue} onChange={handleSpacesChange} />
@@ -66,6 +81,11 @@ export const LocaleSpacesFormSection = () => {
     </Flex>
   );
 };
+
+/** i18n's `isReadOnly` hook: a locale shared with other workspaces is read-only outside default. */
+export const isLocaleReadOnlyInWorkspace = (locale: unknown): boolean =>
+  describeWorkspaceAccess(((locale ?? {}) as SpacesLocaleRow).spaces?.map((s) => s.slug) ?? [])
+    .readOnly;
 
 /**
  * Maps a locale row to the extra form fields' initial values. `spaces` arrives

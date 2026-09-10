@@ -1,66 +1,114 @@
-import { isSpaceScopedContentType, getSpaceScopedContentTypes } from '../content-types';
+import {
+  isSpaceScopedContentType,
+  isSharedContentType,
+  isSharedEditableContentType,
+  getSpaceScopedContentTypes,
+} from '../content-types';
 
 describe('isSpaceScopedContentType', () => {
-  it('returns true when pluginOptions.spaces.scope === "space"', () => {
-    const ct = { pluginOptions: { spaces: { scope: 'space' } } };
-    expect(isSpaceScopedContentType(ct)).toBe(true);
+  it('is on by default for user content types', () => {
+    expect(isSpaceScopedContentType({ uid: 'api::article.article' })).toBe(true);
+    expect(
+      isSpaceScopedContentType({ uid: 'api::article.article', pluginOptions: { i18n: {} } })
+    ).toBe(true);
   });
 
-  it('returns false when scope === "platform"', () => {
-    const ct = { pluginOptions: { spaces: { scope: 'platform' } } };
-    expect(isSpaceScopedContentType(ct)).toBe(false);
+  it('lets a user content type opt out', () => {
+    const uid = 'api::article.article';
+    expect(isSpaceScopedContentType({ uid, pluginOptions: { spaces: { enabled: false } } })).toBe(
+      false
+    );
+    expect(isSpaceScopedContentType({ uid, pluginOptions: { spaces: { scope: 'none' } } })).toBe(
+      false
+    );
+    expect(
+      isSpaceScopedContentType({ uid, pluginOptions: { spaces: { scope: 'platform' } } })
+    ).toBe(false);
   });
 
-  it('returns false when spaces pluginOptions is missing entirely', () => {
-    const ct = { pluginOptions: { i18n: { localized: true } } };
-    expect(isSpaceScopedContentType(ct)).toBe(false);
+  it('is off by default for plugin and admin content types', () => {
+    expect(isSpaceScopedContentType({ uid: 'plugin::upload.file' })).toBe(false);
+    expect(isSpaceScopedContentType({ uid: 'admin::user', pluginOptions: {} })).toBe(false);
   });
 
-  it('returns false when pluginOptions is missing entirely', () => {
-    const ct = { info: { singularName: 'article' } };
-    expect(isSpaceScopedContentType(ct)).toBe(false);
+  it('lets a plugin content type opt in with scope: "space"', () => {
+    expect(
+      isSpaceScopedContentType({
+        uid: 'plugin::upload.file',
+        pluginOptions: { spaces: { scope: 'space' } },
+      })
+    ).toBe(true);
   });
 
-  it('returns false for null/undefined input', () => {
+  it('never scopes when enabled is false, even with scope: "space"', () => {
+    expect(
+      isSpaceScopedContentType({
+        uid: 'api::article.article',
+        pluginOptions: { spaces: { scope: 'space', enabled: false } },
+      })
+    ).toBe(false);
+  });
+
+  it('returns false for null/undefined/uid-less input', () => {
     expect(isSpaceScopedContentType(null)).toBe(false);
     expect(isSpaceScopedContentType(undefined)).toBe(false);
+    expect(isSpaceScopedContentType({ pluginOptions: { i18n: { localized: true } } })).toBe(false);
+  });
+});
+
+describe('shared content types', () => {
+  it('reads sharedEntries / sharedEditable only on scoped content types', () => {
+    const shared = {
+      uid: 'api::glossary.glossary',
+      pluginOptions: { spaces: { sharedEntries: true } },
+    };
+    const editable = {
+      uid: 'api::tag.tag',
+      pluginOptions: { spaces: { sharedEntries: true, sharedEditable: true } },
+    };
+    const optedOut = {
+      uid: 'api::tag.tag',
+      pluginOptions: { spaces: { enabled: false, sharedEntries: true } },
+    };
+
+    expect(isSharedContentType(shared)).toBe(true);
+    expect(isSharedEditableContentType(shared)).toBe(false);
+    expect(isSharedEditableContentType(editable)).toBe(true);
+    expect(isSharedContentType(optedOut)).toBe(false);
+    expect(isSharedContentType({ uid: 'api::article.article' })).toBe(false);
   });
 
-  it('treats unexpected scope values as not space-scoped', () => {
-    const ct = { pluginOptions: { spaces: { scope: 'foo' as never } } };
-    expect(isSpaceScopedContentType(ct)).toBe(false);
+  it('ignores sharedEditable without sharedEntries', () => {
+    expect(
+      isSharedEditableContentType({
+        uid: 'api::tag.tag',
+        pluginOptions: { spaces: { sharedEditable: true } },
+      })
+    ).toBe(false);
   });
 });
 
 describe('getSpaceScopedContentTypes', () => {
-  it('returns only the space-scoped CTs from strapi.contentTypes', () => {
+  it('returns the scoped CTs from strapi.contentTypes', () => {
     const fakeStrapi = {
       contentTypes: {
-        'api::article.article': {
-          uid: 'api::article.article',
+        'api::article.article': { uid: 'api::article.article', pluginOptions: {} },
+        'api::tag.tag': { uid: 'api::tag.tag', pluginOptions: { spaces: { scope: 'none' } } },
+        'plugin::upload.file': {
+          uid: 'plugin::upload.file',
           pluginOptions: { spaces: { scope: 'space' } },
         },
-        'api::tag.tag': {
-          uid: 'api::tag.tag',
-          pluginOptions: { spaces: { scope: 'platform' } },
-        },
-        'admin::user': {
-          uid: 'admin::user',
-          pluginOptions: {},
-        },
+        'admin::user': { uid: 'admin::user', pluginOptions: {} },
       },
     } as any;
 
-    const result = getSpaceScopedContentTypes(fakeStrapi);
-    expect(result).toHaveLength(1);
-    expect((result[0] as any).uid).toBe('api::article.article');
+    const result = getSpaceScopedContentTypes(fakeStrapi).map((ct: any) => ct.uid);
+    expect(result).toEqual(['api::article.article', 'plugin::upload.file']);
   });
 
-  it('returns an empty array when no CT opts in', () => {
+  it('returns an empty array when nothing is scoped', () => {
     const fakeStrapi = {
-      contentTypes: {
-        'admin::user': { uid: 'admin::user', pluginOptions: {} },
-      },
+      contentTypes: { 'admin::user': { uid: 'admin::user', pluginOptions: {} } },
     } as any;
 
     expect(getSpaceScopedContentTypes(fakeStrapi)).toEqual([]);

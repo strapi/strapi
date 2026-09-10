@@ -1,6 +1,7 @@
 import { useIntl } from 'react-intl';
 
 import { getTranslation } from '../utils/getTranslation';
+import { getAttachedWorkspaceAccess } from '../utils/workspaceAccess';
 
 import { getWorkspacesBindingInitialValue, WorkspacesBindingCard } from './WorkspacesBindingCard';
 
@@ -13,6 +14,7 @@ import type { TokenFormExtensionComponentProps } from '@strapi/admin/strapi-admi
  * `X-Strapi-Space-Id` value the caller sends.
  */
 export const TokenWorkspacesField = ({
+  token,
   value,
   onChange,
   disabled,
@@ -24,6 +26,7 @@ export const TokenWorkspacesField = ({
       value={value}
       onChange={(next) => onChange(next)}
       disabled={disabled}
+      access={getAttachedWorkspaceAccess(token)}
       hint={formatMessage({
         id: getTranslation('tokens.workspaces.hint'),
         defaultMessage:

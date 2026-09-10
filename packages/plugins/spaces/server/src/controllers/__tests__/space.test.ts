@@ -20,6 +20,10 @@ const buildMocks = ({
     'content-types': {
       getSpaceScopedContentTypes: jest.fn().mockReturnValue(scopedContentTypes),
     },
+    limits: {
+      assertCanCreate: jest.fn().mockResolvedValue(undefined),
+      getUsage: jest.fn().mockResolvedValue({ maxSpaces: null, count: 0, canCreate: true }),
+    },
   };
 
   const strapi = {
@@ -55,7 +59,7 @@ describe('space controller — create', () => {
     );
   });
 
-  it('derives the slug from the name and applies default capabilities', async () => {
+  it('derives the slug from the name', async () => {
     const { controller, create } = buildMocks();
     const ctx = makeCtx({ name: 'Acme France!' });
 
@@ -66,21 +70,9 @@ describe('space controller — create', () => {
         name: 'Acme France!',
         slug: 'acme-france',
         color: null,
-        capabilities: expect.objectContaining({ apiTokens: true, roles: true }),
       })
     );
     expect(ctx.body).toMatchObject({ slug: 'acme-france', name: 'Acme France!' });
-  });
-
-  it('rejects malformed capabilities', async () => {
-    const { controller } = buildMocks();
-
-    await expect(
-      controller.create(makeCtx({ name: 'Acme', capabilities: { nope: true } }))
-    ).rejects.toThrow('Unknown capability "nope"');
-    await expect(
-      controller.create(makeCtx({ name: 'Acme', capabilities: { webhooks: 'yes' } }))
-    ).rejects.toThrow('Capability "webhooks" must be a boolean');
   });
 
   it('slugifies an explicitly provided slug', async () => {

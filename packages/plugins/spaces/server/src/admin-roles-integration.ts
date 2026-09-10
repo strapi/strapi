@@ -1,15 +1,21 @@
 import type { Core } from '@strapi/types';
 
 import { DEFAULT_SPACE_SLUG } from './services/spaces';
-import { visibilityFilter, wrapControllerForVisibility } from './settings-visibility';
+import {
+  attachWorkspaceAccess,
+  decideWritableInSpace,
+  getBoundSlugs,
+  refuseUnlessWritableInSpace,
+  visibilityFilter,
+  wrapControllerForVisibility,
+} from './settings-visibility';
 
 const ADMIN_ROLE_UID = 'admin::role';
-const ADMIN_USER_UID = 'admin::user';
 
 const ROLES_LIST_RE = /^\/admin\/roles\/?$/;
 const ROLE_DETAIL_RE = /^\/admin\/roles\/(\d+)\/?$/;
-const USERS_LIST_RE = /^\/admin\/users\/?$/;
-const USER_DETAIL_RE = /^\/admin\/users\/(\d+)\/?$/;
+const ROLE_PERMISSIONS_RE = /^\/admin\/roles\/(\d+)\/permissions\/?$/;
+const ROLES_BATCH_DELETE_RE = /^\/admin\/roles\/batch-delete\/?$/;
 
 /**
  * Spaces × admin roles. Roles are workspace-bound resources managed from the
@@ -21,17 +27,13 @@ const USER_DETAIL_RE = /^\/admin\/users\/(\d+)\/?$/;
  *   - **Other workspaces** — the roles list only shows roles bound to that
  *     workspace (or platform-wide ones), direct detail/write access to any
  *     other role is a 404, and a role created there is bound to it
- *     automatically. The association itself is only editable from default.
+ *     automatically. Roles shared with other workspaces (platform-wide or
+ *     multi-bound) are read-only there: name, description and permissions are
+ *     edited from default (403 otherwise, `data.workspaceAccess` tells the admin).
  *
- * Users follow their roles: outside the default workspace, the users list only
- * shows users holding at least one role visible in the active workspace, and
- * direct access to any other user is a 404. (List pagination totals still
- * count the unfiltered set — accepted until a proper query-level filter.)
- *
- * Headerless callers (CLI, provisioning scripts) stay unscoped.
- *
- * NOTE: this scopes role *management*. Filtering which workspaces a USER can
- * enter based on their roles' bindings is the next slice.
+ * Users are handled by `admin-users-integration.ts` (membership = direct
+ * binding or roles' bindings). Headerless callers (CLI, provisioning scripts)
+ * stay unscoped.
  */
 export const patchAdminRolesForSpaces = (strapi: Core.Strapi) => {
   const visibleRoleIds = async (spaceSlug: string): Promise<Set<number>> => {
@@ -65,29 +67,33 @@ export const patchAdminRolesForSpaces = (strapi: Core.Strapi) => {
       }
 
       // Roles not visible in this workspace don't exist for it.
-      if (detailMatch && ['GET', 'PUT', 'DELETE'].includes(ctx.method)) {
+      const permissionsMatch = ctx.path.match(ROLE_PERMISSIONS_RE);
+      const targetId = detailMatch?.[1] ?? permissionsMatch?.[1];
+      if (targetId && ['GET', 'PUT', 'DELETE'].includes(ctx.method)) {
         const ids = await visibleRoleIds(spaceSlug);
-        if (!ids.has(Number(detailMatch[1]))) {
+        if (!ids.has(Number(targetId))) {
           return ctx.notFound('Role not found in this workspace');
+        }
+        // Shared roles are read-only here.
+        if (
+          ['PUT', 'DELETE'].includes(ctx.method) &&
+          (await refuseUnlessWritableInSpace(strapi, ctx, ADMIN_ROLE_UID, targetId, spaceSlug))
+        ) {
+          return;
         }
       }
 
-      // Users follow their roles: no visible role here → the user doesn't exist here.
-      const userDetailMatch = ctx.path.match(USER_DETAIL_RE);
-      if (userDetailMatch && ['GET', 'PUT', 'DELETE'].includes(ctx.method)) {
-        const target = await strapi.db.query(ADMIN_USER_UID).findOne({
-          where: { id: Number(userDetailMatch[1]) },
-          populate: { roles: { select: ['id'] } },
-        });
-        if (target) {
-          const ids = await visibleRoleIds(spaceSlug);
-          const hasVisibleRole = (target.roles ?? []).some((role: { id: number }) =>
-            ids.has(role.id)
-          );
-          if (!hasVisibleRole) {
-            return ctx.notFound('User not found in this workspace');
-          }
+      // Batch delete: only the roles this workspace may edit.
+      if (ctx.method === 'POST' && ROLES_BATCH_DELETE_RE.test(ctx.path)) {
+        const ids: unknown[] = Array.isArray(ctx.request?.body?.ids) ? ctx.request.body.ids : [];
+        const visible = await visibleRoleIds(spaceSlug);
+        const writable: unknown[] = [];
+        for (const id of ids) {
+          if (!visible.has(Number(id))) continue;
+          const bound = await getBoundSlugs(strapi, ADMIN_ROLE_UID, Number(id));
+          if (bound && decideWritableInSpace(bound, spaceSlug).writable) writable.push(id);
         }
+        ctx.request.body = { ...ctx.request.body, ids: writable };
       }
     }
 
@@ -107,11 +113,9 @@ export const patchAdminRolesForSpaces = (strapi: Core.Strapi) => {
       return;
     }
 
-    if (!isDefault && USERS_LIST_RE.test(ctx.path) && Array.isArray(ctx.body?.data?.results)) {
-      const ids = await visibleRoleIds(spaceSlug);
-      ctx.body.data.results = ctx.body.data.results.filter((user: { roles?: { id: number }[] }) =>
-        (user.roles ?? []).some((role) => ids.has(role.id))
-      );
+    // Detail in a sub-workspace: say whether the role is editable from here.
+    if (!isDefault && detailMatch && ctx.body?.data?.id) {
+      await attachWorkspaceAccess(strapi, ctx, ADMIN_ROLE_UID, spaceSlug);
       return;
     }
 

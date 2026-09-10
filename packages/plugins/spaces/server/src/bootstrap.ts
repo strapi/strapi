@@ -1,17 +1,21 @@
 import type { Core } from '@strapi/types';
 
 import { patchAdminRolesForSpaces } from './admin-roles-integration';
+import { patchAdminUsersForSpaces } from './admin-users-integration';
 import { patchApiTokensForSpaces } from './api-tokens-integration';
+import { backfillLegacyRows, persistPluginTables } from './backfill';
+import { registerDefaultOnlyGuard } from './default-only-guard';
 import { registerContentVisibilityGuards } from './content-visibility';
 import { registerDbReadNet } from './db-read-net';
-import { registerSettingsCapabilitiesGuard } from './settings-capabilities';
 import { patchTransferTokensForSpaces } from './transfer-tokens-integration';
 import { patchWebhooksForSpaces } from './webhooks-integration';
 import { createMultitenancyMiddleware } from './document-service/multitenancy';
 import { registerLifecycleSubscriber } from './lifecycles';
+import { patchHistoryAndAuditLogsForSpaces } from './history-audit-integration';
 import { patchI18nForSpaces } from './i18n-integration';
 import { createResolveSpaceMiddleware } from './middlewares/resolve-space';
-import { createPublicationGateMiddleware } from './publication-gate';
+import { patchPreviewForSpaces } from './preview-integration';
+import { patchReleasesForSpaces } from './releases-integration';
 import { registerSpacesActions } from './services/permissions/actions';
 
 const SPACE_MODEL_UID = 'plugin::spaces.space';
@@ -51,35 +55,46 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   // RBAC action gating POST /spaces/move (and the admin UI's move buttons).
   await registerSpacesActions(strapi);
 
-  // Canonical enforcement path: filter reads / stamp writes on the document service.
-  strapi.documents.use(createMultitenancyMiddleware(strapi));
+  await seedDefaultSpaces(strapi);
 
-  // Publication is a per-workspace capability: publish/unpublish are refused
-  // in workspaces that don't have it.
-  strapi.documents.use(createPublicationGateMiddleware(strapi));
+  // Rows that predate workspaces belong to the default workspace; from then on
+  // a NULL `space_id` means "shared with every workspace". Runs before the nets
+  // are registered and is idempotent (plugin-store marker).
+  await backfillLegacyRows(strapi);
+
+  // Keep the plugin tables through a temporary uninstall (EE-only service).
+  await persistPluginTables(strapi);
+
+  // Canonical enforcement path: decide the target workspace of every write and
+  // run it inside that scope on the document service.
+  strapi.documents.use(createMultitenancyMiddleware(strapi));
 
   // Safety net for raw `strapi.db.query()` writes that bypass the document service.
   registerLifecycleSubscriber(strapi);
 
-  // …and for raw READS: filters every db.query find/count on space-scoped
-  // models (Media Library included) to the active workspace.
+  // …and THE read filter: every db.query find/count on a workspace-scoped model
+  // (Media Library included) sees the active workspace's rows plus the shared ones.
   registerDbReadNet(strapi);
-
-  await seedDefaultSpaces(strapi);
 
   // Content types vanish from workspaces they're not bound to: CM navigation
   // stripped, CM document routes and content API routes 404. Registered after
   // resolve-space so it observes the resolved slug.
   registerContentVisibilityGuards(strapi);
 
-  // Per-workspace Settings capabilities: disabled sections 404 outside the
-  // default workspace. Must run before the per-resource scoping middlewares.
-  registerSettingsCapabilitiesGuard(strapi);
+  // What belongs to the default workspace only (schema writes, release
+  // publishing, workspace management); everything else is decided by roles.
+  registerDefaultOnlyGuard(strapi);
 
   // Roles are workspace-bound: managed from the default workspace, scoped
   // elsewhere. Registered after resolve-space so its middlewares observe the
   // resolved slug.
   patchAdminRolesForSpaces(strapi);
+
+  // Users belong to workspaces: member-only lists outside default, invites
+  // that bind (or add an existing account), and the membership guard on the
+  // header. Registered after the tokens integration so its auth wrapper runs
+  // inside the token one.
+  patchAdminUsersForSpaces(strapi);
 
   // API tokens are workspace-bound too: a bound token only operates inside its
   // workspaces regardless of the header value (auth-level enforcement).
@@ -92,6 +107,18 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   // Webhooks: workspace-bound via the plugin store (they aren't a content
   // type) — created in a workspace, visible only there and in default.
   patchWebhooksForSpaces(strapi);
+
+  // History versions follow their entry's workspace; audit logs record the
+  // workspace they were performed in, and a sub-workspace only sees its own.
+  patchHistoryAndAuditLogsForSpaces(strapi);
+
+  // Releases are cross-workspace: each workspace sees its own entries in a
+  // release; publishing is a default-workspace action. No-op without the plugin.
+  patchReleasesForSpaces(strapi);
+
+  // Live preview: the preview handler receives the active workspace (and its
+  // preview origin) under `params.plugins.spaces`.
+  patchPreviewForSpaces(strapi);
 
   // Cross-plugin i18n integration (locale visibility per space, per-space default
   // locale). Must run after seeding so its bootstrap-time permission re-sync sees
