@@ -1,9 +1,28 @@
 import { isIP } from 'node:net';
 import { errors } from '@strapi/utils';
-import type { Core } from '@strapi/types';
+import { generateRegistrationOptions, verifyRegistrationResponse } from '@simplewebauthn/server';
+import { isoBase64URL, isoUint8Array } from '@simplewebauthn/server/helpers';
+import type {
+  AuthenticatorTransport,
+  PublicKeyCredentialCreationOptionsJSON,
+  RegistrationResponseJSON,
+} from '@simplewebauthn/server';
+import type { Core, Data } from '@strapi/types';
+import type { Passkey } from '../../../shared/contracts/mfa';
+import type { PasskeySettings } from '../../../shared/contracts/security-settings';
+import type { MfaConfig } from '../config/mfa';
+import type { MfaEventMetadata, MfaEventType } from './mfa';
 import { warnOnce } from './security-settings';
 
-const { ValidationError } = errors;
+// `RateLimitError` is unused until Task 6 (the login ceremony) throttles a spent challenge token.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const { ApplicationError, RateLimitError, ValidationError } = errors;
+
+const USER_UID = 'admin::user';
+// `CHALLENGE_UID` is unused until Task 6 resolves `admin::mfa-challenge`'s webauthn-challenge
+// column for the login ceremony.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const CHALLENGE_UID = 'admin::mfa-challenge';
 
 export const PASSKEY_UID = 'admin::mfa-passkey';
 
@@ -230,4 +249,389 @@ export const resolveWebauthnRp = (strapi: Core.Strapi): WebauthnRp => {
   }
 
   return { rpId, origins };
+};
+
+export interface PasskeyRow {
+  id: Data.ID;
+  userId: string;
+  credentialId: string;
+  /** Base64URL of the COSE key. */
+  publicKey: string;
+  /** `biginteger` reads back from the database as a string, so every use passes `Number(...)`. */
+  counter: string | number;
+  transports?: string | null;
+  name: string;
+  lastUsedAt?: Date | string | null;
+  createdAt: Date | string;
+}
+
+/** The three notices this module raises; a subset of the service's `MfaChangeNotice`. */
+export type PasskeyNotice = 'passkey_registered' | 'passkey_removed' | 'passkey_used';
+
+export interface PasskeyDeps {
+  strapi: Core.Strapi;
+  /** The live policy. Injected so this module never reads the store itself. */
+  settings: () => Promise<PasskeySettings>;
+  config: () => MfaConfig;
+  recordEvent: (userId: string, type: MfaEventType, metadata?: MfaEventMetadata) => Promise<void>;
+  notify: (
+    userId: string,
+    // `challenge_failed` as well as the three passkey notices: Task 6's verify path charges
+    // cycle 1's account tier, and that notice is how `isAccountThrottled` sees it.
+    type: PasskeyNotice | 'challenge_failed',
+    extra?: { byUserId?: string; count?: number }
+  ) => Promise<void>;
+  isAccountThrottled: (userId: string) => Promise<boolean>;
+}
+
+const toIso = (value: Date | string): string => new Date(value).toISOString();
+
+/** The only shape a passkey ever leaves the server in. */
+const toPublicPasskey = (row: PasskeyRow): Passkey => ({
+  id: String(row.id),
+  name: row.name,
+  createdAt: toIso(row.createdAt),
+  lastUsedAt: row.lastUsedAt ? toIso(row.lastUsedAt) : null,
+});
+
+const splitTransports = (value?: string | null): AuthenticatorTransport[] | undefined => {
+  const parts = (value ?? '').split(',').filter(Boolean);
+  return parts.length > 0 ? (parts as AuthenticatorTransport[]) : undefined;
+};
+
+/**
+ * The challenge the browser actually signed, read out of `clientDataJSON`, so the consume below
+ * can be conditional on *the submitted ceremony* rather than on "any pending ceremony". Anything
+ * malformed returns null and becomes the generic registration failure, never a throw.
+ */
+const readCeremonyChallenge = (registration: RegistrationResponseJSON): string | null => {
+  const clientDataJSON = registration?.response?.clientDataJSON;
+  if (typeof clientDataJSON !== 'string' || clientDataJSON.length === 0) {
+    return null;
+  }
+  try {
+    const decoded = Buffer.from(isoBase64URL.toBuffer(clientDataJSON)).toString('utf8');
+    const parsed = JSON.parse(decoded) as { challenge?: unknown };
+    return typeof parsed.challenge === 'string' && parsed.challenge.length > 0
+      ? parsed.challenge
+      : null;
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Cycle 4: passkeys. Both ceremonies, plus list / count / delete / clear. Composed into
+ * `createMfaService`, so callers reach it as `getService('mfa').registerPasskey` and friends.
+ * Every function that decides anything keys on `userId`, and the credential lookup on the login
+ * path is scoped to the challenge's owner in the `where` itself -- a global lookup followed by an
+ * owner comparison is the same thing until somebody edits it.
+ */
+export const createPasskeys = ({
+  strapi,
+  settings,
+  // Task 6 (the login ceremony) is the consumer of `config` and `isAccountThrottled`.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  config,
+  recordEvent,
+  notify,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  isAccountThrottled,
+}: PasskeyDeps) => {
+  const query = () => strapi.db.query(PASSKEY_UID);
+  const userQuery = () => strapi.db.query(USER_UID);
+
+  /** The true row count, policy or no policy: the cap must not depend on the setting. */
+  const countRows = (userId: string): Promise<number> =>
+    query().count({ where: { userId: String(userId) } });
+
+  /**
+   * Physical column names for the raw statement that consumes a pending registration ceremony,
+   * resolved from metadata for exactly the reasons `consumeTotpStep` gives: the raw connection
+   * speaks columns, not attributes, and a schema or migration problem must surface as an
+   * actionable error rather than as a `TypeError` or -- far worse -- as an UPDATE that silently
+   * affects nothing and therefore reads as "already consumed".
+   */
+  const userChallengeTable = (): { tableName: string; challengeColumn: string } => {
+    const metadata = strapi.db.metadata.get(USER_UID);
+    // @ts-expect-error - no dynamic typings for the models, columnName only exists on scalar
+    // attributes and mfaPasskeyChallenge's static type is the full Attribute union. Optional
+    // chaining also guards a missing attribute (a migration that has not run), which would
+    // otherwise throw before the actionable ApplicationError below can be raised.
+    const challengeColumn: string | undefined = metadata.attributes.mfaPasskeyChallenge?.columnName;
+
+    if (!challengeColumn) {
+      throw new ApplicationError(
+        'Could not resolve the physical column name for admin::user.mfaPasskeyChallenge'
+      );
+    }
+
+    return { tableName: metadata.tableName, challengeColumn };
+  };
+
+  const passkeyRegistrationOptions = async (
+    userId: string
+  ): Promise<PublicKeyCredentialCreationOptionsJSON> => {
+    const user = await userQuery().findOne({ where: { id: userId } });
+    if (!user) {
+      throw new ValidationError('User not found');
+    }
+
+    // The cheap half of the cap: the browser is never prompted for a ceremony that cannot be
+    // stored. The authoritative half is inside `registerPasskey`'s transaction.
+    if ((await countRows(userId)) >= MAX_PASSKEYS_PER_USER) {
+      throw new ValidationError(PASSKEY_CAP_MESSAGE);
+    }
+
+    const { rpId } = resolveWebauthnRp(strapi);
+
+    const existing = (await query().findMany({
+      where: { userId: String(userId) },
+      select: ['credentialId', 'transports'],
+    })) as Array<Pick<PasskeyRow, 'credentialId' | 'transports'>>;
+
+    const displayName =
+      [user.firstname, user.lastname].filter(Boolean).join(' ').trim() || user.email;
+
+    const options = await generateRegistrationOptions({
+      rpName: RP_NAME,
+      rpID: rpId,
+      // The library throws on a string, and if `userID` is omitted it generates random bytes --
+      // which would be unrecoverable, because the user handle is what a discoverable credential
+      // returns at login. Deriving it from the admin user id means a later passwordless cycle can
+      // decode a returned `userHandle` straight back to the id with no stored column, which is
+      // the whole justification for requesting `residentKey: 'preferred'` in this cycle.
+      userID: isoUint8Array.fromUTF8String(String(user.id)),
+      userName: user.email,
+      userDisplayName: displayName,
+      // No AAGUID allow-list, no attestation policy: under `none` the client sends sixteen zero
+      // bytes, so a column for it would hold zeros.
+      attestationType: 'none',
+      // What makes a second registration of the same authenticator fail in the browser with
+      // `InvalidStateError` instead of creating a duplicate row.
+      excludeCredentials: existing.map((row) => ({
+        id: row.credentialId,
+        transports: splitTransports(row.transports),
+      })),
+      authenticatorSelection: {
+        residentKey: 'preferred',
+        // A hardware key with no PIN still works as a second factor: the password already
+        // established who the user is.
+        userVerification: 'preferred',
+      },
+    });
+
+    // One pending registration per user; a new options call overwrites it, exactly as cycle 1's
+    // `mfaPendingSecret` carries a pending enrolment.
+    await userQuery().update({
+      where: { id: userId },
+      data: {
+        mfaPasskeyChallenge: options.challenge,
+        mfaPasskeyChallengeExpiresAt: new Date(Date.now() + PASSKEY_CEREMONY_TTL_SECONDS * 1000),
+      },
+    });
+
+    return options;
+  };
+
+  const registerPasskey = async (
+    userId: string,
+    name: string,
+    registration: RegistrationResponseJSON
+  ): Promise<Passkey> => {
+    const user = await userQuery().findOne({ where: { id: userId } });
+
+    // Load-bearing guard, not defensive noise: written through the query engine a `null`
+    // where-value becomes `IS NULL`, so a user with no pending ceremony would match one row in
+    // the conditional statement below. That is also why that statement goes through the raw
+    // connection.
+    if (!user?.mfaPasskeyChallenge) {
+      throw new ValidationError(PASSKEY_REGISTRATION_FAILED);
+    }
+
+    const submitted = readCeremonyChallenge(registration);
+    if (!submitted) {
+      throw new ValidationError(PASSKEY_REGISTRATION_FAILED);
+    }
+
+    // One conditional statement whose affected-row count is the decision, the idiom
+    // `consumeTotpStep` uses: the ceremony is spent here, before anything is verified, so two
+    // submissions of the same ceremony cannot both land. The submitted challenge is bound as a
+    // non-null string, so a response signed over a different challenge matches nothing and leaves
+    // the genuine ceremony pending.
+    const { tableName, challengeColumn } = userChallengeTable();
+    const affected = await strapi.db
+      .connection(tableName)
+      .where({ id: userId })
+      .where({ [challengeColumn]: submitted })
+      .update({ [challengeColumn]: null });
+
+    if (affected !== 1) {
+      throw new ValidationError(PASSKEY_REGISTRATION_FAILED);
+    }
+
+    // Expiry fails closed (cycle 1's rule): `new Date('nonsense') <= new Date()` is false for an
+    // Invalid Date, so a missing or hand-edited stamp must not read as a ceremony that never
+    // expires. The stamp itself decides nothing else -- the guard above is on the challenge
+    // column alone -- and the next options call overwrites it.
+    const expiresAt = new Date(user.mfaPasskeyChallengeExpiresAt);
+    if (Number.isNaN(expiresAt.getTime()) || expiresAt <= new Date()) {
+      throw new ValidationError(PASSKEY_REGISTRATION_FAILED);
+    }
+
+    const { rpId, origins } = resolveWebauthnRp(strapi);
+
+    let verification;
+    try {
+      verification = await verifyRegistrationResponse({
+        response: registration,
+        expectedChallenge: user.mfaPasskeyChallenge,
+        expectedOrigin: origins,
+        expectedRPID: rpId,
+        // `requireUserVerification` defaults to **true** in both of the library's verifiers, so
+        // passing false is load-bearing, not decorative (spec: "Requiring user verification").
+        requireUserVerification: false,
+      });
+    } catch (error) {
+      // No cause in the response: every registration failure after the ceremony starts is one
+      // message. The log is where the detail goes.
+      strapi.log.warn(
+        `A passkey registration could not be verified for admin user ${userId}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      throw new ValidationError(PASSKEY_REGISTRATION_FAILED);
+    }
+
+    const credential = verification.verified
+      ? verification.registrationInfo?.credential
+      : undefined;
+    if (!credential || credential.id.length > MAX_CREDENTIAL_ID_LENGTH) {
+      throw new ValidationError(PASSKEY_REGISTRATION_FAILED);
+    }
+
+    const transports = credential.transports ?? registration.response?.transports ?? [];
+
+    let created: PasskeyRow;
+    try {
+      created = await strapi.db.transaction(async () => {
+        const row = (await query().create({
+          data: {
+            userId: String(userId),
+            credentialId: credential.id,
+            publicKey: isoBase64URL.fromBuffer(credential.publicKey),
+            counter: credential.counter,
+            transports: transports.length > 0 ? transports.join(',') : null,
+            name,
+            lastUsedAt: null,
+          },
+        })) as PasskeyRow;
+
+        // The authoritative half of the cap, inside the insert's own transaction: two parallel
+        // registrations that both passed the options pre-check must not both land. Over the cap
+        // the throw rolls the insert back.
+        if ((await countRows(userId)) > MAX_PASSKEYS_PER_USER) {
+          throw new ValidationError(PASSKEY_CAP_MESSAGE);
+        }
+
+        // Inside the same transaction as the row, exactly as cycle 3 records `device_trusted`:
+        // the credential and the audit trail that explains it must land or fail together.
+        // `notify` stays outside -- it is the event hub, fire and forget.
+        await recordEvent(userId, 'passkey_registered', { deviceName: name });
+
+        return row;
+      });
+    } catch (error) {
+      // The cap refusal is ours and keeps its actionable message. Anything else is a database
+      // error -- above all the unique-constraint violation on `credentialId`, which must not
+      // propagate as a dialect-specific 500 naming the table.
+      if (error instanceof ValidationError) {
+        throw error;
+      }
+      strapi.log.warn(
+        `A passkey could not be stored for admin user ${userId}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      throw new ValidationError(PASSKEY_REGISTRATION_FAILED);
+    }
+
+    notify(userId, 'passkey_registered');
+
+    return toPublicPasskey(created);
+  };
+
+  /**
+   * The caller's own rows, newest first. Empty while the policy is off, so this and the
+   * administrator count never disagree. One consequence worth stating: in the only state where
+   * surviving rows and a disabled policy coexist (a hand-edited `core_store` row), the lists read
+   * empty, so the permitted direction is reachable only through the administrator DELETE, which
+   * deletes without reading.
+   */
+  const listPasskeys = async (userId: string): Promise<Passkey[]> => {
+    if (!(await settings()).enabled) {
+      return [];
+    }
+
+    const rows = (await query().findMany({
+      where: { userId: String(userId) },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+    })) as PasskeyRow[];
+
+    return rows.map(toPublicPasskey);
+  };
+
+  /** Zero while the policy is off, for the same reason. `passkeyAvailable` is `> 0`. */
+  const countPasskeys = async (userId: string): Promise<number> => {
+    if (!(await settings()).enabled) {
+      return 0;
+    }
+    return countRows(userId);
+  };
+
+  /**
+   * One row, only if it is the caller's -- scoped in the `where` itself. No policy check:
+   * removing a credential is never the dangerous direction, and TOTP always survives it, so there
+   * is no lockout path.
+   */
+  const deletePasskey = async (userId: string, id: string): Promise<boolean> => {
+    const row = (await query().findOne({
+      where: { id, userId: String(userId) },
+    })) as PasskeyRow | null;
+
+    if (!row) {
+      return false;
+    }
+
+    await query().deleteMany({ where: { id: row.id } });
+    await recordEvent(userId, 'passkey_removed', { deviceName: row.name });
+    notify(userId, 'passkey_removed');
+
+    return true;
+  };
+
+  /** Silent: the caller's own event (`disabled`, or the administrator handler) covers it. */
+  const clearPasskeys = async (userId: string): Promise<number> => {
+    const result = await query().deleteMany({ where: { userId: String(userId) } });
+    return result?.count ?? 0;
+  };
+
+  /** Silent, every user: the transition to `passkeys.enabled: false`. */
+  const clearAllPasskeys = async (): Promise<number> => {
+    const result = await query().deleteMany({ where: {} });
+    return result?.count ?? 0;
+  };
+
+  const passkeySettings = (): Promise<PasskeySettings> => settings();
+
+  return {
+    passkeyRegistrationOptions,
+    registerPasskey,
+    listPasskeys,
+    countPasskeys,
+    deletePasskey,
+    clearPasskeys,
+    clearAllPasskeys,
+    passkeySettings,
+  };
 };

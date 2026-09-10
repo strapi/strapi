@@ -7,9 +7,25 @@ import {
   errors,
   getDeviceName,
 } from '@strapi/utils';
+import { isoBase64URL } from '@simplewebauthn/server/helpers';
+import { verifyRegistrationResponse } from '@simplewebauthn/server';
 import createMfaService, { MAX_EVENTS_PER_USER } from '../mfa';
 import { hashTrustToken } from '../mfa-trusted-devices';
 import { MFA_DEFAULTS } from '../../config/mfa';
+
+/**
+ * Cycle 4 mocks exactly the two verification functions and nothing else. What is under test here
+ * is our wiring -- challenge consumption, owner scoping, marshalling, counters, charging,
+ * cascades -- not `@simplewebauthn`'s cryptography, which has its own suite upstream and whose
+ * call shapes are pinned in `webauthn-library-contract.test.ts`. `generateRegistrationOptions`
+ * and `generateAuthenticationOptions` are deliberately left real: they are pure, they mint the
+ * challenge these tests then have to match, and they enforce the `Uint8Array` userID.
+ */
+jest.mock('@simplewebauthn/server', () => ({
+  ...jest.requireActual('@simplewebauthn/server'),
+  verifyRegistrationResponse: jest.fn(),
+  verifyAuthenticationResponse: jest.fn(),
+}));
 
 const DEFAULT_USER_TABLE = 'admin_users';
 const DEFAULT_LAST_USED_STEP_COLUMN = 'mfa_last_used_step';
@@ -22,6 +38,13 @@ const CHALLENGE_TABLE = 'strapi_admin_mfa_challenges';
 const CHALLENGE_ATTEMPTS_COLUMN = 'attempts';
 const EVENT_UID = 'admin::mfa-event';
 const TRUSTED_UID = 'admin::mfa-trusted-device';
+const PASSKEY_UID = 'admin::mfa-passkey';
+// Unused until Task 6/7 give the passkey table its own `db.connection` mock; kept beside the
+// other uid/table constants per the cycle 4 brief.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const PASSKEY_TABLE = 'strapi_admin_mfa_passkeys';
+const DEFAULT_PASSKEY_CHALLENGE_COLUMN = 'mfa_passkey_challenge';
+const DEFAULT_CHALLENGE_WEBAUTHN_COLUMN = 'webauthn_challenge';
 
 type UserRow = Record<string, unknown>;
 type ResolveKey = (column: string) => string;
@@ -166,6 +189,19 @@ interface TrustedRow {
   deviceId: string | null;
   deviceName: string | null;
   expiresAt: Date;
+  lastUsedAt: Date | null;
+  createdAt: Date;
+  [key: string]: unknown;
+}
+
+interface PasskeyRowFixture {
+  id: number;
+  userId: string;
+  credentialId: string;
+  publicKey: string;
+  counter: number | string;
+  transports: string | null;
+  name: string;
   lastUsedAt: Date | null;
   createdAt: Date;
   [key: string]: unknown;
@@ -338,7 +374,8 @@ describe('matchesWhere fixture', () => {
  * `strapi.db.metadata` rather than hardcoding them.
  */
 const buildChallengeConnection =
-  (rows: ChallengeRow[], tableName: string, attemptsColumn: string) => (requestedTable: string) => {
+  (rows: ChallengeRow[], tableName: string, attemptsColumn: string, webauthnColumn: string) =>
+  (requestedTable: string) => {
     if (requestedTable !== tableName) {
       throw new Error(
         `Unexpected table in mock connection: got "${requestedTable}", expected "${tableName}"`
@@ -351,9 +388,10 @@ const buildChallengeConnection =
     // would only be enforcing the table half of the claim.
     const resolveKey = (column: string) => {
       if (column === attemptsColumn) return 'attempts';
+      if (column === webauthnColumn) return 'webauthnChallenge';
       if (column === 'id') return 'id';
       throw new Error(
-        `Unexpected column in mock connection: got "${column}", expected "${attemptsColumn}" or "id"`
+        `Unexpected column in mock connection: got "${column}", expected "${attemptsColumn}", "${webauthnColumn}" or "id"`
       );
     };
     const predicates: Array<(row: ChallengeRow) => boolean> = [];
@@ -402,6 +440,20 @@ const buildChallengeConnection =
         for (let i = rows.length - 1; i >= 0; i -= 1) {
           if (predicates.every((predicate) => predicate(rows[i]))) {
             rows.splice(i, 1);
+            affected += 1;
+          }
+        }
+        return affected;
+      },
+      async update(data: Record<string, unknown>) {
+        const translated = Object.fromEntries(
+          Object.entries(data).map(([key, value]) => [resolveKey(key), value])
+        );
+
+        let affected = 0;
+        for (const row of rows) {
+          if (predicates.every((predicate) => predicate(row))) {
+            Object.assign(row, translated);
             affected += 1;
           }
         }
@@ -464,6 +516,8 @@ interface FixtureOptions {
   recoveryUsedAtColumn?: string;
   challengeTableName?: string;
   challengeAttemptsColumn?: string;
+  userPasskeyChallengeColumn?: string;
+  challengeWebauthnColumn?: string;
   /** Merged over `{ enabled: true }` and returned for `strapi.config.get('admin.auth.mfa')`. */
   mfaConfig?: Record<string, unknown>;
   recoveryOverrides?: Record<string, jest.Mock>;
@@ -493,9 +547,16 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
   const recoveryUsedAtColumn = options.recoveryUsedAtColumn ?? RECOVERY_USED_AT_COLUMN;
   const challengeTable = options.challengeTableName ?? CHALLENGE_TABLE;
   const challengeAttemptsColumn = options.challengeAttemptsColumn ?? CHALLENGE_ATTEMPTS_COLUMN;
+  const userPasskeyChallengeColumn =
+    options.userPasskeyChallengeColumn ?? DEFAULT_PASSKEY_CHALLENGE_COLUMN;
+  const challengeWebauthnColumn =
+    options.challengeWebauthnColumn ?? DEFAULT_CHALLENGE_WEBAUTHN_COLUMN;
 
-  const resolveUserKey: ResolveKey = (column) =>
-    column === userStepColumn ? 'mfaLastUsedStep' : column;
+  const resolveUserKey: ResolveKey = (column) => {
+    if (column === userStepColumn) return 'mfaLastUsedStep';
+    if (column === userPasskeyChallengeColumn) return 'mfaPasskeyChallenge';
+    return column;
+  };
 
   const users = new Map<string, UserRow>();
   users.set('1', {
@@ -508,6 +569,8 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
     mfaPendingSecret: null,
     mfaGraceUntil: null,
     mfaLockedAt: null,
+    mfaPasskeyChallenge: null,
+    mfaPasskeyChallengeExpiresAt: null,
   });
 
   const metadataGet = jest.fn((uid: string) => {
@@ -515,7 +578,10 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
       case USER_UID:
         return {
           tableName: userTable,
-          attributes: { mfaLastUsedStep: { columnName: userStepColumn } },
+          attributes: {
+            mfaLastUsedStep: { columnName: userStepColumn },
+            mfaPasskeyChallenge: { columnName: userPasskeyChallengeColumn },
+          },
         };
       case RECOVERY_UID:
         return {
@@ -525,7 +591,10 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
       case CHALLENGE_UID:
         return {
           tableName: challengeTable,
-          attributes: { attempts: { columnName: challengeAttemptsColumn } },
+          attributes: {
+            attempts: { columnName: challengeAttemptsColumn },
+            webauthnChallenge: { columnName: challengeWebauthnColumn },
+          },
         };
       default:
         throw new Error(`Unexpected metadata lookup in mock: ${uid}`);
@@ -807,6 +876,55 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
     ),
   };
 
+  // Cycle 4. Same two rules as every store above: every row handed out is a snapshot, every write
+  // mutates the live array. `findMany` honours `where` and `orderBy` (the list orders by
+  // `createdAt` desc, `id` desc); `select` is accepted and ignored.
+  const passkeyRows: PasskeyRowFixture[] = [];
+  let nextPasskeyId = 1;
+  const passkeyMocks = {
+    create: jest.fn(async ({ data }: any) => {
+      const row: PasskeyRowFixture = {
+        id: nextPasskeyId,
+        createdAt: new Date(),
+        transports: null,
+        lastUsedAt: null,
+        ...data,
+      };
+      nextPasskeyId += 1;
+      passkeyRows.push(row);
+      return { ...row };
+    }),
+    findOne: jest.fn(async ({ where }: any) => {
+      const row = passkeyRows.find((r) => matchesWhere(r, where));
+      return row ? { ...row } : null;
+    }),
+    findMany: jest.fn(async ({ where, orderBy }: any = {}) =>
+      applyOrderBy(
+        passkeyRows.filter((r) => matchesWhere(r, where)),
+        orderBy
+      ).map((r) => ({ ...r }))
+    ),
+    update: jest.fn(async ({ where, data }: any) => {
+      const row = passkeyRows.find((r) => matchesWhere(r, where));
+      if (!row) return null;
+      Object.assign(row, data);
+      return { ...row };
+    }),
+    deleteMany: jest.fn(async ({ where }: any) => {
+      let count = 0;
+      for (let i = passkeyRows.length - 1; i >= 0; i -= 1) {
+        if (matchesWhere(passkeyRows[i], where)) {
+          passkeyRows.splice(i, 1);
+          count += 1;
+        }
+      }
+      return { count };
+    }),
+    count: jest.fn(
+      async ({ where }: any = {}) => passkeyRows.filter((r) => matchesWhere(r, where)).length
+    ),
+  };
+
   const userConnection = buildConnection(users, userTable, resolveUserKey);
   const recoveryConnection = buildRecoveryConnection(
     recoveryRows,
@@ -816,7 +934,8 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
   const challengeConnection = buildChallengeConnection(
     challenges,
     challengeTable,
-    challengeAttemptsColumn
+    challengeAttemptsColumn,
+    challengeWebauthnColumn
   );
 
   const strapiBase = {
@@ -853,6 +972,8 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
             return eventMocks;
           case TRUSTED_UID:
             return trustedMocks;
+          case PASSKEY_UID:
+            return passkeyMocks;
           default:
             throw new Error(`Unexpected query uid in mock: ${uid}`);
         }
@@ -877,6 +998,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
         const challengesSnapshot = challenges.map((row) => ({ ...row }));
         const eventsSnapshot = events.map((row) => ({ ...row }));
         const trustedSnapshot = trustedRows.map((row) => ({ ...row }));
+        const passkeySnapshot = passkeyRows.map((row) => ({ ...row }));
 
         try {
           return await run({ trx: {} });
@@ -887,6 +1009,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
           challenges.splice(0, challenges.length, ...challengesSnapshot);
           events.splice(0, events.length, ...eventsSnapshot);
           trustedRows.splice(0, trustedRows.length, ...trustedSnapshot);
+          passkeyRows.splice(0, passkeyRows.length, ...passkeySnapshot);
           throw error;
         }
       }),
@@ -914,6 +1037,8 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
     eventMocks,
     trustedRows,
     trustedMocks,
+    passkeyRows,
+    passkeyMocks,
   };
 };
 
@@ -3451,5 +3576,400 @@ describe('mfa service: trusted devices', () => {
     await expect(service.trustedDeviceSettings()).resolves.toEqual({ enabled: true, days: 14 });
     stored.trustedDevices.enabled = false;
     await expect(service.trustedDeviceSettings()).resolves.toEqual({ enabled: false, days: 14 });
+  });
+});
+
+describe('mfa service: passkey registration', () => {
+  const ADMIN_URL = 'https://cms.example.com/admin';
+
+  /**
+   * `stored` is the live store document: a test mutates `stored.passkeys.enabled` mid-flight the
+   * way an officer's save would. `adminUrl` is what `resolveWebauthnRp` derives from, so a test
+   * can hand it the broken production default (`http://0.0.0.0:1337/admin`) and see the refusal.
+   */
+  const setup = ({
+    enabled = true,
+    adminUrl = ADMIN_URL,
+  }: { enabled?: boolean; adminUrl?: string } = {}) => {
+    const stored = { passkeys: { enabled } };
+    const fixture = buildMfaFixture({
+      strapiOverrides: {
+        store: jest.fn(() => ({ get: jest.fn(async () => stored), set: jest.fn() })),
+        config: {
+          get: jest.fn((key: string, defaultValue?: unknown) => {
+            if (key === 'admin.auth.mfa') return { enabled: true };
+            if (key === 'admin.absoluteUrl') return adminUrl;
+            return defaultValue;
+          }),
+        },
+      },
+    });
+    const service = createMfaService(defaultDeps(fixture.strapi));
+    return { ...fixture, service, stored };
+  };
+
+  /** A registration response carrying the challenge the browser really signed. */
+  const registrationFor = (challenge: string, credentialId = 'cred-1') => ({
+    id: credentialId,
+    rawId: credentialId,
+    type: 'public-key' as const,
+    clientExtensionResults: {},
+    response: {
+      clientDataJSON: isoBase64URL.fromBuffer(
+        new Uint8Array(
+          Buffer.from(
+            JSON.stringify({
+              type: 'webauthn.create',
+              challenge,
+              origin: 'https://cms.example.com',
+            }),
+            'utf8'
+          )
+        )
+      ),
+      attestationObject: 'not-parsed-here',
+    },
+  });
+
+  const verified = (overrides: Record<string, unknown> = {}) => ({
+    verified: true,
+    registrationInfo: {
+      credential: {
+        id: 'cred-1',
+        publicKey: new Uint8Array([1, 2, 3, 4]),
+        counter: 0,
+        transports: ['internal', 'hybrid'],
+        ...overrides,
+      },
+    },
+  });
+
+  // `id` is offset by how many rows the fixture already holds, not restarted at 100 per call: two
+  // calls seeding two different users must not hand out the same id, which is exactly what
+  // `deletePasskey`'s owner-scoping test below needs two genuinely distinct rows to prove.
+  const seedPasskeys = (rows: PasskeyRowFixture[], userId: string, count: number) => {
+    const base = rows.length;
+    for (let i = 0; i < count; i += 1) {
+      rows.push({
+        id: 100 + base + i,
+        userId,
+        credentialId: `seed-${i}`,
+        publicKey: 'AQID',
+        counter: 0,
+        transports: null,
+        name: `Seeded ${i}`,
+        lastUsedAt: null,
+        createdAt: new Date(Date.now() - (count - i) * 1000),
+      });
+    }
+  };
+
+  beforeEach(() => {
+    jest.mocked(verifyRegistrationResponse).mockReset();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  test('options mints a ceremony, stores it with a deadline, and derives the rp from the admin url', async () => {
+    const now = Date.parse('2026-09-09T12:00:00.000Z');
+    jest.useFakeTimers({ now });
+    const { service, users } = setup();
+
+    const options = await service.passkeyRegistrationOptions('1');
+
+    expect(options.rp).toEqual({ name: 'Strapi', id: 'cms.example.com' });
+    expect(options.attestation).toBe('none');
+    expect(options.authenticatorSelection).toMatchObject({
+      residentKey: 'preferred',
+      userVerification: 'preferred',
+    });
+    // Deterministic user handle: decodable straight back to the admin user id.
+    expect(Buffer.from(isoBase64URL.toBuffer(options.user.id)).toString('utf8')).toBe('1');
+    expect(options.user.name).toBe('kai@doe.com');
+
+    const row = users.get('1')!;
+    expect(row.mfaPasskeyChallenge).toBe(options.challenge);
+    expect(new Date(row.mfaPasskeyChallengeExpiresAt as Date).getTime()).toBe(now + 300_000);
+  });
+
+  test('options excludes the credentials the user already registered', async () => {
+    const { service, passkeyRows } = setup();
+    seedPasskeys(passkeyRows, '1', 1);
+    passkeyRows[0].credentialId = 'already-here';
+    passkeyRows[0].transports = 'internal,hybrid';
+
+    const options = await service.passkeyRegistrationOptions('1');
+
+    // The real (unmocked) `generateRegistrationOptions` stamps `type: 'public-key'` onto every
+    // `excludeCredentials` entry it returns (`generateRegistrationOptions.js`: `{ ...cred, id:
+    // isoBase64URL.trimPadding(cred.id), type: 'public-key' }`) -- our own call only supplies `id`
+    // and `transports`, so this field is the library's addition, not ours.
+    expect(options.excludeCredentials).toEqual([
+      { id: 'already-here', transports: ['internal', 'hybrid'], type: 'public-key' },
+    ]);
+  });
+
+  test('a second options call overwrites the pending ceremony: one slot per user', async () => {
+    const { service, users } = setup();
+
+    const first = await service.passkeyRegistrationOptions('1');
+    const second = await service.passkeyRegistrationOptions('1');
+
+    expect(second.challenge).not.toBe(first.challenge);
+    expect(users.get('1')!.mfaPasskeyChallenge).toBe(second.challenge);
+  });
+
+  test('options refuses with the actionable message when the rp cannot be resolved, and writes nothing', async () => {
+    const { service, users, strapi } = setup({ adminUrl: 'http://0.0.0.0:1337/admin' });
+
+    await expect(service.passkeyRegistrationOptions('1')).rejects.toThrow(
+      'Passkeys are not configured for this deployment. Set admin.auth.mfa.webauthn.rpId.'
+    );
+    expect(users.get('1')!.mfaPasskeyChallenge).toBeNull();
+    expect(strapi.log.error).toHaveBeenCalledWith(expect.stringContaining('0.0.0.0'));
+  });
+
+  test('options refuses at the cap, naming the limit, before the browser is ever prompted', async () => {
+    const { service, passkeyRows, users } = setup();
+    seedPasskeys(passkeyRows, '1', 10);
+
+    await expect(service.passkeyRegistrationOptions('1')).rejects.toThrow(
+      'You can register at most 10 passkeys.'
+    );
+    expect(users.get('1')!.mfaPasskeyChallenge).toBeNull();
+  });
+
+  test('register stores the marshalled credential, records the event and returns four fields', async () => {
+    const { service, passkeyRows, events, strapi } = setup();
+    const options = await service.passkeyRegistrationOptions('1');
+    jest.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
+
+    const created = await service.registerPasskey(
+      '1',
+      'Work laptop',
+      registrationFor(options.challenge) as never
+    );
+
+    expect(Object.keys(created).sort()).toEqual(['createdAt', 'id', 'lastUsedAt', 'name'].sort());
+    expect(created).toMatchObject({ name: 'Work laptop', lastUsedAt: null });
+
+    expect(passkeyRows).toHaveLength(1);
+    const [row] = passkeyRows;
+    expect(row.userId).toBe('1');
+    expect(row.credentialId).toBe('cred-1');
+    expect(row.publicKey).toBe(isoBase64URL.fromBuffer(new Uint8Array([1, 2, 3, 4])));
+    expect(row.counter).toBe(0);
+    expect(row.transports).toBe('internal,hybrid');
+
+    expect(jest.mocked(verifyRegistrationResponse)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        expectedChallenge: options.challenge,
+        expectedOrigin: ['https://cms.example.com'],
+        expectedRPID: 'cms.example.com',
+        // Defaults to true in the library, so passing false is load-bearing.
+        requireUserVerification: false,
+      })
+    );
+
+    expect(events.find((e) => e.type === 'passkey_registered')).toMatchObject({
+      userId: '1',
+      metadata: { deviceName: 'Work laptop' },
+    });
+    expect(strapi.eventHub.emit).toHaveBeenCalledWith('admin.mfa.passkey.registered', {
+      userId: '1',
+    });
+  });
+
+  test('register consumes the ceremony, so the same response cannot be replayed', async () => {
+    const { service, users } = setup();
+    const options = await service.passkeyRegistrationOptions('1');
+    jest.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
+    const response = registrationFor(options.challenge);
+
+    await service.registerPasskey('1', 'One', response as never);
+    expect(users.get('1')!.mfaPasskeyChallenge).toBeNull();
+
+    await expect(service.registerPasskey('1', 'Two', response as never)).rejects.toThrow(
+      'That passkey could not be verified.'
+    );
+  });
+
+  test('two concurrent submissions of one ceremony: exactly one lands', async () => {
+    const { service, passkeyRows } = setup();
+    const options = await service.passkeyRegistrationOptions('1');
+    jest.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
+    const response = registrationFor(options.challenge);
+
+    const results = await Promise.allSettled([
+      service.registerPasskey('1', 'A', response as never),
+      service.registerPasskey('1', 'B', response as never),
+    ]);
+
+    expect(results.filter((r) => r.status === 'fulfilled')).toHaveLength(1);
+    expect(passkeyRows).toHaveLength(1);
+  });
+
+  test('register with no pending ceremony fails before the library is called', async () => {
+    const { service } = setup();
+    jest.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
+
+    await expect(
+      service.registerPasskey('1', 'Nope', registrationFor('some-challenge') as never)
+    ).rejects.toThrow('That passkey could not be verified.');
+    expect(jest.mocked(verifyRegistrationResponse)).not.toHaveBeenCalled();
+  });
+
+  test('a response signed over a different challenge is refused and leaves the ceremony pending', async () => {
+    const { service, users } = setup();
+    const options = await service.passkeyRegistrationOptions('1');
+    jest.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
+
+    await expect(
+      service.registerPasskey('1', 'Wrong', registrationFor('not-the-challenge') as never)
+    ).rejects.toThrow('That passkey could not be verified.');
+    // The conditional consume matched nothing, so the genuine ceremony is untouched.
+    expect(users.get('1')!.mfaPasskeyChallenge).toBe(options.challenge);
+  });
+
+  test.each([
+    ['expired', () => new Date(Date.now() - 1000)],
+    ['unparseable', () => 'not-a-date' as unknown as Date],
+    ['missing', () => null],
+  ])('an %s deadline fails closed', async (_label, stamp) => {
+    const { service, users } = setup();
+    const options = await service.passkeyRegistrationOptions('1');
+    users.get('1')!.mfaPasskeyChallengeExpiresAt = stamp();
+    jest.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
+
+    await expect(
+      service.registerPasskey('1', 'Late', registrationFor(options.challenge) as never)
+    ).rejects.toThrow('That passkey could not be verified.');
+    expect(jest.mocked(verifyRegistrationResponse)).not.toHaveBeenCalled();
+  });
+
+  test.each([
+    [
+      'the verifier throws',
+      () =>
+        jest
+          .mocked(verifyRegistrationResponse)
+          .mockRejectedValue(new Error('bad attestation') as never),
+    ],
+    [
+      'the verifier reports verified: false',
+      () => jest.mocked(verifyRegistrationResponse).mockResolvedValue({ verified: false } as never),
+    ],
+    [
+      'the credential id is over 255 characters',
+      () =>
+        jest
+          .mocked(verifyRegistrationResponse)
+          .mockResolvedValue(verified({ id: 'x'.repeat(256) }) as never),
+    ],
+  ])('%s: one generic message, no row', async (_label, arrange) => {
+    const { service, passkeyRows } = setup();
+    const options = await service.passkeyRegistrationOptions('1');
+    arrange();
+
+    await expect(
+      service.registerPasskey('1', 'Nope', registrationFor(options.challenge) as never)
+    ).rejects.toThrow('That passkey could not be verified.');
+    expect(passkeyRows).toHaveLength(0);
+  });
+
+  test('over the cap inside the transaction: the insert rolls back and the limit is named', async () => {
+    const { service, passkeyRows, users } = setup();
+    const options = await service.passkeyRegistrationOptions('1');
+    seedPasskeys(passkeyRows, '1', 10);
+    jest.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
+
+    await expect(
+      service.registerPasskey('1', 'Eleventh', registrationFor(options.challenge) as never)
+    ).rejects.toThrow('You can register at most 10 passkeys.');
+
+    expect(passkeyRows).toHaveLength(10);
+    // The ceremony was spent before the transaction opened -- a refused registration costs it,
+    // and the user starts a fresh one.
+    expect(users.get('1')!.mfaPasskeyChallenge).toBeNull();
+  });
+
+  test('a unique-constraint violation on credentialId surfaces as the generic 400, never the dialect error', async () => {
+    const { service, passkeyMocks, passkeyRows } = setup();
+    const options = await service.passkeyRegistrationOptions('1');
+    jest.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
+    passkeyMocks.create.mockRejectedValueOnce(
+      new Error('UNIQUE constraint failed: strapi_admin_mfa_passkeys.credential_id')
+    );
+
+    await expect(
+      service.registerPasskey('1', 'Taken', registrationFor(options.challenge) as never)
+    ).rejects.toThrow('That passkey could not be verified.');
+    await expect(
+      service.registerPasskey('1', 'Taken', registrationFor(options.challenge) as never)
+    ).rejects.not.toThrow(/strapi_admin_mfa_passkeys/);
+    expect(passkeyRows).toHaveLength(0);
+  });
+
+  test('listPasskeys returns the four public fields, newest first, and never the secret columns', async () => {
+    const { service, passkeyRows } = setup();
+    seedPasskeys(passkeyRows, '1', 2);
+    seedPasskeys(passkeyRows, '2', 1);
+
+    const list = await service.listPasskeys('1');
+
+    expect(list).toHaveLength(2);
+    expect(list[0].name).toBe('Seeded 1');
+    expect(Object.keys(list[0]).sort()).toEqual(['createdAt', 'id', 'lastUsedAt', 'name'].sort());
+    expect(JSON.stringify(list)).not.toContain('AQID');
+    expect(JSON.stringify(list)).not.toContain('seed-0');
+    await expect(service.countPasskeys('1')).resolves.toBe(2);
+  });
+
+  test('with the policy off the list reads empty and the count reads zero, rows or not', async () => {
+    const { service, passkeyRows, stored } = setup();
+    seedPasskeys(passkeyRows, '1', 3);
+    stored.passkeys.enabled = false;
+
+    await expect(service.listPasskeys('1')).resolves.toEqual([]);
+    await expect(service.countPasskeys('1')).resolves.toBe(0);
+    expect(passkeyRows).toHaveLength(3);
+    await expect(service.passkeySettings()).resolves.toEqual({ enabled: false });
+  });
+
+  test("deletePasskey removes only the caller's row, records the name, and works while the policy is off", async () => {
+    const { service, passkeyRows, events, stored, strapi } = setup();
+    seedPasskeys(passkeyRows, '1', 1);
+    seedPasskeys(passkeyRows, '2', 1);
+    const mine = String(passkeyRows[0].id);
+    const theirs = String(passkeyRows[1].id);
+    stored.passkeys.enabled = false;
+
+    await expect(service.deletePasskey('1', theirs)).resolves.toBe(false);
+    expect(passkeyRows).toHaveLength(2);
+
+    await expect(service.deletePasskey('1', mine)).resolves.toBe(true);
+    expect(passkeyRows).toHaveLength(1);
+    expect(events.find((e) => e.type === 'passkey_removed')).toMatchObject({
+      userId: '1',
+      metadata: { deviceName: 'Seeded 0' },
+    });
+    expect(strapi.eventHub.emit).toHaveBeenCalledWith('admin.mfa.passkey.removed', {
+      userId: '1',
+    });
+  });
+
+  test('clearPasskeys and clearAllPasskeys are silent', async () => {
+    const { service, passkeyRows, events } = setup();
+    seedPasskeys(passkeyRows, '1', 2);
+    seedPasskeys(passkeyRows, '2', 2);
+
+    await expect(service.clearPasskeys('1')).resolves.toBe(2);
+    expect(passkeyRows).toHaveLength(2);
+    await expect(service.clearAllPasskeys()).resolves.toBe(2);
+    expect(passkeyRows).toHaveLength(0);
+    // The caller's own event (`disabled`, or the settings update) covers both.
+    expect(events.filter((e) => e.type === 'passkey_removed')).toHaveLength(0);
   });
 });

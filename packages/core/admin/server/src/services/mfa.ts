@@ -13,9 +13,14 @@ import type { Core, Data } from '@strapi/types';
 import { MFA_DEFAULTS, validateMfaConfig, type MfaConfig } from '../config/mfa';
 import mfaChangedTemplate from '../config/email-templates/mfa-changed';
 import type { MfaEventNotice } from '../../../shared/contracts/mfa';
-import { readMfaEnforcement, readTrustedDeviceSettings } from './security-settings';
+import {
+  readMfaEnforcement,
+  readPasskeySettings,
+  readTrustedDeviceSettings,
+} from './security-settings';
 import type { MfaEnforcement } from '../../../shared/contracts/security-settings';
 import { createTrustedDevices } from './mfa-trusted-devices';
+import { createPasskeys } from './mfa-passkeys';
 
 const { ApplicationError, RateLimitError, ValidationError } = errors;
 
@@ -192,6 +197,10 @@ export interface MfaServiceDeps {
  *    `listTrustedDevices`, `revokeTrustedDevice`, `revokeAllTrustedDevices`, `clearTrustedDevices`,
  *    `clearAllTrustedDevices`, `sweepExpiredTrustedDevices`, `trustedDeviceSettings` — a browser's
  *    right to skip the second factor for a bounded period.
+ *  - Passkeys (cycle 4, `mfa-passkeys.ts`): `passkeyRegistrationOptions`, `registerPasskey`,
+ *    `listPasskeys`, `countPasskeys`, `deletePasskey`, `clearPasskeys`, `clearAllPasskeys`,
+ *    `authenticationOptions`, `verifyAssertion`, `passkeySettings` -- WebAuthn credentials as a
+ *    second factor, origin-bound by the browser and therefore unphishable.
  */
 const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   let cachedConfig: MfaConfig | null = null;
@@ -1189,6 +1198,23 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     return failures >= maxUserAttempts;
   };
 
+  // --- Passkeys (cycle 4) -------------------------------------------------
+  // Own module, composed here so callers keep one service, exactly as cycle 3's trusted devices.
+  // `settings` is the store reader from `security-settings.ts`, injected rather than imported
+  // inside the module so its tests can hand it any policy without a store double.
+  //
+  // Not beside the `trustedDevices` composition above: this one needs `isAccountThrottled`, whose
+  // `const` is declared just above here. A `const` is hoisted but uninitialised, so composing
+  // earlier would throw a TDZ ReferenceError the moment the service is constructed.
+  const passkeys = createPasskeys({
+    strapi,
+    settings: () => readPasskeySettings(strapi),
+    config,
+    recordEvent,
+    notify,
+    isAccountThrottled,
+  });
+
   const createChallenge = async (userId: string): Promise<{ token: string; expiresIn: number }> => {
     // Checked here as well as in `verifyChallenge`: throttling only one of the two leaves the
     // other as the way around it.
@@ -1509,6 +1535,14 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     clearAllTrustedDevices: trustedDevices.clearAllTrustedDevices,
     sweepExpiredTrustedDevices: trustedDevices.sweepExpiredTrustedDevices,
     trustedDeviceSettings: trustedDevices.trustedDeviceSettings,
+    passkeyRegistrationOptions: passkeys.passkeyRegistrationOptions,
+    registerPasskey: passkeys.registerPasskey,
+    listPasskeys: passkeys.listPasskeys,
+    countPasskeys: passkeys.countPasskeys,
+    deletePasskey: passkeys.deletePasskey,
+    clearPasskeys: passkeys.clearPasskeys,
+    clearAllPasskeys: passkeys.clearAllPasskeys,
+    passkeySettings: passkeys.passkeySettings,
   };
 };
 
