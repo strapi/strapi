@@ -206,6 +206,8 @@ interface MfaServiceLike {
   assertPasswordAndFactor(userId: string, password: string, code: string): Promise<void>;
   /** Cycle 3: every trusted-device row, every user. Called on the transition to `enabled: false`. */
   clearAllTrustedDevices(): Promise<number>;
+  /** Cycle 4: every passkey row, every user. Called on the transition to `enabled: false`. */
+  clearAllPasskeys(): Promise<number>;
 }
 
 interface AuthServiceLike {
@@ -361,8 +363,14 @@ export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) 
         await mfa().clearAllTrustedDevices();
       }
 
-      // Cycle 4's off-transition cascade lands here (Task 7), beside cycle 3's and for the same
-      // reason: credentials left in place would silently reactivate if the setting came back on.
+      // Turning passkeys off means "no user may sign in with one". Leaving rows in place would
+      // let a later re-enable silently revive credentials registered under the old policy, so the
+      // transition deletes them, in the same transaction as the setting that forbids them --
+      // exactly cycle 3's trusted-device cascade, and the reason the `PUT` that does this carries
+      // credentials like a downgrade.
+      if (previous.passkeys.enabled && !nextPasskeys.enabled) {
+        await mfa().clearAllPasskeys();
+      }
 
       if (input.mfa) {
         if (requiredRoles.length > 0) {

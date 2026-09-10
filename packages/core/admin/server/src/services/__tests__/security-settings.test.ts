@@ -232,6 +232,7 @@ describe('security-settings: service', () => {
     const emit = jest.fn();
     const assertPasswordAndFactor = jest.fn(() => Promise.resolve());
     const clearAllTrustedDevices = jest.fn(() => Promise.resolve(0));
+    const clearAllPasskeys = jest.fn(() => Promise.resolve(0));
     const validatePassword = jest.fn(() => Promise.resolve(options.passwordOk ?? true));
     const transaction = jest.fn(async (run: () => Promise<unknown>) => run());
 
@@ -293,6 +294,7 @@ describe('security-settings: service', () => {
             isEnrolled: jest.fn(() => Promise.resolve(options.enrolled ?? false)),
             assertPasswordAndFactor,
             clearAllTrustedDevices,
+            clearAllPasskeys,
           };
         }
         if (uid === 'admin::auth') return { validatePassword };
@@ -310,6 +312,7 @@ describe('security-settings: service', () => {
       emit,
       assertPasswordAndFactor,
       clearAllTrustedDevices,
+      clearAllPasskeys,
       validatePassword,
       transaction,
     };
@@ -706,6 +709,27 @@ describe('security-settings: service', () => {
       actor
     );
     expect(mfaOnly.clearAllTrustedDevices).not.toHaveBeenCalled();
+  });
+
+  test('turning passkeys off deletes every passkey, inside the settings transaction', async () => {
+    const { service, clearAllPasskeys, transaction } = setup({
+      stored: { passkeys: { enabled: true } },
+    });
+
+    await service.updateSettings({ passkeys: { enabled: false }, password: 'pw' }, actor);
+
+    expect(clearAllPasskeys).toHaveBeenCalledTimes(1);
+    expect(transaction).toHaveBeenCalled();
+  });
+
+  test('a save that leaves passkeys enabled, or turns them on, deletes nothing', async () => {
+    const on = setup({ stored: { passkeys: { enabled: false } } });
+    await on.service.updateSettings({ passkeys: { enabled: true } }, actor);
+    expect(on.clearAllPasskeys).not.toHaveBeenCalled();
+
+    const unrelated = setup({ stored: { passkeys: { enabled: true } } });
+    await unrelated.service.updateSettings({ trustedDevices: { enabled: true, days: 30 } }, actor);
+    expect(unrelated.clearAllPasskeys).not.toHaveBeenCalled();
   });
 
   test('a body with only passkeys leaves mfa, the role flags and trustedDevices untouched', async () => {

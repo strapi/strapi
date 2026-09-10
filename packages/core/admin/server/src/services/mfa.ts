@@ -1462,12 +1462,20 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
    * Cycle 3 adds the trusted-device rows to the same transaction: a disabled account has no second
    * factor for a trust to bypass, and the CLI reset (which calls `disable`) must leave none behind
    * either.
+   *
+   * Cycle 4 adds the passkey rows and the pending registration ceremony to the same transaction,
+   * for the same reason: the CLI reset (which calls `disable`) must leave neither behind.
    */
   const disable = async (userId: string): Promise<void> => {
     await strapi.db.transaction(async () => {
       await recoveryQuery().deleteMany({ where: { userId: String(userId) } });
       await challengeQuery().deleteMany({ where: { userId: String(userId) } });
       await trustedDevices.clearTrustedDevices(userId);
+      // Cycle 4: a disabled account has no second factor at all, so a passkey that still
+      // satisfied challenges would be one. The two pending-ceremony columns are nulled in the
+      // same user update that already nulls `mfaPendingSecret` -- otherwise the stated mirror
+      // breaks and a pending ceremony outlives the disable.
+      await passkeys.clearPasskeys(userId);
       await userQuery().update({
         where: { id: userId },
         data: {
@@ -1475,6 +1483,8 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
           mfaPendingSecret: null,
           mfaEnabledAt: null,
           mfaLastUsedStep: null,
+          mfaPasskeyChallenge: null,
+          mfaPasskeyChallengeExpiresAt: null,
         },
       });
     });

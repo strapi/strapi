@@ -2640,6 +2640,69 @@ describe('mfa service: assertPasswordAndFactor and disable', () => {
 
       expect(fixture.trustedRows.map((r) => r.userId)).toEqual(['2']);
     });
+
+    test('disable deletes the account passkeys and the pending ceremony, inside the same transaction', async () => {
+      const { strapi, users, passkeyRows, recoveryRows, challenges } = buildMfaFixture();
+      const service = createMfaService(defaultDeps(strapi));
+      users.get('1')!.mfaPasskeyChallenge = 'pending-ceremony';
+      users.get('1')!.mfaPasskeyChallengeExpiresAt = new Date(Date.now() + 300_000);
+      passkeyRows.push({
+        id: 1,
+        userId: '1',
+        credentialId: 'cred-1',
+        publicKey: 'AQID',
+        counter: 0,
+        transports: null,
+        name: 'Phone',
+        lastUsedAt: null,
+        createdAt: new Date(),
+      });
+      passkeyRows.push({
+        id: 2,
+        userId: '2',
+        credentialId: 'cred-2',
+        publicKey: 'AQID',
+        counter: 0,
+        transports: null,
+        name: 'Somebody else',
+        lastUsedAt: null,
+        createdAt: new Date(),
+      });
+
+      await service.disable('1');
+
+      expect(passkeyRows.map((r) => r.userId)).toEqual(['2']);
+      expect(users.get('1')!.mfaPasskeyChallenge).toBeNull();
+      expect(users.get('1')!.mfaPasskeyChallengeExpiresAt).toBeNull();
+      expect(recoveryRows).toHaveLength(0);
+      expect(challenges).toHaveLength(0);
+    });
+
+    test('a failing user update rolls the passkey deletion back with everything else', async () => {
+      // Same reasoning cycle 1 gives for wrapping `disable`: all of it lands or none does.
+      const { strapi, passkeyRows } = buildMfaFixture({
+        userOverrides: {
+          update: jest.fn(async () => {
+            throw new Error('connection dropped');
+          }),
+        },
+      });
+      const service = createMfaService(defaultDeps(strapi));
+      passkeyRows.push({
+        id: 1,
+        userId: '1',
+        credentialId: 'cred-1',
+        publicKey: 'AQID',
+        counter: 0,
+        transports: null,
+        name: 'Phone',
+        lastUsedAt: null,
+        createdAt: new Date(),
+      });
+
+      await expect(service.disable('1')).rejects.toThrow('connection dropped');
+      expect(passkeyRows).toHaveLength(1);
+    });
   });
 });
 
