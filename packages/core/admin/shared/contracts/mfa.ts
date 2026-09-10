@@ -19,6 +19,8 @@ export declare namespace Me {
       graceUntil: string | null;
       /** Cycle 3: whether the organisation lets this user trust a browser after a code. */
       trustedDevicesEnabled: boolean;
+      /** Cycle 4: whether the organisation lets this user register and use passkeys. */
+      passkeysEnabled: boolean;
     };
   }
 }

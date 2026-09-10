@@ -102,6 +102,12 @@ describe('mfa controller', () => {
       ['revokeAllTrustedDevices', {}],
       ['listUserTrustedDevices', {}],
       ['revokeUserTrustedDevices', {}],
+      ['passkeyRegistrationOptions', {}],
+      ['registerPasskey', {}],
+      ['listPasskeys', {}],
+      ['deletePasskey', {}],
+      ['listUserPasskeys', {}],
+      ['deleteUserPasskeys', {}],
     ];
 
     for (const [handlerName, body] of routes) {
@@ -135,6 +141,7 @@ describe('mfa controller', () => {
             areCodesAcknowledged,
             isMfaRequiredFor,
             trustedDeviceSettings: jest.fn(() => Promise.resolve({ enabled: true, days: 30 })),
+            passkeySettings: jest.fn(() => Promise.resolve({ enabled: true })),
           },
         },
       },
@@ -160,6 +167,7 @@ describe('mfa controller', () => {
         required: false,
         graceUntil: null,
         trustedDevicesEnabled: true,
+        passkeysEnabled: true,
       },
     });
     expect(JSON.stringify(ctx.body)).not.toContain('top-secret-ciphertext');
@@ -176,6 +184,7 @@ describe('mfa controller', () => {
               isEnrolled: jest.fn(() => Promise.resolve(false)),
               isMfaRequiredFor,
               trustedDeviceSettings: jest.fn(() => Promise.resolve({ enabled: true, days: 30 })),
+              passkeySettings: jest.fn(() => Promise.resolve({ enabled: true })),
             },
           },
         },
@@ -195,6 +204,7 @@ describe('mfa controller', () => {
           required: true,
           graceUntil: '2026-09-11T10:00:00.000Z',
           trustedDevicesEnabled: true,
+          passkeysEnabled: true,
         },
       });
     });
@@ -208,6 +218,7 @@ describe('mfa controller', () => {
               isEnrolled: jest.fn(() => Promise.resolve(false)),
               isMfaRequiredFor: jest.fn(() => Promise.resolve(false)),
               trustedDeviceSettings: jest.fn(() => Promise.resolve({ enabled: true, days: 30 })),
+              passkeySettings: jest.fn(() => Promise.resolve({ enabled: true })),
             },
           },
         },
@@ -228,6 +239,7 @@ describe('mfa controller', () => {
               isEnrolled: jest.fn(() => Promise.resolve(false)),
               isMfaRequiredFor: jest.fn(() => Promise.resolve(false)),
               trustedDeviceSettings: jest.fn(() => Promise.resolve({ enabled: false, days: 30 })),
+              passkeySettings: jest.fn(() => Promise.resolve({ enabled: true })),
             },
           },
         },
@@ -237,6 +249,27 @@ describe('mfa controller', () => {
       await mfaController.me(ctx);
 
       expect((ctx.body as any).data.trustedDevicesEnabled).toBe(false);
+    });
+
+    test('reports passkeysEnabled: false when the organisation has turned passkeys off', async () => {
+      setStrapi({
+        admin: {
+          services: {
+            mfa: {
+              isEnabled: () => true,
+              isEnrolled: jest.fn(() => Promise.resolve(false)),
+              isMfaRequiredFor: jest.fn(() => Promise.resolve(false)),
+              trustedDeviceSettings: jest.fn(() => Promise.resolve({ enabled: true, days: 30 })),
+              passkeySettings: jest.fn(() => Promise.resolve({ enabled: false })),
+            },
+          },
+        },
+      });
+      const { ctx } = buildCtx();
+
+      await mfaController.me(ctx);
+
+      expect(ctx.body.data.passkeysEnabled).toBe(false);
     });
   });
 
@@ -841,6 +874,216 @@ describe('mfa controller', () => {
       await mfaController.revokeUserTrustedDevices(known.ctx);
       expect(revokeAllTrustedDevices).toHaveBeenCalledWith('42', { byUserId: '7' });
       expect(known.ctx.status).toBe(204);
+    });
+  });
+
+  describe('passkeys (cycle 4)', () => {
+    const buildStrapiWithPasskeys = (overrides: Record<string, unknown> = {}) => {
+      const passkeySettings = jest.fn(() => Promise.resolve({ enabled: true }));
+      const isEnrolled = jest.fn(() => Promise.resolve(true));
+      const assertPasswordAndFactor = jest.fn(() => Promise.resolve());
+      const passkeyRegistrationOptions = jest.fn(() =>
+        Promise.resolve({
+          challenge: 'opts-challenge',
+          rp: { id: 'cms.example.com', name: 'Strapi' },
+        })
+      );
+      const registerPasskey = jest.fn(() =>
+        Promise.resolve({ id: '4', name: 'Work laptop', createdAt: 'now', lastUsedAt: null })
+      );
+      const listPasskeys = jest.fn(() => Promise.resolve([]));
+      const countPasskeys = jest.fn(() => Promise.resolve(2));
+      const deletePasskey = jest.fn(() => Promise.resolve(true));
+      const clearPasskeys = jest.fn(() => Promise.resolve(2));
+      const recordEvent = jest.fn(() => Promise.resolve());
+      const notify = jest.fn(() => Promise.resolve());
+      const findOne = jest.fn((id: string) =>
+        Promise.resolve(id === '404' ? null : { id: Number(id) })
+      );
+
+      const mfa = {
+        isEnabled: () => true,
+        passkeySettings,
+        isEnrolled,
+        assertPasswordAndFactor,
+        passkeyRegistrationOptions,
+        registerPasskey,
+        listPasskeys,
+        countPasskeys,
+        deletePasskey,
+        clearPasskeys,
+        recordEvent,
+        notify,
+        ...overrides,
+      };
+
+      setStrapi({ admin: { services: { mfa, user: { findOne } } } });
+
+      // Read back off `mfa` itself, not the local consts above: an override in `overrides`
+      // replaces the property on `mfa` (what the controller actually calls) without touching the
+      // shadowed local binding, so a caller asserting on the returned handle for an overridden
+      // key must see the same function the controller reached through `getService('mfa')`.
+      return {
+        passkeySettings: mfa.passkeySettings,
+        isEnrolled: mfa.isEnrolled,
+        assertPasswordAndFactor: mfa.assertPasswordAndFactor,
+        passkeyRegistrationOptions: mfa.passkeyRegistrationOptions,
+        registerPasskey: mfa.registerPasskey,
+        listPasskeys: mfa.listPasskeys,
+        countPasskeys: mfa.countPasskeys,
+        deletePasskey: mfa.deletePasskey,
+        clearPasskeys: mfa.clearPasskeys,
+        recordEvent: mfa.recordEvent,
+        notify: mfa.notify,
+        findOne,
+      };
+    };
+
+    test('options refuses with "Passkeys are disabled" before the body is even validated', async () => {
+      const doubles = buildStrapiWithPasskeys({
+        passkeySettings: jest.fn(() => Promise.resolve({ enabled: false })),
+      });
+      // An empty body would fail validation too; the policy message is what must come back, and
+      // no attempt may be spent on a request that can never succeed.
+      const { ctx } = buildCtx({});
+
+      await expect(mfaController.passkeyRegistrationOptions(ctx)).rejects.toThrow(
+        'Passkeys are disabled'
+      );
+      expect(doubles.assertPasswordAndFactor).not.toHaveBeenCalled();
+      expect(doubles.passkeyRegistrationOptions).not.toHaveBeenCalled();
+    });
+
+    test("options refuses an unenrolled caller: a passkey is never a user's only factor", async () => {
+      const doubles = buildStrapiWithPasskeys({
+        isEnrolled: jest.fn(() => Promise.resolve(false)),
+      });
+      const { ctx } = buildCtx({ password: 'pw', code: '123456' });
+
+      await expect(mfaController.passkeyRegistrationOptions(ctx)).rejects.toThrow(
+        'Set up an authenticator app before adding a passkey.'
+      );
+      expect(doubles.assertPasswordAndFactor).not.toHaveBeenCalled();
+    });
+
+    test('options costs a password and a live factor, then returns the options object', async () => {
+      const doubles = buildStrapiWithPasskeys();
+      const { ctx } = buildCtx({ password: 'pw', code: ' 123456 ' });
+
+      await mfaController.passkeyRegistrationOptions(ctx);
+
+      expect(doubles.assertPasswordAndFactor).toHaveBeenCalledWith('7', 'pw', '123456');
+      expect(ctx.body.data).toMatchObject({ challenge: 'opts-challenge' });
+    });
+
+    test('register trims the name and returns only the four public fields', async () => {
+      const doubles = buildStrapiWithPasskeys();
+      const registration = { id: 'cred-1', response: {} };
+      const { ctx } = buildCtx({ name: '  Work laptop  ', registration });
+
+      await mfaController.registerPasskey(ctx);
+
+      expect(doubles.registerPasskey).toHaveBeenCalledWith('7', 'Work laptop', registration);
+      expect(ctx.body).toEqual({
+        data: { id: '4', name: 'Work laptop', createdAt: 'now', lastUsedAt: null },
+      });
+    });
+
+    test.each([[''], ['   '], ['x'.repeat(51)]])('register rejects the name %p', async (name) => {
+      buildStrapiWithPasskeys();
+      const { ctx } = buildCtx({ name, registration: { id: 'cred-1' } });
+
+      await expect(mfaController.registerPasskey(ctx)).rejects.toThrow();
+    });
+
+    test("the list is the caller's own", async () => {
+      const doubles = buildStrapiWithPasskeys();
+      const { ctx } = buildCtx();
+
+      await mfaController.listPasskeys(ctx);
+
+      expect(doubles.listPasskeys).toHaveBeenCalledWith('7');
+      expect(ctx.body).toEqual({ data: [] });
+    });
+
+    test('delete: a non-numeric id is a 404 without touching the service', async () => {
+      const doubles = buildStrapiWithPasskeys();
+      const { ctx, notFound } = buildCtx({}, {}, {}, { params: { id: 'abc' } });
+
+      await mfaController.deletePasskey(ctx);
+
+      expect(notFound).toHaveBeenCalled();
+      expect(doubles.deletePasskey).not.toHaveBeenCalled();
+    });
+
+    test("delete: a row that is not the caller's is a 404; their own is a 204 with no body", async () => {
+      const missing = buildStrapiWithPasskeys({
+        deletePasskey: jest.fn(() => Promise.resolve(false)),
+      });
+      const first = buildCtx({}, {}, {}, { params: { id: '9' } });
+      await mfaController.deletePasskey(first.ctx);
+      expect(first.notFound).toHaveBeenCalled();
+      expect(missing.deletePasskey).toHaveBeenCalledWith('7', '9');
+
+      buildStrapiWithPasskeys();
+      const second = buildCtx({}, {}, {}, { params: { id: '9' } });
+      await mfaController.deletePasskey(second.ctx);
+      expect(second.ctx.status).toBe(204);
+      expect(second.ctx.body).toBeUndefined();
+    });
+
+    test('the administrator count: 404 for an unknown user, a bare number for a known one', async () => {
+      const doubles = buildStrapiWithPasskeys();
+
+      const unknown = buildCtx({}, {}, {}, { params: { id: '404' } });
+      await mfaController.listUserPasskeys(unknown.ctx);
+      expect(unknown.notFound).toHaveBeenCalled();
+      expect(doubles.countPasskeys).not.toHaveBeenCalled();
+
+      const known = buildCtx({}, {}, {}, { params: { id: '12' } });
+      await mfaController.listUserPasskeys(known.ctx);
+      // A number, not an inventory of somebody's hardware.
+      expect(known.ctx.body).toEqual({ data: { count: 2 } });
+    });
+
+    test('the administrator delete names the acting administrator and how many it covered', async () => {
+      const doubles = buildStrapiWithPasskeys();
+      const { ctx } = buildCtx({}, {}, {}, { params: { id: '12' } });
+
+      await mfaController.deleteUserPasskeys(ctx);
+
+      expect(doubles.clearPasskeys).toHaveBeenCalledWith('12');
+      expect(doubles.recordEvent).toHaveBeenCalledWith('12', 'passkey_removed', {
+        byUserId: '7',
+        count: 2,
+      });
+      expect(doubles.notify).toHaveBeenCalledWith('12', 'passkey_removed', {
+        byUserId: '7',
+        count: 2,
+      });
+      expect(ctx.status).toBe(204);
+      expect(ctx.body).toBeUndefined();
+    });
+
+    test('the administrator delete on an empty list leaves no notice behind', async () => {
+      const doubles = buildStrapiWithPasskeys({ clearPasskeys: jest.fn(() => Promise.resolve(0)) });
+      const { ctx } = buildCtx({}, {}, {}, { params: { id: '12' } });
+
+      await mfaController.deleteUserPasskeys(ctx);
+
+      expect(doubles.recordEvent).not.toHaveBeenCalled();
+      expect(doubles.notify).not.toHaveBeenCalled();
+      expect(ctx.status).toBe(204);
+    });
+
+    test('the administrator delete is a 404 for an unknown user, and deletes nothing', async () => {
+      const doubles = buildStrapiWithPasskeys();
+      const { ctx, notFound } = buildCtx({}, {}, {}, { params: { id: '404' } });
+
+      await mfaController.deleteUserPasskeys(ctx);
+
+      expect(notFound).toHaveBeenCalled();
+      expect(doubles.clearPasskeys).not.toHaveBeenCalled();
     });
   });
 });

@@ -72,6 +72,49 @@ const passwordAndCodeSchema = yup
   .noUnknown();
 
 /**
+ * /mfa/passkeys/options - the same re-authentication gate `/mfa/disable` and
+ * `/mfa/recovery-codes` use, and for the same reason: session authority alone is not enough when
+ * the session may be the thing an attacker holds. Same bounds and no-`.trim()` reasoning as
+ * `mfaLoginSchema`.
+ */
+const passkeyOptionsSchema = yup
+  .object()
+  .shape({
+    password: yup.string().required(),
+    code: yup.string().min(6).max(32).required(),
+  })
+  .required()
+  .noUnknown();
+
+/**
+ * /mfa/passkeys - `name` is the user's own label, 1..50 characters *after trimming*. There is no
+ * `.trim()` transform here for the reason this file's header gives (under strict yup it becomes
+ * an assertion that the value is already trimmed, so it would reject a pasted name with a
+ * trailing space rather than clean it up); the test below bounds the trimmed length and the
+ * handler trims before the value reaches the service. `.max(200)` is a cheap outer bound on the
+ * raw string so the test never runs over something absurd.
+ *
+ * `registration` is a required object passed to `@simplewebauthn/server` otherwise unvalidated:
+ * the library does its own structural checks, and re-declaring the WebAuthn response shape in
+ * yup would reject fields a future spec revision adds.
+ */
+const registerPasskeySchema = yup
+  .object()
+  .shape({
+    name: yup
+      .string()
+      .required()
+      .max(200)
+      .test('trimmed-length', 'name must be 1 to 50 characters', (value) => {
+        const trimmed = (value ?? '').trim();
+        return trimmed.length >= 1 && trimmed.length <= 50;
+      }),
+    registration: yup.object().required(),
+  })
+  .required()
+  .noUnknown();
+
+/**
  * /mfa/notices/seen - `ids` is optional: absent means "every unseen notice for the caller".
  */
 const noticesSeenSchema = yup
@@ -84,3 +127,5 @@ export const validateMfaEnrolInput = validateYupSchema(enrolSchema);
 export const validateMfaCodeInput = validateYupSchema(codeOnlySchema);
 export const validateMfaPasswordAndCodeInput = validateYupSchema(passwordAndCodeSchema);
 export const validateMfaNoticesSeenInput = validateYupSchema(noticesSeenSchema);
+export const validatePasskeyOptionsInput = validateYupSchema(passkeyOptionsSchema);
+export const validateRegisterPasskeyInput = validateYupSchema(registerPasskeySchema);

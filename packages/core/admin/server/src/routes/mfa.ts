@@ -49,4 +49,17 @@ export default [
     'mfa.revokeUserTrustedDevices',
     'admin::users.update'
   ),
+  // Cycle 4: the caller's own passkeys. `/mfa/passkeys/options` is listed before the `:id` route
+  // so the more specific path is registered first, even though the methods already differ.
+  authenticated('POST', '/mfa/passkeys/options', 'mfa.passkeyRegistrationOptions'),
+  authenticated('POST', '/mfa/passkeys', 'mfa.registerPasskey'),
+  authenticated('GET', '/mfa/passkeys', 'mfa.listPasskeys'),
+  authenticated('DELETE', '/mfa/passkeys/:id', 'mfa.deletePasskey'),
+  withPermission('GET', '/mfa/users/:id/passkeys', 'mfa.listUserPasskeys', 'admin::users.read'),
+  withPermission(
+    'DELETE',
+    '/mfa/users/:id/passkeys',
+    'mfa.deleteUserPasskeys',
+    'admin::users.update'
+  ),
 ];
