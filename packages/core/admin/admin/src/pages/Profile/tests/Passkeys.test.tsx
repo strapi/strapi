@@ -135,6 +135,10 @@ describe('Passkeys', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
 
     expect(await screen.findByText('Passkey not found')).toBeInTheDocument();
+    // The row must survive: `deletePasskey` performs no optimistic update, so a refused removal
+    // leaves the list exactly as it was. Without this assertion the test proves only that a
+    // message appeared, not that the table is still truthful.
+    expect(screen.getByText('MacBook Touch ID')).toBeInTheDocument();
   });
 
   it('shows the read error instead of the table or the empty state', async () => {

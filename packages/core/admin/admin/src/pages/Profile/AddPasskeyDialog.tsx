@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { startRegistration } from '@simplewebauthn/browser';
+import { startRegistration, type RegistrationResponseJSON } from '@simplewebauthn/browser';
 import { Button, Field, Flex, Modal, TextInput, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
@@ -95,7 +95,7 @@ const AddPasskeyDialog = ({ open, onClose }: AddPasskeyDialogProps) => {
         return;
       }
 
-      let registration;
+      let registration: RegistrationResponseJSON;
       try {
         registration = await startRegistration({ optionsJSON: optionsRes.data });
       } catch (ceremonyError) {

@@ -404,6 +404,28 @@ describe('TwoFactorSection', () => {
     expect(await screen.findByRole('heading', { name: 'Passkeys' })).toBeInTheDocument();
   });
 
+  it('hides the passkeys block for an UNENROLLED account even when the organisation allows them', async () => {
+    // The other half of the gate. TOTP is the mandatory base factor this cycle: a passkey is a
+    // second factor, never a replacement for one, so an account with no authenticator must not be
+    // offered a way to add a passkey. Without this case, dropping `status.enabled` from the gate
+    // passes every other test in this file -- the same blind spot cycle 3 left on
+    // `trustedDevicesEnabled`.
+    server.use(
+      status({
+        enabled: false,
+        enabledAt: null,
+        recoveryCodesRemaining: 0,
+        codesAcknowledged: false,
+        passkeysEnabled: true,
+      }),
+      http.get('/admin/mfa/passkeys', () => HttpResponse.json({ data: [] }))
+    );
+    renderSection();
+
+    expect(await screen.findByText('Not enabled')).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Passkeys' })).not.toBeInTheDocument();
+  });
+
   it('hides the passkeys block when the organisation does not allow them', async () => {
     server.use(
       status({
