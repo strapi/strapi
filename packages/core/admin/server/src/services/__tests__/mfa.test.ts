@@ -39,9 +39,8 @@ const CHALLENGE_ATTEMPTS_COLUMN = 'attempts';
 const EVENT_UID = 'admin::mfa-event';
 const TRUSTED_UID = 'admin::mfa-trusted-device';
 const PASSKEY_UID = 'admin::mfa-passkey';
-// Unused until Task 6/7 give the passkey table its own `db.connection` mock; kept beside the
-// other uid/table constants per the cycle 4 brief.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// The physical table name asserted against below, in the unique-constraint-translation test: the
+// dialect error names it, and the generic message the caller actually sees must not.
 const PASSKEY_TABLE = 'strapi_admin_mfa_passkeys';
 const DEFAULT_PASSKEY_CHALLENGE_COLUMN = 'mfa_passkey_challenge';
 const DEFAULT_CHALLENGE_WEBAUTHN_COLUMN = 'webauthn_challenge';
@@ -517,6 +516,9 @@ interface FixtureOptions {
   challengeTableName?: string;
   challengeAttemptsColumn?: string;
   userPasskeyChallengeColumn?: string;
+  /** Drops `mfaPasskeyChallenge` from the USER_UID metadata entirely, so a test can prove the
+   * `ApplicationError` guard for a missing physical column. */
+  omitUserPasskeyChallengeColumn?: boolean;
   challengeWebauthnColumn?: string;
   /** Merged over `{ enabled: true }` and returned for `strapi.config.get('admin.auth.mfa')`. */
   mfaConfig?: Record<string, unknown>;
@@ -549,6 +551,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
   const challengeAttemptsColumn = options.challengeAttemptsColumn ?? CHALLENGE_ATTEMPTS_COLUMN;
   const userPasskeyChallengeColumn =
     options.userPasskeyChallengeColumn ?? DEFAULT_PASSKEY_CHALLENGE_COLUMN;
+  const omitUserPasskeyChallengeColumn = options.omitUserPasskeyChallengeColumn ?? false;
   const challengeWebauthnColumn =
     options.challengeWebauthnColumn ?? DEFAULT_CHALLENGE_WEBAUTHN_COLUMN;
 
@@ -580,7 +583,9 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
           tableName: userTable,
           attributes: {
             mfaLastUsedStep: { columnName: userStepColumn },
-            mfaPasskeyChallenge: { columnName: userPasskeyChallengeColumn },
+            ...(omitUserPasskeyChallengeColumn
+              ? {}
+              : { mfaPasskeyChallenge: { columnName: userPasskeyChallengeColumn } }),
           },
         };
       case RECOVERY_UID:
@@ -3590,9 +3595,21 @@ describe('mfa service: passkey registration', () => {
   const setup = ({
     enabled = true,
     adminUrl = ADMIN_URL,
-  }: { enabled?: boolean; adminUrl?: string } = {}) => {
+    userTableName,
+    userPasskeyChallengeColumn,
+    omitUserPasskeyChallengeColumn = false,
+  }: {
+    enabled?: boolean;
+    adminUrl?: string;
+    userTableName?: string;
+    userPasskeyChallengeColumn?: string;
+    omitUserPasskeyChallengeColumn?: boolean;
+  } = {}) => {
     const stored = { passkeys: { enabled } };
     const fixture = buildMfaFixture({
+      userTableName,
+      userPasskeyChallengeColumn,
+      omitUserPasskeyChallengeColumn,
       strapiOverrides: {
         store: jest.fn(() => ({ get: jest.fn(async () => stored), set: jest.fn() })),
         config: {
@@ -3711,6 +3728,21 @@ describe('mfa service: passkey registration', () => {
     ]);
   });
 
+  test('options skips a stored credentialId that is not valid base64url, logs it, and keeps the well-formed one', async () => {
+    const { service, passkeyRows, strapi } = setup();
+    seedPasskeys(passkeyRows, '1', 2);
+    // A row reachable only by hand-editing today, since the column is written from the library's
+    // own base64url `credential.id` -- but the real `generateRegistrationOptions` throws a bare
+    // `Error` for a non-base64url exclude-credential id, which would otherwise brick this route for
+    // the user permanently (they could never register a replacement while the row exists).
+    passkeyRows[0].credentialId = 'not valid!!';
+
+    const options = await service.passkeyRegistrationOptions('1');
+
+    expect(options.excludeCredentials).toEqual([{ id: 'seed-1', type: 'public-key' }]);
+    expect(strapi.log.error).toHaveBeenCalledWith(expect.stringContaining('not valid!!'));
+  });
+
   test('a second options call overwrites the pending ceremony: one slot per user', async () => {
     const { service, users } = setup();
 
@@ -3793,6 +3825,36 @@ describe('mfa service: passkey registration', () => {
 
     await expect(service.registerPasskey('1', 'Two', response as never)).rejects.toThrow(
       'That passkey could not be verified.'
+    );
+  });
+
+  test('resolves the user table and the passkey-challenge column from strapi.db.metadata rather than hardcoding them', async () => {
+    const { service, users } = setup({
+      userTableName: 'admin_users_x',
+      userPasskeyChallengeColumn: 'pk_chal',
+    });
+    const options = await service.passkeyRegistrationOptions('1');
+    jest.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
+
+    const created = await service.registerPasskey(
+      '1',
+      'Weird columns',
+      registrationFor(options.challenge) as never
+    );
+
+    expect(created.name).toBe('Weird columns');
+    expect(users.get('1')!.mfaPasskeyChallenge).toBeNull();
+  });
+
+  test('throws an ApplicationError naming the attribute when the passkey-challenge column cannot be resolved from metadata', async () => {
+    const { service } = setup({ omitUserPasskeyChallengeColumn: true });
+    const options = await service.passkeyRegistrationOptions('1');
+    jest.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
+
+    await expect(
+      service.registerPasskey('1', 'Nope', registrationFor(options.challenge) as never)
+    ).rejects.toThrow(
+      'Could not resolve the physical column name for admin::user.mfaPasskeyChallenge'
     );
   });
 
@@ -3897,18 +3959,27 @@ describe('mfa service: passkey registration', () => {
 
   test('a unique-constraint violation on credentialId surfaces as the generic 400, never the dialect error', async () => {
     const { service, passkeyMocks, passkeyRows } = setup();
-    const options = await service.passkeyRegistrationOptions('1');
+    const dialectError = new Error(`UNIQUE constraint failed: ${PASSKEY_TABLE}.credential_id`);
     jest.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
-    passkeyMocks.create.mockRejectedValueOnce(
-      new Error('UNIQUE constraint failed: strapi_admin_mfa_passkeys.credential_id')
-    );
 
+    const first = await service.passkeyRegistrationOptions('1');
+    passkeyMocks.create.mockRejectedValueOnce(dialectError);
     await expect(
-      service.registerPasskey('1', 'Taken', registrationFor(options.challenge) as never)
+      service.registerPasskey('1', 'Taken', registrationFor(first.challenge) as never)
     ).rejects.toThrow('That passkey could not be verified.');
+
+    // A fresh ceremony: the first call's own was consumed regardless of its outcome, so reusing it
+    // here would fail at the no-pending-ceremony guard before ever reaching `create` a second time
+    // -- which is exactly the bug this test used to have (proved: `create` was only ever called
+    // once, so this second assertion silently re-tested the no-pending-ceremony path instead of the
+    // dialect-error translation it claims to cover).
+    const second = await service.passkeyRegistrationOptions('1');
+    passkeyMocks.create.mockRejectedValueOnce(dialectError);
     await expect(
-      service.registerPasskey('1', 'Taken', registrationFor(options.challenge) as never)
-    ).rejects.not.toThrow(/strapi_admin_mfa_passkeys/);
+      service.registerPasskey('1', 'Taken', registrationFor(second.challenge) as never)
+    ).rejects.not.toThrow(new RegExp(PASSKEY_TABLE));
+
+    expect(passkeyMocks.create).toHaveBeenCalledTimes(2);
     expect(passkeyRows).toHaveLength(0);
   });
 
@@ -3957,6 +4028,21 @@ describe('mfa service: passkey registration', () => {
     });
     expect(strapi.eventHub.emit).toHaveBeenCalledWith('admin.mfa.passkey.removed', {
       userId: '1',
+    });
+  });
+
+  test("deletePasskey's write is scoped by userId as well as id, not id alone", async () => {
+    const { service, passkeyMocks, passkeyRows } = setup();
+    seedPasskeys(passkeyRows, '1', 1);
+    const row = passkeyRows[0];
+
+    await expect(service.deletePasskey('1', String(row.id))).resolves.toBe(true);
+
+    // The row was already fetched scoped to the caller, but the read and the write are two
+    // statements: this asserts the write itself carries `userId` too, rather than trusting the
+    // read's scope to still hold by the time the delete runs.
+    expect(passkeyMocks.deleteMany).toHaveBeenCalledWith({
+      where: { id: row.id, userId: '1' },
     });
   });
 

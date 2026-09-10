@@ -390,6 +390,27 @@ export const createPasskeys = ({
       select: ['credentialId', 'transports'],
     })) as Array<Pick<PasskeyRow, 'credentialId' | 'transports'>>;
 
+    // A stored `credentialId` that is not valid base64url makes the real `generateRegistrationOptions`
+    // throw a bare `Error` -- not a `ValidationError` -- which would surface as a 500 and
+    // permanently brick this route for the user: they could never register a replacement while
+    // the malformed row exists. Skip it instead and log it at error level so the corrupt row gets
+    // noticed; the only cost is losing the browser's `InvalidStateError` de-dupe nicety for that
+    // one authenticator, which is far cheaper than locking the user out of the feature entirely.
+    const excludeCredentials = existing
+      .filter((row) => {
+        if (isoBase64URL.isBase64URL(row.credentialId)) {
+          return true;
+        }
+        strapi.log.error(
+          `Passkey row for admin user ${userId} has a credentialId that is not valid base64url and was skipped when building excludeCredentials: ${row.credentialId}`
+        );
+        return false;
+      })
+      .map((row) => ({
+        id: row.credentialId,
+        transports: splitTransports(row.transports),
+      }));
+
     const displayName =
       [user.firstname, user.lastname].filter(Boolean).join(' ').trim() || user.email;
 
@@ -409,10 +430,7 @@ export const createPasskeys = ({
       attestationType: 'none',
       // What makes a second registration of the same authenticator fail in the browser with
       // `InvalidStateError` instead of creating a duplicate row.
-      excludeCredentials: existing.map((row) => ({
-        id: row.credentialId,
-        transports: splitTransports(row.transports),
-      })),
+      excludeCredentials,
       authenticatorSelection: {
         residentKey: 'preferred',
         // A hardware key with no PIN still works as a second factor: the password already
@@ -441,10 +459,12 @@ export const createPasskeys = ({
   ): Promise<Passkey> => {
     const user = await userQuery().findOne({ where: { id: userId } });
 
-    // Load-bearing guard, not defensive noise: written through the query engine a `null`
-    // where-value becomes `IS NULL`, so a user with no pending ceremony would match one row in
-    // the conditional statement below. That is also why that statement goes through the raw
-    // connection.
+    // Defence in depth, not the primary guard: the conditional statement below binds `submitted`
+    // (the challenge the browser actually signed), never the just-read `user.mfaPasskeyChallenge`,
+    // so a `null` column can never satisfy it and this check is provably redundant for that
+    // binding. It stays because the binding is what does the real work -- if a later edit rebinds
+    // the `where` to the read value instead of `submitted`, a `null` column becomes `IS NULL` and
+    // this guard becomes the only thing standing between that mistake and a replay.
     if (!user?.mfaPasskeyChallenge) {
       throw new ValidationError(PASSKEY_REGISTRATION_FAILED);
     }
@@ -485,7 +505,10 @@ export const createPasskeys = ({
     try {
       verification = await verifyRegistrationResponse({
         response: registration,
-        expectedChallenge: user.mfaPasskeyChallenge,
+        // `submitted` is the value the consume above actually matched on, not the pre-consume read
+        // -- they are provably equal on every reachable path, but this removes the divergence by
+        // construction instead of relying on that proof.
+        expectedChallenge: submitted,
         expectedOrigin: origins,
         expectedRPID: rpId,
         // `requireUserVerification` defaults to **true** in both of the library's verifiers, so
@@ -527,9 +550,14 @@ export const createPasskeys = ({
           },
         })) as PasskeyRow;
 
-        // The authoritative half of the cap, inside the insert's own transaction: two parallel
-        // registrations that both passed the options pre-check must not both land. Over the cap
-        // the throw rolls the insert back.
+        // The authoritative half of the cap: the recount and the insert share this transaction, so
+        // a row that commits between `passkeyRegistrationOptions`' pre-check and this recount is
+        // caught and the insert rolls back. This is not a concurrency guard -- two genuinely
+        // parallel transactions never see each other's uncommitted inserts, so it cannot stop two
+        // truly simultaneous registrations from both landing. The concurrency guard is the
+        // single-use ceremony consume above: one pending challenge column per user, spent by one
+        // conditional statement, so two concurrent registrations for the same user can never both
+        // reach this point.
         if ((await countRows(userId)) > MAX_PASSKEYS_PER_USER) {
           throw new ValidationError(PASSKEY_CAP_MESSAGE);
         }
@@ -603,7 +631,11 @@ export const createPasskeys = ({
       return false;
     }
 
-    await query().deleteMany({ where: { id: row.id } });
+    // Scoped by `userId` as well as `id`, not id alone: the read above is owner-scoped, but a read
+    // and a write are two separate statements, and only carrying the scope on the read is the
+    // hazard this module's own factory doc-comment names -- correct today only because nothing
+    // reorders the two.
+    await query().deleteMany({ where: { id: row.id, userId: String(userId) } });
     await recordEvent(userId, 'passkey_removed', { deviceName: row.name });
     notify(userId, 'passkey_removed');
 
