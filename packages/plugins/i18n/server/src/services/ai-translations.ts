@@ -1,4 +1,5 @@
 import type { Core, Modules } from '@strapi/types';
+import { createStrapiManagedAiTranslationsProvider } from './ai-translations-strapi-managed';
 
 export type GenerateTranslationsParams = {
   sourceLocale: string;
@@ -18,6 +19,7 @@ export type AiTranslationsProvider = Modules.AI.AiProvider & {
 export interface AiTranslationsService {
   hasProvider(): boolean;
   registerProvider(params: { provider: AiTranslationsProvider }): void;
+  registerStrapiManagedProvider(): void;
   generateTranslations(params: GenerateTranslationsParams): Promise<GenerateTranslationsResult>;
 }
 
@@ -27,6 +29,7 @@ const createAITranslationsService = ({
   strapi: Core.Strapi;
 }): AiTranslationsService => {
   let registeredProvider: AiTranslationsProvider | null = null;
+  let strapiManagedProvider: AiTranslationsProvider | null = null;
 
   const resolveProvider = (): AiTranslationsProvider | null => {
     if (!strapi.ai.admin.isAvailable()) {
@@ -42,12 +45,21 @@ const createAITranslationsService = ({
     },
 
     registerProvider({ provider }: { provider: AiTranslationsProvider }) {
-      if (!strapi.ai.admin.isAvailable()) {
-        strapi.log.warn(
-          `The AI translations provider "${provider.name}" was ignored: AI features require an Enterprise license and "admin.ai.enabled" to be true.`
-        );
+      if (!strapi.ai.admin.authorizeCustomProvider()) {
         return;
       }
+
+      if (registeredProvider !== null && registeredProvider !== strapiManagedProvider) {
+        throw new Error(
+          `The AI translations provider "${registeredProvider.name}" is already registered, "${provider.name}" cannot replace it.`
+        );
+      }
+
+      registeredProvider = provider;
+    },
+
+    registerStrapiManagedProvider() {
+      const provider = createStrapiManagedAiTranslationsProvider({ strapi });
 
       if (registeredProvider !== null) {
         throw new Error(
@@ -55,6 +67,7 @@ const createAITranslationsService = ({
         );
       }
 
+      strapiManagedProvider = provider;
       registeredProvider = provider;
     },
 
