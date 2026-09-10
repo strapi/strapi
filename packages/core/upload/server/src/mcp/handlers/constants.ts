@@ -48,7 +48,7 @@ export const MCP_MOVE_ASSETS_ID_FAILED = (cause: string) =>
   `Moving this asset failed: ${cause}. This is not a problem with the id itself — the asset exists and this token may edit it — so retrying may succeed. Any assets listed under \`moved\` were still moved.`;
 
 /**
- * Per-id `failed` reasons for `media_delete_assets`, and the dry-run's `unresolved` reason.
+ * Per-id `failed` reasons for `media_delete_assets`, and the dry-run's `failed` reason.
  *
  * Reported per id rather than thrown, because a delete is irreversible: an error carries no
  * `structuredContent`, so throwing on the third id would discard the report saying the first

@@ -19,8 +19,6 @@ import {
 } from './constants';
 import { ok } from '../utils';
 
-import type { File } from '../../types';
-
 // Type-level only: the MCP SDK validates `args` against the tool's strict Zod input schema
 // before the handler runs, so unknown keys never reach here.
 type MediaUpdateAssetArgs = {
@@ -35,11 +33,12 @@ type MediaMoveAssetsArgs = {
   folder: number | null;
 };
 
-/** The metadata keys `media_update_asset` may write. Everything else is rejected by the schema. */
 type MediaDeleteAssetsArgs = {
   ids: number[];
   dryRun?: boolean;
 };
+
+/** The metadata keys `media_update_asset` may write. Everything else is rejected by the schema. */
 const WRITABLE_FIELDS = ['name', 'alternativeText', 'caption'] as const;
 
 /**
@@ -304,7 +303,7 @@ export const createMediaDeleteAssetsHandler =
     // `ids` can repeat an id; de-duplicating keeps the report one entry per id, and stops the
     // second occurrence of an already-deleted asset from being reported as a missing one.
     for (const id of new Set(ids)) {
-      let file: Record<string, unknown>;
+      let file;
 
       try {
         // Row-level check, shared with the admin controller: an owner-scoped permission
@@ -345,7 +344,7 @@ export const createMediaDeleteAssetsHandler =
       }
 
       try {
-        await getService('upload', strapi).remove(file as unknown as File);
+        await getService('upload', strapi).remove(file);
 
         // Reported from the row read before the delete: the asset no longer exists, so this is
         // the only description of it the agent will ever get.
