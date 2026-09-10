@@ -149,7 +149,11 @@ class ReadableStrapiQuery extends Readable {
 
       // Applies the populate if needed
       if (populate) {
-        await applyPopulate(results, populate, { qb: this._qb, uid: this._uid, db: this._db });
+        await applyPopulate(results, populate, {
+          qb: this._qb,
+          uid: this._uid,
+          db: this._db,
+        });
       }
 
       // Map results if asked to

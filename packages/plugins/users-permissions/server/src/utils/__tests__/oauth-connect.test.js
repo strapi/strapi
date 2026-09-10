@@ -288,6 +288,48 @@ describe('createOAuthConnectMiddleware', () => {
     expect(ctx.redirect).toHaveBeenCalledWith(
       expect.stringContaining('http://localhost:3000/custom-cb')
     );
+    expect(ctx.redirect).not.toHaveBeenCalledWith(expect.stringContaining('access_token'));
+    expect(ctx.session.grant).toEqual({ response: { access_token: 'tok' } });
+  });
+
+  test('keeps only the provider-specific token fields in the server session', async () => {
+    const idToken = `header.${'x'.repeat(1800)}.signature`;
+    jest.spyOn(oauth2, 'exchangeAuthorizationCode').mockResolvedValue({
+      id_token: idToken,
+      access_token: 'access-token',
+      refresh_token: 'refresh-token',
+      token_type: 'bearer',
+    });
+
+    setStrapi({
+      store: () => ({
+        get: async () => ({
+          cognito: {
+            enabled: true,
+            key: 'k',
+            secret: 's',
+            subdomain: 'auth.example.com',
+            callback: 'http://localhost:3000/cb',
+            scope: ['openid', 'email'],
+          },
+        }),
+      }),
+    });
+    mockProvidersService();
+
+    const mw = createOAuthConnectMiddleware();
+    const ctx = {
+      request: { url: '/api/connect/cognito/callback?code=abc&state=good' },
+      query: { code: 'abc', state: 'good' },
+      session: { grant: { state: 'good' } },
+      state: {},
+      redirect: jest.fn(),
+    };
+
+    await mw(ctx, jest.fn());
+
+    expect(ctx.session.grant).toEqual({ response: { id_token: idToken } });
+    expect(ctx.redirect).toHaveBeenCalledWith('http://localhost:3000/cb');
   });
 
   test('start leg keeps dynamic callback in session across grant rewrite', async () => {
