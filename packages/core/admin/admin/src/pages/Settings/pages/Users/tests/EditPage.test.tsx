@@ -388,6 +388,11 @@ describe('Users | EditPage', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
 
       expect(await screen.findByText('User does not exist')).toBeInTheDocument();
+      // A refused removal must leave the panel truthful: the count is unchanged and the action is
+      // still offered, because nothing was deleted. Asserting only the toast would pass even if the
+      // count had optimistically zeroed itself.
+      expect(screen.getByText('1 passkey')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Remove passkeys' })).toBeInTheDocument();
     });
   });
 });
