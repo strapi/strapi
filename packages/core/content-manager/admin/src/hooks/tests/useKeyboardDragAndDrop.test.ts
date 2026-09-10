@@ -1,6 +1,6 @@
 import type { KeyboardEvent } from 'react';
 
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 
 import { useKeyboardDragAndDrop } from '../useKeyboardDragAndDrop';
 
@@ -18,7 +18,7 @@ describe('useKeyboardDragAndDrop', () => {
         useKeyboardDragAndDrop(true, 0, { onGrabItem, onMoveItem: jest.fn() })
       );
 
-      await waitFor(() => {
+      act(() => {
         result.current(event('Enter'));
       });
 
@@ -31,7 +31,7 @@ describe('useKeyboardDragAndDrop', () => {
         useKeyboardDragAndDrop(true, 0, { onGrabItem, onMoveItem: jest.fn() })
       );
 
-      await waitFor(() => {
+      act(() => {
         result.current(event(' '));
         result.current(event('Enter'));
       });
@@ -47,11 +47,11 @@ describe('useKeyboardDragAndDrop', () => {
         useKeyboardDragAndDrop(true, 0, { onDropItem, onMoveItem: jest.fn() })
       );
 
-      await waitFor(() => {
+      act(() => {
         result.current(event('Enter'));
       });
 
-      await waitFor(() => {
+      act(() => {
         result.current(event('Enter'));
       });
 
@@ -64,11 +64,11 @@ describe('useKeyboardDragAndDrop', () => {
         useKeyboardDragAndDrop(true, 0, { onDropItem, onMoveItem: jest.fn() })
       );
 
-      await waitFor(() => {
+      act(() => {
         result.current(event(' '));
       });
 
-      await waitFor(() => {
+      act(() => {
         result.current(event(' '));
       });
 
@@ -83,21 +83,21 @@ describe('useKeyboardDragAndDrop', () => {
         useKeyboardDragAndDrop(true, 0, { onCancel, onMoveItem: jest.fn() })
       );
 
-      await waitFor(() => {
+      act(() => {
         result.current(event('Enter'));
       });
 
-      await waitFor(() => {
+      act(() => {
         result.current(event('Escape'));
       });
 
       expect(onCancel).toHaveBeenCalledWith(0);
 
-      await waitFor(() => {
+      act(() => {
         result.current(event(' '));
       });
 
-      await waitFor(() => {
+      act(() => {
         result.current(event('Escape'));
       });
 
@@ -110,7 +110,7 @@ describe('useKeyboardDragAndDrop', () => {
         useKeyboardDragAndDrop(true, 0, { onCancel, onMoveItem: jest.fn() })
       );
 
-      await waitFor(() => {
+      act(() => {
         result.current(event('Escape'));
       });
 
@@ -123,11 +123,11 @@ describe('useKeyboardDragAndDrop', () => {
       const onMoveItem = jest.fn();
       const { result } = renderHook(() => useKeyboardDragAndDrop(true, 0, { onMoveItem }));
 
-      await waitFor(() => {
+      act(() => {
         result.current(event('Enter'));
       });
 
-      await waitFor(() => {
+      act(() => {
         result.current(event('ArrowDown'));
       });
 
@@ -138,11 +138,11 @@ describe('useKeyboardDragAndDrop', () => {
       const onMoveItem = jest.fn();
       const { result } = renderHook(() => useKeyboardDragAndDrop(true, 0, { onMoveItem }));
 
-      await waitFor(() => {
+      act(() => {
         result.current(event('Enter'));
       });
 
-      await waitFor(() => {
+      act(() => {
         result.current(event('ArrowRight'));
       });
 
@@ -153,11 +153,11 @@ describe('useKeyboardDragAndDrop', () => {
       const onMoveItem = jest.fn();
       const { result } = renderHook(() => useKeyboardDragAndDrop(true, 0, { onMoveItem }));
 
-      await waitFor(() => {
+      act(() => {
         result.current(event('ArrowDown'));
       });
 
-      await waitFor(() => {
+      act(() => {
         result.current(event('ArrowRight'));
       });
 
@@ -168,11 +168,11 @@ describe('useKeyboardDragAndDrop', () => {
       const onMoveItem = jest.fn();
       const { result } = renderHook(() => useKeyboardDragAndDrop(true, 1, { onMoveItem }));
 
-      await waitFor(() => {
+      act(() => {
         result.current(event('Enter'));
       });
 
-      await waitFor(() => {
+      act(() => {
         result.current(event('ArrowUp'));
       });
 
@@ -183,11 +183,11 @@ describe('useKeyboardDragAndDrop', () => {
       const onMoveItem = jest.fn();
       const { result } = renderHook(() => useKeyboardDragAndDrop(true, 1, { onMoveItem }));
 
-      await waitFor(() => {
+      act(() => {
         result.current(event('Enter'));
       });
 
-      await waitFor(() => {
+      act(() => {
         result.current(event('ArrowLeft'));
       });
 
@@ -198,11 +198,11 @@ describe('useKeyboardDragAndDrop', () => {
       const onMoveItem = jest.fn();
       const { result } = renderHook(() => useKeyboardDragAndDrop(true, 1, { onMoveItem }));
 
-      await waitFor(() => {
+      act(() => {
         result.current(event('ArrowUp'));
       });
 
-      await waitFor(() => {
+      act(() => {
         result.current(event('ArrowLeft'));
       });
 
