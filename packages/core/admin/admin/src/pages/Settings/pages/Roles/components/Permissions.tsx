@@ -38,6 +38,8 @@ import { updateValues, updateValuesWithPermissions } from '../utils/updateValues
 import { ContentTypes } from './ContentTypes';
 import { PluginsAndSettingsPermissions } from './PluginsAndSettings';
 
+import type { ConditionsPolicy } from '../hooks/usePermissionsDataManager';
+
 const TAB_LABELS = [
   {
     labelId: 'app.components.LeftMenuLinkContainer.collectionTypes',
@@ -80,12 +82,25 @@ interface PermissionsProps {
   onLocaleValidationChange?: (hasErrors: boolean) => void;
   permissions?: Permission[];
   layout: PermissonContracts.GetAll.Response['data'];
+  /**
+   * The ceiling: permissions the editing admin holds. When set, what they lack is
+   * rendered disabled (never hidden) and cannot be granted.
+   */
   userPermissions?: AuthPermission[];
+  /** See `ConditionsPolicy`; defaults to `inherit` (admin API token semantics). */
+  conditionsPolicy?: ConditionsPolicy;
 }
 
 const Permissions = React.forwardRef<PermissionsAPI, PermissionsProps>(
   (
-    { layout, isFormDisabled, onLocaleValidationChange, permissions = [], userPermissions },
+    {
+      layout,
+      isFormDisabled,
+      onLocaleValidationChange,
+      permissions = [],
+      userPermissions,
+      conditionsPolicy = 'inherit',
+    },
     api
   ) => {
     const [{ initialData, layouts, modifiedData }, dispatch] = React.useReducer(
@@ -178,9 +193,9 @@ const Permissions = React.forwardRef<PermissionsAPI, PermissionsProps>(
 
     const handleChangeConditions = React.useCallback(
       (conditions: OnChangeConditionsAction['conditions']) => {
-        dispatch({ type: 'ON_CHANGE_CONDITIONS', conditions, userPermissions });
+        dispatch({ type: 'ON_CHANGE_CONDITIONS', conditions, userPermissions, conditionsPolicy });
       },
-      [userPermissions]
+      [userPermissions, conditionsPolicy]
     );
 
     const handleChangeSimpleCheckbox: PermissionsDataManagerContextValue['onChangeSimpleCheckbox'] =
@@ -221,6 +236,7 @@ const Permissions = React.forwardRef<PermissionsAPI, PermissionsProps>(
         }
         onChangeCollectionTypeGlobalActionCheckbox={handleChangeCollectionTypeGlobalActionCheckbox}
         userPermissions={userPermissions}
+        conditionsPolicy={conditionsPolicy}
       >
         <Tabs.Root defaultValue={TAB_LABELS[0].id}>
           <Tabs.List
@@ -318,6 +334,7 @@ interface OnChangeConditionsAction {
   type: 'ON_CHANGE_CONDITIONS';
   conditions: Record<string, ConditionForm>;
   userPermissions?: AuthPermission[];
+  conditionsPolicy?: ConditionsPolicy;
 }
 
 interface OnChangeSimpleCheckboxAction {
@@ -546,8 +563,10 @@ const reducer = (state: State, action: Action) =>
         break;
       }
       case 'ON_CHANGE_CONDITIONS': {
-        // In App Token context, conditions are inherited from the user's permissions and must be read-only.
-        if (action.userPermissions !== undefined) {
+        // In App Token context (`inherit`), conditions come from the user's permissions and
+        // are read-only. Under the `bounded` policy (roles) they are editable; the modal locks
+        // the rows whose ceiling permission is conditional.
+        if (action.userPermissions !== undefined && action.conditionsPolicy !== 'bounded') {
           break;
         }
 

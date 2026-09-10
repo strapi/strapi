@@ -14,6 +14,7 @@ import { useQueryParams } from '../../../../../../../admin/src/hooks/useQueryPar
 import { useRBAC } from '../../../../../../../admin/src/hooks/useRBAC';
 import { AuditLog } from '../../../../../../../shared/contracts/audit-logs';
 
+import { getAuditLogFilters, getAuditLogTableColumns } from './audit-logs-plugin';
 import { Modal } from './components/Modal';
 import { useAuditLogsData } from './hooks/useAuditLogsData';
 import { useFormatTimeStamp } from './hooks/useFormatTimeStamp';
@@ -56,15 +57,22 @@ const ListPage = () => {
 
   const formatTimeStamp = useFormatTimeStamp();
 
-  const displayedFilters = getDisplayedFilters({
-    formatMessage,
-    users,
-    usersFilter: {
-      loading: isLoadingUsers,
-      hasMoreItems: hasMoreUsers,
-      onLoadMore: handleLoadMoreUsers,
-    },
-  });
+  const displayedFilters = [
+    ...getDisplayedFilters({
+      formatMessage,
+      users,
+      usersFilter: {
+        loading: isLoadingUsers,
+        hasMoreItems: hasMoreUsers,
+        onLoadMore: handleLoadMoreUsers,
+      },
+    }),
+    // Filters registered by plugins (see audit-logs-plugin.ts).
+    ...getAuditLogFilters({ formatMessage }),
+  ];
+
+  // Columns registered by plugins, rendered after the built-in ones.
+  const extraColumns = getAuditLogTableColumns();
 
   const headers: Table.Header<AuditLog, object>[] = [
     {
@@ -93,6 +101,14 @@ const ListPage = () => {
       // In this case, the passed parameter cannot and shouldn't be something else than User
       cellFormatter: ({ user }) => (user ? user.displayName : ''),
     },
+    ...extraColumns.map(
+      ({ id, header, Cell }): Table.Header<AuditLog, object> => ({
+        name: id,
+        label: formatMessage(header),
+        sortable: false,
+        cellFormatter: (log) => <Cell log={log} />,
+      })
+    ),
   ];
 
   if (hasError) {
@@ -186,9 +202,13 @@ const ListPage = () => {
                       default:
                         return (
                           <Table.Cell key={name}>
-                            <Typography textColor="neutral800">
-                              {(log[name as keyof AuditLog] as string) || '-'}
-                            </Typography>
+                            {cellFormatter ? (
+                              cellFormatter(log, header)
+                            ) : (
+                              <Typography textColor="neutral800">
+                                {(log[name as keyof AuditLog] as string) || '-'}
+                              </Typography>
+                            )}
                           </Table.Cell>
                         );
                     }

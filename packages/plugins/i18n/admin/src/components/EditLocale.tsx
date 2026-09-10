@@ -22,7 +22,7 @@ import { Pencil } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { Locale, UpdateLocale } from '../../../shared/contracts/locales';
-import { getLocaleFormExtensionInitialValues } from '../i18n-plugin';
+import { getLocaleFormExtensionInitialValues, isLocaleReadOnlyByExtensions } from '../i18n-plugin';
 import { useUpdateLocaleMutation } from '../services/locales';
 import { isBaseQueryError } from '../utils/baseQuery';
 import { getTranslation } from '../utils/getTranslation';
@@ -103,6 +103,14 @@ const EditModal = ({
   const titleId = useId();
 
   const [updateLocale] = useUpdateLocaleMutation();
+  const isReadOnly = isLocaleReadOnlyByExtensions({
+    id,
+    code,
+    isDefault,
+    name,
+    spaces,
+    isDefaultIn,
+  });
   const handleSubmit = async (
     { code: _code, ...data }: FormValues,
     helpers: FormHelpers<FormValues>
@@ -209,7 +217,7 @@ const EditModal = ({
               <Divider />
               <Box paddingTop={7} paddingBottom={7}>
                 <Tabs.Content value="basic">
-                  <BaseForm mode="edit" />
+                  <BaseForm mode="edit" disabled={isReadOnly} />
                   <LocaleFormExtensions mode="edit" />
                 </Tabs.Content>
                 <Tabs.Content value="advanced">

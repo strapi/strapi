@@ -5,7 +5,21 @@ export type HandlerParams = {
   documentId: string;
   locale: string;
   status: 'published' | 'draft';
+  /**
+   * Extra context contributed by plugins (see `registerParamsProvider`), keyed
+   * by provider name — e.g. `plugins.spaces` carries the active workspace.
+   */
+  plugins?: Record<string, unknown>;
 };
+
+/**
+ * Extension point: a plugin can add context to the params handed to the
+ * user's preview handler (`plugins.<name>`), computed per request. Returning
+ * `undefined` contributes nothing.
+ */
+export type PreviewParamsProvider = (params: Omit<HandlerParams, 'plugins'>) => unknown;
+
+const paramsProviders = new Map<string, PreviewParamsProvider>();
 
 /**
  * @deprecated Use Core.Config.Admin['preview'] from @strapi/types instead
@@ -80,6 +94,17 @@ const createPreviewConfigService = ({ strapi }: { strapi: Core.Strapi }) => {
           'Preview configuration is invalid. Handler must be a function'
         );
       }
+    },
+
+    /**
+     * Registers (or replaces) a params provider — see `PreviewParamsProvider`.
+     */
+    registerParamsProvider(name: string, provider: PreviewParamsProvider) {
+      paramsProviders.set(name, provider);
+    },
+
+    getParamsProviders(): ReadonlyMap<string, PreviewParamsProvider> {
+      return paramsProviders;
     },
 
     /**

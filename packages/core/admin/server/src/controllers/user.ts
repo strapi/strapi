@@ -1,6 +1,7 @@
 import type { Context } from 'koa';
 
 import * as _ from 'lodash';
+import type { Data } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import {
   validateUserCreationInput,
@@ -21,6 +22,24 @@ import { AdminUser } from '../../../shared/contracts/shared';
 
 const { ApplicationError } = errors;
 
+/**
+ * Roles newly added to a user must be within the caller's permission ceiling
+ * (CMS-1718); roles the user already holds are left alone.
+ */
+const assertAddedRolesWithinCeiling = async (
+  caller: AdminUser | undefined,
+  userId: Data.ID,
+  roles: Data.ID[] | undefined
+) => {
+  if (!Array.isArray(roles)) {
+    return;
+  }
+  const current = (await getService('user').findOne(userId)) as AdminUser | null | undefined;
+  const currentRoleIds = new Set((current?.roles ?? []).map((role) => String(role.id)));
+  const added = roles.filter((roleId) => !currentRoleIds.has(String(roleId)));
+  await getService('permission').assertUserCanAssignRoles(caller, added);
+};
+
 export default {
   async create(ctx: Context) {
     const { body } = ctx.request as Create.Request;
@@ -36,12 +55,18 @@ export default {
       'preferedLanguage',
     ]);
 
+    // Assigning a role grants its permissions: they must be within the caller's own.
+    await getService('permission').assertUserCanAssignRoles(
+      ctx.state?.user,
+      attributes.roles ?? []
+    );
+
     const userAlreadyExists = await getService('user').exists({
       email: attributes.email,
     });
 
     if (userAlreadyExists) {
-      throw new ApplicationError('Email already taken');
+      throw new ApplicationError('Email already taken', { code: 'EMAIL_ALREADY_TAKEN' });
     }
 
     const createdUser = await getService('user').create(attributes);
@@ -107,6 +132,10 @@ export default {
       if (uniqueEmailCheck) {
         throw new ApplicationError('A user with this email address already exists');
       }
+    }
+
+    if (_.has(data, 'roles')) {
+      await assertAddedRolesWithinCeiling(ctx.state?.user, id, data.roles);
     }
 
     const updatedUser = await getService('user').updateById(id, data);

@@ -1,6 +1,8 @@
 /* eslint-disable check-file/filename-naming-convention */
-import { lazy } from 'react';
+import * as React from 'react';
+import { lazy, Suspense } from 'react';
 
+import { Page, useStrapiApp } from '@strapi/admin/strapi-admin';
 import { Navigate, RouteObject, useParams } from 'react-router-dom';
 
 import { COLLECTION_TYPES, SINGLE_TYPES } from './constants/collections';
@@ -52,6 +54,29 @@ const CollectionTypePages = () => {
   );
 };
 
+/**
+ * Pages plugins mount inside the Content Manager (`addPage`), looked up at
+ * render time so the registration order of plugins does not matter.
+ */
+const PluginPage = () => {
+  const { pluginPage } = useParams<{ pluginPage: string }>();
+  const getPlugin = useStrapiApp('PluginPage', (state) => state.getPlugin);
+  const apis = getPlugin('content-manager')?.apis as
+    | { getPages?: () => Array<{ id: string; Component: React.ComponentType }> }
+    | undefined;
+  const page = apis?.getPages?.().find((candidate) => candidate.id === pluginPage);
+
+  if (!page) {
+    return <Navigate to="/404" />;
+  }
+
+  return (
+    <Suspense fallback={<Page.Loading />}>
+      <page.Component />
+    </Suspense>
+  );
+};
+
 const CLONE_RELATIVE_PATH = ':collectionType/:slug/clone/:origin';
 const CLONE_PATH = `/content-manager/${CLONE_RELATIVE_PATH}`;
 const LIST_RELATIVE_PATH = ':collectionType/:slug';
@@ -89,6 +114,10 @@ const routes: RouteObject[] = [
   {
     path: 'no-content-types',
     Component: NoContentType,
+  },
+  {
+    path: 'plugins/:pluginPage/*',
+    element: <PluginPage />,
   },
   ...historyRoutes,
   ...previewRoutes,

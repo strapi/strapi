@@ -1,12 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */ // TODO: TS - Use database parameters interface when they are ready
 /* eslint-disable @typescript-eslint/default-param-last */
 import _ from 'lodash';
-import { set, omit, pick, prop, isArray, differenceWith, differenceBy, isEqual } from 'lodash/fp';
+import { set, omit, prop, isArray, differenceWith, differenceBy } from 'lodash/fp';
 
 import { dates, arrays, hooks as hooksUtils, errors } from '@strapi/utils';
 import type { Data } from '@strapi/types';
 
-import permissionDomain from '../domain/permission';
+import permissionDomain, { arePermissionsEqual } from '../domain/permission';
+import { hasSuperAdminRole } from '../domain/user';
+import { PermissionCeilingError } from './permission/ceiling';
 import type { AdminUser, AdminRole, Permission } from '../../../shared/contracts/shared';
 import type { Action } from '../domain/action';
 
@@ -35,22 +37,6 @@ const sanitizeRole: <T extends object>(obj: T) => Omit<T, 'users' | 'permissions
 ] as const);
 
 export type AdminRoleWithUsersCount = AdminRole & { usersCount: number };
-
-const COMPARABLE_FIELDS = ['conditions', 'properties', 'subject', 'action', 'actionParameters'];
-const pickComparableFields = pick(COMPARABLE_FIELDS);
-
-const jsonClean = <T extends object>(data: T): T => JSON.parse(JSON.stringify(data));
-
-/**
- * Compare two permissions
- */
-const arePermissionsEqual = (p1: Permission, p2: Permission): boolean => {
-  if (p1.action === p2.action) {
-    return isEqual(jsonClean(pickComparableFields(p1)), jsonClean(pickComparableFields(p2)));
-  }
-
-  return false;
-};
 
 /**
  * Create and save a role in database
@@ -324,10 +310,15 @@ const displayWarningIfNoSuperAdmin = async () => {
  * Assign permissions to a role
  * @param roleId - role Data.ID
  * @param {Array<Permission{action,subject,fields,conditions}>} permissions - permissions to assign to the role
+ * @param options.ceilingUser - when given (a request on behalf of an admin), every permission
+ *   NEWLY granted to the role must be within that admin's own permissions (CMS-1718).
+ *   Permissions the role already carries are preserved even when the admin does not hold
+ *   them; narrowing one of them counts as a new grant and is refused. Super admins bypass.
  */
 const assignPermissions = async (
   roleId: Data.ID,
-  permissions: Array<Pick<Permission, 'action' | 'subject' | 'conditions'>> = []
+  permissions: Array<Pick<Permission, 'action' | 'subject' | 'conditions'>> = [],
+  { ceilingUser }: { ceilingUser?: AdminUser | null } = {}
 ) => {
   await validatePermissionsExist(permissions);
 
@@ -367,6 +358,17 @@ const assignPermissions = async (
   ).filter((permission: Permission) => !internalActions.includes(permission.action));
 
   const permissionsToReturn = differenceBy('id', permissionsToDelete, existingPermissions);
+
+  if (ceilingUser && !hasSuperAdminRole(ceilingUser) && permissionsToAdd.length > 0) {
+    const { checkUserCanGrantPermissions, formatCeilingMessage } = getService('permission');
+    const { allowed, violations } = await checkUserCanGrantPermissions(
+      ceilingUser,
+      permissionsToAdd
+    );
+    if (!allowed) {
+      throw new PermissionCeilingError(formatCeilingMessage(violations), { violations });
+    }
+  }
 
   if (permissionsToDelete.length > 0) {
     // @ts-expect-error - lodash prop doesn't resolve the type appropriately
@@ -449,15 +451,6 @@ const resetSuperAdminPermissions = async () => {
   )) as Permission[];
 
   await assignPermissions(superAdminRole.id, transformedPermissions);
-};
-
-/**
- * Check if a user object includes the super admin role
- */
-const hasSuperAdminRole = (user: AdminUser): boolean => {
-  const roles = _.get(user, 'roles', []) as AdminRole[];
-
-  return roles.map(prop('code')).includes(SUPER_ADMIN_CODE);
 };
 
 const constants = {

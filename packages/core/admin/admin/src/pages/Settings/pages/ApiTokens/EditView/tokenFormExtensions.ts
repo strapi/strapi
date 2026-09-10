@@ -22,6 +22,8 @@ interface TokenFormExtension {
   field: string;
   Component: React.ComponentType<TokenFormExtensionComponentProps>;
   getInitialValue?: (token: unknown) => unknown;
+  /** When true for the fetched token, the form is read-only (regeneration included). */
+  isReadOnly?: (token: unknown) => boolean;
 }
 
 const tokenFormExtensions: TokenFormExtension[] = [];
@@ -60,5 +62,8 @@ export const pickTokenFormExtensionValues = (
         : { ...acc, [extension.field]: values[extension.field] },
     {}
   );
+
+export const isTokenReadOnlyByExtensions = (token: unknown): boolean =>
+  tokenFormExtensions.some((extension) => extension.isReadOnly?.(token) === true);
 
 export type { TokenFormExtension, TokenFormExtensionComponentProps };

@@ -53,7 +53,31 @@ const ConditionsModal = ({
   onClose,
 }: ConditionsModalProps) => {
   const { formatMessage } = useIntl();
-  const { availableConditions, modifiedData, onChangeConditions } = usePermissionsDataManager();
+  const {
+    availableConditions,
+    modifiedData,
+    onChangeConditions,
+    conditionsPolicy,
+    getConditionsCeiling,
+  } = usePermissionsDataManager();
+
+  /**
+   * Under the `bounded` policy a row is locked when the editing admin's own permission
+   * for that action is conditional: the role then inherits exactly those conditions,
+   * since adding or removing any would grant more than the admin holds.
+   */
+  const isRowLockedByCeiling = React.useCallback(
+    (actionId: string, pathToConditionsObject: string[]) => {
+      if (conditionsPolicy !== 'bounded') {
+        return false;
+      }
+      const [root, second] = pathToConditionsObject;
+      const subject = root === 'collectionTypes' || root === 'singleTypes' ? second : null;
+
+      return getConditionsCeiling(actionId, subject) !== null;
+    },
+    [conditionsPolicy, getConditionsCeiling]
+  );
 
   const arrayOfOptionsGroupedByCategory = React.useMemo(() => {
     return Object.entries(groupBy(availableConditions, 'category'));
@@ -156,7 +180,10 @@ const ConditionsModal = ({
         </Breadcrumbs>
       </Modal.Header>
       <Modal.Body>
-        {isReadOnly && (
+        {(isReadOnly ||
+          actionsToDisplay.some(({ actionId, pathToConditionsObject }) =>
+            isRowLockedByCeiling(actionId, pathToConditionsObject)
+          )) && (
           <Box paddingBottom={4}>
             <Typography textColor="neutral600">
               {formatMessage({
@@ -179,14 +206,16 @@ const ConditionsModal = ({
         <ul>
           {actionsToDisplay.map(({ actionId, label, pathToConditionsObject }, index) => {
             const name = pathToConditionsObject.join('..');
+            const isRowReadOnly =
+              isReadOnly || isRowLockedByCeiling(actionId, pathToConditionsObject);
 
             return (
               <ActionRow
                 key={actionId}
                 arrayOfOptionsGroupedByCategory={arrayOfOptionsGroupedByCategory}
                 label={label}
-                isFormDisabled={isFormDisabled || isReadOnly}
-                isReadOnly={isReadOnly}
+                isFormDisabled={isFormDisabled || isRowReadOnly}
+                isReadOnly={isRowReadOnly}
                 isGrey={index % 2 === 0}
                 name={name}
                 onChange={handleChange}

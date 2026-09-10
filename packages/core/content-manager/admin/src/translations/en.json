@@ -57,6 +57,7 @@
   "components.Filters.usersSelect.label": "Search and select a user to filter by",
   "components.LeftMenu.Search.label": "Search for a content type",
   "components.LeftMenu.collection-types": "Collection Types",
+  "components.LeftMenu.plugins": "Plugins",
   "components.LeftMenu.single-types": "Single Types",
   "components.LimitSelect.itemsPerPage": "Items per page",
   "components.NotAllowedInput.text": "No permissions to see this field",

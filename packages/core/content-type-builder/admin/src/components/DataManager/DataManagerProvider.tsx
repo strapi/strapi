@@ -24,6 +24,7 @@ import { useCTBSession } from '../CTBSession/useCTBSession';
 import { useFormModalNavigation } from '../FormModalNavigation/useFormModalNavigation';
 
 import { DataManagerContext, type DataManagerContextValue } from './DataManagerContext';
+import { useReadOnlyRules } from './readOnlyRules';
 import { actions, initialState, type State } from './reducer';
 import { useServerRestartWatcher } from './useServerRestartWatcher';
 import { sortContentType, stateToRequestData } from './utils/cleanData';
@@ -106,7 +107,10 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
 
   const fetchClient = useFetchClient();
 
-  const isInDevelopmentMode = autoReload;
+  // Plugins can put the builder in read-only mode (see readOnlyRules.ts):
+  // the schema stays browsable, editing behaves like production mode.
+  const { readOnly: isReadOnlyByRule, reason: readOnlyReason } = useReadOnlyRules();
+  const isInDevelopmentMode = autoReload && !isReadOnlyByRule;
 
   const getDataRef = React.useRef<() => Promise<void>>(async () => undefined);
 
@@ -181,6 +185,12 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       });
     }
   }, [autoReload, toggleNotification, formatMessage]);
+
+  React.useEffect(() => {
+    if (autoReload && isReadOnlyByRule && readOnlyReason) {
+      toggleNotification({ type: 'info', message: formatMessage(readOnlyReason) });
+    }
+  }, [autoReload, isReadOnlyByRule, readOnlyReason, toggleNotification, formatMessage]);
 
   const getAllComponentsThatHaveAComponentInTheirAttributes = (components: Components) => {
     const composWithCompos = retrieveComponentsThatHaveComponents(components);

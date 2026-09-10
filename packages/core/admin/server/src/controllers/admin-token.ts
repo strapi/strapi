@@ -3,7 +3,7 @@ import type { Context } from 'koa';
 import { strings, errors } from '@strapi/utils';
 import { trim, has } from 'lodash/fp';
 import { getService } from '../utils';
-import constants from '../services/constants';
+import { hasSuperAdminRole } from '../domain/user';
 import {
   validateAdminTokenCreationInput,
   validateAdminTokenUpdateInput,
@@ -26,8 +26,7 @@ const { ApplicationError } = errors;
 // Access-control helpers
 // ---------------------------------------------------------------------------
 
-const isSuperAdmin = (user: AdminUser): boolean =>
-  user.roles.some((r) => r.code === constants.SUPER_ADMIN_CODE) === true;
+const isSuperAdmin = (user: AdminUser): boolean => hasSuperAdminRole(user);
 
 const getOwnerId = (token: AdminApiToken): string => {
   const owner = token.adminUserOwner;

@@ -13,7 +13,7 @@ import {
 } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { getLocaleTableColumns } from '../i18n-plugin';
+import { getLocaleTableColumns, isLocaleReadOnlyByExtensions } from '../i18n-plugin';
 import { getTranslation } from '../utils/getTranslation';
 
 import { DeleteLocale } from './DeleteLocale';
@@ -118,7 +118,9 @@ const LocaleTable = ({ locales = [], canDelete, canUpdate }: LocaleTableProps) =
               <Td>
                 <Flex gap={1} justifyContent="flex-end" onClick={(e) => e.stopPropagation()}>
                   {canUpdate && <EditLocale {...locale} />}
-                  {canDelete && !locale.isDefault && <DeleteLocale {...locale} />}
+                  {canDelete && !locale.isDefault && !isLocaleReadOnlyByExtensions(locale) && (
+                    <DeleteLocale {...locale} />
+                  )}
                 </Flex>
               </Td>
             </Tr>

@@ -6,6 +6,7 @@ import { addColumnToTableHook } from './components/ReleaseListCell';
 import { Panel as ReleasesPanel } from './components/ReleasesPanel';
 import { PERMISSIONS, PLUGIN_ID } from './constants';
 import { pluginId } from './pluginId';
+import { registerReleaseDetailsExtension } from './release-plugin';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
 import type { StrapiApp } from '@strapi/admin/strapi-admin';
@@ -25,6 +26,16 @@ const admin: Plugin.Config.AdminInput = {
      * @type {string}
      */
     app.createHook('ContentReleases/pages/ReleaseDetails/add-locale-in-releases');
+
+    app.registerPlugin({
+      id: pluginId,
+      name: pluginId,
+      apis: {
+        // Extension points for plugins that augment the release details page
+        // (used by @strapi/plugin-spaces) — see ./release-plugin.ts.
+        registerReleaseDetailsExtension,
+      },
+    });
 
     if (window.strapi.features.isEnabled('cms-content-releases')) {
       app.addMenuLink({

@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import {
-  Checkbox,
   Box,
   BoxComponent,
   Flex,
@@ -23,6 +22,7 @@ import { cellWidth, firstRowWidth, rowHeight } from '../utils/constants';
 import { getCheckboxState } from '../utils/getCheckboxState';
 import { getLocaleValidationErrorActionKeys } from '../utils/localePermissionValidation';
 
+import { CeilingCheckbox } from './CeilingCheckbox';
 import { CollapseLabel } from './CollapseLabel';
 import { HiddenAction } from './HiddenAction';
 import { RequiredSign } from './RequiredSign';
@@ -234,7 +234,13 @@ const ActionRow = ({
               if (!isCollapsable) {
                 const checkboxValue = get(modifiedData, checkboxName, false);
                 const fieldPath = propertyName === 'fields' ? name : undefined;
-                const userHasPermission = checkUserHasPermission(actionId, subject, fieldPath);
+                const locale = propertyName === 'locales' ? name : undefined;
+                const userHasPermission = checkUserHasPermission(
+                  actionId,
+                  subject,
+                  fieldPath,
+                  locale
+                );
 
                 return (
                   <Flex
@@ -244,7 +250,8 @@ const ActionRow = ({
                     justifyContent="center"
                     alignItems="center"
                   >
-                    <Checkbox
+                    <CeilingCheckbox
+                      restricted={!isFormDisabled && !userHasPermission}
                       disabled={isFormDisabled || !userHasPermission}
                       name={checkboxName.join('..')}
                       aria-label={formatMessage(
@@ -272,7 +279,13 @@ const ActionRow = ({
 
               const { hasAllActionsSelected, hasSomeActionsSelected } = getCheckboxState(data);
               const fieldPath = propertyName === 'fields' ? name : undefined;
-              const userHasPermission = checkUserHasPermission(actionId, subject, fieldPath);
+              const locale = propertyName === 'locales' ? name : undefined;
+              const userHasPermission = checkUserHasPermission(
+                actionId,
+                subject,
+                fieldPath,
+                locale
+              );
 
               return (
                 <Flex
@@ -282,7 +295,8 @@ const ActionRow = ({
                   justifyContent="center"
                   alignItems="center"
                 >
-                  <Checkbox
+                  <CeilingCheckbox
+                    restricted={!isFormDisabled && !userHasPermission}
                     disabled={isFormDisabled || !userHasPermission}
                     name={checkboxName.join('..')}
                     onCheckedChange={(value) => {
@@ -525,7 +539,8 @@ const SubActionRow = ({
                             justifyContent="center"
                             alignItems="center"
                           >
-                            <Checkbox
+                            <CeilingCheckbox
+                              restricted={!isFormDisabled && !userHasPermission}
                               disabled={isFormDisabled || !userHasPermission}
                               name={checkboxName.join('..')}
                               aria-label={formatMessage(
@@ -567,7 +582,7 @@ const SubActionRow = ({
                           justifyContent="center"
                           alignItems="center"
                         >
-                          <Checkbox
+                          <CeilingCheckbox
                             key={propertyLabel}
                             disabled={isFormDisabled || !userHasPermission}
                             name={checkboxName.join('..')}

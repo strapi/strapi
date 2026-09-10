@@ -20,8 +20,17 @@ const Layout = () => {
    */
   const match = useMatch('/settings/:settingId/*');
   const { formatMessage } = useIntl();
-  const { isLoading } = useSettingsMenu();
+  const { isLoading, menu } = useSettingsMenu();
   const isMobile = useIsMobile();
+
+  // The first settings page the user may open: plugins can hide "Overview"
+  // (e.g. billing surfaces outside a workspace), so the landing page follows.
+  const firstDisplayedLink = menu
+    .flatMap((section) => section.links)
+    .find((link) => link.isDisplayed);
+  const landingPath = firstDisplayedLink
+    ? String(firstDisplayedLink.to).replace(/^\/?settings\//, '')
+    : 'application-infos';
 
   // Since the useSettingsMenu hook can make API calls in order to check the links permissions
   // We need to add a loading state to prevent redirecting the user while permissions are being checked
@@ -33,7 +42,7 @@ const Layout = () => {
   if (!match?.params.settingId) {
     // On desktop: redirect to first settings page
     if (!isMobile) {
-      return <Navigate to="application-infos" />;
+      return <Navigate to={landingPath} />;
     }
 
     // On mobile: show navigation page

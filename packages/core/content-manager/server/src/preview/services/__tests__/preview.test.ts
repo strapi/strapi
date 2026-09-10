@@ -4,6 +4,7 @@ import { createPreviewService } from '../preview';
 const mockConfig = {
   isConfigured: jest.fn(),
   getPreviewHandler: jest.fn(),
+  getParamsProviders: jest.fn(() => new Map()),
 };
 
 const mockStrapi = {

@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Checkbox, Box, BoxComponent, Flex, FlexComponent, Modal } from '@strapi/design-system';
+import { Box, BoxComponent, Flex, FlexComponent, Modal } from '@strapi/design-system';
 import { ChevronDown, ChevronUp } from '@strapi/icons';
 import get from 'lodash/get';
 import isEmpty from 'lodash/isEmpty';
@@ -19,6 +19,7 @@ import { createArrayOfValues } from '../utils/createArrayOfValues';
 import { ConditionForm } from '../utils/forms';
 import { getCheckboxState } from '../utils/getCheckboxState';
 
+import { CeilingCheckbox } from './CeilingCheckbox';
 import { CollapsePropertyMatrix } from './CollapsePropertyMatrix';
 import { ConditionsButton } from './ConditionsButton';
 import { ConditionsModal } from './ConditionsModal';
@@ -136,6 +137,7 @@ const Collapse = ({
     onChangeSimpleCheckbox,
     checkUserHasPermission,
     userPermissions,
+    conditionsPolicy,
   } = usePermissionsDataManager();
   const [isConditionModalOpen, setIsConditionModalOpen] = React.useState(false);
 
@@ -219,7 +221,8 @@ const Collapse = ({
                           background="primary600"
                         />
                       )}
-                      <Checkbox
+                      <CeilingCheckbox
+                        restricted={!isFormDisabled && !userHasPermission}
                         disabled={isFormDisabled || !userHasPermission}
                         name={checkboxName}
                         aria-label={formatMessage(
@@ -259,7 +262,8 @@ const Collapse = ({
                       background="primary600"
                     />
                   )}
-                  <Checkbox
+                  <CeilingCheckbox
+                    restricted={!isFormDisabled && !userHasPermission}
                     disabled={isFormDisabled || !userHasPermission}
                     name={checkboxName}
                     // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
@@ -293,7 +297,7 @@ const Collapse = ({
             headerBreadCrumbs={[label, 'Settings.permissions.conditions.conditions']}
             actions={checkboxesActions}
             isFormDisabled={isFormDisabled}
-            isReadOnly={userPermissions !== undefined}
+            isReadOnly={userPermissions !== undefined && conditionsPolicy !== 'bounded'}
             onClose={() => {
               setIsConditionModalOpen(false);
             }}

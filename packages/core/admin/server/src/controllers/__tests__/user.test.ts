@@ -23,6 +23,9 @@ describe('User Controller', () => {
             user: {
               exists,
             },
+            permission: {
+              assertUserCanAssignRoles: jest.fn(() => Promise.resolve()),
+            },
           },
         },
       } as any;
@@ -54,6 +57,9 @@ describe('User Controller', () => {
               create,
               sanitizeUser,
             },
+            permission: {
+              assertUserCanAssignRoles: jest.fn(() => Promise.resolve()),
+            },
           },
         },
       } as any;
@@ -81,6 +87,9 @@ describe('User Controller', () => {
               exists,
               create,
               sanitizeUser,
+            },
+            permission: {
+              assertUserCanAssignRoles: jest.fn(() => Promise.resolve()),
             },
           },
         },

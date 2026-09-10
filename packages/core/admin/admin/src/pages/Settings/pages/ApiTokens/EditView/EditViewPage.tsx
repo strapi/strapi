@@ -33,6 +33,7 @@ import { initialState, reducer } from './reducer';
 import {
   getTokenFormExtensionInitialValues,
   getTokenFormExtensions,
+  isTokenReadOnlyByExtensions,
   pickTokenFormExtensionValues,
 } from './tokenFormExtensions';
 
@@ -337,7 +338,10 @@ export const EditView = () => {
     setSelectedAction,
   };
 
-  const canEditInputs = (canUpdate && !isCreating) || (canCreate && isCreating);
+  // A plugin can lock a fetched token (e.g. shared with other workspaces).
+  const isReadOnlyByExtensions = !isCreating && isTokenReadOnlyByExtensions(apiToken);
+  const canEditInputs =
+    ((canUpdate && !isCreating) || (canCreate && isCreating)) && !isReadOnlyByExtensions;
   const canShowToken = apiToken?.accessKey !== undefined && apiToken.accessKey !== '';
 
   const initialType =
@@ -394,7 +398,7 @@ export const EditView = () => {
                   toggleToken={toggleToken}
                   showToken={showToken}
                   canEditInputs={canEditInputs}
-                  canRegenerate={canRegenerate}
+                  canRegenerate={canRegenerate && !isReadOnlyByExtensions}
                   canShowToken={canShowToken}
                   isSubmitting={isSubmitting}
                   regenerateUrl="/admin/api-tokens/"

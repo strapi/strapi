@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Checkbox, Box, Flex, Typography } from '@strapi/design-system';
+import { Box, Flex, Typography } from '@strapi/design-system';
 import get from 'lodash/get';
 import { useIntl } from 'react-intl';
 
@@ -12,6 +12,8 @@ import {
 import { cellWidth, firstRowWidth } from '../utils/constants';
 import { RecursiveRecordOfBooleans, getCheckboxState } from '../utils/getCheckboxState';
 import { removeConditionKeyFromData } from '../utils/removeConditionKeyFromData';
+
+import { CeilingCheckbox } from './CeilingCheckbox';
 
 interface GlobalActionsProps {
   actions: Action[];
@@ -92,7 +94,8 @@ const GlobalActions = ({ actions = [], isFormDisabled, kind }: GlobalActionsProp
                   defaultMessage: label,
                 })}
               </Typography>
-              <Checkbox
+              <CeilingCheckbox
+                restricted={!isFormDisabled && !userHasPermissionForAll}
                 disabled={isFormDisabled || !userHasPermissionForAll}
                 onCheckedChange={(value) => {
                   onChangeCollectionTypeGlobalActionCheckbox(kind, actionId, !!value);

@@ -21,8 +21,8 @@ export function createUser(attributes: Partial<AdminUserCreationPayload>) {
   };
 }
 
-export const hasSuperAdminRole = (user: AdminUser) => {
-  return user.roles.filter((role: AdminRole) => role.code === SUPER_ADMIN_CODE).length > 0;
+export const hasSuperAdminRole = (user: AdminUser | undefined | null): boolean => {
+  return (user?.roles ?? []).some((role: AdminRole) => role?.code === SUPER_ADMIN_CODE);
 };
 
 export const ADMIN_USER_ALLOWED_FIELDS = [

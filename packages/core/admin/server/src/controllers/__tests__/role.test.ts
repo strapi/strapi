@@ -199,7 +199,9 @@ describe('Role controller', () => {
 
       expect(findOneRole).toHaveBeenCalledWith({ id: roleID });
       expect(willValidateUpdatePermissions).toHaveBeenCalledWith(inputPermissions);
-      expect(assignPermissions).toHaveBeenCalledWith(roleID, inputPermissions);
+      expect(assignPermissions).toHaveBeenCalledWith(roleID, inputPermissions, {
+        ceilingUser: ctx.state?.user,
+      });
 
       expect(ctx.body).toEqual({
         data: inputPermissions,
@@ -272,7 +274,9 @@ describe('Role controller', () => {
       await roleController.updatePermissions(ctx);
 
       expect(willValidateUpdatePermissions).toHaveBeenCalledWith(inputPermissions);
-      expect(assignPermissions).toHaveBeenCalledWith(roleID, normalizedPermissions);
+      expect(assignPermissions).toHaveBeenCalledWith(roleID, normalizedPermissions, {
+        ceilingUser: ctx.state?.user,
+      });
       expect(ctx.body).toEqual({
         data: normalizedPermissions,
       });

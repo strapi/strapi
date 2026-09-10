@@ -14,3 +14,13 @@ export {
    */
   AutoReloadOverlayBlockerProvider as private_AutoReloadOverlayBlockerProvider,
 } from './components/AutoReloadOverlayBlocker';
+
+export {
+  /**
+   * @description Lets a plugin put the Content-Type Builder in read-only mode
+   * from runtime context (the schema stays browsable, editing is disabled and
+   * the rule's reason is shown). See `components/DataManager/readOnlyRules.ts`.
+   */
+  registerReadOnlyRule,
+} from './components/DataManager/readOnlyRules';
+export type { ReadOnlyRule, ReadOnlyState } from './components/DataManager/readOnlyRules';

@@ -1,4 +1,5 @@
 /* eslint-disable check-file/filename-naming-convention */
+import * as React from 'react';
 import { JSX } from 'react';
 
 import { ContentManagerPlugin, DocumentActionComponent, PanelComponent } from '../content-manager';
@@ -42,11 +43,13 @@ describe('content-manager', () => {
           addDocumentAction: expect.any(Function),
           addDocumentHeaderAction: expect.any(Function),
           addEditViewSidePanel: expect.any(Function),
+          addPage: expect.any(Function),
           addRichTextBlocks: expect.any(Function),
           getBulkActions: expect.any(Function),
           getDocumentActions: expect.any(Function),
           getEditViewSidePanels: expect.any(Function),
           getHeaderActions: expect.any(Function),
+          getPages: expect.any(Function),
           getRichTextBlocks: expect.any(Function),
         },
         id: 'content-manager',
@@ -81,11 +84,13 @@ describe('content-manager', () => {
         'addDocumentAction',
         'addDocumentHeaderAction',
         'addEditViewSidePanel',
+        'addPage',
         'addRichTextBlocks',
         'getBulkActions',
         'getDocumentActions',
         'getEditViewSidePanels',
         'getHeaderActions',
+        'getPages',
         'getRichTextBlocks',
       ]);
     });
@@ -409,5 +414,44 @@ describe('content-manager', () => {
         `"Expected the \`blocks\` passed to \`addRichTextBlocks\` to be an object or a function, but received string"`
       );
     });
+  });
+});
+
+describe('ContentManagerPlugin — pages', () => {
+  const page = {
+    id: 'branches',
+    title: { id: 'x', defaultMessage: 'Branches' },
+    Component: () => null,
+  };
+
+  it('registers pages from an array and a reducer', () => {
+    const plugin = new ContentManagerPlugin();
+
+    plugin.addPage([page]);
+    plugin.addPage((pages) => pages.filter((candidate) => candidate.id !== 'nope'));
+
+    expect(plugin.config.apis.getPages()).toEqual([page]);
+  });
+
+  it('accepts lazy components', () => {
+    const plugin = new ContentManagerPlugin();
+    const lazyPage = {
+      ...page,
+      id: 'lazy',
+      Component: React.lazy(() => Promise.resolve({ default: () => null })),
+    };
+
+    plugin.addPage([lazyPage]);
+
+    expect(plugin.config.apis.getPages()).toEqual([lazyPage]);
+  });
+
+  it('rejects malformed pages', () => {
+    const plugin = new ContentManagerPlugin();
+
+    // @ts-expect-error – testing the runtime guard
+    expect(() => plugin.addPage([{ id: 'Bad Id', Component: () => null }])).toThrow('addPage');
+    // @ts-expect-error – testing the runtime guard
+    expect(() => plugin.addPage('nope')).toThrow('addPage');
   });
 });

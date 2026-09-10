@@ -164,8 +164,11 @@ const OpenInNewTabAction: DocumentActionComponent = ({ documentId }) => {
   };
 };
 
-// No `type` is set: it's an optional discriminator constrained to a known union
-// and this action is identified by its component name instead.
+// The discriminator matters beyond this file: it is how a plugin tells a
+// read-only action (this one only opens a link) apart from one that writes, for
+// instance to disable the writing ones on an entry the user may not edit. A
+// component name cannot serve — the production bundle mangles it.
+OpenInNewTabAction.type = 'open-in-new-tab';
 OpenInNewTabAction.position = 'table-row';
 
 const StyledExternalLink = styled(ExternalLink)`

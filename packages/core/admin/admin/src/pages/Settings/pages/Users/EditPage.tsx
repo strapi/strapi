@@ -26,6 +26,11 @@ import { getDisplayName } from '../../../../utils/users';
 
 import { MagicLinkCE } from './components/MagicLinkCE';
 import { SelectRoles } from './components/SelectRoles';
+import {
+  getUserFormExtensionInitialValues,
+  getUserFormExtensions,
+  pickUserFormExtensionValues,
+} from './userFormExtensions';
 import { COMMON_USER_SCHEMA } from './utils/validation';
 
 const EDIT_VALIDATION_SCHEMA = yup.object().shape({
@@ -132,6 +137,8 @@ const EditPage = () => {
     roles: user.roles.map(({ id }) => id),
     password: '',
     confirmPassword: '',
+    // Extra fields registered by plugins (see userFormExtensions.ts).
+    ...getUserFormExtensionInitialValues(user),
   } satisfies InitialData;
 
   const handleSubmit = async (body: InitialData, actions: FormHelpers<InitialData>) => {
@@ -161,6 +168,7 @@ const EditPage = () => {
         ...pick(body, fieldsToPick),
         password: '',
         confirmPassword: '',
+        ...pickUserFormExtensionValues(body as unknown as Record<string, unknown>),
       });
     }
   };
@@ -181,7 +189,7 @@ const EditPage = () => {
         initialValues={initialData}
         validationSchema={EDIT_VALIDATION_SCHEMA}
       >
-        {({ isSubmitting, modified }) => {
+        {({ isSubmitting, modified, values, onChange }) => {
           return (
             <>
               <Layouts.Header
@@ -287,6 +295,15 @@ const EditPage = () => {
                       </Grid.Root>
                     </Flex>
                   </Box>
+                  {getUserFormExtensions().map(({ id: extensionId, field, Component }) => (
+                    <Component
+                      key={extensionId}
+                      user={user}
+                      value={(values as unknown as Record<string, unknown>)[field]}
+                      onChange={(value) => onChange(field, value)}
+                      disabled={!canUpdate}
+                    />
+                  ))}
                 </Flex>
               </Layouts.Content>
             </>

@@ -14,6 +14,7 @@ import {
   map,
   curry,
   merge,
+  isEqual,
 } from 'lodash/fp';
 import { Permission } from '../../../../shared/contracts/shared';
 import { SanitizedPermission } from '../../../../shared/contracts/roles';
@@ -46,6 +47,31 @@ export const sanitizedPermissionFields = [
 
 export const sanitizePermissionFields: (p: Permission) => SanitizedPermission =
   pick(sanitizedPermissionFields);
+
+/** Fields compared when checking whether two permissions are the same grant. */
+export const COMPARABLE_FIELDS = [
+  'conditions',
+  'properties',
+  'subject',
+  'action',
+  'actionParameters',
+] as const;
+
+const pickComparableFields = pick(COMPARABLE_FIELDS);
+
+/** Round-trips through JSON so `undefined` members never break equality. */
+const jsonClean = <T extends object>(data: T): T => JSON.parse(JSON.stringify(data));
+
+/**
+ * Whether two permissions describe the same grant (action, subject, properties,
+ * conditions and action parameters); ids and owners are ignored.
+ */
+export const arePermissionsEqual = (p1: Permission, p2: Permission): boolean => {
+  if (p1.action !== p2.action) {
+    return false;
+  }
+  return isEqual(jsonClean(pickComparableFields(p1)), jsonClean(pickComparableFields(p2)));
+};
 
 /**
  * Creates a permission with default values
@@ -165,6 +191,7 @@ export { toPermission };
 export default {
   addCondition,
   removeCondition,
+  arePermissionsEqual,
   create,
   deleteProperty,
   permissionFields,

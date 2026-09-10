@@ -30,6 +30,7 @@ import { TokenTypeSelect } from '../../components/Tokens/TokenTypeSelect';
 import {
   getTokenFormExtensionInitialValues,
   getTokenFormExtensions,
+  isTokenReadOnlyByExtensions,
   pickTokenFormExtensionValues,
 } from '../ApiTokens/EditView/tokenFormExtensions';
 
@@ -222,7 +223,10 @@ const EditView = () => {
     }
   };
 
-  const canEditInputs = (canUpdate && !isCreating) || (canCreate && isCreating);
+  // A plugin can lock a fetched token (e.g. shared with other workspaces).
+  const isReadOnlyByExtensions = !isCreating && isTokenReadOnlyByExtensions(transferToken);
+  const canEditInputs =
+    ((canUpdate && !isCreating) || (canCreate && isCreating)) && !isReadOnlyByExtensions;
   const isLoading = !isCreating && !transferToken;
 
   if (isLoading) {
@@ -272,7 +276,7 @@ const EditView = () => {
                 setToken={setTransferToken}
                 canShowToken={false}
                 canEditInputs={canEditInputs}
-                canRegenerate={canRegenerate}
+                canRegenerate={canRegenerate && !isReadOnlyByExtensions}
                 isSubmitting={isSubmitting}
                 regenerateUrl="/admin/transfer/tokens/"
               />

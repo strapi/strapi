@@ -22,6 +22,7 @@ import { useCreateUserMutation } from '../../../../../services/users';
 import { FormLayoutInputProps } from '../../../../../types/forms';
 import { isBaseQueryError } from '../../../../../utils/baseQuery';
 import { translatedErrors } from '../../../../../utils/translatedErrors';
+import { getUserFormExtensionInitialValues, getUserFormExtensions } from '../userFormExtensions';
 
 import { MagicLinkCE } from './MagicLinkCE';
 import { SelectRoles } from './SelectRoles';
@@ -103,6 +104,20 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
     });
 
     if ('data' in res) {
+      // An existing account added to a workspace (plugin-driven) needs no
+      // registration step: say so and close.
+      if ((res.data as { addedToWorkspace?: unknown }).addedToWorkspace) {
+        toggleNotification({
+          type: 'success',
+          message: formatMessage({
+            id: 'app.containers.Users.ModalForm.existing-account-added',
+            defaultMessage: 'This email already had an account: it has been added.',
+          }),
+        });
+        onToggle();
+        return;
+      }
+
       // NOTE: when enabling SSO, the user doesn't have to register and the token is undefined
       if (res.data.registrationToken) {
         setRegistrationToken(res.data.registrationToken);
@@ -149,11 +164,15 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
         </Modal.Header>
         <Form
           method={currentStep === 'create' ? 'POST' : 'PUT'}
-          initialValues={initialValues ?? {}}
+          initialValues={{
+            ...(initialValues ?? {}),
+            // Extra fields registered by plugins (see ../userFormExtensions.ts).
+            ...getUserFormExtensionInitialValues(undefined),
+          }}
           onSubmit={handleSubmit}
           validationSchema={FORM_SCHEMA}
         >
-          {({ isSubmitting }) => {
+          {({ isSubmitting, values, onChange }) => {
             return (
               <>
                 <Modal.Body>
@@ -234,6 +253,15 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
                         </Grid.Root>
                       </Box>
                     </Box>
+                    {getUserFormExtensions().map(({ id: extensionId, field, Component }) => (
+                      <Component
+                        key={extensionId}
+                        user={undefined}
+                        value={(values as unknown as Record<string, unknown>)[field]}
+                        onChange={(value) => onChange(field, value)}
+                        disabled={isDisabled}
+                      />
+                    ))}
                   </Flex>
                 </Modal.Body>
                 <Modal.Footer>

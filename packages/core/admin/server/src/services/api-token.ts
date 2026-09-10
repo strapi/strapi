@@ -9,7 +9,6 @@ import {
   uniq,
   isNumber,
   differenceWith,
-  isEqual,
   pick,
   prop,
 } from 'lodash/fp';
@@ -25,13 +24,12 @@ import type { AdminApiToken, AdminTokenBody } from '../../../shared/contracts/ad
 import type { AdminTokenOwner, AdminUser, Permission } from '../../../shared/contracts/shared';
 import constants from './constants';
 import { getService } from '../utils';
-import permissionDomain from '../domain/permission';
+import permissionDomain, { arePermissionsEqual } from '../domain/permission';
+import { hasSuperAdminRole } from '../domain/user';
 import { validatePermissionsExist } from '../validation/permission';
 import { checkExpiry, updateLastUsedAt } from '../strategies/api-token-utils';
 
 type AnyApiToken = ContentApiApiToken | AdminApiToken;
-
-const { SUPER_ADMIN_CODE } = constants;
 
 const { ValidationError, NotFoundError, UnauthorizedError } = errors;
 
@@ -64,8 +62,7 @@ const assertOwnerMatchesCallingUser = async (
   }
 };
 
-const isSuperAdmin = (user: AdminUser | undefined): boolean =>
-  user?.roles?.some((r) => r.code === SUPER_ADMIN_CODE) === true;
+const isSuperAdmin = (user: AdminUser | undefined): boolean => hasSuperAdminRole(user);
 
 const getOwnerId = (token: AdminApiToken): string => {
   const owner = token.adminUserOwner;
@@ -377,27 +374,6 @@ const createApiTokenAdminPermissions = async (tokenId: Data.ID, permissions: Per
   const createdPermissions = await getService('permission').createMany(permissionsWithToken as any);
 
   return createdPermissions;
-};
-
-/**
- * Fields to compare when checking if two permissions are equal
- */
-const COMPARABLE_FIELDS = ['conditions', 'properties', 'subject', 'action', 'actionParameters'];
-const pickComparableFields = pick(COMPARABLE_FIELDS);
-
-/**
- * Helper to clean JSON (remove undefined values)
- */
-const jsonClean = <T extends object>(data: T): T => JSON.parse(JSON.stringify(data));
-
-/**
- * Compare two permissions for equality
- */
-const arePermissionsEqual = (p1: Permission, p2: Permission): boolean => {
-  if (p1.action === p2.action) {
-    return isEqual(jsonClean(pickComparableFields(p1)), jsonClean(pickComparableFields(p2)));
-  }
-  return false;
 };
 
 /**

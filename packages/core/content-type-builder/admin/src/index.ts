@@ -1,5 +1,6 @@
 import { Layout } from '@strapi/icons';
 
+import { registerReadOnlyRule } from './components/DataManager/readOnlyRules';
 import { PERMISSIONS } from './constants';
 import { pluginId } from './pluginId';
 import { reducers } from './reducers';
@@ -30,6 +31,7 @@ export default {
       // Internal APIs exposed by the CTB for the other plugins to use
       apis: {
         forms: formsAPI,
+        registerReadOnlyRule,
       },
     });
   },

@@ -118,11 +118,17 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
       return release;
     },
 
-    findPage(query?: GetReleases.Request['query']) {
+    async findPage(query?: GetReleases.Request['query']) {
       const dbQuery = strapi.get('query-params').transform(RELEASE_MODEL_UID, query ?? {});
+      const scopeWhere = await getService('release-action', { strapi })
+        .getActionScopeStrategy()
+        ?.getReleaseWhere();
 
       return strapi.db.query(RELEASE_MODEL_UID).findPage({
         ...dbQuery,
+        ...(scopeWhere
+          ? { where: { $and: [...(dbQuery.where ? [dbQuery.where] : []), scopeWhere] } }
+          : {}),
         populate: {
           actions: {
             count: true,
@@ -131,11 +137,17 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
       });
     },
 
-    findMany(query?: any) {
+    async findMany(query?: any) {
       const dbQuery = strapi.get('query-params').transform(RELEASE_MODEL_UID, query ?? {});
+      const scopeWhere = await getService('release-action', { strapi })
+        .getActionScopeStrategy()
+        ?.getReleaseWhere();
 
       return strapi.db.query(RELEASE_MODEL_UID).findMany({
         ...dbQuery,
+        ...(scopeWhere
+          ? { where: { $and: [...(dbQuery.where ? [dbQuery.where] : []), scopeWhere] } }
+          : {}),
       });
     },
 
@@ -374,18 +386,13 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
     async updateReleaseStatus(releaseId: Release['id']) {
       const releaseActionService = getService('release-action', { strapi });
 
+      // The persisted status describes the whole release, whoever triggers the update.
       const [totalActions, invalidActions] = await Promise.all([
-        releaseActionService.countActions({
-          filters: {
-            release: releaseId,
-          },
-        }),
-        releaseActionService.countActions({
-          filters: {
-            release: releaseId,
-            isEntryValid: false,
-          },
-        }),
+        releaseActionService.countActions({ filters: { release: releaseId } }, { unscoped: true }),
+        releaseActionService.countActions(
+          { filters: { release: releaseId, isEntryValid: false } },
+          { unscoped: true }
+        ),
       ]);
 
       if (totalActions > 0) {

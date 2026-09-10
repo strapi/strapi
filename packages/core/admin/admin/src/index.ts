@@ -37,6 +37,11 @@ export {
   type TokenFormExtensionComponentProps,
 } from './pages/Settings/pages/ApiTokens/EditView/tokenFormExtensions';
 export {
+  registerUserFormExtension,
+  type UserFormExtension,
+  type UserFormExtensionComponentProps,
+} from './pages/Settings/pages/Users/userFormExtensions';
+export {
   registerSettingsMenuMutator,
   type SettingsMenuMutator,
   type SettingsMenuMutatorHook,

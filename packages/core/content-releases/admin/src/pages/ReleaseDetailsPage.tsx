@@ -45,6 +45,7 @@ import { ReleaseActionMenu } from '../components/ReleaseActionMenu';
 import { ReleaseActionOptions } from '../components/ReleaseActionOptions';
 import { ReleaseModal, FormValues } from '../components/ReleaseModal';
 import { PERMISSIONS } from '../constants';
+import { getReleaseDetailsExtensions, isPublishAllowedByExtensions } from '../release-plugin';
 import {
   GetReleaseActionsQueryParams,
   useGetReleaseActionsQuery,
@@ -238,6 +239,9 @@ const ReleaseDetailsLayout = ({
                 {numberOfEntriesText + (isScheduled ? ` - ${scheduledText}` : '')}
               </Typography>
               <Badge {...getBadgeProps(release.status)}>{release.status}</Badge>
+              {getReleaseDetailsExtensions().map(({ id, Component }) => (
+                <Component key={id} release={release} />
+              ))}
             </Flex>
           }
           navigationAction={<BackButton fallback=".." />}
@@ -309,7 +313,7 @@ const ReleaseDetailsLayout = ({
                     defaultMessage: 'Refresh',
                   })}
                 </Button>
-                {canPublish ? (
+                {canPublish && isPublishAllowedByExtensions() ? (
                   <Button
                     size="S"
                     variant="default"

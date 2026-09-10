@@ -305,3 +305,91 @@ describe('Permissions — "Select all" in Admin Token mode (userPermissions prov
     expect(del).not.toBeChecked();
   });
 });
+
+/**
+ * CMS-1718: an admin managing roles cannot grant a permission they do not hold.
+ * Lacked permissions stay visible but disabled, with a tooltip explaining why.
+ */
+describe('Permissions — ceiling for the roles pages (conditionsPolicy="bounded")', () => {
+  const settingPermission = (action: string, conditions: string[] = []): AuthPermission => ({
+    action,
+    subject: null,
+    properties: {},
+    conditions,
+  });
+
+  it('disables the permissions the current admin lacks and explains why on hover', async () => {
+    const userPermissions: AuthPermission[] = [
+      settingPermission('plugin::i18n.locale.create'),
+      settingPermission('plugin::i18n.locale.read'),
+      settingPermission('plugin::i18n.locale.update'),
+    ];
+
+    const { user } = render(
+      <Permissions
+        layout={layout}
+        userPermissions={userPermissions}
+        conditionsPolicy="bounded"
+        isFormDisabled={false}
+      />
+    );
+
+    await user.click(screen.getByRole('tab', { name: 'Settings' }));
+    await user.click(screen.getByRole('button', { name: /Internationalization/ }));
+
+    const del = screen.getByLabelText('Delete');
+    expect(del).toBeDisabled();
+    expect(screen.getByLabelText('Create')).toBeEnabled();
+
+    await user.hover(del.closest('span')!);
+
+    // The design-system tooltip renders its text twice (visible + assistive copy).
+    expect(
+      await screen.findAllByText(
+        "You can't grant this permission because you don't hold it yourself."
+      )
+    ).not.toHaveLength(0);
+  });
+
+  it('keeps a permission the role already carries checked and disabled when the admin lacks it', async () => {
+    const userPermissions: AuthPermission[] = [settingPermission('plugin::i18n.locale.read')];
+    const rolePermissions = [
+      {
+        id: 1,
+        action: 'plugin::i18n.locale.delete',
+        subject: null,
+        properties: {},
+        conditions: [],
+        actionParameters: {},
+        createdAt: '',
+        updatedAt: '',
+      },
+    ];
+
+    const ref = React.createRef<PermissionsAPI>();
+    const { user } = render(
+      <Permissions
+        ref={ref}
+        layout={layout}
+        permissions={rolePermissions}
+        userPermissions={userPermissions}
+        conditionsPolicy="bounded"
+        isFormDisabled={false}
+      />
+    );
+
+    await user.click(screen.getByRole('tab', { name: 'Settings' }));
+    await user.click(screen.getByRole('button', { name: /Internationalization/ }));
+
+    const del = screen.getByLabelText('Delete');
+    expect(del).toBeChecked();
+    expect(del).toBeDisabled();
+
+    // The pre-existing grant is still sent back unchanged so the server preserves it.
+    expect(ref.current?.getPermissions().permissionsToSend).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ action: 'plugin::i18n.locale.delete', subject: null }),
+      ])
+    );
+  });
+});

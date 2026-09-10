@@ -22,6 +22,11 @@ interface LocaleFormExtension {
    * the locale row on edit, `undefined` on create.
    */
   getInitialValues?: (locale?: unknown) => Record<string, unknown>;
+  /**
+   * When true for the fetched locale, its base settings are read-only and it
+   * cannot be deleted (the advanced "set as default" choice stays available).
+   */
+  isReadOnly?: (locale: unknown) => boolean;
 }
 
 interface LocaleTableColumn {
@@ -59,5 +64,8 @@ export const getLocaleFormExtensionInitialValues = (locale?: unknown): Record<st
     (acc, extension) => ({ ...acc, ...(extension.getInitialValues?.(locale) ?? {}) }),
     {}
   );
+
+export const isLocaleReadOnlyByExtensions = (locale: unknown): boolean =>
+  localeFormExtensions.some((extension) => extension.isReadOnly?.(locale) === true);
 
 export type { LocaleFormExtension, LocaleTableColumn };

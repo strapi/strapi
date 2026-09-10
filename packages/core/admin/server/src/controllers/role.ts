@@ -166,7 +166,10 @@ export default {
       input.permissions
     )) as typeof input.permissions;
 
-    const permissions = await roleService.assignPermissions(role.id, normalizedPermissions);
+    // An admin cannot grant a permission they do not hold themselves (CMS-1718).
+    const permissions = await roleService.assignPermissions(role.id, normalizedPermissions, {
+      ceilingUser: ctx.state?.user,
+    });
 
     const sanitizedPermissions = permissions.map(permissionService.sanitizePermission);
 

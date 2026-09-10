@@ -153,7 +153,8 @@ describe('ADMIN | pages | SettingsPage', () => {
       },
     });
 
-    await screen.findByText('/settings/application-infos');
+    // With no "Overview" link in this menu, the landing page is the first displayed link.
+    await screen.findByText('/settings/internationalization');
 
     await user.click(screen.getByText('Internationalization'));
 

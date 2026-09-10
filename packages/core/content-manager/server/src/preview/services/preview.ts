@@ -20,9 +20,20 @@ const createPreviewService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       const handler = config.getPreviewHandler();
 
+      // Plugin-contributed context (e.g. the active workspace), per request.
+      const plugins: Record<string, unknown> = { ...(params.plugins ?? {}) };
+      for (const [name, provider] of config.getParamsProviders()) {
+        const value = await provider(params);
+        if (value !== undefined) {
+          plugins[name] = value;
+        }
+      }
+      const handlerParams: HandlerParams =
+        Object.keys(plugins).length > 0 ? { ...params, plugins } : params;
+
       try {
         // Try to get the preview URL from the user-defined handler
-        const url = await handler(uid, params);
+        const url = await handler(uid, handlerParams);
         return url;
       } catch (error) {
         // Log the error and throw a generic error

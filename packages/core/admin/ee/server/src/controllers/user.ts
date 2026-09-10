@@ -44,10 +44,15 @@ export default {
     const attributes = pickUserCreationAttributes(cleanData);
     const { useSSORegistration } = cleanData;
 
+    // Assigning a role grants its permissions: they must be within the caller's own.
+    await strapi
+      .service('admin::permission')
+      .assertUserCanAssignRoles(ctx.state?.user, attributes.roles ?? []);
+
     const userAlreadyExists = await getService('user').exists({ email: attributes.email });
 
     if (userAlreadyExists) {
-      throw new ApplicationError('Email already taken');
+      throw new ApplicationError('Email already taken', { code: 'EMAIL_ALREADY_TAKEN' });
     }
 
     if (useSSORegistration) {
@@ -85,6 +90,12 @@ export default {
 
     if (!(await hasAdminSeatsAvaialble()) && !user.isActive && data.isActive) {
       throw new ForbiddenError('License seat limit reached. You cannot active this user');
+    }
+
+    if (_.has(data, 'roles') && Array.isArray(data.roles)) {
+      const currentRoleIds = new Set((user?.roles ?? []).map((role: any) => String(role.id)));
+      const added = data.roles.filter((roleId: any) => !currentRoleIds.has(String(roleId)));
+      await strapi.service('admin::permission').assertUserCanAssignRoles(ctx.state?.user, added);
     }
 
     const updatedUser = await getService('user').updateById(id, data);

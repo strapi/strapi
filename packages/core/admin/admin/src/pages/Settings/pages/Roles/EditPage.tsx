@@ -10,6 +10,7 @@ import * as yup from 'yup';
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useAuth } from '../../../../features/Auth';
 import { BackButton } from '../../../../features/BackButton';
 import { useNotification } from '../../../../features/Notifications';
 import { useTracking } from '../../../../features/Tracking';
@@ -26,7 +27,11 @@ import { translatedErrors } from '../../../../utils/translatedErrors';
 
 import { Permissions, PermissionsAPI } from './components/Permissions';
 import { RoleForm } from './components/RoleForm';
-import { getRoleFormExtensionInitialValues, getRoleFormExtensions } from './roleFormExtensions';
+import {
+  getRoleFormExtensionInitialValues,
+  getRoleFormExtensions,
+  isRoleReadOnlyByExtensions,
+} from './roleFormExtensions';
 
 const EDIT_ROLE_SCHEMA = yup.object().shape({
   name: yup.string().required(translatedErrors.required.id),
@@ -43,6 +48,15 @@ interface EditRoleFormValues {
 
 const EditPage = () => {
   const { toggleNotification } = useNotification();
+  // An admin cannot grant a permission they do not hold (CMS-1718): the editing
+  // admin's own permissions are the ceiling, except for super admins who hold all.
+  const { permissions: currentUserPermissions, user: currentUser } = useAuth(
+    'RolesEditPage',
+    (auth) => auth
+  );
+  const isCurrentUserSuperAdmin =
+    currentUser?.roles?.some((userRole) => userRole.code === 'strapi-super-admin') ?? false;
+
   const { formatMessage } = useIntl();
   const match = useMatch('/settings/roles/:id');
   const id = match?.params.id;
@@ -164,7 +178,10 @@ const EditPage = () => {
     }
   };
 
-  const isFormDisabled = !isRoleLoading && role.code === 'strapi-super-admin';
+  // Read-only for the super admin role, or when a plugin says so (e.g. a role
+  // shared with other workspaces, edited from the default workspace only).
+  const isFormDisabled =
+    !isRoleLoading && (role.code === 'strapi-super-admin' || isRoleReadOnlyByExtensions(role));
 
   if (isLoadingPermissionsLayout || isRoleLoading || isLoadingPermissions || !permissionsLayout) {
     return <Page.Loading />;
@@ -210,7 +227,7 @@ const EditPage = () => {
                 <Button
                   type="submit"
                   startIcon={<Check />}
-                  disabled={role.code === 'strapi-super-admin' || hasLocaleValidationErrors}
+                  disabled={isFormDisabled || hasLocaleValidationErrors}
                   loading={isSubmitting}
                   fullWidth
                 >
@@ -261,6 +278,8 @@ const EditPage = () => {
                     permissions={permissions}
                     ref={permissionsRef}
                     layout={permissionsLayout}
+                    userPermissions={isCurrentUserSuperAdmin ? undefined : currentUserPermissions}
+                    conditionsPolicy="bounded"
                   />
                 </Box>
               </Flex>

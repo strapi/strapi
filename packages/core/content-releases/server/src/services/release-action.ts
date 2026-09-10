@@ -39,6 +39,20 @@ type LocaleDictionary = {
   [key: Locale['code']]: Pick<Locale, 'name' | 'code'>;
 };
 
+/**
+ * Extension point: a plugin can narrow which release actions (and releases) a
+ * caller sees — e.g. @strapi/plugin-spaces shows a workspace only its own
+ * entries. Each hook returns a `where` clause ANDed with the query, or `null`
+ * for "unscoped" (no request, or a caller that sees everything). Publishing
+ * and status computation never consult it: a release publishes as a whole.
+ */
+export interface ActionScopeStrategy {
+  getActionWhere(): Promise<Record<string, unknown> | null>;
+  getReleaseWhere(): Promise<Record<string, unknown> | null>;
+}
+
+let actionScopeStrategy: ActionScopeStrategy | null = null;
+
 const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
   const getLocalesDataForActions = async () => {
     if (!strapi.plugin('i18n')) {
@@ -163,12 +177,18 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
       }
 
       const dbQuery = strapi.get('query-params').transform(RELEASE_ACTION_MODEL_UID, query ?? {});
+      const scopeWhere = await actionScopeStrategy?.getActionWhere();
       const { results: actions, pagination } = await strapi.db
         .query(RELEASE_ACTION_MODEL_UID)
         .findPage({
           ...dbQuery,
+          // Merge rather than replace: the caller's filters must keep applying.
           where: {
-            release: releaseId,
+            $and: [
+              { release: releaseId },
+              ...(dbQuery.where ? [dbQuery.where] : []),
+              ...(scopeWhere ? [scopeWhere] : []),
+            ],
           },
         });
 
@@ -273,11 +293,29 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async countActions(
-      query: Modules.EntityService.Params.Pick<typeof RELEASE_ACTION_MODEL_UID, 'filters'>
+      query: Modules.EntityService.Params.Pick<typeof RELEASE_ACTION_MODEL_UID, 'filters'>,
+      { unscoped = false }: { unscoped?: boolean } = {}
     ) {
       const dbQuery = strapi.get('query-params').transform(RELEASE_ACTION_MODEL_UID, query ?? {});
+      const scopeWhere = unscoped ? null : await actionScopeStrategy?.getActionWhere();
 
-      return strapi.db.query(RELEASE_ACTION_MODEL_UID).count(dbQuery);
+      return strapi.db.query(RELEASE_ACTION_MODEL_UID).count(
+        scopeWhere
+          ? {
+              ...dbQuery,
+              where: { $and: [...(dbQuery.where ? [dbQuery.where] : []), scopeWhere] },
+            }
+          : dbQuery
+      );
+    },
+
+    /** See `ActionScopeStrategy`. Pass `null` to remove the strategy. */
+    setActionScopeStrategy(strategy: ActionScopeStrategy | null) {
+      actionScopeStrategy = strategy;
+    },
+
+    getActionScopeStrategy(): ActionScopeStrategy | null {
+      return actionScopeStrategy;
     },
 
     async update(

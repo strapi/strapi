@@ -28,6 +28,7 @@ import { ChildrenForm, ConditionForm } from '../utils/forms';
 import { RecursiveRecordOfBooleans, getCheckboxState } from '../utils/getCheckboxState';
 import { removeConditionKeyFromData } from '../utils/removeConditionKeyFromData';
 
+import { CeilingCheckbox } from './CeilingCheckbox';
 import { ConditionsButton } from './ConditionsButton';
 import { ConditionsModal } from './ConditionsModal';
 
@@ -150,6 +151,7 @@ const SubCategory = ({
     onChangeSimpleCheckbox,
     checkUserHasPermission,
     userPermissions,
+    conditionsPolicy,
   } = usePermissionsDataManager();
   const [isConditionModalOpen, setIsConditionModalOpen] = React.useState(false);
   const { formatMessage } = useIntl();
@@ -240,8 +242,9 @@ const SubCategory = ({
                     $disabled={isFormDisabled || !userHasPermission}
                     $hasConditions={hasConditions}
                   >
-                    <Checkbox
+                    <CeilingCheckbox
                       name={checkboxName}
+                      restricted={!isFormDisabled && !userHasPermission}
                       disabled={isFormDisabled || !userHasPermission}
                       // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
                       onCheckedChange={(value) => {
@@ -255,7 +258,7 @@ const SubCategory = ({
                       checked={value}
                     >
                       {displayName}
-                    </Checkbox>
+                    </CeilingCheckbox>
                   </CheckboxWrapper>
                 </Grid.Item>
               );
@@ -274,7 +277,7 @@ const SubCategory = ({
               headerBreadCrumbs={[categoryName, subCategoryName]}
               actions={formattedActions}
               isFormDisabled={isFormDisabled}
-              isReadOnly={userPermissions !== undefined}
+              isReadOnly={userPermissions !== undefined && conditionsPolicy !== 'bounded'}
               onClose={() => {
                 setIsConditionModalOpen(false);
               }}

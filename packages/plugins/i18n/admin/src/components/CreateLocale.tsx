@@ -238,9 +238,11 @@ const SubmitButton = () => {
 
 interface BaseFormProps {
   mode?: 'create' | 'edit';
+  /** Locks every base field (a locale a plugin declared read-only). */
+  disabled?: boolean;
 }
 
-const BaseForm = ({ mode = 'create' }: BaseFormProps) => {
+const BaseForm = ({ mode = 'create', disabled = false }: BaseFormProps) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
@@ -267,7 +269,7 @@ const BaseForm = ({ mode = 'create' }: BaseFormProps) => {
 
   const translatedForm = [
     {
-      disabled: mode !== 'create',
+      disabled: disabled || mode !== 'create',
       label: {
         id: getTranslation('Settings.locales.modal.create.code.label'),
         defaultMessage: 'Locales',
@@ -283,6 +285,7 @@ const BaseForm = ({ mode = 'create' }: BaseFormProps) => {
       type: 'enumeration' as const,
     },
     {
+      disabled,
       hint: {
         id: getTranslation('Settings.locales.modal.create.name.description'),
         defaultMessage: 'Locale will be displayed under that name in the administration panel',

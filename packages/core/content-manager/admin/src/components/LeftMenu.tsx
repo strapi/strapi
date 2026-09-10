@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { SubNav } from '@strapi/admin/strapi-admin';
+import { SubNav, useStrapiApp } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Flex,
@@ -10,7 +10,7 @@ import {
   Divider,
   Loader,
 } from '@strapi/design-system';
-import { useIntl } from 'react-intl';
+import { useIntl, type MessageDescriptor } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 
 import { useContentManagerInitData } from '../hooks/useContentManagerInitData';
@@ -85,6 +85,29 @@ const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
     [collectionTypeLinks, search, singleTypeLinks, contains, formatMessage, formatter]
   );
 
+  // Pages plugins mount inside the Content Manager (`addPage`), one section.
+  const getPlugin = useStrapiApp('LeftMenu', (state) => state.getPlugin);
+  const pluginPages = (
+    getPlugin('content-manager')?.apis as
+      | { getPages?: () => Array<{ id: string; title: MessageDescriptor }> }
+      | undefined
+  )?.getPages?.();
+  const pluginSection =
+    pluginPages && pluginPages.length > 0
+      ? {
+          id: 'plugins',
+          title: formatMessage({
+            id: getTranslation('components.LeftMenu.plugins'),
+            defaultMessage: 'Plugins',
+          }),
+          links: pluginPages.map((page) => ({
+            uid: page.id,
+            title: formatMessage(page.title),
+            to: `/content-manager/plugins/${page.id}`,
+          })),
+        }
+      : null;
+
   const handleClear = () => {
     setSearch('');
   };
@@ -158,7 +181,7 @@ const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
       </Box>
       <SubNav.Content>
         <SubNav.Sections>
-          {menu.map((section) => {
+          {[...menu, ...(pluginSection ? [pluginSection] : [])].map((section) => {
             return (
               <SubNav.Section
                 key={section.id}

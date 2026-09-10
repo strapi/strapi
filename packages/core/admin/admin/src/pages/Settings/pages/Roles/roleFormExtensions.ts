@@ -25,6 +25,8 @@ interface RoleFormExtension {
   field: string;
   Component: React.ComponentType<RoleFormExtensionComponentProps>;
   getInitialValue?: (role: unknown) => unknown;
+  /** When true for the fetched role, the whole form (permissions included) is read-only. */
+  isReadOnly?: (role: unknown) => boolean;
 }
 
 const roleFormExtensions: RoleFormExtension[] = [];
@@ -48,5 +50,8 @@ export const getRoleFormExtensionInitialValues = (role: unknown): Record<string,
     }),
     {}
   );
+
+export const isRoleReadOnlyByExtensions = (role: unknown): boolean =>
+  roleFormExtensions.some((extension) => extension.isReadOnly?.(role) === true);
 
 export type { RoleFormExtension, RoleFormExtensionComponentProps };

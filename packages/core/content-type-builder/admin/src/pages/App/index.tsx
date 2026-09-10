@@ -15,6 +15,7 @@ import { AutoReloadOverlayBlockerProvider } from '../../components/AutoReloadOve
 import { ContentTypeBuilderNav } from '../../components/ContentTypeBuilderNav/ContentTypeBuilderNav';
 import { CTBSessionProvider } from '../../components/CTBSession/CTBSessionProvider';
 import DataManagerProvider from '../../components/DataManager/DataManagerProvider';
+import { useReadOnlyRules } from '../../components/DataManager/readOnlyRules';
 import { ExitPrompt } from '../../components/ExitPrompt';
 import { FormModal } from '../../components/FormModal/FormModal';
 import { FormModalNavigationProvider } from '../../components/FormModalNavigation/FormModalNavigationProvider';
@@ -32,6 +33,7 @@ const App = () => {
   });
 
   const autoReload = useAppInfo('DataManagerProvider', (state) => state.autoReload);
+  const { readOnly } = useReadOnlyRules();
   const isAIEnabled = useAIAvailability();
   const state = useGuidedTour('ContentTypeBuilderApp', (s) => s.state);
   const dispatch = useGuidedTour('ContentTypeBuilderApp', (s) => s.dispatch);
@@ -64,7 +66,7 @@ const App = () => {
               <ExitPrompt />
               <ChatProvider>
                 <>
-                  {autoReload && <FormModal />}
+                  {autoReload && !readOnly && <FormModal />}
                   <Layouts.Root sideNav={<ContentTypeBuilderNav />}>
                     <Suspense fallback={<Page.Loading />}>
                       <Routes>

@@ -22,6 +22,7 @@ import * as yup from 'yup';
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useAuth } from '../../../../features/Auth';
 import { BackButton } from '../../../../features/BackButton';
 import { useNotification } from '../../../../features/Notifications';
 import { useTracking } from '../../../../features/Tracking';
@@ -62,6 +63,13 @@ const CreatePage = () => {
   const { id } = useParams();
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
+  // An admin cannot grant a permission they do not hold (CMS-1718).
+  const { permissions: currentUserPermissions, user: currentUser } = useAuth(
+    'RolesCreatePage',
+    (auth) => auth
+  );
+  const isCurrentUserSuperAdmin =
+    currentUser?.roles?.some((userRole) => userRole.code === 'strapi-super-admin') ?? false;
   const navigate = useNavigate();
   const permissionsRef = React.useRef<PermissionsAPI>(null);
   const [hasLocaleValidationErrors, setHasLocaleValidationErrors] = React.useState(false);
@@ -315,6 +323,8 @@ const CreatePage = () => {
                       ref={permissionsRef}
                       permissions={rolePermissions}
                       layout={permissionsLayout}
+                      userPermissions={isCurrentUserSuperAdmin ? undefined : currentUserPermissions}
+                      conditionsPolicy="bounded"
                     />
                   </Box>
                 </Flex>

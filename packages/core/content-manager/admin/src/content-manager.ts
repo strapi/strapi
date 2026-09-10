@@ -23,6 +23,7 @@ import { DEFAULT_TABLE_ROW_ACTIONS } from './pages/ListView/components/TableActi
 import type { Document } from './hooks/useDocument';
 import type { DocumentMetadata } from '../../shared/contracts/collection-types';
 import type { DescriptionComponent, PluginConfig } from '@strapi/admin/strapi-admin';
+import type { MessageDescriptor } from 'react-intl';
 
 /* -------------------------------------------------------------------------------------------------
  * Configuration Types
@@ -96,6 +97,7 @@ interface DocumentActionComponent
     | 'edit'
     | 'edit-the-model'
     | 'history'
+    | 'open-in-new-tab'
     | 'publish'
     | 'unpublish'
     | 'update';
@@ -108,6 +110,20 @@ interface HeaderActionComponent
   extends DescriptionComponent<HeaderActionProps, HeaderActionDescription> {}
 
 interface BulkActionComponentProps extends ListViewContext {}
+
+/**
+ * A page a plugin mounts inside the Content Manager, at
+ * `/content-manager/plugins/<id>` (nested routes are relative to it), with a
+ * link in the Content Manager's sub-navigation. Used by features that belong
+ * to content editing rather than to the main navigation (e.g. content branches).
+ */
+interface ContentManagerPage {
+  /** Route segment under `/content-manager/plugins/`. */
+  id: string;
+  /** Label of the sub-navigation link. */
+  title: MessageDescriptor;
+  Component: React.ComponentType;
+}
 
 interface BulkActionComponent
   extends DescriptionComponent<BulkActionComponentProps, BulkActionDescription> {
@@ -134,8 +150,28 @@ class ContentManagerPlugin {
   ];
   editViewSidePanels: PanelComponent[] = [ActionsPanel];
   headerActions: HeaderActionComponent[] = [];
+  pages: ContentManagerPage[] = [];
 
   constructor() {}
+
+  addPage(pages: DescriptionReducer<ContentManagerPage>): void;
+  addPage(pages: ContentManagerPage[]): void;
+  addPage(pages: DescriptionReducer<ContentManagerPage> | ContentManagerPage[]) {
+    if (Array.isArray(pages)) {
+      validatePages(pages);
+      this.pages = [...this.pages, ...pages];
+    } else if (typeof pages === 'function') {
+      const result = pages(this.pages);
+      validatePages(result);
+      this.pages = result;
+    } else {
+      throw new Error(
+        `Expected the \`pages\` passed to \`addPage\` to be an array or a function, but received ${getPrintableType(
+          pages
+        )}`
+      );
+    }
+  }
 
   addRichTextBlocks(blocks: RichTextBlocksStore): void;
   addRichTextBlocks(blocks: DescriptionObjReducer<RichTextBlocksStore>): void;
@@ -249,6 +285,7 @@ class ContentManagerPlugin {
         addDocumentAction: this.addDocumentAction.bind(this),
         addDocumentHeaderAction: this.addDocumentHeaderAction.bind(this),
         addEditViewSidePanel: this.addEditViewSidePanel.bind(this),
+        addPage: this.addPage.bind(this),
         addRichTextBlocks: this.addRichTextBlocks.bind(this),
         getBulkActions: () => this.bulkActions,
         getDocumentActions: (position?: DocumentActionPosition) => {
@@ -269,6 +306,7 @@ class ContentManagerPlugin {
         },
         getEditViewSidePanels: () => this.editViewSidePanels,
         getHeaderActions: () => this.headerActions,
+        getPages: () => this.pages,
         getRichTextBlocks: () => ({ ...this.richTextBlocksStore }),
       },
     } satisfies PluginConfig;
@@ -321,8 +359,33 @@ const validateDescriptionItems = (items: unknown[], apiName: string, argName: st
   });
 };
 
+const validatePages = (pages: unknown[]): void => {
+  pages.forEach((page, index) => {
+    const candidate = page as Partial<ContentManagerPage> | null;
+    // A component type is a function, or an object for `React.lazy` / `memo` / `forwardRef`.
+    const isComponentType =
+      typeof candidate?.Component === 'function' ||
+      (typeof candidate?.Component === 'object' && candidate.Component !== null);
+    if (
+      !candidate ||
+      typeof candidate !== 'object' ||
+      typeof candidate.id !== 'string' ||
+      !/^[a-z0-9-]+$/.test(candidate.id) ||
+      !isComponentType ||
+      typeof candidate.title !== 'object'
+    ) {
+      throw new Error(
+        `Expected every item in the \`pages\` array passed to \`addPage\` to be { id, title, Component } with a kebab-case id, but received ${getPrintableType(
+          page
+        )} at index ${index}.`
+      );
+    }
+  });
+};
+
 export { ContentManagerPlugin };
 export type {
+  ContentManagerPage,
   EditViewContext,
   ListViewContext,
   BulkActionComponent,

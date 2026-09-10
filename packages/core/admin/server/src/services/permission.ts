@@ -12,6 +12,15 @@ import {
   findMany,
   findUserPermissions,
 } from './permission/queries';
+import {
+  PermissionCeilingError,
+  assertUserCanAssignRoles,
+  assertUserCanGrantPermissions,
+  checkPermissionsWithinCeiling,
+  checkUserCanAssignRoles,
+  checkUserCanGrantPermissions,
+  formatCeilingMessage,
+} from './permission/ceiling';
 
 const actionProvider = createActionProvider();
 const conditionProvider = createConditionProvider();
@@ -31,6 +40,14 @@ export {
   deleteByRolesIds,
   findMany,
   findUserPermissions,
+  // Ceiling (an admin cannot grant what they do not hold)
+  PermissionCeilingError,
+  checkPermissionsWithinCeiling,
+  checkUserCanGrantPermissions,
+  assertUserCanGrantPermissions,
+  checkUserCanAssignRoles,
+  assertUserCanAssignRoles,
+  formatCeilingMessage,
   // Utils
   createPermissionsManager,
   sectionsBuilder,
