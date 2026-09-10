@@ -384,7 +384,8 @@ const formatEditLayout = (
           configuration.layouts.edit,
           componentSchema.attributes,
           configuration.metadatas,
-          { configurations: data.components, schemas: components }
+          { configurations: data.components, schemas: components },
+          schemas
         ),
         settings: {
           ...configuration.settings,
