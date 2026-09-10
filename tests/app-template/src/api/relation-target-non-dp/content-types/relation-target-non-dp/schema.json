@@ -1,0 +1,26 @@
+{
+  "kind": "collectionType",
+  "collectionName": "relation_target_non_dps",
+  "info": {
+    "singularName": "relation-target-non-dp",
+    "pluralName": "relation-target-non-dps",
+    "displayName": "Relation target non-DP",
+    "description": "Non-Draft & Publish target for relation reassignment regression tests"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "relationLabs": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::relation-lab.relation-lab",
+      "mappedBy": "manyToManyNonDp"
+    }
+  }
+}
