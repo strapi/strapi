@@ -125,6 +125,7 @@ const ResetPassword = () => {
           expiresIn: res.data.expiresIn,
           rememberMe: false,
           trustedDeviceDays: res.data.trustedDeviceDays ?? null,
+          passkeyAvailable: res.data.passkeyAvailable === true,
         };
         navigate('/auth/mfa', { state });
         return;

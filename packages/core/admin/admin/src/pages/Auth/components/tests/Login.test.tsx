@@ -67,6 +67,7 @@ describe('ResetPassword', () => {
               challengeToken: 'a'.repeat(64),
               expiresIn: 300,
               trustedDeviceDays: null,
+              passkeyAvailable: false,
             },
           })
         )
@@ -106,6 +107,7 @@ describe('ResetPassword', () => {
               challengeToken: 'a'.repeat(64),
               expiresIn: 300,
               trustedDeviceDays: 30,
+              passkeyAvailable: false,
             },
           })
         )
@@ -124,6 +126,37 @@ describe('ResetPassword', () => {
       fireEvent.click(getByRole('button', { name: 'Login' }));
 
       expect(await findByText(/"trustedDeviceDays":30/)).toBeInTheDocument();
+    });
+
+    it('carries passkeyAvailable into the challenge state', async () => {
+      server.use(
+        http.post('/admin/login', () =>
+          HttpResponse.json({
+            data: {
+              mfaRequired: true,
+              challengeToken: 'a'.repeat(64),
+              expiresIn: 300,
+              trustedDeviceDays: null,
+              passkeyAvailable: true,
+            },
+          })
+        )
+      );
+
+      const { getByRole, getByLabelText, user, findByText } = render(
+        <Routes>
+          <Route path="/auth/login" element={<Login />} />
+          <Route path="/auth/mfa" element={<LocationProbe />} />
+        </Routes>,
+        { initialEntries: ['/auth/login'] }
+      );
+
+      await user.type(getByLabelText('Email*'), 'test@testing.com');
+      await user.type(getByLabelText('Password*'), 'Testing123!');
+      fireEvent.click(getByRole('button', { name: 'Login' }));
+
+      // the probe prints JSON.stringify({ pathname, search, state })
+      expect(await findByText(/"passkeyAvailable":true/)).toBeInTheDocument();
     });
 
     it('shows the locked-account message when login answers 403 MfaLockedError', async () => {

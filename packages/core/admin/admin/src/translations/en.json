@@ -40,6 +40,8 @@
   "Auth.form.mfa.code.label": "Authentication code",
   "Auth.form.mfa.link.back": "Back to login",
   "Auth.form.mfa.locked.message": "This account is locked because two-factor authentication was not set up in time. Ask an administrator to unlock it.",
+  "Auth.form.mfa.passkey.button": "Use a passkey",
+  "Auth.form.mfa.passkey.failed": "Your device could not complete the passkey check. Try again, or enter a code instead.",
   "Auth.form.mfa.subtitle": "Enter the code from your authenticator app, or one of your recovery codes.",
   "Auth.form.mfa.title": "Two-factor authentication",
   "Auth.form.mfa.trustDevice.label": "Trust this device for {days, plural, one {# day} other {# days}}",

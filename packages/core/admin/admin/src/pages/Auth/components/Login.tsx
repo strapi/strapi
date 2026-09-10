@@ -92,6 +92,7 @@ const Login = ({ children }: LoginProps) => {
         expiresIn: res.data.expiresIn,
         rememberMe: body.rememberMe,
         trustedDeviceDays: res.data.trustedDeviceDays ?? null,
+        passkeyAvailable: res.data.passkeyAvailable === true,
       };
       navigate({ pathname: '/auth/mfa', search: searchString }, { state });
     } else {

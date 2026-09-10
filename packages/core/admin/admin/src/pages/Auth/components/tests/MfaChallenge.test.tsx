@@ -1,8 +1,19 @@
+import { browserSupportsWebAuthn, startAuthentication } from '@simplewebauthn/browser';
 import { render, server, screen, fireEvent, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 import { Route, Routes, useLocation } from 'react-router-dom';
 
 import { MfaChallenge } from '../MfaChallenge';
+
+// jsdom defines no `window.PublicKeyCredential`, so the real `browserSupportsWebAuthn()` returns
+// false and the passkey button would never render. Mocking the module also lets each test drive
+// the ceremony's outcome without a real authenticator. Hoisted above the imports by
+// `babel-plugin-jest-hoist`, despite sitting below them here.
+jest.mock('@simplewebauthn/browser', () => ({
+  browserSupportsWebAuthn: jest.fn(() => true),
+  startAuthentication: jest.fn(),
+  startRegistration: jest.fn(),
+}));
 
 // `user.click` on a submit button relies on `HTMLFormElement.requestSubmit`, which jsdom doesn't
 // implement, so it never fires the form's submit handler here. `fireEvent.click` dispatches the
@@ -28,6 +39,7 @@ const STATE = {
   expiresIn: 300,
   rememberMe: false,
   trustedDeviceDays: null,
+  passkeyAvailable: false,
 };
 
 const renderChallenge = (state: object | null = STATE, search = '') =>
@@ -50,6 +62,11 @@ const renderChallenge = (state: object | null = STATE, search = '') =>
   );
 
 describe('MfaChallenge', () => {
+  beforeEach(() => {
+    jest.mocked(browserSupportsWebAuthn).mockReturnValue(true);
+    jest.mocked(startAuthentication).mockReset();
+  });
+
   it('renders one code field that accepts either factor, and a way back to login', () => {
     renderChallenge();
 
@@ -222,5 +239,182 @@ describe('MfaChallenge', () => {
 
     expect(screen.getByRole('heading', { name: 'Two-factor authentication' })).toBeInTheDocument();
     expect(screen.queryByRole('checkbox', { name: /Trust this device/ })).not.toBeInTheDocument();
+  });
+
+  const OPTIONS = { challenge: 'Y2hhbGxlbmdl', rpId: 'localhost', allowCredentials: [] };
+  const ASSERTION = {
+    id: 'credential-id',
+    rawId: 'credential-id',
+    type: 'public-key',
+    clientExtensionResults: {},
+    response: {
+      authenticatorData: 'YXV0aA',
+      clientDataJSON: 'Y2xpZW50',
+      signature: 'c2ln',
+    },
+  };
+  const SESSION = {
+    data: {
+      token: 'session-token',
+      user: { id: 1, email: 'test@testing.com', firstname: 'T', lastname: 'U', roles: [] },
+    },
+  };
+
+  it('offers the passkey button only when the challenge says a passkey is available', () => {
+    const without = renderChallenge(STATE);
+    expect(screen.queryByRole('button', { name: 'Use a passkey' })).not.toBeInTheDocument();
+    without.unmount();
+
+    renderChallenge({ ...STATE, passkeyAvailable: true });
+    expect(screen.getByRole('button', { name: 'Use a passkey' })).toBeInTheDocument();
+  });
+
+  it('hides the passkey button in a browser without WebAuthn', () => {
+    jest.mocked(browserSupportsWebAuthn).mockReturnValue(false);
+    renderChallenge({ ...STATE, passkeyAvailable: true });
+
+    expect(screen.queryByRole('button', { name: 'Use a passkey' })).not.toBeInTheDocument();
+    // the code path is untouched
+    expect(screen.getByLabelText('Authentication code*')).toBeInTheDocument();
+  });
+
+  it('runs the ceremony and sends the assertion with rememberMe and trustDevice', async () => {
+    const optionBodies: Array<Record<string, unknown>> = [];
+    const verifyBodies: Array<Record<string, unknown>> = [];
+    server.use(
+      http.post('/admin/login/mfa/webauthn/options', async ({ request }) => {
+        optionBodies.push((await request.json()) as Record<string, unknown>);
+        return HttpResponse.json({ data: OPTIONS });
+      }),
+      http.post('/admin/login/mfa/webauthn', async ({ request }) => {
+        verifyBodies.push((await request.json()) as Record<string, unknown>);
+        return HttpResponse.json(SESSION);
+      })
+    );
+    jest.mocked(startAuthentication).mockResolvedValue(ASSERTION as never);
+
+    const { user } = renderChallenge({
+      ...STATE,
+      rememberMe: true,
+      trustedDeviceDays: 30,
+      passkeyAvailable: true,
+    });
+
+    await user.click(screen.getByRole('checkbox', { name: 'Trust this device for 30 days' }));
+    await user.click(screen.getByRole('button', { name: 'Use a passkey' }));
+
+    await waitFor(() => expect(verifyBodies).toHaveLength(1));
+    expect(optionBodies[0]).toEqual({ challengeToken: 'a'.repeat(64) });
+    // the options object reaches the browser helper verbatim, under `optionsJSON`
+    expect(jest.mocked(startAuthentication)).toHaveBeenCalledWith({ optionsJSON: OPTIONS });
+    expect(verifyBodies[0]).toMatchObject({
+      challengeToken: 'a'.repeat(64),
+      assertion: ASSERTION,
+      rememberMe: true,
+      trustDevice: true,
+    });
+    expect(typeof verifyBodies[0].deviceId).toBe('string');
+    expect(await screen.findByTestId('probe')).toHaveTextContent('/');
+    expect(window.localStorage.getItem('jwtToken')).toBe(JSON.stringify('session-token'));
+  });
+
+  it('sends trustDevice false on the passkey path when the box is untouched', async () => {
+    const verifyBodies: Array<Record<string, unknown>> = [];
+    server.use(
+      http.post('/admin/login/mfa/webauthn/options', () => HttpResponse.json({ data: OPTIONS })),
+      http.post('/admin/login/mfa/webauthn', async ({ request }) => {
+        verifyBodies.push((await request.json()) as Record<string, unknown>);
+        return HttpResponse.json(SESSION);
+      })
+    );
+    jest.mocked(startAuthentication).mockResolvedValue(ASSERTION as never);
+
+    const { user } = renderChallenge({
+      ...STATE,
+      trustedDeviceDays: 30,
+      passkeyAvailable: true,
+    });
+
+    await user.click(screen.getByRole('button', { name: 'Use a passkey' }));
+
+    await waitFor(() => expect(verifyBodies).toHaveLength(1));
+    expect(verifyBodies[0].trustDevice).toBe(false);
+  });
+
+  it('says nothing and re-enables the button when the user dismisses the prompt', async () => {
+    server.use(
+      http.post('/admin/login/mfa/webauthn/options', () => HttpResponse.json({ data: OPTIONS })),
+      http.post('/admin/login/mfa/webauthn', () => HttpResponse.json(SESSION))
+    );
+    jest
+      .mocked(startAuthentication)
+      .mockRejectedValue(Object.assign(new Error('dismissed'), { name: 'NotAllowedError' }));
+
+    const { user } = renderChallenge({ ...STATE, passkeyAvailable: true });
+    await user.click(screen.getByRole('button', { name: 'Use a passkey' }));
+
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Use a passkey' })).toBeEnabled()
+    );
+    expect(
+      screen.queryByText(/Your device could not complete the passkey check/)
+    ).not.toBeInTheDocument();
+    // still on the challenge screen, with the code field usable
+    expect(screen.getByLabelText('Authentication code*')).toBeInTheDocument();
+  });
+
+  it('shows one line when the ceremony fails for any other reason', async () => {
+    server.use(
+      http.post('/admin/login/mfa/webauthn/options', () => HttpResponse.json({ data: OPTIONS }))
+    );
+    jest
+      .mocked(startAuthentication)
+      .mockRejectedValue(Object.assign(new Error('boom'), { name: 'UnknownError' }));
+
+    const { user } = renderChallenge({ ...STATE, passkeyAvailable: true });
+    await user.click(screen.getByRole('button', { name: 'Use a passkey' }));
+
+    expect(
+      await screen.findByText(
+        'Your device could not complete the passkey check. Try again, or enter a code instead.'
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('shows the server message when the options call or the verify call is refused', async () => {
+    server.use(
+      http.post('/admin/login/mfa/webauthn/options', () =>
+        HttpResponse.json(
+          {
+            error: {
+              status: 400,
+              name: 'ValidationError',
+              message: 'Could not verify that passkey.',
+              details: {},
+            },
+          },
+          { status: 400 }
+        )
+      )
+    );
+
+    const { user } = renderChallenge({ ...STATE, passkeyAvailable: true });
+    await user.click(screen.getByRole('button', { name: 'Use a passkey' }));
+
+    const message = await screen.findByText('Could not verify that passkey.');
+    expect(message).toHaveAttribute('role', 'alert');
+    expect(jest.mocked(startAuthentication)).not.toHaveBeenCalled();
+  });
+
+  it('still renders a challenge whose state predates the passkey field', () => {
+    renderChallenge({
+      challengeToken: 'a'.repeat(64),
+      expiresIn: 300,
+      rememberMe: false,
+      trustedDeviceDays: null,
+    });
+
+    expect(screen.getByRole('heading', { name: 'Two-factor authentication' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Use a passkey' })).not.toBeInTheDocument();
   });
 });

@@ -104,6 +104,7 @@ describe('ResetPassword', () => {
               challengeToken: 'a'.repeat(64),
               expiresIn: 300,
               trustedDeviceDays: 30,
+              passkeyAvailable: true,
             },
           })
         )
@@ -126,6 +127,7 @@ describe('ResetPassword', () => {
       expect(await findByText(/"pathname":"\/auth\/mfa"/)).toBeInTheDocument();
       expect(await findByText(/"rememberMe":false/)).toBeInTheDocument();
       expect(await findByText(/"trustedDeviceDays":30/)).toBeInTheDocument();
+      expect(await findByText(/"passkeyAvailable":true/)).toBeInTheDocument();
       // no session was ever created on the challenge branch
       expect(window.localStorage.getItem('jwtToken')).toBeNull();
     });
