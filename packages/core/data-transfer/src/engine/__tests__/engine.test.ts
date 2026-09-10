@@ -552,7 +552,7 @@ describe('Transfer engine', () => {
 
       await expect(engine.transfer()).rejects.toThrow(closeError);
 
-      expect(rollback).toHaveBeenCalledWith(closeError);
+      expect(rollback).not.toHaveBeenCalled();
       expect(source.close).toHaveBeenCalledTimes(1);
       expect(destination.close).toHaveBeenCalledTimes(1);
     });

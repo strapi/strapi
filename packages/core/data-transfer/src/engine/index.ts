@@ -885,19 +885,22 @@ class TransferEngine<
         this.reportError(e, (e as DataTransferError).severity || 'fatal');
       }
 
-      // Rollback the destination provider if an exception is thrown during the transfer
-      // Note: This will be configurable in the future
-      try {
-        await this.destinationProvider.rollback?.(e as Error);
-      } catch (rollbackError) {
-        const { message } = rollbackError instanceof Error ? rollbackError : { message: '' };
+      // Rollback the destination provider if an exception is thrown before providers are closed.
+      // Once close has started, a provider's transaction may already have ended and cannot be
+      // rolled back safely. Note: This will be configurable in the future.
+      if (!this.#closed) {
+        try {
+          await this.destinationProvider.rollback?.(e as Error);
+        } catch (rollbackError) {
+          const { message } = rollbackError instanceof Error ? rollbackError : { message: '' };
 
-        this.reportWarning(
-          `Failed to rollback the ${this.destinationProvider.name} provider${
-            message ? `: ${message}` : ''
-          }`,
-          'transfer(rollback)'
-        );
+          this.reportWarning(
+            `Failed to rollback the ${this.destinationProvider.name} provider${
+              message ? `: ${message}` : ''
+            }`,
+            'transfer(rollback)'
+          );
+        }
       }
 
       // Providers bootstrapped before the failure may still hold resources: the local providers
