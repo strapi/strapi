@@ -262,6 +262,8 @@ When skipping the assets stage, sync upload binaries separately — for example 
 
 Once all stages have been completed, the transfer waits for all providers to close and then emits a finish event and the transfer completes.
 
+If the transfer throws at any point after bootstrap, the engine rolls back the destination provider and then closes both providers before rethrowing. This matters for programmatic callers: the local providers disable database lifecycles on bootstrap and only re-enable them on close, so a failure that skipped the close would leave the caller's Strapi instance with lifecycles off. Failures during rollback or close are reported as warning diagnostics so they cannot mask the error that caused the transfer to fail.
+
 ### Excluding content types from the CLI
 
 Export, import, and transfer accept `--exclude-content-types` and `--only-content-types` with comma-separated content type UIDs (for example `plugin::upload.file,plugin::upload.folder`). These filters apply to the **entities** and **links** stages:

@@ -496,6 +496,52 @@ describe('Transfer engine', () => {
       expect(beforeTransfer).not.toHaveBeenCalled();
     });
 
+    test('closes both providers when stage validation fails', async () => {
+      const validationError = new Error('invalid asset archive');
+      const source = {
+        ...completeSource,
+        validateStage: jest.fn().mockRejectedValue(validationError),
+      };
+      const rollback = jest.fn();
+      const destination = createDestination({ rollback });
+      const engine = createTransferEngine(source, destination, defaultOptions);
+
+      await expect(engine.transfer()).rejects.toThrow(validationError);
+
+      expect(rollback).toHaveBeenCalled();
+      expect(source.close).toHaveBeenCalledTimes(1);
+      expect(destination.close).toHaveBeenCalledTimes(1);
+    });
+
+    test('reports but does not rethrow cleanup errors raised on the failure path', async () => {
+      const validationError = new Error('invalid asset archive');
+      const source = {
+        ...completeSource,
+        validateStage: jest.fn().mockRejectedValue(validationError),
+        close: jest.fn().mockRejectedValue(new Error('source close failed')),
+      };
+      const destination = createDestination({
+        rollback: jest.fn().mockRejectedValue(new Error('rollback failed')),
+      });
+      const engine = createTransferEngine(source, destination, defaultOptions);
+
+      await expect(engine.transfer()).rejects.toThrow(validationError);
+
+      expect(destination.close).toHaveBeenCalledTimes(1);
+      expect(engine.diagnostics.stack.items.filter((item) => item.kind === 'warning')).toHaveLength(
+        2
+      );
+    });
+
+    test('does not close the providers twice when the transfer succeeds', async () => {
+      const engine = createTransferEngine(completeSource, completeDestination, defaultOptions);
+
+      await engine.transfer();
+
+      expect(completeSource.close).toHaveBeenCalledTimes(1);
+      expect(completeDestination.close).toHaveBeenCalledTimes(1);
+    });
+
     test('does not validate an excluded source stage', async () => {
       const source = {
         ...completeSource,
