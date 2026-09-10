@@ -9,6 +9,7 @@ import {
   readPasskeySettings,
   resetSecuritySettingsWarnings,
   createSecuritySettingsService,
+  warnOnce,
 } from '../security-settings';
 
 const buildStrapi = (stored: unknown) => {
@@ -16,7 +17,11 @@ const buildStrapi = (stored: unknown) => {
     key === SECURITY_SETTINGS_KEY ? stored : null
   );
   const store = jest.fn(() => ({ get, set: jest.fn() }));
-  return { strapi: { store, log: { warn: jest.fn() } } as unknown as Core.Strapi, store, get };
+  return {
+    strapi: { store, log: { warn: jest.fn(), error: jest.fn() } } as unknown as Core.Strapi,
+    store,
+    get,
+  };
 };
 
 describe('security-settings: readMfaEnforcement', () => {
@@ -159,6 +164,23 @@ describe('security-settings: readPasskeySettings', () => {
   );
 });
 
+describe('security-settings: warnOnce', () => {
+  beforeEach(() => {
+    resetSecuritySettingsWarnings();
+  });
+
+  test('a level of "error" logs through strapi.log.error, not strapi.log.warn, and still deduplicates', async () => {
+    const { strapi } = buildStrapi(null);
+
+    warnOnce(strapi, 'webauthn.rp', 'webauthn.rp is misconfigured', 'error');
+    warnOnce(strapi, 'webauthn.rp', 'webauthn.rp is misconfigured', 'error');
+
+    expect(strapi.log.error).toHaveBeenCalledTimes(1);
+    expect(strapi.log.error).toHaveBeenCalledWith(expect.stringContaining('webauthn.rp'));
+    expect(strapi.log.warn).not.toHaveBeenCalled();
+  });
+});
+
 describe('security-settings: service', () => {
   type RoleRow = { id: number; mfaRequired: boolean | null };
 
@@ -254,7 +276,7 @@ describe('security-settings: service', () => {
 
     const strapi = {
       store: jest.fn(() => ({ get: storeGet, set: storeSet })),
-      log: { warn: jest.fn() },
+      log: { warn: jest.fn(), error: jest.fn() },
       eventHub: { emit },
       db: {
         transaction,
@@ -687,7 +709,7 @@ describe('security-settings: service', () => {
   });
 
   test('a body with only passkeys leaves mfa, the role flags and trustedDevices untouched', async () => {
-    const { service, roles, storeSet } = setup({
+    const { service, roles, roleQuery, storeSet } = setup({
       stored: {
         mfa: { mode: 'required', graceDays: 3 },
         trustedDevices: { enabled: false, days: 14 },
@@ -702,6 +724,9 @@ describe('security-settings: service', () => {
     });
 
     expect(roles.find((r) => r.id === 2)!.mfaRequired).toBe(true);
+    // The role flags being unchanged above is consistent with either "left alone" or "rewritten
+    // to the same values" -- this is the assertion that actually distinguishes them.
+    expect(roleQuery.updateMany).not.toHaveBeenCalled();
     expect(storeSet).toHaveBeenCalledWith({
       key: SECURITY_SETTINGS_KEY,
       value: {
@@ -745,6 +770,18 @@ describe('security-settings: service', () => {
     expect(enrolled.assertPasswordAndFactor).toHaveBeenCalledWith('7', 'pw', '123456');
   });
 
+  test('re-sending passkeys off when they are already off is not a transition and needs nothing', async () => {
+    const { service, storeSet, validatePassword } = setup({
+      stored: { passkeys: { enabled: false } },
+    });
+
+    await expect(
+      service.updateSettings({ passkeys: { enabled: false } }, actor)
+    ).resolves.toMatchObject({ passkeys: { enabled: false } });
+    expect(validatePassword).not.toHaveBeenCalled();
+    expect(storeSet).toHaveBeenCalled();
+  });
+
   test('the re-authentication messages are neutral: disabling passkeys is not "lowering requirements"', async () => {
     const { service } = setup({ stored: { passkeys: { enabled: true } } });
 
@@ -756,11 +793,17 @@ describe('security-settings: service', () => {
     ).rejects.not.toThrow(/lower two-factor authentication requirements/);
   });
 
-  test('a password-less (SSO-only) caller may disable passkeys, but nothing else', async () => {
+  test('a password-less (SSO-only) caller may disable passkeys, but not alongside a downgrade', async () => {
     // In an SSO-only organisation every administrator is password-less, so the cycle 2 refusal
     // would make this a setting nobody could ever change, and the CLI offers no escape. Accepted
     // cost: a stolen SSO session can wipe the organisation's passkeys -- everything that session
     // could do instead (resetting each user's MFA through `admin::users.update`) is already worse.
+    //
+    // Note: this does not mean the passkeys-only save is the *only* thing a password-less caller
+    // may change credential-free -- the exemption keys on the triggering-term set, so a
+    // non-downgrading mfa/trustedDevices change (e.g. shortening trust `days`) may ride along too.
+    // That is a pre-existing property of the endpoint, unrelated to passkeys, and is not what this
+    // test asserts.
     const passwordless = { password: null };
 
     const only = setup({
@@ -773,7 +816,7 @@ describe('security-settings: service', () => {
     ).resolves.toMatchObject({ passkeys: { enabled: false } });
     expect(only.validatePassword).not.toHaveBeenCalled();
 
-    // Combined with a real downgrade it is refused exactly as today.
+    // Combined with a real downgrade of lowersEnforcement it is refused exactly as today.
     const combined = setup({
       stored: { mfa: { mode: 'required', graceDays: 7 }, passkeys: { enabled: true } },
       actor: passwordless,
@@ -786,5 +829,21 @@ describe('security-settings: service', () => {
       )
     ).rejects.toThrow(/no local password/);
     expect(combined.storeSet).not.toHaveBeenCalled();
+
+    // Combined with widensTrust -- the *other* downgrade arm the refusal guards -- it is refused
+    // too. Without this the guard could regress to only checking lowersEnforcement and the suite
+    // would not notice.
+    const widened = setup({
+      stored: { trustedDevices: { enabled: false, days: 30 }, passkeys: { enabled: true } },
+      actor: passwordless,
+      exempt: true,
+    });
+    await expect(
+      widened.service.updateSettings(
+        { trustedDevices: { enabled: true, days: 30 }, passkeys: { enabled: false } },
+        actor
+      )
+    ).rejects.toThrow(/no local password/);
+    expect(widened.storeSet).not.toHaveBeenCalled();
   });
 });
