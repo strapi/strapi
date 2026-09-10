@@ -4,6 +4,8 @@ import {
   mediaListAssetsOutputSchema,
   mediaGetAssetOutputSchema,
   mediaListFoldersOutputSchema,
+  mediaUpdateAssetInputSchema,
+  mediaUpdateAssetOutputSchema,
 } from '../schemas';
 import { ALLOWED_SORT_STRINGS } from '../../constants';
 
@@ -67,6 +69,115 @@ describe('upload MCP schemas', () => {
 
     test('requires the id', () => {
       expect(mediaGetAssetInputSchema.safeParse({}).success).toBe(false);
+    });
+  });
+
+  describe('media_update_asset input', () => {
+    test('accepts the three writable metadata fields', () => {
+      const parsed = mediaUpdateAssetInputSchema.safeParse({
+        id: 1,
+        name: 'renamed.jpg',
+        alternativeText: 'alt',
+        caption: 'caption',
+      });
+
+      expect(parsed.success).toBe(true);
+    });
+
+    test('accepts a partial patch', () => {
+      expect(mediaUpdateAssetInputSchema.safeParse({ id: 1, caption: 'only this' }).success).toBe(
+        true
+      );
+    });
+
+    test('accepts null on the nullable text fields, to clear them', () => {
+      expect(
+        mediaUpdateAssetInputSchema.safeParse({ id: 1, alternativeText: null, caption: null })
+          .success
+      ).toBe(true);
+    });
+
+    test('rejects a null name — an asset cannot be left unnamed', () => {
+      expect(mediaUpdateAssetInputSchema.safeParse({ id: 1, name: null }).success).toBe(false);
+      expect(mediaUpdateAssetInputSchema.safeParse({ id: 1, name: '' }).success).toBe(false);
+    });
+
+    test('requires the numeric id', () => {
+      expect(mediaUpdateAssetInputSchema.safeParse({ name: 'renamed.jpg' }).success).toBe(false);
+      expect(
+        mediaUpdateAssetInputSchema.safeParse({ id: 'z7v8zma53x01r6oceimv922b', name: 'x' }).success
+      ).toBe(false);
+    });
+
+    test.each([
+      ['folder', 3],
+      ['folderId', 3],
+      ['folderPath', '/1/2'],
+    ])('rejects %s and directs the caller to media_move_assets', (field, value) => {
+      const parsed = mediaUpdateAssetInputSchema.safeParse({ id: 1, [field]: value });
+
+      expect(parsed.success).toBe(false);
+      expect(JSON.stringify(parsed.error?.issues)).toMatch(/media_move_assets/);
+    });
+
+    test.each([
+      ['url', '/uploads/evil.jpg'],
+      ['provider', 'aws-s3'],
+      ['provider_metadata', { secretKey: 'leak' }],
+      ['hash', 'forced_hash'],
+      ['mime', 'text/html'],
+      ['size', 1],
+      ['width', 10],
+      ['height', 10],
+      ['ext', '.png'],
+      ['formats', { thumbnail: {} }],
+    ])('rejects the provider-owned field %s', (field, value) => {
+      expect(
+        mediaUpdateAssetInputSchema.safeParse({ id: 1, name: 'renamed.jpg', [field]: value })
+          .success
+      ).toBe(false);
+    });
+
+    test.each(['file', 'files', 'data', 'buffer', 'filepath', 'focalPoint'])(
+      'rejects the out-of-scope field %s',
+      (field) => {
+        // File content is out of MCP scope entirely — MCP is text-only.
+        expect(
+          mediaUpdateAssetInputSchema.safeParse({ id: 1, name: 'renamed.jpg', [field]: 'x' })
+            .success
+        ).toBe(false);
+      }
+    );
+
+    test('reports the unrecognised key by name, so an agent can correct itself', () => {
+      const parsed = mediaUpdateAssetInputSchema.safeParse({ id: 1, name: 'x', folder: 3 });
+
+      expect(parsed.success).toBe(false);
+      expect(JSON.stringify(parsed.error?.issues)).toMatch(/folder/);
+    });
+  });
+
+  describe('media_update_asset output', () => {
+    test('returns the asset in the same shape as the read tools', () => {
+      const parsed = mediaUpdateAssetOutputSchema.safeParse({
+        data: {
+          id: 1,
+          name: 'renamed.jpg',
+          alternativeText: 'alt',
+          caption: null,
+          url: '/uploads/photo.jpg',
+          mime: 'image/jpeg',
+          size: 12.5,
+          folder: null,
+        },
+      });
+
+      expect(parsed.success).toBe(true);
+    });
+
+    test('requires data — a successful write always returns the updated asset', () => {
+      expect(mediaUpdateAssetOutputSchema.safeParse({ data: null }).success).toBe(false);
+      expect(mediaUpdateAssetOutputSchema.safeParse({}).success).toBe(false);
     });
   });
 

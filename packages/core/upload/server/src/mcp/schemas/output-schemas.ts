@@ -62,3 +62,11 @@ export const mediaFolderNodeSchema: z.ZodType<MediaFolderNode> = z.lazy(() =>
 export const mediaListFoldersOutputSchema = z.object({
   data: z.array(mediaFolderNodeSchema).describe('Nested folder structure, roots first.'),
 });
+
+/**
+ * `media_update_asset` output — the updated asset in the same shape the read tools return,
+ * so an agent can confirm the write without a follow-up `media_get_asset` call.
+ */
+export const mediaUpdateAssetOutputSchema = z.object({
+  data: mediaAssetOutputSchema,
+});

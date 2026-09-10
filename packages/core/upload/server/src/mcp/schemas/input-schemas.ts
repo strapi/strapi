@@ -76,3 +76,56 @@ export const mediaGetAssetInputSchema = z.object({
 });
 
 export const mediaListFoldersInputSchema = z.object({});
+
+const FOLDER_INPUT_KEYS = ['folder', 'folderId', 'folderPath'] as const;
+
+/**
+ * `media_update_asset` input — the only writable asset metadata.
+ *
+ * `.strict()` turns an out-of-scope field into an error rather than a silent no-op. The custom
+ * object error directs folder-shaped inputs to `media_move_assets`; other unknown keys are named by
+ * Zod's default error, so the agent can correct the call without a round-trip.
+ *
+ * The "at least one field" rule is enforced in the handler, not here: a `.refine()` would turn
+ * this into a `ZodEffects`, which the MCP tool registry cannot expose as an input schema.
+ */
+export const mediaUpdateAssetInputSchema = z
+  .object(
+    {
+      id: mediaIdSchema,
+      name: z
+        .string()
+        .min(1)
+        .optional()
+        .describe(
+          'New asset name as shown in the Media Library. Renames the entry only — the stored file and its URL are unchanged.'
+        ),
+      alternativeText: z
+        .string()
+        .nullable()
+        .optional()
+        .describe(
+          'Alt text used by the frontend for accessibility. Pass null to clear it; the field then reads back as an empty string.'
+        ),
+      caption: z
+        .string()
+        .nullable()
+        .optional()
+        .describe(
+          'Caption shown alongside the asset. Pass null to clear it; the field then reads back as an empty string.'
+        ),
+    },
+    {
+      error(issue) {
+        if (
+          issue.code === 'unrecognized_keys' &&
+          FOLDER_INPUT_KEYS.some((key) => issue.keys.includes(key))
+        ) {
+          return 'Folder changes are not supported by media_update_asset. Use media_move_assets to move an asset between folders.';
+        }
+
+        return undefined;
+      },
+    }
+  )
+  .strict();
