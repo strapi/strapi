@@ -6,8 +6,8 @@ import { resetFiles } from '../../../utils/file-reset';
 import { login } from '../../../utils/login';
 import { describeOnCondition, navToHeader } from '../../../utils/shared';
 
-// With `betaMediaLibrary` on, `plugins/upload` serves the beta Media Library
-// instead of this one, so the legacy suite only applies when the flag is off.
+// The legacy Media Library renders only with `useLegacyMediaLibrary: true`, so this suite
+// runs in the `legacy` e2e job alone.
 describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'legacy')('Media Library', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
