@@ -8,9 +8,12 @@ inputs:
   domains:
     description: 'Restrict the run to these test domains (space separated). Defaults to every domain.'
     default: ''
-  betaMediaLibrary:
-    description: 'Serve the beta Media Library instead of the legacy one. Only the dedicated beta job sets this.'
+  useLegacyMediaLibrary:
+    description: 'Serve the previous Media Library instead of the current one. Only the dedicated legacy job sets this.'
     default: 'false'
+  mediaLibrarySuite:
+    description: 'Which Media Library specs to run: current, legacy, or neither. Only the dedicated jobs set this, so the shared matrix is unaffected by either suite.'
+    default: ''
 runs:
   using: 'composite'
   steps:
@@ -20,5 +23,6 @@ runs:
         JEST_OPTIONS: ${{ inputs.jestOptions }}
         DOMAINS: ${{ inputs.domains }}
         STRAPI_FEATURES_UNSTABLE_PREVIEW_SIDE_EDITOR: true
-        BETA_MEDIA_LIBRARY: ${{ inputs.betaMediaLibrary }}
+        USE_LEGACY_MEDIA_LIBRARY: ${{ inputs.useLegacyMediaLibrary }}
+        E2E_MEDIA_LIBRARY: ${{ inputs.mediaLibrarySuite }}
       shell: bash
