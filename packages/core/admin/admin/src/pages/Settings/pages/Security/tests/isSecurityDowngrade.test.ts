@@ -1,4 +1,4 @@
-import { isTrustedDevicesDowngrade } from '../utils/isSecurityDowngrade';
+import { isPasskeysDisable, isTrustedDevicesDowngrade } from '../utils/isSecurityDowngrade';
 
 describe('isTrustedDevicesDowngrade', () => {
   const on30 = { enabled: true, days: 30 };
@@ -21,5 +21,17 @@ describe('isTrustedDevicesDowngrade', () => {
     expect(isTrustedDevicesDowngrade(on30, off30)).toBe(false);
     expect(isTrustedDevicesDowngrade(on30, { enabled: false, days: 60 })).toBe(false);
     expect(isTrustedDevicesDowngrade(on30, on30)).toBe(false);
+  });
+});
+
+describe('isPasskeysDisable', () => {
+  it('turning passkeys off needs credentials', () => {
+    expect(isPasskeysDisable({ enabled: true }, { enabled: false })).toBe(true);
+  });
+
+  it('turning passkeys on, or saving the same value, does not', () => {
+    expect(isPasskeysDisable({ enabled: false }, { enabled: true })).toBe(false);
+    expect(isPasskeysDisable({ enabled: true }, { enabled: true })).toBe(false);
+    expect(isPasskeysDisable({ enabled: false }, { enabled: false })).toBe(false);
   });
 });

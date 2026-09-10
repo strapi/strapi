@@ -10,6 +10,7 @@ import {
   type RegistrationInfo,
   ForgotPassword,
 } from '../../../shared/contracts/authentication';
+import { type MfaWebauthnLogin, type MfaWebauthnOptions } from '../../../shared/contracts/mfa';
 import { Check } from '../../../shared/contracts/permissions';
 import { GetProviders, IsSSOLocked } from '../../../shared/contracts/providers';
 import {
@@ -138,6 +139,41 @@ const authService = adminApi
           data: body,
         }),
         transformResponse(res: LoginMfa.Response) {
+          return res.data;
+        },
+        invalidatesTags: ['Me'],
+      }),
+      /**
+       * Cycle 4, step one of the passkey login. Lives here beside `loginMfa` rather than in
+       * `services/mfa.ts` because it is an *unauthenticated* login endpoint: the challenge token
+       * is its whole authority, and the challenge-token pair belongs with its sibling.
+       *
+       * A mutation, not a query: it writes the ceremony challenge onto the challenge row
+       * server-side, so it must never be cached, deduplicated or refetched.
+       */
+      loginMfaWebauthnOptions: builder.mutation<
+        MfaWebauthnOptions.Response['data'],
+        MfaWebauthnOptions.Request['body']
+      >({
+        query: (body) => ({
+          method: 'POST',
+          url: '/admin/login/mfa/webauthn/options',
+          data: body,
+        }),
+        transformResponse(res: MfaWebauthnOptions.Response) {
+          return res.data;
+        },
+      }),
+      /**
+       * Step two: the assertion in exchange for a session. Same response shape as `loginMfa`, so
+       * `features/Auth.tsx` persists its token through the identical code path.
+       */
+      loginMfaWebauthn: builder.mutation<
+        MfaWebauthnLogin.Response['data'],
+        MfaWebauthnLogin.Request['body']
+      >({
+        query: (body) => ({ method: 'POST', url: '/admin/login/mfa/webauthn', data: body }),
+        transformResponse(res: MfaWebauthnLogin.Response) {
           return res.data;
         },
         invalidatesTags: ['Me'],
@@ -280,6 +316,8 @@ const {
   useRevokeAllSessionsMutation,
   useLoginMutation,
   useLoginMfaMutation,
+  useLoginMfaWebauthnOptionsMutation,
+  useLoginMfaWebauthnMutation,
   useAccessTokenExchangeMutation,
   useLogoutMutation,
   useUpdateMeMutation,
@@ -304,6 +342,8 @@ export {
   useRevokeAllSessionsMutation,
   useLoginMutation,
   useLoginMfaMutation,
+  useLoginMfaWebauthnOptionsMutation,
+  useLoginMfaWebauthnMutation,
   useAccessTokenExchangeMutation,
   useLogoutMutation,
   useUpdateMeMutation,

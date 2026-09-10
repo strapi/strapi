@@ -1,6 +1,12 @@
+import type {
+  AuthenticationResponseJSON,
+  PublicKeyCredentialCreationOptionsJSON,
+  PublicKeyCredentialRequestOptionsJSON,
+  RegistrationResponseJSON,
+} from '@simplewebauthn/browser';
 import type { Data } from '@strapi/types';
+import type { LoginMfa } from './authentication';
 import type { AdminUser } from './shared';
-import type { Login } from './authentication';
 
 /**
  * /mfa/me - Current second-factor status for the authenticated admin user. Never carries the
@@ -219,10 +225,10 @@ export declare namespace ListPasskeys {
  * credential satisfies every future challenge on its own, so password-only would be a weaker gate
  * on a stronger operation.
  *
- * The response is the library's `PublicKeyCredentialCreationOptionsJSON`, passed through
- * verbatim for `@simplewebauthn/browser`'s `startRegistration({ optionsJSON })` to consume.
- * Typed structurally rather than imported from `@simplewebauthn/server`, which is a server-only
- * dependency: the browser half has its own identical type in `@simplewebauthn/browser`.
+ * The response is passed through verbatim for `@simplewebauthn/browser`'s
+ * `startRegistration({ optionsJSON })` to consume, typed from `@simplewebauthn/browser` (a
+ * type-only import here) rather than from `@simplewebauthn/server`, which is a server-only
+ * dependency this file must not pull in at runtime.
  */
 export declare namespace PasskeyRegistrationOptions {
   export interface Request {
@@ -233,7 +239,7 @@ export declare namespace PasskeyRegistrationOptions {
   }
 
   export interface Response {
-    data: Record<string, unknown>;
+    data: PublicKeyCredentialCreationOptionsJSON;
   }
 }
 
@@ -246,8 +252,7 @@ export declare namespace RegisterPasskey {
     body: {
       /** Trimmed, 1..50 characters. */
       name: string;
-      /** The browser's `RegistrationResponseJSON`, structurally typed for the same reason as above. */
-      registration: Record<string, unknown>;
+      registration: RegistrationResponseJSON;
     };
   }
 
@@ -297,8 +302,9 @@ export declare namespace DeleteUserPasskeys {
 /**
  * POST /admin/login/mfa/webauthn/options - Start an authentication ceremony against a challenge
  * minted by `/login` or `/reset-password`. Unauthenticated; the challenge token is the only
- * credential. Charges no attempt: it evaluates no factor. The response is the library's
- * `PublicKeyCredentialRequestOptionsJSON`, structurally typed as above.
+ * credential. Charges no attempt: it evaluates no factor. The response is passed through verbatim
+ * for `@simplewebauthn/browser`'s `startAuthentication({ optionsJSON })`, typed the same way as
+ * `PasskeyRegistrationOptions` above.
  */
 export declare namespace MfaWebauthnOptions {
   export interface Request {
@@ -308,7 +314,7 @@ export declare namespace MfaWebauthnOptions {
   }
 
   export interface Response {
-    data: Record<string, unknown>;
+    data: PublicKeyCredentialRequestOptionsJSON;
   }
 }
 
@@ -322,15 +328,14 @@ export declare namespace MfaWebauthnLogin {
   export interface Request {
     body: {
       challengeToken: string;
-      /** The browser's `AuthenticationResponseJSON`. */
-      assertion: Record<string, unknown>;
+      assertion: AuthenticationResponseJSON;
       trustDevice?: boolean;
       deviceId?: string;
       rememberMe?: boolean;
     };
   }
 
-  export type Response = Login.Response;
+  export type Response = LoginMfa.Response;
 }
 
 /**

@@ -299,3 +299,19 @@ describe('formatMfaNotice (cycle 3 device notices)', () => {
     );
   });
 });
+
+describe('formatMfaNotice (cycle 4 passkey notices)', () => {
+  const intl = createIntl({ locale: 'en', messages: {} });
+  const base = { id: 1, createdAt: '2026-09-09T10:00:00.000Z', seenAt: null } as const;
+  const format = (notice: Parameters<typeof formatMfaNotice>[0]) =>
+    formatMfaNotice(notice, intl.formatMessage, intl.formatDate);
+
+  it('has copy for both passkey notices the server records a row for', () => {
+    expect(
+      format({ ...base, type: 'passkey_registered', metadata: { deviceName: 'MacBook Touch ID' } })
+    ).toMatch(/^A passkey was added to your account \(/);
+    expect(
+      format({ ...base, type: 'passkey_removed', metadata: { deviceName: 'MacBook Touch ID' } })
+    ).toMatch(/^A passkey was removed from your account \(/);
+  });
+});

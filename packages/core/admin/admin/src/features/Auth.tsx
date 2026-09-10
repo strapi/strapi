@@ -3,6 +3,7 @@ import * as React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { Login, type LoginMfa } from '../../../shared/contracts/authentication';
+import { type MfaWebauthnLogin } from '../../../shared/contracts/mfa';
 import { createContext } from '../components/Context';
 import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
 import { useStrapiApp } from '../features/StrapiApp';
@@ -21,6 +22,7 @@ import {
   useGetMyPermissionsQuery,
   useLazyCheckPermissionsQuery,
   useLoginMfaMutation,
+  useLoginMfaWebauthnMutation,
   useLoginMutation,
   useLogoutMutation,
 } from '../services/auth';
@@ -60,6 +62,18 @@ interface AuthContextValue {
       rememberMe: boolean;
     }
   ) => Promise<Awaited<ReturnType<ReturnType<typeof useLoginMfaMutation>[0]>>>;
+  /**
+   * Cycle 4's passkey twin of `loginMfa`: satisfies the *same* challenge with a WebAuthn
+   * assertion instead of a code, and persists the resulting session token identically.
+   * `trustDevice` and `rememberMe` are carried for exactly the reasons they are carried on
+   * `loginMfa` -- the trust grant is factor-agnostic, and `rememberMe` decides cookie vs
+   * localStorage -- and dropping either on this path would silently lose the user's choice.
+   */
+  loginMfaWebauthn: (
+    body: Pick<MfaWebauthnLogin.Request['body'], 'challengeToken' | 'assertion' | 'trustDevice'> & {
+      rememberMe: boolean;
+    }
+  ) => Promise<Awaited<ReturnType<ReturnType<typeof useLoginMfaWebauthnMutation>[0]>>>;
   logout: () => Promise<void>;
   /**
    * @alpha
@@ -156,6 +170,7 @@ const AuthProvider = ({
 
   const [loginMutation] = useLoginMutation();
   const [loginMfaMutation] = useLoginMfaMutation();
+  const [loginMfaWebauthnMutation] = useLoginMfaWebauthnMutation();
   const [logoutMutation] = useLogoutMutation();
 
   const clearStateAndLogout = React.useCallback(() => {
@@ -339,6 +354,23 @@ const AuthProvider = ({
     [dispatch, loginMfaMutation]
   );
 
+  const loginMfaWebauthn = React.useCallback<AuthContextValue['loginMfaWebauthn']>(
+    async ({ rememberMe, ...body }) => {
+      const res = await loginMfaWebauthnMutation({
+        ...body,
+        deviceId: getOrCreateDeviceId(),
+        rememberMe,
+      });
+
+      if ('data' in res) {
+        dispatch(loginAction({ token: res.data.token, persist: rememberMe }));
+      }
+
+      return res;
+    },
+    [dispatch, loginMfaWebauthnMutation]
+  );
+
   const logout = React.useCallback(async () => {
     await logoutMutation({ deviceId: getOrCreateDeviceId() });
     clearStateAndLogout();
@@ -434,6 +466,7 @@ const AuthProvider = ({
       user={user}
       login={login}
       loginMfa={loginMfa}
+      loginMfaWebauthn={loginMfaWebauthn}
       logout={logout}
       permissions={userPermissions}
       checkUserHasPermissions={checkUserHasPermissions ?? NOOP_CHECK_USER_HAS_PERMISSIONS}

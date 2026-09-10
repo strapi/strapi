@@ -1,6 +1,7 @@
 import type {
   MfaEnforcementMode,
   MfaEnforcementSettings,
+  PasskeySettings,
   TrustedDeviceSettings,
 } from '../../../../../../../shared/contracts/security-settings';
 
@@ -42,3 +43,16 @@ export const isTrustedDevicesDowngrade = (
   previous: TrustedDeviceSettings,
   next: TrustedDeviceSettings
 ): boolean => (!previous.enabled && next.enabled) || (next.enabled && next.days > previous.days);
+
+/**
+ * Cycle 4's third term in the same re-authentication predicate. Mirrors `disablesPasskeys` in the
+ * server's `updateSettings`: turning passkeys off deletes every passkey every administrator has
+ * registered, organisation-wide and irreversibly, so a stolen session must not be able to wipe
+ * them all with one `PUT` and a dialog the attacker is not looking at.
+ *
+ * Turning passkeys **on** needs nothing: adding a phishing-resistant factor strengthens the
+ * second factor and destroys nothing, which is why -- unlike cycle 3's trust period -- only one
+ * direction is gated.
+ */
+export const isPasskeysDisable = (previous: PasskeySettings, next: PasskeySettings): boolean =>
+  previous.enabled && !next.enabled;

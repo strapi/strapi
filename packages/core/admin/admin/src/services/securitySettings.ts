@@ -13,7 +13,14 @@ import type {
  */
 const securitySettingsService = adminApi
   .enhanceEndpoints({
-    addTagTypes: ['SecuritySettings', 'Mfa', 'TrustedDevices', 'UserTrustedDevices'],
+    addTagTypes: [
+      'SecuritySettings',
+      'Mfa',
+      'TrustedDevices',
+      'UserTrustedDevices',
+      'Passkeys',
+      'UserPasskeys',
+    ],
   })
   .injectEndpoints({
     endpoints: (builder) => ({
@@ -33,10 +40,19 @@ const securitySettingsService = adminApi
           return res.data;
         },
         // `Mfa` too: the caller's own `/admin/mfa/me` `required` flag follows the mode and the
-        // role list, so the profile section and the grace banner must re-read it. `TrustedDevices`
-        // and `UserTrustedDevices`: turning trust off empties every trusted-devices table
-        // server-side, so both the profile list and any open user-edit panel must refetch.
-        invalidatesTags: ['SecuritySettings', 'Mfa', 'TrustedDevices', 'UserTrustedDevices'],
+        // role list, and its `passkeysEnabled` flag follows the passkey policy, so the profile
+        // section and the grace banner must re-read it. `TrustedDevices` / `UserTrustedDevices`
+        // and `Passkeys` / `UserPasskeys`: turning either feature off deletes the rows the client
+        // is holding, server-side, so every list and count must refetch rather than show rows
+        // that no longer exist.
+        invalidatesTags: [
+          'SecuritySettings',
+          'Mfa',
+          'TrustedDevices',
+          'UserTrustedDevices',
+          'Passkeys',
+          'UserPasskeys',
+        ],
       }),
     }),
     overrideExisting: false,

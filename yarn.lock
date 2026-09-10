@@ -8395,6 +8395,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@simplewebauthn/browser@npm:14.0.0":
+  version: 14.0.0
+  resolution: "@simplewebauthn/browser@npm:14.0.0"
+  checksum: 10c0/5af1ac7761478dd33ac4cafdc4aede160d322c2097c57778e9fe568a52283aa81cff89b2515d2d91b75909ad68a69cc21e17f6dae5d74fbb0b2f4aa669d0c6f5
+  languageName: node
+  linkType: hard
+
 "@simplewebauthn/server@npm:14.0.1":
   version: 14.0.1
   resolution: "@simplewebauthn/server@npm:14.0.1"
@@ -9078,6 +9085,7 @@ __metadata:
     "@radix-ui/react-context": "npm:1.0.1"
     "@radix-ui/react-toolbar": "npm:1.1.11"
     "@reduxjs/toolkit": "npm:1.9.7"
+    "@simplewebauthn/browser": "npm:14.0.0"
     "@simplewebauthn/server": "npm:14.0.1"
     "@strapi/admin-test-utils": "npm:5.52.3"
     "@strapi/data-transfer": "npm:5.52.3"
