@@ -7,14 +7,18 @@ import { ADMIN_PASSWORD, EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD, TITLE_HOME } fro
 const LOCKED_MESSAGE =
   'This account is locked because two-factor authentication was not set up in time. Ask an administrator to unlock it.';
 
+const twoFactorCard = (page: Page) =>
+  page.getByRole('region', { name: 'Two-factor authentication' });
+
 /**
- * Sets the requirement to Required from the Security page (the caller must be enrolled).
- * The Security page has one Save per card; the two-factor enforcement card is first.
+ * Sets the requirement to Required from the Security page (the caller must be enrolled). Each
+ * card on that page is an accessible region named by its own heading (cycle 4), so its Save
+ * button is selected by card rather than by position.
  */
 const requireTwoFactorForEveryone = async (page: Page) => {
   await page.goto('/admin/settings/security');
   await page.getByRole('radio', { name: /^Required/ }).check();
-  await page.getByRole('button', { name: 'Save' }).first().click();
+  await twoFactorCard(page).getByRole('button', { name: 'Save' }).click();
   await expect(page.getByText('Saved')).toBeVisible();
 };
 
@@ -35,7 +39,7 @@ test.describe('Two-factor enforcement', () => {
     await expect(page.getByRole('radio', { name: /^Optional/ })).toBeChecked();
 
     await page.getByRole('radio', { name: /^Required/ }).check();
-    await page.getByRole('button', { name: 'Save' }).first().click();
+    await twoFactorCard(page).getByRole('button', { name: 'Save' }).click();
 
     await expect(
       page.getByText('Enrol in two-factor authentication before requiring it for others')

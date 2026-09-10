@@ -6,12 +6,10 @@ import { useIntl } from 'react-intl';
 
 import { ErrorMessage } from '../../../../../components/ErrorMessage';
 import { Panel } from '../../../../../components/Panel';
-import { useNotification } from '../../../../../features/Notifications';
-import { useToMessage } from '../../../../../hooks/useToMessage';
-import { useUpdateSecuritySettingsMutation } from '../../../../../services/securitySettings';
+import { useSecuritySettingsSave } from '../hooks/useSecuritySettingsSave';
 import { isTrustedDevicesDowngrade } from '../utils/isSecurityDowngrade';
 
-import { ConfirmDowngradeDialog, type DowngradeCredentials } from './ConfirmDowngradeDialog';
+import { ConfirmDowngradeDialog } from './ConfirmDowngradeDialog';
 
 import type { TrustedDeviceSettings } from '../../../../../../../shared/contracts/security-settings';
 
@@ -47,17 +45,13 @@ const TrustedDevicesCard = ({
   isRefreshing = false,
 }: TrustedDevicesCardProps) => {
   const { formatMessage } = useIntl();
-  const { toggleNotification } = useNotification();
-  const toMessage = useToMessage();
-  const [updateSettings, { isLoading: isSaving }] = useUpdateSecuritySettingsMutation();
+  const titleId = React.useId();
 
   const [enabled, setEnabled] = React.useState(settings.enabled);
   // Kept as the raw field value so an empty or out-of-range entry shows as a validation error
   // instead of being coerced away.
   const [days, setDays] = React.useState<number | null>(settings.days);
   const [daysError, setDaysError] = React.useState<string>();
-  const [saveError, setSaveError] = React.useState<string>();
-  const [downgradeOpen, setDowngradeOpen] = React.useState(false);
 
   React.useEffect(() => {
     setEnabled(settings.enabled);
@@ -67,146 +61,126 @@ const TrustedDevicesCard = ({
   const next: TrustedDeviceSettings = { enabled, days: days ?? settings.days };
   const modified = !isEqual(next, settings);
 
-  const submit = async (credentials?: DowngradeCredentials): Promise<string | undefined> => {
-    const res = await updateSettings({ trustedDevices: next, ...credentials });
-    if ('error' in res) {
-      return toMessage(res.error);
-    }
-    toggleNotification({
-      type: 'success',
-      message: formatMessage({ id: 'notification.success.saved', defaultMessage: 'Saved' }),
+  const { save, isSaving, saveError, downgradeOpen, closeDowngrade, confirmDowngrade } =
+    useSecuritySettingsSave({
+      patch: { trustedDevices: next },
+      requiresCredentials: isTrustedDevicesDowngrade(settings, next),
+      validate: () => {
+        if (!isValidDays(days)) {
+          setDaysError(
+            formatMessage({
+              id: 'Settings.security.trustedDevices.days.error',
+              defaultMessage: 'Enter a whole number of days between 1 and 90',
+            })
+          );
+          return false;
+        }
+        setDaysError(undefined);
+        return true;
+      },
     });
-    return undefined;
-  };
-
-  const handleSave = async () => {
-    setSaveError(undefined);
-    if (!isValidDays(days)) {
-      setDaysError(
-        formatMessage({
-          id: 'Settings.security.trustedDevices.days.error',
-          defaultMessage: 'Enter a whole number of days between 1 and 90',
-        })
-      );
-      return;
-    }
-    setDaysError(undefined);
-
-    if (isTrustedDevicesDowngrade(settings, next)) {
-      setDowngradeOpen(true);
-      return;
-    }
-
-    const message = await submit();
-    if (message) {
-      setSaveError(message);
-    }
-  };
-
-  const handleDowngradeConfirm = async (credentials: DowngradeCredentials) => {
-    const message = await submit(credentials);
-    if (!message) {
-      setDowngradeOpen(false);
-    }
-    return message;
-  };
 
   return (
-    <Panel gap={5}>
-      <Flex direction="column" alignItems="stretch" gap={1}>
-        <Typography variant="delta" tag="h2">
-          {formatMessage({
-            id: 'Settings.security.trustedDevices.title',
-            defaultMessage: 'Trusted devices',
-          })}
-        </Typography>
-        <Typography textColor="neutral600">
-          {formatMessage({
-            id: 'Settings.security.trustedDevices.description',
-            defaultMessage:
-              'After entering a code, a user may trust the browser they are on and skip the code there until the trust expires. The password is still required at every login.',
-          })}
-        </Typography>
-      </Flex>
-
-      <Flex direction="column" alignItems="stretch" gap={2}>
-        <Checkbox
-          name="trusted-devices-enabled"
-          disabled={!canUpdate}
-          checked={enabled}
-          onCheckedChange={(checked) => {
-            const isChecked = checked === true;
-            setEnabled(isChecked);
-            if (!isChecked) {
-              // The days field is disabled while trust is off, so a value it holds from before
-              // unticking (invalid or not) must never be able to block saving `enabled: false`.
-              setDays(settings.days);
-              setDaysError(undefined);
-            }
-          }}
-        >
-          {formatMessage({
-            id: 'Settings.security.trustedDevices.enabled.label',
-            defaultMessage: 'Allow users to trust a device after entering a code',
-          })}
-        </Checkbox>
-        <ErrorMessage error={saveError} />
-      </Flex>
-
-      <Box maxWidth="24rem">
-        <Field.Root
-          name="trustedDeviceDays"
-          required
-          error={daysError}
-          hint={formatMessage({
-            id: 'Settings.security.trustedDevices.days.hint',
-            defaultMessage:
-              'How long a trusted browser skips the code. Shortening it cuts existing trusts at once; lengthening it never extends a trust already granted. Changing a password does not revoke trust; revoking a device does.',
-          })}
-        >
-          <Field.Label>
+    // `Panel` itself is fixed to a `div` root (its `FlexProps` are not generic over `tag`), so the
+    // accessible region is this wrapping `Box`: it renders no styling of its own, only the
+    // `section` landmark named by the card's own heading.
+    <Box tag="section" aria-labelledby={titleId}>
+      <Panel gap={5}>
+        <Flex direction="column" alignItems="stretch" gap={1}>
+          <Typography variant="delta" tag="h2" id={titleId}>
             {formatMessage({
-              id: 'Settings.security.trustedDevices.days.label',
-              defaultMessage: 'Trust period (days)',
+              id: 'Settings.security.trustedDevices.title',
+              defaultMessage: 'Trusted devices',
             })}
-          </Field.Label>
-          {/* A native number input, for the same testability reason as the grace-days field. */}
-          <TextInput
-            type="number"
-            inputMode="numeric"
-            min={DAYS_MIN}
-            max={DAYS_MAX}
-            step={1}
-            disabled={!canUpdate || !enabled}
-            value={days ?? ''}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              const raw = e.target.value;
-              setDays(raw === '' ? null : Number(raw));
-              setDaysError(undefined);
+          </Typography>
+          <Typography textColor="neutral600">
+            {formatMessage({
+              id: 'Settings.security.trustedDevices.description',
+              defaultMessage:
+                'After entering a code, a user may trust the browser they are on and skip the code there until the trust expires. The password is still required at every login.',
+            })}
+          </Typography>
+        </Flex>
+
+        <Flex direction="column" alignItems="stretch" gap={2}>
+          <Checkbox
+            name="trusted-devices-enabled"
+            disabled={!canUpdate}
+            checked={enabled}
+            onCheckedChange={(checked) => {
+              const isChecked = checked === true;
+              setEnabled(isChecked);
+              if (!isChecked) {
+                // The days field is disabled while trust is off, so a value it holds from before
+                // unticking (invalid or not) must never be able to block saving `enabled: false`.
+                setDays(settings.days);
+                setDaysError(undefined);
+              }
             }}
-          />
-          <Field.Hint />
-          <Field.Error />
-        </Field.Root>
-      </Box>
+          >
+            {formatMessage({
+              id: 'Settings.security.trustedDevices.enabled.label',
+              defaultMessage: 'Allow users to trust a device after entering a code',
+            })}
+          </Checkbox>
+          <ErrorMessage error={saveError} />
+        </Flex>
 
-      <Flex justifyContent="flex-end">
-        <Button
-          onClick={handleSave}
-          loading={isSaving}
-          disabled={!canUpdate || !modified || isRefreshing}
-        >
-          {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
-        </Button>
-      </Flex>
+        <Box maxWidth="24rem">
+          <Field.Root
+            name="trustedDeviceDays"
+            required
+            error={daysError}
+            hint={formatMessage({
+              id: 'Settings.security.trustedDevices.days.hint',
+              defaultMessage:
+                'How long a trusted browser skips the code. Shortening it cuts existing trusts at once; lengthening it never extends a trust already granted. Changing a password does not revoke trust; revoking a device does.',
+            })}
+          >
+            <Field.Label>
+              {formatMessage({
+                id: 'Settings.security.trustedDevices.days.label',
+                defaultMessage: 'Trust period (days)',
+              })}
+            </Field.Label>
+            {/* A native number input, for the same testability reason as the grace-days field. */}
+            <TextInput
+              type="number"
+              inputMode="numeric"
+              min={DAYS_MIN}
+              max={DAYS_MAX}
+              step={1}
+              disabled={!canUpdate || !enabled}
+              value={days ?? ''}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                const raw = e.target.value;
+                setDays(raw === '' ? null : Number(raw));
+                setDaysError(undefined);
+              }}
+            />
+            <Field.Hint />
+            <Field.Error />
+          </Field.Root>
+        </Box>
 
-      <ConfirmDowngradeDialog
-        open={downgradeOpen}
-        requiresCode={callerEnrolled}
-        onClose={() => setDowngradeOpen(false)}
-        onConfirm={handleDowngradeConfirm}
-      />
-    </Panel>
+        <Flex justifyContent="flex-end">
+          <Button
+            onClick={save}
+            loading={isSaving}
+            disabled={!canUpdate || !modified || isRefreshing}
+          >
+            {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
+          </Button>
+        </Flex>
+
+        <ConfirmDowngradeDialog
+          open={downgradeOpen}
+          requiresCode={callerEnrolled}
+          onClose={closeDowngrade}
+          onConfirm={confirmDowngrade}
+        />
+      </Panel>
+    </Box>
   );
 };
 

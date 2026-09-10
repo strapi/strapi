@@ -45,12 +45,14 @@ test.describe('Trusted devices', () => {
     test.setTimeout(300_000);
 
     // 1. Shorten the trust period from the Security page. Shortening lowers nothing, so no
-    //    re-authentication. The page has one Save per card; the trusted-devices card is second.
+    //    re-authentication. Each card on that page is an accessible region named by its own
+    //    heading (cycle 4), so both the field and the Save button are scoped to this one.
     await page.goto('/admin/settings/security');
-    const days = page.getByRole('spinbutton', { name: 'Trust period (days)' });
+    const trustCard = page.getByRole('region', { name: 'Trusted devices' });
+    const days = trustCard.getByRole('spinbutton', { name: 'Trust period (days)' });
     await expect(days).toHaveValue('30');
     await days.fill('7');
-    await page.getByRole('button', { name: 'Save' }).nth(1).click();
+    await trustCard.getByRole('button', { name: 'Save' }).click();
     await expect(page.getByText('Saved')).toBeVisible();
 
     // 2. Enrol, log in again with a code, and trust the browser; the label carries the new period.

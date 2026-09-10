@@ -1,3 +1,4 @@
+import { within } from '@testing-library/react';
 import { render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
@@ -135,5 +136,21 @@ describe('SecurityPage', () => {
       screen.getByRole('checkbox', { name: 'Allow users to trust a device after entering a code' })
     ).toBeChecked();
     expect(screen.getByRole('spinbutton', { name: 'Trust period (days)' })).toHaveValue(30);
+  });
+
+  it('names each card as its own region, so a Save button can be selected by card', async () => {
+    server.use(settings(), me(true));
+    render(<SecurityPage />);
+
+    await waitFor(() => expect(screen.queryByText('Loading content.')).not.toBeInTheDocument());
+    const enforcement = screen.getByRole('region', { name: 'Two-factor authentication' });
+    const trust = screen.getByRole('region', { name: 'Trusted devices' });
+
+    expect(enforcement).not.toBe(trust);
+    expect(within(enforcement).getByRole('radio', { name: /^Optional/ })).toBeChecked();
+    expect(within(trust).getByRole('spinbutton', { name: 'Trust period (days)' })).toHaveValue(30);
+    // one Save each, reachable without a positional locator -- this is what the e2e specs use
+    expect(within(enforcement).getByRole('button', { name: 'Save' })).toBeInTheDocument();
+    expect(within(trust).getByRole('button', { name: 'Save' })).toBeInTheDocument();
   });
 });
