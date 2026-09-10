@@ -5,6 +5,8 @@ import { createAuthRequest, createRequest } from 'api-tests/request';
 import { createUtils } from 'api-tests/utils';
 import { base32Decode, generateTotp } from '@strapi/utils';
 
+import { resetSharedMfaState } from './utils/mfa-state';
+
 jest.setTimeout(300_000);
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -86,24 +88,6 @@ describe('Admin MFA trusted devices', () => {
   const putSettings = (body: Record<string, unknown>) =>
     rq({ url: '/admin/security-settings', method: 'PUT', body });
 
-  /**
-   * The shared-app reset: security settings back to their defaults, no role flagged, the super
-   * admin's second factor and trusted devices removed. Goes through the same store and the same
-   * service the server uses, so it cannot drift from the real defaults.
-   */
-  const resetSharedMfaState = async () => {
-    await strapi.store({ type: 'core', name: 'admin' }).set({
-      key: 'security-settings',
-      value: {
-        mfa: { mode: 'optional', graceDays: 7 },
-        trustedDevices: { enabled: true, days: 30 },
-      },
-    });
-    await strapi.db.query('admin::role').updateMany({ where: {}, data: { mfaRequired: false } });
-    await strapi.service('admin::mfa').disable(String(superAdminId));
-    await strapi.db.query('admin::mfa-trusted-device').deleteMany({ where: {} });
-  };
-
   beforeAll(async () => {
     strapi = await createStrapiInstance({
       async bootstrap({ strapi: s }: { strapi: any }) {
@@ -120,7 +104,7 @@ describe('Admin MFA trusted devices', () => {
     // `yarn test:api` runs every admin suite --runInBand against one shared SQLite app, and a
     // sibling suite (admin-mfa-enforcement) leaves the super admin enrolled with the mode raised.
     // Start from the exact state this suite asserts, whatever ran before.
-    await resetSharedMfaState();
+    await resetSharedMfaState(strapi, { userIds: [superAdminId] });
 
     editorRole = await utils.createRole({
       name: 'mfa_trusted_devices_editor',
@@ -153,7 +137,7 @@ describe('Admin MFA trusted devices', () => {
   afterAll(async () => {
     await utils.deleteUsersById([editor.id]);
     await utils.deleteRolesById([editorRole.id]);
-    await resetSharedMfaState();
+    await resetSharedMfaState(strapi, { userIds: [superAdminId] });
     await strapi.destroy();
   });
 
