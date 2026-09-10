@@ -22,7 +22,7 @@ const signFileUrls = jest.fn(async (file: any) => {
     return { ...file, isUrlSigned: false };
   }
 
-  if (!url.startsWith(BUCKET_URL)) {
+  if (!url.startsWith(`${BUCKET_URL}/`)) {
     return { ...file, isUrlSigned: true };
   }
 

@@ -35,7 +35,7 @@ const models = {
  * replaces any query string already there.
  */
 const signFileUrls = jest.fn(async (file: any) => {
-  const isOwned = (url: string) => url.startsWith(BUCKET_URL);
+  const isOwned = (url: string) => url.startsWith(`${BUCKET_URL}/`);
   const sign = (url: string) => (isOwned(url) ? `${url.split('?')[0]}?signature=fresh` : url);
   const signed = { ...file, isUrlSigned: false };
 
