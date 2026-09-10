@@ -122,15 +122,35 @@ describe('useSecuritySettingsSave', () => {
   });
 
   it('sends nothing when the card own validation fails, and clears a previous error first', async () => {
+    // The "clears a previous error" half needs a previous error to exist, or the final assertion is
+    // true before `save()` ever runs and deleting `setSaveError(undefined)` from the hook passes.
+    // So: fail a real save first to put a message on screen, THEN fail validation and prove the
+    // stale message is gone rather than merely absent.
+    server.use(
+      http.put('/admin/security-settings', () =>
+        HttpResponse.json(
+          { error: { status: 400, name: 'ValidationError', message: 'Nope', details: {} } },
+          { status: 400 }
+        )
+      )
+    );
+    const validate = jest.fn(() => true);
+    const { result, rerender } = renderSave({ validate });
+
+    await act(async () => {
+      await result.current.save();
+    });
+    await waitFor(() => expect(result.current.saveError).toBe('Nope'));
+
+    // Now the card's own validation starts failing, and the next save must not reach the server.
+    validate.mockReturnValue(false);
     const bodies = captureSave();
-    const validate = jest.fn(() => false);
-    const { result } = renderSave({ validate });
+    rerender();
 
     await act(async () => {
       await result.current.save();
     });
 
-    expect(validate).toHaveBeenCalledTimes(1);
     expect(bodies).toHaveLength(0);
     expect(result.current.saveError).toBeUndefined();
     expect(result.current.downgradeOpen).toBe(false);
