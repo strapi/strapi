@@ -159,6 +159,7 @@ describe('Admin MFA trusted devices', () => {
     expect(lower.body.data).toEqual({
       mfa: { mode: 'optional', graceDays: 7, requiredRoles: [] },
       trustedDevices: { enabled: true, days: 7 },
+      passkeys: { enabled: true },
     });
 
     const neither = await putSettings({ password: superAdmin.loginInfo.password });
