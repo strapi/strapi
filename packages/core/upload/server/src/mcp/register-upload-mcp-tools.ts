@@ -50,12 +50,11 @@ import {
  * lists at once. Asset ids and folder ids are indistinguishable integers from separate
  * namespaces, and both `media_list_assets` and `media_list_folders` return a plain `id` — a combined tool
  * would let an agent pass folder ids where assets were meant with nothing to object.
- * lists at once, and `media_delete_assets` and `media_delete_folder` stay separate for the same reason even
- * though `/actions/bulk-delete` accepts `fileIds` and `folderIds` together. Asset ids and folder
- * ids are indistinguishable integers from separate namespaces, and both `media_list_assets` and
- * `media_list_folders` return a plain `id` — a combined tool would let an agent pass folder ids where
- * assets were meant with nothing to object. On the delete side that mistake is unrecoverable, and
- * two tools also let each description carry the warning matched to its own blast radius.
+ *
+ * `media_delete_assets` and `media_delete_folder` stay separate for the same reason, even though
+ * `/actions/bulk-delete` accepts `fileIds` and `folderIds` together. On the delete side that
+ * mistake is unrecoverable, and two tools also let each description carry the warning matched to
+ * its own blast radius.
  */
 export const buildUploadMcpToolDefinitions = (): UploadMcpTool[] => [
   {
