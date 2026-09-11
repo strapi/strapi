@@ -70,14 +70,18 @@ const transformParamsToQuery = curry((uid: UID.Schema, params: any) => {
 
     const queryWithoutPublicationParams = stripPublicationParamsFromQuery(query);
 
-    return assoc(
+    const transformedQuery = assoc(
       'where',
       baseWhere,
       assoc('filters', wrappedFilters, queryWithoutPublicationParams)
     );
+
+    return transformedQuery;
   }
 
-  return assoc('where', baseWhere, stripPublicationParamsFromQuery(query));
+  const transformedQuery = assoc('where', baseWhere, stripPublicationParamsFromQuery(query));
+
+  return transformedQuery;
 });
 
 export { transformParamsToQuery };

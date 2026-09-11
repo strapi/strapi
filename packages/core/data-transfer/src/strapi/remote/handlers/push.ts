@@ -9,6 +9,11 @@ import { ProviderTransferError } from '../../../errors/providers';
 import { write } from '../../../utils/writable-async-write';
 import { decodeTransferAssetStreamItem } from '../../../utils/transfer-asset-chunk';
 import { createLocalStrapiDestinationProvider } from '../../providers';
+import {
+  assertRemoteEntityAllowed,
+  assertRemoteLinkAllowed,
+  normalizeRemoteRestoreOptions,
+} from '../../transfer-policy';
 import { createFlow, DEFAULT_TRANSFER_FLOW } from '../flows';
 import { Handler } from './abstract';
 import { handlerControllerFactory, isDataTransferMessage } from './utils';
@@ -59,6 +64,13 @@ export interface PushHandler extends Handler {
    */
   memoryLogInterval?: ReturnType<typeof setInterval>;
 
+  /** A rejected remote policy violation permanently invalidates this connection's transfer. */
+  terminal?: boolean;
+  /** Serialize WebSocket frames so a later close cannot race a policy rollback. */
+  messageQueue?: Promise<void>;
+  /** Shared teardown promise for policy rejection, errors, and socket close. */
+  abortPromise?: Promise<void>;
+
   /**
    * Checks that the given action is a valid push transfer action
    */
@@ -73,6 +85,9 @@ export interface PushHandler extends Handler {
    * Simple override of the auth verification
    */
   verifyAuth(): Promise<void>;
+
+  /** Process one already-serialized WebSocket frame. */
+  processMessage(raw: Parameters<Handler['onMessage']>[0]): Promise<void>;
 
   /**
    * Callback when receiving a regular transfer message
@@ -113,7 +128,88 @@ export interface PushHandler extends Handler {
    * Checks whether it's possible to stream a chunk for the given stage
    */
   assertValidStreamTransferStep(stage: TransferStage): void;
+
+  abort(this: PushHandler, terminal?: boolean): Promise<void>;
 }
+
+type PushTransferTeardown = Pick<PushHandler, 'provider' | 'streams' | 'assets' | 'cleanup'>;
+type ProtectedPushStreamStage = 'entities' | 'links';
+
+const reportTeardownError = (error: unknown) => {
+  strapi?.log?.error('[Data transfer] Failed to clean up push transfer');
+  strapi?.log?.error(error);
+};
+
+export const abortPushTransfer = async ({
+  provider,
+  streams,
+  assets,
+  cleanup,
+}: PushTransferTeardown): Promise<void> => {
+  try {
+    for (const stream of Object.values(streams ?? {})) {
+      try {
+        stream?.destroy();
+      } catch (error) {
+        reportTeardownError(error);
+      }
+    }
+    for (const asset of Object.values(assets ?? {})) {
+      try {
+        asset.stream.destroy();
+      } catch (error) {
+        reportTeardownError(error);
+      }
+    }
+
+    if (provider) {
+      try {
+        await provider.rollback();
+      } catch (error) {
+        reportTeardownError(error);
+      } finally {
+        // A local provider only owns Strapi lifecycle restoration after bootstrap.
+        if (provider.strapi) {
+          try {
+            await provider.close();
+          } catch (error) {
+            reportTeardownError(error);
+          }
+        }
+      }
+    }
+  } finally {
+    try {
+      cleanup();
+    } catch (error) {
+      reportTeardownError(error);
+    }
+  }
+};
+
+export const writeValidatedPushStreamBatch = async (
+  strapi: Core.Strapi,
+  stage: ProtectedPushStreamStage,
+  data: Protocol.Client.GetTransferPushStreamData<ProtectedPushStreamStage>,
+  stream: Writable,
+  stats: Protocol.Client.Stats
+): Promise<void> => {
+  if (stage === 'entities') {
+    for (const entity of data as Protocol.Client.GetTransferPushStreamData<'entities'>) {
+      assertRemoteEntityAllowed(strapi, entity);
+    }
+  } else {
+    for (const link of data as Protocol.Client.GetTransferPushStreamData<'links'>) {
+      assertRemoteLinkAllowed(link);
+    }
+  }
+
+  for (const item of data) {
+    stats.started += 1;
+    await write(stream, item);
+    stats.finished += 1;
+  }
+};
 
 export const createPushController = handlerControllerFactory<Partial<PushHandler>>((proto) => ({
   isTransferStarted(this: PushHandler) {
@@ -159,15 +255,26 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
     delete this.provider;
   },
 
-  teardown(this: PushHandler) {
+  async abort(this: PushHandler, terminal = false) {
+    if (terminal) {
+      this.terminal = true;
+    }
+
+    if (this.abortPromise) {
+      return this.abortPromise;
+    }
+
+    this.abortPromise = abortPushTransfer({ ...this, cleanup: () => this.cleanup() });
+
+    return this.abortPromise;
+  },
+
+  async teardown(this: PushHandler) {
     if (this.memoryLogInterval) {
       clearInterval(this.memoryLogInterval);
       delete this.memoryLogInterval;
     }
-    if (this.provider) {
-      this.provider.rollback();
-    }
-
+    await this.abort();
     proto.teardown.call(this);
   },
 
@@ -227,6 +334,13 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
   },
 
   async onMessage(this: PushHandler, raw) {
+    const previousMessage = this.messageQueue ?? Promise.resolve();
+    const nextMessage = previousMessage.then(() => this.processMessage(raw));
+    this.messageQueue = nextMessage.catch(() => undefined);
+    return nextMessage;
+  },
+
+  async processMessage(this: PushHandler, raw) {
     const msg = JSON.parse(raw.toString());
 
     if (!isDataTransferMessage(msg)) {
@@ -235,6 +349,12 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
 
     if (!msg.uuid) {
       await this.respond(undefined, new Error('Missing uuid in message'));
+      return;
+    }
+
+    if (this.terminal) {
+      await this.respond(msg.uuid, new ProviderTransferError('Transfer has been terminated'));
+      return;
     }
 
     if (proto.hasUUID(msg.uuid)) {
@@ -356,7 +476,9 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
           const rssMb = (mem.rss / 1024 / 1024).toFixed(1);
           const heapMb = (mem.heapUsed / 1024 / 1024).toFixed(1);
           strapi.log.debug(
-            `[Transfer destination] memory RSS=${rssMb}MB heapUsed=${heapMb}MB | assets started=${stats?.started ?? 0} finished=${stats?.finished ?? 0}`
+            `[Transfer destination] memory RSS=${rssMb}MB heapUsed=${heapMb}MB | assets started=${
+              stats?.started ?? 0
+            } finished=${stats?.finished ?? 0}`
           );
         }, 5000);
       }
@@ -377,6 +499,23 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
       // Assets are nested streams
       if (stage === 'assets') {
         return this.streamAsset(msg.data);
+      }
+
+      try {
+        if (stage === 'entities' || stage === 'links') {
+          await writeValidatedPushStreamBatch(
+            strapi as Core.Strapi,
+            stage,
+            msg.data,
+            stream,
+            this.stats[stage]
+          );
+          return;
+        }
+      } catch (error) {
+        // Mark terminal before awaiting rollback so no queued WebSocket frame can commit.
+        await this.abort(true);
+        throw error;
       }
 
       // One objectMode Writable: do not overlap writes.
@@ -484,7 +623,9 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
             const checksum = this.assetChecksums?.[assetID]?.digest('hex');
             if (!checksum || checksum !== item.checksum.value) {
               throw new ProviderTransferError(
-                `Checksum mismatch for asset "${assetID}" (expected ${item.checksum.value}, got ${checksum ?? 'none'})`
+                `Checksum mismatch for asset "${assetID}" (expected ${item.checksum.value}, got ${
+                  checksum ?? 'none'
+                })`
               );
             }
           }
@@ -492,7 +633,9 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
             delete this.assetChecksums[assetID];
           }
           strapi.log.debug(
-            `[Transfer destination] Asset end id=${assetID} (finished=${this.stats.assets.finished + 1}/${this.stats.assets.started})`
+            `[Transfer destination] Asset end id=${assetID} (finished=${
+              this.stats.assets.finished + 1
+            }/${this.stats.assets.started})`
           );
           await new Promise<void>((resolve, reject) => {
             const { stream: assetStream } = this.assets[assetID];
@@ -514,12 +657,12 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
     }
   },
 
-  onClose(this: Handler) {
-    this.teardown();
+  async onClose(this: PushHandler) {
+    await this.teardown();
   },
 
-  onError(this: Handler, err) {
-    this.teardown();
+  async onError(this: PushHandler, err) {
+    await this.teardown();
     strapi.log.error(err);
   },
 
@@ -553,7 +696,7 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
 
     this.provider = createLocalStrapiDestinationProvider({
       strategy: params?.options?.strategy ?? 'restore',
-      restore: params?.options?.restore ?? {},
+      restore: normalizeRemoteRestoreOptions(strapi as Core.Strapi, params?.options?.restore ?? {}),
       autoDestroy: false,
       getStrapi: () => strapi as Core.Strapi,
     });

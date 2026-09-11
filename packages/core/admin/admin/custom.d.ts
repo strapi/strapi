@@ -14,6 +14,13 @@ interface BrowserStrapi {
   future: {
     isEnabled: (name: keyof NonNullable<Modules.Features.FeaturesConfig['future']>) => boolean;
   };
+  /**
+   * Permanent config flags from the project's `features` file. Separate from `features`
+   * below, which carries EE licence feature names rather than configuration.
+   */
+  featureFlags: {
+    isEnabled: (name: keyof Omit<Modules.Features.FeaturesConfig, 'future'>) => boolean;
+  };
   features: {
     SSO: 'sso';
     AUDIT_LOGS: 'audit-logs';

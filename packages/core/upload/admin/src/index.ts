@@ -20,11 +20,12 @@ const name = pluginPkg.strapi.name;
 const admin: Plugin.Config.AdminInput = {
   register(app: StrapiApp) {
     /**
-     * The beta Media Library owns `plugins/upload` outright when the flag is on:
-     * the legacy app is not registered at all, so there is exactly one Media
-     * Library entry in the menu and no route to rename at GA.
+     * Whichever Media Library is selected owns `plugins/upload` outright: the other is
+     * not registered at all, so there is exactly one Media Library entry in the menu.
+     *
+     * The new one is the default; `useLegacyMediaLibrary` opts back out.
      */
-    const isBetaMediaLibrary = window.strapi.future.isEnabled('betaMediaLibrary');
+    const isLegacyMediaLibrary = window.strapi.featureFlags.isEnabled('useLegacyMediaLibrary');
 
     app.addMenuLink({
       to: `plugins/${pluginId}`,
@@ -34,19 +35,19 @@ const admin: Plugin.Config.AdminInput = {
         defaultMessage: 'Media Library',
       },
       permissions: PERMISSIONS.main,
-      Component: isBetaMediaLibrary
+      Component: isLegacyMediaLibrary
         ? () => {
+            return import('./pages/App/App').then((mod) => ({ default: mod.Upload }));
+          }
+        : () => {
             return import('./future/App').then((mod) => ({
               default: mod.BetaMediaLibrary,
             }));
-          }
-        : () => {
-            return import('./pages/App/App').then((mod) => ({ default: mod.Upload }));
           },
       position: 4,
     });
 
-    if (isBetaMediaLibrary) {
+    if (!isLegacyMediaLibrary) {
       app.addReducers({ uploadProgress: uploadProgressReducer });
 
       app.addComponents([
