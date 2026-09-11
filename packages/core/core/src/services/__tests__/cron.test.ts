@@ -1,5 +1,13 @@
 import createCronService from '../cron';
 
+// Loaded CI runners can starve the event loop for several seconds at a time,
+// which these timer-driven tests have to ride out rather than fail on.
+jest.setTimeout(30_000);
+
+// Far enough out that a slow tick cannot push the due time into the past
+// before croner schedules the job, short enough to keep the suite quick.
+const ONE_SHOT_DELAY = 300;
+
 const sleep = (ms: number) =>
   new Promise<void>((resolve) => {
     setTimeout(() => {
@@ -7,10 +15,20 @@ const sleep = (ms: number) =>
     }, ms);
   });
 
-const waitFor = async (condition: () => boolean, timeout = 3000) => {
+const waitFor = async (condition: () => boolean, timeout = 10_000) => {
   const deadline = Date.now() + timeout;
   while (!condition() && Date.now() < deadline) {
     await sleep(25);
+  }
+
+  // A stall can carry us past the deadline with the job's timer already expired
+  // but not yet run, so let pending callbacks take their turn before giving up.
+  if (!condition()) {
+    await sleep(0);
+  }
+
+  if (!condition()) {
+    throw new Error(`Timed out after ${timeout}ms waiting for a condition to become true`);
   }
 };
 
@@ -98,7 +116,7 @@ describe('Cron service', () => {
 
   it('schedules a slightly-future Date exactly once after start', async () => {
     const task = jest.fn();
-    const scheduledAt = new Date(Date.now() + 150);
+    const scheduledAt = new Date(Date.now() + ONE_SHOT_DELAY);
 
     cron.start();
     cron.add({
@@ -144,7 +162,7 @@ describe('Cron service', () => {
     cron.add({
       runAfterStart: {
         task,
-        options: new Date(Date.now() + 100),
+        options: new Date(Date.now() + ONE_SHOT_DELAY),
       },
     });
 
@@ -159,7 +177,7 @@ describe('Cron service', () => {
     cron.add({
       runOnce: {
         task,
-        options: new Date(Date.now() + 200),
+        options: new Date(Date.now() + ONE_SHOT_DELAY),
       },
     });
 
@@ -294,7 +312,7 @@ describe('Cron service', () => {
         async task() {
           throw new Error('cron-boom');
         },
-        options: new Date(Date.now() + 100),
+        options: new Date(Date.now() + ONE_SHOT_DELAY),
       },
     });
 
@@ -487,12 +505,12 @@ describe('Cron service', () => {
     cron.add({
       cancelMe: {
         task,
-        options: new Date(Date.now() + 150),
+        options: new Date(Date.now() + ONE_SHOT_DELAY),
       },
     });
 
     expect(cron.jobs[0].job.cancel()).toBe(true);
-    await sleep(250);
+    await sleep(ONE_SHOT_DELAY + 150);
     expect(task).not.toHaveBeenCalled();
   });
 
@@ -580,14 +598,14 @@ describe('Cron service', () => {
     cron.add({
       publishRelease_1: {
         task: first,
-        options: new Date(Date.now() + 200),
+        options: new Date(Date.now() + ONE_SHOT_DELAY),
       },
     });
     cron.remove('publishRelease_1');
     cron.add({
       publishRelease_1: {
         task: second,
-        options: new Date(Date.now() + 200),
+        options: new Date(Date.now() + ONE_SHOT_DELAY),
       },
     });
 
