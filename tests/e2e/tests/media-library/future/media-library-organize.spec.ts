@@ -28,7 +28,7 @@ import { AssetsPage } from './page-objects/AssetsPage';
 const UPLOADS_DIR = path.join(__dirname, '../../../data/uploads');
 const IMAGE = path.join(UPLOADS_DIR, 'test-image.jpg');
 
-describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
+describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
   'Media Library - Journey 2: Organize my library',
   () => {
     test.describe.configure({ timeout: 600_000 });

@@ -175,7 +175,7 @@ export class AssetsPage {
   }
 
   getMoveSuccessNotification() {
-    // The beta library reports moves through `list.bulk-actions.move.success`,
+    // The current library reports moves through `list.bulk-actions.move.success`,
     // which names the count, source and destination — "1 element has been moved
     // from Home to Marketing". The flat "Elements have been moved successfully"
     // this used to match belongs to the legacy library (`modal.move.success-label`,
