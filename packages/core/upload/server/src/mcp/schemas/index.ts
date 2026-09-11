@@ -13,6 +13,7 @@ export {
   mediaRenameFolderInputSchema,
   mediaMoveFolderInputSchema,
   mediaDeleteFolderInputSchema,
+  mediaMoveAssetsInputSchema,
 } from './input-schemas';
 export {
   mediaAssetOutputSchema,
@@ -26,5 +27,7 @@ export {
   mediaRenameFolderOutputSchema,
   mediaMoveFolderOutputSchema,
   mediaDeleteFolderOutputSchema,
+  mediaMoveAssetsFailureSchema,
+  mediaMoveAssetsOutputSchema,
   type MediaFolderNode,
 } from './output-schemas';

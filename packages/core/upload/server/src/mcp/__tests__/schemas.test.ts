@@ -10,6 +10,8 @@ import {
   mediaRenameFolderInputSchema,
   mediaMoveFolderInputSchema,
   mediaDeleteFolderInputSchema,
+  mediaMoveAssetsInputSchema,
+  mediaMoveAssetsOutputSchema,
 } from '../schemas';
 import { ALLOWED_SORT_STRINGS } from '../../constants';
 
@@ -407,6 +409,148 @@ describe('upload MCP schemas', () => {
 
     test('rejects an unknown key', () => {
       expect(mediaDeleteFolderInputSchema.safeParse({ ids: [1], force: true }).success).toBe(false);
+    });
+  });
+  // ---------------------------------------------------------------------------
+  // media_move_assets
+  // ---------------------------------------------------------------------------
+
+  describe('media_move_assets input', () => {
+    test('accepts a list of asset ids with a destination folder', () => {
+      expect(mediaMoveAssetsInputSchema.safeParse({ ids: [1, 2], folder: 3 }).success).toBe(true);
+    });
+
+    test('accepts folder: null to move assets to the media library root', () => {
+      expect(mediaMoveAssetsInputSchema.safeParse({ ids: [1], folder: null }).success).toBe(true);
+    });
+
+    test('accepts a single-element array — there is no separate single-asset tool', () => {
+      expect(mediaMoveAssetsInputSchema.safeParse({ ids: [42], folder: 3 }).success).toBe(true);
+    });
+
+    test('requires the destination, so a mistyped move cannot become a silent no-op', () => {
+      // Same rule as media_move_folder: omitting the key is not the root, null is.
+      expect(mediaMoveAssetsInputSchema.safeParse({ ids: [1] }).success).toBe(false);
+    });
+
+    test('requires at least one id', () => {
+      expect(mediaMoveAssetsInputSchema.safeParse({ ids: [], folder: 3 }).success).toBe(false);
+      expect(mediaMoveAssetsInputSchema.safeParse({ folder: 3 }).success).toBe(false);
+    });
+
+    test('caps the batch size', () => {
+      const ids = Array.from({ length: 101 }, (_, index) => index + 1);
+      expect(mediaMoveAssetsInputSchema.safeParse({ ids, folder: 3 }).success).toBe(false);
+    });
+
+    test('rejects non-integer, non-positive and string ids', () => {
+      expect(mediaMoveAssetsInputSchema.safeParse({ ids: [0], folder: 3 }).success).toBe(false);
+      expect(mediaMoveAssetsInputSchema.safeParse({ ids: [1.5], folder: 3 }).success).toBe(false);
+      expect(mediaMoveAssetsInputSchema.safeParse({ ids: ['1'], folder: 3 }).success).toBe(false);
+    });
+
+    test('rejects a documentId in place of the numeric ids', () => {
+      expect(
+        mediaMoveAssetsInputSchema.safeParse({ ids: ['z7v8zma53x01r6oceimv922b'], folder: 3 })
+          .success
+      ).toBe(false);
+    });
+
+    test('rejects a non-integer destination folder id', () => {
+      expect(mediaMoveAssetsInputSchema.safeParse({ ids: [1], folder: 0 }).success).toBe(false);
+      expect(mediaMoveAssetsInputSchema.safeParse({ ids: [1], folder: 1.5 }).success).toBe(false);
+    });
+
+    test('points a scalar `id` at the bulk `ids` array', () => {
+      // A single-asset move is an array of one, and the error has to say so rather than leave
+      // the agent to guess from a generic "unrecognized key".
+      const parsed = mediaMoveAssetsInputSchema.safeParse({ id: 1, folder: 3 });
+
+      expect(parsed.success).toBe(false);
+      expect(JSON.stringify(parsed.error)).toMatch(/array of numeric asset ids/);
+    });
+
+    test('points `fileIds` — the admin REST field name — at `ids`', () => {
+      const parsed = mediaMoveAssetsInputSchema.safeParse({ fileIds: [1], folder: 3 });
+
+      expect(parsed.success).toBe(false);
+      expect(JSON.stringify(parsed.error)).toMatch(/array of numeric asset ids/);
+    });
+
+    test('points `folderIds` at media_move_folder, since this tool moves assets only', () => {
+      // `/actions/bulk-move` accepts both id lists; this tool deliberately does not.
+      const parsed = mediaMoveAssetsInputSchema.safeParse({ ids: [1], folderIds: [2], folder: 3 });
+
+      expect(parsed.success).toBe(false);
+      expect(JSON.stringify(parsed.error)).toMatch(/media_move_folder/);
+    });
+
+    test('rejects an unknown key rather than silently ignoring it', () => {
+      expect(
+        mediaMoveAssetsInputSchema.safeParse({ ids: [1], folder: 3, destinationFolderId: 4 })
+          .success
+      ).toBe(false);
+    });
+  });
+
+  describe('media_move_assets output', () => {
+    const MOVED_ASSET = {
+      id: 1,
+      name: 'photo.jpg',
+      url: '/uploads/photo.jpg',
+      mime: 'image/jpeg',
+      size: 12.5,
+      folder: { id: 3, name: 'Archive' },
+    };
+
+    test('accepts a full move with no failures', () => {
+      const parsed = mediaMoveAssetsOutputSchema.safeParse({
+        destinationFolder: { id: 3, name: 'Archive' },
+        moved: [MOVED_ASSET],
+        failed: [],
+      });
+
+      expect(parsed.success).toBe(true);
+    });
+
+    test('accepts a partial success carrying both lists', () => {
+      const parsed = mediaMoveAssetsOutputSchema.safeParse({
+        destinationFolder: { id: 3, name: 'Archive' },
+        moved: [MOVED_ASSET],
+        failed: [{ id: 999, reason: 'No media asset has this id.' }],
+      });
+
+      expect(parsed.success).toBe(true);
+    });
+
+    test('accepts destinationFolder: null for a move to the root', () => {
+      const parsed = mediaMoveAssetsOutputSchema.safeParse({
+        destinationFolder: null,
+        moved: [{ ...MOVED_ASSET, folder: null }],
+        failed: [],
+      });
+
+      expect(parsed.success).toBe(true);
+    });
+
+    test('requires both lists, so every requested id is accounted for', () => {
+      expect(
+        mediaMoveAssetsOutputSchema.safeParse({ destinationFolder: null, moved: [MOVED_ASSET] })
+          .success
+      ).toBe(false);
+      expect(
+        mediaMoveAssetsOutputSchema.safeParse({ destinationFolder: null, failed: [] }).success
+      ).toBe(false);
+    });
+
+    test('requires a reason on every failure', () => {
+      const parsed = mediaMoveAssetsOutputSchema.safeParse({
+        destinationFolder: null,
+        moved: [MOVED_ASSET],
+        failed: [{ id: 999 }],
+      });
+
+      expect(parsed.success).toBe(false);
     });
   });
 });

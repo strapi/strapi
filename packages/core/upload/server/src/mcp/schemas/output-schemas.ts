@@ -75,7 +75,7 @@ export const mediaUpdateAssetOutputSchema = z.object({
  * A folder as returned by the write tools.
  *
  * Like the asset schema this is an ALLOWLIST: `path` and `pathId` are internal materialized-path
- * bookkeeping and stay invisible to MCP clients, matching what `list_folders` already exposes.
+ * bookkeeping and stay invisible to MCP clients, matching what `media_list_folders` already exposes.
  */
 export const mediaFolderOutputSchema = z.object({
   id: z.number().describe('Numeric folder id — the canonical identifier for this folder.'),
@@ -131,4 +131,43 @@ export const mediaDeleteFolderOutputSchema = z.object({
       'Total folders affected, including the matched folders themselves and every descendant.'
     ),
   totalFileNumber: z.number().describe('Total files affected, across the whole cascade.'),
+});
+
+/**
+ * `media_move_assets` output — a per-id report rather than a single verdict.
+ *
+ * A bad id among good ones does not roll back the valid moves (see the handler), so the response
+ * has to say which ids moved and which did not: an agent that only learned "the call failed"
+ * would either retry moves that already happened or abandon ones that did. `moved` and `failed`
+ * together account for every id in the request, on every successful response — including one
+ * where `moved` is empty because no id resolved.
+ *
+ * `moved` carries the full asset in the same shape the read tools return, so the new folder can
+ * be confirmed without a follow-up `media_get_asset`.
+ */
+export const mediaMoveAssetsFailureSchema = z.object({
+  id: z.number().describe('The requested asset id that was not moved.'),
+  reason: z
+    .string()
+    .describe('Why this id was not moved — a missing asset, or one this token may not edit.'),
+});
+
+export const mediaMoveAssetsOutputSchema = z.object({
+  destinationFolder: z
+    .object({
+      id: z.number(),
+      name: z.string().optional(),
+    })
+    .nullable()
+    .describe(
+      'The destination folder, or null when the assets were moved to the media library root.'
+    ),
+  moved: z
+    .array(mediaAssetOutputSchema)
+    .describe('The assets that were moved, in their new location.'),
+  failed: z
+    .array(mediaMoveAssetsFailureSchema)
+    .describe(
+      'The ids that were not moved, each with a reason. The moves reported in `moved` still happened — retry only these.'
+    ),
 });
