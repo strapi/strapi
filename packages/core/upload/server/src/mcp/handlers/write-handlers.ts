@@ -96,9 +96,11 @@ export const createMediaUpdateAssetHandler =
       throw error;
     }
 
-    const updated = await getService('upload', strapi).updateFileInfo(id, fileInfo, {
+    const written = await getService('upload', strapi).updateFileInfo(id, fileInfo, {
       user: context.user,
     });
 
-    return ok({ data: sanitizeMediaAsset(updated) });
+    const updated = await getService('upload', strapi).findOne(id, ['folder']);
+
+    return ok({ data: sanitizeMediaAsset(updated ?? written) });
   };
