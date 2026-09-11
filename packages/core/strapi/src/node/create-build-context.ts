@@ -39,6 +39,11 @@ interface BuildContext extends BaseContext {
    * incl. internal plugins, third party plugins & local plugins
    */
   plugins: PluginMeta[];
+  /**
+   * True when the `unstableNextDesignSystem` future flag is on and the bundler is Vite. The single
+   * decision point for the Tailwind plugin, the host stylesheet and the scan roots
+   */
+  nextDesignSystem: boolean;
   /** The directories Tailwind scans. Computed once: the stylesheet, Vite and the watcher share it */
   scanRoots: string[];
 }
@@ -49,6 +54,8 @@ interface CreateBuildContextArgs extends CLIContext {
   /** If true, Tailwind scans source and not `dist`. E.g. for Vite development server, which serves `admin/src` */
   dev?: boolean;
 }
+
+const NEXT_DESIGN_SYSTEM_FLAG = 'unstableNextDesignSystem';
 
 const DEFAULT_BROWSERSLIST = [
   'last 3 major versions',
@@ -162,12 +169,24 @@ const createBuildContext = async ({
 
   const { bundler = 'vite', ...restOptions } = options;
 
-  const scanRoots = await getScanRoots(
-    { cwd, runtimeDir, plugins: pluginsWithFront, customisations },
-    dev
-  );
+  const flagEnabled = strapiInstance.features.future.isEnabled(NEXT_DESIGN_SYSTEM_FLAG);
 
-  logger.debug('Tailwind scan roots', os.EOL, scanRoots);
+  if (flagEnabled && bundler !== 'vite') {
+    logger.warn(
+      `The ${NEXT_DESIGN_SYSTEM_FLAG} future flag needs Vite. Tailwind is not available under ${bundler}, so this build has no next design system`
+    );
+  }
+
+  const nextDesignSystem = flagEnabled && bundler === 'vite';
+
+  // Nothing scans the roots when the next design system is off, so do not pay for them
+  const scanRoots = nextDesignSystem
+    ? await getScanRoots({ cwd, runtimeDir, plugins: pluginsWithFront, customisations }, dev)
+    : [];
+
+  if (nextDesignSystem) {
+    logger.debug('Tailwind scan roots', os.EOL, scanRoots);
+  }
 
   const buildContext: BuildContext = {
     appDir,
@@ -182,6 +201,7 @@ const createBuildContext = async ({
     env,
     features,
     logger,
+    nextDesignSystem,
     options: restOptions,
     plugins: pluginsWithFront,
     runtimeDir,

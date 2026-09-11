@@ -28,34 +28,45 @@ const replacementFor = (alias: Alias[], mod: string) =>
   alias.find((entry) => (entry.find instanceof RegExp ? entry.find.test(mod) : entry.find === mod))
     ?.replacement;
 
+/**
+ * A build context is a wide interface of which this config reads a handful of fields, so the tests
+ * cast a literal rather than stand up a real one
+ */
+const buildContext = (overrides: Record<string, unknown> = {}): BuildContext =>
+  ({
+    cwd: process.cwd(),
+    target: ['last 3 major versions'],
+    basePath: '/admin',
+    adminPath: '/admin',
+    distDir: 'dist/build',
+    appDir: process.cwd(),
+    entry: '.strapi/client/app.js',
+    distPath: `${process.cwd()}/dist/build`,
+    env: {},
+    runtimeDir: `${process.cwd()}/.strapi/client`,
+    logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+    strapi: { internal_config: {}, server: { httpServer: http.createServer() } },
+    bundler: 'vite' as const,
+    options: { minify: true, sourcemap: false },
+    plugins: [],
+    nextDesignSystem: false,
+    scanRoots: [],
+    tsconfig: undefined,
+    customisations: undefined,
+    features: undefined,
+    ...overrides,
+  }) as unknown as BuildContext;
+
+/** `react()` contributes an array, so the plugin list is one level deeper than it looks */
+const pluginNames = (config: { plugins?: unknown }): string[] =>
+  ((config.plugins ?? []) as { name?: string }[])
+    .flat(2)
+    .map((plugin) => plugin?.name)
+    .filter((name): name is string => typeof name === 'string');
+
 describe('Vite admin configuration', () => {
   it('does not copy public files into the admin build output', async () => {
-    const ctx = {
-      cwd: process.cwd(),
-      target: ['last 3 major versions'],
-      basePath: '/admin',
-      adminPath: '/admin',
-      distDir: 'dist/build',
-      appDir: process.cwd(),
-      entry: '.strapi/client/app.js',
-      distPath: `${process.cwd()}/dist/build`,
-      env: {},
-      runtimeDir: `${process.cwd()}/.strapi/client`,
-      logger: { debug: jest.fn(), info: jest.fn(), error: jest.fn() },
-      strapi: { internal_config: {}, server: { httpServer: http.createServer() } },
-      bundler: 'vite' as const,
-      options: {
-        minify: true,
-        sourcemap: false,
-      },
-      plugins: [],
-      scanRoots: [],
-      tsconfig: undefined,
-      customisations: undefined,
-      features: undefined,
-    } as unknown as BuildContext;
-
-    const config = await resolveProductionConfig(ctx);
+    const config = await resolveProductionConfig(buildContext());
 
     expect(config.publicDir).toBe(false);
     expect(config.build?.rollupOptions?.input).toEqual({
@@ -66,31 +77,9 @@ describe('Vite admin configuration', () => {
   it.each([true, false])(
     'passes options.sourcemap through to the production build config (%s)',
     async (sourcemap) => {
-      const ctx = {
-        cwd: process.cwd(),
-        target: ['last 3 major versions'],
-        basePath: '/admin',
-        adminPath: '/admin',
-        distDir: 'dist/build',
-        appDir: process.cwd(),
-        entry: '.strapi/client/app.js',
-        distPath: `${process.cwd()}/dist/build`,
-        env: {},
-        runtimeDir: `${process.cwd()}/.strapi/client`,
-        logger: { debug: jest.fn(), info: jest.fn(), error: jest.fn() },
-        strapi: { internal_config: {}, server: { httpServer: http.createServer() } },
-        bundler: 'vite' as const,
-        // The CLI flag is `--sourcemap`, so commander stores the value on `options.sourcemap`.
-        // Reading `options.sourcemaps` here silently produced `undefined` and no .map files (#22632).
-        options: {
-          minify: true,
-          sourcemap,
-        },
-        plugins: [],
-        tsconfig: undefined,
-        customisations: undefined,
-        features: undefined,
-      } as unknown as BuildContext;
+      // The CLI flag is `--sourcemap`, so commander stores the value on `options.sourcemap`.
+      // Reading `options.sourcemaps` here silently produced `undefined` and no .map files (#22632).
+      const ctx = buildContext({ options: { minify: true, sourcemap } });
 
       const config = await resolveProductionConfig(ctx);
 
@@ -100,32 +89,13 @@ describe('Vite admin configuration', () => {
 
   it('allows proxied hosts and pins HMR to the Strapi HTTP server without a separate clientPort (#23491)', async () => {
     const mockHttpServer = http.createServer();
-    const ctx = {
-      cwd: process.cwd(),
-      target: ['last 3 major versions'],
-      basePath: '/admin',
-      adminPath: '/admin',
-      distDir: 'dist/build',
-      appDir: process.cwd(),
-      entry: '.strapi/client/app.js',
-      distPath: `${process.cwd()}/dist/build`,
-      env: {},
-      runtimeDir: `${process.cwd()}/.strapi/client`,
-      logger: { debug: jest.fn(), info: jest.fn(), error: jest.fn() },
-      // HMR must bind to Strapi's own http.Server so websockets reuse the app port behind a proxy.
-      // Mock that real source instead of injecting the server via options, so the test guards the
-      // strapi.server.httpServer -> config wiring that actually fixes #23491.
+    // HMR must bind to Strapi's own http.Server so websockets reuse the app port behind a proxy.
+    // Mock that real source instead of injecting the server via options, so the test guards the
+    // strapi.server.httpServer -> config wiring that actually fixes #23491.
+    const ctx = buildContext({
       strapi: { internal_config: {}, server: { httpServer: mockHttpServer } },
-      bundler: 'vite' as const,
-      options: {
-        open: false,
-      },
-      plugins: [],
-      scanRoots: [],
-      tsconfig: undefined,
-      customisations: undefined,
-      features: undefined,
-    } as unknown as BuildContext;
+      options: { open: false },
+    });
 
     const config = await resolveDevelopmentConfig(ctx);
 
@@ -163,27 +133,10 @@ describe('Vite admin configuration', () => {
 
   it('keeps the design system regex alias after the monorepo merge', async () => {
     const mockHttpServer = http.createServer();
-    const ctx = {
-      cwd: process.cwd(),
-      target: ['last 3 major versions'],
-      basePath: '/admin',
-      adminPath: '/admin',
-      distDir: 'dist/build',
-      appDir: process.cwd(),
-      entry: '.strapi/client/app.js',
-      distPath: `${process.cwd()}/dist/build`,
-      env: {},
-      runtimeDir: `${process.cwd()}/.strapi/client`,
-      logger: { debug: jest.fn(), info: jest.fn(), error: jest.fn() },
+    const ctx = buildContext({
       strapi: { internal_config: {}, server: { httpServer: mockHttpServer } },
-      bundler: 'vite' as const,
       options: { open: false },
-      plugins: [],
-      scanRoots: [],
-      tsconfig: undefined,
-      customisations: undefined,
-      features: undefined,
-    } as unknown as BuildContext;
+    });
 
     const config = await resolveDevelopmentConfig(ctx);
     const alias = asAliasArray(config.resolve?.alias);
@@ -210,29 +163,10 @@ describe('Vite admin configuration', () => {
 
   it('pre-bundles prismjs core but not language components (#26964 / blank-admin)', async () => {
     const mockHttpServer = http.createServer();
-    const ctx = {
-      cwd: process.cwd(),
-      target: ['last 3 major versions'],
-      basePath: '/admin',
-      adminPath: '/admin',
-      distDir: 'dist/build',
-      appDir: process.cwd(),
-      entry: '.strapi/client/app.js',
-      distPath: `${process.cwd()}/dist/build`,
-      env: {},
-      runtimeDir: `${process.cwd()}/.strapi/client`,
-      logger: { debug: jest.fn(), info: jest.fn(), error: jest.fn() },
+    const ctx = buildContext({
       strapi: { internal_config: {}, server: { httpServer: mockHttpServer } },
-      bundler: 'vite' as const,
-      options: {
-        open: false,
-      },
-      plugins: [],
-      scanRoots: [],
-      tsconfig: undefined,
-      customisations: undefined,
-      features: undefined,
-    } as unknown as BuildContext;
+      options: { open: false },
+    });
 
     const config = await resolveDevelopmentConfig(ctx);
     const include = config.optimizeDeps?.include ?? [];
@@ -245,5 +179,17 @@ describe('Vite admin configuration', () => {
     await new Promise<void>((resolve) => {
       mockHttpServer.close(() => resolve());
     });
+  });
+
+  it('adds the Tailwind plugin when the next design system is on', async () => {
+    const config = await resolveProductionConfig(buildContext({ nextDesignSystem: true }));
+
+    expect(pluginNames(config)).toContain('tailwindcss');
+  });
+
+  it('adds no Tailwind plugin when the next design system is off', async () => {
+    const config = await resolveProductionConfig(buildContext({ nextDesignSystem: false }));
+
+    expect(pluginNames(config)).not.toContain('tailwindcss');
   });
 });

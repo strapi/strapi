@@ -1,6 +1,11 @@
-import { getStylesheet } from '../staticFiles';
+import { getEntryModule, getStylesheet } from '../staticFiles';
 
 import type { BuildContext } from '../create-build-context';
+
+/**
+ * A build context is a wide interface of which these writers read a field or two, so both `ctx`
+ * factories below cast a literal rather than stand up a real context
+ */
 
 describe('getStylesheet', () => {
   const ctx = (scanRoots: string[]) => ({ scanRoots }) as unknown as BuildContext;
@@ -53,5 +58,18 @@ describe('getStylesheet', () => {
 
   test('stops when the path holds both quote characters', () => {
     expect(() => getStylesheet(ctx([`/pkg/o'br"ien`]))).toThrow('both quote characters');
+  });
+});
+
+describe('getEntryModule', () => {
+  const ctx = (nextDesignSystem: boolean) =>
+    ({ nextDesignSystem, plugins: [] }) as unknown as BuildContext;
+
+  test('imports the host stylesheet when the next design system is on', () => {
+    expect(getEntryModule(ctx(true))).toContain("import './styles.css';");
+  });
+
+  test('imports no stylesheet when the next design system is off', () => {
+    expect(getEntryModule(ctx(false))).not.toContain('styles.css');
   });
 });

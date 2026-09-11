@@ -161,7 +161,7 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
       // where packages imported by plugins may not be resolvable from plugin chunks
       alias: buildAdminViteResolveAliases(),
     },
-    plugins: [tailwindcss(), react(), buildFilesPlugin(ctx)],
+    plugins: [...(ctx.nextDesignSystem ? [tailwindcss()] : []), react(), buildFilesPlugin(ctx)],
   };
 };
 
