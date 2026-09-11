@@ -205,7 +205,7 @@ test.describe('Home as super admin — key statistics', () => {
 
       // Upload an asset
       await navToHeader(page, ['Media Library'], 'Media Library');
-      await page.getByRole('button', { name: 'Add new assets' }).first().click();
+      await page.getByRole('button', { name: 'Add assets' }).first().click();
       await page
         .getByLabel('Drag & Drop here or')
         .setInputFiles('public/assets/administration_panel.png');

@@ -368,7 +368,7 @@ exports[`Header renders 1`] = `
                 <span
                   class="c14"
                 >
-                  Add new assets
+                  Add assets
                 </span>
               </button>
             </div>

@@ -166,7 +166,7 @@ export const AssetContent = ({
           <Modal.Title>
             {formatMessage({
               id: getTrad('header.actions.add-assets'),
-              defaultMessage: 'Add new assets',
+              defaultMessage: 'Add assets',
             })}
           </Modal.Title>
         </Modal.Header>
@@ -190,7 +190,7 @@ export const AssetContent = ({
           <Modal.Title>
             {formatMessage({
               id: getTrad('header.actions.add-assets'),
-              defaultMessage: 'Add new assets',
+              defaultMessage: 'Add assets',
             })}
           </Modal.Title>
         </Modal.Header>
@@ -207,7 +207,7 @@ export const AssetContent = ({
           <Modal.Title>
             {formatMessage({
               id: getTrad('header.actions.add-assets'),
-              defaultMessage: 'Add new assets',
+              defaultMessage: 'Add assets',
             })}
           </Modal.Title>
         </Modal.Header>
@@ -261,7 +261,7 @@ export const AssetContent = ({
         <Modal.Title>
           {formatMessage({
             id: getTrad('header.actions.add-assets'),
-            defaultMessage: 'Add new assets',
+            defaultMessage: 'Add assets',
           })}
         </Modal.Title>
       </Modal.Header>

@@ -103,7 +103,7 @@ export const Header = ({
             <Button startIcon={<Plus />} onClick={onToggleUploadAssetDialog} fullWidth>
               {formatMessage({
                 id: getTrad('header.actions.add-assets'),
-                defaultMessage: 'Add new assets',
+                defaultMessage: 'Add assets',
               })}
             </Button>
           </Flex>

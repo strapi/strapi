@@ -31,13 +31,13 @@ describe('EmptyOrNoPermissions', () => {
   test('canCreate', () => {
     const { getByText } = setup({});
 
-    expect(getByText('Add new assets')).toBeInTheDocument();
+    expect(getByText('Add assets')).toBeInTheDocument();
   });
 
   test('isFiltering and canCreate', () => {
     const { queryByText } = setup({ isFiltering: true });
 
-    expect(queryByText('Add new assets')).not.toBeInTheDocument();
+    expect(queryByText('Add assets')).not.toBeInTheDocument();
   });
 
   test('canRead and not canCreate', () => {
