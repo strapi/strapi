@@ -26,8 +26,8 @@
   ],
   "exports": {
     "./strapi-admin": {
+      "@strapi/source": "./admin/src/index.ts",
       "types": "./dist/admin/src/index.d.ts",
-      "source": "./admin/src/index.ts",
       "import": "./dist/admin/index.mjs",
       "require": "./dist/admin/index.js",
       "default": "./dist/admin/index.js"
