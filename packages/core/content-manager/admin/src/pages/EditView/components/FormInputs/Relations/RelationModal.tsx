@@ -22,6 +22,7 @@ import {
   TextButton,
 } from '@strapi/design-system';
 import { ArrowLeft, ArrowsOut, WarningCircle } from '@strapi/icons';
+import { generateNKeysBetween } from 'fractional-indexing';
 import { useIntl } from 'react-intl';
 import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -348,6 +349,78 @@ const generateCreateUrl = (currentDocumentMeta: DocumentMeta) => {
   }`;
 };
 
+/**
+ * Pre-fill the inverse relation with the parent that opened create-on-the-fly.
+ * One-way relations have no inverse; unsaved parents have no documentId.
+ */
+const prefillParentRelation = ({
+  initialValues,
+  fieldToConnect,
+  childSchema,
+  parentDocument,
+  parentModel,
+}: {
+  initialValues?: AnyData;
+  fieldToConnect?: string;
+  childSchema?: { attributes?: Record<string, unknown> };
+  parentDocument?: Record<string, unknown>;
+  parentModel?: string;
+}): AnyData | undefined => {
+  const documentId = parentDocument?.documentId;
+  const parentFieldName = fieldToConnect?.split('.').at(-1);
+
+  if (!initialValues || typeof documentId !== 'string' || !documentId || !parentFieldName) {
+    return initialValues;
+  }
+
+  const inverseField = Object.entries(childSchema?.attributes ?? {}).find(([, attribute]) => {
+    const relation = attribute as {
+      type?: string;
+      target?: string;
+      inversedBy?: string;
+      mappedBy?: string;
+    };
+
+    return (
+      relation.type === 'relation' &&
+      relation.target === parentModel &&
+      (relation.inversedBy === parentFieldName || relation.mappedBy === parentFieldName)
+    );
+  })?.[0];
+
+  if (!inverseField) {
+    return initialValues;
+  }
+
+  const id = parentDocument.id ?? documentId;
+
+  return {
+    ...initialValues,
+    [inverseField]: {
+      connect: [
+        {
+          ...Object.fromEntries(
+            Object.entries(parentDocument).filter(
+              ([, value]) =>
+                value === null || ['string', 'number', 'boolean'].includes(typeof value)
+            )
+          ),
+          id,
+          documentId,
+          apiData: {
+            id,
+            documentId,
+            locale: parentDocument.locale,
+            isTemporary: true,
+          },
+          __temp_key__: generateNKeysBetween(null, null, 1)[0],
+        },
+      ],
+      disconnect: [],
+    },
+  };
+};
+
 const RelationModal = ({ children }: { children: React.ReactNode }) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
@@ -359,6 +432,18 @@ const RelationModal = ({ children }: { children: React.ReactNode }) => {
   );
   const currentDocument = useRelationModal('RelationModalForm', (state) => state.currentDocument);
   const isCreating = useRelationModal('RelationModalForm', (state) => state.isCreating);
+  const rootDocumentMeta = useRelationModal('RelationModalForm', (state) => state.rootDocumentMeta);
+  const parentDocumentMeta = state.documentHistory.at(-2) ?? rootDocumentMeta;
+  const parentDocument = useDocument(parentDocumentMeta, {
+    skip: !isCreating || !state.fieldToConnect,
+  });
+  const initialValues = prefillParentRelation({
+    initialValues: currentDocument.getInitialFormValues(isCreating),
+    fieldToConnect: isCreating ? state.fieldToConnect : undefined,
+    childSchema: currentDocument.schema,
+    parentDocument: parentDocument.document,
+    parentModel: parentDocumentMeta.model,
+  });
 
   /*
    * We must wrap the modal window with Component Provider with reset values
@@ -436,7 +521,7 @@ const RelationModal = ({ children }: { children: React.ReactNode }) => {
           <Modal.Body>
             <FormContext
               method={isCreating ? 'POST' : 'PUT'}
-              initialValues={currentDocument.getInitialFormValues(isCreating)}
+              initialValues={initialValues}
               validate={(values: Record<string, unknown>, options: Record<string, string>) => {
                 const yupSchema = createYupSchema(
                   currentDocument.schema?.attributes,
@@ -783,5 +868,12 @@ const RelationModalForm = () => {
   );
 };
 
-export { reducer, RelationModalRenderer, useRelationModal, getFullPageUrl, generateCreateUrl };
+export {
+  reducer,
+  RelationModalRenderer,
+  useRelationModal,
+  getFullPageUrl,
+  generateCreateUrl,
+  prefillParentRelation,
+};
 export type { State, Action, RelationOpenMode };
