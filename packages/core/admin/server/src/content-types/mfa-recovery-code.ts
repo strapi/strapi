@@ -37,4 +37,16 @@ export default {
       searchable: false,
     },
   },
+  // Every query in `services/mfa*.ts` against this table narrows by user first, and
+  // several run on the login path. Declared the way `upload`'s file content type
+  // declares its own.
+  indexes: [
+    {
+      // `consumeRecoveryCode` loads a user's unused codes on every recovery attempt, and
+      // `issueRecoveryCodes` deletes the whole set by user.
+      name: 'strapi_admin_mfa_recovery_codes_user_id_index',
+      columns: ['user_id'],
+      type: null,
+    },
+  ],
 };

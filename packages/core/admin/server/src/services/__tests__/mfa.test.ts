@@ -3455,6 +3455,35 @@ describe('mfa service: enforce', () => {
     });
   });
 
+  // `disable` records a notice, so it must not delete the notice rows. Deleting the *user* is
+  // the one caller that wants them gone: left behind they outlive the account, keyed to a
+  // `userId` that no longer resolves and carrying the device names parsed from that person's
+  // user agents.
+  describe('purgeUser', () => {
+    test('clears the factor and the security notices, unlike disable', async () => {
+      const { service, users, events } = setup({
+        user: { mfaEnabledAt: new Date(), mfaSecret: 'enc:SECRET' },
+      });
+
+      await service.recordEvent('1', 'device_trusted', { deviceName: 'Kai MacBook' });
+      expect(events.length).toBeGreaterThan(0);
+
+      await service.purgeUser('1');
+
+      expect(users.get('1')!.mfaSecret).toBeNull();
+      expect(events).toHaveLength(0);
+    });
+
+    test('disable on its own leaves the notices in place', async () => {
+      const { service, events } = setup({ user: { mfaEnabledAt: new Date() } });
+
+      await service.recordEvent('1', 'device_trusted', { deviceName: 'Kai MacBook' });
+      await service.disable('1');
+
+      expect(events.some((e) => e.type === 'device_trusted')).toBe(true);
+    });
+  });
+
   // The recovery path for a user who lost their authenticator and spent their recovery codes.
   // Shared by `POST /mfa/users/:id/reset` and `admin:reset-user-mfa`, which is the point: the
   // panel and the CLI must not drift into doing different amounts of work.

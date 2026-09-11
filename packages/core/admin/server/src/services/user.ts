@@ -373,10 +373,10 @@ const deleteById = async (id: Data.ID): Promise<AdminUser | null> => {
   }
 
   // Unconditional: the mfa tables exist whether or not `unstableAdminMfa` is on, so a user deleted
-  // while it's off must not leave recovery-code hashes or an encrypted secret behind. Runs after
-  // the guard above and right before the row delete, so a refused deletion never touches a live
-  // user's second factor.
-  await getService('mfa').disable(String(id));
+  // while it's off must not leave recovery-code hashes, an encrypted secret or the device names
+  // on their security notices behind. Runs after the guard above and right before the row
+  // delete, so a refused deletion never touches a live user's second factor.
+  await getService('mfa').purgeUser(String(id));
 
   const deletedUser = await strapi.db
     .query('admin::user')
@@ -413,7 +413,7 @@ const deleteByIds = async (ids: (string | number)[]): Promise<AdminUser[]> => {
   const deletedUsers = [] as AdminUser[];
   for (const id of ids) {
     // See deleteById: unconditional, after the guard above, before this id's row is deleted.
-    await getService('mfa').disable(String(id));
+    await getService('mfa').purgeUser(String(id));
 
     const deletedUser = await strapi.db.query('admin::user').delete({
       where: { id },

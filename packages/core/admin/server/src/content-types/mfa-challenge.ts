@@ -70,4 +70,15 @@ export default {
       searchable: false,
     },
   },
+  // Every query in `services/mfa*.ts` against this table narrows by user first, and
+  // several run on the login path. Declared the way `upload`'s file content type
+  // declares its own.
+  indexes: [
+    {
+      // The expiry sweep and every per-user challenge lookup scan on this.
+      name: 'strapi_admin_mfa_challenges_user_id_index',
+      columns: ['user_id'],
+      type: null,
+    },
+  ],
 };

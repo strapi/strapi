@@ -229,16 +229,33 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
     // which is throttled per account and rate limited per IP, and they expire after
     // `challengeTtl` (five minutes by default), so the expired set at boot is small. Batching
     // would be the fix if that ever changed.
-    try {
-      await mfaService.sweepExpiredChallenges();
-      await mfaService.sweepExpiredTrustedDevices();
-    } catch (error) {
-      strapi.log.warn(
-        `Could not sweep expired two-factor challenges or trusted devices: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-    }
+    const sweep = async () => {
+      try {
+        await mfaService.sweepExpiredChallenges();
+        await mfaService.sweepExpiredTrustedDevices();
+      } catch (error) {
+        strapi.log.warn(
+          `Could not sweep expired two-factor challenges or trusted devices: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+    };
+
+    // Once at boot, then daily. Boot alone leaves a long-lived instance -- the normal case for a
+    // production deployment, which may run for months -- never sweeping again, so expired rows
+    // accumulate for the lifetime of the process. `strapi.cron.add` is how metrics, EE audit
+    // logs, content-releases and upload all schedule their own housekeeping.
+    //
+    // Nothing about the security of either flow depends on this running: a dead challenge and a
+    // dead trust are both refused, and deleted, on read. This is table hygiene.
+    await sweep();
+    strapi.cron.add({
+      sweepExpiredMfaRows: {
+        task: sweep,
+        options: '0 30 3 * * *',
+      },
+    });
 
     // Passkeys discoverability. A deployment whose `admin.absoluteUrl` yields no usable
     // relying-party id hides every passkey surface -- correctly, since no ceremony could succeed --

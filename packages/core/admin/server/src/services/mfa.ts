@@ -481,6 +481,22 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
    * doing different amounts of work. Returns the notification promise (never rejecting) for the
    * CLI, which must not `process.exit` before the email has had a chance to send.
    */
+  /**
+   * Everything this feature stored about a user, for when the user itself is being deleted.
+   *
+   * `disable` deliberately leaves the `admin::mfa-event` rows alone -- it *records* one, and the
+   * notice feed is the point of them -- so on deletion they would outlive the account, keyed to
+   * a `userId` that no longer resolves and carrying the device names parsed from that person's
+   * user agents. Deletion is the one caller that wants them gone too.
+   *
+   * Unconditional, like `disable` at the same call site: the tables exist whether or not the
+   * feature flag is on, so a user deleted while it is off must not leave rows behind either.
+   */
+  const purgeUser = async (userId: string): Promise<void> => {
+    await disable(userId);
+    await eventQuery().deleteMany({ where: { userId: String(userId) } });
+  };
+
   const resetUser = async (
     userId: string,
     actor: { byUserId?: string; via?: 'cli' } = {}
@@ -1562,6 +1578,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     enforce,
     unlock,
     resetUser,
+    purgeUser,
     beginEnrolment,
     completeEnrolment,
     verifyTotpForUser,
