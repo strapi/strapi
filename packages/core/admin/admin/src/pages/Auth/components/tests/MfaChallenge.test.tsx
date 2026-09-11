@@ -476,6 +476,56 @@ describe('MfaChallenge', () => {
     await waitFor(() => expect(screen.getByRole('button', { name: 'Verify' })).toBeEnabled());
   });
 
+  // The challenge is single use and the verify route charges an attempt against its budget, so
+  // two concurrent submissions cost the user an attempt for a race they did not cause and show
+  // a generic refusal over a login that in fact succeeded. The button disables itself, but a
+  // form can be submitted by Enter before React re-renders that attribute, so the handler holds
+  // the real guard.
+  it('spends only one attempt when the code form is submitted twice in a row', async () => {
+    let calls = 0;
+    let resolveLogin: (response: Response) => void = () => {};
+    server.use(
+      http.post('/admin/login/mfa', () => {
+        calls += 1;
+        return new Promise<Response>((resolve) => {
+          resolveLogin = resolve;
+        });
+      })
+    );
+
+    const { user } = renderChallenge(STATE);
+    await user.type(screen.getByLabelText('Authentication code*'), '123456');
+
+    submitVerify();
+    submitVerify();
+
+    await waitFor(() => expect(calls).toBe(1));
+
+    resolveLogin(HttpResponse.json(SESSION));
+    await waitFor(() => expect(calls).toBe(1));
+  });
+
+  it('shows the Verify button as loading while its own submission is in flight', async () => {
+    let resolveLogin: (response: Response) => void = () => {};
+    server.use(
+      http.post(
+        '/admin/login/mfa',
+        () =>
+          new Promise<Response>((resolve) => {
+            resolveLogin = resolve;
+          })
+      )
+    );
+
+    const { user } = renderChallenge(STATE);
+    await user.type(screen.getByLabelText('Authentication code*'), '123456');
+    submitVerify();
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Verify' })).toBeDisabled());
+
+    resolveLogin(HttpResponse.json(SESSION));
+  });
+
   it('disables the passkey button while a code submission is in flight', async () => {
     let resolveLogin: (response: Response) => void = () => {};
     server.use(

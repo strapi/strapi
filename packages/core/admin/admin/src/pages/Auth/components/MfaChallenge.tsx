@@ -115,6 +115,19 @@ const MfaChallenge = () => {
    * even for a self-inflicted race.
    */
   const [codeBusy, setCodeBusy] = React.useState(false);
+  /**
+   * The synchronous re-entrancy guard both submit paths share, for the reason `ReAuthDialog`
+   * gives: a fast double Enter fires `onSubmit` twice before React re-renders with the busy
+   * state set, so a state-based check is stale for the second call. The `codeBusy`/`passkeyBusy`
+   * state above still drives the buttons' `loading`/`disabled`; this decides whether the work
+   * actually runs.
+   *
+   * It matters more here than in a dialog: the challenge is single use, and the verify route
+   * charges an attempt against its budget before evaluating anything. A self-inflicted race
+   * therefore costs the user one of their attempts and shows the loser's generic refusal over a
+   * login that in fact succeeded.
+   */
+  const inFlightRef = React.useRef(false);
 
   const hasClearedHistoryStateRef = React.useRef(false);
 
@@ -139,11 +152,15 @@ const MfaChallenge = () => {
   }
 
   const handleSubmit = async ({ code }: { code: string }) => {
-    // Mirrors the guard at the top of `handlePasskey`: a disabled submit button already stops a
-    // real click or Enter, this is the same defence-in-depth for whatever triggers `onSubmit`.
-    if (passkeyBusy) {
+    // Both flags, not just the passkey one. The submit button is disabled while either is set,
+    // but a form can be submitted by Enter before React has re-rendered the disabled attribute,
+    // and two concurrent `loginMfa` calls race the same single-use challenge -- the loser shows
+    // a generic refusal over a login that in fact succeeded, and the verify route charges an
+    // attempt against the challenge budget for a race the user did not cause.
+    if (inFlightRef.current) {
       return;
     }
+    inFlightRef.current = true;
     setApiError(undefined);
     setCodeBusy(true);
 
@@ -163,6 +180,7 @@ const MfaChallenge = () => {
 
       navigate(getRedirectTo(location.search));
     } finally {
+      inFlightRef.current = false;
       setCodeBusy(false);
     }
   };
@@ -182,11 +200,12 @@ const MfaChallenge = () => {
    * this body, and the trust grant is factor-agnostic.
    */
   const handlePasskey = async () => {
-    // Mirrors the guard at the top of `handleSubmit`: a disabled button already stops a real
-    // click, this is the same defence-in-depth for whatever else could call this.
-    if (codeBusy) {
+    // The same guard `handleSubmit` uses, and the same ref: the two paths spend one challenge
+    // between them, so neither may start while the other is running.
+    if (inFlightRef.current) {
       return;
     }
+    inFlightRef.current = true;
     setApiError(undefined);
     setPasskeyBusy(true);
 
@@ -230,6 +249,7 @@ const MfaChallenge = () => {
 
       navigate(getRedirectTo(location.search));
     } finally {
+      inFlightRef.current = false;
       setPasskeyBusy(false);
     }
   };
@@ -302,7 +322,7 @@ const MfaChallenge = () => {
                   )}
                 </Checkbox>
               ) : null}
-              <Button fullWidth type="submit" disabled={passkeyBusy}>
+              <Button fullWidth type="submit" loading={codeBusy} disabled={passkeyBusy}>
                 {formatMessage({ id: 'Auth.form.mfa.button.verify', defaultMessage: 'Verify' })}
               </Button>
               {showPasskey ? (

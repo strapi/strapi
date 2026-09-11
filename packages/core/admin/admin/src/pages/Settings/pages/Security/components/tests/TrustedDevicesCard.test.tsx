@@ -92,7 +92,7 @@ describe('TrustedDevicesCard', () => {
     save();
 
     const dialog = await screen.findByRole('dialog', {
-      name: 'Confirm lowering two-factor requirements',
+      name: 'Let browsers skip the code for longer?',
     });
     expect(bodies).toHaveLength(0);
     expect(dialog).not.toHaveTextContent('Authentication code');
@@ -114,7 +114,7 @@ describe('TrustedDevicesCard', () => {
     await user.click(enabledBox());
     save();
 
-    await screen.findByRole('dialog', { name: 'Confirm lowering two-factor requirements' });
+    await screen.findByRole('dialog', { name: 'Let browsers skip the code for longer?' });
     await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
     await user.type(screen.getByLabelText('Authentication code*'), '123456');
     fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));

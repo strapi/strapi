@@ -56,6 +56,34 @@ const renderSection = () => {
 };
 
 describe('TwoFactorSection', () => {
+  // A non-404 failure is a transient fault, not a feature that is switched off. Returning null
+  // for both erased the whole section on a 500: the page then said nothing about two-factor
+  // authentication at all, and a user could not tell a broken request from an account that is
+  // simply not enrolled.
+  it('shows an error instead of vanishing when the status request fails', async () => {
+    server.use(http.get('/admin/mfa/me', () => new HttpResponse(null, { status: 500 })));
+    renderSection();
+
+    expect(
+      await screen.findByRole('heading', { name: 'Two-factor authentication' })
+    ).toBeInTheDocument();
+    expect(await screen.findByText(/could not be loaded/i)).toBeInTheDocument();
+  });
+
+  it('renders nothing at all when the feature is off (404)', async () => {
+    server.use(http.get('/admin/mfa/me', () => new HttpResponse(null, { status: 404 })));
+    renderSection();
+
+    // Not the error state above: a 404 means the feature does not exist on this instance, so
+    // there is nothing to report and the section stays absent entirely.
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('heading', { name: 'Two-factor authentication' })
+      ).not.toBeInTheDocument()
+    );
+    expect(screen.queryByText(/could not be loaded/i)).not.toBeInTheDocument();
+  });
+
   it('renders nothing while the feature is off (404)', async () => {
     server.use(http.get('/admin/mfa/me', () => new HttpResponse(null, { status: 404 })));
     const { root } = renderSection();

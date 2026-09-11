@@ -173,11 +173,27 @@ const TrustedDevicesCard = ({
           </Button>
         </Flex>
 
+        {/*
+          The default copy says "lowering two-factor requirements", which is wrong for this card:
+          the two changes that land here are *offering* trust and *lengthening* it. Neither
+          lowers a requirement in the user's sense -- both let a browser skip the code step for
+          longer, which is why the server asks for credentials -- so the dialog says what is
+          actually changing, the way `PasskeysCard` does.
+        */}
         <ConfirmDowngradeDialog
           open={downgradeOpen}
           requiresCode={callerEnrolled}
           onClose={closeDowngrade}
           onConfirm={confirmDowngrade}
+          title={formatMessage({
+            id: 'Settings.security.trustedDevices.widen.title',
+            defaultMessage: 'Let browsers skip the code for longer?',
+          })}
+          description={formatMessage({
+            id: 'Settings.security.trustedDevices.widen.description',
+            defaultMessage:
+              'A trusted browser will not ask for a two-factor code until the trust expires. Confirm your password to continue.',
+          })}
         />
       </Panel>
     </Box>

@@ -149,8 +149,42 @@ const TwoFactorSection = () => {
   // reads the flag itself -- a 404 from /admin/mfa/me is the only signal it is off.
   const isNotFound = isNotFoundError(error);
 
-  if (isLoading || isNotFound || !status) {
+  if (isLoading || isNotFound) {
     return null;
+  }
+
+  // Any *other* failure is a transient fault, not a feature that does not exist. Returning null
+  // here too would erase the whole section on a 500, so the page would say nothing about
+  // two-factor authentication at all and a user could not tell a broken request from an account
+  // that is simply not enrolled. Say so instead, and keep the heading so the section does not
+  // silently move everything below it.
+  if (!status) {
+    return (
+      <Panel>
+        <Typography variant="delta" tag="h2">
+          {formatMessage({
+            id: 'Settings.profile.form.section.mfa.title',
+            defaultMessage: 'Two-factor authentication',
+          })}
+        </Typography>
+        <Alert
+          variant="danger"
+          // Not dismissible: the section has nothing else to show, so closing it would leave an
+          // empty panel. `closeLabel` is required by the type regardless.
+          closeLabel={formatMessage({ id: 'global.close', defaultMessage: 'Close' })}
+          title={formatMessage({
+            id: 'Settings.profile.form.section.mfa.unavailable.title',
+            defaultMessage: 'Two-factor settings unavailable',
+          })}
+        >
+          {formatMessage({
+            id: 'Settings.profile.form.section.mfa.unavailable',
+            defaultMessage:
+              'Your two-factor authentication settings could not be loaded. Refresh the page to try again.',
+          })}
+        </Alert>
+      </Panel>
+    );
   }
 
   const showAckWarning = status.enabled && !status.codesAcknowledged && !dismissedAck;
