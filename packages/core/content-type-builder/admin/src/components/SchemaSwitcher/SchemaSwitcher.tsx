@@ -44,44 +44,46 @@ const pathTo = (schema: Schema): string =>
     : `/plugins/${pluginId}/content-types/${schema.uid}`;
 
 /**
- * The trail recedes; the schema you are on is the part you act with.
- *
- * Blue rather than neutral so it reads as navigation and not as a heading of
- * its own, and light enough to sit under the title without competing with it.
+ * The trail sits above the title and under everything else: the same muted
+ * neutral a field's type is written in, so it reads as context rather than as
+ * a second heading.
  */
 const Trail = styled(Breadcrumbs)`
-  color: ${({ theme }) => theme.colors.primary500};
+  color: ${({ theme }) => theme.colors.neutral600};
 
   a {
-    color: ${({ theme }) => theme.colors.primary500};
+    color: ${({ theme }) => theme.colors.neutral600};
   }
 `;
 
-/** Name and caret together: the whole thing is the control, as it reads. */
+/**
+ * Name and caret together: the whole thing is the control, as it reads.
+ *
+ * Padded but not pulled back over its own separator — the hover background
+ * used to cover the slash before it.
+ */
 const SwitchTrigger = styled.button`
   display: inline-flex;
   align-items: center;
   gap: ${({ theme }) => theme.spaces[1]};
   padding: ${({ theme }) => `${theme.spaces[1]} ${theme.spaces[2]}`};
-  margin-inline-start: -${({ theme }) => theme.spaces[2]};
   border: none;
   border-radius: ${({ theme }) => theme.borderRadius};
   background: transparent;
   cursor: pointer;
-  color: ${({ theme }) => theme.colors.primary600};
 
   &:hover,
   &[data-state='open'] {
-    background: ${({ theme }) => theme.colors.primary100};
+    background: ${({ theme }) => theme.colors.neutral150};
   }
 
   svg {
-    width: 1rem;
-    height: 1rem;
+    width: 1.2rem;
+    height: 1.2rem;
   }
 
   svg path {
-    fill: ${({ theme }) => theme.colors.primary600};
+    fill: ${({ theme }) => theme.colors.neutral600};
   }
 `;
 
@@ -174,7 +176,9 @@ export const SchemaSwitcher = ({ current }: { current: Schema }) => {
           tag={ReactRouterLink}
           to={`/plugins/${pluginId}?kind=${kind}`}
         >
-          {formatMessage(KIND_LABELS[kind])}
+          <Typography variant="omega" textColor="neutral600">
+            {formatMessage(KIND_LABELS[kind])}
+          </Typography>
         </CrumbLink>
 
         <Popover.Root
@@ -197,7 +201,7 @@ export const SchemaSwitcher = ({ current }: { current: Schema }) => {
                 { name: upperFirst(current.info.displayName) }
               )}
             >
-              <Typography variant="pi" fontWeight="bold" textColor="primary600">
+              <Typography variant="omega" fontWeight="bold" textColor="neutral600">
                 {upperFirst(current.info.displayName)}
               </Typography>
               <CaretDown aria-hidden />

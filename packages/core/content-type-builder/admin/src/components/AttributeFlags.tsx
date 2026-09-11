@@ -1,9 +1,20 @@
-import { Badge, Flex, Tooltip } from '@strapi/design-system';
+import { Flex, Tooltip, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
+import { styled } from 'styled-components';
 
 import { getAttributeFlags } from './attributeFlagRegistry';
 
-import type { AttributeLike } from './attributeFlagRegistry';
+import type { AttributeFlag, AttributeLike } from './attributeFlagRegistry';
+
+/**
+ * The flag itself: its own colour, paled right down for the ground it sits on,
+ * so a row of them reads as a row of labels rather than a row of alerts.
+ */
+const Pill = styled(Flex)<{ $tone: AttributeFlag['tone'] }>`
+  border-radius: 1.6rem;
+  padding: ${({ theme }) => `${theme.spaces[1]} ${theme.spaces[2]}`};
+  background: ${({ theme, $tone }) => theme.colors[`${$tone}100`]};
+`;
 
 /**
  * What is true of a field, said in words next to it.
@@ -25,14 +36,12 @@ export const AttributeFlags = ({ attribute }: { attribute: AttributeLike }) => {
   return (
     <Flex gap={1} wrap="wrap">
       {active.map((flag) => (
-        // The tooltip hands its trigger a ref, and a Badge is a plain
-        // function component — the span is what takes it.
         <Tooltip key={flag.id} label={formatMessage(flag.label)}>
-          <Flex tag="span">
-            <Badge size="S" variant={flag.variant}>
+          <Pill tag="span" alignItems="center" $tone={flag.tone}>
+            <Typography variant="sigma" textColor={`${flag.tone}600`}>
               {formatMessage(flag.short)}
-            </Badge>
-          </Flex>
+            </Typography>
+          </Pill>
         </Tooltip>
       ))}
     </Flex>

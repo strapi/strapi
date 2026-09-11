@@ -51,29 +51,29 @@ describe('AttributeFlags', () => {
     const localized = { type: 'string', pluginOptions: { i18n: { localized: true } } };
 
     const { unmount } = render(<AttributeFlags attribute={localized} />);
-    expect(screen.queryByText('i18n')).not.toBeInTheDocument();
+    expect(screen.queryByText('Internationalization')).not.toBeInTheDocument();
     unmount();
 
     registerAttributeFlag({
       id: 'i18n',
       label: { id: 'hint', defaultMessage: 'Translated per locale' },
-      short: { id: 'short', defaultMessage: 'i18n' },
-      variant: 'secondary',
+      short: { id: 'short', defaultMessage: 'Internationalization' },
+      tone: 'secondary',
       applies: (attribute) =>
         (attribute.pluginOptions as { i18n?: { localized?: boolean } } | undefined)?.i18n
           ?.localized === true,
     });
 
     render(<AttributeFlags attribute={localized} />);
-    expect(screen.getByText('i18n')).toBeInTheDocument();
+    expect(screen.getByText('Internationalization')).toBeInTheDocument();
   });
 
   it('replaces a flag registered twice under the same id', () => {
     const flag = {
       id: 'i18n',
       label: { id: 'hint', defaultMessage: 'Translated per locale' },
-      short: { id: 'short', defaultMessage: 'i18n' },
-      variant: 'secondary' as const,
+      short: { id: 'short', defaultMessage: 'Internationalization' },
+      tone: 'secondary' as const,
       applies: () => true,
     };
 
@@ -83,6 +83,6 @@ describe('AttributeFlags', () => {
     render(<AttributeFlags attribute={{ type: 'string' }} />);
 
     expect(screen.getByText('Localized')).toBeInTheDocument();
-    expect(screen.queryByText('i18n')).not.toBeInTheDocument();
+    expect(screen.queryByText('Internationalization')).not.toBeInTheDocument();
   });
 });

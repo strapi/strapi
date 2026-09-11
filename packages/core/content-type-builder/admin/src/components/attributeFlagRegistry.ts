@@ -22,8 +22,11 @@ export interface AttributeFlag {
   label: MessageDescriptor;
   /** The pill: short enough to read at a glance down a list of fields. */
   short: MessageDescriptor;
-  /** A design-system Badge variant — the flag is one. */
-  variant: 'danger' | 'primary' | 'neutral' | 'secondary' | 'success' | 'warning' | 'alternative';
+  /**
+   * The colour family the flag is written in: its `600` for the text, its
+   * `100` for the ground behind it.
+   */
+  tone: 'danger' | 'primary' | 'neutral' | 'secondary' | 'success' | 'warning' | 'alternative';
   /** Whether this attribute has the option on. */
   applies: (attribute: AttributeLike) => boolean;
 }
@@ -36,7 +39,7 @@ const CORE_FLAGS: AttributeFlag[] = [
       defaultMessage: 'This field must be filled in',
     },
     short: { id: 'content-type-builder.attribute.flag.required', defaultMessage: 'Required' },
-    variant: 'danger',
+    tone: 'danger',
     applies: (attribute) => attribute.required === true,
   },
   {
@@ -46,7 +49,7 @@ const CORE_FLAGS: AttributeFlag[] = [
       defaultMessage: 'No two entries may share a value',
     },
     short: { id: 'content-type-builder.attribute.flag.unique', defaultMessage: 'Unique' },
-    variant: 'primary',
+    tone: 'primary',
     applies: (attribute) => attribute.unique === true,
   },
   {
@@ -56,7 +59,7 @@ const CORE_FLAGS: AttributeFlag[] = [
       defaultMessage: 'Hidden from the public API',
     },
     short: { id: 'content-type-builder.attribute.flag.private', defaultMessage: 'Private' },
-    variant: 'neutral',
+    tone: 'neutral',
     applies: (attribute) => attribute.private === true,
   },
 ];

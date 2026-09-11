@@ -75,7 +75,7 @@
   "actions.delete.error": "An error occurred while trying to delete the document locale.",
   "actions.delete.label": "Delete entry ({locale})",
   "actions.select-locale": "Select a locale",
-  "attribute.flag.localized": "i18n",
+  "attribute.flag.localized": "Internationalization",
   "attribute.flag.localized.hint": "Translated per locale",
   "components.Select.locales.not-available": "No content available",
   "index.column.header": "Internationalization",

@@ -34,7 +34,12 @@ import {
   UserWorkspacesField,
 } from './components/UserWorkspacesField';
 import { SpaceSwitcher } from './components/SpaceSwitcher';
-import { isEverywhere, SchemaWorkspacesCell, visibleIn } from './components/SchemaWorkspacesCell';
+import {
+  isEverywhere,
+  SchemaSharingCell,
+  SchemaWorkspacesCell,
+  visibleIn,
+} from './components/SchemaWorkspacesCell';
 import { SpaceVisibility } from './components/SpaceVisibility';
 import { WorkspacesSectionHeading } from './components/WorkspacesSectionHeading';
 import { PERMISSIONS } from './constants';
@@ -254,6 +259,17 @@ export default {
           defaultMessage: 'Workspaces',
         },
         Cell: SchemaWorkspacesCell,
+      });
+
+      // Sharing is a different question from availability — a type can be
+      // visible everywhere and still keep an entry list per workspace.
+      ctbApis.registerSchemaColumn?.({
+        id: 'spaces-sharing',
+        header: {
+          id: getTranslation('index.column.sharing'),
+          defaultMessage: 'Shared entries',
+        },
+        Cell: SchemaSharingCell,
       });
 
       ctbApis.registerSchemaFilter?.({

@@ -171,7 +171,7 @@ export default {
           id: string;
           label: { id: string; defaultMessage: string };
           short: { id: string; defaultMessage: string };
-          variant: string;
+          tone: string;
           applies: (attribute: Record<string, unknown>) => boolean;
         }) => void;
       };
@@ -208,8 +208,11 @@ export default {
           id: getTranslation('attribute.flag.localized.hint'),
           defaultMessage: 'Translated per locale',
         },
-        short: { id: getTranslation('attribute.flag.localized'), defaultMessage: 'i18n' },
-        variant: 'secondary',
+        short: {
+          id: getTranslation('attribute.flag.localized'),
+          defaultMessage: 'Internationalization',
+        },
+        tone: 'secondary',
         applies: (attribute) =>
           (attribute.pluginOptions as { i18n?: { localized?: boolean } } | undefined)?.i18n
             ?.localized === true,

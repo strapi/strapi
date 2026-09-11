@@ -1,7 +1,7 @@
 import { render, screen } from '@tests/utils';
 import { userEvent } from '@testing-library/user-event';
 
-import { SchemaWorkspacesCell } from '../SchemaWorkspacesCell';
+import { SchemaSharingCell, SchemaWorkspacesCell } from '../SchemaWorkspacesCell';
 
 jest.mock('../../services/spaces', () => ({
   useGetMineSpacesQuery: jest.fn(() => ({
@@ -46,10 +46,24 @@ describe('SchemaWorkspacesCell', () => {
     expect(screen.getByRole('button', { name: '1 workspace' })).toBeInTheDocument();
   });
 
-  it('says when entries are shared, beside the workspaces', () => {
-    render(<SchemaWorkspacesCell schema={schema({ sharedEntries: true })} />);
+  it('names the workspaces in plain words, not chips', async () => {
+    const user = userEvent.setup();
+    render(<SchemaWorkspacesCell schema={schema({ visibleIn: ['acme'] })} />);
 
-    expect(screen.getByText('All workspaces')).toBeInTheDocument();
-    expect(screen.getByText('Shared entries')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: '1 workspace' }));
+
+    const name = await screen.findByText('Acme');
+    expect(name.tagName.toLowerCase()).not.toBe('button');
+  });
+});
+
+describe('SchemaSharingCell', () => {
+  it("answers the sharing question on its own, like the builder's other options", () => {
+    const { rerender } = render(<SchemaSharingCell schema={schema({ sharedEntries: true })} />);
+    expect(screen.getByText('On')).toBeInTheDocument();
+
+    rerender(<SchemaSharingCell schema={schema({})} />);
+    expect(screen.getByText('—')).toBeInTheDocument();
+    expect(screen.queryByText('On')).not.toBeInTheDocument();
   });
 });
