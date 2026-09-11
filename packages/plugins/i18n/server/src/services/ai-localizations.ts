@@ -1,6 +1,7 @@
 import type { Core, Modules, Schema, UID } from '@strapi/types';
 import { traverseEntity } from '@strapi/utils';
 import { getService } from '../utils';
+import type { GenerateTranslationsResult } from './ai-translations';
 
 const isLocalizedAttribute = (attribute: Schema.Attribute.Attribute | undefined): boolean => {
   return (attribute?.pluginOptions as any)?.i18n?.localized === true;
@@ -138,14 +139,12 @@ const mergeUnsupportedFields = async (
 };
 
 const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
-  // TODO: add a helper function to get the AI server URL
-  const aiServerUrl = process.env.STRAPI_AI_URL || 'https://strapi-ai.apps.strapi.io';
   const aiLocalizationJobsService = getService('ai-localization-jobs');
 
   return {
     // Async to avoid changing the signature later (there will be a db check in the future)
     async isEnabled() {
-      if (strapi.ai.admin.isEnabled() === false) {
+      if (getService('ai-translations').hasProvider() === false) {
         return false;
       }
       const settings = getService('settings');
@@ -258,23 +257,6 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
         status: 'processing',
       });
 
-      let token: string;
-      try {
-        const tokenData = await strapi.ai.admin.getAiToken();
-        token = tokenData.token;
-      } catch (error) {
-        await aiLocalizationJobsService.upsertJobForDocument({
-          documentId,
-          contentType: model,
-          sourceLocale: document.locale,
-          targetLocales,
-          status: 'failed',
-        });
-        throw new Error('Failed to retrieve AI token', {
-          cause: error instanceof Error ? error : undefined,
-        });
-      }
-
       /**
        * Provide a schema to the LLM so that we can give it instructions about how to handle each
        * type of attribute. Only keep essential schema data to avoid cluttering the context.
@@ -311,26 +293,15 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
           })
       );
 
-      strapi.log.http('Contacting AI Server for localizations generation');
-      const response = await fetch(`${aiServerUrl}/i18n/generate-localizations`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          content: translateableContent,
+      let aiResult: GenerateTranslationsResult;
+      try {
+        aiResult = await getService('ai-translations').generateTranslations({
           sourceLocale: document.locale,
           targetLocales,
+          content: translateableContent,
           contentTypeSchema: minimalContentTypeSchema,
-        }),
-      });
-
-      if (!response.ok) {
-        strapi.log.error(
-          `AI Localizations request failed: ${response.status} ${response.statusText}`
-        );
-
+        });
+      } catch (error) {
         await aiLocalizationJobsService.upsertJobForDocument({
           documentId,
           contentType: model,
@@ -339,12 +310,8 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
           status: 'failed',
         });
 
-        throw new Error(`AI Localizations request failed: ${response.statusText}`);
+        throw error;
       }
-
-      const aiResult = (await response.json()) as {
-        localizations: Array<{ content: Record<string, unknown>; locale: string }>;
-      };
 
       // Use populate-builder service for deep populate to fetch all nested fields
       const populateBuilderService = strapi.plugin('content-manager').service('populate-builder');

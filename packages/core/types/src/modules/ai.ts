@@ -1,10 +1,16 @@
 import type * as MCP from './mcp';
 
+export type AiProvider = {
+  name: string;
+};
+
 /**
- * AI service for the admin panel. Only present at runtime when EE + cms-ai feature is active
+ * AI service for the admin panel. Always registered (CE and EE), but its methods gate on
+ * EE/license/config internally and report unavailable outside of that context.
  */
 export type AiAdminService = {
-  isEnabled(): boolean;
+  isAvailable(): boolean;
+  isStrapiManagedAiEnabled(): boolean;
   getAiToken(): Promise<{ token: string; expiresAt?: string }>;
   getAiUsage(): Promise<{
     cmsAiCreditsUsed: number;

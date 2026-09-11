@@ -449,104 +449,154 @@ describe('AI Container', () => {
     });
   });
 
-  describe('isEnabled', () => {
-    test('returns true when config is default and cms-ai license feature is active', () => {
-      const mockStrapi = {
+  describe('isAvailable', () => {
+    const createStrapi = ({ configEnabled = true, isEE = true } = {}) =>
+      ({
         config: {
           get: jest.fn((key: string, defaultValue?: unknown) => {
-            if (key === 'admin.ai.enabled') return defaultValue ?? true;
+            if (key === 'admin.ai.enabled') return configEnabled ? (defaultValue ?? true) : false;
             return defaultValue;
           }),
         },
-        ee: { features: { isEnabled: jest.fn().mockReturnValue(true) } },
-      } as any;
+        ee: { isEE, features: { isEnabled: jest.fn().mockReturnValue(true) } },
+      }) as any;
 
-      const aiContainer = createAiAdminService({ strapi: mockStrapi });
-
-      expect(aiContainer.isEnabled()).toBe(true);
+    test('follows the Enterprise license', () => {
+      expect(createAiAdminService({ strapi: createStrapi() }).isAvailable()).toBe(true);
+      expect(createAiAdminService({ strapi: createStrapi({ isEE: false }) }).isAvailable()).toBe(
+        false
+      );
     });
 
     test('returns false when config explicitly disables AI', () => {
-      const mockStrapi = {
-        config: {
-          get: jest.fn((key: string, defaultValue?: unknown) => {
-            if (key === 'admin.ai.enabled') return false;
-            return defaultValue;
-          }),
-        },
-        ee: { features: { isEnabled: jest.fn().mockReturnValue(true) } },
-      } as any;
-
-      const aiContainer = createAiAdminService({ strapi: mockStrapi });
-
-      expect(aiContainer.isEnabled()).toBe(false);
-    });
-
-    test('returns false when cms-ai license feature is not enabled', () => {
-      const mockStrapi = {
-        config: {
-          get: jest.fn((key: string, defaultValue?: unknown) => {
-            if (key === 'admin.ai.enabled') return defaultValue ?? true;
-            return defaultValue;
-          }),
-        },
-        ee: { features: { isEnabled: jest.fn().mockReturnValue(false) } },
-      } as any;
-
-      const aiContainer = createAiAdminService({ strapi: mockStrapi });
-
-      expect(aiContainer.isEnabled()).toBe(false);
+      expect(
+        createAiAdminService({ strapi: createStrapi({ configEnabled: false }) }).isAvailable()
+      ).toBe(false);
     });
 
     test('returns false when ee is undefined', () => {
-      const mockStrapi = {
+      const strapi = createStrapi();
+      strapi.ee = undefined;
+
+      expect(createAiAdminService({ strapi }).isAvailable()).toBe(false);
+    });
+  });
+
+  describe('isStrapiManagedAiEnabled', () => {
+    const createStrapi = ({ configEnabled = true, licensedFeatures = [] as string[] } = {}) =>
+      ({
         config: {
           get: jest.fn((key: string, defaultValue?: unknown) => {
-            if (key === 'admin.ai.enabled') return defaultValue ?? true;
+            if (key === 'admin.ai.enabled') return configEnabled ? (defaultValue ?? true) : false;
             return defaultValue;
           }),
         },
-        ee: undefined,
-      } as any;
+        ee: {
+          isEE: true,
+          features: { isEnabled: jest.fn((name: string) => licensedFeatures.includes(name)) },
+        },
+      }) as any;
 
-      const aiContainer = createAiAdminService({ strapi: mockStrapi });
+    test('follows the cms-ai license feature', () => {
+      expect(
+        createAiAdminService({
+          strapi: createStrapi({ licensedFeatures: ['cms-ai'] }),
+        }).isStrapiManagedAiEnabled()
+      ).toBe(true);
 
-      expect(aiContainer.isEnabled()).toBe(false);
+      expect(createAiAdminService({ strapi: createStrapi() }).isStrapiManagedAiEnabled()).toBe(
+        false
+      );
+    });
+
+    test('returns false when config explicitly disables AI', () => {
+      expect(
+        createAiAdminService({
+          strapi: createStrapi({ configEnabled: false, licensedFeatures: ['cms-ai'] }),
+        }).isStrapiManagedAiEnabled()
+      ).toBe(false);
+    });
+
+    test('returns false when ee is undefined', () => {
+      const strapi = createStrapi({ licensedFeatures: ['cms-ai'] });
+      strapi.ee = undefined;
+
+      expect(createAiAdminService({ strapi }).isStrapiManagedAiEnabled()).toBe(false);
+    });
+
+    test('follows the license when the entitlement is revoked at runtime', () => {
+      const licensedFeatures = ['cms-ai'];
+      const aiContainer = createAiAdminService({ strapi: createStrapi({ licensedFeatures }) });
+
+      expect(aiContainer.isStrapiManagedAiEnabled()).toBe(true);
+
+      licensedFeatures.length = 0;
+
+      expect(aiContainer.isStrapiManagedAiEnabled()).toBe(false);
     });
   });
 
   describe('getAiFeatureConfig', () => {
-    test('Should return AI feature configuration', async () => {
-      const mockI18nSettings = { aiLocalizations: true };
-      const mockUploadSettings = { aiMetadata: false };
-
-      const mockStrapi = createMockStrapi({
-        plugin: jest.fn((pluginName: string) => {
-          if (pluginName === 'i18n') {
-            return {
-              service: jest.fn(() => ({
-                getSettings: jest.fn().mockResolvedValue(mockI18nSettings),
-              })),
-            };
-          }
-          if (pluginName === 'upload') {
-            return {
-              service: jest.fn(() => ({
-                getSettings: jest.fn().mockResolvedValue(mockUploadSettings),
-              })),
-            };
-          }
-          return {};
+    const createStrapi = ({
+      isEE = true,
+      i18n,
+      upload,
+    }: { isEE?: boolean; i18n?: unknown; upload?: unknown } = {}) =>
+      ({
+        config: { get: jest.fn((key: string, defaultValue?: unknown) => defaultValue) },
+        ee: { isEE, features: { isEnabled: jest.fn().mockReturnValue(true) } },
+        plugin: jest.fn((name: string) => {
+          if (name === 'i18n' && i18n !== undefined) return { service: jest.fn(() => i18n) };
+          if (name === 'upload' && upload !== undefined) return { service: jest.fn(() => upload) };
+          return undefined;
         }),
       }) as any;
 
-      const aiContainer = createAiAdminService({ strapi: mockStrapi });
-      const result = await aiContainer.getAiFeatureConfig();
+    test('asks the plugin that owns each feature', async () => {
+      const strapi = createStrapi({
+        i18n: { isEnabled: jest.fn().mockResolvedValue(true) },
+        upload: { isEnabled: jest.fn().mockResolvedValue(false) },
+      });
 
-      expect(result).toEqual({
+      await expect(createAiAdminService({ strapi }).getAiFeatureConfig()).resolves.toEqual({
         isAiI18nConfigured: true,
         isAiMediaLibraryConfigured: false,
       });
+
+      expect(strapi.plugin).toHaveBeenCalledWith('i18n');
+      expect(strapi.plugin).toHaveBeenCalledWith('upload');
+    });
+
+    test('reports a feature as not configured when its plugin is not installed', async () => {
+      await expect(
+        createAiAdminService({ strapi: createStrapi() }).getAiFeatureConfig()
+      ).resolves.toEqual({
+        isAiI18nConfigured: false,
+        isAiMediaLibraryConfigured: false,
+      });
+    });
+
+    test('reports a feature as not configured when its plugin has no AI service', async () => {
+      await expect(
+        createAiAdminService({ strapi: createStrapi({ i18n: {} }) }).getAiFeatureConfig()
+      ).resolves.toEqual({
+        isAiI18nConfigured: false,
+        isAiMediaLibraryConfigured: false,
+      });
+    });
+
+    test('skips the plugins without an Enterprise license', async () => {
+      const strapi = createStrapi({
+        isEE: false,
+        i18n: { isEnabled: jest.fn().mockResolvedValue(true) },
+      });
+
+      await expect(createAiAdminService({ strapi }).getAiFeatureConfig()).resolves.toEqual({
+        isAiI18nConfigured: false,
+        isAiMediaLibraryConfigured: false,
+      });
+
+      expect(strapi.plugin).not.toHaveBeenCalled();
     });
   });
 });
