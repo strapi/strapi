@@ -17,16 +17,12 @@ interface Answers {
 }
 
 /**
- * `admin::mfa` is registered as a factory (`{ strapi } => createMfaService(...)`, see
- * `packages/core/admin/server/src/services/index.ts`), not a pre-built object like `admin::user`.
- * It is only instantiated when resolved through the services registry, i.e.
- * `strapi.service('admin::mfa')` -- `app.admin!.services.mfa` is the raw, uninstantiated factory
- * function and calling any method on it throws. Typed locally, naming only the methods each
- * command calls, rather than importing `@strapi/admin`'s private service type across packages.
+ * `admin::mfa` is registered as a factory, so `app.admin!.services.mfa` is the uninstantiated
+ * function and calling a method on it throws -- it must be resolved through `app.service`. Typed
+ * locally rather than importing `@strapi/admin`'s private service type across packages.
  */
 interface MfaService {
-  // The same method `POST /mfa/users/:id/reset` calls, so the CLI and the panel cannot drift
-  // into doing different amounts of work.
+  // The same method the route calls, so the CLI and the panel cannot drift apart.
   resetUser(userId: string, actor?: { byUserId?: string; via?: 'cli' }): Promise<void>;
 }
 
@@ -52,18 +48,14 @@ async function resetMfa({ email }: CmdOptions) {
 
   const mfa = app.service('admin::mfa') as MfaService;
 
-  // Awaited, unlike the HTTP caller: those return long before a detached email would need to
-  // complete, but this command's very next line is `process.exit(0)`, which can tear the process
-  // down mid-send if the promise is not waited on first.
+  // Awaited, unlike the HTTP caller: the next line is `process.exit(0)`, which would otherwise tear
+  // the process down mid-send.
   await mfa.resetUser(String(user.id), { via: 'cli' });
 
   console.log(`Two-factor authentication reset for ${email}. All sessions were invalidated.`);
   process.exit(0);
 }
 
-/**
- * Reset user's two-factor authentication
- */
 const action = async (cmdOptions: CmdOptions = {}) => {
   const { email } = cmdOptions;
 

@@ -5,13 +5,9 @@ import { RecoveryCodes } from '../RecoveryCodes';
 const CODES = ['ABCDE12345', 'FGHJK67890', 'MNPQR13579'];
 
 describe('RecoveryCodes', () => {
-  // `render()`'s `user` (`userEvent.setup()`) stubs `navigator.clipboard` itself (see
-  // `@testing-library/user-event`'s `attachClipboardStubToView`), as a getter-only property that
-  // it reinstalls on every `setup()` call. Each test below that touches the clipboard replaces
-  // that stub with its own mock via `Object.defineProperty` (a plain `Object.assign` can't
-  // replace a getter-only property at all -- it throws "Cannot set property clipboard ... which
-  // has only a getter"); this save/restore keeps that override from leaking into later tests in
-  // this file, or into `user-event`'s own state for whichever test runs next.
+  // `userEvent.setup()` stubs `navigator.clipboard` as a getter-only property and reinstalls it on
+  // every call, so a test replacing it needs `defineProperty` (assignment throws). This
+  // save/restore keeps that override out of later tests and out of `user-event`'s own state.
   let originalClipboardDescriptor: PropertyDescriptor | undefined;
 
   beforeEach(() => {
@@ -45,12 +41,10 @@ describe('RecoveryCodes', () => {
   it('copies all codes as one line each', async () => {
     const writeText = jest.fn().mockResolvedValue(undefined);
     const { user } = render(<RecoveryCodes codes={CODES} onAcknowledged={jest.fn()} />);
-    // The override has to happen after `render()`, since `userEvent.setup()` (called inside
-    // `render()`) reinstalls its own clipboard stub on every call.
+    // After `render()`, because `userEvent.setup()` reinstalls its stub on every call.
     Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
 
     await user.click(screen.getByRole('button', { name: 'Copy' }));
-    // `Copy` now awaits `navigator.clipboard.writeText` before resolving.
     await waitFor(() => expect(writeText).toHaveBeenCalledWith(CODES.join('\n')));
   });
 

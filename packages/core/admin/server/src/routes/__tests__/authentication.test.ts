@@ -26,13 +26,8 @@ const hasRateLimitEntry = (
   );
 
 describe('authentication routes', () => {
-  // Every route whose rate-limit bucket structurally collapses onto the source IP, because its
-  // body carries a token rather than an email: `admin::rateLimit` keys on
-  // `${email}:${path}:${ip}` and substitutes a literal `unknownEmail` when the body has none.
-  // Behind NAT that bucket is "everyone on this network", so at the middleware default a whole
-  // org shares five attempts per five minutes. The token must never become the key, so each of
-  // these widens the ceiling at the route level instead. Leaving one at the default is the
-  // regression this pins.
+  // Every route whose bucket collapses onto the source IP, because its body carries a token rather
+  // than an email. Leaving one at the middleware default is the regression this pins.
   describe.each([
     ['/reset-password', 20],
     ['/login/mfa', 50],
@@ -48,20 +43,15 @@ describe('authentication routes', () => {
           typeof m === 'object' && m !== null && m.name === 'admin::rateLimit'
       );
 
-      // A bare `'admin::rateLimit'` string entry (no override) fails here.
       expect(rateLimit).toBeDefined();
       expect(rateLimit!.config?.max).toBeGreaterThanOrEqual(expected);
     });
   });
 
   test('every other admin::rateLimit route entry is left at the shared default', () => {
-    // Pins today's behaviour for the other routes so this test only ever asserts the deliberate
-    // widenings above, not an accidental blanket change to every rate-limited route.
-    //
-    // The `find` predicate must match the object form (`{ name: 'admin::rateLimit', config: {...}
-    // }`) as well as the bare string. Matching the string alone makes the assertion below a
-    // tautology and skips every route that gained an undocumented override -- exactly the case
-    // this test exists to catch.
+    // So this only ever asserts the deliberate widenings above, not a blanket change. The predicate
+    // must match the object form as well as the bare string, or the assertion below is a tautology
+    // that skips exactly the routes this exists to catch.
     const widened = [
       '/reset-password',
       '/login/mfa',
@@ -87,9 +77,8 @@ describe('authentication routes', () => {
     }
   });
 
-  // The feature gate lives only on the route, so a login route missing this policy runs its
-  // handler with the feature off. `/login` must NOT carry it -- ordinary password login works
-  // regardless.
+  // The gate lives only on the route, so one missing it runs its handler with the feature off.
+  // `/login` must NOT carry it.
   test('the three /login/mfa routes carry admin::isMfaEnabled, and /login does not', () => {
     for (const path of ['/login/mfa', '/login/mfa/webauthn/options', '/login/mfa/webauthn']) {
       expect(route('POST', path)!.config.policies).toContain('admin::isMfaEnabled');
@@ -97,11 +86,8 @@ describe('authentication routes', () => {
     expect(route('POST', '/login')!.config.policies ?? []).not.toContain('admin::isMfaEnabled');
   });
 
-  // Nothing pinned the `/login/mfa/webauthn` routes' existence, their `auth: false`, or their
-  // rate limit: deleting the rate-limit middleware from one of them left the whole server suite
-  // green. This enumerates the entire unauthenticated POST login surface -- the plain password
-  // login and all three ways to complete an MFA challenge -- so a route disappearing, gaining
-  // `auth: true`, or losing its throttle fails here first.
+  // The entire unauthenticated POST login surface, so a route disappearing, gaining `auth: true`,
+  // or losing its throttle fails here first. Nothing else covers these.
   describe('the unauthenticated POST login surface is pinned', () => {
     test.each([
       ['/login', 'authentication.login'],

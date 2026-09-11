@@ -19,11 +19,8 @@ const setStrapi = (value: object) => {
   (globalThis as any).strapi = value;
 };
 
-/**
- * Every path that mints an admin session must have had an explicit MFA decision. If this test
- * fails because a new call site appeared, do not update the list without deciding what that
- * path does when the user has a second factor enrolled.
- */
+/** If this fails because a new call site appeared, decide what that path does for an enrolled
+ * user before updating the list. */
 const DECIDED_CALL_SITES = [
   'login', // gated: issues a challenge instead
   'loginMfa', // the gate itself
@@ -33,10 +30,6 @@ const DECIDED_CALL_SITES = [
   'resetPassword', // gated: issues a challenge instead
 ];
 
-/**
- * Recursive `.ts` file listing, shared by every static-scan test in this file so none of them
- * end up with a subtly different notion of "every file".
- */
 const walk = (dir: string): string[] =>
   fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const entryPath = path.join(dir, entry.name);
@@ -46,13 +39,8 @@ const walk = (dir: string): string[] =>
     return entryPath.endsWith('.ts') ? [entryPath] : [];
   });
 
-/**
- * The three source roots a session can be minted from. `server/src` is the CE package this file
- * lives in; `ee/server/src` carries the SSO callback (a documented exemption -- see the
- * call-site inventory below); `shared` carries `issueSession`'s own implementation, which every CE flow
- * funnels through. `admin/src` (the React app) is deliberately out of scope: nothing there can
- * mint a server-side session.
- */
+/** The three roots a session can be minted from. `admin/src` is out of scope: nothing in the React
+ * app can mint a server-side session. */
 const ADMIN_ROOT = path.join(__dirname, '..', '..', '..', '..');
 const SERVER_SRC = path.join(ADMIN_ROOT, 'server', 'src');
 const EE_SERVER_SRC = path.join(ADMIN_ROOT, 'ee', 'server', 'src');
@@ -60,11 +48,8 @@ const SHARED_DIR = path.join(ADMIN_ROOT, 'shared');
 
 const defaultResetBody = { resetPasswordToken: 'reset-token', password: 'NewPassword123' };
 
-/**
- * `resetPassword` reads `request.body` twice for two different reasons: `ctx.request.body` is
- * cast to the validated input, and (on the ungated path) `issueSession` -> `extractDeviceParams`
- * reads it again for `deviceId`/`rememberMe`. Mirrors `buildCtx` in `authentication.test.ts`.
- */
+/** `resetPassword` reads `request.body` twice: once as the validated input, and again through
+ * `extractDeviceParams`. */
 const buildResetCtx = (cookiesSet: jest.Mock, body: Record<string, unknown> = defaultResetBody) => {
   const ctx = createContext(
     { body },
@@ -79,12 +64,8 @@ const buildResetCtx = (cookiesSet: jest.Mock, body: Record<string, unknown> = de
   return ctx;
 };
 
-/**
- * A working `resetPassword` double: an mfa service reporting `enrolled`, a session manager that
- * can both invalidate and (on the ungated path) mint a session, plus `eventHub`/`log`/`config`
- * for `issueSession`'s cookie-building path, with the real `sanitizeUser`. Mirrors
- * `buildIssuingStrapi` in `authentication.test.ts`, scoped to what `resetPassword` reads.
- */
+/** `buildIssuingStrapi` from `authentication.test.ts`, scoped to what `resetPassword` reads, with
+ * the real `sanitizeUser`. */
 const buildResetStrapi = ({
   enrolled,
   resetPassword,
@@ -143,7 +124,7 @@ const buildResetStrapi = ({
 
 type SessionPath = 'register' | 'registerAdmin' | 'resetPassword';
 
-/** Real, valid bodies (see `validation/authentication/*.ts`) -- the validators actually run. */
+/** Real, valid bodies: the validators actually run. */
 const validRegisterBody = {
   registrationToken: 'a-real-token',
   userInfo: { firstname: 'Kai', lastname: 'Doe', password: 'NewPassword123' },
@@ -242,9 +223,7 @@ describe('session issuing paths', () => {
   test('no undecided call site mints an admin session', () => {
     const controller = fs.readFileSync(path.join(__dirname, '..', 'authentication.ts'), 'utf8');
 
-    // `issueSession` is imported from shared/utils/session-auth.ts, not defined here, so every
-    // match is an actual call site -- one per decided path, no separate "definition" match to
-    // account for.
+    // Imported, not defined here, so every match is a call site.
     const callSites = [...controller.matchAll(/issueSession\(/g)];
 
     expect(callSites.length).toBe(DECIDED_CALL_SITES.length);
@@ -259,11 +238,8 @@ describe('session issuing paths', () => {
 
     expect(controller).not.toMatch(/generateRefreshToken\(/);
 
-    // `issueSession` isn't the only way to mint tokens: `accessToken` (the refresh-token
-    // exchange) calls the session manager's rotate/generate primitives directly, bypassing
-    // `issueSession` entirely because it isn't authenticating a user, just renewing an existing
-    // session. `accessToken` is the one decided call site for each -- a second call site would
-    // be a new way to mint a token outside both `issueSession` and this decision.
+    // `accessToken` bypasses `issueSession` because it renews rather than authenticates. A second
+    // call site would be a new way to mint a token outside both it and this decision.
     const rotateSites = [...controller.matchAll(/rotateRefreshToken\(/g)];
     const generateAccessTokenSites = [...controller.matchAll(/generateAccessToken\(/g)];
 
@@ -316,10 +292,8 @@ describe('session issuing paths', () => {
       },
     });
 
-    // Same audit visibility as the login gate, and for the same reason: a gated reset must not
-    // look like a completed one. The exact-shape match below only means something because
-    // `sanitizeUser` is the real implementation (see `buildResetStrapi`) -- a mock returning a
-    // fixed object would pass whether or not the controller ever sanitized anything.
+    // A gated reset must not look like a completed one. The exact-shape match means something only
+    // because `sanitizeUser` is the real implementation.
     expect(emit).toHaveBeenCalledWith('admin.auth.mfa_required', {
       user: { id: user.id, email: user.email, isActive: user.isActive },
       provider: 'local',
@@ -372,8 +346,7 @@ describe('session issuing paths', () => {
     });
 
     expect(emit).not.toHaveBeenCalledWith('admin.auth.mfa_required', expect.anything());
-    // The ungated reset path does not emit `admin.auth.success` today -- out of scope for this
-    // task, and this pins the current behaviour so a future change to it is a deliberate one.
+    // Pins today's behaviour, so a change to it is a deliberate one.
     expect(emit).not.toHaveBeenCalledWith('admin.auth.success', expect.anything());
   });
 
@@ -408,16 +381,11 @@ describe('session issuing paths', () => {
   });
 
   test('a user may never hold both a registration token and an active enrolment', async () => {
-    // Guards the `register()` reasoning: `registrationToken` can only be non-null on a user who
-    // has never logged in (and therefore can't be mfa-enrolled) because exactly one place mints
-    // a real one (user creation) and exactly one place clears it on acceptance (`register`). If
-    // a future change lets an admin re-issue a registration token to an already-active,
-    // possibly-enrolled user, `/admin/register` becomes an mfa-skipping account takeover.
+    // `registrationToken` can only be non-null on a user who has never logged in, and so cannot be
+    // enrolled, because one place mints it and one clears it. If a future change lets an admin
+    // re-issue one to an active user, `/admin/register` becomes an MFA-skipping account takeover.
 
-    // Content-type and validation-schema files declare *shape* (a field exists, or a payload
-    // may carry it) rather than performing a runtime write, so they're excluded on purpose.
-    // Everything else that assigns `registrationToken:` as an object-literal value is either a
-    // real database write or an API response echoing one that already happened.
+    // Content-type and validation files declare shape rather than write, so they are excluded.
     const files = walk(SERVER_SRC).filter(
       (file) =>
         !file.includes(`${path.sep}__tests__${path.sep}`) &&
@@ -433,17 +401,13 @@ describe('session issuing paths', () => {
       return Array(count).fill(path.relative(SERVER_SRC, file));
     });
 
-    // controllers/user.ts echoes the token `create` already minted into the invite-creation
-    // response. services/user.ts is the only place that ever assigns it: once to mint a real
-    // token (createUserInDatabase), once to null it for the bootstrap admin (createFirstAdmin,
-    // who never had one to accept), and once to null it on registration acceptance (register --
-    // the write this test exists to protect).
+    // `services/user.ts` is the only place that assigns it: mint, null it for the bootstrap admin,
+    // and null it on registration acceptance -- the write this test exists to protect.
     expect(writeSites.sort()).toEqual(
       ['controllers/user.ts', 'services/user.ts', 'services/user.ts', 'services/user.ts'].sort()
     );
 
-    // Behavioural half: call the real, unmocked `register` and prove it is the site that nulls
-    // the token, rather than trusting that the literal text is merely present somewhere.
+    // The behavioural half: the real `register` must be the site that nulls the token.
     const updateById = jest.fn(() => Promise.resolve({}));
     const findOne = jest.fn(() => Promise.resolve({ id: 42, registrationToken: 'a-real-token' }));
 
@@ -497,21 +461,11 @@ describe('session issuing paths', () => {
 });
 
 /**
- * the enumeration above (`no undecided call site mints an admin session`) only ever read
- * `controllers/authentication.ts`, so it could never see a mint site anywhere else in the admin
- * package -- including `ee/server/src/controllers/authentication-utils/middlewares.ts`'s SSO
- * callback, which calls the session manager's `generateRefreshToken` directly (it has already
- * completed its own authentication dance via passport and has no request body for
- * `extractDeviceParams` to read, so it does not go through `issueSession`). This scans the whole
- * surface -- `server/src`, `ee/server/src`, and `shared` (where `issueSession` itself is
- * implemented) -- for both ways a session gets minted, and pins the exact, decided set: exactly
- * the CE controller's **six** `issueSession(` calls (`DECIDED_CALL_SITES` above), `issueSession`'s
- * own `generateRefreshToken(` call in `shared/utils/session-auth.ts`, and the EE SSO callback's
- * `generateRefreshToken(` call. A new call site anywhere in this surface -- a helper that mints a
- * session outside `issueSession`, or a second EE integration that mints one directly -- changes
- * this set and must fail here until it is explicitly added with its own documented
- * decision, the same discipline `DECIDED_CALL_SITES` already applies to `controllers/authentication.ts`
- * alone.
+ * The enumeration above reads `controllers/authentication.ts` only, so it cannot see a mint site
+ * elsewhere -- including the EE SSO callback, which calls `generateRefreshToken` directly because
+ * passport has already authenticated and there is no body for `extractDeviceParams` to read.
+ * This scans the whole surface for both ways a session is minted and pins the decided set. A new
+ * call site must fail here until it is added with its own decision.
  */
 describe('generateRefreshToken / issueSession call-site inventory', () => {
   const PATTERNS = ['issueSession(', 'generateRefreshToken('] as const;

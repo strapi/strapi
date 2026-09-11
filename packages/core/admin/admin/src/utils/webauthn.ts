@@ -1,10 +1,7 @@
 import { browserSupportsWebAuthn } from '@simplewebauthn/browser';
 
-/**
- * `dismissed` is not an error: the user closed the prompt, so every surface treats it as a silent
- * no-op. `already-registered` means `excludeCredentials` did its job. `unsupported` means the
- * browser refuses this origin or key type outright.
- */
+/** `dismissed` is not an error: the user closed the prompt, so every surface treats it as a
+ * no-op. */
 export type CeremonyErrorKind = 'dismissed' | 'already-registered' | 'unsupported' | 'failed';
 
 const nameOf = (value: unknown): string | undefined => {
@@ -26,12 +23,9 @@ const codeOf = (value: unknown): string | undefined => {
   return typeof code === 'string' ? code : undefined;
 };
 
-/**
- * Duck-typed on purpose. `@simplewebauthn/browser` re-wraps most `DOMException`s as a
- * `WebAuthnError` with a `code` and the original in `cause`, but passes `NotAllowedError` through
- * untouched, so `name`, `cause.name` and `code` all have to be consulted. And the component tests
- * mock the module wholesale, so there is no class for `instanceof`.
- */
+/** Duck-typed: the library re-wraps most `DOMException`s but passes `NotAllowedError` through, so
+ * `name`, `cause.name` and `code` all have to be consulted -- and the tests mock the module
+ * wholesale, so there is no class for `instanceof`. */
 export const ceremonyErrorKind = (error: unknown): CeremonyErrorKind => {
   const names = [nameOf(error), nameOf(causeOf(error))];
   const code = codeOf(error);
@@ -62,12 +56,9 @@ export const ceremonyErrorKind = (error: unknown): CeremonyErrorKind => {
 
 export type PasskeyAvailability = 'available' | 'insecure-context' | 'unsupported';
 
-/**
- * `browserSupportsWebAuthn()` only checks for `PublicKeyCredential`, which browsers do not expose
- * outside a secure context -- so a panel served over plain http fails it in an entirely capable
- * Chrome, and "this browser does not support passkeys" sends the operator to look in the wrong
- * place. `isSecureContext` separates the two, and is true for localhost.
- */
+/** `browserSupportsWebAuthn()` only checks for `PublicKeyCredential`, which browsers do not expose
+ * outside a secure context -- so a panel on plain http fails it in a capable Chrome, and "this
+ * browser does not support passkeys" sends the operator to the wrong place. */
 export const passkeyAvailability = (): PasskeyAvailability => {
   if (browserSupportsWebAuthn()) {
     return 'available';

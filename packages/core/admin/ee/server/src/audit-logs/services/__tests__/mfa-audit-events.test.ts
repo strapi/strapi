@@ -5,18 +5,12 @@ import { defaultEvents } from '../lifecycles';
 import type { MfaAuditOnlyNotice, MfaEventType } from '../../../../../../shared/contracts/mfa';
 
 /**
- * `notify` emits every MFA notice on the event hub as `admin.mfa.<type>` with `_` replaced by
- * `.`, and the hub is the only mechanism EE audit logging can observe any of them through. The
- * allow-list in `lifecycles.ts` is written out by hand in its own dotted form, so adding a notice
- * type without adding it there means that notice is silently never audited -- a gap nobody would
- * notice until an auditor asked for a trail that does not exist.
- *
- * This pins the two together without coupling them: the allow-list stays the audit feature's own
- * registry, spelled its own way, and this test derives what it must contain.
+ * The allow-list in `lifecycles.ts` is hand-written in its own dotted form, so a notice type added
+ * without it is silently never audited -- a gap nobody finds until an auditor asks for a trail
+ * that does not exist. This derives what it must contain without coupling to it.
  */
 const hubName = (type: string) => `admin.mfa.${type.replace(/_/g, '.')}`;
 
-// Every persisted row type, from the contract that declares them.
 const ROW_TYPES: MfaEventType[] = [
   'enabled',
   'disabled',
@@ -34,11 +28,8 @@ const ROW_TYPES: MfaEventType[] = [
   'passkey_removed',
 ];
 
-/**
- * Deliberately unaudited. `recovery_code_used` and `recovery_codes_issued` are about the codes
- * themselves and say nothing an auditor needs that `disabled`/`reset` does not; `grace_started`
- * is a consequence of policy already audited through `admin.security-settings.update`.
- */
+/** Deliberately unaudited: the recovery-code types say nothing `disabled`/`reset` does not, and
+ * `grace_started` follows from a policy change already audited. */
 const NOT_AUDITED: MfaEventType[] = [
   'recovery_code_used',
   'recovery_codes_issued',
@@ -53,8 +44,7 @@ describe('mfa events reach the audit log', () => {
     }
   );
 
-  // The `MfaAuditOnlyNotice` pair: emitted on the hub but never persisted, so they are not in
-  // `MfaEventType` and a check derived from row types alone would miss them entirely.
+  // Emitted on the hub but never persisted, so a check derived from row types alone misses them.
   test.each<MfaAuditOnlyNotice>(['trusted_device_used', 'passkey_used'])(
     '%s is audited even though it has no row',
     (type) => {

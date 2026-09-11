@@ -1,8 +1,5 @@
-/**
- * The ceiling for the three `/login/mfa*` routes, whose rate-limit bucket is structurally forced
- * to collapse onto the source IP (see `/login/mfa` below). Ten times the middleware default,
- * because one bucket now covers every admin behind a shared address rather than one account.
- */
+/** Ten times the middleware default, because the bucket covers every admin behind a shared
+ * address rather than one account (see `/login/mfa` below). */
 const MFA_LOGIN_RATE_LIMIT = 50;
 
 export default [
@@ -22,17 +19,10 @@ export default [
     config: {
       policies: ['admin::isMfaEnabled'],
       auth: false,
-      // Same structural bucket collapse as `/reset-password` below: the body carries a challenge
-      // token, not an email, so `admin::rateLimit`'s `${email}:${path}:${ip}` key degrades to the
-      // source IP for every caller. The token must not become the key (it is secret material),
-      // so the ceiling is raised at the route level instead.
-      //
-      // This step is stricter than the `/login` that precedes it if left at the default: `/login`
-      // keys on email and so is effectively per-account, while this one is shared by the whole
-      // deployment behind a load balancer. Brute force is not what this bucket defends -- reaching
-      // here at all costs a correct password, and the per-challenge cap (`maxChallengeAttempts`)
-      // plus the account-scoped rolling window in `admin::mfa` are the real limits, both keyed on
-      // the actual user. This is a coarse abuse backstop only.
+      // The body carries a challenge token, not an email, so `admin::rateLimit`'s key degrades to the
+      // source IP -- and the token must never become the key. Left at the default this is stricter than
+      // the `/login` before it, which keys per-account. A coarse abuse backstop only: the real limits
+      // are the per-challenge cap and the account-scoped window, both keyed on the user.
       middlewares: [{ name: 'admin::rateLimit', config: { max: MFA_LOGIN_RATE_LIMIT } }],
     },
   },
@@ -43,8 +33,7 @@ export default [
     config: {
       policies: ['admin::isMfaEnabled'],
       auth: false,
-      // Same reasoning as `/login/mfa`. This one evaluates no factor at all, it only mints
-      // ceremony options against an existing challenge.
+      // Same as `/login/mfa`, though this evaluates no factor at all.
       middlewares: [{ name: 'admin::rateLimit', config: { max: MFA_LOGIN_RATE_LIMIT } }],
     },
   },
@@ -103,13 +92,8 @@ export default [
     handler: 'authentication.resetPassword',
     config: {
       auth: false,
-      // `admin::rateLimit` keys on `${email}:${path}:${ip}`, but a reset body carries a token,
-      // not an email -- and the token must never become part of a bucket identifier. Every reset
-      // in the deployment therefore collapses onto one shared
-      // `unknownEmail:/admin/reset-password:<ip>` bucket, so at the middleware's default a whole
-      // org behind NAT gets five password resets between them. Raised here at the route level
-      // rather than in the shared middleware, because this route is the one whose bucket is
-      // structurally forced to collapse.
+      // Same collapse: a reset body carries a token, not an email, so every reset in the deployment
+      // shares one `unknownEmail:<path>:<ip>` bucket -- five between a whole org behind NAT.
       middlewares: [{ name: 'admin::rateLimit', config: { max: 20 } }],
     },
   },

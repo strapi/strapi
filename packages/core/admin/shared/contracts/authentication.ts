@@ -1,9 +1,6 @@
 import type { errors } from '@strapi/utils';
 import type { AdminUser, SanitizedAdminUser } from './shared';
 
-/**
- * /login - Log in as an admin user
- */
 export declare namespace Login {
   export interface Request {
     query: {
@@ -33,23 +30,20 @@ export interface MfaChallengeResponse {
     mfaRequired: true;
     challengeToken: string;
     expiresIn: number;
-    /** Null when the organisation does not offer trusted devices. Never absent. */
+    /** Null when the organisation does not offer trust. Never absent. */
     trustedDeviceDays: number | null;
-    /** Not a new disclosure to a caller who already proved the password: the challenge itself already
-     * reveals the account is enrolled. Never absent. */
+    /** Not a new disclosure: the challenge already reveals the account is enrolled. Never absent. */
     passkeyAvailable: boolean;
   };
 }
 
-/** Present on a session-issuing response only when the account is required to enrol and has not:
- * the session is real, and `mfaGraceUntil` is when it will be locked if it stays that way. */
+/** The session is real; `mfaGraceUntil` is when the account locks if it stays unenrolled. */
 export interface MfaEnrolmentRequiredFields {
   mfaEnrolmentRequired?: true;
   mfaGraceUntil?: string;
 }
 
-/** POST /login/mfa - accepts either a TOTP code or a recovery code, and issues the same session
- * `/login` does for an unenrolled account. */
+/** Accepts either a TOTP code or a recovery code. */
 export declare namespace LoginMfa {
   export interface Request {
     body: {
@@ -57,7 +51,6 @@ export declare namespace LoginMfa {
       code: string;
       deviceId?: string;
       rememberMe?: boolean;
-      /** Ignored when the organisation disallows trust. */
       trustDevice?: boolean;
     };
   }

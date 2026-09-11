@@ -8,7 +8,7 @@ import type { Data } from '@strapi/types';
 import type { LoginMfa } from './authentication';
 import type { AdminUser } from './shared';
 
-/** GET /mfa/me - never carries the secret, an otpauth URI or a recovery code. */
+/** Never carries the secret, an otpauth URI or a recovery code. */
 export declare namespace Me {
   export interface Response {
     data: {
@@ -27,7 +27,7 @@ export declare namespace Me {
   }
 }
 
-/** `secret`/`otpauthUri` are returned exactly once, here. */
+/** `secret`/`otpauthUri` are returned exactly once. */
 export declare namespace Enrol {
   export interface Request {
     body: {
@@ -83,7 +83,7 @@ export declare namespace AcknowledgeRecoveryCodes {
   }
 }
 
-/** POST /mfa/disable - requires password plus a second factor, and evicts every *other* device. */
+/** Evicts every *other* device. */
 export declare namespace Disable {
   export interface Request {
     body: {
@@ -189,8 +189,7 @@ export declare namespace PasskeyRegistrationOptions {
   }
 }
 
-/** POST /mfa/passkeys - no password or code: the options route already authorised this ceremony,
- * and it is single-use. */
+/** No password or code: the options route already authorised this single-use ceremony. */
 export declare namespace RegisterPasskey {
   export interface Request {
     body: {

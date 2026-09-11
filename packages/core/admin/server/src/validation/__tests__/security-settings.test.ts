@@ -1,12 +1,7 @@
 /* eslint-env jest */
 
-/**
- * Coverage for the passkeys `passkeysSchema` folded into `updateSecuritySettingsSchema`, and for
- * the validation layer's own copy of the `'Provide mfa, trustedDevices or passkeys'` message.
- *
- * Exercised through the exported `validateUpdateSecuritySettings`, the entry point the controller
- * calls: `passkeysSchema` itself is not exported, so there is no way to reach it in isolation.
- */
+/** Exercised through `validateUpdateSecuritySettings`: `passkeysSchema` is not exported, so there
+ * is no way to reach it in isolation. */
 import { validateUpdateSecuritySettings } from '../security-settings';
 
 const messagesOf = async (value: unknown): Promise<string[]> => {

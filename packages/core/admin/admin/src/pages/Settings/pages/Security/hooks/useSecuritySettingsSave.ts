@@ -11,52 +11,31 @@ import type { DowngradeCredentials } from '../components/ConfirmDowngradeDialog'
 
 interface UseSecuritySettingsSaveOptions {
   /**
-   * This card's slice of the `PUT` body -- exactly one of `mfa`, `trustedDevices` or `passkeys`.
-   * The endpoint is per object: whatever key it is given replaces that object whole and the others
-   * are left untouched, so a card must never send a key that is not its own.
-   *
-   * Typed as the three optional keys rather than "exactly one of" on purpose: a computed property
-   * built from a union of literal keys widens to an index signature in TypeScript and would not
-   * assign to the body type at all. The invariant is documented here and honoured by the three
-   * call sites; the worst a breach could do is save two objects in one request, which the server
-   * accepts anyway.
+   * Exactly one of the three keys: the endpoint replaces whatever object it is given, whole.
+   * Not typed as "exactly one of", because a computed property over a union of literal keys widens
+   * to an index signature and would not assign at all.
    */
   patch: Pick<UpdateSecuritySettings.Request['body'], 'mfa' | 'trustedDevices' | 'passkeys'>;
-  /**
-   * Whether this particular change needs the caller's password (plus a code when they are
-   * enrolled) before the server will accept it -- `isSecurityDowngrade`, `isTrustedDevicesDowngrade`
-   * or `isPasskeysDisable`, evaluated by the card. The server is the authority and refuses such a
-   * change sent without credentials; this only decides whether to ask for them first.
-   */
+  /** The server is the authority and refuses a downgrade sent without credentials; this only
+   * decides whether to ask for them first. */
   requiresCredentials: boolean;
-  /**
-   * Card-local validation, run before anything is sent. Returning `false` cancels the save; the
-   * card is responsible for having shown its own inline message (the two numeric fields do).
-   */
+  /** Returning `false` cancels the save; the card must have shown its own message. */
   validate?: () => boolean;
 }
 
 interface UseSecuritySettingsSaveResult {
   save: () => Promise<void>;
   isSaving: boolean;
-  /** A refusal from the credential-free path, to render under the card's own controls. */
   saveError?: string;
   downgradeOpen: boolean;
   closeDowngrade: () => void;
-  /**
-   * `ConfirmDowngradeDialog`'s `onConfirm`: resolves `undefined` on success (and closes the
-   * dialog) or the message to show, in which case the dialog stays open with the password kept.
-   */
+  /** Resolves `undefined` on success, or the message to show -- in which case the dialog stays open
+   * with the password kept. */
   confirmDowngrade: (credentials: DowngradeCredentials) => Promise<string | undefined>;
 }
 
-/**
- * The save flow every card on the Security page shares: one per-object `PUT`, a "Saved" toast, an
- * inline refusal message, and the re-authentication dialog for a change that lowers protection.
- *
- * What varies between cards is the body key, the validation, and which predicate decides "needs
- * credentials"; all three are inputs.
- */
+/** What varies between cards is the body key, the validation, and which predicate decides "needs
+ * credentials". All three are inputs. */
 const useSecuritySettingsSave = ({
   patch,
   requiresCredentials,

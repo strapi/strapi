@@ -1,13 +1,8 @@
 import { errors } from '@strapi/utils';
 
-/**
- * `PolicyError`, not `ForbiddenError`: the authorize middleware collapses every other
- * `ForbiddenError` into a bare `ctx.forbidden()`, discarding the message the login screen shows.
- * Still a 403, because a 401 makes the panel's fetch client log the user out first.
- *
- * `name` is set with `defineProperty` because `PolicyError` types it as a fixed literal, which a
- * subclass cannot redeclare (TS2416).
- */
+/** `PolicyError`, not `ForbiddenError`: the authorize middleware collapses every other into a bare
+ * `ctx.forbidden()`, discarding the message the login screen shows. Still a 403, because a 401
+ * logs the user out first. `name` needs `defineProperty` (TS2416: `PolicyError` fixes the literal). */
 export class MfaLockedError extends errors.PolicyError {
   constructor() {
     super(

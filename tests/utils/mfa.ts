@@ -3,7 +3,6 @@ import { spawnSync } from 'node:child_process';
 import type { Page } from '@playwright/test';
 import { base32Decode, generateTotp } from '@strapi/utils';
 
-/** A TOTP for the given base32 secret at the current 30-second step, same parameters as the server. */
 export const totpFor = (secret: string): string =>
   generateTotp({
     secret: base32Decode(secret),
@@ -12,17 +11,13 @@ export const totpFor = (secret: string): string =>
     timestamp: Math.floor(Date.now() / 1000),
   });
 
-/**
- * The server consumes each TOTP step once per account (`consumeTotpStep`) and accepts no future
- * step (`window.forward: 0`), so a second code inside the same 30-second step is refused. Call
- * this before any TOTP login that follows another TOTP use in the same test.
- */
+/** Each step is consumed once per account and no future step is accepted, so a second code inside
+ * the same 30 seconds is refused. Call this before any TOTP use that follows another. */
 export const waitForNextTotpStep = async (): Promise<void> => {
   const remaining = 30 - (Math.floor(Date.now() / 1000) % 30);
   await new Promise((resolve) => setTimeout(resolve, (remaining + 1) * 1000));
 };
 
-/** Enrols the logged-in admin through the profile page. Returns what the dialog showed. */
 export const enrolViaUi = async (page: Page, password: string) => {
   await page.goto('/admin/me');
   await page.getByRole('button', { name: 'Enable two-factor authentication' }).click();
@@ -34,10 +29,8 @@ export const enrolViaUi = async (page: Page, password: string) => {
   await dialog.getByLabel('Authentication code*').fill(totpFor(secret));
   await dialog.getByRole('button', { name: 'Verify' }).click();
 
-  // `allTextContents()` snapshots the DOM immediately and does not auto-wait like a single-element
-  // locator method does, so without this the codes step can still be rendering (the verify
-  // mutation has resolved but the codes list has not committed to the DOM yet) and this reads back
-  // an empty array. Wait for the first code to actually be there before reading them all.
+  // `allTextContents()` snapshots immediately and does not auto-wait, so without this it reads back
+  // an empty array while the codes step is still committing to the DOM.
   const codesLocator = dialog.getByTestId('mfa-recovery-code');
   await codesLocator.first().waitFor();
   const recoveryCodes = await codesLocator.allTextContents();
@@ -49,13 +42,9 @@ export const enrolViaUi = async (page: Page, password: string) => {
 };
 
 /**
- * Backdates a user's enrolment deadline so their next password login (or token refresh) locks
- * the account. Writes `admin_users.mfa_grace_until` directly in the e2e app's SQLite database
- * (`<TEST_APP_PATH>/.tmp/data.db`, the same file `tests/utils/get-db-counts.js` reads), through
- * the app's own `better-sqlite3` so no dependency is added to the monorepo root.
- *
- * Strapi writes datetimes to SQLite as epoch milliseconds (knex's better-sqlite3 client binds a
- * `Date` via `valueOf()`; `DatetimeField.fromDB` accepts either), so the value is an integer.
+ * Backdates the enrolment deadline so the next login locks the account. Writes the e2e app's
+ * SQLite file directly, through the app's own `better-sqlite3` so no dependency reaches the
+ * monorepo root. Strapi stores datetimes there as epoch milliseconds, hence the integer.
  */
 export const expireMfaGrace = (email: string): void => {
   const appPath = process.env.TEST_APP_PATH;

@@ -15,36 +15,22 @@ import type { PasskeySettings } from '../../../../../../../shared/contracts/secu
 interface PasskeysCardProps {
   settings: PasskeySettings;
   canUpdate: boolean;
-  /** `/admin/mfa/me` `enabled` for the caller: decides whether the off-transition needs a code. */
+  /** Decides whether the off-transition needs a code. */
   callerEnrolled: boolean;
-  /**
-   * `/admin/mfa/me` `hasLocalPassword` for the caller: an
-   * SSO-only administrator has none, and the server exempts exactly that account from presenting
-   * credentials to turn passkeys off. Defaults to `true`, so a caller that has not wired this
-   * prop through asks for credentials rather than skipping them.
-   */
+  /** An SSO-only administrator has none, and the server exempts exactly that account from
+   * presenting credentials. Defaults to `true`, so an unwired caller asks rather than skips. */
   hasLocalPassword?: boolean;
   /** `isFetching` of the `SecuritySettings` query; keeps Save disabled while the saved result lands. */
   isRefreshing?: boolean;
 }
 
 /**
- * The third card on the Security page. One checkbox, saved alone: `PUT
- * /admin/security-settings` is per object, so the body never carries `mfa` or `trustedDevices`.
- *
- * Only the **off**-transition collects credentials, and it is the only asymmetric card on the
- * page. Turning passkeys on adds a phishing-resistant factor and destroys nothing. Turning them
- * off deletes every passkey every administrator has registered, organisation-wide and
- * irreversibly -- so a stolen session must not be able to wipe them with one `PUT` and a dialog
- * the attacker never looks at. That is `isPasskeysDisable`, the mirror of the server's
- * `disablesPasskeys` term.
- *
- * The dialog's copy is overridden for the same reason: the shared heading names "lowering
- * two-factor requirements", which is not what this save does.
- *
- * The off-transition's `requiresCredentials` also factors in `hasLocalPassword`, mirroring the
- * server's password-less exemption -- otherwise an SSO-only administrator could never complete
- * this save from the UI at all, even though the server lets them.
+ * The only asymmetric card on the page: turning passkeys on destroys nothing, while turning them
+ * off deletes every passkey every administrator holds, irreversibly -- so a stolen session must
+ * not manage it with one `PUT` and a dialog the attacker never looks at. The dialog's copy is
+ * overridden because the shared heading names "lowering two-factor requirements", which this is
+ * not, and `requiresCredentials` factors in `hasLocalPassword` so an SSO-only administrator can
+ * still complete the save the server would let them.
  */
 const PasskeysCard = ({
   settings,

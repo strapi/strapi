@@ -28,12 +28,8 @@ import { RecoveryCodes } from './RecoveryCodes';
 interface EnrolDialogProps {
   open: boolean;
   onClose: () => void;
-  /**
-   * `enrol` (default): first enrolment, password only on step 1. `replace`: the account is
-   * already enrolled and is swapping authenticator apps; step 1 also needs a current code (TOTP
-   * or an unused recovery code) because `POST /mfa/enrol` demands it while enrolled. The active
-   * secret keeps working until step 2 verifies the new one; the recovery codes are reissued.
-   */
+  /** `replace` also needs a current code on step 1, because `POST /mfa/enrol` demands one while
+   * enrolled. The active secret keeps working until step 2 verifies the new one. */
   mode?: 'enrol' | 'replace';
 }
 
@@ -41,12 +37,8 @@ const ManualKey = styled(Typography)`
   font-family: monospace;
 `;
 
-/**
- * `fixedCacheKey`s for the three mutations below. These key `state.adminApi.mutations`
- * store-globally: any other component triggering the same mutation with the same key shares --
- * and can clobber -- this dialog's cached result. Nothing else uses these strings, and nothing
- * else should.
- */
+/** These key `state.adminApi.mutations` store-globally, so any other component using the same
+ * string shares -- and can clobber -- this dialog's cached result. */
 const MFA_ENROL_CACHE_KEYS = {
   password: 'mfa-enrol-password',
   verify: 'mfa-enrol-verify',
@@ -89,13 +81,8 @@ const EnrolDialog = ({ open, onClose, mode = 'enrol' }: EnrolDialogProps) => {
   const { formatMessage } = useIntl();
   const toMessage = useToMessage();
   const [step, setStep] = React.useState<Step>({ name: 'password' });
-  /**
-   * Set when the user tries to dismiss the dialog while the recovery codes are on screen. The
-   * codes are shown exactly once and are the only way back into a locked-out account, so Escape,
-   * an overlay click or the X must not silently destroy them -- but neither should the dialog
-   * trap the user with no explanation. It refuses the dismissal and says why; the checkbox in
-   * `RecoveryCodes` is the way out.
-   */
+  /** The codes are shown exactly once and are the only way back into a locked-out account, so a
+   * dismissal must not silently destroy them. Refused with an explanation instead. */
   const [dismissBlocked, setDismissBlocked] = React.useState(false);
   const [password, setPassword] = React.useState('');
   const [code, setCode] = React.useState('');
@@ -114,12 +101,9 @@ const EnrolDialog = ({ open, onClose, mode = 'enrol' }: EnrolDialogProps) => {
     fixedCacheKey: MFA_ENROL_CACHE_KEYS.acknowledge,
   });
 
-  // Unmount-only safety net: a `fixedCacheKey` mutation is deliberately *not*
-  // cleared by RTK Query's own unmount cleanup (it's meant to survive a remount), so if this
-  // component unmounts without `close()` having run first, nothing else would ever clear these
-  // three cache entries. `removeMutationResult` keys on `fixedCacheKey`, not `requestId` (see the
-  // mutations above), so the closures captured on mount delete the right store entries regardless
-  // of which render produced them -- the effect intentionally never needs to re-run.
+  // RTK Query deliberately does not clear a `fixedCacheKey` mutation on unmount, so without this
+  // an unmount that skipped `close()` would strand all three entries. `removeMutationResult` keys
+  // on the cache key, not `requestId`, so the mount-time closures are correct and it never re-runs.
   React.useEffect(() => {
     return () => {
       resetEnrol();
@@ -287,16 +271,11 @@ const EnrolDialog = ({ open, onClose, mode = 'enrol' }: EnrolDialogProps) => {
                 <Flex justifyContent="center">
                   <Box background="neutral0" padding={3} hasRadius>
                     {/*
-                     * `marginSize` draws the QR spec's required 4-module quiet zone inside the
-                     * SVG itself, on its own white `bgColor` -- so the code stays scannable
-                     * regardless of the admin theme (dark mode would otherwise put dark modules
-                     * flush against this `Box`'s dark `background`, which real authenticator
-                     * apps commonly fail to read). `level="M"` gives it a bit of error-correction
-                     * headroom, the usual choice for a screen-displayed TOTP code. Realistic
-                     * account labels (an issuer plus a work email) push the encoded otpauth URI
-                     * to QR version 8-9 at that error-correction level, so `size={260}` is what
-                     * keeps each module above the ~4px practical scan floor once the quiet zone
-                     * is included.
+                     * `marginSize` puts the spec's 4-module quiet zone inside the SVG on its own
+                     * white `bgColor`, so dark mode cannot leave dark modules flush against the
+                     * panel background -- which real authenticator apps commonly fail to read. A
+                     * realistic account label pushes the URI to QR version 8-9 at `level="M"`, so
+                     * `size={260}` is what keeps each module above the practical scan floor.
                      */}
                     <QRCodeSVG
                       value={step.otpauthUri}

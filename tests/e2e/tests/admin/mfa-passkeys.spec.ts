@@ -4,22 +4,15 @@ import { login } from '../../../utils/login';
 import { enrolViaUi, totpFor, waitForNextTotpStep } from '../../../utils/mfa';
 import { ADMIN_PASSWORD, TITLE_HOME } from '../../constants';
 
-// WebAuthn will not run against an IP-literal origin, so this file alone talks to the app over
-// `localhost`. The server's expected origin is pinned to match in
-// `tests/app-template/config/admin.js`, and the fallback must match `config/server.js`'s -- the
-// two ports diverging means every ceremony fails an origin check with nothing useful in the log.
+// WebAuthn will not run against an IP-literal origin, so this file alone uses `localhost`. The
+// fallback must match `config/server.js`'s, or every ceremony fails an origin check silently.
 test.use({ baseURL: `http://localhost:${process.env.PORT ?? 1337}` });
 
 /**
- * Attaches a virtual WebAuthn authenticator to this page over CDP, so a passkey can actually be
- * created and asserted. Platform-authenticator shaped (`internal` transport, user verification
- * already satisfied, presence simulated automatically), which is what a Touch ID / Windows Hello
- * passkey looks like to the page -- and what passkeys requests with
- * `residentKey: 'preferred', userVerification: 'preferred'`.
- *
- * The authenticator is bound to the CDP session, not to the cookie jar, so it survives
- * `context.clearCookies()` and every navigation in these journeys. That is the whole point: the
- * passkey registered while logged in must still be there at the next login.
+ * Platform-authenticator shaped, which is what a Touch ID / Windows Hello passkey looks like to
+ * the page. Bound to the CDP session rather than the cookie jar, so it survives
+ * `context.clearCookies()` -- the passkey registered while logged in must still be there at the
+ * next login.
  */
 const attachVirtualAuthenticator = async (page: Page, context: BrowserContext) => {
   const cdp = await context.newCDPSession(page);
@@ -36,7 +29,6 @@ const attachVirtualAuthenticator = async (page: Page, context: BrowserContext) =
   });
 };
 
-/** Completes the second-factor screen with a fresh TOTP code. */
 const passChallenge = async (page: Page, secret: string) => {
   await expect(page.getByRole('heading', { name: 'Two-factor authentication' })).toBeVisible();
   await waitForNextTotpStep();
@@ -45,7 +37,7 @@ const passChallenge = async (page: Page, secret: string) => {
   await expect(page).toHaveTitle(TITLE_HOME);
 };
 
-/** Registers one passkey from the profile page. The caller must already be TOTP-enrolled. */
+/** The caller must already be TOTP-enrolled. */
 const addPasskey = async (page: Page, name: string, secret: string) => {
   await page.goto('/admin/me');
   await expect(page.getByRole('heading', { name: 'Passkeys' })).toBeVisible();

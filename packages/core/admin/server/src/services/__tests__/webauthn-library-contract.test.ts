@@ -5,22 +5,13 @@ import path from 'node:path';
 import { generateRegistrationOptions } from '@simplewebauthn/server';
 import { isoBase64URL, isoUint8Array } from '@simplewebauthn/server/helpers';
 
-/**
- * Passkeys pins `@simplewebauthn/server` at exactly 14.0.1 and writes its marshalling against
- * three shapes the library enforces at runtime or in its types. Both verify functions are mocked
- * in the service unit tests -- deliberately, since what is under test there is our wiring, not
- * upstream cryptography -- so this file is the only place those shapes are checked against the
- * package that is actually installed. A minor bump that changed any of them would otherwise show
- * up as a 500 in production and nowhere in CI.
- */
+/** The service unit tests mock both verify functions, so this is the only place the library's
+ * shapes meet the package actually installed. A minor bump would otherwise surface as a 500. */
 const findPackageRoot = (from: string): string => {
   let dir = path.dirname(from);
-  // The installed package is built with dnt (deno-to-node), which drops a bare
-  // `{ "type": "commonjs" }` / `{ "type": "module" }` marker `package.json` inside each of its
-  // `script/` and `esm/` output directories. `require.resolve('@simplewebauthn/server')` lands
-  // inside `script/`, so the naive "nearest package.json" walk stops on that marker file --
-  // which has no `name`/`version`/`exports` -- one directory short of the real manifest. Keep
-  // walking until the manifest actually looks like the package (has a `name` and a `version`).
+  // The package is built with dnt, which drops a bare `{ "type": "commonjs" }` marker
+  // `package.json` in its `script/` output. A "nearest package.json" walk stops on that marker, one
+  // directory short of the real manifest, so keep walking until one has a `name` and a `version`.
   for (;;) {
     const candidate = path.join(dir, 'package.json');
     if (fs.existsSync(candidate)) {
@@ -65,15 +56,12 @@ describe('@simplewebauthn/server call contract', () => {
   });
 
   test('the CJS build resolves the root and the ./helpers subpath', () => {
-    // The `strapi-server` build is CJS, so `exports["."].require` and -- the trap this check
-    // exists for -- `exports["./helpers"].require` must both be present and resolvable. A subpath
-    // the CJS build cannot resolve fails at require time, not at build time.
+    // The `strapi-server` build is CJS, and a subpath it cannot resolve fails at require time, not
+    // at build time. `./helpers` is the trap.
     expect(MANIFEST.exports['.'].require).toBeDefined();
     expect(MANIFEST.exports['./helpers'].require).toBeDefined();
     expect(() => require.resolve('@simplewebauthn/server')).not.toThrow();
-    // The `./helpers` subpath is exactly what this test verifies is resolvable;
-    // eslint-plugin-node's static resolver does not evaluate the package's `exports` map and
-    // reports a false positive here.
+    // eslint-plugin-node's resolver does not evaluate `exports`, so this is a false positive.
     // eslint-disable-next-line node/no-missing-require
     expect(() => require.resolve('@simplewebauthn/server/helpers')).not.toThrow();
     expect(typeof isoUint8Array.fromUTF8String).toBe('function');
@@ -82,9 +70,8 @@ describe('@simplewebauthn/server call contract', () => {
   });
 
   test("the engines range is inside Strapi's own", () => {
-    // The package declares `node >= 20`, inside Strapi's `>=22 <=26`. If the installed manifest
-    // phrases it differently, assert the real string rather than deleting the check: a floor
-    // above 22 would put the library outside the Node range Strapi supports.
+    // If the manifest phrases this differently, assert the real string rather than delete the check:
+    // a floor above 22 puts the library outside the Node range Strapi supports.
     expect(MANIFEST).toHaveProperty('engines');
     expect((MANIFEST as { engines?: { node?: string } }).engines?.node).toMatch(/20/);
   });
@@ -110,8 +97,7 @@ describe('@simplewebauthn/server call contract', () => {
     });
 
     expect(typeof options.challenge).toBe('string');
-    // The whole justification for deriving the handle from the admin user id: a later
-    // passwordless flow decodes it back with no stored column.
+    // Why the handle is derived from the admin user id: a later passwordless flow decodes it back.
     expect(Buffer.from(isoBase64URL.toBuffer(options.user.id)).toString('utf8')).toBe('7');
   });
 
@@ -125,23 +111,15 @@ describe('@simplewebauthn/server call contract', () => {
 
   test('shapes 2 and 3: a stored credential is { publicKey: Uint8Array; counter: number }', () => {
     const declarations = declarationText();
-    // Anchored on `type WebAuthnCredential =` rather than a bare `WebAuthnCredential[^=]*=`: the
-    // name is also *referenced* as a parameter/field type in verifyRegistrationResponse.d.ts and
-    // verifyAuthenticationResponse.d.ts (e.g. `credential: WebAuthnCredential;`), with no `=`
-    // anywhere nearby. An unanchored `[^=]*` gap is not bounded by file or declaration edges --
-    // declarationText() concatenates every .d.ts in the package -- so it walks past those
-    // references and past this type's own closing brace to latch onto the next unrelated
-    // `SomethingElse = { ... }` declaration later in the concatenated text. Confirmed against the
-    // installed 14.0.1: the unanchored version matched `VerifiedAuthenticationResponse`'s body
-    // instead of `WebAuthnCredential`'s.
+    // Anchored on `type WebAuthnCredential =`, because the name is also referenced as a field type
+    // elsewhere with no `=` nearby -- and `declarationText()` concatenates every .d.ts, so an
+    // unanchored gap walks past this type's closing brace onto an unrelated declaration. Against the
+    // installed 14.0.1 it matched `VerifiedAuthenticationResponse`'s body instead.
     const credential = declarations.match(/type WebAuthnCredential\s*=\s*\{[\s\S]*?\n\s*\}/);
 
     expect(credential).not.toBeNull();
-    // The installed .d.ts spells the field `publicKey: Uint8Array_` -- a local alias
-    // (`type Uint8Array_ = ReturnType<Uint8Array['slice']>`, i.e. functionally `Uint8Array`) that
-    // exists only to dodge a lib.dom/lib.dom.iterable naming clash. The unanchored match below
-    // still requires the literal substring `Uint8Array` to be present, so the trailing `_` does
-    // not weaken this assertion.
+    // The installed .d.ts spells this `publicKey: Uint8Array_`, a local alias dodging a lib.dom
+    // naming clash. The match still requires the literal `Uint8Array`, so the `_` costs nothing.
     expect(credential![0]).toMatch(/publicKey\s*:\s*Uint8Array/);
     expect(credential![0]).toMatch(/counter\s*:\s*number/);
     expect(credential![0]).toMatch(/id\s*:\s*(Base64URLString|string)/);

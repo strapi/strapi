@@ -8,25 +8,15 @@ interface CredentialFieldsProps {
   onPasswordChange: (value: string) => void;
   code: string;
   onCodeChange: (value: string) => void;
-  /**
-   * Whether to render the code field at all. `ConfirmDowngradeDialog` hides it for a caller who
-   * is not enrolled -- the server asks such a caller for the password alone.
-   */
+  /** `ConfirmDowngradeDialog` hides the code field for an unenrolled caller: the server asks such a
+   * caller for the password alone. */
   requiresCode?: boolean;
-  /** Optional hint under the code field. Only the downgrade dialog sets one. */
   codeHint?: string;
 }
 
 /**
- * The password-plus-code pair every re-authentication surface asks for: `/mfa/disable`,
- * `/mfa/recovery-codes`, `/mfa/passkeys/options` and a security-settings downgrade all take the
- * same `{ password, code }`, so they all rendered the same two fields -- byte-identically, in four
- * separate files.
- *
- * `maxLength={32}` matches the server schema's bound, which is deliberately loose enough for both
- * a 6-8 digit TOTP code and a 10-character recovery code typed with dashes. The value is passed
- * through untrimmed: the caller trims before submitting, because the server treats a code with
- * surrounding whitespace as valid and the field must not fight that.
+ * `maxLength={32}` matches the server schema's bound, loose enough for a TOTP code and a
+ * dash-typed recovery code. Passed through untrimmed: the caller trims before submitting.
  */
 const CredentialFields = ({
   password,

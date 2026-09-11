@@ -5,12 +5,8 @@ import type {
   UpdateSecuritySettings,
 } from '../../../shared/contracts/security-settings';
 
-/**
- * Enforcement settings (`core_store` key `security-settings` plus the per-role
- * `mfaRequired` flags), read and written as one object through `/admin/security-settings`.
- * Both endpoints 404 while the feature is off (future flag or `admin.auth.mfa.enabled: false`);
- * the Security page treats that as its disabled-feature state.
- */
+/** Both endpoints 404 while the feature is off, which the Security page treats as its
+ * disabled-feature state. */
 const securitySettingsService = adminApi
   .enhanceEndpoints({
     addTagTypes: [
@@ -39,12 +35,8 @@ const securitySettingsService = adminApi
         transformResponse(res: UpdateSecuritySettings.Response) {
           return res.data;
         },
-        // `Mfa` too: the caller's own `/admin/mfa/me` `required` flag follows the mode and the
-        // role list, and its `passkeysEnabled` flag follows the passkey policy, so the profile
-        // section and the grace banner must re-read it. `TrustedDevices` / `UserTrustedDevices`
-        // and `Passkeys` / `UserPasskeys`: turning either feature off deletes the rows the client
-        // is holding, server-side, so every list and count must refetch rather than show rows
-        // that no longer exist.
+        // `Mfa`, because the caller's own `/admin/mfa/me` flags follow these settings. The device tags,
+        // because turning either feature off deletes the rows the client is holding, server-side.
         invalidatesTags: [
           'SecuritySettings',
           'Mfa',

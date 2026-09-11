@@ -6,11 +6,8 @@ import { createIntl } from 'react-intl';
 
 import { MfaNotices, formatMfaNotice } from '../MfaNotices';
 
-/**
- * jsdom does not implement the Pointer Events capture API. Sonner (the toast library backing
- * `Notifications`) attaches a swipe-to-dismiss `onPointerDown` handler to the toast container, so
- * even a plain `user.click` on the "Close" button bubbles a pointerdown that crashes without this.
- */
+/** jsdom has no Pointer Events capture API, and sonner attaches a swipe-to-dismiss
+ * `onPointerDown`, so even a plain click bubbles a pointerdown that crashes without this. */
 beforeAll(() => {
   if (!window.HTMLElement.prototype.hasPointerCapture) {
     window.HTMLElement.prototype.hasPointerCapture = () => false;
@@ -40,11 +37,7 @@ const NOTICES = [
   },
 ];
 
-/**
- * `/admin/mfa/me` defaults to a 404 in the shared test server (`tests/server.ts`), matching the
- * future flag being off. Tests that need `useGetMfaStatusQuery` to actually resolve (so the
- * notices query is not skipped) override it with a 200 here.
- */
+/** `/admin/mfa/me` defaults to 404 in the shared test server, matching the flag being off. */
 const status = (overrides = {}) =>
   http.get('/admin/mfa/me', () =>
     HttpResponse.json({
@@ -80,11 +73,8 @@ describe('MfaNotices', () => {
     await waitFor(() => expect(seenBody).toEqual({ ids: [1, 2] }));
   });
 
-  /**
-   * The design system's permanent `#live-region-alert` node always carries `role="alert"`, even
-   * empty, so a bare `getByRole('alert')` query is unreliable here (see `TwoFactorSection.test.tsx`
-   * for the same caveat on `role="status"`) -- assert on text instead.
-   */
+  /** The design system's permanent `#live-region-alert` node always carries `role="alert"` even
+   * when empty, so assert on text rather than role. */
   it('is silent when the feature is off (404)', async () => {
     server.use(http.get('/admin/mfa/notices', () => new HttpResponse(null, { status: 404 })));
     render(<MfaNotices />);
@@ -92,18 +82,12 @@ describe('MfaNotices', () => {
     await waitFor(() => expect(screen.queryByText(/security event/i)).not.toBeInTheDocument());
   });
 
-  /**
-   * before this fix, `useGetMfaNoticesQuery` had no `skip` at all, so `/admin/mfa/notices` was
-   * requested on every authenticated app load regardless of the future flag -- a guaranteed 404 on
-   * every default-off instance. `/admin/mfa/me` 404 (the same signal `TwoFactorSection` uses) is
-   * the only thing this component is allowed to read to suppress the request; it must never read
-   * the flag directly. Mutant-proof: removing the `skip` makes `noticesRequested` true.
-   */
+  /** Without the `skip`, `/admin/mfa/notices` is requested on every authenticated load regardless of
+   * the flag -- a guaranteed 404 on every default-off instance. The 404 from `/admin/mfa/me` is the
+   * only signal this component may read; it must never read the flag directly. */
   it('does not request mfa notices at all when the status query 404s (feature off)', async () => {
     let noticesRequested = false;
     server.use(
-      // `/admin/mfa/me` already defaults to a 404 in the shared test server; this test relies on
-      // that default rather than overriding it, so it also documents that default's meaning.
       http.get('/admin/mfa/notices', () => {
         noticesRequested = true;
         return HttpResponse.json({ data: [] });
@@ -111,17 +95,13 @@ describe('MfaNotices', () => {
     );
     render(<MfaNotices />);
 
-    // Give the status query time to settle and, if the skip were absent, the notices request time
-    // to fire, before asserting it never happened.
+    // Give the notices request time to fire, if the skip were absent, before asserting it did not.
     await waitFor(() => expect(screen.queryByText(/security event/i)).not.toBeInTheDocument());
     expect(noticesRequested).toBe(false);
   });
 
-  /**
-   * Guards against a regression the other way: notices must still flow for a user who is not currently
-   * enrolled (e.g. after a self-disable or a CLI reset), so the skip must depend only on whether
-   * the status query itself 404s -- never on `status.enabled`.
-   */
+  /** Notices must still flow for a user who is not currently enrolled, so the skip may depend only
+   * on the status query 404ing, never on `status.enabled`. */
   it('still shows the toast when the status query resolves with enabled: false', async () => {
     server.use(
       status({ enabled: false, enabledAt: null, recoveryCodesRemaining: 0 }),
@@ -155,15 +135,10 @@ describe('MfaNotices', () => {
   });
 
   /**
-   * Mutant-proof for the `announced` ref. Dismissing the toast calls `markMfaNoticesSeen`, which
-   * invalidates the `MfaNotices` tag and causes the still-mounted `getMfaNotices` query to
-   * refetch automatically. RTK Query structurally shares query results, so a refetch returning
-   * the *same* two notices would keep the same `data` reference regardless of the guard -- that
-   * would not exercise it. Instead, the mock simulates a third event (id 3) arriving after the
-   * dismiss but before the refetch settles: different content forces a genuinely new `notices`
-   * reference. One toast per app load, so even this new, still-unseen event must
-   * not produce a second toast; without the `announced` ref, the effect's `notices` dependency
-   * would have changed and it would fire again.
+   * RTK Query structurally shares results, so a refetch returning the *same* notices keeps the same
+   * `data` reference and would not exercise the `announced` ref at all. The mock adds a third event
+   * after the dismiss, forcing a genuinely new reference: one toast per app load means even that
+   * must not fire a second.
    */
   it('does not fire a second toast for a newly-arrived event once one has already been shown this session', async () => {
     let getCallCount = 0;
@@ -198,10 +173,8 @@ describe('MfaNotices', () => {
     await user.click(screen.getByRole('button', { name: 'Close' }));
     await waitFor(() => expect(seenBody).toEqual({ ids: [1, 2] }));
 
-    // The dismissed toast unmounts ~200ms after `toast.dismiss` (sonner's exit-animation delay,
-    // `TIME_BEFORE_UNMOUNT`) -- wait for it to actually leave the DOM first, so the final check
-    // below can only be satisfied by "no *second* toast appeared", not by "the first one is still
-    // mid-animation".
+    // The dismissed toast unmounts ~200ms later (sonner's exit animation), so wait for it to leave:
+    // the check below must mean "no second toast", not "the first is still animating".
     await waitFor(() =>
       expect(screen.queryByText(/2 security events on your account/i)).not.toBeInTheDocument()
     );

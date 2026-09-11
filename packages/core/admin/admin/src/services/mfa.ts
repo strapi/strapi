@@ -22,13 +22,9 @@ import type {
   VerifyEnrolment,
 } from '../../../shared/contracts/mfa';
 
-/**
- * Self-service second-factor endpoints for the authenticated admin. Every response here is
- * already sanitised by the server: the only place a secret or a recovery code appears is the
- * `enrol`, `verifyEnrolment` and `regenerateRecoveryCodes` responses. Those land in the RTK Query
- * mutation cache like any other, which is why each carries a `fixedCacheKey` its dialog can
- * `reset()` on close.
- */
+/** The only responses carrying a secret or a recovery code are `enrol`, `verifyEnrolment` and
+ * `regenerateRecoveryCodes`. Those land in the mutation cache like any other, which is why each
+ * carries a `fixedCacheKey` its dialog can `reset()` on close. */
 const mfaService = adminApi
   .enhanceEndpoints({
     addTagTypes: [
@@ -64,10 +60,8 @@ const mfaService = adminApi
         transformResponse(res: VerifyEnrolment.Response) {
           return res.data;
         },
-        // Also invalidates `MfaNotices`: the server raises an `enabled` notice for this event.
-        // And `TrustedDevices`: a replacement revokes every trusted device. Deliberately
-        // NOT `Passkeys`: the server's `completeEnrolment` leaves passkeys in place -- a new
-        // authenticator app says nothing about the user's security keys.
+        // Not `Passkeys`: `completeEnrolment` leaves them in place, because a new authenticator app says
+        // nothing about the user's security keys.
         invalidatesTags: ['Mfa', 'MfaNotices', 'TrustedDevices'],
       }),
       regenerateRecoveryCodes: builder.mutation<
@@ -80,17 +74,13 @@ const mfaService = adminApi
         },
         invalidatesTags: ['Mfa'],
       }),
-      // `void`, not `AcknowledgeRecoveryCodes.Request['body']` (which is `{}`): the server reads
-      // nothing, so callers invoke it as `acknowledge()`.
+      // `void` rather than the empty body type, so callers invoke it as `acknowledge()`.
       acknowledgeRecoveryCodes: builder.mutation<void, void>({
         query: () => ({ method: 'POST', url: '/admin/mfa/recovery-codes/ack' }),
         invalidatesTags: ['Mfa'],
       }),
       disableMfa: builder.mutation<void, Disable.Request['body']>({
         query: (body) => ({ method: 'POST', url: '/admin/mfa/disable', data: body }),
-        // Also invalidates `MfaNotices` (a `disabled` notice), `TrustedDevices` (a disable revokes
-        // every trusted device) and `Passkeys` (a disable deletes every passkey in the same
-        // transaction).
         invalidatesTags: ['Mfa', 'MfaNotices', 'TrustedDevices', 'Passkeys'],
       }),
       getMfaNotices: builder.query<Notices.Response['data'], void>({
@@ -104,20 +94,12 @@ const mfaService = adminApi
         query: (body) => ({ method: 'POST', url: '/admin/mfa/notices/seen', data: body }),
         invalidatesTags: ['MfaNotices'],
       }),
-      /**
-       * Enforcement: clear another admin's lock. Invalidating that user's `User` tag makes the edit
-       * page (`useAdminUsers({ id })`) re-read `mfaLockedAt` / `mfaGraceUntil` without a reload.
-       */
+      /** The `User` tag makes the edit page re-read `mfaLockedAt`/`mfaGraceUntil` without a reload. */
       unlockUserMfa: builder.mutation<void, UnlockUser.Params>({
         query: ({ id }) => ({ method: 'POST', url: `/admin/mfa/users/${id}/unlock` }),
         invalidatesTags: (_res, _err, { id }) => [{ type: 'User', id }],
       }),
-      /**
-       * Strip another admin's second factor entirely: the way back for a user who has lost their
-       * authenticator and spent their recovery codes. Invalidates that user's `User` tag so the
-       * edit page re-reads enrolment and lock state, and both device tags, because the reset
-       * clears trusted devices and passkeys along with the factor.
-       */
+      /** Both device tags too, because the reset clears trusted devices and passkeys with the factor. */
       resetUserMfa: builder.mutation<void, ResetUser.Params>({
         query: ({ id }) => ({ method: 'POST', url: `/admin/mfa/users/${id}/reset` }),
         invalidatesTags: (_res, _err, { id }) => [
@@ -126,10 +108,7 @@ const mfaService = adminApi
           { type: 'UserPasskeys', id },
         ],
       }),
-      /**
-       * The caller's trusted browsers. The server marks `current` by hashing the httpOnly
-       * trust cookie the browser sends along; nothing here ever sees the token.
-       */
+      /** The server marks `current` by hashing the httpOnly cookie; nothing here sees the token. */
       getTrustedDevices: builder.query<ListTrustedDevices.Response['data'], void>({
         query: () => ({ method: 'GET', url: '/admin/mfa/trusted-devices' }),
         transformResponse(res: ListTrustedDevices.Response) {
@@ -137,8 +116,6 @@ const mfaService = adminApi
         },
         providesTags: ['TrustedDevices'],
       }),
-      // Both revocations also invalidate `MfaNotices`: the server records a
-      // `device_trust_revoked` notice for the caller.
       revokeTrustedDevice: builder.mutation<void, RevokeTrustedDevice.Params>({
         query: ({ id }) => ({ method: 'DELETE', url: `/admin/mfa/trusted-devices/${id}` }),
         invalidatesTags: ['TrustedDevices', 'MfaNotices'],
@@ -147,7 +124,6 @@ const mfaService = adminApi
         query: () => ({ method: 'DELETE', url: '/admin/mfa/trusted-devices' }),
         invalidatesTags: ['TrustedDevices', 'MfaNotices'],
       }),
-      /** An administrator's view of another user's trusted browsers (`admin::users.read`). */
       getUserTrustedDevices: builder.query<
         ListUserTrustedDevices.Response['data'],
         ListUserTrustedDevices.Params
@@ -158,11 +134,8 @@ const mfaService = adminApi
         },
         providesTags: (_res, _err, { id }) => [{ type: 'UserTrustedDevices', id }],
       }),
-      /**
-       * Administrator revocation (`admin::users.update`); refreshes that user's list. Also
-       * invalidates `TrustedDevices`: an administrator may be revoking their own user page, and
-       * that must refresh their own profile list too.
-       */
+      /** Also `TrustedDevices`: an administrator may be on their own user page, which must refresh
+       * their profile list too. */
       revokeUserTrustedDevices: builder.mutation<void, RevokeUserTrustedDevices.Params>({
         query: ({ id }) => ({ method: 'DELETE', url: `/admin/mfa/users/${id}/trusted-devices` }),
         invalidatesTags: (_res, _err, { id }) => [
@@ -170,11 +143,8 @@ const mfaService = adminApi
           'TrustedDevices',
         ],
       }),
-      /**
-       * The caller's own passkeys. The server answers an empty list -- not a 404 and not
-       * an error -- while the organisation has passkeys turned off, so the profile shows its empty
-       * state rather than a failure. Only the four public fields come back.
-       */
+      /** An empty list, not a 404, while the policy is off, so the profile shows its empty state rather
+       * than a failure. */
       getPasskeys: builder.query<ListPasskeys.Response['data'], void>({
         query: () => ({ method: 'GET', url: '/admin/mfa/passkeys' }),
         transformResponse(res: ListPasskeys.Response) {
@@ -182,11 +152,8 @@ const mfaService = adminApi
         },
         providesTags: ['Passkeys'],
       }),
-      /**
-       * Step one of registration. A mutation rather than a query even though it reads like one:
-       * it mints server state (the single-use pending ceremony on the user row) and charges the
-       * caller's password and live code, so it must never be cached, deduplicated or refetched.
-       */
+      /** A mutation, not a query: it mints the single-use ceremony and charges a password and live
+       * code, so it must never be cached, deduplicated or refetched. */
       passkeyRegistrationOptions: builder.mutation<
         PasskeyRegistrationOptions.Response['data'],
         PasskeyRegistrationOptions.Request['body']
@@ -196,11 +163,7 @@ const mfaService = adminApi
           return res.data;
         },
       }),
-      /**
-       * Step two. Also invalidates `MfaNotices`: the server records a `passkey_registered` notice
-       * row. Deliberately does NOT invalidate `TrustedDevices`: registering a passkey changes no
-       * trusted device, and only a *replacement* revokes trust.
-       */
+      /** Not `TrustedDevices`: registering a passkey revokes no trust, only a *replacement* does. */
       registerPasskey: builder.mutation<
         RegisterPasskey.Response['data'],
         RegisterPasskey.Request['body']
@@ -211,15 +174,11 @@ const mfaService = adminApi
         },
         invalidatesTags: ['Passkeys', 'MfaNotices'],
       }),
-      /** The server records a `passkey_removed` notice row, hence `MfaNotices`. */
       deletePasskey: builder.mutation<void, DeletePasskey.Params>({
         query: ({ id }) => ({ method: 'DELETE', url: `/admin/mfa/passkeys/${id}` }),
         invalidatesTags: ['Passkeys', 'MfaNotices'],
       }),
-      /**
-       * An administrator's view of another user's passkeys (`admin::users.read`): a count only,
-       * never an inventory of somebody's hardware.
-       */
+      /** A count only, never an inventory of somebody's hardware. */
       getUserPasskeys: builder.query<ListUserPasskeys.Response['data'], ListUserPasskeys.Params>({
         query: ({ id }) => ({ method: 'GET', url: `/admin/mfa/users/${id}/passkeys` }),
         transformResponse(res: ListUserPasskeys.Response) {
@@ -227,12 +186,8 @@ const mfaService = adminApi
         },
         providesTags: (_res, _err, { id }) => [{ type: 'UserPasskeys', id }],
       }),
-      /**
-       * Administrator removal (`admin::users.update`). Invalidates both passkey tags -- an
-       * administrator may be on their *own* user page, which must refresh their own profile list
-       * too, the same as `revokeUserTrustedDevices` -- and `MfaNotices`, because the server
-       * records a `passkey_removed` notice for the target.
-       */
+      /** Both passkey tags, as `revokeUserTrustedDevices` does: an administrator may be on their own
+       * user page. */
       deleteUserPasskeys: builder.mutation<void, DeleteUserPasskeys.Params>({
         query: ({ id }) => ({ method: 'DELETE', url: `/admin/mfa/users/${id}/passkeys` }),
         invalidatesTags: (_res, _err, { id }) => [

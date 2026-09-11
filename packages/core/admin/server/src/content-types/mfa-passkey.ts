@@ -24,11 +24,9 @@ export default {
       private: true,
       searchable: false,
     },
-    // Base64URL, authenticator-generated. Unique across the whole table, not per user: a
-    // collision cannot happen by accident, and a global unique index is what makes "this
-    // credential already belongs to somebody" a database constraint rather than a lookup we might
-    // forget to write. `string` is varchar(255) so the index stays portable across every dialect;
-    // a submitted id longer than that is refused before the insert (see MAX_CREDENTIAL_ID_LENGTH).
+    // Unique across the whole table, not per user, so "this credential already belongs to somebody"
+    // is a database constraint rather than a lookup somebody might forget to write. varchar(255) so
+    // the index stays portable; a longer id is refused before the insert.
     credentialId: {
       type: 'string',
       unique: true,
@@ -64,8 +62,7 @@ export default {
       private: true,
       searchable: false,
     },
-    // User-supplied in the registration dialog, 1..50 characters after trimming. There is no
-    // rename route, so this is written once.
+    // There is no rename route, so this is written once.
     name: {
       type: 'string',
       required: true,
@@ -80,12 +77,9 @@ export default {
       searchable: false,
     },
   },
-  // Every query in `services/mfa*.ts` against this table narrows by user first, and
-  // several run on the login path. Declared the way `upload`'s file content type
-  // declares its own.
+  // Every query against this table narrows by user first, and several run on the login path.
   indexes: [
     {
-      // Every list, count and owner-scoped lookup is by user; `token` already has its own unique index.
       name: 'strapi_admin_mfa_passkeys_user_id_index',
       columns: ['user_id'],
       type: null,
