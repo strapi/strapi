@@ -47,6 +47,42 @@ describe('Passkeys', () => {
     jest.mocked(startRegistration).mockReset();
   });
 
+  // `browserSupportsWebAuthn()` is only `PublicKeyCredential !== undefined`, and browsers do not
+  // expose it outside a secure context. A self-hosted panel on plain http therefore fails it in
+  // a perfectly capable Chrome, and "this browser does not support passkeys" sends the operator
+  // to look at the wrong thing entirely.
+  it('blames the insecure origin, not the browser, when the page is not served over HTTPS', async () => {
+    jest.mocked(browserSupportsWebAuthn).mockReturnValue(false);
+    const secure = Object.getOwnPropertyDescriptor(window, 'isSecureContext');
+    Object.defineProperty(window, 'isSecureContext', { value: false, configurable: true });
+
+    try {
+      server.use(list(PASSKEYS));
+      render(<Passkeys />);
+
+      expect(await screen.findByText(/served over HTTPS/i)).toBeInTheDocument();
+      expect(screen.queryByText(/does not support passkeys/i)).not.toBeInTheDocument();
+    } finally {
+      if (secure) Object.defineProperty(window, 'isSecureContext', secure);
+    }
+  });
+
+  it('blames the browser when the context is secure but WebAuthn is missing', async () => {
+    jest.mocked(browserSupportsWebAuthn).mockReturnValue(false);
+    const secure = Object.getOwnPropertyDescriptor(window, 'isSecureContext');
+    Object.defineProperty(window, 'isSecureContext', { value: true, configurable: true });
+
+    try {
+      server.use(list(PASSKEYS));
+      render(<Passkeys />);
+
+      expect(await screen.findByText(/does not support passkeys/i)).toBeInTheDocument();
+      expect(screen.queryByText(/served over HTTPS/i)).not.toBeInTheDocument();
+    } finally {
+      if (secure) Object.defineProperty(window, 'isSecureContext', secure);
+    }
+  });
+
   it('lists passkeys with their name, added date and last use', async () => {
     server.use(list(PASSKEYS));
     render(<Passkeys />);
@@ -76,6 +112,8 @@ describe('Passkeys', () => {
 
   it('replaces the Add button with a note in a browser without WebAuthn', async () => {
     jest.mocked(browserSupportsWebAuthn).mockReturnValue(false);
+    // Pinned secure, so this stays a test about the browser rather than the origin.
+    Object.defineProperty(window, 'isSecureContext', { value: true, configurable: true });
     server.use(list(PASSKEYS));
     render(<Passkeys />);
 

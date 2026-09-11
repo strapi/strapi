@@ -1,6 +1,15 @@
 import * as React from 'react';
 
-import { Box, Button, Field, Flex, Modal, TextInput, Typography } from '@strapi/design-system';
+import {
+  Alert,
+  Box,
+  Button,
+  Field,
+  Flex,
+  Modal,
+  TextInput,
+  Typography,
+} from '@strapi/design-system';
 import { QRCodeSVG } from 'qrcode.react';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -111,6 +120,14 @@ const EnrolDialog = ({ open, onClose, mode = 'enrol' }: EnrolDialogProps) => {
   const { formatMessage } = useIntl();
   const toMessage = useToMessage();
   const [step, setStep] = React.useState<Step>({ name: 'password' });
+  /**
+   * Set when the user tries to dismiss the dialog while the recovery codes are on screen. The
+   * codes are shown exactly once and are the only way back into a locked-out account, so Escape,
+   * an overlay click or the X must not silently destroy them -- but neither should the dialog
+   * trap the user with no explanation. It refuses the dismissal and says why; the checkbox in
+   * `RecoveryCodes` is the way out.
+   */
+  const [dismissBlocked, setDismissBlocked] = React.useState(false);
   const [password, setPassword] = React.useState('');
   const [code, setCode] = React.useState('');
   const [error, setError] = React.useState<string>();
@@ -212,9 +229,14 @@ const EnrolDialog = ({ open, onClose, mode = 'enrol' }: EnrolDialogProps) => {
     <Modal.Root
       open={open}
       onOpenChange={(isOpen) => {
-        if (!isOpen) {
-          close();
+        if (isOpen) {
+          return;
         }
+        if (step.name === 'codes') {
+          setDismissBlocked(true);
+          return;
+        }
+        close();
       }}
     >
       <Modal.Content>
@@ -390,6 +412,23 @@ const EnrolDialog = ({ open, onClose, mode = 'enrol' }: EnrolDialogProps) => {
           <Modal.Body>
             <Flex direction="column" alignItems="stretch" gap={4}>
               <ErrorMessage error={error} />
+              {dismissBlocked ? (
+                <Alert
+                  variant="warning"
+                  closeLabel={formatMessage({ id: 'global.close', defaultMessage: 'Close' })}
+                  onClose={() => setDismissBlocked(false)}
+                  title={formatMessage({
+                    id: 'Settings.profile.form.section.mfa.codes.dismiss.title',
+                    defaultMessage: 'Save your recovery codes first',
+                  })}
+                >
+                  {formatMessage({
+                    id: 'Settings.profile.form.section.mfa.codes.dismiss.body',
+                    defaultMessage:
+                      'These codes are shown once and are the only way back in if you lose your authenticator. Copy or download them, then tick the box below.',
+                  })}
+                </Alert>
+              ) : null}
               <RecoveryCodes codes={step.recoveryCodes} onAcknowledged={handleAcknowledged} />
             </Flex>
           </Modal.Body>

@@ -1,3 +1,5 @@
+import { browserSupportsWebAuthn } from '@simplewebauthn/browser';
+
 /**
  * How a WebAuthn ceremony failed, as far as the UI is concerned.
  *
@@ -70,4 +72,27 @@ export const ceremonyErrorKind = (error: unknown): CeremonyErrorKind => {
   }
 
   return 'failed';
+};
+
+/** Why a passkey ceremony cannot be offered here, when it cannot. */
+export type PasskeyAvailability = 'available' | 'insecure-context' | 'unsupported';
+
+/**
+ * `browserSupportsWebAuthn()` is only `globalThis.PublicKeyCredential !== undefined`, and browsers
+ * do not expose `PublicKeyCredential` at all outside a secure context. A self-hosted admin panel
+ * served over plain http therefore fails that check in an entirely capable Chrome, and telling
+ * that operator "this browser does not support passkeys" sends them to look in the wrong place --
+ * there is nothing wrong with their browser and no version of it will fix this.
+ *
+ * `isSecureContext` separates the two. It is true for https and for localhost (which browsers
+ * treat as secure precisely so development works unconfigured), so this only reports the insecure
+ * case for the deployment that actually has one.
+ */
+export const passkeyAvailability = (): PasskeyAvailability => {
+  if (browserSupportsWebAuthn()) {
+    return 'available';
+  }
+  return typeof window !== 'undefined' && window.isSecureContext === false
+    ? 'insecure-context'
+    : 'unsupported';
 };

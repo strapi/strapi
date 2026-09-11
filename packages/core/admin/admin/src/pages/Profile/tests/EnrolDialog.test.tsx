@@ -432,4 +432,32 @@ describe('EnrolDialog', () => {
       expect(screen.getByRole('button', { name: 'Continue' })).toBeEnabled();
     });
   });
+
+  // The codes are shown exactly once and are the only way back into a locked-out account, so a
+  // stray Escape must not destroy them. It is refused with an explanation rather than silently
+  // swallowed, so the user is not left wondering why the dialog will not close.
+  it('refuses to close on Escape while the recovery codes are on screen, and says why', async () => {
+    const onClose = jest.fn();
+    server.use(
+      http.post('/admin/mfa/enrol/verify', () =>
+        HttpResponse.json({ data: { recoveryCodes: CODES } })
+      )
+    );
+
+    const { user } = renderDialog({ open: true, onClose });
+    await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    await user.type(await screen.findByLabelText('Authentication code*'), '123456');
+    await user.click(screen.getByRole('button', { name: 'Verify' }));
+
+    // On the codes step.
+    await screen.findByRole('checkbox');
+
+    await user.keyboard('{Escape}');
+
+    expect(await screen.findByText('Save your recovery codes first')).toBeInTheDocument();
+    expect(onClose).not.toHaveBeenCalled();
+    // Still open, codes still visible.
+    expect(screen.getByText(CODES[0])).toBeInTheDocument();
+  });
 });

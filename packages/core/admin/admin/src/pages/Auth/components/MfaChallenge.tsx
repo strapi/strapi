@@ -14,6 +14,7 @@ import { Form } from '../../../components/Form';
 import { InputRenderer } from '../../../components/FormInputs/Renderer';
 import { Logo } from '../../../components/UnauthenticatedLogo';
 import { useAuth } from '../../../features/Auth';
+import { useToMessage } from '../../../hooks/useToMessage';
 import {
   UnauthenticatedLayout,
   Column,
@@ -81,6 +82,7 @@ const MFA_SCHEMA = yup.object().shape({
 });
 
 const MfaChallenge = () => {
+  const toMessage = useToMessage();
   const [apiError, setApiError] = React.useState<string>();
   const { formatMessage } = useIntl();
   const location = useLocation();
@@ -174,7 +176,7 @@ const MfaChallenge = () => {
       });
 
       if ('error' in res) {
-        setApiError(res.error.message ?? 'Something went wrong');
+        setApiError(toMessage(res.error));
         return;
       }
 
@@ -212,7 +214,7 @@ const MfaChallenge = () => {
     try {
       const optionsRes = await webauthnOptions({ challengeToken: challenge.challengeToken });
       if ('error' in optionsRes) {
-        setApiError(optionsRes.error.message ?? 'Something went wrong');
+        setApiError(toMessage(optionsRes.error));
         return;
       }
 
@@ -243,7 +245,7 @@ const MfaChallenge = () => {
       });
 
       if ('error' in res) {
-        setApiError(res.error.message ?? 'Something went wrong');
+        setApiError(toMessage(res.error));
         return;
       }
 

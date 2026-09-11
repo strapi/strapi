@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import { browserSupportsWebAuthn } from '@simplewebauthn/browser';
 import {
   Button,
   Dialog,
@@ -23,6 +22,7 @@ import { ErrorMessage } from '../../components/ErrorMessage';
 import { useNotification } from '../../features/Notifications';
 import { useToMessage } from '../../hooks/useToMessage';
 import { useDeletePasskeyMutation, useGetPasskeysQuery } from '../../services/mfa';
+import { passkeyAvailability } from '../../utils/webauthn';
 
 import { AddPasskeyDialog } from './AddPasskeyDialog';
 
@@ -35,9 +35,11 @@ import { AddPasskeyDialog } from './AddPasskeyDialog';
  * rename: the name is captured once in `AddPasskeyDialog`. Removing a passkey costs nothing --
  * the authenticator app always survives it, so there is no lockout path and no re-authentication.
  *
- * `browserSupportsWebAuthn()` gates the Add button only. Existing rows stay listed and removable
- * in a browser that cannot run a ceremony: a user who registered a passkey elsewhere must still
- * be able to take it away from here.
+ * `passkeyAvailability()` gates the Add button only. Existing rows stay listed and removable
+ * where a ceremony cannot run: a user who registered a passkey elsewhere must still be able to
+ * take it away from here. It distinguishes a browser that genuinely cannot do WebAuthn from a
+ * panel served over plain http, which is the far likelier cause on a self-hosted instance and
+ * needs an entirely different fix.
  *
  * The Add button is also hidden at `MAX_PASSKEYS_PER_USER`, with the same one-line note shape
  * as the unsupported-browser branch: the server spends the
@@ -56,7 +58,8 @@ const Passkeys = () => {
   // Keeps the error, empty and table states mutually exclusive: a stale, previously-successful
   // array must not render the table underneath an error (trusted devices's correction to this pattern).
   const hasPasskeys = !error && passkeys.length > 0;
-  const supported = browserSupportsWebAuthn();
+  const availability = passkeyAvailability();
+  const supported = availability === 'available';
   const atCap = passkeys.length >= MAX_PASSKEYS_PER_USER;
 
   const dateTime = (value: string) =>
@@ -99,19 +102,25 @@ const Passkeys = () => {
           </Button>
         ) : (
           <Typography variant="pi" textColor="neutral600">
-            {!supported
+            {availability === 'insecure-context'
               ? formatMessage({
-                  id: 'Settings.profile.form.section.mfa.passkeys.unsupported',
-                  defaultMessage: 'This browser does not support passkeys.',
+                  id: 'Settings.profile.form.section.mfa.passkeys.insecure',
+                  defaultMessage:
+                    'Passkeys need the admin panel to be served over HTTPS. This page is not, so your browser will not offer them.',
                 })
-              : formatMessage(
-                  {
-                    id: 'Settings.profile.form.section.mfa.passkeys.cap',
-                    defaultMessage:
-                      'You have reached the limit of {max} passkeys. Remove one to add another.',
-                  },
-                  { max: MAX_PASSKEYS_PER_USER }
-                )}
+              : !supported
+                ? formatMessage({
+                    id: 'Settings.profile.form.section.mfa.passkeys.unsupported',
+                    defaultMessage: 'This browser does not support passkeys.',
+                  })
+                : formatMessage(
+                    {
+                      id: 'Settings.profile.form.section.mfa.passkeys.cap',
+                      defaultMessage:
+                        'You have reached the limit of {max} passkeys. Remove one to add another.',
+                    },
+                    { max: MAX_PASSKEYS_PER_USER }
+                  )}
           </Typography>
         )}
       </Flex>
