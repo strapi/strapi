@@ -30,20 +30,27 @@ const HOST_RESOLVED: Record<string, string> = Object.fromEntries(
   ])
 );
 
-const ENTRY_RESOLVED: Record<string, string> = {
+const ENTRY_RESOLVED: Record<string, string | Error> = {
   '@strapi/plugin-color-picker/strapi-admin':
     '/node_modules/@strapi/plugin-color-picker/dist/admin/index.js',
   'community-plugin/strapi-admin': '/node_modules/community-plugin/dist/admin/index.js',
   '../../src/plugins/local-plugin/strapi-admin': '/app/src/plugins/local-plugin/strapi-admin.js',
 };
 
-let entryResolved: Record<string, string>;
+let entryResolved: Record<string, string | Error>;
 let hostResolved: Record<string, string>;
 
-const fakeRequire = (table: Record<string, string>) =>
+/**
+ * A table entry that is an `Error` is thrown, so a test can pin the exact error the resolver threw
+ */
+const fakeRequire = (table: Record<string, string | Error>) =>
   ({
     resolve(modulePath: string) {
       const resolved = table[modulePath];
+
+      if (resolved instanceof Error) {
+        throw resolved;
+      }
 
       if (!resolved) {
         throw Object.assign(new Error(`Cannot find module '${modulePath}'`), {
@@ -112,6 +119,38 @@ describe('getScanRoots', () => {
     );
 
     expect(roots).toContain('/app/src/plugins/local-plugin');
+  });
+
+  test('names the plugin when its admin entry is not built', async () => {
+    const notFound = Object.assign(new Error("Cannot find module 'some-package/strapi-admin'"), {
+      code: 'MODULE_NOT_FOUND',
+    });
+    entryResolved['some-package/strapi-admin'] = notFound;
+
+    const call = getScanRoots(
+      scanContext([modulePlugin('my-plugin', 'some-package/strapi-admin')]),
+      false
+    );
+
+    const caught = await call.catch((error: unknown) => error);
+
+    await expect(call).rejects.toThrow(/my-plugin/);
+    await expect(call).rejects.toThrow(/Build the plugin first/);
+    expect(caught instanceof Error ? caught.cause : caught).toBe(notFound);
+  });
+
+  test('rethrows a resolution error that is not a missing module', async () => {
+    const notExported = Object.assign(new Error('Package subpath is not defined by "exports"'), {
+      code: 'ERR_PACKAGE_PATH_NOT_EXPORTED',
+    });
+    entryResolved['some-package/strapi-admin'] = notExported;
+
+    const call = getScanRoots(
+      scanContext([modulePlugin('my-plugin', 'some-package/strapi-admin')]),
+      false
+    );
+
+    await expect(call).rejects.toBe(notExported);
   });
 
   test('holds the application admin directory', async () => {

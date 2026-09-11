@@ -43,10 +43,27 @@ const getScanRoots = async (ctx: ScanContext, dev: boolean): Promise<string[]> =
     return aliases[modulePath] ?? path.dirname(requireFromHost.resolve(modulePath));
   });
 
-  const pluginRoots = ctx.plugins.map(
-    (plugin) =>
-      aliases[plugin.modulePath] ?? path.dirname(requireFromEntry.resolve(plugin.modulePath))
-  );
+  const pluginRoots = ctx.plugins.map((plugin) => {
+    const alias = aliases[plugin.modulePath];
+
+    if (alias) {
+      return alias;
+    }
+
+    try {
+      return path.dirname(requireFromEntry.resolve(plugin.modulePath));
+    } catch (error) {
+      // Only a missing module means the plugin is unbuilt; other errors are their own problem
+      if (!(error instanceof Error && 'code' in error && error.code === 'MODULE_NOT_FOUND')) {
+        throw error;
+      }
+
+      throw new Error(
+        `Cannot find the admin entry of the plugin "${plugin.name}". Build the plugin first`,
+        { cause: error }
+      );
+    }
+  });
 
   // The `@strapi/admin` alias names `admin/src` only, so the Enterprise tree is a second root
   const eeAdminSource = getMonorepoEeAdminSource({ monorepo });
