@@ -15,6 +15,7 @@ interface EditorLayoutProps {
   onToggleExpand: () => void;
   disabled: boolean;
   ariaDescriptionId: string;
+  livePreviewSync?: boolean;
 }
 
 const EditorLayout = ({
@@ -23,6 +24,7 @@ const EditorLayout = ({
   disabled,
   onToggleExpand,
   ariaDescriptionId,
+  livePreviewSync = false,
 }: EditorLayoutProps) => {
   const { formatMessage } = useIntl();
   const { isExpandedMode } = useBlocksEditorContext('editorLayout');
@@ -57,6 +59,7 @@ const EditorLayout = ({
         height="512px"
         $disabled={disabled}
         $hasError={Boolean(error)}
+        minHeight={livePreviewSync ? 0 : undefined}
         style={{ overflow: 'hidden' }}
         aria-describedby={ariaDescriptionId}
         position="relative"

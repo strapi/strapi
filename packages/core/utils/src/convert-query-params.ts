@@ -50,6 +50,46 @@ type FieldsParams = string | string[];
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> => _.isPlainObject(value);
 
+const hasOwnProperty = (object: object, key: PropertyKey): boolean =>
+  Object.prototype.hasOwnProperty.call(object, key);
+
+const setSortMapValue = (field: string, order: SortOrder): SortMap => {
+  const path = _.toPath(field);
+  const sortMap: SortMap = {};
+  let current: SortMap | SortMap[] = sortMap;
+
+  for (const [index, key] of path.entries()) {
+    const isLastSegment = index === path.length - 1;
+
+    if (key === 'prototype' || (key in current && !hasOwnProperty(current, key))) {
+      throw new ValidationError('Invalid sort query');
+    }
+
+    if (isLastSegment) {
+      Object.defineProperty(current, key, {
+        configurable: true,
+        enumerable: true,
+        value: order,
+        writable: true,
+      });
+      continue;
+    }
+
+    const nextValue = /^\d+$/.test(path[index + 1]) ? [] : {};
+
+    Object.defineProperty(current, key, {
+      configurable: true,
+      enumerable: true,
+      value: nextValue,
+      writable: true,
+    });
+
+    current = nextValue;
+  }
+
+  return sortMap;
+};
+
 function isEmptySortMap(sortMap: SortMap): boolean {
   const keys = Object.keys(sortMap);
 
@@ -252,7 +292,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
     // TODO: field should be a valid path on an object model
 
-    return _.set({}, field, order.trim());
+    return setSortMapValue(field, order.trim() as SortOrder);
   };
 
   const convertNestedSortQueryParam = (sortQuery: SortParamsObject): SortMap => {
