@@ -12,7 +12,6 @@ import { Chat } from '../../components/AIChat/Chat';
 import { prefetchAIToken } from '../../components/AIChat/lib/aiClient';
 import { ChatProvider } from '../../components/AIChat/providers/ChatProvider';
 import { AutoReloadOverlayBlockerProvider } from '../../components/AutoReloadOverlayBlocker';
-import { ContentTypeBuilderNav } from '../../components/ContentTypeBuilderNav/ContentTypeBuilderNav';
 import { CTBSessionProvider } from '../../components/CTBSession/CTBSessionProvider';
 import DataManagerProvider from '../../components/DataManager/DataManagerProvider';
 import { useAvailabilityRules, useReadOnlyRules } from '../../components/DataManager/readOnlyRules';
@@ -82,7 +81,7 @@ const App = () => {
               <ChatProvider>
                 <>
                   {autoReload && !readOnly && <FormModal />}
-                  <Layouts.Root sideNav={<ContentTypeBuilderNav />}>
+                  <Layouts.Root>
                     <Suspense fallback={<Page.Loading />}>
                       <Routes>
                         {/* The builder's front door: what distinguishes one

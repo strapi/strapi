@@ -41,6 +41,9 @@ import type { OpenModalCreateSchemaPayload } from '../../components/FormModalNav
 
 type TabKind = 'collectionType' | 'singleType' | 'component';
 
+const isTabKind = (value: unknown): value is TabKind =>
+  value === 'collectionType' || value === 'singleType' || value === 'component';
+
 const ClickableRow = styled(Table.Row)`
   cursor: pointer;
 `;
@@ -133,11 +136,13 @@ export const SchemaIndex = () => {
   const { contains } = useFilter(locale, { sensitivity: 'base' });
   const formatter = useCollator(locale, { sensitivity: 'base' });
 
-  const [tab, setTab] = React.useState<TabKind>('collectionType');
-  // `_q` rather than local state: the same param the Content Manager's search
-  // writes, so a filtered list is a link someone can send.
-  const [{ query }] = useQueryParams<{ _q?: string }>();
+  // Both in the URL rather than in state: the same `_q` the Content Manager's
+  // search writes, and a `kind` the breadcrumb can link back to — so a filtered
+  // list is a link someone can send, and a schema's crumb lands on its own tab.
+  const [{ query }, setQuery] = useQueryParams<{ _q?: string; kind?: string }>();
   const search = query?._q ?? '';
+  const tab: TabKind = isTabKind(query?.kind) ? query.kind : 'collectionType';
+  const setTab = (next: TabKind) => setQuery({ kind: next }, 'push');
   const [applied, setApplied] = React.useState<Record<string, string>>({});
 
   const filters = getSchemaFilters();

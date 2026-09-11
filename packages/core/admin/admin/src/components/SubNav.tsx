@@ -139,35 +139,12 @@ const StyledHeader = styled(Flex)`
   }
 `;
 
-/**
- * A control that belongs with the title rather than with the list below it.
- *
- * Out of the flow on purpose: the navigation is narrow enough that a button in
- * the row costs the title more width than it has to spare, and a wrapped title
- * is worse than a button sitting in the gutter the title already leaves. It
- * lands in the header rather than beside it because `StyledHeader` is
- * `flex: 0 0 <height>` — in a row that basis becomes a width, and the title
- * ends up in a 64px column.
- */
-const HeaderAction = styled(Flex)`
-  position: absolute;
-  right: ${({ theme }) => theme.spaces[1]};
-  top: 50%;
-  transform: translateY(-50%);
-`;
-
-const Header = ({ label, endAction }: { label: string; endAction?: React.ReactNode }) => {
+const Header = ({ label }: { label: string }) => {
   return (
-    <StyledHeader
-      position="relative"
-      justifyContent="space-between"
-      paddingLeft={5}
-      paddingRight={5}
-    >
+    <StyledHeader justifyContent="space-between" paddingLeft={5} paddingRight={5}>
       <Typography variant="beta" tag="h2">
         {label}
       </Typography>
-      {endAction ? <HeaderAction>{endAction}</HeaderAction> : null}
     </StyledHeader>
   );
 };

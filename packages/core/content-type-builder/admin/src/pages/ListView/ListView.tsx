@@ -12,6 +12,7 @@ import { useDataManager } from '../../components/DataManager/useDataManager';
 import { useFormModalNavigation } from '../../components/FormModalNavigation/useFormModalNavigation';
 import { List } from '../../components/List';
 import { SchemaActions } from '../../components/SchemaActions/SchemaActions';
+import { SchemaSwitcher } from '../../components/SchemaSwitcher/SchemaSwitcher';
 import { getTrad } from '../../utils/getTrad';
 
 import { LinkToCMSettingsView } from './LinkToCMSettingsView';
@@ -176,7 +177,12 @@ const ListView = () => {
           </Flex>
         </Flex>
       )}
-      <LayoutsHeaderCustom id="title" primaryAction={primaryAction} title={upperFirst(label)} />
+      <LayoutsHeaderCustom
+        id="title"
+        navigationAction={<SchemaSwitcher current={type} />}
+        primaryAction={primaryAction}
+        title={upperFirst(label)}
+      />
       <Layouts.Content>
         <Box
           background="neutral0"

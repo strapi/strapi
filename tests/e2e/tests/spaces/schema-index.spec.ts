@@ -87,19 +87,38 @@ test.describe('Content-Type Builder — all content types', () => {
   });
 
   /**
-   * The drawer is remembered per browser, so someone who opened it keeps it
-   * open — the index has to read the same either way.
+   * What replaced the sidebar: the breadcrumb says where you are, and its
+   * caret is how you get anywhere else — including to a component, which the
+   * sidebar's one real advantage was reaching in a single step.
    */
-  test('the index holds up with the drawer expanded', async ({ page }) => {
-    await page.goto(CTB_URL);
-    await page.evaluate(() => window.localStorage.setItem('strapi-ctb:schema-list', 'expanded'));
-    await page.reload();
+  test('the breadcrumb switches between any two schemas', async ({ page }) => {
+    await page.goto(`${CTB_URL}/content-types/api::article.article`);
+
+    await expect(page.getByRole('link', { name: 'Collection types' })).toHaveAttribute(
+      'href',
+      /kind=collectionType/
+    );
+
+    await page.getByRole('button', { name: 'Go to another content type or component' }).click();
+    await page
+      .getByRole('searchbox', { name: 'Search content types and components' })
+      .fill('author');
+    await page.getByRole('button', { name: /^Author/ }).click();
+
+    await expect(page).toHaveURL(/content-types\/api::author\.author/);
+    await expect(page.getByRole('heading', { name: 'Author' })).toBeVisible();
+  });
+
+  test('the breadcrumb leads back to the index on the right tab', async ({ page }) => {
+    await page.goto(`${CTB_URL}/content-types/api::homepage.homepage`);
+
+    await page.getByRole('link', { name: 'Single types' }).click();
 
     await expect(page.getByRole('heading', { name: 'All content types' })).toBeVisible();
-    await expect(page.getByRole('tab', { name: /^Collection types/ })).toBeVisible();
-    await page.getByRole('row').filter({ hasText: 'Article' }).first().click();
-
-    await expect(page).toHaveURL(/content-types\/api::article\.article/);
+    await expect(page.getByRole('tab', { name: /^Single types/ })).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
   });
 
   test('creating is one button with three choices', async ({ page }) => {
