@@ -24,32 +24,22 @@ const NAME_MAX = 50;
 /**
  * Registers one passkey, in three steps that must stay in this order.
  *
- * 1. `POST /mfa/passkeys/options` with the current password and a live code. That gate is the same
- *    one `/mfa/disable` and `/mfa/recovery-codes` use, and it is heavier than most competitors'
- *    flows on purpose: the credential this authorises satisfies every future challenge on its own,
- *    so an attacker holding a stolen session plus the password would otherwise register their own
- *    authenticator and log in forever with the victim's authenticator app still working.
- * 2. `startRegistration` in the browser. `excludeCredentials` in the options makes a second
- *    registration of the *same* authenticator fail here with `InvalidStateError` rather than
- *    creating a duplicate row, which is why that case gets its own message.
- * 3. `POST /mfa/passkeys` with the name and the authenticator's response. No password or code:
- *    the ceremony being completed was already authorised in step 1, and it is single-use.
+ * 1. `POST /mfa/passkeys/options` with the current password and a live code -- the same gate
+ *    `/mfa/disable` uses, because the credential this authorises satisfies every future challenge
+ *    on its own: an attacker with a stolen session plus the password would otherwise register
+ *    their own authenticator and keep access indefinitely, with the victim's app still working.
+ * 2. `startRegistration` in the browser. `excludeCredentials` makes re-registering the *same*
+ *    authenticator fail here with `InvalidStateError`, which is why that case has its own message.
+ * 3. `POST /mfa/passkeys` with the name and response. No password or code: step 1 already
+ *    authorised this ceremony, and it is single-use.
  *
- * Deliberately no `fixedCacheKey` (unlike `EnrolDialog` / `ReAuthDialog`): the password and code
- * live in this component's own state, which dies with the component, and neither mutation is
- * meant to survive a remount the way a `fixedCacheKey` mutation is. But the options response is
- * not inert while it sits in the store: it carries a LIVE, unspent registration challenge
- * (`passkeyRegistrationOptions` mints it with a 300-second TTL, spent only by the following
- * `POST /mfa/passkeys` or not at all) plus the user's existing credential ids in
- * `excludeCredentials`. `AddPasskeyDialog` is mounted for the whole life of the Profile page
- * (`Passkeys.tsx`, the same convention `TwoFactorSection.tsx` documents), so without an explicit
- * `reset()` that entry would outlive every `close()` and sit in Redux until the page itself
- * unmounts. Both sibling dialogs (`ReAuthDialog`, `EnrolDialog`) reset their mutations for the
- * same reason; this one does too, just without a `fixedCacheKey` to key it by.
+ * No `fixedCacheKey`, unlike the sibling dialogs -- the password and code live in component state
+ * that dies with the component. The mutations are still reset on close, because the options
+ * response is not inert in the store: it holds a live, unspent registration challenge (300s TTL)
+ * and the user's existing credential ids, and this dialog is mounted for the life of the Profile
+ * page, so that entry would otherwise outlive every close.
  *
- * Submission mechanics follow `ReAuthDialog` (see its doc comment): the footer button is
- * `type="submit"` so Enter works with three blocking fields, and a synchronous `inFlightRef`
- * guards the click + native-submit double fire.
+ * Submission mechanics follow `ReAuthDialog` (see its doc comment).
  */
 const AddPasskeyDialog = ({ open, onClose }: AddPasskeyDialogProps) => {
   const { formatMessage } = useIntl();

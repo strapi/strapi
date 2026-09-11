@@ -25,34 +25,24 @@ interface TwoFactorPanelProps {
 }
 
 /**
- * "Two-factor authentication" on the user edit page, for the people who unlock (the server
- * appends `mfaEnabledAt` / `mfaGraceUntil` / `mfaLockedAt` to `GET /admin/users/:id` only for
- * callers with `admin::users.update`, and only while the feature is on; `EditPage` renders this
- * panel only when those fields are present). One of four states, in priority order: locked,
- * enrolled, in grace, not enrolled. A lock is for *password* login: an SSO session on the same
- * account stays valid until its next token refresh, and the copy says so.
+ * "Two-factor authentication" on the user edit page. The server appends the three mfa fields to
+ * `GET /admin/users/:id` only for callers with `admin::users.update` and only while the feature
+ * is on, and `EditPage` renders this panel only when they are present. One of four states, in
+ * priority order: locked, enrolled, in grace, not enrolled. A lock stops *password* login only --
+ * an SSO session on the same account survives until its next token refresh, and the copy says so.
  *
- * Unlock (`POST /admin/mfa/users/:id/unlock`) clears both stamps and does not start a new grace
- * period: the user's next login does, so an unlock while they are away cannot re-lock them
- * unseen. The mutation invalidates this user's `User` tag, so the panel refreshes itself.
+ * Three of the four actions are security-positive and need no re-authentication: unlock restores
+ * password login without starting a new grace period (the user's next login does that, so an
+ * unlock while they are away cannot re-lock them unseen), and revoking trust or removing passkeys
+ * only forces the second factor back on.
  *
- * Reset (`POST /admin/mfa/users/:id/reset`) is the other direction and the only *destructive*
- * action here: it strips the factor entirely and signs the user out everywhere. Offered for any
- * enrolled account rather than only a locked one, because the case it serves is a user who still
- * knows their password but has lost their authenticator and spent their recovery codes -- there
- * is no lock to clear, and the alternative is `admin:reset-user-mfa` on a shell the customer may
+ * Reset is the exception and the only destructive one: it strips the factor entirely and signs
+ * the user out everywhere. Offered for any enrolled account rather than only a locked one,
+ * because the user it serves has no lock to clear -- they know their password but have lost their
+ * authenticator and spent their recovery codes, and the alternative is a shell the customer may
  * not have.
  *
- * Trusted devices adds, for an enrolled user, the number of trusted browsers and a "Revoke trusted
- * devices" action (`DELETE /admin/mfa/users/:id/trusted-devices`, behind `admin::users.update`).
- * Revoking trust is security-positive, it forces the second factor back on, so unlike a reset it
- * needs no re-authentication.
- *
- * Passkeys adds the same pair for passkeys: how many the user has registered and a "Remove
- * passkeys" action (`DELETE /admin/mfa/users/:id/passkeys`, behind the same `admin::users.update`).
- * Removing them is security-positive in the same way revoking trust is -- the account falls back
- * to its authenticator app -- so, like revocation and unlike a reset, it needs no
- * re-authentication. The count endpoint deliberately returns a number and no names.
+ * The passkey endpoint returns a count, never an inventory of somebody's hardware.
  */
 const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
   const { formatMessage, formatDate } = useIntl();

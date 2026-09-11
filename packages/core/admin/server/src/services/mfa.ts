@@ -458,19 +458,6 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   };
 
   /**
-   * Administrator reset: strips the account's second factor entirely and evicts its sessions, so
-   * a user who has lost their authenticator and spent their recovery codes can get back in.
-   *
-   * The one operation here that an administrator can perform without the target's consent and
-   * that *lowers* their protection, which is why it needs `admin::users.update` at the route and
-   * why it evicts sessions: if the reset is being done because the account is suspected
-   * compromised, leaving the attacker's session alive would defeat the point.
-   *
-   * Shared by the route and `admin:reset-user-mfa`, so the CLI and the panel cannot drift into
-   * doing different amounts of work. Returns the notification promise (never rejecting) for the
-   * CLI, which must not `process.exit` before the email has had a chance to send.
-   */
-  /**
    * Everything this feature stored about a user, for when the user itself is being deleted.
    *
    * `disable` deliberately leaves the `admin::mfa-event` rows alone -- it *records* one, and the
@@ -486,6 +473,19 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     await eventQuery().deleteMany({ where: { userId: String(userId) } });
   };
 
+  /**
+   * Administrator reset: strips the account's second factor entirely and evicts its sessions, so
+   * a user who has lost their authenticator and spent their recovery codes can get back in.
+   *
+   * The one operation here that an administrator can perform without the target's consent and
+   * that *lowers* their protection, which is why it needs `admin::users.update` at the route and
+   * why it evicts sessions: if the reset is being done because the account is suspected
+   * compromised, leaving the attacker's session alive would defeat the point.
+   *
+   * Shared by the route and `admin:reset-user-mfa`, so the CLI and the panel cannot drift into
+   * doing different amounts of work. Returns the notification promise (never rejecting) for the
+   * CLI, which must not `process.exit` before the email has had a chance to send.
+   */
   const resetUser = async (
     userId: string,
     actor: { byUserId?: string; via?: 'cli' } = {}

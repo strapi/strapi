@@ -67,41 +67,25 @@ const COPY = {
 } as const;
 
 /**
- * One form, two intents: re-authenticate with the current password plus a second factor (a TOTP
- * code or an unused recovery code), then either regenerate the recovery-code set or disable MFA
- * entirely. Modeled on `EnrolDialog` -- same `Modal` skeleton, same reset-on-close and
- * unmount-safety-net pattern (see that file for the full rationale); `ErrorMessage`
- * (`components/ErrorMessage.tsx`) and `useToMessage` (`hooks/useToMessage.ts`) are shared with it.
+ * One form, two intents: re-authenticate with the current password plus a second factor, then
+ * either regenerate the recovery-code set or disable MFA. They share this dialog because they
+ * share the gate -- both take `{ password, code }` -- and only the copy, the mutation and the
+ * submit button's styling vary by `intent`. Reset-on-close and the unmount safety net work
+ * exactly as in `EnrolDialog`; see that file for why the `fixedCacheKey` is needed.
  *
- * `regenerate` and `disable` share this dialog because they share the same re-authentication gate
- * (`RegenerateRecoveryCodes`/`Disable` in `shared/contracts/mfa.ts` both take `{ password, code
- * }`); only the copy, the mutation invoked, and the submit button's danger styling vary by
- * `intent`.
+ * This is the canonical note on the re-entrancy hazard the other MFA dialogs refer to.
  *
- * State lives in two places, both cleared on every close path (Cancel, Escape, overlay click, a
- * successful disable, or a successful acknowledge) *and* on unmount, exactly as in `EnrolDialog`:
- * local state via `reset()`, and the freshly issued recovery-code set (which also lands in the
- * Redux store as a mutation result) via a `fixedCacheKey` per mutation (`MFA_REAUTH_CACHE_KEYS`)
- * plus the mount-only unmount effect below as the safety net for a dialog torn down without
- * `close()` ever running.
+ * The form has two blocking fields, and per the HTML spec's implicit-submission algorithm a form
+ * with more than one needs a real submit button for Enter to do anything -- so the footer button
+ * carries `type="submit"`. That reintroduces a hazard a click-only button does not have: a real
+ * click on a submit button fires the React `onClick` *and* the browser's native submit, so
+ * `onSubmit` runs too, both synchronously, before either handler's `await` resolves and before
+ * React re-renders with `isLoading` set. A guard that reads `isLoading` is therefore stale for
+ * the second call. `handleSubmit` uses a synchronous `inFlightRef` flipped in the same tick the
+ * first call starts, plus the same length checks the button uses for `disabled`.
  *
- * Unlike `EnrolDialog` (one field per form step), this form has *two* blocking fields (password
- * and code) in the same `<form>`. Per the HTML spec's implicit-submission algorithm
- * (4.10.22.2), a form with more than one field that blocks implicit submission needs an actual
- * submit button for Enter to do anything at all -- so the footer button below carries
- * `type="submit"`, and `onClick` still calls the same handler directly (jsdom's `PointerEvent`
- * polyfill, see `EnrolDialog.tsx`'s comment, means a `user.click()` in this test suite never
- * reaches the button's native form-submission default action, only its `onClick`).
- *
- * That `type="submit"` reintroduces a re-entrancy hazard `EnrolDialog` doesn't have: a *real*
- * click (`fireEvent.click`, or a real browser) on a submit button both fires the React `onClick`
- * handler and triggers the browser's native default action of submitting the form, which fires
- * `onSubmit` too -- both synchronously, before either the click or the submit handler's `await`
- * resolves, and before React re-renders with `isLoading` reflecting the first call. A state-based
- * guard (checking the mutation hook's `isLoading`) is therefore stale for the second,
- * near-simultaneous call. `handleSubmit` instead guards with a synchronous `inFlightRef`
- * (`React.useRef`, flipped in the same tick the first call starts, before either handler yields to
- * the event loop), plus the same length checks the button uses for `disabled`.
+ * `onClick` also calls the handler directly because jsdom's `PointerEvent` polyfill means
+ * `user.click()` never reaches a submit button's native default action in this suite.
  */
 const ReAuthDialog = ({ open, onClose, intent }: ReAuthDialogProps) => {
   const { formatMessage } = useIntl();

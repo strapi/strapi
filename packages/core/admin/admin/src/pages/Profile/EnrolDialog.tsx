@@ -59,61 +59,29 @@ type Step =
   | { name: 'codes'; recoveryCodes: string[] };
 
 /**
- * Three steps: current password (re-authentication), scan the QR code and confirm with a code,
- * then save the recovery codes.
+ * Three steps: current password (re-authentication), scan the QR and confirm with a code, then
+ * save the recovery codes.
  *
- * State lives in two places, and both are cleared on every close path (Cancel, Escape, overlay
- * click, or a successful acknowledge) *and* on unmount:
- * - `step`/`password`/`code`/`error` are local React state, cleared by `reset()`.
- * - `{ secret, otpauthUri }` and `{ recoveryCodes }` also land in the Redux store, because RTK
- *   Query keeps every mutation's `data` in `state.adminApi.mutations` for as long as the
- *   triggering hook stays mounted -- and this dialog (`<EnrolDialog>` in `TwoFactorSection.tsx`)
- *   is mounted for the whole profile-page session, not just while `open`. Each of the three
- *   mutations below is given a `fixedCacheKey` (see `MFA_ENROL_CACHE_KEYS`) specifically so
- *   `reset()` can synchronously delete its entry (`removeMutationResult`) the moment the dialog
- *   closes; without a `fixedCacheKey`, RTK Query only drops a mutation result on unmount or once a
- *   *newer* call supersedes it, and even then only after the default un-subscribe delay -- so the
- *   secret/URI/codes would otherwise sit in the store indefinitely.
+ * The secret, the otpauth URI and the codes also land in the Redux store, because RTK Query keeps
+ * a mutation's `data` for as long as the triggering hook stays mounted -- and this dialog is
+ * mounted for the whole profile-page session, not just while `open`. Each mutation therefore
+ * carries a `fixedCacheKey` (`MFA_ENROL_CACHE_KEYS`) so `reset()` can delete its entry
+ * synchronously on close. That cuts both ways: RTK Query deliberately skips its own unmount
+ * cleanup for a keyed mutation, so a page unmount that never runs `close()` (browser Back while
+ * the dialog sits open) would strand the secret in the store -- which is what the effect below
+ * the mutation hooks exists for.
  *
- *   `fixedCacheKey` cuts both ways, though: RTK Query's own unmount cleanup explicitly *skips*
- *   resetting a mutation that has one (it's meant to survive a remount), so if the whole page
- *   unmounts this dialog without `close()` ever running -- browser Back, or an app redirect, while
- *   it's sitting open on the scan or codes step -- the secret/URI/codes would otherwise survive in
- *   the store for the rest of the SPA session. The effect right after the mutation hooks below
- *   covers exactly that path; calling the three resets again on an already-`close()`d dialog is a
- *   harmless no-op (deleting an already-absent store entry does nothing).
+ * `handlePassword`/`handleVerify` guard re-entrancy with a synchronous `inFlightRef`, for the
+ * reason `ReAuthDialog.tsx` sets out in full: a real click on a submit button fires both the
+ * React handler and the browser's native submit before either awaits or React re-renders.
  *
- * `handlePassword`/`handleVerify` are called from both the `<form onSubmit>` (a real browser
- * submitting on Enter in the text field) and the footer button's `onClick` (see below), so each
- * guards itself against re-entrancy (`isEnrolling`/`isVerifying`, plus the same length checks the
- * buttons use for `disabled`) -- otherwise pressing Enter twice while a request is in flight posts
- * twice, and a too-short code (or an empty password) typed then submitted via Enter would reach
- * the rate-limited endpoints despite the button refusing it.
- *
- * The footer buttons themselves don't need `type="submit"`: this project's shared Jest setup
- * (`packages/admin-test-utils/src/setup.ts`) polyfills `window.PointerEvent` with a class that
- * does not extend `MouseEvent` (jsdom has no native `PointerEvent`, see jsdom/jsdom#2666 and
- * radix-ui/primitives#1822), and `@testing-library/user-event` dispatches `click` as a
- * `PointerEvent` -- so jsdom's activation-behaviour check (`MouseEvent.isImpl`) never matches and
- * a submit button's native form-submission silently never fires under `user.click()` anywhere in
- * this suite. `onClick` calling the same handler sidesteps that; the design system's `Button`
- * already defaults its own `type` to `"button"` (confirmed by reading its source), so there's
- * nothing to opt out of and no risk of it also firing a native submit.
- *
- * That "one blocking field per step" premise holds for a fresh enrolment (password alone, then a
- * code alone) but not for `replace` mode's password step: `POST /mfa/enrol` demands a current
- * code too while already enrolled (re-proving the factor being replaced), so that step has *two*
- * blocking fields in the same `<form>`. Per the HTML spec's implicit-submission algorithm
- * (4.10.22.2), a form with more than one field that blocks implicit submission needs an actual
- * submit button for Enter to do anything at all -- so the Continue button carries
- * `type="submit"` in replace mode only (see the JSX below), and `onClick` still calls the same
- * handler directly for the jsdom reason above. That `type="submit"` reintroduces the re-entrancy
- * hazard `ReAuthDialog.tsx`'s doc comment covers in full: a *real* click on a submit button both
- * fires the React `onClick` handler and triggers the browser's native default action of
- * submitting the form, both synchronously, before either handler's `await` resolves or React
- * re-renders with `isEnrolling` reflecting the first call -- so `handlePassword` guards with a
- * synchronous `inFlightRef` (`React.useRef`, flipped in the same tick the first call starts)
- * rather than relying on `isEnrolling` alone, exactly like `ReAuthDialog`'s `handleSubmit`.
+ * The footer buttons call their handler from `onClick` rather than relying on `type="submit"`,
+ * because the shared Jest setup polyfills `window.PointerEvent` with a class that does not extend
+ * `MouseEvent` (jsdom has none natively), so jsdom's activation-behaviour check never matches and
+ * native form submission silently never fires under `user.click()` in this suite. The exception
+ * is `replace` mode's password step, which has two blocking fields in one form: per the HTML
+ * spec's implicit-submission algorithm a form with more than one such field needs a real submit
+ * button for Enter to do anything, so Continue carries `type="submit"` there only.
  */
 const EnrolDialog = ({ open, onClose, mode = 'enrol' }: EnrolDialogProps) => {
   const isReplace = mode === 'replace';

@@ -12,29 +12,19 @@ import { isNotFoundError } from '../utils/baseQuery';
 export const MFA_STATUS_POLL_INTERVAL_MS = 15 * 60 * 1000;
 
 /**
- * Non-dismissible warning shown at the top of the authenticated layout while `/admin/mfa/me`
- * reports `required && !enabled`: this account must enrol before `graceUntil` or it is locked
- * for password login. A `Box` rather than the design system `Alert` because `Alert` always
- * renders a close button, and this one must stay until the user enrols.
+ * Non-dismissible warning shown while `/admin/mfa/me` reports `required && !enabled`: this
+ * account must enrol before `graceUntil` or lose password login. A `Box` rather than the design
+ * system `Alert`, because `Alert` always renders a close button and this must stay put.
  *
- * `graceUntil` can be `null` while `required` is true: the session predates the requirement
- * (the grace clock starts at the first *session issue* after the requirement applies), so the
- * copy then says the deadline starts at the next login rather than inventing one.
+ * `graceUntil` can be `null` while `required` is true -- the session predates the requirement,
+ * since the clock starts at the first session issued after it applies -- so the copy then points
+ * at the next login rather than inventing a deadline.
  *
- * Polling and refetch-on-focus stop once the endpoint answers 404 (feature off): there is
- * nothing to watch, and a guaranteed 404 per interval on every default-off instance is pure
- * noise.
- *
- * The options passed to the hook can only depend on the *previous* render's result (the hook's
- * own return value isn't available yet while building its own argument), so "is a 404 the
- * current state" is tracked in state and mirrored off-by-one render behind via an effect rather
- * than read from the `error` this same call returns. This mirroring goes **both ways**: the
- * banner is mounted for the whole authenticated session, and `/admin/mfa/me` is a shared query
- * cache entry that `TwoFactorSection`, `SecurityPage` and `MfaNotices` also read, so any of them
- * (or this component, once the feature is turned back on) can land a successful response and
- * bring polling/refetch-on-focus back for everyone subscribed -- a one-way latch would mean a
- * single observed 404 permanently disables this banner's ability to notice a grace period for
- * the rest of the tab's life, even after an admin enables the requirement.
+ * Polling stops on a 404 (feature off) and starts again on a success. The hook's options can only
+ * see the *previous* render's result, so that state is mirrored one render behind via an effect.
+ * It has to move both ways: `/admin/mfa/me` is a shared cache entry that three other components
+ * also read, and a one-way latch would mean one observed 404 permanently blinds this banner for
+ * the rest of the tab's life, even after an admin turns the requirement on.
  */
 const MfaGraceBanner = () => {
   const { formatMessage, formatDate } = useIntl();
