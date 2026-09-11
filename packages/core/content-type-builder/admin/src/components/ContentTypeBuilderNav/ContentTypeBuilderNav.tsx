@@ -50,24 +50,35 @@ export const ContentTypeBuilderNav = () => {
 
   return (
     <SubNav.Main aria-label={pluginName}>
-      <Flex justifyContent="space-between" alignItems="center" paddingRight={3}>
-        <SubNav.Header label={pluginName} />
-        <IconButton
-          label={formatMessage({
-            id: getTrad('nav.hide'),
-            defaultMessage: 'Hide the list of content types',
-          })}
-          variant="ghost"
-          onClick={() => setSchemaListExpanded(false)}
-        >
-          <ChevronLeft />
-        </IconButton>
-      </Flex>
+      <SubNav.Header
+        label={pluginName}
+        endAction={
+          <IconButton
+            label={formatMessage({
+              id: getTrad('nav.hide'),
+              defaultMessage: 'Hide the list of content types',
+            })}
+            variant="ghost"
+            size="XS"
+            onClick={() => setSchemaListExpanded(false)}
+          >
+            <ChevronLeft />
+          </IconButton>
+        }
+      />
       <Divider background="neutral150" />
       {/* Save and its history menu live in the page header now, where every
           other page of the admin keeps its actions. What is left here is a
           list of names and a way to filter it. */}
-      <Flex padding={5} gap={3} direction={'column'} alignItems={'stretch'}>
+      <Flex
+        paddingTop={4}
+        paddingBottom={4}
+        paddingLeft={3}
+        paddingRight={3}
+        gap={3}
+        direction={'column'}
+        alignItems={'stretch'}
+      >
         <Searchbar
           value={search.value}
           onChange={(e) => search.onChange(e.target.value)}

@@ -73,6 +73,43 @@ const OnOff = ({ on }: { on: boolean }) => {
   );
 };
 
+const NameCell = ({ schema }: { schema: Schema }) => {
+  const { formatMessage } = useIntl();
+
+  return (
+    // The API id is what you need when you need it and noise the rest of the
+    // time, so it waits behind the icon.
+    <Flex gap={2} alignItems="center">
+      <Typography textColor="neutral800" fontWeight="bold">
+        {upperFirst(schema.info.displayName)}
+      </Typography>
+      <Tooltip label={schema.uid}>
+        <Flex tag="span" alignItems="center">
+          <Information
+            fill="neutral500"
+            width="1.6rem"
+            height="1.6rem"
+            aria-label={formatMessage(
+              { id: getTrad('index.column.apiId'), defaultMessage: 'API ID: {uid}' },
+              { uid: schema.uid }
+            )}
+          />
+        </Flex>
+      </Tooltip>
+    </Flex>
+  );
+};
+
+const CategoryCell = ({ schema }: { schema: Schema }) => (
+  <Typography textColor="neutral700">
+    {upperFirst((schema as { category?: string }).category ?? '')}
+  </Typography>
+);
+
+const DraftAndPublishCell = ({ schema }: { schema: Schema }) => (
+  <OnOff on={hasDraftAndPublish(schema)} />
+);
+
 /**
  * "All content types" — the builder's front door.
  *
@@ -156,36 +193,48 @@ export const SchemaIndex = () => {
 
   const pluginColumns = getSchemaColumns(tab === 'component' ? 'component' : 'contentType');
 
-  const headers = [
+  /**
+   * One list, both halves of the table.
+   *
+   * A header and its cells were written apart, and removing a column from one
+   * side left the other behind — every value then read under its neighbour's
+   * name. They cannot drift while they come from here.
+   */
+  const columns: Array<{
+    name: string;
+    label: string;
+    Cell: React.ComponentType<{ schema: Schema }>;
+  }> = [
     {
       name: 'name',
       label: formatMessage({ id: getTrad('index.column.name'), defaultMessage: 'Name' }),
+      Cell: NameCell,
     },
-    {
-      name: 'fields',
-      label: formatMessage({ id: getTrad('index.column.fields'), defaultMessage: 'Fields' }),
-    },
-    ...(tab === 'component'
-      ? [
-          {
-            name: 'category',
-            label: formatMessage({
-              id: getTrad('index.column.category'),
-              defaultMessage: 'Category',
-            }),
-          },
-        ]
-      : [
-          {
-            name: 'draftAndPublish',
-            label: formatMessage({
-              id: getTrad('index.column.draftAndPublish'),
-              defaultMessage: 'Draft & publish',
-            }),
-          },
-        ]),
-    ...pluginColumns.map((column) => ({ name: column.id, label: formatMessage(column.header) })),
-  ].map((header) => ({ ...header, sortable: false }));
+    tab === 'component'
+      ? {
+          name: 'category',
+          label: formatMessage({
+            id: getTrad('index.column.category'),
+            defaultMessage: 'Category',
+          }),
+          Cell: CategoryCell,
+        }
+      : {
+          name: 'draftAndPublish',
+          label: formatMessage({
+            id: getTrad('index.column.draftAndPublish'),
+            defaultMessage: 'Draft & publish',
+          }),
+          Cell: DraftAndPublishCell,
+        },
+    ...pluginColumns.map((column) => ({
+      name: column.id,
+      label: formatMessage(column.header),
+      Cell: column.Cell,
+    })),
+  ];
+
+  const headers = columns.map(({ name, label }) => ({ name, label, sortable: false }));
 
   const appliedEntries = Object.entries(applied);
 
@@ -423,44 +472,8 @@ export const SchemaIndex = () => {
                         )
                       }
                     >
-                      <Table.Cell>
-                        {/* The API id is what you need when you need it and noise
-                          the rest of the time, so it waits behind the icon. */}
-                        <Flex gap={2} alignItems="center">
-                          <Typography textColor="neutral800" fontWeight="bold">
-                            {upperFirst(schema.info.displayName)}
-                          </Typography>
-                          <Tooltip label={schema.uid}>
-                            <Flex tag="span" alignItems="center">
-                              <Information
-                                fill="neutral500"
-                                width="1.6rem"
-                                height="1.6rem"
-                                aria-label={formatMessage(
-                                  {
-                                    id: getTrad('index.column.apiId'),
-                                    defaultMessage: 'API ID: {uid}',
-                                  },
-                                  { uid: schema.uid }
-                                )}
-                              />
-                            </Flex>
-                          </Tooltip>
-                        </Flex>
-                      </Table.Cell>
-                      {tab === 'component' ? (
-                        <Table.Cell>
-                          <Typography textColor="neutral700">
-                            {upperFirst((schema as { category?: string }).category ?? '')}
-                          </Typography>
-                        </Table.Cell>
-                      ) : (
-                        <Table.Cell>
-                          <OnOff on={hasDraftAndPublish(schema)} />
-                        </Table.Cell>
-                      )}
-                      {pluginColumns.map(({ id, Cell }) => (
-                        <Table.Cell key={id}>
+                      {columns.map(({ name, Cell }) => (
+                        <Table.Cell key={name}>
                           <Cell schema={schema} />
                         </Table.Cell>
                       ))}
