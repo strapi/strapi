@@ -89,13 +89,11 @@ describe('authentication routes', () => {
     }
   });
 
-  // Nothing pinned the two new `/login/mfa/webauthn` routes' existence, their `auth: false`,
-  // or their rate limit -- deleting `middlewares: ['admin::rateLimit']` from `POST
-  // /login/mfa/webauthn` left the whole `@strapi/admin` server suite green (1240/1240). This
-  // enumerates the entire unauthenticated POST login surface -- the plain password login and all
-  // three ways to complete an MFA challenge -- so a route disappearing, gaining `auth: true`, or
-  // losing its throttle fails here first. Shaped like `routes/__tests__/mfa.test.ts`'s
-  // `route(method, path)` + `test.each` pattern.
+  // Nothing pinned the `/login/mfa/webauthn` routes' existence, their `auth: false`, or their
+  // rate limit: deleting the rate-limit middleware from one of them left the whole server suite
+  // green. This enumerates the entire unauthenticated POST login surface -- the plain password
+  // login and all three ways to complete an MFA challenge -- so a route disappearing, gaining
+  // `auth: true`, or losing its throttle fails here first.
   describe('the unauthenticated POST login surface is pinned', () => {
     test.each([
       ['/login', 'authentication.login'],

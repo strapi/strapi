@@ -5,7 +5,7 @@
  * the validation layer's own copy of the `'Provide mfa, trustedDevices or passkeys'` message.
  *
  * `mfa` and `trustedDevices` never had validation-level tests either -- this file does not close
- * that pre-existing gap, it only exercises the schema this task added, through the exported
+ * that pre-existing gap, it only exercises this file's schema, through the exported
  * `validateUpdateSecuritySettings`, the same entry point the controller calls (`passkeysSchema`
  * itself is not exported, so there is no way to unit-test it in isolation).
  */

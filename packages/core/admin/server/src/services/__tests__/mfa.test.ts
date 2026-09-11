@@ -3831,7 +3831,7 @@ describe('mfa service: passkey registration', () => {
    * way an officer's save would. `adminUrl` is what `resolveWebauthnRp` derives from, so a test
    * can hand it the broken production default (`http://0.0.0.0:1337/admin`) and see the refusal.
    *
-   * `enrolled` defaults to `true`: I2 moved the registration pair's enrolment invariant into the
+   * `enrolled` defaults to `true`: the registration pair's enrolment invariant lives in the
    * service itself, so every test in this block that expects to reach *past* that guard needs the
    * fixture user to already hold a TOTP factor -- `isEnrolled` only checks `mfaSecret` and
    * `mfaEnabledAt` for truthiness, never decrypts either, so placeholders are enough. Only the
@@ -4310,9 +4310,8 @@ describe('mfa service: passkey registration', () => {
 
     // A fresh ceremony: the first call's own was consumed regardless of its outcome, so reusing it
     // here would fail at the no-pending-ceremony guard before ever reaching `create` a second time
-    // -- which is exactly the bug this test used to have (proved: `create` was only ever called
-    // once, so this second assertion silently re-tested the no-pending-ceremony path instead of the
-    // dialect-error translation it claims to cover).
+    // -- which would silently re-test the no-pending-ceremony path instead of the dialect-error
+    // translation this case is about.
     const second = await service.passkeyRegistrationOptions('1');
     passkeyMocks.create.mockRejectedValueOnce(dialectError);
     await expect(

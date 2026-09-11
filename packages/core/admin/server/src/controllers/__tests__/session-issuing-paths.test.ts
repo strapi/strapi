@@ -308,7 +308,7 @@ describe('session issuing paths', () => {
     expect(isEnrolled).toHaveBeenCalledWith(String(user.id));
     expect(createChallenge).toHaveBeenCalledWith(String(user.id));
 
-    // The property this task exists for: no cookie, no token, alongside mfaRequired.
+    // The property the challenge step rests on: no cookie, no token, alongside mfaRequired.
     expect(cookiesSet).not.toHaveBeenCalled();
     expect(generateRefreshToken).not.toHaveBeenCalled();
     expect(generateAccessToken).not.toHaveBeenCalled();

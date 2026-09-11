@@ -198,8 +198,8 @@ describe('authentication controller', () => {
       expect(isEnrolled).toHaveBeenCalledWith(String(user.id));
       expect(createChallenge).toHaveBeenCalledWith(String(user.id));
 
-      // The property this task exists for: no cookie, no token, no accessToken alongside
-      // mfaRequired. A cookie set here would make the whole feature a silent no-op.
+      // The property the whole challenge step rests on: no cookie, no token, no accessToken
+      // alongside mfaRequired. A cookie set here would make the feature a silent no-op.
       expect(cookiesSet).not.toHaveBeenCalled();
       expect(ctx.body).toEqual({
         data: {

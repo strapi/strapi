@@ -80,7 +80,7 @@ const offeredTrustDays = async (): Promise<number | null> => {
 /**
  * Passkeys: whether the challenge screen may offer the passkey path. `countPasskeys` returns 0
  * while the organisation has turned passkeys off, so this is "the policy allows them and this
- * account holds at least one" -- and I1 adds a third term: the RP must actually resolve, so a
+ * account holds at least one", plus a third term: the RP must actually resolve, so a
  * misconfigured deployment (an IP-literal `admin.absoluteUrl`) never offers a button every
  * ceremony would refuse. `passkeysConfigured` swallows that refusal into a boolean, the same
  * wrapper `/mfa/me`'s `passkeysEnabled` reads, so this can never 500 either.

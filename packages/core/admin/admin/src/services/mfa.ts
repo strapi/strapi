@@ -198,9 +198,9 @@ const mfaService = adminApi
       }),
       /**
        * Step two. Also invalidates `MfaNotices`: the server records a `passkey_registered` notice
-       * row, the precedent trusted devices set for both trusted-device revocations. Deliberately does NOT
-       * invalidate `TrustedDevices` -- trusted devices's ledger recorded that trap; registering a passkey
-       * changes no trusted device, and only a *replacement* revokes trust.
+       * row, the same as both trusted-device revocations. Deliberately does NOT invalidate
+       * `TrustedDevices`: registering a passkey changes no trusted device, and only a
+       * *replacement* revokes trust.
        */
       registerPasskey: builder.mutation<
         RegisterPasskey.Response['data'],
