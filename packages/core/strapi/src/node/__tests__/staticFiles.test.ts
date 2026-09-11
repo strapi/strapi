@@ -22,6 +22,21 @@ describe('getStylesheet', () => {
     expect(sheet).toContain(`@source not "/pkg/dist/admin/**/*.map";`);
   });
 
+  test('excludes the nested node_modules of every root', () => {
+    const sheet = getStylesheet(ctx(['/app/src/admin', '/app/plugins/local/dist/admin']));
+
+    expect(sheet).toContain(`@source not "/app/src/admin/**/node_modules/**";`);
+    expect(sheet).toContain(`@source not "/app/plugins/local/dist/admin/**/node_modules/**";`);
+  });
+
+  test('still scans a root that lives under node_modules', () => {
+    const root = '/app/node_modules/@strapi/admin/dist/admin';
+    const sheet = getStylesheet(ctx([root]));
+
+    expect(sheet).toContain(`@source "${root}";`);
+    expect(sheet).toContain(`@source not "${root}/**/node_modules/**";`);
+  });
+
   test('quotes with an apostrophe when the path holds a double quote', () => {
     const sheet = getStylesheet(ctx(['/pkg/we"ird/dist']));
 
