@@ -6,6 +6,10 @@ import {
   mediaListFoldersOutputSchema,
   mediaUpdateAssetInputSchema,
   mediaUpdateAssetOutputSchema,
+  mediaCreateFolderInputSchema,
+  mediaRenameFolderInputSchema,
+  mediaMoveFolderInputSchema,
+  mediaDeleteFolderInputSchema,
 } from '../schemas';
 import { ALLOWED_SORT_STRINGS } from '../../constants';
 
@@ -260,6 +264,149 @@ describe('upload MCP schemas', () => {
       expect(
         mediaListFoldersOutputSchema.safeParse({ data: [{ id: 1, name: 'root' }] }).success
       ).toBe(false);
+    });
+  });
+  // ---------------------------------------------------------------------------
+  // folder write inputs
+  // ---------------------------------------------------------------------------
+
+  describe('media_create_folder input', () => {
+    test('accepts a name alone — the folder lands at the root', () => {
+      expect(mediaCreateFolderInputSchema.safeParse({ name: 'Photos' }).success).toBe(true);
+    });
+
+    test('accepts an explicit parent, and null for the root', () => {
+      expect(mediaCreateFolderInputSchema.safeParse({ name: 'Photos', parent: 3 }).success).toBe(
+        true
+      );
+      expect(mediaCreateFolderInputSchema.safeParse({ name: 'Photos', parent: null }).success).toBe(
+        true
+      );
+    });
+
+    test('requires the name', () => {
+      expect(mediaCreateFolderInputSchema.safeParse({}).success).toBe(false);
+      expect(mediaCreateFolderInputSchema.safeParse({ name: '' }).success).toBe(false);
+    });
+
+    test('rejects a name with a slash, which would corrupt the materialized path', () => {
+      expect(mediaCreateFolderInputSchema.safeParse({ name: 'a/b' }).success).toBe(false);
+    });
+
+    test('rejects a name padded with whitespace', () => {
+      expect(mediaCreateFolderInputSchema.safeParse({ name: ' Photos' }).success).toBe(false);
+      expect(mediaCreateFolderInputSchema.safeParse({ name: 'Photos ' }).success).toBe(false);
+    });
+
+    test('rejects an unknown key rather than silently ignoring it', () => {
+      expect(mediaCreateFolderInputSchema.safeParse({ name: 'Photos', path: '/1' }).success).toBe(
+        false
+      );
+    });
+
+    test('rejects a non-integer or zero parent id', () => {
+      expect(mediaCreateFolderInputSchema.safeParse({ name: 'Photos', parent: 0 }).success).toBe(
+        false
+      );
+      expect(mediaCreateFolderInputSchema.safeParse({ name: 'Photos', parent: 1.5 }).success).toBe(
+        false
+      );
+    });
+  });
+
+  describe('media_rename_folder input', () => {
+    test('accepts an id and a name', () => {
+      expect(mediaRenameFolderInputSchema.safeParse({ id: 1, name: 'Renamed' }).success).toBe(true);
+    });
+
+    test('requires both the id and the name', () => {
+      expect(mediaRenameFolderInputSchema.safeParse({ id: 1 }).success).toBe(false);
+      expect(mediaRenameFolderInputSchema.safeParse({ name: 'Renamed' }).success).toBe(false);
+    });
+
+    test('rejects a parent, pointing the caller at media_move_folder', () => {
+      // Rename and move are separate tools, so a parent here is a mis-selected tool.
+      const parsed = mediaRenameFolderInputSchema.safeParse({ id: 1, name: 'Renamed', parent: 2 });
+
+      expect(parsed.success).toBe(false);
+      expect(JSON.stringify(parsed.error)).toMatch(/media_move_folder/);
+    });
+
+    test('applies the same name rules as media_create_folder', () => {
+      expect(mediaRenameFolderInputSchema.safeParse({ id: 1, name: 'a/b' }).success).toBe(false);
+      expect(mediaRenameFolderInputSchema.safeParse({ id: 1, name: ' padded' }).success).toBe(
+        false
+      );
+    });
+
+    test('rejects a documentId in place of a numeric id', () => {
+      expect(
+        mediaRenameFolderInputSchema.safeParse({ id: 'z7v8zma53x01r6oceimv922b', name: 'x' })
+          .success
+      ).toBe(false);
+    });
+  });
+
+  describe('media_move_folder input', () => {
+    test('accepts an id with a destination parent', () => {
+      expect(mediaMoveFolderInputSchema.safeParse({ id: 1, parent: 2 }).success).toBe(true);
+    });
+
+    test('accepts parent: null to move a folder to the root', () => {
+      expect(mediaMoveFolderInputSchema.safeParse({ id: 1, parent: null }).success).toBe(true);
+    });
+
+    test('requires the parent, so a mistyped move cannot become a silent no-op', () => {
+      expect(mediaMoveFolderInputSchema.safeParse({ id: 1 }).success).toBe(false);
+    });
+
+    test('rejects a name, pointing the caller at media_rename_folder', () => {
+      const parsed = mediaMoveFolderInputSchema.safeParse({ id: 1, parent: 2, name: 'Renamed' });
+
+      expect(parsed.success).toBe(false);
+      expect(JSON.stringify(parsed.error)).toMatch(/media_rename_folder/);
+    });
+  });
+
+  describe('media_delete_folder input', () => {
+    test('accepts a list of ids, with no dryRun flag', () => {
+      expect(mediaDeleteFolderInputSchema.safeParse({ ids: [1, 2] }).success).toBe(true);
+    });
+
+    test('does not default dryRun at the schema level — the handler owns the safe default', () => {
+      // A schema default would be published as `false`-able JSON Schema; keeping the default in
+      // the handler means an omitted flag is a preview no matter how the client serialises it.
+      const parsed = mediaDeleteFolderInputSchema.safeParse({ ids: [1] });
+
+      expect(parsed.success).toBe(true);
+      expect((parsed as { data: Record<string, unknown> }).data.dryRun).toBeUndefined();
+    });
+
+    test('accepts an explicit dryRun on both branches', () => {
+      expect(mediaDeleteFolderInputSchema.safeParse({ ids: [1], dryRun: true }).success).toBe(true);
+      expect(mediaDeleteFolderInputSchema.safeParse({ ids: [1], dryRun: false }).success).toBe(
+        true
+      );
+    });
+
+    test('requires at least one id', () => {
+      expect(mediaDeleteFolderInputSchema.safeParse({ ids: [] }).success).toBe(false);
+      expect(mediaDeleteFolderInputSchema.safeParse({}).success).toBe(false);
+    });
+
+    test('caps the batch size', () => {
+      const ids = Array.from({ length: 101 }, (_, index) => index + 1);
+      expect(mediaDeleteFolderInputSchema.safeParse({ ids }).success).toBe(false);
+    });
+
+    test('rejects non-integer and non-positive ids', () => {
+      expect(mediaDeleteFolderInputSchema.safeParse({ ids: [0] }).success).toBe(false);
+      expect(mediaDeleteFolderInputSchema.safeParse({ ids: [1.5] }).success).toBe(false);
+      expect(mediaDeleteFolderInputSchema.safeParse({ ids: ['1'] }).success).toBe(false);
+    });
+
+    test('rejects an unknown key', () => {
+      expect(mediaDeleteFolderInputSchema.safeParse({ ids: [1], force: true }).success).toBe(false);
     });
   });
 });

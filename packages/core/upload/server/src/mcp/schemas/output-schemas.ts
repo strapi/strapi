@@ -70,3 +70,65 @@ export const mediaListFoldersOutputSchema = z.object({
 export const mediaUpdateAssetOutputSchema = z.object({
   data: mediaAssetOutputSchema,
 });
+
+/**
+ * A folder as returned by the write tools.
+ *
+ * Like the asset schema this is an ALLOWLIST: `path` and `pathId` are internal materialized-path
+ * bookkeeping and stay invisible to MCP clients, matching what `list_folders` already exposes.
+ */
+export const mediaFolderOutputSchema = z.object({
+  id: z.number().describe('Numeric folder id — the canonical identifier for this folder.'),
+  name: z.string(),
+  parent: z
+    .object({
+      id: z.number(),
+      name: z.string().optional(),
+    })
+    .nullable()
+    .optional()
+    .describe(
+      'Containing folder, or null when the folder sits at the media library root. Absent when this response did not load the relation — absent means unknown, not root.'
+    ),
+  createdAt: z.string().nullable().optional(),
+  updatedAt: z.string().nullable().optional(),
+});
+
+export const mediaCreateFolderOutputSchema = z.object({
+  data: mediaFolderOutputSchema,
+});
+
+export const mediaRenameFolderOutputSchema = z.object({
+  data: mediaFolderOutputSchema,
+});
+
+export const mediaMoveFolderOutputSchema = z.object({
+  data: mediaFolderOutputSchema,
+});
+
+/**
+ * `media_delete_folder` output — the same shape for both branches, so an agent reads one contract.
+ *
+ * `dryRun` echoes which branch ran: on true the counts are what *would* be removed and nothing
+ * was touched; on false they are what actually was. Echoing it back means the agent can tell a
+ * preview from a completed deletion without tracking what it sent.
+ *
+ * There is no "skipped ids" field: an id that does not resolve to a folder rejects the whole
+ * call, so every id in the request is accounted for by `folders` on any successful response.
+ */
+export const mediaDeleteFolderOutputSchema = z.object({
+  dryRun: z
+    .boolean()
+    .describe(
+      'True when this was a preview and NOTHING was deleted. False when the deletion was performed.'
+    ),
+  folders: z
+    .array(mediaFolderOutputSchema)
+    .describe('The folders matched by the given ids (the roots of the cascade).'),
+  totalFolderNumber: z
+    .number()
+    .describe(
+      'Total folders affected, including the matched folders themselves and every descendant.'
+    ),
+  totalFileNumber: z.number().describe('Total files affected, across the whole cascade.'),
+});
