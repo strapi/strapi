@@ -19,6 +19,8 @@ const buildFilesPlugin = (ctx: Pick<BuildContext, 'cwd' | 'runtimeDir'>): Plugin
     async generateBundle(_options, outputBundle) {
       const asset = outputBundle[htmlKey];
 
+      // The html asset comes from rollupOptions.input. A custom config that replaces the
+      // input removes it
       if (!asset) {
         throw new Error(
           `Failed to find the html asset in bundle (${htmlKey}). Vite must build that file; a custom src/admin/vite.config must not replace build.rollupOptions.input`
