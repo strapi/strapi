@@ -6,12 +6,8 @@ import { useAPIErrorHandler } from './useAPIErrorHandler';
 
 import type { SerializedError } from '@reduxjs/toolkit';
 
-/**
- * Shared error-to-string mapping for the MFA dialogs: a `BaseQueryError` (the server actually
- * responded, e.g. "Invalid credentials") is formatted through the app's API error formatter; any
- * other failure (a thrown exception RTK Query serialized as a `SerializedError`) falls back to a
- * generic message, since it carries nothing safe to show verbatim.
- */
+/** A `SerializedError` (a thrown exception, not a server response) carries nothing safe to show
+ * verbatim, so it falls back to a generic message. */
 const useToMessage = () => {
   const { formatMessage } = useIntl();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();

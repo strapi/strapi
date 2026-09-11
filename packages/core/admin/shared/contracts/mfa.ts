@@ -8,10 +8,7 @@ import type { Data } from '@strapi/types';
 import type { LoginMfa } from './authentication';
 import type { AdminUser } from './shared';
 
-/**
- * /mfa/me - Current second-factor status for the authenticated admin user. Never carries the
- * secret, an otpauth URI or a recovery code: enrolment state and remaining-code count only.
- */
+/** GET /mfa/me - never carries the secret, an otpauth URI or a recovery code. */
 export declare namespace Me {
   export interface Response {
     data: {
@@ -19,36 +16,23 @@ export declare namespace Me {
       enabledAt: AdminUser['mfaEnabledAt'];
       recoveryCodesRemaining: number;
       codesAcknowledged: boolean;
-      /** The organisation policy requires this account to be enrolled, whether or not it is. */
       required: boolean;
       graceUntil: string | null;
-      /** Whether the organisation lets this user trust a browser after a code. */
       trustedDevicesEnabled: boolean;
-      /** Whether the organisation lets this user register and use passkeys. */
       passkeysEnabled: boolean;
-      /**
-       * Whether this account has a local password at all. An SSO-only administrator has none,
-       * and `updateSettings` exempts exactly that account from presenting credentials to turn
-       * passkeys off, so `PasskeysCard` reads this to avoid routing them into a dialog they
-       * cannot complete.
-       */
+      /** False for an SSO-only administrator, whom `updateSettings` exempts from presenting credentials
+       * to turn passkeys off -- so the UI must not route them into a dialog they cannot complete. */
       hasLocalPassword: boolean;
     };
   }
 }
 
-/**
- * /mfa/enrol - Start enrolment: re-authenticates with the current password and issues a fresh
- * TOTP secret. `secret`/`otpauthUri` are returned exactly once, here, and never again.
- */
+/** `secret`/`otpauthUri` are returned exactly once, here. */
 export declare namespace Enrol {
   export interface Request {
     body: {
       password: string;
-      /**
-       * Required when the account is already enrolled: replaces the authenticator. Ignored on a
-       * fresh enrolment -- there is no current factor yet to prove.
-       */
+      /** Required when already enrolled; ignored on a fresh enrolment. */
       code?: string;
     };
   }
@@ -61,10 +45,7 @@ export declare namespace Enrol {
   }
 }
 
-/**
- * /mfa/enrol/verify - Complete enrolment with a code from the authenticator app. The recovery
- * codes minted here are returned exactly once; a later call never returns them again.
- */
+/** The recovery codes minted here are returned exactly once. */
 export declare namespace VerifyEnrolment {
   export interface Request {
     body: {
@@ -75,17 +56,12 @@ export declare namespace VerifyEnrolment {
   export interface Response {
     data: {
       recoveryCodes: string[];
-      /** Whether this call promoted a replacement authenticator rather than a fresh enrolment. */
       replaced: boolean;
     };
   }
 }
 
-/**
- * /mfa/recovery-codes - Replace the recovery-code set. Requires the current password and a valid
- * second factor (TOTP or an existing recovery code) -- the same re-authentication gate as
- * /mfa/disable.
- */
+/** The same re-authentication gate as /mfa/disable. */
 export declare namespace RegenerateRecoveryCodes {
   export interface Request {
     body: {
@@ -101,20 +77,13 @@ export declare namespace RegenerateRecoveryCodes {
   }
 }
 
-/**
- * /mfa/recovery-codes/ack - Acknowledge that the current recovery codes have been saved
- * somewhere safe. No request payload, no response body.
- */
 export declare namespace AcknowledgeRecoveryCodes {
   export interface Request {
     body?: {};
   }
 }
 
-/**
- * /mfa/disable - Turn two-factor authentication off. Requires the current password and a valid
- * second factor, and evicts every *other* device for the account. No response body.
- */
+/** POST /mfa/disable - requires password plus a second factor, and evicts every *other* device. */
 export declare namespace Disable {
   export interface Request {
     body: {
@@ -124,73 +93,50 @@ export declare namespace Disable {
   }
 }
 
-/**
- * POST /mfa/users/:id/unlock - Clear a lock (and its grace stamp) on another admin's account.
- * Requires `admin::users.update`. 204 on success; 404 for an unknown user; 400 when the account
- * is not locked. No grace is stamped here: the user's next session starts a fresh window.
- */
+/** POST /mfa/users/:id/unlock - 204; 404 unknown user; 400 when not locked. No grace is stamped:
+ * the user's next session starts a fresh window. */
 export declare namespace UnlockUser {
   export interface Params {
     id: Data.ID;
   }
 }
 
-/**
- * POST /mfa/users/:id/reset - Strip another admin's second factor and evict their sessions.
- * Requires `admin::users.update`. 204 on success (including for an account that was not
- * enrolled); 404 for an unknown user. No response body.
- *
- * The recovery path for a user who lost their authenticator and spent their recovery codes.
- * `admin:reset-user-mfa` on the CLI does the same thing for when nobody can sign in at all.
- */
+/** POST /mfa/users/:id/reset - 204 even for an account that was not enrolled; 404 unknown user.
+ * `admin:reset-user-mfa` on the CLI does the same for when nobody can sign in at all. */
 export declare namespace ResetUser {
   export interface Params {
     id: Data.ID;
   }
 }
 
-/**
- * One browser the caller has trusted to skip the second factor. Never carries the
- * token or its hash: `id` is the row id, and `current` says whether this row is the browser
- * making the request (its trust cookie hashed to this row).
- */
+/** Never carries the token or its hash. `current` means this row is the browser making the
+ * request. */
 export interface TrustedDevice {
   id: string;
   deviceName: string | null;
-  /** ISO, when the trust was granted. */
   createdAt: string;
-  /** ISO, the *effective* expiry: min(stored expiry, createdAt + the current `days` setting). */
+  /** The *effective* expiry: min(stored expiry, createdAt + the current `days` setting). */
   expiresAt: string;
-  /** ISO, the last login this trust skipped a challenge for; null until it has. */
   lastUsedAt: string | null;
   current: boolean;
 }
 
-/**
- * GET /mfa/trusted-devices - The caller's trusted browsers, current first, then newest.
- */
+/** GET /mfa/trusted-devices - current first, then newest. */
 export declare namespace ListTrustedDevices {
   export interface Response {
     data: TrustedDevice[];
   }
 }
 
-/**
- * DELETE /mfa/trusted-devices/:id - Revoke one of the caller's trusted browsers. 204, or 404 when
- * the row is not the caller's. Clears the trust cookie when the row was the current browser.
- * `DELETE /mfa/trusted-devices` (no `:id`) revokes every one of the caller's trusted browsers,
- * 204, and clears the cookie.
- */
+/** DELETE /mfa/trusted-devices/:id - 204, or 404 when the row is not the caller's. Without `:id`
+ * it revokes every one. Either clears the trust cookie when it covers the current browser. */
 export declare namespace RevokeTrustedDevice {
   export interface Params {
     id: string;
   }
 }
 
-/**
- * GET /mfa/users/:id/trusted-devices - An administrator's view of another user's trusted
- * browsers (`admin::users.read`). Same rows without `current`.
- */
+/** The same rows without `current`. */
 export declare namespace ListUserTrustedDevices {
   export interface Params {
     id: Data.ID;
@@ -200,41 +146,26 @@ export declare namespace ListUserTrustedDevices {
   }
 }
 
-/**
- * DELETE /mfa/users/:id/trusted-devices - Revoke every trusted browser of another user
- * (`admin::users.update`). 204, 404 for an unknown user.
- */
 export declare namespace RevokeUserTrustedDevices {
   export interface Params {
     id: Data.ID;
   }
 }
 
-/**
- * The per-user registration cap. Lives here rather than on the server because the client needs
- * it too, to stop offering "Add a passkey" once the server can only ever refuse, rather than
- * spending a password and a live code on a guaranteed rejection.
- */
+/** Shared with the client so it can stop offering "Add a passkey" rather than spend a password
+ * and a live code on a guaranteed rejection. */
 export const MAX_PASSKEYS_PER_USER = 10;
 
-/**
- * One registered passkey, as the owner's list and the registration response render it.
- * `publicKey`, `counter`, `credentialId` and `transports` never leave the server.
- */
+/** `publicKey`, `counter`, `credentialId` and `transports` never leave the server. */
 export interface Passkey {
   id: string;
-  /** User-supplied at registration, 1..50 characters. There is no rename route. */
+  /** There is no rename route. */
   name: string;
-  /** ISO, shown as "Added". */
   createdAt: string;
-  /** ISO, the last challenge this passkey satisfied; null until it has. */
   lastUsedAt: string | null;
 }
 
-/**
- * GET /mfa/passkeys - The caller's own passkeys, newest first. An empty list when the
- * organisation has turned passkeys off, so the list and the administrator count never disagree.
- */
+/** GET /mfa/passkeys - empty while the policy is off, so this and the administrator count agree. */
 export declare namespace ListPasskeys {
   export interface Response {
     data: Passkey[];
@@ -242,13 +173,8 @@ export declare namespace ListPasskeys {
 }
 
 /**
- * POST /mfa/passkeys/options - Start a registration ceremony. Costs the current password *and* a
- * live second factor (`assertPasswordAndFactor`).
- *
- * The response is passed through verbatim to `@simplewebauthn/browser`'s
- * `startRegistration({ optionsJSON })`, so it is typed from `@simplewebauthn/browser` (a
- * type-only import here) rather than from `@simplewebauthn/server`, which is a server-only
- * dependency this file must not pull in at runtime.
+ * POST /mfa/passkeys/options - costs the current password *and* a live second factor. Typed from
+ * `@simplewebauthn/browser`, not `/server`, which this shared file must not pull in at runtime.
  */
 export declare namespace PasskeyRegistrationOptions {
   export interface Request {
@@ -263,14 +189,11 @@ export declare namespace PasskeyRegistrationOptions {
   }
 }
 
-/**
- * POST /mfa/passkeys - Finish the ceremony started by the options route. No password or code: the
- * ceremony this completes was already authorised there, and it is single-use.
- */
+/** POST /mfa/passkeys - no password or code: the options route already authorised this ceremony,
+ * and it is single-use. */
 export declare namespace RegisterPasskey {
   export interface Request {
     body: {
-      /** Trimmed, 1..50 characters. */
       name: string;
       registration: RegistrationResponseJSON;
     };
@@ -281,22 +204,15 @@ export declare namespace RegisterPasskey {
   }
 }
 
-/**
- * DELETE /mfa/passkeys/:id - Remove one of the caller's own passkeys. 204 with no body, or 404
- * when the row is not theirs. Costs nothing: TOTP always survives a passkey deletion, so there is
- * no lockout path, and it works even while the policy is off -- removing a credential is never
- * the dangerous direction.
- */
+/** DELETE /mfa/passkeys/:id - 204, or 404 when the row is not theirs. Costs nothing and works
+ * while the policy is off: removing a credential is never the dangerous direction. */
 export declare namespace DeletePasskey {
   export interface Params {
     id: string;
   }
 }
 
-/**
- * GET /mfa/users/:id/passkeys - How many passkeys another user holds (`admin::users.read`). A
- * number, not an inventory of somebody's hardware. `{ count: 0 }` when the policy is off.
- */
+/** GET /mfa/users/:id/passkeys - a count, never an inventory of somebody's hardware. */
 export declare namespace ListUserPasskeys {
   export interface Params {
     id: Data.ID;
@@ -308,11 +224,7 @@ export declare namespace ListUserPasskeys {
   }
 }
 
-/**
- * DELETE /mfa/users/:id/passkeys - Remove every passkey of another user (`admin::users.update`,
- * the permission that already lets an administrator reset a second factor). 204, 404 for an
- * unknown user, and it works while the policy is off.
- */
+/** Works while the policy is off. */
 export declare namespace DeleteUserPasskeys {
   export interface Params {
     id: Data.ID;
@@ -320,11 +232,8 @@ export declare namespace DeleteUserPasskeys {
 }
 
 /**
- * POST /admin/login/mfa/webauthn/options - Start an authentication ceremony against a challenge
- * minted by `/login` or `/reset-password`. Unauthenticated; the challenge token is the only
- * credential. Charges no attempt: it evaluates no factor. The response is passed through verbatim
- * for `@simplewebauthn/browser`'s `startAuthentication({ optionsJSON })`, typed the same way as
- * `PasskeyRegistrationOptions` above.
+ * POST /admin/login/mfa/webauthn/options - unauthenticated; the challenge token is the only
+ * credential. Charges no attempt, because it evaluates no factor.
  */
 export declare namespace MfaWebauthnOptions {
   export interface Request {
@@ -339,10 +248,8 @@ export declare namespace MfaWebauthnOptions {
 }
 
 /**
- * POST /admin/login/mfa/webauthn - Complete that ceremony and receive a session, exactly as
- * `/login/mfa` does for a code. `deviceId` and `rememberMe` are not decoration: `issueSession`
- * reads both from the request body via `extractDeviceParams`, so omitting them would lose the
- * caller's "remember me" choice and leave a trusted-device row's `deviceId` null.
+ * POST /admin/login/mfa/webauthn - `issueSession` reads `deviceId` and `rememberMe` from the body,
+ * so omitting them loses the caller's "remember me" and leaves a trusted row's `deviceId` null.
  */
 export declare namespace MfaWebauthnLogin {
   export interface Request {
@@ -358,16 +265,7 @@ export declare namespace MfaWebauthnLogin {
   export type Response = LoginMfa.Response;
 }
 
-/**
- * A single security notice: `admin::mfa-event` rows the caller has not yet seen. Never carries a
- * code, a secret or an otpauth URI -- `metadata` is limited to neutral context (see `MfaEventType`
- * in `admin::mfa`).
- */
-/**
- * Every `admin::mfa-event` row type. Declared here rather than on the server because both sides
- * of the wire need it: the server writes these rows, the client renders them. It was declared in
- * both places and the two copies had already drifted.
- */
+/** Declared here, not on the server: the server writes these rows and the client renders them. */
 export type MfaEventType =
   | 'enabled'
   | 'disabled'
@@ -384,19 +282,12 @@ export type MfaEventType =
   | 'passkey_registered'
   | 'passkey_removed';
 
-/**
- * Announced on the event hub -- so EE audit logging can observe them -- but never written as a
- * row, because a notice on every *use* of a factor would bury the notices that report a change
- * to it. They are therefore not `MfaEventType`, and the notice feed can never contain one.
- */
+/** Announced on the hub for EE audit logging, but never written as a row: a notice on every *use*
+ * of a factor would bury the ones that report a change to it. */
 export type MfaAuditOnlyNotice = 'trusted_device_used' | 'passkey_used';
 
-/**
- * What the notice feed can contain. `recovery_codes_issued` is a row type but not a notice: it is
- * the acknowledgement marker `areCodesAcknowledged` reads, and `unseenEvents`/`markEventsSeen`
- * exclude it deliberately. Expressed as an `Exclude` rather than a second hand-written list, so
- * adding a row type cannot silently leave the feed's type behind.
- */
+/** `recovery_codes_issued` is a row type but not a notice: it is the acknowledgement marker. An
+ * `Exclude` rather than a second list, so a new row type cannot leave the feed's type behind. */
 export type MfaNoticeType = Exclude<MfaEventType, 'recovery_codes_issued'>;
 
 export interface MfaEventNotice {
@@ -407,26 +298,19 @@ export interface MfaEventNotice {
   seenAt: string | null;
 }
 
-/**
- * /mfa/notices - Security notices not yet seen by the caller.
- */
 export declare namespace Notices {
   export interface Response {
     data: MfaEventNotice[];
   }
 }
 
-/**
- * /mfa/notices/seen - Mark notices seen. An absent `ids` marks every unseen notice for the
- * caller; a present one is scoped to those ids, and only ever to rows the caller owns. No
- * response body.
- */
+/** POST /mfa/notices/seen - an absent `ids` marks every unseen notice; a present one is scoped to
+ * those ids, and always to rows the caller owns. */
 export declare namespace MarkNoticesSeen {
   export interface Request {
     body: {
-      // Narrower than `Data.ID` (which also admits strings) because the validator behind this
-      // endpoint (`validateMfaNoticesSeenInput`) is `yup.number().integer()`, run strict: a
-      // string id would typecheck against this field yet always 400 at runtime.
+      // Narrower than `Data.ID`: the validator is `yup.number().integer()`, so a string id would
+      // typecheck here and always 400 at runtime.
       ids?: number[];
     };
   }

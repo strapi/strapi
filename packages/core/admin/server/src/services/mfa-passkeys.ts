@@ -26,39 +26,22 @@ const { ApplicationError, RateLimitError, ValidationError } = errors;
 const USER_UID = 'admin::user';
 const CHALLENGE_UID = 'admin::mfa-challenge';
 
-/** Exported so `services/__tests__/mfa.test.ts` can import it rather than re-declaring the
- * literal and letting the two drift. */
 export const PASSKEY_UID = 'admin::mfa-passkey';
 
-/**
- * The same per-user cap trusted devices carry, for symmetry -- but this *refuses* the eleventh
- * registration instead of evicting the oldest. Deleting somebody's security key because they
- * registered an eleventh is destroying a credential they may be holding in their hand, and they
- * have a delete button.
- *
- * Defined in `shared/contracts/mfa.ts`, which the client reads too, so this is a re-export.
- */
+/** Refuses the eleventh rather than evicting the oldest, unlike trusted devices: deleting a
+ * security key somebody may be holding in their hand is not ours to do. */
 export { MAX_PASSKEYS_PER_USER };
 
-/** How long a pending *registration* ceremony stays valid, in seconds. */
 const PASSKEY_CEREMONY_TTL_SECONDS = 300;
 
-/**
- * `credentialId` is a `string`, i.e. varchar(255), so the unique index stays portable across
- * every dialect. WebAuthn permits credential ids up to 1023 bytes; no authenticator in practice
- * produces one longer than this (255 base64url characters is 191 raw bytes).
- */
+/** varchar(255), so the unique index stays portable across dialects. WebAuthn permits up to 1023
+ * bytes, but no authenticator in practice produces one longer than this. */
 export const MAX_CREDENTIAL_ID_LENGTH = 255;
 
 const RP_NAME = 'Strapi';
 
-/**
- * Every literal passkeys introduces, in one place. The first two are *shared*: each covers every
- * failure of its kind, so no caller can tell one cause from another: a caller must not be able to
- * distinguish an expired challenge from a wrong credential. The TOTP paths in `mfa.ts` share one
- * message for the same reason. The last four are route-specific and deliberately actionable, because each names
- * something the caller can fix about their own request.
- */
+/** The first two are shared across every failure of their kind, so a caller cannot distinguish an
+ * expired challenge from a wrong credential. The last four name something the caller can fix. */
 export const PASSKEY_VERIFY_FAILED = 'Could not verify that passkey.';
 export const PASSKEY_REGISTRATION_FAILED = 'That passkey could not be verified.';
 export const PASSKEY_CAP_MESSAGE = `You can register at most ${MAX_PASSKEYS_PER_USER} passkeys.`;
@@ -68,24 +51,15 @@ export const PASSKEY_RP_NOT_CONFIGURED =
   'Passkeys are not configured for this deployment. Set admin.auth.mfa.webauthn.rpId.';
 
 export interface WebauthnRp {
-  /** The relying-party id: a registrable domain, or `localhost`. Never an IP literal. */
   rpId: string;
-  /** Every origin an assertion may legitimately come from. */
   origins: string[];
 }
 
 /**
- * A deliberate approximation of the public suffix list, not the list itself: shipping (or
- * fetching) the real PSL for one validation check is not a trade this check makes. A dotless
- * rpId other than `localhost` is refused outright (which covers `com`, `io`, `dev`), and the set
- * below names the second-level suffixes an operator is realistically likely to type.
- *
- * The approximation errs in ONE direction on purpose. A suffix missing from the set is not caught
- * here, and the browser then refuses the ceremony with its own `SecurityError` -- under-refusing
- * costs nothing. Refusing a host that is NOT a public suffix is the expensive mistake: it locks a
- * legitimate deployment out of the feature with no way to override. Matching on shape rather than
- * membership (say, any two-label host with a two-character suffix) is what makes that mistake, to
- * registrable domains such as `co.io` and `org.io`.
+ * An approximation of the public suffix list, erring in one direction on purpose: a missing suffix
+ * is caught by the browser's own `SecurityError`, while refusing a host that is NOT a public
+ * suffix locks a legitimate deployment out with no override. Matching on shape rather than
+ * membership is what makes that mistake, to real domains like `co.io`.
  */
 const KNOWN_PUBLIC_SUFFIXES = new Set([
   'co.uk',
@@ -222,15 +196,10 @@ const KNOWN_PUBLIC_SUFFIXES = new Set([
   'co.bw',
 ]);
 
-/** An IPv6 host arrives from `URL.hostname` bracketed; `isIP` needs it bare. */
 const stripBrackets = (host: string): string => host.replace(/^\[/, '').replace(/\]$/, '');
 
-/**
- * Lowercased, with every trailing DNS root dot stripped. Both matter: a configured rpId must
- * compare equal to an origin's already-lowercase `URL.hostname`, and a host ending in one or more
- * dots is not one a browser accepts as a relying-party id. The normalised value is what gets
- * RETURNED, not merely what gets checked.
- */
+/** The normalised value is what is RETURNED, not merely what is checked: a trailing root dot is
+ * not a relying-party id any browser accepts. */
 const normalizeHost = (host: string): string => host.toLowerCase().replace(/\.+$/, '');
 
 const isPublicSuffix = (rpId: string): boolean => {
@@ -243,7 +212,6 @@ const isPublicSuffix = (rpId: string): boolean => {
   return KNOWN_PUBLIC_SUFFIXES.has(rpId);
 };
 
-/** WebAuthn needs a secure context: https anywhere, or http on localhost. */
 const isSecureOrigin = (url: URL): boolean =>
   url.protocol === 'https:' ||
   (url.protocol === 'http:' && stripBrackets(url.hostname) === 'localhost');
@@ -270,9 +238,8 @@ const isSecureOrigin = (url: URL): boolean =>
  * information is not theirs to learn.
  */
 export const resolveWebauthnRp = (strapi: Core.Strapi): WebauthnRp => {
-  // `[admin.auth.mfa]`, not the shared helper's `[security-settings]` default: this is a config
-  // fault, not a database-backed security-settings one, and an operator grepping for the passkey
-  // problem greps for the config key, not the store.
+  // `[admin.auth.mfa]`, not the helper's `[security-settings]` default: an operator greps for the
+  // config key, not the store.
   const refuse = (cause: string): never => {
     warnOnce(strapi, 'webauthn.rp', cause, 'error', '[admin.auth.mfa]');
     throw new ValidationError(PASSKEY_RP_NOT_CONFIGURED);
@@ -365,9 +332,8 @@ export const resolveWebauthnRp = (strapi: Core.Strapi): WebauthnRp => {
     }
 
     // The leading dot is load-bearing: `host.endsWith(rpId)` accepts "evil-example.com" for
-    // "example.com". Run for every origin whether or not either key was set -- in the
-    // fully-derived case it is trivially satisfied, and the dangerous case is `origins`
-    // configured against a derived rpId, where nothing else relates the two.
+    // "example.com". Run for every origin, since the dangerous case is `origins` configured against a
+    // derived rpId, where nothing else relates the two.
     const host = stripBrackets(url.hostname);
     if (host !== rpId && !host.endsWith(`.${rpId}`)) {
       return refuse(
@@ -385,7 +351,6 @@ export interface PasskeyRow {
   id: Data.ID;
   userId: string;
   credentialId: string;
-  /** Base64URL of the COSE key. */
   publicKey: string;
   /** `biginteger` reads back from the database as a string, so every use passes `Number(...)`. */
   counter: string | number;
@@ -395,31 +360,25 @@ export interface PasskeyRow {
   createdAt: Date | string;
 }
 
-/** The notices this module raises; a subset of the service's `MfaChangeNotice`. */
 type PasskeyNotice = 'passkey_registered' | 'passkey_removed' | 'passkey_used';
 
 export interface PasskeyDeps {
   strapi: Core.Strapi;
-  /** The live policy. Injected so this module never reads the store itself. */
   settings: () => Promise<PasskeySettings>;
   config: () => MfaConfig;
   recordEvent: (userId: string, type: MfaEventType, metadata?: MfaEventMetadata) => Promise<void>;
   notify: (
     userId: string,
-    // `challenge_failed` as well as the three passkey notices: the verify path charges the same
-    // per-account failure tier the TOTP paths charge, and that notice is how
-    // `isAccountThrottled` sees it.
+    // `challenge_failed` too: the verify path charges the same per-account tier the TOTP paths do,
+    // and that notice is how `isAccountThrottled` sees it.
     type: PasskeyNotice | 'challenge_failed',
     extra?: { byUserId?: string; count?: number }
   ) => Promise<void>;
   isAccountThrottled: (userId: string) => Promise<boolean>;
 }
 
-// `new Date(undefined).toISOString()` throws a `RangeError`. `createdAt` comes from the default
-// timestamps so it is always present in practice -- unlike `lastUsedAt`, which is guarded by its
-// caller below because it is genuinely nullable -- but a hand-edited row (or a migration that
-// never backfilled it) must not turn a list read into a 500. Falling back to the epoch reads as
-// "unknown", which is honest, rather than crashing the route.
+// `new Date(undefined).toISOString()` throws, so a hand-edited row must not turn a list read into
+// a 500. The epoch fallback reads as "unknown".
 const toIso = (value: Date | string): string => {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? new Date(0).toISOString() : date.toISOString();
@@ -438,11 +397,8 @@ const splitTransports = (value?: string | null): AuthenticatorTransport[] | unde
   return parts.length > 0 ? (parts as AuthenticatorTransport[]) : undefined;
 };
 
-/**
- * The challenge the browser actually signed, read out of `clientDataJSON`, so the consume below
- * can be conditional on *the submitted ceremony* rather than on "any pending ceremony". Anything
- * malformed returns null and becomes the generic registration failure, never a throw.
- */
+/** Read out of `clientDataJSON`, so the consume below is conditional on *the submitted ceremony*
+ * rather than on "any pending ceremony". Malformed input returns null, never throws. */
 const readCeremonyChallenge = (registration: RegistrationResponseJSON): string | null => {
   const clientDataJSON = registration?.response?.clientDataJSON;
   if (typeof clientDataJSON !== 'string' || clientDataJSON.length === 0) {
@@ -459,13 +415,9 @@ const readCeremonyChallenge = (registration: RegistrationResponseJSON): string |
   }
 };
 
-/**
- * Both ceremonies, plus list / count / delete / clear. Composed into
- * `createMfaService`, so callers reach it as `getService('mfa').registerPasskey` and friends.
- * Every function that decides anything keys on `userId`, and the credential lookup on the login
- * path is scoped to the challenge's owner in the `where` itself -- a global lookup followed by an
- * owner comparison is the same thing until somebody edits it.
- */
+/** Every function that decides anything keys on `userId`, and the login-path credential lookup is
+ * owner-scoped in the `where` itself: a global lookup plus an owner comparison is the same thing
+ * only until somebody edits it. */
 export const createPasskeys = ({
   strapi,
   settings,
@@ -481,15 +433,8 @@ export const createPasskeys = ({
   const countRows = (userId: string): Promise<number> =>
     query().count({ where: { userId: String(userId) } });
 
-  /**
-   * Physical column names for the raw statement that consumes a pending registration ceremony,
-   * resolved from metadata for exactly the reasons `consumeTotpStep` gives: the raw connection
-   * speaks columns, not attributes, and a schema or migration problem must surface as an
-   * actionable error rather than as a `TypeError` or -- far worse -- as an UPDATE that silently
-   * affects nothing and therefore reads as "already consumed". Both pending-ceremony columns
-   * are resolved: `mfaPasskeyChallengeExpiresAt` is nulled in the same conditional statement as
-   * `mfaPasskeyChallenge`, mirroring the pairing `disable` already keeps between the two.
-   */
+  /** A migration problem must surface as an error, not as an UPDATE that affects nothing and so
+   * reads as "already consumed". Both pending-ceremony columns are nulled in the same statement. */
   const userChallengeTable = (): {
     tableName: string;
     challengeColumn: string;
@@ -519,12 +464,8 @@ export const createPasskeys = ({
 
   const challengeQuery = () => strapi.db.query(CHALLENGE_UID);
 
-  /**
-   * Physical names for the three raw statements on the login path: the conditional attempt
-   * increment, the challenge write, and the single-DELETE consume. Resolved from metadata for the
-   * same reasons as `challengeTable()` in `mfa.ts` -- and resolved *here* rather than injected, so
-   * this module needs nothing from its factory but the services it cannot resolve itself.
-   */
+  /** Resolved here rather than injected, so this module needs nothing from its factory but the
+   * services it cannot resolve itself. */
   const challengeTable = (): {
     tableName: string;
     attemptsColumn: string;
@@ -551,12 +492,8 @@ export const createPasskeys = ({
     return { tableName: metadata.tableName, attemptsColumn, webauthnColumn };
   };
 
-  /**
-   * The challenge row, or null when it cannot authorise anything. Mirrors `verifyChallenge`'s own
-   * opening checks, including the fail-closed expiry: `new Date('nonsense') <= new Date()` is
-   * false for an Invalid Date, so comparing without the NaN guard would turn a missing or
-   * malformed `expiresAt` into a challenge that never expires.
-   */
+  /** Mirrors `verifyChallenge`'s opening checks, including the fail-closed expiry: without the NaN
+   * guard a malformed `expiresAt` is a challenge that never expires. */
   const usableChallenge = async (
     challengeToken: string
   ): Promise<{ id: unknown; userId: string; webauthnChallenge?: string | null } | null> => {
@@ -601,14 +538,10 @@ export const createPasskeys = ({
       select: ['credentialId', 'transports'],
     })) as Array<Pick<PasskeyRow, 'credentialId' | 'transports'>>;
 
-    // A stored `credentialId` that is not valid base64url makes the real
-    // `generateAuthenticationOptions` throw a bare `Error` -- not a `ValidationError` -- which
-    // would surface as a 500 on this unauthenticated route, echo the stored id back to a caller
-    // who holds only a challenge token, and permanently brick passkey login for that user (one
-    // corrupt row blocks every other, good, credential too). Skip it instead and log it at error
-    // level so the corrupt row gets noticed, exactly as `excludeCredentials` does on the
-    // registration path (below). Filtering before the `length === 0` check is what makes an
-    // all-corrupt set fail closed with the generic message rather than with the library's throw.
+    // One credentialId that is not valid base64url makes `generateAuthenticationOptions` throw a bare
+    // `Error`: a 500 on an unauthenticated route that echoes the stored id back and bricks passkey
+    // login for that user entirely. Filtering before the `length === 0` check is what makes an
+    // all-corrupt set fail closed with the generic message.
     const usable = rows.filter((row) => {
       if (isoBase64URL.isBase64URL(row.credentialId)) {
         return true;
@@ -644,12 +577,8 @@ export const createPasskeys = ({
       userVerification: 'preferred',
     });
 
-    // Keyed on the row id alone, overwriting any previous value so a retry re-mints cleanly. No
-    // `consumedAt IS NULL` guard: `consumeChallenge` spends a challenge by *deleting* the row, so
-    // a consumed challenge is a missing row and the id match is the whole check -- a `consumedAt`
-    // predicate here would read as protection it is not providing. The affected-row count is
-    // still checked below: a challenge consumed concurrently between `usableChallenge`'s read and
-    // this write must not be silently written to.
+    // No `consumedAt IS NULL` guard: a spent challenge is a deleted row, so the id match is the whole
+    // check. The affected-row count below catches one consumed concurrently since the read.
     const { tableName, webauthnColumn } = challengeTable();
     const written = await strapi.db
       .getConnection(tableName)
@@ -677,11 +606,8 @@ export const createPasskeys = ({
       throw new RateLimitError();
     }
 
-    // Defence in depth, not a hole being closed: the cascade runs inside `updateSettings`'s own
-    // transaction, so the setting and the rows cannot diverge through it, and the tolerant read
-    // falls back to `enabled: true`, so it cannot manufacture this state either. What this does
-    // cover is a hand-edited `core_store` row and any future caller that clears the setting
-    // without the cascade. No attempt charged and no event: nothing was evaluated.
+    // Defence in depth: the cascade already runs inside `updateSettings`' transaction, so this covers
+    // a hand-edited `core_store` row or a future caller that clears the setting without it.
     if (!(await settings()).enabled) {
       throw new ValidationError(PASSKEY_VERIFY_FAILED);
     }
@@ -722,9 +648,7 @@ export const createPasskeys = ({
       return fail();
     }
 
-    // Scoped to the challenge's owner in the `where` itself, never a global lookup followed by an
-    // owner comparison: that is the same thing until somebody edits it, and scoping the query
-    // means a valid assertion from another account's passkey finds no row.
+    // Owner-scoped in the `where` itself, so a valid assertion from another account finds no row.
     const row = (await query().findOne({
       where: { userId, credentialId },
     })) as PasskeyRow | null;
@@ -732,9 +656,8 @@ export const createPasskeys = ({
       return fail();
     }
 
-    // Resolved here rather than earlier so a misconfiguration cannot be told apart from a bad
-    // credential. A refusal charges no event -- it is a deployment fault, not a verification
-    // outcome -- and its cause is already in the log at error level.
+    // Resolved here, not earlier, so a misconfiguration cannot be told apart from a bad credential.
+    // A refusal charges no event: it is a deployment fault, not a verification outcome.
     let rp: WebauthnRp;
     try {
       rp = resolveWebauthnRp(strapi);
@@ -759,9 +682,8 @@ export const createPasskeys = ({
         },
       });
     } catch (error) {
-      // The library raises on a counter regression, which is the clone signal, and skips that
-      // check when both counters are 0 (most platform passkeys report 0 forever). A raise is
-      // treated as a failure like any other.
+      // The library raises on a counter regression (the clone signal) and skips the check when both
+      // counters are 0, which most platform passkeys report forever.
       strapi.log.warn(
         `A passkey assertion could not be verified for admin user ${userId}: ${
           error instanceof Error ? error.message : String(error)
@@ -774,20 +696,15 @@ export const createPasskeys = ({
       return fail();
     }
 
-    // The same single DELETE `consumeChallenge` uses: whoever removes the row wins, so a token
-    // cannot authorise two operations even if two concurrent requests each present a genuine
-    // assertion. Run *before* the row update and the notice below, so only the racer that wins
-    // the consume touches the stored counter, and only the winner emits the security notice -- a
-    // loser must not announce success for an operation it was refused.
+    // `consumeChallenge`'s DELETE again, run *before* the row update and the notice, so only the
+    // racer that wins the consume touches the counter or announces success.
     const consumed = await strapi.db.getConnection(tableName).where({ id: challenge.id }).del();
     if (consumed !== 1) {
       throw new ValidationError(PASSKEY_VERIFY_FAILED);
     }
 
-    // Scoped by `userId` as well as `id`, not id alone. The row was already read scoped to the
-    // challenge's owner, but a read and a write are two separate statements: an owner check that
-    // lives only on the read is one reordering away from being no check at all. `deletePasskey`
-    // carries the same scope for the same reason.
+    // Scoped by `userId` as well as `id`: an owner check that lives only on the read is one
+    // reordering away from being no check at all.
     await query().update({
       where: { id: row.id, userId },
       data: {
@@ -824,12 +741,9 @@ export const createPasskeys = ({
       select: ['credentialId', 'transports'],
     })) as Array<Pick<PasskeyRow, 'credentialId' | 'transports'>>;
 
-    // A stored `credentialId` that is not valid base64url makes the real `generateRegistrationOptions`
-    // throw a bare `Error` -- not a `ValidationError` -- which would surface as a 500 and
-    // permanently brick this route for the user: they could never register a replacement while
-    // the malformed row exists. Skip it instead and log it at error level so the corrupt row gets
-    // noticed; the only cost is losing the browser's `InvalidStateError` de-dupe nicety for that
-    // one authenticator, which is far cheaper than locking the user out of the feature entirely.
+    // One invalid base64url `credentialId` makes `generateRegistrationOptions` throw, bricking this
+    // route for the user. Skipping costs only the browser's `InvalidStateError` de-dupe for that
+    // authenticator.
     const excludeCredentials = existing
       .filter((row) => {
         if (isoBase64URL.isBase64URL(row.credentialId)) {
@@ -851,11 +765,9 @@ export const createPasskeys = ({
     const options = await generateRegistrationOptions({
       rpName: RP_NAME,
       rpID: rpId,
-      // The library throws on a string, and if `userID` is omitted it generates random bytes --
-      // which would be unrecoverable, because the user handle is what a discoverable credential
-      // returns at login. Deriving it from the admin user id means a later passwordless flow can
-      // decode a returned `userHandle` straight back to the id with no stored column, which is
-      // the whole justification for requesting `residentKey: 'preferred'`.
+      // Omitting `userID` makes the library generate random bytes, which is unrecoverable: the user
+      // handle is what a discoverable credential returns at login. Deriving it from the id means a
+      // later passwordless flow can decode it back with no stored column.
       userID: isoUint8Array.fromUTF8String(String(user.id)),
       userName: user.email,
       userDisplayName: displayName,
@@ -893,12 +805,9 @@ export const createPasskeys = ({
   ): Promise<Passkey> => {
     const user = await userQuery().findOne({ where: { id: userId } });
 
-    // Defence in depth, not the primary guard: the conditional statement below binds `submitted`
-    // (the challenge the browser actually signed), never the just-read `user.mfaPasskeyChallenge`,
-    // so a `null` column can never satisfy it and this check is provably redundant for that
-    // binding. It stays because the binding is what does the real work -- if a later edit rebinds
-    // the `where` to the read value instead of `submitted`, a `null` column becomes `IS NULL` and
-    // this guard becomes the only thing standing between that mistake and a replay.
+    // Redundant while the statement below binds `submitted` rather than the read value. It stays
+    // because rebinding it to the read value turns a `null` column into `IS NULL`, and this would
+    // then be the only thing between that edit and a replay.
     if (!user?.mfaPasskeyChallenge) {
       throw new ValidationError(PASSKEY_REGISTRATION_FAILED);
     }
@@ -908,10 +817,8 @@ export const createPasskeys = ({
       throw new ValidationError(PASSKEY_REGISTRATION_FAILED);
     }
 
-    // `consumeTotpStep`'s conditional statement: the ceremony is spent here, before anything is
-    // verified, so two submissions of the same one cannot both land. The submitted challenge is
-    // bound as a non-null string, so a response signed over a different challenge matches nothing
-    // and leaves the genuine ceremony pending.
+    // Spent before anything is verified, so two submissions of the same ceremony cannot both land.
+    // Bound as a non-null string, so a response signed over a different challenge matches nothing.
     const { tableName, challengeColumn, challengeExpiresAtColumn } = userChallengeTable();
     // Nulls `mfaPasskeyChallengeExpiresAt` in the same statement as the challenge itself, so a
     // spent ceremony never leaves an expiry stamp behind for the next one to trip over.
@@ -925,11 +832,7 @@ export const createPasskeys = ({
       throw new ValidationError(PASSKEY_REGISTRATION_FAILED);
     }
 
-    // Expiry fails closed: `new Date('nonsense') <= new Date()` is false for an
-    // Invalid Date, so a missing or hand-edited stamp must not read as a ceremony that never
-    // expires. The stamp itself decides nothing else -- the guard above is on the challenge
-    // column alone -- and the next options call overwrites it. Read here before the row this
-    // registration lands in is even created, and cleared above regardless of what it reads.
+    // Fails closed: without the NaN guard a hand-edited stamp is a ceremony that never expires.
     const expiresAt = new Date(user.mfaPasskeyChallengeExpiresAt);
     if (Number.isNaN(expiresAt.getTime()) || expiresAt <= new Date()) {
       throw new ValidationError(PASSKEY_REGISTRATION_FAILED);
@@ -941,9 +844,8 @@ export const createPasskeys = ({
     try {
       verification = await verifyRegistrationResponse({
         response: registration,
-        // `submitted` is the value the consume above actually matched on, not the pre-consume read
-        // -- they are provably equal on every reachable path, but this removes the divergence by
-        // construction instead of relying on that proof.
+        // The value the consume matched on, not the pre-consume read: equal on every reachable path, but
+        // this removes the divergence by construction.
         expectedChallenge: submitted,
         expectedOrigin: origins,
         expectedRPID: rpId,
@@ -986,30 +888,21 @@ export const createPasskeys = ({
           },
         })) as PasskeyRow;
 
-        // The authoritative half of the cap: the recount and the insert share this transaction, so
-        // a row that commits between `passkeyRegistrationOptions`' pre-check and this recount is
-        // caught and the insert rolls back. `>` here, against the pre-check's `>=`, because this
-        // recount happens *after* the insert -- the tenth passkey leaves a count of exactly
-        // `MAX_PASSKEYS_PER_USER`, which is allowed.
-        //
-        // Not a concurrency guard: parallel transactions never see each other's uncommitted
-        // inserts. That job belongs to the single-use ceremony consume above -- one pending
-        // challenge column per user, spent by one conditional statement.
+        // The authoritative half of the cap: recount and insert share this transaction, so a row that
+        // commits since the pre-check rolls the insert back. `>` against the pre-check's `>=`, because
+        // this runs *after* the insert. Not a concurrency guard -- that is the ceremony consume above.
         if ((await countRows(userId)) > MAX_PASSKEYS_PER_USER) {
           throw new ValidationError(PASSKEY_CAP_MESSAGE);
         }
 
-        // Inside the same transaction as the row, exactly as trusted devices records `device_trusted`:
-        // the credential and the audit trail that explains it must land or fail together.
-        // `notify` stays outside -- it is the event hub, fire and forget.
+        // In the transaction: the credential and the audit trail that explains it land or fail together.
         await recordEvent(userId, 'passkey_registered', { deviceName: name });
 
         return row;
       });
     } catch (error) {
-      // The cap refusal is ours and keeps its actionable message. Anything else is a database
-      // error -- above all the unique-constraint violation on `credentialId`, which must not
-      // propagate as a dialect-specific 500 naming the table.
+      // Ours keeps its actionable message; anything else is a database error, above all the
+      // unique-constraint violation on `credentialId`, which must not surface as a 500 naming the table.
       if (error instanceof ValidationError) {
         throw error;
       }
@@ -1026,13 +919,7 @@ export const createPasskeys = ({
     return toPublicPasskey(created);
   };
 
-  /**
-   * The caller's own rows, newest first. Empty while the policy is off, so this and the
-   * administrator count never disagree. One consequence worth stating: in the only state where
-   * surviving rows and a disabled policy coexist (a hand-edited `core_store` row), the lists read
-   * empty, so the permitted direction is reachable only through the administrator DELETE, which
-   * deletes without reading.
-   */
+  /** Empty while the policy is off, so this and the administrator count never disagree. */
   const listPasskeys = async (userId: string): Promise<Passkey[]> => {
     if (!(await settings()).enabled) {
       return [];
@@ -1055,11 +942,7 @@ export const createPasskeys = ({
     return countRows(userId);
   };
 
-  /**
-   * One row, only if it is the caller's -- scoped in the `where` itself. No policy check:
-   * removing a credential is never the dangerous direction, and TOTP always survives it, so there
-   * is no lockout path.
-   */
+  /** No policy check: removing a credential is never the dangerous direction, and TOTP survives it. */
   const deletePasskey = async (userId: string, id: string): Promise<boolean> => {
     const row = (await query().findOne({
       where: { id, userId: String(userId) },
@@ -1069,9 +952,7 @@ export const createPasskeys = ({
       return false;
     }
 
-    // Scoped by `userId` as well as `id`, not id alone: the read above is owner-scoped, but a read
-    // and a write are two separate statements, so a check that lives only on the read is correct
-    // today only because nothing reorders them.
+    // Scoped by `userId` too: a check that lives only on the read survives only until a reorder.
     await query().deleteMany({ where: { id: row.id, userId: String(userId) } });
     await recordEvent(userId, 'passkey_removed', { deviceName: row.name });
     notify(userId, 'passkey_removed');
@@ -1093,15 +974,10 @@ export const createPasskeys = ({
 
   const passkeySettings = (): Promise<PasskeySettings> => settings();
 
-  /**
-   * whether a webauthn ceremony can even be attempted in this deployment, without leaking why
-   * not to whichever caller asks -- `resolveWebauthnRp`'s refusal is already logged at error level
-   * (through `warnOnce`) where it happens, so this wrapper only ever needs to swallow it into a
-   * boolean. Composed with the organisation policy by both `passkeysEnabled` on `/mfa/me`
-   * (`controllers/mfa.ts`) and `passkeyAvailable` on the challenge response
-   * (`controllers/authentication.ts`), so neither ever advertises a passkey button a
-   * misconfigured deployment cannot honour, and neither can 500 on account of asking.
-   */
+  /** Whether a ceremony can be attempted at all, without leaking why not: the refusal is already
+   * logged where it happens, so this only swallows it into a boolean. Both callers compose it with
+   * the organisation policy, so neither advertises a button a misconfigured deployment cannot
+   * honour. */
   const passkeysConfigured = (): boolean => {
     try {
       resolveWebauthnRp(strapi);
@@ -1112,22 +988,10 @@ export const createPasskeys = ({
   };
 
   /**
-   * Boot-time discoverability for the one misconfiguration that hides the whole feature.
-   *
-   * `resolveWebauthnRp`'s refusal is already logged at error level with the config key that fixes
-   * it, but its only other caller is `passkeysConfigured` on `/mfa/me` -- so without this the line
-   * would appear once somebody loaded the admin, buried in request logs, long after the operator
-   * had stopped watching the console. Reached from `bootstrap.ts`, the cause lands in the startup
-   * log beside every other configuration complaint.
-   *
-   * Called for its side effect rather than its answer: there is nothing to decide at boot, and
-   * `passkeysConfigured` swallowing the throw is exactly the behaviour wanted here too. `warnOnce`
-   * keys this to `webauthn.rp`, so spending the once at boot is deliberate -- the later lazy
-   * callers stay silent because the operator has already been told.
-   *
-   * Silent when the organisation has passkeys switched off: there is no feature to be missing, and
-   * an error about an unused config key is noise. That also means the check only runs where it can
-   * matter, since the store read below is the only work it does.
+   * Boot-time discoverability for the one misconfiguration that hides the whole feature: without
+   * this the refusal only reaches the log once somebody loads the admin, long after the operator
+   * stopped watching the console. `warnOnce` keys it, so spending the once at boot deliberately
+   * silences the later lazy callers. Silent when the organisation has passkeys off.
    */
   const warnIfPasskeysMisconfigured = async (): Promise<void> => {
     if (!(await settings()).enabled) {
