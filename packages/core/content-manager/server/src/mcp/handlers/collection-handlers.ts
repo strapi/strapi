@@ -13,7 +13,7 @@ import {
 } from './constants';
 import { isContentTypeLocalized } from '../permissions';
 import { shapeRelationsForMcp } from '../sanitizers/shape-relations';
-import { ok, sanitizeFormatShape } from '../utils';
+import { buildWriteReplyPopulate, ok, sanitizeFormatShape } from '../utils';
 
 type McpDocumentQuery = {
   populate?: unknown;
@@ -235,11 +235,14 @@ export const createCollectionCreateHandler =
       await permissionChecker.sanitizeCreateInput(data)
     ) as Record<string, unknown>;
 
+    const writePopulate = await buildWriteReplyPopulate(uid);
+
     const { locale: resolvedLocale, status } = await getDocumentLocaleAndStatus({ locale }, uid);
 
     const result = await strapi.db.transaction(async () => {
       const document = await documentManager.create(uid, {
         data: sanitizedData,
+        populate: writePopulate,
         locale: resolvedLocale,
         status,
       });
@@ -281,6 +284,8 @@ export const createCollectionUpdateHandler =
       .populateFromQuery(permissionQuery)
       .build();
 
+    const writePopulate = await buildWriteReplyPopulate(uid);
+
     const { locale: resolvedLocale } = await getDocumentLocaleAndStatus({ locale }, uid);
 
     const [documentVersion, documentExists] = await Promise.all([
@@ -318,7 +323,7 @@ export const createCollectionUpdateHandler =
       const updatedDocument = await documentManager.update(
         documentVersion?.documentId ?? documentId,
         uid,
-        { data: sanitizedData, locale: resolvedLocale }
+        { data: sanitizedData, populate: writePopulate, locale: resolvedLocale }
       );
 
       return sanitizeFormatShape(permissionChecker, uid, updatedDocument);
@@ -405,6 +410,8 @@ export const createCollectionPublishHandler =
       throw new errors.ForbiddenError();
     }
 
+    const writePopulate = await buildWriteReplyPopulate(uid);
+
     const { locale: resolvedLocale } = await getDocumentLocaleAndStatus({ locale }, uid);
 
     const publishedDocument = await strapi.db.transaction(async () => {
@@ -427,6 +434,7 @@ export const createCollectionPublishHandler =
       }
 
       const publishResult = await documentManager.publish(document.documentId, uid, {
+        populate: writePopulate,
         locale: resolvedLocale,
       });
 
@@ -474,6 +482,8 @@ export const createCollectionUnpublishHandler =
       .populateFromQuery(permissionQuery)
       .build();
 
+    const writePopulate = await buildWriteReplyPopulate(uid);
+
     const { locale: resolvedLocale } = await getDocumentLocaleAndStatus({ locale }, uid);
 
     const document = await documentManager.findOne(documentId, uid, {
@@ -499,7 +509,10 @@ export const createCollectionUnpublishHandler =
         await documentManager.discardDraft(document.documentId, uid, { locale: resolvedLocale });
       }
 
-      return documentManager.unpublish(document.documentId, uid, { locale: resolvedLocale });
+      return documentManager.unpublish(document.documentId, uid, {
+        populate: writePopulate,
+        locale: resolvedLocale,
+      });
     });
 
     const result = await sanitizeFormatShape(permissionChecker, uid, unpublishedDocument);
@@ -534,6 +547,8 @@ export const createCollectionDiscardDraftHandler =
       .populateFromQuery(permissionQuery)
       .build();
 
+    const writePopulate = await buildWriteReplyPopulate(uid);
+
     const { locale: resolvedLocale } = await getDocumentLocaleAndStatus({ locale }, uid);
 
     const document = await documentManager.findOne(documentId, uid, {
@@ -551,7 +566,11 @@ export const createCollectionDiscardDraftHandler =
     }
 
     const discardedDocument = await asyncPipe.pipe(
-      (doc: any) => documentManager.discardDraft(doc.documentId, uid, { locale: resolvedLocale }),
+      (doc: any) =>
+        documentManager.discardDraft(doc.documentId, uid, {
+          populate: writePopulate,
+          locale: resolvedLocale,
+        }),
       (doc: unknown) => sanitizeFormatShape(permissionChecker, uid, doc)
     )(document);
 
