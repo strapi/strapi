@@ -131,10 +131,10 @@ describe('PasskeysCard', () => {
     expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
   });
 
-  // The server exempts a passkeys-only save from a
-  // password-less (SSO-only) actor's no-local-password refusal, but the pre-fix UI routed the
-  // off-transition through `ConfirmDowngradeDialog` unconditionally, whose Confirm demands a
-  // password such an actor cannot supply -- a dead end. `hasLocalPassword` closes that gap.
+  // The server exempts a passkeys-only save from a password-less (SSO-only) actor's
+  // no-local-password refusal. Routing the off-transition through `ConfirmDowngradeDialog`
+  // unconditionally would be a dead end for such an actor, since its Confirm demands a password
+  // they cannot supply -- which is what `hasLocalPassword` is for.
   it('lets a password-less administrator turn passkeys off directly, with no dialog', async () => {
     const bodies = captureSave();
     const { user } = renderCard({ hasLocalPassword: false });
