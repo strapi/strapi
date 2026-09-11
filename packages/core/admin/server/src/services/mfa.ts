@@ -73,8 +73,8 @@ export type { MfaEventType };
 /**
  * The shape `recordEvent`'s `metadata` is expected to carry -- what `buildSessionMetadataFromContext`
  * actually returns (`loginAt`, and `deviceName` when the user-agent maps to one; see
- * `@strapi/utils`'s `buildSessionMetadata`), plus `via: 'cli'`, how the CLI reset marks
- * an event it recorded outside any HTTP request. None of these can ever be a code, a secret or an
+ * `@strapi/utils`'s `buildSessionMetadata`), plus `via: 'cli'`, how the CLI commands mark an
+ * event they recorded outside any HTTP request. None of these can ever be a code, a secret or an
  * otpauth URI.
  *
  * This only turns an undeclared field into a compile error for an object literal passed directly
@@ -340,9 +340,9 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
 
   /**
    * Enforcement, run by every path that mints a session for a password-holding user.
-   * Reloads the row with roles itself so callers may pass a partial user. See the outcome table
-   * below; `retried` bounds the single re-read taken when a conditional update finds its
-   * precondition gone.
+   * Reloads the row with roles itself so callers may pass a partial user. Returns `none`,
+   * `grace` or `refused` (see `MfaEnforcementOutcome`); `retried` bounds the single re-read taken
+   * when a conditional update finds its precondition gone.
    */
   const evaluateEnforcement = async (
     user: { id: Data.ID },
@@ -911,8 +911,9 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
 
   /**
    * The notice types `notify` may announce. Not a subset of `MfaEventType`: it drops the two
-   * recovery-code types and *adds* `passkey_used`, which is emitted on the hub but never
-   * persisted as a row.
+   * recovery-code types, which `recordEvent` alone already serves, and adds the two
+   * `MfaAuditOnlyNotice` members, which reach the hub (and so EE audit logs) but are never
+   * written as rows.
    * `recovery_code_used` and `recovery_codes_issued` never reach here: both are already fully
    * served by `recordEvent` alone (the in-app notice feed, and the acknowledgement marker
    * respectively), and an emailed notice on every recovery-code use would mean an attacker who has
@@ -1506,9 +1507,9 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
    * Clears enrolment entirely. Recovery codes and outstanding challenges go too, so a later
    * re-enrolment starts clean rather than inheriting stale rows.
    *
-   * Wrapped in a transaction, same reasoning as `issueRecoveryCodes`: these three statements must
-   * all land or none does. Without it, a failure on the user `update` (the last of the three)
-   * would leave `mfaEnabledAt`/`mfaSecret` still set -- so a code is still demanded on every
+   * Wrapped in a transaction, same reasoning as `issueRecoveryCodes`: every statement in it must
+   * land or none does. Without it, a failure on the user `update` (the last one) would leave
+   * `mfaEnabledAt`/`mfaSecret` still set -- so a code is still demanded on every
    * future request -- with the recovery codes already deleted, and a replacement enrolment demands
    * a current factor. That is a permanent lockout with no way back in short of the CLI reset.
    *

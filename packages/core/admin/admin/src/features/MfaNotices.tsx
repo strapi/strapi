@@ -64,10 +64,6 @@ const NOTICE_COPY: Record<MfaEventNotice['type'], { id: string; defaultMessage: 
     id: 'Settings.profile.form.section.mfa.notice.device_trust_revoked',
     defaultMessage: 'Trusted devices were revoked',
   },
-  trusted_device_used: {
-    id: 'Settings.profile.form.section.mfa.notice.trusted_device_used',
-    defaultMessage: 'A trusted device logged in without a code',
-  },
   passkey_registered: {
     id: 'Settings.profile.form.section.mfa.notice.passkey_registered',
     defaultMessage: 'A passkey was added to your account',

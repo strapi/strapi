@@ -1,7 +1,7 @@
 import { yup, validateYupSchema } from '@strapi/utils';
 
 /**
- * Two conventions every schema in this file follows.
+ * Three conventions every schema in this file follows.
  *
  * `code`'s `max(32)` is deliberately loose: a 6-8 digit TOTP code and a 10-character recovery
  * code the user may have typed with dashes must both pass. Which factor was submitted is decided

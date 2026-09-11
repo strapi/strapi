@@ -383,9 +383,15 @@ export type MfaEventType =
   | 'authenticator_replaced'
   | 'device_trusted'
   | 'device_trust_revoked'
-  | 'trusted_device_used'
   | 'passkey_registered'
   | 'passkey_removed';
+
+/**
+ * Announced on the event hub -- so EE audit logging can observe them -- but never written as a
+ * row, because a notice on every *use* of a factor would bury the notices that report a change
+ * to it. They are therefore not `MfaEventType`, and the notice feed can never contain one.
+ */
+export type MfaAuditOnlyNotice = 'trusted_device_used' | 'passkey_used';
 
 /**
  * What the notice feed can contain. `recovery_codes_issued` is a row type but not a notice: it is

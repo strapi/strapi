@@ -334,7 +334,6 @@
   "Settings.profile.form.section.mfa.notice.reset": "Two-factor authentication was reset by an administrator",
   "Settings.profile.form.section.mfa.notice.summary": "{count, plural, one {# security event} other {# security events}} on your account since your last visit. Review them on your profile page.",
   "Settings.profile.form.section.mfa.notice.title": "Security notice",
-  "Settings.profile.form.section.mfa.notice.trusted_device_used": "A trusted device logged in without a code",
   "Settings.profile.form.section.mfa.notice.unlocked": "Your account was unlocked by an administrator",
   "Settings.profile.form.section.mfa.notices.markSeen": "Mark all as seen",
   "Settings.profile.form.section.mfa.notices.title": "Recent security events",

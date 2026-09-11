@@ -26,9 +26,8 @@ const { ApplicationError, RateLimitError, ValidationError } = errors;
 const USER_UID = 'admin::user';
 const CHALLENGE_UID = 'admin::mfa-challenge';
 
-/** The one symbol of this module's five originally-exported constants/types that a test actually
- * needs (`services/__tests__/mfa.test.ts` imports it rather than re-declaring the literal). The
- * other four stay unexported: nothing outside this module reaches them. */
+/** Exported so `services/__tests__/mfa.test.ts` can import it rather than re-declaring the
+ * literal and letting the two drift. */
 export const PASSKEY_UID = 'admin::mfa-passkey';
 
 /**
@@ -1063,7 +1062,8 @@ export const createPasskeys = ({
     return rows.map(toPublicPasskey);
   };
 
-  /** Zero while the policy is off, for the same reason. `passkeyAvailable` is `> 0`. */
+  /** Zero while the policy is off, for the same reason. The login screen's `passkeyAvailable`
+   * needs this `> 0` *and* a usable relying party (`passkeyAvailableFor`). */
   const countPasskeys = async (userId: string): Promise<number> => {
     if (!(await settings()).enabled) {
       return 0;

@@ -2,7 +2,7 @@
 
 import { defaultEvents } from '../lifecycles';
 
-import type { MfaEventType } from '../../../../../../shared/contracts/mfa';
+import type { MfaAuditOnlyNotice, MfaEventType } from '../../../../../../shared/contracts/mfa';
 
 /**
  * `notify` emits every MFA notice on the event hub as `admin.mfa.<type>` with `_` replaced by
@@ -30,7 +30,6 @@ const ROW_TYPES: MfaEventType[] = [
   'authenticator_replaced',
   'device_trusted',
   'device_trust_revoked',
-  'trusted_device_used',
   'passkey_registered',
   'passkey_removed',
 ];
@@ -54,11 +53,14 @@ describe('mfa events reach the audit log', () => {
     }
   );
 
-  // Emitted on the hub but never persisted as a row, so it is not in `MfaEventType` and would be
-  // missed by a check derived from row types alone.
-  test('passkey_used is audited even though it has no row', () => {
-    expect(defaultEvents).toContain('admin.mfa.passkey.used');
-  });
+  // The `MfaAuditOnlyNotice` pair: emitted on the hub but never persisted, so they are not in
+  // `MfaEventType` and a check derived from row types alone would miss them entirely.
+  test.each<MfaAuditOnlyNotice>(['trusted_device_used', 'passkey_used'])(
+    '%s is audited even though it has no row',
+    (type) => {
+      expect(defaultEvents).toContain(hubName(type));
+    }
+  );
 
   test('the deliberately unaudited types are genuinely absent, not forgotten', () => {
     for (const type of NOT_AUDITED) {

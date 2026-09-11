@@ -1004,12 +1004,12 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
         throw new Error(`Unexpected table in mock connection: ${table}`);
       }),
       metadata: { get: metadataGet },
-      // A real commit/rollback, not a bare pass-through: `disable` wraps
-      // three statements in one transaction specifically so a failure on the last one (the user
-      // update) undoes the first two (the recovery-code and challenge deletes) rather than
-      // stranding the account mid-teardown. Proving that requires the mock to actually roll back
-      // on a thrown callback -- snapshot every store this suite touches before running the
-      // callback, and restore all four wholesale if it rejects. On success nothing extra happens:
+      // A real commit/rollback, not a bare pass-through: `disable` wraps its whole teardown in
+      // one transaction specifically so a failure on the last statement (the user update) undoes
+      // the deletes before it rather than stranding the account mid-teardown. Proving that
+      // requires the mock to actually roll back on a thrown callback -- snapshot every store this
+      // suite touches before running the callback, and restore them all wholesale if it rejects.
+      // On success nothing extra happens:
       // the stores already hold whatever the callback wrote, exactly like a committed transaction.
       transaction: jest.fn(async (run: (args: { trx: unknown }) => Promise<unknown>) => {
         const usersSnapshot = new Map(Array.from(users.entries(), ([id, row]) => [id, { ...row }]));
@@ -2665,8 +2665,8 @@ describe('mfa service: assertPasswordAndFactor and disable', () => {
     });
 
     test('a failing user update rolls back the recovery-code and challenge deletes, so there is no permanent lockout', async () => {
-      // The third of `disable`'s three statements is made to reject. Without a transaction the
-      // first two (the deletes) would already have committed by the time this throws, leaving
+      // The last of `disable`'s statements, the user update, is made to reject. Without a
+      // transaction the deletes before it would already have committed by the time this throws, leaving
       // the account with `mfaEnabledAt`/`mfaSecret` still set (a code is still demanded) and zero
       // recovery codes -- and `beginEnrolment` refuses to re-enrol while `mfaEnabledAt` is set, so
       // that combination is a permanent lockout with no path back but the CLI reset.
