@@ -37,7 +37,7 @@ const RENAMED = 'journey3_refined.jpeg';
 const ALT_TEXT = 'Head coach Ted Lasso';
 const CAPTION = 'Shot during pre-season';
 
-describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
+describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
   'Media Library - Journey 3: Edit & refine an asset',
   () => {
     test.describe.configure({ timeout: 600_000 });
