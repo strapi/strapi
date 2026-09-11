@@ -6,8 +6,8 @@ import type * as Preset from '@docusaurus/preset-classic';
 import { remarkDesignSystemLinks } from './remark-design-system-links';
 
 const pluginTypedocOptions: Parameters<typeof TypedocPlugin>[1] = {
-  entryPoints: ['../packages/core/strapi/src/admin.ts'],
-  tsconfig: '../packages/core/strapi/tsconfig.build.json',
+  entryPoints: ['../packages/core/strapi/admin/src/index.ts'],
+  tsconfig: '../packages/core/strapi/admin/tsconfig.build.json',
   // `readme: 'none'` uses a single project page (no separate index). Together with
   // `entryFileName: 'modules.md'` this avoids generating `index.md` (invalid MDX: bare `<br>` tags).
   // Do not set `entryFileName: null` — it becomes an empty URL and TypeDoc tries to write

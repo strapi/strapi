@@ -11,11 +11,10 @@ import { previewAdmin } from './preview';
 import { routes } from './router';
 import { prefixPluginTranslations } from './utils/translations';
 
-import type { StrapiApp, WidgetArgs } from '@strapi/admin/strapi-admin';
+import type { PluginDefinition, WidgetArgs } from '@strapi/admin/strapi-admin';
 
-// eslint-disable-next-line import/no-default-export
-export default {
-  register(app: StrapiApp) {
+const admin: PluginDefinition = {
+  register(app) {
     const cm = new ContentManagerPlugin();
 
     app.addReducers({
@@ -106,7 +105,7 @@ export default {
       return [lastEditedWidget, lastPublishedWidget, ...widgets, entriesWidget];
     });
   },
-  bootstrap(app: StrapiApp) {
+  bootstrap(app) {
     if (typeof historyAdmin.bootstrap === 'function') {
       historyAdmin.bootstrap(app);
     }
@@ -136,5 +135,8 @@ export default {
     return Promise.resolve(importedTrads);
   },
 };
+
+// eslint-disable-next-line import/no-default-export
+export default admin;
 
 export * from './exports';

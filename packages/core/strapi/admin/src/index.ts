@@ -1,11 +1,11 @@
 import { RenderAdminArgs, renderAdmin } from '@strapi/admin/strapi-admin';
-import contentTypeBuilder from '@strapi/content-type-builder/strapi-admin';
 import contentManager from '@strapi/content-manager/strapi-admin';
-import email from '@strapi/email/strapi-admin';
-import upload from '@strapi/upload/strapi-admin';
-import i18n from '@strapi/i18n/strapi-admin';
 import contentReleases from '@strapi/content-releases/strapi-admin';
+import contentTypeBuilder from '@strapi/content-type-builder/strapi-admin';
+import email from '@strapi/email/strapi-admin';
+import i18n from '@strapi/i18n/strapi-admin';
 import reviewWorkflows from '@strapi/review-workflows/strapi-admin';
+import upload from '@strapi/upload/strapi-admin';
 
 const render = (mountNode: HTMLElement | null, { plugins, ...restArgs }: RenderAdminArgs) => {
   return renderAdmin(mountNode, {
@@ -23,9 +23,10 @@ const render = (mountNode: HTMLElement | null, { plugins, ...restArgs }: RenderA
   });
 };
 
+// eslint-disable-next-line import/export -- Multiple exports of name 'renderAdmin'.
 export { render as renderAdmin };
-export type { RenderAdminArgs };
 
+// eslint-disable-next-line import/export -- Multiple exports of name 'renderAdmin'.
 export * from '@strapi/admin/strapi-admin';
 
 export {

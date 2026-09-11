@@ -1,13 +1,10 @@
 import { PERMISSIONS } from './constants';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
-import type { StrapiApp } from '@strapi/admin/strapi-admin';
-import type { Plugin } from '@strapi/types';
+import type { PluginDefinition } from '@strapi/admin/strapi-admin';
 
-const admin: Plugin.Config.AdminInput = {
-  // TODO typing app in strapi/types as every plugin needs it
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  register(app: StrapiApp) {
+const admin: PluginDefinition = {
+  register(app) {
     // Create the email settings section
     app.addSettingsLink(
       {
@@ -33,7 +30,6 @@ const admin: Plugin.Config.AdminInput = {
       name: 'email',
     });
   },
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   bootstrap() {},
   async registerTrads({ locales }: { locales: string[] }) {
     const importedTrads = await Promise.all(

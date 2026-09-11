@@ -30,7 +30,7 @@ import { getTranslation } from './utils/getTranslation';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 import { mutateCTBContentTypeSchema } from './utils/schemas';
 
-import type { StrapiApp } from '@strapi/admin/strapi-admin';
+import type { PluginDefinition } from '@strapi/admin/strapi-admin';
 import type {
   ContentManagerPlugin,
   DocumentActionComponent,
@@ -65,9 +65,8 @@ type ContentTypeBuilderAdvancedFieldArgs = {
   type?: string;
 };
 
-// eslint-disable-next-line import/no-default-export
-export default {
-  register(app: StrapiApp) {
+const admin: PluginDefinition = {
+  register(app) {
     app.addMiddlewares([extendCTBAttributeInitialDataMiddleware, extendCTBInitialDataMiddleware]);
     app.addMiddlewares([() => i18nApi.middleware]);
     app.addReducers({
@@ -79,7 +78,7 @@ export default {
       name: pluginId,
     });
   },
-  bootstrap(app: StrapiApp) {
+  bootstrap(app) {
     // // Hook that adds a column into the CM's LV table
     app.registerHook('Admin/CM/pages/ListView/inject-column-in-table', addColumnToTableHook);
     app.registerHook('Admin/CM/pages/EditView/mutate-edit-view-layout', mutateEditViewHook);
@@ -244,3 +243,6 @@ export default {
     return Promise.resolve(importedTrads);
   },
 };
+
+// eslint-disable-next-line import/no-default-export
+export default admin;
