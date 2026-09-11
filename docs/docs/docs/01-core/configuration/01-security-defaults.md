@@ -137,7 +137,7 @@ module.exports = () => ({
 });
 ```
 
-See [MIME type validation](/upload/mime-validation) for how allow/deny lists are evaluated.
+See [MIME type validation](/docs/core/upload/backend/mime-validation) for how allow/deny lists are evaluated.
 
 ### SVG uploads and existing projects
 
