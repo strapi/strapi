@@ -25,3 +25,24 @@ export const MCP_FOLDER_MOVE_INTO_SELF =
  */
 export const MCP_DELETE_FOLDER_UNRESOLVED_IDS = (ids: number[]) =>
   `These ids do not match any media folder: ${ids.join(', ')}. Nothing was deleted — media_delete_folder rejects the whole request rather than deleting the folders that did match, because folder ids and asset ids are indistinguishable integers. If these are asset ids, use media_delete_assets instead; otherwise the folders may already be gone. Use media_list_folders to discover valid folder ids.`;
+
+export const MCP_MOVE_ASSETS_DESTINATION_NOT_FOUND =
+  'The destination folder does not exist. Use media_list_folders to discover valid folder ids, or pass null for the media library root.';
+
+/** Per-id `failed` reasons for `media_move_assets`. Both are per asset, so the wording names the id's fate, not the call's. */
+export const MCP_MOVE_ASSETS_ID_NOT_FOUND =
+  'No media asset has this id, so nothing was moved for it. If this is a folder id, use media_move_folder — and note that a folder id only fails like this when no asset happens to share the number; when one does, media_move_assets moves that asset instead. Otherwise the asset may already be deleted — use media_list_assets to discover valid asset ids.';
+
+export const MCP_MOVE_ASSETS_ID_FORBIDDEN =
+  'This token is not allowed to edit this asset. A permission condition on plugin::upload.assets.update excludes it.';
+
+/**
+ * Returned when the move of one asset failed for a reason that is not a missing asset or a
+ * permission denial — a DB error, say, or an upload-provider fault.
+ *
+ * Reported per id rather than thrown: a tool error carries no `structuredContent`, so throwing
+ * would discard the report naming the assets that had already moved in the same call.
+ * `cause` is the underlying message, kept verbatim so the real fault stays legible.
+ */
+export const MCP_MOVE_ASSETS_ID_FAILED = (cause: string) =>
+  `Moving this asset failed: ${cause}. This is not a problem with the id itself — the asset exists and this token may edit it — so retrying may succeed. Any assets listed under \`moved\` were still moved.`;

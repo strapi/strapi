@@ -5,6 +5,7 @@ import { resetFiles } from '../../../utils/file-reset';
 import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
 import { waitForRestart } from '../../../utils/restart';
 import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../constants';
+import { AssetsPage } from '../media-library/future/page-objects/AssetsPage';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
@@ -203,19 +204,22 @@ test.describe('Home as super admin — key statistics', () => {
       ]);
       await findAndClose(page, 'Saved document');
 
-      // Upload an asset
-      await navToHeader(page, ['Media Library'], 'Media Library');
-      await page.getByRole('button', { name: 'Add new assets' }).first().click();
-      await page
-        .getByLabel('Drag & Drop here or')
-        .setInputFiles('public/assets/administration_panel.png');
-      const uploadButton = page.getByRole('button', { name: 'Upload 1 asset to the library' });
-      try {
-        await uploadButton.waitFor({ state: 'visible', timeout: 5000 });
-        await uploadButton.click();
-      } catch {
-        await page.getByRole('button', { name: /^finish$/i }).click();
-      }
+      // Upload an asset, through the Media Library's page object rather than locators spelled
+      // out here — hardcoded panel copy is what broke this step when the new Media Library
+      // became the default.
+      //
+      // `navToHeader` cannot be used for the same reason: it asserts an exact heading, and the
+      // page is now titled after the folder you are in ("Home (3 items)" at the root). The menu
+      // link is unchanged, so only the readiness check moves — to `New`, which the upload opens
+      // anyway.
+      const assetsPage = new AssetsPage(page);
+      await clickAndWait(page, page.locator('role=link[name^="Media Library"]').last());
+      await expect(assetsPage.newButton).toBeVisible();
+
+      await assetsPage.uploadFilesWithFilePicker('public/assets/administration_panel.png');
+      await assetsPage.waitForUploadProgressSuccess();
+      // Dismissed before moving on: the dialog overlays the page the next steps navigate from.
+      await assetsPage.closeUploadProgressDialog();
 
       // Create a content type and a component
       await navToHeader(page, ['Content-Type Builder'], 'Content-Type Builder');
