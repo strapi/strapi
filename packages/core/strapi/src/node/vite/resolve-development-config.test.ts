@@ -1,6 +1,6 @@
 import http from 'node:http';
 
-import type { Alias, AliasOptions } from 'vite';
+import type { AliasOptions } from 'vite';
 import { ADMIN_VITE_SINGLETON_MODULES } from '../core/admin-vite-alias-modules';
 import { resolveDevelopmentConfig, resolveProductionConfig } from './config';
 import type { BuildContext } from '../create-build-context';
@@ -15,18 +15,19 @@ jest.mock('@tailwindcss/vite', () => ({
   default: jest.fn(() => ({ name: 'tailwindcss' })),
 }));
 
-/** Vite's `AliasOptions` is an array or a record; this config always builds the array form */
-const asAliasArray = (alias: AliasOptions | undefined): Alias[] => {
-  if (!Array.isArray(alias)) {
-    throw new Error('expected an alias array');
+/**
+ * Vite's `AliasOptions` is an array or a record; this config always builds the record form, so a
+ * custom `src/admin/vite.config` can spread `config.resolve.alias` into a new object. A RegExp
+ * find or a call to `mergeAlias` would give the array form instead, which this throw catches
+ */
+const asAliasRecord = (alias: AliasOptions | undefined): Record<string, string> => {
+  if (typeof alias !== 'object' || alias === null || Array.isArray(alias)) {
+    throw new Error('expected a plain alias object');
   }
 
-  return alias;
+  // Array.isArray does not narrow the `readonly Alias[]` half of the union away
+  return alias as Record<string, string>;
 };
-
-const replacementFor = (alias: Alias[], mod: string) =>
-  alias.find((entry) => (entry.find instanceof RegExp ? entry.find.test(mod) : entry.find === mod))
-    ?.replacement;
 
 /**
  * A build context is a wide interface of which this config reads a handful of fields, so the tests
@@ -112,10 +113,10 @@ describe('Vite admin configuration', () => {
     );
 
     // Same modules need explicit aliases so pnpm can resolve optimizeDeps.include (#27014)
-    const alias = asAliasArray(config.resolve?.alias);
-    expect(replacementFor(alias, 'invariant')).toEqual(expect.any(String));
-    expect(replacementFor(alias, 'prismjs')).toEqual(expect.any(String));
-    expect(replacementFor(alias, 'lodash')).toEqual(expect.any(String));
+    const alias = asAliasRecord(config.resolve?.alias);
+    expect(alias.invariant).toEqual(expect.any(String));
+    expect(alias.prismjs).toEqual(expect.any(String));
+    expect(alias.lodash).toEqual(expect.any(String));
 
     // CodeMirror must be pre-bundled and aliased for every admin build so the JSON custom
     // field keeps a single instance (JSONInput instanceof checks)
@@ -123,7 +124,7 @@ describe('Vite admin configuration', () => {
       expect.arrayContaining([...ADMIN_VITE_SINGLETON_MODULES])
     );
     for (const mod of ADMIN_VITE_SINGLETON_MODULES) {
-      expect(replacementFor(alias, mod)).toEqual(expect.any(String));
+      expect(alias[mod]).toEqual(expect.any(String));
     }
 
     await new Promise<void>((resolve) => {
@@ -131,30 +132,28 @@ describe('Vite admin configuration', () => {
     });
   });
 
-  it('keeps the design system regex alias after the monorepo merge', async () => {
+  it('keeps resolve.alias a plain object in both the production and the development config', async () => {
     const mockHttpServer = http.createServer();
     const ctx = buildContext({
       strapi: { internal_config: {}, server: { httpServer: mockHttpServer } },
       options: { open: false },
     });
 
-    const config = await resolveDevelopmentConfig(ctx);
-    const alias = asAliasArray(config.resolve?.alias);
-    // Pin the entry by the specifier it matches, so a second regex alias cannot take its place
-    const designSystem = alias.find((entry) =>
-      entry.find instanceof RegExp
-        ? entry.find.test('@strapi/design-system')
-        : entry.find === '@strapi/design-system'
-    )?.find;
+    const production = asAliasRecord((await resolveProductionConfig(ctx)).resolve?.alias);
+    const development = asAliasRecord((await resolveDevelopmentConfig(ctx)).resolve?.alias);
 
-    expect(designSystem).toBeInstanceOf(RegExp);
-    // A prefix match would skip the exports map, so `next/source.css` must miss
-    expect(
-      designSystem instanceof RegExp && designSystem.test('@strapi/design-system/next/source.css')
-    ).toBe(false);
+    for (const alias of [production, development]) {
+      for (const replacement of Object.values(alias)) {
+        expect(replacement).toEqual(expect.any(String));
+      }
 
-    // The monorepo aliases survive the merge
-    expect(replacementFor(alias, '@strapi/admin/strapi-admin')).toEqual(expect.any(String));
+      // The design system is a prefix alias like every other module, and the host stylesheet
+      // resolves `next/source.css` through it
+      expect(alias['@strapi/design-system']).toEqual(expect.any(String));
+    }
+
+    // The monorepo aliases survive the spread
+    expect(development['@strapi/admin/strapi-admin']).toEqual(expect.any(String));
 
     await new Promise<void>((resolve) => {
       mockHttpServer.close(() => resolve());

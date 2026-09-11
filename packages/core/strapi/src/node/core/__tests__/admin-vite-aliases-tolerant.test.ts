@@ -1,5 +1,3 @@
-import type { Alias } from 'vite';
-
 import { ADMIN_VITE_SINGLETON_MODULES } from '../admin-vite-alias-modules';
 
 jest.mock('../resolve-module', () => ({
@@ -19,10 +17,6 @@ import { getModulePathFrom } from '../resolve-module';
 const getModulePathFromMock = getModulePathFrom as jest.Mock;
 
 const UNRESOLVABLE_SINGLETON = '@codemirror/lint';
-
-const replacementFor = (alias: readonly Alias[], mod: string) =>
-  alias.find((entry) => (entry.find instanceof RegExp ? entry.find.test(mod) : entry.find === mod))
-    ?.replacement;
 
 describe('buildSingletonAliasEntries (tolerant CodeMirror resolution)', () => {
   beforeEach(() => {
@@ -54,10 +48,8 @@ describe('buildSingletonAliasEntries (tolerant CodeMirror resolution)', () => {
     expect(() => buildAdminViteResolveAliases()).not.toThrow();
 
     const alias = buildAdminViteResolveAliases();
-    expect(replacementFor(alias, UNRESOLVABLE_SINGLETON)).toBeUndefined();
-    expect(replacementFor(alias, '@codemirror/state')).toBe(
-      '/resolved/design-system/@codemirror/state'
-    );
+    expect(alias).not.toHaveProperty(UNRESOLVABLE_SINGLETON);
+    expect(alias['@codemirror/state']).toBe('/resolved/design-system/@codemirror/state');
   });
 
   it('keeps optimizeDeps.include in lockstep with the aliased singletons', () => {

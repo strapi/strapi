@@ -193,15 +193,16 @@ const resolveProductionConfig = async (ctx: BuildContext): Promise<InlineConfig>
 const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
   const monorepo = await loadStrapiMonorepo(ctx.cwd);
   const baseConfig = await resolveBaseConfig(ctx);
-  // A static import of Vite makes the CJS build print the Vite CJS deprecation warning
-  const { mergeAlias } = await import('vite');
 
   return {
     ...baseConfig,
     mode: 'development',
     resolve: {
       ...baseConfig.resolve,
-      alias: mergeAlias(baseConfig.resolve?.alias, getMonorepoAliases({ monorepo })),
+      alias: {
+        ...baseConfig.resolve?.alias,
+        ...getMonorepoAliases({ monorepo }),
+      },
     },
     server: {
       cors: false,
