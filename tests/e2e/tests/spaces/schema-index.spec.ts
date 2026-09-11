@@ -121,6 +121,33 @@ test.describe('Content-Type Builder — all content types', () => {
     );
   });
 
+  /**
+   * Unsaved work is spread across the builder, and seeing all of it meant
+   * opening each schema in turn. The status has to survive the trip back to
+   * the index — which is a client-side one, since a reload discards it.
+   */
+  test('the index says which schemas have unsaved changes', async ({ page }) => {
+    await page.goto(`${CTB_URL}/content-types/api::article.article`);
+
+    await page
+      .getByRole('button', { name: /^Add another field/ })
+      .first()
+      .click();
+    await page.getByRole('button', { name: /Text Small or long text/ }).click();
+    await page.getByRole('textbox', { name: 'Name' }).fill('subtitle');
+    await page.getByRole('button', { name: 'Finish' }).click();
+
+    await page.getByRole('link', { name: 'Collection types' }).click();
+    await expect(page.getByRole('heading', { name: 'All content types' })).toBeVisible();
+
+    await expect(page.getByRole('row').filter({ hasText: 'Article' }).first()).toContainText(
+      'Modified'
+    );
+    await expect(page.getByRole('row').filter({ hasText: 'Author' }).first()).not.toContainText(
+      'Modified'
+    );
+  });
+
   test('creating is one button with three choices', async ({ page }) => {
     await page.goto(CTB_URL);
 

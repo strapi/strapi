@@ -1,3 +1,4 @@
+import { Earth } from '@strapi/icons';
 import get from 'lodash/get';
 import * as yup from 'yup';
 
@@ -172,6 +173,7 @@ export default {
           label: { id: string; defaultMessage: string };
           short: { id: string; defaultMessage: string };
           tone: string;
+          Icon?: typeof Earth;
           applies: (attribute: Record<string, unknown>) => boolean;
         }) => void;
       };
@@ -205,14 +207,15 @@ export default {
       ctbApis.registerAttributeFlag?.({
         id: 'i18n',
         label: {
-          id: getTranslation('attribute.flag.localized.hint'),
-          defaultMessage: 'Translated per locale',
+          id: getTranslation('attribute.flag.localized'),
+          defaultMessage: 'Internationalization',
         },
         short: {
           id: getTranslation('attribute.flag.localized'),
           defaultMessage: 'Internationalization',
         },
         tone: 'secondary',
+        Icon: Earth,
         applies: (attribute) =>
           (attribute.pluginOptions as { i18n?: { localized?: boolean } } | undefined)?.i18n
             ?.localized === true,

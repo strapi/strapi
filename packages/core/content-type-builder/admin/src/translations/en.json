@@ -225,6 +225,7 @@
   "index.column.category": "Category",
   "index.column.draftAndPublish": "Draft & publish",
   "index.column.name": "Name",
+  "index.column.status": "Status",
   "index.create": "Create new",
   "index.create.collectionType": "Collection type",
   "index.create.component": "Component",

@@ -39,10 +39,21 @@ import { useFormModalNavigation } from './FormModalNavigation/useFormModalNaviga
 import type { Component, ContentType } from '../types';
 import type { UID } from '@strapi/types';
 
-export const ListGrid = styled(Box)`
+export const ListGrid = styled(Box)<{ $isMain?: boolean }>`
   white-space: nowrap;
   list-style: none;
   list-style-type: none;
+
+  /* The main list sits inside a bordered box, and every row draws its own top
+     border — on the first one that doubled the box's own line. A nested list
+     keeps it: there it separates the rows from the field they belong to. */
+  ${({ $isMain }) =>
+    $isMain &&
+    `
+    & > *:first-child {
+      border-top: none;
+    }
+  `}
 `;
 
 type ListProps = {
@@ -205,7 +216,7 @@ export const List = ({
       onDragCancel={() => setActiveId(null)}
       modifiers={[restrictToVerticalAxis]}
     >
-      <ListGrid tag="ul">
+      <ListGrid tag="ul" $isMain={isMain}>
         {createPortal(
           <DragOverlay zIndex={10}>
             {activeItem && (

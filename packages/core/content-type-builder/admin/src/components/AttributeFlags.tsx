@@ -1,4 +1,4 @@
-import { Flex, Tooltip, Typography } from '@strapi/design-system';
+import { Flex, Tooltip, Typography, VisuallyHidden } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -14,6 +14,10 @@ const Pill = styled(Flex)<{ $tone: AttributeFlag['tone'] }>`
   border-radius: 1.6rem;
   padding: ${({ theme }) => `${theme.spaces[1]} ${theme.spaces[2]}`};
   background: ${({ theme, $tone }) => theme.colors[`${$tone}100`]};
+
+  svg path {
+    fill: ${({ theme, $tone }) => theme.colors[`${$tone}600`]};
+  }
 `;
 
 /**
@@ -36,11 +40,19 @@ export const AttributeFlags = ({ attribute }: { attribute: AttributeLike }) => {
   return (
     <Flex gap={1} wrap="wrap">
       {active.map((flag) => (
+        // The tooltip hands its trigger a ref, so the pill is what takes it.
         <Tooltip key={flag.id} label={formatMessage(flag.label)}>
           <Pill tag="span" alignItems="center" $tone={flag.tone}>
-            <Typography variant="sigma" textColor={`${flag.tone}600`}>
-              {formatMessage(flag.short)}
-            </Typography>
+            {flag.Icon ? (
+              <>
+                <flag.Icon aria-hidden />
+                <VisuallyHidden>{formatMessage(flag.short)}</VisuallyHidden>
+              </>
+            ) : (
+              <Typography variant="sigma" textColor={`${flag.tone}600`}>
+                {formatMessage(flag.short)}
+              </Typography>
+            )}
           </Pill>
         </Tooltip>
       ))}

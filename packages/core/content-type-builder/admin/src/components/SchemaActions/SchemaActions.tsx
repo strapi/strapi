@@ -13,6 +13,18 @@ const ArrowCounterClockwise = styled(ArrowClockwise)`
   transform: scaleX(-1);
 `;
 
+/**
+ * A menu item's label, dimmed when the item is.
+ *
+ * The design system wraps a plain child in its own Typography, which sets a
+ * colour of its own — so the item's disabled state reached the start icon and
+ * stopped at the words, leaving them at full strength beside a greyed icon.
+ */
+const Label = styled(Typography)<{ $disabled?: boolean }>`
+  color: ${({ theme, $disabled }) =>
+    $disabled ? theme.colors.neutral400 : theme.colors.neutral800};
+`;
+
 const DiscardAllMenuItem = styled(Menu.Item)`
   color: ${({ theme }) => theme.colors.danger600};
 
@@ -35,6 +47,10 @@ export const SchemaActions = () => {
   const { saveSchema, isModified, history, isInDevelopmentMode } = useDataManager();
   const [menuIsOpen, setMenuIsOpen] = useState(false);
   const [discardConfirmationModalIsOpen, setDiscardConfirmationModalIsOpen] = useState(false);
+
+  const canUndo = history.canUndo && isInDevelopmentMode;
+  const canRedo = history.canRedo && isInDevelopmentMode;
+  const canDiscardAll = history.canDiscardAll && isInDevelopmentMode;
 
   useEffect(() => {
     if (!isInDevelopmentMode) {
@@ -100,33 +116,37 @@ export const SchemaActions = () => {
           </Menu.Trigger>
           <Menu.Content zIndex={2}>
             <Menu.Item
-              disabled={!history.canUndo || !isInDevelopmentMode}
+              disabled={!canUndo}
               onSelect={() => history.undo()}
               startIcon={<ArrowCounterClockwise />}
             >
-              {formatMessage({
-                id: 'global.last-change.undo',
-                defaultMessage: 'Undo last change',
-              })}
+              <Label $disabled={!canUndo}>
+                {formatMessage({
+                  id: 'global.last-change.undo',
+                  defaultMessage: 'Undo last change',
+                })}
+              </Label>
             </Menu.Item>
             <Menu.Item
-              disabled={!history.canRedo || !isInDevelopmentMode}
+              disabled={!canRedo}
               onSelect={() => history.redo()}
               startIcon={<ArrowClockwise />}
             >
-              {formatMessage({
-                id: 'global.last-change.redo',
-                defaultMessage: 'Redo last change',
-              })}
+              <Label $disabled={!canRedo}>
+                {formatMessage({
+                  id: 'global.last-change.redo',
+                  defaultMessage: 'Redo last change',
+                })}
+              </Label>
             </Menu.Item>
             <Menu.Separator />
             <DiscardAllMenuItem
-              disabled={!history.canDiscardAll || !isInDevelopmentMode}
+              disabled={!canDiscardAll}
               onSelect={() => setDiscardConfirmationModalIsOpen(true)}
             >
               <Flex gap={2}>
                 <Cross />
-                <Typography>
+                <Typography textColor={canDiscardAll ? 'danger600' : 'neutral400'}>
                   {formatMessage({
                     id: 'global.last-changes.discard',
                     defaultMessage: 'Discard last changes',

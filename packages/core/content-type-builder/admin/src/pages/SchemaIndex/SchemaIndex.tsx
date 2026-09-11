@@ -31,6 +31,7 @@ import { styled } from 'styled-components';
 
 import { useDataManager } from '../../components/DataManager/useDataManager';
 import { useFormModalNavigation } from '../../components/FormModalNavigation/useFormModalNavigation';
+import { StatusBadge } from '../../components/Status';
 import { pluginId } from '../../pluginId';
 import { getTrad } from '../../utils/getTrad';
 
@@ -111,6 +112,15 @@ const CategoryCell = ({ schema }: { schema: Schema }) => (
 
 const DraftAndPublishCell = ({ schema }: { schema: Schema }) => (
   <OnOff on={hasDraftAndPublish(schema)} />
+);
+
+/**
+ * Whether the schema has been touched since the last save — new, modified or
+ * deleted. Unsaved work is spread across the builder and the only way to see
+ * all of it was to open each schema in turn.
+ */
+const StatusCell = ({ schema }: { schema: Schema }) => (
+  <StatusBadge status={(schema as { status?: string }).status ?? 'UNCHANGED'} />
 );
 
 /**
@@ -232,6 +242,11 @@ export const SchemaIndex = () => {
           }),
           Cell: DraftAndPublishCell,
         },
+    {
+      name: 'status',
+      label: formatMessage({ id: getTrad('index.column.status'), defaultMessage: 'Status' }),
+      Cell: StatusCell,
+    },
     ...pluginColumns.map((column) => ({
       name: column.id,
       label: formatMessage(column.header),

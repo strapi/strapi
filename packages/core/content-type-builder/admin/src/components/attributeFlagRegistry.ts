@@ -1,3 +1,5 @@
+import type { ComponentType } from 'react';
+
 import type { MessageDescriptor } from 'react-intl';
 
 /**
@@ -22,6 +24,12 @@ export interface AttributeFlag {
   label: MessageDescriptor;
   /** The pill: short enough to read at a glance down a list of fields. */
   short: MessageDescriptor;
+  /**
+   * Shown in place of the words. For a flag whose name is long and whose
+   * symbol is well known, a row of them reads faster as symbols — the tooltip
+   * and the screen-reader label still say it in full.
+   */
+  Icon?: ComponentType<{ 'aria-hidden'?: boolean }>;
   /**
    * The colour family the flag is written in: its `600` for the text, its
    * `100` for the ground behind it.
