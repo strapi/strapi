@@ -135,8 +135,7 @@ const TwoFactorSection = () => {
   const [markNoticesSeen] = useMarkMfaNoticesSeenMutation();
   /**
    * Dismissing a warning only hides it for the lifetime of this component instance -- nothing is
-   * persisted, so the warning comes back the next time the profile page is visited (this state
-   * only resets on remount; the status query re-running while mounted does not reset it).
+   * persisted, so the warning comes back the next time the profile page is visited.
    */
   const [dismissedAck, setDismissedAck] = React.useState(false);
   const [dismissedLowCodes, setDismissedLowCodes] = React.useState(false);

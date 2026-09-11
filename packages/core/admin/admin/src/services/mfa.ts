@@ -24,9 +24,10 @@ import type {
 
 /**
  * Self-service second-factor endpoints for the authenticated admin. Every response here is
- * already sanitised by the server: the only place a secret or a recovery code ever appears is
- * the `enrol`, `verifyEnrolment` and `regenerateRecoveryCodes` responses, and the components
- * that call them keep those values in local state only.
+ * already sanitised by the server: the only place a secret or a recovery code appears is the
+ * `enrol`, `verifyEnrolment` and `regenerateRecoveryCodes` responses. Those land in the RTK Query
+ * mutation cache like any other, which is why each carries a `fixedCacheKey` its dialog can
+ * `reset()` on close.
  */
 const mfaService = adminApi
   .enhanceEndpoints({
@@ -79,18 +80,17 @@ const mfaService = adminApi
         },
         invalidatesTags: ['Mfa'],
       }),
-      // `AcknowledgeRecoveryCodes.Request['body']` is `{}` -- the server reads nothing from the
-      // request body for this endpoint -- so the mutation argument is typed `void` rather than
-      // carrying a body type it never sends; callers invoke it as `acknowledge()`.
+      // `void`, not `AcknowledgeRecoveryCodes.Request['body']` (which is `{}`): the server reads
+      // nothing, so callers invoke it as `acknowledge()`.
       acknowledgeRecoveryCodes: builder.mutation<void, void>({
         query: () => ({ method: 'POST', url: '/admin/mfa/recovery-codes/ack' }),
         invalidatesTags: ['Mfa'],
       }),
       disableMfa: builder.mutation<void, Disable.Request['body']>({
         query: (body) => ({ method: 'POST', url: '/admin/mfa/disable', data: body }),
-        // Also invalidates `MfaNotices` (a `disabled` notice), `TrustedDevices` (a disable
-        // revokes every trusted device, trusted devices) and `Passkeys` (a disable deletes every passkey
-        // inside the same transaction, passkeys).
+        // Also invalidates `MfaNotices` (a `disabled` notice), `TrustedDevices` (a disable revokes
+        // every trusted device) and `Passkeys` (a disable deletes every passkey in the same
+        // transaction).
         invalidatesTags: ['Mfa', 'MfaNotices', 'TrustedDevices', 'Passkeys'],
       }),
       getMfaNotices: builder.query<Notices.Response['data'], void>({
@@ -198,9 +198,8 @@ const mfaService = adminApi
       }),
       /**
        * Step two. Also invalidates `MfaNotices`: the server records a `passkey_registered` notice
-       * row, the same as both trusted-device revocations. Deliberately does NOT invalidate
-       * `TrustedDevices`: registering a passkey changes no trusted device, and only a
-       * *replacement* revokes trust.
+       * row. Deliberately does NOT invalidate `TrustedDevices`: registering a passkey changes no
+       * trusted device, and only a *replacement* revokes trust.
        */
       registerPasskey: builder.mutation<
         RegisterPasskey.Response['data'],
@@ -212,7 +211,7 @@ const mfaService = adminApi
         },
         invalidatesTags: ['Passkeys', 'MfaNotices'],
       }),
-      /** 204, no body. Also a `passkey_removed` notice row, hence `MfaNotices`. */
+      /** The server records a `passkey_removed` notice row, hence `MfaNotices`. */
       deletePasskey: builder.mutation<void, DeletePasskey.Params>({
         query: ({ id }) => ({ method: 'DELETE', url: `/admin/mfa/passkeys/${id}` }),
         invalidatesTags: ['Passkeys', 'MfaNotices'],

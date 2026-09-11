@@ -27,7 +27,6 @@ import type {
 import type { AdminRole } from '../../../../../hooks/useAdminRoles';
 
 interface TwoFactorEnforcementCardProps {
-  /** The stored settings, as `GET /admin/security-settings` returned them. */
   settings: MfaEnforcementSettings;
   roles: AdminRole[];
   canUpdate: boolean;
@@ -73,8 +72,7 @@ const isValidGraceDays = (value: number | null) =>
  * toasts "Saved" and the invalidated `SecuritySettings` query hands back the stored result,
  * which the effect below adopts as the new baseline.
  *
- * Save is on the card, not the page header, because later security settings are meant to become
- * further cards, each saving its own object.
+ * Save is on the card, not the page header: each card saves its own object.
  */
 const TwoFactorEnforcementCard = ({
   settings,
@@ -99,10 +97,16 @@ const TwoFactorEnforcementCard = ({
     setGraceDays(settings.graceDays);
   }, [settings]);
 
+  // An empty grace field reads as the stored value, so `isSecurityDowngrade` never sees the
+  // empty state and never mistakes it for a lengthened period. `validate()` below is what
+  // actually refuses the save; this only keeps `next` a well-formed settings object.
   const next: MfaEnforcementSettings = {
     ...draft,
     graceDays: graceDays ?? settings.graceDays,
   };
+  // Both role lists are sorted before comparing: the server returns them in its own order, which
+  // must not read as an unsaved change. Comparing `next` to `settings` directly would leave Save
+  // permanently enabled.
   const modified = !isEqual(
     { ...next, requiredRoles: [...next.requiredRoles].sort() },
     { ...settings, requiredRoles: [...settings.requiredRoles].sort() }

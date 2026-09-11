@@ -90,9 +90,8 @@ const configureStoreImpl = (
   });
 
   // Lets RTK Query hooks opt in to `refetchOnFocus` / `refetchOnReconnect` (window `focus` and
-  // `online` events). Without this call those options are silently inert. Opt-in per hook: no
-  // existing query passes them, so nothing else changes behaviour. First consumer: the MFA grace
-  // banner, which must notice a grace period stamped by a background token refresh.
+  // `online` events). Without this call those options are silently inert, and a hook that passes
+  // them looks correct while doing nothing.
   setupListeners(store.dispatch);
 
   return store;

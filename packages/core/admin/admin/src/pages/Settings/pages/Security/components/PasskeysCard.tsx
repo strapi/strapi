@@ -13,7 +13,6 @@ import { ConfirmDowngradeDialog } from './ConfirmDowngradeDialog';
 import type { PasskeySettings } from '../../../../../../../shared/contracts/security-settings';
 
 interface PasskeysCardProps {
-  /** The stored policy, as `GET /admin/security-settings` returned it. */
   settings: PasskeySettings;
   canUpdate: boolean;
   /** `/admin/mfa/me` `enabled` for the caller: decides whether the off-transition needs a code. */
@@ -21,8 +20,8 @@ interface PasskeysCardProps {
   /**
    * `/admin/mfa/me` `hasLocalPassword` for the caller: an
    * SSO-only administrator has none, and the server exempts exactly that account from presenting
-   * credentials to turn passkeys off. Defaults to `true` -- the pre-fix, always-ask behaviour --
-   * so a caller that has not wired this prop through yet gets the safe direction.
+   * credentials to turn passkeys off. Defaults to `true`, so a caller that has not wired this
+   * prop through asks for credentials rather than skipping them.
    */
   hasLocalPassword?: boolean;
   /** `isFetching` of the `SecuritySettings` query; keeps Save disabled while the saved result lands. */
@@ -43,10 +42,9 @@ interface PasskeysCardProps {
  * The dialog's copy is overridden for the same reason: the shared heading names "lowering
  * two-factor requirements", which is not what this save does.
  *
- * the off-transition's `requiresCredentials` also factors in
- * `hasLocalPassword`, mirroring the server's password-less exemption -- otherwise an SSO-only
- * administrator could never complete this save from the UI at all, even though the server lets
- * them.
+ * The off-transition's `requiresCredentials` also factors in `hasLocalPassword`, mirroring the
+ * server's password-less exemption -- otherwise an SSO-only administrator could never complete
+ * this save from the UI at all, even though the server lets them.
  */
 const PasskeysCard = ({
   settings,

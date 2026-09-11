@@ -43,10 +43,9 @@ const ManualKey = styled(Typography)`
 
 /**
  * `fixedCacheKey`s for the three mutations below. These key `state.adminApi.mutations`
- * store-globally -- RTK Query shares one cached result across every component that triggers a
- * mutation with the same `fixedCacheKey`, regardless of which component instance called it. There
- * is only one consumer of these three mutations today (this dialog); if a future one reuses these
- * exact strings, it will silently share (and can clobber) this dialog's cached results.
+ * store-globally: any other component triggering the same mutation with the same key shares --
+ * and can clobber -- this dialog's cached result. Nothing else uses these strings, and nothing
+ * else should.
  */
 const MFA_ENROL_CACHE_KEYS = {
   password: 'mfa-enrol-password',
@@ -72,17 +71,18 @@ type Step =
  * the dialog sits open) would strand the secret in the store -- which is what the effect below
  * the mutation hooks exists for.
  *
- * `handlePassword`/`handleVerify` guard re-entrancy with a synchronous `inFlightRef`, for the
- * reason `ReAuthDialog.tsx` sets out in full: a real click on a submit button fires both the
- * React handler and the browser's native submit before either awaits or React re-renders.
+ * `handlePassword` guards re-entrancy with a synchronous `inFlightRef`, for the reason
+ * `ReAuthDialog.tsx` sets out in full: a real click on a submit button fires both the React
+ * handler and the browser's native submit before either awaits or React re-renders.
  *
  * The footer buttons call their handler from `onClick` rather than relying on `type="submit"`,
  * because the shared Jest setup polyfills `window.PointerEvent` with a class that does not extend
- * `MouseEvent` (jsdom has none natively), so jsdom's activation-behaviour check never matches and
- * native form submission silently never fires under `user.click()` in this suite. The exception
- * is `replace` mode's password step, which has two blocking fields in one form: per the HTML
- * spec's implicit-submission algorithm a form with more than one such field needs a real submit
- * button for Enter to do anything, so Continue carries `type="submit"` there only.
+ * `MouseEvent` (jsdom has none natively), so native form submission never fires under
+ * `user.click()` in this suite. The exception is `replace` mode's password step, whose two
+ * blocking fields need a real submit button for Enter to work at all -- so Continue carries
+ * `type="submit"` there, and only there. That is also why only `handlePassword` needs the ref:
+ * the scan step's Verify button takes the design system's default `type="button"`, so a click
+ * reaches `onClick` alone and Enter reaches `onSubmit` alone -- never both in one tick.
  */
 const EnrolDialog = ({ open, onClose, mode = 'enrol' }: EnrolDialogProps) => {
   const isReplace = mode === 'replace';

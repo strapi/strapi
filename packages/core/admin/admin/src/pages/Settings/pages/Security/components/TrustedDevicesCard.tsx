@@ -14,7 +14,6 @@ import { ConfirmDowngradeDialog } from './ConfirmDowngradeDialog';
 import type { TrustedDeviceSettings } from '../../../../../../../shared/contracts/security-settings';
 
 interface TrustedDevicesCardProps {
-  /** The stored policy, as `GET /admin/security-settings` returned it. */
   settings: TrustedDeviceSettings;
   canUpdate: boolean;
   /** `/admin/mfa/me` `enabled` for the caller: decides whether a downgrade also needs a code. */

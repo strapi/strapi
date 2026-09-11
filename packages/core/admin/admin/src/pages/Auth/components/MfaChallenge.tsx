@@ -26,16 +26,10 @@ import { ceremonyErrorKind } from '../../../utils/webauthn';
 import { getRedirectTo } from '../utils';
 
 /**
- * What `Login` hands over when `/login` answers with a challenge instead of a session, via
- * router state. `createBrowserRouter` persists this in `window.history.state.usr` for the life
- * of the history entry it's attached to, and restores it on a full page reload — so the state
- * itself is not where the "refresh returns to login" guarantee comes from. `MfaChallenge` reads
- * it once on mount and immediately replaces that history entry with `state: null` (see the
- * effect below); that's what actually keeps a refresh, a direct visit, or a back/forward
- * navigation from resurrecting the challenge token. Passkeys adds a second factor to the same
- * challenge — `Use a passkey` runs a WebAuthn ceremony instead of asking for a code, and
- * `trustDevice` therefore lives in component state rather than the form's, because both paths
- * read it.
+ * What `Login` hands over when `/login` answers with a challenge instead of a session, via router
+ * state. `createBrowserRouter` persists this in `window.history.state.usr` and restores it on a
+ * full page reload, so the state itself is not where the "refresh returns to login" guarantee
+ * comes from -- the history-clearing effect below is.
  */
 export interface MfaChallengeLocationState {
   challengeToken: string;
@@ -102,10 +96,9 @@ const MfaChallenge = () => {
   const trustedDeviceDays = challenge?.trustedDeviceDays ?? null;
 
   /**
-   * Passkeys lifted `trustDevice` out of the `<Form>`'s Formik state (where trusted devices put it) into
-   * the component's own state: the passkey path is a button click, not a form submit, so it never
-   * sees Formik's values, and leaving the flag in form state would silently drop "Trust this
-   * device" for every passkey login. Both submit paths now read this one value.
+   * `trustDevice` lives here rather than in the `<Form>`'s own values because the passkey path is
+   * a button click, not a form submit, and so never sees them. Leaving the flag in form state
+   * silently drops "Trust this device" for every passkey login.
    */
   const [trustDevice, setTrustDevice] = React.useState(false);
   const [passkeyBusy, setPasskeyBusy] = React.useState(false);

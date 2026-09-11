@@ -119,9 +119,8 @@ const copyFor = (notice: MfaEventNotice): NoticeCopy => {
 };
 
 /**
- * Renders one notice as `"<copy> (<date>)"`, e.g. "A recovery code was used to log in (Sep 1,
- * 2026, 11:00 AM)". Shared by the profile section's "Recent security events" list; the next-login
- * toast only needs a count, so it does not call this.
+ * Shared by the profile section's "Recent security events" list. The next-login toast only needs
+ * a count, so it does not call this.
  */
 export const formatMfaNotice = (
   notice: MfaEventNotice,
@@ -167,8 +166,11 @@ const MfaNotices = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification, dismissNotification } = useNotification();
   const { error: statusError, isLoading: statusLoading } = useGetMfaStatusQuery();
-  const statusIsNotFound = isNotFoundError(statusError) || statusLoading;
-  const { data: notices } = useGetMfaNoticesQuery(undefined, { skip: statusIsNotFound });
+  // Named for the case that matters, but it also holds while the status query is in flight: both
+  // mean "do not ask for notices yet". Dropping the loading half would fire the notices query
+  // once against a feature that may turn out to be off.
+  const skipNotices = isNotFoundError(statusError) || statusLoading;
+  const { data: notices } = useGetMfaNoticesQuery(undefined, { skip: skipNotices });
   const [markSeen] = useMarkMfaNoticesSeenMutation();
   const announced = React.useRef(false);
   const toastId = React.useRef<string | number>();

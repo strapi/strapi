@@ -26,10 +26,9 @@ interface NotificationConfig {
 
 interface NotificationsContextValue {
   /**
-   * Toggles a notification, wrapped in `useCallback` for a stable identity. Returns the toast id
-   * (sonner's `toast.custom` return value) so a caller that needs to dismiss it later -- e.g. on
-   * its own unmount, before the toast's own timeout -- can do so via `dismissNotification` without
-   * importing `sonner` itself.
+   * Returns the toast id (sonner's `toast.custom` return value) so a caller that needs to dismiss
+   * it later -- e.g. on its own unmount, before the toast's own timeout -- can do so via
+   * `dismissNotification` without importing `sonner` itself.
    */
   toggleNotification: (config: NotificationConfig) => string | number | undefined;
   /**

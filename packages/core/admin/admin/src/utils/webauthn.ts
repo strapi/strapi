@@ -43,8 +43,6 @@ const codeOf = (value: unknown): string | undefined => {
  * want to overwrite) -- so both `name` and `cause.name` and `code` have to be consulted. Second,
  * every component test here mocks `@simplewebauthn/browser` wholesale, which exports no
  * `WebAuthnError` class for an `instanceof` check to use.
- *
- * Classifying in one place rather than at each entry point means one implementation and one test.
  */
 export const ceremonyErrorKind = (error: unknown): CeremonyErrorKind => {
   const names = [nameOf(error), nameOf(causeOf(error))];

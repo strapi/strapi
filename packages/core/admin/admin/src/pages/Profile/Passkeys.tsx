@@ -41,11 +41,10 @@ import { AddPasskeyDialog } from './AddPasskeyDialog';
  * panel served over plain http, which is the far likelier cause on a self-hosted instance and
  * needs an entirely different fix.
  *
- * The Add button is also hidden at `MAX_PASSKEYS_PER_USER`, with the same one-line note shape
- * as the unsupported-browser branch: the server spends the
- * password AND a live code (`assertPasswordAndFactor` in `passkeyRegistrationOptions`) before it
- * ever checks the cap, so offering a button that can only be refused burns a factor attempt on a
- * guaranteed rejection.
+ * The Add button is also hidden at `MAX_PASSKEYS_PER_USER`: the server spends the password AND a
+ * live code (`assertPasswordAndFactor` in `passkeyRegistrationOptions`) before it ever checks the
+ * cap, so offering a button that can only be refused burns a factor attempt on a guaranteed
+ * rejection.
  */
 const Passkeys = () => {
   const { formatMessage, formatDate } = useIntl();

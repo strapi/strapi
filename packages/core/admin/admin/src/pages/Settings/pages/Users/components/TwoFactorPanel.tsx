@@ -41,8 +41,6 @@ interface TwoFactorPanelProps {
  * because the user it serves has no lock to clear -- they know their password but have lost their
  * authenticator and spent their recovery codes, and the alternative is a shell the customer may
  * not have.
- *
- * The passkey endpoint returns a count, never an inventory of somebody's hardware.
  */
 const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
   const { formatMessage, formatDate } = useIntl();
@@ -53,10 +51,10 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
   const [resetOpen, setResetOpen] = React.useState(false);
   const [confirmOpen, setConfirmOpen] = React.useState(false);
 
-  // Trusted devices. Only an enrolled user can hold trusted browsers (disable and reset clear them), so
-  // the query is skipped otherwise. A failed read hides the line rather than showing a false zero,
-  // and gating on `isSuccess` (rather than defaulting `data` to `[]`) keeps the line from flashing
-  // "No trusted devices" while the request is still in flight.
+  // Only an enrolled user can hold trusted browsers (disable and reset clear them), so the query
+  // is skipped otherwise. Gating on `isSuccess` rather than defaulting `data` to `[]` keeps the
+  // line from flashing "No trusted devices" in flight, or showing a false zero after a failed
+  // read -- it hides the line instead.
   const {
     data: trustedDevices = [],
     isSuccess: trustedDevicesLoaded,
@@ -66,11 +64,8 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
     useRevokeUserTrustedDevicesMutation();
   const [revokeTrustOpen, setRevokeTrustOpen] = React.useState(false);
 
-  // Passkeys. Same two guards as the trusted-device query above, for the same two reasons: only an
-  // enrolled user can hold a passkey (a passkey is always a second factor, and `disable` deletes
-  // them), and gating on `isSuccess` keeps the line from flashing "No passkeys" while the request
-  // is in flight or from showing a false zero after a failed read. The response is a count, not a
-  // list: an administrator gets a number, never an inventory of somebody's hardware.
+  // Same two guards as the trusted-device query above, for the same reasons. The response is a
+  // count, not a list: an administrator gets a number, never an inventory of somebody's hardware.
   const {
     data: passkeys,
     isSuccess: passkeysLoaded,

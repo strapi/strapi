@@ -37,7 +37,6 @@ interface UseSecuritySettingsSaveOptions {
 }
 
 interface UseSecuritySettingsSaveResult {
-  /** The Save button's handler. */
   save: () => Promise<void>;
   isSaving: boolean;
   /** A refusal from the credential-free path, to render under the card's own controls. */
@@ -55,9 +54,8 @@ interface UseSecuritySettingsSaveResult {
  * The save flow every card on the Security page shares: one per-object `PUT`, a "Saved" toast, an
  * inline refusal message, and the re-authentication dialog for a change that lowers protection.
  *
- * Extracted once the third card would have been the third copy of the same ~35 lines. What
- * varies between cards is the body key, the validation, and which predicate decides "needs
- * credentials", and all three are inputs.
+ * What varies between cards is the body key, the validation, and which predicate decides "needs
+ * credentials"; all three are inputs.
  */
 const useSecuritySettingsSave = ({
   patch,
