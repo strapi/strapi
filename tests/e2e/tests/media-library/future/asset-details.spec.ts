@@ -7,7 +7,7 @@ import { describeOnCondition } from '../../../../utils/shared';
 
 import { AssetsPage } from './page-objects/AssetsPage';
 
-describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
+describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
   'Media Library - Asset Details Drawer',
   () => {
     test.beforeEach(async ({ page }) => {

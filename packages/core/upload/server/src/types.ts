@@ -49,9 +49,9 @@ export interface Folder {
   name: string;
   pathId: number;
   /**
-   * parent id
+   * parent id, or null when the folder sits at the media library root
    */
-  parent?: number;
+  parent?: number | null;
   /**
    * children ids
    */
