@@ -89,15 +89,6 @@ const passwordAndCodeSchema = yup
   .required()
   .noUnknown();
 
-const passkeyOptionsSchema = yup
-  .object()
-  .shape({
-    password: yup.string().required(),
-    code: yup.string().min(6).max(32).required(),
-  })
-  .required()
-  .noUnknown();
-
 /**
  * `name` is the user's own label, 1..50 characters *after* trimming, so the bound is a `test`
  * rather than `.max(50)`; `.max(200)` is a cheap outer bound so the test never runs over
@@ -134,5 +125,7 @@ export const validateMfaEnrolInput = validateYupSchema(enrolSchema);
 export const validateMfaCodeInput = validateYupSchema(codeOnlySchema);
 export const validateMfaPasswordAndCodeInput = validateYupSchema(passwordAndCodeSchema);
 export const validateMfaNoticesSeenInput = validateYupSchema(noticesSeenSchema);
-export const validatePasskeyOptionsInput = validateYupSchema(passkeyOptionsSchema);
+// Its own export rather than a second call site of `validateMfaPasswordAndCodeInput`, so the
+// passkey route can diverge from the two TOTP ones without touching them.
+export const validatePasskeyOptionsInput = validateYupSchema(passwordAndCodeSchema);
 export const validateRegisterPasskeyInput = validateYupSchema(registerPasskeySchema);

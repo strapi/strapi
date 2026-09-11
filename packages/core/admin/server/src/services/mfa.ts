@@ -88,11 +88,10 @@ export type MfaEventMetadata = {
   /** The device label for a session event, or the passkey's own name for `passkey_registered` / `passkey_removed`. */
   deviceName?: string;
   via?: 'cli';
-  /** ISO deadline carried by `grace_started` and `locked`. Never a secret. */
+  /** Never a secret: this whole type is rendered into the notice hub and the audit log. */
   graceUntil?: string;
   /** The administrator who unlocked the account (`unlocked`), revoked trust (`device_trust_revoked`) or removed another user's passkeys (`passkey_removed`). */
   byUserId?: string;
-  /** The trust period, in days, carried by `device_trusted`. */
   days?: number;
   /** How many rows a `device_trust_revoked` or `passkey_removed` event covered. */
   count?: number;
@@ -222,16 +221,14 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   };
 
   /**
-   * Resolver step 0. An account with no local password can only ever log in through EE SSO, and
-   * an SSO-locked account is refused by the local strategy outright, so neither can be graced or
-   * locked on any path -- including `/access-token`, where SSO-minted sessions do arrive. This
-   * single rule is what keeps the guard exemption, the SSO carve-out and the refresh path
-   * consistent. Mirrors `ee/server/src/utils/sso-lock.ts` (CE code cannot import from `ee/`),
-   * including its comparison -- `lockedId === String(role.id)` leaves `lockedId` uncoerced, so a
-   * numeric `ssoLockedRoles` entry that EE's own strict-equality check would fail to match also
-   * fails to match here. This exemption must never be broader than the local-login block SSO
-   * locking actually enforces: coercing both sides would exempt a password-holding user from MFA
-   * that EE never actually locked out of local login.
+   * Resolver step 0. An account with no local password can only log in through EE SSO, and an
+   * SSO-locked account is refused by the local strategy outright, so neither can be graced or
+   * locked on any path -- including `/access-token`, where SSO-minted sessions do arrive.
+   *
+   * Mirrors `ee/server/src/utils/sso-lock.ts` (CE cannot import from `ee/`) **including its
+   * uncoerced `lockedId === String(role.id)` comparison**: a numeric `ssoLockedRoles` entry that
+   * EE's own check fails to match must fail to match here too. Widening it would exempt from MFA
+   * a password-holding user EE never actually locked out of local login.
    */
   const isExemptFromMfa = async (user: AdminUserRow): Promise<boolean> => {
     if (!user.password) {
@@ -303,12 +300,8 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   };
 
   /**
-   * The precondition orders the stored deadline against `now`. A row read through
-   * `strapi.db.query` always yields a `Date` or `null` for `mfaGraceUntil` --
-   * `@strapi/database`'s `DatetimeField.fromDB` never returns anything else for this column --
-   * so `$lte` always has a portable comparison to make: if anything rewrote the column between
-   * the read and this statement (a fresh grace, a clear, another lock), the value has changed and
-   * the match -- and the lock -- fails.
+   * The `$lte now` precondition makes the lock fail if anything rewrote `mfaGraceUntil` between
+   * the read and this statement -- a fresh grace, a clear, another lock.
    */
   const lockAccount = async (userId: string, now: Date): Promise<boolean> => {
     const { count } = await userQuery().updateMany({
@@ -623,11 +616,9 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   const consumeTotpStep = async (userId: string, step: number): Promise<boolean> => {
     const metadata = strapi.db.metadata.get(USER_UID);
     const { tableName } = metadata;
-    // @ts-expect-error - no dynamic typings for the models, columnName only exists on scalar
-    // attributes and mfaLastUsedStep's static type is the full Attribute union. Optional
-    // chaining also guards the case where the attribute itself is missing (e.g. a migration
-    // that hasn't run), which would otherwise throw a TypeError before the check below can
-    // raise the intended, actionable ApplicationError.
+    // @ts-expect-error - columnName exists only on scalar attributes; the static type here is
+    // the full Attribute union. Optional chaining guards a missing attribute (a migration that
+    // has not run) so the actionable ApplicationError below is what surfaces, not a TypeError.
     const lastUsedStepColumn: string | undefined = metadata.attributes.mfaLastUsedStep?.columnName;
 
     if (!lastUsedStepColumn) {
@@ -636,6 +627,10 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       );
     }
 
+    // Strictly increasing, so with `window.back` set a legitimate code for an earlier step is
+    // refused once a later one has been spent -- a user who types the code just as it rolls over
+    // may have to wait for the next one. That is the cost of the replay guard being a single
+    // watermark rather than a set of spent steps.
     const affected = await strapi.db
       .getConnection(tableName)
       .where({ id: userId })
@@ -728,13 +723,11 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   const recoveryQuery = () => strapi.db.query(RECOVERY_CODE_UID);
 
   /**
-   * Recovery codes are hashed with the same password hasher the admin already uses for admin
-   * user passwords, because ASVS 6.5.2 requires a password-storage hash with a salt for secrets
-   * under 112 bits of entropy, and these codes carry only 50. Crucially, bcrypt's per-hash salt
-   * makes this independent of the encryption key: rotating `ENCRYPTION_KEY` makes every TOTP
-   * secret undecryptable, and if recovery codes died with it the user would lose their escape
-   * hatch at the exact moment they needed it. The plaintext is returned to the caller once here
-   * and never stored — only the hash is persisted, and it must never reach a log either.
+   * bcrypt-hashed rather than encrypted, so a rotated `ENCRYPTION_KEY` cannot take the escape
+   * hatch with it: rotation makes every TOTP secret undecryptable, which is the exact moment a
+   * user needs their recovery codes. ASVS 6.5.2 also requires a salted password hash for secrets
+   * under 112 bits of entropy, and these carry 50. The plaintext is returned once here and never
+   * stored.
    */
   const issueRecoveryCodes = async (userId: string): Promise<string[]> => {
     const codes = generateRecoveryCodes(config().recoveryCodeCount);
@@ -777,11 +770,8 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     recoveryQuery().count({ where: { userId: String(userId), usedAt: null } });
 
   /**
-   * The replay guard for recovery codes, matching `consumeTotpStep`'s shape: verification (which
-   * candidate hash matches) is separated from the atomic consume (a single conditional UPDATE
-   * whose affected-row count is the decision), so two concurrent requests carrying the same code
-   * cannot both succeed. Never read-then-write: that would leave a window between the check and
-   * the write for a second request to slip through.
+   * The replay guard for recovery codes. Verification (which candidate hash matches) is separated
+   * from the consume, which is `consumeTotpStep`'s conditional UPDATE again.
    */
   const consumeRecoveryCode = async (userId: string, code: string): Promise<boolean> => {
     const normalised = normaliseRecoveryCode(code);
@@ -795,11 +785,8 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     // returning `false` while masking a broken column mapping would be worse than raising here.
     const metadata = strapi.db.metadata.get(RECOVERY_CODE_UID);
     const { tableName } = metadata;
-    // @ts-expect-error - no dynamic typings for the models, columnName only exists on scalar
-    // attributes and usedAt's static type is the full Attribute union. Optional chaining also
-    // guards the case where the attribute itself is missing (e.g. a migration that hasn't
-    // run), which would otherwise throw a TypeError before the check below can raise the
-    // intended, actionable ApplicationError.
+    // @ts-expect-error - columnName exists only on scalar attributes; the union type does not
+    // know that.
     const usedAtColumn: string | undefined = metadata.attributes.usedAt?.columnName;
 
     if (!usedAtColumn) {
@@ -864,11 +851,8 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   const challengeTable = () => {
     const metadata = strapi.db.metadata.get(CHALLENGE_UID);
     const { tableName } = metadata;
-    // @ts-expect-error - no dynamic typings for the models, columnName only exists on scalar
-    // attributes and attempts' static type is the full Attribute union. Optional chaining also
-    // guards the case where the attribute itself is missing (e.g. a migration that hasn't run),
-    // which would otherwise throw a TypeError before the check below can raise the intended,
-    // actionable ApplicationError.
+    // @ts-expect-error - columnName exists only on scalar attributes; the union type does not
+    // know that.
     const attemptsColumn: string | undefined = metadata.attributes.attempts?.columnName;
 
     if (!attemptsColumn) {
@@ -981,23 +965,15 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
    * provider, so email cannot be a hard dependency of a security control. The primary channel is
    * the in-app notice built from unseen mfa events.
    *
-   * The eventHub event fires for every notice type -- `admin.mfa.<type>`, `_` replaced by `.` so
-   * `challenge_failed` becomes `admin.mfa.challenge.failed` -- unconditionally, since it is cheap
-   * and synchronous and is the one mechanism EE audit logging (where licensed) can observe any of
-   * them through; whether a given emission ends up as a persisted audit row is entirely that
-   * feature's own decision (its allow-list, licensing, request context), not this function's. The
-   * email is sent only for an actual change to the user's own factor (`EmailedNotice`): a failed
-   * challenge is a notice, not a change, and mailing every wrong code would let anyone who merely
-   * knows the password flood the account holder's inbox. `locked`/`unlocked` are hub-only by the
-   * same reasoning, and by enforcement's own decision to send no lock emails at all -- the in-app
-   * notice feed is enough, and `extra.byUserId` (carried straight into the eventHub payload, never
-   * emailed) lets `unlocked` name the administrator who acted.
+   * The eventHub event fires for every notice type -- `admin.mfa.<type>`, `_` replaced by `.` --
+   * unconditionally. It is how EE audit logging observes any of them; whether an emission becomes
+   * a persisted audit row is that feature's decision, not this one's. Email goes only to
+   * `EmailedNotice`: mailing every wrong code would let anyone who knows the password flood the
+   * account holder's inbox.
    *
-   * The email's promise is returned rather than swallowed so the CLI reset command can `await`
-   * it: it calls `notify` and then `process.exit(0)`, which can tear the process down before a
-   * detached promise ever resolves, silently dropping the reset email. The internal try/catch
-   * guarantees the promise never rejects, so the fire-and-forget call sites can keep ignoring
-   * it.
+   * The email's promise is returned rather than swallowed so the CLI reset command can `await` it
+   * before `process.exit(0)`. The internal try/catch guarantees it never rejects, so the
+   * fire-and-forget call sites can keep ignoring it.
    */
   const notify = (
     userId: string,
@@ -1062,10 +1038,6 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
    *    rows `isAccountThrottled`'s rolling window counts. Removing one of those early would let an
    *    attacker outlast the account-scoped throttle by generating enough other traffic (failed
    *    challenges included) to push it past the cap before the window naturally clears it.
-   *
-   * The cutoff -- the `createdAt` of the `MAX_EVENTS_PER_USER`th-newest row -- is found with a
-   * plain, ordered read; the actual deletion is the one `deleteMany` below, whose `where` encodes
-   * both exemptions directly rather than filtering candidates in application code.
    */
   const pruneEvents = async (userId: string): Promise<void> => {
     const total = await eventQuery().count({ where: { userId: String(userId) } });
@@ -1161,7 +1133,8 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   /**
    * Marks the caller's own notice rows seen. `userId` is always part of the `where`, and `ids`
    * -- when given -- only narrows it further, so a foreign id slipped into `ids` can never reach
-   * another user's row. An absent `ids` marks every one of the caller's notices.
+   * another user's row. An *absent* `ids` marks every one of the caller's notices; an *empty*
+   * array marks none, because it narrows to nothing. The two are not interchangeable.
    *
    * The `recovery_codes_issued` marker is excluded unconditionally, even when its own id is
    * included in `ids`: it is an acknowledgement marker, not a notice, and only
@@ -1228,11 +1201,9 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   };
 
   // --- Passkeys -------------------------------------------------
-  // Own module, composed here so callers keep one service, the same as trusted devices above.
-  // `settings` is the store reader from `security-settings.ts`, injected rather than imported
-  // inside the module so its tests can hand it any policy without a store double.
+  // Own module, composed the same way trusted devices are above.
   //
-  // Not beside the `trustedDevices` composition above: this one needs `isAccountThrottled`, whose
+  // Not beside that composition: this one needs `isAccountThrottled`, whose
   // `const` is declared just above here. A `const` is hoisted but uninitialised, so composing
   // earlier would throw a TDZ ReferenceError the moment the service is constructed.
   const passkeys = createPasskeys({
@@ -1245,14 +1216,12 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   });
 
   /**
-   * the same two invariants `controllers/mfa.ts`'s `assertPasskeyRegistrationAllowed` checks
-   * before calling either of the functions below -- moved here too, so the service stays safe for
-   * any caller reaching `strapi.service('admin::mfa')` and not only the controller. `isEnrolled`
-   * is already in scope at this point in the file (no new dependency needed in `PasskeyDeps`), and
-   * `readPasskeySettings` is the same tolerant store reader the passkey module itself is given.
-   * The controller's own checks stay too -- a duplicated cheap check is the correct price for
-   * keeping the ordering (flag, then policy, then enrolment, then body validation) so no
-   * password/code attempt is spent on a request that could never succeed.
+   * The two invariants `controllers/mfa.ts` checks before calling either passkey registration
+   * function, duplicated here so the service is safe for any caller reaching
+   * `strapi.service('admin::mfa')` and not only the controller. The controller's copy stays: a
+   * duplicated cheap check is the price of its ordering -- flag, policy, enrolment, then body
+   * validation -- which is what stops a password/code attempt being spent on a request that could
+   * never succeed.
    */
   const assertPasskeyRegistrationAllowed = async (userId: string): Promise<void> => {
     if (!(await readPasskeySettings(strapi)).enabled) {
@@ -1295,9 +1264,9 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   };
 
   /**
-   * Spends the challenge. A single unconditional-looking DELETE is in fact the conditional
-   * consume: whoever removes the row wins, so a token cannot authorise two operations even if two
-   * concurrent requests each present a genuinely valid factor.
+   * Spends the challenge. The DELETE is the conditional consume: whoever removes the row wins, so
+   * a token cannot authorise two operations even if two concurrent requests each present a
+   * genuinely valid factor.
    */
   const consumeChallenge = async (id: unknown, userId: string): Promise<VerifyChallengeResult> => {
     const { tableName } = challengeTable();
@@ -1363,12 +1332,9 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       return { ok: false as const, reason: 'throttled' as const };
     }
 
-    // One conditional statement — `UPDATE ... SET attempts = attempts + 1 WHERE id = ? AND
-    // attempts < ?` — whose affected-row count is the decision, exactly like `consumeTotpStep`.
-    // The cap check and the increment cannot be separated, so concurrent requests cannot all read
-    // the same pre-write counter and each be granted an attempt. `increment(...).returning(...)`
-    // would be the obvious way to judge the new value instead, but `returning` is unsupported on
-    // MySQL, and reading the counter back would in any case be a second statement.
+    // `consumeTotpStep`'s conditional UPDATE again, capping rather than consuming:
+    // `increment(...).returning(...)` would be the obvious way to judge the new value, but
+    // `returning` is unsupported on MySQL and reading the counter back is a second statement.
     //
     // This runs *before* any code is checked, so a request that crashes mid-verification has
     // still cost an attempt.
@@ -1480,13 +1446,11 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
    * submitted code's own shape, for the same reason `verifyChallenge` does: letting the caller
    * declare which factor they are presenting is the classic factor-switching bypass.
    *
-   * Calls `verifyTotpForUser` directly rather than `attemptTotp`: `attemptTotp`'s error-swallowing
-   * is deliberately scoped to the unauthenticated challenge path, and here the actionable "secret
-   * could not be read" error must keep propagating rather than collapse into "Invalid code". A
-   * recovery-shaped code never reaches the TOTP branch at all (the shape dispatch below), so an
-   * account whose secret cannot be decrypted can still be disabled with a recovery code --
-   * noted that `mfaEnabledAt` set with `mfaSecret` null is otherwise un-enrollable except via the
-   * CLI.
+   * Calls `verifyTotpForUser` directly rather than `attemptTotp`: that function's error-swallowing
+   * is scoped to the unauthenticated challenge path, and here the actionable "secret could not be
+   * read" error must keep propagating rather than collapse into "Invalid code". A recovery-shaped
+   * code never reaches the TOTP branch (the shape dispatch below), so an account whose secret
+   * cannot be decrypted can still be disabled with a recovery code.
    */
   const assertPasswordAndFactor = async (
     userId: string,
@@ -1511,12 +1475,9 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
    * future request -- with the recovery codes already deleted, and a replacement enrolment demands
    * a current factor. That is a permanent lockout with no way back in short of the CLI reset.
    *
-   * Trusted devices adds the trusted-device rows to the same transaction: a disabled account has no second
-   * factor for a trust to bypass, and the CLI reset (which calls `disable`) must leave none behind
-   * either.
-   *
-   * Passkeys adds the passkey rows and the pending registration ceremony to the same transaction,
-   * for the same reason: the CLI reset (which calls `disable`) must leave neither behind.
+   * Trusted devices, passkeys and the pending registration ceremony are in the same transaction
+   * for the same reason: a disabled account has no second factor for any of them to bypass, and
+   * the CLI reset (which calls `disable`) must leave none behind.
    */
   const disable = async (userId: string): Promise<void> => {
     await strapi.db.transaction(async () => {

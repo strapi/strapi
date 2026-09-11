@@ -75,8 +75,7 @@ const warnedKeys = new Set<WarnableKey>();
  * logged at error level, while every stored-value fallback stays a warning. `prefix` exists for
  * the same caller: an `admin.auth.mfa.webauthn` misconfiguration is a **config** fault, not a
  * database-backed security-settings one, so it logs under its own tag rather than
- * `[security-settings]` -- and the trailing sentence names itself accurately for the level it is
- * actually logged at, rather than always calling an error-level line a "warning".
+ * `[security-settings]`.
  */
 export const warnOnce = (
   strapi: Core.Strapi,
@@ -440,6 +439,9 @@ export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) 
             data: { mfaRequired: true },
           });
         }
+        // `where: {}` is every role in the table, not a no-op: an empty `requiredRoles` means
+        // "no role requires MFA", so every row is cleared. Deliberate, and the reason this runs
+        // inside the transaction with the set above rather than beside it.
         await roleQuery().updateMany({
           where: requiredRoles.length > 0 ? { id: { $notIn: requiredRoles } } : {},
           data: { mfaRequired: false },

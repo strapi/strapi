@@ -19,9 +19,8 @@ export declare namespace Me {
       enabledAt: AdminUser['mfaEnabledAt'];
       recoveryCodesRemaining: number;
       codesAcknowledged: boolean;
-      /** Enforcement: policy requires this account to be enrolled. */
+      /** The organisation policy requires this account to be enrolled, whether or not it is. */
       required: boolean;
-      /** ISO deadline of the running grace period, or null. */
       graceUntil: string | null;
       /** Trusted devices: whether the organisation lets this user trust a browser after a code. */
       trustedDevicesEnabled: boolean;
@@ -220,8 +219,7 @@ export const MAX_PASSKEYS_PER_USER = 10;
 
 /**
  * One registered passkey, as the owner's list and the registration response render it.
- * Exactly four fields: `publicKey`, `counter`, `credentialId` and `transports` never leave the
- * server.
+ * `publicKey`, `counter`, `credentialId` and `transports` never leave the server.
  */
 export interface Passkey {
   id: string;

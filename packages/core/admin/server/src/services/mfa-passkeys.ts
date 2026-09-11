@@ -496,10 +496,8 @@ export const createPasskeys = ({
     challengeExpiresAtColumn: string;
   } => {
     const metadata = strapi.db.metadata.get(USER_UID);
-    // @ts-expect-error - no dynamic typings for the models, columnName only exists on scalar
-    // attributes and mfaPasskeyChallenge's static type is the full Attribute union. Optional
-    // chaining also guards a missing attribute (a migration that has not run), which would
-    // otherwise throw before the actionable ApplicationError below can be raised.
+    // @ts-expect-error - columnName exists only on scalar attributes; the union type does not
+    // know that.
     const challengeColumn: string | undefined = metadata.attributes.mfaPasskeyChallenge?.columnName;
     const expiresAttr = metadata.attributes.mfaPasskeyChallengeExpiresAt;
     // @ts-expect-error - same reasoning, for the sibling expiry stamp nulled alongside it.
@@ -533,9 +531,8 @@ export const createPasskeys = ({
     webauthnColumn: string;
   } => {
     const metadata = strapi.db.metadata.get(CHALLENGE_UID);
-    // @ts-expect-error - no dynamic typings for the models, columnName only exists on scalar
-    // attributes and attempts' static type is the full Attribute union. Optional chaining guards
-    // a missing attribute so the actionable ApplicationError below is what surfaces.
+    // @ts-expect-error - columnName exists only on scalar attributes; the union type does not
+    // know that.
     const attemptsColumn: string | undefined = metadata.attributes.attempts?.columnName;
     // @ts-expect-error - same reasoning for the passkeys column.
     const webauthnColumn: string | undefined = metadata.attributes.webauthnChallenge?.columnName;
@@ -691,12 +688,10 @@ export const createPasskeys = ({
 
     const { tableName, attemptsColumn } = challengeTable();
 
-    // The same conditional increment `verifyChallenge` uses -- `UPDATE ... SET attempts =
-    // attempts + 1 WHERE id = ? AND attempts < ?` -- whose affected-row count is the decision,
-    // run *before* any verification so a request that crashes mid-verification has still cost an
-    // attempt. Both tiers are charged on this path: charging one but not the other is a hole in
-    // the other, and a passkey path that charged neither would be the way around the throttle
-    // entirely.
+    // `verifyChallenge`'s conditional increment, run *before* any verification so a request that
+    // crashes mid-verification has still cost an attempt. Both tiers are charged on this path:
+    // charging one but not the other is a hole in the other, and a passkey path that charged
+    // neither would be the way around the throttle entirely.
     const accepted = await strapi.db
       .getConnection(tableName)
       .where({ id: challenge.id })
@@ -913,11 +908,10 @@ export const createPasskeys = ({
       throw new ValidationError(PASSKEY_REGISTRATION_FAILED);
     }
 
-    // One conditional statement whose affected-row count is the decision, the idiom
-    // `consumeTotpStep` uses: the ceremony is spent here, before anything is verified, so two
-    // submissions of the same ceremony cannot both land. The submitted challenge is bound as a
-    // non-null string, so a response signed over a different challenge matches nothing and leaves
-    // the genuine ceremony pending.
+    // `consumeTotpStep`'s conditional statement: the ceremony is spent here, before anything is
+    // verified, so two submissions of the same one cannot both land. The submitted challenge is
+    // bound as a non-null string, so a response signed over a different challenge matches nothing
+    // and leaves the genuine ceremony pending.
     const { tableName, challengeColumn, challengeExpiresAtColumn } = userChallengeTable();
     // Nulls `mfaPasskeyChallengeExpiresAt` in the same statement as the challenge itself, so a
     // spent ceremony never leaves an expiry stamp behind for the next one to trip over.
@@ -994,12 +988,13 @@ export const createPasskeys = ({
 
         // The authoritative half of the cap: the recount and the insert share this transaction, so
         // a row that commits between `passkeyRegistrationOptions`' pre-check and this recount is
-        // caught and the insert rolls back. This is not a concurrency guard -- two genuinely
-        // parallel transactions never see each other's uncommitted inserts, so it cannot stop two
-        // truly simultaneous registrations from both landing. The concurrency guard is the
-        // single-use ceremony consume above: one pending challenge column per user, spent by one
-        // conditional statement, so two concurrent registrations for the same user can never both
-        // reach this point.
+        // caught and the insert rolls back. `>` here, against the pre-check's `>=`, because this
+        // recount happens *after* the insert -- the tenth passkey leaves a count of exactly
+        // `MAX_PASSKEYS_PER_USER`, which is allowed.
+        //
+        // Not a concurrency guard: parallel transactions never see each other's uncommitted
+        // inserts. That job belongs to the single-use ceremony consume above -- one pending
+        // challenge column per user, spent by one conditional statement.
         if ((await countRows(userId)) > MAX_PASSKEYS_PER_USER) {
           throw new ValidationError(PASSKEY_CAP_MESSAGE);
         }

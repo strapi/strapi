@@ -200,16 +200,22 @@ export const createTrustedDevices = ({
 
     const presentedHash = presentedToken ? hashTrustToken(presentedToken) : null;
 
-    return live
-      .map((row) => ({
-        id: String(row.id),
-        deviceName: row.deviceName ?? null,
-        createdAt: toIso(row.createdAt),
-        expiresAt: effectiveExpiry(row, current).toISOString(),
-        lastUsedAt: row.lastUsedAt ? toIso(row.lastUsedAt) : null,
-        current: presentedHash !== null && row.tokenHash === presentedHash,
-      }))
-      .sort((a, b) => Number(b.current) - Number(a.current));
+    return (
+      live
+        .map((row) => ({
+          id: String(row.id),
+          deviceName: row.deviceName ?? null,
+          createdAt: toIso(row.createdAt),
+          expiresAt: effectiveExpiry(row, current).toISOString(),
+          lastUsedAt: row.lastUsedAt ? toIso(row.lastUsedAt) : null,
+          current: presentedHash !== null && row.tokenHash === presentedHash,
+        }))
+        // The contract promises "current first, then newest", and this comparator only orders the
+        // first half of that. The rest rests on `Array.prototype.sort` being stable and the
+        // `findMany` above being ordered `createdAt` desc: collapsing the two into one comparator,
+        // or dropping that ordering, silently breaks the documented order.
+        .sort((a, b) => Number(b.current) - Number(a.current))
+    );
   };
 
   /** Silent: the caller's own event (`disabled`, `authenticator_replaced`, a settings update) covers it. */
