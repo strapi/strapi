@@ -1,9 +1,9 @@
 <p align="center">
   <a href="https://strapi.io/#gh-light-mode-only">
-    <img src="https://strapi.io/assets/strapi-logo-dark.svg" width="318px" alt="Strapi logo" />
+    <img src="public/assets/strapi-logo-dark.svg" width="318px" alt="Strapi logo" />
   </a>
   <a href="https://strapi.io/#gh-dark-mode-only">
-    <img src="https://strapi.io/assets/strapi-logo-light.svg" width="318px" alt="Strapi logo" />
+    <img src="public/assets/strapi-logo-light.svg" width="318px" alt="Strapi logo" />
   </a>
 </p>
 
