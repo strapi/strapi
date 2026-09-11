@@ -3,21 +3,20 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { getAttributeFlags } from './attributeFlagRegistry';
+import { Pill } from './Pill';
 
-import type { AttributeFlag, AttributeLike } from './attributeFlagRegistry';
+import type { AttributeLike } from './attributeFlagRegistry';
 
 /**
- * The flag itself: its own colour, paled right down for the ground it sits on,
- * so a row of them reads as a row of labels rather than a row of alerts.
+ * A flag that does not apply still holds its place.
+ *
+ * Every row shows every flag in the same order, so "required" is in the same
+ * column on the row above and the row below. Packing only the flags that apply
+ * would put i18n where required sits one row up, and a list of thirty-five
+ * fields becomes unreadable for the sake of a little width.
  */
-const Pill = styled(Flex)<{ $tone: AttributeFlag['tone'] }>`
-  border-radius: 1.6rem;
-  padding: ${({ theme }) => `${theme.spaces[1]} ${theme.spaces[2]}`};
-  background: ${({ theme, $tone }) => theme.colors[`${$tone}100`]};
-
-  svg path {
-    fill: ${({ theme, $tone }) => theme.colors[`${$tone}600`]};
-  }
+const Absent = styled.span`
+  visibility: hidden;
 `;
 
 /**
@@ -31,17 +30,18 @@ const Pill = styled(Flex)<{ $tone: AttributeFlag['tone'] }>`
 export const AttributeFlags = ({ attribute }: { attribute: AttributeLike }) => {
   const { formatMessage } = useIntl();
 
-  const active = getAttributeFlags().filter((flag) => flag.applies(attribute));
+  const flags = getAttributeFlags();
 
-  if (active.length === 0) {
+  if (flags.length === 0) {
     return null;
   }
 
   return (
-    <Flex gap={1} wrap="wrap">
-      {active.map((flag) => (
-        // The tooltip hands its trigger a ref, so the pill is what takes it.
-        <Tooltip key={flag.id} label={formatMessage(flag.label)}>
+    <Flex gap={1}>
+      {flags.map((flag) => {
+        const applies = flag.applies(attribute);
+
+        const pill = (
           <Pill tag="span" alignItems="center" $tone={flag.tone}>
             {flag.Icon ? (
               <>
@@ -54,8 +54,23 @@ export const AttributeFlags = ({ attribute }: { attribute: AttributeLike }) => {
               </Typography>
             )}
           </Pill>
-        </Tooltip>
-      ))}
+        );
+
+        if (!applies) {
+          return (
+            <Absent key={flag.id} aria-hidden>
+              {pill}
+            </Absent>
+          );
+        }
+
+        // The tooltip hands its trigger a ref, so the pill is what takes it.
+        return (
+          <Tooltip key={flag.id} label={formatMessage(flag.label)}>
+            {pill}
+          </Tooltip>
+        );
+      })}
     </Flex>
   );
 };

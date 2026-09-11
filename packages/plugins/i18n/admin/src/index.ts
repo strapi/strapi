@@ -214,7 +214,7 @@ export default {
           id: getTranslation('attribute.flag.localized'),
           defaultMessage: 'Internationalization',
         },
-        tone: 'secondary',
+        tone: 'neutral',
         Icon: Earth,
         applies: (attribute) =>
           (attribute.pluginOptions as { i18n?: { localized?: boolean } } | undefined)?.i18n

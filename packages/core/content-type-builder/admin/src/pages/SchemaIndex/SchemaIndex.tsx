@@ -100,6 +100,7 @@ const NameCell = ({ schema }: { schema: Schema }) => {
           />
         </Flex>
       </Tooltip>
+      <StatusBadge status={(schema as { status?: string }).status ?? 'UNCHANGED'} />
     </Flex>
   );
 };
@@ -112,15 +113,6 @@ const CategoryCell = ({ schema }: { schema: Schema }) => (
 
 const DraftAndPublishCell = ({ schema }: { schema: Schema }) => (
   <OnOff on={hasDraftAndPublish(schema)} />
-);
-
-/**
- * Whether the schema has been touched since the last save — new, modified or
- * deleted. Unsaved work is spread across the builder and the only way to see
- * all of it was to open each schema in turn.
- */
-const StatusCell = ({ schema }: { schema: Schema }) => (
-  <StatusBadge status={(schema as { status?: string }).status ?? 'UNCHANGED'} />
 );
 
 /**
@@ -242,11 +234,6 @@ export const SchemaIndex = () => {
           }),
           Cell: DraftAndPublishCell,
         },
-    {
-      name: 'status',
-      label: formatMessage({ id: getTrad('index.column.status'), defaultMessage: 'Status' }),
-      Cell: StatusCell,
-    },
     ...pluginColumns.map((column) => ({
       name: column.id,
       label: formatMessage(column.header),

@@ -1,4 +1,6 @@
-import { Typography, Badge } from '@strapi/design-system';
+import { Typography } from '@strapi/design-system';
+
+import { Pill } from './Pill';
 
 export const Status = ({ status }: { status: string }) => {
   switch (status) {
@@ -25,55 +27,30 @@ export const Status = ({ status }: { status: string }) => {
   }
 };
 
+const TONES = {
+  CHANGED: { tone: 'alternative', label: 'Modified' },
+  REMOVED: { tone: 'danger', label: 'Deleted' },
+  NEW: { tone: 'success', label: 'New' },
+} as const;
+
+/**
+ * What has happened to a schema or a field since the last save, in the same
+ * rounded shape as the flags it sits beside.
+ */
 export const StatusBadge = ({ status }: { status: string }) => {
-  switch (status) {
-    case 'CHANGED':
-      return (
-        <Badge
-          fontWeight="bold"
-          textColor="alternative600"
-          backgroundColor="alternative100"
-          borderColor="alternative200"
-        >
-          Modified
-        </Badge>
-      );
-    case 'REMOVED':
-      return (
-        <Badge
-          fontWeight="bold"
-          textColor="danger600"
-          backgroundColor="danger100"
-          borderColor="danger200"
-        >
-          Deleted
-        </Badge>
-      );
-    case 'NEW':
-      return (
-        <Badge
-          fontWeight="bold"
-          textColor="success600"
-          backgroundColor="success100"
-          borderColor="success200"
-        >
-          New
-        </Badge>
-      );
-    case 'UNCHANGED':
-    default:
-      return (
-        <Badge
-          style={{
-            visibility: 'hidden',
-          }}
-          fontWeight="bold"
-          textColor="warning600"
-          backgroundColor="warning100"
-          borderColor="warning200"
-        >
-          Unchanged
-        </Badge>
-      );
+  const entry = TONES[status as keyof typeof TONES];
+
+  // Nothing to hold a place for: the badge sits inline beside a name, not in
+  // a column of its own.
+  if (!entry) {
+    return null;
   }
+
+  return (
+    <Pill tag="span" alignItems="center" $tone={entry.tone}>
+      <Typography variant="sigma" textColor={`${entry.tone}600`}>
+        {entry.label}
+      </Typography>
+    </Pill>
+  );
 };

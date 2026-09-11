@@ -140,12 +140,12 @@ test.describe('Content-Type Builder — all content types', () => {
     await page.getByRole('link', { name: 'Collection types' }).click();
     await expect(page.getByRole('heading', { name: 'All content types' })).toBeVisible();
 
-    await expect(page.getByRole('row').filter({ hasText: 'Article' }).first()).toContainText(
-      'Modified'
-    );
-    await expect(page.getByRole('row').filter({ hasText: 'Author' }).first()).not.toContainText(
-      'Modified'
-    );
+    await expect(
+      page.getByRole('row').filter({ hasText: 'Article' }).first().getByText('Modified')
+    ).toBeVisible();
+    await expect(
+      page.getByRole('row').filter({ hasText: 'Author' }).first().getByText('Modified')
+    ).toHaveCount(0);
   });
 
   test('creating is one button with three choices', async ({ page }) => {

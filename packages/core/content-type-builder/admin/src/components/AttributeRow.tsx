@@ -293,6 +293,7 @@ const MemoizedRow = memo((props: Omit<AttributeRowProps, 'style'>) => {
                 {item.type === 'component' && <ComponentLink uid={item.component} />}
               </Typography>
             </Flex>
+            {item.status && <StatusBadge status={item.status} />}
           </Flex>
         </Flex>
 
@@ -300,7 +301,6 @@ const MemoizedRow = memo((props: Omit<AttributeRowProps, 'style'>) => {
           <Flex justifyContent="flex-end" gap={2} onClick={(e) => e.stopPropagation()}>
             <AttributeFlags attribute={item} />
             <>
-              <Box>{item.status && <StatusBadge status={item.status} />}</Box>
               {['component', 'dynamiczone'].includes(item.type) ? (
                 <IconButton
                   onClick={(e) => {

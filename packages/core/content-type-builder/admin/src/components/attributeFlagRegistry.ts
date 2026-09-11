@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react';
 
+import type { PillTone } from './Pill';
 import type { MessageDescriptor } from 'react-intl';
 
 /**
@@ -34,7 +35,7 @@ export interface AttributeFlag {
    * The colour family the flag is written in: its `600` for the text, its
    * `100` for the ground behind it.
    */
-  tone: 'danger' | 'primary' | 'neutral' | 'secondary' | 'success' | 'warning' | 'alternative';
+  tone: PillTone;
   /** Whether this attribute has the option on. */
   applies: (attribute: AttributeLike) => boolean;
 }

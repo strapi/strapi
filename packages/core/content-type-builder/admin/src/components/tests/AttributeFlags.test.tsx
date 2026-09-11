@@ -8,11 +8,16 @@ afterEach(() => {
 });
 
 describe('AttributeFlags', () => {
-  it('says nothing about a field with no option on', () => {
+  /**
+   * The slots stay: every row shows every flag in the same order so a column
+   * of them lines up, and a flag that does not apply is only invisible.
+   */
+  it('says nothing about a field with no option on, but keeps its place', () => {
     render(<AttributeFlags attribute={{ type: 'string' }} />);
 
     ['Required', 'Unique', 'Private'].forEach((flag) => {
-      expect(screen.queryByText(flag)).not.toBeInTheDocument();
+      expect(screen.getByText(flag)).toBeInTheDocument();
+      expect(screen.getByText(flag)).not.toBeVisible();
     });
   });
 
@@ -23,15 +28,15 @@ describe('AttributeFlags', () => {
   it('flags a required field', () => {
     render(<AttributeFlags attribute={{ type: 'string', required: true }} />);
 
-    expect(screen.getByText('Required')).toBeInTheDocument();
+    expect(screen.getByText('Required')).toBeVisible();
   });
 
   it('flags unique and private fields', () => {
     render(<AttributeFlags attribute={{ type: 'string', unique: true, private: true }} />);
 
-    expect(screen.getByText('Unique')).toBeInTheDocument();
-    expect(screen.getByText('Private')).toBeInTheDocument();
-    expect(screen.queryByText('Required')).not.toBeInTheDocument();
+    expect(screen.getByText('Unique')).toBeVisible();
+    expect(screen.getByText('Private')).toBeVisible();
+    expect(screen.getByText('Required')).not.toBeVisible();
   });
 
   it('shows every option a field has, in registration order', () => {
@@ -65,7 +70,7 @@ describe('AttributeFlags', () => {
     });
 
     render(<AttributeFlags attribute={localized} />);
-    expect(screen.getByText('Internationalization')).toBeInTheDocument();
+    expect(screen.getByText('Internationalization')).toBeVisible();
   });
 
   it('replaces a flag registered twice under the same id', () => {
