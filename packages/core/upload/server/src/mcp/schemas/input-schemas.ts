@@ -243,3 +243,61 @@ export const mediaDeleteFolderInputSchema = z
       ),
   })
   .strict();
+
+/**
+ * `media_move_assets` input.
+ *
+ * Bulk by design: an agent reorganising a library moves many assets at once, and one call with a
+ * per-id report is cheaper and easier to recover from than N sequential calls. There is no
+ * single-asset variant — the array length is the only difference, and a second tool would add a
+ * choice without removing a mistake. The admin REST API agrees: `/actions/bulk-move` is the only
+ * move route.
+ *
+ * `folder` is required, including an explicit null for the root, for the same reason `media_move_folder`
+ * requires `parent`: a move needs a destination, and an omitted key would silently become a no-op.
+ *
+ * ASSET ids only, and the schema CANNOT enforce it. Asset ids and folder ids are independently
+ * numbered, so the same integer routinely names both; the handler resolves ids in the file table,
+ * which means a folder id whose number collides with an asset moves that asset — and reports it
+ * as a success. Only an id matching no asset at all is reported as failed.
+ *
+ * This is an accepted risk, not an oversight: with a bare `ids: number[]` there is no way for the
+ * caller to say which namespace it meant, and refusing every colliding id would make those assets
+ * permanently unmovable over MCP. The mitigation is the tool description. The durable fix is
+ * namespaced handles (`asset:1` / `folder:1`) across the whole media surface, which is a breaking
+ * change to the read tools and belongs to its own ticket.
+ */
+export const mediaMoveAssetsInputSchema = z
+  .object(
+    {
+      ids: z
+        .array(mediaIdSchema)
+        .min(1)
+        .max(100)
+        .describe(
+          'Numeric ids of the assets to move (1-100). ASSET ids only, taken from media_list_assets or media_get_asset — never from media_list_folders. Folder ids are numbered separately and the same number often names both an asset and a folder, so a folder id here moves the asset sharing that number; use media_move_folder to move a folder.'
+        ),
+      folder: folderIdSchema
+        .nullable()
+        .describe(
+          'Numeric id of the destination folder. Pass null to move the assets to the media library root. Required — including the explicit null — so a move always names a destination. Use media_list_folders to discover folder ids.'
+        ),
+    },
+    {
+      error(issue) {
+        if (
+          issue.code === 'unrecognized_keys' &&
+          issue.keys.some((key) => key === 'id' || key === 'fileIds')
+        ) {
+          return 'media_move_assets moves assets in bulk: pass `ids` as an array of numeric asset ids, even for a single asset.';
+        }
+
+        if (issue.code === 'unrecognized_keys' && issue.keys.includes('folderIds')) {
+          return 'media_move_assets moves assets only. Use media_move_folder to move a folder.';
+        }
+
+        return undefined;
+      },
+    }
+  )
+  .strict();
