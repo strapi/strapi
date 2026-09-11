@@ -84,6 +84,7 @@ const WysiwygNav = ({
   const { formatMessage } = useIntl();
   const isMobile = useIsMobile();
   const isDisabled = disabled || isPreviewMode;
+  const toolbarContainerRef = React.useRef<HTMLElement>(null);
 
   const handleActionClick = (
     value: string,
@@ -493,6 +494,7 @@ const WysiwygNav = ({
       </Field.Root>
       <Flex width="100%" justifyContent="space-between" overflow="hidden">
         <Flex
+          ref={toolbarContainerRef}
           gap={{ initial: 3, medium: 2 }}
           overflow="hidden"
           width="100%"
@@ -501,6 +503,7 @@ const WysiwygNav = ({
           <EditorToolbarObserver
             menuTriggerVariant="tertiary"
             observedComponents={observedComponents}
+            containerRef={toolbarContainerRef}
           />
         </Flex>
 
