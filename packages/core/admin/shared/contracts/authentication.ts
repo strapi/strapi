@@ -26,46 +26,30 @@ export declare namespace Login {
   }
 }
 
-/**
- * The response `/login` sends instead of `Login.Response` when the account has two-factor
- * authentication enrolled: no session is created yet, so there is deliberately no cookie and no
- * access token here. `challengeToken` authorises exactly one follow-up call, `/login/mfa`.
- */
+/** Sent instead of `Login.Response` when the account is enrolled: no session yet, so no cookie and
+ * no access token. `challengeToken` authorises exactly one follow-up call. */
 export interface MfaChallengeResponse {
   data: {
     mfaRequired: true;
     challengeToken: string;
     expiresIn: number;
-    /**
-     * The trust period the challenge screen may offer ("Trust this device for {n}
-     * days"), or null when the organisation does not offer trusted devices. Never absent.
-     */
+    /** Null when the organisation does not offer trusted devices. Never absent. */
     trustedDeviceDays: number | null;
-    /**
-     * Whether the challenge screen may offer "Use a passkey" -- the organisation allows
-     * passkeys *and* this account holds at least one. Never absent. Telling a caller who already
-     * proved the password that this account has passkeys is not a new disclosure: the challenge
-     * itself already reveals that the account is enrolled.
-     */
+    /** Not a new disclosure to a caller who already proved the password: the challenge itself already
+     * reveals the account is enrolled. Never absent. */
     passkeyAvailable: boolean;
   };
 }
 
-/**
- * Present on a session-issuing response (login, register, register-admin, reset-password) only
- * when the account is required to enrol in two-factor authentication and has not yet: the session
- * is real, and `mfaGraceUntil` (ISO) is when the account will be locked if it stays unenrolled.
- */
+/** Present on a session-issuing response only when the account is required to enrol and has not:
+ * the session is real, and `mfaGraceUntil` is when it will be locked if it stays that way. */
 export interface MfaEnrolmentRequiredFields {
   mfaEnrolmentRequired?: true;
   mfaGraceUntil?: string;
 }
 
-/**
- * /login/mfa - Complete a login started by `/login` when `Login.Response` came back as
- * `MfaChallengeResponse`. Accepts either a TOTP code or a recovery code; on success it issues a
- * session exactly like `/login` does for an unenrolled account.
- */
+/** POST /login/mfa - accepts either a TOTP code or a recovery code, and issues the same session
+ * `/login` does for an unenrolled account. */
 export declare namespace LoginMfa {
   export interface Request {
     body: {
@@ -73,7 +57,7 @@ export declare namespace LoginMfa {
       code: string;
       deviceId?: string;
       rememberMe?: boolean;
-      /** Trust this browser after the code verifies. Ignored when the organisation disallows it. */
+      /** Ignored when the organisation disallows trust. */
       trustDevice?: boolean;
     };
   }

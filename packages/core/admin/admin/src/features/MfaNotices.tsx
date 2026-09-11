@@ -13,11 +13,7 @@ import { useNotification } from './Notifications';
 
 import type { MfaEventNotice } from '../../../shared/contracts/mfa';
 
-/**
- * Copy for every `admin::mfa-event` type the server can raise a notice about. Keyed by
- * `notice.type` so the profile section's list (via `formatMfaNotice`) has one source of truth for
- * what each event means; the next-login toast only needs the count, not this table.
- */
+/** One source of truth for what each event means. The next-login toast only needs the count. */
 const NOTICE_COPY: Record<MfaEventNotice['type'], { id: string; defaultMessage: string }> = {
   enabled: {
     id: 'Settings.profile.form.section.mfa.notice.enabled',
@@ -74,20 +70,14 @@ const NOTICE_COPY: Record<MfaEventNotice['type'], { id: string; defaultMessage: 
   },
 };
 
-/**
- * `device_trust_revoked` carries `byUserId` when an administrator did it, and the
- * notice should say so. Chosen here from the metadata rather than by a fourth event type: the
- * server records one type for both and keeps the distinction in the event's metadata.
- */
+/** Chosen from the metadata rather than by a second event type: the server records one type for
+ * both and keeps the distinction in `byUserId`. */
 const REVOKED_BY_ADMIN_COPY = {
   id: 'Settings.profile.form.section.mfa.notice.device_trust_revoked.byAdmin',
   defaultMessage: 'Trusted devices were revoked by an administrator',
 };
 
-/**
- * `device_trusted` carries `deviceName` and `days` when the server could name the
- * browser that was trusted, and the notice should say so instead of the generic static copy.
- */
+/** Used when the server could name the browser, instead of the generic copy. */
 const DEVICE_TRUSTED_NAMED_COPY = {
   id: 'Settings.profile.form.section.mfa.notice.device_trusted.named',
   defaultMessage:
@@ -118,10 +108,6 @@ const copyFor = (notice: MfaEventNotice): NoticeCopy => {
   return { descriptor: NOTICE_COPY[notice.type] };
 };
 
-/**
- * Shared by the profile section's "Recent security events" list. The next-login toast only needs
- * a count, so it does not call this.
- */
 export const formatMfaNotice = (
   notice: MfaEventNotice,
   formatMessage: IntlFormatters['formatMessage'],
@@ -135,39 +121,27 @@ export const formatMfaNotice = (
 };
 
 /**
- * The primary notification channel: unseen `admin::mfa-event` rows become one warning
- * toast on the next authenticated load. There is deliberately no link -- `Notifications` renders
- * `link` as an external `<Link isExternal>` (new tab / full navigation), which is wrong for an
- * in-app destination -- so the message just says where to look. Dismissing the toast marks
- * exactly those rows seen; the profile section (`TwoFactorSection`) lists the same notices, so
- * nothing is lost if the toast is left to sit or times out.
+ * Unseen notice rows become one warning toast on the next authenticated load. No link, because
+ * `Notifications` renders `link` as an external `<Link isExternal>`, which is wrong for an in-app
+ * destination.
  *
- * Stays silent while loading, when the future flag is off, and when there are no unseen notices.
- * The flag-off signal is a 404 from `useGetMfaStatusQuery` (`/admin/mfa/me`) -- the same query
- * `TwoFactorSection` already runs and RTK Query caches, so checking it here costs no extra
- * request -- which then `skip`s `useGetMfaNoticesQuery` entirely. This deliberately does NOT
- * factor in `status.enabled`: `disabled`/`reset` notices are raised exactly when a user stops
- * being enrolled, so notices must keep flowing for a not-currently-enrolled user too.
+ * The flag-off signal is a 404 from `useGetMfaStatusQuery`, which then `skip`s the notices query.
+ * Deliberately not `status.enabled`: `disabled`/`reset` notices are raised exactly when a user
+ * stops being enrolled, so they must keep flowing for a not-currently-enrolled user.
  *
- * `announced` caps this at one toast per mount: RTK Query caches `getMfaNotices`, so it does not
- * refire on every route change, but a later refetch -- e.g. the `MfaNotices` tag invalidation that
- * follows `markMfaNoticesSeen` -- hands back a new array reference for `notices`, which would
- * otherwise re-run the effect below and toast again for events already dismissed.
+ * `announced` caps this at one toast per mount, because a refetch hands back a new array
+ * reference and would otherwise toast again for events already dismissed.
  *
- * The toast is `blockTransition: true` (`duration: Infinity`), and `Toaster` is rendered once for
- * the whole app, above the router -- while this component lives inside `AdminLayout`, below it. An
- * in-SPA logout unmounts `AdminLayout` (and this component) without ever unmounting `Toaster`, so
- * without the cleanup effect below the toast would survive on the login screen, and a fresh one
- * would stack on top of it after the next login. `toast.dismiss` does not run the `Alert`'s
- * `onClose`, so unmounting this way deliberately does NOT mark the notices seen -- the user never
- * actually saw them.
+ * `Toaster` is rendered above the router while this lives inside `AdminLayout`, so an in-SPA
+ * logout unmounts this and not the toast: without the cleanup effect the toast survives onto the
+ * login screen. `toast.dismiss` does not run `onClose`, so that path deliberately does not mark
+ * the notices seen -- the user never saw them.
  */
 const MfaNotices = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification, dismissNotification } = useNotification();
   const { error: statusError, isLoading: statusLoading } = useGetMfaStatusQuery();
-  // Named for the case that matters, but it also holds while the status query is in flight: both
-  // mean "do not ask for notices yet". Dropping the loading half would fire the notices query
+  // Also true while the status query is in flight: dropping that half would fire the notices query
   // once against a feature that may turn out to be off.
   const skipNotices = isNotFoundError(statusError) || statusLoading;
   const { data: notices } = useGetMfaNoticesQuery(undefined, { skip: skipNotices });

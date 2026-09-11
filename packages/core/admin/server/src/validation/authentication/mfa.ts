@@ -1,21 +1,10 @@
 import { yup, validateYupSchema } from '@strapi/utils';
 
 /**
- * Three conventions every schema in this file follows.
- *
- * `code`'s `max(32)` is deliberately loose: a 6-8 digit TOTP code and a 10-character recovery
- * code the user may have typed with dashes must both pass. Which factor was submitted is decided
- * later, by shape, inside `admin::mfa`'s `verifyChallenge`.
- *
- * No `.trim()` anywhere: `validateYupSchema` runs with `strict: true`, and under strict mode
- * yup's `.trim()` stops being a transform and becomes an assertion that the value is already
- * trimmed -- it would reject, not clean up, a pasted code with surrounding whitespace. The
- * handlers trim before the value reaches the service.
- *
- * `deviceId`/`rememberMe` mirror `/login`'s own schema (`validation/authentication/login.ts`):
- * `issueSession` reads both from the request body via `extractDeviceParams`, so the login
- * schemas must accept them too, or `.noUnknown()` would reject a body that legitimately carries
- * them and silently lose the caller's "remember me" choice.
+ * `code`'s `max(32)` is loose so a TOTP code and a dash-typed recovery code both pass. No
+ * `.trim()` anywhere: under `strict: true` yup's `.trim()` asserts rather than transforms, so it
+ * would reject a pasted code instead of cleaning it -- the handlers trim. `deviceId`/`rememberMe`
+ * mirror `/login`'s schema, or `.noUnknown()` rejects a body `issueSession` legitimately reads.
  */
 const mfaLoginSchema = yup
   .object()
@@ -39,11 +28,8 @@ const mfaWebauthnOptionsSchema = yup
   .required()
   .noUnknown();
 
-/**
- * `assertion` is handed to `@simplewebauthn/server` otherwise unvalidated: the library does its
- * own structural checks, and re-declaring the WebAuthn response shape in yup would reject fields a
- * future revision adds. `registerPasskeySchema` leaves `registration` alone for the same reason.
- */
+/** `assertion` is left to `@simplewebauthn/server`: re-declaring the WebAuthn response shape here
+ * would reject fields a future revision adds. */
 const mfaWebauthnLoginSchema = yup
   .object()
   .shape({
@@ -59,10 +45,7 @@ const mfaWebauthnLoginSchema = yup
 export const validateMfaWebauthnOptionsInput = validateYupSchema(mfaWebauthnOptionsSchema);
 export const validateMfaWebauthnLoginInput = validateYupSchema(mfaWebauthnLoginSchema);
 
-/**
- * /mfa/enrol - a password starts a fresh enrolment; an already-enrolled account must also send
- * `code` to replace its authenticator, which is why `code` is optional here.
- */
+/** `code` is optional: only an already-enrolled account sends one, to replace its authenticator. */
 const enrolSchema = yup
   .object()
   .shape({ password: yup.string().required(), code: yup.string().min(6).max(32).optional() })
@@ -75,11 +58,8 @@ const codeOnlySchema = yup
   .required()
   .noUnknown();
 
-/**
- * The shared re-authentication gate for /mfa/recovery-codes, /mfa/disable and
- * /mfa/passkeys/options: each requires the current password on top of an existing second factor,
- * so a stolen session alone is never enough to relax or extend the account's protection.
- */
+/** The shared gate for /mfa/recovery-codes, /mfa/disable and /mfa/passkeys/options: a stolen
+ * session alone is never enough to relax or extend the account's protection. */
 const passwordAndCodeSchema = yup
   .object()
   .shape({
@@ -89,15 +69,9 @@ const passwordAndCodeSchema = yup
   .required()
   .noUnknown();
 
-/**
- * `name` is the user's own label, 1..50 characters *after* trimming, so the bound is a `test`
- * rather than `.max(50)`; `.max(200)` is a cheap outer bound so the test never runs over
- * something absurd.
- *
- * `registration` is passed to `@simplewebauthn/server` otherwise unvalidated: the library does
- * its own structural checks, and re-declaring the WebAuthn response shape in yup would reject
- * fields a future revision adds.
- */
+/** `name` is bounded 1..50 *after* trimming, hence a `test` rather than `.max(50)`; the `.max(200)`
+ * only stops the test running over something absurd. `registration` is left to the library, as
+ * `assertion` is above. */
 const registerPasskeySchema = yup
   .object()
   .shape({
@@ -114,7 +88,6 @@ const registerPasskeySchema = yup
   .required()
   .noUnknown();
 
-/** `ids` absent means "every unseen notice for the caller". */
 const noticesSeenSchema = yup
   .object()
   .shape({ ids: yup.array().of(yup.number().integer().required()).optional() })
@@ -125,7 +98,6 @@ export const validateMfaEnrolInput = validateYupSchema(enrolSchema);
 export const validateMfaCodeInput = validateYupSchema(codeOnlySchema);
 export const validateMfaPasswordAndCodeInput = validateYupSchema(passwordAndCodeSchema);
 export const validateMfaNoticesSeenInput = validateYupSchema(noticesSeenSchema);
-// Its own export rather than a second call site of `validateMfaPasswordAndCodeInput`, so the
-// passkey route can diverge from the two TOTP ones without touching them.
+// Its own export, so the passkey route can diverge from the two TOTP ones.
 export const validatePasskeyOptionsInput = validateYupSchema(passwordAndCodeSchema);
 export const validateRegisterPasskeyInput = validateYupSchema(registerPasskeySchema);

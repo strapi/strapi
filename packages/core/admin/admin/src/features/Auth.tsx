@@ -51,24 +51,16 @@ interface AuthContextValue {
   login: (
     body: Login.Request['body'] & { rememberMe: boolean }
   ) => Promise<Awaited<ReturnType<ReturnType<typeof useLoginMutation>[0]>>>;
-  /**
-   * Completes a login that `login` answered with the challenge shape. Persists the resulting
-   * session token exactly as `login` does; `rememberMe` decides between cookie and localStorage.
-   * `trustDevice` asks the server to trust this browser; the trust itself arrives as an
-   * httpOnly cookie the panel never sees.
-   */
+  /** Persists the session token exactly as `login` does. The trust `trustDevice` asks for arrives
+   * as an httpOnly cookie the panel never sees. */
   loginMfa: (
     body: Pick<LoginMfa.Request['body'], 'challengeToken' | 'code' | 'trustDevice'> & {
       rememberMe: boolean;
     }
   ) => Promise<Awaited<ReturnType<ReturnType<typeof useLoginMfaMutation>[0]>>>;
-  /**
-   * The passkey twin of `loginMfa`: satisfies the *same* challenge with a WebAuthn
-   * assertion instead of a code, and persists the resulting session token identically.
-   * `trustDevice` and `rememberMe` are carried for exactly the reasons they are carried on
-   * `loginMfa` -- the trust grant is factor-agnostic, and `rememberMe` decides cookie vs
-   * localStorage -- and dropping either on this path would silently lose the user's choice.
-   */
+  /** Satisfies the *same* challenge with an assertion instead of a code. `trustDevice` and
+   * `rememberMe` are carried for the reasons `loginMfa` gives: dropping either here would silently
+   * lose the user's choice. */
   loginMfaWebauthn: (
     body: Pick<MfaWebauthnLogin.Request['body'], 'challengeToken' | 'assertion' | 'trustDevice'> & {
       rememberMe: boolean;

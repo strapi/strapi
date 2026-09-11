@@ -25,27 +25,15 @@ import { translatedErrors } from '../../../utils/translatedErrors';
 import { ceremonyErrorKind } from '../../../utils/webauthn';
 import { getRedirectTo } from '../utils';
 
-/**
- * What `Login` hands over when `/login` answers with a challenge instead of a session, via router
- * state. `createBrowserRouter` persists this in `window.history.state.usr` and restores it on a
- * full page reload, so the state itself is not where the "refresh returns to login" guarantee
- * comes from -- the history-clearing effect below is.
- */
+/** `createBrowserRouter` persists router state in `window.history.state.usr` and restores it on a
+ * full reload, so the history-clearing effect below is what makes a refresh return to login. */
 export interface MfaChallengeLocationState {
   challengeToken: string;
   expiresIn: number;
   rememberMe: boolean;
-  /**
-   * The trust period the organisation offers ("Trust this device for {n} days"), or
-   * null when it offers none. Missing in a state written by an older bundle mid-flight, which is
-   * read as null.
-   */
+  /** Optional only because an older bundle's state may be in flight; read as null. */
   trustedDeviceDays?: number | null;
-  /**
-   * Whether this account can satisfy the challenge with a passkey (the organisation
-   * allows them and the account has at least one). Missing in a state written by an older bundle
-   * mid-flight, which is read as false -- the code field always works.
-   */
+  /** Optional for the same reason; read as false, and the code field always works. */
   passkeyAvailable?: boolean;
 }
 
@@ -61,16 +49,13 @@ const isChallengeState = (value: unknown): value is MfaChallengeLocationState =>
   (typeof (value as MfaChallengeLocationState).passkeyAvailable === 'boolean' ||
     (value as MfaChallengeLocationState).passkeyAvailable === undefined);
 
-// Same bounds as the server's validator: a 6-8 digit TOTP code or a 10-character recovery code
-// the user may have typed with dashes or spaces. Which factor it is gets decided server-side.
+// The server's bounds. Which factor it is gets decided server-side.
 const MFA_SCHEMA = yup.object().shape({
   code: yup
     .string()
     .required(translatedErrors.required)
-    // `translatedErrors.minLength`/`maxLength` interpolate a `{min}`/`{max}` placeholder, so
-    // (matching the pattern in ResetPassword.tsx and Settings/pages/Users/utils/validation.ts)
-    // they need an explicit `values` object — passing the descriptor bare makes react-intl's
-    // `formatMessage` throw and crash the form.
+    // These descriptors interpolate a `{min}`/`{max}`, so passing one bare makes `formatMessage`
+    // throw and crash the form.
     .min(6, { ...translatedErrors.minLength, values: { min: 6 } })
     .max(32, { ...translatedErrors.maxLength, values: { max: 32 } }),
 });
@@ -84,11 +69,8 @@ const MfaChallenge = () => {
   const { loginMfa, loginMfaWebauthn } = useAuth('MfaChallenge', (auth) => auth);
   const [webauthnOptions] = useLoginMfaWebauthnOptionsMutation();
 
-  // Captured once, on mount, from whatever `location.state` was at that moment. The effect below
-  // clears `location.state` right after, so every later render (including the one that clearing
-  // navigate itself triggers) must keep working from this in-memory copy rather than reading
-  // `location.state` again — otherwise the guard below would see the state disappear and bounce
-  // the user back to login immediately after it successfully validated the challenge.
+  // Captured once on mount, because the effect below clears `location.state` right after: reading
+  // it again would bounce the user to login immediately after the challenge validated.
   const [challenge] = React.useState<MfaChallengeLocationState | null>(() =>
     isChallengeState(location.state) ? location.state : null
   );
@@ -132,10 +114,8 @@ const MfaChallenge = () => {
     }
     hasClearedHistoryStateRef.current = true;
 
-    // Replace this history entry with the same URL but `state: null`. Without this,
-    // `window.history.state.usr` (which `createBrowserRouter` restores on a full page reload)
-    // would still carry the challenge token after the user refreshes, opens this URL again from
-    // history, or navigates back/forward to it.
+    // Without this, `window.history.state.usr` still carries the challenge token after a refresh, a
+    // revisit from history, or a back/forward navigation.
     navigate(
       { pathname: location.pathname, search: location.search },
       { replace: true, state: null }
@@ -147,11 +127,9 @@ const MfaChallenge = () => {
   }
 
   const handleSubmit = async ({ code }: { code: string }) => {
-    // Both flags, not just the passkey one. The submit button is disabled while either is set,
-    // but a form can be submitted by Enter before React has re-rendered the disabled attribute,
-    // and two concurrent `loginMfa` calls race the same single-use challenge -- the loser shows
-    // a generic refusal over a login that in fact succeeded, and the verify route charges an
-    // attempt against the challenge budget for a race the user did not cause.
+    // Enter can submit before React re-renders the disabled attribute, and two concurrent calls race
+    // the same single-use challenge: the loser shows a refusal over a login that succeeded, and the
+    // verify route charges an attempt for a race the user did not cause.
     if (inFlightRef.current) {
       return;
     }
@@ -164,7 +142,6 @@ const MfaChallenge = () => {
         challengeToken: challenge.challengeToken,
         code,
         rememberMe: challenge.rememberMe,
-        // Only meaningful when the organisation offers trust; the server ignores it otherwise.
         trustDevice: trustedDeviceDays !== null && trustDevice,
       });
 
@@ -180,23 +157,14 @@ const MfaChallenge = () => {
     }
   };
 
-  /**
-   * `browserSupportsWebAuthn()` is called on every render rather than memoised: it is a cheap
-   * feature test, and hoisting it to module scope would freeze the answer for the life of the
-   * bundle (and defeat the per-test mock).
-   */
+  /** Called per render rather than hoisted: module scope would freeze the answer for the life of
+   * the bundle, and defeat the per-test mock. */
   const showPasskey = challenge.passkeyAvailable === true && browserSupportsWebAuthn();
 
-  /**
-   * The passkey factor, as three steps that must stay in this order: exchange the challenge
-   * token for options (the server stores that ceremony's challenge on the challenge row), run the
-   * ceremony in the browser, then hand the assertion back for a session. `rememberMe` and
-   * `trustDevice` ride along exactly as they do on the code path -- the server reads both out of
-   * this body, and the trust grant is factor-agnostic.
-   */
+  /** Three steps that must stay in this order: options (which stores the ceremony's challenge on
+   * the challenge row), the browser ceremony, then the assertion. */
   const handlePasskey = async () => {
-    // The same guard `handleSubmit` uses, and the same ref: the two paths spend one challenge
-    // between them, so neither may start while the other is running.
+    // The same ref `handleSubmit` uses: the two paths spend one challenge between them.
     if (inFlightRef.current) {
       return;
     }
@@ -215,9 +183,8 @@ const MfaChallenge = () => {
       try {
         assertion = await startAuthentication({ optionsJSON: optionsRes.data });
       } catch (error) {
-        // A dismissed or timed-out prompt is a no-op, not a failure: the user closed their own
-        // dialog and is still looking at the code field. Everything else gets one neutral line --
-        // the specific cause is the browser's business and is not safe to paraphrase.
+        // A dismissed prompt is a no-op: the user closed their own dialog. Everything else gets one
+        // neutral line, because the cause is not safe to paraphrase.
         if (ceremonyErrorKind(error) !== 'dismissed') {
           setApiError(
             formatMessage({

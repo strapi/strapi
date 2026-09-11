@@ -48,11 +48,8 @@ import { AdminUser } from '../../../shared/contracts/shared';
 
 const { ApplicationError, RateLimitError, ValidationError } = errors;
 
-/**
- * Enforcement for a user about to receive a session. Throws `MfaLockedError` (403) on
- * refusal, after emitting `admin.auth.error` like every other failed login; otherwise returns the
- * `issueSession` options carrying the grace deadline when one applies.
- */
+/** Throws `MfaLockedError` on refusal, after emitting `admin.auth.error` like any other failed
+ * login; otherwise returns the `issueSession` options carrying the grace deadline. */
 const enforceMfaOrThrow = async (
   user: AdminUser
 ): Promise<{ mfaEnrolment?: { graceUntil: Date } }> => {
@@ -67,24 +64,14 @@ const enforceMfaOrThrow = async (
   return result.outcome === 'grace' ? { mfaEnrolment: { graceUntil: result.graceUntil } } : {};
 };
 
-/**
- * What a challenge response advertises as the trust period, or null when the
- * organisation does not offer trusted devices. Read per challenge, never cached, so a settings
- * change shows on the very next login screen.
- */
+/** Read per challenge, never cached, so a settings change shows on the next login screen. */
 const offeredTrustDays = async (): Promise<number | null> => {
   const settings = await getService('mfa').trustedDeviceSettings();
   return settings.enabled ? settings.days : null;
 };
 
-/**
- * Whether the challenge screen may offer the passkey path. `countPasskeys` returns 0
- * while the organisation has turned passkeys off, so this is "the policy allows them and this
- * account holds at least one", plus a third term: the RP must actually resolve, so a
- * misconfigured deployment (an IP-literal `admin.absoluteUrl`) never offers a button every
- * ceremony would refuse. `passkeysConfigured` swallows that refusal into a boolean, the same
- * wrapper `/mfa/me`'s `passkeysEnabled` reads, so this can never 500 either.
- */
+/** The RP must resolve as well as the account holding a credential, so a misconfigured deployment
+ * never offers a button every ceremony would refuse. */
 const passkeyAvailableFor = async (userId: string): Promise<boolean> =>
   (await getService('mfa').countPasskeys(userId)) > 0 && getService('mfa').passkeysConfigured();
 
@@ -118,9 +105,8 @@ export default {
         const query = ctx.state as Login.Request['query'];
         query.user = user;
 
-        // Not `admin.auth.success` here: the second-factor check below can still gate this
-        // login, and that event must fire only when a session is actually issued (see the
-        // next step and `loginMfa`).
+        // Not `admin.auth.success`: the second-factor check below can still gate this login, and that
+        // event fires only when a session is issued.
         return next();
       })(ctx, next);
     },
@@ -130,22 +116,14 @@ export default {
 
       const mfa = getService('mfa');
 
-      // Enforcement first: a locked account is refused before anything else, and a graced one
-      // carries its deadline into the session below. Enrolled users come back as `none` and take
-      // the trust check or the challenge branch.
+      // Enforcement first: a locked account is refused before anything else.
       const sessionOptions = await enforceMfaOrThrow(user);
 
       if (mfa.isEnabled() && (await mfa.isEnrolled(userId))) {
-        // Read once, before anything else in this block: `createChallenge` below already mints a
-        // challenge row, so a store-read failure for the offered trust period must not risk a
-        // 500 on a response whose challenge already exists (a retry would then mint a second,
-        // orphaned one). A browser trusted after an earlier verified code skips the
-        // challenge. Only here (never on reset-password), only after the password check and
-        // `enforce`, only for an enrolled user, and only through `consumeTrustedDevice`, which
-        // compares the row's owner to this user. A cookie that matches nothing live, belongs to a
-        // foreign owner, or is refused outright because the setting is now disabled is cleared so
-        // the browser stops presenting it. Written as a fall-through so `login` keeps a single
-        // `issueSession` call site (see session-issuing-paths.test.ts).
+        // Every store read this response needs happens *before* `createChallenge` mints its row, so a
+        // blip cannot 500 a response whose challenge already exists and leave the retry minting a second,
+        // orphaned one. A cookie that matches nothing live, has a foreign owner, or is refused because
+        // the setting is now off is cleared so the browser stops presenting it.
         const trustedDeviceDays = await offeredTrustDays();
 
         const trustToken = ctx.cookies.get(MFA_TRUST_COOKIE_NAME);
@@ -156,30 +134,23 @@ export default {
             clearTrustCookie(ctx);
           }
 
-          // Read here, immediately before `createChallenge`, for the same recorded reason as
-          // `trustedDeviceDays` above: every store and database read this response needs happens
-          // *before* `createChallenge` mints its row, so a blip cannot 500 a response whose
-          // challenge already exists and make the retry mint a second, orphaned one. Unlike
-          // `trustedDeviceDays`, this read is scoped to inside the trust-cookie branch: a trusted
-          // browser's happy path never needs this value (it is discarded when `trusted` is true),
-          // so paying a per-user COUNT and a new 500 surface for it there would be pure waste.
+          // Before `createChallenge`, for the reason `trustedDeviceDays` above gives. Scoped inside the
+          // trust-cookie branch, unlike that one: a trusted browser discards this value, so paying a
+          // per-user COUNT and a new 500 surface for it there would be waste.
           const passkeyAvailable = await passkeyAvailableFor(userId);
 
           const { token: challengeToken, expiresIn } = await mfa.createChallenge(userId);
 
-          // A distinct event, not `admin.auth.success`: the password matched but no session was
-          // issued, so audit consumers (EE audit logs, `admin.auth.events` config hooks) must be
-          // able to see that this login was gated rather than have it look identical to no
-          // attempt at all.
+          // A distinct event: the password matched but no session was issued, and audit consumers must be
+          // able to tell that from no attempt at all.
           const sanitizedUser = getService('user').sanitizeUser(user);
           strapi.eventHub.emit('admin.auth.mfa_required', {
             user: sanitizedUser,
             provider: 'local',
           });
 
-          // Deliberately no cookie and no access token here: the challenge token authorises
-          // exactly one endpoint (`/login/mfa`) and mints nothing on its own. A cookie set
-          // alongside this response would make the whole feature a silent no-op.
+          // No cookie and no access token: a cookie set alongside this response would make the whole
+          // feature a silent no-op.
           ctx.body = {
             data: {
               mfaRequired: true,
@@ -208,9 +179,7 @@ export default {
       const { challengeToken, code, trustDevice, deviceId } = ctx.request
         .body as LoginMfa.Request['body'];
 
-      // The validator deliberately does not trim `code` (see `validation/authentication/mfa.ts`),
-      // so that a whitespace-only code still fails `required`. Trim here instead, after validation
-      // and before `verifyChallenge` compares it.
+      // The validator deliberately does not trim, so a whitespace-only code still fails `required`.
       const result = await mfa.verifyChallenge(challengeToken, code.trim());
 
       if (!result.ok) {
@@ -218,28 +187,21 @@ export default {
           throw new RateLimitError();
         }
 
-        // One generic message for every other outcome ('unusable', 'exhausted', 'invalid') so a
-        // caller cannot tell an expired challenge from a wrong code from an exhausted one.
+        // One generic message, so a caller cannot tell an expired challenge from a wrong code.
         throw new ValidationError('Invalid code');
       }
 
       const user = await getService('user').findOne(result.userId);
 
-      // `/login` is gated by the local passport strategy's `checkCredentials`
-      // (services/auth.ts), which rejects a missing user or `isActive !== true`.
-      // `verifyChallenge` above has no equivalent gate, and a challenge can outlive an account
-      // being disabled during its `challengeTtl` window, so the same
-      // account check is repeated here. Mirrors `checkCredentials` exactly -- it does not
-      // consult `blocked` -- and reuses its generic message: revealing "this account is
-      // disabled" would be a new enumeration channel on top of the one `verifyChallenge`
-      // already closes.
+      // A challenge can outlive an account being disabled inside its `challengeTtl` window, and
+      // `verifyChallenge` has no equivalent of `checkCredentials`' gate. Mirrors it exactly -- it does
+      // not consult `blocked` -- and reuses its generic message rather than open an enumeration channel.
       if (!user || user.isActive !== true) {
         throw new ValidationError('Invalid code');
       }
 
-      // Any verified challenge may grant trust. The service returns null when the
-      // organisation does not offer it, and a stale checkbox is not an error. The raw token
-      // exists only here and in the Set-Cookie header.
+      // The service returns null when the organisation does not offer trust, and a stale checkbox is
+      // not an error. The raw token exists only here and in the Set-Cookie header.
       if (trustDevice) {
         const granted = await mfa.trustDevice(String(user.id), {
           deviceId,
@@ -270,49 +232,35 @@ export default {
 
       const options = await getService('mfa').authenticationOptions(challengeToken);
 
-      // Passed straight through: the contract's `data` is now the same
-      // `PublicKeyCredentialRequestOptionsJSON` the service returns, not the earlier
-      // `Record<string, unknown>`, so no spread is needed to satisfy it.
       ctx.body = { data: options } satisfies MfaWebauthnOptions.Response;
     },
   ]),
 
-  /**
-   * Complete it. `verifyChallenge` is deliberately not extended for this: it dispatches on the
-   * submitted code's own shape, which is how the factor-switching bypass is avoided, and an
-   * assertion is not a code. Both counters `verifyChallenge` charges are charged here too (see
-   * `verifyAssertion`).
-   */
+  /** Not folded into `verifyChallenge`, which dispatches on the submitted code's own shape -- an
+   * assertion is not a code. Both counters are still charged. */
   loginMfaWebauthn: compose([
     async (ctx: Context) => {
       await validateMfaWebauthnLoginInput(ctx.request.body ?? {});
 
       const mfa = getService('mfa');
-      // `rememberMe` is deliberately not destructured: `issueSession` reads it (and `deviceId`)
-      // from the request body itself via `extractDeviceParams`. It still has to be in the
-      // validator, or `.noUnknown()` rejects the body that carries it.
+      // `rememberMe` is read from the body by `issueSession` itself, but must still be in the
+      // validator or `.noUnknown()` rejects the request.
       const { challengeToken, assertion, trustDevice, deviceId } = ctx.request
         .body as MfaWebauthnLogin.Request['body'];
 
-      // Throws `RateLimitError` (429) when the account is throttled, and one generic
-      // `ValidationError` for every other outcome, so no caller can tell an expired challenge
-      // from a wrong credential from a policy that is off.
+      // One generic error for every outcome but throttling, so no caller can tell an expired challenge
+      // from a wrong credential.
       const { userId } = await mfa.verifyAssertion(challengeToken, assertion);
 
       const user = await getService('user').findOne(userId);
 
-      // Exactly what `loginMfa` does, and for the same reason: a challenge can outlive an account
-      // being disabled inside its `challengeTtl` window, and `verifyAssertion` has no
-      // equivalent gate. Mirrors `checkCredentials` -- it does not consult `blocked` -- and
-      // reuses this pair's one generic message rather than revealing "this account is disabled".
-      // It runs *before* the trust grant, or a deactivated account would also collect a
-      // trust cookie good for the whole configured trust window.
+      // What `loginMfa` does, for the same reason. Before the trust grant, or a deactivated account
+      // also collects a trust cookie good for the whole configured window.
       if (!user || user.isActive !== true) {
         throw new ValidationError(PASSKEY_VERIFY_FAILED);
       }
 
-      // The trust grant is factor-agnostic, so this is byte for byte what `/login/mfa` does. The service returns null when the organisation does not offer trust, and a stale
-      // checkbox is not an error. The raw token exists only here and in the Set-Cookie header.
+      // Byte for byte what `/login/mfa` does: the trust grant is factor-agnostic.
       if (trustDevice) {
         const granted = await mfa.trustDevice(String(user.id), {
           deviceId,
@@ -405,21 +353,17 @@ export default {
     const mfa = getService('mfa');
 
     if (mfa.isEnabled() && (await mfa.isEnrolled(String(user.id)))) {
-      // Read before `createChallenge` mints its row, for the same reason as `login`: a store-read
-      // failure here must not risk a 500 on a response whose challenge already exists.
+      // Before `createChallenge` mints its row, for the reason `login` gives.
       const trustedDeviceDays = await offeredTrustDays();
       const passkeyAvailable = await passkeyAvailableFor(String(user.id));
 
       const { token: challengeToken, expiresIn } = await mfa.createChallenge(String(user.id));
 
-      // Same reasoning as `login`'s gate: forgot-password must not be a way to walk past a
-      // second factor, so a reset that lands on an enrolled account gets a challenge instead of
-      // a session. Emits the same audit event as the login gate, for the same reason -- a gated
-      // reset must not look identical to no attempt at all.
+      // Forgot-password must not be a way to walk past a second factor, so a reset landing on an
+      // enrolled account gets a challenge, not a session.
       //
-      // No trust check here, by design: a password reset is the classic second-factor bypass,
-      // and a trust cookie does not change that. A trust granted through this challenge is still
-      // legitimate, a code was verified.
+      // No trust check here by design: a password reset is the classic second-factor bypass, and a
+      // trust cookie does not change that.
       const sanitizedUser = getService('user').sanitizeUser(user);
       strapi.eventHub.emit('admin.auth.mfa_required', { user: sanitizedUser, provider: 'local' });
 
@@ -435,8 +379,7 @@ export default {
       return;
     }
 
-    // No rememberMe flow here: force a fresh device id and a session-type (non-persistent) cookie
-    // regardless of anything the request body carries.
+    // A fresh device id and a non-persistent cookie, whatever the body carries.
     return issueSession(ctx, user, {
       deviceId: generateDeviceId(),
       rememberMe: false,

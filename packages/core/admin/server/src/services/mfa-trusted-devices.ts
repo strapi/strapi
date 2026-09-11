@@ -7,16 +7,12 @@ import type { MfaEventMetadata, MfaEventType } from './mfa';
 
 export const TRUSTED_DEVICE_UID = 'admin::mfa-trusted-device';
 
-/**
- * The most trusted browsers one account may hold: bounded at ten, transiently eleven under
- * concurrent grants; the next grant heals it.
- */
+/** Transiently eleven under concurrent grants; the next grant heals it. */
 export const MAX_TRUSTED_DEVICES_PER_USER = 10;
 
 const TRUST_TOKEN_BYTES = 32;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-/** The notices this module raises; a subset of the service's `MfaChangeNotice`. */
 export type TrustedDeviceNotice = 'device_trusted' | 'device_trust_revoked' | 'trusted_device_used';
 
 export interface TrustedDeviceRow {
@@ -30,21 +26,14 @@ export interface TrustedDeviceRow {
   createdAt: Date | string;
 }
 
-/**
- * The stored form of the cookie token. A plain sha256, not bcrypt: the token is 256 bits of
- * CSPRNG output, so there is nothing for a slow hash to protect. Recovery codes are bcrypted
- * because those carry only 50 bits. Hex in, hex out, so it can be compared with `===` after a
- * unique-index lookup.
- */
+/** sha256, not bcrypt: 256 bits of CSPRNG output leave nothing for a slow hash to protect.
+ * Recovery codes are bcrypted because those carry 50. */
 export const hashTrustToken = (token: string): string =>
   crypto.createHash('sha256').update(token, 'utf8').digest('hex');
 
-/**
- * `min(expiresAt, createdAt + settings.days)`. The stored expiry is the promise made at grant
- * and never slides; the ceiling is the organisation's current policy. Lowering `days` therefore
- * cuts every existing trust immediately with no row rewrite, and raising it never extends a trust
- * beyond what was promised.
- */
+/** The stored expiry is the promise made at grant and never slides; the ceiling is current policy.
+ * So lowering `days` cuts every trust immediately with no row rewrite, and raising it extends
+ * none beyond what was promised. */
 export const effectiveExpiry = (
   row: Pick<TrustedDeviceRow, 'expiresAt' | 'createdAt'>,
   settings: Pick<TrustedDeviceSettings, 'days'>
@@ -62,15 +51,10 @@ export const isLive = (
 
 export interface TrustedDeviceDeps {
   strapi: Core.Strapi;
-  /** The live policy. Injected so this module never reads the store itself. */
   settings: () => Promise<TrustedDeviceSettings>;
   recordEvent: (userId: string, type: MfaEventType, metadata?: MfaEventMetadata) => Promise<void>;
-  /**
-   * Deliberately never awaited at any call site in this module, and never inside a transaction:
-   * it is the event hub plus a best-effort email, and neither is allowed to fail or delay the
-   * operation that raised it. The returned promise cannot reject. Awaiting one of these is not a
-   * fix for a floating promise here -- it would put an email send on the request's critical path.
-   */
+  /** Never awaited here and never inside a transaction: it cannot reject, and awaiting it would put
+   * an email send on the request's critical path. The floating promises are deliberate. */
   notify: (
     userId: string,
     type: TrustedDeviceNotice,
@@ -80,12 +64,8 @@ export interface TrustedDeviceDeps {
 
 const toIso = (value: Date | string): string => new Date(value).toISOString();
 
-/**
- * Trusted browsers. Grant after a verified challenge, honour on `/login`, list, revoke,
- * sweep. Composed into `createMfaService`, so callers reach it as `getService('mfa').trustDevice`
- * and friends. Every function that decides anything keys on `userId`; the token's owner is never
- * inferred from the token alone.
- */
+/** Every function that decides anything keys on `userId`: the token's owner is never inferred
+ * from the token alone. */
 export const createTrustedDevices = ({
   strapi,
   settings,
@@ -101,13 +81,9 @@ export const createTrustedDevices = ({
     await query().deleteMany({ where: { id: { $in: ids } } });
   };
 
-  /**
-   * Mints the token, stores its hash, applies the cap, records `device_trusted`. Returns the raw
-   * token exactly once, for the controller to put in the cookie, or null when the organisation
-   * does not offer trust (a stale checkbox is not an error). Any verified challenge may call
-   * this; the function does not know which factor passed, which is what lets the passkey login
-   * path reuse it unchanged.
-   */
+  /** Returns the raw token exactly once, or null when the organisation does not offer trust (a
+   * stale checkbox is not an error). It does not know which factor passed, which is what lets the
+   * passkey login path reuse it unchanged. */
   const trustDevice = async (
     userId: string,
     context: { deviceId?: string; userAgent?: string | null }
@@ -133,7 +109,6 @@ export const createTrustedDevices = ({
         },
       });
 
-      // The cap. Rows per user are bounded by this very rule, so reading them all is cheap.
       const rows = (await query().findMany({
         where: { userId: String(userId) },
         orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
@@ -141,10 +116,8 @@ export const createTrustedDevices = ({
       })) as Array<Pick<TrustedDeviceRow, 'id'>>;
       await deleteRows(rows.slice(MAX_TRUSTED_DEVICES_PER_USER).map((row) => row.id));
 
-      // Recorded inside the same transaction as the row and the cap eviction: the grant and its
-      // audit trail must land or fail together, not have the row committed while the event that
-      // explains it is lost to an unrelated failure. `notify` stays outside, for the reason its
-      // own declaration gives.
+      // In the transaction with the row and the eviction: the grant and the audit trail that explains
+      // it must land or fail together.
       await recordEvent(userId, 'device_trusted', {
         ...(deviceName ? { deviceName } : {}),
         days: current.days,
@@ -156,12 +129,8 @@ export const createTrustedDevices = ({
     return { token, expiresAt };
   };
 
-  /**
-   * The `/login` check. True only for a live row owned by `userId`; stamps `lastUsedAt` and emits
-   * the audit-only `trusted_device_used`. A row found dead -- past its stored expiry or past the
-   * current ceiling -- is deleted here, so a later raise of `days` cannot revive a trust an
-   * earlier cut killed. A row owned by someone else is left alone and simply refused.
-   */
+  /** A dead row is deleted here, so a later raise of `days` cannot revive a trust an earlier cut
+   * killed. A row owned by someone else is left alone and refused. */
   const consumeTrustedDevice = async (userId: string, token: string): Promise<boolean> => {
     const current = await settings();
     if (!current.enabled) {
@@ -185,11 +154,8 @@ export const createTrustedDevices = ({
     return true;
   };
 
-  /**
-   * The caller's live rows, current first, then newest. Dead rows met on the way are deleted.
-   * `current` is decided by hashing the cookie the browser presented, never by `deviceId`.
-   * The hash never leaves this function.
-   */
+  /** `current` is decided by hashing the presented cookie, never by `deviceId`, and the hash never
+   * leaves this function. Dead rows met on the way are deleted. */
   const listTrustedDevices = async (
     userId: string,
     presentedToken?: string
@@ -216,30 +182,25 @@ export const createTrustedDevices = ({
           lastUsedAt: row.lastUsedAt ? toIso(row.lastUsedAt) : null,
           current: presentedHash !== null && row.tokenHash === presentedHash,
         }))
-        // The contract promises "current first, then newest", and this comparator only orders the
-        // first half of that. The rest rests on `Array.prototype.sort` being stable and the
-        // `findMany` above being ordered `createdAt` desc: collapsing the two into one comparator,
-        // or dropping that ordering, silently breaks the documented order.
+        // This orders only the "current first" half of the contract. The rest rests on `sort` being
+        // stable and the `findMany` above being ordered: collapsing the two silently breaks it.
         .sort((a, b) => Number(b.current) - Number(a.current))
     );
   };
 
-  /** Silent: the caller's own event (`disabled`, `authenticator_replaced`, a settings update) covers it. */
+  /** Silent: the caller's own event covers it. */
   const clearTrustedDevices = async (userId: string): Promise<number> => {
     const result = await query().deleteMany({ where: { userId: String(userId) } });
     return result?.count ?? 0;
   };
 
-  /** Silent, every user: the transition to `trustedDevices.enabled: false`. */
   const clearAllTrustedDevices = async (): Promise<number> => {
     const result = await query().deleteMany({ where: {} });
     return result?.count ?? 0;
   };
 
-  /**
-   * One row, only if it is the caller's. `current` tells the controller whether the row it just
-   * deleted is the one the presented cookie hashes to, so it can clear that cookie.
-   */
+  /** `current` tells the controller whether the deleted row is the one the presented cookie hashes
+   * to, so it can clear that cookie. */
   const revokeTrustedDevice = async (
     userId: string,
     id: string,
@@ -265,11 +226,8 @@ export const createTrustedDevices = ({
     };
   };
 
-  /**
-   * Every row of one user, by the user or by an administrator (`actor.byUserId`). Records and
-   * emits only when something was actually revoked, so an administrator clicking on an empty list
-   * leaves no notice behind.
-   */
+  /** Records and emits only when something was actually revoked, so an administrator acting on an
+   * empty list leaves no notice behind. */
   const revokeAllTrustedDevices = async (
     userId: string,
     actor: { byUserId?: string } = {}
@@ -283,11 +241,8 @@ export const createTrustedDevices = ({
     return count;
   };
 
-  /**
-   * Housekeeping, not enforcement: a dead row is already refused (and deleted) on read, so this
-   * only keeps the table from holding rows nobody will present again. Stored expiry only; the
-   * read-time ceiling needs no sweep.
-   */
+  /** Housekeeping: a dead row is already refused, and deleted, on read. Stored expiry only -- the
+   * read-time ceiling needs no sweep. */
   const sweepExpiredTrustedDevices = async (): Promise<number> => {
     const result = await query().deleteMany({ where: { expiresAt: { $lt: new Date() } } });
     return result?.count ?? 0;
