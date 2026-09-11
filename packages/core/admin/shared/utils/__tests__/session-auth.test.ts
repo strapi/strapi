@@ -1,6 +1,7 @@
 import {
   getAccessCookieName,
   getAccessCookiePath,
+  getRefreshCookiePath,
   getAccessCookieDomain,
   getRefreshCookieOptions,
   resolveLogoutDeviceId,
@@ -104,6 +105,49 @@ describe('getAccessCookieDomain', () => {
   });
 });
 
+describe('getRefreshCookiePath', () => {
+  const logWarn = jest.fn();
+
+  beforeEach(() => {
+    logWarn.mockReset();
+    global.strapi = {
+      config: {
+        get: jest.fn(() => undefined),
+      },
+      log: {
+        warn: logWarn,
+      },
+    } as any;
+  });
+
+  test('defaults to /admin regardless of admin.auth.cookie.path', () => {
+    global.strapi.config.get = jest.fn((key: string) =>
+      key === 'admin.auth.cookie.path' ? '/dashboard' : undefined
+    ) as any;
+
+    // refresh path must default to /admin, not the custom access-cookie path
+    expect(getRefreshCookiePath()).toBe('/admin');
+  });
+
+  test('uses admin.auth.cookie.refreshPath when configured', () => {
+    global.strapi.config.get = jest.fn((key: string) =>
+      key === 'admin.auth.cookie.refreshPath' ? '/admin' : undefined
+    ) as any;
+
+    expect(getRefreshCookiePath()).toBe('/admin');
+  });
+
+  test('allows a custom refresh path distinct from the access path', () => {
+    global.strapi.config.get = jest.fn((key: string) => {
+      if (key === 'admin.auth.cookie.path') return '/dashboard';
+      if (key === 'admin.auth.cookie.refreshPath') return '/admin';
+      return undefined;
+    }) as any;
+
+    expect(getRefreshCookiePath()).toBe('/admin');
+  });
+});
+
 describe('getRefreshCookieOptions', () => {
   const logWarn = jest.fn();
 
@@ -134,6 +178,26 @@ describe('getRefreshCookieOptions', () => {
 
     expect(getRefreshCookieOptions().domain).toBe(DEFAULT_AUTH_COOKIE_DOMAIN);
     expect(logWarn).toHaveBeenCalledWith(expect.stringContaining('strapi.test:1337'));
+  });
+
+  test('refresh cookie path defaults to /admin even when access cookie path is custom', () => {
+    global.strapi.config.get = jest.fn((key: string) =>
+      key === 'admin.auth.cookie.path' ? '/dashboard' : undefined
+    ) as any;
+
+    // The access-token cookie is at /dashboard, but the refresh token endpoint
+    // is always served from the fixed /admin prefix, so its cookie must stay at /admin.
+    expect(getRefreshCookieOptions().path).toBe('/admin');
+  });
+
+  test('refresh cookie path uses admin.auth.cookie.refreshPath when configured', () => {
+    global.strapi.config.get = jest.fn((key: string) => {
+      if (key === 'admin.auth.cookie.refreshPath') return '/admin';
+      if (key === 'admin.auth.cookie.path') return '/dashboard';
+      return undefined;
+    }) as any;
+
+    expect(getRefreshCookieOptions().path).toBe('/admin');
   });
 });
 
