@@ -125,6 +125,8 @@ class TransferEngine<
 
   #aborted: boolean = false;
 
+  #closed: boolean = false;
+
   onSchemaDiff(handler: SchemaDiffHandler) {
     this.#handlers?.schemaDiff?.push(handler);
   }
@@ -719,6 +721,8 @@ class TransferEngine<
    * Run the close method in both source and destination providers
    */
   async close(): Promise<void> {
+    this.#closed = true;
+
     const results = await Promise.allSettled([
       this.sourceProvider.close?.(),
       this.destinationProvider.close?.(),
@@ -727,6 +731,32 @@ class TransferEngine<
     results.forEach((result) => {
       if (result.status === 'rejected') {
         this.panic(result.reason);
+      }
+    });
+  }
+
+  /**
+   * Close both providers on a failure path, reporting rather than throwing cleanup errors so the
+   * error that caused the failure is the one the caller sees.
+   */
+  async #closeAfterError(): Promise<void> {
+    if (this.#closed) {
+      return;
+    }
+
+    this.#closed = true;
+
+    const providers = [this.sourceProvider, this.destinationProvider];
+    const results = await Promise.allSettled(providers.map((provider) => provider.close?.()));
+
+    results.forEach((result, index) => {
+      if (result.status === 'rejected') {
+        const { message } = result.reason instanceof Error ? result.reason : { message: '' };
+
+        this.reportWarning(
+          `Failed to close the ${providers[index].name} provider${message ? `: ${message}` : ''}`,
+          'transfer(cleanup)'
+        );
       }
     });
   }
@@ -819,6 +849,7 @@ class TransferEngine<
   async transfer(): Promise<ITransferResults<S, D>> {
     // reset data between transfers
     this.progress.data = {};
+    this.#closed = false;
 
     try {
       this.#emitTransferUpdate('init');
@@ -826,6 +857,7 @@ class TransferEngine<
       await this.init();
 
       await this.integrityCheck();
+      await this.validateStages();
 
       this.#emitTransferUpdate('start');
 
@@ -853,9 +885,28 @@ class TransferEngine<
         this.reportError(e, (e as DataTransferError).severity || 'fatal');
       }
 
-      // Rollback the destination provider if an exception is thrown during the transfer
-      // Note: This will be configurable in the future
-      await this.destinationProvider.rollback?.(e as Error);
+      // Rollback the destination provider if an exception is thrown before providers are closed.
+      // Once close has started, a provider's transaction may already have ended and cannot be
+      // rolled back safely. Note: This will be configurable in the future.
+      if (!this.#closed) {
+        try {
+          await this.destinationProvider.rollback?.(e as Error);
+        } catch (rollbackError) {
+          const { message } = rollbackError instanceof Error ? rollbackError : { message: '' };
+
+          this.reportWarning(
+            `Failed to rollback the ${this.destinationProvider.name} provider${
+              message ? `: ${message}` : ''
+            }`,
+            'transfer(rollback)'
+          );
+        }
+      }
+
+      // Providers bootstrapped before the failure may still hold resources: the local providers
+      // disable database lifecycles on bootstrap and only re-enable them on close, so skipping this
+      // would leave a programmatic caller's Strapi instance with lifecycles permanently off.
+      await this.#closeAfterError();
 
       throw e;
     }
@@ -865,6 +916,18 @@ class TransferEngine<
       destination: this.destinationProvider.results,
       engine: this.progress.data,
     };
+  }
+
+  async validateStages(): Promise<void> {
+    if (!this.sourceProvider.validateStage) {
+      return;
+    }
+
+    for (const stage of TRANSFER_STAGES) {
+      if (!this.shouldSkipStage(stage)) {
+        await this.sourceProvider.validateStage(stage);
+      }
+    }
   }
 
   async beforeTransfer(): Promise<void> {
