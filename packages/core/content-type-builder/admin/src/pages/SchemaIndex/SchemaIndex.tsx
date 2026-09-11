@@ -12,11 +12,12 @@ import {
   SingleSelectOption,
   Tabs,
   Tag,
+  Tooltip,
   Typography,
   useCollator,
   useFilter,
 } from '@strapi/design-system';
-import { Cross, Filter, Plus } from '@strapi/icons';
+import { Cross, Filter, Information, Plus } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
@@ -24,7 +25,6 @@ import { styled } from 'styled-components';
 
 import { useDataManager } from '../../components/DataManager/useDataManager';
 import { useFormModalNavigation } from '../../components/FormModalNavigation/useFormModalNavigation';
-import { Status } from '../../components/Status';
 import { pluginId } from '../../pluginId';
 import { getTrad } from '../../utils/getTrad';
 
@@ -39,13 +39,7 @@ const ClickableRow = styled(Table.Row)`
   cursor: pointer;
 `;
 
-const Mono = styled(Typography)`
-  font-family: monospace;
-`;
-
 const isContentType = (schema: Schema): boolean => schema.modelType === 'contentType';
-
-const attributeCount = (schema: Schema) => schema.attributes?.length ?? 0;
 
 const hasDraftAndPublish = (schema: Schema) =>
   isContentType(schema) &&
@@ -274,6 +268,7 @@ export const SchemaIndex = () => {
           <Flex gap={2} alignItems="center">
             <Box flex="1">
               <Searchbar
+                size="M"
                 name="search-schemas"
                 value={search}
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
@@ -295,7 +290,7 @@ export const SchemaIndex = () => {
 
             {filters.length > 0 ? (
               <Menu.Root>
-                <Menu.Trigger variant="tertiary" startIcon={<Filter />}>
+                <Menu.Trigger variant="tertiary" size="M" startIcon={<Filter />}>
                   {formatMessage({ id: 'app.utils.filters', defaultMessage: 'Filters' })}
                 </Menu.Trigger>
                 <Menu.Content zIndex={2} popoverPlacement="bottom-end">
@@ -350,105 +345,120 @@ export const SchemaIndex = () => {
             </Flex>
           ) : null}
 
-          <Tabs.Root value={tab} onValueChange={(value: string) => setTab(value as TabKind)}>
-            <Tabs.List
-              aria-label={formatMessage({
-                id: getTrad('index.tabs.label'),
-                defaultMessage: 'Schema kinds',
-              })}
-            >
-              <Tabs.Trigger value="collectionType">
-                {formatMessage(
-                  { id: getTrad('index.tab.collectionTypes'), defaultMessage: 'Collection types' },
-                  { count: counts.collectionType }
-                )}
-                {` (${counts.collectionType})`}
-              </Tabs.Trigger>
-              <Tabs.Trigger value="singleType">
-                {formatMessage({
-                  id: getTrad('index.tab.singleTypes'),
-                  defaultMessage: 'Single types',
+          {/* The tabs label the table, so they sit on it rather than near it. */}
+          <Flex direction="column" alignItems="stretch" gap={0}>
+            <Tabs.Root value={tab} onValueChange={(value: string) => setTab(value as TabKind)}>
+              <Tabs.List
+                aria-label={formatMessage({
+                  id: getTrad('index.tabs.label'),
+                  defaultMessage: 'Schema kinds',
                 })}
-                {` (${counts.singleType})`}
-              </Tabs.Trigger>
-              <Tabs.Trigger value="component">
-                {formatMessage({
-                  id: getTrad('index.tab.components'),
-                  defaultMessage: 'Components',
-                })}
-                {` (${counts.component})`}
-              </Tabs.Trigger>
-            </Tabs.List>
-          </Tabs.Root>
+              >
+                <Tabs.Trigger value="collectionType">
+                  {formatMessage(
+                    {
+                      id: getTrad('index.tab.collectionTypes'),
+                      defaultMessage: 'Collection types',
+                    },
+                    { count: counts.collectionType }
+                  )}
+                  {` (${counts.collectionType})`}
+                </Tabs.Trigger>
+                <Tabs.Trigger value="singleType">
+                  {formatMessage({
+                    id: getTrad('index.tab.singleTypes'),
+                    defaultMessage: 'Single types',
+                  })}
+                  {` (${counts.singleType})`}
+                </Tabs.Trigger>
+                <Tabs.Trigger value="component">
+                  {formatMessage({
+                    id: getTrad('index.tab.components'),
+                    defaultMessage: 'Components',
+                  })}
+                  {` (${counts.component})`}
+                </Tabs.Trigger>
+              </Tabs.List>
+            </Tabs.Root>
 
-          {/* The table's row type wants an `id`; schemas are keyed by uid. */}
-          <Table.Root
-            rows={rows.map((schema) => ({ ...schema, id: schema.uid }))}
-            headers={headers}
-          >
-            <Table.Content>
-              <Table.Head>
-                {headers.map((header) => (
-                  <Table.HeaderCell key={header.name} {...header} />
-                ))}
-              </Table.Head>
-              <Table.Empty
-                content={formatMessage({
-                  id: getTrad('index.empty'),
-                  defaultMessage: 'No schema matches those filters.',
-                })}
-              />
-              <Table.Body>
-                {rows.map((schema) => (
-                  <ClickableRow
-                    key={schema.uid}
-                    onClick={() =>
-                      navigate(
-                        schema.modelType === 'component'
-                          ? `/plugins/${pluginId}/component-categories/${
-                              (schema as { category?: string }).category
-                            }/${schema.uid}`
-                          : `/plugins/${pluginId}/content-types/${schema.uid}`
-                      )
-                    }
-                  >
-                    <Table.Cell>
-                      <Flex direction="column" alignItems="flex-start">
-                        <Typography textColor="neutral800" fontWeight="bold">
-                          {upperFirst(schema.info.displayName)}
-                        </Typography>
-                        <Mono variant="pi" textColor="neutral500">
-                          {schema.uid}
-                        </Mono>
-                      </Flex>
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Typography textColor="neutral700">{attributeCount(schema)}</Typography>
-                    </Table.Cell>
-                    {tab === 'component' ? (
+            {/* The table's row type wants an `id`; schemas are keyed by uid. */}
+            <Table.Root
+              rows={rows.map((schema) => ({ ...schema, id: schema.uid }))}
+              headers={headers}
+            >
+              <Table.Content>
+                <Table.Head>
+                  {headers.map((header) => (
+                    <Table.HeaderCell key={header.name} {...header} />
+                  ))}
+                </Table.Head>
+                <Table.Empty
+                  content={formatMessage({
+                    id: getTrad('index.empty'),
+                    defaultMessage: 'No schema matches those filters.',
+                  })}
+                />
+                <Table.Body>
+                  {rows.map((schema) => (
+                    <ClickableRow
+                      key={schema.uid}
+                      onClick={() =>
+                        navigate(
+                          schema.modelType === 'component'
+                            ? `/plugins/${pluginId}/component-categories/${
+                                (schema as { category?: string }).category
+                              }/${schema.uid}`
+                            : `/plugins/${pluginId}/content-types/${schema.uid}`
+                        )
+                      }
+                    >
                       <Table.Cell>
-                        <Typography textColor="neutral700">
-                          {upperFirst((schema as { category?: string }).category ?? '')}
-                        </Typography>
+                        {/* The API id is what you need when you need it and noise
+                          the rest of the time, so it waits behind the icon. */}
+                        <Flex gap={2} alignItems="center">
+                          <Typography textColor="neutral800" fontWeight="bold">
+                            {upperFirst(schema.info.displayName)}
+                          </Typography>
+                          <Tooltip label={schema.uid}>
+                            <Flex tag="span" alignItems="center">
+                              <Information
+                                fill="neutral500"
+                                width="1.6rem"
+                                height="1.6rem"
+                                aria-label={formatMessage(
+                                  {
+                                    id: getTrad('index.column.apiId'),
+                                    defaultMessage: 'API ID: {uid}',
+                                  },
+                                  { uid: schema.uid }
+                                )}
+                              />
+                            </Flex>
+                          </Tooltip>
+                        </Flex>
                       </Table.Cell>
-                    ) : (
-                      <Table.Cell>
-                        <OnOff on={hasDraftAndPublish(schema)} />
-                      </Table.Cell>
-                    )}
-                    {pluginColumns.map(({ id, Cell }) => (
-                      <Table.Cell key={id}>
-                        <Cell schema={schema} />
-                      </Table.Cell>
-                    ))}
-                    <Table.Cell>
-                      <Status status={schema.status} />
-                    </Table.Cell>
-                  </ClickableRow>
-                ))}
-              </Table.Body>
-            </Table.Content>
-          </Table.Root>
+                      {tab === 'component' ? (
+                        <Table.Cell>
+                          <Typography textColor="neutral700">
+                            {upperFirst((schema as { category?: string }).category ?? '')}
+                          </Typography>
+                        </Table.Cell>
+                      ) : (
+                        <Table.Cell>
+                          <OnOff on={hasDraftAndPublish(schema)} />
+                        </Table.Cell>
+                      )}
+                      {pluginColumns.map(({ id, Cell }) => (
+                        <Table.Cell key={id}>
+                          <Cell schema={schema} />
+                        </Table.Cell>
+                      ))}
+                    </ClickableRow>
+                  ))}
+                </Table.Body>
+              </Table.Content>
+            </Table.Root>
+          </Flex>
         </Flex>
       </Layouts.Content>
     </>

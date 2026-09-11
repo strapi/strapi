@@ -40,8 +40,9 @@ test.describe('Content-Type Builder — all content types', () => {
     await expect(headerRow).toContainText('Workspaces');
     await expect(headerRow).toContainText('Draft & publish');
 
-    // …and a row that answers those questions without opening anything.
-    await expect(page.getByRole('row').filter({ hasText: 'api::article.article' })).toContainText(
+    // …and a row that answers those questions without opening anything. The
+    // API id is behind the icon beside the name, so the row is found by name.
+    await expect(page.getByRole('row').filter({ hasText: 'Article' }).first()).toContainText(
       'All workspaces'
     );
   });
@@ -50,8 +51,6 @@ test.describe('Content-Type Builder — all content types', () => {
     await page.goto(CTB_URL);
     await expect(page.getByRole('row').filter({ hasText: 'Article' })).toBeVisible();
 
-    // Two search fields share this screen — the sidebar's list filter and the
-    // table's — so the name has to say which.
     await page.getByRole('searchbox', { name: 'Search schemas' }).fill('author');
 
     await expect(page.getByRole('row').filter({ hasText: 'Author' })).toBeVisible();
