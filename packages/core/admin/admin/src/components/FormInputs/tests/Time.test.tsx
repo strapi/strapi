@@ -33,6 +33,14 @@ describe('TimeInput Component', () => {
     expect(screen.getByText('Test Time')).toBeInTheDocument();
   });
 
+  it('should not use a native time input (avoids a second clock picker)', () => {
+    setupTest(null);
+    render(<TimeInput type="time" name="testTime" label="Test Time" />);
+
+    const input = screen.getByRole('combobox');
+    expect(input).not.toHaveAttribute('type', 'time');
+  });
+
   it('should strip seconds and milliseconds from display value', () => {
     setupTest('14:30:00.000');
     render(<TimeInput type="time" name="testTime" label="Test Time" />);
