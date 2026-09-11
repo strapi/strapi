@@ -2,6 +2,7 @@ import { errors } from '@strapi/utils';
 import type { Core, Modules } from '@strapi/types';
 
 import { getService } from '../../utils';
+import { assertAmbientInstance, getFolderService } from '../ambient-instance';
 import { ACTIONS, FILE_MODEL_UID, FOLDER_MODEL_UID } from '../../constants';
 import { assertMediaPermission } from '../permissions';
 import { findEntityAndCheckPermissions } from '../../controllers/utils/find-entity-and-check-permissions';
@@ -65,9 +66,13 @@ const buildAssetFilters = (args: ListMediaArgs): Record<string, unknown> => {
  * (`addPermissionsQueryTo`) so a token restricted by a condition — e.g. own-assets-only —
  * sees the same subset it would through the admin API.
  */
-export const createMediaListAssetsHandler =
-  (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
-  async ({
+export const createMediaListAssetsHandler = (
+  strapi: Core.Strapi,
+  context: Modules.MCP.McpHandlerContext
+) => {
+  assertAmbientInstance(strapi);
+
+  return async ({
     args,
   }: {
     args: Record<string, unknown>;
@@ -90,6 +95,7 @@ export const createMediaListAssetsHandler =
       pagination,
     });
   };
+};
 
 /**
  * `media_get_asset` — a single asset by numeric id.
@@ -100,9 +106,13 @@ export const createMediaListAssetsHandler =
  * without those fields would deny a conditioned grant its own assets, and would disagree with
  * `media_list_assets`, where the condition is pushed into the query instead.
  */
-export const createMediaGetAssetHandler =
-  (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
-  async ({
+export const createMediaGetAssetHandler = (
+  strapi: Core.Strapi,
+  context: Modules.MCP.McpHandlerContext
+) => {
+  assertAmbientInstance(strapi);
+
+  return async ({
     args,
   }: {
     args: Record<string, unknown>;
@@ -132,6 +142,7 @@ export const createMediaGetAssetHandler =
 
     return ok({ data: sanitizeMediaAsset(asset) });
   };
+};
 
 /**
  * `media_list_folders` — the nested folder structure, reusing `folder.getStructure()`.
@@ -139,13 +150,21 @@ export const createMediaGetAssetHandler =
  * `getStructure()` returns the whole tree in one query and has no permission-condition
  * filtering, so this is gated on the model-level read permission only — matching
  * `GET /upload/folder-structure` in the admin API.
+ *
+ * The factory asserts the handler's instance is the ambient `global.strapi` the folder service
+ * actually queries — see `assertAmbientInstance` for why.
  */
-export const createMediaListFoldersHandler =
-  (strapi: Core.Strapi, context: Modules.MCP.McpHandlerContext) =>
-  async (): Promise<Modules.MCP.McpToolHandlerReturn> => {
+export const createMediaListFoldersHandler = (
+  strapi: Core.Strapi,
+  context: Modules.MCP.McpHandlerContext
+) => {
+  assertAmbientInstance(strapi);
+
+  return async (): Promise<Modules.MCP.McpToolHandlerReturn> => {
     assertMediaPermission(strapi, context, ACTIONS.read, FOLDER_MODEL_UID);
 
-    const structure = await getService('folder', strapi).getStructure();
+    const structure = await getFolderService(strapi).getStructure();
 
     return ok({ data: sanitizeMediaFolderTree(structure) });
   };
+};
