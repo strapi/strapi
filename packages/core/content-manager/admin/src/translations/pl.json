@@ -171,6 +171,7 @@
   "containers.SettingsPage.pluginHeaderDescription": "Skonfiguruj domyślne opcje wszystkich twoich modeli",
   "containers.SettingsView.list.subtitle": "Skonfiguruj układ i wyświetlanie modeli i grup",
   "containers.SettingsView.list.title": "Wyświetl ustawienia",
+  "containers.empty-label": "Bez tytułu",
   "containers.untitled": "Bez tytułu",
   "dnd.cancel-item": "{item}, upuszczony. Anulowano zmianę kolejności.",
   "dnd.drop-item": "{item}, upuszczony. Finalna pozycja na liście: {position}.",

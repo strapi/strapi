@@ -27,6 +27,19 @@ export const actionTypes = {
   'permission.create': 'Create permission',
   'permission.update': 'Update permission',
   'permission.delete': 'Delete permission',
+  'release.create': 'Create release',
+  'release.update': 'Update release',
+  'release.delete': 'Delete release',
+  'release.trigger': 'Trigger release',
+  'release.entry.add': 'Add entry to release',
+  'release.entry.update': 'Change entry on release',
+  'release.entry.remove': 'Remove entry from release',
+  'release.settings.update': 'Update release settings',
+  'audit-log.export': 'Export audit logs',
+  'locale.create': 'Create locale',
+  'locale.update': 'Update locale',
+  'locale.delete': 'Delete locale',
+  'locale.default.update': 'Change default locale',
 };
 
 export const getDefaultMessage = (value: keyof typeof actionTypes) => {

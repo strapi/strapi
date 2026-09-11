@@ -3,6 +3,7 @@ import pipe from 'lodash/fp/pipe';
 import qs from 'qs';
 
 import { AUTH_COOKIE_NAME, getCookieValue, setCookie } from './cookies';
+import { decodeAccessTokenExpiry } from './jwt';
 
 import type { errors } from '@strapi/utils';
 
@@ -145,39 +146,139 @@ const storeToken = (token: string): void => {
   }
 };
 
+const getToken = (): string | null => {
+  const fromLocalStorage = localStorage.getItem(STORAGE_KEYS.TOKEN);
+  if (fromLocalStorage) {
+    return JSON.parse(fromLocalStorage);
+  }
+
+  const fromCookie = getCookieValue(AUTH_COOKIE_NAME);
+  return fromCookie ?? null;
+};
+
+const ADMIN_REFRESH_LOCK = 'strapi-admin-access-token';
+const FALLBACK_ADOPT_TIMEOUT_MS = 250;
+const FALLBACK_ADOPT_POLL_MS = 25;
+
+const postAccessToken = (backendURL: string) =>
+  fetch(`${backendURL}/admin/access-token`, {
+    method: 'POST',
+    credentials: 'include', // Include cookies for the refresh token
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+  });
+
+const adoptSharedAccessToken = (token: string): string => {
+  resetSessionExpiredNotification();
+
+  if (onTokenUpdate) {
+    onTokenUpdate(token);
+  }
+  return token;
+};
+
+/**
+ * Another tab may have refreshed already and written a newer access token to the
+ * shared localStorage/cookie. Per-tab Redux is not visible here — only shared
+ * storage counts.
+ */
+const readValidAccessTokenFromSharedStorage = (staleToken: string | null): string | null => {
+  const stored = getToken();
+  if (!stored || stored === staleToken) {
+    return null;
+  }
+
+  const expiry = decodeAccessTokenExpiry(stored);
+  if (expiry === null || expiry <= Date.now()) {
+    return null;
+  }
+
+  return stored;
+};
+
+const waitForSharedAccessToken = async (staleToken: string | null): Promise<string | null> => {
+  const timeoutAt = Date.now() + FALLBACK_ADOPT_TIMEOUT_MS;
+
+  while (Date.now() < timeoutAt) {
+    await new Promise((resolve) => {
+      setTimeout(resolve, FALLBACK_ADOPT_POLL_MS);
+    });
+
+    const adopted = readValidAccessTokenFromSharedStorage(staleToken);
+    if (adopted) {
+      return adoptSharedAccessToken(adopted);
+    }
+  }
+
+  return null;
+};
+
+const executeRefreshAccessToken = async (
+  backendURL: string,
+  tokenBeforeRefresh: string | null,
+  { allowHttpRetry }: { allowHttpRetry: boolean }
+): Promise<string | null> => {
+  const adopted = readValidAccessTokenFromSharedStorage(tokenBeforeRefresh);
+  if (adopted) {
+    return adoptSharedAccessToken(adopted);
+  }
+
+  let response = await postAccessToken(backendURL);
+
+  if (response.status === 401 && allowHttpRetry) {
+    const adoptedAfterFail = readValidAccessTokenFromSharedStorage(tokenBeforeRefresh);
+    if (adoptedAfterFail) {
+      return adoptSharedAccessToken(adoptedAfterFail);
+    }
+
+    const adoptedAfterWait = await waitForSharedAccessToken(tokenBeforeRefresh);
+    if (adoptedAfterWait) {
+      return adoptedAfterWait;
+    }
+
+    response = await postAccessToken(backendURL);
+  }
+
+  if (!response.ok) {
+    console.warn('[Auth] Token refresh failed with status:', response.status);
+    return null;
+  }
+
+  const result = await response.json();
+  const token = result?.data?.token as string | undefined;
+
+  if (!token) {
+    console.warn('[Auth] Token refresh response missing token');
+    return null;
+  }
+
+  storeToken(token);
+  return token;
+};
+
 /**
  * Refresh the access token by calling the /admin/access-token endpoint.
  * This uses a low-level fetch to avoid recursion through the interceptor.
  * Returns the new token on success, or null on failure.
  */
-const refreshAccessToken = async (): Promise<string | null> => {
+const refreshAccessToken = async (
+  tokenUsedByFailedRequest?: string | null
+): Promise<string | null> => {
   const backendURL = window.strapi.backendURL;
+  const tokenBeforeRefresh = tokenUsedByFailedRequest ?? getToken();
 
   try {
-    const response = await fetch(`${backendURL}/admin/access-token`, {
-      method: 'POST',
-      credentials: 'include', // Include cookies for the refresh token
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
+    if (typeof navigator !== 'undefined' && navigator.locks?.request) {
+      return await navigator.locks.request(ADMIN_REFRESH_LOCK, () =>
+        executeRefreshAccessToken(backendURL, tokenBeforeRefresh, { allowHttpRetry: false })
+      );
+    }
+
+    return await executeRefreshAccessToken(backendURL, tokenBeforeRefresh, {
+      allowHttpRetry: true,
     });
-
-    if (!response.ok) {
-      console.warn('[Auth] Token refresh failed with status:', response.status);
-      return null;
-    }
-
-    const result = await response.json();
-    const token = result?.data?.token as string | undefined;
-
-    if (!token) {
-      console.warn('[Auth] Token refresh response missing token');
-      return null;
-    }
-
-    storeToken(token);
-    return token;
   } catch (error) {
     console.error('[Auth] Token refresh error:', error);
     return null;
@@ -192,9 +293,9 @@ const refreshAccessToken = async (): Promise<string | null> => {
  * @throws {Error} If the token refresh fails (e.g., refresh token expired)
  * @internal Exported for testing purposes
  */
-const attemptTokenRefresh = async (): Promise<string> => {
+const attemptTokenRefresh = async (tokenUsedByFailedRequest?: string | null): Promise<string> => {
   if (!refreshPromise) {
-    refreshPromise = refreshAccessToken().finally(() => {
+    refreshPromise = refreshAccessToken(tokenUsedByFailedRequest).finally(() => {
       refreshPromise = null;
     });
   }
@@ -260,16 +361,6 @@ const isFetchError = (error: unknown): error is FetchError => {
   return error instanceof FetchError;
 };
 
-const getToken = (): string | null => {
-  const fromLocalStorage = localStorage.getItem(STORAGE_KEYS.TOKEN);
-  if (fromLocalStorage) {
-    return JSON.parse(fromLocalStorage);
-  }
-
-  const fromCookie = getCookieValue(AUTH_COOKIE_NAME);
-  return fromCookie ?? null;
-};
-
 type FetchClient = {
   get: {
     (url: string, config: FetchOptions & { responseType: 'blob' }): Promise<FetchResponse<Blob>>;
@@ -320,10 +411,10 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
    * Create default headers with the current token.
    * This is a function so we can get a fresh token after refresh.
    */
-  const getDefaultHeaders = () => ({
+  const getDefaultHeaders = (token = getToken()) => ({
     Accept: 'application/json',
     'Content-Type': 'application/json',
-    Authorization: `Bearer ${getToken()}`,
+    Authorization: `Bearer ${token}`,
   });
 
   const isFormDataRequest = (body: unknown) => body instanceof FormData;
@@ -403,7 +494,8 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
    */
   const withTokenRefresh = async <TData>(
     url: string,
-    executeRequest: () => Promise<FetchResponse<TData>>
+    executeRequest: () => Promise<FetchResponse<TData>>,
+    getRequestToken: () => string | null
   ): Promise<FetchResponse<TData>> => {
     try {
       return await executeRequest();
@@ -411,7 +503,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       // Only attempt refresh for 401 errors on non-auth paths
       if (isFetchError(error) && error.status === 401 && !isAuthPath(url)) {
         try {
-          await attemptTokenRefresh();
+          await attemptTokenRefresh(getRequestToken());
           // Retry - executeRequest will call getDefaultHeaders() again, picking up the new token
           return await executeRequest();
         } catch {
@@ -460,12 +552,15 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
     get: async <TData>(url: string, options?: FetchOptions): Promise<FetchResponse<TData>> => {
       const createRequestUrl = makeCreateRequestUrl(options);
       const responseType = options?.responseType ?? 'json';
+      let requestToken: string | null = null;
 
       const executeRequest = async () => {
-        const { Authorization } = getDefaultHeaders();
+        requestToken = getToken();
+        const { Authorization } = getDefaultHeaders(requestToken);
 
         // For non-JSON response types, omit content negotiation headers that imply JSON
-        const defaultHeaders = responseType === 'json' ? getDefaultHeaders() : { Authorization };
+        const defaultHeaders =
+          responseType === 'json' ? getDefaultHeaders(requestToken) : { Authorization };
 
         const headers = new Headers({
           ...defaultHeaders,
@@ -482,7 +577,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         return responseInterceptor<TData>(response, options?.validateStatus, responseType);
       };
 
-      return withTokenRefresh(url, executeRequest);
+      return withTokenRefresh(url, executeRequest, () => requestToken);
     },
     post: async <TData, TSend = unknown>(
       url: string,
@@ -490,10 +585,12 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       options?: FetchOptions
     ): Promise<FetchResponse<TData>> => {
       const createRequestUrl = makeCreateRequestUrl(options);
+      let requestToken: string | null = null;
 
       const executeRequest = async () => {
+        requestToken = getToken();
         const headers = new Headers({
-          ...getDefaultHeaders(),
+          ...getDefaultHeaders(requestToken),
           ...options?.headers,
         });
 
@@ -515,7 +612,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         return responseInterceptor<TData>(response, options?.validateStatus);
       };
 
-      return withTokenRefresh(url, executeRequest);
+      return withTokenRefresh(url, executeRequest, () => requestToken);
     },
     put: async <TData, TSend = unknown>(
       url: string,
@@ -523,10 +620,12 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       options?: FetchOptions
     ): Promise<FetchResponse<TData>> => {
       const createRequestUrl = makeCreateRequestUrl(options);
+      let requestToken: string | null = null;
 
       const executeRequest = async () => {
+        requestToken = getToken();
         const headers = new Headers({
-          ...getDefaultHeaders(),
+          ...getDefaultHeaders(requestToken),
           ...options?.headers,
         });
 
@@ -549,14 +648,16 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         return responseInterceptor<TData>(response, options?.validateStatus);
       };
 
-      return withTokenRefresh(url, executeRequest);
+      return withTokenRefresh(url, executeRequest, () => requestToken);
     },
     del: async <TData>(url: string, options?: FetchOptions): Promise<FetchResponse<TData>> => {
       const createRequestUrl = makeCreateRequestUrl(options);
+      let requestToken: string | null = null;
 
       const executeRequest = async () => {
+        requestToken = getToken();
         const headers = new Headers({
-          ...getDefaultHeaders(),
+          ...getDefaultHeaders(requestToken),
           ...options?.headers,
         });
 
@@ -569,7 +670,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         return responseInterceptor<TData>(response, options?.validateStatus);
       };
 
-      return withTokenRefresh(url, executeRequest);
+      return withTokenRefresh(url, executeRequest, () => requestToken);
     },
   };
 
@@ -581,10 +682,12 @@ export {
   isFetchError,
   FetchError,
   attemptTokenRefresh,
+  refreshAccessToken,
   storeToken,
   setOnTokenUpdate,
   setOnSessionExpired,
   triggerSessionExpired,
   resetSessionExpiredNotification,
+  ADMIN_REFRESH_LOCK,
 };
 export type { FetchOptions, FetchResponse, FetchConfig, FetchClient, ErrorResponse };

@@ -6,7 +6,7 @@ import { assetKey, folderKey } from '../../../utils/selection';
 import { AssetsDndProvider, useAssetsDnd } from '../AssetsDndProvider';
 
 import type { FolderNode } from '../../../../../../../../shared/contracts/folders';
-import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
+import type { DragEndEvent, DragStartEvent, Modifier } from '@dnd-kit/core';
 
 const mockToggleNotification = jest.fn();
 const mockBulkMoveUnwrap = jest.fn().mockResolvedValue({});
@@ -33,6 +33,7 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
   useNotification: () => ({ toggleNotification: mockToggleNotification }),
 }));
 
+let overlayModifiers: Modifier[] | undefined;
 let triggerDragStart: ((event: DragStartEvent) => void) | undefined;
 let triggerDragEnd: ((event: DragEndEvent) => void) | undefined;
 let triggerDragCancel: (() => void) | undefined;
@@ -60,6 +61,11 @@ jest.mock('@dnd-kit/core', () => {
           {...props}
         />
       );
+    },
+    DragOverlay: ({ modifiers, ...props }: React.ComponentProps<typeof actual.DragOverlay>) => {
+      overlayModifiers = modifiers;
+
+      return <actual.DragOverlay modifiers={modifiers} {...props} />;
     },
   };
 });
@@ -175,6 +181,7 @@ describe('AssetsDndProvider', () => {
     jest.clearAllMocks();
     mockIsMovePending = false;
     mockBulkMoveUnwrap.mockResolvedValue({});
+    overlayModifiers = undefined;
     triggerDragStart = undefined;
     triggerDragEnd = undefined;
     triggerDragCancel = undefined;
@@ -193,6 +200,45 @@ describe('AssetsDndProvider', () => {
       setup();
 
       expect(screen.getByTestId('move-pending')).toHaveTextContent('true');
+    });
+  });
+
+  describe('Drag overlay placement', () => {
+    it('keeps the drag chip centered on the cursor wherever the item was grabbed', () => {
+      setup();
+
+      expect(overlayModifiers).toHaveLength(1);
+
+      const [modifier] = overlayModifiers!;
+      const pointer = { x: 420, y: 310 };
+      const chipRect = {
+        top: 0,
+        left: 0,
+        width: 200,
+        height: 48,
+        right: 200,
+        bottom: 48,
+      };
+
+      const transform = modifier({
+        activatorEvent: new MouseEvent('pointerdown', {
+          clientX: pointer.x,
+          clientY: pointer.y,
+        }),
+        draggingNodeRect: chipRect,
+        transform: { x: 0, y: 0, scaleX: 1, scaleY: 1 },
+        active: null,
+        over: null,
+        activeNodeRect: null,
+        containerNodeRect: null,
+        overlayNodeRect: null,
+        scrollableAncestors: [],
+        scrollableAncestorRects: [],
+        windowRect: null,
+      });
+
+      expect(chipRect.left + transform.x + chipRect.width / 2).toBe(pointer.x);
+      expect(chipRect.top + transform.y + chipRect.height / 2).toBe(pointer.y);
     });
   });
 

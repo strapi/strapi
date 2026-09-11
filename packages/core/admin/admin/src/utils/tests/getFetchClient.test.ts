@@ -1,16 +1,33 @@
 import {
+  ADMIN_REFRESH_LOCK,
+  attemptTokenRefresh,
   getFetchClient,
+  refreshAccessToken,
   resetSessionExpiredNotification,
   setOnSessionExpired,
   setOnTokenUpdate,
   triggerSessionExpired,
 } from '../getFetchClient';
 
+const buildJwt = (expSeconds: number): string => {
+  const json = JSON.stringify({ exp: expSeconds });
+  const base64url = window.btoa(json).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  return `header.${base64url}.signature`;
+};
+
 describe('getFetchClient', () => {
   const originalLocalStorage = window.localStorage;
+  const originalNavigatorLocks = navigator.locks;
 
   beforeEach(() => {
     window.fetch = jest.fn(); // Reset the mock before each test
+
+    Object.defineProperty(navigator, 'locks', {
+      configurable: true,
+      value: {
+        request: jest.fn(async (_name: string, callback: () => Promise<unknown>) => callback()),
+      },
+    });
 
     // Mock localStorage
     const localStorageMock = {
@@ -29,6 +46,10 @@ describe('getFetchClient', () => {
     Object.defineProperty(window, 'localStorage', {
       value: originalLocalStorage,
       writable: true,
+    });
+    Object.defineProperty(navigator, 'locks', {
+      configurable: true,
+      value: originalNavigatorLocks,
     });
     jest.clearAllMocks();
   });
@@ -400,7 +421,7 @@ describe('getFetchClient', () => {
               }),
           })
         )
-        // Token refresh call fails
+        // Token refresh fails once under the cross-tab lock
         .mockImplementationOnce(() =>
           Promise.resolve({
             status: 401,
@@ -416,8 +437,264 @@ describe('getFetchClient', () => {
 
       await expect(fetchClient.get('/api/test')).rejects.toThrow('Token expired');
 
-      // Should have called original request and refresh attempt
+      // Original request plus one access-token attempt
       expect(window.fetch).toHaveBeenCalledTimes(2);
+    });
+
+    it('should adopt a valid access token from shared storage before calling access-token', async () => {
+      const nowSeconds = Math.floor(Date.now() / 1000);
+      const staleToken = buildJwt(nowSeconds - 60);
+      const freshToken = buildJwt(nowSeconds + 3600);
+      let storageReads = 0;
+
+      (window.localStorage.getItem as jest.Mock).mockImplementation((key: string) => {
+        if (key !== 'jwtToken') {
+          return null;
+        }
+
+        storageReads += 1;
+        return JSON.stringify(storageReads === 1 ? staleToken : freshToken);
+      });
+
+      const token = await attemptTokenRefresh();
+
+      expect(token).toBe(freshToken);
+      expect(window.fetch).not.toHaveBeenCalled();
+    });
+
+    it('should serialize refresh across tabs so only one access-token call is made', async () => {
+      const nowSeconds = Math.floor(Date.now() / 1000);
+      const staleToken = buildJwt(nowSeconds - 60);
+      const freshToken = buildJwt(nowSeconds + 3600);
+      let lockChain = Promise.resolve();
+      let holders = 0;
+
+      Object.defineProperty(navigator, 'locks', {
+        configurable: true,
+        value: {
+          request: jest.fn(async (_name: string, callback: () => Promise<unknown>) => {
+            const run = lockChain.then(async () => {
+              holders += 1;
+              expect(holders).toBe(1);
+              try {
+                return await callback();
+              } finally {
+                holders -= 1;
+              }
+            });
+            lockChain = run.then(() => undefined);
+            return run;
+          }),
+        },
+      });
+
+      let storageReads = 0;
+      (window.localStorage.getItem as jest.Mock).mockImplementation((key: string) => {
+        if (key !== 'jwtToken') {
+          return null;
+        }
+
+        storageReads += 1;
+        // Two tabs capture stale tokens, then the lock holder checks storage once more.
+        return JSON.stringify(storageReads <= 3 ? staleToken : freshToken);
+      });
+
+      (window.fetch as jest.Mock).mockImplementationOnce(() =>
+        Promise.resolve({
+          status: 200,
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              data: { token: freshToken },
+            }),
+        })
+      );
+
+      const [first, second] = await Promise.all([refreshAccessToken(), refreshAccessToken()]);
+
+      expect(first).toBe(freshToken);
+      expect(second).toBe(freshToken);
+      expect(window.fetch).toHaveBeenCalledTimes(1);
+      expect(navigator.locks.request).toHaveBeenCalledWith(
+        ADMIN_REFRESH_LOCK,
+        expect.any(Function)
+      );
+    });
+
+    it('should adopt a token refreshed before the failed request starts refresh handling', async () => {
+      const nowSeconds = Math.floor(Date.now() / 1000);
+      const staleToken = buildJwt(nowSeconds - 60);
+      const freshToken = buildJwt(nowSeconds + 3600);
+      let storageReads = 0;
+
+      (window.localStorage.getItem as jest.Mock).mockImplementation((key: string) => {
+        if (key !== 'jwtToken') {
+          return null;
+        }
+
+        storageReads += 1;
+        return JSON.stringify(storageReads === 1 ? staleToken : freshToken);
+      });
+
+      (window.fetch as jest.Mock)
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 401,
+            ok: false,
+            json: () => Promise.resolve({ error: { message: 'Unauthorized', status: 401 } }),
+          })
+        )
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 200,
+            ok: true,
+            json: () => Promise.resolve({ data: 'success after retry' }),
+          })
+        );
+
+      const fetchClient = getFetchClient();
+      const { data } = await fetchClient.get('/api/test');
+
+      expect(data).toEqual({ data: 'success after retry' });
+      expect(navigator.locks.request).toHaveBeenCalledWith(
+        ADMIN_REFRESH_LOCK,
+        expect.any(Function)
+      );
+      expect(window.fetch).toHaveBeenCalledTimes(2);
+      expect(window.fetch).not.toHaveBeenCalledWith(
+        'http://localhost:1337/admin/access-token',
+        expect.anything()
+      );
+
+      const retryHeaders = (window.fetch as jest.Mock).mock.calls[1][1].headers as Headers;
+      expect(retryHeaders.get('Authorization')).toBe(`Bearer ${freshToken}`);
+    });
+
+    it('should adopt a token from shared cookie storage before calling access-token', async () => {
+      const nowSeconds = Math.floor(Date.now() / 1000);
+      const staleToken = buildJwt(nowSeconds - 60);
+      const freshToken = buildJwt(nowSeconds + 3600);
+
+      (window.localStorage.getItem as jest.Mock).mockReturnValue(null);
+      document.cookie = `jwtToken=${encodeURIComponent(freshToken)}; Path=/`;
+
+      const token = await refreshAccessToken(staleToken);
+
+      expect(token).toBe(freshToken);
+      expect(window.fetch).not.toHaveBeenCalled();
+
+      document.cookie = 'jwtToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    });
+
+    it('should wait for a shared token before retrying when Web Locks are unavailable', async () => {
+      Object.defineProperty(navigator, 'locks', {
+        configurable: true,
+        value: undefined,
+      });
+
+      const nowSeconds = Math.floor(Date.now() / 1000);
+      const staleToken = buildJwt(nowSeconds - 60);
+      const freshToken = buildJwt(nowSeconds + 3600);
+      let storedToken = staleToken;
+
+      (window.localStorage.getItem as jest.Mock).mockImplementation((key: string) => {
+        if (key !== 'jwtToken') {
+          return null;
+        }
+
+        return JSON.stringify(storedToken);
+      });
+
+      (window.fetch as jest.Mock)
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 401,
+            ok: false,
+            json: () => Promise.resolve({ error: { message: 'Unauthorized', status: 401 } }),
+          })
+        )
+        .mockImplementationOnce(() => {
+          setTimeout(() => {
+            storedToken = freshToken;
+          }, 0);
+
+          return Promise.resolve({
+            status: 401,
+            ok: false,
+          });
+        })
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 200,
+            ok: true,
+            json: () => Promise.resolve({ data: 'success after retry' }),
+          })
+        );
+
+      const fetchClient = getFetchClient();
+      const { data } = await fetchClient.get('/api/test');
+
+      expect(data).toEqual({ data: 'success after retry' });
+      expect(window.fetch).toHaveBeenCalledTimes(3);
+      expect(window.fetch).toHaveBeenNthCalledWith(
+        2,
+        'http://localhost:1337/admin/access-token',
+        expect.objectContaining({ method: 'POST', credentials: 'include' })
+      );
+
+      const retryHeaders = (window.fetch as jest.Mock).mock.calls[2][1].headers as Headers;
+      expect(retryHeaders.get('Authorization')).toBe(`Bearer ${freshToken}`);
+    });
+
+    it('should retry access-token once when Web Locks are unavailable', async () => {
+      Object.defineProperty(navigator, 'locks', {
+        configurable: true,
+        value: undefined,
+      });
+
+      const nowSeconds = Math.floor(Date.now() / 1000);
+      const staleToken = buildJwt(nowSeconds - 60);
+
+      (window.localStorage.getItem as jest.Mock).mockImplementation((key: string) => {
+        if (key !== 'jwtToken') {
+          return null;
+        }
+
+        return JSON.stringify(staleToken);
+      });
+
+      (window.fetch as jest.Mock)
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 401,
+            ok: false,
+          })
+        )
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 200,
+            ok: true,
+            json: () =>
+              Promise.resolve({
+                data: { token: 'recovered-token' },
+              }),
+          })
+        );
+
+      const token = await attemptTokenRefresh();
+
+      expect(token).toBe('recovered-token');
+      expect(window.fetch).toHaveBeenCalledTimes(2);
+      expect(window.fetch).toHaveBeenNthCalledWith(
+        1,
+        'http://localhost:1337/admin/access-token',
+        expect.objectContaining({ method: 'POST', credentials: 'include' })
+      );
+      expect(window.fetch).toHaveBeenNthCalledWith(
+        2,
+        'http://localhost:1337/admin/access-token',
+        expect.objectContaining({ method: 'POST', credentials: 'include' })
+      );
     });
 
     it('should store new token in localStorage when refresh succeeds', async () => {

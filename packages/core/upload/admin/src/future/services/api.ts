@@ -182,6 +182,18 @@ const METADATA_STATUS_BY_RESULT: Record<GenerateAIMetadata.FileStatus, FileMetad
 };
 
 /**
+ * Re-attaches the folder an upload targeted.
+ *
+ * The create response is built from `db.query().create()` with no populate, so
+ * it comes back without the folder relation it was just given. The list needs
+ * it to tell whether a freshly uploaded asset belongs to the folder on screen.
+ */
+const withTargetFolder = (
+  file: UploadedFile,
+  folder: number | string | null | undefined
+): UploadedFile => (file.folder != null ? file : { ...file, folder: folder ?? null });
+
+/**
  * Kicks off AI metadata generation for a freshly uploaded file.
  *
  * Deliberately fire-and-forget — the caller must NOT await it:
@@ -298,7 +310,14 @@ const runUploadPool = async ({
       );
       batcher.cancel();
       uploaded.push(file);
-      dispatch(setFileComplete({ index, file, uploadId }));
+      dispatch(
+        setFileComplete({
+          index,
+          file: withTargetFolder(file, entry.fileInfo?.folder),
+          uploadId,
+          completedAt: Date.now(),
+        })
+      );
 
       // Not awaited: overlaps with the next file's upload and can't fail the batch.
       maybeGenerateMetadata({
@@ -484,11 +503,13 @@ const processSSEStream = async ({
   dispatch,
   uploadId,
   generateAiMetadata,
+  folderId,
 }: {
   response: Response;
   dispatch: Dispatch;
   uploadId: number;
   generateAiMetadata: boolean;
+  folderId?: number | null;
 }): Promise<CreateFilesStream.Response | null> => {
   const reader = response.body!.getReader();
   const decoder = new TextDecoder();
@@ -527,6 +548,26 @@ const processSSEStream = async ({
           dispatch(setFileUploading({ name: parsed.url as string, index, size: 0, uploadId }));
           break;
         }
+        case 'file:progress': {
+          const payload = parsed as CreateFilesStreamEvents.FileProgressEvent;
+
+          // No usable Content-Length on the remote: leave the row indeterminate
+          if (payload.totalBytes === null) {
+            break;
+          }
+
+          // Already throttled server-side (~5 frames a second per file), so no batching
+          // here. `size` rides along because the row is still at 0 — see `setFileProgress`.
+          dispatch(
+            setFileProgress({
+              index,
+              bytes: payload.loadedBytes,
+              size: payload.totalBytes,
+              uploadId,
+            })
+          );
+          break;
+        }
         case 'file:uploading': {
           const payload = parsed as CreateFilesStreamEvents.FileUploadingEvent;
           dispatch(setFileUploading({ name: payload.name, index, size: payload.size, uploadId }));
@@ -534,7 +575,14 @@ const processSSEStream = async ({
         }
         case 'file:complete': {
           const payload = parsed as CreateFilesStreamEvents.FileCompleteEvent;
-          dispatch(setFileComplete({ index, file: payload.file, uploadId }));
+          dispatch(
+            setFileComplete({
+              index,
+              file: withTargetFolder(payload.file, folderId),
+              uploadId,
+              completedAt: Date.now(),
+            })
+          );
 
           // Same fire-and-forget semantics as the file flow.
           maybeGenerateMetadata({
@@ -843,6 +891,7 @@ const uploadApi = adminApi
               dispatch,
               uploadId,
               generateAiMetadata,
+              folderId,
             });
 
             unregisterAbortController(uploadId);

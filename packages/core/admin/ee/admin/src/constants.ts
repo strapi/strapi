@@ -8,6 +8,7 @@ export const ADMIN_PERMISSIONS_EE = {
       main: [{ action: 'admin::audit-logs.read', subject: null }],
       read: [{ action: 'admin::audit-logs.read', subject: null }],
       update: [{ action: 'admin::audit-logs.update', subject: null }],
+      export: [{ action: 'admin::audit-logs.export', subject: null }],
     },
     'review-workflows': {
       main: [{ action: 'admin::review-workflows.read', subject: null }],
