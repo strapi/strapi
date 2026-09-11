@@ -21,7 +21,12 @@ const FOLDER_WRITE_TOOLS = [
   'media_delete_folder',
 ] as const;
 
-const WRITE_TOOLS = ['media_update_asset', 'media_move_assets', ...FOLDER_WRITE_TOOLS] as const;
+const WRITE_TOOLS = [
+  'media_update_asset',
+  'media_move_assets',
+  'media_delete_assets',
+  ...FOLDER_WRITE_TOOLS,
+] as const;
 
 /** Fields that must never reach an MCP client. */
 const FORBIDDEN_ASSET_FIELDS = [
@@ -1771,7 +1776,7 @@ describe('MCP upload tools RBAC (api)', () => {
 
     test('reports a folder id that matches no asset as failed, moving nothing', async () => {
       // The guarantee this tool DOES make: a number that resolves to no asset moves nothing, and
-      // the reason points at move_folder because a folder id is the likeliest cause.
+      // the reason points at media_move_folder because a folder id is the likeliest cause.
       //
       // The id is forced past every asset id in the database, so the assertion holds on the id
       // itself rather than on whichever sequence values this test happened to draw.
@@ -1851,7 +1856,7 @@ describe('MCP upload tools RBAC (api)', () => {
       const { moved, failed } = structured(response);
       expect(moved).toEqual([]);
       expect(failed.map(({ id }) => id).sort()).toEqual([999998, 999999]);
-      expect(failed[0].reason).toMatch(/move_folder/);
+      expect(failed[0].reason).toMatch(/media_move_folder/);
     });
 
     test('rejects the whole call for a destination folder that does not exist', async () => {
@@ -1975,6 +1980,403 @@ describe('MCP upload tools RBAC (api)', () => {
 
       expect(response.error ?? response.result?.isError).toBeTruthy();
       expect(await fileRow(seeded.id)).toMatchObject({ folder: null });
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // media_delete_assets
+  // ---------------------------------------------------------------------------
+
+  describe('media_delete_assets', () => {
+    const structured = (response: Awaited<ReturnType<typeof mcp.callTool>>) =>
+      response.result?.structuredContent as {
+        dryRun: boolean;
+        deleted: Record<string, unknown>[];
+        failed: { id: number; reason: string }[];
+        totalFileNumber: number;
+      };
+
+    const countFiles = async () => strapi.db.query('plugin::upload.file').count({});
+
+    const fileRow = async (id: number) =>
+      strapi.db.query('plugin::upload.file').findOne({ where: { id } });
+
+    /** Highest asset id currently in the database, or 0 when there are none. */
+    const maxAssetId = async (): Promise<number> => {
+      const rows = await strapi.db.query('plugin::upload.file').findMany({ select: ['id'] });
+      return rows.reduce((highest: number, row: { id: number }) => Math.max(highest, row.id), 0);
+    };
+
+    /**
+     * Seeds a folder and an asset that share the same numeric id.
+     *
+     * The two tables have independent sequences sitting at arbitrary offsets by the time these
+     * tests run, so the collision is CONSTRUCTED rather than waited for: both rows are seeded
+     * normally and the folder is then renumbered onto the asset's id with a direct update.
+     *
+     * Forcing it is the point. The api tests these replaced asserted the opposite behaviour and
+     * passed only because the sequences happened to be far apart — a fixture that produced a
+     * collision by luck proved nothing, and hid a real data-loss bug from review.
+     */
+    const seedIdCollision = async (assetName: string) => {
+      const asset = await seeder.seedAsset({ name: assetName });
+      const folder = await seeder.seedFolder(`Collides with ${assetName}`);
+
+      // Renumber the folder onto the asset's id. `id` is not writable through the folder service,
+      // so this goes straight to the row — the collision is the fixture, not the behaviour.
+      await strapi.db
+        .connection(strapi.getModel('plugin::upload.folder').collectionName)
+        .where({ id: folder.id })
+        .update({ id: asset.id });
+
+      const renumbered = await folderRow(asset.id);
+      expect(renumbered).toMatchObject({ id: asset.id });
+      expect(await fileRow(asset.id)).toMatchObject({ id: asset.id, name: assetName });
+
+      return { collidingId: asset.id, assetName };
+    };
+
+    test('dry-runs by default: lists what would be deleted and deletes nothing', async () => {
+      const first = await seeder.seedAsset({ name: 'doomed-one.jpg' });
+      const second = await seeder.seedAsset({ name: 'doomed-two.jpg' });
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'media_delete_assets', {
+        ids: [first.id, second.id],
+      });
+
+      expect(response.error ?? response.result?.isError).toBeFalsy();
+
+      const { dryRun, deleted, failed, totalFileNumber } = structured(response);
+      expect(dryRun).toBe(true);
+      expect(totalFileNumber).toBe(2);
+      expect(deleted.map((asset) => asset.id).sort()).toEqual([first.id, second.id].sort());
+      expect(failed).toEqual([]);
+
+      // Proven by reading back: every asset is still there, and still readable over MCP.
+      expect(await countFiles()).toBe(2);
+      expect(await fileRow(first.id)).toMatchObject({ name: 'doomed-one.jpg' });
+      const readBack = await mcp.callTool(token.accessKey, 'media_get_asset', { id: second.id });
+      expect(readBack.result?.structuredContent?.data).toMatchObject({ name: 'doomed-two.jpg' });
+    });
+
+    test('dry-runs with dryRun: true, leaving everything in place', async () => {
+      const asset = await seeder.seedAsset({ name: 'still-here.jpg' });
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'media_delete_assets', {
+        ids: [asset.id],
+        dryRun: true,
+      });
+
+      expect(structured(response)).toMatchObject({ dryRun: true, totalFileNumber: 1 });
+      expect(await countFiles()).toBe(1);
+    });
+
+    test('describes the assets it would delete, not just their count', async () => {
+      const folder = await seeder.seedFolder('Preview');
+      const asset = await seeder.seedAsset({ name: 'described.jpg', folderId: folder.id });
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'media_delete_assets', {
+        ids: [asset.id],
+      });
+      const { deleted } = structured(response);
+
+      // An agent has to report what it is about to destroy, so a bare count is not enough.
+      expect(deleted[0]).toMatchObject({
+        id: asset.id,
+        name: 'described.jpg',
+        folder: { id: folder.id, name: 'Preview' },
+      });
+
+      for (const field of FORBIDDEN_ASSET_FIELDS) {
+        expect(deleted[0]).not.toHaveProperty(field);
+      }
+    });
+
+    test('deletes with dryRun: false, removing the rows', async () => {
+      const first = await seeder.seedAsset({ name: 'gone-one.jpg' });
+      const second = await seeder.seedAsset({ name: 'gone-two.jpg' });
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'media_delete_assets', {
+        ids: [first.id, second.id],
+        dryRun: false,
+      });
+
+      expect(response.error ?? response.result?.isError).toBeFalsy();
+      expect(structured(response)).toMatchObject({ dryRun: false, totalFileNumber: 2 });
+
+      expect(await countFiles()).toBe(0);
+
+      // ...and the assets are gone from the read surface too.
+      const readBack = await mcp.callTool(token.accessKey, 'media_get_asset', { id: first.id });
+      expect(readBack.result?.structuredContent?.data ?? null).toBeNull();
+    });
+
+    test('deletes a single asset through the same bulk contract', async () => {
+      const asset = await seeder.seedAsset({ name: 'single.jpg' });
+      const survivor = await seeder.seedAsset({ name: 'survivor.jpg' });
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'media_delete_assets', {
+        ids: [asset.id],
+        dryRun: false,
+      });
+
+      const { deleted, failed, totalFileNumber } = structured(response);
+      expect(deleted.map((a) => a.id)).toEqual([asset.id]);
+      expect(failed).toEqual([]);
+      expect(totalFileNumber).toBe(1);
+
+      // Assets outside the request are untouched.
+      expect(await fileRow(survivor.id)).toMatchObject({ name: 'survivor.jpg' });
+      expect(await countFiles()).toBe(1);
+    });
+
+    test('the dry-run report matches what the destructive call then deletes', async () => {
+      const first = await seeder.seedAsset({ name: 'match-one.jpg' });
+      const second = await seeder.seedAsset({ name: 'match-two.jpg' });
+      const token = await createUpdateTokenSession();
+
+      const preview = structured(
+        await mcp.callTool(token.accessKey, 'media_delete_assets', { ids: [first.id, second.id] })
+      );
+      const executed = structured(
+        await mcp.callTool(token.accessKey, 'media_delete_assets', {
+          ids: [first.id, second.id],
+          dryRun: false,
+        })
+      );
+
+      // The two branches must agree — a preview an agent cannot trust is worse than none.
+      expect(executed.totalFileNumber).toBe(preview.totalFileNumber);
+      expect(executed.deleted.map((a) => a.id).sort()).toEqual(
+        preview.deleted.map((a) => a.id).sort()
+      );
+      expect(executed.failed).toEqual(preview.failed);
+    });
+
+    test('leaves the containing folder in place — this tool deletes assets only', async () => {
+      const folder = await seeder.seedFolder('Keeps its folder');
+      const asset = await seeder.seedAsset({ name: 'inside.jpg', folderId: folder.id });
+      const token = await createUpdateTokenSession();
+
+      await mcp.callTool(token.accessKey, 'media_delete_assets', {
+        ids: [asset.id],
+        dryRun: false,
+      });
+
+      expect(await countFiles()).toBe(0);
+      expect(await folderRow(folder.id)).toMatchObject({ name: 'Keeps its folder' });
+    });
+
+    test('applies the valid deletions and reports the bad id, without rolling back', async () => {
+      const first = await seeder.seedAsset({ name: 'valid-one.jpg' });
+      const second = await seeder.seedAsset({ name: 'valid-two.jpg' });
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'media_delete_assets', {
+        ids: [first.id, 999999, second.id],
+        dryRun: false,
+      });
+
+      expect(response.error ?? response.result?.isError).toBeFalsy();
+
+      const { deleted, failed, totalFileNumber } = structured(response);
+
+      // The requirement this tool exists for: a bad id among good ones must not discard the
+      // deletions that succeeded — and here they cannot be undone.
+      expect(deleted.map((a) => a.id).sort()).toEqual([first.id, second.id].sort());
+      expect(totalFileNumber).toBe(2);
+      expect(failed).toHaveLength(1);
+      expect(failed[0].id).toBe(999999);
+      expect(failed[0].reason).toMatch(/media_delete_folder/);
+
+      expect(await countFiles()).toBe(0);
+    });
+
+    test('reports a folder id that matches no asset as failed, deleting nothing', async () => {
+      // The guarantee this tool DOES make: a number that resolves to no asset deletes nothing,
+      // and the reason points at delete_folder because a folder id is the likeliest cause.
+      //
+      // The folder id is forced past every asset id in the database, so the assertion holds on
+      // the id itself rather than on whichever sequence values this test happened to draw.
+      const folder = await seeder.seedFolder('Not an asset');
+      const inside = await seeder.seedAsset({ name: 'inside.jpg', folderId: folder.id });
+      const unusedId = (await maxAssetId()) + 1000;
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'media_delete_assets', {
+        ids: [unusedId],
+        dryRun: false,
+      });
+
+      const { deleted, failed, totalFileNumber } = structured(response);
+      expect(deleted).toEqual([]);
+      expect(totalFileNumber).toBe(0);
+      expect(failed).toHaveLength(1);
+      expect(failed[0].reason).toMatch(/media_delete_folder/);
+
+      // Neither the folder nor its contents were touched.
+      expect(await folderRow(folder.id)).toMatchObject({ name: 'Not an asset' });
+      expect(await fileRow(inside.id)).toMatchObject({ name: 'inside.jpg' });
+    });
+
+    /**
+     * ACCEPTED RISK, asserted so it cannot change unnoticed.
+     *
+     * Asset ids and folder ids are independent sequences, so the same integer can name both. The
+     * tool resolves ids in the file table only: handed a folder id that collides with an asset
+     * id, it deletes THAT ASSET. Nothing in the input can express which namespace was meant, and
+     * refusing every colliding id would make those assets permanently undeletable over MCP.
+     *
+     * The mitigation is the dry run plus the tool description, not a server-side check. The
+     * durable fix is namespaced handles across the whole media surface (`asset:1` / `folder:1`),
+     * which is a breaking change to the read tools and belongs to its own ticket.
+     *
+     * This test pins the real behaviour on a FORCED collision. The previous version asserted the
+     * opposite and passed only because earlier tests had advanced the two sequences apart — it
+     * proved nothing, and hid this from review.
+     */
+    test('deletes the colliding asset when a folder id doubles as an asset id', async () => {
+      const { collidingId, assetName } = await seedIdCollision('collides.jpg');
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'media_delete_assets', {
+        ids: [collidingId],
+        dryRun: false,
+      });
+
+      const { deleted, failed } = structured(response);
+
+      // The asset sharing the number is gone; the folder is untouched.
+      expect(deleted.map((a) => a.id)).toEqual([collidingId]);
+      expect(deleted[0]).toMatchObject({ name: assetName });
+      expect(failed).toEqual([]);
+      expect(await fileRow(collidingId)).toBeNull();
+      expect(await folderRow(collidingId)).toMatchObject({ id: collidingId });
+    });
+
+    test('shows the colliding asset in the dry run, so a preview can catch the mistake', async () => {
+      // The dry run is the only thing standing between an agent and this deletion, so the
+      // preview must name the asset it would remove rather than report an empty result.
+      const { collidingId, assetName } = await seedIdCollision('previewed.jpg');
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'media_delete_assets', {
+        ids: [collidingId],
+      });
+
+      const { dryRun, deleted } = structured(response);
+      expect(dryRun).toBe(true);
+      expect(deleted[0]).toMatchObject({ id: collidingId, name: assetName });
+
+      // Still there: the preview destroyed nothing.
+      expect(await fileRow(collidingId)).toMatchObject({ name: assetName });
+    });
+
+    test('reports an unresolvable id on the dry run too, before anything is destroyed', async () => {
+      const asset = await seeder.seedAsset({ name: 'real.jpg' });
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'media_delete_assets', {
+        ids: [asset.id, 999999],
+      });
+
+      // The agent must learn which ids will not resolve *before* it deletes, not after.
+      const { dryRun, deleted, failed } = structured(response);
+      expect(dryRun).toBe(true);
+      expect(deleted.map((a) => a.id)).toEqual([asset.id]);
+      expect(failed.map(({ id }) => id)).toEqual([999999]);
+      expect(await countFiles()).toBe(1);
+    });
+
+    test('still returns the per-id report when nothing was deleted at all', async () => {
+      const token = await createUpdateTokenSession();
+
+      // Throwing would drop `structuredContent`, so a single bad id would get prose where
+      // `[valid, bad]` gets a machine-readable entry, for the same class of mistake.
+      const response = await mcp.callTool(token.accessKey, 'media_delete_assets', {
+        ids: [999998, 999999],
+        dryRun: false,
+      });
+
+      expect(response.error ?? response.result?.isError).toBeFalsy();
+
+      const { deleted, failed, totalFileNumber } = structured(response);
+      expect(deleted).toEqual([]);
+      expect(totalFileNumber).toBe(0);
+      expect(failed.map(({ id }) => id)).toEqual([999998, 999999]);
+    });
+
+    test('rejects a documentId in place of the numeric ids', async () => {
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'media_delete_assets', {
+        ids: ['z7v8zma53x01r6oceimv922b'],
+        dryRun: false,
+      });
+
+      expect(response.error ?? response.result?.isError).toBeTruthy();
+    });
+
+    test('rejects an empty id list', async () => {
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'media_delete_assets', {
+        ids: [],
+        dryRun: false,
+      });
+
+      expect(response.error ?? response.result?.isError).toBeTruthy();
+    });
+
+    test('denies the deletion to a token without plugin::upload.assets.update', async () => {
+      const asset = await seeder.seedAsset({ name: 'protected.jpg' });
+
+      // A read-granted token: it can see the asset but must not be able to delete it.
+      const token = await createReadTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'media_delete_assets', {
+        ids: [asset.id],
+        dryRun: false,
+      });
+
+      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expect(await fileRow(asset.id)).toMatchObject({ name: 'protected.jpg' });
+      expect(await countFiles()).toBe(1);
+    });
+
+    test('denies even the dry run to a read-only token', async () => {
+      const asset = await seeder.seedAsset({ name: 'protected.jpg' });
+      const token = await createReadTokenSession();
+
+      // The preview reveals which ids exist and what they are, so it takes the write action too.
+      const response = await mcp.callTool(token.accessKey, 'media_delete_assets', {
+        ids: [asset.id],
+      });
+
+      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expect(await countFiles()).toBe(1);
+    });
+
+    test('denies the deletion to a token holding an unrelated upload permission', async () => {
+      const asset = await seeder.seedAsset({ name: 'unrelated.jpg' });
+
+      const token = await createAdminToken([permission(UPLOAD_ACTIONS.settingsRead)]);
+      await mcp.initializeSession(token.accessKey);
+
+      expect(await mcp.listToolNames(token.accessKey)).not.toContain('media_delete_assets');
+
+      const response = await mcp.callTool(token.accessKey, 'media_delete_assets', {
+        ids: [asset.id],
+        dryRun: false,
+      });
+
+      expect(response.error ?? response.result?.isError).toBeTruthy();
+      expect(await fileRow(asset.id)).toMatchObject({ name: 'unrelated.jpg' });
     });
   });
 });
