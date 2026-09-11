@@ -86,6 +86,22 @@ test.describe('Content-Type Builder — all content types', () => {
     await expect(page).toHaveURL(/content-types\/api::homepage\.homepage/);
   });
 
+  /**
+   * The drawer is remembered per browser, so someone who opened it keeps it
+   * open — the index has to read the same either way.
+   */
+  test('the index holds up with the drawer expanded', async ({ page }) => {
+    await page.goto(CTB_URL);
+    await page.evaluate(() => window.localStorage.setItem('strapi-ctb:schema-list', 'expanded'));
+    await page.reload();
+
+    await expect(page.getByRole('heading', { name: 'All content types' })).toBeVisible();
+    await expect(page.getByRole('tab', { name: /^Collection types/ })).toBeVisible();
+    await page.getByRole('row').filter({ hasText: 'Article' }).first().click();
+
+    await expect(page).toHaveURL(/content-types\/api::article\.article/);
+  });
+
   test('creating is one button with three choices', async ({ page }) => {
     await page.goto(CTB_URL);
 
