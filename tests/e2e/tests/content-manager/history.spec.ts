@@ -3,7 +3,6 @@ import {
   clickAndWait,
   describeOnCondition,
   findAndClose,
-  locateFirstAfter,
   navToHeader,
 } from '../../../utils/shared';
 import { resetFiles } from '../../../utils/file-reset';
@@ -46,19 +45,19 @@ const HOMEPAGE_CTB_URL =
   /\/admin\/plugins\/content-type-builder\/content-types\/api::homepage\.homepage/;
 
 /**
- * CTB restores the last visited type on open. Open the plugin, then click the type under the
- * correct sidebar section so we do not hit the Content Manager link with the same name.
+ * The builder opens on its index of every schema. Pick the kind's tab, then the row — the
+ * tab keeps us off a row of another kind that happens to share the name.
  */
 const goToContentTypeInBuilder = async (
   page: Page,
-  section: 'Collection Types' | 'Single Types',
-  contentTypeLinkName: string,
+  tab: 'Collection types' | 'Single types',
+  contentTypeName: string,
   contentTypeUrl: RegExp
 ) => {
   await clickAndWait(page, page.locator('role=link[name^="Content-Type Builder"]').last());
   await page.waitForURL(/\/plugins\/content-type-builder/);
-  const contentTypeLink = await locateFirstAfter(page, section, contentTypeLinkName);
-  await clickAndWait(page, contentTypeLink);
+  await page.getByRole('tab', { name: new RegExp(`^${tab}`) }).click();
+  await clickAndWait(page, page.getByRole('row').filter({ hasText: contentTypeName }).first());
   await page.waitForURL(contentTypeUrl);
 };
 
@@ -285,7 +284,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       /**
        * Rename field in content-type builder
        */
-      await goToContentTypeInBuilder(page, 'Collection Types', 'Article', ARTICLE_CTB_URL);
+      await goToContentTypeInBuilder(page, 'Collection types', 'Article', ARTICLE_CTB_URL);
       await page.getByRole('button', { name: 'Edit title' }).first().click();
       await page.getByRole('textbox', { name: 'name' }).fill('titleRename');
       await page.getByRole('button', { name: 'Finish' }).click();
@@ -435,7 +434,7 @@ describeOnCondition(edition === 'EE')('History', () => {
 
     test('A user should see the relations and whether some are missing', async ({ page }) => {
       // Create relation in Content-Type Builder
-      await goToContentTypeInBuilder(page, 'Single Types', 'Homepage', HOMEPAGE_CTB_URL);
+      await goToContentTypeInBuilder(page, 'Single types', 'Homepage', HOMEPAGE_CTB_URL);
       await page.getByRole('button', { name: /add another field to this single type/i }).click();
       await page.getByRole('button', { name: /relation/i }).click();
       await page.getByLabel('Basic settings').getByRole('button').nth(1).click();
@@ -503,7 +502,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       /**
        * Rename field in content-type builder
        */
-      await goToContentTypeInBuilder(page, 'Single Types', 'Homepage', HOMEPAGE_CTB_URL);
+      await goToContentTypeInBuilder(page, 'Single types', 'Homepage', HOMEPAGE_CTB_URL);
       await page.getByRole('button', { name: 'Edit title' }).first().click();
       await page.getByRole('textbox', { name: 'name' }).fill('titleRename');
       await page.getByRole('button', { name: 'Finish' }).click();

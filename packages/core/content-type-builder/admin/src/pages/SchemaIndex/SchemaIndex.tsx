@@ -4,6 +4,7 @@ import {
   Layouts,
   SearchInput,
   Table,
+  tours,
   useQueryParams,
   useTracking,
 } from '@strapi/admin/strapi-admin';
@@ -198,6 +199,10 @@ export const SchemaIndex = () => {
 
   return (
     <>
+      {/* The guided tour opens on the page you land on, and that is this one. */}
+      <tours.contentTypeBuilder.Introduction>
+        <Box />
+      </tours.contentTypeBuilder.Introduction>
       <Layouts.Header
         title={formatMessage({ id: getTrad('index.title'), defaultMessage: 'All content types' })}
         subtitle={formatMessage(
@@ -211,9 +216,11 @@ export const SchemaIndex = () => {
         primaryAction={
           isInDevelopmentMode ? (
             <Menu.Root>
-              <Menu.Trigger startIcon={<Plus />} variant="default">
-                {formatMessage({ id: getTrad('index.create'), defaultMessage: 'Create new' })}
-              </Menu.Trigger>
+              <tours.contentTypeBuilder.YourTurn asChild>
+                <Menu.Trigger startIcon={<Plus />} variant="default">
+                  {formatMessage({ id: getTrad('index.create'), defaultMessage: 'Create new' })}
+                </Menu.Trigger>
+              </tours.contentTypeBuilder.YourTurn>
               <Menu.Content zIndex={2}>
                 <Menu.Item
                   onSelect={() =>
@@ -352,30 +359,36 @@ export const SchemaIndex = () => {
                   defaultMessage: 'Schema kinds',
                 })}
               >
-                <Tabs.Trigger value="collectionType">
-                  {formatMessage(
-                    {
-                      id: getTrad('index.tab.collectionTypes'),
-                      defaultMessage: 'Collection types',
-                    },
-                    { count: counts.collectionType }
-                  )}
-                  {` (${counts.collectionType})`}
-                </Tabs.Trigger>
-                <Tabs.Trigger value="singleType">
-                  {formatMessage({
-                    id: getTrad('index.tab.singleTypes'),
-                    defaultMessage: 'Single types',
-                  })}
-                  {` (${counts.singleType})`}
-                </Tabs.Trigger>
-                <Tabs.Trigger value="component">
-                  {formatMessage({
-                    id: getTrad('index.tab.components'),
-                    defaultMessage: 'Components',
-                  })}
-                  {` (${counts.component})`}
-                </Tabs.Trigger>
+                <tours.contentTypeBuilder.CollectionTypes asChild>
+                  <Tabs.Trigger value="collectionType">
+                    {formatMessage(
+                      {
+                        id: getTrad('index.tab.collectionTypes'),
+                        defaultMessage: 'Collection types',
+                      },
+                      { count: counts.collectionType }
+                    )}
+                    {` (${counts.collectionType})`}
+                  </Tabs.Trigger>
+                </tours.contentTypeBuilder.CollectionTypes>
+                <tours.contentTypeBuilder.SingleTypes asChild>
+                  <Tabs.Trigger value="singleType">
+                    {formatMessage({
+                      id: getTrad('index.tab.singleTypes'),
+                      defaultMessage: 'Single types',
+                    })}
+                    {` (${counts.singleType})`}
+                  </Tabs.Trigger>
+                </tours.contentTypeBuilder.SingleTypes>
+                <tours.contentTypeBuilder.Components asChild>
+                  <Tabs.Trigger value="component">
+                    {formatMessage({
+                      id: getTrad('index.tab.components'),
+                      defaultMessage: 'Components',
+                    })}
+                    {` (${counts.component})`}
+                  </Tabs.Trigger>
+                </tours.contentTypeBuilder.Components>
               </Tabs.List>
             </Tabs.Root>
 

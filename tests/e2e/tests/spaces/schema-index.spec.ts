@@ -71,6 +71,21 @@ test.describe('Content-Type Builder — all content types', () => {
     await expect(page.getByRole('button', { name: 'Save' })).toBeVisible();
   });
 
+  /**
+   * The way into a schema of another kind, and the path the Content Manager's
+   * history suite takes to reach one: pick the tab, then the row.
+   */
+  test('a tab narrows the table to its kind', async ({ page }) => {
+    await page.goto(CTB_URL);
+
+    await page.getByRole('tab', { name: /^Single types/ }).click();
+
+    await expect(page.getByRole('row').filter({ hasText: 'Article' })).toBeHidden();
+    await page.getByRole('row').filter({ hasText: 'Homepage' }).first().click();
+
+    await expect(page).toHaveURL(/content-types\/api::homepage\.homepage/);
+  });
+
   test('creating is one button with three choices', async ({ page }) => {
     await page.goto(CTB_URL);
 

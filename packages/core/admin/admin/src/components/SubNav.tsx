@@ -19,8 +19,6 @@ import {
   WIDTH_SIDE_NAVIGATION,
 } from '../constants/theme';
 
-import { tours } from './GuidedTour/Tours';
-
 const MainSubNav = styled(DSSubNav)<{ $isFullPage?: boolean }>`
   width: 100%;
   height: 100%;
@@ -175,47 +173,15 @@ const Sections = ({
   );
 };
 
-/**
- * TODO:
- * This would be better in the content-type-builder package directly but currently
- * the SubNav API does not expose a way to wrap the link, instead it wraps the link and the list
- */
-const GuidedTourTooltip = ({
-  sectionId,
-  children,
-}: {
-  sectionId?: string;
-  children: React.ReactNode;
-}) => {
-  switch (sectionId) {
-    case 'models':
-      return (
-        <tours.contentTypeBuilder.CollectionTypes>
-          <tours.contentTypeBuilder.YourTurn>{children}</tours.contentTypeBuilder.YourTurn>
-        </tours.contentTypeBuilder.CollectionTypes>
-      );
-    case 'singleTypes':
-      return (
-        <tours.contentTypeBuilder.SingleTypes>{children}</tours.contentTypeBuilder.SingleTypes>
-      );
-    case 'components':
-      return <tours.contentTypeBuilder.Components>{children}</tours.contentTypeBuilder.Components>;
-    default:
-      return children;
-  }
-};
-
 const Section = ({
   label,
   children,
   link,
-  sectionId,
   badgeLabel,
 }: {
   label: string;
   children: React.ReactNode[];
   link?: { label: string; onClick: () => void };
-  sectionId?: string;
   badgeLabel?: string;
 }) => {
   const listId = useId();
@@ -247,17 +213,15 @@ const Section = ({
               </Badge>
             )}
             {link && (
-              <GuidedTourTooltip sectionId={sectionId}>
-                <IconButton
-                  label={link.label}
-                  variant="ghost"
-                  withTooltip
-                  onClick={link.onClick}
-                  size="XS"
-                >
-                  <Plus />
-                </IconButton>
-              </GuidedTourTooltip>
+              <IconButton
+                label={link.label}
+                variant="ghost"
+                withTooltip
+                onClick={link.onClick}
+                size="XS"
+              >
+                <Plus />
+              </IconButton>
             )}
           </Flex>
         </Flex>

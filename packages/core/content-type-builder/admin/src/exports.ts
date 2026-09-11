@@ -35,3 +35,12 @@ export {
   registerSchemaFilter,
 } from './pages/SchemaIndex/schemaRegistry';
 export type { SchemaColumn, SchemaFilter } from './pages/SchemaIndex/schemaRegistry';
+export {
+  /**
+   * @description Lets a plugin add a flag to a field's row for the option it
+   * owns — i18n for `localized`. The builder registers its own three
+   * (required, unique, private). See `components/attributeFlags.ts`.
+   */
+  registerAttributeFlag,
+} from './components/attributeFlagRegistry';
+export type { AttributeFlag } from './components/attributeFlagRegistry';

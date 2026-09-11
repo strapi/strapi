@@ -1,5 +1,6 @@
 import { Layout } from '@strapi/icons';
 
+import { registerAttributeFlag } from './components/attributeFlagRegistry';
 import {
   registerAvailabilityRule,
   registerReadOnlyRule,
@@ -37,6 +38,7 @@ export default {
         forms: formsAPI,
         registerReadOnlyRule,
         registerAvailabilityRule,
+        registerAttributeFlag,
         registerSchemaColumn,
         registerSchemaFilter,
       },

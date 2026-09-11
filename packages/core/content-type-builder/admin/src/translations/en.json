@@ -22,8 +22,6 @@
   "attribute.email.description": "Email field with validations format",
   "attribute.enumeration": "Enumeration",
   "attribute.enumeration.description": "List of values, then pick one",
-  "attribute.flag.localized": "i18n",
-  "attribute.flag.localized.hint": "Translated per locale",
   "attribute.flag.private": "Private",
   "attribute.flag.private.hint": "Hidden from the public API",
   "attribute.flag.required": "Required",

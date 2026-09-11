@@ -167,6 +167,13 @@ export default {
           useOptions: () => Array<{ value: string; label: string }>;
           matches: (schema: unknown, value: string) => boolean;
         }) => void;
+        registerAttributeFlag?: (flag: {
+          id: string;
+          label: { id: string; defaultMessage: string };
+          short: { id: string; defaultMessage: string };
+          color: string;
+          applies: (attribute: Record<string, unknown>) => boolean;
+        }) => void;
       };
 
       // Whether a content type is translated, said once per row instead of once
@@ -191,6 +198,21 @@ export default {
           { value: 'off', label: 'Off' },
         ],
         matches: (schema, value) => (value === 'on' ? isLocalized(schema) : !isLocalized(schema)),
+      });
+
+      // And whether a *field* is, said on its row rather than inside its
+      // settings modal. `localized` is ours, so the flag is ours to give.
+      ctbApis.registerAttributeFlag?.({
+        id: 'i18n',
+        label: {
+          id: getTranslation('attribute.flag.localized.hint'),
+          defaultMessage: 'Translated per locale',
+        },
+        short: { id: getTranslation('attribute.flag.localized'), defaultMessage: 'i18n' },
+        color: 'secondary600',
+        applies: (attribute) =>
+          (attribute.pluginOptions as { i18n?: { localized?: boolean } } | undefined)?.i18n
+            ?.localized === true,
       });
 
       const ctbFormsAPI = ctbPlugin.apis.forms as ContentTypeBuilderFormsAPI;

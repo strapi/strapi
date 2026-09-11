@@ -42,6 +42,13 @@ type GuidedTourTooltipProps = {
   tourName: ValidTourName;
   step: number;
   when?: (completedActions: CompletedActions) => boolean;
+  /**
+   * Anchor on the child itself instead of on a wrapping element. Needed
+   * wherever the anchored element has to stay a direct child of its parent —
+   * a tab inside a tab list, an item inside a menu — since the wrapper would
+   * otherwise take its place in the layout. The child must forward its ref.
+   */
+  asChild?: boolean;
 };
 
 const GuidedTourTooltip = ({ children, ...props }: GuidedTourTooltipProps) => {
@@ -70,6 +77,7 @@ const GuidedTourTooltipImpl = ({
   tourName,
   step,
   when,
+  asChild,
 }: GuidedTourTooltipProps) => {
   const { data: guidedTourMeta } = useGetGuidedTourMetaQuery();
   const state = useGuidedTour('GuidedTourTooltip', (s) => s.state);
@@ -135,7 +143,9 @@ const GuidedTourTooltipImpl = ({
         </Portal>
       )}
       <Popover.Root open={isPopoverOpen}>
-        <Popover.Anchor ref={anchorRef}>{children}</Popover.Anchor>
+        <Popover.Anchor ref={anchorRef} asChild={asChild}>
+          {children}
+        </Popover.Anchor>
         {content({ Step, state, dispatch })}
       </Popover.Root>
     </>
@@ -158,7 +168,10 @@ export function createTour<const T extends ReadonlyArray<TourStep<string>>>(
   steps: T
 ) {
   type Components = {
-    [K in T[number]['name']]: React.ComponentType<{ children: React.ReactNode }>;
+    [K in T[number]['name']]: React.ComponentType<{
+      children: React.ReactNode;
+      asChild?: boolean;
+    }>;
   };
 
   const tour = steps.reduce(
@@ -169,13 +182,20 @@ export function createTour<const T extends ReadonlyArray<TourStep<string>>>(
         throw Error(`The tour: ${tourName} with step: ${step.name} has already been registered`);
       }
 
-      (acc as Components)[name] = ({ children }: { children: React.ReactNode }) => {
+      (acc as Components)[name] = ({
+        children,
+        asChild,
+      }: {
+        children: React.ReactNode;
+        asChild?: boolean;
+      }) => {
         return (
           <GuidedTourTooltip
             tourName={tourName as ValidTourName}
             step={index}
             content={step.content}
             when={step.when}
+            asChild={asChild}
           >
             {children}
           </GuidedTourTooltip>

@@ -286,7 +286,7 @@ const MemoizedRow = memo((props: Omit<AttributeRowProps, 'style'>) => {
 
         <Box>
           <Flex justifyContent="flex-end" gap={2} onClick={(e) => e.stopPropagation()}>
-            <AttributeFlags attribute={item as never} />
+            <AttributeFlags attribute={item} />
             <>
               <Box>{item.status && <StatusBadge status={item.status} />}</Box>
               {['component', 'dynamiczone'].includes(item.type) && (

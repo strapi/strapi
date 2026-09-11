@@ -115,7 +115,6 @@ export const ContentTypeBuilderNav = () => {
                     onClick: section.customLink?.onClick,
                   }
                 }
-                sectionId={section.name}
               >
                 {section.links.map((link) => {
                   const linkLabel = formatMessage({ id: link.name, defaultMessage: link.title });

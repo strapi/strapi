@@ -71,7 +71,9 @@ describeOnCondition(edition !== 'EE')('Guided tour', () => {
 
     // Create collection type — Continue persists the type and moves to the schema editor; wait for network
     // so the guided tour can attach the next step before we assert on the dialog (fast runners can race otherwise).
-    await page.getByRole('button', { name: 'Create new collection type' }).click();
+    // Creating is one button with three choices now, so the kind is picked in the menu.
+    await page.getByRole('button', { name: 'Create new' }).click();
+    await page.getByRole('menuitem', { name: 'Collection type' }).click();
     await page
       .getByRole('textbox', { name: 'Display name' })
       .fill(GUIDED_TOUR_COLLECTION_DISPLAY_NAME);
