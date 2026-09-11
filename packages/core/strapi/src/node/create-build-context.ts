@@ -105,7 +105,9 @@ const createBuildContext = async ({
   env.STRAPI_ADMIN_AUTH_COOKIE_NAME =
     strapiInstance.config.get<string | undefined>('admin.auth.cookie.name') || '';
   env.STRAPI_ADMIN_AUTH_COOKIE_PATH =
-    strapiInstance.config.get<string | undefined>('admin.auth.cookie.path') || '';
+    strapiInstance.config.get<string | undefined>('admin.auth.cookie.path') ||
+    strapiInstance.config.get<string | undefined>('admin.path') ||
+    '';
   env.STRAPI_ADMIN_AUTH_COOKIE_DOMAIN =
     strapiInstance.config.get<string | undefined>('admin.auth.cookie.domain') ||
     strapiInstance.config.get<string | undefined>('admin.auth.domain') ||
