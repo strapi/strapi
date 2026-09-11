@@ -16,4 +16,8 @@ export interface WebhookRunner {
   add(webhook: Webhook): void;
   update(webhook: Webhook): void;
   remove(webhook: Webhook): void;
+  reload(webhooks: Webhook[]): void;
+  startReloadPolling(interval: number, load: () => Promise<Webhook[]>): void;
+  stopReloadPolling(): void;
+  destroy(): void;
 }
