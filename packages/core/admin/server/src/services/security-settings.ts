@@ -201,6 +201,56 @@ export const GUARD_MESSAGE = 'Enrol in two-factor authentication before requirin
 
 const MODE_RANK: Record<MfaEnforcementMode, number> = { off: 0, optional: 1, required: 2 };
 
+/**
+ * Which of the three relaxing changes a save makes. A pure function of the stored document and
+ * the resolved next values, and therefore cheap to evaluate twice: once outside the write
+ * transaction to decide which credentials to demand, and again inside it against a re-read
+ * document, because the first read is not serialised against a concurrent save.
+ *
+ * Without that second evaluation two saves race into a bypass. From `mode: 'off'`, a save
+ * raising to `required` needs no credentials; a concurrent save to `optional` reads the same
+ * `off` and so also looks like a raise, needing none either. Whichever commits second has
+ * lowered the mode below what the other just set, having never been challenged for a password
+ * or a code.
+ */
+const relaxingChanges = (
+  previous: SecuritySettings,
+  next: {
+    mfa: { mode: MfaEnforcementMode; graceDays: number };
+    requiredRoles: string[];
+    trustedDevices: { enabled: boolean; days: number };
+    passkeys: { enabled: boolean };
+  }
+) => {
+  // A role dropped from `requiredRoles` only relaxes anything while the *resulting* mode is not
+  // `required`: once every local-password user is covered by mode alone the per-role list is
+  // inert, so removing a role on the same move that raises to `required` is not a downgrade.
+  const removedRoles = previous.mfa.requiredRoles.filter((id) => !next.requiredRoles.includes(id));
+  const lowersEnforcement =
+    MODE_RANK[next.mfa.mode] < MODE_RANK[previous.mfa.mode] ||
+    (next.mfa.mode !== 'required' && removedRoles.length > 0) ||
+    next.mfa.graceDays > previous.mfa.graceDays;
+
+  // Offering trust where none was offered, or promising a longer one, both let a browser skip
+  // the second factor for longer than before. Lowering `days` or disabling only cuts trust short.
+  const widensTrust =
+    (!previous.trustedDevices.enabled && next.trustedDevices.enabled) ||
+    (next.trustedDevices.enabled && next.trustedDevices.days > previous.trustedDevices.days);
+
+  // Turning passkeys off is an organisation-wide, irreversible deletion of every
+  // phishing-resistant credential every administrator holds (the cascade runs in the same
+  // transaction), so a stolen session must not be able to wipe them all with one PUT and a
+  // dialog the attacker is not looking at. Turning them *on* needs nothing.
+  const disablesPasskeys = previous.passkeys.enabled && !next.passkeys.enabled;
+
+  return {
+    lowersEnforcement,
+    widensTrust,
+    disablesPasskeys,
+    any: lowersEnforcement || widensTrust || disablesPasskeys,
+  };
+};
+
 /** The slice of `admin::mfa` this service depends on, resolved lazily through the registry. */
 interface MfaServiceLike {
   isExemptFromMfa(user: {
@@ -295,30 +345,17 @@ export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) 
     }
 
     // Security downgrades need re-authentication, exactly like `/mfa/disable`: session authority
-    // alone is not enough when the session may be the thing an attacker holds. Any change that
-    // relaxes enforcement -- a lower mode, a dropped required role, or a longer grace period --
-    // counts. A role dropped from `requiredRoles` only relaxes anything while the *resulting* mode
-    // is not `required`: once every local-password user is covered by mode alone, the per-role
-    // list is inert, so removing a role on the same move that raises to `required` is not a
-    // downgrade.
-    const removedRoles = previous.mfa.requiredRoles.filter((id) => !requiredRoles.includes(id));
-    const lowersEnforcement =
-      MODE_RANK[nextMfa.mode] < MODE_RANK[previous.mfa.mode] ||
-      (nextMfa.mode !== 'required' && removedRoles.length > 0) ||
-      nextMfa.graceDays > previous.mfa.graceDays;
-    // Trusted devices: offering trust where none was offered, or promising a longer trust, both let a
-    // browser skip the second factor for longer than before. Lowering `days` or disabling only
-    // ever cuts trust short, so neither needs re-authentication.
-    const widensTrust =
-      (!previous.trustedDevices.enabled && nextTrusted.enabled) ||
-      (nextTrusted.enabled && nextTrusted.days > previous.trustedDevices.days);
-    // Passkeys: turning passkeys off is an organisation-wide, irreversible deletion of every
-    // phishing-resistant credential every administrator holds (the cascade runs in the
-    // transaction below), so it joins the branch on enforcement's stated grounds -- a stolen session
-    // must not be able to wipe every passkey with one unauthenticated PUT and a dialog the
-    // attacker is not looking at. Turning them *on* needs nothing: it strengthens the second
-    // factor and destroys nothing.
-    const disablesPasskeys = previous.passkeys.enabled && !nextPasskeys.enabled;
+    // alone is not enough when the session may be the thing an attacker holds.
+    const nextValues = {
+      mfa: nextMfa,
+      requiredRoles,
+      trustedDevices: nextTrusted,
+      passkeys: nextPasskeys,
+    };
+    const { lowersEnforcement, widensTrust, disablesPasskeys } = relaxingChanges(
+      previous,
+      nextValues
+    );
 
     if (lowersEnforcement || widensTrust || disablesPasskeys) {
       // An account with no local password (SSO-only, the same condition `isExemptFromMfa` treats
@@ -350,7 +387,25 @@ export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) 
       }
     }
 
+    // Whether the caller actually presented and passed a credential check above. A save that
+    // demanded nothing is only safe if it still demands nothing against the document as it
+    // stands at write time.
+    const credentialsVerified = lowersEnforcement || widensTrust || disablesPasskeys;
+
     await strapi.db.transaction(async () => {
+      // Re-evaluate against the document as it is *now*, not as it was when this request started.
+      // Between the read at the top and this write, a concurrent save may have raised protection,
+      // which can turn a change that looked like a raise into a relaxation. The credential check
+      // is deliberately not repeated here -- bcrypt inside an open transaction would hold it for
+      // the duration -- so a save whose requirement appeared only after a concurrent commit is
+      // refused and the caller retries against the new state.
+      const current = await getSettings();
+      if (relaxingChanges(current, nextValues).any && !credentialsVerified) {
+        throw new ValidationError(
+          'Two-factor settings changed while this save was in flight. Review the current settings and try again.'
+        );
+      }
+
       // The document is always written whole, from the resolved next values, so an absent object
       // in the body is re-written unchanged rather than dropped.
       await adminStore(strapi).set({

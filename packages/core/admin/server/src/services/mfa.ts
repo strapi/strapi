@@ -530,13 +530,32 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     return secret;
   };
 
+  /**
+   * `bcryptjs.compare(pw, null)` *rejects* rather than returning false, so every route that
+   * re-authenticates with a password 500s for an SSO-only administrator instead of refusing them
+   * cleanly. There is nothing for such an account to prove here -- the second factor it would be
+   * pairing with a password does not exist -- so this is a refusal, not a failure.
+   *
+   * `security-settings.ts` guards the identical case before its own `validatePassword`.
+   */
+  const assertPassword = async (
+    user: { password?: string | null },
+    password: string
+  ): Promise<void> => {
+    if (!user.password) {
+      throw new ValidationError(
+        'Your account has no local password, so it cannot manage two-factor authentication. Ask an administrator who signs in with a password.'
+      );
+    }
+    if (!(await auth.validatePassword(password, user.password))) {
+      throw new ValidationError('Invalid credentials');
+    }
+  };
+
   const beginEnrolment = async (userId: string, password: string, code?: string) => {
     const user = await loadUser(userId);
 
-    const passwordOk = await auth.validatePassword(password, user.password);
-    if (!passwordOk) {
-      throw new ValidationError('Invalid credentials');
-    }
+    await assertPassword(user, password);
 
     // An enrolled account may replace its authenticator, but only by proving it still holds the
     // current second factor: a TOTP code from the existing app or an unused recovery code. The
@@ -1471,9 +1490,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     const user = await loadUser(userId);
 
     // Wrong password is not a second-factor attempt: it charges neither throttle tier.
-    if (!(await auth.validatePassword(password, user.password))) {
-      throw new ValidationError('Invalid credentials');
-    }
+    await assertPassword(user, password);
 
     await assertFactor(userId, code);
   };

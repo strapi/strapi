@@ -1348,6 +1348,35 @@ describe('mfa service: enrolment', () => {
     expect(row.mfaEnabledAt).toBeInstanceOf(Date);
   });
 
+  // `bcryptjs.compare(pw, null)` rejects rather than returning false, so an SSO-only
+  // administrator (no local password) used to get a 500 from every MFA self-service route
+  // instead of a clean refusal. `security-settings.ts` already guarded the identical case.
+  describe('an account with no local password', () => {
+    const ssoOnly = () => {
+      const { strapi, users } = buildStrapi();
+      users.get('1')!.password = null;
+      return createMfaService({
+        ...defaultDeps(strapi),
+        auth: {
+          async validatePassword() {
+            throw new Error('Illegal arguments: string, object');
+          },
+          hashPassword: async (v: string) => `h:${v}`,
+        },
+      });
+    };
+
+    test('is refused by beginEnrolment with an actionable message, not a 500', async () => {
+      await expect(ssoOnly().beginEnrolment('1', 'pw')).rejects.toThrow(/no local password/i);
+    });
+
+    test('is refused by assertPasswordAndFactor with the same message', async () => {
+      await expect(ssoOnly().assertPasswordAndFactor('1', 'pw', '123456')).rejects.toThrow(
+        /no local password/i
+      );
+    });
+  });
+
   test('completing without a pending secret is rejected', async () => {
     const { strapi } = buildStrapi();
     const service = createMfaService(defaultDeps(strapi));

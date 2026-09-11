@@ -192,6 +192,11 @@ describe('security-settings: service', () => {
       exempt?: boolean;
       passwordOk?: boolean;
       transactionFails?: 'open' | 'commit';
+      /**
+       * Runs after the transaction opens and before its body, so a test can stand in for a
+       * concurrent save committing between the read at the top of `updateSettings` and its write.
+       */
+      onTransaction?: (setStored: (value: unknown) => void) => void;
     } = {}
   ) => {
     const roles: RoleRow[] = [
@@ -241,6 +246,9 @@ describe('security-settings: service', () => {
     // call to inside the transaction's scope without needing real rollback state to observe.
     const transaction = jest.fn(async (run: () => Promise<unknown>) => {
       if (options.transactionFails === 'open') throw new Error('could not open transaction');
+      options.onTransaction?.((value: unknown) => {
+        stored = value;
+      });
       const result = await run();
       if (options.transactionFails === 'commit') throw new Error('commit failed');
       return result;
@@ -348,6 +356,42 @@ describe('security-settings: service', () => {
       )
     ).rejects.toThrow('Enrol in two-factor authentication before requiring it for others');
     expect(storeSet).not.toHaveBeenCalled();
+  });
+
+  // The downgrade decision is made against a read taken before the write transaction opens, so
+  // it is not serialised against a concurrent save. From `off`, raising to `required` needs no
+  // credentials -- and a concurrent save to `optional` reads the same `off`, so it looks like a
+  // raise and needs none either. Whichever commits second lowers the mode below what the other
+  // just set, unchallenged. The write re-evaluates against the document as it stands and refuses.
+  test('a save that becomes a downgrade mid-flight is refused rather than committed unchallenged', async () => {
+    const { service, storeSet } = setup({
+      stored: { mfa: { mode: 'off' } },
+      // A concurrent save raises the mode to `required` after this request read `off` and before
+      // it writes.
+      onTransaction: (setStored) => setStored({ mfa: { mode: 'required', graceDays: 7 } }),
+    });
+
+    // `requiredRoles: ['2']` keeps the flagged role in place, so nothing is removed and the
+    // only change is the mode: off -> optional, a raise at read time and a drop at write time.
+    await expect(
+      service.updateSettings(
+        { mfa: { mode: 'optional', graceDays: 7, requiredRoles: ['2'] } },
+        actor
+      )
+    ).rejects.toThrow(/changed while this save was in flight/i);
+
+    expect(storeSet).not.toHaveBeenCalled();
+  });
+
+  test('a save that is still a raise at write time commits without credentials', async () => {
+    const { service, storeSet } = setup({ stored: { mfa: { mode: 'off' } }, enrolled: true });
+
+    await service.updateSettings(
+      { mfa: { mode: 'required', graceDays: 7, requiredRoles: ['2'] } },
+      actor
+    );
+
+    expect(storeSet).toHaveBeenCalled();
   });
 
   test('adding a role the caller holds is refused unless enrolled; adding one they do not hold is fine', async () => {
