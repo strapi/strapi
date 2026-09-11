@@ -340,11 +340,20 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     return true;
   };
 
-  /** `disable` leaves the event rows for the notice feed; on deletion they must go, or they outlive
-   * the account carrying device names parsed from that person's user agents. */
+  /**
+   * Everything this feature stored about a user, for when the user itself is deleted. Not
+   * `disable`: that nulls the MFA columns on the user row, which bumps its `updatedAt` and so
+   * changes the row the delete response echoes back -- pointless work on a row about to go. The
+   * event rows are included here and not in `disable`, where the notice feed still needs them.
+   */
   const purgeUser = async (userId: string): Promise<void> => {
-    await disable(userId);
-    await eventQuery().deleteMany({ where: { userId: String(userId) } });
+    await strapi.db.transaction(async () => {
+      await recoveryQuery().deleteMany({ where: { userId: String(userId) } });
+      await challengeQuery().deleteMany({ where: { userId: String(userId) } });
+      await trustedDevices.clearTrustedDevices(userId);
+      await passkeys.clearPasskeys(userId);
+      await eventQuery().deleteMany({ where: { userId: String(userId) } });
+    });
   };
 
   /** The only operation that lowers someone's protection without their consent, hence the session

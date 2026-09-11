@@ -3454,8 +3454,8 @@ describe('mfa service: enforce', () => {
   // `userId` that no longer resolves and carrying the device names parsed from that person's
   // user agents.
   describe('purgeUser', () => {
-    test('clears the factor and the security notices, unlike disable', async () => {
-      const { service, users, events } = setup({
+    test('clears the security notices, unlike disable', async () => {
+      const { service, events } = setup({
         user: { mfaEnabledAt: new Date(), mfaSecret: 'enc:SECRET' },
       });
 
@@ -3464,8 +3464,22 @@ describe('mfa service: enforce', () => {
 
       await service.purgeUser('1');
 
-      expect(users.get('1')!.mfaSecret).toBeNull();
       expect(events).toHaveLength(0);
+    });
+
+    // The row is about to be deleted, so nulling its MFA columns is pointless work -- and it
+    // bumps `updatedAt`, which changes the row the delete response echoes back. `admin-user`'s
+    // API suite compares that response against the user it captured beforehand.
+    test('does not write to the user row it is about to have deleted', async () => {
+      const { service, users, userMocks } = setup({
+        user: { mfaEnabledAt: new Date(), mfaSecret: 'enc:SECRET' },
+      });
+
+      await service.purgeUser('1');
+
+      expect(users.get('1')!.mfaSecret).toBe('enc:SECRET');
+      expect(userMocks.update).not.toHaveBeenCalled();
+      expect(userMocks.updateMany).not.toHaveBeenCalled();
     });
 
     test('disable on its own leaves the notices in place', async () => {
