@@ -132,6 +132,33 @@ describe('planMilestones, candidate in flight', () => {
     });
   });
 
+  it('plans an adjacent-version override by moving the current next milestone first', () => {
+    const adjacent = [
+      { number: 430, title: '5.52.4', state: 'closed' },
+      { number: 431, title: '5.52.5', state: 'open' },
+    ];
+
+    const plan = planMilestones({
+      allMilestones: adjacent,
+      version: '5.52.5',
+      candidateVersion: '5.52.4',
+    });
+
+    assert.deepEqual(plan.shipping, {
+      action: 'rename',
+      number: 430,
+      currentTitle: '5.52.4',
+      title: '5.52.5',
+      close: false,
+    });
+    assert.deepEqual(plan.next, {
+      action: 'rename',
+      number: 431,
+      currentTitle: '5.52.5',
+      title: '5.52.6',
+    });
+  });
+
   it('closes a shipping milestone an earlier run left open', () => {
     const halfDone = [
       { number: 430, title: '5.53.0', state: 'open' },
@@ -207,21 +234,24 @@ describe('planRealignment', () => {
   it('moves everything that does not already carry the shipping milestone', () => {
     const planned = planRealignment(
       [
-        { number: 1, milestone: '5.53.0' },
-        { number: 2, milestone: '5.53.1' },
-        { number: 3, milestone: null },
+        { number: 1, milestone: '5.53.0', milestoneNumber: 430 },
+        { number: 2, milestone: '5.53.1', milestoneNumber: 431 },
+        { number: 3, milestone: null, milestoneNumber: null },
       ],
       shipping
     );
 
     assert.deepEqual(planned, [
-      { number: 2, from: '5.53.1', toTitle: '5.53.0' },
-      { number: 3, from: null, toTitle: '5.53.0' },
+      { number: 2, fromNumber: 431, fromTitle: '5.53.1', toTitle: '5.53.0' },
+      { number: 3, fromNumber: null, fromTitle: null, toTitle: '5.53.0' },
     ]);
   });
 
   it('plans nothing when every pull request already agrees with history', () => {
-    assert.deepEqual(planRealignment([{ number: 1, milestone: '5.53.0' }], shipping), []);
+    assert.deepEqual(
+      planRealignment([{ number: 1, milestone: '5.53.0', milestoneNumber: 430 }], shipping),
+      []
+    );
   });
 });
 

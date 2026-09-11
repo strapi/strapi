@@ -45,6 +45,7 @@ docs:
 # TODO: this needs a lot more in it
 global:
   - 'packages/**/package.json'
+  - '.github/actions/draft-release/**'
   - '.github/actions/yarn-nm-install/*.yml'
   - '.github/workflows/**'
   - 'yarn.lock'

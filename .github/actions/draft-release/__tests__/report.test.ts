@@ -128,6 +128,7 @@ describe('renderPullRequestTable', () => {
       baseRef: 'develop',
       headRef: 'fix/x',
       milestone: null,
+      milestoneNumber: null,
       mergedAt: '2026-09-05T09:59:00Z',
       status: 'resolved',
       basis: 'none',
@@ -150,6 +151,7 @@ describe('renderPullRequestTable', () => {
       baseRef: 'develop',
       headRef: 'fix/x',
       milestone: null,
+      milestoneNumber: null,
       mergedAt: '2026-09-05T09:59:00Z',
       status: 'resolved',
       basis: 'none',
@@ -258,8 +260,10 @@ describe('renderBody', () => {
   it('carries a JSON block that round-trips through the markers', () => {
     const body = renderBody({ payload: built, pullRequests: built.pullRequests, attention: [] });
 
+    assert.match(body, /<details>\n<summary>Machine-readable release candidate data<\/summary>/u);
     assert.equal(body.includes(BLOCK_START), true);
     assert.equal(body.includes(BLOCK_END), true);
+    assert.equal(body.indexOf(BLOCK_END) < body.indexOf('</details>'), true);
     assert.deepEqual(extractJsonBlock(body), JSON.parse(JSON.stringify(built)));
   });
 

@@ -191,6 +191,18 @@ export async function applyRelease(
   const { inputs, git, gh, journal, logger } = deps;
   const generatedAt = (deps.clock ?? ((): string => new Date().toISOString()))();
 
+  if (plan.branchAdvances === false) {
+    git.fetchBranch(plan.branch);
+    const currentHead = git.resolveSha(`origin/${plan.branch}`);
+
+    if (currentHead !== plan.range.toSha) {
+      throw new Error(
+        `${plan.branch} moved from the pinned head ${plan.range.toSha} to ${currentHead} after ` +
+          'preflight. Re-run before applying any write.'
+      );
+    }
+  }
+
   // 1. Branch.
   if (plan.branchAdvances === true) {
     await journal.write(
@@ -203,7 +215,12 @@ export async function applyRelease(
             ? `advanced to ${plan.range.toRef}`
             : `cut from ${plan.range.toRef}`,
       },
-      async () => git.pushBranch(plan.range.toSha, plan.branch)
+      async () =>
+        git.pushBranch(
+          plan.range.toSha,
+          plan.branch,
+          plan.mode === 'refresh' ? plan.candidateHeadSha : null
+        )
     );
   } else {
     logger.info(`${plan.branch} already points at ${plan.range.toSha}, nothing to push.`);
@@ -220,15 +237,25 @@ export async function applyRelease(
   );
 
   // 3. Milestones.
-  const shippingNumber = await applyMilestone(journal, gh, plan.milestones.shipping, 'shipping');
-  const nextNumber = await applyMilestone(journal, gh, plan.milestones.next, 'next');
+  let shippingNumber: number | null;
+  let nextNumber: number | null;
+
+  if (plan.milestones.shipping.title === plan.milestones.next.currentTitle) {
+    // The explicit version selected the current next milestone. Move that milestone out of the way
+    // before renaming shipping onto its title.
+    nextNumber = await applyMilestone(journal, gh, plan.milestones.next, 'next');
+    shippingNumber = await applyMilestone(journal, gh, plan.milestones.shipping, 'shipping');
+  } else {
+    shippingNumber = await applyMilestone(journal, gh, plan.milestones.shipping, 'shipping');
+    nextNumber = await applyMilestone(journal, gh, plan.milestones.next, 'next');
+  }
 
   await applyRealignment(journal, gh, plan.realignment, shippingNumber);
 
   const milestoneItems = shippingNumber === null ? [] : await gh.listMilestoneItems(shippingNumber);
   const cleanup = planCleanup(milestoneItems, nextNumber);
 
-  await applyCleanup(journal, gh, cleanup, plan.milestones);
+  await applyCleanup(journal, gh, cleanup, plan.milestones, shippingNumber);
 
   if (plan.milestones.shipping.close === true) {
     await journal.write(
@@ -476,7 +503,8 @@ async function applyMilestone(
 
   const created = await journal.write(
     { op: 'milestone.create', target: 'milestones', after: plan.title, detail: role },
-    async () => gh.createMilestone(plan.title)
+    async () => gh.createMilestone(plan.title),
+    (milestone) => ({ target: `milestone/${milestone.number}` })
   );
 
   return created?.number ?? null;
@@ -499,9 +527,10 @@ async function applyRealignment(
       {
         op: 'issue.milestone.set',
         target: `issues/${item.number}`,
-        before: item.from,
-        after: item.toTitle,
-        detail: 'Merged inside the release range.',
+        before: item.fromNumber === null ? null : String(item.fromNumber),
+        after: shippingNumber === null ? null : String(shippingNumber),
+        detail:
+          `Merged inside the release range. ${item.fromTitle ?? 'No milestone'} → ` + item.toTitle,
       },
       async () => {
         await gh.setIssueMilestone(
@@ -517,7 +546,8 @@ async function applyCleanup(
   journal: Journal,
   gh: GithubAdapter,
   cleanup: readonly CleanupItem[],
-  milestonePlan: MilestonePlan
+  milestonePlan: MilestonePlan,
+  shippingNumber: number | null
 ): Promise<void> {
   // Sequential on purpose: a release milestone carries dozens of items and GitHub throttles
   // parallel issue writes.
@@ -532,9 +562,11 @@ async function applyCleanup(
       {
         op: moving === true ? 'issue.milestone.set' : 'issue.milestone.clear',
         target: `issues/${item.number}`,
-        before: milestonePlan.shipping.title,
-        after: moving === true ? milestonePlan.next.title : null,
-        detail: item.reason,
+        before: shippingNumber === null ? null : String(shippingNumber),
+        after: moving === true && item.to !== null ? String(item.to) : null,
+        detail:
+          `${item.reason} ${milestonePlan.shipping.title} → ` +
+          (moving === true ? milestonePlan.next.title : 'no milestone'),
       },
       async () => {
         await gh.setIssueMilestone(item.number, moving === true ? item.to : null);
@@ -565,7 +597,8 @@ async function applyPullRequest(
         base: RELEASE_BASE,
         title,
         body: `Release \`${plan.version}\`. The attribution report lands here once the run finishes.`,
-      })
+      }),
+    (pull) => ({ target: `pulls/${pull.number}` })
   );
 
   return { pullNumber: created?.number ?? null, pullUrl: created?.html_url ?? null };
