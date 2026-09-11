@@ -301,3 +301,62 @@ export const mediaMoveAssetsInputSchema = z
     }
   )
   .strict();
+
+/**
+ * `media_delete_assets` input.
+ *
+ * Bulk-only, like `media_move_assets`: the admin REST API has no single-asset delete route either
+ * (`/actions/bulk-delete` is the only one), and single-vs-bulk is an array length rather than a
+ * distinction an agent can get wrong.
+ *
+ * `dryRun` defaults to true in the handler, not here — same reasoning as `media_delete_folder`: the
+ * safe branch is what an agent gets when it omits the flag, so an irreversible delete is never
+ * the path of least resistance. A schema-level `.default(true)` would publish as a JSON Schema
+ * default a client could serialise away.
+ *
+ * ASSET ids only, and the schema CANNOT enforce it. Asset ids and folder ids are independently
+ * numbered, so the same integer routinely names both; the handler resolves ids in the file table,
+ * which means a folder id whose number collides with an asset deletes that asset. Only an id
+ * matching no asset at all is reported as failed.
+ *
+ * This is an accepted risk, not an oversight: with a bare `ids: number[]` there is no way for the
+ * caller to say which namespace it meant, and refusing every colliding id would make those assets
+ * permanently undeletable over MCP. The mitigations are the dry run and the tool description. The
+ * durable fix is namespaced handles (`asset:1` / `folder:1`) across the whole media surface, which
+ * is a breaking change to the read tools and belongs to its own ticket.
+ */
+export const mediaDeleteAssetsInputSchema = z
+  .object(
+    {
+      ids: z
+        .array(mediaIdSchema)
+        .min(1)
+        .max(100)
+        .describe(
+          'Numeric ids of the assets to delete (1-100). ASSET ids only, taken from media_list_assets or media_get_asset — never from media_list_folders. Folder ids are numbered separately and the same number often names both an asset and a folder, so a folder id here deletes the asset sharing that number; use media_delete_folder for folders.'
+        ),
+      dryRun: z
+        .boolean()
+        .optional()
+        .describe(
+          'When true (the default), NOTHING is deleted and the tool only reports which assets WOULD be permanently removed. Pass false to actually perform the irreversible deletion.'
+        ),
+    },
+    {
+      error(issue) {
+        if (
+          issue.code === 'unrecognized_keys' &&
+          issue.keys.some((key) => key === 'id' || key === 'fileIds')
+        ) {
+          return 'media_delete_assets deletes assets in bulk: pass `ids` as an array of numeric asset ids, even for a single asset.';
+        }
+
+        if (issue.code === 'unrecognized_keys' && issue.keys.includes('folderIds')) {
+          return 'media_delete_assets deletes assets only. Use media_delete_folder to delete a folder.';
+        }
+
+        return undefined;
+      },
+    }
+  )
+  .strict();

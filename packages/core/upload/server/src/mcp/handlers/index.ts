@@ -3,7 +3,11 @@ export {
   createMediaGetAssetHandler,
   createMediaListFoldersHandler,
 } from './read-handlers';
-export { createMediaUpdateAssetHandler, createMediaMoveAssetsHandler } from './write-handlers';
+export {
+  createMediaUpdateAssetHandler,
+  createMediaMoveAssetsHandler,
+  createMediaDeleteAssetsHandler,
+} from './write-handlers';
 export {
   createMediaCreateFolderHandler,
   createMediaRenameFolderHandler,
@@ -22,4 +26,7 @@ export {
   MCP_MOVE_ASSETS_ID_NOT_FOUND,
   MCP_MOVE_ASSETS_ID_FORBIDDEN,
   MCP_MOVE_ASSETS_ID_FAILED,
+  MCP_DELETE_ASSETS_ID_NOT_FOUND,
+  MCP_DELETE_ASSETS_ID_FORBIDDEN,
+  MCP_DELETE_ASSETS_ID_FAILED,
 } from './constants';
