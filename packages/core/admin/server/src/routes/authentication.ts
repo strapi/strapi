@@ -20,6 +20,7 @@ export default [
     path: '/login/mfa',
     handler: 'authentication.loginMfa',
     config: {
+      policies: ['admin::isMfaEnabled'],
       auth: false,
       // Same structural bucket collapse as `/reset-password` below: the body carries a challenge
       // token, not an email, so `admin::rateLimit`'s `${email}:${path}:${ip}` key degrades to the
@@ -40,6 +41,7 @@ export default [
     path: '/login/mfa/webauthn/options',
     handler: 'authentication.loginMfaWebauthnOptions',
     config: {
+      policies: ['admin::isMfaEnabled'],
       auth: false,
       // Same reasoning as `/login/mfa`. This one evaluates no factor at all, it only mints
       // ceremony options against an existing challenge.
@@ -51,6 +53,7 @@ export default [
     path: '/login/mfa/webauthn',
     handler: 'authentication.loginMfaWebauthn',
     config: {
+      policies: ['admin::isMfaEnabled'],
       auth: false,
       // Same reasoning as `/login/mfa`.
       middlewares: [{ name: 'admin::rateLimit', config: { max: MFA_LOGIN_RATE_LIMIT } }],

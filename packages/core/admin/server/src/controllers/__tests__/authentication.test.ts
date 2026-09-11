@@ -477,34 +477,10 @@ describe('authentication controller', () => {
       expect(emit).not.toHaveBeenCalledWith('admin.auth.mfa_required', expect.anything());
     });
 
-    // The flag check must run before body validation, matching `controllers/mfa.ts`'s
-    // `requireEnabled` ordering -- otherwise flag-off returns 400 for a malformed body and 404 for
-    // a well-formed one, which is itself a feature-presence tell (a 400 on a route that is
-    // supposed to not exist reveals the validator behind it exists). A malformed body here (no
-    // `code` at all) would throw a `ValidationError` if validation ran first; with the flag
-    // checked first it must still be a plain 404, with validation never even reached.
-    test('with the future flag off, POST /login/mfa returns 404 even for a malformed body', async () => {
-      const verifyChallenge = jest.fn();
-
-      setStrapi({
-        log: { error: jest.fn() },
-        admin: {
-          services: {
-            mfa: { isEnabled: jest.fn(() => false), verifyChallenge },
-            user: { sanitizeUser: jest.fn(), findOne: jest.fn() },
-          },
-        },
-      });
-
-      // Missing `challengeToken` and `code` entirely -- `validateMfaLoginInput` would reject this
-      // if it ever ran.
-      const { ctx, notFound } = buildCtx({});
-
-      await expect(authenticationController.loginMfa(ctx, jest.fn())).resolves.toBeUndefined();
-
-      expect(notFound).toHaveBeenCalled();
-      expect(verifyChallenge).not.toHaveBeenCalled();
-    });
+    // The feature-off 404 is the `admin::isMfaEnabled` policy's job, not this handler's --
+    // `routes/__tests__/authentication.test.ts` pins that the three `/login/mfa*` routes carry
+    // it, and `policies/__tests__/isMfaEnabled.test.ts` pins what it does. A policy runs before
+    // the handler, so it also still runs before body validation.
 
     describe('login with enforcement', () => {
       const user = { id: 7, email: 'admin@example.com', password: 'hashed', isActive: true };
@@ -861,25 +837,6 @@ describe('authentication controller', () => {
 
         expect(passkeysConfigured).toHaveBeenCalled();
         expect((ctx.body as any).data.passkeyAvailable).toBe(false);
-      });
-
-      test('both routes 404 while the feature is off, before the body is validated', async () => {
-        const authenticationOptions = jest.fn();
-        const verifyAssertion = jest.fn();
-        buildIssuingStrapi(
-          webauthnMfa({ isEnabled: jest.fn(() => false), authenticationOptions, verifyAssertion })
-        );
-
-        const first = buildCtx({});
-        await authenticationController.loginMfaWebauthnOptions(first.ctx, jest.fn());
-        expect(first.notFound).toHaveBeenCalled();
-
-        const second = buildCtx({});
-        await authenticationController.loginMfaWebauthn(second.ctx, jest.fn());
-        expect(second.notFound).toHaveBeenCalled();
-
-        expect(authenticationOptions).not.toHaveBeenCalled();
-        expect(verifyAssertion).not.toHaveBeenCalled();
       });
 
       test('the options route returns the library options for the submitted challenge token', async () => {

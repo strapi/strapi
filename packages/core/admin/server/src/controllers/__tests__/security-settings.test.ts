@@ -25,22 +25,6 @@ const settings = {
 };
 
 describe('security-settings controller', () => {
-  test('both handlers 404 while the feature is off', async () => {
-    const getSettings = jest.fn();
-    setStrapi({
-      admin: {
-        services: { mfa: { isEnabled: () => false }, 'security-settings': { getSettings } },
-      },
-    });
-    const { ctx, notFound } = buildCtx();
-
-    await controller.get(ctx);
-    await controller.update(ctx);
-
-    expect(notFound).toHaveBeenCalledTimes(2);
-    expect(getSettings).not.toHaveBeenCalled();
-  });
-
   test('get returns the settings', async () => {
     setStrapi({
       admin: {

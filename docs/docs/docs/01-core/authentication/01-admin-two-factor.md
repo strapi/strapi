@@ -29,8 +29,12 @@ export default {
 ```
 
 Every MFA route returns **404 before body validation** when the feature is off, so a disabled
-deployment does not advertise the endpoints or leak validation messages. The single source of this
-decision is `isEnabled()` in `packages/core/admin/server/src/services/mfa.ts`.
+deployment does not advertise the endpoints or leak validation messages. That is one registered
+policy, `admin::isMfaEnabled` (`server/src/policies/isMfaEnabled.ts`), carried by every MFA route
+including the three `/login/mfa*` ones and the security-settings pair. Being a policy is what puts
+it ahead of body validation: validating first would answer 400 for a malformed body and 404 for a
+well-formed one, and that difference is itself a feature-presence tell. It reads `isEnabled()` in
+`server/src/services/mfa.ts` per request, so toggling the config needs no restart.
 
 Turning `admin.auth.mfa.enabled` off does **not** delete enrolment data. Nobody is challenged and
 nobody is locked out, and re-enabling restores the previous state. That is what makes it usable as

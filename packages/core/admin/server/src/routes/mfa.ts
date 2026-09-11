@@ -3,7 +3,7 @@ const authenticated = (method: string, path: string, handler: string) => ({
   path,
   handler,
   config: {
-    policies: ['admin::isAuthenticatedAdmin'],
+    policies: ['admin::isMfaEnabled', 'admin::isAuthenticatedAdmin'],
     middlewares: ['admin::rateLimit'],
   },
 });
@@ -15,6 +15,7 @@ const withPermission = (method: string, path: string, handler: string, action: s
   handler,
   config: {
     policies: [
+      'admin::isMfaEnabled',
       'admin::isAuthenticatedAdmin',
       { name: 'admin::hasPermissions', config: { actions: [action] } },
     ],

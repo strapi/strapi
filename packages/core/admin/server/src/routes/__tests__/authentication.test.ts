@@ -8,6 +8,7 @@ type RouteEntry = {
   handler: string;
   config: {
     auth?: boolean;
+    policies?: Array<string | { name: string; config?: unknown }>;
     middlewares?: Array<string | { name: string; config?: unknown }>;
   };
 };
@@ -87,6 +88,16 @@ describe('authentication routes', () => {
         expect(entry).toBe('admin::rateLimit');
       }
     }
+  });
+
+  // The three MFA login routes must carry the feature gate: the handler no longer checks it, so
+  // a route missing this policy would run the handler with the feature off. `/login` must NOT
+  // carry it -- ordinary password login works regardless.
+  test('the three /login/mfa routes carry admin::isMfaEnabled, and /login does not', () => {
+    for (const path of ['/login/mfa', '/login/mfa/webauthn/options', '/login/mfa/webauthn']) {
+      expect(route('POST', path)!.config.policies).toContain('admin::isMfaEnabled');
+    }
+    expect(route('POST', '/login')!.config.policies ?? []).not.toContain('admin::isMfaEnabled');
   });
 
   // Nothing pinned the `/login/mfa/webauthn` routes' existence, their `auth: false`, or their

@@ -38,21 +38,14 @@ import type {
 } from '../../../shared/contracts/mfa';
 
 /**
- * The flag is checked per request, not cached, so toggling it does not require a route rebuild:
- * flag off means no route below responds at all, matching every other MFA endpoint.
+ * Every route in this controller carries `admin::isMfaEnabled`, which 404s before the handler
+ * runs, so a handler that is executing already knows the feature is on.
  */
-export const requireEnabled = (ctx: Context) => {
-  const mfa = getService('mfa');
-  if (!mfa.isEnabled()) {
-    ctx.notFound();
-    return null;
-  }
-  return mfa;
-};
+const mfaService = () => getService('mfa');
 
 const { ValidationError } = errors;
 
-type MfaService = NonNullable<ReturnType<typeof requireEnabled>>;
+type MfaService = ReturnType<typeof mfaService>;
 
 /**
  * The two checks both registration routes make, in order: the organisation must offer
@@ -71,8 +64,7 @@ const assertPasskeyRegistrationAllowed = async (mfa: MfaService, userId: string)
 
 export default {
   async me(ctx: Context) {
-    const mfa = requireEnabled(ctx);
-    if (!mfa) return;
+    const mfa = mfaService();
 
     const user = ctx.state.user as AdminUser;
     const userId = String(user.id);
@@ -110,8 +102,7 @@ export default {
   },
 
   async enrol(ctx: Context) {
-    const mfa = requireEnabled(ctx);
-    if (!mfa) return;
+    const mfa = mfaService();
 
     await validateMfaEnrolInput(ctx.request.body ?? {});
     const { password, code } = ctx.request.body as Enrol.Request['body'];
@@ -125,8 +116,7 @@ export default {
   },
 
   async verifyEnrolment(ctx: Context) {
-    const mfa = requireEnabled(ctx);
-    if (!mfa) return;
+    const mfa = mfaService();
 
     await validateMfaCodeInput(ctx.request.body ?? {});
     const { code } = ctx.request.body as VerifyEnrolment.Request['body'];
@@ -141,8 +131,7 @@ export default {
   },
 
   async regenerateRecoveryCodes(ctx: Context) {
-    const mfa = requireEnabled(ctx);
-    if (!mfa) return;
+    const mfa = mfaService();
 
     await validateMfaPasswordAndCodeInput(ctx.request.body ?? {});
     const { password, code } = ctx.request.body as RegenerateRecoveryCodes.Request['body'];
@@ -156,16 +145,14 @@ export default {
   },
 
   async acknowledgeRecoveryCodes(ctx: Context) {
-    const mfa = requireEnabled(ctx);
-    if (!mfa) return;
+    const mfa = mfaService();
 
     await mfa.acknowledgeCodes(String(ctx.state.user.id));
     ctx.status = 204;
   },
 
   async disable(ctx: Context) {
-    const mfa = requireEnabled(ctx);
-    if (!mfa) return;
+    const mfa = mfaService();
 
     // Checked before anything else runs, including `assertPasswordAndFactor`: eviction is not
     // optional for a disable, so a deployment that cannot evict sessions must not be allowed to
@@ -232,8 +219,7 @@ export default {
   },
 
   async notices(ctx: Context) {
-    const mfa = requireEnabled(ctx);
-    if (!mfa) return;
+    const mfa = mfaService();
 
     ctx.body = {
       data: await mfa.unseenEvents(String(ctx.state.user.id)),
@@ -241,8 +227,7 @@ export default {
   },
 
   async markNoticesSeen(ctx: Context) {
-    const mfa = requireEnabled(ctx);
-    if (!mfa) return;
+    const mfa = mfaService();
 
     await validateMfaNoticesSeenInput(ctx.request.body ?? {});
     const { ids } = ctx.request.body as MarkNoticesSeen.Request['body'];
@@ -256,8 +241,7 @@ export default {
    * `admin::users.update` (the people who can deactivate a user). 404 unknown user, 400 not locked.
    */
   async unlockUser(ctx: Context) {
-    const mfa = requireEnabled(ctx);
-    if (!mfa) return;
+    const mfa = mfaService();
 
     const { id } = ctx.params as { id: string };
     const target = await getService('user').findOne(id);
@@ -284,8 +268,7 @@ export default {
    * state to a caller who can already read it from the user record anyway.
    */
   async resetUser(ctx: Context) {
-    const mfa = requireEnabled(ctx);
-    if (!mfa) return;
+    const mfa = mfaService();
 
     const { id } = ctx.params as { id: string };
     const target = await getService('user').findOne(id);
@@ -303,8 +286,7 @@ export default {
    * The service hashes it, the hash never reaches the response.
    */
   async listTrustedDevices(ctx: Context) {
-    const mfa = requireEnabled(ctx);
-    if (!mfa) return;
+    const mfa = mfaService();
 
     ctx.body = {
       data: await mfa.listTrustedDevices(
@@ -315,8 +297,7 @@ export default {
   },
 
   async revokeTrustedDevice(ctx: Context) {
-    const mfa = requireEnabled(ctx);
-    if (!mfa) return;
+    const mfa = mfaService();
 
     // Row ids are integers; anything else can only ever be a 404, and asking the database to
     // compare an integer column against arbitrary text is a 500 on Postgres rather than a miss.
@@ -341,8 +322,7 @@ export default {
   },
 
   async revokeAllTrustedDevices(ctx: Context) {
-    const mfa = requireEnabled(ctx);
-    if (!mfa) return;
+    const mfa = mfaService();
 
     await mfa.revokeAllTrustedDevices(String(ctx.state.user.id));
     // Unconditionally: whatever cookie this browser holds no longer matches a row.
@@ -357,8 +337,7 @@ export default {
    * browsers, so it is stripped.
    */
   async listUserTrustedDevices(ctx: Context) {
-    const mfa = requireEnabled(ctx);
-    if (!mfa) return;
+    const mfa = mfaService();
 
     const { id } = ctx.params as { id: string };
     const target = await getService('user').findOne(id);
@@ -384,8 +363,7 @@ export default {
    * back on, so it is not an escalation path. 404 for an unknown user.
    */
   async revokeUserTrustedDevices(ctx: Context) {
-    const mfa = requireEnabled(ctx);
-    if (!mfa) return;
+    const mfa = mfaService();
 
     const { id } = ctx.params as { id: string };
     const target = await getService('user').findOne(id);
@@ -409,8 +387,7 @@ export default {
    * a weaker gate on a stronger operation.
    */
   async passkeyRegistrationOptions(ctx: Context) {
-    const mfa = requireEnabled(ctx);
-    if (!mfa) return;
+    const mfa = mfaService();
 
     const userId = String(ctx.state.user.id);
     await assertPasskeyRegistrationAllowed(mfa, userId);
@@ -436,8 +413,7 @@ export default {
    * authorised above, and it is single-use.
    */
   async registerPasskey(ctx: Context) {
-    const mfa = requireEnabled(ctx);
-    if (!mfa) return;
+    const mfa = mfaService();
 
     const userId = String(ctx.state.user.id);
     await assertPasskeyRegistrationAllowed(mfa, userId);
@@ -452,8 +428,7 @@ export default {
 
   /** The caller's own passkeys. Empty while the policy is off (see the service). */
   async listPasskeys(ctx: Context) {
-    const mfa = requireEnabled(ctx);
-    if (!mfa) return;
+    const mfa = mfaService();
 
     ctx.body = {
       data: await mfa.listPasskeys(String(ctx.state.user.id)),
@@ -465,8 +440,7 @@ export default {
    * never the dangerous direction.
    */
   async deletePasskey(ctx: Context) {
-    const mfa = requireEnabled(ctx);
-    if (!mfa) return;
+    const mfa = mfaService();
 
     // Row ids are integers; anything else can only ever be a 404, and asking the database to
     // compare an integer column against arbitrary text is a 500 on Postgres rather than a miss.
@@ -488,8 +462,7 @@ export default {
    * a count only. The user edit page needs a number, not an inventory of somebody's hardware.
    */
   async listUserPasskeys(ctx: Context) {
-    const mfa = requireEnabled(ctx);
-    if (!mfa) return;
+    const mfa = mfaService();
 
     const { id } = ctx.params as { id: string };
     const target = await getService('user').findOne(id);
@@ -511,8 +484,7 @@ export default {
    * empty list leaves no notice behind (trusted devices's precedent).
    */
   async deleteUserPasskeys(ctx: Context) {
-    const mfa = requireEnabled(ctx);
-    if (!mfa) return;
+    const mfa = mfaService();
 
     const { id } = ctx.params as { id: string };
     const target = await getService('user').findOne(id);

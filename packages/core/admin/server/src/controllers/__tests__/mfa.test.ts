@@ -86,45 +86,10 @@ describe('mfa controller', () => {
     jest.clearAllMocks();
   });
 
-  test('every route 404s when the future flag is off', async () => {
-    const routes: Array<[keyof typeof mfaController, Record<string, unknown>]> = [
-      ['me', {}],
-      ['enrol', { password: 'Password123' }],
-      ['verifyEnrolment', { code: '123456' }],
-      ['regenerateRecoveryCodes', { password: 'Password123', code: '123456' }],
-      ['acknowledgeRecoveryCodes', {}],
-      ['disable', { password: 'Password123', code: '123456' }],
-      ['notices', {}],
-      ['markNoticesSeen', {}],
-      ['unlockUser', {}],
-      ['resetUser', {}],
-      ['listTrustedDevices', {}],
-      ['revokeTrustedDevice', {}],
-      ['revokeAllTrustedDevices', {}],
-      ['listUserTrustedDevices', {}],
-      ['revokeUserTrustedDevices', {}],
-      ['passkeyRegistrationOptions', {}],
-      ['registerPasskey', {}],
-      ['listPasskeys', {}],
-      ['deletePasskey', {}],
-      ['listUserPasskeys', {}],
-      ['deleteUserPasskeys', {}],
-    ];
-
-    for (const [handlerName, body] of routes) {
-      // A double with only `isEnabled`: if a handler ever reached past `requireEnabled` it would
-      // call an undefined method and reject, which would fail this test just as loudly as a
-      // missing `notFound()` call would.
-      setStrapi({ admin: { services: { mfa: { isEnabled: jest.fn(() => false) } } } });
-      const { ctx, notFound } = buildCtx(body);
-
-      // eslint-disable-next-line no-await-in-loop
-      await (mfaController[handlerName] as (ctx: unknown) => Promise<void>)(ctx);
-
-      expect(notFound).toHaveBeenCalled();
-      expect(ctx.body).toBeUndefined();
-    }
-  });
+  // The feature-off gate is no longer a guard in each handler: it is the `admin::isMfaEnabled`
+  // policy, which 404s before any handler runs. That every route carries it is pinned in
+  // `routes/__tests__/mfa.test.ts`, and the policy's own behaviour in
+  // `policies/__tests__/isMfaEnabled.test.ts`. A handler-level test could no longer observe it.
 
   test('GET /mfa/me never returns the secret', async () => {
     const isEnrolled = jest.fn(() => Promise.resolve(true));

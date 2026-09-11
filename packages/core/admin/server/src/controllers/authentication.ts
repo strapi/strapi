@@ -88,21 +88,6 @@ const offeredTrustDays = async (): Promise<number | null> => {
 const passkeyAvailableFor = async (userId: string): Promise<boolean> =>
   (await getService('mfa').countPasskeys(userId)) > 0 && getService('mfa').passkeysConfigured();
 
-/**
- * The flag check runs before body validation, matching `controllers/mfa.ts`'s `requireEnabled`
- * ordering: validating first would make flag-off return 400 for a malformed body and 404 for a
- * well-formed one, and that difference is itself a feature-presence tell on a route that is
- * supposed to behave as though it does not exist. Shared by all three challenge-completing
- * routes since passkeys added two more.
- */
-const requireMfaEnabled = async (ctx: Context, next: Next) => {
-  if (!getService('mfa').isEnabled()) {
-    return ctx.notFound();
-  }
-
-  return next();
-};
-
 export default {
   login: compose([
     async (ctx: Context, next: Next) => {
@@ -216,7 +201,6 @@ export default {
   ]),
 
   loginMfa: compose([
-    requireMfaEnabled,
     async (ctx: Context) => {
       await validateMfaLoginInput(ctx.request.body ?? {});
 
@@ -279,7 +263,6 @@ export default {
    * the challenge's usability, so it cannot be used as an unmetered oracle.
    */
   loginMfaWebauthnOptions: compose([
-    requireMfaEnabled,
     async (ctx: Context) => {
       await validateMfaWebauthnOptionsInput(ctx.request.body ?? {});
       const { challengeToken } = ctx.request.body as MfaWebauthnOptions.Request['body'];
@@ -300,7 +283,6 @@ export default {
    * `verifyAssertion`).
    */
   loginMfaWebauthn: compose([
-    requireMfaEnabled,
     async (ctx: Context) => {
       await validateMfaWebauthnLoginInput(ctx.request.body ?? {});
 

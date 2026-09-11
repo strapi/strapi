@@ -5,6 +5,7 @@ export default [
     handler: 'security-settings.get',
     config: {
       policies: [
+        'admin::isMfaEnabled',
         'admin::isAuthenticatedAdmin',
         { name: 'admin::hasPermissions', config: { actions: ['admin::security-settings.read'] } },
       ],
@@ -16,6 +17,7 @@ export default [
     handler: 'security-settings.update',
     config: {
       policies: [
+        'admin::isMfaEnabled',
         'admin::isAuthenticatedAdmin',
         { name: 'admin::hasPermissions', config: { actions: ['admin::security-settings.update'] } },
       ],
