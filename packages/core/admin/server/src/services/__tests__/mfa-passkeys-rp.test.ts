@@ -198,11 +198,11 @@ describe('resolveWebauthnRp', () => {
   test.each([['https://127.0.0.1/admin'], ['https://[::1]/admin'], ['https://[::]/admin']])(
     'an IP literal (%s) behind a secure origin is refused specifically as an IP literal',
     (adminUrl) => {
-      // All four rows of the existing IP-literal table are `http://`, each refused by a
-      // *different* guard (non-secure-origin for the dotted-quad ones, bare-label for the bracketed
-      // IPv6 ones) -- none of them fails only because of the isIP guard. These use `https:` so the
-      // non-secure-origin refusal cannot fire, and assert the IP-literal message specifically so a
-      // bare-label or non-secure refusal firing instead (i.e. isIP silently disabled) is caught.
+      // The `http://` IP-literal rows above are each refused by a *different* guard --
+      // non-secure-origin for the dotted quads, bare-label for the bracketed IPv6 -- so none of
+      // them fails on the isIP guard alone. These use `https:` so the non-secure refusal cannot
+      // fire, and assert the IP-literal message specifically, which is what catches isIP being
+      // silently disabled.
       const { strapi, error } = buildStrapi({ 'admin.absoluteUrl': adminUrl });
 
       expect(() => resolveWebauthnRp(strapi)).toThrow(PASSKEY_RP_NOT_CONFIGURED);

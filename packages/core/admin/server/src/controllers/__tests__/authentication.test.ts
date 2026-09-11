@@ -168,10 +168,6 @@ describe('authentication controller', () => {
 
       // Deliberately no sessionManager/config on strapi: reaching for either on this path would
       // throw, which is itself proof that the branch never tries to mint a session.
-      //
-      // `sanitizeUser` is the real implementation here, not a canned mock: `user` carries the
-      // MFA columns, so the emit assertion below only means something if a leak would actually
-      // survive it.
       setStrapi({
         eventHub: { emit },
         log: { error: jest.fn() },
@@ -231,10 +227,6 @@ describe('authentication controller', () => {
 
     test('a valid code at /login/mfa issues the session', async () => {
       const verifyChallenge = jest.fn(() => Promise.resolve({ ok: true, userId: '7' }));
-      // `sanitizeUser` is overridden to the real implementation here (the fixture `user` carries
-      // the MFA columns), so the assertions below prove they never reach `ctx.body` or the
-      // `admin.auth.success` payload, rather than trusting a canned mock that would pass either
-      // way.
       const { generateRefreshToken, generateAccessToken, emit } = buildIssuingStrapi(
         { isEnabled: jest.fn(() => true), verifyChallenge },
         { sanitizeUser: jest.fn(realSanitizeUser) }
@@ -795,6 +787,10 @@ describe('authentication controller', () => {
     });
 
     describe('passkeys', () => {
+      // Shadows the outer fixture user deliberately, and with a different id: every assertion in
+      // this block that names an id is checking the passkey path resolved *this* user, not the one
+      // the enclosing describe blocks set up. A `findOne` override inside a test here has to
+      // spread this one, not that one.
       const user = { id: 5, email: 'passkey-user@example.com', isActive: true };
 
       const webauthnMfa = (overrides: Record<string, unknown> = {}) => ({
@@ -962,11 +958,10 @@ describe('authentication controller', () => {
         );
       });
 
-      // Neither `mfaWebauthnOptionsSchema` nor `mfaWebauthnLoginSchema` had a single test --
-      // gutting either one (e.g. making `challengeToken`/`assertion` optional and unbounded) left
-      // 48/48 green. These are controller-level, like the rest of this file's validator coverage
-      // (e.g. `'a challengeToken over 64 characters is rejected...'` above): the schemas
-      // themselves are not exported, only the wrapped `validate*` functions.
+      // The only coverage `mfaWebauthnOptionsSchema` and `mfaWebauthnLoginSchema` have: gutting
+      // either (making `challengeToken`/`assertion` optional and unbounded) fails nothing else.
+      // Controller-level, like the rest of this file's validator coverage, because the schemas
+      // themselves are not exported -- only the wrapped `validate*` functions are.
       describe('webauthn validators', () => {
         test('loginMfaWebauthn: a missing assertion is rejected before verifyAssertion runs', async () => {
           const verifyAssertion = jest.fn();
@@ -1005,9 +1000,8 @@ describe('authentication controller', () => {
           expect(verifyAssertion).not.toHaveBeenCalled();
         });
 
-        // `deviceId`/`rememberMe` are declared verbatim from `mfaLoginSchema` (per the brief), so
-        // they must carry the same constraints: a uuid-shaped `deviceId` and a boolean
-        // `rememberMe`. Neither was ever exercised against a bad value on this route.
+        // `deviceId`/`rememberMe` are declared verbatim from `mfaLoginSchema`, so they must carry
+        // the same constraints: a uuid-shaped `deviceId` and a boolean `rememberMe`.
         test('loginMfaWebauthn: a non-uuid deviceId is rejected, mirroring mfaLoginSchema', async () => {
           const verifyAssertion = jest.fn();
           buildIssuingStrapi(webauthnMfa({ verifyAssertion }));

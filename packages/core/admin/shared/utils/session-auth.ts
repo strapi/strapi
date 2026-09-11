@@ -72,7 +72,7 @@ export const getRefreshCookieOptions = (secureRequest?: boolean) => {
 };
 
 /**
- * Trusted devices: the "trust this device" cookie. A random 32-byte token whose sha256 is stored in
+ * The "trust this device" cookie. A random 32-byte token whose sha256 is stored in
  * `admin::mfa-trusted-device`; presenting it on `/login` lets an enrolled user skip the second
  * factor until the row's effective expiry. It inherits every scope option of the refresh cookie
  * (httpOnly, path, domain, secure, sameSite) so any deployment where the refresh cookie already

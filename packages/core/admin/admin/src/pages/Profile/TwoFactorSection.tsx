@@ -293,13 +293,13 @@ const TwoFactorSection = () => {
         )}
       </Flex>
       {/*
-       * Trusted devices. Only for an enrolled user (an unenrolled one has nothing to skip) and only while
+       * Only for an enrolled user (an unenrolled one has nothing to skip) and only while
        * the organisation offers trust: `trustedDevicesEnabled` comes from `/mfa/me`, and the
        * server empties the table when the setting is turned off.
        */}
       {status.enabled && status.trustedDevicesEnabled ? <TrustedDevices /> : null}
       {/*
-       * Passkeys. Same two gates as the trusted-devices block above and for the same reasons: only
+       * Same two gates as the trusted-devices block above and for the same reasons: only
        * an enrolled account can hold a passkey (a passkey is a second factor, never a replacement
        * for TOTP), and `passkeysEnabled` comes from `/mfa/me` -- the server deletes every passkey
        * when the setting is turned off. An SSO-only user never reaches either, because they are

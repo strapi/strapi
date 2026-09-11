@@ -100,7 +100,7 @@ export default {
       private: true,
       searchable: false,
     },
-    // Passkeys: the one pending passkey *registration* ceremony, mirroring `mfaPendingSecret`
+    // The one pending passkey *registration* ceremony, mirroring `mfaPendingSecret`
     // exactly -- one per user, overwritten by a new options call, consumed by one conditional
     // statement, and cleared by `disable`. The login ceremony's challenge lives on the
     // `admin::mfa-challenge` row instead, so it inherits that row's TTL and throttle.

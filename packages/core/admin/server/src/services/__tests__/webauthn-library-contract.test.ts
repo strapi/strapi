@@ -83,8 +83,8 @@ describe('@simplewebauthn/server call contract', () => {
 
   test("the engines range is inside Strapi's own", () => {
     // The package declares `node >= 20`, inside Strapi's `>=22 <=26`. If the installed manifest
-    // phrases it differently, assert the real string rather than deleting the check, and record
-    // the value in the report -- an engines range above 22 would be a blocker, not a nit.
+    // phrases it differently, assert the real string rather than deleting the check: a floor
+    // above 22 would put the library outside the Node range Strapi supports.
     expect(MANIFEST).toHaveProperty('engines');
     expect((MANIFEST as { engines?: { node?: string } }).engines?.node).toMatch(/20/);
   });

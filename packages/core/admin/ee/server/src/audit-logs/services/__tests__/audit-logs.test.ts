@@ -146,8 +146,9 @@ describe('Audit logs service', () => {
     await handleEvent('admin.mfa.passkey.removed', { userId: '1', byUserId: '9', count: 2 });
     await handleEvent('admin.mfa.passkey.used', { userId: '1' });
 
-    // All fourteen are on the allow-list, so all fourteen produce a saved audit event -- an event
-    // name eventMap doesn't recognise resolves to `undefined` and is silently dropped instead.
+    // Every name above is on the allow-list, so every one produces a saved audit event. A name
+    // `eventMap` does not recognise resolves to `undefined` and is silently dropped, so the count
+    // is what catches an omission.
     expect(saveEvent).toHaveBeenCalledTimes(14);
   });
 

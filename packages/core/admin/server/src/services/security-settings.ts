@@ -57,7 +57,7 @@ type WarnableKey =
   | 'trustedDevices.enabled'
   | 'trustedDevices.days'
   | 'passkeys.enabled'
-  /** Passkeys: `resolveWebauthnRp`'s refusal cause, logged at error level from `mfa-passkeys.ts`. */
+  /** `resolveWebauthnRp`'s refusal cause, logged at error level from `mfa-passkeys.ts`. */
   | 'webauthn.rp';
 
 /**
@@ -259,9 +259,9 @@ interface MfaServiceLike {
   }): Promise<boolean>;
   isEnrolled(userId: string): Promise<boolean>;
   assertPasswordAndFactor(userId: string, password: string, code: string): Promise<void>;
-  /** Trusted devices: every trusted-device row, every user. Called on the transition to `enabled: false`. */
+  /** Every trusted-device row, every user. Called on the transition to `enabled: false`. */
   clearAllTrustedDevices(): Promise<number>;
-  /** Passkeys: every passkey row, every user. Called on the transition to `enabled: false`. */
+  /** Every passkey row, every user. Called on the transition to `enabled: false`. */
   clearAllPasskeys(): Promise<number>;
 }
 

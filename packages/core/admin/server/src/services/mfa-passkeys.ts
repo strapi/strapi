@@ -460,7 +460,7 @@ const readCeremonyChallenge = (registration: RegistrationResponseJSON): string |
 };
 
 /**
- * Passkeys. Both ceremonies, plus list / count / delete / clear. Composed into
+ * Both ceremonies, plus list / count / delete / clear. Composed into
  * `createMfaService`, so callers reach it as `getService('mfa').registerPasskey` and friends.
  * Every function that decides anything keys on `userId`, and the credential lookup on the login
  * path is scoped to the challenge's owner in the `where` itself -- a global lookup followed by an

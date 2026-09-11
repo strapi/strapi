@@ -702,7 +702,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
         throw new ValidationError('No enrolment in progress');
       }
 
-      // Trusted devices: the trusts on file were granted against the authenticator the user just retired.
+      // The trusts on file were granted against the authenticator the user just retired.
       // Conservative by design -- the cost is one code per browser at its next login -- and only
       // on a replacement: a first enrolment has nothing to revoke.
       if (replaced) {
@@ -1484,7 +1484,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       await recoveryQuery().deleteMany({ where: { userId: String(userId) } });
       await challengeQuery().deleteMany({ where: { userId: String(userId) } });
       await trustedDevices.clearTrustedDevices(userId);
-      // Passkeys: a disabled account has no second factor at all, so a passkey that still
+      // A disabled account has no second factor at all, so a passkey that still
       // satisfied challenges would be one. The two pending-ceremony columns are nulled in the
       // same user update that already nulls `mfaPendingSecret`, so no pending ceremony of either
       // kind outlives the disable.

@@ -22,9 +22,9 @@ export declare namespace Me {
       /** The organisation policy requires this account to be enrolled, whether or not it is. */
       required: boolean;
       graceUntil: string | null;
-      /** Trusted devices: whether the organisation lets this user trust a browser after a code. */
+      /** Whether the organisation lets this user trust a browser after a code. */
       trustedDevicesEnabled: boolean;
-      /** Passkeys: whether the organisation lets this user register and use passkeys. */
+      /** Whether the organisation lets this user register and use passkeys. */
       passkeysEnabled: boolean;
       /**
        * Whether this account has a local password at all. An SSO-only administrator has none,

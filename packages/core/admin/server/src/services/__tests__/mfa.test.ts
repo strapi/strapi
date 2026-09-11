@@ -10,13 +10,13 @@ import {
 import { isoBase64URL } from '@simplewebauthn/server/helpers';
 import { verifyRegistrationResponse, verifyAuthenticationResponse } from '@simplewebauthn/server';
 import createMfaService, { MAX_EVENTS_PER_USER } from '../mfa';
-import { hashTrustToken } from '../mfa-trusted-devices';
-import { PASSKEY_UID } from '../mfa-passkeys';
+import { hashTrustToken, MAX_TRUSTED_DEVICES_PER_USER } from '../mfa-trusted-devices';
+import { PASSKEY_UID, PASSKEY_CAP_MESSAGE, MAX_PASSKEYS_PER_USER } from '../mfa-passkeys';
 import { MFA_DEFAULTS } from '../../config/mfa';
 import { resetSecuritySettingsWarnings } from '../security-settings';
 
 /**
- * Passkeys mocks exactly the two verification functions and nothing else. What is under test here
+ * Mocks exactly the two passkey verification functions and nothing else. What is under test here
  * is our wiring -- challenge consumption, owner scoping, marshalling, counters, charging,
  * cascades -- not `@simplewebauthn`'s cryptography, which has its own suite upstream and whose
  * call shapes are pinned in `webauthn-library-contract.test.ts`. `generateRegistrationOptions`
@@ -680,11 +680,10 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
     ...options.userOverrides,
   };
 
-  // A real store (not an inert no-op), so `completeEnrolment`'s recovery codes are genuinely
-  // persisted here too — regressing `issueRecoveryCodes` to skip storage, not just to return
-  // `[]`, would also be caught by a test that inspects `recoveryRows`. `recoveryOverrides` lets a
-  // test swap in a throwing `createMany` etc. to exercise the ordering guarantee in
-  // `completeEnrolment` (recovery codes before `mfaEnabledAt`).
+  // A real store, not an inert no-op, so a test inspecting `recoveryRows` sees what
+  // `issueRecoveryCodes` actually persisted rather than only what it returned.
+  // `recoveryOverrides` lets a test swap in a throwing `createMany` to exercise
+  // `completeEnrolment`'s ordering guarantee (recovery codes before `mfaEnabledAt`).
   const recoveryRows: RecoveryRow[] = [];
   let nextRecoveryId = 1;
   const recoveryMocks = {
@@ -817,9 +816,8 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
 
       return matches[0] ?? null;
     }),
-    // Mutates the live rows (not a snapshot), same as the recovery/challenge `deleteMany`s above:
-    // `pruneEvents` tests need to observe the write through the same `events` array the fixture
-    // hands back, not a copy that silently diverges from it.
+    // Mutates the live rows, not a snapshot, like every other store here: a test has to observe
+    // the write through the same `events` array the fixture hands back.
     deleteMany: jest.fn(async ({ where }: any) => {
       let count = 0;
       for (let i = events.length - 1; i >= 0; i -= 1) {
@@ -830,9 +828,6 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
       }
       return { count };
     }),
-    // Mutates the live rows (not a snapshot), same as `deleteMany` above: `markEventsSeen` /
-    // `acknowledgeCodes` tests need to observe the write through the same `events` array the
-    // fixture hands back, not a copy that silently diverges from it.
     updateMany: jest.fn(async ({ where, data }: any) => {
       let count = 0;
       for (const event of events) {
@@ -845,7 +840,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
     }),
   };
 
-  // Trusted devices. Every row handed out is a snapshot, every write mutates the live array, exactly as
+  // Every row handed out is a snapshot, every write mutates the live array, exactly as
   // the challenge and event stores above. `findMany` honours `where` and `orderBy` (the cap and
   // the list both order by `createdAt` desc, `id` desc); `select` is accepted and ignored.
   const trustedRows: TrustedRow[] = [];
@@ -895,9 +890,8 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
     ),
   };
 
-  // Passkeys. Same two rules as every store above: every row handed out is a snapshot, every write
-  // mutates the live array. `findMany` honours `where` and `orderBy` (the list orders by
-  // `createdAt` desc, `id` desc); `select` is accepted and ignored.
+  // `findMany` honours `where` and `orderBy` (the list orders by `createdAt` desc, `id` desc);
+  // `select` is accepted and ignored.
   const passkeyRows: PasskeyRowFixture[] = [];
   let nextPasskeyId = 1;
   const passkeyMocks = {
@@ -1199,8 +1193,7 @@ describe('mfa service: enrolment', () => {
     const stored = users.get('1')!;
     expect(stored.mfaEnabledAt).toBeInstanceOf(Date);
     expect(Number(stored.mfaLastUsedStep)).toBeGreaterThan(0);
-    // Regressing `completeEnrolment` back to a hardcoded `{ recoveryCodes: [] }` must fail this:
-    // the codes are real, config-sized, and genuinely persisted (not just returned).
+    // Config-sized, and persisted rather than only returned.
     expect(result.recoveryCodes).toHaveLength(MFA_DEFAULTS.recoveryCodeCount);
     expect(recoveryRows).toHaveLength(MFA_DEFAULTS.recoveryCodeCount);
   });
@@ -1531,6 +1524,9 @@ describe('mfa service: enrolment', () => {
         const current = generateTotp({ secret: base32Decode(secret), step: 30, digits: 6 });
         const next = await service.beginEnrolment('1', 'pw', current);
 
+        // A second step forward, even though this code comes from a different secret:
+        // `consumeTotpStep`'s replay guard is account-wide, not per-secret, so the step
+        // `beginEnrolment` just spent is spent for the new secret too.
         jest.setSystemTime(now + 60_000);
         const newCode = generateTotp({ secret: base32Decode(next.secret), step: 30, digits: 6 });
         const result = await service.completeEnrolment('1', newCode);
@@ -2671,7 +2667,7 @@ describe('mfa service: assertPasswordAndFactor and disable', () => {
       // that combination is a permanent lockout with no path back but the CLI reset.
       //
       // Also seeds one trusted-device row for this user: `disable` runs the trusted-device clear
-      // (Trusted devices) inside the same transaction as the recovery-code and challenge deletes, and this
+      // inside the same transaction as the recovery-code and challenge deletes, and this
       // is the only test that proves the rollback actually reaches it -- a failure of the user
       // update here must leave the trust in place, exactly as it leaves the recovery codes and
       // challenges in place. Seeded directly through `trustedMocks.create`, bypassing
@@ -2980,7 +2976,7 @@ describe('mfa service: event pruning', () => {
     for (let i = 0; i < MAX_EVENTS_PER_USER; i += 1) {
       seedEvent(events, '1', types[i % types.length], i);
     }
-    // The 501st row, and the oldest of all of them.
+    // One past the cap, and the oldest of all of them.
     const oldest = seedEvent(events, '1', 'enabled', MAX_EVENTS_PER_USER);
 
     await service.pruneEvents('1');
@@ -2994,8 +2990,8 @@ describe('mfa service: event pruning', () => {
     for (let i = 0; i < MAX_EVENTS_PER_USER; i += 1) {
       seedEvent(events, '1', 'enabled', i);
     }
-    // Oldest of all (rank MAX+1, so a deletion candidate by rank alone), but well inside the
-    // default 900s `userAttemptWindow` -- `isAccountThrottled` still needs to count it.
+    // Oldest of all (rank MAX+1, so a deletion candidate by rank alone), but well inside
+    // `userAttemptWindow` -- `isAccountThrottled` still needs to count it.
     const young = seedEvent(events, '1', 'challenge_failed', MAX_EVENTS_PER_USER + 1);
 
     await service.pruneEvents('1');
@@ -3674,16 +3670,18 @@ describe('mfa service: trusted devices', () => {
     jest.useFakeTimers({ now });
     const { service, trustedRows } = setup();
     const tokens: string[] = [];
-    for (let i = 0; i < 11; i += 1) {
+    for (let i = 0; i <= MAX_TRUSTED_DEVICES_PER_USER; i += 1) {
       jest.setSystemTime(now + i * 1000);
       // eslint-disable-next-line no-await-in-loop
       tokens.push((await service.trustDevice('1', {}))!.token);
     }
 
-    expect(trustedRows).toHaveLength(10);
+    expect(trustedRows).toHaveLength(MAX_TRUSTED_DEVICES_PER_USER);
     await expect(service.consumeTrustedDevice('1', tokens[0])).resolves.toBe(false);
     await expect(service.consumeTrustedDevice('1', tokens[1])).resolves.toBe(true);
-    await expect(service.consumeTrustedDevice('1', tokens[10])).resolves.toBe(true);
+    await expect(
+      service.consumeTrustedDevice('1', tokens[MAX_TRUSTED_DEVICES_PER_USER])
+    ).resolves.toBe(true);
   });
 
   test('listTrustedDevices hides the hash, marks the presented token current and sorts it first', async () => {
@@ -3940,7 +3938,7 @@ describe('mfa service: passkey registration', () => {
   });
 
   // `controllers/mfa.ts`'s `assertPasskeyRegistrationAllowed` enforces both invariants too, so
-  // these four call the SERVICE directly -- the same surface `strapi.service('admin::mfa')`
+  // these tests call the SERVICE directly -- the same surface `strapi.service('admin::mfa')`
   // exposes to any other caller -- to prove the guard holds there as well, not only when the
   // request happens to arrive through the controller.
   describe('the registration pair enforces its own invariants, not only through the controller', () => {
@@ -4088,11 +4086,9 @@ describe('mfa service: passkey registration', () => {
 
   test('options refuses at the cap, naming the limit, before the browser is ever prompted', async () => {
     const { service, passkeyRows, users } = setup();
-    seedPasskeys(passkeyRows, '1', 10);
+    seedPasskeys(passkeyRows, '1', MAX_PASSKEYS_PER_USER);
 
-    await expect(service.passkeyRegistrationOptions('1')).rejects.toThrow(
-      'You can register at most 10 passkeys.'
-    );
+    await expect(service.passkeyRegistrationOptions('1')).rejects.toThrow(PASSKEY_CAP_MESSAGE);
     expect(users.get('1')!.mfaPasskeyChallenge).toBeNull();
   });
 
@@ -4282,14 +4278,14 @@ describe('mfa service: passkey registration', () => {
   test('over the cap inside the transaction: the insert rolls back and the limit is named', async () => {
     const { service, passkeyRows, users } = setup();
     const options = await service.passkeyRegistrationOptions('1');
-    seedPasskeys(passkeyRows, '1', 10);
+    seedPasskeys(passkeyRows, '1', MAX_PASSKEYS_PER_USER);
     jest.mocked(verifyRegistrationResponse).mockResolvedValue(verified() as never);
 
     await expect(
       service.registerPasskey('1', 'Eleventh', registrationFor(options.challenge) as never)
-    ).rejects.toThrow('You can register at most 10 passkeys.');
+    ).rejects.toThrow(PASSKEY_CAP_MESSAGE);
 
-    expect(passkeyRows).toHaveLength(10);
+    expect(passkeyRows).toHaveLength(MAX_PASSKEYS_PER_USER);
     // The ceremony was spent before the transaction opened -- a refused registration costs it,
     // and the user starts a fresh one.
     expect(users.get('1')!.mfaPasskeyChallenge).toBeNull();
@@ -4484,9 +4480,9 @@ describe('mfa service: passkey login', () => {
     jest.mocked(verifyAuthenticationResponse).mockReset();
     // `resolveWebauthnRp`'s refusal logs through `warnOnce`, which is deliberately once-per-key-
     // per-process (see `security-settings.ts`) so a misconfigured deployment doesn't spam the
-    // log on every request. Two tests below each need a fresh log call for the same
-    // `'webauthn.rp'` key, and the registration suite earlier in this file already spent it once
-    // -- reset here, exactly as `mfa-passkeys-rp.test.ts` does, so each test starts clean.
+    // log on every request. The registration suite earlier in this file already spends it for
+    // `'webauthn.rp'`, so any test here that asserts on a log call needs it reset first --
+    // exactly as `mfa-passkeys-rp.test.ts` does.
     resetSecuritySettingsWarnings();
   });
 
@@ -4682,6 +4678,8 @@ describe('mfa service: passkey login', () => {
   });
 
   test('two concurrent successful assertions: exactly one wins the challenge', async () => {
+    // The cap is explicit so it is visibly above 2: both assertions must be allowed to run and
+    // race for the challenge, rather than one losing to a spent attempt budget.
     const { service, passkeyRows } = setup({ mfaConfig: { maxChallengeAttempts: 5 } });
     const row = seedCredential(passkeyRows, '1');
     const { token } = await service.createChallenge('1');

@@ -28,7 +28,7 @@ import {
 import type { TrustedDevice } from '../../../../shared/contracts/mfa';
 
 /**
- * Trusted devices: the browsers this user has trusted to skip the second factor, inside the profile's
+ * The browsers this user has trusted to skip the second factor, inside the profile's
  * Two-factor section. The server decides everything shown here -- which row is the current
  * browser (by hashing the httpOnly trust cookie it sent), and each row's *effective* expiry --
  * so this component never reads a cookie or computes a date. Revoking one row or all of them

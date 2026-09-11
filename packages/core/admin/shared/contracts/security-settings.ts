@@ -22,7 +22,7 @@ export interface MfaEnforcementSettings extends MfaEnforcement {
 }
 
 /**
- * Trusted devices: whether a user may trust a browser after a verified code, and for how many days.
+ * Whether a user may trust a browser after a verified code, and for how many days.
  * Stored beside `mfa` in the same `security-settings` document. `days` is an integer 1..90.
  */
 export interface TrustedDeviceSettings {
@@ -31,7 +31,7 @@ export interface TrustedDeviceSettings {
 }
 
 /**
- * Passkeys: whether users may register and sign in with a passkey. Stored beside `mfa` and
+ * Whether users may register and sign in with a passkey. Stored beside `mfa` and
  * `trustedDevices` in the same `security-settings` document. Turning it off deletes every
  * registered passkey, which is why the `PUT` that does so carries credentials like a downgrade.
  */

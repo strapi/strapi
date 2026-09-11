@@ -8,10 +8,8 @@ const mfaServiceInstance = {
   unlock,
 };
 
-// Mirrors the REAL registration shape (`packages/core/admin/server/src/services/index.ts`):
-// `admin.services.mfa` is the raw, uninstantiated FACTORY function -- only the services registry
-// ever calls it. A command that reads `app.admin.services.mfa.unlock(...)` directly would be
-// calling `.unlock` on this function itself (undefined), not on the service.
+// The raw, uninstantiated factory, exactly as `services/index.ts` registers it. See
+// `mfa-state.test.ts` for why a command must never reach it directly.
 const mfaFactory = jest.fn(() => mfaServiceInstance);
 
 const admin = {
@@ -24,9 +22,7 @@ const db = {
   query: jest.fn(() => ({ findOne })),
 };
 
-// Mirrors `Strapi.service(uid)` (`packages/core/core/src/Strapi.ts`): resolves the already
-// instantiated service for a known uid, `undefined` for anything else. The command must go
-// through this, never through `admin.services.mfa` directly.
+// `Strapi.service(uid)`'s behaviour, the only way a command may reach the service.
 const service = jest.fn((uid: string) => (uid === 'admin::mfa' ? mfaServiceInstance : undefined));
 
 const mock = {

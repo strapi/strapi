@@ -141,9 +141,9 @@ const TwoFactorEnforcementCard = ({
   };
 
   return (
-    // `Panel` itself is fixed to a `div` root (its `FlexProps` are not generic over `tag`), so the
-    // accessible region is this wrapping `Box`: it renders no styling of its own, only the
-    // `section` landmark named by the card's own heading.
+    // `Panel` hardcodes its own outer `Box` and forwards props only to the inner `Flex`, so a
+    // `tag` given to it would land inside the panel rather than on its root. The `section`
+    // landmark goes on this wrapper, which adds no styling of its own.
     <Box tag="section" aria-labelledby={titleId}>
       <Panel gap={5}>
         <Flex direction="column" alignItems="stretch" gap={1}>

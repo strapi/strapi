@@ -531,9 +531,9 @@ describe('mfa controller', () => {
     expect(invalidateRefreshToken).toHaveBeenCalledTimes(2);
     expect(invalidateRefreshToken).toHaveBeenCalledWith('7', 'device-1');
     expect(invalidateRefreshToken).toHaveBeenCalledWith('7', 'device-2');
-    // The property this fix exists for: the device making this very request must survive, and
-    // eviction is never done "for everyone" (a call with no deviceId) in this branch -- that
-    // would take the caller's own device down too.
+    // The property that matters: the device making this very request must survive, and eviction
+    // is never done "for everyone" (a call with no deviceId) in this branch -- that would take
+    // the caller's own device down too.
     expect(invalidateRefreshToken).not.toHaveBeenCalledWith('7', 'device-current');
     expect(invalidateRefreshToken).not.toHaveBeenCalledWith('7');
     expect(ctx.status).toBe(204);
@@ -1090,9 +1090,9 @@ describe('mfa controller', () => {
     });
 
     test.each([[''], ['   '], ['x'.repeat(51)]])('register rejects the name %p', async (name) => {
-      // a bare `rejects.toThrow()` passes on any rejection at all, including one caused by a
-      // missing mock, and discarding the doubles meant nothing pinned that the refusal happens
-      // *before* the service is reached. Both are asserted explicitly now.
+      // A bare `rejects.toThrow()` would pass on any rejection at all, including one caused by a
+      // missing mock, so the doubles are kept and asserted: the refusal must happen *before* the
+      // service is reached.
       const doubles = buildStrapiWithPasskeys();
       const { ctx } = buildCtx({ name, registration: { id: 'cred-1' } });
 

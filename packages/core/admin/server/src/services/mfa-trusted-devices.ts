@@ -81,7 +81,7 @@ export interface TrustedDeviceDeps {
 const toIso = (value: Date | string): string => new Date(value).toISOString();
 
 /**
- * Trusted devices: trusted browsers. Grant after a verified challenge, honour on `/login`, list, revoke,
+ * Trusted browsers. Grant after a verified challenge, honour on `/login`, list, revoke,
  * sweep. Composed into `createMfaService`, so callers reach it as `getService('mfa').trustDevice`
  * and friends. Every function that decides anything keys on `userId`; the token's owner is never
  * inferred from the token alone.

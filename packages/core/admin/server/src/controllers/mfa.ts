@@ -82,10 +82,10 @@ export default {
         // by `enforce` at the first session it applied to. The grace banner reads these.
         required: await mfa.isMfaRequiredFor(user),
         graceUntil: user.mfaGraceUntil ? new Date(user.mfaGraceUntil).toISOString() : null,
-        // Trusted devices: the profile renders its trusted-devices list only when the organisation
+        // The profile renders its trusted-devices list only when the organisation
         // offers trust at all.
         trustedDevicesEnabled: (await mfa.trustedDeviceSettings()).enabled,
-        // Passkeys: the profile decides whether to render the passkey section from this; the list
+        // The profile decides whether to render the passkey section from this; the list
         // endpoint stays the source of truth for the rows. Not the org policy alone: the
         // default production deployment (an IP-literal `admin.absoluteUrl`) would otherwise
         // advertise a section whose "Add a passkey" button cannot work. `passkeysConfigured`
@@ -282,7 +282,7 @@ export default {
   },
 
   /**
-   * Trusted devices. The caller's trusted browsers; the presented cookie (if any) marks the current one.
+   * The caller's trusted browsers; the presented cookie (if any) marks the current one.
    * The service hashes it, the hash never reaches the response.
    */
   async listTrustedDevices(ctx: Context) {
@@ -379,7 +379,7 @@ export default {
   },
 
   /**
-   * Passkeys. Start a registration ceremony. Costs the current password *and* a live second factor
+   * Start a registration ceremony. Costs the current password *and* a live second factor
    * (the same gate `/mfa/disable` and `/mfa/recovery-codes` use): under the factor model
    * the new credential satisfies every future challenge on its own, so an attacker holding a
    * stolen session plus the password would otherwise register their own authenticator and log in
@@ -442,8 +442,7 @@ export default {
   async deletePasskey(ctx: Context) {
     const mfa = mfaService();
 
-    // Row ids are integers; anything else can only ever be a 404, and asking the database to
-    // compare an integer column against arbitrary text is a 500 on Postgres rather than a miss.
+    // Same guard as `revokeTrustedDevice`: a non-integer id is a 500 on Postgres, not a miss.
     const { id } = ctx.params as DeletePasskey.Params;
     if (!/^\d+$/.test(id)) {
       return ctx.notFound('Passkey not found');

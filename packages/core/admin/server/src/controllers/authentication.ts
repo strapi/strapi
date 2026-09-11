@@ -68,7 +68,7 @@ const enforceMfaOrThrow = async (
 };
 
 /**
- * Trusted devices: what a challenge response advertises as the trust period, or null when the
+ * What a challenge response advertises as the trust period, or null when the
  * organisation does not offer trusted devices. Read per challenge, never cached, so a settings
  * change shows on the very next login screen.
  */
@@ -78,7 +78,7 @@ const offeredTrustDays = async (): Promise<number | null> => {
 };
 
 /**
- * Passkeys: whether the challenge screen may offer the passkey path. `countPasskeys` returns 0
+ * Whether the challenge screen may offer the passkey path. `countPasskeys` returns 0
  * while the organisation has turned passkeys off, so this is "the policy allows them and this
  * account holds at least one", plus a third term: the RP must actually resolve, so a
  * misconfigured deployment (an IP-literal `admin.absoluteUrl`) never offers a button every
@@ -139,7 +139,7 @@ export default {
         // Read once, before anything else in this block: `createChallenge` below already mints a
         // challenge row, so a store-read failure for the offered trust period must not risk a
         // 500 on a response whose challenge already exists (a retry would then mint a second,
-        // orphaned one). Trusted devices: a browser trusted after an earlier verified code skips the
+        // orphaned one). A browser trusted after an earlier verified code skips the
         // challenge. Only here (never on reset-password), only after the password check and
         // `enforce`, only for an enrolled user, and only through `consumeTrustedDevice`, which
         // compares the row's owner to this user. A cookie that matches nothing live, belongs to a
@@ -237,7 +237,7 @@ export default {
         throw new ValidationError('Invalid code');
       }
 
-      // Trusted devices: any verified challenge may grant trust. The service returns null when the
+      // Any verified challenge may grant trust. The service returns null when the
       // organisation does not offer it, and a stale checkbox is not an error. The raw token
       // exists only here and in the Set-Cookie header.
       if (trustDevice) {
@@ -258,7 +258,7 @@ export default {
   ]),
 
   /**
-   * Passkeys: start an authentication ceremony against a challenge `/login` or `/reset-password`
+   * Start an authentication ceremony against a challenge `/login` or `/reset-password`
    * already minted. Unauthenticated and rate-limited; the challenge token is the only credential.
    * Charges no attempt -- it evaluates no factor -- but the service still checks the throttle and
    * the challenge's usability, so it cannot be used as an unmetered oracle.

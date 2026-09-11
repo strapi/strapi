@@ -127,7 +127,7 @@ const mfaService = adminApi
         ],
       }),
       /**
-       * Trusted devices: the caller's trusted browsers. The server marks `current` by hashing the httpOnly
+       * The caller's trusted browsers. The server marks `current` by hashing the httpOnly
        * trust cookie the browser sends along; nothing here ever sees the token.
        */
       getTrustedDevices: builder.query<ListTrustedDevices.Response['data'], void>({
@@ -171,7 +171,7 @@ const mfaService = adminApi
         ],
       }),
       /**
-       * Passkeys: the caller's own passkeys. The server answers an empty list -- not a 404 and not
+       * The caller's own passkeys. The server answers an empty list -- not a 404 and not
        * an error -- while the organisation has passkeys turned off, so the profile shows its empty
        * state rather than a failure. Only the four public fields come back.
        */

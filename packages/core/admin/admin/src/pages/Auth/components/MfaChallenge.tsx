@@ -36,13 +36,13 @@ export interface MfaChallengeLocationState {
   expiresIn: number;
   rememberMe: boolean;
   /**
-   * Trusted devices: the trust period the organisation offers ("Trust this device for {n} days"), or
+   * The trust period the organisation offers ("Trust this device for {n} days"), or
    * null when it offers none. Missing in a state written by an older bundle mid-flight, which is
    * read as null.
    */
   trustedDeviceDays?: number | null;
   /**
-   * Passkeys: whether this account can satisfy the challenge with a passkey (the organisation
+   * Whether this account can satisfy the challenge with a passkey (the organisation
    * allows them and the account has at least one). Missing in a state written by an older bundle
    * mid-flight, which is read as false -- the code field always works.
    */

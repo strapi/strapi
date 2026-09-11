@@ -9,11 +9,8 @@ import createContext from '../../../../../../../tests/helpers/create-context';
 import authenticationController from '../authentication';
 import { REFRESH_COOKIE_NAME } from '../../../../shared/utils/session-auth';
 import { MfaLockedError } from '../../services/mfa-errors';
-// The real implementation, not a canned mock: used wherever a test needs to prove that
-// `sanitizeUser` actually strips a field (e.g. the MFA columns) from an `admin.auth.*` event
-// payload. A mock that always returns the same fixed object would make that kind of assertion
-// vacuous -- it would pass even if the controller emitted the raw user. Mirrors
-// `authentication.test.ts`.
+// The real implementation, for the reason `authentication.test.ts` gives: a canned mock would
+// make every "this field never leaks" assertion vacuous.
 import userService from '../../services/user';
 
 const { sanitizeUser: realSanitizeUser } = userService;
@@ -85,10 +82,8 @@ const buildResetCtx = (cookiesSet: jest.Mock, body: Record<string, unknown> = de
 /**
  * A working `resetPassword` double: an mfa service reporting `enrolled`, a session manager that
  * can both invalidate and (on the ungated path) mint a session, plus `eventHub`/`log`/`config`
- * for `issueSession`'s cookie-building path. `sanitizeUser` is always the real implementation
- * (not a canned mock) so any test can assert on what actually reaches an emitted payload or
- * `ctx.body`. Mirrors `buildIssuingStrapi` in `authentication.test.ts`, scoped to what
- * `resetPassword` reads.
+ * for `issueSession`'s cookie-building path, with the real `sanitizeUser`. Mirrors
+ * `buildIssuingStrapi` in `authentication.test.ts`, scoped to what `resetPassword` reads.
  */
 const buildResetStrapi = ({
   enrolled,
@@ -281,9 +276,8 @@ describe('session issuing paths', () => {
       id: 9,
       email: 'reset-mfa@example.com',
       isActive: true,
-      // Carried on the fixture so the real `sanitizeUser` (see `buildResetStrapi`) has
-      // something non-vacuous to strip -- present here (and only here) matters because this
-      // test asserts on the exact emitted payload.
+      // Carried on the fixture so `sanitizeUser` has something to strip: this test asserts on
+      // the exact emitted payload.
       mfaSecret: 'encrypted-secret-ciphertext',
       mfaEnabledAt: '2026-01-01T00:00:00.000Z',
       mfaLastUsedStep: 3,
@@ -433,9 +427,8 @@ describe('session issuing paths', () => {
 
     const writeSites = files.flatMap((file) => {
       const contents = fs.readFileSync(file, 'utf8');
-      // Excludes `registrationToken: string` type annotations (two of them, on
-      // `findRegistrationInfo` and `register`'s destructured parameter in services/user.ts) --
-      // those describe a parameter's shape, not an assignment.
+      // Excludes `registrationToken: string` type annotations, which describe a parameter's
+      // shape rather than an assignment.
       const count = [...contents.matchAll(/registrationToken:(?!\s*string)/g)].length;
       return Array(count).fill(path.relative(SERVER_SRC, file));
     });
@@ -552,8 +545,7 @@ describe('generateRefreshToken / issueSession call-site inventory', () => {
         DECIDED_CALL_SITES.length,
       // `issueSession`'s own implementation: every CE flow above funnels through this one call.
       [`${path.join('shared', 'utils', 'session-auth.ts')} :: generateRefreshToken(`]: 1,
-      // The SSO callback: deliberately exempt from `issueSession` (see the block comment above)
-      // per the session-path table this branch's earlier tasks documented.
+      // The SSO callback: deliberately exempt from `issueSession` (see the block comment above).
       [`${path.join('ee', 'server', 'src', 'controllers', 'authentication-utils', 'middlewares.ts')} :: generateRefreshToken(`]: 1,
     });
   });

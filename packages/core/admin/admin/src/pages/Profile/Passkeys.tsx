@@ -27,7 +27,7 @@ import { passkeyAvailability } from '../../utils/webauthn';
 import { AddPasskeyDialog } from './AddPasskeyDialog';
 
 /**
- * Passkeys: the WebAuthn credentials this user can sign in with instead of typing a code, inside
+ * The WebAuthn credentials this user can sign in with instead of typing a code, inside
  * the profile's Two-factor section. `TwoFactorSection` renders this only for an enrolled account
  * while the organisation allows passkeys, so nothing here re-checks either.
  *

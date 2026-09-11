@@ -856,8 +856,7 @@ describe('security-settings: service', () => {
     });
 
     expect(roles.find((r) => r.id === 2)!.mfaRequired).toBe(true);
-    // The role flags being unchanged above is consistent with either "left alone" or "rewritten
-    // to the same values" -- this is the assertion that actually distinguishes them.
+    // Distinguishes "left alone" from "rewritten to the same values".
     expect(roleQuery.updateMany).not.toHaveBeenCalled();
     expect(storeSet).toHaveBeenCalledWith({
       key: SECURITY_SETTINGS_KEY,
