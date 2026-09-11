@@ -1,4 +1,10 @@
-import { applyRenameDecisions, collectPendingRenames } from '../RenameMigrationModal';
+import {
+  applyRenameDecisions,
+  collectPendingRenames,
+  getAttributeRenameDecision,
+  shouldPromptForRenamesBeforeSave,
+  type AttributeRenameMigrationMode,
+} from '../RenameMigrationModal';
 
 type RequestData = Parameters<typeof collectPendingRenames>[0];
 
@@ -112,6 +118,38 @@ describe('RenameMigrationModal helpers', () => {
 
       expect('renames' in requestData.contentTypes[0]).toBe(false);
       expect('renames' in requestData.components[0]).toBe(false);
+    });
+  });
+
+  describe.each([
+    {
+      mode: 'always',
+      editDecision: true,
+      promptBeforeSave: false,
+    },
+    {
+      mode: 'never',
+      editDecision: false,
+      promptBeforeSave: false,
+    },
+    {
+      mode: 'prompt-after-edit',
+      editDecision: 'prompt',
+      promptBeforeSave: false,
+    },
+    {
+      mode: 'prompt-before-save',
+      editDecision: true,
+      promptBeforeSave: true,
+    },
+  ] satisfies Array<{
+    mode: AttributeRenameMigrationMode;
+    editDecision: boolean | 'prompt';
+    promptBeforeSave: boolean;
+  }>)('$mode mode', ({ mode, editDecision, promptBeforeSave }) => {
+    it('selects the correct per-edit and pre-save behavior', () => {
+      expect(getAttributeRenameDecision(mode)).toBe(editDecision);
+      expect(shouldPromptForRenamesBeforeSave(mode)).toBe(promptBeforeSave);
     });
   });
 });

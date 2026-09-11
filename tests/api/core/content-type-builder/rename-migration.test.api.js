@@ -322,6 +322,87 @@ describe('Content Type Builder - swap migration preserves data', () => {
   });
 });
 
+describe('Content Type Builder - ordered name reuse preserves data', () => {
+  const REUSE_UID = 'api::ordered-reuse.ordered-reuse';
+
+  const restartReuse = async () => {
+    await strapi.destroy();
+    strapi = await createStrapiInstance();
+    rq = await createAuthRequest({ strapi });
+  };
+
+  beforeAll(async () => {
+    strapi = await createStrapiInstance();
+    rq = await createAuthRequest({ strapi });
+
+    await updateSchema({
+      contentTypes: [
+        {
+          action: 'create',
+          uid: REUSE_UID,
+          displayName: 'Ordered Reuse',
+          singularName: 'ordered-reuse',
+          pluralName: 'ordered-reuses',
+          kind: 'collectionType',
+          draftAndPublish: false,
+          attributes: [
+            { action: 'create', name: 'fieldA', properties: { type: 'string' } },
+            { action: 'create', name: 'fieldB', properties: { type: 'string' } },
+          ],
+        },
+      ],
+      components: [],
+    });
+    await restartReuse();
+
+    const created = await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/${REUSE_UID}`,
+      body: { fieldA: 'Value A', fieldB: 'Value B' },
+    });
+    expect(created.statusCode).toBe(201);
+  });
+
+  afterAll(async () => {
+    await updateSchema({ contentTypes: [{ action: 'delete', uid: REUSE_UID }], components: [] });
+    await strapi.destroy();
+    await builder.cleanup();
+  });
+
+  test('replays A -> C, B -> A, A -> B in order and preserves both values', async () => {
+    const res = await updateSchema({
+      contentTypes: [
+        {
+          action: 'update',
+          uid: REUSE_UID,
+          displayName: 'Ordered Reuse',
+          draftAndPublish: false,
+          renames: [
+            { oldName: 'fieldA', newName: 'fieldC' },
+            { oldName: 'fieldB', newName: 'fieldA' },
+            { oldName: 'fieldA', newName: 'fieldB' },
+          ],
+          attributes: [
+            { action: 'update', name: 'fieldB', properties: { type: 'string' } },
+            { action: 'update', name: 'fieldC', properties: { type: 'string' } },
+          ],
+        },
+      ],
+      components: [],
+    });
+    expect(res.statusCode).toBe(200);
+
+    await restartReuse();
+
+    const { statusCode, body } = await listEntries(REUSE_UID);
+    expect(statusCode).toBe(200);
+    expect(body.results).toHaveLength(1);
+    expect(body.results[0].fieldB).toBe('Value B');
+    expect(body.results[0].fieldC).toBe('Value A');
+    expect(body.results[0].fieldA).toBeUndefined();
+  });
+});
+
 describe('Content Type Builder - relation rename preserves data', () => {
   const TAG_UID = 'api::reltag.reltag';
   const OWNER_UID = 'api::relowner.relowner';
@@ -953,7 +1034,10 @@ describe('Content Type Builder - rename migrations disabled', () => {
   test("keeps legacy drop-and-recreate behavior when renameMigrations is 'never'", async () => {
     // The CTB schema service reads the plugin config at save time, so setting the
     // loaded test app's config here exercises the real `never` branch.
-    strapi.config.set('plugin::content-type-builder.renameMigrations', 'never');
+    strapi.config.set(['plugin::content-type-builder', 'renameMigrations', 'attributes'], 'never');
+    expect(strapi.plugin('content-type-builder').config('renameMigrations.attributes')).toBe(
+      'never'
+    );
     const migrationFilesBefore = listRenameMigrationFiles();
 
     const res = await updateSchema({

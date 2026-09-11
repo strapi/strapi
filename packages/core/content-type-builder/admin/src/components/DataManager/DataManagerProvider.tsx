@@ -29,6 +29,9 @@ import {
   RenameMigrationModal,
   applyRenameDecisions,
   collectPendingRenames,
+  getAttributeRenameDecision,
+  shouldPromptForRenamesBeforeSave,
+  type AttributeRenameMigrationMode,
   type PendingRename,
 } from './RenameMigrationModal';
 import { useServerRestartWatcher } from './useServerRestartWatcher';
@@ -56,8 +59,6 @@ type SchemaResponse = {
     };
   };
 };
-
-type AttributeRenameMigrationMode = 'always' | 'never' | 'prompt-after-edit' | 'prompt-before-save';
 
 type ReservedNamesResponse = DataManagerContextValue['reservedNames'];
 
@@ -257,7 +258,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       contentTypes: mutatedCTs,
     });
 
-    if (renameMigrationModeRef.current === 'prompt-before-save') {
+    if (shouldPromptForRenamesBeforeSave(renameMigrationModeRef.current)) {
       const pendingRenames = collectPendingRenames(requestData);
 
       if (pendingRenames.length > 0) {
@@ -404,12 +405,9 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
         return true;
       }
 
-      if (renameMigrationModeRef.current === 'never') {
-        return false;
-      }
-
-      if (renameMigrationModeRef.current !== 'prompt-after-edit') {
-        return true;
+      const decision = getAttributeRenameDecision(renameMigrationModeRef.current);
+      if (decision !== 'prompt') {
+        return decision;
       }
 
       const schema =

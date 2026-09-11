@@ -4,6 +4,31 @@ import { useIntl } from 'react-intl';
 
 import { getTrad } from '../../utils/getTrad';
 
+export type AttributeRenameMigrationMode =
+  | 'always'
+  | 'never'
+  | 'prompt-after-edit'
+  | 'prompt-before-save';
+
+export type AttributeRenameDecision = boolean | 'prompt';
+
+export const getAttributeRenameDecision = (
+  mode: AttributeRenameMigrationMode
+): AttributeRenameDecision => {
+  if (mode === 'never') {
+    return false;
+  }
+
+  if (mode === 'prompt-after-edit') {
+    return 'prompt';
+  }
+
+  return true;
+};
+
+export const shouldPromptForRenamesBeforeSave = (mode: AttributeRenameMigrationMode): boolean =>
+  mode === 'prompt-before-save';
+
 /**
  * A single rename hop the user performed on an existing field, shown in the
  * confirmation modal. `key` is `${uid}:${hopIndex}` so a decision maps back to
