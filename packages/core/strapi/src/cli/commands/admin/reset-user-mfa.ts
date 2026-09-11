@@ -21,15 +21,12 @@ interface Answers {
  * `packages/core/admin/server/src/services/index.ts`), not a pre-built object like `admin::user`.
  * It is only instantiated when resolved through the services registry, i.e.
  * `strapi.service('admin::mfa')` -- `app.admin!.services.mfa` is the raw, uninstantiated factory
- * function and calling any method on it throws. Typed locally (rather than importing
- * `@strapi/admin`'s own, private `src/utils` service type) naming only the methods this command
- * calls, to avoid a deep cross-package import into another package's internals.
+ * function and calling any method on it throws. Typed locally, naming only the methods each
+ * command calls, rather than importing `@strapi/admin`'s private service type across packages.
  */
 interface MfaService {
   // The same method `POST /mfa/users/:id/reset` calls, so the CLI and the panel cannot drift
-  // into doing different amounts of work. Returns the (never-rejecting) notification promise
-  // rather than `void`: this command awaits it below so `process.exit` cannot tear the process
-  // down before a detached email send has had a chance to run.
+  // into doing different amounts of work.
   resetUser(userId: string, actor?: { byUserId?: string; via?: 'cli' }): Promise<void>;
 }
 

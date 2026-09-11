@@ -4,7 +4,8 @@ module.exports = ({ env }) => ({
     // WebAuthn refuses an IP-literal relying-party id, and the harness serves this app on
     // 127.0.0.1. `localhost` is the one dotless host browsers accept, so the passkey specs
     // navigate there (see `mfa-passkeys.spec.ts`'s `test.use({ baseURL })`) and the expected
-    // origin is pinned to match. The port is per-worker; the harness sets PORT.
+    // origin is pinned to match. The port is per-worker and the harness sets PORT; the fallback
+    // tracks `config/server.js`'s, since the two must name the same port when it is unset.
     mfa: {
       webauthn: {
         rpId: 'localhost',

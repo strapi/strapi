@@ -9,15 +9,7 @@ interface CmdOptions {
   email?: string;
 }
 
-/**
- * `admin::mfa` is registered as a factory (`{ strapi } => createMfaService(...)`, see
- * `packages/core/admin/server/src/services/index.ts`), not a pre-built object like `admin::user`.
- * It is only instantiated when resolved through the services registry, i.e.
- * `strapi.service('admin::mfa')` -- `app.admin!.services.mfa` is the raw, uninstantiated factory
- * function and calling any method on it throws. Typed locally (rather than importing
- * `@strapi/admin`'s own, private `src/utils` service type) naming only the methods this command
- * calls, to avoid a deep cross-package import into another package's internals.
- */
+/** See `reset-user-mfa.ts` for why the service is resolved through `app.service`. */
 interface MfaService {
   isEnrolled(userId: string): Promise<boolean>;
   countUnusedRecoveryCodes(userId: string): Promise<number>;

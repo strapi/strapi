@@ -16,7 +16,7 @@ export const MAX_TRUSTED_DEVICES_PER_USER = 10;
 const TRUST_TOKEN_BYTES = 32;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-/** The three notices this module raises; a subset of the service's `MfaChangeNotice`. */
+/** The notices this module raises; a subset of the service's `MfaChangeNotice`. */
 export type TrustedDeviceNotice = 'device_trusted' | 'device_trust_revoked' | 'trusted_device_used';
 
 export interface TrustedDeviceRow {
@@ -65,6 +65,12 @@ export interface TrustedDeviceDeps {
   /** The live policy. Injected so this module never reads the store itself. */
   settings: () => Promise<TrustedDeviceSettings>;
   recordEvent: (userId: string, type: MfaEventType, metadata?: MfaEventMetadata) => Promise<void>;
+  /**
+   * Deliberately never awaited at any call site in this module, and never inside a transaction:
+   * it is the event hub plus a best-effort email, and neither is allowed to fail or delay the
+   * operation that raised it. The returned promise cannot reject. Awaiting one of these is not a
+   * fix for a floating promise here -- it would put an email send on the request's critical path.
+   */
   notify: (
     userId: string,
     type: TrustedDeviceNotice,
@@ -137,8 +143,8 @@ export const createTrustedDevices = ({
 
       // Recorded inside the same transaction as the row and the cap eviction: the grant and its
       // audit trail must land or fail together, not have the row committed while the event that
-      // explains it is lost to an unrelated failure. `notify` stays outside -- it is the event
-      // hub, fire-and-forget.
+      // explains it is lost to an unrelated failure. `notify` stays outside, for the reason its
+      // own declaration gives.
       await recordEvent(userId, 'device_trusted', {
         ...(deviceName ? { deviceName } : {}),
         days: current.days,

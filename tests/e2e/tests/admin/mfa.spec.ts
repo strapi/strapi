@@ -30,7 +30,6 @@ test.describe('Two-factor authentication', () => {
 
     const { secret, recoveryCodes } = await enrolViaUi(page, ADMIN_PASSWORD);
 
-    // fresh session
     await context.clearCookies();
     await page.goto('/admin');
     await login({ page });
@@ -50,7 +49,6 @@ test.describe('Two-factor authentication', () => {
     await page.getByRole('button', { name: 'Verify' }).click();
     await expect(page).toHaveTitle(TITLE_HOME);
 
-    // again with a recovery code
     await context.clearCookies();
     await page.goto('/admin');
     await login({ page });

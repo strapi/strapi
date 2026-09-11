@@ -11,10 +11,8 @@ type RouteEntry = {
 const route = (method: string, path: string): RouteEntry =>
   (routes as unknown as RouteEntry[]).find((r) => r.method === method && r.path === path)!;
 
-// Neither administrator permission gate was asserted anywhere -- removing
-// `admin::users.read` from the count route, or `admin::users.update` from the removal route,
-// left the whole admin package green. This pins the policies on all six passkey routes,
-// and in particular the exact `hasPermissions` action each administrator route carries.
+// The policies on all six passkey routes, and in particular the exact `hasPermissions` action
+// each administrator route carries: nothing else in the package fails if one is dropped.
 describe('mfa routes (passkeys)', () => {
   test.each([
     ['POST', '/mfa/passkeys/options'],

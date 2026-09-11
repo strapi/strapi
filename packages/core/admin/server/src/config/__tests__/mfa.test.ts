@@ -182,7 +182,6 @@ describe('validateMfaConfig', () => {
   });
 
   test('MFA_DEFAULTS cannot be mutated through config export', () => {
-    // Save original values
     const originalDigits = MFA_DEFAULTS.digits;
     const originalBack = MFA_DEFAULTS.window.back;
 
@@ -197,16 +196,14 @@ describe('validateMfaConfig', () => {
       },
     });
 
-    // Verify MFA_DEFAULTS is unchanged
     expect(MFA_DEFAULTS.digits).toBe(originalDigits);
     expect(MFA_DEFAULTS.window.back).toBe(originalBack);
   });
 
-  // `MfaConfig` deliberately omits `webauthn` (it has no safe default and is validated
-  // separately by `resolveWebauthnRp`), but the naive `{ ...MFA_DEFAULTS, ...input }` spread used
-  // to carry it through onto the returned object anyway -- a runtime value the type says cannot
-  // exist. `toEqual` alone would not catch this (it treats a present-but-undefined key the same
-  // as an absent one), so this asserts the key's actual presence on the object.
+  // `MfaConfig` deliberately omits `webauthn` (it has no safe default and is validated separately
+  // by `resolveWebauthnRp`), so a `{ ...MFA_DEFAULTS, ...input }` spread must not carry it through
+  // onto the result -- that is a runtime value the type says cannot exist. `toEqual` would not
+  // catch it, treating a present-but-undefined key as absent, hence `hasOwnProperty`.
   test('a stored webauthn key does not survive onto the validated result', () => {
     const logger = makeLogger();
     const raw = { webauthn: { rpId: 'example.com' } };

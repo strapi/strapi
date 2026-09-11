@@ -59,10 +59,9 @@ export default {
       private: true,
       searchable: false,
     },
-    // Passkeys: the WebAuthn challenge for a *login* ceremony, set by
+    // The WebAuthn challenge for a *login* ceremony, set by
     // `POST /admin/login/mfa/webauthn/options` and cleared by this row's deletion (the consume) or
-    // its expiry sweep. Nullable, so every existing row and every TOTP-only challenge is
-    // untouched.
+    // its expiry sweep. Nullable: a TOTP-only challenge has none.
     webauthnChallenge: {
       type: 'string',
       configurable: false,

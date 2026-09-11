@@ -118,7 +118,6 @@ describe('Audit logs service', () => {
   });
 
   it('routes mfa change events and the gated-login notice into the audit log', async () => {
-    // Mock Strapi EE feature to be enabled for this test
     jest.mocked(strapi.ee.features.isEnabled).mockReturnValueOnce(true);
     const saveEvent = jest.fn();
     // Only this one call to `strapi.get('audit-logs')` -- inside `createAuditLogsLifecycleService`
@@ -251,7 +250,6 @@ describe('Audit logs service', () => {
   });
 
   it('should create a cron job that executed one time a day', async () => {
-    // Mock Strapi EE feature to be enabled for this test
     jest.mocked(strapi.ee.features.isEnabled).mockReturnValueOnce(true);
 
     const lifecycle = createAuditLogsLifecycleService(strapi);

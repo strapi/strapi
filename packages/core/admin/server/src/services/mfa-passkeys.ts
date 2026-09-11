@@ -395,7 +395,7 @@ export interface PasskeyRow {
   createdAt: Date | string;
 }
 
-/** The three notices this module raises; a subset of the service's `MfaChangeNotice`. */
+/** The notices this module raises; a subset of the service's `MfaChangeNotice`. */
 type PasskeyNotice = 'passkey_registered' | 'passkey_removed' | 'passkey_used';
 
 export interface PasskeyDeps {

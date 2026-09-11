@@ -185,12 +185,9 @@ const RECOVERY_CODE_LENGTH = 10;
 /** 10 characters over a 32 character alphabet, so 50 bits of entropy. */
 export const generateRecoveryCode = (): string => {
   let code = '';
-  // Rejection-free: masking a byte to 5 bits (`& 31`) always yields 0-31, a value in range for
-  // every one of the alphabet's 32 symbols, with no bias and no candidate to ever reject --
-  // unlike a wider byte range folded down by modulo (`byte % 32`), which is only unbiased when
-  // the range is itself a multiple of 32. 256 (a byte's range) happens to be a multiple of 32, so
-  // modulo would also be unbiased here; masking is preferred anyway because it is exact by
-  // construction rather than by this coincidence, and needs no rejection loop to stay that way.
+  // Rejection-free: masking a byte to 5 bits (`& 31`) always yields 0-31, in range for every one
+  // of the alphabet's 32 symbols, with no bias and nothing to reject. Exact by construction,
+  // rather than by the alphabet's size happening to divide a byte's range.
   while (code.length < RECOVERY_CODE_LENGTH) {
     for (const byte of crypto.randomBytes(RECOVERY_CODE_LENGTH)) {
       if (code.length === RECOVERY_CODE_LENGTH) break;

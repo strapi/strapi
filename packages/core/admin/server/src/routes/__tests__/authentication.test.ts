@@ -28,12 +28,11 @@ const hasRateLimitEntry = (
 describe('authentication routes', () => {
   // Every route whose rate-limit bucket structurally collapses onto the source IP, because its
   // body carries a token rather than an email: `admin::rateLimit` keys on
-  // `${email}:${path}:${ip}` (see `middlewares/rateLimit.ts`) and substitutes a literal
-  // `unknownEmail` when the body has none. Behind NAT or an unproxied reverse proxy that bucket
-  // is "everyone on this network", so at the middleware default a whole org shares five attempts
-  // per five minutes. The token must never become the key (it is secret material), so each of
-  // these routes widens the ceiling at the route level instead. Leaving one at the default is
-  // the regression this pins.
+  // `${email}:${path}:${ip}` and substitutes a literal `unknownEmail` when the body has none.
+  // Behind NAT that bucket is "everyone on this network", so at the middleware default a whole
+  // org shares five attempts per five minutes. The token must never become the key, so each of
+  // these widens the ceiling at the route level instead. Leaving one at the default is the
+  // regression this pins.
   describe.each([
     ['/reset-password', 20],
     ['/login/mfa', 50],
@@ -88,9 +87,9 @@ describe('authentication routes', () => {
     }
   });
 
-  // The three MFA login routes must carry the feature gate: the handler no longer checks it, so
-  // a route missing this policy would run the handler with the feature off. `/login` must NOT
-  // carry it -- ordinary password login works regardless.
+  // The feature gate lives only on the route, so a login route missing this policy runs its
+  // handler with the feature off. `/login` must NOT carry it -- ordinary password login works
+  // regardless.
   test('the three /login/mfa routes carry admin::isMfaEnabled, and /login does not', () => {
     for (const path of ['/login/mfa', '/login/mfa/webauthn/options', '/login/mfa/webauthn']) {
       expect(route('POST', path)!.config.policies).toContain('admin::isMfaEnabled');

@@ -5,8 +5,10 @@ import { enrolViaUi, totpFor, waitForNextTotpStep } from '../../../utils/mfa';
 import { ADMIN_PASSWORD, TITLE_HOME } from '../../constants';
 
 // WebAuthn will not run against an IP-literal origin, so this file alone talks to the app over
-// `localhost`. The server's expected origin is pinned to match in tests/app-template/config/admin.js.
-test.use({ baseURL: `http://localhost:${process.env.PORT ?? 8000}` });
+// `localhost`. The server's expected origin is pinned to match in
+// `tests/app-template/config/admin.js`, and the fallback must match `config/server.js`'s -- the
+// two ports diverging means every ceremony fails an origin check with nothing useful in the log.
+test.use({ baseURL: `http://localhost:${process.env.PORT ?? 1337}` });
 
 /**
  * Attaches a virtual WebAuthn authenticator to this page over CDP, so a passkey can actually be

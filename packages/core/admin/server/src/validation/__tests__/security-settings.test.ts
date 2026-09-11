@@ -4,10 +4,8 @@
  * Coverage for the passkeys `passkeysSchema` folded into `updateSecuritySettingsSchema`, and for
  * the validation layer's own copy of the `'Provide mfa, trustedDevices or passkeys'` message.
  *
- * `mfa` and `trustedDevices` never had validation-level tests either -- this file does not close
- * that pre-existing gap, it only exercises this file's schema, through the exported
- * `validateUpdateSecuritySettings`, the same entry point the controller calls (`passkeysSchema`
- * itself is not exported, so there is no way to unit-test it in isolation).
+ * Exercised through the exported `validateUpdateSecuritySettings`, the entry point the controller
+ * calls: `passkeysSchema` itself is not exported, so there is no way to reach it in isolation.
  */
 import { validateUpdateSecuritySettings } from '../security-settings';
 

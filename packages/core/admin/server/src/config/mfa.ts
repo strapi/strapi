@@ -13,6 +13,9 @@ export const MFA_DEFAULTS: MfaConfig = {
   enabled: true,
   digits: 6,
   step: 30,
+  // Asymmetric on purpose: one step of tolerance for a clock behind the server, none for one
+  // ahead, since a future code is not yet legitimate. This is why every e2e and API helper waits
+  // out a step boundary rather than reusing a code.
   window: { back: 1, forward: 0 },
   challengeTtl: 300,
   maxChallengeAttempts: 5,
@@ -27,7 +30,6 @@ interface Logger {
 
 const PREFIX = '[admin.auth.mfa]';
 
-/** A non-null, non-array object -- anything else spreads into indexed keys instead of settings. */
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
@@ -37,10 +39,8 @@ const isPlainObject = (value: unknown): value is Record<string, unknown> =>
  * because that is the operator's decision to make.
  */
 export const validateMfaConfig = (raw: unknown, logger: Logger): MfaConfig => {
-  // A string or an array is truthy and passes straight through `raw ?? {}` below, then gets cast
-  // to `Partial<MfaConfig>` and spread over the defaults -- which does not merge settings, it
-  // spreads characters/elements onto indexed string keys ("0", "1", ...) of the result. Caught
-  // here, before that spread, rather than letting it produce a config nobody asked for.
+  // A string or an array is truthy, so it passes `raw ?? {}` and then spreads over the defaults
+  // as indexed keys ("0", "1", ...) rather than merging as settings. Caught before that spread.
   let safeRaw: unknown = raw;
   if (raw !== undefined && raw !== null && !isPlainObject(raw)) {
     logger.warn(

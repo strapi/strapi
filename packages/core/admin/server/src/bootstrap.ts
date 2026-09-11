@@ -218,17 +218,14 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
 
   const mfaService = getService('mfa');
   if (mfaService.isEnabled()) {
-    // Housekeeping. Expired challenges are also rejected lazily on read, so this is only about
-    // not letting the table grow — nothing about the security of the flow depends on it having
-    // run, which is exactly why it is wrapped: a cleanup that cannot fail safely would otherwise
-    // be able to stop the admin from booting at all. Trusted-device rows are swept here
-    // for the same reason and with the same safety: a dead row is already refused, and deleted,
-    // on read.
+    // Table hygiene only: an expired challenge and a dead trust are both refused, and deleted, on
+    // read. That is why the whole thing is wrapped -- a cleanup nothing depends on must never be
+    // able to stop the admin from booting.
     //
     // The delete is unbounded, deliberately. Challenge rows come only from `createChallenge`,
     // which is throttled per account and rate limited per IP, and they expire after
-    // `challengeTtl` (five minutes by default), so the expired set at boot is small. Batching
-    // would be the fix if that ever changed.
+    // `challengeTtl`, so the expired set at boot is small. Batching would be the fix if that
+    // ever changed.
     const sweep = async () => {
       try {
         await mfaService.sweepExpiredChallenges();
@@ -242,13 +239,9 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
       }
     };
 
-    // Once at boot, then daily. Boot alone leaves a long-lived instance -- the normal case for a
-    // production deployment, which may run for months -- never sweeping again, so expired rows
-    // accumulate for the lifetime of the process. `strapi.cron.add` is how metrics, EE audit
+    // Once at boot, then daily. Boot alone leaves a long-lived instance -- months, for a
+    // production deployment -- never sweeping again. `strapi.cron.add` is how metrics, EE audit
     // logs, content-releases and upload all schedule their own housekeeping.
-    //
-    // Nothing about the security of either flow depends on this running: a dead challenge and a
-    // dead trust are both refused, and deleted, on read. This is table hygiene.
     await sweep();
     strapi.cron.add({
       sweepExpiredMfaRows: {
@@ -261,13 +254,11 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
     // relying-party id hides every passkey surface -- correctly, since no ceremony could succeed.
     // Asking here rather than on the first `/mfa/me` puts the cause and the config key that fixes
     // it in the startup log, where an operator is actually looking, instead of leaving the
-    // surfaces silently absent. In practice this fires for a deployment that never set `server.url`, so
-    // `admin.absoluteUrl` falls back to `http://<host>:<port>` and the template's `HOST=0.0.0.0`
-    // makes that an IP literal.
+    // surfaces silently absent. In practice this fires for a deployment that never set
+    // `server.url`, so `admin.absoluteUrl` falls back to `http://<host>:<port>` and the template's
+    // `HOST=0.0.0.0` makes that an IP literal.
     //
-    // Wrapped separately from the sweeps above, for two reasons: a store read that fails here
-    // must not be reported as a sweep failure, and -- like the sweeps -- a diagnostic must never
-    // be able to stop the admin from booting.
+    // Its own `try`, so a store read that fails here is not reported as a sweep failure.
     try {
       await mfaService.warnIfPasskeysMisconfigured();
     } catch (error) {
