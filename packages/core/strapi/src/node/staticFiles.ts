@@ -27,8 +27,12 @@ const toCssString = (value: string): string => {
   );
 };
 
-/** Files that hold class names but reach no page. They add candidates and bytes for nothing */
+/**
+ * Files that hold class names but reach no page. Each pattern is joined onto a root, so a root that
+ * itself lives under `node_modules` is still scanned
+ */
 const EXCLUDED_SOURCES = [
+  '**/node_modules/**',
   '**/__tests__/**',
   '**/*.test.*',
   '**/*.spec.*',
