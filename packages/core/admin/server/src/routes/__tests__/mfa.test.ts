@@ -39,3 +39,17 @@ describe('mfa routes (passkeys)', () => {
     ]);
   });
 });
+
+// The two administrator actions that change another account's factor state. Both lower or
+// restore access for somebody else, so both carry the same gate the users API uses for a write.
+describe('mfa routes (administrator actions on another user)', () => {
+  test.each([
+    ['POST', '/mfa/users/:id/unlock'],
+    ['POST', '/mfa/users/:id/reset'],
+  ])('%s %s carries admin::users.update', (method, path) => {
+    expect(route(method, path).config.policies).toEqual([
+      'admin::isAuthenticatedAdmin',
+      { name: 'admin::hasPermissions', config: { actions: ['admin::users.update'] } },
+    ]);
+  });
+});

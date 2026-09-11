@@ -37,6 +37,7 @@ export default [
   authenticated('DELETE', '/mfa/trusted-devices/:id', 'mfa.revokeTrustedDevice'),
   // Administrator actions on another user, gated like the users API itself.
   withPermission('POST', '/mfa/users/:id/unlock', 'mfa.unlockUser', 'admin::users.update'),
+  withPermission('POST', '/mfa/users/:id/reset', 'mfa.resetUser', 'admin::users.update'),
   withPermission(
     'GET',
     '/mfa/users/:id/trusted-devices',

@@ -3,16 +3,17 @@ import { action as resetUserMfaCommand } from '../reset-user-mfa';
 
 const load = jest.fn(() => mock) as any;
 const findOne = jest.fn();
-const disable = jest.fn();
-const recordEvent = jest.fn();
-const notify = jest.fn();
+const resetUser = jest.fn();
 const invalidateRefreshToken = jest.fn();
 const sessionManager = jest.fn(() => ({ invalidateRefreshToken }));
 
+// The command delegates the whole reset (disable, evict sessions, record, notify) to the
+// service, which is the same method `POST /mfa/users/:id/reset` calls. What is left for this
+// suite to prove is the command's own job: resolve the email, delegate once, and not exit before
+// the notification promise settles. The orchestration itself is covered in the admin service's
+// own tests.
 const mfaServiceInstance = {
-  disable,
-  recordEvent,
-  notify,
+  resetUser,
 };
 
 // Mirrors the REAL registration shape (`packages/core/admin/server/src/services/index.ts`):
@@ -57,9 +58,7 @@ describe('admin:reset-user-mfa command', () => {
   beforeEach(() => {
     load.mockClear();
     findOne.mockClear();
-    disable.mockClear();
-    recordEvent.mockClear();
-    notify.mockClear();
+    resetUser.mockClear();
     invalidateRefreshToken.mockClear();
     sessionManager.mockClear();
     db.query.mockClear();
@@ -85,7 +84,7 @@ describe('admin:reset-user-mfa command', () => {
     expect(findOne).toHaveBeenCalledWith({ where: { email } });
     expect(service).toHaveBeenCalledWith('admin::mfa');
     expect(mfaFactory).not.toHaveBeenCalled();
-    expect(disable).toHaveBeenCalledWith('1');
+    expect(resetUser).toHaveBeenCalledWith('1', { via: 'cli' });
     expect(mockExit).toHaveBeenCalledWith(0);
     expect(consoleLog).toHaveBeenCalled();
 
@@ -93,20 +92,18 @@ describe('admin:reset-user-mfa command', () => {
     consoleLog.mockRestore();
   });
 
-  // `notify` emits the eventHub event synchronously then starts the email send. The command
-  // used to call `notify(...)` and immediately `process.exit(0)` without waiting for it, so the
-  // process could tear down before the detached email promise ever settled and the reset email
-  // would silently never send. `notify` now returns that promise, and the command must await it
-  // before exiting.
-  test('awaits notify before exiting, so the reset email cannot be dropped by an early exit', async () => {
+  // `resetUser` returns the (never-rejecting) notification promise. The command used to fire it
+  // and immediately `process.exit(0)`, so the process could tear down before the detached email
+  // ever settled and the reset mail would silently never send. Exit must wait for it.
+  test('awaits the reset before exiting, so the reset email cannot be dropped by an early exit', async () => {
     const email = 'kai@doe.com';
     findOne.mockResolvedValue({ id: 1, email });
 
-    let releaseNotify: (() => void) | undefined;
-    notify.mockImplementation(
+    let releaseReset: (() => void) | undefined;
+    resetUser.mockImplementation(
       () =>
         new Promise<void>((resolve) => {
-          releaseNotify = resolve;
+          releaseReset = resolve;
         })
     );
 
@@ -115,64 +112,31 @@ describe('admin:reset-user-mfa command', () => {
 
     const run = resetUserMfaCommand({ email });
 
-    // Drains every pending microtask (the chain of already-resolved awaits ahead of `notify` in
-    // the command) without waiting on `notify`'s own still-unresolved promise: a macrotask
-    // boundary (`setImmediate`) only runs once the microtask queue is empty, and the only thing
-    // keeping it non-empty here is that promise.
+    // Drains every pending microtask (the chain of already-resolved awaits ahead of `resetUser`
+    // in the command) without waiting on its own still-unresolved promise: a macrotask boundary
+    // (`setImmediate`) only runs once the microtask queue is empty, and the only thing keeping it
+    // non-empty here is that promise.
     await new Promise<void>((resolve) => {
       setImmediate(resolve);
     });
 
-    // `notify` was called, but its promise has not resolved yet -- `process.exit` must not have
-    // run before it does.
-    expect(notify).toHaveBeenCalledWith('1', 'reset');
+    // `resetUser` was called, but its promise has not resolved yet -- `process.exit` must not
+    // have run before it does.
+    expect(resetUser).toHaveBeenCalledWith('1', { via: 'cli' });
     expect(mockExit).not.toHaveBeenCalled();
 
-    releaseNotify!();
+    releaseReset!();
     await run;
 
     expect(mockExit).toHaveBeenCalledWith(0);
-    // Direct ordering evidence, not just "eventually both happened": notify's own call happens
-    // before exit, and (via the not-yet-called assertion above) exit could not have run until the
-    // returned promise resolved.
-    expect(notify.mock.invocationCallOrder[0]).toBeLessThan(mockExit.mock.invocationCallOrder[0]);
+    // Direct ordering evidence, not just "eventually both happened".
+    expect(resetUser.mock.invocationCallOrder[0]).toBeLessThan(
+      mockExit.mock.invocationCallOrder[0]
+    );
 
     mockExit.mockRestore();
     consoleLog.mockRestore();
-    notify.mockReset();
-  });
-
-  test('invalidates the user sessions as well', async () => {
-    // Otherwise an attacker holding a live session survives the reset meant to evict them
-    const email = 'kai@doe.com';
-    findOne.mockResolvedValue({ id: 1, email });
-
-    const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
-    const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
-
-    await resetUserMfaCommand({ email });
-
-    expect(service).toHaveBeenCalledWith('admin::mfa');
-    expect(mfaFactory).not.toHaveBeenCalled();
-    expect(sessionManager).toHaveBeenCalledWith('admin');
-    expect(invalidateRefreshToken).toHaveBeenCalledWith('1');
-
-    // Ordering matters: a failing event write must never leave an attacker's session alive, so
-    // sessions are evicted before the reset is recorded and notified.
-    const disableOrder = disable.mock.invocationCallOrder[0];
-    const evictOrder = invalidateRefreshToken.mock.invocationCallOrder[0];
-    const recordOrder = recordEvent.mock.invocationCallOrder[0];
-    const notifyOrder = notify.mock.invocationCallOrder[0];
-
-    expect(disableOrder).toBeLessThan(evictOrder);
-    expect(evictOrder).toBeLessThan(recordOrder);
-    expect(recordOrder).toBeLessThan(notifyOrder);
-
-    expect(recordEvent).toHaveBeenCalledWith('1', 'reset', { via: 'cli' });
-    expect(notify).toHaveBeenCalledWith('1', 'reset');
-
-    mockExit.mockRestore();
-    consoleLog.mockRestore();
+    resetUser.mockReset();
   });
 
   test('exits non-zero when the email is unknown', async () => {
@@ -191,10 +155,7 @@ describe('admin:reset-user-mfa command', () => {
     expect(consoleError).toHaveBeenCalledWith(`No admin user found for ${email}`);
     expect(mockExit).toHaveBeenCalledWith(1);
     expect(service).not.toHaveBeenCalled();
-    expect(disable).not.toHaveBeenCalled();
-    expect(invalidateRefreshToken).not.toHaveBeenCalled();
-    expect(recordEvent).not.toHaveBeenCalled();
-    expect(notify).not.toHaveBeenCalled();
+    expect(resetUser).not.toHaveBeenCalled();
 
     mockExit.mockRestore();
     consoleError.mockRestore();
@@ -233,8 +194,7 @@ describe('admin:reset-user-mfa command', () => {
     expect(mockExit).toHaveBeenCalledWith(0);
     expect(load).not.toHaveBeenCalled();
     expect(service).not.toHaveBeenCalled();
-    expect(disable).not.toHaveBeenCalled();
-    expect(invalidateRefreshToken).not.toHaveBeenCalled();
+    expect(resetUser).not.toHaveBeenCalled();
 
     mockInquiry.mockRestore();
     mockExit.mockRestore();

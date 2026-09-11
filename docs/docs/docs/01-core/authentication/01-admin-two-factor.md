@@ -206,6 +206,12 @@ strapi admin:unlock-user-mfa -e user@example.com  # lift an enforcement lock (al
 does **not** lift an enforcement lock, and an unlock restarts the grace period without touching the
 factor.
 
+The reset is also available in the panel, on the user edit page, as `POST
+/admin/mfa/users/:id/reset` behind `admin::users.update` (see
+[Enforcement](./02-admin-mfa-enforcement.md)). Both call the same service method. The CLI exists
+for when nobody can sign in at all; the panel action for the ordinary case of one user who lost
+their authenticator.
+
 ## Status endpoint
 
 `GET /admin/mfa/me` is the one call the admin UI polls for state. It never carries the secret, an

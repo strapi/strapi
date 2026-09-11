@@ -130,6 +130,20 @@ export declare namespace Disable {
  * Requires `admin::users.update`. 204 on success; 404 for an unknown user; 400 when the account
  * is not locked. No grace is stamped here: the user's next session starts a fresh window.
  */
+/**
+ * POST /mfa/users/:id/reset - Strip another admin's second factor and evict their sessions.
+ * Requires `admin::users.update`. 204 on success (including for an account that was not
+ * enrolled); 404 for an unknown user. No response body.
+ *
+ * The recovery path for a user who lost their authenticator and spent their recovery codes.
+ * `admin:reset-user-mfa` on the CLI does the same thing for when nobody can sign in at all.
+ */
+export declare namespace ResetUser {
+  export interface Params {
+    id: Data.ID;
+  }
+}
+
 export declare namespace UnlockUser {
   export interface Params {
     id: Data.ID;

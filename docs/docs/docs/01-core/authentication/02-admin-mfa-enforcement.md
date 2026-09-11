@@ -88,8 +88,28 @@ From the CLI, for when nobody can get in:
 strapi admin:unlock-user-mfa -e user@example.com
 ```
 
-An unlock does not touch the second factor, and `admin:reset-user-mfa` does not lift a lock. The
-two are deliberately separate operations.
+An unlock does not touch the second factor, and a reset does not lift a lock. The two are
+deliberately separate operations.
+
+## Resetting another user's factor
+
+```
+POST /admin/mfa/users/:id/reset      # requires admin::users.update
+```
+
+Strips the account's second factor entirely -- authenticator, recovery codes, passkeys and
+trusted devices -- and invalidates every session for it. 204 on success, 404 for an unknown user,
+and 204 (not 400) for an account that was never enrolled: the caller's intent is "this account
+must end up with no second factor", which an unenrolled account already satisfies.
+
+This is the way back for a user who still knows their password but has lost their authenticator
+and spent their recovery codes. There is no lock to clear in that situation, so unlocking does
+not help. Sessions are evicted before the audit event is written, so a failing event write cannot
+leave an attacker's session alive past a reset done because the account was suspected
+compromised.
+
+`admin:reset-user-mfa` on the CLI calls the same service method, for when nobody can sign in at
+all.
 
 ## The security-settings endpoint
 

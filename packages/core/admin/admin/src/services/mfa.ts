@@ -17,6 +17,7 @@ import type {
   RegisterPasskey,
   RevokeTrustedDevice,
   RevokeUserTrustedDevices,
+  ResetUser,
   UnlockUser,
   VerifyEnrolment,
 } from '../../../shared/contracts/mfa';
@@ -110,6 +111,20 @@ const mfaService = adminApi
       unlockUserMfa: builder.mutation<void, UnlockUser.Params>({
         query: ({ id }) => ({ method: 'POST', url: `/admin/mfa/users/${id}/unlock` }),
         invalidatesTags: (_res, _err, { id }) => [{ type: 'User', id }],
+      }),
+      /**
+       * Strip another admin's second factor entirely: the way back for a user who has lost their
+       * authenticator and spent their recovery codes. Invalidates that user's `User` tag so the
+       * edit page re-reads enrolment and lock state, and both device tags, because the reset
+       * clears trusted devices and passkeys along with the factor.
+       */
+      resetUserMfa: builder.mutation<void, ResetUser.Params>({
+        query: ({ id }) => ({ method: 'POST', url: `/admin/mfa/users/${id}/reset` }),
+        invalidatesTags: (_res, _err, { id }) => [
+          { type: 'User', id },
+          { type: 'UserTrustedDevices', id },
+          { type: 'UserPasskeys', id },
+        ],
       }),
       /**
        * Trusted devices: the caller's trusted browsers. The server marks `current` by hashing the httpOnly
@@ -240,6 +255,7 @@ const {
   useDisableMfaMutation,
   useGetMfaNoticesQuery,
   useMarkMfaNoticesSeenMutation,
+  useResetUserMfaMutation,
   useUnlockUserMfaMutation,
   useGetTrustedDevicesQuery,
   useRevokeTrustedDeviceMutation,
@@ -263,6 +279,7 @@ export {
   useDisableMfaMutation,
   useGetMfaNoticesQuery,
   useMarkMfaNoticesSeenMutation,
+  useResetUserMfaMutation,
   useUnlockUserMfaMutation,
   useGetTrustedDevicesQuery,
   useRevokeTrustedDeviceMutation,

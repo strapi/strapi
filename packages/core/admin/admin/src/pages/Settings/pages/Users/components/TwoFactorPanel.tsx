@@ -11,6 +11,7 @@ import {
   useDeleteUserPasskeysMutation,
   useGetUserPasskeysQuery,
   useGetUserTrustedDevicesQuery,
+  useResetUserMfaMutation,
   useRevokeUserTrustedDevicesMutation,
   useUnlockUserMfaMutation,
 } from '../../../../../services/mfa';
@@ -35,6 +36,13 @@ interface TwoFactorPanelProps {
  * period: the user's next login does, so an unlock while they are away cannot re-lock them
  * unseen. The mutation invalidates this user's `User` tag, so the panel refreshes itself.
  *
+ * Reset (`POST /admin/mfa/users/:id/reset`) is the other direction and the only *destructive*
+ * action here: it strips the factor entirely and signs the user out everywhere. Offered for any
+ * enrolled account rather than only a locked one, because the case it serves is a user who still
+ * knows their password but has lost their authenticator and spent their recovery codes -- there
+ * is no lock to clear, and the alternative is `admin:reset-user-mfa` on a shell the customer may
+ * not have.
+ *
  * Trusted devices adds, for an enrolled user, the number of trusted browsers and a "Revoke trusted
  * devices" action (`DELETE /admin/mfa/users/:id/trusted-devices`, behind `admin::users.update`).
  * Revoking trust is security-positive, it forces the second factor back on, so unlike a reset it
@@ -51,6 +59,8 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const [unlock, { isLoading }] = useUnlockUserMfaMutation();
+  const [resetMfa, { isLoading: isResetting }] = useResetUserMfaMutation();
+  const [resetOpen, setResetOpen] = React.useState(false);
   const [confirmOpen, setConfirmOpen] = React.useState(false);
 
   // Trusted devices. Only an enrolled user can hold trusted browsers (disable and reset clear them), so
@@ -99,6 +109,27 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
       message: formatMessage({
         id: 'Settings.permissions.users.mfa.unlock.success',
         defaultMessage: 'Account unlocked',
+      }),
+    });
+  };
+
+  const handleReset = async () => {
+    const res = await resetMfa({ id: user.id });
+    setResetOpen(false);
+    if ('error' in res) {
+      toggleNotification({
+        type: 'danger',
+        message: isBaseQueryError(res.error)
+          ? formatAPIError(res.error)
+          : formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
+      });
+      return;
+    }
+    toggleNotification({
+      type: 'success',
+      message: formatMessage({
+        id: 'Settings.permissions.users.mfa.reset.success',
+        defaultMessage: 'Two-factor authentication reset',
       }),
     });
   };
@@ -212,6 +243,38 @@ const TwoFactorPanel = ({ user, canUpdate }: TwoFactorPanelProps) => {
       </Typography>
       <Flex justifyContent="space-between" alignItems="flex-start" gap={4} wrap="wrap">
         {state}
+        {/*
+          Reset is offered for any enrolled account, whether or not it is locked, because the
+          case it exists for is not a lock: the user still knows their password but has lost the
+          authenticator and spent their recovery codes. Unlock does not help them -- there is
+          nothing to unlock -- and without this the only way back in is a shell, which a Cloud
+          customer does not have.
+        */}
+        {user.mfaEnabledAt && canUpdate ? (
+          <Dialog.Root open={resetOpen} onOpenChange={setResetOpen}>
+            <Dialog.Trigger>
+              <Button variant="danger-light" loading={isResetting}>
+                {formatMessage({
+                  id: 'Settings.permissions.users.mfa.reset',
+                  defaultMessage: 'Reset',
+                })}
+              </Button>
+            </Dialog.Trigger>
+            <ConfirmDialog
+              title={formatMessage({
+                id: 'Settings.permissions.users.mfa.reset.title',
+                defaultMessage: "Reset this user's two-factor authentication?",
+              })}
+              onConfirm={handleReset}
+            >
+              {formatMessage({
+                id: 'Settings.permissions.users.mfa.reset.body',
+                defaultMessage:
+                  'Their authenticator app, recovery codes, passkeys and trusted devices are all removed, and they are signed out everywhere. They sign in with their password alone until they set up two-factor authentication again. Use this when a user has lost their authenticator and their recovery codes.',
+              })}
+            </ConfirmDialog>
+          </Dialog.Root>
+        ) : null}
         {user.mfaLockedAt ? (
           <Dialog.Root open={confirmOpen} onOpenChange={setConfirmOpen}>
             <Dialog.Trigger>

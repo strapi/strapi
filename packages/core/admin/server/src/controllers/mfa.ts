@@ -274,6 +274,31 @@ export default {
   },
 
   /**
+   * Strips another administrator's second factor and evicts their sessions. The way back in for
+   * a user who has lost their authenticator and spent their recovery codes; without it that
+   * account is only recoverable from a shell, which a Cloud customer does not have.
+   *
+   * 204 whether or not the target was enrolled: the caller's intent is "this account must end up
+   * with no second factor", and an account that already has none satisfies it. Reporting 400 for
+   * an unenrolled target would make the UI's job harder for no gain, and would leak enrolment
+   * state to a caller who can already read it from the user record anyway.
+   */
+  async resetUser(ctx: Context) {
+    const mfa = requireEnabled(ctx);
+    if (!mfa) return;
+
+    const { id } = ctx.params as { id: string };
+    const target = await getService('user').findOne(id);
+    if (!target) {
+      return ctx.notFound('User does not exist');
+    }
+
+    await mfa.resetUser(String(target.id), { byUserId: String(ctx.state.user.id) });
+
+    ctx.status = 204;
+  },
+
+  /**
    * Trusted devices. The caller's trusted browsers; the presented cookie (if any) marks the current one.
    * The service hashes it, the hash never reaches the response.
    */

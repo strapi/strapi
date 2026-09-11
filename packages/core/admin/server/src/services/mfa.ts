@@ -351,9 +351,9 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
 
   /**
    * Enforcement, run by every path that mints a session for a password-holding user.
-   * Reloads the row with roles itself so callers may pass a partial user. See the outcome table in
-   * the outcome table below; `retried` bounds the single re-read taken when a
-   * conditional update finds its precondition gone.
+   * Reloads the row with roles itself so callers may pass a partial user. See the outcome table
+   * below; `retried` bounds the single re-read taken when a conditional update finds its
+   * precondition gone.
    */
   const evaluateEnforcement = async (
     user: { id: Data.ID },
@@ -466,6 +466,37 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     });
     notify(userId, 'unlocked', actor.byUserId ? { byUserId: actor.byUserId } : {});
     return true;
+  };
+
+  /**
+   * Administrator reset: strips the account's second factor entirely and evicts its sessions, so
+   * a user who has lost their authenticator and spent their recovery codes can get back in.
+   *
+   * The one operation here that an administrator can perform without the target's consent and
+   * that *lowers* their protection, which is why it needs `admin::users.update` at the route and
+   * why it evicts sessions: if the reset is being done because the account is suspected
+   * compromised, leaving the attacker's session alive would defeat the point.
+   *
+   * Shared by the route and `admin:reset-user-mfa`, so the CLI and the panel cannot drift into
+   * doing different amounts of work. Returns the notification promise (never rejecting) for the
+   * CLI, which must not `process.exit` before the email has had a chance to send.
+   */
+  const resetUser = async (
+    userId: string,
+    actor: { byUserId?: string; via?: 'cli' } = {}
+  ): Promise<void> => {
+    await disable(userId);
+
+    // Sessions are evicted before the event is recorded: a failing event write must never leave
+    // an attacker holding a live session past the reset meant to evict them.
+    await invalidateAllSessions(userId);
+
+    await recordEvent(userId, 'reset', {
+      ...(actor.byUserId ? { byUserId: actor.byUserId } : {}),
+      ...(actor.via ? { via: actor.via } : {}),
+    });
+
+    return notify(userId, 'reset', actor.byUserId ? { byUserId: actor.byUserId } : {});
   };
 
   /**
@@ -1513,6 +1544,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     isMfaRequiredFor,
     enforce,
     unlock,
+    resetUser,
     beginEnrolment,
     completeEnrolment,
     verifyTotpForUser,

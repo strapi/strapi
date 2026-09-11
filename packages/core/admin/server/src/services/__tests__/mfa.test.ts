@@ -3425,6 +3425,63 @@ describe('mfa service: enforce', () => {
       expect(events[0].metadata).toEqual({ via: 'cli' });
     });
   });
+
+  // The recovery path for a user who lost their authenticator and spent their recovery codes.
+  // Shared by `POST /mfa/users/:id/reset` and `admin:reset-user-mfa`, which is the point: the
+  // panel and the CLI must not drift into doing different amounts of work.
+  describe('resetUser', () => {
+    test('strips the factor, evicts sessions, records and notifies, attributed to the actor', async () => {
+      const { service, users, events, strapi } = setup({
+        user: { mfaEnabledAt: new Date(), mfaSecret: 'enc:SECRET' },
+      });
+
+      await service.resetUser('1', { byUserId: '9' });
+
+      expect(users.get('1')!.mfaSecret).toBeNull();
+      expect(users.get('1')!.mfaEnabledAt).toBeNull();
+      expect(events).toEqual([
+        expect.objectContaining({ type: 'reset', metadata: { byUserId: '9' } }),
+      ]);
+      expect((strapi as any).eventHub.emit).toHaveBeenCalledWith('admin.mfa.reset', {
+        userId: '1',
+        byUserId: '9',
+      });
+    });
+
+    // Ordering is the security property: if the reset is being done because the account is
+    // suspected compromised, a failing event write must not leave the attacker's session alive.
+    test('evicts sessions before recording the event', async () => {
+      const { service, strapi } = setup({ user: { mfaEnabledAt: new Date() } });
+      const invalidate = (strapi as any).sessionManager('admin').invalidateRefreshToken;
+      const create = (strapi as any).db.query('admin::mfa-event').create;
+
+      await service.resetUser('1', { byUserId: '9' });
+
+      expect(invalidate).toHaveBeenCalledWith('1');
+      expect(invalidate.mock.invocationCallOrder[0]).toBeLessThan(
+        create.mock.invocationCallOrder[0]
+      );
+    });
+
+    test('the CLI marks its reset with via: cli and no byUserId', async () => {
+      const { service, events } = setup({ user: { mfaEnabledAt: new Date() } });
+
+      await service.resetUser('1', { via: 'cli' });
+
+      expect(events[0].metadata).toEqual({ via: 'cli' });
+    });
+
+    // 204-for-everyone at the controller rests on this: an account with nothing to strip is a
+    // no-op that still lands the audit trail, not an error.
+    test('an unenrolled account is a no-op that still records the reset', async () => {
+      const { service, users, events } = setup();
+
+      await expect(service.resetUser('1', { byUserId: '9' })).resolves.toBeUndefined();
+
+      expect(users.get('1')!.mfaSecret).toBeNull();
+      expect(events).toEqual([expect.objectContaining({ type: 'reset' })]);
+    });
+  });
 });
 
 describe('mfa service: trusted devices', () => {

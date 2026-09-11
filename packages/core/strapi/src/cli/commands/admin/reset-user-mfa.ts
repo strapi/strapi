@@ -26,12 +26,11 @@ interface Answers {
  * calls, to avoid a deep cross-package import into another package's internals.
  */
 interface MfaService {
-  disable(userId: string): Promise<void>;
-  recordEvent(userId: string, type: 'reset', metadata?: { via?: 'cli' }): Promise<void>;
-  // Returns the (never-rejecting) email promise rather than `void`: this command awaits it below
-  // so `process.exit` cannot tear the process down before a detached email send has a chance to
-  // run, silently dropping the reset notification.
-  notify(userId: string, type: 'reset'): Promise<void>;
+  // The same method `POST /mfa/users/:id/reset` calls, so the CLI and the panel cannot drift
+  // into doing different amounts of work. Returns the (never-rejecting) notification promise
+  // rather than `void`: this command awaits it below so `process.exit` cannot tear the process
+  // down before a detached email send has had a chance to run.
+  resetUser(userId: string, actor?: { byUserId?: string; via?: 'cli' }): Promise<void>;
 }
 
 const promptQuestions: ReadonlyArray<DistinctQuestion<Answers>> = [
@@ -56,18 +55,10 @@ async function resetMfa({ email }: CmdOptions) {
 
   const mfa = app.service('admin::mfa') as MfaService;
 
-  await mfa.disable(String(user.id));
-
-  // Sessions are evicted before the event is recorded and the notice is sent: a failing event
-  // write must never leave an attacker holding a live session past this reset.
-  await app.sessionManager('admin').invalidateRefreshToken(String(user.id));
-
-  await mfa.recordEvent(String(user.id), 'reset', { via: 'cli' });
-  // Awaited, unlike every other caller of `notify`: those are HTTP request handlers that return
-  // long before a detached email would need to complete, but this command's very next line is
-  // `process.exit(0)`, which can tear the process down mid-send if the promise is not waited on
-  // first.
-  await mfa.notify(String(user.id), 'reset');
+  // Awaited, unlike the HTTP caller: those return long before a detached email would need to
+  // complete, but this command's very next line is `process.exit(0)`, which can tear the process
+  // down mid-send if the promise is not waited on first.
+  await mfa.resetUser(String(user.id), { via: 'cli' });
 
   console.log(`Two-factor authentication reset for ${email}. All sessions were invalidated.`);
   process.exit(0);

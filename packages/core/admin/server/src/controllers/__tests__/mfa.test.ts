@@ -97,6 +97,7 @@ describe('mfa controller', () => {
       ['notices', {}],
       ['markNoticesSeen', {}],
       ['unlockUser', {}],
+      ['resetUser', {}],
       ['listTrustedDevices', {}],
       ['revokeTrustedDevice', {}],
       ['revokeAllTrustedDevices', {}],
@@ -773,6 +774,51 @@ describe('mfa controller', () => {
       await mfaController.unlockUser(ctx);
       expect(notFound).toHaveBeenCalledWith('User does not exist');
       expect(unlock).not.toHaveBeenCalled();
+      expect(ctx.status).not.toBe(204);
+    });
+  });
+
+  describe('resetUser', () => {
+    const build = (userExists = true) => {
+      const resetUser = jest.fn(() => Promise.resolve());
+      const findOne = jest.fn(() => Promise.resolve(userExists ? { id: 3 } : null));
+      setStrapi({
+        admin: { services: { mfa: { isEnabled: () => true, resetUser }, user: { findOne } } },
+      });
+      const notFound = jest.fn();
+      const ctx = createContext(
+        {},
+        {
+          state: { user: { id: 7 } },
+          params: { id: '3' },
+          notFound,
+          request: { query: {}, body: {} },
+        }
+      ) as any;
+      return { ctx, resetUser, notFound };
+    };
+
+    test('resets and answers 204 with the acting admin recorded', async () => {
+      const { ctx, resetUser } = build();
+      await mfaController.resetUser(ctx);
+      expect(resetUser).toHaveBeenCalledWith('3', { byUserId: '7' });
+      expect(ctx.status).toBe(204);
+    });
+
+    // Deliberately not a 400, unlike `unlockUser`: the caller's intent is "this account must end
+    // up with no second factor", and one that already has none satisfies it.
+    test('204 for an account that was never enrolled', async () => {
+      const { ctx, resetUser } = build();
+      await mfaController.resetUser(ctx);
+      expect(resetUser).toHaveBeenCalled();
+      expect(ctx.status).toBe(204);
+    });
+
+    test('404 when the user does not exist, without touching the factor', async () => {
+      const { ctx, resetUser, notFound } = build(false);
+      await mfaController.resetUser(ctx);
+      expect(notFound).toHaveBeenCalledWith('User does not exist');
+      expect(resetUser).not.toHaveBeenCalled();
       expect(ctx.status).not.toBe(204);
     });
   });
