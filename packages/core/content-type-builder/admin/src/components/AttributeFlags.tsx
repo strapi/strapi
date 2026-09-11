@@ -1,17 +1,9 @@
-import { Flex, Tooltip, Typography } from '@strapi/design-system';
+import { Badge, Flex, Tooltip } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import { styled } from 'styled-components';
 
 import { getAttributeFlags } from './attributeFlagRegistry';
 
 import type { AttributeLike } from './attributeFlagRegistry';
-
-const Pill = styled(Flex)`
-  border: 1px solid ${({ theme }) => theme.colors.neutral200};
-  border-radius: ${({ theme }) => theme.borderRadius};
-  padding: 0 ${({ theme }) => theme.spaces[2]};
-  height: 2rem;
-`;
 
 /**
  * What is true of a field, said in words next to it.
@@ -33,12 +25,14 @@ export const AttributeFlags = ({ attribute }: { attribute: AttributeLike }) => {
   return (
     <Flex gap={1} wrap="wrap">
       {active.map((flag) => (
+        // The tooltip hands its trigger a ref, and a Badge is a plain
+        // function component — the span is what takes it.
         <Tooltip key={flag.id} label={formatMessage(flag.label)}>
-          <Pill alignItems="center" tag="span">
-            <Typography variant="pi" textColor={flag.color}>
+          <Flex tag="span">
+            <Badge size="S" variant={flag.variant}>
               {formatMessage(flag.short)}
-            </Typography>
-          </Pill>
+            </Badge>
+          </Flex>
         </Tooltip>
       ))}
     </Flex>

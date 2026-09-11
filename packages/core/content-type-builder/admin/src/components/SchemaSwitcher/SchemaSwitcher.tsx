@@ -3,10 +3,8 @@ import * as React from 'react';
 import {
   Box,
   Breadcrumbs,
-  Crumb,
   CrumbLink,
   Flex,
-  IconButton,
   Popover,
   Typography,
   useCollator,
@@ -44,6 +42,48 @@ const pathTo = (schema: Schema): string =>
         (schema as { category?: string }).category
       }/${schema.uid}`
     : `/plugins/${pluginId}/content-types/${schema.uid}`;
+
+/**
+ * The trail recedes; the schema you are on is the part you act with.
+ *
+ * Blue rather than neutral so it reads as navigation and not as a heading of
+ * its own, and light enough to sit under the title without competing with it.
+ */
+const Trail = styled(Breadcrumbs)`
+  color: ${({ theme }) => theme.colors.primary500};
+
+  a {
+    color: ${({ theme }) => theme.colors.primary500};
+  }
+`;
+
+/** Name and caret together: the whole thing is the control, as it reads. */
+const SwitchTrigger = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spaces[1]};
+  padding: ${({ theme }) => `${theme.spaces[1]} ${theme.spaces[2]}`};
+  margin-inline-start: -${({ theme }) => theme.spaces[2]};
+  border: none;
+  border-radius: ${({ theme }) => theme.borderRadius};
+  background: transparent;
+  cursor: pointer;
+  color: ${({ theme }) => theme.colors.primary600};
+
+  &:hover,
+  &[data-state='open'] {
+    background: ${({ theme }) => theme.colors.primary100};
+  }
+
+  svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  svg path {
+    fill: ${({ theme }) => theme.colors.primary600};
+  }
+`;
 
 const SearchInput = styled.input`
   width: 100%;
@@ -127,7 +167,7 @@ export const SchemaSwitcher = ({ current }: { current: Schema }) => {
 
   return (
     <Flex gap={1} alignItems="center">
-      <Breadcrumbs label={upperFirst(current.info.displayName)}>
+      <Trail label={upperFirst(current.info.displayName)}>
         <CrumbLink
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore - `tag` is not in BaseLinkProps, the media library does the same
@@ -136,110 +176,114 @@ export const SchemaSwitcher = ({ current }: { current: Schema }) => {
         >
           {formatMessage(KIND_LABELS[kind])}
         </CrumbLink>
-        <Crumb isCurrent>{upperFirst(current.info.displayName)}</Crumb>
-      </Breadcrumbs>
 
-      <Popover.Root
-        open={open}
-        onOpenChange={(next) => {
-          setOpen(next);
-          if (!next) {
-            setSearch('');
-          }
-        }}
-      >
-        <Popover.Trigger>
-          <IconButton
-            variant="ghost"
-            size="XS"
-            label={formatMessage({
-              id: getTrad('switcher.open'),
-              defaultMessage: 'Go to another content type or component',
-            })}
-          >
-            <CaretDown />
-          </IconButton>
-        </Popover.Trigger>
-        <Popover.Content align="start" sideOffset={4}>
-          <Box width="28rem" padding={2}>
-            <Box
-              paddingLeft={3}
-              paddingRight={3}
-              paddingTop={2}
-              paddingBottom={2}
-              marginBottom={2}
-              background="neutral100"
-              hasRadius
-            >
-              <SearchInput
-                type="search"
-                autoFocus
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                aria-label={formatMessage({
-                  id: getTrad('switcher.search'),
-                  defaultMessage: 'Search content types and components',
-                })}
-                placeholder={formatMessage({
-                  id: getTrad('switcher.search.placeholder'),
-                  defaultMessage: 'Search…',
-                })}
-              />
-            </Box>
-
-            <Box maxHeight="32rem" overflow="auto">
-              {groups.length === 0 ? (
-                <Box padding={3}>
-                  <Typography textColor="neutral600">
-                    {formatMessage({
-                      id: getTrad('switcher.empty'),
-                      defaultMessage: 'Nothing matches that.',
-                    })}
-                  </Typography>
-                </Box>
-              ) : (
-                groups.map((group) => (
-                  <Box key={group.kind} paddingBottom={2}>
-                    <Box paddingLeft={3} paddingRight={3} paddingBottom={1}>
-                      <Typography variant="sigma" textColor="neutral600">
-                        {formatMessage(KIND_LABELS[group.kind])}
-                      </Typography>
-                    </Box>
-                    <Flex direction="column" alignItems="stretch" tag="ul">
-                      {group.schemas.map((schema) => (
-                        <li key={schema.uid}>
-                          <Option
-                            tag="button"
-                            type="button"
-                            onClick={() => go(schema)}
-                            justifyContent="space-between"
-                            gap={2}
-                            hasRadius
-                            paddingLeft={3}
-                            paddingRight={3}
-                            paddingTop={2}
-                            paddingBottom={2}
-                          >
-                            <Typography
-                              textColor="neutral800"
-                              fontWeight={schema.uid === current.uid ? 'bold' : 'regular'}
-                            >
-                              {upperFirst(schema.info.displayName)}
-                            </Typography>
-                            {schema.uid === current.uid ? (
-                              <Check fill="primary600" width="1.2rem" height="1.2rem" />
-                            ) : null}
-                          </Option>
-                        </li>
-                      ))}
-                    </Flex>
-                  </Box>
-                ))
+        <Popover.Root
+          open={open}
+          onOpenChange={(next) => {
+            setOpen(next);
+            if (!next) {
+              setSearch('');
+            }
+          }}
+        >
+          <Popover.Trigger>
+            <SwitchTrigger
+              type="button"
+              aria-label={formatMessage(
+                {
+                  id: getTrad('switcher.open'),
+                  defaultMessage: '{name} — go to another content type or component',
+                },
+                { name: upperFirst(current.info.displayName) }
               )}
+            >
+              <Typography variant="pi" fontWeight="bold" textColor="primary600">
+                {upperFirst(current.info.displayName)}
+              </Typography>
+              <CaretDown aria-hidden />
+            </SwitchTrigger>
+          </Popover.Trigger>
+          <Popover.Content align="start" sideOffset={4}>
+            <Box width="28rem" padding={2}>
+              <Box
+                paddingLeft={3}
+                paddingRight={3}
+                paddingTop={2}
+                paddingBottom={2}
+                marginBottom={2}
+                background="neutral100"
+                hasRadius
+              >
+                <SearchInput
+                  type="search"
+                  autoFocus
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  aria-label={formatMessage({
+                    id: getTrad('switcher.search'),
+                    defaultMessage: 'Search content types and components',
+                  })}
+                  placeholder={formatMessage({
+                    id: getTrad('switcher.search.placeholder'),
+                    defaultMessage: 'Search…',
+                  })}
+                />
+              </Box>
+
+              <Box maxHeight="32rem" overflow="auto">
+                {groups.length === 0 ? (
+                  <Box padding={3}>
+                    <Typography textColor="neutral600">
+                      {formatMessage({
+                        id: getTrad('switcher.empty'),
+                        defaultMessage: 'Nothing matches that.',
+                      })}
+                    </Typography>
+                  </Box>
+                ) : (
+                  groups.map((group) => (
+                    <Box key={group.kind} paddingBottom={2}>
+                      <Box paddingLeft={3} paddingRight={3} paddingBottom={1}>
+                        <Typography variant="sigma" textColor="neutral600">
+                          {formatMessage(KIND_LABELS[group.kind])}
+                        </Typography>
+                      </Box>
+                      <Flex direction="column" alignItems="stretch" tag="ul">
+                        {group.schemas.map((schema) => (
+                          <li key={schema.uid}>
+                            <Option
+                              tag="button"
+                              type="button"
+                              onClick={() => go(schema)}
+                              justifyContent="space-between"
+                              gap={2}
+                              hasRadius
+                              paddingLeft={3}
+                              paddingRight={3}
+                              paddingTop={2}
+                              paddingBottom={2}
+                            >
+                              <Typography
+                                textColor="neutral800"
+                                fontWeight={schema.uid === current.uid ? 'bold' : 'regular'}
+                              >
+                                {upperFirst(schema.info.displayName)}
+                              </Typography>
+                              {schema.uid === current.uid ? (
+                                <Check fill="primary600" width="1.2rem" height="1.2rem" />
+                              ) : null}
+                            </Option>
+                          </li>
+                        ))}
+                      </Flex>
+                    </Box>
+                  ))
+                )}
+              </Box>
             </Box>
-          </Box>
-        </Popover.Content>
-      </Popover.Root>
+          </Popover.Content>
+        </Popover.Root>
+      </Trail>
     </Flex>
   );
 };

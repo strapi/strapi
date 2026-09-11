@@ -28,8 +28,13 @@ import type { AnyAttribute, Component, ContentType } from '../types';
 import type { DraggableAttributes, DraggableSyntheticListeners } from '@dnd-kit/core';
 import type { UID } from '@strapi/types';
 
-export const GridWrapper = styled(Flex)<{ $isOverlay?: boolean; $isDragging?: boolean }>`
+export const GridWrapper = styled(Flex)<{
+  $isOverlay?: boolean;
+  $isDragging?: boolean;
+  $isClickable?: boolean;
+}>`
   justify-content: space-between;
+  cursor: ${({ $isClickable }) => ($isClickable ? 'pointer' : 'auto')};
 
   border-top: ${({ theme, $isOverlay }) =>
     $isOverlay ? 'none' : `1px solid ${theme.colors.neutral150}`};
@@ -39,6 +44,12 @@ export const GridWrapper = styled(Flex)<{ $isOverlay?: boolean; $isDragging?: bo
 
   opacity: ${({ $isDragging }) => ($isDragging ? 0 : 1)};
   align-items: center;
+`;
+
+/** Holds the toggle's place on the rows that have none, so the flags line up. */
+const ToggleSlot = styled.div`
+  width: 3.2rem;
+  flex-shrink: 0;
 `;
 
 export type AttributeRowProps = {
@@ -203,6 +214,7 @@ const MemoizedRow = memo((props: Omit<AttributeRowProps, 'style'>) => {
       <GridWrapper
         $isOverlay={isOverlay}
         $isDragging={isDragging}
+        $isClickable={canClick}
         onClick={canClick ? handleClick : undefined}
         paddingLeft={4}
         paddingRight={4}
@@ -289,7 +301,7 @@ const MemoizedRow = memo((props: Omit<AttributeRowProps, 'style'>) => {
             <AttributeFlags attribute={item} />
             <>
               <Box>{item.status && <StatusBadge status={item.status} />}</Box>
-              {['component', 'dynamiczone'].includes(item.type) && (
+              {['component', 'dynamiczone'].includes(item.type) ? (
                 <IconButton
                   onClick={(e) => {
                     e.preventDefault();
@@ -318,6 +330,8 @@ const MemoizedRow = memo((props: Omit<AttributeRowProps, 'style'>) => {
                     }}
                   />
                 </IconButton>
+              ) : (
+                <ToggleSlot />
               )}
               {isInDevelopmentMode && item.configurable !== false ? (
                 <>

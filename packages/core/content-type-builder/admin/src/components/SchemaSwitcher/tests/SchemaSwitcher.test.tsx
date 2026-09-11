@@ -36,7 +36,7 @@ jest.mock('../../DataManager/useDataManager', () => ({
 }));
 
 const open = async (user: ReturnType<typeof userEvent.setup>) => {
-  await user.click(screen.getByRole('button', { name: 'Go to another content type or component' }));
+  await user.click(screen.getByRole('button', { name: /go to another content type or component/ }));
 };
 
 describe('SchemaSwitcher', () => {

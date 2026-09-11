@@ -30,6 +30,7 @@
   "index.column.workspaces": "Workspaces",
   "index.sharing.shared": "Shared entries",
   "index.workspaces.all": "All workspaces",
+  "index.workspaces.count": "{count, plural, one {# workspace} other {# workspaces}}",
   "limits.reached.hint": "Your plan does not allow another workspace. Delete one, or contact your Strapi representative to raise the limit.",
   "limits.reached.title": "Workspace limit reached ({count}/{max}).",
   "list.column.label": "Workspace",

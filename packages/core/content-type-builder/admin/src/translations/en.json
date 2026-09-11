@@ -305,7 +305,7 @@
   "relation.oneToOne": "has and belongs to one",
   "relation.oneWay": "has one",
   "switcher.empty": "Nothing matches that.",
-  "switcher.open": "Go to another content type or component",
+  "switcher.open": "{name} — go to another content type or component",
   "switcher.search": "Search content types and components",
   "switcher.search.placeholder": "Search…",
   "table.button.no-fields": "Add new field",

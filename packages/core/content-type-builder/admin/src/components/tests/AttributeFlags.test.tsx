@@ -58,7 +58,7 @@ describe('AttributeFlags', () => {
       id: 'i18n',
       label: { id: 'hint', defaultMessage: 'Translated per locale' },
       short: { id: 'short', defaultMessage: 'i18n' },
-      color: 'secondary600',
+      variant: 'secondary',
       applies: (attribute) =>
         (attribute.pluginOptions as { i18n?: { localized?: boolean } } | undefined)?.i18n
           ?.localized === true,
@@ -73,7 +73,7 @@ describe('AttributeFlags', () => {
       id: 'i18n',
       label: { id: 'hint', defaultMessage: 'Translated per locale' },
       short: { id: 'short', defaultMessage: 'i18n' },
-      color: 'secondary600' as const,
+      variant: 'secondary' as const,
       applies: () => true,
     };
 

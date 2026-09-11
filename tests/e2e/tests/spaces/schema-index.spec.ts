@@ -99,7 +99,7 @@ test.describe('Content-Type Builder — all content types', () => {
       /kind=collectionType/
     );
 
-    await page.getByRole('button', { name: 'Go to another content type or component' }).click();
+    await page.getByRole('button', { name: /go to another content type or component/ }).click();
     await page
       .getByRole('searchbox', { name: 'Search content types and components' })
       .fill('author');
