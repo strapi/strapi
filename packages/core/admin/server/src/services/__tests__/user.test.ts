@@ -1,8 +1,10 @@
 import _ from 'lodash';
 import { errors, queryParams } from '@strapi/utils';
-import constants from '../constants';
+import constants, { PRIVATE_MFA_FIELDS } from '../constants';
 import userService from '../user';
 import userContentType from '../../content-types/User';
+
+import type { PrivateMfaField } from '../../../../shared/contracts/shared';
 
 const { SUPER_ADMIN_CODE } = constants;
 
@@ -22,6 +24,34 @@ const {
   resetPasswordByEmail,
   getLanguagesInUse,
 } = userService;
+
+/**
+ * The runtime omit list and the contract's `PrivateMfaField` are two expressions of one rule:
+ * these columns never reach a sanitized payload. They cannot be one declaration -- the shared
+ * contract must not import server code -- so this pins them equal instead. A column added to one
+ * and forgotten in the other fails here rather than leaking TOTP ciphertext into a user payload
+ * or the EE audit table.
+ */
+describe('private MFA fields', () => {
+  test('the runtime list and the contract type name exactly the same columns', () => {
+    // A compile error here means the runtime list gained a column the contract type has not.
+    const fromRuntime: PrivateMfaField[] = [...PRIVATE_MFA_FIELDS];
+
+    // ...and this direction catches the contract type gaining one the runtime list has not.
+    const fromContract: Array<(typeof PRIVATE_MFA_FIELDS)[number]> = [
+      'mfaSecret',
+      'mfaEnabledAt',
+      'mfaLastUsedStep',
+      'mfaPendingSecret',
+      'mfaGraceUntil',
+      'mfaLockedAt',
+      'mfaPasskeyChallenge',
+      'mfaPasskeyChallengeExpiresAt',
+    ] satisfies PrivateMfaField[];
+
+    expect([...fromRuntime].sort()).toEqual([...fromContract].sort());
+  });
+});
 
 describe('User', () => {
   global.strapi = {

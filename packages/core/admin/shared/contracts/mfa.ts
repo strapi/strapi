@@ -130,6 +130,12 @@ export declare namespace Disable {
  * Requires `admin::users.update`. 204 on success; 404 for an unknown user; 400 when the account
  * is not locked. No grace is stamped here: the user's next session starts a fresh window.
  */
+export declare namespace UnlockUser {
+  export interface Params {
+    id: Data.ID;
+  }
+}
+
 /**
  * POST /mfa/users/:id/reset - Strip another admin's second factor and evict their sessions.
  * Requires `admin::users.update`. 204 on success (including for an account that was not
@@ -139,12 +145,6 @@ export declare namespace Disable {
  * `admin:reset-user-mfa` on the CLI does the same thing for when nobody can sign in at all.
  */
 export declare namespace ResetUser {
-  export interface Params {
-    id: Data.ID;
-  }
-}
-
-export declare namespace UnlockUser {
   export interface Params {
     id: Data.ID;
   }
@@ -365,23 +365,39 @@ export declare namespace MfaWebauthnLogin {
  * code, a secret or an otpauth URI -- `metadata` is limited to neutral context (see `MfaEventType`
  * in `admin::mfa`).
  */
+/**
+ * Every `admin::mfa-event` row type. Declared here rather than on the server because both sides
+ * of the wire need it: the server writes these rows, the client renders them. It was declared in
+ * both places and the two copies had already drifted.
+ */
+export type MfaEventType =
+  | 'enabled'
+  | 'disabled'
+  | 'reset'
+  | 'challenge_failed'
+  | 'recovery_code_used'
+  | 'recovery_codes_issued'
+  | 'grace_started'
+  | 'locked'
+  | 'unlocked'
+  | 'authenticator_replaced'
+  | 'device_trusted'
+  | 'device_trust_revoked'
+  | 'trusted_device_used'
+  | 'passkey_registered'
+  | 'passkey_removed';
+
+/**
+ * What the notice feed can contain. `recovery_codes_issued` is a row type but not a notice: it is
+ * the acknowledgement marker `areCodesAcknowledged` reads, and `unseenEvents`/`markEventsSeen`
+ * exclude it deliberately. Expressed as an `Exclude` rather than a second hand-written list, so
+ * adding a row type cannot silently leave the feed's type behind.
+ */
+export type MfaNoticeType = Exclude<MfaEventType, 'recovery_codes_issued'>;
+
 export interface MfaEventNotice {
   id: Data.ID;
-  type:
-    | 'enabled'
-    | 'disabled'
-    | 'reset'
-    | 'challenge_failed'
-    | 'recovery_code_used'
-    | 'grace_started'
-    | 'locked'
-    | 'unlocked'
-    | 'authenticator_replaced'
-    | 'device_trusted'
-    | 'device_trust_revoked'
-    | 'trusted_device_used'
-    | 'passkey_registered'
-    | 'passkey_removed';
+  type: MfaNoticeType;
   metadata: Record<string, unknown>;
   createdAt: string;
   seenAt: string | null;

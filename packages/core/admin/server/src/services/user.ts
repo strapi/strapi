@@ -4,6 +4,7 @@ import { defaults } from 'lodash/fp';
 import { arrays, errors } from '@strapi/utils';
 import type { Data } from '@strapi/types';
 import { createUser, hasSuperAdminRole } from '../domain/user';
+import constants, { PRIVATE_MFA_FIELDS } from './constants';
 import type {
   AdminUser,
   AdminRole,
@@ -15,7 +16,6 @@ import type {
 } from '../../../shared/contracts/shared';
 import { password as passwordValidator } from '../validation/common-validators';
 import { getService } from '../utils';
-import constants from './constants';
 
 const { SUPER_ADMIN_CODE } = constants;
 
@@ -40,19 +40,10 @@ const sanitizeUser = (user: AdminUser): SanitizedAdminUser => {
       'resetPasswordTokenExpiresAt',
       'registrationToken',
       'roles',
-      // Private two-factor-auth columns (declared in the content-type schema; the
-      // `AdminUser` contract type declares them only so this omit list can name them). Omitting
-      // the ciphertext, the enrolment timestamp and the last-used TOTP step keeps them out of
-      // every sanitized payload -- login responses, `/users/me`, user listings, and the
+      // Private two-factor columns, from the one list `services/constants.ts` holds. Keeping them
+      // out of every sanitized payload covers login responses, `/users/me`, user listings and the
       // `admin.auth.*` event payloads EE audit logs persist.
-      'mfaSecret',
-      'mfaEnabledAt',
-      'mfaLastUsedStep',
-      'mfaPendingSecret',
-      'mfaGraceUntil',
-      'mfaLockedAt',
-      'mfaPasskeyChallenge',
-      'mfaPasskeyChallengeExpiresAt',
+      ...PRIVATE_MFA_FIELDS,
     ]),
     roles: user.roles && user.roles.map(sanitizeUserRoles),
   };

@@ -13,7 +13,7 @@ import type { Core, Data } from '@strapi/types';
 import type { RegistrationResponseJSON } from '@simplewebauthn/server';
 import { MFA_DEFAULTS, validateMfaConfig, type MfaConfig } from '../config/mfa';
 import mfaChangedTemplate from '../config/email-templates/mfa-changed';
-import type { MfaEventNotice } from '../../../shared/contracts/mfa';
+import type { MfaEventNotice, MfaEventType } from '../../../shared/contracts/mfa';
 import {
   readMfaEnforcement,
   readPasskeySettings,
@@ -64,22 +64,11 @@ export const MAX_EVENTS_PER_USER = 500;
  * `areCodesAcknowledged` and `acknowledgeCodes` below. It is deliberately excluded from
  * `unseenEvents`/`markEventsSeen`, which surface and clear notices, not this marker.
  */
-export type MfaEventType =
-  | 'enabled'
-  | 'disabled'
-  | 'reset'
-  | 'challenge_failed'
-  | 'recovery_code_used'
-  | 'recovery_codes_issued'
-  | 'grace_started'
-  | 'locked'
-  | 'unlocked'
-  | 'authenticator_replaced'
-  | 'device_trusted'
-  | 'device_trust_revoked'
-  | 'trusted_device_used'
-  | 'passkey_registered'
-  | 'passkey_removed';
+/**
+ * Re-exported from `shared/contracts/mfa.ts`, which is where it is declared: the client renders
+ * these rows too, and a second hand-written copy here had already drifted from that one.
+ */
+export type { MfaEventType };
 
 /**
  * The shape `recordEvent`'s `metadata` is expected to carry -- what `buildSessionMetadataFromContext`
@@ -921,7 +910,9 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   };
 
   /**
-   * The notice types `notify` may announce -- deliberately narrower than `MfaEventType`.
+   * The notice types `notify` may announce. Not a subset of `MfaEventType`: it drops the two
+   * recovery-code types and *adds* `passkey_used`, which is emitted on the hub but never
+   * persisted as a row.
    * `recovery_code_used` and `recovery_codes_issued` never reach here: both are already fully
    * served by `recordEvent` alone (the in-app notice feed, and the acknowledgement marker
    * respectively), and an emailed notice on every recovery-code use would mean an attacker who has

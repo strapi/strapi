@@ -9,7 +9,7 @@ const DEFAULT_RETENTION_DAYS = 90;
  * compatibility. Do not add events here: new events come through registerEvent().
  * TODO: migrate these to the standard.
  */
-const defaultEvents = [
+export const defaultEvents = [
   'entry.create',
   'entry.update',
   'entry.delete',
