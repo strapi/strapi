@@ -44,14 +44,17 @@ const STORED_ASSET = {
 const setupStrapi = (options: MockOptions = {}) => {
   const { isAllowed = true, canOnEntity = true, asset = STORED_ASSET } = options;
 
-  const findOne = jest.fn().mockResolvedValue(asset);
+  let stored = asset === null ? null : { ...asset };
+
+  const findOne = jest.fn().mockImplementation(async () => stored);
   const updateFileInfo = jest
     .fn()
-    .mockImplementation(async (id: number, fileInfo: Record<string, unknown>) => ({
-      ...STORED_ASSET,
-      ...fileInfo,
-      id,
-    }));
+    .mockImplementation(async (id: number, fileInfo: Record<string, unknown>) => {
+      stored = { ...(stored ?? STORED_ASSET), ...fileInfo, id };
+      const { folder: _folder, ...unpopulated } = stored;
+
+      return unpopulated;
+    });
 
   const createPermissionsManager = jest.fn(() => ({
     isAllowed,

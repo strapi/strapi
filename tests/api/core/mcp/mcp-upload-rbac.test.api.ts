@@ -625,6 +625,41 @@ describe('MCP upload tools RBAC (api)', () => {
       });
     });
 
+    test('reports the containing folder in its own response after a rename', async () => {
+      const folder = await seeder.seedFolder('Reported');
+      const seeded = await seeder.seedAsset({ name: 'in-folder.jpg', folderId: folder.id });
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'media_update_asset', {
+        id: seeded.id,
+        alternativeText: 'still in its folder',
+      });
+
+      expect(structured(response)).toMatchObject({
+        alternativeText: 'still in its folder',
+        folder: { id: folder.id, name: 'Reported' },
+      });
+
+      const row: any = await strapi.db
+        .query('plugin::upload.file')
+        .findOne({ where: { id: seeded.id }, populate: { folder: true } });
+
+      expect(row?.folder?.id).toBe(folder.id);
+      expect(row?.folderPath).toBe(folder.path);
+    });
+
+    test('reports null only for an asset genuinely at the media library root', async () => {
+      const seeded = await seeder.seedAsset({ name: 'at-root.jpg' });
+      const token = await createUpdateTokenSession();
+
+      const response = await mcp.callTool(token.accessKey, 'media_update_asset', {
+        id: seeded.id,
+        caption: 'root asset',
+      });
+
+      expect(structured(response)).toMatchObject({ caption: 'root asset', folder: null });
+    });
+
     test('returns the sanitized shape, with no provider secrets on the write path either', async () => {
       const seeded = await seeder.seedAsset({ name: 'sanitized.jpg' });
       const token = await createUpdateTokenSession();
