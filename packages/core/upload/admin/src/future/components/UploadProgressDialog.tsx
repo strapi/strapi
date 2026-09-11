@@ -25,6 +25,8 @@ import {
   toggleMinimize,
   cancelUpload,
   selectAggregateProgress,
+  selectReportsByteProgress,
+  selectCountBasedProgress,
   selectMetadataProgress,
   selectIsGeneratingMetadata,
   selectMetadataOutcome,
@@ -32,6 +34,7 @@ import {
 import { getTranslationKey } from '../utils/translations';
 
 import { Drawer } from './Drawer';
+import { TruncatedText } from './TruncatedText';
 
 import type { FileMetadataStatus, FileProgress, FileProgressStatus } from '../store/uploadProgress';
 import type { MessageDescriptor } from 'react-intl';
@@ -50,7 +53,14 @@ const HeaderStatusMessage = ({
   metadataSubtitle?: string;
 }) => {
   return (
-    <Flex direction="column" alignItems="flex-start" paddingLeft={2}>
+    <Flex
+      direction="column"
+      alignItems="flex-start"
+      paddingLeft={2}
+      paddingRight={2}
+      paddingTop={1}
+      paddingBottom={1}
+    >
       <Drawer.Title>
         <Typography variant="omega">{title}</Typography>
       </Drawer.Title>
@@ -69,6 +79,7 @@ const HeaderStatusMessage = ({
 };
 
 const HeaderStatusIcon = styled(Flex)`
+  align-self: stretch;
   padding: ${({ theme }) => theme.spaces[3]};
   border-radius: ${({ theme }) => `${theme.borderRadius} 0 0 ${theme.borderRadius}`};
 
@@ -84,7 +95,8 @@ const HeaderStatusWrapper = styled(Flex)`
 
 type HeaderStatusProps = {
   status: 'uploading' | 'success' | 'error' | 'canceled';
-  progress?: number;
+  /** Byte-weighted progress, or `null` for a batch that reports no bytes (the URL flow). */
+  progress: number | null;
   totalFiles: number;
   successfulCount: number;
   errorCount: number;
@@ -243,26 +255,34 @@ const HeaderStatus = ({
   }
 
   if (status === 'uploading') {
-    const progressPercentage = progress ? Math.round(progress) : 0;
+    // Two separate strings so a locale can position (or omit) the percentage itself.
+    const title =
+      progress === null
+        ? formatMessage(
+            {
+              id: getTranslationKey('upload.progress.uploading.indeterminate'),
+              defaultMessage: 'Uploading {total, plural, one {# item} other {# items}}',
+            },
+            { total: totalFiles }
+          )
+        : formatMessage(
+            {
+              id: getTranslationKey('upload.progress.uploading.withCount'),
+              defaultMessage:
+                'Uploading {total, plural, one {# item} other {# items}} ({percentage}%)',
+            },
+            {
+              total: totalFiles,
+              percentage: Math.round(progress),
+            }
+          );
 
     return (
       <HeaderStatusWrapper>
         <HeaderStatusIcon background="primary200">
           <Upload fill="primary700" />
         </HeaderStatusIcon>
-        <HeaderStatusMessage
-          title={formatMessage(
-            {
-              id: getTranslationKey('upload.progress.uploading.withCount'),
-              defaultMessage: 'Uploading {total} items ({percentage}%)',
-            },
-            {
-              total: totalFiles,
-              percentage: progressPercentage,
-            }
-          )}
-          metadataSubtitle={metadataSubtitle}
-        />
+        <HeaderStatusMessage title={title} metadataSubtitle={metadataSubtitle} />
       </HeaderStatusWrapper>
     );
   }
@@ -295,7 +315,12 @@ const DialogHeader = ({ handleClose }: { handleClose: () => void }) => {
   const { isMinimized, files, uploadId, totalFiles } = useTypedSelector(
     (state) => state.uploadProgress
   );
-  const progress = useTypedSelector(selectAggregateProgress);
+  const aggregateProgress = useTypedSelector(selectAggregateProgress);
+  const reportsByteProgress = useTypedSelector(selectReportsByteProgress);
+  const countBasedProgress = useTypedSelector(selectCountBasedProgress);
+  // Byte-weighted when the flow streams bytes (direct-file), else count-based (settled/total).
+  // Both return `null` for an indeterminate header when there's nothing to show yet.
+  const progress = reportsByteProgress ? aggregateProgress : countBasedProgress;
   const metadataProgress = useTypedSelector(selectMetadataProgress);
   const isGeneratingMetadata = useTypedSelector(selectIsGeneratingMetadata);
   const metadataOutcome = useTypedSelector(selectMetadataOutcome);
@@ -481,6 +506,27 @@ const IndeterminateBar = () => {
   );
 };
 
+/**
+ * Without a floor of zero the row is as wide as its longest filename, which
+ * pushes past the panel and gives the dialog a second, horizontal scrollbar
+ * instead of truncating.
+ *
+ * The floor belongs to the name alone: the icon carries its size in SVG
+ * attributes, which flex is free to override, so letting it shrink squashes it
+ * against a long name instead of truncating the name.
+ */
+const FileRowName = styled(Flex)`
+  min-width: 0;
+
+  > :first-child {
+    flex-shrink: 0;
+  }
+
+  > :last-child {
+    min-width: 0;
+  }
+`;
+
 const FileRow = ({
   icon,
   fileName,
@@ -492,12 +538,12 @@ const FileRow = ({
 }) => {
   return (
     <Flex direction="column" alignItems="stretch" justifyContent="center" gap={1} width="100%">
-      <Flex gap={2}>
+      <FileRowName gap={2}>
         {icon}
-        <Typography variant="omega" fontWeight="semiBold" ellipsis>
+        <TruncatedText variant="omega" fontWeight="semiBold">
           {fileName}
-        </Typography>
-      </Flex>
+        </TruncatedText>
+      </FileRowName>
       {children}
     </Flex>
   );
@@ -579,15 +625,17 @@ const FileRowRenderer = ({ file }: { file: FileProgress }) => {
 
   if (isCurrentFile) {
     // Determinate only once bytes are actually being reported — a known `size` is not
-    // enough. The two upload flows differ here:
-    //  - the direct-file flow streams real byte counts from XHR, so `uploadedBytes`
-    //    climbs and a determinate bar is meaningful;
-    //  - the URL flow learns the size from the `file:uploading` SSE event but receives
-    //    no incremental counts at all (the next event is `file:complete`), so
-    //    `uploadedBytes` stays 0 for the whole transfer.
-    // Keying off `size` alone froze URL rows at a determinate 0% for the entire upload;
+    // enough. Both flows can report bytes, but neither always does:
+    //  - the direct-file flow streams real byte counts from XHR;
+    //  - the URL flow streams `file:progress` SSE frames while the server fetches the
+    //    remote file, but only when the remote sent a usable Content-Length. Without one
+    //    there is no denominator, nothing is dispatched, and `uploadedBytes` stays 0.
+    // Keying off `size` alone froze such rows at a determinate 0% for the entire upload;
     // keying off reported bytes keeps them animating until there is a fraction to show.
-    const hasReportedProgress = file.size > 0 && file.uploadedBytes > 0;
+    // Back to indeterminate once every byte is in: the server is still working (the URL
+    // flow's provider upload, the direct flow awaiting its response), not stuck at 100%.
+    const hasReportedProgress =
+      file.size > 0 && file.uploadedBytes > 0 && file.uploadedBytes < file.size;
 
     return (
       <FileRow icon={<ArrowsCounterClockwise fill="secondary600" />} fileName={file.name}>

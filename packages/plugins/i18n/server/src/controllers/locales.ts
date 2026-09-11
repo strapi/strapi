@@ -40,7 +40,7 @@ const controller: Core.Controller = {
 
     const localeToPersist = setCreatorFields({ user })(formatLocale(localeToCreate));
 
-    const locale = await localesService.create(localeToPersist);
+    const locale = await localesService.create(localeToPersist, { isDefault: Boolean(isDefault) });
 
     if (isDefault) {
       await localesService.setDefaultLocale(locale);

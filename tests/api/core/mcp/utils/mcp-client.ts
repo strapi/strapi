@@ -3,11 +3,19 @@ import type { Core } from '@strapi/types';
 
 export const MCP_PROTOCOL_VERSION = '2025-06-18';
 
+export type AdvertisedJsonSchema = Record<string, unknown>;
+
+export type AdvertisedTool = {
+  name: string;
+  inputSchema: AdvertisedJsonSchema;
+  outputSchema?: AdvertisedJsonSchema;
+};
+
 export type JsonRpcResponse = {
   jsonrpc?: '2.0';
   id?: number | string | null;
   result?: {
-    tools?: Array<{ name: string }>;
+    tools?: AdvertisedTool[];
     structuredContent?: Record<string, unknown>;
     content?: Array<{ type: string; text?: string }>;
     isError?: boolean;
@@ -109,12 +117,15 @@ export const createMcpClient = (strapi: Core.Strapi, clientName = 'strapi-mcp-te
     return parsed;
   };
 
-  const listToolNames = async (accessKey: string): Promise<string[]> => {
+  const listTools = async (accessKey: string): Promise<AdvertisedTool[]> => {
     const res = await rpc(accessKey, 'tools/list');
     const parsed = parseMcpResponse(res);
     expect(parsed.error).toBeUndefined();
-    return parsed.result?.tools?.map((tool) => tool.name) ?? [];
+    return parsed.result?.tools ?? [];
   };
 
-  return { post, rpc, initializeSession, callTool, listToolNames, parseMcpResponse };
+  const listToolNames = async (accessKey: string): Promise<string[]> =>
+    (await listTools(accessKey)).map((tool) => tool.name);
+
+  return { post, rpc, initializeSession, callTool, listTools, listToolNames, parseMcpResponse };
 };

@@ -20,6 +20,7 @@ export * from './normalizeAPIError';
 export * from './prefixFileUrlWithBackendUrl';
 export * from './prefixPluginTranslations';
 export * from './rawFileToAsset';
+export * from './resolveFileMime';
 export * from './toSingularTypes';
 export * from './typeFromMime';
 export * from './urlsToAssets';

@@ -135,6 +135,157 @@ describe('Upload service - replace()', () => {
     expect(providerMethods.delete).not.toHaveBeenCalled();
   });
 
+  test('keeps the file in its folder', async () => {
+    currentDbFile = {
+      id: 4,
+      hash: 'in_folder_abc',
+      ext: '.txt',
+      provider: PROVIDER,
+      formats: null,
+      folderPath: '/7',
+    };
+
+    await uploadService.replace(4, {
+      data: { fileInfo: {} as any },
+      file: inputFile() as any,
+    });
+
+    // Left to `formatFileInfo` this became '/', contradicting the surviving
+    // relation — and `folder.deleteByIds` selects by folderPath, so deleting the
+    // folder left the file behind, invisible and never freed from storage.
+    expect(dbUpdate.mock.calls[0][0].data).toMatchObject({ folderPath: '/7' });
+  });
+
+  test('moves the file when a folder is sent explicitly', async () => {
+    currentDbFile = {
+      id: 5,
+      hash: 'moving_def',
+      ext: '.txt',
+      provider: PROVIDER,
+      formats: null,
+      folderPath: '/7',
+    };
+
+    fileServiceMock.getFolderPath.mockImplementationOnce(async () => '/9');
+
+    // Replace-and-move in one request is a supported call, so an explicit folder
+    // still wins over the file's current location.
+    await uploadService.replace(5, {
+      data: { fileInfo: { folder: 9 } as any },
+      file: inputFile() as any,
+    });
+
+    expect(dbUpdate.mock.calls[0][0].data).toMatchObject({ folder: 9, folderPath: '/9' });
+  });
+
+  test('sends the file to the root when the folder is explicitly cleared', async () => {
+    currentDbFile = {
+      id: 6,
+      hash: 'to_root_ghi',
+      ext: '.txt',
+      provider: PROVIDER,
+      formats: null,
+      folderPath: '/7',
+    };
+
+    // `null` is a deliberate move to the root, unlike an absent folder.
+    await uploadService.replace(6, {
+      data: { fileInfo: { folder: null } as any },
+      file: inputFile() as any,
+    });
+
+    expect(dbUpdate.mock.calls[0][0].data).toMatchObject({ folder: null, folderPath: '/' });
+  });
+
+  test('forwards the path meta to the provider', async () => {
+    currentDbFile = {
+      id: 7,
+      hash: 'prefixed_jkl',
+      ext: '.txt',
+      provider: PROVIDER,
+      formats: null,
+    };
+
+    // `path` is the provider storage prefix, not a `files` column, so the provider
+    // call is the only place it shows up.
+    await uploadService.replace(7, {
+      data: { fileInfo: {} as any, path: 'baz/qux' },
+      file: inputFile() as any,
+    });
+
+    expect(providerMethods.replace.mock.calls[0][0]).toMatchObject({ path: 'baz/qux' });
+  });
+
+  /**
+   * `formatFileInfo` turns the triplet into a one-element `related` array, and the database
+   * layer reads a bare array as `set` — whose morphToMany branch deletes every join row for
+   * the file before inserting. Writing `related` here would therefore detach the file from
+   * every other entry using it, so the triplet is dropped instead of forwarded.
+   */
+  test('does not write related, even when the relation triplet is sent', async () => {
+    currentDbFile = {
+      id: 8,
+      hash: 'related_mno',
+      ext: '.txt',
+      provider: PROVIDER,
+      formats: null,
+    };
+
+    await uploadService.replace(8, {
+      data: {
+        fileInfo: {} as any,
+        refId: 12,
+        ref: 'api::article.article',
+        field: 'cover',
+      },
+      file: inputFile() as any,
+    });
+
+    expect(dbUpdate.mock.calls[0][0].data).not.toHaveProperty('related');
+  });
+
+  test('still forwards the other metas when the triplet is sent alongside them', async () => {
+    currentDbFile = {
+      id: 8,
+      hash: 'related_with_path',
+      ext: '.txt',
+      provider: PROVIDER,
+      formats: null,
+    };
+
+    await uploadService.replace(8, {
+      data: {
+        fileInfo: {} as any,
+        refId: 12,
+        ref: 'api::article.article',
+        field: 'cover',
+        path: 'baz/qux',
+      },
+      file: inputFile() as any,
+    });
+
+    expect(providerMethods.replace.mock.calls[0][0]).toMatchObject({ path: 'baz/qux' });
+    expect(dbUpdate.mock.calls[0][0].data).not.toHaveProperty('related');
+  });
+
+  test('does not invent a path or a relation when no metas are sent', async () => {
+    currentDbFile = {
+      id: 9,
+      hash: 'no_path_pqr',
+      ext: '.txt',
+      provider: PROVIDER,
+      formats: null,
+    };
+
+    await uploadService.replace(9, {
+      data: { fileInfo: {} as any },
+      file: inputFile() as any,
+    });
+
+    expect(providerMethods.replace.mock.calls[0][0]).not.toHaveProperty('path');
+    expect(dbUpdate.mock.calls[0][0].data).not.toHaveProperty('related');
+  });
+
   test('checks the file size before writing anything to the provider', async () => {
     currentDbFile = {
       id: 3,

@@ -128,4 +128,50 @@ describe('Local source assets stream warnings', () => {
       metadata: expect.objectContaining({ id: 1 }),
     });
   });
+
+  test.each([null, undefined])(
+    'uses a canonical filename when the extension is %s',
+    async (ext) => {
+      await writeFile(join(publicDir, 'uploads', 'media-hash'), Buffer.from('media'));
+
+      const uploadFile = {
+        id: 1,
+        hash: 'media-hash',
+        ext,
+        url: '/uploads/media-hash',
+        provider: 'local',
+        formats: undefined,
+      };
+      const strapi = {
+        db: {
+          queryBuilder: jest.fn(() => ({
+            select: jest.fn().mockReturnThis(),
+            stream: jest.fn(() => Readable.from([uploadFile])),
+          })),
+        },
+        dirs: {
+          static: { public: publicDir },
+        },
+        log: { warn: jest.fn() },
+        plugins: {
+          upload: {
+            provider: {
+              isPrivate: jest.fn().mockResolvedValue(false),
+            },
+          },
+        },
+        config: {
+          get: jest.fn(() => ({ provider: 'local' })),
+        },
+      } as any;
+
+      const items = [];
+      for await (const item of createAssetsStream(strapi)) {
+        items.push(item);
+      }
+
+      expect(items).toHaveLength(1);
+      expect(items[0]).toMatchObject({ filename: 'media-hash' });
+    }
+  );
 });

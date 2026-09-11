@@ -1,7 +1,8 @@
 import { fireEvent, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
-import { AssetDetails, getBusyMessage } from '../AssetDetailsDrawer';
+import { ASSET_DETAILS_TRIGGER_PROPS, ASSET_ITEM_CONTROL_PROPS } from '../../../constants';
+import { AssetDetails, AssetDetailsDrawer, getBusyMessage } from '../AssetDetailsDrawer';
 
 import type { AssetWithPopulatedCreatedBy } from '../../../../../../../../shared/contracts/files';
 
@@ -319,9 +320,14 @@ describe('AssetDetails (asset details drawer body)', () => {
     // Request (see admin-test-utils request-body-stash), so `request.formData()`
     // reliably returns the picked file here instead of relying on undici's
     // cross-realm multipart serialization (which yields a `text/plain` body).
-    let captured: { id: string | null; file: FormDataEntryValue | null } = {
+    let captured: {
+      id: string | null;
+      file: FormDataEntryValue | null;
+      fileInfo: FormDataEntryValue | null;
+    } = {
       id: null,
       file: null,
+      fileInfo: null,
     };
     server.use(
       http.post('/upload/files/:id/replace', async ({ request, params }) => {
@@ -329,6 +335,7 @@ describe('AssetDetails (asset details drawer body)', () => {
         captured = {
           id: String(params.id),
           file: body.get('files'),
+          fileInfo: body.get('fileInfo'),
         };
         return HttpResponse.json({ ...baseAsset, name: 'replacement.png' });
       })
@@ -358,6 +365,7 @@ describe('AssetDetails (asset details drawer body)', () => {
     await waitFor(() => expect(captured.id).toBe('1'));
     expect(captured.file).toBeInstanceOf(File);
     expect((captured.file as File).name).toBe('replacement.png');
+    expect(JSON.parse(String(captured.fileInfo))).toMatchObject({ name: 'photo.png' });
     // Success toast renders inside the drawer, above the preview, not in the
     // global notifications region.
     await screen.findByText(/File replaced\./i);
@@ -728,5 +736,161 @@ describe('icon button tooltips', () => {
     ]) {
       expect(await screen.findByRole('button', { name: label })).toBeInTheDocument();
     }
+  });
+});
+
+/* -------------------------------------------------------------------------------------------------
+ * Outside-click dismissal
+ * -----------------------------------------------------------------------------------------------*/
+
+describe('AssetDetailsDrawer outside-click dismissal', () => {
+  beforeEach(() => {
+    server.use(
+      buildFoldersHandler(),
+      buildSettingsHandler(),
+      http.get('/upload/files/:id', () => HttpResponse.json(baseAsset))
+    );
+  });
+
+  // jsdom never runs the slide-out animation, so "closed" is read off the
+  // state attribute rather than the element disappearing.
+  const renderOpenDrawer = async () => {
+    const result = render(
+      <>
+        {/* Plain page background. */}
+        <div data-testid="page-background">Background</div>
+        {/* Stands in for a grid card/table row, whose click switches the drawer. */}
+        <div data-testid="other-asset" {...ASSET_DETAILS_TRIGGER_PROPS}>
+          Other asset
+          {/* Its own controls, which act on the item rather than opening it. */}
+          <span {...ASSET_ITEM_CONTROL_PROPS}>
+            <button
+              type="button"
+              role="checkbox"
+              aria-checked="false"
+              data-testid="item-checkbox"
+            />
+            <button type="button" data-testid="item-actions">
+              Actions
+            </button>
+          </span>
+        </div>
+        {/* The list's own controls, which dismiss it like any other outside press. */}
+        <button type="button" data-testid="toolbar-button">
+          Sort
+        </button>
+        <button type="button" role="checkbox" aria-checked="false" data-testid="select-all" />
+        <input data-testid="search" aria-label="Search" />
+        <div role="menuitem" data-testid="menu-option">
+          Name (A to Z)
+        </div>
+        <AssetDetailsDrawer />
+      </>,
+      { initialEntries: ['/?assetId=1'] }
+    );
+
+    const drawer = await screen.findByRole('dialog');
+    expect(drawer).toHaveAttribute('data-state', 'open');
+
+    return { ...result, drawer };
+  };
+
+  it('closes when the pointer goes down on the page background', async () => {
+    const { user, drawer } = await renderOpenDrawer();
+
+    await user.click(screen.getByTestId('page-background'));
+
+    await waitFor(() => expect(drawer).toHaveAttribute('data-state', 'closed'));
+  });
+
+  // A right-click is contextual — and on the assets background it opens the
+  // create menu, so dismissing here would fire two outcomes from one press.
+  it.each([
+    ['a right-click', 2],
+    ['a middle-click', 1],
+  ])('stays open on %s outside the panel', async (_label, button) => {
+    const { drawer } = await renderOpenDrawer();
+
+    fireEvent.pointerDown(screen.getByTestId('page-background'), { button });
+
+    await waitFor(() => expect(drawer).toHaveAttribute('data-state', 'open'));
+  });
+
+  // The primary button must still dismiss — the guard is about which button,
+  // not about disabling dismissal.
+  it('still closes on a primary-button press outside the panel', async () => {
+    const { drawer } = await renderOpenDrawer();
+
+    fireEvent.pointerDown(screen.getByTestId('page-background'), { button: 0 });
+
+    await waitFor(() => expect(drawer).toHaveAttribute('data-state', 'closed'));
+  });
+
+  // Anywhere behind the panel dismisses it, controls included — pressing one is
+  // still leaving the drawer.
+  it.each([
+    ['a toolbar button', 'toolbar-button'],
+    ['the select-all checkbox', 'select-all'],
+    ['the search field', 'search'],
+    ['an option in a menu portaled out of the page', 'menu-option'],
+  ])('closes when the pointer goes down on %s', async (_label, testId) => {
+    const { user, drawer } = await renderOpenDrawer();
+
+    await user.click(screen.getByTestId(testId));
+
+    await waitFor(() => expect(drawer).toHaveAttribute('data-state', 'closed'));
+  });
+
+  it('stays open when the pointer goes down inside the panel', async () => {
+    const { user, drawer } = await renderOpenDrawer();
+
+    await user.click(await screen.findByRole('button', { name: 'Copy link' }));
+
+    expect(drawer).toHaveAttribute('data-state', 'open');
+  });
+
+  // Dismissing on the pointerdown would turn switching assets into a
+  // close-then-reopen round trip.
+  it('stays open when the pointer goes down on another asset', async () => {
+    const { user, drawer } = await renderOpenDrawer();
+
+    await user.click(screen.getByTestId('other-asset'));
+
+    expect(drawer).toHaveAttribute('data-state', 'open');
+  });
+
+  // The card is exempt because its click switches the drawer — but its checkbox
+  // selects the asset and stops that click, so nothing switches and it closes.
+  it.each([
+    ["the asset's own checkbox", 'item-checkbox'],
+    ["the asset's own actions menu", 'item-actions'],
+  ])('closes when the pointer goes down on %s', async (_label, testId) => {
+    const { user, drawer } = await renderOpenDrawer();
+
+    await user.click(screen.getByTestId(testId));
+
+    await waitFor(() => expect(drawer).toHaveAttribute('data-state', 'closed'));
+  });
+
+  // The delete confirmation is portaled to the body but rendered from inside
+  // the drawer, so Radix treats it as "inside".
+  it('stays open while interacting with a dialog opened from inside it', async () => {
+    const { user, drawer } = await renderOpenDrawer();
+
+    await user.click(await screen.findByRole('button', { name: 'Delete this file' }));
+    await user.click(await screen.findByRole('button', { name: 'Cancel' }));
+
+    expect(drawer).toHaveAttribute('data-state', 'open');
+  });
+
+  // The press happened inside, so there's no outside pointerdown to act on.
+  it('stays open when a drag started inside the panel ends outside it', async () => {
+    const { drawer } = await renderOpenDrawer();
+
+    const title = await screen.findByRole('heading', { name: 'photo.png' });
+    fireEvent.pointerDown(title);
+    fireEvent.pointerUp(screen.getByTestId('page-background'));
+
+    expect(drawer).toHaveAttribute('data-state', 'open');
   });
 });
