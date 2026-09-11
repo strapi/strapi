@@ -17,7 +17,7 @@ import { AssetsPage } from './page-objects/AssetsPage';
 /**
  * Journey 5 — Permissions for the Media Library (CMS-1066).
  *
- * Role-level enforcement on the future/unstable Media Library's actions
+ * Role-level enforcement on the current Media Library's actions
  * (CMS-434). Folder-level permissions (CMS-387) are tracked in a separate
  * milestone and are not exercised here.
  *
@@ -48,7 +48,7 @@ const READ_ONLY_ROLE = 'E2E Media Library Read Only';
 // scenario never needs the upload permission it's specifically missing.
 const SEEDED_ASSET_NAME = 'ted_lasso_profile';
 
-describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
+describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
   'Media Library - Journey 5: Permissions',
   () => {
     test.describe.configure({ timeout: 420_000 });
