@@ -74,6 +74,11 @@ const isValidGraceDays = (value: number | null) =>
  *
  * Save is on the card, not the page header: each card saves its own object.
  */
+const byRoleId = (a: string, b: string) => {
+  if (a === b) return 0;
+  return a < b ? -1 : 1;
+};
+
 const TwoFactorEnforcementCard = ({
   settings,
   roles,
@@ -104,12 +109,13 @@ const TwoFactorEnforcementCard = ({
     ...draft,
     graceDays: graceDays ?? settings.graceDays,
   };
-  // Both role lists are sorted before comparing: the server returns them in its own order, which
+  // Both role lists are ordered before comparing: the server returns them in its own order, which
   // must not read as an unsaved change. Comparing `next` to `settings` directly would leave Save
-  // permanently enabled.
+  // permanently enabled. These are opaque ids, so the comparator only has to be the same on both
+  // sides -- it is not trying to order them meaningfully.
   const modified = !isEqual(
-    { ...next, requiredRoles: [...next.requiredRoles].sort() },
-    { ...settings, requiredRoles: [...settings.requiredRoles].sort() }
+    { ...next, requiredRoles: [...next.requiredRoles].sort(byRoleId) },
+    { ...settings, requiredRoles: [...settings.requiredRoles].sort(byRoleId) }
   );
 
   const { save, isSaving, saveError, downgradeOpen, closeDowngrade, confirmDowngrade } =
