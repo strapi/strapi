@@ -208,8 +208,9 @@ export default {
       const { challengeToken, code, trustDevice, deviceId } = ctx.request
         .body as LoginMfa.Request['body'];
 
-      // The validator no longer trims `code` (see validation/authentication/mfa.ts): trim it
-      // here instead, after validation and before it reaches `verifyChallenge`.
+      // The validator deliberately does not trim `code` (see `validation/authentication/mfa.ts`),
+      // so that a whitespace-only code still fails `required`. Trim here instead, after validation
+      // and before `verifyChallenge` compares it.
       const result = await mfa.verifyChallenge(challengeToken, code.trim());
 
       if (!result.ok) {
@@ -227,7 +228,7 @@ export default {
       // `/login` is gated by the local passport strategy's `checkCredentials`
       // (services/auth.ts), which rejects a missing user or `isActive !== true`.
       // `verifyChallenge` above has no equivalent gate, and a challenge can outlive an account
-      // being disabled during its (default five-minute) `challengeTtl` window, so the same
+      // being disabled during its `challengeTtl` window, so the same
       // account check is repeated here. Mirrors `checkCredentials` exactly -- it does not
       // consult `blocked` -- and reuses its generic message: revealing "this account is
       // disabled" would be a new enumeration channel on top of the one `verifyChallenge`
@@ -301,17 +302,16 @@ export default {
       const user = await getService('user').findOne(userId);
 
       // Exactly what `loginMfa` does, and for the same reason: a challenge can outlive an account
-      // being disabled inside its (default five-minute) window, and `verifyAssertion` has no
+      // being disabled inside its `challengeTtl` window, and `verifyAssertion` has no
       // equivalent gate. Mirrors `checkCredentials` -- it does not consult `blocked` -- and
       // reuses this pair's one generic message rather than revealing "this account is disabled".
-      // It runs *before* the trust grant, or a deactivated account would also collect a 30-day
-      // trust cookie.
+      // It runs *before* the trust grant, or a deactivated account would also collect a
+      // trust cookie good for the whole configured trust window.
       if (!user || user.isActive !== true) {
         throw new ValidationError(PASSKEY_VERIFY_FAILED);
       }
 
-      // Trusted devices's seam: the grant is factor-agnostic, so this is byte for byte what `/login/mfa`
-      // does. The service returns null when the organisation does not offer trust, and a stale
+      // The trust grant is factor-agnostic, so this is byte for byte what `/login/mfa` does. The service returns null when the organisation does not offer trust, and a stale
       // checkbox is not an error. The raw token exists only here and in the Set-Cookie header.
       if (trustDevice) {
         const granted = await mfa.trustDevice(String(user.id), {

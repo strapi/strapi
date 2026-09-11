@@ -92,9 +92,9 @@ describe('admin:reset-user-mfa command', () => {
     consoleLog.mockRestore();
   });
 
-  // `resetUser` returns the (never-rejecting) notification promise. The command used to fire it
-  // and immediately `process.exit(0)`, so the process could tear down before the detached email
-  // ever settled and the reset mail would silently never send. Exit must wait for it.
+  // `resetUser` returns the (never-rejecting) notification promise. Firing it and immediately
+  // calling `process.exit(0)` tears the process down before the email settles, so the reset mail
+  // silently never sends. Exit must wait for it.
   test('awaits the reset before exiting, so the reset email cannot be dropped by an early exit', async () => {
     const email = 'kai@doe.com';
     findOne.mockResolvedValue({ id: 1, email });

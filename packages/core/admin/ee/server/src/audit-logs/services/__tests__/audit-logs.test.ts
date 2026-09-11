@@ -230,7 +230,7 @@ describe('Audit logs service', () => {
 
   it('still drops a non-mfa event when ctx.state.user is not set', async () => {
     // The control for the test above: the payload-userId fallback is scoped to `admin.mfa.*`
-    // names only, so anything else with no session-context user is dropped exactly as before.
+    // names only, so anything else with no session-context user is still dropped.
     jest.mocked(strapi.ee.features.isEnabled).mockReturnValueOnce(true);
     const saveEvent = jest.fn();
     strapi.get.mockReturnValueOnce({ deleteExpiredEvents: jest.fn(), saveEvent });

@@ -144,9 +144,8 @@ describe('authentication controller', () => {
       return { ctx, cookiesSet, cookiesGet, notFound };
     };
 
-    // Shared by 'trusted devices' and 'passkeys' below: both need an
-    // enrolled-and-challengeable mfa double, and passkeys's tests otherwise have no access to a
-    // helper scoped inside the trusted devices describe block.
+    // Shared by the 'trusted devices' and 'passkeys' blocks below: both need an
+    // enrolled-and-challengeable mfa double, so it is scoped outside either of them.
     const enrolledMfa = (overrides: Record<string, unknown> = {}) => ({
       isEnabled: jest.fn(() => true),
       isEnrolled: jest.fn(() => Promise.resolve(true)),
@@ -822,9 +821,9 @@ describe('authentication controller', () => {
         expect((ctx.body as any).data.passkeyAvailable).toBe(true);
       });
 
-      // `countPasskeys > 0` alone used to decide `passkeyAvailable`, so a deployment whose RP
-      // cannot resolve still offered a "use a passkey" button that every ceremony would refuse.
-      // This pins the AND: holding a credential is not enough on its own.
+      // `passkeyAvailable` is an AND, and this pins the half that is easy to drop: were it
+      // `countPasskeys > 0` alone, a deployment whose RP cannot resolve would offer a "use a
+      // passkey" button that every ceremony refuses. Holding a credential is not enough.
       test('passkeyAvailable is false when the account holds a credential but the RP cannot be resolved', async () => {
         mockPassportUser(user);
         const passkeysConfigured = jest.fn(() => false);
@@ -1055,10 +1054,10 @@ describe('authentication controller', () => {
       });
     });
 
-    // Findings 2, 3 & 6: nothing pinned which user `countPasskeys` was asked about, that it runs
-    // before `createChallenge` mints a row, or that the trusted-cookie fast path never pays for it
-    // at all. Substituting a hardcoded `passkeyAvailableFor('999')`, or moving either read to
-    // after its `createChallenge` call, left every existing assertion green.
+    // Nothing else pins which user `countPasskeys` is asked about, that it runs before
+    // `createChallenge` mints a row, or that the trusted-cookie fast path never pays for it at
+    // all. Substituting a hardcoded `passkeyAvailableFor('999')`, or moving either read to after
+    // its `createChallenge` call, leaves every other assertion in this file green.
     describe('passkeyAvailable: read timing, identity, and the trusted-cookie fast path', () => {
       test('login: countPasskeys is asked about this user, before createChallenge mints a row', async () => {
         mockPassportUser(user);

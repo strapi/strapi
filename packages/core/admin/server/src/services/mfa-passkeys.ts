@@ -31,7 +31,7 @@ const CHALLENGE_UID = 'admin::mfa-challenge';
 export const PASSKEY_UID = 'admin::mfa-passkey';
 
 /**
- * Matching trusted devices's per-user cap for symmetry -- but this *refuses* the eleventh
+ * The same per-user cap trusted devices carry, for symmetry -- but this *refuses* the eleventh
  * registration instead of evicting the oldest. Deleting somebody's security key because they
  * registered an eleventh is destroying a credential they may be holding in their hand, and they
  * have a delete button.
@@ -54,9 +54,9 @@ const RP_NAME = 'Strapi';
 
 /**
  * Every literal passkeys introduces, in one place. The first two are *shared*: each covers every
- * failure of its kind, so no caller can tell one cause from another -- the base factor's reason,
- * unchanged, is that a caller must not be able to distinguish an expired challenge from a wrong
- * credential. The last four are route-specific and deliberately actionable, because each names
+ * failure of its kind, so no caller can tell one cause from another: a caller must not be able to
+ * distinguish an expired challenge from a wrong credential. The TOTP paths in `mfa.ts` share one
+ * message for the same reason. The last four are route-specific and deliberately actionable, because each names
  * something the caller can fix about their own request.
  */
 export const PASSKEY_VERIFY_FAILED = 'Could not verify that passkey.';
@@ -81,22 +81,13 @@ export interface WebauthnRp {
  * below names the second-level suffixes an operator is realistically likely to type.
  *
  * The approximation errs in ONE direction on purpose. A suffix missing from the set is not caught
- * here, and the ceremony then fails in the browser with its own `SecurityError` -- the behaviour
- * that existed before this check, so a miss costs nothing new. Refusing a host that is NOT a
- * public suffix would be the expensive mistake, because it locks a legitimate deployment out of
- * the feature with no way to override. An earlier revision of this check refused on shape (a
- * two-label host with a generic first label and a two-character second label) and did exactly
- * that to real registrable domains such as `co.io` and `org.io`; the shape rule is gone.
+ * here, and the browser then refuses the ceremony with its own `SecurityError` -- under-refusing
+ * costs nothing. Refusing a host that is NOT a public suffix is the expensive mistake: it locks a
+ * legitimate deployment out of the feature with no way to override. Matching on shape rather than
+ * membership (say, any two-label host with a two-character suffix) is what makes that mistake, to
+ * registrable domains such as `co.io` and `org.io`.
  */
 const KNOWN_PUBLIC_SUFFIXES = new Set([
-  // The widely used ICANN second-level suffixes. This is an APPROXIMATION of the Public Suffix
-  // List, not the list itself: shipping or fetching the real PSL for one check is not worth it.
-  // The trade-off is deliberate and one-directional -- a suffix missing from this set is simply
-  // not caught here, and the browser refuses the ceremony with its own `SecurityError` exactly as
-  // it did before this check existed. An earlier revision instead refused on SHAPE (any two-label
-  // host whose first label was generic and whose second was two characters), which over-refused
-  // real registrable domains such as `co.io` and `org.io` and would have locked those deployments
-  // out of the feature entirely. Under-refusing degrades; over-refusing blocks.
   'co.uk',
   'org.uk',
   'ac.uk',
@@ -415,8 +406,9 @@ export interface PasskeyDeps {
   recordEvent: (userId: string, type: MfaEventType, metadata?: MfaEventMetadata) => Promise<void>;
   notify: (
     userId: string,
-    // `challenge_failed` as well as the three passkey notices: the verify path charges
-    // the base factor's account tier, and that notice is how `isAccountThrottled` sees it.
+    // `challenge_failed` as well as the three passkey notices: the verify path charges the same
+    // per-account failure tier the TOTP paths charge, and that notice is how
+    // `isAccountThrottled` sees it.
     type: PasskeyNotice | 'challenge_failed',
     extra?: { byUserId?: string; count?: number }
   ) => Promise<void>;
@@ -532,8 +524,8 @@ export const createPasskeys = ({
   /**
    * Physical names for the three raw statements on the login path: the conditional attempt
    * increment, the challenge write, and the single-DELETE consume. Resolved from metadata for the
-   * same reasons as `challengeTable()` in `mfa.ts` -- and resolved *here* rather than injected,
-   * so this module stays self-contained the way trusted devices's does.
+   * same reasons as `challengeTable()` in `mfa.ts` -- and resolved *here* rather than injected, so
+   * this module needs nothing from its factory but the services it cannot resolve itself.
    */
   const challengeTable = (): {
     tableName: string;
@@ -692,8 +684,7 @@ export const createPasskeys = ({
     // transaction, so the setting and the rows cannot diverge through it, and the tolerant read
     // falls back to `enabled: true`, so it cannot manufacture this state either. What this does
     // cover is a hand-edited `core_store` row and any future caller that clears the setting
-    // without the cascade -- the same class of reason the base factor gives for its fail-closed expiry
-    // checks. No attempt charged and no event: nothing was evaluated.
+    // without the cascade. No attempt charged and no event: nothing was evaluated.
     if (!(await settings()).enabled) {
       throw new ValidationError(PASSKEY_VERIFY_FAILED);
     }
@@ -704,8 +695,8 @@ export const createPasskeys = ({
     // attempts + 1 WHERE id = ? AND attempts < ?` -- whose affected-row count is the decision,
     // run *before* any verification so a request that crashes mid-verification has still cost an
     // attempt. Both tiers are charged on this path: charging one but not the other is a hole in
-    // the other, and a passkey path that charged neither would be the way around the base factor's
-    // throttle entirely.
+    // the other, and a passkey path that charged neither would be the way around the throttle
+    // entirely.
     const accepted = await strapi.db
       .getConnection(tableName)
       .where({ id: challenge.id })
@@ -798,12 +789,10 @@ export const createPasskeys = ({
       throw new ValidationError(PASSKEY_VERIFY_FAILED);
     }
 
-    // Scoped by `userId` as well as `id`, not id alone, for the exact reason `deletePasskey`
-    // states below: the row was already read scoped to the challenge's owner, but a read and a
-    // write are two separate statements, and only carrying the scope on the read is the hazard
-    // this module's own factory doc-comment names. This write matters more than that one -- it
-    // advances the clone-detection counter -- so the rule has to be uniform, not just followed
-    // where it was first noticed.
+    // Scoped by `userId` as well as `id`, not id alone. The row was already read scoped to the
+    // challenge's owner, but a read and a write are two separate statements: an owner check that
+    // lives only on the read is one reordering away from being no check at all. `deletePasskey`
+    // carries the same scope for the same reason.
     await query().update({
       where: { id: row.id, userId },
       data: {
@@ -812,7 +801,8 @@ export const createPasskeys = ({
       },
     });
 
-    // Hub only, no row -- exactly like trusted devices's `trusted_device_used`.
+    // Hub only, no row -- the same treatment `trusted_device_used` gets: audit-visible, but not
+    // worth a persisted event per login.
     notify(userId, 'passkey_used');
 
     return { userId };
@@ -888,8 +878,8 @@ export const createPasskeys = ({
       },
     });
 
-    // One pending registration per user; a new options call overwrites it, exactly as the base factor's
-    // `mfaPendingSecret` carries a pending enrolment.
+    // One pending registration per user; a new options call overwrites it, the way
+    // `mfaPendingSecret` carries one pending TOTP enrolment.
     await userQuery().update({
       where: { id: userId },
       data: {
@@ -929,9 +919,8 @@ export const createPasskeys = ({
     // non-null string, so a response signed over a different challenge matches nothing and leaves
     // the genuine ceremony pending.
     const { tableName, challengeColumn, challengeExpiresAtColumn } = userChallengeTable();
-    // Nulls `mfaPasskeyChallengeExpiresAt` in the same statement, alongside the challenge
-    // itself -- the stamp used to survive a successful registration and only `disable` ever
-    // cleared it, which is the mirror `disable`'s own comment already claims is kept.
+    // Nulls `mfaPasskeyChallengeExpiresAt` in the same statement as the challenge itself, so a
+    // spent ceremony never leaves an expiry stamp behind for the next one to trip over.
     const affected = await strapi.db
       .getConnection(tableName)
       .where({ id: userId })
@@ -942,7 +931,7 @@ export const createPasskeys = ({
       throw new ValidationError(PASSKEY_REGISTRATION_FAILED);
     }
 
-    // Expiry fails closed (the base factor's rule): `new Date('nonsense') <= new Date()` is false for an
+    // Expiry fails closed: `new Date('nonsense') <= new Date()` is false for an
     // Invalid Date, so a missing or hand-edited stamp must not read as a ceremony that never
     // expires. The stamp itself decides nothing else -- the guard above is on the challenge
     // column alone -- and the next options call overwrites it. Read here before the row this
@@ -1086,9 +1075,8 @@ export const createPasskeys = ({
     }
 
     // Scoped by `userId` as well as `id`, not id alone: the read above is owner-scoped, but a read
-    // and a write are two separate statements, and only carrying the scope on the read is the
-    // hazard this module's own factory doc-comment names -- correct today only because nothing
-    // reorders the two.
+    // and a write are two separate statements, so a check that lives only on the read is correct
+    // today only because nothing reorders them.
     await query().deleteMany({ where: { id: row.id, userId: String(userId) } });
     await recordEvent(userId, 'passkey_removed', { deviceName: row.name });
     notify(userId, 'passkey_removed');
@@ -1132,10 +1120,10 @@ export const createPasskeys = ({
    * Boot-time discoverability for the one misconfiguration that hides the whole feature.
    *
    * `resolveWebauthnRp`'s refusal is already logged at error level with the config key that fixes
-   * it, but until this existed the first thing to ask was `passkeysConfigured` on `/mfa/me` -- so
-   * the line only appeared once somebody loaded the admin, buried in request logs, long after the
-   * operator had stopped watching the console. Reached from `bootstrap.ts` instead, the cause is
-   * in the startup log beside every other configuration complaint.
+   * it, but its only other caller is `passkeysConfigured` on `/mfa/me` -- so without this the line
+   * would appear once somebody loaded the admin, buried in request logs, long after the operator
+   * had stopped watching the console. Reached from `bootstrap.ts`, the cause lands in the startup
+   * log beside every other configuration complaint.
    *
    * Called for its side effect rather than its answer: there is nothing to decide at boot, and
    * `passkeysConfigured` swallowing the throw is exactly the behaviour wanted here too. `warnOnce`

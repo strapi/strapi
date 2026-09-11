@@ -40,7 +40,7 @@ interface ConfirmDowngradeDialogProps {
  * period (`isSecurityDowngrade`). The server (`PUT /admin/security-settings`) refuses such a
  * change without the caller's password, plus a current code when the caller is enrolled.
  *
- * Deliberately not the base factor's `ReAuthDialog`: that one is bound to the regenerate/disable
+ * Deliberately not `ReAuthDialog`: that one is bound to the regenerate/disable
  * mutations and always requires a code, while an *unenrolled* administrator may lower protection
  * with the password alone. This component owns no mutation; the card hands it the save.
  *

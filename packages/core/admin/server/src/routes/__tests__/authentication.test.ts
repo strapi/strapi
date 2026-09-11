@@ -59,12 +59,10 @@ describe('authentication routes', () => {
     // Pins today's behaviour for the other routes so this test only ever asserts the deliberate
     // widenings above, not an accidental blanket change to every rate-limited route.
     //
-    // The `find` predicate below used to match only entries that were *already* the bare
-    // string `'admin::rateLimit'`, then assert they equal `'admin::rateLimit'` -- a tautology
-    // that skipped any route whose entry was an object override entirely (`if (entry !==
-    // undefined)` never ran for those). It now also matches the object form (`{ name:
-    // 'admin::rateLimit', config: {...} }`), so a route that gained an undocumented override
-    // fails here instead of silently passing.
+    // The `find` predicate must match the object form (`{ name: 'admin::rateLimit', config: {...}
+    // }`) as well as the bare string. Matching the string alone makes the assertion below a
+    // tautology and skips every route that gained an undocumented override -- exactly the case
+    // this test exists to catch.
     const widened = [
       '/reset-password',
       '/login/mfa',

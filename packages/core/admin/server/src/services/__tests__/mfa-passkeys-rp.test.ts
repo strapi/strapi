@@ -50,9 +50,10 @@ describe('resolveWebauthnRp', () => {
   });
 
   test('a configured rpId is case-normalised, so a same-case-mismatched origin still matches', () => {
-    // `EXAMPLE.com` used to be compared, unlowercased, against `URL.hostname` (which
-    // the URL parser always lowercases), so a config that is correct in every way a browser cares
-    // about was refused, blaming `.origins` for a `.rpId` casing problem.
+    // The configured `rpId` is compared against `URL.hostname`, which the URL parser always
+    // lowercases. Without normalising the config value first, `EXAMPLE.com` is refused -- a config
+    // correct in every way a browser cares about, rejected with `.origins` blamed for a `.rpId`
+    // casing problem.
     const { strapi, error } = buildStrapi({
       'admin.auth.mfa.webauthn.rpId': 'EXAMPLE.com',
       'admin.auth.mfa.webauthn.origins': ['https://example.com'],
@@ -79,11 +80,11 @@ describe('resolveWebauthnRp', () => {
   });
 
   test('a trailing dot on a derived rpId no longer produces a browser-invalid rpId', () => {
-    // `admin.absoluteUrl: 'https://example.com./admin'` used to silently derive
-    // `rpId: 'example.com.'`, which is not a hostname any browser accepts, with no refusal and no
-    // log. Normalising means the module never returns that broken value; here it is refused
-    // instead, because the (unmodified) derived origin still literally carries the root dot and no
-    // longer matches the now-corrected rpId -- a fail-closed outcome, not a silent broken accept.
+    // Derived unnormalised, `admin.absoluteUrl: 'https://example.com./admin'` yields
+    // `rpId: 'example.com.'` -- not a hostname any browser accepts, returned with no refusal and
+    // no log. Normalising means the module never returns that value: it is refused here instead,
+    // because the (unmodified) derived origin still literally carries the root dot and so does not
+    // match the corrected rpId. Fail-closed, not a silent broken accept.
     const { strapi, error } = buildStrapi({ 'admin.absoluteUrl': 'https://example.com./admin' });
 
     expect(() => resolveWebauthnRp(strapi)).toThrow(PASSKEY_RP_NOT_CONFIGURED);
@@ -151,11 +152,11 @@ describe('resolveWebauthnRp', () => {
   );
 
   test('a non-array origins config is refused rather than silently discarded', () => {
-    // A bare string typo for `origins` used to fall through `Array.isArray` unnoticed
-    // and fall back to the derived origin, with no refusal and no log -- the one misconfiguration
-    // in this module that produced neither. Refusing (rather than accepting a one-element array)
-    // matches the module's fail-closed-and-loud contract: this is a misconfiguration to name, not
-    // shorthand to accept.
+    // A bare string typo for `origins` falls through an `Array.isArray` check unnoticed, leaving
+    // the derived origin in place with no refusal and no log -- the one misconfiguration in this
+    // module that could produce neither. Refusing, rather than accepting it as a one-element
+    // array, matches the module's fail-closed-and-loud contract: this is a misconfiguration to
+    // name, not shorthand to accept.
     const { strapi, error } = buildStrapi({
       'admin.absoluteUrl': 'https://cms.example.com/admin',
       'admin.auth.mfa.webauthn.origins': 'https://evil.com',
@@ -316,11 +317,10 @@ describe('resolveWebauthnRp', () => {
   test.each([['co.io'], ['org.io'], ['com.io'], ['net.de']])(
     'a real registrable two-label domain (%s) is accepted, not refused as a suffix',
     (rpId) => {
-      // The regression this pins. An earlier revision refused on SHAPE -- any two-label host whose
-      // first label was generic and whose second was two characters -- which caught all four of
-      // these even though none is a public suffix, locking those deployments out of passkeys with
-      // no override. The approximation must only ever MISS a suffix (the browser then refuses, as
-      // it did before the check existed), never invent one.
+      // Refusing on SHAPE -- any two-label host with a generic first label and a two-character
+      // second -- catches all four of these even though none is a public suffix, locking those
+      // deployments out of passkeys with no override. The approximation must only ever MISS a
+      // suffix, in which case the browser refuses the ceremony itself, and never invent one.
       const { strapi } = buildStrapi({
         'admin.absoluteUrl': `https://${rpId}/admin`,
       });

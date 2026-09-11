@@ -3,9 +3,9 @@ import { browserSupportsWebAuthn } from '@simplewebauthn/browser';
 /**
  * How a WebAuthn ceremony failed, as far as the UI is concerned.
  *
- * - `dismissed`: the user closed the prompt or it timed out. Not an error at all -- passkeys's
- *   rule is a silent no-op with the control re-enabled, because the user is still looking at the
- *   screen and knows what they just did.
+ * - `dismissed`: the user closed the prompt or it timed out. Not an error at all -- every passkey
+ *   surface treats it as a silent no-op with the control re-enabled, because the user is still
+ *   looking at the screen and knows what they just did.
  * - `already-registered`: registration only. `excludeCredentials` did its job and this
  *   authenticator already holds a credential for this account, which is worth saying out loud.
  * - `unsupported`: the browser refuses to run a ceremony for this origin or key type at all

@@ -63,7 +63,7 @@ interface AuthContextValue {
     }
   ) => Promise<Awaited<ReturnType<ReturnType<typeof useLoginMfaMutation>[0]>>>;
   /**
-   * Passkeys's passkey twin of `loginMfa`: satisfies the *same* challenge with a WebAuthn
+   * The passkey twin of `loginMfa`: satisfies the *same* challenge with a WebAuthn
    * assertion instead of a code, and persists the resulting session token identically.
    * `trustDevice` and `rememberMe` are carried for exactly the reasons they are carried on
    * `loginMfa` -- the trust grant is factor-agnostic, and `rememberMe` decides cookie vs

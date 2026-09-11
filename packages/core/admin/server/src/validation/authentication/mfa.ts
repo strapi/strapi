@@ -39,7 +39,11 @@ const mfaWebauthnOptionsSchema = yup
   .required()
   .noUnknown();
 
-/** `assertion` is handed to `@simplewebauthn/server` otherwise unvalidated (see below). */
+/**
+ * `assertion` is handed to `@simplewebauthn/server` otherwise unvalidated: the library does its
+ * own structural checks, and re-declaring the WebAuthn response shape in yup would reject fields a
+ * future revision adds. `registerPasskeySchema` leaves `registration` alone for the same reason.
+ */
 const mfaWebauthnLoginSchema = yup
   .object()
   .shape({

@@ -34,8 +34,7 @@ describe('Admin MFA enforcement', () => {
     const me = await rq({ url: '/admin/users/me', method: 'GET' });
     superAdminId = me.body.data.id;
 
-    // This suite IS the base factor's original MFA API suite, and it is the only one of the three
-    // with no reset -- its `defaults` test's exact `toEqual` was safe only because both sibling
+    // Without this, the `defaults` test's exact `toEqual` would be safe only because both sibling
     // suites happen to call `resetSharedMfaState` in their own `afterAll`. `yarn test:api` runs
     // every admin suite --runInBand against one shared SQLite app, so start from the exact state
     // this suite asserts, whatever ran before it, the same way the other two do.

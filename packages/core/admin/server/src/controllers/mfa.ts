@@ -481,7 +481,7 @@ export default {
    * `clearPasskeys` is deliberately silent, so the event and the notice are recorded here; the
    * owner's own `deletePasskey` records its own inside the service because only it sees the row's
    * name. Recorded only when something was actually removed, so an administrator acting on an
-   * empty list leaves no notice behind (trusted devices's precedent).
+   * empty list leaves no notice behind, matching `revokeUserTrustedDevices`.
    */
   async deleteUserPasskeys(ctx: Context) {
     const mfa = mfaService();

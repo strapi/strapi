@@ -61,11 +61,9 @@ describe('mfa routes (administrator actions on another user)', () => {
 });
 
 /**
- * The feature-off gate used to be a guard at the top of all 21 handlers, duplicated as a Koa
- * middleware on the login routes and imported across controllers for the settings ones. It is now
- * one registered policy, so what has to be pinned is that every route carries it -- a new route
- * added without it would be the only way for a handler to run while the feature is off, and no
- * handler-level test can see that.
+ * The feature-off gate is one registered policy rather than a guard inside each handler, so what
+ * has to be pinned is that every route carries it: a new route added without it is the only way a
+ * handler could run while the feature is off, and no handler-level test can see that.
  */
 describe('every mfa route is gated by the feature flag', () => {
   test.each((routes as unknown as RouteEntry[]).map((r) => [r.method, r.path] as const))(

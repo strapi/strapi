@@ -47,8 +47,8 @@ const RECOVERY_CODE_LENGTH = 10;
 
 /**
  * The per-user cap `pruneEvents` enforces on `admin::mfa-event` rows. Comfortably above anything
- * `maxUserAttempts`/`userAttemptWindow` could produce on their own (10 failures per 900s by
- * default), so the exemptions in `pruneEvents` are the actual guarantee for `isAccountThrottled`
+ * `maxUserAttempts`/`userAttemptWindow` could produce on their own, so the exemptions in
+ * `pruneEvents` are the actual guarantee for `isAccountThrottled`
  * -- this cap only keeps the table bounded for an account that keeps generating other kinds of
  * event (enable/disable/reset/recovery-code-use) indefinitely.
  */
@@ -291,8 +291,8 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     Boolean(user.mfaEnabledAt && user.mfaSecret);
 
   /**
-   * One conditional UPDATE each; the affected count is the decision (the base factor's atomicity rule).
-   * Read-then-write would let a refresh-path lock race an administrator's unlock and silently win.
+   * One conditional UPDATE each; the affected count is the decision. Read-then-write would let a
+   * refresh-path lock race an administrator's unlock and silently win.
    */
   const stampGrace = async (userId: string, graceUntil: Date): Promise<boolean> => {
     const { count } = await userQuery().updateMany({
@@ -573,7 +573,6 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
           'A current two-factor code or a recovery code is required to replace your authenticator'
         );
       }
-      // `assertFactor` is defined with the re-authentication gate below.
       await assertFactor(userId, code);
     }
 
@@ -963,8 +962,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
 
   /**
    * The `<%= change %>` phrase fed to `mfaChangedTemplate` ("Two-factor authentication was
-   * <%= change %> on your account..."). `enabled`, `disabled` and `reset` map to themselves, so
-   * those three emails read exactly as they did before `authenticator_replaced` existed;
+   * <%= change %> on your account..."). `enabled`, `disabled` and `reset` map to themselves;
    * `authenticator_replaced` gets its own phrase rather than leaking the raw enum value verbatim
    * into the sentence. Typed over exactly `EmailedNotice`, not `MfaChangeNotice`, so the typecheck
    * itself keeps this exhaustive -- `challenge_failed`, `locked` and `unlocked` never reach this
@@ -1281,12 +1279,11 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       data: {
         token,
         userId: String(userId),
-        // Passkeys: this stopped being an honest `'totp'` the moment a passkey assertion could
-        // consume the same row -- `verifyChallenge` (TOTP/recovery code) and `verifyAssertion`
-        // (passkey) both call `consumeChallenge` on whichever one the caller completes first, and
-        // neither reads this column to decide anything (dispatch is on the submitted credential's
-        // own shape, never on what was minted). `'any'` records what is actually true: any factor
-        // the account currently has enrolled may satisfy this row.
+        // Not `'totp'`: `verifyChallenge` (TOTP/recovery code) and `verifyAssertion` (passkey)
+        // both call `consumeChallenge` on whichever one the caller completes first, and neither
+        // reads this column to decide anything -- dispatch is on the submitted credential's own
+        // shape, never on what was minted. `'any'` records what is actually true: any factor the
+        // account currently has enrolled may satisfy this row.
         factorType: 'any',
         attempts: 0,
         expiresAt: new Date(Date.now() + challengeTtl * 1000),
@@ -1397,7 +1394,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     //
     // It matters because `consumeRecoveryCode` bcrypt-compares against every unused code: without
     // this, every wrong 6-digit code on an unauthenticated endpoint would cost
-    // `recoveryCodeCount` bcrypt comparisons, roughly a second of CPU each at the default of 10.
+    // one bcrypt comparison per unused recovery code, each costing roughly a second of CPU.
     // The attempt caps bound the total, but there is no reason to hand out the amplifier.
     const normalised = normaliseRecoveryCode(code);
 
@@ -1412,7 +1409,8 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
 
       // `consumeTotpStep` is what makes a code single-use across the whole account rather than
       // within one challenge, so a code spent on an earlier challenge cannot be replayed against a
-      // freshly created one (CVE-2024-0227).
+      // freshly created one. RFC 6238 section 5.2 requires exactly this: the verifier must not
+      // accept a second use of an OTP that already validated.
       if (totpResult.valid && (await consumeTotpStep(challenge.userId, totpResult.step))) {
         return consumeChallenge(challenge.id, challenge.userId);
       }
@@ -1527,8 +1525,8 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       await trustedDevices.clearTrustedDevices(userId);
       // Passkeys: a disabled account has no second factor at all, so a passkey that still
       // satisfied challenges would be one. The two pending-ceremony columns are nulled in the
-      // same user update that already nulls `mfaPendingSecret` -- otherwise the stated mirror
-      // breaks and a pending ceremony outlives the disable.
+      // same user update that already nulls `mfaPendingSecret`, so no pending ceremony of either
+      // kind outlives the disable.
       await passkeys.clearPasskeys(userId);
       await userQuery().update({
         where: { id: userId },

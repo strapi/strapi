@@ -364,7 +364,7 @@ export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) 
       // not acceptable for a feature toggle: in an SSO-only organisation every administrator is
       // password-less, so nobody could ever turn passkeys off. So a save whose only triggering
       // term is `disablesPasskeys` proceeds on session authority; combined with either of the
-      // others it is refused exactly as before.
+      // others it is refused.
       if (!actorRow.password && (lowersEnforcement || widensTrust)) {
         throw new ValidationError(
           'Your account has no local password, so it cannot lower two-factor authentication requirements. Ask an administrator who signs in with a password.'
@@ -427,8 +427,8 @@ export const createSecuritySettingsService = ({ strapi }: SecuritySettingsDeps) 
       // Turning passkeys off means "no user may sign in with one". Leaving rows in place would
       // let a later re-enable silently revive credentials registered under the old policy, so the
       // transition deletes them, in the same transaction as the setting that forbids them --
-      // exactly trusted devices's trusted-device cascade, and the reason the `PUT` that does this carries
-      // credentials like a downgrade.
+      // exactly what the trusted-device cascade above does, and the reason the `PUT` that does
+      // this carries credentials like a downgrade.
       if (previous.passkeys.enabled && !nextPasskeys.enabled) {
         await mfa().clearAllPasskeys();
       }

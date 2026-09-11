@@ -65,7 +65,7 @@ const mfaService = adminApi
         },
         // Also invalidates `MfaNotices`: the server raises an `enabled` notice for this event.
         // And `TrustedDevices`: a replacement revokes every trusted device. Deliberately
-        // NOT `Passkeys`: passkeys's `completeEnrolment` leaves passkeys in place -- a new
+        // NOT `Passkeys`: the server's `completeEnrolment` leaves passkeys in place -- a new
         // authenticator app says nothing about the user's security keys.
         invalidatesTags: ['Mfa', 'MfaNotices', 'TrustedDevices'],
       }),

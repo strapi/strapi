@@ -56,7 +56,7 @@ const Passkeys = () => {
   const [addOpen, setAddOpen] = React.useState(false);
 
   // Keeps the error, empty and table states mutually exclusive: a stale, previously-successful
-  // array must not render the table underneath an error (trusted devices's correction to this pattern).
+  // array must not render the table underneath an error. `TrustedDevices.tsx` derives the same way.
   const hasPasskeys = !error && passkeys.length > 0;
   const availability = passkeyAvailability();
   const supported = availability === 'available';

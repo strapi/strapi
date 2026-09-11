@@ -1135,20 +1135,19 @@ describe('mfa service: enrolment', () => {
 
     const service = createMfaService(defaultDeps(strapi));
 
-    // No longer an outright refusal ("disable it first"): an enrolled account may replace its
+    // Not an outright refusal ("disable it first"): an enrolled account may replace its
     // authenticator, but only by presenting a current second factor alongside the password.
     await expect(service.beginEnrolment('1', 'pw')).rejects.toThrow(/current two-factor code/i);
     // Nothing was written: refusing must happen before any update, not just before completion.
     expect(users.get('1')).toEqual(snapshot);
   });
 
-  // `isEnrolled` requires both `mfaEnabledAt` AND `mfaSecret`, but `beginEnrolment` used to
-  // gate on `mfaEnabledAt` alone. A half-written row (`mfaEnabledAt` set, `mfaSecret` null --
-  // reachable through direct DB tampering, a partial write elsewhere, or a hand-edited row) is not
-  // enrolled for login purposes (`isEnrolled` would say false, so no challenge is ever issued) but
-  // could never re-enrol either, since the old guard refused on `mfaEnabledAt` alone -- a
-  // permanent lockout with no path back except the CLI reset. Gating on `isEnrolled` itself closes
-  // that gap while still refusing a genuinely enrolled account (both columns set, the case above).
+  // `beginEnrolment` gates on `isEnrolled` -- both `mfaEnabledAt` AND `mfaSecret` -- not on
+  // `mfaEnabledAt` alone. A half-written row (`mfaEnabledAt` set, `mfaSecret` null: reachable
+  // through direct DB tampering, a partial write elsewhere, or a hand-edited row) is not enrolled
+  // for login purposes, so no challenge is ever issued for it. Gating on `mfaEnabledAt` alone
+  // would also refuse re-enrolment, leaving that account permanently locked out with no path back
+  // except the CLI reset. A genuinely enrolled account (both columns set) is still refused above.
   test('allows re-enrolment for a half-written row (mfaEnabledAt set, mfaSecret null), no code required', async () => {
     const { strapi, users } = buildStrapi();
     const existing = users.get('1')!;
@@ -1349,8 +1348,9 @@ describe('mfa service: enrolment', () => {
   });
 
   // `bcryptjs.compare(pw, null)` rejects rather than returning false, so an SSO-only
-  // administrator (no local password) used to get a 500 from every MFA self-service route
-  // instead of a clean refusal. `security-settings.ts` already guarded the identical case.
+  // administrator (no local password) reaching a password check unguarded gets a 500 from every
+  // MFA self-service route instead of a clean refusal. `security-settings.ts` guards the
+  // identical case.
   describe('an account with no local password', () => {
     const ssoOnly = () => {
       const { strapi, users } = buildStrapi();
@@ -1386,12 +1386,12 @@ describe('mfa service: enrolment', () => {
     );
   });
 
-  // The promotion used to be read-then-write (`user` read at the top of
-  // `completeEnrolment`, its `mfaPendingSecret` written back as `mfaSecret` after
-  // `issueRecoveryCodes` resolves). A `disable` racing in that window would be silently undone --
-  // the account comes back enrolled on the very secret `disable` just abandoned. `createMany` is
-  // the hook: it runs, awaited, between the read and the promotion write, so mutating the row
-  // there stands in for a concurrent `disable` landing in exactly that gap.
+  // Promotion must not be read-then-write: reading `user` at the top of `completeEnrolment` and
+  // writing its `mfaPendingSecret` back as `mfaSecret` after `issueRecoveryCodes` resolves leaves
+  // a window in which a `disable` is silently undone -- the account comes back enrolled on the
+  // very secret `disable` just abandoned. `createMany` is the hook: it runs, awaited, between the
+  // read and the promotion write, so mutating the row there stands in for a concurrent `disable`
+  // landing in exactly that gap.
   test('a disable landing between the read and the promotion write is not undone, and mfaSecret stays null', async () => {
     const { strapi, users } = buildStrapi(
       {},
@@ -2200,7 +2200,7 @@ describe('mfa service: challenge lifecycle', () => {
     const consumedStep = Number(users.get('1')!.mfaLastUsedStep);
     expect(consumedStep).toBeGreaterThan(0);
 
-    // CVE-2024-0227: a brand new challenge must not resurrect a code that was already spent. The
+    // RFC 6238 section 5.2: a brand new challenge must not resurrect a code already spent. The
     // step is consumed per account, not per challenge, so B cannot accept it even though B has
     // its own untouched attempt counter — an implementation that scoped the replay guard to the
     // challenge would hand an observer of one code a free second login for the rest of the step.
@@ -2320,13 +2320,12 @@ describe('mfa service: challenge lifecycle', () => {
     expect(validatePassword).toHaveBeenCalled();
   });
 
-  // The shape dispatch normalises the submitted code (via `normaliseRecoveryCode`) only to
-  // decide *which* branch to take -- it used to then hand the TOTP branch the raw, un-normalised
-  // `code`, and `verifyTotp` only `.trim()`s (leading/trailing whitespace), not internal
-  // whitespace. A display-formatted code like "123 456" (some authenticator apps group digits)
-  // would therefore dispatch correctly (6 digits once spaces are stripped, so
-  // `normalised.length <= MAX_TOTP_CODE_LENGTH`) but then fail `verifyTotp`'s own digit check,
-  // because "123 456" is 7 characters, not 6. Rejecting a genuinely valid code is the finding.
+  // The shape dispatch normalises the submitted code (via `normaliseRecoveryCode`) only to decide
+  // *which* branch to take, so the TOTP branch must be handed a normalised code too. `verifyTotp`
+  // only `.trim()`s, never stripping internal whitespace: hand it the raw `code` and a
+  // display-formatted "123 456" (some authenticator apps group digits) dispatches correctly -- 6
+  // digits once spaces are stripped -- then fails `verifyTotp`'s own digit check, because
+  // "123 456" is 7 characters. That rejects a genuinely valid code.
   test('a totp code typed with a display-format space still verifies', async () => {
     const { service, validCode } = setup();
     const code = validCode();
@@ -2571,10 +2570,10 @@ describe('mfa service: assertPasswordAndFactor and disable', () => {
       expect(events.filter((e) => e.type === 'challenge_failed')).toHaveLength(1);
     });
 
-    // Same fix as `verifyChallenge` -- the dispatch normalises the code to decide which branch
-    // to take, but used to pass the raw, un-normalised code to `verifyTotpForUser`, so a
-    // display-formatted code with an internal space failed `verifyTotp`'s digit check even though
-    // it dispatched to the right branch.
+    // The same normalisation `verifyChallenge` needs, for the same reason: the dispatch
+    // normalises to choose a branch, so `verifyTotpForUser` must receive the normalised code too,
+    // or a display-formatted code with an internal space fails `verifyTotp`'s digit check having
+    // dispatched to the right branch.
     test('a totp code typed with a display-format space still verifies', async () => {
       const { service, validCode } = setup();
       const code = validCode();
@@ -2768,7 +2767,7 @@ describe('mfa service: assertPasswordAndFactor and disable', () => {
     });
 
     test('a failing user update rolls the passkey deletion back with everything else', async () => {
-      // Same reasoning the base factor gives for wrapping `disable`: all of it lands or none does.
+      // Same reason `disable` is wrapped: all of it lands or none does.
       const { strapi, passkeyRows } = buildMfaFixture({
         userOverrides: {
           update: jest.fn(async () => {
@@ -2830,11 +2829,10 @@ describe('mfa notifications', () => {
     );
   });
 
-  // `notify`'s email used to be an untracked, detached async IIFE -- nothing about the
-  // returned value ever told a caller when (or whether) it had settled. The CLI reset command
-  // calls `notify` and then `process.exit(0)` immediately after, which can tear the process down
-  // before that detached promise ever resolves, so the reset email silently never sends. Awaiting
-  // the promise `notify` now returns is what lets the CLI wait for it before exiting.
+  // `notify` must return a promise that tracks the email, not send it from a detached async
+  // IIFE. The CLI reset command calls `notify` and then `process.exit(0)`, which tears the process
+  // down before an untracked promise resolves -- the reset email silently never sends. Awaiting
+  // what `notify` returns is what lets the CLI wait for it before exiting.
   test("notify's returned promise resolves only after the email settles", async () => {
     let releaseEmail: (() => void) | undefined;
     const sendTemplatedEmail = jest.fn(
@@ -3941,11 +3939,11 @@ describe('mfa service: passkey registration', () => {
     jest.useRealTimers();
   });
 
-  // Both invariants used to live only in `controllers/mfa.ts`'s
-  // `assertPasskeyRegistrationAllowed`. These four call the SERVICE directly -- the same surface
-  // `strapi.service('admin::mfa')` exposes to any other caller -- to prove the guard now holds
-  // there too, not only when the request happens to arrive through the controller.
-  describe('I2: the registration pair enforces its own invariants, not only through the controller', () => {
+  // `controllers/mfa.ts`'s `assertPasskeyRegistrationAllowed` enforces both invariants too, so
+  // these four call the SERVICE directly -- the same surface `strapi.service('admin::mfa')`
+  // exposes to any other caller -- to prove the guard holds there as well, not only when the
+  // request happens to arrive through the controller.
+  describe('the registration pair enforces its own invariants, not only through the controller', () => {
     test('options refuses at the service layer when the policy is off', async () => {
       const { service } = setup({ enabled: false });
 
@@ -3984,7 +3982,7 @@ describe('mfa service: passkey registration', () => {
   // (`controllers/authentication.ts`) compose with the organisation policy, so a deployment whose
   // `admin.absoluteUrl` cannot resolve to an RP (the default production shape) stops advertising a
   // passkey entry point that could never work -- without ever 500ing on account of asking.
-  describe('I1: passkeysConfigured swallows an RP refusal into a boolean', () => {
+  describe('passkeysConfigured swallows an RP refusal into a boolean', () => {
     // `resolveWebauthnRp`'s refusal logs through `warnOnce`, deliberately once-per-key-per-process
     // (`security-settings.ts`), and this describe block is the only place in the registration
     // suite that deliberately triggers a refusal outside the dedicated "rp cannot be resolved"
@@ -4045,9 +4043,9 @@ describe('mfa service: passkey registration', () => {
     const options = await service.passkeyRegistrationOptions('1');
 
     // The real (unmocked) `generateRegistrationOptions` stamps `type: 'public-key'` onto every
-    // `excludeCredentials` entry it returns (`generateRegistrationOptions.js`: `{ ...cred, id:
-    // isoBase64URL.trimPadding(cred.id), type: 'public-key' }`) -- our own call only supplies `id`
-    // and `transports`, so this field is the library's addition, not ours.
+    // `excludeCredentials` entry it returns. Our own call supplies `id` and `transports` only, so
+    // asserting the field here pins that we are reading the library's output rather than echoing
+    // our input -- if a version bump stopped adding it, this fails instead of passing silently.
     expect(options.excludeCredentials).toEqual([
       { id: 'already-here', transports: ['internal', 'hybrid'], type: 'public-key' },
     ]);
@@ -4153,8 +4151,8 @@ describe('mfa service: passkey registration', () => {
     );
   });
 
-  // Only `disable` used to clear `mfaPasskeyChallengeExpiresAt`; a successful registration
-  // nulled the challenge column but left the stamp behind indefinitely.
+  // The stamp is cleared in the same statement as the challenge column. Clearing only the
+  // challenge leaves `mfaPasskeyChallengeExpiresAt` behind until the next `disable`.
   test('a successful registration clears the pending expiry stamp alongside the challenge', async () => {
     const { service, users } = setup();
     const options = await service.passkeyRegistrationOptions('1');

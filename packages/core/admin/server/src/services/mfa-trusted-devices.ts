@@ -32,8 +32,8 @@ export interface TrustedDeviceRow {
 
 /**
  * The stored form of the cookie token. A plain sha256, not bcrypt: the token is 256 bits of
- * CSPRNG output, so there is nothing for a slow hash to protect (the base factor bcrypts recovery codes
- * because those carry only 50 bits). Hex in, hex out, so it can be compared with `===` after a
+ * CSPRNG output, so there is nothing for a slow hash to protect. Recovery codes are bcrypted
+ * because those carry only 50 bits. Hex in, hex out, so it can be compared with `===` after a
  * unique-index lookup.
  */
 export const hashTrustToken = (token: string): string =>
@@ -99,7 +99,7 @@ export const createTrustedDevices = ({
    * Mints the token, stores its hash, applies the cap, records `device_trusted`. Returns the raw
    * token exactly once, for the controller to put in the cookie, or null when the organisation
    * does not offer trust (a stale checkbox is not an error). Any verified challenge may call
-   * this; the function does not know which factor passed, which is what lets passkeys's passkey
+   * this; the function does not know which factor passed, which is what lets the passkey login
    * path reuse it unchanged.
    */
   const trustDevice = async (

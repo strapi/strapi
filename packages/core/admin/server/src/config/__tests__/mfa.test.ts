@@ -141,8 +141,8 @@ describe('validateMfaConfig', () => {
     expect(logger.warnings.join(' ')).toContain('userAttemptWindow');
   });
 
-  // `maxChallengeAttempts`/`maxUserAttempts` used to guard with `< 0`, so `0` passed through
-  // unwarned. `maxUserAttempts: 0` makes `isAccountThrottled` (`failures >= 0`) true for every
+  // Zero is the value a `< 0` floor would let through, and it is the worst one.
+  // `maxUserAttempts: 0` makes `isAccountThrottled` (`failures >= 0`) true for every
   // account before a single failure is ever recorded, so every challenge create returns 429 and
   // every verify reports `throttled`. `maxChallengeAttempts: 0` makes the per-challenge conditional
   // increment's own cap condition (`attempts < 0`) impossible to satisfy, so every verify reports
@@ -163,11 +163,10 @@ describe('validateMfaConfig', () => {
     expect(logger.warnings.join(' ')).toContain('maxUserAttempts');
   });
 
-  // `raw` used to be cast straight to `Partial<MfaConfig>` and spread over the defaults with
-  // no shape check, so a string or array (both truthy, both objects to `typeof`... except a string
-  // isn't) got spread character-by-character / index-by-index into the result as extra indexed
-  // keys instead of being read as settings -- silently producing a config that is neither the
-  // caller's intent nor the documented defaults.
+  // Without a shape check, casting `raw` to `Partial<MfaConfig>` and spreading it over the
+  // defaults spreads a string character-by-character and an array index-by-index, adding indexed
+  // keys instead of reading settings -- silently producing a config that is neither the caller's
+  // intent nor the documented defaults.
   test('falls back to the defaults and warns once when the config is a string', () => {
     const logger = makeLogger();
     const result = validateMfaConfig('nonsense' as unknown, logger);

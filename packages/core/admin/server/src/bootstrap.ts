@@ -258,10 +258,10 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
     });
 
     // Passkeys discoverability. A deployment whose `admin.absoluteUrl` yields no usable
-    // relying-party id hides every passkey surface -- correctly, since no ceremony could succeed --
-    // and used to say so only lazily, on whichever `/mfa/me` happened first. Asking here puts the
-    // cause and the config key that fixes it in the startup log, where an operator is actually
-    // looking. In practice this fires for a production deployment that never set `server.url`, so
+    // relying-party id hides every passkey surface -- correctly, since no ceremony could succeed.
+    // Asking here rather than on the first `/mfa/me` puts the cause and the config key that fixes
+    // it in the startup log, where an operator is actually looking, instead of leaving the
+    // surfaces silently absent. In practice this fires for a deployment that never set `server.url`, so
     // `admin.absoluteUrl` falls back to `http://<host>:<port>` and the template's `HOST=0.0.0.0`
     // makes that an IP literal.
     //

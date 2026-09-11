@@ -86,10 +86,10 @@ describe('mfa controller', () => {
     jest.clearAllMocks();
   });
 
-  // The feature-off gate is no longer a guard in each handler: it is the `admin::isMfaEnabled`
-  // policy, which 404s before any handler runs. That every route carries it is pinned in
-  // `routes/__tests__/mfa.test.ts`, and the policy's own behaviour in
-  // `policies/__tests__/isMfaEnabled.test.ts`. A handler-level test could no longer observe it.
+  // No feature-off cases here: the gate is the `admin::isMfaEnabled` policy, which 404s before
+  // any handler runs, so a handler-level test cannot observe it. That every route carries it is
+  // pinned in `routes/__tests__/mfa.test.ts`, the policy's own behaviour in
+  // `policies/__tests__/isMfaEnabled.test.ts`.
 
   test('GET /mfa/me never returns the secret', async () => {
     const isEnrolled = jest.fn(() => Promise.resolve(true));
@@ -244,10 +244,9 @@ describe('mfa controller', () => {
       expect(ctx.body.data.passkeysEnabled).toBe(false);
     });
 
-    // The org policy alone used to decide `passkeysEnabled`, so a deployment whose RP cannot
-    // resolve (the default production shape -- an IP-literal `admin.absoluteUrl`) still advertised
-    // a passkey section with a button that could never work. This pins the AND: the policy being
-    // on is not enough on its own.
+    // `passkeysEnabled` is an AND, and this pins the half that is easy to drop: were it the org
+    // policy alone, a deployment whose RP cannot resolve (the default production shape -- an
+    // IP-literal `admin.absoluteUrl`) would advertise a passkey section that could never work.
     test('reports passkeysEnabled: false when the policy is on but the RP cannot be resolved', async () => {
       const passkeysConfigured = jest.fn(() => false);
       setStrapi({
