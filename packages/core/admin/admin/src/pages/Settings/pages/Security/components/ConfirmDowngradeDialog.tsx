@@ -1,9 +1,10 @@
 import * as React from 'react';
 
-import { Button, Field, Flex, Modal, TextInput, Typography } from '@strapi/design-system';
+import { Button, Flex, Modal, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { ErrorMessage } from '../../../../../components/ErrorMessage';
+import { CredentialFields } from '../../../../Profile/CredentialFields';
 
 interface DowngradeCredentials {
   password: string;
@@ -134,45 +135,17 @@ const ConfirmDowngradeDialog = ({
                       'This change makes two-factor authentication less strict for other users. Confirm your password to continue.',
                   })}
               </Typography>
-              <Field.Root name="password" required>
-                <Field.Label>
-                  {formatMessage({
-                    id: 'Settings.profile.form.section.mfa.enrol.password.label',
-                    defaultMessage: 'Current password',
-                  })}
-                </Field.Label>
-                <TextInput
-                  type="password"
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
-                />
-              </Field.Root>
-              {requiresCode ? (
-                <Field.Root
-                  name="code"
-                  required
-                  hint={formatMessage({
-                    id: 'Settings.security.mfa.downgrade.code.hint',
-                    defaultMessage:
-                      'A code from your authenticator app, or an unused recovery code.',
-                  })}
-                >
-                  <Field.Label>
-                    {formatMessage({
-                      id: 'Auth.form.mfa.code.label',
-                      defaultMessage: 'Authentication code',
-                    })}
-                  </Field.Label>
-                  <TextInput
-                    autoComplete="one-time-code"
-                    maxLength={32}
-                    value={code}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCode(e.target.value)}
-                  />
-                  <Field.Hint />
-                </Field.Root>
-              ) : null}
+              <CredentialFields
+                password={password}
+                onPasswordChange={setPassword}
+                code={code}
+                onCodeChange={setCode}
+                requiresCode={requiresCode}
+                codeHint={formatMessage({
+                  id: 'Settings.security.mfa.downgrade.code.hint',
+                  defaultMessage: 'A code from your authenticator app, or an unused recovery code.',
+                })}
+              />
             </Flex>
           </Modal.Body>
           <Modal.Footer>

@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Button, Field, Flex, Modal, TextInput, Typography } from '@strapi/design-system';
+import { Button, Flex, Modal, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { ErrorMessage } from '../../components/ErrorMessage';
@@ -12,6 +12,7 @@ import {
   useRegenerateRecoveryCodesMutation,
 } from '../../services/mfa';
 
+import { CredentialFields } from './CredentialFields';
 import { RecoveryCodes } from './RecoveryCodes';
 
 interface ReAuthDialogProps {
@@ -217,36 +218,12 @@ const ReAuthDialog = ({ open, onClose, intent }: ReAuthDialogProps) => {
               <Flex direction="column" alignItems="stretch" gap={4}>
                 <ErrorMessage error={error} />
                 <Typography>{formatMessage(copy.intro)}</Typography>
-                <Field.Root name="password" required>
-                  <Field.Label>
-                    {formatMessage({
-                      id: 'Settings.profile.form.section.mfa.enrol.password.label',
-                      defaultMessage: 'Current password',
-                    })}
-                  </Field.Label>
-                  <TextInput
-                    type="password"
-                    autoComplete="current-password"
-                    value={password}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setPassword(e.target.value)
-                    }
-                  />
-                </Field.Root>
-                <Field.Root name="code" required>
-                  <Field.Label>
-                    {formatMessage({
-                      id: 'Auth.form.mfa.code.label',
-                      defaultMessage: 'Authentication code',
-                    })}
-                  </Field.Label>
-                  <TextInput
-                    autoComplete="one-time-code"
-                    maxLength={32}
-                    value={code}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCode(e.target.value)}
-                  />
-                </Field.Root>
+                <CredentialFields
+                  password={password}
+                  onPasswordChange={setPassword}
+                  code={code}
+                  onCodeChange={setCode}
+                />
               </Flex>
             </Modal.Body>
             <Modal.Footer>

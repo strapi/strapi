@@ -22,6 +22,7 @@ import {
   useVerifyMfaEnrolmentMutation,
 } from '../../services/mfa';
 
+import { CredentialFields } from './CredentialFields';
 import { RecoveryCodes } from './RecoveryCodes';
 
 interface EnrolDialogProps {
@@ -243,38 +244,13 @@ const EnrolDialog = ({ open, onClose, mode = 'enrol' }: EnrolDialogProps) => {
                         }
                   )}
                 </Typography>
-                <Field.Root name="password" required>
-                  <Field.Label>
-                    {formatMessage({
-                      id: 'Settings.profile.form.section.mfa.enrol.password.label',
-                      defaultMessage: 'Current password',
-                    })}
-                  </Field.Label>
-                  <TextInput
-                    type="password"
-                    autoComplete="current-password"
-                    value={password}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setPassword(e.target.value)
-                    }
-                  />
-                </Field.Root>
-                {isReplace ? (
-                  <Field.Root name="code" required>
-                    <Field.Label>
-                      {formatMessage({
-                        id: 'Auth.form.mfa.code.label',
-                        defaultMessage: 'Authentication code',
-                      })}
-                    </Field.Label>
-                    <TextInput
-                      autoComplete="one-time-code"
-                      maxLength={32}
-                      value={code}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCode(e.target.value)}
-                    />
-                  </Field.Root>
-                ) : null}
+                <CredentialFields
+                  password={password}
+                  onPasswordChange={setPassword}
+                  code={code}
+                  onCodeChange={setCode}
+                  requiresCode={isReplace}
+                />
               </Flex>
             </Modal.Body>
             <Modal.Footer>
