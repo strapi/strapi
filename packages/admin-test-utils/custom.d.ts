@@ -12,6 +12,9 @@ declare global {
       future: {
         isEnabled: (name: string) => boolean;
       };
+      featureFlags: {
+        isEnabled: (name: string) => boolean;
+      };
       projectType: string;
       telemetryDisabled: boolean;
       flags: {
