@@ -17,52 +17,13 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   padding-inline-start: 20px;
 }
 
-.c11 {
-  border-radius: 4px;
-  cursor: pointer;
-  flex: 1;
-  padding-inline-start: 16px;
-  padding-inline-end: 16px;
-  width: 100%;
+.c19 {
+  padding-block-end: 8px;
+  padding-inline-start: 20px;
+  padding-inline-end: 20px;
 }
 
-.c15 {
-  border-radius: 4px;
-  cursor: pointer;
-  padding-inline-start: 7px;
-  padding-inline-end: 7px;
-  padding-block-start: 4px;
-}
-
-.c28 {
-  max-width: 100%;
-  padding-block-end: 20px;
-  padding-inline-start: 12px;
-  padding-inline-end: 12px;
-  padding-block-start: 20px;
-}
-
-.c31 {
-  padding-inline-start: 12px;
-  padding-inline-end: 12px;
-}
-
-.c32 {
-  position: relative;
-}
-
-.c36 {
-  border-radius: 4px;
-  cursor: pointer;
-  display: inline-flex;
-}
-
-.c39 {
-  margin-inline-start: 0;
-  margin-inline-end: 0;
-}
-
-.c43 {
+.c22 {
   border-radius: 4px;
   padding-block-end: 4px;
   padding-inline-start: 12px;
@@ -71,21 +32,49 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   width: 100%;
 }
 
-.c44 {
+.c23 {
   width: 100%;
 }
 
-.c46 {
+.c25 {
   overflow: hidden;
   width: 80dvw;
 }
 
-.c48 {
+.c30 {
+  max-width: 100%;
+  padding-block-end: 20px;
+  padding-inline-start: 12px;
+  padding-inline-end: 12px;
+  padding-block-start: 20px;
+}
+
+.c33 {
+  padding-inline-start: 12px;
+  padding-inline-end: 12px;
+}
+
+.c34 {
+  position: relative;
+}
+
+.c38 {
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+}
+
+.c41 {
+  margin-inline-start: 0;
+  margin-inline-end: 0;
+}
+
+.c43 {
   text-align: center;
   width: 24px;
 }
 
-.c50 {
+.c45 {
   padding-inline-start: 8px;
 }
 
@@ -103,29 +92,14 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   display: flex;
 }
 
-.c10 {
-  gap: 8px;
-  align-items: center;
-  flex-direction: row;
-  display: flex;
-}
-
-.c12 {
-  gap: 8px;
-  align-items: center;
-  justify-content: center;
-  flex-direction: row;
-  display: inline-flex;
-}
-
-.c19 {
+.c11 {
   gap: 4px;
   align-items: stretch;
   flex-direction: column;
   display: flex;
 }
 
-.c20 {
+.c13 {
   gap: 8px;
   align-items: center;
   justify-content: space-between;
@@ -133,56 +107,63 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   display: flex;
 }
 
-.c29 {
+.c24 {
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+  display: flex;
+}
+
+.c27 {
+  gap: 8px;
+  align-items: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c31 {
   gap: 24px;
   align-items: stretch;
   flex-direction: column;
   display: flex;
 }
 
-.c30 {
+.c32 {
   gap: 8px;
   align-items: stretch;
   flex-direction: column;
   display: flex;
 }
 
-.c33 {
-  align-items: center;
-  flex-direction: row;
-  display: flex;
-}
-
 .c35 {
-  gap: 4px;
   align-items: center;
   flex-direction: row;
   display: flex;
 }
 
 .c37 {
+  gap: 4px;
+  align-items: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c39 {
   align-items: center;
   justify-content: center;
   flex-direction: row;
   display: flex;
 }
 
-.c40 {
+.c42 {
   gap: 8px;
   align-items: stretch;
   flex-direction: column;
   display: flex;
 }
 
-.c45 {
-  gap: 8px;
-  align-items: center;
-  justify-content: space-between;
-  flex-direction: row;
-  display: flex;
-}
-
-.c52 {
+.c47 {
   gap: 2px;
   align-items: stretch;
   flex-direction: column;
@@ -196,14 +177,14 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   color: currentcolor;
 }
 
-.c14 {
-  font-size: 1.2rem;
-  line-height: 1.33;
+.c26 {
+  font-size: 1.6rem;
+  line-height: 32px;
   color: currentcolor;
-  font-weight: 600;
+  line-height: 32px;
 }
 
-.c34 {
+.c36 {
   font-weight: 600;
   text-transform: uppercase;
   font-size: 1.1rem;
@@ -211,21 +192,14 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c47 {
-  font-size: 1.6rem;
-  line-height: 32px;
-  color: currentcolor;
-  line-height: 32px;
-}
-
-.c51 {
+.c46 {
   font-size: 1.6rem;
   line-height: 1.5;
   color: #32324d;
   font-weight: 500;
 }
 
-.c17 {
+.c12 {
   border: 0;
   clip: rect(0 0 0 0);
   height: 1px;
@@ -236,55 +210,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c13 {
-  height: 4rem;
-  text-decoration: none;
-  border: 1px solid #4945ff;
-  background: #4945ff;
-  color: #ffffff;
-}
-
-.c13:hover {
-  border: 1px solid #7b79ff;
-  background: #7b79ff;
-}
-
-.c13:active {
-  border: 1px solid #4945ff;
-  background: #4945ff;
-}
-
-.c13[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-  color: #666687;
-  cursor: default;
-}
-
-.c16 {
-  height: 4rem;
-  text-decoration: none;
-  border: 1px solid #dcdce4;
-  background: #ffffff;
-  color: #32324d;
-}
-
-.c16:hover {
-  background-color: #f6f6f9;
-}
-
-.c16:active {
-  background-color: #eaeaef;
-}
-
-.c16[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-  color: #666687;
-  cursor: default;
-}
-
-.c38 {
+.c40 {
   text-decoration: none;
   padding-block: 0.7rem;
   padding-inline: 0.7rem;
@@ -293,26 +219,26 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   color: #32324d;
 }
 
-.c38 svg {
+.c40 svg {
   fill: #8e8ea9;
 }
 
-.c38:hover {
+.c40:hover {
   background-color: #f6f6f9;
 }
 
-.c38:active {
+.c40:active {
   background-color: #eaeaef;
 }
 
-.c38[aria-disabled='true'] {
+.c40[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
   color: #666687;
   cursor: default;
 }
 
-.c25 {
+.c18 {
   border: none;
   border-radius: 4px;
   color: #32324d;
@@ -327,21 +253,21 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   padding-block: 8px;
 }
 
-.c25::placeholder {
+.c18::placeholder {
   color: #666687;
   opacity: 1;
 }
 
-.c25[aria-disabled='true'] {
+.c18[aria-disabled='true'] {
   color: inherit;
 }
 
-.c25:focus {
+.c18:focus {
   outline: none;
   box-shadow: none;
 }
 
-.c21 {
+.c14 {
   border: 1px solid #dcdce4;
   border-radius: 4px;
   background: #ffffff;
@@ -353,19 +279,19 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   transition-duration: 0.2s;
 }
 
-.c21:focus-within {
+.c14:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c26 {
+.c28 {
   width: 100%;
   height: 100%;
   overflow: hidden;
   display: flex;
 }
 
-.c27 {
+.c29 {
   min-width: 100%;
 }
 
@@ -375,24 +301,24 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   flex-shrink: 0;
 }
 
-.c24 {
+.c17 {
   font-size: 1rem;
 }
 
-.c24 path {
+.c17 path {
   fill: #8e8ea9;
 }
 
-.c18 {
+.c10 {
   border-radius: 4px;
   border: 1px solid #eaeaef;
 }
 
-.c18:focus-within .c23 {
+.c10:focus-within .c16 {
   fill: #4945ff;
 }
 
-.c22 {
+.c15 {
   border: 1px solid #eaeaef;
   padding: 0 0 0 8px;
   color: #32324d;
@@ -402,31 +328,31 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   transition-duration: 0.2s;
 }
 
-.c22:hover button {
+.c15:hover button {
   cursor: pointer;
 }
 
-.c22:focus-within {
+.c15:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c22 >input::-ms-clear {
+.c15 >input::-ms-clear {
   display: none;
   width: 0;
   height: 0;
 }
 
-.c22 >input::-ms-reveal {
+.c15 >input::-ms-reveal {
   display: none;
   width: 0;
   height: 0;
 }
 
-.c22 >input::-webkit-search-decoration,
-.c22 >input::-webkit-search-cancel-button,
-.c22 >input::-webkit-search-results-button,
-.c22 >input::-webkit-search-results-decoration {
+.c15 >input::-webkit-search-decoration,
+.c15 >input::-webkit-search-cancel-button,
+.c15 >input::-webkit-search-results-button,
+.c15 >input::-webkit-search-results-decoration {
   display: none;
 }
 
@@ -453,7 +379,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   position: relative;
 }
 
-.c42 {
+.c21 {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -462,21 +388,21 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   color: #32324d;
 }
 
-.c42.active>div {
+.c21.active>div {
   background-color: #f0f0ff;
   color: #271fe0;
   font-weight: 500;
 }
 
-.c42:hover.active>div {
+.c21:hover.active>div {
   background-color: #f0f0ff;
 }
 
-.c42:hover>div {
+.c21:hover>div {
   background-color: #f6f6f9;
 }
 
-.c42:focus-visible {
+.c21:focus-visible {
   outline-offset: -2px;
 }
 
@@ -485,7 +411,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   height: 6.4rem;
 }
 
-.c49 {
+.c44 {
   cursor: pointer;
   width: 100%;
   border: none;
@@ -500,22 +426,35 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   padding-bottom: 8px;
 }
 
-.c49:hover {
+.c44:hover {
   background-color: #f6f6f9;
 }
 
-.c53 .c41>div {
+.c48 .c20>div {
   padding-left: 36px;
 }
 
+@media (min-width: 1080px) {
+  .c22 {
+    padding-block-end: 0;
+    padding-block-start: 0;
+  }
+}
+
 @media (min-width: 768px) {
-  .c28 {
+  .c25 {
+    width: 100%;
+  }
+}
+
+@media (min-width: 768px) {
+  .c30 {
     max-width: 23.2rem;
   }
 }
 
 @media (min-width: 1080px) {
-  .c28 {
+  .c30 {
     padding-block-end: 16px;
     padding-inline-start: 0;
     padding-inline-end: 0;
@@ -524,41 +463,28 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 }
 
 @media (min-width: 1080px) {
-  .c31 {
+  .c33 {
     padding-inline-start: 20px;
     padding-inline-end: 20px;
   }
 }
 
 @media (min-width: 1080px) {
-  .c39 {
+  .c41 {
     margin-inline-start: 8px;
     margin-inline-end: 8px;
   }
 }
 
 @media (min-width: 1080px) {
-  .c43 {
-    padding-block-end: 0;
-    padding-block-start: 0;
-  }
-}
-
-@media (min-width: 768px) {
-  .c46 {
-    width: 100%;
-  }
-}
-
-@media (min-width: 1080px) {
-  .c40 {
-    gap: 2px;
-  }
-}
-
-@media (min-width: 1080px) {
-  .c45 {
+  .c24 {
     gap: 4px;
+  }
+}
+
+@media (min-width: 1080px) {
+  .c42 {
+    gap: 2px;
   }
 }
 
@@ -569,69 +495,45 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 }
 
 @media (min-width: 768px) {
-  .c47 {
+  .c26 {
     font-size: 1.4rem;
   }
 }
 
 @media (min-width: 768px) {
-  .c51 {
+  .c46 {
     font-size: 1.4rem;
   }
 }
 
 @media (min-width: 768px) {
-  .c51 {
+  .c46 {
     line-height: 1.43;
   }
 }
 
 @media (min-width: 768px) {
-  .c13 {
-    height: 3.2rem;
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .c13 {
-    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  }
-}
-
-@media (min-width: 768px) {
-  .c16 {
-    height: 3.2rem;
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .c16 {
-    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  }
-}
-
-@media (min-width: 768px) {
-  .c38 {
+  .c40 {
     padding-block: 0.2rem;
     padding-inline: 0.2rem;
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .c38 {
+  .c40 {
     transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 }
 
 @media (min-width: 768px) {
-  .c25 {
+  .c18 {
     font-size: 1.4rem;
     line-height: 2.2rem;
   }
 }
 
 @media (min-width: 768px) {
-  .c25 {
+  .c18 {
     padding-block: 4px;
   }
 }
@@ -686,65 +588,18 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
       <div
         class="c10"
       >
-        <button
-          aria-disabled="false"
-          class="c11 c12 c13"
-          type="submit"
-        >
-          <span
-            class="c14"
-          >
-            Save
-          </span>
-        </button>
-        <button
-          aria-disabled="false"
-          aria-expanded="false"
-          aria-haspopup="menu"
-          class="c15 c12 c16"
-          data-state="closed"
-          id="radix-:r0:"
-          type="button"
-        >
-          <span
-            class="c14"
-          >
-            <svg
-              aria-hidden="true"
-              fill="#8e8ea9"
-              focusable="false"
-              height="16"
-              viewBox="0 0 32 32"
-              width="16"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M18 16a2 2 0 1 1-4 0 2 2 0 0 1 4 0M7.5 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4m17 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4"
-              />
-            </svg>
-            <span
-              class="c17"
-            >
-              More actions
-            </span>
-          </span>
-        </button>
-      </div>
-      <div
-        class="c18"
-      >
         <div
-          class="c19"
+          class="c11"
         >
           <span
-            class="c17"
+            class="c12"
           />
           <div
-            class="c20 c21 c22"
+            class="c13 c14 c15"
           >
             <svg
               aria-hidden="true"
-              class="c23 c24"
+              class="c16 c17"
               fill="currentColor"
               height="16"
               viewBox="0 0 32 32"
@@ -758,8 +613,8 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
             <input
               aria-disabled="false"
               aria-label="Search"
-              class="c25"
-              id=":r2:"
+              class="c18"
+              id=":r0:"
               name="search_contentType"
               placeholder="Search"
               type="search"
@@ -770,7 +625,33 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
       </div>
     </div>
     <div
-      class="c26"
+      class="c19"
+    >
+      <a
+        class="c20 c21"
+        href="/plugins/content-type-builder"
+      >
+        <div
+          class="c22"
+        >
+          <div
+            class="c23 c24"
+          >
+            <div
+              class="c25 c26"
+              style="text-overflow: ellipsis; white-space: nowrap;"
+            >
+              All content types
+            </div>
+            <div
+              class="c27"
+            />
+          </div>
+        </div>
+      </a>
+    </div>
+    <div
+      class="c28"
       dir="ltr"
       style="position: relative; --radix-scroll-area-corner-width: 0px; --radix-scroll-area-corner-height: 0px;"
     >
@@ -778,7 +659,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
         [data-radix-scroll-area-viewport]{scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;}[data-radix-scroll-area-viewport]::-webkit-scrollbar{display:none}
       </style>
       <div
-        class="c27"
+        class="c29"
         data-radix-scroll-area-viewport=""
         style="overflow-x: scroll; overflow-y: scroll;"
       >
@@ -786,40 +667,40 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
           style="min-width: 100%; display: table;"
         >
           <div
-            class="c28"
+            class="c30"
           >
             <ul
-              class="c29"
+              class="c31"
             >
               <li>
                 <div
-                  class="c30"
+                  class="c32"
                 >
                   <div
-                    class="c31"
+                    class="c33"
                   >
                     <div
-                      class="c32 c20"
+                      class="c34 c13"
                     >
                       <div
-                        class="c33"
+                        class="c35"
                       >
                         <div
                           class=""
                         >
                           <span
-                            class="c34"
+                            class="c36"
                           >
                             Collection Types
                           </span>
                         </div>
                       </div>
                       <div
-                        class="c35"
+                        class="c37"
                       >
                         <button
                           aria-disabled="false"
-                          class="c36 c37 c38"
+                          class="c38 c39 c40"
                           data-state="closed"
                           type="button"
                         >
@@ -837,7 +718,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                             />
                           </svg>
                           <span
-                            class="c17"
+                            class="c12"
                           >
                             Create new collection type
                           </span>
@@ -846,31 +727,31 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                     </div>
                   </div>
                   <ol
-                    class="c39 c40"
-                    id=":r3:"
+                    class="c41 c42"
+                    id=":r1:"
                   >
                     <li>
                       <a
-                        class="c41 c42"
+                        class="c20 c21"
                         href="/plugins/content-type-builder/content-types/application::address.address"
                       >
                         <div
-                          class="c43"
+                          class="c22"
                         >
                           <div
-                            class="c44 c45"
+                            class="c23 c24"
                           >
                             <div
-                              class="c46 c47"
+                              class="c25 c26"
                               style="text-overflow: ellipsis; white-space: nowrap;"
                             >
                               address
                             </div>
                             <div
-                              class="c10"
+                              class="c27"
                             >
                               <span
-                                class="c48"
+                                class="c43"
                               />
                             </div>
                           </div>
@@ -879,26 +760,26 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                     </li>
                     <li>
                       <a
-                        class="c41 c42"
+                        class="c20 c21"
                         href="/plugins/content-type-builder/content-types/application::category.category"
                       >
                         <div
-                          class="c43"
+                          class="c22"
                         >
                           <div
-                            class="c44 c45"
+                            class="c23 c24"
                           >
                             <div
-                              class="c46 c47"
+                              class="c25 c26"
                               style="text-overflow: ellipsis; white-space: nowrap;"
                             >
                               category
                             </div>
                             <div
-                              class="c10"
+                              class="c27"
                             >
                               <span
-                                class="c48"
+                                class="c43"
                               />
                             </div>
                           </div>
@@ -910,33 +791,33 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
               </li>
               <li>
                 <div
-                  class="c30"
+                  class="c32"
                 >
                   <div
-                    class="c31"
+                    class="c33"
                   >
                     <div
-                      class="c32 c20"
+                      class="c34 c13"
                     >
                       <div
-                        class="c33"
+                        class="c35"
                       >
                         <div
                           class=""
                         >
                           <span
-                            class="c34"
+                            class="c36"
                           >
                             Single Types
                           </span>
                         </div>
                       </div>
                       <div
-                        class="c35"
+                        class="c37"
                       >
                         <button
                           aria-disabled="false"
-                          class="c36 c37 c38"
+                          class="c38 c39 c40"
                           data-state="closed"
                           type="button"
                         >
@@ -954,7 +835,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                             />
                           </svg>
                           <span
-                            class="c17"
+                            class="c12"
                           >
                             Create new single type
                           </span>
@@ -963,31 +844,31 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                     </div>
                   </div>
                   <ol
-                    class="c39 c40"
-                    id=":r5:"
+                    class="c41 c42"
+                    id=":r3:"
                   >
                     <li>
                       <a
-                        class="c41 c42"
+                        class="c20 c21"
                         href="/plugins/content-type-builder/content-types/application::homepage.homepage"
                       >
                         <div
-                          class="c43"
+                          class="c22"
                         >
                           <div
-                            class="c44 c45"
+                            class="c23 c24"
                           >
                             <div
-                              class="c46 c47"
+                              class="c25 c26"
                               style="text-overflow: ellipsis; white-space: nowrap;"
                             >
                               Homepage
                             </div>
                             <div
-                              class="c10"
+                              class="c27"
                             >
                               <span
-                                class="c48"
+                                class="c43"
                               />
                             </div>
                           </div>
@@ -999,33 +880,33 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
               </li>
               <li>
                 <div
-                  class="c30"
+                  class="c32"
                 >
                   <div
-                    class="c31"
+                    class="c33"
                   >
                     <div
-                      class="c32 c20"
+                      class="c34 c13"
                     >
                       <div
-                        class="c33"
+                        class="c35"
                       >
                         <div
                           class=""
                         >
                           <span
-                            class="c34"
+                            class="c36"
                           >
                             Components
                           </span>
                         </div>
                       </div>
                       <div
-                        class="c35"
+                        class="c37"
                       >
                         <button
                           aria-disabled="false"
-                          class="c36 c37 c38"
+                          class="c38 c39 c40"
                           data-state="closed"
                           type="button"
                         >
@@ -1043,7 +924,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                             />
                           </svg>
                           <span
-                            class="c17"
+                            class="c12"
                           >
                             Create a new component
                           </span>
@@ -1052,8 +933,8 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                     </div>
                   </div>
                   <ol
-                    class="c39 c40"
-                    id=":r7:"
+                    class="c41 c42"
+                    id=":r5:"
                   >
                     <li>
                       <div
@@ -1063,9 +944,9 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                           class="c3"
                         >
                           <button
-                            aria-controls=":r9:"
+                            aria-controls=":r7:"
                             aria-expanded="true"
-                            class="c49"
+                            class="c44"
                           >
                             <svg
                               aria-hidden="true"
@@ -1081,10 +962,10 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                               />
                             </svg>
                             <div
-                              class="c50"
+                              class="c45"
                             >
                               <span
-                                class="c51"
+                                class="c46"
                               >
                                 basic
                               </span>
@@ -1092,34 +973,34 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                           </button>
                         </div>
                         <ul
-                          class="c52"
-                          id=":r9:"
+                          class="c47"
+                          id=":r7:"
                           style="max-height: 0px; overflow: hidden; transition: max-height 0.5s cubic-bezier(0, 1, 0, 1);"
                         >
                           <li
-                            class="c53"
+                            class="c48"
                           >
                             <a
-                              class="c41 c42"
+                              class="c20 c21"
                               href="/plugins/content-type-builder/component-categories/basic/basic.simple"
                             >
                               <div
-                                class="c43"
+                                class="c22"
                               >
                                 <div
-                                  class="c44 c45"
+                                  class="c23 c24"
                                 >
                                   <div
-                                    class="c46 c47"
+                                    class="c25 c26"
                                     style="text-overflow: ellipsis; white-space: nowrap;"
                                   >
                                     simple
                                   </div>
                                   <div
-                                    class="c10"
+                                    class="c27"
                                   >
                                     <span
-                                      class="c48"
+                                      class="c43"
                                     />
                                   </div>
                                 </div>
@@ -1137,9 +1018,9 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                           class="c3"
                         >
                           <button
-                            aria-controls=":ra:"
+                            aria-controls=":r8:"
                             aria-expanded="true"
-                            class="c49"
+                            class="c44"
                           >
                             <svg
                               aria-hidden="true"
@@ -1155,10 +1036,10 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                               />
                             </svg>
                             <div
-                              class="c50"
+                              class="c45"
                             >
                               <span
-                                class="c51"
+                                class="c46"
                               >
                                 default
                               </span>
@@ -1166,34 +1047,34 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                           </button>
                         </div>
                         <ul
-                          class="c52"
-                          id=":ra:"
+                          class="c47"
+                          id=":r8:"
                           style="max-height: 0px; overflow: hidden; transition: max-height 0.5s cubic-bezier(0, 1, 0, 1);"
                         >
                           <li
-                            class="c53"
+                            class="c48"
                           >
                             <a
-                              class="c41 c42"
+                              class="c20 c21"
                               href="/plugins/content-type-builder/component-categories/default/default.closingperiod"
                             >
                               <div
-                                class="c43"
+                                class="c22"
                               >
                                 <div
-                                  class="c44 c45"
+                                  class="c23 c24"
                                 >
                                   <div
-                                    class="c46 c47"
+                                    class="c25 c26"
                                     style="text-overflow: ellipsis; white-space: nowrap;"
                                   >
                                     closingperiod
                                   </div>
                                   <div
-                                    class="c10"
+                                    class="c27"
                                   >
                                     <span
-                                      class="c48"
+                                      class="c43"
                                     />
                                   </div>
                                 </div>
@@ -1201,29 +1082,29 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                             </a>
                           </li>
                           <li
-                            class="c53"
+                            class="c48"
                           >
                             <a
-                              class="c41 c42"
+                              class="c20 c21"
                               href="/plugins/content-type-builder/component-categories/default/default.dish"
                             >
                               <div
-                                class="c43"
+                                class="c22"
                               >
                                 <div
-                                  class="c44 c45"
+                                  class="c23 c24"
                                 >
                                   <div
-                                    class="c46 c47"
+                                    class="c25 c26"
                                     style="text-overflow: ellipsis; white-space: nowrap;"
                                   >
                                     dish
                                   </div>
                                   <div
-                                    class="c10"
+                                    class="c27"
                                   >
                                     <span
-                                      class="c48"
+                                      class="c43"
                                     />
                                   </div>
                                 </div>
@@ -1243,7 +1124,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
     </div>
   </nav>
   <span
-    class="c17"
+    class="c12"
   >
     <p
       aria-live="polite"

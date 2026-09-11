@@ -6,12 +6,9 @@ import { useIntl } from 'react-intl';
 
 import { pluginId } from '../../pluginId';
 import { getTrad } from '../../utils/getTrad';
-import { useCTBTracking } from '../CTBSession/ctbSession';
 import { useDataManager } from '../DataManager/useDataManager';
-import { useFormModalNavigation } from '../FormModalNavigation/useFormModalNavigation';
 
 import type { Status } from '../../types';
-import type { OpenModalCreateSchemaPayload } from '../FormModalNavigation/FormModalNavigationProvider';
 
 type Link = {
   name: string;
@@ -44,11 +41,8 @@ type MenuSection = {
 type Menu = MenuSection[];
 
 export const useContentTypeBuilderMenu = () => {
-  const { componentsGroupedByCategory, isInDevelopmentMode, sortedContentTypesList } =
-    useDataManager();
-  const { trackUsage } = useCTBTracking();
+  const { componentsGroupedByCategory, sortedContentTypesList } = useDataManager();
   const [searchValue, setSearchValue] = useState('');
-  const { onOpenModalCreateSchema } = useFormModalNavigation();
   const { locale } = useIntl();
 
   const { contains } = useFilter(locale, {
@@ -58,45 +52,6 @@ export const useContentTypeBuilderMenu = () => {
   const formatter = useCollator(locale, {
     sensitivity: 'base',
   });
-
-  const handleClickOpenModalCreateCollectionType = () => {
-    trackUsage(`willCreateContentType`);
-
-    const nextState = {
-      modalType: 'contentType',
-      kind: 'collectionType',
-      actionType: 'create',
-      forTarget: 'contentType',
-    } satisfies OpenModalCreateSchemaPayload;
-
-    onOpenModalCreateSchema(nextState);
-  };
-
-  const handleClickOpenModalCreateSingleType = () => {
-    trackUsage(`willCreateSingleType`);
-
-    const nextState = {
-      modalType: 'contentType',
-      kind: 'singleType',
-      actionType: 'create',
-      forTarget: 'contentType',
-    } satisfies OpenModalCreateSchemaPayload;
-
-    onOpenModalCreateSchema(nextState);
-  };
-
-  const handleClickOpenModalCreateComponent = () => {
-    trackUsage('willCreateComponent');
-
-    const nextState = {
-      modalType: 'component',
-      kind: 'collectionType',
-      actionType: 'create',
-      forTarget: 'component',
-    } satisfies OpenModalCreateSchemaPayload;
-
-    onOpenModalCreateSchema(nextState);
-  };
 
   const componentsData = Object.entries(componentsGroupedByCategory)
     .map(([category, components]) => ({
@@ -130,13 +85,6 @@ export const useContentTypeBuilderMenu = () => {
         id: `${getTrad('menu.section.models.name')}`,
         defaultMessage: 'Collection Types',
       },
-      customLink: isInDevelopmentMode
-        ? {
-            id: `${getTrad('button.model.create')}`,
-            defaultMessage: 'Create new collection type',
-            onClick: handleClickOpenModalCreateCollectionType,
-          }
-        : undefined,
       links: displayedContentTypes.filter((contentType) => contentType.kind === 'collectionType'),
     },
     {
@@ -145,13 +93,6 @@ export const useContentTypeBuilderMenu = () => {
         id: `${getTrad('menu.section.single-types.name')}`,
         defaultMessage: 'Single Types',
       },
-      customLink: isInDevelopmentMode
-        ? {
-            id: `${getTrad('button.single-types.create')}`,
-            defaultMessage: 'Create new single type',
-            onClick: handleClickOpenModalCreateSingleType,
-          }
-        : undefined,
       links: displayedContentTypes.filter((singleType) => singleType.kind === 'singleType'),
     },
     {
@@ -160,13 +101,6 @@ export const useContentTypeBuilderMenu = () => {
         id: `${getTrad('menu.section.components.name')}`,
         defaultMessage: 'Components',
       },
-      customLink: isInDevelopmentMode
-        ? {
-            id: `${getTrad('button.component.create')}`,
-            defaultMessage: 'Create a new component',
-            onClick: handleClickOpenModalCreateComponent,
-          }
-        : undefined,
       links: componentsData,
     },
   ].map((section) => {

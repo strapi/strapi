@@ -1,0 +1,459 @@
+import * as React from 'react';
+
+import { Layouts, Table, useTracking } from '@strapi/admin/strapi-admin';
+import {
+  Box,
+  Button,
+  Field,
+  Flex,
+  Menu,
+  Searchbar,
+  SingleSelect,
+  SingleSelectOption,
+  Tabs,
+  Tag,
+  Typography,
+  useCollator,
+  useFilter,
+} from '@strapi/design-system';
+import { Cross, Filter, Plus } from '@strapi/icons';
+import upperFirst from 'lodash/upperFirst';
+import { useIntl } from 'react-intl';
+import { useNavigate } from 'react-router-dom';
+import { styled } from 'styled-components';
+
+import { useDataManager } from '../../components/DataManager/useDataManager';
+import { useFormModalNavigation } from '../../components/FormModalNavigation/useFormModalNavigation';
+import { Status } from '../../components/Status';
+import { pluginId } from '../../pluginId';
+import { getTrad } from '../../utils/getTrad';
+
+import { getSchemaColumns, getSchemaFilters } from './schemaRegistry';
+
+import type { Schema } from './schemaRegistry';
+import type { OpenModalCreateSchemaPayload } from '../../components/FormModalNavigation/FormModalNavigationProvider';
+
+type TabKind = 'collectionType' | 'singleType' | 'component';
+
+const ClickableRow = styled(Table.Row)`
+  cursor: pointer;
+`;
+
+const Mono = styled(Typography)`
+  font-family: monospace;
+`;
+
+const isContentType = (schema: Schema): boolean => schema.modelType === 'contentType';
+
+const attributeCount = (schema: Schema) => schema.attributes?.length ?? 0;
+
+const hasDraftAndPublish = (schema: Schema) =>
+  isContentType(schema) &&
+  (schema as { options?: { draftAndPublish?: boolean } }).options?.draftAndPublish === true;
+
+/** An option that is on reads as a word; one that is off reads as nothing. */
+const OnOff = ({ on }: { on: boolean }) => {
+  const { formatMessage } = useIntl();
+
+  if (!on) {
+    return (
+      <Typography
+        textColor="neutral400"
+        aria-label={formatMessage({ id: 'global.off', defaultMessage: 'Off' })}
+      >
+        —
+      </Typography>
+    );
+  }
+
+  return (
+    <Typography textColor="success600" fontWeight="bold">
+      {formatMessage({ id: 'global.on', defaultMessage: 'On' })}
+    </Typography>
+  );
+};
+
+/**
+ * "All content types" — the builder's front door.
+ *
+ * The sidebar lists names, which is the one thing you already know. This lists
+ * what actually distinguishes one schema from another: how many fields it has,
+ * whether it is localized, which workspaces see it, whether it has drafts. The
+ * columns beyond the intrinsic ones come from the plugins that own those
+ * options (see schemaRegistry).
+ *
+ * Everything here is already in the browser — `useDataManager()` holds every
+ * schema in full — so searching, filtering and sorting happen in memory and the
+ * page has no loading state of its own.
+ */
+export const SchemaIndex = () => {
+  const { formatMessage, locale } = useIntl();
+  const navigate = useNavigate();
+  const { trackUsage } = useTracking();
+  const { contentTypes, components, isInDevelopmentMode } = useDataManager();
+  const { onOpenModalCreateSchema } = useFormModalNavigation();
+
+  const { contains } = useFilter(locale, { sensitivity: 'base' });
+  const formatter = useCollator(locale, { sensitivity: 'base' });
+
+  const [tab, setTab] = React.useState<TabKind>('collectionType');
+  const [search, setSearch] = React.useState('');
+  const [applied, setApplied] = React.useState<Record<string, string>>({});
+
+  const filters = getSchemaFilters();
+  // Called unconditionally and in registration order — the list is frozen
+  // before the first render (see schemaRegistry).
+  const filterOptions = filters.map((filter) => filter.useOptions());
+
+  const all = React.useMemo<Schema[]>(() => {
+    const types = Object.values(contentTypes).filter((type) => type.visible);
+    return [...types, ...Object.values(components)] as Schema[];
+  }, [contentTypes, components]);
+
+  const rows = React.useMemo(() => {
+    return all
+      .filter((schema) => {
+        if (tab === 'component') {
+          return schema.modelType === 'component';
+        }
+        return isContentType(schema) && (schema as { kind?: string }).kind === tab;
+      })
+      .filter((schema) => {
+        if (search.length === 0) {
+          return true;
+        }
+        return contains(schema.info.displayName, search) || contains(schema.uid, search);
+      })
+      .filter((schema) =>
+        filters.every((filter) => {
+          const value = applied[filter.id];
+          return value === undefined || filter.matches(schema, value);
+        })
+      )
+      .sort((a, b) => formatter.compare(a.info.displayName, b.info.displayName));
+  }, [all, tab, search, applied, filters, contains, formatter]);
+
+  const counts = React.useMemo(
+    () => ({
+      collectionType: all.filter(
+        (s) => isContentType(s) && (s as { kind?: string }).kind === 'collectionType'
+      ).length,
+      singleType: all.filter(
+        (s) => isContentType(s) && (s as { kind?: string }).kind === 'singleType'
+      ).length,
+      component: all.filter((s) => s.modelType === 'component').length,
+    }),
+    [all]
+  );
+
+  const openCreate = (payload: OpenModalCreateSchemaPayload) => {
+    trackUsage('willCreateContentType');
+    onOpenModalCreateSchema(payload);
+  };
+
+  const pluginColumns = getSchemaColumns(tab === 'component' ? 'component' : 'contentType');
+
+  const headers = [
+    {
+      name: 'name',
+      label: formatMessage({ id: getTrad('index.column.name'), defaultMessage: 'Name' }),
+    },
+    {
+      name: 'fields',
+      label: formatMessage({ id: getTrad('index.column.fields'), defaultMessage: 'Fields' }),
+    },
+    ...(tab === 'component'
+      ? [
+          {
+            name: 'category',
+            label: formatMessage({
+              id: getTrad('index.column.category'),
+              defaultMessage: 'Category',
+            }),
+          },
+        ]
+      : [
+          {
+            name: 'draftAndPublish',
+            label: formatMessage({
+              id: getTrad('index.column.draftAndPublish'),
+              defaultMessage: 'Draft & publish',
+            }),
+          },
+        ]),
+    ...pluginColumns.map((column) => ({ name: column.id, label: formatMessage(column.header) })),
+    {
+      name: 'status',
+      label: formatMessage({ id: getTrad('index.column.status'), defaultMessage: 'Status' }),
+    },
+  ].map((header) => ({ ...header, sortable: false }));
+
+  const appliedEntries = Object.entries(applied);
+
+  const clearFilter = (id: string) => {
+    setApplied((current) => {
+      const next = { ...current };
+      delete next[id];
+      return next;
+    });
+  };
+
+  return (
+    <>
+      <Layouts.Header
+        title={formatMessage({ id: getTrad('index.title'), defaultMessage: 'All content types' })}
+        subtitle={formatMessage(
+          {
+            id: getTrad('index.subtitle'),
+            defaultMessage:
+              '{types, plural, one {# content type} other {# content types}} · {components, plural, one {# component} other {# components}}',
+          },
+          { types: counts.collectionType + counts.singleType, components: counts.component }
+        )}
+        primaryAction={
+          isInDevelopmentMode ? (
+            <Menu.Root>
+              <Menu.Trigger startIcon={<Plus />} variant="default">
+                {formatMessage({ id: getTrad('index.create'), defaultMessage: 'Create new' })}
+              </Menu.Trigger>
+              <Menu.Content zIndex={2}>
+                <Menu.Item
+                  onSelect={() =>
+                    openCreate({
+                      modalType: 'contentType',
+                      kind: 'collectionType',
+                      actionType: 'create',
+                      forTarget: 'contentType',
+                    })
+                  }
+                >
+                  {formatMessage({
+                    id: getTrad('index.create.collectionType'),
+                    defaultMessage: 'Collection type',
+                  })}
+                </Menu.Item>
+                <Menu.Item
+                  onSelect={() =>
+                    openCreate({
+                      modalType: 'contentType',
+                      kind: 'singleType',
+                      actionType: 'create',
+                      forTarget: 'contentType',
+                    })
+                  }
+                >
+                  {formatMessage({
+                    id: getTrad('index.create.singleType'),
+                    defaultMessage: 'Single type',
+                  })}
+                </Menu.Item>
+                <Menu.Item
+                  onSelect={() =>
+                    openCreate({
+                      modalType: 'component',
+                      actionType: 'create',
+                      forTarget: 'component',
+                    } as OpenModalCreateSchemaPayload)
+                  }
+                >
+                  {formatMessage({
+                    id: getTrad('index.create.component'),
+                    defaultMessage: 'Component',
+                  })}
+                </Menu.Item>
+              </Menu.Content>
+            </Menu.Root>
+          ) : null
+        }
+      />
+
+      <Layouts.Content>
+        <Flex direction="column" alignItems="stretch" gap={4}>
+          {/* The search takes the row; filters sit at its end. Applied filters
+              get a line of their own below, so adding one never reshapes this. */}
+          <Flex gap={2} alignItems="center">
+            <Box flex="1">
+              <Searchbar
+                name="search-schemas"
+                value={search}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                  setSearch(event.target.value)
+                }
+                onClear={() => setSearch('')}
+                clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
+                placeholder={formatMessage({
+                  id: getTrad('index.search.placeholder'),
+                  defaultMessage: 'Search content types and components',
+                })}
+              >
+                {formatMessage({
+                  id: getTrad('index.search.label'),
+                  defaultMessage: 'Search schemas',
+                })}
+              </Searchbar>
+            </Box>
+
+            {filters.length > 0 ? (
+              <Menu.Root>
+                <Menu.Trigger variant="tertiary" startIcon={<Filter />}>
+                  {formatMessage({ id: 'app.utils.filters', defaultMessage: 'Filters' })}
+                </Menu.Trigger>
+                <Menu.Content zIndex={2} popoverPlacement="bottom-end">
+                  <Box padding={3}>
+                    <Flex direction="column" alignItems="stretch" gap={3} width="220px">
+                      {filters.map((filter, index) => (
+                        <Field.Root key={filter.id} name={filter.id}>
+                          <Field.Label>{formatMessage(filter.label)}</Field.Label>
+                          <SingleSelect
+                            value={applied[filter.id] ?? ''}
+                            onChange={(value: string | number) =>
+                              setApplied((current) => ({ ...current, [filter.id]: String(value) }))
+                            }
+                            placeholder={formatMessage({
+                              id: getTrad('index.filter.any'),
+                              defaultMessage: 'Any',
+                            })}
+                          >
+                            {filterOptions[index].map((option) => (
+                              <SingleSelectOption key={option.value} value={option.value}>
+                                {option.label}
+                              </SingleSelectOption>
+                            ))}
+                          </SingleSelect>
+                        </Field.Root>
+                      ))}
+                    </Flex>
+                  </Box>
+                </Menu.Content>
+              </Menu.Root>
+            ) : null}
+          </Flex>
+
+          {appliedEntries.length > 0 ? (
+            <Flex gap={2} wrap="wrap" alignItems="center">
+              {appliedEntries.map(([id, value]) => {
+                const filter = filters.find((entry) => entry.id === id);
+                const index = filters.findIndex((entry) => entry.id === id);
+                const option = filterOptions[index]?.find((entry) => entry.value === value);
+                if (!filter) {
+                  return null;
+                }
+                return (
+                  <Tag key={id} icon={<Cross />} onClick={() => clearFilter(id)}>
+                    {`${formatMessage(filter.label)}: ${option?.label ?? value}`}
+                  </Tag>
+                );
+              })}
+              <Button variant="tertiary" size="S" onClick={() => setApplied({})}>
+                {formatMessage({ id: getTrad('index.filter.clear'), defaultMessage: 'Clear all' })}
+              </Button>
+            </Flex>
+          ) : null}
+
+          <Tabs.Root value={tab} onValueChange={(value: string) => setTab(value as TabKind)}>
+            <Tabs.List
+              aria-label={formatMessage({
+                id: getTrad('index.tabs.label'),
+                defaultMessage: 'Schema kinds',
+              })}
+            >
+              <Tabs.Trigger value="collectionType">
+                {formatMessage(
+                  { id: getTrad('index.tab.collectionTypes'), defaultMessage: 'Collection types' },
+                  { count: counts.collectionType }
+                )}
+                {` (${counts.collectionType})`}
+              </Tabs.Trigger>
+              <Tabs.Trigger value="singleType">
+                {formatMessage({
+                  id: getTrad('index.tab.singleTypes'),
+                  defaultMessage: 'Single types',
+                })}
+                {` (${counts.singleType})`}
+              </Tabs.Trigger>
+              <Tabs.Trigger value="component">
+                {formatMessage({
+                  id: getTrad('index.tab.components'),
+                  defaultMessage: 'Components',
+                })}
+                {` (${counts.component})`}
+              </Tabs.Trigger>
+            </Tabs.List>
+          </Tabs.Root>
+
+          {/* The table's row type wants an `id`; schemas are keyed by uid. */}
+          <Table.Root
+            rows={rows.map((schema) => ({ ...schema, id: schema.uid }))}
+            headers={headers}
+          >
+            <Table.Content>
+              <Table.Head>
+                {headers.map((header) => (
+                  <Table.HeaderCell key={header.name} {...header} />
+                ))}
+              </Table.Head>
+              <Table.Empty
+                content={formatMessage({
+                  id: getTrad('index.empty'),
+                  defaultMessage: 'No schema matches those filters.',
+                })}
+              />
+              <Table.Body>
+                {rows.map((schema) => (
+                  <ClickableRow
+                    key={schema.uid}
+                    onClick={() =>
+                      navigate(
+                        schema.modelType === 'component'
+                          ? `/plugins/${pluginId}/component-categories/${
+                              (schema as { category?: string }).category
+                            }/${schema.uid}`
+                          : `/plugins/${pluginId}/content-types/${schema.uid}`
+                      )
+                    }
+                  >
+                    <Table.Cell>
+                      <Flex direction="column" alignItems="flex-start">
+                        <Typography textColor="neutral800" fontWeight="bold">
+                          {upperFirst(schema.info.displayName)}
+                        </Typography>
+                        <Mono variant="pi" textColor="neutral500">
+                          {schema.uid}
+                        </Mono>
+                      </Flex>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Typography textColor="neutral700">{attributeCount(schema)}</Typography>
+                    </Table.Cell>
+                    {tab === 'component' ? (
+                      <Table.Cell>
+                        <Typography textColor="neutral700">
+                          {upperFirst((schema as { category?: string }).category ?? '')}
+                        </Typography>
+                      </Table.Cell>
+                    ) : (
+                      <Table.Cell>
+                        <OnOff on={hasDraftAndPublish(schema)} />
+                      </Table.Cell>
+                    )}
+                    {pluginColumns.map(({ id, Cell }) => (
+                      <Table.Cell key={id}>
+                        <Cell schema={schema} />
+                      </Table.Cell>
+                    ))}
+                    <Table.Cell>
+                      <Status status={schema.status} />
+                    </Table.Cell>
+                  </ClickableRow>
+                ))}
+              </Table.Body>
+            </Table.Content>
+          </Table.Root>
+        </Flex>
+      </Layouts.Content>
+    </>
+  );
+};
+
+// eslint-disable-next-line import/no-default-export
+export default SchemaIndex;

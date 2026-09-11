@@ -5,6 +5,7 @@ import {
   registerReadOnlyRule,
 } from './components/DataManager/readOnlyRules';
 import { PERMISSIONS } from './constants';
+import { registerSchemaColumn, registerSchemaFilter } from './pages/SchemaIndex/schemaRegistry';
 import { pluginId } from './pluginId';
 import { reducers } from './reducers';
 import { formsAPI } from './utils/formAPI';
@@ -36,6 +37,8 @@ export default {
         forms: formsAPI,
         registerReadOnlyRule,
         registerAvailabilityRule,
+        registerSchemaColumn,
+        registerSchemaFilter,
       },
     });
   },

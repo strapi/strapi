@@ -24,6 +24,7 @@ import { pluginId } from '../../pluginId';
 import { EmptyState } from '../ListView/EmptyState';
 
 const ListView = lazy(() => import('../ListView/ListView'));
+const SchemaIndex = lazy(() => import('../SchemaIndex/SchemaIndex'));
 
 const App = () => {
   const { formatMessage } = useIntl();
@@ -83,6 +84,9 @@ const App = () => {
                   <Layouts.Root sideNav={<ContentTypeBuilderNav />}>
                     <Suspense fallback={<Page.Loading />}>
                       <Routes>
+                        {/* The builder's front door: what distinguishes one
+                            schema from another, before you pick one. */}
+                        <Route index element={<SchemaIndex />} />
                         <Route path="content-types/create-content-type" element={<EmptyState />} />
                         <Route path="content-types/:contentTypeUid" element={<ListView />} />
                         <Route

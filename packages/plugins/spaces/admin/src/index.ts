@@ -34,9 +34,16 @@ import {
   UserWorkspacesField,
 } from './components/UserWorkspacesField';
 import { SpaceSwitcher } from './components/SpaceSwitcher';
+import {
+  isEverywhere,
+  SchemaSharingCell,
+  SchemaWorkspacesCell,
+  visibleIn,
+} from './components/SchemaWorkspacesCell';
 import { SpaceVisibility } from './components/SpaceVisibility';
 import { WorkspacesSectionHeading } from './components/WorkspacesSectionHeading';
 import { PERMISSIONS } from './constants';
+import { useGetMineSpacesQuery } from './services/spaces';
 import { pluginId } from './pluginId';
 import { installSpaceHeaderInterceptor } from './utils/fetchInterceptor';
 import { DEFAULT_SPACE_SLUG, getCurrentSpaceSlug, useCurrentSpaceSlug } from './utils/currentSpace';
@@ -88,6 +95,17 @@ type ContentTypeBuilderApis = {
     useRule: () => { readOnly: boolean; reason?: { id: string; defaultMessage: string } };
   }) => void;
   registerAvailabilityRule?: (rule: { id: string; useRule: () => { available: boolean } }) => void;
+  registerSchemaColumn?: (column: {
+    id: string;
+    header: { id: string; defaultMessage: string };
+    Cell: typeof SchemaWorkspacesCell;
+  }) => void;
+  registerSchemaFilter?: (filter: {
+    id: string;
+    label: { id: string; defaultMessage: string };
+    useOptions: () => Array<{ value: string; label: string }>;
+    matches: (schema: unknown, value: string) => boolean;
+  }) => void;
 };
 
 /** Extension points exposed by i18n's admin (see i18n's `admin/src/i18n-plugin.ts`). */
@@ -227,6 +245,43 @@ export default {
       ctbApis.registerReadOnlyRule?.({
         id: 'spaces-default-workspace-only',
         useRule: useWorkspaceReadOnlyRule,
+      });
+
+      /**
+       * Where a content type is available, and whether its entries are shared,
+       * on the schema index — the two questions that otherwise need a modal
+       * each, per type.
+       */
+      ctbApis.registerSchemaColumn?.({
+        id: 'spaces-workspaces',
+        header: {
+          id: getTranslation('index.column.workspaces'),
+          defaultMessage: 'Workspaces',
+        },
+        Cell: SchemaWorkspacesCell,
+      });
+
+      ctbApis.registerSchemaColumn?.({
+        id: 'spaces-sharing',
+        header: { id: getTranslation('index.column.entries'), defaultMessage: 'Entries' },
+        Cell: SchemaSharingCell,
+      });
+
+      ctbApis.registerSchemaFilter?.({
+        id: 'spaces-workspaces',
+        label: { id: getTranslation('index.column.workspaces'), defaultMessage: 'Workspaces' },
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        useOptions: () => {
+          const { data } = useGetMineSpacesQuery();
+          return (data ?? []).map((space: { slug: string; name: string }) => ({
+            value: space.slug,
+            label: space.name,
+          }));
+        },
+        // A type bound to nothing is available everywhere, so it matches every
+        // workspace — the same rule the server applies.
+        matches: (schema: unknown, value: string) =>
+          isEverywhere(schema) || visibleIn(schema).includes(value),
       });
 
       ctbFormsAPI.components.add({ id: 'spaces-workspaces', component: SpaceVisibility });

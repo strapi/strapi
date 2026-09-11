@@ -16,6 +16,7 @@ import {
   UnpublishModalAdditionalInfo,
 } from './components/CMListViewModalsAdditionalInformation';
 import { LocalePicker } from './components/LocalePicker';
+import { isLocalized, LocalizedCell } from './components/SchemaIndexColumn';
 import { PERMISSIONS } from './constants';
 import { mutateEditViewHook } from './contentManagerHooks/editView';
 import { addColumnToTableHook } from './contentManagerHooks/listView';
@@ -154,6 +155,44 @@ export default {
     const ctbPlugin = app.getPlugin('content-type-builder');
 
     if (ctbPlugin) {
+      const ctbApis = ctbPlugin.apis as {
+        registerSchemaColumn?: (column: {
+          id: string;
+          header: { id: string; defaultMessage: string };
+          Cell: typeof LocalizedCell;
+        }) => void;
+        registerSchemaFilter?: (filter: {
+          id: string;
+          label: { id: string; defaultMessage: string };
+          useOptions: () => Array<{ value: string; label: string }>;
+          matches: (schema: unknown, value: string) => boolean;
+        }) => void;
+      };
+
+      // Whether a content type is translated, said once per row instead of once
+      // per modal.
+      ctbApis.registerSchemaColumn?.({
+        id: 'i18n',
+        header: {
+          id: getTranslation('index.column.header'),
+          defaultMessage: 'Internationalization',
+        },
+        Cell: LocalizedCell,
+      });
+
+      ctbApis.registerSchemaFilter?.({
+        id: 'i18n',
+        label: {
+          id: getTranslation('index.column.header'),
+          defaultMessage: 'Internationalization',
+        },
+        useOptions: () => [
+          { value: 'on', label: 'On' },
+          { value: 'off', label: 'Off' },
+        ],
+        matches: (schema, value) => (value === 'on' ? isLocalized(schema) : !isLocalized(schema)),
+      });
+
       const ctbFormsAPI = ctbPlugin.apis.forms as ContentTypeBuilderFormsAPI;
       ctbFormsAPI.addContentTypeSchemaMutation(mutateCTBContentTypeSchema);
       ctbFormsAPI.components.add({ id: 'checkboxConfirmation', component: CheckboxConfirmation });

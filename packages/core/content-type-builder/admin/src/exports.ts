@@ -25,3 +25,13 @@ export {
   registerAvailabilityRule,
 } from './components/DataManager/readOnlyRules';
 export type { ReadOnlyRule, ReadOnlyState } from './components/DataManager/readOnlyRules';
+export {
+  /**
+   * @description Lets a plugin add a column, and a filter, to the schema index
+   * for the option it owns — i18n for `localized`, workspaces for `visibleIn`.
+   * See `pages/SchemaIndex/schemaRegistry.ts`.
+   */
+  registerSchemaColumn,
+  registerSchemaFilter,
+} from './pages/SchemaIndex/schemaRegistry';
+export type { SchemaColumn, SchemaFilter } from './pages/SchemaIndex/schemaRegistry';

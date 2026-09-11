@@ -11,6 +11,7 @@ import { useCTBTracking } from '../../components/CTBSession/ctbSession';
 import { useDataManager } from '../../components/DataManager/useDataManager';
 import { useFormModalNavigation } from '../../components/FormModalNavigation/useFormModalNavigation';
 import { List } from '../../components/List';
+import { SchemaActions } from '../../components/SchemaActions/SchemaActions';
 import { getTrad } from '../../utils/getTrad';
 
 import { LinkToCMSettingsView } from './LinkToCMSettingsView';
@@ -146,6 +147,8 @@ const ListView = () => {
       >
         {type.attributes.length === 0 ? addNewFieldLabel : addAnotherFieldLabel}
       </Button>
+
+      <SchemaActions />
     </Flex>
   );
 

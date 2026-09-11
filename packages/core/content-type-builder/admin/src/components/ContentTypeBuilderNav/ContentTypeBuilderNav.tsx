@@ -1,94 +1,18 @@
-import { Fragment, useState, useEffect } from 'react';
+import { Fragment } from 'react';
 
-import { ConfirmDialog, SubNav, tours } from '@strapi/admin/strapi-admin';
-import {
-  Box,
-  Searchbar,
-  Button,
-  Flex,
-  Typography,
-  Divider,
-  Menu,
-  VisuallyHidden,
-  Dialog,
-} from '@strapi/design-system';
-import { ArrowClockwise, Cross, More } from '@strapi/icons';
+import { SubNav } from '@strapi/admin/strapi-admin';
+import { Box, Searchbar, Divider, Flex } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import { styled } from 'styled-components';
 
+import { pluginId } from '../../pluginId';
 import { getTrad } from '../../utils/getTrad';
-import { useDataManager } from '../DataManager/useDataManager';
 import { Status } from '../Status';
 
 import { useContentTypeBuilderMenu } from './useContentTypeBuilderMenu';
 
-const ArrowCounterClockwise = styled(ArrowClockwise)`
-  transform: scaleX(-1);
-`;
-
-const DiscardAllMenuItem = styled(Menu.Item)`
-  color: ${({ theme }) => theme.colors.danger600};
-
-  &:hover {
-    background: ${({ theme, disabled }) => !disabled && theme.colors.danger100};
-  }
-`;
-
 export const ContentTypeBuilderNav = () => {
   const { menu, search } = useContentTypeBuilderMenu();
-  const { saveSchema, isModified, history, isInDevelopmentMode } = useDataManager();
-
   const { formatMessage } = useIntl();
-
-  const [menuIsOpen, setMenuIsOpen] = useState(false);
-  const [discardConfirmationModalIsOpen, setDiscardConfirmationModalIsOpen] = useState(false);
-
-  useEffect(() => {
-    if (!isInDevelopmentMode) {
-      return;
-    }
-
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey || e.metaKey) {
-        if (e.key === 'Enter') {
-          if (isModified) {
-            e.preventDefault();
-            saveSchema();
-          }
-        } else if (e.key === 'z' && !e.shiftKey) {
-          e.preventDefault(); // Prevent browser default undo (e.g., in input fields)
-          history.undo();
-        } else if (e.key === 'y' || (e.shiftKey && e.key === 'z') || e.key === 'Z') {
-          e.preventDefault(); // Prevent browser default redo (e.g., in input fields)
-          history.redo();
-        }
-      }
-    };
-
-    document.addEventListener('keydown', onKeyDown);
-
-    return () => {
-      document.removeEventListener('keydown', onKeyDown);
-    };
-  });
-
-  const discardHandler = () => {
-    setDiscardConfirmationModalIsOpen(true);
-  };
-
-  const discardChanges = () => {
-    setMenuIsOpen(false);
-    setDiscardConfirmationModalIsOpen(false);
-    history.discardAllChanges();
-  };
-
-  const undoHandler = () => {
-    history.undo();
-  };
-
-  const redoHandler = () => {
-    history.redo();
-  };
 
   const pluginName = formatMessage({
     id: getTrad('plugin.name'),
@@ -99,83 +23,10 @@ export const ContentTypeBuilderNav = () => {
     <SubNav.Main aria-label={pluginName}>
       <SubNav.Header label={pluginName} />
       <Divider background="neutral150" />
+      {/* Save and its history menu live in the page header now, where every
+          other page of the admin keeps its actions. What is left here is a
+          list of names and a way to filter it. */}
       <Flex padding={5} gap={3} direction={'column'} alignItems={'stretch'}>
-        <tours.contentTypeBuilder.Save>
-          <Flex gap={2}>
-            <Button
-              flex={1}
-              onClick={(e) => {
-                e.preventDefault();
-                saveSchema();
-              }}
-              type="submit"
-              disabled={!isModified || !isInDevelopmentMode}
-              fullWidth
-              size="S"
-            >
-              {formatMessage({
-                id: 'global.save',
-                defaultMessage: 'Save',
-              })}
-            </Button>
-            <Menu.Root open={menuIsOpen} onOpenChange={setMenuIsOpen}>
-              <Menu.Trigger
-                size="S"
-                endIcon={null}
-                paddingTop="4px"
-                paddingLeft="7px"
-                paddingRight="7px"
-                variant="tertiary"
-              >
-                <More fill="neutral500" aria-hidden focusable={false} />
-                <VisuallyHidden tag="span">
-                  {formatMessage({
-                    id: 'global.more.actions',
-                    defaultMessage: 'More actions',
-                  })}
-                </VisuallyHidden>
-              </Menu.Trigger>
-              <Menu.Content zIndex={1}>
-                <Menu.Item
-                  disabled={!history.canUndo || !isInDevelopmentMode}
-                  onSelect={undoHandler}
-                  startIcon={<ArrowCounterClockwise />}
-                >
-                  {formatMessage({
-                    id: 'global.last-change.undo',
-                    defaultMessage: 'Undo last change',
-                  })}
-                </Menu.Item>
-                <Menu.Item
-                  disabled={!history.canRedo || !isInDevelopmentMode}
-                  onSelect={redoHandler}
-                  startIcon={<ArrowClockwise />}
-                >
-                  {formatMessage({
-                    id: 'global.last-change.redo',
-                    defaultMessage: 'Redo last change',
-                  })}
-                </Menu.Item>
-                <Menu.Separator />
-                <DiscardAllMenuItem
-                  disabled={!history.canDiscardAll || !isInDevelopmentMode}
-                  onSelect={discardHandler}
-                >
-                  <Flex gap={2}>
-                    <Cross />
-                    <Typography>
-                      {formatMessage({
-                        id: 'global.last-changes.discard',
-                        defaultMessage: 'Discard last changes',
-                      })}
-                    </Typography>
-                  </Flex>
-                </DiscardAllMenuItem>
-              </Menu.Content>
-            </Menu.Root>
-          </Flex>
-        </tours.contentTypeBuilder.Save>
-
         <Searchbar
           value={search.value}
           onChange={(e) => search.onChange(e.target.value)}
@@ -195,6 +46,16 @@ export const ContentTypeBuilderNav = () => {
           })}
         />
       </Flex>
+      <Box paddingLeft={5} paddingRight={5} paddingBottom={2}>
+        <SubNav.Link
+          to={`/plugins/${pluginId}`}
+          end
+          label={formatMessage({
+            id: getTrad('index.title'),
+            defaultMessage: 'All content types',
+          })}
+        />
+      </Box>
       <SubNav.Content>
         <SubNav.Sections>
           {menu.map((section) => (
@@ -262,17 +123,6 @@ export const ContentTypeBuilderNav = () => {
           ))}
         </SubNav.Sections>
       </SubNav.Content>
-      <Dialog.Root
-        open={discardConfirmationModalIsOpen}
-        onOpenChange={setDiscardConfirmationModalIsOpen}
-      >
-        <ConfirmDialog onConfirm={discardChanges}>
-          {formatMessage({
-            id: getTrad('popUpWarning.discardAll.message'),
-            defaultMessage: 'Are you sure you want to discard all changes?',
-          })}
-        </ConfirmDialog>
-      </Dialog.Root>
     </SubNav.Main>
   );
 };
