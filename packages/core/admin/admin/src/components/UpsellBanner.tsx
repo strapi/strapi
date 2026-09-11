@@ -30,6 +30,10 @@ const FixedButtonWrapper = styled(Box)`
   right: 16px;
 `;
 
+const BannerButtonWrapper = styled(FixedButtonWrapper)`
+  position: absolute;
+`;
+
 const Banner = ({
   isTrialEndedRecently,
   onDismiss,
@@ -40,82 +44,80 @@ const Banner = ({
   const { formatMessage } = useIntl();
 
   return (
-    <>
-      <BannerBackground width="100%" justifyContent="center">
-        <Flex
-          justifyContent="center"
-          alignItems="center"
-          width="100%"
-          paddingTop={2}
-          paddingBottom={2}
-          paddingLeft={RESPONSIVE_DEFAULT_SPACING}
-          paddingRight={RESPONSIVE_DEFAULT_SPACING}
-          gap={2}
-        >
-          <Box>
-            <Typography
-              variant="delta"
-              fontWeight="bold"
-              textColor="neutral0"
-              textAlign="center"
-              fontSize={2}
-            >
-              {formatMessage(
-                isTrialEndedRecently
-                  ? {
-                      id: 'app.components.UpsellBanner.intro.ended',
-                      defaultMessage: 'Your trial has ended: ',
-                    }
-                  : {
-                      id: 'app.components.UpsellBanner.intro',
-                      defaultMessage: 'Access to Growth plan features: ',
-                    }
-              )}
-            </Typography>
-            <Typography
-              variant="delta"
-              textColor="neutral0"
-              textAlign="center"
-              paddingRight={4}
-              fontSize={2}
-            >
-              {formatMessage(
-                isTrialEndedRecently
-                  ? {
-                      id: 'app.components.UpsellBanner.text.ended',
-                      defaultMessage: 'Keep access to Growth features by upgrading now.',
-                    }
-                  : {
-                      id: 'app.components.UpsellBanner.text',
-                      defaultMessage:
-                        'As part of your trial, you can explore premium tools such as Content History, Releases, and Single Sign-On (SSO).',
-                    }
-              )}
-            </Typography>
-          </Box>
-          <Box>
-            <LinkButton
-              width="max-content"
-              variant="tertiary"
-              href="https://billing.strapi.io"
-              target="_blank"
-            >
-              {formatMessage(
-                isTrialEndedRecently
-                  ? {
-                      id: 'app.components.UpsellBanner.button.ended',
-                      defaultMessage: 'Keep Growth plan',
-                    }
-                  : {
-                      id: 'app.components.UpsellBanner.button',
-                      defaultMessage: 'Upgrade now',
-                    }
-              )}
-            </LinkButton>
-          </Box>
-        </Flex>
-      </BannerBackground>
-      <FixedButtonWrapper>
+    <BannerBackground width="100%" justifyContent="center">
+      <Flex
+        justifyContent="center"
+        alignItems="center"
+        width="100%"
+        paddingTop={2}
+        paddingBottom={2}
+        paddingLeft={RESPONSIVE_DEFAULT_SPACING}
+        paddingRight={RESPONSIVE_DEFAULT_SPACING}
+        gap={2}
+      >
+        <Box>
+          <Typography
+            variant="delta"
+            fontWeight="bold"
+            textColor="neutral0"
+            textAlign="center"
+            fontSize={2}
+          >
+            {formatMessage(
+              isTrialEndedRecently
+                ? {
+                    id: 'app.components.UpsellBanner.intro.ended',
+                    defaultMessage: 'Your trial has ended: ',
+                  }
+                : {
+                    id: 'app.components.UpsellBanner.intro',
+                    defaultMessage: 'Access to Growth plan features: ',
+                  }
+            )}
+          </Typography>
+          <Typography
+            variant="delta"
+            textColor="neutral0"
+            textAlign="center"
+            paddingRight={4}
+            fontSize={2}
+          >
+            {formatMessage(
+              isTrialEndedRecently
+                ? {
+                    id: 'app.components.UpsellBanner.text.ended',
+                    defaultMessage: 'Keep access to Growth features by upgrading now.',
+                  }
+                : {
+                    id: 'app.components.UpsellBanner.text',
+                    defaultMessage:
+                      'As part of your trial, you can explore premium tools such as Content History, Releases, and Single Sign-On (SSO).',
+                  }
+            )}
+          </Typography>
+        </Box>
+        <Box>
+          <LinkButton
+            width="max-content"
+            variant="tertiary"
+            href="https://billing.strapi.io"
+            target="_blank"
+          >
+            {formatMessage(
+              isTrialEndedRecently
+                ? {
+                    id: 'app.components.UpsellBanner.button.ended',
+                    defaultMessage: 'Keep Growth plan',
+                  }
+                : {
+                    id: 'app.components.UpsellBanner.button',
+                    defaultMessage: 'Upgrade now',
+                  }
+            )}
+          </LinkButton>
+        </Box>
+      </Flex>
+      <BannerButtonWrapper>
         <IconButton
           withTooltip={false}
           label={formatMessage({
@@ -126,8 +128,8 @@ const Banner = ({
         >
           <Cross />
         </IconButton>
-      </FixedButtonWrapper>
-    </>
+      </BannerButtonWrapper>
+    </BannerBackground>
   );
 };
 
