@@ -31,7 +31,7 @@ const IMAGE = path.join(UPLOADS_DIR, 'test-image.jpg');
 const IMAGE_1 = path.join(UPLOADS_DIR, 'test-image-1.jpg');
 const IMAGE_2 = path.join(UPLOADS_DIR, 'test-image-2.jpg');
 
-describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
+describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
   'Media Library - Journey 4: Organize many assets at once',
   () => {
     test.describe.configure({ timeout: 600_000 });
