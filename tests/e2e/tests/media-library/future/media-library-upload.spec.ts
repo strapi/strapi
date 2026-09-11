@@ -91,7 +91,7 @@ const countAssets = async (request: APIRequestContext) => {
   return (await listed.json())?.pagination?.total ?? 0;
 };
 
-describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
+describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
   'Media Library - Journey 1: Upload my assets',
   () => {
     test.describe.configure({ timeout: 600_000 });

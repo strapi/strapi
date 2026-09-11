@@ -36,7 +36,7 @@ const clearMediaLibrary = async (request: APIRequestContext) => {
 
 const FIXTURE_IMAGE = path.join(__dirname, '../../../data/uploads/test-image.jpg');
 
-describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
+describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
   'Media Library - Empty state',
   () => {
     test.beforeEach(async ({ page }) => {
