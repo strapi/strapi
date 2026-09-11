@@ -15,6 +15,7 @@ import { getAttributeDisplayedType } from '../utils/getAttributeDisplayedType';
 import { getRelationType } from '../utils/getRelationType';
 import { getTrad } from '../utils/getTrad';
 
+import { AttributeFlags } from './AttributeFlags';
 import { AttributeIcon } from './AttributeIcon';
 import { ComponentList } from './ComponentList';
 import { useDataManager } from './DataManager/useDataManager';
@@ -239,9 +240,6 @@ const MemoizedRow = memo((props: Omit<AttributeRowProps, 'style'>) => {
                 overflow="hidden"
               >
                 {item.name}
-                {'required' in item && item.required && (
-                  <Typography textColor="danger600">*&nbsp;</Typography>
-                )}
               </Typography>
             </Flex>
             <Flex>
@@ -287,7 +285,8 @@ const MemoizedRow = memo((props: Omit<AttributeRowProps, 'style'>) => {
         </Flex>
 
         <Box>
-          <Flex justifyContent="flex-end" gap={1} onClick={(e) => e.stopPropagation()}>
+          <Flex justifyContent="flex-end" gap={2} onClick={(e) => e.stopPropagation()}>
+            <AttributeFlags attribute={item as never} />
             <>
               <Box>{item.status && <StatusBadge status={item.status} />}</Box>
               {['component', 'dynamiczone'].includes(item.type) && (

@@ -1,7 +1,8 @@
 import { Fragment } from 'react';
 
 import { SubNav } from '@strapi/admin/strapi-admin';
-import { Box, Searchbar, Divider, Flex } from '@strapi/design-system';
+import { Box, Divider, Flex, IconButton, Searchbar } from '@strapi/design-system';
+import { ChevronLeft, ChevronRight } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { pluginId } from '../../pluginId';
@@ -9,19 +10,59 @@ import { getTrad } from '../../utils/getTrad';
 import { Status } from '../Status';
 
 import { useContentTypeBuilderMenu } from './useContentTypeBuilderMenu';
+import { setSchemaListExpanded, useSchemaListExpanded } from './useSidebarState';
 
 export const ContentTypeBuilderNav = () => {
   const { menu, search } = useContentTypeBuilderMenu();
   const { formatMessage } = useIntl();
+  const isExpanded = useSchemaListExpanded();
 
   const pluginName = formatMessage({
     id: getTrad('plugin.name'),
     defaultMessage: 'Content-Type Builder',
   });
 
+  const expandLabel = formatMessage({
+    id: getTrad('nav.show'),
+    defaultMessage: 'Show the list of content types',
+  });
+
+  if (!isExpanded) {
+    return (
+      <Flex
+        direction="column"
+        alignItems="center"
+        paddingTop={4}
+        paddingLeft={2}
+        paddingRight={2}
+        background="neutral0"
+        height="100%"
+        borderColor="neutral150"
+        borderStyle="solid"
+        borderWidth="0 1px 0 0"
+      >
+        <IconButton label={expandLabel} variant="ghost" onClick={() => setSchemaListExpanded(true)}>
+          <ChevronRight />
+        </IconButton>
+      </Flex>
+    );
+  }
+
   return (
     <SubNav.Main aria-label={pluginName}>
-      <SubNav.Header label={pluginName} />
+      <Flex justifyContent="space-between" alignItems="center" paddingRight={3}>
+        <SubNav.Header label={pluginName} />
+        <IconButton
+          label={formatMessage({
+            id: getTrad('nav.hide'),
+            defaultMessage: 'Hide the list of content types',
+          })}
+          variant="ghost"
+          onClick={() => setSchemaListExpanded(false)}
+        >
+          <ChevronLeft />
+        </IconButton>
+      </Flex>
       <Divider background="neutral150" />
       {/* Save and its history menu live in the page header now, where every
           other page of the admin keeps its actions. What is left here is a

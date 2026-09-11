@@ -1,13 +1,18 @@
 import * as React from 'react';
 
-import { Layouts, Table, useTracking } from '@strapi/admin/strapi-admin';
+import {
+  Layouts,
+  SearchInput,
+  Table,
+  useQueryParams,
+  useTracking,
+} from '@strapi/admin/strapi-admin';
 import {
   Box,
   Button,
   Field,
   Flex,
   Menu,
-  Searchbar,
   SingleSelect,
   SingleSelectOption,
   Tabs,
@@ -91,7 +96,10 @@ export const SchemaIndex = () => {
   const formatter = useCollator(locale, { sensitivity: 'base' });
 
   const [tab, setTab] = React.useState<TabKind>('collectionType');
-  const [search, setSearch] = React.useState('');
+  // `_q` rather than local state: the same param the Content Manager's search
+  // writes, so a filtered list is a link someone can send.
+  const [{ query }] = useQueryParams<{ _q?: string }>();
+  const search = query?._q ?? '';
   const [applied, setApplied] = React.useState<Record<string, string>>({});
 
   const filters = getSchemaFilters();
@@ -176,10 +184,6 @@ export const SchemaIndex = () => {
           },
         ]),
     ...pluginColumns.map((column) => ({ name: column.id, label: formatMessage(column.header) })),
-    {
-      name: 'status',
-      label: formatMessage({ id: getTrad('index.column.status'), defaultMessage: 'Status' }),
-    },
   ].map((header) => ({ ...header, sortable: false }));
 
   const appliedEntries = Object.entries(applied);
@@ -261,39 +265,28 @@ export const SchemaIndex = () => {
         }
       />
 
-      <Layouts.Content>
-        <Flex direction="column" alignItems="stretch" gap={4}>
-          {/* The search takes the row; filters sit at its end. Applied filters
-              get a line of their own below, so adding one never reshapes this. */}
-          <Flex gap={2} alignItems="center">
-            <Box flex="1">
-              <Searchbar
-                size="M"
-                name="search-schemas"
-                value={search}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                  setSearch(event.target.value)
-                }
-                onClear={() => setSearch('')}
-                clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
-                placeholder={formatMessage({
-                  id: getTrad('index.search.placeholder'),
-                  defaultMessage: 'Search content types and components',
-                })}
-              >
-                {formatMessage({
-                  id: getTrad('index.search.label'),
-                  defaultMessage: 'Search schemas',
-                })}
-              </Searchbar>
-            </Box>
-
+      {/* The same bar the Content Manager uses: search collapses to its icon
+          until asked for, the filters button sits beside it, and whatever is
+          applied gets a line of its own underneath (`bottomActions`). */}
+      <Layouts.Action
+        startActions={
+          <>
+            <SearchInput
+              label={formatMessage({
+                id: getTrad('index.search.label'),
+                defaultMessage: 'Search schemas',
+              })}
+              placeholder={formatMessage({
+                id: getTrad('index.search.placeholder'),
+                defaultMessage: 'Search content types and components',
+              })}
+            />
             {filters.length > 0 ? (
               <Menu.Root>
-                <Menu.Trigger variant="tertiary" size="M" startIcon={<Filter />}>
+                <Menu.Trigger variant="tertiary" startIcon={<Filter />}>
                   {formatMessage({ id: 'app.utils.filters', defaultMessage: 'Filters' })}
                 </Menu.Trigger>
-                <Menu.Content zIndex={2} popoverPlacement="bottom-end">
+                <Menu.Content zIndex={2} popoverPlacement="bottom-start">
                   <Box padding={3}>
                     <Flex direction="column" alignItems="stretch" gap={3} width="220px">
                       {filters.map((filter, index) => (
@@ -322,10 +315,11 @@ export const SchemaIndex = () => {
                 </Menu.Content>
               </Menu.Root>
             ) : null}
-          </Flex>
-
-          {appliedEntries.length > 0 ? (
-            <Flex gap={2} wrap="wrap" alignItems="center">
+          </>
+        }
+        bottomActions={
+          appliedEntries.length > 0 ? (
+            <>
               {appliedEntries.map(([id, value]) => {
                 const filter = filters.find((entry) => entry.id === id);
                 const index = filters.findIndex((entry) => entry.id === id);
@@ -342,9 +336,13 @@ export const SchemaIndex = () => {
               <Button variant="tertiary" size="S" onClick={() => setApplied({})}>
                 {formatMessage({ id: getTrad('index.filter.clear'), defaultMessage: 'Clear all' })}
               </Button>
-            </Flex>
-          ) : null}
+            </>
+          ) : null
+        }
+      />
 
+      <Layouts.Content>
+        <Flex direction="column" alignItems="stretch" gap={4}>
           {/* The tabs label the table, so they sit on it rather than near it. */}
           <Flex direction="column" alignItems="stretch" gap={0}>
             <Tabs.Root value={tab} onValueChange={(value: string) => setTab(value as TabKind)}>

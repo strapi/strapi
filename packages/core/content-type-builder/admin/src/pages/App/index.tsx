@@ -25,12 +25,6 @@ import { EmptyState } from '../ListView/EmptyState';
 
 const ListView = lazy(() => import('../ListView/ListView'));
 
-/**
- * The sidebar that lists every schema by name, off while the index is being
- * tried out as the way in. Flip it back on to get it: the nav component and its
- * menu are untouched underneath.
- */
-const SHOW_SCHEMA_SIDEBAR = false;
 const SchemaIndex = lazy(() => import('../SchemaIndex/SchemaIndex'));
 
 const App = () => {
@@ -88,9 +82,7 @@ const App = () => {
               <ChatProvider>
                 <>
                   {autoReload && !readOnly && <FormModal />}
-                  <Layouts.Root
-                    sideNav={SHOW_SCHEMA_SIDEBAR ? <ContentTypeBuilderNav /> : undefined}
-                  >
+                  <Layouts.Root sideNav={<ContentTypeBuilderNav />}>
                     <Suspense fallback={<Page.Loading />}>
                       <Routes>
                         {/* The builder's front door: what distinguishes one

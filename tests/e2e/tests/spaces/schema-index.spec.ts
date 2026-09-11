@@ -51,7 +51,12 @@ test.describe('Content-Type Builder — all content types', () => {
     await page.goto(CTB_URL);
     await expect(page.getByRole('row').filter({ hasText: 'Article' })).toBeVisible();
 
+    // Search collapses to its icon until asked for, exactly as it does in the
+    // Content Manager.
+    await page.getByRole('button', { name: 'Search', exact: true }).click();
+    // …and it applies on submit, also as it does there.
     await page.getByRole('searchbox', { name: 'Search schemas' }).fill('author');
+    await page.getByRole('searchbox', { name: 'Search schemas' }).press('Enter');
 
     await expect(page.getByRole('row').filter({ hasText: 'Author' })).toBeVisible();
     await expect(page.getByRole('row').filter({ hasText: 'Article' })).toBeHidden();

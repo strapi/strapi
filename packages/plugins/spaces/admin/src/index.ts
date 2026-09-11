@@ -34,12 +34,7 @@ import {
   UserWorkspacesField,
 } from './components/UserWorkspacesField';
 import { SpaceSwitcher } from './components/SpaceSwitcher';
-import {
-  isEverywhere,
-  SchemaSharingCell,
-  SchemaWorkspacesCell,
-  visibleIn,
-} from './components/SchemaWorkspacesCell';
+import { isEverywhere, SchemaWorkspacesCell, visibleIn } from './components/SchemaWorkspacesCell';
 import { SpaceVisibility } from './components/SpaceVisibility';
 import { WorkspacesSectionHeading } from './components/WorkspacesSectionHeading';
 import { PERMISSIONS } from './constants';
@@ -259,12 +254,6 @@ export default {
           defaultMessage: 'Workspaces',
         },
         Cell: SchemaWorkspacesCell,
-      });
-
-      ctbApis.registerSchemaColumn?.({
-        id: 'spaces-sharing',
-        header: { id: getTranslation('index.column.entries'), defaultMessage: 'Entries' },
-        Cell: SchemaSharingCell,
       });
 
       ctbApis.registerSchemaFilter?.({

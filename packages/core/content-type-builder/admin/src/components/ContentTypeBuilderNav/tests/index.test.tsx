@@ -100,8 +100,44 @@ const App = <ContentTypeBuilderNav />;
 describe('<ContentTypeBuilderNav />', () => {
   beforeEach(() => {
     mockedUseDataManager.mockImplementation(() => mockDataManager({ isModified: true }));
-
     mockSearchOnChange.mockClear();
+    // The list is collapsed to a strip by default; these cover it open.
+    window.localStorage.setItem('strapi-ctb:schema-list', 'expanded');
+  });
+
+  afterEach(() => {
+    window.localStorage.removeItem('strapi-ctb:schema-list');
+  });
+
+  /**
+   * The index is the way in now, so the list starts out of the way and opens on
+   * request — for the stretch of work where you are hopping between types.
+   */
+  describe('collapsed by default', () => {
+    it('shows only a way to open the list', async () => {
+      window.localStorage.removeItem('strapi-ctb:schema-list');
+
+      render(App);
+
+      expect(
+        screen.getByRole('button', { name: /show the list of content types/i })
+      ).toBeInTheDocument();
+      expect(screen.queryByRole('searchbox')).not.toBeInTheDocument();
+    });
+
+    it('opens, and closes again', async () => {
+      window.localStorage.removeItem('strapi-ctb:schema-list');
+      const user = userEvent.setup();
+
+      render(App);
+      await user.click(screen.getByRole('button', { name: /show the list of content types/i }));
+
+      expect(screen.getByRole('searchbox')).toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: /hide the list of content types/i }));
+
+      expect(screen.queryByRole('searchbox')).not.toBeInTheDocument();
+    });
   });
 
   it('renders and matches the snapshot', () => {
