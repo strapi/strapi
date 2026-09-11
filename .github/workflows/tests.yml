@@ -812,7 +812,6 @@ jobs:
         unit_front,
         e2e_ce,
         e2e_ee,
-        e2e_media_library_beta,
         cli,
         migration_v5,
         api_ce_pg,
