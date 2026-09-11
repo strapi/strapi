@@ -25,36 +25,38 @@ const hasRateLimitEntry = (
   );
 
 describe('authentication routes', () => {
-  // `/reset-password` carries a reset token, not an email, so `admin::rateLimit`'s
-  // `${email}:${path}:${ip}` key (see `middlewares/rateLimit.ts`) collapses every reset in the
-  // deployment onto one shared `unknownEmail:/admin/reset-password:<ip>` bucket. Behind NAT or an
-  // unproxied reverse proxy that bucket is effectively "everyone on this network" -- at the
-  // middleware's own default (`max: 5` per 5 minutes) a whole org would get five password resets
-  // total. The token itself must never become the rate-limit key (it is secret material), and the
-  // middleware itself is required, so the fix is route-level config widening the shared
-  // bucket rather than a smarter key.
-  test('/reset-password raises admin::rateLimit above the collapsed-bucket default', () => {
-    const route = routes.find(
-      (r) => r.method === 'POST' && r.path === '/reset-password'
-    )! as unknown as {
-      config: { middlewares: Array<string | { name: string; config?: { max?: number } }> };
-    };
+  // Every route whose rate-limit bucket structurally collapses onto the source IP, because its
+  // body carries a token rather than an email: `admin::rateLimit` keys on
+  // `${email}:${path}:${ip}` (see `middlewares/rateLimit.ts`) and substitutes a literal
+  // `unknownEmail` when the body has none. Behind NAT or an unproxied reverse proxy that bucket
+  // is "everyone on this network", so at the middleware default a whole org shares five attempts
+  // per five minutes. The token must never become the key (it is secret material), so each of
+  // these routes widens the ceiling at the route level instead. Leaving one at the default is
+  // the regression this pins.
+  describe.each([
+    ['/reset-password', 20],
+    ['/login/mfa', 50],
+    ['/login/mfa/webauthn/options', 50],
+    ['/login/mfa/webauthn', 50],
+  ])('POST %s raises its rate-limit ceiling', (path, expected) => {
+    test(`is overridden to at least ${expected}`, () => {
+      const entry = route('POST', path);
+      expect(entry).toBeDefined();
 
-    expect(route).toBeDefined();
+      const rateLimit = (entry!.config.middlewares ?? []).find(
+        (m): m is { name: string; config?: { max?: number } } =>
+          typeof m === 'object' && m !== null && m.name === 'admin::rateLimit'
+      );
 
-    const rateLimitEntry = route.config.middlewares.find(
-      (m) => typeof m === 'object' && m.name === 'admin::rateLimit'
-    ) as { name: string; config?: { max?: number } } | undefined;
-
-    expect(rateLimitEntry).toBeDefined();
-    // Raised well above the middleware's own default of 5 -- a bare `'admin::rateLimit'` string
-    // entry (no override) would fail this.
-    expect(rateLimitEntry!.config?.max).toBeGreaterThanOrEqual(20);
+      // A bare `'admin::rateLimit'` string entry (no override) fails here.
+      expect(rateLimit).toBeDefined();
+      expect(rateLimit!.config?.max).toBeGreaterThanOrEqual(expected);
+    });
   });
 
   test('every other admin::rateLimit route entry is left at the shared default', () => {
-    // Pins today's behaviour for the other routes so this test only ever asserts the one
-    // deliberate widening, not an accidental blanket change to every rate-limited route.
+    // Pins today's behaviour for the other routes so this test only ever asserts the deliberate
+    // widenings above, not an accidental blanket change to every rate-limited route.
     //
     // The `find` predicate below used to match only entries that were *already* the bare
     // string `'admin::rateLimit'`, then assert they equal `'admin::rateLimit'` -- a tautology
@@ -62,8 +64,14 @@ describe('authentication routes', () => {
     // undefined)` never ran for those). It now also matches the object form (`{ name:
     // 'admin::rateLimit', config: {...} }`), so a route that gained an undocumented override
     // fails here instead of silently passing.
+    const widened = [
+      '/reset-password',
+      '/login/mfa',
+      '/login/mfa/webauthn/options',
+      '/login/mfa/webauthn',
+    ];
     const otherRateLimited = routes.filter(
-      (r) => r.path !== '/reset-password' && r.method === 'POST'
+      (r) => !widened.includes(r.path) && r.method === 'POST'
     ) as unknown as Array<{
       path: string;
       config: { middlewares?: Array<string | { name: string; config?: unknown }> };

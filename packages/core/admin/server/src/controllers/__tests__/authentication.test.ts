@@ -1102,7 +1102,7 @@ describe('authentication controller', () => {
     // before `createChallenge` mints a row, or that the trusted-cookie fast path never pays for it
     // at all. Substituting a hardcoded `passkeyAvailableFor('999')`, or moving either read to
     // after its `createChallenge` call, left every existing assertion green.
-    describe('passkeyAvailable: read timing, identity, and the trusted-cookie fast path (findings 2, 3 & 6)', () => {
+    describe('passkeyAvailable: read timing, identity, and the trusted-cookie fast path', () => {
       test('login: countPasskeys is asked about this user, before createChallenge mints a row', async () => {
         mockPassportUser(user);
         const countPasskeys = jest.fn(() => Promise.resolve(0));

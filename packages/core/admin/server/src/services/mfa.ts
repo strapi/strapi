@@ -583,7 +583,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     }
 
     const affected = await strapi.db
-      .connection(tableName)
+      .getConnection(tableName)
       .where({ id: userId })
       .where((builder) =>
         builder.whereNull(lastUsedStepColumn).orWhere(lastUsedStepColumn, '<', step)
@@ -622,23 +622,20 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
 
     const replaced = Boolean(user.mfaEnabledAt && user.mfaSecret);
 
-    // Issued before the promotion, not after: if this throws, the safe direction is to leave the
-    // pending secret pending (a fresh account stays unenrolled and free to retry; a replacing
-    // account keeps its working authenticator) rather than promote with no recovery codes.
-    const recoveryCodes = await issueRecoveryCodes(userId);
-
-    // A single conditional statement, not read-then-write: `mfaPendingSecret` is part of the
-    // `where` itself, so the promotion only applies to the exact row this call read at the top.
-    // Without that, a `disable` (or anything else) racing in between the read above and this
-    // write would be silently undone -- the account would come back enrolled on the abandoned
-    // pending secret the moment this write lands, no matter what ran in between.
+    // Everything below is one transaction, including the recovery codes. `issueRecoveryCodes`
+    // opens a transaction of its own, which joins this ambient one rather than committing
+    // separately -- and it must, because it *deletes the existing set* before writing the new
+    // one. Committed on its own it would rotate a replacing user's codes to values the errored
+    // response never returned, leaving them with a working authenticator and no usable way back
+    // in. The promotion and the codes have to land or fail together.
     //
-    // Wrapped in a transaction together with the trust clear below, same reasoning as `disable`:
-    // if the clear throws, the promotion must not have already landed -- otherwise the caller
-    // gets a 500 for an authenticator that was in fact replaced, the recovery codes issued just
-    // above are lost to the response, and the old trusts stay honoured against the retired
-    // authenticator. Nested query calls below join this ambient transaction.
-    await strapi.db.transaction(async () => {
+    // The promotion itself is a single conditional statement, not read-then-write:
+    // `mfaPendingSecret` is part of the `where`, so it only applies to the exact row this call
+    // read at the top. Without that, a `disable` racing in between would be silently undone --
+    // the account would come back enrolled on the abandoned pending secret.
+    const recoveryCodes = await strapi.db.transaction(async () => {
+      const codes = await issueRecoveryCodes(userId);
+
       const { count } = await userQuery().updateMany({
         where: { id: userId, mfaPendingSecret: user.mfaPendingSecret },
         data: {
@@ -662,6 +659,8 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       if (replaced) {
         await trustedDevices.clearTrustedDevices(userId);
       }
+
+      return codes;
     });
 
     return { recoveryCodes, replaced };
@@ -771,7 +770,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
       // Conditional update: whoever flips usedAt from null wins, so a code cannot be spent twice
       // by two concurrent requests.
       const affected = await strapi.db
-        .connection(tableName)
+        .getConnection(tableName)
         .where({ id: candidate.id })
         .whereNull(usedAtColumn)
         .update({ [usedAtColumn]: new Date() });
@@ -1173,7 +1172,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
   };
 
   // --- Passkeys -------------------------------------------------
-  // Own module, composed here so callers keep one service, exactly as trusted devices's trusted devices.
+  // Own module, composed here so callers keep one service, the same as trusted devices above.
   // `settings` is the store reader from `security-settings.ts`, injected rather than imported
   // inside the module so its tests can hand it any policy without a store double.
   //
@@ -1247,7 +1246,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
    */
   const consumeChallenge = async (id: unknown, userId: string): Promise<VerifyChallengeResult> => {
     const { tableName } = challengeTable();
-    const affected = await strapi.db.connection(tableName).where({ id }).del();
+    const affected = await strapi.db.getConnection(tableName).where({ id }).del();
 
     return affected === 1
       ? { ok: true as const, userId }
@@ -1320,7 +1319,7 @@ const createMfaService = ({ strapi, encryption, auth }: MfaServiceDeps) => {
     // still cost an attempt.
     const { tableName, attemptsColumn } = challengeTable();
     const accepted = await strapi.db
-      .connection(tableName)
+      .getConnection(tableName)
       .where({ id: challenge.id })
       .where(attemptsColumn, '<', config().maxChallengeAttempts)
       .increment(attemptsColumn, 1);

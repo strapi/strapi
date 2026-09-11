@@ -57,9 +57,8 @@ type MfaService = NonNullable<ReturnType<typeof requireEnabled>>;
 /**
  * The two checks both registration routes make, in order: the organisation must offer
  * passkeys at all, and the caller must already hold a TOTP factor -- a passkey is never a user's
- * only factor, and `isEnrolled` keeps its the base factor meaning. Run *before* body validation, for the
- * reason enforcement's `disable` gives: no password or code attempt should be spent on a request that
- * can never succeed.
+ * only factor, so `isEnrolled` keeps meaning "holds a TOTP factor". Run *before* body
+ * validation: no password or code attempt should be spent on a request that can never succeed.
  */
 const assertPasskeyRegistrationAllowed = async (mfa: MfaService, userId: string): Promise<void> => {
   if (!(await mfa.passkeySettings()).enabled) {

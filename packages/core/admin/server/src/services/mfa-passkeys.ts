@@ -469,7 +469,7 @@ const readCeremonyChallenge = (registration: RegistrationResponseJSON): string |
 };
 
 /**
- * Passkeys: passkeys. Both ceremonies, plus list / count / delete / clear. Composed into
+ * Passkeys. Both ceremonies, plus list / count / delete / clear. Composed into
  * `createMfaService`, so callers reach it as `getService('mfa').registerPasskey` and friends.
  * Every function that decides anything keys on `userId`, and the credential lookup on the login
  * path is scoped to the challenge's owner in the `where` itself -- a global lookup followed by an
@@ -664,7 +664,7 @@ export const createPasskeys = ({
     // this write must not be silently written to.
     const { tableName, webauthnColumn } = challengeTable();
     const written = await strapi.db
-      .connection(tableName)
+      .getConnection(tableName)
       .where({ id: challenge.id })
       .update({ [webauthnColumn]: options.challenge });
 
@@ -708,7 +708,7 @@ export const createPasskeys = ({
     // the other, and a passkey path that charged neither would be the way around the base factor's
     // throttle entirely.
     const accepted = await strapi.db
-      .connection(tableName)
+      .getConnection(tableName)
       .where({ id: challenge.id })
       .where(attemptsColumn, '<', config().maxChallengeAttempts)
       .increment(attemptsColumn, 1);
@@ -794,7 +794,7 @@ export const createPasskeys = ({
     // assertion. Run *before* the row update and the notice below, so only the racer that wins
     // the consume touches the stored counter, and only the winner emits the security notice -- a
     // loser must not announce success for an operation it was refused.
-    const consumed = await strapi.db.connection(tableName).where({ id: challenge.id }).del();
+    const consumed = await strapi.db.getConnection(tableName).where({ id: challenge.id }).del();
     if (consumed !== 1) {
       throw new ValidationError(PASSKEY_VERIFY_FAILED);
     }
@@ -934,7 +934,7 @@ export const createPasskeys = ({
     // itself -- the stamp used to survive a successful registration and only `disable` ever
     // cleared it, which is the mirror `disable`'s own comment already claims is kept.
     const affected = await strapi.db
-      .connection(tableName)
+      .getConnection(tableName)
       .where({ id: userId })
       .where({ [challengeColumn]: submitted })
       .update({ [challengeColumn]: null, [challengeExpiresAtColumn]: null });

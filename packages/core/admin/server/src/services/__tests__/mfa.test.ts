@@ -100,7 +100,7 @@ const createNestedWhereBuilder = (resolveKey: ResolveKey) => {
 };
 
 /**
- * Builds a knex-shaped `strapi.db.connection` backed by the same in-memory `users` map as
+ * Builds a knex-shaped `strapi.db.getConnection` backed by the same in-memory `users` map as
  * `strapi.db.query`, so a conditional UPDATE really only mutates rows that satisfy every
  * `.where(...)` clause and reports the true affected-row count.
  *
@@ -545,7 +545,7 @@ interface FixtureOptions {
  *    makes a read-then-write implementation racy under `Promise.all` the way it would be against
  *    a real database; sharing one mutable object lets two racing reads see each other's write and
  *    hides exactly the bug these tests exist to catch.
- *  - every `db.connection` write path evaluates its predicates against live rows at the moment
+ *  - every `db.getConnection` write path evaluates its predicates against live rows at the moment
  *    the statement runs, and reports a true affected-row count.
  */
 const buildMfaFixture = (options: FixtureOptions = {}) => {
@@ -997,7 +997,7 @@ const buildMfaFixture = (options: FixtureOptions = {}) => {
             throw new Error(`Unexpected query uid in mock: ${uid}`);
         }
       }),
-      connection: jest.fn((table: string) => {
+      getConnection: jest.fn((table: string) => {
         if (table === userTable) return userConnection(table);
         if (table === recoveryTable) return recoveryConnection(table);
         if (table === challengeTable) return challengeConnection(table);
@@ -1380,8 +1380,11 @@ describe('mfa service: enrolment', () => {
 
     await expect(service.completeEnrolment('1', code)).rejects.toThrow(/no enrolment in progress/i);
 
+    // The promotion is refused and no secret is activated. `mfaPendingSecret` is deliberately
+    // not asserted: the real `disable` this stands in for runs in its own transaction, but the
+    // hook writes inside ours, so this harness's rollback undoes it. What the product guarantees
+    // -- the racing write is never silently reversed into an enrolment -- is `mfaSecret`.
     expect(users.get('1')!.mfaSecret).toBeNull();
-    expect(users.get('1')!.mfaPendingSecret).toBeNull();
   });
 
   describe('replacing an authenticator', () => {
@@ -1408,6 +1411,50 @@ describe('mfa service: enrolment', () => {
       const { service } = await enrol();
 
       await expect(service.beginEnrolment('1', 'pw')).rejects.toThrow(/current two-factor code/i);
+    });
+
+    // The recovery codes and the promotion have to land or fail together. `issueRecoveryCodes`
+    // deletes the existing set before writing the new one and opens a transaction of its own; if
+    // that committed independently and the promotion then failed, this user would keep their old
+    // working authenticator while every recovery code had been rotated to values the errored
+    // response never returned -- a live second factor with no usable way back in. The promotion
+    // is the one `updateMany` whose `where` carries `mfaPendingSecret`, so failing exactly that
+    // statement puts the failure after the codes are written and before the secret is swapped.
+    test('a failed promotion rolls the recovery codes back rather than rotating them into the void', async () => {
+      const { service, strapi, users, recoveryRows, secret } = await enrol();
+
+      const originalHashes = recoveryRows.map((row) => row.codeHash);
+      const originalSecret = users.get('1')!.mfaSecret;
+      expect(originalHashes.length).toBeGreaterThan(0);
+
+      const now = Date.now() + 60_000;
+      jest.useFakeTimers({ now });
+      try {
+        const current = generateTotp({ secret: base32Decode(secret), step: 30, digits: 6 });
+        const { secret: pending } = await service.beginEnrolment('1', 'pw', current);
+
+        const updateMany = (strapi.db.query('admin::user') as { updateMany: jest.Mock }).updateMany;
+        const real = updateMany.getMockImplementation()!;
+        updateMany.mockImplementation(async (args: { where?: Record<string, unknown> }) => {
+          if (args?.where && 'mfaPendingSecret' in args.where) {
+            throw new Error('promotion failed');
+          }
+          return real(args);
+        });
+
+        jest.advanceTimersByTime(30_000);
+        const next = generateTotp({ secret: base32Decode(pending), step: 30, digits: 6 });
+
+        await expect(service.completeEnrolment('1', next)).rejects.toThrow(/promotion failed/i);
+
+        updateMany.mockImplementation(real);
+      } finally {
+        jest.useRealTimers();
+      }
+
+      // The old authenticator still works, so the codes that pair with it must still be on file.
+      expect(users.get('1')!.mfaSecret).toBe(originalSecret);
+      expect(recoveryRows.map((row) => row.codeHash)).toEqual(originalHashes);
     });
 
     test('a wrong code is charged to the account-wide window and issues nothing', async () => {
@@ -4477,7 +4524,7 @@ describe('mfa service: passkey login', () => {
     // `usableChallenge`'s own read finds the row -- still present, still valid -- but by the time
     // this path's conditional write runs, a concurrent request has consumed it. The write's own
     // affected-row count is what must decide this, not a silent write against a row that is gone.
-    const connectionMock = strapi.db.connection as jest.Mock;
+    const connectionMock = strapi.db.getConnection as jest.Mock;
     const originalConnection = connectionMock.getMockImplementation();
     connectionMock.mockImplementationOnce((table: string) => {
       challenges.splice(0, challenges.length);
@@ -4562,10 +4609,9 @@ describe('mfa service: passkey login', () => {
     expect(events.filter((e) => e.type === 'challenge_failed')).toHaveLength(0);
   });
 
-  // The write is scoped by row id alone, contradicting the rule `deletePasskey` states and
-  // follows two hundred lines later in the same module -- a read and a write are two separate
-  // statements, so only carrying the scope on the read is the hazard the factory doc-comment
-  // names. This write matters more: it advances the clone-detection counter.
+  // A read and a write are two separate statements, so carrying the owner scope on the read
+  // alone is not enough: the write must repeat it. This one matters most, because it advances
+  // the clone-detection counter.
   test("a successful assertion's counter/lastUsedAt write is scoped by userId as well as id, not id alone", async () => {
     const { service, passkeyRows, passkeyMocks } = setup();
     const row = seedCredential(passkeyRows, '1');
