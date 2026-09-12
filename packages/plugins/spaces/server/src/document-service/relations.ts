@@ -125,7 +125,7 @@ const collect = (
 };
 
 /**
- * Refuses a write that would link an entry to content in another space.
+ * Refuses a write that would link an entry to content this space cannot reach.
  *
  * The query scope already hides the far end of such a link, so without this the
  * write would succeed and the relation would read back as missing. An entry
@@ -165,22 +165,39 @@ export const assertRelationsWithinSpace = async (
     const rows = (await runUnscoped(() =>
       strapi.db.query(target as UID.ContentType).findMany({
         where,
-        select: ['id'],
+        select: schema.attributes.documentId ? ['id', 'documentId'] : ['id'],
         populate: { [SPACE_ATTRIBUTE]: { select: ['id'] } },
         limit: -1,
       })
     )) as Array<Record<string, any>>;
 
-    const outsider = rows.find((row) => {
+    // What this space can legitimately point at: its own rows, and shared ones.
+    const reachable = new Set<unknown>();
+
+    for (const row of rows) {
       const owner = row[SPACE_ATTRIBUTE];
       const ownerId = owner && typeof owner === 'object' ? owner.id : owner;
 
-      return ownerId !== null && ownerId !== undefined && ownerId !== spaceId;
-    });
+      if (ownerId === null || ownerId === undefined || ownerId === spaceId) {
+        reachable.add(row.id);
+        reachable.add(String(row.id));
 
-    if (outsider) {
+        if (row.documentId !== undefined) {
+          reachable.add(row.documentId);
+        }
+      }
+    }
+
+    const unreachable = values.filter(
+      (value) => !reachable.has(value) && !reachable.has(String(value))
+    );
+
+    // A target in another space and a target that does not exist are reported
+    // the same way, on purpose. Telling them apart would answer "does row 412
+    // exist somewhere I cannot see?" for anyone willing to ask often enough.
+    if (unreachable.length > 0) {
       throw new ApplicationError(
-        `This entry links to ${schema.info?.displayName ?? target} from another space. ` +
+        `This entry links to ${schema.info?.displayName ?? target} that is not available in this space. ` +
           `Entries can only link to content in their own space, or to content shared with every space.`
       );
     }

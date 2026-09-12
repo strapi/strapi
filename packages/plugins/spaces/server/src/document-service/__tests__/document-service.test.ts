@@ -264,7 +264,26 @@ describe('document service middleware', () => {
 
       await expect(
         runInSpace(FRANCE, () => run({ uid: 'api::article.article', action: 'create', params }))
-      ).rejects.toThrow(/from another space/i);
+      ).rejects.toThrow(/not available in this space/i);
+    });
+
+    it('reports a target that does not exist the same way as one in another space', async () => {
+      // Telling them apart would answer "does row 999 exist somewhere I cannot
+      // see?" for anyone willing to ask often enough.
+      const { run } = makeStrapi({ rowOwners: { 50: 2 } });
+
+      const foreign: any = { data: { title: 'x', author: 50 } };
+      const missing: any = { data: { title: 'x', author: 999 } };
+
+      const errors = await Promise.all(
+        [foreign, missing].map((params) =>
+          runInSpace(FRANCE, () =>
+            run({ uid: 'api::article.article', action: 'create', params })
+          ).catch((error: Error) => error.message)
+        )
+      );
+
+      expect(errors[0]).toEqual(errors[1]);
     });
 
     it('allows a link within the same space', async () => {
@@ -294,7 +313,7 @@ describe('document service middleware', () => {
 
       await expect(
         runInSpace(FRANCE, () => run({ uid: 'api::article.article', action: 'create', params }))
-      ).rejects.toThrow(/from another space/i);
+      ).rejects.toThrow(/not available in this space/i);
     });
 
     it('ignores disconnect: letting go of a link needs no claim over it', async () => {
