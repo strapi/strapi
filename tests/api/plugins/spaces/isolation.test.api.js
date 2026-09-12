@@ -161,15 +161,31 @@ describeOnCondition(edition === 'EE')('Spaces | content isolation', () => {
     });
 
     test('the all-spaces view sees both', async () => {
-      const agent = inSpace(await createAuthRequest({ strapi }), '*');
-      const { body, statusCode } = await listArticles(agent);
+      const seen = async (header) => {
+        const agent = header
+          ? inSpace(await createAuthRequest({ strapi }), header)
+          : await createAuthRequest({ strapi });
 
-      expect({ statusCode, body }).toMatchObject({ statusCode: 200 });
+        const { statusCode, body } = await listArticles(agent);
 
-      const titles = (body.results ?? []).map((entry) => entry.title);
+        return {
+          statusCode,
+          total: body.pagination?.total,
+          titles: (body.results ?? []).map((entry) => entry.title).sort(),
+        };
+      };
 
-      expect({ titles, pagination: body.pagination }).toMatchObject({
-        titles: expect.arrayContaining(['Bonjour', 'Guten Tag']),
+      // Reported side by side: if the cross-space view disagrees with the sum
+      // of the spaces, the difference says where to look.
+      const [all, france, germany, noHeader] = await Promise.all([
+        seen('*'),
+        seen('france'),
+        seen('germany'),
+        seen(undefined),
+      ]);
+
+      expect({ all, france, germany, noHeader }).toMatchObject({
+        all: { statusCode: 200, titles: expect.arrayContaining(['Bonjour', 'Guten Tag']) },
       });
     });
 
