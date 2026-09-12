@@ -155,13 +155,35 @@ export const decimalToSchema = (attribute: Schema.Attribute.Decimal): z.Schema =
  * @param attribute - The DynamicZone attribute object from the Strapi schema.
  * @returns A Zod schema representing the dynamic zone field.
  */
-export const dynamicZoneToSchema = (attribute: Schema.Attribute.DynamicZone): z.Schema => {
-  const { writable, required, min, max } = attribute;
+export const dynamicZoneToSchema = (
+  strapi: Core.Strapi,
+  attribute: Schema.Attribute.DynamicZone
+): z.Schema => {
+  const { writable, required, min, max, components } = attribute;
 
-  const baseSchema = z.array(z.any());
+  const componentSchemas = components.map(
+    (component) =>
+      safeSchemaCreation(
+        strapi,
+        component,
+        () => new CoreComponentRouteValidator(strapi, component).entry
+      ) as z.ZodType
+  );
+
+  let itemSchema: z.ZodType = z.any();
+
+  if (componentSchemas.length === 1) {
+    itemSchema = componentSchemas[0];
+  } else if (componentSchemas.length > 1) {
+    // z.union requires at least two options
+    itemSchema = z.union(componentSchemas as [z.ZodType, z.ZodType, ...z.ZodType[]]);
+  }
+
+  const baseSchema = z.array(itemSchema);
 
   const schema = augmentSchema(baseSchema, [
-    maybeWithMinMax(min, max),
+    (schema) => (min !== undefined && schema instanceof z.ZodArray ? schema.min(min) : schema),
+    (schema) => (max !== undefined && schema instanceof z.ZodArray ? schema.max(max) : schema),
     maybeRequired(required),
     maybeReadonly(writable),
   ]);
