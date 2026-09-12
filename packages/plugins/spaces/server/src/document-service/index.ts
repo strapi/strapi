@@ -43,7 +43,7 @@ export const registerDocumentServiceMiddleware = (strapi: Core.Strapi) => {
     }
 
     if (!WRITE_ACTIONS.has(action)) {
-      return next();
+      return withoutSpace(await next());
     }
 
     const targetSpaceId = await resolveTargetSpace(strapi, action, params, scope);
@@ -52,8 +52,47 @@ export const registerDocumentServiceMiddleware = (strapi: Core.Strapi) => {
       await assertRelationsWithinSpace(strapi, uid, params.data, targetSpaceId);
     }
 
-    return next();
+    return withoutSpace(await next());
   });
+};
+
+/**
+ * Takes the space back off whatever is being returned.
+ *
+ * Exported because it is the one thing the plugin still has to do when the
+ * feature is off: the column stays so a lapsed licence does not lose track of
+ * who owns what, and nothing else should have to notice it is there.
+ *
+ * The column lives on the row itself, so a plain read brings it along, and the
+ * Content Manager — unlike the content API — hands `private` attributes to
+ * administrators rather than stripping them. Left alone, every entry in every
+ * admin response would carry a `space` nobody asked for, and the all-spaces
+ * view would disclose ownership the ownership endpoint exists to control.
+ *
+ * Relations populate whole entries, so nested values are walked too.
+ */
+export const withoutSpace = <T>(result: T, depth = 0): T => {
+  if (!result || typeof result !== 'object' || depth > 8) {
+    return result;
+  }
+
+  if (Array.isArray(result)) {
+    result.forEach((entry) => withoutSpace(entry, depth + 1));
+
+    return result;
+  }
+
+  const record = result as Record<string, unknown>;
+
+  delete record[SPACE_ATTRIBUTE];
+
+  for (const value of Object.values(record)) {
+    if (value && typeof value === 'object') {
+      withoutSpace(value, depth + 1);
+    }
+  }
+
+  return result;
 };
 
 const isSpaceScoped = (strapi: Core.Strapi, uid: string): boolean =>

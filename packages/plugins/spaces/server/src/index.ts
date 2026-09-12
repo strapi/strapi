@@ -4,6 +4,7 @@ import config from './config';
 import contentTypes from './content-types';
 import controllers from './controllers';
 import destroy from './destroy';
+import hidden from './hidden';
 import register from './register';
 import routes from './routes';
 import services from './services';
@@ -41,7 +42,8 @@ const always = { register, contentTypes, config };
 
 const getPlugin = () => {
   if (!isEnabled()) {
-    return always;
+    // The column stays; the attribute is kept out of sight. See `./hidden`.
+    return { ...always, bootstrap: hidden };
   }
 
   return {

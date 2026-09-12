@@ -2,7 +2,7 @@ import { errors } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
 import { SPACE_UID, type Space, type SpaceStatus } from '../../../shared/constants';
-import { runUnscoped } from '../scope/context';
+import { getSpaceColumn, runUnscoped } from '../scope/context';
 
 const { ApplicationError, NotFoundError } = errors;
 
@@ -262,7 +262,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       await strapi.db.transaction(async () =>
         runUnscoped(async () => {
           for (const uid of scopedUids) {
-            const count = await strapi.db.query(uid).deleteMany({ where: { space: id } });
+            const column = getSpaceColumn(strapi, uid);
+
+            if (!column) {
+              continue;
+            }
+
+            const count = await strapi.db.query(uid).deleteMany({ where: { [column]: id } });
 
             if (count?.count) {
               deleted[uid] = count.count;

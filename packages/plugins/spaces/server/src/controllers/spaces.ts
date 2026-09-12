@@ -3,7 +3,7 @@ import type { Core } from '@strapi/types';
 import type { Context } from 'koa';
 
 import { GLOBAL_SPACE_HEADER_VALUE, type SpaceScope } from '../../../shared/constants';
-import { runUnscoped } from '../scope/context';
+import { getSpaceColumn, runUnscoped } from '../scope/context';
 
 const { ValidationError } = errors;
 
@@ -135,7 +135,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     const entries: Record<string, number> = {};
 
     for (const uid of uids) {
-      const count = await runUnscoped(() => strapi.db.query(uid).count({ where: { space: id } }));
+      const column = getSpaceColumn(strapi, uid);
+
+      if (!column) {
+        continue;
+      }
+
+      const count = await runUnscoped(() =>
+        strapi.db.query(uid).count({ where: { [column]: id } })
+      );
 
       if (count > 0) {
         entries[uid] = count;

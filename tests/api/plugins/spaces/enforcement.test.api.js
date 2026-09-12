@@ -238,6 +238,27 @@ describe('Spaces | enforcement', () => {
     });
   });
 
+  describe('the install migration', () => {
+    test('assigns rows that have no space, without losing the update', async () => {
+      // A filter on the `space` relation joins `strapi_spaces`, and a
+      // conditional update with a join is rewritten as a subquery that drops
+      // the update's payload — so the backfill has to name the column.
+      await create(ARTICLE_UID, { title: 'Orphan', documentId: 'orphan-doc' }, null);
+
+      current = null;
+      await strapi.db.query(ARTICLE_UID).updateMany({
+        where: { space_id: null },
+        data: { space: france.id },
+      });
+
+      const [row] = await strapi.db
+        .query(ARTICLE_UID)
+        .findMany({ where: { documentId: 'orphan-doc' }, populate: { space: true } });
+
+      expect(row.space?.id).toBe(france.id);
+    });
+  });
+
   describe('media', () => {
     test('files are scoped like content', async () => {
       const file = await strapi.db.query('plugin::upload.file').create({

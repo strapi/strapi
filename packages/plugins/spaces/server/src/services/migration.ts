@@ -1,7 +1,7 @@
 import type { Core } from '@strapi/types';
 
 import { SPACE_ATTRIBUTE, type Space } from '../../../shared/constants';
-import { runUnscoped } from '../scope/context';
+import { getSpaceColumn, runUnscoped } from '../scope/context';
 import { KEEP_UNASSIGNED_ON_INSTALL } from './content-types';
 
 const STORE_KEY = 'spaces_migration';
@@ -88,15 +88,23 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const assigned: Record<string, number> = {};
 
       for (const uid of uids) {
+        const column = getSpaceColumn(strapi, uid);
+
+        if (!column) {
+          continue;
+        }
+
         const count = await runUnscoped(async () => {
-          const pending = await strapi.db.query(uid).count({ where: { [SPACE_ATTRIBUTE]: null } });
+          const pending = await strapi.db.query(uid).count({ where: { [column]: null } });
 
           if (pending === 0) {
             return 0;
           }
 
+          // The filter names the column and the data names the attribute: the
+          // first avoids a join, the second is what the row mapper understands.
           await strapi.db.query(uid).updateMany({
-            where: { [SPACE_ATTRIBUTE]: null },
+            where: { [column]: null },
             data: { [SPACE_ATTRIBUTE]: space.id },
           });
 
@@ -124,8 +132,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const counts: Record<string, number> = {};
 
       for (const uid of uids) {
+        const column = getSpaceColumn(strapi, uid);
+
+        if (!column) {
+          continue;
+        }
+
         const count = await runUnscoped(() =>
-          strapi.db.query(uid).count({ where: { [SPACE_ATTRIBUTE]: null } })
+          strapi.db.query(uid).count({ where: { [column]: null } })
         );
 
         if (count > 0) {

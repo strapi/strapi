@@ -2,7 +2,12 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 
 import type { Core } from '@strapi/types';
 
-import { SPACE_STATE_KEY, type SpaceScope } from '../../../shared/constants';
+import {
+  SPACE_ATTRIBUTE,
+  SPACE_STATE_KEY,
+  SPACE_UID,
+  type SpaceScope,
+} from '../../../shared/constants';
 
 /**
  * Scope declared explicitly by code that is not serving a request, or that must
@@ -71,3 +76,24 @@ export const setRequestScope = (ctx: { state: Record<string, unknown> }, scope: 
 
 export const getRequestScope = (ctx: { state: Record<string, unknown> }): SpaceScope | undefined =>
   ctx.state[SPACE_STATE_KEY] as SpaceScope | undefined;
+
+/**
+ * The `space_id` column of a model, read from the database metadata.
+ *
+ * Filtering by the `space` *attribute* would make the query builder join
+ * `strapi_spaces`, which is wasted work on a read and outright broken on a
+ * write: a conditional update with a join is rewritten as a subquery, and that
+ * rewrite drops the update's own payload. Naming the column keeps both simple.
+ */
+export const getSpaceColumn = (strapi: Core.Strapi, uid: string): string | null => {
+  const meta = strapi.db.metadata.has?.(uid) ? strapi.db.metadata.get(uid) : undefined;
+  const attribute = meta?.attributes?.[SPACE_ATTRIBUTE] as
+    | { type?: string; target?: string; joinColumn?: { name?: string } }
+    | undefined;
+
+  if (attribute?.type !== 'relation' || attribute.target !== SPACE_UID) {
+    return null;
+  }
+
+  return attribute.joinColumn?.name ?? null;
+};
