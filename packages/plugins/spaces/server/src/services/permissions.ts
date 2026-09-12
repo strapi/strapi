@@ -73,9 +73,20 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       // before authentication has put them on the request — hence passing the
       // user in. The answer is memoised on the request, so settling the scope
       // afterwards costs nothing.
-      const { scope } = await strapi.service('plugin::spaces.access').resolve(ctx, user);
+      const { scope, canAccessAll } = await strapi
+        .service('plugin::spaces.access')
+        .resolve(ctx, user);
 
-      // The cross-space view keeps every role the user holds. Which rows they
+      // Someone who may work across every space is not governed by membership.
+      // They still land in a space by default — choosing one has to be
+      // deliberate — and narrowing them to the roles of a membership they do
+      // not have would leave them with no permissions at all, including the
+      // permission to create the first space.
+      if (canAccessAll) {
+        return null;
+      }
+
+      // Outside a space, every role the user holds applies. Which rows they
       // then reach is the query scope's business, not the ability's.
       if (scope.mode !== 'space') {
         return null;

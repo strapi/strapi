@@ -87,6 +87,12 @@ export interface Resolution {
    * space-scoped data is actually touched.
    */
   denied?: string;
+  /**
+   * Whether the caller may work across every space. Someone who may is not
+   * governed by membership, so landing in a space must not narrow what they can
+   * do — see the role scope.
+   */
+  canAccessAll: boolean;
 }
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
@@ -175,7 +181,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         const bound = await resolveTokenSpace(strapi, ctx);
 
         if (bound) {
-          return { scope: { mode: 'space', ...bound } };
+          return { scope: { mode: 'space', ...bound }, canAccessAll: false };
         }
 
         // A token issued before Spaces, or from the all-spaces view, has no
@@ -185,8 +191,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         const fallback = await spacesService().getDefault();
 
         return fallback
-          ? { scope: toScope(fallback) }
-          : { scope: { mode: 'unresolved', reason: 'No space is available.' } };
+          ? { scope: toScope(fallback), canAccessAll: false }
+          : {
+              scope: { mode: 'unresolved', reason: 'No space is available.' },
+              canAccessAll: false,
+            };
       }
 
       const requested = service.readHeader(ctx);
@@ -202,14 +211,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         return service.resolveForAnonymous(requested);
       }
 
+      // Asked once, and carried on the answer: the role scope needs it too, and
+      // it costs a query for anyone who is not a super admin.
       const global = await canAccessAllSpaces(user);
 
       if (requested === GLOBAL_SPACE_HEADER_VALUE) {
         return global
-          ? { scope: { mode: 'global' } }
+          ? { scope: { mode: 'global' }, canAccessAll: true }
           : {
               scope: { mode: 'unresolved', reason: 'Cross-space access is not allowed.' },
               denied: 'You are not allowed to work across every space.',
+              canAccessAll: false,
             };
       }
 
@@ -220,11 +232,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           return {
             scope: { mode: 'unresolved', reason: `Unknown or archived space "${requested}".` },
             denied: `Unknown or archived space "${requested}".`,
+            canAccessAll: global,
           };
         }
 
         if (global || (await membershipService().isMember(user.id, space.id))) {
-          return { scope: toScope(space) };
+          return { scope: toScope(space), canAccessAll: global };
         }
 
         return {
@@ -233,6 +246,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
             reason: `You are not a member of the space "${space.slug}".`,
           },
           denied: `You are not a member of the space "${space.slug}".`,
+          canAccessAll: false,
         };
       }
 
@@ -247,17 +261,21 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           return {
             scope: { mode: 'unresolved', reason: `Unknown or archived space "${requested}".` },
             denied: `Unknown or archived space "${requested}".`,
+            canAccessAll: false,
           };
         }
 
-        return { scope: toScope(space) };
+        return { scope: toScope(space), canAccessAll: false };
       }
 
       const fallback = await spacesService().getDefault();
 
       return fallback
-        ? { scope: toScope(fallback) }
-        : { scope: { mode: 'unresolved', reason: 'No space is available.' } };
+        ? { scope: toScope(fallback), canAccessAll: false }
+        : {
+            scope: { mode: 'unresolved', reason: 'No space is available.' },
+            canAccessAll: false,
+          };
     },
 
     /** The space a caller lands in when they did not name one. */
@@ -275,13 +293,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           memberships.find((membership: { space: Space }) => membership.space.isDefault) ??
           memberships[0];
 
-        return { scope: toScope(preferred.space) };
+        return { scope: toScope(preferred.space), canAccessAll: global };
       }
 
       if (global) {
         const fallback = await spacesService().getDefault();
 
-        return fallback ? { scope: toScope(fallback) } : { scope: { mode: 'global' } };
+        return fallback
+          ? { scope: toScope(fallback), canAccessAll: true }
+          : { scope: { mode: 'global' }, canAccessAll: true };
       }
 
       // Not a denial: the admin shell must still load so it can tell them so.
@@ -290,6 +310,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           mode: 'unresolved',
           reason: 'You do not belong to any space. Ask an administrator to add you to one.',
         },
+        canAccessAll: false,
       };
     },
 

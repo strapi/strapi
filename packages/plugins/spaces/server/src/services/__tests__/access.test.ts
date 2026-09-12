@@ -191,6 +191,24 @@ describe('space access', () => {
       expect(scope).toEqual({ mode: 'space', id: 1, slug: 'fr' });
     });
 
+    it('is reported on the resolution, so the role scope need not ask again', async () => {
+      const strapi = makeStrapi({ accessAllPermission: true });
+      const service = createAccessService({ strapi });
+
+      const { canAccessAll } = await service.resolve(makeCtx(undefined, { id: 1 }));
+
+      expect(canAccessAll).toBe(true);
+    });
+
+    it('is reported as false for an ordinary member', async () => {
+      const strapi = makeStrapi({ memberships: [{ space: FRANCE }] });
+      const service = createAccessService({ strapi });
+
+      const { canAccessAll } = await service.resolve(makeCtx(undefined, { id: 10 }));
+
+      expect(canAccessAll).toBe(false);
+    });
+
     it('is granted to a super admin without a separate permission row', async () => {
       const strapi = makeStrapi({ isSuperAdmin: true });
       const service = createAccessService({ strapi });
