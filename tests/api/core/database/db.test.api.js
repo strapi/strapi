@@ -16,6 +16,9 @@ const testCT = {
     name: {
       type: 'string',
     },
+    locale: {
+      type: 'string',
+    },
     related: {
       type: 'relation',
       relation: 'manyToOne',
@@ -33,6 +36,9 @@ const relatedCT = {
     title: {
       type: 'string',
     },
+    locale: {
+      type: 'string',
+    },
   },
 };
 
@@ -41,14 +47,17 @@ const fixtures = {
     return [
       {
         name: 'Hugo LLORIS',
+        locale: 'en',
         related: related[0].id,
       },
       {
         name: 'Samuel UMTITI',
+        locale: 'fr',
         related: related[1].id,
       },
       {
         name: 'Lucas HERNANDEZ',
+        locale: 'fr',
         related: related[0].id,
       },
     ];
@@ -56,9 +65,11 @@ const fixtures = {
   related: [
     {
       title: 'Category A',
+      locale: 'en',
     },
     {
       title: 'Category B',
+      locale: 'fr',
     },
   ],
 };
@@ -93,6 +104,12 @@ const deleteManyFilterCases = [
     params: { where: { related: { title: 'Category B' } } },
     deletedCount: 1,
     remaining: ['Hugo LLORIS', 'Lucas HERNANDEZ'],
+  },
+  {
+    label: 'where: relation + overlapping locale',
+    params: { where: { related: { title: 'Category A' }, locale: 'en' } },
+    deletedCount: 1,
+    remaining: ['Lucas HERNANDEZ', 'Samuel UMTITI'],
   },
   {
     label: 'where: $or across scalars',
@@ -515,5 +532,80 @@ describe('deleteMany filter params', () => {
     expect(await strapi.db.query(TEST_UID).findMany(params)).toHaveLength(1);
     expect(await strapi.db.query(TEST_UID).count(params)).toBe(2);
     expect((await strapi.db.query(TEST_UID).deleteMany(params)).count).toBe(2);
+  });
+});
+
+/**
+ * updateMany with relation filters uses the same subquery path as deleteMany (GH#11998 class).
+ */
+describe('updateMany relation filters', () => {
+  const resetTestEntries = async () => {
+    await strapi.db.query(TEST_UID).deleteMany({});
+    const related = await strapi.db
+      .query('api::related.related')
+      .findMany({ orderBy: { id: 'asc' } });
+
+    for (const entry of fixtures.test({ related })) {
+      await strapi.db.query(TEST_UID).create({ data: entry });
+    }
+  };
+
+  beforeAll(async () => {
+    await builder
+      .addContentTypes([relatedCT, testCT])
+      .addFixtures(relatedCT.singularName, fixtures.related)
+      .addFixtures(testCT.singularName, fixtures.test)
+      .build();
+
+    strapi = await createStrapiInstance();
+  });
+
+  afterAll(async () => {
+    await strapi.destroy();
+    await builder.cleanup();
+  });
+
+  beforeEach(async () => {
+    await resetTestEntries();
+  });
+
+  test('updateMany: nested relation where updates matching rows only', async () => {
+    const result = await strapi.db.query(TEST_UID).updateMany({
+      where: { related: { title: 'Category A' } },
+      data: { name: 'UPDATED' },
+    });
+
+    expect(result.count).toBe(2);
+
+    const names = (await strapi.db.query(TEST_UID).findMany()).map((entry) => entry.name).sort();
+    expect(names).toEqual(['Samuel UMTITI', 'UPDATED', 'UPDATED']);
+  });
+
+  test('updateMany: relation + overlapping locale applies the root predicate', async () => {
+    const result = await strapi.db.query(TEST_UID).updateMany({
+      where: { related: { title: 'Category A' }, locale: 'en' },
+      data: { name: 'UPDATED LOCALE' },
+    });
+
+    expect(result.count).toBe(1);
+
+    const names = (await strapi.db.query(TEST_UID).findMany()).map((entry) => entry.name).sort();
+    expect(names).toEqual(['Lucas HERNANDEZ', 'Samuel UMTITI', 'UPDATED LOCALE']);
+  });
+
+  test('updateMany: scalar relation id shorthand', async () => {
+    const categoryB = await strapi.db
+      .query(RELATED_UID)
+      .findOne({ where: { title: 'Category B' } });
+
+    const result = await strapi.db.query(TEST_UID).updateMany({
+      where: { related: categoryB.id },
+      data: { name: 'CATEGORY B ROW' },
+    });
+
+    expect(result.count).toBe(1);
+
+    const names = (await strapi.db.query(TEST_UID).findMany()).map((entry) => entry.name).sort();
+    expect(names).toEqual(['CATEGORY B ROW', 'Hugo LLORIS', 'Lucas HERNANDEZ']);
   });
 });
