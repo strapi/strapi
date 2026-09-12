@@ -23,12 +23,10 @@
  * The same write-time-vs-publish-time split applies to required MEDIA, exercised below
  * with a real uploaded file so the disconnect/connect shapes go through the upload plugin.
  *
- * NOTE on a media/relation divergence surfaced by these tests: single media treats an
- * object-form payload (`{ connect | disconnect | set }`) as a full replace, so `{ connect: [] }`
- * EMPTIES a single media — whereas on a oneToOne relation `{ connect: [] }` is a no-op that
- * preserves the value. This is pre-existing media behaviour (reproduces with the flag off and
- * with an optional field), not something strictRelations introduces; the media cases below
- * assert the actual behaviour rather than assuming media mirrors relations.
+ * Media now mirrors relations for connect/disconnect deltas (CMS-1428): a no-op
+ * `{ connect: [] }` / `{ disconnect: [] }` preserves an already-attached single media
+ * instead of emptying it, so publish stays 200 — exactly like the oneToOne relation
+ * no-op case above. See `media-delta-payloads.test.api.js` for the full delta matrix.
  *
  * DISCONNECT-ONLY on TO-ONE / SINGLE-MEDIA is rejected at WRITE time (not deferred): a to-one
  * relation or single media holds at most one entry, so `{ disconnect: [...] }` (no `connect`/
@@ -309,14 +307,11 @@ describe('strictRelations — publish-time enforcement of connect/disconnect edg
         expect(publish.statusCode).toBe(400);
       });
 
-      // Divergence from relations: single media treats an object-form payload
-      // (`{ connect | disconnect | set }`) as a full replace, so a `{ connect: [] }` EMPTIES
-      // the cover — unlike a oneToOne relation, where `{ connect: [] }` is a no-op that
-      // preserves the value (see the relation "no-op" case above). This is pre-existing media
-      // behaviour, independent of strictRelations (it also empties with the flag off / field
-      // optional). Write-time still passes (the validator sees a connect object, not an empty
-      // value); the empty state is caught by the publish backstop → 400.
-      test('{ connect: [] } empties a required media (media replace semantics) → update 200, publish 400', async () => {
+      // Media now mirrors relations (CMS-1428): a no-op `{ connect: [] }` on an already-
+      // populated single media preserves the attached file instead of emptying it — just
+      // like the oneToOne relation no-op case above. The required cover stays populated, so
+      // publish succeeds.
+      test('no-op { connect: [] } on a populated required media then publishing → 200', async () => {
         const upload = await uploadImg();
         expect(upload.statusCode).toBe(201);
         const fileId = upload.body[0].id;
@@ -333,13 +328,13 @@ describe('strictRelations — publish-time enforcement of connect/disconnect edg
         );
         expect(update.statusCode).toBe(200);
 
-        // The cover was emptied by the connect-object replace…
+        // The existing cover is untouched by the no-op connect.
         const draft = await getMediaDraft(documentId);
-        expect(draft.body.data.cover).toBe(null);
+        expect(draft.body.data.cover).not.toBe(null);
+        expect(draft.body.data.cover.id).toBe(fileId);
 
-        // …so publishing the now-empty required media is rejected by the backstop.
         const publish = await publishEntry(MEDIA_UID, documentId);
-        expect(publish.statusCode).toBe(400);
+        expect(publish.statusCode).toBe(200);
       });
 
       // The publish check validates the *resulting* state: after disconnecting (which empties
