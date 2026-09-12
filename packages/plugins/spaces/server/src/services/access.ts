@@ -27,7 +27,11 @@ const RESOLUTION_STATE_KEY = 'spacesResolution';
  * across every space.
  */
 const SCOPE_FREE_PATHS = [
-  '/admin/spaces/mine',
+  // This plugin's own routes are mounted at `/spaces`, not under `/admin`.
+  // `mine` is what the space switcher reads, so it has to answer even when the
+  // caller's remembered space has become unreachable — otherwise the one screen
+  // that could get them out is the one that refuses them.
+  '/spaces/mine',
   '/admin/login',
   '/admin/logout',
   '/admin/renew-token',
@@ -47,6 +51,26 @@ const SCOPE_FREE_PATHS = [
 ];
 
 const isScopeFree = (path: string) => SCOPE_FREE_PATHS.some((prefix) => path.startsWith(prefix));
+
+/**
+ * Strategies whose `ctx.state.user` is an administrator of this project.
+ *
+ * Users & Permissions also puts a user there, but an application user — a
+ * different table, with its own ids. Reading memberships for one of those would
+ * match whichever administrator happens to share the number.
+ */
+const ADMIN_STRATEGIES = new Set(['admin', 'admin-token']);
+
+const adminCaller = (ctx: Context): AdminUserLike | undefined => {
+  const strategy = (ctx.state?.auth as { strategy?: { name?: string } } | undefined)?.strategy
+    ?.name;
+
+  if (!strategy || !ADMIN_STRATEGIES.has(strategy)) {
+    return undefined;
+  }
+
+  return ctx.state?.user as AdminUserLike | undefined;
+};
 
 export interface Resolution {
   scope: SpaceScope;
@@ -116,7 +140,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * the ability is being built and again once authentication has finished.
      */
     async resolve(ctx: Context, asUser?: AdminUserLike): Promise<Resolution> {
-      const caller = asUser ?? (ctx.state?.user as AdminUserLike | undefined);
+      const caller = asUser ?? adminCaller(ctx);
       const callerId = caller?.id ?? null;
       const cached = ctx.state?.[RESOLUTION_STATE_KEY] as Resolution | undefined;
 
@@ -135,7 +159,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     async computeResolution(ctx: Context, asUser?: AdminUserLike): Promise<Resolution> {
       const resolution = await service.deriveResolution(ctx, asUser);
-      const caller = asUser ?? (ctx.state?.user as AdminUserLike | undefined);
+      const caller = asUser ?? adminCaller(ctx);
 
       return { ...resolution, resolvedFor: caller?.id ?? null };
     },
@@ -145,17 +169,30 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       asUser?: AdminUserLike
     ): Promise<Omit<Resolution, 'resolvedFor'>> {
       // A token carries its own space, decided when it was issued. It wins over
-      // anything the request asks for, because the request is the token.
-      const bound = await resolveTokenSpace(strapi, ctx);
+      // anything the request asks for, because the request *is* the token: a
+      // caller holding one cannot be asked to say honestly where it belongs.
+      if (isToken(ctx)) {
+        const bound = await resolveTokenSpace(strapi, ctx);
 
-      if (bound) {
-        return { scope: { mode: 'space', ...bound } };
+        if (bound) {
+          return { scope: { mode: 'space', ...bound } };
+        }
+
+        // A token issued before Spaces, or from the all-spaces view, has no
+        // space of its own. It lands in the default one — the same place the
+        // migration put everything else — rather than being handed whichever
+        // space its header names.
+        const fallback = await spacesService().getDefault();
+
+        return fallback
+          ? { scope: toScope(fallback) }
+          : { scope: { mode: 'unresolved', reason: 'No space is available.' } };
       }
 
       const requested = service.readHeader(ctx);
       // The caller is passed in while the ability is still being built, because
       // at that point the strategy has not put the user on the request yet.
-      const user = asUser ?? (ctx.state?.user as AdminUserLike | undefined);
+      const user = asUser ?? adminCaller(ctx);
 
       // No admin user behind the request: the public content API, or a route
       // that runs before authentication. Such a caller has no membership, so
@@ -257,13 +294,38 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     /**
+     * Refuses unless the caller may act on this particular space.
+     *
+     * Holding `members.manage` says someone administers memberships; it does
+     * not say which spaces are theirs to administer. Without this, anyone
+     * granted it could add themselves to any space in the project.
+     */
+    async assertCanActOn(ctx: Context, spaceId: number): Promise<void> {
+      const user = adminCaller(ctx);
+
+      if (!user) {
+        throw new ForbiddenError('Only an administrator can manage a space.');
+      }
+
+      if (await canAccessAllSpaces(user)) {
+        return;
+      }
+
+      if (await membershipService().isMember(user.id, spaceId)) {
+        return;
+      }
+
+      throw new ForbiddenError('You are not a member of that space.');
+    },
+
+    /**
      * Settles the scope of a request and records it, or refuses the request.
      *
      * Runs once authentication has finished, for authenticated and anonymous
      * requests alike, so that no request reaches a controller without a space.
      */
     async applyToRequest(ctx: Context): Promise<void> {
-      const caller = (ctx.state?.user as AdminUserLike | undefined)?.id ?? null;
+      const caller = adminCaller(ctx)?.id ?? null;
       const settled = ctx.state?.[RESOLUTION_STATE_KEY] as Resolution | undefined;
 
       // Already settled for this caller. A second run with a new identity —
@@ -292,6 +354,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 };
 
 type AdminUserLike = { id: number; roles?: unknown[] };
+
+const TOKEN_STRATEGIES = new Set(['api-token', 'admin-token']);
+
+const isToken = (ctx: Context): boolean => {
+  const strategy = (ctx.state?.auth as { strategy?: { name?: string } } | undefined)?.strategy
+    ?.name;
+
+  return Boolean(strategy && TOKEN_STRATEGIES.has(strategy));
+};
 
 const toScope = (space: Space): SpaceScope => ({
   mode: 'space',

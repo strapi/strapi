@@ -1,36 +1,25 @@
+import { errors } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
 import { SPACE_ATTRIBUTE } from '../../../shared/constants';
-import { runInSpace, runUnscoped } from '../scope/context';
+import { getScope, runInSpace, runUnscoped } from '../scope/context';
+
+const RELEASE_UID = 'plugin::content-releases.release';
 
 /**
  * Work that happens for a space without anyone asking for it: a release
  * publishing at the time it was scheduled for, long after the request that
  * scheduled it ended.
  *
- * Such work has no request to take its space from, so it has to take it from
- * the record it is acting on. Running it unscoped instead would let a release
- * created in one space publish entries from another; running it in the space
- * the record belongs to makes the background run see exactly what the
- * scheduling user saw.
+ * Such work has no request to take its space from, so it takes it from the
+ * record it is acting on. That is also why it cannot simply always do so — the
+ * same service call serves the publish endpoint, where there *is* a caller, and
+ * taking the space from the release there would let anyone who knows a release
+ * id publish in a space they cannot enter.
  */
 export const registerBackgroundJobIntegration = (strapi: Core.Strapi) => {
   const releases = strapi.plugin('content-releases');
-
-  if (!releases) {
-    return;
-  }
-
-  /**
-   * Both the publish endpoint and the scheduler call the release service, so
-   * putting the space in force there covers them at once — including a
-   * scheduled run that fires days after the request that set it up.
-   *
-   * The space is resolved when the publish happens rather than when it was
-   * scheduled: a release can be moved, or its space archived, in between, and
-   * the state that matters is the one at publication.
-   */
-  const releaseService = releases.service('release');
+  const releaseService = releases?.service('release');
 
   if (!releaseService?.publish) {
     return;
@@ -39,13 +28,37 @@ export const registerBackgroundJobIntegration = (strapi: Core.Strapi) => {
   const originalPublish = releaseService.publish.bind(releaseService);
 
   releaseService.publish = async (releaseId: string | number, ...rest: unknown[]) => {
-    const space = await resolveReleaseSpace(strapi, releaseId);
+    const scope = getScope(strapi);
 
-    if (!space) {
+    if (scope.mode === 'unresolved') {
+      throw new errors.ForbiddenError(
+        scope.reason ?? 'This request has no space, so it cannot publish a release.'
+      );
+    }
+
+    // A caller inside a space may only publish that space's releases. The
+    // release controller hands the id straight to this service, so this is
+    // where that is established — and once established, the space in force is
+    // already the right one.
+    if (scope.mode === 'space') {
+      const visible = await strapi.db.query(RELEASE_UID).findOne({ where: { id: releaseId } });
+
+      if (!visible) {
+        throw new errors.NotFoundError('Release not found');
+      }
+
       return originalPublish(releaseId, ...rest);
     }
 
-    return runInSpace(space, () => originalPublish(releaseId, ...rest));
+    // No space in force: the scheduler firing on its own, or someone working
+    // across every space. Take it from the release, resolved now rather than
+    // when it was scheduled — a release can be moved, or its space archived, in
+    // between, and the state that matters is the one at publication.
+    const space = await resolveReleaseSpace(strapi, releaseId);
+
+    return space
+      ? runInSpace(space, () => originalPublish(releaseId, ...rest))
+      : originalPublish(releaseId, ...rest);
   };
 };
 
@@ -54,7 +67,7 @@ const resolveReleaseSpace = async (
   releaseId: string | number
 ): Promise<{ id: number; slug: string } | undefined> => {
   const release = await runUnscoped(() =>
-    strapi.db.query('plugin::content-releases.release').findOne({
+    strapi.db.query(RELEASE_UID).findOne({
       where: { id: releaseId },
       populate: { [SPACE_ATTRIBUTE]: true },
     })

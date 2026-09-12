@@ -22,7 +22,7 @@ What follows is what each feature does, and where something extra was needed.
 | Relations                 | Narrowed on read; a write that would link across spaces is refused with an error rather than leaving a dangling link              |
 | i18n                      | Locales stay global; a localised entry's rows each carry the space                                                                |
 | Releases                  | Releases and their actions carry a space. A publish runs in the release's own space, including a scheduled one firing days later  |
-| Review Workflows          | Workflows and stages carry a space                                                                                                |
+| Review Workflows          | Workflows and stages carry a space; reorganising one is an all-spaces action (see below)                                          |
 | Content History           | Versions carry a space, and one with none is platform-only                                                                        |
 | Audit logs                | Entries carry the space they happened in; a platform event is not shown to a tenant                                               |
 | Webhooks                  | A webhook belongs to the space it was created in; delivery skips events from other spaces. An unbound webhook stays platform-wide |
@@ -48,6 +48,18 @@ writes of the same value into the same space can both pass the check. That is
 pre-existing Strapi behaviour, not something Spaces introduces, but tenancy
 makes a database-level constraint harder to add later, since it would have to be
 on `(space_id, column)`.
+
+## Where a space stops short
+
+Two review-workflow operations — reorganising a workflow's stages, and removing
+a content type from a workflow — rewrite every entry's stage for that content
+type in one statement, written in raw SQL rather than through the query builder.
+The query scope narrows queries the builder makes, so it does not see them.
+
+They are refused from inside a space and have to be done from the all-spaces
+view, where their reach is what the caller expects. Everything else about
+workflows stays per-space: which ones a space has, which stage an entry is in,
+and who it is assigned to.
 
 ## Platform-only, on purpose
 

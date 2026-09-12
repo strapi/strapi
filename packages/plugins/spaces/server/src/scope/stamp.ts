@@ -1,3 +1,4 @@
+import { errors } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
 import { SPACE_ATTRIBUTE, SPACE_UID } from '../../../shared/constants';
@@ -46,10 +47,21 @@ export const registerWriteStamping = (strapi: Core.Strapi) => {
 
     const scope = getScope(strapi);
 
+    if (scope.mode === 'unresolved') {
+      // An INSERT has no rows to narrow, so the query scope lets it through.
+      // Left alone the row would be written with no space and become visible to
+      // every tenant — the one way a request with no space could still affect
+      // one. Refusing is the same answer reads get.
+      throw new errors.ForbiddenError(
+        scope.reason ??
+          `This request has no space, so it cannot create ${uid}. If this runs outside a ` +
+            `request, wrap it in runUnscoped() or runInSpace().`
+      );
+    }
+
     if (scope.mode !== 'space') {
       // `global` and `unscoped` leave the row shared, which is what the
-      // migration and the CLI want. A request with no space never gets this
-      // far: the query scope refuses it first.
+      // migration, the CLI and deliberate cross-space work want.
       return;
     }
 

@@ -30,6 +30,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   /** Everyone who belongs to a space, with the roles they hold there. */
   async find(ctx: Context) {
     const spaceId = Number(ctx.params.spaceId);
+    await strapi.service('plugin::spaces.access').assertCanActOn(ctx, spaceId);
+
     const memberships = await strapi.service('plugin::spaces.membership').listForSpace(spaceId);
 
     ctx.body = {
@@ -45,6 +47,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
   async upsert(ctx: Context) {
     const spaceId = Number(ctx.params.spaceId);
+    await strapi.service('plugin::spaces.access').assertCanActOn(ctx, spaceId);
+
     const body = (ctx.request.body ?? {}) as Record<string, unknown>;
     const userId = Number(body.user);
 
@@ -63,6 +67,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
   async remove(ctx: Context) {
     const spaceId = Number(ctx.params.spaceId);
+    await strapi.service('plugin::spaces.access').assertCanActOn(ctx, spaceId);
+
     const userId = Number(ctx.params.userId);
 
     await strapi.service('plugin::spaces.membership').remove(userId, spaceId);
@@ -79,6 +85,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
    */
   async candidates(ctx: Context) {
     const spaceId = Number(ctx.params.spaceId);
+    await strapi.service('plugin::spaces.access').assertCanActOn(ctx, spaceId);
 
     const [users, memberships] = await Promise.all([
       runUnscoped(() =>

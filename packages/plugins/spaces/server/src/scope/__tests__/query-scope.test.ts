@@ -141,6 +141,19 @@ describe('spaces query scope', () => {
       expect(clause.$or).toContainEqual({ space_id: { $null: true } });
     });
 
+    it.each(['update', 'delete'] as const)(
+      'cannot be changed from inside one space (%s)',
+      (operation) => {
+        // Reading what everyone shares is fine; rewriting it from inside one
+        // tenant is one tenant changing what every other tenant reads.
+        const clause = runInSpace({ id: 7, slug: 'fr' }, () =>
+          ask(makeStrapi(), scopedMeta, operation)
+        );
+
+        expect(clause).toEqual({ space_id: 7 });
+      }
+    );
+
     it('are platform-only for records about the platform itself', () => {
       const auditMeta = {
         uid: 'admin::audit-log',

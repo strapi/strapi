@@ -1,3 +1,13 @@
+/**
+ * The licence feature that unlocks Spaces, as the admin knows it.
+ *
+ * The server gates the same name, and also accepts an environment override
+ * while the feature is rolled out to licences; the admin cannot see that, so a
+ * project using the override will not show these screens until the licence
+ * carries the feature.
+ */
+export const FEATURE_ID = 'cms-spaces';
+
 /** Header naming the space a request acts in. `*` asks for the all-spaces view. */
 export const SPACE_HEADER = 'X-Strapi-Space';
 

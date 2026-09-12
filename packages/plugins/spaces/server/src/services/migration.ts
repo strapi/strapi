@@ -2,6 +2,7 @@ import type { Core } from '@strapi/types';
 
 import { SPACE_ATTRIBUTE, type Space } from '../../../shared/constants';
 import { runUnscoped } from '../scope/context';
+import { KEEP_UNASSIGNED_ON_INSTALL } from './content-types';
 
 const STORE_KEY = 'spaces_migration';
 
@@ -80,7 +81,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * actually changing.
      */
     async assignOrphanRows(space: Space): Promise<Record<string, number>> {
-      const uids: string[] = strapi.service('plugin::spaces.content-types').listScopedUids();
+      const uids: string[] = strapi
+        .service('plugin::spaces.content-types')
+        .listScopedUids()
+        .filter((uid: string) => !KEEP_UNASSIGNED_ON_INSTALL.has(uid));
       const assigned: Record<string, number> = {};
 
       for (const uid of uids) {

@@ -28,7 +28,7 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   registerQueryScope(strapi);
   registerWriteStamping(strapi);
   registerDocumentServiceMiddleware(strapi);
-  await registerIntegrations(strapi);
+  registerIntegrations(strapi);
 
   // 4. Give existing content a space. Runs once; afterwards it is a no-op.
   if (strapi.config.get('plugin::spaces.migrateOnBootstrap', true)) {

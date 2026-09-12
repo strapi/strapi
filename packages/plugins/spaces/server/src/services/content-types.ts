@@ -33,6 +33,21 @@ export const PLATFORM_WHEN_UNASSIGNED_UIDS = new Set<string>([
 ]);
 
 /**
+ * Models the install migration leaves unassigned.
+ *
+ * Everything else a project already had belongs to the space that existed
+ * before there were spaces, and is assigned to it. A record of who signed in or
+ * who changed a role is not a tenant's — handing the whole pre-Spaces audit
+ * trail to whichever space was created first would make one tenant the keeper
+ * of everyone's history.
+ *
+ * Content history is deliberately *not* here: a version belongs with the entry
+ * it was taken from, and on install those entries are all going to the same
+ * place.
+ */
+export const KEEP_UNASSIGNED_ON_INSTALL = new Set<string>(['admin::audit-log']);
+
+/**
  * Models that must never carry a space, whatever else says otherwise. These are
  * the platform's own records: identities, the permission system, the space
  * registry, and the schemas themselves.

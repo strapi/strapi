@@ -55,12 +55,30 @@ const makeStrapi = ({
   } as any;
 };
 
-const makeCtx = (header?: string, user?: { id: number }, path = '/admin/content-manager/x') =>
-  ({
+/**
+ * A request. `user` is an administrator unless `strategy` says otherwise —
+ * Users & Permissions puts an application user on `ctx.state.user` too, and the
+ * two must not be confused.
+ */
+const makeCtx = (
+  header?: string,
+  user?: { id: number },
+  path = '/admin/content-manager/x',
+  strategy?: string
+) => {
+  // A token request has an auth strategy but no user; an admin request has
+  // both; an anonymous one has neither.
+  const name = strategy ?? (user ? 'admin' : undefined);
+
+  return {
     path,
-    state: user ? { user } : {},
-    get: (name: string) => (name.toLowerCase() === 'x-strapi-space' ? (header ?? '') : ''),
-  }) as any;
+    state: {
+      ...(user ? { user } : {}),
+      ...(name ? { auth: { strategy: { name } } } : {}),
+    },
+    get: (header_: string) => (header_.toLowerCase() === 'x-strapi-space' ? (header ?? '') : ''),
+  } as any;
+};
 
 describe('space access', () => {
   beforeEach(() => {
@@ -236,9 +254,78 @@ describe('space access', () => {
       const strapi = makeStrapi({ accessAllPermission: true });
       const service = createAccessService({ strapi });
 
-      const { scope } = await service.resolve(makeCtx('fr', { id: 1 }));
+      const { scope } = await service.resolve(makeCtx('fr', { id: 1 }, undefined, 'api-token'));
 
       expect(scope).toEqual({ mode: 'space', id: 2, slug: 'de' });
+    });
+
+    it('lands in the default space when it is bound to none', async () => {
+      // A token issued before Spaces has no space of its own. Letting its
+      // header choose would make every pre-existing token a cross-tenant one.
+      resolveTokenSpace.mockResolvedValue(undefined);
+
+      const service = createAccessService({ strapi: makeStrapi() });
+
+      const { scope } = await service.resolve(makeCtx('de', undefined, undefined, 'api-token'));
+
+      expect(scope).toEqual({ mode: 'space', id: 1, slug: 'fr' });
+    });
+  });
+
+  describe('an application user is not an administrator', () => {
+    it('does not inherit the memberships of the admin with the same id', async () => {
+      // Users & Permissions puts its own user on ctx.state.user, from a
+      // different table with its own ids.
+      const strapi = makeStrapi({ memberships: [{ space: GERMANY }] });
+      const service = createAccessService({ strapi });
+
+      const { scope } = await service.resolve(
+        makeCtx(undefined, { id: 10 }, '/api/articles', 'users-permissions')
+      );
+
+      expect(scope).toEqual({ mode: 'space', id: 1, slug: 'fr' });
+    });
+
+    it('does not inherit cross-space access either', async () => {
+      const strapi = makeStrapi({ accessAllPermission: true });
+      const service = createAccessService({ strapi });
+
+      const { scope } = await service.resolve(
+        makeCtx('*', { id: 1 }, '/api/articles', 'users-permissions')
+      );
+
+      expect(scope).not.toEqual({ mode: 'global' });
+    });
+  });
+
+  describe('acting on a particular space', () => {
+    it('lets a member administer their own space', async () => {
+      const strapi = makeStrapi({ memberships: [{ space: FRANCE }] });
+      const service = createAccessService({ strapi });
+
+      await expect(
+        service.assertCanActOn(makeCtx(undefined, { id: 10 }), FRANCE.id)
+      ).resolves.toBeUndefined();
+    });
+
+    it('refuses a space they do not belong to', async () => {
+      // Holding the permission says someone administers memberships, not which
+      // spaces are theirs to administer.
+      const strapi = makeStrapi({ memberships: [{ space: FRANCE }] });
+      const service = createAccessService({ strapi });
+
+      await expect(
+        service.assertCanActOn(makeCtx(undefined, { id: 10 }), GERMANY.id)
+      ).rejects.toThrow(/not a member/i);
+    });
+
+    it('lets someone with cross-space access administer any space', async () => {
+      const strapi = makeStrapi({ accessAllPermission: true });
+      const service = createAccessService({ strapi });
+
+      await expect(
+        service.assertCanActOn(makeCtx(undefined, { id: 1 }), GERMANY.id)
+      ).resolves.toBeUndefined();
     });
   });
 
@@ -296,6 +383,7 @@ describe('space access', () => {
       expect(ctx.state[SPACE_STATE_KEY]).toEqual({ mode: 'space', id: 1, slug: 'fr' });
 
       ctx.state.user = { id: 10 };
+      ctx.state.auth = { strategy: { name: 'admin' } };
       await service.applyToRequest(ctx);
 
       expect(ctx.state[SPACE_STATE_KEY]).toEqual({ mode: 'space', id: 2, slug: 'de' });

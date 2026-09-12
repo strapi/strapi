@@ -64,6 +64,37 @@ const addSpaceIndex = (strapi: Core.Strapi, contentType: Struct.Schema) => {
 };
 
 /**
+ * Makes a scoped model's unique constraints unique *per space*.
+ *
+ * A declared unique index is a statement about the whole project, and once a
+ * table belongs to tenants that is the wrong statement: media folders allocate
+ * their `pathId` from the highest one they can see, so the second space would
+ * pick a number the first already used and the insert would be refused. The
+ * same holds for anything else a scoped content type declares unique.
+ *
+ * Attribute-level `unique: true` needs nothing here — Strapi enforces that with
+ * a query rather than an index, and that query is scoped like any other, so it
+ * is already per-space.
+ */
+const scopeUniqueIndexes = (contentType: Struct.Schema) => {
+  const indexes = (contentType as { indexes?: Array<Record<string, unknown>> }).indexes;
+
+  if (!Array.isArray(indexes)) {
+    return;
+  }
+
+  for (const index of indexes) {
+    const columns = index.columns as string[] | undefined;
+
+    if (index.type !== 'unique' || !Array.isArray(columns) || columns.includes('space_id')) {
+      continue;
+    }
+
+    index.columns = ['space_id', ...columns];
+  }
+};
+
+/**
  * Gives every space-scoped content type its `space` column.
  *
  * Done during register, before the database builds its metadata, so schema sync
@@ -76,6 +107,7 @@ const addSpaceToContentTypes = (strapi: Core.Strapi) => {
     }
 
     contentType.attributes[SPACE_ATTRIBUTE] = spaceRelation() as never;
+    scopeUniqueIndexes(contentType);
     addSpaceIndex(strapi, contentType);
   }
 };

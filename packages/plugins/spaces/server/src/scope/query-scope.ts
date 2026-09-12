@@ -42,14 +42,22 @@ const refuse = (uid: string, reason?: string): never => {
   );
 };
 
+/** Statements that change rows rather than read them. */
+const WRITE_OPERATIONS = new Set(['update', 'delete']);
+
 /**
- * The `where` clause that limits a query to the rows the current scope may see.
+ * The `where` clause that limits a query to the rows the current scope may
+ * reach, for the thing it is trying to do.
  *
- * A row with no space is usually shared — data every space reads and only the
+ * A row with no space is shared — data every space reads and only the
  * all-spaces view writes — which is how reference content, and anything seeded
- * before Spaces was installed, stays reachable. For the models in
- * {@link PLATFORM_WHEN_UNASSIGNED_UIDS} it means the opposite: a record about
- * the platform itself, which no single space should see.
+ * before Spaces was installed, stays reachable. Reads see it; updates and
+ * deletes do not, or one tenant could quietly rewrite what every other tenant
+ * is reading.
+ *
+ * For the models in {@link PLATFORM_WHEN_UNASSIGNED_UIDS} an unassigned row
+ * means the opposite: a record about the platform itself, which no single space
+ * should see at all.
  */
 export const createSpacesQueryScope =
   (strapi: Core.Strapi) =>
@@ -67,13 +75,17 @@ export const createSpacesQueryScope =
       case 'global':
         return null;
 
-      case 'space':
+      case 'space': {
         // The column is addressed directly rather than through the `space`
         // attribute: naming an attribute would make the query builder add a
         // join to `strapi_spaces` for every read.
-        return PLATFORM_WHEN_UNASSIGNED_UIDS.has(ctx.uid)
+        const ownRowsOnly =
+          WRITE_OPERATIONS.has(ctx.operation) || PLATFORM_WHEN_UNASSIGNED_UIDS.has(ctx.uid);
+
+        return ownRowsOnly
           ? { [column]: scope.id }
           : { $or: [{ [column]: scope.id }, { [column]: { $null: true } }] };
+      }
 
       case 'unresolved':
         return refuse(ctx.uid, scope.reason);

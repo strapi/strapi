@@ -20,8 +20,8 @@ const SPACE_FIELD = 'space';
  * maps rows through a fixed set of fields; a column added to its model would be
  * dropped on the way in and on the way out.
  */
-export const registerWebhookIntegration = async (strapi: Core.Strapi) => {
-  const bindings = await createBindingIndex(strapi);
+export const registerWebhookIntegration = (strapi: Core.Strapi) => {
+  const bindings = createBindingIndex(strapi);
 
   stampEvents(strapi);
   bindNewWebhooks(strapi, bindings);
@@ -33,32 +33,71 @@ export const registerWebhookIntegration = async (strapi: Core.Strapi) => {
  * webhook id → space id, held in memory.
  *
  * Delivery happens on a queue with no request behind it and must not wait on a
- * database round trip per event, so the mapping is read once and kept current
- * by the writes below.
+ * database round trip per event, so the mapping is cached rather than read per
+ * delivery. Writes on this process update it immediately; a webhook created by
+ * *another* process is picked up when the cache next expires, which is what the
+ * short lifetime is for — until then it would look unbound, and an unbound
+ * webhook hears everything.
  */
 interface BindingIndex {
-  get(webhookId: string | number): number | undefined;
+  /** `undefined` means "not bound"; the boolean says whether that is certain. */
+  get(webhookId: string | number): Promise<number | undefined>;
   set(webhookId: string | number, spaceId: number): void;
   remove(webhookId: string | number): void;
 }
 
-const createBindingIndex = async (strapi: Core.Strapi): Promise<BindingIndex> => {
-  const rows = await runUnscoped(() =>
-    strapi.db.query(WEBHOOK_BINDING_UID).findMany({ populate: { space: true }, limit: -1 })
-  );
+const CACHE_TTL_MS = 30_000;
 
-  const index = new Map<string, number>();
+const createBindingIndex = (strapi: Core.Strapi): BindingIndex => {
+  let index = new Map<string, number>();
+  let loadedAt = 0;
+  let loading: Promise<void> | null = null;
 
-  for (const row of rows as Array<{ webhookId: string; space?: { id: number } }>) {
-    if (row.space?.id) {
-      index.set(String(row.webhookId), row.space.id);
+  const load = async () => {
+    const rows = await runUnscoped(() =>
+      strapi.db.query(WEBHOOK_BINDING_UID).findMany({ populate: { space: true }, limit: -1 })
+    );
+
+    const next = new Map<string, number>();
+
+    for (const row of rows as Array<{ webhookId: string; space?: { id: number } }>) {
+      if (row.space?.id) {
+        next.set(String(row.webhookId), row.space.id);
+      }
     }
-  }
+
+    index = next;
+    loadedAt = Date.now();
+  };
+
+  const fresh = async () => {
+    if (Date.now() - loadedAt < CACHE_TTL_MS) {
+      return;
+    }
+
+    // One reload at a time: a burst of events must not become a burst of
+    // identical queries.
+    loading =
+      loading ??
+      load().finally(() => {
+        loading = null;
+      });
+
+    await loading;
+  };
 
   return {
-    get: (webhookId) => index.get(String(webhookId)),
-    set: (webhookId, spaceId) => index.set(String(webhookId), spaceId),
-    remove: (webhookId) => index.delete(String(webhookId)),
+    async get(webhookId) {
+      await fresh();
+
+      return index.get(String(webhookId));
+    },
+    set(webhookId, spaceId) {
+      index.set(String(webhookId), spaceId);
+    },
+    remove(webhookId) {
+      index.delete(String(webhookId));
+    },
   };
 };
 
@@ -159,8 +198,10 @@ const scopeTheWebhookList = (strapi: Core.Strapi, bindings: BindingIndex) => {
       return webhooks;
     }
 
-    return webhooks.filter((webhook) => {
-      const boundTo = bindings.get(webhook.id);
+    const owners = await Promise.all(webhooks.map((webhook) => bindings.get(webhook.id)));
+
+    return webhooks.filter((_webhook, index) => {
+      const boundTo = owners[index];
 
       return boundTo === undefined || boundTo === scope.id;
     });
@@ -187,8 +228,8 @@ const filterDelivery = (strapi: Core.Strapi, bindings: BindingIndex) => {
 
   const originalRun = runner.run.bind(runner);
 
-  runner.run = (webhook, event, info = {}) => {
-    const boundTo = bindings.get(webhook?.id);
+  runner.run = async (webhook, event, info = {}) => {
+    const boundTo = await bindings.get(webhook?.id);
 
     // An unbound webhook is a platform webhook and hears about everything.
     if (boundTo === undefined) {
