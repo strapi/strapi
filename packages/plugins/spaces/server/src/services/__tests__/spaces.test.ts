@@ -16,8 +16,14 @@ const makeStrapi = (rows: Row[] = [], { maxSpaces = null }: { maxSpaces?: number
   const table = rows.map((row) => ({ ...row }));
   let nextId = table.length + 1;
 
+  const reads = { findMany: 0 };
+
   const query = {
-    findMany: async () => table,
+    async findMany() {
+      reads.findMany += 1;
+
+      return table;
+    },
     async create({ data }: { data: Record<string, unknown> }) {
       const row = { id: nextId, ...data } as Row;
       nextId += 1;
@@ -47,6 +53,7 @@ const makeStrapi = (rows: Row[] = [], { maxSpaces = null }: { maxSpaces?: number
 
   return {
     table,
+    reads,
     strapi: {
       requestContext: { get: () => undefined },
       eventHub: { emit: jest.fn() },
@@ -292,6 +299,115 @@ describe('the space registry', () => {
 
       expect(spaces.isContentTypeAvailable(limited, 'api::page.page')).toBe(true);
       expect(spaces.isContentTypeAvailable(limited, 'api::article.article')).toBe(false);
+    });
+  });
+});
+
+describe('reading the space registry', () => {
+  const GERMANY: Row = {
+    id: 2,
+    documentId: 'space-2',
+    name: 'Germany',
+    slug: 'germany',
+    status: 'active',
+    isDefault: false,
+  };
+
+  it('lists the spaces by name', async () => {
+    const { strapi } = makeStrapi([GERMANY, FRANCE]);
+    const spaces = createSpacesService({ strapi });
+
+    await expect(spaces.list()).resolves.toMatchObject([{ slug: 'france' }, { slug: 'germany' }]);
+  });
+
+  it('finds one by id', async () => {
+    const { strapi } = makeStrapi([FRANCE]);
+    const spaces = createSpacesService({ strapi });
+
+    await expect(spaces.findById(1)).resolves.toMatchObject({ slug: 'france' });
+  });
+
+  it('finds one by slug, which is what a header names', async () => {
+    const { strapi } = makeStrapi([FRANCE]);
+    const spaces = createSpacesService({ strapi });
+
+    await expect(spaces.findBySlug('france')).resolves.toMatchObject({ id: 1 });
+  });
+
+  it('counts them', async () => {
+    const { strapi } = makeStrapi([FRANCE, GERMANY]);
+    const spaces = createSpacesService({ strapi });
+
+    await expect(spaces.count()).resolves.toBe(2);
+  });
+
+  describe('the space callers land in', () => {
+    it('is the one marked default', async () => {
+      const { strapi } = makeStrapi([GERMANY, FRANCE]);
+      const spaces = createSpacesService({ strapi });
+
+      await expect(spaces.getDefault()).resolves.toMatchObject({ slug: 'france' });
+    });
+
+    it('is the first one when none is marked, so a project is never stranded', async () => {
+      const { strapi } = makeStrapi([{ ...GERMANY, isDefault: false }]);
+      const spaces = createSpacesService({ strapi });
+
+      await expect(spaces.getDefault()).resolves.toMatchObject({ slug: 'germany' });
+    });
+
+    it('is nothing at all when there are no spaces', async () => {
+      const { strapi } = makeStrapi();
+      const spaces = createSpacesService({ strapi });
+
+      await expect(spaces.getDefault()).resolves.toBeUndefined();
+    });
+  });
+
+  describe('the cache', () => {
+    it('spares the database on every header that has to be resolved', async () => {
+      const { strapi, reads } = makeStrapi([FRANCE]);
+      const spaces = createSpacesService({ strapi });
+
+      await spaces.findBySlug('france');
+      await spaces.findBySlug('france');
+      await spaces.list();
+
+      expect(reads.findMany).toBe(1);
+    });
+
+    it('is dropped when a space changes, so a rename is not served stale', async () => {
+      const { strapi, reads } = makeStrapi([FRANCE]);
+      const spaces = createSpacesService({ strapi });
+
+      await spaces.list();
+      await spaces.update(1, { name: 'La France' });
+      await spaces.list();
+
+      expect(reads.findMany).toBe(2);
+    });
+
+    it('is dropped when a space is archived, so it stops resolving', async () => {
+      const { strapi } = makeStrapi([FRANCE, GERMANY]);
+      const spaces = createSpacesService({ strapi });
+
+      await spaces.resolveHeaderValue('germany');
+      await spaces.update(2, { status: 'archived' });
+
+      await expect(spaces.resolveHeaderValue('germany')).resolves.toBeUndefined();
+    });
+
+    it('can be dropped on demand, for when another process wrote', async () => {
+      // It is process-local, so a sibling's write is only heard about this way
+      // or by waiting out the TTL.
+      const { strapi, reads } = makeStrapi([FRANCE]);
+      const spaces = createSpacesService({ strapi });
+
+      await spaces.list();
+      spaces.invalidate();
+      await spaces.list();
+
+      expect(reads.findMany).toBe(2);
     });
   });
 });
