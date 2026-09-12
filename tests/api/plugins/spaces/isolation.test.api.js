@@ -1,10 +1,5 @@
 'use strict';
 
-// Spaces is an Enterprise feature whose licence flag is rolled out separately
-// from the code. Set before anything loads Strapi, because the plugin decides
-// whether it is on when its module is first required.
-process.env.STRAPI_FEATURE_SPACES = 'true';
-
 const { createStrapiInstance, superAdmin } = require('api-tests/strapi');
 const { createTestBuilder } = require('api-tests/builder');
 const { createAuthRequest, createRequest } = require('api-tests/request');
@@ -60,12 +55,21 @@ const listArticles = async (agent) =>
   });
 
 describeOnCondition(edition === 'EE')('Spaces | content isolation', () => {
+  let previousFeatureFlag;
   let france;
   let germany;
   let frenchArticle;
   let germanArticle;
 
   beforeAll(async () => {
+    // Spaces is an Enterprise feature whose licence flag is rolled out
+    // separately from the code, so it is switched on for this suite. It has to
+    // be set before the instance loads the plugin, and unset afterwards: the
+    // API suite runs every file in one process, and leaving it on would turn
+    // tenancy on for every suite that follows.
+    previousFeatureFlag = process.env.STRAPI_FEATURE_SPACES;
+    process.env.STRAPI_FEATURE_SPACES = 'true';
+
     await builder.addContentType(article).build();
 
     strapi = await createStrapiInstance();
@@ -94,6 +98,12 @@ describeOnCondition(edition === 'EE')('Spaces | content isolation', () => {
   afterAll(async () => {
     await strapi.destroy();
     await builder.cleanup();
+
+    if (previousFeatureFlag === undefined) {
+      delete process.env.STRAPI_FEATURE_SPACES;
+    } else {
+      process.env.STRAPI_FEATURE_SPACES = previousFeatureFlag;
+    }
   });
 
   describe('setup', () => {
