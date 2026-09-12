@@ -73,6 +73,26 @@ interface StrapiAppPlugin {
   registerTrads?: (args: { locales: string[] }) => Promise<Translations>;
 }
 
+/**
+ * Slots in the admin's own chrome that a plugin can render into, as opposed to
+ * the per-plugin zones declared by the Content Manager and friends.
+ */
+/**
+ * A component rendered into one of the admin's own slots. Unlike a plugin's
+ * injection zones, these are not tied to a document, so nothing is forwarded to
+ * them.
+ */
+interface AdminInjectionZoneComponent {
+  Component: React.ComponentType;
+  name: string;
+}
+
+interface AdminInjectionZones {
+  navigation: {
+    top: AdminInjectionZoneComponent[];
+  };
+}
+
 interface InjectionZoneComponent {
   Component: React.ComponentType;
   name: string;
@@ -104,8 +124,15 @@ class StrapiApp {
   hooksDict: Record<string, ReturnType<typeof createHook>> = {};
   private warnedLegacyLocalePairs = new Set<string>();
 
-  admin = {
-    injectionZones: {},
+  admin: { injectionZones: { admin: AdminInjectionZones } } = {
+    injectionZones: {
+      admin: {
+        navigation: {
+          /** Above the main navigation's links, under the Strapi logo. */
+          top: [],
+        },
+      },
+    },
   };
 
   translations: StrapiApp['configurations']['translations'] = {};
@@ -319,7 +346,7 @@ class StrapiApp {
     moduleName: string,
     containerName: string,
     blockName: string
-  ): InjectionZoneComponent[] => {
+  ): AdminInjectionZoneComponent[] => {
     try {
       // @ts-expect-error – we have a catch block so if you don't pass it correctly we still return an array.
       return this.admin.injectionZones[moduleName][containerName][blockName] || [];
@@ -328,6 +355,35 @@ class StrapiApp {
 
       return [];
     }
+  };
+
+  /**
+   * Renders a component in one of the admin's own slots — the main navigation,
+   * for instance — the way `plugin.injectComponent` does for a plugin's.
+   *
+   * Use it for chrome that belongs to the application rather than to a page: a
+   * plugin that has to be present wherever the user is, not only inside its own
+   * screens.
+   */
+  injectAdminComponent = <TContainer extends keyof AdminInjectionZones>(
+    containerName: TContainer,
+    blockName: keyof AdminInjectionZones[TContainer],
+    component: AdminInjectionZoneComponent
+  ) => {
+    const container = this.admin.injectionZones.admin[containerName] as Record<
+      string,
+      AdminInjectionZoneComponent[]
+    >;
+
+    if (!container?.[blockName as string]) {
+      console.error(
+        `Cannot inject component: "${containerName}.${String(blockName)}" is not an admin injection zone.`
+      );
+
+      return;
+    }
+
+    container[blockName as string].push(component);
   };
 
   getPlugin = (pluginId: PluginConfig['id']) => this.plugins[pluginId];
@@ -603,4 +659,10 @@ class StrapiApp {
 }
 
 export { StrapiApp };
-export type { StrapiAppPlugin, StrapiAppConstructorArgs, InjectionZoneComponent };
+export type {
+  StrapiAppPlugin,
+  StrapiAppConstructorArgs,
+  InjectionZoneComponent,
+  AdminInjectionZones,
+  AdminInjectionZoneComponent,
+};

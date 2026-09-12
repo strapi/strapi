@@ -113,6 +113,8 @@ export interface QueryBuilder {
 
   processState(): void;
 
+  applyQueryScopes(): void;
+
   ensurePaginationOrderStability(): void;
 
   shouldUseDistinct(): boolean;
@@ -454,6 +456,8 @@ const createQueryBuilder = (
 
       state.orderBy = helpers.processOrderBy(state.orderBy, { qb: this, uid, db });
 
+      this.applyQueryScopes();
+
       if (!_.isNil(state.filters)) {
         if (_.isFunction(state.filters)) {
           const filters = state.filters({ qb: this, uid, meta, db });
@@ -476,6 +480,40 @@ const createQueryBuilder = (
       this.processSelect();
 
       this.state.processed = true;
+    },
+
+    /**
+     * ANDs the clauses of every registered query scope into this query.
+     *
+     * Runs for every statement that has a WHERE — selects, counts, aggregates,
+     * and conditional updates/deletes — and, because populating a relation
+     * builds its own query builder, for populated rows too. INSERTs are skipped:
+     * there are no existing rows to narrow.
+     *
+     * Clauses land in `state.where`, which is ANDed as a whole, so a caller
+     * cannot widen past a scope with an `$or` of their own.
+     */
+    applyQueryScopes() {
+      // `queryScopes` is absent when a caller builds a query against a partial
+      // database object rather than a real one, which tests do.
+      if (!db.queryScopes || db.queryScopes.isEmpty()) {
+        return;
+      }
+
+      if (state.type === 'insert' || state.type === 'truncate') {
+        return;
+      }
+
+      const clauses = db.queryScopes.resolve({
+        uid,
+        meta,
+        db,
+        operation: state.type,
+      });
+
+      for (const clause of clauses) {
+        state.where.push(clause);
+      }
     },
 
     /**

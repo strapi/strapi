@@ -24,8 +24,24 @@ interface Strategy {
   verify?: (auth: AuthenticationInfo, config: Core.RouteConfig['auth']) => Promise<any>;
 }
 
+/**
+ * Runs once per request, after the request's identity is settled and before the
+ * route's policies and controller — for authenticated requests and for
+ * `auth: false` routes alike, so a handler sees anonymous callers too.
+ *
+ * Handlers derive request-scoped state from that identity (which tenant the
+ * caller is acting in, for instance). Rejecting is done the Koa way: throw, or
+ * call `ctx.forbidden()`/`ctx.unauthorized()`.
+ */
+type AuthenticatedHandler = (ctx: ParameterizedContext) => Promise<void> | void;
+
 interface Authentication {
   register: (type: string, strategy: Strategy) => Authentication;
+  /**
+   * Registers a handler to run after authentication resolves. Returns a
+   * function that unregisters it.
+   */
+  onAuthenticated: (handler: AuthenticatedHandler) => () => void;
   authenticate: Core.MiddlewareHandler;
   verify: (auth: AuthenticationInfo, config?: Core.RouteConfig['auth']) => Promise<any>;
 }
@@ -44,6 +60,13 @@ const validStrategy = (strategy: Strategy) => {
 
 const createAuthentication = (): Authentication => {
   const strategies: Record<string, Strategy[]> = {};
+  const authenticatedHandlers: AuthenticatedHandler[] = [];
+
+  const runAuthenticatedHandlers = async (ctx: ParameterizedContext) => {
+    for (const handler of authenticatedHandlers) {
+      await handler(ctx);
+    }
+  };
 
   return {
     register(type, strategy) {
@@ -58,6 +81,18 @@ const createAuthentication = (): Authentication => {
       return this;
     },
 
+    onAuthenticated(handler) {
+      authenticatedHandlers.push(handler);
+
+      return () => {
+        const index = authenticatedHandlers.indexOf(handler);
+
+        if (index !== -1) {
+          authenticatedHandlers.splice(index, 1);
+        }
+      };
+    },
+
     async authenticate(ctx, next) {
       const route: Core.Route = ctx.state.route;
 
@@ -65,6 +100,8 @@ const createAuthentication = (): Authentication => {
       const config = route?.config?.auth;
 
       if (config === false) {
+        await runAuthenticatedHandlers(ctx);
+
         return next();
       }
 
@@ -112,6 +149,8 @@ const createAuthentication = (): Authentication => {
             credentials,
             ability,
           };
+
+          await runAuthenticatedHandlers(ctx);
 
           return next();
         }

@@ -11,6 +11,7 @@ import {
   deleteByRolesIds,
   findMany,
   findUserPermissions,
+  setUserRolesScope,
 } from './permission/queries';
 
 const actionProvider = createActionProvider();
@@ -31,6 +32,7 @@ export {
   deleteByRolesIds,
   findMany,
   findUserPermissions,
+  setUserRolesScope,
   // Utils
   createPermissionsManager,
   sectionsBuilder,
