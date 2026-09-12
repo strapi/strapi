@@ -35,10 +35,20 @@ const SettingsPage = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
 
-  const { allowedActions, isLoading: isLoadingRBAC } = useRBAC({
-    manage: PERMISSIONS.manage,
-    manageMembers: PERMISSIONS.manageMembers,
-  });
+  /**
+   * Asked separately, because `useRBAC` names what it found after the last
+   * segment of the action: `spaces.manage` and `members.manage` would both
+   * come back as `canManage`, and holding either would look like holding both.
+   */
+  const { allowedActions: spaceActions, isLoading: isLoadingSpaceRBAC } = useRBAC(
+    PERMISSIONS.manage
+  );
+  const { allowedActions: memberActions, isLoading: isLoadingMemberRBAC } = useRBAC(
+    PERMISSIONS.manageMembers
+  );
+
+  const canManage = spaceActions.canManage;
+  const canManageMembers = memberActions.canManage;
 
   const { data: spaces, isLoading, error } = useGetSpacesQuery();
   const [deleteSpace] = useDeleteSpaceMutation();
@@ -48,7 +58,7 @@ const SettingsPage = () => {
   const [managingMembers, setManagingMembers] = React.useState<Space | null>(null);
   const [pendingDeletion, setPendingDeletion] = React.useState<Space | null>(null);
 
-  if (isLoading || isLoadingRBAC) {
+  if (isLoading || isLoadingSpaceRBAC || isLoadingMemberRBAC) {
     return <Page.Loading />;
   }
 
@@ -103,7 +113,7 @@ const SettingsPage = () => {
             'Keep content, media and members apart. Each space holds its own entries; the schema is shared by all of them.',
         })}
         primaryAction={
-          allowedActions.canManage ? (
+          canManage ? (
             <Button startIcon={<Plus />} onClick={() => setEditing('new')}>
               {formatMessage({
                 id: getTranslation('settings.create'),
@@ -205,7 +215,7 @@ const SettingsPage = () => {
                   </Td>
                   <Td>
                     <Flex gap={1} justifyContent="flex-end">
-                      {allowedActions.canManageMembers ? (
+                      {canManageMembers ? (
                         <IconButton
                           label={formatMessage({
                             id: getTranslation('settings.members'),
@@ -218,7 +228,7 @@ const SettingsPage = () => {
                         </IconButton>
                       ) : null}
 
-                      {allowedActions.canManage ? (
+                      {canManage ? (
                         <>
                           <IconButton
                             label={formatMessage({
@@ -272,7 +282,7 @@ const SettingsPage = () => {
               defaultMessage: 'No space yet.',
             })}
             action={
-              allowedActions.canManage ? (
+              canManage ? (
                 <Button variant="secondary" startIcon={<Plus />} onClick={() => setEditing('new')}>
                   {formatMessage({
                     id: getTranslation('settings.create'),

@@ -31,7 +31,7 @@ describe('the permissions Spaces adds', () => {
       // out of it; an action nothing asks for would be dead weight in the UI.
       const registered = adminActions.map((action) => `plugin::${PLUGIN_ID}.${action.uid}`).sort();
 
-      expect(registered).toEqual([...Object.values(ACTIONS)].sort());
+      expect(registered).toEqual(Object.values(ACTIONS).sort());
     });
 
     it('each carry a name an administrator can read', () => {
