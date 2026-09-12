@@ -4,15 +4,23 @@ import { http, HttpResponse } from 'msw';
 
 import { MembersModal } from '../MembersModal';
 
-const ALICE = { id: 7, firstname: 'Alice', lastname: 'Martin', email: 'alice@example.com' };
-const BOB = { id: 8, firstname: undefined, lastname: undefined, email: 'bob@example.com' };
+/** A member is known by their name, or by their email when they have none. */
+interface User {
+  id: number;
+  firstname?: string;
+  lastname?: string;
+  email: string;
+}
+
+const ALICE: User = { id: 7, firstname: 'Alice', lastname: 'Martin', email: 'alice@example.com' };
+const BOB: User = { id: 8, email: 'bob@example.com' };
 
 const EDITOR = { id: 1, name: 'Editor' };
 const AUTHOR = { id: 2, name: 'Author' };
 
 interface Options {
-  members?: Array<{ id: number; user: typeof ALICE; roles: Array<{ id: number; name: string }> }>;
-  candidates?: Array<typeof ALICE>;
+  members?: Array<{ id: number; user: User; roles: Array<{ id: number; name: string }> }>;
+  candidates?: User[];
   roles?: Array<{ id: number; name: string }>;
   /** Makes the write endpoints answer with this message instead of succeeding. */
   refuseWith?: string;
@@ -68,7 +76,7 @@ const setup = ({
   return { writes, ...render(<MembersModal space={GERMANY} onClose={jest.fn()} />) };
 };
 
-const memberOf = (user: typeof ALICE, roles: Array<{ id: number; name: string }> = []) => ({
+const memberOf = (user: User, roles: Array<{ id: number; name: string }> = []) => ({
   id: user.id,
   user,
   roles,

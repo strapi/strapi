@@ -1,5 +1,6 @@
 import {
   ADMIN_REFRESH_LOCK,
+  addDefaultHeaders,
   attemptTokenRefresh,
   getFetchClient,
   refreshAccessToken,
@@ -895,5 +896,119 @@ describe('getFetchClient', () => {
 
       expect(callback).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('headers added to every request', () => {
+  /** The registry outlives a single client, so each test cleans up after itself. */
+  const registered: Array<() => void> = [];
+
+  const register = (provider: Parameters<typeof addDefaultHeaders>[0]) => {
+    registered.push(addDefaultHeaders(provider));
+  };
+
+  const respondOnce = () => {
+    (window.fetch as jest.Mock).mockImplementationOnce(() =>
+      Promise.resolve({ status: 200, ok: true, json: () => Promise.resolve({}) })
+    );
+  };
+
+  const headersOfLastCall = () => {
+    const [, options] = (window.fetch as jest.Mock).mock.calls.at(-1);
+
+    return options.headers as Headers;
+  };
+
+  beforeEach(() => {
+    window.fetch = jest.fn();
+  });
+
+  afterEach(() => {
+    registered.splice(0).forEach((unregister) => unregister());
+  });
+
+  it('are sent with the request', async () => {
+    register(() => ({ 'X-Tenant': 'france' }));
+    respondOnce();
+
+    await getFetchClient().get('/things');
+
+    expect(headersOfLastCall().get('X-Tenant')).toBe('france');
+  });
+
+  it("leave the client's own headers alone", async () => {
+    register(() => ({ 'X-Tenant': 'france' }));
+    respondOnce();
+
+    await getFetchClient().get('/things');
+
+    expect(headersOfLastCall().get('Accept')).toBe('application/json');
+  });
+
+  it('are asked for again on every request, because the value can change', async () => {
+    let tenant = 'france';
+    register(() => ({ 'X-Tenant': tenant }));
+
+    respondOnce();
+    const client = getFetchClient();
+    await client.get('/things');
+    expect(headersOfLastCall().get('X-Tenant')).toBe('france');
+
+    tenant = 'germany';
+    respondOnce();
+    await client.get('/things');
+
+    expect(headersOfLastCall().get('X-Tenant')).toBe('germany');
+  });
+
+  it('are left out when the provider has nothing to say', async () => {
+    register(() => ({ 'X-Tenant': undefined }));
+    respondOnce();
+
+    await getFetchClient().get('/things');
+
+    expect(headersOfLastCall().has('X-Tenant')).toBe(false);
+  });
+
+  it('give way to a header the caller set on that request', async () => {
+    register(() => ({ 'X-Tenant': 'france' }));
+    respondOnce();
+
+    await getFetchClient().get('/things', { headers: { 'X-Tenant': 'germany' } });
+
+    expect(headersOfLastCall().get('X-Tenant')).toBe('germany');
+  });
+
+  it('come from every registered provider', async () => {
+    register(() => ({ 'X-Tenant': 'france' }));
+    register(() => ({ 'X-Trace': 'abc' }));
+    respondOnce();
+
+    await getFetchClient().get('/things');
+
+    expect(headersOfLastCall().get('X-Tenant')).toBe('france');
+    expect(headersOfLastCall().get('X-Trace')).toBe('abc');
+  });
+
+  it('stop once the provider is unregistered', async () => {
+    const unregister = addDefaultHeaders(() => ({ 'X-Tenant': 'france' }));
+    unregister();
+    respondOnce();
+
+    await getFetchClient().get('/things');
+
+    expect(headersOfLastCall().has('X-Tenant')).toBe(false);
+  });
+
+  it('are sent on a request that does not want JSON back either', async () => {
+    // A download still belongs to a tenant.
+    register(() => ({ 'X-Tenant': 'france' }));
+    (window.fetch as jest.Mock).mockImplementationOnce(() =>
+      Promise.resolve({ status: 200, ok: true, blob: () => Promise.resolve(new Blob()) })
+    );
+
+    await getFetchClient().get('/export', { responseType: 'blob' });
+
+    expect(headersOfLastCall().get('X-Tenant')).toBe('france');
   });
 });

@@ -74,13 +74,9 @@ interface StrapiAppPlugin {
 }
 
 /**
- * Slots in the admin's own chrome that a plugin can render into, as opposed to
- * the per-plugin zones declared by the Content Manager and friends.
- */
-/**
- * A component rendered into one of the admin's own slots. Unlike a plugin's
- * injection zones, these are not tied to a document, so nothing is forwarded to
- * them.
+ * A component rendered into one of the admin's own chrome slots, as opposed to
+ * the per-plugin zones the Content Manager and friends declare. These are not
+ * tied to a document, so nothing is forwarded to them.
  */
 interface AdminInjectionZoneComponent {
   Component: React.ComponentType;
