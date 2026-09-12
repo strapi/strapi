@@ -12,8 +12,8 @@ import { registerWebhookIntegration } from './webhooks';
  * remainder — the places where work is done for a space by something that is
  * not a request, or where an identity carries a space of its own.
  */
-export const registerIntegrations = (strapi: Core.Strapi) => {
+export const registerIntegrations = async (strapi: Core.Strapi) => {
   registerApiTokenIntegration(strapi);
   registerBackgroundJobIntegration(strapi);
-  registerWebhookIntegration(strapi);
+  await registerWebhookIntegration(strapi);
 };

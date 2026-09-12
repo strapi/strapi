@@ -23,6 +23,12 @@ export default {
     },
     {
       method: 'GET',
+      path: '/ownership',
+      handler: 'ownership.find',
+      config: withPermission(ACTIONS.accessAll),
+    },
+    {
+      method: 'GET',
       path: '/spaces',
       handler: 'spaces.find',
       config: withPermission(ACTIONS.read),

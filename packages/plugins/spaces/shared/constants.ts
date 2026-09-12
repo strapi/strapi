@@ -4,6 +4,7 @@ export const PLUGIN_ID = 'spaces';
 export const SPACE_UID = 'plugin::spaces.space';
 export const MEMBERSHIP_UID = 'plugin::spaces.space-membership';
 export const TOKEN_BINDING_UID = 'plugin::spaces.token-space';
+export const WEBHOOK_BINDING_UID = 'plugin::spaces.webhook-space';
 
 /**
  * Attribute injected onto every space-scoped model. `useJoinTable: false` makes

@@ -3,6 +3,7 @@ import type { Core } from '@strapi/types';
 import type { QueryScopeContext } from '@strapi/database';
 
 import { SPACE_ATTRIBUTE, SPACE_UID } from '../../../shared/constants';
+import { PLATFORM_WHEN_UNASSIGNED_UIDS } from '../services/content-types';
 import { getScope } from './context';
 
 /**
@@ -44,9 +45,11 @@ const refuse = (uid: string, reason?: string): never => {
 /**
  * The `where` clause that limits a query to the rows the current scope may see.
  *
- * Rows with no space (`space_id IS NULL`) are shared: platform-wide data every
- * space reads, which only the cross-space view may write. That is how reference
- * content, and anything seeded before Spaces was installed, stays reachable.
+ * A row with no space is usually shared — data every space reads and only the
+ * all-spaces view writes — which is how reference content, and anything seeded
+ * before Spaces was installed, stays reachable. For the models in
+ * {@link PLATFORM_WHEN_UNASSIGNED_UIDS} it means the opposite: a record about
+ * the platform itself, which no single space should see.
  */
 export const createSpacesQueryScope =
   (strapi: Core.Strapi) =>
@@ -68,7 +71,9 @@ export const createSpacesQueryScope =
         // The column is addressed directly rather than through the `space`
         // attribute: naming an attribute would make the query builder add a
         // join to `strapi_spaces` for every read.
-        return { $or: [{ [column]: scope.id }, { [column]: { $null: true } }] };
+        return PLATFORM_WHEN_UNASSIGNED_UIDS.has(ctx.uid)
+          ? { [column]: scope.id }
+          : { $or: [{ [column]: scope.id }, { [column]: { $null: true } }] };
 
       case 'unresolved':
         return refuse(ctx.uid, scope.reason);

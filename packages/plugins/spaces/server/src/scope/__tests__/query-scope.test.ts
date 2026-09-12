@@ -134,6 +134,33 @@ describe('spaces query scope', () => {
     });
   });
 
+  describe('rows that belong to no space', () => {
+    it('are shared: every space reads them', () => {
+      const clause = runInSpace({ id: 7, slug: 'fr' }, () => ask(makeStrapi())) as any;
+
+      expect(clause.$or).toContainEqual({ space_id: { $null: true } });
+    });
+
+    it('are platform-only for records about the platform itself', () => {
+      const auditMeta = {
+        uid: 'admin::audit-log',
+        attributes: {
+          space: {
+            type: 'relation',
+            relation: 'manyToOne',
+            target: SPACE_UID,
+            joinColumn: { name: 'space_id', referencedColumn: 'id' },
+          },
+        },
+      } as any;
+
+      // A tenant must not be shown who signed in or who changed a role.
+      const clause = runInSpace({ id: 7, slug: 'fr' }, () => ask(makeStrapi(), auditMeta));
+
+      expect(clause).toEqual({ space_id: 7 });
+    });
+  });
+
   describe('where the scope comes from', () => {
     it('reads the space the request settled on', () => {
       const strapi = makeStrapi({

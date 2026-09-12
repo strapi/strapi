@@ -46,5 +46,7 @@
   "members.user": "User",
   "members.actions": "Actions",
   "members.remove": "Remove from this space",
-  "members.done": "Done"
+  "members.done": "Done",
+  "list.column": "Space",
+  "list.shared": "Shared"
 }

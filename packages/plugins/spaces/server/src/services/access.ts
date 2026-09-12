@@ -51,6 +51,12 @@ const isScopeFree = (path: string) => SCOPE_FREE_PATHS.some((prefix) => path.sta
 export interface Resolution {
   scope: SpaceScope;
   /**
+   * Who the scope was worked out for. A route that authenticates itself settles
+   * its identity after this has already run for an anonymous caller, so the
+   * answer has to be recomputed rather than reused.
+   */
+  resolvedFor: number | null;
+  /**
    * Set when the caller *named* a space they may not enter. That is a
    * deliberate, answerable request, so it is refused outright — unlike simply
    * having no space, which leaves the scope unresolved and only bites if
@@ -110,9 +116,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * the ability is being built and again once authentication has finished.
      */
     async resolve(ctx: Context, asUser?: AdminUserLike): Promise<Resolution> {
+      const caller = asUser ?? (ctx.state?.user as AdminUserLike | undefined);
+      const callerId = caller?.id ?? null;
       const cached = ctx.state?.[RESOLUTION_STATE_KEY] as Resolution | undefined;
 
-      if (cached) {
+      if (cached && cached.resolvedFor === callerId) {
         return cached;
       }
 
@@ -126,6 +134,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async computeResolution(ctx: Context, asUser?: AdminUserLike): Promise<Resolution> {
+      const resolution = await service.deriveResolution(ctx, asUser);
+      const caller = asUser ?? (ctx.state?.user as AdminUserLike | undefined);
+
+      return { ...resolution, resolvedFor: caller?.id ?? null };
+    },
+
+    async deriveResolution(
+      ctx: Context,
+      asUser?: AdminUserLike
+    ): Promise<Omit<Resolution, 'resolvedFor'>> {
       // A token carries its own space, decided when it was issued. It wins over
       // anything the request asks for, because the request is the token.
       const bound = await resolveTokenSpace(strapi, ctx);
@@ -184,7 +202,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       return service.resolveDefaultFor(user, global);
     },
 
-    async resolveForAnonymous(requested?: string): Promise<Resolution> {
+    async resolveForAnonymous(requested?: string): Promise<Omit<Resolution, 'resolvedFor'>> {
       if (requested && requested !== GLOBAL_SPACE_HEADER_VALUE) {
         const space = await spacesService().resolveHeaderValue(requested);
 
@@ -206,7 +224,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     /** The space a caller lands in when they did not name one. */
-    async resolveDefaultFor(user: AdminUserLike, global: boolean): Promise<Resolution> {
+    async resolveDefaultFor(
+      user: AdminUserLike,
+      global: boolean
+    ): Promise<Omit<Resolution, 'resolvedFor'>> {
       const memberships = await membershipService().listForUser(user.id);
 
       if (memberships.length > 0) {
@@ -242,7 +263,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * requests alike, so that no request reaches a controller without a space.
      */
     async applyToRequest(ctx: Context): Promise<void> {
-      if (getRequestScope(ctx)) {
+      const caller = (ctx.state?.user as AdminUserLike | undefined)?.id ?? null;
+      const settled = ctx.state?.[RESOLUTION_STATE_KEY] as Resolution | undefined;
+
+      // Already settled for this caller. A second run with a new identity —
+      // a route that authenticates itself — falls through and redoes the work.
+      if (getRequestScope(ctx) && settled?.resolvedFor === caller) {
         return;
       }
 

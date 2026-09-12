@@ -11,6 +11,7 @@ import {
 import { useIntl } from 'react-intl';
 
 import { ALL_SPACES } from '../constants';
+import { clearDocumentSpaceCache } from '../hooks/useDocumentSpace';
 import { getSelectedSpace, setSelectedSpace } from '../selectedSpace';
 import { useGetMySpacesQuery } from '../services/api';
 import { getTranslation } from '../utils/getTranslation';
@@ -39,6 +40,7 @@ const SpaceSwitcher = () => {
       return;
     }
 
+    clearDocumentSpaceCache();
     setSelectedSpace(slug);
     window.location.reload();
   };

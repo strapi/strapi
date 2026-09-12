@@ -44,6 +44,10 @@ export const createPostHandler = (deps: McpHandlerDependencies): Core.Middleware
       ctx.state.user = authResult.user;
       ctx.state.auditSource = 'mcp';
 
+      // The route authenticates itself, so anything deriving request state from
+      // the caller's identity has so far only seen an anonymous request.
+      await strapi.get('auth').runAuthenticated(ctx);
+
       const { mcpServer } = createServerWithRegistries({
         strapi,
         definitions: capabilityDefinitions,

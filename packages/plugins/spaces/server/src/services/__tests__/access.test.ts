@@ -272,15 +272,33 @@ describe('space access', () => {
       expect(ctx.state[SPACE_STATE_KEY]).toMatchObject({ mode: 'unresolved' });
     });
 
-    it('does not overwrite a space something upstream already settled', async () => {
+    it('settles once for a caller and does not redo the work', async () => {
       const strapi = makeStrapi({ memberships: [{ space: FRANCE }] });
+      const listForUser = jest.spyOn(strapi.service('plugin::spaces.membership'), 'listForUser');
       const service = createAccessService({ strapi });
       const ctx = makeCtx(undefined, { id: 10 });
-      ctx.state[SPACE_STATE_KEY] = { mode: 'space', id: 99, slug: 'preset' };
 
       await service.applyToRequest(ctx);
+      await service.applyToRequest(ctx);
 
-      expect(ctx.state[SPACE_STATE_KEY]).toEqual({ mode: 'space', id: 99, slug: 'preset' });
+      expect(listForUser).toHaveBeenCalledTimes(1);
+    });
+
+    it('settles again when the caller turns out to be someone else', async () => {
+      // A route that authenticates itself — the MCP endpoint does — runs the
+      // handlers once as an anonymous caller and again once it knows who is
+      // asking. The second answer has to replace the first.
+      const strapi = makeStrapi({ memberships: [{ space: GERMANY }] });
+      const service = createAccessService({ strapi });
+      const ctx = makeCtx(undefined);
+
+      await service.applyToRequest(ctx);
+      expect(ctx.state[SPACE_STATE_KEY]).toEqual({ mode: 'space', id: 1, slug: 'fr' });
+
+      ctx.state.user = { id: 10 };
+      await service.applyToRequest(ctx);
+
+      expect(ctx.state[SPACE_STATE_KEY]).toEqual({ mode: 'space', id: 2, slug: 'de' });
     });
   });
 });

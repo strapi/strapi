@@ -14,7 +14,23 @@ export const ALWAYS_SCOPED_UIDS = [
   'plugin::content-releases.release-action',
   'plugin::review-workflows.workflow',
   'plugin::review-workflows.workflow-stage',
+  'admin::audit-log',
 ] as const;
+
+/**
+ * Models where a row with no space is the platform's own record rather than
+ * something shared with every space.
+ *
+ * For content, an unassigned row is shared: that is how reference data, and
+ * anything seeded before Spaces was switched on, stays reachable from every
+ * space. For a record *about* the platform — who signed in, who changed a role
+ * — the same rule would hand every tenant a view of everyone else's activity,
+ * so unassigned means "visible only across spaces" instead.
+ */
+export const PLATFORM_WHEN_UNASSIGNED_UIDS = new Set<string>([
+  'admin::audit-log',
+  'plugin::content-manager.history-version',
+]);
 
 /**
  * Models that must never carry a space, whatever else says otherwise. These are

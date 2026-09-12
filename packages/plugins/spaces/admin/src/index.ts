@@ -2,6 +2,7 @@ import { addDefaultHeaders } from '@strapi/admin/strapi-admin';
 
 import { SpaceSwitcher } from './components/SpaceSwitcher';
 import { PERMISSIONS } from './constants';
+import { addSpaceColumnHook } from './contentManagerHooks/listView';
 import { pluginId } from './pluginId';
 import { getSpaceHeaders } from './selectedSpace';
 import { spacesApi } from './services/api';
@@ -33,6 +34,8 @@ export default {
       name: 'spaces-switcher',
       Component: SpaceSwitcher,
     });
+
+    app.registerHook('Admin/CM/pages/ListView/inject-column-in-table', addSpaceColumnHook);
 
     app.addSettingsLink('global', {
       id: 'spaces',

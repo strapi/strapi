@@ -32,6 +32,12 @@ interface Strategy {
  * Handlers derive request-scoped state from that identity (which tenant the
  * caller is acting in, for instance). Rejecting is done the Koa way: throw, or
  * call `ctx.forbidden()`/`ctx.unauthorized()`.
+ *
+ * A route that authenticates on its own — the MCP endpoint does, because its
+ * protocol carries the credential — can call `runAuthenticated` once it knows
+ * who the caller is, and handlers will run again with that identity. So a
+ * handler must be able to run more than once per request, and reach the same
+ * conclusion given the same state.
  */
 type AuthenticatedHandler = (ctx: ParameterizedContext) => Promise<void> | void;
 
@@ -42,6 +48,11 @@ interface Authentication {
    * function that unregisters it.
    */
   onAuthenticated: (handler: AuthenticatedHandler) => () => void;
+  /**
+   * Runs the registered handlers for a request that established its identity
+   * itself, rather than through a strategy.
+   */
+  runAuthenticated: (ctx: ParameterizedContext) => Promise<void>;
   authenticate: Core.MiddlewareHandler;
   verify: (auth: AuthenticationInfo, config?: Core.RouteConfig['auth']) => Promise<any>;
 }
@@ -80,6 +91,8 @@ const createAuthentication = (): Authentication => {
 
       return this;
     },
+
+    runAuthenticated: runAuthenticatedHandlers,
 
     onAuthenticated(handler) {
       authenticatedHandlers.push(handler);
