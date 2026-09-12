@@ -25,6 +25,15 @@ import { useFormModalNavigation } from '../FormModalNavigation/useFormModalNavig
 
 import { DataManagerContext, type DataManagerContextValue } from './DataManagerContext';
 import { actions, initialState, type State } from './reducer';
+import {
+  RenameMigrationModal,
+  applyRenameDecisions,
+  collectPendingRenames,
+  getAttributeRenameDecision,
+  shouldPromptForRenamesBeforeSave,
+  type AttributeRenameMigrationMode,
+  type PendingRename,
+} from './RenameMigrationModal';
 import { useServerRestartWatcher } from './useServerRestartWatcher';
 import { sortContentType, stateToRequestData } from './utils/cleanData';
 import { retrieveComponentsThatHaveComponents } from './utils/retrieveComponentsThatHaveComponents';
@@ -43,6 +52,11 @@ type SchemaResponse = {
   data: {
     components: Components;
     contentTypes: ContentTypes;
+    settings?: {
+      renameMigrations?: {
+        attributes?: AttributeRenameMigrationMode;
+      };
+    };
   };
 };
 
@@ -64,6 +78,8 @@ const CONTENT_MANAGER_SCHEMA_CACHE_TAGS = [
   'ContentTypesConfiguration',
   'ContentTypeSettings',
   'ComponentConfiguration',
+  // Existing cached documents still use the pre-change field names.
+  'Document',
 ] as const;
 
 const invalidateContentManagerSchemaCaches = () =>
@@ -100,6 +116,15 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const [isSaving, setIsSaving] = React.useState(false);
   const previousLocationRef = React.useRef<string | null>(null);
 
+  const renameMigrationModeRef = React.useRef<AttributeRenameMigrationMode>('prompt-before-save');
+
+  // When `modal` mode prompts the user, we hold the pending renames plus the
+  // promise resolver here so `saveSchema` can await the decision.
+  const [renameModal, setRenameModal] = React.useState<{
+    renames: PendingRename[];
+    resolve: (_acceptedKeys: Set<string> | null) => void;
+  } | null>(null);
+
   const isModified = React.useMemo(() => {
     return !(isEqual(components, initialComponents) && isEqual(contentTypes, initialContentTypes));
   }, [components, contentTypes, initialComponents, initialContentTypes]);
@@ -117,7 +142,11 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
         fetchClient.get<ReservedNamesResponse>(`/content-type-builder/reserved-names`),
       ]);
 
-      const { components, contentTypes } = schemaResponse.data.data;
+      const { components, contentTypes, settings } = schemaResponse.data.data;
+
+      if (settings?.renameMigrations?.attributes) {
+        renameMigrationModeRef.current = settings.renameMigrations.attributes;
+      }
 
       dispatch(
         actions.init({
@@ -198,6 +227,15 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     await refetchPermissions();
   };
 
+  const requestRenameDecision = async (renames: PendingRename[]) => {
+    const acceptedKeys = await new Promise<Set<string> | null>((resolve) => {
+      setRenameModal({ renames, resolve });
+    });
+    setRenameModal(null);
+
+    return acceptedKeys;
+  };
+
   const saveSchema = async () => {
     setIsSaving(true);
 
@@ -219,6 +257,22 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       components: state.current.components,
       contentTypes: mutatedCTs,
     });
+
+    if (shouldPromptForRenamesBeforeSave(renameMigrationModeRef.current)) {
+      const pendingRenames = collectPendingRenames(requestData);
+
+      if (pendingRenames.length > 0) {
+        const acceptedKeys = await requestRenameDecision(pendingRenames);
+
+        // The user cancelled the whole save — return to editing untouched.
+        if (acceptedKeys === null) {
+          setIsSaving(false);
+          return;
+        }
+
+        applyRenameDecisions(requestData, acceptedKeys);
+      }
+    }
 
     // Track that the save button was clicked (includes session ID via useCTBTracking)
     trackUsage('willUpdateCTBSchema', {
@@ -346,6 +400,34 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
         })
       );
     },
+    async confirmAttributeRenameMigration({ uid, oldName, newName }) {
+      if (oldName === newName) {
+        return true;
+      }
+
+      const decision = getAttributeRenameDecision(renameMigrationModeRef.current);
+      if (decision !== 'prompt') {
+        return decision;
+      }
+
+      const schema =
+        contentTypes[uid as Internal.UID.ContentType] ?? components[uid as Internal.UID.Component];
+      const acceptedKeys = await requestRenameDecision([
+        {
+          key: `${uid}:edit`,
+          uid,
+          typeName: schema?.info.displayName ?? uid,
+          oldName,
+          newName,
+        },
+      ]);
+
+      if (acceptedKeys === null) {
+        return null;
+      }
+
+      return acceptedKeys.has(`${uid}:edit`);
+    },
     addCreatedComponentToDynamicZone(payload) {
       dispatch(actions.addCreatedComponentToDynamicZone(payload));
     },
@@ -452,7 +534,18 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     },
   };
 
-  return <DataManagerContext.Provider value={context}>{children}</DataManagerContext.Provider>;
+  return (
+    <DataManagerContext.Provider value={context}>
+      {children}
+      {renameModal && (
+        <RenameMigrationModal
+          renames={renameModal.renames}
+          onConfirm={(acceptedKeys) => renameModal.resolve(acceptedKeys)}
+          onCancel={() => renameModal.resolve(null)}
+        />
+      )}
+    </DataManagerContext.Provider>
+  );
 };
 
 // eslint-disable-next-line import/no-default-export

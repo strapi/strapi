@@ -9337,6 +9337,8 @@ __metadata:
     ajv: "npm:8.20.0"
     date-fns: "npm:2.30.0"
     debug: "npm:4.3.4"
+    esbuild: "npm:0.21.5"
+    esbuild-register: "npm:3.6.0"
     eslint-config-custom: "npm:5.53.0"
     fs-extra: "npm:11.3.4"
     jest: "npm:29.6.0"
@@ -16604,7 +16606,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild@npm:^0.21.3":
+"esbuild@npm:0.21.5, esbuild@npm:^0.21.3":
   version: 0.21.5
   resolution: "esbuild@npm:0.21.5"
   dependencies:

@@ -7,9 +7,11 @@ import { command as blockAdminUser } from './admin/block-user';
 import { command as listAdminUsers } from './admin/list-users';
 import { command as resetAdminUserPassword } from './admin/reset-user-password';
 import { command as listComponents } from './components/list';
+import { command as renameComponent } from './components/rename';
 import { command as configurationDump } from './configuration/dump';
 import { command as configurationRestore } from './configuration/restore';
 import { command as listContentTypes } from './content-types/list';
+import { command as renameField } from './content-types/rename-field';
 import { command as listControllers } from './controllers/list';
 import { command as listHooks } from './hooks/list';
 import { command as listMiddlewares } from './middlewares/list';
@@ -42,10 +44,12 @@ export const commands: StrapiCommand[] = [
   listAdminUsers,
   resetAdminUserPassword,
   listComponents,
+  renameComponent,
   configurationDump,
   configurationRestore,
   consoleCommand,
   listContentTypes,
+  renameField,
   listControllers,
   generateCommand,
   listHooks,

@@ -50,6 +50,8 @@
     "ajv": "8.20.0",
     "date-fns": "2.30.0",
     "debug": "4.3.4",
+    "esbuild": "0.21.5",
+    "esbuild-register": "3.6.0",
     "fs-extra": "11.3.4",
     "knex": "3.0.1",
     "lodash": "4.18.1",
