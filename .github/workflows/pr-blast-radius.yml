@@ -1,0 +1,56 @@
+name: PR blast radius (advisory)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, closed]
+
+concurrency:
+  group: pr-blast-radius-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  classify:
+    name: PR blast radius (advisory)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+      - name: Classify pull request
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          RESULT_PATH: ${{ runner.temp }}/pr-blast-radius.json
+        run: |
+          set -euo pipefail
+          yarn tsx scripts/pr-blast-radius/index.ts "$PR_NUMBER" --json > "$RESULT_PATH"
+      - name: Validate classifier JSON
+        shell: bash
+        env:
+          RESULT_PATH: ${{ runner.temp }}/pr-blast-radius.json
+        run: |
+          node <<'NODE'
+          const { readFileSync } = require('node:fs');
+          const output = readFileSync(process.env.RESULT_PATH, 'utf8');
+          if (output.trim().length === 0) {
+            throw new Error('Classifier produced an empty JSON result.');
+          }
+          JSON.parse(output);
+          NODE
+      - name: Publish advisory job summary
+        shell: bash
+        env:
+          RESULT_PATH: ${{ runner.temp }}/pr-blast-radius.json
+        run: |
+          set -euo pipefail
+          yarn tsx scripts/pr-blast-radius/summary.ts "$RESULT_PATH" | tee -a "$GITHUB_STEP_SUMMARY"
+          test -s "$GITHUB_STEP_SUMMARY"
