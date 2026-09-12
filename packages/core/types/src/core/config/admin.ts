@@ -31,6 +31,50 @@ export interface AuthProvider {
   [key: string]: unknown;
 }
 
+export interface MfaWindow {
+  back: number;
+  forward: number;
+}
+
+/**
+ * Passkeys WebAuthn relying-party overrides. Both optional: the server derives them from
+ * `admin.absoluteUrl`. `rpId` is **required** for any deployment whose `admin.absoluteUrl`
+ * resolves to an IP literal -- the default production shape -- because an IP literal is not a
+ * valid relying-party id. `origins` exists for one deployment served on several hostnames.
+ */
+export interface MfaWebauthn {
+  rpId?: string;
+  origins?: string[];
+}
+
+export interface Mfa {
+  enabled?: boolean;
+  digits?: number;
+  step?: number;
+  window?: MfaWindow;
+  challengeTtl?: number;
+  maxChallengeAttempts?: number;
+  maxUserAttempts?: number;
+  userAttemptWindow?: number;
+  recoveryCodeCount?: number;
+  issuer?: string;
+  webauthn?: MfaWebauthn;
+  /**
+   * Template for the best-effort "your two-factor settings changed" notification email. Same
+   * shape `ForgotPassword.emailTemplate` should be -- a subject/text/html triple -- not the bare
+   * `string` that field is actually typed as (a pre-existing inaccuracy, left alone here).
+   * Optional because the built-in template (`config/email-templates/mfa-changed.ts`) is applied
+   * as a call-site default (`strapi.config.get('admin.auth.mfa.emailTemplate', mfaChangedTemplate)`),
+   * not merged into `MFA_DEFAULTS` -- this field only needs to exist so an operator's own
+   * `config/admin.ts` can override it without a type error.
+   */
+  emailTemplate?: {
+    subject: string;
+    text: string;
+    html: string;
+  };
+}
+
 export interface Auth {
   secret: string;
   domain?: string;
@@ -42,6 +86,7 @@ export interface Auth {
     expiresIn?: string | number;
     [key: string]: unknown;
   };
+  mfa?: Mfa;
 }
 
 export interface TransferToken {

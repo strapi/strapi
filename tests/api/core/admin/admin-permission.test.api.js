@@ -506,6 +506,18 @@ describe('Role CRUD End to End', () => {
                 "subCategory": "roles",
               },
               {
+                "action": "admin::security-settings.read",
+                "category": "security",
+                "displayName": "Read the security settings",
+                "subCategory": "general",
+              },
+              {
+                "action": "admin::security-settings.update",
+                "category": "security",
+                "displayName": "Update the security settings",
+                "subCategory": "general",
+              },
+              {
                 "action": "admin::transfer.tokens.access",
                 "category": "transfer tokens",
                 "displayName": "Access the transfer tokens settings page",
@@ -1084,6 +1096,18 @@ describe('Role CRUD End to End', () => {
                 "category": "users and roles",
                 "displayName": "Update",
                 "subCategory": "roles",
+              },
+              {
+                "action": "admin::security-settings.read",
+                "category": "security",
+                "displayName": "Read the security settings",
+                "subCategory": "general",
+              },
+              {
+                "action": "admin::security-settings.update",
+                "category": "security",
+                "displayName": "Update the security settings",
+                "subCategory": "general",
               },
               {
                 "action": "admin::transfer.tokens.access",

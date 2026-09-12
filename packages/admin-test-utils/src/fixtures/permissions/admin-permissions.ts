@@ -1313,6 +1313,22 @@ const admin = [
     conditions: [],
   },
   {
+    id: 378,
+    action: 'admin::security-settings.read',
+    actionParameters: {},
+    subject: null,
+    properties: {},
+    conditions: [],
+  },
+  {
+    id: 379,
+    action: 'admin::security-settings.update',
+    actionParameters: {},
+    subject: null,
+    properties: {},
+    conditions: [],
+  },
+  {
     id: 323,
     action: 'plugin::content-manager.explorer.create',
     actionParameters: {},

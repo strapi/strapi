@@ -111,12 +111,16 @@ describe('User Controller', () => {
     test('Find a user correctly', async () => {
       const findOne = jest.fn(() => user);
       const sanitizeUser = jest.fn((user) => user);
-      const ctx = createContext({ params: { id: user.id } }) as any;
+      const ctx = createContext(
+        { params: { id: user.id } },
+        { state: { userAbility: { can: () => false } } }
+      ) as any;
 
       global.strapi = {
         admin: {
           services: {
             user: { findOne, sanitizeUser },
+            mfa: { isEnabled: () => false },
           },
         },
       } as any;
@@ -132,12 +136,16 @@ describe('User Controller', () => {
       const fakeId = 42;
       const notFound = jest.fn();
       const findOne = jest.fn(() => Promise.resolve(null));
-      const ctx = createContext({ params: { id: fakeId } }, { notFound }) as any;
+      const ctx = createContext(
+        { params: { id: fakeId } },
+        { notFound, state: { userAbility: { can: () => false } } }
+      ) as any;
 
       global.strapi = {
         admin: {
           services: {
             user: { findOne },
+            mfa: { isEnabled: () => false },
           },
         },
       } as any;
@@ -146,6 +154,97 @@ describe('User Controller', () => {
 
       expect(findOne).toHaveBeenCalledWith(fakeId);
       expect(notFound).toHaveBeenCalledWith('User does not exist');
+    });
+
+    test('appends the MFA state for a caller who may update users', async () => {
+      const user = {
+        id: 1,
+        email: 'a@b.c',
+        mfaEnabledAt: null,
+        mfaGraceUntil: '2026-09-11T10:00:00.000Z',
+        mfaLockedAt: null,
+        mfaSecret: 'enc:x',
+        mfaPendingSecret: 'enc:y',
+      };
+      const findOne = jest.fn(() => Promise.resolve(user));
+      const sanitizeUser = jest.fn(() => ({ id: 1, email: 'a@b.c' }));
+      global.strapi = {
+        admin: {
+          services: {
+            user: { findOne, sanitizeUser },
+            mfa: { isEnabled: () => true },
+          },
+        },
+      } as any;
+      const ctx = createContext(
+        {},
+        { params: { id: 1 }, state: { userAbility: { can: jest.fn(() => true) } } }
+      ) as any;
+
+      await userController.findOne(ctx);
+
+      expect(findOne).toHaveBeenCalledWith(1);
+      expect(ctx.state.userAbility.can).toHaveBeenCalledWith('admin::users.update');
+      expect(ctx.body).toEqual({
+        data: {
+          id: 1,
+          email: 'a@b.c',
+          mfaEnabledAt: null,
+          mfaGraceUntil: '2026-09-11T10:00:00.000Z',
+          mfaLockedAt: null,
+        },
+      });
+    });
+
+    test('appends nothing for a read-only caller', async () => {
+      const user = { id: 1, email: 'a@b.c', mfaGraceUntil: '2026-09-11T10:00:00.000Z' };
+      const findOne = jest.fn(() => Promise.resolve(user));
+      const sanitizeUser = jest.fn(() => ({ id: 1, email: 'a@b.c' }));
+      global.strapi = {
+        admin: {
+          services: {
+            user: { findOne, sanitizeUser },
+            mfa: { isEnabled: () => true },
+          },
+        },
+      } as any;
+      const ctx = createContext(
+        {},
+        { params: { id: 1 }, state: { userAbility: { can: jest.fn(() => false) } } }
+      ) as any;
+
+      await userController.findOne(ctx);
+
+      expect(findOne).toHaveBeenCalledWith(1);
+      expect(ctx.body).toEqual({ data: { id: 1, email: 'a@b.c' } });
+    });
+
+    test('flag off: appends nothing even for a caller who may update users', async () => {
+      const user = {
+        id: 1,
+        email: 'a@b.c',
+        mfaEnabledAt: null,
+        mfaGraceUntil: '2026-09-11T10:00:00.000Z',
+        mfaLockedAt: null,
+      };
+      const findOne = jest.fn(() => Promise.resolve(user));
+      const sanitizeUser = jest.fn(() => ({ id: 1, email: 'a@b.c' }));
+      global.strapi = {
+        admin: {
+          services: {
+            user: { findOne, sanitizeUser },
+            mfa: { isEnabled: () => false },
+          },
+        },
+      } as any;
+      const ctx = createContext(
+        {},
+        { params: { id: 1 }, state: { userAbility: { can: () => true } } }
+      ) as any;
+
+      await userController.findOne(ctx);
+
+      expect(ctx.body).toEqual({ data: { id: 1, email: 'a@b.c' } });
     });
   });
 

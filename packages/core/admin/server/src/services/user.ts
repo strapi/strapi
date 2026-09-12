@@ -4,6 +4,7 @@ import { defaults } from 'lodash/fp';
 import { arrays, errors } from '@strapi/utils';
 import type { Data } from '@strapi/types';
 import { createUser, hasSuperAdminRole } from '../domain/user';
+import constants, { PRIVATE_MFA_FIELDS } from './constants';
 import type {
   AdminUser,
   AdminRole,
@@ -15,7 +16,6 @@ import type {
 } from '../../../shared/contracts/shared';
 import { password as passwordValidator } from '../validation/common-validators';
 import { getService } from '../utils';
-import constants from './constants';
 
 const { SUPER_ADMIN_CODE } = constants;
 
@@ -40,6 +40,10 @@ const sanitizeUser = (user: AdminUser): SanitizedAdminUser => {
       'resetPasswordTokenExpiresAt',
       'registrationToken',
       'roles',
+      // Private two-factor columns, from the one list `services/constants.ts` holds. Keeping them
+      // out of every sanitized payload covers login responses, `/users/me`, user listings and the
+      // `admin.auth.*` event payloads EE audit logs persist.
+      ...PRIVATE_MFA_FIELDS,
     ]),
     roles: user.roles && user.roles.map(sanitizeUserRoles),
   };
@@ -359,6 +363,12 @@ const deleteById = async (id: Data.ID): Promise<AdminUser | null> => {
     }
   }
 
+  // Unconditional: the mfa tables exist whether or not `unstableAdminMfa` is on, so a user deleted
+  // while it's off must not leave recovery-code hashes, an encrypted secret or the device names
+  // on their security notices behind. Runs after the guard above and right before the row
+  // delete, so a refused deletion never touches a live user's second factor.
+  await getService('mfa').purgeUser(String(id));
+
   const deletedUser = await strapi.db
     .query('admin::user')
     .delete({ where: { id }, populate: ['roles'] });
@@ -393,6 +403,9 @@ const deleteByIds = async (ids: (string | number)[]): Promise<AdminUser[]> => {
 
   const deletedUsers = [] as AdminUser[];
   for (const id of ids) {
+    // See deleteById: unconditional, after the guard above, before this id's row is deleted.
+    await getService('mfa').purgeUser(String(id));
+
     const deletedUser = await strapi.db.query('admin::user').delete({
       where: { id },
       populate: ['roles'],

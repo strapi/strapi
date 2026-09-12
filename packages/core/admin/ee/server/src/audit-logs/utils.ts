@@ -1,4 +1,4 @@
-interface AdminUserLike {
+export interface AdminUserLike {
   username?: string | null;
   firstname?: string | null;
   lastname?: string | null;

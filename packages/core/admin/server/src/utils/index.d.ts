@@ -11,6 +11,8 @@ import type { ContentApiTokenService, AdminTokenService } from '../services/api-
 import * as projectSettings from '../services/project-settings';
 import * as transfer from '../services/transfer';
 import { homepageService } from '../services/homepage';
+import createMfaService from '../services/mfa';
+import { createSecuritySettingsService } from '../services/security-settings';
 
 type S = {
   role: typeof role;
@@ -30,6 +32,8 @@ type S = {
   encryption: typeof encryption;
   'guided-tour': ReturnType<typeof createGuidedTourService>;
   homepage: ReturnType<typeof homepageService>;
+  mfa: ReturnType<typeof createMfaService>;
+  'security-settings': ReturnType<typeof createSecuritySettingsService>;
 };
 
 type Resolve<T> = T extends (...args: unknown[]) => unknown ? T : { [K in keyof T]: T[K] };

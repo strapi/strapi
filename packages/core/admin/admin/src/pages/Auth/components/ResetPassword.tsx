@@ -22,6 +22,8 @@ import { isBaseQueryError } from '../../../utils/baseQuery';
 import { getByteSize } from '../../../utils/strings';
 import { translatedErrors } from '../../../utils/translatedErrors';
 
+import type { MfaChallengeLocationState } from './MfaChallenge';
+
 const RESET_PASSWORD_SCHEMA = yup.object().shape({
   password: yup
     .string()
@@ -115,6 +117,20 @@ const ResetPassword = () => {
     const res = await resetPassword(body);
 
     if ('data' in res) {
+      if ('mfaRequired' in res.data) {
+        // No session yet: hand the challenge to the second-factor screen through router state,
+        // the same way `Login.tsx` does for an enrolled account.
+        const state: MfaChallengeLocationState = {
+          challengeToken: res.data.challengeToken,
+          expiresIn: res.data.expiresIn,
+          rememberMe: false,
+          trustedDeviceDays: res.data.trustedDeviceDays ?? null,
+          passkeyAvailable: res.data.passkeyAvailable === true,
+        };
+        navigate('/auth/mfa', { state });
+        return;
+      }
+
       dispatch(login({ token: res.data.token }));
       navigate('/');
     }

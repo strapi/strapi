@@ -18,11 +18,22 @@ import {
 import { translatedErrors } from '../../../utils/translatedErrors';
 import { getRedirectTo } from '../utils';
 
+import type { MfaChallengeLocationState } from './MfaChallenge';
 import type { Login } from '../../../../../shared/contracts/authentication';
 
 interface LoginProps {
   children?: React.ReactNode;
 }
+
+/**
+ * The server refuses a password login for an account whose enrolment grace period expired with
+ * `MfaLockedError` (403). Keyed on the runtime `name`, not the message, so copy changes on the
+ * server never break the screen. Typed loosely on purpose: `ApiError['name']` is a closed union
+ * of the `@strapi/utils` error class names, and this class sets its `name` at runtime, so a
+ * direct comparison against the union would not typecheck.
+ */
+export const isMfaLockedError = (error: { name?: string }): boolean =>
+  error.name === 'MfaLockedError';
 
 const LOGIN_SCHEMA = yup.object().shape({
   email: yup
@@ -51,6 +62,17 @@ const Login = ({ children }: LoginProps) => {
     const res = await login(body);
 
     if ('error' in res) {
+      if (isMfaLockedError(res.error)) {
+        setApiError(
+          formatMessage({
+            id: 'Auth.form.mfa.locked.message',
+            defaultMessage:
+              'This account is locked because two-factor authentication was not set up in time. Ask an administrator to unlock it.',
+          })
+        );
+        return;
+      }
+
       const message = res.error.message ?? 'Something went wrong';
 
       if (camelCase(message).toLowerCase() === 'usernotactive') {
@@ -59,6 +81,20 @@ const Login = ({ children }: LoginProps) => {
       }
 
       setApiError(message);
+    } else if ('mfaRequired' in res.data) {
+      // No session yet: hand the challenge to the second-factor screen through router state.
+      // react-router's browser history keeps this in `window.history.state.usr` for the life of
+      // this history entry (and restores it on a full reload), so `MfaChallenge` is what
+      // actually clears it — by replacing the entry with `state: null` right after reading it —
+      // to make a refresh, direct visit, or back/forward land back on the login form.
+      const state: MfaChallengeLocationState = {
+        challengeToken: res.data.challengeToken,
+        expiresIn: res.data.expiresIn,
+        rememberMe: body.rememberMe,
+        trustedDeviceDays: res.data.trustedDeviceDays ?? null,
+        passkeyAvailable: res.data.passkeyAvailable === true,
+      };
+      navigate({ pathname: '/auth/mfa', search: searchString }, { state });
     } else {
       navigate(getRedirectTo(searchString));
     }

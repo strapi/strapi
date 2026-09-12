@@ -6,6 +6,7 @@ import { buildSessionMetadata } from '@strapi/utils';
 import { resolveAuthCookieName } from './auth-cookie-name';
 import { resolveAuthCookiePath } from './auth-cookie-path';
 import { resolveAuthCookieDomain } from './auth-cookie-domain';
+import type { AdminUser } from '../contracts/shared';
 
 const ADMIN_ORIGIN = 'admin';
 const SESSION_CONTENT_TYPE = 'admin::session';
@@ -68,6 +69,41 @@ export const getRefreshCookieOptions = (secureRequest?: boolean) => {
     sameSite,
     maxAge: undefined,
   };
+};
+
+/**
+ * The "trust this device" cookie. A random 32-byte token whose sha256 is stored in
+ * `admin::mfa-trusted-device`; presenting it on `/login` lets an enrolled user skip the second
+ * factor until the row's effective expiry. It inherits every scope option of the refresh cookie
+ * (httpOnly, path, domain, secure, sameSite) so any deployment where the refresh cookie already
+ * works is covered, and it carries an absolute `expires` rather than the refresh cookie's
+ * idle/absolute pair: trust never slides.
+ */
+export const MFA_TRUST_COOKIE_NAME = 'strapi_admin_mfa_trust';
+
+export const buildTrustCookieOptions = (expiresAt: Date, secureRequest?: boolean) => {
+  const base = getRefreshCookieOptions(secureRequest);
+  return {
+    ...base,
+    expires: expiresAt,
+    maxAge: Math.max(0, expiresAt.getTime() - Date.now()),
+  };
+};
+
+export const setTrustCookie = (ctx: Context, token: string, expiresAt: Date): void => {
+  ctx.cookies.set(
+    MFA_TRUST_COOKIE_NAME,
+    token,
+    buildTrustCookieOptions(expiresAt, ctx.request.secure)
+  );
+};
+
+/** Same scope options as the set, so the browser matches and drops the right cookie. */
+export const clearTrustCookie = (ctx: Context): void => {
+  ctx.cookies.set(MFA_TRUST_COOKIE_NAME, '', {
+    ...getRefreshCookieOptions(ctx.request.secure),
+    expires: new Date(0),
+  });
 };
 
 const getLifespansForType = (
@@ -142,6 +178,81 @@ export const buildSessionMetadataFromContext = (ctx: Context) =>
   buildSessionMetadata({
     userAgent: ctx.request.headers['user-agent'],
   });
+
+/**
+ * Mints an admin refresh session and access token, then writes them to `ctx`: the refresh
+ * cookie and `ctx.body`. This is the single place every CE flow that authenticates a user
+ * (password login, the MFA challenge, registration, first-admin registration, password reset)
+ * turns that authentication into a session — so there is exactly one implementation of the
+ * refresh-cookie/access-token dance to keep in sync.
+ *
+ * `options.deviceId` / `options.rememberMe` override what would otherwise be read from
+ * `ctx.request.body` via `extractDeviceParams`. Reset-password uses this to force a fresh
+ * device id and a non-persistent session cookie regardless of what the caller's body contains;
+ * every other caller omits `options` and lets the request body decide.
+ */
+export const issueSession = async (
+  ctx: Context,
+  user: AdminUser,
+  options: {
+    deviceId?: string;
+    rememberMe?: boolean;
+    /** Set by the controllers when enforcement returned a grace outcome. */
+    mfaEnrolment?: { graceUntil: Date };
+  } = {}
+): Promise<void> => {
+  try {
+    const sessionManager = getSessionManager();
+    if (!sessionManager) {
+      ctx.internalServerError();
+      return;
+    }
+
+    const userId = String(user.id);
+    const bodyParams = extractDeviceParams(ctx.request.body);
+    const deviceId = options.deviceId ?? bodyParams.deviceId;
+    const rememberMe = options.rememberMe ?? bodyParams.rememberMe;
+
+    const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
+      'admin'
+    ).generateRefreshToken(userId, deviceId, {
+      type: rememberMe ? 'refresh' : 'session',
+      metadata: buildSessionMetadataFromContext(ctx),
+    });
+
+    const cookieOptions = buildCookieOptionsWithExpiry(
+      rememberMe ? 'refresh' : 'session',
+      absoluteExpiresAt,
+      ctx.request.secure
+    );
+    ctx.cookies.set(REFRESH_COOKIE_NAME, refreshToken, cookieOptions);
+
+    const accessResult = await sessionManager('admin').generateAccessToken(refreshToken);
+    if ('error' in accessResult) {
+      ctx.internalServerError();
+      return;
+    }
+
+    const { token: accessToken } = accessResult;
+
+    ctx.body = {
+      data: {
+        token: accessToken,
+        accessToken,
+        user: strapi.service('admin::user').sanitizeUser(user),
+        ...(options.mfaEnrolment
+          ? {
+              mfaEnrolmentRequired: true as const,
+              mfaGraceUntil: options.mfaEnrolment.graceUntil.toISOString(),
+            }
+          : {}),
+      },
+    };
+  } catch (error) {
+    strapi.log.error('Failed to create admin refresh session', error);
+    ctx.internalServerError();
+  }
+};
 
 /**
  * Resolves the device id to use when revoking sessions on logout.

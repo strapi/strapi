@@ -122,5 +122,17 @@ const isBaseQueryError = (error: BaseQueryError | SerializedError): error is Bas
   return error.name !== undefined;
 };
 
-export { fetchBaseQuery, isBaseQueryError };
+/**
+ * The admin MFA endpoints answer 404 while the feature is off (future flag or kill switch); the
+ * components that call them treat that, and only that, as "render nothing / disabled state".
+ */
+const isNotFoundError = (error: unknown): boolean =>
+  Boolean(
+    error &&
+      isBaseQueryError(error as BaseQueryError | SerializedError) &&
+      'status' in (error as object) &&
+      (error as { status?: unknown }).status === 404
+  );
+
+export { fetchBaseQuery, isBaseQueryError, isNotFoundError };
 export type { BaseQueryError, UnknownApiError, QueryArguments };

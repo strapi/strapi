@@ -1,9 +1,16 @@
 import { fireEvent } from '@testing-library/react';
-import { render } from '@tests/utils';
+import { render, server } from '@tests/utils';
+import { http, HttpResponse } from 'msw';
+import { Route, Routes, useLocation } from 'react-router-dom';
 
 import { ResetPassword } from '../ResetPassword';
 
 const FIELD_LABELS = ['Password', 'Confirm Password'];
+
+const LocationProbe = () => {
+  const { pathname, state } = useLocation();
+  return <pre>{JSON.stringify({ pathname, state })}</pre>;
+};
 
 describe('ResetPassword', () => {
   it('renders correctly', () => {
@@ -84,6 +91,45 @@ describe('ResetPassword', () => {
       fireEvent.click(getByRole('button', { name: 'Change password' }));
 
       expect(await findByText('Password must be less than 73 bytes')).toBeInTheDocument();
+    });
+  });
+
+  describe('second factor', () => {
+    it('sends the user to /auth/mfa with the challenge in router state when reset-password answers mfaRequired', async () => {
+      server.use(
+        http.post('/admin/reset-password', () =>
+          HttpResponse.json({
+            data: {
+              mfaRequired: true,
+              challengeToken: 'a'.repeat(64),
+              expiresIn: 300,
+              trustedDeviceDays: 30,
+              passkeyAvailable: true,
+            },
+          })
+        )
+      );
+
+      const { getByRole, getByLabelText, user, findByText } = render(
+        <Routes>
+          <Route path="/" element={<ResetPassword />} />
+          <Route path="/auth/mfa" element={<LocationProbe />} />
+        </Routes>,
+        { initialEntries: [{ search: '?code=test' }] }
+      );
+
+      await user.type(getByLabelText('Password*'), 'Testing123!');
+      await user.type(getByLabelText('Confirm Password*'), 'Testing123!');
+
+      fireEvent.click(getByRole('button', { name: 'Change password' }));
+
+      // the probe prints JSON.stringify({ pathname, state })
+      expect(await findByText(/"pathname":"\/auth\/mfa"/)).toBeInTheDocument();
+      expect(await findByText(/"rememberMe":false/)).toBeInTheDocument();
+      expect(await findByText(/"trustedDeviceDays":30/)).toBeInTheDocument();
+      expect(await findByText(/"passkeyAvailable":true/)).toBeInTheDocument();
+      // no session was ever created on the challenge branch
+      expect(window.localStorage.getItem('jwtToken')).toBeNull();
     });
   });
 });

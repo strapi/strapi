@@ -2,7 +2,27 @@ import { ContentApiApiToken } from '../../../shared/contracts/api-token';
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
+/**
+ * The private two-factor columns every sanitizer must strip. One list, because there are two
+ * sanitizers (CE and EE) plus the `SanitizedAdminUser` contract type, and a column missing from
+ * any one of them leaks: the EE copy feeds the `user.update`/`user.delete` payloads audit logs
+ * persist, so a miss there writes TOTP ciphertext into the audit table.
+ *
+ * `as const` so `SanitizedAdminUser` can derive its `Omit` from this rather than repeating it.
+ */
+const PRIVATE_MFA_FIELDS = [
+  'mfaSecret',
+  'mfaEnabledAt',
+  'mfaLastUsedStep',
+  'mfaPendingSecret',
+  'mfaGraceUntil',
+  'mfaLockedAt',
+  'mfaPasskeyChallenge',
+  'mfaPasskeyChallengeExpiresAt',
+] as const;
+
 const constants = {
+  PRIVATE_MFA_FIELDS,
   CONTENT_TYPE_SECTION: 'contentTypes',
   SUPER_ADMIN_CODE: 'strapi-super-admin',
   EDITOR_CODE: 'strapi-editor',
@@ -57,4 +77,5 @@ const constants = {
   },
 };
 
+export { PRIVATE_MFA_FIELDS };
 export default constants;

@@ -60,6 +60,15 @@ export declare namespace FindAll {
   }
 }
 /**
+ * Enforcement state appended to `GET /admin/users/:id` for callers holding `admin::users.update`.
+ */
+export interface AdminUserMfaState {
+  mfaEnabledAt?: string | Date | null;
+  mfaGraceUntil?: string | Date | null;
+  mfaLockedAt?: string | Date | null;
+}
+
+/**
  * /findOne - Find an admin user
  */
 export declare namespace FindOne {
@@ -73,7 +82,7 @@ export declare namespace FindOne {
   }
 
   export interface Response {
-    data: SanitizedAdminUser;
+    data: SanitizedAdminUser & AdminUserMfaState;
     error?: errors.ApplicationError;
   }
 }

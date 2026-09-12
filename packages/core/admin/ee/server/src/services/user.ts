@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { pipe, map, castArray, toNumber } from 'lodash/fp';
 import { arrays, errors } from '@strapi/utils';
 import { hasSuperAdminRole } from '../../../../server/src/domain/user';
-import constants from '../../../../server/src/services/constants';
+import constants, { PRIVATE_MFA_FIELDS } from '../../../../server/src/services/constants';
 import { getService } from '../utils';
 
 const { ValidationError } = errors;
@@ -231,6 +231,10 @@ const sanitizeUser = (user: any) => {
       'resetPasswordTokenExpiresAt',
       'registrationToken',
       'roles',
+      // The same list the CE sanitizer strips. This sanitizer feeds the `user.update` /
+      // `user.delete` payloads EE audit logs persist, so a column missing here writes TOTP
+      // ciphertext into the audit table -- which is why the list is shared rather than copied.
+      ...PRIVATE_MFA_FIELDS,
     ]),
     roles: user.roles && user.roles.map(sanitizeUserRoles),
   };

@@ -1,8 +1,10 @@
 import _ from 'lodash';
 import { errors, queryParams } from '@strapi/utils';
-import constants from '../constants';
+import constants, { PRIVATE_MFA_FIELDS } from '../constants';
 import userService from '../user';
 import userContentType from '../../content-types/User';
+
+import type { PrivateMfaField } from '../../../../shared/contracts/shared';
 
 const { SUPER_ADMIN_CODE } = constants;
 
@@ -22,6 +24,34 @@ const {
   resetPasswordByEmail,
   getLanguagesInUse,
 } = userService;
+
+/**
+ * The runtime omit list and the contract's `PrivateMfaField` are two expressions of one rule:
+ * these columns never reach a sanitized payload. They cannot be one declaration -- the shared
+ * contract must not import server code -- so this pins them equal instead. A column added to one
+ * and forgotten in the other fails here rather than leaking TOTP ciphertext into a user payload
+ * or the EE audit table.
+ */
+describe('private MFA fields', () => {
+  test('the runtime list and the contract type name exactly the same columns', () => {
+    // A compile error here means the runtime list gained a column the contract type has not.
+    const fromRuntime: PrivateMfaField[] = [...PRIVATE_MFA_FIELDS];
+
+    // ...and this direction catches the contract type gaining one the runtime list has not.
+    const fromContract: Array<(typeof PRIVATE_MFA_FIELDS)[number]> = [
+      'mfaSecret',
+      'mfaEnabledAt',
+      'mfaLastUsedStep',
+      'mfaPendingSecret',
+      'mfaGraceUntil',
+      'mfaLockedAt',
+      'mfaPasskeyChallenge',
+      'mfaPasskeyChallengeExpiresAt',
+    ] satisfies PrivateMfaField[];
+
+    expect([...fromRuntime].sort()).toEqual([...fromContract].sort());
+  });
+});
 
 describe('User', () => {
   global.strapi = {
@@ -58,6 +88,44 @@ describe('User', () => {
         otherField: 'Hello',
         roles: [],
       });
+    });
+
+    test('Removes every MFA column, cycles 1 to 4 alike', () => {
+      const res = sanitizeUser({
+        id: 1,
+        firstname: 'Test',
+        otherField: 'Hello',
+        password: '$5IAZUDB871',
+        resetPasswordToken: '3456-5678-6789-789',
+        mfaSecret: 'encrypted-secret-ciphertext',
+        mfaEnabledAt: '2026-01-01T00:00:00.000Z',
+        mfaLastUsedStep: 12345,
+        mfaPendingSecret: 'encrypted-pending-ciphertext',
+        mfaGraceUntil: '2026-09-11T00:00:00.000Z',
+        mfaLockedAt: '2026-09-12T00:00:00.000Z',
+        mfaPasskeyChallenge: 'pending-ceremony-challenge',
+        mfaPasskeyChallengeExpiresAt: '2026-09-09T00:05:00.000Z',
+        roles: [],
+      } as any);
+
+      expect(res).toEqual({
+        id: 1,
+        firstname: 'Test',
+        otherField: 'Hello',
+        roles: [],
+      });
+      for (const column of [
+        'mfaSecret',
+        'mfaEnabledAt',
+        'mfaLastUsedStep',
+        'mfaPendingSecret',
+        'mfaGraceUntil',
+        'mfaLockedAt',
+        'mfaPasskeyChallenge',
+        'mfaPasskeyChallengeExpiresAt',
+      ]) {
+        expect(res).not.toHaveProperty(column);
+      }
     });
   });
 
@@ -347,6 +415,7 @@ describe('User', () => {
       );
 
       const getSuperAdminWithUsersCount = jest.fn(() => Promise.resolve({ id: 1, usersCount: 1 }));
+      const purgeUser = jest.fn(() => Promise.resolve());
 
       global.strapi = {
         ...global.strapi,
@@ -354,10 +423,10 @@ describe('User', () => {
           emit: jest.fn(),
         },
         db: { query: () => ({ findOne }) },
-        admin: { services: { role: { getSuperAdminWithUsersCount } } },
+        admin: { services: { role: { getSuperAdminWithUsersCount }, mfa: { purgeUser } } },
       } as any;
 
-      expect.assertions(2);
+      expect.assertions(3);
 
       try {
         await deleteById(2);
@@ -365,6 +434,9 @@ describe('User', () => {
         expect(e instanceof errors.ApplicationError).toBe(true);
         expect(e.message).toEqual('You must have at least one user with super admin role.');
       }
+
+      // A refused deletion must never strip the still-live user's second factor.
+      expect(purgeUser).not.toHaveBeenCalled();
     });
 
     test('Can delete a super admin if they are not the last one', async () => {
@@ -372,6 +444,7 @@ describe('User', () => {
       const findOne = jest.fn(() => Promise.resolve(user));
       const getSuperAdminWithUsersCount = jest.fn(() => Promise.resolve({ id: 1, usersCount: 2 }));
       const deleteFn = jest.fn(() => user);
+      const purgeUser = jest.fn(() => Promise.resolve());
 
       global.strapi = {
         ...global.strapi,
@@ -379,7 +452,7 @@ describe('User', () => {
           emit: jest.fn(),
         },
         db: { query: () => ({ findOne, delete: deleteFn }) },
-        admin: { services: { role: { getSuperAdminWithUsersCount } } },
+        admin: { services: { role: { getSuperAdminWithUsersCount }, mfa: { purgeUser } } },
       } as any;
 
       const res = await deleteById(user.id);
@@ -393,16 +466,17 @@ describe('User', () => {
     test('Cannot delete last super admin', async () => {
       const count = jest.fn(() => Promise.resolve(2));
       const getSuperAdminWithUsersCount = jest.fn(() => Promise.resolve({ id: 1, usersCount: 2 }));
+      const purgeUser = jest.fn(() => Promise.resolve());
       global.strapi = {
         ...global.strapi,
         eventHub: {
           emit: jest.fn(),
         },
         db: { query: () => ({ count }) },
-        admin: { services: { role: { getSuperAdminWithUsersCount } } },
+        admin: { services: { role: { getSuperAdminWithUsersCount }, mfa: { purgeUser } } },
       } as any;
 
-      expect.assertions(2);
+      expect.assertions(3);
 
       try {
         await deleteByIds([2, 3]);
@@ -410,6 +484,9 @@ describe('User', () => {
         expect(e instanceof errors.ApplicationError).toBe(true);
         expect(e.message).toEqual('You must have at least one user with super admin role.');
       }
+
+      // A refused batch deletion must never strip any of the still-live users' second factor.
+      expect(purgeUser).not.toHaveBeenCalled();
     });
 
     test('Can delete a super admin if they are not the last one', async () => {
@@ -420,6 +497,7 @@ describe('User', () => {
         .fn()
         .mockImplementationOnce(() => users[0])
         .mockImplementationOnce(() => users[1]);
+      const purgeUser = jest.fn(() => Promise.resolve());
 
       global.strapi = {
         ...global.strapi,
@@ -427,7 +505,7 @@ describe('User', () => {
           emit: jest.fn(),
         },
         db: { query: () => ({ count, delete: deleteFn }) },
-        admin: { services: { role: { getSuperAdminWithUsersCount } } },
+        admin: { services: { role: { getSuperAdminWithUsersCount }, mfa: { purgeUser } } },
       } as any;
 
       const res = await deleteByIds([2, 3]);
@@ -439,6 +517,74 @@ describe('User', () => {
     });
   });
 
+  describe('MFA cleanup on user deletion', () => {
+    test('deleting a user removes their mfa secret, recovery codes and challenges', async () => {
+      const user = { id: 2, roles: [{ code: SUPER_ADMIN_CODE }] };
+      const findOne = jest.fn(() => Promise.resolve(user));
+      const getSuperAdminWithUsersCount = jest.fn(() => Promise.resolve({ id: 1, usersCount: 2 }));
+      const deleteFn = jest.fn(() => user);
+      const purgeUser = jest.fn(() => Promise.resolve());
+
+      global.strapi = {
+        ...global.strapi,
+        eventHub: { emit: jest.fn() },
+        db: { query: () => ({ findOne, delete: deleteFn }) },
+        admin: { services: { role: { getSuperAdminWithUsersCount }, mfa: { purgeUser } } },
+      } as any;
+
+      const res = await deleteById(user.id);
+
+      // `purgeUser` clears mfaSecret, recovery codes, challenges, devices, passkeys *and* the
+      // security-notice rows (see admin::mfa#purgeUser). `disable` alone would leave the notices
+      // behind, keyed to a user id that no longer resolves and carrying their device names.
+      expect(purgeUser).toHaveBeenCalledWith(String(user.id));
+      // After the super-admin guard read, before the row is actually removed.
+      expect(getSuperAdminWithUsersCount.mock.invocationCallOrder[0]).toBeLessThan(
+        purgeUser.mock.invocationCallOrder[0]
+      );
+      expect(purgeUser.mock.invocationCallOrder[0]).toBeLessThan(
+        deleteFn.mock.invocationCallOrder[0]
+      );
+      expect(res).toEqual(user);
+    });
+
+    test('deleting several users removes all of their mfa data', async () => {
+      const users = [{ id: 2 }, { id: 3 }];
+      const count = jest.fn(() => Promise.resolve(users.length));
+      const getSuperAdminWithUsersCount = jest.fn(() => Promise.resolve({ id: 1, usersCount: 3 }));
+      const deleteFn = jest
+        .fn()
+        .mockImplementationOnce(() => users[0])
+        .mockImplementationOnce(() => users[1]);
+      const purgeUser = jest.fn(() => Promise.resolve());
+
+      global.strapi = {
+        ...global.strapi,
+        eventHub: { emit: jest.fn() },
+        db: { query: () => ({ count, delete: deleteFn }) },
+        admin: { services: { role: { getSuperAdminWithUsersCount }, mfa: { purgeUser } } },
+      } as any;
+
+      const res = await deleteByIds([2, 3]);
+
+      expect(purgeUser).toHaveBeenCalledTimes(2);
+      expect(purgeUser).toHaveBeenNthCalledWith(1, '2');
+      expect(purgeUser).toHaveBeenNthCalledWith(2, '3');
+      // Each id's cleanup happens before that same id's row is deleted.
+      expect(purgeUser.mock.invocationCallOrder[0]).toBeLessThan(
+        deleteFn.mock.invocationCallOrder[0]
+      );
+      expect(purgeUser.mock.invocationCallOrder[1]).toBeLessThan(
+        deleteFn.mock.invocationCallOrder[1]
+      );
+      // The account-wide guard runs once before the loop, ahead of every purge call.
+      expect(getSuperAdminWithUsersCount.mock.invocationCallOrder[0]).toBeLessThan(
+        purgeUser.mock.invocationCallOrder[0]
+      );
+      expect(res).toEqual(users);
+    });
+  });
+
   describe('Session invalidation on user deletion', () => {
     test('deleteById invalidates user sessions when sessionManager exists', async () => {
       const user = { id: 2, roles: [] };
@@ -446,12 +592,14 @@ describe('User', () => {
       const deleteFn = jest.fn(() => user);
       const invalidateRefreshToken = jest.fn(() => Promise.resolve());
       const hasOrigin = jest.fn(() => true);
+      const purgeUser = jest.fn(() => Promise.resolve());
 
       global.strapi = {
         ...global.strapi,
         eventHub: { emit: jest.fn() },
         sessionManager: jest.fn(() => ({ invalidateRefreshToken })),
         db: { query: () => ({ findOne, delete: deleteFn }) },
+        admin: { services: { mfa: { purgeUser } } },
       } as any;
 
       // Add hasOrigin method to sessionManager
@@ -471,12 +619,14 @@ describe('User', () => {
       const deleteFn = jest.fn(() => user);
       const invalidateRefreshToken = jest.fn(() => Promise.resolve());
       const hasOrigin = jest.fn(() => false);
+      const purgeUser = jest.fn(() => Promise.resolve());
 
       global.strapi = {
         ...global.strapi,
         eventHub: { emit: jest.fn() },
         sessionManager: jest.fn(() => ({ invalidateRefreshToken })),
         db: { query: () => ({ findOne, delete: deleteFn }) },
+        admin: { services: { mfa: { purgeUser } } },
       } as any;
 
       (global.strapi.sessionManager as any).hasOrigin = hasOrigin;
@@ -499,13 +649,14 @@ describe('User', () => {
         .mockImplementationOnce(() => users[1]);
       const invalidateRefreshToken = jest.fn(() => Promise.resolve());
       const hasOrigin = jest.fn(() => true);
+      const purgeUser = jest.fn(() => Promise.resolve());
 
       global.strapi = {
         ...global.strapi,
         eventHub: { emit: jest.fn() },
         sessionManager: jest.fn(() => ({ invalidateRefreshToken })),
         db: { query: () => ({ count, delete: deleteFn }) },
-        admin: { services: { role: { getSuperAdminWithUsersCount } } },
+        admin: { services: { role: { getSuperAdminWithUsersCount }, mfa: { purgeUser } } },
       } as any;
 
       (global.strapi.sessionManager as any).hasOrigin = hasOrigin;
@@ -525,13 +676,14 @@ describe('User', () => {
       const deleteFn = jest.fn(() => users[0]);
       const invalidateRefreshToken = jest.fn(() => Promise.reject(new Error('Session error')));
       const hasOrigin = jest.fn(() => true);
+      const purgeUser = jest.fn(() => Promise.resolve());
 
       global.strapi = {
         ...global.strapi,
         eventHub: { emit: jest.fn() },
         sessionManager: jest.fn(() => ({ invalidateRefreshToken })),
         db: { query: () => ({ count, delete: deleteFn }) },
-        admin: { services: { role: { getSuperAdminWithUsersCount } } },
+        admin: { services: { role: { getSuperAdminWithUsersCount }, mfa: { purgeUser } } },
       } as any;
 
       (global.strapi.sessionManager as any).hasOrigin = hasOrigin;

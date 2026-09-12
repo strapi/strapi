@@ -2,12 +2,15 @@ import { ProvidersOptions } from '../../../shared/contracts/admin';
 import {
   type AccessTokenExchange,
   type Login,
+  type LoginMfa,
+  type MfaChallengeResponse,
   type ResetPassword,
   type RegisterAdmin,
   type Register,
   type RegistrationInfo,
   ForgotPassword,
 } from '../../../shared/contracts/authentication';
+import { type MfaWebauthnLogin, type MfaWebauthnOptions } from '../../../shared/contracts/mfa';
 import { Check } from '../../../shared/contracts/permissions';
 import { GetProviders, IsSSOLocked } from '../../../shared/contracts/providers';
 import {
@@ -104,13 +107,73 @@ const authService = adminApi
       /**
        * Auth methods
        */
-      login: builder.mutation<Login.Response['data'], Login.Request['body']>({
+      login: builder.mutation<
+        Login.Response['data'] | MfaChallengeResponse['data'],
+        Login.Request['body']
+      >({
         query: (body) => ({
           method: 'POST',
           url: '/admin/login',
           data: body,
         }),
-        transformResponse(res: Login.Response) {
+        transformResponse(res: Login.Response | MfaChallengeResponse) {
+          // The MFA-challenge shape carries no token/user to transform; return it as-is and let
+          // the caller narrow on `mfaRequired` before treating the result as a session.
+          if ('mfaRequired' in res.data) {
+            return res.data;
+          }
+
+          return res.data;
+        },
+        invalidatesTags: ['Me'],
+      }),
+      /**
+       * Completes a login that `/login` answered with `MfaChallengeResponse`. The response is
+       * the same session shape `/login` returns for an unenrolled account; `features/Auth.tsx`
+       * persists its token exactly as it does for `login`.
+       */
+      loginMfa: builder.mutation<LoginMfa.Response['data'], LoginMfa.Request['body']>({
+        query: (body) => ({
+          method: 'POST',
+          url: '/admin/login/mfa',
+          data: body,
+        }),
+        transformResponse(res: LoginMfa.Response) {
+          return res.data;
+        },
+        invalidatesTags: ['Me'],
+      }),
+      /**
+       * Passkeys, step one of the passkey login. Lives here beside `loginMfa` rather than in
+       * `services/mfa.ts` because it is an *unauthenticated* login endpoint: the challenge token
+       * is its whole authority, and the challenge-token pair belongs with its sibling.
+       *
+       * A mutation, not a query: it writes the ceremony challenge onto the challenge row
+       * server-side, so it must never be cached, deduplicated or refetched.
+       */
+      loginMfaWebauthnOptions: builder.mutation<
+        MfaWebauthnOptions.Response['data'],
+        MfaWebauthnOptions.Request['body']
+      >({
+        query: (body) => ({
+          method: 'POST',
+          url: '/admin/login/mfa/webauthn/options',
+          data: body,
+        }),
+        transformResponse(res: MfaWebauthnOptions.Response) {
+          return res.data;
+        },
+      }),
+      /**
+       * Step two: the assertion in exchange for a session. Same response shape as `loginMfa`, so
+       * `features/Auth.tsx` persists its token through the identical code path.
+       */
+      loginMfaWebauthn: builder.mutation<
+        MfaWebauthnLogin.Response['data'],
+        MfaWebauthnLogin.Request['body']
+      >({
+        query: (body) => ({ method: 'POST', url: '/admin/login/mfa/webauthn', data: body }),
+        transformResponse(res: MfaWebauthnLogin.Response) {
           return res.data;
         },
         invalidatesTags: ['Me'],
@@ -123,7 +186,7 @@ const authService = adminApi
         }),
       }),
       resetPassword: builder.mutation<
-        ResetPassword.Response['data'],
+        ResetPassword.Response['data'] | MfaChallengeResponse['data'],
         ResetPassword.Request['body']
       >({
         query: (body) => ({
@@ -131,7 +194,13 @@ const authService = adminApi
           url: '/admin/reset-password',
           data: body,
         }),
-        transformResponse(res: ResetPassword.Response) {
+        transformResponse(res: ResetPassword.Response | MfaChallengeResponse) {
+          // The MFA-challenge shape carries no token/user to transform; return it as-is and let
+          // the caller narrow on `mfaRequired` before treating the result as a session.
+          if ('mfaRequired' in res.data) {
+            return res.data;
+          }
+
           return res.data;
         },
       }),
@@ -246,6 +315,9 @@ const {
   useRevokeSessionMutation,
   useRevokeAllSessionsMutation,
   useLoginMutation,
+  useLoginMfaMutation,
+  useLoginMfaWebauthnOptionsMutation,
+  useLoginMfaWebauthnMutation,
   useAccessTokenExchangeMutation,
   useLogoutMutation,
   useUpdateMeMutation,
@@ -269,6 +341,9 @@ export {
   useRevokeSessionMutation,
   useRevokeAllSessionsMutation,
   useLoginMutation,
+  useLoginMfaMutation,
+  useLoginMfaWebauthnOptionsMutation,
+  useLoginMfaWebauthnMutation,
   useAccessTokenExchangeMutation,
   useLogoutMutation,
   useUpdateMeMutation,
