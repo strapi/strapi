@@ -30,6 +30,25 @@ What follows is what each feature does, and where something extra was needed.
 | REST and GraphQL          | Both resolve through the document service and the query scope, so both are narrowed                                               |
 | Content-type availability | A space can be limited to some content types; reaching another is refused rather than answered with an empty list                 |
 
+## Unique fields
+
+A `unique: true` attribute becomes unique **per space**, and nothing had to be
+written to make that happen.
+
+Strapi enforces uniqueness with a query rather than a database index (see
+`entity-validator/validators.ts`), and that query goes through the query scope
+like any other. So two spaces can each have an `about-us` slug, which is what a
+multi-brand project expects, while a second `about-us` inside one space is still
+refused.
+
+The same follows for single types: each space has its own.
+
+It also means uniqueness is only as strong as the query — two simultaneous
+writes of the same value into the same space can both pass the check. That is
+pre-existing Strapi behaviour, not something Spaces introduces, but tenancy
+makes a database-level constraint harder to add later, since it would have to be
+on `(space_id, column)`.
+
 ## Platform-only, on purpose
 
 These stay outside tenancy, and are reachable only by someone who administers

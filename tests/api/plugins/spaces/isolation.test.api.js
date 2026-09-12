@@ -302,6 +302,21 @@ describeOnCondition(edition === 'EE')('Spaces | content isolation', () => {
     });
   });
 
+  describe('unique fields', () => {
+    test('the same value is allowed once in each space', async () => {
+      // Uniqueness is enforced by a query, and that query is scoped — so two
+      // brands can each have an `about-us`, which is the point.
+      const france = inSpace(await createAuthRequest({ strapi }), 'france');
+      const germany = inSpace(await createAuthRequest({ strapi }), 'germany');
+
+      const first = await createArticle(france, 'Shared title');
+      const second = await createArticle(germany, 'Shared title');
+
+      expect(first.statusCode).toBe(200);
+      expect(second.statusCode).toBe(200);
+    });
+  });
+
   describe('deleting a space', () => {
     test('says what it would destroy before doing it', async () => {
       const { body, statusCode } = await rq({
