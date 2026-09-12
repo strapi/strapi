@@ -184,9 +184,19 @@ describeOnCondition(edition === 'EE')('Spaces | content isolation', () => {
         seen(undefined),
       ]);
 
-      expect({ all, france, germany, noHeader }).toMatchObject({
-        all: { statusCode: 200, titles: expect.arrayContaining(['Bonjour', 'Guten Tag']) },
-      });
+      const missing = ['Bonjour', 'Guten Tag'].filter((title) => !all.titles.includes(title));
+
+      // Thrown rather than asserted so the other three views appear in the
+      // message: a matcher only prints the part it compared.
+      if (missing.length > 0) {
+        throw new Error(
+          `The all-spaces view is missing ${missing.join(' and ')}.\n${JSON.stringify(
+            { all, france, germany, noHeader },
+            null,
+            2
+          )}`
+        );
+      }
     });
 
     test('a count does not leak the other space either', async () => {
