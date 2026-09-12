@@ -37,7 +37,7 @@ export const validatePreviewUrl = async (
 
   // Fill the documentId if it's a single type
   if (isSingleType) {
-    const doc = await strapi.documents(uid).findFirst();
+    const doc = await strapi.documents(uid).findFirst({ locale: newParams.locale });
 
     if (!doc) {
       throw new errors.NotFoundError('Document not found');
