@@ -147,6 +147,19 @@ describeOnCondition(edition === 'EE')('Spaces | content isolation', () => {
       expect(titles).not.toContain('Bonjour');
     });
 
+    test('asking for every space actually puts the caller there', async () => {
+      // Reported separately from the listing below, so a wrong answer here is
+      // not mistaken for a filtering problem.
+      const agent = inSpace(await createAuthRequest({ strapi }), '*');
+
+      const { body } = await agent({ url: '/spaces/mine', method: 'GET' });
+
+      expect({ current: body.current, canAccessAll: body.canAccessAll }).toEqual({
+        current: '*',
+        canAccessAll: true,
+      });
+    });
+
     test('the all-spaces view sees both', async () => {
       const agent = inSpace(await createAuthRequest({ strapi }), '*');
       const { body, statusCode } = await listArticles(agent);

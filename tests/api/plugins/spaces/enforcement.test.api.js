@@ -2,6 +2,7 @@
 
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createTestBuilder } = require('api-tests/builder');
+const { createAuthRequest } = require('api-tests/request');
 
 const builder = createTestBuilder();
 
@@ -256,6 +257,50 @@ describe('Spaces | enforcement', () => {
         .findMany({ where: { documentId: 'orphan-doc' }, populate: { space: true } });
 
       expect(row.space?.id).toBe(france.id);
+    });
+  });
+
+  describe('through the Content Manager', () => {
+    // The document service is only half the path an administrator takes. This
+    // drives the endpoint itself, which sanitizes, paginates and applies the
+    // caller's permissions on top.
+    const list = async () => {
+      const rq = await createAuthRequest({ strapi });
+
+      return rq({
+        url: `/content-manager/collection-types/${ARTICLE_UID}`,
+        method: 'GET',
+      });
+    };
+
+    test('one space sees its own entries and the shared ones', async () => {
+      current = france.id;
+
+      const { statusCode, body } = await list();
+
+      expect(statusCode).toBe(200);
+      expect(body.results.map((entry) => entry.title)).toEqual(
+        expect.arrayContaining(['Bonjour', 'Shared'])
+      );
+    });
+
+    test('with no space in force it sees every space', async () => {
+      current = null;
+
+      const { statusCode, body } = await list();
+
+      expect(statusCode).toBe(200);
+      expect(body.results.map((entry) => entry.title)).toEqual(
+        expect.arrayContaining(['Bonjour', 'Guten Tag'])
+      );
+    });
+
+    test('the space is not on the entries it returns', async () => {
+      current = france.id;
+
+      const { body } = await list();
+
+      expect(body.results.every((entry) => !('space' in entry))).toBe(true);
     });
   });
 
