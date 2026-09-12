@@ -1,12 +1,9 @@
+import { lazyInit } from '@strapi/utils';
+
 // Lazy: only resolved when compileStrapi is invoked (develop / build)
-let lazyTsUtils: typeof import('@strapi/typescript-utils') | undefined;
-const tsUtils = (): typeof import('@strapi/typescript-utils') => {
-  if (!lazyTsUtils) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    lazyTsUtils = require('@strapi/typescript-utils');
-  }
-  return lazyTsUtils as typeof import('@strapi/typescript-utils');
-};
+const tsUtils = lazyInit<typeof import('@strapi/typescript-utils')>(() =>
+  require('@strapi/typescript-utils')
+);
 
 interface Options {
   appDir?: string;

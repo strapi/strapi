@@ -2,8 +2,8 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import cluster from 'node:cluster';
 
-import type chokidarType from 'chokidar';
 import type { createStrapi as CreateStrapi } from '@strapi/core';
+import { lazyInit } from '@strapi/utils';
 import type { CLIContext } from '../cli/types';
 import { handleAdminDependencies } from './core/ensure-admin-dependencies';
 import { getTimer, prettyTime, type TimeMeasurer } from './core/timer';
@@ -12,19 +12,11 @@ import type { ViteWatcher } from './vite/watch';
 import type { Logger } from '../cli/utils/logger';
 
 // Lazy: worker-only deps; primary cluster process should not pay for them
-const lazy = <T>(spec: string): (() => T) => {
-  let cached: T | undefined;
-  return (): T => {
-    if (cached === undefined) {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      cached = require(spec);
-    }
-    return cached as T;
-  };
-};
+const lazy = <T>(spec: string): (() => T) => lazyInit(() => require(spec));
+
 const tsUtils = lazy<typeof import('@strapi/typescript-utils')>('@strapi/typescript-utils');
 const utils = lazy<typeof import('@strapi/utils')>('@strapi/utils');
-const chokidar = lazy<typeof chokidarType>('chokidar');
+const chokidar = lazy<typeof import('chokidar')>('chokidar');
 const core = lazy<typeof import('@strapi/core')>('@strapi/core');
 const buildCtx = lazy<typeof import('./create-build-context')>('./create-build-context');
 const staticFs = lazy<typeof import('./staticFiles')>('./staticFiles');

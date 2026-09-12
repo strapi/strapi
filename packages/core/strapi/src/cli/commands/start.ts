@@ -3,9 +3,14 @@ import fs from 'fs';
 import path from 'path';
 import { createStrapi } from '@strapi/core';
 
+import { lazyInit } from '@strapi/utils';
 import type { StrapiCommand } from '../types';
 import { runAction } from '../utils/helpers';
 import { tryQuickOutDir } from '../utils/try-quick-outdir';
+
+const importTsUtils = lazyInit<typeof import('@strapi/typescript-utils')>(() =>
+  require('@strapi/typescript-utils')
+);
 
 const action = async () => {
   const appDir = process.cwd();
@@ -23,11 +28,10 @@ const action = async () => {
       distDir = quickOutDir;
     } else {
       // Custom/extended tsconfig or unbuilt project — fall back to the slow correct path
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const tsUtils = require('@strapi/typescript-utils');
+      const tsUtils = importTsUtils();
       const outDir = await tsUtils.resolveOutDir(appDir);
 
-      if (!fs.existsSync(outDir)) {
+      if (!outDir || !fs.existsSync(outDir)) {
         throw new Error(
           `${outDir} directory not found. Please run the build command before starting your application`
         );

@@ -5,7 +5,7 @@ import path from 'path';
 import { map, values, sumBy, pipe, flatMap, propEq } from 'lodash/fp';
 import _ from 'lodash';
 import { exists } from 'fs-extra';
-import { env } from '@strapi/utils';
+import { env, lazyInit } from '@strapi/utils';
 import {
   validateUpdateProjectSettings,
   validateUpdateProjectSettingsFiles,
@@ -24,17 +24,9 @@ import type {
 } from '../../../shared/contracts/admin';
 
 // Lazy: only resolved on first GET /admin/project-type request
-type TsUtilsModule = typeof import('@strapi/typescript-utils');
-let lazyTsUtils: TsUtilsModule | undefined;
-const isUsingTypeScript: TsUtilsModule['isUsingTypeScript'] = (
-  ...args: Parameters<TsUtilsModule['isUsingTypeScript']>
-) => {
-  if (!lazyTsUtils) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    lazyTsUtils = require('@strapi/typescript-utils');
-  }
-  return (lazyTsUtils as TsUtilsModule).isUsingTypeScript(...args);
-};
+const importTsUtils = lazyInit<typeof import('@strapi/typescript-utils')>(() =>
+  require('@strapi/typescript-utils')
+);
 
 /**
  * A set of functions called "actions" for `Admin`
@@ -107,8 +99,10 @@ export default {
       return;
     }
 
-    const useTypescriptOnServer = await isUsingTypeScript(strapi.dirs.app.root);
-    const useTypescriptOnAdmin = await isUsingTypeScript(
+    const tsUtils = importTsUtils();
+
+    const useTypescriptOnServer = await tsUtils.isUsingTypeScript(strapi.dirs.app.root);
+    const useTypescriptOnAdmin = await tsUtils.isUsingTypeScript(
       path.join(strapi.dirs.app.root, 'src', 'admin')
     );
     const isHostedOnStrapiCloud = env('STRAPI_HOSTING', null) === 'strapi.cloud';

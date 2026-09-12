@@ -7,6 +7,7 @@ import { Database } from '@strapi/database';
 
 import type { Core, Modules, UID, Schema } from '@strapi/types';
 
+import { lazyInit } from '@strapi/utils';
 import { loadConfiguration } from './configuration';
 import { warnDeprecatedServerConfig } from './configuration/server-config';
 
@@ -41,14 +42,9 @@ import { cleanComponentJoinTable } from './services/document-service/utils/clean
 import { createContentAPISchemaRegistry } from './core-api/routes/validation/schema-registry';
 
 // Lazy: only resolved when `useTypescriptMigrations` is true (default false)
-let lazyTsUtils: typeof import('@strapi/typescript-utils') | undefined;
-const tsUtils = (): typeof import('@strapi/typescript-utils') => {
-  if (!lazyTsUtils) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    lazyTsUtils = require('@strapi/typescript-utils');
-  }
-  return lazyTsUtils as typeof import('@strapi/typescript-utils');
-};
+const tsUtils = lazyInit<typeof import('@strapi/typescript-utils')>(() =>
+  require('@strapi/typescript-utils')
+);
 
 class Strapi extends Container implements Core.Strapi {
   app: any;
