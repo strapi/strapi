@@ -4,7 +4,6 @@ const core = require('@actions/core');
 const github = require('@actions/github');
 
 const BLOCKING_LABELS = [`flag: 💥 Breaking change`, `flag: don't merge`];
-const QA_REQUIRED_LABEL = 'needs-qa';
 const QA_COMPLETION_LABELS = ['qa-done', 'qa-skipped'];
 const STRAPI_ENGINEER_ASSOCIATIONS = ['MEMBER', 'OWNER'];
 
@@ -25,14 +24,11 @@ async function main() {
     }
 
     const labelNames = labels.map((label) => label.name);
-    const needsQa = labelNames.includes(QA_REQUIRED_LABEL);
     const hasQaResolution = QA_COMPLETION_LABELS.some((label) => labelNames.includes(label));
 
-    if (needsQa === true && hasQaResolution === false) {
+    if (hasQaResolution === false) {
       core.setFailed(
-        `The PR has been labelled with '${QA_REQUIRED_LABEL}' and must be resolved with one of: ${QA_COMPLETION_LABELS.join(
-          ', '
-        )}.`
+        `The PR must have one of the following QA labels: ${QA_COMPLETION_LABELS.join(', ')}.`
       );
 
       return;
@@ -78,7 +74,6 @@ async function main() {
 }
 
 main.BLOCKING_LABELS = BLOCKING_LABELS;
-main.QA_REQUIRED_LABEL = QA_REQUIRED_LABEL;
 main.QA_COMPLETION_LABELS = QA_COMPLETION_LABELS;
 main.STRAPI_ENGINEER_ASSOCIATIONS = STRAPI_ENGINEER_ASSOCIATIONS;
 
