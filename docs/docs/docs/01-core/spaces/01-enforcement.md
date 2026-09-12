@@ -43,6 +43,20 @@ Database lifecycles would have covered only the first two: they do not fire for
 populated relations, and `db.lifecycles.disable()` turns them off wholesale
 during a data transfer. The query scope has neither hole.
 
+What it does **not** cover is a table brought into a query by a JOIN. A filter
+or a sort on a relation compiles to a JOIN inside one query rather than to a
+second query, and a scope narrows queries. So `filters[author][name]` is
+answered against every row of `authors`.
+
+The caller still only gets their own rows back — the JOIN decides which of
+_their_ rows match and selects nothing from the joined table — so what leaks is
+the existence of a matching row, and only for rows their own content already
+links to. Creating such a link across spaces is refused on write, so setting one
+up takes data that predates tenancy. Closing it properly means scoping JOINs as
+well as queries; until then the gap is pinned by a test in
+`packages/core/database/src/__tests__/query-scopes-sqlite.test.ts` rather than
+assumed covered.
+
 Clauses are pushed into `state.where`, which is ANDed as a whole, so a caller
 cannot widen past a scope with an `$or` of their own.
 

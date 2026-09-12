@@ -109,12 +109,27 @@ export const setUserRolesScope = (scope: UserRolesScope | null) => {
   };
 };
 
+export interface FindUserPermissionsOptions {
+  /**
+   * Whether the installed {@link UserRolesScope} applies.
+   *
+   * It should, for anything deciding what a caller may do right now. It should
+   * not for anything reasoning about a user's authority in general — the
+   * ceiling an admin token is clamped to, for instance, which is about the user
+   * rather than about the request that happens to be running.
+   */
+  scoped?: boolean;
+}
+
 /**
  * Find all permissions for a user
  * @param user - user
  */
-export const findUserPermissions = async (user: AdminUser): Promise<Permission[]> => {
-  const roleIds = userRolesScope ? await userRolesScope(user) : null;
+export const findUserPermissions = async (
+  user: AdminUser,
+  { scoped = true }: FindUserPermissionsOptions = {}
+): Promise<Permission[]> => {
+  const roleIds = scoped && userRolesScope ? await userRolesScope(user) : null;
 
   if (roleIds === null) {
     return findMany({ where: { role: { users: { id: user.id } } } });

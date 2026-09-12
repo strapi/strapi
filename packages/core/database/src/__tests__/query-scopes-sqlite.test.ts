@@ -191,6 +191,33 @@ describe('query scopes against SQLite', () => {
     });
   });
 
+  describe('the limit of a query scope', () => {
+    it('does not reach a table brought in by a relation filter', async () => {
+      tenant = 1;
+
+      // A relation filter compiles to a JOIN inside one query rather than to a
+      // second query, and a scope narrows queries. So filtering on a joined
+      // table's column is answered against every row of that table.
+      //
+      // What that costs: the caller still only gets their own rows back — the
+      // JOIN decides which of *their* rows match, and selects nothing from the
+      // joined table. It tells them that a row matching the predicate exists,
+      // which is an existence oracle, and only for rows their own content
+      // already links to. Creating such a link across spaces is refused, so it
+      // takes data that predates tenancy to set one up.
+      //
+      // Closing it means scoping JOINs as well as queries. This test is here so
+      // the gap is visible rather than assumed covered.
+      const rows: any[] = await db.query(ARTICLE).findMany({
+        where: { author: { name: 'Anton' } },
+      });
+
+      expect(rows.map((row) => row.title)).toEqual(['Crossed']);
+      // The other tenant's row itself is still not returned.
+      expect(rows.every((row) => row.tenant_id !== 2)).toBe(true);
+    });
+  });
+
   describe('writing', () => {
     it('does not update another tenant’s row', async () => {
       tenant = 1;

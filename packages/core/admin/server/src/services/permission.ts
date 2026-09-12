@@ -14,6 +14,8 @@ import {
   setUserRolesScope,
 } from './permission/queries';
 
+export type { FindUserPermissionsOptions, UserRolesScope } from './permission/queries';
+
 const actionProvider = createActionProvider();
 const conditionProvider = createConditionProvider();
 const sectionsBuilder = createSectionsBuilder();

@@ -276,7 +276,11 @@ const enforceAdminPermissionsCeiling = async (
     });
   }
 
-  const userPermissions: Permission[] = await getService('permission').findUserPermissions(user);
+  // The ceiling is about what this user may delegate at all, not about wherever
+  // the request creating the token happens to be pointed.
+  const userPermissions: Permission[] = await getService('permission').findUserPermissions(user, {
+    scoped: false,
+  });
 
   const exceeding: string[] = [];
 
@@ -542,8 +546,12 @@ const syncApiTokenPermissionsForUser = async (userId: Data.ID): Promise<void> =>
   if (user === null || user === undefined) return;
   if (isSuperAdmin(user as AdminUser)) return;
 
+  // Bookkeeping about the user, run from whatever request changed their roles.
+  // Narrowing to that request's view of them would delete token permissions
+  // that are still legitimate elsewhere.
   const userEffectivePermissions: Permission[] = await getService('permission').findUserPermissions(
-    user as AdminUser
+    user as AdminUser,
+    { scoped: false }
   );
 
   const tokens = await strapi.db.query('admin::api-token').findMany({
