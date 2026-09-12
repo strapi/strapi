@@ -71,6 +71,7 @@
   "devDependencies": {
     "@strapi/admin": "5.51.1",
     "@strapi/content-manager": "5.51.1",
+    "@strapi/content-type-builder": "5.51.1",
     "@strapi/database": "5.51.1",
     "@strapi/types": "5.51.1",
     "koa": "2.16.4",
@@ -82,6 +83,7 @@
   "peerDependencies": {
     "@strapi/admin": "^5.0.0",
     "@strapi/content-manager": "^5.0.0",
+    "@strapi/content-type-builder": "^5.0.0",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^6.30.3",

@@ -44,3 +44,10 @@ export {
   registerAttributeFlag,
 } from './components/attributeFlagRegistry';
 export type { AttributeFlag } from './components/attributeFlagRegistry';
+export {
+  /**
+   * @description The way the schema index draws a yes-or-no option, for the
+   * plugins that contribute a column of one. See `components/SchemaOption.tsx`.
+   */
+  SchemaOption,
+} from './components/SchemaOption';

@@ -5,6 +5,7 @@ import {
   registerAvailabilityRule,
   registerReadOnlyRule,
 } from './components/DataManager/readOnlyRules';
+import { SchemaOption } from './components/SchemaOption';
 import { PERMISSIONS } from './constants';
 import { registerSchemaColumn, registerSchemaFilter } from './pages/SchemaIndex/schemaRegistry';
 import { pluginId } from './pluginId';
@@ -39,6 +40,7 @@ export default {
         registerReadOnlyRule,
         registerAvailabilityRule,
         registerAttributeFlag,
+        SchemaOption,
         registerSchemaColumn,
         registerSchemaFilter,
       },

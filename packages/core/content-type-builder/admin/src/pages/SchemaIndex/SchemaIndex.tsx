@@ -18,12 +18,11 @@ import {
   SingleSelectOption,
   Tabs,
   Tag,
-  Tooltip,
   Typography,
   useCollator,
   useFilter,
 } from '@strapi/design-system';
-import { Cross, Filter, Information, Plus } from '@strapi/icons';
+import { Cross, Filter, Plus } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
@@ -31,6 +30,7 @@ import { styled } from 'styled-components';
 
 import { useDataManager } from '../../components/DataManager/useDataManager';
 import { useFormModalNavigation } from '../../components/FormModalNavigation/useFormModalNavigation';
+import { SchemaOption } from '../../components/SchemaOption';
 import { StatusBadge } from '../../components/Status';
 import { pluginId } from '../../pluginId';
 import { getTrad } from '../../utils/getTrad';
@@ -55,55 +55,16 @@ const hasDraftAndPublish = (schema: Schema) =>
   isContentType(schema) &&
   (schema as { options?: { draftAndPublish?: boolean } }).options?.draftAndPublish === true;
 
-/** An option that is on reads as a word; one that is off reads as nothing. */
-const OnOff = ({ on }: { on: boolean }) => {
-  const { formatMessage } = useIntl();
-
-  if (!on) {
-    return (
-      <Typography
-        textColor="neutral400"
-        aria-label={formatMessage({ id: 'global.off', defaultMessage: 'Off' })}
-      >
-        —
-      </Typography>
-    );
-  }
-
-  return (
-    <Typography textColor="success600" fontWeight="bold">
-      {formatMessage({ id: 'global.on', defaultMessage: 'On' })}
+const NameCell = ({ schema }: { schema: Schema }) => (
+  // The API id is on the schema's own page; an icon for it on every row of the
+  // list was a second thing to look past before reading the name.
+  <Flex gap={2} alignItems="center">
+    <Typography textColor="neutral800" fontWeight="bold">
+      {upperFirst(schema.info.displayName)}
     </Typography>
-  );
-};
-
-const NameCell = ({ schema }: { schema: Schema }) => {
-  const { formatMessage } = useIntl();
-
-  return (
-    // The API id is what you need when you need it and noise the rest of the
-    // time, so it waits behind the icon.
-    <Flex gap={2} alignItems="center">
-      <Typography textColor="neutral800" fontWeight="bold">
-        {upperFirst(schema.info.displayName)}
-      </Typography>
-      <Tooltip label={schema.uid}>
-        <Flex tag="span" alignItems="center">
-          <Information
-            fill="neutral500"
-            width="1.6rem"
-            height="1.6rem"
-            aria-label={formatMessage(
-              { id: getTrad('index.column.apiId'), defaultMessage: 'API ID: {uid}' },
-              { uid: schema.uid }
-            )}
-          />
-        </Flex>
-      </Tooltip>
-      <StatusBadge status={(schema as { status?: string }).status ?? 'UNCHANGED'} />
-    </Flex>
-  );
-};
+    <StatusBadge status={(schema as { status?: string }).status ?? 'UNCHANGED'} />
+  </Flex>
+);
 
 const CategoryCell = ({ schema }: { schema: Schema }) => (
   <Typography textColor="neutral700">
@@ -112,7 +73,7 @@ const CategoryCell = ({ schema }: { schema: Schema }) => (
 );
 
 const DraftAndPublishCell = ({ schema }: { schema: Schema }) => (
-  <OnOff on={hasDraftAndPublish(schema)} />
+  <SchemaOption on={hasDraftAndPublish(schema)} />
 );
 
 /**

@@ -3,48 +3,84 @@ import { render, screen } from '@strapi/admin/strapi-admin/test';
 import { registerAttributeFlag, resetAttributeFlags } from '../attributeFlagRegistry';
 import { AttributeFlags } from '../AttributeFlags';
 
+import type { AttributeLike } from '../attributeFlagRegistry';
+
 afterEach(() => {
   resetAttributeFlags();
 });
 
+/** A field rendered among the list it belongs to, which is what sets the columns. */
+const show = (attribute: AttributeLike, siblings: AttributeLike[] = [attribute]) =>
+  render(<AttributeFlags attribute={attribute} siblings={siblings} />);
+
+const localized = { type: 'string', pluginOptions: { i18n: { localized: true } } };
+
+const i18nFlag = {
+  id: 'i18n',
+  label: { id: 'hint', defaultMessage: 'Internationalization' },
+  short: { id: 'short', defaultMessage: 'Internationalization' },
+  tone: 'neutral' as const,
+  applies: (attribute: AttributeLike) =>
+    (attribute.pluginOptions as { i18n?: { localized?: boolean } } | undefined)?.i18n?.localized ===
+    true,
+};
+
 describe('AttributeFlags', () => {
-  /**
-   * The slots stay: every row shows every flag in the same order so a column
-   * of them lines up, and a flag that does not apply is only invisible.
-   */
-  it('says nothing about a field with no option on, but keeps its place', () => {
-    render(<AttributeFlags attribute={{ type: 'string' }} />);
+  it('says nothing about a field whose list uses no flags', () => {
+    show({ type: 'string' });
 
     ['Required', 'Unique', 'Private'].forEach((flag) => {
-      expect(screen.getByText(flag)).toBeInTheDocument();
-      expect(screen.getByText(flag)).not.toBeVisible();
+      expect(screen.queryByText(flag)).not.toBeInTheDocument();
     });
   });
 
-  /**
-   * The red asterisk after a field's name said this and nothing else; it is a
-   * flag now, so the one option that had an affordance must keep it.
-   */
   it('flags a required field', () => {
-    render(<AttributeFlags attribute={{ type: 'string', required: true }} />);
+    show({ type: 'string', required: true });
 
     expect(screen.getByText('Required')).toBeVisible();
   });
 
   it('flags unique and private fields', () => {
-    render(<AttributeFlags attribute={{ type: 'string', unique: true, private: true }} />);
+    show({ type: 'string', unique: true, private: true });
 
     expect(screen.getByText('Unique')).toBeVisible();
     expect(screen.getByText('Private')).toBeVisible();
-    expect(screen.getByText('Required')).not.toBeVisible();
   });
 
   it('shows every option a field has, in registration order', () => {
-    const { container } = render(
-      <AttributeFlags attribute={{ type: 'string', required: true, unique: true, private: true }} />
-    );
+    const { container } = show({ type: 'string', required: true, unique: true, private: true });
 
     expect(container).toHaveTextContent('RequiredUniquePrivate');
+  });
+
+  /**
+   * A column is only worth its width if something in the list is in it — a
+   * field list with nothing unique should not carry a unique column.
+   */
+  it('leaves out a flag no field in the list carries', () => {
+    show({ type: 'string', required: true }, [
+      { type: 'string', required: true },
+      { type: 'string' },
+    ]);
+
+    expect(screen.getByText('Required')).toBeVisible();
+    expect(screen.queryByText('Unique')).not.toBeInTheDocument();
+    expect(screen.queryByText('Private')).not.toBeInTheDocument();
+  });
+
+  /**
+   * …and a column something else in the list is in stays, invisible, so the
+   * flags read down the list as columns rather than as a ragged edge.
+   */
+  it('keeps the place of a flag another field in the list carries', () => {
+    show({ type: 'string', required: true }, [
+      { type: 'string', required: true },
+      { type: 'string', unique: true },
+    ]);
+
+    expect(screen.getByText('Required')).toBeVisible();
+    expect(screen.getByText('Unique')).toBeInTheDocument();
+    expect(screen.getByText('Unique')).not.toBeVisible();
   });
 
   /**
@@ -53,39 +89,25 @@ describe('AttributeFlags', () => {
    * plugin is there to contribute it.
    */
   it('says nothing about a plugin option until the plugin registers it', () => {
-    const localized = { type: 'string', pluginOptions: { i18n: { localized: true } } };
-
-    const { unmount } = render(<AttributeFlags attribute={localized} />);
+    const { unmount } = show(localized);
     expect(screen.queryByText('Internationalization')).not.toBeInTheDocument();
     unmount();
 
-    registerAttributeFlag({
-      id: 'i18n',
-      label: { id: 'hint', defaultMessage: 'Translated per locale' },
-      short: { id: 'short', defaultMessage: 'Internationalization' },
-      tone: 'secondary',
-      applies: (attribute) =>
-        (attribute.pluginOptions as { i18n?: { localized?: boolean } } | undefined)?.i18n
-          ?.localized === true,
-    });
+    registerAttributeFlag(i18nFlag);
 
-    render(<AttributeFlags attribute={localized} />);
+    show(localized);
     expect(screen.getByText('Internationalization')).toBeVisible();
   });
 
   it('replaces a flag registered twice under the same id', () => {
-    const flag = {
-      id: 'i18n',
-      label: { id: 'hint', defaultMessage: 'Translated per locale' },
-      short: { id: 'short', defaultMessage: 'Internationalization' },
-      tone: 'secondary' as const,
+    registerAttributeFlag({ ...i18nFlag, applies: () => true });
+    registerAttributeFlag({
+      ...i18nFlag,
+      short: { id: 'short', defaultMessage: 'Localized' },
       applies: () => true,
-    };
+    });
 
-    registerAttributeFlag(flag);
-    registerAttributeFlag({ ...flag, short: { id: 'short', defaultMessage: 'Localized' } });
-
-    render(<AttributeFlags attribute={{ type: 'string' }} />);
+    show({ type: 'string' });
 
     expect(screen.getByText('Localized')).toBeInTheDocument();
     expect(screen.queryByText('Internationalization')).not.toBeInTheDocument();

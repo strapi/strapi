@@ -8,12 +8,12 @@ import { Pill } from './Pill';
 import type { AttributeLike } from './attributeFlagRegistry';
 
 /**
- * A flag that does not apply still holds its place.
+ * A flag that does not apply to this field still holds its place.
  *
- * Every row shows every flag in the same order, so "required" is in the same
- * column on the row above and the row below. Packing only the flags that apply
- * would put i18n where required sits one row up, and a list of thirty-five
- * fields becomes unreadable for the sake of a little width.
+ * Every row shows the same flags in the same order, so "required" is in the
+ * same column on the row above and the row below. Packing only what applies
+ * would put internationalization where required sits one row up, and a list of
+ * thirty-five fields becomes unreadable for the sake of a little width.
  */
 const Absent = styled.span`
   visibility: hidden;
@@ -27,10 +27,22 @@ const Absent = styled.span`
  * these now instead, beside the options that had no affordance at all. The
  * list itself comes from the registry (see `attributeFlagRegistry.ts`).
  */
-export const AttributeFlags = ({ attribute }: { attribute: AttributeLike }) => {
+export const AttributeFlags = ({
+  attribute,
+  siblings,
+}: {
+  attribute: AttributeLike;
+  /**
+   * The fields this one is listed with. A column is only worth its width if
+   * something in the list is in it: a flag no field here carries — i18n among
+   * a component's fields, unique among a list with nothing unique — is left
+   * out rather than reserved empty on every row.
+   */
+  siblings: AttributeLike[];
+}) => {
   const { formatMessage } = useIntl();
 
-  const flags = getAttributeFlags();
+  const flags = getAttributeFlags().filter((flag) => siblings.some((field) => flag.applies(field)));
 
   if (flags.length === 0) {
     return null;
@@ -39,8 +51,6 @@ export const AttributeFlags = ({ attribute }: { attribute: AttributeLike }) => {
   return (
     <Flex gap={1}>
       {flags.map((flag) => {
-        const applies = flag.applies(attribute);
-
         const pill = (
           <Pill tag="span" alignItems="center" $tone={flag.tone}>
             {flag.Icon ? (
@@ -56,7 +66,7 @@ export const AttributeFlags = ({ attribute }: { attribute: AttributeLike }) => {
           </Pill>
         );
 
-        if (!applies) {
+        if (!flag.applies(attribute)) {
           return (
             <Absent key={flag.id} aria-hidden>
               {pill}

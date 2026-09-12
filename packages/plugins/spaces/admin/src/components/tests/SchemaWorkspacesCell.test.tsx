@@ -60,10 +60,10 @@ describe('SchemaWorkspacesCell', () => {
 describe('SchemaSharingCell', () => {
   it("answers the sharing question on its own, like the builder's other options", () => {
     const { rerender } = render(<SchemaSharingCell schema={schema({ sharedEntries: true })} />);
-    expect(screen.getByText('On')).toBeInTheDocument();
+    expect(screen.getByLabelText('On')).toBeInTheDocument();
 
     rerender(<SchemaSharingCell schema={schema({})} />);
-    expect(screen.getByText('—')).toBeInTheDocument();
-    expect(screen.queryByText('On')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Off')).toBeInTheDocument();
+    expect(screen.queryByLabelText('On')).not.toBeInTheDocument();
   });
 });

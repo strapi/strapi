@@ -299,7 +299,7 @@ const MemoizedRow = memo((props: Omit<AttributeRowProps, 'style'>) => {
 
         <Box>
           <Flex justifyContent="flex-end" gap={2} onClick={(e) => e.stopPropagation()}>
-            <AttributeFlags attribute={item} />
+            <AttributeFlags attribute={item} siblings={type.attributes} />
             <>
               {['component', 'dynamiczone'].includes(item.type) ? (
                 <IconButton

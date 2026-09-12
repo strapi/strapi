@@ -1,5 +1,7 @@
+import { SchemaOption } from '@strapi/content-type-builder/strapi-admin';
 import { Menu, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
+import { styled } from 'styled-components';
 
 import { useGetMineSpacesQuery } from '../services/spaces';
 import { getTranslation } from '../utils/getTranslation';
@@ -11,6 +13,18 @@ interface SpacesOptions {
   sharedEntries?: boolean;
   sharedEditable?: boolean;
 }
+
+/**
+ * The count sits in a dropdown and the other rows say "All workspaces" in
+ * plain text — the trigger's own padding put the two a button's width apart,
+ * in a column whose whole job is to be read down.
+ */
+const FlushTrigger = styled(Menu.Trigger)`
+  padding-left: 0;
+  padding-right: 0;
+  border: none;
+  background: transparent;
+`;
 
 const optionsOf = (schema: unknown): SpacesOptions =>
   (schema as { pluginOptions?: { spaces?: SpacesOptions } })?.pluginOptions?.spaces ?? {};
@@ -52,7 +66,7 @@ export const SchemaWorkspacesCell = ({ schema }: { schema: unknown }) => {
 
   return (
     <Menu.Root>
-      <Menu.Trigger onClick={(e) => e.stopPropagation()}>
+      <FlushTrigger onClick={(e) => e.stopPropagation()}>
         <Typography style={{ cursor: 'pointer' }} textColor="neutral800">
           {formatMessage(
             {
@@ -62,7 +76,7 @@ export const SchemaWorkspacesCell = ({ schema }: { schema: unknown }) => {
             { count: slugs.length }
           )}
         </Typography>
-      </Menu.Trigger>
+      </FlushTrigger>
       <Menu.Content>
         {slugs.map((slug) => (
           <Menu.Item key={slug} disabled onSelect={() => {}}>
@@ -78,23 +92,6 @@ export const SchemaWorkspacesCell = ({ schema }: { schema: unknown }) => {
  * Whether every entry of this content type is shared with every workspace — a
  * column of its own, reading the way the builder's other yes-or-no options do.
  */
-export const SchemaSharingCell = ({ schema }: { schema: unknown }) => {
-  const { formatMessage } = useIntl();
-
-  if (optionsOf(schema).sharedEntries !== true) {
-    return (
-      <Typography
-        textColor="neutral400"
-        aria-label={formatMessage({ id: 'global.off', defaultMessage: 'Off' })}
-      >
-        —
-      </Typography>
-    );
-  }
-
-  return (
-    <Typography textColor="success600" fontWeight="bold">
-      {formatMessage({ id: 'global.on', defaultMessage: 'On' })}
-    </Typography>
-  );
-};
+export const SchemaSharingCell = ({ schema }: { schema: unknown }) => (
+  <SchemaOption on={optionsOf(schema).sharedEntries === true} />
+);
