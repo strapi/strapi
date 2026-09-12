@@ -1,4 +1,3 @@
-import { Earth, EarthStriked } from '@strapi/icons';
 import get from 'lodash/get';
 import * as yup from 'yup';
 
@@ -173,13 +172,6 @@ export default {
           label: { id: string; defaultMessage: string };
           short: { id: string; defaultMessage: string };
           tone: string;
-          Icon?: typeof Earth;
-          off?: {
-            Icon: typeof Earth;
-            label: { id: string; defaultMessage: string };
-            short: { id: string; defaultMessage: string };
-            tone: string;
-          };
           applies: (attribute: Record<string, unknown>) => boolean;
         }) => void;
       };
@@ -217,23 +209,10 @@ export default {
           defaultMessage: 'Internationalization',
         },
         short: {
-          id: getTranslation('attribute.flag.localized'),
-          defaultMessage: 'Internationalization',
+          id: getTranslation('attribute.flag.localized.short'),
+          defaultMessage: 'Localized',
         },
-        tone: 'success',
-        Icon: Earth,
-        off: {
-          Icon: EarthStriked,
-          label: {
-            id: getTranslation('attribute.flag.notLocalized'),
-            defaultMessage: 'Not translated per locale',
-          },
-          short: {
-            id: getTranslation('attribute.flag.notLocalized'),
-            defaultMessage: 'Not translated per locale',
-          },
-          tone: 'neutral',
-        },
+        tone: 'secondary',
         applies: (attribute) =>
           (attribute.pluginOptions as { i18n?: { localized?: boolean } } | undefined)?.i18n
             ?.localized === true,

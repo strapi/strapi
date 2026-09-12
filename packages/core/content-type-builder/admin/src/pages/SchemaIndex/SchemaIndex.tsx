@@ -49,6 +49,26 @@ const ClickableRow = styled(Table.Row)`
   cursor: pointer;
 `;
 
+/**
+ * The options are yes-or-no; their columns are as wide as the word above them
+ * and no wider, packed together after the name so they can be read across a
+ * row in one go. The last column takes the slack, which leaves it at the right
+ * — spreading it across all of them put half a screen between an option and
+ * the next.
+ */
+const CondensedTable = styled(Box)`
+  th,
+  td {
+    width: 1%;
+    white-space: nowrap;
+  }
+
+  th:last-of-type,
+  td:last-of-type {
+    width: auto;
+  }
+`;
+
 const isContentType = (schema: Schema): boolean => schema.modelType === 'contentType';
 
 const hasDraftAndPublish = (schema: Schema) =>
@@ -414,41 +434,43 @@ export const SchemaIndex = () => {
               rows={rows.map((schema) => ({ ...schema, id: schema.uid }))}
               headers={headers}
             >
-              <Table.Content>
-                <Table.Head>
-                  {headers.map((header) => (
-                    <Table.HeaderCell key={header.name} {...header} />
-                  ))}
-                </Table.Head>
-                <Table.Empty
-                  content={formatMessage({
-                    id: getTrad('index.empty'),
-                    defaultMessage: 'No schema matches those filters.',
-                  })}
-                />
-                <Table.Body>
-                  {rows.map((schema) => (
-                    <ClickableRow
-                      key={schema.uid}
-                      onClick={() =>
-                        navigate(
-                          schema.modelType === 'component'
-                            ? `/plugins/${pluginId}/component-categories/${
-                                (schema as { category?: string }).category
-                              }/${schema.uid}`
-                            : `/plugins/${pluginId}/content-types/${schema.uid}`
-                        )
-                      }
-                    >
-                      {columns.map(({ name, Cell }) => (
-                        <Table.Cell key={name}>
-                          <Cell schema={schema} />
-                        </Table.Cell>
-                      ))}
-                    </ClickableRow>
-                  ))}
-                </Table.Body>
-              </Table.Content>
+              <CondensedTable>
+                <Table.Content>
+                  <Table.Head>
+                    {headers.map((header) => (
+                      <Table.HeaderCell key={header.name} {...header} />
+                    ))}
+                  </Table.Head>
+                  <Table.Empty
+                    content={formatMessage({
+                      id: getTrad('index.empty'),
+                      defaultMessage: 'No schema matches those filters.',
+                    })}
+                  />
+                  <Table.Body>
+                    {rows.map((schema) => (
+                      <ClickableRow
+                        key={schema.uid}
+                        onClick={() =>
+                          navigate(
+                            schema.modelType === 'component'
+                              ? `/plugins/${pluginId}/component-categories/${
+                                  (schema as { category?: string }).category
+                                }/${schema.uid}`
+                              : `/plugins/${pluginId}/content-types/${schema.uid}`
+                          )
+                        }
+                      >
+                        {columns.map(({ name, Cell }) => (
+                          <Table.Cell key={name}>
+                            <Cell schema={schema} />
+                          </Table.Cell>
+                        ))}
+                      </ClickableRow>
+                    ))}
+                  </Table.Body>
+                </Table.Content>
+              </CondensedTable>
             </Table.Root>
           </Flex>
         </Flex>
