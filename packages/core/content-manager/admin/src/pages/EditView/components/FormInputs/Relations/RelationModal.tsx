@@ -367,7 +367,8 @@ const prefillParentRelation = ({
   parentModel?: string;
 }): AnyData | undefined => {
   const documentId = parentDocument?.documentId;
-  const parentFieldName = fieldToConnect?.split('.').at(-1);
+  // mappedBy/inversedBy names a top-level attribute, not a component path.
+  const parentFieldName = fieldToConnect;
 
   if (!initialValues || typeof documentId !== 'string' || !documentId || !parentFieldName) {
     return initialValues;

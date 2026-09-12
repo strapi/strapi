@@ -362,7 +362,7 @@ describe('prefillParentRelation', () => {
     parentModel: 'api::article.article',
   };
 
-  it('pre-fills the inverse field from a bidirectional parent, including component paths', () => {
+  it('pre-fills the inverse field from a bidirectional parent', () => {
     const result = prefillParentRelation({ ...params, fieldToConnect: 'authors' });
 
     expect(result).toEqual({
@@ -381,18 +381,10 @@ describe('prefillParentRelation', () => {
     expect((result as { articles: { connect: object[] } }).articles.connect[0]).not.toHaveProperty(
       'authors'
     );
-    expect(
-      prefillParentRelation({
-        ...params,
-        initialValues: {} as AnyData,
-        fieldToConnect: 'seo.authors',
-      })
-    ).toEqual({
-      articles: {
-        connect: [expect.objectContaining({ documentId: 'article-doc' })],
-        disconnect: [],
-      },
-    });
+  });
+
+  it('does not treat a component path as the inverse of a top-level field with the same last segment', () => {
+    expect(prefillParentRelation({ ...params, fieldToConnect: 'seo.authors' })).toBe(initialValues);
   });
 
   it('does not pre-fill one-way relations, missing inverses, or unsaved parents', () => {
