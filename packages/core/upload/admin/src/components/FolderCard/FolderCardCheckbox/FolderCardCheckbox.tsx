@@ -6,7 +6,7 @@ export const FolderCardCheckbox = (props: CheckboxProps) => {
   const { id } = useFolderCard();
 
   return (
-    <Box position="relative" zIndex={2}>
+    <Box position="relative">
       <Checkbox aria-labelledby={`${id}-title`} {...props} />
     </Box>
   );
