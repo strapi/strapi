@@ -1,5 +1,5 @@
 import type { Struct, Modules, Schema } from '@strapi/types';
-import { errors } from '@strapi/utils';
+import { errors, contentTypes } from '@strapi/utils';
 import { curry, assoc } from 'lodash/fp';
 
 type Transform = (
@@ -166,16 +166,34 @@ const copyNonLocalizedFields = async (
     return dataToCreate;
   }
 
-  // Find an existing entry for the same document to copy unlocalized fields from
+  // Find the canonical default-locale draft explicitly. Ordering by publishedAt
+  // is database-dependent because drafts store NULL, and could select an older
+  // published value instead of the current draft.
   const attributesToPopulate = i18nService.getNestedPopulateOfNonLocalizedAttributes(
     contentType.uid
   );
-  const existingEntry = await strapi.db.query(contentType.uid).findOne({
-    where: { documentId },
-    // Prefer published entry, but fall back to any entry
-    orderBy: { publishedAt: 'desc' },
+  const defaultLocaleCode = await getDefaultLocale();
+  const draftFilter = contentTypes.hasDraftAndPublish(contentType)
+    ? { publishedAt: { $null: true } }
+    : {};
+  const query = strapi.db.query(contentType.uid);
+  let existingEntry = await query.findOne({
+    where: {
+      documentId,
+      locale: defaultLocaleCode,
+      ...draftFilter,
+    },
     populate: attributesToPopulate,
   });
+
+  // A document can exist without its default locale. Keep locale creation
+  // functional in that case, but still prefer a draft deterministically.
+  if (!existingEntry) {
+    existingEntry = await query.findOne({
+      where: { documentId, ...draftFilter },
+      populate: attributesToPopulate,
+    });
+  }
 
   // If an entry exists in another locale, copy its non-localized fields
   if (existingEntry) {
