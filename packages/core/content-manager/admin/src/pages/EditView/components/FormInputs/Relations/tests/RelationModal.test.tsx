@@ -1,5 +1,7 @@
 import { DocumentMeta } from '../../../../../../hooks/useDocumentContext';
-import { reducer, type State, type Action } from '../RelationModal';
+import { reducer, prefillParentRelation, type State, type Action } from '../RelationModal';
+
+import type { AnyData } from '../../../../utils/data';
 
 describe('Document Modal Reducer', () => {
   // Sample documents for testing
@@ -331,5 +333,75 @@ describe('Document Modal Reducer', () => {
 
       expect(result).toBe(stateWithHistory);
     });
+  });
+});
+
+describe('prefillParentRelation', () => {
+  const parentDocument = {
+    id: 12,
+    documentId: 'article-doc',
+    locale: 'en',
+    status: 'draft',
+    title: 'West Ham post match analysis',
+    authors: { count: 1 },
+  };
+  const childSchema = {
+    attributes: {
+      articles: {
+        type: 'relation',
+        target: 'api::article.article',
+        mappedBy: 'authors',
+      },
+    },
+  };
+  const initialValues = { articles: { connect: [], disconnect: [] } } as AnyData;
+  const params = {
+    initialValues,
+    childSchema,
+    parentDocument,
+    parentModel: 'api::article.article',
+  };
+
+  it('pre-fills the inverse field from a bidirectional parent', () => {
+    const result = prefillParentRelation({ ...params, fieldToConnect: 'authors' });
+
+    expect(result).toEqual({
+      articles: {
+        connect: [
+          expect.objectContaining({
+            id: 12,
+            documentId: 'article-doc',
+            title: 'West Ham post match analysis',
+            apiData: expect.objectContaining({ documentId: 'article-doc', isTemporary: true }),
+          }),
+        ],
+        disconnect: [],
+      },
+    });
+    expect((result as { articles: { connect: object[] } }).articles.connect[0]).not.toHaveProperty(
+      'authors'
+    );
+  });
+
+  it('does not treat a component path as the inverse of a top-level field with the same last segment', () => {
+    expect(prefillParentRelation({ ...params, fieldToConnect: 'seo.authors' })).toBe(initialValues);
+  });
+
+  it('does not pre-fill one-way relations, missing inverses, or unsaved parents', () => {
+    expect(prefillParentRelation({ ...params, fieldToConnect: 'cover' })).toBe(initialValues);
+    expect(
+      prefillParentRelation({
+        ...params,
+        fieldToConnect: 'authors',
+        childSchema: { attributes: { name: { type: 'string' } } },
+      })
+    ).toBe(initialValues);
+    expect(
+      prefillParentRelation({
+        ...params,
+        fieldToConnect: 'authors',
+        parentDocument: { title: 'Draft parent' },
+      })
+    ).toBe(initialValues);
   });
 });
