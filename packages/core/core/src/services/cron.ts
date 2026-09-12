@@ -31,7 +31,7 @@ interface Tasks {
   [key: string]: Task;
 }
 
-const createCronService = () => {
+const createCronService = (strapi: Core.Strapi) => {
   let jobsSpecs: JobSpec[] = [];
   let running = false;
 
