@@ -6,5 +6,12 @@
     },
     "types": ["@testing-library/jest-dom", "jest"]
   },
-  "include": ["./src", "../../shared", "./tests", "./custom.d.ts"]
+  "include": [
+    "./src",
+    "../../admin/src",
+    "../../admin/tests",
+    "../../shared",
+    "./tests",
+    "./custom.d.ts"
+  ]
 }
