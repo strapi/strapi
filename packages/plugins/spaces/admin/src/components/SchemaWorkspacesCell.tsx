@@ -1,5 +1,5 @@
 import { SchemaOption } from '@strapi/content-type-builder/strapi-admin';
-import { Menu, Typography } from '@strapi/design-system';
+import { Flex, Menu, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -15,15 +15,24 @@ interface SpacesOptions {
 }
 
 /**
+ * Every cell in the column is this tall, whether it holds a button or a word.
+ *
+ * The trigger is a control and stands taller than text; without this, the one
+ * row with a dropdown in it was taller than every other row in the table.
+ */
+const Cell = styled(Flex)`
+  height: 3.2rem;
+`;
+
+/**
  * The count sits in a dropdown and the other rows say "All workspaces" in
- * plain text — the trigger's own padding put the two a button's width apart,
- * in a column whose whole job is to be read down.
+ * plain text. The trigger keeps its padding — it is a button and needs to look
+ * like one — and is pulled back by exactly that padding, so the count starts
+ * where the words above and below it start.
  */
 const FlushTrigger = styled(Menu.Trigger)`
-  padding-left: 0;
-  padding-right: 0;
-  border: none;
-  background: transparent;
+  height: 3.2rem;
+  margin-left: calc(-1 * (${({ theme }) => theme.spaces[2]} - 2px + 1px));
 `;
 
 const optionsOf = (schema: unknown): SpacesOptions =>
@@ -53,38 +62,42 @@ export const SchemaWorkspacesCell = ({ schema }: { schema: unknown }) => {
 
   if (slugs.length === 0) {
     return (
-      <Typography textColor="neutral600">
-        {formatMessage({
-          id: getTranslation('index.workspaces.all'),
-          defaultMessage: 'All workspaces',
-        })}
-      </Typography>
+      <Cell alignItems="center">
+        <Typography textColor="neutral600">
+          {formatMessage({
+            id: getTranslation('index.workspaces.all'),
+            defaultMessage: 'All workspaces',
+          })}
+        </Typography>
+      </Cell>
     );
   }
 
   const nameFor = (slug: string) => spaces?.find((entry) => entry.slug === slug)?.name ?? slug;
 
   return (
-    <Menu.Root>
-      <FlushTrigger onClick={(e) => e.stopPropagation()}>
-        <Typography style={{ cursor: 'pointer' }} textColor="neutral800">
-          {formatMessage(
-            {
-              id: getTranslation('index.workspaces.count'),
-              defaultMessage: '{count, plural, one {# workspace} other {# workspaces}}',
-            },
-            { count: slugs.length }
-          )}
-        </Typography>
-      </FlushTrigger>
-      <Menu.Content>
-        {slugs.map((slug) => (
-          <Menu.Item key={slug} disabled onSelect={() => {}}>
-            <Typography textColor="neutral800">{nameFor(slug)}</Typography>
-          </Menu.Item>
-        ))}
-      </Menu.Content>
-    </Menu.Root>
+    <Cell alignItems="center">
+      <Menu.Root>
+        <FlushTrigger onClick={(e) => e.stopPropagation()}>
+          <Typography style={{ cursor: 'pointer' }} textColor="neutral800">
+            {formatMessage(
+              {
+                id: getTranslation('index.workspaces.count'),
+                defaultMessage: '{count, plural, one {# workspace} other {# workspaces}}',
+              },
+              { count: slugs.length }
+            )}
+          </Typography>
+        </FlushTrigger>
+        <Menu.Content>
+          {slugs.map((slug) => (
+            <Menu.Item key={slug} disabled onSelect={() => {}}>
+              <Typography textColor="neutral800">{nameFor(slug)}</Typography>
+            </Menu.Item>
+          ))}
+        </Menu.Content>
+      </Menu.Root>
+    </Cell>
   );
 };
 

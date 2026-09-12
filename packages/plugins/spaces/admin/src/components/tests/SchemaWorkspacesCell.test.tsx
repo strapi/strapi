@@ -40,6 +40,28 @@ describe('SchemaWorkspacesCell', () => {
     expect(screen.getByText('Globex')).toBeInTheDocument();
   });
 
+  /**
+   * The count is a button and a button stands taller than text, so the one row
+   * with a dropdown in it made itself taller than every other row of the
+   * table. Both cells are the same height whatever they hold.
+   */
+  it('is the same height whether it holds a dropdown or a word', () => {
+    const heightOf = (element: HTMLElement | null) =>
+      element ? window.getComputedStyle(element.parentElement!).height : undefined;
+
+    const { unmount } = render(<SchemaWorkspacesCell schema={schema({})} />);
+    const plain = heightOf(screen.getByText('All workspaces'));
+    unmount();
+
+    render(<SchemaWorkspacesCell schema={schema({ visibleIn: ['acme', 'globex'] })} />);
+    const dropdown = window.getComputedStyle(
+      screen.getByRole('button', { name: '2 workspaces' }).closest('div')!
+    ).height;
+
+    expect(plain).toBe('3.2rem');
+    expect(dropdown).toBe('3.2rem');
+  });
+
   it('counts one workspace in the singular', () => {
     render(<SchemaWorkspacesCell schema={schema({ visibleIn: ['acme'] })} />);
 

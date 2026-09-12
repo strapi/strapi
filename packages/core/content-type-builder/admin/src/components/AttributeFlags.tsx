@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { Flex, Tooltip, Typography, VisuallyHidden } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -51,22 +53,27 @@ export const AttributeFlags = ({
   return (
     <Flex gap={1}>
       {flags.map((flag) => {
+        const applies = flag.applies(attribute);
+        // A flag that reads in both states says so; one that does not keeps
+        // its place and says nothing.
+        const shown = applies ? flag : flag.off;
+
         const pill = (
-          <Pill tag="span" alignItems="center" $tone={flag.tone}>
-            {flag.Icon ? (
+          <Pill tag="span" alignItems="center" $tone={(shown ?? flag).tone}>
+            {(shown ?? flag).Icon ? (
               <>
-                <flag.Icon aria-hidden />
-                <VisuallyHidden>{formatMessage(flag.short)}</VisuallyHidden>
+                {React.createElement((shown ?? flag).Icon!, { 'aria-hidden': true })}
+                <VisuallyHidden>{formatMessage((shown ?? flag).short)}</VisuallyHidden>
               </>
             ) : (
-              <Typography variant="sigma" textColor={`${flag.tone}600`}>
-                {formatMessage(flag.short)}
+              <Typography variant="sigma" textColor={`${(shown ?? flag).tone}600`}>
+                {formatMessage((shown ?? flag).short)}
               </Typography>
             )}
           </Pill>
         );
 
-        if (!flag.applies(attribute)) {
+        if (!shown) {
           return (
             <Absent key={flag.id} aria-hidden>
               {pill}
@@ -76,7 +83,7 @@ export const AttributeFlags = ({
 
         // The tooltip hands its trigger a ref, so the pill is what takes it.
         return (
-          <Tooltip key={flag.id} label={formatMessage(flag.label)}>
+          <Tooltip key={flag.id} label={formatMessage(shown.label)}>
             {pill}
           </Tooltip>
         );

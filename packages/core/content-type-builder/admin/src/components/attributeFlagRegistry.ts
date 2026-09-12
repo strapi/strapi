@@ -32,6 +32,18 @@ export interface AttributeFlag {
    */
   Icon?: ComponentType<{ 'aria-hidden'?: boolean }>;
   /**
+   * How the flag reads when the option is off. An option with a symbol for
+   * both states says more in the same space than a gap does — a struck-through
+   * globe is "not translated", where an empty slot is only "not the thing to
+   * its left". Without it the flag simply holds its place.
+   */
+  off?: {
+    Icon: ComponentType<{ 'aria-hidden'?: boolean }>;
+    label: MessageDescriptor;
+    short: MessageDescriptor;
+    tone: PillTone;
+  };
+  /**
    * The colour family the flag is written in: its `600` for the text, its
    * `100` for the ground behind it.
    */
