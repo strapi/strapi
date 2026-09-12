@@ -442,10 +442,13 @@ const SettingsPage = () => {
                                 })}
                               </Field.Label>
                               <TextInput
-                                placeholder={formatMessage({
-                                  id: 'email.Settings.email.plugin.placeholder.defaultFrom',
-                                  defaultMessage: 'ex: no-reply@strapi.io',
-                                })}
+                                placeholder={formatMessage(
+                                  {
+                                    id: 'email.Settings.email.plugin.placeholder.defaultFrom',
+                                    defaultMessage: 'ex: no-reply@strapi.io',
+                                  },
+                                  {}
+                                )}
                                 disabled
                                 readOnly
                                 value={parsedFrom.email}
@@ -479,10 +482,13 @@ const SettingsPage = () => {
                                 })}
                               </Field.Label>
                               <TextInput
-                                placeholder={formatMessage({
-                                  id: 'email.Settings.email.plugin.placeholder.defaultReplyTo',
-                                  defaultMessage: 'ex: support@strapi.io',
-                                })}
+                                placeholder={formatMessage(
+                                  {
+                                    id: 'email.Settings.email.plugin.placeholder.defaultReplyTo',
+                                    defaultMessage: 'ex: support@strapi.io',
+                                  },
+                                  {}
+                                )}
                                 disabled
                                 readOnly
                                 value={parsedReplyTo.email}
