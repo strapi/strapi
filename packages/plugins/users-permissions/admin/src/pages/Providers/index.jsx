@@ -23,7 +23,7 @@ import {
 } from '@strapi/strapi/admin';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import FormModal from '../../components/FormModal';
 import { PERMISSIONS } from '../../constants';

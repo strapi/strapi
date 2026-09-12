@@ -1,5 +1,5 @@
 import { useFetchClient, FetchClient } from '@strapi/admin/strapi-admin';
-import { useMutation, useQueryClient } from 'react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { CreateFolders, UpdateFolder } from '../../../shared/contracts/folders';
 import { pluginId } from '../pluginId';
@@ -39,8 +39,8 @@ export const useEditFolder = () => {
     EditFolderRequestParams
   >((...args) => editFolderRequest(put, post, ...args), {
     async onSuccess() {
-      await queryClient.refetchQueries([pluginId, 'folders'], { active: true });
-      await queryClient.refetchQueries([pluginId, 'folder', 'structure'], { active: true });
+      await queryClient.refetchQueries([pluginId, 'folders'], { type: 'active' });
+      await queryClient.refetchQueries([pluginId, 'folder', 'structure'], { type: 'active' });
     },
   });
 

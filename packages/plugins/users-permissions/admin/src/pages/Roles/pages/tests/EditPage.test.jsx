@@ -10,7 +10,7 @@ import {
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 
 import { EditPage } from '../EditPage';

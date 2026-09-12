@@ -4,8 +4,8 @@ import {
   useFetchClient,
   adminApi,
 } from '@strapi/admin/strapi-admin';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useIntl } from 'react-intl';
-import { useMutation, useQueryClient } from 'react-query';
 import { useDispatch } from 'react-redux';
 
 import { BulkDeleteFiles, File } from '../../../shared/contracts/files';
@@ -59,12 +59,12 @@ export const useBulkRemove = () => {
       } = res;
 
       if (data?.files?.length > 0) {
-        queryClient.refetchQueries([pluginId, 'assets'], { active: true });
-        queryClient.refetchQueries([pluginId, 'asset-count'], { active: true });
+        queryClient.refetchQueries([pluginId, 'assets'], { type: 'active' });
+        queryClient.refetchQueries([pluginId, 'asset-count'], { type: 'active' });
       }
 
       if (data?.folders?.length > 0) {
-        queryClient.refetchQueries([pluginId, 'folders'], { active: true });
+        queryClient.refetchQueries([pluginId, 'folders'], { type: 'active' });
       }
 
       toggleNotification({
