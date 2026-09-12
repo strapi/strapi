@@ -1,7 +1,7 @@
 import knex from 'knex';
 
 import createQueryBuilder from '../query-builder';
-import { createQueryScopeProvider } from '../scopes';
+import { createQueryScopeProvider, type QueryScopeContext } from '../scopes';
 import type { Database } from '../..';
 
 /**
@@ -186,25 +186,32 @@ describe('query scopes', () => {
   describe('what the scope is told', () => {
     it('receives the model, so it can decline the ones it knows nothing about', () => {
       const { db, queryScopes } = buildDb();
-      const scope = jest.fn(() => null);
-      queryScopes.register('tenancy', scope);
+      const seen: QueryScopeContext[] = [];
+      queryScopes.register('tenancy', (ctx) => {
+        seen.push(ctx);
+
+        return null;
+      });
 
       createQueryBuilder(UID, db).init({ where: {} }).getKnexQuery();
 
-      expect(scope).toHaveBeenCalledWith(
-        expect.objectContaining({ uid: UID, operation: 'select' })
-      );
-      expect(scope.mock.calls[0][0].meta.tableName).toBe('articles');
+      expect(seen).toHaveLength(1);
+      expect(seen[0]).toMatchObject({ uid: UID, operation: 'select' });
+      expect(seen[0].meta.tableName).toBe('articles');
     });
 
     it('is told which statement it is narrowing', () => {
       const { db, queryScopes } = buildDb();
-      const scope = jest.fn(() => null);
-      queryScopes.register('tenancy', scope);
+      const seen: QueryScopeContext[] = [];
+      queryScopes.register('tenancy', (ctx) => {
+        seen.push(ctx);
+
+        return null;
+      });
 
       createQueryBuilder(UID, db).delete().where({ id: 1 }).getKnexQuery();
 
-      expect(scope).toHaveBeenCalledWith(expect.objectContaining({ operation: 'delete' }));
+      expect(seen[0]).toMatchObject({ operation: 'delete' });
     });
 
     it('runs once per query, not once per clause', () => {

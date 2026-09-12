@@ -82,9 +82,11 @@ database before its scope is settled fails loudly instead of leaking quietly.
 
 ## Where the scope comes from
 
-```ts
-getScope() = explicitScope(AsyncLocalStorage) ?? // runInSpace / runGlobal / runUnscoped
-  request.state.space ?? { mode: 'unscoped' }; // settled once, after authentication // no request: trusted code
+```text
+getScope()
+  1. an explicit scope        runInSpace / runGlobal / runUnscoped
+  2. request.state.space      settled once, after authentication
+  3. { mode: 'unscoped' }     no request at all: trusted code
 ```
 
 Inside a request, the space lives on `ctx.state` and is read through Koa's own
