@@ -1,4 +1,6 @@
-export const actions = [
+import { CreateActionPayload } from '../domain/action';
+
+export const actions: CreateActionPayload[] = [
   {
     uid: 'marketplace.read',
     displayName: 'Access the marketplace',
