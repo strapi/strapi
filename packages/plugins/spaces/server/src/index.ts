@@ -1,33 +1,13 @@
-import { ENABLE_ENV_VAR, LICENSE_FEATURE } from '../../shared/constants';
 import bootstrap from './bootstrap';
 import config from './config';
 import contentTypes from './content-types';
 import controllers from './controllers';
 import destroy from './destroy';
+import { isEnabled } from './enabled';
 import hidden from './hidden';
 import register from './register';
 import routes from './routes';
 import services from './services';
-
-/**
- * Whether this project may use Spaces.
- *
- * The feature is Enterprise, and normally comes from the licence. The
- * environment variable exists because the licence feature is rolled out
- * separately from the code: it lets a project with an Enterprise licence turn
- * Spaces on ahead of that, and it does not let a Community project in.
- */
-const isEnabled = (): boolean => {
-  if (!strapi.ee.isEE) {
-    return false;
-  }
-
-  if (strapi.ee.features.isEnabled(LICENSE_FEATURE)) {
-    return true;
-  }
-
-  return process.env[ENABLE_ENV_VAR]?.toLowerCase() === 'true';
-};
 
 /**
  * The schema is registered whether or not the feature is on.

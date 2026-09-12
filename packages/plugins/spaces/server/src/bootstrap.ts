@@ -7,10 +7,9 @@ import { registerDocumentServiceMiddleware } from './document-service';
 import { registerIntegrations } from './integrations';
 
 export default async ({ strapi }: { strapi: Core.Strapi }) => {
-  // 1. Permissions first: both providers refuse registrations once Strapi has
-  //    finished loading, and the role scope must exist before any request is
-  //    served.
-  await strapi.service('plugin::spaces.permissions').registerActions();
+  // 1. The role scope must exist before any request is served. The actions
+  //    themselves are registered earlier, during the register phase — see
+  //    `./register`.
   strapi.service('plugin::spaces.permissions').installRoleScope();
 
   // 2. Settle the space of every request as soon as its identity is known, and

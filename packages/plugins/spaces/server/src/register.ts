@@ -1,7 +1,10 @@
 import type { Core, Struct } from '@strapi/types';
 
+import { isEnabled } from './enabled';
+
 import { SPACE_ATTRIBUTE, SPACE_UID } from '../../shared/constants';
 import { isScopedContentType } from './services/content-types';
+import { adminActions } from './services/permissions';
 
 /**
  * The space a row belongs to.
@@ -134,7 +137,25 @@ const addSpaceToInternalModels = (strapi: Core.Strapi) => {
   }
 };
 
-export default ({ strapi }: { strapi: Core.Strapi }) => {
+/**
+ * Declares the actions that govern the space registry.
+ *
+ * This happens during register rather than bootstrap because the super admin's
+ * permissions are rebuilt from the registered actions in the admin's *own*
+ * bootstrap, which runs before any plugin's. Registered later, these actions
+ * would exist but nobody would hold them until the next restart — and on a
+ * fresh project, that means the person who just installed Spaces cannot create
+ * a space.
+ */
+const registerActions = async (strapi: Core.Strapi) => {
+  await strapi.service('admin::permission').actionProvider.registerMany(adminActions);
+};
+
+export default async ({ strapi }: { strapi: Core.Strapi }) => {
   addSpaceToContentTypes(strapi);
   addSpaceToInternalModels(strapi);
+
+  if (isEnabled()) {
+    await registerActions(strapi);
+  }
 };

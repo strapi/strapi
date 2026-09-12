@@ -1,6 +1,11 @@
 import { SPACE_ATTRIBUTE, SPACE_UID } from '../../../shared/constants';
 import register from '../register';
 
+// These cover the schema half of register, which runs whether or not the
+// feature is on. Declaring the permission actions is the other half, and needs
+// a licence.
+jest.mock('../enabled', () => ({ isEnabled: () => false }));
+
 const makeStrapi = (contentTypes: Record<string, any>, models: any[] = []) =>
   ({
     contentTypes,

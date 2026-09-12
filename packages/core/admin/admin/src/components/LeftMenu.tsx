@@ -28,7 +28,9 @@ const NavigationTopZone = () => {
     state.getAdminInjectedComponents('admin', 'navigation', 'top')
   );
 
-  if (components.length === 0) {
+  // The navigation is chrome: it renders on every screen, so it should survive
+  // a zone that has nothing in it — or a caller that does not implement one.
+  if (!components?.length) {
     return null;
   }
 
