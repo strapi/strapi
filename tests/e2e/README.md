@@ -28,6 +28,29 @@ Options meant for Playwright (for example `--grep`) are forwarded by the unified
 
 Playwright is spawned from `tests/utils/runners/browser-runner.js` with a **small** `env` override (`PORT`, `HOST`, `TEST_APP_PATH`, `STRAPI_DISABLE_EE`). **execa** merges that with the parent environment by default, so other variables you export before `yarn test:e2e` still reach Playwright and the app under test. Details and the parallel Jest behaviour are in `tests/cli/README.md` → **Environment variables**.
 
+## Playwright MCP (selector discovery)
+
+A [Playwright MCP](https://github.com/microsoft/playwright-mcp) server is declared in the repo
+root `.mcp.json`. When working in Claude Code it appears under `/mcp` as `playwright`. Use it to
+drive a running admin (e.g. `yarn develop` in a generated test app, or `examples/getstarted`) and
+read the accessible tree before writing specs — prefer role-based locators (`getByRole`,
+`getByText`) over CSS so specs aren't tied to design-system internals. The MCP is for _discovering_
+behaviour and selectors; the committed specs still run through the test runners below.
+
+## Vitest e2e pilot
+
+`admin/login` has a parallel implementation under Vitest as a migration pilot:
+`tests/e2e/tests/admin/login.vitest.spec.ts`, run via `yarn test:e2e:vitest`
+(config `tests/e2e/vitest.e2e.config.ts`). Unlike Playwright's bundled runner, this uses **Vitest
+as the runner** and drives the browser with the **`playwright` library directly**
+(`chromium.launch()` → `context` → `page`), which keeps full access to cookies, multi-page
+contexts and `page.request`. The original Playwright `login.spec.ts` is retained until the suite
+is migrated in bulk. See `tests/e2e/vitest/` for the shared boot + browser fixtures.
+
+The deterministic `strapi user-stories:sync-e2e` CLI command keeps these `*.vitest.spec.ts` files
+in sync with the Gherkin acceptance criteria in `docs/user-stories/` (scaffolding only — bodies
+are filled in by hand or via the Playwright MCP workflow).
+
 ## Additional Documentation
 
 See contributor docs in `docs/docs/guides/e2e` for more detailed information about writing and maintaining e2e tests.

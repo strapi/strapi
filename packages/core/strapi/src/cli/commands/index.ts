@@ -31,6 +31,7 @@ import { command as openAPICommand } from './openapi';
 import exportCommand from './export/command';
 import importCommand from './import/command';
 import transferCommand from './transfer/command';
+import { command as userStoriesSyncE2e } from './user-stories/command';
 
 import { StrapiCommand } from '../types';
 
@@ -66,6 +67,7 @@ export const commands: StrapiCommand[] = [
   importCommand,
   transferCommand,
   openAPICommand,
+  userStoriesSyncE2e,
   /**
    * Cloud
    */
