@@ -49,12 +49,9 @@ const SpaceSwitcher = () => {
     return null;
   }
 
-  // A project with one space and no cross-space view has nothing to switch
-  // between, and the switcher would only be noise.
-  if (data.data.length <= 1 && !data.canAccessAll) {
-    return null;
-  }
-
+  // Nowhere to work: say so, rather than showing an empty switcher or nothing
+  // at all. This is the one screen that can explain why the Content Manager is
+  // empty.
   if (data.data.length === 0 && !data.canAccessAll) {
     return (
       <Box paddingBottom={2}>
@@ -67,6 +64,12 @@ const SpaceSwitcher = () => {
         </Typography>
       </Box>
     );
+  }
+
+  // One space and no cross-space view: nothing to switch between, so the
+  // switcher would only be noise.
+  if (data.data.length <= 1 && !data.canAccessAll) {
+    return null;
   }
 
   return (
