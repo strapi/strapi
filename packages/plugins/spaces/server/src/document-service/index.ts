@@ -99,6 +99,16 @@ const resolveTargetSpace = async (
   const requested = data[SPACE_ATTRIBUTE];
   const requestedId = idOf(requested);
 
+  // An entry's space is settled when it is created and changed only by moving
+  // it, which is its own action and not part of this version. An update that
+  // names one is refused rather than quietly ignored: a write that looks like
+  // it moved an entry and did not is worse than one that says it cannot.
+  if (action === 'update' && requestedId !== undefined && scope.mode !== 'space') {
+    throw new ApplicationError(
+      'An entry cannot be moved to another space by updating it. Moving content between spaces is not supported yet.'
+    );
+  }
+
   if (scope.mode === 'space') {
     // A space is a property of the request, not of the payload. Dropping a
     // caller-supplied one silently would let a write look like it moved an

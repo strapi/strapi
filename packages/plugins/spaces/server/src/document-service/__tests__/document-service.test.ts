@@ -209,6 +209,19 @@ describe('document service middleware', () => {
       expect(params.data[SPACE_ATTRIBUTE]).toBe(2);
     });
 
+    it('refuses an update that names a space, rather than ignoring it', async () => {
+      // Moving content between spaces is its own action, and is not part of
+      // this version. The database lifecycle would strip the field, so without
+      // this the write would look like it moved the entry and would not have.
+      const { run } = makeStrapi();
+
+      const params: any = { data: { title: 'x', [SPACE_ATTRIBUTE]: 2 } };
+
+      await expect(
+        runGlobal(() => run({ uid: 'api::article.article', action: 'update', params }))
+      ).rejects.toThrow(/cannot be moved to another space/i);
+    });
+
     it('refuses a target space that does not exist', async () => {
       const { run } = makeStrapi();
 
