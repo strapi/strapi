@@ -33,10 +33,12 @@ describe('handlePost', () => {
   let mockAuthenticationStrategy: McpHandlerDependencies['authenticationStrategy'];
   let logErrorSpy: jest.Mock;
   let logInfoSpy: jest.Mock;
+  let runAuthenticatedSpy: jest.Mock;
 
   beforeEach(() => {
     logErrorSpy = jest.fn();
     logInfoSpy = jest.fn();
+    runAuthenticatedSpy = jest.fn().mockResolvedValue(undefined);
     jest.mocked(sendDidUseMcpServer).mockClear();
     jest.mocked(sendDidNotAuthenticateMcpRequest).mockClear();
     jest.mocked(sendDidNotHandleMcpRequest).mockClear();
@@ -48,6 +50,11 @@ describe('handlePost', () => {
       config: {
         get: jest.fn((key, defaultValue) => defaultValue),
       } as any,
+      // The handler authenticates on its own, then tells the auth service so
+      // that anything deriving request state from the caller can catch up.
+      get: jest.fn((key: string) =>
+        key === 'auth' ? { runAuthenticated: runAuthenticatedSpy } : undefined
+      ) as any,
     };
     mockConfig = new McpConfiguration(mockStrapi as Core.Strapi);
     mockAuthenticationStrategy = {
@@ -275,6 +282,37 @@ describe('handlePost', () => {
     // user (id 42), not credentials (id 7) — the actor is the token owner.
     expect(ctx.state.user).toEqual({ id: 42 });
     expect(ctx.state.auditSource).toBe('mcp');
+  });
+
+  test('should let the auth service derive request state once the caller is known', async () => {
+    const deps: McpHandlerDependencies = {
+      strapi: mockStrapi as Core.Strapi,
+      authenticationStrategy: mockAuthenticationStrategy,
+      config: mockConfig,
+      createServerWithRegistries: jest.fn().mockReturnValue({
+        mcpServer: {
+          connect: jest.fn().mockResolvedValue(undefined),
+          close: jest.fn().mockResolvedValue(undefined),
+        },
+        registries: {},
+      }),
+      capabilityDefinitions: {} as any,
+    };
+
+    const { NodeStreamableHTTPServerTransport } = jest.requireMock('@modelcontextprotocol/node');
+    NodeStreamableHTTPServerTransport.mockImplementation(() => ({
+      handleRequest: jest.fn().mockResolvedValue(undefined),
+    }));
+
+    const handler = createPostHandler(deps);
+    const ctx = makeCtx(makeReq(), { headersSent: false } as unknown as ServerResponse);
+
+    await handler(ctx, () => Promise.resolve());
+
+    // This endpoint authenticates itself, so nothing downstream would otherwise
+    // know who is asking.
+    expect(runAuthenticatedSpy).toHaveBeenCalledWith(ctx);
+    expect(ctx.state.user).toEqual({ id: 42 });
   });
 
   test('should call withTimeout with connectTimeoutMs for connect and requestTimeoutMs for handleRequest', async () => {

@@ -703,4 +703,71 @@ describe('ADMIN | new StrapiApp', () => {
       }
     });
   });
+
+  describe('Admin injection zones', () => {
+    const Switcher = () => null;
+
+    it('renders a component in one of the admin’s own slots', () => {
+      // For chrome that belongs to the application rather than to a page: a
+      // plugin that has to be present wherever the user is.
+      const app = new StrapiApp();
+
+      app.injectAdminComponent('navigation', 'top', { name: 'spaces', Component: Switcher });
+
+      expect(app.getAdminInjectedComponents('admin', 'navigation', 'top')).toEqual([
+        { name: 'spaces', Component: Switcher },
+      ]);
+    });
+
+    it('keeps every component injected into the same slot, in order', () => {
+      const Other = () => null;
+      const app = new StrapiApp();
+
+      app.injectAdminComponent('navigation', 'top', { name: 'first', Component: Switcher });
+      app.injectAdminComponent('navigation', 'top', { name: 'second', Component: Other });
+
+      expect(
+        app.getAdminInjectedComponents('admin', 'navigation', 'top').map(({ name }) => name)
+      ).toEqual(['first', 'second']);
+    });
+
+    it('starts empty, so the navigation renders nothing extra by default', () => {
+      const app = new StrapiApp();
+
+      expect(app.getAdminInjectedComponents('admin', 'navigation', 'top')).toEqual([]);
+    });
+
+    it('says so when the slot does not exist, rather than failing silently', () => {
+      const app = new StrapiApp();
+      const error = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      // @ts-expect-error – the point is to pass a slot that is not declared.
+      app.injectAdminComponent('navigation', 'bottom', { name: 'x', Component: Switcher });
+
+      expect(error).toHaveBeenCalledWith(expect.stringContaining('navigation.bottom'));
+      error.mockRestore();
+    });
+
+    it('leaves the real slots alone when one is named wrongly', () => {
+      const app = new StrapiApp();
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      // @ts-expect-error – as above.
+      app.injectAdminComponent('nowhere', 'top', { name: 'x', Component: Switcher });
+
+      expect(app.getAdminInjectedComponents('admin', 'navigation', 'top')).toEqual([]);
+      (console.error as jest.Mock).mockRestore();
+    });
+
+    it('answers with nothing for a zone that was never declared', () => {
+      const app = new StrapiApp();
+      // The lookup reports the mistake and carries on; the setup turns an
+      // unexpected console.error into a failure.
+      const error = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      expect(app.getAdminInjectedComponents('admin', 'nowhere', 'top')).toEqual([]);
+      expect(error).toHaveBeenCalled();
+      error.mockRestore();
+    });
+  });
 });

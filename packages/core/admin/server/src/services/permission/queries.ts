@@ -80,11 +80,66 @@ export const findMany = async (params = {}): Promise<Permission[]> => {
 };
 
 /**
+ * Narrows which of a user's roles apply to the request being served.
+ *
+ * Returns the ids of the roles that count right now, or `null` to keep the
+ * default (every role the user holds). An empty array means the user holds no
+ * applicable role and therefore no permission at all.
+ *
+ * A user's roles are not always all of them: a deployment may scope a role
+ * assignment to part of the project, so that being an editor in one place does
+ * not carry over to another. This is where such a deployment says so — once,
+ * before the ability is built, rather than by filtering the ability afterwards.
+ */
+export type UserRolesScope = (user: AdminUser) => Promise<Data.ID[] | null> | Data.ID[] | null;
+
+let userRolesScope: UserRolesScope | null = null;
+
+/**
+ * Installs the scope described by {@link UserRolesScope}, replacing any scope
+ * already installed. Returns a function that removes it again.
+ */
+export const setUserRolesScope = (scope: UserRolesScope | null) => {
+  userRolesScope = scope;
+
+  return () => {
+    if (userRolesScope === scope) {
+      userRolesScope = null;
+    }
+  };
+};
+
+export interface FindUserPermissionsOptions {
+  /**
+   * Whether the installed {@link UserRolesScope} applies.
+   *
+   * It should, for anything deciding what a caller may do right now. It should
+   * not for anything reasoning about a user's authority in general — the
+   * ceiling an admin token is clamped to, for instance, which is about the user
+   * rather than about the request that happens to be running.
+   */
+  scoped?: boolean;
+}
+
+/**
  * Find all permissions for a user
  * @param user - user
  */
-export const findUserPermissions = async (user: AdminUser): Promise<Permission[]> => {
-  return findMany({ where: { role: { users: { id: user.id } } } });
+export const findUserPermissions = async (
+  user: AdminUser,
+  { scoped = true }: FindUserPermissionsOptions = {}
+): Promise<Permission[]> => {
+  const roleIds = scoped && userRolesScope ? await userRolesScope(user) : null;
+
+  if (roleIds === null) {
+    return findMany({ where: { role: { users: { id: user.id } } } });
+  }
+
+  if (roleIds.length === 0) {
+    return [];
+  }
+
+  return findMany({ where: { role: { id: { $in: roleIds } } } });
 };
 
 const filterPermissionsToRemove = async (permissions: Permission[]) => {
@@ -194,5 +249,6 @@ export default {
   deleteByRolesIds,
   deleteByIds,
   findUserPermissions,
+  setUserRolesScope,
   cleanPermissionsInDatabase,
 };

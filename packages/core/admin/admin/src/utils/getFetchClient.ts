@@ -80,6 +80,51 @@ const triggerSessionExpired = (): void => {
 };
 
 /**
+ * Providers of extra headers sent with every admin API request.
+ */
+type DefaultHeadersProvider = () => Record<string, string | undefined | null>;
+
+const defaultHeadersProviders = new Set<DefaultHeadersProvider>();
+
+/**
+ * Registers headers to add to every request this client makes, so that a plugin
+ * can put ambient request state — which tenant the user is working in, say — on
+ * the wire without wrapping each call site or patching `window.fetch`.
+ *
+ * The provider is consulted per request, so it can return a value that changes
+ * over the session. A header whose value is nullish is omitted, and an explicit
+ * `headers` option on a single call still wins.
+ *
+ * Returns a function that unregisters the provider again.
+ *
+ * @example
+ * useEffect(() => addDefaultHeaders(() => ({ 'X-Tenant': currentTenant })), [currentTenant]);
+ */
+const addDefaultHeaders = (provider: DefaultHeadersProvider): (() => void) => {
+  defaultHeadersProviders.add(provider);
+
+  return () => {
+    defaultHeadersProviders.delete(provider);
+  };
+};
+
+const getRegisteredHeaders = (): Record<string, string> => {
+  const headers: Record<string, string> = {};
+
+  for (const provider of defaultHeadersProviders) {
+    const provided = provider();
+
+    for (const [name, value] of Object.entries(provided ?? {})) {
+      if (value !== null && value !== undefined) {
+        headers[name] = value;
+      }
+    }
+  }
+
+  return headers;
+};
+
+/**
  * Check if the URL is an auth path that should not trigger token refresh.
  * Note: No ^ anchor since the URL may include the baseURL prefix (e.g., "http://localhost:1337/admin/login").
  * This differs from baseQuery.ts which uses ^/admin since it receives normalized paths.
@@ -376,6 +421,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
    * This is a function so we can get a fresh token after refresh.
    */
   const getDefaultHeaders = (token = getToken()) => ({
+    ...getRegisteredHeaders(),
     Accept: 'application/json',
     'Content-Type': 'application/json',
     Authorization: `Bearer ${token}`,
@@ -524,7 +570,9 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
 
         // For non-JSON response types, omit content negotiation headers that imply JSON
         const defaultHeaders =
-          responseType === 'json' ? getDefaultHeaders(requestToken) : { Authorization };
+          responseType === 'json'
+            ? getDefaultHeaders(requestToken)
+            : { ...getRegisteredHeaders(), Authorization };
 
         const headers = new Headers({
           ...defaultHeaders,
@@ -643,6 +691,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
 
 export {
   getFetchClient,
+  addDefaultHeaders,
   isFetchError,
   FetchError,
   attemptTokenRefresh,
@@ -653,4 +702,11 @@ export {
   triggerSessionExpired,
   ADMIN_REFRESH_LOCK,
 };
-export type { FetchOptions, FetchResponse, FetchConfig, FetchClient, ErrorResponse };
+export type {
+  FetchOptions,
+  FetchResponse,
+  FetchConfig,
+  FetchClient,
+  ErrorResponse,
+  DefaultHeadersProvider,
+};
