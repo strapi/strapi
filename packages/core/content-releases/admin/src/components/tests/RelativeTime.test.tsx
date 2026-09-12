@@ -41,4 +41,13 @@ describe('RelativeTime', () => {
     expect(screen.getByRole('time')).toHaveTextContent('5 minutes ago');
     // expect(getByText('5 minutes ago')).toBeInTheDocument();
   });
+
+  it('renders a safe fallback for invalid dates instead of crashing (#27382)', () => {
+    render(<RelativeTime timestamp={new Date('')} />);
+
+    const timeElement = screen.getByRole('time');
+    expect(timeElement).toBeInTheDocument();
+    expect(timeElement).toHaveTextContent('-');
+    expect(timeElement).not.toHaveAttribute('datetime');
+  });
 });
