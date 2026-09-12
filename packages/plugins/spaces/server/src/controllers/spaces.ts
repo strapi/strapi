@@ -97,6 +97,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     const id = Number(ctx.params.id);
 
     const space = await strapi.service('plugin::spaces.spaces').update(id, {
+      // Passed through rather than dropped: the service refuses a rename, and
+      // silently ignoring one would let a caller believe it had happened.
+      slug: typeof body.slug === 'string' ? body.slug : undefined,
       name: body.name === undefined ? undefined : asString(body.name, 'name'),
       description: body.description === undefined ? undefined : (body.description as string | null),
       status: body.status as 'active' | 'archived' | undefined,

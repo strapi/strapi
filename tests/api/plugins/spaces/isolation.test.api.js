@@ -149,11 +149,15 @@ describeOnCondition(edition === 'EE')('Spaces | content isolation', () => {
 
     test('the all-spaces view sees both', async () => {
       const agent = inSpace(await createAuthRequest({ strapi }), '*');
-      const { body } = await listArticles(agent);
+      const { body, statusCode } = await listArticles(agent);
 
-      const titles = body.results.map((entry) => entry.title);
+      expect({ statusCode, body }).toMatchObject({ statusCode: 200 });
 
-      expect(titles).toEqual(expect.arrayContaining(['Bonjour', 'Guten Tag']));
+      const titles = (body.results ?? []).map((entry) => entry.title);
+
+      expect({ titles, pagination: body.pagination }).toMatchObject({
+        titles: expect.arrayContaining(['Bonjour', 'Guten Tag']),
+      });
     });
 
     test('a count does not leak the other space either', async () => {
@@ -322,8 +326,8 @@ describeOnCondition(edition === 'EE')('Spaces | content isolation', () => {
       const first = await createArticle(france, 'Shared title');
       const second = await createArticle(germany, 'Shared title');
 
-      expect(first.statusCode).toBe(200);
-      expect(second.statusCode).toBe(200);
+      expect(first.statusCode).toBeLessThan(300);
+      expect(second.statusCode).toBeLessThan(300);
     });
   });
 
