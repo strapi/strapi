@@ -27,19 +27,18 @@ const assertCwdContainsStrapiProject = (name: string) => {
   }
 };
 
-const runAction =
-  (name: string, action: (...args: any[]) => Promise<unknown>) =>
-  (...args: unknown[]) => {
+const runAction = (name: string, action: (...args: any[]) => Promise<unknown>) => {
+  // NOTE: Commander binds the Command to the action handler. Keep it a regular function.
+  return function handler(...args: unknown[]) {
     assertCwdContainsStrapiProject(name);
 
     Promise.resolve()
-      .then(() => {
-        return action(...args);
-      })
+      .then(() => action(...args))
       .catch((error) => {
         console.error(error);
         process.exit(1);
       });
   };
+};
 
 export { runAction };

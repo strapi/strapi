@@ -29,7 +29,7 @@ const core = lazy<typeof import('@strapi/core')>('@strapi/core');
 const buildCtx = lazy<typeof import('./create-build-context')>('./create-build-context');
 const staticFs = lazy<typeof import('./staticFiles')>('./staticFiles');
 
-interface DevelopOptions extends CLIContext {
+interface DevelopOptions {
   /**
    * Which bundler to use for building.
    *
@@ -53,7 +53,7 @@ const cleanupDistDirectory = async ({
   tsconfig,
   logger,
   timer,
-}: Pick<DevelopOptions, 'tsconfig' | 'logger'> & { timer: TimeMeasurer }) => {
+}: Pick<CLIContext, 'tsconfig' | 'logger'> & { timer: TimeMeasurer }) => {
   const distDir = tsconfig?.config?.options?.outDir;
 
   if (
@@ -90,16 +90,10 @@ const cleanupDistDirectory = async ({
   cleaningSpinner?.succeed();
 };
 
-const develop = async ({
-  cwd,
-  polling,
-  logger,
-  tsconfig,
-  watchAdmin,
-  buildAdmin,
-  installDeps = true,
-  ...options
-}: DevelopOptions) => {
+const develop = async (
+  { polling, watchAdmin, buildAdmin, installDeps = true, ...options }: DevelopOptions,
+  { cwd, logger, tsconfig }: CLIContext
+) => {
   const timer = getTimer();
 
   if (cluster.isPrimary) {
