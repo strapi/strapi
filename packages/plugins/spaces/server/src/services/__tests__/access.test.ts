@@ -389,6 +389,27 @@ describe('space access', () => {
       expect(listForUser).toHaveBeenCalledTimes(1);
     });
 
+    it('replaces an answer given before the caller was known', async () => {
+      // A request can be asked about twice: once while its identity is still
+      // being settled, and again once it is. The second answer is the real one,
+      // and it has to reach the request — otherwise an authenticated caller
+      // works in the space an anonymous one would have got.
+      const strapi = makeStrapi({ accessAllPermission: true });
+      const service = createAccessService({ strapi });
+      const ctx = makeCtx('*');
+
+      // First, as nobody in particular: the cross-space view is not on offer.
+      await service.resolve(ctx);
+      expect(ctx.state[SPACE_STATE_KEY]).toEqual({ mode: 'space', id: 1, slug: 'fr' });
+
+      // Then, once the caller is known to be allowed it.
+      ctx.state.user = { id: 1 };
+      ctx.state.auth = { strategy: { name: 'admin' } };
+      await service.resolve(ctx, { id: 1 });
+
+      expect(ctx.state[SPACE_STATE_KEY]).toEqual({ mode: 'global' });
+    });
+
     it('settles again when the caller turns out to be someone else', async () => {
       // A route that authenticates itself — the MCP endpoint does — runs the
       // handlers once as an anonymous caller and again once it knows who is

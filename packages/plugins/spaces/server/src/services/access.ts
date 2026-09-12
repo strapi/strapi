@@ -158,6 +158,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       if (ctx.state) {
         ctx.state[RESOLUTION_STATE_KEY] = resolution;
+
+        // The scope follows the best identity known so far. A request can be
+        // asked about before its caller is settled — the ability is built from
+        // one place and authentication finishes in another — and the first
+        // answer is for nobody in particular. Writing it here means the later,
+        // better-informed answer replaces it rather than being computed and
+        // discarded.
+        setRequestScope(ctx, resolution.scope);
       }
 
       return resolution;
