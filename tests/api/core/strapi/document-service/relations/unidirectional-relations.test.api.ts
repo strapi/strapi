@@ -288,6 +288,101 @@ describe('Document Service unidirectional relations', () => {
     expect(joinTableRows.length).toBe(0);
   });
 
+  it('Publishing the relation target after parent publish links the published component', async () => {
+    const joinTableName = 'components_default_compos_tags_lnk';
+
+    // Setup: create a fresh draft-only tag for this scenario
+    await strapi.documents(TAG_UID).create({
+      data: { name: 'Tag6', documentId: 'Tag6' },
+    });
+
+    // Step 1: Create draft Product with component relation to draft Tag6
+    const testProduct = await strapi.documents(PRODUCT_UID).create({
+      data: {
+        name: 'PublishTargetAfterParent',
+        compo: { tags: [{ documentId: 'Tag6' }] },
+      },
+    });
+
+    // 1 row: draft compo → draft Tag6
+    let joinTableRows = (await strapi.db.connection.raw(`SELECT * FROM ${joinTableName}`)) as any;
+    joinTableRows = Array.isArray(joinTableRows)
+      ? joinTableRows
+      : (joinTableRows.rows ?? joinTableRows);
+    expect(joinTableRows.length).toBe(1);
+
+    // Step 2: Publish Product while Tag6 is still draft.
+    // The published component is created but has no relation to the (non-existing) published tag.
+    await strapi.documents(PRODUCT_UID).publish({ documentId: testProduct.documentId });
+
+    // Step 3: Publish Tag6. The published component should now point to the new published tag.
+    await strapi.documents(TAG_UID).publish({ documentId: 'Tag6' });
+
+    // Verify via API: the published product's component relation must contain the published Tag6.
+    const publishedTag = await strapi.db.query(TAG_UID).findOne({
+      where: { documentId: 'Tag6', publishedAt: { $ne: null } },
+    });
+    expect(publishedTag).toBeTruthy();
+
+    const publishedProduct = await strapi.documents(PRODUCT_UID).findFirst({
+      filters: { name: 'PublishTargetAfterParent' },
+      populate: { compo: { populate: { tags: true } } },
+      status: 'published',
+    });
+    expect(publishedProduct).toBeDefined();
+    expect((publishedProduct as any).compo.tags).toHaveLength(1);
+    expect((publishedProduct as any).compo.tags[0].id).toBe(publishedTag.id);
+
+    // Cleanup
+    await strapi.documents(PRODUCT_UID).delete({ documentId: testProduct.documentId });
+    await strapi.documents(TAG_UID).delete({ documentId: 'Tag6' });
+  });
+
+  it('Publishing the relation target after parent publish links the nested published component', async () => {
+    const { joinTableName, targetColumn } = getInnerJoinInfo();
+
+    await strapi.documents(TAG_UID).create({
+      data: { name: 'Tag7', documentId: 'Tag7' },
+    });
+
+    const testProduct = await strapi.documents(PRODUCT_UID).create({
+      data: {
+        name: 'PublishTargetAfterParentNested',
+        compo: { inner: { tags: [{ documentId: 'Tag7' }] } },
+      },
+    });
+
+    // Publish product while Tag7 is still draft → published nested component has no relation row.
+    await strapi.documents(PRODUCT_UID).publish({ documentId: testProduct.documentId });
+
+    // Publish Tag7 → fix-up must link the published nested component to the new published tag.
+    await strapi.documents(TAG_UID).publish({ documentId: 'Tag7' });
+
+    const publishedTag = await strapi.db.query(TAG_UID).findOne({
+      where: { documentId: 'Tag7', publishedAt: { $ne: null } },
+    });
+    expect(publishedTag).toBeTruthy();
+
+    const publishedProduct = await strapi.documents(PRODUCT_UID).findFirst({
+      filters: { name: 'PublishTargetAfterParentNested' },
+      populate: { compo: { populate: { inner: { populate: { tags: true } } } } },
+      status: 'published',
+    });
+    expect(publishedProduct).toBeDefined();
+    expect((publishedProduct as any).compo.inner.tags).toHaveLength(1);
+    expect((publishedProduct as any).compo.inner.tags[0].id).toBe(publishedTag.id);
+
+    // Cleanup
+    await strapi.documents(PRODUCT_UID).delete({ documentId: testProduct.documentId });
+    await strapi.documents(TAG_UID).delete({ documentId: 'Tag7' });
+    // Sanity: rows targeting Tag7 should be gone
+    const rowsAfter = await strapi.db
+      .connection(joinTableName)
+      .select('*')
+      .whereIn(targetColumn, [publishedTag.id]);
+    expect(rowsAfter.length).toBe(0);
+  });
+
   it('Should not create orphaned relations for a draft and publish content-type when updating from the relation side', async () => {
     const joinTableName = 'components_default_compos_tags_lnk';
 
