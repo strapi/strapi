@@ -14,6 +14,12 @@ jest.mock('../../node/develop', () => ({
   develop: jest.fn().mockResolvedValue(undefined),
 }));
 
+// the CLI asserts the cwd is a Strapi project before running any action
+jest.mock('@strapi/utils', () => ({
+  ...jest.requireActual('@strapi/utils'),
+  isDependencyInCwd: jest.fn().mockReturnValue(true),
+}));
+
 const nodeBuildMock = nodeBuild as jest.MockedFunction<typeof nodeBuild>;
 const nodeDevelopMock = nodeDevelop as jest.MockedFunction<typeof nodeDevelop>;
 

@@ -15,6 +15,12 @@ jest.mock('../../../utils/get-inquirer', () => ({
   getInquirer: jest.fn(),
 }));
 
+// the CLI asserts the cwd is a Strapi project before running any action
+jest.mock('@strapi/utils', () => ({
+  ...jest.requireActual('@strapi/utils'),
+  isDependencyInCwd: jest.fn().mockReturnValue(true),
+}));
+
 const mockedTransferAction = transferAction as jest.MockedFunction<typeof transferAction>;
 const mockedGetInquirer = getInquirer as jest.MockedFunction<typeof getInquirer>;
 

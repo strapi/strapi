@@ -4,7 +4,6 @@ import _ from 'lodash';
 import type { QuestionCollection } from 'inquirer';
 import { createStrapi, compileStrapi } from '@strapi/core';
 
-import { runAction } from '../../utils/helpers';
 import { getInquirer } from '../../utils/get-inquirer';
 import type { StrapiCommand } from '../../types';
 
@@ -109,7 +108,7 @@ const command: StrapiCommand = () => {
     .alias('admin:delete')
     .description('Delete an existing admin')
     .option('-e, --email <email>', 'Email of the current admin')
-    .action(runAction('admin:delete-user', action));
+    .action(action);
 };
 
 export { action, command };

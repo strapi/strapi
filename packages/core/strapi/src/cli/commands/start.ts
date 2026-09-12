@@ -4,7 +4,6 @@ import path from 'path';
 import { createStrapi } from '@strapi/core';
 
 import type { StrapiCommand } from '../types';
-import { runAction } from '../utils/helpers';
 import { tryQuickOutDir } from '../utils/try-quick-outdir';
 
 const action = async () => {
@@ -44,9 +43,7 @@ const action = async () => {
  * `$ strapi start`
  */
 const command: StrapiCommand = () => {
-  return createCommand('start')
-    .description('Start your Strapi application')
-    .action(runAction('start', action));
+  return createCommand('start').description('Start your Strapi application').action(action);
 };
 
 export { command };

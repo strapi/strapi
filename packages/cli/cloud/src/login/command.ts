@@ -1,6 +1,5 @@
 import { createCommand } from 'commander';
 import type { StrapiCloudCommand } from '../types';
-import { runAction } from '../utils/helpers';
 import action from './action';
 
 /**
@@ -16,7 +15,9 @@ const command: StrapiCloudCommand = ({ ctx }) => {
     )
     .option('-d, --debug', 'Enable debugging mode with verbose logs')
     .option('-s, --silent', "Don't log anything")
-    .action(() => runAction('login', action)(ctx));
+    .action(async () => {
+      await action(ctx);
+    });
 };
 
 export default command;

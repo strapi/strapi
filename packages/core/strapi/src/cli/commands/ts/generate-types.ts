@@ -1,7 +1,6 @@
 import { createCommand } from 'commander';
 
 import type { StrapiCommand } from '../../types';
-import { runAction } from '../../utils/helpers';
 
 interface CmdOptions {
   debug?: boolean;
@@ -51,7 +50,7 @@ const command: StrapiCommand = () => {
       '-o, --out-dir <outDir>',
       'Specify a relative root directory in which the definitions will be generated. Changing this value might break types exposed by Strapi that relies on generated types.'
     )
-    .action(runAction('ts:generate-types', action));
+    .action(action);
 };
 
 export { action, command };
