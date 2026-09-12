@@ -1,7 +1,7 @@
 import { get, map, mapValues } from 'lodash/fp';
-import type { Context } from '../../types';
+import type { StrapiContext } from '../../types';
 
-export default ({ strapi }: Context) => ({
+export default ({ strapi }: StrapiContext) => ({
   graphqlScalarToOperators(graphqlScalar: string) {
     const { GRAPHQL_SCALAR_OPERATORS } = strapi.plugin('graphql').service('constants');
     const { operators } = strapi.plugin('graphql').service('builders').filters;

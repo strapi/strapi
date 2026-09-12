@@ -1,6 +1,6 @@
 import getEnabledScalars from './get-enabled-scalars';
-import type { Context } from '../../types';
+import type { StrapiContext } from '../../types';
 
-export default (context: Context) => ({
+export default (context: StrapiContext) => ({
   getEnabledScalars: getEnabledScalars(context),
 });

@@ -5,9 +5,9 @@ import publicationStatus from './publication-status';
 import publicationFilter from './publication-filter';
 import filters from './filters';
 import error from './error';
-import type { Context } from '../../types';
+import type { StrapiContext } from '../../types';
 
-export default (context: Context) => () => {
+export default (context: StrapiContext) => () => {
   const { strapi } = context;
 
   const { KINDS } = strapi.plugin('graphql').service('constants');

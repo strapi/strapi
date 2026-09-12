@@ -7,7 +7,7 @@ export default () => ({
 
   strapiOperator: '$endsWith',
 
-  add(t: Nexus.blocks.ObjectDefinitionBlock<string>, type: string) {
+  add(t: Nexus.blocks.InputDefinitionBlock<string>, type: string) {
     t.field(ENDS_WITH_FIELD_NAME, { type });
   },
 });

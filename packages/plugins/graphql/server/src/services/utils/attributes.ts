@@ -1,8 +1,8 @@
 import { propEq } from 'lodash/fp';
 import type { Schema } from '@strapi/types';
-import type { Context } from '../types';
+import type { StrapiContext } from '../types';
 
-export default ({ strapi }: Context) => {
+export default ({ strapi }: StrapiContext) => {
   /**
    * Check if the given attribute is a Strapi scalar
    * @param {object} attribute

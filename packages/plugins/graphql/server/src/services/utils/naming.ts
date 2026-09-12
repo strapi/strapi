@@ -2,11 +2,11 @@ import { camelCase, upperFirst, lowerFirst, pipe, get } from 'lodash/fp';
 import { singular } from 'pluralize';
 import { errors } from '@strapi/utils';
 import type { Struct, Schema } from '@strapi/types';
-import type { Context } from '../types';
+import type { StrapiContext } from '../types';
 
 const { ApplicationError } = errors;
 
-export default ({ strapi }: Context) => {
+export default ({ strapi }: StrapiContext) => {
   /**
    * Build a type name for a enum based on a content type & an attribute name
    */

@@ -1,10 +1,10 @@
 import { get, difference } from 'lodash/fp';
 import { errors } from '@strapi/utils';
-import type { Context } from '../../types';
+import type { StrapiContext } from '../../types';
 
 const { ApplicationError } = errors;
 
-export default ({ strapi }: Context) => {
+export default ({ strapi }: StrapiContext) => {
   const { STRAPI_SCALARS, SCALARS_ASSOCIATIONS } = strapi.plugin('graphql').service('constants');
 
   const missingStrapiScalars = difference(STRAPI_SCALARS, Object.keys(SCALARS_ASSOCIATIONS));

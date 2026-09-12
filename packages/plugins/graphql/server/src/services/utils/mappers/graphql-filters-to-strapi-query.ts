@@ -1,11 +1,11 @@
 import { has, propEq, isNil, isDate, isObject } from 'lodash/fp';
 import type { Struct } from '@strapi/types';
-import type { Context } from '../../types';
+import type { StrapiContext } from '../../types';
 
 // todo[v4]: Find a way to get that dynamically
 const virtualScalarAttributes = ['id', 'documentId'];
 
-export default ({ strapi }: Context) => {
+export default ({ strapi }: StrapiContext) => {
   const { service: getService } = strapi.plugin('graphql');
 
   const recursivelyReplaceScalarOperators = (data: any): any => {

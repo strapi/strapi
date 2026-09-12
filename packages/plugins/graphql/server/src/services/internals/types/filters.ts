@@ -1,11 +1,11 @@
 import { inputObjectType } from 'nexus';
-import type { Context } from '../../types';
+import type { StrapiContext } from '../../types';
 
 /**
  * Build a map of filters type for every GraphQL scalars
  * @return {Object<string, NexusInputTypeDef>}
  */
-const buildScalarFilters = ({ strapi }: Context) => {
+const buildScalarFilters = ({ strapi }: StrapiContext) => {
   const { naming, mappers } = strapi.plugin('graphql').service('utils');
   const { helpers } = strapi.plugin('graphql').service('internals');
 
@@ -33,6 +33,6 @@ const buildScalarFilters = ({ strapi }: Context) => {
   }, {});
 };
 
-export default (context: Context) => ({
+export default (context: StrapiContext) => ({
   scalars: buildScalarFilters(context),
 });

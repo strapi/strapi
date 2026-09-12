@@ -61,7 +61,6 @@ export default (context: Context) => {
     const resolve = buildComponentResolver({
       contentTypeUID: contentType.uid,
       attributeName,
-      strapi,
     });
 
     const args = getContentTypeArgs(targetComponent, {
@@ -143,7 +142,6 @@ export default (context: Context) => {
     const resolve = buildAssociationResolver({
       contentTypeUID: contentType.uid,
       attributeName,
-      strapi,
     });
 
     const args = attribute.multiple
@@ -161,18 +159,19 @@ export default (context: Context) => {
 
       builder.field(attributeName, {
         type: nonNull(list(typeName)),
-        async resolve(...args: unknown[]) {
-          const res = await resolve(...args);
-          return res.nodes ?? [];
+        async resolve(parent: unknown, args: unknown, context: unknown, info: unknown) {
+          const res = await resolve(parent, args, context, info);
+          const nodes = res && 'nodes' in res ? res.nodes : [];
+          return nodes ?? [];
         },
         args,
       });
     } else {
       builder.field(attributeName, {
         type: typeName,
-        async resolve(...args: unknown[]) {
-          const res = await resolve(...args);
-          return res.value;
+        async resolve(parent: unknown, args: unknown, context: unknown, info: unknown) {
+          const res = await resolve(parent, args, context, info);
+          return res && 'value' in res ? res.value : undefined;
         },
         args,
       });
@@ -202,7 +201,6 @@ export default (context: Context) => {
     const resolve = buildAssociationResolver({
       contentTypeUID: contentType.uid,
       attributeName,
-      strapi,
     });
 
     // If there is no specific target specified, then use the GenericMorph type
@@ -242,7 +240,6 @@ export default (context: Context) => {
     const resolve = buildAssociationResolver({
       contentTypeUID: contentType.uid,
       attributeName,
-      strapi,
     });
 
     const targetContentType = strapi.getModel(attribute.target);
@@ -271,18 +268,19 @@ export default (context: Context) => {
 
       builder.field(attributeName, {
         type: nonNull(list(typeName)),
-        async resolve(...args: unknown[]) {
-          const res = await resolve(...args);
-          return res.nodes ?? [];
+        async resolve(parent: unknown, args: unknown, context: unknown, info: unknown) {
+          const res = await resolve(parent, args, context, info);
+          const nodes = res && 'nodes' in res ? res.nodes : [];
+          return nodes ?? [];
         },
         args,
       });
     } else {
       builder.field(attributeName, {
         type: typeName,
-        async resolve(...args: unknown[]) {
-          const res = await resolve(...args);
-          return res.value;
+        async resolve(parent: unknown, args: unknown, context: unknown, info: unknown) {
+          const res = await resolve(parent, args, context, info);
+          return res && 'value' in res ? res.value : undefined;
         },
         args,
       });
