@@ -2,6 +2,7 @@ import { Flex, Typography, Grid, ProgressBar } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
+import { useAIAvailability } from '../../../../../hooks/useAIAvailability';
 import { useGetAiUsageQuery } from '../../../../../services/ai';
 
 const StyledProgressBar = styled(ProgressBar)`
@@ -20,9 +21,15 @@ const StyledGridItem = styled(Grid.Item)`
 
 export const AIUsage = () => {
   const { formatMessage } = useIntl();
+  const isAIAvailable = useAIAvailability();
   const { data, isLoading, error } = useGetAiUsageQuery(undefined, {
     refetchOnMountOrArgChange: true,
+    skip: !isAIAvailable,
   });
+
+  if (!isAIAvailable) {
+    return null;
+  }
 
   if (isLoading) {
     return null;
