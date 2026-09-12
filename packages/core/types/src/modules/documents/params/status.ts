@@ -5,9 +5,9 @@ export type Kind = 'draft' | 'published';
 export type { PublicationFilterMode };
 
 export type Param = {
-  status?: Kind;
+  status?: Kind | undefined;
   /** @deprecated Use `publicationFilter` instead (`never-published`, `has-published-version`, …). */
-  hasPublishedVersion?: boolean;
+  hasPublishedVersion?: boolean | undefined;
 };
 
-export type PublicationFilterParam = { publicationFilter?: PublicationFilterMode };
+export type PublicationFilterParam = { publicationFilter?: PublicationFilterMode | undefined };
