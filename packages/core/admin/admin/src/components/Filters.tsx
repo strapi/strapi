@@ -55,6 +55,44 @@ interface FitlersContextValue {
 
 const [FiltersProvider, useFilters] = createContext<FitlersContextValue>('Filters');
 
+const DATETIME_FILTER_RANGE_MS = 60 * 1000;
+
+const createDateTimeRangeFilter = (operator: '$eq' | '$ne', isoValue: string) => {
+  const start = new Date(isoValue);
+  start.setUTCSeconds(0, 0);
+  const end = new Date(start.getTime() + DATETIME_FILTER_RANGE_MS);
+
+  const range = {
+    $gte: encodeURIComponent(start.toISOString()),
+    $lt: encodeURIComponent(end.toISOString()),
+  };
+
+  return operator === '$eq' ? range : { $not: range };
+};
+
+const parseDateTimeRangeFilter = (
+  operatorObj: Record<string, unknown>
+): { operator: string; value: unknown } | null => {
+  const keys = Object.keys(operatorObj);
+
+  if (keys.length === 2 && '$gte' in operatorObj && '$lt' in operatorObj) {
+    return { operator: '$eq', value: operatorObj.$gte };
+  }
+
+  const negated = operatorObj.$not;
+  if (
+    keys.length === 1 &&
+    negated !== null &&
+    typeof negated === 'object' &&
+    '$gte' in negated &&
+    '$lt' in negated
+  ) {
+    return { operator: '$ne', value: (negated as Record<string, unknown>).$gte };
+  }
+
+  return null;
+};
+
 const getFilterDetails = (
   filterEntry: Record<string, unknown>,
   options: Filters.Filter[]
@@ -72,6 +110,14 @@ const getFilterDetails = (
 
   if (typeof operatorObj !== 'object' || operatorObj === null) {
     return null;
+  }
+
+  const attributeType = option.mainField?.type ?? option.type;
+  if (attributeType === 'datetime') {
+    const range = parseDateTimeRangeFilter(operatorObj as Record<string, unknown>);
+    if (range) {
+      return { name, ...range };
+    }
   }
 
   const [operator] = Object.keys(operatorObj as Record<string, unknown>);
@@ -212,9 +258,14 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
      * }
      * ```
      */
-    const operatorValuePairing = {
-      [data.filter]: value,
-    };
+    const isDateTimeRange =
+      fieldOptions.type === 'datetime' && (data.filter === '$eq' || data.filter === '$ne');
+
+    const operatorValuePairing = isDateTimeRange
+      ? createDateTimeRangeFilter(data.filter as '$eq' | '$ne', data.value!)
+      : {
+          [data.filter]: value,
+        };
 
     const newFilterEntry = {
       [data.name]:
@@ -223,7 +274,7 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
               [fieldOptions.mainField?.name ?? 'id']: operatorValuePairing,
             }
           : operatorValuePairing,
-    };
+    } as NonNullable<NonNullable<Filters.Query['filters']>['$and']>[number];
 
     const existingFilters = query.filters?.$and ?? [];
 
@@ -624,4 +675,4 @@ namespace Filters {
   }
 }
 
-export { Filters };
+export { Filters, createDateTimeRangeFilter, parseDateTimeRangeFilter };
