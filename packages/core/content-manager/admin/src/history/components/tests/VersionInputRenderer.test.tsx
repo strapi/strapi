@@ -10,13 +10,57 @@
  *   - admin-user relation sanitized server-side to a plain user object
  *   - a relation attribute removed from the schema, whose stored historical
  *     value is the raw payload (server's populate skipped it)
+ *
+ * Also covers #27137 — custom fields that read `value`/`onChange` from props
+ * (not `useField`) must receive the form field bag, matching Edit View.
  */
+import * as React from 'react';
+
 import { Form } from '@strapi/admin/strapi-admin';
 import { render as renderRTL, screen } from '@tests/utils';
 
-import { CustomRelationInput, resolveComponentRenderResources } from '../VersionInputRenderer';
+import { type HistoryContextValue, HistoryProvider } from '../../pages/History';
+import {
+  CustomRelationInput,
+  resolveComponentRenderResources,
+  VersionInputRenderer,
+} from '../VersionInputRenderer';
 
 import type { RelationsFieldProps } from '../../../pages/EditView/components/FormInputs/Relations/Relations';
+import type { UID } from '@strapi/types';
+
+jest.mock('../../../hooks/useDocument', () => ({
+  useDoc: () => ({ id: 'doc-1', components: {} }),
+  useDocument: () => ({ isLoading: false, components: {} }),
+}));
+
+jest.mock('../../../hooks/useDocumentLayout', () => ({
+  useDocLayout: () => ({
+    edit: { components: {} },
+  }),
+  useDocumentLayout: () => ({
+    edit: { components: {} },
+  }),
+}));
+
+/**
+ * Simulates a custom field that only reads `value` from props (TinyMCE / CKEditor
+ * style) — the contract restored for Edit View in #21163 and missing in History.
+ */
+jest.mock('../../../hooks/useLazyComponents', () => ({
+  useLazyComponents: () => ({
+    isLazyLoading: false,
+    lazyComponentStore: {
+      'plugin::test.prop-based': ({ value }: { value?: unknown }) =>
+        React.createElement(
+          'div',
+          { 'data-testid': 'prop-based-custom-field' },
+          value == null || value === '' ? 'MISSING_VALUE' : String(value)
+        ),
+    },
+    cleanup: jest.fn(),
+  }),
+}));
 
 const baseAttribute = {
   type: 'relation' as const,
@@ -167,5 +211,61 @@ describe('resolveComponentRenderResources', () => {
 
   it('returns null when all three dicts are empty', () => {
     expect(resolveComponentRenderResources('default.kept', {}, {}, {})).toBeNull();
+  });
+});
+
+/**
+ * #27137 — History must pass `...useField(name)` into custom field Inputs so
+ * plugins that bind `value`/`onChange` from props (docs / Edit View contract)
+ * show the historical value instead of rendering empty.
+ */
+describe('VersionInputRenderer custom fields (#27137)', () => {
+  const HISTORY_VALUE = '<p>hello from history</p>';
+
+  const selectedVersion = {
+    id: '26',
+    contentType: 'api::article.article' as UID.ContentType,
+    relatedDocumentId: 'doc-1',
+    createdAt: '2022-01-01T00:00:00Z',
+    status: 'draft' as const,
+    schema: {},
+    componentsSchemas: {},
+    locale: null,
+    data: {
+      custom_body: HISTORY_VALUE,
+    },
+    meta: {
+      unknownAttributes: {
+        added: {},
+        removed: {},
+      },
+    },
+  };
+
+  const historyContext = {
+    selectedVersion,
+    configuration: { contentType: { metadatas: {} }, components: {} },
+  } as Partial<HistoryContextValue>;
+
+  it('passes the form field value to custom fields that read value from props', async () => {
+    renderRTL(
+      // @ts-expect-error — partial HistoryContext is enough for this path
+      <HistoryProvider {...historyContext}>
+        <Form method="POST" initialValues={{ custom_body: HISTORY_VALUE }} onSubmit={jest.fn()}>
+          <VersionInputRenderer
+            visible
+            shouldIgnoreRBAC
+            name="custom_body"
+            label="Custom body"
+            type="string"
+            // @ts-expect-error — minimal attribute shape for a custom field
+            attribute={{ type: 'string', customField: 'plugin::test.prop-based' }}
+          />
+        </Form>
+      </HistoryProvider>
+    );
+
+    expect(await screen.findByTestId('prop-based-custom-field')).toHaveTextContent(HISTORY_VALUE);
+    expect(screen.queryByText('MISSING_VALUE')).not.toBeInTheDocument();
   });
 });
