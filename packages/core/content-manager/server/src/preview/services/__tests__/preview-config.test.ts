@@ -1,10 +1,11 @@
 import { createPreviewConfigService } from '../preview-config';
 
-const getConfig = (enabled: boolean, handler: () => void) => {
+const getConfig = (enabled: boolean, handler: () => void, viewports?: object) => {
   return {
     enabled,
     config: {
       handler,
+      ...(viewports ? { viewports } : {}),
     },
   };
 };
@@ -92,6 +93,74 @@ describe('Preview Config', () => {
       } as any;
 
       expect(() => createPreviewConfigService({ strapi }).validate()).toThrowError();
+    });
+
+    test('Passes with valid viewports', () => {
+      const strapi = {
+        config: {
+          get: () =>
+            getConfig(true, () => {}, {
+              desktop: { width: 1440, height: 900 },
+              tablet: { width: 768, height: 1024 },
+              mobile: { width: 390, height: 844 },
+            }),
+        },
+      } as any;
+
+      createPreviewConfigService({ strapi }).validate();
+    });
+
+    test('Fails on non-numeric viewport width/height', () => {
+      const strapi = {
+        config: {
+          get: () => getConfig(true, () => {}, { tablet: { width: '768', height: 1024 } }),
+        },
+      } as any;
+
+      expect(() => createPreviewConfigService({ strapi }).validate()).toThrowError();
+    });
+
+    test('Fails on negative viewport width/height', () => {
+      const strapi = {
+        config: {
+          get: () => getConfig(true, () => {}, { mobile: { width: 390, height: -1 } }),
+        },
+      } as any;
+
+      expect(() => createPreviewConfigService({ strapi }).validate()).toThrowError();
+    });
+  });
+
+  describe('getViewports', () => {
+    test('Returns an empty object when preview is disabled', () => {
+      const strapi = {
+        config: {
+          get: () => undefined,
+        },
+      } as any;
+
+      expect(createPreviewConfigService({ strapi }).getViewports()).toEqual({});
+    });
+
+    test('Returns an empty object when no viewports are configured', () => {
+      const strapi = {
+        config: {
+          get: () => getConfig(true, () => {}),
+        },
+      } as any;
+
+      expect(createPreviewConfigService({ strapi }).getViewports()).toEqual({});
+    });
+
+    test('Returns the configured viewports', () => {
+      const viewports = { tablet: { width: 768, height: 1024 } };
+      const strapi = {
+        config: {
+          get: () => getConfig(true, () => {}, viewports),
+        },
+      } as any;
+
+      expect(createPreviewConfigService({ strapi }).getViewports()).toEqual(viewports);
     });
   });
 });
