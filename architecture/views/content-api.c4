@@ -1,0 +1,151 @@
+views {
+  view content_api_runtime_components of strapi.server_runtime {
+    title 'Content API Runtime - Components'
+    description '''
+      Runtime components that load application APIs, register HTTP surfaces, execute generated Content API requests, and delegate persistence.
+    '''
+
+    include
+      http_server,
+      schema_loader,
+      schema_sync,
+      api_module_loader,
+      route_registration,
+      endpoint_composer,
+      content_api,
+      content_api_validation,
+      content_api_permissions,
+      auth,
+      core_api_layer,
+      plugin_system,
+      document_service,
+      database_layer,
+      strapi.application_source,
+      strapi.application_source.content_type_schema_files,
+      strapi.application_source.api_module_files,
+      strapi.database,
+      schema_loader -> strapi.application_source.content_type_schema_files,
+      schema_loader -> schema_sync,
+      schema_sync -> database_layer,
+      schema_loader -> core_api_layer,
+      api_module_loader -> strapi.application_source.api_module_files,
+      api_module_loader -> route_registration,
+      http_server -> route_registration,
+      route_registration -> endpoint_composer,
+      route_registration -> core_api_layer,
+      route_registration -> plugin_system,
+      route_registration -> content_api,
+      endpoint_composer -> auth,
+      endpoint_composer -> core_api_layer,
+      content_api -> content_api_validation,
+      content_api -> content_api_permissions,
+      core_api_layer -> content_api,
+      core_api_layer -> content_api_validation,
+      core_api_layer -> document_service,
+      document_service -> database_layer,
+      database_layer -> strapi.database
+    style api_module_loader {
+      shape rectangle
+      border none
+    }
+  }
+
+  view content_api_service_code of strapi.server_runtime.content_api {
+    title 'Content API Service - Code Organization'
+    description '''
+      Code-level organization of the Content API service: route metadata, permission providers, validation helpers, and extra route schemas.
+    '''
+
+    include
+      ca_route_metadata,
+      ca_permission_providers,
+      ca_validation_helpers,
+      ca_route_schemas,
+      ca_route_metadata -> ca_permission_providers,
+      ca_permission_providers -> ca_validation_helpers,
+      ca_route_schemas -> ca_validation_helpers
+  }
+
+  view generated_core_api_code of strapi.server_runtime.core_api_layer {
+    title 'Generated Core API Layer - Code Organization'
+    description '''
+      Code-level organization of generated Content API routers, controllers, and services.
+    '''
+
+    include
+      core_api_routes,
+      core_api_controllers,
+      core_api_services,
+      strapi.server_runtime.content_api,
+      strapi.server_runtime.document_service,
+      core_api_routes -> core_api_controllers,
+      core_api_controllers -> core_api_services,
+      core_api_controllers -> strapi.server_runtime.content_api,
+      core_api_services -> strapi.server_runtime.document_service
+  }
+
+  view auth_code of strapi.server_runtime.auth {
+    title 'Authentication and Authorization - Code Organization'
+    description '''
+      Code-level organization of route authentication: strategy lookup, request auth context, and authorization checks.
+    '''
+
+    include
+      auth_strategy_registry,
+      auth_request_context,
+      auth_authorization_step,
+      strapi.server_runtime.content_api_token_strategy,
+      strapi.server_runtime.users_permissions_strategy,
+      auth_strategy_registry -> auth_request_context,
+      auth_request_context -> auth_authorization_step,
+      strapi.server_runtime.content_api_token_strategy -> strapi.server_runtime.content_api_permissions,
+      strapi.server_runtime.users_permissions_strategy -> strapi.server_runtime.content_api_permissions
+  }
+
+  view document_service_code of strapi.server_runtime.document_service {
+    title 'Document Service - Code Organization'
+    description '''
+      Code-level organization of strapi.documents: document operations, middleware, transforms, attribute handlers, and utilities.
+    '''
+
+    include
+      ds_document_operations,
+      ds_middlewares,
+      ds_transform_layer,
+      ds_attribute_handlers,
+      ds_utils,
+      strapi.server_runtime.database_layer,
+      ds_document_operations -> ds_middlewares,
+      ds_document_operations -> ds_transform_layer,
+      ds_transform_layer -> ds_attribute_handlers,
+      ds_transform_layer -> ds_utils,
+      ds_document_operations -> strapi.server_runtime.database_layer
+  }
+
+  dynamic view content_api_request_flow {
+    variant sequence
+    title 'Content API - Published Content Request Flow'
+    description '''
+      Sequence view for a typical public Content API read request: HTTP routing composes the endpoint, authentication and authorization build request context, generated controllers validate and sanitize data, and document operations read through the database abstraction.
+    '''
+
+    public_client -> strapi.server_runtime.http_server 'GET /api/:content-type'
+    strapi.server_runtime.http_server -> strapi.server_runtime.endpoint_composer 'dispatch matched Koa endpoint'
+    strapi.server_runtime.endpoint_composer -> strapi.server_runtime.auth 'authenticate and authorize request'
+    strapi.server_runtime.auth -> strapi.server_runtime.content_api_token_strategy 'check bearer API token when present'
+    strapi.server_runtime.auth -> strapi.server_runtime.users_permissions_strategy 'fall back to JWT or public role access'
+    strapi.server_runtime.content_api_token_strategy -> strapi.server_runtime.content_api_permissions 'generate token ability'
+    strapi.server_runtime.users_permissions_strategy -> strapi.server_runtime.content_api_permissions 'generate role ability'
+    strapi.server_runtime.endpoint_composer -> strapi.server_runtime.core_api_layer.core_api_controllers 'invoke generated controller action'
+    strapi.server_runtime.core_api_layer.core_api_controllers -> strapi.server_runtime.content_api 'validate and sanitize query/output'
+    strapi.server_runtime.core_api_layer.core_api_controllers -> strapi.server_runtime.core_api_layer.core_api_services 'delegate content operation'
+    strapi.server_runtime.core_api_layer.core_api_services -> strapi.server_runtime.document_service 'read documents'
+    strapi.server_runtime.document_service -> strapi.server_runtime.database_layer 'query content and relations'
+    strapi.server_runtime.database_layer -> strapi.database 'execute SQL'
+    strapi.server_runtime.database_layer <- strapi.database 'rows'
+    strapi.server_runtime.document_service <- strapi.server_runtime.database_layer 'database result'
+    strapi.server_runtime.core_api_layer.core_api_services <- strapi.server_runtime.document_service 'documents'
+    strapi.server_runtime.core_api_layer.core_api_controllers <- strapi.server_runtime.core_api_layer.core_api_services 'controller payload'
+    public_client <- strapi.server_runtime.http_server 'sanitized JSON response'
+  }
+}

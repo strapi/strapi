@@ -1,0 +1,56 @@
+views {
+  view content_manager_components of strapi.server_runtime {
+    title 'Content Manager - Components'
+    description '''
+      Focused component view for the Content Manager capability: routes and controllers coordinate permission checks, schema/configuration services, populate metadata, and document operations.
+    '''
+
+    include
+      content_manager_server,
+      cm_routes,
+      cm_routing_middleware,
+      cm_controllers,
+      cm_permission_services,
+      cm_schema_configuration,
+      cm_populate_metadata,
+      cm_history_preview_homepage,
+      cm_document_manager,
+      document_service,
+      database_layer,
+      strapi.database,
+      content_manager_server -> cm_routes,
+      cm_routes -> cm_routing_middleware,
+      cm_routes -> cm_controllers,
+      cm_routes -> cm_history_preview_homepage,
+      cm_controllers -> cm_permission_services,
+      cm_controllers -> cm_schema_configuration,
+      cm_controllers -> cm_populate_metadata,
+      cm_controllers -> cm_document_manager,
+      cm_history_preview_homepage -> cm_document_manager,
+      cm_document_manager -> document_service,
+      cm_document_manager -> database_layer,
+      document_service -> database_layer,
+      database_layer -> strapi.database
+  }
+
+  view content_manager_server_code of strapi.server_runtime.content_manager_server {
+    title 'Content Manager Server - Code Organization'
+    description '''
+      Code-level organization of the Content Manager server package: routes, middlewares, controllers, services, and feature modules.
+    '''
+
+    include
+      cm_server_routes_code,
+      cm_server_middlewares_code,
+      cm_server_controllers_code,
+      cm_server_services_code,
+      cm_server_feature_modules_code,
+      strapi.server_runtime.document_service,
+      cm_server_routes_code -> cm_server_middlewares_code,
+      cm_server_routes_code -> cm_server_controllers_code,
+      cm_server_routes_code -> cm_server_feature_modules_code,
+      cm_server_controllers_code -> cm_server_services_code,
+      cm_server_feature_modules_code -> cm_server_services_code,
+      cm_server_services_code -> strapi.server_runtime.document_service
+  }
+}
