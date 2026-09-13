@@ -1239,7 +1239,16 @@ const ListItem = React.memo(({ data, index, style }: ListItemProps) => {
       documentId: documentId ?? apiData?.documentId,
       params: documentParams,
     },
-    { skip: !isTemporary }
+    /**
+     * This fetch only refreshes a label we can already render, so a failure is not worth
+     * interrupting the user for — we fall back to the label the relation came with.
+     *
+     * It also fails routinely: the target may be a content type the user cannot read
+     * through the Content Manager at all, such as `plugin::users-permissions.role`, which
+     * no admin holds `explorer.read` on. Notifying there reports a "Policy Failed" error
+     * for an action that succeeded.
+     */
+    { skip: !isTemporary, skipErrorNotification: true }
   );
   const label =
     isTemporary && document ? getRelationLabel(document, mainField, emptyLabel) : originalLabel;

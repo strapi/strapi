@@ -39,7 +39,16 @@ interface UseDocumentArgs {
   params?: object;
 }
 
-type UseDocumentOpts = Parameters<typeof useGetDocumentQuery>[1];
+type UseDocumentOpts = Parameters<typeof useGetDocumentQuery>[1] & {
+  /**
+   * Suppresses the error notification this hook otherwise raises for a failed fetch.
+   *
+   * For callers whose document is the point of the view, a failure is worth telling the
+   * user about. For callers that only enrich something already on screen it is noise —
+   * the user did nothing wrong and there is nothing for them to act on.
+   */
+  skipErrorNotification?: boolean;
+};
 
 type Document = FindOne.Response['data'];
 
@@ -125,6 +134,8 @@ const useDocument: UseDocument = (args, opts) => {
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const { formatMessage } = useIntl();
 
+  const { skipErrorNotification, ...queryOpts } = opts ?? {};
+
   const {
     currentData: data,
     isLoading: isLoadingDocument,
@@ -132,8 +143,8 @@ const useDocument: UseDocument = (args, opts) => {
     error,
     refetch,
   } = useGetDocumentQuery(args, {
-    ...opts,
-    skip: (!args.documentId && args.collectionType !== SINGLE_TYPES) || opts?.skip,
+    ...queryOpts,
+    skip: (!args.documentId && args.collectionType !== SINGLE_TYPES) || queryOpts.skip,
   });
   const document = data?.data;
   const meta = data?.meta;
@@ -171,13 +182,13 @@ const useDocument: UseDocument = (args, opts) => {
   );
 
   React.useEffect(() => {
-    if (error) {
+    if (error && !skipErrorNotification) {
       toggleNotification({
         type: 'danger',
         message: formatAPIError(error),
       });
     }
-  }, [toggleNotification, error, formatAPIError, args.collectionType]);
+  }, [toggleNotification, error, formatAPIError, args.collectionType, skipErrorNotification]);
 
   const validationSchema = React.useMemo(() => {
     if (!schema) {
