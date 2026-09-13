@@ -338,6 +338,24 @@ export const databaseConfigSchema = z
   })
   .passthrough();
 
+/**
+ * Middleware config is an array of names, `{ name, config, resolve }` objects, or handlers.
+ * Per-middleware config shapes are not validated here yet (follow-up / definitions).
+ */
+export const middlewaresConfigSchema = z.array(
+  z.union([
+    z.string(),
+    z
+      .object({
+        name: z.string().optional(),
+        resolve: z.string().optional(),
+        config: z.unknown().optional(),
+      })
+      .passthrough(),
+    z.any(),
+  ])
+);
+
 export const configSchemas = {
   admin: adminConfigSchema,
   server: serverConfigSchema,
@@ -345,6 +363,7 @@ export const configSchemas = {
   features: featuresConfigSchema,
   typescript: typescriptConfigSchema,
   database: databaseConfigSchema,
+  middlewares: middlewaresConfigSchema,
 } as const;
 
 export type ConfigSchemaNamespace = keyof typeof configSchemas;
