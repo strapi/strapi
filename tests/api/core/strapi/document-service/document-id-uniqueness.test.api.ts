@@ -49,6 +49,46 @@ describe('Document Service - Document ID Uniqueness', () => {
     await destroyTestSetup(testUtils);
   });
 
+  it('generates a documentId when create data contains a null documentId', async () => {
+    const api = strapi.documents(ARTICLE_UID);
+
+    const doc = await api.create({
+      data: { documentId: null, title: 'null document id' } as any,
+    });
+
+    expect(doc.documentId).toEqual(expect.any(String));
+    expect(doc.documentId).not.toBe('');
+
+    const row = await strapi.db.query(ARTICLE_UID).findOne({
+      where: { id: doc.id },
+      select: ['documentId'],
+    });
+
+    expect(row?.documentId).toBe(doc.documentId);
+  });
+
+  it('ignores a null documentId when updating a document', async () => {
+    const api = strapi.documents(ARTICLE_UID);
+
+    const doc = await api.create({
+      data: { title: 'created document id' },
+    });
+
+    const updatedDoc = await api.update({
+      documentId: doc.documentId,
+      data: { documentId: null, title: 'updated document id' } as any,
+    });
+
+    expect(updatedDoc.documentId).toBe(doc.documentId);
+
+    const row = await strapi.db.query(ARTICLE_UID).findOne({
+      where: { id: doc.id },
+      select: ['documentId'],
+    });
+
+    expect(row?.documentId).toBe(doc.documentId);
+  });
+
   it('prevents creating a document with a duplicate documentId', async () => {
     const api = strapi.documents(ARTICLE_UID);
 
