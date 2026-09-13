@@ -10,6 +10,31 @@ tags:
 
 The Strapi file providers expect a .tar file (optionally compressed with gzip and/or encrypted with 'aes-128-ecb') that internally uses POSIX style file paths with the following structure:
 
+## Encrypted exports (`.enc`)
+
+When encryption is enabled, new exports are prefixed with a plaintext `STRAPIEX` header before the AES stream. Exports created before this header shipped have no prefix; import detects the magic bytes and falls back to the legacy empty-salt KDF when they are absent.
+
+### Fixed prefix (12 bytes)
+
+| Field          | Size    | Description                                    |
+| -------------- | ------- | ---------------------------------------------- |
+| Magic          | 8 bytes | `STRAPIEX\0`                                   |
+| Header version | 1 byte  | `1`                                            |
+| Header length  | 2 bytes | Big-endian total header size (includes prefix) |
+| Flags          | 1 byte  | Reserved; must be `0`                          |
+
+### TLV body (`header length − 12` bytes)
+
+Repeated records of `type (1 byte) | length (1 byte) | value`. Unknown types are ignored.
+
+| Type   | Value (v1) | Description                          |
+| ------ | ---------- | ------------------------------------ |
+| `0x01` | 16 bytes   | Random salt for the scrypt KDF       |
+| `0x02` | 1 byte     | KDF id (`0` = scrypt, Node defaults) |
+| `0x03` | 1 byte     | Cipher id (`0` = aes-128-ecb)        |
+
+The AES ciphertext follows immediately after the header.
+
 ```
 ./
 configuration
