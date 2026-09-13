@@ -3,6 +3,7 @@ import {
   defineApiConfig,
   defineConfig,
   defineMiddlewaresConfig,
+  definePluginsConfig,
   defineServerConfig,
 } from '../define-config';
 
@@ -128,5 +129,26 @@ describe('defineConfig factories', () => {
       // @ts-expect-error intentional invalid runtime shape
       defineMiddlewaresConfig({ name: 'strapi::logger' })
     ).toThrow(/Invalid Strapi config "middlewares"/);
+  });
+
+  it('validates the plugins config envelope without deep plugin payloads', () => {
+    const config = definePluginsConfig({
+      graphql: { enabled: true, config: { endpoint: '/graphql' } },
+      upload: false,
+    });
+
+    expect(config).toEqual({
+      graphql: { enabled: true, config: { endpoint: '/graphql' } },
+      upload: false,
+    });
+  });
+
+  it('rejects an invalid plugins entry shape', () => {
+    expect(() =>
+      definePluginsConfig({
+        // @ts-expect-error intentional invalid runtime shape
+        graphql: 'yes',
+      })
+    ).toThrow(/Invalid Strapi config "plugins"/);
   });
 });

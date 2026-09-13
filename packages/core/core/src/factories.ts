@@ -15,6 +15,7 @@ import {
   defineTypescriptConfig,
   defineDatabaseConfig,
   defineMiddlewaresConfig,
+  definePluginsConfig,
 } from './configuration/define-config';
 
 const symbols = {
@@ -152,4 +153,5 @@ export {
   defineTypescriptConfig,
   defineDatabaseConfig,
   defineMiddlewaresConfig,
+  definePluginsConfig,
 };
