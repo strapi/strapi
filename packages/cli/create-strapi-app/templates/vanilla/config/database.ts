@@ -1,8 +1,8 @@
 import path from 'path';
-import type { Core } from '@strapi/strapi';
+import { factories } from '@strapi/strapi';
 import { isDatabaseClientKind } from '@strapi/database';
 
-const config = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Database => {
+export default factories.defineDatabaseConfig(({ env }) => {
   const client = env('DATABASE_CLIENT', 'sqlite');
 
   if (!isDatabaseClientKind(client)) {
@@ -11,7 +11,7 @@ const config = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Database 
     );
   }
 
-  const connections: Record<Core.Config.Database.ClientKind, Core.Config.Database['connection']> = {
+  const connections = {
     mysql: {
       client: 'mysql',
       connection: {
@@ -67,6 +67,4 @@ const config = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Database 
       acquireConnectionTimeout: env.int('DATABASE_CONNECTION_TIMEOUT', 60000),
     },
   };
-};
-
-export default config;
+});
