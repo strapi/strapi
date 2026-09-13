@@ -10035,7 +10035,7 @@ __metadata:
     ora: "npm:5.4.1"
     outdent: "npm:0.8.0"
     pkg-up: "npm:3.1.0"
-    prettier: "npm:3.6.2"
+    prettier: "npm:3.9.5"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-refresh: "npm:0.14.0"
@@ -10110,7 +10110,7 @@ __metadata:
     fs-extra: "npm:11.3.4"
     jest: "npm:29.6.0"
     lodash: "npm:4.18.1"
-    prettier: "npm:3.6.2"
+    prettier: "npm:3.9.5"
     tsconfig: "npm:5.53.0"
     typescript: "npm:5.9.3"
   languageName: unknown
@@ -25442,12 +25442,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:3.6.2":
-  version: 3.6.2
-  resolution: "prettier@npm:3.6.2"
+"prettier@npm:3.9.5":
+  version: 3.9.5
+  resolution: "prettier@npm:3.9.5"
   bin:
     prettier: bin/prettier.cjs
-  checksum: 10c0/488cb2f2b99ec13da1e50074912870217c11edaddedeadc649b1244c749d15ba94e846423d062e2c4c9ae683e2d65f754de28889ba06e697ac4f988d44f45812
+  checksum: 10c0/0349dd9e6d8010965de6f69e6b6ee2484b8caf78c66675afced6c75ad60ff24c3a2a4f41153fb8adeaee4d8f539641b48cebc71d283cec4d146e9962126c5ceb
   languageName: node
   linkType: hard
 
@@ -27961,7 +27961,7 @@ __metadata:
     nx: "npm:20.8.4"
     oxlint: "npm:1.72.0"
     plop: "npm:4.0.5"
-    prettier: "npm:3.6.2"
+    prettier: "npm:3.9.5"
     prettier-2: "npm:prettier@^2"
     qs: "npm:6.15.3"
     rimraf: "npm:6.1.3"
