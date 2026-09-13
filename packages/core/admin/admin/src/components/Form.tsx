@@ -12,6 +12,7 @@ import { WarningCircle } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
 import { produce, type Draft } from 'immer';
 import isEqual from 'lodash/isEqual';
+import toPath from 'lodash/toPath';
 import { useIntl, type MessageDescriptor, type PrimitiveType } from 'react-intl';
 import { useBlocker } from 'react-router-dom';
 
@@ -602,6 +603,35 @@ const setDraftValues = <TFormValues extends FormValues>(
   draft.values = values as Draft<TFormValues>;
 };
 
+/**
+ * Removes the error message a field is holding onto once its value changes, so a message left
+ * behind by a rejected submission (e.g. the server-side `<field> must be defined.` of a required
+ * field) does not survive the user fixing the field.
+ *
+ * Errors are keyed at the field path whilst the value can be updated at a path nested within it —
+ * relations write their value to `<field>.connect` / `<field>.disconnect` — so the ancestors of the
+ * changed path are cleared too. Only actual messages (a string or a `MessageDescriptor`) are
+ * removed: nested error structures are left alone so that changing one row of a repeatable
+ * component or a dynamic zone does not wipe the errors of its siblings.
+ */
+const clearErrorsForField = <TFormValues extends FormValues>(
+  errors: FormErrors<TFormValues>,
+  field: string
+): FormErrors<TFormValues> => {
+  const path = toPath(field);
+
+  return path.reduceRight<FormErrors<TFormValues>>((acc, _, index) => {
+    const currentPath = path.slice(0, index + 1).join('.');
+    const error = getIn(acc, currentPath);
+
+    if (typeof error === 'string' || isErrorMessageDescriptor(error)) {
+      return setIn(acc, currentPath, undefined);
+    }
+
+    return acc;
+  }, errors);
+};
+
 type FormActions<TFormValues extends FormValues = FormValues> =
   | { type: 'SUBMIT_ATTEMPT' }
   | { type: 'SUBMIT_FAILURE' }
@@ -640,9 +670,18 @@ const reducer = <TFormValues extends FormValues = FormValues>(
       case 'SUBMIT_SUCCESS':
         draft.isSubmitting = false;
         break;
-      case 'SET_FIELD_VALUE':
+      case 'SET_FIELD_VALUE': {
         setDraftValues(draft, setIn(state.values, action.payload.field, action.payload.value));
+
+        const errors = clearErrorsForField(state.errors, action.payload.field);
+
+        if (errors !== state.errors) {
+          // @ts-expect-error – TODO: figure out why this fails a TS check.
+          draft.errors = errors;
+        }
+
         break;
+      }
       case 'ADD_FIELD_ROW': {
         /**
          * TODO: add check for if the field is an array?
