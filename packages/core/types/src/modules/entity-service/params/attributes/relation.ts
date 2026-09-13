@@ -1,6 +1,6 @@
 import type * as Schema from '../../../../schema';
 
-import type { If } from '../../../../utils';
+import type { Constants, If } from '../../../../utils';
 import type * as UID from '../../../../uid';
 
 import type { ID } from './id';
@@ -35,6 +35,41 @@ type RelationInputValue<TRelationKind extends Schema.Attribute.RelationKind.Any>
   XOneInput
 >;
 
+/**
+ * Media attributes are persisted as a morph relation to `plugin::upload.file` at write time -
+ * see `buildRelationsStore` in the entity validator. That runtime path only ever reads a bare
+ * id or an `{ id }` object off each entry (for the value itself, `connect`, `set`, and
+ * `disconnect`) - it never resolves `documentId`. So media inputs use their own, narrower
+ * id-only long-hand rather than reusing `relation`'s `LongHand`, which would type-check a
+ * `documentId` update that silently drops the existing association instead of applying it.
+ */
+type MediaShortHand = ID;
+type MediaLongHand = { id: ID };
+
+type MediaSet = { set: MediaShortHand[] | MediaLongHand[] | null };
+type MediaConnect = { connect: MediaShortHand[] | WithPositionArguments<MediaLongHand>[] };
+type MediaDisconnect = { disconnect: MediaShortHand[] | MediaLongHand[] };
+
+type MediaFullUpdate = MediaSet;
+type MediaPartialUpdate = Partial<MediaConnect & MediaDisconnect>;
+
+type MediaXOneInput = MediaShortHand | MediaLongHand | null;
+type MediaXManyInput =
+  | MediaShortHand[]
+  | MediaLongHand[]
+  | null
+  | MediaPartialUpdate
+  | MediaFullUpdate;
+
+// A naked conditional (as opposed to `If`, which is intentionally non-distributive) so a
+// widened/generic `TMultiple extends boolean` distributes into `XManyInput | XOneInput`
+// instead of collapsing to the `false` branch.
+type MediaInputValue<TMultiple extends Constants.BooleanValue> = TMultiple extends Constants.True
+  ? MediaXManyInput
+  : TMultiple extends Constants.False
+    ? MediaXOneInput
+    : never;
+
 type RelationsKeysWithoutTarget<TSchemaUID extends UID.Schema> = Exclude<
   Schema.AttributeNamesByType<TSchemaUID, 'relation'>,
   Schema.AttributeNamesWithTarget<TSchemaUID>
@@ -45,4 +80,9 @@ type OmitRelationsWithoutTarget<TSchemaUID extends UID.Schema, TValue> = Omit<
   RelationsKeysWithoutTarget<TSchemaUID>
 >;
 
-export type { RelationInputValue, RelationsKeysWithoutTarget, OmitRelationsWithoutTarget };
+export type {
+  RelationInputValue,
+  MediaInputValue,
+  RelationsKeysWithoutTarget,
+  OmitRelationsWithoutTarget,
+};

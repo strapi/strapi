@@ -3,7 +3,7 @@ import type * as Schema from '../../../../schema';
 import type * as UID from '../../../../uid';
 import type { Array, Constants, If, Extends, IsNotNever, MatchFirst } from '../../../../utils';
 
-import type { OmitRelationsWithoutTarget, RelationInputValue } from './relation';
+import type { MediaInputValue, OmitRelationsWithoutTarget, RelationInputValue } from './relation';
 import type { ID } from './id';
 import type * as Literals from './literals';
 
@@ -71,6 +71,18 @@ export type GetValue<TAttribute extends Schema.Attribute.Attribute, TGuard = unk
         Extends<TAttribute, Schema.Attribute.OfType<'relation'>>,
         TAttribute extends Schema.Attribute.Relation<infer TRelationKind, infer TTarget>
           ? If<IsNotNever<TTarget>, RelationInputValue<TRelationKind>>
+          : never,
+      ],
+      // Media
+      [
+        Extends<TAttribute, Schema.Attribute.OfType<'media'>>,
+        TAttribute extends Schema.Attribute.Media<
+          // Unused as long as the media input value doesn't depend on the allowed kinds
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          infer _TKind,
+          infer TMultiple
+        >
+          ? MediaInputValue<TMultiple>
           : never,
       ],
       // DynamicZone
