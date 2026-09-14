@@ -216,7 +216,9 @@ After that, the integrity check between the source and destination is run, which
 
 Note: Schema differences during this stage can be resolved programmatically by adding an `onSchemaDiff` handler. However, be aware that this interface is likely to change to a more generic engine handler (such as `engine.on('schemaDiff', handler)`) before this feature is stable.
 
-Once the integrity check has passed, the transfer begins by opening streams from the source to the destination one stage at a time. The following is a list of the stages in the order they are run:
+Source providers can then validate each included stage with `validateStage`. This validation runs before `beforeTransfer`, the point where a restore can begin changing destination data. Archive and directory imports use it to check that every included upload has valid matching sidecar metadata. An invalid archive therefore fails before destination content or files are changed. Asset validation is skipped when the files stage is excluded.
+
+Once the integrity and stage validation checks have passed, the transfer begins by opening streams from the source to the destination one stage at a time. The following is a list of the stages in the order they are run:
 
 1. schemas - content type schemas. Note: with all built-in Strapi destination providers, only the Strapi file provider makes use of this data
 2. entities - all entities (including components, dynamic zones, and media data but not media files) _without their relations_
@@ -261,6 +263,8 @@ const options = {
 When skipping the assets stage, sync upload binaries separately — for example with `rsync -avz public/uploads/ user@host:/path/to/strapi/public/uploads/`.
 
 Once all stages have been completed, the transfer waits for all providers to close and then emits a finish event and the transfer completes.
+
+If the transfer throws after bootstrap but before provider closing begins, the engine rolls back the destination provider and then closes both providers before rethrowing. This matters for programmatic callers: the local providers disable database lifecycles on bootstrap and only re-enable them on close, so a failure that skipped the close would leave the caller's Strapi instance with lifecycles off. Failures during rollback or failure-path cleanup are reported as warning diagnostics so they cannot mask the error that caused the transfer to fail.
 
 ### Excluding content types from the CLI
 
