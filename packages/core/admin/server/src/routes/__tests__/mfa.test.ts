@@ -5,7 +5,7 @@ import routes from '../mfa';
 type RouteEntry = {
   method: string;
   path: string;
-  config: { policies: unknown[] };
+  config: { policies: unknown[]; middlewares?: unknown[] };
 };
 
 const route = (method: string, path: string): RouteEntry =>
@@ -70,4 +70,43 @@ describe('every mfa route is gated by the feature flag', () => {
       expect(route(method, path).config.policies[0]).toBe('admin::isMfaEnabled');
     }
   );
+});
+
+/**
+ * A read behind the login-grade limiter is a bug, not a hardening: the default is five requests
+ * per five minutes and the key collapses to `unknownEmail:<path>:<ip>`, so one profile visit can
+ * spend the whole allowance for every administrator on that address and the section renders its
+ * "unavailable" error. Only the routes that check a password or a code carry it.
+ */
+describe('mfa routes (rate limiting)', () => {
+  const CREDENTIAL_ROUTES = [
+    ['POST', '/mfa/enrol'],
+    ['POST', '/mfa/enrol/verify'],
+    ['POST', '/mfa/recovery-codes'],
+    ['POST', '/mfa/disable'],
+  ] as const;
+
+  test.each(CREDENTIAL_ROUTES)('%s %s is rate limited', (method, path) => {
+    expect(route(method, path).config.middlewares).toEqual([
+      { name: 'admin::rateLimit', config: { max: 20 } },
+    ]);
+  });
+
+  const isCredentialRoute = (method: string, path: string) =>
+    CREDENTIAL_ROUTES.some(([m, p]) => m === method && p === path);
+
+  test.each(
+    (routes as unknown as RouteEntry[])
+      .filter((r) => !isCredentialRoute(r.method, r.path))
+      .map((r) => [r.method, r.path] as const)
+  )('%s %s carries no rate limiter', (method, path) => {
+    expect(route(method, path).config.middlewares).toBeUndefined();
+  });
+
+  test('every GET is free of the limiter', () => {
+    const limitedReads = (routes as unknown as RouteEntry[]).filter(
+      (r) => r.method === 'GET' && r.config.middlewares !== undefined
+    );
+    expect(limitedReads).toEqual([]);
+  });
 });
