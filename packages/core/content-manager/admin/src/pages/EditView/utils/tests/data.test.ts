@@ -529,6 +529,86 @@ describe('data', () => {
       expect(result.data).not.toHaveProperty('internationalCode');
       expect(result.removedAttributes).toEqual(['internationalCode']);
     });
+
+    // https://github.com/strapi/strapi/issues/25030
+    it('should not restore a non-repeatable component relation when the component is reset and re-added', () => {
+      const componentSchema = {
+        uid: 'basic.relation' as const,
+        category: 'basic',
+        modelType: 'component' as const,
+        modelName: 'relation',
+        globalId: 'ComponentBasicRelation',
+        info: { displayName: 'Relation' },
+        options: {},
+        pluginOptions: {},
+        attributes: {
+          id: { type: 'integer' as const },
+          documentId: { type: 'string' as const },
+          categories: {
+            type: 'relation' as const,
+            relation: 'oneToMany' as const,
+            target: 'api::category.category' as const,
+          },
+        },
+      };
+
+      const result = handleInvisibleAttributes(
+        {
+          documentId: 'ow3vxhwkt7ca7yw8dvda4ek4',
+          title: 'My entry',
+          // The user reset the component (→ null) and re-added it via the
+          // initializer, so `getValues()` holds a freshly created, empty
+          // component with no id.
+          single_relation: {},
+        },
+        {
+          schema: {
+            uid: 'api::bugtest.bugtest',
+            kind: 'collectionType',
+            modelType: 'contentType',
+            modelName: 'bugtest',
+            globalId: 'BugTest',
+            info: {
+              displayName: 'BugTest',
+              singularName: 'bugtest',
+              pluralName: 'bugtests',
+              description: '',
+            },
+            options: { draftAndPublish: true },
+            pluginOptions: {},
+            attributes: {
+              documentId: { type: 'string' },
+              title: { type: 'string' },
+              single_relation: {
+                type: 'component',
+                component: 'basic.relation',
+                repeatable: false,
+              },
+            },
+          },
+          // The previously-saved component (id + connected relation) as it is
+          // loaded into the form.
+          initialValues: {
+            documentId: 'ow3vxhwkt7ca7yw8dvda4ek4',
+            title: 'My entry',
+            single_relation: {
+              id: 5,
+              categories: { connect: [], disconnect: [] },
+            },
+          },
+          components: {
+            'basic.relation': componentSchema,
+          },
+        }
+      );
+
+      // The re-added component must not inherit the previous component's id nor
+      // its relation from initialValues; otherwise the server updates the old
+      // component row in place and restores the relation on save.
+      expect(result.data.single_relation).toBeDefined();
+      expect(result.data.single_relation.id).toBeUndefined();
+      expect(result.data.single_relation).not.toHaveProperty('categories');
+    });
   });
 
   describe('prepareTempKeys', () => {
