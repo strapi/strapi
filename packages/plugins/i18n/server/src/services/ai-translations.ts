@@ -29,7 +29,6 @@ const createAITranslationsService = ({
   strapi: Core.Strapi;
 }): AiTranslationsService => {
   let registeredProvider: AiTranslationsProvider | null = null;
-  let strapiManagedProvider: AiTranslationsProvider | null = null;
 
   const resolveProvider = (): AiTranslationsProvider | null => {
     if (!strapi.ai.admin.isAvailable()) {
@@ -49,7 +48,7 @@ const createAITranslationsService = ({
         return;
       }
 
-      if (registeredProvider !== null && registeredProvider !== strapiManagedProvider) {
+      if (registeredProvider !== null) {
         throw new Error(
           `The AI translations provider "${registeredProvider.name}" is already registered, "${provider.name}" cannot replace it.`
         );
@@ -59,6 +58,13 @@ const createAITranslationsService = ({
     },
 
     registerStrapiManagedProvider() {
+      if (!strapi.ai.admin.isStrapiManagedAiEnabled()) {
+        strapi.log.warn(
+          'The Strapi-managed AI translations provider was ignored: the Strapi license does not include the "cms-ai" feature.'
+        );
+        return;
+      }
+
       const provider = createStrapiManagedAiTranslationsProvider({ strapi });
 
       if (registeredProvider !== null) {
@@ -67,7 +73,6 @@ const createAITranslationsService = ({
         );
       }
 
-      strapiManagedProvider = provider;
       registeredProvider = provider;
     },
 

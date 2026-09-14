@@ -1,11 +1,16 @@
 import { createAITranslationsService, type AiTranslationsProvider } from '../ai-translations';
 
-const createMockStrapi = ({ isAvailable = true, authorizeCustomProvider = true } = {}) =>
+const createMockStrapi = ({
+  isAvailable = true,
+  authorizeCustomProvider = true,
+  isStrapiManagedAiEnabled = true,
+} = {}) =>
   ({
     ai: {
       admin: {
         isAvailable: jest.fn(() => isAvailable),
         authorizeCustomProvider: jest.fn(() => authorizeCustomProvider),
+        isStrapiManagedAiEnabled: jest.fn(() => isStrapiManagedAiEnabled),
         getAiToken: jest.fn().mockResolvedValue({ token: 'test-token' }),
       },
     },
@@ -115,18 +120,15 @@ describe('ai-translations service', () => {
     );
   });
 
-  test('a custom provider replaces the Strapi-managed one', async () => {
+  test('throws when a custom provider is registered after the Strapi-managed one', () => {
     const strapi = createMockStrapi();
     const service = createAITranslationsService({ strapi });
-    const provider = createProvider();
 
     service.registerStrapiManagedProvider();
-    service.registerProvider({ provider });
 
-    await service.generateTranslations(PARAMS);
-
-    expect(provider.generateTranslations).toHaveBeenCalledWith(PARAMS);
-    expect((global as any).fetch).toBeUndefined();
+    expect(() => service.registerProvider({ provider: createProvider() })).toThrow(
+      'The AI translations provider "strapi-managed" is already registered, "byok" cannot replace it.'
+    );
   });
 
   test('registerStrapiManagedProvider throws when a custom provider is already registered', () => {
@@ -138,5 +140,15 @@ describe('ai-translations service', () => {
     expect(() => service.registerStrapiManagedProvider()).toThrow(
       'The AI translations provider "byok" is already registered, "strapi-managed" cannot replace it.'
     );
+  });
+
+  test('registerStrapiManagedProvider is ignored without the cms-ai feature', () => {
+    const strapi = createMockStrapi({ isStrapiManagedAiEnabled: false });
+    const service = createAITranslationsService({ strapi });
+
+    service.registerStrapiManagedProvider();
+
+    expect(service.hasProvider()).toBe(false);
+    expect(strapi.log.warn).toHaveBeenCalledWith(expect.stringContaining('cms-ai'));
   });
 });
