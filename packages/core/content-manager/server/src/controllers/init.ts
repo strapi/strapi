@@ -6,12 +6,14 @@ export default {
     const { findAllComponents } = getService('components');
     const { getAllFieldSizes } = getService('field-sizes');
     const { findAllContentTypes } = getService('content-types');
+    const { getViewports } = getService('preview-config');
 
     ctx.body = {
       data: {
         fieldSizes: getAllFieldSizes(),
         components: findAllComponents().map(toDto),
         contentTypes: findAllContentTypes().map(toDto),
+        previewViewports: getViewports(),
       },
     };
   },
