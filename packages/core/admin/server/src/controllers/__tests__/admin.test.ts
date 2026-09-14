@@ -94,4 +94,18 @@ describe('Admin Controller', () => {
       });
     });
   });
+
+  describe('getProjectType', () => {
+    beforeAll(() => {
+      global.strapi = { config: { get: jest.fn(() => ({})) } } as any;
+    });
+
+    test('Returns isTrial, which the admin contract requires as a boolean', async () => {
+      const result = await adminController.getProjectType();
+
+      expect(result).toEqual({
+        data: { isEE: false, isTrial: false, features: [], flags: {}, ai: { enabled: false } },
+      });
+    });
+  });
 });
