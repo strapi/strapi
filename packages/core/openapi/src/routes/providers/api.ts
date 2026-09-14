@@ -29,7 +29,8 @@ export class ApiRoutesProvider extends AbstractRoutesProvider {
       // Extract and flatten each router from every API
       .flatMap((api) => Object.values(api.routes))
       // Extract and flatten the routes from each router
-      .flatMap((router) => router.routes);
+      .flatMap((router) => router.routes)
+      .map((route) => this.withContentApiPrefix(route));
 
     debug('found %o routes in Strapi APIs', routes.length);
 
