@@ -194,6 +194,7 @@ describe('Upload | extensions | entity-manager', () => {
 
   describe('signEntityMedia | richtext and blocks', () => {
     const BUCKET_URL = 'https://my-bucket.s3.eu-west-1.amazonaws.com';
+    const FRESH_SIGNATURE = 'X-Amz-Signature=fresh&X-Amz-Expires=900';
 
     let signFileUrls: any;
 
@@ -201,11 +202,13 @@ describe('Upload | extensions | entity-manager', () => {
      * Mimics the real `signFileUrls`: `isUrlSigned` is set for every file of
      * the configured private provider, but the provider itself only rewrites
      * URLs from its own bucket and hands every other URL back untouched. The
-     * signature always replaces whatever query string the stored URL had.
+     * signature always replaces whatever query string the stored URL had, and
+     * the flag is set on the file and on each format, as the real one does.
      */
     const fakeSignFileUrls = jest.fn(async (file: any) => {
       const isOwned = (url: string) => url.startsWith(`${BUCKET_URL}/`);
-      const sign = (url: string) => (isOwned(url) ? `${url.split('?')[0]}?signature=fresh` : url);
+      const sign = (url: string) =>
+        isOwned(url) ? `${url.split('?')[0]}?${FRESH_SIGNATURE}` : url;
       const signed = { ...file, isUrlSigned: false };
 
       if (file.provider !== 'aws-s3') {
@@ -219,7 +222,7 @@ describe('Upload | extensions | entity-manager', () => {
         signed.formats = Object.fromEntries(
           Object.entries(file.formats).map(([key, format]: [string, any]) => [
             key,
-            { ...format, url: sign(format.url) },
+            { ...format, url: sign(format.url), isUrlSigned: true },
           ])
         );
       }
@@ -253,9 +256,11 @@ describe('Upload | extensions | entity-manager', () => {
 
         const result: any = await signEntityMedia(entity, modelUID);
 
-        expect(result.blocks[0].image.url).toBe(`${BUCKET_URL}/photo_abc123.png?signature=fresh`);
+        expect(result.blocks[0].image.url).toBe(
+          `${BUCKET_URL}/photo_abc123.png?${FRESH_SIGNATURE}`
+        );
         expect(result.blocks[0].image.formats.thumbnail.url).toBe(
-          `${BUCKET_URL}/thumbnail_photo_abc123.png?signature=fresh`
+          `${BUCKET_URL}/thumbnail_photo_abc123.png?${FRESH_SIGNATURE}`
         );
         // the stored value is never mutated
         expect(entity.blocks[0].image.url).toBe(`${BUCKET_URL}/photo_abc123.png`);
@@ -268,7 +273,9 @@ describe('Upload | extensions | entity-manager', () => {
 
         const result: any = await signEntityMedia(entity, modelUID);
 
-        expect(result.blocks[0].image.url).toBe(`${BUCKET_URL}/photo_abc123.png?signature=fresh`);
+        expect(result.blocks[0].image.url).toBe(
+          `${BUCKET_URL}/photo_abc123.png?${FRESH_SIGNATURE}`
+        );
       });
 
       test('signs image nodes nested in children', async () => {
@@ -286,7 +293,7 @@ describe('Upload | extensions | entity-manager', () => {
         const result: any = await signEntityMedia(entity, modelUID);
 
         expect(result.blocks[0].children[0].children[0].image.url).toBe(
-          `${BUCKET_URL}/photo_abc123.png?signature=fresh`
+          `${BUCKET_URL}/photo_abc123.png?${FRESH_SIGNATURE}`
         );
       });
 
@@ -315,8 +322,8 @@ describe('Upload | extensions | entity-manager', () => {
         const result: any = await signEntityMedia(entity, modelUID);
 
         expect(result.richtext).toBe(
-          `![alt](${BUCKET_URL}/photo_abc123.png?signature=fresh)\n\n` +
-            `[doc](${BUCKET_URL}/doc_abc123.pdf?signature=fresh)`
+          `![alt](${BUCKET_URL}/photo_abc123.png?${FRESH_SIGNATURE})\n\n` +
+            `[doc](${BUCKET_URL}/doc_abc123.pdf?${FRESH_SIGNATURE})`
         );
       });
 
@@ -327,7 +334,7 @@ describe('Upload | extensions | entity-manager', () => {
 
         const result: any = await signEntityMedia(entity, modelUID);
 
-        expect(result.richtext).toBe(`![alt](${BUCKET_URL}/photo_abc123.png?signature=fresh)`);
+        expect(result.richtext).toBe(`![alt](${BUCKET_URL}/photo_abc123.png?${FRESH_SIGNATURE})`);
       });
 
       test('leaves external urls, and their query string, untouched', async () => {
@@ -357,8 +364,8 @@ describe('Upload | extensions | entity-manager', () => {
         const result: any = await signEntityMedia(entity, modelUID);
 
         expect(result.richtext).toBe(
-          `<img src="${BUCKET_URL}/photo_abc123.png?signature=fresh" width="200">\n` +
-            `<a href='${BUCKET_URL}/doc_abc123.pdf?signature=fresh'>doc</a>\n` +
+          `<img src="${BUCKET_URL}/photo_abc123.png?${FRESH_SIGNATURE}" width="200">\n` +
+            `<a href='${BUCKET_URL}/doc_abc123.pdf?${FRESH_SIGNATURE}'>doc</a>\n` +
             '<img src="https://example.com/x.png?w=1">'
         );
       });
@@ -371,8 +378,22 @@ describe('Upload | extensions | entity-manager', () => {
         const result: any = await signEntityMedia(entity, modelUID);
 
         expect(result.richtext).toBe(
-          `<img src="${BUCKET_URL}/a.png?signature=fresh"> then ![b](${BUCKET_URL}/b.png?signature=fresh) then <a href="${BUCKET_URL}/c.pdf?signature=fresh">c</a>`
+          `<img src="${BUCKET_URL}/a.png?${FRESH_SIGNATURE}"> then ![b](${BUCKET_URL}/b.png?${FRESH_SIGNATURE}) then <a href="${BUCKET_URL}/c.pdf?${FRESH_SIGNATURE}">c</a>`
         );
+      });
+
+      test('presigns each distinct url once', async () => {
+        const url = `${BUCKET_URL}/photo_abc123.png`;
+        const entity = {
+          richtext: `![a](${url}) ![b](${url}?X-Amz-Signature=expired) <img src="${url}">`,
+        };
+
+        const result: any = await signEntityMedia(entity, modelUID);
+
+        expect(result.richtext).toBe(
+          `![a](${url}?${FRESH_SIGNATURE}) ![b](${url}?${FRESH_SIGNATURE}) <img src="${url}?${FRESH_SIGNATURE}">`
+        );
+        expect(signFileUrls).toHaveBeenCalledTimes(1);
       });
 
       test('short circuits when the value has no markdown link nor html url', async () => {
@@ -401,10 +422,10 @@ describe('Upload | extensions | entity-manager', () => {
       const result: any = await signEntityMedia(entity, modelUID);
 
       expect(result.compo_media.richtext).toBe(
-        `![alt](${BUCKET_URL}/photo_abc123.png?signature=fresh)`
+        `![alt](${BUCKET_URL}/photo_abc123.png?${FRESH_SIGNATURE})`
       );
       expect(result.dynamicZone[0].blocks[0].image.url).toBe(
-        `${BUCKET_URL}/photo_abc123.png?signature=fresh`
+        `${BUCKET_URL}/photo_abc123.png?${FRESH_SIGNATURE}`
       );
     });
   });

@@ -5,11 +5,16 @@ import { getService } from '../../utils';
 jest.mock('../../utils');
 
 const BUCKET_URL = 'https://my-bucket.s3.eu-west-1.amazonaws.com';
+const FRESH_SIGNATURE = 'X-Amz-Signature=fresh&X-Amz-Expires=900';
+
+/** The transaction the migration runner hands to `up` */
+const trx = { schema: {} } as any;
 
 /**
  * Mimics the real `signFileUrls`: `isUrlSigned` is set for every file of the
- * configured private provider, but the provider itself only rewrites URLs from
- * its own bucket and hands every other URL back untouched.
+ * configured private provider, on the file and on each format, but the
+ * provider itself only rewrites URLs from its own bucket and hands every other
+ * URL back untouched.
  */
 const signFileUrls = jest.fn(async (file: any) => {
   const url = String(file.url ?? '');
@@ -22,11 +27,21 @@ const signFileUrls = jest.fn(async (file: any) => {
     return { ...file, isUrlSigned: false };
   }
 
-  if (!url.startsWith(`${BUCKET_URL}/`)) {
-    return { ...file, isUrlSigned: true };
+  const sign = (value: string) =>
+    value.startsWith(`${BUCKET_URL}/`) ? `${value.split('?')[0]}?${FRESH_SIGNATURE}` : value;
+
+  const signed = { ...file, url: sign(url), isUrlSigned: true };
+
+  if (file.formats) {
+    signed.formats = Object.fromEntries(
+      Object.entries(file.formats).map(([key, format]: [string, any]) => [
+        key,
+        { ...format, url: sign(format.url), isUrlSigned: true },
+      ])
+    );
   }
 
-  return { ...file, url: `${url.split('?')[0]}?signature=fresh`, isUrlSigned: true };
+  return signed;
 });
 
 const imageNode = (url: string) => ({
@@ -37,7 +52,10 @@ const imageNode = (url: string) => ({
     provider: 'aws-s3',
     url,
     formats: {
-      thumbnail: { url: `${BUCKET_URL}/thumbnail_photo_abc123.png?X-Amz-Signature=expired` },
+      thumbnail: {
+        url: `${BUCKET_URL}/thumbnail_photo_abc123.png?X-Amz-Signature=expired`,
+        isUrlSigned: true,
+      },
     },
     isUrlSigned: true,
   },
@@ -109,6 +127,12 @@ const createFakeDb = (
   const uidByTable = Object.fromEntries(Object.entries(tableNames).map(([uid, t]) => [t, uid]));
   const schemas: Record<string, any> = { ...contentTypes, ...components };
 
+  const getSchemaConnection = jest.fn(() => ({
+    hasTable: async (tableName: string) => Object.values(tableNames).includes(tableName),
+    hasColumn: async (tableName: string, column: string) =>
+      !missingColumns.includes(`${uidByTable[tableName]}.${column}`),
+  }));
+
   const db = {
     metadata: {
       has: (uid: string) => uid in tableNames,
@@ -119,14 +143,10 @@ const createFakeDb = (
         ),
       }),
     },
-    getSchemaConnection: () => ({
-      hasTable: async (tableName: string) => Object.values(tableNames).includes(tableName),
-      hasColumn: async (tableName: string, column: string) =>
-        !missingColumns.includes(`${uidByTable[tableName]}.${column}`),
-    }),
+    getSchemaConnection,
   } as unknown as Database;
 
-  return { db, query, update, findMany };
+  return { db, query, update, findMany, getSchemaConnection };
 };
 
 const setupStrapi = ({ isPrivate = true, query }: { isPrivate?: boolean; query: jest.Mock }) => {
@@ -159,7 +179,7 @@ describe('Upload | migrations | unsign-richtext-and-blocks-urls', () => {
     const { db, query, update } = createFakeDb(rows);
     setupStrapi({ query });
 
-    await unsignRichtextAndBlocksUrls.up(null as any, db);
+    await unsignRichtextAndBlocksUrls.up(trx, db);
 
     expect(rows['api::article.article'][0].body).toBe(`![alt](${BUCKET_URL}/photo_abc123.png)`);
     expect(rows['api::article.article'][0].content[0].image.url).toBe(
@@ -169,7 +189,93 @@ describe('Upload | migrations | unsign-richtext-and-blocks-urls', () => {
       `${BUCKET_URL}/thumbnail_photo_abc123.png`
     );
     expect(rows['api::article.article'][0].content[0].image).not.toHaveProperty('isUrlSigned');
+    expect(rows['api::article.article'][0].content[0].image.formats.thumbnail).not.toHaveProperty(
+      'isUrlSigned'
+    );
     expect(update).toHaveBeenCalledTimes(1);
+  });
+
+  test('drops isUrlSigned from a format whose url is already bare', async () => {
+    // The state an earlier version of the fix left behind
+    const node = imageNode(`${BUCKET_URL}/photo_abc123.png`);
+    delete (node.image as Partial<typeof node.image>).isUrlSigned;
+    node.image.formats.thumbnail.url = `${BUCKET_URL}/thumbnail_photo_abc123.png`;
+
+    const rows = { 'api::article.article': [{ id: 1, body: null, content: [node] }] };
+    const { db, query, update } = createFakeDb(rows);
+    setupStrapi({ query });
+
+    await unsignRichtextAndBlocksUrls.up(trx, db);
+
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(rows['api::article.article'][0].content[0].image.formats.thumbnail).toEqual({
+      url: `${BUCKET_URL}/thumbnail_photo_abc123.png`,
+    });
+  });
+
+  test('removes only the signature parameters and keeps the others', async () => {
+    const rows = {
+      'api::article.article': [
+        {
+          id: 1,
+          body: `![alt](${BUCKET_URL}/photo_abc123.png?width=200&X-Amz-Signature=expired)`,
+          content: null,
+        },
+      ],
+    };
+    const { db, query } = createFakeDb(rows);
+    setupStrapi({ query });
+
+    await unsignRichtextAndBlocksUrls.up(trx, db);
+
+    expect(rows['api::article.article'][0].body).toBe(
+      `![alt](${BUCKET_URL}/photo_abc123.png?width=200)`
+    );
+  });
+
+  test('presigns each distinct url once per run', async () => {
+    const body = `![alt](${BUCKET_URL}/photo_abc123.png?X-Amz-Signature=expired)`;
+    const rows = {
+      'api::article.article': [
+        { id: 1, body, content: null },
+        { id: 2, body, content: null },
+        { id: 3, body, content: null },
+      ],
+      'default.section': [{ id: 1, body }],
+    };
+    const { db, query, update } = createFakeDb(rows);
+    setupStrapi({ query });
+
+    await unsignRichtextAndBlocksUrls.up(trx, db);
+
+    expect(update).toHaveBeenCalledTimes(4);
+    expect(signFileUrls).toHaveBeenCalledTimes(1);
+  });
+
+  test('logs the rows scanned and updated per schema, and a total', async () => {
+    const rows = {
+      'api::article.article': [
+        { id: 1, body: `![alt](${BUCKET_URL}/photo_abc123.png?X-Amz-Signature=expired)` },
+        { id: 2, body: 'nothing to do here' },
+      ],
+      'default.section': [{ id: 1, body: 'nothing to do here either' }],
+    };
+    const { db, query } = createFakeDb(rows);
+    setupStrapi({ query });
+
+    await unsignRichtextAndBlocksUrls.up(trx, db);
+
+    expect(global.strapi.log.info).toHaveBeenCalledWith(
+      '[unsign-richtext-and-blocks-urls] api::article.article: 2 rows scanned, 1 updated'
+    );
+    expect(global.strapi.log.info).toHaveBeenCalledWith(
+      '[unsign-richtext-and-blocks-urls] default.section: 1 rows scanned, 0 updated'
+    );
+    expect(global.strapi.log.info).toHaveBeenLastCalledWith(
+      '[unsign-richtext-and-blocks-urls] Done: 3 rows scanned, 1 updated'
+    );
+    // `api::tag.tag` has no richtext / blocks attribute, so it is not reported
+    expect(global.strapi.log.info).toHaveBeenCalledTimes(3);
   });
 
   test('is idempotent: a second run writes nothing', async () => {
@@ -185,11 +291,11 @@ describe('Upload | migrations | unsign-richtext-and-blocks-urls', () => {
     const { db, query, update } = createFakeDb(rows);
     setupStrapi({ query });
 
-    await unsignRichtextAndBlocksUrls.up(null as any, db);
+    await unsignRichtextAndBlocksUrls.up(trx, db);
     expect(update).toHaveBeenCalledTimes(1);
 
     update.mockClear();
-    await unsignRichtextAndBlocksUrls.up(null as any, db);
+    await unsignRichtextAndBlocksUrls.up(trx, db);
     expect(update).not.toHaveBeenCalled();
   });
 
@@ -197,7 +303,7 @@ describe('Upload | migrations | unsign-richtext-and-blocks-urls', () => {
     const { db, query } = createFakeDb({ 'api::article.article': [{ id: 1, body: 'x' }] });
     setupStrapi({ query, isPrivate: false });
 
-    await unsignRichtextAndBlocksUrls.up(null as any, db);
+    await unsignRichtextAndBlocksUrls.up(trx, db);
 
     expect(query).not.toHaveBeenCalled();
   });
@@ -217,7 +323,7 @@ describe('Upload | migrations | unsign-richtext-and-blocks-urls', () => {
     const { db, query, update } = createFakeDb(rows);
     setupStrapi({ query });
 
-    await unsignRichtextAndBlocksUrls.up(null as any, db);
+    await unsignRichtextAndBlocksUrls.up(trx, db);
 
     expect(update).not.toHaveBeenCalled();
   });
@@ -235,7 +341,7 @@ describe('Upload | migrations | unsign-richtext-and-blocks-urls', () => {
     const { db, query } = createFakeDb(rows);
     setupStrapi({ query });
 
-    await unsignRichtextAndBlocksUrls.up(null as any, db);
+    await unsignRichtextAndBlocksUrls.up(trx, db);
 
     expect(rows['api::article.article'][0].body).toBe(
       `<img src="${BUCKET_URL}/photo_abc123.png" width="200">`
@@ -251,7 +357,7 @@ describe('Upload | migrations | unsign-richtext-and-blocks-urls', () => {
     const { db, query, update } = createFakeDb(rows);
     setupStrapi({ query });
 
-    await unsignRichtextAndBlocksUrls.up(null as any, db);
+    await unsignRichtextAndBlocksUrls.up(trx, db);
 
     expect(rows['default.section'][0].body).toBe(`![alt](${BUCKET_URL}/photo_abc123.png)`);
     expect(update).toHaveBeenCalledWith('default.section', { id: 1 }, expect.anything());
@@ -262,7 +368,7 @@ describe('Upload | migrations | unsign-richtext-and-blocks-urls', () => {
   test('warns and continues when a single value cannot be processed', async () => {
     const rows = {
       'api::article.article': [
-        { id: 1, body: `![alt](${BUCKET_URL}/boom.png)`, content: null },
+        { id: 1, body: `![alt](${BUCKET_URL}/boom.png?X-Amz-Signature=expired)`, content: null },
         {
           id: 2,
           body: `![alt](${BUCKET_URL}/photo_abc123.png?X-Amz-Signature=expired)`,
@@ -273,7 +379,7 @@ describe('Upload | migrations | unsign-richtext-and-blocks-urls', () => {
     const { db, query, update } = createFakeDb(rows);
     setupStrapi({ query });
 
-    await unsignRichtextAndBlocksUrls.up(null as any, db);
+    await unsignRichtextAndBlocksUrls.up(trx, db);
 
     expect(global.strapi.log.warn).toHaveBeenCalledTimes(1);
     expect(update).toHaveBeenCalledTimes(1);
@@ -291,7 +397,7 @@ describe('Upload | migrations | unsign-richtext-and-blocks-urls', () => {
     });
     setupStrapi({ query });
 
-    await expect(unsignRichtextAndBlocksUrls.up(null as any, db)).resolves.toBeUndefined();
+    await expect(unsignRichtextAndBlocksUrls.up(trx, db)).resolves.toBeUndefined();
 
     expect(findMany).toHaveBeenCalledWith('api::article.article', ['id', 'body']);
     expect(update).toHaveBeenCalledWith(
@@ -304,6 +410,24 @@ describe('Upload | migrations | unsign-richtext-and-blocks-urls', () => {
     expect(global.strapi.log.warn).not.toHaveBeenCalled();
   });
 
+  test('runs the schema checks on the migration transaction', async () => {
+    const rows = {
+      'api::article.article': [
+        { id: 1, body: `![alt](${BUCKET_URL}/photo_abc123.png?X-Amz-Signature=expired)` },
+      ],
+    };
+    const { db, query, getSchemaConnection } = createFakeDb(rows);
+    setupStrapi({ query });
+
+    await unsignRichtextAndBlocksUrls.up(trx, db);
+
+    // A call with no argument falls back to the root connection, which on SQLite
+    // waits on the single pooled connection the transaction already holds
+    expect(getSchemaConnection).toHaveBeenCalled();
+    expect(getSchemaConnection).not.toHaveBeenCalledWith();
+    getSchemaConnection.mock.calls.forEach((call) => expect(call).toEqual([trx]));
+  });
+
   test('skips a schema when none of its columns exist yet', async () => {
     const { db, query, findMany } = createFakeDb(
       { 'default.section': [{ id: 1, body: 'x' }] },
@@ -311,30 +435,25 @@ describe('Upload | migrations | unsign-richtext-and-blocks-urls', () => {
     );
     setupStrapi({ query });
 
-    await unsignRichtextAndBlocksUrls.up(null as any, db);
+    await unsignRichtextAndBlocksUrls.up(trx, db);
 
     expect(findMany).not.toHaveBeenCalledWith('default.section', expect.anything());
   });
 
-  test('warns and moves on to the next schema when a query fails', async () => {
+  test('propagates a database error instead of skipping the table', async () => {
     const rows = {
       'api::article.article': [
-        { id: 1, body: `![alt](${BUCKET_URL}/photo_abc123.png?X-Amz-Signature=expired)` },
-      ],
-      'default.section': [
         { id: 1, body: `![alt](${BUCKET_URL}/photo_abc123.png?X-Amz-Signature=expired)` },
       ],
     };
     const { db, query, update } = createFakeDb(rows, { failingUids: ['api::article.article'] });
     setupStrapi({ query });
 
-    await expect(unsignRichtextAndBlocksUrls.up(null as any, db)).resolves.toBeUndefined();
-
-    expect(global.strapi.log.warn).toHaveBeenCalledTimes(1);
-    expect(global.strapi.log.warn).toHaveBeenCalledWith(
-      expect.stringContaining('Skipped api::article.article: table articles is broken')
+    await expect(unsignRichtextAndBlocksUrls.up(trx, db)).rejects.toThrow(
+      'table articles is broken'
     );
-    expect(update).toHaveBeenCalledTimes(1);
-    expect(rows['default.section'][0].body).toBe(`![alt](${BUCKET_URL}/photo_abc123.png)`);
+
+    expect(update).not.toHaveBeenCalled();
+    expect(global.strapi.log.warn).not.toHaveBeenCalled();
   });
 });
