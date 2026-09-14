@@ -42,6 +42,20 @@ describe('isLifecycleNonEmpty', () => {
   it('is false for an empty body despite a commented destructured param', () => {
     expect(isLifecycleNonEmpty(function register(/* { strapi } */) {})).toBe(false);
   });
+
+  it('is true for a concise arrow body', () => {
+    // `register: ({ strapi }) => strapi.log.info('x')` has no braces at all, so looking
+    // for the body after the first `{` finds nothing and used to report "empty".
+    expect(isLifecycleNonEmpty((strapi: any) => strapi.log.info('real work'))).toBe(true);
+  });
+
+  it('is true for an async concise arrow body', () => {
+    expect(isLifecycleNonEmpty(async (strapi: any) => strapi.doThing())).toBe(true);
+  });
+
+  it('is true for a concise arrow returning an object literal', () => {
+    expect(isLifecycleNonEmpty(() => ({ registered: true }))).toBe(true);
+  });
 });
 
 describe('detectCustomizations', () => {

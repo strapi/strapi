@@ -8,6 +8,12 @@ const APP_UID_PREFIX = 'api::';
  * True when a lifecycle function has a non-empty body. The compiled function
  * source is inspected here only to derive a boolean; it is never returned.
  */
+const stripComments = (body: string): string =>
+  body
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/\/\/[^\n]*/g, '')
+    .trim();
+
 export const isLifecycleNonEmpty = (fn: unknown): boolean => {
   if (typeof fn !== 'function') {
     return false;
@@ -18,13 +24,18 @@ export const isLifecycleNonEmpty = (fn: unknown): boolean => {
   // or the template's `register(/*{ strapi }*/)` puts a `{` in the params/comment.
   const parenEnd = source.indexOf(')');
   const bodyStart = source.indexOf('{', parenEnd === -1 ? 0 : parenEnd);
-  const body = bodyStart === -1 ? '' : source.slice(bodyStart + 1, source.lastIndexOf('}'));
-  // strip line + block comments, then whitespace
-  const stripped = body
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/\/\/[^\n]*/g, '')
-    .trim();
-  return stripped.length > 0;
+
+  // No brace anywhere after the parameters means a concise arrow body
+  // (`register: ({ strapi }) => strapi.log.info('x')`), where everything after the
+  // arrow IS the body. Treating that as empty under-reported a real customization,
+  // telling Support an app was stock when it was not. The template only ever ships
+  // braced method shorthand, so this branch cannot misread a fresh app.
+  if (bodyStart === -1) {
+    const arrow = source.indexOf('=>');
+    return arrow === -1 ? false : stripComments(source.slice(arrow + 2)).length > 0;
+  }
+
+  return stripComments(source.slice(bodyStart + 1, source.lastIndexOf('}'))).length > 0;
 };
 
 /**
