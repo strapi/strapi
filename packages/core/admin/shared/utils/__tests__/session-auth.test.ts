@@ -131,20 +131,20 @@ describe('getRefreshCookiePath', () => {
 
   test('uses admin.auth.cookie.refreshPath when configured', () => {
     global.strapi.config.get = jest.fn((key: string) =>
-      key === 'admin.auth.cookie.refreshPath' ? '/admin' : undefined
+      key === 'admin.auth.cookie.refreshPath' ? '/cms/admin' : undefined
     ) as any;
 
-    expect(getRefreshCookiePath()).toBe('/admin');
+    expect(getRefreshCookiePath()).toBe('/cms/admin');
   });
 
   test('allows a custom refresh path distinct from the access path', () => {
     global.strapi.config.get = jest.fn((key: string) => {
       if (key === 'admin.auth.cookie.path') return '/dashboard';
-      if (key === 'admin.auth.cookie.refreshPath') return '/admin';
+      if (key === 'admin.auth.cookie.refreshPath') return '/cms/admin';
       return undefined;
     }) as any;
 
-    expect(getRefreshCookiePath()).toBe('/admin');
+    expect(getRefreshCookiePath()).toBe('/cms/admin');
   });
 });
 
@@ -192,12 +192,12 @@ describe('getRefreshCookieOptions', () => {
 
   test('refresh cookie path uses admin.auth.cookie.refreshPath when configured', () => {
     global.strapi.config.get = jest.fn((key: string) => {
-      if (key === 'admin.auth.cookie.refreshPath') return '/admin';
+      if (key === 'admin.auth.cookie.refreshPath') return '/cms/admin';
       if (key === 'admin.auth.cookie.path') return '/dashboard';
       return undefined;
     }) as any;
 
-    expect(getRefreshCookieOptions().path).toBe('/admin');
+    expect(getRefreshCookieOptions().path).toBe('/cms/admin');
   });
 });
 
