@@ -6,6 +6,7 @@ import upload from '@strapi/upload/strapi-admin';
 import i18n from '@strapi/i18n/strapi-admin';
 import contentReleases from '@strapi/content-releases/strapi-admin';
 import reviewWorkflows from '@strapi/review-workflows/strapi-admin';
+import spaces from '@strapi/spaces/strapi-admin';
 
 const render = (mountNode: HTMLElement | null, { plugins, ...restArgs }: RenderAdminArgs) => {
   return renderAdmin(mountNode, {
@@ -18,6 +19,7 @@ const render = (mountNode: HTMLElement | null, { plugins, ...restArgs }: RenderA
       contentReleases,
       i18n,
       reviewWorkflows,
+      spaces,
       ...plugins,
     },
   });
