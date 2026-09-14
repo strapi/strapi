@@ -377,7 +377,7 @@ describe('Deep Filtering API', () => {
         expect(res.body.data).toEqual(expect.arrayContaining(data.collector.slice(1, 3)));
       });
 
-      test('collector_friends.name + search isa', async () => {
+      test('collector_friends.name + search sabel', async () => {
         const res = await rq({
           method: 'GET',
           url: '/collectors',
@@ -387,7 +387,10 @@ describe('Deep Filtering API', () => {
                 name: data.collector[0].name,
               },
             },
-            _q: 'isa',
+            // `_q` also searches `documentId`, a random cuid2 over [a-z0-9]. A short
+            // lowercase term can occur inside one by chance and match an extra row, so
+            // keep the term long enough for that to be negligible.
+            _q: 'sabel',
           },
         });
 
