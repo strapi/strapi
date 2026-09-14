@@ -1,4 +1,7 @@
+import { isNil } from 'lodash/fp';
+
 import * as types from '../utils/types';
+import { getScalarAttributeDefault } from '../utils/attribute-default';
 import { identifiers } from '../utils/identifiers';
 import type { Metadata, Meta } from '../metadata';
 import type { Column, Schema, Table } from './types';
@@ -22,7 +25,7 @@ import type { Attribute } from '../types';
 const createColumn = (name: string, attribute: Attribute): Column => {
   const { type, args = [], ...opts } = getColumnType(attribute);
 
-  return {
+  const column: Column = {
     name: identifiers.getName(name),
     type,
     args,
@@ -32,6 +35,14 @@ const createColumn = (name: string, attribute: Attribute): Column => {
     ...opts,
     ...('column' in attribute ? (attribute.column ?? {}) : {}),
   };
+
+  const attributeDefault = getScalarAttributeDefault(attribute);
+
+  if (attributeDefault !== undefined && isNil(column.defaultTo)) {
+    column.defaultTo = attributeDefault;
+  }
+
+  return column;
 };
 
 const createTable = (meta: Meta): Table => {
