@@ -67,6 +67,39 @@ describe('ai-translations service', () => {
     );
   });
 
+  test('the Strapi-managed provider wraps AI token retrieval failures', async () => {
+    const strapi = createMockStrapi();
+    strapi.ai.admin.getAiToken.mockRejectedValue(new Error('license expired'));
+    const service = createAITranslationsService({ strapi });
+    (global as any).fetch = jest.fn();
+
+    service.registerStrapiManagedProvider();
+
+    await expect(service.generateTranslations(PARAMS)).rejects.toThrow(
+      'Failed to retrieve AI token'
+    );
+    expect((global as any).fetch).not.toHaveBeenCalled();
+  });
+
+  test('the Strapi-managed provider throws when the AI server responds with an error', async () => {
+    const strapi = createMockStrapi();
+    const service = createAITranslationsService({ strapi });
+    (global as any).fetch = jest.fn().mockResolvedValue({
+      ok: false,
+      status: 503,
+      statusText: 'Service Unavailable',
+    });
+
+    service.registerStrapiManagedProvider();
+
+    await expect(service.generateTranslations(PARAMS)).rejects.toThrow(
+      'AI Localizations request failed: Service Unavailable'
+    );
+    expect(strapi.log.error).toHaveBeenCalledWith(
+      'AI Localizations request failed: 503 Service Unavailable'
+    );
+  });
+
   test('registerProvider asks core to authorize a custom provider', () => {
     const strapi = createMockStrapi();
     const service = createAITranslationsService({ strapi });
