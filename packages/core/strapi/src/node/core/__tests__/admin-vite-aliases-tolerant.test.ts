@@ -76,10 +76,10 @@ describe('buildSingletonAliasEntries (tolerant CodeMirror resolution)', () => {
   it('keeps optimizeDeps.include in lockstep with the aliased singletons', () => {
     const resolvable = getResolvableSingletonModules();
 
-    // Drop an unresolvable singleton from include instead of forcing it into pre-bundling
+    // An unresolvable singleton must be dropped from include, not forced into pre-bundling.
     expect(resolvable).not.toContain(UNRESOLVABLE_SINGLETON);
 
-    // include mirrors what resolve.alias aliased
+    // include mirrors exactly what resolve.alias aliased.
     expect(resolvable).toEqual(buildSingletonAliasEntries().map(([mod]) => mod));
   });
 });

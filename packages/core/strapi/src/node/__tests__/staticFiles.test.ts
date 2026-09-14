@@ -2,11 +2,6 @@ import { getEntryModule, getStylesheet } from '../staticFiles';
 
 import type { BuildContext } from '../create-build-context';
 
-/**
- * A build context is a wide interface of which these writers read a field or two, so both `ctx`
- * factories below cast a literal rather than stand up a real context
- */
-
 describe('getStylesheet', () => {
   const ctx = (scanRoots: string[]) => ({ scanRoots }) as unknown as BuildContext;
 

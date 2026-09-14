@@ -40,9 +40,6 @@ const ENTRY_RESOLVED: Record<string, string | Error> = {
 let entryResolved: Record<string, string | Error>;
 let hostResolved: Record<string, string>;
 
-/**
- * A table entry that is an `Error` is thrown, so a test can pin the exact error the resolver threw
- */
 const fakeRequire = (table: Record<string, string | Error>) =>
   ({
     resolve(modulePath: string) {

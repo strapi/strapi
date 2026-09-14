@@ -16,23 +16,17 @@ jest.mock('@tailwindcss/vite', () => ({
 }));
 
 /**
- * Vite's `AliasOptions` is an array or a record; this config always builds the record form, so a
- * custom `src/admin/vite.config` can spread `config.resolve.alias` into a new object. A RegExp
- * find or a call to `mergeAlias` would give the array form instead, which this throw catches
+ * Vite's `AliasOptions` is an array or a record. This config always builds the record form, so a
+ * custom `src/admin/vite.config` can spread `config.resolve.alias` into a new object
  */
 const asAliasRecord = (alias: AliasOptions | undefined): Record<string, string> => {
   if (typeof alias !== 'object' || alias === null || Array.isArray(alias)) {
     throw new Error('expected a plain alias object');
   }
 
-  // Array.isArray does not narrow the `readonly Alias[]` half of the union away
   return alias as Record<string, string>;
 };
 
-/**
- * A build context is a wide interface of which this config reads a handful of fields, so the tests
- * cast a literal rather than stand up a real one
- */
 const buildContext = (overrides: Record<string, unknown> = {}): BuildContext =>
   ({
     cwd: process.cwd(),
