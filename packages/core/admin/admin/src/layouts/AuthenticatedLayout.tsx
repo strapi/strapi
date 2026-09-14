@@ -11,6 +11,7 @@ import valid from 'semver/functions/valid';
 import { LazyOutlet } from '../components/LazyOutlet';
 import { LeftMenu } from '../components/LeftMenu';
 import { MediaLibraryBanner } from '../components/MediaLibraryBanner';
+import { MfaGraceBanner } from '../components/MfaGraceBanner';
 import { NpsSurvey } from '../components/NpsSurvey';
 import { Page } from '../components/PageHelpers';
 import { PluginsInitializer } from '../components/PluginsInitializer';
@@ -19,6 +20,7 @@ import { UpsellBanner } from '../components/UpsellBanner';
 import { AppInfoProvider } from '../features/AppInfo';
 import { useAuth } from '../features/Auth';
 import { useConfiguration } from '../features/Configuration';
+import { MfaNotices } from '../features/MfaNotices';
 import { useStrapiApp } from '../features/StrapiApp';
 import { useTracking } from '../features/Tracking';
 import { useMenu } from '../hooks/useMenu';
@@ -103,6 +105,7 @@ const AdminLayout = () => {
       shouldUpdateStrapi={checkLatestStrapiVersion(strapiVersion, tagName)}
     >
       <NpsSurvey />
+      <MfaNotices />
       <PluginsInitializer>
         <DndProvider backend={HTML5Backend}>
           <Box background="neutral100">
@@ -134,6 +137,7 @@ const AdminLayout = () => {
                   large: '100%',
                 }}
               >
+                <MfaGraceBanner />
                 <UpsellBanner />
                 <MediaLibraryBanner />
                 {/*

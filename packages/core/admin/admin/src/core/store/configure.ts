@@ -7,6 +7,7 @@ import {
   MiddlewareAPI,
   isRejected,
 } from '@reduxjs/toolkit';
+import { setupListeners } from '@reduxjs/toolkit/query';
 
 import { reducer as appReducer, AppState, logout } from '../../reducer';
 import { adminApi } from '../../services/api';
@@ -87,6 +88,11 @@ const configureStoreImpl = (
     ],
     enhancers: [injectReducerStoreEnhancer(coreReducers)],
   });
+
+  // Lets RTK Query hooks opt in to `refetchOnFocus` / `refetchOnReconnect` (window `focus` and
+  // `online` events). Without this call those options are silently inert, and a hook that passes
+  // them looks correct while doing nothing.
+  setupListeners(store.dispatch);
 
   return store;
 };

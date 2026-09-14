@@ -75,4 +75,45 @@ describe('Profile page', () => {
     expect(queryByLabelText(/^password$/)).not.toBeInTheDocument();
     expect(queryByLabelText(/confirm password/i)).not.toBeInTheDocument();
   });
+
+  it('should display the two-factor authentication section when the status endpoint is available', async () => {
+    server.use(
+      http.get('/admin/mfa/me', () =>
+        HttpResponse.json({
+          data: {
+            enabled: false,
+            enabledAt: null,
+            recoveryCodesRemaining: 0,
+            codesAcknowledged: false,
+            required: false,
+            graceUntil: null,
+          },
+        })
+      )
+    );
+
+    const { findByText, findByRole } = render(<ProfilePage />);
+
+    await findByText('Interface language');
+
+    expect(await findByRole('heading', { name: 'Two-factor authentication' })).toBeInTheDocument();
+  });
+
+  it('should not display the two-factor authentication section if the user role is Locked', async () => {
+    server.use(
+      http.get('/admin/providers/isSSOLocked', () => {
+        return HttpResponse.json({
+          data: {
+            isSSOLocked: true,
+          },
+        });
+      })
+    );
+
+    const { queryByRole, findByText } = render(<ProfilePage />);
+
+    await findByText('Interface language');
+
+    expect(queryByRole('heading', { name: 'Two-factor authentication' })).not.toBeInTheDocument();
+  });
 });

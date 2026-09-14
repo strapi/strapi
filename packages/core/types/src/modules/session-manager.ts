@@ -29,6 +29,7 @@ export interface OriginSessionManagerService {
     | {
         token: string;
         sessionId: string;
+        userId: string;
         absoluteExpiresAt: string;
         type: 'refresh' | 'session';
       }

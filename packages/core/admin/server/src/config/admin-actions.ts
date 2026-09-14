@@ -222,6 +222,22 @@ export const actions = [
     category: 'project',
   },
   {
+    uid: 'security-settings.read',
+    displayName: 'Read the security settings',
+    pluginName: 'admin',
+    section: 'settings',
+    category: 'security',
+    subCategory: 'general',
+  },
+  {
+    uid: 'security-settings.update',
+    displayName: 'Update the security settings',
+    pluginName: 'admin',
+    section: 'settings',
+    category: 'security',
+    subCategory: 'general',
+  },
+  {
     uid: 'transfer.tokens.access',
     displayName: 'Access the transfer tokens settings page',
     pluginName: 'admin',

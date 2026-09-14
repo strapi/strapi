@@ -1,6 +1,6 @@
 import type { Core, Modules } from '@strapi/types';
 
-import { getDisplayName } from '../utils';
+import { getDisplayName, type AdminUserLike } from '../utils';
 
 const DEFAULT_RETENTION_DAYS = 90;
 
@@ -9,7 +9,7 @@ const DEFAULT_RETENTION_DAYS = 90;
  * compatibility. Do not add events here: new events come through registerEvent().
  * TODO: migrate these to the standard.
  */
-const defaultEvents = [
+export const defaultEvents = [
   'entry.create',
   'entry.update',
   'entry.delete',
@@ -25,6 +25,21 @@ const defaultEvents = [
   'user.update',
   'user.delete',
   'admin.auth.success',
+  'admin.auth.mfa_required',
+  'admin.mfa.enabled',
+  'admin.mfa.disabled',
+  'admin.mfa.reset',
+  'admin.mfa.challenge.failed',
+  'admin.mfa.authenticator.replaced',
+  'admin.mfa.locked',
+  'admin.mfa.unlocked',
+  'admin.mfa.device.trusted',
+  'admin.mfa.device.trust.revoked',
+  'admin.mfa.trusted.device.used',
+  'admin.mfa.passkey.registered',
+  'admin.mfa.passkey.removed',
+  'admin.mfa.passkey.used',
+  'admin.security-settings.update',
   'admin.logout',
   'content-type.create',
   'content-type.update',
@@ -44,6 +59,9 @@ const defaultEvents = [
  * Legacy events store the first emitted argument as-is; registered events store the
  * standard shape built by their transformer.
  */
+/** The user an audit row is attributed to: the session user, or the account an `admin.mfa.*` payload names. */
+type AttributableUser = AdminUserLike & { id: string | number };
+
 type EventRegistration =
   | { kind: 'legacy' }
   | { kind: 'standard'; transform: Modules.AuditLogs.EventTransformer };
@@ -114,13 +132,34 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
     const auditSource = requestState?.auditSource;
     const isMcpAdminAction = auditSource === 'mcp';
     const user = requestState?.user;
-
     const systemOrigin =
       auditSource && SYSTEM_ORIGINS.includes(auditSource)
         ? (auditSource as Modules.AuditLogs.SystemOrigin)
         : undefined;
 
-    if (!systemOrigin && ((!isUsingAdminAuth && !isMcpAdminAction) || !user)) {
+    if (!systemOrigin && !isUsingAdminAuth && !isMcpAdminAction) {
+      return null;
+    }
+
+    // `/login/mfa` challenges a second factor before `ctx.state.user` exists -- it is only
+    // populated on a successful login (`issueSession`, called after the challenge passes) -- and
+    // the refresh exchange locks an expired grace with no session user on the context either. Both
+    // are exactly the rows an audit log most wants. `admin::mfa`'s `notify` names the account in
+    // the event payload (`{ userId }`), so for `admin.mfa.*` names only, fall back to that id and
+    // load the user it names; every other event still requires `requestState.user` exactly as
+    // before. A payload id that matches no user cannot be attributed and is dropped.
+    let attributedUser: AttributableUser | undefined = user;
+    if (!attributedUser && !systemOrigin && name.startsWith('admin.mfa.')) {
+      const fallbackId = args[0]?.userId;
+      if (fallbackId !== undefined) {
+        attributedUser = await strapi.db.query('admin::user').findOne({
+          where: { id: fallbackId },
+          select: ['id', 'email', 'username', 'firstname', 'lastname'],
+        });
+      }
+    }
+
+    if (!systemOrigin && !attributedUser) {
       return null;
     }
 
@@ -128,7 +167,7 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
     const date = new Date().toISOString();
     // Scheduled actions have no user, so a null user is expected. The earlier audit
     // entry that set the schedule records who did it.
-    const userId = systemOrigin ? null : user.id;
+    const userId = systemOrigin ? null : attributedUser!.id;
 
     if (registration.kind === 'legacy') {
       // TODO: What does this ignore in upload? Why would we want to ignore anything?
@@ -151,7 +190,11 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
           type: 'admin-user',
           // We copy the user data into the row so the history stays unchanged if the
           // user changes later
-          user: { id: user.id, email: user.email, name: getDisplayName(user) },
+          user: {
+            id: attributedUser!.id,
+            email: attributedUser!.email,
+            name: getDisplayName(attributedUser!),
+          },
         };
 
     let shape: Modules.AuditLogs.EventShape | null = null;

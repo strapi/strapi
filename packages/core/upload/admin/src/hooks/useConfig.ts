@@ -27,7 +27,7 @@ export const useConfig = () => {
     },
     {
       onError() {
-        return toggleNotification({
+        toggleNotification({
           type: 'danger',
           message: formatMessage({ id: 'notification.error' }),
         });
@@ -53,7 +53,7 @@ export const useConfig = () => {
         config.refetch();
       },
       onError() {
-        return toggleNotification({
+        toggleNotification({
           type: 'danger',
           message: formatMessage({ id: 'notification.error' }),
         });

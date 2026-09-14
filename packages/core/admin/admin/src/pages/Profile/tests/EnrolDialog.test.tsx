@@ -1,0 +1,463 @@
+import { render, server, screen, waitFor, fireEvent } from '@tests/utils';
+import { http, HttpResponse } from 'msw';
+
+import { EnrolDialog } from '../EnrolDialog';
+
+import {
+  MfaStoreProbe,
+  resetMfaStoreProbe,
+  hasLeakedMfaSecrets as hasLeakedSecrets,
+} from './MfaStoreProbe';
+
+const SECRET = 'JBSWY3DPEHPK3PXP';
+const URI = `otpauth://totp/Strapi:test%40testing.com?secret=${SECRET}&issuer=Strapi`;
+const CODES = ['ABCDE12345', 'FGHJK67890'];
+
+const renderDialog = (props: Parameters<typeof EnrolDialog>[0]) =>
+  render(
+    <>
+      <MfaStoreProbe />
+      <EnrolDialog {...props} />
+    </>
+  );
+
+/** True if any cached mutation result still carries the secret, the otpauth URI, or a code. */
+const hasLeakedMfaSecrets = () => hasLeakedSecrets(SECRET, URI, ...CODES);
+
+describe('EnrolDialog', () => {
+  beforeEach(() => {
+    resetMfaStoreProbe();
+    server.use(
+      http.post('/admin/mfa/enrol', async ({ request }) => {
+        const body = (await request.json()) as { password?: string };
+        if (body.password !== 'Testing123!') {
+          return HttpResponse.json(
+            {
+              error: {
+                status: 400,
+                name: 'ValidationError',
+                message: 'Invalid credentials',
+                details: {},
+              },
+            },
+            { status: 400 }
+          );
+        }
+        return HttpResponse.json({ data: { secret: SECRET, otpauthUri: URI } });
+      }),
+      http.post('/admin/mfa/enrol/verify', async ({ request }) => {
+        const body = (await request.json()) as { code?: string };
+        if (body.code !== '123456') {
+          return HttpResponse.json(
+            {
+              error: { status: 400, name: 'ValidationError', message: 'Invalid code', details: {} },
+            },
+            { status: 400 }
+          );
+        }
+        return HttpResponse.json({ data: { recoveryCodes: CODES } });
+      }),
+      http.post('/admin/mfa/recovery-codes/ack', () => new HttpResponse(null, { status: 204 }))
+    );
+  });
+
+  it('walks password, scan, verify, recovery codes, acknowledge', async () => {
+    const onClose = jest.fn();
+    const { user } = renderDialog({ open: true, onClose });
+
+    expect(
+      screen.getByRole('dialog', { name: 'Enable two-factor authentication' })
+    ).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+
+    // step 2: the QR code and the manual key, never the raw URI as plain text or in an attribute
+    expect(await screen.findByRole('img', { name: /scan this qr code/i })).toBeInTheDocument();
+    expect(screen.getByText(SECRET)).toBeInTheDocument();
+    expect(screen.queryByText(URI)).not.toBeInTheDocument();
+    // `document.body.innerHTML` serialises `&` as `&amp;`, so an attribute leak of the full
+    // URI would render as `...secret=...&amp;issuer=Strapi` and asserting on the raw `URI`
+    // string (with a literal `&`) would pass even though the secret leaked. Assert on the
+    // `otpauth://totp/...?secret=...` prefix instead, which contains no character HTML escapes.
+    expect(document.body.innerHTML).not.toContain(URI.split('&')[0]);
+
+    await user.type(screen.getByLabelText('Authentication code*'), '123456');
+    await user.click(screen.getByRole('button', { name: 'Verify' }));
+
+    // step 3: codes shown once, acknowledgement mandatory
+    CODES.forEach((code) => expect(screen.getByText(code)).toBeInTheDocument());
+    expect(screen.getByRole('button', { name: 'I have saved my recovery codes' })).toBeDisabled();
+    await user.click(screen.getByRole('checkbox', { name: /saved these codes/i }));
+    await user.click(screen.getByRole('button', { name: 'I have saved my recovery codes' }));
+
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+
+    // the secret, otpauth URI and recovery codes must not outlive the dialog in the Redux store
+    // (RTK Query keeps a mutation's `data` around for as long as the hook stays subscribed, and
+    // this dialog stays mounted for the whole profile-page session -- see EnrolDialog.tsx).
+    expect(hasLeakedMfaSecrets()).toBe(false);
+  });
+
+  it('posts only the password on a fresh enrolment, never a code key', async () => {
+    let enrolBody: unknown;
+    server.use(
+      http.post('/admin/mfa/enrol', async ({ request }) => {
+        enrolBody = await request.json();
+        return HttpResponse.json({ data: { secret: SECRET, otpauthUri: URI } });
+      })
+    );
+    const { user } = renderDialog({ open: true, onClose: jest.fn() });
+
+    await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+
+    await screen.findByText(SECRET);
+    expect(enrolBody).toEqual({ password: 'Testing123!' });
+  });
+
+  it('renders the QR code with a scannable quiet zone and a larger size', async () => {
+    const { user } = renderDialog({ open: true, onClose: jest.fn() });
+
+    await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+
+    const svg = await screen.findByRole('img', { name: /scan this qr code/i });
+
+    // qrcode.react (node_modules/qrcode.react/lib/esm/index.js) renders
+    // `<svg width={size} height={size} viewBox="0 0 numCells numCells">` with a background
+    // <path> covering the whole viewBox followed by a foreground <path> whose `d` comes from
+    // `generatePath(cells, margin)`. That function's very first drawing command is
+    // `M${start + margin} ${y + margin}h...`, and the top-left finder pattern always makes
+    // module (0,0) dark -- so a `marginSize` of 4 (the QR spec's required quiet zone) must show
+    // up as the foreground path starting at "M4 " (never "M0 "). Without a quiet zone the dark
+    // modules run flush to the SVG's edge, and framed by this dialog's dark `Box` in dark mode a
+    // real authenticator app commonly fails to scan it.
+    expect(svg).toHaveAttribute('width', '260');
+    expect(svg).toHaveAttribute('height', '260');
+
+    const paths = svg.querySelectorAll('path');
+    expect(paths).toHaveLength(2);
+    const [backgroundPath, foregroundPath] = paths;
+    expect(backgroundPath).toHaveAttribute('d', expect.stringMatching(/^M0,0/));
+    expect(foregroundPath).toHaveAttribute('d', expect.stringMatching(/^M4[ ,]/));
+  });
+
+  it('shows the credentials error on a wrong password and stays on step 1', async () => {
+    const { user } = renderDialog({ open: true, onClose: jest.fn() });
+
+    await user.type(screen.getByLabelText('Current password*'), 'wrong');
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+
+    expect(await screen.findByText('Invalid credentials')).toBeInTheDocument();
+    expect(screen.getByLabelText('Current password*')).toBeInTheDocument();
+  });
+
+  it('shows the generic error on a wrong code and stays on the scan step with the same secret', async () => {
+    const { user } = renderDialog({ open: true, onClose: jest.fn() });
+
+    await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    await user.type(await screen.findByLabelText('Authentication code*'), '000000');
+    await user.click(screen.getByRole('button', { name: 'Verify' }));
+
+    expect(await screen.findByText('Invalid code')).toBeInTheDocument();
+    expect(screen.getByText(SECRET)).toBeInTheDocument();
+  });
+
+  it('trims surrounding whitespace off the code before sending it to verify', async () => {
+    let capturedBody: { code?: string } | undefined;
+    server.use(
+      http.post('/admin/mfa/enrol/verify', async ({ request }) => {
+        capturedBody = (await request.json()) as { code?: string };
+        return HttpResponse.json({ data: { recoveryCodes: CODES } });
+      })
+    );
+
+    const { user } = renderDialog({ open: true, onClose: jest.fn() });
+    await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    // A pasted TOTP or recovery code commonly picks up a stray leading/trailing space.
+    await user.type(await screen.findByLabelText('Authentication code*'), ' 123456 ');
+    await user.click(screen.getByRole('button', { name: 'Verify' }));
+
+    await screen.findByText(CODES[0]);
+    expect(capturedBody?.code).toBe('123456');
+  });
+
+  it('does not post the enrol request twice when Enter is pressed again while one is pending', async () => {
+    let enrolRequestCount = 0;
+    server.use(
+      http.post('/admin/mfa/enrol', async () => {
+        enrolRequestCount += 1;
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        return HttpResponse.json({ data: { secret: SECRET, otpauthUri: URI } });
+      })
+    );
+
+    const { user } = renderDialog({ open: true, onClose: jest.fn() });
+    const passwordInput = screen.getByLabelText('Current password*');
+    await user.type(passwordInput, 'Testing123!');
+    const form = passwordInput.closest('form');
+    if (!form) {
+      throw new Error('expected the password field to live inside a <form>');
+    }
+
+    fireEvent.submit(form);
+    fireEvent.submit(form);
+
+    await screen.findByText(SECRET);
+    expect(enrolRequestCount).toBe(1);
+  });
+
+  it('ignores an Enter-key submit on the password step when the password is empty', async () => {
+    let enrolRequestCount = 0;
+    server.use(
+      http.post('/admin/mfa/enrol', async () => {
+        enrolRequestCount += 1;
+        return HttpResponse.json({ data: { secret: SECRET, otpauthUri: URI } });
+      })
+    );
+
+    renderDialog({ open: true, onClose: jest.fn() });
+    const passwordInput = screen.getByLabelText('Current password*');
+    const form = passwordInput.closest('form');
+    if (!form) {
+      throw new Error('expected the password field to live inside a <form>');
+    }
+
+    fireEvent.submit(form);
+
+    // See the analogous scan-step test below for why this needs a real wait rather than an
+    // immediate assertion.
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(enrolRequestCount).toBe(0);
+    expect(screen.getByLabelText('Current password*')).toBeInTheDocument();
+  });
+
+  it('does not post the verify request twice when Enter is pressed again while one is pending', async () => {
+    let verifyRequestCount = 0;
+    server.use(
+      http.post('/admin/mfa/enrol/verify', async () => {
+        verifyRequestCount += 1;
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        return HttpResponse.json({ data: { recoveryCodes: CODES } });
+      })
+    );
+
+    const { user } = renderDialog({ open: true, onClose: jest.fn() });
+    await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+
+    const codeInput = await screen.findByLabelText('Authentication code*');
+    await user.type(codeInput, '123456');
+    const form = codeInput.closest('form');
+    if (!form) {
+      throw new Error('expected the code field to live inside a <form>');
+    }
+
+    // Simulates pressing Enter twice in a row: `fireEvent.submit` dispatches a real `submit`
+    // event, which is how a real browser (not `user.click`, see EnrolDialog.tsx's comment on
+    // this suite's `PointerEvent` polyfill) reacts to Enter in a text field.
+    fireEvent.submit(form);
+    fireEvent.submit(form);
+
+    await screen.findByRole('checkbox');
+    expect(verifyRequestCount).toBe(1);
+  });
+
+  it('ignores an Enter-key submit while the code is too short to pass the button gate', async () => {
+    let verifyRequestCount = 0;
+    server.use(
+      http.post('/admin/mfa/enrol/verify', async () => {
+        verifyRequestCount += 1;
+        return HttpResponse.json({ data: { recoveryCodes: CODES } });
+      })
+    );
+
+    const { user } = renderDialog({ open: true, onClose: jest.fn() });
+    await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+
+    const codeInput = await screen.findByLabelText('Authentication code*');
+    await user.type(codeInput, '123');
+    const form = codeInput.closest('form');
+    if (!form) {
+      throw new Error('expected the code field to live inside a <form>');
+    }
+
+    fireEvent.submit(form);
+
+    // Give a wrongly-unguarded handler time to actually reach the mocked network layer before
+    // asserting it never did -- `fireEvent.submit` only flushes the synchronous part of the
+    // (async) handler, so asserting immediately would pass trivially regardless of the guard.
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(verifyRequestCount).toBe(0);
+    expect(screen.getByLabelText('Authentication code*')).toBeInTheDocument();
+  });
+
+  it('shows the acknowledge error and stays on the codes step when saving fails, then closes once it succeeds', async () => {
+    const onClose = jest.fn();
+    let shouldFail = true;
+    server.use(
+      http.post('/admin/mfa/recovery-codes/ack', () =>
+        shouldFail
+          ? HttpResponse.json(
+              {
+                error: {
+                  status: 500,
+                  name: 'InternalError',
+                  message: 'Something went wrong',
+                  details: {},
+                },
+              },
+              { status: 500 }
+            )
+          : new HttpResponse(null, { status: 204 })
+      )
+    );
+
+    const { user } = renderDialog({ open: true, onClose });
+    await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    await user.type(await screen.findByLabelText('Authentication code*'), '123456');
+    await user.click(screen.getByRole('button', { name: 'Verify' }));
+
+    await user.click(screen.getByRole('checkbox', { name: /saved these codes/i }));
+    await user.click(screen.getByRole('button', { name: 'I have saved my recovery codes' }));
+
+    expect(await screen.findByText('Something went wrong')).toBeInTheDocument();
+    expect(onClose).not.toHaveBeenCalled();
+    CODES.forEach((code) => expect(screen.getByText(code)).toBeInTheDocument());
+
+    shouldFail = false;
+    await user.click(screen.getByRole('button', { name: 'I have saved my recovery codes' }));
+
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+  });
+
+  it('forgets the secret when closed before finishing', async () => {
+    const onClose = jest.fn();
+    const { user, rerender } = renderDialog({ open: true, onClose });
+
+    await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    await screen.findByText(SECRET);
+
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(onClose).toHaveBeenCalled();
+    expect(hasLeakedMfaSecrets()).toBe(false);
+
+    // `<EnrolDialog>` is mounted for the whole profile-page session in production (see
+    // TwoFactorSection.tsx) -- only its `open` prop toggles -- so re-opening it here means
+    // toggling `open` on the *same* instance, not remounting a fresh one (a fresh instance would
+    // trivially start clean regardless of whether `reset()` actually clears anything).
+    rerender(
+      <>
+        <MfaStoreProbe />
+        <EnrolDialog open={false} onClose={onClose} />
+      </>
+    );
+    rerender(
+      <>
+        <MfaStoreProbe />
+        <EnrolDialog open onClose={onClose} />
+      </>
+    );
+    expect(screen.getByLabelText('Current password*')).toBeInTheDocument();
+    expect(screen.queryByText(SECRET)).not.toBeInTheDocument();
+  });
+
+  it('does not leak the secret into the store when the dialog unmounts without closing', async () => {
+    // Simulates the whole page unmounting the dialog directly -- browser Back, or an app
+    // redirect -- while it's open on the scan step, i.e. `close()` never runs at all. The
+    // captured store outlives the unmounted component tree, so this reads it after `unmount()`.
+    const { user, unmount } = renderDialog({ open: true, onClose: jest.fn() });
+
+    await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    await screen.findByText(SECRET);
+
+    unmount();
+
+    expect(hasLeakedMfaSecrets()).toBe(false);
+  });
+
+  describe('replace mode', () => {
+    it('titles itself Replace authenticator and asks for password and a code on the first step', () => {
+      renderDialog({ open: true, onClose: jest.fn(), mode: 'replace' });
+
+      expect(screen.getByRole('dialog', { name: 'Replace authenticator' })).toBeInTheDocument();
+      expect(screen.getByLabelText('Current password*')).toBeInTheDocument();
+      expect(screen.getByLabelText('Authentication code*')).toHaveAttribute(
+        'autocomplete',
+        'one-time-code'
+      );
+      expect(screen.getByText(/keeps working until you verify the new one/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Continue' })).toBeDisabled();
+    });
+
+    it('posts password and trimmed code to /mfa/enrol, then verifies and shows the new codes', async () => {
+      let enrolBody: unknown;
+      server.use(
+        http.post('/admin/mfa/enrol', async ({ request }) => {
+          enrolBody = await request.json();
+          return HttpResponse.json({ data: { secret: SECRET, otpauthUri: URI } });
+        }),
+        http.post('/admin/mfa/enrol/verify', () =>
+          HttpResponse.json({ data: { recoveryCodes: ['AAAAA-BBBBB'], replaced: true } })
+        )
+      );
+      const { user } = renderDialog({ open: true, onClose: jest.fn(), mode: 'replace' });
+
+      await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
+      await user.type(screen.getByLabelText('Authentication code*'), ' 654321 ');
+      fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+
+      await screen.findByTestId('mfa-manual-key');
+      expect(enrolBody).toEqual({ password: 'Testing123!', code: '654321' });
+
+      await user.type(screen.getByLabelText('Authentication code*'), '123456');
+      fireEvent.click(screen.getByRole('button', { name: 'Verify' }));
+
+      expect(await screen.findByTestId('mfa-recovery-code')).toHaveTextContent('AAAAA-BBBBB');
+    });
+
+    it('keeps the Continue button disabled until both password and a 6+ character code are present', async () => {
+      const { user } = renderDialog({ open: true, onClose: jest.fn(), mode: 'replace' });
+
+      await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
+      expect(screen.getByRole('button', { name: 'Continue' })).toBeDisabled();
+      await user.type(screen.getByLabelText('Authentication code*'), '123456');
+      expect(screen.getByRole('button', { name: 'Continue' })).toBeEnabled();
+    });
+  });
+
+  // The codes are shown exactly once and are the only way back into a locked-out account, so a
+  // stray Escape must not destroy them. It is refused with an explanation rather than silently
+  // swallowed, so the user is not left wondering why the dialog will not close.
+  it('refuses to close on Escape while the recovery codes are on screen, and says why', async () => {
+    const onClose = jest.fn();
+    server.use(
+      http.post('/admin/mfa/enrol/verify', () =>
+        HttpResponse.json({ data: { recoveryCodes: CODES } })
+      )
+    );
+
+    const { user } = renderDialog({ open: true, onClose });
+    await user.type(screen.getByLabelText('Current password*'), 'Testing123!');
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    await user.type(await screen.findByLabelText('Authentication code*'), '123456');
+    await user.click(screen.getByRole('button', { name: 'Verify' }));
+
+    // On the codes step.
+    await screen.findByRole('checkbox');
+
+    await user.keyboard('{Escape}');
+
+    expect(await screen.findByText('Save your recovery codes first')).toBeInTheDocument();
+    expect(onClose).not.toHaveBeenCalled();
+    // Still open, codes still visible.
+    expect(screen.getByText(CODES[0])).toBeInTheDocument();
+  });
+});

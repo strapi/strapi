@@ -2,7 +2,8 @@ import * as React from 'react';
 
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import { Login } from '../../../shared/contracts/authentication';
+import { Login, type LoginMfa } from '../../../shared/contracts/authentication';
+import { type MfaWebauthnLogin } from '../../../shared/contracts/mfa';
 import { createContext } from '../components/Context';
 import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
 import { useStrapiApp } from '../features/StrapiApp';
@@ -20,6 +21,8 @@ import {
   useGetMeQuery,
   useGetMyPermissionsQuery,
   useLazyCheckPermissionsQuery,
+  useLoginMfaMutation,
+  useLoginMfaWebauthnMutation,
   useLoginMutation,
   useLogoutMutation,
 } from '../services/auth';
@@ -48,6 +51,21 @@ interface AuthContextValue {
   login: (
     body: Login.Request['body'] & { rememberMe: boolean }
   ) => Promise<Awaited<ReturnType<ReturnType<typeof useLoginMutation>[0]>>>;
+  /** Persists the session token exactly as `login` does. The trust `trustDevice` asks for arrives
+   * as an httpOnly cookie the panel never sees. */
+  loginMfa: (
+    body: Pick<LoginMfa.Request['body'], 'challengeToken' | 'code' | 'trustDevice'> & {
+      rememberMe: boolean;
+    }
+  ) => Promise<Awaited<ReturnType<ReturnType<typeof useLoginMfaMutation>[0]>>>;
+  /** Satisfies the *same* challenge with an assertion instead of a code. `trustDevice` and
+   * `rememberMe` are carried for the reasons `loginMfa` gives: dropping either here would silently
+   * lose the user's choice. */
+  loginMfaWebauthn: (
+    body: Pick<MfaWebauthnLogin.Request['body'], 'challengeToken' | 'assertion' | 'trustDevice'> & {
+      rememberMe: boolean;
+    }
+  ) => Promise<Awaited<ReturnType<ReturnType<typeof useLoginMfaWebauthnMutation>[0]>>>;
   logout: () => Promise<void>;
   /**
    * @alpha
@@ -143,6 +161,8 @@ const AuthProvider = ({
   const navigate = useNavigate();
 
   const [loginMutation] = useLoginMutation();
+  const [loginMfaMutation] = useLoginMfaMutation();
+  const [loginMfaWebauthnMutation] = useLoginMfaWebauthnMutation();
   const [logoutMutation] = useLogoutMutation();
 
   const clearStateAndLogout = React.useCallback(() => {
@@ -292,8 +312,12 @@ const AuthProvider = ({
       /**
        * There will always be a `data` key in the response
        * because if something fails, it will throw an error.
+       *
+       * An MFA-enrolled account resolves `res.data` to the challenge shape instead of a
+       * session: no token exists yet, so there is nothing to persist here until the caller
+       * completes `/login/mfa` and receives a real session response.
        */
-      if ('data' in res) {
+      if ('data' in res && !('mfaRequired' in res.data)) {
         const { token } = res.data;
 
         dispatch(
@@ -307,6 +331,36 @@ const AuthProvider = ({
       return res;
     },
     [dispatch, loginMutation]
+  );
+
+  const loginMfa = React.useCallback<AuthContextValue['loginMfa']>(
+    async ({ rememberMe, ...body }) => {
+      const res = await loginMfaMutation({ ...body, deviceId: getOrCreateDeviceId(), rememberMe });
+
+      if ('data' in res) {
+        dispatch(loginAction({ token: res.data.token, persist: rememberMe }));
+      }
+
+      return res;
+    },
+    [dispatch, loginMfaMutation]
+  );
+
+  const loginMfaWebauthn = React.useCallback<AuthContextValue['loginMfaWebauthn']>(
+    async ({ rememberMe, ...body }) => {
+      const res = await loginMfaWebauthnMutation({
+        ...body,
+        deviceId: getOrCreateDeviceId(),
+        rememberMe,
+      });
+
+      if ('data' in res) {
+        dispatch(loginAction({ token: res.data.token, persist: rememberMe }));
+      }
+
+      return res;
+    },
+    [dispatch, loginMfaWebauthnMutation]
   );
 
   const logout = React.useCallback(async () => {
@@ -403,6 +457,8 @@ const AuthProvider = ({
       token={token}
       user={user}
       login={login}
+      loginMfa={loginMfa}
+      loginMfaWebauthn={loginMfaWebauthn}
       logout={logout}
       permissions={userPermissions}
       checkUserHasPermissions={checkUserHasPermissions ?? NOOP_CHECK_USER_HAS_PERMISSIONS}

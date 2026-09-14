@@ -39,6 +39,11 @@ export default {
       type: 'string',
       configurable: false,
     },
+    mfaRequired: {
+      type: 'boolean',
+      default: false,
+      configurable: false,
+    },
     users: {
       configurable: false,
       type: 'relation',

@@ -41,6 +41,11 @@ export const ADMIN_PERMISSIONS_CE = {
       read: [{ action: 'admin::roles.read', subject: null }],
       update: [{ action: 'admin::roles.update', subject: null }],
     },
+    security: {
+      main: [{ action: 'admin::security-settings.read', subject: null }],
+      read: [{ action: 'admin::security-settings.read', subject: null }],
+      update: [{ action: 'admin::security-settings.update', subject: null }],
+    },
     users: {
       main: [
         { action: 'admin::users.create', subject: null },
@@ -224,6 +229,17 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
       to: '/settings/admin-tokens',
       id: 'admin-tokens',
     },
+    // Enforcement of admin two-factor authentication. The one place the admin reads the future flag:
+    // the page itself, and everything behind it, keys off the API (404 = feature off) instead.
+    ...(window.strapi.future.isEnabled('unstableAdminMfa')
+      ? [
+          {
+            intlLabel: { id: 'Settings.security.title', defaultMessage: 'Security' },
+            to: '/settings/security',
+            id: 'security',
+          },
+        ]
+      : []),
     ...(!window.strapi.features.isEnabled(window.strapi.features.AUDIT_LOGS) &&
     window.strapi?.flags?.promoteEE
       ? [

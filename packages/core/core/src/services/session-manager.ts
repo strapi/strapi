@@ -171,6 +171,7 @@ class OriginSessionManager {
     | {
         token: string;
         sessionId: string;
+        userId: string;
         absoluteExpiresAt: string;
         type: 'refresh' | 'session';
       }
@@ -568,6 +569,7 @@ class SessionManager {
     | {
         token: string;
         sessionId: string;
+        userId: string;
         absoluteExpiresAt: string;
         type: 'refresh' | 'session';
       }
@@ -647,6 +649,7 @@ class SessionManager {
           return {
             token: childToken,
             sessionId: child.sessionId,
+            userId: child.userId,
             absoluteExpiresAt,
             type: child.type ?? 'refresh',
           };
@@ -724,6 +727,7 @@ class SessionManager {
       return {
         token: childToken,
         sessionId: childSessionId,
+        userId: current.userId,
         absoluteExpiresAt,
         type: tokenType,
       };
