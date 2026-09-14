@@ -82,6 +82,12 @@ test.describe('Relations on the fly - Create a Relation and Save', () => {
         request.url().includes('/content-manager/collection-types/api::article.article')
     );
     await clickAndWait(page, page.getByRole('button', { name: 'Publish' }));
+    await clickAndWait(
+      page,
+      page
+        .getByRole('alertdialog', { name: 'Confirmation' })
+        .getByRole('button', { name: 'Publish' })
+    );
 
     const parentUpdateData = (await parentUpdate).postDataJSON() as {
       title?: string;
