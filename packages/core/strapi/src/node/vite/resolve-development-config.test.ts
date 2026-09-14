@@ -147,8 +147,12 @@ describe('Vite admin configuration', () => {
         expect(replacement).toEqual(expect.any(String));
       }
 
-      // The design system is a prefix alias like every other module, and the host stylesheet
-      // resolves `next/source.css` through it
+      // A custom config spreads the object, and a spread keeps insertion order, so the exact
+      // subpath keys stay ahead of the prefix key that would otherwise match them first
+      const keys = Object.keys(alias);
+      expect(keys.indexOf('@strapi/design-system/next/source.css')).toBeLessThan(
+        keys.indexOf('@strapi/design-system')
+      );
       expect(alias['@strapi/design-system']).toEqual(expect.any(String));
     }
 
