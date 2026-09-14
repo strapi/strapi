@@ -14,6 +14,8 @@ import {
   DEFAULT_RETENTION_DAYS as AUDIT_LOGS_DEFAULT_RETENTION_DAYS,
 } from './audit-logs/services/lifecycles';
 import { auditLog } from './audit-logs/content-types/audit-log';
+import { AUDIT_LOG_EXPORT_EVENT } from '../../../shared/utils/audit-log-export';
+import { registerTokenAuditEvents } from '../../../server/src/audit-logs/tokens';
 
 const getAdminEE = () => {
   const eeAdmin = {
@@ -53,6 +55,16 @@ const getAdminEE = () => {
         // Register an internal audit logs lifecycle service
         const auditLogsLifecycle = createAuditLogsLifecycleService(strapi);
         strapi.add('audit-logs-lifecycle', auditLogsLifecycle);
+
+        auditLogsLifecycle.registerEvent(
+          AUDIT_LOG_EXPORT_EVENT,
+          (event: { filters?: unknown }) => ({
+            resource: { type: 'audit-log' },
+            details: { format: 'csv', filters: event?.filters ?? null },
+          })
+        );
+
+        registerTokenAuditEvents(auditLogsLifecycle);
 
         await auditLogsLifecycle.register();
 
