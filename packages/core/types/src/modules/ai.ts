@@ -11,6 +11,7 @@ export type AiProvider = {
 export type AiAdminService = {
   isAvailable(): boolean;
   isStrapiManagedAiEnabled(): boolean;
+  authorizeCustomProvider(): boolean;
   getAiToken(): Promise<{ token: string; expiresAt?: string }>;
   getAiUsage(): Promise<{
     cmsAiCreditsUsed: number;

@@ -5,6 +5,7 @@ import path from 'path';
 import { AdminUser } from '../../../../shared/contracts/shared';
 
 const STRAPI_MANAGED_AI_LICENSE_FEATURE = 'cms-ai';
+const CUSTOM_AI_PROVIDER_LICENSE_FEATURE = 'cms-byok-ai';
 
 const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
   /**
@@ -20,12 +21,36 @@ const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
     }
   >();
 
+  let isCustomProviderRejected = false;
+
   const isConfigEnabled = (): boolean => strapi.config.get('admin.ai.enabled', true) === true;
 
-  const isAvailable = (): boolean => isConfigEnabled() && strapi.ee?.isEE === true;
+  const isAvailable = (): boolean =>
+    isConfigEnabled() && strapi.ee?.isEE === true && !isCustomProviderRejected;
 
   const isStrapiManagedAiEnabled = (): boolean =>
-    isConfigEnabled() && strapi.ee?.features?.isEnabled(STRAPI_MANAGED_AI_LICENSE_FEATURE) === true;
+    isConfigEnabled() &&
+    !isCustomProviderRejected &&
+    strapi.ee?.features?.isEnabled(STRAPI_MANAGED_AI_LICENSE_FEATURE) === true;
+
+  const authorizeCustomProvider = (): boolean => {
+    if (!isConfigEnabled()) {
+      strapi.log.info(
+        'A custom AI provider was ignored: AI is disabled by the "admin.ai.enabled" config.'
+      );
+      return false;
+    }
+
+    if (strapi.ee?.features?.isEnabled(CUSTOM_AI_PROVIDER_LICENSE_FEATURE) === true) {
+      return true;
+    }
+
+    isCustomProviderRejected = true;
+    strapi.log.warn(
+      `A custom AI provider was rejected: the Strapi license does not include the "${CUSTOM_AI_PROVIDER_LICENSE_FEATURE}" feature. All AI features are disabled.`
+    );
+    return false;
+  };
 
   const isPluginAiFeatureConfigured = async (plugin: string, service: string): Promise<boolean> => {
     const aiService = strapi.plugin(plugin)?.service(service) as
@@ -303,6 +328,7 @@ const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
          This boolean is needed while all AI features are being ported to providers architecture.
          Once all compatibility has been tested, this flag will most likely be deprecated. */
     isStrapiManagedAiEnabled,
+    authorizeCustomProvider,
     /* Returns one flag per feature, each saying if it has a
      *   usable provider:
      *     - With Strapi-managed, every feature says yes.
