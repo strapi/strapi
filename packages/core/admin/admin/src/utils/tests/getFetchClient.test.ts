@@ -586,6 +586,28 @@ describe('getFetchClient', () => {
       expect(window.fetch).not.toHaveBeenCalled();
     });
 
+    it('should keep the failed request token as the first argument and refresh against the global backend', async () => {
+      const nowSeconds = Math.floor(Date.now() / 1000);
+      const staleToken = buildJwt(nowSeconds - 60);
+      const freshToken = buildJwt(nowSeconds + 3600);
+
+      (window.fetch as jest.Mock).mockImplementationOnce(() =>
+        Promise.resolve({
+          status: 200,
+          ok: true,
+          json: () => Promise.resolve({ data: { token: freshToken } }),
+        })
+      );
+
+      const token = await attemptTokenRefresh(staleToken);
+
+      expect(token).toBe(freshToken);
+      expect(window.fetch).toHaveBeenCalledWith(
+        `${window.strapi.backendURL}/admin/access-token`,
+        expect.anything()
+      );
+    });
+
     it('should serialize refresh across tabs so only one access-token call is made', async () => {
       const nowSeconds = Math.floor(Date.now() / 1000);
       const staleToken = buildJwt(nowSeconds - 60);
@@ -634,10 +656,7 @@ describe('getFetchClient', () => {
         })
       );
 
-      const [first, second] = await Promise.all([
-        refreshAccessToken(window.strapi.backendURL),
-        refreshAccessToken(window.strapi.backendURL),
-      ]);
+      const [first, second] = await Promise.all([refreshAccessToken(), refreshAccessToken()]);
 
       expect(first).toBe(freshToken);
       expect(second).toBe(freshToken);
@@ -705,7 +724,7 @@ describe('getFetchClient', () => {
       (window.localStorage.getItem as jest.Mock).mockReturnValue(null);
       document.cookie = `jwtToken=${encodeURIComponent(freshToken)}; Path=/`;
 
-      const token = await refreshAccessToken(window.strapi.backendURL, staleToken);
+      const token = await refreshAccessToken(staleToken);
 
       expect(token).toBe(freshToken);
       expect(window.fetch).not.toHaveBeenCalled();

@@ -239,19 +239,30 @@ const resolveBackendURL = (backendURL?: string): string | undefined =>
  * Returns the new token on success, or null on failure.
  */
 const refreshAccessToken = async (
-  backendURL: string,
-  tokenUsedByFailedRequest?: string | null
+  tokenUsedByFailedRequest?: string | null,
+  backendURL?: string
 ): Promise<string | null> => {
   const tokenBeforeRefresh = tokenUsedByFailedRequest ?? getToken();
 
   try {
+    const resolvedBackendURL = resolveBackendURL(backendURL);
+
+    if (resolvedBackendURL == null) {
+      console.error(
+        '[Auth] Token refresh error: could not resolve a backend URL. Pass one explicitly if `window.strapi` is not assigned yet.'
+      );
+      return null;
+    }
+
     if (typeof navigator !== 'undefined' && navigator.locks?.request) {
       return await navigator.locks.request(ADMIN_REFRESH_LOCK, () =>
-        executeRefreshAccessToken(backendURL, tokenBeforeRefresh, { allowHttpRetry: false })
+        executeRefreshAccessToken(resolvedBackendURL, tokenBeforeRefresh, {
+          allowHttpRetry: false,
+        })
       );
     }
 
-    return await executeRefreshAccessToken(backendURL, tokenBeforeRefresh, {
+    return await executeRefreshAccessToken(resolvedBackendURL, tokenBeforeRefresh, {
       allowHttpRetry: true,
     });
   } catch (error) {
@@ -271,8 +282,8 @@ const refreshAccessToken = async (
  * @internal Exported for testing purposes
  */
 const attemptTokenRefresh = async (
-  backendURL?: string,
-  tokenUsedByFailedRequest?: string | null
+  tokenUsedByFailedRequest?: string | null,
+  backendURL?: string
 ): Promise<string> => {
   const resolvedBackendURL = resolveBackendURL(backendURL);
 
@@ -287,7 +298,7 @@ const attemptTokenRefresh = async (
   let refreshPromise = refreshPromises.get(resolvedBackendURL);
 
   if (!refreshPromise) {
-    refreshPromise = refreshAccessToken(resolvedBackendURL, tokenUsedByFailedRequest).finally(
+    refreshPromise = refreshAccessToken(tokenUsedByFailedRequest, resolvedBackendURL).finally(
       () => {
         refreshPromises.delete(resolvedBackendURL);
       }
@@ -516,7 +527,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       if (isFetchError(error) && error.status === 401 && !isAuthPath(url)) {
         try {
           // Refresh against the backend this client targets, not the global one.
-          await attemptTokenRefresh(backendURL, getRequestToken());
+          await attemptTokenRefresh(getRequestToken(), backendURL);
           // Retry - executeRequest will call getDefaultHeaders() again, picking up the new token
           return await executeRequest();
         } catch {
