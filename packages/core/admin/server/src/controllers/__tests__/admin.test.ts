@@ -100,7 +100,7 @@ describe('Admin Controller', () => {
       global.strapi = { config: { get: jest.fn(() => ({})) } } as any;
     });
 
-    test('Returns isTrial, which the admin contract requires as a boolean', async () => {
+    test('CE getProjectType always returns isTrial: false', async () => {
       const result = await adminController.getProjectType();
 
       expect(result).toEqual({
