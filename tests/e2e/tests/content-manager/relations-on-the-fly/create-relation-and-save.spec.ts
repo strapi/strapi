@@ -26,6 +26,9 @@ test.describe('Relations on the fly - Create a Relation and Save', () => {
     // Step 3. Edit the form
     await expect(page.getByRole('banner').getByText('Create a relation')).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Untitled' })).toBeVisible();
+    await expect(
+      page.getByRole('dialog').getByRole('button', { name: 'West Ham post match analysis' })
+    ).toBeVisible();
     const name = page.getByRole('textbox', { name: 'name' });
     await expect(name).toHaveValue('');
     await name.fill('Mr. Plop');
