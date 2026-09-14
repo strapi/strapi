@@ -1,12 +1,12 @@
 import { useTracking as useStrapiTracking, TrackingEvent } from '@strapi/admin/strapi-admin';
-import { useAIAvailability } from '@strapi/admin/strapi-admin/ee';
 
+import { useAIMetadataAvailability } from '../hooks/useAIMetadataAvailability';
 import { useSettings } from '../hooks/useSettings';
 
 export const useTracking = () => {
   const { trackUsage: trackStrapiUsage } = useStrapiTracking();
   const { data } = useSettings();
-  const isAiAvailable = useAIAvailability();
+  const isAiAvailable = useAIMetadataAvailability();
 
   const trackUsage = <TEvent extends TrackingEvent>(
     event: TEvent['name'],

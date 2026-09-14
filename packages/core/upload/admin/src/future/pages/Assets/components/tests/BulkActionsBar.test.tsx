@@ -8,7 +8,6 @@ import { BulkActionsBar } from '../BulkActionsBar';
 import type { File } from '../../../../../../../shared/contracts/files';
 
 const mockToggleNotification = jest.fn();
-const mockAIAvailability = jest.fn(() => false);
 const mockTrackUsage = jest.fn();
 let mockAiMetadataEnabled = false;
 
@@ -20,11 +19,6 @@ jest.mock('../../../../hooks/useAIMetadataEnabled', () => ({
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
   useNotification: () => ({ toggleNotification: mockToggleNotification }),
-}));
-
-jest.mock('@strapi/admin/strapi-admin/ee', () => ({
-  ...jest.requireActual('@strapi/admin/strapi-admin/ee'),
-  useAIAvailability: () => mockAIAvailability(),
 }));
 
 jest.mock('../../../../hooks/useTracking', () => ({

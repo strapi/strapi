@@ -34,6 +34,7 @@ exports[`services:list should output list of services 1`] = `
 │ plugin::upload.extensions                            │
 │ plugin::upload.aiMetadata                            │
 │ plugin::upload.aiMetadataJobs                        │
+│ plugin::upload.aiMetadataProvider                    │
 │ plugin::i18n.permissions                             │
 │ plugin::i18n.metrics                                 │
 │ plugin::i18n.localizations                           │
