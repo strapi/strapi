@@ -3,7 +3,7 @@ import createCronService from '../services/cron';
 
 export default defineProvider({
   init(strapi) {
-    strapi.add('cron', () => createCronService());
+    strapi.add('cron', () => createCronService(strapi));
   },
   async bootstrap(strapi) {
     if (strapi.config.get('server.cron.enabled', true)) {
