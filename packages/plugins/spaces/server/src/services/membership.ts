@@ -50,7 +50,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         query().findMany({
           where: { user: userId },
           populate: { space: true, roles: true },
-          limit: -1,
         })
       );
 
@@ -68,7 +67,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         query().findMany({
           where: { space: spaceId },
           populate: { user: true, roles: true },
-          limit: -1,
         })
       );
     },

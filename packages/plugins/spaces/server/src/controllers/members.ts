@@ -92,7 +92,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         strapi.db.query('admin::user').findMany({
           where: { isActive: true },
           populate: { roles: true },
-          limit: -1,
         })
       ),
       strapi.service('plugin::spaces.membership').listForSpace(spaceId),

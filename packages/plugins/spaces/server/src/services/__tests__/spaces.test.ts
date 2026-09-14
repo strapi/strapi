@@ -17,10 +17,13 @@ const makeStrapi = (rows: Row[] = [], { maxSpaces = null }: { maxSpaces?: number
   let nextId = table.length + 1;
 
   const reads = { findMany: 0 };
+  /** Options the service asked the query engine for, so a test can inspect them. */
+  const readOptions: Array<Record<string, unknown>> = [];
 
   const query = {
-    async findMany() {
+    async findMany(options: Record<string, unknown> = {}) {
       reads.findMany += 1;
+      readOptions.push(options);
 
       return table;
     },
@@ -54,6 +57,7 @@ const makeStrapi = (rows: Row[] = [], { maxSpaces = null }: { maxSpaces?: number
   return {
     table,
     reads,
+    readOptions,
     strapi: {
       requestContext: { get: () => undefined },
       eventHub: { emit: jest.fn() },
@@ -361,6 +365,23 @@ describe('reading the space registry', () => {
       const spaces = createSpacesService({ strapi });
 
       await expect(spaces.getDefault()).resolves.toBeUndefined();
+    });
+  });
+
+  describe('reading the registry itself', () => {
+    it('asks for no limit at all, rather than a negative one', async () => {
+      // `limit: -1` is the document service's way of saying "all of them". The
+      // query engine underneath adds a LIMIT clause for any value it is given,
+      // so -1 reaches the driver verbatim — SQLite reads it as unlimited and
+      // Postgres refuses it outright. Omitting the key is what means unlimited
+      // here, and this read happens on every request that names a space.
+      const { strapi, readOptions } = makeStrapi([FRANCE]);
+      const spaces = createSpacesService({ strapi });
+
+      await spaces.list();
+
+      expect(readOptions).toHaveLength(1);
+      expect(readOptions[0].limit).toBeUndefined();
     });
   });
 

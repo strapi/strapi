@@ -57,7 +57,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     // The space registry is platform data: read it whatever space the caller is
     // in, or resolving a header would depend on the header.
-    const spaces: Space[] = await runUnscoped(() => query().findMany({ limit: -1 }));
+    // No `limit`: the query engine adds a LIMIT clause for any value it is
+    // given, and `-1` — the document service's way of saying "all of them" —
+    // reaches the driver verbatim. Postgres refuses a negative LIMIT.
+    const spaces: Space[] = await runUnscoped(() => query().findMany({}));
 
     cache = {
       at: Date.now(),

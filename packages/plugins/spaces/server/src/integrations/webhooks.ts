@@ -55,7 +55,7 @@ const createBindingIndex = (strapi: Core.Strapi): BindingIndex => {
 
   const load = async () => {
     const rows = await runUnscoped(() =>
-      strapi.db.query(WEBHOOK_BINDING_UID).findMany({ populate: { space: true }, limit: -1 })
+      strapi.db.query(WEBHOOK_BINDING_UID).findMany({ populate: { space: true } })
     );
 
     const next = new Map<string, number>();

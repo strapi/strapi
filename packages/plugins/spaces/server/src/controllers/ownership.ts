@@ -59,7 +59,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         where: { documentId: { $in: documentIds } },
         select: ['documentId'],
         populate: { [SPACE_ATTRIBUTE]: { select: ['id', 'name', 'slug'] } },
-        limit: -1,
       })
     );
 

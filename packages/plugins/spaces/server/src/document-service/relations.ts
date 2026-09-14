@@ -167,7 +167,6 @@ export const assertRelationsWithinSpace = async (
         where,
         select: schema.attributes.documentId ? ['id', 'documentId'] : ['id'],
         populate: { [SPACE_ATTRIBUTE]: { select: ['id'] } },
-        limit: -1,
       })
     )) as Array<Record<string, any>>;
 

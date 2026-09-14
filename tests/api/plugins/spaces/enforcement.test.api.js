@@ -41,6 +41,14 @@ const AUTHOR_UID = 'api::scoped-author.scoped-author';
  * service, the real query builder and the real database; only the parts a
  * licence gates (request resolution, membership, the admin) are left out, and
  * those are covered by isolation.test.api.js.
+ *
+ * Note what this does NOT reach: the plugin's own services. Rows are created
+ * here through `strapi.db.query` directly, because without a licence the
+ * services are not registered at all. So a fault in the service layer — the
+ * registry read, membership lookups — is invisible to this file even though it
+ * runs against a real database. That gap is real: a negative `limit` in the
+ * registry read once reached Postgres this way, and only a licensed run found
+ * it.
  */
 describe('Spaces | enforcement', () => {
   let scope;
