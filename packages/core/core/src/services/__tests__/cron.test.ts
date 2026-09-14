@@ -130,6 +130,7 @@ describe('Cron service', () => {
       '*/1 * * * * *': task,
     });
 
+    await jest.runOnlyPendingTimersAsync();
     expect(task).not.toHaveBeenCalled();
 
     cron.start();
