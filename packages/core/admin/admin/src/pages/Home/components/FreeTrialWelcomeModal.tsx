@@ -1,113 +1,287 @@
-import { useState } from 'react';
+import * as React from 'react';
 
-import { Box, Button, Flex, Modal, Typography } from '@strapi/design-system';
-import { Cross } from '@strapi/icons';
+import { Button, Flex, Modal, Typography } from '@strapi/design-system';
+import { Calendar, Eye, Key, ListPlus, Image, Book } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { useLicenseLimits } from '../../../../../ee/admin/src/hooks/useLicenseLimits';
-import lightIllustration from '../../../assets/images/free-trial.png';
-import { useScopedPersistentState } from '../../../hooks/usePersistentState';
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
 
-const StyledModalContent = styled(Modal.Content)`
-  max-width: 51.6rem;
-`;
+interface FreeTrialWelcomeModalProps {
+  onClose: () => void;
+}
 
-const StyledModalBody = styled(Modal.Body)`
-  padding: 0;
-  position: relative;
+interface Feature {
+  icon: React.ReactNode;
+  titleId: string;
+  titleDefault: string;
+  descId: string;
+  descDefault: string;
+  isAI?: boolean;
+  fullWidth?: boolean;
+}
 
-  > div {
-    padding: 0;
-  }
-`;
+// ---------------------------------------------------------------------------
+// Styled primitives
+// ---------------------------------------------------------------------------
 
-const StyledButton = styled(Button)`
-  border: 0;
-  border-radius: 50%;
-
-  > span {
-    line-height: 0;
-  }
-`;
-
-export const FreeTrialWelcomeModal = () => {
-  const { formatMessage } = useIntl();
-  const [open, setOpen] = useState(true);
-  const [previouslyOpen, setPreviouslyOpen] = useScopedPersistentState(
-    'STRAPI_FREE_TRIAL_WELCOME_MODAL',
-    false
+const ModalHeader = styled(Flex)`
+  background: linear-gradient(
+    135deg,
+    ${({ theme }) => theme.colors.primary600} 0%,
+    ${({ theme }) => theme.colors.primary500} 60%,
+    ${({ theme }) => theme.colors.alternative500} 100%
   );
-  const { license } = useLicenseLimits();
+  border-radius: 4px 4px 0 0;
+  padding: 2.8rem 2.8rem 2.4rem;
+`;
 
-  const handleClose = () => {
-    setPreviouslyOpen(true);
-    setOpen(false);
-  };
+const TrialBadge = styled.span`
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 6px;
+  padding: 0.4rem 1rem;
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: theme.colors.neutral0;
+  letter-spacing: 0.05em;
+  display: inline-block;
+  margin-bottom: 0.8rem;
+`;
 
-  const handleOnOpenChange = (isOpen: boolean) => {
-    if (!isOpen) {
-      setPreviouslyOpen(true);
-    }
+const FeatureGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+`;
 
-    setOpen(isOpen);
-  };
+const FeatureCard = styled.div<{ $isAI?: boolean; $fullWidth?: boolean }>`
+  border: 0.5px solid
+    ${({ theme, $isAI }) => ($isAI ? theme.colors.alternative500 : theme.colors.neutral150)};
+  border-radius: 10px;
+  padding: 1.2rem 1.4rem;
+  background: ${({ theme, $isAI }) =>
+    $isAI ? theme.colors.alternative100 : theme.colors.neutral100};
+  grid-column: ${({ $fullWidth }) => ($fullWidth ? '1 / -1' : 'auto')};
+`;
 
-  if (previouslyOpen || !license?.isTrial) {
-    return null;
+const IconWrapper = styled.span<{ $isAI?: boolean }>`
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.6rem;
+
+  svg {
+    width: 18px;
+    height: 18px;
+    color: ${({ theme, $isAI }) => ($isAI ? theme.colors.alternative700 : theme.colors.neutral600)};
   }
+`;
+
+// ---------------------------------------------------------------------------
+// Feature definitions
+// ---------------------------------------------------------------------------
+
+const FEATURES: Feature[] = [
+  {
+    icon: <Book />,
+    titleId: 'app.components.FreeTrialWelcomeModal.feature.aiTranslations.title',
+    titleDefault: 'AI Translations',
+    descId: 'app.components.FreeTrialWelcomeModal.feature.aiTranslations.desc',
+    descDefault: 'Auto-translate content across locales instantly',
+    isAI: true,
+  },
+  {
+    icon: <Image />,
+    titleId: 'app.components.FreeTrialWelcomeModal.feature.aiMediaLibrary.title',
+    titleDefault: 'AI Media Library',
+    descId: 'app.components.FreeTrialWelcomeModal.feature.aiMediaLibrary.desc',
+    descDefault: 'Smart tagging and search for your assets',
+    isAI: true,
+  },
+  {
+    icon: <ListPlus />,
+    titleId: 'app.components.FreeTrialWelcomeModal.feature.aiContentTypeBuilder.title',
+    titleDefault: 'AI Content-Type Builder',
+    descId: 'app.components.FreeTrialWelcomeModal.feature.aiContentTypeBuilder.desc',
+    descDefault: 'Generate schemas from a text description',
+    isAI: true,
+  },
+  {
+    icon: <Eye />,
+    titleId: 'app.components.FreeTrialWelcomeModal.feature.livePreview.title',
+    titleDefault: 'Live Preview',
+    descId: 'app.components.FreeTrialWelcomeModal.feature.livePreview.desc',
+    descDefault: 'See changes in real time before publishing',
+  },
+  {
+    icon: <Calendar />,
+    titleId: 'app.components.FreeTrialWelcomeModal.feature.releases.title',
+    titleDefault: 'Releases',
+    descId: 'app.components.FreeTrialWelcomeModal.feature.releases.desc',
+    descDefault: 'Schedule and coordinate content publishing',
+  },
+  {
+    icon: <Calendar />,
+    titleId: 'app.components.FreeTrialWelcomeModal.feature.contentHistory.title',
+    titleDefault: 'Content History',
+    descId: 'app.components.FreeTrialWelcomeModal.feature.contentHistory.desc',
+    descDefault: 'Browse and restore previous content versions',
+  },
+  {
+    icon: <Key />,
+    titleId: 'app.components.FreeTrialWelcomeModal.feature.sso.title',
+    titleDefault: 'SSO — Single Sign-On',
+    descId: 'app.components.FreeTrialWelcomeModal.feature.sso.desc',
+    descDefault: 'Let your team log in with Google, Okta, or any SAML provider',
+    fullWidth: true,
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
+
+const FreeTrialWelcomeModal = ({ onClose }: FreeTrialWelcomeModalProps) => {
+  const { formatMessage } = useIntl();
 
   return (
-    <Modal.Root open={open} onOpenChange={handleOnOpenChange}>
-      <StyledModalContent aria-labelledby="title">
-        <StyledModalBody>
-          <Box position="absolute" top={0} right={0} padding={2}>
-            <StyledButton
-              aria-label={formatMessage({
-                id: 'app.utils.close-label',
-                defaultMessage: 'Close',
-              })}
-              variant="tertiary"
-              width="2.4rem"
-              height="2.4rem"
-              onClick={handleClose}
+    <Modal.Root defaultOpen onOpenChange={(open) => !open && onClose()}>
+      <Modal.Content style={{ maxWidth: '560px', overflow: 'hidden' }}>
+        {/* Gradient header — custom styled, not a DS Modal.Header */}
+        <ModalHeader direction="column" alignItems="flex-start">
+          <TrialBadge>
+            {formatMessage({
+              id: 'app.components.FreeTrialWelcomeModal.badge',
+              defaultMessage: '30-DAY FREE TRIAL',
+            })}
+          </TrialBadge>
+
+          <Typography variant="alpha" style={{ color: '#fff', marginBottom: '0.4rem' }}>
+            {formatMessage({
+              id: 'app.components.FreeTrialWelcomeModal.title',
+              defaultMessage: 'Your Growth trial has started! 🎉',
+            })}
+          </Typography>
+
+          <Typography variant="epsilon" style={{ color: 'rgba(255,255,255,0.8)' }}>
+            {formatMessage({
+              id: 'app.components.FreeTrialWelcomeModal.subtitle',
+              defaultMessage:
+                'Unlock the full power of Strapi for 30 days — no credit card needed.',
+            })}
+          </Typography>
+        </ModalHeader>
+
+        <Modal.Body>
+          <Flex direction="column" gap={4} alignItems="stretch">
+            {/* Section label */}
+            <Typography
+              variant="sigma"
+              style={{ textTransform: 'uppercase', letterSpacing: '0.08em' }}
+              textColor="neutral500"
             >
-              <Cross />
-            </StyledButton>
-          </Box>
-          <img src={lightIllustration} alt="free-trial" width="100%" height="100%" />
-          <Flex direction="column" alignItems="start" justifyContent="stretch" padding={8} gap={4}>
-            <Typography variant="alpha" fontWeight="bold" fontSize={4} id="title">
               {formatMessage({
-                id: 'app.components.FreeTrialWelcomeModal.title',
-                defaultMessage: "We're glad to have you on board",
+                id: 'app.components.FreeTrialWelcomeModal.sectionLabel',
+                defaultMessage: 'Included in your trial',
               })}
             </Typography>
-            <Typography>
-              {formatMessage({
-                id: 'app.components.FreeTrialWelcomeModal.description1',
-                defaultMessage:
-                  'For the next 30 days, you will have full access to advanced features like Content History, Releases and Single Sign-On (SSO) – everything you need to explore the power of Strapi CMS.',
-              })}
-            </Typography>
-            <Typography>
-              {formatMessage({
-                id: 'app.components.FreeTrialWelcomeModal.description2',
-                defaultMessage:
-                  'Use this time to build, customize, and test your content workflows with complete flexibility!',
-              })}
-            </Typography>
-            <Box marginTop={4}>
-              <Button onClick={handleClose}>
-                {formatMessage({
-                  id: 'app.components.FreeTrialWelcomeModal.button',
-                  defaultMessage: 'Start exploring',
-                })}
-              </Button>
-            </Box>
+
+            {/* Feature grid */}
+            <FeatureGrid>
+              {FEATURES.map((feature) => (
+                <FeatureCard
+                  key={feature.titleId}
+                  $isAI={feature.isAI}
+                  $fullWidth={feature.fullWidth}
+                >
+                  {feature.fullWidth ? (
+                    // SSO: horizontal layout
+                    <Flex gap={3} alignItems="center">
+                      <IconWrapper $isAI={feature.isAI}>{feature.icon}</IconWrapper>
+                      <div>
+                        <Typography
+                          variant="pi"
+                          fontWeight="bold"
+                          style={{
+                            color: feature.isAI ? 'theme.colors.primary700' : undefined,
+                            display: 'block',
+                            marginBottom: '0.2rem',
+                          }}
+                          textColor={feature.isAI ? undefined : 'theme.colors.neutral800'}
+                        >
+                          {formatMessage({
+                            id: feature.titleId,
+                            defaultMessage: feature.titleDefault,
+                          })}
+                        </Typography>
+                        <Typography
+                          variant="pi"
+                          style={{ color: feature.isAI ? 'theme.colors.primary700' : undefined }}
+                          textColor={feature.isAI ? undefined : 'theme.colors.neutral600'}
+                        >
+                          {formatMessage({
+                            id: feature.descId,
+                            defaultMessage: feature.descDefault,
+                          })}
+                        </Typography>
+                      </div>
+                    </Flex>
+                  ) : (
+                    // Standard card: vertical layout
+                    <>
+                      <IconWrapper $isAI={feature.isAI}>{feature.icon}</IconWrapper>
+                      <Typography
+                        variant="pi"
+                        fontWeight="bold"
+                        style={{
+                          color: feature.isAI ? 'theme.colors.primary700' : undefined,
+                          display: 'block',
+                          marginBottom: '0.2rem',
+                        }}
+                        textColor={feature.isAI ? undefined : 'theme.colors.neutral800'}
+                      >
+                        {formatMessage({
+                          id: feature.titleId,
+                          defaultMessage: feature.titleDefault,
+                        })}
+                      </Typography>
+                      <Typography
+                        variant="pi"
+                        textColor={feature.isAI ? 'alternative700' : 'neutral600'}
+                      >
+                        {formatMessage({
+                          id: feature.descId,
+                          defaultMessage: feature.descDefault,
+                        })}
+                      </Typography>
+                    </>
+                  )}
+                </FeatureCard>
+              ))}
+            </FeatureGrid>
           </Flex>
-        </StyledModalBody>
-      </StyledModalContent>
+        </Modal.Body>
+
+        <Modal.Footer>
+          <Flex justifyContent="space-between" alignItems="center" width="100%">
+            <Typography variant="pi" textColor="theme.colors.neutral500">
+              {formatMessage({
+                id: 'app.components.FreeTrialWelcomeModal.footer',
+                defaultMessage: '30 days free · No credit card required',
+              })}
+            </Typography>
+            <Button onClick={onClose} size="L">
+              {formatMessage({
+                id: 'app.components.FreeTrialWelcomeModal.button',
+                defaultMessage: 'Start exploring',
+              })}
+            </Button>
+          </Flex>
+        </Modal.Footer>
+      </Modal.Content>
     </Modal.Root>
   );
 };
+
+export { FreeTrialWelcomeModal };
