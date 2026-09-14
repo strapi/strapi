@@ -100,6 +100,14 @@ export const classifyPath = (filePath: string): Surface | null => {
 
 type Json = Record<string, unknown>;
 
+/**
+ * A manifest/schema field is typed `unknown` — it may not be a string at runtime. Plain
+ * `String()` on a non-primitive just yields "[object Object]", so fall back to JSON for
+ * anything that isn't already a string.
+ */
+const describeValue = (value: unknown): string =>
+  typeof value === 'string' ? value : JSON.stringify(value);
+
 const exportSubpaths = (manifest: Json): Map<string, string> => {
   const result = new Map<string, string>();
   const exportsField = manifest.exports;
@@ -115,17 +123,11 @@ const exportSubpaths = (manifest: Json): Map<string, string> => {
   return result;
 };
 
-/**
- * Removed or renamed export subpaths, removed export conditions, narrowed engines,
- * tightened peer dependencies, removed bins. All of these break consumers at
- * install- or build-time rather than at runtime, so they are cheap to detect and
- * expensive to miss.
- */
-export const diffManifest = (before: Json, after: Json): Omit<Finding, 'path' | 'surface'>[] => {
+const diffExportSubpaths = (
+  beforeExports: Map<string, string>,
+  afterExports: Map<string, string>
+): Omit<Finding, 'path' | 'surface'>[] => {
   const findings: Omit<Finding, 'path' | 'surface'>[] = [];
-
-  const beforeExports = exportSubpaths(before);
-  const afterExports = exportSubpaths(after);
 
   for (const [subpath, definition] of beforeExports) {
     if (afterExports.has(subpath) === false) {
@@ -146,17 +148,28 @@ export const diffManifest = (before: Json, after: Json): Omit<Finding, 'path' | 
     }
   }
 
+  return findings;
+};
+
+const diffEngines = (before: Json, after: Json): Omit<Finding, 'path' | 'surface'>[] => {
   const beforeEngines = (before.engines as Json | undefined)?.node;
   const afterEngines = (after.engines as Json | undefined)?.node;
 
-  if (beforeEngines !== undefined && afterEngines !== beforeEngines) {
-    findings.push({
-      tier: 1,
-      rule: 'engines:changed',
-      detail: `engines.node changed from "${String(beforeEngines)}" to "${String(afterEngines)}" — confirm whether this narrows supported versions; dropping one still supported upstream is a Tier 1 break`,
-    });
+  if (beforeEngines === undefined || afterEngines === beforeEngines) {
+    return [];
   }
 
+  return [
+    {
+      tier: 1,
+      rule: 'engines:changed',
+      detail: `engines.node changed from "${describeValue(beforeEngines)}" to "${describeValue(afterEngines)}" — confirm whether this narrows supported versions; dropping one still supported upstream is a Tier 1 break`,
+    },
+  ];
+};
+
+const diffPeerDependencies = (before: Json, after: Json): Omit<Finding, 'path' | 'surface'>[] => {
+  const findings: Omit<Finding, 'path' | 'surface'>[] = [];
   const beforePeers = (before.peerDependencies as Json | undefined) ?? {};
   const afterPeers = (after.peerDependencies as Json | undefined) ?? {};
 
@@ -171,34 +184,54 @@ export const diffManifest = (before: Json, after: Json): Omit<Finding, 'path' | 
       findings.push({
         tier: 1,
         rule: 'peer-deps:changed',
-        detail: `peerDependency "${name}" moved from "${String(range)}" to "${String(afterPeers[name])}" — confirm whether this narrows supported versions; narrowing forces users to upgrade`,
+        detail: `peerDependency "${name}" moved from "${describeValue(range)}" to "${describeValue(afterPeers[name])}" — confirm whether this narrows supported versions; narrowing forces users to upgrade`,
       });
     }
-  }
-
-  const beforeBins = Object.keys((before.bin as Json | undefined) ?? {});
-  const afterBins = Object.keys((after.bin as Json | undefined) ?? {});
-
-  for (const bin of beforeBins) {
-    if (afterBins.includes(bin) === false) {
-      findings.push({
-        tier: 1,
-        rule: 'bin:removed',
-        detail: `CLI binary "${bin}" was removed — the CLI is documented and therefore Tier 1`,
-      });
-    }
-  }
-
-  if (before.name !== undefined && after.name !== before.name) {
-    findings.push({
-      tier: 1,
-      rule: 'manifest:renamed',
-      detail: `package renamed from "${String(before.name)}" to "${String(after.name)}"`,
-    });
   }
 
   return findings;
 };
+
+const diffBins = (before: Json, after: Json): Omit<Finding, 'path' | 'surface'>[] => {
+  const beforeBins = Object.keys((before.bin as Json | undefined) ?? {});
+  const afterBins = Object.keys((after.bin as Json | undefined) ?? {});
+
+  return beforeBins
+    .filter((bin) => afterBins.includes(bin) === false)
+    .map((bin) => ({
+      tier: 1 as Tier,
+      rule: 'bin:removed',
+      detail: `CLI binary "${bin}" was removed — the CLI is documented and therefore Tier 1`,
+    }));
+};
+
+const diffPackageName = (before: Json, after: Json): Omit<Finding, 'path' | 'surface'>[] => {
+  if (before.name === undefined || after.name === before.name) {
+    return [];
+  }
+
+  return [
+    {
+      tier: 1,
+      rule: 'manifest:renamed',
+      detail: `package renamed from "${describeValue(before.name)}" to "${describeValue(after.name)}"`,
+    },
+  ];
+};
+
+/**
+ * Removed or renamed export subpaths, removed export conditions, narrowed engines,
+ * tightened peer dependencies, removed bins. All of these break consumers at
+ * install- or build-time rather than at runtime, so they are cheap to detect and
+ * expensive to miss.
+ */
+export const diffManifest = (before: Json, after: Json): Omit<Finding, 'path' | 'surface'>[] => [
+  ...diffExportSubpaths(exportSubpaths(before), exportSubpaths(after)),
+  ...diffEngines(before, after),
+  ...diffPeerDependencies(before, after),
+  ...diffBins(before, after),
+  ...diffPackageName(before, after),
+];
 
 /* -------------------------------------------------------------------------- */
 /* content-type schemas                                                       */
@@ -222,7 +255,7 @@ export const diffSchema = (before: Json, after: Json): Omit<Finding, 'path' | 's
     findings.push({
       tier: 1,
       rule: 'schema:kind-changed',
-      detail: `kind changed from "${String(before.kind)}" to "${String(after.kind)}" — the Content API route shape changes with it`,
+      detail: `kind changed from "${describeValue(before.kind)}" to "${describeValue(after.kind)}" — the Content API route shape changes with it`,
     });
   }
 
@@ -276,9 +309,21 @@ export const diffSchema = (before: Json, after: Json): Omit<Finding, 'path' | 's
 /* -------------------------------------------------------------------------- */
 
 const NAMED_EXPORT_PATTERNS = [
-  /export\s+(?:declare\s+)?(?:default\s+)?(?:async\s+)?(?:const|let|var|function\*?|class|type|interface|enum|namespace)\s+([A-Za-z_$][\w$]*)/g,
+  /export\s+(?:(?:declare|default|async)\s+)*(?:const|let|var|function\*?|class|type|interface|enum|namespace)\s+([A-Za-z_$][\w$]*)/g,
   /export\s+\{([^}]*)\}/g,
 ];
+
+/**
+ * The name an `export { ... }` list entry exposes, e.g. "Foo as Bar" -> "Bar", "type Foo" -> "Foo".
+ * Whitespace is collapsed before splitting on the literal " as " so the parser never needs two
+ * adjacent unbounded `\s+` quantifiers around a shared separator.
+ */
+const exposedName = (entry: string): string => {
+  const normalized = entry.trim().replace(/\s+/g, ' ');
+  const parts = normalized.split(' as ');
+
+  return (parts[1] ?? parts[0]).replace(/^type\s+/, '');
+};
 
 /** Best-effort set of identifiers a module exports. Regex-based: approximate by design. */
 export const collectNamedExports = (source: string): Set<string> => {
@@ -290,8 +335,7 @@ export const collectNamedExports = (source: string): Set<string> => {
 
   for (const match of source.matchAll(NAMED_EXPORT_PATTERNS[1])) {
     for (const entry of match[1].split(',')) {
-      const parts = entry.trim().split(/\s+as\s+/);
-      const exposed = (parts[1] ?? parts[0]).trim().replace(/^type\s+/, '');
+      const exposed = exposedName(entry);
 
       if (exposed.length > 0) {
         names.add(exposed);
@@ -314,10 +358,7 @@ export const hasDefaultExport = (source: string): boolean => {
 
   for (const match of source.matchAll(NAMED_EXPORT_PATTERNS[1])) {
     for (const entry of match[1].split(',')) {
-      const parts = entry.trim().split(/\s+as\s+/);
-      const exposed = (parts[1] ?? parts[0]).trim();
-
-      if (exposed === 'default') {
+      if (exposedName(entry) === 'default') {
         return true;
       }
     }

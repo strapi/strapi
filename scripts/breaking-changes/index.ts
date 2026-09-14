@@ -36,11 +36,24 @@ import {
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, '..', '..');
 
+/**
+ * A `PATH` entry that is relative (or empty, i.e. `.` via a trailing/leading/doubled
+ * delimiter) resolves against whatever the current working directory happens to be,
+ * which lets a writable directory earlier in the search order shadow the real `git`
+ * binary. Only fixed, absolute directories are trustworthy search locations.
+ */
+const trustedPath = (): string =>
+  (process.env.PATH ?? '')
+    .split(path.delimiter)
+    .filter((entry) => path.isAbsolute(entry))
+    .join(path.delimiter);
+
 const git = (args: string[]): string =>
   execFileSync('git', args, {
     cwd: repoRoot,
     encoding: 'utf8',
     maxBuffer: 64 * 1024 * 1024,
+    env: { ...process.env, PATH: trustedPath() },
     // Capture stderr rather than inheriting it: `git show` on a path that does not exist
     // in the base is an expected miss, not something to print.
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -184,7 +197,7 @@ const deepFindings = (
     return beforeJson === null || afterJson === null ? [] : diffSchema(beforeJson, afterJson);
   }
 
-  if (/(^|\/)routes(\/|\.)/.test(file.path) === true) {
+  if (/(^|\/)routes(\/|[.])/.test(file.path) === true) {
     return diffRoutes(before, after);
   }
 
