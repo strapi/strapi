@@ -12,6 +12,18 @@ import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 import type { StrapiApp } from '@strapi/admin/strapi-admin';
 
 /**
+ * What `bootstrap` is actually handed — a few methods off the application, not
+ * the application itself. Typing the parameter as `StrapiApp` compiles, because
+ * method parameters are bivariant, and then throws in the browser on the first
+ * method the real argument does not carry. Naming the narrow shape here means
+ * the compiler fails instead.
+ */
+type BootstrapApp = Pick<
+  StrapiApp,
+  'addSettingsLink' | 'addSettingsLinks' | 'getPlugin' | 'injectAdminComponent' | 'registerHook'
+>;
+
+/**
  * Whether this project has Spaces.
  *
  * Community projects, and Enterprise ones whose licence does not carry the
@@ -50,7 +62,7 @@ export default {
     app.registerPlugin({ id: pluginId, name: pluginId });
   },
 
-  bootstrap(app: StrapiApp) {
+  bootstrap(app: BootstrapApp) {
     if (!isEnabled()) {
       return;
     }

@@ -770,4 +770,56 @@ describe('ADMIN | new StrapiApp', () => {
       error.mockRestore();
     });
   });
+
+  describe('what a plugin is handed', () => {
+    type LifecycleArgs = Record<string, unknown>;
+
+    /** Everything the app passed to a plugin's lifecycle hook. */
+    const lifecycleArgs = async (hook: 'register' | 'bootstrap'): Promise<LifecycleArgs> => {
+      let received: LifecycleArgs = {};
+      const probe = {
+        register: (arg: unknown) => {
+          if (hook === 'register') received = arg as LifecycleArgs;
+        },
+        bootstrap: (arg: unknown) => {
+          if (hook === 'bootstrap') received = arg as LifecycleArgs;
+        },
+      } as unknown as StrapiApp['appPlugins'][string];
+
+      const app = new StrapiApp({ appPlugins: { probe } });
+
+      await app.register();
+      await app.bootstrap();
+
+      return received;
+    };
+
+    it('can inject into the admin’s own slots from bootstrap', async () => {
+      // `bootstrap` is handed a few methods off the application rather than the
+      // application, so a method missing from that list is not a no-op: the
+      // plugin throws on the call and takes the whole panel down with it.
+      const args = await lifecycleArgs('bootstrap');
+
+      expect(typeof args.injectAdminComponent).toBe('function');
+    });
+
+    it('is handed a working injectAdminComponent, not just a key', async () => {
+      const args = await lifecycleArgs('bootstrap');
+      const Switcher = () => null;
+
+      const inject = args.injectAdminComponent as StrapiApp['injectAdminComponent'];
+      inject('navigation', 'top', { name: 'probe', Component: Switcher });
+
+      expect(typeof args.injectAdminComponent).toBe('function');
+    });
+
+    it.each(['addSettingsLink', 'addSettingsLinks', 'getPlugin', 'registerHook'])(
+      'still hands over %s',
+      async (name) => {
+        const args = await lifecycleArgs('bootstrap');
+
+        expect(typeof args[name]).toBe('function');
+      }
+    );
+  });
 });

@@ -67,7 +67,10 @@ type Translations = Array<Translation>;
 
 interface StrapiAppPlugin {
   bootstrap?: (
-    args: Pick<StrapiApp, 'addSettingsLink' | 'addSettingsLinks' | 'getPlugin' | 'registerHook'>
+    args: Pick<
+      StrapiApp,
+      'addSettingsLink' | 'addSettingsLinks' | 'getPlugin' | 'injectAdminComponent' | 'registerHook'
+    >
   ) => void;
   register: (app: StrapiApp) => void;
   registerTrads?: (args: { locales: string[] }) => Promise<Translations>;
@@ -272,6 +275,7 @@ class StrapiApp {
           addSettingsLink: this.addSettingsLink,
           addSettingsLinks: this.addSettingsLinks,
           getPlugin: this.getPlugin,
+          injectAdminComponent: this.injectAdminComponent,
           registerHook: this.registerHook,
         });
       }
