@@ -132,6 +132,11 @@ export type GetValue<TAttribute extends Schema.Attribute.Attribute> = If<
             : never
           : never,
       ],
+      // Media
+      [
+        Extends<TAttribute, Schema.Attribute.OfType<'media'>>,
+        Schema.Attribute.GetMediaValue<TAttribute>,
+      ],
       // Boolean
       [Extends<TAttribute, Schema.Attribute.Boolean>, BooleanValue],
       // Number
