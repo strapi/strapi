@@ -161,6 +161,7 @@
     "react-refresh": "0.14.0",
     "read-pkg-up": "7.0.1",
     "resolve-from": "5.0.0",
+    "resolve.exports": "2.0.2",
     "semver": "7.7.4",
     "style-loader": "3.3.4",
     "tailwindcss": "4.3.3",

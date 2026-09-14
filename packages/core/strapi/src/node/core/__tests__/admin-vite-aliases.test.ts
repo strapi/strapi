@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import fs from 'node:fs';
-import path from 'node:path';
 
 import readPkgUp from 'read-pkg-up';
 
@@ -11,7 +10,7 @@ import {
   ADMIN_VITE_DEDUPE_ONLY_MODULES,
   ADMIN_VITE_SINGLETON_MODULES,
 } from '../admin-vite-alias-modules';
-import { buildAdminViteResolveAliases } from '../admin-vite-aliases';
+import { buildAdminViteResolveAliases, getSubpathEntries } from '../admin-vite-aliases';
 import { getModulePath, getModulePathFrom } from '../resolve-module';
 
 const adminDeps = require('@strapi/admin/package.json').dependencies as Record<string, string>;
@@ -156,46 +155,34 @@ describe('buildAdminViteResolveAliases', () => {
   );
 });
 
-/**
- * A subpath key that resolves to no file at the package root is remapped by the `exports` map, so
- * a prefix alias would rewrite the import to a path that does not exist
- */
-const getRemappedSubpathKeys = (mod: string): string[] => {
-  const root = getModulePath(mod);
-  const { exports: exportsMap }: { exports?: unknown } = require(path.join(root, 'package.json'));
+/** A string alias key matches the exact importee, or a prefix of it on a slash boundary */
+const matches = (key: string, importee: string): boolean =>
+  importee === key || importee.startsWith(`${key}/`);
 
-  if (typeof exportsMap !== 'object' || exportsMap === null) {
-    return [];
-  }
+describe('exports subpath aliases', () => {
+  it.each(ADMIN_VITE_ALIAS_MODULES)('gives %s a key for every exports subpath', (mod) => {
+    const alias = buildAdminViteResolveAliases();
 
-  const subpathKeys = Object.keys(exportsMap).filter(
-    (key) => key.startsWith('./') && key !== './package.json' && !key.includes('*')
-  );
-
-  return subpathKeys.filter((key) => {
-    const target = path.join(root, key);
-    const candidates = [
-      target,
-      `${target}.js`,
-      `${target}.mjs`,
-      `${target}.cjs`,
-      path.join(target, 'index.js'),
-      path.join(target, 'index.mjs'),
-      path.join(target, 'index.cjs'),
-      path.join(target, 'package.json'),
-    ];
-
-    return !candidates.some((candidate) => fs.existsSync(candidate));
-  });
-};
-
-describe('prefix alias safety', () => {
-  // Skipped until @strapi/design-system ships the top-level next/ folder; remove the skip with
-  // the pin bump
-  it.skip.each(ADMIN_VITE_ALIAS_MODULES)(
-    '%s resolves every exports subpath from the package root, so a prefix alias is safe',
-    (mod) => {
-      expect(getRemappedSubpathKeys(mod)).toEqual([]);
+    for (const [key, target] of getSubpathEntries(mod)) {
+      expect(alias[key]).toBe(target);
     }
-  );
+  });
+
+  it.each(ADMIN_VITE_ALIAS_MODULES)('puts every %s subpath key ahead of what shadows it', (mod) => {
+    const keys = Object.keys(buildAdminViteResolveAliases());
+
+    for (const [key] of getSubpathEntries(mod)) {
+      for (const other of keys.filter((k) => k !== key && matches(k, key))) {
+        expect(keys.indexOf(key)).toBeLessThan(keys.indexOf(other));
+      }
+    }
+  });
+
+  it('points every alias at a path that exists on disk', () => {
+    const missing = Object.entries(buildAdminViteResolveAliases()).filter(
+      ([, target]) => !fs.existsSync(target)
+    );
+
+    expect(missing).toEqual([]);
+  });
 });
