@@ -114,6 +114,7 @@ export default {
           ? (JSON.parse(row.value) as {
               license?: string | null;
               error?: string;
+              errorKind?: 'unreachable' | 'rejected';
               lastCheckAt?: number;
             })
           : null
@@ -176,6 +177,7 @@ export default {
       nextRegistrySyncAt,
       usingCachedLicense: Boolean(eeInformation?.error && eeInformation?.license),
       registrySyncError: eeInformation?.error ?? null,
+      registrySyncErrorKind: eeInformation?.errorKind ?? null,
       shouldNotify,
       shouldStopCreate: isNil(permittedSeats) ? false : currentActiveUserCount >= permittedSeats,
       licenseLimitStatus,

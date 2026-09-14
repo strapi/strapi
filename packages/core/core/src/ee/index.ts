@@ -163,10 +163,19 @@ const onlineUpdate = async ({ strapi }: { strapi: Core.Strapi }) => {
     const result: {
       license?: string | null;
       error?: string;
+      errorKind?: 'unreachable' | 'rejected';
       lastCheckAt?: number;
     } = { lastCheckAt: Date.now() };
 
     const fallback = (error: Error) => {
+      // Whether the registry was unreachable or actually refused the license is only
+      // knowable here, from `shouldFallback`. Record it rather than letting the admin
+      // panel infer it from the presence of a cached license: an instance that has never
+      // reached the registry has no cache to fall back to, and would otherwise be told
+      // its license was refused when the registry was merely unreachable.
+      result.errorKind =
+        error instanceof LicenseCheckError && error.shouldFallback ? 'unreachable' : 'rejected';
+
       if (error instanceof LicenseCheckError && error.shouldFallback && storedInfo?.license) {
         ee.logger?.warn(
           `${error.message} The last stored one will be used as a potential fallback.`

@@ -25,6 +25,7 @@ const baseLicense: LicenseData = {
   nextRegistrySyncAt: null,
   usingCachedLicense: false,
   registrySyncError: null,
+  registrySyncErrorKind: null,
   features: [],
   entitlements: [],
   planEntitlements: [
@@ -133,6 +134,7 @@ describe('LicenseInfoEE', () => {
       licenseStatus: 'unknown',
       usingCachedLicense: true,
       registrySyncError: 'Could not proceed to the online validation of your license.',
+      registrySyncErrorKind: 'unreachable',
     };
     render(<LicenseInfoEE />);
 
@@ -146,11 +148,29 @@ describe('LicenseInfoEE', () => {
       licenseStatus: 'unknown',
       usingCachedLicense: false,
       registrySyncError: 'The associated subscription is cancelled.',
+      registrySyncErrorKind: 'rejected',
     };
     render(<LicenseInfoEE />);
 
     expect(await screen.findByText(/could not validate this license/)).toBeInTheDocument();
     expect(screen.queryByText(/Couldn't reach the license registry/)).not.toBeInTheDocument();
+  });
+
+  it('says the registry was unreachable when there is no cached licence to fall back to', async () => {
+    // A first boot behind a firewall never reaches the registry, so there is nothing cached
+    // and `usingCachedLicense` is false. It must not be told its licence was refused.
+    licenseData = {
+      ...structuredClone(baseLicense),
+      licenseStatus: 'unknown',
+      usingCachedLicense: false,
+      registrySyncError: 'Could not proceed to the online validation of your license.',
+      registrySyncErrorKind: 'unreachable',
+    };
+    render(<LicenseInfoEE />);
+
+    expect(await screen.findByText(/Couldn't reach the license registry/)).toBeInTheDocument();
+    expect(screen.queryByText(/could not validate this license/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Showing the last license we retrieved/)).not.toBeInTheDocument();
   });
 
   it('shows no registry notice on a healthy licence', async () => {

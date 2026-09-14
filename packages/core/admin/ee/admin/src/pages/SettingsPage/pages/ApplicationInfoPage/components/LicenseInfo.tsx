@@ -147,6 +147,7 @@ const LicenseInfoEE = () => {
     planEntitlements,
     usingCachedLicense,
     registrySyncError,
+    registrySyncErrorKind,
   } = license;
 
   const licensedPlan = getProjectType({
@@ -230,12 +231,20 @@ const LicenseInfoEE = () => {
         defaultMessage:
           "Couldn't reach the license registry. Showing the last license we retrieved.",
       }
-    : registrySyncError && licenseStatus !== 'active'
+    : // An instance that has never reached the registry has nothing cached, so
+      // `usingCachedLicense` is false even though the cause was an outage rather than a
+      // refusal. Read the recorded kind instead of inferring the cause from the cache.
+      registrySyncErrorKind === 'unreachable' && licenseStatus !== 'active'
       ? {
-          id: 'Settings.license.registry.rejected',
-          defaultMessage: 'The license registry could not validate this license.',
+          id: 'Settings.license.registry.unreachable',
+          defaultMessage: "Couldn't reach the license registry.",
         }
-      : null;
+      : registrySyncError && licenseStatus !== 'active'
+        ? {
+            id: 'Settings.license.registry.rejected',
+            defaultMessage: 'The license registry could not validate this license.',
+          }
+        : null;
 
   const checkinLine =
     licenseMode === 'offline'

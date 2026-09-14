@@ -231,6 +231,13 @@ export declare namespace GetLicenseLimitInformation {
       nextRegistrySyncAt: number | null;
       usingCachedLicense: boolean;
       registrySyncError: string | null;
+      /**
+       * Why the last registry check failed. `unreachable` covers transport failures and
+       * unexpected responses; `rejected` means the registry answered and refused the
+       * license. Distinguishing them from `usingCachedLicense` alone is not possible for
+       * an instance that has never reached the registry and so has nothing cached.
+       */
+      registrySyncErrorKind: 'unreachable' | 'rejected' | null;
       entitlements: Array<{
         feature: string;
         limits: Array<{ key: string; unit?: 'days' | 'count'; value: number | null }>;

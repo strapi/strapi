@@ -209,6 +209,7 @@
   "Settings.license.no": "No",
   "Settings.license.registry.cached": "Couldn't reach the license registry. Showing the last license we retrieved.",
   "Settings.license.registry.rejected": "The license registry could not validate this license.",
+  "Settings.license.registry.unreachable": "Couldn't reach the license registry.",
   "Settings.license.renewal-date": "renewal date",
   "Settings.license.status": "license status",
   "Settings.license.status-tooltip": "Strapi checks the license status every 12 hours and on every build.",
