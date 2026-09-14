@@ -8,6 +8,7 @@ export interface WebhookRunner {
   deleteListener(event: string): void;
   createListener(event: string): void;
   executeListener({ event, info }: Event): Promise<void>;
+  shouldDeliver(webhook: Webhook, info: Record<string, unknown>): boolean;
   run(
     webhook: Webhook,
     event: string,

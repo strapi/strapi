@@ -5,6 +5,11 @@ export interface Webhook {
   headers: Record<string, string>;
   events: string[];
   isEnabled: boolean;
+  /**
+   * Optional list of content-type uids the webhook is restricted to.
+   * When empty/undefined, the webhook fires for every content type (default behaviour).
+   */
+  contentTypes?: string[];
 }
 
 export interface WebhookStore {
