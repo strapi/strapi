@@ -153,6 +153,8 @@
     "@types/react-dom": "18.3.0",
     "@typescript-eslint/eslint-plugin": "6.21.0",
     "@typescript-eslint/parser": "6.21.0",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
     "chalk": "4.1.2",
     "chokidar": "3.6.0",
     "coffee": "5.5.1",

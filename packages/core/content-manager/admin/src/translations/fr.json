@@ -259,6 +259,7 @@
   "containers.edit-settings.modal-form.placeholder": "Placeholder",
   "containers.edit-settings.modal-form.mainField": "Titre de l'entrée",
   "containers.edit-settings.modal-form.editable": "Champ modifiable",
+  "containers.empty-label": "Sans titre",
   "containers.untitled": "Sans titre",
   "dnd.cancel-item": "{item}, , abandonné. Annulation de la réorganisation.",
   "dnd.drop-item": "{item}, abandonné. Position finale dans la liste : {position}",

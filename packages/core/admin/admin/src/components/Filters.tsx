@@ -14,7 +14,11 @@ import {
   FILTERS_WITH_NO_VALUE,
 } from '../constants/filters';
 import { useControllableState } from '../hooks/useControllableState';
-import { useQueryParams } from '../hooks/useQueryParams';
+import {
+  deepEncodeQueryValues,
+  useQueryParams,
+  withEncodedUserParams,
+} from '../hooks/useQueryParams';
 
 import { createContext } from './Context';
 import { Form, InputProps } from './Form';
@@ -183,9 +187,7 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
   }
 
   const handleSubmit = (data: FilterFormData) => {
-    const value = FILTERS_WITH_NO_VALUE.includes(data.filter)
-      ? 'true'
-      : encodeURIComponent(data.value ?? '');
+    const value = FILTERS_WITH_NO_VALUE.includes(data.filter) ? 'true' : (data.value ?? '');
 
     if (!value) {
       return;
@@ -237,7 +239,11 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
           $and: [...existingFilters, newFilterEntry],
         };
 
-    setQuery({ filters: newFilterQuery, page: 1 }, 'push', true);
+    setQuery(
+      withEncodedUserParams(query, { filters: deepEncodeQueryValues(newFilterQuery), page: 1 }),
+      'push',
+      true
+    );
     setOpen(false);
     setEditingFilter(null);
   };
@@ -396,7 +402,12 @@ const List = () => {
   const handleRemove = (index: number) => {
     const nextFilters = (query?.filters?.$and ?? []).filter((_, i) => i !== index);
 
-    setQuery({ filters: { $and: nextFilters }, page: 1 });
+    setQuery(
+      withEncodedUserParams(query, {
+        filters: deepEncodeQueryValues({ $and: nextFilters }),
+        page: 1,
+      })
+    );
   };
 
   if (!query?.filters?.$and?.length) {
@@ -467,7 +478,7 @@ const AttributeTag = ({
       name,
       filter: operator,
       index,
-      value: FILTERS_WITH_NO_VALUE.includes(operator) ? undefined : decodeURIComponent(value),
+      value: FILTERS_WITH_NO_VALUE.includes(operator) ? undefined : value,
     });
     setOpen(true);
   };
@@ -609,6 +620,7 @@ namespace Filters {
       $and?: Array<Record<string, Record<string, string | Record<string, string>>>>;
     };
     page?: number;
+    _q?: string;
   }
 }
 

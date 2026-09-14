@@ -246,7 +246,9 @@ describe('migration providers', () => {
       expect(logger.info).toHaveBeenCalledWith(
         expect.objectContaining({
           level: 'info',
-          message: '[internal migration]: migrated test-internal',
+          message: expect.stringMatching(
+            /^\[internal migration\]: migrated test-internal \(\d+\.\d{3}s\)$/
+          ),
         })
       );
       expect(logger.debug).not.toHaveBeenCalled();

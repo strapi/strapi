@@ -18,10 +18,12 @@ export class OperationParametersAssembler implements Assembler.Operation {
   assemble(context: OperationContext, route: Core.Route): void {
     debug('assembling parameters for %o %o...', route.method, route.path);
 
-    const pathParameters = this._getPathParameters(route);
+    const schemaStore = context.strapi.contentAPISchemaRegistry;
+    const { extractedComponentSchemas } = context.registries;
+    const pathParameters = this._getPathParameters(route, schemaStore, extractedComponentSchemas);
     debug('found %o path parameters', pathParameters.length);
 
-    const queryParameters = this._getQueryParameters(route);
+    const queryParameters = this._getQueryParameters(route, schemaStore, extractedComponentSchemas);
     debug('found %o query parameters', queryParameters.length);
 
     const parameters = [...pathParameters, ...queryParameters];
@@ -30,7 +32,11 @@ export class OperationParametersAssembler implements Assembler.Operation {
     context.output.data.parameters = parameters;
   }
 
-  private _getPathParameters(route: Core.Route): PathParameterObject[] {
+  private _getPathParameters(
+    route: Core.Route,
+    schemaStore: Core.ContentAPISchemaRegistry,
+    extractedComponentSchemas: Record<string, OpenAPIV3_1.SchemaObject>
+  ): PathParameterObject[] {
     const { params } = route.request ?? {};
 
     // TODO: Allow auto inference (from path) if enabled through configuration
@@ -42,7 +48,9 @@ export class OperationParametersAssembler implements Assembler.Operation {
 
     for (const [name, zodSchema] of Object.entries(params)) {
       const required = !zodSchema.isOptional();
-      const schema = zodToOpenAPI(zodSchema) as any;
+      const schema = zodToOpenAPI(zodSchema, schemaStore, {
+        extractedComponentSchemas,
+      }) as any;
 
       pathParams.push({ name, in: 'path', required, schema });
     }
@@ -50,7 +58,11 @@ export class OperationParametersAssembler implements Assembler.Operation {
     return pathParams;
   }
 
-  private _getQueryParameters(route: Core.Route): QueryParameterObject[] {
+  private _getQueryParameters(
+    route: Core.Route,
+    schemaStore: Core.ContentAPISchemaRegistry,
+    extractedComponentSchemas: Record<string, OpenAPIV3_1.SchemaObject>
+  ): QueryParameterObject[] {
     const { query } = route.request ?? {};
 
     if (!query) {
@@ -61,7 +73,9 @@ export class OperationParametersAssembler implements Assembler.Operation {
 
     for (const [name, zodSchema] of Object.entries(query)) {
       const required = !zodSchema.isOptional();
-      const schema = zodToOpenAPI(zodSchema) as any;
+      const schema = zodToOpenAPI(zodSchema, schemaStore, {
+        extractedComponentSchemas,
+      }) as any;
 
       const resolvedSchema = this._resolveSchema(schema);
 

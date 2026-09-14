@@ -25,6 +25,26 @@ const isLinkNode = (element: Element): element is Schema.Attribute.LinkInlineNod
   return element.type === 'link';
 };
 
+const ALLOWED_LINK_PROTOCOLS = new Set(['http:', 'https:', 'ftp:', 'mailto:', 'tel:']);
+
+const isValidLink = (link: string) => {
+  try {
+    const url = new URL(link.startsWith('/') ? `https://strapi.io${link}` : link);
+
+    return ALLOWED_LINK_PROTOCOLS.has(url.protocol);
+  } catch {
+    return false;
+  }
+};
+
+const isValidAbsoluteLink = (link: string) => {
+  try {
+    return ALLOWED_LINK_PROTOCOLS.has(new URL(link).protocol);
+  } catch {
+    return false;
+  }
+};
+
 const removeLink = (editor: Editor) => {
   Transforms.unwrapNodes(editor, {
     match: (node) => !Editor.isEditor(node) && SlateElement.isElement(node) && node.type === 'link',
@@ -123,29 +143,17 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
     const isLastInsertedLink = editor.lastInsertedLinkPath
       ? !Path.equals(path, editor.lastInsertedLinkPath)
       : true;
-    const [isSaveDisabled, setIsSaveDisabled] = React.useState(false);
+    const isSaveDisabled = !isValidLink(linkUrl);
 
     const onLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setIsSaveDisabled(false);
       setLinkUrl(e.target.value);
-
-      try {
-        // eslint-disable-next-line no-new
-        new URL(
-          e.target.value?.startsWith('/') ? `https://strapi.io${e.target.value}` : e.target.value
-        );
-      } catch {
-        setIsSaveDisabled(true);
-      }
     };
 
     const onLinkRelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setIsSaveDisabled(false);
       setLinRel(e.target.value);
     };
 
     const onLinkTargetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setIsSaveDisabled(false);
       setLinkTarget(e.target.value);
     };
 
@@ -195,7 +203,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
             {...attributes}
             ref={forwardedRef}
             tag="a"
-            href={link.url}
+            href={isValidLink(link.url) ? link.url : undefined}
             rel={link.rel}
             target={link.target}
             onClick={() => setPopoverOpen(true)}
@@ -400,15 +408,11 @@ const withLinks = (editor: Editor) => {
     const pastedText = data.getData('text/plain');
 
     if (pastedText) {
-      try {
-        // eslint-disable-next-line no-new
-        new URL(pastedText);
+      if (isValidAbsoluteLink(pastedText)) {
         // Do not show link popup on copy-paste a link, so do not save its path
         editor.shouldSaveLinkPath = false;
         insertLink(editor, { url: pastedText });
         return;
-      } catch {
-        // continue normal data insertion
       }
     }
 

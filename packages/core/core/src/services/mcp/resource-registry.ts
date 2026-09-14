@@ -1,8 +1,4 @@
-import type {
-  McpServer,
-  RegisteredResource,
-  // eslint-disable-next-line import/extensions
-} from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { McpServer, RegisteredResource, ServerContext } from '@modelcontextprotocol/server';
 import type { Core, Modules } from '@strapi/types';
 import { McpCapabilityDefinitionRegistry } from './internal/McpCapabilityDefinitionRegistry';
 import {
@@ -11,6 +7,11 @@ import {
 } from './internal/McpCapabilityRegistry';
 import { createSafeCapabilityRegistration } from './utils/createSafeCapabilityRegistration';
 import { wrapCapabilityHandlerForMetrics } from './metrics/wrapCapabilityHandlerForMetrics';
+import { createMcpCapabilityHandlerContext } from './utils/createMcpCapabilityHandlerContext';
+import {
+  toSdkResourceListingMetadata,
+  toSdkResourceReadResult,
+} from './utils/toSdkMcpCapabilityResult';
 
 /**
  * Defines a Strapi MCP resource with full type inference, ready to pass to
@@ -102,10 +103,18 @@ export class McpResourceRegistry
             'resource',
             name,
             definition.telemetry,
-            safeHandler
+            async (uri: URL, context: ServerContext) =>
+              toSdkResourceReadResult(
+                await safeHandler(uri, createMcpCapabilityHandlerContext(context))
+              )
           );
 
-          return mcpServer.registerResource(name, uri, metadata, sdkHandler);
+          return mcpServer.registerResource(
+            name,
+            uri,
+            toSdkResourceListingMetadata(metadata),
+            sdkHandler
+          );
         },
       });
     });
