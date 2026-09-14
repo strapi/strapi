@@ -943,10 +943,13 @@ const PublishAction: DocumentActionComponent = ({
          * TODO: refactor the router so we can just do `../${res.data.documentId}` instead of this.
          */
         if (idToPublish === 'create' && !fromRelationModal) {
-          navigate({
-            pathname: `../${collectionType}/${model}/${res.data.documentId}`,
-            search: rawQuery,
-          });
+          navigate(
+            {
+              pathname: `../${collectionType}/${model}/${res.data.documentId}`,
+              search: rawQuery,
+            },
+            { replace: true }
+          );
         } else if (fromRelationModal) {
           const newRelation = {
             documentId: res.data.documentId,

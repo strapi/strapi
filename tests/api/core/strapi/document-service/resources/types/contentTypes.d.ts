@@ -792,6 +792,7 @@ export interface ApiMixedContentMixedContent extends Struct.CollectionTypeSchema
           localized: false;
         };
       }>;
+    images: Schema.Attribute.Component<'mixed-content.mixed-content-nested-media-leaf', true>;
     createdAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     publishedAt: Schema.Attribute.DateTime;

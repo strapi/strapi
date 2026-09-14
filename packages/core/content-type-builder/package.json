@@ -1,6 +1,6 @@
 {
   "name": "@strapi/content-type-builder",
-  "version": "5.52.2",
+  "version": "5.53.0",
   "description": "Create and manage content types",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -66,7 +66,7 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@ai-sdk/react": "2.0.212",
+    "@ai-sdk/react": "3.0.280",
     "@dnd-kit/core": "6.3.1",
     "@dnd-kit/modifiers": "9.0.0",
     "@dnd-kit/sortable": "10.0.0",
@@ -74,10 +74,10 @@
     "@reduxjs/toolkit": "1.9.7",
     "@sindresorhus/slugify": "1.1.0",
     "@strapi/design-system": "2.2.4",
-    "@strapi/generators": "5.52.2",
+    "@strapi/generators": "5.53.0",
     "@strapi/icons": "2.2.4",
-    "@strapi/utils": "5.52.2",
-    "ai": "5.0.210",
+    "@strapi/utils": "5.53.0",
+    "ai": "6.0.277",
     "date-fns": "2.30.0",
     "fs-extra": "11.3.4",
     "immer": "9.0.21",
@@ -94,8 +94,8 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@strapi/admin": "5.52.2",
-    "@strapi/types": "5.52.2",
+    "@strapi/admin": "5.53.0",
+    "@strapi/types": "5.53.0",
     "@testing-library/dom": "10.4.1",
     "@testing-library/jest-dom": "6.9.1",
     "@testing-library/react": "16.3.2",
@@ -115,7 +115,7 @@
     "react-router-dom": "6.30.4",
     "styled-components": "6.4.1",
     "vitest": "catalog:",
-    "vitest-config": "5.52.2"
+    "vitest-config": "5.53.0"
   },
   "peerDependencies": {
     "@strapi/admin": "^5.0.0",

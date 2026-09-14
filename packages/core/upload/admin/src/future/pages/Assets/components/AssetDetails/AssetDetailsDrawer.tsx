@@ -62,6 +62,7 @@ import {
 } from '../../../../utils/files';
 import { getAssetIcon } from '../../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../../utils/translations';
+import { ASSET_DETAILS_TRIGGER_SELECTOR, ASSET_ITEM_CONTROL_SELECTOR } from '../../constants';
 import { useFolderInfo } from '../../hooks/useFolderInfo';
 import { ASSET_DETAILS_URL_PARAM, parseAssetDetailsId } from '../../hooks/useIsAssetDetailsOpen';
 import { BusyOverlay } from '../BusyOverlay';
@@ -795,7 +796,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
   // Owns the replace upload so isReplacing can drive the busy overlay.
   const handleReplace = React.useCallback(
     async (file: globalThis.File) => {
-      const res = await replaceMutation({ id: asset.id, file });
+      const res = await replaceMutation({ id: asset.id, file, fileInfo: { name: asset.name } });
       if ('error' in res) {
         notify({
           type: 'danger',
@@ -818,7 +819,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
         }),
       });
     },
-    [asset.id, formatMessage, getErrorMessage, notify, replaceMutation, trackUsage]
+    [asset.id, asset.name, formatMessage, getErrorMessage, notify, replaceMutation, trackUsage]
   );
 
   // Owns the delete: on error notify in-drawer (drawer stays), on success fire
@@ -1177,6 +1178,19 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
  * DrawerHeader
  * -----------------------------------------------------------------------------------------------*/
 
+/**
+ * The icon's size lives in SVG attributes, which flex is free to override, so a
+ * long asset name would squash it. Matches the grid and table rows, where the
+ * file-type icon is shrink-proof and the name is what truncates.
+ */
+const HeaderIcon = styled(Flex)`
+  flex-shrink: 0;
+`;
+
+const HeaderTitle = styled(Typography)`
+  min-width: 0;
+`;
+
 interface DrawerHeaderProps {
   asset: AssetWithPopulatedCreatedBy;
   closeDetails: () => void;
@@ -1195,11 +1209,13 @@ const DrawerHeader = ({ asset, closeDetails }: DrawerHeaderProps) => {
       borderStyle="solid"
       borderWidth="0 0 1px 0"
     >
-      <DocIcon width={20} height={20} />
+      <HeaderIcon>
+        <DocIcon width={20} height={20} />
+      </HeaderIcon>
       <Drawer.Title asChild>
-        <Typography variant="omega" fontWeight="semiBold" overflow="hidden" ellipsis tag="h2">
+        <HeaderTitle variant="omega" fontWeight="semiBold" overflow="hidden" ellipsis tag="h2">
           {asset.name}
-        </Typography>
+        </HeaderTitle>
       </Drawer.Title>
       <Box marginLeft="auto">
         <Drawer.CloseButton onClose={closeDetails}>
@@ -1268,6 +1284,43 @@ const DrawerContent = ({ assetId, closeDetails }: DrawerContentProps) => {
  * AssetDetailsDrawer
  * -----------------------------------------------------------------------------------------------*/
 
+/**
+ * Whether a pointer press outside the panel should leave the drawer open.
+ *
+ * Anywhere on the page behind dismisses it, controls included. Two exceptions,
+ * neither of which is "the user meant to stay": the part of an asset's card or
+ * row whose `click` switches the drawer rather than closing it — not its own
+ * checkbox or actions menu, which act on the item; and a panel already closing,
+ * which `forceMount` keeps listening through its animation, where dismissing
+ * again would re-trigger the unsaved-changes guard for nothing.
+ */
+const shouldKeepDrawerOpen = (
+  event: { target: EventTarget | null; detail: { originalEvent: { button: number } } },
+  isVisible: boolean
+) => {
+  if (!isVisible) {
+    return true;
+  }
+
+  // Radix's dismisser fires on any `pointerdown`, secondary buttons included. A
+  // right-click is contextual, and with the create menu on the background one
+  // press would otherwise both close this and open that.
+  if (event.detail.originalEvent.button !== 0) {
+    return true;
+  }
+
+  if (!(event.target instanceof Element)) {
+    return false;
+  }
+
+  // The card's own controls — its checkbox, its actions menu — act on the item
+  // and stop the card's click, so no switch follows and the press dismisses.
+  return (
+    event.target.closest(ASSET_DETAILS_TRIGGER_SELECTOR) !== null &&
+    event.target.closest(ASSET_ITEM_CONTROL_SELECTOR) === null
+  );
+};
+
 export const AssetDetailsDrawer = () => {
   const { formatMessage } = useIntl();
   const { assetId, isVisible, shouldRenderDrawer, onCloseAnimationEnd, closeDetails } =
@@ -1306,6 +1359,13 @@ export const AssetDetailsDrawer = () => {
         // off-screen. dvh tracks the actual visible height.
         height="100dvh"
         onAnimationEnd={onCloseAnimationEnd}
+        // Opt in to dismiss-on-outside-click; `closeDetails` is the same path
+        // as the header's close button, so unsaved edits are still guarded.
+        onPointerDownOutside={(event) => {
+          if (shouldKeepDrawerOpen(event, isVisible)) {
+            event.preventDefault();
+          }
+        }}
       >
         <DrawerContent assetId={assetId} closeDetails={closeDetails} />
       </Drawer.Body>
