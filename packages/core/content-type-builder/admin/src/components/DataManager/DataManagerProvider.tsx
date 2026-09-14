@@ -178,6 +178,13 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       toggleNotification({
         type: 'info',
         message: formatMessage({ id: getTrad('notification.info.autoreaload-disable') }),
+        link: {
+          label: formatMessage({
+            id: getTrad('notification.info.autoreaload-disable.link'),
+            defaultMessage: 'Learn more',
+          }),
+          url: 'https://docs.strapi.io/cms/deployment',
+        },
       });
     }
   }, [autoReload, toggleNotification, formatMessage]);
