@@ -1,5 +1,8 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
 import { DocumentMeta } from '../../../../../../hooks/useDocumentContext';
-import { reducer, type State, type Action } from '../RelationModal';
+import { reducer, RELATION_MODAL_VIEWPORT_HEIGHT, type State, type Action } from '../RelationModal';
 
 describe('Document Modal Reducer', () => {
   // Sample documents for testing
@@ -41,6 +44,22 @@ describe('Document Modal Reducer', () => {
     ...stateWithHistory,
     hasUnsavedChanges: true,
   };
+
+  describe('layout contract (#27285)', () => {
+    it('pins the dialog to a definite viewport height so nested flex scrolling works', () => {
+      expect(RELATION_MODAL_VIEWPORT_HEIGHT).toBe('90vh');
+    });
+
+    it('keeps document actions in Modal.Footer instead of a nested overflow body', () => {
+      // Structural guard: Save/Publish must not live in a nested flex+overflow scroller
+      // inside Modal.Body, or tall dynamic-zone forms push them out of reach.
+      const source = fs.readFileSync(path.join(__dirname, '../RelationModal.tsx'), 'utf8');
+
+      expect(source).toContain('<StyledModalFooter');
+      expect(source).toContain('StyledModalBody');
+      expect(source).not.toMatch(/flex=\{1\} overflow="auto"/);
+    });
+  });
 
   describe('GO_TO_RELATION action', () => {
     it('should add document to history and open modal when no unsaved changes', () => {
