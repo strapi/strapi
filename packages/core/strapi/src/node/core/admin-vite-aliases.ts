@@ -24,12 +24,10 @@ export const buildAdminViteResolveAliases = (): Record<string, string> =>
   ]);
 
 /**
- * Alias key and absolute target for each exports subpath of an aliased module that a browser
- * build can import
+ * Alias key and absolute target for each exports subpath a browser build can import
  *
- * The bare module key rewrites to a directory and bypasses the exports map, so each subpath needs
- * its own exact key. Wildcard subpaths and `./package.json` get no key and keep resolving through
- * the bare key
+ * The bare key rewrites to a directory. A directory rewrite bypasses the exports map. Thus each
+ * subpath needs its own exact key. Wildcards and `./package.json` get no key
  *
  * @internal
  */

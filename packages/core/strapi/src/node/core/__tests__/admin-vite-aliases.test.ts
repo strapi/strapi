@@ -144,8 +144,7 @@ describe('buildAdminViteResolveAliases', () => {
     'aliases %s to the version pinned by @strapi/admin',
     (mod) => {
       const alias = buildAdminViteResolveAliases();
-      // Without this, a missing alias sends read-pkg-up to the monorepo root and the failure
-      // reads as a version mismatch instead of a missing alias
+      // Without this, a missing alias reads as a read-pkg-up version mismatch at the repo root
       expect(alias[mod]).toBeDefined();
 
       const pkg = readPkgUp.sync({ cwd: alias[mod] });

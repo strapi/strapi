@@ -1,5 +1,7 @@
 import type { Core } from '@strapi/types';
 
+import type { Logger } from '../../cli/utils/logger';
+
 import { createBuildContext } from '../create-build-context';
 
 jest.mock('../core/env', () => ({
@@ -20,10 +22,10 @@ jest.mock('node:fs/promises', () => ({
   rm: jest.fn().mockResolvedValue(undefined),
 }));
 
-const SCAN_ROOT = '/app/node_modules/@strapi/admin/dist/admin';
+const mockScanRoot = '/app/node_modules/@strapi/admin/dist/admin';
 
 jest.mock('../core/scan-roots', () => ({
-  getScanRoots: jest.fn().mockResolvedValue(['/app/node_modules/@strapi/admin/dist/admin']),
+  getScanRoots: jest.fn(async () => [mockScanRoot]),
 }));
 
 const buildStrapiMock = (
@@ -73,18 +75,18 @@ const buildStrapiMock = (
     },
   }) as unknown as Core.Strapi;
 
-/** The flag cases need no cookie configuration, so they skip the cookie arguments */
 const buildStrapiMockWithFlags = (futureFlags: Record<string, boolean>): Core.Strapi =>
   buildStrapiMock(undefined, undefined, undefined, undefined, futureFlags);
 
 const buildArgs = (strapi: Core.Strapi) => ({
   cwd: '/app',
+  // The tests observe `warn` only, so the mock leaves the rest of `Logger` out
   logger: {
     debug: jest.fn(),
     info: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
-  },
+  } as unknown as Logger,
   strapi,
 });
 
@@ -113,7 +115,7 @@ describe('createBuildContext', () => {
       const ctx = await createBuildContext({ ...buildArgs(strapi), options: { bundler: 'vite' } });
 
       expect(ctx.nextDesignSystem).toBe(true);
-      expect(ctx.scanRoots).toEqual([SCAN_ROOT]);
+      expect(ctx.scanRoots).toEqual([mockScanRoot]);
     });
 
     it('is off and warns once when the flag is on under webpack', async () => {

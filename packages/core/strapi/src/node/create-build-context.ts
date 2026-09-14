@@ -179,7 +179,6 @@ const createBuildContext = async ({
 
   const nextDesignSystem = flagEnabled && bundler === 'vite';
 
-  // Nothing scans the roots when the next design system is off, so do not pay for them
   const scanRoots = nextDesignSystem
     ? await getScanRoots({ cwd, runtimeDir, plugins: pluginsWithFront, customisations }, dev)
     : [];
