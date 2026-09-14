@@ -88,6 +88,28 @@ describe('debug-dump scrub', () => {
     );
   });
 
+  it('relativizes a long path whose characters are all base64-legal', () => {
+    // A POSIX path made only of letters, digits and `/` is indistinguishable from a
+    // standard-base64 blob once it passes 40 characters, so the secret heuristics used
+    // to claim it before relativization ever ran.
+    const appRoot = '/srv/data/strapiappsdir/projects/mainsite';
+    expect(appRoot.length).toBeGreaterThanOrEqual(40);
+    expect(scrub(appRoot, { appRoot })).toBe('<app>');
+    expect(scrub(`${appRoot}/src/apiconfig`, { appRoot })).toBe('<app>/src/apiconfig');
+  });
+
+  it('relativizes a long home path whose characters are all base64-legal', () => {
+    const homeDir = '/datavolumes/serviceaccounts/strapirunner';
+    expect(scrub(`${homeDir}/projects/mainsiteproduction`, { homeDir })).toBe(
+      '<home>/projects/mainsiteproduction'
+    );
+  });
+
+  it('still masks a base64 token that is not under app or home', () => {
+    const token = 'YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXowMTIzNDU2Nzg5';
+    expect(scrub(token, { appRoot: '/srv/app', homeDir: '/home/deploy' })).toBe('[REDACTED]');
+  });
+
   it('relativizes Windows app and home paths (backslash separators)', () => {
     expect(
       scrub('C:\\Users\\alice\\app\\src\\index.js', {

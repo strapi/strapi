@@ -123,10 +123,17 @@ const deleteAtPath = (target: unknown, path: string): void => {
 
 const walk = (value: unknown, appRoot?: string, homeDir?: string): unknown => {
   if (typeof value === 'string') {
-    if (looksSecret(value)) {
-      return REDACTED;
+    // Relativization is tried FIRST, and a value it rewrote is returned as-is. A string
+    // that starts with the app root or the home directory is a path, never a credential,
+    // whereas the reverse order let the secret heuristics claim one: a POSIX path made
+    // only of letters, digits and `/` is valid standard base64, so anything past 40
+    // characters matched LONG_TOKEN_PATTERN and shipped as `[REDACTED]` instead of
+    // `<app>/...`. Values that do not relativize still go through the full checks.
+    const relativized = relativize(value, appRoot, homeDir);
+    if (relativized !== value) {
+      return relativized;
     }
-    return relativize(value, appRoot, homeDir);
+    return looksSecret(value) ? REDACTED : value;
   }
   if (Array.isArray(value)) {
     return value.map((item) => walk(item, appRoot, homeDir));
