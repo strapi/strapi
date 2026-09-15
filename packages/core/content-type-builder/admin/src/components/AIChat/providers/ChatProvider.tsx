@@ -103,6 +103,7 @@ export const BaseChatProvider = ({
     resumeStream,
     addToolResult,
     addToolOutput,
+    addToolApprovalResponse,
   } = useAIChat({
     id: chatId?.toString(),
     experimental_throttle: 100,
@@ -224,6 +225,7 @@ export const BaseChatProvider = ({
       resumeStream,
       addToolResult,
       addToolOutput,
+      addToolApprovalResponse,
       messages,
       handleSubmit,
       input,
@@ -251,6 +253,7 @@ export const BaseChatProvider = ({
       resumeStream,
       addToolResult,
       addToolOutput,
+      addToolApprovalResponse,
       messages,
       handleSubmit,
       input,
