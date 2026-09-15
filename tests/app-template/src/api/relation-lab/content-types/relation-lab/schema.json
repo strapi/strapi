@@ -41,6 +41,12 @@
       "relation": "manyToMany",
       "target": "api::relation-target.relation-target",
       "inversedBy": "relationLabs"
+    },
+    "manyToManyNonDp": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::relation-target-non-dp.relation-target-non-dp",
+      "inversedBy": "relationLabs"
     }
   }
 }
