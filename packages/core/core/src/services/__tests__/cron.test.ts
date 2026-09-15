@@ -4,9 +4,10 @@ import createCronService from '../cron';
 // which these timer-driven tests have to ride out rather than fail on.
 jest.setTimeout(30_000);
 
-// Far enough out that a slow tick cannot push the due time into the past
-// before croner schedules the job, short enough to keep the suite quick.
-const ONE_SHOT_DELAY = 300;
+// A one-shot is an absolute instant: croner never fires it if the event loop stalls
+// past the due time before the timer is armed. 300ms was inside the stall budget these
+// runners actually hit, so the window has to clear a multi-second pause.
+const ONE_SHOT_DELAY = 3_000;
 
 const sleep = (ms: number) =>
   new Promise<void>((resolve) => {
@@ -159,16 +160,16 @@ describe('Cron service', () => {
     const task = jest.fn();
 
     cron.start();
+    // A recurring sub-second pattern rather than a one-shot Date: croner recomputes the
+    // next occurrence after every stall, so this cannot silently lapse the way an
+    // absolute instant can. One-shot scheduling is covered by the tests below.
     cron.add({
-      runAfterStart: {
-        task,
-        options: new Date(Date.now() + ONE_SHOT_DELAY),
-      },
+      '*/1 * * * * *': task,
     });
 
-    await waitFor(() => task.mock.calls.length === 1);
+    await waitFor(() => task.mock.calls.length > 0);
 
-    expect(task).toHaveBeenCalledTimes(1);
+    expect(task).toHaveBeenCalled();
   });
 
   it('does not schedule a one-shot twice across stop and start cycles', async () => {
