@@ -688,7 +688,9 @@ describe('Admin Token Controller', () => {
       await adminTokenController.getOwnerPermissions(ctx as any);
 
       expect(findOne).toHaveBeenCalledWith(String(ownerUser.id));
-      expect(findUserPermissions).toHaveBeenCalledWith(ownerUser);
+      // Unscoped: this is the owner's ceiling, not what they may do wherever
+      // the request happens to be pointed.
+      expect(findUserPermissions).toHaveBeenCalledWith(ownerUser, { scoped: false });
       expect((ctx as any).body).toEqual({ data: ownerPermissions });
     });
 
@@ -715,7 +717,9 @@ describe('Admin Token Controller', () => {
       await adminTokenController.getOwnerPermissions(ctx as any);
 
       expect(findOne).toHaveBeenCalledWith(String(ownerUser.id));
-      expect(findUserPermissions).toHaveBeenCalledWith(ownerUser);
+      // Unscoped: this is the owner's ceiling, not what they may do wherever
+      // the request happens to be pointed.
+      expect(findUserPermissions).toHaveBeenCalledWith(ownerUser, { scoped: false });
       expect((ctx as any).body).toEqual({ data: ownerPermissions });
     });
   });

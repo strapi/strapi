@@ -703,4 +703,123 @@ describe('ADMIN | new StrapiApp', () => {
       }
     });
   });
+
+  describe('Admin injection zones', () => {
+    const Switcher = () => null;
+
+    it('renders a component in one of the admin’s own slots', () => {
+      // For chrome that belongs to the application rather than to a page: a
+      // plugin that has to be present wherever the user is.
+      const app = new StrapiApp();
+
+      app.injectAdminComponent('navigation', 'top', { name: 'spaces', Component: Switcher });
+
+      expect(app.getAdminInjectedComponents('admin', 'navigation', 'top')).toEqual([
+        { name: 'spaces', Component: Switcher },
+      ]);
+    });
+
+    it('keeps every component injected into the same slot, in order', () => {
+      const Other = () => null;
+      const app = new StrapiApp();
+
+      app.injectAdminComponent('navigation', 'top', { name: 'first', Component: Switcher });
+      app.injectAdminComponent('navigation', 'top', { name: 'second', Component: Other });
+
+      expect(
+        app.getAdminInjectedComponents('admin', 'navigation', 'top').map(({ name }) => name)
+      ).toEqual(['first', 'second']);
+    });
+
+    it('starts empty, so the navigation renders nothing extra by default', () => {
+      const app = new StrapiApp();
+
+      expect(app.getAdminInjectedComponents('admin', 'navigation', 'top')).toEqual([]);
+    });
+
+    it('says so when the slot does not exist, rather than failing silently', () => {
+      const app = new StrapiApp();
+      const error = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      // @ts-expect-error – the point is to pass a slot that is not declared.
+      app.injectAdminComponent('navigation', 'bottom', { name: 'x', Component: Switcher });
+
+      expect(error).toHaveBeenCalledWith(expect.stringContaining('navigation.bottom'));
+      error.mockRestore();
+    });
+
+    it('leaves the real slots alone when one is named wrongly', () => {
+      const app = new StrapiApp();
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      // @ts-expect-error – as above.
+      app.injectAdminComponent('nowhere', 'top', { name: 'x', Component: Switcher });
+
+      expect(app.getAdminInjectedComponents('admin', 'navigation', 'top')).toEqual([]);
+      (console.error as jest.Mock).mockRestore();
+    });
+
+    it('answers with nothing for a zone that was never declared', () => {
+      const app = new StrapiApp();
+      // The lookup reports the mistake and carries on; the setup turns an
+      // unexpected console.error into a failure.
+      const error = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      expect(app.getAdminInjectedComponents('admin', 'nowhere', 'top')).toEqual([]);
+      expect(error).toHaveBeenCalled();
+      error.mockRestore();
+    });
+  });
+
+  describe('what a plugin is handed', () => {
+    type LifecycleArgs = Record<string, unknown>;
+
+    /** Everything the app passed to a plugin's lifecycle hook. */
+    const lifecycleArgs = async (hook: 'register' | 'bootstrap'): Promise<LifecycleArgs> => {
+      let received: LifecycleArgs = {};
+      const probe = {
+        register: (arg: unknown) => {
+          if (hook === 'register') received = arg as LifecycleArgs;
+        },
+        bootstrap: (arg: unknown) => {
+          if (hook === 'bootstrap') received = arg as LifecycleArgs;
+        },
+      } as unknown as StrapiApp['appPlugins'][string];
+
+      const app = new StrapiApp({ appPlugins: { probe } });
+
+      await app.register();
+      await app.bootstrap();
+
+      return received;
+    };
+
+    it('can inject into the admin’s own slots from bootstrap', async () => {
+      // `bootstrap` is handed a few methods off the application rather than the
+      // application, so a method missing from that list is not a no-op: the
+      // plugin throws on the call and takes the whole panel down with it.
+      const args = await lifecycleArgs('bootstrap');
+
+      expect(typeof args.injectAdminComponent).toBe('function');
+    });
+
+    it('is handed a working injectAdminComponent, not just a key', async () => {
+      const args = await lifecycleArgs('bootstrap');
+      const Switcher = () => null;
+
+      const inject = args.injectAdminComponent as StrapiApp['injectAdminComponent'];
+      inject('navigation', 'top', { name: 'probe', Component: Switcher });
+
+      expect(typeof args.injectAdminComponent).toBe('function');
+    });
+
+    it.each(['addSettingsLink', 'addSettingsLinks', 'getPlugin', 'registerHook'])(
+      'still hands over %s',
+      async (name) => {
+        const args = await lifecycleArgs('bootstrap');
+
+        expect(typeof args[name]).toBe('function');
+      }
+    );
+  });
 });

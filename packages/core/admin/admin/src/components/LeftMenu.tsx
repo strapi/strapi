@@ -6,6 +6,7 @@ import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import { useStrapiApp } from '../features/StrapiApp';
 import { useTracking } from '../features/Tracking';
 import { useIsDesktop } from '../hooks/useMediaQuery';
 import { Menu, MenuItem, MobileMenuItem } from '../hooks/useMenu';
@@ -16,6 +17,31 @@ import { NavBrand } from './MainNav/NavBrand';
 import { NavBurgerMenu } from './MainNav/NavBurgerMenu';
 import { NavUser } from './MainNav/NavUser';
 import { TrialCountdown } from './MainNav/TrialCountdown';
+
+/**
+ * Components a plugin has put at the top of the navigation — a workspace or
+ * tenant switcher, typically: chrome that has to be reachable from every page
+ * rather than from one plugin's own screens.
+ */
+const NavigationTopZone = () => {
+  const components = useStrapiApp('LeftMenu', (state) =>
+    state.getAdminInjectedComponents('admin', 'navigation', 'top')
+  );
+
+  // The navigation is chrome: it renders on every screen, so it should survive
+  // a zone that has nothing in it — or a caller that does not implement one.
+  if (!components?.length) {
+    return null;
+  }
+
+  return (
+    <Box paddingLeft={3} paddingRight={3} paddingTop={3}>
+      {components.map(({ name, Component }) => (
+        <Component key={name} />
+      ))}
+    </Box>
+  );
+};
 
 const sortLinks = (links: MenuItem[]) => {
   return links.sort((a, b) => {
@@ -128,6 +154,8 @@ const LeftMenu = ({
     <>
       <MainNav>
         <NavBrand />
+
+        {isDesktop && <NavigationTopZone />}
 
         {isDesktop && <Divider />}
 

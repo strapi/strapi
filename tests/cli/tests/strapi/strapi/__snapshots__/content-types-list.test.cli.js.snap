@@ -9,6 +9,10 @@ exports[`content-types:list should output list of content-types 1`] = `
 │ plugin::content-releases.release-action              │
 │ plugin::review-workflows.workflow                    │
 │ plugin::review-workflows.workflow-stage              │
+│ plugin::spaces.space                                 │
+│ plugin::spaces.space-membership                      │
+│ plugin::spaces.token-space                           │
+│ plugin::spaces.webhook-space                         │
 │ plugin::users-permissions.permission                 │
 │ plugin::users-permissions.role                       │
 │ plugin::users-permissions.user                       │

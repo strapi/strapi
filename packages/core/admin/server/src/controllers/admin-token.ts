@@ -221,7 +221,9 @@ export default {
       return ctx.notFound('owner.notFound');
     }
 
-    const ownerPermissions = await permissionService.findUserPermissions(ownerUser);
+    const ownerPermissions = await permissionService.findUserPermissions(ownerUser, {
+      scoped: false,
+    });
     const sanitizedPermissions = ownerPermissions.map(permissionService.sanitizePermission);
 
     // @ts-expect-error - transform response type to sanitized permission

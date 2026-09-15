@@ -125,6 +125,7 @@
     "@strapi/openapi": "5.53.0",
     "@strapi/permissions": "5.53.0",
     "@strapi/review-workflows": "5.53.0",
+    "@strapi/spaces": "5.53.0",
     "@strapi/types": "5.53.0",
     "@strapi/typescript-utils": "5.53.0",
     "@strapi/upload": "5.53.0",

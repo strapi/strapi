@@ -16,8 +16,15 @@ import { validateDatabase } from './validations';
 import type { Model, JoinTable } from './types';
 import type { Identifiers } from './utils/identifiers';
 import { createRepairManager, type RepairManager } from './repairs';
+import { createQueryScopeProvider, type QueryScopeProvider } from './query';
 
 export { isKnexQuery } from './utils/knex';
+export type {
+  QueryScope,
+  QueryScopeContext,
+  QueryScopeOperation,
+  QueryScopeProvider,
+} from './query';
 export { isDatabaseClientKind } from './connection';
 
 interface Settings {
@@ -71,6 +78,13 @@ class Database {
 
   repair: RepairManager;
 
+  /**
+   * Row-level `where` clauses applied to every query this database builds.
+   * See `./query/scopes` — this is the enforcement point for row-level access
+   * control, because populate and hand-written queries pass through it too.
+   */
+  queryScopes: QueryScopeProvider;
+
   logger: Logger;
 
   constructor(config: DatabaseConfig) {
@@ -109,6 +123,8 @@ class Database {
         },
       };
     }
+
+    this.queryScopes = createQueryScopeProvider();
 
     this.metadata = createMetadata([]);
 
