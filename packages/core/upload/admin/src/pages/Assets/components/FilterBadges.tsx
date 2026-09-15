@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useRef, useState } from 'react';
 
 import { Checkbox, Flex, Popover, Typography } from '@strapi/design-system';
 import { Check, Cross } from '@strapi/icons';
@@ -404,6 +404,21 @@ interface FilterBadgesProps {
 
 export const FilterBadges = ({ listFilters, compact = false }: FilterBadgesProps) => {
   const { filters, updateFilter, removeFilter } = listFilters;
+  const filterKeyPrefix = useId();
+  const nextFilterKey = useRef(0);
+  const filterKeys = useRef<string[]>([]);
+
+  while (filterKeys.current.length < filters.length) {
+    filterKeys.current.push(`${filterKeyPrefix}-${nextFilterKey.current}`);
+    nextFilterKey.current += 1;
+  }
+  filterKeys.current.length = filters.length;
+
+  const filtersWithKeys = filters.map((filter, index) => ({
+    filter,
+    index,
+    key: filterKeys.current[index],
+  }));
 
   if (filters.length === 0) {
     return null;
@@ -411,13 +426,15 @@ export const FilterBadges = ({ listFilters, compact = false }: FilterBadgesProps
 
   return (
     <BadgesRoot $compact={compact} gap={2} wrap="wrap" data-testid="filter-badges">
-      {filters.map((filter, index) => (
+      {filtersWithKeys.map(({ filter, index, key }) => (
         <FilterBadge
-          // Position is identity: badges are edited/removed by index.
-          key={index}
+          key={key}
           filter={filter}
           onChange={(next) => updateFilter(index, next)}
-          onRemove={() => removeFilter(index)}
+          onRemove={() => {
+            filterKeys.current.splice(index, 1);
+            removeFilter(index);
+          }}
         />
       ))}
     </BadgesRoot>

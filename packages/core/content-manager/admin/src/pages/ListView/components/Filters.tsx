@@ -29,7 +29,7 @@ const { INJECT_LIST_VIEW_FILTERS } = HOOKS;
 /**
  * If new attributes are added, this list needs to be updated.
  */
-const NOT_ALLOWED_FILTERS = [
+const NOT_ALLOWED_FILTERS = new Set([
   'json',
   'component',
   'media',
@@ -37,9 +37,9 @@ const NOT_ALLOWED_FILTERS = [
   'dynamiczone',
   'password',
   'blocks',
-];
+]);
 const DEFAULT_ALLOWED_FILTERS = ['createdAt', 'updatedAt'];
-const USER_FILTER_ATTRIBUTES = [...CREATOR_FIELDS, 'strapi_assignee'];
+const USER_FILTER_ATTRIBUTES = new Set([...CREATOR_FIELDS, 'strapi_assignee']);
 
 /* -------------------------------------------------------------------------------------------------
  * Filters
@@ -81,7 +81,7 @@ const Root = ({ disabled, schema, layout, children }: FiltersProps) => {
     const isAdminUserRelation =
       attribute?.type === 'relation' && 'target' in attribute && attribute.target === 'admin::user';
 
-    if (id && (isAdminUserRelation || USER_FILTER_ATTRIBUTES.includes(key)) && !acc.includes(id)) {
+    if (id && (isAdminUserRelation || USER_FILTER_ATTRIBUTES.has(key)) && !acc.includes(id)) {
       acc.push(id);
     }
 
@@ -104,16 +104,16 @@ const Root = ({ disabled, schema, layout, children }: FiltersProps) => {
   });
 
   const displayedFilters = React.useMemo(() => {
-    const [{ properties: { fields = [] } = { fields: [] } }] = allPermissions.filter(
+    const { properties: { fields = [] } = { fields: [] } } = allPermissions.find(
       (permission) =>
         permission.action === 'plugin::content-manager.explorer.read' &&
         permission.subject === model
-    );
+    )!;
 
     const allowedFields = fields.filter((field) => {
       const attribute = attributes[field] ?? {};
 
-      return attribute.type && !NOT_ALLOWED_FILTERS.includes(attribute.type);
+      return attribute.type && !NOT_ALLOWED_FILTERS.has(attribute.type);
     });
 
     const baseFilters = [
@@ -177,7 +177,7 @@ const Root = ({ disabled, schema, layout, children }: FiltersProps) => {
 
         const attribute = attributes[name];
 
-        if (!attribute || NOT_ALLOWED_FILTERS.includes(attribute.type)) {
+        if (!attribute || NOT_ALLOWED_FILTERS.has(attribute.type)) {
           return null;
         }
 
@@ -268,7 +268,7 @@ const Root = ({ disabled, schema, layout, children }: FiltersProps) => {
       };
 
       // User-typed filters need user options so the chip can render the display name instead of the id.
-      if (USER_FILTER_ATTRIBUTES.includes(filter.name) && !next.options?.length) {
+      if (USER_FILTER_ATTRIBUTES.has(filter.name) && !next.options?.length) {
         next.options = userOptions;
       }
 

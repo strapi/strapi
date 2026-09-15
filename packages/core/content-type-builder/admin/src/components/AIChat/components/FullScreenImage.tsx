@@ -1,4 +1,13 @@
-import { useEffect, useRef, createContext, useContext, useState, ReactNode } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+} from 'react';
 
 import { createPortal } from 'react-dom';
 import { styled } from 'styled-components';
@@ -169,14 +178,18 @@ const ImageModal = ({ src, alt, onClose }: FullScreenImageProps) => {
 const Root = ({ children, src, alt, onClose, defaultOpen = false }: FullScreenImageRootProps) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
-  const open = () => setIsOpen(true);
-  const close = () => {
+  const open = useCallback(() => setIsOpen(true), []);
+  const close = useCallback(() => {
     setIsOpen(false);
     onClose?.();
-  };
+  }, [onClose]);
+  const contextValue = useMemo(
+    () => ({ isOpen, open, close, src, alt }),
+    [isOpen, open, close, src, alt]
+  );
 
   return (
-    <FullScreenImageContext.Provider value={{ isOpen, open, close, src, alt }}>
+    <FullScreenImageContext.Provider value={contextValue}>
       {children}
       {isOpen && <ImageModal src={src} alt={alt} onClose={close} />}
     </FullScreenImageContext.Provider>

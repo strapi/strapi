@@ -335,10 +335,12 @@ const assignPermissions = async (
 
   // Internal actions are not handled by the role service, so any permission
   // with an internal action is filtered out
-  const internalActions = getService('permission')
-    .actionProvider.values()
-    .filter((action) => action.section === 'internal')
-    .map((action) => action.actionId);
+  const internalActions = new Set(
+    getService('permission')
+      .actionProvider.values()
+      .filter((action) => action.section === 'internal')
+      .map((action) => action.actionId)
+  );
 
   const superAdmin = await getService('role').getSuperAdmin();
   const isSuperAdmin = superAdmin && superAdmin.id === roleId;
@@ -359,13 +361,13 @@ const assignPermissions = async (
     permissionsWithRole,
     existingPermissions,
     arePermissionsEqual
-  ).filter((permission: Permission) => !internalActions.includes(permission.action));
+  ).filter((permission: Permission) => !internalActions.has(permission.action));
 
   const permissionsToDelete = differenceWith(
     existingPermissions,
     permissionsWithRole,
     arePermissionsEqual
-  ).filter((permission: Permission) => !internalActions.includes(permission.action));
+  ).filter((permission: Permission) => !internalActions.has(permission.action));
 
   const permissionsToReturn = differenceBy(permissionsToDelete, existingPermissions, 'id');
 
