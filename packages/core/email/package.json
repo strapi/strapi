@@ -53,13 +53,14 @@
     "build:types:admin": "run -T tsc -p admin/tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint . --max-warnings=0",
-    "test:unit": "run -T jest",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
     "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",
     "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
     "test:front:watch:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
     "test:ts:front": "run -T tsc -p admin/tsconfig.json",
-    "watch": "run -T rollup -c -w"
+    "watch": "run -T rollup -c -w",
+    "test:unit:vitest": "vitest run",
+    "test:unit:vitest:watch": "vitest --watch"
   },
   "dependencies": {
     "@strapi/design-system": "2.2.4",
@@ -89,7 +90,9 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.30.4",
-    "styled-components": "6.4.1"
+    "styled-components": "6.4.1",
+    "vitest": "catalog:",
+    "vitest-config": "5.52.0"
   },
   "peerDependencies": {
     "@strapi/admin": "^5.0.0",
