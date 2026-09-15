@@ -13,6 +13,26 @@ export function isKnexQuery(value: unknown): value is Knex.Raw | Knex.QueryBuild
 }
 
 /**
+ * Applies the configured `settings.queryTimeout` (milliseconds) to a query, cancelling
+ * the underlying database query rather than letting it run to completion once the timeout
+ * elapses. A no-op when the setting is unset, or when the query already has its own timeout.
+ *
+ * @internal
+ */
+export function applyDefaultQueryTimeout<T extends Knex.Raw | Knex.QueryBuilder>(
+  query: T,
+  db: Database
+): T {
+  const queryTimeout = db.config.settings.queryTimeout;
+
+  if (!queryTimeout || (query as unknown as { _timeout?: number })._timeout) {
+    return query;
+  }
+
+  return query.timeout(queryTimeout, { cancel: true }) as T;
+}
+
+/**
  * Adds the name of the schema to the table name if the schema was defined by the user.
  * Users can set the db schema only for Postgres in strapi database config.
  */
