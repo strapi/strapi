@@ -19,6 +19,7 @@ const TAG_UID = 'api::tag.tag' as UID.ContentType;
 const CATEGORY_UID = 'api::clone-category.clone-category' as UID.ContentType;
 const MORPH_BOX_UID = 'api::clone-morph-box.clone-morph-box' as UID.ContentType;
 const PLAIN_UID = 'api::clone-plain.clone-plain' as UID.ContentType;
+const LOCALIZED_TAG_UID = 'api::localized-tag.localized-tag' as UID.ContentType;
 const FK_OWNER_UID = 'api::clone-fk-owner.clone-fk-owner' as UID.ContentType;
 const FK_INVERSE_UID = 'api::clone-fk-inverse.clone-fk-inverse' as UID.ContentType;
 
@@ -120,11 +121,34 @@ const plainModel = {
       target: TAG_UID,
       useJoinTable: false,
     },
+    localizedTag: {
+      type: 'relation',
+      relation: 'oneToOne',
+      target: LOCALIZED_TAG_UID,
+      useJoinTable: false,
+    },
   },
   draftAndPublish: false,
   displayName: 'Clone plain',
   singularName: 'clone-plain',
   pluralName: 'clone-plains',
+  description: '',
+  collectionName: '',
+};
+
+const localizedTagModel = {
+  attributes: {
+    name: { type: 'string' },
+  },
+  pluginOptions: {
+    i18n: {
+      localized: true,
+    },
+  },
+  draftAndPublish: false,
+  displayName: 'Localized tag',
+  singularName: 'localized-tag',
+  pluralName: 'localized-tags',
   description: '',
   collectionName: '',
 };
@@ -241,6 +265,7 @@ describe('Document Service clone relation operation payloads', () => {
         productModel,
         categoryModel,
         morphBoxModel,
+        localizedTagModel,
         plainModel,
         fkInverseBaseModel,
         fkOwnerBaseModel,
@@ -805,6 +830,31 @@ describe('Document Service clone relation operation payloads', () => {
         publishedTagId: publishedRow?.id,
         draftTagId: draftRow?.id,
       });
+    }
+  );
+
+  testInTransaction(
+    'clone uses the default locale for an inline relation from a non-localized source',
+    async () => {
+      const localizedTag = await strapi.documents(LOCALIZED_TAG_UID).create({
+        locale: 'es',
+        data: { name: 'Spanish only' },
+      });
+      const source = await strapi.documents(PLAIN_UID).create({
+        data: { name: 'Plain localized source' },
+      });
+
+      await expect(
+        strapi.documents(PLAIN_UID).clone({
+          documentId: source.documentId,
+          data: {
+            name: 'Plain localized clone',
+            localizedTag: {
+              connect: [{ documentId: localizedTag.documentId }],
+            },
+          },
+        })
+      ).rejects.toThrow('Unable to resolve relation target for clone relation update');
     }
   );
 

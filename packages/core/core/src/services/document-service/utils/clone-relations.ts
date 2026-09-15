@@ -4,8 +4,13 @@ import type { Core, Schema, UID } from '@strapi/types';
 import { contentTypes, traverseEntity } from '@strapi/utils';
 import { transactionCtx } from '@strapi/database';
 import { traverseEntityRelations } from '../transform/relations/utils/map-relation';
-import { getRelationTargetLocale } from '../transform/relations/utils/i18n';
+import {
+  getDefaultLocale,
+  getRelationTargetLocale,
+  isLocalizedContentType,
+} from '../transform/relations/utils/i18n';
 import { getRelationTargetStatus } from '../transform/relations/utils/dp';
+import { setDefaultLocaleToRelation } from '../transform/relations/transform/default-locale';
 
 const RELATION_OPERATIONS = ['connect', 'disconnect', 'set'] as const;
 type TraversableData = Parameters<typeof traverseEntity>[2];
@@ -665,11 +670,19 @@ const resolveEntryIdByRef = async (
     return undefined;
   }
 
-  const relation = {
+  let relation = {
     documentId: ref.documentId,
     locale: typeof ref.locale === 'string' ? ref.locale : undefined,
     status: toRelationStatus(ref.status),
   };
+
+  if (
+    relation.locale == null &&
+    !isLocalizedContentType(sourceUid) &&
+    isLocalizedContentType(targetUid)
+  ) {
+    relation = setDefaultLocaleToRelation(relation, await getDefaultLocale());
+  }
 
   const targetLocale = getRelationTargetLocale(relation, {
     targetUid,
@@ -922,7 +935,7 @@ const resolveInlineRelationAssignment = async (
 
 export const applyPostCloneRelationUpdates = async (
   strapi: Core.Strapi,
-  _rootUid: UID.ContentType,
+  rootUid: UID.ContentType,
   sourceRootId: number,
   clonedEntryId: number,
   clonedData: Record<string, unknown>,
@@ -958,7 +971,7 @@ export const applyPostCloneRelationUpdates = async (
 
     const assignment = await resolveInlineRelationAssignment(strapi, attribute, update.value, {
       locale,
-      sourceUid: update.schemaUid,
+      sourceUid: rootUid,
       originalValue: get(update.dataPath, originalData),
       sourceOwnerId,
       targetOwnerId: ownerEntryId,

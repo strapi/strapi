@@ -3,6 +3,7 @@
  * source entry's populated relation data when cloning.
  */
 import type { Core, UID } from '@strapi/types';
+import type { Knex } from 'knex';
 
 import { testInTransaction } from '../../../../utils';
 
@@ -17,6 +18,7 @@ const TAG_UID = 'api::tag.tag' as UID.ContentType;
 const RELATION_CONTAINER_UID = 'default.relation-container' as UID.Component;
 
 type RelationContainer = {
+  id?: number;
   label?: string;
   tag?: {
     documentId?: string;
@@ -457,9 +459,16 @@ describe('Document Service clone nested relation operation payloads', () => {
 
   testInTransaction(
     'clone applies duplicate-form selected target for a useJoinTable:false relation inside a component',
-    async () => {
+    async (trx: Knex.Transaction) => {
       const originalTag = await createTag('Inline Component Original Tag');
       const selectedTag = await createTag('Inline Component Selected Tag');
+      await strapi.documents(TAG_UID).publish({ documentId: selectedTag.documentId });
+      const selectedDraftRow = await strapi.db.query(TAG_UID).findOne({
+        where: { documentId: selectedTag.documentId, publishedAt: null },
+      });
+      const selectedPublishedRow = await strapi.db.query(TAG_UID).findOne({
+        where: { documentId: selectedTag.documentId, publishedAt: { $ne: null } },
+      });
       const product = await strapi.documents(PRODUCT_UID).create({
         data: {
           name: 'Inline Component Source Product',
@@ -490,27 +499,44 @@ describe('Document Service clone nested relation operation payloads', () => {
         product.documentId
       )) as ProductWithNestedRelations | null;
       const clonedProduct = result.entries[0] as ProductWithNestedRelations;
+      const componentMeta = strapi.db.metadata.get(RELATION_CONTAINER_UID);
+      const tagColumn = (
+        componentMeta.attributes.legacyTag as { joinColumn?: { name?: string } } | undefined
+      )?.joinColumn?.name;
+      const clonedComponentRow = await strapi.db
+        .connection(componentMeta.tableName)
+        .where({ id: clonedProduct.details?.id })
+        .select([tagColumn!])
+        .transacting(trx)
+        .first();
 
       expect({
         cloneLegacyTagDocumentId: nestedLegacyTagDocumentId(clonedProduct.details),
         originalLegacyTagDocumentId: nestedLegacyTagDocumentId(originalProduct?.details),
+        storedTagId: clonedComponentRow?.[tagColumn!] ?? null,
       }).toEqual({
         cloneLegacyTagDocumentId: selectedTag.documentId,
         originalLegacyTagDocumentId: originalTag.documentId,
+        storedTagId: selectedDraftRow?.id,
       });
+      expect(selectedDraftRow?.id).not.toBe(selectedPublishedRow?.id);
     }
   );
 
   testInTransaction(
     'clone applies duplicate-form selected target for a morphToOne relation inside a component',
-    async () => {
+    async (trx: Knex.Transaction) => {
       const originalTag = await createTag('Morph Component Original Tag');
       const selectedTag = await createTag('Morph Component Selected Tag');
+      await strapi.documents(TAG_UID).publish({ documentId: selectedTag.documentId });
       const originalTagRow = await strapi.db.query(TAG_UID).findOne({
         where: { documentId: originalTag.documentId, publishedAt: null },
       });
       const selectedTagRow = await strapi.db.query(TAG_UID).findOne({
         where: { documentId: selectedTag.documentId, publishedAt: null },
+      });
+      const selectedPublishedTagRow = await strapi.db.query(TAG_UID).findOne({
+        where: { documentId: selectedTag.documentId, publishedAt: { $ne: null } },
       });
 
       const product = await strapi.documents(PRODUCT_UID).create({
@@ -531,7 +557,7 @@ describe('Document Service clone nested relation operation payloads', () => {
           details: {
             label: 'Cloned details',
             mto: {
-              connect: [{ id: selectedTagRow!.id, __type: TAG_UID }],
+              connect: [{ documentId: selectedTag.documentId, __type: TAG_UID }],
               disconnect: [{ id: originalTagRow!.id, __type: TAG_UID }],
             },
           },
@@ -543,14 +569,31 @@ describe('Document Service clone nested relation operation payloads', () => {
         product.documentId
       )) as ProductWithNestedRelations | null;
       const clonedProduct = result.entries[0] as ProductWithNestedRelations;
+      const componentMeta = strapi.db.metadata.get(RELATION_CONTAINER_UID);
+      const morphColumn = (
+        componentMeta.attributes.mto as
+          | { morphColumn?: { idColumn?: { name?: string }; typeColumn?: { name?: string } } }
+          | undefined
+      )?.morphColumn;
+      const clonedComponentRow = await strapi.db
+        .connection(componentMeta.tableName)
+        .where({ id: clonedProduct.details?.id })
+        .select([morphColumn!.idColumn!.name!, morphColumn!.typeColumn!.name!])
+        .transacting(trx)
+        .first();
 
       expect({
         cloneMorphDocumentId: nestedMorphDocumentId(clonedProduct.details),
         originalMorphDocumentId: nestedMorphDocumentId(originalProduct?.details),
+        storedMorphId: clonedComponentRow?.[morphColumn!.idColumn!.name!] ?? null,
+        storedMorphType: clonedComponentRow?.[morphColumn!.typeColumn!.name!] ?? null,
       }).toEqual({
         cloneMorphDocumentId: selectedTag.documentId,
         originalMorphDocumentId: originalTag.documentId,
+        storedMorphId: selectedTagRow?.id,
+        storedMorphType: TAG_UID,
       });
+      expect(selectedTagRow?.id).not.toBe(selectedPublishedTagRow?.id);
     }
   );
 });
