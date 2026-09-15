@@ -9,6 +9,7 @@
   "include": ["./src", "./custom.d.ts", "../shared", "../ee/admin", "../package.json", "./tests"],
   "exclude": [
     "**/__mocks__",
+    "**/__tests__",
     "./src/**/tests",
     "**/*.test.*",
     "../ee/admin/**/*.test.*",
