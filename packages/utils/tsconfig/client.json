@@ -16,6 +16,7 @@
     "noEmit": true,
     "noImplicitAny": true,
     "declaration": true,
+    "composite": true,
     "jsx": "react-jsx",
     "types": [],
     "noUncheckedSideEffectImports": true,
