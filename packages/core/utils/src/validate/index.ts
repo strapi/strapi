@@ -175,9 +175,9 @@ const createAPIValidators = (opts: APIOptions) => {
 
     if (strictParams) {
       const extraQueryKeys = getExtraQueryKeysFromRoute(route);
-      const allowedKeys = [...ALLOWED_QUERY_PARAM_KEYS, ...extraQueryKeys];
+      const allowedKeys = new Set([...ALLOWED_QUERY_PARAM_KEYS, ...extraQueryKeys]);
       for (const key of Object.keys(query)) {
-        if (!allowedKeys.includes(key)) {
+        if (!allowedKeys.has(key)) {
           try {
             throwInvalidKey({ key, path: null });
           } catch (e) {

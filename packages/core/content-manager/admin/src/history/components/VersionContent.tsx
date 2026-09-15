@@ -74,13 +74,13 @@ function getRemaingFieldsLayout({
   schemaAttributes,
   fieldSizes,
 }: GetRemainingFieldsLayoutOptions) {
-  const fieldsInLayout = layout.flatMap((panel) =>
-    panel.flatMap((row) => row.flatMap((field) => field.name))
+  const fieldsInLayout = new Set(
+    layout.flatMap((panel) => panel.flatMap((row) => row.flatMap((field) => field.name)))
   );
   const remainingFields = Object.entries(metadatas).reduce<EditFieldLayout[]>(
     (currentRemainingFields, [name, field]) => {
       // Make sure we do not fields that are not visible, e.g. "id"
-      if (!fieldsInLayout.includes(name) && field.edit.visible === true) {
+      if (!fieldsInLayout.has(name) && field.edit.visible === true) {
         const attribute = schemaAttributes[name];
         // @ts-expect-error not sure why attribute causes type error
         currentRemainingFields.push({
@@ -192,7 +192,7 @@ const FormPanel = ({ panel }: { panel: EditFieldLayout[][] }) => {
       borderColor={{ initial: 'transparent', medium: 'neutral150' }}
     >
       <Flex direction="column" alignItems="stretch" gap={6}>
-        {panel.map((row, gridRowIndex) => {
+        {panel.map((row) => {
           const visibleFields = row.filter(isFieldVisible);
 
           if (visibleFields.length === 0) {
@@ -200,7 +200,10 @@ const FormPanel = ({ panel }: { panel: EditFieldLayout[][] }) => {
           }
 
           return (
-            <Grid.Root key={gridRowIndex} gap={{ initial: 6, medium: 4 }}>
+            <Grid.Root
+              key={row.map((field) => field.name).join('.')}
+              gap={{ initial: 6, medium: 4 }}
+            >
               {visibleFields.map(({ size, ...field }) => {
                 return (
                   <Grid.Item
@@ -291,8 +294,13 @@ const VersionContent = () => {
       <Box paddingBottom={{ initial: 0, large: 8 }}>
         <Form key={version.id} disabled={true} method="PUT" initialValues={transformedData}>
           <Flex direction="column" alignItems="stretch" gap={6} position="relative">
-            {[...layout, ...remainingFieldsLayout].map((panel, index) => {
-              return <FormPanel key={index} panel={panel} />;
+            {[...layout, ...remainingFieldsLayout].map((panel) => {
+              return (
+                <FormPanel
+                  key={panel.flatMap((row) => row.map((field) => field.name)).join('.')}
+                  panel={panel}
+                />
+              );
             })}
           </Flex>
         </Form>
@@ -338,8 +346,13 @@ const VersionContent = () => {
                 initialValues={version.data}
               >
                 <Flex direction="column" alignItems="stretch" gap={6} position="relative">
-                  {unknownFieldsLayout.map((panel, index) => {
-                    return <FormPanel key={index} panel={panel} />;
+                  {unknownFieldsLayout.map((panel) => {
+                    return (
+                      <FormPanel
+                        key={panel.flatMap((row) => row.map((field) => field.name)).join('.')}
+                        panel={panel}
+                      />
+                    );
                   })}
                 </Flex>
               </Form>

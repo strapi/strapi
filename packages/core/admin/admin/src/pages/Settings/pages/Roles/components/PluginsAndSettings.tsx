@@ -33,6 +33,8 @@ import { ConditionsModal } from './ConditionsModal';
 
 import type { GenericLayout } from '../utils/layouts';
 
+const EMPTY_ACTIONS: NonNullable<SubCategoryProps['actions']> = [];
+
 /* -------------------------------------------------------------------------------------------------
  * PluginsAndSettingsPermissions
  * -----------------------------------------------------------------------------------------------*/
@@ -138,7 +140,7 @@ interface SubCategoryProps {
 }
 
 const SubCategory = ({
-  actions = [],
+  actions = EMPTY_ACTIONS,
   categoryName,
   isFormDisabled,
   subCategoryName,

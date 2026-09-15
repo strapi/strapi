@@ -40,6 +40,8 @@ import { FolderActionsMenu } from './FolderActionsMenu';
 import type { File } from '../../../../../../shared/contracts/files';
 import type { Folder } from '../../../../../../shared/contracts/folders';
 
+const EMPTY_FOLDERS: NonNullable<AssetsTableProps['folders']> = [];
+
 const StyledTable = styled(RawTable)`
   width: 100%;
   border-collapse: separate;
@@ -611,7 +613,7 @@ interface AssetsTableProps {
 
 export const AssetsTable = ({
   assets,
-  folders = [],
+  folders = EMPTY_FOLDERS,
   mixedItems = null,
   renderedKeys,
   onAssetItemClick,

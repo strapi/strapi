@@ -35,6 +35,9 @@ import { DeleteItemsDialog } from './DeleteItemsDialog';
 
 import type { File } from '../../../../../../shared/contracts/files';
 
+const EMPTY_ASSETS: NonNullable<BulkActionsBarProps['assets']> = [];
+const EMPTY_RENDERED_KEYS: NonNullable<BulkActionsBarProps['renderedKeys']> = [];
+
 /**
  * Bulk action bar for the future Media Library. Mobile: docked full-bleed to the
  * bottom edge (no radius, top border only). Desktop (medium+): a floating,
@@ -163,9 +166,9 @@ interface BulkActionsBarProps {
 }
 
 export const BulkActionsBar = ({
-  assets = [],
+  assets = EMPTY_ASSETS,
   locations = emptyItemLocations,
-  renderedKeys = [],
+  renderedKeys = EMPTY_RENDERED_KEYS,
 }: BulkActionsBarProps) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();

@@ -25,6 +25,10 @@ import { ConditionsModal } from './ConditionsModal';
 import { HiddenAction } from './HiddenAction';
 import { RowLabelWithCheckbox, RowLabelWithCheckboxProps } from './RowLabelWithCheckbox';
 
+const EMPTY_ACTIONS: NonNullable<ContentTypeCollapsesProps['actions']> = [];
+const EMPTY_SUBJECTS: NonNullable<ContentTypeCollapsesProps['subjects']> = [];
+const EMPTY_AVAILABLE_ACTIONS: NonNullable<CollapseProps['availableActions']> = [];
+
 /* -------------------------------------------------------------------------------------------------
  * ContentTypeCollapses
  * -----------------------------------------------------------------------------------------------*/
@@ -36,10 +40,10 @@ interface ContentTypeCollapsesProps extends Pick<CollapseProps, 'pathToData'> {
 }
 
 const ContentTypeCollapses = ({
-  actions = [],
+  actions = EMPTY_ACTIONS,
   isFormDisabled,
   pathToData,
-  subjects = [],
+  subjects = EMPTY_SUBJECTS,
 }: ContentTypeCollapsesProps) => {
   const [collapseToOpen, setCollapseToOpen] = React.useState<string | null>(null);
 
@@ -120,7 +124,7 @@ interface CollapseProps
 }
 
 const Collapse = ({
-  availableActions = [],
+  availableActions = EMPTY_AVAILABLE_ACTIONS,
   isActive = false,
   isGrey = false,
   isFormDisabled = false,

@@ -9,6 +9,13 @@ import { Draggable } from './Draggable';
 import type { File } from '../../../../shared/contracts/files';
 import type { AllowedTypes } from '../AssetCard/AssetCard';
 
+const DEFAULT_ALLOWED_TYPES: NonNullable<AssetGridListProps['allowedTypes']> = [
+  'files',
+  'images',
+  'videos',
+  'audios',
+];
+
 const DraggableAssetCard = styled(AssetCard)`
   && {
     cursor: inherit;
@@ -27,7 +34,7 @@ export interface AssetGridListProps {
 }
 
 export const AssetGridList = ({
-  allowedTypes = ['files', 'images', 'videos', 'audios'],
+  allowedTypes = DEFAULT_ALLOWED_TYPES,
   assets,
   onEditAsset,
   onSelectAsset,

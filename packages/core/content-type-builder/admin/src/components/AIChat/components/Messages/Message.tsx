@@ -1,3 +1,5 @@
+import { useId, useRef } from 'react';
+
 import { Typography, Box, IconButton, Flex } from '@strapi/design-system';
 import { ThumbUp, ThumbDown } from '@strapi/icons';
 import Markdown from 'react-markdown';
@@ -112,6 +114,78 @@ const isSchemaToolPart = (part: unknown): part is SchemaToolPart => {
   return part.type === 'tool-schemaGenerationTool';
 };
 
+const getPartFingerprint = (part: AIMessage['parts'][number]) => {
+  if (part.type === 'text') {
+    return `text:${part.text}`;
+  }
+
+  if (part.type === 'file') {
+    return `file:${part.filename ?? ''}:${part.mediaType}:${part.url}`;
+  }
+
+  if ('toolCallId' in part && typeof part.toolCallId === 'string') {
+    return `${part.type}:${part.toolCallId}`;
+  }
+
+  return part.type;
+};
+
+type PartRecord = {
+  fingerprint: string;
+  key: string;
+  part: AIMessage['parts'][number];
+};
+
+const usePartsWithKeys = (parts: AIMessage['parts']) => {
+  const keyPrefix = useId();
+  const nextKey = useRef(0);
+  const previousParts = useRef<PartRecord[]>([]);
+  const matchedParts = new Set<PartRecord>();
+
+  const exactMatches = parts.map((part) => {
+    const fingerprint = getPartFingerprint(part);
+    const exactMatch = previousParts.current.find(
+      (candidate) => candidate.fingerprint === fingerprint && !matchedParts.has(candidate)
+    );
+    const sameObject = previousParts.current.find(
+      (candidate) => candidate.part === part && !matchedParts.has(candidate)
+    );
+    const previousPart = exactMatch ?? sameObject;
+
+    if (previousPart) {
+      matchedParts.add(previousPart);
+    }
+
+    return { fingerprint, part, previousPart };
+  });
+
+  const keyedParts = exactMatches.map(({ fingerprint, part, previousPart }, index) => {
+    const sameSlot = previousParts.current[index];
+    const streamingMatch =
+      !previousPart && sameSlot && sameSlot.part.type === part.type && !matchedParts.has(sameSlot)
+        ? sameSlot
+        : undefined;
+    const matchedPart = previousPart ?? streamingMatch;
+    const key = matchedPart?.key ?? `${keyPrefix}-${nextKey.current}`;
+
+    if (streamingMatch) {
+      matchedParts.add(streamingMatch);
+    }
+
+    if (matchedPart) {
+      matchedParts.add(matchedPart);
+    } else {
+      nextKey.current += 1;
+    }
+
+    return { fingerprint, key, part };
+  });
+
+  previousParts.current = keyedParts;
+
+  return keyedParts;
+};
+
 const capitalize = (s?: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
 
 const getSchemaLink = (schema: SchemaToolSchema): string | undefined => {
@@ -191,10 +265,9 @@ const MessageContent = ({
 };
 
 const UserMessage = ({ message }: { message: UserMessageType }) => {
-  const hasText = message.parts.some(
-    (content) => content.type === 'text' && content.text.trim() !== ''
-  );
-  const attachments = message.parts.filter((content) => content.type === 'file');
+  const partsWithKeys = usePartsWithKeys(message.parts);
+  const hasText = partsWithKeys.some(({ part }) => part.type === 'text' && part.text.trim() !== '');
+  const attachments = partsWithKeys.filter(({ part }) => part.type === 'file');
 
   return (
     <AnimatedBox
@@ -207,19 +280,19 @@ const UserMessage = ({ message }: { message: UserMessageType }) => {
     >
       {hasText ? (
         <Box background="neutral150" borderStyle="none" padding={['10px', '16px']} hasRadius>
-          {message.parts.map((content, index) => {
-            if (content.type !== 'text') return null;
-            return <UserMessageTypography key={index}>{content.text}</UserMessageTypography>;
+          {partsWithKeys.map(({ key, part }) => {
+            if (part.type !== 'text') return null;
+            return <UserMessageTypography key={key}>{part.text}</UserMessageTypography>;
           })}
         </Box>
       ) : null}
 
       {/* Attachments */}
-      {attachments.map((attachment, idx) => (
+      {attachments.map(({ key, part }) => (
         <AttachmentPreview
-          key={`${attachment.type === 'file' ? attachment.filename : attachment.type}-${idx}`}
+          key={key}
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          attachment={{ ...attachment, status: 'ready' } as any}
+          attachment={{ ...part, status: 'ready' } as any}
         />
       ))}
     </AnimatedBox>
@@ -235,11 +308,12 @@ const AssistantMessage = ({
 }) => {
   const { upvoteMessage } = useFeedback();
   const { openFeedbackModal } = useFeedbackModal();
+  const partsWithKeys = usePartsWithKeys(message.parts);
 
   return (
     <Box style={{ alignSelf: 'flex-start' }} maxWidth="90%">
-      {message.parts.map((content, index) => (
-        <MessageContent key={index} part={content} />
+      {partsWithKeys.map(({ key, part }) => (
+        <MessageContent key={key} part={part} />
       ))}
       {isLoading ? (
         <Flex gap={1}>

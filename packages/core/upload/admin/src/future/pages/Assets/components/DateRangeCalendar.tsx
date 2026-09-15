@@ -115,7 +115,10 @@ export const DateRangeCalendar = ({ from, to, onSelect }: DateRangeCalendarProps
   };
 
   const weeks = buildWeeks(viewYear, viewMonth);
-  const weekDayLabels = weeks[0].map((day) => formatDate(day, { weekday: 'short' }).slice(0, 2));
+  const weekDays = weeks[0].map((day) => ({
+    key: day.getDay(),
+    label: formatDate(day, { weekday: 'short' }).slice(0, 2),
+  }));
 
   return (
     // role="group" (not "application"): these are plain buttons — hijacking
@@ -158,8 +161,8 @@ export const DateRangeCalendar = ({ from, to, onSelect }: DateRangeCalendarProps
       </Flex>
 
       <Flex>
-        {weekDayLabels.map((label, index) => (
-          <Flex key={index} width="3rem" height="2.4rem" justifyContent="center">
+        {weekDays.map(({ key, label }) => (
+          <Flex key={key} width="3rem" height="2.4rem" justifyContent="center">
             <Typography variant="pi" fontWeight="semiBold" textColor="neutral600">
               {label}
             </Typography>
@@ -167,8 +170,8 @@ export const DateRangeCalendar = ({ from, to, onSelect }: DateRangeCalendarProps
         ))}
       </Flex>
 
-      {weeks.map((week, weekIndex) => (
-        <Flex key={weekIndex}>
+      {weeks.map((week) => (
+        <Flex key={toKey(week[0])}>
           {week.map((day) => {
             const key = toKey(day);
             const isEdge = key === rangeStart || key === rangeEnd;
