@@ -68,7 +68,7 @@ const renderAdmin = async (
     // eslint-disable-next-line
     // @ts-ignore – there's pollution from the global scope of Node. Cannot use @ts-expect-error because of build:code and build:types context collision.
     ai: {
-      enabled: true,
+      enabled: false,
     },
   };
 
@@ -85,9 +85,7 @@ const renderAdmin = async (
     features: {
       name: string;
     }[];
-    ai: {
-      enabled: boolean;
-    };
+    ai: Window['strapi']['ai'];
   }
 
   try {
