@@ -205,13 +205,12 @@ describe('relation parent updates', () => {
       fieldToConnectUID: undefined,
       getParentFormValues: undefined,
       setParentFormValue: undefined,
+      // A single entry (just the child being created/published) means its parent is the ROOT
+      // document that originally opened the modal — its own Form stays mounted for the whole
+      // session, so connecting writes directly into it via setParentFormValue. See the "nested
+      // relation parent updates" describe below for the case with a parent still further up
+      // documentHistory, which goes through dispatch's connectPatch instead.
       documentHistory: [
-        {
-          documentId: 'parent',
-          model: 'api::parent.parent',
-          collectionType: 'collection-types',
-          params: {},
-        },
         {
           documentId: undefined,
           model: 'api::child.child',
@@ -346,6 +345,206 @@ describe('relation parent updates', () => {
       connect: [{ id: 55, documentId: 'created', locale: 'en', status: 'published' }],
       disconnect: [],
     });
+  });
+});
+
+describe('nested relation parent updates', () => {
+  // Every level of a nested relation-on-the-fly chain (root aside) shares one Form instance
+  // whose values get wholesale-replaced by fresh initialValues on every documentHistory
+  // navigation, so writing straight into it (as the root-level case does) would land on the
+  // wrong document and then immediately be discarded. These tests assert the connect is instead
+  // queued via dispatch's connectPatch, to be re-applied once the target document is current
+  // again — see RelationModal.tsx's `pendingConnects`.
+  const NestedActionHarness = ({
+    Action,
+    label,
+  }: {
+    Action: typeof UpdateAction;
+    label: string;
+  }) => {
+    const action = Action({
+      activeTab: 'draft',
+      documentId: undefined,
+      model: 'api::child.child',
+      collectionType: 'collection-types',
+      meta: { availableStatus: [], availableLocales: [] },
+      document: { documentId: 'child', id: 1, status: 'draft' },
+    });
+
+    if (!action) {
+      return null;
+    }
+
+    return <button onClick={() => action.onClick?.({} as React.SyntheticEvent)}>{label}</button>;
+  };
+
+  const ExistingDocumentActionHarness = ({
+    Action,
+    label,
+  }: {
+    Action: typeof UpdateAction;
+    label: string;
+  }) => {
+    const action = Action({
+      activeTab: 'draft',
+      documentId: 'existing-child',
+      model: 'api::child.child',
+      collectionType: 'collection-types',
+      meta: { availableStatus: [], availableLocales: [] },
+      document: { documentId: 'existing-child', id: 1, status: 'draft' },
+    });
+
+    if (!action) {
+      return null;
+    }
+
+    return <button onClick={() => action.onClick?.({} as React.SyntheticEvent)}>{label}</button>;
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockIsRelationModalContext = true;
+    parentInitialFormValues = undefined;
+    relationModalState = {
+      isModalOpen: true,
+      fieldToConnect: 'relation',
+      fieldToConnectUID: undefined,
+      getParentFormValues: () => ({}),
+      // Deliberately set: the nested path must never call it directly, even though it's
+      // available — a regression here would mean writing into the wrong (shared, ephemeral)
+      // modal Form again, exactly the bug this describe block guards against.
+      setParentFormValue: mockSetParentFormValue,
+      // Two entries: a grandparent still open further up the modal, and the child currently
+      // being created/published. This is what marks the connect as targeting a NESTED parent
+      // rather than the root document.
+      documentHistory: [
+        {
+          documentId: 'grandparent',
+          model: 'api::parent.parent',
+          collectionType: 'collection-types',
+          params: {},
+        },
+        {
+          documentId: undefined,
+          model: 'api::child.child',
+          collectionType: 'collection-types',
+          params: {},
+        },
+      ],
+    };
+    mockCreate.mockResolvedValue({ data: { id: 101, documentId: 'created', locale: 'en' } });
+    mockPublish.mockResolvedValue({ data: { id: 102, documentId: 'published', locale: 'en' } });
+    mockFetchDraftDocument.mockResolvedValue({ data: undefined });
+    mockCountDraftRelations.mockResolvedValue({
+      data: { unpublishedRelations: 0, draftM2mLinks: 0 },
+      error: undefined,
+    });
+    mockUpdateDocument.mockResolvedValue({ data: {} });
+  });
+
+  it('queues a connect patch for the nested parent instead of writing into the shared modal form, on save', async () => {
+    const { user } = render(<NestedActionHarness Action={UpdateAction} label="Save child" />);
+
+    await user.click(screen.getByRole('button', { name: 'Save child' }));
+
+    await waitFor(() =>
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'GO_TO_CREATED_RELATION',
+        payload: {
+          document: {
+            documentId: 'created',
+            collectionType: 'collection-types',
+            model: 'api::child.child',
+            params: {},
+          },
+          shouldBypassConfirmation: true,
+          connectPatch: {
+            fieldToConnect: 'relation',
+            relationValue: {
+              connect: [{ id: 101, documentId: 'created', locale: 'en', status: 'draft' }],
+              disconnect: [],
+            },
+            componentUIDPath: undefined,
+            componentUID: undefined,
+          },
+        },
+      })
+    );
+    expect(mockSetParentFormValue).not.toHaveBeenCalled();
+  });
+
+  it('queues a connect patch for the nested parent instead of writing into the shared modal form, on publish', async () => {
+    const { user } = render(<NestedActionHarness Action={PublishAction} label="Publish child" />);
+
+    await user.click(screen.getByRole('button', { name: 'Publish child' }));
+
+    await waitFor(() =>
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'GO_TO_CREATED_RELATION',
+        payload: {
+          document: {
+            documentId: 'published',
+            collectionType: 'collection-types',
+            model: 'api::child.child',
+            params: {},
+          },
+          shouldBypassConfirmation: true,
+          connectPatch: {
+            fieldToConnect: 'relation',
+            relationValue: {
+              connect: [{ id: 102, documentId: 'published', locale: 'en', status: 'published' }],
+              disconnect: [],
+            },
+            componentUIDPath: undefined,
+            componentUID: undefined,
+          },
+        },
+      })
+    );
+    expect(mockSetParentFormValue).not.toHaveBeenCalled();
+  });
+
+  it('includes the new component UID in the queued patch when the nested field is inside an unsaved component', async () => {
+    relationModalState.fieldToConnect = 'component.relation';
+    relationModalState.fieldToConnectUID = 'shared.component';
+
+    const { user } = render(<NestedActionHarness Action={UpdateAction} label="Save child" />);
+
+    await user.click(screen.getByRole('button', { name: 'Save child' }));
+
+    await waitFor(() =>
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'GO_TO_CREATED_RELATION',
+          payload: expect.objectContaining({
+            connectPatch: {
+              fieldToConnect: 'component.relation',
+              relationValue: {
+                connect: [{ id: 101, documentId: 'created', locale: 'en', status: 'draft' }],
+                disconnect: [],
+              },
+              componentUIDPath: 'component.__component',
+              componentUID: 'shared.component',
+            },
+          }),
+        })
+      )
+    );
+  });
+
+  it('clears any pending connects recorded against a document once it is itself saved', async () => {
+    const { user } = render(
+      <ExistingDocumentActionHarness Action={UpdateAction} label="Save existing" />
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Save existing' }));
+
+    await waitFor(() =>
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'CLEAR_PENDING_CONNECTS',
+        payload: { documentMeta: { model: 'api::child.child', documentId: 'existing-child' } },
+      })
+    );
   });
 });
 
