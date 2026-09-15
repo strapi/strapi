@@ -11,7 +11,7 @@ import {
   Layouts,
 } from '@strapi/strapi/admin';
 import { useIntl } from 'react-intl';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { PERMISSIONS } from '../../constants';
 import { getTrad } from '../../utils';
