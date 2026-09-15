@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react';
 
-import { useQueryParams } from '@strapi/admin/strapi-admin';
+import { useQueryParams, withEncodedUserParams } from '@strapi/admin/strapi-admin';
 
 import type { Folder } from '../../../../../../shared/contracts/folders';
 
@@ -50,8 +50,8 @@ export const useFolderNavigation = () => {
    * Strips a `?folder=` value we can't parse.
    */
   const stripFolderParam = useCallback(() => {
-    setQuery({ folder: '' }, 'remove');
-  }, [setQuery]);
+    setQuery(withEncodedUserParams(query, { folder: undefined }));
+  }, [query, setQuery]);
 
   // Malformed ?folder= values (e.g. abc) parse as null; strip the param from the URL.
   // Deleted/missing folders (404) are handled in AssetsPage — that needs a fetch.

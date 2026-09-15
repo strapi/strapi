@@ -1,4 +1,4 @@
-import { useQueryParams } from '@strapi/admin/strapi-admin';
+import { useQueryParams, withEncodedUserParams } from '@strapi/admin/strapi-admin';
 
 /**
  * Filter state for the assets list, backed by a single `?filters=` query param
@@ -203,7 +203,7 @@ export interface ListFilters {
 }
 
 export const useListFilters = (): ListFilters => {
-  const [{ query }, setQuery] = useQueryParams<{ filters?: string }>();
+  const [{ query }, setQuery] = useQueryParams<{ filters?: string; _q?: string }>();
 
   const filters = parseFiltersParam(query?.filters);
 
@@ -213,9 +213,9 @@ export const useListFilters = (): ListFilters => {
   // URL stays shareable and refresh-safe either way.
   const writeFilters = (next: ListFilter[]) => {
     if (next.length === 0) {
-      setQuery({ filters: '' }, 'remove', true);
+      setQuery(withEncodedUserParams(query, { filters: undefined }), 'push', true);
     } else {
-      setQuery({ filters: serializeFilters(next) }, 'push', true);
+      setQuery(withEncodedUserParams(query, { filters: serializeFilters(next) }), 'push', true);
     }
   };
 

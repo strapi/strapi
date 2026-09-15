@@ -8,6 +8,7 @@ import registerUploadMiddleware from './middlewares/upload';
 import spec from '../../documentation/content-api.json';
 import type { Config, File, InputFile } from './types';
 import { aiMetadataJob } from './models/ai-metadata-job';
+import { registerUploadMcpTools } from './mcp';
 
 const { PayloadTooLargeError } = errors;
 const { bytesToHumanReadable, kbytesToBytes } = file;
@@ -36,6 +37,9 @@ export async function register({ strapi }: { strapi: Core.Strapi }) {
   strapi.plugin('upload').provider = createProvider(uploadConfig);
 
   await registerUploadMiddleware({ strapi });
+
+  // Register phase, before the MCP HTTP server starts during bootstrap.
+  registerUploadMcpTools({ strapi });
 
   if (strapi.plugin('graphql')) {
     const { installGraphqlExtension } = await import('./graphql.js');

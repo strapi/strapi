@@ -59,19 +59,15 @@ export const FromComputerForm = ({
 
   const handleDragLeave = () => setDragOver(false);
 
-  const handleChange = () => {
-    const files = inputRef.current?.files;
-    const assets: FileWithRawFile[] = [];
+  const filesToAssets = async (fileList: FileList) => {
+    const files = Array.from(fileList);
 
-    if (files) {
-      for (let i = 0; i < files.length; i++) {
-        const file = files.item(i);
-        if (file) {
-          const asset = rawFileToAsset(file, ASSET_SOURCES.Computer);
-          assets.push(asset);
-        }
-      }
-    }
+    return Promise.all(files.map((file) => rawFileToAsset(file, ASSET_SOURCES.Computer)));
+  };
+
+  const handleChange = async () => {
+    const files = inputRef.current?.files;
+    const assets = files ? await filesToAssets(files) : [];
 
     if (trackedLocation) {
       trackUsage('didSelectFile', { source: 'computer', location: trackedLocation });
@@ -80,21 +76,11 @@ export const FromComputerForm = ({
     onAddAssets(assets);
   };
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
 
     if (e?.dataTransfer?.files) {
-      const files = e.dataTransfer.files;
-      const assets = [];
-
-      for (let i = 0; i < files.length; i++) {
-        const file = files.item(i);
-        if (file) {
-          const asset = rawFileToAsset(file, ASSET_SOURCES.Computer);
-          assets.push(asset);
-        }
-      }
-
+      const assets = await filesToAssets(e.dataTransfer.files);
       onAddAssets(assets);
     }
 

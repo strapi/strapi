@@ -134,6 +134,106 @@ describe('Drawer', () => {
     });
   });
 
+  // Dismiss-on-outside-click is opt-in and the handler can veto it; focus
+  // leaving the panel never closes it (the drawer is non-modal).
+  describe('outside interaction', () => {
+    const renderWithOutside = ({
+      onClose,
+      onPointerDownOutside,
+    }: {
+      onClose: jest.Mock;
+      onPointerDownOutside?: (event: Event) => void;
+    }) =>
+      render(
+        <>
+          <button type="button" data-testid="outside">
+            Outside
+          </button>
+          <Drawer.Root isVisible onClose={onClose}>
+            <Drawer.Body onPointerDownOutside={onPointerDownOutside}>
+              <Dialog.Title>Test title</Dialog.Title>
+              <Dialog.Description>Test description</Dialog.Description>
+              <Drawer.ScrollableContent>
+                <button type="button" data-testid="inside">
+                  Inside
+                </button>
+                {/* Rendered from inside the panel, portaled outside it — like a DS dialog. */}
+                <Dialog.Root modal={false}>
+                  <Dialog.Trigger data-testid="portal-trigger">Open portal</Dialog.Trigger>
+                  <Dialog.Portal>
+                    <Dialog.Content>
+                      <Dialog.Title>Portaled</Dialog.Title>
+                      <button type="button" data-testid="portal-inside">
+                        Portaled button
+                      </button>
+                    </Dialog.Content>
+                  </Dialog.Portal>
+                </Dialog.Root>
+              </Drawer.ScrollableContent>
+            </Drawer.Body>
+          </Drawer.Root>
+        </>
+      );
+
+    it('does not close on an outside pointer press by default', async () => {
+      const onClose = jest.fn();
+      const { user } = renderWithOutside({ onClose });
+
+      await user.click(screen.getByTestId('outside'));
+
+      expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it('closes on an outside pointer press once the consumer opts in', async () => {
+      const onClose = jest.fn();
+      const { user } = renderWithOutside({ onClose, onPointerDownOutside: () => {} });
+
+      await user.click(screen.getByTestId('outside'));
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('stays open when the handler prevents the default', async () => {
+      const onClose = jest.fn();
+      const { user } = renderWithOutside({
+        onClose,
+        onPointerDownOutside: (event) => event.preventDefault(),
+      });
+
+      await user.click(screen.getByTestId('outside'));
+
+      expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it('does not close on a pointer press inside the panel', async () => {
+      const onClose = jest.fn();
+      const { user } = renderWithOutside({ onClose, onPointerDownOutside: () => {} });
+
+      await user.click(screen.getByTestId('inside'));
+
+      expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it('does not close on a pointer press inside content portaled out of the panel', async () => {
+      const onClose = jest.fn();
+      const { user } = renderWithOutside({ onClose, onPointerDownOutside: () => {} });
+
+      await user.click(screen.getByTestId('portal-trigger'));
+      await user.click(await screen.findByTestId('portal-inside'));
+
+      expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it('does not close when focus moves outside the panel', async () => {
+      const onClose = jest.fn();
+      renderWithOutside({ onClose, onPointerDownOutside: () => {} });
+
+      fireEvent.focusIn(screen.getByTestId('outside'));
+
+      expect(onClose).not.toHaveBeenCalled();
+    });
+  });
+
   describe('Drawer.CloseButton', () => {
     it('renders and calls onClose when clicked', () => {
       const onClose = jest.fn();

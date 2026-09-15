@@ -26,6 +26,8 @@ export interface FileProgress {
   size: number;
   uploadedBytes: number;
   file?: File;
+  /** When the server confirmed the upload. Set with the row's asset. */
+  completedAt?: number;
   error?: string;
   metadataStatus?: FileMetadataStatus;
 }
@@ -37,6 +39,11 @@ export interface UploadProgressState {
   files: FileProgress[];
   errors: FileUploadError[];
   uploadId: number;
+  /**
+   * Whether every row's size was known when the batch opened (the direct-file flow), so
+   * the byte-weighted aggregate is meaningful. The URL flow learns sizes one row at a time.
+   */
+  reportsByteProgress: boolean;
 }
 
 export interface RootState {
@@ -50,6 +57,7 @@ const initialState: UploadProgressState = {
   files: [],
   errors: [],
   uploadId: 0,
+  reportsByteProgress: false,
 };
 
 const uploadProgressSlice = createSlice({
@@ -80,6 +88,8 @@ const uploadProgressSlice = createSlice({
       state.totalFiles = action.payload.totalFiles;
       state.errors = [];
       state.uploadId += 1;
+      // Known sizes == the direct-file flow == the flow that streams bytes.
+      state.reportsByteProgress = action.payload.fileSizes !== undefined;
     },
     /**
      * Rows for a second drop, joined to the batch already uploading. Indices
@@ -128,28 +138,41 @@ const uploadProgressSlice = createSlice({
         state.files[index].size = size;
       }
     },
+    /**
+     * `size` is optional and only sent by the URL flow, which learns the size from the
+     * same server event that carries the first byte count — the row was created with
+     * `size: 0`, and bytes clamped against a zero size would all read as zero. The
+     * direct-file flow already knows the size up front and omits it.
+     */
     setFileProgress(
       state,
-      action: PayloadAction<{ index: number; bytes: number; uploadId: number }>
+      action: PayloadAction<{ index: number; bytes: number; uploadId: number; size?: number }>
     ) {
-      const { index, bytes, uploadId } = action.payload;
+      const { index, bytes, size, uploadId } = action.payload;
       if (uploadId !== state.uploadId) {
         return;
       }
       const file = state.files[index];
       if (file) {
+        if (size !== undefined && file.size === 0) {
+          file.size = size;
+        }
         // Clamp to the known file size so the aggregate can never exceed 100%.
         file.uploadedBytes = Math.min(bytes, file.size);
       }
     },
-    setFileComplete(state, action: PayloadAction<{ index: number; file: File; uploadId: number }>) {
-      const { index, file, uploadId } = action.payload;
+    setFileComplete(
+      state,
+      action: PayloadAction<{ index: number; file: File; uploadId: number; completedAt: number }>
+    ) {
+      const { index, file, uploadId, completedAt } = action.payload;
       if (uploadId !== state.uploadId) {
         return;
       }
       if (state.files[index]) {
         state.files[index].status = 'complete';
         state.files[index].file = file;
+        state.files[index].completedAt = completedAt;
         // Reflect completion in the aggregate even if the final progress event was throttled.
         state.files[index].uploadedBytes = state.files[index].size;
       }
@@ -214,6 +237,7 @@ const uploadProgressSlice = createSlice({
       state.totalFiles = 0;
       state.files = [];
       state.errors = [];
+      state.reportsByteProgress = false;
     },
     toggleMinimize(state) {
       state.isMinimized = !state.isMinimized;
@@ -260,6 +284,36 @@ const uploadProgressSlice = createSlice({
 });
 
 /**
+ * Assets whose own upload has already finished, newest batch only.
+ *
+ * The list behind the upload dialog uses these to show each asset the moment it
+ * lands, instead of waiting for the batch mutation to invalidate the cache. Rows
+ * only carry a `file` once the server has created it, so every entry here is a
+ * real, persisted asset.
+ */
+const NO_FILES: FileProgress[] = [];
+
+/** An uploaded asset, with the moment the server confirmed it. */
+export interface CompletedUpload {
+  asset: File;
+  completedAt: number;
+}
+
+export const selectCompletedUploads = createSelector(
+  // The plugin registers this slice in `register()`, so a host that has not
+  // reached that point has no upload state — and therefore nothing to place.
+  (state: Partial<RootState>) => state.uploadProgress?.files ?? NO_FILES,
+  (files): CompletedUpload[] =>
+    files.reduce<CompletedUpload[]>((completed, row) => {
+      if (row.status === 'complete' && row.file && row.completedAt !== undefined) {
+        completed.push({ asset: row.file, completedAt: row.completedAt });
+      }
+
+      return completed;
+    }, [])
+);
+
+/**
  * Byte-weighted aggregate progress across the whole batch: `sum(uploadedBytes) / sum(size)`.
  *
  * Falls back to count-based progress (settled files / total files) when all sizes are
@@ -281,6 +335,45 @@ export const selectAggregateProgress = createSelector(
 
     const uploadedBytes = files.reduce((sum, f) => sum + f.uploadedBytes, 0);
     return Math.round((uploadedBytes / totalSize) * 100);
+  }
+);
+
+/**
+ * Whether to show byte-weighted `selectAggregateProgress` rather than `selectCountBasedProgress`.
+ *
+ * Only the flag: byte-weighting needs every size up front. A URL batch learns sizes one row
+ * at a time, so weighting over the sizes known so far makes the header jump backwards at
+ * every file boundary.
+ */
+export const selectReportsByteProgress = createSelector(
+  (state: RootState) => state.uploadProgress.reportsByteProgress,
+  (reportsByteProgress): boolean => reportsByteProgress
+);
+
+/**
+ * Row-weighted progress for a batch whose sizes are not known up front (the URL flow).
+ * Each row is worth `1 / total`: settled rows count fully and an in-flight row contributes
+ * `uploadedBytes / size` once it reports bytes, so a multi-URL batch climbs smoothly to
+ * 33 → 67 → 100 and never moves backwards.
+ *
+ * Returns `null` until something has moved — 0% is the frozen signal this flow exists to
+ * remove, so the header stays indeterminate until there's real progress.
+ */
+export const selectCountBasedProgress = createSelector(
+  (state: RootState) => state.uploadProgress.files,
+  (files): number | null => {
+    const done = files.reduce((sum, f) => {
+      if (f.status === 'complete' || f.status === 'error' || f.status === 'cancelled') {
+        return sum + 1;
+      }
+      return f.size > 0 ? sum + Math.min(f.uploadedBytes / f.size, 1) : sum;
+    }, 0);
+
+    if (done === 0) {
+      return null;
+    }
+
+    return Math.round((done / files.length) * 100);
   }
 );
 
