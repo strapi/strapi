@@ -29,6 +29,10 @@ import { InputRenderer, type InputRendererProps } from '../../InputRenderer';
 
 import type { ComponentPickerProps } from './ComponentPicker';
 
+const EMPTY_DYNAMIC_COMPONENTS_BY_CATEGORY: NonNullable<
+  DynamicComponentProps['dynamicComponentsByCategory']
+> = {};
+
 interface DynamicComponentProps
   extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel'>,
     Pick<ComponentPickerProps, 'dynamicComponentsByCategory'> {
@@ -63,7 +67,7 @@ const DynamicComponent = ({
   onGrabItem,
   onDropItem,
   onCancel,
-  dynamicComponentsByCategory = {},
+  dynamicComponentsByCategory = EMPTY_DYNAMIC_COMPONENTS_BY_CATEGORY,
   onAddComponent,
   totalLength,
   children,
@@ -410,9 +414,15 @@ const DynamicComponentFields = React.memo(
     return (
       <Box padding={{ initial: 4, medium: 6 }}>
         <Grid.Root gap={4}>
-          {layout?.map((row, rowInd) => {
+          {layout?.map((row) => {
             return (
-              <Grid.Item col={12} key={rowInd} xs={12} direction="column" alignItems="stretch">
+              <Grid.Item
+                col={12}
+                key={row.map((field) => field.name).join('.')}
+                xs={12}
+                direction="column"
+                alignItems="stretch"
+              >
                 <ResponsiveGridRoot gap={4}>
                   {row.map(({ size, ...field }) => {
                     const fieldName = `${name}.${index}.${field.name}`;

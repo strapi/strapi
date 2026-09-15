@@ -9,6 +9,8 @@ import { BulkMoveDialog } from '../../../components/BulkMoveDialog/BulkMoveDialo
 import type { File } from '../../../../../shared/contracts/files';
 import type { Folder as FolderDefinition } from '../../../../../shared/contracts/folders';
 
+const EMPTY_SELECTED: NonNullable<BulkMoveButtonProps['selected']> = [];
+
 interface FolderWithType extends FolderDefinition {
   type: string;
 }
@@ -24,7 +26,7 @@ export interface BulkMoveButtonProps {
 }
 
 export const BulkMoveButton = ({
-  selected = [],
+  selected = EMPTY_SELECTED,
   onSuccess,
   currentFolder,
 }: BulkMoveButtonProps) => {

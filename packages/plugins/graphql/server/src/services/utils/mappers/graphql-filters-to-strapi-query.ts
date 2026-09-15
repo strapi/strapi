@@ -3,7 +3,7 @@ import type { Struct } from '@strapi/types';
 import type { Context } from '../../types';
 
 // todo[v4]: Find a way to get that dynamically
-const virtualScalarAttributes = ['id', 'documentId'];
+const virtualScalarAttributes = new Set(['id', 'documentId']);
 
 export default ({ strapi }: Context) => {
   const { service: getService } = strapi.plugin('graphql');
@@ -63,7 +63,7 @@ export default ({ strapi }: Context) => {
       const { attributes } = contentType;
 
       const isAttribute = (attributeName: string) => {
-        return virtualScalarAttributes.includes(attributeName) || has(attributeName, attributes);
+        return virtualScalarAttributes.has(attributeName) || has(attributeName, attributes);
       };
 
       for (const [key, value] of Object.entries(filters)) {
@@ -72,7 +72,7 @@ export default ({ strapi }: Context) => {
           const attribute: any = attributes[key];
 
           // If it's a scalar attribute
-          if (virtualScalarAttributes.includes(key) || isStrapiScalar(attribute)) {
+          if (virtualScalarAttributes.has(key) || isStrapiScalar(attribute)) {
             // Replace (recursively) every GraphQL scalar operator with the associated Strapi operator
             resultMap[key] = recursivelyReplaceScalarOperators(value);
           }

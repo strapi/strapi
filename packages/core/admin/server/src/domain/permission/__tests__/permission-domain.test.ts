@@ -229,8 +229,8 @@ describe('Permission Domain', () => {
   });
 
   describe('sanitizeConditions', () => {
-    const conditions = ['foo', 'bar'];
-    const conditionProvider = { has: (condition: any) => conditions.includes(condition) };
+    const conditions = new Set(['foo', 'bar']);
+    const conditionProvider = { has: (condition: any) => conditions.has(condition) };
 
     test(`No conditions should be removed if they're valid`, () => {
       const permission = { conditions: ['foo', 'bar'] };

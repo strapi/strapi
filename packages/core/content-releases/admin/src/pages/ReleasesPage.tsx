@@ -45,6 +45,8 @@ import {
   useCreateReleaseMutation,
 } from '../services/release';
 
+const EMPTY_RELEASES: NonNullable<ReleasesGridProps['releases']> = [];
+
 /* -------------------------------------------------------------------------------------------------
  * ReleasesGrid
  * -----------------------------------------------------------------------------------------------*/
@@ -92,7 +94,11 @@ const getBadgeProps = (status: Release['status']) => {
   };
 };
 
-const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: ReleasesGridProps) => {
+const ReleasesGrid = ({
+  sectionTitle,
+  releases = EMPTY_RELEASES,
+  isError = false,
+}: ReleasesGridProps) => {
   const { formatMessage } = useIntl();
 
   if (isError) {

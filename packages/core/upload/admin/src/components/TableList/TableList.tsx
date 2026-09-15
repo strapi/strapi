@@ -22,6 +22,9 @@ import type { File } from '../../../../shared/contracts/files';
 import type { Folder } from '../../../../shared/contracts/folders';
 import type { AllowedTypes } from '../AssetCard/AssetCard';
 
+const EMPTY_ROWS: NonNullable<TableListProps['rows']> = [];
+const EMPTY_SELECTED: NonNullable<TableListProps['selected']> = [];
+
 export interface FileRow extends File {
   folderURL?: string;
   isSelectable?: boolean;
@@ -62,8 +65,8 @@ export const TableList = ({
   onEditFolder = null,
   onSelectAll,
   onSelectOne,
-  rows = [],
-  selected = [],
+  rows = EMPTY_ROWS,
+  selected = EMPTY_SELECTED,
   shouldDisableBulkSelect = false,
   sortQuery = '',
 }: TableListProps) => {

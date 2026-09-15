@@ -194,11 +194,11 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     return appNestedCompo;
   };
 
-  const updatePermissions = async () => {
+  const updatePermissions = React.useCallback(async () => {
     await refetchPermissions();
-  };
+  }, [refetchPermissions]);
 
-  const saveSchema = async () => {
+  const saveSchema = React.useCallback(async () => {
     setIsSaving(true);
 
     const PluginForms = plugin?.apis?.forms as FormAPI;
@@ -276,7 +276,23 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
         ctbSessionId,
       });
     }
-  };
+  }, [
+    ctbSessionId,
+    dispatch,
+    dispatchGuidedTour,
+    fetchClient,
+    formatMessage,
+    initialContentTypes,
+    lockAppWithAutoreload,
+    plugin,
+    regenerateSessionId,
+    serverRestartWatcher,
+    state,
+    toggleNotification,
+    trackUsage,
+    unlockAppWithAutoreload,
+    updatePermissions,
+  ]);
 
   const componentsThatHaveOtherComponentInTheirAttributes = React.useMemo(() => {
     return getAllComponentsThatHaveAComponentInTheirAttributes(components);
@@ -298,159 +314,183 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     return sortContentType(contentTypes);
   }, [contentTypes]);
 
-  const context: DataManagerContextValue = {
-    componentsThatHaveOtherComponentInTheirAttributes,
-    nestedComponents,
-    saveSchema,
-    reservedNames,
-    components,
-    contentTypes,
-    initialComponents,
-    initialContentTypes,
-    isSaving,
-    isModified,
-    isInDevelopmentMode,
-    allComponentsCategories,
-    componentsGroupedByCategory,
-    sortedContentTypesList,
-    isLoading,
-    addAttribute(payload) {
-      dispatch(
-        actions.addAttribute({
-          ...payload,
-          attributeToSet: payload.attributeToSet as AnyAttribute,
-        })
-      );
-    },
-    editAttribute(payload) {
-      dispatch(
-        actions.editAttribute({
-          ...payload,
-          attributeToSet: payload.attributeToSet as AnyAttribute,
-        })
-      );
-    },
-    addCustomFieldAttribute(payload) {
-      dispatch(
-        actions.addCustomFieldAttribute({
-          ...payload,
-          attributeToSet: payload.attributeToSet as AnyAttribute,
-        })
-      );
-    },
-    editCustomFieldAttribute(payload) {
-      dispatch(
-        actions.editCustomFieldAttribute({
-          ...payload,
-          attributeToSet: payload.attributeToSet as AnyAttribute,
-        })
-      );
-    },
-    addCreatedComponentToDynamicZone(payload) {
-      dispatch(actions.addCreatedComponentToDynamicZone(payload));
-    },
-    createSchema(payload) {
-      dispatch(actions.createSchema(payload));
-    },
-    createComponentSchema({ data, uid, componentCategory }) {
-      dispatch(actions.createComponentSchema({ data, uid, componentCategory }));
-    },
-    changeDynamicZoneComponents({ forTarget, targetUid, dynamicZoneTarget, newComponents }) {
-      dispatch(
-        actions.changeDynamicZoneComponents({
-          forTarget,
-          targetUid,
-          dynamicZoneTarget,
-          newComponents,
-        })
-      );
-    },
-    removeAttribute(payload) {
-      if (payload.forTarget === 'contentType') {
-        // Note: willDeleteFieldOfContentType doesn't accept properties
-        trackUsage('willDeleteFieldOfContentType');
-      }
+  const context = React.useMemo<DataManagerContextValue>(
+    () => ({
+      componentsThatHaveOtherComponentInTheirAttributes,
+      nestedComponents,
+      saveSchema,
+      reservedNames,
+      components,
+      contentTypes,
+      initialComponents,
+      initialContentTypes,
+      isSaving,
+      isModified,
+      isInDevelopmentMode,
+      allComponentsCategories,
+      componentsGroupedByCategory,
+      sortedContentTypesList,
+      isLoading,
+      addAttribute(payload) {
+        dispatch(
+          actions.addAttribute({
+            ...payload,
+            attributeToSet: payload.attributeToSet as AnyAttribute,
+          })
+        );
+      },
+      editAttribute(payload) {
+        dispatch(
+          actions.editAttribute({
+            ...payload,
+            attributeToSet: payload.attributeToSet as AnyAttribute,
+          })
+        );
+      },
+      addCustomFieldAttribute(payload) {
+        dispatch(
+          actions.addCustomFieldAttribute({
+            ...payload,
+            attributeToSet: payload.attributeToSet as AnyAttribute,
+          })
+        );
+      },
+      editCustomFieldAttribute(payload) {
+        dispatch(
+          actions.editCustomFieldAttribute({
+            ...payload,
+            attributeToSet: payload.attributeToSet as AnyAttribute,
+          })
+        );
+      },
+      addCreatedComponentToDynamicZone(payload) {
+        dispatch(actions.addCreatedComponentToDynamicZone(payload));
+      },
+      createSchema(payload) {
+        dispatch(actions.createSchema(payload));
+      },
+      createComponentSchema({ data, uid, componentCategory }) {
+        dispatch(actions.createComponentSchema({ data, uid, componentCategory }));
+      },
+      changeDynamicZoneComponents({ forTarget, targetUid, dynamicZoneTarget, newComponents }) {
+        dispatch(
+          actions.changeDynamicZoneComponents({
+            forTarget,
+            targetUid,
+            dynamicZoneTarget,
+            newComponents,
+          })
+        );
+      },
+      removeAttribute(payload) {
+        if (payload.forTarget === 'contentType') {
+          // Note: willDeleteFieldOfContentType doesn't accept properties
+          trackUsage('willDeleteFieldOfContentType');
+        }
 
-      dispatch(actions.removeField(payload));
-    },
-    removeComponentFromDynamicZone(payload) {
-      dispatch(actions.removeComponentFromDynamicZone(payload));
-    },
-    deleteComponent(uid: Internal.UID.Component) {
-      const userConfirm = window.confirm(
-        formatMessage({
-          id: getTrad(`popUpWarning.bodyMessage.component.delete`),
-        })
-      );
+        dispatch(actions.removeField(payload));
+      },
+      removeComponentFromDynamicZone(payload) {
+        dispatch(actions.removeComponentFromDynamicZone(payload));
+      },
+      deleteComponent(uid: Internal.UID.Component) {
+        const userConfirm = window.confirm(
+          formatMessage({
+            id: getTrad(`popUpWarning.bodyMessage.component.delete`),
+          })
+        );
 
-      if (userConfirm) {
-        onCloseModal();
+        if (userConfirm) {
+          onCloseModal();
 
-        dispatch(actions.deleteComponent(uid));
-      }
-    },
-    deleteContentType(uid: Internal.UID.ContentType) {
-      const userConfirm = window.confirm(
-        formatMessage({
-          id: getTrad(`popUpWarning.bodyMessage.contentType.delete`),
-        })
-      );
+          dispatch(actions.deleteComponent(uid));
+        }
+      },
+      deleteContentType(uid: Internal.UID.ContentType) {
+        const userConfirm = window.confirm(
+          formatMessage({
+            id: getTrad(`popUpWarning.bodyMessage.contentType.delete`),
+          })
+        );
 
-      if (userConfirm) {
-        onCloseModal();
+        if (userConfirm) {
+          onCloseModal();
 
-        dispatch(actions.deleteContentType(uid));
-      }
-    },
-
-    updateComponentSchema({ data, componentUID }) {
-      dispatch(
-        actions.updateComponentSchema({
-          data,
-          uid: componentUID,
-        })
-      );
-    },
-
-    updateComponentUid({ componentUID, newComponentUID }) {
-      dispatch(
-        actions.updateComponentUid({
-          uid: componentUID,
-          newComponentUID,
-        })
-      );
-    },
-
-    updateSchema(args) {
-      dispatch(actions.updateSchema(args));
-    },
-
-    moveAttribute(args) {
-      dispatch(actions.moveAttribute(args));
-    },
-
-    applyChange(args) {
-      dispatch(actions.applyChange(args));
-    },
-
-    history: {
-      undo() {
-        dispatch(actions.undo());
+          dispatch(actions.deleteContentType(uid));
+        }
       },
 
-      redo() {
-        dispatch(actions.redo());
+      updateComponentSchema({ data, componentUID }) {
+        dispatch(
+          actions.updateComponentSchema({
+            data,
+            uid: componentUID,
+          })
+        );
       },
 
-      discardAllChanges() {
-        dispatch(actions.discardAll());
+      updateComponentUid({ componentUID, newComponentUID }) {
+        dispatch(
+          actions.updateComponentUid({
+            uid: componentUID,
+            newComponentUID,
+          })
+        );
       },
 
-      canUndo: state.past.length > 0,
-      canRedo: state.future.length > 0,
-      canDiscardAll: isModified,
-    },
-  };
+      updateSchema(args) {
+        dispatch(actions.updateSchema(args));
+      },
+
+      moveAttribute(args) {
+        dispatch(actions.moveAttribute(args));
+      },
+
+      applyChange(args) {
+        dispatch(actions.applyChange(args));
+      },
+
+      history: {
+        undo() {
+          dispatch(actions.undo());
+        },
+
+        redo() {
+          dispatch(actions.redo());
+        },
+
+        discardAllChanges() {
+          dispatch(actions.discardAll());
+        },
+
+        canUndo: state.past.length > 0,
+        canRedo: state.future.length > 0,
+        canDiscardAll: isModified,
+      },
+    }),
+    [
+      allComponentsCategories,
+      components,
+      componentsGroupedByCategory,
+      componentsThatHaveOtherComponentInTheirAttributes,
+      contentTypes,
+      dispatch,
+      formatMessage,
+      initialComponents,
+      initialContentTypes,
+      isInDevelopmentMode,
+      isLoading,
+      isModified,
+      isSaving,
+      nestedComponents,
+      onCloseModal,
+      reservedNames,
+      saveSchema,
+      sortedContentTypesList,
+      state,
+      trackUsage,
+    ]
+  );
 
   return <DataManagerContext.Provider value={context}>{children}</DataManagerContext.Provider>;
 };

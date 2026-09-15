@@ -26,6 +26,8 @@ import { InputRenderer } from './FormInputs/Renderer';
 
 import type { Schema } from '@strapi/types';
 
+const EMPTY_OPTIONS: NonNullable<RootProps['options']> = [];
+
 /* -------------------------------------------------------------------------------------------------
  * Root
  * -----------------------------------------------------------------------------------------------*/
@@ -92,7 +94,7 @@ const Root = ({
   children,
   disabled = false,
   onChange,
-  options = [],
+  options = EMPTY_OPTIONS,
   onOpenChange,
   open: openProp,
   defaultOpen,
@@ -394,14 +396,31 @@ const List = () => {
   const [{ query }, setQuery] = useQueryParams<Filters.Query>();
 
   const options = useFilters('List', ({ options }) => options);
+  const queryFilters = query?.filters?.$and ?? [];
+  const filterKeyPrefix = React.useId();
+  const nextFilterKey = React.useRef(0);
+  const filterKeys = React.useRef<string[]>([]);
+
+  while (filterKeys.current.length < queryFilters.length) {
+    filterKeys.current.push(`${filterKeyPrefix}-${nextFilterKey.current}`);
+    nextFilterKey.current += 1;
+  }
+  filterKeys.current.length = queryFilters.length;
+
+  const filtersWithKeys = queryFilters.map((queryFilter, index) => ({
+    queryFilter,
+    index,
+    key: filterKeys.current[index],
+  }));
 
   /**
    * Removed by position: identical filters are a legal query, so matching on
    * `(name, operator, value)` would drop every copy at once.
    */
   const handleRemove = (index: number) => {
-    const nextFilters = (query?.filters?.$and ?? []).filter((_, i) => i !== index);
+    const nextFilters = queryFilters.filter((_, i) => i !== index);
 
+    filterKeys.current.splice(index, 1);
     setQuery(
       withEncodedUserParams(query, {
         filters: deepEncodeQueryValues({ $and: nextFilters }),
@@ -410,13 +429,13 @@ const List = () => {
     );
   };
 
-  if (!query?.filters?.$and?.length) {
+  if (queryFilters.length === 0) {
     return null;
   }
 
   return (
     <>
-      {query?.filters?.$and?.map((queryFilter, index) => {
+      {filtersWithKeys.map(({ queryFilter, index, key }) => {
         const details = getFilterDetails(queryFilter, options);
         if (!details || typeof details.value === 'object') {
           return null;
@@ -433,7 +452,7 @@ const List = () => {
          */
         return (
           <AttributeTag
-            key={`${index}-${details.name}-${details.operator}-${details.value}`}
+            key={key}
             {...filter}
             index={index}
             onRemove={handleRemove}

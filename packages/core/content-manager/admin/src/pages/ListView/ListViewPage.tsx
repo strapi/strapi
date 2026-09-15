@@ -66,6 +66,7 @@ import { ViewSettingsMenu } from './components/ViewSettingsMenu';
 import type { Modules } from '@strapi/types';
 
 const { INJECT_COLUMN_IN_TABLE } = HOOKS;
+const NON_LINKABLE_TYPES = new Set(['media', 'relation', 'component', 'dynamiczone']);
 
 /* -------------------------------------------------------------------------------------------------
  * ListViewPage
@@ -368,13 +369,12 @@ const ListViewPage = () => {
    * dynamic zones (they embed their own links/menus), plugin-formatted columns
    * (`cellFormatter`), and the synthetic `status` column.
    */
-  const NON_LINKABLE_TYPES = ['media', 'relation', 'component', 'dynamiczone'];
   const linkCandidates = tableHeaders.filter(
     ({ name, attribute, cellFormatter }) =>
       name !== 'status' &&
       typeof cellFormatter !== 'function' &&
       attribute &&
-      !NON_LINKABLE_TYPES.includes(attribute.type)
+      !NON_LINKABLE_TYPES.has(attribute.type)
   );
 
   // The link column for a given row: the first candidate that actually has a

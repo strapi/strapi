@@ -1,6 +1,6 @@
 const CSV_LINE_SEPARATOR = '\r\n';
 const CSV_BOM = '\uFEFF';
-const FORMULA_TRIGGER_CHARACTERS = ['=', '+', '-', '@', '\t', '\r'];
+const FORMULA_TRIGGER_CHARACTERS = new Set(['=', '+', '-', '@', '\t', '\r']);
 
 const escapeCsvValue = (value: unknown): string => {
   if (value === null || value === undefined) {
@@ -9,7 +9,7 @@ const escapeCsvValue = (value: unknown): string => {
 
   let stringValue = typeof value === 'string' ? value : String(value);
 
-  if (typeof value === 'string' && FORMULA_TRIGGER_CHARACTERS.includes(stringValue.charAt(0))) {
+  if (typeof value === 'string' && FORMULA_TRIGGER_CHARACTERS.has(stringValue.charAt(0))) {
     stringValue = `'${stringValue}`;
   }
 

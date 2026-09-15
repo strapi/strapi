@@ -6,14 +6,14 @@ const isLocalizedAttribute = (attribute: Schema.Attribute.Attribute | undefined)
   return (attribute?.pluginOptions as any)?.i18n?.localized === true;
 };
 
-const UNSUPPORTED_ATTRIBUTE_TYPES: Schema.Attribute.Kind[] = [
+const UNSUPPORTED_ATTRIBUTE_TYPES = new Set<Schema.Attribute.Kind>([
   'media',
   'relation',
   'boolean',
   'enumeration',
-];
+]);
 
-const IGNORED_FIELDS = [
+const IGNORED_FIELDS = new Set([
   'id',
   'documentId',
   'createdAt',
@@ -23,7 +23,7 @@ const IGNORED_FIELDS = [
   'updatedBy',
   'createdBy',
   'localizations',
-];
+]);
 
 /**
  * Deep merge where target values take priority over source values.
@@ -99,7 +99,7 @@ const mergeUnsupportedFields = async (
         return;
       }
 
-      if (IGNORED_FIELDS.includes(key)) {
+      if (IGNORED_FIELDS.has(key)) {
         remove(key);
         return;
       }
@@ -117,7 +117,7 @@ const mergeUnsupportedFields = async (
       }
 
       // Keep other unsupported attribute types (boolean, enumeration)
-      if (UNSUPPORTED_ATTRIBUTE_TYPES.includes(attribute.type)) {
+      if (UNSUPPORTED_ATTRIBUTE_TYPES.has(attribute.type)) {
         return;
       }
 
@@ -196,12 +196,12 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       const translateableContent = await traverseEntity(
         ({ key, attribute, parent, path }, { remove }) => {
-          if (IGNORED_FIELDS.includes(key)) {
+          if (IGNORED_FIELDS.has(key)) {
             remove(key);
             return;
           }
           const hasLocalizedOption = attribute && isLocalizedAttribute(attribute);
-          if (attribute && UNSUPPORTED_ATTRIBUTE_TYPES.includes(attribute.type)) {
+          if (attribute && UNSUPPORTED_ATTRIBUTE_TYPES.has(attribute.type)) {
             remove(key);
             return;
           }
@@ -286,7 +286,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           .filter(([_, attr]) => {
             const isLocalized = isLocalizedAttribute(attr);
-            const isSupportedType = !UNSUPPORTED_ATTRIBUTE_TYPES.includes(attr.type);
+            const isSupportedType = !UNSUPPORTED_ATTRIBUTE_TYPES.has(attr.type);
             return isLocalized && isSupportedType;
           })
           .map(([key, attr]) => {

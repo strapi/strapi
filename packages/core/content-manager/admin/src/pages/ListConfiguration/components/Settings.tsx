@@ -28,7 +28,7 @@ export type InputPropsWithMessageDescriptors = DistributiveOmit<
  */
 export type FormLayoutInputProps = InputPropsWithMessageDescriptors & { size: number };
 
-const EXCLUDED_SORT_ATTRIBUTE_TYPES = [
+const EXCLUDED_SORT_ATTRIBUTE_TYPES = new Set([
   'media',
   'richtext',
   'dynamiczone',
@@ -36,7 +36,7 @@ const EXCLUDED_SORT_ATTRIBUTE_TYPES = [
   'component',
   'json',
   'blocks',
-];
+]);
 
 interface SortOption {
   value: string;
@@ -63,7 +63,7 @@ const Settings = () => {
   const sortOptions = React.useMemo(
     () =>
       Object.values(layout).reduce<SortOption[]>((acc, field) => {
-        if (schema && !EXCLUDED_SORT_ATTRIBUTE_TYPES.includes(schema.attributes[field.name].type)) {
+        if (schema && !EXCLUDED_SORT_ATTRIBUTE_TYPES.has(schema.attributes[field.name].type)) {
           acc.push({
             value: field.name,
             label: typeof field.label !== 'string' ? formatMessage(field.label) : field.label,
