@@ -4,7 +4,7 @@ import fse from 'fs-extra';
 
 import { wrapTransaction } from './common';
 
-import type { Context, MigrationResolver } from './common';
+import type { Context, Migration, MigrationResolver } from './common';
 
 // TODO: check multiple commands in one sql statement
 export const migrationResolver: MigrationResolver = ({ name, path: migrationPath, context }) => {
@@ -28,9 +28,25 @@ export const migrationResolver: MigrationResolver = ({ name, path: migrationPath
     };
   }
 
-  // NOTE: we can add some ts register if we want to handle ts migration files at some point
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const migration = require(migrationPath);
+  let loadedMigration: Migration | { default: Migration };
+  if (migrationPath.endsWith('.ts')) {
+    // Keep the transform scoped to loading the migration so database consumers
+    // do not receive a process-wide TypeScript require hook.
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { register } = require('esbuild-register/dist/node');
+    const { unregister } = register({ extensions: ['.ts'] });
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      loadedMigration = require(migrationPath);
+    } finally {
+      unregister();
+    }
+  } else {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    loadedMigration = require(migrationPath);
+  }
+
+  const migration = 'default' in loadedMigration ? loadedMigration.default : loadedMigration;
   return {
     name,
     path: migrationPath,

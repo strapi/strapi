@@ -69,6 +69,35 @@ describe('migrationResolver', () => {
     expect(await sqlite.schema.hasTable('items')).toBe(false);
   });
 
+  it('transpiles and runs TypeScript migrations inside a transaction', async () => {
+    const migrationPath = path.join(tempDir, '001-create.ts');
+    await fse.writeFile(
+      migrationPath,
+      `export default {
+        async up(knex: import('knex').Knex): Promise<void> {
+          await knex.schema.createTable('typed_items', (table) => {
+            table.increments('id');
+          });
+        },
+        async down(knex: import('knex').Knex): Promise<void> {
+          await knex.schema.dropTable('typed_items');
+        },
+      };`
+    );
+
+    const migration = migrationResolver({
+      name: path.basename(migrationPath),
+      path: migrationPath,
+      context: { db },
+    });
+
+    await migration.up();
+    expect(await sqlite.schema.hasTable('typed_items')).toBe(true);
+
+    await migration.down();
+    expect(await sqlite.schema.hasTable('typed_items')).toBe(false);
+  });
+
   it('runs sql migrations and rejects down', async () => {
     const migrationPath = path.join(tempDir, '001-create.sql');
     await fse.writeFile(migrationPath, 'CREATE TABLE notes (id INTEGER PRIMARY KEY);');

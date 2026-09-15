@@ -16,15 +16,19 @@ describe('discoverMigrationFiles', () => {
     await fse.remove(tempDir);
   });
 
-  it('returns js and sql files sorted alphabetically with absolute paths', async () => {
+  it('returns js, ts, and sql files sorted alphabetically with absolute paths', async () => {
     await fse.writeFile(path.join(tempDir, '002-b.sql'), 'SELECT 1;');
     await fse.writeFile(path.join(tempDir, '001-a.js'), 'module.exports = {}');
     await fse.writeFile(path.join(tempDir, 'README.md'), '# ignore');
-    await fse.writeFile(path.join(tempDir, '003-c.ts'), '// ignore');
+    await fse.writeFile(path.join(tempDir, '003-c.ts'), 'export default {}');
 
     const files = discoverMigrationFiles(tempDir);
 
-    expect(files).toEqual([path.resolve(tempDir, '001-a.js'), path.resolve(tempDir, '002-b.sql')]);
+    expect(files).toEqual([
+      path.resolve(tempDir, '001-a.js'),
+      path.resolve(tempDir, '002-b.sql'),
+      path.resolve(tempDir, '003-c.ts'),
+    ]);
   });
 
   it('returns an empty array when the directory does not exist', () => {
