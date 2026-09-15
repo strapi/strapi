@@ -1,4 +1,4 @@
-import { getTrad } from './utils';
+import { getTrad } from './legacy/utils';
 
 export const ASSET_SOURCES = {
   Url: 'url',
