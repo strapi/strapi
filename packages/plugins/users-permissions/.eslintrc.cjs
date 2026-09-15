@@ -9,18 +9,13 @@ const config = {
     'rollup.config.mjs',
     'coverage/',
     'lint-staged.config.mjs',
+    'jest.config.front.js',
+    'jest.config.js',
   ],
   overrides: [
     {
-      files: ['admin/**/*'],
-      extends: ['eslint-config-custom/front'],
-      rules: {
-        'import/extensions': 'off',
-      },
-    },
-    {
-      files: ['**/*'],
-      excludedFiles: ['admin/**/*'],
+      files: ['**'],
+      excludedFiles: ['admin/**/*', 'server/**/*'],
       extends: ['eslint-config-custom/back'],
     },
   ],
