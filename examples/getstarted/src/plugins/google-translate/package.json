@@ -1,0 +1,12 @@
+{
+  "name": "strapi-plugin-google-translate",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Translate Strapi content with Google Cloud Translation. Credentials are saved from the admin Settings page.",
+  "strapi": {
+    "name": "google-translate",
+    "displayName": "Google Translate",
+    "description": "Translate content with Google Cloud Translation. Add credentials in Settings.",
+    "kind": "plugin"
+  }
+}
