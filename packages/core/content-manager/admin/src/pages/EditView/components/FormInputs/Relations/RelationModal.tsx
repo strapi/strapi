@@ -84,6 +84,9 @@ interface State {
   fieldToConnect?: string;
   fieldToConnectUID?: string;
   getParentFormValues?: () => AnyData;
+  // Sets a field directly on the parent's own (live, unsaved) form state, so connecting a
+  // newly-created relation doesn't require persisting the whole parent document to the server.
+  setParentFormValue?: (path: string, value: unknown) => void;
 }
 
 type Action =
@@ -95,6 +98,7 @@ type Action =
         fieldToConnect?: string;
         fieldToConnectUID?: string;
         getParentFormValues?: () => AnyData;
+        setParentFormValue?: (path: string, value: unknown) => void;
       };
     }
   | {
@@ -136,6 +140,7 @@ function reducer(state: State, action: Action): State {
           fieldToConnect: action.payload.fieldToConnect,
           fieldToConnectUID: action.payload.fieldToConnectUID,
           getParentFormValues: action.payload.getParentFormValues,
+          setParentFormValue: action.payload.setParentFormValue,
         };
       }
 
@@ -155,6 +160,9 @@ function reducer(state: State, action: Action): State {
         getParentFormValues: hasToResetDocumentHistory
           ? undefined
           : action.payload.getParentFormValues,
+        setParentFormValue: hasToResetDocumentHistory
+          ? undefined
+          : action.payload.setParentFormValue,
       };
     case 'GO_BACK':
       if (state.hasUnsavedChanges && !action.payload.shouldBypassConfirmation) {
@@ -190,6 +198,7 @@ function reducer(state: State, action: Action): State {
         fieldToConnect: undefined,
         fieldToConnectUID: undefined,
         getParentFormValues: undefined,
+        setParentFormValue: undefined,
       };
     case 'CANCEL_CONFIRM_DIALOG':
       return {
@@ -210,6 +219,7 @@ function reducer(state: State, action: Action): State {
         fieldToConnect: undefined,
         fieldToConnectUID: undefined,
         getParentFormValues: undefined,
+        setParentFormValue: undefined,
       };
     case 'SET_HAS_UNSAVED_CHANGES':
       return {
@@ -220,6 +230,19 @@ function reducer(state: State, action: Action): State {
       return state;
   }
 }
+
+/**
+ * Whether any relation-on-the-fly modal is currently open, anywhere on the page.
+ *
+ * The modal's React context (`RelationModalProvider`, below) only reaches the modal's own subtree
+ * (the relation field that renders it), so components mounted outside that subtree — like the
+ * background entry's save/publish buttons in the side panel — can't read `state.isModalOpen` from
+ * context. This module-level counter is the cross-tree signal those components use instead, so
+ * they can tell a relation modal is open and suppress their own keyboard shortcuts while it is.
+ */
+let openRelationModalCount = 0;
+
+const isAnyRelationModalOpen = () => openRelationModalCount > 0;
 
 interface RelationModalContextValue {
   state: State;
@@ -291,6 +314,20 @@ const RootRelationRenderer = (props: RelationModalRendererProps) => {
   // TODO: check if we can remove the single type check
   const isSingleType = currentDocumentMeta.collectionType === SINGLE_TYPES;
   const isCreating = !currentDocumentMeta.documentId && !isSingleType;
+
+  const { isModalOpen } = state;
+  React.useEffect(() => {
+    if (!isModalOpen) {
+      return;
+    }
+
+    openRelationModalCount += 1;
+
+    return () => {
+      openRelationModalCount -= 1;
+    };
+  }, [isModalOpen]);
+
   /**
    * There is no parent relation, so the relation modal doesn't exist. Create it and set up all the
    * pieces that will be used by potential child relations: the context, header, form, and footer.
@@ -628,6 +665,7 @@ const RelationModalBody = () => {
           fieldToConnect: state.fieldToConnect,
           fieldToConnectUID: state.fieldToConnectUID,
           getParentFormValues: state.getParentFormValues,
+          setParentFormValue: state.setParentFormValue,
         },
       });
     }
@@ -873,6 +911,7 @@ export {
   reducer,
   RelationModalRenderer,
   useRelationModal,
+  isAnyRelationModalOpen,
   getFullPageUrl,
   generateCreateUrl,
   prefillParentRelation,
