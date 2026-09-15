@@ -2,6 +2,14 @@ import type { Utils } from '@strapi/types';
 
 import { curry, pipe, merge, set, pick, omit, includes, isArray, prop } from 'lodash/fp';
 
+export type RegisterProviderActionSection = (typeof registerProviderActionSections)[number];
+export const registerProviderActionSections = [
+  'contentTypes',
+  'plugins',
+  'settings',
+  'internal',
+] as const;
+
 export interface ActionAlias {
   /**
    * The action ID to alias
@@ -14,26 +22,16 @@ export interface ActionAlias {
   subjects?: string[];
 }
 
-export type Action = {
+type ActionBase = {
   /**
    * The unique identifier of the action
    */
   actionId: string;
 
   /**
-   * The section linked to the action - These can be 'contentTypes' | 'plugins' | 'settings' | 'internal'
-   */
-  section: string;
-
-  /**
    * The human readable name of an action
    */
   displayName: string;
-
-  /**
-   * The main category of an action
-   */
-  category: string;
 
   /**
    * The secondary category of an action (only for settings and plugins section)
@@ -75,18 +73,28 @@ export type Action = {
   aliases?: ActionAlias[];
 };
 
+type ActionSettings = ActionBase & {
+  section: Utils.StrictExtract<RegisterProviderActionSection, 'settings'>;
+  category: string;
+};
+
+type ActionOthers = ActionBase & {
+  section: Utils.StrictExclude<RegisterProviderActionSection, 'settings'>;
+};
+
+export type Action = ActionSettings | ActionOthers;
+
 /**
  * Set of attributes used to create a new {@link Action} object
- * @typedef {Action, { uid: string }} CreateActionPayload
+ * Action Id is computed from the uid value
+ * Options is filled with default values
  */
 export type CreateActionPayload = Utils.Intersect<
   [
-    Utils.Object.PartialBy<
-      // Action Id is computed from the uid value
-      Omit<Action, 'actionId'>,
-      // Options is filled with default values
-      'options'
-    >,
+    (
+      | Utils.Object.PartialBy<Utils.StrictOmit<ActionSettings, 'actionId'>, 'options'>
+      | Utils.Object.PartialBy<Utils.StrictOmit<ActionOthers, 'actionId'>, 'options'>
+    ),
     { uid: string },
   ]
 >;
@@ -156,7 +164,7 @@ const assignActionId = (attrs: CreateActionPayload) =>
  * @return {Action}
  */
 const assignOrOmitSubCategory = (action: Action): Action => {
-  const shouldHaveSubCategory = ['settings', 'plugins'].includes(action.section);
+  const shouldHaveSubCategory = action.section === 'settings' || action.section === 'plugins';
 
   return shouldHaveSubCategory
     ? set('subCategory', action.subCategory || 'general', action)

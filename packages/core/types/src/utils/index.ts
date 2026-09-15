@@ -234,3 +234,68 @@ export type OneOf<T, U> = (T & { [K in keyof U]?: never }) | (U & { [K in keyof 
  * ```
  */
 export type Pretty<T> = { [K in keyof T]: T[K] } & unknown;
+
+/**
+ * Type-safe variant of {@link Exclude} which makes sure the excluded members ({@link TExcluded}) are
+ * actual members of the given union ({@link TUnion}).
+ *
+ * The regular {@link Exclude} silently returns the original union when given a member that doesn't
+ * exist in it, which lets typos and stale references survive refactors. `StrictExclude` turns those
+ * cases into compilation errors.
+ *
+ * @template TUnion - The union to exclude members from.
+ * @template TExcluded - The members to exclude, constrained to members of {@link TUnion}.
+ *
+ * @example
+ * type Status = 'draft' | 'published' | 'archived';
+ *
+ * type Visible = StrictExclude<Status, 'archived'>;
+ * //   ^ 'draft' | 'published'
+ *
+ * // Error: 'deleted' does not satisfy the constraint 'Status'
+ * type Invalid = StrictExclude<Status, 'deleted'>;
+ */
+export type StrictExclude<TUnion, TExcluded extends TUnion> = Exclude<TUnion, TExcluded>;
+
+/**
+ * Type-safe variant of {@link Extract} which makes sure the extracted members ({@link TExtracted}) are
+ * actual members of the given union ({@link TUnion}).
+ *
+ * The regular {@link Extract} silently returns `never` when given a member that doesn't exist in the
+ * union, which lets typos and stale references survive refactors. `StrictExtract` turns those cases
+ * into compilation errors.
+ *
+ * @template TUnion - The union to extract members from.
+ * @template TExtracted - The members to extract, constrained to members of {@link TUnion}.
+ *
+ * @example
+ * type Status = 'draft' | 'published' | 'archived';
+ *
+ * type Terminal = StrictExtract<Status, 'archived'>;
+ * //   ^ 'archived'
+ *
+ * // Error: 'deleted' does not satisfy the constraint 'Status'
+ * type Invalid = StrictExtract<Status, 'deleted'>;
+ */
+export type StrictExtract<TUnion, TExtracted extends TUnion> = Extract<TUnion, TExtracted>;
+
+/**
+ * Type-safe variant of {@link Omit} which makes sure the omitted keys ({@link TKeys}) are actual keys
+ * of the given type ({@link TValue}).
+ *
+ * The regular {@link Omit} accepts any key, so a typo or a key removed during a refactor silently
+ * becomes a no-op. `StrictOmit` turns those cases into compilation errors.
+ *
+ * @template TValue - The object type to omit keys from.
+ * @template TKeys - The keys to omit, constrained to keys of {@link TValue}.
+ *
+ * @example
+ * type User = { id: number; name: string; password: string };
+ *
+ * type PublicUser = StrictOmit<User, 'password'>;
+ * //   ^ { id: number; name: string }
+ *
+ * // Error: 'passwrod' does not satisfy the constraint 'keyof User'
+ * type Invalid = StrictOmit<User, 'passwrod'>;
+ */
+export type StrictOmit<TValue, TKeys extends keyof TValue> = Omit<TValue, TKeys>;
