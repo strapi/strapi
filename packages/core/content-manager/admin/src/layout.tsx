@@ -119,15 +119,8 @@ const Layout = () => {
   ) {
     // On desktop: redirect to first collection type
     if (!isMobile) {
-      return (
-        <Navigate
-          to={{
-            pathname: authorisedModels[0].to,
-            search: authorisedModels[0].search ?? '',
-          }}
-          replace
-        />
-      );
+      // Let the list restore saved preferences before applying its defaults.
+      return <Navigate to={authorisedModels[0].to} replace />;
     }
 
     // On mobile: show navigation page
