@@ -1,3 +1,6 @@
+import path from 'node:path';
+
+import tailwindcss from '@tailwindcss/vite';
 import type { InlineConfig, UserConfig } from 'vite';
 
 import { getUserConfig } from '../core/config';
@@ -158,7 +161,7 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
       // where packages imported by plugins may not be resolvable from plugin chunks
       alias: buildAdminViteResolveAliases(),
     },
-    plugins: [react(), buildFilesPlugin(ctx)],
+    plugins: [...(ctx.nextDesignSystem ? [tailwindcss()] : []), react(), buildFilesPlugin(ctx)],
   };
 };
 
@@ -180,7 +183,7 @@ const resolveProductionConfig = async (ctx: BuildContext): Promise<InlineConfig>
       sourcemap,
       rollupOptions: {
         input: {
-          strapi: ctx.entry,
+          strapi: path.join(ctx.runtimeDir, 'index.html'),
         },
       },
     },
