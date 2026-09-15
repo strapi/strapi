@@ -146,6 +146,20 @@ type Assocs =
       disconnect?: Array<ScalarAssoc> | null;
     };
 
+/**
+ * Media attributes are modelled as morph relations targeting the upload file model
+ * (see transformAttribute in @strapi/core: `media` -> morphOne/morphMany on
+ * `plugin::upload.file`). Single media is last-wins and holds at most one file.
+ *
+ * `morphOne` on its own is NOT a media marker — it is a generic inverse polymorphic
+ * relation available to any content type — so last-wins truncation must be gated on
+ * the upload target rather than on the relation kind.
+ */
+const UPLOAD_FILE_UID = 'plugin::upload.file';
+
+const isSingleMediaAttribute = (attribute: { relation?: string; target?: string }) =>
+  attribute.relation === 'morphOne' && attribute.target === UPLOAD_FILE_UID;
+
 const toAssocs = (data: Assocs) => {
   if (
     isArray(data) ||
@@ -159,7 +173,12 @@ const toAssocs = (data: Assocs) => {
     };
   }
 
-  if (data?.set) {
+  // Check for the `set` key by presence, not truthiness: `{ set: null }` is a valid
+  // "clear this field" payload. A truthiness check let it fall through to the
+  // connect/disconnect branch below, where it arrived without a `set` key and was
+  // then indistinguishable from a delta payload — silently preserving the relation
+  // instead of clearing it.
+  if (isRecord(data) && has('set', data) && data.set !== undefined) {
     return {
       set: isNull(data.set) ? data.set : toIdArray(data.set),
     };
@@ -607,22 +626,47 @@ export const createEntityManager = (db: Database): EntityManager => {
 
             const { idColumn, typeColumn } = morphColumn;
 
-            if (isEmpty(cleanRelationData.set)) {
+            // At create there is nothing to delta against, so a connect is equivalent to a
+            // set — honour `set || connect` like regular joinTable relations do. Without this,
+            // create-with-connect (`{ connect: [file] }`) on media silently attaches nothing.
+            // `disconnect` at create is meaningless and is ignored (same as relations).
+            const attachData = !isEmpty(cleanRelationData.set)
+              ? cleanRelationData.set
+              : cleanRelationData.connect;
+
+            if (isEmpty(attachData)) {
               continue;
             }
 
-            const rows =
-              cleanRelationData.set?.map((data, idx) => {
-                return {
-                  [joinColumn.name]: data.id,
-                  [idColumn.name]: id,
-                  [typeColumn.name]: uid,
-                  ...('on' in joinTable && joinTable.on),
-                  ...data.__pivot,
-                  order: idx + 1,
-                  field: attributeName,
-                };
-              }) ?? [];
+            // Single media is last-wins and holds at most one file. Gate on the upload
+            // target, not on `morphOne`: `morphOne` is a generic inverse polymorphic
+            // relation that users can author against any content type. For a non-D&P
+            // source targeting a D&P model the Document Service deliberately expands one
+            // documentId into both the draft and published entity ids, so truncating a
+            // generic morphOne here would drop a legitimate row.
+            //
+            // Then deduplicate by target id before ordering/insert: toIdArray dedups with
+            // uniqWith(isEqual) *before* scalar and object entries are given a common
+            // shape, so `[B, { id: B }]` survives as two structurally different entries and
+            // would insert two identical morph rows — the join table has no composite
+            // uniqueness guard. Regular joinTable relations already guard this with
+            // uniqBy('id', ...); do the same here.
+            const dataset = uniqBy(
+              'id',
+              isSingleMediaAttribute(attribute) ? (attachData ?? []).slice(-1) : (attachData ?? [])
+            );
+
+            const rows = dataset.map((data, idx) => {
+              return {
+                [joinColumn.name]: data.id,
+                [idColumn.name]: id,
+                [typeColumn.name]: uid,
+                ...('on' in joinTable && joinTable.on),
+                ...data.__pivot,
+                order: idx + 1,
+                field: attributeName,
+              };
+            });
 
             await batchInsertJoinTable(db, joinTable.name, rows, trx);
           }
@@ -869,40 +913,80 @@ export const createEntityManager = (db: Database): EntityManager => {
 
             const { idColumn, typeColumn } = morphColumn;
 
-            const hasSet = !isEmpty(cleanRelationData.set);
+            // Single *media* only — see isSingleMediaAttribute: a generic `morphOne`
+            // must keep every row the Document Service expanded for it.
+            const isSingle = isSingleMediaAttribute(attribute);
             const hasConnect = !isEmpty(cleanRelationData.connect);
-            const hasDisconnect = !isEmpty(cleanRelationData.disconnect);
+            const hasSet = !isEmpty(cleanRelationData.set);
 
-            // for connect/disconnect without a set, only modify those relations
-            if (!hasSet && (hasConnect || hasDisconnect)) {
-              // delete disconnects and connects (to prevent duplicates when we add them later)
-              const idsToDelete = [
-                ...(cleanRelationData.disconnect || []),
-                ...(cleanRelationData.connect || []),
-              ];
+            // A partial update is a connect/disconnect delta payload (no `set` key),
+            // which must modify only the listed relations — as opposed to a `set`/
+            // scalar/array/null payload, which replaces the whole field. Gate on the
+            // payload *shape* (like regular joinTable relations at `!has('set', …)`),
+            // not on content, so that an empty delta (`{ connect: [] }` /
+            // `{ disconnect: [] }`) is a no-op instead of wiping the field.
+            const isPartialUpdate = !has('set', cleanRelationData);
 
-              if (!isEmpty(idsToDelete)) {
-                const where = {
-                  $or: idsToDelete.map((item: any) => {
-                    return {
-                      [idColumn.name]: id,
-                      [typeColumn.name]: uid,
-                      [joinColumn.name]: item.id,
-                      ...joinTable.on,
-                      field: attributeName,
-                    };
-                  }),
-                };
-
+            if (isPartialUpdate) {
+              // For single media a connect is last-wins and the field holds at most one
+              // file, so a connect replaces whatever is attached: delete ALL
+              // existing rows for this field first (not just the connected ids). Upload
+              // files have no draft & publish, so we enforce exactly one physical row —
+              // do not copy the xToOne-relation looseness that tolerates two rows.
+              // For multiple media (morphMany) only the listed connect/disconnect ids are
+              // deleted (dedup before re-insert / removal).
+              if (isSingle && hasConnect) {
                 await this.createQueryBuilder(joinTable.name)
                   .delete()
-                  .where(where)
+                  .where({
+                    [idColumn.name]: id,
+                    [typeColumn.name]: uid,
+                    ...joinTable.on,
+                    field: attributeName,
+                  })
                   .transacting(trx)
                   .execute();
+              } else {
+                // delete disconnects and connects (to prevent duplicates when we add them later)
+                const idsToDelete = [
+                  ...(cleanRelationData.disconnect || []),
+                  ...(cleanRelationData.connect || []),
+                ];
+
+                if (!isEmpty(idsToDelete)) {
+                  const where = {
+                    $or: idsToDelete.map((item: any) => {
+                      return {
+                        [idColumn.name]: id,
+                        [typeColumn.name]: uid,
+                        [joinColumn.name]: item.id,
+                        ...joinTable.on,
+                        field: attributeName,
+                      };
+                    }),
+                  };
+
+                  await this.createQueryBuilder(joinTable.name)
+                    .delete()
+                    .where(where)
+                    .transacting(trx)
+                    .execute();
+                }
               }
 
               // connect relations
               if (hasConnect) {
+                // Single media is last-wins: keep only the final connected file so the
+                // field ends with exactly one row. Multiple media appends all connects.
+                // Dedup by id (see the create path): mixed scalar/object representations
+                // of the same file must produce exactly one physical row.
+                const connects = uniqBy(
+                  'id',
+                  isSingle
+                    ? (cleanRelationData.connect ?? []).slice(-1)
+                    : (cleanRelationData.connect ?? [])
+                );
+
                 // Query database to find the order of the last relation
                 const start = await this.createQueryBuilder(joinTable.name)
                   .where({
@@ -918,7 +1002,7 @@ export const createEntityManager = (db: Database): EntityManager => {
 
                 const startOrder = (start as any)?.max || 0;
 
-                const rows = (cleanRelationData.connect ?? []).map((data, idx) => ({
+                const rows = connects.map((data, idx) => ({
                   [joinColumn.name]: data.id,
                   [idColumn.name]: id,
                   [typeColumn.name]: uid,
@@ -947,7 +1031,17 @@ export const createEntityManager = (db: Database): EntityManager => {
               .execute();
 
             if (hasSet) {
-              const rows = (cleanRelationData.set ?? []).map((data, idx) => ({
+              // Single media is last-wins for multi-item set/array shapes too,
+              // mirroring create and `normalizeXToOneRelationValue` for xToOne relations.
+              // Without the slice, `{ set: [B, C] }` would insert both rows and — because
+              // morphOne populate reads `order asc` + first — leave B observable with a
+              // hidden C row, the same phantom-row defect the connect path guards against.
+              const setData = uniqBy(
+                'id',
+                isSingle ? (cleanRelationData.set ?? []).slice(-1) : (cleanRelationData.set ?? [])
+              );
+
+              const rows = setData.map((data, idx) => ({
                 [joinColumn.name]: data.id,
                 [idColumn.name]: id,
                 [typeColumn.name]: uid,
