@@ -306,7 +306,118 @@ jobs:
           org-slug: strapi
           token: ${{ secrets.TRUNK_API_TOKEN }}
         continue-on-error: true
+  # The Media Library specs run in dedicated jobs rather than the shared matrix, and each
+  # job picks its suite explicitly with `mediaLibrarySuite`. Nothing about the product
+  # default decides what runs here: the shared matrix sets neither suite, so it is
+  # unaffected by both, and the two suites cannot collide in one app.
+  #
+  # Chromium only, for two different reasons — this is the constraint to lift first if
+  # the Media Library suite should join the shared matrix.
+  #
+  # WebKit is a hard limitation: the upload drag-and-drop helper builds a DataTransfer,
+  # which WebKit does not implement.
+  #
+  # Firefox is simply unknown. It has never been run against this suite: locally the
+  # admin login does not go through under Firefox, so every test drives a logged-out app
+  # and fails on the first click — which says nothing about the Media Library itself. CI
+  # does run Firefox for the rest of the e2e suite, so login works there.
+  #
+  # The folder drag & drop specs are skipped in the specs themselves rather than filtered
+  # out here — see `RUN_FOLDER_DRAG_SPECS` in `drag-drop-deep.spec.ts`. A grep filter only
+  # protects this job, and those specs must stay parked wherever they are run from.
+  e2e_media_library:
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
+    timeout-minutes: 45
+    needs: [conditions, build]
+    name: '[CE] e2e media library (browser: chromium)'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 22
+
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+
+      - name: Install Playwright Browsers
+        run: node_modules/.bin/playwright install --with-deps chromium
+
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+
+      - name: Run [CE] e2e media library E2E tests
+        uses: ./.github/actions/run-e2e-tests
+        with:
+          runEE: false
+          useLegacyMediaLibrary: false
+          mediaLibrarySuite: current
+          domains: media-library
+          jestOptions: '--project=chromium'
+
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        if: failure()
+        with:
+          name: ce-media-library-playwright-trace-${{ github.run_id }}-${{ github.job }}
+          path: test-apps/e2e/test-results/**/trace.zip
+          retention-days: 1
+
+      - name: Upload results to trunk
+        if: '!cancelled()'
+        uses: trunk-io/analytics-uploader@1198efcc0976501147b10a7e343c3fa069527526 # v2.0.9
+        with:
+          junit-paths: test-apps/junit-reports/*.xml
+          org-slug: strapi
+          token: ${{ secrets.TRUNK_API_TOKEN }}
+        continue-on-error: true
+
+  e2e_media_library_legacy:
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
+    timeout-minutes: 45
+    needs: [conditions, build]
+    name: '[CE] e2e media library (legacy) (browser: chromium)'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 22
+
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+
+      - name: Install Playwright Browsers
+        run: node_modules/.bin/playwright install --with-deps chromium
+
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+
+      - name: Run [CE] e2e media library (legacy) E2E tests
+        uses: ./.github/actions/run-e2e-tests
+        with:
+          runEE: false
+          useLegacyMediaLibrary: true
+          mediaLibrarySuite: legacy
+          domains: media-library
+          jestOptions: '--project=chromium'
+
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        if: failure()
+        with:
+          name: ce-media-library-legacy-playwright-trace-${{ github.run_id }}-${{ github.job }}
+          path: test-apps/e2e/test-results/**/trace.zip
+          retention-days: 1
+
+      - name: Upload results to trunk
+        if: '!cancelled()'
+        uses: trunk-io/analytics-uploader@1198efcc0976501147b10a7e343c3fa069527526 # v2.0.9
+        with:
+          junit-paths: test-apps/junit-reports/*.xml
+          org-slug: strapi
+          token: ${{ secrets.TRUNK_API_TOKEN }}
+        continue-on-error: true
   e2e_ee:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
     timeout-minutes: 60
@@ -701,6 +812,8 @@ jobs:
         unit_front,
         e2e_ce,
         e2e_ee,
+        e2e_media_library,
+        e2e_media_library_legacy,
         cli,
         migration_v5,
         api_ce_pg,
