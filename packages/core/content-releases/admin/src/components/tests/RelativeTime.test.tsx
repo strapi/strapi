@@ -41,4 +41,11 @@ describe('RelativeTime', () => {
     expect(screen.getByRole('time')).toHaveTextContent('5 minutes ago');
     // expect(getByText('5 minutes ago')).toBeInTheDocument();
   });
+
+  // Regression for https://github.com/strapi/strapi/issues/27382
+  it('does not throw when the timestamp is an invalid Date', () => {
+    render(<RelativeTime timestamp={new Date('')} />);
+
+    expect(screen.getByRole('time')).toHaveTextContent('-');
+  });
 });
