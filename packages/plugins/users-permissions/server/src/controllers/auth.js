@@ -205,7 +205,15 @@ module.exports = ({ strapi }) => ({
 
     // Connect the user with the third-party provider.
     try {
-      const user = await getService('providers').connect(provider, ctx.query);
+      const grantResponse = _.get(ctx, 'session.grant.response');
+
+      if (!grantResponse) {
+        throw new ApplicationError('OAuth authentication requires a completed provider session');
+      }
+
+      const user = await getService('providers').connect(provider, grantResponse, {
+        grantResponse,
+      });
 
       if (user.blocked) {
         throw new ForbiddenError('Your account has been blocked by an administrator');
@@ -371,7 +379,14 @@ module.exports = ({ strapi }) => ({
     const requestHttpOnly = ctx.request.header['x-strapi-refresh-cookie'] === 'httpOnly';
     if (upSessions?.httpOnly || requestHttpOnly) {
       const cookieName = upSessions.cookie?.name || 'strapi_up_refresh';
-      ctx.cookies.set(cookieName, '', { expires: new Date(0) });
+      const isProduction = process.env.NODE_ENV === 'production';
+
+      const { maxAge: _maxAge, ...cookieOptions } = buildRefreshCookieOptions(
+        upSessions,
+        isProduction
+      );
+
+      ctx.cookies.set(cookieName, '', { ...cookieOptions, expires: new Date(0) });
     }
     return ctx.send({ ok: true });
   },

@@ -7,6 +7,7 @@ import {
   OperationParametersAssembler,
 } from '../src/assemblers/document/path/path-item/operation';
 import { OperationContextFactory } from '../src/context';
+import { createTestContentAPISchemaRegistry } from './helpers/content-api-schema-registry';
 
 /**
  * Params registered via strapi.contentAPI.addQueryParams / addInputParams are
@@ -76,7 +77,15 @@ function createMockContentAPI() {
 describe('OpenAPI operation assemblers – params added via addQueryParams / addInputParams', () => {
   const createOperationContext = () => {
     const factory = new OperationContextFactory();
-    return factory.create({ strapi: {} as Core.Strapi, routes: [] }, {});
+    return factory.create(
+      {
+        strapi: {
+          contentAPISchemaRegistry: createTestContentAPISchemaRegistry(),
+        } as Core.Strapi,
+        routes: [],
+      },
+      {}
+    );
   };
 
   describe('OperationParametersAssembler', () => {

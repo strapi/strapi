@@ -1,5 +1,5 @@
 {
-  "apiError.FileTooBig": "El fitxer supera la mida màxima permesa.",
+  "apiError.FileTooBig": "El fitxer és massa gran per pujar-lo. Supera la mida màxima de petició permesa pel servidor.",
   "bulk.select.label": "Seleccioneu tots els fitxers",
   "button.next": "Següent",
   "checkControl.crop-duplicate": "Duplica i retalla l'imatge",

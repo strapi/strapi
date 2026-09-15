@@ -225,13 +225,25 @@ describe('AssetActionsMenu', () => {
   });
 
   describe('Replace media', () => {
+    // Mirrors the drawer's own picker test: the two entry points call the same
+    // endpoint, and this one had drifted — its input carried no `accept`, so a
+    // JPG could be replaced with PNG bytes still served under a `.jpg` url.
+    it("offers only the asset's own type in the file picker", async () => {
+      setup();
+
+      // eslint-disable-next-line testing-library/no-node-access
+      expect(document.querySelector('input[type="file"]')).toHaveAttribute('accept', 'image/png');
+    });
+
     it('warns before opening the file picker, and uploads the picked file against this asset', async () => {
       let uploadedId: string | null = null;
+      let sentFileInfo: string | null = null;
       server.use(
         http.post(
           '*/upload/files/:id/replace',
-          ({ params }) => {
+          async ({ params, request }) => {
             uploadedId = params.id as string;
+            sentFileInfo = String((await request.formData()).get('fileInfo'));
             return HttpResponse.json({ id: 5, name: 'new.png' });
           },
           { once: true }
@@ -253,6 +265,7 @@ describe('AssetActionsMenu', () => {
       await user.upload(input, new globalThis.File(['x'], 'new.png', { type: 'image/png' }));
 
       await waitFor(() => expect(uploadedId).toBe('5'));
+      expect(JSON.parse(String(sentFileInfo))).toMatchObject({ name: 'photo.png' });
       expect(mockToggleNotification).toHaveBeenCalledWith({
         type: 'success',
         message: 'File replaced.',

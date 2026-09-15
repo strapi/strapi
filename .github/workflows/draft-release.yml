@@ -1,0 +1,74 @@
+name: 'Draft release'
+
+# Prepares a release candidate: pins the range against the published npm baseline, decides the
+# version from the commits that landed, cuts `releases/x.y.z`, opens the draft PR against `main`,
+# attributes every shipping PR, and reconciles milestones.
+#
+# Runs as many times as a release window needs. A second run folds whatever landed on `develop`
+# since into the same candidate: it advances the release branch, refills the shipping milestone, and
+# rewrites the report on the pull request already open. When the new commits change the version, it
+# redrafts the candidate under the version they decided.
+#
+# Defaults to a dry run. A dry run performs no write at all and reports the exact list of writes the
+# real run would perform.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run? Default: true.'
+        type: boolean
+        required: false
+        default: true
+      version:
+        description: 'Explicit x.y.z version. Default: auto-computed.'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+# Never two at once. Both runs would compute the same release and race each other's writes, and the
+# journal exists to survive a run that stops, not two that interleave.
+concurrency:
+  group: draft-release
+  cancel-in-progress: false
+
+jobs:
+  draft:
+    name: 'Draft'
+    runs-on: ubuntu-latest
+    if: github.repository == 'strapi/strapi'
+    steps:
+      - uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ secrets.DRAFT_RELEASE_APP_ID }}
+          private-key: ${{ secrets.DRAFT_RELEASE_APP_SECRET }}
+
+      - uses: actions/checkout@v6
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          fetch-depth: 0 # tags and full first-parent history are both required
+
+      # The action runs its TypeScript sources directly through Node's type stripping, which needs
+      # Node >= 22.18. Pinned here rather than left to the runner image default.
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Draft the release
+        id: draft
+        uses: ./.github/actions/draft-release
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          version: ${{ inputs.version }}
+          dry_run: ${{ inputs.dry_run }}
+
+      - name: Upload the write journal
+        if: always() && steps.draft.outputs.journal_path != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: draft-release-journal
+          path: ${{ steps.draft.outputs.journal_path }}
+          if-no-files-found: warn

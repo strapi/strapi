@@ -793,7 +793,7 @@ const PublishAction: DocumentActionComponent = ({
   }, [components, formValues, model, schema]);
 
   const fetchDraftRelationsCount = React.useCallback(async () => {
-    if (!document?.documentId || isListView) {
+    if (!document?.documentId || isListView || !schema?.options?.draftAndPublish) {
       return;
     }
 
@@ -825,6 +825,7 @@ const PublishAction: DocumentActionComponent = ({
     documentId,
     isListView,
     model,
+    schema?.options?.draftAndPublish,
   ]);
 
   React.useEffect(() => {
@@ -942,10 +943,13 @@ const PublishAction: DocumentActionComponent = ({
          * TODO: refactor the router so we can just do `../${res.data.documentId}` instead of this.
          */
         if (idToPublish === 'create' && !fromRelationModal) {
-          navigate({
-            pathname: `../${collectionType}/${model}/${res.data.documentId}`,
-            search: rawQuery,
-          });
+          navigate(
+            {
+              pathname: `../${collectionType}/${model}/${res.data.documentId}`,
+              search: rawQuery,
+            },
+            { replace: true }
+          );
         } else if (fromRelationModal) {
           const newRelation = {
             documentId: res.data.documentId,

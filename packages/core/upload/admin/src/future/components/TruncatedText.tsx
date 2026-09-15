@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { Tooltip, Typography, type TypographyProps } from '@strapi/design-system';
 
@@ -17,43 +17,68 @@ interface TruncatedTextProps extends Omit<TypographyProps, 'children' | 'ellipsi
  * description that merely repeats the visible text.
  *
  * Whether the text is truncated can't be derived from the string — it depends on
- * the rendered width — so it is measured, and re-measured on resize. That is
- * what keeps it correct as a card reflows, a column resizes, or the sidebar rail
- * changes width.
+ * the rendered width — so it has to be measured. That measurement happens when
+ * the pointer or focus arrives, not at mount.
+ *
+ * Measuring at mount is the obvious approach and it does not work here. The
+ * reading is only correct once the row's width constraint has reached this span,
+ * and the tree remounts its rows during first render: the instance that survives
+ * can take its one measurement while still unconstrained, conclude it fits, and
+ * be stuck there. Nothing corrects it afterwards, because a ResizeObserver on
+ * this span never fires again — an ancestor clamps the row, so the text
+ * overflows inside a box whose own size stops changing.
+ *
+ * Reading on hover sidesteps all of that. It is the only moment the answer is
+ * needed, the layout is settled by then, and nothing is cached across remounts
+ * or resizes that could go stale.
  */
 export const TruncatedText = ({ children, ...props }: TruncatedTextProps) => {
-  const textRef = useRef<HTMLSpanElement>(null);
+  const textRef = useRef<HTMLSpanElement | null>(null);
   const [isTruncated, setIsTruncated] = useState(false);
 
-  useLayoutEffect(() => {
+  const checkTruncation = () => {
     const el = textRef.current;
-    if (!el) {
-      return;
-    }
 
-    const checkTruncation = () => {
+    if (el) {
       setIsTruncated(el.scrollWidth > el.clientWidth);
-    };
+    }
+  };
 
-    checkTruncation();
+  // A ref callback rather than useRef alone, so the first measurement happens
+  // when the node attaches and again whenever it is replaced. The tree remounts
+  // its rows during first render, and a value measured against the discarded
+  // node would never be revisited — this re-runs against the node that survives.
+  const attachRef = (el: HTMLSpanElement | null) => {
+    textRef.current = el;
 
-    const observer = new ResizeObserver(checkTruncation);
-    observer.observe(el);
+    if (el) {
+      checkTruncation();
+    }
+  };
 
-    return () => observer.disconnect();
-  }, [children]);
-
-  const text = (
-    <Typography ref={textRef} ellipsis {...props}>
-      {children}
-    </Typography>
+  // The Tooltip stays mounted and the *label* is what's conditional, rather than
+  // swapping between a wrapped and unwrapped span. Swapping loses the first
+  // hover: the measurement that decides to show a tooltip is itself triggered by
+  // the pointer arriving, so the trigger would mount underneath a pointer that
+  // has already entered, and Radix — which starts watching at mount — sees no
+  // enter event and stays closed until the pointer leaves and returns.
+  //
+  // With `label` empty the DS Tooltip renders its child as-is and attaches
+  // nothing, so untruncated text still costs no DOM node and announces no
+  // description duplicating what is already on screen.
+  return (
+    <Tooltip label={isTruncated ? children : undefined}>
+      <Typography
+        ref={attachRef}
+        ellipsis
+        // Focus is covered as well as hover: the tooltip has to be reachable by
+        // keyboard, and these rows are buttons.
+        onPointerEnter={checkTruncation}
+        onFocus={checkTruncation}
+        {...props}
+      >
+        {children}
+      </Typography>
+    </Tooltip>
   );
-
-  if (isTruncated) {
-    // The DS Tooltip renders as its child, so this adds no DOM node — the
-    // Typography stays the same flex/grid item it was and layout is untouched.
-    return <Tooltip label={children}>{text}</Tooltip>;
-  }
-
-  return text;
 };

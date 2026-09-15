@@ -12,6 +12,15 @@ jest.mock('../../../../services/assets', () => ({
   useGetAssetsQuery: (...args: unknown[]) => mockUseGetAssetsQuery(...args),
 }));
 
+let mockCompletedUploads: Array<{ asset: File; completedAt: number }> = [];
+
+// Only the selector is stubbed: `services/api` imports the rest of this module,
+// so replacing it wholesale would break the hook's own import graph.
+jest.mock('../../../../store/uploadProgress', () => ({
+  ...jest.requireActual('../../../../store/uploadProgress'),
+  selectCompletedUploads: () => mockCompletedUploads,
+}));
+
 const createMockAsset = (id: number): File => ({
   id,
   name: `asset-${id}.png`,
@@ -120,6 +129,7 @@ const renderWithFolder = () => {
 describe('useInfiniteAssets', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCompletedUploads = [];
   });
 
   it('returns first page of assets on initial load', () => {
@@ -742,6 +752,94 @@ describe('useInfiniteAssets', () => {
     expect(ids[PAGE_SIZE - 1]).toBe(PAGE_SIZE);
   });
 
+  describe('returning to a folder', () => {
+    const rootPage1 = createMockPage(1, 3, 50);
+    const rootPage2 = createMockPage(2, 3, 50);
+    const subfolderPage1 = createMockPage(1, 1, 2, 2);
+
+    /**
+     * The root has three pages, the subfolder one. `whenBack` lets a test return
+     * something other than settled data after the user comes back — modelling a
+     * re-read that is still in flight rather than instant.
+     */
+    const mockFolders = (whenBack?: () => object | undefined) => {
+      mockUseGetAssetsQuery.mockImplementation(
+        ({ folder, page: p }: { folder: number | null; page: number }) => {
+          if (folder !== null) {
+            return subfolderPage1;
+          }
+
+          return whenBack?.() ?? (p === 2 ? rootPage2 : rootPage1);
+        }
+      );
+    };
+
+    it('restores the pages a folder had loaded when the user comes back to it', () => {
+      mockFolders();
+
+      const { getResult, changeFolder } = renderWithFolder();
+
+      act(() => {
+        getResult().fetchNextPage();
+      });
+
+      expect(getResult().assets).toHaveLength(PAGE_SIZE * 2);
+
+      changeFolder(26);
+
+      expect(getResult().assets).toHaveLength(2);
+
+      changeFolder(null);
+
+      expect(getResult().assets).toHaveLength(PAGE_SIZE * 2);
+      // Page 1 is back too, in front — the whole list returned, not just the
+      // page current when the user left.
+      expect(getResult().assets[0].id).toBe(1);
+      expect(getResult().assets[PAGE_SIZE].id).toBe(PAGE_SIZE + 1);
+      // And it resumes at the page it was read to, so the next scroll asks for
+      // page 3 rather than replaying pages the user already has.
+      expect(mockUseGetAssetsQuery).toHaveBeenLastCalledWith(
+        expect.objectContaining({ folder: null, page: 2 }),
+        expect.anything()
+      );
+    });
+
+    it('shows the restored rows rather than a spinner while the pages re-read', () => {
+      // Leaving evicts the folder's cache entries, so returning always re-reads.
+      // But rows stay on screen throughout, so it's a refresh, not a load.
+      let hasReturned = false;
+      mockFolders(() => (hasReturned ? PENDING_QUERY : undefined));
+
+      const { getResult, changeFolder } = renderWithFolder();
+
+      act(() => {
+        getResult().fetchNextPage();
+      });
+
+      changeFolder(26);
+      hasReturned = true;
+      changeFolder(null);
+
+      expect(getResult().isLoading).toBe(false);
+      expect(getResult().assets).toHaveLength(PAGE_SIZE * 2);
+      expect(getResult().pagination?.total).toBe(50);
+    });
+
+    it('still reports loading when the list it returns to has nothing to show', () => {
+      // Nothing was ever loaded for folder 26, so there is nothing to restore.
+      mockUseGetAssetsQuery.mockImplementation(({ folder }: { folder: number | null }) =>
+        folder === null ? rootPage1 : PENDING_QUERY
+      );
+
+      const { getResult, changeFolder } = renderWithFolder();
+
+      changeFolder(26);
+
+      expect(getResult().isLoading).toBe(true);
+      expect(getResult().assets).toHaveLength(0);
+    });
+  });
+
   it('returns error from query', () => {
     const mockError = { status: 500, data: 'Server error' };
     mockUseGetAssetsQuery.mockReturnValue({
@@ -755,5 +853,149 @@ describe('useInfiniteAssets', () => {
     const { result } = renderHook(() => useInfiniteAssets());
 
     expect(result.current.error).toBe(mockError);
+  });
+});
+
+describe('useInfiniteAssets — assets uploaded during the batch', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockCompletedUploads = [];
+  });
+
+  const justUploaded = (overrides: Partial<File> = {}, completedAt = 2_000) => ({
+    asset: {
+      ...createMockAsset(999),
+      name: 'just-uploaded.png',
+      // Newer than anything `createMockAsset` produces, so the default sort puts
+      // it at the top of the list.
+      updatedAt: '2030-01-01T00:00:00.000Z',
+      folder: null,
+      ...overrides,
+    } as File,
+    completedAt,
+  });
+
+  it('shows an asset as soon as its own upload finishes', () => {
+    mockUseGetAssetsQuery.mockReturnValue(createMockPage(1, 1, 20));
+    mockCompletedUploads = [justUploaded()];
+
+    const { result } = renderHook(() => useInfiniteAssets());
+
+    expect(result.current.assets[0].name).toBe('just-uploaded.png');
+    expect(result.current.assets).toHaveLength(PAGE_SIZE + 1);
+  });
+
+  it('leaves the list alone while a search is active', () => {
+    mockUseGetAssetsQuery.mockReturnValue(createMockPage(1, 1, 20));
+    mockCompletedUploads = [justUploaded()];
+
+    const { result } = renderHook(() => useInfiniteAssets({ search: 'report' }));
+
+    // Whether an upload matches the query is the server's call, so a searched
+    // list waits for the end-of-batch refetch.
+    expect(result.current.assets).toHaveLength(PAGE_SIZE);
+  });
+
+  it('leaves the list alone while list filters are active', () => {
+    mockUseGetAssetsQuery.mockReturnValue(createMockPage(1, 1, 20));
+    mockCompletedUploads = [justUploaded()];
+
+    const { result } = renderHook(() =>
+      useInfiniteAssets({ filters: [{ mime: { $contains: 'image' } }] })
+    );
+
+    expect(result.current.assets).toHaveLength(PAGE_SIZE);
+  });
+
+  it('ignores an upload that landed in another folder', () => {
+    mockUseGetAssetsQuery.mockReturnValue(createMockPage(1, 1, 20));
+    mockCompletedUploads = [justUploaded({ folder: 42 })];
+
+    const { result } = renderHook(() => useInfiniteAssets({ folder: 7 }));
+
+    expect(result.current.assets).toHaveLength(PAGE_SIZE);
+  });
+
+  it('shows an upload that landed in the folder being viewed', () => {
+    mockUseGetAssetsQuery.mockReturnValue(createMockPage(1, 1, 20));
+    mockCompletedUploads = [justUploaded({ folder: 7 })];
+
+    const { result } = renderHook(() => useInfiniteAssets({ folder: 7 }));
+
+    expect(result.current.assets[0].name).toBe('just-uploaded.png');
+  });
+
+  /**
+   * A response that the server produced after the upload was stored. Past this
+   * point the list knows about the asset, so its absence means it is genuinely
+   * gone (deleted) or elsewhere (moved) — not that the list is behind.
+   */
+  const answeredAfterUpload = (completedAt: number) => ({
+    ...createMockPage(1, 1, 20),
+    startedTimeStamp: completedAt + 1,
+    fulfilledTimeStamp: completedAt + 2,
+  });
+
+  it('stops bridging once the list has answered on that upload', () => {
+    mockUseGetAssetsQuery.mockReturnValue(answeredAfterUpload(2_000));
+    mockCompletedUploads = [justUploaded({}, 2_000)];
+
+    const { result } = renderHook(() => useInfiniteAssets());
+
+    // The asset is not in the refetched page — deleted after the batch settled.
+    // Re-inserting it would resurrect a row whose asset no longer exists.
+    expect(result.current.assets).toHaveLength(PAGE_SIZE);
+  });
+
+  it('keeps bridging an upload that finished after the loaded response', () => {
+    mockUseGetAssetsQuery.mockReturnValue(answeredAfterUpload(1_000));
+    // Completed after that response was requested, so the list cannot know it yet.
+    mockCompletedUploads = [justUploaded({}, 5_000)];
+
+    const { result } = renderHook(() => useInfiniteAssets());
+
+    expect(result.current.assets[0].name).toBe('just-uploaded.png');
+  });
+
+  it('keeps bridging when the loaded response was requested before the upload', () => {
+    // Requested at 1000, delivered at 3000, upload stored at 2000: the server was
+    // asked before the asset existed, so its absence says nothing. Comparing
+    // against the delivery time instead would settle here and hide the asset —
+    // exactly the gap this bridging exists to cover.
+    mockUseGetAssetsQuery.mockReturnValue({
+      ...createMockPage(1, 1, 20),
+      startedTimeStamp: 1_000,
+      fulfilledTimeStamp: 3_000,
+    });
+    mockCompletedUploads = [justUploaded({}, 2_000)];
+
+    const { result } = renderHook(() => useInfiniteAssets());
+
+    expect(result.current.assets[0].name).toBe('just-uploaded.png');
+  });
+
+  it('keeps bridging while a refetch is still in flight', () => {
+    // `fulfilledTimeStamp` still belongs to the previous response, so the loaded
+    // data predates the upload even though a newer request has started.
+    mockUseGetAssetsQuery.mockReturnValue({
+      ...createMockPage(1, 1, 20),
+      startedTimeStamp: 3_000,
+      fulfilledTimeStamp: 1_000,
+    });
+    mockCompletedUploads = [justUploaded({}, 2_000)];
+
+    const { result } = renderHook(() => useInfiniteAssets());
+
+    expect(result.current.assets[0].name).toBe('just-uploaded.png');
+  });
+
+  it('matches the populated folder relation the list returns', () => {
+    mockUseGetAssetsQuery.mockReturnValue(createMockPage(1, 1, 20));
+    // A refetched asset carries `folder` as the populated object rather than an id.
+    mockCompletedUploads = [justUploaded({ folder: { id: 7 } as unknown as number })];
+
+    const { result } = renderHook(() => useInfiniteAssets({ folder: 7 }));
+
+    expect(result.current.assets[0].name).toBe('just-uploaded.png');
   });
 });

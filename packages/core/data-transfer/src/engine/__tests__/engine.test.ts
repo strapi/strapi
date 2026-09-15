@@ -18,7 +18,8 @@ import type {
   TransferFilterPreset,
 } from '../../types';
 
-import { extendExpectForDataTransferTests } from '../../__tests__/test-utils';
+import { extendExpectForDataTransferTests, getStrapiFactory } from '../../__tests__/test-utils';
+import { createLocalStrapiDestinationProvider } from '../../strapi/providers';
 import { TransferEngineValidationError } from '../errors';
 
 /**
@@ -474,6 +475,163 @@ describe('Transfer engine', () => {
 
       expect(completeSource).toHaveAllSourceStagesCalledTimes(1);
       expect(completeDestination).toHaveAllDestinationStagesCalledTimes(1);
+    });
+
+    test('validates included source stages before preparing the destination', async () => {
+      const validationError = new Error('invalid asset archive');
+      const source = {
+        ...completeSource,
+        validateStage: jest.fn().mockImplementation((stage: TransferStage) => {
+          if (stage === 'assets') {
+            throw validationError;
+          }
+        }),
+      };
+      const beforeTransfer = jest.fn();
+      const destination = createDestination({ beforeTransfer });
+      const engine = createTransferEngine(source, destination, defaultOptions);
+
+      await expect(engine.transfer()).rejects.toThrow(validationError);
+
+      expect(source.validateStage).toHaveBeenCalledWith('assets');
+      expect(beforeTransfer).not.toHaveBeenCalled();
+    });
+
+    test('closes both providers when stage validation fails', async () => {
+      const validationError = new Error('invalid asset archive');
+      const source = {
+        ...completeSource,
+        validateStage: jest.fn().mockRejectedValue(validationError),
+      };
+      const disableLifecycles = jest.fn();
+      const enableLifecycles = jest.fn();
+      const rollback = jest.fn();
+      const destination = createDestination({
+        bootstrap: disableLifecycles,
+        rollback,
+        close: enableLifecycles,
+      });
+      const engine = createTransferEngine(source, destination, defaultOptions);
+
+      await expect(engine.transfer()).rejects.toThrow(validationError);
+
+      expect(disableLifecycles).toHaveBeenCalledTimes(1);
+      expect(rollback).toHaveBeenCalled();
+      expect(source.close).toHaveBeenCalledTimes(1);
+      expect(enableLifecycles).toHaveBeenCalledTimes(1);
+      expect(enableLifecycles.mock.invocationCallOrder[0]).toBeGreaterThan(
+        rollback.mock.invocationCallOrder[0]
+      );
+    });
+
+    test('re-enables local Strapi lifecycles when stage validation fails', async () => {
+      const validationError = new Error('invalid asset archive');
+      const source = {
+        ...completeSource,
+        getMetadata: jest.fn().mockResolvedValue(null),
+        getSchemas: jest.fn().mockResolvedValue(null),
+        validateStage: jest.fn().mockRejectedValue(validationError),
+      };
+      const enableLifecycles = jest.fn();
+      const disableLifecycles = jest.fn();
+      const rollback = jest.fn();
+      const transaction = jest.fn(async (handler) => {
+        await handler({ trx: {}, rollback });
+      });
+      const strapi = getStrapiFactory({
+        config: {
+          get(key: string) {
+            if (key === 'info.strapi') {
+              return '5.0.0';
+            }
+            if (key === 'plugin::upload') {
+              return { provider: 'local' };
+            }
+            return undefined;
+          },
+        },
+        db: {
+          transaction,
+          lifecycles: {
+            enable: enableLifecycles,
+            disable: disableLifecycles,
+          },
+        },
+        contentTypes: {},
+        components: {},
+      })();
+      const destination = createLocalStrapiDestinationProvider({
+        getStrapi: () => strapi,
+        autoDestroy: false,
+        strategy: 'restore',
+        restore: {},
+      });
+      const engine = createTransferEngine(source, destination, {
+        ...defaultOptions,
+        versionStrategy: 'ignore',
+        schemaStrategy: 'ignore',
+      });
+
+      await expect(engine.transfer()).rejects.toThrow(validationError);
+
+      expect(disableLifecycles).toHaveBeenCalledTimes(1);
+      expect(rollback).toHaveBeenCalledTimes(1);
+      expect(enableLifecycles).toHaveBeenCalledTimes(1);
+      expect(enableLifecycles.mock.invocationCallOrder[0]).toBeGreaterThan(
+        disableLifecycles.mock.invocationCallOrder[0]
+      );
+    });
+
+    test('reports but does not rethrow cleanup errors raised on the failure path', async () => {
+      const validationError = new Error('invalid asset archive');
+      const source = {
+        ...completeSource,
+        validateStage: jest.fn().mockRejectedValue(validationError),
+        close: jest.fn().mockRejectedValue(new Error('source close failed')),
+      };
+      const destination = createDestination({
+        rollback: jest.fn().mockRejectedValue(new Error('rollback failed')),
+      });
+      const engine = createTransferEngine(source, destination, defaultOptions);
+
+      await expect(engine.transfer()).rejects.toThrow(validationError);
+
+      expect(destination.close).toHaveBeenCalledTimes(1);
+      expect(engine.diagnostics.stack.items.filter((item) => item.kind === 'warning')).toHaveLength(
+        2
+      );
+    });
+
+    test('does not retry provider cleanup when close itself fails', async () => {
+      const closeError = new Error('source close failed');
+      const source = {
+        ...completeSource,
+        close: jest.fn().mockRejectedValue(closeError),
+      };
+      const rollback = jest.fn();
+      const destination = createDestination({ rollback });
+      const engine = createTransferEngine(source, destination, defaultOptions);
+
+      await expect(engine.transfer()).rejects.toThrow(closeError);
+
+      expect(rollback).not.toHaveBeenCalled();
+      expect(source.close).toHaveBeenCalledTimes(1);
+      expect(destination.close).toHaveBeenCalledTimes(1);
+    });
+
+    test('does not validate an excluded source stage', async () => {
+      const source = {
+        ...completeSource,
+        validateStage: jest.fn(),
+      };
+      const engine = createTransferEngine(source, completeDestination, {
+        ...defaultOptions,
+        exclude: ['files'],
+      });
+
+      await engine.transfer();
+
+      expect(source.validateStage).not.toHaveBeenCalledWith('assets');
     });
 
     test.each<

@@ -1,0 +1,20 @@
+{
+  "name": "draft-release",
+  "version": "5.52.3",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0 <=26.x.x"
+  },
+  "scripts": {
+    "lint": "run -T eslint . --max-warnings=0",
+    "test:ts": "run -T tsc --noEmit --project tsconfig.json",
+    "test:unit": "node --test \"__tests__/**/*.test.ts\"",
+    "test:unit:watch": "node --test --watch \"__tests__/**/*.test.ts\""
+  },
+  "devDependencies": {
+    "@types/node": "20.19.41",
+    "typescript": "5.9.3"
+  }
+}

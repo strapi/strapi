@@ -156,6 +156,7 @@
   "containers.SettingsPage.pluginHeaderDescription": "Einstellungen für alle Sammlungen und Gruppen konfigurieren",
   "containers.SettingsView.list.subtitle": "Layout und Darstellung für alle Sammlungen und Gruppen konfigurieren",
   "containers.SettingsView.list.title": "Darstellungsoptionen",
+  "containers.empty-label": "Unbenannt",
   "containers.untitled": "Unbenannt",
   "dnd.cancel-item": "{item}, fallen gelassen. Neuordnung abgebrochen.",
   "dnd.drop-item": "{item}, fallen gelassen. Endposition in der Liste: {position}.",

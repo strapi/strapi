@@ -164,7 +164,7 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
 
 const resolveProductionConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
   const {
-    options: { minify, sourcemaps },
+    options: { minify, sourcemap },
   } = ctx;
 
   const baseConfig = await resolveBaseConfig(ctx);
@@ -177,7 +177,7 @@ const resolveProductionConfig = async (ctx: BuildContext): Promise<InlineConfig>
       ...baseConfig.build,
       assetsDir: '',
       minify,
-      sourcemap: sourcemaps,
+      sourcemap,
       rollupOptions: {
         input: {
           strapi: ctx.entry,
