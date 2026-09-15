@@ -5,7 +5,6 @@ import { createStrapi, compileStrapi } from '@strapi/core';
 import type { Database } from '@strapi/database';
 
 import type { StrapiCommand } from '../../types';
-import { runAction } from '../../utils/helpers';
 
 type Strategy = 'replace' | 'merge' | 'keep';
 
@@ -192,7 +191,7 @@ const command: StrapiCommand = () => {
     .description('Restore configurations of your application')
     .option('-f, --file <file>', 'Input file, default input is stdin')
     .option('-s, --strategy <strategy>', 'Strategy name, one of: "replace", "merge", "keep"')
-    .action(runAction('configuration:restore', action));
+    .action(action);
 };
 
 export { action, command };

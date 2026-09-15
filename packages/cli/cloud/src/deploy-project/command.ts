@@ -1,6 +1,5 @@
 import { createCommand } from 'commander';
 import { type StrapiCloudCommand } from '../types';
-import { runAction } from '../utils/helpers';
 import action from './action';
 
 /**
@@ -14,7 +13,7 @@ const command: StrapiCloudCommand = ({ ctx }) => {
     .option('-s, --silent', "Don't log anything")
     .option('-f, --force', 'Skip confirmation to deploy')
     .option('-e, --env <name>', 'Specify the environment to deploy')
-    .action((opts) => runAction('deploy', action)(ctx, opts));
+    .action((opts) => action(ctx, opts));
 };
 
 export default command;
