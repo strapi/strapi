@@ -14,13 +14,30 @@ jest.mock('react-router-dom', () => {
   };
 });
 
-// Mock CM hook once and override return per-test
+// Mock CM hooks used by tests
 const mockUseDocumentLayout = jest.fn(() => ({ edit: undefined as unknown as EditLayout }));
 jest.mock('@strapi/content-manager/strapi-admin', () => {
   const actual = jest.requireActual('@strapi/content-manager/strapi-admin');
   return {
     ...actual,
     unstable_useDocumentLayout: () => mockUseDocumentLayout(),
+  };
+});
+
+const mockUseGetLocalesQuery = jest.fn(() => ({
+  data: [{ code: 'en', isDefault: true, name: 'English' }],
+}));
+const mockUseQueryParams = jest.fn(() => [{ query: { plugins: { i18n: { locale: 'en' } } } }]);
+
+jest.mock('../../services/locales', () => ({
+  useGetLocalesQuery: () => mockUseGetLocalesQuery(),
+}));
+
+jest.mock('@strapi/admin/strapi-admin', () => {
+  const actual = jest.requireActual('@strapi/admin/strapi-admin');
+  return {
+    ...actual,
+    useQueryParams: () => mockUseQueryParams(),
   };
 });
 
@@ -98,7 +115,7 @@ describe('mutateEditViewHook – label action injection and localization', () =>
     }
   });
 
-  it('does not show localization icon for a non-localized component field', () => {
+  it('does not show a localization icon for a non-localized field on the default locale', () => {
     const componentUid = 'shared.button';
 
     const layout = makeEditLayout({
@@ -128,13 +145,146 @@ describe('mutateEditViewHook – label action injection and localization', () =>
     });
 
     mockUseDocumentLayout.mockReturnValue({ edit: layout });
+    mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'en' } } } }]);
+    mockUseGetLocalesQuery.mockReturnValue({
+      data: [{ code: 'en', isDefault: true, name: 'English' }],
+    });
+
+    const { layout: mutated } = mutateEditViewHook({ layout });
+    const action = mutated.layout[0][0][0].labelAction as React.ReactElement;
+
+    // NonLocalizedLabelAction mounts but renders null on the default locale (#24890).
+    expect(React.isValidElement(action)).toBe(true);
+    render(action);
+    expect(
+      screen.queryByText(/This value is unique for the selected locale/i)
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/This value is common to all locales/i)).not.toBeInTheDocument();
+  });
+
+  it('shows a locked tooltip for non-localized fields on a non-default locale', () => {
+    const titleField = makeEditField({
+      attribute: { type: 'string', pluginOptions: { i18n: { localized: false } } },
+    });
+
+    const layout = makeEditLayout({ ctLocalized: true, topFields: [[titleField]] });
+    mockUseDocumentLayout.mockReturnValue({ edit: layout });
+    mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'fr' } } } }]);
+    mockUseGetLocalesQuery.mockReturnValue({
+      data: [
+        { code: 'en', isDefault: true, name: 'English' },
+        { code: 'fr', isDefault: false, name: 'French' },
+      ],
+    });
 
     const { layout: mutated } = mutateEditViewHook({ layout });
     const action = mutated.layout[0][0][0].labelAction as React.ReactElement;
 
     render(action);
     expect(
-      screen.queryByText(/This value is unique for the selected locale/i)
-    ).not.toBeInTheDocument();
+      screen.getByText(/This value is common to all locales. Edit it in the default locale./i)
+    ).toBeInTheDocument();
+  });
+
+  it('shows a locked tooltip for non-localized dynamic zones on a non-default locale', () => {
+    const dzField = makeEditField({
+      attribute: {
+        type: 'dynamiczone',
+        components: ['shared.button'],
+        pluginOptions: { i18n: { localized: false } },
+      },
+      label: 'Body',
+      name: 'body',
+      type: 'dynamiczone',
+    });
+
+    const layout = makeEditLayout({ ctLocalized: true, topFields: [[dzField]] });
+    mockUseDocumentLayout.mockReturnValue({ edit: layout });
+    mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'fr' } } } }]);
+    mockUseGetLocalesQuery.mockReturnValue({
+      data: [
+        { code: 'en', isDefault: true, name: 'English' },
+        { code: 'fr', isDefault: false, name: 'French' },
+      ],
+    });
+
+    const { layout: mutated } = mutateEditViewHook({ layout });
+    const action = mutated.layout[0][0][0].labelAction as React.ReactElement;
+
+    render(action);
+    expect(
+      screen.getByText(/This value is common to all locales. Edit it in the default locale./i)
+    ).toBeInTheDocument();
+  });
+
+  it('does not stamp lock icons onto nested component fields', () => {
+    const componentUid = 'shared.button';
+    const nestedField = makeEditField({
+      attribute: { type: 'string', pluginOptions: { i18n: { localized: false } } },
+      label: 'Label',
+      name: 'label',
+    });
+
+    const layout = makeEditLayout({
+      ctLocalized: true,
+      topFields: [
+        [
+          makeEditField({
+            attribute: {
+              type: 'component',
+              component: componentUid,
+              pluginOptions: { i18n: { localized: false } },
+            },
+            label: 'CTA',
+            name: 'cta',
+            type: 'component',
+          }),
+        ],
+      ],
+      components: {
+        [componentUid]: {
+          layout: [[nestedField]],
+          settings: {
+            displayName: 'Button',
+          } as unknown as EditLayout['components'][string]['settings'],
+        },
+      },
+    });
+
+    mockUseDocumentLayout.mockReturnValue({ edit: layout });
+    mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'fr' } } } }]);
+    mockUseGetLocalesQuery.mockReturnValue({
+      data: [
+        { code: 'en', isDefault: true, name: 'English' },
+        { code: 'fr', isDefault: false, name: 'French' },
+      ],
+    });
+
+    const { layout: mutated } = mutateEditViewHook({ layout });
+    const nestedAction = mutated.components[componentUid].layout[0][0].labelAction;
+    expect(nestedAction).toBeUndefined();
+  });
+
+  it('treats relations without i18n pluginOptions as localized (server parity)', () => {
+    const relationField = makeEditField({
+      attribute: { type: 'relation' },
+    });
+
+    const layout = makeEditLayout({ ctLocalized: true, topFields: [[relationField]] });
+    mockUseDocumentLayout.mockReturnValue({ edit: layout });
+    mockUseQueryParams.mockReturnValue([{ query: { plugins: { i18n: { locale: 'fr' } } } }]);
+    mockUseGetLocalesQuery.mockReturnValue({
+      data: [
+        { code: 'en', isDefault: true, name: 'English' },
+        { code: 'fr', isDefault: false, name: 'French' },
+      ],
+    });
+
+    const { layout: mutated } = mutateEditViewHook({ layout });
+    const action = mutated.layout[0][0][0].labelAction as React.ReactElement;
+
+    render(action);
+    expect(screen.getByText(/This value is unique for the selected locale/i)).toBeInTheDocument();
+    expect(screen.queryByText(/This value is common to all locales/i)).not.toBeInTheDocument();
   });
 });
