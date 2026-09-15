@@ -12,6 +12,8 @@ import type {
   Folder as FolderInitial,
 } from '../../../../../shared/contracts/folders';
 
+const EMPTY_SELECTED: NonNullable<BulkActionsProps['selected']> = [];
+
 interface FolderWithType extends FolderInitial {
   type: string;
 }
@@ -26,7 +28,11 @@ export interface BulkActionsProps {
   currentFolder?: FolderWithType;
 }
 
-export const BulkActions = ({ selected = [], onSuccess, currentFolder }: BulkActionsProps) => {
+export const BulkActions = ({
+  selected = EMPTY_SELECTED,
+  onSuccess,
+  currentFolder,
+}: BulkActionsProps) => {
   const { formatMessage } = useIntl();
   const numberAssets = selected?.reduce(function (_this, val) {
     return val?.type === 'folder' && 'files' in val && val?.files && 'count' in val.files

@@ -40,6 +40,8 @@ import { adminApi } from '../src/services/api';
 import { server } from './server';
 import { initialState } from './store';
 
+const EMPTY_PERMISSIONS: NonNullable<ProvidersProps['permissions']> = [];
+
 setLogger({
   log: () => {},
   warn: () => {},
@@ -97,7 +99,12 @@ const DEFAULT_PERMISSIONS = [
   },
 ];
 
-const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: ProvidersProps) => {
+const Providers = ({
+  children,
+  initialEntries,
+  storeConfig,
+  permissions = EMPTY_PERMISSIONS,
+}: ProvidersProps) => {
   /**
    * Keep these instances stable for the lifetime of the render.
    * Recreating the data router on rerenders can crash React Router.

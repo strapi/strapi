@@ -24,9 +24,9 @@ async function main() {
       return;
     }
 
-    const labelNames = labels.map((label) => label.name);
-    const needsQa = labelNames.includes(QA_REQUIRED_LABEL);
-    const hasQaResolution = QA_COMPLETION_LABELS.some((label) => labelNames.includes(label));
+    const labelNames = new Set(labels.map((label) => label.name));
+    const needsQa = labelNames.has(QA_REQUIRED_LABEL);
+    const hasQaResolution = QA_COMPLETION_LABELS.some((label) => labelNames.has(label));
 
     if (needsQa === true && hasQaResolution === false) {
       core.setFailed(

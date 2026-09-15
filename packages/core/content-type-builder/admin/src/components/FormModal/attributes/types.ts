@@ -308,8 +308,8 @@ export const attributeTypes = {
           modifiedData.name,
         ];
 
-        const forbiddenTargetAttributeName = initialForbiddenName.filter(
-          (val) => val !== initialData.targetAttribute
+        const forbiddenTargetAttributeName = new Set(
+          initialForbiddenName.filter((val) => val !== initialData.targetAttribute)
         );
 
         return schema
@@ -322,7 +322,7 @@ export const attributeTypes = {
                 return false;
               }
 
-              return !forbiddenTargetAttributeName.includes(value);
+              return !forbiddenTargetAttributeName.has(value);
             },
           })
           .required(errorsTrads.required.id);

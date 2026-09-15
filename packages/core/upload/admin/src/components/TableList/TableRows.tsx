@@ -11,6 +11,9 @@ import { CellContent } from './CellContent';
 import type { File } from '../../../../shared/contracts/files';
 import type { Folder } from '../../../../shared/contracts/folders';
 
+const EMPTY_ROWS: NonNullable<TableRowsProps['rows']> = [];
+const EMPTY_SELECTED: NonNullable<TableRowsProps['selected']> = [];
+
 interface FileRow extends File {
   folderURL?: string;
   isSelectable?: boolean;
@@ -37,8 +40,8 @@ export const TableRows = ({
   onEditAsset,
   onEditFolder,
   onSelectOne,
-  rows = [],
-  selected = [],
+  rows = EMPTY_ROWS,
+  selected = EMPTY_SELECTED,
 }: TableRowsProps) => {
   const { formatMessage } = useIntl();
 

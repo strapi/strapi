@@ -7,7 +7,7 @@ import Dialect from '../dialect';
 import SqliteSchemaInspector from './schema-inspector';
 import type { Database } from '../..';
 
-const UNSUPPORTED_OPERATORS = ['$jsonSupersetOf'];
+const UNSUPPORTED_OPERATORS = new Set(['$jsonSupersetOf']);
 
 /** SQLite compound SELECT limit (SQLITE_MAX_COMPOUND_SELECT); Knex batch insert uses UNION ALL per row. */
 const SQLITE_BATCH_INSERT_SIZE = 500;
@@ -68,7 +68,7 @@ export default class SqliteDialect extends Dialect {
   }
 
   supportsOperator(operator: string) {
-    return !UNSUPPORTED_OPERATORS.includes(operator);
+    return !UNSUPPORTED_OPERATORS.has(operator);
   }
 
   async startSchemaUpdate() {

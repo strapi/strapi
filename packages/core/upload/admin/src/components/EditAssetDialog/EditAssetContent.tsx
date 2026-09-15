@@ -38,6 +38,9 @@ import type {
   FocalPoint,
 } from '../../../../shared/contracts/files';
 
+const EMPTY_OMIT_FIELDS: NonNullable<EditAssetContentProps['omitFields']> = [];
+const EMPTY_OMIT_ACTIONS: NonNullable<EditAssetContentProps['omitActions']> = [];
+
 const LoadingBody = styled(Flex)`
   /* 80px are coming from the Tabs component that is not included in the ModalBody */
   min-height: ${() => `calc(60dvh + 8rem)`};
@@ -109,8 +112,8 @@ export const EditAssetContent = ({
   canCopyLink = false,
   canDownload = false,
   trackedLocation,
-  omitFields = [],
-  omitActions = [],
+  omitFields = EMPTY_OMIT_FIELDS,
+  omitActions = EMPTY_OMIT_ACTIONS,
 }: EditAssetContentProps) => {
   const { formatMessage, formatDate } = useIntl();
   const { trackUsage } = useTracking();

@@ -28,6 +28,9 @@ import type {
 } from './FormInputs/types';
 import type * as Yup from 'yup';
 
+const DEFAULT_ON_PROCEED: NonNullable<BlockerProps['onProceed']> = () => {};
+const DEFAULT_ON_CANCEL: NonNullable<BlockerProps['onCancel']> = () => {};
+
 /* -------------------------------------------------------------------------------------------------
  * FormContext
  * -----------------------------------------------------------------------------------------------*/
@@ -851,7 +854,10 @@ interface BlockerProps {
 /* -------------------------------------------------------------------------------------------------
  * Blocker
  * -----------------------------------------------------------------------------------------------*/
-const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) => {
+const Blocker = ({
+  onProceed = DEFAULT_ON_PROCEED,
+  onCancel = DEFAULT_ON_CANCEL,
+}: BlockerProps) => {
   const { formatMessage } = useIntl();
   const modified = useForm('Blocker', (state) => state.modified);
   const isSubmitting = useForm('Blocker', (state) => state.isSubmitting);

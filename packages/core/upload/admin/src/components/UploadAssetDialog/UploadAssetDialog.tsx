@@ -11,6 +11,12 @@ import { PendingAssetStep } from './PendingAssetStep/PendingAssetStep';
 import type { File, RawFile } from '../../../../shared/contracts/files';
 import type { AllowedFiles } from '../../utils';
 
+const DEFAULT_ON_CLOSE: NonNullable<UploadAssetDialogProps['onClose']> = () => {};
+const DEFAULT_VALIDATE_ASSETS_TYPES: NonNullable<UploadAssetDialogProps['validateAssetsTypes']> = (
+  _,
+  cb
+) => cb();
+
 const Steps = {
   AddAsset: 'AddAsset',
   PendingAsset: 'PendingAsset',
@@ -46,11 +52,11 @@ export interface UploadAssetDialogProps {
 export const UploadAssetDialog = ({
   initialAssetsToAdd,
   folderId = null,
-  onClose = () => {},
+  onClose = DEFAULT_ON_CLOSE,
   addUploadedFiles,
   trackedLocation,
   open,
-  validateAssetsTypes = (_, cb) => cb(),
+  validateAssetsTypes = DEFAULT_VALIDATE_ASSETS_TYPES,
 }: UploadAssetDialogProps) => {
   const { formatMessage } = useIntl();
   const [step, setStep] = React.useState(initialAssetsToAdd ? Steps.PendingAsset : Steps.AddAsset);

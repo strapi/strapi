@@ -5,7 +5,7 @@ import { curry } from 'lodash/fp';
 
 import { getService } from '../../utils';
 
-const LOCALIZATION_FIELDS = ['locale', 'localizations'];
+const LOCALIZATION_FIELDS = new Set(['locale', 'localizations']);
 
 const sanitize = ({ strapi }: { strapi: Core.Strapi }) => {
   const { isLocalizedContentType } = getService('content-types');
@@ -20,7 +20,7 @@ const sanitize = ({ strapi }: { strapi: Core.Strapi }) => {
     traverseEntity(
       ({ key, schema }, { remove }) => {
         const isLocalized = isLocalizedContentType(schema);
-        const isLocalizationField = LOCALIZATION_FIELDS.includes(key);
+        const isLocalizationField = LOCALIZATION_FIELDS.has(key);
 
         if (!isLocalized && isLocalizationField) {
           remove(key);

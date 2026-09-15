@@ -432,13 +432,16 @@ export default (db: Database) => {
         })) ?? [])
       : [];
 
-    const reservedTables = [...RESERVED_TABLE_NAMES, ...persistedTables.map(parsePersistedTable)];
+    const reservedTables = new Set([
+      ...RESERVED_TABLE_NAMES,
+      ...persistedTables.map(parsePersistedTable),
+    ]);
 
     // for all tables in the database schema, check if they are not in the user schema
     for (const databaseTable of databaseSchema.tables) {
       const isInUserSchema = helpers.hasTable(userSchema, databaseTable.name);
       const wasTracked = previousSchema && helpers.hasTable(previousSchema, databaseTable.name);
-      const isReserved = reservedTables.includes(databaseTable.name);
+      const isReserved = reservedTables.has(databaseTable.name);
 
       // NOTE: if db table is not in the user schema and is not in the previous stored schema leave it alone. it is a user custom table that we should not touch
       if (!isInUserSchema && !wasTracked) {
