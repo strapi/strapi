@@ -68,7 +68,7 @@
     "resolve-cwd": "3.0.0",
     "semver": "7.7.4",
     "stream-chain": "2.2.5",
-    "stream-json": "1.9.1",
+    "stream-json": "3.5.0",
     "tar": "7.5.22",
     "tar-stream": "2.2.0",
     "ws": "8.21.2"
