@@ -35,6 +35,7 @@ import { useDoc, useDocument, type UseDocument } from '../../../../../hooks/useD
 import { type DocumentMeta } from '../../../../../hooks/useDocumentContext';
 import { useDocumentLayout } from '../../../../../hooks/useDocumentLayout';
 import { useLazyGetDocumentQuery } from '../../../../../services/documents';
+import { setIn } from '../../../../../utils/objects';
 import { createYupSchema } from '../../../../../utils/validation';
 import { DocumentActionButton } from '../../../components/DocumentActions';
 import { DocumentStatus } from '../../DocumentStatus';
@@ -71,6 +72,27 @@ const getFullPageUrl = (currentDocumentMeta: DocumentMeta): string => {
  * RelationModalRenderer
  * -----------------------------------------------------------------------------------------------*/
 
+/**
+ * A local "connect" edit waiting to be applied to a document that isn't the modal's current one.
+ * Needed because every level of a nested relation-on-the-fly chain (root document aside) shares
+ * one Form instance whose values get wholesale-replaced by fresh initialValues on every
+ * `documentHistory` navigation — writing the field directly while a different level is current
+ * would land on the wrong document and then immediately be discarded. Instead the patch is stashed
+ * here, keyed by the target document, and merged back into that document's initialValues once it
+ * becomes current again (see `RelationModal`'s `initialValues` below).
+ */
+interface PendingConnectPatch {
+  fieldToConnect: string;
+  relationValue: AnyData;
+  componentUIDPath?: string;
+  componentUID?: string;
+}
+
+const getDocumentHistoryKey = (meta: Pick<DocumentMeta, 'model' | 'documentId'>) =>
+  `${meta.model}::${meta.documentId}`;
+
+const EMPTY_PENDING_CONNECTS: PendingConnectPatch[] = [];
+
 interface State {
   documentHistory: DocumentMeta[];
   confirmDialogIntent:
@@ -87,6 +109,7 @@ interface State {
   // Sets a field directly on the parent's own (live, unsaved) form state, so connecting a
   // newly-created relation doesn't require persisting the whole parent document to the server.
   setParentFormValue?: (path: string, value: unknown) => void;
+  pendingConnects: Record<string, PendingConnectPatch[]>;
 }
 
 type Action =
@@ -113,9 +136,9 @@ type Action =
       payload: {
         document: DocumentMeta;
         shouldBypassConfirmation: boolean;
-        fieldToConnect?: string;
-        fieldToConnectUID?: string;
-        getParentFormValues?: () => AnyData;
+        // Present when the document being connected belongs to a NESTED parent (one still further
+        // up `documentHistory`, not the root document) — see `pendingConnects` on `State`.
+        connectPatch?: PendingConnectPatch;
       };
     }
   | {
@@ -128,6 +151,10 @@ type Action =
   | {
       type: 'SET_HAS_UNSAVED_CHANGES';
       payload: { hasUnsavedChanges: boolean };
+    }
+  | {
+      type: 'CLEAR_PENDING_CONNECTS';
+      payload: { documentMeta: Pick<DocumentMeta, 'model' | 'documentId'> };
     };
 
 function reducer(state: State, action: Action): State {
@@ -185,8 +212,25 @@ function reducer(state: State, action: Action): State {
         hasUnsavedChanges: false,
         isModalOpen: false,
         confirmDialogIntent: null,
+        pendingConnects: {},
       };
-    case 'GO_TO_CREATED_RELATION':
+    case 'GO_TO_CREATED_RELATION': {
+      // Anything beyond the second-to-last history entry is a nested parent still open further up
+      // the stack — the root document (outside documentHistory entirely) is handled directly via
+      // setParentFormValue instead, since its Form never gets replaced by modal navigation.
+      const nestedParentMeta =
+        state.documentHistory.length >= 2 ? state.documentHistory.at(-2) : undefined;
+      const pendingConnects =
+        nestedParentMeta && action.payload.connectPatch
+          ? {
+              ...state.pendingConnects,
+              [getDocumentHistoryKey(nestedParentMeta)]: [
+                ...(state.pendingConnects[getDocumentHistoryKey(nestedParentMeta)] ?? []),
+                action.payload.connectPatch,
+              ],
+            }
+          : state.pendingConnects;
+
       return {
         ...state,
         // Reset document history if the last item has documentId undefined
@@ -199,7 +243,9 @@ function reducer(state: State, action: Action): State {
         fieldToConnectUID: undefined,
         getParentFormValues: undefined,
         setParentFormValue: undefined,
+        pendingConnects,
       };
+    }
     case 'CANCEL_CONFIRM_DIALOG':
       return {
         ...state,
@@ -220,12 +266,25 @@ function reducer(state: State, action: Action): State {
         fieldToConnectUID: undefined,
         getParentFormValues: undefined,
         setParentFormValue: undefined,
+        pendingConnects: {},
       };
     case 'SET_HAS_UNSAVED_CHANGES':
       return {
         ...state,
         hasUnsavedChanges: action.payload.hasUnsavedChanges,
       };
+    case 'CLEAR_PENDING_CONNECTS': {
+      const key = getDocumentHistoryKey(action.payload.documentMeta);
+
+      if (!(key in state.pendingConnects)) {
+        return state;
+      }
+
+      const pendingConnects = { ...state.pendingConnects };
+      delete pendingConnects[key];
+
+      return { ...state, pendingConnects };
+    }
     default:
       return state;
   }
@@ -291,6 +350,7 @@ const RootRelationRenderer = (props: RelationModalRendererProps) => {
     isModalOpen: false,
     hasUnsavedChanges: false,
     fieldToConnect: undefined,
+    pendingConnects: {},
   });
 
   const rootDocument = useDoc();
@@ -475,13 +535,47 @@ const RelationModal = ({ children }: { children: React.ReactNode }) => {
   const parentDocument = useDocument(parentDocumentMeta, {
     skip: !isCreating || !state.fieldToConnect,
   });
-  const initialValues = prefillParentRelation({
-    initialValues: currentDocument.getInitialFormValues(isCreating),
-    fieldToConnect: isCreating ? state.fieldToConnect : undefined,
-    childSchema: currentDocument.schema,
-    parentDocument: parentDocument.document,
-    parentModel: parentDocumentMeta.model,
-  });
+
+  const pendingConnectsForCurrent =
+    useRelationModal(
+      'RelationModalForm',
+      (state) => state.state.pendingConnects[getDocumentHistoryKey(currentDocumentMeta)],
+      false
+    ) ?? EMPTY_PENDING_CONNECTS;
+
+  // Re-apply any local "connect" edits recorded for this document while a nested child was open,
+  // since navigating here just replaced the Form's values with a fresh, patch-less snapshot.
+  const initialValues = React.useMemo(() => {
+    const baseInitialValues = prefillParentRelation({
+      initialValues: currentDocument.getInitialFormValues(isCreating),
+      fieldToConnect: isCreating ? state.fieldToConnect : undefined,
+      childSchema: currentDocument.schema,
+      parentDocument: parentDocument.document,
+      parentModel: parentDocumentMeta.model,
+    });
+
+    // The document (and its default values) may still be loading, e.g. right after navigating
+    // back to a document that now has a real documentId. Let the loading guard below handle it
+    // instead of trying to patch a value that doesn't exist yet.
+    if (!baseInitialValues) {
+      return baseInitialValues;
+    }
+
+    return pendingConnectsForCurrent.reduce((values, patch) => {
+      const withRelation = setIn(values, patch.fieldToConnect, patch.relationValue);
+
+      return patch.componentUIDPath && patch.componentUID !== undefined
+        ? setIn(withRelation, patch.componentUIDPath, patch.componentUID)
+        : withRelation;
+    }, baseInitialValues);
+  }, [
+    currentDocument,
+    isCreating,
+    state.fieldToConnect,
+    parentDocument.document,
+    parentDocumentMeta.model,
+    pendingConnectsForCurrent,
+  ]);
 
   /*
    * We must wrap the modal window with Component Provider with reset values
@@ -916,4 +1010,4 @@ export {
   generateCreateUrl,
   prefillParentRelation,
 };
-export type { State, Action, RelationOpenMode };
+export type { State, Action, RelationOpenMode, PendingConnectPatch };

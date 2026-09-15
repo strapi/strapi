@@ -54,7 +54,11 @@ import {
 } from '../utils/draftRelationCounts';
 import { getEditViewShortcut } from '../utils/keyboardShortcuts';
 
-import { isAnyRelationModalOpen, useRelationModal } from './FormInputs/Relations/RelationModal';
+import {
+  isAnyRelationModalOpen,
+  useRelationModal,
+  type PendingConnectPatch,
+} from './FormInputs/Relations/RelationModal';
 
 import type { DocumentActionComponent } from '../../../content-manager';
 
@@ -759,6 +763,11 @@ const PublishAction: DocumentActionComponent = ({
     (state) => state.state.setParentFormValue,
     false
   );
+  const documentHistory = useRelationModal(
+    'PublishAction',
+    (state) => state.state.documentHistory,
+    false
+  );
 
   const dispatchGuidedTour = useGuidedTour('PublishAction', (s) => s.dispatch);
 
@@ -913,6 +922,12 @@ const PublishAction: DocumentActionComponent = ({
       // Reset form with current values as new initial values (clears errors/submitting and sets modified to false)
       if ('data' in res) {
         resetForm(getValues());
+        // This document is now persisted with whatever local connect patches were merged into
+        // it, if any (see the pendingConnects explanation below) — they'd be stale from here on.
+        dispatch?.({
+          type: 'CLEAR_PENDING_CONNECTS',
+          payload: { documentMeta: { model, documentId: res.data.documentId } },
+        });
         dispatchGuidedTour({
           type: 'set_completed_actions',
           payload: [GUIDED_TOUR_REQUIRED_ACTIONS.contentManager.createContent],
@@ -940,12 +955,24 @@ const PublishAction: DocumentActionComponent = ({
           };
 
           /*
-           * Connect the newly published document to the parent's relation field, purely in the
-           * parent's own (live, unsaved) form state — never on the server. This must not persist
-           * the parent document, otherwise publishing here would silently save any of the
-           * parent's other unrelated unsaved edits too.
+           * Connect the newly published document to the parent's relation field, purely in local
+           * form state — never on the server. This must not persist the parent document,
+           * otherwise publishing here would silently save any of the parent's other unrelated
+           * unsaved edits too.
+           *
+           * The parent is either the root document that originally opened the modal (its own Form
+           * stays mounted for the whole session, so it's safe to write into directly) or a nested
+           * document still further up the modal's documentHistory (whose Form is the SAME shared
+           * instance the modal reuses at every level, wholesale-replaced on every navigation — a
+           * direct write there would land on the wrong document and be gone the moment we
+           * navigate). For the latter the patch is queued on GO_TO_CREATED_RELATION below instead,
+           * to be re-applied once that document becomes current again.
            */
-          if (fieldToConnect && setParentFormValue) {
+          const isNestedParent = Array.isArray(documentHistory) && documentHistory.length >= 2;
+
+          let connectPatch: PendingConnectPatch | undefined;
+
+          if (fieldToConnect && (setParentFormValue || isNestedParent)) {
             const currentFieldValue = getIn<unknown>(getParentFormValues?.(), fieldToConnect);
             // Publishing a brand-new document creates two rows sharing one documentId — a draft
             // and a published one, each with its own numeric id. The parent's relation search
@@ -966,7 +993,14 @@ const PublishAction: DocumentActionComponent = ({
               fieldToConnectUID
             );
 
-            if (patch) {
+            if (patch && isNestedParent) {
+              connectPatch = {
+                fieldToConnect,
+                relationValue: patch.relationValue,
+                componentUIDPath: patch.componentUIDPath,
+                componentUID: patch.componentUIDPath ? fieldToConnectUID : undefined,
+              };
+            } else if (patch && setParentFormValue) {
               setParentFormValue(fieldToConnect, patch.relationValue);
 
               if (patch.componentUIDPath) {
@@ -977,7 +1011,7 @@ const PublishAction: DocumentActionComponent = ({
 
           dispatch({
             type: 'GO_TO_CREATED_RELATION',
-            payload: { document: newRelation, shouldBypassConfirmation: true },
+            payload: { document: newRelation, shouldBypassConfirmation: true, connectPatch },
           });
         }
       } else if (
@@ -1235,6 +1269,11 @@ const UpdateAction: DocumentActionComponent = ({
     (state) => state.state.setParentFormValue,
     false
   );
+  const documentHistory = useRelationModal(
+    'UpdateAction',
+    (state) => state.state.documentHistory,
+    false
+  );
   const fromRelationModal = relationContext != undefined;
 
   const { currentDocumentMeta } = useDocumentContext('UpdateAction');
@@ -1335,6 +1374,12 @@ const UpdateAction: DocumentActionComponent = ({
           setErrors(formatValidationErrors(res.error));
         } else {
           resetForm(latestValues);
+          // This document is now persisted with whatever local connect patches were merged into
+          // it, if any (see the pendingConnects explanation below) — they'd be stale from here on.
+          dispatch?.({
+            type: 'CLEAR_PENDING_CONNECTS',
+            payload: { documentMeta: { model, documentId } },
+          });
         }
       } else {
         const { data } = handleInvisibleAttributes(transformDocumentData(latestValues), {
@@ -1359,12 +1404,24 @@ const UpdateAction: DocumentActionComponent = ({
               params: currentDocumentMeta.params,
             };
             /*
-             * Connect the newly created document to the parent's relation field, purely in the
-             * parent's own (live, unsaved) form state — never on the server. This must not
-             * persist the parent document, otherwise saving here would silently save any of the
-             * parent's other unrelated unsaved edits too.
+             * Connect the newly created document to the parent's relation field, purely in local
+             * form state — never on the server. This must not persist the parent document,
+             * otherwise saving here would silently save any of the parent's other unrelated
+             * unsaved edits too.
+             *
+             * The parent is either the root document that originally opened the modal (its own
+             * Form stays mounted for the whole session, so it's safe to write into directly) or a
+             * nested document still further up the modal's documentHistory (whose Form is the
+             * SAME shared instance the modal reuses at every level, wholesale-replaced on every
+             * navigation — a direct write there would land on the wrong document and be gone the
+             * moment we navigate). For the latter the patch is queued on GO_TO_CREATED_RELATION
+             * below instead, to be re-applied once that document becomes current again.
              */
-            if (fieldToConnect && setParentFormValue) {
+            const isNestedParent = Array.isArray(documentHistory) && documentHistory.length >= 2;
+
+            let connectPatch: PendingConnectPatch | undefined;
+
+            if (fieldToConnect && (setParentFormValue || isNestedParent)) {
               const currentFieldValue = getIn<unknown>(getParentFormValues?.(), fieldToConnect);
               const patch = buildRelationConnectPatch(
                 currentFieldValue,
@@ -1374,7 +1431,14 @@ const UpdateAction: DocumentActionComponent = ({
                 fieldToConnectUID
               );
 
-              if (patch) {
+              if (patch && isNestedParent) {
+                connectPatch = {
+                  fieldToConnect,
+                  relationValue: patch.relationValue,
+                  componentUIDPath: patch.componentUIDPath,
+                  componentUID: patch.componentUIDPath ? fieldToConnectUID : undefined,
+                };
+              } else if (patch && setParentFormValue) {
                 setParentFormValue(fieldToConnect, patch.relationValue);
 
                 if (patch.componentUIDPath) {
@@ -1385,7 +1449,7 @@ const UpdateAction: DocumentActionComponent = ({
 
             dispatch({
               type: 'GO_TO_CREATED_RELATION',
-              payload: { document: createdRelation, shouldBypassConfirmation: true },
+              payload: { document: createdRelation, shouldBypassConfirmation: true, connectPatch },
             });
           } else {
             navigate(
