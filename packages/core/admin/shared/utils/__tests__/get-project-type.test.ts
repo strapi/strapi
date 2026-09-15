@@ -1,4 +1,4 @@
-import { getProjectType } from '../getProjectType';
+import { getProjectType } from '../get-project-type';
 
 describe('getProjectType', () => {
   it('returns "Community" when there is no license', () => {

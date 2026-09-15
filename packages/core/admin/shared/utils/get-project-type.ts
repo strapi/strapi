@@ -1,8 +1,9 @@
 type ProjectType = 'Community' | 'Growth' | 'Enterprise';
 
 /**
- * Resolves the plan label displayed across the admin panel from the license
- * information returned by the `/admin/project-type` endpoint.
+ * Resolves the plan label displayed across the admin panel, and reported in
+ * the support debug dump, from the license information returned by the
+ * `/admin/project-type` endpoint (browser) or `strapi.ee` (server).
  *
  * The label is intentionally limited to three values:
  * - `Community`  when there is no license (Community Edition).

@@ -1,9 +1,10 @@
 /* eslint-disable no-undef */
 import { createRoot } from 'react-dom/client';
 
+import { getProjectType } from '../../shared/utils/get-project-type';
+
 import { StrapiApp, StrapiAppConstructorArgs } from './StrapiApp';
 import { getFetchClient } from './utils/getFetchClient';
-import { getProjectType } from './utils/getProjectType';
 import { createAbsoluteUrl } from './utils/urls';
 
 import type { Modules } from '@strapi/types';
