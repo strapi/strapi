@@ -47,6 +47,9 @@ export const RELEASE_BASE = 'main';
 export const RELEASE_BRANCH_NAME = 'releases';
 export const EXPERIMENTAL_LABEL = 'publish-experimental';
 
+/** The clock used when the caller injects none. */
+const systemClock: Clock = () => new Date().toISOString();
+
 /** Statuses that do not stop the run but do need a human to look. */
 const ATTENTION_STATUSES: ReadonlySet<AttributionStatus> = new Set([
   'ambiguous',
@@ -152,6 +155,7 @@ export async function preflightRelease(deps: DraftReleaseDeps): Promise<ReleaseP
     allMilestones: await gh.listMilestones('all'),
     version,
     candidateVersion: candidate?.version ?? null,
+    now: (deps.clock ?? systemClock)(),
   });
 
   return {
@@ -189,7 +193,7 @@ export async function applyRelease(
   deps: DraftReleaseDeps
 ): Promise<DraftReleaseResult> {
   const { inputs, git, gh, journal, logger } = deps;
-  const generatedAt = (deps.clock ?? ((): string => new Date().toISOString()))();
+  const generatedAt = (deps.clock ?? systemClock)();
 
   if (plan.branchAdvances === false) {
     git.fetchBranch(plan.branch);
@@ -240,14 +244,18 @@ export async function applyRelease(
   let shippingNumber: number | null;
   let nextNumber: number | null;
 
+  // Only the next milestone is ever given a due date. The shipping one is closed by the end of this
+  // run, and it received its own back when it was the next one.
+  const nextDueOn = plan.milestones.next.dueOn;
+
   if (plan.milestones.shipping.title === plan.milestones.next.currentTitle) {
     // The explicit version selected the current next milestone. Move that milestone out of the way
     // before renaming shipping onto its title.
-    nextNumber = await applyMilestone(journal, gh, plan.milestones.next, 'next');
-    shippingNumber = await applyMilestone(journal, gh, plan.milestones.shipping, 'shipping');
+    nextNumber = await applyMilestone(journal, gh, plan.milestones.next, 'next', nextDueOn);
+    shippingNumber = await applyMilestone(journal, gh, plan.milestones.shipping, 'shipping', null);
   } else {
-    shippingNumber = await applyMilestone(journal, gh, plan.milestones.shipping, 'shipping');
-    nextNumber = await applyMilestone(journal, gh, plan.milestones.next, 'next');
+    shippingNumber = await applyMilestone(journal, gh, plan.milestones.shipping, 'shipping', null);
+    nextNumber = await applyMilestone(journal, gh, plan.milestones.next, 'next', nextDueOn);
   }
 
   await applyRealignment(journal, gh, plan.realignment, shippingNumber);
@@ -467,20 +475,38 @@ export async function resolveVersion(input: {
 }
 
 /**
- * Brings one milestone to the title the plan decided.
+ * Brings one milestone to the title and the due date the plan decided.
+ *
+ * A create carries its due date in the same request, so a milestone can never be left without one
+ * by a follow-up that failed. Everything else writes the due date separately, because a rename and
+ * a backfill are undone differently and folding them into one entry would say neither happened.
  *
  * @param role - Which of the two milestones this is, recorded in the journal so a reader of a
  * partial run can tell the two renames apart.
+ * @param dueOn - The due date to write, or `null` to leave whatever the milestone carries. Always
+ * `null` for the shipping milestone, which this run closes.
  * @returns The milestone number, or `null` on a dry run that would have created it.
  */
 async function applyMilestone(
   journal: Journal,
   gh: GithubAdapter,
   plan: MilestoneTarget,
-  role: 'shipping' | 'next'
+  role: 'shipping' | 'next',
+  dueOn: string | null
 ): Promise<number | null> {
-  if (plan.action === 'keep') {
-    return plan.number;
+  if (plan.action === 'create') {
+    const created = await journal.write(
+      {
+        op: 'milestone.create',
+        target: 'milestones',
+        after: plan.title,
+        detail: dueOn === null ? role : `${role}, due ${dueOn}`,
+      },
+      async () => gh.createMilestone(plan.title, dueOn),
+      (milestone) => ({ target: `milestone/${milestone.number}` })
+    );
+
+    return created?.number ?? null;
   }
 
   if (plan.action === 'rename') {
@@ -497,17 +523,25 @@ async function applyMilestone(
           title: plan.title,
         })
     );
-
-    return plan.number;
   }
 
-  const created = await journal.write(
-    { op: 'milestone.create', target: 'milestones', after: plan.title, detail: role },
-    async () => gh.createMilestone(plan.title),
-    (milestone) => ({ target: `milestone/${milestone.number}` })
-  );
+  if (dueOn !== null) {
+    await journal.write(
+      {
+        op: 'milestone.due',
+        target: `milestone/${plan.number ?? '<new>'}`,
+        before: null,
+        after: dueOn,
+        detail: role,
+      },
+      async () =>
+        gh.updateMilestone(applied(plan.number, `The ${role} milestone number`), {
+          due_on: dueOn,
+        })
+    );
+  }
 
-  return created?.number ?? null;
+  return plan.number;
 }
 
 /**

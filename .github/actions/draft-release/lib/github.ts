@@ -177,8 +177,12 @@ export function createGithubAdapter(
       return rest.paginate(`${base}/milestones?${query({ state })}`);
     },
 
-    async createMilestone(title) {
-      return rest.send('POST', `${base}/milestones`, { title });
+    /** The due date travels with the create, so a failed follow-up can never leave one without. */
+    async createMilestone(title, dueOn) {
+      return rest.send('POST', `${base}/milestones`, {
+        title,
+        ...(dueOn === null ? {} : { due_on: dueOn }),
+      });
     },
 
     async updateMilestone(milestoneNumber, patch) {

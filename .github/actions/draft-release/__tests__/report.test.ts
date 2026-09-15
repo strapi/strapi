@@ -238,7 +238,13 @@ describe('buildPayload', () => {
             title: '5.53.0',
             close: false,
           },
-          next: { action: 'keep', number: 431, currentTitle: '5.53.1', title: '5.53.1' },
+          next: {
+            action: 'keep',
+            number: 431,
+            currentTitle: '5.53.1',
+            title: '5.53.1',
+            dueOn: null,
+          },
         },
       },
     });

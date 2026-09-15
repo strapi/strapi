@@ -10,6 +10,71 @@ import type {
   RealignItem,
 } from './types.ts';
 
+/**
+ * The release train ships on a Wednesday, and a milestone opened during one release names the one
+ * after it, so its due date is the Wednesday of the following week however far into the week the
+ * run happens.
+ */
+const DAYS_PER_WEEK = 7;
+const DAYS_FROM_MONDAY_TO_WEDNESDAY = 2;
+
+/**
+ * The time of day written with a due date.
+ *
+ * GitHub stores `due_on` verbatim and renders the date part of it, and every milestone this
+ * repository carries was filed at UTC midnight. Matching that keeps a generated due date
+ * indistinguishable from a hand-filed one.
+ */
+const DUE_TIME = 'T00:00:00Z';
+
+const ISO_DATE_LENGTH = 'YYYY-MM-DD'.length;
+
+/**
+ * The Wednesday of the week after a run.
+ *
+ * Weeks start on Monday, so a run on a Sunday still belongs to the week that began six days
+ * earlier and targets the same Wednesday as the Monday run that opened it. Everything is computed
+ * in UTC through `Date.UTC`, which normalises an out-of-range day into the next month or year on
+ * its own, so no branch is needed at a boundary.
+ *
+ * @param now - The moment the run was triggered, as an ISO 8601 timestamp.
+ */
+export function releaseDueDate(now: string): string {
+  const triggered = new Date(now);
+
+  if (Number.isNaN(triggered.getTime()) === true) {
+    throw new Error(`Cannot compute a milestone due date from "${now}", which is not a date.`);
+  }
+
+  // `getUTCDay` counts from Sunday; this counts from Monday.
+  const sinceMonday = (triggered.getUTCDay() + 6) % DAYS_PER_WEEK;
+
+  const due = new Date(
+    Date.UTC(
+      triggered.getUTCFullYear(),
+      triggered.getUTCMonth(),
+      triggered.getUTCDate() - sinceMonday + DAYS_PER_WEEK + DAYS_FROM_MONDAY_TO_WEDNESDAY
+    )
+  );
+
+  return `${due.toISOString().slice(0, ISO_DATE_LENGTH)}${DUE_TIME}`;
+}
+
+/**
+ * Decides whether this run writes a due date on the next milestone.
+ *
+ * A milestone that already carries one is left alone: the date is a human-facing commitment, and a
+ * run that revisits a candidate in a later week must not quietly move it. A milestone that carries
+ * none is backfilled, which is also what catches one opened before this action wrote due dates.
+ *
+ * @returns The date to write, or `null` when the milestone already has one.
+ */
+function planDueDate(existing: Milestone | undefined, now: string): string | null {
+  const carried = existing?.due_on ?? null;
+
+  return carried === null || carried === '' ? releaseDueDate(now) : null;
+}
+
 function isOpen(milestone: Milestone): boolean {
   return milestone.state !== 'closed';
 }
@@ -151,7 +216,8 @@ function planNext(
   allMilestones: readonly Milestone[],
   version: string,
   candidateVersion: string | null,
-  shippingNumber: number | null
+  shippingNumber: number | null,
+  now: string
 ): MilestonePlan['next'] {
   const title = nextPatchOf(version);
   const open = soleOpenMilestone(allMilestones, shippingNumber);
@@ -166,11 +232,23 @@ function planNext(
       );
     }
 
-    return { action: 'create', number: null, currentTitle: null, title };
+    return {
+      action: 'create',
+      number: null,
+      currentTitle: null,
+      title,
+      dueOn: releaseDueDate(now),
+    };
   }
 
   if (open.title === title) {
-    return { action: 'keep', number: open.number, currentTitle: open.title, title };
+    return {
+      action: 'keep',
+      number: open.number,
+      currentTitle: open.title,
+      title,
+      dueOn: planDueDate(open, now),
+    };
   }
 
   // On a fresh draft the open milestone became the shipping one, and `soleOpenMilestone` refused a
@@ -189,7 +267,13 @@ function planNext(
 
   assertTitleFree(allMilestones, title, open.number);
 
-  return { action: 'rename', number: open.number, currentTitle: open.title, title };
+  return {
+    action: 'rename',
+    number: open.number,
+    currentTitle: open.title,
+    title,
+    dueOn: planDueDate(open, now),
+  };
 }
 
 /**
@@ -203,11 +287,13 @@ function planNext(
  * candidate's life, so a state filter would hide it.
  * @param candidateVersion - The version an open candidate was cut under, `null` on a fresh draft.
  * When it differs from `version`, the release drifted and both milestones are renamed.
+ * @param now - The moment the run was triggered, which decides the next milestone's due date.
  */
 export function planMilestones(input: {
   allMilestones: readonly Milestone[];
   version: string;
   candidateVersion: string | null;
+  now: string;
 }): MilestonePlan {
   const shipping = planShipping(input.allMilestones, input.version, input.candidateVersion);
 
@@ -218,7 +304,8 @@ export function planMilestones(input: {
     input.allMilestones,
     input.version,
     input.candidateVersion,
-    shipping.number
+    shipping.number,
+    input.now
   );
 
   return { shipping, next };

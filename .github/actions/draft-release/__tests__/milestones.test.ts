@@ -1,14 +1,29 @@
 import * as assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { planCleanup, planMilestones, planRealignment, reconcile } from '../lib/milestones.ts';
+import {
+  planCleanup,
+  planMilestones,
+  planRealignment,
+  reconcile,
+  releaseDueDate,
+} from '../lib/milestones.ts';
 import { milestoneItem, pullRequestItem } from '../lib/__fixtures__/fixtures.ts';
+
+/** A Monday. The Wednesday of the week after it is 2026-09-23. */
+const NOW = '2026-09-14T09:00:00Z';
+const DUE = '2026-09-23T00:00:00Z';
 
 describe('planMilestones, fresh draft', () => {
   const open = [{ number: 430, title: '5.52.4', state: 'open' }];
 
   it('renames the open milestone to the version that actually ships', () => {
-    const plan = planMilestones({ allMilestones: open, version: '5.53.0', candidateVersion: null });
+    const plan = planMilestones({
+      allMilestones: open,
+      version: '5.53.0',
+      candidateVersion: null,
+      now: NOW,
+    });
 
     assert.deepEqual(plan.shipping, {
       action: 'rename',
@@ -22,11 +37,17 @@ describe('planMilestones, fresh draft', () => {
       number: null,
       currentTitle: null,
       title: '5.53.1',
+      dueOn: DUE,
     });
   });
 
   it('leaves the title alone when it already matches', () => {
-    const plan = planMilestones({ allMilestones: open, version: '5.52.4', candidateVersion: null });
+    const plan = planMilestones({
+      allMilestones: open,
+      version: '5.52.4',
+      candidateVersion: null,
+      now: NOW,
+    });
 
     assert.equal(plan.shipping.action, 'keep');
     assert.equal(plan.shipping.close, true);
@@ -34,7 +55,12 @@ describe('planMilestones, fresh draft', () => {
   });
 
   it('creates the shipping milestone when none is open', () => {
-    const plan = planMilestones({ allMilestones: [], version: '5.53.0', candidateVersion: null });
+    const plan = planMilestones({
+      allMilestones: [],
+      version: '5.53.0',
+      candidateVersion: null,
+      now: NOW,
+    });
 
     assert.deepEqual(plan.shipping, {
       action: 'create',
@@ -52,7 +78,13 @@ describe('planMilestones, fresh draft', () => {
     ];
 
     assert.throws(
-      () => planMilestones({ allMilestones: many, version: '5.53.0', candidateVersion: null }),
+      () =>
+        planMilestones({
+          allMilestones: many,
+          version: '5.53.0',
+          candidateVersion: null,
+          now: NOW,
+        }),
       /Expected at most one open milestone, found 2 \(5\.52\.4, 5\.53\.0\)/u
     );
   });
@@ -61,7 +93,8 @@ describe('planMilestones, fresh draft', () => {
     const all = [...open, { number: 431, title: '5.53.0', state: 'closed' }];
 
     assert.throws(
-      () => planMilestones({ allMilestones: all, version: '5.53.0', candidateVersion: null }),
+      () =>
+        planMilestones({ allMilestones: all, version: '5.53.0', candidateVersion: null, now: NOW }),
       /A milestone titled 5\.53\.0 already exists \(#431, closed\)/u
     );
   });
@@ -70,7 +103,8 @@ describe('planMilestones, fresh draft', () => {
     const all = [...open, { number: 431, title: '5.53.1', state: 'closed' }];
 
     assert.throws(
-      () => planMilestones({ allMilestones: all, version: '5.53.0', candidateVersion: null }),
+      () =>
+        planMilestones({ allMilestones: all, version: '5.53.0', candidateVersion: null, now: NOW }),
       /the one titled 5\.53\.1 is closed \(#431\)/u
     );
   });
@@ -88,6 +122,7 @@ describe('planMilestones, candidate in flight', () => {
       allMilestones: inFlight,
       version: '5.53.0',
       candidateVersion: '5.53.0',
+      now: NOW,
     });
 
     assert.deepEqual(plan.shipping, {
@@ -102,6 +137,7 @@ describe('planMilestones, candidate in flight', () => {
       number: 431,
       currentTitle: '5.53.1',
       title: '5.53.1',
+      dueOn: DUE,
     });
   });
 
@@ -115,6 +151,7 @@ describe('planMilestones, candidate in flight', () => {
       allMilestones: drifted,
       version: '5.53.0',
       candidateVersion: '5.52.4',
+      now: NOW,
     });
 
     assert.deepEqual(plan.shipping, {
@@ -129,6 +166,7 @@ describe('planMilestones, candidate in flight', () => {
       number: 431,
       currentTitle: '5.52.5',
       title: '5.53.1',
+      dueOn: DUE,
     });
   });
 
@@ -142,6 +180,7 @@ describe('planMilestones, candidate in flight', () => {
       allMilestones: adjacent,
       version: '5.52.5',
       candidateVersion: '5.52.4',
+      now: NOW,
     });
 
     assert.deepEqual(plan.shipping, {
@@ -156,6 +195,7 @@ describe('planMilestones, candidate in flight', () => {
       number: 431,
       currentTitle: '5.52.5',
       title: '5.52.6',
+      dueOn: DUE,
     });
   });
 
@@ -169,6 +209,7 @@ describe('planMilestones, candidate in flight', () => {
       allMilestones: halfDone,
       version: '5.53.0',
       candidateVersion: '5.53.0',
+      now: NOW,
     });
 
     assert.equal(plan.shipping.close, true);
@@ -182,6 +223,7 @@ describe('planMilestones, candidate in flight', () => {
           allMilestones: [{ number: 431, title: '5.53.1', state: 'open' }],
           version: '5.53.0',
           candidateVersion: '5.53.0',
+          now: NOW,
         }),
       /No milestone is titled 5\.53\.0, the version the open candidate was cut under/u
     );
@@ -194,7 +236,13 @@ describe('planMilestones, candidate in flight', () => {
     ];
 
     assert.throws(
-      () => planMilestones({ allMilestones: wrong, version: '5.53.0', candidateVersion: '5.53.0' }),
+      () =>
+        planMilestones({
+          allMilestones: wrong,
+          version: '5.53.0',
+          candidateVersion: '5.53.0',
+          now: NOW,
+        }),
       /The open milestone is 6\.0\.0, but this release expects 5\.53\.1/u
     );
   });
@@ -204,6 +252,7 @@ describe('planMilestones, candidate in flight', () => {
       allMilestones: [{ number: 430, title: '5.53.0', state: 'closed' }],
       version: '5.53.0',
       candidateVersion: '5.53.0',
+      now: NOW,
     });
 
     assert.deepEqual(plan.next, {
@@ -211,6 +260,7 @@ describe('planMilestones, candidate in flight', () => {
       number: null,
       currentTitle: null,
       title: '5.53.1',
+      dueOn: DUE,
     });
   });
 
@@ -220,6 +270,7 @@ describe('planMilestones, candidate in flight', () => {
       allMilestones: single,
       version: '5.53.0',
       candidateVersion: '5.53.0',
+      now: NOW,
     });
 
     assert.equal(plan.shipping.number, 430);
@@ -252,6 +303,84 @@ describe('planRealignment', () => {
       planRealignment([{ number: 1, milestone: '5.53.0', milestoneNumber: 430 }], shipping),
       []
     );
+  });
+});
+
+describe('releaseDueDate', () => {
+  // The release train ships on a Wednesday, and the milestone this action opens names the release
+  // after the one shipping, so it is always due the Wednesday of the following week.
+  const cases = [
+    { label: 'a Monday run', now: '2026-09-14T09:00:00Z', due: '2026-09-23T00:00:00Z' },
+    { label: 'a Tuesday run', now: '2026-09-08T10:23:42Z', due: '2026-09-16T00:00:00Z' },
+    { label: 'a Wednesday run', now: '2026-09-16T23:59:59Z', due: '2026-09-23T00:00:00Z' },
+    // Sunday closes the week that began on the Monday before it, not the one about to start.
+    { label: 'a Sunday run', now: '2026-09-06T17:57:00Z', due: '2026-09-09T00:00:00Z' },
+    {
+      label: 'a run that crosses a month',
+      now: '2026-08-25T07:45:42Z',
+      due: '2026-09-02T00:00:00Z',
+    },
+    {
+      label: 'a run that crosses a year',
+      now: '2026-12-29T12:00:00Z',
+      due: '2027-01-06T00:00:00Z',
+    },
+  ];
+
+  cases.forEach((entry) => {
+    it(`picks the Wednesday of the week after ${entry.label}`, () => {
+      assert.equal(releaseDueDate(entry.now), entry.due);
+    });
+  });
+
+  it('reproduces the dates the milestones in this repository were filed with', () => {
+    // 5.54.0 was opened on 2026-09-08 and hand-filed as due 2026-09-16.
+    assert.equal(releaseDueDate('2026-09-08T10:23:42Z'), '2026-09-16T00:00:00Z');
+    // 5.53.0 was opened on 2026-09-01 and hand-filed as due 2026-09-09.
+    assert.equal(releaseDueDate('2026-09-01T12:22:29Z'), '2026-09-09T00:00:00Z');
+  });
+
+  it('refuses a value that is not a date rather than emitting an Invalid Date', () => {
+    assert.throws(
+      () => releaseDueDate('not a date'),
+      /Cannot compute a milestone due date from "not a date"/u
+    );
+  });
+});
+
+describe('planMilestones, due date on the next milestone', () => {
+  const shipping = { number: 430, title: '5.53.0', state: 'closed' };
+
+  function nextOf(next: { due_on?: string | null }) {
+    return planMilestones({
+      allMilestones: [shipping, { number: 431, title: '5.53.1', state: 'open', ...next }],
+      version: '5.53.0',
+      candidateVersion: '5.53.0',
+      now: NOW,
+    }).next;
+  }
+
+  it('backfills a milestone that carries no due date', () => {
+    assert.equal(nextOf({}).dueOn, DUE);
+    assert.equal(nextOf({ due_on: null }).dueOn, DUE);
+  });
+
+  it('leaves a due date someone already set alone', () => {
+    // A run revisiting a candidate in a later week must not quietly move a date people planned
+    // around, so an existing one is never recomputed.
+    assert.equal(nextOf({ due_on: '2026-09-30T00:00:00Z' }).dueOn, null);
+  });
+
+  it('never gives the shipping milestone one, because this run closes it', () => {
+    const plan = planMilestones({
+      allMilestones: [{ number: 430, title: '5.52.4', state: 'open' }],
+      version: '5.53.0',
+      candidateVersion: null,
+      now: NOW,
+    });
+
+    assert.equal('dueOn' in plan.shipping, false);
+    assert.equal(plan.next.dueOn, DUE);
   });
 });
 

@@ -18,6 +18,9 @@ import type {
 
 const CLOCK = (): string => '2026-09-06T17:57:00Z';
 
+/** The Wednesday of the week after `CLOCK`, which is the Sunday that closes the week before it. */
+const DUE = '2026-09-09T00:00:00Z';
+
 const FEAT_SHA = 'f'.repeat(40);
 const FIX_SHA = '1'.repeat(40);
 const BACK_MERGE_SHA = SHA.BACK_MERGE;
@@ -135,8 +138,8 @@ function scenario(overrides: Overrides = {}): {
     listPullCommits: async () => [],
     listPulls: async () => overrides.openPulls ?? [],
     listMilestones: async () => [{ number: 430, title: '5.52.4', state: 'open' }],
-    async createMilestone(title) {
-      calls.push(`createMilestone:${title}`);
+    async createMilestone(title, dueOn) {
+      calls.push(`createMilestone:${title}:${dueOn}`);
 
       return { number: 431, title };
     },
@@ -314,7 +317,7 @@ describe('runDraftRelease', () => {
       ),
       [
         'updateMilestone:430:{"title":"5.53.0"}',
-        'createMilestone:5.53.1',
+        `createMilestone:5.53.1:${DUE}`,
         'updateMilestone:430:{"state":"closed"}',
       ]
     );
@@ -678,6 +681,31 @@ describe('runDraftRelease, candidate in flight', () => {
     );
   });
 
+  it('backfills a due date on a next milestone opened before this action wrote them', async () => {
+    const { calls } = await run({ dryRun: false }, inFlight(SHA.CANDIDATE_HEAD));
+
+    assert.equal(calls.includes(`updateMilestone:431:{"due_on":"${DUE}"}`), true);
+  });
+
+  it('leaves a due date someone already set on the next milestone alone', async () => {
+    const { calls } = await run(
+      { dryRun: false },
+      inFlight(SHA.CANDIDATE_HEAD, {
+        gh: {
+          listMilestones: async () => [
+            { number: 430, title: '5.53.0', state: 'closed' },
+            { number: 431, title: '5.53.1', state: 'open', due_on: '2026-09-30T00:00:00Z' },
+          ],
+        },
+      })
+    );
+
+    assert.equal(
+      calls.some((call) => call.includes('due_on')),
+      false
+    );
+  });
+
   it('does not push, and says so, when nothing landed since the last run', async () => {
     const { calls, result } = await run({ dryRun: false }, inFlight(FEAT_SHA));
 
@@ -868,7 +896,12 @@ describe('runDraftRelease, redraft', () => {
     assert.equal(result.version, '5.53.0');
     assert.deepEqual(
       calls.filter((call) => call.startsWith('updateMilestone:')),
-      ['updateMilestone:430:{"title":"5.53.0"}', 'updateMilestone:431:{"title":"5.53.1"}']
+      [
+        'updateMilestone:430:{"title":"5.53.0"}',
+        'updateMilestone:431:{"title":"5.53.1"}',
+        // The renamed next milestone carried no due date, so this run backfills one.
+        `updateMilestone:431:{"due_on":"${DUE}"}`,
+      ]
     );
   });
 
@@ -878,7 +911,13 @@ describe('runDraftRelease, redraft', () => {
     assert.equal(result.mode, 'redraft');
     assert.deepEqual(
       calls.filter((call) => call.startsWith('updateMilestone:')),
-      ['updateMilestone:431:{"title":"5.52.6"}', 'updateMilestone:430:{"title":"5.52.5"}']
+      [
+        'updateMilestone:431:{"title":"5.52.6"}',
+        // The backfill lands inside the window too, so the next milestone is entirely off the
+        // title before shipping claims it.
+        `updateMilestone:431:{"due_on":"${DUE}"}`,
+        'updateMilestone:430:{"title":"5.52.5"}',
+      ]
     );
   });
 
@@ -913,6 +952,7 @@ describe('runDraftRelease, redraft', () => {
         'pr.label',
         'milestone.rename',
         'milestone.rename',
+        'milestone.due',
         'issue.milestone.set',
         'issue.milestone.set',
         'issue.milestone.set',

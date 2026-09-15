@@ -174,6 +174,29 @@ describe('createGithubAdapter', () => {
     assert.equal(JSON.parse(calls[0]?.body ?? '{}').draft, true);
   });
 
+  it('creates a milestone with its due date in the same request', async () => {
+    const { request, calls } = stubRequest([
+      response({ payload: { number: 432, title: '5.54.1' } }),
+    ]);
+
+    await createGithubAdapter('t', coords, request).createMilestone(
+      '5.54.1',
+      '2026-09-23T00:00:00Z'
+    );
+
+    assert.equal(calls[0]?.body, '{"title":"5.54.1","due_on":"2026-09-23T00:00:00Z"}');
+  });
+
+  it('omits due_on entirely rather than sending null for it', async () => {
+    const { request, calls } = stubRequest([
+      response({ payload: { number: 432, title: '5.54.1' } }),
+    ]);
+
+    await createGithubAdapter('t', coords, request).createMilestone('5.54.1', null);
+
+    assert.equal(calls[0]?.body, '{"title":"5.54.1"}');
+  });
+
   it('clears a milestone by sending null', async () => {
     const { request, calls } = stubRequest([response()]);
 

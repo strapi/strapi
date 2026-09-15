@@ -52,6 +52,7 @@ export const JOURNAL_OPS = [
   'issue.milestone.set',
   'milestone.close',
   'milestone.create',
+  'milestone.due',
   'milestone.rename',
   'pr.body',
   'pr.close',
@@ -239,6 +240,8 @@ export type Milestone = {
   number: number;
   title: string;
   state?: string;
+  /** The due date, as an ISO 8601 timestamp. Absent or `null` when the milestone carries none. */
+  due_on?: string | null;
 };
 
 /**
@@ -265,7 +268,15 @@ export type MilestonePlan = {
      */
     close: boolean;
   };
-  next: MilestoneTarget;
+  next: MilestoneTarget & {
+    /**
+     * The due date to write, or `null` when the milestone already carries one.
+     *
+     * Only the next milestone has one. The shipping milestone is closed by the end of the run, and
+     * it already received its due date back when it was the next one.
+     */
+    dueOn: string | null;
+  };
 };
 
 /**
@@ -524,10 +535,10 @@ export type GithubAdapter = {
   listPulls: (input: { state: 'open' | 'closed' | 'all'; base: string }) => Promise<PullPayload[]>;
   listPullCommits: (pullNumber: number) => Promise<PullCommit[]>;
   listMilestones: (state: 'open' | 'closed' | 'all') => Promise<Milestone[]>;
-  createMilestone: (title: string) => Promise<Milestone>;
+  createMilestone: (title: string, dueOn: string | null) => Promise<Milestone>;
   updateMilestone: (
     milestoneNumber: number,
-    patch: { title?: string; state?: 'open' | 'closed' }
+    patch: { title?: string; state?: 'open' | 'closed'; due_on?: string }
   ) => Promise<Milestone>;
   listMilestoneItems: (milestoneNumber: number) => Promise<MilestoneItem[]>;
   setIssueMilestone: (issueNumber: number, milestoneNumber: number | null) => Promise<void>;

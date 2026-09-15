@@ -11,18 +11,18 @@ Triggered by hand from the Actions tab through [`draft-release.yml`](../../workf
 
 ## What it does
 
-| Step         | Effect                                                                                              |
-| ------------ | --------------------------------------------------------------------------------------------------- |
-| Pin          | Resolves the npm `latest` baseline, the `v<latest>` tag and `origin/develop` to fixed SHAs.         |
-| Attribute    | Resolves each first-parent integration to the pull request that produced it.                        |
-| Version      | Decides `minor` or `patch` from the commits, unless `version` is given.                             |
-| Discover     | Finds the candidate already in flight, and decides whether to draft, refresh or redraft.            |
-| Branch       | Pushes `releases/x.y.z` at the pinned SHA, or advances it.                                          |
-| Pull request | Opens the draft PR `Release x.y.z` against `main`, or reuses the one in flight.                     |
-| Milestones   | Makes the shipping milestone name the version that ships, keeps the next one open, closes shipping. |
-| Realign      | Pulls every pull request that shipped onto the shipping milestone, whatever its author picked.      |
-| Cleanup      | Moves open PRs to the next milestone, clears closed-unmerged PRs and every issue.                   |
-| Report       | Writes the shipping table and a machine-readable JSON block into the PR body, then comments.        |
+| Step         | Effect                                                                                                        |
+| ------------ | ------------------------------------------------------------------------------------------------------------- |
+| Pin          | Resolves the npm `latest` baseline, the `v<latest>` tag and `origin/develop` to fixed SHAs.                   |
+| Attribute    | Resolves each first-parent integration to the pull request that produced it.                                  |
+| Version      | Decides `minor` or `patch` from the commits, unless `version` is given.                                       |
+| Discover     | Finds the candidate already in flight, and decides whether to draft, refresh or redraft.                      |
+| Branch       | Pushes `releases/x.y.z` at the pinned SHA, or advances it.                                                    |
+| Pull request | Opens the draft PR `Release x.y.z` against `main`, or reuses the one in flight.                               |
+| Milestones   | Makes the shipping milestone name the version that ships, keeps the next one open and dated, closes shipping. |
+| Realign      | Pulls every pull request that shipped onto the shipping milestone, whatever its author picked.                |
+| Cleanup      | Moves open PRs to the next milestone, clears closed-unmerged PRs and every issue.                             |
+| Report       | Writes the shipping table and a machine-readable JSON block into the PR body, then comments.                  |
 
 Every refusal happens in the preflight, before the first write. A run that stops leaves the
 repository untouched; only a run that dies mid-write leaves it half-changed, and the journal is what
@@ -96,6 +96,34 @@ look:
 | `subject`      | The landing commit's conventional header, including its `!`.  |
 | `pr-commits`   | The commits inside the pull request, headers and bodies both. |
 | `landing-body` | The body of the landing commit itself.                        |
+
+## Milestone due dates
+
+The next milestone, the one that collects work for the release after this one, is opened with a
+`due_on` of **the Wednesday of the week after the run**. The release train ships on a Wednesday, and
+that milestone names the release after the one shipping now, so it is due a week later however far
+into the week the run happens.
+
+Weeks start on Monday, and everything is computed in UTC. A run on a Sunday therefore still belongs
+to the week that began six days earlier and targets the same Wednesday as the Monday run that opened
+the release:
+
+| Run              | Due          |
+| ---------------- | ------------ |
+| Mon `2026-09-14` | `2026-09-23` |
+| Tue `2026-09-08` | `2026-09-16` |
+| Wed `2026-09-16` | `2026-09-23` |
+| Sun `2026-09-06` | `2026-09-09` |
+
+The date is written as `YYYY-MM-DDT00:00:00Z`, which is what every milestone this repository carries
+was filed with by hand, so a generated due date is indistinguishable from one a human set.
+
+A due date that is already there is **never** recomputed. It is a commitment people plan around, and
+a run revisiting a candidate in a later week must not quietly move it. A milestone carrying none is
+backfilled instead, which is also what catches one opened before this action wrote due dates at all.
+
+The shipping milestone is never given one: this run closes it, and it received its own due date back
+when it was the next milestone.
 
 ## Attribution rule
 
@@ -215,6 +243,7 @@ vouch for whether it landed.
 | ----------------------- | ----------------------------------------------------------------------------- |
 | `milestone.rename`      | `gh api -X PATCH repos/strapi/strapi/milestones/<n> -f title=<before>`        |
 | `milestone.create`      | `gh api -X DELETE repos/strapi/strapi/milestones/<target n>`                  |
+| `milestone.due`         | `gh api -X PATCH repos/strapi/strapi/milestones/<n> -F due_on=null`           |
 | `milestone.close`       | `gh api -X PATCH repos/strapi/strapi/milestones/<n> -f state=open`            |
 | `issue.milestone.set`   | `gh api -X PATCH repos/strapi/strapi/issues/<n> -F milestone=<before number>` |
 | `issue.milestone.clear` | same, with the milestone number recorded in `before`                          |
