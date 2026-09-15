@@ -46,6 +46,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
   let fileService: {
     signFileUrls: jest.Mock;
     upload: jest.Mock;
+    fetchUrlToInputFile: jest.Mock;
   };
 
   beforeEach(() => {
@@ -72,6 +73,9 @@ describe('Admin Upload Controller - AI Service Connection', () => {
     fileService = {
       upload: jest.fn().mockResolvedValue([{}]),
       signFileUrls: jest.fn((file) => Promise.resolve({ ...file, isUrlSigned: true })),
+      fetchUrlToInputFile: jest.fn().mockResolvedValue({
+        file: { originalFilename: 'test.jpg', mimetype: 'image/jpeg', size: 10 },
+      }),
     };
 
     mockGetService.mockImplementation((serviceName: string) => {
@@ -104,6 +108,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
       },
       log: { warn: jest.fn() },
       telemetry: { send: jest.fn() },
+      config: { get: jest.fn().mockReturnValue({ sizeLimit: 1024 * 1024 * 1024 }) },
     } as any;
 
     mockValidateUploadBody.mockResolvedValue({
@@ -803,6 +808,187 @@ describe('Admin Upload Controller - AI Service Connection', () => {
       await expect(adminUploadController.updateFileInfo(mockContext as Context)).rejects.toThrow(
         'File id is required'
       );
+    });
+  });
+  /**
+   * `fetchUrlToInputFile` reports byte progress raw — once per streamed chunk, thousands of
+   * times for a large file. The controller is the throttle, and these cover the contract the
+   * admin's progress bar depends on.
+   */
+  describe('uploadFromUrls', () => {
+    type SSEFrame = { event: string; data: Record<string, any> };
+
+    let frames: SSEFrame[];
+    let ctxUrls: Partial<Context>;
+    let now: number;
+
+    /** A single SSE write is `event: <name>\ndata: <json>\n\n`. */
+    const parseFrame = (chunk: string): SSEFrame => {
+      const [eventLine, dataLine] = chunk.trim().split('\n');
+
+      return {
+        event: eventLine.replace('event: ', ''),
+        data: JSON.parse(dataLine.replace('data: ', '')),
+      };
+    };
+
+    const eventsOf = (name: string) => frames.filter((frame) => frame.event === name);
+    const indexOfEvent = (name: string) => frames.findIndex((frame) => frame.event === name);
+
+    beforeEach(() => {
+      frames = [];
+      now = 1_000;
+      jest.spyOn(Date, 'now').mockImplementation(() => now);
+
+      ctxUrls = {
+        state: { userAbility: {}, user: { id: 1 } },
+        request: { body: { urls: ['https://example.com/big.zip'], folderId: null } },
+        res: {
+          writeHead: jest.fn(),
+          write: jest.fn((chunk: string) => {
+            frames.push(parseFrame(chunk));
+            return true;
+          }),
+          end: jest.fn(),
+        },
+        forbidden: jest.fn(),
+      } as any;
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    /**
+     * Drives the fetch with a scripted set of progress reports. `advanceMs` moves the clock
+     * between reports, which is what the controller's throttle keys off.
+     */
+    const mockFetchReporting = (
+      reports: Array<{ bytesWritten: number; totalBytes: number | null }>,
+      advanceMs = 0
+    ) => {
+      fileService.fetchUrlToInputFile.mockImplementation(
+        async (_url: string, _dir: string, _limit: number, onProgress?: (p: any) => void) => {
+          reports.forEach((report) => {
+            now += advanceMs;
+            onProgress?.(report);
+          });
+
+          return { file: { originalFilename: 'big.zip', mimetype: 'image/jpeg', size: 300 } };
+        }
+      );
+    };
+
+    it('streams progress frames between the fetch starting and the file completing', async () => {
+      mockFetchReporting(
+        [
+          { bytesWritten: 0, totalBytes: 300 },
+          { bytesWritten: 100, totalBytes: 300 },
+          { bytesWritten: 200, totalBytes: 300 },
+          { bytesWritten: 300, totalBytes: 300 },
+        ],
+        250
+      );
+
+      await adminUploadController.uploadFromUrls(ctxUrls as Context);
+
+      expect(eventsOf('file:progress').map((frame) => frame.data)).toEqual([
+        { index: 0, loadedBytes: 0, totalBytes: 300, phase: 'fetch' },
+        { index: 0, loadedBytes: 100, totalBytes: 300, phase: 'fetch' },
+        { index: 0, loadedBytes: 200, totalBytes: 300, phase: 'fetch' },
+        { index: 0, loadedBytes: 300, totalBytes: 300, phase: 'fetch' },
+      ]);
+
+      // The fetch phase sits between the fetch announcement and the upload of the temp file.
+      expect(indexOfEvent('file:fetching')).toBeLessThan(indexOfEvent('file:progress'));
+      expect(frames.findIndex((frame) => frame.event === 'file:uploading')).toBeGreaterThan(
+        frames.map((frame) => frame.event).lastIndexOf('file:progress')
+      );
+      expect(indexOfEvent('file:complete')).toBeGreaterThan(indexOfEvent('file:uploading'));
+    });
+
+    // The untouched events keep their payloads: only a new event was added.
+    it('leaves the surrounding events unchanged', async () => {
+      mockFetchReporting([{ bytesWritten: 0, totalBytes: 300 }]);
+
+      await adminUploadController.uploadFromUrls(ctxUrls as Context);
+
+      expect(eventsOf('file:fetching')[0].data).toEqual({
+        url: 'https://example.com/big.zip',
+        index: 0,
+        total: 1,
+      });
+      expect(eventsOf('file:uploading')[0].data).toEqual({
+        name: 'big.zip',
+        index: 0,
+        total: 1,
+        size: 300,
+      });
+    });
+
+    it('coalesces a flood of chunk reports into a handful of frames', async () => {
+      const chunks = Array.from({ length: 512 }, (_, i) => ({
+        bytesWritten: (i + 1) * 1024,
+        totalBytes: 512 * 1024,
+      }));
+
+      // Clock frozen: every chunk lands inside the same throttle window.
+      mockFetchReporting([{ bytesWritten: 0, totalBytes: 512 * 1024 }, ...chunks]);
+
+      await adminUploadController.uploadFromUrls(ctxUrls as Context);
+
+      // Only the size announcement and the final frame get through.
+      expect(eventsOf('file:progress').map((frame) => frame.data.loadedBytes)).toEqual([
+        0,
+        512 * 1024,
+      ]);
+    });
+
+    // Otherwise the row holds the last emitted fraction through the whole provider upload.
+    it('flushes the frame that reaches the total even inside the throttle window', async () => {
+      mockFetchReporting([
+        { bytesWritten: 0, totalBytes: 300 },
+        { bytesWritten: 200, totalBytes: 300 },
+        { bytesWritten: 300, totalBytes: 300 },
+      ]);
+
+      await adminUploadController.uploadFromUrls(ctxUrls as Context);
+
+      expect(eventsOf('file:progress').map((frame) => frame.data.loadedBytes)).toEqual([0, 300]);
+    });
+
+    // Without it the client never learns the denominator and the row stays indeterminate.
+    it('always emits the size announcement, however tight the throttle', async () => {
+      mockFetchReporting([
+        { bytesWritten: 0, totalBytes: 300 },
+        { bytesWritten: 300, totalBytes: 300 },
+      ]);
+
+      await adminUploadController.uploadFromUrls(ctxUrls as Context);
+
+      expect(eventsOf('file:progress')).toHaveLength(2);
+      expect(eventsOf('file:progress')[0].data).toEqual({
+        index: 0,
+        loadedBytes: 0,
+        totalBytes: 300,
+        phase: 'fetch',
+      });
+    });
+
+    // A chunked remote sends no Content-Length. The absence is forwarded as-is so the client
+    // can stay indeterminate rather than invent a denominator.
+    it('forwards an unknown total as null', async () => {
+      mockFetchReporting(
+        [
+          { bytesWritten: 0, totalBytes: null },
+          { bytesWritten: 100, totalBytes: null },
+        ],
+        250
+      );
+
+      await adminUploadController.uploadFromUrls(ctxUrls as Context);
+
+      expect(eventsOf('file:progress').map((frame) => frame.data.totalBytes)).toEqual([null, null]);
     });
   });
 });

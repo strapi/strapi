@@ -14,7 +14,7 @@ interface ObservedToolbarComponentProps {
   index: number;
   lastVisibleIndex: number;
   setLastVisibleIndex: React.Dispatch<React.SetStateAction<number>>;
-  rootRef: React.RefObject<HTMLElement>;
+  rootRef: React.RefObject<HTMLElement | null>;
   children: React.ReactNode;
 }
 
@@ -37,12 +37,20 @@ const ObservedToolbarComponent = ({
         setLastVisibleIndex((prev) => Math.max(prev, index));
       }
     },
-    { threshold: 1, root: rootRef.current }
+    // Use a getter so root is read inside useElementOnScreen's useEffect (after refs are
+    // committed) rather than at render time (when containerRef.current is still null).
+    {
+      threshold: 1,
+      get root() {
+        return rootRef.current;
+      },
+    }
   );
 
   return (
     <div
       ref={containerRef}
+      data-toolbar-item="true"
       style={{
         /**
          * Use visibility so that the element occupies the space if requires even when there's not
@@ -103,18 +111,86 @@ const MenuTriggerWrapper = styled(Box)`
 export const EditorToolbarObserver = ({
   observedComponents,
   menuTriggerVariant = 'ghost',
+  containerRef,
 }: {
   observedComponents: ObservedComponent[];
   menuTriggerVariant?: Menu.TriggerProps['variant'];
+  containerRef: React.RefObject<HTMLElement | null>;
 }) => {
   const { formatMessage } = useIntl();
-  const toolbarRef = React.useRef<HTMLElement>(null);
 
   const [lastVisibleIndex, setLastVisibleIndex] = React.useState<number>(
     observedComponents.length - 1
   );
   const hasHiddenItems = lastVisibleIndex < observedComponents.length - 1;
   const menuIndex = lastVisibleIndex + 1;
+
+  /**
+   * Measure whether toolbar items overflow the container using clientWidth/offsetWidth.
+   * These layout-box dimensions are unaffected by CSS transforms (including the Radix
+   * popover positioning transform), so the result is always correct.
+   *
+   * We run this both synchronously on mount (useLayoutEffect) and on every container
+   * resize (ResizeObserver) so that label changes in BlocksDropdown, which narrow the
+   * toolbar container, are caught and the More menu appears as needed.
+   */
+  const measureOverflow = React.useCallback(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    // Items are in DOM order 0..N-1 regardless of where the trigger sits.
+    // data-toolbar-trigger is skipped by the [data-toolbar-item] selector.
+    const triggerEl = container.querySelector(
+      '[data-toolbar-trigger="true"]'
+    ) as HTMLElement | null;
+    const itemEls = Array.from(
+      container.querySelectorAll('[data-toolbar-item="true"]')
+    ) as HTMLElement[];
+
+    if (!triggerEl || itemEls.length === 0) return;
+
+    const containerWidth = container.clientWidth;
+    const triggerWidth = triggerEl.offsetWidth;
+    const gap = parseFloat(getComputedStyle(container).columnGap) || 0;
+
+    const itemWidths = itemEls.map((el) => el.offsetWidth);
+    const totalItemsWidth = itemWidths.reduce((sum, w) => sum + w, 0);
+
+    // Check if all items fit without the trigger
+    if (totalItemsWidth + Math.max(0, itemEls.length - 1) * gap <= containerWidth) {
+      setLastVisibleIndex(itemEls.length - 1);
+      return;
+    }
+
+    // Items overflow: find the last item that fits alongside the trigger
+    let cumWidth = 0;
+    let lastFitting = -1;
+    for (let i = 0; i < itemWidths.length; i++) {
+      const widthWithItem = cumWidth + (i > 0 ? gap : 0) + itemWidths[i];
+      if (widthWithItem + gap + triggerWidth <= containerWidth) {
+        cumWidth = widthWithItem;
+        lastFitting = i;
+      } else {
+        break;
+      }
+    }
+
+    setLastVisibleIndex(lastFitting);
+  }, [containerRef]);
+
+  // Synchronous initial measurement before the first paint
+  React.useLayoutEffect(() => {
+    measureOverflow();
+  }, [measureOverflow]);
+
+  // Re-measure whenever the container resizes (e.g. BlocksDropdown label changes width)
+  React.useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const ro = new ResizeObserver(measureOverflow);
+    ro.observe(container);
+    return () => ro.disconnect();
+  }, [containerRef, measureOverflow]);
 
   const [open, setOpen] = React.useState(false);
   const isMenuOpenWithContent = open && hasHiddenItems;
@@ -131,7 +207,13 @@ export const EditorToolbarObserver = ({
         setOpen(isMenuOpenWithContent);
       }
     },
-    { threshold: 1, root: toolbarRef.current }
+    // Same getter pattern — root is read at effect time, not render time.
+    {
+      threshold: 1,
+      get root() {
+        return containerRef.current;
+      },
+    }
   );
 
   return observedComponents
@@ -142,7 +224,7 @@ export const EditorToolbarObserver = ({
           index={index}
           lastVisibleIndex={lastVisibleIndex}
           setLastVisibleIndex={setLastVisibleIndex}
-          rootRef={toolbarRef}
+          rootRef={containerRef}
         >
           {component.toolbar}
         </ObservedToolbarComponent>
@@ -153,6 +235,7 @@ export const EditorToolbarObserver = ({
       0,
       <MenuTriggerWrapper
         key="more-menu-wrapper"
+        data-toolbar-trigger="true"
         style={{ visibility: hasHiddenItems ? 'visible' : 'hidden' }}
       >
         <Menu.Root defaultOpen={false} open={isMenuOpenWithContent} onOpenChange={setOpen}>

@@ -152,27 +152,29 @@ const createConfig = ({ port, testDir, appDir, reportFileName, domain }) => {
     outputDir,
 
     /* Run your local dev server before starting the tests */
-    webServer: {
-      command: `cd ${appDir} && npm run develop -- --no-watch-admin`,
-      url: `http://127.0.0.1:${port}`,
-      // Strapi reads PORT/HOST from env (see tests/app-template/config/server.js). Without this,
-      // `yarn playwright test --config test-apps/e2e/test-app-0/playwright.config.js` leaves PORT
-      // unset → default 1337 while baseURL/webServer.url expect 8000+ (browser-runner sets PORT).
-      env: {
-        PORT: String(port),
-        HOST: '127.0.0.1',
+    webServer: [
+      {
+        command: `cd ${appDir} && npm run develop -- --no-watch-admin`,
+        url: `http://127.0.0.1:${port}`,
+        // Strapi reads PORT/HOST from env (see tests/app-template/config/server.js). Without this,
+        // `yarn playwright test --config test-apps/e2e/test-app-0/playwright.config.js` leaves PORT
+        // unset → default 1337 while baseURL/webServer.url expect 8000+ (browser-runner sets PORT).
+        env: {
+          PORT: String(port),
+          HOST: '127.0.0.1',
+        },
+        /* default Strapi server startup timeout to 160s */
+        timeout: getEnvNum(process.env.PLAYWRIGHT_WEBSERVER_TIMEOUT, 160 * 1000),
+        // If true, Playwright skips `command` when `url` already responds — you may get the wrong
+        // edition or stale env (license / STRAPI_DISABLE_EE) vs this run. Default: never reuse;
+        // set PLAYWRIGHT_REUSE_EXISTING_SERVER=true locally when you intentionally keep a matching
+        // server up. CI always starts fresh.
+        reuseExistingServer: process.env.CI
+          ? false
+          : getEnvBool(process.env.PLAYWRIGHT_REUSE_EXISTING_SERVER, false),
+        stdout: 'pipe',
       },
-      /* default Strapi server startup timeout to 160s */
-      timeout: getEnvNum(process.env.PLAYWRIGHT_WEBSERVER_TIMEOUT, 160 * 1000),
-      // If true, Playwright skips `command` when `url` already responds — you may get the wrong
-      // edition or stale env (license / STRAPI_DISABLE_EE) vs this run. Default: never reuse;
-      // set PLAYWRIGHT_REUSE_EXISTING_SERVER=true locally when you intentionally keep a matching
-      // server up. CI always starts fresh.
-      reuseExistingServer: process.env.CI
-        ? false
-        : getEnvBool(process.env.PLAYWRIGHT_REUSE_EXISTING_SERVER, false),
-      stdout: 'pipe',
-    },
+    ],
   };
 };
 
