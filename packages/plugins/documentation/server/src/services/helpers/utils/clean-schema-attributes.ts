@@ -234,16 +234,20 @@ const cleanSchemaAttributes = (
         }
 
         typeMap.set(attribute.target, true);
-        const targetAttributes = strapi.contentType(attribute.target).attributes;
+        try {
+          const targetAttributes = strapi.contentType(attribute.target).attributes;
 
-        schemaAttributes[prop] = getSchemaData(
-          isListOfEntities,
-          cleanSchemaAttributes(targetAttributes, {
-            typeMap,
-            isRequest,
-            didAddStrapiComponentsToSchemas,
-          })
-        );
+          schemaAttributes[prop] = getSchemaData(
+            isListOfEntities,
+            cleanSchemaAttributes(targetAttributes, {
+              typeMap,
+              isRequest,
+              didAddStrapiComponentsToSchemas,
+            })
+          );
+        } finally {
+          typeMap.delete(attribute.target);
+        }
 
         break;
       }
