@@ -28,7 +28,7 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
         'media-library': ({ onSelectAssets }: MediaLibraryProps) => (
           <div>
             <p>{mockMediaLibraryTitle}</p>
-            <button type="button" onClick={() => onSelectAssets([mockImage])}>
+            <button type="button" onClick={() => onSelectAssets(mockSelectedImages)}>
               {mockMediaLibrarySubmitButton}
             </button>
           </div>
@@ -41,6 +41,9 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
 const mockMediaLibraryTitle = 'dialog component';
 const mockMediaLibrarySubmitButton = 'upload images';
 
+// The images the mocked media library returns when its submit button is clicked
+let mockSelectedImages: (typeof mockImage)[] = [mockImage];
+
 const render = (ui: ReactElement, { baseEditor }: { baseEditor?: Editor } = {}) =>
   renderRTL(ui, {
     renderOptions: {
@@ -49,6 +52,10 @@ const render = (ui: ReactElement, { baseEditor }: { baseEditor?: Editor } = {}) 
   });
 
 describe('Image', () => {
+  beforeEach(() => {
+    mockSelectedImages = [mockImage];
+  });
+
   it('renders an image block properly', () => {
     render(
       imageBlocks.image.renderElement({
@@ -68,6 +75,26 @@ describe('Image', () => {
     const image = screen.getByRole('img', { name: 'Some image' });
     expect(image).toBeInTheDocument();
     expect(image).toHaveAttribute('src', 'https://example.com/image.png');
+  });
+
+  it('prefixes a relative image URL with the backend URL when rendering', () => {
+    render(
+      imageBlocks.image.renderElement({
+        children: 'A line of text in a paragraph.',
+        element: {
+          type: 'image',
+          image: { url: '/uploads/image.png', alternativeText: 'Some image' },
+          children: [{ type: 'text', text: '' }],
+        },
+        attributes: {
+          'data-slate-node': 'element',
+          ref: null,
+        },
+      })
+    );
+
+    const image = screen.getByRole('img', { name: 'Some image' });
+    expect(image).toHaveAttribute('src', 'http://localhost:1337/uploads/image.png');
   });
 
   it('handles enter key on an image', () => {
@@ -133,6 +160,40 @@ describe('Image', () => {
       {
         type: 'image',
         image: mockImage,
+        children: [{ type: 'text', text: '' }],
+      },
+    ]);
+  });
+
+  it('stores a relative image URL without the backend URL prefix', async () => {
+    const relativeImage = { ...mockImage, url: '/uploads/relative_image.png' };
+    mockSelectedImages = [relativeImage];
+
+    const baseEditor = createEditor();
+    baseEditor.children = [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }];
+
+    await waitFor(() =>
+      Transforms.select(baseEditor, {
+        anchor: { path: [0, 0], offset: 0 },
+        focus: { path: [0, 0], offset: 0 },
+      })
+    );
+
+    // Display the media library modal via handleConvert
+    const modalComponent = imageBlocks.image.handleConvert!(baseEditor);
+    const modalUi = modalComponent!();
+    const { user } = render(modalUi, {
+      baseEditor,
+    });
+
+    // Fake selecting an image that has a relative URL
+    await user.click(screen.getByText(mockMediaLibrarySubmitButton));
+
+    // The URL is kept relative so the content stays portable across environments
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'image',
+        image: relativeImage,
         children: [{ type: 'text', text: '' }],
       },
     ]);
