@@ -12,12 +12,13 @@ const PROFILES: Record<string, ProfileConfig> = {
 };
 
 /** Global checks always run regardless of spec entry checks. */
-const GLOBAL_CHECK_IDS = ['documentIdBackfill'];
+const GLOBAL_CHECK_IDS = ['documentIdBackfill', 'localizedDocumentIdRecovery'];
 
 /** Run order for validation sections. */
 const CHECK_RUN_ORDER = [
   'rowCounts',
   'documentIdBackfill',
+  'localizedDocumentIdRecovery',
   'draftPublishPair',
   'relationTargets',
   'joinTableParity',
