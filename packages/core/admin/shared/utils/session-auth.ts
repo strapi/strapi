@@ -26,7 +26,10 @@ export const getAccessCookieName = (): string => {
 
 export const getAccessCookiePath = (): string => {
   const configured: string | undefined = strapi.config.get('admin.auth.cookie.path');
-  return resolveAuthCookiePath(configured, warnViaStrapiLog);
+  // Fall back to the path the admin panel is served from, so a custom
+  // `admin.url` keeps the cookie readable by the panel without extra config.
+  const adminPath: string | undefined = strapi.config.get('admin.path');
+  return resolveAuthCookiePath(configured || adminPath, warnViaStrapiLog);
 };
 
 export const getAccessCookieDomain = (): string | undefined => {
