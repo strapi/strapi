@@ -22,7 +22,6 @@ import {
 import { useIntl } from 'react-intl';
 import { styled, css } from 'styled-components';
 
-import { BetaNotice } from '../../components/BetaNotice';
 import { useAIMetadataEnabled } from '../../hooks/useAIMetadataEnabled';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { useTracking, MEDIA_LIBRARY_LOCATION } from '../../hooks/useTracking';
@@ -841,7 +840,6 @@ export const AssetsPage = () => {
                     </StickyHeader>
 
                     <Layouts.Content>
-                      <BetaNotice />
                       {/* Renders nothing — keeps every loaded page's query subscribed
                           so a rename/delete refreshes the whole list. */}
                       {assetPageSubscribers}
