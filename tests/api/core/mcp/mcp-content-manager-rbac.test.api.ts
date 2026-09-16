@@ -248,7 +248,11 @@ describe('MCP content-manager CRUD RBAC (api)', () => {
         data: {
           additionalProperties: false,
           properties: {
-            publishedOn: { type: 'string' },
+            // Non-required attributes are nullable in every mode: `addRequiredValidation`
+            // takes its `.nullable()` else-branch whenever `required` is falsy, regardless of
+            // `isDraft`/`createOrUpdate`, so the server accepts an explicit clear even on this
+            // published non-D&P create. `.nullable()` emits `anyOf: [<inner>, { type: 'null' }]`.
+            publishedOn: { anyOf: [{ type: 'string' }, { type: 'null' }] },
           },
         },
       },
