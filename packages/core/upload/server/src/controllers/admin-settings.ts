@@ -39,7 +39,9 @@ export default {
       state: { userAbility },
     } = ctx;
 
-    if (userAbility.cannot(ACTIONS.readSettings, FILE_MODEL_UID)) {
+    // Mirrors the route policy: reading is gated on `read`, writing on
+    // `readSettings`.
+    if (userAbility.cannot(ACTIONS.read, FILE_MODEL_UID)) {
       return ctx.forbidden();
     }
 
