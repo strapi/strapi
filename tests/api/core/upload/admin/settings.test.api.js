@@ -14,6 +14,8 @@ let rq;
 // `plugin::upload.settings.read` — the shape of the default Editor and Author
 // roles.
 let rqUploadReader;
+// Authenticated as a role holding no upload permissions at all.
+let rqNoUpload;
 
 const uploadReaderUser = {
   email: 'upload-reader@user.io',
@@ -25,9 +27,21 @@ const uploadReaderRole = {
   description: '',
 };
 
+const noUploadUser = {
+  email: 'no-upload@user.io',
+  password: 'NoUpload123',
+};
+
+const noUploadRole = {
+  name: 'no-upload-role',
+  description: '',
+};
+
 const localData = {
   uploadReaderUser: null,
   uploadReaderRole: null,
+  noUploadUser: null,
+  noUploadRole: null,
 };
 
 const createFixtures = async () => {
@@ -42,11 +56,21 @@ const createFixtures = async () => {
 
   localData.uploadReaderUser = user;
   localData.uploadReaderRole = role;
+
+  const bareRole = await utils.createRole(noUploadRole);
+  const bareUser = await utils.createUserIfNotExists({
+    ...noUploadUser,
+    roles: [bareRole.id],
+  });
+
+  localData.noUploadUser = bareUser;
+  localData.noUploadRole = bareRole;
 };
 
 const deleteFixtures = async () => {
   await utils.deleteUserById(localData.uploadReaderUser.id);
-  await utils.deleteRolesById([localData.uploadReaderRole.id]);
+  await utils.deleteUserById(localData.noUploadUser.id);
+  await utils.deleteRolesById([localData.uploadReaderRole.id, localData.noUploadRole.id]);
 };
 
 const dogModel = {
@@ -71,6 +95,7 @@ describe('Settings', () => {
 
     rq = await createAuthRequest({ strapi });
     rqUploadReader = await createAuthRequest({ strapi, userInfo: uploadReaderUser });
+    rqNoUpload = await createAuthRequest({ strapi, userInfo: noUploadUser });
   });
 
   afterAll(async () => {
@@ -107,6 +132,12 @@ describe('Settings', () => {
         aiMetadata: expect.any(Boolean),
         concurrentUploadRequests: 1,
       });
+    });
+
+    test('403 response when the role has no upload permissions', async () => {
+      const res = await rqNoUpload({ method: 'GET', url: '/upload/settings' });
+
+      expect(res.statusCode).toBe(403);
     });
   });
 

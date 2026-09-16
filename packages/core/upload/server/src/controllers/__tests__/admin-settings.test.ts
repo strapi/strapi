@@ -45,6 +45,8 @@ describe('Admin Settings Controller - getSettings permission gate', () => {
     } as never;
   });
 
+  // Reads are gated by the route policy alone (`plugin::upload.read`), which the
+  // API tests cover. This asserts the handler itself adds no second gate.
   test('serves a role that holds `read` but not `settings.read`', async () => {
     // The shape of the default Editor and Author roles.
     const ctx = buildContext(['plugin::upload.settings.read']);
@@ -55,15 +57,6 @@ describe('Admin Settings Controller - getSettings permission gate', () => {
     expect(ctx.body).toEqual({
       data: { ...STORED_SETTINGS, concurrentUploadRequests: 1 },
     });
-  });
-
-  test('forbids a caller without `read`', async () => {
-    const ctx = buildContext(['plugin::upload.read']);
-
-    await adminSettingsController.getSettings(ctx as Context);
-
-    expect(ctx.forbidden).toHaveBeenCalled();
-    expect(ctx.body).toBeUndefined();
   });
 });
 
