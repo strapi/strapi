@@ -1,5 +1,7 @@
 // @ts-check
 
+const { createOxlintOverride, frontJavaScript } = require('../oxlint');
+
 /** @type {import('eslint').Linter.Config} */
 const config = {
   parser: '@babel/eslint-parser',
@@ -69,6 +71,7 @@ const config = {
       },
     ],
   },
+  overrides: createOxlintOverride(frontJavaScript),
 };
 
 module.exports = config;

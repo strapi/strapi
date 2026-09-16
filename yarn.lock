@@ -24232,8 +24232,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "oxlint-config@workspace:packages/utils/oxlint-config"
   dependencies:
+    eslint: "npm:8.57.1"
     oxlint: "npm:1.72.0"
     tsconfig: "npm:5.54.0"
+    tsx: "npm:4.22.4"
   languageName: unknown
   linkType: soft
 
