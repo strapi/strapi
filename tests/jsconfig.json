@@ -2,7 +2,9 @@
   "compilerOptions": {
     "module": "node20",
     "moduleResolution": "node16",
-    "target": "es2022"
+    "target": "es2022",
+    "lib": ["es2023"],
+    "types": ["node", "jest"]
   },
   "exclude": ["node_modules", "dist"]
 }
