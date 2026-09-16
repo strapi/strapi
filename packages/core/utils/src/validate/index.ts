@@ -16,7 +16,7 @@ import * as visitors from './visitors';
 import * as validators from './validators';
 import traverseEntity from '../traverse-entity';
 
-import { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate } from '../traverse';
+import { traverseQueryFilters, traverseQuerySort } from '../traverse';
 
 import { Model, Data } from '../types';
 import { ValidationError } from '../errors';
@@ -303,20 +303,11 @@ const createAPIValidators = (opts: APIOptions) => {
     }
   };
 
-  const validatePopulate: ValidateFunc = async (populate, schema: Model, { auth } = {}) => {
+  const validatePopulate: ValidateFunc = async (populate, schema: Model) => {
     if (!schema) {
       throw new Error('Missing schema in sanitizePopulate');
     }
     const transforms = [validators.defaultValidatePopulate({ schema, getModel })];
-
-    if (auth) {
-      transforms.push(
-        traverseQueryPopulate(visitors.throwRestrictedRelations(auth), {
-          schema,
-          getModel,
-        })
-      );
-    }
 
     try {
       await pipeAsync(...transforms)(populate);

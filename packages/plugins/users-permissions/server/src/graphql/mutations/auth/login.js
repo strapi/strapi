@@ -3,9 +3,11 @@
 const { toPlainObject } = require('lodash/fp');
 
 const { checkBadRequest } = require('../../utils');
+const { createRateLimitRunner } = require('./rate-limit');
 
 module.exports = ({ nexus, strapi }) => {
   const { nonNull } = nexus;
+  const runRateLimit = createRateLimitRunner(strapi, '/auth/local');
 
   return {
     type: nonNull('UsersPermissionsLoginPayload'),
@@ -17,12 +19,14 @@ module.exports = ({ nexus, strapi }) => {
     async resolve(parent, args, context) {
       const { koaContext } = context;
 
-      koaContext.params = { provider: args.input.provider };
-      koaContext.request.body = toPlainObject(args.input);
-
-      await strapi.plugin('users-permissions').controller('auth').callback(koaContext);
-
-      const output = koaContext.body;
+      const output = await runRateLimit(
+        koaContext,
+        {
+          body: toPlainObject(args.input),
+          params: { provider: args.input.provider },
+        },
+        (ctx) => strapi.plugin('users-permissions').controller('auth').callback(ctx)
+      );
 
       checkBadRequest(output);
 

@@ -456,6 +456,17 @@ export const AssetCropEditor = ({
     setFocal((prev) => ({ ...prev, [axis]: Math.round(pct) }));
   };
 
+  /**
+   * Forces a focal field to redisplay the state on blur.
+   *
+   * One key per axis: a shared key remounted both fields, so tabbing out of X
+   * destroyed Y before it could take focus and it was unreachable by keyboard.
+   */
+  const [focalXKey, setFocalXKey] = React.useState(0);
+  const [focalYKey, setFocalYKey] = React.useState(0);
+  const syncFocalX = () => setFocalXKey((key) => key + 1);
+  const syncFocalY = () => setFocalYKey((key) => key + 1);
+
   const cropPercents =
     naturalSize.width && naturalSize.height
       ? {
@@ -679,10 +690,14 @@ export const AssetCropEditor = ({
                         id: getTranslationKey('asset-details.crop.focal-x'),
                         defaultMessage: 'Focal point X (px)',
                       })}
+                      key={`focal-x-${focalXKey}`}
                       value={focalPxX}
+                      min={0}
+                      max={width || undefined}
                       onValueChange={(next) => {
                         if (next !== undefined) setFocalPx('x', next);
                       }}
+                      onBlur={syncFocalX}
                     />
                   </FieldRow>
                   <FieldRow name="focal-y" gap={2}>
@@ -697,10 +712,14 @@ export const AssetCropEditor = ({
                         id: getTranslationKey('asset-details.crop.focal-y'),
                         defaultMessage: 'Focal point Y (px)',
                       })}
+                      key={`focal-y-${focalYKey}`}
                       value={focalPxY}
+                      min={0}
+                      max={height || undefined}
                       onValueChange={(next) => {
                         if (next !== undefined) setFocalPx('y', next);
                       }}
+                      onBlur={syncFocalY}
                     />
                   </FieldRow>
                 </Flex>

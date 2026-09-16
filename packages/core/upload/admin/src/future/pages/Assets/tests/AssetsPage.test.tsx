@@ -1,4 +1,4 @@
-import { act, render, screen, server, waitFor } from '@tests/utils';
+import { act, fireEvent, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -388,6 +388,27 @@ describe('AssetsPage search', () => {
       expect(screen.getAllByText(/^page-one-/)).toHaveLength(20);
     });
 
+    it('brings the loaded pages back when a folder is re-entered, without scrolling again', async () => {
+      respondWithPagedAssets();
+
+      const { user } = renderPage('?folder=1');
+
+      expect(await screen.findByText('page-one-0.png')).toBeInTheDocument();
+
+      await scrollToLoadMore();
+      expect(await screen.findByText('page-two.png')).toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Go to root' }));
+      expect(await screen.findByText('root.png')).toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Go to folder 1' }));
+
+      // No second `scrollToLoadMore` on purpose: coming back shows what had been
+      // read, not page 1 with all the scrolling to do over.
+      expect(await screen.findByText('page-two.png')).toBeInTheDocument();
+      expect(screen.getAllByText(/^page-one-/)).toHaveLength(20);
+    });
+
     it('refetches an earlier page after a mutation invalidation (the subscribers node is rendered)', async () => {
       // Page-level guard for the "caller must render `subscribers`" contract: if
       // AssetsPage drops that node, page 1 stops being subscribed, so the rename
@@ -590,6 +611,152 @@ describe('AssetsPage search', () => {
       expect(await screen.findByRole('option', { name: 'Media Library' })).toBeInTheDocument();
       expect(screen.queryByRole('option', { name: 'A' })).not.toBeInTheDocument();
     });
+  });
+});
+
+describe('AssetsPage main-area context menu', () => {
+  // The menu listens on the scrolling column the admin layout marks, so this is
+  // also the strip below the list that no descendant of the page covers.
+  const rightClickBackground = () => {
+    // eslint-disable-next-line testing-library/no-node-access
+    const column = document.querySelector('[data-strapi-main-content]');
+
+    if (!column) {
+      throw new Error('the admin layout did not render its main column');
+    }
+
+    fireEvent.contextMenu(column, { clientX: 200, clientY: 300 });
+  };
+
+  /**
+   * The menu is gated on `assets.create`, which is `false` until the RBAC check
+   * settles — the "New" menu appearing is the signal that it has.
+   */
+  const waitForCreatePermission = () => screen.findByRole('button', { name: 'New' });
+
+  it('offers the same creation actions as the New menu', async () => {
+    respondWithAssets([createAsset(1, 'image.png')]);
+
+    renderPage();
+    await waitForCreatePermission();
+
+    rightClickBackground();
+
+    const items = await screen.findAllByRole('menuitem');
+    expect(items.map((item) => item.textContent)).toEqual([
+      'New folder',
+      'File upload',
+      'File upload from URL',
+    ]);
+  });
+
+  it('reaches the page header band, whose empty space is part of the same surface', async () => {
+    respondWithAssets([createAsset(1, 'image.png')]);
+
+    renderPage();
+    await waitForCreatePermission();
+
+    // The heading is inert, so a press on it is background rather than a
+    // control. The header used to sit outside the wrapped area entirely, which
+    // made its whole band a dead zone.
+    fireEvent.contextMenu(screen.getByRole('heading', { level: 1 }), {
+      clientX: 200,
+      clientY: 40,
+    });
+
+    expect(await screen.findAllByRole('menuitem')).toHaveLength(3);
+  });
+
+  it('leaves the table header row to the browser, since sorting will make it interactive', async () => {
+    respondWithAssets([createAsset(1, 'image.png')]);
+    // Grid is the default view, and only the table has a header row.
+    window.localStorage.setItem('STRAPI_UPLOAD_LIBRARY_VIEW', '1');
+
+    try {
+      renderPage();
+      await waitForCreatePermission();
+
+      // Wrapping the header brought `thead` inside the hit area, so the explicit
+      // `thead` exclusion is now what keeps it out.
+      const table = await screen.findByRole('grid');
+      // eslint-disable-next-line testing-library/no-node-access
+      const columnHeader = table.querySelector('thead th') as HTMLElement;
+
+      fireEvent.contextMenu(columnHeader, { clientX: 200, clientY: 120 });
+
+      expect(screen.queryByRole('menuitem')).not.toBeInTheDocument();
+    } finally {
+      window.localStorage.removeItem('STRAPI_UPLOAD_LIBRARY_VIEW');
+    }
+  });
+
+  it('creates the folder inside the folder currently open', async () => {
+    respondWithAssets([createAsset(1, 'image.png')]);
+    respondWithFolders([]);
+    server.use(
+      http.get('*/upload/folders/:id', () =>
+        HttpResponse.json({ data: { id: 1, name: 'Photos', pathId: 1, path: '/1', parent: null } })
+      )
+    );
+
+    const { user } = renderPage('?folder=1');
+    await waitForCreatePermission();
+
+    rightClickBackground();
+    await user.click(await screen.findByRole('menuitem', { name: 'New folder' }));
+
+    expect(await screen.findByText('New folder in Photos')).toBeInTheDocument();
+  });
+
+  it('opens the file picker from File upload', async () => {
+    respondWithAssets([createAsset(1, 'image.png')]);
+
+    const { user } = renderPage();
+    await waitForCreatePermission();
+
+    // The hidden input the header "New > File upload" also clicks.
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const click = jest.spyOn(fileInput, 'click').mockImplementation(() => {});
+
+    rightClickBackground();
+    await user.click(await screen.findByRole('menuitem', { name: 'File upload' }));
+
+    expect(click).toHaveBeenCalled();
+    click.mockRestore();
+  });
+
+  it('leaves an asset card to the browser', async () => {
+    respondWithAssets([createAsset(1, 'image.png')]);
+
+    renderPage();
+    await waitForCreatePermission();
+
+    const card = (await screen.findByText('image.png')).closest('[data-native-context-menu]');
+    const event = fireEvent.contextMenu(card!, { clientX: 20, clientY: 20 });
+
+    // Nothing called preventDefault, so the browser's own menu still opens.
+    expect(event).toBe(true);
+    await waitFor(() => expect(screen.queryByRole('menuitem')).not.toBeInTheDocument());
+  });
+
+  it('stays shut without assets.create', async () => {
+    respondWithAssets([createAsset(1, 'image.png')]);
+
+    render(<AssetsPage />, {
+      initialEntries: ['/'],
+      providerOptions: {
+        permissions: (defaults: Array<{ action: string }>) =>
+          defaults.filter((permission) => permission.action !== 'plugin::upload.assets.create'),
+      },
+    });
+    await findHeading();
+    await waitFor(() =>
+      expect(screen.queryByRole('button', { name: 'New' })).not.toBeInTheDocument()
+    );
+
+    rightClickBackground();
+
+    await waitFor(() => expect(screen.queryByRole('menuitem')).not.toBeInTheDocument());
   });
 });
 

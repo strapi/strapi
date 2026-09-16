@@ -18,6 +18,7 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from '@dnd-kit/core';
+import { snapCenterToCursor } from '@dnd-kit/modifiers';
 import { useNotification } from '@strapi/admin/strapi-admin';
 import { Flex, VisuallyHidden } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
@@ -116,6 +117,10 @@ const resolveDestination = (
 // constant-length sensor array while disabling drag for users without the move
 // permission (see the note in the provider).
 const DRAG_DISABLED_DISTANCE = Number.MAX_SAFE_INTEGER;
+
+// Without a modifier the overlay is anchored to the dragged node's top-left, so the
+// chip trails the cursor by however far into the card or row the grab landed.
+const OVERLAY_MODIFIERS = [snapCenterToCursor];
 
 export const AssetsDndProvider = ({
   children,
@@ -387,7 +392,7 @@ export const AssetsDndProvider = ({
         <Flex position="relative" alignItems="stretch" direction="column" height="100%">
           {children}
         </Flex>
-        <DragOverlay dropAnimation={null}>
+        <DragOverlay dropAnimation={null} modifiers={OVERLAY_MODIFIERS}>
           {dragItems.length > 0 ? <DragOverlayChip items={dragItems} /> : null}
         </DragOverlay>
       </DndContext>
