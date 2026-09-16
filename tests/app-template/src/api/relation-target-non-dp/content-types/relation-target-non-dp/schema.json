@@ -4,7 +4,7 @@
   "info": {
     "singularName": "relation-target-non-dp",
     "pluralName": "relation-target-non-dps",
-    "displayName": "Relation target non-DP",
+    "displayName": "Non-DP relation target",
     "description": "Non-Draft & Publish target for relation reassignment regression tests"
   },
   "options": {
