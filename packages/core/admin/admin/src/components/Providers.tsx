@@ -22,6 +22,11 @@ const queryClient = new QueryClient({
     queries: {
       refetchOnWindowFocus: false,
     },
+    mutations: {
+      // Preserve react-query v3's fail-fast behavior instead of pausing offline mutations
+      // and unexpectedly replaying them when the connection returns.
+      networkMode: 'always',
+    },
   },
 });
 
