@@ -183,16 +183,16 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
               settings={{}}
             >
               <Provider store={storeRef.current!}>
-                <AuthProvider _defaultPermissions={allPermissions} _disableRenewToken={true}>
-                  <QueryClientProvider client={queryClientRef.current!}>
-                    <DndProvider backend={HTML5Backend}>
-                      <LanguageProvider messages={{}}>
-                        <Theme
-                          themes={{
-                            dark: darkTheme,
-                            light: lightTheme,
-                          }}
-                        >
+                <LanguageProvider messages={{}}>
+                  <Theme
+                    themes={{
+                      dark: darkTheme,
+                      light: lightTheme,
+                    }}
+                  >
+                    <AuthProvider _defaultPermissions={allPermissions} _disableRenewToken={true}>
+                      <QueryClientProvider client={queryClientRef.current!}>
+                        <DndProvider backend={HTML5Backend}>
                           <NotificationsProvider>
                             <GuidedTourContext enabled={false}>
                               <ConfigurationContextProvider
@@ -219,11 +219,11 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
                               </ConfigurationContextProvider>
                             </GuidedTourContext>
                           </NotificationsProvider>
-                        </Theme>
-                      </LanguageProvider>
-                    </DndProvider>
-                  </QueryClientProvider>
-                </AuthProvider>
+                        </DndProvider>
+                      </QueryClientProvider>
+                    </AuthProvider>
+                  </Theme>
+                </LanguageProvider>
               </Provider>
             </StrapiAppProvider>
           ),
