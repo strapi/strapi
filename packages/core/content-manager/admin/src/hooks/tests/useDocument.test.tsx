@@ -56,6 +56,35 @@ describe('useDocument', () => {
     expect(result.current.isLoading).toBeFalsy();
   });
 
+  it('should not display an error when skipErrorNotification is set', async () => {
+    server.use(
+      http.get('/content-manager/:collectionType/:model/:id', () =>
+        HttpResponse.json(
+          {
+            error: new errors.PolicyError('Policy Failed'),
+          },
+          { status: 403 }
+        )
+      )
+    );
+
+    const { result } = renderHook(() =>
+      useDocument(
+        {
+          collectionType: 'collection-types',
+          model: mockData.contentManager.contentType,
+          documentId: '12345',
+        },
+        { skipErrorNotification: true }
+      )
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(screen.queryByText('Policy Failed')).not.toBeInTheDocument();
+    expect(result.current.document).toBeUndefined();
+  });
+
   it('should return a validate function', async () => {
     const { result } = renderHook(() =>
       useDocument({
