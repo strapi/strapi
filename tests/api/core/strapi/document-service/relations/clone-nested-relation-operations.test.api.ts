@@ -596,4 +596,121 @@ describe('Document Service clone nested relation operation payloads', () => {
       expect(selectedTagRow?.id).not.toBe(selectedPublishedTagRow?.id);
     }
   );
+
+  testInTransaction(
+    'clone preserves an inline relation inside a component when disconnect does not match',
+    async () => {
+      const originalTag = await createTag('Unmatched Component Original Tag');
+      const unrelatedTag = await createTag('Unmatched Component Unrelated Tag');
+      const product = await strapi.documents(PRODUCT_UID).create({
+        data: {
+          name: 'Unmatched Component Source Product',
+          details: {
+            label: 'Source details',
+            legacyTag: originalTag.id,
+          },
+        },
+        populate,
+      });
+
+      const result = await strapi.documents(PRODUCT_UID).clone({
+        documentId: product.documentId,
+        data: {
+          name: 'Unmatched Component Clone Product',
+          details: {
+            label: 'Cloned details',
+            legacyTag: {
+              disconnect: [{ documentId: unrelatedTag.documentId }],
+            },
+          },
+        },
+        populate,
+      });
+
+      const clonedProduct = result.entries[0] as ProductWithNestedRelations;
+
+      expect(nestedLegacyTagDocumentId(clonedProduct.details)).toBe(originalTag.documentId);
+    }
+  );
+
+  testInTransaction(
+    'clone preserves an inline relation inside a dynamic-zone block when disconnect does not match',
+    async () => {
+      const originalTag = await createTag('Unmatched Dynamic Zone Original Tag');
+      const unrelatedTag = await createTag('Unmatched Dynamic Zone Unrelated Tag');
+      const product = await strapi.documents(PRODUCT_UID).create({
+        data: {
+          name: 'Unmatched Dynamic Zone Source Product',
+          sections: [
+            {
+              __component: RELATION_CONTAINER_UID,
+              label: 'Source section',
+              legacyTag: originalTag.id,
+            },
+          ],
+        },
+        populate,
+      });
+
+      const result = await strapi.documents(PRODUCT_UID).clone({
+        documentId: product.documentId,
+        data: {
+          name: 'Unmatched Dynamic Zone Clone Product',
+          sections: [
+            {
+              __component: RELATION_CONTAINER_UID,
+              label: 'Cloned section',
+              legacyTag: {
+                disconnect: [{ documentId: unrelatedTag.documentId }],
+              },
+            },
+          ],
+        },
+        populate,
+      });
+
+      const clonedProduct = result.entries[0] as ProductWithNestedRelations;
+
+      expect(nestedLegacyTagDocumentId(clonedProduct.sections?.[0])).toBe(originalTag.documentId);
+    }
+  );
+
+  testInTransaction(
+    'clone preserves a morphToOne relation inside a component when disconnect does not match',
+    async () => {
+      const originalTag = await createTag('Unmatched Morph Original Tag');
+      const unrelatedTag = await createTag('Unmatched Morph Unrelated Tag');
+      const originalTagRow = await strapi.db.query(TAG_UID).findOne({
+        where: { documentId: originalTag.documentId, publishedAt: null },
+      });
+      const product = await strapi.documents(PRODUCT_UID).create({
+        data: {
+          name: 'Unmatched Morph Source Product',
+          details: {
+            label: 'Source details',
+            mto: { id: originalTagRow!.id, __type: TAG_UID },
+          },
+        },
+        populate,
+      });
+
+      const result = await strapi.documents(PRODUCT_UID).clone({
+        documentId: product.documentId,
+        data: {
+          name: 'Unmatched Morph Clone Product',
+          details: {
+            label: 'Cloned details',
+            mto: {
+              disconnect: [{ documentId: unrelatedTag.documentId, __type: TAG_UID }],
+            },
+          },
+        },
+        populate,
+      });
+
+      const clonedProduct = result.entries[0] as ProductWithNestedRelations;
+
+      expect(nestedMorphDocumentId(clonedProduct.details)).toBe(originalTag.documentId);
+    }
+  );
 });

@@ -830,6 +830,7 @@ const resolveInlineRelationAssignment = async (
   value: Record<string, unknown>,
   opts: {
     locale?: string;
+    ownerUid: UID.Schema;
     sourceUid: UID.Schema;
     originalValue?: unknown;
     sourceOwnerId?: number;
@@ -869,7 +870,7 @@ const resolveInlineRelationAssignment = async (
     if (isMorphToOneAttribute(attribute)) {
       await copyMorphToOneRelation(
         strapi,
-        opts.sourceUid,
+        opts.ownerUid,
         opts.attributeName,
         opts.sourceOwnerId,
         opts.targetOwnerId
@@ -877,7 +878,7 @@ const resolveInlineRelationAssignment = async (
     } else {
       await copyFkColumnRelation(
         strapi,
-        opts.sourceUid,
+        opts.ownerUid,
         opts.attributeName,
         opts.sourceOwnerId,
         opts.targetOwnerId
@@ -971,6 +972,7 @@ export const applyPostCloneRelationUpdates = async (
 
     const assignment = await resolveInlineRelationAssignment(strapi, attribute, update.value, {
       locale,
+      ownerUid: update.schemaUid,
       sourceUid: rootUid,
       originalValue: get(update.dataPath, originalData),
       sourceOwnerId,
