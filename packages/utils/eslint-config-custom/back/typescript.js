@@ -66,7 +66,7 @@ const config = {
         '@typescript-eslint/ban-ts-comment': 'warn', // as long as javascript is allowed in our codebase, we want to test erroneous typescript usage
       },
     },
-    ...createOxlintOverride(backTypeScript, ['**/permission-checker.ts']),
+    ...createOxlintOverride(backTypeScript),
   ],
 };
 

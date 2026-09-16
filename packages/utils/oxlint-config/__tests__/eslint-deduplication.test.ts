@@ -405,6 +405,7 @@ test('the root lint pass delegates only proven duplicate rules to OxLint', async
     }
 
     const permissionChecker = join(contentManagerRoot, 'server/src/services/permission-checker.ts');
+    const backendOptionHoldouts = ['no-cond-assign', 'no-unsafe-optional-chaining'] as const;
     const configProbe = `
       const { ESLint } = require('eslint');
       const rules = require(${JSON.stringify(
@@ -413,15 +414,23 @@ test('the root lint pass delegates only proven duplicate rules to OxLint', async
       new ESLint({ cwd: ${JSON.stringify(join(contentManagerRoot, 'server'))} })
         .calculateConfigForFile(${JSON.stringify(permissionChecker)})
         .then((config) => console.log(JSON.stringify(Object.fromEntries(
-          [...rules, 'no-cond-assign', 'no-unsafe-optional-chaining'].map((rule) => [rule, config.rules[rule]])
+          [...rules, ...${JSON.stringify(backendOptionHoldouts)}].map((rule) => [rule, config.rules[rule]])
         ))));
     `;
     const permissionRules = JSON.parse(
       run(process.execPath, ['-e', configProbe], { ESLINT_SKIP_OXLINT_RULES: 'true' }).stdout
     ) as Record<string, unknown>;
-    assert.equal(Object.keys(permissionRules).length, 45);
+
     assert.ok(
-      Object.values(permissionRules).every((setting) => {
+      backTypeScript.every((rule) => {
+        const setting = permissionRules[rule];
+        return Array.isArray(setting) && (setting[0] === 'off' || setting[0] === 0);
+      }),
+      'delegated backend TypeScript rules were not disabled for permission-checker.ts'
+    );
+    assert.ok(
+      backendOptionHoldouts.every((rule) => {
+        const setting = permissionRules[rule];
         if (!Array.isArray(setting)) {
           return false;
         }
@@ -432,7 +441,8 @@ test('the root lint pass delegates only proven duplicate rules to OxLint', async
           severity === 'warn' ||
           (typeof severity === 'number' && severity > 0)
         );
-      })
+      }),
+      'option-sensitive backend rules did not remain enabled for permission-checker.ts'
     );
 
     const permissionOxlint = parseOxlint(
@@ -444,7 +454,7 @@ test('the root lint pass delegates only proven duplicate rules to OxLint', async
         relative(repositoryRoot, permissionChecker),
       ]).stdout
     );
-    assert.equal(permissionOxlint.number_of_files, 0);
+    assert.equal(permissionOxlint.number_of_files, 1);
 
     const lintStagedModule = await import(
       pathToFileURL(join(repositoryRoot, 'lint-staged.shared.mjs')).href

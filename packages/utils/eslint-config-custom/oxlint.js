@@ -145,9 +145,8 @@ const frontTypeScript = [
  * The environment gate keeps direct package lint, lint:fix, and lint-staged authoritative.
  *
  * @param {readonly string[]} rules
- * @param {string[]} [excludedFiles]
  */
-const createOxlintOverride = (rules, excludedFiles) => {
+const createOxlintOverride = (rules) => {
   if (process.env.ESLINT_SKIP_OXLINT_RULES !== 'true') {
     return [];
   }
@@ -158,7 +157,6 @@ const createOxlintOverride = (rules, excludedFiles) => {
   return [
     {
       files: ['**/*'],
-      ...(excludedFiles === undefined ? {} : { excludedFiles }),
       rules: disabledRules,
     },
   ];
