@@ -1,0 +1,14 @@
+{
+  "$schema": "https://likec4.dev/schemas/config.json",
+  "name": "strapi-architecture",
+  "title": "Strapi Architecture",
+  "implicitViews": true,
+  "landingPage": {
+    "redirect": true
+  },
+  "metadata": {
+    "repository": "strapi/strapi",
+    "branch": "develop",
+    "purpose": "Collaborative C4 architecture model for the Strapi monorepo"
+  }
+}

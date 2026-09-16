@@ -1,0 +1,89 @@
+views {
+  view index {
+    title 'Strapi CMS - System Context'
+    description '''
+      Product-level view for the current architecture scope: Strapi lets teams model content, manage entries, configure administration, and expose Content APIs consumed by applications and integrations.
+    '''
+
+    include
+      content_editor,
+      developer,
+      administrator,
+      public_client,
+      external_system,
+      strapi,
+      content_editor -> strapi,
+      developer -> strapi,
+      administrator -> strapi,
+      public_client -> strapi,
+      external_system -> strapi
+  }
+
+  view strapi_containers of strapi {
+    title 'Strapi CMS - Containers'
+    description '''
+      Simple C4 container view. Containers are named by capability/runtime responsibility, not by package name. Package names appear as implementation technology on components.
+    '''
+
+    include
+      admin_web_app,
+      cli_tooling,
+      application_source,
+      server_runtime,
+      database,
+      admin_web_app -> server_runtime,
+      cli_tooling -> application_source,
+      application_source -> server_runtime,
+      server_runtime -> database
+  }
+
+  view strapi_container_internals of strapi {
+    title 'Strapi CMS - Container Internals'
+    description '''
+      First level below the container view. Each container exposes its main internal component groups; feature files provide deeper focused views.
+    '''
+
+    include
+      admin_web_app,
+      admin_web_app.admin_shell,
+      admin_web_app.admin_router,
+      admin_web_app.admin_providers,
+      admin_web_app.content_manager_ui,
+      admin_web_app.content_type_builder_ui,
+      admin_web_app.settings_api_tokens_ui,
+      server_runtime,
+      server_runtime.http_server,
+      server_runtime.route_registration,
+      server_runtime.endpoint_composer,
+      server_runtime.schema_loader,
+      server_runtime.content_api,
+      server_runtime.core_api_layer,
+      server_runtime.document_service,
+      server_runtime.database_layer,
+      cli_tooling,
+      cli_tooling.generators,
+      cli_tooling.create_strapi_app,
+      application_source,
+      application_source.content_type_schema_files,
+      application_source.api_module_files,
+      database,
+      admin_web_app.admin_shell -> admin_web_app.admin_router,
+      admin_web_app.admin_shell -> admin_web_app.admin_providers,
+      admin_web_app.admin_router -> admin_web_app.content_manager_ui,
+      admin_web_app.admin_router -> admin_web_app.content_type_builder_ui,
+      admin_web_app.admin_router -> admin_web_app.settings_api_tokens_ui,
+      admin_web_app.content_manager_ui -> server_runtime.content_manager_server,
+      admin_web_app.content_type_builder_ui -> server_runtime.content_type_builder_server,
+      admin_web_app.settings_api_tokens_ui -> server_runtime.admin_server_apis,
+      cli_tooling.generators -> application_source.content_type_schema_files,
+      cli_tooling.generators -> application_source.api_module_files,
+      server_runtime.schema_loader -> application_source.content_type_schema_files,
+      server_runtime.http_server -> server_runtime.route_registration,
+      server_runtime.route_registration -> server_runtime.endpoint_composer,
+      server_runtime.endpoint_composer -> server_runtime.core_api_layer,
+      server_runtime.core_api_layer -> server_runtime.content_api,
+      server_runtime.core_api_layer -> server_runtime.document_service,
+      server_runtime.document_service -> server_runtime.database_layer,
+      server_runtime.database_layer -> database
+  }
+}
