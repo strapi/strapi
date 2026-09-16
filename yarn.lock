@@ -9189,7 +9189,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/core@npm:5.54.0, @strapi/core@workspace:packages/core/core":
+"@strapi/core@npm:5.54.0, @strapi/core@workspace:*, @strapi/core@workspace:packages/core/core":
   version: 0.0.0-use.local
   resolution: "@strapi/core@workspace:packages/core/core"
   dependencies:
@@ -10061,7 +10061,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/types@npm:5.54.0, @strapi/types@workspace:packages/core/types":
+"@strapi/types@npm:5.54.0, @strapi/types@workspace:*, @strapi/types@workspace:packages/core/types":
   version: 0.0.0-use.local
   resolution: "@strapi/types@workspace:packages/core/types"
   dependencies:
@@ -16163,6 +16163,18 @@ __metadata:
   checksum: 10c0/b67bbd28dd8a539e90c15ffb61100eb64ef995c5270a124d4f99bbb53f4d82f55a051b731ba81f3215dd9dce2b4c8d69927dc20b3be1c5fc88bab159467aa438
   languageName: node
   linkType: hard
+
+"dts-tests@workspace:tests/dts":
+  version: 0.0.0-use.local
+  resolution: "dts-tests@workspace:tests/dts"
+  dependencies:
+    "@strapi/core": "workspace:*"
+    "@strapi/types": "workspace:*"
+    "@types/node": "npm:20.19.41"
+    typescript: "npm:5.9.3"
+    vitest: "catalog:"
+  languageName: unknown
+  linkType: soft
 
 "dunder-proto@npm:^1.0.0, dunder-proto@npm:^1.0.1":
   version: 1.0.1

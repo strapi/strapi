@@ -28,7 +28,8 @@
     "examples/plugins/*",
     "examples/*/src/plugins/*",
     ".github/actions/*",
-    "scripts/*"
+    "scripts/*",
+    "tests/dts"
   ],
   "scripts": {
     "build": "nx run-many --targets build:code,build:types --nx-ignore-cycles",
@@ -70,6 +71,8 @@
     "test:api:clean": "rimraf ./coverage",
     "test:clean": "run-s -c test:api:clean test:e2e:clean test:cli:clean",
     "test:cli": "node tests/scripts/run-cli-tests.js",
+    "test:dts": "node tests/scripts/run-dts-tests.mjs",
+    "test:dts:userland": "node tests/scripts/run-dts-tests.mjs --userland",
     "test:cli:clean": "node tests/scripts/run-cli-tests.js clean",
     "test:cli:debug": "node tests/scripts/run-cli-tests.js --debug",
     "test:cli:update": "node tests/scripts/run-cli-tests.js -u",
