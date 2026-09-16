@@ -26,6 +26,7 @@ const config = {
     const ignored = await Promise.all(files.map((file) => eslint.isPathIgnored(file)));
     const lintable = files.filter((_file, index) => !ignored[index]);
 
+    /** @param {readonly string[]} list */
     const quote = (list) => list.map((file) => `"${file}"`).join(' ');
 
     const commands = [];

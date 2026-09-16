@@ -27939,6 +27939,7 @@ __metadata:
     supertest: "npm:7.2.2"
     syncpack: "npm:13.0.4"
     tar: "npm:7.5.22"
+    tsconfig: "workspace:*"
     tsx: "npm:4.22.4"
     typescript: "npm:5.9.3"
     vitest: "catalog:"
@@ -28973,7 +28974,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tsconfig@npm:5.54.0, tsconfig@workspace:packages/utils/tsconfig":
+"tsconfig@npm:5.54.0, tsconfig@workspace:*, tsconfig@workspace:packages/utils/tsconfig":
   version: 0.0.0-use.local
   resolution: "tsconfig@workspace:packages/utils/tsconfig"
   dependencies:
