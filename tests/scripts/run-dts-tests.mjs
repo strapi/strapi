@@ -10,8 +10,11 @@
  * installed from packed tarballs. Inside the monorepo every dependency is hoisted to the root
  * `node_modules`, so declaration files can resolve modules (or `@types/*` packages) that a package
  * never declares. In userland mode every workspace package the tests depend on is packed, then
- * installed with pnpm and hoisting disabled, so each package only sees its own `dependencies` and
- * `peerDependencies`.
+ * installed with pnpm so that each package only sees its own `dependencies` and `peerDependencies`:
+ *   - hoisting is disabled
+ *   - packages are linked from pnpm's global virtual store, outside of the application, so they
+ *     cannot resolve modules from the application's `node_modules` either
+ *   - peer dependency issues fail the install
  *
  * `tests/dts/package.json` describes the consumer:
  *   - `workspace:` dependencies resolve to their tarballs (also forced for transitive dependencies)
@@ -202,6 +205,25 @@ const assertIsolated = (dir) => {
 };
 
 /**
+ * Ensures packages are linked from pnpm's global virtual store. Packages installed inside the
+ * application could resolve modules from the application's own `node_modules`, for example
+ * `@types/*` packages it installs, and hide dependencies they do not declare.
+ *
+ * @param {string} appDir
+ * @param {string[]} names Packages the application depends on
+ * @throws When one of the packages is installed inside the application
+ */
+const assertLinkedFromGlobalStore = (appDir, names) => {
+  for (const name of names) {
+    const location = fs.realpathSync(path.join(appDir, 'node_modules', name));
+
+    if (!path.relative(appDir, location).startsWith('..')) {
+      throw new Error(`${name} is installed in ${location}, not in pnpm's global virtual store`);
+    }
+  }
+};
+
+/**
  * Runs the type tests inside the monorepo.
  *
  * @param {Workspaces} workspaces
@@ -301,16 +323,26 @@ const runInUserland = (workspaces, consumer) => {
       [
         'hoist: false',
         'publicHoistPattern: []',
+        'strictPeerDependencies: true',
+        'enableGlobalVirtualStore: true',
+        'peerDependencyRules:',
+        '  allowedVersions:',
+        // `codemirror5` (`npm:codemirror@5`) of @strapi/admin and @strapi/content-manager is matched
+        // against the `codemirror@>=6` peer of @uiw/react-codemirror by its real package name
+        "    '@uiw/react-codemirror>codemirror': '5'",
         'overrides:',
         ...Object.entries(tarballs).map(([name, specifier]) => `  '${name}': '${specifier}'`),
         '',
       ].join('\n')
     );
 
-    const env = { ...process.env, COREPACK_ENABLE_DOWNLOAD_PROMPT: '0', CI: 'true' };
+    // pnpm disables the global virtual store when it detects a CI environment
+    const env = { ...process.env, COREPACK_ENABLE_DOWNLOAD_PROMPT: '0', CI: 'false' };
 
     console.log(`Installing ${appDir}`);
     run('corepack', [...PNPM, 'install', '--ignore-scripts'], { cwd: appDir, env });
+
+    assertLinkedFromGlobalStore(appDir, getWorkspaceDependencies(consumerDependencies));
 
     console.log(`Running type tests in ${appDir}`);
     run('corepack', [...PNPM, 'exec', 'vitest', '--config', CONFIG, ...vitestArgs], {
