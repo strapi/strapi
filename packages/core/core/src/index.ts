@@ -49,7 +49,7 @@ declare module 'koa' {
   // Keep Koa's context and response types in sync with the helpers registered at runtime in `koa.ts`.
   // `BaseResponse` and `BaseContext` both extend `DefaultContextDelegatedResponse`, so augmenting it
   // once covers `ctx.*` and `ctx.response.*`.
-  interface DefaultContextDelegatedResponse
+  export interface DefaultContextDelegatedResponse
     extends ContextDelegatedResponseErrorMethods,
       ContextDelegatedResponseSuccessMethods {}
 }
