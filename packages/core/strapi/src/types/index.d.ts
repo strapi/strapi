@@ -5,3 +5,4 @@ declare module '@strapi/upload/strapi-admin';
 declare module '@strapi/i18n/strapi-admin';
 declare module '@strapi/content-releases/strapi-admin';
 declare module '@strapi/review-workflows/strapi-admin';
+declare module '@strapi/spaces/strapi-admin';

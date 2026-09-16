@@ -1,0 +1,30 @@
+/* eslint-disable check-file/filename-naming-convention */
+import * as React from 'react';
+
+import {
+  render as renderAdmin,
+  renderHook as renderHookAdmin,
+  screen,
+  waitFor,
+  act,
+  type RenderOptions,
+} from '@strapi/admin/strapi-admin/test';
+
+import { PERMISSIONS } from '../src/constants';
+
+const render = (
+  ui: React.ReactElement,
+  options: RenderOptions = {}
+): ReturnType<typeof renderAdmin> =>
+  renderAdmin(ui, {
+    ...options,
+    providerOptions: { permissions: Object.values(PERMISSIONS).flat() },
+  });
+
+const renderHook: typeof renderHookAdmin = (hook, options) =>
+  renderHookAdmin(hook, {
+    ...options,
+    providerOptions: { permissions: Object.values(PERMISSIONS).flat() },
+  });
+
+export { render, renderHook, screen, waitFor, act };
