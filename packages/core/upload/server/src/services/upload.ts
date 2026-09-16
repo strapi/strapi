@@ -473,7 +473,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
   async function replace(
     id: ID,
-    { data, file }: { data: { fileInfo: FileInfo }; file: InputFile },
+    { data, file }: { data: { fileInfo: FileInfo } & Metas; file: InputFile },
     opts?: CommonOptions
   ) {
     const { user } = opts ?? {};
@@ -493,8 +493,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     let fileData: UploadableFile;
 
     try {
-      const { fileInfo } = data;
-      fileData = await enhanceAndValidateFile(file, fileInfo);
+      // `refId` / `ref` / `field` are dropped rather than forwarded: `formatFileInfo` turns
+      // them into a one-element `related` array, and a bare array reaches the morph join as
+      // `set` — which deletes every row for this file, detaching it from every other entry
+      // that uses it. Attaching an existing file to an entry is the content API's job.
+      const { fileInfo, refId: _refId, ref: _ref, field: _field, ...metas } = data;
+      fileData = await enhanceAndValidateFile(file, fileInfo, metas);
 
       // Replacing a file writes new bytes just like creating one, so it has to
       // respect sizeLimit too. Checked before any provider write, and measured on
@@ -506,6 +510,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         hash: dbFile.hash,
         ext: dbFile.ext,
       });
+
+      // A plain replace sends no folder, so `formatFileInfo` resolved folderPath to
+      // '/' while the relation survived — and folder deletion selects by folderPath,
+      // which orphaned the file. An explicitly sent folder still moves it.
+      if (fileInfo?.folder === undefined) {
+        _.assign(fileData, { folderPath: dbFile.folderPath });
+      }
 
       // clear old formats — replaceImage / replace will set new ones
       _.set(fileData, 'formats', {});
