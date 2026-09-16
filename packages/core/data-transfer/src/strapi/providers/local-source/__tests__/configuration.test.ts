@@ -22,7 +22,10 @@ describe('Configuration', () => {
       ],
     });
 
-    const strapi = getStrapiFactory({ db: { queryBuilder } })();
+    const get = jest.fn(() => {
+      throw new Error('DTS must not access Strapi services');
+    });
+    const strapi = getStrapiFactory({ db: { queryBuilder }, get })();
 
     const stream = createConfigurationStream(strapi);
 
@@ -31,6 +34,7 @@ describe('Configuration', () => {
     const results = await collect(stream);
 
     expect(results).toHaveLength(5);
+    expect(get).not.toHaveBeenCalled();
 
     results.forEach((result) => {
       expect(result).toMatchObject(
@@ -40,56 +44,5 @@ describe('Configuration', () => {
         })
       );
     });
-  });
-
-  const contentStructureFile = {
-    version: 1,
-    sections: {
-      collectionTypes: {
-        groups: [
-          {
-            parent: null,
-            name: 'Blog',
-            id: 'grp_blog01',
-            children: [{ type: 'contentType', uid: 'api::article.article' }],
-          },
-        ],
-      },
-      singleTypes: { groups: [] },
-    },
-  };
-
-  test('Should emit content-structure groups.json as a configuration item when present', async () => {
-    const queryBuilder = createMockedQueryBuilder({
-      'strapi::core-store': [],
-      'strapi::webhook': [],
-    });
-    const read = jest.fn(async () => contentStructureFile);
-    const strapi = getStrapiFactory({
-      db: { queryBuilder },
-      get: jest.fn((token: string) => (token === 'content-structure' ? { read } : undefined)),
-    })();
-
-    const results = await collect(createConfigurationStream(strapi));
-
-    expect(read).toHaveBeenCalledTimes(1);
-    expect(results).toEqual([{ type: 'content-structure', value: contentStructureFile }]);
-  });
-
-  test('Should not emit a content-structure item when groups.json is absent', async () => {
-    const queryBuilder = createMockedQueryBuilder({
-      'strapi::core-store': [],
-      'strapi::webhook': [],
-    });
-    const read = jest.fn(async () => null);
-    const strapi = getStrapiFactory({
-      db: { queryBuilder },
-      get: jest.fn(() => ({ read })),
-    })();
-
-    const results = await collect(createConfigurationStream(strapi));
-
-    expect(read).toHaveBeenCalledTimes(1);
-    expect(results).toEqual([]);
   });
 });

@@ -131,6 +131,12 @@ describe('<ContentTypeBuilderNav />', () => {
   it('renders and matches the snapshot', () => {
     const { container } = render(App);
 
+    // Normalize hidden DnD instructions so formatting does not create snapshot-only whitespace.
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+    container.querySelectorAll('[id^="DndDescribedBy"]').forEach((node) => {
+      node.textContent = node.textContent?.trim() ?? '';
+    });
+
     expect(container).toMatchSnapshot();
   });
 

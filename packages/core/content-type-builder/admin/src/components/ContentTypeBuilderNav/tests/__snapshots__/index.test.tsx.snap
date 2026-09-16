@@ -99,7 +99,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   min-width: 0px;
 }
 
-.c65 {
+.c64 {
   overflow: hidden;
 }
 
@@ -254,7 +254,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   font-weight: 500;
 }
 
-.c66 {
+.c65 {
   font-size: 1.6rem;
   line-height: 32px;
   color: currentcolor;
@@ -525,21 +525,6 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   outline-offset: -2px;
 }
 
-.c64 {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 16px;
-}
-
-.c64::before {
-  content: '';
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background-color: currentColor;
-}
-
 .c4 {
   flex: 0 0 6.4rem;
   height: 6.4rem;
@@ -713,7 +698,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 }
 
 @media (min-width: 768px) {
-  .c66 {
+  .c65 {
     font-size: 1.4rem;
   }
 }
@@ -1049,11 +1034,9 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                           id="DndDescribedBy-0"
                           style="display: none;"
                         >
-                          
-    To pick up a draggable item, press the space bar.
+                          To pick up a draggable item, press the space bar.
     While dragging, use the arrow keys to move the item.
     Press space again to drop the item in its new position, or press escape to cancel.
-  
                         </div>
                         <div
                           aria-atomic="true"
@@ -1167,11 +1150,9 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                           id="DndDescribedBy-1"
                           style="display: none;"
                         >
-                          
-    To pick up a draggable item, press the space bar.
+                          To pick up a draggable item, press the space bar.
     While dragging, use the arrow keys to move the item.
     Press space again to drop the item in its new position, or press escape to cancel.
-  
                         </div>
                         <div
                           aria-atomic="true"
@@ -1296,12 +1277,8 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                                   <div
                                     class="c63 c10"
                                   >
-                                    <span
-                                      aria-hidden="true"
-                                      class="c64"
-                                    />
                                     <div
-                                      class="c65 c66"
+                                      class="c64 c65"
                                       style="text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0;"
                                     >
                                       simple
@@ -1378,12 +1355,8 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                                   <div
                                     class="c63 c10"
                                   >
-                                    <span
-                                      aria-hidden="true"
-                                      class="c64"
-                                    />
                                     <div
-                                      class="c65 c66"
+                                      class="c64 c65"
                                       style="text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0;"
                                     >
                                       closingperiod
@@ -1416,12 +1389,8 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                                   <div
                                     class="c63 c10"
                                   >
-                                    <span
-                                      aria-hidden="true"
-                                      class="c64"
-                                    />
                                     <div
-                                      class="c65 c66"
+                                      class="c64 c65"
                                       style="text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0;"
                                     >
                                       dish

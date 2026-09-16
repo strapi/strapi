@@ -13,9 +13,10 @@ jest.mock('fs-extra', () => ({
 
 const fseMock = fse as jest.Mocked<typeof fse>;
 
-const CONTENT_STRUCTURE_DIR = '/app/src/content-structure';
-const DIST_CONTENT_STRUCTURE_DIR = '/app/dist/src/content-structure';
-const FILE_PATH = path.join(CONTENT_STRUCTURE_DIR, CONTENT_STRUCTURE_FILE_NAME);
+const SOURCE_CONTENT_STRUCTURE_DIR = '/app/src/content-structure';
+const DIST_CONTENT_STRUCTURE_DIR = '/dist/src/content-structure';
+const SOURCE_FILE_PATH = path.join(SOURCE_CONTENT_STRUCTURE_DIR, CONTENT_STRUCTURE_FILE_NAME);
+const DIST_FILE_PATH = path.join(DIST_CONTENT_STRUCTURE_DIR, CONTENT_STRUCTURE_FILE_NAME);
 
 type MockContentTypes = Record<string, { kind?: string }>;
 
@@ -29,7 +30,13 @@ const setup = (
 ) => {
   const { exists = true, read, readError, contentTypes = {} } = options;
 
-  fseMock.pathExists.mockResolvedValue(exists as never);
+  fseMock.pathExists.mockImplementation(async (filePath) => {
+    if (filePath === SOURCE_FILE_PATH) {
+      throw new Error('runtime content-structure reads must use the dist artifact');
+    }
+
+    return exists;
+  });
 
   if (readError) {
     fseMock.readJSON.mockRejectedValue(readError);
@@ -42,11 +49,17 @@ const setup = (
 
   const strapi = {
     dirs: {
-      app: { contentStructure: CONTENT_STRUCTURE_DIR },
+      app: { contentStructure: SOURCE_CONTENT_STRUCTURE_DIR },
       dist: { contentStructure: DIST_CONTENT_STRUCTURE_DIR },
     },
     log: { warn, error },
     contentTypes,
+    get store(): never {
+      throw new Error('content-structure must not access core-store');
+    },
+    get db(): never {
+      throw new Error('content-structure must not access the database');
+    },
   } as unknown as Core.Strapi;
 
   return { service: createContentStructureService(strapi), warn, error };
@@ -127,6 +140,8 @@ describe('content-structure service', () => {
       const { service } = setup({ read: file });
 
       await expect(service.read()).resolves.toEqual(file);
+      expect(fseMock.pathExists).toHaveBeenCalledWith(DIST_FILE_PATH);
+      expect(fseMock.readJSON).toHaveBeenCalledWith(DIST_FILE_PATH);
     });
   });
 
@@ -364,20 +379,36 @@ describe('content-structure service', () => {
 
     it('re-reads after invalidate()', async () => {
       const { service } = setup({ read: fileWith([grp('g1', 'A', null)]) });
+      fseMock.readJSON.mockResolvedValueOnce(fileWith([grp('g1', 'A', null)]) as never);
+      fseMock.readJSON.mockResolvedValueOnce(fileWith([grp('g2', 'B', null)]) as never);
 
-      await service.resolve();
+      await expect(service.resolve()).resolves.toEqual({
+        collectionTypes: [{ type: 'group', id: 'g1', name: 'A', children: [] }],
+        singleTypes: [],
+      });
       service.invalidate();
-      await service.resolve();
+      await expect(service.resolve()).resolves.toEqual({
+        collectionTypes: [{ type: 'group', id: 'g2', name: 'B', children: [] }],
+        singleTypes: [],
+      });
 
       expect(fseMock.readJSON).toHaveBeenCalledTimes(2);
     });
 
     it('invalidates the cache after a write()', async () => {
       const { service } = setup({ read: fileWith([grp('g1', 'A', null)]) });
+      fseMock.readJSON.mockResolvedValueOnce(fileWith([grp('g1', 'A', null)]) as never);
+      fseMock.readJSON.mockResolvedValueOnce(fileWith([grp('g2', 'B', null)]) as never);
 
-      await service.resolve();
+      await expect(service.resolve()).resolves.toEqual({
+        collectionTypes: [{ type: 'group', id: 'g1', name: 'A', children: [] }],
+        singleTypes: [],
+      });
       await service.write(fileWith([grp('g1', 'A', null)]) as never);
-      await service.resolve();
+      await expect(service.resolve()).resolves.toEqual({
+        collectionTypes: [{ type: 'group', id: 'g2', name: 'B', children: [] }],
+        singleTypes: [],
+      });
 
       expect(fseMock.readJSON).toHaveBeenCalledTimes(2);
     });
@@ -389,12 +420,27 @@ describe('content-structure service', () => {
 
       await service.write(fileWith([grp('g1', 'A', null)]) as never);
 
-      expect(fseMock.ensureDir).toHaveBeenCalledWith(CONTENT_STRUCTURE_DIR);
+      expect(fseMock.ensureDir).toHaveBeenCalledWith(SOURCE_CONTENT_STRUCTURE_DIR);
       expect(fseMock.writeJSON).toHaveBeenCalledWith(
-        FILE_PATH,
+        SOURCE_FILE_PATH,
         expect.objectContaining({ version: 1 }),
         { spaces: 2 }
       );
+      expect(fseMock.writeJSON).not.toHaveBeenCalledWith(
+        DIST_FILE_PATH,
+        expect.anything(),
+        expect.anything()
+      );
+    });
+  });
+
+  describe('validate()', () => {
+    it('strictly validates canonical input without using core-store or the database', () => {
+      const { service } = setup();
+      const valid = fileWith([grp('grp_valid1', 'A', null)]);
+
+      expect(service.validate(valid)).toEqual(valid);
+      expect(() => service.validate({ malformed: true })).toThrow();
     });
   });
 
