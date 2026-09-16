@@ -44,6 +44,7 @@ import { fileURLToPath } from 'node:url';
 /**
  * @typedef {object} PackageJson The fields of a `package.json` this script reads
  * @property {string} [name]
+ * @property {'module' | 'commonjs'} [type]
  * @property {Dependencies} [dependencies]
  * @property {Dependencies} [devDependencies]
  * @property {Dependencies} [peerDependencies]
@@ -198,10 +199,10 @@ const assertIsolated = (dir) => {
  * Runs the type tests inside the monorepo.
  *
  * @param {Workspaces} workspaces
- * @param {Dependencies} consumerDependencies The dependencies of `tests/dts`
+ * @param {PackageJson} consumer The manifest of `tests/dts`
  */
-const runInRepository = (workspaces, consumerDependencies) => {
-  assertBuilt(workspaces, getWorkspaceDependencies(consumerDependencies));
+const runInRepository = (workspaces, consumer) => {
+  assertBuilt(workspaces, getWorkspaceDependencies(consumer.devDependencies ?? {}));
 
   run('yarn', ['vitest', '--config', CONFIG, ...vitestArgs], { cwd: testsDir });
 };
@@ -211,9 +212,10 @@ const runInRepository = (workspaces, consumerDependencies) => {
  * installed from packed tarballs by pnpm with hoisting disabled.
  *
  * @param {Workspaces} workspaces
- * @param {Dependencies} consumerDependencies The dependencies of `tests/dts`
+ * @param {PackageJson} consumer The manifest of `tests/dts`
  */
-const runInUserland = (workspaces, consumerDependencies) => {
+const runInUserland = (workspaces, consumer) => {
+  const consumerDependencies = consumer.devDependencies ?? {};
   const closure = getWorkspaceClosure(workspaces, getWorkspaceDependencies(consumerDependencies));
 
   assertBuilt(workspaces, closure);
@@ -273,6 +275,8 @@ const runInUserland = (workspaces, consumerDependencies) => {
         {
           name: 'strapi-dts-tests-app',
           private: true,
+          // The module format decides how test files resolve packages
+          type: consumer.type,
           devDependencies: Object.fromEntries(
             Object.entries(consumerDependencies).map(([name, specifier]) => [
               name,
@@ -318,14 +322,13 @@ const runInUserland = (workspaces, consumerDependencies) => {
 
 const main = () => {
   const workspaces = getWorkspaces();
-  const consumerDependencies =
-    readPackageJson(path.join(testsDir, 'package.json')).devDependencies ?? {};
+  const consumer = readPackageJson(path.join(testsDir, 'package.json'));
 
   try {
     if (userland) {
-      runInUserland(workspaces, consumerDependencies);
+      runInUserland(workspaces, consumer);
     } else {
-      runInRepository(workspaces, consumerDependencies);
+      runInRepository(workspaces, consumer);
     }
   } catch (error) {
     process.exitCode = 1;

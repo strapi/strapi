@@ -8,7 +8,7 @@ import { defineConfig } from 'vitest/config';
  */
 export default defineConfig({
   test: {
-    root: __dirname,
+    root: import.meta.dirname,
     watch: false,
     typecheck: {
       enabled: true,

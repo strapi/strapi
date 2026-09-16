@@ -9,7 +9,13 @@ describe('@strapi/strapi exports', () => {
     type ModulePathKey = `"${string}"`;
 
     expectTypeOf<Exclude<keyof typeof Strapi, ModulePathKey>>().toEqualTypeOf<
-      'createStrapi' | 'compileStrapi' | 'factories' | 'ai'
+      | 'createStrapi'
+      | 'compileStrapi'
+      | 'factories'
+      | 'ai'
+      // Wrong: `dist/index.mjs` has no default export, but the `import` condition shares the
+      // CommonJS declarations, so ESM consumers see one (https://github.com/strapi/strapi/issues/27686)
+      | 'default'
     >();
   });
 
