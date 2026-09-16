@@ -1,4 +1,4 @@
-import { isValidElement, useEffect, useId, useRef, useState, useMemo } from 'react';
+import { Children, useEffect, useId, useMemo, useRef, useState } from 'react';
 
 import {
   Badge,
@@ -22,14 +22,6 @@ import {
 
 import { tours } from './GuidedTour/Tours';
 import { SubNavFolder } from './SubNavFolder';
-
-const getChildKey = (child: React.ReactNode): React.Key => {
-  if (!isValidElement(child) || child.key === null) {
-    throw new Error('SubNav list children must have a stable key.');
-  }
-
-  return child.key;
-};
 
 const MainSubNav = styled(DSSubNav)<{ $isFullPage?: boolean }>`
   width: 100%;
@@ -200,9 +192,9 @@ const Sections = ({
       maxWidth={{ initial: '100%', medium: WIDTH_SIDE_NAVIGATION }}
     >
       <Flex tag="ul" gap={6} direction="column" alignItems="stretch" {...props}>
-        {children.map((child) => {
-          return <li key={getChildKey(child)}>{child}</li>;
-        })}
+        {Children.map(children, (child) => (
+          <li>{child}</li>
+        ))}
       </Flex>
     </Box>
   );
@@ -372,9 +364,9 @@ const Section = ({
           large: 2,
         }}
       >
-        {children.map((child) => {
-          return <li key={getChildKey(child)}>{child}</li>;
-        })}
+        {Children.map(children, (child) => (
+          <li>{child}</li>
+        ))}
       </Flex>
     </Flex>
   );
@@ -453,9 +445,9 @@ const SubSection = ({ label, children }: { label: string; children: React.ReactN
           transition: 'max-height 0.5s cubic-bezier(0, 1, 0, 1)',
         }}
       >
-        {children.map((child) => {
-          return <SubSectionLinkWrapper key={getChildKey(child)}>{child}</SubSectionLinkWrapper>;
-        })}
+        {Children.map(children, (child) => (
+          <SubSectionLinkWrapper>{child}</SubSectionLinkWrapper>
+        ))}
       </Flex>
     </Box>
   );
