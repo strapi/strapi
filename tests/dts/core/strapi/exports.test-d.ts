@@ -8,14 +8,13 @@ describe('@strapi/strapi exports', () => {
     // the quoted absolute path of the augmented module to the namespace type
     type ModulePathKey = `"${string}"`;
 
-    expectTypeOf<Exclude<keyof typeof Strapi, ModulePathKey>>().toEqualTypeOf<
-      | 'createStrapi'
-      | 'compileStrapi'
-      | 'factories'
-      | 'ai'
-      // Wrong: `dist/index.mjs` has no default export, but the `import` condition shares the
-      // CommonJS declarations, so ESM consumers see one (https://github.com/strapi/strapi/issues/27686)
-      | 'default'
+    // ES module consumers (`--esm`) also see a `default` key: `dist/index.mjs` has no default
+    // export, but the `import` condition shares the CommonJS declarations
+    // (https://github.com/strapi/strapi/issues/27686)
+    type EsmDefaultKey = 'default';
+
+    expectTypeOf<Exclude<keyof typeof Strapi, ModulePathKey | EsmDefaultKey>>().toEqualTypeOf<
+      'createStrapi' | 'compileStrapi' | 'factories' | 'ai'
     >();
   });
 

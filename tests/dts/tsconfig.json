@@ -5,13 +5,34 @@
     "lib": ["ES2023"],
     "module": "node20",
     "moduleResolution": "node16",
-    "strict": true,
+    "moduleDetection": "force",
     "esModuleInterop": true,
-    "skipLibCheck": true,
+    "resolveJsonModule": true,
     "noEmit": true,
-    "types": ["node"]
+    "types": ["node"],
+
+    // The strictest settings an application may use: the public API must hold up under them
+    "strict": true,
+    "exactOptionalPropertyTypes": true,
+    "noUncheckedIndexedAccess": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "isolatedModules": true,
+    "isolatedDeclarations": true,
+    "declaration": true,
+    "erasableSyntaxOnly": true,
+    "noUncheckedSideEffectImports": true,
+    "forceConsistentCasingInFileNames": true,
+
+    // Declaration files of dependencies are not checked; fixtures are `.ts` so they still are
+    "skipLibCheck": true
   },
-  // Fixtures are `.ts`, not `.d.ts`, so they are type checked despite `skipLibCheck`
   "files": ["./fixtures/content-types.ts"],
   "include": ["./**/*.test-d.ts"]
 }

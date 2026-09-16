@@ -18,10 +18,13 @@
  *   - `catalog:` dependencies resolve to the exact version installed in the repository
  *   - anything else is kept as is
  *
+ * Test files are CommonJS, like the applications the Strapi CLI runs. With `--esm` (userland only)
+ * the application is an ES module instead, so packages resolve through their `import` condition.
+ *
  * Every workspace package involved must be built first.
  *
  * @example
- * node tests/scripts/run-dts-tests.mjs [--userland] [--keep] [-- <vitest args>]
+ * node tests/scripts/run-dts-tests.mjs [--userland [--esm] [--keep]] [-- <vitest args>]
  */
 
 import { execFileSync } from 'node:child_process';
@@ -60,6 +63,9 @@ const vitestArgs = separator === -1 ? [] : process.argv.slice(separator + 1);
 /** Run against packed tarballs in an isolated install instead of the monorepo */
 const userland = args.includes('--userland');
 
+/** Make the userland application an ES module instead of CommonJS */
+const esm = args.includes('--esm');
+
 /** Keep the temporary userland project for inspection */
 const keep = args.includes('--keep');
 
@@ -67,7 +73,7 @@ const keep = args.includes('--keep');
 const PNPM = ['pnpm@10'];
 
 /** Vitest configuration file, relative to `tests/dts` */
-const CONFIG = 'vitest.config.ts';
+const CONFIG = 'vitest.config.mts';
 
 /**
  * Runs a command synchronously, streaming its output by default.
@@ -276,7 +282,7 @@ const runInUserland = (workspaces, consumer) => {
           name: 'strapi-dts-tests-app',
           private: true,
           // The module format decides how test files resolve packages
-          type: consumer.type,
+          type: esm ? 'module' : consumer.type,
           devDependencies: Object.fromEntries(
             Object.entries(consumerDependencies).map(([name, specifier]) => [
               name,
@@ -325,6 +331,10 @@ const main = () => {
   const consumer = readPackageJson(path.join(testsDir, 'package.json'));
 
   try {
+    if (esm && !userland) {
+      throw new Error('--esm is only supported with --userland');
+    }
+
     if (userland) {
       runInUserland(workspaces, consumer);
     } else {
