@@ -38,6 +38,10 @@
       "require": "./dist/index.js",
       "default": "./dist/index.js"
     },
+    "./globals-admin": {
+      "types": "./dist/globals-admin.d.ts",
+      "source": "./src/globals-admin.ts"
+    },
     "./package.json": "./package.json",
     "./*": "./*"
   },
