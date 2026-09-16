@@ -68,5 +68,13 @@
     "@types/jest": "29.5.2",
     "@types/node": "20.19.41",
     "jest": "29.6.0"
+  },
+  "peerDependencies": {
+    "@types/debug": "^4.1.12"
+  },
+  "peerDependenciesMeta": {
+    "@types/debug": {
+      "optional": true
+    }
   }
 }
