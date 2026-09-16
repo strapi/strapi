@@ -5,6 +5,7 @@ const { errors } = require('@strapi/utils');
 const builtinProviderEndpoints = require('./providers');
 const oauth1 = require('./oauth1');
 const oauth2 = require('./oauth2');
+const { trimGrantSessionResponse } = require('../trim-grant-session-response');
 
 const CONNECT_PREFIX = '/connect';
 
@@ -87,6 +88,15 @@ const preserveGrantDynamic = (ctx) => {
   return dynamic ? { dynamic } : {};
 };
 
+const redirectWithSessionResponse = (ctx, callbackUrl, provider, tokenResponse) => {
+  const grantResponse = oauth2.tokensToQueryPayload(provider, tokenResponse);
+  ctx.session.grant = {
+    response: trimGrantSessionResponse(grantResponse, provider.name),
+  };
+
+  return redirectWithPayload(ctx, callbackUrl, {});
+};
+
 const startOAuth1Flow = async (ctx, provider, parsed, redirectUri) => {
   const requestToken = await oauth1.requestToken({
     requestUrl: provider.request_url,
@@ -142,9 +152,7 @@ const handleOAuth1Callback = async (ctx, provider, callbackUrl) => {
     oauthTokenCredential: requestToken.oauth_token_secret,
   });
 
-  const payload = oauth2.tokensToQueryPayload(provider, tokenResponse);
-  ctx.session.grant = {};
-  return redirectWithPayload(ctx, callbackUrl, payload);
+  return redirectWithSessionResponse(ctx, callbackUrl, provider, tokenResponse);
 };
 
 const handleOAuth2Callback = async (ctx, provider, callbackUrl, redirectUri) => {
@@ -176,9 +184,7 @@ const handleOAuth2Callback = async (ctx, provider, callbackUrl, redirectUri) => 
     subdomain: provider.subdomain,
   });
 
-  const payload = oauth2.tokensToQueryPayload(provider, tokenResponse);
-  ctx.session.grant = {};
-  return redirectWithPayload(ctx, callbackUrl, payload);
+  return redirectWithSessionResponse(ctx, callbackUrl, provider, tokenResponse);
 };
 
 const createOAuthConnectMiddleware = () => {

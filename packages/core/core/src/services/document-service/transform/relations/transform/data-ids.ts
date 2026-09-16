@@ -11,6 +11,7 @@ import { mapRelation, traverseEntityRelations } from '../utils/map-relation';
 import { normalizeXToOneRelationValue } from '../utils/xto-one';
 
 const { isPolymorphic } = relations;
+const MEDIA_UID = 'plugin::upload.file' as UID.ContentType;
 
 interface Options {
   uid: UID.Schema;
@@ -65,7 +66,7 @@ const getRelationIds = curry(
 );
 
 /**
- * Iterate over all relations of a data object and transform all relational document ids to entity ids.
+ * Iterate over all relations and media of a data object and transform document ids to entity ids.
  */
 const transformDataIdsVisitor = (idMap: IdMap, data: Record<string, any>, source: Options) => {
   return traverseEntityRelations(
@@ -87,7 +88,14 @@ const transformDataIdsVisitor = (idMap: IdMap, data: Record<string, any>, source
 
         // Find relational attributes, and return the document ids
         // if its a polymorphic relation we need to get it from the data itself
-        const targetUid: UID.Schema = isPolymorphicRelation ? relation.__type : attribute.target;
+        let targetUid: UID.Schema;
+        if (attribute.type === 'media') {
+          targetUid = MEDIA_UID;
+        } else if (isPolymorphicRelation) {
+          targetUid = relation.__type;
+        } else {
+          targetUid = attribute.target;
+        }
         const ids: ID[] = getIds(targetUid, relation);
 
         // Handle positional arguments
@@ -129,7 +137,11 @@ const transformDataIdsVisitor = (idMap: IdMap, data: Record<string, any>, source
 
       set(key, newRelation as any);
     },
-    { schema: strapi.getModel(source.uid), getModel: strapi.getModel.bind(strapi) },
+    {
+      schema: strapi.getModel(source.uid),
+      getModel: strapi.getModel.bind(strapi),
+      includeMedia: true,
+    },
     data
   );
 };

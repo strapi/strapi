@@ -170,23 +170,42 @@ const CloseIconButton = styled(IconButton)`
  * Drawer.Body
  * -----------------------------------------------------------------------------------------------*/
 
+type PointerDownOutsideHandler = NonNullable<Dialog.DialogContentProps['onPointerDownOutside']>;
+
+/** Vetoes an outside interaction that would otherwise dismiss the drawer. */
+const keepOpen = (event: { preventDefault: () => void }) => event.preventDefault();
+
 interface DrawerBodyProps extends Omit<FlexProps, 'width' | 'maxHeight'> {
   animationDirection?: 'up' | 'left';
   /** Width of the panel from the medium breakpoint up. Mobile is always full-bleed. */
   width?: string;
   /** Cap on the panel height. Defaults to the dynamic viewport height. */
   maxHeight?: string;
+  /**
+   * Opt in to dismiss-on-outside-click. Omitted, an outside pointer press never
+   * closes the drawer — it must be closed explicitly, as long-running panels
+   * like the upload progress dialog need. Passed, the handler can still veto
+   * individual presses via `event.preventDefault()`. Content rendered from
+   * inside the panel but portaled elsewhere (DS dialogs, popovers, tooltips)
+   * never counts as outside — Radix reads the React tree, not the DOM.
+   */
+  onPointerDownOutside?: PointerDownOutsideHandler;
   children: React.ReactNode;
 }
 
 const DrawerBody = React.forwardRef<HTMLDivElement, DrawerBodyProps>(
-  ({ animationDirection, width, maxHeight, children, ...props }, ref) => (
+  (
+    { animationDirection, width, maxHeight, onPointerDownOutside = keepOpen, children, ...props },
+    ref
+  ) => (
     <Dialog.Content
       ref={ref}
       forceMount
       asChild
-      onPointerDownOutside={(e) => e.preventDefault()}
-      onInteractOutside={(e) => e.preventDefault()}
+      onPointerDownOutside={onPointerDownOutside}
+      // Non-modal, so focus legitimately moves outside (tabbing past the last
+      // field); only a pointer press should ever dismiss.
+      onFocusOutside={keepOpen}
       data-animation-direction={animationDirection}
     >
       {/* width/maxHeight go through transient props so the DS Flex never emits a

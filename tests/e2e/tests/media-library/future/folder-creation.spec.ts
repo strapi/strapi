@@ -4,7 +4,7 @@ import { resetDatabaseAndImportDataFromPath } from '../../../../utils/dts-import
 import { AssetsPage } from './page-objects/AssetsPage';
 import { describeOnCondition } from '../../../../utils/shared';
 
-describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
+describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
   'Media Library - Folder Creation',
   () => {
     test.beforeEach(async ({ page }) => {
@@ -24,7 +24,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
       await assetsPage.createFolderDialog.getByRole('textbox').fill('Test Folder');
       await assetsPage.createFolderDialog.getByRole('button', { name: /create folder/i }).click();
 
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.waitForNotification();
 
       await assetsPage.switchToGridView();
       await expect(assetsPage.getFolderCard('Test Folder')).toBeVisible();
@@ -36,7 +36,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
 
       // Create a parent folder first
       await assetsPage.createFolder('Parent Folder');
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.waitForNotification();
 
       // Navigate into the parent folder
       await assetsPage.switchToGridView();
@@ -53,7 +53,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
       await assetsPage.createFolderDialog.getByRole('textbox').fill('Sub Folder');
       await assetsPage.createFolderDialog.getByRole('button', { name: /create folder/i }).click();
 
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.waitForNotification();
 
       await expect(assetsPage.getFolderCard('Sub Folder')).toBeVisible();
     });
@@ -78,7 +78,7 @@ describeOnCondition(process.env.BETA_MEDIA_LIBRARY === 'true')(
 
       // Create a folder named "Duplicate"
       await assetsPage.createFolder('Duplicate');
-      await assetsPage.waitForUploadSuccess();
+      await assetsPage.waitForNotification();
 
       // Try to create another folder with the same name
       await assetsPage.openCreateFolderDialog();

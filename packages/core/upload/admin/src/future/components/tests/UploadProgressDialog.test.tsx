@@ -372,6 +372,24 @@ describe('UploadProgressDialog', () => {
       expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '25');
     });
 
+    it('goes back to indeterminate once every byte is in but the row has not completed', () => {
+      // The URL flow's provider upload runs after the fetch reached 100%; a solid full bar
+      // would read as finished while work is still running.
+      setup(
+        createMockState({
+          files: [
+            {
+              ...createMockFile(0, 'uploading-file.png', 'uploading'),
+              size: 1000,
+              uploadedBytes: 1000,
+            },
+          ],
+        })
+      );
+
+      expect(screen.getByRole('progressbar')).not.toHaveAttribute('aria-valuenow');
+    });
+
     it('falls back to an indeterminate bar while the size is still unknown', () => {
       // The URL flow opens rows at size 0 during the server-side fetch; a determinate
       // bar would sit at 0% for the whole phase and read as stalled.

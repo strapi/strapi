@@ -56,6 +56,33 @@ describe('Schema', () => {
       },
     });
 
+    const schemaWithSearchable = (searchable?: boolean | null) => ({
+      data: {
+        contentTypes: [
+          {
+            action: 'create',
+            uid: 'api::article.article',
+            displayName: 'Article',
+            draftAndPublish: false,
+            singularName: 'article',
+            pluralName: 'articles',
+            kind: 'collectionType',
+            attributes: [
+              {
+                action: 'create',
+                name: 'secret',
+                properties: {
+                  type: 'text',
+                  private: true,
+                  ...(searchable === undefined ? {} : { searchable }),
+                },
+              },
+            ],
+          },
+        ],
+      },
+    });
+
     test('reports a missing schema', () => {
       expect(() => validateUpdateSchema(undefined)).toThrow('Schema is required');
     });
@@ -87,6 +114,61 @@ describe('Schema', () => {
           contentTypes: [{ options: {}, pluginOptions: {} }],
         },
       });
+    });
+
+    test('retains searchable when a private attribute explicitly disables search', () => {
+      expect(validateUpdateSchema(schemaWithSearchable(false))).toMatchObject({
+        data: {
+          contentTypes: [
+            {
+              attributes: [
+                {
+                  properties: { type: 'text', private: true, searchable: false },
+                },
+              ],
+            },
+          ],
+        },
+      });
+    });
+
+    test('retains searchable when a private attribute explicitly enables search', () => {
+      expect(validateUpdateSchema(schemaWithSearchable(true))).toMatchObject({
+        data: {
+          contentTypes: [
+            {
+              attributes: [
+                {
+                  properties: { type: 'text', private: true, searchable: true },
+                },
+              ],
+            },
+          ],
+        },
+      });
+    });
+
+    test('accepts an absent searchable property', () => {
+      const schema = validateUpdateSchema(schemaWithSearchable());
+
+      expect(schema).toMatchObject({
+        data: {
+          contentTypes: [
+            {
+              attributes: [
+                {
+                  properties: { type: 'text', private: true },
+                },
+              ],
+            },
+          ],
+        },
+      });
+      expect(schema).not.toHaveProperty('data.contentTypes.0.attributes.0.properties.searchable');
+    });
+
+    test('rejects a null searchable property', () => {
+      expect(() => validateUpdateSchema(schemaWithSearchable(null))).toThrow();
     });
   });
 
