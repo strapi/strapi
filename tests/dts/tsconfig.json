@@ -3,13 +3,15 @@
   "compilerOptions": {
     "target": "ES2022",
     "lib": ["ES2023"],
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
+    "module": "node20",
+    "moduleResolution": "node16",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "noEmit": true,
     "types": ["node"]
   },
-  "include": ["./**/*.ts"]
+  // Fixtures are `.ts`, not `.d.ts`, so they are type checked despite `skipLibCheck`
+  "files": ["./fixtures/content-types.ts"],
+  "include": ["./**/*.test-d.ts"]
 }

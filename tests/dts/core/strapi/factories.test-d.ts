@@ -1,8 +1,5 @@
 import { describe, expectTypeOf, test } from 'vitest';
-import type { Core, Modules } from '@strapi/types';
-import { factories } from '@strapi/core';
-
-import '../../fixtures/content-types';
+import { factories, type Core, type Modules } from '@strapi/strapi';
 
 type Factory<T> = (params: { strapi: Core.Strapi }) => T;
 type Built<T> = T extends Factory<infer R> ? R : never;

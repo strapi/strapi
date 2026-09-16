@@ -1,7 +1,5 @@
 import { describe, expectTypeOf, test } from 'vitest';
-import type { Core } from '@strapi/types';
-// Nothing is imported: loading the module is what applies its `declare module 'koa'` augmentations
-import type {} from '@strapi/core';
+import type { Core } from '@strapi/strapi';
 
 // The koa context as applications receive it in controllers, without depending on koa themselves.
 // `toEqualTypeOf` passes when the actual type is `any`, so every type below is guarded against it.

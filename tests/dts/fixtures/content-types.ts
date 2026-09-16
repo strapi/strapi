@@ -1,8 +1,8 @@
 /**
  * Content-type registry of a fictional application, shaped like the declarations Strapi generates
- * in `types/generated/contentTypes.d.ts`.
+ * in `types/generated/contentTypes.d.ts`. Loaded for every test through `files` in `tsconfig.json`.
  */
-import type { Struct } from '@strapi/types';
+import type { Struct } from '@strapi/strapi';
 
 export interface ApiArticleArticle extends Struct.CollectionTypeSchema {
   collectionName: 'articles';
@@ -28,7 +28,7 @@ export interface ApiHomepageHomepage extends Struct.SingleTypeSchema {
   };
 }
 
-declare module '@strapi/types' {
+declare module '@strapi/strapi' {
   export namespace Public {
     export interface ContentTypeSchemas {
       'api::article.article': ApiArticleArticle;

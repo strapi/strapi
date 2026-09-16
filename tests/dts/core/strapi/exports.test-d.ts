@@ -1,11 +1,14 @@
 import { describe, expectTypeOf, test } from 'vitest';
-import type { Core } from '@strapi/types';
-import type * as StrapiCore from '@strapi/core';
-import { ai, compileStrapi, createStrapi, factories } from '@strapi/core';
+import type * as Strapi from '@strapi/strapi';
+import { ai, compileStrapi, createStrapi, factories, type Core } from '@strapi/strapi';
 
-describe('@strapi/core exports', () => {
+describe('@strapi/strapi exports', () => {
   test('exposes exactly the public entry points', () => {
-    expectTypeOf<keyof typeof StrapiCore>().toEqualTypeOf<
+    // Augmenting the `Public` registries, as generated application types do, adds a key named after
+    // the quoted absolute path of the augmented module to the namespace type
+    type ModulePathKey = `"${string}"`;
+
+    expectTypeOf<Exclude<keyof typeof Strapi, ModulePathKey>>().toEqualTypeOf<
       'createStrapi' | 'compileStrapi' | 'factories' | 'ai'
     >();
   });

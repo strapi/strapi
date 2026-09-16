@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// @ts-check
 
 /**
  * Runs the public API type tests in `tests/dts`.
@@ -19,16 +20,34 @@
  *
  * Every workspace package involved must be built first.
  *
- * Usage:
- *   node tests/scripts/run-dts-tests.mjs [--userland] [--keep] [-- <vitest args>]
+ * @example
+ * node tests/scripts/run-dts-tests.mjs [--userland] [--keep] [-- <vitest args>]
  */
 
 import { execFileSync } from 'node:child_process';
+import console from 'node:console';
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import os from 'node:os';
 import path from 'node:path';
+import process from 'node:process';
 import { fileURLToPath } from 'node:url';
+
+/**
+ * @typedef {Record<string, string>} Dependencies Dependency names mapped to version specifiers
+ */
+
+/**
+ * @typedef {Map<string, string>} Workspaces Workspace package names mapped to their absolute paths
+ */
+
+/**
+ * @typedef {object} PackageJson The fields of a `package.json` this script reads
+ * @property {string} [name]
+ * @property {Dependencies} [dependencies]
+ * @property {Dependencies} [devDependencies]
+ * @property {Dependencies} [peerDependencies]
+ */
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const testsDir = path.join(repoRoot, 'tests', 'dts');
@@ -37,22 +56,48 @@ const separator = process.argv.indexOf('--');
 const args = separator === -1 ? process.argv.slice(2) : process.argv.slice(2, separator);
 const vitestArgs = separator === -1 ? [] : process.argv.slice(separator + 1);
 
+/** Run against packed tarballs in an isolated install instead of the monorepo */
 const userland = args.includes('--userland');
+
+/** Keep the temporary userland project for inspection */
 const keep = args.includes('--keep');
 
+/** pnpm version run through corepack for userland installs */
 const PNPM = ['pnpm@10'];
+
+/** Vitest configuration file, relative to `tests/dts` */
 const CONFIG = 'vitest.config.ts';
 
-const run = (command, commandArgs, options = {}) =>
+/**
+ * Runs a command synchronously, streaming its output by default.
+ *
+ * @param {string} command
+ * @param {string[]} commandArgs
+ * @param {import('node:child_process').ExecFileSyncOptions} [options]
+ * @throws When the command exits with a non-zero code
+ */
+const run = (command, commandArgs, options = {}) => {
   execFileSync(command, commandArgs, { stdio: 'inherit', ...options });
+};
 
-const readJson = (file) => JSON.parse(fs.readFileSync(file, 'utf8'));
+/**
+ * @param {string} file Absolute path to a `package.json`
+ * @returns {PackageJson}
+ */
+const readPackageJson = (file) => JSON.parse(fs.readFileSync(file, 'utf8'));
 
+/**
+ * @param {Dependencies} dependencies
+ * @returns {string[]} The names of the dependencies using the `workspace:` protocol
+ */
 const getWorkspaceDependencies = (dependencies) =>
   Object.entries(dependencies)
-    .filter(([, range]) => range.startsWith('workspace:'))
+    .filter(([, specifier]) => specifier.startsWith('workspace:'))
     .map(([name]) => name);
 
+/**
+ * @returns {Workspaces} Every workspace of the monorepo
+ */
 const getWorkspaces = () => {
   const output = execFileSync('yarn', ['workspaces', 'list', '--json'], {
     cwd: repoRoot,
@@ -69,15 +114,20 @@ const getWorkspaces = () => {
 };
 
 /**
- * Every workspace package reachable from the given ones through `dependencies` and
- * `peerDependencies`, including themselves.
+ * Collects every workspace package reachable from the given ones through `dependencies` and
+ * `peerDependencies`.
+ *
+ * @param {Workspaces} workspaces
+ * @param {string[]} names
+ * @returns {Set<string>} The given packages and all their workspace dependencies
  */
 const getWorkspaceClosure = (workspaces, names) => {
+  /** @type {Set<string>} */
   const closure = new Set();
   const queue = [...names];
 
   while (queue.length > 0) {
-    const name = queue.pop();
+    const name = /** @type {string} */ (queue.pop());
 
     if (closure.has(name)) {
       continue;
@@ -85,7 +135,7 @@ const getWorkspaceClosure = (workspaces, names) => {
 
     closure.add(name);
 
-    const pkg = readJson(path.join(workspaces.get(name), 'package.json'));
+    const pkg = readPackageJson(path.join(getWorkspacePath(workspaces, name), 'package.json'));
     const dependencies = Object.keys({ ...pkg.dependencies, ...pkg.peerDependencies });
 
     queue.push(...dependencies.filter((dependency) => workspaces.has(dependency)));
@@ -94,9 +144,30 @@ const getWorkspaceClosure = (workspaces, names) => {
   return closure;
 };
 
+/**
+ * @param {Workspaces} workspaces
+ * @param {string} name
+ * @returns {string} The absolute path of the workspace package
+ * @throws When the package is not a workspace of the monorepo
+ */
+const getWorkspacePath = (workspaces, name) => {
+  const location = workspaces.get(name);
+
+  if (!location) {
+    throw new Error(`${name} is not a workspace package`);
+  }
+
+  return location;
+};
+
+/**
+ * @param {Workspaces} workspaces
+ * @param {Iterable<string>} names
+ * @throws When one of the packages has no `dist` directory
+ */
 const assertBuilt = (workspaces, names) => {
   const missing = [...names].filter(
-    (name) => !fs.existsSync(path.join(workspaces.get(name), 'dist'))
+    (name) => !fs.existsSync(path.join(getWorkspacePath(workspaces, name), 'dist'))
   );
 
   if (missing.length > 0) {
@@ -105,8 +176,11 @@ const assertBuilt = (workspaces, names) => {
 };
 
 /**
- * The temporary project must not have a `node_modules` directory in any ancestor, otherwise
- * modules could resolve from there and hide missing dependencies again.
+ * Ensures no ancestor of the directory has a `node_modules` directory, from which modules could
+ * resolve and hide missing dependencies again.
+ *
+ * @param {string} dir
+ * @throws When an ancestor has a `node_modules` directory
  */
 const assertIsolated = (dir) => {
   for (
@@ -120,12 +194,25 @@ const assertIsolated = (dir) => {
   }
 };
 
+/**
+ * Runs the type tests inside the monorepo.
+ *
+ * @param {Workspaces} workspaces
+ * @param {Dependencies} consumerDependencies The dependencies of `tests/dts`
+ */
 const runInRepository = (workspaces, consumerDependencies) => {
   assertBuilt(workspaces, getWorkspaceDependencies(consumerDependencies));
 
   run('yarn', ['vitest', '--config', CONFIG, ...vitestArgs], { cwd: testsDir });
 };
 
+/**
+ * Runs the type tests in a temporary project outside of the monorepo, with the workspace packages
+ * installed from packed tarballs by pnpm with hoisting disabled.
+ *
+ * @param {Workspaces} workspaces
+ * @param {Dependencies} consumerDependencies The dependencies of `tests/dts`
+ */
 const runInUserland = (workspaces, consumerDependencies) => {
   const closure = getWorkspaceClosure(workspaces, getWorkspaceDependencies(consumerDependencies));
 
@@ -141,27 +228,38 @@ const runInUserland = (workspaces, consumerDependencies) => {
 
     console.log(`Packing ${closure.size} workspace package(s) into ${tarballsDir}`);
 
+    /** @type {Dependencies} Workspace package names mapped to `file:` tarball specifiers */
     const tarballs = {};
 
     for (const name of [...closure].sort()) {
       const tarball = path.join(tarballsDir, `${name.replace('@', '').replace('/', '-')}.tgz`);
 
-      run('yarn', ['pack', '--out', tarball], { cwd: workspaces.get(name), stdio: 'ignore' });
+      run('yarn', ['pack', '--out', tarball], {
+        cwd: getWorkspacePath(workspaces, name),
+        stdio: 'ignore',
+      });
       tarballs[name] = `file:${tarball}`;
     }
 
     const requireFromTests = createRequire(path.join(testsDir, 'package.json'));
 
-    const resolveSpecifier = (name, range) => {
-      if (range.startsWith('workspace:')) {
+    /**
+     * Translates a monorepo version specifier into one the temporary project can install.
+     *
+     * @param {string} name
+     * @param {string} specifier
+     * @returns {string}
+     */
+    const resolveSpecifier = (name, specifier) => {
+      if (specifier.startsWith('workspace:')) {
         return tarballs[name];
       }
 
-      if (range.startsWith('catalog:')) {
+      if (specifier.startsWith('catalog:')) {
         return requireFromTests(`${name}/package.json`).version;
       }
 
-      return range;
+      return specifier;
     };
 
     fs.cpSync(testsDir, appDir, {
@@ -176,9 +274,9 @@ const runInUserland = (workspaces, consumerDependencies) => {
           name: 'strapi-dts-tests-app',
           private: true,
           devDependencies: Object.fromEntries(
-            Object.entries(consumerDependencies).map(([name, range]) => [
+            Object.entries(consumerDependencies).map(([name, specifier]) => [
               name,
-              resolveSpecifier(name, range),
+              resolveSpecifier(name, specifier),
             ])
           ),
         },
@@ -220,7 +318,8 @@ const runInUserland = (workspaces, consumerDependencies) => {
 
 const main = () => {
   const workspaces = getWorkspaces();
-  const consumerDependencies = readJson(path.join(testsDir, 'package.json')).devDependencies ?? {};
+  const consumerDependencies =
+    readPackageJson(path.join(testsDir, 'package.json')).devDependencies ?? {};
 
   try {
     if (userland) {
@@ -232,8 +331,8 @@ const main = () => {
     process.exitCode = 1;
 
     // Failed child processes already printed their output
-    if (error.status === undefined) {
-      console.error(error.message);
+    if (!(error instanceof Error && 'status' in error)) {
+      console.error(error instanceof Error ? error.message : error);
     }
   }
 };
