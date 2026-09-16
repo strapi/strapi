@@ -63,8 +63,9 @@ const contentStructureFileObjectSchema = z.object({
 
 type ContentStructureFileObject = z.infer<typeof contentStructureFileObjectSchema>;
 type ContentStructureGroupInput = z.infer<typeof contentStructureGroupSchema>;
+type SuperRefinement<T> = (value: T, ctx: z.RefinementCtx) => void | Promise<void>;
 
-const uniqueGroupIdsAcrossFile: z.SuperRefinement<ContentStructureFileObject> = (file, ctx) => {
+const uniqueGroupIdsAcrossFile: SuperRefinement<ContentStructureFileObject> = (file, ctx) => {
   const seen = new Set<string>();
 
   for (const section of [file.sections.collectionTypes, file.sections.singleTypes]) {
@@ -208,7 +209,7 @@ const validateSectionGraph = (
   }
 };
 
-const validateGraphRules: z.SuperRefinement<ContentStructureFileObject> = (file, ctx) => {
+const validateGraphRules: SuperRefinement<ContentStructureFileObject> = (file, ctx) => {
   validateSectionGraph(file.sections.collectionTypes.groups, 'collectionTypes', ctx);
   validateSectionGraph(file.sections.singleTypes.groups, 'singleTypes', ctx);
 };
