@@ -52,6 +52,38 @@ describe('Documentation plugin | clean schema attributes', () => {
     });
   });
 
+  it('resolves a repeated sibling relation target once per schema traversal', () => {
+    const schema = cleanSchemaAttributes(
+      {
+        primaryAuthor: {
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'api::author.author',
+        },
+        secondaryAuthor: {
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'api::author.author',
+        },
+      } as any,
+      { didAddStrapiComponentsToSchemas: () => false }
+    );
+
+    expect(schema.primaryAuthor).toMatchObject({
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+      },
+    });
+    expect(schema.secondaryAuthor).toMatchObject({
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+      },
+    });
+    expect(global.strapi.contentType).toHaveBeenCalledTimes(1);
+  });
+
   it('terminates genuine relation cycles with the id and documentId fallback', () => {
     global.strapi = {
       contentType: jest.fn((uid) => {
