@@ -4,6 +4,7 @@ import { createAbsoluteUrl } from './urls';
 
 import type { GetProjectType } from '../../../shared/contracts/admin';
 import type { Modules } from '@strapi/types';
+import type { Admin } from '@strapi/types/_internal';
 
 /**
  * Builds the `window.strapi` object: Community defaults, then the license response.
@@ -15,8 +16,8 @@ import type { Modules } from '@strapi/types';
  */
 const createBrowserStrapi = async (
   features?: Modules.Features.FeaturesService['config']
-): Promise<Window['strapi']> => {
-  const browserStrapi: Window['strapi'] = {
+): Promise<Admin.BrowserStrapi> => {
+  const browserStrapi: Admin.BrowserStrapi = {
     /**
      * This ENV variable is passed from the strapi instance, by default no url is set
      * in the config and therefore the instance returns you an empty string so URLs are relative.
