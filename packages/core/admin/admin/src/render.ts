@@ -42,6 +42,11 @@ const renderAdmin = async (
         return features?.future?.[name] === true;
       },
     },
+    featureFlags: {
+      isEnabled: (name: keyof Omit<Modules.Features.FeaturesConfig, 'future'>) => {
+        return features?.[name] === true;
+      },
+    },
     // eslint-disable-next-line
     // @ts-ignore – there's pollution from the global scope of Node. Cannot use @ts-expect-error because of build:code and build:types context collision. Cannot use @ts-expect-error because of build:code and build:types context collision.
     features: {
