@@ -110,8 +110,8 @@ const createProvider = (config: Config) => {
   }
 
   if (!providerInstance.replace && !providerInstance.replaceStream) {
-    throw new Error(
-      `The upload provider "${providerName}" doesn't implement the replaceStream nor the replace method.`
+    process.emitWarning(
+      `The upload provider "${providerName}" doesn't implement the replaceStream nor the replace method. Strapi will fallback with delete and upload method which will be less performing.`
     );
   }
 
