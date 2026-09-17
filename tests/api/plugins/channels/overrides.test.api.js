@@ -54,7 +54,11 @@ describe('Channels — per-channel overrides and lifecycle', () => {
   const cleanup = async () => {
     await strapi.db.query(ARTICLE_UID).deleteMany();
     await strapi.db.query(OVERRIDE_UID).deleteMany();
-    await strapi.db.query(CHANNEL_UID).deleteMany();
+    // Keep the bootstrap-seeded "default" channel; restore its flag.
+    await strapi.db.query(CHANNEL_UID).deleteMany({ where: { slug: { $ne: 'default' } } });
+    await strapi.db
+      .query(CHANNEL_UID)
+      .updateMany({ where: { slug: 'default' }, data: { isDefault: true } });
   };
 
   const overrideRows = (documentId = data.article.documentId) =>
@@ -96,10 +100,17 @@ describe('Channels — per-channel overrides and lifecycle', () => {
       data.desktop = desktop.body;
 
       const mine = await rq({ url: '/channels/mine', method: 'GET' });
-      expect(mine.body.map((channel) => channel.slug).sort()).toEqual(['desktop', 'mobile']);
+      expect(mine.body.map((channel) => channel.slug).sort()).toEqual([
+        'default',
+        'desktop',
+        'mobile',
+      ]);
+      expect(mine.body.find((channel) => channel.slug === 'default')).toMatchObject({
+        isDefault: true,
+      });
     });
 
-    test('The default slug is reserved', async () => {
+    test('The default slug is taken by the seeded base channel', async () => {
       const res = await rq({ url: '/channels', method: 'POST', body: { name: 'default' } });
 
       expect(res.statusCode).toBe(400);
@@ -331,6 +342,79 @@ describe('Channels — per-channel overrides and lifecycle', () => {
       const rows = await overrideRows();
       expect(rows.filter((row) => row.status === 'published')).toHaveLength(0);
       expect(rows.filter((row) => row.status === 'draft').length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('Default channel', () => {
+    const channelIdBySlug = async (slug) => {
+      const mine = await rq({ url: '/channels/mine', method: 'GET' });
+      return mine.body.find((channel) => channel.slug === slug).id;
+    };
+
+    test('Making a channel the default serves its content headerless', async () => {
+      const res = await rq({
+        url: `/channels/${data.mobile.id}`,
+        method: 'PUT',
+        body: { isDefault: true },
+      });
+      expect(res.statusCode).toBe(200);
+      expect(res.body.isDefault).toBe(true);
+
+      // Two documents at this point: the original (draft override back to v2
+      // after the discard) and its clone (copied with the v3 override).
+      const headerless = await rq({ url: `/api/articles?status=draft`, method: 'GET' });
+      expect(headerless.body.data.map((doc) => doc.title).sort()).toEqual([
+        'Sneaker X — mobile v2',
+        'Sneaker X — mobile v3',
+      ]);
+
+      // Explicitly asking for the base channel still serves the base.
+      const explicitBase = await rq({
+        url: `/api/articles?status=draft`,
+        method: 'GET',
+        headers: onChannel('default'),
+      });
+      expect(explicitBase.body.data.map((doc) => doc.title).sort()).toEqual([
+        'Sneaker X',
+        'Sneaker X clone',
+      ]);
+    });
+
+    test('The default channel can be neither deleted nor archived', async () => {
+      const del = await rq({ url: `/channels/${data.mobile.id}`, method: 'DELETE' });
+      expect(del.statusCode).toBe(400);
+
+      const archive = await rq({
+        url: `/channels/${data.mobile.id}`,
+        method: 'PUT',
+        body: { archived: true },
+      });
+      expect(archive.statusCode).toBe(400);
+    });
+
+    test('The flag moves back to the base channel', async () => {
+      const defaultId = await channelIdBySlug('default');
+      const res = await rq({
+        url: `/channels/${defaultId}`,
+        method: 'PUT',
+        body: { isDefault: true },
+      });
+      expect(res.statusCode).toBe(200);
+
+      const headerless = await rq({ url: `/api/articles?status=draft`, method: 'GET' });
+      expect(headerless.body.data.map((doc) => doc.title).sort()).toEqual([
+        'Sneaker X',
+        'Sneaker X clone',
+      ]);
+
+      const mobile = await rq({ url: `/channels/${data.mobile.id}`, method: 'GET' });
+      expect(mobile.body.isDefault).toBe(false);
+    });
+
+    test('The seeded base channel cannot be deleted', async () => {
+      const defaultId = await channelIdBySlug('default');
+      const res = await rq({ url: `/channels/${defaultId}`, method: 'DELETE' });
+      expect(res.statusCode).toBe(400);
     });
   });
 

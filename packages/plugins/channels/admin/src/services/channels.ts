@@ -11,6 +11,7 @@ export interface Channel {
   description?: string | null;
   color: string | null;
   archived: boolean;
+  isDefault: boolean;
   order: number;
   createdAt?: string;
   updatedAt?: string;
@@ -55,6 +56,7 @@ const endpoints = channelsApi.injectEndpoints({
         color?: string | null;
         order?: number;
         archived?: boolean;
+        isDefault?: boolean;
       }
     >({
       query: ({ id, ...body }) => ({ url: `/channels/${id}`, method: 'PUT', data: body }),

@@ -51,5 +51,8 @@
   "settings.empty": "Add your first channel",
   "settings.create.submit": "Create channel",
   "form.name.placeholder": "Mobile",
-  "form.slug.create.hint": "Lowercase letters, digits and dashes — used in the X-Strapi-Channel header and API calls. Immutable once created."
+  "form.slug.create.hint": "Lowercase letters, digits and dashes — used in the X-Strapi-Channel header and API calls. Immutable once created.",
+  "settings.default": "Default",
+  "settings.set-default": "Set as default",
+  "settings.delete.disabled": "The default channel cannot be deleted — make another channel the default first"
 }

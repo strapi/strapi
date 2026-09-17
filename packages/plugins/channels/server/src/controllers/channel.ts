@@ -22,6 +22,7 @@ const format = (channel: Channel, extra: Record<string, unknown> = {}) => ({
   description: channel.description ?? null,
   color: channel.color ?? null,
   archived: channel.archived,
+  isDefault: channel.isDefault,
   order: channel.order,
   createdAt: channel.createdAt,
   updatedAt: channel.updatedAt,
@@ -94,6 +95,14 @@ const channel = ({ strapi }: { strapi: Core.Strapi }) => ({
         throw new ValidationError('`archived` must be a boolean');
       }
       data.archived = body.archived;
+    }
+
+    if (body.isDefault === true) {
+      await getService('channels').setDefault(id);
+    } else if (body.isDefault === false) {
+      throw new ValidationError(
+        'A channel cannot unset itself as default — set another channel as the default instead'
+      );
     }
 
     ctx.body = format(await getService('channels').update(id, data));

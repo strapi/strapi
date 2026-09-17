@@ -1,4 +1,4 @@
-import { CHANNEL_HEADER, DEFAULT_CHANNEL_SLUG } from '../constants';
+import { CHANNEL_HEADER } from '../constants';
 import { getCurrentChannelSlug } from './currentChannel';
 
 const PATCHED = Symbol.for('@strapi/plugin-channels/fetch-patched');
@@ -34,10 +34,10 @@ export const installChannelHeaderInterceptor = () => {
   const originalFetch = w.fetch.bind(window);
 
   const patched = (input: RequestInfo | URL, init?: RequestInit) => {
+    // Always explicit — including `default`: headerless requests now resolve
+    // to the flagged default channel server-side, and the admin must show
+    // exactly what it names.
     const slug = getCurrentChannelSlug();
-    if (slug === DEFAULT_CHANNEL_SLUG) {
-      return originalFetch(input, init);
-    }
 
     try {
       const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;

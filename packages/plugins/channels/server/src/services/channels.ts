@@ -13,6 +13,7 @@ export interface Channel {
   description: string | null;
   color: string | null;
   archived: boolean;
+  isDefault: boolean;
   order: number;
   createdAt: string;
   updatedAt: string;
@@ -112,9 +113,6 @@ const channelsService = ({ strapi }: { strapi: Core.Strapi }) => {
           'Could not derive a valid slug — use lowercase letters, digits and dashes'
         );
       }
-      if (slug === DEFAULT_CHANNEL_SLUG) {
-        throw new ValidationError(`"${DEFAULT_CHANNEL_SLUG}" is reserved for the base content`);
-      }
       if (input.color && !COLOR_REGEX.test(input.color)) {
         throw new ValidationError('`color` must be a #rrggbb hex value');
       }
@@ -159,6 +157,11 @@ const channelsService = ({ strapi }: { strapi: Core.Strapi }) => {
       if (data.color && !COLOR_REGEX.test(data.color)) {
         throw new ValidationError('`color` must be a #rrggbb hex value');
       }
+      if (data.archived === true && existing.isDefault) {
+        throw new ValidationError(
+          'The default channel cannot be archived — make another channel the default first'
+        );
+      }
 
       const userId = getCurrentUserId();
       lookupCache.clear();
@@ -182,6 +185,16 @@ const channelsService = ({ strapi }: { strapi: Core.Strapi }) => {
       if (!existing) {
         throw new NotFoundError(`Unknown channel: ${id}`);
       }
+      if (existing.isDefault) {
+        throw new ValidationError(
+          'The default channel cannot be deleted — make another channel the default first'
+        );
+      }
+      if (existing.slug === DEFAULT_CHANNEL_SLUG) {
+        throw new ValidationError(
+          `"${DEFAULT_CHANNEL_SLUG}" is the base content channel and cannot be deleted`
+        );
+      }
 
       await strapi.db.transaction(async () => {
         await getService('overrides').removeForChannel(id);
@@ -190,6 +203,85 @@ const channelsService = ({ strapi }: { strapi: Core.Strapi }) => {
       });
 
       strapi.eventHub.emit('channel.delete', { channel: existing });
+    },
+
+    /**
+     * The channel served when no `X-Strapi-Channel` header is sent, resolved
+     * within the current workspace scope (the spaces read net applies) and
+     * cached like the slug lookups.
+     */
+    async getDefault(spaceId?: number | null): Promise<Channel | null> {
+      const key = `${spaceId ?? ''}:__default__`;
+      const hit = lookupCache.get(key);
+      if (hit && hit.expiresAt > Date.now()) {
+        return hit.value;
+      }
+      const channel: Channel | null = await query().findOne({ where: { isDefault: true } });
+      if (lookupCache.size >= LOOKUP_MAX_ENTRIES) {
+        lookupCache.clear();
+      }
+      lookupCache.set(key, { value: channel, expiresAt: Date.now() + LOOKUP_TTL_MS });
+      return channel;
+    },
+
+    /**
+     * Makes `id` the default channel: clears the flag on the channels visible
+     * in the current scope (per workspace with Spaces installed), then sets
+     * it. The target must be active.
+     */
+    async setDefault(id: number): Promise<Channel> {
+      const target = await service.getById(id);
+      if (!target) {
+        throw new NotFoundError(`Unknown channel: ${id}`);
+      }
+      if (target.archived) {
+        throw new ValidationError('An archived channel cannot be the default');
+      }
+      const userId = getCurrentUserId();
+      await strapi.db.transaction(async () => {
+        // Scoped findMany (not a blind updateMany): with Spaces installed the
+        // read net keeps the clearing inside the current workspace.
+        const flagged: Channel[] = await query().findMany({ where: { isDefault: true } });
+        for (const channel of flagged) {
+          if (channel.id !== id) {
+            await query().update({ where: { id: channel.id }, data: { isDefault: false } });
+          }
+        }
+        await query().update({
+          where: { id },
+          data: { isDefault: true, ...(userId ? { updatedBy: userId } : {}) },
+        });
+      });
+      lookupCache.clear();
+      const updated = await service.getById(id);
+      strapi.eventHub.emit('channel.set-default', { channel: updated });
+      return updated as Channel;
+    },
+
+    /**
+     * Bootstrap seed: the base "Default" channel (slug `default`, flagged as
+     * the default) so the list, the pickers and the header speak the same
+     * language. Idempotent; editing on it writes the base entries — it never
+     * carries overrides.
+     */
+    async ensureDefaultChannel(): Promise<void> {
+      const existing = await service.getBySlug(DEFAULT_CHANNEL_SLUG);
+      if (!existing) {
+        const flagged = await query().findOne({ where: { isDefault: true } });
+        await query().create({
+          data: {
+            slug: DEFAULT_CHANNEL_SLUG,
+            name: 'Default',
+            description: 'The base content — served when no channel is selected.',
+            color: null,
+            archived: false,
+            isDefault: !flagged,
+            order: 0,
+          },
+        });
+        lookupCache.clear();
+        strapi.log.info('[channels] Seeded the "default" channel.');
+      }
     },
 
     clearCache() {

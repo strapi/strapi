@@ -40,19 +40,38 @@ const ensureSpaceResolved = async (strapi: Core.Strapi, ctx: any): Promise<boole
 export const createResolveChannelMiddleware = (strapi: Core.Strapi) => {
   return async (ctx: any, next: () => Promise<any>) => {
     const raw = ctx.get(CHANNEL_HEADER);
-    if (!raw || raw === DEFAULT_CHANNEL_SLUG) {
-      return next();
-    }
 
     if (!(await ensureSpaceResolved(strapi, ctx))) {
       return undefined;
     }
 
     const channels = getService('channels');
+
+    // No header: the flagged default channel answers. When that is the base
+    // "default" channel (the seeded state) nothing is scoped, as before.
+    if (!raw) {
+      const fallback = await channels.getDefault(ctx.state.spaceId ?? null);
+      if (fallback && !fallback.archived && fallback.slug !== DEFAULT_CHANNEL_SLUG) {
+        ctx.state.channel = { id: fallback.id, slug: fallback.slug };
+        ctx.state.channelId = fallback.id;
+        ctx.state.channelSlug = fallback.slug;
+      }
+      return next();
+    }
+
+    // The base channel by name = no scoping: overrides never exist for it.
+    if (raw === DEFAULT_CHANNEL_SLUG) {
+      return next();
+    }
+
     const channel = await channels.resolveHeaderValue(raw, ctx.state.spaceId ?? null);
 
     if (!channel || channel.archived) {
       return ctx.badRequest(`Unknown or archived channel: "${raw}"`);
+    }
+
+    if (channel.slug === DEFAULT_CHANNEL_SLUG) {
+      return next();
     }
 
     ctx.state.channel = { id: channel.id, slug: channel.slug };

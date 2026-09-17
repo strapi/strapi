@@ -37,7 +37,7 @@ describe('Channels — coexistence with Spaces', () => {
   const cleanup = async () => {
     await strapi.db.query(ARTICLE_UID).deleteMany();
     await strapi.db.query(OVERRIDE_UID).deleteMany();
-    await strapi.db.query(CHANNEL_UID).deleteMany();
+    await strapi.db.query(CHANNEL_UID).deleteMany({ where: { slug: { $ne: 'default' } } });
   };
 
   beforeAll(async () => {
@@ -78,13 +78,15 @@ describe('Channels — coexistence with Spaces', () => {
 
     // Workspaces v2 semantics: the default workspace sees everything
     // unfiltered; sub-workspaces only see their own channels.
+    // The seeded base channel (workspace-shared) shows everywhere; the
+    // default workspace sees every channel, acme only its own.
     const mineDefault = await rq({
       url: '/channels/mine',
       method: 'GET',
       headers: { [SPACE_HEADER]: 'default' },
     });
-    expect(mineDefault.body.map((channel) => channel.id).sort()).toEqual(
-      [inDefault.body.id, inAcme.body.id].sort()
+    expect(mineDefault.body.map((channel) => channel.id)).toEqual(
+      expect.arrayContaining([inDefault.body.id, inAcme.body.id])
     );
 
     const mineAcme = await rq({
@@ -92,7 +94,12 @@ describe('Channels — coexistence with Spaces', () => {
       method: 'GET',
       headers: { [SPACE_HEADER]: 'acme' },
     });
-    expect(mineAcme.body.map((channel) => channel.id)).toEqual([inAcme.body.id]);
+    expect(mineAcme.body.map((channel) => channel.id)).toEqual(
+      expect.arrayContaining([inAcme.body.id])
+    );
+    expect(mineAcme.body.map((channel) => channel.id)).not.toEqual(
+      expect.arrayContaining([inDefault.body.id])
+    );
   });
 
   test('The channel header resolves within the request workspace', async () => {
@@ -126,6 +133,7 @@ describe('Channels — coexistence with Spaces', () => {
       method: 'GET',
       headers: { [SPACE_HEADER]: 'acme' },
     });
-    expect(rows[0].channel.id).toBe(mineAcme.body[0].id);
+    const acmeMobile = mineAcme.body.find((channel) => channel.slug === 'mobile');
+    expect(rows[0].channel.id).toBe(acmeMobile.id);
   });
 });

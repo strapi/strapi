@@ -73,8 +73,20 @@ const EditPage = () => {
         primaryAction={
           canUpdate && (
             <Flex gap={2}>
+              {!channel.isDefault && !channel.archived ? (
+                <Button
+                  variant="secondary"
+                  onClick={() => save({ id: channel.id, isDefault: true })}
+                >
+                  {formatMessage({
+                    id: getTranslation('settings.set-default'),
+                    defaultMessage: 'Set as default',
+                  })}
+                </Button>
+              ) : null}
               <Button
                 variant={channel.archived ? 'secondary' : 'danger-light'}
+                disabled={channel.isDefault}
                 onClick={() => save({ id: channel.id, archived: !channel.archived })}
               >
                 {channel.archived

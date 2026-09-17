@@ -11,7 +11,9 @@ their own view of it.
 Overrides are stored as **sparse overlays**, never as copies of your entries:
 
 - `strapi_channels` — the channel definitions (slug, name, color, order,
-  archived), managed from **Settings → Channels**.
+  archived, default flag), managed from **Settings → Channels**. A base
+  **Default** channel (slug `default`) is seeded at boot: it is the content
+  as stored — it never carries overrides, and it cannot be deleted.
 - `strapi_channel_overrides` — one row per
   `(channel, content type, document, locale, draft|published)` holding a JSON
   map of **only the overridden attributes**. A unique index guarantees one row
@@ -38,7 +40,11 @@ GET /api/articles
 X-Strapi-Channel: mobile
 ```
 
-- No header (or `default`) = the base content.
+- No header = **the default channel's content**. Which channel is the
+  default is a movable flag (Settings → Channels → "Set as default");
+  initially it is the base Default channel. The flagged channel can be
+  neither deleted nor archived.
+- `X-Strapi-Channel: default` always serves the base content explicitly.
 - Unknown or archived slug = `400`.
 - Works identically on REST, GraphQL and the admin (the admin stores the
   active channel in `localStorage` and stamps the header via a fetch

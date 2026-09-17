@@ -170,6 +170,14 @@ const ListPage = () => {
                     <Flex gap={2} alignItems="center">
                       <ChannelDot color={channel.color} />
                       <Typography fontWeight="semiBold">{channel.name}</Typography>
+                      {channel.isDefault ? (
+                        <Badge active>
+                          {formatMessage({
+                            id: getTranslation('settings.default'),
+                            defaultMessage: 'Default',
+                          })}
+                        </Badge>
+                      ) : null}
                     </Flex>
                   </Td>
                   <Td>
@@ -209,13 +217,22 @@ const ListPage = () => {
                       {canDelete ? (
                         <IconButton
                           variant="ghost"
-                          label={formatMessage(
-                            {
-                              id: getTranslation('settings.delete'),
-                              defaultMessage: 'Delete {name}',
-                            },
-                            { name: channel.name }
-                          )}
+                          disabled={channel.isDefault || channel.slug === 'default'}
+                          label={
+                            channel.isDefault || channel.slug === 'default'
+                              ? formatMessage({
+                                  id: getTranslation('settings.delete.disabled'),
+                                  defaultMessage:
+                                    'The default channel cannot be deleted — make another channel the default first',
+                                })
+                              : formatMessage(
+                                  {
+                                    id: getTranslation('settings.delete'),
+                                    defaultMessage: 'Delete {name}',
+                                  },
+                                  { name: channel.name }
+                                )
+                          }
                           onClick={() => setDeleting(channel)}
                         >
                           <Trash />

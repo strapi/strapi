@@ -56,6 +56,12 @@
       "default": 0,
       "required": true,
       "configurable": false
+    },
+    "isDefault": {
+      "type": "boolean",
+      "default": false,
+      "required": true,
+      "configurable": false
     }
   }
 }
