@@ -203,7 +203,9 @@ describe('content type mutation compensation', () => {
       })
     ).rejects.toThrow('groups write failed');
 
-    expect(files.schemas).toEqual(new Set([contentType.uid, secondContentType.uid, pluginContentType.uid]));
+    expect(files.schemas).toEqual(
+      new Set([contentType.uid, secondContentType.uid, pluginContentType.uid])
+    );
     expect(files.apis).toEqual(new Set(['article']));
     expect(files.groups).toBe('before');
   });
@@ -211,7 +213,9 @@ describe('content type mutation compensation', () => {
   it('rejects a crafted protected plugin deletion before it mutates schema or API files', async () => {
     await expect(deleteContentType(pluginContentType.uid)).rejects.toThrow(/not managed by CTB/);
 
-    expect(files.schemas).toEqual(new Set([contentType.uid, secondContentType.uid, pluginContentType.uid]));
+    expect(files.schemas).toEqual(
+      new Set([contentType.uid, secondContentType.uid, pluginContentType.uid])
+    );
     expect(files.apis).toEqual(new Set(['article']));
     expect(apiHandler.backup).not.toHaveBeenCalled();
     expect(builder.deleteContentType).not.toHaveBeenCalled();
@@ -240,7 +244,9 @@ describe('content type mutation compensation', () => {
       'groups write failed'
     );
 
-    expect(files.schemas).toEqual(new Set([contentType.uid, secondContentType.uid, pluginContentType.uid]));
+    expect(files.schemas).toEqual(
+      new Set([contentType.uid, secondContentType.uid, pluginContentType.uid])
+    );
     expect(files.apis).toEqual(new Set(['article']));
     expect(files.groups).toBe('before');
   });
@@ -254,7 +260,9 @@ describe('content type mutation compensation', () => {
       'backup failed'
     );
 
-    expect(files.schemas).toEqual(new Set([contentType.uid, secondContentType.uid, pluginContentType.uid]));
+    expect(files.schemas).toEqual(
+      new Set([contentType.uid, secondContentType.uid, pluginContentType.uid])
+    );
     expect(files.apis).toEqual(new Set(['article']));
     expect(apiHandler.rollback).toHaveBeenCalledWith(contentType.uid);
     expect(apiHandler.rollback).not.toHaveBeenCalledWith(secondContentType.uid);
