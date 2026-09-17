@@ -131,17 +131,34 @@ const GateInner = ({ field, children }: FieldDecoratorProps) => {
     const measure = () => {
       const wrapperRect = wrapper.getBoundingClientRect();
       const label = wrapper.querySelector('label');
-      const container = label?.parentElement;
       let top = Infinity;
       let bottom = -Infinity;
-      if (container) {
-        let pastLabel = false;
+
+      // The design system nests <label> inside a flex ROW that itself sits in
+      // the field's column (Field.Root). Walk down from the field root and,
+      // at each level, union the boxes of the siblings BELOW the element
+      // holding the label — the first level where something real follows is
+      // the control zone. Descending covers widgets that wrap label and
+      // control in an extra layer.
+      let container: Element | null = wrapper.firstElementChild;
+      for (let depth = 0; label && container && depth < 6; depth += 1) {
+        let holder: Element | null = null;
         for (const child of Array.from(container.children)) {
-          if (child === label) {
-            pastLabel = true;
+          if (child === label || child.contains(label)) {
+            holder = child;
+            break;
+          }
+        }
+        if (!holder) {
+          break;
+        }
+        let pastHolder = false;
+        for (const child of Array.from(container.children)) {
+          if (child === holder) {
+            pastHolder = true;
             continue;
           }
-          if (!pastLabel) {
+          if (!pastHolder) {
             continue;
           }
           const rect = child.getBoundingClientRect();
@@ -151,7 +168,12 @@ const GateInner = ({ field, children }: FieldDecoratorProps) => {
           top = Math.min(top, rect.top);
           bottom = Math.max(bottom, rect.bottom);
         }
+        if (bottom > -Infinity || holder === label) {
+          break;
+        }
+        container = holder;
       }
+
       if (bottom === -Infinity) {
         // No label to anchor on: frame the whole rendered input.
         top = wrapperRect.top;
