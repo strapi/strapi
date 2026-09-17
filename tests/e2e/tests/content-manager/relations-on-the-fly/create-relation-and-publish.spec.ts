@@ -28,13 +28,23 @@ test.describe('Relations on the fly - Create a Relation and Save', () => {
       await page.getByRole('option', { name: 'Create a relation' }).click();
 
       // Step 3. Edit the form
+      await expect(page.getByRole('banner').getByText('Create a relation')).toBeVisible();
+      await expect(
+        page.getByRole('dialog').getByRole('button', { name: 'West Ham post match analysis' })
+      ).toBeVisible();
       const name = page.getByRole('textbox', { name: 'name' });
       await expect(name).toHaveValue('');
       await name.fill('Mr. Fred Passo');
       await expect(name).toHaveValue('Mr. Fred Passo');
 
-      // Step 4. Publish the related document
+      // Step 4. Publish the related document (parent article is still draft, so confirm)
       await clickAndWait(page, page.getByRole('button', { name: 'Publish' }));
+      await clickAndWait(
+        page,
+        page
+          .getByRole('alertdialog', { name: 'Confirmation' })
+          .getByRole('button', { name: 'Publish' })
+      );
       await expect(name).toHaveValue('Mr. Fred Passo');
       await expect(page.getByRole('status', { name: 'Published' }).first()).toBeVisible();
 
@@ -72,6 +82,12 @@ test.describe('Relations on the fly - Create a Relation and Save', () => {
         request.url().includes('/content-manager/collection-types/api::article.article')
     );
     await clickAndWait(page, page.getByRole('button', { name: 'Publish' }));
+    await clickAndWait(
+      page,
+      page
+        .getByRole('alertdialog', { name: 'Confirmation' })
+        .getByRole('button', { name: 'Publish' })
+    );
 
     const parentUpdateData = (await parentUpdate).postDataJSON() as {
       title?: string;

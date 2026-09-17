@@ -487,4 +487,48 @@ const escapeLike = (value: unknown) => escapeQuery(`${value}`, LIKE_SPECIAL_CHAR
 const likeEscapeClause = (qb: Knex.QueryBuilder) =>
   qb.client.dialect === 'sqlite3' ? " ESCAPE '\\'" : '';
 
-export { applyWhere, processWhere };
+/**
+ * Prefix unaliased root column keys with `alias` (e.g. `published_at` → `t0.published_at`).
+ * Used for update/delete subqueries that join other tables sharing column names.
+ * Group operators are walked; already-qualified keys (`t1.title`) and operator keys are left as-is.
+ */
+function qualifyRootColumns(where: Record<string, unknown>, alias: string): Record<string, unknown>;
+function qualifyRootColumns(
+  where: Record<string, unknown>[],
+  alias: string
+): Record<string, unknown>[];
+function qualifyRootColumns(
+  where: Record<string, unknown> | Record<string, unknown>[],
+  alias: string
+): Record<string, unknown> | Record<string, unknown>[] {
+  if (isArray(where)) {
+    return where.map((sub) => qualifyRootColumns(sub, alias));
+  }
+
+  const result: Record<string, unknown> = {};
+
+  for (const key of Object.keys(where)) {
+    const value = where[key];
+
+    if (isOperatorOfType('group', key)) {
+      if (Array.isArray(value)) {
+        result[key] = value.map((sub) => (isRecord(sub) ? qualifyRootColumns(sub, alias) : sub));
+      } else {
+        result[key] = value;
+      }
+      continue;
+    }
+
+    if (key === '$not' && isRecord(value)) {
+      result[key] = qualifyRootColumns(value, alias);
+      continue;
+    }
+
+    const qualifiedKey = key.includes('.') || isOperator(key) ? key : `${alias}.${key}`;
+    result[qualifiedKey] = value;
+  }
+
+  return result;
+}
+
+export { applyWhere, processWhere, qualifyRootColumns };
