@@ -75,9 +75,16 @@ const endpoints = channelsApi.injectEndpoints({
         method: 'GET',
         config: { params: locale ? { locale } : {} },
       }),
+      // Also provide the Content Manager's own Document tags: every save,
+      // publish, unpublish or discard invalidates them, so the override
+      // state (chips, footer notes, ··· entries) refreshes right after a
+      // write instead of waiting for a page reload. Single types are tagged
+      // by model alone, collection types by model_documentId.
       providesTags: (_res, _err, { model, documentId }) => [
         { type: 'ChannelOverrides', id: `${model}_${documentId}` },
         'ChannelOverrides',
+        { type: 'Document', id: `${model}_${documentId}` },
+        { type: 'Document', id: model },
       ],
     }),
     resetOverrides: builder.mutation<
