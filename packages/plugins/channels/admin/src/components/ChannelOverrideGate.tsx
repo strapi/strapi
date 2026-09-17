@@ -22,26 +22,28 @@ interface ChannelsAttributeOptions {
 
 const GateWrapper = styled.div`
   position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 `;
 
 /**
- * The inherited-value veil: a light primary dim over the input control — the
- * label and any editor toolbar stay clear (the measured `$top` offset skips
- * them) and the Default value stays readable underneath. One click (or
- * Enter) lifts it and the field becomes editable — saving then records the
- * override.
+ * The "inherited ghost" treatment: the input control sits behind a dashed
+ * frame with a light page-colored scrim — dimmed but readable, nothing
+ * covered by chrome. Hovering (or focusing) the frame turns it primary,
+ * lifts most of the scrim and reveals an inline "Override" affordance; one
+ * click makes the field editable, and saving records the override. The
+ * measured `$top` offset keeps the field label out of the ghost zone.
  */
-const Veil = styled.button<{ $top: number }>`
+const GhostFrame = styled.button<{ $top: number }>`
   position: absolute;
   top: ${({ $top }) => $top}px;
   right: 0;
   bottom: 0;
   left: 0;
   z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
+  border: 1px dashed ${({ theme }) => theme.colors.neutral500};
+  border-radius: ${({ theme }) => theme.borderRadius};
   background: transparent;
   cursor: pointer;
   padding: 0;
@@ -50,24 +52,37 @@ const Veil = styled.button<{ $top: number }>`
     content: '';
     position: absolute;
     inset: 0;
-    border-radius: ${({ theme }) => theme.borderRadius};
-    background: ${({ theme }) => theme.colors.primary700};
-    opacity: 0.15;
+    background: ${({ theme }) => theme.colors.neutral0};
+    opacity: 0.45;
   }
 
-  &:hover::before,
-  &:focus-visible::before {
-    opacity: 0.2;
+  &:hover,
+  &:focus-visible {
+    border-color: ${({ theme }) => theme.colors.primary600};
+
+    &::before {
+      opacity: 0.2;
+    }
   }
 `;
 
-const VeilLabel = styled(Typography)`
-  position: relative;
-  background: ${({ theme }) => theme.colors.neutral0};
+const OverrideHint = styled.span`
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+  font-weight: 600;
   color: ${({ theme }) => theme.colors.primary600};
+  background: ${({ theme }) => theme.colors.neutral0};
   border-radius: ${({ theme }) => theme.borderRadius};
-  padding: ${({ theme }) => `${theme.spaces[1]} ${theme.spaces[3]}`};
-  box-shadow: ${({ theme }) => theme.shadows.filterShadow};
+  padding: 2px 8px;
+  opacity: 0;
+
+  ${GhostFrame}:hover &,
+  ${GhostFrame}:focus-visible & {
+    opacity: 1;
+  }
 `;
 
 const GateInner = ({ field, children }: FieldDecoratorProps) => {
@@ -88,8 +103,9 @@ const GateInner = ({ field, children }: FieldDecoratorProps) => {
     { skip: !documentId || isOnDefault }
   );
   const [unlocked, setUnlocked] = React.useState(false);
+  const [hovered, setHovered] = React.useState(false);
   const wrapperRef = React.useRef<HTMLDivElement>(null);
-  const [veilTop, setVeilTop] = React.useState(0);
+  const [frameTop, setFrameTop] = React.useState(0);
 
   const veiled =
     !isOnDefault &&
@@ -101,23 +117,21 @@ const GateInner = ({ field, children }: FieldDecoratorProps) => {
     !overrides[current.slug]?.attributes.includes(field.name) &&
     !unlocked;
 
-  // The veil only covers the input control: measure past the label and any
-  // editor toolbar (Blocks exposes role="toolbar"), and follow their size.
+  // The ghost frame only wraps the input control: measure past the field
+  // label and follow its size.
   React.useLayoutEffect(() => {
     const wrapper = wrapperRef.current;
     if (!veiled || !wrapper) {
       return undefined;
     }
     const measure = () => {
-      const wrapperTop = wrapper.getBoundingClientRect().top;
-      let top = 0;
-      for (const selector of ['label', '[role="toolbar"]']) {
-        const element = wrapper.querySelector(selector);
-        if (element) {
-          top = Math.max(top, element.getBoundingClientRect().bottom - wrapperTop + 4);
-        }
+      const label = wrapper.querySelector('label');
+      if (!label) {
+        setFrameTop(0);
+        return;
       }
-      setVeilTop(top);
+      const wrapperTop = wrapper.getBoundingClientRect().top;
+      setFrameTop(Math.max(0, label.getBoundingClientRect().bottom - wrapperTop + 2));
     };
     measure();
     const observer = new ResizeObserver(measure);
@@ -132,10 +146,14 @@ const GateInner = ({ field, children }: FieldDecoratorProps) => {
   return (
     <GateWrapper ref={wrapperRef}>
       {children}
-      <Veil
-        $top={veilTop}
+      <GhostFrame
+        $top={frameTop}
         type="button"
         onClick={() => setUnlocked(true)}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        onFocus={() => setHovered(true)}
+        onBlur={() => setHovered(false)}
         aria-label={formatMessage(
           {
             id: getTranslation('field.click-to-override'),
@@ -144,16 +162,24 @@ const GateInner = ({ field, children }: FieldDecoratorProps) => {
           { channel: current.name }
         )}
       >
-        <VeilLabel variant="pi" fontWeight="bold">
-          {formatMessage(
-            {
-              id: getTranslation('field.click-to-override.short'),
-              defaultMessage: 'Click to override',
-            },
-            { channel: current.name }
-          )}
-        </VeilLabel>
-      </Veil>
+        <OverrideHint>
+          {formatMessage({ id: getTranslation('field.override'), defaultMessage: 'Override' })}
+        </OverrideHint>
+      </GhostFrame>
+      <Typography variant="pi" textColor={hovered ? 'primary600' : 'neutral600'}>
+        {hovered
+          ? formatMessage(
+              {
+                id: getTranslation('field.click-to-override'),
+                defaultMessage: 'Click to override on {channel}',
+              },
+              { channel: current.name }
+            )
+          : formatMessage({
+              id: getTranslation('field.inherited'),
+              defaultMessage: 'Inherited from Default',
+            })}
+      </Typography>
     </GateWrapper>
   );
 };
@@ -179,8 +205,8 @@ class GateBoundary extends React.Component<React.PropsWithChildren, { failed: bo
 
 /**
  * Field decorator (see the Content Manager's `registerFieldDecorator`):
- * lays the inherited-value veil over overridable fields a channel has not
- * touched yet. Anything else renders as-is.
+ * ghosts the overridable fields a channel has not touched yet. Anything
+ * else renders as-is.
  */
 export const ChannelOverrideGate = ({ field, children }: FieldDecoratorProps) => {
   const options = (

@@ -65,5 +65,6 @@
   "ctb.available-in.description": "Entries carry channel variants only in the checked channels; anywhere else they serve the Default content.",
   "ctb.section.title": "Channels",
   "field.click-to-override": "Click to override on {channel}",
-  "field.click-to-override.short": "Click to override"
+  "field.inherited": "Inherited from Default",
+  "field.override": "Override"
 }
