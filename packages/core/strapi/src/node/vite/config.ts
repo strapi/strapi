@@ -188,7 +188,7 @@ const resolveProductionConfig = async (ctx: BuildContext): Promise<InlineConfig>
       sourcemap,
       rollupOptions: {
         input: {
-          strapi: path.join(ctx.runtimeDir, 'index.html'),
+          strapi: ctx.nextDesignSystem ? path.join(ctx.runtimeDir, 'index.html') : ctx.entry,
         },
       },
     },

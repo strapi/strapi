@@ -61,9 +61,16 @@ const pluginNames = (config: { plugins?: unknown }): string[] =>
 
 describe('Vite admin configuration', () => {
   it('does not copy public files into the admin build output', async () => {
-    const config = await resolveProductionConfig(buildContext());
+    const ctx = buildContext();
+    const config = await resolveProductionConfig(ctx);
 
     expect(config.publicDir).toBe(false);
+    expect(config.build?.rollupOptions?.input).toEqual({ strapi: ctx.entry });
+  });
+
+  it('builds from the html entry when the next design system is on', async () => {
+    const config = await resolveProductionConfig(buildContext({ nextDesignSystem: true }));
+
     expect(config.build?.rollupOptions?.input).toEqual({
       strapi: expect.stringMatching(/index\.html$/),
     });
