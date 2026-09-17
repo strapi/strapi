@@ -47,5 +47,9 @@
   "form.slug": "Slug",
   "form.slug.hint": "Slugs are immutable — API consumers rely on them.",
   "form.color": "Color",
-  "form.status": "Status"
+  "form.status": "Status",
+  "settings.empty": "Add your first channel",
+  "settings.create.submit": "Create channel",
+  "form.name.placeholder": "Mobile",
+  "form.slug.create.hint": "Lowercase letters, digits and dashes — used in the X-Strapi-Channel header and API calls. Immutable once created."
 }

@@ -12,8 +12,10 @@ import {
   Badge,
   Button,
   Dialog,
+  EmptyStateLayout,
   Flex,
   IconButton,
+  LinkButton,
   Table,
   Tbody,
   Td,
@@ -24,8 +26,9 @@ import {
   VisuallyHidden,
 } from '@strapi/design-system';
 import { Pencil, Plus, Trash } from '@strapi/icons';
+import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
-import { Route, Routes, useNavigate } from 'react-router-dom';
+import { Link, Route, Routes, useNavigate } from 'react-router-dom';
 
 import { ChannelDot } from '../components/ChannelDot';
 import { PERMISSIONS } from '../constants';
@@ -109,102 +112,122 @@ const ListPage = () => {
         }
       />
       <Layouts.Content>
-        <Table colCount={4} rowCount={channels.length + 1}>
-          <Thead>
-            <Tr>
-              <Th>
-                <Typography variant="sigma">
-                  {formatMessage({ id: getTranslation('form.name'), defaultMessage: 'Name' })}
-                </Typography>
-              </Th>
-              <Th>
-                <Typography variant="sigma">
-                  {formatMessage({ id: getTranslation('form.slug'), defaultMessage: 'Slug' })}
-                </Typography>
-              </Th>
-              <Th>
-                <Typography variant="sigma">
-                  {formatMessage({ id: getTranslation('form.status'), defaultMessage: 'Status' })}
-                </Typography>
-              </Th>
-              <Th>
-                <VisuallyHidden>
+        {channels.length === 0 ? (
+          <EmptyStateLayout
+            icon={<EmptyDocuments width="16rem" />}
+            content={formatMessage({
+              id: getTranslation('settings.empty'),
+              defaultMessage: 'Add your first channel',
+            })}
+            action={
+              canCreate ? (
+                <LinkButton tag={Link} variant="secondary" startIcon={<Plus />} to="create">
                   {formatMessage({
-                    id: getTranslation('settings.actions'),
-                    defaultMessage: 'Actions',
+                    id: getTranslation('settings.create'),
+                    defaultMessage: 'Create a channel',
                   })}
-                </VisuallyHidden>
-              </Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {channels.map((channel) => (
-              <Tr
-                key={channel.id}
-                onClick={canUpdate ? () => navigate(String(channel.id)) : undefined}
-                style={canUpdate ? { cursor: 'pointer' } : undefined}
-              >
-                <Td>
-                  <Flex gap={2} alignItems="center">
-                    <ChannelDot color={channel.color} />
-                    <Typography fontWeight="semiBold">{channel.name}</Typography>
-                  </Flex>
-                </Td>
-                <Td>
-                  <Typography textColor="neutral600">{channel.slug}</Typography>
-                </Td>
-                <Td>
-                  {channel.archived ? (
-                    <Badge>
-                      {formatMessage({
-                        id: getTranslation('settings.archived'),
-                        defaultMessage: 'Archived',
-                      })}
-                    </Badge>
-                  ) : (
-                    <Badge active>
-                      {formatMessage({
-                        id: getTranslation('settings.active'),
-                        defaultMessage: 'Active',
-                      })}
-                    </Badge>
-                  )}
-                </Td>
-                <Td onClick={(event: React.MouseEvent) => event.stopPropagation()}>
-                  <Flex gap={1} justifyContent="flex-end">
-                    {canUpdate ? (
-                      <IconButton
-                        variant="ghost"
-                        label={formatMessage(
-                          { id: getTranslation('settings.edit'), defaultMessage: 'Edit {name}' },
-                          { name: channel.name }
-                        )}
-                        onClick={() => navigate(String(channel.id))}
-                      >
-                        <Pencil />
-                      </IconButton>
-                    ) : null}
-                    {canDelete ? (
-                      <IconButton
-                        variant="ghost"
-                        label={formatMessage(
-                          {
-                            id: getTranslation('settings.delete'),
-                            defaultMessage: 'Delete {name}',
-                          },
-                          { name: channel.name }
-                        )}
-                        onClick={() => setDeleting(channel)}
-                      >
-                        <Trash />
-                      </IconButton>
-                    ) : null}
-                  </Flex>
-                </Td>
+                </LinkButton>
+              ) : undefined
+            }
+          />
+        ) : (
+          <Table colCount={4} rowCount={channels.length + 1}>
+            <Thead>
+              <Tr>
+                <Th>
+                  <Typography variant="sigma">
+                    {formatMessage({ id: getTranslation('form.name'), defaultMessage: 'Name' })}
+                  </Typography>
+                </Th>
+                <Th>
+                  <Typography variant="sigma">
+                    {formatMessage({ id: getTranslation('form.slug'), defaultMessage: 'Slug' })}
+                  </Typography>
+                </Th>
+                <Th>
+                  <Typography variant="sigma">
+                    {formatMessage({ id: getTranslation('form.status'), defaultMessage: 'Status' })}
+                  </Typography>
+                </Th>
+                <Th>
+                  <VisuallyHidden>
+                    {formatMessage({
+                      id: getTranslation('settings.actions'),
+                      defaultMessage: 'Actions',
+                    })}
+                  </VisuallyHidden>
+                </Th>
               </Tr>
-            ))}
-          </Tbody>
-        </Table>
+            </Thead>
+            <Tbody>
+              {channels.map((channel) => (
+                <Tr
+                  key={channel.id}
+                  onClick={canUpdate ? () => navigate(String(channel.id)) : undefined}
+                  style={canUpdate ? { cursor: 'pointer' } : undefined}
+                >
+                  <Td>
+                    <Flex gap={2} alignItems="center">
+                      <ChannelDot color={channel.color} />
+                      <Typography fontWeight="semiBold">{channel.name}</Typography>
+                    </Flex>
+                  </Td>
+                  <Td>
+                    <Typography textColor="neutral600">{channel.slug}</Typography>
+                  </Td>
+                  <Td>
+                    {channel.archived ? (
+                      <Badge>
+                        {formatMessage({
+                          id: getTranslation('settings.archived'),
+                          defaultMessage: 'Archived',
+                        })}
+                      </Badge>
+                    ) : (
+                      <Badge active>
+                        {formatMessage({
+                          id: getTranslation('settings.active'),
+                          defaultMessage: 'Active',
+                        })}
+                      </Badge>
+                    )}
+                  </Td>
+                  <Td onClick={(event: React.MouseEvent) => event.stopPropagation()}>
+                    <Flex gap={1} justifyContent="flex-end">
+                      {canUpdate ? (
+                        <IconButton
+                          variant="ghost"
+                          label={formatMessage(
+                            { id: getTranslation('settings.edit'), defaultMessage: 'Edit {name}' },
+                            { name: channel.name }
+                          )}
+                          onClick={() => navigate(String(channel.id))}
+                        >
+                          <Pencil />
+                        </IconButton>
+                      ) : null}
+                      {canDelete ? (
+                        <IconButton
+                          variant="ghost"
+                          label={formatMessage(
+                            {
+                              id: getTranslation('settings.delete'),
+                              defaultMessage: 'Delete {name}',
+                            },
+                            { name: channel.name }
+                          )}
+                          onClick={() => setDeleting(channel)}
+                        >
+                          <Trash />
+                        </IconButton>
+                      ) : null}
+                    </Flex>
+                  </Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        )}
         <Dialog.Root open={deleting !== null} onOpenChange={(open) => !open && setDeleting(null)}>
           <ConfirmDialog onConfirm={handleDelete}>
             {formatMessage(

@@ -1,22 +1,22 @@
 import * as React from 'react';
 
 import {
+  BackButton,
   Layouts,
   Page,
   useAPIErrorHandler,
   useNotification,
   useRBAC,
 } from '@strapi/admin/strapi-admin';
-import { Button, Field, Flex, Grid, TextInput } from '@strapi/design-system';
+import { Box, Button, Field, Flex, TextInput } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate, useParams } from 'react-router-dom';
 
+import { ColorSwatchPicker } from '../components/ColorSwatchPicker';
 import { CHANNEL_COLOR_PALETTE, PERMISSIONS } from '../constants';
 import { useGetChannelQuery, useUpdateChannelMutation } from '../services/channels';
 import { getTranslation } from '../utils/getTranslation';
-
-import { ColorSwatch } from './CreatePage';
 
 const EditPage = () => {
   const { formatMessage } = useIntl();
@@ -65,103 +65,84 @@ const EditPage = () => {
     }
   };
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    await save({ id: channel.id, name: currentName, color: currentColor });
-  };
-
   return (
     <Page.Main tabIndex={-1}>
-      <form onSubmit={handleSubmit}>
-        <Layouts.Header
-          title={channel.name}
-          navigationAction={
-            <Button variant="tertiary" onClick={() => navigate('..')} size="S">
-              {formatMessage({ id: 'global.back', defaultMessage: 'Back' })}
-            </Button>
-          }
-          primaryAction={
-            canUpdate && (
-              <Flex gap={2}>
-                <Button
-                  variant={channel.archived ? 'secondary' : 'danger-light'}
-                  onClick={() => save({ id: channel.id, archived: !channel.archived })}
-                  size="S"
-                >
-                  {channel.archived
-                    ? formatMessage({
-                        id: getTranslation('settings.restore'),
-                        defaultMessage: 'Restore',
-                      })
-                    : formatMessage({
-                        id: getTranslation('settings.archive'),
-                        defaultMessage: 'Archive',
-                      })}
-                </Button>
-                <Button
-                  type="submit"
-                  startIcon={<Check />}
-                  loading={isSaving}
-                  disabled={!isModified || !currentName.trim()}
-                  size="S"
-                >
-                  {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
-                </Button>
-              </Flex>
-            )
-          }
-        />
-        <Layouts.Content>
-          <Grid.Root gap={4}>
-            <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
-              <Field.Root name="name" required>
-                <Field.Label>
-                  {formatMessage({ id: getTranslation('form.name'), defaultMessage: 'Name' })}
-                </Field.Label>
-                <TextInput
-                  value={currentName}
-                  disabled={!canUpdate}
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                    setName(event.target.value)
-                  }
-                />
-              </Field.Root>
-            </Grid.Item>
-            <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
-              <Field.Root
-                name="slug"
-                hint={formatMessage({
-                  id: getTranslation('form.slug.hint'),
-                  defaultMessage: 'Slugs are immutable — API consumers rely on them.',
-                })}
+      <Layouts.Header
+        navigationAction={<BackButton fallback=".." />}
+        title={channel.name}
+        primaryAction={
+          canUpdate && (
+            <Flex gap={2}>
+              <Button
+                variant={channel.archived ? 'secondary' : 'danger-light'}
+                onClick={() => save({ id: channel.id, archived: !channel.archived })}
               >
-                <Field.Label>
-                  {formatMessage({ id: getTranslation('form.slug'), defaultMessage: 'Slug' })}
-                </Field.Label>
-                <TextInput value={channel.slug} disabled />
-                <Field.Hint />
-              </Field.Root>
-            </Grid.Item>
-            <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
-              <Field.Root name="color">
-                <Field.Label>
-                  {formatMessage({ id: getTranslation('form.color'), defaultMessage: 'Color' })}
-                </Field.Label>
-                <Flex gap={2} paddingTop={1}>
-                  {CHANNEL_COLOR_PALETTE.map((candidate) => (
-                    <ColorSwatch
-                      key={candidate}
-                      color={candidate}
-                      selected={candidate === currentColor}
-                      onSelect={(next) => canUpdate && setColor(next)}
-                    />
-                  ))}
-                </Flex>
-              </Field.Root>
-            </Grid.Item>
-          </Grid.Root>
-        </Layouts.Content>
-      </form>
+                {channel.archived
+                  ? formatMessage({
+                      id: getTranslation('settings.restore'),
+                      defaultMessage: 'Restore',
+                    })
+                  : formatMessage({
+                      id: getTranslation('settings.archive'),
+                      defaultMessage: 'Archive',
+                    })}
+              </Button>
+              <Button
+                startIcon={<Check />}
+                onClick={() => save({ id: channel.id, name: currentName, color: currentColor })}
+                loading={isSaving}
+                disabled={!isModified || !currentName.trim()}
+              >
+                {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
+              </Button>
+            </Flex>
+          )
+        }
+      />
+      <Layouts.Content>
+        <Box background="neutral0" hasRadius shadow="filterShadow" padding={6}>
+          <Flex direction="column" alignItems="stretch" gap={6}>
+            <Flex gap={6} alignItems="flex-start">
+              <Box flex="1">
+                <Field.Root name="channels-edit-name" required>
+                  <Field.Label>
+                    {formatMessage({ id: getTranslation('form.name'), defaultMessage: 'Name' })}
+                  </Field.Label>
+                  <TextInput
+                    value={currentName}
+                    disabled={!canUpdate}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
+                  />
+                </Field.Root>
+              </Box>
+              <Box flex="1">
+                <Field.Root
+                  name="channels-edit-slug"
+                  hint={formatMessage({
+                    id: getTranslation('form.slug.hint'),
+                    defaultMessage: 'Slugs are immutable — API consumers rely on them.',
+                  })}
+                >
+                  <Field.Label>
+                    {formatMessage({ id: getTranslation('form.slug'), defaultMessage: 'Slug' })}
+                  </Field.Label>
+                  <TextInput value={channel.slug} disabled />
+                  <Field.Hint />
+                </Field.Root>
+              </Box>
+            </Flex>
+
+            <Field.Root name="channels-edit-color">
+              <Field.Label>
+                {formatMessage({ id: getTranslation('form.color'), defaultMessage: 'Color' })}
+              </Field.Label>
+              <Box paddingTop={1}>
+                <ColorSwatchPicker value={currentColor} onChange={setColor} disabled={!canUpdate} />
+              </Box>
+            </Field.Root>
+          </Flex>
+        </Box>
+      </Layouts.Content>
     </Page.Main>
   );
 };
