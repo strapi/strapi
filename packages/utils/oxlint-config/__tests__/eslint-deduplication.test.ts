@@ -466,9 +466,9 @@ test('the root lint pass delegates only proven duplicate rules to OxLint', async
     const lintStagedCommands = await lintStaged['*.{js,ts,jsx,tsx}']([
       primaryFiles.get('no-debugger') ?? '',
     ]);
-    assert.match(lintStagedCommands[0], /^eslint --cache --fix --max-warnings=0 /);
-    assert.match(lintStagedCommands[1], /^prettier --cache --write /);
-    assert.ok(lintStagedCommands.every((command) => !command.includes('OxLint')));
+    assert.match(lintStagedCommands[0], /^oxlint --config .* --fix /);
+    assert.match(lintStagedCommands[1], /^eslint --cache --fix --max-warnings=0 /);
+    assert.match(lintStagedCommands[2], /^prettier --cache --write /);
     assert.ok(lintStagedCommands.every((command) => !command.includes('ESLINT_SKIP_OXLINT_RULES')));
   } finally {
     await Promise.all(

@@ -8,6 +8,7 @@
  */
 const config = {
   '*.{js,ts,jsx,tsx}': [
+    'yarn run -T oxlint --config ../../../packages/utils/oxlint-config/oxlint.config.ts --fix --no-error-on-unmatched-pattern',
     'yarn run -T eslint --cache --fix --max-warnings=0',
     'prettier --cache --write',
   ],
