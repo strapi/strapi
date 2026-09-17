@@ -55,7 +55,14 @@ const deleteFn = async ({ id }: any) => {
   const localeToDelete = await findById(id);
 
   if (localeToDelete) {
-    await deleteAllLocalizedEntriesFor({ locale: localeToDelete.code });
+    const localesWithSameCode = await count({ code: localeToDelete.code });
+
+    // Content is keyed by locale code rather than the locale row id. If corrupted data contains
+    // duplicate locale rows, deleting one row must not remove content while that code is still in use.
+    if (localesWithSameCode <= 1) {
+      await deleteAllLocalizedEntriesFor({ locale: localeToDelete.code });
+    }
+
     const result = await strapi.db.query('plugin::i18n.locale').delete({ where: { id } });
 
     getService('metrics').sendDidUpdateI18nLocalesEvent();
