@@ -8,7 +8,7 @@ tags:
   - ee
 ---
 
-An abstraction around `react-query`'s `useQuery` hook to fetch license limits for a project.
+An abstraction around the admin API's RTK Query hook for fetching project license limits.
 
 ## Usage
 
@@ -20,8 +20,8 @@ const { license, getFeature, isError, isLoading } = useLicenseLimits(options);
 
 ### `enabled`
 
-Boolean flag which is passed onto react-query indicating whether the license check should be performed. This
-can be useful if e.g. other permissions need to be checked before.
+Boolean flag controlling whether the license check should be performed. This can be useful if e.g.
+other permissions need to be checked before.
 
 ## Result
 
@@ -45,8 +45,6 @@ const reviewWorkflowOptions = getFeature('review-workflows');
 ## Typescript
 
 ```ts
-import { UseQueryResult } from 'react-query';
-
 // Note: the list of attributes might be incomplete
 interface License {
   enforcementUserCount: number;
@@ -68,5 +66,10 @@ type Options {
   enabled?: boolean;
 }
 
-type UseLicenseLimit = (options: Options) => Pick<UseQueryResult, 'isError' | 'isLoading'> & { license: License, getFeature: (name: string) => object }
+type UseLicenseLimit = (options: Options) => {
+  isError: boolean;
+  isLoading: boolean;
+  license?: License;
+  getFeature: (name: string) => object;
+};
 ```

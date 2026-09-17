@@ -2,6 +2,7 @@ import http from 'node:http';
 
 import { resolveProductionConfig } from './config';
 import type { BuildContext } from '../create-build-context';
+import { getModulePath } from '../core/resolve-module';
 
 jest.mock('browserslist-to-esbuild', () => ({
   __esModule: true,
@@ -31,6 +32,16 @@ const createContext = (options: Record<string, unknown>) =>
   }) as unknown as BuildContext;
 
 describe('Webpack admin configuration', () => {
+  it('aliases TanStack Query so plugins share the admin QueryClient context', async () => {
+    const config = await resolveProductionConfig(createContext({ minify: true, sourcemap: false }));
+
+    expect(config.resolve?.alias).toEqual(
+      expect.objectContaining({
+        '@tanstack/react-query': getModulePath('@tanstack/react-query'),
+      })
+    );
+  });
+
   // The CLI flag is `--sourcemap`, so commander stores the value on `options.sourcemap`. Reading
   // `options.sourcemaps` here left devtool permanently disabled and emitted no .map files (#22632).
   it('enables the source-map devtool when options.sourcemap is true', async () => {

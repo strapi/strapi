@@ -21,11 +21,11 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
+      networkMode: 'offlineFirst',
     },
     mutations: {
-      // Preserve react-query v3's fail-fast behavior instead of pausing offline mutations
-      // and unexpectedly replaying them when the connection returns.
-      networkMode: 'always',
+      // Preserve react-query v3 behavior: attempt the request while offline, then pause retries.
+      networkMode: 'offlineFirst',
     },
   },
 });

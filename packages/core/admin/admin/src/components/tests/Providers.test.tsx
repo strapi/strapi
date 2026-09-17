@@ -6,14 +6,17 @@ jest.mock('@tanstack/react-query', () => ({
 }));
 
 describe('Providers', () => {
-  it('configures mutations to fail fast while offline', async () => {
+  it('preserves v3 offline behavior for queries and mutations', async () => {
     await import('../Providers');
 
     expect(QueryClient).toHaveBeenCalledWith(
       expect.objectContaining({
         defaultOptions: expect.objectContaining({
+          queries: expect.objectContaining({
+            networkMode: 'offlineFirst',
+          }),
           mutations: {
-            networkMode: 'always',
+            networkMode: 'offlineFirst',
           },
         }),
       })
