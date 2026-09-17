@@ -49,3 +49,8 @@ export type {
 } from './pages/EditView/components/FormInputs/BlocksInput/BlocksEditor';
 export { registerDocumentRenderContext } from './hooks/useDocumentRenderContext';
 export type { DocumentRenderContextSource } from './hooks/useDocumentRenderContext';
+export { registerFieldDecorator } from './pages/EditView/components/FieldDecorators';
+export type {
+  FieldDecorator,
+  FieldDecoratorProps,
+} from './pages/EditView/components/FieldDecorators';

@@ -6,6 +6,7 @@ import { styled } from 'styled-components';
 
 import { EditLayout } from '../../../hooks/useDocumentLayout';
 
+import { DecoratedField } from './FieldDecorators';
 import { InputRenderer } from './InputRenderer';
 
 import type { UseDocument } from '../../../hooks/useDocument';
@@ -69,11 +70,13 @@ const FormLayout = React.memo(({ layout, document, hasBackground = true }: FormL
           return (
             <Grid.Root key={field.name} gap={4}>
               <Grid.Item col={12} s={12} xs={12} direction="column" alignItems="stretch">
-                <InputRenderer
-                  {...field}
-                  label={getLabel(field.name, field.label)}
-                  document={document}
-                />
+                <DecoratedField field={field}>
+                  <InputRenderer
+                    {...field}
+                    label={getLabel(field.name, field.label)}
+                    document={document}
+                  />
+                </DecoratedField>
               </Grid.Item>
             </Grid.Root>
           );
@@ -95,11 +98,13 @@ const FormLayout = React.memo(({ layout, document, hasBackground = true }: FormL
                           direction="column"
                           alignItems="stretch"
                         >
-                          <InputRenderer
-                            {...field}
-                            label={getLabel(field.name, field.label)}
-                            document={document}
-                          />
+                          <DecoratedField field={field}>
+                            <InputRenderer
+                              {...field}
+                              label={getLabel(field.name, field.label)}
+                              document={document}
+                            />
+                          </DecoratedField>
                         </ResponsiveGridItem>
                       );
                     })}

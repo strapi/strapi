@@ -63,5 +63,7 @@
   "field.not-available": "No \"{channel}\" variants for this content type — it serves its Default content here",
   "ctb.available-in.label": "Available in channels",
   "ctb.available-in.description": "Entries carry channel variants only in the checked channels; anywhere else they serve the Default content.",
-  "ctb.section.title": "Channels"
+  "ctb.section.title": "Channels",
+  "field.click-to-override": "Click to override on {channel}",
+  "field.click-to-override.short": "Click to override"
 }

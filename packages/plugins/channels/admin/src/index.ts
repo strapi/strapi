@@ -1,8 +1,12 @@
-import { registerDocumentRenderContext } from '@strapi/content-manager/strapi-admin';
+import {
+  registerDocumentRenderContext,
+  registerFieldDecorator,
+} from '@strapi/content-manager/strapi-admin';
 import get from 'lodash/get';
 import * as yup from 'yup';
 
 import { ChannelHeaderAction } from './components/ChannelHeaderAction';
+import { ChannelOverrideGate } from './components/ChannelOverrideGate';
 import { ChannelPicker } from './components/ChannelPicker';
 import { ChannelsSectionHeading } from './components/ChannelsSectionHeading';
 import { FillFromChannelAction } from './components/FillFromChannelAction';
@@ -38,6 +42,13 @@ export default {
     registerDocumentRenderContext({
       id: PLUGIN_ID,
       useValue: useCurrentChannelSlug,
+    });
+
+    // Untouched overridable fields show the inherited Default value under a
+    // "Click to override" veil while a channel is active.
+    registerFieldDecorator({
+      id: PLUGIN_ID,
+      Component: ChannelOverrideGate,
     });
 
     app.registerPlugin({
