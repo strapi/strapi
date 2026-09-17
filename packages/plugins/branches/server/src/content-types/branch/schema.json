@@ -1,0 +1,67 @@
+{
+  "kind": "collectionType",
+  "collectionName": "strapi_branches",
+  "info": {
+    "singularName": "branch",
+    "pluralName": "branches",
+    "displayName": "Branch",
+    "description": "An isolated overlay of content created from main or another branch."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": false
+    },
+    "content-type-builder": {
+      "visible": false
+    },
+    "spaces": {
+      "scope": "space"
+    }
+  },
+  "attributes": {
+    "slug": {
+      "type": "string",
+      "required": true,
+      "configurable": false,
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "name": {
+      "type": "string",
+      "required": true,
+      "configurable": false,
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "description": {
+      "type": "text",
+      "configurable": false
+    },
+    "color": {
+      "type": "string",
+      "configurable": false,
+      "regex": "^#[0-9A-Fa-f]{6}$"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["active", "merged", "archived"],
+      "default": "active",
+      "required": true,
+      "configurable": false
+    },
+    "parent": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::branches.branch",
+      "useJoinTable": false,
+      "configurable": false
+    },
+    "mergedAt": {
+      "type": "datetime",
+      "configurable": false
+    }
+  }
+}

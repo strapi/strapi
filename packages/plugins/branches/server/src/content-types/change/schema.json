@@ -1,0 +1,65 @@
+{
+  "kind": "collectionType",
+  "collectionName": "strapi_branch_changes",
+  "info": {
+    "singularName": "change",
+    "pluralName": "changes",
+    "displayName": "Branch change",
+    "description": "Per-branch modifications (or deletion) of a document inherited from the parent branch."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": false
+    },
+    "content-type-builder": {
+      "visible": false
+    }
+  },
+  "indexes": [
+    {
+      "name": "strapi_branch_changes_lookup_idx",
+      "columns": ["branch_id", "content_type", "entry_document_id"]
+    }
+  ],
+  "attributes": {
+    "branch": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::branches.branch",
+      "useJoinTable": false,
+      "configurable": false
+    },
+    "contentType": {
+      "type": "string",
+      "required": true,
+      "configurable": false
+    },
+    "entryDocumentId": {
+      "type": "string",
+      "required": true,
+      "configurable": false
+    },
+    "entryLocale": {
+      "type": "string",
+      "configurable": false
+    },
+    "operation": {
+      "type": "enumeration",
+      "enum": ["update", "delete"],
+      "default": "update",
+      "required": true,
+      "configurable": false
+    },
+    "changes": {
+      "type": "json",
+      "configurable": false
+    },
+    "base": {
+      "type": "json",
+      "configurable": false
+    }
+  }
+}
