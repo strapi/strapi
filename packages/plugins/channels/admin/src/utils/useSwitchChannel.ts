@@ -47,11 +47,11 @@ export const useSwitchChannel = () => {
   );
 };
 
-/** The current slug as React state (re-renders on switches from any picker). */
-export const useCurrentChannelSlug = () => {
-  const [slug, setSlug] = React.useState(getCurrentChannelSlug);
-
-  React.useEffect(() => subscribeToChannel(() => setSlug(getCurrentChannelSlug())), []);
-
-  return slug;
-};
+/**
+ * The current slug as React state. `useSyncExternalStore` re-reads the
+ * snapshot on every render, so a WORKSPACE switch (which re-keys the storage
+ * without firing our own listeners) is picked up by the re-render wave it
+ * triggers, on top of our own channel switches.
+ */
+export const useCurrentChannelSlug = () =>
+  React.useSyncExternalStore(subscribeToChannel, getCurrentChannelSlug);
