@@ -169,7 +169,7 @@ const EditViewPage = () => {
         </tours.contentManager.Introduction>
       )}
       <Form
-        key={`${collectionType}:${model}:${id ?? 'create'}:${activeLocale ?? 'default'}${renderContextKey ? `:${renderContextKey}` : ''}`}
+        key={`${collectionType}:${model}:${id ?? 'create'}:${activeLocale ?? 'default'}`}
         disabled={hasDraftAndPublished && status === 'published'}
         initialValues={initialValues}
         method={isCreatingDocument ? 'POST' : 'PUT'}
@@ -235,7 +235,23 @@ const EditViewPage = () => {
                 }}
                 gap={4}
               >
-                <Grid.Item col={9} xs={12} direction="column" alignItems="stretch">
+                {/* The render-context key remounts ONLY the fields column: a
+                    context switch (e.g. a delivery-channel change) must reseed
+                    editor-state inputs, while the side panels stay mounted.
+                    The document's updatedAt joins the key so the remount also
+                    fires when the refetched values land. Constant when no
+                    plugin registers a context — stock behavior untouched. */}
+                <Grid.Item
+                  key={
+                    renderContextKey
+                      ? `fields:${renderContextKey}:${document?.updatedAt ?? ''}`
+                      : 'fields'
+                  }
+                  col={9}
+                  xs={12}
+                  direction="column"
+                  alignItems="stretch"
+                >
                   <Tabs.Content value="draft">
                     <tours.contentManager.Fields>
                       <Box />

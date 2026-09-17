@@ -12,6 +12,7 @@ import {
   Button,
   Field,
   Flex,
+  Modal,
   SingleSelect,
   SingleSelectOption,
   Typography,
@@ -120,50 +121,59 @@ const FillModal = ({
     }
   };
 
+  // A function `content` is rendered bare by the document-action modal:
+  // the body and footer chrome are ours to provide.
   return (
-    <Flex direction="column" alignItems="stretch" gap={4}>
-      <Typography variant="omega" textColor="neutral600">
-        {formatMessage(
-          {
-            id: getTranslation('fill.description'),
-            defaultMessage:
-              'Copy the overridable field values of another channel into this form. Nothing is saved until you save the entry on {target}.',
-          },
-          { target: targetName }
-        )}
-      </Typography>
-      <Field.Root name="fill-from-channel" required>
-        <Field.Label>
-          {formatMessage({ id: getTranslation('fill.source'), defaultMessage: 'Source channel' })}
-        </Field.Label>
-        <SingleSelect
-          value={source ?? undefined}
-          onChange={(value) => setSource(String(value))}
-          placeholder={formatMessage({
-            id: getTranslation('fill.source.placeholder'),
-            defaultMessage: 'Select a channel',
-          })}
-        >
-          {sources.map((channel) => (
-            <SingleSelectOption
-              key={channel.slug}
-              value={channel.slug}
-              startIcon={<ChannelDot color={channel.color} />}
+    <>
+      <Modal.Body>
+        <Flex direction="column" alignItems="stretch" gap={4}>
+          <Typography variant="omega" textColor="neutral600">
+            {formatMessage(
+              {
+                id: getTranslation('fill.description'),
+                defaultMessage:
+                  'Copy the overridable field values of another channel into this form. Nothing is saved until you save the entry on {target}.',
+              },
+              { target: targetName }
+            )}
+          </Typography>
+          <Field.Root name="fill-from-channel" required>
+            <Field.Label>
+              {formatMessage({
+                id: getTranslation('fill.source'),
+                defaultMessage: 'Source channel',
+              })}
+            </Field.Label>
+            <SingleSelect
+              value={source ?? undefined}
+              onChange={(value) => setSource(String(value))}
+              placeholder={formatMessage({
+                id: getTranslation('fill.source.placeholder'),
+                defaultMessage: 'Select a channel',
+              })}
             >
-              {channel.name}
-            </SingleSelectOption>
-          ))}
-        </SingleSelect>
-      </Field.Root>
-      <Flex justifyContent="flex-end" gap={2}>
+              {sources.map((channel) => (
+                <SingleSelectOption
+                  key={channel.slug}
+                  value={channel.slug}
+                  startIcon={<ChannelDot color={channel.color} />}
+                >
+                  {channel.name}
+                </SingleSelectOption>
+              ))}
+            </SingleSelect>
+          </Field.Root>
+        </Flex>
+      </Modal.Body>
+      <Modal.Footer>
         <Button variant="tertiary" onClick={onClose}>
           {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
         </Button>
         <Button onClick={handleFill} loading={isFilling} disabled={!source}>
           {formatMessage({ id: getTranslation('fill.submit'), defaultMessage: 'Fill in' })}
         </Button>
-      </Flex>
-    </Flex>
+      </Modal.Footer>
+    </>
   );
 };
 
