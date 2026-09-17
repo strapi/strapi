@@ -34,7 +34,8 @@ const createTestMigrationFileBuilder = ({ migrationsDir }: { migrationsDir?: str
       return `    // ${op.comment ?? ''}
     if (
       (await knex.schema.hasTable(${quote(op.table)})) &&
-      (await knex.schema.hasColumn(${quote(op.table)}, ${quote(op.from)}))
+      (await knex.schema.hasColumn(${quote(op.table)}, ${quote(op.from)})) &&
+      !(await knex.schema.hasColumn(${quote(op.table)}, ${quote(op.to)}))
     ) {
       await knex.schema.alterTable(${quote(op.table)}, (table) => {
         table.renameColumn(${quote(op.from)}, ${quote(op.to)});
@@ -99,16 +100,19 @@ ${body}
 `,
       };
     },
-    async writeFiles({ name }: { name: string }) {
+    async writeFiles({ name, dir }: { name: string; dir?: string }) {
       const built = this.build({ name });
-      if (!built || !migrationsDir) {
+      // Honor an explicit `dir` override (what the CTB passes), falling back to
+      // the database-configured dir — mirroring the real file builder.
+      const targetDir = dir ?? migrationsDir;
+      if (!built || !targetDir) {
         return null;
       }
 
-      fs.ensureDirSync(migrationsDir);
-      let filePath = path.join(migrationsDir, built.filename);
+      fs.ensureDirSync(targetDir);
+      let filePath = path.join(targetDir, built.filename);
       for (let suffix = 1; fs.pathExistsSync(filePath); suffix += 1) {
-        filePath = path.join(migrationsDir, built.filename.replace(/\.js$/, `-${suffix}.js`));
+        filePath = path.join(targetDir, built.filename.replace(/\.js$/, `-${suffix}.js`));
       }
       fs.writeFileSync(filePath, built.content, 'utf8');
       return filePath;
@@ -123,12 +127,14 @@ ${body}
 const createStrapiMock = ({
   metas = {},
   migrationsDir,
+  appRoot,
   useTypescriptMigrations = false,
   identifiers,
   schema,
 }: {
   metas?: Record<string, any>;
   migrationsDir?: string;
+  appRoot?: string;
   useTypescriptMigrations?: boolean;
   identifiers?: Partial<Record<string, jest.Mock>>;
   // schema attribute descriptors per uid, used by the builder to distinguish e.g.
@@ -176,7 +182,10 @@ const createStrapiMock = ({
     components: {},
     db,
     dirs: {
-      app: { root: migrationsDir ? path.dirname(path.dirname(migrationsDir)) : process.cwd() },
+      app: {
+        root:
+          appRoot ?? (migrationsDir ? path.dirname(path.dirname(migrationsDir)) : process.cwd()),
+      },
     },
     log: { info: jest.fn(), warn: jest.fn(), error: jest.fn() },
   } as any;
@@ -888,6 +897,35 @@ describe('MigrationBuilder', () => {
       const written = await builder.writeFiles();
       expect(written).toBeNull();
       expect(fs.existsSync(migrationsDir) ? fs.readdirSync(migrationsDir) : []).toHaveLength(0);
+      fs.removeSync(tmp);
+    });
+
+    it('writes to the app source dir, not the database-configured dir', async () => {
+      // With `useTypescriptMigrations` the database's configured migrations dir
+      // resolves to build output (e.g. `dist/database/migrations`), which is
+      // gitignored and wiped on rebuild. The generated migration must instead
+      // land in the app's source `database/migrations` so it is a portable record.
+      const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ctb-src-dir-'));
+      const distMigrationsDir = path.join(tmp, 'dist', 'database', 'migrations');
+      const sourceMigrationsDir = path.join(tmp, 'database', 'migrations');
+      const strapi = createStrapiMock({
+        metas: scalarMeta,
+        migrationsDir: distMigrationsDir,
+        appRoot: tmp,
+        useTypescriptMigrations: true,
+      });
+      const builder = createMigrationBuilder({ strapi });
+      builder.addRenameAttribute('api::article.article', {
+        oldName: 'oldTitle',
+        newName: 'heading',
+      });
+
+      const written = await builder.writeFiles();
+
+      expect(written).not.toBeNull();
+      expect(written as string).toContain(sourceMigrationsDir);
+      expect(fs.readdirSync(sourceMigrationsDir)).toHaveLength(1);
+      expect(fs.existsSync(distMigrationsDir)).toBe(false);
       fs.removeSync(tmp);
     });
   });

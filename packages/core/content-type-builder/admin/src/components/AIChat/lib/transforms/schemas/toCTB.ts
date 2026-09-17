@@ -10,9 +10,6 @@ import type { Struct, UID } from '@strapi/types';
 
 const RENAME_METADATA_KEYS = ['previousName', 'renamedFrom', 'action'] as const;
 
-const attributePropertiesForRenameMatch = (attr: Record<string, unknown>) =>
-  omit(attr, ['name', 'status', ...RENAME_METADATA_KEYS]);
-
 const collectExplicitAttributeRenames = (
   attributes: Schema['attributes']
 ): { renames: RenameHop[]; attributes: Schema['attributes'] } => {
@@ -74,45 +71,6 @@ const applyExplicitRenames = (
     processedAttributes,
     removedAttributes: removedAttributes.filter((attr) => !consumedRemoved.has(attr.name)),
   };
-};
-
-const inferRenamesFromAttributeDiff = (
-  processedAttributes: AnyAttribute[],
-  removedAttributes: AnyAttribute[]
-): { attributes: AnyAttribute[]; renames: RenameHop[] } => {
-  const renames: RenameHop[] = [];
-  const consumedRemoved = new Set<string>();
-
-  const unmatchedNewAttributes = processedAttributes.filter((attr) => attr.status === 'NEW');
-  const unmatchedRemovedAttributes = removedAttributes.filter((attr) => attr.status === 'REMOVED');
-
-  unmatchedNewAttributes.forEach((newAttr) => {
-    const candidates = unmatchedRemovedAttributes.filter(
-      (removedAttr) =>
-        !consumedRemoved.has(removedAttr.name) &&
-        removedAttr.type === newAttr.type &&
-        isEqual(
-          attributePropertiesForRenameMatch(newAttr as Record<string, unknown>),
-          attributePropertiesForRenameMatch(removedAttr as Record<string, unknown>)
-        )
-    );
-
-    if (candidates.length !== 1) {
-      return;
-    }
-
-    const [removedAttr] = candidates;
-    renames.push({ oldName: removedAttr.name, newName: newAttr.name });
-    consumedRemoved.add(removedAttr.name);
-    newAttr.status = 'CHANGED';
-  });
-
-  const attributes = [
-    ...processedAttributes,
-    ...removedAttributes.filter((attr) => !consumedRemoved.has(attr.name)),
-  ];
-
-  return { attributes, renames };
 };
 
 const isPluginContentTypeUid = (uid: string) => uid.startsWith('plugin::');
@@ -213,9 +171,10 @@ type TransformAttributesResult = {
 
 /**
  * Transform attributes from Chat format to CTB format while collecting rename metadata.
- * Also performs a diff to determine the status of each attribute and infers
- * rename hops so AI-driven updates can use the same migration path as manual
- * edits in the Content-Type Builder.
+ * Also performs a diff to determine the status of each attribute. Renames are only
+ * taken from explicit metadata the AI provides (`previousName` / `renamedFrom`, or a
+ * top-level `renames` array), never inferred from a remove/add diff, so data is never
+ * moved unless a rename was explicitly requested.
  */
 const transformAttributesAndRenamesFromChatToCTB = (
   { action, attributes: rawAttributes, renames: schemaRenames = [] }: Schema,
@@ -269,16 +228,12 @@ const transformAttributesAndRenamesFromChatToCTB = (
   const explicitRenames = [...schemaRenames, ...explicitAttributeRenames];
   const reconciled = applyExplicitRenames(processedAttributes, removedAttributes, explicitRenames);
 
-  const inferred = inferRenamesFromAttributeDiff(
-    reconciled.processedAttributes,
-    reconciled.removedAttributes
-  );
-
-  const renames = dedupeRenames([...explicitRenames, ...inferred.renames]);
+  // Combine both sets of attributes
+  const combinedAttributes = [...reconciled.processedAttributes, ...reconciled.removedAttributes];
 
   return {
-    attributes: inferred.attributes,
-    renames,
+    attributes: combinedAttributes,
+    renames: dedupeRenames(explicitRenames),
   };
 };
 

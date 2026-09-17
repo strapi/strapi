@@ -46,7 +46,6 @@ jest.mock('../migration-builder', () => ({
 const { createMigrationBuilder } = require('../migration-builder');
 
 let renameMode = 'prompt-before-save';
-let migrationFileFormat = 'javascript';
 
 const getServiceMock = jest.fn().mockImplementation((service) => {
   if (service === 'content-types') {
@@ -81,7 +80,6 @@ describe('Content Type Builder - Schema service', () => {
     // Reset mocks
     jest.clearAllMocks();
     renameMode = 'prompt-before-save';
-    migrationFileFormat = 'javascript';
     migrationBuilderMock.hasChanges.mockReturnValue(true);
     migrationBuilderMock.getUnsupported.mockReturnValue([]);
 
@@ -101,9 +99,6 @@ describe('Content Type Builder - Schema service', () => {
           config(key: string, defaultValue: unknown) {
             if (key === 'renameMigrations.attributes') {
               return renameMode;
-            }
-            if (key === 'renameMigrations.migrationFile.format') {
-              return migrationFileFormat;
             }
             return defaultValue;
           },
@@ -800,15 +795,7 @@ describe('Content Type Builder - Schema service', () => {
         newName: 'heading',
       });
       expect(migrationBuilderMock.writeFiles).toHaveBeenCalledTimes(1);
-      expect(migrationBuilderMock.writeFiles).toHaveBeenCalledWith({ format: 'javascript' });
-    });
-
-    it('uses the configured TypeScript migration file format', async () => {
-      migrationFileFormat = 'typescript';
-
-      await updateSchema(schemaWithRenames([{ oldName: 'title', newName: 'heading' }]));
-
-      expect(migrationBuilderMock.writeFiles).toHaveBeenCalledWith({ format: 'typescript' });
+      expect(migrationBuilderMock.writeFiles).toHaveBeenCalledWith();
     });
 
     it('forwards every rename hop in order (e.g. a user-routed swap)', async () => {

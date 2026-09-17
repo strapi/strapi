@@ -1,7 +1,7 @@
+import path from 'node:path';
 import { snakeCase } from 'lodash/fp';
 
 import type { Core } from '@strapi/types';
-import type { MigrationFileFormat } from '../../config';
 
 export interface RenameNames {
   oldName: string;
@@ -85,7 +85,7 @@ interface MigrationFileBuilder {
   }): void;
   hasChanges(): boolean;
   build(options: { name: string }): BuiltMigration | null;
-  writeFiles(options: { name: string }): Promise<string | null>;
+  writeFiles(options: { name: string; dir?: string }): Promise<string | null>;
 }
 
 interface MigrationProviderWithFileBuilder {
@@ -96,7 +96,7 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
   const { db } = strapi;
 
   const migrationFileBuilder = (
-    db.migrations as typeof db.migrations & MigrationProviderWithFileBuilder
+    db.migrations as unknown as MigrationProviderWithFileBuilder
   ).createFileBuilder();
   const unsupported: UnsupportedRename[] = [];
 
@@ -449,12 +449,14 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
       return migrationFileBuilder.build({ name: 'rename-fields' });
     },
 
-    async writeFiles({
-      format = 'javascript',
-    }: {
-      format?: MigrationFileFormat;
-    } = {}): Promise<string | null> {
-      return migrationFileBuilder.writeFiles({ name: 'rename-fields', format });
+    async writeFiles(): Promise<string | null> {
+      // Always write to the app's *source* migrations dir, never the database's
+      // configured dir: when `useTypescriptMigrations` is enabled that points at
+      // build output (e.g. `dist/database/migrations`), which is gitignored and
+      // wiped on the next build, so the generated migration would not be a
+      // portable record.
+      const dir = path.join(strapi.dirs.app.root, 'database', 'migrations');
+      return migrationFileBuilder.writeFiles({ name: 'rename-fields', dir });
     },
   };
 };

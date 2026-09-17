@@ -29,6 +29,9 @@ describe('MigrationFileBuilder', () => {
       expect(result).not.toBeNull();
       expect(result!.content).toContain("hasTable('articles')");
       expect(result!.content).toContain("hasColumn('articles', 'old_title')");
+      // The target column must not already exist, otherwise renaming would throw
+      // on deploy when a prior save already created a column with the new name.
+      expect(result!.content).toContain("!(await knex.schema.hasColumn('articles', 'new_title'))");
       expect(result!.content).toContain("renameColumn('old_title', 'new_title')");
     });
 
@@ -95,18 +98,6 @@ describe('MigrationFileBuilder', () => {
       );
     });
 
-    it('renders a typed ESM migration when TypeScript is configured', () => {
-      const builder = createMigrationFileBuilder({ db: createDbMock() });
-      builder.renameColumn({ table: 'articles', from: 'old_title', to: 'heading' });
-
-      const result = builder.build({ name: 'rename-fields', format: 'typescript' })!;
-
-      expect(result.filename).toMatch(/\.rename-fields\.ts$/);
-      expect(result.content).toContain('export default');
-      expect(result.content).toContain("knex: import('knex').Knex");
-      expect(result.content).toContain("renameColumn('old_title', 'heading')");
-    });
-
     it('returns null when there are no operations', () => {
       const builder = createMigrationFileBuilder({ db: createDbMock() });
       expect(builder.hasChanges()).toBe(false);
@@ -155,6 +146,26 @@ describe('MigrationFileBuilder', () => {
       expect(writtenPath).not.toBeNull();
       expect(fs.readFileSync(writtenPath as string, 'utf8')).not.toBe('// existing');
       expect(fs.readdirSync(migrationsDir)).toHaveLength(2);
+      fs.removeSync(tmp);
+    });
+
+    it('writes to an explicit dir override instead of the configured dir', async () => {
+      const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'db-migration-dir-'));
+      // The configured dir points at build output (e.g. dist); the override is
+      // the app source dir the Content-Type Builder passes explicitly.
+      const configuredDir = path.join(tmp, 'dist', 'database', 'migrations');
+      const overrideDir = path.join(tmp, 'database', 'migrations');
+      const builder = createMigrationFileBuilder({
+        db: createDbMock({ migrationsDir: configuredDir }),
+      });
+      builder.renameColumn({ table: 'articles', from: 'old_title', to: 'heading' });
+
+      const written = await builder.writeFiles({ name: 'rename-fields', dir: overrideDir });
+
+      expect(written).not.toBeNull();
+      expect(written as string).toContain(overrideDir);
+      expect(fs.existsSync(configuredDir)).toBe(false);
+      expect(fs.readdirSync(overrideDir)).toHaveLength(1);
       fs.removeSync(tmp);
     });
   });

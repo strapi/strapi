@@ -186,7 +186,9 @@ describe('transformChatToCTB', () => {
       ],
     };
 
-    it('infers a rename when the AI replaces one field with another of the same config', () => {
+    it('does not infer a rename when the AI replaces one field with another of the same config', () => {
+      // Renames must be explicit: a same-config delete+add is treated as a
+      // remove and an add, never silently as a data-moving rename.
       const schema = makeSchema({
         uid: 'api::article.article',
         name: 'Article',
@@ -199,10 +201,11 @@ describe('transformChatToCTB', () => {
 
       const result = transformChatToCTB(schema, oldSchema) as ContentType;
 
-      expect(result.renames).toEqual([{ oldName: 'title', newName: 'heading' }]);
+      expect(result.renames).toBeUndefined();
       expect(result.attributes).toEqual([
-        { name: 'heading', type: 'string', required: true, status: 'CHANGED' },
+        { name: 'heading', type: 'string', required: true, status: 'NEW' },
         { name: 'body', type: 'blocks', status: 'UNCHANGED' },
+        { name: 'title', type: 'string', required: true, status: 'REMOVED' },
       ]);
     });
 

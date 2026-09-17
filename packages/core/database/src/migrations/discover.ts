@@ -20,11 +20,7 @@ export const discoverMigrationFiles = (dir: string): string[] => {
         return false;
       }
 
-      if (
-        !entry.name.endsWith('.js') &&
-        !entry.name.endsWith('.ts') &&
-        !entry.name.endsWith('.sql')
-      ) {
+      if (!entry.name.endsWith('.js') && !entry.name.endsWith('.sql')) {
         return false;
       }
 

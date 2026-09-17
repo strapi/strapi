@@ -5,6 +5,17 @@ import { type Knex } from 'knex';
 import { Database } from '../../index';
 import { createMigrationsProvider } from '../index';
 import { createUserMigrationProvider } from '../users';
+import { renderMigrationFile } from '../file-builder';
+
+/**
+ * Built with the *real* generator (not a hand-written fixture) so the shipped
+ * `renameColumn` snippet — including its guard against an already-existing target
+ * column — is what actually runs here.
+ */
+const GENERATED_RENAME_MIGRATION = renderMigrationFile({
+  timestamp: '2026.01.01T00.00.00.000',
+  operations: [{ kind: 'renameColumn', table: 'articles', from: 'old_title', to: 'new_title' }],
+});
 
 jest.mock('../internal-migrations', () => ({ internalMigrations: [] }));
 
@@ -375,6 +386,41 @@ describe.each(drivers)(
 
       const rows = await db.connection('articles').select('new_title');
       expect(rows).toEqual([{ new_title: 'Hello' }]);
+
+      const executed = await getExecutedMigrations(db);
+      expect(executed).toContain('2026.01.01.00.00.00.rename-fields.js');
+    });
+
+    it('is a no-op (does not throw) when the target column already exists', async () => {
+      if (!db) {
+        return;
+      }
+
+      // Deploy scenario: an earlier save already produced a column with the new
+      // name (e.g. delete `new_title`, then rename `old_title -> new_title` in a
+      // later save). Both migrations ship together, and this one runs before
+      // schema-sync, so `new_title` still physically exists. The rename must be a
+      // guarded no-op rather than throwing a duplicate-column error that would
+      // fail the migration transaction and stop the app from booting.
+      writeMigration(workDir, '2026.01.01.00.00.00.rename-fields.js', GENERATED_RENAME_MIGRATION);
+
+      await db.connection.schema.createTable('articles', (table) => {
+        table.increments('id');
+        table.string('old_title');
+        table.string('new_title');
+      });
+      await db.connection('articles').insert({ old_title: 'Old', new_title: 'New' });
+
+      const provider = createUserMigrationProvider(db);
+
+      await expect(provider.up()).resolves.not.toThrow();
+
+      // Both columns remain; no rename happened and no data was clobbered.
+      expect(await db.connection.schema.hasColumn('articles', 'old_title')).toBe(true);
+      expect(await db.connection.schema.hasColumn('articles', 'new_title')).toBe(true);
+
+      const rows = await db.connection('articles').select('old_title', 'new_title');
+      expect(rows).toEqual([{ old_title: 'Old', new_title: 'New' }]);
 
       const executed = await getExecutedMigrations(db);
       expect(executed).toContain('2026.01.01.00.00.00.rename-fields.js');

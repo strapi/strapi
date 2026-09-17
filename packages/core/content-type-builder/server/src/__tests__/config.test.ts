@@ -1,11 +1,10 @@
-import config, { ATTRIBUTE_RENAME_MIGRATION_MODES, MIGRATION_FILE_FORMATS } from '../config';
+import config, { ATTRIBUTE_RENAME_MIGRATION_MODES } from '../config';
 
 describe('content-type-builder config', () => {
   describe('default', () => {
-    it('defaults to a before-save prompt and JavaScript files', () => {
+    it('defaults to a before-save prompt', () => {
       expect(config.default.renameMigrations).toEqual({
         attributes: 'prompt-before-save',
-        migrationFile: { format: 'javascript' },
       });
     });
   });
@@ -14,25 +13,8 @@ describe('content-type-builder config', () => {
     it.each(ATTRIBUTE_RENAME_MIGRATION_MODES)('accepts the valid mode "%s"', (attributes) => {
       expect(() =>
         config.validator({
-          renameMigrations: { attributes, migrationFile: { format: 'javascript' } },
+          renameMigrations: { attributes },
         })
-      ).not.toThrow();
-    });
-
-    it.each(MIGRATION_FILE_FORMATS)('accepts the migration format "%s"', (format) => {
-      expect(() =>
-        config.validator({
-          renameMigrations: { attributes: 'always', migrationFile: { format } },
-        })
-      ).not.toThrow();
-    });
-
-    it('accepts either nested setting without requiring the other', () => {
-      expect(() =>
-        config.validator({ renameMigrations: { attributes: 'prompt-after-edit' } })
-      ).not.toThrow();
-      expect(() =>
-        config.validator({ renameMigrations: { migrationFile: { format: 'typescript' } } })
       ).not.toThrow();
     });
 
@@ -44,21 +26,9 @@ describe('content-type-builder config', () => {
       expect(() =>
         config.validator({
           // @ts-expect-error testing runtime validation
-          renameMigrations: { attributes: 'sometimes', migrationFile: { format: 'javascript' } },
+          renameMigrations: { attributes: 'sometimes' },
         })
       ).toThrow(/renameMigrations\.attributes/);
-    });
-
-    it('throws for an unknown migration format', () => {
-      expect(() =>
-        config.validator({
-          renameMigrations: {
-            attributes: 'always',
-            // @ts-expect-error testing runtime validation
-            migrationFile: { format: 'coffee' },
-          },
-        })
-      ).toThrow(/renameMigrations\.migrationFile\.format/);
     });
   });
 });

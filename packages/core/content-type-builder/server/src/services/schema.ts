@@ -7,7 +7,7 @@ import createBuilder from './schema-builder';
 import { createMigrationBuilder } from './migration-builder';
 import { getService } from '../utils';
 import type { Schema as CTBSchema } from '../controllers/validation/schema';
-import type { AttributeRenameMigrationMode, MigrationFileFormat } from '../config';
+import type { AttributeRenameMigrationMode } from '../config';
 import { getRestrictRelationsTo, isContentTypeVisible } from './content-types';
 
 const removeEmptyDefaultsOnUpdates = (schema: CTBSchema) => {
@@ -79,16 +79,6 @@ const getAttributeRenameMigrationMode = (): AttributeRenameMigrationMode => {
       .config('renameMigrations.attributes', 'prompt-before-save');
   } catch {
     return 'prompt-before-save';
-  }
-};
-
-const getMigrationFileFormat = (): MigrationFileFormat => {
-  try {
-    return strapi
-      .plugin('content-type-builder')
-      .config('renameMigrations.migrationFile.format', 'javascript');
-  } catch {
-    return 'javascript';
   }
 };
 
@@ -185,7 +175,7 @@ const generateRenameMigrations = async (schema: CTBSchema): Promise<void> => {
   }
 
   if (migrationBuilder.hasChanges()) {
-    await migrationBuilder.writeFiles({ format: getMigrationFileFormat() });
+    await migrationBuilder.writeFiles();
   }
 };
 
