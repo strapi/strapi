@@ -10,18 +10,10 @@ import { getTimer, prettyTime, type TimeMeasurer } from './core/timer';
 import type { WebpackWatcher } from './webpack/watch';
 import type { ViteWatcher } from './vite/watch';
 import type { Logger } from '../cli/utils/logger';
+import { lazyInit } from '../cli/utils/lazy-init';
 
 // Lazy: worker-only deps; primary cluster process should not pay for them
-const lazy = <T>(spec: string): (() => T) => {
-  let cached: T | undefined;
-  return (): T => {
-    if (cached === undefined) {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      cached = require(spec);
-    }
-    return cached as T;
-  };
-};
+const lazy = <T extends object>(spec: string): (() => T) => lazyInit((): T => require(spec));
 const tsUtils = lazy<typeof import('@strapi/typescript-utils')>('@strapi/typescript-utils');
 const utils = lazy<typeof import('@strapi/utils')>('@strapi/utils');
 const chokidar = lazy<typeof chokidarType>('chokidar');
