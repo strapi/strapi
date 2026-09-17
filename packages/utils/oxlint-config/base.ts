@@ -22,6 +22,9 @@ export const base = {
   categories: {
     // Blocking bar: correctness plus extra-policy `perf`.
     // Later categories (suspicious/pedantic/style) are not extra policy yet.
+    // The category enable also accepts any new `perf` rule that a future oxlint
+    // release adds. oxlint is pinned exactly, so such a rule breaks the blocking
+    // gate on the version bump PR and not on a code merge.
     correctness: 'error',
     perf: 'error',
   },
@@ -36,11 +39,6 @@ export const base = {
     // A category enable would expand that ban onto the backend (~495 of the
     // Aug 20 +685 perf delta). Frontend JS stays covered by ESLint.
     'eslint/no-await-in-loop': 'off',
-    // Extra-policy `perf` checks cleared before joining the blocking bar.
-    'unicorn/prefer-set-has': 'error',
-    'react/no-object-type-as-default-prop': 'error',
-    'react/jsx-no-constructed-context-values': 'error',
-    'react/no-array-index-key': 'error',
   },
   ignorePatterns: [
     '**/dist/**',
