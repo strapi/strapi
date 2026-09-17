@@ -8,8 +8,8 @@
  * top-level `Attribute` form, which no longer resolves against `@strapi/types`. Under
  * `skipLibCheck` (the default for `.d.ts`) those errors were dropped and every interface
  * degraded to `any`, so `Required` markers were inert — TypeScript happily accepted values
- * the runtime fixture rejects. Nothing caught that: `tests/api` runs through SWC
- * (transpile-only) and is not part of any `test:ts` project.
+ * the runtime fixture rejects. Nothing caught that on its own: `tests/api` runs through SWC
+ * (transpile-only) and is not part of any Nx `test:ts*` project.
  *
  * The assertions below go through `Schema.RequiredAttributeNames`, which resolves a UID via
  * the `ComponentSchemas` augmentation and then reads the `Required` markers. That single
@@ -17,10 +17,15 @@
  * (attributes degrade to `any`), a UID key that does not match the `<category>.<filename>`
  * the loader derives, and a missing or spurious `Required` marker.
  *
- * Run it with:
- *   npx tsc --noEmit --strict --skipLibCheck false \
- *     --moduleResolution node16 --module node16 --target es2022 \
- *     tests/api/core/strapi/document-service/resources/types/components.probe.ts
+ * CI runs this: the `typescript` job's "TSC for test fixtures" step invokes
+ * `yarn test:ts:fixtures` (`tests/scripts/typecheck-fixtures.js`), which compiles this file
+ * with `--skipLibCheck false` and fails on any diagnostic in this directory. That flag is
+ * required — the degradation above shows up as TS2312/TS2305 *inside the `.d.ts`*, which
+ * `skipLibCheck` drops by design — and the runner filters out the unrelated pre-existing
+ * errors that the same flag surfaces inside `@strapi/types`' own `dist`.
+ *
+ * To run it directly:
+ *   yarn test:ts:fixtures
  */
 import type { Schema } from '@strapi/types';
 

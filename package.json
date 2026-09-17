@@ -91,6 +91,7 @@
     "test:ts:back": "nx run-many --target=test:ts:back --nx-ignore-cycles",
     "test:ts:front": "nx run-many --target=test:ts:front --nx-ignore-cycles",
     "test:ts:packages": "nx run-many --target=test:ts --nx-ignore-cycles",
+    "test:ts:fixtures": "node tests/scripts/typecheck-fixtures.js",
     "test:unit": "nx run-many --target=test:unit --nx-ignore-cycles",
     "test:unit:update": "nx run-many --target=test:unit --nx-ignore-cycles -- -u",
     "test:unit:watch": "run test:unit --watch",

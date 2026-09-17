@@ -5,7 +5,8 @@
 // `Schema.Attribute.*`. The older `Schema.Component` + top-level `Attribute` form does not
 // resolve against current `@strapi/types` — every interface silently degraded to `any`, so
 // markers like `Required` here had no effect. See ./components.probe.ts, which fails to
-// compile if these declarations stop being enforceable.
+// compile if these declarations stop being enforceable, and runs in CI via
+// `yarn test:ts:fixtures` (the `typescript` job's "TSC for test fixtures" step).
 //
 // UIDs below are `<category>.<filename>` — loadComponents derives them from the schema file
 // on disk, not from the map keys in ../schemas/index.js (the builder passes only the values,
