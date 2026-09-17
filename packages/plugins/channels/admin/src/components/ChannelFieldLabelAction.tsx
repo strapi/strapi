@@ -17,7 +17,7 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { Stack } from '@strapi/icons';
+import { Information } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { createGlobalStyle, styled } from 'styled-components';
 
@@ -44,7 +44,7 @@ const PlainBadge = ({ title }: { title: string }) => (
   <IconSpan tag="span">
     <VisuallyHidden tag="span">{title}</VisuallyHidden>
     <Tooltip label={title}>
-      <Stack aria-hidden focusable={false} />
+      <Information aria-hidden focusable={false} />
     </Tooltip>
   </IconSpan>
 );
