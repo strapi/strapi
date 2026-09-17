@@ -1,0 +1,203 @@
+name: Transaction contribution validation
+
+on:
+  push:
+    branches:
+      - validate/transaction-ownership-20260917
+
+permissions:
+  contents: read
+
+concurrency:
+  group: transaction-contribution-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NX_DAEMON: 'false'
+  STRAPI_TELEMETRY_DISABLED: 'true'
+
+jobs:
+  database-unit:
+    if: github.repository == 'dijedontahiri/strapi'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24, 26]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: b417f11aea20f7056aa27ec75c6a188a8109b60f
+          fetch-depth: 2
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Install pinned dependencies
+        run: |
+          corepack enable
+          yarn install --immutable
+      - name: Build the database package and its dependencies
+        run: yarn nx run @strapi/database:build --nx-ignore-cycles --parallel=2
+      - name: Prove the original implementation fails the ownership regressions
+        if: matrix.node == 22
+        shell: bash
+        run: |
+          source=packages/core/database/src/transaction-context.ts
+          trap 'git restore -- "$source"' EXIT
+          git show 3cd7dba3495e094682cc7a8d0eb83bde77e9b0b4:"$source" > "$source"
+          set +e
+          yarn workspace @strapi/database test:unit --runInBand --testPathPattern=transaction-context.test.ts --json --outputFile=/tmp/transaction-unit-before.json
+          status=$?
+          set -e
+          test "$status" -eq 1
+          node -e "const r=require('/tmp/transaction-unit-before.json'); if(r.numFailedTests!==10 || r.numPassedTests!==7 || r.numTotalTestSuites!==1) throw Error('Unexpected baseline result'); console.log('Baseline confirmed: 10 assertion failures, 7 passing controls');"
+          git restore -- "$source"
+          trap - EXIT
+      - name: Run the complete database unit suite
+        if: success() || failure()
+        run: yarn workspace @strapi/database test:unit --runInBand
+      - name: Type-check database sources and tests
+        if: success() || failure()
+        run: yarn workspace @strapi/database test:ts
+      - name: Lint database sources and tests
+        if: success() || failure()
+        run: yarn workspace @strapi/database lint
+      - name: Check changed-file formatting
+        if: success() || failure()
+        run: yarn prettier --check packages/core/database/src/transaction-context.ts packages/core/database/src/__tests__/transaction-context.test.ts tests/api/core/database/transactions-ownership.test.api.js
+
+  submitted-pr-checks:
+    if: github.repository == 'dijedontahiri/strapi'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - pr: 27698
+            sha: 60f14f38e3cee6b389199bc3ef57459f4b4febaa
+            workspace: '@strapi/typescript-utils'
+          - pr: 27699
+            sha: df29b09a5acb5fe4f8057415a9fc02bd88a415e7
+            workspace: '@strapi/typescript-utils'
+          - pr: 27700
+            sha: 5bea5deab6f37aa06a576af39c2ea7ed7523328b
+            workspace: '@strapi/utils'
+          - pr: 27701
+            sha: 3e47c0403d2ad2ebdb88dee4f90457dd39986abd
+            workspace: '@strapi/utils'
+          - pr: 27702
+            sha: 3158efe1bfa146df65aa9c76f3d47c6f73848cd9
+            workspace: create-strapi-app
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ matrix.sha }}
+          fetch-depth: 5
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 22
+      - name: Install pinned dependencies
+        run: |
+          corepack enable
+          yarn install --immutable
+      - name: Build CLI test dependencies and the real CLI
+        if: matrix.pr == 27702
+        run: |
+          yarn nx run-many --targets=build --projects=@strapi/utils,@strapi/database --nx-ignore-cycles --parallel=2
+          yarn nx run create-strapi-app:build --nx-ignore-cycles --parallel=2
+      - name: Complete affected package unit suite on the exact PR head
+        run: yarn workspace '${{ matrix.workspace }}' test:unit --runInBand
+      - name: Package type check
+        if: success() || failure()
+        run: yarn workspace '${{ matrix.workspace }}' test:ts
+      - name: Package lint
+        if: success() || failure()
+        run: yarn workspace '${{ matrix.workspace }}' lint
+      - name: Check the exact submitted diff formatting
+        if: success() || failure()
+        run: git diff --name-only -z 3cd7dba3495e094682cc7a8d0eb83bde77e9b0b4 HEAD | xargs -0 yarn prettier --check
+
+  sql-integration:
+    if: github.repository == 'dijedontahiri/strapi'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        database: [sqlite, postgres, mysql]
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: strapi
+          POSTGRES_PASSWORD: strapi
+          POSTGRES_DB: strapi_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U strapi -d strapi_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: strapi_test
+          MYSQL_USER: strapi
+          MYSQL_PASSWORD: strapi
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: b417f11aea20f7056aa27ec75c6a188a8109b60f
+          fetch-depth: 2
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 22
+      - name: Install pinned dependencies
+        run: |
+          corepack enable
+          yarn install --immutable
+      - name: Build all runtime packages for the real Strapi API harness
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+        run: yarn build:code --parallel=2
+      - name: Prepare PostgreSQL schema
+        if: matrix.database == 'postgres'
+        env:
+          PGPASSWORD: strapi
+        run: psql -h 127.0.0.1 -U strapi -d strapi_test -c 'CREATE SCHEMA IF NOT EXISTS myschema;'
+      - name: Prove the SQL-backed regressions fail before the fix
+        shell: bash
+        run: |
+          source=packages/core/database/src/transaction-context.ts
+          trap 'git restore -- "$source"' EXIT
+          git show 3cd7dba3495e094682cc7a8d0eb83bde77e9b0b4:"$source" > "$source"
+          yarn workspace @strapi/database build:code
+          set +e
+          yarn test:api --db=${{ matrix.database }} tests/api/core/database/transactions-ownership.test.api.js --json --outputFile=/tmp/transaction-api-before.json
+          status=$?
+          set -e
+          test "$status" -eq 1
+          node -e "const r=require('/tmp/transaction-api-before.json'); if(r.numFailedTests!==4 || r.numTotalTests!==4 || r.numTotalTestSuites!==1) throw Error('Expected four SQL regression failures, not a setup error'); console.log('SQL baseline confirmed: all four regressions fail');"
+          git restore -- "$source"
+          yarn workspace @strapi/database build:code
+          trap - EXIT
+      - name: Run existing transaction integration tests and new ownership regressions
+        if: success() || failure()
+        run: |
+          git restore -- packages/core/database/src/transaction-context.ts
+          yarn workspace @strapi/database build:code
+          yarn test:api --db=${{ matrix.database }} tests/api/core/database/transactions
