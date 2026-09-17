@@ -6,9 +6,10 @@ import { UploadProgressDialog } from './components/UploadProgressDialog';
 import { PERMISSIONS } from './constants';
 import { MediaLibraryDialog } from './legacy/components/MediaLibraryDialog/MediaLibraryDialog';
 import { MediaLibraryInput } from './legacy/components/MediaLibraryInput/MediaLibraryInput';
-import { getTrad, prefixPluginTranslations } from './legacy/utils';
+import { prefixPluginTranslations } from './legacy/utils/prefixPluginTranslations';
 import { pluginId } from './pluginId';
 import { uploadProgressReducer } from './store/uploadProgress';
+import { getTranslationKey } from './utils/translations';
 
 import type { MediaLibraryDialogProps } from './legacy/components/MediaLibraryDialog/MediaLibraryDialog';
 import type { MediaLibraryInputProps } from './legacy/components/MediaLibraryInput/MediaLibraryInput';
@@ -62,7 +63,7 @@ const admin: Plugin.Config.AdminInput = {
       id: 'media-library-settings',
       to: 'media-library',
       intlLabel: {
-        id: getTrad('plugin.name'),
+        id: getTranslationKey('plugin.name'),
         defaultMessage: 'Media Library',
       },
       Component() {
