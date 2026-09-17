@@ -28,17 +28,14 @@ import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
 
-import { AIMetadataJob } from '../../../../../shared/contracts/ai-metadata-jobs';
-import {
-  GetAIMetadataPendingCount,
-  CreateAIMetadataJob,
-} from '../../../../../shared/contracts/files';
-import { UpdateSettings } from '../../../../../shared/contracts/settings';
-import { PERMISSIONS } from '../../../constants';
-import { useAIMetadataJob } from '../../hooks/useAIMetadataJob';
-import { useSettings } from '../../hooks/useSettings';
-import { useTracking } from '../../hooks/useTracking';
-import { getTrad } from '../../utils';
+import { AIMetadataJob } from '../../../../shared/contracts/ai-metadata-jobs';
+import { GetAIMetadataPendingCount, CreateAIMetadataJob } from '../../../../shared/contracts/files';
+import { UpdateSettings } from '../../../../shared/contracts/settings';
+import { PERMISSIONS } from '../../constants';
+import { useAIMetadataJob } from '../../legacy/hooks/useAIMetadataJob';
+import { useSettings } from '../../legacy/hooks/useSettings';
+import { useTracking } from '../../legacy/hooks/useTracking';
+import { getTrad } from '../../legacy/utils';
 
 import { init } from './init';
 import { initialState, reducer } from './reducer';

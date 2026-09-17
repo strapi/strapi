@@ -25,7 +25,9 @@ src/
 ├── services/              # RTK Query slices (assets, folders, settings, api)
 ├── store/                 # Local UI store
 ├── utils/
+├── pages/SettingsPage/    # Global Settings → Media Library; ships in both modes, stays
 └── legacy/                # pre-revamp stack: old ML page + Content Manager media field picker
+                           # shrinks as things are rewritten; not deletable wholesale
 ```
 
 ## Where to add code

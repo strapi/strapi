@@ -1,7 +1,7 @@
 import { produce } from 'immer';
 import set from 'lodash/set';
 
-import { SettingsData } from '../../../../../shared/contracts/settings';
+import { SettingsData } from '../../../../shared/contracts/settings';
 
 const initialData: SettingsData = {
   responsiveDimensions: true,

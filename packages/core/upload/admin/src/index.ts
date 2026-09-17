@@ -66,7 +66,7 @@ const admin: Plugin.Config.AdminInput = {
         defaultMessage: 'Media Library',
       },
       Component() {
-        return import('./legacy/pages/SettingsPage/SettingsPage').then((mod) => ({
+        return import('./pages/SettingsPage/SettingsPage').then((mod) => ({
           default: mod.ProtectedSettingsPage,
         }));
       },
