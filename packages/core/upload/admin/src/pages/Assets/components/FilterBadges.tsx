@@ -404,6 +404,14 @@ interface FilterBadgesProps {
 
 export const FilterBadges = ({ listFilters, compact = false }: FilterBadgesProps) => {
   const { filters, updateFilter, removeFilter } = listFilters;
+  /**
+   * Stable per-slot keys held in a ref. The ref is written during render, but
+   * the bookkeeping depends on the list length rather than on how often render
+   * runs, so the second pass of a StrictMode double render sees equal lengths
+   * and does nothing. A content-derived key fails twice over here: filters may
+   * legitimately repeat, and the key would change while the user edits a badge,
+   * remounting the badge under its open popover.
+   */
   const filterKeyPrefix = useId();
   const nextFilterKey = useRef(0);
   const filterKeys = useRef<string[]>([]);
@@ -412,6 +420,13 @@ export const FilterBadges = ({ listFilters, compact = false }: FilterBadgesProps
     filterKeys.current.push(`${filterKeyPrefix}-${nextFilterKey.current}`);
     nextFilterKey.current += 1;
   }
+  /**
+   * Keys are truncated from the tail. The `onRemove` closure below splices the
+   * removed slot out first, so removal through this component is correct. Any
+   * other shrink path (browser back or forward, an external filter reset)
+   * shifts the remaining keys and degrades to the index keys this replaced.
+   * Known and accepted.
+   */
   filterKeys.current.length = filters.length;
 
   const filtersWithKeys = filters.map((filter, index) => ({

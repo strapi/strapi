@@ -136,6 +136,13 @@ type PartRecord = {
   part: AIMessage['parts'][number];
 };
 
+/**
+ * Gives each part a key that survives across renders. A key derived from the
+ * part content alone cannot work: a streaming text part changes on every chunk,
+ * so its fingerprint would change on every tick and remount the node mid
+ * stream. Hence the fallback chain below: exact fingerprint match first, then
+ * object identity, then same slot and same type for the streaming case.
+ */
 const usePartsWithKeys = (parts: AIMessage['parts']) => {
   const keyPrefix = useId();
   const nextKey = useRef(0);
@@ -181,6 +188,13 @@ const usePartsWithKeys = (parts: AIMessage['parts']) => {
     return { fingerprint, key, part };
   });
 
+  /**
+   * Both refs are written during render. The outcome depends only on the parts
+   * passed in, so re-invoking the render function is harmless: on the second
+   * pass of a StrictMode double render every part exact-matches the record the
+   * first pass stored here, the same keys come back out and `nextKey` does not
+   * advance.
+   */
   previousParts.current = keyedParts;
 
   return keyedParts;
