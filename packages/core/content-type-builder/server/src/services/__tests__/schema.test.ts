@@ -248,6 +248,19 @@ describe('Content Type Builder - Schema service', () => {
       expect(writeFilesCallOrder).toBeLessThan(clearCallOrder);
     });
 
+    it('rejects a crafted protected plugin delete before any schema or API mutation', async () => {
+      const schema: CTBSchema = {
+        contentTypes: [{ action: 'delete', uid: 'plugin::example.article' as UID.ContentType }],
+        components: [],
+      };
+
+      await expect(updateSchema(schema)).rejects.toThrow(/not managed by CTB/);
+
+      expect(builderServiceMock.deleteContentType).not.toHaveBeenCalled();
+      expect(apiHandlerServiceMock.backup).not.toHaveBeenCalled();
+      expect(apiHandlerServiceMock.clear).not.toHaveBeenCalled();
+    });
+
     it('should handle component creation and emit event', async () => {
       const componentUid = 'component.test';
       const mockComponent = {

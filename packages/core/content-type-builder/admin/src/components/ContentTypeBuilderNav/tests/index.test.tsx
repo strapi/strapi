@@ -40,6 +40,7 @@ jest.mock('../hooks/useContentTypeBuilderMenu', () => {
 const mockUndo = jest.fn();
 const mockRedo = jest.fn();
 const mockDiscardAllChanges = jest.fn();
+const mockDeleteFolderOnly = jest.fn();
 
 type DataManagerMockOptions = Partial<Omit<DataManagerContextValue, 'history'>> & {
   history?: Partial<DataManagerContextValue['history']>;
@@ -88,7 +89,7 @@ const mockDataManager = ({
   createFolder() {},
   renameFolder() {},
   moveFolder() {},
-  deleteFolderOnly() {},
+  deleteFolderOnly: mockDeleteFolderOnly,
   deleteFolderAndContent() {},
   assignContentTypeToFolder() {},
   reorderFolderChildren() {},
@@ -123,6 +124,7 @@ describe('<ContentTypeBuilderNav />', () => {
     mockUndo.mockClear();
     mockRedo.mockClear();
     mockDiscardAllChanges.mockClear();
+    mockDeleteFolderOnly.mockClear();
     mockedUseDataManager.mockImplementation(() => mockDataManager({ isModified: true }));
 
     mockSearchOnChange.mockClear();
@@ -199,6 +201,60 @@ describe('<ContentTypeBuilderNav />', () => {
       const saveButton = getByRole('button', { name: /save/i });
       expect(saveButton).toBeEnabled();
     });
+  });
+
+  it('blocks folder-only deletion from navigation when reparenting would collide by case', async () => {
+    const user = userEvent.setup();
+    const contentStructure = createEmptyContentStructure();
+    contentStructure.sections.collectionTypes.groups = [
+      {
+        id: 'grp_root',
+        name: 'Root',
+        parent: null,
+        status: 'UNCHANGED',
+        children: [
+          { type: 'group', id: 'grp_delete' },
+          { type: 'group', id: 'grp_existing' },
+        ],
+      },
+      {
+        id: 'grp_delete',
+        name: 'Delete',
+        parent: 'grp_root',
+        status: 'UNCHANGED',
+        children: [{ type: 'group', id: 'grp_child' }],
+      },
+      {
+        id: 'grp_child',
+        name: 'Blog',
+        parent: 'grp_delete',
+        status: 'UNCHANGED',
+        children: [],
+      },
+      {
+        id: 'grp_existing',
+        name: 'blog',
+        parent: 'grp_root',
+        status: 'UNCHANGED',
+        children: [],
+      },
+    ];
+    mockedUseDataManager.mockImplementation(() =>
+      mockDataManager({ contentStructure, deleteFolderOnly: mockDeleteFolderOnly })
+    );
+
+    render(App);
+
+    await user.click(screen.getByRole('button', { name: 'Actions for Delete' }));
+    await user.click(await screen.findByRole('menuitem', { name: 'Delete folder' }));
+
+    expect(
+      screen.getByText(
+        'This folder cannot be deleted because these folder names already exist in its destination: Blog.'
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Yes, delete' })).toBeDisabled();
+    expect(mockDeleteFolderOnly).not.toHaveBeenCalled();
   });
 
   describe('unde redo discardAllChanges', () => {

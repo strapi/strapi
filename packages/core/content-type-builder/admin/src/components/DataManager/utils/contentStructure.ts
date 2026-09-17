@@ -179,3 +179,47 @@ export function isFolderNameTakenBySibling(
 ): boolean {
   return findSiblingFolderByName(groups, parentId, name, excludeId) !== undefined;
 }
+
+/**
+ * Returns names that would collide if a folder were removed and its child folders inherited its
+ * parent. Both the existing destination siblings and the incoming children are compared using
+ * the same case-insensitive contract as create, rename, and move.
+ */
+export function getDeleteFolderOnlySiblingNameCollisions(
+  groups: Pick<ContentStructureGroup, 'id' | 'name' | 'parent' | 'children'>[],
+  groupId: string
+): string[] {
+  const groupToDelete = groups.find((group) => group.id === groupId);
+
+  if (!groupToDelete) {
+    return [];
+  }
+
+  const siblingNames = new Set(
+    groups
+      .filter((group) => group.parent === groupToDelete.parent && group.id !== groupId)
+      .map((group) => group.name.trim().toLowerCase())
+  );
+  const collisions: string[] = [];
+
+  for (const child of groupToDelete.children) {
+    if (child.type !== 'group') {
+      continue;
+    }
+
+    const childGroup = groups.find((group) => group.id === child.id);
+    if (!childGroup) {
+      continue;
+    }
+
+    const name = childGroup.name.trim().toLowerCase();
+    if (siblingNames.has(name)) {
+      collisions.push(childGroup.name);
+      continue;
+    }
+
+    siblingNames.add(name);
+  }
+
+  return collisions;
+}

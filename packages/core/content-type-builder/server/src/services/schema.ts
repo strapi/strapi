@@ -7,7 +7,11 @@ import createBuilder from './schema-builder';
 import { finalizeSchemaMutation, rollbackSchemaMutation } from './schema-mutation';
 import { getService } from '../utils';
 import type { Schema as CTBSchema } from '../controllers/validation/schema';
-import { getRestrictRelationsTo, isContentTypeVisible } from './content-types';
+import {
+  assertCTBOwnedApplicationContentType,
+  getRestrictRelationsTo,
+  isContentTypeVisible,
+} from './content-types';
 import type { CoreContentStructureService } from './content-structure';
 
 type ContentTypeKind = 'collectionType' | 'singleType';
@@ -152,6 +156,12 @@ export const updateSchema = async (schema: CTBSchema) => {
   const apiHandler = getService('api-handler') as typeof import('./api-handler');
 
   const { components, contentTypes, contentStructure } = schema;
+
+  // Reject protected/plugin deletes before builders, API backups, or folder reconciliation can
+  // mutate anything. This is the server-side invariant for crafted update requests.
+  contentTypes
+    .filter((contentType) => contentType.action === 'delete')
+    .forEach((contentType) => assertCTBOwnedApplicationContentType(contentType.uid));
 
   // pre-process data
   removeEmptyDefaultsOnUpdates(schema);

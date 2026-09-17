@@ -9,7 +9,8 @@ import { getTrad } from '../../../../utils/getTrad';
 export type DeleteFolderMode = 'only' | 'withContent';
 
 interface DeleteFolderDialogProps {
-  counts: { contentTypes: number; subfolders: number };
+  counts: { contentTypes: number; subfolders: number; preservedContentTypes: number };
+  conflictingFolderNames: string[];
   onOpenChange: (open: boolean) => void;
   mode: DeleteFolderMode;
   onConfirm: () => void;
@@ -22,6 +23,7 @@ export const DeleteFolderDialog = ({
   folderName,
   onConfirm,
   counts,
+  conflictingFolderNames,
   open,
   mode,
 }: DeleteFolderDialogProps) => {
@@ -47,7 +49,7 @@ export const DeleteFolderDialog = ({
         {
           id: getTrad('nav.folder.delete-with-content.body'),
           defaultMessage:
-            'You are about to delete the folder named {name} and all its contents ({contentTypes, plural, =0 {{subfolders, plural, one {# subfolder} other {# subfolders}}} one {# content type{subfolders, plural, =0 {} one {, # subfolder} other {, # subfolders}}} other {# content types{subfolders, plural, =0 {} one {, # subfolder} other {, # subfolders}}}}). Are you sure you want to proceed?',
+            'You are about to delete the folder named {name} and its deletable contents ({contentTypes, plural, =0 {{subfolders, plural, one {# subfolder} other {# subfolders}}} one {# application content type{subfolders, plural, =0 {} one {, # subfolder} other {, # subfolders}}} other {# application content types{subfolders, plural, =0 {} one {, # subfolder} other {, # subfolders}}}}). Are you sure you want to proceed?',
         },
         { name: <Typography fontWeight="bold">{folderName}</Typography>, ...counts }
       );
@@ -62,6 +64,8 @@ export const DeleteFolderDialog = ({
       { name: <Typography fontWeight="bold">{folderName}</Typography> }
     );
   }, [formatMessage, folderName, mode, counts]);
+
+  const isBlocked = mode === 'only' && conflictingFolderNames.length > 0;
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -79,7 +83,7 @@ export const DeleteFolderDialog = ({
         }
         endAction={
           <Dialog.Action>
-            <Button variant={'danger'} onClick={onConfirm} fullWidth>
+            <Button variant={'danger'} onClick={onConfirm} fullWidth disabled={isBlocked}>
               {formatMessage({
                 id: getTrad('nav.folder.delete.confirm'),
                 defaultMessage: 'Yes, delete',
@@ -89,6 +93,30 @@ export const DeleteFolderDialog = ({
         }
       >
         <Typography tag="span">{body}</Typography>
+        {mode === 'withContent' && counts.preservedContentTypes > 0 && (
+          <Typography tag="p">
+            {formatMessage(
+              {
+                id: getTrad('nav.folder.delete-with-content.preserved'),
+                defaultMessage:
+                  '{preservedContentTypes, plural, one {# protected content type will be preserved and ungrouped.} other {# protected content types will be preserved and ungrouped.}}',
+              },
+              { preservedContentTypes: counts.preservedContentTypes }
+            )}
+          </Typography>
+        )}
+        {isBlocked && (
+          <Typography tag="p">
+            {formatMessage(
+              {
+                id: getTrad('nav.folder.delete.blocked'),
+                defaultMessage:
+                  'This folder cannot be deleted because these folder names already exist in its destination: {names}.',
+              },
+              { names: conflictingFolderNames.join(', ') }
+            )}
+          </Typography>
+        )}
       </ConfirmDialog>
     </Dialog.Root>
   );

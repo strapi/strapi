@@ -10,6 +10,15 @@ import { coreUids, pluginsUids } from './constants';
 
 const { ApplicationError } = errors;
 
+export const isCTBOwnedApplicationContentType = (uid: UID.ContentType): boolean =>
+  uid.startsWith('api::');
+
+export const assertCTBOwnedApplicationContentType = (uid: UID.ContentType): void => {
+  if (!isCTBOwnedApplicationContentType(uid)) {
+    throw new ApplicationError(`Content type "${uid}" is not managed by CTB and cannot be deleted`);
+  }
+};
+
 const pruneFolderReferences = (uids: UID.ContentType[]) => {
   return getService('content-structure').commitFromUpdate({ deletedUids: new Set(uids) });
 };
@@ -323,6 +332,8 @@ export const editContentType = async (
 };
 
 export const deleteContentTypes = async (uids: UID.ContentType[]) => {
+  uids.forEach(assertCTBOwnedApplicationContentType);
+
   const builder = createBuilder();
   const apiHandler = strapi
     .plugin('content-type-builder')
@@ -374,6 +385,8 @@ export const deleteContentTypes = async (uids: UID.ContentType[]) => {
  * Deletes a content type and the api files related to it
  */
 export const deleteContentType = async (uid: UID.ContentType, defaultBuilder: any = undefined) => {
+  assertCTBOwnedApplicationContentType(uid);
+
   const builder = defaultBuilder || createBuilder();
   // make a backup
   const apiHandler = strapi

@@ -10,6 +10,7 @@ import { createUndoRedoSlice } from './undoRedo';
 import {
   createEmptyContentStructure,
   findSiblingFolderByName,
+  getDeleteFolderOnlySiblingNameCollisions,
   isFolderNameTakenBySibling,
   MAX_FOLDER_DEPTH,
   sectionKeyForKind,
@@ -500,6 +501,12 @@ const getSubtreeHeight = (groups: ContentStructureGroup[], id: string): number =
 
 const applyDeleteContentType = (state: DataManagerStateType, uid: Internal.UID.ContentType) => {
   const type = state.contentTypes[uid];
+
+  // Only application schemas belong to CTB. Folder actions can be crafted outside the UI,
+  // so this guard must live at the mutation boundary rather than in the dialog alone.
+  if (!type || !type.uid.startsWith('api::') || type.plugin) {
+    return;
+  }
 
   // just drop new content types
   if (type.status === 'NEW') {
@@ -1141,6 +1148,12 @@ const slice = createUndoRedoSlice(
         }
 
         const groupToDeleteParentId = groupToDelete.parent;
+
+        // Reparenting a child folder into its grandparent must preserve the same sibling-name
+        // invariant as create, rename, and move. Do this before mutating any group state.
+        if (getDeleteFolderOnlySiblingNameCollisions(groups, groupToDeleteId).length > 0) {
+          return;
+        }
 
         // It is necessary to clone the children because we must subsequently mutate the original group.children array when we splice it out of its parent.
         const children = groupToDelete.children.map((child) => ({ ...child }));

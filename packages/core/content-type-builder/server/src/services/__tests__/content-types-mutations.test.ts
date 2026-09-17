@@ -60,6 +60,12 @@ const pluginContentType: { uid: UID.ContentType; [key: string]: any } = {
   plugin: 'example',
 };
 
+const secondContentType: { uid: UID.ContentType; [key: string]: any } = {
+  ...contentType,
+  uid: 'api::category.category',
+  apiName: 'category',
+};
+
 const createInput = {
   contentType: {
     uid: contentType.uid,
@@ -75,12 +81,13 @@ const createInput = {
 describe('content type mutation compensation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    files.schemas = new Set([contentType.uid, pluginContentType.uid]);
+    files.schemas = new Set([contentType.uid, secondContentType.uid, pluginContentType.uid]);
     files.apis = new Set(['article']);
     files.groups = 'before';
 
     builder.contentTypes = new Map([
       [contentType.uid, { schema: contentType }],
+      [secondContentType.uid, { schema: secondContentType }],
       [pluginContentType.uid, { schema: pluginContentType }],
     ]);
     builder.createContentType.mockImplementation(() => ({
@@ -97,7 +104,7 @@ describe('content type mutation compensation', () => {
     });
     builder.writeFiles.mockResolvedValue(true);
     builder.rollback.mockImplementation(async () => {
-      files.schemas = new Set([contentType.uid, pluginContentType.uid]);
+      files.schemas = new Set([contentType.uid, secondContentType.uid, pluginContentType.uid]);
     });
     apiHandler.backup.mockResolvedValue(undefined);
     apiHandler.clear.mockImplementation(async (uid) => {
@@ -196,18 +203,18 @@ describe('content type mutation compensation', () => {
       })
     ).rejects.toThrow('groups write failed');
 
-    expect(files.schemas).toEqual(new Set([contentType.uid, pluginContentType.uid]));
+    expect(files.schemas).toEqual(new Set([contentType.uid, secondContentType.uid, pluginContentType.uid]));
     expect(files.apis).toEqual(new Set(['article']));
     expect(files.groups).toBe('before');
   });
 
-  it('restores a standalone plugin-extension schema and rejects when folder reconciliation fails', async () => {
-    contentStructure.commitFromUpdate.mockRejectedValueOnce(new Error('groups write failed'));
+  it('rejects a crafted protected plugin deletion before it mutates schema or API files', async () => {
+    await expect(deleteContentType(pluginContentType.uid)).rejects.toThrow(/not managed by CTB/);
 
-    await expect(deleteContentType(pluginContentType.uid)).rejects.toThrow('groups write failed');
-
-    expect(files.schemas).toEqual(new Set([contentType.uid, pluginContentType.uid]));
+    expect(files.schemas).toEqual(new Set([contentType.uid, secondContentType.uid, pluginContentType.uid]));
     expect(files.apis).toEqual(new Set(['article']));
+    expect(apiHandler.backup).not.toHaveBeenCalled();
+    expect(builder.deleteContentType).not.toHaveBeenCalled();
     expect(files.groups).toBe('before');
   });
 
@@ -229,11 +236,11 @@ describe('content type mutation compensation', () => {
   it('restores all schemas and APIs and rejects when bulk folder reconciliation fails', async () => {
     contentStructure.commitFromUpdate.mockRejectedValueOnce(new Error('groups write failed'));
 
-    await expect(deleteContentTypes([contentType.uid, pluginContentType.uid])).rejects.toThrow(
+    await expect(deleteContentTypes([contentType.uid, secondContentType.uid])).rejects.toThrow(
       'groups write failed'
     );
 
-    expect(files.schemas).toEqual(new Set([contentType.uid, pluginContentType.uid]));
+    expect(files.schemas).toEqual(new Set([contentType.uid, secondContentType.uid, pluginContentType.uid]));
     expect(files.apis).toEqual(new Set(['article']));
     expect(files.groups).toBe('before');
   });
@@ -243,14 +250,14 @@ describe('content type mutation compensation', () => {
       .mockResolvedValueOnce(undefined)
       .mockRejectedValueOnce(new Error('backup failed'));
 
-    await expect(deleteContentTypes([contentType.uid, pluginContentType.uid])).rejects.toThrow(
+    await expect(deleteContentTypes([contentType.uid, secondContentType.uid])).rejects.toThrow(
       'backup failed'
     );
 
-    expect(files.schemas).toEqual(new Set([contentType.uid, pluginContentType.uid]));
+    expect(files.schemas).toEqual(new Set([contentType.uid, secondContentType.uid, pluginContentType.uid]));
     expect(files.apis).toEqual(new Set(['article']));
     expect(apiHandler.rollback).toHaveBeenCalledWith(contentType.uid);
-    expect(apiHandler.rollback).not.toHaveBeenCalledWith(pluginContentType.uid);
+    expect(apiHandler.rollback).not.toHaveBeenCalledWith(secondContentType.uid);
     expect(files.groups).toBe('before');
   });
 
@@ -259,7 +266,7 @@ describe('content type mutation compensation', () => {
 
     await expect(deleteContentTypes([contentType.uid])).resolves.toBeUndefined();
 
-    expect(files.schemas).toEqual(new Set([pluginContentType.uid]));
+    expect(files.schemas).toEqual(new Set([secondContentType.uid, pluginContentType.uid]));
     expect(files.apis).toEqual(new Set());
     expect(files.groups).toBe('after');
     expect(strapi.eventHub.emit).toHaveBeenCalledWith('content-type.delete', {

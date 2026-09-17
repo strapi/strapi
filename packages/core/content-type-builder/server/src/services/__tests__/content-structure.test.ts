@@ -4,8 +4,19 @@
  * General validation rules are handled by the CTB's contentStructure controller.
  */
 import { errors } from '@strapi/utils';
+import type { UID } from '@strapi/types';
 
+import { buildSectionTree } from '../../../../admin/src/components/ContentTypeBuilderNav/lib/buildFolderTree';
+import {
+  actions as dataManagerActions,
+  reducer as dataManagerReducer,
+} from '../../../../admin/src/components/DataManager/reducer';
+import { stateToRequestData } from '../../../../admin/src/components/DataManager/utils/cleanData';
+import { fromServerFile } from '../../../../admin/src/components/DataManager/utils/contentStructure';
 import { createContentStructureService } from '../content-structure';
+
+import type { ContentType } from '../../../../admin/src/types';
+import type { ContentStructure } from '../../../../admin/src/components/DataManager/utils/contentStructure';
 
 type Kind = 'collectionType' | 'singleType';
 
@@ -365,6 +376,110 @@ describe('CTB content-structure service', () => {
         type: 'contentType',
         uid: 'api::article.article',
       });
+    });
+
+    it('persists and reloads a mixed folder deletion as a local delete with an ungrouped plugin', async () => {
+      const localUid = 'api::article.article' as UID.ContentType;
+      const pluginUid = 'plugin::example.article' as UID.ContentType;
+      const initialContentStructure = {
+        version: 1,
+        sections: {
+          collectionTypes: {
+            groups: [
+              {
+                id: 'grp_folder',
+                name: 'Folder',
+                parent: null,
+                status: 'UNCHANGED',
+                children: [
+                  { type: 'contentType' as const, uid: localUid },
+                  { type: 'contentType' as const, uid: pluginUid },
+                ],
+              },
+            ],
+          },
+          singleTypes: { groups: [] },
+        },
+      } satisfies ContentStructure;
+      const localContentType = {
+        uid: localUid,
+        status: 'UNCHANGED',
+        attributes: [],
+        modelType: 'contentType',
+        kind: 'collectionType',
+        info: { displayName: 'Article', singularName: 'article', pluralName: 'articles' },
+        globalId: 'Article',
+        modelName: 'article',
+        visible: true,
+        restrictRelationsTo: [],
+      } satisfies ContentType;
+      const pluginContentType = {
+        ...localContentType,
+        uid: pluginUid,
+        plugin: 'example',
+      } satisfies ContentType;
+      const initialized = dataManagerReducer(
+        undefined,
+        dataManagerActions.init({
+          components: {},
+          contentTypes: { [localUid]: localContentType, [pluginUid]: pluginContentType },
+          reservedNames: { models: [], attributes: [] },
+          contentStructure: initialContentStructure,
+        })
+      );
+      const deleted = dataManagerReducer(
+        initialized,
+        dataManagerActions.deleteFolderAndContent({
+          section: 'collectionTypes',
+          id: 'grp_folder',
+          contentTypeUids: [localUid, pluginUid],
+        })
+      );
+      const { requestData } = stateToRequestData({
+        components: deleted.current.components,
+        contentTypes: deleted.current.contentTypes,
+        contentStructure: deleted.current.contentStructure,
+        initialContentStructure,
+      });
+      const deletedUids = new Set(
+        requestData.contentTypes
+          .filter((contentType) => contentType.action === 'delete')
+          .map((contentType) => contentType.uid)
+      );
+      const strapi = buildStrapi({
+        [localUid]: { kind: 'collectionType' },
+        [pluginUid]: { kind: 'collectionType' },
+      });
+
+      await expect(
+        createContentStructureService(strapi).commitFromUpdate({
+          incomingStructure: requestData.contentStructure,
+          deletedUids,
+        })
+      ).resolves.toBe(true);
+
+      expect(requestData.contentTypes).toEqual([{ action: 'delete', uid: localUid }]);
+      const persisted = coreServiceMock.write.mock.calls[0][0];
+      expect(persisted.sections.collectionTypes.groups).toEqual([]);
+
+      const reloaded = fromServerFile(persisted);
+      const tree = buildSectionTree(
+        reloaded.sections.collectionTypes,
+        [
+          {
+            uid: pluginUid,
+            title: 'Plugin article',
+            to: '/plugin-article',
+            status: deleted.current.contentTypes[pluginUid].status,
+          },
+        ],
+        (left, right) => left.localeCompare(right)
+      );
+
+      expect(deleted.current.contentTypes[pluginUid]).toMatchObject({ status: 'UNCHANGED' });
+      expect(tree).toEqual([
+        expect.objectContaining({ type: 'contentType', uid: pluginUid, parentId: null }),
+      ]);
     });
 
     it('with no incoming structure but batch deletions: prunes the current file and writes', async () => {

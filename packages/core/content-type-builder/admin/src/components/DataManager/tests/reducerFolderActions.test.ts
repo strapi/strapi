@@ -320,6 +320,19 @@ describe('Content Type Builder | DataManager | reducer | folder actions', () => 
 
       expect(groupsOf(next)).toEqual(groupsOf(before));
     });
+
+    it('refuses to reparent a folder into a case-insensitive sibling collision', () => {
+      const before = stateWith([
+        grp('grp_root', 'Root', null, [groupChild('grp_delete'), groupChild('grp_existing')]),
+        grp('grp_delete', 'Delete', 'grp_root', [groupChild('grp_child')]),
+        grp('grp_child', 'Blog', 'grp_delete'),
+        grp('grp_existing', 'blog', 'grp_root'),
+      ]);
+
+      const next = reducer(before, actions.deleteFolderOnly({ section, id: 'grp_delete' }));
+
+      expect(groupsOf(next)).toEqual(groupsOf(before));
+    });
   });
 
   describe('assignContentTypeToFolder', () => {
@@ -483,8 +496,31 @@ describe('Content Type Builder | DataManager | reducer | folder actions', () => 
       expect(next.current.contentTypes['api::a.a']?.status).toBe('REMOVED');
       expect(next.current.contentTypes['api::b.b']?.status).toBe('REMOVED');
     });
-  });
 
+    it('deletes only CTB-owned application types and ungroups protected types', () => {
+      const protectedUid = 'plugin::example.article' as UID.ContentType;
+      const before = folderWithContentState();
+      before.current.contentTypes[protectedUid] = {
+        ...ct(protectedUid, 'UNCHANGED'),
+        plugin: 'example',
+      };
+      findGroup(before, 'grp_c')?.children.push(ctChild(protectedUid));
+
+      const next = reducer(
+        before,
+        actions.deleteFolderAndContent({
+          section,
+          id: 'grp_p',
+          contentTypeUids: ['api::a.a', 'api::b.b', protectedUid],
+        })
+      );
+
+      expect(next.current.contentTypes['api::a.a']?.status).toBe('REMOVED');
+      expect(next.current.contentTypes['api::b.b']?.status).toBe('REMOVED');
+      expect(next.current.contentTypes[protectedUid]?.status).toBe('UNCHANGED');
+      expect(groupsOf(next)).toEqual([grp('grp_g', 'G', null, [], 'CHANGED')]);
+    });
+  });
   describe('reorderFolderChildren', () => {
     it('reorders children within a folder and marks it CHANGED', () => {
       const next = reducer(

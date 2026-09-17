@@ -9,7 +9,10 @@ import { useIntl } from 'react-intl';
 
 import { getTrad } from '../../../../utils/getTrad';
 import { useDataManager } from '../../../DataManager/useDataManager';
-import { isFolderNameTakenBySibling } from '../../../DataManager/utils/contentStructure';
+import {
+  getDeleteFolderOnlySiblingNameCollisions,
+  isFolderNameTakenBySibling,
+} from '../../../DataManager/utils/contentStructure';
 import { useFolderActions } from '../../hooks/useFolderActions';
 import { useSortableTree } from '../../hooks/useSortableTree';
 import {
@@ -63,7 +66,7 @@ export const FolderNavSection = ({
   title,
   links,
 }: FolderNavSectionProps) => {
-  const { contentStructure, isInDevelopmentMode } = useDataManager();
+  const { contentStructure, contentTypes, isInDevelopmentMode } = useDataManager();
   const { formatMessage, locale } = useIntl();
   const actions = useFolderActions();
 
@@ -83,9 +86,13 @@ export const FolderNavSection = ({
   const searchActive = searchValue.trim().length > 0;
   const canEdit = Boolean(isInDevelopmentMode);
 
-  const linkUids = useMemo(() => {
-    return new Set(links.map((link) => link.uid));
-  }, [links]);
+  const deletableContentTypeUids = useMemo(() => {
+    return new Set(
+      Object.values(contentTypes)
+        .filter((contentType) => contentType.uid.startsWith('api::') && !contentType.plugin)
+        .map((contentType) => contentType.uid)
+    );
+  }, [contentTypes]);
 
   const tree = useMemo(() => {
     return buildSectionTree(sectionData, links, (a, b) => formatter.compare(a, b));
@@ -159,12 +166,19 @@ export const FolderNavSection = ({
     if (deleteTarget.mode === 'withContent') {
       actions.deleteFolderAndContent({
         contentTypeUids: collectSubtreeContentTypeUids(sectionData, deleteTarget.node.id).filter(
-          (uid) => linkUids.has(uid)
+          (uid) => deletableContentTypeUids.has(uid)
         ),
         id: deleteTarget.node.id,
         section,
       });
     } else {
+      if (
+        getDeleteFolderOnlySiblingNameCollisions(sectionData.groups, deleteTarget.node.id).length >
+        0
+      ) {
+        return;
+      }
+
       actions.deleteFolderOnly({ section, id: deleteTarget.node.id });
     }
 
@@ -324,7 +338,18 @@ export const FolderNavSection = ({
 
       {deleteTarget && (
         <DeleteFolderDialog
-          counts={countSubtree(sectionData, deleteTarget.node.id, linkUids)}
+          counts={{
+            ...countSubtree(sectionData, deleteTarget.node.id, deletableContentTypeUids),
+            preservedContentTypes: collectSubtreeContentTypeUids(
+              sectionData,
+              deleteTarget.node.id
+            ).filter((uid) => !deletableContentTypeUids.has(uid)).length,
+          }}
+          conflictingFolderNames={
+            deleteTarget.mode === 'only'
+              ? getDeleteFolderOnlySiblingNameCollisions(sectionData.groups, deleteTarget.node.id)
+              : []
+          }
           folderName={deleteTarget.node.name}
           onConfirm={confirmDelete}
           mode={deleteTarget.mode}
