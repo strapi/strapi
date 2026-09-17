@@ -134,5 +134,55 @@ describe('transaction context ownership', () => {
         expect(rows[0].key).toEqual('fresh transaction key');
       }
     );
+
+    test('rolls back a failed commit and keeps recovery transaction hooks isolated', async () => {
+      const failedCommit = jest.fn();
+      const failedRollback = jest.fn();
+      const recoveryCommit = jest.fn();
+      const failure = new Error('commit failed before completion');
+      let recovery;
+
+      await expect(
+        strapi.db.transaction(async ({ trx, onCommit, onRollback }) => {
+          // Fail before Knex sends COMMIT, leaving a real transaction for the catch path to roll back.
+          trx.commit = jest.fn().mockRejectedValue(failure);
+          onCommit(failedCommit);
+          onRollback(() => {
+            failedRollback();
+            recovery = strapi.db.transaction(async ({ onCommit }) => {
+              const rows = await strapi.db
+                .queryBuilder('strapi::core-store')
+                .select(['key'])
+                .where({ id: 1 })
+                .execute();
+              expect(rows[0].key).toEqual(original[0].key);
+              await strapi.db
+                .queryBuilder('strapi::core-store')
+                .update({ key: 'recovery after failed commit' })
+                .where({ id: 1 })
+                .execute();
+              onCommit(recoveryCommit);
+            });
+          });
+          await strapi.db
+            .queryBuilder('strapi::core-store')
+            .update({ key: 'uncommitted key' })
+            .where({ id: 1 })
+            .execute();
+        })
+      ).rejects.toBe(failure);
+
+      expect(recovery).toBeDefined();
+      await recovery;
+      expect(failedCommit).not.toHaveBeenCalled();
+      expect(failedRollback).toHaveBeenCalledTimes(1);
+      expect(recoveryCommit).toHaveBeenCalledTimes(1);
+      const rows = await strapi.db
+        .queryBuilder('strapi::core-store')
+        .select(['key'])
+        .where({ id: 1 })
+        .execute();
+      expect(rows[0].key).toEqual('recovery after failed commit');
+    });
   });
 });

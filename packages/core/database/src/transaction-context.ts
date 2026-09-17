@@ -26,18 +26,27 @@ export interface Store {
   rollbackCallbacks: Callback[];
 }
 
-const storage = new AsyncLocalStorage<Store>();
+// Keep ownership after clearing the active transactor: a failed commit still needs rollback hooks.
+interface TransactionStore extends Store {
+  readonly owner: Knex.Transaction;
+}
+
+const storage = new AsyncLocalStorage<TransactionStore>();
 
 const getTransactionStore = (trx: Knex.Transaction) => {
   const store = storage.getStore();
-  return store?.trx === trx ? store : undefined;
+  return store?.owner === trx ? store : undefined;
 };
 
 const transactionCtx = {
   async run<TCallback extends Callback>(trx: Knex.Transaction, cb: TCallback) {
     // Only scopes of the same transaction share its lifecycle and callbacks. A transaction
     // started from a completion hook must not inherit hooks from the finalized transaction.
-    const store = getTransactionStore(trx) ?? { trx, commitCallbacks: [], rollbackCallbacks: [] };
+    const parentStore = storage.getStore();
+    const store =
+      parentStore?.trx === trx
+        ? parentStore
+        : { owner: trx, trx, commitCallbacks: [], rollbackCallbacks: [] };
 
     return storage.run<ReturnType<TCallback>, void[]>(store, cb);
   },

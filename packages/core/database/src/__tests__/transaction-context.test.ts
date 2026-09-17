@@ -342,4 +342,50 @@ describe('transaction context ownership', () => {
     assert.equal(transactions.length, 1);
     assert.deepEqual(calls, ['commit']);
   });
+
+  it('runs rollback hooks when commit rejects before the transactor completes', async () => {
+    const { database, transactions } = createDatabase();
+    const calls: string[] = [];
+    const failure = new Error('commit failed before completion');
+
+    await assert.rejects(
+      database.transaction(({ trx, onCommit, onRollback }) => {
+        trx.commit = () => Promise.reject(failure);
+        onCommit(() => calls.push('unexpected commit'));
+        onRollback(() => calls.push('rollback'));
+      }),
+      (error) => error === failure
+    );
+
+    assert.equal(transactions.length, 1);
+    assert.equal(transactions[0].isCompleted(), true);
+    assert.deepEqual(calls, ['rollback']);
+    assert.equal(transactionCtx.get(), undefined);
+  });
+
+  it('keeps recovery hooks isolated after rolling back a failed commit', async () => {
+    const { database, transactions } = createDatabase();
+    const calls: string[] = [];
+    const failure = new Error('commit failed before completion');
+    let recovery: Promise<unknown> | undefined;
+
+    await assert.rejects(
+      database.transaction(({ trx, onCommit, onRollback }) => {
+        trx.commit = () => Promise.reject(failure);
+        onCommit(() => calls.push('unexpected original commit'));
+        onRollback(() => {
+          calls.push('original rollback');
+          recovery = database.transaction(({ onCommit }) => {
+            onCommit(() => calls.push('recovery commit'));
+          });
+        });
+      }),
+      (error) => error === failure
+    );
+    assert.ok(recovery);
+    await recovery;
+
+    assert.equal(transactions.length, 2);
+    assert.deepEqual(calls, ['original rollback', 'recovery commit']);
+  });
 });
