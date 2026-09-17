@@ -67,6 +67,21 @@ function setup(
 }
 
 describe('useFolderStructure', () => {
+  beforeEach(() => {
+    client.clear();
+    jest.clearAllMocks();
+  });
+
+  test('does not fetch or report loading when disabled with an empty cache', async () => {
+    const { get } = useFetchClient();
+    const { result } = await setup({ enabled: false });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.data).toBeUndefined();
+    expect(get).not.toHaveBeenCalled();
+  });
+
   test('fetches data from the right URL', async () => {
     const { get } = useFetchClient();
 

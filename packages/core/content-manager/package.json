@@ -77,7 +77,6 @@
     "@strapi/icons": "2.2.4",
     "@strapi/types": "5.54.0",
     "@strapi/utils": "5.54.0",
-    "@tanstack/react-query": "4.36.1",
     "codemirror5": "npm:codemirror@^5.65.11",
     "date-fns": "2.30.0",
     "dompurify": "3.4.13",

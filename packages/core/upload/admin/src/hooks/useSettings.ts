@@ -22,5 +22,6 @@ export function useSettings(isEnabled: boolean = true) {
   return {
     ...query,
     isLoading: query.isInitialLoading,
+    status: !isEnabled && query.status === 'loading' ? ('idle' as const) : query.status,
   };
 }

@@ -51,10 +51,12 @@ describe('useSettings', () => {
     const { result } = setup(false);
 
     expect(result.current.isLoading).toBe(false);
+    expect(result.current.status).toBe('idle');
     expect(result.current.data).toBeUndefined();
 
     await waitFor(() => expect(get).not.toHaveBeenCalled());
 
     expect(result.current.isLoading).toBe(false);
+    expect(result.current.status).toBe('idle');
   });
 });
