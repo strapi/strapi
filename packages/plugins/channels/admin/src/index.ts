@@ -45,16 +45,29 @@ export default {
     if (contentManager) {
       const apis = contentManager.apis as ContentManagerPlugin['config']['apis'];
 
-      // Channel picker in the list view toolbar (same zone as the locale picker)…
+      // Channel picker in the list view toolbar (same zone as the locale
+      // picker), pinned FIRST whatever the plugins' bootstrap order: the
+      // injection zone getter is patched at render time, the same pattern as
+      // the spaces plugin's action guards.
       contentManager.injectComponent('listView', 'actions', {
         name: 'channels-picker',
         Component: ChannelPicker,
       });
+      const getInjectedComponents = contentManager.getInjectedComponents.bind(contentManager);
+      contentManager.getInjectedComponents = (containerName: string, blockName: string) => {
+        const components = getInjectedComponents(containerName, blockName);
+        if (containerName === 'listView' && blockName === 'actions') {
+          return [...components].sort((a, b) =>
+            a.name === 'channels-picker' ? -1 : b.name === 'channels-picker' ? 1 : 0
+          );
+        }
+        return components;
+      };
 
-      // …and in the edit view header (same seam as i18n's locale picker).
+      // …and FIRST in the edit view header (same seam as i18n's locale picker).
       apis.addDocumentHeaderAction((actions: HeaderActionComponent[]) => [
-        ...actions,
         ChannelHeaderAction,
+        ...actions,
       ]);
 
       // "Overrides" side panel with the way back to the default values.
