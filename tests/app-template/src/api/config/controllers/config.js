@@ -1,5 +1,9 @@
+'use strict';
+
 const { createTestTransferToken } = require('../../../create-transfer-token');
 const resyncSuperAdminAfterImport = require('../utils/resync-super-admin-after-import');
+const resetAdminFixtureData = require('../utils/reset-admin-fixture');
+const isLoopbackAddress = require('../utils/is-loopback-address');
 
 module.exports = {
   rateLimitEnable(ctx) {
@@ -27,6 +31,15 @@ module.exports = {
   },
   async resetTransferToken(ctx) {
     await createTestTransferToken(strapi);
+
+    ctx.send(200);
+  },
+  async resetAdminFixture(ctx) {
+    if (!isLoopbackAddress(ctx.req?.socket?.remoteAddress)) {
+      ctx.throw(403, 'Admin fixture reset is only available from the loopback interface');
+    }
+
+    await resetAdminFixtureData(strapi, ctx.request.body.fixture);
 
     ctx.send(200);
   },

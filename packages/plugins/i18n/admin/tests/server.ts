@@ -74,6 +74,16 @@ export const server = setupServer(
   }),
   /**
    *
+   * settings
+   *
+   */
+  http.get('/i18n/settings', () => {
+    return HttpResponse.json({
+      data: { aiLocalizations: false, aiLocalizationsAvailable: false },
+    });
+  }),
+  /**
+   *
    * iso-locales
    *
    */

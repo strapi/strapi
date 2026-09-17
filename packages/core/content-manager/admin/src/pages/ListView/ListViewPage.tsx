@@ -623,6 +623,7 @@ const ListViewPage = () => {
               </Table.Root>
               <Pagination.Root
                 {...pagination}
+                defaultPageSize={list.settings.pageSize}
                 onPageSizeChange={() => trackUsage('willChangeNumberOfEntriesPerPage')}
               >
                 <Pagination.PageSize />

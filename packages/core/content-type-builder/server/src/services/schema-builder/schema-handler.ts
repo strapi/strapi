@@ -262,6 +262,8 @@ export default function createSchemaHandler(infos: Infos) {
             pluginOptions: state.schema.pluginOptions,
             attributes: state.schema.attributes,
             config: (state.schema as any).config,
+            indexes: (state.schema as Struct.ContentTypeSchema).indexes,
+            foreignKeys: (state.schema as Struct.ContentTypeSchema).foreignKeys,
           },
           { spaces: 2 }
         );

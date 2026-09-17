@@ -23,6 +23,9 @@ const initProviders = ({ baseURL }) => ({
     },
     async authCallback({ accessToken }) {
       const { body } = await bearerGet('https://discord.com/api/users/@me', accessToken);
+      if (body.verified !== true) {
+        throw new Error('Email not verified by Discord');
+      }
       const username =
         body.discriminator && body.discriminator !== '0'
           ? `${body.username}#${body.discriminator}`
@@ -46,6 +49,9 @@ const initProviders = ({ baseURL }) => ({
       const { body } = await bearerGet('https://graph.facebook.com/me', accessToken, {
         qs: { fields: 'name,email' },
       });
+      if (!body.email) {
+        throw new Error('Email not verified by Facebook');
+      }
       return {
         username: body.name,
         email: body.email,
@@ -65,6 +71,10 @@ const initProviders = ({ baseURL }) => ({
       const { body } = await fetchJson(
         `https://oauth2.googleapis.com/tokeninfo?access_token=${encodeURIComponent(accessToken)}`
       );
+      const verified = body.verified_email ?? body.email_verified;
+      if (verified !== true && verified !== 'true') {
+        throw new Error('Email not verified by Google');
+      }
       return {
         username: body.email.split('@')[0],
         email: body.email,
@@ -85,13 +95,6 @@ const initProviders = ({ baseURL }) => ({
         headers: { 'user-agent': 'strapi' },
       });
 
-      if (userBody.email) {
-        return {
-          username: userBody.login,
-          email: userBody.email,
-        };
-      }
-
       const { body: emailBody } = await bearerGet(
         'https://api.github.com/user/emails',
         accessToken,
@@ -100,11 +103,32 @@ const initProviders = ({ baseURL }) => ({
         }
       );
 
+      if (userBody.email) {
+        const verifiedPublicEmail = Array.isArray(emailBody)
+          ? emailBody.find((entry) => entry.email === userBody.email && entry.verified === true)
+          : null;
+
+        if (!verifiedPublicEmail) {
+          throw new Error('Email not verified by GitHub');
+        }
+
+        return {
+          username: userBody.login,
+          email: userBody.email,
+        };
+      }
+
+      const primaryEmail = Array.isArray(emailBody)
+        ? emailBody.find((email) => email.primary === true)
+        : null;
+
+      if (!primaryEmail || primaryEmail.verified !== true) {
+        throw new Error('Email not verified by GitHub');
+      }
+
       return {
         username: userBody.login,
-        email: Array.isArray(emailBody)
-          ? emailBody.find((email) => email.primary === true).email
-          : null,
+        email: primaryEmail.email,
       };
     },
   },
@@ -134,16 +158,27 @@ const initProviders = ({ baseURL }) => ({
       secret: '',
       callbackUrl: `${baseURL}/twitter/callback`,
     },
-    async authCallback({ accessToken, query, providers }) {
+    async authCallback({ accessToken, providers, grantResponse }) {
+      const accessSecret = grantResponse?.access_secret;
+      const screenName = grantResponse?.raw?.screen_name;
+
+      if (!accessSecret) {
+        throw new Error('Twitter authentication requires a completed OAuth session');
+      }
+
       const { twitterGet } = require('../utils/oauth-connect/oauth1');
       const { body } = await twitterGet({
         url: 'https://api.twitter.com/1.1/account/verify_credentials.json',
         accessToken,
-        accessCredential: query.access_secret,
+        accessCredential: accessSecret,
         consumerKey: providers.twitter.key,
         clientCredential: providers.twitter.secret,
-        qs: { include_email: 'true', screen_name: query['raw[screen_name]'] },
+        qs: { include_email: 'true', screen_name: screenName },
       });
+
+      if (!body.email) {
+        throw new Error('Email not verified by Twitter');
+      }
 
       return {
         username: body.screen_name,
@@ -179,13 +214,25 @@ const initProviders = ({ baseURL }) => ({
       callbackUrl: `${baseURL}/vk/callback`,
       scope: ['email'],
     },
-    async authCallback({ accessToken, query }) {
+    async authCallback({ accessToken, grantResponse }) {
+      const email = grantResponse?.raw?.email;
+      const userId = grantResponse?.raw?.user_id;
+
+      if (!email || !userId) {
+        throw new Error('VK authentication requires a completed OAuth session');
+      }
+
       const { body } = await bearerGet('https://api.vk.com/method/users.get', accessToken, {
-        qs: { user_ids: query.raw.user_id, v: '5.122' },
+        qs: { user_ids: userId, v: '5.122' },
       });
+
+      if (!body.response?.[0]) {
+        throw new Error('Invalid VK access token');
+      }
+
       return {
         username: `${body.response[0].last_name} ${body.response[0].first_name}`,
-        email: query.raw.email,
+        email,
       };
     },
   },
@@ -205,9 +252,13 @@ const initProviders = ({ baseURL }) => ({
           'Client-Id': providers.twitch.key,
         },
       });
+      const email = body.data?.[0]?.email;
+      if (!email) {
+        throw new Error('Email not verified by Twitch');
+      }
       return {
         username: body.data[0].login,
-        email: body.data[0].email,
+        email,
       };
     },
   },
@@ -228,7 +279,11 @@ const initProviders = ({ baseURL }) => ({
         accessToken
       );
 
-      const email = emailBody.elements[0]['handle~'];
+      const email = emailBody.elements[0]?.['handle~'];
+
+      if (!email?.emailAddress) {
+        throw new Error('Email not verified by LinkedIn');
+      }
 
       return {
         username: profileBody.localizedFirstName,
@@ -247,10 +302,18 @@ const initProviders = ({ baseURL }) => ({
       callback: `${baseURL}/cognito/callback`,
       scope: ['email', 'openid', 'profile'],
     },
-    async authCallback({ query, providers }) {
+    async authCallback({ providers, grantResponse }) {
       const jwksUrl = new URL(providers.cognito.jwksurl);
-      const idToken = query.id_token;
+      const idToken = grantResponse?.id_token;
+
+      if (!idToken) {
+        throw new Error('Cognito authentication requires a completed OAuth session');
+      }
+
       const tokenPayload = await verifyJwtWithJwks({ idToken, jwksUrl });
+      if (tokenPayload.email_verified !== true) {
+        throw new Error('Email not verified by Cognito');
+      }
       return {
         username: tokenPayload['cognito:username'],
         email: tokenPayload.email,
@@ -293,6 +356,9 @@ const initProviders = ({ baseURL }) => ({
         `https://${providers.auth0.subdomain}.auth0.com/userinfo`,
         accessToken
       );
+      if (body.email && body.email_verified !== true) {
+        throw new Error('Email not verified by Auth0');
+      }
       const username = body.username || body.nickname || body.name || body.email.split('@')[0];
       const email = body.email || `${username.replace(/\s+/g, '.')}@strapi.io`;
 
@@ -324,10 +390,14 @@ const initProviders = ({ baseURL }) => ({
       const email = body.attributes
         ? body.attributes.strapiemail || body.attributes.email
         : body.strapiemail || body.email;
+      const emailVerified = body.email_verified ?? body.attributes?.email_verified;
       if (!username || !email) {
         strapi.log.warn(
           `CAS Response Body did not contain required attributes: ${JSON.stringify(body)}`
         );
+      }
+      if (email && emailVerified !== true) {
+        throw new Error('Email not verified by CAS');
       }
       return {
         username,
@@ -347,10 +417,13 @@ const initProviders = ({ baseURL }) => ({
     },
     async authCallback({ accessToken }) {
       const { body } = await bearerGet(
-        'https://www.patreon.com/api/oauth2/v2/identity?fields[user]=full_name,email',
+        'https://www.patreon.com/api/oauth2/v2/identity?fields[user]=full_name,email,is_email_verified',
         accessToken
       );
       const patreonData = body.data.attributes;
+      if (patreonData.is_email_verified !== true) {
+        throw new Error('Email not verified by Patreon');
+      }
       return {
         username: patreonData.full_name,
         email: patreonData.email,
@@ -372,6 +445,9 @@ const initProviders = ({ baseURL }) => ({
         `https://${providers.keycloak.subdomain}/protocol/openid-connect/userinfo`,
         accessToken
       );
+      if (body.email_verified !== true) {
+        throw new Error('Email not verified by Keycloak');
+      }
       return {
         username: body.preferred_username,
         email: body.email,
@@ -400,12 +476,12 @@ module.exports = () => {
       delete authProviders[name];
     },
 
-    async run({ provider, accessToken, query, providers }) {
+    async run({ provider, accessToken, query, providers, grantResponse }) {
       const authProvider = authProviders[provider];
 
       assert(authProvider, 'Unknown auth provider');
 
-      return authProvider.authCallback({ accessToken, query, providers });
+      return authProvider.authCallback({ accessToken, query, providers, grantResponse });
     },
   };
 };

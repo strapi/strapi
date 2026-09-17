@@ -35,7 +35,10 @@ const createSingleTypeController = ({
      * create or update single type content.
      */
     async update(ctx) {
-      const { query, body = {} as any } = ctx.request;
+      await this.validateQuery(ctx);
+      const sanitizedQuery = await this.sanitizeQuery(ctx);
+
+      const { body = {} as any } = ctx.request;
 
       if (!isObject(body.data)) {
         throw new errors.ValidationError('Missing "data" payload in the request body');
@@ -46,7 +49,7 @@ const createSingleTypeController = ({
       const sanitizedInputData = await this.sanitizeInput(body.data, ctx);
 
       const entity = await strapi.service(uid).createOrUpdate({
-        ...query,
+        ...sanitizedQuery,
         data: sanitizedInputData,
       });
 
@@ -56,9 +59,10 @@ const createSingleTypeController = ({
     },
 
     async delete(ctx) {
-      const { query } = ctx;
+      await this.validateQuery(ctx);
+      const sanitizedQuery = await this.sanitizeQuery(ctx);
 
-      await strapi.service(uid).delete(query);
+      await strapi.service(uid).delete(sanitizedQuery);
 
       ctx.status = 204;
     },

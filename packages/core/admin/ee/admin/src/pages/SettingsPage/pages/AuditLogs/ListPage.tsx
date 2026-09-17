@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { Flex, IconButton, Typography } from '@strapi/design-system';
-import { Eye } from '@strapi/icons';
+import { Button, Flex, IconButton, Typography } from '@strapi/design-system';
+import { Download, Eye } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { Filters } from '../../../../../../../admin/src/components/Filters';
@@ -17,8 +17,10 @@ import {
 import { useRBAC } from '../../../../../../../admin/src/hooks/useRBAC';
 import { AuditLog } from '../../../../../../../shared/contracts/audit-logs';
 
+import { ExportCard } from './components/ExportCard';
 import { Modal } from './components/Modal';
 import { useAuditLogsData } from './hooks/useAuditLogsData';
+import { useExportAuditLogs } from './hooks/useExportAuditLogs';
 import { useFormatTimeStamp } from './hooks/useFormatTimeStamp';
 import { getDefaultMessage } from './utils/getActionTypesDefaultMessages';
 import { getDisplayedFilters } from './utils/getDisplayedFilters';
@@ -29,10 +31,17 @@ const ListPage = () => {
   const { formatMessage } = useIntl();
   const permissions = useTypedSelector((state) => state.admin_app.permissions.settings);
 
+  const readPermissions = permissions?.auditLogs?.read;
+  const exportPermissions = permissions?.auditLogs?.export;
   const {
-    allowedActions: { canRead: canReadAuditLogs },
+    allowedActions: { canRead: canReadAuditLogs, canExport: canExportAuditLogs },
     isLoading: isLoadingRBAC,
-  } = useRBAC(permissions?.auditLogs?.read || []);
+  } = useRBAC(
+    React.useMemo(
+      () => [...(readPermissions ?? []), ...(exportPermissions ?? [])],
+      [readPermissions, exportPermissions]
+    )
+  );
 
   const [{ query }, setQuery] = useQueryParams<{
     id?: AuditLog['id'];
@@ -43,6 +52,9 @@ const ListPage = () => {
   const openLog = (id: AuditLog['id']) =>
     setQuery(withEncodedUserParams(query, { id }), 'push', true);
   const closeLog = () => setQuery(withEncodedUserParams(query, { id: undefined }), 'push', true);
+  const { exportAuditLogs, downloadExport, dismissExport, isExporting, progress, exportResult } =
+    useExportAuditLogs();
+
   const [usersPageSize, setUsersPageSize] = React.useState(USERS_PAGE_SIZE);
   const {
     auditLogs,
@@ -113,6 +125,7 @@ const ListPage = () => {
   const isLoading = isLoadingData || isLoadingRBAC;
 
   const { results = [] } = auditLogs ?? {};
+  const totalEntries = auditLogs?.pagination?.total;
 
   return (
     <Page.Main aria-busy={isLoading}>
@@ -136,6 +149,21 @@ const ListPage = () => {
           id: 'Settings.permissions.auditLogs.listview.header.subtitle',
           defaultMessage: 'Logs of all the activities that happened in your environment',
         })}
+        primaryAction={
+          canExportAuditLogs && (
+            <Button
+              startIcon={<Download />}
+              loading={isExporting}
+              disabled={isLoading || totalEntries === 0}
+              onClick={() => exportAuditLogs(query?.filters, totalEntries ?? 0)}
+            >
+              {formatMessage({
+                id: 'Settings.permissions.auditLogs.listview.export',
+                defaultMessage: 'Export as CSV',
+              })}
+            </Button>
+          )
+        }
       />
       <Layouts.Action
         startActions={
@@ -231,6 +259,12 @@ const ListPage = () => {
         </Pagination.Root>
       </Layouts.Content>
       {query?.id && <Modal handleClose={closeLog} logId={query.id.toString()} />}
+      <ExportCard
+        progress={progress}
+        exportResult={exportResult}
+        onDownload={downloadExport}
+        onDismiss={dismissExport}
+      />
     </Page.Main>
   );
 };
