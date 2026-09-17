@@ -1,11 +1,14 @@
+import { mkdtemp } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 import process from 'node:process';
 import { outputFile, outputJSON, readFile, readJSON, remove, pathExists } from 'fs-extra';
 import * as strapiGenerators from '../../index';
+import '../../plopfile';
 
 describe('Content Type Generator — folder assignment', () => {
-  const outputDirectory = path.join(__dirname, 'output-folders');
-  const groupsPath = path.join(outputDirectory, 'src/content-structure/groups.json');
+  let outputDirectory: string;
+  let groupsPath: string;
 
   const baseAnswers = {
     displayName: 'article',
@@ -60,7 +63,12 @@ describe('Content Type Generator — folder assignment', () => {
 
   beforeAll(() => {
     const spy = jest.spyOn(process, 'cwd');
-    spy.mockReturnValue(outputDirectory);
+    spy.mockImplementation(() => outputDirectory);
+  });
+
+  beforeEach(async () => {
+    outputDirectory = await mkdtemp(path.join(tmpdir(), 'strapi-generators-folders-'));
+    groupsPath = path.join(outputDirectory, 'src/content-structure/groups.json');
   });
 
   afterAll(() => {

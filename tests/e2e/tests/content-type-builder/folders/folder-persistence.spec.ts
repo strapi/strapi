@@ -32,7 +32,7 @@ test.describe('Content type folder assignment persistence', () => {
     await folderNameInput.fill(FOLDER_NAME);
     await folderNameInput.press('Enter');
 
-    await expect(page.getByRole('button', { name: FOLDER_NAME })).toBeVisible();
+    await expect(page.getByRole('button', { name: FOLDER_NAME, exact: true })).toBeVisible();
 
     await createCollectionType(page, {
       name: CONTENT_TYPE_NAME,
@@ -42,7 +42,7 @@ test.describe('Content type folder assignment persistence', () => {
 
     await navToHeader(page, ['Content Manager', CONTENT_TYPE_NAME], CONTENT_TYPE_NAME);
 
-    const folderToggle = page.getByRole('button', { name: FOLDER_NAME });
+    const folderToggle = page.getByRole('button', { name: FOLDER_NAME, exact: true });
     await expect(folderToggle).toBeVisible();
     if ((await folderToggle.getAttribute('aria-expanded')) !== 'true') {
       await folderToggle.click();
