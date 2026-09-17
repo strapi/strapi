@@ -69,6 +69,34 @@ describe('content-structure shape validation (zod)', () => {
 
       expect(ok(file)).toBe(true);
     });
+
+    it('accepts opaque non-empty ids and resolves parent and child references exactly', () => {
+      const file = {
+        version: 1,
+        sections: {
+          collectionTypes: {
+            groups: [
+              {
+                id: 'g1',
+                name: 'Root',
+                parent: null,
+                children: [{ type: 'group', id: 'my-folder' }],
+              },
+              {
+                id: 'my-folder',
+                name: 'Child',
+                parent: 'g1',
+                children: [{ type: 'group', id: 'grp_abc12345' }],
+              },
+              { id: 'grp_abc12345', name: 'Leaf', parent: 'my-folder', children: [] },
+            ],
+          },
+          singleTypes: { groups: [] },
+        },
+      };
+
+      expect(ok(file)).toBe(true);
+    });
   });
 
   describe('group id', () => {
@@ -195,6 +223,45 @@ describe('content-structure shape validation (zod)', () => {
           singleTypes: { groups: [{ id: 'grp_lonely', name: 'S', parent: null, children: [] }] },
         },
       };
+      expect(ok(file)).toBe(false);
+    });
+
+    it('rejects a parent reference that differs from an opaque id only by trailing whitespace', () => {
+      const file = {
+        version: 1,
+        sections: {
+          collectionTypes: {
+            groups: [
+              { id: 'my-folder', name: 'Folder', parent: null, children: [] },
+              { id: 'g1', name: 'Child', parent: 'my-folder ', children: [] },
+            ],
+          },
+          singleTypes: { groups: [] },
+        },
+      };
+
+      expect(ok(file)).toBe(false);
+    });
+
+    it('rejects a group-child reference that differs from an opaque id only by trailing whitespace', () => {
+      const file = {
+        version: 1,
+        sections: {
+          collectionTypes: {
+            groups: [
+              {
+                id: 'g1',
+                name: 'Parent',
+                parent: null,
+                children: [{ type: 'group', id: 'my-folder ' }],
+              },
+              { id: 'my-folder', name: 'Folder', parent: 'g1', children: [] },
+            ],
+          },
+          singleTypes: { groups: [] },
+        },
+      };
+
       expect(ok(file)).toBe(false);
     });
 

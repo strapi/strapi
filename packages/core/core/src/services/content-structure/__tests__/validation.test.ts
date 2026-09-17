@@ -17,6 +17,29 @@ describe('contentStructureFileSchema', () => {
     expect(ok(file)).toBe(true);
   });
 
+  test('accepts opaque non-empty group ids and resolves parent and child references exactly', () => {
+    const file = {
+      version: 1,
+      sections: sections([
+        {
+          id: 'g1',
+          name: 'Root',
+          parent: null,
+          children: [{ type: 'group', id: 'my-folder' }],
+        },
+        {
+          id: 'my-folder',
+          name: 'Child',
+          parent: 'g1',
+          children: [{ type: 'group', id: 'grp_abc12345' }],
+        },
+        { id: 'grp_abc12345', name: 'Leaf', parent: 'my-folder', children: [] },
+      ]),
+    };
+
+    expect(ok(file)).toBe(true);
+  });
+
   test('rejects a malformed value', () => {
     expect(ok({ malformed: true })).toBe(false);
   });
@@ -25,11 +48,61 @@ describe('contentStructureFileSchema', () => {
     expect(ok({ version: 2, sections: sections() })).toBe(false);
   });
 
+  test('rejects an empty group id', () => {
+    const file = {
+      version: 1,
+      sections: sections([{ id: '', name: 'Empty', parent: null, children: [] }]),
+    };
+
+    expect(ok(file)).toBe(false);
+  });
+
+  test('rejects duplicate group ids across both sections', () => {
+    const file = {
+      version: 1,
+      sections: sections(
+        [{ id: 'g1', name: 'Collection', parent: null, children: [] }],
+        [{ id: 'g1', name: 'Single', parent: null, children: [] }]
+      ),
+    };
+
+    expect(ok(file)).toBe(false);
+  });
+
   test('rejects a dangling parent reference', () => {
     const file = {
       version: 1,
       sections: sections([
         { id: 'grp_orphan1', name: 'Orphan', parent: 'grp_missing', children: [] },
+      ]),
+    };
+
+    expect(ok(file)).toBe(false);
+  });
+
+  test('rejects a parent reference that differs from an opaque id only by trailing whitespace', () => {
+    const file = {
+      version: 1,
+      sections: sections([
+        { id: 'my-folder', name: 'Folder', parent: null, children: [] },
+        { id: 'g1', name: 'Child', parent: 'my-folder ', children: [] },
+      ]),
+    };
+
+    expect(ok(file)).toBe(false);
+  });
+
+  test('rejects a group-child reference that differs from an opaque id only by trailing whitespace', () => {
+    const file = {
+      version: 1,
+      sections: sections([
+        {
+          id: 'g1',
+          name: 'Parent',
+          parent: null,
+          children: [{ type: 'group', id: 'my-folder ' }],
+        },
+        { id: 'my-folder', name: 'Folder', parent: 'g1', children: [] },
       ]),
     };
 
@@ -63,5 +136,48 @@ describe('contentStructureFileSchema', () => {
     };
 
     expect(ok(file)).toBe(false);
+  });
+
+  test('rejects a parent cycle', () => {
+    const file = {
+      version: 1,
+      sections: sections([
+        {
+          id: 'g1',
+          name: 'First',
+          parent: 'my-folder',
+          children: [{ type: 'group', id: 'my-folder' }],
+        },
+        {
+          id: 'my-folder',
+          name: 'Second',
+          parent: 'g1',
+          children: [{ type: 'group', id: 'g1' }],
+        },
+      ]),
+    };
+
+    expect(ok(file)).toBe(false);
+  });
+
+  test('rejects invalid group names and content type uids', () => {
+    const invalidName = {
+      version: 1,
+      sections: sections([{ id: 'g1', name: ' Invalid', parent: null, children: [] }]),
+    };
+    const invalidUid = {
+      version: 1,
+      sections: sections([
+        {
+          id: 'g1',
+          name: 'Valid',
+          parent: null,
+          children: [{ type: 'contentType', uid: 'not-a-uid' }],
+        },
+      ]),
+    };
+
+    expect(ok(invalidName)).toBe(false);
+    expect(ok(invalidUid)).toBe(false);
   });
 });

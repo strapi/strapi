@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
 const CONTENT_TYPE_UID_REGEX = /^((strapi|admin)::[\w-]+|(api|plugin)::[\w-]+\.[\w-]+)$/;
-const GROUP_ID_REGEX = /^grp_[a-z0-9]{4,32}$/;
 
 // eslint-disable-next-line no-control-regex
 const CONTROL_CHARS_REGEX = /[\x00-\x1F\x7F-\x9F]/;
@@ -11,7 +10,7 @@ const ANSI_ESCAPE_REGEX = /\x1B\[[0-9;]*[A-Za-z]/;
 const GROUP_NAME_MAX_LENGTH = 255;
 const MAX_FOLDER_DEPTH = 3;
 
-const groupIdSchema = z.string().regex(GROUP_ID_REGEX, 'Invalid group id');
+const groupIdSchema = z.string().min(1, 'Group id must not be empty');
 
 const groupNameSchema = z
   .string()
