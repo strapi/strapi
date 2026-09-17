@@ -1,5 +1,3 @@
-import { isFetchError } from '@strapi/admin/strapi-admin';
-
 import { useAIMetadataAvailability } from './useAIMetadataAvailability';
 import { useSettings } from './useSettings';
 
@@ -12,13 +10,8 @@ import { useSettings } from './useSettings';
  * while the answer is still unknown.
  */
 export const useAIMetadataEnabled = () => {
-  const { status, data, error } = useSettings();
+  const { status, data } = useSettings();
   const isAvailable = useAIMetadataAvailability();
-
-  // TODO: editors without `settings.read` get a 403 here (strapi/strapi#25131); once the fix lands there, also make sure editors get access to the AI features here.
-  if (isFetchError(error) && error.status === 403) {
-    return { status: 'success' as const, isEnabled: false };
-  }
 
   return { status, isEnabled: isAvailable && data?.aiMetadata === true };
 };
