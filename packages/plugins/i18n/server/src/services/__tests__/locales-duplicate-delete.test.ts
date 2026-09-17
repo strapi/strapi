@@ -6,18 +6,28 @@ const fakeMetricsService = {
   sendDidUpdateI18nLocalesEvent: jest.fn(),
 };
 
-const setup = ({ duplicateCount }: { duplicateCount: number }) => {
+const setup = ({ hasDuplicate }: { hasDuplicate: boolean }) => {
   const locale = { id: 2, name: 'English-Jordan', code: 'en-JO' };
+  const duplicate = { id: 3, name: 'English-Jordan duplicate', code: 'en-JO' };
   const deleteLocale = jest.fn(() => Promise.resolve(locale));
   const deleteMany = jest.fn(() => Promise.resolve([]));
-  const findOne = jest.fn(() => Promise.resolve(locale));
-  const count = jest.fn(() => Promise.resolve(duplicateCount));
+  const findOne = jest.fn(({ where }: any) => {
+    if (where.id === locale.id) {
+      return Promise.resolve(locale);
+    }
+
+    if (where.code === locale.code && where.id?.$ne === locale.id) {
+      return Promise.resolve(hasDuplicate ? duplicate : null);
+    }
+
+    return Promise.resolve(null);
+  });
   const isLocalizedContentType = jest.fn(() => true);
   const eventHub = { emit: jest.fn(() => Promise.resolve()) };
 
   const query = jest.fn((uid: string) => {
     if (uid === 'plugin::i18n.locale') {
-      return { count, delete: deleteLocale, findOne };
+      return { delete: deleteLocale, findOne };
     }
 
     return { deleteMany };
@@ -40,7 +50,7 @@ const setup = ({ duplicateCount }: { duplicateCount: number }) => {
     },
   } as any;
 
-  return { count, deleteLocale, deleteMany, eventHub, locale };
+  return { deleteLocale, deleteMany, findOne, locale };
 };
 
 describe('Locales duplicate deletion', () => {
@@ -49,18 +59,20 @@ describe('Locales duplicate deletion', () => {
   });
 
   test('keeps localized content when another locale row uses the same code', async () => {
-    const { count, deleteLocale, deleteMany, locale } = setup({ duplicateCount: 2 });
+    const { deleteLocale, deleteMany, findOne, locale } = setup({ hasDuplicate: true });
 
     const result = await localesService.delete({ id: locale.id });
 
-    expect(count).toHaveBeenCalledWith({ where: { code: locale.code } });
+    expect(findOne).toHaveBeenCalledWith({
+      where: { code: locale.code, id: { $ne: locale.id } },
+    });
     expect(deleteMany).not.toHaveBeenCalled();
     expect(deleteLocale).toHaveBeenCalledWith({ where: { id: locale.id } });
     expect(result).toEqual(locale);
   });
 
   test('deletes localized content when removing the last locale row for a code', async () => {
-    const { deleteLocale, deleteMany, locale } = setup({ duplicateCount: 1 });
+    const { deleteLocale, deleteMany, locale } = setup({ hasDuplicate: false });
 
     await localesService.delete({ id: locale.id });
 
