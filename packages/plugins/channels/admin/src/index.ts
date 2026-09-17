@@ -4,6 +4,7 @@ import * as yup from 'yup';
 
 import { ChannelHeaderAction } from './components/ChannelHeaderAction';
 import { ChannelPicker } from './components/ChannelPicker';
+import { ChannelsSectionHeading } from './components/ChannelsSectionHeading';
 import { FillFromChannelAction } from './components/FillFromChannelAction';
 import { ResetOverridesAction } from './components/ResetOverridesAction';
 import {
@@ -116,6 +117,14 @@ export default {
         id: 'channels-visibility',
         component: ChannelVisibilityField,
       });
+      ctbApis.forms.components.add({
+        id: 'channels-availability',
+        component: ChannelAvailabilityField,
+      });
+      ctbApis.forms.components.add({
+        id: 'channels-section-heading',
+        component: ChannelsSectionHeading,
+      });
 
       ctbApis.forms.extendContentType({
         validator: () => ({
@@ -127,6 +136,15 @@ export default {
         form: {
           advanced() {
             return [
+              {
+                name: 'pluginOptions.channels.__section',
+                type: 'channels-section-heading',
+                size: 12,
+                intlLabel: {
+                  id: getTranslation('ctb.section.title'),
+                  defaultMessage: 'Channels',
+                },
+              },
               {
                 name: 'pluginOptions.channels.enabled',
                 type: 'checkbox',

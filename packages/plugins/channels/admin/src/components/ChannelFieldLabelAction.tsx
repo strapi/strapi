@@ -19,7 +19,7 @@ import {
 } from '@strapi/design-system';
 import { Stack } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { styled } from 'styled-components';
+import { createGlobalStyle, styled } from 'styled-components';
 
 import { useGetEntryOverridesQuery, useResetOverridesMutation } from '../services/channels';
 import { getTranslation } from '../utils/getTranslation';
@@ -79,11 +79,24 @@ export const SameOnAllChannels = () => {
   );
 };
 
-const OverriddenChip = styled.button`
-  /* Field.Root is an alignItems: stretch column, so the label flex spans the
-   * field's full width: auto margin sends the chip to the input's right edge,
-   * on the label's line. */
+/**
+ * Sends the chip to the input's right edge, on the label's line. The chip is
+ * nested inside the popover trigger, so the auto margin must sit on the slot
+ * (the label row's direct flex child) — and the label row only spans the
+ * field's width once widened, hence the `:has` rule.
+ */
+const ChipSlot = styled.span`
+  display: inline-flex;
   margin-left: auto;
+`;
+
+const ChipRowStyles = createGlobalStyle`
+  :where(label, div, span):has(> .channels-chip-slot) {
+    width: 100%;
+  }
+`;
+
+const OverriddenChip = styled.button`
   border: none;
   background: ${({ theme }) => theme.colors.primary100};
   color: ${({ theme }) => theme.colors.primary600};
@@ -129,7 +142,8 @@ const OverriddenBadge = ({
   React.useEffect(() => () => closeTimer.current && clearTimeout(closeTimer.current), []);
 
   return (
-    <>
+    <ChipSlot className="channels-chip-slot">
+      <ChipRowStyles />
       <Popover.Root open={open} onOpenChange={setOpen}>
         <Popover.Trigger>
           {/* Mouse-only: focus handlers would loop with the popover's focus
@@ -198,7 +212,7 @@ const OverriddenBadge = ({
           )}
         </ConfirmDialog>
       </Dialog.Root>
-    </>
+    </ChipSlot>
   );
 };
 
