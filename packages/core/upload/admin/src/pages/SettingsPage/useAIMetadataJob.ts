@@ -4,7 +4,7 @@ import { useFetchClient, useNotification } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { useQuery, useQueryClient } from 'react-query';
 
-import { getTrad } from '../utils';
+import { getTranslationKey } from '../../utils/translations';
 
 import type {
   AIMetadataJob,
@@ -71,7 +71,7 @@ export const useAIMetadataJob = (options?: { enabled?: boolean }) => {
       toggleNotification({
         type: 'success',
         message: formatMessage({
-          id: getTrad('settings.form.aiMetadata.job-completed'),
+          id: getTranslationKey('settings.form.aiMetadata.job-completed'),
           defaultMessage: 'Successfully generated metadata',
         }),
       });
@@ -84,7 +84,7 @@ export const useAIMetadataJob = (options?: { enabled?: boolean }) => {
       toggleNotification({
         type: 'danger',
         message: formatMessage({
-          id: getTrad('settings.form.aiMetadata.job-failed'),
+          id: getTranslationKey('settings.form.aiMetadata.job-failed'),
           defaultMessage: 'Failed to generate metadata. Please try again.',
         }),
       });
