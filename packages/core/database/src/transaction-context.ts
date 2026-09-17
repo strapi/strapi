@@ -28,18 +28,18 @@ export interface Store {
 
 const storage = new AsyncLocalStorage<Store>();
 
+const getTransactionStore = (trx: Knex.Transaction) => {
+  const store = storage.getStore();
+  return store?.trx === trx ? store : undefined;
+};
+
 const transactionCtx = {
   async run<TCallback extends Callback>(trx: Knex.Transaction, cb: TCallback) {
-    const store = storage.getStore();
-    return storage.run<ReturnType<TCallback>, void[]>(
-      {
-        trx,
-        // Fill with existing callbacks if nesting transactions
-        commitCallbacks: store?.commitCallbacks || [],
-        rollbackCallbacks: store?.rollbackCallbacks || [],
-      },
-      cb
-    );
+    // Only scopes of the same transaction share its lifecycle and callbacks. A transaction
+    // started from a completion hook must not inherit hooks from the finalized transaction.
+    const store = getTransactionStore(trx) ?? { trx, commitCallbacks: [], rollbackCallbacks: [] };
+
+    return storage.run<ReturnType<TCallback>, void[]>(store, cb);
   },
 
   get() {
@@ -48,7 +48,7 @@ const transactionCtx = {
   },
 
   async commit(trx: Knex.Transaction) {
-    const store = storage.getStore();
+    const store = getTransactionStore(trx);
     if (isTransactorComplete(trx)) {
       if (store?.trx) {
         store.trx = null;
@@ -74,7 +74,7 @@ const transactionCtx = {
   },
 
   async rollback(trx: Knex.Transaction) {
-    const store = storage.getStore();
+    const store = getTransactionStore(trx);
     if (isTransactorComplete(trx)) {
       if (store?.trx) {
         store.trx = null;
