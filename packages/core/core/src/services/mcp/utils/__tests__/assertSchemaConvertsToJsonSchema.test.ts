@@ -4,7 +4,8 @@ import { assertSchemaConvertsToJsonSchema } from '../assertSchemaConvertsToJsonS
 
 /** Mimics a schema from zod 4.0/4.1, which predates `~standard.jsonSchema`. */
 const withoutStandardJsonSchema = (schema: z.ZodType) => {
-  const { jsonSchema, ...standard } = schema['~standard'] as StandardSchemaWithJSON['~standard'];
+  const std = schema['~standard'] as StandardSchemaWithJSON['~standard'];
+  const { jsonSchema: _jsonSchema, ...standard } = std;
 
   return { _zod: schema._zod, '~standard': standard } as unknown as StandardSchemaWithJSON;
 };
