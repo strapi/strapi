@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { useQueryParams } from '@strapi/admin/strapi-admin';
+import { useForm, useQueryParams } from '@strapi/admin/strapi-admin';
 import { unstable_useContentManagerContext as useContentManagerContext } from '@strapi/content-manager/strapi-admin';
 import { Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
@@ -101,15 +101,33 @@ const GateInner = ({ field, children }: FieldDecoratorProps) => {
   const wrapperRef = React.useRef<HTMLDivElement>(null);
   const [frame, setFrame] = React.useState({ top: 0, height: 0 });
 
-  const veiled =
+  const values = useForm('ChannelOverrideGate', (state) => state.values) as Record<string, unknown>;
+  const setValues = useForm('ChannelOverrideGate', (state) => state.setValues);
+  // The inherited value as it was when the field got unlocked — what Cancel
+  // puts back before re-locking.
+  const inheritedValue = React.useRef<unknown>(undefined);
+
+  const gateActive =
     !isOnDefault &&
     !unavailable &&
     layoutChannels?.enabled === true &&
     !isCreatingEntry &&
     documentId !== null &&
     overrides !== undefined &&
-    !overrides[current.slug]?.attributes.includes(field.name) &&
-    !unlocked;
+    !overrides[current.slug]?.attributes.includes(field.name);
+
+  const veiled = gateActive && !unlocked;
+  const overriding = gateActive && unlocked;
+
+  const unlock = () => {
+    inheritedValue.current = values[field.name];
+    setUnlocked(true);
+  };
+
+  const cancelOverride = () => {
+    setValues({ ...values, [field.name]: inheritedValue.current });
+    setUnlocked(false);
+  };
 
   // The invisible layer only spans the input control (the label above and
   // the caption below stay live): the union of the field's elements after
@@ -175,6 +193,27 @@ const GateInner = ({ field, children }: FieldDecoratorProps) => {
     return () => observer.disconnect();
   }, [veiled]);
 
+  if (overriding) {
+    return (
+      <GateWrapper>
+        {children}
+        <Typography variant="pi" textColor="primary600" fontWeight="semiBold">
+          {formatMessage(
+            {
+              id: getTranslation('field.overriding'),
+              defaultMessage: 'Overriding on {channel} — saved with the entry',
+            },
+            { channel: current.name }
+          )}
+          {' · '}
+          <OverrideLink type="button" $active={false} onClick={cancelOverride}>
+            {formatMessage({ id: getTranslation('field.cancel'), defaultMessage: 'Cancel' })}
+          </OverrideLink>
+        </Typography>
+      </GateWrapper>
+    );
+  }
+
   if (!veiled) {
     return <>{children}</>;
   }
@@ -194,7 +233,7 @@ const GateInner = ({ field, children }: FieldDecoratorProps) => {
         $top={frame.top}
         $height={frame.height}
         type="button"
-        onClick={() => setUnlocked(true)}
+        onClick={unlock}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => {
           setHovered(false);
@@ -222,12 +261,7 @@ const GateInner = ({ field, children }: FieldDecoratorProps) => {
           defaultMessage: 'Same as Default',
         })}
         {' · '}
-        <OverrideLink
-          type="button"
-          $active={hovered}
-          onClick={() => setUnlocked(true)}
-          aria-label={unlockLabel}
-        >
+        <OverrideLink type="button" $active={hovered} onClick={unlock} aria-label={unlockLabel}>
           {formatMessage({ id: getTranslation('field.override'), defaultMessage: 'Override' })}
         </OverrideLink>
       </Typography>

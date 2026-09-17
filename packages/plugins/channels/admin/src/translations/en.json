@@ -67,5 +67,7 @@
   "field.click-to-override": "Click to override on {channel}",
   "field.override": "Override",
   "field.same-as-default": "Same as Default",
-  "field.click-to-override.short": "Click to override"
+  "field.click-to-override.short": "Click to override",
+  "field.overriding": "Overriding on {channel} — saved with the entry",
+  "field.cancel": "Cancel"
 }
