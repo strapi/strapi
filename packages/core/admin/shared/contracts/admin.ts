@@ -107,7 +107,7 @@ export declare namespace TelemetryProperties {
       numberOfAllContentTypes: number;
       numberOfComponents: number;
       numberOfDynamicZones: number;
-      numberOfFolders: number;
+      numberOfContentTypeFolders: number;
     };
     error?: errors.ApplicationError;
   }

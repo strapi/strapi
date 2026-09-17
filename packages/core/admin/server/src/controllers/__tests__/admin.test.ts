@@ -66,7 +66,7 @@ describe('Admin Controller', () => {
       } as any;
     };
 
-    test('reports numberOfFolders from the content-structure service', async () => {
+    test('reports numberOfContentTypeFolders from the content-structure service', async () => {
       const countGroups = jest.fn(async () => 4);
       setupStrapi({ contentStructure: { countGroups } });
 
@@ -74,7 +74,7 @@ describe('Admin Controller', () => {
       const result = await adminController.telemetryProperties(ctx);
 
       expect(countGroups).toHaveBeenCalled();
-      expect(result?.data).toMatchObject({ numberOfFolders: 4 });
+      expect(result?.data).toMatchObject({ numberOfContentTypeFolders: 4 });
     });
 
     test('falls back to 0 folders when the content-structure service is unavailable', async () => {
@@ -83,7 +83,7 @@ describe('Admin Controller', () => {
       const ctx = {} as any;
       const result = await adminController.telemetryProperties(ctx);
 
-      expect(result?.data).toMatchObject({ numberOfFolders: 0 });
+      expect(result?.data).toMatchObject({ numberOfContentTypeFolders: 0 });
     });
 
     test('falls back to 0 folders when countGroups throws', async () => {
@@ -95,7 +95,7 @@ describe('Admin Controller', () => {
       const ctx = {} as any;
       const result = await adminController.telemetryProperties(ctx);
 
-      expect(result?.data).toMatchObject({ numberOfFolders: 0 });
+      expect(result?.data).toMatchObject({ numberOfContentTypeFolders: 0 });
     });
 
     test('returns 204 and no body when telemetry is disabled', async () => {

@@ -17,7 +17,7 @@ export interface TelemetryProperties {
   numberOfAllContentTypes?: number;
   numberOfComponents?: number;
   numberOfDynamicZones?: number;
-  numberOfFolders?: number;
+  numberOfContentTypeFolders?: number;
 }
 
 export interface TrackingContextValue {
