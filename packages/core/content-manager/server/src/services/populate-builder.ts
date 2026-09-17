@@ -12,7 +12,7 @@ import { type Populate, getDeepPopulate, getQueryPopulate } from './utils/popula
  * // populate = { article: { populate: { count: true } } }
  *
  */
-const populateBuilder = (uid: UID.Schema) => {
+export const populateBuilder = (uid: UID.Schema) => {
   let getInitialPopulate = async (): Promise<undefined | Populate> => {
     return undefined;
   };

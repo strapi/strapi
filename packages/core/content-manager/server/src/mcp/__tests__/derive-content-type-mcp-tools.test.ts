@@ -206,6 +206,12 @@ jest.mock('../../utils', () => ({
   }),
 }));
 
+// `buildWriteReplyPopulate` imports the builder directly instead of going through `getService`,
+// so the module itself is mocked onto the same shared builder the `getService` mock returns.
+jest.mock('../../services/populate-builder', () => ({
+  populateBuilder: () => mockPopulateBuilder(),
+}));
+
 jest.mock('../../controllers/validation/dimensions', () => ({
   getDocumentLocaleAndStatus: jest.fn(({ locale, status }: { locale?: string; status?: string }) =>
     Promise.resolve({ locale: locale ?? 'en', status: status ?? 'draft' })
