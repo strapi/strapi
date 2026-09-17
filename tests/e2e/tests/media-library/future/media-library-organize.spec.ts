@@ -9,20 +9,16 @@ import { describeOnCondition } from '../../../../utils/shared';
 import { AssetsPage } from './page-objects/AssetsPage';
 
 /**
- * Journey 2 — Organize my library (CMS-1066).
+ * Journey 2 — Organize my library.
  *
  * A content manager structures an already-populated library and finds assets
- * within it. Broad and shallow: chains every capability once in a single
- * flow, per the journey's own framing in CMS-1066.
+ * within it. Broad and shallow: chains every capability once in a single flow,
+ * per the journey's own framing.
  *
- * Two steps from the ticket's pseudocode are not yet shippped in the
- * future/unstable Media Library as of this writing, so they're left as
- * comments rather than fabricated assertions:
- *  - "rename a folder" [CMS-127] — no rename mutation/UI exists anywhere in
- *    packages/core/upload/admin/src/future (FolderActionsMenu only offers
- *    Copy link / Move to folder / Delete folder).
- *  - "the breadcrumb reflects the current depth" — there is no breadcrumb
- *    component in future/; the header instead shows "<Folder> (N items)".
+ * One step from the journey is not shipped and is left as a note rather than a
+ * fabricated assertion: "the breadcrumb reflects the current depth" — there is
+ * no breadcrumb component in this Media Library; the header shows
+ * "<Folder> (N items)" and the side tree carries the hierarchy instead.
  */
 
 const UPLOADS_DIR = path.join(__dirname, '../../../data/uploads');
@@ -48,7 +44,7 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
         await assetsPage.createFolder('Marketing');
         await expect(assetsPage.getFolderCard('Marketing')).toBeVisible();
 
-        // I can create nested sub-folders                          [CMS-127/131/133]
+        // Nested sub-folders
         await assetsPage.navigateIntoFolder('Marketing');
         await expect(page.getByRole('heading', { name: /^Marketing/ })).toBeVisible();
 
@@ -57,7 +53,7 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
       });
 
       await test.step('I navigate folders', async () => {
-        // folders show as nodes in the side tree                    [CMS-130/133]
+        // Folders show as nodes in the side tree
         await assetsPage.navigateIntoFolder('Campaigns');
         await expect(page.getByRole('heading', { name: /^Campaigns/ })).toBeVisible();
 
@@ -71,8 +67,18 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
       await test.step('I use the folder "…" actions menu', async () => {
         await assetsPage.createFolder('Design assets');
 
-        // Copy link to folder                                      [CMS-1497]
-        const designFolderCard = assetsPage.getFolderCard('Design assets');
+        // Rename a folder, and prove the old name is gone rather than duplicated.
+        const createdFolderCard = assetsPage.getFolderCard('Design assets');
+        await createdFolderCard.getByRole('button', { name: 'More actions' }).click();
+        await page.getByRole('menuitem', { name: 'Rename folder' }).click();
+        const renameDialog = page.getByRole('dialog', { name: 'Rename folder' });
+        await renameDialog.getByRole('textbox', { name: 'Folder name' }).fill('Design system');
+        await renameDialog.getByRole('button', { name: 'Save' }).click();
+        await expect(assetsPage.getFolderCard('Design system')).toBeVisible();
+        await expect(assetsPage.getFolderCard('Design assets')).not.toBeVisible();
+
+        // Copy link to folder
+        const designFolderCard = assetsPage.getFolderCard('Design system');
         await designFolderCard.getByRole('button', { name: 'More actions' }).click();
         await page.getByRole('menuitem', { name: 'Copy link to folder' }).click();
         await expect(
@@ -82,7 +88,7 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
             .filter({ hasText: 'Folder link copied.' })
         ).toBeVisible();
 
-        // Move the folder itself into another folder                [CMS-1497]
+        // Move the folder itself into another folder
         await designFolderCard.getByRole('button', { name: 'More actions' }).click();
         await page.getByRole('menuitem', { name: 'Move to folder' }).click();
         const moveDialog = page.getByRole('dialog', { name: 'Move elements to' });
@@ -92,10 +98,10 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
         await page.getByRole('option', { name: 'Marketing', exact: true }).click();
         await moveDialog.getByRole('button', { name: 'Move' }).click();
         await expect(assetsPage.getMoveSuccessNotification()).toBeVisible();
-        await expect(assetsPage.getFolderCard('Design assets')).not.toBeVisible();
+        await expect(assetsPage.getFolderCard('Design system')).not.toBeVisible();
 
         await assetsPage.navigateIntoFolder('Marketing');
-        await expect(assetsPage.getFolderCard('Design assets')).toBeVisible();
+        await expect(assetsPage.getFolderCard('Design system')).toBeVisible();
         await assetsPage.getHomeTreeRow().click();
       });
 
@@ -122,6 +128,8 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
         await assetsPage.closeUploadProgressDialog();
 
         const searchBox = page.getByRole('searchbox', { name: 'Search for an asset' });
+        const unfilteredRowCount = (await assetsPage.getTableRowNames()).length;
+
         await searchBox.fill('test-image');
         await expect(assetsPage.getAssetRow('test-image')).toBeVisible();
 
@@ -131,6 +139,12 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
         await expect(page.getByText('No results found')).toBeVisible();
 
         await searchBox.fill('');
+        // `AssetsSearchInput` debounces the query by 300ms, so clearing the box does
+        // not restore the list synchronously. Pin it back to its full state here
+        // rather than letting the next step's first read race the debounce.
+        await expect
+          .poll(async () => (await assetsPage.getTableRowNames()).length)
+          .toBe(unfilteredRowCount);
       });
 
       await test.step('I sort assets', async () => {
@@ -154,7 +168,7 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
 
       await test.step('I scroll through a large library', async () => {
         // Enough assets to exceed the 20-item page size regardless of what the
-        // with-admin fixture already seeded.                        [CMS-134]
+        // with-admin fixture already seeded.
         await assetsPage.uploadFilesWithFilePicker(Array(22).fill(IMAGE));
         await assetsPage.waitForUploadProgressSuccess();
         await assetsPage.closeUploadProgressDialog();
@@ -173,9 +187,8 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
           .poll(async () => (await assetsPage.getTableRowNames()).length)
           .toBeGreaterThan(initialRows.length);
 
-        // A tall enough viewport auto-loads the next page with no manual
-        // scroll at all (CMS-1562) — the load-more sentinel is already
-        // on-screen the moment the list renders.
+        // A tall enough viewport auto-loads the next page with no manual scroll at
+        // all — the load-more sentinel is already on-screen when the list renders.
         await page.setViewportSize({ width: 1280, height: 2400 });
         await page.reload();
         await assetsPage.switchToTableView();
@@ -183,11 +196,28 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
           .poll(async () => (await assetsPage.getTableRowNames()).length)
           .toBeGreaterThan(20);
 
-        // Re-entering the folder after scrolling still shows a correct,
-        // complete list rather than a stuck/broken page-1-only view (CMS-1535).
-        await assetsPage.getHomeTreeRow().click();
+        // Leaving a folder and coming back still shows a correct, complete list
+        // rather than a stuck or page-1-only view.
+        //
+        // Back to a short viewport first: the tall one above auto-loads page 2 on
+        // render, which would mask a broken re-entry by satisfying the final
+        // assertion before any navigation happened.
+        await page.setViewportSize({ width: 1280, height: 720 });
+        await page.reload();
+        await assetsPage.switchToTableView();
+
         await assetsPage.navigateIntoFolder('Marketing');
+        // Marketing holds exactly what the earlier steps put there — the moved
+        // asset and the moved folder — and not Home's list.
+        await expect(assetsPage.getAssetRow('test-image')).toBeVisible();
+        await expect(assetsPage.getFolderRow('Design system')).toBeVisible();
+
         await assetsPage.getHomeTreeRow().click();
+        // Re-entry starts at a fresh first page...
+        await expect
+          .poll(async () => fileRows(await assetsPage.getTableRowNames()).length)
+          .toBeLessThanOrEqual(20);
+        // ...and scrolling still loads the next one.
         await page.mouse.wheel(0, 20_000);
         await expect
           .poll(async () => (await assetsPage.getTableRowNames()).length)
