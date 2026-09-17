@@ -35,15 +35,18 @@ const GateWrapper = styled.div`
  * click makes the field editable, and saving records the override. The
  * measured `$top` offset keeps the field label out of the ghost zone.
  */
-const GhostFrame = styled.button<{ $top: number }>`
+const GhostFrame = styled.button<{ $top: number; $height: number }>`
   position: absolute;
   top: ${({ $top }) => $top}px;
+  height: ${({ $height }) => $height}px;
   right: 0;
-  bottom: 0;
   left: 0;
   z-index: 2;
   border: 1px dashed ${({ theme }) => theme.colors.neutral500};
   border-radius: ${({ theme }) => theme.borderRadius};
+  /* Paints a page-colored ring just inside the dashes, hiding the control's
+   * own border so the ghost reads as dashed-only, never a double line. */
+  box-shadow: inset 0 0 0 2px ${({ theme }) => theme.colors.neutral0};
   background: transparent;
   cursor: pointer;
   padding: 0;
@@ -105,7 +108,7 @@ const GateInner = ({ field, children }: FieldDecoratorProps) => {
   const [unlocked, setUnlocked] = React.useState(false);
   const [hovered, setHovered] = React.useState(false);
   const wrapperRef = React.useRef<HTMLDivElement>(null);
-  const [frameTop, setFrameTop] = React.useState(0);
+  const [frame, setFrame] = React.useState({ top: 0, height: 0 });
 
   const veiled =
     !isOnDefault &&
@@ -117,21 +120,47 @@ const GateInner = ({ field, children }: FieldDecoratorProps) => {
     !overrides[current.slug]?.attributes.includes(field.name) &&
     !unlocked;
 
-  // The ghost frame only wraps the input control: measure past the field
-  // label and follow its size.
+  // The ghost frame hugs the input CONTROL exactly: the union of the field's
+  // elements after its label (so the label stays clear above and the caption
+  // below never falls inside the dashes), kept fresh as the control resizes.
   React.useLayoutEffect(() => {
     const wrapper = wrapperRef.current;
     if (!veiled || !wrapper) {
       return undefined;
     }
     const measure = () => {
+      const wrapperRect = wrapper.getBoundingClientRect();
       const label = wrapper.querySelector('label');
-      if (!label) {
-        setFrameTop(0);
-        return;
+      const container = label?.parentElement;
+      let top = Infinity;
+      let bottom = -Infinity;
+      if (container) {
+        let pastLabel = false;
+        for (const child of Array.from(container.children)) {
+          if (child === label) {
+            pastLabel = true;
+            continue;
+          }
+          if (!pastLabel) {
+            continue;
+          }
+          const rect = child.getBoundingClientRect();
+          if (rect.height === 0) {
+            continue;
+          }
+          top = Math.min(top, rect.top);
+          bottom = Math.max(bottom, rect.bottom);
+        }
       }
-      const wrapperTop = wrapper.getBoundingClientRect().top;
-      setFrameTop(Math.max(0, label.getBoundingClientRect().bottom - wrapperTop + 2));
+      if (bottom === -Infinity) {
+        // No label to anchor on: frame the whole rendered input.
+        top = wrapperRect.top;
+        bottom = wrapperRect.bottom;
+      }
+      setFrame({
+        top: Math.max(0, top - wrapperRect.top),
+        height: Math.max(0, bottom - top),
+      });
     };
     measure();
     const observer = new ResizeObserver(measure);
@@ -147,7 +176,8 @@ const GateInner = ({ field, children }: FieldDecoratorProps) => {
     <GateWrapper ref={wrapperRef}>
       {children}
       <GhostFrame
-        $top={frameTop}
+        $top={frame.top}
+        $height={frame.height}
         type="button"
         onClick={() => setUnlocked(true)}
         onMouseEnter={() => setHovered(true)}
