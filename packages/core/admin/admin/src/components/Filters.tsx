@@ -397,6 +397,14 @@ const List = () => {
 
   const options = useFilters('List', ({ options }) => options);
   const queryFilters = query?.filters?.$and ?? [];
+  /**
+   * One stable key per list slot, kept in a ref. The write happens during
+   * render, but it is driven by the list length and not by the number of render
+   * calls, so a repeat invocation (the StrictMode double render) finds the
+   * lengths already equal and changes nothing. A content-derived key is not an
+   * option: identical filters are a legal query, so a key would still need an
+   * occurrence counter on top of the content.
+   */
   const filterKeyPrefix = React.useId();
   const nextFilterKey = React.useRef(0);
   const filterKeys = React.useRef<string[]>([]);
@@ -405,6 +413,13 @@ const List = () => {
     filterKeys.current.push(`${filterKeyPrefix}-${nextFilterKey.current}`);
     nextFilterKey.current += 1;
   }
+  /**
+   * Truncation drops keys from the tail. `handleRemove` splices the removed
+   * slot out first, so removal through this component stays correct. A list
+   * that shrinks by any other route (browser history, an external `setQuery`,
+   * a clear all) shifts the remaining keys and falls back to the index-key
+   * behaviour this replaced. Accepted limit, not a bug to chase.
+   */
   filterKeys.current.length = queryFilters.length;
 
   const filtersWithKeys = queryFilters.map((queryFilter, index) => ({
