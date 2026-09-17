@@ -46,6 +46,22 @@ const InvisibleGate = styled.button<{ $top: number; $height: number }>`
   padding: 0;
 `;
 
+/** Cursor-following hint shown while hovering a locked control. */
+const HoverHint = styled.div`
+  position: absolute;
+  z-index: 3;
+  transform: translate(-50%, -110%);
+  pointer-events: none;
+  white-space: nowrap;
+  background: ${({ theme }) => theme.colors.neutral900};
+  color: ${({ theme }) => theme.colors.neutral0};
+  border-radius: ${({ theme }) => theme.borderRadius};
+  padding: 4px 10px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  box-shadow: ${({ theme }) => theme.shadows.filterShadow};
+`;
+
 const OverrideLink = styled.button<{ $active: boolean }>`
   border: none;
   background: transparent;
@@ -81,6 +97,7 @@ const GateInner = ({ field, children }: FieldDecoratorProps) => {
   );
   const [unlocked, setUnlocked] = React.useState(false);
   const [hovered, setHovered] = React.useState(false);
+  const [cursor, setCursor] = React.useState<{ x: number; y: number } | null>(null);
   const wrapperRef = React.useRef<HTMLDivElement>(null);
   const [frame, setFrame] = React.useState({ top: 0, height: 0 });
 
@@ -179,9 +196,26 @@ const GateInner = ({ field, children }: FieldDecoratorProps) => {
         type="button"
         onClick={() => setUnlocked(true)}
         onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
+        onMouseLeave={() => {
+          setHovered(false);
+          setCursor(null);
+        }}
+        onMouseMove={(event: React.MouseEvent) => {
+          const rect = wrapperRef.current?.getBoundingClientRect();
+          if (rect) {
+            setCursor({ x: event.clientX - rect.left, y: event.clientY - rect.top });
+          }
+        }}
         aria-label={unlockLabel}
       />
+      {hovered && cursor ? (
+        <HoverHint style={{ left: cursor.x, top: cursor.y - 6 }} aria-hidden>
+          {formatMessage({
+            id: getTranslation('field.click-to-override.short'),
+            defaultMessage: 'Click to override',
+          })}
+        </HoverHint>
+      ) : null}
       <Typography variant="pi" textColor="neutral600">
         {formatMessage({
           id: getTranslation('field.same-as-default'),

@@ -66,5 +66,6 @@
   "ctb.section.title": "Channels",
   "field.click-to-override": "Click to override on {channel}",
   "field.override": "Override",
-  "field.same-as-default": "Same as Default"
+  "field.same-as-default": "Same as Default",
+  "field.click-to-override.short": "Click to override"
 }
