@@ -87,12 +87,19 @@ export const SameOnAllChannels = () => {
  */
 const ChipSlot = styled.span`
   display: inline-flex;
+  /* Covers the no-wrapper case where the slot is the row's own flex child. */
   margin-left: auto;
 `;
 
+/**
+ * The label row already spans the field's width; the chip's direct parent is
+ * the label's action wrapper, a plain flex child sitting next to the text.
+ * Pushing THAT wrapper right (never sizing it — a width would crush the
+ * label text into an ellipsis) parks the chip at the field's right edge.
+ */
 const ChipRowStyles = createGlobalStyle`
   :where(label, div, span):has(> .channels-chip-slot) {
-    width: 100%;
+    margin-left: auto;
   }
 `;
 
