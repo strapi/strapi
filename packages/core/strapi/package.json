@@ -120,7 +120,6 @@
     "@strapi/core": "5.53.0",
     "@strapi/data-transfer": "5.53.0",
     "@strapi/database": "5.53.0",
-    "@strapi/design-system": "0.0.0-experimental.65fd50f14e6e09b03cee73167fc9f98ae9ca777f",
     "@strapi/email": "5.53.0",
     "@strapi/generators": "5.53.0",
     "@strapi/i18n": "5.53.0",

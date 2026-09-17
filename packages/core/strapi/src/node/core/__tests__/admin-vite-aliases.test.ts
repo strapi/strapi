@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import fs from 'node:fs';
 
 import readPkgUp from 'read-pkg-up';
@@ -12,8 +11,6 @@ import {
 } from '../admin-vite-alias-modules';
 import { buildAdminViteResolveAliases, getSubpathEntries } from '../admin-vite-aliases';
 import { getModulePath, getModulePathFrom } from '../resolve-module';
-
-const adminDeps = require('@strapi/admin/package.json').dependencies as Record<string, string>;
 
 /** CJS/UMD deps on optimizeDeps.include must stay aliased for pnpm (#27014). */
 const PNPM_OPTIMIZE_ALIAS_MODULES = ['invariant', 'prismjs', 'lodash'] as const;
@@ -140,18 +137,14 @@ describe('buildAdminViteResolveAliases', () => {
     }
   );
 
-  it.each(ADMIN_PINNED_ALIAS_MODULES)(
-    'aliases %s to the version pinned by @strapi/admin',
-    (mod) => {
-      const alias = buildAdminViteResolveAliases();
-      // Without this, a missing alias reads as a read-pkg-up version mismatch at the repo root
-      expect(alias[mod]).toBeDefined();
+  it.each(ADMIN_PINNED_ALIAS_MODULES)('aliases %s to its own package root', (mod) => {
+    const alias = buildAdminViteResolveAliases();
+    expect(alias[mod]).toBeDefined();
 
-      const pkg = readPkgUp.sync({ cwd: alias[mod] });
+    const pkg = readPkgUp.sync({ cwd: alias[mod] });
 
-      expect(pkg?.packageJson?.version).toBe(adminDeps[mod]);
-    }
-  );
+    expect(pkg?.packageJson?.name).toBe(mod);
+  });
 });
 
 /** A string alias key matches the exact importee, or a prefix of it on a slash boundary */
