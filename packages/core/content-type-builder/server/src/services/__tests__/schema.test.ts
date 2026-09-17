@@ -25,6 +25,8 @@ const apiHandlerServiceMock = {
   clear: jest.fn().mockResolvedValue(undefined),
   backup: jest.fn().mockResolvedValue(undefined),
   rollback: jest.fn().mockResolvedValue(undefined),
+  clearGenerated: jest.fn().mockResolvedValue(undefined),
+  finalize: jest.fn().mockResolvedValue(undefined),
 };
 
 const contentTypeServiceMock = {
@@ -228,7 +230,9 @@ describe('Content Type Builder - Schema service', () => {
       // Verify API operations
 
       expect(apiHandlerServiceMock.backup).toHaveBeenCalledWith(contentTypeUid);
-      expect(apiHandlerServiceMock.clear).toHaveBeenCalledWith(contentTypeUid);
+      expect(apiHandlerServiceMock.clear).toHaveBeenCalledWith(contentTypeUid, {
+        preserveBackup: true,
+      });
 
       // Verify event emission
       expect(strapi.eventHub.emit).toHaveBeenCalledWith('content-type.delete', {
@@ -396,21 +400,15 @@ describe('Content Type Builder - Schema service', () => {
         components: [],
       };
 
-      await updateSchema(schema);
+      await expect(updateSchema(schema)).rejects.toThrow('API clear failed');
 
       // Verify writeFiles is called before API operations
       expect(builderServiceMock.writeFiles).toHaveBeenCalledTimes(1);
 
-      // Verify error handling
-      expect(strapi.log.error).toHaveBeenCalled();
-
-      // Verify rollback was called
+      // The request must fail and all written artifacts must be compensated.
+      expect(builderServiceMock.rollback).toHaveBeenCalledWith();
       expect(apiHandlerServiceMock.rollback).toHaveBeenCalledWith(contentTypeUid);
-
-      // Events should still be emitted even after an error
-      expect(strapi.eventHub.emit).toHaveBeenCalledWith('content-type.delete', {
-        contentType: mockContentType,
-      });
+      expect(strapi.eventHub.emit).not.toHaveBeenCalled();
 
       // Verify the execution order: writeFiles should be called before clear attempt
       const writeFilesCallOrder = jest.mocked(builderServiceMock.writeFiles).mock
@@ -824,6 +822,50 @@ describe('Content Type Builder - Schema service', () => {
       expect(builderServiceMock.writeFiles).toHaveBeenCalledTimes(1);
       expect(contentStructureServiceMock.commitFromUpdate).not.toHaveBeenCalled();
       expect(builderServiceMock.rollback).not.toHaveBeenCalled();
+    });
+
+    it('removes a partial generated API before an absent schema directory prevents rollback', async () => {
+      const artifacts = { schema: false, api: false, groups: 'before' };
+      builderServiceMock.createContentType.mockImplementation(() => {
+        artifacts.schema = true;
+      });
+      builderServiceMock.rollback.mockImplementationOnce(async () => {
+        artifacts.schema = false;
+        throw new Error('schema directory does not exist');
+      });
+      contentTypeServiceMock.generateAPI.mockImplementationOnce(async () => {
+        artifacts.api = true;
+        throw new Error('generator failed');
+      });
+      apiHandlerServiceMock.clearGenerated.mockImplementationOnce(async () => {
+        artifacts.api = false;
+      });
+      contentStructureServiceMock.commitFromUpdate.mockImplementationOnce(async () => {
+        artifacts.groups = 'after';
+        return true;
+      });
+
+      await expect(
+        updateSchema({
+          contentTypes: [
+            {
+              action: 'create',
+              uid: 'api::test.test',
+              displayName: 'Test',
+              singularName: 'test',
+              pluralName: 'tests',
+              kind: 'collectionType',
+              draftAndPublish: false,
+              pluginOptions: {},
+              options: {},
+              attributes: [],
+            },
+          ],
+          components: [],
+        })
+      ).rejects.toThrow('schema directory does not exist');
+
+      expect(artifacts).toEqual({ schema: false, api: false, groups: 'before' });
     });
 
     it('should handle attribute deletion during component update', async () => {

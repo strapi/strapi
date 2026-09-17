@@ -5,6 +5,7 @@ import type { UID, Struct } from '@strapi/types';
 import { formatAttributes, replaceTemporaryUIDs } from '../utils/attributes';
 import { getService } from '../utils';
 import createBuilder from './schema-builder';
+import { finalizeSchemaMutation, rollbackSchemaMutation } from './schema-mutation';
 import { coreUids, pluginsUids } from './constants';
 
 const { ApplicationError } = errors;
@@ -63,18 +64,50 @@ export const formatContentType = (contentType: any) => {
 export const createContentTypes = async (contentTypes: any[]) => {
   const builder = createBuilder();
   const createdContentTypes: any[] = [];
+  const generatedApiNames: string[] = [];
+  let schemaAlreadyRolledBack = false;
 
-  for (const contentType of contentTypes) {
-    createdContentTypes.push(await createContentType(contentType, { defaultBuilder: builder }));
+  try {
+    for (const contentType of contentTypes) {
+      createdContentTypes.push(
+        await createContentType(contentType, {
+          defaultBuilder: builder,
+          generatedApiNames,
+          deferEvent: true,
+        })
+      );
+    }
+
+    const schemaFilesWritten = await builder.writeFiles();
+    if (!schemaFilesWritten) {
+      schemaAlreadyRolledBack = true;
+      throw new ApplicationError('Invalid schema edition');
+    }
+  } catch (error) {
+    const apiHandler = strapi
+      .plugin('content-type-builder')
+      .service('api-handler') as typeof import('./api-handler');
+    await rollbackSchemaMutation({
+      builder,
+      apiHandler,
+      generatedApiNames,
+      schemaAlreadyRolledBack,
+    });
+
+    throw error;
   }
 
-  await builder.writeFiles();
+  for (const contentType of createdContentTypes) {
+    strapi.eventHub.emit('content-type.create', { contentType });
+  }
 
   return createdContentTypes;
 };
 
 type CreateContentTypeOptions = {
   defaultBuilder?: any; // TODO
+  generatedApiNames?: string[];
+  deferEvent?: boolean;
 };
 
 /**
@@ -113,19 +146,48 @@ export const createContentType = async (
     return builder.editComponent(options);
   });
 
-  // generate api skeleton
-  await generateAPI({
-    displayName: contentType!.displayName || contentType!.info.displayName,
-    singularName: contentType!.singularName,
-    pluralName: contentType!.pluralName,
-    kind: contentType!.kind,
-  });
+  const generatedApiNames = options.generatedApiNames ?? [];
+  let schemaAlreadyRolledBack = false;
 
-  if (!options.defaultBuilder) {
-    await builder.writeFiles();
+  try {
+    // Generate before writing the schema so a successful mutation retains the existing layout.
+    if (!contentType.plugin) {
+      generatedApiNames.push(contentType.singularName);
+
+      await generateAPI({
+        displayName: contentType!.displayName || contentType!.info.displayName,
+        singularName: contentType!.singularName,
+        pluralName: contentType!.pluralName,
+        kind: contentType!.kind,
+      });
+    }
+
+    if (!options.defaultBuilder) {
+      const schemaFilesWritten = await builder.writeFiles();
+      if (!schemaFilesWritten) {
+        schemaAlreadyRolledBack = true;
+        throw new ApplicationError('Invalid schema edition');
+      }
+    }
+  } catch (error) {
+    if (!options.defaultBuilder) {
+      const apiHandler = strapi
+        .plugin('content-type-builder')
+        .service('api-handler') as typeof import('./api-handler');
+      await rollbackSchemaMutation({
+        builder,
+        apiHandler,
+        generatedApiNames,
+        schemaAlreadyRolledBack,
+      });
+    }
+
+    throw error;
   }
 
-  strapi.eventHub.emit('content-type.create', { contentType: newContentType });
+  if (!options.deferEvent) {
+    strapi.eventHub.emit('content-type.create', { contentType: newContentType });
+  }
 
   return newContentType;
 };
@@ -167,6 +229,7 @@ export const editContentType = async (
   const builder = createBuilder();
 
   const previousSchema = builder.contentTypes.get(uid).schema;
+  const isPluginContentType = Boolean(builder.contentTypes.get(uid).plugin);
   const previousKind = previousSchema.kind;
   const newKind = contentType.kind || previousKind;
 
@@ -209,25 +272,44 @@ export const editContentType = async (
   });
 
   if (newKind !== previousKind) {
-    const apiHandler = strapi.plugin('content-type-builder').service('api-handler');
+    let schemaAlreadyRolledBack = false;
+    const apiHandler = strapi
+      .plugin('content-type-builder')
+      .service('api-handler') as typeof import('./api-handler');
     await apiHandler.backup(uid);
 
     try {
-      await apiHandler.clear(uid);
+      await apiHandler.clear(uid, { preserveBackup: true });
 
-      // generate new api skeleton
-      await generateAPI({
-        displayName: updatedContentType.schema.info.displayName,
-        singularName: updatedContentType.schema.info.singularName,
-        pluralName: updatedContentType.schema.info.pluralName,
-        kind: updatedContentType.schema.kind,
-      });
+      if (!isPluginContentType) {
+        // generate new api skeleton
+        await generateAPI({
+          displayName: updatedContentType.schema.info.displayName,
+          singularName: updatedContentType.schema.info.singularName,
+          pluralName: updatedContentType.schema.info.pluralName,
+          kind: updatedContentType.schema.kind,
+        });
+      }
 
-      await builder.writeFiles();
+      const schemaFilesWritten = await builder.writeFiles();
+      if (!schemaFilesWritten) {
+        schemaAlreadyRolledBack = true;
+        throw new ApplicationError('Invalid schema edition');
+      }
       await pruneFolderReferences([uid]);
     } catch (error) {
+      await rollbackSchemaMutation({
+        builder,
+        apiHandler,
+        backedUpApiUids: [uid],
+        schemaAlreadyRolledBack,
+      });
+
+      throw error;
+    }
+
+    for (const error of await finalizeSchemaMutation({ apiHandler, backedUpApiUids: [uid] })) {
       strapi.log.error(error);
-      await apiHandler.rollback(uid);
     }
 
     return updatedContentType;
@@ -242,23 +324,50 @@ export const editContentType = async (
 
 export const deleteContentTypes = async (uids: UID.ContentType[]) => {
   const builder = createBuilder();
-  const apiHandler = strapi.plugin('content-type-builder').service('api-handler');
+  const apiHandler = strapi
+    .plugin('content-type-builder')
+    .service('api-handler') as typeof import('./api-handler');
 
-  for (const uid of uids) {
-    await deleteContentType(uid, builder);
-  }
+  const deletedContentTypes: any[] = [];
+  const backedUpApiUids: UID.ContentType[] = [];
+  let schemaAlreadyRolledBack = false;
 
-  await builder.writeFiles();
-  for (const uid of uids) {
-    try {
-      await apiHandler.clear(uid);
-    } catch (error) {
-      strapi.log.error(error);
-      await apiHandler.rollback(uid);
+  try {
+    for (const uid of uids) {
+      await apiHandler.backup(uid);
+      backedUpApiUids.push(uid);
+      deletedContentTypes.push(builder.deleteContentType(uid));
     }
+
+    const schemaFilesWritten = await builder.writeFiles();
+    if (!schemaFilesWritten) {
+      schemaAlreadyRolledBack = true;
+      throw new ApplicationError('Invalid schema edition');
+    }
+
+    for (const uid of uids) {
+      await apiHandler.clear(uid, { preserveBackup: true });
+    }
+
+    await pruneFolderReferences(uids);
+  } catch (error) {
+    await rollbackSchemaMutation({
+      builder,
+      apiHandler,
+      backedUpApiUids,
+      schemaAlreadyRolledBack,
+    });
+
+    throw error;
   }
 
-  await pruneFolderReferences(uids);
+  for (const error of await finalizeSchemaMutation({ apiHandler, backedUpApiUids })) {
+    strapi.log.error(error);
+  }
+
+  for (const contentType of deletedContentTypes) {
+    strapi.eventHub.emit('content-type.delete', { contentType });
+  }
 };
 
 /**
@@ -267,22 +376,45 @@ export const deleteContentTypes = async (uids: UID.ContentType[]) => {
 export const deleteContentType = async (uid: UID.ContentType, defaultBuilder: any = undefined) => {
   const builder = defaultBuilder || createBuilder();
   // make a backup
-  const apiHandler = strapi.plugin('content-type-builder').service('api-handler');
+  const apiHandler = strapi
+    .plugin('content-type-builder')
+    .service('api-handler') as typeof import('./api-handler');
   await apiHandler.backup(uid);
 
-  const contentType = builder.deleteContentType(uid);
+  let contentType;
+  let schemaAlreadyRolledBack = false;
 
   if (!defaultBuilder) {
     try {
-      await builder.writeFiles();
-      await apiHandler.clear(uid);
+      contentType = builder.deleteContentType(uid);
+      const schemaFilesWritten = await builder.writeFiles();
+      if (!schemaFilesWritten) {
+        schemaAlreadyRolledBack = true;
+        throw new ApplicationError('Invalid schema edition');
+      }
+      await apiHandler.clear(uid, { preserveBackup: true });
       await pruneFolderReferences([uid]);
-    } catch {
-      await apiHandler.rollback(uid);
+    } catch (error) {
+      await rollbackSchemaMutation({
+        builder,
+        apiHandler,
+        backedUpApiUids: [uid],
+        schemaAlreadyRolledBack,
+      });
+
+      throw error;
     }
+
+    for (const error of await finalizeSchemaMutation({ apiHandler, backedUpApiUids: [uid] })) {
+      strapi.log.error(error);
+    }
+  } else {
+    contentType = builder.deleteContentType(uid);
   }
 
-  strapi.eventHub.emit('content-type.delete', { contentType });
+  if (!defaultBuilder) {
+    strapi.eventHub.emit('content-type.delete', { contentType });
+  }
 
   return contentType;
 };
