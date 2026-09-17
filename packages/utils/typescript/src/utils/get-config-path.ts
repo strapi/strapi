@@ -26,7 +26,9 @@ export const getConfigPath = (
 
   const relativePath = path.relative(dirAbsolutePath, configFilePath);
   const isOutsideDirectory =
-    relativePath === '..' || relativePath.startsWith(`..${path.sep}`) || path.isAbsolute(relativePath);
+    relativePath === '..' ||
+    relativePath.startsWith(`..${path.sep}`) ||
+    path.isAbsolute(relativePath);
 
   return isOutsideDirectory ? undefined : configFilePath;
 };
