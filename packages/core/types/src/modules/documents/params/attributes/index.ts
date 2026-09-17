@@ -12,6 +12,7 @@ import type {
 } from '../../../../utils';
 
 import type { ID, DocumentID } from './id';
+import type { GetMediaInputValue } from './media';
 import type { OmitRelationsWithoutTarget, RelationInputValue } from './relations';
 
 export type NonFilterableKind = Extract<Schema.Attribute.Kind, 'password' | 'dynamiczone'>;
@@ -133,10 +134,7 @@ export type GetValue<TAttribute extends Schema.Attribute.Attribute> = If<
           : never,
       ],
       // Media
-      [
-        Extends<TAttribute, Schema.Attribute.OfType<'media'>>,
-        Schema.Attribute.GetMediaValue<TAttribute>,
-      ],
+      [Extends<TAttribute, Schema.Attribute.OfType<'media'>>, GetMediaInputValue<TAttribute>],
       // Boolean
       [Extends<TAttribute, Schema.Attribute.Boolean>, BooleanValue],
       // Number

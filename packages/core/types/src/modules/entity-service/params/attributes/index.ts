@@ -2,6 +2,7 @@ import type * as Schema from '../../../../schema';
 
 import type * as UID from '../../../../uid';
 import type { Array, Constants, If, Extends, IsNotNever, MatchFirst } from '../../../../utils';
+import type { GetMediaInputValue } from '../../../documents/params/attributes/media';
 
 import type { OmitRelationsWithoutTarget, RelationInputValue } from './relation';
 import type { ID } from './id';
@@ -99,10 +100,7 @@ export type GetValue<TAttribute extends Schema.Attribute.Attribute, TGuard = unk
           : never,
       ],
       // Media
-      [
-        Extends<TAttribute, Schema.Attribute.OfType<'media'>>,
-        Schema.Attribute.GetMediaValue<TAttribute>,
-      ],
+      [Extends<TAttribute, Schema.Attribute.OfType<'media'>>, GetMediaInputValue<TAttribute>],
       // Boolean
       [Extends<TAttribute, Schema.Attribute.Boolean>, Literals.BooleanValue],
       // Number
