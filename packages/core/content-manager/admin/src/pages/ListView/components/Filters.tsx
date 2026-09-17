@@ -104,11 +104,14 @@ const Root = ({ disabled, schema, layout, children }: FiltersProps) => {
   });
 
   const displayedFilters = React.useMemo(() => {
-    const { properties: { fields = [] } = { fields: [] } } = allPermissions.find(
-      (permission) =>
-        permission.action === 'plugin::content-manager.explorer.read' &&
-        permission.subject === model
-    )!;
+    // An absent read permission for this model yields no filterable fields.
+    // The empty object lets the defaults below apply instead of throwing.
+    const { properties: { fields = [] } = { fields: [] } } =
+      allPermissions.find(
+        (permission) =>
+          permission.action === 'plugin::content-manager.explorer.read' &&
+          permission.subject === model
+      ) ?? {};
 
     const allowedFields = fields.filter((field) => {
       const attribute = attributes[field] ?? {};
