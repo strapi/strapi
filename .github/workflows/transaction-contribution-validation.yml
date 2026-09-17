@@ -28,8 +28,8 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          ref: b417f11aea20f7056aa27ec75c6a188a8109b60f
-          fetch-depth: 2
+          ref: b9cc6ccac4258ee4abaa8b0b4ed8eae08847e9d4
+          fetch-depth: 3
           persist-credentials: false
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
@@ -40,19 +40,26 @@ jobs:
           yarn install --immutable
       - name: Build the database package and its dependencies
         run: yarn nx run @strapi/database:build --nx-ignore-cycles --parallel=2
-      - name: Prove the original implementation fails the ownership regressions
+      - name: Prove regressions against upstream and the first PR revision
         if: matrix.node == 22
         shell: bash
         run: |
           source=packages/core/database/src/transaction-context.ts
           trap 'git restore -- "$source"' EXIT
-          git show 3cd7dba3495e094682cc7a8d0eb83bde77e9b0b4:"$source" > "$source"
-          set +e
-          yarn workspace @strapi/database test:unit --runInBand --testPathPattern=transaction-context.test.ts --json --outputFile=/tmp/transaction-unit-before.json
-          status=$?
-          set -e
-          test "$status" -eq 1
-          node -e "const r=require('/tmp/transaction-unit-before.json'); if(r.numFailedTests!==10 || r.numPassedTests!==7 || r.numTotalTestSuites!==1) throw Error('Unexpected baseline result'); console.log('Baseline confirmed: 10 assertion failures, 7 passing controls');"
+          check_baseline() {
+            revision="$1"
+            failed="$2"
+            passed="$3"
+            git show "$revision:$source" > "$source"
+            set +e
+            yarn workspace @strapi/database test:unit --runInBand --testPathPattern=transaction-context.test.ts --json --outputFile=/tmp/transaction-unit-before.json
+            status=$?
+            set -e
+            test "$status" -eq 1
+            node -e "const r=require('/tmp/transaction-unit-before.json'); if(r.numFailedTests!==$failed || r.numPassedTests!==$passed || r.numTotalTestSuites!==1) throw Error('Unexpected baseline result'); console.log('Baseline $revision confirmed: $failed assertion failures, $passed passing controls');"
+          }
+          check_baseline 3cd7dba3495e094682cc7a8d0eb83bde77e9b0b4 11 8
+          check_baseline b417f11aea20f7056aa27ec75c6a188a8109b60f 2 17
           git restore -- "$source"
           trap - EXIT
       - name: Run the complete database unit suite
@@ -77,10 +84,10 @@ jobs:
       matrix:
         include:
           - pr: 27698
-            sha: 60f14f38e3cee6b389199bc3ef57459f4b4febaa
+            sha: 317c99344bc01140905ab7644de791679c00461f
             workspace: '@strapi/typescript-utils'
           - pr: 27699
-            sha: df29b09a5acb5fe4f8057415a9fc02bd88a415e7
+            sha: e598ed8890fb4daa06575b65ced744d4ac5b2897
             workspace: '@strapi/typescript-utils'
           - pr: 27700
             sha: 5bea5deab6f37aa06a576af39c2ea7ed7523328b
@@ -121,6 +128,80 @@ jobs:
         if: success() || failure()
         run: git diff --name-only -z 3cd7dba3495e094682cc7a8d0eb83bde77e9b0b4 HEAD | xargs -0 yarn prettier --check
 
+  config-compiler-compatibility:
+    if: github.repository == 'dijedontahiri/strapi'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: ['5.4.5', '5.5.4', '5.9.3']
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 317c99344bc01140905ab7644de791679c00461f
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 22
+      - name: Install an isolated external TypeScript compiler
+        run: npm install --prefix "$RUNNER_TEMP/config-compiler" --ignore-scripts --no-audit --no-fund --package-lock=false typescript@${{ matrix.compiler }}
+      - name: Verify the documented compiler floor and project-local override
+        env:
+          COMPILER_VERSION: ${{ matrix.compiler }}
+        run: |
+          node <<'NODE'
+          const assert = require('node:assert/strict');
+          const fs = require('node:fs');
+          const os = require('node:os');
+          const path = require('node:path');
+          const ts = require(path.join(process.env.RUNNER_TEMP, 'config-compiler/node_modules/typescript'));
+          assert.equal(ts.version, process.env.COMPILER_VERSION);
+          const root = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-external-compiler-'));
+          try {
+            const shared = path.join(root, 'shared/server.json');
+            fs.mkdirSync(path.dirname(shared), { recursive: true });
+            fs.copyFileSync('packages/utils/typescript/tsconfigs/server.json', shared);
+            function compile(name, override) {
+              const dir = path.join(root, name);
+              fs.mkdirSync(path.join(dir, 'src'), { recursive: true });
+              fs.writeFileSync(path.join(dir, 'src/index.ts'), `export const value = '${name}';`);
+              const configPath = path.join(dir, 'tsconfig.json');
+              fs.writeFileSync(configPath, JSON.stringify({
+                extends: shared,
+                compilerOptions: { rootDir: './src', outDir: './dist', types: [], ...(override ? { tsBuildInfoFile: './.tsbuildinfo' } : {}) },
+                include: ['./src'],
+              }));
+              const config = ts.getParsedCommandLineOfConfigFile(configPath, {}, {
+                ...ts.sys, onUnRecoverableConfigFileDiagnostic(d) { throw Error(ts.flattenDiagnosticMessageText(d.messageText, '\n')); },
+              });
+              assert.ok(config);
+              assert.deepEqual(config.errors, []);
+              assert.equal(config.options.tsBuildInfoFile, path.join(dir, '.tsbuildinfo'));
+              const program = ts.createProgram({ rootNames: config.fileNames, options: config.options });
+              assert.deepEqual(ts.getPreEmitDiagnostics(program), []);
+              const result = program.emit();
+              assert.equal(result.emitSkipped, false);
+              assert.deepEqual(result.diagnostics, []);
+              assert.ok(fs.existsSync(path.join(dir, '.tsbuildinfo')));
+              assert.ok(fs.existsSync(path.join(dir, 'dist/index.js')));
+              return path.join(dir, '.tsbuildinfo');
+            }
+            if (!ts.version.startsWith('5.4.')) {
+              const first = compile('first', false);
+              const contents = fs.readFileSync(first, 'utf8');
+              compile('second', false);
+              assert.equal(fs.readFileSync(first, 'utf8'), contents);
+              console.log('Unmodified shared preset keeps separate project caches');
+            }
+            compile('project-override', true);
+            assert.equal(fs.existsSync(path.join(root, 'shared/.tsbuildinfo')), false);
+            console.log(`TypeScript ${ts.version}: documented project override passed`);
+          } finally {
+            fs.rmSync(root, { recursive: true, force: true });
+          }
+          NODE
+
   sql-integration:
     if: github.repository == 'dijedontahiri/strapi'
     runs-on: ubuntu-latest
@@ -160,8 +241,8 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          ref: b417f11aea20f7056aa27ec75c6a188a8109b60f
-          fetch-depth: 2
+          ref: b9cc6ccac4258ee4abaa8b0b4ed8eae08847e9d4
+          fetch-depth: 3
           persist-credentials: false
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
@@ -191,7 +272,7 @@ jobs:
           status=$?
           set -e
           test "$status" -eq 1
-          node -e "const r=require('/tmp/transaction-api-before.json'); if(r.numFailedTests!==4 || r.numTotalTests!==4 || r.numTotalTestSuites!==1) throw Error('Expected four SQL regression failures, not a setup error'); console.log('SQL baseline confirmed: all four regressions fail');"
+          node -e "const r=require('/tmp/transaction-api-before.json'); if(r.numFailedTests!==5 || r.numTotalTests!==5 || r.numTotalTestSuites!==1) throw Error('Expected five SQL regression failures, not a setup error'); console.log('SQL baseline confirmed: all five regressions fail');"
           git restore -- "$source"
           yarn workspace @strapi/database build:code
           trap - EXIT
