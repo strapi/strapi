@@ -11,6 +11,8 @@
     "strapi": "strapi"
   },
   "dependencies": {
+    "@strapi/plugin-branches": "latest",
+    "@strapi/plugin-channels": "latest",
     "@strapi/plugin-spaces": "latest",
     "@strapi/plugin-users-permissions": "latest",
     "@strapi/strapi": "latest",

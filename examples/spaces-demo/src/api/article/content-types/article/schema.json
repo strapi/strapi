@@ -15,7 +15,11 @@
     },
     "spaces": {
       "scope": "space",
-      "visibleIn": []
+      "visibleIn": ["default", "acme"],
+      "sharedEntries": true
+    },
+    "channels": {
+      "enabled": true
     }
   },
   "attributes": {
@@ -24,6 +28,9 @@
       "pluginOptions": {
         "i18n": {
           "localized": true
+        },
+        "channels": {
+          "overridable": true
         }
       },
       "required": true
@@ -33,6 +40,9 @@
       "pluginOptions": {
         "i18n": {
           "localized": true
+        },
+        "channels": {
+          "overridable": true
         }
       }
     },
@@ -41,6 +51,10 @@
       "pluginOptions": {
         "i18n": {
           "localized": true
+        },
+        "channels": {
+          "overridable": true,
+          "visibleIn": ["desktop"]
         }
       }
     },
@@ -49,6 +63,9 @@
       "pluginOptions": {
         "i18n": {
           "localized": true
+        },
+        "channels": {
+          "overridable": true
         }
       },
       "multiple": false,
@@ -60,6 +77,9 @@
       "pluginOptions": {
         "i18n": {
           "localized": false
+        },
+        "channels": {
+          "overridable": true
         }
       }
     },

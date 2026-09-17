@@ -1,0 +1,67 @@
+{
+  "kind": "collectionType",
+  "collectionName": "strapi_channel_overrides",
+  "info": {
+    "singularName": "override",
+    "pluralName": "overrides",
+    "displayName": "Channel override",
+    "description": "Per-channel attribute overrides of one document entry, for one status."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": false
+    },
+    "content-type-builder": {
+      "visible": false
+    }
+  },
+  "indexes": [
+    {
+      "name": "strapi_channel_overrides_uq",
+      "type": "unique",
+      "columns": ["channel_id", "content_type", "entry_document_id", "entry_locale", "status"]
+    },
+    {
+      "name": "strapi_channel_overrides_doc_idx",
+      "columns": ["content_type", "entry_document_id"]
+    }
+  ],
+  "attributes": {
+    "channel": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::channels.channel",
+      "useJoinTable": false,
+      "configurable": false
+    },
+    "contentType": {
+      "type": "string",
+      "required": true,
+      "configurable": false
+    },
+    "entryDocumentId": {
+      "type": "string",
+      "required": true,
+      "configurable": false
+    },
+    "entryLocale": {
+      "type": "string",
+      "required": true,
+      "configurable": false
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["draft", "published"],
+      "default": "draft",
+      "required": true,
+      "configurable": false
+    },
+    "overrides": {
+      "type": "json",
+      "configurable": false
+    }
+  }
+}

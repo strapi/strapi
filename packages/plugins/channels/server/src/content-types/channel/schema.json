@@ -1,0 +1,61 @@
+{
+  "kind": "collectionType",
+  "collectionName": "strapi_channels",
+  "info": {
+    "singularName": "channel",
+    "pluralName": "channels",
+    "displayName": "Channel",
+    "description": "A delivery channel: the same documents, with per-channel field visibility and value overrides."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": false
+    },
+    "content-type-builder": {
+      "visible": false
+    },
+    "spaces": {
+      "scope": "space"
+    }
+  },
+  "attributes": {
+    "slug": {
+      "type": "string",
+      "required": true,
+      "configurable": false,
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "name": {
+      "type": "string",
+      "required": true,
+      "configurable": false,
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "description": {
+      "type": "text",
+      "configurable": false
+    },
+    "color": {
+      "type": "string",
+      "configurable": false,
+      "regex": "^#[0-9A-Fa-f]{6}$"
+    },
+    "archived": {
+      "type": "boolean",
+      "default": false,
+      "required": true,
+      "configurable": false
+    },
+    "order": {
+      "type": "integer",
+      "default": 0,
+      "required": true,
+      "configurable": false
+    }
+  }
+}

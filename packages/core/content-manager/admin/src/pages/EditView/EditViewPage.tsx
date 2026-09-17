@@ -22,6 +22,7 @@ import { PERMISSIONS } from '../../constants/plugin';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
 import { useDoc, type UseDocument } from '../../hooks/useDocument';
 import { useDocumentLayout } from '../../hooks/useDocumentLayout';
+import { useDocumentRenderKey } from '../../hooks/useDocumentRenderContext';
 import { useLazyComponents } from '../../hooks/useLazyComponents';
 import { useOnce } from '../../hooks/useOnce';
 import {
@@ -125,6 +126,7 @@ const EditViewPage = () => {
       settings: { mainField },
     },
   } = useDocumentLayout(model);
+  const renderContextKey = useDocumentRenderKey();
   const pageTitle = getTitle(mainField);
 
   const { isLazyLoading } = useLazyComponents([]);
@@ -167,7 +169,7 @@ const EditViewPage = () => {
         </tours.contentManager.Introduction>
       )}
       <Form
-        key={`${collectionType}:${model}:${id ?? 'create'}:${activeLocale ?? 'default'}`}
+        key={`${collectionType}:${model}:${id ?? 'create'}:${activeLocale ?? 'default'}${renderContextKey ? `:${renderContextKey}` : ''}`}
         disabled={hasDraftAndPublished && status === 'published'}
         initialValues={initialValues}
         method={isCreatingDocument ? 'POST' : 'PUT'}

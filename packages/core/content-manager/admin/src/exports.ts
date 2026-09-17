@@ -47,3 +47,5 @@ export type {
   SelectorBlock,
   NonSelectorBlock,
 } from './pages/EditView/components/FormInputs/BlocksInput/BlocksEditor';
+export { registerDocumentRenderContext } from './hooks/useDocumentRenderContext';
+export type { DocumentRenderContextSource } from './hooks/useDocumentRenderContext';

@@ -4,6 +4,12 @@ module.exports = () => ({
   spaces: {
     enabled: true,
   },
+  channels: {
+    enabled: true,
+  },
+  branches: {
+    enabled: true,
+  },
   graphql: {
     enabled: true,
     config: {

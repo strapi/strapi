@@ -22,6 +22,7 @@ import {
   useDoc,
   useDocument,
 } from './useDocument';
+import { useDocumentRenderKey } from './useDocumentRenderContext';
 
 import type { ComponentConfiguration } from '../../../shared/contracts/components';
 import type {
@@ -200,6 +201,7 @@ const DEFAULT_SETTINGS = {
 const useDocumentLayout: UseDocumentLayout = (model) => {
   const { schema, components } = useDocument({ model, collectionType: '' }, { skip: true });
   const [{ query }] = useQueryParams();
+  const renderContextKey = useDocumentRenderKey();
   const runHookWaterfall = useStrapiApp('useDocumentLayout', (state) => state.runHookWaterfall);
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
@@ -298,8 +300,9 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
       runHookWaterfall(HOOKS.MUTATE_EDIT_VIEW_LAYOUT, {
         layout: editLayout,
         query,
+        renderContextKey,
       }),
-    [editLayout, query, runHookWaterfall]
+    [editLayout, query, renderContextKey, runHookWaterfall]
   );
 
   const listViewConversionContext = stableLayouts?.listViewConversionContext ?? null;

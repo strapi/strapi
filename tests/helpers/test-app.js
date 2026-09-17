@@ -43,6 +43,8 @@ const generateTestApp = async ({ appPath, database, template, link = false }) =>
       '@strapi/plugin-documentation': pkg.version,
       '@strapi/plugin-cloud': pkg.version,
       '@strapi/plugin-spaces': pkg.version,
+      '@strapi/plugin-branches': pkg.version,
+      '@strapi/plugin-channels': pkg.version,
       react: '18.2.0',
       'react-dom': '18.2.0',
       'react-router-dom': '^6.0.0',
