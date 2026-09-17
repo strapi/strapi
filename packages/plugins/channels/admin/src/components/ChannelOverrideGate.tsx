@@ -25,13 +25,18 @@ const GateWrapper = styled.div`
 `;
 
 /**
- * The inherited-value veil: a 30% dim over the whole field with the Default
- * value readable underneath. One click (or Enter) lifts it and the field
- * becomes editable — saving then records the override.
+ * The inherited-value veil: a light primary dim over the input control — the
+ * label and any editor toolbar stay clear (the measured `$top` offset skips
+ * them) and the Default value stays readable underneath. One click (or
+ * Enter) lifts it and the field becomes editable — saving then records the
+ * override.
  */
-const Veil = styled.button`
+const Veil = styled.button<{ $top: number }>`
   position: absolute;
-  inset: 0;
+  top: ${({ $top }) => $top}px;
+  right: 0;
+  bottom: 0;
+  left: 0;
   z-index: 2;
   display: flex;
   align-items: center;
@@ -46,13 +51,13 @@ const Veil = styled.button`
     position: absolute;
     inset: 0;
     border-radius: ${({ theme }) => theme.borderRadius};
-    background: ${({ theme }) => theme.colors.neutral800};
-    opacity: 0.3;
+    background: ${({ theme }) => theme.colors.primary700};
+    opacity: 0.15;
   }
 
   &:hover::before,
   &:focus-visible::before {
-    opacity: 0.4;
+    opacity: 0.2;
   }
 `;
 
@@ -83,6 +88,8 @@ const GateInner = ({ field, children }: FieldDecoratorProps) => {
     { skip: !documentId || isOnDefault }
   );
   const [unlocked, setUnlocked] = React.useState(false);
+  const wrapperRef = React.useRef<HTMLDivElement>(null);
+  const [veilTop, setVeilTop] = React.useState(0);
 
   const veiled =
     !isOnDefault &&
@@ -94,14 +101,39 @@ const GateInner = ({ field, children }: FieldDecoratorProps) => {
     !overrides[current.slug]?.attributes.includes(field.name) &&
     !unlocked;
 
+  // The veil only covers the input control: measure past the label and any
+  // editor toolbar (Blocks exposes role="toolbar"), and follow their size.
+  React.useLayoutEffect(() => {
+    const wrapper = wrapperRef.current;
+    if (!veiled || !wrapper) {
+      return undefined;
+    }
+    const measure = () => {
+      const wrapperTop = wrapper.getBoundingClientRect().top;
+      let top = 0;
+      for (const selector of ['label', '[role="toolbar"]']) {
+        const element = wrapper.querySelector(selector);
+        if (element) {
+          top = Math.max(top, element.getBoundingClientRect().bottom - wrapperTop + 4);
+        }
+      }
+      setVeilTop(top);
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(wrapper);
+    return () => observer.disconnect();
+  }, [veiled]);
+
   if (!veiled) {
     return <>{children}</>;
   }
 
   return (
-    <GateWrapper>
+    <GateWrapper ref={wrapperRef}>
       {children}
       <Veil
+        $top={veilTop}
         type="button"
         onClick={() => setUnlocked(true)}
         aria-label={formatMessage(
