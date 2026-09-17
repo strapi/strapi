@@ -256,7 +256,7 @@ const buildCollectionTools = (
     {
       name: `update_${slug}`,
       telemetry: { source: 'content-manager', name: 'update' },
-      ...describeTool({ apiID: model.apiID, uid, operation: 'update' }),
+      ...describeTool({ apiID: model.apiID, uid, operation: 'update', draftAndPublish }),
       auth: { policies: [{ action: ACTIONS.update, subject: uid }] },
       resolveInputSchema: resolveUpdateInputSchema,
       resolveOutputSchema: resolveReadOutputSchema,
@@ -464,7 +464,7 @@ const buildSingleTypeTools = (
     {
       name: `write_${slug}`,
       telemetry: { source: 'content-manager', name: 'write' },
-      ...describeTool({ apiID: model.apiID, uid, operation: 'write' }),
+      ...describeTool({ apiID: model.apiID, uid, operation: 'write', draftAndPublish }),
       auth: {
         policies: [
           { action: ACTIONS.create, subject: uid },

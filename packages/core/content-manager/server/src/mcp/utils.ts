@@ -68,15 +68,39 @@ export const ok = (
 });
 
 /**
+ * Note appended to `update`/`write` on a model without draft & publish.
+ *
+ * Both tools can reach a *create* on the server — `update_*` creates a missing locale
+ * (`collection-handlers.ts`), and `write_*` is an upsert that creates on first write. Their
+ * input schema is partial (REST/admin update parity) and is resolved per tool, before the
+ * request, so it cannot know whether a given call will update an existing version or create
+ * a new one. On a draft & publish model that create is a draft and omitted required fields
+ * match the server. On a model without draft & publish the create is published immediately,
+ * so the entity validator enforces required fields *after* this schema has accepted the
+ * payload, and the failure surfaces as a tool result rather than a schema error.
+ *
+ * `tools/list` is the only thing an agent sees, so that late check is stated here rather
+ * than only in `buildDataSchema`'s source comment — otherwise the advertised shape looks
+ * uniformly lenient across both model kinds.
+ */
+const PUBLISHED_CREATE_VIA_UPDATE_NOTE =
+  ' This content type has no draft & publish, so a write that creates (a new locale, or the' +
+  ' first write of a single type) is published immediately: the server enforces required' +
+  ' fields on that create even though this schema accepts them as optional.';
+
+/**
  * Generates the `title` and `description` metadata for a derived MCP tool.
- * Appends operation-specific notes for write/publish/unpublish/discard_draft operations.
+ * Appends operation-specific notes for write/publish/unpublish/discard_draft operations,
+ * and — on a model without draft & publish — the late published-create note for
+ * update/write (see `PUBLISHED_CREATE_VIA_UPDATE_NOTE`).
  */
 export const describeTool = (params: {
   apiID: string;
   uid: string;
   operation: string;
+  draftAndPublish?: boolean;
 }): { title: string; description: string } => {
-  const { apiID, uid, operation } = params;
+  const { apiID, uid, operation, draftAndPublish } = params;
   const operationNoteByType: Partial<Record<string, string>> = {
     write:
       ' Creates or updates the single-type document. If no document exists, creates one; otherwise updates the existing draft.',
@@ -88,8 +112,13 @@ export const describeTool = (params: {
       ' Operates on an existing document by documentId; treat documentId as the stable identity.',
   };
 
+  const publishedCreateNote =
+    draftAndPublish === false && (operation === 'update' || operation === 'write')
+      ? PUBLISHED_CREATE_VIA_UPDATE_NOTE
+      : '';
+
   return {
     title: `Content: ${apiID} — ${operation}`,
-    description: `Content-manager ${operation} for ${uid}.${operationNoteByType[operation] ?? ''}`,
+    description: `Content-manager ${operation} for ${uid}.${operationNoteByType[operation] ?? ''}${publishedCreateNote}`,
   };
 };
