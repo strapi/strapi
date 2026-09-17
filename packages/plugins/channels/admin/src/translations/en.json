@@ -12,12 +12,6 @@
   "field.reset": "Reset to default value",
   "field.reset.confirm": "Reset \"{field}\" on {channel}? It will follow the Default value again.",
   "field.reset.success": "\"{field}\" now follows Default again on {channel}.",
-  "panel.title": "Channels",
-  "panel.title.channel": "Overrides — {channel}",
-  "panel.summary": "{channel} — {count, plural, one {# field} other {# fields}} overridden",
-  "panel.description": "Attributes whose value differs from Default on {channel}.",
-  "panel.reset": "Reset all overrides for {channel}",
-  "panel.reset.confirm": "Reset every override of this entry on {channel}? It will follow the Default values again.",
   "panel.reset.success": "Overrides reset — {channel} follows Default again.",
   "ctb.enabled.label": "Channel variants",
   "ctb.enabled.description": "Fields marked overridable can carry a different value per delivery channel",
@@ -54,5 +48,10 @@
   "form.slug.create.hint": "Lowercase letters, digits and dashes — used in the X-Strapi-Channel header and API calls. Immutable once created.",
   "settings.default": "Default",
   "settings.set-default": "Set as default",
-  "settings.delete.disabled": "The default channel cannot be deleted — make another channel the default first"
+  "settings.delete.disabled": "The default channel cannot be deleted — make another channel the default first",
+  "field.overridden.chip": "Overridden",
+  "field.overridden.details": "\"{field}\" carries its own value on {channel}. The Default content is untouched.",
+  "action.reset.label": "Reset overrides ({channel})",
+  "action.reset.dialog.title": "Confirmation",
+  "action.reset.dialog.body": "Reset {count, plural, one {# overridden field} other {# overridden fields}} on {channel}? This entry will follow the Default values again."
 }

@@ -26,23 +26,22 @@ import { getTranslation } from '../utils/getTranslation';
 
 import { useChannels } from './useChannels';
 
-/** i18n's `LabelAction` sizing, shared by every channel label action. */
-const IconSpan = styled(Flex)<{ $accent?: boolean }>`
+/** i18n's `LabelAction` sizing for the icon-only states. */
+const IconSpan = styled(Flex)`
   svg {
     width: 12px;
     height: 12px;
 
-    fill: ${({ theme, $accent }) => ($accent ? theme.colors.primary600 : theme.colors.neutral500)};
+    fill: ${({ theme }) => theme.colors.neutral500};
 
     path {
-      fill: ${({ theme, $accent }) =>
-        $accent ? theme.colors.primary600 : theme.colors.neutral500};
+      fill: ${({ theme }) => theme.colors.neutral500};
     }
   }
 `;
 
-const PlainBadge = ({ title, accent = false }: { title: string; accent?: boolean }) => (
-  <IconSpan tag="span" $accent={accent}>
+const PlainBadge = ({ title }: { title: string }) => (
+  <IconSpan tag="span">
     <VisuallyHidden tag="span">{title}</VisuallyHidden>
     <Tooltip label={title}>
       <Stack aria-hidden focusable={false} />
@@ -63,12 +62,134 @@ export const SameOnAllChannels = () => {
   );
 };
 
+const OverriddenChip = styled.button`
+  border: none;
+  background: ${({ theme }) => theme.colors.primary100};
+  color: ${({ theme }) => theme.colors.primary600};
+  border-radius: ${({ theme }) => theme.borderRadius};
+  padding: 0 ${({ theme }) => theme.spaces[1]};
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.6rem;
+  cursor: default;
+`;
+
+/**
+ * The overridden state: a small "Overridden" text chip; hovering it opens a
+ * popover with the details and the way back to the Default value. The popover
+ * stays open while the cursor is inside it.
+ */
+const OverriddenBadge = ({
+  fieldName,
+  channelName,
+  onReset,
+  isResetting,
+}: {
+  fieldName: string;
+  channelName: string;
+  onReset: () => Promise<void>;
+  isResetting: boolean;
+}) => {
+  const { formatMessage } = useIntl();
+  const [open, setOpen] = React.useState(false);
+  const [confirmOpen, setConfirmOpen] = React.useState(false);
+  const closeTimer = React.useRef<ReturnType<typeof setTimeout>>();
+
+  const show = () => {
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current);
+    }
+    setOpen(true);
+  };
+  const hide = () => {
+    closeTimer.current = setTimeout(() => setOpen(false), 150);
+  };
+
+  React.useEffect(() => () => closeTimer.current && clearTimeout(closeTimer.current), []);
+
+  return (
+    <>
+      <Popover.Root open={open} onOpenChange={setOpen}>
+        <Popover.Trigger>
+          <OverriddenChip
+            type="button"
+            onMouseEnter={show}
+            onMouseLeave={hide}
+            onFocus={show}
+            onBlur={hide}
+          >
+            {formatMessage({
+              id: getTranslation('field.overridden.chip'),
+              defaultMessage: 'Overridden',
+            })}
+          </OverriddenChip>
+        </Popover.Trigger>
+        <Popover.Content sideOffset={4} onMouseEnter={show} onMouseLeave={hide}>
+          <Flex direction="column" alignItems="stretch" gap={2} padding={4} width="240px">
+            <Typography variant="pi" fontWeight="bold">
+              {formatMessage(
+                {
+                  id: getTranslation('field.overridden'),
+                  defaultMessage: 'Overridden on {channel}',
+                },
+                { channel: channelName }
+              )}
+            </Typography>
+            <Typography variant="pi" textColor="neutral600">
+              {formatMessage(
+                {
+                  id: getTranslation('field.overridden.details'),
+                  defaultMessage:
+                    '"{field}" carries its own value on {channel}. The Default content is untouched.',
+                },
+                { field: fieldName, channel: channelName }
+              )}
+            </Typography>
+            <Button
+              variant="danger-light"
+              size="S"
+              fullWidth
+              loading={isResetting}
+              onClick={() => {
+                setOpen(false);
+                setConfirmOpen(true);
+              }}
+            >
+              {formatMessage({
+                id: getTranslation('field.reset'),
+                defaultMessage: 'Reset to default value',
+              })}
+            </Button>
+          </Flex>
+        </Popover.Content>
+      </Popover.Root>
+      <Dialog.Root open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <ConfirmDialog
+          onConfirm={async () => {
+            await onReset();
+            setConfirmOpen(false);
+          }}
+        >
+          {formatMessage(
+            {
+              id: getTranslation('field.reset.confirm'),
+              defaultMessage:
+                'Reset "{field}" on {channel}? It will follow the Default value again.',
+            },
+            { field: fieldName, channel: channelName }
+          )}
+        </ConfirmDialog>
+      </Dialog.Root>
+    </>
+  );
+};
+
 /**
  * Per-field badge on channel-overridable fields:
  *   - on a channel, field not overridden → muted icon ("editing creates an
  *     override");
- *   - on a channel, field overridden → accent icon opening a popover with the
- *     way back to the default value;
+ *   - on a channel, field overridden → an "Overridden" text chip whose hover
+ *     popover carries the details and the per-field reset;
  *   - on Default → muted icon listing the channels that override the field.
  */
 const LabelActionInner = ({ fieldName }: { fieldName: string }) => {
@@ -76,12 +197,11 @@ const LabelActionInner = ({ fieldName }: { fieldName: string }) => {
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const { model, id, isCreatingEntry } = useContentManagerContext();
-  const { current, isOnDefault, others } = useChannels();
+  const { current, isOnDefault } = useChannels();
   const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
   const locale = query.plugins?.i18n?.locale ?? null;
 
-  // Single types have no route id: degrade to the static badge (the side
-  // panel still covers resets there once the CM exposes the documentId).
+  // Single types have no route id: degrade to the static badge.
   const documentId = id && !isCreatingEntry ? id : null;
 
   const { data: overrides } = useGetEntryOverridesQuery(
@@ -89,7 +209,6 @@ const LabelActionInner = ({ fieldName }: { fieldName: string }) => {
     { skip: !documentId }
   );
   const [reset, { isLoading }] = useResetOverridesMutation();
-  const [confirmOpen, setConfirmOpen] = React.useState(false);
 
   const overriddenHere =
     !isOnDefault && !!overrides?.[current.slug]?.attributes.includes(fieldName);
@@ -160,69 +279,15 @@ const LabelActionInner = ({ fieldName }: { fieldName: string }) => {
         message: formatAPIError(error as Parameters<typeof formatAPIError>[0]),
       });
     }
-    setConfirmOpen(false);
   };
 
   return (
-    <Popover.Root>
-      <Popover.Trigger>
-        <button
-          type="button"
-          aria-label={formatMessage(
-            {
-              id: getTranslation('field.overridden'),
-              defaultMessage: 'Overridden on {channel}',
-            },
-            { channel: current.name }
-          )}
-          style={{ border: 'none', background: 'transparent', padding: 0, cursor: 'pointer' }}
-        >
-          <PlainBadge
-            accent
-            title={formatMessage(
-              {
-                id: getTranslation('field.overridden'),
-                defaultMessage: 'Overridden on {channel}',
-              },
-              { channel: current.name }
-            )}
-          />
-        </button>
-      </Popover.Trigger>
-      <Popover.Content>
-        <Flex direction="column" alignItems="stretch" gap={2} padding={4} width="220px">
-          <Typography variant="pi" fontWeight="bold">
-            {formatMessage(
-              {
-                id: getTranslation('field.overridden'),
-                defaultMessage: 'Overridden on {channel}',
-              },
-              { channel: current.name }
-            )}
-          </Typography>
-          <Dialog.Root open={confirmOpen} onOpenChange={setConfirmOpen}>
-            <Dialog.Trigger>
-              <Button variant="danger-light" size="S" fullWidth loading={isLoading}>
-                {formatMessage({
-                  id: getTranslation('field.reset'),
-                  defaultMessage: 'Reset to default value',
-                })}
-              </Button>
-            </Dialog.Trigger>
-            <ConfirmDialog onConfirm={handleReset}>
-              {formatMessage(
-                {
-                  id: getTranslation('field.reset.confirm'),
-                  defaultMessage:
-                    'Reset "{field}" on {channel}? It will follow the Default value again.',
-                },
-                { field: fieldName, channel: current.name }
-              )}
-            </ConfirmDialog>
-          </Dialog.Root>
-        </Flex>
-      </Popover.Content>
-    </Popover.Root>
+    <OverriddenBadge
+      fieldName={fieldName}
+      channelName={current.name}
+      onReset={handleReset}
+      isResetting={isLoading}
+    />
   );
 };
 

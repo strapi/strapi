@@ -3,8 +3,8 @@ import get from 'lodash/get';
 import * as yup from 'yup';
 
 import { ChannelHeaderAction } from './components/ChannelHeaderAction';
-import { ChannelOverridesPanel } from './components/ChannelOverridesPanel';
 import { ChannelPicker } from './components/ChannelPicker';
+import { ResetOverridesAction } from './components/ResetOverridesAction';
 import { ChannelVisibilityField } from './components/ChannelVisibilityField';
 import { PERMISSIONS } from './constants';
 import { mutateEditViewHook } from './contentManagerHooks/editView';
@@ -18,8 +18,8 @@ import { useCurrentChannelSlug } from './utils/useSwitchChannel';
 import type { StrapiApp } from '@strapi/admin/strapi-admin';
 import type {
   ContentManagerPlugin,
+  DocumentActionComponent,
   HeaderActionComponent,
-  PanelComponent,
 } from '@strapi/content-manager/strapi-admin';
 
 // eslint-disable-next-line import/no-default-export
@@ -70,8 +70,12 @@ export default {
         ...actions,
       ]);
 
-      // "Overrides" side panel with the way back to the default values.
-      apis.addEditViewSidePanel((panels: PanelComponent[]) => [...panels, ChannelOverridesPanel]);
+      // "Reset overrides (channel)" in the document's ··· menu — the way back
+      // to the Default values, without adding a side-panel block.
+      apis.addDocumentAction((actions: DocumentActionComponent[]) => [
+        ...actions,
+        ResetOverridesAction,
+      ]);
 
       // Per-field decoration: hidden / disabled / override badge per channel.
       app.registerHook('Admin/CM/pages/EditView/mutate-edit-view-layout', mutateEditViewHook);
