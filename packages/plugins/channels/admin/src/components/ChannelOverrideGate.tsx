@@ -28,63 +28,37 @@ const GateWrapper = styled.div`
 `;
 
 /**
- * The "inherited ghost" treatment: the input control sits behind a dashed
- * frame with a light page-colored scrim — dimmed but readable, nothing
- * covered by chrome. Hovering (or focusing) the frame turns it primary,
- * lifts most of the scrim and reveals an inline "Override" affordance; one
- * click makes the field editable, and saving records the override. The
- * measured `$top` offset keeps the field label out of the ghost zone.
+ * The "footer note" treatment: the field renders untouched and fully
+ * readable; an invisible layer over the control keeps it read-only, and the
+ * caption below — "Same as Default · Override" — carries the affordance.
+ * Clicking the link (or the field) unlocks it; saving records the override.
  */
-const GhostFrame = styled.button<{ $top: number; $height: number }>`
+const InvisibleGate = styled.button<{ $top: number; $height: number }>`
   position: absolute;
   top: ${({ $top }) => $top}px;
   height: ${({ $height }) => $height}px;
   right: 0;
   left: 0;
   z-index: 2;
-  border: 1px dashed ${({ theme }) => theme.colors.neutral500};
-  border-radius: ${({ theme }) => theme.borderRadius};
-  /* Paints a page-colored ring just inside the dashes, hiding the control's
-   * own border so the ghost reads as dashed-only, never a double line. */
-  box-shadow: inset 0 0 0 2px ${({ theme }) => theme.colors.neutral0};
+  border: none;
   background: transparent;
   cursor: pointer;
   padding: 0;
+`;
 
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: ${({ theme }) => theme.colors.neutral0};
-    opacity: 0.45;
-  }
+const OverrideLink = styled.button<{ $active: boolean }>`
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-size: inherit;
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.primary600};
+  text-decoration: ${({ $active }) => ($active ? 'underline' : 'none')};
+  cursor: pointer;
 
   &:hover,
   &:focus-visible {
-    border-color: ${({ theme }) => theme.colors.primary600};
-
-    &::before {
-      opacity: 0.2;
-    }
-  }
-`;
-
-const OverrideHint = styled.span`
-  position: absolute;
-  top: 50%;
-  right: 12px;
-  transform: translateY(-50%);
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: ${({ theme }) => theme.colors.primary600};
-  background: ${({ theme }) => theme.colors.neutral0};
-  border-radius: ${({ theme }) => theme.borderRadius};
-  padding: 2px 8px;
-  opacity: 0;
-
-  ${GhostFrame}:hover &,
-  ${GhostFrame}:focus-visible & {
-    opacity: 1;
+    text-decoration: underline;
   }
 `;
 
@@ -120,9 +94,10 @@ const GateInner = ({ field, children }: FieldDecoratorProps) => {
     !overrides[current.slug]?.attributes.includes(field.name) &&
     !unlocked;
 
-  // The ghost frame hugs the input CONTROL exactly: the union of the field's
-  // elements after its label (so the label stays clear above and the caption
-  // below never falls inside the dashes), kept fresh as the control resizes.
+  // The invisible layer only spans the input control (the label above and
+  // the caption below stay live): the union of the field's elements after
+  // the element holding its <label>, walking a level down when a widget
+  // wraps label and control together.
   React.useLayoutEffect(() => {
     const wrapper = wrapperRef.current;
     if (!veiled || !wrapper) {
@@ -134,12 +109,6 @@ const GateInner = ({ field, children }: FieldDecoratorProps) => {
       let top = Infinity;
       let bottom = -Infinity;
 
-      // The design system nests <label> inside a flex ROW that itself sits in
-      // the field's column (Field.Root). Walk down from the field root and,
-      // at each level, union the boxes of the siblings BELOW the element
-      // holding the label — the first level where something real follows is
-      // the control zone. Descending covers widgets that wrap label and
-      // control in an extra layer.
       let container: Element | null = wrapper.firstElementChild;
       for (let depth = 0; label && container && depth < 6; depth += 1) {
         let holder: Element | null = null;
@@ -175,7 +144,6 @@ const GateInner = ({ field, children }: FieldDecoratorProps) => {
       }
 
       if (bottom === -Infinity) {
-        // No label to anchor on: frame the whole rendered input.
         top = wrapperRect.top;
         bottom = wrapperRect.bottom;
       }
@@ -194,43 +162,40 @@ const GateInner = ({ field, children }: FieldDecoratorProps) => {
     return <>{children}</>;
   }
 
+  const unlockLabel = formatMessage(
+    {
+      id: getTranslation('field.click-to-override'),
+      defaultMessage: 'Click to override on {channel}',
+    },
+    { channel: current.name }
+  );
+
   return (
     <GateWrapper ref={wrapperRef}>
       {children}
-      <GhostFrame
+      <InvisibleGate
         $top={frame.top}
         $height={frame.height}
         type="button"
         onClick={() => setUnlocked(true)}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        onFocus={() => setHovered(true)}
-        onBlur={() => setHovered(false)}
-        aria-label={formatMessage(
-          {
-            id: getTranslation('field.click-to-override'),
-            defaultMessage: 'Click to override on {channel}',
-          },
-          { channel: current.name }
-        )}
-      >
-        <OverrideHint>
+        aria-label={unlockLabel}
+      />
+      <Typography variant="pi" textColor="neutral600">
+        {formatMessage({
+          id: getTranslation('field.same-as-default'),
+          defaultMessage: 'Same as Default',
+        })}
+        {' · '}
+        <OverrideLink
+          type="button"
+          $active={hovered}
+          onClick={() => setUnlocked(true)}
+          aria-label={unlockLabel}
+        >
           {formatMessage({ id: getTranslation('field.override'), defaultMessage: 'Override' })}
-        </OverrideHint>
-      </GhostFrame>
-      <Typography variant="pi" textColor={hovered ? 'primary600' : 'neutral600'}>
-        {hovered
-          ? formatMessage(
-              {
-                id: getTranslation('field.click-to-override'),
-                defaultMessage: 'Click to override on {channel}',
-              },
-              { channel: current.name }
-            )
-          : formatMessage({
-              id: getTranslation('field.inherited'),
-              defaultMessage: 'Inherited from Default',
-            })}
+        </OverrideLink>
       </Typography>
     </GateWrapper>
   );
@@ -257,8 +222,8 @@ class GateBoundary extends React.Component<React.PropsWithChildren, { failed: bo
 
 /**
  * Field decorator (see the Content Manager's `registerFieldDecorator`):
- * ghosts the overridable fields a channel has not touched yet. Anything
- * else renders as-is.
+ * keeps the overridable fields a channel has not touched yet behind the
+ * footer-note gate. Anything else renders as-is.
  */
 export const ChannelOverrideGate = ({ field, children }: FieldDecoratorProps) => {
   const options = (
