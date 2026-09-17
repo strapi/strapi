@@ -123,8 +123,6 @@ const HeadersInput = () => {
           <AddHeaderButton
             type="button"
             onClick={() => {
-              rowKeys.current.push(`${rowKeyPrefix}-${nextRowKey.current}`);
-              nextRowKey.current += 1;
               addFieldRow('headers', { key: '', value: '' });
             }}
             startIcon={<Plus />}
