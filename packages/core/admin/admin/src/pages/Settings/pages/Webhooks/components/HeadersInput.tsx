@@ -54,7 +54,9 @@ const HeadersInput = () => {
   }));
 
   const removeRow = (index: number) => {
-    // if we are removing the last row, simply clear it
+    // Removing the only row clears it in place instead of deleting it, so the list length
+    // stays 1 and its key stays valid. Splicing rowKeys here would drop a key that the render
+    // body regenerates on the next pass, which would remount the row and tear down its inputs.
     if (value.length === 1) {
       setFieldValue('headers', [{ key: '', value: '' }]);
     } else {
