@@ -20,6 +20,7 @@ describe('discoverMigrationFiles', () => {
     await fse.writeFile(path.join(tempDir, '002-b.sql'), 'SELECT 1;');
     await fse.writeFile(path.join(tempDir, '001-a.js'), 'module.exports = {}');
     await fse.writeFile(path.join(tempDir, 'README.md'), '# ignore');
+    await fse.writeFile(path.join(tempDir, '003-c.ts'), '// ignore');
 
     const files = discoverMigrationFiles(tempDir);
 

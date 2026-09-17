@@ -62,13 +62,11 @@ describe('rename:field', () => {
     expect(created).toHaveLength(1);
 
     const migration = await fs.readFile(path.join(migrationsDir, created[0]), 'utf8');
-    expect(migration).toMatch(/renameColumn/);
-    expect(migration).toContain("'dogs'");
-    expect(migration).toContain("'age'");
-    expect(migration).toContain("'age_in_years'");
-    // Guarded for fresh-database safety.
-    expect(migration).toMatch(/hasTable/);
-    expect(migration).toMatch(/hasColumn/);
+    // The column is renamed through the guarded database helper (fresh-database
+    // safety lives in the helper, not in the file).
+    expect(migration).toContain(
+      "db.schema.renameColumn(knex, { table: 'dogs', from: 'age', to: 'age_in_years' })"
+    );
 
     const plainOut = stripAnsi(stdout);
     expect(plainOut).toMatch(/Renamed "age" to "ageInYears" on api::dog\.dog/);

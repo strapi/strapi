@@ -246,6 +246,30 @@ describe('transformChatToCTB', () => {
       ]);
     });
 
+    it('drops an explicit rename whose type also changed (falls back to remove + add)', () => {
+      // title (string) -> views (integer): the column cannot simply be renamed,
+      // so no rename is forwarded and the field is treated as removed + added.
+      const schema = makeSchema({
+        uid: 'api::article.article',
+        name: 'Article',
+        action: 'update',
+        renames: [{ oldName: 'title', newName: 'views' }],
+        attributes: {
+          views: { type: 'integer', previousName: 'title' },
+          body: { type: 'blocks' },
+        },
+      });
+
+      const result = transformChatToCTB(schema, oldSchema) as ContentType;
+
+      expect(result.renames).toBeUndefined();
+      expect(result.attributes).toEqual([
+        { name: 'views', type: 'integer', status: 'NEW' },
+        { name: 'body', type: 'blocks', status: 'UNCHANGED' },
+        { name: 'title', type: 'string', required: true, status: 'REMOVED' },
+      ]);
+    });
+
     it('does not treat delete+add with different configs as a rename', () => {
       const schema = makeSchema({
         uid: 'api::article.article',

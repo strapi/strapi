@@ -796,6 +796,153 @@ describe('Content Type Builder - component-level rename (category change) preser
   });
 });
 
+describe('Content Type Builder - component display-name rename (CG-1001) preserves data', () => {
+  // Renaming a component's display name changes the name half of its uid
+  // (`<category>.<slug(displayName)>`) and its schema file name. The embedded
+  // rows are preserved through the same `component_type` migration as a
+  // category change, and the original name becomes available again.
+  const ORIGINAL_UID = 'default.badge';
+  const RENAMED_UID = 'default.ribbon';
+  const HOST_UID = 'api::badge-host.badge-host';
+
+  const restartRename = async () => {
+    await strapi.destroy();
+    strapi = await createStrapiInstance();
+    rq = await createAuthRequest({ strapi });
+  };
+
+  let hostDocId;
+
+  beforeAll(async () => {
+    strapi = await createStrapiInstance();
+    rq = await createAuthRequest({ strapi });
+
+    await updateSchema({
+      components: [
+        {
+          action: 'create',
+          uid: ORIGINAL_UID,
+          category: 'default',
+          displayName: 'Badge',
+          icon: 'apps',
+          attributes: [{ action: 'create', name: 'label', properties: { type: 'string' } }],
+        },
+      ],
+      contentTypes: [
+        {
+          action: 'create',
+          uid: HOST_UID,
+          displayName: 'Badge Host',
+          singularName: 'badge-host',
+          pluralName: 'badge-hosts',
+          kind: 'collectionType',
+          draftAndPublish: false,
+          attributes: [
+            {
+              action: 'create',
+              name: 'zone',
+              properties: { type: 'dynamiczone', components: [ORIGINAL_UID] },
+            },
+          ],
+        },
+      ],
+    });
+    await restartRename();
+
+    const host = await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/${HOST_UID}`,
+      body: { zone: [{ __component: ORIGINAL_UID, label: 'Gold' }] },
+    });
+    expect(host.statusCode).toBe(201);
+    hostDocId = host.body.data.documentId;
+  });
+
+  afterAll(async () => {
+    await updateSchema({
+      contentTypes: [{ action: 'delete', uid: HOST_UID }],
+      components: [
+        { action: 'delete', uid: RENAMED_UID },
+        ...(strapi.components[ORIGINAL_UID] ? [{ action: 'delete', uid: ORIGINAL_UID }] : []),
+      ],
+    });
+    await strapi.destroy();
+    await builder.cleanup();
+  });
+
+  test('renaming the display name moves the uid, keeps the data and frees the old name', async () => {
+    const cmpsTable = strapi.db.metadata.get(HOST_UID).attributes.zone.joinTable.name;
+    const oldTable = strapi.db.metadata.get(ORIGINAL_UID).tableName;
+    expect(await strapi.db.connection(oldTable).select('label')).toEqual([{ label: 'Gold' }]);
+
+    const res = await updateSchema({
+      contentTypes: [],
+      components: [
+        {
+          action: 'update',
+          uid: ORIGINAL_UID,
+          category: 'default',
+          displayName: 'Ribbon',
+          icon: 'apps',
+          attributes: [{ action: 'update', name: 'label', properties: { type: 'string' } }],
+        },
+      ],
+    });
+    expect(res.statusCode).toBe(200);
+
+    await restartRename();
+
+    // The component now lives under the new uid (and schema file), and its data
+    // table was renamed along with its collection name, keeping the rows.
+    expect(strapi.db.metadata.has(RENAMED_UID)).toBe(true);
+    expect(strapi.db.metadata.has(ORIGINAL_UID)).toBe(false);
+    expect(strapi.components[RENAMED_UID].info.displayName).toBe('Ribbon');
+    const newTable = strapi.db.metadata.get(RENAMED_UID).tableName;
+    expect(newTable).not.toBe(oldTable);
+    expect(await strapi.db.connection.schema.hasTable(oldTable)).toBe(false);
+    expect(await strapi.db.connection(newTable).select('label')).toEqual([{ label: 'Gold' }]);
+
+    // The component_type references were migrated, not orphaned.
+    expect(await strapi.db.connection(cmpsTable).where('component_type', RENAMED_UID)).toHaveLength(
+      1
+    );
+    expect(
+      await strapi.db.connection(cmpsTable).where('component_type', ORIGINAL_UID)
+    ).toHaveLength(0);
+
+    const { statusCode, body } = await rq({
+      method: 'GET',
+      url: `/content-manager/collection-types/${HOST_UID}/${hostDocId}`,
+      qs: { populate: ['zone'] },
+    });
+    expect(statusCode).toBe(200);
+    expect(body.data.zone).toHaveLength(1);
+    expect(body.data.zone[0].__component).toBe(RENAMED_UID);
+    expect(body.data.zone[0].label).toBe('Gold');
+
+    // The original name is free again: a brand-new component can take it.
+    const recreate = await updateSchema({
+      contentTypes: [],
+      components: [
+        {
+          action: 'create',
+          uid: ORIGINAL_UID,
+          category: 'default',
+          displayName: 'Badge',
+          icon: 'apps',
+          attributes: [{ action: 'create', name: 'title', properties: { type: 'string' } }],
+        },
+      ],
+    });
+    expect(recreate.statusCode).toBe(200);
+
+    await restartRename();
+
+    expect(strapi.db.metadata.has(ORIGINAL_UID)).toBe(true);
+    expect(strapi.db.metadata.has(RENAMED_UID)).toBe(true);
+  });
+});
+
 describe('Content Type Builder - media rename preserves data', () => {
   const MEDIA_HOST_UID = 'api::media-host.media-host';
 

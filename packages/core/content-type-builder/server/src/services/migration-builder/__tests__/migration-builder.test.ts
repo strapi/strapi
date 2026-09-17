@@ -3,69 +3,28 @@ import os from 'os';
 import fs from 'fs-extra';
 import { snakeCase } from 'lodash/fp';
 
-import { createMigrationBuilder } from '..';
+import { createMigrationBuilder, isCompatibleRename } from '..';
 
-const quote = (value: string) => `'${value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
+type Operation =
+  | { kind: 'renameColumn'; table: string; from: string; to: string; comment?: string }
+  | { kind: 'renameTable'; from: string; to: string; comment?: string }
+  | {
+      kind: 'updateRows';
+      table: string;
+      guardColumn?: string;
+      where: Record<string, string>;
+      set: Record<string, string>;
+      comment?: string;
+    };
 
-const getFormattedTimestamp = (date: Date = new Date()): string => {
-  return new Date(date.getTime() - date.getTimezoneOffset() * 60000)
-    .toJSON()
-    .replace(/[-:]/g, '.')
-    .replace(/Z$/, '');
-};
-
+/**
+ * Stand-in for `db.migrations.createFileBuilder()` that only records the
+ * operations the CTB builder resolves. Rendering the migration file (and the
+ * runtime guards) is the database package's responsibility and is tested there;
+ * what matters here is *which* physical artifacts a rename resolves to.
+ */
 const createTestMigrationFileBuilder = ({ migrationsDir }: { migrationsDir?: string } = {}) => {
-  type Operation =
-    | { kind: 'renameColumn'; table: string; from: string; to: string; comment?: string }
-    | { kind: 'renameTable'; from: string; to: string; comment?: string }
-    | {
-        kind: 'updateRows';
-        table: string;
-        guardColumn?: string;
-        where: Record<string, string>;
-        set: Record<string, string>;
-        comment?: string;
-      };
-
   const operations: Operation[] = [];
-
-  const renderOperation = (op: Operation): string => {
-    if (op.kind === 'renameColumn') {
-      return `    // ${op.comment ?? ''}
-    if (
-      (await knex.schema.hasTable(${quote(op.table)})) &&
-      (await knex.schema.hasColumn(${quote(op.table)}, ${quote(op.from)})) &&
-      !(await knex.schema.hasColumn(${quote(op.table)}, ${quote(op.to)}))
-    ) {
-      await knex.schema.alterTable(${quote(op.table)}, (table) => {
-        table.renameColumn(${quote(op.from)}, ${quote(op.to)});
-      });
-    }`;
-    }
-
-    if (op.kind === 'renameTable') {
-      return `    // ${op.comment ?? ''}
-    if (
-      (await knex.schema.hasTable(${quote(op.from)})) &&
-      !(await knex.schema.hasTable(${quote(op.to)}))
-    ) {
-      await knex.schema.renameTable(${quote(op.from)}, ${quote(op.to)});
-    }`;
-    }
-
-    const [setColumn, setValue] = Object.entries(op.set)[0];
-    const where = Object.entries(op.where)
-      .map(([column, value]) => `.where(${quote(column)}, ${quote(value)})`)
-      .join('');
-
-    return `    // ${op.comment ?? ''}
-    if (
-      (await knex.schema.hasTable(${quote(op.table)})) &&
-      (await knex.schema.hasColumn(${quote(op.table)}, ${quote(op.guardColumn ?? setColumn)}))
-    ) {
-      await knex(${quote(op.table)})${where}.update(${quote(setColumn)}, ${quote(setValue)});
-    }`;
-  };
 
   return {
     renameColumn(op: Omit<Extract<Operation, { kind: 'renameColumn' }>, 'kind'>): void {
@@ -80,28 +39,29 @@ const createTestMigrationFileBuilder = ({ migrationsDir }: { migrationsDir?: str
     hasChanges(): boolean {
       return operations.length > 0;
     },
-    build({ name }: { name: string }) {
+    getOperations(): Operation[] {
+      return [...operations];
+    },
+    build({ name, format = 'javascript' }: { name: string; format?: 'javascript' | 'typescript' }) {
       if (operations.length === 0) {
         return null;
       }
-      const timestamp = getFormattedTimestamp();
-      const body = operations.map(renderOperation).join('\n\n');
+      const extension = format === 'typescript' ? 'ts' : 'js';
       return {
-        filename: `${timestamp}.${name}.js`,
-        content: `'use strict';
-
-module.exports = {
-  async up(knex) {
-${body}
-  },
-  async down(knex) {
-  },
-};
-`,
+        filename: `2026.01.01T00.00.00.000.${name}.${extension}`,
+        content: JSON.stringify({ format, operations }),
       };
     },
-    async writeFiles({ name, dir }: { name: string; dir?: string }) {
-      const built = this.build({ name });
+    async writeFiles({
+      name,
+      dir,
+      format,
+    }: {
+      name: string;
+      dir?: string;
+      format?: 'javascript' | 'typescript';
+    }) {
+      const built = this.build({ name, format });
       // Honor an explicit `dir` override (what the CTB passes), falling back to
       // the database-configured dir — mirroring the real file builder.
       const targetDir = dir ?? migrationsDir;
@@ -110,10 +70,7 @@ ${body}
       }
 
       fs.ensureDirSync(targetDir);
-      let filePath = path.join(targetDir, built.filename);
-      for (let suffix = 1; fs.pathExistsSync(filePath); suffix += 1) {
-        filePath = path.join(targetDir, built.filename.replace(/\.js$/, `-${suffix}.js`));
-      }
+      const filePath = path.join(targetDir, built.filename);
       fs.writeFileSync(filePath, built.content, 'utf8');
       return filePath;
     },
@@ -121,44 +78,42 @@ ${body}
 };
 
 /**
- * Build a fake `strapi` with a metadata map + identifiers, mirroring the shape
- * the real `strapi.db.metadata` exposes (see packages/core/database metadata).
+ * Build a fake `strapi` with a metadata map + identifiers/naming, mirroring the
+ * shape the real `strapi.db.metadata` exposes (see packages/core/database metadata).
  */
 const createStrapiMock = ({
   metas = {},
   migrationsDir,
   appRoot,
   useTypescriptMigrations = false,
-  identifiers,
+  naming,
   schema,
 }: {
   metas?: Record<string, any>;
   migrationsDir?: string;
   appRoot?: string;
   useTypescriptMigrations?: boolean;
-  identifiers?: Partial<Record<string, jest.Mock>>;
-  // schema attribute descriptors per uid, used by the builder to distinguish e.g.
-  // media (unsupported) from components/dynamic zones that share the same
-  // morph-join-table metadata shape, and to resolve which owners reference a
-  // renamed component (via `component` / `components`).
-  schema?: Record<
-    string,
-    Record<string, { type: string; component?: string; components?: string[] }>
-  >;
+  naming?: Partial<Record<string, jest.Mock>>;
+  // schema attribute descriptors per uid (the pre-reload `strapi.contentTypes`),
+  // used by the builder to distinguish e.g. media from components/dynamic zones
+  // that share the same morph-join-table metadata shape, to resolve which owners
+  // reference a renamed component, and to detect type changes.
+  schema?: Record<string, Record<string, Record<string, unknown>>>;
 } = {}) => {
   const metadata = new Map<string, any>(Object.entries(metas));
 
-  const idents = identifiers ?? {
+  const namingRules = {
     // default: behave like a no-op shortener so identifiers are deterministic
-    getColumnName: jest.fn((name: string) => name),
-    getJoinColumnAttributeIdName: jest.fn((name: string) => `${name}_id`),
-    getJoinTableName: jest.fn((table: string, name: string) => `${table}_${name}_lnk`),
-    FIELD_COLUMN: 'field',
+    columnName: jest.fn((name: string) => snakeCase(name)),
+    joinColumnName: jest.fn((name: string) => `${snakeCase(name)}_id`),
+    joinTableName: jest.fn((table: string, name: string) => `${table}_${snakeCase(name)}_lnk`),
+    ...naming,
   };
 
-  (metadata as any).identifiers = idents;
+  (metadata as any).naming = namingRules;
+  (metadata as any).identifiers = { FIELD_COLUMN: 'field' };
 
-  const models: Record<string, { attributes: Record<string, { type: string }> }> = {};
+  const models: Record<string, { attributes: Record<string, unknown> }> = {};
   for (const [uid, attrs] of Object.entries(schema ?? {})) {
     models[uid] = { attributes: attrs };
   }
@@ -168,19 +123,22 @@ const createStrapiMock = ({
     config: {
       settings: {
         migrations: { dir: migrationsDir },
-        useTypescriptMigrations,
       },
     },
-  };
-
-  (db as any).migrations = {
-    createFileBuilder: () => createTestMigrationFileBuilder({ migrationsDir }),
+    migrations: {
+      createFileBuilder: () => createTestMigrationFileBuilder({ migrationsDir }),
+    },
   };
 
   return {
     contentTypes: models,
     components: {},
     db,
+    config: {
+      get: jest.fn((key: string) =>
+        key === 'database.settings.useTypescriptMigrations' ? useTypescriptMigrations : undefined
+      ),
+    },
     dirs: {
       app: {
         root:
@@ -203,9 +161,28 @@ const scalarMeta = {
   },
 };
 
+const scalarSchema = {
+  'api::article.article': {
+    oldTitle: { type: 'string' },
+    summary: { type: 'text' },
+  },
+};
+
+const columnRenamesOf = (builder: ReturnType<typeof createMigrationBuilder>): string[][] =>
+  builder
+    .getOperations()
+    .filter((op) => op.kind === 'renameColumn')
+    .map((op) => [(op as any).from, (op as any).to]);
+
+const tableRenamesOf = (builder: ReturnType<typeof createMigrationBuilder>): string[][] =>
+  builder
+    .getOperations()
+    .filter((op) => op.kind === 'renameTable')
+    .map((op) => [(op as any).from, (op as any).to]);
+
 describe('MigrationBuilder', () => {
   describe('addRenameAttribute + build', () => {
-    it('resolves real identifiers (old columnName from metadata, new via identifiers)', () => {
+    it('resolves real identifiers (old columnName from metadata, new via naming rules)', () => {
       const strapi = createStrapiMock({ metas: scalarMeta });
       const builder = createMigrationBuilder({ strapi });
 
@@ -214,18 +191,22 @@ describe('MigrationBuilder', () => {
         newName: 'newTitle',
       });
 
-      const result = builder.build();
-      expect(result).not.toBeNull();
-      expect(result!.content).toContain("hasColumn('articles', 'old_title')");
-      // new column resolved via identifiers.getColumnName(snakeCase(newName))
-      expect(result!.content).toContain("renameColumn('old_title', 'new_title')");
-      expect(strapi.db.metadata.identifiers.getColumnName).toHaveBeenCalledWith(
-        snakeCase('newTitle')
-      );
+      expect(builder.getOperations()).toEqual([
+        {
+          kind: 'renameColumn',
+          table: 'articles',
+          from: 'old_title',
+          to: 'new_title',
+          comment: 'api::article.article: rename field "oldTitle" -> "newTitle"',
+        },
+      ]);
+      // new column resolved via the shared naming rules (same as the metadata loader)
+      expect(strapi.db.metadata.naming.columnName).toHaveBeenCalledWith('newTitle');
+      expect(builder.build()).not.toBeNull();
     });
 
-    it('uses the (possibly hashed) value returned by identifiers verbatim for long names', () => {
-      const getColumnName = jest.fn(() => 'a_very_long_field_name_th3f5a2');
+    it('uses the (possibly hashed) value returned by the naming rules verbatim for long names', () => {
+      const columnName = jest.fn(() => 'a_very_long_field_name_th3f5a2');
       const strapi = createStrapiMock({
         metas: {
           'api::article.article': {
@@ -235,7 +216,7 @@ describe('MigrationBuilder', () => {
             },
           },
         },
-        identifiers: { getColumnName },
+        naming: { columnName },
       });
       const builder = createMigrationBuilder({ strapi });
 
@@ -244,13 +225,8 @@ describe('MigrationBuilder', () => {
         newName: 'aVeryLongFieldNameThatExceedsTheLimit',
       });
 
-      const result = builder.build();
-      expect(getColumnName).toHaveBeenCalledWith(
-        snakeCase('aVeryLongFieldNameThatExceedsTheLimit')
-      );
-      expect(result!.content).toContain(
-        "renameColumn('old_col', 'a_very_long_field_name_th3f5a2')"
-      );
+      expect(columnName).toHaveBeenCalledWith('aVeryLongFieldNameThatExceedsTheLimit');
+      expect(columnRenamesOf(builder)).toEqual([['old_col', 'a_very_long_field_name_th3f5a2']]);
     });
 
     it('collapses multiple renames into a single file, preserving order', () => {
@@ -266,28 +242,11 @@ describe('MigrationBuilder', () => {
         newName: 'excerpt',
       });
 
-      const result = builder.build()!;
-      const headingIdx = result.content.indexOf("'heading'");
-      const excerptIdx = result.content.indexOf("'excerpt'");
-      expect(headingIdx).toBeGreaterThan(-1);
-      expect(excerptIdx).toBeGreaterThan(headingIdx);
-      // single up() block
-      expect(result.content.match(/async up/g)?.length).toBe(1);
-    });
-
-    it('emits guarded existence checks for fresh-DB safety', () => {
-      const strapi = createStrapiMock({ metas: scalarMeta });
-      const builder = createMigrationBuilder({ strapi });
-      builder.addRenameAttribute('api::article.article', {
-        oldName: 'oldTitle',
-        newName: 'heading',
-      });
-
-      const result = builder.build()!;
-      expect(result.content).toContain('await knex.schema.hasTable');
-      expect(result.content).toContain('await knex.schema.hasColumn');
-      expect(result.content).toContain("hasTable('articles')");
-      expect(result.content).toContain("hasColumn('articles', 'old_title')");
+      expect(columnRenamesOf(builder)).toEqual([
+        ['old_title', 'heading'],
+        ['summary', 'excerpt'],
+      ]);
+      expect(builder.build()!.filename).toMatch(/\.rename-fields\.js$/);
     });
 
     it('skips no-op renames where the resolved column does not change', () => {
@@ -310,10 +269,102 @@ describe('MigrationBuilder', () => {
     });
   });
 
-  describe('ordered-path replay (no synthetic temp columns)', () => {
-    const renamesFrom = (content: string): string[][] =>
-      [...content.matchAll(/renameColumn\('([^']+)', '([^']+)'\)/g)].map((m) => [m[1], m[2]]);
+  describe('type changes', () => {
+    it('reports a hop whose type changed as unsupported and produces no operation', () => {
+      const strapi = createStrapiMock({ metas: scalarMeta, schema: scalarSchema });
+      const builder = createMigrationBuilder({ strapi });
 
+      builder.addRenameAttribute('api::article.article', {
+        oldName: 'oldTitle',
+        newName: 'views',
+        newAttribute: { type: 'integer' },
+      });
+
+      expect(builder.hasChanges()).toBe(false);
+      expect(builder.getUnsupported()).toEqual([
+        {
+          uid: 'api::article.article',
+          oldName: 'oldTitle',
+          newName: 'views',
+          reason: 'type-changed',
+        },
+      ]);
+    });
+
+    it('accepts a hop whose new definition keeps the same type', () => {
+      const strapi = createStrapiMock({ metas: scalarMeta, schema: scalarSchema });
+      const builder = createMigrationBuilder({ strapi });
+
+      builder.addRenameAttribute('api::article.article', {
+        oldName: 'oldTitle',
+        newName: 'heading',
+        newAttribute: { type: 'string', required: true },
+      });
+
+      expect(builder.getUnsupported()).toHaveLength(0);
+      expect(columnRenamesOf(builder)).toEqual([['old_title', 'heading']]);
+    });
+
+    it('checks the end of a chain against the definition the chain started from', () => {
+      const strapi = createStrapiMock({ metas: scalarMeta, schema: scalarSchema });
+      const builder = createMigrationBuilder({ strapi });
+
+      // `tmp` is never a real attribute, so the intermediate hop carries no definition.
+      builder.addRenameAttribute('api::article.article', { oldName: 'oldTitle', newName: 'tmp' });
+      builder.addRenameAttribute('api::article.article', {
+        oldName: 'tmp',
+        newName: 'views',
+        newAttribute: { type: 'integer' },
+      });
+
+      expect(columnRenamesOf(builder)).toEqual([['old_title', 'tmp']]);
+      expect(builder.getUnsupported()).toEqual([
+        expect.objectContaining({ oldName: 'tmp', newName: 'views', reason: 'type-changed' }),
+      ]);
+    });
+
+    it('does not block when the new definition is unknown', () => {
+      const strapi = createStrapiMock({ metas: scalarMeta, schema: scalarSchema });
+      const builder = createMigrationBuilder({ strapi });
+
+      builder.addRenameAttribute('api::article.article', {
+        oldName: 'oldTitle',
+        newName: 'heading',
+      });
+
+      expect(builder.getUnsupported()).toHaveLength(0);
+      expect(builder.hasChanges()).toBe(true);
+    });
+
+    describe('isCompatibleRename', () => {
+      it('requires the same type', () => {
+        expect(isCompatibleRename({ type: 'string' }, { type: 'string' })).toBe(true);
+        expect(isCompatibleRename({ type: 'string' }, { type: 'text' })).toBe(false);
+        expect(isCompatibleRename({ type: 'string' }, { type: 'relation' })).toBe(false);
+      });
+
+      it('requires the same relation kind and target for relations', () => {
+        const rel = { type: 'relation', relation: 'manyToMany', target: 'api::tag.tag' };
+        expect(isCompatibleRename(rel, { ...rel })).toBe(true);
+        expect(isCompatibleRename(rel, { ...rel, relation: 'oneToMany' })).toBe(false);
+        expect(isCompatibleRename(rel, { ...rel, target: 'api::label.label' })).toBe(false);
+      });
+
+      it('requires the same component and repeatable flag for components', () => {
+        const cmp = { type: 'component', component: 'default.hero', repeatable: false };
+        expect(isCompatibleRename(cmp, { ...cmp })).toBe(true);
+        expect(isCompatibleRename(cmp, { ...cmp, repeatable: true })).toBe(false);
+        expect(isCompatibleRename(cmp, { ...cmp, component: 'default.banner' })).toBe(false);
+      });
+
+      it('is permissive when either definition is missing', () => {
+        expect(isCompatibleRename(undefined, { type: 'integer' })).toBe(true);
+        expect(isCompatibleRename({ type: 'string' }, undefined)).toBe(true);
+      });
+    });
+  });
+
+  describe('ordered-path replay (no synthetic temp columns)', () => {
     it("replays a user-routed swap verbatim using the user's own intermediate column", () => {
       const strapi = createStrapiMock({ metas: scalarMeta });
       const builder = createMigrationBuilder({ strapi });
@@ -327,16 +378,12 @@ describe('MigrationBuilder', () => {
       });
       builder.addRenameAttribute('api::article.article', { oldName: 'tmp', newName: 'summary' });
 
-      const result = builder.build()!;
-
       // Verbatim, in order — no `strapi_tmp_` synthesized, no reordering.
-      expect(renamesFrom(result.content)).toEqual([
+      expect(columnRenamesOf(builder)).toEqual([
         ['old_title', 'tmp'],
         ['summary', 'old_title'],
         ['tmp', 'summary'],
       ]);
-      expect(result.content).not.toContain('strapi_tmp_');
-      expect(result.content).not.toContain('temporary column');
     });
 
     it('replays a rename chain (a -> b -> c) verbatim in order', () => {
@@ -352,8 +399,7 @@ describe('MigrationBuilder', () => {
         newName: 'finalTitle',
       });
 
-      const result = builder.build()!;
-      expect(renamesFrom(result.content)).toEqual([
+      expect(columnRenamesOf(builder)).toEqual([
         ['old_title', 'heading'],
         ['heading', 'final_title'],
       ]);
@@ -376,7 +422,7 @@ describe('MigrationBuilder', () => {
         newName: 'summary',
       });
 
-      expect(renamesFrom(builder.build()!.content)).toEqual([
+      expect(columnRenamesOf(builder)).toEqual([
         ['old_title', 'final_title'],
         ['summary', 'old_title'],
         ['old_title', 'summary'],
@@ -396,8 +442,7 @@ describe('MigrationBuilder', () => {
         newName: 'oldTitle',
       });
 
-      const result = builder.build()!;
-      expect(renamesFrom(result.content)).toEqual([
+      expect(columnRenamesOf(builder)).toEqual([
         ['old_title', 'heading'],
         ['heading', 'old_title'],
       ]);
@@ -420,12 +465,10 @@ describe('MigrationBuilder', () => {
       builder.addRenameAttribute('api::foo.foo', { oldName: 'colA', newName: 'colB' });
       builder.addRenameAttribute('api::foo.foo', { oldName: 'colC', newName: 'colA' });
 
-      const result = builder.build()!;
-      expect(renamesFrom(result.content)).toEqual([
+      expect(columnRenamesOf(builder)).toEqual([
         ['col_a', 'col_b'],
         ['col_c', 'col_a'],
       ]);
-      expect(result.content).not.toContain('strapi_tmp_');
     });
 
     it('continues an in-flight chain even when an intermediate name is not a known attribute', () => {
@@ -437,7 +480,7 @@ describe('MigrationBuilder', () => {
       builder.addRenameAttribute('api::article.article', { oldName: 'tmp', newName: 'heading' });
 
       expect(builder.getUnsupported()).toHaveLength(0);
-      expect(renamesFrom(builder.build()!.content)).toEqual([
+      expect(columnRenamesOf(builder)).toEqual([
         ['old_title', 'tmp'],
         ['tmp', 'heading'],
       ]);
@@ -528,9 +571,15 @@ describe('MigrationBuilder', () => {
         newName: 'section',
       });
 
-      const result = builder.build()!;
-      expect(result.content).toContain("hasColumn('articles', 'category_id')");
-      expect(result.content).toContain("renameColumn('category_id', 'section_id')");
+      expect(builder.getOperations()).toEqual([
+        expect.objectContaining({
+          kind: 'renameColumn',
+          table: 'articles',
+          from: 'category_id',
+          to: 'section_id',
+        }),
+      ]);
+      expect(strapi.db.metadata.naming.joinColumnName).toHaveBeenCalledWith('section');
       expect(builder.getUnsupported()).toHaveLength(0);
     });
 
@@ -539,9 +588,8 @@ describe('MigrationBuilder', () => {
       const builder = createMigrationBuilder({ strapi });
       builder.addRenameAttribute('api::article.article', { oldName: 'tags', newName: 'labels' });
 
-      const result = builder.build()!;
-      expect(result.content).toContain("hasTable('articles_tags_lnk')");
-      expect(result.content).toContain("renameTable('articles_tags_lnk', 'articles_labels_lnk')");
+      expect(tableRenamesOf(builder)).toEqual([['articles_tags_lnk', 'articles_labels_lnk']]);
+      expect(strapi.db.metadata.naming.joinTableName).toHaveBeenCalledWith('articles', 'labels');
       expect(builder.getUnsupported()).toHaveLength(0);
     });
 
@@ -554,14 +602,22 @@ describe('MigrationBuilder', () => {
         newName: 'sections',
       });
 
-      const result = builder.build()!;
-      expect(result.content).toContain("hasColumn('articles_cmps', 'field')");
-      expect(result.content).toContain(
-        "knex('articles_cmps').where('field', 'hero').update('field', 'banner')"
-      );
-      expect(result.content).toContain(
-        "knex('articles_cmps').where('field', 'blocks').update('field', 'sections')"
-      );
+      expect(builder.getOperations()).toEqual([
+        expect.objectContaining({
+          kind: 'updateRows',
+          table: 'articles_cmps',
+          guardColumn: 'field',
+          where: { field: 'hero' },
+          set: { field: 'banner' },
+        }),
+        expect.objectContaining({
+          kind: 'updateRows',
+          table: 'articles_cmps',
+          guardColumn: 'field',
+          where: { field: 'blocks' },
+          set: { field: 'sections' },
+        }),
+      ]);
       expect(builder.getUnsupported()).toHaveLength(0);
     });
 
@@ -582,11 +638,15 @@ describe('MigrationBuilder', () => {
       const builder = createMigrationBuilder({ strapi });
       builder.addRenameAttribute('api::article.article', { oldName: 'cover', newName: 'image' });
 
-      const result = builder.build()!;
-      expect(result.content).toContain("hasColumn('files_related_morphs', 'field')");
-      expect(result.content).toContain(
-        "knex('files_related_morphs').where('field', 'cover').where('related_type', 'api::article.article').update('field', 'image')"
-      );
+      expect(builder.getOperations()).toEqual([
+        expect.objectContaining({
+          kind: 'updateRows',
+          table: 'files_related_morphs',
+          guardColumn: 'field',
+          where: { field: 'cover', related_type: 'api::article.article' },
+          set: { field: 'image' },
+        }),
+      ]);
       expect(builder.getUnsupported()).toHaveLength(0);
     });
 
@@ -598,10 +658,12 @@ describe('MigrationBuilder', () => {
       const builder = createMigrationBuilder({ strapi });
       builder.addRenameAttribute('api::article.article', { oldName: 'cover', newName: 'image' });
 
-      const result = builder.build()!;
-      expect(result.content).toContain(
-        "knex('files_related_morphs').where('field', 'cover').where('related_type', 'api::article.article').update('field', 'image')"
-      );
+      expect(builder.getOperations()).toEqual([
+        expect.objectContaining({
+          table: 'files_related_morphs',
+          where: { field: 'cover', related_type: 'api::article.article' },
+        }),
+      ]);
       expect(builder.getUnsupported()).toHaveLength(0);
     });
 
@@ -624,23 +686,41 @@ describe('MigrationBuilder', () => {
       builder.addRenameAttribute('api::article.article', { oldName: 'tags', newName: 'temp' });
       builder.addRenameAttribute('api::article.article', { oldName: 'temp', newName: 'labels' });
 
-      const result = builder.build()!;
-      const renames = [...result.content.matchAll(/renameTable\('([^']+)', '([^']+)'\)/g)].map(
-        (m) => [m[1], m[2]]
-      );
-      expect(renames).toEqual([
+      expect(tableRenamesOf(builder)).toEqual([
         ['articles_tags_lnk', 'articles_temp_lnk'],
         ['articles_temp_lnk', 'articles_labels_lnk'],
       ]);
       expect(builder.getUnsupported()).toHaveLength(0);
     });
+
+    it('refuses a relation rename that also retargets the relation', () => {
+      const strapi = createStrapiMock({
+        metas: relMeta,
+        schema: {
+          'api::article.article': {
+            tags: { type: 'relation', relation: 'manyToMany', target: 'api::tag.tag' },
+          },
+        },
+      });
+      const builder = createMigrationBuilder({ strapi });
+      builder.addRenameAttribute('api::article.article', {
+        oldName: 'tags',
+        newName: 'labels',
+        newAttribute: { type: 'relation', relation: 'manyToMany', target: 'api::label.label' },
+      });
+
+      expect(builder.hasChanges()).toBe(false);
+      expect(builder.getUnsupported()).toEqual([
+        expect.objectContaining({ oldName: 'tags', reason: 'type-changed' }),
+      ]);
+    });
   });
 
   describe('addRenameComponent (component-level renames)', () => {
-    // A component's uid is `<category>.<name>`; moving it to a new category
-    // changes the uid. The component's own data table keeps its collectionName,
-    // so the only data to preserve is the `component_type` reference stored in
-    // every owner's `*_cmps` link table.
+    // A component's uid is `<category>.<name>`; moving it to a new category or
+    // renaming it changes the uid. The component's own data table keeps its
+    // collectionName, so the only data to preserve is the `component_type`
+    // reference stored in every owner's `*_cmps` link table.
     const componentMeta = {
       // content-type owner using the component as a plain `component` attribute
       'api::article.article': {
@@ -674,23 +754,25 @@ describe('MigrationBuilder', () => {
       'api::page.page': { blocks: { type: 'dynamiczone', components: ['default.hero'] } },
     };
 
-    const updatesFrom = (content: string): string[][] =>
-      [
-        ...content.matchAll(
-          /knex\('([^']+)'\)\.where\('component_type', '([^']+)'\)\.update\('component_type', '([^']+)'\)/g
-        ),
-      ].map((m) => [m[1], m[2], m[3]]);
+    const updatesOf = (builder: ReturnType<typeof createMigrationBuilder>): string[][] =>
+      builder
+        .getOperations()
+        .filter((op) => op.kind === 'updateRows')
+        .map((op: any) => [op.table, op.where.component_type, op.set.component_type]);
 
-    it('updates component_type in every owner link table, guarded for fresh-DB', () => {
+    it('updates component_type in every owner link table', () => {
       const strapi = createStrapiMock({ metas: componentMeta, schema: componentSchema });
       const builder = createMigrationBuilder({ strapi });
 
       builder.addRenameComponent({ oldUid: 'default.hero', newUid: 'shared.hero' });
 
-      const result = builder.build()!;
-      expect(result.content).toContain("hasColumn('articles_cmps', 'component_type')");
-      expect(result.content).toContain("hasColumn('pages_cmps', 'component_type')");
-      expect(updatesFrom(result.content)).toEqual(
+      expect(builder.getOperations()).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ table: 'articles_cmps', guardColumn: 'component_type' }),
+          expect.objectContaining({ table: 'pages_cmps', guardColumn: 'component_type' }),
+        ])
+      );
+      expect(updatesOf(builder)).toEqual(
         expect.arrayContaining([
           ['articles_cmps', 'default.hero', 'shared.hero'],
           ['pages_cmps', 'default.hero', 'shared.hero'],
@@ -730,8 +812,7 @@ describe('MigrationBuilder', () => {
 
       builder.addRenameComponent({ oldUid: 'default.hero', newUid: 'shared.hero' });
 
-      const updates = updatesFrom(builder.build()!.content);
-      expect(updates).toEqual([['articles_cmps', 'default.hero', 'shared.hero']]);
+      expect(updatesOf(builder)).toEqual([['articles_cmps', 'default.hero', 'shared.hero']]);
     });
 
     it('replays a component-uid chain verbatim (a -> b -> c) reusing resolved tables', () => {
@@ -742,8 +823,7 @@ describe('MigrationBuilder', () => {
       builder.addRenameComponent({ oldUid: 'default.hero', newUid: 'tmp.hero' });
       builder.addRenameComponent({ oldUid: 'tmp.hero', newUid: 'shared.hero' });
 
-      const updates = updatesFrom(builder.build()!.content);
-      expect(updates).toEqual(
+      expect(updatesOf(builder)).toEqual(
         expect.arrayContaining([
           ['articles_cmps', 'default.hero', 'tmp.hero'],
           ['pages_cmps', 'default.hero', 'tmp.hero'],
@@ -752,6 +832,60 @@ describe('MigrationBuilder', () => {
         ])
       );
       expect(builder.getUnsupported()).toHaveLength(0);
+    });
+
+    it('renames the data table when the collection name changes (display-name rename)', () => {
+      const strapi = createStrapiMock({ metas: componentMeta, schema: componentSchema });
+      const builder = createMigrationBuilder({ strapi });
+
+      builder.addRenameComponent({
+        oldUid: 'default.hero',
+        newUid: 'default.banner',
+        oldCollectionName: 'components_default_heroes',
+        newCollectionName: 'components_default_banners',
+      });
+
+      expect(updatesOf(builder)).toEqual(
+        expect.arrayContaining([
+          ['articles_cmps', 'default.hero', 'default.banner'],
+          ['pages_cmps', 'default.hero', 'default.banner'],
+        ])
+      );
+      // `from` is the live table name from metadata, not the hint in the payload.
+      expect(tableRenamesOf(builder)).toEqual([
+        ['components_default_heroes', 'components_default_banners'],
+      ]);
+      expect(builder.getUnsupported()).toHaveLength(0);
+    });
+
+    it('does not rename the data table for a category-only move', () => {
+      const strapi = createStrapiMock({ metas: componentMeta, schema: componentSchema });
+      const builder = createMigrationBuilder({ strapi });
+
+      builder.addRenameComponent({ oldUid: 'default.hero', newUid: 'shared.hero' });
+
+      expect(tableRenamesOf(builder)).toEqual([]);
+    });
+
+    it('renames the data table from its in-flight name on a continuation hop', () => {
+      const strapi = createStrapiMock({ metas: componentMeta, schema: componentSchema });
+      const builder = createMigrationBuilder({ strapi });
+
+      builder.addRenameComponent({
+        oldUid: 'default.hero',
+        newUid: 'default.banner',
+        newCollectionName: 'components_default_banners',
+      });
+      builder.addRenameComponent({
+        oldUid: 'default.banner',
+        newUid: 'default.header',
+        newCollectionName: 'components_default_headers',
+      });
+
+      expect(tableRenamesOf(builder)).toEqual([
+        ['components_default_heroes', 'components_default_banners'],
+        ['components_default_banners', 'components_default_headers'],
+      ]);
     });
 
     it('records an unknown component as unsupported (model-not-found)', () => {
@@ -783,52 +917,8 @@ describe('MigrationBuilder', () => {
     });
   });
 
-  describe('filename + output format', () => {
-    it('uses a full sortable timestamp in the filename (not just the year)', () => {
-      const strapi = createStrapiMock({ metas: scalarMeta });
-      const builder = createMigrationBuilder({ strapi });
-      builder.addRenameAttribute('api::article.article', {
-        oldName: 'oldTitle',
-        newName: 'heading',
-      });
-
-      const result = builder.build()!;
-      // e.g. 2026.06.11T15.39.50.123.rename-fields.js — full timestamp with ms,
-      // must not collapse to 2026.rename-fields.js (which would collide between saves)
-      expect(result.filename).not.toMatch(/^2026\.rename-fields\.js$/);
-      expect(result.filename).toMatch(
-        /^\d{4}\.\d{2}\.\d{2}T\d{2}\.\d{2}\.\d{2}\.\d{3}\.rename-fields\.js$/
-      );
-    });
-
-    it('writeFiles never overwrites an existing migration with the same timestamp', async () => {
-      const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ctb-collide-'));
-      const migrationsDir = path.join(tmp, 'database', 'migrations');
-      const strapi = createStrapiMock({ metas: scalarMeta, migrationsDir });
-
-      const buildOne = () => {
-        const b = createMigrationBuilder({ strapi });
-        b.addRenameAttribute('api::article.article', { oldName: 'oldTitle', newName: 'heading' });
-        return b;
-      };
-
-      // Pre-seed a file occupying the deterministic name to force the collision path.
-      const built = buildOne().build()!;
-      fs.ensureDirSync(migrationsDir);
-      fs.writeFileSync(path.join(migrationsDir, built.filename), '// existing');
-
-      // Stabilise the timestamp so both builders would resolve the same filename.
-      const spy = jest.spyOn(Date.prototype, 'toJSON').mockReturnValue('2026-01-01T00:00:00.000Z');
-      const writtenPath = await buildOne().writeFiles();
-      spy.mockRestore();
-
-      expect(writtenPath).not.toBeNull();
-      expect(fs.readFileSync(writtenPath as string, 'utf8')).not.toBe('// existing');
-      expect(fs.readdirSync(migrationsDir)).toHaveLength(2);
-      fs.removeSync(tmp);
-    });
-
-    it('emits JS (CommonJS module.exports)', () => {
+  describe('output format', () => {
+    it('emits JavaScript by default', () => {
       const strapi = createStrapiMock({ metas: scalarMeta });
       const builder = createMigrationBuilder({ strapi });
       builder.addRenameAttribute('api::article.article', {
@@ -838,19 +928,14 @@ describe('MigrationBuilder', () => {
 
       const result = builder.build()!;
       expect(result.filename).toMatch(/\.rename-fields\.js$/);
-      expect(result.content).toContain('module.exports');
+      expect(JSON.parse(result.content).format).toBe('javascript');
     });
 
-    it('always emits JS even when useTypescriptMigrations is enabled', () => {
-      // The runner only globs `*.{js,sql}`, and the TS-migrations dir resolves to
-      // the compiled output dir, so a `.ts` file would silently never run.
-      const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ctb-ts-'));
-      fs.writeFileSync(path.join(tmp, 'tsconfig.json'), '{}');
-      const strapi = createStrapiMock({
-        metas: scalarMeta,
-        migrationsDir: path.join(tmp, 'database', 'migrations'),
-        useTypescriptMigrations: true,
-      });
+    it('emits TypeScript when useTypescriptMigrations is enabled', () => {
+      // With `useTypescriptMigrations` the database discovers migrations from the
+      // compiled output dir and the app's tsconfig does not compile `.js`
+      // sources, so a `.js` file would silently never run.
+      const strapi = createStrapiMock({ metas: scalarMeta, useTypescriptMigrations: true });
       const builder = createMigrationBuilder({ strapi });
       builder.addRenameAttribute('api::article.article', {
         oldName: 'oldTitle',
@@ -858,10 +943,9 @@ describe('MigrationBuilder', () => {
       });
 
       const result = builder.build()!;
-      expect(result.filename).toMatch(/\.rename-fields\.js$/);
-      expect(result.content).toContain('module.exports');
-      expect(result.content).not.toContain('export default');
-      fs.removeSync(tmp);
+      expect(strapi.config.get).toHaveBeenCalledWith('database.settings.useTypescriptMigrations');
+      expect(result.filename).toMatch(/\.rename-fields\.ts$/);
+      expect(JSON.parse(result.content).format).toBe('typescript');
     });
   });
 
@@ -883,8 +967,6 @@ describe('MigrationBuilder', () => {
       const files = fs.readdirSync(migrationsDir);
       expect(files).toHaveLength(1);
       expect(files[0]).toMatch(/\.rename-fields\.js$/);
-      const content = fs.readFileSync(path.join(migrationsDir, files[0]), 'utf8');
-      expect(content).toContain("renameColumn('old_title', 'heading')");
       fs.removeSync(tmp);
     });
 
@@ -900,11 +982,12 @@ describe('MigrationBuilder', () => {
       fs.removeSync(tmp);
     });
 
-    it('writes to the app source dir, not the database-configured dir', async () => {
+    it('writes a .ts file to the app source dir (not the dist dir) when useTypescriptMigrations is enabled', async () => {
       // With `useTypescriptMigrations` the database's configured migrations dir
       // resolves to build output (e.g. `dist/database/migrations`), which is
       // gitignored and wiped on rebuild. The generated migration must instead
-      // land in the app's source `database/migrations` so it is a portable record.
+      // land in the app's source `database/migrations` as a `.ts` file so `tsc`
+      // compiles it into `dist`, where discovery looks.
       const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ctb-src-dir-'));
       const distMigrationsDir = path.join(tmp, 'dist', 'database', 'migrations');
       const sourceMigrationsDir = path.join(tmp, 'database', 'migrations');
@@ -924,6 +1007,7 @@ describe('MigrationBuilder', () => {
 
       expect(written).not.toBeNull();
       expect(written as string).toContain(sourceMigrationsDir);
+      expect(written).toMatch(/\.rename-fields\.ts$/);
       expect(fs.readdirSync(sourceMigrationsDir)).toHaveLength(1);
       expect(fs.existsSync(distMigrationsDir)).toBe(false);
       fs.removeSync(tmp);

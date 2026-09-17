@@ -104,6 +104,16 @@ describe('Content Type Builder - Schema service', () => {
           },
         },
       },
+      contentTypes: {},
+      components: {
+        'default.hero': {
+          uid: 'default.hero',
+          category: 'default',
+          collectionName: 'components_default_heroes',
+          info: { displayName: 'Hero' },
+          attributes: {},
+        },
+      },
     } as any;
   });
 
@@ -656,6 +666,7 @@ describe('Content Type Builder - Schema service', () => {
         uid: componentUid,
         displayName: 'Test Component',
         category: 'default',
+        followDisplayName: true,
         attributes: {
           field: { type: 'string' },
           newField: { type: 'boolean' },
@@ -790,9 +801,12 @@ describe('Content Type Builder - Schema service', () => {
       await updateSchema(schemaWithRenames([{ oldName: 'title', newName: 'heading' }]));
 
       expect(createMigrationBuilder).toHaveBeenCalledTimes(1);
+      // The hop carries the definition the field ends up with (looked up by
+      // `newName` in the same entry) so the builder can refuse type changes.
       expect(migrationBuilderMock.addRenameAttribute).toHaveBeenCalledWith('api::article.article', {
         oldName: 'title',
         newName: 'heading',
+        newAttribute: { type: 'string' },
       });
       expect(migrationBuilderMock.writeFiles).toHaveBeenCalledTimes(1);
       expect(migrationBuilderMock.writeFiles).toHaveBeenCalledWith();
@@ -807,11 +821,29 @@ describe('Content Type Builder - Schema service', () => {
         ])
       );
 
+      // Intermediate names (`tmp`, `title`, `subtitle`) are not in the final
+      // attributes array, so they carry no definition.
       expect(migrationBuilderMock.addRenameAttribute.mock.calls).toEqual([
-        ['api::article.article', { oldName: 'title', newName: 'tmp' }],
-        ['api::article.article', { oldName: 'subtitle', newName: 'title' }],
-        ['api::article.article', { oldName: 'tmp', newName: 'subtitle' }],
+        ['api::article.article', { oldName: 'title', newName: 'tmp', newAttribute: undefined }],
+        [
+          'api::article.article',
+          { oldName: 'subtitle', newName: 'title', newAttribute: undefined },
+        ],
+        ['api::article.article', { oldName: 'tmp', newName: 'subtitle', newAttribute: undefined }],
       ]);
+    });
+
+    it('does not pick a deleted attribute up as the new definition', async () => {
+      const schema = schemaWithRenames([{ oldName: 'title', newName: 'heading' }]);
+      (schema.contentTypes[0] as any).attributes = [{ action: 'delete', name: 'heading' }];
+
+      await updateSchema(schema);
+
+      expect(migrationBuilderMock.addRenameAttribute).toHaveBeenCalledWith('api::article.article', {
+        oldName: 'title',
+        newName: 'heading',
+        newAttribute: undefined,
+      });
     });
 
     it('does not generate a migration when renameMigrations is never', async () => {
@@ -879,6 +911,7 @@ describe('Content Type Builder - Schema service', () => {
       expect(migrationBuilderMock.addRenameAttribute).toHaveBeenCalledWith('default.seo', {
         oldName: 'title',
         newName: 'metaTitle',
+        newAttribute: { type: 'string' },
       });
     });
 
@@ -906,10 +939,84 @@ describe('Content Type Builder - Schema service', () => {
 
       await updateSchema(schema);
 
+      // A category-only move keeps its collection name (no table rename).
       expect(migrationBuilderMock.addRenameComponent).toHaveBeenCalledWith({
         oldUid: 'default.hero',
         newUid: 'shared.hero',
       });
+    });
+
+    it('collects a component-level rename when the display name changes (CG-1001)', async () => {
+      const schema: CTBSchema = {
+        contentTypes: [],
+        components: [
+          {
+            action: 'update',
+            uid: 'default.hero',
+            category: 'default',
+            // The name half of the uid follows the new display name.
+            displayName: 'Hero Banner',
+            attributes: [],
+          } as any,
+        ],
+      };
+
+      await updateSchema(schema);
+
+      // The data table follows the new collection name so the old name is free.
+      expect(migrationBuilderMock.addRenameComponent).toHaveBeenCalledWith({
+        oldUid: 'default.hero',
+        newUid: 'default.hero-banner',
+        oldCollectionName: 'components_default_heroes',
+        newCollectionName: 'components_default_hero_banners',
+      });
+    });
+
+    it('collects a single rename when both the category and the display name change', async () => {
+      const schema: CTBSchema = {
+        contentTypes: [],
+        components: [
+          {
+            action: 'update',
+            uid: 'default.hero',
+            category: 'shared',
+            displayName: 'Hero Banner',
+            attributes: [],
+          } as any,
+        ],
+      };
+
+      await updateSchema(schema);
+
+      expect(migrationBuilderMock.addRenameComponent).toHaveBeenCalledTimes(1);
+      expect(migrationBuilderMock.addRenameComponent).toHaveBeenCalledWith({
+        oldUid: 'default.hero',
+        newUid: 'shared.hero-banner',
+        oldCollectionName: 'components_default_heroes',
+        newCollectionName: 'components_shared_hero_banners',
+      });
+    });
+
+    it('does not rename a component whose file name differs from its unchanged display name', async () => {
+      // A hand-edited schema: file `hero.json`, display name "Main Hero". An
+      // unrelated edit (e.g. the icon) must not move it to `default.main-hero`.
+      (global.strapi as any).components['default.hero'].info.displayName = 'Main Hero';
+
+      await updateSchema({
+        contentTypes: [],
+        components: [
+          {
+            action: 'update',
+            uid: 'default.hero',
+            category: 'default',
+            displayName: 'Main Hero',
+            icon: 'star',
+            attributes: [],
+          } as any,
+        ],
+      });
+
+      expect(migrationBuilderMock.addRenameComponent).not.toHaveBeenCalled();
     });
 
     it('does not collect a component rename when the category is unchanged', async () => {
@@ -984,6 +1091,7 @@ describe('Content Type Builder - Schema service', () => {
       expect(migrationBuilderMock.addRenameAttribute).toHaveBeenCalledWith('api::article.article', {
         oldName: 'title',
         newName: 'heading',
+        newAttribute: { type: 'string' },
       });
 
       expect(builderServiceMock.editContentType).toHaveBeenCalledTimes(1);
@@ -1094,10 +1202,55 @@ describe('Content Type Builder - Schema service', () => {
       );
     });
 
+    it('renames the component when given a new display name', async () => {
+      seedComponent();
+
+      await renameComponent('default.hero', { displayName: 'Hero Banner' });
+
+      expect(migrationBuilderMock.addRenameComponent).toHaveBeenCalledWith({
+        oldUid: 'default.hero',
+        newUid: 'default.hero-banner',
+        oldCollectionName: 'components_default_heroes',
+        newCollectionName: 'components_default_hero_banners',
+      });
+
+      const editArg = jest.mocked(builderServiceMock.editComponent).mock.calls[0][0] as any;
+      expect(editArg.uid).toBe('default.hero');
+      expect(editArg.category).toBe('default');
+      expect(editArg.displayName).toBe('Hero Banner');
+    });
+
+    it('applies a new category and display name in one step', async () => {
+      seedComponent();
+
+      await renameComponent('default.hero', { category: 'shared', displayName: 'Hero Banner' });
+
+      expect(migrationBuilderMock.addRenameComponent).toHaveBeenCalledWith({
+        oldUid: 'default.hero',
+        newUid: 'shared.hero-banner',
+        oldCollectionName: 'components_default_heroes',
+        newCollectionName: 'components_shared_hero_banners',
+      });
+    });
+
+    it('throws when neither a category nor a display name is given', async () => {
+      seedComponent();
+
+      await expect(renameComponent('default.hero', {})).rejects.toThrow(/required/);
+    });
+
     it('throws when the component is already in the target category', async () => {
       seedComponent();
 
-      await expect(renameComponent('default.hero', 'default')).rejects.toThrow(/already in/);
+      await expect(renameComponent('default.hero', 'default')).rejects.toThrow(/nothing to rename/);
+    });
+
+    it('throws when the display name is unchanged', async () => {
+      seedComponent();
+
+      await expect(renameComponent('default.hero', { displayName: 'Hero' })).rejects.toThrow(
+        /nothing to rename/
+      );
     });
 
     it('throws when a component already exists in the target category', async () => {

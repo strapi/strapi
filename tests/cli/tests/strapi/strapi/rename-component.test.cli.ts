@@ -63,16 +63,15 @@ describe('rename:component', () => {
     expect(created).toHaveLength(1);
 
     const migration = await fs.readFile(path.join(migrationsDir, created[0]), 'utf8');
-    expect(migration).toMatch(/update/);
-    expect(migration).toContain("'component_type'");
-    expect(migration).toContain("'match.player'");
-    expect(migration).toContain("'team.player'");
-    // Guarded for fresh-database safety.
-    expect(migration).toMatch(/hasTable/);
-    expect(migration).toMatch(/hasColumn/);
+    // The component_type reference is rewritten through the guarded database
+    // helper (fresh-database safety lives in the helper, not in the file).
+    expect(migration).toContain('db.schema.updateRows(knex, {');
+    expect(migration).toContain("guardColumn: 'component_type'");
+    expect(migration).toContain("component_type: 'match.player'");
+    expect(migration).toContain("component_type: 'team.player'");
 
     const plainOut = stripAnsi(stdout);
-    expect(plainOut).toMatch(/Moved component "match\.player" to category "team"/);
+    expect(plainOut).toMatch(/Renamed component "match\.player" to category "team"/);
     expect(plainOut).toMatch(/Generated migration/);
   });
 });
