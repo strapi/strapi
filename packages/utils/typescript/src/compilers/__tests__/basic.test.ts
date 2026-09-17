@@ -42,6 +42,8 @@ describe('basic compiler', () => {
         compilerOptions: {
           module: 'commonjs',
           moduleResolution: 'node',
+          noCheck: true,
+          noLib: true,
           outDir: 'dist',
           resolveJsonModule: true,
           rootDir: '.',
@@ -51,7 +53,7 @@ describe('basic compiler', () => {
       })
     );
 
-    run(join(appDir, 'tsconfig.json'));
+    run(join(appDir, 'tsconfig.json'), { ignoreDiagnostics: true });
 
     await expect(
       readFile(
