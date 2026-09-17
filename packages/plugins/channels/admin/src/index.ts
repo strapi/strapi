@@ -4,6 +4,7 @@ import * as yup from 'yup';
 
 import { ChannelHeaderAction } from './components/ChannelHeaderAction';
 import { ChannelPicker } from './components/ChannelPicker';
+import { FillFromChannelAction } from './components/FillFromChannelAction';
 import { ResetOverridesAction } from './components/ResetOverridesAction';
 import { ChannelVisibilityField } from './components/ChannelVisibilityField';
 import { PERMISSIONS } from './constants';
@@ -74,6 +75,7 @@ export default {
       // to the Default values, without adding a side-panel block.
       apis.addDocumentAction((actions: DocumentActionComponent[]) => [
         ...actions,
+        FillFromChannelAction,
         ResetOverridesAction,
       ]);
 

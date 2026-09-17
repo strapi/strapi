@@ -63,6 +63,10 @@ export const SameOnAllChannels = () => {
 };
 
 const OverriddenChip = styled.button`
+  /* Field.Root is an alignItems: stretch column, so the label flex spans the
+   * field's full width: auto margin sends the chip to the input's right edge,
+   * on the label's line. */
+  margin-left: auto;
   border: none;
   background: ${({ theme }) => theme.colors.primary100};
   color: ${({ theme }) => theme.colors.primary600};
@@ -111,13 +115,10 @@ const OverriddenBadge = ({
     <>
       <Popover.Root open={open} onOpenChange={setOpen}>
         <Popover.Trigger>
-          <OverriddenChip
-            type="button"
-            onMouseEnter={show}
-            onMouseLeave={hide}
-            onFocus={show}
-            onBlur={hide}
-          >
+          {/* Mouse-only: focus handlers would loop with the popover's focus
+              stealing (open → content steals focus → blur → close → focus
+              restored → open again). */}
+          <OverriddenChip type="button" onMouseEnter={show} onMouseLeave={hide}>
             {formatMessage({
               id: getTranslation('field.overridden.chip'),
               defaultMessage: 'Overridden',

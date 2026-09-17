@@ -53,5 +53,11 @@
   "field.overridden.details": "\"{field}\" carries its own value on {channel}. The Default content is untouched.",
   "action.reset.label": "Reset overrides ({channel})",
   "action.reset.dialog.title": "Confirmation",
-  "action.reset.dialog.body": "Reset {count, plural, one {# overridden field} other {# overridden fields}} on {channel}? This entry will follow the Default values again."
+  "action.reset.dialog.body": "Reset {count, plural, one {# overridden field} other {# overridden fields}} on {channel}? This entry will follow the Default values again.",
+  "fill.label": "Fill from another channel",
+  "fill.description": "Copy the overridable field values of another channel into this form. Nothing is saved until you save the entry on {target}.",
+  "fill.source": "Source channel",
+  "fill.source.placeholder": "Select a channel",
+  "fill.submit": "Fill in",
+  "fill.success": "Values from {source} filled in — review and save to make them {target} overrides."
 }

@@ -74,6 +74,15 @@ export const installChannelHeaderInterceptor = () => {
         return originalFetch(input, init);
       }
 
+      // A caller that set the header itself knows better (e.g. "fill from
+      // another channel" reading a sibling view): pass through untouched.
+      const explicit = new Headers(
+        init?.headers ?? (input instanceof Request ? input.headers : undefined)
+      );
+      if (explicit.has(CHANNEL_HEADER)) {
+        return originalFetch(input, init);
+      }
+
       let stamped: Promise<Response>;
       if (input instanceof Request && init === undefined) {
         const headers = new Headers(input.headers);
