@@ -28,6 +28,13 @@ jest.mock('../core/scan-roots', () => ({
   getScanRoots: jest.fn(async () => [mockScanRoot]),
 }));
 
+const mockGetModulePath = jest.fn((mod: string): string => `/app/node_modules/${mod}`);
+
+jest.mock('../core/resolve-module', () => ({
+  ...jest.requireActual('../core/resolve-module'),
+  getModulePath: (mod: string) => mockGetModulePath(mod),
+}));
+
 const buildStrapiMock = (
   cookieName?: string,
   cookiePath?: string,
@@ -116,6 +123,35 @@ describe('createBuildContext', () => {
 
       expect(ctx.nextDesignSystem).toBe(true);
       expect(ctx.scanRoots).toEqual([mockScanRoot]);
+    });
+
+    it('throws with the resolutions snippet when the next entry does not resolve', async () => {
+      mockGetModulePath.mockImplementationOnce(() => {
+        throw new Error('Cannot find module');
+      });
+      const strapi = buildStrapiMockWithFlags({ unstableNextDesignSystem: true });
+
+      await expect(
+        createBuildContext({ ...buildArgs(strapi), options: { bundler: 'vite' } })
+      ).rejects.toThrow(/"resolutions": \{ "@strapi\/design-system": "<version>" \}/);
+    });
+
+    it('resolves the next entry from the admin closure when the flag is on', async () => {
+      const strapi = buildStrapiMockWithFlags({ unstableNextDesignSystem: true });
+
+      const ctx = await createBuildContext({
+        ...buildArgs(strapi),
+        options: { bundler: 'vite' },
+      });
+
+      expect(ctx.nextDesignSystem).toBe(true);
+      expect(mockGetModulePath).toHaveBeenCalledWith('@strapi/design-system/next/source.css');
+    });
+
+    it('resolves nothing when the flag is off', async () => {
+      await createBuildContext(buildArgs(buildStrapiMock()));
+
+      expect(mockGetModulePath).not.toHaveBeenCalledWith('@strapi/design-system/next/source.css');
     });
 
     it('is off and warns once when the flag is on under webpack', async () => {

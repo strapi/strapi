@@ -11,6 +11,7 @@ import { getStrapiAdminEnvVars, loadEnv } from './core/env';
 import { PluginMeta, getEnabledPlugins, getMapOfPluginsWithAdmin } from './core/plugins';
 import { AppFile, loadUserAppFile } from './core/admin-customisations';
 import { getScanRoots } from './core/scan-roots';
+import { getModulePath } from './core/resolve-module';
 import type { BaseContext } from './types';
 
 interface BaseOptions {
@@ -56,6 +57,29 @@ interface CreateBuildContextArgs extends CLIContext {
 }
 
 const NEXT_DESIGN_SYSTEM_FLAG = 'unstableNextDesignSystem';
+
+/** The export the flag-on stylesheet imports. Only a design system release with the `next` entry has it */
+const NEXT_DESIGN_SYSTEM_ENTRY = '@strapi/design-system/next/source.css';
+
+/** Fails the build when @strapi/admin's closure has no next design system entry, the root the Vite alias resolves from */
+const assertNextDesignSystemEntry = (): void => {
+  try {
+    getModulePath(NEXT_DESIGN_SYSTEM_ENTRY);
+  } catch {
+    throw new Error(
+      [
+        `The ${NEXT_DESIGN_SYSTEM_FLAG} future flag needs a @strapi/design-system release that ships the "next" entry, but ${NEXT_DESIGN_SYSTEM_ENTRY} does not resolve.`,
+        'Point the application package.json at such a release:',
+        '',
+        '"resolutions": { "@strapi/design-system": "<version>" }',
+        '',
+        'npm and pnpm users use "overrides" in place of "resolutions", with the key at the top level of the object.',
+        'An entry in "dependencies" is not enough. The override must be global, so that @strapi/admin gets the same copy.',
+        'The current release is the experimental dist-tag on npm, see `npm view @strapi/design-system dist-tags`.',
+      ].join(os.EOL)
+    );
+  }
+};
 
 const DEFAULT_BROWSERSLIST = [
   'last 3 major versions',
@@ -178,6 +202,10 @@ const createBuildContext = async ({
   }
 
   const nextDesignSystem = flagEnabled && bundler === 'vite';
+
+  if (nextDesignSystem) {
+    assertNextDesignSystemEntry();
+  }
 
   const scanRoots = nextDesignSystem
     ? await getScanRoots({ cwd, runtimeDir, plugins: pluginsWithFront, customisations }, dev)
