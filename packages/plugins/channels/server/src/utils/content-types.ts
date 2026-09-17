@@ -61,6 +61,24 @@ export const getHiddenAttributes = (model: Schema.ContentType, channelSlug: stri
     return Array.isArray(visibleIn) && visibleIn.length > 0 && !visibleIn.includes(channelSlug);
   });
 
+/**
+ * Content-type-level channel binding:
+ *
+ *   "pluginOptions": { "channels": { "availableIn": ["mobile", "tablet"] } }
+ *
+ * Entries carry variants only in the listed channels; on any other channel
+ * they serve the base content and refuse overrides. Empty/missing = every
+ * channel.
+ */
+export const isAvailableOnChannel = (model: unknown, channelSlug: string): boolean => {
+  const availableIn = (model as { pluginOptions?: { channels?: { availableIn?: string[] } } })
+    ?.pluginOptions?.channels?.availableIn;
+  if (!Array.isArray(availableIn) || availableIn.length === 0) {
+    return true;
+  }
+  return availableIn.includes(channelSlug);
+};
+
 export const isLocalizedContentType = (model: unknown): boolean =>
   (model as { pluginOptions?: { i18n?: { localized?: boolean } } })?.pluginOptions?.i18n
     ?.localized === true;

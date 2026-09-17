@@ -1,5 +1,6 @@
 import { pick } from 'lodash/fp';
 import type { Core } from '@strapi/types';
+import { errors } from '@strapi/utils';
 
 import { MAX_OVERLAY_DEPTH, NO_LOCALE } from '../constants';
 import {
@@ -17,6 +18,7 @@ import {
   getOverlayDepth,
   getService,
   hasDraftAndPublish,
+  isAvailableOnChannel,
   isChannelsEnabledContentType,
   isInternalScope,
   isLocalizedContentType,
@@ -25,6 +27,8 @@ import {
 } from '../utils';
 
 import type { OverrideRow, OverrideStatus } from '../services/overrides';
+
+const { ValidationError } = errors;
 
 const READ_ACTIONS = new Set(['findMany', 'findFirst', 'findOne']);
 
@@ -322,6 +326,9 @@ export const createChannelsMiddleware = (strapi: Core.Strapi) => {
     }
 
     const channel = getCurrentChannel();
+    // CT-level binding: outside its `availableIn` channels the content type
+    // serves the plain base — no overlay, no stripping, no overrides.
+    const available = channel ? isAvailableOnChannel(ctx.contentType, channel.slug) : true;
 
     switch (ctx.action) {
       // Lifecycle actions maintain the override rows for EVERY channel, so
@@ -337,10 +344,15 @@ export const createChannelsMiddleware = (strapi: Core.Strapi) => {
       case 'clone':
         return handleClone(ctx, next);
       case 'update':
+        if (channel && !available) {
+          throw new ValidationError(
+            `"${ctx.uid}" has no channel variants on "${channel.slug}" — edit it on the default channel.`
+          );
+        }
         return channel ? handleUpdate(ctx, next, channel) : next();
       case 'create':
       default:
-        if (channel && (READ_ACTIONS.has(ctx.action) || ctx.action === 'create')) {
+        if (channel && available && (READ_ACTIONS.has(ctx.action) || ctx.action === 'create')) {
           const result = await next();
           if (getOverlayDepth() > MAX_OVERLAY_DEPTH) {
             return result;

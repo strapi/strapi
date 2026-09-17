@@ -49,6 +49,23 @@ const PlainBadge = ({ title }: { title: string }) => (
   </IconSpan>
 );
 
+/** Whole-CT lock: the content type has no variants on the active channel. */
+export const NotAvailableOnChannel = ({ slug }: { slug: string }) => {
+  const { formatMessage } = useIntl();
+  return (
+    <PlainBadge
+      title={formatMessage(
+        {
+          id: getTranslation('field.not-available'),
+          defaultMessage:
+            'No "{channel}" variants for this content type — it serves its Default content here',
+        },
+        { channel: slug }
+      )}
+    />
+  );
+};
+
 /** "Same on every channel" — non-overridable field, shown on a channel. */
 export const SameOnAllChannels = () => {
   const { formatMessage } = useIntl();

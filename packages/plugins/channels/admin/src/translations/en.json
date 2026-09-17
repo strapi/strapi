@@ -59,5 +59,8 @@
   "fill.source": "Source channel",
   "fill.source.placeholder": "Select a channel",
   "fill.submit": "Fill in",
-  "fill.success": "Values from {source} filled in — review and save to make them {target} overrides."
+  "fill.success": "Values from {source} filled in — review and save to make them {target} overrides.",
+  "field.not-available": "No \"{channel}\" variants for this content type — it serves its Default content here",
+  "ctb.available-in.label": "Available in channels",
+  "ctb.available-in.description": "Entries carry channel variants only in the checked channels; anywhere else they serve the Default content."
 }

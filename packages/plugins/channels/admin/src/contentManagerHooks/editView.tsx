@@ -1,7 +1,11 @@
 /* eslint-disable check-file/filename-naming-convention */
 import { DEFAULT_CHANNEL_SLUG } from '../constants';
 import { getCurrentChannelSlug } from '../utils/currentChannel';
-import { ChannelFieldLabelAction, SameOnAllChannels } from '../components/ChannelFieldLabelAction';
+import {
+  ChannelFieldLabelAction,
+  NotAvailableOnChannel,
+  SameOnAllChannels,
+} from '../components/ChannelFieldLabelAction';
 
 import type { EditFieldLayout, EditLayout } from '@strapi/content-manager/strapi-admin';
 
@@ -11,7 +15,7 @@ interface MutateEditViewArgs {
 }
 
 type ChannelsLayoutOptions = EditLayout['options'] & {
-  channels?: { enabled?: boolean };
+  channels?: { enabled?: boolean; availableIn?: string[] };
 };
 
 interface ChannelsAttributeOptions {
@@ -48,7 +52,25 @@ const mutateEditViewHook = ({ layout, ...rest }: MutateEditViewArgs): MutateEdit
   const slug = getCurrentChannelSlug();
   const onChannel = slug !== DEFAULT_CHANNEL_SLUG;
 
+  // CT-level binding: outside its `availableIn` channels the content type
+  // serves the base and takes no overrides — the whole form locks.
+  const { availableIn } = (layout.options as ChannelsLayoutOptions).channels ?? {};
+  const unavailable =
+    onChannel &&
+    Array.isArray(availableIn) &&
+    availableIn.length > 0 &&
+    !availableIn.includes(slug);
+
   const decorateField = (field: EditFieldLayout): EditFieldLayout => {
+    if (unavailable) {
+      const { overridable } = attributeOptions(field.attribute);
+      return {
+        ...field,
+        disabled: true,
+        ...(overridable === true ? { labelAction: <NotAvailableOnChannel slug={slug} /> } : {}),
+      };
+    }
+
     const { overridable, visibleIn } = attributeOptions(field.attribute);
 
     if (

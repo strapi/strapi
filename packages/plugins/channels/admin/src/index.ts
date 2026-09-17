@@ -6,7 +6,10 @@ import { ChannelHeaderAction } from './components/ChannelHeaderAction';
 import { ChannelPicker } from './components/ChannelPicker';
 import { FillFromChannelAction } from './components/FillFromChannelAction';
 import { ResetOverridesAction } from './components/ResetOverridesAction';
-import { ChannelVisibilityField } from './components/ChannelVisibilityField';
+import {
+  ChannelAvailabilityField,
+  ChannelVisibilityField,
+} from './components/ChannelVisibilityField';
 import { PERMISSIONS } from './constants';
 import { mutateEditViewHook } from './contentManagerHooks/editView';
 import { PLUGIN_ID } from './pluginId';
@@ -118,6 +121,7 @@ export default {
         validator: () => ({
           channels: yup.object().shape({
             enabled: yup.bool(),
+            availableIn: yup.array().of(yup.string()),
           }),
         }),
         form: {
@@ -134,6 +138,20 @@ export default {
                   id: getTranslation('ctb.enabled.description'),
                   defaultMessage:
                     'Fields marked overridable can carry a different value per delivery channel',
+                },
+              },
+              {
+                name: 'pluginOptions.channels.availableIn',
+                type: 'channels-availability',
+                size: 12,
+                intlLabel: {
+                  id: getTranslation('ctb.available-in.label'),
+                  defaultMessage: 'Available in channels',
+                },
+                description: {
+                  id: getTranslation('ctb.available-in.description'),
+                  defaultMessage:
+                    'Entries carry channel variants only in the checked channels; anywhere else they serve the Default content.',
                 },
               },
             ];

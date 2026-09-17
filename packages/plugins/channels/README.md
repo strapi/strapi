@@ -58,6 +58,10 @@ Channels are opt-in at both levels, from the Content-Type Builder:
 // content type
 "pluginOptions": { "channels": { "enabled": true } }
 
+// content type: variants only in these channels (empty/missing = every
+// channel); anywhere else entries serve the Default content, read-only
+"pluginOptions": { "channels": { "enabled": true, "availableIn": ["mobile", "tablet"] } }
+
 // attribute: the value can vary by channel
 "pluginOptions": { "channels": { "overridable": true } }
 

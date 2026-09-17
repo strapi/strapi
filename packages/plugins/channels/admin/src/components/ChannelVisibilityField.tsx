@@ -22,6 +22,8 @@ interface ChannelVisibilityFieldProps {
   name: string;
   onChange: (input: { target: { name: string; value: string[]; type: string } }) => void;
   value?: string[];
+  /** The base channel always sees everything; CT availability excludes it. */
+  includeDefault?: boolean;
 }
 
 /**
@@ -39,6 +41,7 @@ export const ChannelVisibilityField = ({
   name,
   onChange,
   value,
+  includeDefault = true,
 }: ChannelVisibilityFieldProps) => {
   const { formatMessage } = useIntl();
   const { get: fetchGet } = useFetchClient();
@@ -64,10 +67,9 @@ export const ChannelVisibilityField = ({
   if (!available) return null;
   if (!channels || channels.length === 0) return null;
 
-  const options: ChannelOption[] = [
-    { id: 0, slug: DEFAULT_CHANNEL_SLUG, name: 'Default', color: null },
-    ...channels,
-  ];
+  const options: ChannelOption[] = includeDefault
+    ? [{ id: 0, slug: DEFAULT_CHANNEL_SLUG, name: 'Default', color: null }, ...channels]
+    : channels;
 
   const safeValue: string[] = Array.isArray(value) ? value : [];
   // Empty stored value = visible everywhere → every box checked in the UI.
@@ -110,3 +112,8 @@ export const ChannelVisibilityField = ({
     </Field.Root>
   );
 };
+
+/** CT-level "Available in channels" — same select, without the base channel. */
+export const ChannelAvailabilityField = (
+  props: Omit<ChannelVisibilityFieldProps, 'includeDefault'>
+) => <ChannelVisibilityField {...props} includeDefault={false} />;

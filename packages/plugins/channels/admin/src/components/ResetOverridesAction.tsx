@@ -11,7 +11,7 @@ import { useChannels } from './useChannels';
 
 import type { DocumentActionComponent } from '@strapi/content-manager/strapi-admin';
 
-type ChannelsLayoutOptions = { channels?: { enabled?: boolean } };
+type ChannelsLayoutOptions = { channels?: { enabled?: boolean; availableIn?: string[] } };
 
 /**
  * "Reset overrides" entry in the document's ··· menu (the `header` document
@@ -30,14 +30,18 @@ export const ResetOverridesAction: DocumentActionComponent = ({ model, documentI
   const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
   const locale = query.plugins?.i18n?.locale ?? null;
 
-  const enabled = (options as ChannelsLayoutOptions).channels?.enabled === true;
+  const layoutChannels = (options as ChannelsLayoutOptions).channels;
+  const enabled = layoutChannels?.enabled === true;
+  const availableIn = layoutChannels?.availableIn;
+  const unavailable =
+    Array.isArray(availableIn) && availableIn.length > 0 && !availableIn.includes(current.slug);
   const { data: overrides } = useGetEntryOverridesQuery(
     { model, documentId: documentId ?? '', locale },
     { skip: !enabled || !documentId || isOnDefault }
   );
   const [reset, { isLoading }] = useResetOverridesMutation();
 
-  if (!enabled || isOnDefault || !documentId) {
+  if (!enabled || isOnDefault || unavailable || !documentId) {
     return null;
   }
 

@@ -28,7 +28,7 @@ import { useChannels } from './useChannels';
 import type { Channel } from '../services/channels';
 import type { DocumentActionComponent } from '@strapi/content-manager/strapi-admin';
 
-type ChannelsLayoutOptions = { channels?: { enabled?: boolean } };
+type ChannelsLayoutOptions = { channels?: { enabled?: boolean; availableIn?: string[] } };
 
 interface ChannelsAttributeOptions {
   overridable?: boolean;
@@ -184,9 +184,13 @@ export const FillFromChannelAction: DocumentActionComponent = ({
   const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
   const locale = query.plugins?.i18n?.locale ?? null;
 
-  const enabled = (layout.edit.options as ChannelsLayoutOptions).channels?.enabled === true;
+  const layoutChannels = (layout.edit.options as ChannelsLayoutOptions).channels;
+  const enabled = layoutChannels?.enabled === true;
+  const availableIn = layoutChannels?.availableIn;
+  const unavailable =
+    Array.isArray(availableIn) && availableIn.length > 0 && !availableIn.includes(current.slug);
 
-  if (!enabled || isOnDefault || others.length === 0) {
+  if (!enabled || isOnDefault || unavailable || others.length === 0) {
     return null;
   }
   if (collectionType !== 'single-types' && !documentId) {

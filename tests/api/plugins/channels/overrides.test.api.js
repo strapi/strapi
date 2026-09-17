@@ -37,6 +37,25 @@ const articleModel = {
   collectionName: '',
 };
 
+const LANDING_UID = 'api::landing.landing';
+const LANDING_CM_URL = `/content-manager/collection-types/${LANDING_UID}`;
+
+const landingModel = {
+  draftAndPublish: true,
+  pluginOptions: { channels: { enabled: true, availableIn: ['mobile'] } },
+  attributes: {
+    title: {
+      type: 'string',
+      pluginOptions: { channels: { overridable: true } },
+    },
+  },
+  displayName: 'Landing',
+  singularName: 'landing',
+  pluralName: 'landings',
+  description: '',
+  collectionName: '',
+};
+
 describe('Channels — per-channel overrides and lifecycle', () => {
   const builder = createTestBuilder();
   let strapi;
@@ -53,6 +72,7 @@ describe('Channels — per-channel overrides and lifecycle', () => {
 
   const cleanup = async () => {
     await strapi.db.query(ARTICLE_UID).deleteMany();
+    await strapi.db.query(LANDING_UID).deleteMany();
     await strapi.db.query(OVERRIDE_UID).deleteMany();
     // Keep the bootstrap-seeded "default" channel; restore its flag.
     await strapi.db.query(CHANNEL_UID).deleteMany({ where: { slug: { $ne: 'default' } } });
@@ -68,7 +88,7 @@ describe('Channels — per-channel overrides and lifecycle', () => {
     });
 
   beforeAll(async () => {
-    await builder.addContentType(articleModel).build();
+    await builder.addContentTypes([articleModel, landingModel]).build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
@@ -415,6 +435,52 @@ describe('Channels — per-channel overrides and lifecycle', () => {
       const defaultId = await channelIdBySlug('default');
       const res = await rq({ url: `/channels/${defaultId}`, method: 'DELETE' });
       expect(res.statusCode).toBe(400);
+    });
+  });
+
+  describe('Content-type channel availability', () => {
+    test('Outside availableIn the entry serves base and refuses overrides', async () => {
+      const created = await rq({
+        url: LANDING_CM_URL,
+        method: 'POST',
+        body: { title: 'Landing base' },
+      });
+      expect(created.statusCode).toBe(201);
+      const landing = created.body.data ?? created.body;
+
+      // Overrides work on the bound channel…
+      const onMobile = await rq({
+        url: `${LANDING_CM_URL}/${landing.documentId}`,
+        method: 'PUT',
+        body: { title: 'Landing — mobile' },
+        headers: onChannel('mobile'),
+      });
+      expect(onMobile.statusCode).toBe(200);
+      expect((onMobile.body.data ?? onMobile.body).title).toBe('Landing — mobile');
+
+      // …are refused outside it…
+      const onDesktop = await rq({
+        url: `${LANDING_CM_URL}/${landing.documentId}`,
+        method: 'PUT',
+        body: { title: 'Landing — desktop' },
+        headers: onChannel('desktop'),
+      });
+      expect(onDesktop.statusCode).toBe(400);
+
+      // …and reads outside it serve the plain base, no overlay.
+      const readDesktop = await rq({
+        url: `${LANDING_CM_URL}/${landing.documentId}`,
+        method: 'GET',
+        headers: onChannel('desktop'),
+      });
+      expect((readDesktop.body.data ?? readDesktop.body).title).toBe('Landing base');
+
+      const readMobile = await rq({
+        url: `${LANDING_CM_URL}/${landing.documentId}`,
+        method: 'GET',
+        headers: onChannel('mobile'),
+      });
+      expect((readMobile.body.data ?? readMobile.body).title).toBe('Landing — mobile');
     });
   });
 
