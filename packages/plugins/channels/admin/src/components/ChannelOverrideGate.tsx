@@ -8,6 +8,7 @@ import { styled } from 'styled-components';
 
 import { useGetEntryOverridesQuery } from '../services/channels';
 import { getTranslation } from '../utils/getTranslation';
+import { clearUnlocked, draftKey, markUnlocked, useIsUnlocked } from '../utils/overrideDraft';
 
 import { useChannels } from './useChannels';
 
@@ -95,17 +96,37 @@ const GateInner = ({ field, children }: FieldDecoratorProps) => {
     { model, documentId: documentId ?? '', locale },
     { skip: !documentId || isOnDefault }
   );
-  const [unlocked, setUnlocked] = React.useState(false);
   const [hovered, setHovered] = React.useState(false);
   const [cursor, setCursor] = React.useState<{ x: number; y: number } | null>(null);
   const wrapperRef = React.useRef<HTMLDivElement>(null);
   const [frame, setFrame] = React.useState({ top: 0, height: 0 });
 
   const values = useForm('ChannelOverrideGate', (state) => state.values) as Record<string, unknown>;
-  const setValues = useForm('ChannelOverrideGate', (state) => state.setValues);
-  // The inherited value as it was when the field got unlocked — what Cancel
-  // puts back before re-locking.
-  const inheritedValue = React.useRef<unknown>(undefined);
+
+  const key = draftKey({
+    model,
+    documentId: documentId ?? '',
+    channel: current.slug,
+    locale,
+    field: field.name,
+  });
+  // Unlocked state lives in a shared store: the label badge shows the
+  // Overridden chip as soon as the field unlocks — the same feedback as
+  // editing a saved override — and its reset restores + re-locks.
+  const unlocked = useIsUnlocked(key);
+
+  const serverOverridden = !!overrides?.[current.slug]?.attributes.includes(field.name);
+
+  // Once the override is saved, the draft entry has served its purpose.
+  React.useEffect(() => {
+    if (serverOverridden && unlocked) {
+      clearUnlocked(key);
+    }
+  }, [serverOverridden, unlocked, key]);
+
+  // Leaving the document (unmount) drops unsaved unlocks — the CM discards
+  // the edits with it.
+  React.useEffect(() => () => clearUnlocked(key), [key]);
 
   const gateActive =
     !isOnDefault &&
@@ -114,19 +135,12 @@ const GateInner = ({ field, children }: FieldDecoratorProps) => {
     !isCreatingEntry &&
     documentId !== null &&
     overrides !== undefined &&
-    !overrides[current.slug]?.attributes.includes(field.name);
+    !serverOverridden;
 
   const veiled = gateActive && !unlocked;
-  const overriding = gateActive && unlocked;
 
   const unlock = () => {
-    inheritedValue.current = values[field.name];
-    setUnlocked(true);
-  };
-
-  const cancelOverride = () => {
-    setValues({ ...values, [field.name]: inheritedValue.current });
-    setUnlocked(false);
+    markUnlocked(key, values[field.name]);
   };
 
   // The invisible layer only spans the input control (the label above and
@@ -192,27 +206,6 @@ const GateInner = ({ field, children }: FieldDecoratorProps) => {
     observer.observe(wrapper);
     return () => observer.disconnect();
   }, [veiled]);
-
-  if (overriding) {
-    return (
-      <GateWrapper>
-        {children}
-        <Typography variant="pi" textColor="primary600" fontWeight="semiBold">
-          {formatMessage(
-            {
-              id: getTranslation('field.overriding'),
-              defaultMessage: 'Overriding on {channel} — saved with the entry',
-            },
-            { channel: current.name }
-          )}
-          {' · '}
-          <OverrideLink type="button" $active={false} onClick={cancelOverride}>
-            {formatMessage({ id: getTranslation('field.cancel'), defaultMessage: 'Cancel' })}
-          </OverrideLink>
-        </Typography>
-      </GateWrapper>
-    );
-  }
 
   if (!veiled) {
     return <>{children}</>;

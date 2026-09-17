@@ -4,6 +4,7 @@ import * as React from 'react';
 import {
   ConfirmDialog,
   useAPIErrorHandler,
+  useForm,
   useNotification,
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
@@ -23,6 +24,7 @@ import { createGlobalStyle, styled } from 'styled-components';
 
 import { useGetEntryOverridesQuery, useResetOverridesMutation } from '../services/channels';
 import { getTranslation } from '../utils/getTranslation';
+import { clearUnlocked, draftKey, getInheritedValue, useIsUnlocked } from '../utils/overrideDraft';
 
 import { useChannels } from './useChannels';
 
@@ -248,9 +250,27 @@ const LabelActionInner = ({ fieldName }: { fieldName: string }) => {
     { skip: !documentId }
   );
   const [reset, { isLoading }] = useResetOverridesMutation();
+  const values = useForm('ChannelFieldLabelAction', (state) => state.values) as Record<
+    string,
+    unknown
+  >;
+  const setValues = useForm('ChannelFieldLabelAction', (state) => state.setValues);
 
-  const overriddenHere =
+  const key = draftKey({
+    model,
+    documentId: documentId ?? '',
+    channel: current.slug,
+    locale,
+    field: fieldName,
+  });
+  // A field unlocked for override shows the chip right away — same feedback
+  // as editing a saved override; the chip's reset then restores the
+  // inherited value and re-locks instead of calling the API.
+  const optimistic = useIsUnlocked(key);
+
+  const serverOverridden =
     !isOnDefault && !!overrides?.[current.slug]?.attributes.includes(fieldName);
+  const overriddenHere = serverOverridden || (!isOnDefault && optimistic);
   const overriddenIn = Object.values(overrides ?? {})
     .filter((entry) => entry.attributes.includes(fieldName))
     .map((entry) => entry.channel.name ?? entry.channel.slug);
@@ -294,6 +314,12 @@ const LabelActionInner = ({ fieldName }: { fieldName: string }) => {
     if (!documentId) {
       return;
     }
+    if (!serverOverridden) {
+      // Unsaved override: put the inherited value back and re-lock.
+      setValues({ ...values, [fieldName]: getInheritedValue(key) });
+      clearUnlocked(key);
+      return;
+    }
     try {
       await reset({
         model,
@@ -302,6 +328,7 @@ const LabelActionInner = ({ fieldName }: { fieldName: string }) => {
         locale,
         attributes: [fieldName],
       }).unwrap();
+      clearUnlocked(key);
       toggleNotification({
         type: 'success',
         message: formatMessage(
