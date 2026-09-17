@@ -164,22 +164,23 @@ export const SettingsPage = () => {
   const { data, isLoading, refetch } = useSettings();
   const isAIAvailable = useAIAvailability();
 
-  const { data: imageCountResponse, isLoading: isLoadingImagesWithoutMetadataCount } = useQuery<
-    GetAIMetadataPendingCount.Response['data'],
-    GetAIMetadataPendingCount.Response['error']
-  >(
-    ['ai-metadata-count'],
-    async () => {
-      const { data } = await get<GetAIMetadataPendingCount.Response['data']>(
-        '/upload/ai-metadata-jobs/pending-count'
-      );
-      return data;
-    },
-    {
-      enabled: isAIAvailable && !!data?.aiMetadata,
-      retry: false,
-    }
-  );
+  const { data: imageCountResponse, isInitialLoading: isLoadingImagesWithoutMetadataCount } =
+    useQuery<
+      GetAIMetadataPendingCount.Response['data'],
+      GetAIMetadataPendingCount.Response['error']
+    >(
+      ['ai-metadata-count'],
+      async () => {
+        const { data } = await get<GetAIMetadataPendingCount.Response['data']>(
+          '/upload/ai-metadata-jobs/pending-count'
+        );
+        return data;
+      },
+      {
+        enabled: isAIAvailable && !!data?.aiMetadata,
+        retry: false,
+      }
+    );
 
   const imagesWithoutMetadataCount = imageCountResponse?.imagesWithoutMetadataCount ?? 0;
 

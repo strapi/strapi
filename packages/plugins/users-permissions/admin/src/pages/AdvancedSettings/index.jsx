@@ -12,8 +12,8 @@ import {
   useRBAC,
   Layouts,
 } from '@strapi/strapi/admin';
-import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useIntl } from 'react-intl';
 
 import { PERMISSIONS } from '../../constants';
 import { getTrad } from '../../utils';
@@ -88,7 +88,6 @@ const AdvancedSettingsPage = () => {
         message: formatAPIError(error),
       });
     },
-    refetchActive: true,
   });
 
   const { isLoading: isSubmittingForm } = submitMutation;
