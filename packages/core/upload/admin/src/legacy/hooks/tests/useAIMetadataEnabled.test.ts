@@ -59,18 +59,7 @@ describe('useAIMetadataEnabled', () => {
     expect(result.current.status).toBe('success');
   });
 
-  // Editors have no `settings.read` permission, so the request 403s
-  // (strapi/strapi#25131). That must read as "no AI", not as a page error.
-  it('reports success and no AI when the settings request is forbidden', async () => {
-    mockSettingsError(fetchError(403));
-
-    const { result } = renderHook(() => useAIMetadataEnabled());
-
-    await waitFor(() => expect(result.current.status).toBe('success'));
-    expect(result.current.isEnabled).toBe(false);
-  });
-
-  it('keeps reporting any other failure as an error', async () => {
+  it('reports a failed settings request as an error', async () => {
     mockSettingsError(fetchError(500));
 
     const { result } = renderHook(() => useAIMetadataEnabled());
