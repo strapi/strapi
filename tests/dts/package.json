@@ -1,0 +1,13 @@
+{
+  "name": "dts-tests",
+  "private": true,
+  "type": "commonjs",
+  "description": "Public API type tests. In userland mode (yarn test:dts:userland) this manifest becomes the one of an isolated TypeScript application, with workspace packages installed from packed tarballs. Only declare what the tests need: `@types/*` packages are optional peer dependencies of Strapi packages and are expected to reach them through those peers.",
+  "devDependencies": {
+    "@strapi/strapi": "workspace:*",
+    "@types/node": "20.19.41",
+    "typescript": "5.9.3",
+    "vite": "^8.0.10",
+    "vitest": "catalog:"
+  }
+}

@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "target": "es6"
+    "module": "node20",
+    "moduleResolution": "node16",
+    "target": "es2022",
+    "lib": ["es2023"],
+    "types": ["node", "jest"]
   },
-  "exclude": ["node_modules", "dist"]
+  // `dts` has its own tsconfig, and its vitest imports reference the DOM library
+  "exclude": ["node_modules", "dist", "dts"]
 }

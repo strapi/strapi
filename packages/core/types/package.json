@@ -85,6 +85,22 @@
     "typescript": "5.9.3",
     "undici": "6.28.1"
   },
+  "peerDependencies": {
+    "@types/json-logic-js": "^2.0.8",
+    "@types/koa": "^2.15.2",
+    "@types/koa__router": "^12.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/json-logic-js": {
+      "optional": true
+    },
+    "@types/koa": {
+      "optional": true
+    },
+    "@types/koa__router": {
+      "optional": true
+    }
+  },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",
     "npm": ">=6.0.0"
