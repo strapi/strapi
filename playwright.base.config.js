@@ -54,6 +54,9 @@ const createConfig = ({ port, testDir, appDir, reportFileName, domain }) => {
   return {
     testDir,
     testMatch: '*.spec.ts',
+    // Vitest e2e pilot specs (tests/e2e/tests/**/*.vitest.spec.ts) also match `*.spec.ts` and
+    // `import` from 'vitest', which Playwright's runner cannot load. Keep the two suites disjoint.
+    testIgnore: '*.vitest.spec.ts',
 
     /* default timeout for a jest test */
     timeout: getEnvNum(process.env.PLAYWRIGHT_TIMEOUT, 90 * 1000),
