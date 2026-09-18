@@ -26,91 +26,125 @@ export interface Store {
   rollbackCallbacks: Callback[];
 }
 
-const storage = new AsyncLocalStorage<Store>();
+interface TransactionStore extends Store {
+  // Retain ownership through a failed commit so its rollback can still find the hooks.
+  owner: Knex.Transaction | null;
+  phase: 'active' | 'finalizing' | 'closed';
+  finalization?: { event: 'commit' | 'rollback'; promise: Promise<void> };
+}
+
+const storage = new AsyncLocalStorage<TransactionStore>();
+
+const getActiveStore = () => {
+  const store = storage.getStore();
+  if (store && store.phase !== 'active') {
+    throw new Error(`Transaction is ${store.phase}; new work is not allowed.`);
+  }
+  return store;
+};
+
+const getTransactionStore = (trx: Knex.Transaction) => {
+  const store = storage.getStore();
+  return store?.owner === trx ? store : undefined;
+};
+
+const closeStore = (store: TransactionStore | undefined) => {
+  if (store) {
+    store.phase = 'closed';
+    store.trx = null;
+    store.owner = null;
+    store.commitCallbacks = [];
+    store.rollbackCallbacks = [];
+  }
+};
+
+const finalize = async (trx: Knex.Transaction, event: 'commit' | 'rollback') => {
+  const store = getTransactionStore(trx);
+  // Completion can be reported before the driver promise settles. Repeated helpers must
+  // await that finalizer rather than clear its hooks or send another finalization query.
+  if (store?.finalization) {
+    if (store.finalization.event !== event) {
+      throw new Error('Transaction is finalizing; another finalizer is not allowed.');
+    }
+    return store.finalization.promise;
+  }
+
+  if (isTransactorComplete(trx)) {
+    closeStore(store);
+    return;
+  }
+
+  // Descendants must not join a dying transaction or silently start an independent one.
+  if (store) {
+    store.phase = 'finalizing';
+  }
+
+  const finish = async () => {
+    try {
+      await trx[event]();
+    } catch (error) {
+      if (store) {
+        store.phase = 'closed';
+        store.trx = null;
+      }
+      // A rejected commit still needs its owner and hooks for the wrapper's rollback path.
+      // A rejected rollback is terminal: do not retain the transactor or either hook list.
+      if (event === 'rollback') {
+        closeStore(store);
+      }
+      throw error;
+    }
+
+    const callbacks = store?.[event === 'commit' ? 'commitCallbacks' : 'rollbackCallbacks'] ?? [];
+    closeStore(store);
+
+    // Only completion hooks get a clean context. Already-created descendants keep the closed
+    // store, while recovery work (including async hook continuations) starts outside it.
+    storage.exit(() => callbacks.forEach((cb) => cb()));
+  };
+
+  const promise = finish();
+  if (store) {
+    store.finalization = { event, promise };
+  }
+  try {
+    await promise;
+  } finally {
+    if (store) {
+      store.finalization = undefined;
+    }
+  }
+};
 
 const transactionCtx = {
   async run<TCallback extends Callback>(trx: Knex.Transaction, cb: TCallback) {
-    const store = storage.getStore();
-    return storage.run<ReturnType<TCallback>, void[]>(
-      {
-        trx,
-        // Fill with existing callbacks if nesting transactions
-        commitCallbacks: store?.commitCallbacks || [],
-        rollbackCallbacks: store?.rollbackCallbacks || [],
-      },
-      cb
-    );
+    const parentStore = getActiveStore();
+    const store: TransactionStore =
+      parentStore?.trx === trx
+        ? parentStore
+        : { owner: trx, trx, phase: 'active', commitCallbacks: [], rollbackCallbacks: [] };
+
+    return storage.run<ReturnType<TCallback>, void[]>(store, cb);
   },
 
   get() {
-    const store = storage.getStore();
-    return store?.trx;
+    return getActiveStore()?.trx;
   },
 
   async commit(trx: Knex.Transaction) {
-    const store = storage.getStore();
-    if (isTransactorComplete(trx)) {
-      if (store?.trx) {
-        store.trx = null;
-      }
-      return;
-    }
-
-    // Clear transaction from store
-    if (store?.trx) {
-      store.trx = null;
-    }
-
-    // Commit transaction
-    await trx.commit();
-
-    if (!store?.commitCallbacks.length) {
-      return;
-    }
-
-    // Run callbacks
-    store.commitCallbacks.forEach((cb) => cb());
-    store.commitCallbacks = [];
+    await finalize(trx, 'commit');
   },
 
   async rollback(trx: Knex.Transaction) {
-    const store = storage.getStore();
-    if (isTransactorComplete(trx)) {
-      if (store?.trx) {
-        store.trx = null;
-      }
-      return;
-    }
-
-    // Clear transaction from store
-    if (store?.trx) {
-      store.trx = null;
-    }
-
-    // Rollback transaction
-    await trx.rollback();
-
-    if (!store?.rollbackCallbacks.length) {
-      return;
-    }
-
-    // Run callbacks
-    store.rollbackCallbacks.forEach((cb) => cb());
-    store.rollbackCallbacks = [];
+    await finalize(trx, 'rollback');
   },
 
   onCommit(cb: Callback) {
-    const store = storage.getStore();
-    if (store?.commitCallbacks) {
-      store.commitCallbacks.push(cb);
-    }
+    getActiveStore()?.commitCallbacks.push(cb);
   },
 
   onRollback(cb: Callback) {
-    const store = storage.getStore();
-    if (store?.rollbackCallbacks) {
-      store.rollbackCallbacks.push(cb);
-    }
+    getActiveStore()?.rollbackCallbacks.push(cb);
   },
 };
 
