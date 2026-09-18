@@ -114,7 +114,11 @@ const isSchemaToolPart = (part: unknown): part is SchemaToolPart => {
   return part.type === 'tool-schemaGenerationTool';
 };
 
-const getPartFingerprint = (part: AIMessage['parts'][number]) => {
+/**
+ * Exported for unit tests only. The AI chat needs a live AI backend, so no E2E
+ * run can reach this logic.
+ */
+export const getPartFingerprint = (part: AIMessage['parts'][number]) => {
   if (part.type === 'text') {
     return `text:${part.text}`;
   }
@@ -142,8 +146,11 @@ type PartRecord = {
  * so its fingerprint would change on every tick and remount the node mid
  * stream. Hence the fallback chain below: exact fingerprint match first, then
  * object identity, then same slot and same type for the streaming case.
+ *
+ * Exported for unit tests only. The AI chat needs a live AI backend, so no E2E
+ * run can reach this logic.
  */
-const usePartsWithKeys = (parts: AIMessage['parts']) => {
+export const usePartsWithKeys = (parts: AIMessage['parts']) => {
   const keyPrefix = useId();
   const nextKey = useRef(0);
   const previousParts = useRef<PartRecord[]>([]);
