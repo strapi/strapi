@@ -12,6 +12,29 @@ const auditMocks = () => ({
   log: { error: jest.fn() },
 });
 
+const transactionMocks = (lockedRows: Array<{ id: number }> = []) => {
+  const trx = Symbol('trx');
+  const queryBuilder = {
+    select: jest.fn(),
+    where: jest.fn(),
+    orderBy: jest.fn(),
+    transacting: jest.fn(),
+    forUpdate: jest.fn(),
+    execute: jest.fn(() => Promise.resolve(lockedRows)),
+  };
+
+  queryBuilder.select.mockReturnValue(queryBuilder);
+  queryBuilder.where.mockReturnValue(queryBuilder);
+  queryBuilder.orderBy.mockReturnValue(queryBuilder);
+  queryBuilder.transacting.mockReturnValue(queryBuilder);
+  queryBuilder.forUpdate.mockReturnValue(queryBuilder);
+
+  return {
+    queryBuilder: jest.fn(() => queryBuilder),
+    transaction: jest.fn(async (callback: any) => callback({ trx })),
+  };
+};
+
 describe('Locales', () => {
   describe('setIsDefault', () => {
     test('Set isDefault to false', async () => {
@@ -288,9 +311,10 @@ describe('Locales', () => {
       const findOne = jest.fn(() => locale);
       const isLocalizedContentType = jest.fn(() => true);
       const query = jest.fn(() => ({ delete: deleteFn, findOne, deleteMany }));
+      const { queryBuilder, transaction } = transactionMocks([{ id: locale.id }]);
       const { eventHub, log } = auditMocks();
       global.strapi = {
-        db: { query },
+        db: { query, queryBuilder, transaction },
         eventHub,
         log,
         plugins: {
@@ -332,7 +356,7 @@ describe('Locales', () => {
       const deletedLocale = await localesService.delete({ id: 1 });
       expect(query).toHaveBeenCalledWith('plugin::i18n.locale');
       expect(deleteFn).not.toHaveBeenCalled();
-      expect(deletedLocale).toBeUndefined();
+      expect(deletedLocale).toBeNull();
       expect(eventHub.emit).not.toHaveBeenCalled();
     });
   });
