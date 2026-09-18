@@ -5,7 +5,12 @@ import { ACTIONS } from '../services/permission-checker';
 
 import type { ContentManagerModelForMcp, McpToolsBuildContext, DerivedTool } from './types';
 import { slugifyUidForMcpToolName, describeTool } from './utils';
-import { buildLocaleSchema, resolvePermittedLocaleSchema, getPermittedFields } from './permissions';
+import {
+  buildLocaleSchema,
+  resolvePermittedLocaleSchema,
+  getPermittedFields,
+  isContentTypeLocalized,
+} from './permissions';
 import {
   statusSchema,
   documentIdSchema,
@@ -61,6 +66,7 @@ const buildCollectionTools = (
   const uid = model.uid as UID.CollectionType;
   const slug = slugifyUidForMcpToolName(uid);
   const draftAndPublish = model.options?.draftAndPublish === true;
+  const localized = isContentTypeLocalized(strapi, uid);
   const { attributes } = model;
   const runtimeLocaleSchema = buildLocaleSchema(ctx.localeCodes, ctx.defaultLocale);
 
@@ -137,7 +143,12 @@ const buildCollectionTools = (
       uid,
       attributes
     );
-    const dataSchema = buildDataSchema(strapi, model, attributes, writeFields);
+    // Updates are partial (REST/admin parity) — every attribute is optional. On a non-D&P
+    // model, the new-locale branch in the handler creates+publishes, so required fields are
+    // enforced late by the entity validator (see buildDataSchema's note).
+    const dataSchema = buildDataSchema(strapi, model, attributes, writeFields, {
+      operation: 'update',
+    });
     const localeSchema = resolvePermittedLocaleSchema(
       strapi,
       context,
@@ -251,7 +262,13 @@ const buildCollectionTools = (
     {
       name: `update_${slug}`,
       telemetry: { source: 'content-manager', name: 'update' },
-      ...describeTool({ apiID: model.apiID, uid, operation: 'update' }),
+      ...describeTool({
+        apiID: model.apiID,
+        uid,
+        operation: 'update',
+        draftAndPublish,
+        localized,
+      }),
       auth: { policies: [{ action: ACTIONS.update, subject: uid }] },
       resolveInputSchema: resolveUpdateInputSchema,
       resolveOutputSchema: resolveReadOutputSchema,
@@ -367,7 +384,12 @@ const buildSingleTypeTools = (
       createFields === null || updateFields === null
         ? null
         : new Set([...createFields, ...updateFields]);
-    const dataSchema = buildDataSchema(strapi, model, attributes, writeFields);
+    // Single-type write is an upsert; treat as partial for update parity (REST updates are
+    // partial). On a non-D&P model the first write creates+publishes, so required fields are
+    // enforced late by the entity validator (see buildDataSchema's note).
+    const dataSchema = buildDataSchema(strapi, model, attributes, writeFields, {
+      operation: 'update',
+    });
     const localeSchema = resolvePermittedLocaleSchema(
       strapi,
       context,
@@ -454,7 +476,7 @@ const buildSingleTypeTools = (
     {
       name: `write_${slug}`,
       telemetry: { source: 'content-manager', name: 'write' },
-      ...describeTool({ apiID: model.apiID, uid, operation: 'write' }),
+      ...describeTool({ apiID: model.apiID, uid, operation: 'write', draftAndPublish }),
       auth: {
         policies: [
           { action: ACTIONS.create, subject: uid },

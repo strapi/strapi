@@ -248,7 +248,12 @@ describe('MCP content-manager CRUD RBAC (api)', () => {
         data: {
           additionalProperties: false,
           properties: {
-            publishedOn: { type: 'string' },
+            // Advertised shape only: this suite matches the JSON Schema from `tools/list` and
+            // does not exercise server validation. Non-required attributes are optional and
+            // nullable in every mode, and `.nullable()` emits `anyOf: [<inner>, { type: 'null' }]`.
+            // The server-side counterpart (`addRequiredValidation`'s `.nullable()` else-branch)
+            // is pinned in the entity-validator suite.
+            publishedOn: { anyOf: [{ type: 'string' }, { type: 'null' }] },
           },
         },
       },
