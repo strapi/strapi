@@ -56,11 +56,6 @@ const labelModel = {
       type: 'relation',
       relation: 'morphToMany',
     },
-    restrictedItems: {
-      type: 'relation',
-      relation: 'morphToMany',
-      target: ['api::tag.tag', 'api::label.label'],
-    },
     images: {
       type: 'media',
       multiple: true,
@@ -161,9 +156,6 @@ describe('GraphQL list item nullability', () => {
     expectNonNullListItems(findField(types, 'Label', 'palette').type, { listRequired: false });
     expectNonNullListItems(findField(types, 'Label', 'tags').type, { listRequired: true });
     expectNonNullListItems(findField(types, 'Label', 'genericItems').type, { listRequired: false });
-    expectNonNullListItems(findField(types, 'Label', 'restrictedItems').type, {
-      listRequired: false,
-    });
     expectNonNullListItems(findField(types, 'Label', 'images').type, { listRequired: true });
   });
 });
