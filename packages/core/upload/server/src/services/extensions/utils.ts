@@ -421,7 +421,7 @@ const createUnsignEntityMediaVisitor =
  * if they are from the current upload provider
  *
  * @param {Object} entity
- * @param {Object} modelAttributes
+ * @param {UID.Schema} uid - UID of the model the entity belongs to
  * @param {Map} cache one per document service call, see `SignCache`
  * @returns
  */
