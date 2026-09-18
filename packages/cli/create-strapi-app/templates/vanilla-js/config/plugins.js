@@ -1,3 +1,7 @@
+'use strict';
+
+const { factories } = require('@strapi/strapi');
+
 const allowedMediaTypes = [
   'image/*',
   'video/*',
@@ -21,7 +25,7 @@ const deniedTypes = [
   'application/x-mach-binary',
 ];
 
-module.exports = () => ({
+module.exports = factories.definePluginsConfig(() => ({
   'users-permissions': {
     config: {
       jwtManagement: 'refresh',
@@ -38,4 +42,4 @@ module.exports = () => ({
       },
     },
   },
-});
+}));

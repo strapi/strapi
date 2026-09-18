@@ -107,11 +107,12 @@ In Strapi v5, they will be used for:
 
 ### Config factories (opt-in)
 
-Prefer `factories.defineAdminConfig` / `defineServerConfig` / `defineMiddlewaresConfig` / `defineConfig('admin', …)` from `@strapi/strapi` when authoring `config/*` files. These are identity helpers with Zod runtime validation:
+Prefer `factories.defineAdminConfig` / `defineServerConfig` / `defineMiddlewaresConfig` / `definePluginsConfig` / `defineConfig('admin', …)` from `@strapi/strapi` when authoring `config/*` files. These are identity helpers with Zod runtime validation:
 
 - TypeScript users get inference without manual `: Core.Config.*` annotations
 - JavaScript users get the same runtime checks when the config loads
 - Existing plain object / function exports remain supported (non-breaking)
+- `definePluginsConfig` validates the plugin envelope (`enabled` / `resolve` / `config`) only; deep per-plugin payload checks remain on each plugin's `config.validator`
 
 Schemas currently live in `@strapi/core` (`configuration/schemas`) and are intended to move to `@strapi/definitions` (`schemas.config.*`) once that package lands. Load-time validation of _all_ configs (without opting into factories) and strict unknown-key rejection are follow-ups.
 
