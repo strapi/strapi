@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest';
+
 import outdent from 'outdent';
 
 import { appendToFile } from '../extend-plugin-index-files';
