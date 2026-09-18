@@ -5,7 +5,7 @@ import type { Database } from '..';
 
 import { DatabaseError } from '../errors';
 import { transactionCtx } from '../transaction-context';
-import { isKnexQuery } from '../utils/knex';
+import { applyDefaultQueryTimeout, isKnexQuery } from '../utils/knex';
 import * as helpers from './helpers';
 import type { Join } from './helpers/join';
 import type { OrderByValue } from './helpers/order-by';
@@ -755,7 +755,7 @@ const createQueryBuilder = (
 
     async execute({ mapResults = true } = {}) {
       try {
-        const qb = this.getKnexQuery();
+        const qb = applyDefaultQueryTimeout(this.getKnexQuery(), db);
 
         const transaction = transactionCtx.get();
         if (transaction) {
