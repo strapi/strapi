@@ -56,6 +56,19 @@ describe('<FilterList />', () => {
     },
   ];
 
+  const renderWithFilter = (value: string, onRemoveFilter = jest.fn()) =>
+    render(
+      <DesignSystemProvider>
+        <IntlProvider locale="en" messages={messages} defaultLocale="en">
+          <FilterList
+            appliedFilters={[{ mime: { $contains: value } }]}
+            filtersSchema={filtersSchema}
+            onRemoveFilter={onRemoveFilter}
+          />
+        </IntlProvider>
+      </DesignSystemProvider>
+    );
+
   it('renders and matches the snapshot', () => {
     const filters = [
       { mime: { $contains: 'image' } },
@@ -184,6 +197,31 @@ describe('<FilterList />', () => {
     );
 
     expect(screen.getByText(/type is not file/i)).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button'));
+
+    expect(onRemoveFilter).toHaveBeenCalledWith([]);
+  });
+
+  it.each([
+    ['a literal percent sign', '100%'],
+    ['a percent sign mid-string', '50%off'],
+    ['a trailing percent sign', 'draft%'],
+    ['an incomplete escape', '100%2'],
+    ['text that merely looks pre-encoded', 'a%26b'],
+    ['an ampersand', 'a&b'],
+  ])('renders %s without crashing, showing it as stored', (_label, value) => {
+    expect(() => renderWithFilter(value)).not.toThrow();
+    expect(
+      screen.getByText(new RegExp(value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'))
+    ).toBeInTheDocument();
+  });
+
+  it('removes a percent-valued filter when its chip is clicked', async () => {
+    const user = userEvent.setup();
+    const onRemoveFilter = jest.fn();
+
+    renderWithFilter('100%', onRemoveFilter);
 
     await user.click(screen.getByRole('button'));
 

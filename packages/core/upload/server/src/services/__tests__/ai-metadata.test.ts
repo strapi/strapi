@@ -50,7 +50,7 @@ describe('AI Metadata Service', () => {
       },
       ai: {
         admin: {
-          isEnabled: jest.fn().mockReturnValue(true),
+          isStrapiManagedAiEnabled: jest.fn().mockReturnValue(true),
           getAiToken: jest.fn().mockResolvedValue({ token: 'mock-token' }),
         },
       },
@@ -86,30 +86,30 @@ describe('AI Metadata Service', () => {
   });
 
   describe('isEnabled', () => {
-    it('should return true when strapi.ai.admin.isEnabled() is true and aiMetadata is true', async () => {
-      mockStrapi.ai.admin.isEnabled.mockReturnValue(true);
+    it('should return true when strapi.ai.admin.isStrapiManagedAiEnabled() is true and aiMetadata is true', async () => {
+      mockStrapi.ai.admin.isStrapiManagedAiEnabled.mockReturnValue(true);
       mockGetSettings.mockResolvedValue({ aiMetadata: true });
 
       expect(await aiMetadataService.isEnabled()).toBe(true);
       expect(mockGetSettings).toHaveBeenCalled();
     });
 
-    it('should return false when strapi.ai.admin.isEnabled() is false', async () => {
-      mockStrapi.ai.admin.isEnabled.mockReturnValue(false);
+    it('should return false when strapi.ai.admin.isStrapiManagedAiEnabled() is false', async () => {
+      mockStrapi.ai.admin.isStrapiManagedAiEnabled.mockReturnValue(false);
 
       expect(await aiMetadataService.isEnabled()).toBe(false);
       expect(mockGetSettings).not.toHaveBeenCalled();
     });
 
-    it('should return false when strapi.ai.admin.isEnabled() is true but aiMetadata is false', async () => {
-      mockStrapi.ai.admin.isEnabled.mockReturnValue(true);
+    it('should return false when strapi.ai.admin.isStrapiManagedAiEnabled() is true but aiMetadata is false', async () => {
+      mockStrapi.ai.admin.isStrapiManagedAiEnabled.mockReturnValue(true);
       mockGetSettings.mockResolvedValue({ aiMetadata: false });
 
       expect(await aiMetadataService.isEnabled()).toBe(false);
     });
 
     it('should default aiMetadata to true when not set in settings', async () => {
-      mockStrapi.ai.admin.isEnabled.mockReturnValue(true);
+      mockStrapi.ai.admin.isStrapiManagedAiEnabled.mockReturnValue(true);
       mockGetSettings.mockResolvedValue({});
 
       expect(await aiMetadataService.isEnabled()).toBe(true);
@@ -155,7 +155,7 @@ describe('AI Metadata Service', () => {
       });
 
       // Mock service as enabled by default
-      mockStrapi.ai.admin.isEnabled.mockReturnValue(true);
+      mockStrapi.ai.admin.isStrapiManagedAiEnabled.mockReturnValue(true);
       mockGetSettings.mockResolvedValue({ aiMetadata: true });
 
       const mockBuffer = Buffer.from('image-data');
@@ -164,7 +164,7 @@ describe('AI Metadata Service', () => {
 
     describe('error cases', () => {
       it('should throw error when service is disabled', async () => {
-        mockStrapi.ai.admin.isEnabled.mockReturnValue(false);
+        mockStrapi.ai.admin.isStrapiManagedAiEnabled.mockReturnValue(false);
 
         await expect(aiMetadataService.processFiles([mockImageFile])).rejects.toThrow(
           'AI Metadata service is not enabled'
@@ -172,7 +172,7 @@ describe('AI Metadata Service', () => {
       });
 
       it('should throw if getSettings throws an error', async () => {
-        mockStrapi.ai.admin.isEnabled.mockReturnValue(true);
+        mockStrapi.ai.admin.isStrapiManagedAiEnabled.mockReturnValue(true);
         mockGetSettings.mockRejectedValue(new Error('Settings error'));
 
         const files = [mockImageFile, mockPdfFile, mockImageFile2, mockPdfFile];
@@ -181,7 +181,7 @@ describe('AI Metadata Service', () => {
       });
 
       it('should throw when getAiToken fails (fail-fast)', async () => {
-        mockStrapi.ai.admin.isEnabled.mockReturnValue(true);
+        mockStrapi.ai.admin.isStrapiManagedAiEnabled.mockReturnValue(true);
         mockGetSettings.mockResolvedValue({ aiMetadata: true });
         mockStrapi.ai.admin.getAiToken.mockRejectedValue(new Error('token error'));
 
@@ -292,7 +292,7 @@ describe('AI Metadata Service', () => {
       });
 
       it('should not call fetch and throw if aiMetadata is false', async () => {
-        mockStrapi.ai.admin.isEnabled.mockReturnValue(true);
+        mockStrapi.ai.admin.isStrapiManagedAiEnabled.mockReturnValue(true);
         mockGetSettings.mockResolvedValue({ aiMetadata: false });
 
         const files = [mockImageFile, mockPdfFile, mockImageFile2, mockPdfFile];

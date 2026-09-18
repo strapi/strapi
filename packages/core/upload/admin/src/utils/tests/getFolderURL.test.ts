@@ -37,6 +37,20 @@ describe('getFolderURL', () => {
     ).toBe('/media-library?folder=1&folderPath=/1/2/3');
   });
 
+  test.each([
+    ['a percent sign', '100%', '100%25'],
+    ['an ampersand', 'a&b', 'a%26b'],
+    ['a hash', 'a#b', 'a%23b'],
+  ])('re-encodes %s in a carried-over filter', (_label, raw, encoded) => {
+    expect(
+      getFolderURL(
+        FIXTURE_PATHNAME,
+        { filters: { $and: [{ name: { $eq: raw } }] } },
+        { folder: FIXTURE_FOLDER }
+      )
+    ).toBe(`/media-library?filters[$and][0][name][$eq]=${encoded}&folder=1`);
+  });
+
   test('includes folderPath if provided and folder is undefined', () => {
     expect(getFolderURL(FIXTURE_PATHNAME, FIXTURE_QUERY, { folderPath: FIXTURE_FOLDER_PATH })).toBe(
       '/media-library?folderPath=/1/2/3'

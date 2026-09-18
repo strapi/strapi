@@ -24,11 +24,12 @@ import { formatBytes } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { isEventFromWithin } from '../../../utils/isEventFromWithin';
 import { getTranslationKey } from '../../../utils/translations';
-import { TABLE_HEADERS } from '../constants';
+import { ASSET_DETAILS_TRIGGER_PROPS, ASSET_ITEM_CONTROL_PROPS, TABLE_HEADERS } from '../constants';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useBusyAssetsOptional } from '../hooks/useBusyAssets';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
 import { type MixedItem } from '../utils/mergeMixedList';
+import { buildRenderedKeys } from '../utils/renderedKeys';
 import { assetKey, folderKey, getSelectAllState, type ItemKey } from '../utils/selection';
 
 import { AssetActionsMenu } from './AssetActionsMenu';
@@ -47,26 +48,15 @@ const StyledTable = styled(RawTable)`
   border-radius: 4px;
   overflow: hidden;
 
-  /* Below desktop only the name column remains. A fixed layout makes a long
-     name ellipsize instead of widening the table past the viewport — the
-     checkbox (first) and actions (last) columns keep a fixed width and the name
-     takes the rest. Desktop keeps the content-sized auto layout. */
-  table-layout: fixed;
+  /* An auto layout lets every column but the name size itself to its content,
+     so the dates never wrap. The name cell is what absorbs the leftover and
+     ellipsizes — see NameTd. */
+  table-layout: auto;
 
   & td:last-child,
   & th:last-child {
     width: 5.6rem;
     white-space: nowrap;
-  }
-
-  ${({ theme }) => theme.breakpoints.large} {
-    table-layout: auto;
-
-    & td:last-child,
-    & th:last-child {
-      width: auto;
-      white-space: normal;
-    }
   }
 `;
 
@@ -78,15 +68,48 @@ const StyledThead = styled(RawThead)`
   }
 `;
 
-const StyledTh = styled(RawTh)`
+/**
+ * Column sizing, applied to the header and body cells alike.
+ *
+ * `hug` shrinks a column to its content: `width: 1%` is a floor the content
+ * overrides, and `nowrap` stops a date breaking across lines.
+ *
+ * `flex` claims everything left over. `width: 100%` asks for all of it and
+ * `max-width: 0` is what allows the cell to be narrower than its content, which
+ * is what lets the name inside ellipsize instead of widening the table.
+ */
+const hugColumn = css`
+  width: 1%;
+  white-space: nowrap;
+`;
+
+const flexColumn = css`
+  width: 100%;
+  max-width: 0;
+  overflow: hidden;
+`;
+
+const StyledTh = styled(RawTh)<{ $flex?: boolean }>`
   height: 40px;
   padding: 0 ${({ theme }) => theme.spaces[4]};
   text-align: left;
+
+  ${({ $flex }) => ($flex ? flexColumn : hugColumn)}
 `;
 
 const StyledTd = styled(RawTd)`
   padding: 0 ${({ theme }) => theme.spaces[4]};
   border-bottom: 1px solid ${({ theme }) => theme.colors.neutral150};
+`;
+
+/** The name column: takes whatever the others leave and ellipsizes. */
+const NameTd = styled(StyledTd)`
+  ${flexColumn}
+`;
+
+/** Every other column: as wide as its content, never wrapping. */
+const HugTd = styled(StyledTd)`
+  ${hugColumn}
 `;
 
 const StyledTr = styled.tr<{
@@ -297,12 +320,16 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
       ref={setNodeRef}
       {...attributes}
       {...listeners}
+      {...ASSET_DETAILS_TRIGGER_PROPS}
       $isDragging={isDragging}
       $isMovePending={isMovePending}
       $isBusy={busyMessage !== null}
       $isSelected={selected}
       tabIndex={0}
       role="row"
+      // Right-clicking an item is not the background gesture: the row keeps the
+      // browser's own menu. See MainAreaContextMenu.
+      data-native-context-menu
       onDragStart={(e) => e.preventDefault()}
       onClick={handleRowClick}
       onKeyDown={handleKeyDown}
@@ -315,7 +342,7 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
       {/* No checkbox without the update permission (nothing selectable can be
           acted on). Shown at every viewport width otherwise. */}
       {canUpdate && (
-        <CheckboxTd onClick={stopRowEvent} onKeyDown={stopRowEvent}>
+        <CheckboxTd {...ASSET_ITEM_CONTROL_PROPS} onClick={stopRowEvent} onKeyDown={stopRowEvent}>
           <Flex>
             <Checkbox
               checked={selected}
@@ -331,7 +358,7 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
           </Flex>
         </CheckboxTd>
       )}
-      <StyledTd>
+      <NameTd>
         <Flex alignItems="center" justifyContent="space-between" gap={2} minWidth={0}>
           <Flex gap={3} alignItems="center" minWidth={0}>
             {/* The row is dimmed and inert while busy; the spinner in place of the
@@ -363,29 +390,34 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
             </Tooltip>
           )}
         </Flex>
-      </StyledTd>
+      </NameTd>
       {isDesktop && (
         <>
-          <StyledTd>
+          <HugTd>
             <Typography textColor="neutral600">
               {asset.createdAt ? formatDate(new Date(asset.createdAt), { dateStyle: 'long' }) : '-'}
             </Typography>
-          </StyledTd>
-          <StyledTd>
+          </HugTd>
+          <HugTd>
             <Typography textColor="neutral600">
               {asset.updatedAt ? formatDate(new Date(asset.updatedAt), { dateStyle: 'long' }) : '-'}
             </Typography>
-          </StyledTd>
-          <StyledTd>
+          </HugTd>
+          <HugTd>
             <Typography textColor="neutral600">
               {asset.size ? formatBytes(asset.size, 1) : '-'}
             </Typography>
-          </StyledTd>
+          </HugTd>
         </>
       )}
       {/* The row owns click, Enter and Space; none of them should reach it from
           the menu trigger (Enter would open the details drawer). */}
-      <StyledTd onClick={stopRowEvent} onKeyDown={stopRowEvent} onPointerDown={stopRowEvent}>
+      <StyledTd
+        {...ASSET_ITEM_CONTROL_PROPS}
+        onClick={stopRowEvent}
+        onKeyDown={stopRowEvent}
+        onPointerDown={stopRowEvent}
+      >
         <Flex justifyContent="flex-end">
           <AssetActionsMenu asset={asset} dragData={dragData} />
         </Flex>
@@ -481,6 +513,9 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
       $isSelected={isSelected(key)}
       tabIndex={0}
       role="row"
+      // Right-clicking an item is not the background gesture: the row keeps the
+      // browser's own menu. See MainAreaContextMenu.
+      data-native-context-menu
       onDragStart={(e: React.DragEvent) => {
         if (isEventFromWithin(e)) {
           e.preventDefault();
@@ -511,7 +546,7 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
           </Flex>
         </CheckboxTd>
       )}
-      <StyledTd>
+      <NameTd>
         <Flex gap={3} alignItems="center" minWidth={0}>
           <Flex
             justifyContent="center"
@@ -528,26 +563,26 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
             {folder.name}
           </TruncatedText>
         </Flex>
-      </StyledTd>
+      </NameTd>
       {isDesktop && (
         <>
-          <StyledTd>
+          <HugTd>
             <Typography textColor="neutral600">
               {folder.createdAt
                 ? formatDate(new Date(folder.createdAt), { dateStyle: 'long' })
                 : '-'}
             </Typography>
-          </StyledTd>
-          <StyledTd>
+          </HugTd>
+          <HugTd>
             <Typography textColor="neutral600">
               {folder.updatedAt
                 ? formatDate(new Date(folder.updatedAt), { dateStyle: 'long' })
                 : '-'}
             </Typography>
-          </StyledTd>
-          <StyledTd>
+          </HugTd>
+          <HugTd>
             <Typography textColor="neutral600">-</Typography>
-          </StyledTd>
+          </HugTd>
         </>
       )}
       {/* The row owns click, Enter and Space; none of them should reach it from
@@ -569,6 +604,8 @@ interface AssetsTableProps {
    * order instead of folders-first. Range selection follows the same order.
    */
   mixedItems?: MixedItem[] | null;
+  /** Keys of the rendered rows, in render order. Owned by the view. */
+  renderedKeys?: ItemKey[];
   onAssetItemClick: (assetId: number) => void;
 }
 
@@ -576,6 +613,7 @@ export const AssetsTable = ({
   assets,
   folders = [],
   mixedItems = null,
+  renderedKeys,
   onAssetItemClick,
 }: AssetsTableProps) => {
   const isDesktop = useIsDesktop();
@@ -600,14 +638,8 @@ export const AssetsTable = ({
 
   // Render order — folders first by default, or the interleaved mixed order.
   // Range selection follows it.
-  const orderedItemKeys: ItemKey[] = mixedItems
-    ? mixedItems.map((item) =>
-        item.kind === 'folder' ? folderKey(item.folder.id) : assetKey(item.asset.id)
-      )
-    : [
-        ...folders.map((folder) => folderKey(folder.id)),
-        ...assets.map((asset) => assetKey(asset.id)),
-      ];
+  const orderedItemKeys: ItemKey[] =
+    renderedKeys ?? buildRenderedKeys({ folders, assets, mixedItems });
   const { allSelected, isIndeterminate } = getSelectAllState(selectedKeys, orderedItemKeys);
 
   const handleSelectAll = () => {
@@ -650,7 +682,7 @@ export const AssetsTable = ({
 
             if (isVisuallyHidden) {
               return (
-                <StyledTh key={header.name}>
+                <StyledTh key={header.name} $flex={header.name === 'name'}>
                   <VisuallyHidden>
                     {formatMessage({
                       id: getTranslationKey('table.header.actions'),
@@ -662,7 +694,7 @@ export const AssetsTable = ({
             }
 
             return (
-              <StyledTh key={header.name}>
+              <StyledTh key={header.name} $flex={header.name === 'name'}>
                 <Typography textColor="neutral600" variant="sigma">
                   {tableHeaderLabel}
                 </Typography>

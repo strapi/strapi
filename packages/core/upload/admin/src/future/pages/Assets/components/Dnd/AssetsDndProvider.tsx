@@ -18,16 +18,17 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from '@dnd-kit/core';
+import { snapCenterToCursor } from '@dnd-kit/modifiers';
 import { useNotification } from '@strapi/admin/strapi-admin';
 import { Flex, VisuallyHidden } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
+import { useApiErrorMessage } from '../../../../hooks/useApiErrorMessage';
 import { useMediaLibraryPermissions } from '../../../../hooks/useMediaLibraryPermissions';
 import { useBulkMoveMutation, useGetFolderStructureQuery } from '../../../../services/folders';
 import { buildBulkMovePayload } from '../../../../utils/buildBulkMovePayload';
 import { canDropItemOnFolder } from '../../../../utils/canDropItemOnFolder';
 import { formatMoveSuccessMessage } from '../../../../utils/formatMoveSuccessMessage';
-import { getBulkMoveErrorMessage } from '../../../../utils/getBulkMoveErrorMessage';
 import { getFolderLabel } from '../../../../utils/getFolderLabel';
 import { emptyItemLocations, type ItemLocations } from '../../../../utils/itemLocations';
 import { getTranslationKey } from '../../../../utils/translations';
@@ -117,11 +118,16 @@ const resolveDestination = (
 // permission (see the note in the provider).
 const DRAG_DISABLED_DISTANCE = Number.MAX_SAFE_INTEGER;
 
+// Without a modifier the overlay is anchored to the dragged node's top-left, so the
+// chip trails the cursor by however far into the card or row the grab landed.
+const OVERLAY_MODIFIERS = [snapCenterToCursor];
+
 export const AssetsDndProvider = ({
   children,
   locations = emptyItemLocations,
 }: AssetsDndProviderProps) => {
   const { formatMessage } = useIntl();
+  const getErrorMessage = useApiErrorMessage();
   const { toggleNotification } = useNotification();
   const selection = useAssetSelectionOptional();
   const { currentFolderId } = useFolderNavigation();
@@ -273,7 +279,7 @@ export const AssetsDndProvider = ({
           message: successMessage,
         });
       } catch (error) {
-        const errorMessage = getBulkMoveErrorMessage(error, errorFallback);
+        const errorMessage = getErrorMessage(error, errorFallback);
 
         announceToLiveRegion(
           formatMessage(
@@ -297,6 +303,7 @@ export const AssetsDndProvider = ({
       clearDragState,
       folderStructure,
       formatMessage,
+      getErrorMessage,
       isMovePending,
       rootLabel,
       selection,
@@ -385,7 +392,7 @@ export const AssetsDndProvider = ({
         <Flex position="relative" alignItems="stretch" direction="column" height="100%">
           {children}
         </Flex>
-        <DragOverlay dropAnimation={null}>
+        <DragOverlay dropAnimation={null} modifiers={OVERLAY_MODIFIERS}>
           {dragItems.length > 0 ? <DragOverlayChip items={dragItems} /> : null}
         </DragOverlay>
       </DndContext>

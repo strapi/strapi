@@ -14,7 +14,8 @@ const FOLDER_ICON_SIZE = 20;
 const FILE_ICON_SIZE = 24;
 const ICON_BOX = 24;
 
-const Chip = styled(Flex)`
+// `CompositeChip` is `styled(Chip)`, so it inherits the testid.
+const Chip = styled(Flex).attrs({ 'data-testid': 'drag-overlay-chip' })`
   position: relative;
   align-items: center;
   gap: ${({ theme }) => theme.spaces[2]};

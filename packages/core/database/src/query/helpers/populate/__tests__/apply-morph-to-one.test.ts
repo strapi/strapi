@@ -127,6 +127,69 @@ describe('morphToOne populate', () => {
     expect(results[1][ATTRIBUTE_NAME]).toBeNull();
   });
 
+  it('returns one count for a morphToOne target without populate.on filtering', async () => {
+    const { ctx } = buildCtx([]);
+    const results: Record<string, unknown>[] = [
+      { id: 1, related_id: 10, related_type: TARGET_TYPE },
+    ];
+
+    await applyPopulate(
+      results,
+      {
+        [ATTRIBUTE_NAME]: {
+          count: true,
+        },
+      },
+      ctx as any
+    );
+
+    expect(results[0][ATTRIBUTE_NAME]).toEqual({ count: 1 });
+  });
+
+  it('returns one count for a morphToOne target included by populate.on', async () => {
+    const { ctx } = buildCtx([]);
+    const results: Record<string, unknown>[] = [
+      { id: 1, related_id: 20, related_type: TARGET_TYPE_B },
+    ];
+
+    await applyPopulate(
+      results,
+      {
+        [ATTRIBUTE_NAME]: {
+          count: true,
+          on: {
+            [TARGET_TYPE_B]: {},
+          },
+        },
+      },
+      ctx as any
+    );
+
+    expect(results[0][ATTRIBUTE_NAME]).toEqual({ count: 1 });
+  });
+
+  it('returns zero count for a morphToOne target excluded by populate.on', async () => {
+    const { ctx } = buildCtx([]);
+    const results: Record<string, unknown>[] = [
+      { id: 1, related_id: 20, related_type: TARGET_TYPE_B },
+    ];
+
+    await applyPopulate(
+      results,
+      {
+        [ATTRIBUTE_NAME]: {
+          count: true,
+          on: {
+            [TARGET_TYPE]: {},
+          },
+        },
+      },
+      ctx as any
+    );
+
+    expect(results[0][ATTRIBUTE_NAME]).toEqual({ count: 0 });
+  });
+
   it('morph type UID overwrites a same-named key on the target row (fromRow output)', async () => {
     const targetRow = {
       id: 10,
@@ -442,6 +505,48 @@ describe('morphToMany populate', () => {
       { ...categoryRow, __type: TARGET_TYPE },
       { ...tagRow, __type: TARGET_TYPE_B },
     ]);
+  });
+
+  it('counts only morphToMany join rows whose target type is included by populate.on', async () => {
+    const { ctx, createQueryBuilder } = buildMorphToManyCtx(
+      [
+        {
+          article_id: 1,
+          related_id: 10,
+          related_type: TARGET_TYPE,
+          order: 1,
+        },
+        {
+          article_id: 1,
+          related_id: 20,
+          related_type: TARGET_TYPE_B,
+          order: 2,
+        },
+      ],
+      {
+        [TARGET_TYPE]: [{ id: 10, name: 'Category A' }],
+        [TARGET_TYPE_B]: [{ id: 20, name: 'Tag B' }],
+      }
+    );
+
+    const results: Record<string, unknown>[] = [{ id: 1 }];
+
+    await applyPopulate(
+      results,
+      {
+        [MORPH_TO_MANY_ATTRIBUTE_NAME]: {
+          count: true,
+          on: {
+            [TARGET_TYPE_B]: {},
+          },
+        },
+      },
+      ctx as any
+    );
+
+    expect(results[0][MORPH_TO_MANY_ATTRIBUTE_NAME]).toEqual({ count: 1 });
+    expect(createQueryBuilder).not.toHaveBeenCalledWith(TARGET_TYPE);
+    expect(createQueryBuilder).not.toHaveBeenCalledWith(TARGET_TYPE_B);
   });
 
   it('uses dynamic-zone join table metadata without SQL type filtering', async () => {

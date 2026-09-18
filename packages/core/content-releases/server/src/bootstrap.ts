@@ -2,6 +2,7 @@
 import type { Core, UID, Modules } from '@strapi/types';
 
 import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID, ALLOWED_WEBHOOK_EVENTS } from './constants';
+import { registerAuditEvents } from './audit-logs';
 import { getService } from './utils';
 import { deleteActionsOnDelete, updateActionsOnUpdate } from './middlewares/documents';
 
@@ -79,5 +80,11 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
     Object.entries(ALLOWED_WEBHOOK_EVENTS).forEach(([key, value]) => {
       strapi.get('webhookStore').addAllowedEvent(key, value);
     });
+
+    // Absent in CE, without the audit-logs license, or when disabled by config;
+    // get() throws for services that were never added, so probe first.
+    if (strapi.has('audit-logs-lifecycle')) {
+      registerAuditEvents(strapi.get('audit-logs-lifecycle'));
+    }
   }
 };

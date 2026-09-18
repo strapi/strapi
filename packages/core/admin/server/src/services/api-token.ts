@@ -14,7 +14,7 @@ import {
   prop,
 } from 'lodash/fp';
 import type { Core, Data } from '@strapi/types';
-import { errors } from '@strapi/utils';
+import { errors, emitAudit } from '@strapi/utils';
 import type { Ability } from '@casl/ability';
 import type {
   Update,
@@ -28,6 +28,13 @@ import { getService } from '../utils';
 import permissionDomain from '../domain/permission';
 import { validatePermissionsExist } from '../validation/permission';
 import { checkExpiry, updateLastUsedAt } from '../strategies/api-token-utils';
+import {
+  AUDITED_EVENTS,
+  getTokenChanges,
+  toActionRefs,
+  toAdminPermissionRefs,
+} from '../audit-logs/tokens';
+import type { PermissionRef, TokenKind } from '../audit-logs/tokens';
 
 type AnyApiToken = ContentApiApiToken | AdminApiToken;
 
@@ -798,6 +805,19 @@ const create = async <K extends AnyApiToken['kind']>(
       }
     }
 
+    await emitAudit({ strapi }, AUDITED_EVENTS.TOKEN_CREATE, {
+      tokenId: apiToken.id,
+      name: apiToken.name,
+      kind: 'content-api',
+      description: apiToken.description ?? null,
+      lifespan: apiToken.lifespan,
+      expiresAt: apiToken.expiresAt,
+      type: apiToken.type,
+      ...(apiToken.type === constants.API_TOKEN_TYPE.CUSTOM && {
+        permissions: result.permissions ?? [],
+      }),
+    });
+
     // Casted to any to avoid complex type duplication
     return omit(['adminPermissions', 'adminUserOwner'], result) as any;
   }
@@ -854,6 +874,17 @@ const create = async <K extends AnyApiToken['kind']>(
     }
   }
 
+  await emitAudit({ strapi }, AUDITED_EVENTS.TOKEN_CREATE, {
+    tokenId: apiToken.id,
+    name: apiToken.name,
+    kind: 'admin',
+    adminUserOwner: ownerId,
+    description: apiToken.description ?? null,
+    lifespan: apiToken.lifespan,
+    expiresAt: apiToken.expiresAt,
+    permissions: toAdminPermissionRefs((result as AdminApiToken).adminPermissions),
+  });
+
   // Casted to any to avoid complex type duplication
   return {
     ...(omit(['permissions'], result) as object),
@@ -867,7 +898,9 @@ const regenerate = async (id: string | number): Promise<ContentApiApiToken | Adm
   const encryptedKey = encryptionService.encrypt(accessKey);
 
   const apiToken: AnyApiToken = await strapi.db.query('admin::api-token').update({
-    select: ['id', 'accessKey', 'kind'],
+    select: ['id', 'name', 'accessKey', 'kind'],
+    // The owner id only, for the audit row; it is stripped from the response below
+    populate: { adminUserOwner: { select: ['id'] } },
     where: { id },
     data: {
       accessKey: hash(accessKey),
@@ -879,8 +912,18 @@ const regenerate = async (id: string | number): Promise<ContentApiApiToken | Adm
     throw new NotFoundError('The provided token id does not exist');
   }
 
+  const ownerId =
+    apiToken.kind === 'admin' ? resolveAdminTokenOwnerId(apiToken as AdminApiToken) : null;
+
+  await emitAudit({ strapi }, AUDITED_EVENTS.TOKEN_REGENERATE, {
+    tokenId: apiToken.id,
+    name: apiToken.name,
+    kind: (apiToken.kind ?? 'content-api') as TokenKind,
+    ...(ownerId != null && { adminUserOwner: ownerId }),
+  });
+
   return {
-    ...apiToken,
+    ...omit(['adminUserOwner'], apiToken),
     kind: (apiToken.kind ?? 'content-api') as AnyApiToken['kind'],
     accessKey,
   } as any;
@@ -987,6 +1030,16 @@ const revoke = async (id: string | number): Promise<AnyApiToken> => {
     return deletedToken;
   }
 
+  const ownerId =
+    deletedToken.kind === 'admin' ? resolveAdminTokenOwnerId(deletedToken as AdminApiToken) : null;
+
+  await emitAudit({ strapi }, AUDITED_EVENTS.TOKEN_DELETE, {
+    tokenId: deletedToken.id,
+    name: deletedToken.name,
+    kind: (deletedToken.kind ?? 'content-api') as TokenKind,
+    ...(ownerId != null && { adminUserOwner: ownerId }),
+  });
+
   if (deletedToken.kind === 'admin') {
     return {
       ...deletedToken,
@@ -1023,13 +1076,53 @@ const update = async (
   id: string | number,
   attributes: Update.Request['body']
 ): Promise<AnyApiToken> => {
-  const originalToken = await strapi.db
-    .query('admin::api-token')
-    .findOne({ select: SELECT_FIELDS, populate: ['adminUserOwner'], where: { id } });
+  const originalToken = await strapi.db.query('admin::api-token').findOne({
+    select: SELECT_FIELDS,
+    populate: ['adminUserOwner', 'permissions', 'adminPermissions'],
+    where: { id },
+  });
 
   if (!originalToken) {
     throw new NotFoundError('Token not found');
   }
+
+  // Populated with its permissions: the audit row for this update lists what changed,
+  // so the state before the write is needed. `type` is a content-api concept: admin
+  // tokens only carry the column default.
+  const previousSnapshot = {
+    name: originalToken.name,
+    description: originalToken.description,
+    ...(originalToken.kind !== 'admin' && { type: originalToken.type }),
+    permissions:
+      originalToken.kind === 'admin'
+        ? toAdminPermissionRefs(originalToken.adminPermissions)
+        : toActionRefs(originalToken.permissions),
+  };
+
+  const emitUpdate = async (
+    kind: TokenKind,
+    next: {
+      name: string;
+      description: string | null;
+      type?: string | null;
+      permissions: PermissionRef[];
+    },
+    adminUserOwner?: Data.ID | null
+  ) => {
+    const changes = getTokenChanges(previousSnapshot, next);
+
+    if (Object.keys(changes).length === 0) {
+      return;
+    }
+
+    await emitAudit({ strapi }, AUDITED_EVENTS.TOKEN_UPDATE, {
+      tokenId: originalToken.id,
+      name: next.name,
+      kind,
+      changes,
+      ...(adminUserOwner != null && { adminUserOwner }),
+    });
+  };
 
   const raw = attributes as Record<string, unknown>;
 
@@ -1056,10 +1149,7 @@ const update = async (
 
     // Only re-validate if permissions or type are being changed
     if (incomingPermissions !== undefined || changingTypeToCustom) {
-      assertCustomTokenPermissionsValidity(
-        resolvedType,
-        incomingPermissions ?? (originalToken.permissions as string[])
-      );
+      assertCustomTokenPermissionsValidity(resolvedType, incomingPermissions);
     }
   } else if (originalToken.kind === 'admin') {
     assertAdminKindFields(attributes as AdminTokenBody);
@@ -1159,10 +1249,16 @@ const update = async (
       .query('admin::api-token')
       .load(updatedToken, 'permissions');
 
-    return {
-      ...updatedToken,
-      permissions: permissionsFromDb ? permissionsFromDb.map((p: any) => p.action) : undefined,
-    } as AnyApiToken;
+    const permissions = permissionsFromDb ? toActionRefs(permissionsFromDb) : undefined;
+
+    await emitUpdate('content-api', {
+      name: updatedToken.name,
+      description: updatedToken.description ?? null,
+      type: updatedToken.type,
+      permissions: permissions ?? [],
+    });
+
+    return { ...updatedToken, permissions } as AnyApiToken;
   }
 
   // kind === 'admin'
@@ -1180,6 +1276,16 @@ const update = async (
   const adminUserOwnerFromDb = await strapi.db
     .query('admin::api-token')
     .load(updatedToken, 'adminUserOwner');
+
+  await emitUpdate(
+    'admin',
+    {
+      name: updatedToken.name,
+      description: updatedToken.description ?? null,
+      permissions: toAdminPermissionRefs(adminPermissionsFromDb || []),
+    },
+    resolveAdminTokenOwnerId(originalToken as AdminApiToken)
+  );
 
   return {
     ...updatedToken,

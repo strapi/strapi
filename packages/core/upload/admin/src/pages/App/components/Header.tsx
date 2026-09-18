@@ -1,4 +1,4 @@
-import { useQueryParams, Layouts } from '@strapi/admin/strapi-admin';
+import { deepEncodeQueryValues, useQueryParams, Layouts } from '@strapi/admin/strapi-admin';
 import { Button, Flex, Link } from '@strapi/design-system';
 import { ArrowLeft, Plus } from '@strapi/icons';
 import { stringify } from 'qs';
@@ -40,7 +40,7 @@ export const Header = ({
   const { pathname } = useLocation();
   const [{ query }] = useQueryParams();
   const backQuery = {
-    ...query,
+    ...deepEncodeQueryValues(query),
     folder:
       folder?.parent && typeof folder.parent !== 'number' && folder.parent.id
         ? folder.parent.id
