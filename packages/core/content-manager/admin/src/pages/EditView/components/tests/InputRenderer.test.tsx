@@ -12,9 +12,8 @@ describe('getComponentLayout', () => {
     const components = {
       'shared.resolved': {
         layout,
-        settings: {},
       },
-    } as EditLayout['components'];
+    } as unknown as EditLayout['components'];
 
     expect(getComponentLayout(components, 'shared.resolved')).toBe(layout);
   });
