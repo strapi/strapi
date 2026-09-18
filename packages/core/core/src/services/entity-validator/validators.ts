@@ -264,12 +264,22 @@ const addUniqueValidator = <T extends yup.AnySchema>(
     if (hasRepeatableData) {
       const { name: updatedName, value: updatedValue } = updatedAttribute;
       // Construct the full path to the unique field within the component.
-      const pathToCheck = [...componentContext.pathToComponent.slice(1), updatedName].join('.');
+      const pathToCheck = [...componentContext.pathToComponent.slice(1), updatedName];
 
-      // Extract the values from the repeatable data using the constructed path
-      const values = componentContext.repeatableData.map((item) => {
-        return pathToCheck.split('.').reduce((acc, key) => acc[key], item as any);
-      });
+      // `repeatableData` only holds the outermost repeatable, so the path can
+      // cross nested repeatables: a segment may branch into several values, and
+      // branches that do not reach the leaf are dropped.
+      const values = pathToCheck.reduce<any[]>(
+        (acc, key) =>
+          acc.flatMap((entry) => {
+            if (_.isNil(entry)) {
+              return [];
+            }
+
+            return Array.isArray(entry) ? entry.map((item) => item?.[key]) : [entry[key]];
+          }),
+        [...componentContext.repeatableData]
+      );
 
       // Check if the value is repeated in the current entity
       const isUpdatedAttributeRepeatedInThisEntity =
