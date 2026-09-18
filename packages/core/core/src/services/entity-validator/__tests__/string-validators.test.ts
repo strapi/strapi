@@ -225,6 +225,99 @@ describe('String validator', () => {
         });
       });
     });
+
+    describe('within a nested repeatable component', () => {
+      const options = { ...mockOptions, isDraft: false };
+
+      const fakeParentModel: Schema.ContentType = {
+        ...fakeModel,
+        uid: 'api::menu.menu',
+        attributes: {
+          menu_items: { type: 'component', repeatable: true, component: 'menu.menu-item-1' },
+        },
+      };
+
+      // A single type holding `menu_items` (repeatable), each item holding
+      // `children` (repeatable), each child holding `children` (repeatable).
+      // `repeatableData` is captured at the top level only, so the path walked
+      // from it crosses the nested repeatable arrays.
+      const repeatableData = [
+        {
+          id: 1,
+          slug: 'root-a',
+          children: [
+            { id: 11, slug: 'child-a', children: [{ id: 111, slug: 'leaf-a' }] },
+            { id: 12, slug: 'child-b' },
+          ],
+        },
+        {
+          id: 2,
+          slug: 'root-b',
+          children: [{ id: 21, slug: 'child-a', children: [{ id: 211, slug: 'leaf-a' }] }],
+        },
+      ];
+
+      const createValidator = (pathToComponent: string[], value: string) =>
+        strapiUtils.validateYupSchema(
+          Validators.string(
+            {
+              attr: { type: 'string', unique: true },
+              model: fakeModel,
+              updatedAttribute: { name: 'slug', value },
+              entity: null,
+              componentContext: {
+                parentContent: { model: fakeParentModel, options },
+                pathToComponent,
+                repeatableData,
+              },
+            },
+            options
+          )
+        );
+
+      test('it does not throw when the path crosses a repeatable array', async () => {
+        fakeFindOne.mockResolvedValue(null);
+
+        const validator = createValidator(['menu_items', 'children', 'children'], 'leaf-c');
+
+        expect(await validator('leaf-c')).toBe('leaf-c');
+      });
+
+      test('it does not throw when a branch does not hold the nested component', async () => {
+        fakeFindOne.mockResolvedValue(null);
+
+        // `children[1]` of the first root has no `children` of its own.
+        const validator = createValidator(['menu_items', 'children', 'children'], 'leaf-d');
+
+        expect(await validator('leaf-d')).toBe('leaf-d');
+      });
+
+      test('it fails the validation when the value is repeated in another branch of the repeatable', async () => {
+        expect.assertions(1);
+        fakeFindOne.mockResolvedValue(null);
+
+        const validator = createValidator(['menu_items', 'children'], 'child-a');
+
+        try {
+          await validator('child-a');
+        } catch (err) {
+          expect(err).toBeInstanceOf(errors.YupValidationError);
+        }
+      });
+
+      test('it fails the validation when the value is repeated deeper in the repeatable', async () => {
+        expect.assertions(1);
+        fakeFindOne.mockResolvedValue(null);
+
+        const validator = createValidator(['menu_items', 'children', 'children'], 'leaf-a');
+
+        try {
+          await validator('leaf-a');
+        } catch (err) {
+          expect(err).toBeInstanceOf(errors.YupValidationError);
+        }
+      });
+    });
   });
 
   describe('minLength', () => {
