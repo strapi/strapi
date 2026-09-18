@@ -58,13 +58,17 @@ const writeComp = {
   },
 };
 
-/** Draft & publish: create resolves to a draft, so required fields are relaxed. */
+/**
+ * Draft & publish, and localized: create resolves to a draft (so required fields are
+ * relaxed), and the localized flag is what surfaces the new-locale fill note on `update_*`.
+ */
 const dpCt = {
   kind: 'collectionType',
   displayName: 'mcp-write-dp',
   singularName: 'mcp-write-dp',
   pluralName: 'mcp-write-dps',
   draftAndPublish: true,
+  pluginOptions: { i18n: { localized: true } },
   attributes: {
     title: { type: 'string', required: true },
     subtitle: { type: 'string' },
@@ -85,12 +89,23 @@ const noDpCt = {
   },
 };
 
-const fieldPermission = (action: string, subject: string, fields: string[]): AdminPermission => ({
+/**
+ * On a localized subject the permission must also carry `locales`; without it the permission
+ * checker denies every locale and the tool returns "Forbidden access".
+ */
+const fieldPermission = (
+  action: string,
+  subject: string,
+  fields: string[],
+  locales?: string[]
+): AdminPermission => ({
   action,
   subject,
   conditions: [],
-  properties: { fields },
+  properties: locales === undefined ? { fields } : { fields, locales },
 });
+
+const DEFAULT_LOCALES = ['en'];
 
 describe('MCP content-manager write contracts (api)', () => {
   const builder = createTestBuilder();
@@ -122,9 +137,9 @@ describe('MCP content-manager write contracts (api)', () => {
   /** A token permitted on every field of both models, for the non-RBAC contract assertions. */
   const createFullToken = async (): Promise<AdminToken> =>
     createAdminToken([
-      fieldPermission(CM_ACTIONS.create, DP_UID, ['title', 'subtitle', 'seo']),
-      fieldPermission(CM_ACTIONS.update, DP_UID, ['title', 'subtitle', 'seo']),
-      fieldPermission(CM_ACTIONS.read, DP_UID, ['title', 'subtitle', 'seo']),
+      fieldPermission(CM_ACTIONS.create, DP_UID, ['title', 'subtitle', 'seo'], DEFAULT_LOCALES),
+      fieldPermission(CM_ACTIONS.update, DP_UID, ['title', 'subtitle', 'seo'], DEFAULT_LOCALES),
+      fieldPermission(CM_ACTIONS.read, DP_UID, ['title', 'subtitle', 'seo'], DEFAULT_LOCALES),
       fieldPermission(CM_ACTIONS.create, NO_DP_UID, ['title', 'seo']),
       fieldPermission(CM_ACTIONS.update, NO_DP_UID, ['title', 'seo']),
       fieldPermission(CM_ACTIONS.read, NO_DP_UID, ['title', 'seo']),
@@ -272,6 +287,25 @@ describe('MCP content-manager write contracts (api)', () => {
     // must not be advertised as required on a D&P create.
     expect(data.required ?? []).not.toContain('title');
     expect(JSON.stringify(data.properties.title)).toContain('fill it in before publishing');
+  });
+
+  test('localized update description names the new-locale shared-field fill', async () => {
+    const token = await createFullToken();
+    await mcp.initializeSession(token.accessKey);
+
+    const tools = await mcp.listTools(token.accessKey);
+
+    // The schema advertises non-localized fields as nullable, and that clear is a real write
+    // on an existing locale. But when `update_*` creates a locale that does not exist yet,
+    // `fillNonLocalizedAttributes` copies shared values over an explicit `null` (it tests
+    // `isNil`). REST and the admin Content Manager lose the clear the same way — this is
+    // Document Service behaviour — so `tools/list` is where an agent can learn about it.
+    const localizedUpdate = tools.find((tool) => tool.name === `update_${DP_SLUG}`);
+    expect(localizedUpdate?.description).toContain('copied from an existing locale');
+
+    // A non-localized model has no new-locale branch of this shape.
+    const plainUpdate = tools.find((tool) => tool.name === `update_${NO_DP_SLUG}`);
+    expect(plainUpdate?.description ?? '').not.toContain('copied from an existing locale');
   });
 
   test('non-D&P update description names the late published-create check', async () => {

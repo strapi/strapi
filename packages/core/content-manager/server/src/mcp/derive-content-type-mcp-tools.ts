@@ -5,7 +5,12 @@ import { ACTIONS } from '../services/permission-checker';
 
 import type { ContentManagerModelForMcp, McpToolsBuildContext, DerivedTool } from './types';
 import { slugifyUidForMcpToolName, describeTool } from './utils';
-import { buildLocaleSchema, resolvePermittedLocaleSchema, getPermittedFields } from './permissions';
+import {
+  buildLocaleSchema,
+  resolvePermittedLocaleSchema,
+  getPermittedFields,
+  isContentTypeLocalized,
+} from './permissions';
 import {
   statusSchema,
   documentIdSchema,
@@ -61,6 +66,7 @@ const buildCollectionTools = (
   const uid = model.uid as UID.CollectionType;
   const slug = slugifyUidForMcpToolName(uid);
   const draftAndPublish = model.options?.draftAndPublish === true;
+  const localized = isContentTypeLocalized(strapi, uid);
   const { attributes } = model;
   const runtimeLocaleSchema = buildLocaleSchema(ctx.localeCodes, ctx.defaultLocale);
 
@@ -256,7 +262,13 @@ const buildCollectionTools = (
     {
       name: `update_${slug}`,
       telemetry: { source: 'content-manager', name: 'update' },
-      ...describeTool({ apiID: model.apiID, uid, operation: 'update', draftAndPublish }),
+      ...describeTool({
+        apiID: model.apiID,
+        uid,
+        operation: 'update',
+        draftAndPublish,
+        localized,
+      }),
       auth: { policies: [{ action: ACTIONS.update, subject: uid }] },
       resolveInputSchema: resolveUpdateInputSchema,
       resolveOutputSchema: resolveReadOutputSchema,
