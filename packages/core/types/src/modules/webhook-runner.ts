@@ -5,6 +5,7 @@ interface Event {
   info: Record<string, unknown>;
 }
 export interface WebhookRunner {
+  getSignatureHeaders(body: string, secret?: string): Record<string, string>;
   deleteListener(event: string): void;
   createListener(event: string): void;
   executeListener({ event, info }: Event): Promise<void>;
