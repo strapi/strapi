@@ -120,7 +120,7 @@ export const mapAttributeToSchema = (
     case 'decimal':
       return attributes.decimalToSchema(attribute);
     case 'dynamiczone':
-      return attributes.dynamicZoneToSchema(attribute);
+      return attributes.dynamicZoneToSchema(strapi, attribute);
     case 'email':
       return attributes.emailToSchema(attribute);
     case 'enumeration':
