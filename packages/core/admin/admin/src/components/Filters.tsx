@@ -26,6 +26,8 @@ import { InputRenderer } from './FormInputs/Renderer';
 
 import type { Schema } from '@strapi/types';
 
+const EMPTY_OPTIONS: NonNullable<RootProps['options']> = [];
+
 /* -------------------------------------------------------------------------------------------------
  * Root
  * -----------------------------------------------------------------------------------------------*/
@@ -92,7 +94,7 @@ const Root = ({
   children,
   disabled = false,
   onChange,
-  options = [],
+  options = EMPTY_OPTIONS,
   onOpenChange,
   open: openProp,
   defaultOpen,
@@ -394,14 +396,46 @@ const List = () => {
   const [{ query }, setQuery] = useQueryParams<Filters.Query>();
 
   const options = useFilters('List', ({ options }) => options);
+  const queryFilters = query?.filters?.$and ?? [];
+  /**
+   * One stable key per list slot, kept in a ref. The write happens during
+   * render, but it is driven by the list length and not by the number of render
+   * calls, so a repeat invocation (the StrictMode double render) finds the
+   * lengths already equal and changes nothing. A content-derived key is not an
+   * option: identical filters are a legal query, so a key would still need an
+   * occurrence counter on top of the content.
+   */
+  const filterKeyPrefix = React.useId();
+  const nextFilterKey = React.useRef(0);
+  const filterKeys = React.useRef<string[]>([]);
+
+  while (filterKeys.current.length < queryFilters.length) {
+    filterKeys.current.push(`${filterKeyPrefix}-${nextFilterKey.current}`);
+    nextFilterKey.current += 1;
+  }
+  /**
+   * Truncation drops keys from the tail. `handleRemove` splices the removed
+   * slot out first, so removal through this component stays correct. A list
+   * that shrinks by any other route (browser history, an external `setQuery`,
+   * a clear all) shifts the remaining keys and falls back to the index-key
+   * behaviour this replaced. Accepted limit, not a bug to chase.
+   */
+  filterKeys.current.length = queryFilters.length;
+
+  const filtersWithKeys = queryFilters.map((queryFilter, index) => ({
+    queryFilter,
+    index,
+    key: filterKeys.current[index],
+  }));
 
   /**
    * Removed by position: identical filters are a legal query, so matching on
    * `(name, operator, value)` would drop every copy at once.
    */
   const handleRemove = (index: number) => {
-    const nextFilters = (query?.filters?.$and ?? []).filter((_, i) => i !== index);
+    const nextFilters = queryFilters.filter((_, i) => i !== index);
 
+    filterKeys.current.splice(index, 1);
     setQuery(
       withEncodedUserParams(query, {
         filters: deepEncodeQueryValues({ $and: nextFilters }),
@@ -410,13 +444,13 @@ const List = () => {
     );
   };
 
-  if (!query?.filters?.$and?.length) {
+  if (queryFilters.length === 0) {
     return null;
   }
 
   return (
     <>
-      {query?.filters?.$and?.map((queryFilter, index) => {
+      {filtersWithKeys.map(({ queryFilter, index, key }) => {
         const details = getFilterDetails(queryFilter, options);
         if (!details || typeof details.value === 'object') {
           return null;
@@ -433,7 +467,7 @@ const List = () => {
          */
         return (
           <AttributeTag
-            key={`${index}-${details.name}-${details.operator}-${details.value}`}
+            key={key}
             {...filter}
             index={index}
             onRemove={handleRemove}

@@ -326,8 +326,7 @@ export const forms = {
       advanced({ extensions }: { extensions: FormAPI }) {
         const baseForm = contentTypeForm.advanced
           .default()
-          .sections.map((section) => section.items)
-          .flat();
+          .sections.flatMap((section) => section.items);
         const itemsToAdd = extensions.getAdvancedForm(['contentType']);
 
         return {

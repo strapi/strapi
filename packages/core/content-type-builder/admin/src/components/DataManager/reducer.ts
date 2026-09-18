@@ -43,7 +43,7 @@ const initialState: DataManagerStateType = {
   isLoading: true,
 };
 
-const ONE_SIDE_RELATIONS = ['oneWay', 'manyWay'];
+const ONE_SIDE_RELATIONS = new Set(['oneWay', 'manyWay']);
 
 type AttributeMutation = AnyAttribute & {
   createComponent?: unknown;
@@ -481,7 +481,7 @@ const slice = createUndoRedoSlice(
           attributeToSet.targetAttribute
         );
         const isBidirectionnal =
-          newRelationType !== undefined && !ONE_SIDE_RELATIONS.includes(newRelationType);
+          newRelationType !== undefined && !ONE_SIDE_RELATIONS.has(newRelationType);
 
         if (isBidirectionnal) {
           const newTargetAttribute = {
@@ -555,7 +555,7 @@ const slice = createUndoRedoSlice(
           const { target, relation, targetAttribute: targetAttributeName } = attribute;
           const relationType = getRelationType(relation, targetAttributeName);
 
-          const isBidirectionnal = !ONE_SIDE_RELATIONS.includes(relationType!);
+          const isBidirectionnal = !ONE_SIDE_RELATIONS.has(relationType!);
 
           if (isBidirectionnal && targetAttributeName) {
             const targetContentType = getType(state, { forTarget, targetUid: target });

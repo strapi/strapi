@@ -13,6 +13,16 @@ const STEPS = {
 
 import type { File } from '../../../../shared/contracts/files';
 import type { AllowedTypes } from '../AssetCard/AssetCard';
+
+const DEFAULT_ALLOWED_TYPES: NonNullable<MediaLibraryDialogProps['allowedTypes']> = [
+  'files',
+  'images',
+  'videos',
+  'audios',
+];
+const EMPTY_INITIALLY_SELECTED_ASSETS: NonNullable<
+  MediaLibraryDialogProps['initiallySelectedAssets']
+> = [];
 export interface MediaLibraryDialogProps {
   allowedTypes?: AllowedTypes[];
   multiple?: boolean;
@@ -24,9 +34,9 @@ export interface MediaLibraryDialogProps {
 export const MediaLibraryDialog = ({
   onClose,
   onSelectAssets,
-  allowedTypes = ['files', 'images', 'videos', 'audios'],
+  allowedTypes = DEFAULT_ALLOWED_TYPES,
   multiple = true,
-  initiallySelectedAssets = [],
+  initiallySelectedAssets = EMPTY_INITIALLY_SELECTED_ASSETS,
 }: MediaLibraryDialogProps) => {
   const [step, setStep] = React.useState(STEPS.AssetSelect);
   const [folderId, setFolderId] = React.useState<number | null>(null);

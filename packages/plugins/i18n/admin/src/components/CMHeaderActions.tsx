@@ -251,7 +251,7 @@ const LocalePickerAction = ({
       if (isAiAvailable && settings?.data?.aiLocalizations) {
         return {
           _render: () => (
-            <React.Fragment key={index}>
+            <React.Fragment key={locale.code}>
               <SingleSelectOption
                 disabled={!permissionsToCheck.includes(locale.code)}
                 key={locale.code}

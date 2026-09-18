@@ -45,6 +45,9 @@ import type { File, Query, FilterCondition } from '../../../../../shared/contrac
 import type { Folder } from '../../../../../shared/contracts/folders';
 import type { AllowedTypes } from '../../AssetCard/AssetCard';
 
+const EMPTY_ALLOWED_TYPES: NonNullable<BrowseStepProps['allowedTypes']> = [];
+const EMPTY_FOLDERS: NonNullable<BrowseStepProps['folders']> = [];
+
 const TypographyMaxWidth = styled(Typography)`
   max-width: 100%;
 `;
@@ -128,11 +131,11 @@ export interface BrowseStepProps {
 }
 
 export const BrowseStep = ({
-  allowedTypes = [],
+  allowedTypes = EMPTY_ALLOWED_TYPES,
   assets: rawAssets,
   canCreate,
   canRead,
-  folders = [],
+  folders = EMPTY_FOLDERS,
   multiple = false,
   onAddAsset,
   onChangeFilters,

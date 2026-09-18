@@ -13,6 +13,8 @@ import { CarouselAssets, CarouselAssetsProps, FileWithoutIdHash } from './Carous
 
 import type { File } from '../../../../shared/contracts/files';
 
+const EMPTY_ATTRIBUTE: NonNullable<MediaLibraryInputProps['attribute']> = {};
+
 type AllowedTypes = 'files' | 'images' | 'videos' | 'audios';
 
 const STEPS = {
@@ -37,7 +39,7 @@ export interface MediaLibraryInputProps {
 export const MediaLibraryInput = React.forwardRef<CarouselAssetsProps, MediaLibraryInputProps>(
   (
     {
-      attribute: { allowedTypes = null, multiple = false } = {},
+      attribute: { allowedTypes = null, multiple = false } = EMPTY_ATTRIBUTE,
       label,
       hint,
       disabled = false,

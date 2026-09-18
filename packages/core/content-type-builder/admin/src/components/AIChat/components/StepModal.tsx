@@ -6,7 +6,9 @@ import {
   Children,
   isValidElement,
   FormEvent,
+  useCallback,
   useEffect,
+  useMemo,
 } from 'react';
 
 import { Modal, Box, Button, Typography } from '@strapi/design-system';
@@ -73,9 +75,13 @@ const StepModal = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const childrenArray = Children.toArray(children)
-    .filter((child): child is React.ReactElement => isValidElement(child))
-    .map((child) => child.props);
+  const childrenArray = useMemo(
+    () =>
+      Children.toArray(children)
+        .filter((child): child is React.ReactElement => isValidElement(child))
+        .map((child) => child.props),
+    [children]
+  );
 
   const totalSteps = childrenArray.length;
   const isFirstStep = currentStep === 0;
@@ -91,24 +97,24 @@ const StepModal = ({
     }
   }, [open]);
 
-  const resetStates = () => {
+  const resetStates = useCallback(() => {
     setCurrentStep(0);
     setIsLoading(false);
     setError(null);
-  };
+  }, []);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     onCancel?.();
     resetStates();
     onOpenChange(false);
-  };
+  }, [onCancel, onOpenChange, resetStates]);
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     setCurrentStep((prev) => Math.max(0, prev - 1));
     setError(null);
-  };
+  }, []);
 
-  const nextStep = async () => {
+  const nextStep = useCallback(async () => {
     const currentStepProps = childrenArray[currentStep];
 
     if (currentStepProps.onNext) {
@@ -142,28 +148,34 @@ const StepModal = ({
       }
       return true;
     }
-  };
+  }, [childrenArray, currentStep, isLastStep, onComplete, onOpenChange, resetStates]);
 
   // Handle form submission (triggered by Enter key)
-  const handleFormSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    if (!isLoading && !childrenArray[currentStep]?.disableNext) {
-      nextStep();
-    }
-  };
+  const handleFormSubmit = useCallback(
+    (e: FormEvent) => {
+      e.preventDefault();
+      if (!isLoading && !childrenArray[currentStep]?.disableNext) {
+        nextStep();
+      }
+    },
+    [childrenArray, currentStep, isLoading, nextStep]
+  );
 
-  const contextValue = {
-    currentStep,
-    goToStep: setCurrentStep,
-    nextStep,
-    prevStep: handleBack,
-    isFirstStep,
-    isLastStep,
-    totalSteps,
-    isLoading,
-    error,
-    setError,
-  };
+  const contextValue = useMemo(
+    () => ({
+      currentStep,
+      goToStep: setCurrentStep,
+      nextStep,
+      prevStep: handleBack,
+      isFirstStep,
+      isLastStep,
+      totalSteps,
+      isLoading,
+      error,
+      setError,
+    }),
+    [currentStep, nextStep, handleBack, isFirstStep, isLastStep, totalSteps, isLoading, error]
+  );
 
   const currentChild = childrenArray[currentStep];
 

@@ -3,6 +3,8 @@ import * as React from 'react';
 import { Duration, intervalToDuration, isPast } from 'date-fns';
 import { useIntl } from 'react-intl';
 
+const EMPTY_CUSTOM_INTERVALS: NonNullable<RelativeTimeProps['customIntervals']> = [];
+
 const intervals: Array<keyof Duration> = ['years', 'months', 'days', 'hours', 'minutes', 'seconds'];
 
 interface CustomInterval {
@@ -31,7 +33,7 @@ interface RelativeTimeProps extends React.ComponentPropsWithoutRef<'time'> {
  * ```
  */
 const RelativeTime = React.forwardRef<HTMLTimeElement, RelativeTimeProps>(
-  ({ timestamp, customIntervals = [], ...restProps }, forwardedRef) => {
+  ({ timestamp, customIntervals = EMPTY_CUSTOM_INTERVALS, ...restProps }, forwardedRef) => {
     const { formatRelativeTime, formatDate, formatTime } = useIntl();
 
     /**

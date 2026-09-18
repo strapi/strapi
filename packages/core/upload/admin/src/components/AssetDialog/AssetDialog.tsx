@@ -43,6 +43,10 @@ import type { File as Asset, FilterCondition, Query } from '../../../../shared/c
 import type { Folder, FolderDefinition } from '../../../../shared/contracts/folders';
 import type { AllowedTypes } from '../AssetCard/AssetCard';
 
+const EMPTY_ALLOWED_TYPES: NonNullable<AssetContentProps['allowedTypes']> = [];
+const EMPTY_INITIALLY_SELECTED_ASSETS: NonNullable<AssetContentProps['initiallySelectedAssets']> =
+  [];
+
 const LoadingBody = styled(Flex)`
   /* 80px are coming from the Tabs component that is not included in the ModalBody */
   min-height: ${() => `calc(60dvh + 8rem)`};
@@ -74,7 +78,7 @@ interface AssetContentProps {
 }
 
 export const AssetContent = ({
-  allowedTypes = [],
+  allowedTypes = EMPTY_ALLOWED_TYPES,
   folderId = null,
   onClose,
   onAddAsset,
@@ -82,7 +86,7 @@ export const AssetContent = ({
   onChangeFolder,
   onValidate,
   multiple = false,
-  initiallySelectedAssets = [],
+  initiallySelectedAssets = EMPTY_INITIALLY_SELECTED_ASSETS,
   trackedLocation,
 }: AssetContentProps) => {
   const [assetToEdit, setAssetToEdit] = React.useState<FileWithType | undefined>(undefined);

@@ -1,4 +1,4 @@
-import { createContext, useContext, useRef, useState } from 'react';
+import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 
 import { Flex, Typography, Box } from '@strapi/design-system';
 import { Folder, FileZip } from '@strapi/icons';
@@ -36,17 +36,19 @@ export const UploadProjectToChatProvider = ({ children }: { children: React.Reac
   const [isCodeUploadOpen, setIsCodeUploadOpen] = useState(false);
   const [submitOnFinish, setSubmitOnFinish] = useState(false);
 
-  const openCodeUpload = (submitOnFinish?: boolean) => {
+  const openCodeUpload = useCallback((submitOnFinish?: boolean) => {
     setIsCodeUploadOpen(true);
     setSubmitOnFinish(submitOnFinish ?? false);
-  };
+  }, []);
 
-  const closeCodeUpload = () => setIsCodeUploadOpen(false);
+  const closeCodeUpload = useCallback(() => setIsCodeUploadOpen(false), []);
+  const contextValue = useMemo(
+    () => ({ isCodeUploadOpen, submitOnFinish, openCodeUpload, closeCodeUpload }),
+    [isCodeUploadOpen, submitOnFinish, openCodeUpload, closeCodeUpload]
+  );
 
   return (
-    <UploadProjectContext.Provider
-      value={{ isCodeUploadOpen, submitOnFinish, openCodeUpload, closeCodeUpload }}
-    >
+    <UploadProjectContext.Provider value={contextValue}>
       {isCodeUploadOpen && <UploadCodeModal />}
       {children}
     </UploadProjectContext.Provider>

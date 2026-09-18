@@ -3,7 +3,7 @@ import type { Core, Struct, UID } from '@strapi/types';
 import { traverseEntity } from '@strapi/utils';
 import type { FieldContentSourceMap } from '@strapi/admin/strapi-admin';
 
-const ENCODABLE_TYPES = [
+const ENCODABLE_TYPES = new Set([
   'string',
   'text',
   'richtext',
@@ -28,10 +28,10 @@ const ENCODABLE_TYPES = [
    * The blocks type is an array of nodes — handled in a dedicated branch below
    * because it requires walking the AST to encode the first text leaf of each visual block.
    */
-];
+]);
 
 // TODO: use a centralized store for these fields that would be shared with the CM and CTB
-const EXCLUDED_FIELDS = [
+const EXCLUDED_FIELDS = new Set([
   'id',
   'documentId',
   'locale',
@@ -41,7 +41,7 @@ const EXCLUDED_FIELDS = [
   'created_at',
   'updated_at',
   'publishedAt',
-];
+]);
 
 interface EncodingInfo {
   data: any;
@@ -246,7 +246,7 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
 
       return traverseEntity(
         ({ key, value, attribute, schema, path, parent }, { set }) => {
-          if (!attribute || EXCLUDED_FIELDS.includes(key)) {
+          if (!attribute || EXCLUDED_FIELDS.has(key)) {
             return;
           }
 
@@ -265,7 +265,7 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
             return;
           }
 
-          if (ENCODABLE_TYPES.includes(attribute.type) && typeof value === 'string') {
+          if (ENCODABLE_TYPES.has(attribute.type) && typeof value === 'string') {
             // For inner fields of a multi-media field's items (e.g. `medias.0.url`),
             // drop the array index so all items share the same encoded path. The
             // preview groups them under one highlight and opens the multi-media

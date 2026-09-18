@@ -6,18 +6,28 @@ import { listViewFilters as Filters } from '../Filters';
 import type { Schema } from '../../../../hooks/useDocument';
 import type { ListLayout } from '../../../../hooks/useDocumentLayout';
 
+type MockPermission = {
+  action: string;
+  subject: string | null;
+  properties?: { fields?: string[] };
+};
+
+const ARTICLE_READ_PERMISSIONS: MockPermission[] = [
+  {
+    action: 'plugin::content-manager.explorer.read',
+    subject: 'api::article.article',
+    properties: {
+      fields: ['title', 'period'],
+    },
+  },
+];
+
+let mockPermissions: MockPermission[] = ARTICLE_READ_PERMISSIONS;
+
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
   useAdminUsers: jest.fn(() => ({ data: { users: [] }, isLoading: false })),
-  useAuth: jest.fn(() => [
-    {
-      action: 'plugin::content-manager.explorer.read',
-      subject: 'api::article.article',
-      properties: {
-        fields: ['title', 'period'],
-      },
-    },
-  ]),
+  useAuth: jest.fn(() => mockPermissions),
   useQueryParams: jest.fn(() => [{ query: {} }]),
   useStrapiApp: jest.fn((_name, selector) =>
     selector({
@@ -113,6 +123,30 @@ const renderEnumerationFilters = (messages?: Record<string, string>) =>
   );
 
 describe('ListView Filters', () => {
+  beforeEach(() => {
+    mockPermissions = ARTICLE_READ_PERMISSIONS;
+  });
+
+  it('renders no attribute options when the model has no read permission', async () => {
+    mockPermissions = [
+      {
+        action: 'plugin::content-manager.explorer.read',
+        subject: 'api::other.other',
+        properties: { fields: ['title', 'period'] },
+      },
+    ];
+
+    const { user } = renderEnumerationFilters();
+
+    const trigger = screen.getByRole('button', { name: 'Filters' });
+    await user.click(trigger);
+
+    // The popover is open, but it holds no attribute to filter on.
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.queryByRole('combobox', { name: 'Select field' })).not.toBeInTheDocument();
+    expect(screen.queryAllByRole('option')).toHaveLength(0);
+  });
+
   it('does not crash when filterable field metadata is not loaded yet', async () => {
     const schema = {
       uid: 'api::article.article',
