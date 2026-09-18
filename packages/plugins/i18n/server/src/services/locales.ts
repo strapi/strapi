@@ -55,7 +55,7 @@ const deleteFn = async ({ id }: any) => {
   const localeToDelete = await findById(id);
 
   if (!localeToDelete) {
-    return null;
+    return localeToDelete;
   }
 
   const deletion = await strapi.db.transaction(async ({ trx }) => {
