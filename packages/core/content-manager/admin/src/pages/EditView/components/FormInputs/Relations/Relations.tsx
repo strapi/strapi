@@ -37,6 +37,7 @@ import { COLLECTION_TYPES } from '../../../../../constants/collections';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { PERMISSIONS } from '../../../../../constants/plugin';
 import { DocumentRBAC, useDocumentRBAC } from '../../../../../features/DocumentRBAC';
+import { useContentTypeSchema } from '../../../../../hooks/useContentTypeSchema';
 import { useDebounce } from '../../../../../hooks/useDebounce';
 import { useDocument } from '../../../../../hooks/useDocument';
 import { type DocumentMeta, useDocumentContext } from '../../../../../hooks/useDocumentContext';
@@ -715,6 +716,8 @@ const RelationModalWithContext = ({
     defaultMessage: 'Untitled',
   });
   const canCreate = useDocumentRBAC('RelationModalWrapper', (state) => state.canCreate);
+  const { schema: targetSchema } = useContentTypeSchema(relation.model);
+  const isTargetSingleType = targetSchema?.kind === 'singleType';
   const fieldRef = useFocusInputField<HTMLInputElement>(name);
   const componentUID = useComponent('RelationsField', (state) => state.uid);
   const getParentFormValues = useForm('RelationModalWrapper', (state) => state.getValues);
@@ -745,7 +748,7 @@ const RelationModalWithContext = ({
         <Combobox
           ref={fieldRef}
           creatable="visible"
-          creatableDisabled={!canCreate}
+          creatableDisabled={!canCreate || isTargetSingleType}
           createMessage={() =>
             formatMessage({
               id: getTranslation('relation.create'),
@@ -753,7 +756,7 @@ const RelationModalWithContext = ({
             })
           }
           onCreateOption={() => {
-            if (canCreate) {
+            if (canCreate && !isTargetSingleType) {
               dispatch({
                 type: 'GO_TO_RELATION',
                 payload: {
