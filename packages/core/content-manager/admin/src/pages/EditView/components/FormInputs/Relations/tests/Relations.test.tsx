@@ -248,6 +248,86 @@ describe('Relations', () => {
 
   it.todo('should disconnect a relation');
 
+  describe('relation targeting a Single Type', () => {
+    const mockCreatePermission = (subject: string) =>
+      http.get('/admin/users/me/permissions', () =>
+        HttpResponse.json({
+          data: [
+            {
+              id: 1,
+              action: 'plugin::content-manager.explorer.create',
+              subject,
+              properties: {},
+              conditions: [],
+            },
+          ],
+        })
+      );
+
+    const singleTypeAttribute = {
+      type: 'relation',
+      relation: 'oneToOne',
+      target: 'api::profile.profile',
+      inversedBy: 'dog',
+      targetModel: 'api::profile.profile',
+      relationType: 'oneToOne',
+    } as const;
+
+    const mockSingleTypeSchema = () =>
+      http.get('/content-manager/init', () =>
+        HttpResponse.json({
+          data: {
+            components: [],
+            contentTypes: [
+              {
+                uid: 'api::profile.profile',
+                kind: 'singleType',
+                isDisplayed: true,
+                apiID: 'profile',
+                info: { displayName: 'Profile' },
+                options: {},
+                attributes: {},
+              },
+            ],
+          },
+        })
+      );
+
+    it('disables the "Create a relation" option even when the user can create', async () => {
+      server.use(mockSingleTypeSchema(), mockCreatePermission('api::profile.profile'));
+
+      const { user } = render({ attribute: singleTypeAttribute });
+
+      await waitFor(() => {
+        expect(screen.queryByText('Relations are loading')).not.toBeInTheDocument();
+      });
+
+      await user.click(await screen.findByRole('combobox', { name: /relations/i }));
+
+      expect(await screen.findByRole('option', { name: 'Create a relation' })).toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
+    });
+
+    it('does not disable "Create a relation" for a Collection Type target when the user can create', async () => {
+      server.use(mockCreatePermission('api::category.category'));
+
+      const { user } = render({});
+
+      await waitFor(() => {
+        expect(screen.queryByText('Relations are loading')).not.toBeInTheDocument();
+      });
+
+      await user.click(await screen.findByRole('combobox', { name: /relations/i }));
+
+      expect(await screen.findByRole('option', { name: 'Create a relation' })).not.toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
+    });
+  });
+
   it('should search nested component relations using the component id', async () => {
     const relationSearchRequests: Array<{
       model: string;
