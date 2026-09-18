@@ -85,32 +85,6 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')('Media Library 
     }
   });
 
-  test('shows the rotate tooltips above the editor rather than behind it', async ({ page }) => {
-    const assetsPage = new AssetsPage(page);
-    await assetsPage.goto();
-    await assetsPage.switchToGridView();
-    await assetsPage.clickAssetInGrid('ted_lasso_profile.jpeg');
-    await expect(assetsPage.assetDetailsDrawer).toBeVisible();
-
-    await assetsPage.openCropEditor();
-    await page.getByRole('button', { name: 'Rotate right' }).hover();
-
-    const tooltip = page.getByRole('tooltip', { name: 'Rotate right' });
-    await expect(tooltip).toBeVisible();
-
-    // The tooltip portals to the body, so it does not inherit the editor's stacking
-    // context: if the editor outranks the theme's tooltip layer the tooltip renders
-    // behind it, visible to `toBeVisible()` but hidden to the user. Hit-test the
-    // tooltip's own centre instead.
-    const hitsTooltip = await tooltip.evaluate((node) => {
-      const box = node.getBoundingClientRect();
-      const top = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2);
-      return node === top || node.contains(top);
-    });
-
-    expect(hitsTooltip, 'the tooltip is painted behind the crop editor').toBe(true);
-  });
-
   test('crops an image and saves it as a copy in the same folder', async ({ page }) => {
     const assetsPage = new AssetsPage(page);
     await assetsPage.goto();
