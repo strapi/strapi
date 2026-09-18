@@ -45,7 +45,7 @@
     "lint": "run -T eslint . --max-warnings=0",
     "test:ts": "run -T tsc -p tsconfig.json",
     "watch": "run -T rollup -c -w",
-    "test:unit:vitest": "vitest run",
+    "test:unit:vitest": "run -T nx run generators:build && run -T vitest run",
     "test:unit:vitest:watch": "vitest --watch"
   },
   "dependencies": {
