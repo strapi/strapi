@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/types';
-import { z } from 'zod';
+import * as z from 'zod/v4';
 import { InputFile, File } from '../types';
 import { Settings } from '../controllers/validation/admin/settings';
 import { getService } from '../utils';
@@ -8,9 +8,9 @@ import { AI_METADATA_CHUNK_SIZE, AI_METADATA_SUPPORTED_IMAGE_TYPES } from '../co
 
 import { isAIMetadataSupportedMime } from '../../../shared/constants';
 
-import type { UnstableGenerateAIMetadata } from '../../../shared/contracts/files';
+import type { GenerateAIMetadata } from '../../../shared/contracts/files';
 
-export type AIMetadataFileResult = UnstableGenerateAIMetadata.FileResult;
+export type AIMetadataFileResult = GenerateAIMetadata.FileResult;
 
 /**
  * Supported image types for AI metadata generation. Lives in `shared/` so the
@@ -35,7 +35,7 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
 
   return {
     async isEnabled() {
-      if (strapi.ai.admin.isEnabled() === false) {
+      if (strapi.ai.admin.isStrapiManagedAiEnabled() === false) {
         return false;
       }
       const settings: Settings = await strapi.plugin('upload').service('upload').getSettings();

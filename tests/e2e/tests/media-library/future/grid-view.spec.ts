@@ -5,7 +5,7 @@ import { AssetsPage } from './page-objects/AssetsPage';
 import path from 'path';
 import { describeOnCondition } from '../../../../utils/shared';
 
-describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')(
+describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
   'Media Library - Grid View',
   () => {
     test.beforeEach(async ({ page }) => {
@@ -49,7 +49,7 @@ describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')(
 
         const testImagePath = path.join(__dirname, '../../../data/uploads/test-image.jpg');
         await assetsPage.uploadFilesWithFilePicker(testImagePath);
-        await assetsPage.waitForUploadSuccess();
+        await assetsPage.completeUpload();
 
         await assetsPage.switchToTableView();
         await assetsPage.selectAsset('test-image.jpg');
@@ -78,7 +78,7 @@ describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')(
 
         const testImagePath = path.join(__dirname, '../../../data/uploads/test-image.jpg');
         await assetsPage.uploadFilesWithFilePicker(testImagePath);
-        await assetsPage.waitForUploadSuccess();
+        await assetsPage.completeUpload();
 
         // Verify asset appears as card
         const assetCard = assetsPage.getAssetCard('test-image');

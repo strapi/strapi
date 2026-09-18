@@ -8,6 +8,7 @@ import {
   useForm,
   useNotification,
   useQueryParams,
+  withEncodedUserParams,
   getDisplayName,
 } from '@strapi/admin/strapi-admin';
 import {
@@ -42,7 +43,9 @@ import { styled } from 'styled-components';
 import { ASSET_TYPES } from '../../../../../enums';
 import { Drawer } from '../../../../components/Drawer';
 import { useAIMetadataEnabled } from '../../../../hooks/useAIMetadataEnabled';
+import { useApiErrorMessage } from '../../../../hooks/useApiErrorMessage';
 import { useMediaLibraryPermissions } from '../../../../hooks/useMediaLibraryPermissions';
+import { useTracking, MEDIA_LIBRARY_LOCATION } from '../../../../hooks/useTracking';
 import { useUploadFileSilentlyMutation } from '../../../../services/api';
 import {
   useDeleteAssetMutation,
@@ -59,7 +62,9 @@ import {
 } from '../../../../utils/files';
 import { getAssetIcon } from '../../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../../utils/translations';
+import { ASSET_DETAILS_TRIGGER_SELECTOR, ASSET_ITEM_CONTROL_SELECTOR } from '../../constants';
 import { useFolderInfo } from '../../hooks/useFolderInfo';
+import { ASSET_DETAILS_URL_PARAM, parseAssetDetailsId } from '../../hooks/useIsAssetDetailsOpen';
 import { BusyOverlay } from '../BusyOverlay';
 
 import { AssetCropEditor } from './AssetCropEditor';
@@ -69,9 +74,6 @@ import type {
   AssetWithPopulatedCreatedBy,
   FocalPoint,
 } from '../../../../../../../shared/contracts/files';
-
-// Name of the parameter to look for in the URL to open the drawer
-const URL_PARAM = 'assetId';
 
 interface DrawerToast {
   type: 'success' | 'danger';
@@ -119,15 +121,17 @@ const useAssetOperation = () => {
 };
 
 /* -------------------------------------------------------------------------------------------------
- * useAssetDetailsParam - sync drawer visibility with URL ?{URL_PARAM}={id}
+ * useAssetDetailsParam - sync drawer visibility with URL ?{ASSET_DETAILS_URL_PARAM}={id}
  * -----------------------------------------------------------------------------------------------*/
 
 export const useAssetDetailsParam = () => {
-  const [{ query }, setQuery] = useQueryParams<{ [URL_PARAM]?: string }>();
+  const [{ query }, setQuery] = useQueryParams<{
+    [ASSET_DETAILS_URL_PARAM]?: string;
+    _q?: string;
+  }>();
 
-  const detailsId = query?.[URL_PARAM];
-  const assetId = detailsId ? parseInt(detailsId, 10) : null;
-  const hasValidId = assetId !== null && !Number.isNaN(assetId);
+  const assetId = parseAssetDetailsId(query?.[ASSET_DETAILS_URL_PARAM]);
+  const hasValidId = assetId !== null;
 
   // Closing is driven by removing the URL param (a navigation), so navigation
   // guards like <Blocker> can intercept it. `isMounted` keeps the drawer in the
@@ -156,14 +160,18 @@ export const useAssetDetailsParam = () => {
 
   const openDetails = React.useCallback(
     (id: number) => {
-      setQuery({ [URL_PARAM]: String(id) }, 'push', true);
+      setQuery(
+        withEncodedUserParams(query, { [ASSET_DETAILS_URL_PARAM]: String(id) }),
+        'push',
+        true
+      );
     },
-    [setQuery]
+    [query, setQuery]
   );
 
   const closeDetails = React.useCallback(() => {
-    setQuery({ [URL_PARAM]: undefined }, 'remove', true);
-  }, [setQuery]);
+    setQuery(withEncodedUserParams(query, { [ASSET_DETAILS_URL_PARAM]: undefined }), 'push', true);
+  }, [query, setQuery]);
 
   return {
     assetId: hasValidId ? assetId : displayAssetId.current,
@@ -410,7 +418,7 @@ const DeleteAssetButton = () => {
   return (
     <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
       <Dialog.Trigger>
-        <IconButton withTooltip={false} label={triggerLabel} variant="danger-light">
+        <IconButton label={triggerLabel} variant="danger-light">
           <Trash />
         </IconButton>
       </Dialog.Trigger>
@@ -481,7 +489,6 @@ const CopyLinkButton = ({ asset }: CopyLinkButtonProps) => {
 
   return (
     <IconButton
-      withTooltip={false}
       label={formatMessage({
         id: getTranslationKey('asset-details.copy-link.trigger'),
         defaultMessage: 'Copy link',
@@ -528,7 +535,6 @@ const DownloadAssetButton = ({ asset }: DownloadAssetButtonProps) => {
 
   return (
     <IconButton
-      withTooltip={false}
       label={formatMessage({
         id: getTranslationKey('asset-details.download.trigger'),
         defaultMessage: 'Download',
@@ -547,7 +553,10 @@ const DownloadAssetButton = ({ asset }: DownloadAssetButtonProps) => {
  * -----------------------------------------------------------------------------------------------*/
 
 interface ReplaceAssetButtonProps {
-  /** The asset's mime, so the dialog only promises AI metadata when it applies. */
+  /**
+   * The asset's mime. Two jobs: the dialog only promises AI metadata when it
+   * applies, and the file picker only offers files of the same type.
+   */
   mime?: string | null;
 }
 
@@ -586,6 +595,7 @@ const ReplaceAssetButton = ({ mime }: ReplaceAssetButtonProps) => {
         <input
           ref={fileInputRef}
           type="file"
+          accept={mime ?? ''}
           multiple={false}
           onChange={handleFileChange}
           aria-hidden
@@ -593,7 +603,6 @@ const ReplaceAssetButton = ({ mime }: ReplaceAssetButtonProps) => {
         />
       </VisuallyHidden>
       <IconButton
-        withTooltip={false}
         label={formatMessage({
           id: getTranslationKey('asset-details.replace.trigger'),
           defaultMessage: 'Replace this file',
@@ -652,21 +661,24 @@ const ReplaceAssetButton = ({ mime }: ReplaceAssetButtonProps) => {
 };
 
 /* -------------------------------------------------------------------------------------------------
- * AssetImageActions - crop and replace buttons overlaid on the image preview.
+ * AssetImageActions - image-editing controls overlaid on the preview.
+ *
+ * Crop only. Replace used to sit here too, directly beneath it, which put a
+ * file-level operation among the image-editing controls and read as if replacing
+ * were a kind of editing. It now lives in the footer with its peers.
  * -----------------------------------------------------------------------------------------------*/
 
-interface AssetImageActionsProps extends ReplaceAssetButtonProps {
+interface AssetImageActionsProps {
   onCrop?: () => void;
 }
 
-const AssetImageActions = ({ onCrop, mime }: AssetImageActionsProps) => {
+const AssetImageActions = ({ onCrop }: AssetImageActionsProps) => {
   const { formatMessage } = useIntl();
   const isSubmitting = useForm('AssetImageActions', (state) => state.isSubmitting);
 
   return (
     <Flex direction="column" gap={2}>
       <IconButton
-        withTooltip={false}
         label={formatMessage({
           id: getTranslationKey('asset-details.crop.trigger'),
           defaultMessage: 'Crop',
@@ -677,7 +689,6 @@ const AssetImageActions = ({ onCrop, mime }: AssetImageActionsProps) => {
       >
         <Crop />
       </IconButton>
-      <ReplaceAssetButton mime={mime} />
     </Flex>
   );
 };
@@ -700,10 +711,12 @@ interface AssetFormState {
 
 export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
   const { formatMessage, formatDate } = useIntl();
+  const getErrorMessage = useApiErrorMessage();
   const { canCreate, canUpdate, canDownload, canCopyLink } = useMediaLibraryPermissions();
   const { data: folders = [] } = useGetAllFoldersQuery();
   const { toggleNotification } = useNotification();
   const [updateAsset] = useUpdateAssetMutation();
+  const { trackUsage } = useTracking();
   const [replaceMutation, { isLoading: isReplacing }] = useReplaceAssetMutation();
   const [deleteMutation, { isLoading: isDeleting }] = useDeleteAssetMutation();
   const [uploadCroppedCopy, { isLoading: isCropCopying }] = useUploadFileSilentlyMutation();
@@ -747,13 +760,23 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
     if ('error' in res) {
       notify({
         type: 'danger',
-        message: formatMessage({
-          id: getTranslationKey('asset-details.update.error'),
-          defaultMessage: 'Failed to update the file.',
-        }),
+        message: getErrorMessage(
+          res.error,
+          formatMessage({
+            id: getTranslationKey('asset-details.update.error'),
+            defaultMessage: 'Failed to update the file.',
+          })
+        ),
       });
       return;
     }
+
+    trackUsage('didEditMediaLibraryElements', {
+      location: MEDIA_LIBRARY_LOCATION,
+      // Legacy sends the mime top-level type (image/video/audio/application…).
+      type: asset.mime?.split('/')[0],
+      changeLocation: values.folder !== initialValues.folder,
+    });
 
     notify({
       type: 'success',
@@ -773,19 +796,21 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
   // Owns the replace upload so isReplacing can drive the busy overlay.
   const handleReplace = React.useCallback(
     async (file: globalThis.File) => {
-      const res = await replaceMutation({ id: asset.id, file });
+      const res = await replaceMutation({ id: asset.id, file, fileInfo: { name: asset.name } });
       if ('error' in res) {
-        const error = res.error as { data?: { error?: { message?: string }; message?: string } };
-        const message =
-          error?.data?.error?.message ??
-          error?.data?.message ??
-          formatMessage({
-            id: getTranslationKey('asset-details.replace.error'),
-            defaultMessage: 'Failed to replace the file.',
-          });
-        notify({ type: 'danger', message });
+        notify({
+          type: 'danger',
+          message: getErrorMessage(
+            res.error,
+            formatMessage({
+              id: getTranslationKey('asset-details.replace.error'),
+              defaultMessage: 'Failed to replace the file.',
+            })
+          ),
+        });
         return;
       }
+      trackUsage('didReplaceMedia', { location: MEDIA_LIBRARY_LOCATION });
       notify({
         type: 'success',
         message: formatMessage({
@@ -794,7 +819,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
         }),
       });
     },
-    [asset.id, formatMessage, notify, replaceMutation]
+    [asset.id, asset.name, formatMessage, getErrorMessage, notify, replaceMutation, trackUsage]
   );
 
   // Owns the delete: on error notify in-drawer (drawer stays), on success fire
@@ -802,15 +827,16 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
   const handleDelete = React.useCallback(async () => {
     const res = await deleteMutation(asset.id);
     if ('error' in res) {
-      const error = res.error as { data?: { error?: { message?: string }; message?: string } };
-      const message =
-        error?.data?.error?.message ??
-        error?.data?.message ??
-        formatMessage({
-          id: getTranslationKey('asset-details.delete.error'),
-          defaultMessage: 'Failed to delete the asset.',
-        });
-      notify({ type: 'danger', message });
+      notify({
+        type: 'danger',
+        message: getErrorMessage(
+          res.error,
+          formatMessage({
+            id: getTranslationKey('asset-details.delete.error'),
+            defaultMessage: 'Failed to delete the asset.',
+          })
+        ),
+      });
       return;
     }
     toggleNotification({
@@ -830,17 +856,21 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
     deleteMutation,
     folderName,
     formatMessage,
+    getErrorMessage,
     notify,
     toggleNotification,
   ]);
 
-  const notifyCropError = () => {
+  const notifyCropError = (error?: unknown) => {
     notify({
       type: 'danger',
-      message: formatMessage({
-        id: getTranslationKey('asset-details.crop.error'),
-        defaultMessage: 'Failed to crop the file.',
-      }),
+      message: getErrorMessage(
+        error,
+        formatMessage({
+          id: getTranslationKey('asset-details.crop.error'),
+          defaultMessage: 'Failed to crop the file.',
+        })
+      ),
     });
   };
 
@@ -855,9 +885,10 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
       fileInfo: { focalPoint },
     });
     if ('error' in res) {
-      notifyCropError();
+      notifyCropError(res.error);
       return;
     }
+    trackUsage('didCropFile', { location: MEDIA_LIBRARY_LOCATION, duplicatedFile: false });
     notify({
       type: 'success',
       message: formatMessage({
@@ -883,9 +914,10 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
       },
     });
     if ('error' in res) {
-      notifyCropError();
+      notifyCropError(res.error);
       return;
     }
+    trackUsage('didCropFile', { location: MEDIA_LIBRARY_LOCATION, duplicatedFile: true });
     notify({
       type: 'success',
       message: formatMessage({
@@ -948,7 +980,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
                       asset={asset}
                       actions={
                         isImage && canUpdate ? (
-                          <AssetImageActions onCrop={() => setIsCropOpen(true)} mime={asset.mime} />
+                          <AssetImageActions onCrop={() => setIsCropOpen(true)} />
                         ) : null
                       }
                     />
@@ -1077,26 +1109,24 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
                         folders={folders}
                         disabled={!canUpdate}
                       />
-                      {isImage && (
-                        <>
-                          <DetailField
-                            name="caption"
-                            label={formatMessage({
-                              id: getTranslationKey('asset-details.caption'),
-                              defaultMessage: 'Caption',
-                            })}
-                            disabled={!canUpdate}
-                          />
-                          <DetailField
-                            name="alternativeText"
-                            label={formatMessage({
-                              id: getTranslationKey('asset-details.alternativeText'),
-                              defaultMessage: 'Alternative text',
-                            })}
-                            disabled={!canUpdate}
-                          />
-                        </>
-                      )}
+                      {/* Caption and alternative text apply to every file type
+                          (matches the legacy Media Library), not images only. */}
+                      <DetailField
+                        name="caption"
+                        label={formatMessage({
+                          id: getTranslationKey('asset-details.caption'),
+                          defaultMessage: 'Caption',
+                        })}
+                        disabled={!canUpdate}
+                      />
+                      <DetailField
+                        name="alternativeText"
+                        label={formatMessage({
+                          id: getTranslationKey('asset-details.alternativeText'),
+                          defaultMessage: 'Alternative text',
+                        })}
+                        disabled={!canUpdate}
+                      />
                     </Flex>
                   </Drawer.ScrollableContent>
                   {/* Every footer action is permission-gated — when none survive,
@@ -1116,6 +1146,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
                         {canUpdate && <DeleteAssetButton />}
                         {canCopyLink && <CopyLinkButton asset={asset} />}
                         {canDownload && <DownloadAssetButton asset={asset} />}
+                        {canUpdate && <ReplaceAssetButton mime={asset.mime} />}
                       </Flex>
                       {canUpdate && (
                         <Button
@@ -1147,6 +1178,19 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
  * DrawerHeader
  * -----------------------------------------------------------------------------------------------*/
 
+/**
+ * The icon's size lives in SVG attributes, which flex is free to override, so a
+ * long asset name would squash it. Matches the grid and table rows, where the
+ * file-type icon is shrink-proof and the name is what truncates.
+ */
+const HeaderIcon = styled(Flex)`
+  flex-shrink: 0;
+`;
+
+const HeaderTitle = styled(Typography)`
+  min-width: 0;
+`;
+
 interface DrawerHeaderProps {
   asset: AssetWithPopulatedCreatedBy;
   closeDetails: () => void;
@@ -1165,11 +1209,13 @@ const DrawerHeader = ({ asset, closeDetails }: DrawerHeaderProps) => {
       borderStyle="solid"
       borderWidth="0 0 1px 0"
     >
-      <DocIcon width={20} height={20} />
+      <HeaderIcon>
+        <DocIcon width={20} height={20} />
+      </HeaderIcon>
       <Drawer.Title asChild>
-        <Typography variant="omega" fontWeight="semiBold" overflow="hidden" ellipsis tag="h2">
+        <HeaderTitle variant="omega" fontWeight="semiBold" overflow="hidden" ellipsis tag="h2">
           {asset.name}
-        </Typography>
+        </HeaderTitle>
       </Drawer.Title>
       <Box marginLeft="auto">
         <Drawer.CloseButton onClose={closeDetails}>
@@ -1238,6 +1284,43 @@ const DrawerContent = ({ assetId, closeDetails }: DrawerContentProps) => {
  * AssetDetailsDrawer
  * -----------------------------------------------------------------------------------------------*/
 
+/**
+ * Whether a pointer press outside the panel should leave the drawer open.
+ *
+ * Anywhere on the page behind dismisses it, controls included. Two exceptions,
+ * neither of which is "the user meant to stay": the part of an asset's card or
+ * row whose `click` switches the drawer rather than closing it — not its own
+ * checkbox or actions menu, which act on the item; and a panel already closing,
+ * which `forceMount` keeps listening through its animation, where dismissing
+ * again would re-trigger the unsaved-changes guard for nothing.
+ */
+const shouldKeepDrawerOpen = (
+  event: { target: EventTarget | null; detail: { originalEvent: { button: number } } },
+  isVisible: boolean
+) => {
+  if (!isVisible) {
+    return true;
+  }
+
+  // Radix's dismisser fires on any `pointerdown`, secondary buttons included. A
+  // right-click is contextual, and with the create menu on the background one
+  // press would otherwise both close this and open that.
+  if (event.detail.originalEvent.button !== 0) {
+    return true;
+  }
+
+  if (!(event.target instanceof Element)) {
+    return false;
+  }
+
+  // The card's own controls — its checkbox, its actions menu — act on the item
+  // and stop the card's click, so no switch follows and the press dismisses.
+  return (
+    event.target.closest(ASSET_DETAILS_TRIGGER_SELECTOR) !== null &&
+    event.target.closest(ASSET_ITEM_CONTROL_SELECTOR) === null
+  );
+};
+
 export const AssetDetailsDrawer = () => {
   const { formatMessage } = useIntl();
   const { assetId, isVisible, shouldRenderDrawer, onCloseAnimationEnd, closeDetails } =
@@ -1276,6 +1359,13 @@ export const AssetDetailsDrawer = () => {
         // off-screen. dvh tracks the actual visible height.
         height="100dvh"
         onAnimationEnd={onCloseAnimationEnd}
+        // Opt in to dismiss-on-outside-click; `closeDetails` is the same path
+        // as the header's close button, so unsaved edits are still guarded.
+        onPointerDownOutside={(event) => {
+          if (shouldKeepDrawerOpen(event, isVisible)) {
+            event.preventDefault();
+          }
+        }}
       >
         <DrawerContent assetId={assetId} closeDetails={closeDetails} />
       </Drawer.Body>

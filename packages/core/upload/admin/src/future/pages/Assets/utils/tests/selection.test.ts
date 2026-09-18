@@ -2,6 +2,7 @@ import {
   assetKey,
   clearSelection,
   createEmptySelection,
+  deselect,
   folderKey,
   getIdsOfKind,
   getSelectAllState,
@@ -61,6 +62,62 @@ describe('selection logic', () => {
       toggleSelection(prev, assetKey(20));
 
       expect([...prev.selectedKeys]).toEqual([assetKey(10)]);
+    });
+  });
+
+  describe('deselect', () => {
+    it('removes only the given key, leaving the rest of the selection', () => {
+      const next = deselect(
+        stateFrom([folderKey(1), assetKey(10), assetKey(20)], assetKey(20)),
+        assetKey(10)
+      );
+
+      expect([...next.selectedKeys]).toEqual([folderKey(1), assetKey(20)]);
+    });
+
+    it('is a no-op when the key was never selected', () => {
+      const next = deselect(stateFrom([folderKey(1), assetKey(10)], folderKey(1)), assetKey(999));
+
+      expect([...next.selectedKeys]).toEqual([folderKey(1), assetKey(10)]);
+      expect(next.anchorKey).toBe(folderKey(1));
+    });
+
+    it('keeps an anchor pointing at another key, so a later range still works', () => {
+      const next = deselect(
+        stateFrom([folderKey(1), assetKey(10), assetKey(20)], folderKey(1)),
+        assetKey(20)
+      );
+
+      expect(next.anchorKey).toBe(folderKey(1));
+      expect([...selectRange(next, ORDER, assetKey(10)).selectedKeys]).toEqual([
+        folderKey(1),
+        folderKey(2),
+        assetKey(10),
+      ]);
+    });
+
+    it('nulls the anchor when the removed key is the anchor', () => {
+      const next = deselect(stateFrom([folderKey(1), assetKey(10)], assetKey(10)), assetKey(10));
+
+      expect([...next.selectedKeys]).toEqual([folderKey(1)]);
+      expect(next.anchorKey).toBeNull();
+    });
+
+    // `toggleSelection` anchors on the key it removes, so the anchor can already
+    // point at an unselected row before anything is deselected.
+    it('nulls the anchor pointing at the removed key even when it was not selected', () => {
+      const next = deselect(stateFrom([folderKey(1)], assetKey(10)), assetKey(10));
+
+      expect([...next.selectedKeys]).toEqual([folderKey(1)]);
+      expect(next.anchorKey).toBeNull();
+    });
+
+    it('does not mutate the input state', () => {
+      const prev = stateFrom([assetKey(10), assetKey(20)], assetKey(20));
+      deselect(prev, assetKey(20));
+
+      expect([...prev.selectedKeys]).toEqual([assetKey(10), assetKey(20)]);
+      expect(prev.anchorKey).toBe(assetKey(20));
     });
   });
 

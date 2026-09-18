@@ -1,8 +1,15 @@
-import { render, screen } from '@tests/utils';
+import { render, screen, waitFor } from '@tests/utils';
 
 import { FilterMenu } from '../components/FilterMenu';
 
 import type { ListFilter, ListFilters } from '../hooks/useListFilters';
+
+const mockTrackUsage = jest.fn();
+
+jest.mock('../../../hooks/useTracking', () => ({
+  ...jest.requireActual('../../../hooks/useTracking'),
+  useTracking: () => ({ trackUsage: mockTrackUsage }),
+}));
 
 const makeListFilters = (
   filters: ListFilter[] = [],
@@ -18,6 +25,10 @@ const makeListFilters = (
 });
 
 describe('FilterMenu', () => {
+  beforeEach(() => {
+    mockTrackUsage.mockClear();
+  });
+
   it('shows the three field submenus (file size stays out)', async () => {
     const { user } = render(<FilterMenu listFilters={makeListFilters()} />);
 
@@ -100,7 +111,7 @@ describe('FilterMenu', () => {
 
     await user.click(screen.getByRole('button', { name: 'Filter' }));
     await user.click(screen.getByText('Creation date'));
-    await user.click(await screen.findByRole('menuitem', { name: '1 week ago' }));
+    await user.click(await screen.findByRole('menuitemradio', { name: '1 week ago' }));
 
     expect(listFilters.addFilter).toHaveBeenCalledWith({
       kind: 'date',
@@ -111,13 +122,103 @@ describe('FilterMenu', () => {
     });
   });
 
+  it('replaces the field preset badge in place instead of adding another (single-select)', async () => {
+    const listFilters = makeListFilters([
+      {
+        kind: 'date',
+        field: 'createdAt',
+        mode: 'preset',
+        condition: 'withinLast',
+        preset: '1week',
+      },
+    ]);
+    const { user } = render(<FilterMenu listFilters={listFilters} />);
+
+    await user.click(screen.getByRole('button', { name: /Filter/ }));
+    await user.click(screen.getByText('Creation date'));
+    await user.click(await screen.findByRole('menuitemradio', { name: '3 days ago' }));
+
+    expect(listFilters.addFilter).not.toHaveBeenCalled();
+    expect(listFilters.updateFilter).toHaveBeenCalledWith(0, {
+      kind: 'date',
+      field: 'createdAt',
+      mode: 'preset',
+      condition: 'withinLast',
+      preset: '3days',
+    });
+  });
+
+  // A date field holds exactly one value, so the pick is complete and the menu
+  // closes on it. Type is a set, so it has to stay open — both directions are
+  // asserted because either one silently regressing is a UX bug.
+  it('closes the menu after picking a date preset', async () => {
+    const { user } = render(<FilterMenu listFilters={makeListFilters()} />);
+
+    await user.click(screen.getByRole('button', { name: 'Filter' }));
+    await user.click(screen.getByText('Creation date'));
+    await user.click(await screen.findByRole('menuitemradio', { name: '1 week ago' }));
+
+    await waitFor(() =>
+      expect(screen.queryByRole('menuitemradio', { name: '1 week ago' })).not.toBeInTheDocument()
+    );
+  });
+
+  it('keeps the menu open after checking a type, so more can be picked', async () => {
+    const { user } = render(<FilterMenu listFilters={makeListFilters()} />);
+
+    await user.click(screen.getByRole('button', { name: 'Filter' }));
+    await user.click(screen.getByText('Type'));
+    await user.click(await screen.findByRole('menuitemcheckbox', { name: 'Picture' }));
+
+    expect(screen.getByRole('menuitemcheckbox', { name: 'Video' })).toBeInTheDocument();
+  });
+
   it('offers the date range only under Creation date', async () => {
     const { user } = render(<FilterMenu listFilters={makeListFilters()} />);
 
     await user.click(screen.getByRole('button', { name: 'Filter' }));
     await user.click(screen.getByText('Last modified'));
 
-    expect(await screen.findByRole('menuitem', { name: '1 year ago' })).toBeInTheDocument();
+    expect(await screen.findByRole('menuitemradio', { name: '1 year ago' })).toBeInTheDocument();
     expect(screen.queryByText('Select date range')).not.toBeInTheDocument();
+  });
+
+  describe('tracking', () => {
+    it('fires didFilterMediaLibraryElements with the type facet when checking a Type value', async () => {
+      const { user } = render(<FilterMenu listFilters={makeListFilters()} />);
+
+      await user.click(screen.getByRole('button', { name: 'Filter' }));
+      await user.click(screen.getByText('Type'));
+      await user.click(await screen.findByRole('menuitemcheckbox', { name: 'Picture' }));
+
+      expect(mockTrackUsage).toHaveBeenCalledWith('didFilterMediaLibraryElements', {
+        location: 'upload',
+        filter: 'type',
+      });
+    });
+
+    it('fires didFilterMediaLibraryElements with the createdAt facet when picking a Creation date preset', async () => {
+      const { user } = render(<FilterMenu listFilters={makeListFilters()} />);
+
+      await user.click(screen.getByRole('button', { name: 'Filter' }));
+      await user.click(screen.getByText('Creation date'));
+      await user.click(await screen.findByRole('menuitemradio', { name: '1 week ago' }));
+
+      expect(mockTrackUsage).toHaveBeenCalledWith('didFilterMediaLibraryElements', {
+        location: 'upload',
+        filter: 'createdAt',
+      });
+    });
+
+    it('does not fire when unchecking an already-checked Type value', async () => {
+      const existing: ListFilter = { kind: 'type', condition: 'is', values: ['picture'] };
+      const { user } = render(<FilterMenu listFilters={makeListFilters([existing])} />);
+
+      await user.click(screen.getByRole('button', { name: /Filter/ }));
+      await user.click(screen.getByText('Type'));
+      await user.click(await screen.findByRole('menuitemcheckbox', { name: 'Picture' }));
+
+      expect(mockTrackUsage).not.toHaveBeenCalled();
+    });
   });
 });

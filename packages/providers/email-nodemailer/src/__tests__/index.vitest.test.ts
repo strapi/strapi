@@ -76,6 +76,8 @@ describe('@strapi/provider-email-nodemailer', () => {
         subject: 'Test Subject',
         text: 'Test content',
         html: '<p>Test content</p>',
+        disableFileAccess: true,
+        disableUrlAccess: true,
       });
     });
 
@@ -376,7 +378,7 @@ describe('@strapi/provider-email-nodemailer', () => {
       expect(mockSendMail).toHaveBeenCalledWith(expect.objectContaining({ dkim }));
     });
 
-    it('passes security flags (disableUrlAccess, disableFileAccess)', async () => {
+    it('always forces disableFileAccess and disableUrlAccess to true', async () => {
       mockSendMail.mockResolvedValueOnce({ messageId: '<test@example.com>' });
 
       const instance = provider.init(providerOptions, settings);
@@ -385,14 +387,58 @@ describe('@strapi/provider-email-nodemailer', () => {
         to: 'recipient@example.com',
         subject: 'Test Subject',
         text: 'Test content',
-        disableUrlAccess: true,
-        disableFileAccess: true,
       });
 
       expect(mockSendMail).toHaveBeenCalledWith(
         expect.objectContaining({
-          disableUrlAccess: true,
           disableFileAccess: true,
+          disableUrlAccess: true,
+        })
+      );
+    });
+
+    it('cannot be re-enabled by caller-supplied disable flags set to false', async () => {
+      mockSendMail.mockResolvedValueOnce({ messageId: '<test@example.com>' });
+
+      const instance = provider.init(providerOptions, settings);
+
+      await instance.send({
+        to: 'recipient@example.com',
+        subject: 'Test Subject',
+        text: 'Test content',
+        disableFileAccess: false,
+        disableUrlAccess: false,
+      } as any);
+
+      expect(mockSendMail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          disableFileAccess: true,
+          disableUrlAccess: true,
+        })
+      );
+    });
+
+    it('applies file/URL access guard on sends with path/href attachments (LFI/SSRF)', async () => {
+      mockSendMail.mockResolvedValueOnce({ messageId: '<test@example.com>' });
+
+      const instance = provider.init(providerOptions, settings);
+      const attachments = [
+        { filename: 'passwd', path: '/etc/passwd' },
+        { filename: 'secret', href: 'http://169.254.169.254/latest/meta-data/' },
+      ];
+
+      await instance.send({
+        to: 'recipient@example.com',
+        subject: 'Test Subject',
+        text: 'Test content',
+        attachments,
+      });
+
+      expect(mockSendMail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attachments,
+          disableFileAccess: true,
+          disableUrlAccess: true,
         })
       );
     });

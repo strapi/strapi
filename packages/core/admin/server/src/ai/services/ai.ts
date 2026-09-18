@@ -4,6 +4,9 @@ import fs from 'fs';
 import path from 'path';
 import { AdminUser } from '../../../../shared/contracts/shared';
 
+const STRAPI_MANAGED_AI_LICENSE_FEATURE = 'cms-ai';
+const CUSTOM_AI_PROVIDER_LICENSE_FEATURE = 'cms-byok-ai';
+
 const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
   /**
    * In-memory cache for AI tokens
@@ -18,27 +21,63 @@ const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
     }
   >();
 
-  const isEnabled = (): boolean => {
-    const configEnabled = strapi.config.get('admin.ai.enabled', true) === true;
-    const licenseEnabled = strapi.ee?.features?.isEnabled('cms-ai') === true;
-    return configEnabled && licenseEnabled;
+  let isCustomProviderRejected = false;
+
+  const isConfigEnabled = (): boolean => strapi.config.get('admin.ai.enabled', true) === true;
+
+  const isAvailable = (): boolean =>
+    isConfigEnabled() && strapi.ee?.isEE === true && !isCustomProviderRejected;
+
+  const isStrapiManagedAiEnabled = (): boolean =>
+    isConfigEnabled() &&
+    !isCustomProviderRejected &&
+    strapi.ee?.features?.isEnabled(STRAPI_MANAGED_AI_LICENSE_FEATURE) === true;
+
+  const authorizeCustomProvider = (): boolean => {
+    if (!isConfigEnabled()) {
+      strapi.log.info(
+        'A custom AI provider was ignored: AI is disabled by the "admin.ai.enabled" config.'
+      );
+      return false;
+    }
+
+    if (strapi.ee?.features?.isEnabled(CUSTOM_AI_PROVIDER_LICENSE_FEATURE) === true) {
+      return true;
+    }
+
+    isCustomProviderRejected = true;
+    strapi.log.warn(
+      `A custom AI provider was rejected: the Strapi license does not include the "${CUSTOM_AI_PROVIDER_LICENSE_FEATURE}" feature. All AI features are disabled.`
+    );
+    return false;
+  };
+
+  const isPluginAiFeatureConfigured = async (plugin: string, service: string): Promise<boolean> => {
+    const aiService = strapi.plugin(plugin)?.service(service) as
+      | { isEnabled?: () => Promise<boolean> | boolean }
+      | undefined;
+
+    if (typeof aiService?.isEnabled !== 'function') {
+      return false;
+    }
+
+    return (await aiService.isEnabled()) === true;
   };
 
   const getAiFeatureConfig = async () => {
-    if (!isEnabled()) {
+    if (!isAvailable()) {
       return {
         isAiI18nConfigured: false,
         isAiMediaLibraryConfigured: false,
       };
     }
 
-    const i18nSettings = await strapi.plugin('i18n').service('settings').getSettings();
-    const uploadSettings = await strapi.plugin('upload').service('upload').getSettings();
+    const [isAiI18nConfigured, isAiMediaLibraryConfigured] = await Promise.all([
+      isPluginAiFeatureConfigured('i18n', 'ai-localizations'),
+      isPluginAiFeatureConfigured('upload', 'aiMetadata'),
+    ]);
 
-    return {
-      isAiI18nConfigured: Boolean(i18nSettings?.aiLocalizations),
-      isAiMediaLibraryConfigured: Boolean(uploadSettings?.aiMetadata),
-    };
+    return { isAiI18nConfigured, isAiMediaLibraryConfigured };
   };
 
   /**
@@ -46,7 +85,7 @@ const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
    * EE license, project ID, and AI server URL.
    */
   const resolveAiContext = (errorPrefix: string) => {
-    if (!isEnabled()) {
+    if (!isStrapiManagedAiEnabled()) {
       strapi.log.error(`${errorPrefix} AI is not enabled`);
       throw new Error(`${errorPrefix.replace(/:$/, '')}. Check server logs for details.`);
     }
@@ -282,7 +321,13 @@ const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   return {
-    isEnabled,
+    /* Requires `ai.enabled=true` + license + no failed AI provider registration */
+    isAvailable,
+    /* `true` only when the license has the `cms-ai` entitlement to globally enable AI features.
+        TODO: once all AI features are migrated to the providers architecture, consider removing this flag */
+    isStrapiManagedAiEnabled,
+    authorizeCustomProvider,
+    /* Returns the status of each AI feature, flagging which are enabled. */
     getAiFeatureConfig,
     getAiToken,
     getAiUsage,

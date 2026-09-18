@@ -39,6 +39,7 @@ import {
   getComponentTypeColumn,
   getDzJoinTableName,
 } from '../../utils/transform-content-types-to-models';
+import { serializeJsonColumns } from './serialize-json-columns';
 
 type DocumentVersion = { documentId: string; locale: string };
 type Knex = Parameters<Migration['up']>[0];
@@ -1859,6 +1860,10 @@ async function cloneComponentInstance({
       reverseMapCache
     );
   }
+
+  // mysql2 deserializes JSON columns on SELECT but knex does not re-serialize
+  // them on INSERT. Ensure any object values in JSON/blocks columns are stringified.
+  serializeJsonColumns(newComponentRow, componentMeta);
 
   let insertResult;
   if (supportsReturning(trx)) {

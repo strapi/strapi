@@ -113,7 +113,7 @@
   "modal.folder.move.title": "Mover elementos a",
   "modal.move.success-label": "Los elementos han sido movidos con éxito",
   "modal.upload-list.footer.button": "Subir {number, plural, one {# archivo} other {# archivo}} a la biblioteca",
-  "apiError.FileTooBig": "El archivo cargado excede el tamaño máximo permitido.",
+  "apiError.FileTooBig": "El archivo es demasiado grande para subirlo. Excede el tamaño máximo de solicitud permitido por el servidor.",
   "input.notification.not-supported": "No puede cargar este tipo de archivos, sólo se aceptan los siguientes tipos – {fileTypes}",
   "list-assets-select": "Seleccionar medio {name}",
   "list.folder.select": "Seleccionar carpeta {name}",

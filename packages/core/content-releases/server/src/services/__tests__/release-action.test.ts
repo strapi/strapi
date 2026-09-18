@@ -32,13 +32,17 @@ const baseStrapiMock = {
     },
   },
   db: {
+    // Standalone by default: the emit goes out directly
+    inTransaction: jest.fn().mockReturnValue(false),
     query: jest.fn().mockReturnValue({
       update: jest.fn(),
     }),
     transaction: jest
       .fn()
       .mockImplementation((fn) =>
-        fn ? fn({ trx: jest.fn() }) : { commit: jest.fn(), get: jest.fn() }
+        fn
+          ? fn({ trx: jest.fn(), onCommit: (cb: () => unknown) => cb() })
+          : { commit: jest.fn(), get: jest.fn() }
       ),
     queryBuilder: jest.fn().mockReturnValue({
       select: jest.fn().mockReturnThis(),
@@ -138,6 +142,7 @@ describe('Release Action service', () => {
       const strapiMock = {
         ...baseStrapiMock,
         db: {
+          ...baseStrapiMock.db,
           query: jest.fn().mockReturnValue({
             create: jest.fn().mockReturnValue({
               type: 'publish',
@@ -165,6 +170,52 @@ describe('Release Action service', () => {
         type: 'publish',
         entry: { id: 1, contentType: 'api::contentTypeA.contentTypeA' },
       });
+      // Standalone: emitted directly, no transaction opened for it
+      expect(strapiMock.eventHub.emit).toHaveBeenCalledWith(
+        'release.entry.add',
+        expect.objectContaining({ type: 'publish' })
+      );
+      expect(strapiMock.db.transaction).not.toHaveBeenCalled();
+    });
+
+    it('defers the audit event to the commit inside a transaction', async () => {
+      const onCommit = jest.fn();
+      const strapiMock = {
+        ...baseStrapiMock,
+        eventHub: { emit: jest.fn() },
+        db: {
+          ...baseStrapiMock.db,
+          // A bulk request runs the creates inside a transaction
+          inTransaction: jest.fn().mockReturnValue(true),
+          transaction: jest.fn((fn: any) => fn({ trx: jest.fn(), onCommit })),
+          query: jest.fn().mockReturnValue({
+            create: jest.fn().mockReturnValue({ id: 1, type: 'publish' }),
+            findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
+            count: jest.fn(),
+            update: jest.fn(),
+          }),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseActionService = createReleaseActionService({ strapi: strapiMock });
+
+      await releaseActionService.create(1, {
+        type: 'publish' as const,
+        entryDocumentId: '1',
+        contentType: 'api::contentTypeA.contentTypeA' as const,
+      });
+
+      // The emit waits for the commit: a rollback must leave no audit row
+      expect(onCommit).toHaveBeenCalled();
+      expect(strapiMock.eventHub.emit).not.toHaveBeenCalled();
+
+      // Firing the registered callback emits it
+      await onCommit.mock.calls[0][0]();
+      expect(strapiMock.eventHub.emit).toHaveBeenCalledWith(
+        'release.entry.add',
+        expect.objectContaining({ type: 'publish' })
+      );
     });
 
     it('throws an error if the release does not exist', () => {
@@ -307,6 +358,7 @@ describe('Release Action service', () => {
       const strapiMock = {
         ...baseStrapiMock,
         db: {
+          ...baseStrapiMock.db,
           query: jest.fn().mockReturnValue({
             delete: jest.fn().mockReturnValue({ id: 1, type: 'publish' }),
             update: jest.fn().mockReturnValue({ id: 1, type: 'publish' }),
@@ -361,6 +413,30 @@ describe('Release Action service', () => {
       const release = await releaseActionService.update(1, 1, { type: 'publish' });
 
       expect(release).toEqual({ id: 1, type: 'publish' });
+    });
+
+    it('reports nothing when the update matched no action', async () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        eventHub: { emit: jest.fn() },
+        db: {
+          ...baseStrapiMock.db,
+          query: jest.fn().mockReturnValue({
+            findOne: jest.fn().mockReturnValue({ id: 1, type: 'publish' }),
+            // The release was published or the action deleted between read and write
+            update: jest.fn().mockReturnValue(null),
+            count: jest.fn(),
+          }),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseActionService = createReleaseActionService({ strapi: strapiMock });
+
+      const result = await releaseActionService.update(1, 1, { type: 'unpublish' });
+
+      expect(result).toBeNull();
+      expect(strapiMock.eventHub.emit).not.toHaveBeenCalled();
     });
 
     it('throws an error if the release does not exist or was already published', () => {

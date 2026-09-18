@@ -35,14 +35,7 @@ export default {
   },
 
   async getSettings(ctx: Context) {
-    const {
-      state: { userAbility },
-    } = ctx;
-
-    if (userAbility.cannot(ACTIONS.readSettings, FILE_MODEL_UID)) {
-      return ctx.forbidden();
-    }
-
+    // Gated on `plugin::upload.read` by the route policy.
     const data = await getService('upload').getSettings();
 
     // Read-only echo of the app config so the admin knows how many upload

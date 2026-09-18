@@ -1,5 +1,5 @@
 {
-  "apiError.FileTooBig": "Die hochgeladene Datei überschreitet die maximal erlaubte Dateigröße.",
+  "apiError.FileTooBig": "Die Datei ist zu groß für den Upload. Sie überschreitet die maximal zulässige Anfragegröße des Servers.",
   "upload.generic-error": "Beim Hochladen der Datei ist ein Fehler aufgetreten.",
   "bulk.select.label": "Wähle alle Dateien aus",
   "button.next": "Weiter",
