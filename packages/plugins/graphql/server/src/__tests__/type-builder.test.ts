@@ -83,7 +83,7 @@ describe('GraphQL type builder polymorphic list items', () => {
 
     createTypeBuilder(context).buildTypeDefinition(contentType);
 
-    const objectTypeConfig = jest.mocked(objectType).mock.calls[0][0] as {
+    const objectTypeConfig = jest.mocked(objectType).mock.calls[0][0] as unknown as {
       definition: (builder: typeof rootBuilder) => void;
     };
     objectTypeConfig.definition(rootBuilder);
