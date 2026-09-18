@@ -205,4 +205,46 @@ describe('CM API - first publish with experimental_firstPublishedAt', () => {
       expect(published.tags.count).toBe(2);
     });
   });
+
+  describe('clone', () => {
+    test('cloned document starts without the source firstPublishedAt timestamp', async () => {
+      const UID = 'api::fpa-article.fpa-article';
+
+      const createRes = await rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/${UID}`,
+        body: { title: 'Clone first published at source' },
+      });
+
+      expect(createRes.statusCode).toBe(201);
+      const { documentId } = createRes.body.data;
+
+      const publishRes = await rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/${UID}/${documentId}/actions/publish`,
+      });
+
+      expect(publishRes.statusCode).toBe(200);
+      expect(publishRes.body.data.firstPublishedAt).not.toBeNull();
+
+      const sourceDraft = await strapi.documents(UID).findOne({ documentId, status: 'draft' });
+      expect(sourceDraft.firstPublishedAt).not.toBeNull();
+
+      const cloned = await strapi.documents(UID).clone({
+        documentId,
+        data: { title: 'Cloned first published at source' },
+      });
+
+      expect(cloned.entries).toHaveLength(1);
+      expect(cloned.entries[0].firstPublishedAt).toBeNull();
+
+      const clonedDraft = await strapi.documents(UID).findOne({
+        documentId: cloned.documentId,
+        status: 'draft',
+      });
+
+      expect(clonedDraft.firstPublishedAt).toBeNull();
+      expect(sourceDraft.firstPublishedAt).not.toBeNull();
+    });
+  });
 });
