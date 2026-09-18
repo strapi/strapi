@@ -447,13 +447,15 @@ jobs:
       - name: Monorepo build
         uses: ./.github/actions/run-build
       - name: Run [EE] E2E tests
+        id: e2e
+        continue-on-error: true
         uses: ./.github/actions/run-e2e-tests
         with:
           runEE: true
           jestOptions: '--project=${{ matrix.project }} --shard=${{ matrix.shard }}'
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: failure()
+        if: ${{ steps.e2e.outcome == 'failure' }}
         with:
           name: ee-${{ matrix.project }}--playwright-trace-${{ github.run_id }}-${{ github.job }}
           path: test-apps/e2e/test-results/**/trace.zip
@@ -461,13 +463,19 @@ jobs:
 
       # Add the Trunk Analytics Uploader step
       - name: Upload results to trunk
+        id: trunk
         if: '!cancelled()'
         uses: trunk-io/analytics-uploader@385f1ccdf345b4532dc4b6c665dd432b702b8e28 # v2.1.2
         with:
           junit-paths: test-apps/junit-reports/*.xml
           org-slug: strapi
           token: ${{ secrets.TRUNK_API_TOKEN }}
+          previous-step-outcome: ${{ steps.e2e.outcome }}
         continue-on-error: true
+
+      - name: Fail on a non-quarantined E2E failure
+        if: ${{ !cancelled() && steps.e2e.outcome == 'failure' && steps.trunk.outcome != 'success' }}
+        run: exit 1
 
   migration_v5:
     if: needs.conditions.outputs.migrations == 'true'
