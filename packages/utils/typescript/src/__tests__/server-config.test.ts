@@ -26,12 +26,16 @@ describe('server tsconfig', () => {
         })
       );
 
-      const config = ts.getParsedCommandLineOfConfigFile(configPath, {}, {
-        ...ts.sys,
-        onUnRecoverableConfigFileDiagnostic(diagnostic) {
-          throw new Error(ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'));
-        },
-      });
+      const config = ts.getParsedCommandLineOfConfigFile(
+        configPath,
+        {},
+        {
+          ...ts.sys,
+          onUnRecoverableConfigFileDiagnostic(diagnostic) {
+            throw new Error(ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'));
+          },
+        }
+      );
 
       expect(config).toBeDefined();
       expect(config?.options.strict).toBe(true);
@@ -42,7 +46,9 @@ describe('server tsconfig', () => {
       });
       const diagnostics = ts.getPreEmitDiagnostics(program);
 
-      expect(diagnostics).toEqual(expect.arrayContaining([expect.objectContaining({ code: 7006 })]));
+      expect(diagnostics).toEqual(
+        expect.arrayContaining([expect.objectContaining({ code: 7006 })])
+      );
     } finally {
       fs.rmSync(root, { recursive: true, force: true });
     }
