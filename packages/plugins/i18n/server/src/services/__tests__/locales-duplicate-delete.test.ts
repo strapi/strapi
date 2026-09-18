@@ -36,11 +36,14 @@ const setup = ({
     return { deleteMany };
   });
 
-  const lockedRows = targetStillExists
-    ? hasDuplicate
-      ? [{ id: locale.id }, { id: duplicate.id }]
-      : [{ id: locale.id }]
-    : [];
+  const lockedRows: Array<{ id: number }> = [];
+  if (targetStillExists) {
+    lockedRows.push({ id: locale.id });
+    if (hasDuplicate) {
+      lockedRows.push({ id: duplicate.id });
+    }
+  }
+
   const queryBuilder = {
     select: jest.fn(),
     where: jest.fn(),
@@ -55,7 +58,7 @@ const setup = ({
   queryBuilder.transacting.mockReturnValue(queryBuilder);
   queryBuilder.forUpdate.mockReturnValue(queryBuilder);
 
-  const transaction = jest.fn(async (callback: any) => callback({ trx }));
+  const transaction = jest.fn(async (handler: any) => handler({ trx }));
   const createQueryBuilder = jest.fn(() => queryBuilder);
 
   global.strapi = {
