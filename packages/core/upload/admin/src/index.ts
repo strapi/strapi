@@ -1,4 +1,4 @@
-import { Images, WarningCircle } from '@strapi/icons';
+import { Images } from '@strapi/icons';
 
 import pluginPkg from '../../package.json';
 
@@ -19,6 +19,14 @@ const name = pluginPkg.strapi.name;
 
 const admin: Plugin.Config.AdminInput = {
   register(app: StrapiApp) {
+    /**
+     * Whichever Media Library is selected owns `plugins/upload` outright: the other is
+     * not registered at all, so there is exactly one Media Library entry in the menu.
+     *
+     * The new one is the default; `useLegacyMediaLibrary` opts back out.
+     */
+    const isLegacyMediaLibrary = window.strapi.featureFlags.isEnabled('useLegacyMediaLibrary');
+
     app.addMenuLink({
       to: `plugins/${pluginId}`,
       icon: Images,
@@ -27,13 +35,19 @@ const admin: Plugin.Config.AdminInput = {
         defaultMessage: 'Media Library',
       },
       permissions: PERMISSIONS.main,
-      Component: () => {
-        return import('./pages/App/App').then((mod) => ({ default: mod.Upload }));
-      },
+      Component: isLegacyMediaLibrary
+        ? () => {
+            return import('./pages/App/App').then((mod) => ({ default: mod.Upload }));
+          }
+        : () => {
+            return import('./future/App').then((mod) => ({
+              default: mod.BetaMediaLibrary,
+            }));
+          },
       position: 4,
     });
 
-    if (window.strapi.future.isEnabled('unstableMediaLibrary')) {
+    if (!isLegacyMediaLibrary) {
       app.addReducers({ uploadProgress: uploadProgressReducer });
 
       app.addComponents([
@@ -42,22 +56,6 @@ const admin: Plugin.Config.AdminInput = {
           Component: UploadProgressDialog,
         },
       ]);
-
-      app.addMenuLink({
-        to: `plugins/unstable-${pluginId}`,
-        icon: WarningCircle,
-        intlLabel: {
-          id: `${pluginId}.plugin.name`,
-          defaultMessage: 'Media Library',
-        },
-        permissions: PERMISSIONS.main,
-        Component: () => {
-          return import('./future/App').then((mod) => ({
-            default: mod.UnstableMediaLibrary,
-          }));
-        },
-        position: 5,
-      });
     }
 
     app.addSettingsLink('global', {

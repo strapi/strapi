@@ -26,7 +26,9 @@ export class OperationResponsesAssembler implements Assembler.Operation {
     }
 
     if (route.response) {
-      const schema = zodToOpenAPI(route.response);
+      const schema = zodToOpenAPI(route.response, context.strapi.contentAPISchemaRegistry, {
+        extractedComponentSchemas: context.registries.extractedComponentSchemas,
+      });
 
       responses[200] = {
         description: 'OK',

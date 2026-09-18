@@ -155,7 +155,7 @@ export const copyCloneRelationRows = async (
         .connection(joinTable.name)
         .where({
           [joinColumn.name]: sourceEntryId,
-          ...(('on' in joinTable && joinTable.on) || {}),
+          ...(('on' in joinTable && joinTable.on) || undefined),
         })
         .select('*')
         .transacting(trx)) as Record<string, unknown>[];

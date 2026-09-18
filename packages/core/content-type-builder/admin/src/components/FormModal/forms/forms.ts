@@ -239,7 +239,7 @@ export const forms = {
       base({ data, type, step, attributes }: Base<'base'>) {
         try {
           return attributesForm.base[type](data as never, step ?? '', attributes as never);
-        } catch (err) {
+        } catch {
           return commonBaseForm;
         }
       },

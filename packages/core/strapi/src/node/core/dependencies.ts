@@ -167,7 +167,7 @@ const validateDeclaredAdminPeerDeps = async (cwd: string, logger: Logger) => {
 
     try {
       minDeclaredVersion = semver.minVersion(dep.declaredVersion);
-    } catch (err) {
+    } catch {
       // Intentional fall-through (variable will be left as null, throwing below)
     }
 

@@ -101,7 +101,7 @@ const createCoreStore = ({ db }: { db: Database }) => {
     ) {
       try {
         return JSON.parse(data.value);
-      } catch (err) {
+      } catch {
         return new Date(data.value);
       }
     } else if (data.type === 'number') {

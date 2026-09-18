@@ -7,20 +7,21 @@ import { Route, Routes } from 'react-router-dom';
 import { AssetsPage } from './pages/Assets/AssetsPage';
 import { getTranslationKey } from './utils/translations';
 
-export const UnstableMediaLibrary = () => {
+export const BetaMediaLibrary = () => {
   const { formatMessage } = useIntl();
+
   const title = formatMessage({
     id: getTranslationKey('plugin.name'),
     defaultMessage: 'Media Library',
   });
 
   return (
-    <Page.Main>
+    <>
       <Page.Title>{title}</Page.Title>
 
       <Routes>
         <Route index element={<AssetsPage />} />
       </Routes>
-    </Page.Main>
+    </>
   );
 };

@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import utils, { async, errors } from '@strapi/utils';
+import { async, errors } from '@strapi/utils';
 
 import type { Context } from 'koa';
 import type { Core } from '@strapi/types';
@@ -10,7 +10,7 @@ import { validateUploadBody } from './validation/content-api/upload';
 import { FileInfo } from '../types';
 import { prepareUploadRequest } from '../utils/mime-validation';
 
-const { ValidationError } = utils.errors;
+const { ValidationError } = errors;
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const sanitizeOutput = async (data: unknown | unknown[], ctx: Context) => {

@@ -135,6 +135,23 @@ describe('Populate', () => {
       });
     });
 
+    test('nested populate is not dropped by a shallower sibling condition', async () => {
+      const query = {
+        filters: {
+          $or: [
+            { relation: { component: { field: { $eq: 'value' } } } },
+            { $and: [{ $or: [{ relation: { field: 'value' } }] }] },
+          ],
+        },
+      };
+
+      const result = await getQueryPopulate(uid, query);
+
+      expect(result).toEqual({
+        relation: { populate: { component: {} } },
+      });
+    });
+
     test('populate multiple fields at once', async () => {
       const query = getFilterQuery([
         { relation: { component: { field: { $eq: 'value' } } } },

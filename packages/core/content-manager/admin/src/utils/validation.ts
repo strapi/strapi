@@ -238,7 +238,7 @@ const createAttributeSchema = (
           try {
             JSON.stringify(value);
             return true;
-          } catch (err) {
+          } catch {
             return false;
           }
         }
@@ -247,7 +247,7 @@ const createAttributeSchema = (
           JSON.parse(value);
 
           return true;
-        } catch (err) {
+        } catch {
           return false;
         }
       });

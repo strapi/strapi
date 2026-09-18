@@ -283,11 +283,57 @@ const isSingleType = ({ kind = COLLECTION_TYPE }) => kind === SINGLE_TYPE;
 const isCollectionType = ({ kind = COLLECTION_TYPE }) => kind === COLLECTION_TYPE;
 const isKind = (kind: Kind) => (model: Model) => model.kind === kind;
 
-const getStoredPrivateAttributes = (model: Model) =>
-  union(
-    (strapi?.config?.get('api.responses.privateAttributes', []) ?? []) as Array<string>,
-    getOr([], 'options.privateAttributes', model)
+/**
+ * Memo of each model's "stored" private attributes — those declared in
+ * `api.responses.privateAttributes` config or in the model's `options.privateAttributes`,
+ * as opposed to attributes flagged `private: true` individually.
+ *
+ * `isPrivateAttribute` is called once per key, per node, per traversal, per entity, and
+ * recomputing this set every time dominated response sanitization: a 25-entity page made
+ * 48,605 calls, each doing two lodash path lookups plus a fresh `union()` allocation, all
+ * returning the same answer.
+ *
+ * Keyed on the model object rather than its uid, so a rebuilt schema is a distinct key and
+ * the entry cannot go stale. Deliberately NOT stored on the schema itself: a
+ * `privateAttributes` getter used to live there and was removed in 2023 (2fa8f30371)
+ * because it polluted schema serialization, and because it was only ever attached by
+ * `createContentType`, so components never got one.
+ *
+ * Both inputs are fixed for a model's lifetime — `api.responses.privateAttributes` is
+ * boot configuration and is never written at runtime, and `options.privateAttributes`
+ * comes from the schema definition. The cache is only populated once `strapi.config` is
+ * available so that a lookup during early boot cannot record an empty set permanently.
+ */
+const storedPrivateAttributesCache = new WeakMap<object, Set<string>>();
+
+const computeStoredPrivateAttributes = (model: Model): Set<string> =>
+  new Set(
+    union(
+      (strapi?.config?.get('api.responses.privateAttributes', []) ?? []) as Array<string>,
+      getOr([], 'options.privateAttributes', model) as Array<string>
+    )
   );
+
+const getStoredPrivateAttributesSet = (model: Model): Set<string> => {
+  const cacheable = typeof model === 'object' && model !== null && strapi?.config != null;
+
+  if (!cacheable) {
+    return computeStoredPrivateAttributes(model);
+  }
+
+  let cached = storedPrivateAttributesCache.get(model as object);
+
+  if (cached === undefined) {
+    cached = computeStoredPrivateAttributes(model);
+    storedPrivateAttributesCache.set(model as object, cached);
+  }
+
+  return cached;
+};
+
+// Set iteration order is insertion order, which matches what `union` returned before.
+const getStoredPrivateAttributes = (model: Model) =>
+  Array.from(getStoredPrivateAttributesSet(model));
 
 const getPrivateAttributes = (model: Model) => {
   return _.union(
@@ -300,7 +346,11 @@ const isPrivateAttribute = (model: Model, attributeName: string) => {
   if (model?.attributes?.[attributeName]?.private === true) {
     return true;
   }
-  return getStoredPrivateAttributes(model).includes(attributeName);
+
+  const storedPrivateAttributes = getStoredPrivateAttributesSet(model);
+
+  // The set is empty for the overwhelming majority of models, so check size before hashing.
+  return storedPrivateAttributes.size !== 0 && storedPrivateAttributes.has(attributeName);
 };
 
 const isScalarAttribute = (attribute?: Attribute) => {

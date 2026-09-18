@@ -72,7 +72,7 @@ function trackEvent(event: string, payload: Record<string, unknown>) {
         'X-Strapi-Event': event,
       },
     }).catch(() => {});
-  } catch (err) {
+  } catch {
     /** ignore errors */
     return Promise.resolve();
   }
@@ -86,7 +86,7 @@ export async function trackError({ scope, error }: { scope: Scope; error?: Track
       deviceId: scope.installId,
       ...properties,
     });
-  } catch (err) {
+  } catch {
     /** ignore errors */
     return Promise.resolve();
   }
@@ -108,7 +108,7 @@ export async function trackUsage({
       deviceId: scope.installId,
       ...properties,
     });
-  } catch (err) {
+  } catch {
     /** ignore errors */
     return Promise.resolve();
   }

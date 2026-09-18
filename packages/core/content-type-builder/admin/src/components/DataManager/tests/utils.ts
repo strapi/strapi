@@ -46,10 +46,10 @@ export const init = (initState: Partial<DataManagerStateType>) => {
     undefined,
     actions.init({
       components: {
-        ...(initState.components ?? {}),
+        ...initState.components,
       },
       contentTypes: {
-        ...(initState.contentTypes ?? {}),
+        ...initState.contentTypes,
       },
       reservedNames: { models: [], attributes: [] },
     })

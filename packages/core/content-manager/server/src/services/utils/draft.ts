@@ -1,5 +1,5 @@
 import { castArray } from 'lodash/fp';
-import strapiUtils from '@strapi/utils';
+import * as strapiUtils from '@strapi/utils';
 import type { Core, UID } from '@strapi/types';
 
 import { type DraftRelationCounts, isBidirectionalManyToMany } from './draft-relations';

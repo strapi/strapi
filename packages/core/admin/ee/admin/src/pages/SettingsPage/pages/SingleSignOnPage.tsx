@@ -99,7 +99,7 @@ export const SingleSignOnPage = () => {
         type: 'success',
         message: formatMessage({ id: 'notification.success.saved' }),
       });
-    } catch (err) {
+    } catch {
       toggleNotification({
         type: 'danger',
         message: formatMessage({

@@ -223,7 +223,7 @@ const NpsSurvey = () => {
       setTimeout(() => {
         setSurveyIsShown(false);
       }, 3000);
-    } catch (err) {
+    } catch {
       toggleNotification({
         type: 'danger',
         message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),

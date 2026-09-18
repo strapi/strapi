@@ -8,6 +8,12 @@ import { useTracking } from '../../../hooks/useTracking';
 import { getTrad, urlsToAssets, urlSchema } from '../../../utils';
 
 import type { FileWithRawFile } from './AddAssetStep';
+import type { MessageDescriptor, PrimitiveType } from 'react-intl';
+
+type TranslationMessage = MessageDescriptor & { values?: Record<string, PrimitiveType> };
+
+const isMessageDescriptor = (error: unknown): error is TranslationMessage =>
+  typeof error === 'object' && error !== null && 'id' in error;
 
 interface FromUrlFormProps {
   onClose: () => void;
@@ -20,6 +26,24 @@ export const FromUrlForm = ({ onClose, onAddAsset, trackedLocation }: FromUrlFor
   const [error, setError] = React.useState<Error | undefined>(undefined);
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
+
+  /**
+   * `urlSchema` errors are message descriptors: they carry the values needed to interpolate
+   * placeholders such as `{max}` or `{number}`, even though Formik types the error as a string.
+   */
+  const formatValidationError = (validationError: unknown) => {
+    if (isMessageDescriptor(validationError)) {
+      const { values, ...message } = validationError;
+
+      return formatMessage({ defaultMessage: 'An error occurred', ...message }, values);
+    }
+
+    if (typeof validationError === 'string') {
+      return formatMessage({ id: validationError, defaultMessage: 'An error occurred' });
+    }
+
+    return undefined;
+  };
 
   const handleSubmit = async ({ urls }: { urls: string }) => {
     setLoading(true);
@@ -57,12 +81,7 @@ export const FromUrlForm = ({ onClose, onAddAsset, trackedLocation }: FromUrlFor
                 id: getTrad('input.url.description'),
                 defaultMessage: 'Separate your URL links by a carriage return.',
               })}
-              error={
-                error?.message ||
-                (errors.urls
-                  ? formatMessage({ id: errors.urls, defaultMessage: 'An error occurred' })
-                  : undefined)
-              }
+              error={error?.message || formatValidationError(errors.urls)}
             >
               <Field.Label>
                 {formatMessage({ id: getTrad('input.url.label'), defaultMessage: 'URL' })}

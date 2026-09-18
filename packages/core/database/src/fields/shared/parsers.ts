@@ -9,7 +9,7 @@ const isDate = (value: unknown): value is Date => {
 
 const DATE_REGEX = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/;
 const PARTIAL_DATE_REGEX = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])/g;
-const TIME_REGEX = /^(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(.[0-9]{1,3})?$/;
+const TIME_REGEX = /^(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]{1,3})?$/;
 
 export const parseDateTimeOrTimestamp = (value: unknown): Date => {
   if (isDate(value)) {
@@ -28,7 +28,7 @@ export const parseDateTimeOrTimestamp = (value: unknown): Date => {
     }
 
     throw new InvalidDateTimeError(`Invalid format, expected a timestamp or an ISO date`);
-  } catch (error) {
+  } catch {
     throw new InvalidDateTimeError(`Invalid format, expected a timestamp or an ISO date`);
   }
 };

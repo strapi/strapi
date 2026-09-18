@@ -2,6 +2,7 @@ import { PayloadAction } from '@reduxjs/toolkit';
 import merge from 'lodash/merge';
 import omit from 'lodash/omit';
 
+import { applyPrivateSearchDefault } from '../../utils/applyPrivateSearchDefault';
 import { getRelationType } from '../../utils/getRelationType';
 import { makeUnique } from '../../utils/makeUnique';
 
@@ -216,7 +217,7 @@ const setAttributeStatus = (attribute: { status?: Status }, status: Status) => {
 
 const createAttribute = (properties: Record<string, unknown>): AnyAttribute => {
   return {
-    ...properties,
+    ...applyPrivateSearchDefault(properties),
     status: 'NEW',
   } as AnyAttribute;
 };
@@ -227,7 +228,7 @@ const setAttributeAt = (type: ContentType | Component, index: number, attribute:
   const newStatus = getNewStatus(previousAttribute.status, 'CHANGED');
 
   type.attributes[index] = {
-    ...attribute,
+    ...applyPrivateSearchDefault(attribute),
     status: newStatus,
   };
 
@@ -465,6 +466,10 @@ const slice = createUndoRedoSlice(
           previousTarget,
           previousAttribute.targetAttribute ?? ''
         );
+        const previousTargetAttribute =
+          previousTargetAttributeIndex !== -1
+            ? previousTarget.attributes[previousTargetAttributeIndex]
+            : undefined;
 
         // remove old targetAttribute
         if (previousAttribute.targetAttribute) {
@@ -487,6 +492,9 @@ const slice = createUndoRedoSlice(
             target: type.uid,
             private: previousAttribute.private ?? attributeToSet.private,
             pluginOptions: previousAttribute.pluginOptions ?? attributeToSet.pluginOptions,
+            ...(previousTarget.uid === newTarget.uid && previousTargetAttribute?.conditions
+              ? { conditions: previousTargetAttribute.conditions }
+              : {}),
             status: 'CHANGED',
           } as AnyAttribute;
 

@@ -22,6 +22,7 @@ import {
   TextButton,
 } from '@strapi/design-system';
 import { ArrowLeft, ArrowsOut, WarningCircle } from '@strapi/icons';
+import { generateNKeysBetween } from 'fractional-indexing';
 import { useIntl } from 'react-intl';
 import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -42,6 +43,7 @@ import { ComponentProvider } from '../ComponentContext';
 
 import type { RelationOpenMode } from '../../../../../../../shared/contracts/content-types';
 import type { ContentManagerPlugin, DocumentActionProps } from '../../../../../content-manager';
+import type { AnyData } from '../../../utils/data';
 
 export function getCollectionType(url: string) {
   const regex = new RegExp(`(${COLLECTION_TYPES}|${SINGLE_TYPES})`);
@@ -81,6 +83,7 @@ interface State {
   hasUnsavedChanges: boolean;
   fieldToConnect?: string;
   fieldToConnectUID?: string;
+  getParentFormValues?: () => AnyData;
 }
 
 type Action =
@@ -91,6 +94,7 @@ type Action =
         shouldBypassConfirmation: boolean;
         fieldToConnect?: string;
         fieldToConnectUID?: string;
+        getParentFormValues?: () => AnyData;
       };
     }
   | {
@@ -107,6 +111,7 @@ type Action =
         shouldBypassConfirmation: boolean;
         fieldToConnect?: string;
         fieldToConnectUID?: string;
+        getParentFormValues?: () => AnyData;
       };
     }
   | {
@@ -130,6 +135,7 @@ function reducer(state: State, action: Action): State {
           confirmDialogIntent: action.payload.document,
           fieldToConnect: action.payload.fieldToConnect,
           fieldToConnectUID: action.payload.fieldToConnectUID,
+          getParentFormValues: action.payload.getParentFormValues,
         };
       }
 
@@ -146,6 +152,9 @@ function reducer(state: State, action: Action): State {
         isModalOpen: true,
         fieldToConnect: hasToResetDocumentHistory ? undefined : action.payload.fieldToConnect,
         fieldToConnectUID: hasToResetDocumentHistory ? undefined : action.payload.fieldToConnectUID,
+        getParentFormValues: hasToResetDocumentHistory
+          ? undefined
+          : action.payload.getParentFormValues,
       };
     case 'GO_BACK':
       if (state.hasUnsavedChanges && !action.payload.shouldBypassConfirmation) {
@@ -180,6 +189,7 @@ function reducer(state: State, action: Action): State {
         isModalOpen: true,
         fieldToConnect: undefined,
         fieldToConnectUID: undefined,
+        getParentFormValues: undefined,
       };
     case 'CANCEL_CONFIRM_DIALOG':
       return {
@@ -197,6 +207,9 @@ function reducer(state: State, action: Action): State {
         confirmDialogIntent: null,
         hasUnsavedChanges: false,
         isModalOpen: false,
+        fieldToConnect: undefined,
+        fieldToConnectUID: undefined,
+        getParentFormValues: undefined,
       };
     case 'SET_HAS_UNSAVED_CHANGES':
       return {
@@ -336,6 +349,79 @@ const generateCreateUrl = (currentDocumentMeta: DocumentMeta) => {
   }`;
 };
 
+/**
+ * Pre-fill the inverse relation with the parent that opened create-on-the-fly.
+ * One-way relations have no inverse; unsaved parents have no documentId.
+ */
+const prefillParentRelation = ({
+  initialValues,
+  fieldToConnect,
+  childSchema,
+  parentDocument,
+  parentModel,
+}: {
+  initialValues?: AnyData;
+  fieldToConnect?: string;
+  childSchema?: { attributes?: Record<string, unknown> };
+  parentDocument?: Record<string, unknown>;
+  parentModel?: string;
+}): AnyData | undefined => {
+  const documentId = parentDocument?.documentId;
+  // mappedBy/inversedBy names a top-level attribute, not a component path.
+  const parentFieldName = fieldToConnect;
+
+  if (!initialValues || typeof documentId !== 'string' || !documentId || !parentFieldName) {
+    return initialValues;
+  }
+
+  const inverseField = Object.entries(childSchema?.attributes ?? {}).find(([, attribute]) => {
+    const relation = attribute as {
+      type?: string;
+      target?: string;
+      inversedBy?: string;
+      mappedBy?: string;
+    };
+
+    return (
+      relation.type === 'relation' &&
+      relation.target === parentModel &&
+      (relation.inversedBy === parentFieldName || relation.mappedBy === parentFieldName)
+    );
+  })?.[0];
+
+  if (!inverseField) {
+    return initialValues;
+  }
+
+  const id = parentDocument.id ?? documentId;
+
+  return {
+    ...initialValues,
+    [inverseField]: {
+      connect: [
+        {
+          ...Object.fromEntries(
+            Object.entries(parentDocument).filter(
+              ([, value]) =>
+                value === null || ['string', 'number', 'boolean'].includes(typeof value)
+            )
+          ),
+          id,
+          documentId,
+          apiData: {
+            id,
+            documentId,
+            locale: parentDocument.locale,
+            isTemporary: true,
+          },
+          __temp_key__: generateNKeysBetween(null, null, 1)[0],
+        },
+      ],
+      disconnect: [],
+    },
+  };
+};
+
 const RelationModal = ({ children }: { children: React.ReactNode }) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
@@ -347,6 +433,18 @@ const RelationModal = ({ children }: { children: React.ReactNode }) => {
   );
   const currentDocument = useRelationModal('RelationModalForm', (state) => state.currentDocument);
   const isCreating = useRelationModal('RelationModalForm', (state) => state.isCreating);
+  const rootDocumentMeta = useRelationModal('RelationModalForm', (state) => state.rootDocumentMeta);
+  const parentDocumentMeta = state.documentHistory.at(-2) ?? rootDocumentMeta;
+  const parentDocument = useDocument(parentDocumentMeta, {
+    skip: !isCreating || !state.fieldToConnect,
+  });
+  const initialValues = prefillParentRelation({
+    initialValues: currentDocument.getInitialFormValues(isCreating),
+    fieldToConnect: isCreating ? state.fieldToConnect : undefined,
+    childSchema: currentDocument.schema,
+    parentDocument: parentDocument.document,
+    parentModel: parentDocumentMeta.model,
+  });
 
   /*
    * We must wrap the modal window with Component Provider with reset values
@@ -424,7 +522,7 @@ const RelationModal = ({ children }: { children: React.ReactNode }) => {
           <Modal.Body>
             <FormContext
               method={isCreating ? 'POST' : 'PUT'}
-              initialValues={currentDocument.getInitialFormValues(isCreating)}
+              initialValues={initialValues}
               validate={(values: Record<string, unknown>, options: Record<string, string>) => {
                 const yupSchema = createYupSchema(
                   currentDocument.schema?.attributes,
@@ -524,7 +622,13 @@ const RelationModalBody = () => {
     } else if ('documentId' in state.confirmDialogIntent) {
       dispatch({
         type: 'GO_TO_RELATION',
-        payload: { document: state.confirmDialogIntent, shouldBypassConfirmation: true },
+        payload: {
+          document: state.confirmDialogIntent,
+          shouldBypassConfirmation: true,
+          fieldToConnect: state.fieldToConnect,
+          fieldToConnectUID: state.fieldToConnectUID,
+          getParentFormValues: state.getParentFormValues,
+        },
       });
     }
   };
@@ -765,5 +869,12 @@ const RelationModalForm = () => {
   );
 };
 
-export { reducer, RelationModalRenderer, useRelationModal, getFullPageUrl, generateCreateUrl };
+export {
+  reducer,
+  RelationModalRenderer,
+  useRelationModal,
+  getFullPageUrl,
+  generateCreateUrl,
+  prefillParentRelation,
+};
 export type { State, Action, RelationOpenMode };

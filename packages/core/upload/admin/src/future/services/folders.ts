@@ -1,3 +1,5 @@
+import { encodeSearchQuery } from '../utils/searchQueryParam';
+
 import { uploadApi } from './api';
 
 import type {
@@ -8,6 +10,7 @@ import type {
   GetFolders,
   GetFolderStructure,
   BulkMoveFolders,
+  UpdateFolder,
 } from '../../../../shared/contracts/folders';
 
 export type FolderWithCounts = Omit<Folder, 'children' | 'files'> & {
@@ -17,12 +20,18 @@ export type FolderWithCounts = Omit<Folder, 'children' | 'files'> & {
 
 interface GetFoldersParams {
   parentId?: number | null;
+  /** Comma-separated rules, e.g. `updatedAt:DESC,name:ASC`. Defaults to alphabetical. */
+  sort?: string;
+  search?: string;
+  /** Extra `filters[$and]` entries (list filters), AND-ed with the parent/search scope. */
+  filters?: Record<string, unknown>[];
 }
 
 interface BulkMoveParams {
   fileIds?: number[];
   folderIds?: number[];
-  destinationFolderId: number;
+  /** `null` moves the items to the root of the Media Library. */
+  destinationFolderId: number | null;
 }
 
 type DataEnvelope<T> = {
@@ -39,20 +48,32 @@ const foldersApi = uploadApi.injectEndpoints({
   endpoints: (builder) => ({
     getFolders: builder.query<Folder[], GetFoldersParams | void>({
       query: (params = {}) => {
-        const { parentId } = params as GetFoldersParams;
+        const { parentId, sort, search, filters = [] } = params as GetFoldersParams;
 
         const queryParams: Record<string, unknown> = {
-          // Match sidebar FolderTree order (server getStructure uses sortBy('name')).
-          sort: 'name:ASC',
+          // Default matches sidebar FolderTree order (server getStructure uses sortBy('name')).
+          sort: sort ?? 'name:ASC',
+          populate: { parent: true },
         };
 
-        if (parentId != null) {
-          queryParams['filters'] = {
-            $and: [{ parent: { id: parentId } }],
-          };
+        // List filters (dates) apply in BOTH modes — search composes with them,
+        // only the parent scope is dropped while searching.
+        if (search) {
+          // Search is global: the parent filter is dropped so matching folders
+          // anywhere in the library surface. The endpoint is unpaginated — it
+          // returns every match — so callers can treat the array length as the
+          // true total. Bounding it is a separate decision.
+          queryParams['_q'] = encodeSearchQuery(search);
+
+          if (filters.length > 0) {
+            queryParams['filters'] = { $and: [...filters] };
+          }
         } else {
+          const parentScope =
+            parentId != null ? { parent: { id: parentId } } : { parent: { id: { $null: true } } };
+
           queryParams['filters'] = {
-            $and: [{ parent: { id: { $null: true } } }],
+            $and: [parentScope, ...filters],
           };
         }
 
@@ -82,6 +103,22 @@ const foldersApi = uploadApi.injectEndpoints({
       }),
       transformResponse: (response: CreateFolders.Response) => response.data,
       invalidatesTags: [
+        { type: 'Folder', id: 'LIST' },
+        { type: 'Folder', id: 'STRUCTURE' },
+      ],
+    }),
+    updateFolder: builder.mutation<
+      UpdateFolder.Response['data'],
+      { id: number } & UpdateFolder.Request['body']
+    >({
+      query: ({ id, ...body }) => ({
+        url: `/upload/folders/${id}`,
+        method: 'PUT',
+        data: body,
+      }),
+      transformResponse: (response: UpdateFolder.Response) => response.data,
+      invalidatesTags: (_result, _error, { id }) => [
+        { type: 'Folder', id },
         { type: 'Folder', id: 'LIST' },
         { type: 'Folder', id: 'STRUCTURE' },
       ],
@@ -149,7 +186,15 @@ const foldersApi = uploadApi.injectEndpoints({
       }),
       transformResponse: (response: GetFolder.Response) =>
         response.data as unknown as FolderWithCounts,
-      providesTags: (_result, _error, { id }) => [{ type: 'Folder', id }],
+      // Also carries the LIST tag so a mutation that changes a folder's file
+      // count (upload / delete into it) can refresh the header count by
+      // invalidating `{ Folder, LIST }`, without needing the folder id at the
+      // mutation site (it's buried in the upload FormData / not passed to the
+      // delete).
+      providesTags: (_result, _error, { id }) => [
+        { type: 'Folder', id },
+        { type: 'Folder', id: 'LIST' },
+      ],
     }),
     bulkMove: builder.mutation<BulkMoveFolders.Response['data'], BulkMoveParams>({
       query: ({ fileIds = [], folderIds = [], destinationFolderId }) => ({
@@ -169,6 +214,7 @@ const foldersApi = uploadApi.injectEndpoints({
 
 export const {
   useCreateFolderMutation,
+  useUpdateFolderMutation,
   useGetFoldersQuery,
   useGetFolderQuery,
   useGetAllFoldersQuery,

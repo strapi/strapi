@@ -123,7 +123,7 @@ export function useAPIErrorHandler(
         }
 
         return formattedErr;
-      } catch (_) {
+      } catch {
         throw new Error('formatAPIError: Unknown error:', error);
       }
     },

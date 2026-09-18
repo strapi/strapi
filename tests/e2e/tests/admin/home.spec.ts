@@ -1,9 +1,11 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import { resetFiles } from '../../../utils/file-reset';
 import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
 import { waitForRestart } from '../../../utils/restart';
 import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../constants';
+import { AssetsPage } from '../media-library/future/page-objects/AssetsPage';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
@@ -47,6 +49,32 @@ test.describe('Home as super admin', () => {
 
     await expect(profileWidget.getByText('Ted Lasso')).toBeVisible();
     await expect(profileWidget.getByText('ted.lasso@afcrichmond.co.uk')).toBeVisible();
+  });
+
+  test('a super admin should see the deploy now widget', async ({ page }) => {
+    const deployWidget = page.locator('[data-strapi-widget-id="plugin::admin.deploy-now"]');
+    await expect(deployWidget).toBeVisible();
+    await expect(deployWidget.getByText('Ready to go live')).toBeVisible();
+    await expect(deployWidget.getByText('Deploy with Strapi Cloud')).toBeVisible();
+    await expect(deployWidget.getByRole('link', { name: /deploy now/i })).toBeVisible();
+  });
+});
+
+test.describe('Home as super admin — key statistics', () => {
+  let didWriteSchemaFiles = false;
+
+  test.beforeEach(async ({ page }) => {
+    didWriteSchemaFiles = false;
+    await resetFiles();
+    await resetDatabaseAndImportDataFromPath('with-admin');
+    await page.goto('/admin');
+    await login({ page });
+  });
+
+  test.afterEach(async () => {
+    if (didWriteSchemaFiles) {
+      await resetFiles();
+    }
   });
 
   test('a super admin should see the key statistics widget', async ({ page }) => {
@@ -164,6 +192,8 @@ test.describe('Home as super admin', () => {
       initialAssetsMatch &&
       initialEntriesMatch
     ) {
+      didWriteSchemaFiles = true;
+
       // Create an entry
       await navToHeader(page, ['Content Manager', 'Article'], 'Article');
       await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }).first());
@@ -174,27 +204,32 @@ test.describe('Home as super admin', () => {
       ]);
       await findAndClose(page, 'Saved document');
 
-      // Upload an asset
-      await navToHeader(page, ['Media Library'], 'Media Library');
-      await page.getByRole('button', { name: 'Add new assets' }).first().click();
-      await page
-        .getByLabel('Drag & Drop here or')
-        .setInputFiles('public/assets/administration_panel.png');
-      const uploadButton = page.getByRole('button', { name: 'Upload 1 asset to the library' });
-      try {
-        await uploadButton.waitFor({ state: 'visible', timeout: 5000 });
-        await uploadButton.click();
-      } catch {
-        await page.getByRole('button', { name: /^finish$/i }).click();
-      }
-      await clickAndWait(page, page.getByRole('link', { name: 'Home' }));
+      // Upload an asset, through the Media Library's page object rather than locators spelled
+      // out here — hardcoded panel copy is what broke this step when the new Media Library
+      // became the default.
+      //
+      // `navToHeader` cannot be used for the same reason: it asserts an exact heading, and the
+      // page is now titled after the folder you are in ("Home (3 items)" at the root). The menu
+      // link is unchanged, so only the readiness check moves — to `New`, which the upload opens
+      // anyway.
+      const assetsPage = new AssetsPage(page);
+      await clickAndWait(page, page.locator('role=link[name^="Media Library"]').last());
+      await expect(assetsPage.newButton).toBeVisible();
+
+      await assetsPage.uploadFilesWithFilePicker('public/assets/administration_panel.png');
+      await assetsPage.waitForUploadProgressSuccess();
+      // Dismissed before moving on: the dialog overlays the page the next steps navigate from.
+      await assetsPage.closeUploadProgressDialog();
 
       // Create a content type and a component
       await navToHeader(page, ['Content-Type Builder'], 'Content-Type Builder');
       await page.getByRole('button', { name: /create new collection type/i }).click();
       await expect(page.getByRole('heading', { name: 'Create a collection type' })).toBeVisible();
       await page.getByRole('textbox', { name: /display name/i }).fill('NewType');
+      await expect(page.getByLabel('API ID (Singular)')).toHaveValue('new-type');
+      await expect(page.getByLabel('API ID (Plural)')).toHaveValue('new-types');
       await page.getByRole('button', { name: /continue/i }).click();
+      await expect(page.getByRole('button', { name: 'Add new field' }).first()).toBeVisible();
 
       await page.getByRole('button', { name: /create new component/i }).click();
       await expect(page.getByRole('heading', { name: 'Create a component' })).toBeVisible();
@@ -245,14 +280,19 @@ test.describe('Home as super admin', () => {
       await page.getByRole('option', { name: 'Full access' }).click();
       await page.getByRole('button', { name: /save/i }).click();
 
-      // Go back to the home page and wait for refreshed statistics
+      // Go back to the home page and wait for refreshed statistics.
+      // Avoid clickAndWait(networkidle): the homepage SPA often never reaches networkidle.
+      // Wait for key-statistics (Home-only query). Do NOT wait for count-documents: CM pages
+      // keep that RTK query warm, so Home remount often serves cache and no GET is issued
+      // (waitForResponse then times out). Entries still come from count-documents — assert
+      // via expect() polling once the widget is ready.
       const keyStatisticsReady = page.waitForResponse(
         (response) =>
           response.request().method() === 'GET' &&
           response.url().includes('/homepage/key-statistics') &&
           response.ok()
       );
-      await clickAndWait(page, page.getByRole('link', { name: /^home$/i }));
+      await page.getByRole('link', { name: /^home$/i }).click();
       await keyStatisticsReady;
 
       // The numbers should be updated
@@ -280,28 +320,7 @@ test.describe('Home as super admin', () => {
       await expect(keyStatisticsWidget.getByText('API Tokens').locator('..')).toContainText(
         String(initialApiTokensCount + 1)
       );
-
-      // Remove the collection type and component to reset the dataset
-      page.on('dialog', (dialog) => dialog.accept());
-      await navToHeader(page, ['Content-Type Builder'], 'Content-Type Builder');
-      await page.getByRole('link', { name: 'NewType' }).click();
-      await page.getByRole('button', { name: /edit/i }).click();
-      await page.getByRole('button', { name: /delete/i }).click();
-      await page.getByRole('link', { name: 'NewComponent' }).click();
-      await page.getByRole('button', { name: /edit/i }).click();
-      await page.getByRole('button', { name: /delete/i }).click();
-
-      await page.getByRole('button', { name: /save/i }).click();
-      await waitForRestart(page);
     }
-  });
-
-  test('a super admin should see the deploy now widget', async ({ page }) => {
-    const deployWidget = page.locator('[data-strapi-widget-id="plugin::admin.deploy-now"]');
-    await expect(deployWidget).toBeVisible();
-    await expect(deployWidget.getByText('Ready to go live')).toBeVisible();
-    await expect(deployWidget.getByText('Deploy with Strapi Cloud')).toBeVisible();
-    await expect(deployWidget.getByRole('link', { name: /deploy now/i })).toBeVisible();
   });
 });
 

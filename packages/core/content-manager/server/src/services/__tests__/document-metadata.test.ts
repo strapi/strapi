@@ -133,4 +133,61 @@ describe('document-metadata service', () => {
       expect(result?.map((entry) => entry.locale)).toEqual(['fr']);
     });
   });
+
+  describe('getManyAvailableStatus', () => {
+    const createServiceWithQuery = () => {
+      const findMany = jest.fn().mockResolvedValue([]);
+      const service = createService({ query: () => ({ findMany }) });
+
+      return { service, findMany };
+    };
+
+    const whereOf = (findMany: jest.Mock) => findMany.mock.calls[0][0].where;
+
+    it('filters on the locales when every version is localized', async () => {
+      const { service, findMany } = createServiceWithQuery();
+
+      await service.getManyAvailableStatus('api::article.article', [
+        { id: 1, documentId: 'doc-1', locale: 'en', publishedAt: null },
+        { id: 2, documentId: 'doc-2', locale: 'fr', publishedAt: null },
+      ]);
+
+      expect(whereOf(findMany)).toMatchObject({ locale: { $in: ['en', 'fr'] } });
+      expect(whereOf(findMany).$or).toBeUndefined();
+    });
+
+    it('does not filter on the locale when no version is localized', async () => {
+      const { service, findMany } = createServiceWithQuery();
+
+      await service.getManyAvailableStatus('api::article.article', [
+        { id: 1, documentId: 'doc-1', publishedAt: null },
+        { id: 2, documentId: 'doc-2', publishedAt: null },
+      ]);
+
+      expect(whereOf(findMany).locale).toBeUndefined();
+      expect(whereOf(findMany).$or).toBeUndefined();
+    });
+
+    /**
+     * A content type can hold versions with a locale next to versions without one —
+     * after i18n is disabled on it, or when a locale reaches a non-localized content
+     * type through the API. `locales` then only describes part of the batch, so
+     * filtering on it alone hid the counterparts of the non-localized versions, and
+     * the list view reported published documents as drafts.
+     */
+    it('also matches non-localized versions when the batch mixes both', async () => {
+      const { service, findMany } = createServiceWithQuery();
+
+      await service.getManyAvailableStatus('api::article.article', [
+        { id: 1, documentId: 'doc-1', locale: 'fr', publishedAt: null },
+        { id: 2, documentId: 'doc-2', publishedAt: null },
+      ]);
+
+      expect(whereOf(findMany).locale).toBeUndefined();
+      expect(whereOf(findMany).$or).toEqual([
+        { locale: { $in: ['fr'] } },
+        { locale: { $null: true } },
+      ]);
+    });
+  });
 });

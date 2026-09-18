@@ -1,5 +1,4 @@
-// eslint-disable-next-line import/extensions
-import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
+import { NodeStreamableHTTPServerTransport } from '@modelcontextprotocol/node';
 import type { Core } from '@strapi/types';
 import {
   classifyMcpRequestFailure,
@@ -41,6 +40,10 @@ export const createPostHandler = (deps: McpHandlerDependencies): Core.Middleware
       hadAuthenticatedMcpRequest = true;
       sendDidUseMcpServer(strapi);
 
+      // Let audit logs pick up MCP actions and tag their origin.
+      ctx.state.user = authResult.user;
+      ctx.state.auditSource = 'mcp';
+
       const { mcpServer } = createServerWithRegistries({
         strapi,
         definitions: capabilityDefinitions,
@@ -49,7 +52,7 @@ export const createPostHandler = (deps: McpHandlerDependencies): Core.Middleware
         user: authResult.user,
       });
 
-      const transport = new StreamableHTTPServerTransport({
+      const transport = new NodeStreamableHTTPServerTransport({
         sessionIdGenerator: undefined,
       });
 

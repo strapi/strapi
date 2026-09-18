@@ -34,6 +34,8 @@ const normalizeName = (name: string) => (strings.isKebabCase(name) ? name : _.ke
 
 const isDirectory = (fd: fse.Dirent) => fd.isDirectory();
 const isDotFile = (fd: fse.Dirent) => fd.name.startsWith('.');
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 export default async function loadAPIs(strapi: Core.Strapi) {
   if (!existsSync(strapi.dirs.dist.api)) {
@@ -98,9 +100,10 @@ const loadAPI = async (apiName: string, dir: string) => {
       loadContentTypes(apiName, join(dir, 'content-types')),
     ])
   ).map((result) => result?.result);
+  const apiIndex = isRecord(index) ? index : {};
 
   return {
-    ...(index || {}),
+    ...apiIndex,
     config: config || {},
     routes: routes || [],
     controllers: controllers || {},

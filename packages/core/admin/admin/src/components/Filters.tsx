@@ -14,7 +14,11 @@ import {
   FILTERS_WITH_NO_VALUE,
 } from '../constants/filters';
 import { useControllableState } from '../hooks/useControllableState';
-import { useQueryParams } from '../hooks/useQueryParams';
+import {
+  deepEncodeQueryValues,
+  useQueryParams,
+  withEncodedUserParams,
+} from '../hooks/useQueryParams';
 
 import { createContext } from './Context';
 import { Form, InputProps } from './Form';
@@ -32,13 +36,21 @@ interface FilterFormData {
   value?: string;
 }
 
+/**
+ * Carries the position in the `$and` array so we replace that exact entry, not every entry
+ * sharing the same `(name, operator, value)`.
+ */
+interface EditingFilter extends FilterFormData {
+  index: number;
+}
+
 interface FitlersContextValue {
   disabled: boolean;
   onChange: (data: FilterFormData) => void;
   options: Filters.Filter[];
   setOpen: (open: boolean) => void;
-  editingFilter: FilterFormData | null;
-  setEditingFilter: (filter: FilterFormData | null) => void;
+  editingFilter: EditingFilter | null;
+  setEditingFilter: (filter: EditingFilter | null) => void;
 }
 
 const [FiltersProvider, useFilters] = createContext<FitlersContextValue>('Filters');
@@ -70,24 +82,6 @@ const getFilterDetails = (
   return { name, operator, value: (operatorObj as Record<string, unknown>)[operator] };
 };
 
-const isFilterMatch = (
-  filterEntry: Record<string, unknown>,
-  options: Filters.Filter[],
-  target: FilterFormData
-): boolean => {
-  const details = getFilterDetails(filterEntry, options);
-  if (!details || details.name !== target.name || details.operator !== target.filter) {
-    return false;
-  }
-  if (FILTERS_WITH_NO_VALUE.includes(target.filter)) {
-    return true;
-  }
-
-  const decoded =
-    typeof details.value === 'string' ? decodeURIComponent(details.value) : details.value;
-  return decoded === target.value;
-};
-
 interface RootProps
   extends Partial<Pick<FitlersContextValue, 'disabled' | 'onChange' | 'options'>>,
     Popover.Props {
@@ -104,7 +98,7 @@ const Root = ({
   defaultOpen,
   ...restProps
 }: RootProps) => {
-  const [editingFilter, setEditingFilter] = React.useState<FilterFormData | null>(null);
+  const [editingFilter, setEditingFilter] = React.useState<EditingFilter | null>(null);
 
   const handleChange = (data: FilterFormData) => {
     if (onChange) {
@@ -193,9 +187,7 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
   }
 
   const handleSubmit = (data: FilterFormData) => {
-    const value = FILTERS_WITH_NO_VALUE.includes(data.filter)
-      ? 'true'
-      : encodeURIComponent(data.value ?? '');
+    const value = FILTERS_WITH_NO_VALUE.includes(data.filter) ? 'true' : (data.value ?? '');
 
     if (!value) {
       return;
@@ -238,8 +230,8 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
     const newFilterQuery = editingFilter
       ? {
           ...query.filters,
-          $and: existingFilters.map((filter) =>
-            isFilterMatch(filter, options, editingFilter) ? newFilterEntry : filter
+          $and: existingFilters.map((filter, i) =>
+            i === editingFilter.index ? newFilterEntry : filter
           ),
         }
       : {
@@ -247,7 +239,11 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
           $and: [...existingFilters, newFilterEntry],
         };
 
-    setQuery({ filters: newFilterQuery, page: 1 }, 'push', true);
+    setQuery(
+      withEncodedUserParams(query, { filters: deepEncodeQueryValues(newFilterQuery), page: 1 }),
+      'push',
+      true
+    );
     setOpen(false);
     setEditingFilter(null);
   };
@@ -261,7 +257,7 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
           onSubmit={handleSubmit}
           key={
             editingFilter
-              ? `edit-${editingFilter.name}-${editingFilter.filter}-${editingFilter.value ?? 'empty'}`
+              ? `edit-${editingFilter.index}-${editingFilter.name}-${editingFilter.filter}-${editingFilter.value ?? 'empty'}`
               : 'create'
           }
         >
@@ -399,25 +395,19 @@ const List = () => {
 
   const options = useFilters('List', ({ options }) => options);
 
-  const handleClick = (data: FilterFormData) => {
-    /**
-     * Check the name, operator and value to see if it already exists in the query
-     * if it does, remove it.
-     */
-    const nextFilters = (query?.filters?.$and ?? []).filter((filter) => {
-      const details = getFilterDetails(filter, options);
-      if (!details) {
-        return true;
-      }
+  /**
+   * Removed by position: identical filters are a legal query, so matching on
+   * `(name, operator, value)` would drop every copy at once.
+   */
+  const handleRemove = (index: number) => {
+    const nextFilters = (query?.filters?.$and ?? []).filter((_, i) => i !== index);
 
-      return !(
-        details.name === data.name &&
-        details.operator === data.filter &&
-        details.value === data.value
-      );
-    });
-
-    setQuery({ filters: { $and: nextFilters }, page: 1 });
+    setQuery(
+      withEncodedUserParams(query, {
+        filters: deepEncodeQueryValues({ $and: nextFilters }),
+        page: 1,
+      })
+    );
   };
 
   if (!query?.filters?.$and?.length) {
@@ -426,7 +416,7 @@ const List = () => {
 
   return (
     <>
-      {query?.filters?.$and?.map((queryFilter) => {
+      {query?.filters?.$and?.map((queryFilter, index) => {
         const details = getFilterDetails(queryFilter, options);
         if (!details || typeof details.value === 'object') {
           return null;
@@ -436,11 +426,17 @@ const List = () => {
         if (!filter) {
           return null;
         }
+        /**
+         * `index` is the position in the raw `$and` array — entries skipped above still count.
+         * Never cache it: `qs` re-indexes on removal, so dropping entry 0 of [0, 1, 2]
+         * leaves [0, 1] and any held index goes stale.
+         */
         return (
           <AttributeTag
-            key={`${details.name}-${details.operator}-${details.value}`}
+            key={`${index}-${details.name}-${details.operator}-${details.value}`}
             {...filter}
-            onRemove={handleClick}
+            index={index}
+            onRemove={handleRemove}
             operator={details.operator}
             value={String(details.value)}
           />
@@ -451,12 +447,18 @@ const List = () => {
 };
 
 interface AttributeTagProps extends Filters.Filter {
-  onRemove: (data: FilterFormData) => void;
+  /**
+   * Position in the `$and` array. An explicit prop rather than a closure bound at the call
+   * site, so it stays part of the props comparison if this ever gets memoised.
+   */
+  index: number;
+  onRemove: (index: number) => void;
   operator: string;
   value: string;
 }
 
 const AttributeTag = ({
+  index,
   input,
   label,
   mainField,
@@ -475,13 +477,14 @@ const AttributeTag = ({
     setEditingFilter({
       name,
       filter: operator,
-      value: FILTERS_WITH_NO_VALUE.includes(operator) ? undefined : decodeURIComponent(value),
+      index,
+      value: FILTERS_WITH_NO_VALUE.includes(operator) ? undefined : value,
     });
     setOpen(true);
   };
 
   const handleRemove = () => {
-    onRemove({ name, value, filter: operator });
+    onRemove(index);
   };
 
   const type = mainField?.type ? mainField.type : filter.type;
@@ -617,6 +620,7 @@ namespace Filters {
       $and?: Array<Record<string, Record<string, string | Record<string, string>>>>;
     };
     page?: number;
+    _q?: string;
   }
 }
 

@@ -383,7 +383,7 @@ const handleShiftTabOnList = (editor: Editor) => {
         if (isNestedListNode(remainingList) && remainingList.children.length === 0) {
           Transforms.removeNodes(editor, { at: remainingListPath });
         }
-      } catch (error) {
+      } catch {
         // The path might no longer exist if the structure changed, which is fine
       }
     }

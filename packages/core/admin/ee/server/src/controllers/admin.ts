@@ -7,8 +7,6 @@ export default {
   // NOTE: Overrides CE admin controller
   async getProjectType() {
     const flags = strapi.config.get('admin.flags', {});
-    const isAILicense = strapi.ee.features.isEnabled('cms-ai');
-    const isAIConfigured = strapi.config.get('admin.ai', { enabled: isAILicense });
 
     try {
       return {
@@ -20,11 +18,11 @@ export default {
           type: strapi.ee.type,
           planPriceId: strapi.ee.planPriceId,
           ai: {
-            enabled: isAILicense && isAIConfigured.enabled,
+            enabled: strapi.ai.admin.isStrapiManagedAiEnabled(),
           },
         },
       };
-    } catch (err) {
+    } catch {
       return { data: { isEE: false, features: [], flags, ai: { enabled: false } } };
     }
   },

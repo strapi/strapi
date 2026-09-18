@@ -75,7 +75,7 @@ export async function handleCloudLogin(): Promise<boolean> {
           logger.warn(message);
           return false;
         }
-      } catch (e) {
+      } catch {
         /* empty */
       }
       logger.error(defaultErrorMessage);

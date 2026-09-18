@@ -1,7 +1,15 @@
 import { test, expect, type Page } from '@playwright/test';
 import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
+import {
+  clickAndWait,
+  findAndClose,
+  isElementBefore,
+  navToHeader,
+  withContentManagerPublish,
+  withContentManagerSave,
+} from '../../../utils/shared';
+import { selectRelationComboboxOption } from './publish-draft-relations-warning.utils';
 
 // Relations UI - global management smoke (@extended)
 //
@@ -15,6 +23,50 @@ import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
 const ARTICLE = 'West Ham post match analysis';
 const SEEDED_AUTHOR = 'Coach Beard';
 const ADDED_AUTHOR = 'Ted Lasso';
+const INITIAL_PRODUCT_ORDER = ['First product', 'Second product', 'Third product'];
+const UPDATED_PRODUCT_ORDER = [
+  'Third product',
+  'Second product',
+  'Fourth product',
+  'Fifth product',
+];
+
+const relationRow = (page: Page, name: string) =>
+  page
+    .getByRole('button', { name, exact: true })
+    .locator('xpath=ancestor::li[@aria-describedby][1]');
+
+const expectRelationOrder = async (page: Page, names: string[]) => {
+  for (let index = 0; index < names.length - 1; index += 1) {
+    expect(
+      await isElementBefore(relationRow(page, names[index]), relationRow(page, names[index + 1]))
+    ).toBe(true);
+  }
+};
+
+const createPublishedProduct = async (page: Page, name: string) => {
+  await navToHeader(page, ['Content Manager', 'Products'], 'Products');
+  await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }).last());
+  await page.getByRole('textbox', { name: 'name' }).fill(name);
+  await page
+    .getByRole('textbox', { name: 'slug' })
+    .fill(`relations-${name.toLowerCase().replaceAll(' ', '-')}`);
+  await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
+  await findAndClose(page, 'Saved Document');
+  await withContentManagerPublish(page, () =>
+    page.getByRole('button', { name: 'Publish', exact: true }).click()
+  );
+  await findAndClose(page, 'Published Document');
+};
+
+const selectProduct = async (page: Page, name: string) => {
+  await page.getByRole('combobox', { name: /products/ }).click();
+  await selectRelationComboboxOption(page, name, 'published');
+};
+
+const openProductCarousel = async (page: Page) => {
+  await page.getByRole('button', { name: 'Product carousel - 23/24 kits' }).click();
+};
 
 test.describe('Relations UI - manage relations to existing entries', { tag: ['@extended'] }, () => {
   test.describe.configure({ timeout: 300000 });
@@ -73,5 +125,56 @@ test.describe('Relations UI - manage relations to existing entries', { tag: ['@e
     await openArticle(page);
     await expect(page.getByRole('button', { name: SEEDED_AUTHOR })).toBeVisible();
     await expect(page.getByRole('button', { name: ADDED_AUTHOR })).toHaveCount(0);
+  });
+
+  test('preserves newly added relation order in a dynamic-zone component after save and publish', async ({
+    page,
+  }) => {
+    for (const name of [...INITIAL_PRODUCT_ORDER, 'Fourth product', 'Fifth product']) {
+      await createPublishedProduct(page, name);
+    }
+
+    await navToHeader(page, ['Content Manager', 'Shop'], 'UK Shop');
+    await openProductCarousel(page);
+
+    for (const name of INITIAL_PRODUCT_ORDER) {
+      await selectProduct(page, name);
+    }
+
+    await withContentManagerSave(page, () => page.getByRole('button', { name: 'Save' }).click());
+    await findAndClose(page, 'Saved Document');
+    await withContentManagerPublish(page, () =>
+      page.getByRole('button', { name: 'Publish' }).click()
+    );
+    await findAndClose(page, 'Published Document');
+
+    await page.reload();
+    await page.waitForLoadState('networkidle');
+    await expect(page.getByRole('tab', { name: 'Draft' })).toHaveAttribute('aria-selected', 'true');
+    await openProductCarousel(page);
+    await expectRelationOrder(page, INITIAL_PRODUCT_ORDER);
+
+    await relationRow(page, 'First product').getByRole('button', { name: 'Remove' }).click();
+    await selectProduct(page, 'Fourth product');
+    await selectProduct(page, 'Fifth product');
+    await relationRow(page, 'Third product').getByRole('button', { name: 'Drag' }).focus();
+    await page.keyboard.press('Space');
+    await page.keyboard.press('ArrowUp');
+    await page.keyboard.press('Space');
+    await expectRelationOrder(page, UPDATED_PRODUCT_ORDER);
+
+    await withContentManagerSave(page, () => page.getByRole('button', { name: 'Save' }).click());
+    await findAndClose(page, 'Saved Document');
+    await expectRelationOrder(page, UPDATED_PRODUCT_ORDER);
+    await expect(page.getByRole('button', { name: 'First product', exact: true })).toHaveCount(0);
+
+    await withContentManagerPublish(page, () =>
+      page.getByRole('button', { name: 'Publish' }).click()
+    );
+    await findAndClose(page, 'Published Document');
+    await clickAndWait(page, page.getByRole('tab', { name: 'Published' }));
+    await openProductCarousel(page);
+    await expectRelationOrder(page, UPDATED_PRODUCT_ORDER);
+    await expect(page.getByRole('button', { name: 'First product', exact: true })).toHaveCount(0);
   });
 });

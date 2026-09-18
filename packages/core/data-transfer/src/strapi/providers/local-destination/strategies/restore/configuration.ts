@@ -57,7 +57,7 @@ export const createConfigurationWriteStream = async (
             new ProviderTransferError(
               `Failed to import ${chalk.yellowBright(config.type)} (${chalk.greenBright(
                 config.value.id
-              )}`
+              )}): ${error instanceof Error ? error.message : String(error)}`
             )
           );
         }

@@ -4,10 +4,74 @@
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
+const { createUtils } = require('api-tests/utils');
 
 const builder = createTestBuilder();
 let strapi;
+let utils;
 let rq;
+// Authenticated as a role holding `plugin::upload.read` but NOT
+// `plugin::upload.settings.read` — the shape of the default Editor and Author
+// roles.
+let rqUploadReader;
+// Authenticated as a role holding no upload permissions at all.
+let rqNoUpload;
+
+const uploadReaderUser = {
+  email: 'upload-reader@user.io',
+  password: 'UploadReader123',
+};
+
+const uploadReaderRole = {
+  name: 'upload-reader-role',
+  description: '',
+};
+
+const noUploadUser = {
+  email: 'no-upload@user.io',
+  password: 'NoUpload123',
+};
+
+const noUploadRole = {
+  name: 'no-upload-role',
+  description: '',
+};
+
+const localData = {
+  uploadReaderUser: null,
+  uploadReaderRole: null,
+  noUploadUser: null,
+  noUploadRole: null,
+};
+
+const createFixtures = async () => {
+  const role = await utils.createRole(uploadReaderRole);
+
+  await utils.assignPermissionsToRole(role.id, [{ action: 'plugin::upload.read' }]);
+
+  const user = await utils.createUserIfNotExists({
+    ...uploadReaderUser,
+    roles: [role.id],
+  });
+
+  localData.uploadReaderUser = user;
+  localData.uploadReaderRole = role;
+
+  const bareRole = await utils.createRole(noUploadRole);
+  const bareUser = await utils.createUserIfNotExists({
+    ...noUploadUser,
+    roles: [bareRole.id],
+  });
+
+  localData.noUploadUser = bareUser;
+  localData.noUploadRole = bareRole;
+};
+
+const deleteFixtures = async () => {
+  await utils.deleteUserById(localData.uploadReaderUser.id);
+  await utils.deleteUserById(localData.noUploadUser.id);
+  await utils.deleteRolesById([localData.uploadReaderRole.id, localData.noUploadRole.id]);
+};
 
 const dogModel = {
   displayName: 'Dog',
@@ -25,10 +89,18 @@ describe('Settings', () => {
   beforeAll(async () => {
     await builder.addContentType(dogModel).build();
     strapi = await createStrapiInstance();
+    utils = createUtils(strapi);
+
+    await createFixtures();
+
     rq = await createAuthRequest({ strapi });
+    rqUploadReader = await createAuthRequest({ strapi, userInfo: uploadReaderUser });
+    rqNoUpload = await createAuthRequest({ strapi, userInfo: noUploadUser });
   });
 
   afterAll(async () => {
+    await deleteFixtures();
+
     await strapi.destroy();
     await builder.cleanup();
   });
@@ -44,12 +116,46 @@ describe('Settings', () => {
           sizeOptimization: true,
           responsiveDimensions: true,
           aiMetadata: true,
+          // Read-only echo of the app config, defaulting to 1 (sequential).
+          concurrentUploadRequests: 1,
         },
       });
+    });
+
+    test('Returns the settings to a role with `upload.read` but not `settings.read`', async () => {
+      // `concurrentUploadRequests` drives upload parallelism and `aiMetadata`
+      // gates the AI metadata phase, so a 403 here degrades the library.
+      const res = await rqUploadReader({ method: 'GET', url: '/upload/settings' });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data).toMatchObject({
+        aiMetadata: expect.any(Boolean),
+        concurrentUploadRequests: 1,
+      });
+    });
+
+    test('403 response when the role has no upload permissions', async () => {
+      const res = await rqNoUpload({ method: 'GET', url: '/upload/settings' });
+
+      expect(res.statusCode).toBe(403);
     });
   });
 
   describe('PUT /upload/settings/:environment', () => {
+    test('403 response when a role with `upload.read` but not `settings.read` updates the settings', async () => {
+      // Opening up the read must not let an Editor change settings project-wide.
+      const res = await rqUploadReader({
+        method: 'PUT',
+        url: '/upload/settings',
+        body: {
+          sizeOptimization: false,
+          responsiveDimensions: false,
+        },
+      });
+
+      expect(res.statusCode).toBe(403);
+    });
+
     test('Updates an environment config correctly', async () => {
       const updateRes = await rq({
         method: 'PUT',
@@ -75,8 +181,34 @@ describe('Settings', () => {
         data: {
           sizeOptimization: true,
           responsiveDimensions: true,
+          // Read-only echo of the app config, appended to every GET response.
+          concurrentUploadRequests: 1,
         },
       });
+    });
+
+    test('strips the read-only concurrentUploadRequests echo from a PUT instead of persisting it', async () => {
+      // The legacy Settings page seeds its form from GET (which now echoes
+      // concurrentUploadRequests) and PUTs the whole payload back. That echo
+      // must never be written to the store.
+      const updateRes = await rq({
+        method: 'PUT',
+        url: '/upload/settings',
+        body: {
+          sizeOptimization: true,
+          responsiveDimensions: true,
+          concurrentUploadRequests: 4,
+        },
+      });
+
+      expect(updateRes.statusCode).toBe(200);
+      expect(updateRes.body.data).not.toHaveProperty('concurrentUploadRequests');
+
+      const getRes = await rq({ method: 'GET', url: '/upload/settings' });
+
+      // GET still echoes the config value (1), not the 4 that was PUT — proving
+      // it was stripped, not persisted.
+      expect(getRes.body.data.concurrentUploadRequests).toBe(1);
     });
   });
 });

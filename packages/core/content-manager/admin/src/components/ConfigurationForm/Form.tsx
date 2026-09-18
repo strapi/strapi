@@ -264,8 +264,8 @@ const extractMetadata = (
  */
 const addTmpSpaceToLayout = (
   layout: ReturnType<typeof extractMetadata>
-): Array<ConfigurationFormData['layout'][number]['children']> => [
-  ...layout.map((row) => {
+): Array<ConfigurationFormData['layout'][number]['children']> =>
+  layout.map((row) => {
     const totalSpaceTaken = row.reduce((acc, field) => acc + field.size, 0);
 
     if (totalSpaceTaken < 12) {
@@ -280,8 +280,7 @@ const addTmpSpaceToLayout = (
     }
 
     return row;
-  }),
-];
+  });
 
 /**
  * @internal

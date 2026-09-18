@@ -9,14 +9,19 @@ const config = {
     'rollup.config.mjs',
     'coverage/',
     'lint-staged.config.mjs',
-    'shared/**/*',
     // ee/server has no TS eslint project (#26699); back/CJS config can't parse these.
     'ee/server/**/*',
   ],
   overrides: [
     {
       files: ['**/*'],
-      excludedFiles: ['admin/**/*', 'ee/admin/**/*', 'server/**/*'],
+      excludedFiles: [
+        'admin/**/*',
+        'ee/admin/**/*',
+        'ee/server/**/*',
+        'server/**/*',
+        'shared/**/*',
+      ],
       extends: ['eslint-config-custom/back'],
     },
   ],

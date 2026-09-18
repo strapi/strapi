@@ -4,9 +4,11 @@ import path from 'path';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { resetFiles } from '../../../utils/file-reset';
 import { login } from '../../../utils/login';
-import { navToHeader } from '../../../utils/shared';
+import { describeOnCondition, navToHeader } from '../../../utils/shared';
 
-test.describe('Media Library', () => {
+// The legacy Media Library renders only with `useLegacyMediaLibrary: true`, so this suite
+// runs in the `legacy` e2e job alone.
+describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'legacy')('Media Library', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin');
     await resetFiles();

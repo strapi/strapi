@@ -155,8 +155,9 @@ const EditorStylesContainer = styled.div<{ $disabled?: boolean; $isExpandMode?: 
         : '410px'}; //  512px(total height) - 48px (header) - 52px(footer) - 2px border
     color: ${({ theme }) => theme.colors.neutral800};
     direction: ltr;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
-      'Open Sans', 'Helvetica Neue', sans-serif;
+    font-family:
+      -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans',
+      'Helvetica Neue', sans-serif;
 
     ${({ theme }) => theme.breakpoints.medium} {
       font-size: 1.4rem;

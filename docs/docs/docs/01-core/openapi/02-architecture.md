@@ -122,13 +122,11 @@ erDiagram
 Generates valid OpenAPI documents from a Strapi application:
 
 - **Processors**
-
   - Lifecycle objects and methods
   - **Pre-processors**: Prepare data and registries before assembly
   - **Post-processors**: Clean up and finalize the output after assembly
 
 - **Assemblers**
-
   - Generate specific parts of the final document
   - Each has a single responsibility
   - **Sub-Assemblers**

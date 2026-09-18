@@ -7,6 +7,8 @@ import {
   buildCookieOptionsWithExpiry,
   buildSessionMetadataFromContext,
   getAccessCookieName,
+  getAccessCookiePath,
+  getAccessCookieDomain,
   getSessionManager,
   generateDeviceId,
 } from '../../../../../shared/utils/session-auth';
@@ -138,8 +140,11 @@ export const redirectWithAuth: Core.MiddlewareHandler = async (ctx) => {
     const isProduction = process.env.NODE_ENV === 'production';
     const isSecure = typeof configuredSecure === 'boolean' ? configuredSecure : isProduction;
 
-    const domain: string | undefined = strapi.config.get('admin.auth.domain');
-    const path: string = strapi.config.get('admin.auth.cookie.path', '/admin');
+    // Resolve through the shared helpers so the server write agrees with the
+    // client set/delete (which read the same config inlined at build time);
+    // any divergence leaves a cookie the admin panel cannot clear on logout.
+    const domain = getAccessCookieDomain();
+    const path = getAccessCookiePath();
 
     ctx.cookies.set(getAccessCookieName(), accessToken, {
       httpOnly: false,
