@@ -334,7 +334,9 @@ export default function createComponentBuilder() {
         .set('options', {
           ...contentType.schema.options,
           ...infos.options,
-          draftAndPublish: infos.draftAndPublish,
+          ...(infos.draftAndPublish !== undefined && {
+            draftAndPublish: infos.draftAndPublish,
+          }),
         })
         .set('pluginOptions', infos.pluginOptions)
         .setAttributes(this.convertAttributes(newAttributes));
