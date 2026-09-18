@@ -67,6 +67,30 @@ describe('content-type-builder editContentType options', () => {
     expect(contentType.getAttribute('summary')).toEqual({ type: 'text' });
   });
 
+  it('preserves draftAndPublish when the update payload omits it', () => {
+    const { uid, contentType, builder } = createBuilder({
+      draftAndPublish: true,
+      populateCreatorFields: true,
+    });
+
+    builder.editContentType({
+      uid,
+      kind: 'collectionType',
+      displayName: 'Article',
+      description: '',
+      options: {},
+      pluginOptions: {},
+      attributes: {
+        title: { type: 'string' },
+      },
+    });
+
+    expect(contentType.schema.options).toEqual({
+      draftAndPublish: true,
+      populateCreatorFields: true,
+    });
+  });
+
   it('allows submitted options and draftAndPublish to override existing values', () => {
     const { uid, contentType, builder } = createBuilder({
       draftAndPublish: false,
