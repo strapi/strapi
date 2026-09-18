@@ -3,8 +3,13 @@ type OriginalNonLocalizedLookupInput = {
   locale?: unknown;
   action: string;
   hasDraftAndPublish: boolean;
-  defaultLocale: string;
+  // The locales service reads the default from the core store, which is untyped.
+  defaultLocale?: unknown;
 };
+
+/** `'*'` means every locale, so it cannot scope the lookup to a single row. */
+const asLocaleCode = (value: unknown): string | undefined =>
+  typeof value === 'string' && value !== '' && value !== '*' ? value : undefined;
 
 /**
  * Lookup for the row we are about to write, so shared-field sync compares the
@@ -21,28 +26,23 @@ const getOriginalNonLocalizedLookup = ({
     return null;
   }
 
-  const resolvedLocale = typeof locale === 'string' && locale !== '*' ? locale : defaultLocale;
+  const resolvedLocale = asLocaleCode(locale) ?? asLocaleCode(defaultLocale);
 
-  if (!hasDraftAndPublish) {
-    return {
-      documentId,
-      locale: resolvedLocale,
-    };
+  const where: {
+    documentId: string;
+    locale?: string;
+    publishedAt?: { $ne: null } | { $null: true };
+  } = { documentId };
+
+  if (resolvedLocale) {
+    where.locale = resolvedLocale;
   }
 
-  if (action === 'publish') {
-    return {
-      documentId,
-      locale: resolvedLocale,
-      publishedAt: { $ne: null },
-    };
+  if (hasDraftAndPublish) {
+    where.publishedAt = action === 'publish' ? { $ne: null } : { $null: true };
   }
 
-  return {
-    documentId,
-    locale: resolvedLocale,
-    publishedAt: { $null: true },
-  };
+  return where;
 };
 
 export { getOriginalNonLocalizedLookup };

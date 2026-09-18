@@ -73,6 +73,20 @@ describe('getOriginalNonLocalizedLookup', () => {
     });
   });
 
+  it('omits the locale when neither the request nor the store resolves one', () => {
+    expect(
+      getOriginalNonLocalizedLookup({
+        documentId: 'doc-1',
+        action: 'update',
+        hasDraftAndPublish: true,
+        defaultLocale: undefined,
+      })
+    ).toEqual({
+      documentId: 'doc-1',
+      publishedAt: { $null: true },
+    });
+  });
+
   it('omits publication status when Draft & Publish is disabled', () => {
     expect(
       getOriginalNonLocalizedLookup({
