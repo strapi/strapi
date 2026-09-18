@@ -52,13 +52,13 @@ const update = async (params: any, updates: any) => {
 };
 
 const deleteFn = async ({ id }: any) => {
+  const localeToDelete = await findById(id);
+
+  if (!localeToDelete) {
+    return null;
+  }
+
   const deletion = await strapi.db.transaction(async ({ trx }) => {
-    const localeToDelete = await findById(id);
-
-    if (!localeToDelete) {
-      return { localeToDelete: null, result: null };
-    }
-
     // Serialize deletions for every row sharing this code. Without the lock, two concurrent
     // duplicate deletions can each observe the other row and both skip localized-content cleanup.
     const localesWithSameCode = await strapi.db
