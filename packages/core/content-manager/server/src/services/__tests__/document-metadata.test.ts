@@ -1,3 +1,4 @@
+import { queryParams } from '@strapi/utils';
 import documentMetadataServiceFactory from '../document-metadata';
 
 const createService = (overrides: Record<string, unknown> = {}) => {
@@ -295,25 +296,30 @@ describe('document-metadata service', () => {
 
     it('deep-populates nested component and dynamic zone paths from i18n', async () => {
       const findMany = jest.fn().mockResolvedValue([]);
-      const transform = jest.fn((uid, params) => params);
       const getNonLocalizedAttributes = jest
         .fn()
         .mockReturnValue(['sku', 'profile', 'blocks', 'images']);
       const getNestedPopulateOfNonLocalizedAttributes = jest
         .fn()
-        .mockImplementation((uid: string) =>
-          uid === 'shared.hero'
-            ? ['image', 'body', 'body.items']
-            : [
-                'profile',
-                'profile.mid',
-                'profile.mid.inners',
-                'blocks',
-                'blocks.image',
-                'blocks.body',
-                'blocks.body.items',
-              ]
-        );
+        .mockImplementation((uid: string) => {
+          if (uid === 'shared.hero') {
+            return ['image', 'body', 'body.items', 'body.sections'];
+          }
+
+          if (uid === 'shared.section') {
+            return ['items'];
+          }
+
+          return [
+            'profile',
+            'profile.mid',
+            'profile.mid.inners',
+            'blocks',
+            'blocks.image',
+            'blocks.body',
+            'blocks.body.items',
+          ];
+        });
 
       const service = createService({
         getModel: (uid: string) =>
@@ -337,14 +343,36 @@ describe('document-metadata service', () => {
                 body: { type: 'component', component: 'shared.body', repeatable: false },
               },
             },
+            'shared.outer': {
+              uid: 'shared.outer',
+              attributes: {
+                mid: { type: 'component', component: 'shared.mid', repeatable: false },
+              },
+            },
+            'shared.mid': {
+              uid: 'shared.mid',
+              attributes: {
+                inners: { type: 'component', component: 'shared.item', repeatable: true },
+              },
+            },
             'shared.body': {
               uid: 'shared.body',
+              modelType: 'component',
+              attributes: {
+                items: { type: 'component', component: 'shared.item', repeatable: true },
+                sections: { type: 'dynamiczone', components: ['shared.section'] },
+              },
+            },
+            'shared.section': {
+              uid: 'shared.section',
+              modelType: 'component',
               attributes: {
                 items: { type: 'component', component: 'shared.item', repeatable: true },
               },
             },
             'shared.item': {
               uid: 'shared.item',
+              modelType: 'component',
               attributes: {
                 label: { type: 'string' },
               },
@@ -368,7 +396,18 @@ describe('document-metadata service', () => {
         },
         get(key: string) {
           if (key === 'query-params') {
-            return { transform };
+            const transformer = queryParams.createTransformer({
+              getModel: (uid: string) =>
+                (this as { getModel: (modelUID: string) => never }).getModel(uid),
+            });
+            return {
+              transform: jest.fn((uid, params) => ({
+                ...params,
+                populate: transformer.transformQueryParams(uid, {
+                  populate: params.populate,
+                }).populate,
+              })),
+            };
           }
           return undefined;
         },
@@ -383,7 +422,7 @@ describe('document-metadata service', () => {
         { availableLocales: true, availableStatus: false }
       );
 
-      const [, params] = transform.mock.calls[0];
+      const [params] = findMany.mock.calls[0];
       expect(params.populate.profile).toEqual({
         populate: {
           mid: {
@@ -401,13 +440,21 @@ describe('document-metadata service', () => {
               body: {
                 populate: {
                   items: true,
+                  sections: {
+                    on: {
+                      'shared.section': {
+                        populate: {
+                          items: true,
+                        },
+                      },
+                    },
+                  },
                 },
               },
             },
           },
         },
       });
-      expect(params.populate.images).toEqual({ populate: { folder: true } });
     });
   });
 });

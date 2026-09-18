@@ -180,6 +180,7 @@ describe('mutateEditViewHook – label action injection and localization', () =>
     const { layout: mutated } = mutateEditViewHook({ layout });
     const action = mutated.layout[0][0][0].labelAction as React.ReactElement;
 
+    expect(action.props.title.id).toBe('i18n.Field.not-localized');
     render(action);
     expect(
       screen.getByText(/This value is common to all locales. Edit it in the default locale./i)

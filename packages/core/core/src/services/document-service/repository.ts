@@ -528,10 +528,15 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
         .findOne({ where: { documentId } });
 
       if (documentExists) {
-        const mergedData = await copyNonLocalizedFields(contentType, documentId, {
-          ...queryParams.data,
+        const mergedData = await copyNonLocalizedFields(
+          contentType,
           documentId,
-        });
+          {
+            ...queryParams.data,
+            documentId,
+          },
+          { status: 'draft', strategy: 'fill' }
+        );
 
         updatedDraft = await entries.create({
           ...queryParams,
@@ -574,7 +579,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       i18n.multiLocaleToLookup(contentType)
     )(params);
 
-    const [draftsToPublish, oldPublishedVersions] = await Promise.all([
+    const [draftsToPublish, oldPublishedVersions, publishedVersions] = await Promise.all([
       strapi.db.query(uid).findMany({
         where: {
           ...queryParams?.lookup,
@@ -591,6 +596,15 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
           publishedAt: { $ne: null },
         },
         select: ['id', 'locale'],
+      }),
+      // All published locales of this document (not scoped to the publish lookup).
+      // Used so a first publish of FR can inherit EN published shared fields.
+      strapi.db.query(uid).findMany({
+        where: {
+          documentId,
+          publishedAt: { $ne: null },
+        },
+        select: ['locale'],
       }),
     ]);
 
@@ -625,10 +639,28 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       addFirstPublishedAtToDraft(draft, entries.update, contentType)
     );
 
-    // Transform draft entry data and create published versions
-    const publishedEntries = await async.map(updatedDraft, (draft: any) =>
-      entries.publish(draft, queryParams)
+    // First publish of a locale must inherit shared fields from an existing
+    // published sibling. Copying the draft would publish unpublished shared
+    // edits and i18n sync would then overwrite every published locale.
+    const publishedLocales = new Set(
+      (publishedVersions as Array<{ locale?: string }>).map((entry) => entry.locale)
     );
+
+    // Transform draft entry data and create published versions
+    const publishedEntries = await async.map(updatedDraft, async (draft: any) => {
+      const isFirstPublishForLocale = !publishedLocales.has(draft.locale);
+      const hasPublishedSibling = [...publishedLocales].some((locale) => locale !== draft.locale);
+
+      let entryToPublish = draft;
+      if (hasDraftAndPublish && isFirstPublishForLocale && hasPublishedSibling) {
+        entryToPublish = await copyNonLocalizedFields(contentType, documentId, draft, {
+          status: 'published',
+          strategy: 'replace',
+        });
+      }
+
+      return entries.publish(entryToPublish, queryParams);
+    });
 
     // Sync unidirectional relations with the new published entries
     await unidirectionalRelations.sync(

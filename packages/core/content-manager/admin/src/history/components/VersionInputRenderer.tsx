@@ -619,4 +619,9 @@ const attributeHasCustomFieldProperty = (
   'customField' in attribute && typeof attribute.customField === 'string';
 
 export type { VersionInputRendererProps };
-export { VersionInputRenderer, CustomRelationInput, resolveComponentRenderResources };
+export {
+  VersionInputRenderer,
+  CustomRelationInput,
+  getLabelAction,
+  resolveComponentRenderResources,
+};

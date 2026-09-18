@@ -15,6 +15,7 @@ describe('document service internationalization', () => {
       });
 
       global.strapi = {
+        plugin: (name: string) => (global.strapi as any).plugins[name],
         plugins: {
           i18n: {
             services: {
@@ -70,6 +71,7 @@ describe('document service internationalization', () => {
       const findOne = jest.fn().mockResolvedValueOnce(null).mockResolvedValueOnce(siblingDraft);
 
       global.strapi = {
+        plugin: (name: string) => (global.strapi as any).plugins[name],
         plugins: {
           i18n: {
             services: {
@@ -113,6 +115,121 @@ describe('document service internationalization', () => {
         populate: [],
       });
       expect(result.shared).toBe('sibling-value');
+    });
+
+    it('copies from the default-locale published sibling when writing published', async () => {
+      const defaultPublished = {
+        documentId: 'doc-1',
+        locale: 'en',
+        publishedAt: '2026-01-01',
+        shared: 'published-value',
+      };
+      const findOne = jest.fn().mockResolvedValue(defaultPublished);
+      const fillNonLocalizedAttributes = jest.fn((entry, relatedEntry) => {
+        entry.shared = relatedEntry.shared;
+      });
+
+      global.strapi = {
+        plugin: (name: string) => (global.strapi as any).plugins[name],
+        plugins: {
+          i18n: {
+            services: {
+              locales: { getDefaultLocale: jest.fn().mockResolvedValue('en') },
+              'content-types': {
+                isLocalizedContentType: () => true,
+                getNestedPopulateOfNonLocalizedAttributes: () => [],
+                fillNonLocalizedAttributes,
+              },
+            },
+            controllers: {},
+            contentTypes: {},
+            policies: {},
+          },
+        },
+        apis: {},
+        db: {
+          query: () => ({ findOne }),
+        },
+      } as any;
+
+      const result = await copyNonLocalizedFields(
+        {
+          uid: 'api::article.article',
+          options: { draftAndPublish: true },
+          attributes: {
+            shared: { type: 'string' },
+          },
+        } as any,
+        'doc-1',
+        { localized: 'fr' },
+        { status: 'published' }
+      );
+
+      expect(findOne).toHaveBeenCalledWith({
+        where: {
+          documentId: 'doc-1',
+          locale: 'en',
+          publishedAt: { $ne: null },
+        },
+        populate: [],
+      });
+      expect(result.shared).toBe('published-value');
+    });
+
+    it('replaces present shared fields from the published sibling', async () => {
+      const defaultPublished = {
+        documentId: 'doc-1',
+        locale: 'en',
+        publishedAt: '2026-01-01',
+        shared: 'published-value',
+      };
+      const findOne = jest.fn().mockResolvedValue(defaultPublished);
+
+      global.strapi = {
+        plugin: (name: string) => (global.strapi as any).plugins[name],
+        plugins: {
+          i18n: {
+            services: {
+              locales: { getDefaultLocale: jest.fn().mockResolvedValue('en') },
+              'content-types': {
+                isLocalizedContentType: () => true,
+                getNestedPopulateOfNonLocalizedAttributes: () => [],
+                copyNonLocalizedAttributes: (_schema: unknown, entry: { shared: string }) => ({
+                  shared: entry.shared,
+                }),
+                fillNonLocalizedAttributes: jest.fn(),
+              },
+            },
+            controllers: {},
+            contentTypes: {},
+            policies: {},
+          },
+        },
+        apis: {},
+        db: {
+          query: () => ({ findOne }),
+        },
+      } as any;
+
+      const fillNonLocalizedAttributes = (global.strapi as any).plugins.i18n.services[
+        'content-types'
+      ].fillNonLocalizedAttributes;
+
+      const result = await copyNonLocalizedFields(
+        {
+          uid: 'api::article.article',
+          options: { draftAndPublish: true },
+          attributes: {
+            shared: { type: 'string' },
+          },
+        } as any,
+        'doc-1',
+        { localized: 'fr', shared: 'draft-value' },
+        { status: 'published', strategy: 'replace' }
+      );
+
+      expect(fillNonLocalizedAttributes).not.toHaveBeenCalled();
+      expect(result).toEqual({ localized: 'fr', shared: 'published-value' });
     });
   });
 });

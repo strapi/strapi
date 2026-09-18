@@ -120,7 +120,14 @@ const addLabelActionToField = (
 
   return {
     ...field,
-    labelAction: <NonLocalizedLabelAction />,
+    labelAction: (
+      <NonLocalizedLabelAction
+        title={{
+          id: getTranslation('Field.not-localized'),
+          defaultMessage: 'This value is common to all locales',
+        }}
+      />
+    ),
   };
 };
 
@@ -147,7 +154,7 @@ const LabelAction = ({ title, icon = 'earth' }: LabelActionProps) => {
   );
 };
 
-const NonLocalizedLabelAction = () => {
+const NonLocalizedLabelAction = ({ title: _title }: Pick<LabelActionProps, 'title'>) => {
   const [{ query }] = useQueryParams<I18nBaseQuery>();
   const { data: locales = [] } = useGetLocalesQuery();
 

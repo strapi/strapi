@@ -549,6 +549,7 @@ const documentApi = contentManagerApi.injectEndpoints({
      */
     getI18nLocales: builder.query<Array<{ code: string; isDefault: boolean }>, void>({
       query: () => '/i18n/locales',
+      providesTags: [{ type: 'Locale', id: 'LIST' }],
     }),
   }),
 });

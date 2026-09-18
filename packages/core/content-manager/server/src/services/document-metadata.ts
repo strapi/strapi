@@ -367,7 +367,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     let nonLocalizedFields: string[] = [];
     let nonLocalizedMediaFields: string[] = [];
     let nestedPopulate: Record<string, unknown> = {};
-    const dynamicZonePopulate: Record<string, unknown> = {};
     try {
       const i18nPlugin = strapi.plugin('i18n');
       if (i18nPlugin) {
@@ -388,30 +387,57 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
             );
 
             if (typeof i18nService.getNestedPopulateOfNonLocalizedAttributes === 'function') {
-              nestedPopulate = dottedPathsToPopulate(
-                i18nService.getNestedPopulateOfNonLocalizedAttributes(uid)
-              );
-              // Dynamic zones are polymorphic, so each component needs its own
-              // deep-populate fragment. A wildcard only populates the immediate
-              // attributes and can omit nested shared component data.
-              for (const field of Object.keys(nestedPopulate)) {
-                const attribute = model.attributes[field];
-                if (attribute?.type === 'dynamiczone') {
-                  dynamicZonePopulate[field] = {
-                    on: attribute.components.reduce<Record<string, { populate: object }>>(
-                      (acc, componentUID) => {
-                        acc[componentUID] = {
-                          populate: dottedPathsToPopulate(
-                            i18nService.getNestedPopulateOfNonLocalizedAttributes(componentUID)
+              const buildNestedPopulate = (
+                schemaUID: UID.Schema,
+                populate = dottedPathsToPopulate(
+                  i18nService.getNestedPopulateOfNonLocalizedAttributes(schemaUID)
+                )
+              ): Record<string, unknown> => {
+                const schema = strapi.getModel(schemaUID);
+
+                return Object.fromEntries(
+                  Object.entries(populate).map(([field, value]) => {
+                    const attribute = schema?.attributes[field];
+
+                    if (attribute?.type === 'dynamiczone') {
+                      return [
+                        field,
+                        {
+                          on: attribute.components.reduce<
+                            Record<string, { populate: Record<string, unknown> }>
+                          >((acc, componentUID) => {
+                            acc[componentUID] = {
+                              populate: buildNestedPopulate(componentUID),
+                            };
+                            return acc;
+                          }, {}),
+                        },
+                      ];
+                    }
+
+                    if (
+                      attribute?.type === 'component' &&
+                      typeof value === 'object' &&
+                      value !== null &&
+                      'populate' in value
+                    ) {
+                      return [
+                        field,
+                        {
+                          populate: buildNestedPopulate(
+                            attribute.component,
+                            (value as { populate: Record<string, unknown> }).populate
                           ),
-                        };
-                        return acc;
-                      },
-                      {}
-                    ),
-                  };
-                }
-              }
+                        },
+                      ];
+                    }
+
+                    return [field, value];
+                  })
+                );
+              };
+
+              nestedPopulate = buildNestedPopulate(uid);
             } else {
               const componentAndDzFields = allNonLocalized.filter(
                 (field: string) =>
@@ -451,7 +477,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       populate: {
         ...nestedPopulate,
         ...mediaPopulate,
-        ...dynamicZonePopulate,
         ...AVAILABLE_STATUS_POPULATE,
       },
       fields: uniq([...AVAILABLE_LOCALES_FIELDS, ...nonLocalizedFields]),
