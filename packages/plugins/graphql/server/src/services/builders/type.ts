@@ -69,7 +69,11 @@ export default (context: Context) => {
       isNested: true,
     });
 
-    localBuilder.field(attributeName, { type, resolve, args });
+    localBuilder.field(attributeName, {
+      type: attribute.repeatable ? nonNull(type) : type,
+      resolve,
+      args,
+    });
   };
 
   /**
@@ -102,7 +106,7 @@ export default (context: Context) => {
           attributeName,
         });
 
-    builder.list.field(attributeName, { type, resolve });
+    builder.list.field(attributeName, { type: nonNull(type), resolve });
   };
 
   /**
@@ -160,7 +164,7 @@ export default (context: Context) => {
       });
 
       builder.field(attributeName, {
-        type: nonNull(list(typeName)),
+        type: nonNull(list(nonNull(typeName))),
         async resolve(...args: unknown[]) {
           const res = await resolve(...args);
           return res.nodes ?? [];
@@ -208,7 +212,7 @@ export default (context: Context) => {
     // If there is no specific target specified, then use the GenericMorph type
     if (isUndefined(target)) {
       builder.field(attributeName, {
-        type: GENERIC_MORPH_TYPENAME,
+        type: isToManyRelation ? nonNull(GENERIC_MORPH_TYPENAME) : GENERIC_MORPH_TYPENAME,
         resolve,
       });
     }
@@ -217,7 +221,10 @@ export default (context: Context) => {
     else if (isArray(target) && target.every(isString)) {
       const type = naming.getMorphRelationTypeName(contentType, attributeName);
 
-      builder.field(attributeName, { type, resolve });
+      builder.field(attributeName, {
+        type: isToManyRelation ? nonNull(type) : type,
+        resolve,
+      });
     }
   };
 
@@ -270,7 +277,7 @@ export default (context: Context) => {
       });
 
       builder.field(attributeName, {
-        type: nonNull(list(typeName)),
+        type: nonNull(list(nonNull(typeName))),
         async resolve(...args: unknown[]) {
           const res = await resolve(...args);
           return res.nodes ?? [];
