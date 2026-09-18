@@ -22,7 +22,7 @@ export const DEFAULT_CONFLICT_STRATEGY = 'restore';
 export interface ILocalStrapiDestinationProviderOptions {
   getStrapi(): Core.Strapi | Promise<Core.Strapi>; // return an initialized instance of Strapi
 
-  autoDestroy?: boolean; // shut down the instance returned by getStrapi() at the end of the transfer
+  autoDestroy?: boolean; // shut down the instance returned from getStrapi() at the end of the transfer
   restore?: restore.IRestoreOptions; // erase data in strapi database before transfer; required if strategy is 'restore'
   strategy: 'restore'; // conflict management strategy; only the restore strategy is available at this time
   /** CLI / UI: human-readable progress during {@link beforeTransfer} (restore prep). */
@@ -276,8 +276,22 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
         // eslint-disable-next-line no-bitwise
         await fse.access(path.join(assetsDirectory, '..'), fse.constants.W_OK | fse.constants.R_OK);
 
-        await fse.move(assetsDirectory, backupDirectory);
-        await fse.mkdir(assetsDirectory);
+        const assetsDirectoryStats = await fse.lstat(assetsDirectory);
+
+        if (assetsDirectoryStats.isSymbolicLink()) {
+          // Keep deployment symlinks intact. Moving the symlink itself replaces `uploads` with a
+          // real directory, so instead move the linked directory's contents into the backup.
+          await fse.mkdir(backupDirectory);
+          const entries = await fse.readdir(assetsDirectory);
+
+          for (const entry of entries) {
+            await fse.move(path.join(assetsDirectory, entry), path.join(backupDirectory, entry));
+          }
+        } else {
+          await fse.move(assetsDirectory, backupDirectory);
+          await fse.mkdir(assetsDirectory);
+        }
+
         // Create a .gitkeep file to ensure the directory is not empty
         await fse.outputFile(path.join(assetsDirectory, '.gitkeep'), '');
         this.#reportInfo(`created assets backup directory ${backupDirectory}`);
@@ -350,7 +364,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   async createLinksWriteStream(): Promise<Writable> {
-    this.#reportInfo('creating links write stream');
+    this.#reportInfo('creating links stream');
     if (!this.strapi) {
       throw new Error('Not able to stream links. Strapi instance not found');
     }
@@ -362,9 +376,9 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       return restore.createLinksWriteStream(mapID, this.strapi, this.transaction, this.onWarning);
     }
 
-    throw new ProviderValidationError(`Invalid strategy ${strategy}`, {
+    throw new ProviderValidationError(`Invalid strategy ${this.options.strategy}`, {
       check: 'strategy',
-      strategy,
+      strategy: this.options.strategy,
       validStrategies: VALID_CONFLICT_STRATEGIES,
     });
   }
