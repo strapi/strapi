@@ -721,6 +721,7 @@ const RelationModalWithContext = ({
   const getParentFormValuesWithCurrentRelation = () => {
     return setIn(getParentFormValues(), name, fieldValue);
   };
+  const setParentFormValue = useForm('RelationModalWrapper', (state) => state.onChange);
 
   const handleLoadMore = () => {
     if (!data || !data.pagination) {
@@ -762,6 +763,7 @@ const RelationModalWithContext = ({
                   fieldToConnect: name,
                   fieldToConnectUID: componentUID,
                   getParentFormValues: getParentFormValuesWithCurrentRelation,
+                  setParentFormValue,
                 },
               });
             }

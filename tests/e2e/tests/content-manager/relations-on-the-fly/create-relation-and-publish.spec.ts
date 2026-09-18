@@ -57,7 +57,7 @@ test.describe('Relations on the fly - Create a Relation and Save', () => {
     }
   );
 
-  test('I want to retain unsaved parent changes when publishing a top-level relation', async ({
+  test('I want to retain unsaved parent changes, unpersisted, when publishing a top-level relation', async ({
     page,
   }) => {
     const updatedTitle = 'West Ham post match analysis - published update';
@@ -76,10 +76,13 @@ test.describe('Relations on the fly - Create a Relation and Save', () => {
     await page.getByRole('option', { name: 'Create a relation' }).click();
     await page.getByRole('textbox', { name: 'name' }).fill(authorName);
 
+    // Connecting the newly published relation must never PUT the parent article to the server —
+    // that would silently persist the unsaved title edit above along with it.
     const parentUpdate = page.waitForRequest(
       (request) =>
         request.method() === 'PUT' &&
-        request.url().includes('/content-manager/collection-types/api::article.article')
+        request.url().includes('/content-manager/collection-types/api::article.article'),
+      { timeout: 2000 }
     );
     await clickAndWait(page, page.getByRole('button', { name: 'Publish' }));
     await clickAndWait(
@@ -88,28 +91,18 @@ test.describe('Relations on the fly - Create a Relation and Save', () => {
         .getByRole('alertdialog', { name: 'Confirmation' })
         .getByRole('button', { name: 'Publish' })
     );
-
-    const parentUpdateData = (await parentUpdate).postDataJSON() as {
-      title?: string;
-      authors?: { connect?: Array<{ documentId?: unknown }> };
-      undefined?: unknown;
-    };
-    expect(parentUpdateData).toEqual(
-      expect.objectContaining({
-        title: updatedTitle,
-        authors: expect.objectContaining({
-          connect: expect.arrayContaining([
-            expect.objectContaining({ documentId: expect.any(String) }),
-          ]),
-        }),
-      })
-    );
-    expect(parentUpdateData.undefined).toBeUndefined();
-
     await expect(page.getByRole('banner').getByText('Edit a relation')).toBeVisible();
+    await expect(parentUpdate).rejects.toThrow();
 
+    // The relation and the title edit both show locally, still unsaved.
     await clickAndWait(page, page.getByRole('button', { name: 'Close modal' }));
     await expect(page.getByRole('button', { name: authorName })).toBeVisible();
     await expect(title).toHaveValue(updatedTitle);
+
+    // Neither survives a reload, proving nothing was persisted on the parent's behalf — the user
+    // must still explicitly save the parent article for the title edit and the relation to stick.
+    await page.reload();
+    await expect(page.getByRole('textbox', { name: 'title' })).not.toHaveValue(updatedTitle);
+    await expect(page.getByRole('button', { name: authorName })).not.toBeVisible();
   });
 });
