@@ -41,7 +41,7 @@ This is why the file has an unusual structure with many functions defined inline
 
 ### Field identification with stega
 
-We use [stega encoding](https://github.com/vercel/stega) to identify which Strapi field each piece of text comes from. Stega embeds invisible metadata into text content using Unicode zero-width characters that are imperceptible to users but can be decoded programmatically.
+We use [stega encoding](https://www.npmjs.com/package/@vercel/stega) to identify which Strapi field each piece of text comes from. Stega embeds invisible metadata into text content using Unicode zero-width characters that are imperceptible to users but can be decoded programmatically.
 
 1. The Document Service encodes field metadata into text values (invisible to users)
 2. The frontend renders the content normally
