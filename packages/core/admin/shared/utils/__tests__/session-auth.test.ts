@@ -62,6 +62,32 @@ describe('getAccessCookiePath', () => {
 
     expect(getAccessCookiePath()).toBe('/strapi-de/admin');
   });
+
+  test('falls back to admin.path so a custom admin.url stays readable', () => {
+    global.strapi.config.get = jest.fn((key: string) =>
+      key === 'admin.path' ? '/dashboard' : undefined
+    ) as any;
+
+    expect(getAccessCookiePath()).toBe('/dashboard');
+  });
+
+  test('prefers admin.auth.cookie.path over admin.path', () => {
+    global.strapi.config.get = jest.fn((key: string) => {
+      if (key === 'admin.auth.cookie.path') return '/strapi-de/admin';
+      if (key === 'admin.path') return '/dashboard';
+      return undefined;
+    }) as any;
+
+    expect(getAccessCookiePath()).toBe('/strapi-de/admin');
+  });
+
+  test('still defaults to /admin when admin.path is the default admin path', () => {
+    global.strapi.config.get = jest.fn((key: string) =>
+      key === 'admin.path' ? DEFAULT_AUTH_COOKIE_PATH : undefined
+    ) as any;
+
+    expect(getAccessCookiePath()).toBe(DEFAULT_AUTH_COOKIE_PATH);
+  });
 });
 
 describe('getAccessCookieDomain', () => {
