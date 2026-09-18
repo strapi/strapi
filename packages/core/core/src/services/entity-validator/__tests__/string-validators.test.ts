@@ -237,27 +237,7 @@ describe('String validator', () => {
         },
       };
 
-      // A single type holding `menu_items` (repeatable), each item holding
-      // `children` (repeatable), each child holding `children` (repeatable).
-      // `repeatableData` is captured at the top level only, so the path walked
-      // from it crosses the nested repeatable arrays.
-      const repeatableData = [
-        {
-          id: 1,
-          slug: 'root-a',
-          children: [
-            { id: 11, slug: 'child-a', children: [{ id: 111, slug: 'leaf-a' }] },
-            { id: 12, slug: 'child-b' },
-          ],
-        },
-        {
-          id: 2,
-          slug: 'root-b',
-          children: [{ id: 21, slug: 'child-a', children: [{ id: 211, slug: 'leaf-a' }] }],
-        },
-      ];
-
-      const createValidator = (pathToComponent: string[], value: string) =>
+      const validate = (pathToComponent: string[], repeatableData: any[], value: string) =>
         strapiUtils.validateYupSchema(
           Validators.string(
             {
@@ -273,48 +253,132 @@ describe('String validator', () => {
             },
             options
           )
-        );
+        )(value);
 
-      test('it does not throw when the path crosses a repeatable array', async () => {
+      type Case = [string, string[], any[], string, 'accepts' | 'rejects'];
+
+      // `repeatableData` only holds the outermost repeatable, so a path reaching
+      // a nested component crosses arrays, optional branches and absent keys.
+      const cases: Case[] = [
+        [
+          'accepts a unique value in a flat repeatable',
+          ['menu_items'],
+          [{ slug: 'a' }, { slug: 'b' }],
+          'a',
+          'accepts',
+        ],
+        [
+          'rejects a value repeated in a flat repeatable',
+          ['menu_items'],
+          [{ slug: 'a' }, { slug: 'a' }],
+          'a',
+          'rejects',
+        ],
+
+        [
+          'accepts a unique value in a nested repeatable',
+          ['menu_items', 'children'],
+          [{ children: [{ slug: 'a' }] }, { children: [{ slug: 'b' }] }],
+          'a',
+          'accepts',
+        ],
+        [
+          'rejects a value repeated within one branch',
+          ['menu_items', 'children'],
+          [{ children: [{ slug: 'a' }, { slug: 'a' }] }],
+          'a',
+          'rejects',
+        ],
+        [
+          'rejects a value repeated across branches',
+          ['menu_items', 'children'],
+          [{ children: [{ slug: 'a' }] }, { children: [{ slug: 'a' }] }],
+          'a',
+          'rejects',
+        ],
+
+        [
+          'accepts a unique value in a single component',
+          ['menu_items', 'child'],
+          [{ child: { slug: 'a' } }, { child: { slug: 'b' } }],
+          'a',
+          'accepts',
+        ],
+        [
+          'rejects a value repeated in a single component',
+          ['menu_items', 'child'],
+          [{ child: { slug: 'a' } }, { child: { slug: 'a' } }],
+          'a',
+          'rejects',
+        ],
+
+        [
+          'accepts a unique value two repeatables deep',
+          ['menu_items', 'children', 'children'],
+          [
+            { children: [{ children: [{ slug: 'a' }] }] },
+            { children: [{ children: [{ slug: 'b' }] }] },
+          ],
+          'a',
+          'accepts',
+        ],
+        [
+          'rejects a value repeated two repeatables deep',
+          ['menu_items', 'children', 'children'],
+          [
+            { children: [{ children: [{ slug: 'a' }] }] },
+            { children: [{ children: [{ slug: 'a' }] }] },
+          ],
+          'a',
+          'rejects',
+        ],
+        [
+          'rejects a value repeated in a component inside a repeatable',
+          ['menu_items', 'children', 'child'],
+          [{ children: [{ child: { slug: 'a' } }, { child: { slug: 'a' } }] }],
+          'a',
+          'rejects',
+        ],
+
+        [
+          'ignores a branch without the nested component',
+          ['menu_items', 'children', 'children'],
+          [{ children: [{ children: [{ slug: 'a' }] }, { slug: 'no children here' }] }],
+          'a',
+          'accepts',
+        ],
+        [
+          'ignores a branch holding an empty repeatable',
+          ['menu_items', 'children', 'children'],
+          [{ children: [] }, { children: [{ children: [{ slug: 'a' }] }] }],
+          'a',
+          'accepts',
+        ],
+        [
+          'ignores a branch holding null',
+          ['menu_items', 'children', 'children'],
+          [{ children: null }, { children: [{ children: [{ slug: 'a' }] }] }],
+          'a',
+          'accepts',
+        ],
+        [
+          'ignores a branch without the unique attribute',
+          ['menu_items', 'children'],
+          [{ children: [{}] }, { children: [{ slug: 'a' }] }],
+          'a',
+          'accepts',
+        ],
+      ];
+
+      test.each(cases)('it %s', async (_name, pathToComponent, repeatableData, value, expected) => {
         fakeFindOne.mockResolvedValue(null);
 
-        const validator = createValidator(['menu_items', 'children', 'children'], 'leaf-c');
+        const result = validate(pathToComponent, repeatableData, value);
 
-        expect(await validator('leaf-c')).toBe('leaf-c');
-      });
-
-      test('it does not throw when a branch does not hold the nested component', async () => {
-        fakeFindOne.mockResolvedValue(null);
-
-        // `children[1]` of the first root has no `children` of its own.
-        const validator = createValidator(['menu_items', 'children', 'children'], 'leaf-d');
-
-        expect(await validator('leaf-d')).toBe('leaf-d');
-      });
-
-      test('it fails the validation when the value is repeated in another branch of the repeatable', async () => {
-        expect.assertions(1);
-        fakeFindOne.mockResolvedValue(null);
-
-        const validator = createValidator(['menu_items', 'children'], 'child-a');
-
-        try {
-          await validator('child-a');
-        } catch (err) {
-          expect(err).toBeInstanceOf(errors.YupValidationError);
-        }
-      });
-
-      test('it fails the validation when the value is repeated deeper in the repeatable', async () => {
-        expect.assertions(1);
-        fakeFindOne.mockResolvedValue(null);
-
-        const validator = createValidator(['menu_items', 'children', 'children'], 'leaf-a');
-
-        try {
-          await validator('leaf-a');
-        } catch (err) {
-          expect(err).toBeInstanceOf(errors.YupValidationError);
+        if (expected === 'rejects') {
+          await expect(result).rejects.toBeInstanceOf(errors.YupValidationError);
+        } else {
+          await expect(result).resolves.toBe(value);
         }
       });
     });

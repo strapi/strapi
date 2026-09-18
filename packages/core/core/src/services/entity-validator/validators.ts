@@ -266,11 +266,9 @@ const addUniqueValidator = <T extends yup.AnySchema>(
       // Construct the full path to the unique field within the component.
       const pathToCheck = [...componentContext.pathToComponent.slice(1), updatedName];
 
-      // Extract the values from the repeatable data using the constructed path.
-      // `repeatableData` is only captured for the outermost repeatable, so the
-      // path may cross nested repeatables, which are arrays. Each segment can
-      // therefore branch into several values, and a branch that does not hold
-      // the nested component is dropped rather than walked into.
+      // `repeatableData` only holds the outermost repeatable, so the path can
+      // cross nested repeatables: a segment may branch into several values, and
+      // branches that do not reach the leaf are dropped.
       const values = pathToCheck.reduce<any[]>(
         (acc, key) =>
           acc.flatMap((entry) => {
