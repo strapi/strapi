@@ -9,6 +9,13 @@ import createSchemaHandler from './schema-handler';
 
 const { ApplicationError } = errors;
 
+// TODO: create a utility for this
+// Duplicate in admin/src/components/FormModal/forms/utils/createCollectionName.ts
+export const getComponentCollectionName = (category: string, displayName: string): string =>
+  `components_${strings.nameToCollectionName(category)}_${strings.nameToCollectionName(
+    pluralize(displayName)
+  )}`;
+
 export default function createComponentBuilder() {
   return {
     createComponentUID({ category, displayName }: any) {
@@ -49,11 +56,7 @@ export default function createComponentBuilder() {
         filename: `${strings.nameToSlug(infos.displayName)}.json`,
       });
 
-      // TODO: create a utility for this
-      // Duplicate in admin/src/components/FormModal/forms/utils/createCollectionName.ts
-      const collectionName = `components_${strings.nameToCollectionName(
-        infos.category
-      )}_${strings.nameToCollectionName(pluralize(infos.displayName))}`;
+      const collectionName = getComponentCollectionName(infos.category, infos.displayName);
 
       this.components.forEach((compo: any) => {
         if (compo.schema.collectionName === collectionName) {
@@ -98,13 +101,50 @@ export default function createComponentBuilder() {
       const [, nameUID] = uid.split('.');
 
       const newCategory = strings.nameToSlug(infos.category);
-      const newUID = `${newCategory}.${nameUID}`;
+
+      // The name half of the uid (and the schema file name) follows the display
+      // name, but only when the display name actually changed: a component whose
+      // file does not match its display name (e.g. a hand-edited schema) must
+      // not be moved by an unrelated edit. This keeps the old name free once a
+      // component has been renamed (CG-1001).
+      //
+      // Opt-in (`followDisplayName`): only the `update-schema` path sets it, as
+      // it also generates the migration that renames the component's data table
+      // and rewrites `component_type` references. The legacy
+      // `PUT /components/:uid` route has no migration support and keeps the uid.
+      const currentDisplayName = component.schema.info?.displayName;
+      const displayNameChanged =
+        infos.followDisplayName === true &&
+        typeof infos.displayName === 'string' &&
+        infos.displayName !== '' &&
+        infos.displayName !== currentDisplayName;
+      const newNameUID = displayNameChanged ? strings.nameToSlug(infos.displayName) : nameUID;
+
+      const newUID = `${newCategory}.${newNameUID}`;
 
       if (newUID !== uid && this.components.has(newUID)) {
         throw new errors.ApplicationError('component.edit.alreadyExists');
       }
 
       const newDir = path.join(strapi.dirs.app.components, newCategory);
+      const newFilename = `${newNameUID}.json`;
+
+      // A renamed component also gets the collection name a component created
+      // with that name would get, so the old name is really free afterwards
+      // (`createComponent` rejects duplicate collection names). The data table
+      // is renamed by the generated migration (see `collectComponentRenames` in
+      // the schema service). A category-only move keeps its collection name.
+      const newCollectionName = displayNameChanged
+        ? getComponentCollectionName(newCategory, infos.displayName)
+        : component.schema.collectionName;
+
+      if (newCollectionName !== component.schema.collectionName) {
+        this.components.forEach((compo: any) => {
+          if (compo.schema.collectionName === newCollectionName) {
+            throw new ApplicationError('component.edit.alreadyExists');
+          }
+        });
+      }
 
       const oldAttributes = component.schema.attributes;
 
@@ -115,6 +155,8 @@ export default function createComponentBuilder() {
       component
         .setUID(newUID)
         .setDir(newDir)
+        .setFilename(newFilename)
+        .set('collectionName', newCollectionName)
         .set(['info', 'displayName'], infos.displayName)
         .set(['info', 'icon'], infos.icon)
         .set(['info', 'description'], infos.description)

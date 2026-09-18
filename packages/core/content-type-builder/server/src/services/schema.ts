@@ -4,7 +4,9 @@ import { mapValues } from 'lodash/fp';
 import type { Schema } from '@strapi/types';
 
 import createBuilder from './schema-builder';
+import { getComponentCollectionName } from './schema-builder/component-builder';
 import { createMigrationBuilder } from './migration-builder';
+import type { RenameAttributeDefinition, UnsupportedRename } from './migration-builder';
 import { getService } from '../utils';
 import type { Schema as CTBSchema } from '../controllers/validation/schema';
 import type { AttributeRenameMigrationMode } from '../config';
@@ -70,16 +72,13 @@ interface CollectedRename {
   uid: string;
   oldName: string;
   newName: string;
+  newAttribute?: RenameAttributeDefinition;
 }
 
 const getAttributeRenameMigrationMode = (): AttributeRenameMigrationMode => {
-  try {
-    return strapi
-      .plugin('content-type-builder')
-      .config('renameMigrations.attributes', 'prompt-before-save');
-  } catch {
-    return 'prompt-before-save';
-  }
+  return strapi
+    .plugin('content-type-builder')
+    .config('renameMigrations.attributes', 'prompt-before-save');
 };
 
 /**
@@ -94,7 +93,13 @@ const collectRenames = (schema: CTBSchema): CollectedRename[] => {
   const renames: CollectedRename[] = [];
 
   type RenameHop = { oldName?: string; newName?: string };
-  type RenameAwareEntry = { action?: string; uid: string; renames?: RenameHop[] };
+  type AttributeEntry = { action?: string; name?: string; properties?: RenameAttributeDefinition };
+  type RenameAwareEntry = {
+    action?: string;
+    uid: string;
+    renames?: RenameHop[];
+    attributes?: AttributeEntry[];
+  };
 
   const collectFrom = (entries: RenameAwareEntry[]) => {
     entries
@@ -102,7 +107,20 @@ const collectRenames = (schema: CTBSchema): CollectedRename[] => {
       .forEach((entry) => {
         entry.renames!.forEach((hop) => {
           if (hop.oldName && hop.newName && hop.oldName !== hop.newName) {
-            renames.push({ uid: entry.uid, oldName: hop.oldName, newName: hop.newName });
+            // The definition the field ends up with in this save, so the builder
+            // can refuse hops that also change the field's storage (type,
+            // relation target, component…). Intermediate hops of a chain have no
+            // matching attribute and are checked when the chain completes.
+            const newAttribute = entry.attributes?.find(
+              (attribute) => attribute.action !== 'delete' && attribute.name === hop.newName
+            )?.properties;
+
+            renames.push({
+              uid: entry.uid,
+              oldName: hop.oldName,
+              newName: hop.newName,
+              newAttribute,
+            });
           }
         });
       });
@@ -117,26 +135,97 @@ const collectRenames = (schema: CTBSchema): CollectedRename[] => {
 interface CollectedComponentRename {
   oldUid: string;
   newUid: string;
+  /** Set when the component's data table is renamed along with it. */
+  oldCollectionName?: string;
+  newCollectionName?: string;
+}
+
+interface EditedComponentIdentity {
+  uid: string;
+  /** `undefined` when the collection name is unchanged. */
+  collectionName?: string;
 }
 
 /**
- * Collects component-level renames from the update-schema payload. A component's
- * uid is `<category>.<name>`; the CTB only lets the *category* change on an edit
- * (the name part is preserved), so a new category yields a new uid. We derive the
- * new uid exactly as the schema builder's `editComponent` does so the generated
- * migration targets the same uid the reload will write to disk.
+ * Derives the identity a component ends up with after an edit, exactly as the
+ * schema builder's `editComponent` does, so the generated migration targets the
+ * same uid / table the reload will write to disk.
+ *
+ * A component's uid is `<category>.<name>`. The category half follows the new
+ * category. The name half follows the display name *only when the display name
+ * changed*: components whose file name does not match their display name (e.g.
+ * hand-edited schemas) must not be renamed by an unrelated edit. A display-name
+ * change also gives the component the collection name a component created with
+ * that name would get, so the old name is really free afterwards (CG-1001); a
+ * category-only move keeps its collection name.
+ */
+export const getEditedComponentIdentity = (
+  uid: string,
+  { category, displayName }: { category?: string; displayName?: string },
+  currentDisplayName?: string
+): EditedComponentIdentity => {
+  const [categoryUID, nameUID] = uid.split('.');
+
+  const newCategory = category ? strings.nameToSlug(category) : categoryUID;
+  const displayNameChanged =
+    typeof displayName === 'string' && displayName !== '' && displayName !== currentDisplayName;
+  const newName = displayNameChanged ? strings.nameToSlug(displayName) : nameUID;
+
+  return {
+    uid: `${newCategory}.${newName}`,
+    collectionName: displayNameChanged
+      ? getComponentCollectionName(newCategory, displayName)
+      : undefined,
+  };
+};
+
+export const getEditedComponentUid = (
+  ...args: Parameters<typeof getEditedComponentIdentity>
+): string => getEditedComponentIdentity(...args).uid;
+
+/**
+ * Collects component-level renames from the update-schema payload: a category or
+ * display-name change moves the component to a new uid (see
+ * `getEditedComponentIdentity`).
  */
 const collectComponentRenames = (schema: CTBSchema): CollectedComponentRename[] => {
-  type ComponentEntry = { action?: string; uid?: string; category?: string };
+  type ComponentEntry = { action?: string; uid?: string; category?: string; displayName?: string };
 
   return (schema.components as unknown as ComponentEntry[])
-    .filter((entry) => entry.action === 'update' && !!entry.uid && !!entry.category)
+    .filter((entry) => entry.action === 'update' && !!entry.uid)
     .map((entry) => {
-      const [, nameUID] = entry.uid!.split('.');
-      const newUid = `${strings.nameToSlug(entry.category!)}.${nameUID}`;
-      return { oldUid: entry.uid!, newUid };
+      const current = (strapi.components as Record<string, any> | undefined)?.[entry.uid!];
+      const { uid: newUid, collectionName } = getEditedComponentIdentity(
+        entry.uid!,
+        entry,
+        current?.info?.displayName
+      );
+
+      const oldCollectionName = current?.collectionName as string | undefined;
+      const tableRenamed =
+        !!collectionName && !!oldCollectionName && collectionName !== oldCollectionName;
+
+      return {
+        oldUid: entry.uid!,
+        newUid,
+        ...(tableRenamed ? { oldCollectionName, newCollectionName: collectionName } : {}),
+      };
     })
-    .filter((rename) => rename.oldUid !== rename.newUid);
+    .filter((rename) => rename.oldUid !== rename.newUid || !!rename.newCollectionName);
+};
+
+const describeUnsupportedReason = (reason: UnsupportedRename['reason']): string => {
+  switch (reason) {
+    case 'type-changed':
+      return 'the field type, relation or component also changed';
+    case 'unsupported-type':
+      return 'polymorphic/morph relations are not supported';
+    case 'attribute-not-found':
+      return 'the field is not in the current schema';
+    case 'model-not-found':
+    default:
+      return 'the type is not in the current schema';
+  }
 };
 
 /**
@@ -158,19 +247,21 @@ const generateRenameMigrations = async (schema: CTBSchema): Promise<void> => {
 
   const migrationBuilder = createMigrationBuilder({ strapi });
 
-  for (const { uid, oldName, newName } of renames) {
-    migrationBuilder.addRenameAttribute(uid, { oldName, newName });
+  for (const { uid, oldName, newName, newAttribute } of renames) {
+    migrationBuilder.addRenameAttribute(uid, { oldName, newName, newAttribute });
   }
 
-  for (const { oldUid, newUid } of componentRenames) {
-    migrationBuilder.addRenameComponent({ oldUid, newUid });
+  for (const rename of componentRenames) {
+    migrationBuilder.addRenameComponent(rename);
   }
 
   const unsupported = migrationBuilder.getUnsupported();
   if (unsupported.length > 0) {
-    const fields = unsupported.map((u) => `${u.uid}.${u.oldName}`).join(', ');
+    const fields = unsupported
+      .map((u) => `${u.uid}.${u.oldName} (${describeUnsupportedReason(u.reason)})`)
+      .join(', ');
     strapi.log.warn(
-      `[content-type-builder] Could not generate a rename migration for ${unsupported.length} field(s) (polymorphic/morph relations are not supported): ${fields}. Data in these fields may not be preserved.`
+      `[content-type-builder] Could not generate a rename migration for ${unsupported.length} field(s): ${fields}. Data in these fields may not be preserved.`
     );
   }
 
@@ -274,21 +365,34 @@ export const renameAttribute = async (
   await updateSchema(payload as unknown as CTBSchema);
 };
 
+export interface RenameComponentOptions {
+  /** New category; the component moves to `<category>.<name>`. */
+  category?: string;
+  /** New display name; the component moves to `<category>.<slug(displayName)>`. */
+  displayName?: string;
+}
+
 /**
- * Moves a component to a new category (which changes its uid from
- * `<oldCategory>.<name>` to `<newCategory>.<name>`) and generates the migration
- * that preserves embedded data, in one step. Used by `strapi rename:component`.
+ * Moves a component to a new category and/or display name (either of which
+ * changes its uid `<category>.<name>`) and generates the migration that
+ * preserves embedded data, in one step. Used by `strapi rename:component`.
  *
  * Like `renameAttribute`, it reuses the regular `updateSchema` path so the
  * component rename is resolved by the same `generateRenameMigrations` →
  * `createMigrationBuilder` flow the admin uses (which migrates the
  * `component_type` value in every `*_cmps` link table referencing the component).
  */
-export const renameComponent = async (uid: string, newCategory: string): Promise<void> => {
+export const renameComponent = async (
+  uid: string,
+  options: string | RenameComponentOptions
+): Promise<void> => {
   const { ApplicationError } = errors;
 
-  if (!newCategory) {
-    throw new ApplicationError('A new category is required');
+  const { category: newCategory, displayName: newDisplayName } =
+    typeof options === 'string' ? { category: options, displayName: undefined } : options;
+
+  if (!newCategory && !newDisplayName) {
+    throw new ApplicationError('A new category or a new display name is required');
   }
 
   const component = (strapi.components as Record<string, any>)[uid];
@@ -297,13 +401,16 @@ export const renameComponent = async (uid: string, newCategory: string): Promise
     throw new ApplicationError(`No component found for uid "${uid}"`);
   }
 
-  // A component uid is `<category>.<name>`; only the category can change (the
-  // name part is preserved), exactly as `editComponent` derives the new uid.
-  const [, nameUID] = uid.split('.');
-  const newUid = `${strings.nameToSlug(newCategory)}.${nameUID}`;
+  const { uid: newUid } = getEditedComponentIdentity(
+    uid,
+    { category: newCategory, displayName: newDisplayName },
+    component.info?.displayName
+  );
 
   if (newUid === uid) {
-    throw new ApplicationError(`Component "${uid}" is already in category "${newCategory}"`);
+    throw new ApplicationError(
+      `Component "${uid}" already has this category and display name; nothing to rename`
+    );
   }
 
   if ((strapi.components as Record<string, any>)[newUid]) {
@@ -325,8 +432,8 @@ export const renameComponent = async (uid: string, newCategory: string): Promise
       {
         action: 'update',
         uid,
-        category: newCategory,
-        displayName: component.info?.displayName,
+        category: newCategory ?? component.category,
+        displayName: newDisplayName ?? component.info?.displayName,
         icon: component.info?.icon,
         description: component.info?.description,
         pluginOptions: component.pluginOptions,
@@ -508,6 +615,9 @@ export const updateSchema = async (schema: CTBSchema) => {
     if (action === 'update') {
       builder.editComponent({
         ...component,
+        // A display-name change moves the component to a new uid / collection
+        // name; `generateRenameMigrations` below emits the matching migration.
+        followDisplayName: true,
         attributes: component.attributes.reduce((acc: any, attr: any) => {
           if (attr.action === 'delete') {
             return acc;

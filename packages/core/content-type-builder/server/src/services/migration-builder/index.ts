@@ -1,24 +1,93 @@
 import path from 'node:path';
-import { snakeCase } from 'lodash/fp';
 
 import type { Core } from '@strapi/types';
+
+/**
+ * The CTB-level attribute definition of the *new* side of a rename hop (the
+ * `properties` the admin sends for `newName`). Only the storage-relevant keys
+ * are inspected; see `isCompatibleRename`.
+ */
+export interface RenameAttributeDefinition {
+  type?: string;
+  relation?: string;
+  target?: string;
+  component?: string;
+  repeatable?: boolean;
+  [key: string]: unknown;
+}
 
 export interface RenameNames {
   oldName: string;
   newName: string;
+  /**
+   * Definition of the attribute under its new name, when known. Used to refuse
+   * hops that also change the attribute's storage (e.g. `string` -> `integer`,
+   * or a relation retargeted): renaming the column and letting schema sync
+   * alter its type in place can fail on Postgres/MySQL, whereas the legacy
+   * drop-and-recreate path is always safe.
+   */
+  newAttribute?: RenameAttributeDefinition;
 }
 
 export interface ComponentRenameUids {
   oldUid: string;
   newUid: string;
+  /**
+   * Set when the component's own data table is renamed too (its collection name
+   * follows a display-name change). `oldCollectionName` is only a hint: the
+   * physical `from` is read from the live metadata / in-flight state.
+   */
+  oldCollectionName?: string;
+  newCollectionName?: string;
 }
+
+export type UnsupportedRenameReason =
+  | 'model-not-found'
+  | 'attribute-not-found'
+  | 'unsupported-type'
+  | 'type-changed';
 
 export interface UnsupportedRename {
   uid: string;
   oldName: string;
   newName: string;
-  reason: 'model-not-found' | 'attribute-not-found' | 'unsupported-type';
+  reason: UnsupportedRenameReason;
 }
+
+/**
+ * Whether the storage of `oldAttribute` can host `newAttribute` after a plain
+ * rename of its physical artifact. Anything else must go through the legacy
+ * drop-and-recreate path, so the hop is reported as `type-changed`.
+ */
+export const isCompatibleRename = (
+  oldAttribute: RenameAttributeDefinition | undefined,
+  newAttribute: RenameAttributeDefinition | undefined
+): boolean => {
+  // Without both definitions there is nothing to compare; the metadata-based
+  // classification is the only guard we have.
+  if (!oldAttribute?.type || !newAttribute?.type) {
+    return true;
+  }
+
+  if (oldAttribute.type !== newAttribute.type) {
+    return false;
+  }
+
+  switch (newAttribute.type) {
+    case 'relation':
+      return (
+        oldAttribute.relation === newAttribute.relation &&
+        oldAttribute.target === newAttribute.target
+      );
+    case 'component':
+      return (
+        oldAttribute.component === newAttribute.component &&
+        Boolean(oldAttribute.repeatable) === Boolean(newAttribute.repeatable)
+      );
+    default:
+      return true;
+  }
+};
 
 /**
  * Physical column that stores a component's uid in every `*_cmps` link table
@@ -73,34 +142,28 @@ interface MigrationBuilderDeps {
   strapi: Core.Strapi;
 }
 
-interface MigrationFileBuilder {
-  renameColumn(op: { table: string; from: string; to: string; comment?: string }): void;
-  renameTable(op: { from: string; to: string; comment?: string }): void;
-  updateRows(op: {
-    table: string;
-    guardColumn?: string;
-    where: Record<string, string>;
-    set: Record<string, string>;
-    comment?: string;
-  }): void;
-  hasChanges(): boolean;
-  build(options: { name: string }): BuiltMigration | null;
-  writeFiles(options: { name: string; dir?: string }): Promise<string | null>;
-}
-
-interface MigrationProviderWithFileBuilder {
-  createFileBuilder(): MigrationFileBuilder;
-}
+const MIGRATION_NAME = 'rename-fields';
 
 export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
   const { db } = strapi;
 
-  const migrationFileBuilder = (
-    db.migrations as unknown as MigrationProviderWithFileBuilder
-  ).createFileBuilder();
+  const migrationFileBuilder = db.migrations.createFileBuilder();
   const unsupported: UnsupportedRename[] = [];
 
-  const { identifiers } = db.metadata;
+  // Physical-name rules shared with the metadata loader, so the *new* side of a
+  // rename is derived exactly as `db.metadata` will derive it after the reload.
+  const { naming } = db.metadata;
+
+  /**
+   * With `useTypescriptMigrations` the database discovers migrations from the
+   * compiled output dir (`<outDir>/database/migrations`) and the app's tsconfig
+   * does not compile `.js` sources, so the generated file must be a `.ts` file
+   * in the source dir for `tsc` to carry it into `dist`.
+   */
+  const getFormat = () =>
+    strapi.config.get('database.settings.useTypescriptMigrations') === true
+      ? 'typescript'
+      : 'javascript';
 
   // Artifacts "in flight" for the current save, i.e. produced by an earlier
   // rename hop in this same batch (e.g. the intermediate `tmp` field a user
@@ -117,6 +180,15 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
   // instead of re-scanning the schema (which no longer knows the intermediate uid).
   const componentInFlight = new Map<string, string[]>();
 
+  // Current physical data table of each component renamed in this save (keyed
+  // by its *current* uid), so a continuation hop renames from the right table.
+  const componentTableInFlight = new Map<string, string>();
+
+  // CTB-level definition of each in-flight field (per uid, by logical name), so
+  // a continuation hop can still be checked for a storage change against the
+  // definition the chain started from.
+  const inFlightDefinitions = new Map<string, Map<string, RenameAttributeDefinition>>();
+
   const markInFlight = (uid: string, name: string, resolved: Resolved): void => {
     let entries = inFlight.get(uid);
     if (!entries) {
@@ -126,17 +198,18 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
     entries.set(name, resolved);
   };
 
-  const resolveColumn = (name: string): string => identifiers.getColumnName(snakeCase(name));
-
   const isMorphRelation = (attribute: any): boolean =>
     typeof attribute?.relation === 'string' && attribute.relation.startsWith('morph');
 
-  const schemaTypeOf = (uid: string, name: string): string | undefined => {
+  const schemaAttributeOf = (uid: string, name: string): RenameAttributeDefinition | undefined => {
     const contentTypes = strapi.contentTypes as Record<string, any> | undefined;
     const components = strapi.components as Record<string, any> | undefined;
     const model = contentTypes?.[uid] ?? components?.[uid];
-    return model?.attributes?.[name]?.type as string | undefined;
+    return model?.attributes?.[name] as RenameAttributeDefinition | undefined;
   };
+
+  const schemaTypeOf = (uid: string, name: string): string | undefined =>
+    schemaAttributeOf(uid, name)?.type;
 
   // Resolves the shared upload morph table (e.g. `files_related_morphs`) and its
   // `related_type` column from the file model's `related` morph attribute. This
@@ -157,7 +230,7 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
     }
     return {
       table: joinTable.name,
-      fieldColumn: identifiers.FIELD_COLUMN,
+      fieldColumn: db.metadata.identifiers.FIELD_COLUMN,
       typeColumn: morphColumn.typeColumn.name,
     };
   };
@@ -254,8 +327,8 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
       case 'joinColumn': {
         const to =
           resolved.kind === 'joinColumn'
-            ? identifiers.getJoinColumnAttributeIdName(snakeCase(newName))
-            : resolveColumn(newName);
+            ? naming.joinColumnName(newName)
+            : naming.columnName(newName);
         if (resolved.from !== to) {
           migrationFileBuilder.renameColumn({
             table: resolved.table,
@@ -267,7 +340,7 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
         return { ...resolved, from: to };
       }
       case 'joinTable': {
-        const to = identifiers.getJoinTableName(snakeCase(meta.tableName), snakeCase(newName));
+        const to = naming.joinTableName(meta.tableName, newName);
         if (resolved.from !== to) {
           migrationFileBuilder.renameTable({ from: resolved.from, to, comment });
         }
@@ -314,7 +387,7 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
    * targets an occupied artifact, so no synthetic temporary name is ever needed
    * (a "swap" is already expressed by the user's own intermediate-name hop).
    */
-  const addRename = (uid: string, { oldName, newName }: RenameNames): void => {
+  const addRename = (uid: string, { oldName, newName, newAttribute }: RenameNames): void => {
     // `metadata.get` throws when the model is unknown, so guard with `has` first.
     if (!db.metadata.has(uid)) {
       unsupported.push({ uid, oldName, newName, reason: 'model-not-found' });
@@ -322,8 +395,26 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
     }
 
     const entries = inFlight.get(uid);
-    const resolved = entries?.get(oldName) ?? classify(uid, oldName);
+    const definitions = inFlightDefinitions.get(uid);
+    const oldAttribute = definitions?.get(oldName) ?? schemaAttributeOf(uid, oldName);
+    let resolved = entries?.get(oldName) ?? classify(uid, oldName);
     entries?.delete(oldName);
+    definitions?.delete(oldName);
+
+    // A rename that also changes the attribute's storage cannot be expressed as a
+    // rename of the physical artifact: leave it to the drop-and-recreate path.
+    if (resolved.kind !== 'unsupported' && !isCompatibleRename(oldAttribute, newAttribute)) {
+      resolved = { kind: 'unsupported', reason: 'type-changed' };
+    }
+
+    if (newAttribute ?? oldAttribute) {
+      let byName = inFlightDefinitions.get(uid);
+      if (!byName) {
+        byName = new Map();
+        inFlightDefinitions.set(uid, byName);
+      }
+      byName.set(newName, (newAttribute ?? oldAttribute) as RenameAttributeDefinition);
+    }
 
     if (resolved.kind === 'unsupported') {
       unsupported.push({ uid, oldName, newName, reason: resolved.reason });
@@ -391,17 +482,19 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
   };
 
   /**
-   * Records a component-level rename (its uid changed, e.g. the user moved it to
-   * a new category). The component's own data table keeps its `collectionName`
-   * (the CTB does not rename it), so the only data to preserve is the
-   * `component_type` reference in every link table that points at the old uid.
+   * Records a component-level rename (its uid changed: the user moved it to a
+   * new category and/or renamed it). The `component_type` reference in every
+   * link table that points at the old uid is rewritten; when the rename also
+   * changes the component's collection name (display-name change), its own data
+   * table is renamed as well. A category-only move keeps its collection name.
    */
-  const addRenameComponentUid = (oldUid: string, newUid: string): void => {
-    if (oldUid === newUid) {
-      return;
-    }
-
+  const addRenameComponentUid = ({
+    oldUid,
+    newUid,
+    newCollectionName,
+  }: ComponentRenameUids): void => {
     const known = componentInFlight.get(oldUid);
+    const knownTable = componentTableInFlight.get(oldUid);
     if (!known && !db.metadata.has(oldUid)) {
       unsupported.push({
         uid: oldUid,
@@ -413,19 +506,36 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
     }
 
     const tables = known ?? resolveComponentCmpsTables(oldUid);
+    const currentTable = knownTable ?? db.metadata.get(oldUid).tableName;
 
-    for (const table of tables) {
-      migrationFileBuilder.updateRows({
-        table,
-        guardColumn: COMPONENT_TYPE_COLUMN,
-        where: { [COMPONENT_TYPE_COLUMN]: oldUid },
-        set: { [COMPONENT_TYPE_COLUMN]: newUid },
-        comment: `rename component "${oldUid}" -> "${newUid}" in ${table}`,
+    if (oldUid !== newUid) {
+      for (const table of tables) {
+        migrationFileBuilder.updateRows({
+          table,
+          guardColumn: COMPONENT_TYPE_COLUMN,
+          where: { [COMPONENT_TYPE_COLUMN]: oldUid },
+          set: { [COMPONENT_TYPE_COLUMN]: newUid },
+          comment: `rename component "${oldUid}" -> "${newUid}" in ${table}`,
+        });
+      }
+    }
+
+    // The component's own data table follows its collection name. The link
+    // tables reference it by `cmp_id` without a foreign key, so a plain table
+    // rename is enough.
+    const nextTable = newCollectionName ?? currentTable;
+    if (nextTable !== currentTable) {
+      migrationFileBuilder.renameTable({
+        from: currentTable,
+        to: nextTable,
+        comment: `rename component "${oldUid}" -> "${newUid}": data table ${currentTable} -> ${nextTable}`,
       });
     }
 
     componentInFlight.delete(oldUid);
+    componentTableInFlight.delete(oldUid);
     componentInFlight.set(newUid, tables);
+    componentTableInFlight.set(newUid, nextTable);
   };
 
   return {
@@ -433,8 +543,8 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
       addRename(uid, names);
     },
 
-    addRenameComponent({ oldUid, newUid }: ComponentRenameUids): void {
-      addRenameComponentUid(oldUid, newUid);
+    addRenameComponent(rename: ComponentRenameUids): void {
+      addRenameComponentUid(rename);
     },
 
     hasChanges(): boolean {
@@ -445,8 +555,12 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
       return [...unsupported];
     },
 
+    getOperations() {
+      return migrationFileBuilder.getOperations();
+    },
+
     build(): BuiltMigration | null {
-      return migrationFileBuilder.build({ name: 'rename-fields' });
+      return migrationFileBuilder.build({ name: MIGRATION_NAME, format: getFormat() });
     },
 
     async writeFiles(): Promise<string | null> {
@@ -456,7 +570,7 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
       // wiped on the next build, so the generated migration would not be a
       // portable record.
       const dir = path.join(strapi.dirs.app.root, 'database', 'migrations');
-      return migrationFileBuilder.writeFiles({ name: 'rename-fields', dir });
+      return migrationFileBuilder.writeFiles({ name: MIGRATION_NAME, format: getFormat(), dir });
     },
   };
 };

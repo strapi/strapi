@@ -27,9 +27,10 @@ const action = async (uid: string, oldName: string, newName: string) => {
   const app = await createStrapi(appContext).load();
 
   try {
-    const migrationsDir =
-      app.db.config?.settings?.migrations?.dir ??
-      path.join(process.cwd(), 'database', 'migrations');
+    // The Content-Type Builder always writes to the app's *source* migrations
+    // dir (the database-configured dir points at build output when
+    // `useTypescriptMigrations` is enabled).
+    const migrationsDir = path.join(app.dirs.app.root, 'database', 'migrations');
 
     const before = await listMigrationFiles(migrationsDir);
 

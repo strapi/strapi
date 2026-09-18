@@ -33,6 +33,42 @@ const collectExplicitAttributeRenames = (
   return { renames, attributes: sanitizedAttributes };
 };
 
+/**
+ * A rename can only preserve data when the field keeps its storage: same type,
+ * and for relations the same kind and target, for components the same component
+ * and repeatable flag. Anything else must go through the regular remove + add
+ * path (renaming the column and altering its type in place can fail at startup),
+ * so such hops are dropped and the field is treated as removed + added.
+ */
+const isStorageCompatibleRename = (
+  oldAttribute: AnyAttribute | undefined,
+  newAttribute: SchemaAttribute | undefined
+): boolean => {
+  if (!oldAttribute || !newAttribute) {
+    return true;
+  }
+
+  const previous = oldAttribute as Record<string, unknown>;
+  const next = newAttribute as Record<string, unknown>;
+
+  if (previous.type !== next.type) {
+    return false;
+  }
+
+  if (next.type === 'relation') {
+    return previous.relation === next.relation && previous.target === next.target;
+  }
+
+  if (next.type === 'component') {
+    return (
+      previous.component === next.component &&
+      Boolean(previous.repeatable) === Boolean(next.repeatable)
+    );
+  }
+
+  return true;
+};
+
 const dedupeRenames = (renames: RenameHop[]): RenameHop[] => {
   const seen = new Set<string>();
 
@@ -199,12 +235,21 @@ const transformAttributesAndRenamesFromChatToCTB = (
     {} as Record<string, AnyAttribute>
   );
 
-  const explicitOldNames = new Set(explicitAttributeRenames.map((hop) => hop.oldName));
+  // Only renames that keep the field's storage can be replayed as a migration;
+  // the rest fall back to remove + add.
+  const compatibleRenames = [...schemaRenames, ...explicitAttributeRenames].filter((hop) =>
+    isStorageCompatibleRename(oldAttributesMap[hop.oldName], attributes[hop.newName])
+  );
+  const compatibleAttributeRenames = explicitAttributeRenames.filter((hop) =>
+    compatibleRenames.includes(hop)
+  );
+
+  const explicitOldNames = new Set(compatibleAttributeRenames.map((hop) => hop.oldName));
 
   // Process current attributes (new and changed)
   const processedAttributes = Object.entries(attributes).map(([name, attr]) => {
     const oldAttr = oldAttributesMap[name];
-    const explicitRename = explicitAttributeRenames.find((hop) => hop.newName === name);
+    const explicitRename = compatibleAttributeRenames.find((hop) => hop.newName === name);
     const status = explicitRename
       ? oldSchema.status === 'NEW'
         ? 'NEW'
@@ -225,15 +270,18 @@ const transformAttributesAndRenamesFromChatToCTB = (
     .filter(([name]) => !attributes[name] && !explicitOldNames.has(name))
     .map(([name, oldAttr]) => createAttributeWithStatus(name, oldAttr, 'REMOVED'));
 
-  const explicitRenames = [...schemaRenames, ...explicitAttributeRenames];
-  const reconciled = applyExplicitRenames(processedAttributes, removedAttributes, explicitRenames);
+  const reconciled = applyExplicitRenames(
+    processedAttributes,
+    removedAttributes,
+    compatibleRenames
+  );
 
   // Combine both sets of attributes
   const combinedAttributes = [...reconciled.processedAttributes, ...reconciled.removedAttributes];
 
   return {
     attributes: combinedAttributes,
-    renames: dedupeRenames(explicitRenames),
+    renames: dedupeRenames(compatibleRenames),
   };
 };
 

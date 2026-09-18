@@ -226,11 +226,45 @@ const createAttribute = (properties: Record<string, unknown>): AnyAttribute => {
 };
 
 /**
+ * Whether `newAttribute` keeps the storage of `previousAttribute`, i.e. whether
+ * renaming the underlying database artifact is enough to carry the data over.
+ * A type change (or a relation retargeted, or a component swapped) must go
+ * through the regular drop-and-recreate path: renaming the column and letting
+ * schema sync alter its type in place can fail at startup on Postgres/MySQL.
+ */
+const isStorageCompatibleRename = (
+  previousAttribute: AnyAttribute,
+  newAttribute: AnyAttribute
+): boolean => {
+  if (previousAttribute.type !== newAttribute.type) {
+    return false;
+  }
+
+  if (previousAttribute.type === 'relation' && newAttribute.type === 'relation') {
+    return (
+      previousAttribute.relation === newAttribute.relation &&
+      previousAttribute.target === newAttribute.target
+    );
+  }
+
+  if (previousAttribute.type === 'component' && newAttribute.type === 'component') {
+    return (
+      previousAttribute.component === newAttribute.component &&
+      Boolean(previousAttribute.repeatable) === Boolean(newAttribute.repeatable)
+    );
+  }
+
+  return true;
+};
+
+/**
  * Records an attribute rename hop in the order the user performed it, so the
  * server can replay the exact path as a data-preserving migration.
  *
  * - Only renames of fields that already exist in the database are recorded; a
  *   brand-new field (status NEW) has no data yet, so its renames are ignored.
+ * - A rename that also changes the field's type / relation / component is not
+ *   recorded (see `isStorageCompatibleRename`).
  * - Each hop (`previousName -> newName`) is appended verbatim. The recorded
  *   sequence is inherently collision-free because the CTB never allows two
  *   fields to share a name — a "swap" is expressed through the user's own
@@ -239,14 +273,19 @@ const createAttribute = (properties: Record<string, unknown>): AnyAttribute => {
 const recordRename = (
   type: ContentType | Component,
   previousAttribute: AnyAttribute,
-  newName: string
+  newAttribute: AnyAttribute
 ): void => {
   if (previousAttribute.status === 'NEW') {
     return;
   }
 
   const oldName = previousAttribute.name;
+  const newName = newAttribute?.name;
   if (!newName || oldName === newName) {
+    return;
+  }
+
+  if (!isStorageCompatibleRename(previousAttribute, newAttribute)) {
     return;
   }
 
@@ -485,7 +524,7 @@ const slice = createUndoRedoSlice(
         const previousAttribute = type.attributes[initialAttributeIndex];
 
         if (shouldRecordRename) {
-          recordRename(type, previousAttribute, (attributeToSet as AnyAttribute).name);
+          recordRename(type, previousAttribute, attributeToSet as AnyAttribute);
         }
 
         setAttributeAt(type, initialAttributeIndex, attributeToSet as AnyAttribute);
@@ -572,7 +611,7 @@ const slice = createUndoRedoSlice(
 
         setAttributeAt(type, initialAttributeIndex, attributeToSet as AnyAttribute);
         if (shouldRecordRename) {
-          recordRename(type, previousAttribute, (attributeToSet as AnyAttribute).name);
+          recordRename(type, previousAttribute, attributeToSet as AnyAttribute);
         }
       },
       reloadPlugin: () => {

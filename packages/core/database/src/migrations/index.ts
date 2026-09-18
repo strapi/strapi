@@ -6,6 +6,7 @@ import type { MigrationProvider, Migration } from './common';
 import type {
   BuiltMigrationFile,
   MigrationFileBuilder,
+  MigrationFileFormat,
   MigrationFileOperation,
 } from './file-builder';
 import type { Database } from '..';
@@ -15,6 +16,7 @@ export type {
   Migration,
   BuiltMigrationFile,
   MigrationFileBuilder,
+  MigrationFileFormat,
   MigrationFileOperation,
 };
 

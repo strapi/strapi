@@ -15,7 +15,7 @@ import isEqual from 'lodash/isEqual';
 import mapValues from 'lodash/mapValues';
 import { useIntl } from 'react-intl';
 import { useSelector, useDispatch } from 'react-redux';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { getTrad } from '../../utils/getTrad';
 import { useAutoReloadOverlayBlocker } from '../AutoReloadOverlayBlocker';
@@ -36,6 +36,7 @@ import {
 } from './RenameMigrationModal';
 import { useServerRestartWatcher } from './useServerRestartWatcher';
 import { sortContentType, stateToRequestData } from './utils/cleanData';
+import { getRenamedComponentUid } from './utils/getRenamedComponentUid';
 import { retrieveComponentsThatHaveComponents } from './utils/retrieveComponentsThatHaveComponents';
 import { retrieveNestedComponents } from './utils/retrieveNestedComponents';
 import { retrieveSpecificInfoFromComponents } from './utils/retrieveSpecificInfoFromComponents';
@@ -90,6 +91,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const state = useSelector(selectState);
   const dispatchGuidedTour = useGuidedTour('DataManagerProvider', (s) => s.dispatch);
   const location = useLocation();
+  const navigate = useNavigate();
   const { sessionId: ctbSessionId, regenerateSessionId } = useCTBSession();
 
   const {
@@ -282,6 +284,19 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
 
     const isSendingContentTypes = Object.keys(state.current.contentTypes).length > 0;
 
+    // A category or display-name change moves the component to a new uid on the
+    // server, so the page currently open under the old uid must follow it after
+    // the reload (otherwise the list view falls back to the first content type).
+    const openComponentUid = location.pathname.match(
+      /\/component-categories\/[^/]+\/([^/]+)\/?$/
+    )?.[1];
+    const openComponent = openComponentUid
+      ? state.current.components[openComponentUid as Internal.UID.Component]
+      : undefined;
+    const renamedOpenComponentUid = openComponent
+      ? getRenamedComponentUid(openComponent, initialComponents[openComponent.uid])
+      : null;
+
     lockAppWithAutoreload();
 
     try {
@@ -298,6 +313,17 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       regenerateSessionId();
       // refetch and update initial state after the data has been saved
       await getDataRef.current();
+
+      if (renamedOpenComponentUid) {
+        const [newCategory] = renamedOpenComponentUid.split('.');
+        navigate(
+          `/plugins/content-type-builder/component-categories/${newCategory}/${renamedOpenComponentUid}`,
+          {
+            replace: true,
+          }
+        );
+      }
+
       // Update the app's permissions
       await updatePermissions();
       // Refresh content-manager caches that depend on the CT/component schema.

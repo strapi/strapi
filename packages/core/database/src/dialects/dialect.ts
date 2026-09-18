@@ -1,3 +1,5 @@
+import type { Knex } from 'knex';
+
 import type { Database } from '..';
 import type { ForeignKey, Index, Schema } from '../schema';
 
@@ -75,6 +77,29 @@ export default class Dialect {
 
   canAddIncrements() {
     return true;
+  }
+
+  /**
+   * Whether indexes and constraints can be renamed in place (used by the rename
+   * migration helpers to keep index/constraint names in sync with a renamed
+   * column or table). When false, schema sync drops and recreates them by name.
+   */
+  canRenameSchemaObjects() {
+    return false;
+  }
+
+  /**
+   * Renames the index or constraint `from` on `table` to `to`, if it exists and
+   * `to` is free. Runs on the given transaction. Returns whether a rename happened.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async renameSchemaObject(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    trx: Knex,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    params: { table: string; from: string; to: string }
+  ): Promise<boolean> {
+    return false;
   }
 
   /**

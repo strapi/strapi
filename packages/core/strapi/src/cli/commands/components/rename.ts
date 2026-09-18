@@ -17,28 +17,51 @@ const listMigrationFiles = async (dir: string): Promise<Set<string>> => {
   }
 };
 
+interface RenameComponentCLIOptions {
+  displayName?: string;
+}
+
 /**
- * Moves a component to a new category (changing its uid) and generates the
- * data-preserving migration in a single step, reusing the same rename resolver
- * the Content-Type Builder admin uses.
+ * Moves a component to a new category and/or display name (either changes its
+ * uid) and generates the data-preserving migration in a single step, reusing
+ * the same rename resolver the Content-Type Builder admin uses.
  */
-const action = async (uid: string, newCategory: string) => {
+const action = async (
+  uid: string,
+  newCategory: string | undefined,
+  { displayName }: RenameComponentCLIOptions = {}
+) => {
+  if (!newCategory && !displayName) {
+    console.error(chalk.red('Provide a new category, a --display-name, or both.'));
+    process.exit(1);
+  }
+
   const appContext = await compileStrapi();
   const app = await createStrapi(appContext).load();
 
   try {
-    const migrationsDir =
-      app.db.config?.settings?.migrations?.dir ??
-      path.join(process.cwd(), 'database', 'migrations');
+    // The Content-Type Builder always writes to the app's *source* migrations
+    // dir (the database-configured dir points at build output when
+    // `useTypescriptMigrations` is enabled).
+    const migrationsDir = path.join(app.dirs.app.root, 'database', 'migrations');
 
     const before = await listMigrationFiles(migrationsDir);
 
-    await app.plugin('content-type-builder').service('schema').renameComponent(uid, newCategory);
+    await app
+      .plugin('content-type-builder')
+      .service('schema')
+      .renameComponent(uid, { category: newCategory, displayName });
 
     const after = await listMigrationFiles(migrationsDir);
     const created = [...after].filter((file) => !before.has(file));
 
-    console.log(chalk.green(`Moved component "${uid}" to category "${newCategory}".`));
+    const changes = [
+      newCategory ? `category "${newCategory}"` : null,
+      displayName ? `display name "${displayName}"` : null,
+    ]
+      .filter(Boolean)
+      .join(' and ');
+    console.log(chalk.green(`Renamed component "${uid}" to ${changes}.`));
 
     if (created.length > 0) {
       created.forEach((file) => {
@@ -59,13 +82,14 @@ const action = async (uid: string, newCategory: string) => {
 };
 
 /**
- * `$ strapi rename:component <uid> <newCategory>`
+ * `$ strapi rename:component <uid> [newCategory] [--display-name <name>]`
  */
 const command: StrapiCommand = () => {
   return createCommand('rename:component')
-    .arguments('<uid> <newCategory>')
+    .arguments('<uid> [newCategory]')
+    .option('--display-name <displayName>', 'New display name for the component')
     .description(
-      'Move a component to a new category (changing its uid) and generate a data-preserving migration'
+      'Move a component to a new category and/or display name (changing its uid) and generate a data-preserving migration'
     )
     .action(runAction('rename:component', action));
 };
