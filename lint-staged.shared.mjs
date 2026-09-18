@@ -1,6 +1,14 @@
 // @ts-check
 
 import { ESLint } from 'eslint';
+import { fileURLToPath } from 'node:url';
+
+const oxlintConfig = fileURLToPath(
+  new URL('./packages/utils/oxlint-config/oxlint.config.ts', import.meta.url)
+);
+
+const quote = (value) => `'${value.replaceAll("'", "'\\''")}'`;
+const quoteList = (list) => list.map((file) => quote(file)).join(' ');
 
 /**
  * Shared lint-staged task map, re-exported by each workspace's
@@ -8,6 +16,8 @@ import { ESLint } from 'eslint';
  *
  * lint-staged runs these with the cwd set to the package containing the matched
  * config file, so eslint resolves that package's own tsconfig / .eslintrc.cjs.
+ * Oxlint uses the central repository config but keeps the same package cwd and
+ * lintable-file set.
  *
  * Some files are intentionally excluded via a package's ESLint `ignorePatterns`
  * (e.g. `shared/**` in `@strapi/admin`, `jest.config.js` in several packages,
@@ -26,13 +36,14 @@ const config = {
     const ignored = await Promise.all(files.map((file) => eslint.isPathIgnored(file)));
     const lintable = files.filter((_file, index) => !ignored[index]);
 
-    const quote = (list) => list.map((file) => `"${file}"`).join(' ');
-
     const commands = [];
     if (lintable.length > 0) {
-      commands.push(`eslint --cache --fix --max-warnings=0 ${quote(lintable)}`);
+      commands.push(
+        `oxlint --config ${quote(oxlintConfig)} --fix --no-error-on-unmatched-pattern ${quoteList(lintable)}`
+      );
+      commands.push(`eslint --cache --fix --max-warnings=0 ${quoteList(lintable)}`);
     }
-    commands.push(`prettier --cache --write ${quote(files)}`);
+    commands.push(`prettier --cache --write ${quoteList(files)}`);
 
     return commands;
   },
