@@ -91,7 +91,9 @@ describe('Local Strapi destination uploads backup', () => {
 
     const uploadsStats = await fse.lstat(uploadsDirectory);
     expect(uploadsStats.isSymbolicLink()).toBe(true);
-    expect(await fse.realpath(uploadsDirectory)).toBe(await fse.realpath(persistentUploadsDirectory));
+    expect(await fse.realpath(uploadsDirectory)).toBe(
+      await fse.realpath(persistentUploadsDirectory)
+    );
 
     const backupDirectory = path.join(publicDirectory, provider.uploadsBackupDirectoryName);
     await expect(fse.readFile(path.join(backupDirectory, 'existing.txt'), 'utf8')).resolves.toBe(
