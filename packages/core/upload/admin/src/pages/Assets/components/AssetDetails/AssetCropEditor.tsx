@@ -12,7 +12,7 @@ import {
   Portal,
   Typography,
 } from '@strapi/design-system';
-import { ArrowsHorizontal, ArrowsVertical, Crop, Link } from '@strapi/icons';
+import { ArrowClockwise, ArrowsHorizontal, ArrowsVertical, Crop, Link } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled, useTheme } from 'styled-components';
 
@@ -33,10 +33,12 @@ const HANDLE_PX = 12;
  * Styled
  * -----------------------------------------------------------------------------------------------*/
 
-// Full-viewport takeover with a small inset so the editor reads as a card.
+// Full-viewport takeover with a small inset so the editor reads as a card. It sits
+// below the tooltip layer so the header buttons' tooltips, which portal to the body,
+// are not covered by it — and above notifications, which it does take over.
 const Overlay = styled(Flex)`
   position: fixed;
-  z-index: 1200;
+  z-index: ${({ theme }) => theme.zIndices.tooltip - 100};
   flex-direction: column;
   top: ${({ theme }) => theme.spaces[1]};
   left: ${({ theme }) => theme.spaces[1]};
@@ -47,6 +49,19 @@ const Overlay = styled(Flex)`
   background: ${({ theme }) => theme.colors.neutral0};
   /* Focused programmatically on open (tabIndex -1) — no visible ring needed. */
   outline: none;
+`;
+
+// Stacked over the editor content, top right. Above the crop area so the buttons stay
+// clickable where the image runs under them.
+const RotateControls = styled(Flex)`
+  position: absolute;
+  top: ${({ theme }) => theme.spaces[3]};
+  right: ${({ theme }) => theme.spaces[3]};
+  z-index: 1;
+`;
+
+const RotateLeftIcon = styled(ArrowClockwise)`
+  transform: scaleX(-1);
 `;
 
 const HeaderBar = styled(Flex)`
@@ -81,11 +96,17 @@ const Body = styled(Box)`
 // Wrapper sized to the image's natural aspect ratio so the <img> inside fills
 // it without letterboxing. Percentage-based positioning of the crop overlay
 // then maps directly to natural-px coordinates.
-const CropArea = styled.div<{ $aspect?: number }>`
+const CropArea = styled.div<{ $aspect?: number; $rotation?: number }>`
   position: relative;
   max-width: 100%;
   max-height: 100%;
   ${({ $aspect }) => ($aspect ? `aspect-ratio: ${$aspect};` : '')}
+
+  /**
+   * A definite height, because on a quarter turn the image is taken out of flow and
+   * this flex item would otherwise have no in-flow content left to size it.
+   */
+  ${({ $rotation }) => ($rotation === 90 || $rotation === 270 ? 'height: 100%;' : '')}
 
   img {
     display: block;
@@ -288,6 +309,8 @@ export const AssetCropEditor = ({
     setCropPosition,
     setAspectRatio,
     produceFile,
+    rotation,
+    rotate,
     width,
     height,
   } = useCropImg();
@@ -295,6 +318,13 @@ export const AssetCropEditor = ({
   const [aspectLocked, setAspectLocked] = React.useState(false);
   // Focal point as a percentage of the crop area (matches the {x,y} contract).
   const [focal, setFocal] = React.useState<FocalPoint>(asset.focalPoint ?? { x: 50, y: 50 });
+
+  const handleRotate = (direction: 'left' | 'right') => {
+    rotate(direction);
+    setFocal((prev) =>
+      direction === 'right' ? { x: 100 - prev.y, y: prev.x } : { x: prev.y, y: 100 - prev.x }
+    );
+  };
 
   // The crop editor reads pixels from a canvas (useCropImg -> toBlob), so its
   // <img> must be CORS-clean and always sets crossOrigin="anonymous" (see the
@@ -315,6 +345,38 @@ export const AssetCropEditor = ({
     cacheKey !== undefined
       ? `${rawImageUrl}${rawImageUrl.includes('?') ? '&' : '?'}updatedAt=${cacheKey}`
       : rawImageUrl;
+
+  /**
+   * Applied inline rather than through the styled component: the admin's global
+   * `img { max-width: 100% }` reset would otherwise clamp the reciprocal sizing and
+   * square the image off. A half turn keeps the aspect, so it only spins; a quarter
+   * turn swaps it, and the image is laid out against the container's other axis
+   * before being turned into place.
+   */
+  const rotatedImageStyle = React.useMemo((): React.CSSProperties | undefined => {
+    if (!rotation) return undefined;
+
+    const isQuarterTurn = rotation === 90 || rotation === 270;
+    const aspect =
+      naturalSize.width && naturalSize.height ? naturalSize.width / naturalSize.height : undefined;
+
+    // A half turn keeps the aspect, so the image stays in flow and only spins. Taking
+    // it out of flow there would collapse the crop area, which is sized by it.
+    if (!isQuarterTurn || !aspect) {
+      return { transform: `rotate(${rotation}deg)` };
+    }
+
+    return {
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      maxWidth: 'none',
+      maxHeight: 'none',
+      width: `${100 / aspect}%`,
+      height: `${100 * aspect}%`,
+      transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
+    };
+  }, [rotation, naturalSize.width, naturalSize.height]);
 
   const handleImageLoad = () => {
     if (imgRef.current) {
@@ -521,8 +583,30 @@ export const AssetCropEditor = ({
           </HeaderBar>
 
           <Body>
+            <RotateControls direction="column" gap={1}>
+              <IconButton
+                onClick={() => handleRotate('right')}
+                label={formatMessage({
+                  id: getTranslationKey('asset-details.crop.rotate-right'),
+                  defaultMessage: 'Rotate right',
+                })}
+              >
+                <ArrowClockwise />
+              </IconButton>
+              <IconButton
+                onClick={() => handleRotate('left')}
+                label={formatMessage({
+                  id: getTranslationKey('asset-details.crop.rotate-left'),
+                  defaultMessage: 'Rotate left',
+                })}
+              >
+                <RotateLeftIcon />
+              </IconButton>
+            </RotateControls>
+
             <CropArea
               ref={cropAreaRef}
+              $rotation={rotation}
               $aspect={
                 naturalSize.width && naturalSize.height
                   ? naturalSize.width / naturalSize.height
@@ -531,6 +615,8 @@ export const AssetCropEditor = ({
             >
               <img
                 ref={imgRef}
+                data-testid="crop-editor-image"
+                style={rotatedImageStyle}
                 src={imageUrl}
                 alt={asset.name}
                 // Always anonymous, unlike AssetPreview/AssetsGrid which gate it:

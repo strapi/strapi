@@ -45,6 +45,8 @@
   "asset-details.download.error": "Failed to download the file.",
   "asset-details.crop.trigger": "Crop",
   "asset-details.crop.title": "Crop & Focus area",
+  "asset-details.crop.rotate-left": "Rotate left",
+  "asset-details.crop.rotate-right": "Rotate right",
   "asset-details.crop.hint": "Set the crop area with the rectangle. Pin the always-visible area with the circle.",
   "asset-details.crop.width": "Width (px)",
   "asset-details.crop.height": "Height (px)",
