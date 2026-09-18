@@ -52,6 +52,11 @@ const labelModel = {
       relation: 'oneToMany',
       target: 'api::tag.tag',
     },
+    images: {
+      type: 'media',
+      multiple: true,
+      allowedTypes: ['images'],
+    },
   },
   singularName: 'label',
   pluralName: 'labels',
@@ -138,5 +143,6 @@ describe('GraphQL list item nullability', () => {
     expectNonNullListItems(findField(types, 'requiredColors').type, { listRequired: true });
     expectNonNullListItems(findField(types, 'palette').type, { listRequired: false });
     expectNonNullListItems(findField(types, 'tags').type, { listRequired: true });
+    expectNonNullListItems(findField(types, 'images').type, { listRequired: true });
   });
 });
