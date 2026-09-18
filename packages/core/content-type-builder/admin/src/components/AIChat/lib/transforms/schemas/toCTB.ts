@@ -4,9 +4,110 @@ import pluralize from 'pluralize';
 
 import { applyPrivateSearchDefault } from '../../../../../utils/applyPrivateSearchDefault';
 
-import type { ContentType, Component, AnyAttribute } from '../../../../../types';
+import type { ContentType, Component, AnyAttribute, RenameHop } from '../../../../../types';
 import type { Schema, SchemaAttribute } from '../../types/schema';
 import type { Struct, UID } from '@strapi/types';
+
+const RENAME_METADATA_KEYS = ['previousName', 'renamedFrom', 'action'] as const;
+
+const collectExplicitAttributeRenames = (
+  attributes: Schema['attributes']
+): { renames: RenameHop[]; attributes: Schema['attributes'] } => {
+  const renames: RenameHop[] = [];
+  const sanitizedAttributes = { ...attributes };
+
+  Object.entries(attributes).forEach(([newName, rawAttr]) => {
+    if (!rawAttr || typeof rawAttr !== 'object') {
+      return;
+    }
+
+    const previousName = rawAttr.previousName ?? rawAttr.renamedFrom;
+    if (typeof previousName !== 'string' || !previousName || previousName === newName) {
+      return;
+    }
+
+    renames.push({ oldName: previousName, newName });
+    sanitizedAttributes[newName] = omit(rawAttr, RENAME_METADATA_KEYS) as SchemaAttribute;
+  });
+
+  return { renames, attributes: sanitizedAttributes };
+};
+
+/**
+ * A rename can only preserve data when the field keeps its storage: same type,
+ * and for relations the same kind and target, for components the same component
+ * and repeatable flag. Anything else must go through the regular remove + add
+ * path (renaming the column and altering its type in place can fail at startup),
+ * so such hops are dropped and the field is treated as removed + added.
+ */
+const isStorageCompatibleRename = (
+  oldAttribute: AnyAttribute | undefined,
+  newAttribute: SchemaAttribute | undefined
+): boolean => {
+  if (!oldAttribute || !newAttribute) {
+    return true;
+  }
+
+  const previous = oldAttribute as Record<string, unknown>;
+  const next = newAttribute as Record<string, unknown>;
+
+  if (previous.type !== next.type) {
+    return false;
+  }
+
+  if (next.type === 'relation') {
+    return previous.relation === next.relation && previous.target === next.target;
+  }
+
+  if (next.type === 'component') {
+    return (
+      previous.component === next.component &&
+      Boolean(previous.repeatable) === Boolean(next.repeatable)
+    );
+  }
+
+  return true;
+};
+
+const dedupeRenames = (renames: RenameHop[]): RenameHop[] => {
+  const seen = new Set<string>();
+
+  return renames.filter((hop) => {
+    const key = `${hop.oldName}->${hop.newName}`;
+    if (seen.has(key)) {
+      return false;
+    }
+
+    seen.add(key);
+    return true;
+  });
+};
+
+const applyExplicitRenames = (
+  processedAttributes: AnyAttribute[],
+  removedAttributes: AnyAttribute[],
+  explicitRenames: RenameHop[]
+): { processedAttributes: AnyAttribute[]; removedAttributes: AnyAttribute[] } => {
+  if (explicitRenames.length === 0) {
+    return { processedAttributes, removedAttributes };
+  }
+
+  const consumedRemoved = new Set(
+    explicitRenames.map((hop) => hop.oldName).filter((oldName) => oldName)
+  );
+
+  explicitRenames.forEach((hop) => {
+    const newAttr = processedAttributes.find((attr) => attr.name === hop.newName);
+    if (newAttr && newAttr.status === 'NEW') {
+      newAttr.status = 'CHANGED';
+    }
+  });
+
+  return {
+    processedAttributes,
+    removedAttributes: removedAttributes.filter((attr) => !consumedRemoved.has(attr.name)),
+  };
+};
 
 const isPluginContentTypeUid = (uid: string) => uid.startsWith('plugin::');
 
@@ -99,19 +200,33 @@ const transformStatusFromChatToCTB = (
   return oldSchema.status;
 };
 
+type TransformAttributesResult = {
+  attributes: AnyAttribute[];
+  renames: RenameHop[];
+};
+
 /**
- * Transform attributes from Chat format to CTB format
- * Also performs a diff to determine the status of each attribute
+ * Transform attributes from Chat format to CTB format while collecting rename metadata.
+ * Also performs a diff to determine the status of each attribute. Renames are only
+ * taken from explicit metadata the AI provides (`previousName` / `renamedFrom`, or a
+ * top-level `renames` array), never inferred from a remove/add diff, so data is never
+ * moved unless a rename was explicitly requested.
  */
-export const transformAttributesFromChatToCTB = (
-  { action, attributes }: Schema,
+const transformAttributesAndRenamesFromChatToCTB = (
+  { action, attributes: rawAttributes, renames: schemaRenames = [] }: Schema,
   oldSchema?: ContentType | Component
-): AnyAttribute[] => {
+): TransformAttributesResult => {
+  const { attributes, renames: explicitAttributeRenames } =
+    collectExplicitAttributeRenames(rawAttributes);
+
   // If it's a new schema or no oldAttributes provided, all attributes are NEW
   if (action === 'create' || !oldSchema) {
-    return Object.entries(attributes).map(([name, attribute]) =>
-      createAttributeWithStatus(name, attribute, 'NEW')
-    );
+    return {
+      attributes: Object.entries(attributes).map(([name, attribute]) =>
+        createAttributeWithStatus(name, attribute, 'NEW')
+      ),
+      renames: [],
+    };
   }
 
   // Convert old attributes array to a lookup map for faster access
@@ -120,10 +235,26 @@ export const transformAttributesFromChatToCTB = (
     {} as Record<string, AnyAttribute>
   );
 
+  // Only renames that keep the field's storage can be replayed as a migration;
+  // the rest fall back to remove + add.
+  const compatibleRenames = [...schemaRenames, ...explicitAttributeRenames].filter((hop) =>
+    isStorageCompatibleRename(oldAttributesMap[hop.oldName], attributes[hop.newName])
+  );
+  const compatibleAttributeRenames = explicitAttributeRenames.filter((hop) =>
+    compatibleRenames.includes(hop)
+  );
+
+  const explicitOldNames = new Set(compatibleAttributeRenames.map((hop) => hop.oldName));
+
   // Process current attributes (new and changed)
   const processedAttributes = Object.entries(attributes).map(([name, attr]) => {
     const oldAttr = oldAttributesMap[name];
-    const status = determineAttributeStatus({ ...attr, name }, oldAttr, oldSchema);
+    const explicitRename = compatibleAttributeRenames.find((hop) => hop.newName === name);
+    const status = explicitRename
+      ? oldSchema.status === 'NEW'
+        ? 'NEW'
+        : 'CHANGED'
+      : determineAttributeStatus({ ...attr, name }, oldAttr, oldSchema);
 
     return createAttributeWithStatus(name, attr, status);
   });
@@ -131,17 +262,38 @@ export const transformAttributesFromChatToCTB = (
   // No need to mark removed attributes if the old schema is new, just remove it from the list
   // TODO: Else a validation error occurs on the backend side.
   if (oldSchema?.status === 'NEW') {
-    return processedAttributes;
+    return { attributes: processedAttributes, renames: [] };
   }
 
   // Find removed attributes (exist in old but not in new)
   const removedAttributes = Object.entries(oldAttributesMap)
-    .filter(([name]) => !attributes[name])
+    .filter(([name]) => !attributes[name] && !explicitOldNames.has(name))
     .map(([name, oldAttr]) => createAttributeWithStatus(name, oldAttr, 'REMOVED'));
 
+  const reconciled = applyExplicitRenames(
+    processedAttributes,
+    removedAttributes,
+    compatibleRenames
+  );
+
   // Combine both sets of attributes
-  return [...processedAttributes, ...removedAttributes];
+  const combinedAttributes = [...reconciled.processedAttributes, ...reconciled.removedAttributes];
+
+  return {
+    attributes: combinedAttributes,
+    renames: dedupeRenames(compatibleRenames),
+  };
 };
+
+/**
+ * Transform attributes from Chat format to CTB format.
+ *
+ * Keep the existing array return type for callers that only need attributes.
+ */
+export const transformAttributesFromChatToCTB = (
+  schema: Schema,
+  oldSchema?: ContentType | Component
+): AnyAttribute[] => transformAttributesAndRenamesFromChatToCTB(schema, oldSchema).attributes;
 
 /**
  * Transform schema format
@@ -157,12 +309,15 @@ export const transformChatToCTB = (
 ): ContentType | Component => {
   const singularName = pluralize.singular(schema.name).toLowerCase().replace(/ /g, '-');
   const pluralName = pluralize.plural(schema.name).toLowerCase().replace(/ /g, '-');
+  const { attributes, renames } = transformAttributesAndRenamesFromChatToCTB(schema, oldSchema);
+  const renamePayload = renames.length > 0 ? { renames } : {};
 
   if (schema.modelType === 'component') {
     return {
       category: schema.category || 'default',
       modelName: singularName,
-      attributes: transformAttributesFromChatToCTB(schema, oldSchema),
+      attributes,
+      ...renamePayload,
       info: {
         displayName: schema.name,
         description: schema.description,
@@ -193,7 +348,8 @@ export const transformChatToCTB = (
       pluralName: previousContentType?.info.pluralName ?? pluralName,
     },
     collectionName: pluralName,
-    attributes: transformAttributesFromChatToCTB(schema, oldSchema),
+    attributes,
+    ...renamePayload,
     options: {
       draftAndPublish: schema.options?.draftAndPublish ?? true,
     },

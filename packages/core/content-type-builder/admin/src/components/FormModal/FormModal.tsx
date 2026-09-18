@@ -165,6 +165,7 @@ export const FormModal = () => {
     updateComponentSchema,
     updateComponentUid,
     reservedNames,
+    confirmAttributeRenameMigration,
   } = useDataManager();
 
   const {
@@ -557,6 +558,25 @@ export const FormModal = () => {
     try {
       await checkFormValidity();
 
+      let recordRename = true;
+      if (
+        actionType === 'edit' &&
+        (isCreatingAttribute || isCreatingCustomFieldAttribute) &&
+        toStringValue(initialData.name) !== toStringValue(modifiedData.name)
+      ) {
+        const decision = await confirmAttributeRenameMigration({
+          uid: targetUid,
+          oldName: toStringValue(initialData.name),
+          newName: toStringValue(modifiedData.name),
+        });
+
+        if (decision === null) {
+          return;
+        }
+
+        recordRename = decision;
+      }
+
       dispatch(
         actions.setErrors({
           errors: {},
@@ -641,6 +661,7 @@ export const FormModal = () => {
             data: {
               icon: toOptionalStringValue(modifiedData.icon),
               displayName: toStringValue(modifiedData.displayName),
+              category: toStringValue(modifiedData.category),
             },
             componentUID: targetUid as Internal.UID.Component,
           });
@@ -672,6 +693,7 @@ export const FormModal = () => {
           forTarget,
           targetUid,
           name: toStringValue(initialData.name),
+          recordRename,
         };
 
         if (actionType === 'edit') {
@@ -707,6 +729,7 @@ export const FormModal = () => {
               forTarget,
               targetUid,
               name: toStringValue(initialData.name),
+              recordRename,
             });
           }
 
@@ -739,6 +762,7 @@ export const FormModal = () => {
               forTarget,
               targetUid,
               name: toStringValue(initialData.name),
+              recordRename,
             });
           }
 
@@ -803,6 +827,7 @@ export const FormModal = () => {
             forTarget,
             targetUid,
             name: toStringValue(initialData.name),
+            recordRename,
           });
         }
 

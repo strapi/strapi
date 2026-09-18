@@ -4,15 +4,18 @@ import createSchemaBuilder from './builder';
 import createSchemaDiff from './diff';
 import createSchemaStorage from './storage';
 import { metadataToSchema } from './schema';
+import { createRenameHelpers } from './rename-helpers';
 
 import type { Schema, SchemaDiff } from './types';
+import type { RenameHelpers } from './rename-helpers';
 import type { Database } from '..';
 
 export type * from './types';
+export type { RenameHelpers } from './rename-helpers';
 
 const debug = createDebug('strapi::database');
 
-export interface SchemaProvider {
+export interface SchemaProvider extends RenameHelpers {
   builder: ReturnType<typeof createSchemaBuilder>;
   schemaDiff: ReturnType<typeof createSchemaDiff>;
   schemaStorage: ReturnType<typeof createSchemaStorage>;
@@ -43,6 +46,10 @@ export const createSchemaProvider = (db: Database): SchemaProvider => {
     builder: createSchemaBuilder(db),
     schemaDiff: createSchemaDiff(db),
     schemaStorage: createSchemaStorage(db),
+
+    // Guarded, logged runtime helpers for generated rename migrations
+    // (`db.schema.renameColumn(knex, …)` etc.). See rename-helpers.ts.
+    ...createRenameHelpers({ db }),
 
     /**
      * Drops the database schema

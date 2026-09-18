@@ -162,6 +162,136 @@ describe('transformChatToCTB', () => {
     });
   });
 
+  describe('rename migration compatibility', () => {
+    const oldSchema: ContentType = {
+      uid: 'api::article.article' as UID.ContentType,
+      modelType: 'contentType',
+      kind: 'collectionType',
+      modelName: 'article',
+      collectionName: 'articles',
+      globalId: 'Article',
+      visible: true,
+      status: 'UNCHANGED',
+      restrictRelationsTo: null,
+      info: {
+        displayName: 'Article',
+        singularName: 'article',
+        pluralName: 'articles',
+      },
+      options: { draftAndPublish: true },
+      pluginOptions: { i18n: { localized: false } },
+      attributes: [
+        { name: 'title', type: 'string', required: true, status: 'UNCHANGED' },
+        { name: 'body', type: 'blocks', status: 'UNCHANGED' },
+      ],
+    };
+
+    it('does not infer a rename when the AI replaces one field with another of the same config', () => {
+      // Renames must be explicit: a same-config delete+add is treated as a
+      // remove and an add, never silently as a data-moving rename.
+      const schema = makeSchema({
+        uid: 'api::article.article',
+        name: 'Article',
+        action: 'update',
+        attributes: {
+          heading: { type: 'string', required: true },
+          body: { type: 'blocks' },
+        },
+      });
+
+      const result = transformChatToCTB(schema, oldSchema) as ContentType;
+
+      expect(result.renames).toBeUndefined();
+      expect(result.attributes).toEqual([
+        { name: 'heading', type: 'string', required: true, status: 'NEW' },
+        { name: 'body', type: 'blocks', status: 'UNCHANGED' },
+        { name: 'title', type: 'string', required: true, status: 'REMOVED' },
+      ]);
+    });
+
+    it('uses explicit schema-level renames when provided by the AI server', () => {
+      const schema = makeSchema({
+        uid: 'api::article.article',
+        name: 'Article',
+        action: 'update',
+        renames: [{ oldName: 'title', newName: 'heading' }],
+        attributes: {
+          heading: { type: 'string', required: true },
+          body: { type: 'blocks' },
+        },
+      });
+
+      const result = transformChatToCTB(schema, oldSchema) as ContentType;
+
+      expect(result.renames).toEqual([{ oldName: 'title', newName: 'heading' }]);
+    });
+
+    it('uses attribute-level previousName metadata when provided', () => {
+      const schema = makeSchema({
+        uid: 'api::article.article',
+        name: 'Article',
+        action: 'update',
+        attributes: {
+          heading: { type: 'string', required: true, previousName: 'title' },
+          body: { type: 'blocks' },
+        },
+      });
+
+      const result = transformChatToCTB(schema, oldSchema) as ContentType;
+
+      expect(result.renames).toEqual([{ oldName: 'title', newName: 'heading' }]);
+      expect(result.attributes).toEqual([
+        { name: 'heading', type: 'string', required: true, status: 'CHANGED' },
+        { name: 'body', type: 'blocks', status: 'UNCHANGED' },
+      ]);
+    });
+
+    it('drops an explicit rename whose type also changed (falls back to remove + add)', () => {
+      // title (string) -> views (integer): the column cannot simply be renamed,
+      // so no rename is forwarded and the field is treated as removed + added.
+      const schema = makeSchema({
+        uid: 'api::article.article',
+        name: 'Article',
+        action: 'update',
+        renames: [{ oldName: 'title', newName: 'views' }],
+        attributes: {
+          views: { type: 'integer', previousName: 'title' },
+          body: { type: 'blocks' },
+        },
+      });
+
+      const result = transformChatToCTB(schema, oldSchema) as ContentType;
+
+      expect(result.renames).toBeUndefined();
+      expect(result.attributes).toEqual([
+        { name: 'views', type: 'integer', status: 'NEW' },
+        { name: 'body', type: 'blocks', status: 'UNCHANGED' },
+        { name: 'title', type: 'string', required: true, status: 'REMOVED' },
+      ]);
+    });
+
+    it('does not treat delete+add with different configs as a rename', () => {
+      const schema = makeSchema({
+        uid: 'api::article.article',
+        name: 'Article',
+        action: 'update',
+        attributes: {
+          summary: { type: 'text' },
+          body: { type: 'blocks' },
+        },
+      });
+
+      const result = transformChatToCTB(schema, oldSchema) as ContentType;
+
+      expect(result.renames).toBeUndefined();
+      expect(result.attributes).toEqual([
+        { name: 'summary', type: 'text', status: 'NEW' },
+        { name: 'body', type: 'blocks', status: 'UNCHANGED' },
+        { name: 'title', type: 'string', required: true, status: 'REMOVED' },
+      ]);
+    });
+  });
+
   describe('kind fallback', () => {
     it('keeps a valid content-type kind', () => {
       const result = transformChatToCTB(makeSchema({ kind: 'singleType' })) as ContentType;

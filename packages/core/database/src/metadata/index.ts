@@ -8,9 +8,12 @@ import {
   isManyToAny,
 } from './relations';
 import { Metadata, Meta } from './metadata';
+import { attributeNaming } from './attribute-naming';
+import type { AttributeNaming } from './attribute-naming';
 import type { Model } from '../types';
 
-export type { Metadata, Meta };
+export type { Metadata, Meta, AttributeNaming };
+export { attributeNaming };
 export {
   isPolymorphic,
   isBidirectional,

@@ -28,3 +28,25 @@ export default {
   async down(knex: Knex, db: Database): void {},
 };
 ```
+
+## User migrations
+
+User migrations live in the application's `database/migrations` directory (or `<outDir>/database/migrations` when `database.settings.useTypescriptMigrations` is enabled, in which case the compiled output is discovered). They run before schema sync, inside a transaction, and receive `(knex, db)` where `db` is the `Database` instance.
+
+### File ordering
+
+Discovery lists `*.js` and `*.sql` files in the migrations directory (non-recursively) and runs them **sorted by file name**. There is no other ordering mechanism, so the file name prefix decides the order.
+
+`strapi generate migration` names files `YYYY.MM.DDTHH.mm.ss.<name>.<js|ts>` (see `packages/generators/generators/src/plops/utils/get-formatted-date.ts`).
+
+### Generated rename migrations
+
+When a field or component is renamed in the Content-Type Builder, a migration named `YYYY.MM.DDTHH.mm.ss.SSS.rename-fields.<js|ts>` is written to the app's source `database/migrations` directory (`packages/core/database/src/migrations/file-builder.ts`). The prefix is the same shape as the generator's, with milliseconds appended and expressed in **UTC**, so:
+
+- generated files interleave predictably with hand-written ones by timestamp;
+- two saves within the same second do not collide;
+- developers in different time zones produce files that sort in creation order.
+
+Within the same second, a generated file (whose next characters are millisecond digits) sorts before a hand-written file whose name starts with a letter. To interleave your own migration deterministically with a generated one, use the same timestamp prefix and pick a later time.
+
+The generated file only calls the guarded helpers on `db.schema` (`renameColumn`, `renameTable`, `updateRows` — see `packages/core/database/src/schema/rename-helpers.ts`). Each helper checks that the source exists and the target does not before doing anything, so the file is a safe no-op on a fresh database. Skipped steps are logged: at `info` level when the source is missing (expected on a fresh database) and at `warn` level when the target already exists (the environment drifted and the rename was not applied).

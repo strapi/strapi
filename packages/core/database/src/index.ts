@@ -4,9 +4,18 @@ import path from 'node:path';
 
 import { Dialect, getDialect } from './dialects';
 import { createSchemaProvider, SchemaProvider } from './schema';
-import { createMetadata, Metadata } from './metadata';
+import { createMetadata, Metadata, attributeNaming } from './metadata';
+import type { AttributeNaming } from './metadata';
 import { createEntityManager, EntityManager } from './entity-manager';
-import { createMigrationsProvider, MigrationProvider, type Migration } from './migrations';
+import {
+  createMigrationsProvider,
+  MigrationProvider,
+  type Migration,
+  type BuiltMigrationFile,
+  type MigrationFileBuilder,
+  type MigrationFileFormat,
+  type MigrationFileOperation,
+} from './migrations';
 import { createLifecyclesProvider, LifecycleProvider } from './lifecycles';
 import type { Event } from './lifecycles';
 import { createConnection } from './connection';
@@ -19,6 +28,7 @@ import { createRepairManager, type RepairManager } from './repairs';
 
 export { isKnexQuery } from './utils/knex';
 export { isDatabaseClientKind } from './connection';
+export { attributeNaming };
 
 interface Settings {
   forceMigration?: boolean;
@@ -273,4 +283,15 @@ class Database {
 }
 
 export { Database, errors };
-export type { Model, JoinTable, Identifiers, Migration, Event };
+export type {
+  Model,
+  JoinTable,
+  Identifiers,
+  AttributeNaming,
+  Migration,
+  BuiltMigrationFile,
+  MigrationFileBuilder,
+  MigrationFileFormat,
+  MigrationFileOperation,
+  Event,
+};

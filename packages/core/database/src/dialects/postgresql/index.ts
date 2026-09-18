@@ -1,3 +1,5 @@
+import type { Knex } from 'knex';
+
 import * as errors from '../../errors';
 import type { Database } from '../..';
 import Dialect from '../dialect';
@@ -48,6 +50,58 @@ export default class PostgresDialect extends Dialect {
   }
 
   usesForeignKeys() {
+    return true;
+  }
+
+  canRenameSchemaObjects() {
+    return true;
+  }
+
+  async renameSchemaObject(
+    trx: Knex,
+    { table, from, to }: { table: string; from: string; to: string }
+  ): Promise<boolean> {
+    const hasConstraint = async (name: string): Promise<boolean> => {
+      const result = await trx.raw(
+        `SELECT 1
+         FROM pg_constraint c
+         JOIN pg_class t ON t.oid = c.conrelid
+         JOIN pg_namespace n ON n.oid = t.relnamespace
+         WHERE n.nspname = current_schema() AND t.relname = ? AND c.conname = ?
+         LIMIT 1`,
+        [table, name]
+      );
+      return result.rows.length > 0;
+    };
+
+    const hasIndex = async (name: string): Promise<boolean> => {
+      const result = await trx.raw(
+        `SELECT 1
+         FROM pg_indexes
+         WHERE schemaname = current_schema() AND tablename = ? AND indexname = ?
+         LIMIT 1`,
+        [table, name]
+      );
+      return result.rows.length > 0;
+    };
+
+    const isConstraint = await hasConstraint(from);
+    if (!isConstraint && !(await hasIndex(from))) {
+      return false;
+    }
+
+    if ((await hasConstraint(to)) || (await hasIndex(to))) {
+      return false;
+    }
+
+    // Unique and foreign-key constraints back their index with the same name;
+    // renaming the constraint renames that index too.
+    if (isConstraint) {
+      await trx.raw('ALTER TABLE ?? RENAME CONSTRAINT ?? TO ??', [table, from, to]);
+    } else {
+      await trx.raw('ALTER INDEX ?? RENAME TO ??', [from, to]);
+    }
+
     return true;
   }
 

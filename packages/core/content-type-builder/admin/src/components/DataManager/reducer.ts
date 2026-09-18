@@ -125,6 +125,7 @@ type EditAttributePayload = {
   forTarget: Struct.ModelType;
   targetUid: string;
   name: string;
+  recordRename?: boolean;
 };
 
 type EditCustomFieldAttributePayload = {
@@ -132,6 +133,7 @@ type EditCustomFieldAttributePayload = {
   forTarget: Struct.ModelType;
   targetUid: string;
   name: string;
+  recordRename?: boolean;
 };
 
 type RemoveComponentFromDynamicZonePayload = {
@@ -151,6 +153,7 @@ type UpdateComponentSchemaPayload = {
   data: {
     icon?: string;
     displayName: string;
+    category?: string;
   };
   uid: Internal.UID.Component;
 };
@@ -220,6 +223,77 @@ const createAttribute = (properties: Record<string, unknown>): AnyAttribute => {
     ...applyPrivateSearchDefault(properties),
     status: 'NEW',
   } as AnyAttribute;
+};
+
+/**
+ * Whether `newAttribute` keeps the storage of `previousAttribute`, i.e. whether
+ * renaming the underlying database artifact is enough to carry the data over.
+ * A type change (or a relation retargeted, or a component swapped) must go
+ * through the regular drop-and-recreate path: renaming the column and letting
+ * schema sync alter its type in place can fail at startup on Postgres/MySQL.
+ */
+const isStorageCompatibleRename = (
+  previousAttribute: AnyAttribute,
+  newAttribute: AnyAttribute
+): boolean => {
+  if (previousAttribute.type !== newAttribute.type) {
+    return false;
+  }
+
+  if (previousAttribute.type === 'relation' && newAttribute.type === 'relation') {
+    return (
+      previousAttribute.relation === newAttribute.relation &&
+      previousAttribute.target === newAttribute.target
+    );
+  }
+
+  if (previousAttribute.type === 'component' && newAttribute.type === 'component') {
+    return (
+      previousAttribute.component === newAttribute.component &&
+      Boolean(previousAttribute.repeatable) === Boolean(newAttribute.repeatable)
+    );
+  }
+
+  return true;
+};
+
+/**
+ * Records an attribute rename hop in the order the user performed it, so the
+ * server can replay the exact path as a data-preserving migration.
+ *
+ * - Only renames of fields that already exist in the database are recorded; a
+ *   brand-new field (status NEW) has no data yet, so its renames are ignored.
+ * - A rename that also changes the field's type / relation / component is not
+ *   recorded (see `isStorageCompatibleRename`).
+ * - Each hop (`previousName -> newName`) is appended verbatim. The recorded
+ *   sequence is inherently collision-free because the CTB never allows two
+ *   fields to share a name — a "swap" is expressed through the user's own
+ *   intermediate-name hop, so no synthetic temp column is ever needed.
+ */
+const recordRename = (
+  type: ContentType | Component,
+  previousAttribute: AnyAttribute,
+  newAttribute: AnyAttribute
+): void => {
+  if (previousAttribute.status === 'NEW') {
+    return;
+  }
+
+  const oldName = previousAttribute.name;
+  const newName = newAttribute?.name;
+  if (!newName || oldName === newName) {
+    return;
+  }
+
+  if (!isStorageCompatibleRename(previousAttribute, newAttribute)) {
+    return;
+  }
+
+  if (!type.renames) {
+    type.renames = [];
+  }
+
+  type.renames.push({ oldName, newName });
 };
 
 const setAttributeAt = (type: ContentType | Component, index: number, attribute: AnyAttribute) => {
@@ -431,7 +505,13 @@ const slice = createUndoRedoSlice(
         attr.components = updatedComponents;
       },
       editAttribute: (state, action: PayloadAction<EditAttributePayload>) => {
-        const { name, attributeToSet, forTarget, targetUid } = action.payload;
+        const {
+          name,
+          attributeToSet,
+          forTarget,
+          targetUid,
+          recordRename: shouldRecordRename = true,
+        } = action.payload;
 
         const type = getType(state, { forTarget, targetUid });
 
@@ -442,6 +522,10 @@ const slice = createUndoRedoSlice(
         }
 
         const previousAttribute = type.attributes[initialAttributeIndex];
+
+        if (shouldRecordRename) {
+          recordRename(type, previousAttribute, attributeToSet as AnyAttribute);
+        }
 
         setAttributeAt(type, initialAttributeIndex, attributeToSet as AnyAttribute);
 
@@ -511,14 +595,24 @@ const slice = createUndoRedoSlice(
         }
       },
       editCustomFieldAttribute: (state, action: PayloadAction<EditCustomFieldAttributePayload>) => {
-        const { forTarget, targetUid, name, attributeToSet } = action.payload;
+        const {
+          forTarget,
+          targetUid,
+          name,
+          attributeToSet,
+          recordRename: shouldRecordRename = true,
+        } = action.payload;
 
         const initialAttributeName = name;
         const type = getType(state, { forTarget, targetUid });
 
         const initialAttributeIndex = findAttributeIndex(type, initialAttributeName);
+        const previousAttribute = type.attributes[initialAttributeIndex];
 
         setAttributeAt(type, initialAttributeIndex, attributeToSet as AnyAttribute);
+        if (shouldRecordRename) {
+          recordRename(type, previousAttribute, attributeToSet as AnyAttribute);
+        }
       },
       reloadPlugin: () => {
         return initialState;
@@ -590,6 +684,11 @@ const slice = createUndoRedoSlice(
             displayName: data.displayName,
             icon: data.icon,
           },
+          // A component's category is part of its uid (`<category>.<name>`), so a
+          // category change is a component-level rename. Persist it here so it is
+          // serialized on save; the server derives the new uid and generates a
+          // data-preserving migration for the `component_type` references.
+          ...(data.category ? { category: data.category } : {}),
         });
       },
       updateComponentUid: (state, action: PayloadAction<UpdateComponentUIDPayload>) => {
