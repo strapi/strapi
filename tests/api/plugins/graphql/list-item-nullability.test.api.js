@@ -52,6 +52,15 @@ const labelModel = {
       relation: 'oneToMany',
       target: 'api::tag.tag',
     },
+    genericItems: {
+      type: 'relation',
+      relation: 'morphToMany',
+    },
+    restrictedItems: {
+      type: 'relation',
+      relation: 'morphToMany',
+      target: ['api::tag.tag', 'api::label.label'],
+    },
     images: {
       type: 'media',
       multiple: true,
@@ -65,12 +74,16 @@ const labelModel = {
   collectionName: '',
 };
 
-const findField = (types, fieldName) => {
-  const owner = types.find((type) => type.fields?.some((field) => field.name === fieldName));
+const findField = (types, typeName, fieldName) => {
+  const owner = types.find((type) => type.name === typeName);
 
   expect(owner).toBeDefined();
 
-  return owner.fields.find((field) => field.name === fieldName);
+  const field = owner.fields?.find((field) => field.name === fieldName);
+
+  expect(field).toBeDefined();
+
+  return field;
 };
 
 const expectNonNullListItems = (type, { listRequired }) => {
@@ -139,10 +152,18 @@ describe('GraphQL list item nullability', () => {
 
     const types = res.body.data.__schema.types;
 
-    expectNonNullListItems(findField(types, 'optionalColors').type, { listRequired: false });
-    expectNonNullListItems(findField(types, 'requiredColors').type, { listRequired: true });
-    expectNonNullListItems(findField(types, 'palette').type, { listRequired: false });
-    expectNonNullListItems(findField(types, 'tags').type, { listRequired: true });
-    expectNonNullListItems(findField(types, 'images').type, { listRequired: true });
+    expectNonNullListItems(findField(types, 'Label', 'optionalColors').type, {
+      listRequired: false,
+    });
+    expectNonNullListItems(findField(types, 'Label', 'requiredColors').type, {
+      listRequired: true,
+    });
+    expectNonNullListItems(findField(types, 'Label', 'palette').type, { listRequired: false });
+    expectNonNullListItems(findField(types, 'Label', 'tags').type, { listRequired: true });
+    expectNonNullListItems(findField(types, 'Label', 'genericItems').type, { listRequired: false });
+    expectNonNullListItems(findField(types, 'Label', 'restrictedItems').type, {
+      listRequired: false,
+    });
+    expectNonNullListItems(findField(types, 'Label', 'images').type, { listRequired: true });
   });
 });
