@@ -21,7 +21,7 @@ import {
 } from '@strapi/strapi/admin';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
-import { useQuery, useMutation } from 'react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { useMatch } from 'react-router-dom';
 
 import UsersPermissions from '../../../components/UsersPermissions';

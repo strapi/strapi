@@ -2,11 +2,11 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { adminApi, NotificationsProvider, useNotification } from '@strapi/admin/strapi-admin';
 import { DesignSystemProvider } from '@strapi/design-system';
+import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { act, renderHook, waitFor, RenderHookResult } from '@testing-library/react';
 import { server } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider, useQueryClient } from 'react-query';
 import { Provider } from 'react-redux';
 
 import { useRemoveAsset } from '../useRemoveAsset';
@@ -40,8 +40,8 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
 
 const refetchQueriesMock = jest.fn();
 
-jest.mock('react-query', () => ({
-  ...jest.requireActual('react-query'),
+jest.mock('@tanstack/react-query', () => ({
+  ...jest.requireActual('@tanstack/react-query'),
   useQueryClient: () => ({
     refetchQueries: refetchQueriesMock,
   }),
@@ -124,7 +124,7 @@ describe('useRemoveAsset', () => {
 
     await waitFor(() =>
       expect(queryClient.refetchQueries).toHaveBeenCalledWith(['upload', 'assets'], {
-        active: true,
+        type: 'active',
       })
     );
   });

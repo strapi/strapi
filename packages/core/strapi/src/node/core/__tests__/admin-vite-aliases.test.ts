@@ -44,6 +44,12 @@ describe('ADMIN_VITE_ALIAS_MODULES contract', () => {
     expect(ADMIN_PINNED_ALIAS_MODULES).toContain('invariant');
   });
 
+  it('aliases and dedupes TanStack Query so plugins share the root QueryClient context', () => {
+    expect(ADMIN_VITE_ALIAS_MODULES).toContain('@tanstack/react-query');
+    expect(ADMIN_VITE_DEDUPE_MODULES).toContain('@tanstack/react-query');
+    expect(ADMIN_PINNED_ALIAS_MODULES).toContain('@tanstack/react-query');
+  });
+
   it('dedupes react-dnd so the admin DndProvider and content-manager share one context (#22392)', () => {
     for (const mod of DND_SINGLETON_MODULES) {
       expect(ADMIN_VITE_DEDUPE_MODULES).toContain(mod);

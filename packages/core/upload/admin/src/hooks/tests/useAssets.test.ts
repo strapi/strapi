@@ -162,12 +162,11 @@ describe('useAssets', () => {
 
   test('it does not fetch, if skipWhen is set', async () => {
     const { result } = setup({ skipWhen: true });
-
-    await waitFor(() => result.current.data);
-
     const { get } = useFetchClient();
 
-    expect(get).toBeCalledTimes(0);
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.data).toBeUndefined();
+    expect(get).not.toHaveBeenCalled();
   });
 
   test('calls toggleNotification in case of error', async () => {

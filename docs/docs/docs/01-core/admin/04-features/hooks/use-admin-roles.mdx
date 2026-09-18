@@ -7,7 +7,7 @@ tags:
   - roles
 ---
 
-An abstraction around `react-query`'s `useQuery` hook. It can be used to fetch one ore more admin role.
+An abstraction around the admin API's RTK Query hook. It can fetch one or more admin roles.
 
 ## Usage
 
@@ -16,18 +16,21 @@ The hooks can receive two optional parameters:
 1. query params: an object containing the query params to be sent to the API. They are going to be
    stringified by `qs`. All params are equal except `id`, which is used to fetch a single users, if
    it is passed.
-2. options: an object containing the options to be passed to `useQuery`.
+2. options: an object containing the RTK Query options for the request.
 
-It returns an object containing some of the react-query attributes.
+It returns the roles and request state.
 
 ## Typescript
 
 ```ts
-import { UseQueryOptions } from 'react-query'
-
 type Role = object;
 
-useAdminRoles(queryParams: object, reactQueryOptions: UseQueryOptions): {
+type QueryOptions = {
+  skip?: boolean;
+  refetchOnMountOrArgChange?: boolean | number;
+};
+
+useAdminRoles(queryParams?: object, queryOptions?: QueryOptions): {
     roles: Role[],
     isLoading: boolean;
     error: object;

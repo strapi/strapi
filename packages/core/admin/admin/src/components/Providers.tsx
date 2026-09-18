@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Provider } from 'react-redux';
 
 import { AuthProvider } from '../features/Auth';
@@ -21,6 +21,11 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
+      networkMode: 'offlineFirst',
+    },
+    mutations: {
+      // Preserve react-query v3 behavior: attempt the request while offline, then pause retries.
+      networkMode: 'offlineFirst',
     },
   },
 });

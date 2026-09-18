@@ -1,8 +1,8 @@
 // TODO: find a better naming convention for the file that was an index file before
 import { DesignSystemProvider } from '@strapi/design-system';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider } from 'react-query';
 
 import en from '../../../translations/en.json';
 import { UploadProgress, UploadProgressProps } from '../UploadProgress';

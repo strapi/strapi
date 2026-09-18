@@ -15,11 +15,12 @@ jest.setTimeout(60 * 1000);
  * This does not affect production behavior.
  */
 try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { notifyManager } = require('react-query') as typeof import('react-query');
+  const { notifyManager } =
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require('@tanstack/react-query') as typeof import('@tanstack/react-query');
 
   notifyManager.setNotifyFunction((fn) => act(fn));
   notifyManager.setBatchNotifyFunction((fn) => act(fn));
 } catch {
-  // `react-query` may not be installed for all consumers of @strapi/admin-test-utils.
+  // `@tanstack/react-query` may not be installed for all consumers of @strapi/admin-test-utils.
 }

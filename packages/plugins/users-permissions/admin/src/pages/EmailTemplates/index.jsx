@@ -10,8 +10,8 @@ import {
   useRBAC,
   Layouts,
 } from '@strapi/strapi/admin';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useIntl } from 'react-intl';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
 
 import { PERMISSIONS } from '../../constants';
 import { getTrad } from '../../utils';
@@ -98,7 +98,6 @@ const EmailTemplatesPage = () => {
           message: formatAPIError(error),
         });
       },
-      refetchActive: true,
     }
   );
 

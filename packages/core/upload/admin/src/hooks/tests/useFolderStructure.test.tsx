@@ -1,8 +1,8 @@
 /* eslint-disable check-file/filename-naming-convention */
 import { useFetchClient } from '@strapi/admin/strapi-admin';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor, RenderHookResult } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider } from 'react-query';
 
 import { useFolderStructure } from '../useFolderStructure';
 
@@ -67,6 +67,21 @@ function setup(
 }
 
 describe('useFolderStructure', () => {
+  beforeEach(() => {
+    client.clear();
+    jest.clearAllMocks();
+  });
+
+  test('does not fetch or report loading when disabled with an empty cache', async () => {
+    const { get } = useFetchClient();
+    const { result } = await setup({ enabled: false });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.data).toBeUndefined();
+    expect(get).not.toHaveBeenCalled();
+  });
+
   test('fetches data from the right URL', async () => {
     const { get } = useFetchClient();
 

@@ -35,6 +35,8 @@ const resolveBaseConfig = async (ctx: BuildContext) => {
         'react-router-dom': getModulePath('react-router-dom'),
         // Force single instance so plugin custom field chunks inherit root DesignSystemProvider context
         '@strapi/design-system': getModulePath('@strapi/design-system'),
+        // QueryClient context is module-scoped, so plugins must resolve the same instance as admin.
+        '@tanstack/react-query': getModulePath('@tanstack/react-query'),
         // Force a single CodeMirror instance (resolved from design-system's closure) so the JSON
         // custom field does not crash on cross-copy instanceof checks. Tolerant: unresolvable
         // optional/transitive CodeMirror packages are skipped

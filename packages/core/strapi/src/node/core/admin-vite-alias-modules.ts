@@ -18,6 +18,9 @@ export const ADMIN_VITE_ALIAS_MODULES = [
   'lodash',
   'invariant',
   'prismjs',
+  // QueryClient context is scoped to the module instance. Core plugins declare this dependency
+  // independently, so alias and dedupe it to ensure every plugin uses the root provider.
+  '@tanstack/react-query',
   // react-dnd holds its DndContext in module scope, and @strapi/admin and
   // @strapi/content-manager each declare react-dnd@16.0.1 themselves. npm hoisting collapses
   // those onto one copy, so the DndProvider rendered by @strapi/admin's AuthenticatedLayout and
@@ -99,6 +102,7 @@ export const ADMIN_PINNED_ALIAS_MODULES = [
   '@strapi/design-system',
   'lodash',
   'invariant',
+  '@tanstack/react-query',
   'react-dnd',
   'react-dnd-html5-backend',
 ] as const satisfies readonly AdminViteAliasModule[];
