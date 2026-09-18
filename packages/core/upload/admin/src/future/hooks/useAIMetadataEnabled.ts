@@ -1,16 +1,18 @@
-import { useAIAvailability } from '@strapi/admin/strapi-admin/ee';
-
 import { isAIMetadataSupportedMime } from '../../../../shared/constants';
 import { useGetUploadSettingsQuery } from '../services/settings';
+
+import { useAIMetadataAvailability } from './useAIMetadataAvailability';
 
 /**
  * Whether the replace flow will actually regenerate AI metadata, so the UI only
  * promises it when it happens.
  *
  * Two independent gates, both required — `GET /upload/settings` returns the
- * stored `aiMetadata` toggle on its own, which stays `true` (its default) on
- * licenses without AI, so the setting alone over-promises. The server's own
- * check (`aiMetadata.isEnabled()`) ANDs the same two conditions.
+ * stored `aiMetadata` toggle on its own, which stays `true` (its default) when
+ * no AI metadata provider is registered, so the setting alone over-promises.
+ * `aiMetadataAvailable` is the server telling us a provider is registered
+ * (Strapi-managed or custom). The server's own check (`aiMetadata.isEnabled()`)
+ * ANDs the same two conditions.
  *
  * Pass `{ mime }` to add the third gate the replace flow applies: it only
  * regenerates metadata for images the AI provider can read
@@ -27,7 +29,7 @@ import { useGetUploadSettingsQuery } from '../services/settings';
  * (and fails closed); only an omitted `options` skips the mime check.
  */
 export const useAIMetadataEnabled = (options?: { mime?: string | null }): boolean => {
-  const isAIAvailable = useAIAvailability();
+  const isAIAvailable = useAIMetadataAvailability();
   const { data: settings } = useGetUploadSettingsQuery();
 
   if (!isAIAvailable || !(settings?.data?.aiMetadata ?? false)) {

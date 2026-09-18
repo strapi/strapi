@@ -76,7 +76,7 @@ interface UploadEntry {
  * Everything a batch needs to be replayed on retry: the original entries plus the
  * flags it was started with (AI-metadata and upload concurrency). These live here
  * rather than in Redux because `retryCancelledFiles` takes no args and the page
- * that owns `useAIAvailability` / the settings value is not involved in the retry.
+ * that owns the settings value is not involved in the retry.
  */
 interface UploadBatch {
   entries: UploadEntry[];

@@ -1,9 +1,10 @@
 import { useCallback } from 'react';
 
 import { useTracking as useStrapiTracking, type TrackingEvent } from '@strapi/admin/strapi-admin';
-import { useAIAvailability } from '@strapi/admin/strapi-admin/ee';
 
 import { useGetUploadSettingsQuery } from '../services/settings';
+
+import { useAIMetadataAvailability } from './useAIMetadataAvailability';
 
 /**
  * Media Library version tag stamped on every event fired from the new
@@ -35,7 +36,7 @@ export const MEDIA_LIBRARY_LOCATION = 'upload';
 export const useTracking = () => {
   const { trackUsage: trackStrapiUsage } = useStrapiTracking();
   const { data } = useGetUploadSettingsQuery();
-  const isAiAvailable = useAIAvailability();
+  const isAiAvailable = useAIMetadataAvailability();
 
   // Memoised so consumers can safely list `trackUsage` in effect deps (the
   // search-input debounce commit does) without re-firing every render.
