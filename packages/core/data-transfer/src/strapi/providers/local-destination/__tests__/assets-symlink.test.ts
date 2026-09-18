@@ -92,12 +92,12 @@ describe('Local Strapi destination uploads backup', () => {
     const uploadsStats = await fse.lstat(uploadsDirectory);
     expect(uploadsStats.isSymbolicLink()).toBe(true);
     expect(await fse.realpath(uploadsDirectory)).toBe(
-      await fse.realpath(persistentUploadsDirectory),
+      await fse.realpath(persistentUploadsDirectory)
     );
 
     const backupDirectory = path.join(publicDirectory, provider.uploadsBackupDirectoryName);
     await expect(fse.readFile(path.join(backupDirectory, 'existing.txt'), 'utf8')).resolves.toBe(
-      'existing asset',
+      'existing asset'
     );
     expect(await fse.pathExists(path.join(uploadsDirectory, 'existing.txt'))).toBe(false);
     expect(await fse.pathExists(path.join(uploadsDirectory, '.gitkeep'))).toBe(true);
@@ -120,7 +120,7 @@ describe('Local Strapi destination uploads backup', () => {
 
     const backupDirectory = path.join(publicDirectory, provider.uploadsBackupDirectoryName);
     await expect(fse.readFile(path.join(backupDirectory, 'existing.txt'), 'utf8')).resolves.toBe(
-      'existing asset',
+      'existing asset'
     );
     expect(await fse.pathExists(path.join(uploadsDirectory, 'existing.txt'))).toBe(false);
     expect(await fse.pathExists(path.join(uploadsDirectory, '.gitkeep'))).toBe(true);
