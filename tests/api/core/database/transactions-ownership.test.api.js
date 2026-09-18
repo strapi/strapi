@@ -4,6 +4,14 @@ const { createStrapiInstance } = require('api-tests/strapi');
 
 let strapi;
 
+const createGate = () => {
+  let release;
+  const promise = new Promise((resolve) => {
+    release = resolve;
+  });
+  return { promise, release };
+};
+
 describe('transaction context ownership', () => {
   let original;
   beforeAll(async () => {
@@ -108,21 +116,31 @@ describe('transaction context ownership', () => {
     });
 
     test.each(['commit', 'rollback'])(
-      'can start a fresh transaction after calling the outer %s helper inside a nested callback',
+      'rejects work in closed scopes after calling the outer %s helper inside a nested callback',
       async (finalization) => {
         const freshCommit = jest.fn();
         await strapi.db.transaction(async (outer) => {
-          await strapi.db.transaction(() => outer[finalization]());
-          expect(strapi.db.inTransaction()).toBe(false);
-          await strapi.db.transaction(async ({ trx, onCommit }) => {
-            expect(trx).not.toBe(outer.trx);
-            await strapi.db
-              .queryBuilder('strapi::core-store')
-              .update({ key: 'fresh transaction key' })
-              .where({ id: 1 })
-              .execute();
-            onCommit(freshCommit);
+          await strapi.db.transaction(async () => {
+            await outer[finalization]();
+            await expect(
+              strapi.db
+                .queryBuilder('strapi::core-store')
+                .update({ key: 'unexpected detached key' })
+                .where({ id: 1 })
+                .execute()
+            ).rejects.toThrow('Transaction is closed');
           });
+          await expect(strapi.db.transaction(async () => {})).rejects.toThrow(
+            'Transaction is closed'
+          );
+        });
+        await strapi.db.transaction(async ({ onCommit }) => {
+          await strapi.db
+            .queryBuilder('strapi::core-store')
+            .update({ key: 'fresh transaction key' })
+            .where({ id: 1 })
+            .execute();
+          onCommit(freshCommit);
         });
 
         expect(freshCommit).toHaveBeenCalledTimes(1);
@@ -185,4 +203,137 @@ describe('transaction context ownership', () => {
       expect(rows[0].key).toEqual('recovery after failed commit');
     });
   });
+
+  test('a nested scope cannot commit independently while the outer commit is in flight', async () => {
+    const failure = new Error('commit failed before completion');
+    let rejectCommit;
+    const pendingCommit = new Promise((resolve, reject) => {
+      rejectCommit = reject;
+    });
+    const resume = createGate();
+    let nested;
+    let nestedError;
+    const startTransaction = jest.spyOn(strapi.db.connection.context, 'transaction');
+    const nestedCallback = jest.fn(async () => {
+      await strapi.db
+        .queryBuilder('strapi::core-store')
+        .update({ key: 'nested key' })
+        .where({ id: 1 })
+        .execute();
+    });
+
+    try {
+      await expect(
+        strapi.db.transaction(async (outer) => {
+          await strapi.db.transaction(() => {
+            nested = resume.promise.then(() => strapi.db.transaction(nestedCallback));
+          });
+          // Reject before a driver COMMIT, not a simulated Knex executionPromise failure.
+          outer.trx.commit = () => pendingCommit;
+          const finalizing = outer.commit();
+          resume.release();
+          try {
+            await nested;
+          } catch (error) {
+            nestedError = error;
+          } finally {
+            rejectCommit(failure);
+          }
+          await finalizing;
+        })
+      ).rejects.toBe(failure);
+
+      const rows = await strapi.db
+        .queryBuilder('strapi::core-store')
+        .select(['key'])
+        .where({ id: 1 })
+        .execute();
+      expect(rows[0].key).toEqual(original[0].key);
+      expect(nestedError).toBeInstanceOf(Error);
+      expect(nestedError.message).toContain('Transaction is finalizing');
+      expect(nestedCallback).not.toHaveBeenCalled();
+      expect(startTransaction).toHaveBeenCalledTimes(1);
+    } finally {
+      startTransaction.mockRestore();
+    }
+  });
+
+  test.each(['commit', 'rollback'])(
+    'rejects a detached query while %s is in flight',
+    async (finalization) => {
+      const finish = createGate();
+      const resume = createGate();
+      let detached;
+
+      await strapi.db.transaction(async (outer) => {
+        await strapi.db.transaction(() => {
+          detached = resume.promise.then(() =>
+            strapi.db
+              .queryBuilder('strapi::core-store')
+              .update({ key: 'unexpected mid-finalization key' })
+              .where({ id: 1 })
+              .execute()
+          );
+        });
+        const finishTransaction = outer.trx[finalization].bind(outer.trx);
+        outer.trx[finalization] = async () => {
+          await finish.promise;
+          return finishTransaction();
+        };
+        const finalizing = outer[finalization]();
+        try {
+          resume.release();
+          await expect(detached).rejects.toThrow('Transaction is finalizing');
+        } finally {
+          finish.release();
+          await finalizing;
+        }
+      });
+
+      const rows = await strapi.db
+        .queryBuilder('strapi::core-store')
+        .select(['key'])
+        .where({ id: 1 })
+        .execute();
+      expect(rows[0].key).toEqual(original[0].key);
+    }
+  );
+
+  test.each(['commit', 'rollback'])(
+    'rejects a detached query after %s instead of silently autocommitting',
+    async (finalization) => {
+      const resume = createGate();
+      let detached;
+
+      await strapi.db.transaction(async (outer) => {
+        await strapi.db.transaction(() => {
+          detached = resume.promise.then(() =>
+            strapi.db
+              .queryBuilder('strapi::core-store')
+              .update({ key: 'unexpected stale key' })
+              .where({ id: 1 })
+              .execute()
+          );
+        });
+        await outer[finalization]();
+      });
+
+      resume.release();
+      // Capture the result so the row read-back proves no write escaped, even on the old branch.
+      let queryError;
+      try {
+        await detached;
+      } catch (error) {
+        queryError = error;
+      }
+      const rows = await strapi.db
+        .queryBuilder('strapi::core-store')
+        .select(['key'])
+        .where({ id: 1 })
+        .execute();
+      expect(rows[0].key).toEqual(original[0].key);
+      expect(queryError).toBeInstanceOf(Error);
+      expect(queryError.message).toContain('Transaction is closed');
+    }
+  );
 });
