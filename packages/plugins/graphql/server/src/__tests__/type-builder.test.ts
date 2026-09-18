@@ -24,7 +24,7 @@ describe('GraphQL type builder polymorphic list items', () => {
     const rootBuilder = {
       field: jest.fn(),
       list: { field: listField },
-      nonNull: { field: jest.fn() },
+      nonNull: { field: jest.fn(), id: jest.fn() },
     };
 
     const extension = {
