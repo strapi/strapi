@@ -1,4 +1,4 @@
-import { render, screen } from '@tests/utils';
+import { fireEvent, render, screen } from '@tests/utils';
 
 import { ModalForm } from '../NewUserForm';
 
@@ -20,7 +20,8 @@ describe('<ModalForm />', () => {
 
     expect(screen.getByRole('dialog')).toBeInTheDocument();
 
-    await user.click(document.body);
+    fireEvent.pointerDown(document.body);
+    fireEvent.click(document.body);
 
     expect(onToggle).not.toHaveBeenCalled();
     expect(screen.getByRole('dialog')).toBeInTheDocument();
