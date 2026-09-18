@@ -60,7 +60,11 @@ export { useHistory } from './features/BackButton';
  */
 export { useInjectReducer } from './hooks/useInjectReducer';
 export { useAPIErrorHandler } from './hooks/useAPIErrorHandler';
-export { useQueryParams } from './hooks/useQueryParams';
+export {
+  useQueryParams,
+  deepEncodeQueryValues,
+  withEncodedUserParams,
+} from './hooks/useQueryParams';
 export { useFetchClient } from './hooks/useFetchClient';
 export { useFocusInputField } from './hooks/useFocusInputField';
 export { useRBAC, type AllowedActions } from './hooks/useRBAC';

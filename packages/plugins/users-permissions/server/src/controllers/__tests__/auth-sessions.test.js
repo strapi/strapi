@@ -323,6 +323,7 @@ describe('Auth controller - sessions', () => {
               domain: 'example.com',
               sameSite: 'strict',
               secure: true,
+              maxAge: 3600000,
             },
           };
         }
@@ -349,6 +350,7 @@ describe('Auth controller - sessions', () => {
           expires: expect.any(Date),
         })
       );
+      expect(ctx.cookies.set.mock.calls[0][2]).not.toHaveProperty('maxAge');
     });
   });
 });

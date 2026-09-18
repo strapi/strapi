@@ -1,10 +1,18 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { useNotification } from '@strapi/admin/strapi-admin';
-import { Box, Button, Flex, IconButton, Tooltip, Typography } from '@strapi/design-system';
+import {
+  Box,
+  Button,
+  Flex,
+  IconButton,
+  TextButton,
+  Tooltip,
+  Typography,
+} from '@strapi/design-system';
 import { ArrowRight, Cross, Sparkle, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { styled } from 'styled-components';
+import { css, styled } from 'styled-components';
 
 import {
   AI_METADATA_MAX_FILES,
@@ -12,12 +20,15 @@ import {
 } from '../../../../../../shared/constants';
 import { useAIMetadataEnabled } from '../../../hooks/useAIMetadataEnabled';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
+import { useTracking } from '../../../hooks/useTracking';
 import { useGenerateAiMetadataMutation } from '../../../services/assets';
 import { buildDragSetFromSelection } from '../../../utils/buildDragSetFromSelection';
 import { emptyItemLocations, type ItemLocations } from '../../../utils/itemLocations';
 import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
+import { useIsAssetDetailsOpen } from '../hooks/useIsAssetDetailsOpen';
+import { type ItemKey } from '../utils/selection';
 
 import { BulkMoveDialog } from './BulkMoveDialog';
 import { DeleteItemsDialog } from './DeleteItemsDialog';
@@ -29,7 +40,7 @@ import type { File } from '../../../../../../shared/contracts/files';
  * bottom edge (no radius, top border only). Desktop (medium+): a floating,
  * centered pill.
  */
-const Bar = styled(Flex)`
+const Bar = styled(Flex)<{ $isDrawerOpen: boolean; $isStacked: boolean }>`
   position: fixed;
   z-index: ${({ theme }) => theme.zIndices.popover};
   left: 0;
@@ -45,13 +56,72 @@ const Bar = styled(Flex)`
   border-radius: 0;
   box-shadow: ${({ theme }) => theme.shadows.popupShadow};
 
+  /* Docked full-bleed at the bottom on mobile, which is exactly where the open
+     drawer keeps its own actions — so it steps aside there, and only there. */
+  display: ${({ $isDrawerOpen }) => ($isDrawerOpen ? 'none' : 'flex')};
+
+  /* Mobile with the metadata action present: the labelled button plus the icons
+     no longer fit beside the count on one line, so the count takes a row of its
+     own and every button drops to the next.
+
+     Addressed by slot rather than by position: these rules used to use
+     nth-child, which silently retargeted the moment a control was inserted
+     into the row. */
+  ${({ $isStacked }) =>
+    $isStacked &&
+    css`
+      flex-wrap: wrap;
+      justify-content: space-between;
+
+      > [data-bar-slot='count'] {
+        flex-basis: 100%;
+        margin-right: 0;
+      }
+
+      > [data-bar-slot='actions'] {
+        margin-left: 0;
+      }
+
+      /* The divider only existed to set the clear action apart from the rest;
+         with the row spread it would hang in mid-air between them. */
+      > [data-bar-slot='divider'] {
+        display: none;
+      }
+    `}
+
   ${({ theme }) => theme.breakpoints.medium} {
+    display: flex;
     left: 50%;
     right: auto;
     bottom: ${({ theme }) => theme.spaces[4]};
     transform: translateX(-50%);
     border: 1px solid ${({ theme }) => theme.colors.neutral150};
     border-radius: ${({ theme }) => theme.borderRadius};
+    /* Sized by its content, capped so the pill can never span the whole
+       viewport. The nowrap is what lets the content set that width — without it
+       the labels wrap and the bar reads as narrow and tall. Inherited, so it
+       covers every label inside.
+
+       Deliberately not applied on mobile: there the bar is full-bleed and
+       cannot grow, so refusing to wrap would clip the last action on a narrow
+       phone rather than widen anything. */
+    white-space: nowrap;
+    max-width: 90%;
+
+    /* One line again from tablet up, where it fits. */
+    flex-wrap: nowrap;
+
+    > [data-bar-slot='count'] {
+      flex-basis: auto;
+    }
+
+    > [data-bar-slot='actions'] {
+      margin-left: auto;
+    }
+
+    > [data-bar-slot='divider'] {
+      display: block;
+    }
   }
 `;
 
@@ -84,11 +154,18 @@ interface BulkActionsBarProps {
    * everything, which falls back to the folder currently open.
    */
   locations?: ItemLocations;
+  /**
+   * Keys of the items on screen, in render order. Owned by the view so
+   * select-all covers exactly what the user can see — in mixed mode that is not
+   * every folder.
+   */
+  renderedKeys?: ItemKey[];
 }
 
 export const BulkActionsBar = ({
   assets = [],
   locations = emptyItemLocations,
+  renderedKeys = [],
 }: BulkActionsBarProps) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
@@ -98,8 +175,10 @@ export const BulkActionsBar = ({
   // Every bulk action (move, delete, metadata) is an `assets.update` mutation
   // server-side — one flag gates the whole cluster.
   const { canUpdate } = useMediaLibraryPermissions();
-  const { selectedIds, selectedFolderIds, clear } = useAssetSelection();
+  const { selectedIds, selectedFolderIds, selectAll, clear } = useAssetSelection();
+  const { trackUsage } = useTracking();
   const { currentFolderId } = useFolderNavigation();
+  const isDetailsDrawerOpen = useIsAssetDetailsOpen();
   const [generateAiMetadata, { isLoading: isGeneratingMetadata }] = useGenerateAiMetadataMutation();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isMoveDialogOpen, setIsMoveDialogOpen] = useState(false);
@@ -108,6 +187,45 @@ export const BulkActionsBar = ({
   const [isDeleting, setIsDeleting] = useState(false);
 
   const count = selectedIds.size + selectedFolderIds.size;
+
+  // `innerHeight - top` rather than the bar's height: it also spans the gap the
+  // bar floats above the viewport edge (0 docked on mobile, `spaces[4]` for the
+  // desktop pill), so one measurement covers both layouts and no height is
+  // hardcoded.
+  const [barEl, setBarEl] = useState<HTMLElement | null>(null);
+  const [reservedSpace, setReservedSpace] = useState(0);
+
+  useEffect(() => {
+    if (!barEl) {
+      setReservedSpace(0);
+      return;
+    }
+
+    const measure = () => {
+      const rect = barEl.getBoundingClientRect();
+      // Zero height means the CSS has hidden the bar (drawer open on mobile) —
+      // reserving anything then would leave a gap under nothing.
+      setReservedSpace(rect.height === 0 ? 0 : Math.max(0, window.innerHeight - rect.top));
+    };
+
+    measure();
+
+    const observer = new ResizeObserver(measure);
+    observer.observe(barEl);
+    window.addEventListener('resize', measure);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+    // `isDetailsDrawerOpen` toggles the bar's `display`, which a ResizeObserver
+    // is not guaranteed to report.
+  }, [barEl, isDetailsDrawerOpen]);
+
+  const handleSelectAll = () => {
+    trackUsage('didSelectAllMediaLibraryElements');
+    selectAll(renderedKeys);
+  };
   const isBusy = isDeleting || isGeneratingMetadata;
 
   // Stable identity: the move dialog memoizes its destination walk on it. Each
@@ -245,109 +363,131 @@ export const BulkActionsBar = ({
   // without the permission, the bar has nothing to offer — drop it entirely
   // rather than show a count + "Clear selection" over no actions (mirrors the
   // drawer footer, which hides when no permitted action survives).
+  //
+  // With the drawer open the bar is hidden on mobile only, in CSS: there the two
+  // are stacked at `bottom: 0` and the bar (popover, 500) would cover the
+  // drawer's footer actions, since the drawer sits below the overlay token at
+  // 200. From `medium` up the drawer is a side panel and the bar is a centered
+  // pill, so they no longer collide.
   if (count === 0 || !canUpdate) {
     return null;
   }
 
   return (
-    <Bar
-      tag="section"
-      role="region"
-      aria-label={formatMessage({
-        id: getTranslationKey('list.bulk-actions.label'),
-        defaultMessage: 'Bulk actions',
-      })}
-    >
-      <Typography fontWeight="bold" textColor="neutral800" marginRight={4}>
-        {formatMessage(
-          {
-            id: getTranslationKey('list.bulk-actions.selected-count'),
-            defaultMessage: '{count, plural, =1 {# item selected} other {# items selected}}',
-          },
-          { count }
-        )}
-      </Typography>
-
-      {/* Past the early return the user always has `assets.update`, so the
-          individual actions no longer re-check it. */}
-      <ActionCluster>
-        {isAiMetadataEnabled && (
-          <Tooltip label={metadataDisabledReason}>
-            {/* Wrapped so the tooltip still receives pointer events while the
-                button itself is disabled. */}
-            <Box>
-              <Button
-                size="S"
-                startIcon={<Sparkle />}
-                disabled={
-                  isBusy || selectedIds.size === 0 || isOverMetadataLimit || hasNoEligibleAssets
-                }
-                loading={isGeneratingMetadata}
-                onClick={handleCreateMetadata}
-              >
-                {formatMessage({
-                  id: getTranslationKey('list.bulk-actions.create-metadata'),
-                  defaultMessage: 'Create metadata',
-                })}
-              </Button>
-            </Box>
-          </Tooltip>
-        )}
-
-        <IconButton
-          variant="tertiary"
-          disabled={isBusy}
-          label={formatMessage({
-            id: getTranslationKey('list.bulk-actions.move'),
-            defaultMessage: 'Move',
-          })}
-          onClick={() => setIsMoveDialogOpen(true)}
-        >
-          <ArrowRight />
-        </IconButton>
-        <BulkMoveDialog
-          open={isMoveDialogOpen}
-          onClose={() => setIsMoveDialogOpen(false)}
-          items={moveItems}
-          onSuccess={clear}
-        />
-
-        <IconButton
-          variant="danger-light"
-          disabled={isBusy}
-          label={formatMessage({
-            id: getTranslationKey('list.bulk-actions.delete'),
-            defaultMessage: 'Delete',
-          })}
-          onClick={() => setIsDeleteDialogOpen(true)}
-        >
-          <Trash />
-        </IconButton>
-        <DeleteItemsDialog
-          open={isDeleteDialogOpen}
-          onClose={() => setIsDeleteDialogOpen(false)}
-          target={{
-            fileIds: Array.from(selectedIds),
-            folderIds: Array.from(selectedFolderIds),
-          }}
-          onSuccess={clear}
-          onPendingChange={setIsDeleting}
-        />
-      </ActionCluster>
-
-      <VerticalDivider aria-hidden />
-
-      <IconButton
-        variant="ghost"
-        label={formatMessage({
-          id: getTranslationKey('list.bulk-actions.clear'),
-          defaultMessage: 'Clear selection',
+    <>
+      <Box aria-hidden height={`${reservedSpace}px`} data-bar-spacer />
+      <Bar
+        ref={setBarEl}
+        $isDrawerOpen={isDetailsDrawerOpen}
+        $isStacked={isAiMetadataEnabled}
+        tag="section"
+        role="region"
+        // The bar floats over the list but is not part of its background: a
+        // right-click on it keeps the browser's own menu. See MainAreaContextMenu.
+        data-native-context-menu
+        aria-label={formatMessage({
+          id: getTranslationKey('list.bulk-actions.label'),
+          defaultMessage: 'Bulk actions',
         })}
-        onClick={clear}
-        disabled={isBusy}
       >
-        <Cross />
-      </IconButton>
-    </Bar>
+        <Typography data-bar-slot="count" fontWeight="bold" textColor="neutral800" marginRight={4}>
+          {formatMessage(
+            {
+              id: getTranslationKey('list.bulk-actions.selected-count'),
+              defaultMessage: '{count, plural, =1 {# item selected} other {# items selected}}',
+            },
+            { count }
+          )}
+        </Typography>
+
+        <TextButton onClick={handleSelectAll} marginRight={4} disabled={isBusy}>
+          {formatMessage({
+            id: getTranslationKey('list.bulk-actions.select-all'),
+            defaultMessage: 'Select all',
+          })}
+        </TextButton>
+
+        {/* Past the early return the user always has `assets.update`, so the
+            individual actions no longer re-check it. */}
+        <ActionCluster data-bar-slot="actions">
+          {isAiMetadataEnabled && (
+            <Tooltip label={metadataDisabledReason}>
+              {/* Wrapped so the tooltip still receives pointer events while the
+                  button itself is disabled. */}
+              <Box>
+                <Button
+                  size="S"
+                  startIcon={<Sparkle />}
+                  disabled={
+                    isBusy || selectedIds.size === 0 || isOverMetadataLimit || hasNoEligibleAssets
+                  }
+                  loading={isGeneratingMetadata}
+                  onClick={handleCreateMetadata}
+                >
+                  {formatMessage({
+                    id: getTranslationKey('list.bulk-actions.create-metadata'),
+                    defaultMessage: 'Create metadata',
+                  })}
+                </Button>
+              </Box>
+            </Tooltip>
+          )}
+
+          <IconButton
+            variant="tertiary"
+            disabled={isBusy}
+            label={formatMessage({
+              id: getTranslationKey('list.bulk-actions.move'),
+              defaultMessage: 'Move',
+            })}
+            onClick={() => setIsMoveDialogOpen(true)}
+          >
+            <ArrowRight />
+          </IconButton>
+          <BulkMoveDialog
+            open={isMoveDialogOpen}
+            onClose={() => setIsMoveDialogOpen(false)}
+            items={moveItems}
+            onSuccess={clear}
+          />
+
+          <IconButton
+            variant="danger-light"
+            disabled={isBusy}
+            label={formatMessage({
+              id: getTranslationKey('list.bulk-actions.delete'),
+              defaultMessage: 'Delete',
+            })}
+            onClick={() => setIsDeleteDialogOpen(true)}
+          >
+            <Trash />
+          </IconButton>
+          <DeleteItemsDialog
+            open={isDeleteDialogOpen}
+            onClose={() => setIsDeleteDialogOpen(false)}
+            target={{
+              fileIds: Array.from(selectedIds),
+              folderIds: Array.from(selectedFolderIds),
+            }}
+            onSuccess={clear}
+            onPendingChange={setIsDeleting}
+          />
+        </ActionCluster>
+
+        <VerticalDivider data-bar-slot="divider" aria-hidden />
+
+        <IconButton
+          variant="ghost"
+          label={formatMessage({
+            id: getTranslationKey('list.bulk-actions.clear'),
+            defaultMessage: 'Clear selection',
+          })}
+          onClick={clear}
+          disabled={isBusy}
+        >
+          <Cross />
+        </IconButton>
+      </Bar>
+    </>
   );
 };

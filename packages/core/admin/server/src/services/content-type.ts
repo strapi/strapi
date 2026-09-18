@@ -153,6 +153,7 @@ const cleanPermissionFields = (
   permissions: Modules.Permissions.PermissionRule[]
 ): Modules.Permissions.PermissionRule[] => {
   const { actionProvider } = getService('permission');
+  const nestedFieldsCache = new Map<string, string[]>();
 
   return permissions.map((permission: any) => {
     const {
@@ -172,9 +173,13 @@ const cleanPermissionFields = (
       return permission;
     }
 
-    const possibleFields = getNestedFieldsWithIntermediate(strapi.contentTypes[subject], {
-      components: strapi.components,
-    });
+    let possibleFields = nestedFieldsCache.get(subject);
+    if (!possibleFields) {
+      possibleFields = getNestedFieldsWithIntermediate(strapi.contentTypes[subject], {
+        components: strapi.components,
+      });
+      nestedFieldsCache.set(subject, possibleFields);
+    }
 
     const currentFields: string[] = fields || [];
 

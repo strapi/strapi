@@ -117,6 +117,11 @@ async function trySendViaHost(
         to: recipients,
       },
       dkim,
+      // Prevent nodemailer from reading local files or fetching URLs referenced by
+      // `attachments[].path` / `attachments[].href`. Set after the spread so a caller
+      // cannot re-enable file/URL access through the passed mail options.
+      disableFileAccess: true,
+      disableUrlAccess: true,
     });
   } finally {
     transporter.close();

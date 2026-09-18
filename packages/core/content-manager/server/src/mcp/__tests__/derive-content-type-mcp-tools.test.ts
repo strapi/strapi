@@ -88,12 +88,11 @@ const makeFieldRestrictedAbility = (
 const mockUser = { id: 42 };
 const mockContext = { userAbility: makeUserAbility(), user: mockUser };
 
-const mockExtra: HandlerParams['extra'] = {
-  signal: new AbortController().signal,
+const mockExtra = {
   requestId: 'test-request-id',
-  sendNotification: jest.fn(),
-  sendRequest: jest.fn(),
-};
+  signal: new AbortController().signal,
+  _meta: undefined,
+} satisfies HandlerParams['extra'];
 
 const makePermissionChecker = (overrides: Record<string, jest.Mock> = {}) => ({
   cannot: {
@@ -1141,6 +1140,32 @@ describe('buildDataSchema', () => {
       relationModel.attributes as TestAttrs
     );
     expect(schema.safeParse({ tags: { set: null } }).success).toBe(true);
+  });
+
+  it('xMany relation rejects { set: [...] } combined with connect or disconnect', () => {
+    const schema = buildDataSchema(
+      mockStrapi,
+      relationModel,
+      relationModel.attributes as TestAttrs
+    );
+    expect(schema.safeParse({ tags: { set: ['abc'], connect: ['def'] } }).success).toBe(false);
+    expect(schema.safeParse({ tags: { set: ['abc'], disconnect: ['def'] } }).success).toBe(false);
+    expect(
+      schema.safeParse({ tags: { set: ['abc'], connect: ['def'], disconnect: ['ghi'] } }).success
+    ).toBe(false);
+  });
+
+  it('xMany relation rejects { set: null } combined with connect or disconnect', () => {
+    const schema = buildDataSchema(
+      mockStrapi,
+      relationModel,
+      relationModel.attributes as TestAttrs
+    );
+    expect(schema.safeParse({ tags: { set: null, connect: ['def'] } }).success).toBe(false);
+    expect(schema.safeParse({ tags: { set: null, disconnect: ['def'] } }).success).toBe(false);
+    expect(
+      schema.safeParse({ tags: { set: null, connect: ['def'], disconnect: ['ghi'] } }).success
+    ).toBe(false);
   });
 
   it('xMany relation accepts empty object {}', () => {

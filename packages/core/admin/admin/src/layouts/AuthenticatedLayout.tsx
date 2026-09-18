@@ -10,6 +10,7 @@ import valid from 'semver/functions/valid';
 
 import { LazyOutlet } from '../components/LazyOutlet';
 import { LeftMenu } from '../components/LeftMenu';
+import { MediaLibraryBanner } from '../components/MediaLibraryBanner';
 import { NpsSurvey } from '../components/NpsSurvey';
 import { Page } from '../components/PageHelpers';
 import { PluginsInitializer } from '../components/PluginsInitializer';
@@ -134,6 +135,7 @@ const AdminLayout = () => {
                 }}
               >
                 <UpsellBanner />
+                <MediaLibraryBanner />
                 {/*
                  * Top-level Suspense only — nested layouts (Settings, Content Manager) use
                  * LazyOutlet with useNavigation so in-app navigations show loading in the content

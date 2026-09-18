@@ -7,6 +7,8 @@ import {
   Pagination,
   useTracking,
   useQueryParams,
+  withEncodedUserParams,
+  deepEncodeQueryValues,
   Layouts,
 } from '@strapi/admin/strapi-admin';
 import {
@@ -173,10 +175,7 @@ export const MediaLibrary = () => {
     // we have to navigate the user to that page, in case a folder
     // was created successfully in order for them to see it
     if (created && query?.page !== '1') {
-      setQuery({
-        ...query,
-        page: 1,
-      });
+      setQuery(withEncodedUserParams(query, { page: 1 }));
     }
 
     setShowEditFolderDialog((prev) => !prev);
@@ -198,7 +197,7 @@ export const MediaLibrary = () => {
       location: 'upload',
       sort: value,
     });
-    setQuery({ sort: value as Query['sort'] });
+    setQuery(withEncodedUserParams(query, { sort: value as Query['sort'] }));
   };
 
   const handleEditFolder = (folder: FolderRow) => {
@@ -222,10 +221,7 @@ export const MediaLibrary = () => {
       assetsData?.pagination?.page &&
       assetsData.pagination.page > 1
     ) {
-      setQuery({
-        ...query,
-        page: assetsData.pagination.page - 1,
-      });
+      setQuery(withEncodedUserParams(query, { page: assetsData.pagination.page - 1 }));
     }
   };
 
@@ -302,7 +298,7 @@ export const MediaLibrary = () => {
                     tag={ReactRouterLink}
                     to={{
                       pathname: `${pathname}/configuration`,
-                      search: stringify(query, { encode: false }),
+                      search: stringify(deepEncodeQueryValues(query), { encode: false }),
                     }}
                     label={formatMessage({
                       id: 'app.links.configure-view',
