@@ -10,6 +10,13 @@ tags:
 
 This page documents how the Upload plugin validates file MIME types when upload security is configured (`plugin::upload.security` with `allowedTypes` and/or `deniedTypes`). All accept/deny decisions go through a single helper so the logic stays simple and consistent.
 
+New projects scaffolded with `create-strapi-app` explicitly deny `image/svg+xml` even though their
+allowlist includes `image/*`. This is a generated configuration default only: it does not change
+existing projects, projects without an explicit upload policy, or objects that were already uploaded.
+Projects that intentionally accept SVG can adjust their explicit policy, while remembering that
+`deniedTypes` takes precedence over `allowedTypes`. Upload providers and CDNs control final delivery
+headers, so MIME admission configuration does not guarantee how a remote object is delivered.
+
 ## Inputs
 
 - **declared** — Client-provided Content-Type (may be generic or missing).

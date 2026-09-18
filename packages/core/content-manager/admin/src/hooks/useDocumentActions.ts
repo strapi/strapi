@@ -202,8 +202,10 @@ const useDocumentActions: UseDocumentActions = () => {
   const { trackUsage } = useTracking();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const navigate = useNavigate();
-  const { data: aiFeatureConfig } = useGetAiFeatureConfigQuery();
   const isAiAvailable = useAIAvailability();
+  const { data: aiFeatureConfig } = useGetAiFeatureConfigQuery(undefined, {
+    skip: !isAiAvailable,
+  });
   const isAiI18nConfigured = Boolean(aiFeatureConfig?.isAiI18nConfigured);
 
   // Get metadata from context providers for tracking purposes

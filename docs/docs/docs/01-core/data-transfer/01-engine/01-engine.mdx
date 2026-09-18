@@ -183,13 +183,42 @@ In that step the provider may back up the local `uploads` folder, delete existin
 
 This avoids ID conflicts during the `entities` and `links` stages, but it is **not a merge**: once the transfer completes successfully, pre-existing destination data in scope is replaced. If the transfer fails after `beforeTransfer()`, database changes run inside a transaction and may be rolled back; asset backup behavior is described in the destination provider documentation.
 
+**Supported workflow — content replace, keep destination config:** `--only content` (or `--exclude config`) replaces in-scope content on the destination while leaving core store and webhooks untouched. That is intentional restore scoping, not incremental sync. Incremental / merge sync remains a possible future product direction; designs should prefer opt-in strategies over changing restore defaults.
+
+### `--only` / `--exclude` deletion vs transfer matrix
+
+Stage presets:
+
+| Preset    | Stages          | Typical payload                                                  |
+| --------- | --------------- | ---------------------------------------------------------------- |
+| `content` | entities, links | Content-type rows (incl. media library DB records) and relations |
+| `files`   | assets          | Upload binaries under `public/uploads`                           |
+| `config`  | configuration   | Core store and webhooks                                          |
+
+Schemas always transfer with the CLI (independent of these presets).
+
+| Flags                     | Transferred                             | Pre-transfer wipe                                   | Destination preserved                                              |
+| ------------------------- | --------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------ |
+| (none)                    | content + files + config                | All transferable entities, assets, config           | Admin / ignored types only                                         |
+| `--only content`          | content                                 | User content types only (not core store / webhooks) | Config + upload binaries                                           |
+| `--only content,config`   | content + config                        | All transferable entities + config                  | Upload binaries                                                    |
+| `--exclude config`        | content + files                         | User content types only                             | Config (core store / webhooks)                                     |
+| `--exclude files`         | content + config                        | Entities + config (assets skipped)                  | Upload binaries; media library DB rows still transfer with content |
+| `--exclude media-library` | content (without upload types) + config | Entities except upload types + config               | Upload binaries + `plugin::upload.file` / `folder`                 |
+
+Content-type filters (`--only-content-types` / `--exclude-content-types`) further narrow the entities/links stream and restore wipe. When upload types are out of scope, the files stage is skipped automatically.
+
+When `--only` omits one or more of `content` / `files` / `config`, the CLI prints a dim clarity line listing stages that are not transferred so destination data for those stages is obviously preserved.
+
 A transfer starts by bootstrapping and initializing itself and the providers. That is the stage where providers attempt to make any necessary connections to files, databases, websockets, etc.
 
 After that, the integrity check between the source and destination is run, which validates the requirements set by the chosen schemaStrategy and versionStrategy.
 
 Note: Schema differences during this stage can be resolved programmatically by adding an `onSchemaDiff` handler. However, be aware that this interface is likely to change to a more generic engine handler (such as `engine.on('schemaDiff', handler)`) before this feature is stable.
 
-Once the integrity check has passed, the transfer begins by opening streams from the source to the destination one stage at a time. The following is a list of the stages in the order they are run:
+Source providers can then validate each included stage with `validateStage`. This validation runs before `beforeTransfer`, the point where a restore can begin changing destination data. Archive and directory imports use it to check that every included upload has valid matching sidecar metadata. An invalid archive therefore fails before destination content or files are changed. Asset validation is skipped when the files stage is excluded.
+
+Once the integrity and stage validation checks have passed, the transfer begins by opening streams from the source to the destination one stage at a time. The following is a list of the stages in the order they are run:
 
 1. schemas - content type schemas. Note: with all built-in Strapi destination providers, only the Strapi file provider makes use of this data
 2. entities - all entities (including components, dynamic zones, and media data but not media files) _without their relations_
@@ -234,6 +263,8 @@ const options = {
 When skipping the assets stage, sync upload binaries separately — for example with `rsync -avz public/uploads/ user@host:/path/to/strapi/public/uploads/`.
 
 Once all stages have been completed, the transfer waits for all providers to close and then emits a finish event and the transfer completes.
+
+If the transfer throws after bootstrap but before provider closing begins, the engine rolls back the destination provider and then closes both providers before rethrowing. This matters for programmatic callers: the local providers disable database lifecycles on bootstrap and only re-enable them on close, so a failure that skipped the close would leave the caller's Strapi instance with lifecycles off. Failures during rollback or failure-path cleanup are reported as warning diagnostics so they cannot mask the error that caused the transfer to fail.
 
 ### Excluding content types from the CLI
 

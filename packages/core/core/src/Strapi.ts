@@ -38,6 +38,7 @@ import { coreStoreModel } from './services/core-store';
 import { createConfigProvider } from './services/config';
 
 import { cleanComponentJoinTable } from './services/document-service/utils/clean-component-join-table';
+import { createContentAPISchemaRegistry } from './core-api/routes/validation/schema-registry';
 
 // Lazy: only resolved when `useTypescriptMigrations` is true (default false)
 let lazyTsUtils: typeof import('@strapi/typescript-utils') | undefined;
@@ -243,6 +244,10 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('content-api');
   }
 
+  get contentAPISchemaRegistry(): Core.ContentAPISchemaRegistry {
+    return this.get('content-api-schema-registry');
+  }
+
   get sanitizers() {
     return this.get('sanitizers');
   }
@@ -281,6 +286,7 @@ class Strapi extends Container implements Core.Strapi {
     this.add('config', () => config)
       .add('query-params', createQueryParamService(this))
       .add('content-api', createContentAPI(this))
+      .add('content-api-schema-registry', () => createContentAPISchemaRegistry())
       .add('auth', createAuth())
       .add('server', () => createServer(this))
       .add('fs', () => createStrapiFs(this))

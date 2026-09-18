@@ -4,7 +4,8 @@ import type { Core, Internal, Modules, UID, Data } from '@strapi/types';
 
 import _ from 'lodash/fp';
 
-import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';
+import { AUDITED_EVENTS, RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';
+import { emitAuditOnCommit } from '../audit-logs';
 
 import type {
   CreateReleaseAction,
@@ -145,6 +146,16 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
       if (!disableUpdateReleaseStatus) {
         getService('release', { strapi }).updateReleaseStatus(release.id);
       }
+
+      await emitAuditOnCommit({ strapi }, AUDITED_EVENTS.RELEASE_ENTRY_ADD, {
+        releaseId: release.id,
+        name: release.name,
+        actionId: releaseAction.id,
+        type: releaseAction.type,
+        contentType: releaseAction.contentType,
+        entryDocumentId: releaseAction.entryDocumentId,
+        locale: releaseAction.locale,
+      });
 
       return releaseAction;
     },
@@ -295,6 +306,7 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
             },
           },
         },
+        populate: { release: { select: ['id', 'name'] } },
       });
 
       if (!action) {
@@ -327,13 +339,28 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
             },
           },
         },
+        // Only the field the PUT contract allows. Changing the entry is remove + add.
         data: {
-          ...update,
+          type: update.type,
           isEntryValid: actionStatus,
         },
       });
 
       getService('release', { strapi }).updateReleaseStatus(releaseId);
+
+      // isEntryValid is recalculated, not edited: only the type change is audited
+      if (updatedAction && action.type !== updatedAction.type) {
+        await emitAuditOnCommit({ strapi }, AUDITED_EVENTS.RELEASE_ENTRY_UPDATE, {
+          releaseId: action.release?.id ?? Number(releaseId),
+          name: action.release?.name,
+          actionId: updatedAction.id,
+          contentType: updatedAction.contentType,
+          entryDocumentId: updatedAction.entryDocumentId,
+          locale: updatedAction.locale,
+          from: action.type,
+          to: updatedAction.type,
+        });
+      }
 
       return updatedAction;
     },
@@ -342,7 +369,7 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
       actionId: DeleteReleaseAction.Request['params']['actionId'],
       releaseId: DeleteReleaseAction.Request['params']['releaseId']
     ) {
-      const deletedAction = await strapi.db.query(RELEASE_ACTION_MODEL_UID).delete({
+      const deletedRow = await strapi.db.query(RELEASE_ACTION_MODEL_UID).delete({
         where: {
           id: actionId,
           release: {
@@ -352,15 +379,28 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
             },
           },
         },
+        populate: { release: { select: ['id', 'name'] } },
       });
 
-      if (!deletedAction) {
+      if (!deletedRow) {
         throw new errors.NotFoundError(
           `Action with id ${actionId} not found in release with id ${releaseId} or it is already published`
         );
       }
 
+      const { release: populatedRelease, ...deletedAction } = deletedRow;
+
       getService('release', { strapi }).updateReleaseStatus(releaseId);
+
+      await emitAuditOnCommit({ strapi }, AUDITED_EVENTS.RELEASE_ENTRY_REMOVE, {
+        releaseId: populatedRelease?.id ?? Number(releaseId),
+        name: populatedRelease?.name,
+        actionId: deletedAction.id,
+        type: deletedAction.type,
+        contentType: deletedAction.contentType,
+        entryDocumentId: deletedAction.entryDocumentId,
+        locale: deletedAction.locale,
+      });
 
       return deletedAction;
     },
