@@ -1,5 +1,3 @@
-import { describe, expect, test } from 'vitest';
-
 import { getComponentLayout } from '../InputRenderer';
 
 import type { EditLayout } from '../../../../hooks/useDocumentLayout';
