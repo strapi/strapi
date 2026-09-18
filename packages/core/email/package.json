@@ -92,7 +92,7 @@
     "react-router-dom": "6.30.4",
     "styled-components": "6.4.1",
     "vitest": "catalog:",
-    "vitest-config": "5.52.0"
+    "vitest-config": "5.54.0"
   },
   "peerDependencies": {
     "@strapi/admin": "^5.0.0",
