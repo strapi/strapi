@@ -31,8 +31,7 @@ const LanguageProvider = ({ children, messages }: LanguageProviderProps) => {
           warnedKeysRef.current.add(err.message);
 
           console.warn(
-            `[react-intl] Missing translation detected. English fallback message is being used. ${err.message} ` +
-              'Set STRAPI_ADMIN_LOG_MISSING_TRANSLATIONS=true to see these warnings (dev only).'
+            `[react-intl] Missing translation detected. English fallback message is being used. ${err.message}`
           );
         }
 
