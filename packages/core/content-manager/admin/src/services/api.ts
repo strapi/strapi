@@ -15,6 +15,7 @@ const contentManagerApi = adminApi.enhanceEndpoints({
     'CountDocuments',
     'UpcomingReleasesList',
     'AILocalizationJobs',
+    'Locale',
   ],
 });
 

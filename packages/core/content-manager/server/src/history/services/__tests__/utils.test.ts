@@ -5,6 +5,33 @@ const baseStrapiMock = {
 };
 
 describe('History utils', () => {
+  describe('getVersionStatus', () => {
+    it('does not populate available locales when resolving relation status', async () => {
+      const getMetadata = jest.fn().mockResolvedValue({ availableStatus: [] });
+      const getStatus = jest.fn().mockReturnValue('draft');
+      const strapi = {
+        plugin: jest.fn((name: string) =>
+          name === 'content-manager'
+            ? {
+                service: () => ({ getMetadata, getStatus }),
+              }
+            : undefined
+        ),
+      };
+      const { getVersionStatus } = createServiceUtils({
+        // @ts-expect-error minimal service mock
+        strapi,
+      });
+      const document = { id: 1, documentId: 'doc-1', locale: 'fr', publishedAt: null };
+
+      await getVersionStatus('api::article.article', document);
+
+      expect(getMetadata).toHaveBeenCalledWith('api::article.article', document, {
+        availableLocales: false,
+      });
+    });
+  });
+
   describe('getSchemaAttributesDiff', () => {
     const { getSchemaAttributesDiff } = createServiceUtils({
       // @ts-expect-error ignore

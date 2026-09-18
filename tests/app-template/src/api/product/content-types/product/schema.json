@@ -93,10 +93,19 @@
       "repeatable": true,
       "pluginOptions": {
         "i18n": {
-          "localized": true
+          "localized": false
         }
       },
       "component": "product.variations"
+    },
+    "variationBlocks": {
+      "type": "dynamiczone",
+      "components": ["product.variations"],
+      "pluginOptions": {
+        "i18n": {
+          "localized": false
+        }
+      }
     },
     "type": {
       "type": "enumeration",

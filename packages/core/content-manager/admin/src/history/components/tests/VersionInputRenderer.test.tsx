@@ -11,10 +11,16 @@
  *   - a relation attribute removed from the schema, whose stored historical
  *     value is the raw payload (server's populate skipped it)
  */
+import * as React from 'react';
+
 import { Form } from '@strapi/admin/strapi-admin';
 import { render as renderRTL, screen } from '@tests/utils';
 
-import { CustomRelationInput, resolveComponentRenderResources } from '../VersionInputRenderer';
+import {
+  CustomRelationInput,
+  getLabelAction,
+  resolveComponentRenderResources,
+} from '../VersionInputRenderer';
 
 import type { RelationsFieldProps } from '../../../pages/EditView/components/FormInputs/Relations/Relations';
 
@@ -30,6 +36,32 @@ type RenderFieldOptions = {
   name?: string;
   label?: string;
 };
+
+describe('getLabelAction (history)', () => {
+  it('mounts the i18n action for a shared root field with history wording', () => {
+    const SharedFieldAction = ({ title }: { title: { id: string; defaultMessage: string } }) => (
+      <span>{title.defaultMessage}</span>
+    );
+
+    const action = getLabelAction(
+      <SharedFieldAction
+        title={{
+          id: 'i18n.Field.not-localized',
+          defaultMessage: 'This value is common to all locales',
+        }}
+      />
+    );
+
+    if (!React.isValidElement(action)) {
+      throw new Error('Expected a valid shared-field label action');
+    }
+    renderRTL(action);
+
+    expect(
+      screen.getByText(/If you restore this version and save the changes/i)
+    ).toBeInTheDocument();
+  });
+});
 
 const renderField = (
   initialFormValues: Record<string, unknown>,
