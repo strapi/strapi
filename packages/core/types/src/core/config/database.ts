@@ -65,5 +65,9 @@ export interface Database<TClient extends Database.ClientKind = Database.ClientK
     forceMigration?: boolean;
     runMigrations?: boolean;
     useTypescriptMigrations?: boolean;
+    migrations?: {
+      dir?: string;
+      postDir?: string;
+    };
   };
 }
