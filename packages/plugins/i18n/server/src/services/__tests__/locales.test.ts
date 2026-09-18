@@ -356,7 +356,7 @@ describe('Locales', () => {
       const deletedLocale = await localesService.delete({ id: 1 });
       expect(query).toHaveBeenCalledWith('plugin::i18n.locale');
       expect(deleteFn).not.toHaveBeenCalled();
-      expect(deletedLocale).toBeNull();
+      expect(deletedLocale).toBeUndefined();
       expect(eventHub.emit).not.toHaveBeenCalled();
     });
   });
