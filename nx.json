@@ -50,7 +50,8 @@
         "{projectRoot}/**/*.ts",
         "{projectRoot}/**/.eslintrc.cjs",
         "{projectRoot}/**/tsconfig.eslint.json",
-        "{workspaceRoot}/packages/utils/eslint-config-custom/**/*"
+        "{workspaceRoot}/packages/utils/eslint-config-custom/**/*",
+        { "env": "ESLINT_SKIP_OXLINT_RULES" }
       ],
       "cache": true
     }

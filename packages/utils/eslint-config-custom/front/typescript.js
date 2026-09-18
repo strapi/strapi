@@ -1,5 +1,7 @@
 // @ts-check
 
+const { createOxlintOverride, frontTypeScript } = require('../oxlint');
+
 /** @type {import('eslint').Linter.Config} */
 const config = {
   root: true,
@@ -21,6 +23,7 @@ const config = {
         'no-undef': 'error',
       },
     },
+    ...createOxlintOverride(frontTypeScript),
   ],
   globals: {
     process: true,

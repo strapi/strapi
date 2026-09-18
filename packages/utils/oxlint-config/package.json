@@ -15,11 +15,14 @@
     "./tests": "./tests.ts"
   },
   "devDependencies": {
+    "eslint": "8.57.1",
     "oxlint": "1.72.0",
-    "tsconfig": "5.54.0"
+    "tsconfig": "5.54.0",
+    "tsx": "4.22.4"
   },
   "scripts": {
-    "test:ts": "run -T tsc --noEmit"
+    "test:ts": "run -T tsc --noEmit",
+    "test:unit": "run -T tsx --test __tests__/*.test.ts"
   },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",

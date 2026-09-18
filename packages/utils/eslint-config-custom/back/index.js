@@ -1,5 +1,7 @@
 // @ts-check
 
+const { backJavaScript, createOxlintOverride } = require('../oxlint');
+
 /** @type {import('eslint').Linter.Config} */
 const config = {
   extends: '@strapi/eslint-config/back/javascript',
@@ -44,6 +46,7 @@ const config = {
       },
     ],
   },
+  overrides: createOxlintOverride(backJavaScript),
 };
 
 module.exports = config;
