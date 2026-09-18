@@ -9963,7 +9963,7 @@ __metadata:
     semver: "npm:7.7.4"
     styled-components: "npm:6.4.1"
     vitest: "catalog:"
-    vitest-config: "npm:5.52.0"
+    vitest-config: "npm:5.54.0"
     yup: "npm:0.32.9"
   peerDependencies:
     "@strapi/admin": ^5.0.0
