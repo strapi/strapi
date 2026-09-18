@@ -242,9 +242,13 @@ describe('CM API - first publish with experimental_firstPublishedAt', () => {
         documentId: cloned.documentId,
         status: 'draft',
       });
+      const sourceDraftAfterClone = await strapi.documents(UID).findOne({
+        documentId,
+        status: 'draft',
+      });
 
       expect(clonedDraft.firstPublishedAt).toBeNull();
-      expect(sourceDraft.firstPublishedAt).not.toBeNull();
+      expect(sourceDraftAfterClone.firstPublishedAt).not.toBeNull();
     });
   });
 });
