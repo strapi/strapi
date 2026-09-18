@@ -1,0 +1,49 @@
+# SECURITY (read before editing):
+# Runs on a schedule / manual dispatch from the BASE branch only — PR head code
+# is never checked out or executed. The compiled script only uses the
+# repo token and reads PR metadata; PR-controlled values are never interpolated
+# into `run:` steps.
+
+name: CLA Reminder
+
+on:
+  schedule:
+    - cron: '30 10 * * *' # Daily at 10:30am UTC (offset from the community lifecycle cron)
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run — report what would change without making changes'
+        type: boolean
+        default: true
+
+env:
+  CLA_REMINDER_DAYS: ${{ vars.CLA_REMINDER_DAYS || '7' }}
+  CLA_STALE_DAYS: ${{ vars.CLA_STALE_DAYS || '7' }}
+  CLA_STATUS_CONTEXT: ${{ vars.CLA_STATUS_CONTEXT || 'license/cla' }}
+
+permissions: {}
+
+jobs:
+  cla-reminder:
+    name: Remind unsigned CLAs and mark stale
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Checkout base branch
+        uses: actions/checkout@v4
+
+      - name: Install and build scripts
+        run: cd .github/scripts && npm install && npx tsup cla-reminder.ts --format cjs --target node20 --out-dir dist --no-splitting
+
+      - name: Process CLA reminders
+        uses: actions/github-script@v7
+        env:
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+        with:
+          script: |
+            const { processClaReminders } = require('./.github/scripts/dist/cla-reminder.js')
+            await processClaReminders({ github, context, core })
