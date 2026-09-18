@@ -25,6 +25,7 @@ exports[`content-types:list should output list of content-types 1`] = `
 │ api::product.product                                 │
 │ api::relation-lab.relation-lab                       │
 │ api::relation-target.relation-target                 │
+│ api::relation-target-non-dp.relation-target-non-dp   │
 │ api::shop.shop                                       │
 │ api::single-type-localized.single-type-localized     │
 │ api::single-type-non-local.single-type-non-local     │

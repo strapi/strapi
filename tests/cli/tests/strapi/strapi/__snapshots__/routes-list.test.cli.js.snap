@@ -62,6 +62,11 @@ exports[`routes:list should output list of routes 1`] = `
 │ POST               │ /api/relation-targets                                                           │
 │ PUT                │ /api/relation-targets/:id                                                       │
 │ DELETE             │ /api/relation-targets/:id                                                       │
+│ HEAD|GET           │ /api/relation-target-non-dps                                                    │
+│ HEAD|GET           │ /api/relation-target-non-dps/:id                                                │
+│ POST               │ /api/relation-target-non-dps                                                    │
+│ PUT                │ /api/relation-target-non-dps/:id                                                │
+│ DELETE             │ /api/relation-target-non-dps/:id                                                │
 │ HEAD|GET           │ /api/shop                                                                       │
 │ PUT                │ /api/shop                                                                       │
 │ DELETE             │ /api/shop                                                                       │
