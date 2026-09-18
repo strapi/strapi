@@ -129,12 +129,11 @@ const EditViewPage = () => {
 
   const { isLazyLoading } = useLazyComponents([]);
 
-  const isLoading =
-    !isHydrated || isLoadingActionsRBAC || isLoadingDocument || isLoadingLayout || isLazyLoading;
+  const isLoading = !isHydrated || isLoadingDocument || isLoadingLayout || isLazyLoading;
 
   const initialValues = getInitialFormValues(isCreatingDocument);
 
-  if (isLoading && !document?.documentId) {
+  if (isLoadingActionsRBAC || (isLoading && !document?.documentId)) {
     return <Page.Loading />;
   }
 

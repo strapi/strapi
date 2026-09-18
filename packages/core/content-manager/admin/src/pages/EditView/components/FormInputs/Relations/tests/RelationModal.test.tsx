@@ -1,6 +1,18 @@
-import { DocumentMeta } from '../../../../../../hooks/useDocumentContext';
-import { reducer, prefillParentRelation, type State, type Action } from '../RelationModal';
+import { render, screen } from '@tests/utils';
 
+import { DocumentRBAC } from '../../../../../../features/DocumentRBAC';
+import { DocumentMeta } from '../../../../../../hooks/useDocumentContext';
+import {
+  reducer,
+  prefillParentRelation,
+  RelationModalFormBody,
+  type State,
+  type Action,
+  type RelationModalFormBodyProps,
+} from '../RelationModal';
+
+import type { DocumentActionProps } from '../../../../../../content-manager';
+import type { UseDocument } from '../../../../../../hooks/useDocument';
 import type { AnyData } from '../../../../utils/data';
 
 describe('Document Modal Reducer', () => {
@@ -403,5 +415,51 @@ describe('prefillParentRelation', () => {
         parentDocument: { title: 'Draft parent' },
       })
     ).toBe(initialValues);
+  });
+});
+
+describe('RelationModalFormBody', () => {
+  const mockPlugins = {
+    'content-manager': {
+      apis: {
+        getDocumentActions: () => [],
+      },
+    },
+  } as unknown as RelationModalFormBodyProps['plugins'];
+
+  const mockDocumentActionProps = {
+    activeTab: 'draft',
+    collectionType: 'collection-types',
+    model: 'api::address.address',
+    documentId: '12345',
+    document: undefined,
+    meta: undefined,
+  } as unknown as DocumentActionProps;
+
+  const mockCurrentDocument = {
+    document: undefined,
+    schema: undefined,
+  } as unknown as ReturnType<UseDocument>;
+
+  it('shows a loader instead of rendering document actions and the form while permissions are resolving', async () => {
+    render(
+      <DocumentRBAC permissions={[]} model="api::address.address">
+        <RelationModalFormBody
+          currentDocument={mockCurrentDocument}
+          documentTitle="Entry 1"
+          hasDraftAndPublished={false}
+          layout={[]}
+          plugins={mockPlugins}
+          props={mockDocumentActionProps}
+        />
+      </DocumentRBAC>
+    );
+
+    // The document title (and the rest of the form) must not render before permissions resolve.
+    expect(screen.queryByText('Entry 1')).not.toBeInTheDocument();
+    expect(screen.getByText('Relations are loading')).toBeInTheDocument();
+
+    await screen.findByText('Entry 1');
+    expect(screen.queryByText('Relations are loading')).not.toBeInTheDocument();
   });
 });
