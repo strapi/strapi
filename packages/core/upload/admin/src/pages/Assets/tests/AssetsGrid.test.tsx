@@ -185,6 +185,23 @@ describe('AssetsGrid', () => {
       expect(screen.queryByTestId('assets-grid')).not.toBeInTheDocument();
     });
 
+    it('adds columns on wider viewports instead of stretching the tiles', () => {
+      setup();
+
+      // The design system's `Grid.Item` has no breakpoint above `m` (1080px), so the
+      // 12-column spans this used to carry held the list at four columns on every wider
+      // screen and grew each tile instead. An intrinsic track list has no such ceiling.
+      // Reading the compiled CSS for the same reason as the stacking test above.
+      // eslint-disable-next-line testing-library/no-node-access
+      const css = Array.from(document.querySelectorAll('style'))
+        .map((style) => style.textContent ?? '')
+        .join('\n');
+
+      expect(css).toContain(
+        'grid-template-columns:repeat(auto-fill, minmax(min(240px, 100%), 1fr))'
+      );
+    });
+
     // The page's background context menu reads this attribute to tell an item
     // apart from empty space — see MainAreaContextMenu.
     it('opts every card out of the background context menu', () => {
