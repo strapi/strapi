@@ -9,25 +9,25 @@ const renderGridStyles = (userAgent: string | undefined, col: number) => {
   let mediumBreakpoint = '';
 
   try {
-    Object.defineProperty(globalThis, 'navigator', {
-      configurable: true,
-      value: userAgent === undefined ? undefined : { userAgent },
-    });
-
     // The exported component chooses its branch when the module is evaluated. Load React,
     // its renderer, and styled-components together so each isolated module shares one instance.
     jest.isolateModules(() => {
       const React = jest.requireActual<typeof import('react')>('react');
-      const { renderToStaticMarkup } = jest.requireActual<typeof import('react-dom/server')>(
-        'react-dom/server.node'
-      );
+      const { renderToStaticMarkup } =
+        jest.requireActual<typeof import('react-dom/server')>('react-dom/server.node');
       const { ServerStyleSheet, ThemeProvider } =
         jest.requireActual<typeof import('styled-components')>('styled-components');
       const { lightTheme } =
         jest.requireActual<typeof import('@strapi/design-system')>('@strapi/design-system');
-      const { ResponsiveGridItem } = jest.requireActual<typeof import('../FormLayout')>(
-        '../FormLayout'
-      );
+
+      // Browser-aware dependencies initialize before varying the environment observed by
+      // FormLayout. In particular, React DOM reads navigator while a JSDOM window exists.
+      Object.defineProperty(globalThis, 'navigator', {
+        configurable: true,
+        value: userAgent === undefined ? undefined : { userAgent },
+      });
+      const { ResponsiveGridItem } =
+        jest.requireActual<typeof import('../FormLayout')>('../FormLayout');
       const sheet = new ServerStyleSheet();
 
       try {
@@ -70,14 +70,17 @@ const renderGridStyles = (userAgent: string | undefined, col: number) => {
 };
 
 describe('FormLayout responsive grid environment', () => {
-  it.each([4, 6])('emits the configured %i-column breakpoint for a browser in NODE_ENV=test', (col) => {
-    expect(process.env.NODE_ENV).toBe('test');
-    const { componentStyles, mediumBreakpoint } = renderGridStyles(browserUserAgent, col);
+  it.each([4, 6])(
+    'emits the configured %i-column breakpoint for a browser in NODE_ENV=test',
+    (col) => {
+      expect(process.env.NODE_ENV).toBe('test');
+      const { componentStyles, mediumBreakpoint } = renderGridStyles(browserUserAgent, col);
 
-    expect(componentStyles).toContain('grid-column:span12;');
-    expect(componentStyles).toContain(mediumBreakpoint);
-    expect(componentStyles).toContain(`grid-column:span${col};`);
-  });
+      expect(componentStyles).toContain('grid-column:span12;');
+      expect(componentStyles).toContain(mediumBreakpoint);
+      expect(componentStyles).toContain(`grid-column:span${col};`);
+    }
+  );
 
   it('emits only the full-width wrapper in JSDOM', () => {
     const { componentStyles, mediumBreakpoint } = renderGridStyles('Mozilla/5.0 (jsdom/26.1.0)', 6);
