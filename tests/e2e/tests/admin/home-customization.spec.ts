@@ -44,10 +44,12 @@ test.describe('Homepage Widget Customization', () => {
 
     // Hover over the widget to make delete button visible
     await profileWidget.hover();
-    await page.waitForTimeout(1000); // Wait for hover effects to appear
 
     // Look for delete button (it has text "Delete" but aria-label is null)
     const deleteButton = profileWidget.locator('button').first();
+    // Wait for the hover-triggered reveal instead of a fixed sleep; a widget without a
+    // delete button leaves this pending, which the count() check below still handles.
+    await deleteButton.waitFor({ state: 'visible', timeout: 2_000 }).catch(() => {});
 
     if ((await deleteButton.count()) > 0) {
       // Click delete button
