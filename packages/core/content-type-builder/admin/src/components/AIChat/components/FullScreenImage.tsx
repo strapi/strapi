@@ -244,4 +244,5 @@ const Trigger = ({ children, asChild = false }: FullScreenImageTriggerProps) => 
 export const FullScreenImage = {
   Root,
   Trigger,
+  useFullScreenImage,
 };
