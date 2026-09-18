@@ -587,4 +587,42 @@ describe('transaction context ownership', () => {
     assert.equal(transactions.length, 1);
     assert.deepEqual(calls, ['commit']);
   });
+
+  (['commit', 'rollback'] as const).forEach((finalization) => {
+    it(`preserves ${finalization} hooks when a completed transactor still has a pending finalizer`, async () => {
+      const finish = createGate();
+      const transaction = createTransaction();
+      const calls: string[] = [];
+      let finalizations = 0;
+      const slowTransaction = {
+        ...transaction,
+        async [finalization]() {
+          finalizations += 1;
+          // Knex can mark a transaction completed before its finalizer promise settles.
+          const result = transaction[finalization]();
+          await finish.promise;
+          return result;
+        },
+      } as unknown as Knex.Transaction;
+      const { database, transactions } = createDatabase(slowTransaction);
+
+      await database.transaction(async (outer) => {
+        const register = finalization === 'commit' ? outer.onCommit : outer.onRollback;
+        register(() => calls.push(finalization));
+        const first = outer[finalization]();
+        const second = outer[finalization]();
+        try {
+          assert.equal(outer.trx.isCompleted(), true);
+          assert.equal(finalizations, 1);
+          assert.deepEqual(calls, []);
+        } finally {
+          finish.release();
+          await Promise.all([first, second]);
+        }
+      });
+
+      assert.equal(transactions.length, 1);
+      assert.deepEqual(calls, [finalization]);
+    });
+  });
 });

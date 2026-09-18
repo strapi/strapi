@@ -30,6 +30,7 @@ interface TransactionStore extends Store {
   // Retain ownership through a failed commit so its rollback can still find the hooks.
   owner: Knex.Transaction | null;
   phase: 'active' | 'finalizing' | 'closed';
+  finalization?: { event: 'commit' | 'rollback'; promise: Promise<void> };
 }
 
 const storage = new AsyncLocalStorage<TransactionStore>();
@@ -59,6 +60,15 @@ const closeStore = (store: TransactionStore | undefined) => {
 
 const finalize = async (trx: Knex.Transaction, event: 'commit' | 'rollback') => {
   const store = getTransactionStore(trx);
+  // Completion can be reported before the driver promise settles. Repeated helpers must
+  // await that finalizer rather than clear its hooks or send another finalization query.
+  if (store?.finalization) {
+    if (store.finalization.event !== event) {
+      throw new Error('Transaction is finalizing; another finalizer is not allowed.');
+    }
+    return store.finalization.promise;
+  }
+
   if (isTransactorComplete(trx)) {
     closeStore(store);
     return;
@@ -69,27 +79,41 @@ const finalize = async (trx: Knex.Transaction, event: 'commit' | 'rollback') => 
     store.phase = 'finalizing';
   }
 
-  try {
-    await trx[event]();
-  } catch (error) {
-    if (store) {
-      store.phase = 'closed';
-      store.trx = null;
+  const finish = async () => {
+    try {
+      await trx[event]();
+    } catch (error) {
+      if (store) {
+        store.phase = 'closed';
+        store.trx = null;
+      }
+      // A rejected commit still needs its owner and hooks for the wrapper's rollback path.
+      // A rejected rollback is terminal: do not retain the transactor or either hook list.
+      if (event === 'rollback') {
+        closeStore(store);
+      }
+      throw error;
     }
-    // A rejected commit still needs its owner and hooks for the wrapper's rollback path.
-    // A rejected rollback is terminal: do not retain the transactor or either hook list.
-    if (event === 'rollback') {
-      closeStore(store);
-    }
-    throw error;
+
+    const callbacks = store?.[event === 'commit' ? 'commitCallbacks' : 'rollbackCallbacks'] ?? [];
+    closeStore(store);
+
+    // Only completion hooks get a clean context. Already-created descendants keep the closed
+    // store, while recovery work (including async hook continuations) starts outside it.
+    storage.exit(() => callbacks.forEach((cb) => cb()));
+  };
+
+  const promise = finish();
+  if (store) {
+    store.finalization = { event, promise };
   }
-
-  const callbacks = store?.[event === 'commit' ? 'commitCallbacks' : 'rollbackCallbacks'] ?? [];
-  closeStore(store);
-
-  // Only completion hooks get a clean context. Already-created descendants keep the closed
-  // store, while recovery work (including async hook continuations) starts outside it.
-  storage.exit(() => callbacks.forEach((cb) => cb()));
+  try {
+    await promise;
+  } finally {
+    if (store) {
+      store.finalization = undefined;
+    }
+  }
 };
 
 const transactionCtx = {
