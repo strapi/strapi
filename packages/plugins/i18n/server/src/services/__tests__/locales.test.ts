@@ -31,7 +31,7 @@ const transactionMocks = (lockedRows: Array<{ id: number }> = []) => {
 
   return {
     queryBuilder: jest.fn(() => queryBuilder),
-    transaction: jest.fn(async (callback: any) => callback({ trx })),
+    transaction: jest.fn(async (handler: any) => handler({ trx })),
   };
 };
 
