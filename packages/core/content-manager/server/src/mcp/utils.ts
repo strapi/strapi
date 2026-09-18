@@ -1,6 +1,8 @@
 import type { Modules, UID } from '@strapi/types';
 
 import { formatDocumentWithMetadata } from '../controllers/utils/metadata';
+import { populateBuilder } from '../services/populate-builder';
+import { getPopulateForLocalizations } from '../services/utils/populate';
 import type { GetMetadataOptions } from '../services/document-metadata';
 import { shapeRelationsForMcp } from './sanitizers/shape-relations';
 
@@ -19,6 +21,23 @@ export const slugifyUidForMcpToolName = (uid: string): string => {
   }
 
   return `${namespace.toLowerCase()}-${parts.join('_')}`;
+};
+
+/**
+ * Populate for the document a write handler echoes back.
+ * Deliberately skips `countRelations()`: `reduceToIdentity` reduces the resulting `{ count: N }`
+ * to `[]`, which reports a populated to-many relation as empty.
+ */
+export const buildWriteReplyPopulate = async (uid: UID.ContentType) => {
+  const populate = await populateBuilder(uid)
+    .populateDeep(Infinity)
+    .withPopulateOverride(getPopulateForLocalizations(uid))
+    .build();
+
+  // `populateDeep` resolves through `getDeepPopulate`, which always returns the object notation.
+  // The builder's return type also covers the string notation, which only `populateFromQuery`
+  // can produce, and which the document manager write options do not accept.
+  return populate as Exclude<typeof populate, string>;
 };
 
 type McpPermissionChecker = {
