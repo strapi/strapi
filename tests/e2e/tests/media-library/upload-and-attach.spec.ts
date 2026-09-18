@@ -10,14 +10,14 @@ import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
 /**
  * The `media.upload-and-attach` critical path.
  *
- * `media-library/future/media-library-upload.spec.ts` covers upload against the beta library.
+ * `media-library/media-library-upload.spec.ts` covers upload against the current library.
  * Nothing covered attaching an asset to an entry, on either implementation.
  *
- * Deliberately carries no `E2E_MEDIA_LIBRARY` gate, unlike the specs under `future/`.
+ * Deliberately carries no `E2E_MEDIA_LIBRARY` gate, unlike the other specs in this directory.
  *
  * Selecting a library swaps the Media Library page only. `upload/admin/src/index.ts` registers the
  * `media` field (`MediaLibraryInput`) and the picker (`MediaLibraryDialog`) outside its
- * `if (!isLegacyMediaLibrary)` block, and neither the current library nor `future/` ships an
+ * `if (!isLegacyMediaLibrary)` block, and neither the current library nor `legacy/` ships an
  * equivalent — so entry editing opens the same component tree whichever library is selected, and
  * one spec covers both suites. Confirmed by running it under `current` and `legacy`.
  *
