@@ -12,6 +12,7 @@ import { Layouts } from '../../../../../components/Layouts/Layout';
 import { BackButton } from '../../../../../features/BackButton';
 import { useEnterprise } from '../../../../../hooks/useEnterprise';
 
+import { ContentTypesInput } from './ContentTypesInput';
 import { EventTableCE } from './EventsTable';
 import { HeadersInput } from './HeadersInput';
 import { TriggerContainer } from './TriggerContainer';
@@ -23,6 +24,7 @@ interface WebhookFormValues {
   url: Modules.WebhookStore.Webhook['url'];
   headers: Array<{ key: string; value: string }>;
   events: Modules.WebhookStore.Webhook['events'];
+  contentTypes: Modules.WebhookStore.Webhook['contentTypes'];
 }
 
 interface WebhookFormProps {
@@ -80,6 +82,7 @@ const WebhookForm = ({
         url: data?.url || '',
         headers: mapHeaders(data?.headers || {}),
         events: data?.events || [],
+        contentTypes: data?.contentTypes || [],
       }}
       method={isCreating ? 'POST' : 'PUT'}
       onSubmit={handleSubmit}
@@ -180,6 +183,7 @@ const WebhookForm = ({
                     ))}
                   </Grid.Root>
                   <HeadersInput />
+                  <ContentTypesInput />
                   <EventTable />
                 </Flex>
               </Box>
@@ -264,6 +268,7 @@ const makeWebhookValidationSchema = ({ formatMessage }: Pick<IntlShape, 'formatM
       );
     }),
     events: yup.array(),
+    contentTypes: yup.array().of(yup.string()),
   });
 
 export { WebhookForm };

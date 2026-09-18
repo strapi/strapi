@@ -104,11 +104,32 @@ class WebhookRunner {
     const activeWebhooks = webhooks.filter((webhook) => webhook.isEnabled === true);
 
     for (const webhook of activeWebhooks) {
+      if (!this.shouldDeliver(webhook, info)) {
+        continue;
+      }
+
       await this.run(webhook, event, info).catch((error: unknown) => {
         this.logger.error('Error running webhook');
         this.logger.error(error);
       });
     }
+  }
+
+  /**
+   * A webhook restricted to a set of content types only delivers events whose
+   * payload carries a matching `uid` (e.g. entry events). Events without a `uid`
+   * (media, media-folder) never match a restriction, since they aren't a content
+   * type. An unrestricted webhook (no `contentTypes`, or an empty list) delivers
+   * every event, matching the previous behaviour.
+   */
+  shouldDeliver(webhook: Webhook, info: Record<string, unknown> = {}): boolean {
+    const { contentTypes } = webhook;
+
+    if (!contentTypes || contentTypes.length === 0) {
+      return true;
+    }
+
+    return typeof info.uid === 'string' && contentTypes.includes(info.uid);
   }
 
   run(webhook: Webhook, event: string, info = {}) {
