@@ -42,9 +42,7 @@ describe('server tsconfig', () => {
       });
       const diagnostics = ts.getPreEmitDiagnostics(program);
 
-      expect(diagnostics).toEqual(
-        expect.arrayContaining([expect.objectContaining({ code: 7006 })])
-      );
+      expect(diagnostics).toEqual(expect.arrayContaining([expect.objectContaining({ code: 7006 })]));
     } finally {
       fs.rmSync(root, { recursive: true, force: true });
     }
