@@ -161,9 +161,13 @@ export type ObjectNotation<TSchemaUID extends UID.Schema> = [
     >
   : never;
 
-export type NestedParams<TSchemaUID extends UID.Schema> = Params.Pick<
-  TSchemaUID,
-  'fields' | 'filters' | 'populate' | 'sort' | 'plugin'
+export type NestedParams<TSchemaUID extends UID.Schema> = Intersect<
+  [
+    Params.Pick<TSchemaUID, 'fields' | 'filters' | 'populate' | 'sort' | 'plugin'>,
+    // Only `status` is supported in nested populate; `hasPublishedVersion` and
+    // `publicationFilter` remain root-level params.
+    Pick<Params.PublicationStatus.Param, 'status'>,
+  ]
 >;
 
 export type Any<TSchemaUID extends UID.Schema> =

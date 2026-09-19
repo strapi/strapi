@@ -142,6 +142,7 @@ export interface PopulateObjectParams {
   start?: number | string;
   page?: number | string;
   pageSize?: number | string;
+  status?: 'draft' | 'published';
 }
 
 type PopulateParams = string | string[] | PopulateAttributesParams;
@@ -606,10 +607,25 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
       throw new ValidationError(`Invalid nested populate. Expected '*' or an object`);
     }
 
-    const { sort, filters, fields, populate, count, ordering, page, pageSize, start, limit } =
-      subPopulate as PopulateObjectParams;
+    const {
+      sort,
+      filters,
+      fields,
+      populate,
+      count,
+      ordering,
+      page,
+      pageSize,
+      start,
+      limit,
+      status,
+    } = subPopulate as PopulateObjectParams;
 
     const query: Query = {};
+
+    if (!isNil(status)) {
+      convertStatusParams(status, query);
+    }
 
     applySortToQuery(query, sort);
 

@@ -739,7 +739,9 @@ const getPopulateValue = (populate: Record<string, any>, filters: Record<string,
     populateValue.on = _.mapValues(
       (value) => {
         if (_.isPlainObject(value)) {
-          value.filters = filters;
+          // Fragments may carry their own `filters` (e.g. from a nested `status`
+          // param); only inherit the parent filters when they don't.
+          value.filters ??= filters;
         }
 
         return value;
