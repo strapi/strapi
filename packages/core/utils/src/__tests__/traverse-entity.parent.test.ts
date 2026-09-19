@@ -62,7 +62,9 @@ describe('traverseEntity parent context', () => {
       }
     );
 
-    const componentMarkerCall = visitor.mock.calls.find(([options]) => options.key === '__component');
+    const componentMarkerCall = visitor.mock.calls.find(
+      ([options]) => options.key === '__component'
+    );
 
     expect(componentMarkerCall?.[0].parent).toEqual({
       schema: article,
