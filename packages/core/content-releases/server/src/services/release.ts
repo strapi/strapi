@@ -19,7 +19,7 @@ import type {
 } from '../../../shared/contracts/releases';
 import type { ReleaseAction } from '../../../shared/contracts/release-actions';
 import type { UserInfo } from '../../../shared/types';
-import { getService, getPublishOrderForContentTypes } from '../utils';
+import { getService, getPublishOrderForContentTypes, getDraftEntryValidStatus } from '../utils';
 import { getReleaseChanges } from '../audit-logs';
 
 const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
@@ -78,6 +78,34 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
     }
 
     return formattedActions;
+  };
+
+  const validatePublishActions = async (releaseId: Release['id']) => {
+    const actions = (await strapi.db.query(RELEASE_ACTION_MODEL_UID).findMany({
+      where: {
+        release: {
+          id: releaseId,
+        },
+        type: 'publish',
+      },
+    })) as ReleaseAction[];
+
+    const validity = await Promise.all(
+      actions.map((action) =>
+        getDraftEntryValidStatus(
+          {
+            contentType: action.contentType,
+            documentId: action.entryDocumentId,
+            locale: action.locale,
+          },
+          { strapi }
+        )
+      )
+    );
+
+    if (validity.some((isValid) => !isValid)) {
+      throw new errors.ValidationError('Release is blocked');
+    }
   };
 
   return {
@@ -328,6 +356,11 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
         if (lockedRelease.status === 'failed') {
           throw new errors.ValidationError('Release failed to publish');
         }
+
+        // Release action validity is cached for the admin UI and can become stale when
+        // content changes outside the document-service middleware. Revalidate immediately
+        // before publishing so the publish decision reflects the current entries.
+        await validatePublishActions(releaseId);
 
         try {
           strapi.log.info(`[Content Releases] Starting to publish release ${lockedRelease.name}`);

@@ -2,6 +2,14 @@ import { queryParams } from '@strapi/utils';
 
 import createReleaseService from '../release';
 import releaseCT from '../../content-types/release/schema';
+import { getDraftEntryValidStatus } from '../../utils';
+
+jest.mock('../../utils', () => ({
+  ...jest.requireActual('../../utils'),
+  getDraftEntryValidStatus: jest.fn(),
+}));
+
+const mockGetDraftEntryValidStatus = jest.mocked(getDraftEntryValidStatus);
 
 const mockSchedulingSet = jest.fn();
 const mockSchedulingCancel = jest.fn();
@@ -244,6 +252,11 @@ describe('Release service', () => {
   });
 
   describe('publish', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockGetDraftEntryValidStatus.mockResolvedValue(true);
+    });
+
     it('throws an error if the release does not exist', () => {
       mockExecute.mockReturnValueOnce(null);
 
@@ -260,6 +273,104 @@ describe('Release service', () => {
       const releaseService = createReleaseService({ strapi: baseStrapiMock });
 
       expect(() => releaseService.publish(1)).rejects.toThrow('Release already published');
+    });
+
+    it('revalidates publish actions and blocks entries that are currently invalid', async () => {
+      mockExecute.mockReturnValueOnce({
+        id: 1,
+        name: 'Release',
+        releasedAt: null,
+        status: 'ready',
+      });
+      mockGetDraftEntryValidStatus.mockResolvedValueOnce(false);
+
+      const action = {
+        contentType: 'api::contentTypeA.contentTypeA',
+        type: 'publish',
+        entryDocumentId: 'doc1',
+        locale: 'en',
+      };
+
+      const strapiMock = {
+        ...baseStrapiMock,
+        db: {
+          ...baseStrapiMock.db,
+          query: jest.fn().mockReturnValue({
+            findMany: jest.fn().mockResolvedValue([action]),
+            update: jest.fn(),
+          }),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      await expect(releaseService.publish(1)).rejects.toThrow('Release is blocked');
+
+      expect(mockGetDraftEntryValidStatus).toHaveBeenCalledWith(
+        {
+          contentType: action.contentType,
+          documentId: action.entryDocumentId,
+          locale: action.locale,
+        },
+        { strapi: strapiMock }
+      );
+      expect(mockPublish).not.toHaveBeenCalled();
+    });
+
+    it('publishes a stale blocked release when its entries are currently valid', async () => {
+      mockExecute.mockReturnValueOnce({
+        id: 1,
+        name: 'Release',
+        releasedAt: null,
+        status: 'blocked',
+      });
+      mockGetDraftEntryValidStatus.mockResolvedValueOnce(true);
+
+      const action = {
+        contentType: 'api::contentTypeA.contentTypeA',
+        type: 'publish',
+        entryDocumentId: 'doc1',
+        locale: 'en',
+      };
+
+      const strapiMock = {
+        ...baseStrapiMock,
+        db: {
+          ...baseStrapiMock.db,
+          query: jest.fn().mockImplementation((modelUid: string) => {
+            if (modelUid === 'plugin::content-releases.release-action') {
+              return {
+                findMany: jest.fn().mockResolvedValue([action]),
+              };
+            }
+
+            return {
+              update: jest.fn().mockResolvedValue({
+                id: 1,
+                name: 'Release',
+                status: 'done',
+                releasedAt: new Date(),
+              }),
+            };
+          }),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      await releaseService.publish(1);
+
+      expect(mockGetDraftEntryValidStatus).toHaveBeenCalledWith(
+        {
+          contentType: action.contentType,
+          documentId: action.entryDocumentId,
+          locale: action.locale,
+        },
+        { strapi: strapiMock }
+      );
+      expect(mockPublish).toHaveBeenCalledWith({ documentId: 'doc1', locale: 'en' });
     });
 
     it('throws an error if the release have 0 actions', () => {
