@@ -41,9 +41,9 @@ const GRAPHQL_ENUM_REGEX = /^[_A-Za-z][_0-9A-Za-z]*$/;
 /**
  * AI can generate enum values that are valid strings but invalid GraphQL enum names after
  * regression, for example a list of years (`2020`, `2021`, ...). Prefix only those values with
- * an underscore so the CTB can save them while preserving the generated value as closely as
- * possible. Values that regress to an empty string stay untouched so normal validation can reject
- * them instead of silently inventing a value.
+ * `value_` so the regressed value always starts with a GraphQL-safe letter. Values that regress to
+ * an empty string stay untouched so normal validation can reject them instead of silently inventing
+ * a value.
  */
 const normalizeAIEnumValue = (value: unknown) => {
   if (typeof value !== 'string') {
@@ -55,7 +55,7 @@ const normalizeAIEnumValue = (value: unknown) => {
     return value;
   }
 
-  return `_${value}`;
+  return `value_${value}`;
 };
 
 const normalizeAIEnumerationAttribute = (
