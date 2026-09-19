@@ -210,7 +210,6 @@ const UIDInput = React.forwardRef<HTMLInputElement, UIDInputProps>(
                   $available={!!availability?.isAvailable}
                   pointerEvents="none"
                   width="100px"
-                  flexShrink={0}
                 >
                   {availability?.isAvailable ? <CheckCircle /> : <WarningCircle />}
 
