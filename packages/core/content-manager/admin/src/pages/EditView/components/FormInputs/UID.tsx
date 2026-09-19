@@ -197,7 +197,7 @@ const UIDInput = React.forwardRef<HTMLInputElement, UIDInputProps>(
     return (
       <Field.Root hint={hint} name={name} error={field.error} required={required}>
         <Field.Label action={labelAction}>{label}</Field.Label>
-        <UIDTextInput
+        <TextInput
           ref={composedRefs}
           disabled={props.disabled}
           endAction={
@@ -269,6 +269,7 @@ const UIDInput = React.forwardRef<HTMLInputElement, UIDInputProps>(
           onChange={field.onChange}
           value={field.value ?? ''}
           {...props}
+          style={{ textOverflow: 'ellipsis', ...props.style }}
           type="text"
         />
         <Field.Error />
@@ -277,10 +278,6 @@ const UIDInput = React.forwardRef<HTMLInputElement, UIDInputProps>(
     );
   }
 );
-
-const UIDTextInput = styled(TextInput)`
-  text-overflow: ellipsis;
-`;
 
 /* -------------------------------------------------------------------------------------------------
  * FieldActionWrapper
