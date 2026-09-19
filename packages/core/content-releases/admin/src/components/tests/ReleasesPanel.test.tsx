@@ -102,7 +102,9 @@ describe('ReleasesPanel permissions', () => {
     await user.click(await screen.findByRole('button', { name: 'Release action options' }));
 
     expect(await screen.findByRole('menuitem', { name: 'Edit release' })).toBeInTheDocument();
-    expect(await screen.findByRole('menuitem', { name: 'Remove from release' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('menuitem', { name: 'Remove from release' })
+    ).toBeInTheDocument();
   });
 
   test('retains only the removal action for a user with removal permission', async () => {
@@ -112,9 +114,7 @@ describe('ReleasesPanel permissions', () => {
 
     await user.click(await screen.findByRole('button', { name: 'Release action options' }));
     expect(screen.queryByRole('menuitem', { name: 'Edit release' })).not.toBeInTheDocument();
-    await user.click(
-      await screen.findByRole('menuitem', { name: 'Remove from release' })
-    );
+    await user.click(await screen.findByRole('menuitem', { name: 'Remove from release' }));
 
     await waitFor(() => expect(remove).toHaveBeenCalledTimes(1));
   });
