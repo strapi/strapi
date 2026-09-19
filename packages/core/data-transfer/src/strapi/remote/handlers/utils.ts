@@ -151,20 +151,21 @@ export const handlerControllerFactory =
 
     return async (ctx: Context) => {
       const cb: WSCallback = (ws) => {
+        const connectionStrapi = strapi;
         const state: TransferState = { id: undefined };
         const messageUUIDs = new Set<string>();
         const diagnostics = createDiagnosticReporter();
 
         const cannotRespondHandler = (err: unknown) => {
-          strapi?.log?.error(
+          connectionStrapi.log?.error(
             '[Data transfer] Cannot send error response to client, closing connection'
           );
-          strapi?.log?.error(err);
+          connectionStrapi.log?.error(err);
           try {
             ws.terminate();
             ctx.req.socket.destroy();
           } catch {
-            strapi?.log?.error('[Data transfer] Failed to close socket on error');
+            connectionStrapi.log?.error('[Data transfer] Failed to close socket on error');
           }
         };
 
@@ -347,21 +348,24 @@ export const handlerControllerFactory =
           try {
             await handler.onClose(...args);
           } catch (err) {
-            strapi?.log?.error('[Data transfer] Uncaught error closing connection');
-            strapi?.log?.error(err);
+            connectionStrapi.log?.error('[Data transfer] Uncaught error closing connection');
+            connectionStrapi.log?.error(err);
             cannotRespondHandler(err);
           } finally {
-            resetTimeouts();
-            strapi.db.lifecycles.enable();
-            strapi.log.info('[Data transfer] Restoring lifecycle hooks');
+            // A delayed close must not revive a destroyed or replacement instance.
+            if (hasHttpServer() && strapi === connectionStrapi) {
+              resetTimeouts();
+              connectionStrapi.db.lifecycles.enable();
+              connectionStrapi.log.info('[Data transfer] Restoring lifecycle hooks');
+            }
           }
         });
         ws.on('error', async (...args) => {
           try {
             await handler.onError(...args);
           } catch (err) {
-            strapi?.log?.error('[Data transfer] Uncaught error in error handling');
-            strapi?.log?.error(err);
+            connectionStrapi.log?.error('[Data transfer] Uncaught error in error handling');
+            connectionStrapi.log?.error(err);
             cannotRespondHandler(err);
           }
         });
@@ -369,8 +373,8 @@ export const handlerControllerFactory =
           try {
             await handler.onMessage(...args);
           } catch (err) {
-            strapi?.log?.error('[Data transfer] Uncaught error in message handling');
-            strapi?.log?.error(err);
+            connectionStrapi.log?.error('[Data transfer] Uncaught error in message handling');
+            connectionStrapi.log?.error(err);
             cannotRespondHandler(err);
           }
         });
