@@ -1,4 +1,4 @@
-import type { UID, Modules } from '@strapi/types';
+import type { UID, Modules, Schema } from '@strapi/types';
 import { async, errors } from '@strapi/utils';
 import { assoc, omit } from 'lodash/fp';
 
@@ -32,13 +32,64 @@ const isStrictRelationsEnabled = (): boolean => {
   return rawStrictRelations === true;
 };
 
+type CreateEntryOptions = {
+  trustStoredPasswords?: boolean;
+};
+
+const getStoredPasswordAttributeNames = (
+  contentType: Schema.Schema,
+  data: Record<string, unknown>
+): Set<string> => {
+  return new Set(
+    Object.entries(contentType.attributes)
+      .filter(
+        ([attributeName, attribute]) =>
+          attribute.type === 'password' && data[attributeName] !== undefined
+      )
+      .map(([attributeName]) => attributeName)
+  );
+};
+
+/**
+ * Password values loaded from the database are already encrypted. When a draft is copied to a
+ * published entry (or vice versa), validating min/max/regex/unique constraints against the stored
+ * bcrypt hash is both incorrect and inconsistent with normal writes, where those constraints are
+ * checked against the plaintext value before encryption.
+ *
+ * Keep required/default handling intact, but remove only value-level password constraints for the
+ * trusted internal copy. User-supplied creates and updates continue to validate the original schema.
+ */
+const getValidationContentType = <TSchema extends Schema.Schema>(
+  contentType: TSchema,
+  storedPasswordAttributeNames: ReadonlySet<string>
+): TSchema => {
+  if (storedPasswordAttributeNames.size === 0) {
+    return contentType;
+  }
+
+  const attributes = { ...contentType.attributes };
+
+  for (const attributeName of storedPasswordAttributeNames) {
+    const attribute = attributes[attributeName];
+
+    if (attribute?.type === 'password') {
+      attributes[attributeName] = omit(
+        ['minLength', 'maxLength', 'regex', 'unique'],
+        attribute
+      ) as typeof attribute;
+    }
+  }
+
+  return { ...contentType, attributes } as TSchema;
+};
+
 const createEntriesService = (
   uid: UID.ContentType,
   entityValidator: Modules.EntityValidator.EntityValidator
 ) => {
   const contentType = strapi.contentType(uid);
 
-  async function createEntry(params = {} as any) {
+  async function createEntry(params = {} as any, options: CreateEntryOptions = {}) {
     const { data, ...restParams } = await transformParamsDocumentId(uid, params);
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams) as any); // select / populate
 
@@ -88,7 +139,15 @@ const createEntriesService = (
       }
     }
 
-    const validData = await entityValidator.validateEntityCreation(contentType, data, {
+    const storedPasswordAttributeNames = options.trustStoredPasswords
+      ? getStoredPasswordAttributeNames(contentType, data)
+      : new Set<string>();
+    const validationContentType = getValidationContentType(
+      contentType,
+      storedPasswordAttributeNames
+    );
+
+    const validData = await entityValidator.validateEntityCreation(validationContentType, data, {
       // Note: publishedAt value will always be set when DP is disabled
       isDraft: !params?.data?.publishedAt,
       locale: params?.locale,
@@ -103,7 +162,9 @@ const createEntriesService = (
       validData
     );
 
-    const entryData = applyTransforms(contentType, dataWithComponents);
+    const entryData = applyTransforms(contentType, dataWithComponents, {
+      skipAttributeNames: storedPasswordAttributeNames,
+    });
 
     const doc = await strapi.db.query(uid).create({ ...query, data: entryData });
 
@@ -165,8 +226,13 @@ const createEntriesService = (
         };
         return transformData(draft, opts);
       },
-      // Create the published entry
-      (draft) => createEntry({ ...params, data: draft, locale: draft.locale, status: 'published' })
+      // Create the published entry. Passwords came from a trusted DB row, so preserve their
+      // existing hashes instead of validating or encrypting the hashes as if they were plaintext.
+      (draft) =>
+        createEntry(
+          { ...params, data: draft, locale: draft.locale, status: 'published' },
+          { trustStoredPasswords: true }
+        )
     )(entry);
   }
 
@@ -186,8 +252,12 @@ const createEntriesService = (
         };
         return transformData(entry, opts);
       },
-      // Create the draft entry
-      (data) => createEntry({ ...params, locale: data.locale, data, status: 'draft' })
+      // Create the draft entry from an already-stored published row without re-encrypting passwords.
+      (data) =>
+        createEntry(
+          { ...params, locale: data.locale, data, status: 'draft' },
+          { trustStoredPasswords: true }
+        )
     )(entry);
   }
 

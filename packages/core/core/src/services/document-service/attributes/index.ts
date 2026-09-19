@@ -1,5 +1,3 @@
-import { curry } from 'lodash/fp';
-
 import type { UID, Modules, Schema } from '@strapi/types';
 
 import transforms from './transforms';
@@ -7,7 +5,15 @@ import transforms from './transforms';
 // aliasing the type to make it easier to read
 type Data = Modules.Documents.Params.Data.Input<UID.Schema>;
 
-const applyTransforms = curry((schema: Schema.Schema, data: Data) => {
+type ApplyTransformsOptions = {
+  skipAttributeNames?: ReadonlySet<string>;
+};
+
+const applyTransforms = (
+  schema: Schema.Schema,
+  data: Data,
+  { skipAttributeNames }: ApplyTransformsOptions = {}
+) => {
   const attributeNames = Object.keys(data) as Array<keyof typeof data & string>;
 
   for (const attributeName of attributeNames) {
@@ -15,7 +21,7 @@ const applyTransforms = curry((schema: Schema.Schema, data: Data) => {
 
     const attribute = schema.attributes[attributeName];
 
-    if (!attribute) {
+    if (!attribute || skipAttributeNames?.has(attributeName)) {
       continue;
     }
 
@@ -29,6 +35,6 @@ const applyTransforms = curry((schema: Schema.Schema, data: Data) => {
   }
 
   return data;
-});
+};
 
 export { applyTransforms };
