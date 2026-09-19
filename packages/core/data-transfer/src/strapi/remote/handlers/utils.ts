@@ -1,4 +1,4 @@
-import type { IncomingMessage } from 'node:http';
+import type { IncomingMessage, Server as HttpServer } from 'node:http';
 import { randomUUID } from 'crypto';
 import type { Context } from 'koa';
 import type { RawData, ServerOptions } from 'ws';
@@ -23,7 +23,13 @@ export const transformUpgradeHeader = (header = '') => {
   return header.split(',').map((s) => s.trim().toLowerCase());
 };
 
-let timeouts: Record<string, number> | undefined;
+type TimeoutState = {
+  headersTimeout: number;
+  requestTimeout: number;
+  activeTransfers: number;
+};
+
+const timeoutStates = new WeakMap<HttpServer, TimeoutState>();
 
 const hasHttpServer = () => {
   // during server restarts, strapi may not have ever been defined at all, so we have to check it first
@@ -37,30 +43,44 @@ const disableTimeouts = () => {
   }
 
   const { httpServer } = strapi.server;
+  let timeoutState = timeoutStates.get(httpServer);
 
-  // save the original timeouts to restore after
-  if (!timeouts) {
-    timeouts = {
+  if (!timeoutState) {
+    timeoutState = {
       headersTimeout: httpServer.headersTimeout,
       requestTimeout: httpServer.requestTimeout,
+      activeTransfers: 0,
     };
+    timeoutStates.set(httpServer, timeoutState);
   }
 
+  timeoutState.activeTransfers += 1;
   httpServer.headersTimeout = 0;
   httpServer.requestTimeout = 0;
 
   strapi.log.info('[Data transfer] Disabling http timeouts');
 };
 const resetTimeouts = () => {
-  if (!hasHttpServer() || !timeouts) {
+  if (!hasHttpServer()) {
     return;
   }
 
   const { httpServer } = strapi.server;
+  const timeoutState = timeoutStates.get(httpServer);
+
+  if (!timeoutState) {
+    return;
+  }
+
+  timeoutState.activeTransfers = Math.max(0, timeoutState.activeTransfers - 1);
+  if (timeoutState.activeTransfers > 0) {
+    return;
+  }
 
   strapi.log.info('[Data transfer] Restoring http timeouts');
-  httpServer.headersTimeout = timeouts.headersTimeout;
-  httpServer.requestTimeout = timeouts.requestTimeout;
+  httpServer.headersTimeout = timeoutState.headersTimeout;
+  httpServer.requestTimeout = timeoutState.requestTimeout;
+  timeoutStates.delete(httpServer);
 };
 /**
  * Make sure that the upgrade header is a valid websocket one
