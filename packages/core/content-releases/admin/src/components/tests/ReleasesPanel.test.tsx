@@ -102,12 +102,13 @@ describe('ReleasesPanel permissions', () => {
     expect(await screen.findByRole('menuitem', { name: 'Remove from release' })).toBeInTheDocument();
   });
 
-  test('retains the removal action for a user with only removal permission', async () => {
+  test('retains only the removal action for a user with removal permission', async () => {
     const remove = jest.fn(() => HttpResponse.json({ data: { id: 12 } }));
     server.use(http.delete('*/content-releases/7/actions/12', remove));
     const { user } = renderPanel([...PERMISSIONS.main, ...PERMISSIONS.deleteAction]);
 
     await user.click(await screen.findByRole('button', { name: 'Release action options' }));
+    expect(screen.queryByRole('menuitem', { name: 'Edit release' })).not.toBeInTheDocument();
     await user.click(await screen.findByRole('menuitem', { name: 'Remove from release' }));
 
     await waitFor(() => expect(remove).toHaveBeenCalledTimes(1));
