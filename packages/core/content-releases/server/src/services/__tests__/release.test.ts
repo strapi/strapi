@@ -703,7 +703,10 @@ describe('Release service', () => {
 
       const publishComplete = releaseService.publish(1);
 
-      for (let i = 0; i < 5; i += 1) {
+      // Fresh release-action validation adds bounded async preflight work before
+      // document publishing begins. Wait for that preflight without weakening the
+      // sequentiality assertion below.
+      for (let i = 0; i < 20 && callOrder.length === 0; i += 1) {
         await Promise.resolve();
       }
 

@@ -357,12 +357,12 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
           throw new errors.ValidationError('Release failed to publish');
         }
 
-        // Release action validity is cached for the admin UI and can become stale when
-        // content changes outside the document-service middleware. Revalidate immediately
-        // before publishing so the publish decision reflects the current entries.
-        await validatePublishActions(releaseId);
-
         try {
+          // Release action validity is cached for the admin UI and can become stale when
+          // content changes outside the document-service middleware. Revalidate immediately
+          // before publishing so the publish decision reflects the current entries.
+          await validatePublishActions(releaseId);
+
           strapi.log.info(`[Content Releases] Starting to publish release ${lockedRelease.name}`);
 
           const formattedActions = await getFormattedActions(releaseId);
@@ -412,6 +412,13 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
 
           return { release, error: null, lockedRelease };
         } catch (error) {
+          // A fresh content validation failure is a pre-flight rejection, not a failed
+          // publish attempt. Throwing rolls back the locking transaction without changing
+          // the release status or emitting a publish-failure webhook/audit entry.
+          if (error instanceof errors.ValidationError && error.message === 'Release is blocked') {
+            throw error;
+          }
+
           dispatchWebhook(ALLOWED_WEBHOOK_EVENTS.RELEASES_PUBLISH, {
             isPublished: false,
             error,
