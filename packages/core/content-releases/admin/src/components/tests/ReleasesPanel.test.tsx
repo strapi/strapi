@@ -53,7 +53,10 @@ const renderPanel = (permissions: Permission[], overrides: Partial<PanelComponen
 
 const expectHiddenPanel = async () => {
   await waitFor(() => {
-    expect(screen.getByTestId('release-panel')).toHaveAttribute('data-permissions-loading', 'false');
+    expect(screen.getByTestId('release-panel')).toHaveAttribute(
+      'data-permissions-loading',
+      'false'
+    );
   });
   expect(screen.queryByText(release.name)).not.toBeInTheDocument();
   expect(screen.queryByRole('button', { name: 'Release action options' })).not.toBeInTheDocument();
@@ -109,7 +112,9 @@ describe('ReleasesPanel permissions', () => {
 
     await user.click(await screen.findByRole('button', { name: 'Release action options' }));
     expect(screen.queryByRole('menuitem', { name: 'Edit release' })).not.toBeInTheDocument();
-    await user.click(await screen.findByRole('menuitem', { name: 'Remove from release' }));
+    await user.click(
+      await screen.findByRole('menuitem', { name: 'Remove from release' })
+    );
 
     await waitFor(() => expect(remove).toHaveBeenCalledTimes(1));
   });
@@ -121,7 +126,9 @@ describe('ReleasesPanel permissions', () => {
     renderPanel(permissions);
 
     expect(await screen.findByText(release.name)).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Release action options' })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Release action options' })
+    ).not.toBeInTheDocument();
   });
 
   test('still requires permission to read releases', async () => {
