@@ -175,6 +175,17 @@ const slice = createSlice({
         }
       }
 
+      if (
+        hasDefaultValue &&
+        obj.type === 'uid' &&
+        keys.length === 1 &&
+        keys[0] === 'targetField' &&
+        typeof value === 'string' &&
+        value !== ''
+      ) {
+        delete state.modifiedData.default;
+      }
+
       set(state, ['modifiedData', ...keys], value);
     },
     onChangeRelationTarget: (state, action: PayloadAction<OnChangeRelationTargetPayload>) => {
