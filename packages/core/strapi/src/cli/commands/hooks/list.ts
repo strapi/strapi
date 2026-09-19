@@ -4,7 +4,6 @@ import chalk from 'chalk';
 import { createStrapi, compileStrapi } from '@strapi/core';
 
 import type { StrapiCommand } from '../../types';
-import { runAction } from '../../utils/helpers';
 
 const action = async () => {
   const appContext = await compileStrapi();
@@ -27,9 +26,7 @@ const action = async () => {
  * `$ strapi hooks:list`
  */
 const command: StrapiCommand = () => {
-  return createCommand('hooks:list')
-    .description('List all the application hooks')
-    .action(runAction('hooks:list', action));
+  return createCommand('hooks:list').description('List all the application hooks').action(action);
 };
 
 export { action, command };

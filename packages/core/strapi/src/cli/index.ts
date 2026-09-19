@@ -1,11 +1,40 @@
 import { Command } from 'commander';
 
+import { getCommandPath, isDependencyInCwd } from '@strapi/utils';
+import chalk from 'chalk';
 import { commands as strapiCommands } from './commands';
 
 import { createLogger } from './utils/logger';
 import { loadTsConfig, type TsConfig } from './utils/tsconfig';
 import { CLIContext } from './types';
 import { version } from '../../package.json';
+
+// TODO v6: remove these deprecation notices
+const deprecatedCommands = [
+  { name: 'plugin:init', message: 'Please use `npx @strapi/sdk-plugin init` instead.' },
+  {
+    name: 'plugin:verify',
+    message: 'After migrating your plugin to v5, use `strapi-plugin verify`',
+  },
+  {
+    name: 'plugin:watch',
+    message: 'After migrating your plugin to v5, use `strapi-plugin watch`',
+  },
+  {
+    name: 'plugin:watch:link',
+    message: 'After migrating your plugin to v5, use `strapi-plugin watch:link`',
+  },
+  {
+    name: 'plugin:build',
+    message: 'After migrating your plugin to v5, use `strapi-plugin build`',
+  },
+];
+
+/**
+ * Commands that are runnable outside of a Strapi project, and therefore must not
+ * be rejected by the pre-action check.
+ */
+const projectAgnosticCommands = new Set(['version', ...deprecatedCommands.map(({ name }) => name)]);
 
 const createCLI = async (argv: string[], command = new Command()) => {
   // Initial program setup
@@ -18,6 +47,16 @@ const createCLI = async (argv: string[], command = new Command()) => {
   command.version(version, '-v, --version', 'Output the version number');
 
   const cwd = process.cwd();
+
+  command.hook('preAction', (_thisCommand, actionCommand) => {
+    if (projectAgnosticCommands.has(actionCommand.name())) return;
+    if (isDependencyInCwd('@strapi/strapi', cwd)) return;
+
+    const commandName = chalk.yellow(`strapi ${getCommandPath(actionCommand)}`);
+    const message = `You need to run ${commandName} in a Strapi project. Make sure you are in the right directory.`;
+    console.log(message);
+    process.exit(1);
+  });
 
   const hasDebug = argv.includes('--debug');
   const hasSilent = argv.includes('--silent');
@@ -53,27 +92,6 @@ const createCLI = async (argv: string[], command = new Command()) => {
     }
   }
 
-  // TODO v6: remove these deprecation notices
-  const deprecatedCommands = [
-    { name: 'plugin:init', message: 'Please use `npx @strapi/sdk-plugin init` instead.' },
-    {
-      name: 'plugin:verify',
-      message: 'After migrating your plugin to v5, use `strapi-plugin verify`',
-    },
-    {
-      name: 'plugin:watch',
-      message: 'After migrating your plugin to v5, use `strapi-plugin watch`',
-    },
-    {
-      name: 'plugin:watch:link',
-      message: 'After migrating your plugin to v5, use `strapi-plugin watch:link`',
-    },
-    {
-      name: 'plugin:build',
-      message: 'After migrating your plugin to v5, use `strapi-plugin build`',
-    },
-  ];
-
   // Add hidden commands for deprecatedCommands that output a warning that the command has been removed.
   deprecatedCommands.forEach(({ name, message }) => {
     const deprecated = new Command(name)
@@ -94,7 +112,13 @@ const createCLI = async (argv: string[], command = new Command()) => {
 
 const runCLI = async (argv = process.argv, command = new Command()) => {
   const commands = await createCLI(argv, command);
-  await commands.parseAsync(argv);
+
+  try {
+    await commands.parseAsync(argv);
+  } catch (error) {
+    console.error(error);
+    process.exit(1);
+  }
 };
 
 export { runCLI, createCLI };
