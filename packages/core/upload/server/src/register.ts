@@ -113,7 +113,23 @@ const createProvider = (config: Config) => {
     );
   }
 
+  if (!providerInstance.replace && !providerInstance.replaceStream) {
+    process.emitWarning(
+      `The upload provider "${providerName}" doesn't implement the replaceStream nor the replace method. Strapi will fallback with delete and upload method which will be less performing.`
+    );
+  }
+
+  if (!providerInstance.replaceStream) {
+    process.emitWarning(
+      `The upload provider "${providerName}" doesn't implement the replaceStream function. Strapi will fallback on the replace method. Some performance issues may occur.`
+    );
+  }
+
   const wrappedProvider = _.mapValues(providerInstance, (method, methodName) => {
+    if (methodName === 'replace' || methodName === 'replaceStream') {
+      return async (newFile: File, oldFile: File, options = actionOptions[methodName]) =>
+        providerInstance[methodName](newFile, oldFile, options);
+    }
     return async (file: File, options = actionOptions[methodName]) =>
       providerInstance[methodName](file, options);
   });
