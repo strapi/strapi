@@ -24,5 +24,19 @@
   "notification.update.success": "设置更新成功",
   "plugin.description.long": "创建OpenAPI文档并使用SwaggerUI可视化你的API",
   "plugin.description.short": "创建OpenAPI文档并使用SwaggerUI可视化你的API",
-  "plugin.name": "文档"
+  "plugin.name": "文档",
+  "coming-soon": "此内容目前正在建设中，将在几周后恢复！",
+  "pages.PluginPage.Button.open": "打开文档",
+  "pages.PluginPage.header.description": "配置文档插件",
+  "pages.PluginPage.table.generated": "上次生成时间",
+  "pages.PluginPage.table.icon.regenerate": "重新生成 {target}",
+  "pages.PluginPage.table.icon.show": "打开 {target}",
+  "pages.PluginPage.table.version": "版本",
+  "pages.SettingsPage.header.description": "配置文档插件",
+  "pages.SettingsPage.header.save": "保存",
+  "pages.SettingsPage.toggle.hint": "将文档端点设为私有",
+  "pages.SettingsPage.toggle.label": "限制访问",
+  "Input.error.contain.lowercase": "密码必须至少包含一个小写字母",
+  "Input.error.contain.number": "密码必须至少包含一个数字",
+  "Input.error.contain.uppercase": "密码必须至少包含一个大写字母"
 }
