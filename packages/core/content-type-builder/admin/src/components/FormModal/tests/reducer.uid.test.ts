@@ -49,7 +49,7 @@ describe('CTB | FormModal | UID changes', () => {
       type: 'uid',
       name: 'slug',
       default: 'fallback-slug',
-      targetField: '',
+      targetField: null,
     });
   });
 });
