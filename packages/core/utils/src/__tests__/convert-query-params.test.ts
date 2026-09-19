@@ -20,6 +20,7 @@ const models = {
         type: 'string',
       },
       one_to_one: { type: 'relation', relation: 'oneToOne', target: 'api::dog.dog' },
+      cats: { type: 'relation', relation: 'oneToMany', target: 'api::cat.cat' },
       cpa: { type: 'component', component: 'default.cpa' },
       cpb: { type: 'component', component: 'default.cpb' },
       dz: { type: 'dynamiczone', components: ['default.cpa', 'default.cpb'] },
@@ -34,6 +35,23 @@ const models = {
     modelType: 'component',
     attributes: {
       field: { type: 'string' },
+      vouchers: { type: 'relation', relation: 'oneToMany', target: 'api::cat.cat' },
+    },
+  },
+  'api::cat.cat': {
+    uid: 'api::cat.cat',
+    modelType: 'contentType',
+    kind: 'collectionType',
+    info: {
+      displayName: 'Cat',
+      singularName: 'cat',
+      pluralName: 'cats',
+    },
+    options: {
+      draftAndPublish: true,
+    },
+    attributes: {
+      name: { type: 'string' },
     },
   },
   'default.cpb': {
@@ -303,6 +321,47 @@ describe('convert-query-params', () => {
 
         expect(newPopulate).toStrictEqual({
           one_to_one: { select: ['id', 'documentId', 'title'] },
+        });
+      });
+    });
+
+    describe('Nested status', () => {
+      test.each<[status: 'draft' | 'published', isNull: boolean]>([
+        ['draft', true],
+        ['published', false],
+      ])('converts nested status: %s into a publishedAt $null filter', (status, isNull) => {
+        const newPopulate = transformer.private_convertPopulateQueryParams(
+          { cats: { status } },
+          models['api::dog.dog']
+        );
+
+        const { filters } = (newPopulate as Record<string, any>).cats;
+        expect(typeof filters).toBe('function');
+
+        // The status filter is evaluated per target: DP-enabled targets get a
+        // publishedAt condition, others are no-ops.
+        expect(filters({ meta: { uid: 'api::cat.cat' } })).toEqual({
+          publishedAt: { $null: isNull },
+        });
+        expect(filters({ meta: { uid: 'api::dog.dog' } })).toEqual({});
+      });
+
+      test('converts status on a populate fragment target (on)', () => {
+        const newPopulate = transformer.private_convertPopulateQueryParams(
+          {
+            dz: {
+              on: {
+                'default.cpa': { populate: { vouchers: { status: 'draft' } } },
+              },
+            },
+          },
+          models['api::dog.dog']
+        );
+
+        const { filters } = (newPopulate as any).dz.on['default.cpa'].populate.vouchers;
+        expect(typeof filters).toBe('function');
+        expect(filters({ meta: { uid: 'api::cat.cat' } })).toEqual({
+          publishedAt: { $null: true },
         });
       });
     });

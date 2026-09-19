@@ -503,6 +503,15 @@ export const validatePopulate = asyncCurry(
             throwInvalidKey({ key, path: path.attribute });
           }
 
+          // Ensure status is a valid publication status
+          if (key === 'status') {
+            if (value === 'draft' || value === 'published') {
+              return;
+            }
+
+            throwInvalidKey({ key, path: path.attribute });
+          }
+
           // Allowed boolean-like keywords should be ignored.
           //
           // Asked as a predicate rather than by catching `parseType`'s error: this runs
