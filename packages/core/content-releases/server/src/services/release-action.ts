@@ -15,6 +15,7 @@ import type {
   UpdateReleaseAction,
   DeleteReleaseAction,
 } from '../../../shared/contracts/release-actions';
+import type { Release } from '../../../shared/contracts/releases';
 import type { Entity } from '../../../shared/types';
 import { getService, getDraftEntryValidStatus, getEntry, getEntryStatus } from '../utils';
 
@@ -403,6 +404,46 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
       });
 
       return deletedAction;
+    },
+
+    /**
+     * Recomputes the stored `isEntryValid` flag of a release's publish actions and
+     * returns the number of entries that are still invalid.
+     * The flag is only refreshed when the acted-upon document is updated through the
+     * document service, so it can be stale by the time the release is published.
+     */
+    async revalidateActions(releaseId: Release['id']) {
+      const actions = (await strapi.db.query(RELEASE_ACTION_MODEL_UID).findMany({
+        where: {
+          release: { id: releaseId },
+          // Only publish actions require a valid entry
+          type: 'publish',
+        },
+      })) as ReleaseAction[];
+
+      const validity = await async.map(actions, async (action: ReleaseAction) => {
+        const isValid = await getDraftEntryValidStatus(
+          {
+            contentType: action.contentType,
+            documentId: action.entryDocumentId,
+            locale: action.locale,
+          },
+          { strapi }
+        );
+
+        await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
+          where: {
+            id: action.id,
+          },
+          data: {
+            isEntryValid: isValid,
+          },
+        });
+
+        return isValid;
+      });
+
+      return validity.filter((isValid: boolean) => !isValid).length;
     },
 
     async validateActionsByContentTypes(contentTypeUids: UID.ContentType[]) {
