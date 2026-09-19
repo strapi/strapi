@@ -61,6 +61,50 @@ async function validateDocumentIdBackfill(strapi: Strapi): Promise<CheckErrors> 
   return { errors };
 }
 
+type LocalizedDocumentIdRecoveryFixture = {
+  tableName: string;
+  existingDocumentId: string;
+  rows: Array<{ locale: string; marker: string }>;
+};
+
+async function validateLocalizedDocumentIdRecovery(
+  strapi: Strapi,
+  fixture: LocalizedDocumentIdRecoveryFixture
+): Promise<CheckErrors> {
+  const errors = [];
+  const markers = fixture.rows.map((row) => row.marker);
+  const rows: Array<{
+    id: number;
+    locale: string;
+    string_field: string;
+    document_id: string | null;
+  }> = await strapi.db
+    .connection(fixture.tableName)
+    .select('id', 'locale', 'string_field', 'document_id')
+    .whereIn('string_field', markers);
+  const rowsByMarker = new Map(rows.map((row) => [row.string_field, row]));
+
+  for (const expected of fixture.rows) {
+    const row = rowsByMarker.get(expected.marker);
+    if (!row) {
+      errors.push(`localized document_id recovery: missing marker row ${expected.marker}`);
+      continue;
+    }
+    if (row.locale !== expected.locale) {
+      errors.push(
+        `localized document_id recovery: ${expected.marker} has locale ${row.locale}, expected ${expected.locale}`
+      );
+    }
+    if (row.document_id !== fixture.existingDocumentId) {
+      errors.push(
+        `localized document_id recovery: ${expected.marker} has document_id ${row.document_id}, expected preserved id ${fixture.existingDocumentId}`
+      );
+    }
+  }
+
+  return { errors };
+}
+
 async function validateDraftPublishPairingForUid(
   strapi: Strapi,
   uid: string,
@@ -807,6 +851,7 @@ async function validateRelationParityForDp(strapi: Strapi, uid: string): Promise
 
 module.exports = {
   validateDocumentIdBackfill,
+  validateLocalizedDocumentIdRecovery,
   validateDraftPublishPairingForUid,
   validateDraftPublishPairing,
   validateRelationsPresence,
