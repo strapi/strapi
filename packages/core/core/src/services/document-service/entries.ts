@@ -89,7 +89,7 @@ const createEntriesService = (
 ) => {
   const contentType = strapi.contentType(uid);
 
-  async function createEntry(params = {} as any, options: CreateEntryOptions = {}) {
+  async function createEntryWithOptions(params = {} as any, options: CreateEntryOptions = {}) {
     const { data, ...restParams } = await transformParamsDocumentId(uid, params);
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams) as any); // select / populate
 
@@ -171,6 +171,10 @@ const createEntriesService = (
     return doc;
   }
 
+  async function createEntry(params = {} as any) {
+    return createEntryWithOptions(params);
+  }
+
   async function deleteEntry(id: number, query = {} as any) {
     const componentsToDelete = await components.getComponents(uid, { id });
 
@@ -229,7 +233,7 @@ const createEntriesService = (
       // Create the published entry. Passwords came from a trusted DB row, so preserve their
       // existing hashes instead of validating or encrypting the hashes as if they were plaintext.
       (draft) =>
-        createEntry(
+        createEntryWithOptions(
           { ...params, data: draft, locale: draft.locale, status: 'published' },
           { trustStoredPasswords: true }
         )
@@ -254,7 +258,7 @@ const createEntriesService = (
       },
       // Create the draft entry from an already-stored published row without re-encrypting passwords.
       (data) =>
-        createEntry(
+        createEntryWithOptions(
           { ...params, locale: data.locale, data, status: 'draft' },
           { trustStoredPasswords: true }
         )
