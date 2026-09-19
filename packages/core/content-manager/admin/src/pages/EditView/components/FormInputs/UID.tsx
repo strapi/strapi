@@ -269,7 +269,7 @@ const UIDInput = React.forwardRef<HTMLInputElement, UIDInputProps>(
           onChange={field.onChange}
           value={field.value ?? ''}
           {...props}
-          style={{ textOverflow: 'ellipsis', ...props.style }}
+          style={{ textOverflow: 'ellipsis' }}
           type="text"
         />
         <Field.Error />
