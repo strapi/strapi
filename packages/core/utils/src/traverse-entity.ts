@@ -160,6 +160,11 @@ const traverseEntity = async (
 
   const keys = Object.keys(copy);
   for (let i = 0; i < keys.length; i += 1) {
+    // Each sibling starts from the parent passed to this traversal. Descending into a
+    // relation/component mutates `parent` for that child only; without this reset a
+    // later sibling can incorrectly inherit the previous sibling as its parent.
+    parent = options.parent;
+
     const key = keys[i];
     // Retrieve the attribute definition associated to the key from the schema
     const attribute = schema.attributes[key] as AnyAttribute | undefined;
