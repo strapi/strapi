@@ -1,6 +1,8 @@
+// @ts-check
 'use strict';
 
-module.exports = {
+/** @type {import('jest').Config} */
+const config = {
   displayName: 'API integration tests',
   testMatch: ['**/?(*.)+(spec|test).api.(js|ts)'],
   testEnvironment: 'node',
@@ -33,7 +35,9 @@ module.exports = {
     '<rootDir>/coverage/',
   ],
   transform: {
-    '^.+\\.ts$': ['@swc/jest'],
+    '^.+\\.ts$': ['@swc/jest', {}],
   },
   modulePathIgnorePatterns: ['[/\\\\]\\.cache[/\\\\]', '[/\\\\]dist[/\\\\]'],
 };
+
+module.exports = config;
