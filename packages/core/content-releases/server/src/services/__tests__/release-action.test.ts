@@ -458,4 +458,96 @@ describe('Release Action service', () => {
       );
     });
   });
+
+  describe('revalidateActions', () => {
+    const buildStrapiMock = (findManyMock: jest.Mock, updateMock: jest.Mock) => ({
+      ...baseStrapiMock,
+      config: { get: jest.fn().mockReturnValue(undefined) },
+      entityValidator: {
+        // Entries carrying documentId 'invalid' fail validation
+        validateEntityCreation: jest.fn((_model: unknown, entry: any) =>
+          entry?.documentId === 'invalid'
+            ? Promise.reject(new Error('invalid entry'))
+            : Promise.resolve()
+        ),
+      },
+      documents: jest.fn((contentType: string) => ({
+        findOne: jest
+          .fn()
+          .mockReturnValue(
+            contentType === 'api::contentTypeB.contentTypeB'
+              ? { documentId: 'invalid' }
+              : { documentId: 'doc1', name: 'test' }
+          ),
+      })),
+      db: {
+        ...baseStrapiMock.db,
+        query: jest.fn().mockReturnValue({
+          findMany: findManyMock,
+          update: updateMock,
+        }),
+      },
+    });
+
+    it('recomputes the publish actions validity and returns the number of invalid entries', async () => {
+      const findManyMock = jest.fn().mockResolvedValue([
+        {
+          id: 1,
+          contentType: 'api::contentTypeA.contentTypeA',
+          entryDocumentId: 'doc1',
+          locale: 'en',
+          type: 'publish',
+        },
+        {
+          id: 2,
+          contentType: 'api::contentTypeB.contentTypeB',
+          entryDocumentId: 'doc2',
+          locale: null,
+          type: 'publish',
+        },
+      ]);
+      const updateMock = jest.fn();
+
+      const strapiMock = buildStrapiMock(findManyMock, updateMock);
+
+      // @ts-expect-error Ignore missing properties
+      const releaseActionService = createReleaseActionService({ strapi: strapiMock });
+
+      const invalidCount = await releaseActionService.revalidateActions(1);
+
+      // Only the publish actions of that release are revalidated
+      expect(findManyMock).toHaveBeenCalledWith({
+        where: { release: { id: 1 }, type: 'publish' },
+      });
+      expect(invalidCount).toBe(1);
+      expect(updateMock).toHaveBeenCalledWith({
+        where: { id: 1 },
+        data: { isEntryValid: true },
+      });
+      expect(updateMock).toHaveBeenCalledWith({
+        where: { id: 2 },
+        data: { isEntryValid: false },
+      });
+    });
+
+    it('returns 0 when every publish action is still valid', async () => {
+      const findManyMock = jest.fn().mockResolvedValue([
+        {
+          id: 1,
+          contentType: 'api::contentTypeA.contentTypeA',
+          entryDocumentId: 'doc1',
+          locale: 'en',
+          type: 'publish',
+        },
+      ]);
+      const updateMock = jest.fn();
+
+      const strapiMock = buildStrapiMock(findManyMock, updateMock);
+
+      // @ts-expect-error Ignore missing properties
+      const releaseActionService = createReleaseActionService({ strapi: strapiMock });
+
+      await expect(releaseActionService.revalidateActions(1)).resolves.toBe(0);
+    });
+  });
 });
