@@ -291,13 +291,32 @@ describe('Release service', () => {
         locale: 'en',
       };
 
+      const rollback = jest.fn();
+      const releaseUpdate = jest.fn();
+      const emit = jest.fn();
+      const transaction = jest.fn().mockImplementation((fn) => {
+        if (!fn) {
+          return { commit: jest.fn(), get: jest.fn() };
+        }
+
+        return Promise.resolve(fn({ trx: jest.fn() })).catch((error) => {
+          rollback();
+          throw error;
+        });
+      });
+
       const strapiMock = {
         ...baseStrapiMock,
+        eventHub: { emit },
         db: {
           ...baseStrapiMock.db,
-          query: jest.fn().mockReturnValue({
-            findMany: jest.fn().mockResolvedValue([action]),
-            update: jest.fn(),
+          transaction,
+          query: jest.fn().mockImplementation((modelUid: string) => {
+            if (modelUid === 'plugin::content-releases.release-action') {
+              return { findMany: jest.fn().mockResolvedValue([action]) };
+            }
+
+            return { update: releaseUpdate };
           }),
         },
       };
@@ -315,10 +334,14 @@ describe('Release service', () => {
         },
         { strapi: strapiMock }
       );
+      expect(transaction).toHaveBeenCalledTimes(1);
+      expect(rollback).toHaveBeenCalledTimes(1);
       expect(mockPublish).not.toHaveBeenCalled();
+      expect(releaseUpdate).not.toHaveBeenCalled();
+      expect(emit).not.toHaveBeenCalled();
     });
 
-    it('publishes a stale blocked release when its entries are currently valid', async () => {
+    it('publishes the exact release-action snapshot that was revalidated', async () => {
       mockExecute.mockReturnValueOnce({
         id: 1,
         name: 'Release',
@@ -327,12 +350,22 @@ describe('Release service', () => {
       });
       mockGetDraftEntryValidStatus.mockResolvedValueOnce(true);
 
-      const action = {
+      const validatedAction = {
         contentType: 'api::contentTypeA.contentTypeA',
         type: 'publish',
         entryDocumentId: 'doc1',
         locale: 'en',
       };
+      const laterAction = {
+        contentType: 'api::contentTypeA.contentTypeA',
+        type: 'publish',
+        entryDocumentId: 'doc2',
+        locale: 'en',
+      };
+      const findMany = jest
+        .fn()
+        .mockResolvedValueOnce([validatedAction])
+        .mockResolvedValueOnce([laterAction]);
 
       const strapiMock = {
         ...baseStrapiMock,
@@ -340,9 +373,7 @@ describe('Release service', () => {
           ...baseStrapiMock.db,
           query: jest.fn().mockImplementation((modelUid: string) => {
             if (modelUid === 'plugin::content-releases.release-action') {
-              return {
-                findMany: jest.fn().mockResolvedValue([action]),
-              };
+              return { findMany };
             }
 
             return {
@@ -362,15 +393,17 @@ describe('Release service', () => {
 
       await releaseService.publish(1);
 
+      expect(findMany).toHaveBeenCalledTimes(1);
       expect(mockGetDraftEntryValidStatus).toHaveBeenCalledWith(
         {
-          contentType: action.contentType,
-          documentId: action.entryDocumentId,
-          locale: action.locale,
+          contentType: validatedAction.contentType,
+          documentId: validatedAction.entryDocumentId,
+          locale: validatedAction.locale,
         },
         { strapi: strapiMock }
       );
       expect(mockPublish).toHaveBeenCalledWith({ documentId: 'doc1', locale: 'en' });
+      expect(mockPublish).not.toHaveBeenCalledWith({ documentId: 'doc2', locale: 'en' });
     });
 
     it('throws an error if the release have 0 actions', () => {

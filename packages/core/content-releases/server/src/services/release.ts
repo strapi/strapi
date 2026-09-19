@@ -34,11 +34,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
     });
   };
 
-  /**
-   * Given a release id, it returns the actions formatted ready to be used to publish them.
-   * We split them by contentType and type (publish/unpublish) and extract only the documentIds and locales.
-   */
-  const getFormattedActions = async (releaseId: Release['id']) => {
+  const getReleaseActions = async (releaseId: Release['id']) => {
     const actions = (await strapi.db.query(RELEASE_ACTION_MODEL_UID).findMany({
       where: {
         release: {
@@ -51,9 +47,10 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
       throw new errors.ValidationError('No entries to publish');
     }
 
-    /**
-     * We separate publish and unpublish actions, grouping them by contentType and extracting only their documentIds and locales.
-     */
+    return actions;
+  };
+
+  const getFormattedActions = (actions: ReleaseAction[]) => {
     const formattedActions: {
       [key: UID.ContentType]: {
         publish: { documentId: ReleaseAction['entryDocumentId']; locale?: string }[];
@@ -65,10 +62,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
       const contentTypeUid: UID.ContentType = action.contentType;
 
       if (!formattedActions[contentTypeUid]) {
-        formattedActions[contentTypeUid] = {
-          publish: [],
-          unpublish: [],
-        };
+        formattedActions[contentTypeUid] = { publish: [], unpublish: [] };
       }
 
       formattedActions[contentTypeUid][action.type].push({
@@ -80,27 +74,20 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
     return formattedActions;
   };
 
-  const validatePublishActions = async (releaseId: Release['id']) => {
-    const actions = (await strapi.db.query(RELEASE_ACTION_MODEL_UID).findMany({
-      where: {
-        release: {
-          id: releaseId,
-        },
-        type: 'publish',
-      },
-    })) as ReleaseAction[];
-
+  const validatePublishActions = async (actions: ReleaseAction[]) => {
     const validity = await Promise.all(
-      actions.map((action) =>
-        getDraftEntryValidStatus(
-          {
-            contentType: action.contentType,
-            documentId: action.entryDocumentId,
-            locale: action.locale,
-          },
-          { strapi }
+      actions
+        .filter((action) => action.type === 'publish')
+        .map((action) =>
+          getDraftEntryValidStatus(
+            {
+              contentType: action.contentType,
+              documentId: action.entryDocumentId,
+              locale: action.locale,
+            },
+            { strapi }
+          )
         )
-      )
     );
 
     if (validity.some((isValid) => !isValid)) {
@@ -359,13 +346,14 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
 
         try {
           // Release action validity is cached for the admin UI and can become stale when
-          // content changes outside the document-service middleware. Revalidate immediately
-          // before publishing so the publish decision reflects the current entries.
-          await validatePublishActions(releaseId);
+          // content changes outside the document-service middleware. Read the actions once
+          // after locking the release, then validate and publish that exact snapshot.
+          const actions = await getReleaseActions(releaseId);
+          await validatePublishActions(actions);
 
           strapi.log.info(`[Content Releases] Starting to publish release ${lockedRelease.name}`);
 
-          const formattedActions = await getFormattedActions(releaseId);
+          const formattedActions = getFormattedActions(actions);
 
           // Publish content types in dependency order so that when entity A has a relation
           // to entity B, B is published first to keep this relation.
