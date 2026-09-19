@@ -197,7 +197,7 @@ const UIDInput = React.forwardRef<HTMLInputElement, UIDInputProps>(
     return (
       <Field.Root hint={hint} name={name} error={field.error} required={required}>
         <Field.Label action={labelAction}>{label}</Field.Label>
-        <TextInput
+        <UIDTextInput
           ref={composedRefs}
           disabled={props.disabled}
           endAction={
@@ -208,11 +208,9 @@ const UIDInput = React.forwardRef<HTMLInputElement, UIDInputProps>(
                   gap={1}
                   justifyContent="flex-end"
                   $available={!!availability?.isAvailable}
-                  data-not-here-outer
-                  position="absolute"
                   pointerEvents="none"
-                  right={6}
                   width="100px"
+                  flexShrink={0}
                 >
                   {availability?.isAvailable ? <CheckCircle /> : <WarningCircle />}
 
@@ -280,6 +278,10 @@ const UIDInput = React.forwardRef<HTMLInputElement, UIDInputProps>(
     );
   }
 );
+
+const UIDTextInput = styled(TextInput)`
+  text-overflow: ellipsis;
+`;
 
 /* -------------------------------------------------------------------------------------------------
  * FieldActionWrapper
