@@ -8,7 +8,7 @@ const config = {
   // setupFilesAfterEnv: ['<rootDir>/test/setup/jest-api.setup.js'],
   coveragePathIgnorePatterns: ['<rootDir>/dist/', '<rootDir>/node_modules/', '<rootDir>/out-tsc/'],
   transform: {
-    '^.+\\.ts$': ['@swc/jest'],
+    '^.+\\.ts$': '@swc/jest',
   },
   modulePathIgnorePatterns: ['[/\\\\]\\.cache[/\\\\]', '[/\\\\]dist[/\\\\]'],
 };
