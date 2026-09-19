@@ -8,6 +8,11 @@ import transforms from './transforms';
 type Data = Modules.Documents.Params.Data.Input<UID.Schema>;
 
 const applyTransforms = curry((schema: Schema.Schema, data: Data) => {
+  // NOTE: this iterates the *data* keys, so unlike the rest of the write path it does visit keys
+  // that were passed explicitly as `undefined`. The input types deliberately allow that
+  // (`{ foo: undefined }` must behave like `{}` — see `processData` in `@strapi/database`), so
+  // every transform registered below has to leave a non-matching value untouched rather than
+  // assume a present key holds a value.
   const attributeNames = Object.keys(data) as Array<keyof typeof data & string>;
 
   for (const attributeName of attributeNames) {
