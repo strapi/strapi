@@ -51,7 +51,7 @@ const config = {
       },
       {
         selector: 'typeLike',
-        format: ['PascalCase'],
+        format: ['PascalCase', 'UPPER_CASE'],
       },
     ],
     '@typescript-eslint/no-empty-interface': 'warn',
