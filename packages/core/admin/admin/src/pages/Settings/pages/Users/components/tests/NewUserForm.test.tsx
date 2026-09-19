@@ -5,7 +5,8 @@ import { render, screen } from '@tests/utils';
 import { ModalForm } from '../NewUserForm';
 
 jest.mock('@strapi/design-system', () => {
-  const actual = jest.requireActual<typeof import('@strapi/design-system')>('@strapi/design-system');
+  const actual =
+    jest.requireActual<typeof import('@strapi/design-system')>('@strapi/design-system');
   const React = jest.requireActual<typeof import('react')>('react');
   const ActualContent = actual.Modal.Content;
   type ContentProps = ComponentProps<typeof ActualContent>;
