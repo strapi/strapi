@@ -1,17 +1,20 @@
+import type { ComponentProps } from 'react';
+
 import { render, screen } from '@tests/utils';
 
 import { ModalForm } from '../NewUserForm';
 
 jest.mock('@strapi/design-system', () => {
-  const actual = jest.requireActual('@strapi/design-system');
-  const React = jest.requireActual('react');
+  const actual = jest.requireActual<typeof import('@strapi/design-system')>('@strapi/design-system');
+  const React = jest.requireActual<typeof import('react')>('react');
   const ActualContent = actual.Modal.Content;
+  type ContentProps = ComponentProps<typeof ActualContent>;
 
   return {
     ...actual,
     Modal: {
       ...actual.Modal,
-      Content: ({ onInteractOutside, children, ...props }: any) => {
+      Content: ({ onInteractOutside, children, ...props }: ContentProps) => {
         const [prevented, setPrevented] = React.useState(false);
 
         return React.createElement(
@@ -23,9 +26,11 @@ jest.mock('@strapi/design-system', () => {
               type: 'button',
               'data-testid': 'simulate-outside-interaction',
               onClick: () => {
-                onInteractOutside?.({
+                const outsideEvent = {
                   preventDefault: () => setPrevented(true),
-                });
+                } as Parameters<NonNullable<ContentProps['onInteractOutside']>>[0];
+
+                onInteractOutside?.(outsideEvent);
               },
             },
             'Simulate outside interaction'
