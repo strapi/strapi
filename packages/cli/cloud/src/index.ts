@@ -9,7 +9,7 @@ import { createGrowthSsoTrial } from './create-growth-sso-trial';
 import listProjects from './list-projects';
 import listEnvironments from './environment/list';
 import linkEnvironment from './environment/link';
-import { CLIContext } from './types';
+import type { CLIContext, StrapiCloudCommandInfo } from './types';
 import { getLocalConfig, saveLocalConfig } from './config/local';
 
 export const cli = {
@@ -25,7 +25,7 @@ export const cli = {
 
 export { createGrowthSsoTrial };
 
-const cloudCommands = [
+const cloudCommands: StrapiCloudCommandInfo[] = [
   deployProject,
   link,
   login,
