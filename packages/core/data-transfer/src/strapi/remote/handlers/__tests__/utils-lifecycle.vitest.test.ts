@@ -124,6 +124,40 @@ describe('transfer WebSocket close ownership', () => {
     expect(owner.db.lifecycles.enable).not.toHaveBeenCalled();
   });
 
+  test('restores the replacement server own timeout snapshot after overlapping connections', async () => {
+    const owner = createOwner();
+    setOwner(owner);
+    const gate = deferred();
+    const connection = await connect(() => gate.promise);
+    const closing = connection.close();
+
+    const replacement = createOwner();
+    replacement.server.httpServer.headersTimeout = 1234;
+    replacement.server.httpServer.requestTimeout = 5678;
+    setOwner(replacement);
+    const replacementConnection = await connect(async () => {});
+
+    expect(replacement.server.httpServer).toEqual({
+      headersTimeout: 0,
+      requestTimeout: 0,
+    });
+
+    gate.resolve();
+    await expect(closing).resolves.toBeUndefined();
+    expect(replacement.server.httpServer).toEqual({
+      headersTimeout: 0,
+      requestTimeout: 0,
+    });
+
+    await expect(replacementConnection.close()).resolves.toBeUndefined();
+    expect(replacement.server.httpServer).toEqual({
+      headersTimeout: 1234,
+      requestTimeout: 5678,
+    });
+    expect(owner.db.lifecycles.enable).not.toHaveBeenCalled();
+    expect(replacement.db.lifecycles.enable).toHaveBeenCalledTimes(1);
+  });
+
   test('reports a late handler rejection without consulting the removed instance', async () => {
     const owner = createOwner();
     setOwner(owner);
