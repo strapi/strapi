@@ -3,6 +3,7 @@ import omit from 'lodash/omit';
 import pluralize from 'pluralize';
 
 import { applyPrivateSearchDefault } from '../../../../../utils/applyPrivateSearchDefault';
+import { toRegressedEnumValue } from '../../../../../utils/toRegressedEnumValue';
 
 import type { ContentType, Component, AnyAttribute } from '../../../../../types';
 import type { Schema, SchemaAttribute } from '../../types/schema';
@@ -35,6 +36,44 @@ const ACTION_TO_STATUS: Record<Schema['action'], ContentType['status']> = {
   update: 'CHANGED',
 };
 
+const GRAPHQL_ENUM_REGEX = /^[_A-Za-z][_0-9A-Za-z]*$/;
+
+/**
+ * AI can generate enum values that are valid strings but invalid GraphQL enum names after
+ * regression, for example a list of years (`2020`, `2021`, ...). Prefix only those values with
+ * an underscore so the CTB can save them while preserving the generated value as closely as
+ * possible. Values that regress to an empty string stay untouched so normal validation can reject
+ * them instead of silently inventing a value.
+ */
+const normalizeAIEnumValue = (value: unknown) => {
+  if (typeof value !== 'string') {
+    return value;
+  }
+
+  const regressedValue = toRegressedEnumValue(value);
+  if (!regressedValue || GRAPHQL_ENUM_REGEX.test(regressedValue)) {
+    return value;
+  }
+
+  return `_${value}`;
+};
+
+const normalizeAIEnumerationAttribute = (
+  attributeData: SchemaAttribute | AnyAttribute
+): SchemaAttribute | AnyAttribute => {
+  if (attributeData.type !== 'enumeration' || !Array.isArray(attributeData.enum)) {
+    return attributeData;
+  }
+
+  return {
+    ...attributeData,
+    enum: attributeData.enum.map(normalizeAIEnumValue),
+    ...(typeof attributeData.default === 'string'
+      ? { default: normalizeAIEnumValue(attributeData.default) }
+      : {}),
+  } as SchemaAttribute | AnyAttribute;
+};
+
 /**
  * Creates a new attribute with the specified status
  */
@@ -44,7 +83,7 @@ const createAttributeWithStatus = (
   status: AnyAttribute['status']
 ): AnyAttribute =>
   ({
-    ...applyPrivateSearchDefault(attributeData),
+    ...applyPrivateSearchDefault(normalizeAIEnumerationAttribute(attributeData)),
     name,
     status,
   }) as AnyAttribute;
