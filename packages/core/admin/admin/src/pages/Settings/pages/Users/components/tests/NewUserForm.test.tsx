@@ -78,7 +78,7 @@ describe('<ModalForm />', () => {
     expect(onToggle).not.toHaveBeenCalled();
     expect(screen.getByRole('dialog')).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'Close modal' }));
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
 
     expect(onToggle).toHaveBeenCalledTimes(1);
   });
