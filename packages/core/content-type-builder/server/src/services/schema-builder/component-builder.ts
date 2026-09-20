@@ -9,6 +9,31 @@ import createSchemaHandler from './schema-handler';
 
 const { ApplicationError } = errors;
 
+const createCollectionName = (category: string, displayName: string) =>
+  `components_${strings.nameToCollectionName(category)}_${strings.nameToCollectionName(
+    pluralize(displayName)
+  )}`;
+
+const createUniqueCollectionName = (baseName: string, components: Map<string, any>) => {
+  const usedCollectionNames = new Set(
+    Array.from(components.values(), (component) => component.schema.collectionName)
+  );
+
+  if (!usedCollectionNames.has(baseName)) {
+    return baseName;
+  }
+
+  let suffix = 1;
+  let candidate = `${baseName}_${suffix}`;
+
+  while (usedCollectionNames.has(candidate)) {
+    suffix += 1;
+    candidate = `${baseName}_${suffix}`;
+  }
+
+  return candidate;
+};
+
 export default function createComponentBuilder() {
   return {
     createComponentUID({ category, displayName }: any) {
@@ -49,17 +74,12 @@ export default function createComponentBuilder() {
         filename: `${strings.nameToSlug(infos.displayName)}.json`,
       });
 
-      // TODO: create a utility for this
-      // Duplicate in admin/src/components/FormModal/forms/utils/createCollectionName.ts
-      const collectionName = `components_${strings.nameToCollectionName(
-        infos.category
-      )}_${strings.nameToCollectionName(pluralize(infos.displayName))}`;
-
-      this.components.forEach((compo: any) => {
-        if (compo.schema.collectionName === collectionName) {
-          throw new ApplicationError('component.alreadyExists');
-        }
-      });
+      // Keep an existing component table stable when a component is renamed. If a newly-created
+      // component would reuse that table name, give only the new table a deterministic suffix.
+      const collectionName = createUniqueCollectionName(
+        createCollectionName(infos.category, infos.displayName),
+        this.components
+      );
 
       handler
         .setUID(uid)
@@ -95,16 +115,16 @@ export default function createComponentBuilder() {
 
       const component = this.components.get(uid);
 
-      const [, nameUID] = uid.split('.');
-
       const newCategory = strings.nameToSlug(infos.category);
-      const newUID = `${newCategory}.${nameUID}`;
+      const newName = strings.nameToSlug(infos.displayName);
+      const newUID = `${newCategory}.${newName}`;
 
       if (newUID !== uid && this.components.has(newUID)) {
         throw new errors.ApplicationError('component.edit.alreadyExists');
       }
 
       const newDir = path.join(strapi.dirs.app.components, newCategory);
+      const newFilename = `${newName}.json`;
 
       const oldAttributes = component.schema.attributes;
 
@@ -115,6 +135,7 @@ export default function createComponentBuilder() {
       component
         .setUID(newUID)
         .setDir(newDir)
+        .setFilename(newFilename)
         .set(['info', 'displayName'], infos.displayName)
         .set(['info', 'icon'], infos.icon)
         .set(['info', 'description'], infos.description)
