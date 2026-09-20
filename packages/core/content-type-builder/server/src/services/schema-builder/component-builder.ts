@@ -39,8 +39,7 @@ const createAvailableIdentity = (infos: any, components: Map<string, any>) => {
   for (let suffix = 0; ; suffix += 1) {
     const identityName = suffix === 0 ? name : `${name}-${suffix}`;
     const uid = `${category}.${identityName}` as Internal.UID.Component;
-    const collectionName =
-      suffix === 0 ? baseCollectionName : `${baseCollectionName}_${suffix}`;
+    const collectionName = suffix === 0 ? baseCollectionName : `${baseCollectionName}_${suffix}`;
 
     if (!components.has(uid) && !usedCollectionNames.has(collectionName)) {
       return {
