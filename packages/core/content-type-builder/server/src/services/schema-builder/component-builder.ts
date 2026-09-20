@@ -93,7 +93,7 @@ export default function createComponentBuilder() {
       });
 
       handler
-        .setUID(uid)
+        .setUID(uid as Internal.UID.Component)
         .set('collectionName', collectionName)
         .set(['info', 'displayName'], infos.displayName)
         .set(['info', 'icon'], infos.icon)
