@@ -1,5 +1,5 @@
-import { attributeTypes } from '../../../../../FormModal/attributes/types';
 import { toRegressedEnumValue } from '../../../../../../utils/toRegressedEnumValue';
+import { attributeTypes } from '../../../../../FormModal/attributes/types';
 import { transformAttributesFromChatToCTB } from '../toCTB';
 
 import type { Schema } from '../../../types/schema';
@@ -45,9 +45,9 @@ describe('AI enumeration normalization', () => {
       'value_2021',
       'value_2025',
     ]);
-    expect(enumValues.map(toRegressedEnumValue).every((value) => GRAPHQL_ENUM_REGEX.test(value))).toBe(
-      true
-    );
+    expect(
+      enumValues.map(toRegressedEnumValue).every((value) => GRAPHQL_ENUM_REGEX.test(value))
+    ).toBe(true);
     expect(() => attributeTypes.enumeration([], []).validateSync(attribute)).not.toThrow();
   });
 
