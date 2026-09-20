@@ -71,6 +71,7 @@
     "typedoc": "0.28.19",
     "typedoc-github-wiki-theme": "2.1.0",
     "typedoc-plugin-markdown": "4.11.0",
+    "undici": "6.28.1",
     "zod": "4.4.3"
   },
   "devDependencies": {
@@ -82,8 +83,27 @@
     "eslint-config-custom": "5.54.0",
     "lodash": "4.18.1",
     "tsconfig": "5.54.0",
-    "typescript": "5.9.3",
-    "undici": "6.28.1"
+    "typescript": "5.9.3"
+  },
+  "peerDependencies": {
+    "@types/json-logic-js": "^2.0.0",
+    "@types/koa": "^2.0.0",
+    "@types/koa__router": "^12.0.0",
+    "@types/lodash": "^4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/json-logic-js": {
+      "optional": true
+    },
+    "@types/koa": {
+      "optional": true
+    },
+    "@types/koa__router": {
+      "optional": true
+    },
+    "@types/lodash": {
+      "optional": true
+    }
   },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",

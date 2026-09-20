@@ -183,10 +183,20 @@
     "yalc": "1.0.0-pre.53"
   },
   "peerDependencies": {
+    "@types/cli-progress": "^3.0.0",
+    "@types/inquirer": "^9.0.0",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^6.30.3",
     "styled-components": "^6.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/cli-progress": {
+      "optional": true
+    },
+    "@types/inquirer": {
+      "optional": true
+    }
   },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",

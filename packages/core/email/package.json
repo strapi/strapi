@@ -93,11 +93,25 @@
   },
   "peerDependencies": {
     "@strapi/admin": "^5.0.0",
+    "@strapi/types": "^5.0.0",
+    "@types/koa": "^2.0.0",
+    "@types/react": "^17.0.0 || ^18.0.0",
     "koa": "^2.15.2",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^6.30.3",
     "styled-components": "^6.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@strapi/types": {
+      "optional": true
+    },
+    "@types/koa": {
+      "optional": true
+    },
+    "@types/react": {
+      "optional": true
+    }
   },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",

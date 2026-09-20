@@ -71,6 +71,7 @@
   "dependencies": {
     "@dnd-kit/core": "6.3.1",
     "@dnd-kit/modifiers": "9.0.0",
+    "@dnd-kit/utilities": "3.2.2",
     "@mux/mux-player-react": "3.1.0",
     "@radix-ui/react-dialog": "1.0.5",
     "@radix-ui/react-toggle-group": "1.1.11",
@@ -80,6 +81,7 @@
     "@strapi/icons": "2.2.4",
     "@strapi/provider-upload-local": "5.54.0",
     "@strapi/utils": "5.54.0",
+    "axios": "1.19.0",
     "byte-size": "8.1.1",
     "cropperjs": "1.6.2",
     "date-fns": "2.30.0",
@@ -98,6 +100,8 @@
     "react-query": "3.39.3",
     "react-redux": "8.1.3",
     "react-select": "5.8.0",
+    "redux": "4.2.1",
+    "reselect": "4.1.8",
     "sharp": "0.35.3",
     "yup": "0.32.9",
     "zod": "4.4.3"
@@ -128,10 +132,28 @@
   },
   "peerDependencies": {
     "@strapi/admin": "^5.0.0",
+    "@strapi/types": "^5.0.0",
+    "@types/formidable": "^2.0.0",
+    "@types/koa": "^2.0.0",
+    "@types/react": "^17.0.0 || ^18.0.0",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^6.30.3",
     "styled-components": "^6.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@strapi/types": {
+      "optional": true
+    },
+    "@types/formidable": {
+      "optional": true
+    },
+    "@types/koa": {
+      "optional": true
+    },
+    "@types/react": {
+      "optional": true
+    }
   },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",

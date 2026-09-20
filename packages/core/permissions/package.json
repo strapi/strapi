@@ -56,6 +56,14 @@
     "vitest": "catalog:",
     "vitest-config": "5.54.0"
   },
+  "peerDependencies": {
+    "@types/lodash": "^4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/lodash": {
+      "optional": true
+    }
+  },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",
     "npm": ">=6.0.0"

@@ -78,9 +78,11 @@
     "@strapi/icons": "2.2.4",
     "@strapi/utils": "5.54.0",
     "ai": "6.0.277",
+    "axios": "1.19.0",
     "date-fns": "2.30.0",
     "fs-extra": "11.3.4",
     "immer": "9.0.21",
+    "json-logic-js": "2.0.5",
     "jszip": "^3.10.1",
     "lodash": "4.18.1",
     "micromatch": "^4.0.8",
@@ -90,6 +92,7 @@
     "react-intl": "6.6.2",
     "react-markdown": "9.1.0",
     "react-redux": "8.1.3",
+    "redux": "4.2.1",
     "yup": "0.32.9",
     "zod": "4.4.3"
   },
@@ -119,10 +122,28 @@
   },
   "peerDependencies": {
     "@strapi/admin": "^5.0.0",
+    "@strapi/types": "^5.0.0",
+    "@types/json-logic-js": "^2.0.0",
+    "@types/koa": "^2.0.0",
+    "@types/react": "^17.0.0 || ^18.0.0",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^6.30.3",
     "styled-components": "^6.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@strapi/types": {
+      "optional": true
+    },
+    "@types/json-logic-js": {
+      "optional": true
+    },
+    "@types/koa": {
+      "optional": true
+    },
+    "@types/react": {
+      "optional": true
+    }
   },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",

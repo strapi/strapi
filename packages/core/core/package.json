@@ -144,6 +144,42 @@
     "vitest": "catalog:",
     "vitest-config": "5.54.0"
   },
+  "peerDependencies": {
+    "@types/http-errors": "^2.0.0",
+    "@types/json-logic-js": "^2.0.0",
+    "@types/jsonwebtoken": "^9.0.0",
+    "@types/koa": "^2.0.0",
+    "@types/koa-compress": "^4.0.0",
+    "@types/koa__router": "^12.0.0",
+    "@types/lodash": "^4.0.0",
+    "@types/qs": "^6.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/http-errors": {
+      "optional": true
+    },
+    "@types/json-logic-js": {
+      "optional": true
+    },
+    "@types/jsonwebtoken": {
+      "optional": true
+    },
+    "@types/koa": {
+      "optional": true
+    },
+    "@types/koa-compress": {
+      "optional": true
+    },
+    "@types/koa__router": {
+      "optional": true
+    },
+    "@types/lodash": {
+      "optional": true
+    },
+    "@types/qs": {
+      "optional": true
+    }
+  },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",
     "npm": ">=6.0.0"
