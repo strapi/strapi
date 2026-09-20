@@ -11,8 +11,8 @@ export const createComponentSchema = (
   usedComponentNames: Array<string>,
   reservedNames: Array<string>,
   category: string,
-  takenCollectionNames: Array<string>,
-  currentCollectionName: string
+  _takenCollectionNames: Array<string>,
+  _currentCollectionName: string
 ) => {
   const shape = {
     displayName: yup
@@ -26,18 +26,11 @@ export const createComponentSchema = (
           }
 
           const name = createComponentUid(value, category);
-
           const snakeCaseKey = snakeCase(name);
-          const snakeCaseCollectionName = snakeCase(currentCollectionName);
 
-          return (
-            usedComponentNames.every((reserved) => {
-              return snakeCase(reserved) !== snakeCaseKey;
-            }) &&
-            takenCollectionNames.every(
-              (collectionName) => snakeCase(collectionName) !== snakeCaseCollectionName
-            )
-          );
+          return usedComponentNames.every((reserved) => {
+            return snakeCase(reserved) !== snakeCaseKey;
+          });
         },
       })
       .test({
