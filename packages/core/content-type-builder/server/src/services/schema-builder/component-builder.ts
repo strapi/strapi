@@ -36,9 +36,7 @@ const createAvailableIdentity = (infos: any, components: Map<string, any>) => {
     Array.from(components.values(), (component) => component.schema.collectionName)
   );
 
-  let suffix = 0;
-
-  while (true) {
+  for (let suffix = 0; ; suffix += 1) {
     const identityName = suffix === 0 ? name : `${name}-${suffix}`;
     const uid = `${category}.${identityName}` as Internal.UID.Component;
     const collectionName =
@@ -51,8 +49,6 @@ const createAvailableIdentity = (infos: any, components: Map<string, any>) => {
         filename: `${identityName}.json`,
       };
     }
-
-    suffix += 1;
   }
 };
 
