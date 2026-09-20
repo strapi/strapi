@@ -40,7 +40,7 @@ const createAvailableIdentity = (infos: any, components: Map<string, any>) => {
 
   while (true) {
     const identityName = suffix === 0 ? name : `${name}-${suffix}`;
-    const uid = `${category}.${identityName}`;
+    const uid = `${category}.${identityName}` as Internal.UID.Component;
     const collectionName =
       suffix === 0 ? baseCollectionName : `${baseCollectionName}_${suffix}`;
 
@@ -93,7 +93,7 @@ export default function createComponentBuilder() {
       });
 
       handler
-        .setUID(uid as Internal.UID.Component)
+        .setUID(uid)
         .set('collectionName', collectionName)
         .set(['info', 'displayName'], infos.displayName)
         .set(['info', 'icon'], infos.icon)

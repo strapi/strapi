@@ -9,7 +9,7 @@ export type Infos = {
   category?: string;
   modelName?: string;
   plugin?: string;
-  uid?: Internal.UID.ContentType;
+  uid?: Internal.UID.Schema;
   dir: string;
   filename: string;
   schema?: Struct.ContentTypeSchema;
@@ -69,7 +69,7 @@ export default function createSchemaHandler(infos: Infos) {
       return _.get(state, 'plugin') !== 'admin';
     },
 
-    setUID(val: Internal.UID.ContentType) {
+    setUID(val: Internal.UID.Schema) {
       modified = true;
 
       state.uid = val;
