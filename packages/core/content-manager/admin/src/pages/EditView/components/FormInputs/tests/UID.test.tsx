@@ -188,7 +188,11 @@ describe('UIDInput', () => {
     const availabilityContainer = availability.parentElement;
 
     expect(availabilityContainer).not.toBeNull();
-    expect(window.getComputedStyle(availabilityContainer!).position).not.toBe('absolute');
+    if (!availabilityContainer) {
+      throw new Error('Expected availability feedback to have a container');
+    }
+
+    expect(window.getComputedStyle(availabilityContainer).position).not.toBe('absolute');
     expect(window.getComputedStyle(input).textOverflow).toBe('ellipsis');
 
     jest.runOnlyPendingTimers();
