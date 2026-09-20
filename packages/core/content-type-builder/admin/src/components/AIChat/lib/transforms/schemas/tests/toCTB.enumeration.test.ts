@@ -35,7 +35,11 @@ describe('AI enumeration normalization', () => {
       status: 'NEW',
     });
 
-    const enumValues = attribute.enum as string[];
+    if (!attribute || attribute.type !== 'enumeration') {
+      throw new Error('Expected generated year attribute to be an enumeration');
+    }
+
+    const enumValues = attribute.enum;
     expect(enumValues.map(toRegressedEnumValue)).toEqual([
       'value_2020',
       'value_2021',
