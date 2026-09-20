@@ -1,5 +1,3 @@
-import { describe, expect, it } from 'vitest';
-
 import { createComponentSchema } from '../../component/createComponentSchema';
 
 describe('component form schema', () => {
