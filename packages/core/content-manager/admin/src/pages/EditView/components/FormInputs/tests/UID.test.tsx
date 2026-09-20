@@ -187,7 +187,6 @@ describe('UIDInput', () => {
     const availability = await screen.findByText(/^Unavailable$/);
     const availabilityContainer = availability.parentElement;
 
-    expect(availabilityContainer).not.toBeNull();
     if (!availabilityContainer) {
       throw new Error('Expected availability feedback to have a container');
     }
