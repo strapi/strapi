@@ -145,6 +145,46 @@ jobs:
       - name: Run OxLint
         run: yarn lint:oxlint
 
+  # Guards against workspaces relying on dependencies they don't declare.
+  #
+  # The repo ships `nodeLinker: node-modules`, which hoists every dependency into the
+  # root node_modules — so a workspace can import a package it never declared and
+  # nothing fails. A strict/isolated linker only resolves what a package declares, so
+  # running the monorepo under one turns those latent gaps into hard failures.
+  #
+  # Deliberate choices here:
+  #   - YARN_NODE_LINKER overrides the linker for this job only; .yarnrc.yml is untouched.
+  #   - cache-prefix MUST differ from the other jobs. The cache key hashes yarn.lock and
+  #     .yarnrc.yml, neither of which changes when the linker comes from the environment,
+  #     so without it this job restores a node-modules-layout node_modules and installs
+  #     on top of it (which fails in nx's postinstall with "Manifest not found").
+  #   - `yarn build` rather than ./.github/actions/run-build: that action restores
+  #     packages/**/dist keyed on the commit sha, which would hand this job artifacts
+  #     built under the node-modules linker and skip the build entirely.
+  #   - full `lint`/`test:unit` rather than `nx affected`: an undeclared dependency can
+  #     sit in a package the PR never touched.
+  #   - single node version; this checks resolution, which does not vary across them.
+  strict_linker:
+    name: 'strict linker (pnpm)'
+    runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
+    env:
+      YARN_NODE_LINKER: pnpm
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+        with:
+          cache-prefix: 'pnpm'
+      - name: Monorepo build
+        run: yarn build
+      - name: Run lint
+        run: yarn lint
+      - name: Run unit tests
+        run: yarn test:unit
+
   typescript:
     name: 'typescript (node: ${{ matrix.node }})'
     needs: [conditions, build]
