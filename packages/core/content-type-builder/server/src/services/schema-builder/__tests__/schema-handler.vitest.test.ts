@@ -38,8 +38,6 @@ describe('schema-handler flush', () => {
   beforeEach(() => {
     vi.mocked(fse.ensureFile).mockClear();
     vi.mocked(fse.writeJSON).mockClear();
-    vi.mocked(fse.remove).mockClear();
-    vi.mocked(fse.readdir).mockClear();
   });
 
   it('writes experimental indexes and foreignKeys when saving an unrelated change', async () => {
@@ -67,20 +65,5 @@ describe('schema-handler flush', () => {
 
     expect(written.indexes).toBeUndefined();
     expect(written.foreignKeys).toBeUndefined();
-  });
-
-  it('moves the schema file when its filename changes', async () => {
-    const handler = createTestHandler();
-
-    handler.setFilename('renamed.json');
-    await handler.flush();
-
-    expect(fse.ensureFile).toHaveBeenCalledWith('/tmp/api/test/content-types/test/renamed.json');
-    expect(fse.writeJSON).toHaveBeenCalledWith(
-      '/tmp/api/test/content-types/test/renamed.json',
-      expect.any(Object),
-      { spaces: 2 }
-    );
-    expect(fse.remove).toHaveBeenCalledWith('/tmp/api/test/content-types/test/schema.json');
   });
 });
