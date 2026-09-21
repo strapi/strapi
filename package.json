@@ -147,7 +147,6 @@
     "@swc/helpers": "0.5.17",
     "@swc/jest": "0.2.39",
     "@types/fs-extra": "11.0.4",
-    "@types/git-url-parse": "9.0.3",
     "@types/prompts": "2.4.9",
     "@types/react": "18.3.2",
     "@types/react-dom": "18.3.0",
