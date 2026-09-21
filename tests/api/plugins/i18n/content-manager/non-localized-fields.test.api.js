@@ -880,6 +880,7 @@ describe('i18n', () => {
           documentId: created.documentId,
           locale: 'fr',
           status: 'published',
+          populate: ['nonLocalizedRepeatableCompo'],
           data: {
             name: 'document service french',
           },
