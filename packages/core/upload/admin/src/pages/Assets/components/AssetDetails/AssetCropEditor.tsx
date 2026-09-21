@@ -524,6 +524,14 @@ export const AssetCropEditor = ({
    * One key per axis: a shared key remounted both fields, so tabbing out of X
    * destroyed Y before it could take focus and it was unreachable by keyboard.
    */
+  /**
+   * The design system's `NumberInput` stops adopting an external `value` once the
+   * user has typed into it, so a rotation that swaps width and height leaves the
+   * fields showing the old numbers. Remounting on rotation re-seeds them — the
+   * same reason the focal fields remount on blur.
+   */
+  const sizeFieldsKey = rotation;
+
   const [focalXKey, setFocalXKey] = React.useState(0);
   const [focalYKey, setFocalYKey] = React.useState(0);
   const syncFocalX = () => setFocalXKey((key) => key + 1);
@@ -717,6 +725,7 @@ export const AssetCropEditor = ({
                         <ArrowsHorizontal />
                       </LabelIcon>
                       <FieldNumberInput
+                        key={`crop-width-${sizeFieldsKey}`}
                         aria-label={formatMessage({
                           id: getTranslationKey('asset-details.crop.width'),
                           defaultMessage: 'Width (px)',
@@ -734,6 +743,7 @@ export const AssetCropEditor = ({
                         <ArrowsVertical />
                       </LabelIcon>
                       <FieldNumberInput
+                        key={`crop-height-${sizeFieldsKey}`}
                         aria-label={formatMessage({
                           id: getTranslationKey('asset-details.crop.height'),
                           defaultMessage: 'Height (px)',

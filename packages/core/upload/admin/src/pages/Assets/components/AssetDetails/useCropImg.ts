@@ -136,6 +136,10 @@ export const useCropImg = () => {
       setCrop((prev) => rotateCropRect(prev, direction, naturalSize));
       setNaturalSize((prev) => ({ width: prev.height, height: prev.width }));
       setRotation((prev) => nextRotation(prev, direction));
+      // A locked ratio describes the orientation it was locked in, so a quarter
+      // turn inverts it. Without this it keeps enforcing the pre-rotation shape
+      // and fights every later resize.
+      setAspectRatioState((prev) => (prev ? 1 / prev : prev));
     },
     [naturalSize]
   );
