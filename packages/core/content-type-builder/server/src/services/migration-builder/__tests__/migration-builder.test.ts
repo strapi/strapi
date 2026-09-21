@@ -993,6 +993,50 @@ describe('MigrationBuilder', () => {
       );
     });
 
+    it('records an unknown attribute as unsupported (attribute-not-found)', () => {
+      const strapi = createStrapiMock({ metas: scalarMeta, schema: scalarSchema });
+      const builder = createMigrationBuilder({ strapi });
+
+      builder.addRenameAttribute('api::article.article', {
+        oldName: 'ghost',
+        newName: 'spirit',
+      });
+
+      expect(builder.hasChanges()).toBe(false);
+      expect(builder.getUnsupported()).toEqual([
+        expect.objectContaining({
+          uid: 'api::article.article',
+          oldName: 'ghost',
+          reason: 'attribute-not-found',
+        }),
+      ]);
+    });
+
+    it('records media as unsupported when the upload plugin is not installed', () => {
+      const strapi = createStrapiMock({
+        metas: {
+          'api::article.article': {
+            tableName: 'articles',
+            attributes: {
+              cover: {
+                type: 'relation',
+                relation: 'morphToMany',
+                joinTable: { name: 'files_related_morphs', on: { field: 'cover' } },
+              },
+            },
+          },
+        },
+        schema: { 'api::article.article': { cover: { type: 'media' } } },
+      });
+      const builder = createMigrationBuilder({ strapi });
+
+      builder.addRenameAttribute('api::article.article', { oldName: 'cover', newName: 'image' });
+
+      expect(builder.getUnsupported()).toEqual([
+        expect.objectContaining({ oldName: 'cover', reason: 'unsupported-type' }),
+      ]);
+    });
+
     it('produces no changes for a known component that is not used anywhere', () => {
       const strapi = createStrapiMock({
         metas: { 'default.hero': { tableName: 'components_default_heroes', attributes: {} } },

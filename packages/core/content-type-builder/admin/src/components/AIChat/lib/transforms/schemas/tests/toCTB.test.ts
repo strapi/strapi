@@ -246,6 +246,95 @@ describe('transformChatToCTB', () => {
       ]);
     });
 
+    it('keeps explicit rename attributes NEW when the old schema is itself NEW', () => {
+      const newOldSchema = {
+        ...oldSchema,
+        status: 'NEW' as const,
+      };
+
+      const schema = makeSchema({
+        uid: 'api::article.article',
+        name: 'Article',
+        action: 'update',
+        attributes: {
+          heading: { type: 'string', required: true, previousName: 'title' },
+          body: { type: 'blocks' },
+        },
+      });
+
+      const result = transformChatToCTB(schema, newOldSchema) as ContentType;
+
+      expect(result.renames).toBeUndefined();
+      expect(result.attributes).toEqual([
+        { name: 'heading', type: 'string', required: true, status: 'NEW' },
+        { name: 'body', type: 'blocks', status: 'NEW' },
+      ]);
+    });
+
+    it('ignores non-object attributes when collecting previousName metadata', () => {
+      const schema = makeSchema({
+        uid: 'api::article.article',
+        name: 'Article',
+        action: 'update',
+        attributes: {
+          heading: { type: 'string', required: true, previousName: 'title' },
+          body: { type: 'blocks' },
+          // AI payloads can include non-object placeholders that must not throw.
+          skipped: 'not-an-attribute' as unknown as { type: 'string' },
+        },
+      });
+
+      const result = transformChatToCTB(schema, oldSchema) as ContentType;
+
+      expect(result.renames).toEqual([{ oldName: 'title', newName: 'heading' }]);
+    });
+
+    it('forwards a compatible component rename and drops an incompatible one', () => {
+      const componentOldSchema = {
+        ...oldSchema,
+        attributes: [
+          {
+            name: 'hero',
+            type: 'component',
+            component: 'default.hero',
+            repeatable: false,
+            status: 'UNCHANGED',
+          },
+          {
+            name: 'blocks',
+            type: 'component',
+            component: 'default.block',
+            repeatable: true,
+            status: 'UNCHANGED',
+          },
+        ],
+      } as ContentType;
+
+      const schema = makeSchema({
+        uid: 'api::article.article',
+        name: 'Article',
+        action: 'update',
+        attributes: {
+          banner: {
+            type: 'component',
+            component: 'default.hero',
+            repeatable: false,
+            previousName: 'hero',
+          },
+          layout: {
+            type: 'component',
+            component: 'default.block',
+            repeatable: false,
+            previousName: 'blocks',
+          },
+        },
+      });
+
+      const result = transformChatToCTB(schema, componentOldSchema) as ContentType;
+
+      expect(result.renames).toEqual([{ oldName: 'hero', newName: 'banner' }]);
+    });
+
     it('drops an explicit rename whose type also changed (falls back to remove + add)', () => {
       // title (string) -> views (integer): the column cannot simply be renamed,
       // so no rename is forwarded and the field is treated as removed + added.

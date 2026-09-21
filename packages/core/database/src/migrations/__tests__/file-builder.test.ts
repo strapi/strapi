@@ -203,6 +203,17 @@ describe('MigrationFileBuilder', () => {
       expect(builder.hasChanges()).toBe(false);
       expect(builder.build({ name: 'rename-fields' })).toBeNull();
     });
+
+    it('returns a copy of the recorded operations', () => {
+      const builder = createMigrationFileBuilder({ db: createDbMock() });
+      expect(builder.getOperations()).toEqual([]);
+
+      builder.renameColumn({ table: 'articles', from: 'old_title', to: 'heading' });
+
+      expect(builder.getOperations()).toEqual([
+        expect.objectContaining({ kind: 'renameColumn', from: 'old_title', to: 'heading' }),
+      ]);
+    });
   });
 
   describe('getFormattedTimestamp', () => {
@@ -267,6 +278,16 @@ describe('MigrationFileBuilder', () => {
   });
 
   describe('writeFiles', () => {
+    it('returns null when there are no operations', async () => {
+      const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'db-migration-write-empty-'));
+      const migrationsDir = path.join(tmp, 'database', 'migrations');
+      const builder = createMigrationFileBuilder({ db: createDbMock({ migrationsDir }) });
+
+      await expect(builder.writeFiles({ name: 'rename-fields' })).resolves.toBeNull();
+      expect(fs.existsSync(migrationsDir)).toBe(false);
+      fs.removeSync(tmp);
+    });
+
     it('creates the migrations dir and writes one file', async () => {
       const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'db-migration-write-'));
       const migrationsDir = path.join(tmp, 'database', 'migrations');

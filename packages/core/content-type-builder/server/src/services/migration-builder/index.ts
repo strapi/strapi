@@ -298,6 +298,71 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
    * still reflects the pre-rename schema. Continuation hops never reach here —
    * they inherit their classification from the in-flight map.
    */
+  const classifyMedia = (
+    uid: string,
+    oldName: string,
+    joinTable: any,
+    upload: ReturnType<typeof resolveUploadMorphTable>
+  ): Resolved | undefined => {
+    // Media: the attribute name is a value in the shared `files_related_morphs`
+    // `field` column, scoped by `related_type` (the owning uid). Detect it by
+    // schema type OR by the join table being the shared upload table — the
+    // latter guard is critical so a media field can never fall through to the
+    // unscoped component branch and corrupt other types' media on the shared
+    // table.
+    const isMedia =
+      schemaTypeOf(uid, oldName) === 'media' || (!!upload && joinTable?.name === upload.table);
+    if (!isMedia) {
+      return undefined;
+    }
+    if (!upload) {
+      return { kind: 'unsupported', reason: 'unsupported-type' };
+    }
+    return {
+      kind: 'media',
+      table: upload.table,
+      fieldColumn: upload.fieldColumn,
+      typeColumn: upload.typeColumn,
+      typeValue: uid,
+      from: oldName,
+    };
+  };
+
+  const classifyComponent = (oldName: string, joinTable: any): Resolved | undefined => {
+    if (!joinTable?.on || typeof joinTable.on !== 'object') {
+      return undefined;
+    }
+    const fieldColumn = Object.keys(joinTable.on).find((key) => joinTable.on[key] === oldName);
+    if (!fieldColumn) {
+      return undefined;
+    }
+    return { kind: 'component', table: joinTable.name, fieldColumn, from: oldName };
+  };
+
+  const classifyRelation = (meta: any, attribute: any, joinTable: any): Resolved => {
+    // Polymorphic morph relations need shared-table handling and are not
+    // creatable through the CTB UI, so they are left unsupported.
+    if (isMorphRelation(attribute) || attribute.morphColumn) {
+      return { kind: 'unsupported', reason: 'unsupported-type' };
+    }
+
+    // Join column on the owner's own table (`<field>_id`), e.g. useJoinTable:false.
+    if (attribute.joinColumn?.name && !joinTable) {
+      return { kind: 'joinColumn', table: meta.tableName, from: attribute.joinColumn.name };
+    }
+
+    if (joinTable?.name) {
+      // The inverse side of a bidirectional relation: the join table is named
+      // from the owning attribute, so renaming this side touches no artifact.
+      if (attribute.mappedBy) {
+        return { kind: 'skip' };
+      }
+      return { kind: 'joinTable', from: joinTable.name };
+    }
+
+    return { kind: 'unsupported', reason: 'unsupported-type' };
+  };
+
   const classify = (uid: string, oldName: string): Resolved => {
     const meta = db.metadata.get(uid);
     const attribute = meta.attributes?.[oldName] as any;
@@ -308,60 +373,18 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
 
     const joinTable = attribute.joinTable;
     const upload = resolveUploadMorphTable();
-
-    // Media: the attribute name is a value in the shared `files_related_morphs`
-    // `field` column, scoped by `related_type` (the owning uid). Detect it by
-    // schema type OR by the join table being the shared upload table — the
-    // latter guard is critical so a media field can never fall through to the
-    // unscoped component branch and corrupt other types' media on the shared
-    // table.
-    const isMedia =
-      schemaTypeOf(uid, oldName) === 'media' || (!!upload && joinTable?.name === upload.table);
-    if (isMedia) {
-      if (upload) {
-        return {
-          kind: 'media',
-          table: upload.table,
-          fieldColumn: upload.fieldColumn,
-          typeColumn: upload.typeColumn,
-          typeValue: uid,
-          from: oldName,
-        };
-      }
-      return { kind: 'unsupported', reason: 'unsupported-type' };
+    const media = classifyMedia(uid, oldName, joinTable, upload);
+    if (media) {
+      return media;
     }
 
-    // Components & dynamic zones: the attribute name is a value in the per-type
-    // link table's `field` column.
-    if (joinTable?.on && typeof joinTable.on === 'object') {
-      const fieldColumn = Object.keys(joinTable.on).find((key) => joinTable.on[key] === oldName);
-      if (fieldColumn) {
-        return { kind: 'component', table: joinTable.name, fieldColumn, from: oldName };
-      }
+    const component = classifyComponent(oldName, joinTable);
+    if (component) {
+      return component;
     }
 
     if (attribute.type === 'relation') {
-      // Polymorphic morph relations need shared-table handling and are not
-      // creatable through the CTB UI, so they are left unsupported.
-      if (isMorphRelation(attribute) || attribute.morphColumn) {
-        return { kind: 'unsupported', reason: 'unsupported-type' };
-      }
-
-      // Join column on the owner's own table (`<field>_id`), e.g. useJoinTable:false.
-      if (attribute.joinColumn?.name && !joinTable) {
-        return { kind: 'joinColumn', table: meta.tableName, from: attribute.joinColumn.name };
-      }
-
-      if (joinTable?.name) {
-        // The inverse side of a bidirectional relation: the join table is named
-        // from the owning attribute, so renaming this side touches no artifact.
-        if (attribute.mappedBy) {
-          return { kind: 'skip' };
-        }
-        return { kind: 'joinTable', from: joinTable.name };
-      }
-
-      return { kind: 'unsupported', reason: 'unsupported-type' };
+      return classifyRelation(meta, attribute, joinTable);
     }
 
     // Plain scalar column on the model's own table.

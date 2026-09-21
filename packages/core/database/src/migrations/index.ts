@@ -2,23 +2,16 @@ import { createUserMigrationProvider } from './users';
 import { createInternalMigrationProvider } from './internal';
 import { createMigrationFileBuilder } from './file-builder';
 
-import type { MigrationProvider, Migration } from './common';
-import type {
+import type { MigrationProvider } from './common';
+import type { Database } from '..';
+
+export type { MigrationProvider, Migration } from './common';
+export type {
   BuiltMigrationFile,
   MigrationFileBuilder,
   MigrationFileFormat,
   MigrationFileOperation,
 } from './file-builder';
-import type { Database } from '..';
-
-export type {
-  MigrationProvider,
-  Migration,
-  BuiltMigrationFile,
-  MigrationFileBuilder,
-  MigrationFileFormat,
-  MigrationFileOperation,
-};
 
 export const createMigrationsProvider = (db: Database): MigrationProvider => {
   const userProvider = createUserMigrationProvider(db);
