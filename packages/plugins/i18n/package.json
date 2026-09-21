@@ -39,7 +39,13 @@
       "require": "./dist/server/index.js",
       "default": "./dist/server/index.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./services": {
+      "types": "./dist/server/src/public-services.d.ts"
+    },
+    "./types": {
+      "types": "./dist/server/src/types.d.ts"
+    }
   },
   "files": [
     "dist/",
@@ -110,5 +116,15 @@
     "description": "This plugin enables to create, to read and to update content in different languages, both from the Admin Panel and from the API.",
     "required": false,
     "kind": "plugin"
+  },
+  "typesVersions": {
+    "*": {
+      "services": [
+        "./dist/server/src/public-services.d.ts"
+      ],
+      "types": [
+        "./dist/server/src/types.d.ts"
+      ]
+    }
   }
 }

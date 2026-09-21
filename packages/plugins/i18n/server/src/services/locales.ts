@@ -1,17 +1,25 @@
 import { isNil } from 'lodash/fp';
+import type { Data } from '@strapi/types';
 import { emitAudit } from '@strapi/utils';
+import type {
+  Locale,
+  LocaleFilters,
+  LocaleService as PublicLocaleService,
+} from '../public-services';
 import { AUDITED_EVENTS, DEFAULT_LOCALE } from '../constants';
 import { getService, getCoreStore } from '../utils';
 
-const find = (params: any = {}) =>
+const find = (params: LocaleFilters = {}): Promise<Locale[]> =>
   strapi.db.query('plugin::i18n.locale').findMany({ where: params });
 
-const findById = (id: any) => strapi.db.query('plugin::i18n.locale').findOne({ where: { id } });
+const findById = (id: Data.ID): Promise<Locale | null> =>
+  strapi.db.query('plugin::i18n.locale').findOne({ where: { id } });
 
-const findByCode = (code: any) =>
+const findByCode = (code: string): Promise<Locale | null> =>
   strapi.db.query('plugin::i18n.locale').findOne({ where: { code } });
 
-const count = (params: any = {}) => strapi.db.query('plugin::i18n.locale').count({ where: params });
+const count = (params: LocaleFilters = {}): Promise<number> =>
+  strapi.db.query('plugin::i18n.locale').count({ where: params });
 
 const create = async (locale: any, { isDefault = false }: { isDefault?: boolean } = {}) => {
   const result = await strapi.db.query('plugin::i18n.locale').create({ data: locale });
@@ -100,7 +108,8 @@ const setDefaultLocale = async ({ code }: any) => {
   return result;
 };
 
-const getDefaultLocale = () => getCoreStore().get({ key: 'default_locale' });
+const getDefaultLocale = () =>
+  getCoreStore().get({ key: 'default_locale' }) as Promise<string | null>;
 
 const setIsDefault = async (locales: any) => {
   if (isNil(locales)) {
@@ -135,19 +144,20 @@ const deleteAllLocalizedEntriesFor = async ({ locale }: any) => {
   }
 };
 
-const locales = () => ({
-  find,
-  findById,
-  findByCode,
-  create,
-  update,
-  count,
-  setDefaultLocale,
-  getDefaultLocale,
-  setIsDefault,
-  delete: deleteFn,
-  initDefaultLocale,
-});
+const locales = () =>
+  ({
+    find,
+    findById,
+    findByCode,
+    create,
+    update,
+    count,
+    setDefaultLocale,
+    getDefaultLocale,
+    setIsDefault,
+    delete: deleteFn,
+    initDefaultLocale,
+  }) satisfies PublicLocaleService;
 
 type LocaleService = typeof locales;
 

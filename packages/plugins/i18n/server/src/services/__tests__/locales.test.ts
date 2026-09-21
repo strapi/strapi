@@ -124,6 +124,23 @@ describe('Locales', () => {
   });
 
   describe('CRUD', () => {
+    test('returns null for missing locale lookups', async () => {
+      const findOne = jest.fn(() => Promise.resolve(null));
+      global.strapi = { db: { query: () => ({ findOne }) } } as any;
+
+      await expect(localesService.findByCode('missing')).resolves.toBeNull();
+      await expect(localesService.findById(999)).resolves.toBeNull();
+    });
+
+    test('returns stored locales without adding default status', async () => {
+      const locale = { id: 1, code: 'en', name: null };
+      const findMany = jest.fn(() => Promise.resolve([locale]));
+      global.strapi = { db: { query: () => ({ findMany }) } } as any;
+
+      await expect(localesService.find()).resolves.toEqual([locale]);
+      expect(locale).not.toHaveProperty('isDefault');
+    });
+
     test('find', async () => {
       const locales = [{ name: 'French', code: 'fr' }];
       const findMany = jest.fn(() => Promise.resolve(locales));
