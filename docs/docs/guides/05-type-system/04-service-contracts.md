@@ -67,6 +67,44 @@ Package-provided contracts are registered separately in `Public.DefaultServiceRe
 
 The separate registries are deliberate. Existing `Public.Services` augmentations keep their previous behavior. Both new registries are exposed only through the `Public` namespace. Internal lookup types must import them from the public barrel (`src/public/index.ts`), not directly from `src/public/registries.ts`: TypeScript applies this namespace augmentation at the barrel. Direct imports from the declaration file do not receive those entries.
 
+### Generated application service contracts
+
+`strapi develop` and `strapi ts:generate-types` emit `types/generated/services.d.ts` next to the content-type and component definitions. It registers every application service (`api::<api>.<service>`) in `ServiceRegistry`, typed from its source file:
+
+```ts
+import type { Core } from '@strapi/strapi';
+
+type ServiceInstance<TModule> = TModule extends { default: infer TExport }
+  ? TExport extends (...args: any[]) => infer TInstance
+    ? TInstance
+    : TExport
+  : Core.Service;
+
+declare module '@strapi/strapi' {
+  interface ServiceRegistry {
+    'api::article.article': ServiceInstance<
+      typeof import('../../src/api/article/services/article')
+    >;
+  }
+}
+```
+
+The registered type is the return type of the module's default export when it is a factory (`createCoreService(...)` or `({ strapi }) => ({ ... })`), or the default export itself when it is a plain object. A module without a default export keeps the permissive `Core.Service`, which matches the runtime: the loader registers `undefined` for it.
+
+The generator mirrors the API loader (`@strapi/core`, `loaders/apis.ts`): it walks `src/api/<api>/services/*.{ts,js}`, derives the uid with the same kebab-case normalization, and only emits entries for uids the running application registered. When a `.ts` and a `.js` file resolve to the same uid, the `.ts` one wins with a warning. Plugin and admin services are not emitted; their contracts belong to the packages, in `DefaultServiceRegistry`.
+
+Because the contract is inferred from the implementation, a method whose return type is inferred from a lookup of the same service, directly or through another service, is circular. The compiler then reports `TS7022` on the service's default export and the whole contract becomes `any` (silently, when `noImplicitAny` is off). Annotate the return type of that method to break the cycle:
+
+```ts
+export default factories.createCoreService('api::article.article', ({ strapi }) => ({
+  async findRandomTitle(): Promise<string | null | undefined> {
+    const article = await strapi.service('api::article.article').findRandom();
+
+    return article?.title;
+  },
+}));
+```
+
 ### Build compatibility and extensions
 
 Ordinary `Core.Strapi` lookups do not become stricter merely because an application upgrades. The i18n registration is absent from its ordinary server declaration entry point. Importing the opt-in module anywhere in a TypeScript program applies its contract throughout that program, including other files and dependencies checked in that program.
