@@ -115,7 +115,8 @@ const interpolate = (template: string, values: Record<string, string>): string =
   });
 };
 
-const quote = (value: string): string => `'${value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
+const quote = (value: string): string =>
+  `'${value.replaceAll('\\', String.raw`\\`).replaceAll("'", String.raw`\'`)}'`;
 
 const IDENTIFIER_KEY = /^[A-Za-z_$][\w$]*$/;
 
@@ -267,8 +268,10 @@ export const createMigrationFileBuilder = ({ db }: MigrationFileBuilderDeps) => 
       const extension = path.extname(built.filename);
       const basename = built.filename.slice(0, -extension.length);
 
+      let suffix = 0;
       let filePath = path.join(dir, built.filename);
-      for (let suffix = 1; await fse.pathExists(filePath); suffix += 1) {
+      while (await fse.pathExists(filePath)) {
+        suffix += 1;
         filePath = path.join(dir, `${basename}-${suffix}${extension}`);
       }
 

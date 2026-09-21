@@ -18,6 +18,7 @@ const collectExplicitAttributeRenames = (
 
   Object.entries(attributes).forEach(([newName, rawAttr]) => {
     if (!rawAttr || typeof rawAttr !== 'object') {
+      delete sanitizedAttributes[newName];
       return;
     }
 
@@ -92,13 +93,11 @@ const applyExplicitRenames = (
     return { processedAttributes, removedAttributes };
   }
 
-  const consumedRemoved = new Set(
-    explicitRenames.map((hop) => hop.oldName).filter((oldName) => oldName)
-  );
+  const consumedRemoved = new Set(explicitRenames.map((hop) => hop.oldName).filter(Boolean));
 
   explicitRenames.forEach((hop) => {
     const newAttr = processedAttributes.find((attr) => attr.name === hop.newName);
-    if (newAttr && newAttr.status === 'NEW') {
+    if (newAttr?.status === 'NEW') {
       newAttr.status = 'CHANGED';
     }
   });
@@ -249,12 +248,11 @@ const transformAttributesAndRenamesFromChatToCTB = (
   // Process current attributes (new and changed)
   const processedAttributes = Object.entries(attributes).map(([name, attr]) => {
     const oldAttr = oldAttributesMap[name];
-    const explicitRename = compatibleAttributeRenames.find((hop) => hop.newName === name);
-    const status = explicitRename
-      ? oldSchema.status === 'NEW'
-        ? 'NEW'
-        : 'CHANGED'
-      : determineAttributeStatus({ ...attr, name }, oldAttr, oldSchema);
+    const isExplicitRename = compatibleAttributeRenames.some((hop) => hop.newName === name);
+    let status = determineAttributeStatus({ ...attr, name }, oldAttr, oldSchema);
+    if (isExplicitRename) {
+      status = oldSchema.status === 'NEW' ? 'NEW' : 'CHANGED';
+    }
 
     return createAttributeWithStatus(name, attr, status);
   });
