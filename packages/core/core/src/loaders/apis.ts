@@ -23,6 +23,9 @@ interface APIs {
   [key: string]: API;
 }
 
+// Extensions `loadFile` knows how to read. Everything else is ignored by `loadDir`.
+const LOADABLE_EXTENSIONS = ['.js', '.json'];
+
 const DEFAULT_CONTENT_TYPE = {
   schema: {},
   actions: {},
@@ -136,10 +139,13 @@ const loadContentTypes = async (apiName: string, dir: string) => {
     }
 
     const contentTypeName = normalizeName(fd.name);
-    const loadedContentType = (await loadDir(join(dir, fd.name)))?.result;
+    const contentTypeDir = join(dir, fd.name);
+    const loadedContentType = (await loadDir(contentTypeDir))?.result;
 
     if (isEmpty(loadedContentType) || isEmpty(loadedContentType.schema)) {
-      throw new Error(`Could not load content type found at ${dir}`);
+      throw new Error(
+        `Could not load content type found at ${contentTypeDir}: no schema.json was found. If this content type was deleted, remove the folder and restart the server.`
+      );
     }
 
     const contentType = {
@@ -169,7 +175,9 @@ const loadDir = async (dir: string) => {
 
   const root: Record<string, unknown> = {};
   for (const fd of fds) {
-    if (!fd.isFile() || extname(fd.name) === '.map') {
+    // Anything `loadFile` cannot parse is skipped rather than registered as an empty object.
+    // A file such as `foo.js.bak` would otherwise be keyed as `foo-js` with no content.
+    if (!fd.isFile() || !LOADABLE_EXTENSIONS.includes(extname(fd.name))) {
       continue;
     }
 
