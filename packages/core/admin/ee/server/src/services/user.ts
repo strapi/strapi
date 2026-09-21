@@ -217,7 +217,6 @@ const deleteByIds = async (ids: any) => {
     users: deletedUsers.map((deletedUser) => sanitizeUser(deletedUser)),
   });
 
-  // One audit row per account
   for (const deletedUser of deletedUsers) {
     await emitAdminUserDeleted({ strapi }, deletedUser);
   }

@@ -207,7 +207,6 @@ export const registerAdminUserAuditEvents = (auditLogsLifecycle: AuditLogsLifecy
     email: event.email,
   });
 
-  // Public forms: no session, so the row records an unknown actor.
   const withoutSession = { allowUnknownActor: true };
 
   // The first super admin registers from a public form too

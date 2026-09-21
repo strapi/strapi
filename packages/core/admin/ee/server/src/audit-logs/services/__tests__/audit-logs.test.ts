@@ -301,7 +301,6 @@ describe('Audit logs service', () => {
     it('records an event allowing an unknown actor when the admin request has no user', async () => {
       const { lifecycle, handleEvent } = await setup();
 
-      // A public admin form: the route is an admin one, nobody is logged in
       lifecycle.registerEvent('admin-user.password-reset.create', releaseTransform, {
         allowUnknownActor: true,
       });
@@ -376,7 +375,6 @@ describe('Audit logs service', () => {
     it('does not let the opt-in bypass the admin route requirement', async () => {
       const { lifecycle, handleEvent } = await setup();
 
-      // A content-api request with no user is still not an admin action
       lifecycle.registerEvent('admin-user.invite.accept', releaseTransform, {
         allowUnknownActor: true,
       });

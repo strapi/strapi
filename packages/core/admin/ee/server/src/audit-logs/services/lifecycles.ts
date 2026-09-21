@@ -7,8 +7,8 @@ const DEFAULT_RETENTION_DAYS = 90;
 /**
  * Events audited before the payload standard; their stored shape is frozen for
  * compatibility. Do not add events here: new events come through registerEvent().
- * `user.create`, `user.update` and `user.delete` left this list for the `admin-user.*`
- * events; the event hub still emits them for custom listeners.
+ * The event hub still emits user.create, user.update and user.delete; the audit log
+ * records them as admin-user.* (server/src/audit-logs/admin-users.ts).
  * TODO: migrate the rest to the standard.
  */
 const defaultEvents = [
