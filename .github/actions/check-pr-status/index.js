@@ -60,8 +60,6 @@ async function main() {
         core.setFailed(
           'Community PRs must target `develop`, not `main`. Please edit the PR and change the base branch to `develop`.'
         );
-
-        return;
       }
     }
   } catch (error) {
