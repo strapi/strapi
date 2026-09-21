@@ -123,7 +123,7 @@
     "tmp@~0.2.1": "0.2.7",
     "@types/node": "20.19.41",
     "@types/react": "18.3.2",
-    "@strapi/design-system": "0.0.0-experimental.65fd50f14e6e09b03cee73167fc9f98ae9ca777f"
+    "@strapi/design-system": "0.0.0-experimental.ad5a8b137716a7af7b8df6d2bc14640ac6e454a7"
   },
   "devDependencies": {
     "@babel/core": "7.29.7",
