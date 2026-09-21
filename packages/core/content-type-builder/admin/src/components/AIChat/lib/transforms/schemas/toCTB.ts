@@ -3,6 +3,7 @@ import omit from 'lodash/omit';
 import pluralize from 'pluralize';
 
 import { applyPrivateSearchDefault } from '../../../../../utils/applyPrivateSearchDefault';
+import { isStorageCompatibleRename } from '../../../../DataManager/utils/isStorageCompatibleRename';
 
 import type { ContentType, Component, AnyAttribute, RenameHop } from '../../../../../types';
 import type { Schema, SchemaAttribute } from '../../types/schema';
@@ -31,42 +32,6 @@ const collectExplicitAttributeRenames = (
   });
 
   return { renames, attributes: sanitizedAttributes };
-};
-
-/**
- * A rename can only preserve data when the field keeps its storage: same type,
- * and for relations the same kind and target, for components the same component
- * and repeatable flag. Anything else must go through the regular remove + add
- * path (renaming the column and altering its type in place can fail at startup),
- * so such hops are dropped and the field is treated as removed + added.
- */
-const isStorageCompatibleRename = (
-  oldAttribute: AnyAttribute | undefined,
-  newAttribute: SchemaAttribute | undefined
-): boolean => {
-  if (!oldAttribute || !newAttribute) {
-    return true;
-  }
-
-  const previous = oldAttribute as Record<string, unknown>;
-  const next = newAttribute as Record<string, unknown>;
-
-  if (previous.type !== next.type) {
-    return false;
-  }
-
-  if (next.type === 'relation') {
-    return previous.relation === next.relation && previous.target === next.target;
-  }
-
-  if (next.type === 'component') {
-    return (
-      previous.component === next.component &&
-      Boolean(previous.repeatable) === Boolean(next.repeatable)
-    );
-  }
-
-  return true;
 };
 
 const dedupeRenames = (renames: RenameHop[]): RenameHop[] => {
@@ -236,10 +201,21 @@ const transformAttributesAndRenamesFromChatToCTB = (
   );
 
   // Only renames that keep the field's storage can be replayed as a migration;
-  // the rest fall back to remove + add.
-  const compatibleRenames = [...schemaRenames, ...explicitAttributeRenames].filter((hop) =>
-    isStorageCompatibleRename(oldAttributesMap[hop.oldName], attributes[hop.newName])
-  );
+  // the rest fall back to remove + add. A hop whose old or new side is unknown
+  // cannot be checked (nor replayed by the server), so it is dropped too.
+  const compatibleRenames = [...schemaRenames, ...explicitAttributeRenames].filter((hop) => {
+    const previousAttribute = oldAttributesMap[hop.oldName];
+    const nextAttribute = attributes[hop.newName];
+
+    if (!previousAttribute || !nextAttribute) {
+      return false;
+    }
+
+    return isStorageCompatibleRename(previousAttribute, {
+      ...nextAttribute,
+      name: hop.newName,
+    } as AnyAttribute);
+  });
   const compatibleAttributeRenames = explicitAttributeRenames.filter((hop) =>
     compatibleRenames.includes(hop)
   );

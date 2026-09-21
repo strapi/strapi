@@ -99,10 +99,19 @@ export type AnyAttribute = Base &
     | Relation
   );
 
+/**
+ * Attribute names involved in rename chains the user declined to preserve data
+ * for (`prompt-after-edit` mode). A later hop touching one of these names is
+ * declined without a prompt so a chain is never partially preserved. Transient
+ * (admin only), never sent to the server.
+ */
+export type DeclinedRenameNames = string[];
+
 export type Component = Omit<Struct.ComponentSchema, 'attributes'> & {
   status: Status;
   attributes: Array<AnyAttribute>;
   renames?: RenameHop[];
+  declinedRenameNames?: DeclinedRenameNames;
 };
 
 export type ContentType = Omit<Struct.ContentTypeSchema, 'attributes'> & {
@@ -112,6 +121,7 @@ export type ContentType = Omit<Struct.ContentTypeSchema, 'attributes'> & {
   restrictRelationsTo: Schema.Attribute.RelationKind.Any[] | null;
   attributes: Array<AnyAttribute>;
   renames?: RenameHop[];
+  declinedRenameNames?: DeclinedRenameNames;
 };
 
 export type Components = Record<string, Component>;

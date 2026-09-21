@@ -212,4 +212,71 @@ describe('CTB | DataManager | reducer | rename tracking (EDIT_ATTRIBUTE)', () =>
 
     expect(getRenames(state, uid)).toBeUndefined();
   });
+
+  describe('declined renames (prompt-after-edit)', () => {
+    const declineName = (name: string, newName: string) =>
+      actions.editAttribute({
+        attributeToSet: { type: 'string', name: newName } as AnyAttribute,
+        forTarget: 'contentType',
+        targetUid: uid as Internal.UID.ContentType,
+        name,
+        recordRename: false,
+        declineRename: true,
+      });
+
+    const getDeclined = (state: State) => state.current.contentTypes[uid]?.declinedRenameNames;
+
+    it('remembers both names of a declined hop instead of recording it', () => {
+      const state = reducer(
+        buildState([{ name: 'title', type: 'string', status: 'UNCHANGED' }]),
+        declineName('title', 'tmp')
+      );
+
+      expect(getRenames(state, uid)).toBeUndefined();
+      expect(getDeclined(state)).toEqual(['title', 'tmp']);
+      expect(getAttr(state, uid, 'tmp')).toBeDefined();
+    });
+
+    it('deduplicates names across declined hops of the same chain', () => {
+      let state = reducer(
+        buildState([{ name: 'title', type: 'string', status: 'UNCHANGED' }]),
+        declineName('title', 'tmp')
+      );
+      state = reducer(state, declineName('tmp', 'heading'));
+
+      expect(getDeclined(state)).toEqual(['title', 'tmp', 'heading']);
+    });
+
+    it('ignores a declined edit that does not change the name', () => {
+      const state = reducer(
+        buildState([{ name: 'title', type: 'string', status: 'UNCHANGED' }]),
+        declineName('title', 'title')
+      );
+
+      expect(getDeclined(state)).toBeUndefined();
+    });
+
+    it('declines a custom field rename the same way', () => {
+      const state = reducer(
+        buildState([
+          { name: 'color', type: 'string', customField: 'plugin::x.color', status: 'UNCHANGED' },
+        ]),
+        actions.editCustomFieldAttribute({
+          attributeToSet: {
+            type: 'string',
+            name: 'shade',
+            customField: 'plugin::x.color',
+          } as AnyAttribute,
+          forTarget: 'contentType',
+          targetUid: uid as Internal.UID.ContentType,
+          name: 'color',
+          recordRename: false,
+          declineRename: true,
+        })
+      );
+
+      expect(getRenames(state, uid)).toBeUndefined();
+      expect(getDeclined(state)).toEqual(['color', 'shade']);
+    });
+  });
 });

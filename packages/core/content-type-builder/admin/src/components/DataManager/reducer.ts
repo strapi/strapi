@@ -1,12 +1,14 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 import merge from 'lodash/merge';
 import omit from 'lodash/omit';
+import uniq from 'lodash/uniq';
 
 import { applyPrivateSearchDefault } from '../../utils/applyPrivateSearchDefault';
 import { getRelationType } from '../../utils/getRelationType';
 import { makeUnique } from '../../utils/makeUnique';
 
 import { createUndoRedoSlice } from './undoRedo';
+import { isStorageCompatibleRename } from './utils/isStorageCompatibleRename';
 
 import type {
   Components,
@@ -120,20 +122,28 @@ type CreateSchemaPayload = {
   };
 };
 
-type EditAttributePayload = {
-  attributeToSet: AttributeMutation;
-  forTarget: Struct.ModelType;
-  targetUid: string;
-  name: string;
+type RenameConsentPayload = {
+  /** Record the hop so the server preserves data (default). */
   recordRename?: boolean;
+  /**
+   * The user declined to preserve data for this hop: remember both names so
+   * later hops of the same chain are declined without another prompt.
+   */
+  declineRename?: boolean;
 };
 
-type EditCustomFieldAttributePayload = {
+type EditAttributePayload = RenameConsentPayload & {
   attributeToSet: AttributeMutation;
   forTarget: Struct.ModelType;
   targetUid: string;
   name: string;
-  recordRename?: boolean;
+};
+
+type EditCustomFieldAttributePayload = RenameConsentPayload & {
+  attributeToSet: AttributeMutation;
+  forTarget: Struct.ModelType;
+  targetUid: string;
+  name: string;
 };
 
 type RemoveComponentFromDynamicZonePayload = {
@@ -226,38 +236,6 @@ const createAttribute = (properties: Record<string, unknown>): AnyAttribute => {
 };
 
 /**
- * Whether `newAttribute` keeps the storage of `previousAttribute`, i.e. whether
- * renaming the underlying database artifact is enough to carry the data over.
- * A type change (or a relation retargeted, or a component swapped) must go
- * through the regular drop-and-recreate path: renaming the column and letting
- * schema sync alter its type in place can fail at startup on Postgres/MySQL.
- */
-const isStorageCompatibleRename = (
-  previousAttribute: AnyAttribute,
-  newAttribute: AnyAttribute
-): boolean => {
-  if (previousAttribute.type !== newAttribute.type) {
-    return false;
-  }
-
-  if (previousAttribute.type === 'relation' && newAttribute.type === 'relation') {
-    return (
-      previousAttribute.relation === newAttribute.relation &&
-      previousAttribute.target === newAttribute.target
-    );
-  }
-
-  if (previousAttribute.type === 'component' && newAttribute.type === 'component') {
-    return (
-      previousAttribute.component === newAttribute.component &&
-      Boolean(previousAttribute.repeatable) === Boolean(newAttribute.repeatable)
-    );
-  }
-
-  return true;
-};
-
-/**
  * Records an attribute rename hop in the order the user performed it, so the
  * server can replay the exact path as a data-preserving migration.
  *
@@ -294,6 +272,47 @@ const recordRename = (
   }
 
   type.renames.push({ oldName, newName });
+};
+
+/**
+ * Remembers the names of a rename hop the user declined to preserve data for,
+ * so the rest of that chain is declined without another prompt.
+ */
+const recordDeclinedRename = (
+  type: ContentType | Component,
+  previousAttribute: AnyAttribute,
+  newAttribute: AnyAttribute
+): void => {
+  const oldName = previousAttribute.name;
+  const newName = newAttribute?.name;
+  if (!newName || oldName === newName) {
+    return;
+  }
+
+  type.declinedRenameNames = uniq([...(type.declinedRenameNames ?? []), oldName, newName]);
+};
+
+/**
+ * Applies the rename consent carried by an edit: either records the hop or
+ * remembers it as declined. Never both.
+ */
+const applyRenameConsent = (
+  type: ContentType | Component,
+  previousAttribute: AnyAttribute,
+  newAttribute: AnyAttribute,
+  {
+    recordRename: shouldRecordRename = true,
+    declineRename: shouldDecline = false,
+  }: RenameConsentPayload
+): void => {
+  if (shouldDecline) {
+    recordDeclinedRename(type, previousAttribute, newAttribute);
+    return;
+  }
+
+  if (shouldRecordRename) {
+    recordRename(type, previousAttribute, newAttribute);
+  }
 };
 
 const setAttributeAt = (type: ContentType | Component, index: number, attribute: AnyAttribute) => {
@@ -347,6 +366,29 @@ const removeAttributeByName = (type: ContentType | Component, name: string) => {
   } else {
     setAttributeStatus(attr, 'REMOVED');
   }
+};
+
+/**
+ * Carries the pending rename state of `existing` over to a full replacement of
+ * the type (the AI chat's `applyChange`). Appending the incoming hops after the
+ * existing ones is order-correct: the chat transform diffs against the current
+ * reducer entry, whose attributes already carry the manual renames, so its hops
+ * start from where the manual hops ended.
+ */
+const mergeRenameState = (
+  existing: Pick<ContentType, 'renames' | 'declinedRenameNames'> | undefined,
+  incoming: Pick<ContentType, 'renames' | 'declinedRenameNames'>
+): Pick<ContentType, 'renames' | 'declinedRenameNames'> => {
+  const renames = [...(existing?.renames ?? []), ...(incoming.renames ?? [])];
+  const declinedRenameNames = uniq([
+    ...(existing?.declinedRenameNames ?? []),
+    ...(incoming.declinedRenameNames ?? []),
+  ]);
+
+  return {
+    ...(renames.length > 0 ? { renames } : {}),
+    ...(declinedRenameNames.length > 0 ? { declinedRenameNames } : {}),
+  };
 };
 
 const updateType = (type: ContentType | Component, data: Record<string, unknown>) => {
@@ -505,13 +547,8 @@ const slice = createUndoRedoSlice(
         attr.components = updatedComponents;
       },
       editAttribute: (state, action: PayloadAction<EditAttributePayload>) => {
-        const {
-          name,
-          attributeToSet,
-          forTarget,
-          targetUid,
-          recordRename: shouldRecordRename = true,
-        } = action.payload;
+        const { name, attributeToSet, forTarget, targetUid, recordRename, declineRename } =
+          action.payload;
 
         const type = getType(state, { forTarget, targetUid });
 
@@ -523,9 +560,10 @@ const slice = createUndoRedoSlice(
 
         const previousAttribute = type.attributes[initialAttributeIndex];
 
-        if (shouldRecordRename) {
-          recordRename(type, previousAttribute, attributeToSet as AnyAttribute);
-        }
+        applyRenameConsent(type, previousAttribute, attributeToSet as AnyAttribute, {
+          recordRename,
+          declineRename,
+        });
 
         setAttributeAt(type, initialAttributeIndex, attributeToSet as AnyAttribute);
 
@@ -595,13 +633,8 @@ const slice = createUndoRedoSlice(
         }
       },
       editCustomFieldAttribute: (state, action: PayloadAction<EditCustomFieldAttributePayload>) => {
-        const {
-          forTarget,
-          targetUid,
-          name,
-          attributeToSet,
-          recordRename: shouldRecordRename = true,
-        } = action.payload;
+        const { forTarget, targetUid, name, attributeToSet, recordRename, declineRename } =
+          action.payload;
 
         const initialAttributeName = name;
         const type = getType(state, { forTarget, targetUid });
@@ -610,9 +643,10 @@ const slice = createUndoRedoSlice(
         const previousAttribute = type.attributes[initialAttributeIndex];
 
         setAttributeAt(type, initialAttributeIndex, attributeToSet as AnyAttribute);
-        if (shouldRecordRename) {
-          recordRename(type, previousAttribute, attributeToSet as AnyAttribute);
-        }
+        applyRenameConsent(type, previousAttribute, attributeToSet as AnyAttribute, {
+          recordRename,
+          declineRename,
+        });
       },
       reloadPlugin: () => {
         return initialState;
@@ -870,12 +904,14 @@ const slice = createUndoRedoSlice(
                 const component = state.components[uid];
                 state.components[uid] = {
                   ...schema,
+                  ...mergeRenameState(component, schema),
                   status: component?.status === 'NEW' ? 'NEW' : schema.status,
                 };
               } else {
                 const contentType = state.contentTypes[uid];
                 state.contentTypes[uid] = {
                   ...schema,
+                  ...mergeRenameState(contentType, schema),
                   status: contentType?.status === 'NEW' ? 'NEW' : schema.status,
                 };
               }

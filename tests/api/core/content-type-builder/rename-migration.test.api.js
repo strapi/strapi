@@ -1134,6 +1134,94 @@ describe('Content Type Builder - delete-then-reuse-name guard', () => {
   });
 });
 
+describe('Content Type Builder - target-occupied guard', () => {
+  const OCCUPIED_UID = 'api::occupied-test.occupied-test';
+
+  const restartOccupied = async () => {
+    await strapi.destroy();
+    strapi = await createStrapiInstance();
+    rq = await createAuthRequest({ strapi });
+  };
+
+  beforeAll(async () => {
+    strapi = await createStrapiInstance();
+    rq = await createAuthRequest({ strapi });
+
+    await updateSchema({
+      contentTypes: [
+        {
+          action: 'create',
+          uid: OCCUPIED_UID,
+          displayName: 'Occupied Test',
+          singularName: 'occupied-test',
+          pluralName: 'occupied-tests',
+          kind: 'collectionType',
+          draftAndPublish: false,
+          attributes: [
+            { action: 'create', name: 'title', properties: { type: 'string' } },
+            { action: 'create', name: 'body', properties: { type: 'string' } },
+          ],
+        },
+      ],
+      components: [],
+    });
+    await restartOccupied();
+
+    const created = await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/${OCCUPIED_UID}`,
+      body: { title: 'T', body: 'B' },
+    });
+    expect(created.statusCode).toBe(201);
+  });
+
+  afterAll(async () => {
+    await updateSchema({ contentTypes: [{ action: 'delete', uid: OCCUPIED_UID }], components: [] });
+    await strapi.destroy();
+    await builder.cleanup();
+  });
+
+  test('refuses a hop whose target field still exists instead of writing a migration', async () => {
+    // A truncated chain: only `tmp -> title` of a swap reaches the server while
+    // `title` is still live. Replaying it would collide with the existing
+    // column (schema-sync drops it only after migrations), so the builder
+    // refuses the hop and logs a warning; no `rename-fields` file is written.
+    const warn = jest.spyOn(strapi.log, 'warn');
+    const migrationFilesBefore = listRenameMigrationFiles();
+
+    const res = await updateSchema({
+      contentTypes: [
+        {
+          action: 'update',
+          uid: OCCUPIED_UID,
+          displayName: 'Occupied Test',
+          draftAndPublish: false,
+          renames: [{ oldName: 'tmp', newName: 'title' }],
+          attributes: [
+            { action: 'update', name: 'title', properties: { type: 'string' } },
+            { action: 'update', name: 'body', properties: { type: 'string' } },
+          ],
+        },
+      ],
+      components: [],
+    });
+    expect(res.statusCode).toBe(200);
+
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining('the target field still exists in the current schema')
+    );
+    expect(listRenameMigrationFiles()).toEqual(migrationFilesBefore);
+    warn.mockRestore();
+
+    // `title` keeps its data after the reload.
+    await restartOccupied();
+    const { body } = await listEntries(OCCUPIED_UID);
+    expect(body.results).toHaveLength(1);
+    expect(body.results[0].title).toBe('T');
+    expect(body.results[0].body).toBe('B');
+  });
+});
+
 describe('Content Type Builder - rename migrations disabled', () => {
   const NEVER_UID = 'api::never-rename.never-rename';
 

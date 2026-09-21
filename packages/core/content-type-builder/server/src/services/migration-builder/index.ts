@@ -45,7 +45,8 @@ export type UnsupportedRenameReason =
   | 'model-not-found'
   | 'attribute-not-found'
   | 'unsupported-type'
-  | 'type-changed';
+  | 'type-changed'
+  | 'target-occupied';
 
 export interface UnsupportedRename {
   uid: string;
@@ -155,15 +156,45 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
   const { naming } = db.metadata;
 
   /**
-   * With `useTypescriptMigrations` the database discovers migrations from the
-   * compiled output dir (`<outDir>/database/migrations`) and the app's tsconfig
-   * does not compile `.js` sources, so the generated file must be a `.ts` file
-   * in the source dir for `tsc` to carry it into `dist`.
+   * The app's *source* migrations dir. Generated files always land here (see
+   * `writeFiles`), and it is also the dir discovery reads from when
+   * `useTypescriptMigrations` is off or no tsconfig `outDir` resolves.
    */
-  const getFormat = () =>
-    strapi.config.get('database.settings.useTypescriptMigrations') === true
-      ? 'typescript'
-      : 'javascript';
+  const sourceMigrationsDir = () => path.join(strapi.dirs.app.root, 'database', 'migrations');
+
+  let format: 'javascript' | 'typescript' | undefined;
+
+  /**
+   * Mirror the database's discovery decision (`Strapi.ts`): it reads from
+   * `<outDir>/database/migrations` only when `useTypescriptMigrations` is on
+   * *and* a tsconfig `outDir` resolves. In that case the source file must be
+   * `.ts` so `tsc` carries it into `dist`. Otherwise discovery reads the source
+   * dir and only loads `.js`, so a `.ts` file would never run.
+   *
+   * Memoised so the fallback warning is logged once per builder (both `build`
+   * and `writeFiles` call this).
+   */
+  const getFormat = (): 'javascript' | 'typescript' => {
+    if (format) {
+      return format;
+    }
+
+    const useTSM = strapi.config.get('database.settings.useTypescriptMigrations') === true;
+    const discoveryDir = db.config.settings.migrations?.dir;
+    const discoversFromDist =
+      typeof discoveryDir === 'string' &&
+      path.resolve(discoveryDir) !== path.resolve(sourceMigrationsDir());
+
+    if (useTSM && !discoversFromDist) {
+      strapi.log.warn(
+        'database.settings.useTypescriptMigrations is enabled but no TypeScript outDir was resolved for this app; ' +
+          'writing the rename migration as JavaScript so it is discovered from database/migrations.'
+      );
+    }
+
+    format = useTSM && discoversFromDist ? 'typescript' : 'javascript';
+    return format;
+  };
 
   // Artifacts "in flight" for the current save, i.e. produced by an earlier
   // rename hop in this same batch (e.g. the intermediate `tmp` field a user
@@ -188,6 +219,33 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
   // a continuation hop can still be checked for a storage change against the
   // definition the chain started from.
   const inFlightDefinitions = new Map<string, Map<string, RenameAttributeDefinition>>();
+
+  // Logical names vacated by an earlier hop of this batch (per uid). A hop may
+  // only target a name that is free: not live in the pre-reload schema (unless
+  // an earlier hop vacated it) and not produced by an earlier hop still in
+  // flight. At migration time the schema-sync drop of a still-live field has
+  // not happened yet, so renaming onto it would collide and the runtime guard
+  // would silently skip the hop. Refusing it here surfaces the problem (e.g. a
+  // truncated chain sent by a client) instead of losing data.
+  const vacated = new Map<string, Set<string>>();
+
+  const isTargetOccupied = (uid: string, newName: string): boolean => {
+    if (inFlight.get(uid)?.has(newName)) {
+      return true;
+    }
+    return Boolean(schemaAttributeOf(uid, newName)) && !(vacated.get(uid)?.has(newName) ?? false);
+  };
+
+  const trackVacated = (uid: string, oldName: string, newName: string): void => {
+    let names = vacated.get(uid);
+    if (!names) {
+      names = new Set<string>();
+      vacated.set(uid, names);
+    }
+    names.add(oldName);
+    // The target is occupied again by the in-flight field.
+    names.delete(newName);
+  };
 
   const markInFlight = (uid: string, name: string, resolved: Resolved): void => {
     let entries = inFlight.get(uid);
@@ -394,6 +452,15 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
       return;
     }
 
+    if (isTargetOccupied(uid, newName)) {
+      trackVacated(uid, oldName, newName);
+      unsupported.push({ uid, oldName, newName, reason: 'target-occupied' });
+      // Keep the chain consistent so a later continuation hop stays silent.
+      markInFlight(uid, newName, { kind: 'unsupported', reason: 'target-occupied' });
+      return;
+    }
+    trackVacated(uid, oldName, newName);
+
     const entries = inFlight.get(uid);
     const definitions = inFlightDefinitions.get(uid);
     const oldAttribute = definitions?.get(oldName) ?? schemaAttributeOf(uid, oldName);
@@ -569,7 +636,7 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
       // build output (e.g. `dist/database/migrations`), which is gitignored and
       // wiped on the next build, so the generated migration would not be a
       // portable record.
-      const dir = path.join(strapi.dirs.app.root, 'database', 'migrations');
+      const dir = sourceMigrationsDir();
       return migrationFileBuilder.writeFiles({ name: MIGRATION_NAME, format: getFormat(), dir });
     },
   };

@@ -157,7 +157,15 @@ const formatTypeForRequest = (type: ContentType | Component) => {
     action,
     uid: type.uid,
     category: 'category' in type ? type.category : undefined,
-    ...omit(type, ['info', 'options', 'visible', 'uid', 'restrictRelationsTo', 'renames']),
+    ...omit(type, [
+      'info',
+      'options',
+      'visible',
+      'uid',
+      'restrictRelationsTo',
+      'renames',
+      'declinedRenameNames',
+    ]),
     ...type.options,
     ...type.info,
     // Forward the ordered rename path (existing fields only) so the server can

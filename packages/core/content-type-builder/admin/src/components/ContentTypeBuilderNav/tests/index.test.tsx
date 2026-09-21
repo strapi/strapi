@@ -50,6 +50,7 @@ const mockDataManager = ({
   moveAttribute() {},
   addCustomFieldAttribute() {},
   editCustomFieldAttribute() {},
+  attributeRenameMigrationMode: 'prompt-before-save',
   async confirmAttributeRenameMigration() {
     return true;
   },
@@ -81,7 +82,9 @@ const mockDataManager = ({
   async saveSchema() {},
   isModified: false,
   isSaving: false,
-  applyChange() {},
+  async applyChange() {
+    return true;
+  },
   ...overrides,
   history: {
     canUndo: true,

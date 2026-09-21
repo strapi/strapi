@@ -270,6 +270,56 @@ describe('transformChatToCTB', () => {
       ]);
     });
 
+    it('starts an AI rename from the already-renamed name held in the reducer', () => {
+      // The reducer entry passed as `oldSchema` already reflects a manual
+      // `title -> headline`; the AI hop must continue from `headline`, so the
+      // appended chain replays `title -> headline -> heading`.
+      const renamedSchema: ContentType = {
+        ...oldSchema,
+        status: 'CHANGED',
+        renames: [{ oldName: 'title', newName: 'headline' }],
+        attributes: [
+          { name: 'headline', type: 'string', required: true, status: 'CHANGED' },
+          { name: 'body', type: 'blocks', status: 'UNCHANGED' },
+        ],
+      };
+      const schema = makeSchema({
+        uid: 'api::article.article',
+        name: 'Article',
+        action: 'update',
+        attributes: {
+          heading: { type: 'string', required: true, previousName: 'headline' },
+          body: { type: 'blocks' },
+        },
+      });
+
+      const result = transformChatToCTB(schema, renamedSchema) as ContentType;
+
+      expect(result.renames).toEqual([{ oldName: 'headline', newName: 'heading' }]);
+    });
+
+    it('drops an explicit rename whose old or new side is unknown', () => {
+      const schema = makeSchema({
+        uid: 'api::article.article',
+        name: 'Article',
+        action: 'update',
+        renames: [
+          // `missing` is not an existing attribute.
+          { oldName: 'missing', newName: 'heading' },
+          // `nowhere` is not in the new attributes.
+          { oldName: 'title', newName: 'nowhere' },
+        ],
+        attributes: {
+          heading: { type: 'string', required: true },
+          body: { type: 'blocks' },
+        },
+      });
+
+      const result = transformChatToCTB(schema, oldSchema) as ContentType;
+
+      expect(result.renames).toBeUndefined();
+    });
+
     it('does not treat delete+add with different configs as a rename', () => {
       const schema = makeSchema({
         uid: 'api::article.article',

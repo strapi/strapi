@@ -13,6 +13,8 @@ import {
 import groupBy from 'lodash/groupBy';
 import isEqual from 'lodash/isEqual';
 import mapValues from 'lodash/mapValues';
+import omit from 'lodash/omit';
+import uniq from 'lodash/uniq';
 import { useIntl } from 'react-intl';
 import { useSelector, useDispatch } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -29,19 +31,26 @@ import {
   RenameMigrationModal,
   applyRenameDecisions,
   collectPendingRenames,
-  getAttributeRenameDecision,
+  filterRenamesByAcceptedChains,
   shouldPromptForRenamesBeforeSave,
+  toPendingRename,
   type AttributeRenameMigrationMode,
   type PendingRename,
 } from './RenameMigrationModal';
 import { useServerRestartWatcher } from './useServerRestartWatcher';
 import { sortContentType, stateToRequestData } from './utils/cleanData';
 import { getRenamedComponentUid } from './utils/getRenamedComponentUid';
+import { groupRenameChains } from './utils/groupRenameChains';
+import { resolveAfterEditRenameConsent } from './utils/resolveAfterEditRenameConsent';
 import { retrieveComponentsThatHaveComponents } from './utils/retrieveComponentsThatHaveComponents';
 import { retrieveNestedComponents } from './utils/retrieveNestedComponents';
 import { retrieveSpecificInfoFromComponents } from './utils/retrieveSpecificInfoFromComponents';
+import {
+  namesOfChains,
+  splitChainsByInheritedConsent,
+} from './utils/splitChainsByInheritedConsent';
 
-import type { AnyAttribute, ContentTypes, ContentType, Components } from '../../types';
+import type { AnyAttribute, Component, ContentTypes, ContentType, Components } from '../../types';
 import type { FormAPI } from '../../utils/formAPI';
 import type { Internal } from '@strapi/types';
 
@@ -394,6 +403,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     componentsGroupedByCategory,
     sortedContentTypesList,
     isLoading,
+    attributeRenameMigrationMode: renameMigrationModeRef.current,
     addAttribute(payload) {
       dispatch(
         actions.addAttribute({
@@ -426,25 +436,38 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
         })
       );
     },
-    async confirmAttributeRenameMigration({ uid, oldName, newName }) {
+    async confirmAttributeRenameMigration({ forTarget, uid, oldName, newName }) {
       if (oldName === newName) {
         return true;
       }
 
-      const decision = getAttributeRenameDecision(renameMigrationModeRef.current);
-      if (decision !== 'prompt') {
-        return decision;
+      const schema =
+        forTarget === 'contentType'
+          ? contentTypes[uid as Internal.UID.ContentType]
+          : components[uid as Internal.UID.Component];
+
+      // Consent inherits along a chain: a hop joining an accepted chain is
+      // accepted, one touching a declined name is declined, neither prompts.
+      const consent = resolveAfterEditRenameConsent({
+        renames: schema?.renames ?? [],
+        declinedRenameNames: schema?.declinedRenameNames ?? [],
+        oldName,
+        newName,
+        mode: renameMigrationModeRef.current,
+      });
+
+      if (consent !== 'prompt') {
+        return consent === 'accept';
       }
 
-      const schema =
-        contentTypes[uid as Internal.UID.ContentType] ?? components[uid as Internal.UID.Component];
+      const key = `${uid}:edit`;
       const acceptedKeys = await requestRenameDecision([
         {
-          key: `${uid}:edit`,
+          key,
           uid,
           typeName: schema?.info.displayName ?? uid,
-          oldName,
-          newName,
+          pairs: [{ oldName, newName }],
+          via: [],
         },
       ]);
 
@@ -452,7 +475,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
         return null;
       }
 
-      return acceptedKeys.has(`${uid}:edit`);
+      return acceptedKeys.has(key);
     },
     addCreatedComponentToDynamicZone(payload) {
       dispatch(actions.addCreatedComponentToDynamicZone(payload));
@@ -537,8 +560,79 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       dispatch(actions.moveAttribute(args));
     },
 
-    applyChange(args) {
-      dispatch(actions.applyChange(args));
+    async applyChange({ action, schema }) {
+      const renames = schema.renames ?? [];
+
+      if (action !== 'update' || renames.length === 0) {
+        dispatch(actions.applyChange({ action, schema }));
+        return true;
+      }
+
+      const mode = renameMigrationModeRef.current;
+
+      if (mode === 'never') {
+        dispatch(
+          actions.applyChange({
+            action,
+            schema: omit(schema, ['renames']) as ContentType | Component,
+          })
+        );
+        return true;
+      }
+
+      // 'always' | 'prompt-before-save': the before-save modal decides per chain.
+      if (mode !== 'prompt-after-edit') {
+        dispatch(actions.applyChange({ action, schema }));
+        return true;
+      }
+
+      // 'prompt-after-edit': decide per chain now, inheriting consent already
+      // given (or refused) for the hops recorded on the type.
+      const existing =
+        schema.modelType === 'contentType'
+          ? contentTypes[schema.uid as Internal.UID.ContentType]
+          : components[schema.uid as Internal.UID.Component];
+      const chains = groupRenameChains(schema.uid, renames);
+      const { keep, prompt } = splitChainsByInheritedConsent({
+        recorded: existing?.renames ?? [],
+        declinedRenameNames: existing?.declinedRenameNames ?? [],
+        chains,
+        renames,
+      });
+
+      const accepted = new Set(keep.map((chain) => chain.id));
+      if (prompt.length > 0) {
+        const typeName = schema.info?.displayName ?? schema.uid;
+        const decision = await requestRenameDecision(
+          prompt.map((chain) => toPendingRename(chain, renames, { uid: schema.uid, typeName }))
+        );
+
+        // The user cancelled: apply nothing.
+        if (decision === null) {
+          return false;
+        }
+
+        decision.forEach((id) => accepted.add(id));
+      }
+
+      const declinedChains = chains.filter((chain) => !accepted.has(chain.id));
+      const keptRenames = filterRenamesByAcceptedChains(schema.uid, renames, accepted);
+      const declinedRenameNames = uniq([
+        ...(schema.declinedRenameNames ?? []),
+        ...namesOfChains(declinedChains, renames),
+      ]);
+
+      dispatch(
+        actions.applyChange({
+          action,
+          schema: {
+            ...omit(schema, ['renames', 'declinedRenameNames']),
+            ...(keptRenames.length > 0 ? { renames: keptRenames } : {}),
+            ...(declinedRenameNames.length > 0 ? { declinedRenameNames } : {}),
+          } as ContentType | Component,
+        })
+      );
+      return true;
     },
 
     history: {

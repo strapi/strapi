@@ -76,6 +76,16 @@ describe('CleanData | rename serialization', () => {
     ]);
   });
 
+  it('never forwards declinedRenameNames to the server', () => {
+    const contentTypes = buildContentTypes([{ name: 'tmp', type: 'string', status: 'CHANGED' }]);
+    contentTypes['api::article.article'].declinedRenameNames = ['title', 'tmp'];
+
+    const { requestData } = stateToRequestData({ components: {}, contentTypes });
+
+    expect(firstContentType(requestData)).not.toHaveProperty('declinedRenameNames');
+    expect(firstContentType(requestData)).not.toHaveProperty('renames');
+  });
+
   it('omits renames when there are none', () => {
     const { requestData } = stateToRequestData({
       components: {},

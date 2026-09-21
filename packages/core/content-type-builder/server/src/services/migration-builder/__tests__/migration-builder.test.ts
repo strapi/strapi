@@ -366,7 +366,7 @@ describe('MigrationBuilder', () => {
 
   describe('ordered-path replay (no synthetic temp columns)', () => {
     it("replays a user-routed swap verbatim using the user's own intermediate column", () => {
-      const strapi = createStrapiMock({ metas: scalarMeta });
+      const strapi = createStrapiMock({ metas: scalarMeta, schema: scalarSchema });
       const builder = createMigrationBuilder({ strapi });
 
       // The CTB never lets two fields share a name, so a swap is performed by the
@@ -378,6 +378,8 @@ describe('MigrationBuilder', () => {
       });
       builder.addRenameAttribute('api::article.article', { oldName: 'tmp', newName: 'summary' });
 
+      // Both live names are re-targeted only after an earlier hop vacated them.
+      expect(builder.getUnsupported()).toHaveLength(0);
       // Verbatim, in order — no `strapi_tmp_` synthesized, no reordering.
       expect(columnRenamesOf(builder)).toEqual([
         ['old_title', 'tmp'],
@@ -483,6 +485,95 @@ describe('MigrationBuilder', () => {
       expect(columnRenamesOf(builder)).toEqual([
         ['old_title', 'tmp'],
         ['tmp', 'heading'],
+      ]);
+    });
+  });
+
+  describe('target still occupied', () => {
+    const uid = 'api::article.article';
+
+    it('refuses a hop whose target is still live and nothing vacated it', () => {
+      const strapi = createStrapiMock({ metas: scalarMeta, schema: scalarSchema });
+      const builder = createMigrationBuilder({ strapi });
+
+      builder.addRenameAttribute(uid, { oldName: 'oldTitle', newName: 'summary' });
+
+      expect(builder.hasChanges()).toBe(false);
+      expect(builder.getUnsupported()).toEqual([
+        { uid, oldName: 'oldTitle', newName: 'summary', reason: 'target-occupied' },
+      ]);
+    });
+
+    it('refuses the tail of a truncated swap (tmp -> b while b is live)', () => {
+      const strapi = createStrapiMock({ metas: scalarMeta, schema: scalarSchema });
+      const builder = createMigrationBuilder({ strapi });
+
+      // A client that sent only the last hop of `oldTitle -> tmp, summary ->
+      // oldTitle, tmp -> summary` would collide with the live `summary` column.
+      builder.addRenameAttribute(uid, { oldName: 'tmp', newName: 'summary' });
+
+      expect(builder.hasChanges()).toBe(false);
+      expect(builder.getUnsupported()).toEqual([
+        { uid, oldName: 'tmp', newName: 'summary', reason: 'target-occupied' },
+      ]);
+    });
+
+    it('refuses the accepted tail of a partially accepted swap', () => {
+      const strapi = createStrapiMock({ metas: scalarMeta, schema: scalarSchema });
+      const builder = createMigrationBuilder({ strapi });
+
+      // `summary -> oldTitle` was dropped from the middle of the swap; `summary`
+      // is therefore still live when `tmp -> summary` runs.
+      builder.addRenameAttribute(uid, { oldName: 'oldTitle', newName: 'tmp' });
+      builder.addRenameAttribute(uid, { oldName: 'tmp', newName: 'summary' });
+
+      expect(columnRenamesOf(builder)).toEqual([['old_title', 'tmp']]);
+      expect(builder.getUnsupported()).toEqual([
+        { uid, oldName: 'tmp', newName: 'summary', reason: 'target-occupied' },
+      ]);
+    });
+
+    it('refuses a hop targeting a name produced by an earlier hop still in flight', () => {
+      const strapi = createStrapiMock({ metas: scalarMeta, schema: scalarSchema });
+      const builder = createMigrationBuilder({ strapi });
+
+      builder.addRenameAttribute(uid, { oldName: 'oldTitle', newName: 'heading' });
+      builder.addRenameAttribute(uid, { oldName: 'summary', newName: 'heading' });
+
+      expect(columnRenamesOf(builder)).toEqual([['old_title', 'heading']]);
+      expect(builder.getUnsupported()).toEqual([
+        { uid, oldName: 'summary', newName: 'heading', reason: 'target-occupied' },
+      ]);
+    });
+
+    it('keeps a chain unsupported after a target-occupied hop', () => {
+      const strapi = createStrapiMock({ metas: scalarMeta, schema: scalarSchema });
+      const builder = createMigrationBuilder({ strapi });
+
+      builder.addRenameAttribute(uid, { oldName: 'tmp', newName: 'summary' });
+      builder.addRenameAttribute(uid, { oldName: 'summary', newName: 'finalTitle' });
+
+      expect(builder.hasChanges()).toBe(false);
+      expect(builder.getUnsupported()).toEqual([
+        { uid, oldName: 'tmp', newName: 'summary', reason: 'target-occupied' },
+        { uid, oldName: 'summary', newName: 'finalTitle', reason: 'target-occupied' },
+      ]);
+    });
+
+    it('allows a target that an earlier hop vacated (a -> b, c -> a)', () => {
+      const strapi = createStrapiMock({
+        metas: scalarMeta,
+        schema: scalarSchema,
+      });
+      const builder = createMigrationBuilder({ strapi });
+
+      builder.addRenameAttribute(uid, { oldName: 'oldTitle', newName: 'heading' });
+      builder.addRenameAttribute(uid, { oldName: 'summary', newName: 'oldTitle' });
+
+      expect(builder.getUnsupported()).toHaveLength(0);
+      expect(columnRenamesOf(builder)).toEqual([
+        ['old_title', 'heading'],
+        ['summary', 'old_title'],
       ]);
     });
   });
@@ -929,13 +1020,20 @@ describe('MigrationBuilder', () => {
       const result = builder.build()!;
       expect(result.filename).toMatch(/\.rename-fields\.js$/);
       expect(JSON.parse(result.content).format).toBe('javascript');
+      expect(strapi.log.warn).not.toHaveBeenCalled();
     });
 
-    it('emits TypeScript when useTypescriptMigrations is enabled', () => {
-      // With `useTypescriptMigrations` the database discovers migrations from the
-      // compiled output dir and the app's tsconfig does not compile `.js`
-      // sources, so a `.js` file would silently never run.
-      const strapi = createStrapiMock({ metas: scalarMeta, useTypescriptMigrations: true });
+    it('emits TypeScript when useTypescriptMigrations is enabled and discovery reads from dist', () => {
+      // With `useTypescriptMigrations` and a resolvable tsconfig `outDir` the
+      // database discovers migrations from the compiled output dir and the
+      // app's tsconfig does not compile `.js` sources, so a `.js` file would
+      // silently never run.
+      const strapi = createStrapiMock({
+        metas: scalarMeta,
+        useTypescriptMigrations: true,
+        appRoot: '/app',
+        migrationsDir: '/app/dist/database/migrations',
+      });
       const builder = createMigrationBuilder({ strapi });
       builder.addRenameAttribute('api::article.article', {
         oldName: 'oldTitle',
@@ -946,6 +1044,54 @@ describe('MigrationBuilder', () => {
       expect(strapi.config.get).toHaveBeenCalledWith('database.settings.useTypescriptMigrations');
       expect(result.filename).toMatch(/\.rename-fields\.ts$/);
       expect(JSON.parse(result.content).format).toBe('typescript');
+      expect(strapi.log.warn).not.toHaveBeenCalled();
+    });
+
+    it('falls back to JavaScript when the flag is on but discovery reads the source dir', () => {
+      // A JS app (no tsconfig) or a TS app without an `outDir`: `Strapi.ts`
+      // keeps discovery on the source dir, which only loads `.js`, so a `.ts`
+      // file would never be compiled or run.
+      const strapi = createStrapiMock({
+        metas: scalarMeta,
+        useTypescriptMigrations: true,
+        appRoot: '/app',
+        migrationsDir: '/app/database/migrations',
+      });
+      const builder = createMigrationBuilder({ strapi });
+      builder.addRenameAttribute('api::article.article', {
+        oldName: 'oldTitle',
+        newName: 'heading',
+      });
+
+      const result = builder.build()!;
+      expect(result.filename).toMatch(/\.rename-fields\.js$/);
+      expect(JSON.parse(result.content).format).toBe('javascript');
+      expect(strapi.log.warn).toHaveBeenCalledTimes(1);
+      expect(strapi.log.warn).toHaveBeenCalledWith(
+        expect.stringContaining('useTypescriptMigrations')
+      );
+
+      // The decision is memoised: a second call does not warn again.
+      builder.build();
+      expect(strapi.log.warn).toHaveBeenCalledTimes(1);
+    });
+
+    it('falls back to JavaScript when the database has no migrations dir configured', () => {
+      const strapi = createStrapiMock({
+        metas: scalarMeta,
+        useTypescriptMigrations: true,
+        migrationsDir: undefined,
+      });
+      const builder = createMigrationBuilder({ strapi });
+      builder.addRenameAttribute('api::article.article', {
+        oldName: 'oldTitle',
+        newName: 'heading',
+      });
+
+      const result = builder.build()!;
+      expect(result.filename).toMatch(/\.rename-fields\.js$/);
+      expect(JSON.parse(result.content).format).toBe('javascript');
+      expect(strapi.log.warn).toHaveBeenCalledTimes(1);
     });
   });
 

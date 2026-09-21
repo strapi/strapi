@@ -31,7 +31,7 @@ export default {
 
 ## User migrations
 
-User migrations live in the application's `database/migrations` directory (or `<outDir>/database/migrations` when `database.settings.useTypescriptMigrations` is enabled, in which case the compiled output is discovered). They run before schema sync, inside a transaction, and receive `(knex, db)` where `db` is the `Database` instance.
+User migrations live in the application's `database/migrations` directory (or `<outDir>/database/migrations` when `database.settings.useTypescriptMigrations` is enabled, in which case the compiled output is discovered). They run before schema sync, inside a transaction, and receive `(knex, db)` where `db` is the `Database` instance. In `strapi develop`, the cluster primary recompiles the app before it forks the new worker on every reload, so a `.ts` migration written to the source directory (for example by the Content-Type Builder) is emitted to `<outDir>/database/migrations` and discovered on that same reload. `strapi build` does the same for production.
 
 ### File ordering
 

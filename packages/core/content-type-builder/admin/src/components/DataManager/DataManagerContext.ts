@@ -1,6 +1,7 @@
 /* eslint-disable check-file/filename-naming-convention */
 import { createContext } from 'react';
 
+import type { AttributeRenameMigrationMode } from './RenameMigrationModal';
 import type { Component, ContentType } from '../../types';
 import type { ComponentWithChildren } from './utils/retrieveComponentsThatHaveComponents';
 import type { NestedComponent } from './utils/retrieveNestedComponents';
@@ -19,6 +20,7 @@ export interface DataManagerContextValue {
     targetUid: Internal.UID.Schema;
     name: string;
     recordRename?: boolean;
+    declineRename?: boolean;
   }) => void;
   moveAttribute: (opts: {
     forTarget: Struct.ModelType;
@@ -37,12 +39,21 @@ export interface DataManagerContextValue {
     targetUid: Internal.UID.Schema;
     name: string;
     recordRename?: boolean;
+    declineRename?: boolean;
   }) => void;
+  /**
+   * Resolves the user's consent to preserve data for one rename hop performed
+   * in the attribute form: `true` records the hop, `false` declines it (and the
+   * rest of its chain), `null` means the user cancelled the edit.
+   */
   confirmAttributeRenameMigration: (rename: {
+    forTarget: Struct.ModelType;
     uid: Internal.UID.Schema;
     oldName: string;
     newName: string;
   }) => Promise<boolean | null>;
+  /** Effective `renameMigrations.attributes` plugin setting. */
+  attributeRenameMigrationMode: AttributeRenameMigrationMode;
   addCreatedComponentToDynamicZone: (opts: {
     forTarget: Struct.ModelType;
     targetUid: Internal.UID.Schema;
@@ -135,10 +146,16 @@ export interface DataManagerContextValue {
   saveSchema(): Promise<void>;
   isModified: boolean;
   isSaving: boolean;
+  /**
+   * Applies a whole-type change (AI chat). Rename hops declared by the change
+   * go through the same preservation consent as manual renames, so this may
+   * prompt the user. Resolves `false` when the user cancelled and nothing was
+   * applied.
+   */
   applyChange: (opts: {
     action: 'add' | 'update' | 'delete';
     schema: ContentType | Component;
-  }) => void;
+  }) => Promise<boolean>;
   history: {
     undo(): void;
     redo(): void;

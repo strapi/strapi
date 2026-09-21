@@ -222,6 +222,8 @@ const describeUnsupportedReason = (reason: UnsupportedRename['reason']): string 
       return 'polymorphic/morph relations are not supported';
     case 'attribute-not-found':
       return 'the field is not in the current schema';
+    case 'target-occupied':
+      return 'the target field still exists in the current schema';
     case 'model-not-found':
     default:
       return 'the type is not in the current schema';

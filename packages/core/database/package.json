@@ -56,6 +56,7 @@
     "semver": "7.7.4"
   },
   "devDependencies": {
+    "@strapi/typescript-utils": "5.54.0",
     "@types/fs-extra": "11.0.4",
     "@types/jest": "29.5.2",
     "@types/node": "20.19.41",
