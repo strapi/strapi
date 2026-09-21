@@ -33,7 +33,7 @@ const action = async ({ debug, silent, verbose, outDir }: CmdOptions) => {
       silent,
       debug,
     },
-    artifacts: { contentTypes: true, components: true },
+    artifacts: { contentTypes: true, components: true, services: true },
   });
 
   await app.destroy();

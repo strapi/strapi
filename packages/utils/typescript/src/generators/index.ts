@@ -5,10 +5,12 @@ import { TYPES_ROOT_DIR, GENERATED_OUT_DIR } from './constants';
 import { saveDefinitionToFileSystem, createLogger, timer } from './utils';
 import { generateContentTypesDefinitions } from './content-types';
 import { generateComponentsDefinitions } from './components';
+import { generateServicesDefinitions } from './services';
 
 const GENERATORS = {
   contentTypes: generateContentTypesDefinitions,
   components: generateComponentsDefinitions,
+  services: generateServicesDefinitions,
 };
 
 export interface GenerateConfig {
