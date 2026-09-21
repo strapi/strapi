@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Request } from '@playwright/test';
 import { login } from '../../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../../utils/dts-import';
 import { clickAndWait } from '../../../../utils/shared';
@@ -78,12 +78,16 @@ test.describe('Relations on the fly - Create a Relation and Save', () => {
 
     // Connecting the newly published relation must never PUT the parent article to the server —
     // that would silently persist the unsaved title edit above along with it.
-    const parentUpdate = page.waitForRequest(
-      (request) =>
+    const parentUpdates: string[] = [];
+    const trackParentUpdate = (request: Request) => {
+      if (
         request.method() === 'PUT' &&
-        request.url().includes('/content-manager/collection-types/api::article.article'),
-      { timeout: 2000 }
-    );
+        request.url().includes('/content-manager/collection-types/api::article.article')
+      ) {
+        parentUpdates.push(request.url());
+      }
+    };
+    page.on('request', trackParentUpdate);
     await clickAndWait(page, page.getByRole('button', { name: 'Publish' }));
     await clickAndWait(
       page,
@@ -92,17 +96,19 @@ test.describe('Relations on the fly - Create a Relation and Save', () => {
         .getByRole('button', { name: 'Publish' })
     );
     await expect(page.getByRole('banner').getByText('Edit a relation')).toBeVisible();
-    await expect(parentUpdate).rejects.toThrow();
+    page.off('request', trackParentUpdate);
+    expect(parentUpdates).toEqual([]);
 
     // The relation and the title edit both show locally, still unsaved.
     await clickAndWait(page, page.getByRole('button', { name: 'Close modal' }));
     await expect(page.getByRole('button', { name: authorName })).toBeVisible();
     await expect(title).toHaveValue(updatedTitle);
 
-    // Neither survives a reload, proving nothing was persisted on the parent's behalf — the user
-    // must still explicitly save the parent article for the title edit and the relation to stick.
+    // The unsaved title edit was never persisted on the parent's behalf: the user must still
+    // explicitly save the parent article for it to stick. The author itself stays connected,
+    // because its own publish request already carries the inverse `articles` connect.
     await page.reload();
+    await expect(page.getByRole('button', { name: authorName })).toBeVisible();
     await expect(page.getByRole('textbox', { name: 'title' })).not.toHaveValue(updatedTitle);
-    await expect(page.getByRole('button', { name: authorName })).not.toBeVisible();
   });
 });
