@@ -1,4 +1,4 @@
-import { Box, Card, CardBody, CardHeader, Checkbox, Flex, Grid } from '@strapi/design-system';
+import { Box, Card, CardBody, CardHeader, Checkbox, Flex } from '@strapi/design-system';
 import { Folder as FolderIcon } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled, css } from 'styled-components';
@@ -86,6 +86,14 @@ const StyledCard = styled(Card)<{
 
 const FoldersRow = styled(Box)`
   grid-column: 1 / -1;
+`;
+
+const MIN_TILE_WIDTH = '240px';
+
+const ItemsGrid = styled(Box)`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(${MIN_TILE_WIDTH}, 100%), 1fr));
+  gap: ${({ theme }) => theme.spaces[4]};
 `;
 
 const StyledFolderCard = styled(Flex)<{
@@ -571,35 +579,29 @@ export const AssetsGrid = ({
   }
 
   return (
-    <Grid.Root gap={4} role="list" data-testid="assets-grid">
+    <ItemsGrid role="list" data-testid="assets-grid">
       {folders.length > 0 && (
         <FoldersRow>
-          <Grid.Root gap={4}>
+          <ItemsGrid>
             {folders.map((folder) => (
-              <Grid.Item col={3} m={4} s={6} xs={12} key={`folder-${folder.id}`}>
-                <FolderCard folder={folder} orderedItemKeys={orderedItemKeys} />
-              </Grid.Item>
+              <FolderCard
+                folder={folder}
+                orderedItemKeys={orderedItemKeys}
+                key={`folder-${folder.id}`}
+              />
             ))}
-          </Grid.Root>
+          </ItemsGrid>
         </FoldersRow>
       )}
       {assets.map((asset) => (
-        <Grid.Item
-          col={3}
-          m={4}
-          s={6}
-          xs={12}
-          key={asset.id}
-          direction="column"
-          alignItems="stretch"
-        >
+        <Flex key={asset.id} direction="column" alignItems="stretch">
           <AssetCard
             asset={asset}
             orderedItemKeys={orderedItemKeys}
             onAssetItemClick={onAssetItemClick}
           />
-        </Grid.Item>
+        </Flex>
       ))}
-    </Grid.Root>
+    </ItemsGrid>
   );
 };
