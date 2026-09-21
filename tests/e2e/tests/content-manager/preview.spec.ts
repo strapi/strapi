@@ -139,6 +139,27 @@ test.describe('Preview', () => {
     );
   });
 
+  test('Selecting the Tablet device should resize the preview iframe', async ({ page }) => {
+    // Open an edit view for a content type that has preview
+    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
+    await clickAndWait(page, page.getByRole('gridcell', { name: /west ham post match/i }));
+
+    // Check that preview opens in its own page
+    await openPreview(page);
+
+    const deviceSelect = page.getByRole('combobox', { name: /select device type/i });
+    await expect(deviceSelect).toBeVisible();
+
+    const iframe = page.getByTitle('Preview');
+
+    await clickAndWait(page, deviceSelect);
+    await clickAndWait(page, page.getByRole('option', { name: 'Tablet' }));
+
+    await expect(iframe).toHaveCSS('width', '768px');
+    await expect(iframe).toHaveCSS('height', '1024px');
+  });
+
   test('Publishing from preview with conditional fields should not trigger validation errors', async ({
     page,
   }) => {
