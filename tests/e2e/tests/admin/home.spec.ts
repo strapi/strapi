@@ -5,7 +5,7 @@ import { resetFiles } from '../../../utils/file-reset';
 import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
 import { waitForRestart } from '../../../utils/restart';
 import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../constants';
-import { AssetsPage } from '../media-library/future/page-objects/AssetsPage';
+import { AssetsPage } from '../media-library/page-objects/AssetsPage';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
