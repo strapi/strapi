@@ -431,6 +431,22 @@ describe('AssetCropEditor rotation', () => {
     expect((screen.getByLabelText('Focal point Y (px)') as HTMLInputElement).value).toBe('200');
   });
 
+  it('keeps the size fields in sync after they have been typed into', async () => {
+    // The design system's NumberInput stops adopting an external `value` once its
+    // internal buffer diverges, so a field the user has edited kept showing the
+    // pre-rotation number while the crop underneath rotated correctly.
+    await renderEditor();
+
+    fireEvent.change(cropFields().width, { target: { value: '400' } });
+    expect(cropFields().width.value).toBe('400');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Rotate right' }));
+
+    // 800x600 cropped to 400 wide, turned: the fields must follow the swap.
+    expect(cropFields().width.value).toBe('600');
+    expect(cropFields().height.value).toBe('400');
+  });
+
   it('labels both controls for assistive tech and keyboard use', async () => {
     await renderEditor();
 

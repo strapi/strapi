@@ -124,3 +124,37 @@ describe('produceFile', () => {
     expect(canvas.height).toBe(NATURAL.height);
   });
 });
+
+describe('rotate and a locked aspect ratio', () => {
+  it('inverts the locked ratio on a quarter turn', () => {
+    // A ratio locked as 2:1 describes the orientation it was locked in. After a
+    // quarter turn the same selection is 1:2, so leaving the number alone makes
+    // every later resize enforce the pre-rotation shape.
+    const result = setup();
+
+    act(() => {
+      result.current.setAspectRatio(2);
+    });
+    expect(result.current.aspectRatio).toBe(2);
+
+    act(() => {
+      result.current.rotate('right');
+    });
+    expect(result.current.aspectRatio).toBe(0.5);
+
+    act(() => {
+      result.current.rotate('right');
+    });
+    expect(result.current.aspectRatio).toBe(2);
+  });
+
+  it('leaves an unlocked ratio alone', () => {
+    const result = setup();
+
+    act(() => {
+      result.current.rotate('right');
+    });
+
+    expect(result.current.aspectRatio).toBeNull();
+  });
+});
