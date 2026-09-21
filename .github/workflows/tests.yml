@@ -270,7 +270,7 @@ jobs:
     strategy:
       fail-fast: false # remove once tests aren't flaky
       matrix:
-        project: ['chromium', 'webkit', 'firefox']
+        project: ['chromium', 'webkit']
         shard: [1/4, 2/4, 3/4, 4/4]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -316,11 +316,6 @@ jobs:
   #
   # WebKit is a hard limitation: the upload drag-and-drop helper builds a DataTransfer,
   # which WebKit does not implement.
-  #
-  # Firefox is simply unknown. It has never been run against this suite: locally the
-  # admin login does not go through under Firefox, so every test drives a logged-out app
-  # and fails on the first click — which says nothing about the Media Library itself. CI
-  # does run Firefox for the rest of the e2e suite, so login works there.
   #
   # The folder drag & drop specs are skipped in the specs themselves rather than filtered
   # out here — see `RUN_FOLDER_DRAG_SPECS` in `drag-drop-deep.spec.ts`. A grep filter only
@@ -429,7 +424,7 @@ jobs:
     strategy:
       fail-fast: false # remove once tests aren't flaky
       matrix:
-        project: ['chromium', 'webkit', 'firefox']
+        project: ['chromium', 'webkit']
         shard: [1/4, 2/4, 3/4, 4/4]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

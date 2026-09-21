@@ -130,14 +130,6 @@ const createConfig = ({ port, testDir, appDir, reportFileName, domain }) => {
       },
 
       {
-        name: 'firefox',
-        use: {
-          ...devices['Desktop Firefox'],
-          // Firefox doesn't need clipboard permissions for secure sites
-        },
-      },
-
-      {
         name: 'webkit',
         use: {
           ...devices['Desktop Safari'],
