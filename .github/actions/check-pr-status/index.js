@@ -64,14 +64,6 @@ async function main() {
         return;
       }
     }
-
-    const milestone = github.context.payload.pull_request?.milestone;
-    const requiresMilestone = baseRef === 'develop';
-    const isMissingMilestone = milestone === null || milestone === undefined;
-
-    if (requiresMilestone === true && isMissingMilestone === true) {
-      core.setFailed(`The PR must have a milestone.`);
-    }
   } catch (error) {
     core.setFailed(error.message);
   }
