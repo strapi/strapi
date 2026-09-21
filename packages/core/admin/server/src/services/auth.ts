@@ -42,10 +42,13 @@ const assignResetPasswordToken = async (userId: AdminUser['id']): Promise<string
     resetPasswordTokenExpiresAt,
   });
 
-  await emitAudit({ strapi }, AUDITED_EVENTS.PASSWORD_RESET_CREATE, {
-    ...toAdminUserEvent(user),
-    expiresAt: user.resetPasswordTokenExpiresAt,
-  });
+  // null when the account was deleted between the caller's lookup and this write
+  if (user) {
+    await emitAudit({ strapi }, AUDITED_EVENTS.PASSWORD_RESET_CREATE, {
+      ...toAdminUserEvent(user),
+      expiresAt: user.resetPasswordTokenExpiresAt,
+    });
+  }
 
   return resetPasswordToken;
 };

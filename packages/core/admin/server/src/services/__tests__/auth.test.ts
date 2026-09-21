@@ -251,6 +251,29 @@ describe('Auth', () => {
       expect(JSON.stringify(jest.mocked(emitAudit).mock.calls)).not.toContain(resetPasswordToken);
     });
 
+    test('Records nothing and does not throw when the account vanished before the write', async () => {
+      const user = { id: 1, email: 'test@strapi.io' };
+
+      global.strapi = {
+        config: { get: (_key: string, defaultValue: unknown) => defaultValue },
+        db: { query: () => ({ findOne: jest.fn(() => Promise.resolve(user)) }) },
+        admin: {
+          services: {
+            user: { updateById: jest.fn(() => Promise.resolve(null)) },
+            token: { createToken: jest.fn(() => 'token') },
+          },
+        },
+        plugins: {
+          email: { services: { email: { sendTemplatedEmail: jest.fn(() => Promise.resolve()) } } },
+        },
+      } as any;
+      jest.mocked(emitAudit).mockClear();
+
+      await expect(forgotPassword({ email: user.email })).resolves.toBeUndefined();
+
+      expect(emitAudit).not.toHaveBeenCalled();
+    });
+
     test('Will call the send service', async () => {
       const user = {
         id: 1,

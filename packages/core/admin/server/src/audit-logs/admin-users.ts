@@ -17,7 +17,7 @@ export const AUDITED_EVENTS = {
  * it records the AUDITED_EVENTS above, built from the row with before/after values.
  *
  * @deprecated Removed in the next major. Listen to the audit log events, or to the
- * document lifecycles, instead.
+ * database lifecycles, instead.
  */
 export const LEGACY_USER_EVENTS = {
   CREATE: 'user.create',
