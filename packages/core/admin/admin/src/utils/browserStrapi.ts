@@ -1,4 +1,3 @@
-import { getFetchClient } from './getFetchClient';
 import { getProjectType } from './getProjectType';
 import { createAbsoluteUrl } from './urls';
 
@@ -59,14 +58,23 @@ const createBrowserStrapi = async (
     },
   };
 
-  const { get } = getFetchClient({ backendURL: browserStrapi.backendURL });
-
   try {
+    /**
+     * Plain `fetch` rather than `getFetchClient`: the fetch client resolves its
+     * backend from `window.strapi`, which does not exist yet. The route is public,
+     * so it needs neither the auth header nor the token refresh the client adds.
+     */
+    const response = await fetch(`${browserStrapi.backendURL}/admin/project-type`, {
+      headers: { Accept: 'application/json' },
+    });
+
+    if (!response.ok) {
+      throw new Error(`[@strapi/admin]: /admin/project-type responded with ${response.status}`);
+    }
+
     const {
-      data: {
-        data: { isEE, isTrial, features: licensedFeatures, flags, ai, planPriceId },
-      },
-    } = await get<GetProjectType.Response>('/admin/project-type');
+      data: { isEE, isTrial, features: licensedFeatures, flags, ai, planPriceId },
+    }: GetProjectType.Response = await response.json();
 
     // Runtime defense: the payload is only typed by convention, not validated.
     const trial = isTrial ?? false;

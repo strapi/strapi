@@ -26,12 +26,9 @@ const STORAGE_KEYS = {
 };
 
 /**
- * Module-level promises to ensure only one token refresh happens at a time,
- * keyed by the backend they target. Keying by backend keeps the de-duplication
- * for the common single-backend case, without a client that overrides
- * `backendURL` adopting a refresh performed against another backend.
+ * Module-level promise to ensure only one token refresh happens at a time
  */
-const refreshPromises = new Map<string, Promise<string | null>>();
+let refreshPromise: Promise<string | null> | null = null;
 
 /**
  * Callback to notify the app when the token is updated (e.g., to update Redux state)
@@ -262,43 +259,24 @@ const executeRefreshAccessToken = async (
 };
 
 /**
- * Resolve the backend a request should target: an explicit value first, the
- * global second. The global is not assigned yet during bootstrap, hence the
- * optional chaining.
- */
-const resolveBackendURL = (backendURL?: string): string | undefined =>
-  backendURL ?? window.strapi?.backendURL;
-
-/**
  * Refresh the access token by calling the /admin/access-token endpoint.
  * This uses a low-level fetch to avoid recursion through the interceptor.
  * Returns the new token on success, or null on failure.
  */
 const refreshAccessToken = async (
-  tokenUsedByFailedRequest?: string | null,
-  backendURL?: string
+  tokenUsedByFailedRequest?: string | null
 ): Promise<string | null> => {
+  const backendURL = window.strapi.backendURL;
   const tokenBeforeRefresh = tokenUsedByFailedRequest ?? getToken();
 
   try {
-    const resolvedBackendURL = resolveBackendURL(backendURL);
-
-    if (resolvedBackendURL == null) {
-      console.error(
-        '[Auth] Token refresh error: could not resolve a backend URL. Pass one explicitly if `window.strapi` is not assigned yet.'
-      );
-      return null;
-    }
-
     if (typeof navigator !== 'undefined' && navigator.locks?.request) {
       return await navigator.locks.request(ADMIN_REFRESH_LOCK, () =>
-        executeRefreshAccessToken(resolvedBackendURL, tokenBeforeRefresh, {
-          allowHttpRetry: false,
-        })
+        executeRefreshAccessToken(backendURL, tokenBeforeRefresh, { allowHttpRetry: false })
       );
     }
 
-    return await executeRefreshAccessToken(resolvedBackendURL, tokenBeforeRefresh, {
+    return await executeRefreshAccessToken(backendURL, tokenBeforeRefresh, {
       allowHttpRetry: true,
     });
   } catch (error) {
@@ -309,37 +287,17 @@ const refreshAccessToken = async (
 
 /**
  * Attempt to refresh the token if not already refreshing.
- * Uses a module-level promise per backend to prevent concurrent refresh requests.
+ * Uses a module-level promise to prevent concurrent refresh requests.
  *
- * @param backendURL - Overrides `window.strapi.backendURL`, so a client created
- * with an explicit backend refreshes against that same backend.
  * @returns The new authentication token
  * @throws {Error} If the token refresh fails (e.g., refresh token expired)
  * @internal Exported for testing purposes
  */
-const attemptTokenRefresh = async (
-  tokenUsedByFailedRequest?: string | null,
-  backendURL?: string
-): Promise<string> => {
-  const resolvedBackendURL = resolveBackendURL(backendURL);
-
-  if (resolvedBackendURL == null) {
-    const error = new Error(
-      '[@strapi/admin]: attemptTokenRefresh() could not resolve a backend URL. Pass one explicitly if `window.strapi` is not assigned yet.'
-    );
-    error.name = 'TokenRefreshError';
-    throw error;
-  }
-
-  let refreshPromise = refreshPromises.get(resolvedBackendURL);
-
+const attemptTokenRefresh = async (tokenUsedByFailedRequest?: string | null): Promise<string> => {
   if (!refreshPromise) {
-    refreshPromise = refreshAccessToken(tokenUsedByFailedRequest, resolvedBackendURL).finally(
-      () => {
-        refreshPromises.delete(resolvedBackendURL);
-      }
-    );
-    refreshPromises.set(resolvedBackendURL, refreshPromise);
+    refreshPromise = refreshAccessToken(tokenUsedByFailedRequest).finally(() => {
+      refreshPromise = null;
+    });
   }
 
   const newToken = await refreshPromise;
@@ -368,11 +326,6 @@ type FetchOptions = {
 
 type FetchConfig = {
   signal?: AbortSignal;
-  /**
-   * Overrides `window.strapi.backendURL`. Needed during bootstrap, before the
-   * global is assigned.
-   */
-  backendURL?: string;
 };
 
 interface ErrorResponse {
@@ -452,19 +405,7 @@ type FetchClient = {
  * ```
  */
 const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
-  const backendURL = resolveBackendURL(defaultOptions.backendURL);
-
-  /**
-   * An empty string is legitimate — it makes every request relative. A missing
-   * value is not: it would prefix every URL with the string "undefined" and turn
-   * a broken client into a stream of confusing 404s. Fail here, at the call
-   * site, rather than on the first request.
-   */
-  if (backendURL == null) {
-    throw new Error(
-      '[@strapi/admin]: getFetchClient() could not resolve a backend URL. Pass one explicitly if `window.strapi` is not assigned yet.'
-    );
-  }
+  const backendURL = window.strapi.backendURL;
 
   /**
    * Create default headers with the current token.
@@ -562,8 +503,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       // Only attempt refresh for 401 errors on non-auth paths
       if (isFetchError(error) && error.status === 401 && !isAuthPath(url)) {
         try {
-          // Refresh against the backend this client targets, not the global one.
-          await attemptTokenRefresh(getRequestToken(), backendURL);
+          await attemptTokenRefresh(getRequestToken());
           // Retry - executeRequest will call getDefaultHeaders() again, picking up the new token
           return await executeRequest();
         } catch {

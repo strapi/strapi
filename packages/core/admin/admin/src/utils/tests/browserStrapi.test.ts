@@ -74,4 +74,15 @@ describe('createBrowserStrapi', () => {
     expect(browserStrapi.isTrialLicense).toBe(false);
     expect(browserStrapi.projectType).toBe('Community');
   });
+
+  it('keeps the Community defaults when the request fails', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    server.use(http.get('*/admin/project-type', () => new HttpResponse(null, { status: 500 })));
+
+    const browserStrapi = await createBrowserStrapi();
+
+    expect(browserStrapi.isEE).toBe(false);
+    expect(browserStrapi.projectType).toBe('Community');
+    expect(browserStrapi.features.isEnabled('sso')).toBe(false);
+  });
 });
