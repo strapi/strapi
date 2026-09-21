@@ -54,11 +54,10 @@ export const useFolders = ({ enabled = true, query = {} }: UseFoldersOptions = {
     };
   }
 
-  // v4: disabled queries report isLoading=true; isInitialLoading matches v3 isLoading.
   const {
     data,
     error,
-    isInitialLoading: isLoading,
+    isLoading: isQueryLoading,
   } = useQuery<GetFolders.Response['data'], GetFolders.Response['error']>(
     [pluginId, 'folders', stringify(params)],
     async () => {
@@ -80,6 +79,9 @@ export const useFolders = ({ enabled = true, query = {} }: UseFoldersOptions = {
       },
     }
   );
+  // v4 reports disabled empty queries as loading. Gate that state by `enabled` while preserving
+  // v3's loading state when an enabled offline-first query pauses between retries.
+  const isLoading = enabled && isQueryLoading;
 
   React.useEffect(() => {
     if (data) {

@@ -43,16 +43,18 @@ export const useFolderStructure = ({ enabled = true } = {}) => {
     ];
   };
 
-  // v4: disabled queries report isLoading=true; isInitialLoading matches v3 isLoading.
   const {
     data,
     error,
-    isInitialLoading: isLoading,
+    isLoading: isQueryLoading,
   } = useQuery([pluginId, 'folder', 'structure'], fetchFolderStructure, {
     enabled,
     staleTime: 0,
     cacheTime: 0,
   });
+  // v4 reports disabled empty queries as loading. Gate that state by `enabled` while preserving
+  // v3's loading state when an enabled offline-first query pauses between retries.
+  const isLoading = enabled && isQueryLoading;
 
   return { data, error, isLoading };
 };

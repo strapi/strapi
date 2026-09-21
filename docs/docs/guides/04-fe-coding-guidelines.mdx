@@ -207,53 +207,37 @@ acting in this way we hope to keep our dependency surface as small as possible.
 
 ## Data fetching
 
-### V4
+### Strapi 5
 
-Whilst we are actively developing V4 of the CMS we should _always_ be using TanStack Query's hooks to
-manage the fetching and mutation of data in conjunction with `useFetchClient`. This is because
-TanStack Query caches our data-fetching meaning multiple calls are not necessarily made unless a
-mutation occurs as well as handling various intermittent states and events during the fetching
-lifecycle.
+Use the data-fetching layer already established by the area you are changing:
 
-:::note
-We're using `@tanstack/react-query` version 4. See the [v4 documentation](https://tanstack.com/query/v4/docs/framework/react/overview).
-:::
+- Admin core uses [RTK Query](https://redux-toolkit.js.org/rtk-query/overview). Define endpoints by
+  enhancing and injecting them into `adminApi`, then consume the generated hooks.
+- Some plugins and legacy admin surfaces still use
+  [TanStack Query v4](https://tanstack.com/query/v4/docs/framework/react/overview) with
+  `useFetchClient`.
 
-There are a few guidelines to keep in mind when writing your query-keys
+Do not create a TanStack query for an endpoint already managed by `adminApi`; that creates a second,
+independent cache. When working in a TanStack surface, keep these query-key guidelines:
 
-- Use the URL fragments from the called URL e.g `/admin/content-manger/:id/stages -> ['content-manager', id, 'stages']` with the exception of `admin`
-- All ee calls should be prefixed with ee, to be able to invalidate it all at once
-- All dynamic variables need to be part of the dependency array
+- Use URL fragments from the called URL, for example
+  `/admin/content-manager/:id/stages` → `['content-manager', id, 'stages']`, except for `admin`.
+- Prefix Enterprise Edition calls with `ee` so they can be invalidated together.
+- Include every dynamic variable in the query key.
 
-You can read more about [TanStack Query v4 query keys](https://tanstack.com/query/v4/docs/framework/react/guides/query-keys).
+Read more about [TanStack Query v4 query keys](https://tanstack.com/query/v4/docs/framework/react/guides/query-keys).
 
 #### Example
 
 ```jsx
+import { useGetLicenseLimitsQuery } from '../services/admin';
+
 const useLicenseLimits = () => {
-  const { get } = useFetchClient();
+  const { data, isError, isLoading } = useGetLicenseLimitsQuery();
 
-  const { data: license } = useQuery(['ee', 'license-limit-info'], async () => {
-    const {
-      data: { data },
-    } = await get('/admin/license-limit-information');
-
-    return data;
-  });
-
-  return { license };
+  return { license: data?.data, isError, isLoading };
 };
 ```
-
-### V5
-
-In V5 we'll be looking at using `react-router-dom`'s loaders function to avoid data-waterfalls //
-render as you fetch. For mutations we'll be using `@redux/toolkit` and subsequently it's caching
-mechanisms making `react-query` redundant.
-
-:::note
-🚧 This section will be filled in further upon delivery of v5.
-:::
 
 ## Managing state
 

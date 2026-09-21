@@ -1,9 +1,10 @@
 /* eslint-disable check-file/filename-naming-convention */
 import { useFetchClient } from '@strapi/admin/strapi-admin';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { onlineManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor, RenderHookResult } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
+import { pluginId } from '../../../pluginId';
 import { useFolderStructure } from '../useFolderStructure';
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
@@ -38,8 +39,15 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
 const client = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: false,
+      retry: 1,
+      retryDelay: 0,
+      networkMode: 'offlineFirst',
     },
+  },
+  logger: {
+    log: () => {},
+    warn: () => {},
+    error: () => {},
   },
 });
 
@@ -72,6 +80,11 @@ describe('useFolderStructure', () => {
     jest.clearAllMocks();
   });
 
+  afterEach(() => {
+    client.clear();
+    onlineManager.setOnline(true);
+  });
+
   test('does not fetch or report loading when disabled with an empty cache', async () => {
     const { get } = useFetchClient();
     const { result } = await setup({ enabled: false });
@@ -80,6 +93,20 @@ describe('useFolderStructure', () => {
 
     expect(result.current.data).toBeUndefined();
     expect(get).not.toHaveBeenCalled();
+  });
+
+  test('continues reporting loading when an enabled initial fetch pauses offline', async () => {
+    const { get } = useFetchClient();
+    (get as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
+    onlineManager.setOnline(false);
+
+    const { result } = await setup();
+
+    await waitFor(() =>
+      expect(client.getQueryState([pluginId, 'folder', 'structure'])?.fetchStatus).toBe('paused')
+    );
+
+    expect(result.current.isLoading).toBe(true);
   });
 
   test('fetches data from the right URL', async () => {

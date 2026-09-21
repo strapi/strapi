@@ -11,11 +11,10 @@ export const useFolder = (id: number | null | undefined, { enabled = true } = {}
   const { get } = useFetchClient();
   const { formatMessage } = useIntl();
 
-  // v4: disabled queries report isLoading=true; isInitialLoading matches v3 isLoading.
   const {
     data,
     error,
-    isInitialLoading: isLoading,
+    isLoading: isQueryLoading,
   } = useQuery<GetFolder.Response['data'], GetFolder.Response['error']>(
     [pluginId, 'folder', id],
     async () => {
@@ -51,6 +50,9 @@ export const useFolder = (id: number | null | undefined, { enabled = true } = {}
       },
     }
   );
+  // v4 reports disabled empty queries as loading. Gate that state by `enabled` while preserving
+  // v3's loading state when an enabled offline-first query pauses between retries.
+  const isLoading = enabled && isQueryLoading;
 
   return { data, error, isLoading };
 };

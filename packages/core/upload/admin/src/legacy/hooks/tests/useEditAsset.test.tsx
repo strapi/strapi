@@ -5,7 +5,7 @@ import { IntlProvider } from 'react-intl';
 
 import { useEditAsset } from '../useEditAsset';
 
-import type { File as FileAsset } from '../../../../shared/contracts/files';
+import type { File as FileAsset } from '../../../../../shared/contracts/files';
 
 const FIXTURE_ASSET = {
   id: 1,
