@@ -36,7 +36,7 @@ describe('webhook audit events', () => {
     expect(shape).toEqual({
       resource: { type: 'webhook', id: '4', name: 'Deploy site' },
       details: {
-        url: 'https://example.com/hook',
+        url: 'https://example.com',
         events: ['entry.create', 'entry.update'],
         headers: ['Authorization', 'X-Env'],
         isEnabled: true,
@@ -64,11 +64,21 @@ describe('webhook audit events', () => {
 });
 
 describe('toAuditedWebhook', () => {
+  test('keeps scheme and host of the url only', () => {
+    const audited = toAuditedWebhook({
+      ...webhook,
+      url: 'https://user:s3cretpw@hooks.example.com:8443/services/T1/B2/xyz?token=qt0ken#frag',
+    });
+
+    expect(audited.url).toBe('https://hooks.example.com:8443');
+    expect(JSON.stringify(audited)).not.toMatch(/s3cretpw|xyz|qt0ken|frag/);
+  });
+
   test('drops header values and sorts events and header names', () => {
     expect(toAuditedWebhook(webhook)).toEqual({
       webhookId: '4',
       name: 'Deploy site',
-      url: 'https://example.com/hook',
+      url: 'https://example.com',
       events: ['entry.create', 'entry.update'],
       headers: ['Authorization', 'X-Env'],
       isEnabled: true,
@@ -104,10 +114,22 @@ describe('getWebhookChanges', () => {
       })
     ).toEqual({
       name: { before: 'Deploy site', after: 'Deploy staging' },
-      url: { before: 'https://example.com/hook', after: 'https://new.example.com/hook' },
+      url: { before: 'https://example.com', after: 'https://new.example.com' },
       events: { before: ['entry.create', 'entry.update'], after: ['entry.create'] },
       headers: { added: ['X-Region'], removed: ['X-Env'], changed: ['Authorization'] },
     });
+  });
+
+  test('records a url change within the same host, without the path', () => {
+    const changes = getWebhookChanges(
+      { ...webhook, url: 'https://hooks.example.com/services/old-t0ken' },
+      { ...webhook, url: 'https://hooks.example.com/services/new-t0ken' }
+    );
+
+    expect(changes).toEqual({
+      url: { before: 'https://hooks.example.com', after: 'https://hooks.example.com' },
+    });
+    expect(JSON.stringify(changes)).not.toMatch(/t0ken/);
   });
 
   test('records a header whose value changed, without the value', () => {
