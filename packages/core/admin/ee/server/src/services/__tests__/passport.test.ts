@@ -1,4 +1,5 @@
 import passport from 'koa-passport';
+
 import passportService from '../../../../../server/src/services/passport';
 import eePassportService from '../passport';
 
