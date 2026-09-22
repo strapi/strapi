@@ -1,4 +1,4 @@
-// @ts-nocheck
+// @ts-nocheck - @rollup/plugin-* types are published wrong https://github.com/rollup/plugins/issues/1860
 
 /** @import { ExternalOption, InputOption, OutputOptions, RollupOptions } from 'rollup' */
 
