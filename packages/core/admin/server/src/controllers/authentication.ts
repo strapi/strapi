@@ -239,8 +239,8 @@ export default {
 
     // Not awaited: the response must not reveal whether the email exists. A rejection
     // here has no handler otherwise, and an unhandled one takes the process down.
-    getService('auth')
-      .forgotPassword(input)
+    Promise.resolve()
+      .then(() => getService('auth').forgotPassword(input))
       .catch((error: unknown) => {
         strapi.log.error('Failed to process the forgot-password request', { error });
       });
