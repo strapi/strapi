@@ -178,7 +178,7 @@
   "Settings.global": "Paramètre Globaux",
   "Settings.permissions": "Panneau d'aministration",
   "Settings.permissions.category": "Paramètres de permissions pour la catégorie {category}",
-  "Settings.permissions.category.plugins": "Paramètres de permissions pour le plugin {plugin}",
+  "Settings.permissions.category.plugins": "Paramètres de permissions pour le plugin {category}",
   "Settings.permissions.conditions.anytime": "N'importe quand",
   "Settings.permissions.conditions.apply": "Appliquer",
   "Settings.permissions.conditions.can": "Peut",
