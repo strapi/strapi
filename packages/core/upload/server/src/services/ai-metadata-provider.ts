@@ -29,6 +29,8 @@ const resultSchema = z.object({
   ),
 });
 
+// This service mirrors i18n's ai-translations service on purpose. Keep the two in sync,
+// and only extract the shared logic once a third feature needs it.
 const createAIMetadataProviderService = ({
   strapi,
 }: {

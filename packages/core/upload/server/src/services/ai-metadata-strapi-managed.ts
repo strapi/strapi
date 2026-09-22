@@ -7,7 +7,7 @@ const createStrapiManagedAiMetadataProvider = ({
 }: {
   strapi: Core.Strapi;
 }): AiMetadataProvider => {
-  // TODO: add a helper function to get the AI server URL
+  // TODO(ai): add a helper function to get the AI server URL
   const aiServerUrl = process.env.STRAPI_AI_URL || 'https://strapi-ai.apps.strapi.io';
 
   const getAiToken = async () => {
@@ -48,6 +48,8 @@ const createStrapiManagedAiMetadataProvider = ({
 
       if (!res.ok) {
         const errorText = await res.text();
+        strapi.log.error(`AI metadata generation request failed: ${res.status} ${res.statusText}`);
+
         throw Error(`AI metadata generation failed`, { cause: errorText });
       }
 
