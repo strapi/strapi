@@ -218,7 +218,7 @@
   "Settings.profile.form.section.experience.here": "여기",
   "Settings.profile.form.section.experience.interfaceLanguage": "인터페이스 언어",
   "Settings.profile.form.section.experience.interfaceLanguage.hint": "선택한 언어로 인터페이스의 언어가 변경됩니다.",
-  "Settings.profile.form.section.experience.interfaceLanguageHelp": "선택하면 이 계정에서만 인터페이스 언어가 변경됩니다. 팀에서 다른 언어를 사용할 수 있도록 하려면 이 {documentation}를 참조해주세요.",
+  "Settings.profile.form.section.experience.interfaceLanguageHelp": "선택하면 이 계정에서만 인터페이스 언어가 변경됩니다. 팀에서 다른 언어를 사용할 수 있도록 하려면 이 {here}를 참조해주세요.",
   "Settings.profile.form.section.experience.mode.hint": "선택한 모드로 인터페이스가 표시됩니다.",
   "Settings.profile.form.section.experience.mode.label": "인터페이스 모드",
   "Settings.profile.form.section.experience.mode.option-label": "{name} 모드",
