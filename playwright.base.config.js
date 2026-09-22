@@ -119,7 +119,14 @@ const createConfig = ({ port, testDir, appDir, reportFileName, domain }) => {
       storageState: './tests/e2e/playwright-storage-state.json',
     },
 
-    /* Configure projects for major browsers */
+    /* Configure projects for major browsers.
+     * Firefox ESR is still a supported browserslist target for the admin panel (see
+     * packages/core/strapi/src/node/create-build-context.ts), but it is not covered here: the
+     * admin login flow does not complete under Firefox in local runs, so every test failed at
+     * login before it could exercise anything else. Support and e2e coverage are tracked
+     * separately for now — see docs/docs/guides/e2e/00-setup.md for how to run against a browser
+     * manually if you need to check Firefox behavior.
+     */
     projects: [
       {
         name: 'chromium',
