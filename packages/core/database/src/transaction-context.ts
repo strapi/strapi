@@ -34,6 +34,15 @@ interface TransactionStore extends Store {
 }
 
 const storage = new AsyncLocalStorage<TransactionStore>();
+const transactionStores = new WeakMap<Knex.Transaction, TransactionStore>();
+
+const createTransactionStore = (trx: Knex.Transaction): TransactionStore => ({
+  owner: trx,
+  trx,
+  phase: 'active',
+  commitCallbacks: [],
+  rollbackCallbacks: [],
+});
 
 const getActiveStore = () => {
   const store = storage.getStore();
@@ -44,12 +53,30 @@ const getActiveStore = () => {
 };
 
 const getTransactionStore = (trx: Knex.Transaction) => {
-  const store = storage.getStore();
-  return store?.owner === trx ? store : undefined;
+  const activeStore = storage.getStore();
+  if (activeStore?.owner === trx) {
+    return activeStore;
+  }
+
+  return transactionStores.get(trx);
+};
+
+const getOrCreateTransactionStore = (trx: Knex.Transaction) => {
+  const store = getTransactionStore(trx);
+  if (store) {
+    return store;
+  }
+
+  const created = createTransactionStore(trx);
+  transactionStores.set(trx, created);
+  return created;
 };
 
 const closeStore = (store: TransactionStore | undefined) => {
   if (store) {
+    if (store.owner) {
+      transactionStores.delete(store.owner);
+    }
     store.phase = 'closed';
     store.trx = null;
     store.owner = null;
@@ -59,10 +86,10 @@ const closeStore = (store: TransactionStore | undefined) => {
 };
 
 const finalize = async (trx: Knex.Transaction, event: 'commit' | 'rollback') => {
-  const store = getTransactionStore(trx);
+  const store = getOrCreateTransactionStore(trx);
   // Completion can be reported before the driver promise settles. Repeated helpers must
   // await that finalizer rather than clear its hooks or send another finalization query.
-  if (store?.finalization) {
+  if (store.finalization) {
     if (store.finalization.event !== event) {
       throw new Error('Transaction is finalizing; another finalizer is not allowed.');
     }
@@ -75,18 +102,14 @@ const finalize = async (trx: Knex.Transaction, event: 'commit' | 'rollback') => 
   }
 
   // Descendants must not join a dying transaction or silently start an independent one.
-  if (store) {
-    store.phase = 'finalizing';
-  }
+  store.phase = 'finalizing';
 
   const finish = async () => {
     try {
       await trx[event]();
     } catch (error) {
-      if (store) {
-        store.phase = 'closed';
-        store.trx = null;
-      }
+      store.phase = 'closed';
+      store.trx = null;
       // A rejected commit still needs its owner and hooks for the wrapper's rollback path.
       // A rejected rollback is terminal: do not retain the transactor or either hook list.
       if (event === 'rollback') {
@@ -95,7 +118,7 @@ const finalize = async (trx: Knex.Transaction, event: 'commit' | 'rollback') => 
       throw error;
     }
 
-    const callbacks = store?.[event === 'commit' ? 'commitCallbacks' : 'rollbackCallbacks'] ?? [];
+    const callbacks = store[event === 'commit' ? 'commitCallbacks' : 'rollbackCallbacks'];
     closeStore(store);
 
     // Only completion hooks get a clean context. Already-created descendants keep the closed
@@ -104,26 +127,25 @@ const finalize = async (trx: Knex.Transaction, event: 'commit' | 'rollback') => 
   };
 
   const promise = finish();
-  if (store) {
-    store.finalization = { event, promise };
-  }
+  store.finalization = { event, promise };
   try {
     await promise;
   } finally {
-    if (store) {
-      store.finalization = undefined;
-    }
+    store.finalization = undefined;
   }
 };
 
 const transactionCtx = {
   async run<TCallback extends Callback>(trx: Knex.Transaction, cb: TCallback) {
     const parentStore = getActiveStore();
-    const store: TransactionStore =
-      parentStore?.trx === trx
-        ? parentStore
-        : { owner: trx, trx, phase: 'active', commitCallbacks: [], rollbackCallbacks: [] };
+    const store =
+      parentStore?.trx === trx ? parentStore : getOrCreateTransactionStore(trx);
 
+    if (store.phase !== 'active') {
+      throw new Error(`Transaction is ${store.phase}; new work is not allowed.`);
+    }
+
+    transactionStores.set(trx, store);
     return storage.run<ReturnType<TCallback>, void[]>(store, cb);
   },
 
