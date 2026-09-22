@@ -481,7 +481,7 @@ export const createEntityManager = (db: Database): EntityManager => {
       const states = await db.lifecycles.run('beforeUpdateMany', uid, { params });
 
       const metadata = db.metadata.get(uid);
-      const { where, data } = params;
+      const { data } = params;
 
       const dataToUpdate = processData(metadata, data);
 
@@ -489,8 +489,11 @@ export const createEntityManager = (db: Database): EntityManager => {
         throw new Error('Update requires data');
       }
 
+      // Only apply filter criteria (_q / where / filters), same as count and deleteMany.
+      // limit, offset, orderBy, populate, etc. must be ignored so updateMany does not
+      // diverge from count or update an unexpected slice.
       const updatedRows = await this.createQueryBuilder(uid)
-        .where(where)
+        .init(pick(['_q', 'where', 'filters'], params))
         .update(dataToUpdate)
         .execute<number>({ mapResults: false });
 
