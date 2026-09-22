@@ -1,20 +1,12 @@
-import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
+import { contentTypes as contentTypesUtils } from '@strapi/utils';
 import { mapValues } from 'lodash/fp';
 
 import type { Schema } from '@strapi/types';
 
 import createBuilder from './schema-builder';
-import { finalizeSchemaMutation, rollbackSchemaMutation } from './schema-mutation';
 import { getService } from '../utils';
 import type { Schema as CTBSchema } from '../controllers/validation/schema';
-import {
-  assertCTBOwnedApplicationContentType,
-  getRestrictRelationsTo,
-  isContentTypeVisible,
-} from './content-types';
-import type { CoreContentStructureService } from './content-structure';
-
-type ContentTypeKind = 'collectionType' | 'singleType';
+import { getRestrictRelationsTo, isContentTypeVisible } from './content-types';
 
 const removeEmptyDefaultsOnUpdates = (schema: CTBSchema) => {
   schema.components.forEach((component) => {
@@ -141,11 +133,7 @@ export const getSchema = async () => {
     };
   }, strapi.components);
 
-  const coreContentStructure: CoreContentStructureService = strapi.get('content-structure');
-  const contentStructure = await coreContentStructure.getCleanedFile();
-
   return {
-    contentStructure,
     contentTypes,
     components,
   };
@@ -153,187 +141,132 @@ export const getSchema = async () => {
 
 export const updateSchema = async (schema: CTBSchema) => {
   const builder = createBuilder();
-  const apiHandler = getService('api-handler') as typeof import('./api-handler');
+  const apiHandler = getService('api-handler');
 
-  const { components, contentTypes, contentStructure } = schema;
-
-  // Reject protected/plugin deletes before builders, API backups, or folder reconciliation can
-  // mutate anything. This is the server-side invariant for crafted update requests.
-  contentTypes
-    .filter((contentType) => contentType.action === 'delete')
-    .forEach((contentType) => assertCTBOwnedApplicationContentType(contentType.uid));
+  const { components, contentTypes } = schema;
 
   // pre-process data
   removeEmptyDefaultsOnUpdates(schema);
   removeDeletedUIDTargetFieldsOnUpdates(schema);
 
-  const upsertedUids = new Map<string, ContentTypeKind>();
-  const deletedUids = new Set<string>();
-  const generatedApiNames: string[] = [];
-  const backedUpApiUids: string[] = [];
-  let schemaAlreadyRolledBack = false;
-  const APIsToDelete = contentTypes
-    .filter((contentType) => contentType.action === 'delete')
-    .map((contentType) => contentType.uid);
-
-  try {
-    for (const contentType of contentTypes) {
-      if (contentType.action === 'create') {
-        upsertedUids.set(contentType.uid, contentType.kind ?? 'collectionType');
-      } else if (contentType.action === 'update' && contentType.kind) {
-        // A kind switch in the same save must override the registry's stale kind,
-        // otherwise a folder assignment into the new section fails validation.
-        upsertedUids.set(contentType.uid, contentType.kind);
-      } else if (contentType.action === 'delete') {
-        deletedUids.add(contentType.uid);
-      }
+  // we pre create empty typesk
+  for (const contentType of contentTypes) {
+    if (contentType.action === 'create') {
+      builder.createContentType({
+        ...contentType,
+        attributes: {},
+      });
     }
-
-    // Validate folder references before anything is written. This will throw if invalid.
-    getService('content-structure').validateFromUpdate({
-      incomingStructure: contentStructure,
-      upsertedUids,
-      deletedUids,
-    });
-
-    // we pre create empty typesk
-    for (const contentType of contentTypes) {
-      if (contentType.action === 'create') {
-        builder.createContentType({
-          ...contentType,
-          attributes: {},
-        });
-      }
-    }
-
-    // we pre create empty types
-    for (const component of components) {
-      if (component.action === 'create') {
-        builder.createComponent({
-          ...component,
-          attributes: {},
-        });
-      }
-    }
-
-    for (const contentType of contentTypes) {
-      const { action, uid } = contentType;
-
-      if (action === 'create') {
-        builder.createContentTypeAttributes(
-          uid,
-          contentType.attributes.reduce((acc: any, attr: any) => {
-            acc[attr.name] = attr.properties;
-            return acc;
-          }, {})
-        );
-
-        if (!contentType.plugin) {
-          // Track before generation because a generator failure can leave a partial skeleton.
-          generatedApiNames.push(contentType.singularName);
-          await getService('content-types').generateAPI({
-            displayName: contentType!.displayName,
-            singularName: contentType!.singularName,
-            pluralName: contentType!.pluralName,
-            kind: contentType!.kind,
-          });
-        }
-      }
-
-      if (action === 'update') {
-        builder.editContentType({
-          ...contentType,
-          attributes: contentType.attributes.reduce((acc: any, attr: any) => {
-            // NOTE: handle renaming migrations here by comparing attr name & attr.properties.name
-
-            if (attr.action === 'delete') {
-              return acc;
-            }
-
-            acc[attr.name] = attr.properties;
-            return acc;
-          }, {}),
-        });
-      }
-
-      if (action === 'delete') {
-        builder.deleteContentType(uid);
-        await apiHandler.backup(uid);
-        backedUpApiUids.push(uid);
-      }
-    }
-
-    for (const component of components) {
-      const { action, uid } = component;
-
-      if (action === 'create') {
-        builder.createComponentAttributes(
-          uid,
-          component.attributes.reduce((acc: any, attr: any) => {
-            acc[attr.name] = attr.properties;
-            return acc;
-          }, {})
-        );
-      }
-
-      if (action === 'update') {
-        builder.editComponent({
-          ...component,
-          attributes: component.attributes.reduce((acc: any, attr: any) => {
-            if (attr.action === 'delete') {
-              return acc;
-            }
-
-            acc[attr.name] = attr.properties;
-            return acc;
-          }, {}),
-        });
-      }
-
-      if (action === 'delete') {
-        builder.deleteComponent(uid);
-      }
-    }
-
-    // run sanity checks on the schema
-    // Relations target existing types
-    // Bidirectional relation have their counterpart in the schema
-    // Components target existing components
-    // Nested components target existing components
-    // Dynamic zones target existing components
-
-    const schemaFilesWritten = await builder.writeFiles();
-
-    if (!schemaFilesWritten) {
-      schemaAlreadyRolledBack = true;
-      throw new errors.ApplicationError('Invalid schema edition');
-    }
-
-    for (const uid of APIsToDelete) {
-      await apiHandler.clear(uid, { preserveBackup: true });
-    }
-
-    // Commit the single folder file last. Every preceding filesystem mutation can be restored.
-    await getService('content-structure').commitFromUpdate({
-      incomingStructure: contentStructure,
-      deletedUids,
-    });
-  } catch (error) {
-    await rollbackSchemaMutation({
-      builder,
-      apiHandler,
-      backedUpApiUids,
-      generatedApiNames,
-      schemaAlreadyRolledBack,
-    });
-
-    throw error;
   }
 
-  // Backup cleanup is deliberately outside the compensating boundary: at this point all
-  // user-visible artifacts, including groups.json, have committed.
-  for (const error of await finalizeSchemaMutation({ apiHandler, backedUpApiUids })) {
+  // we pre create empty types
+  for (const component of components) {
+    if (component.action === 'create') {
+      builder.createComponent({
+        ...component,
+        attributes: {},
+      });
+    }
+  }
+
+  for (const contentType of contentTypes) {
+    const { action, uid } = contentType;
+
+    if (action === 'create') {
+      builder.createContentTypeAttributes(
+        uid,
+        contentType.attributes.reduce((acc: any, attr: any) => {
+          acc[attr.name] = attr.properties;
+          return acc;
+        }, {})
+      );
+
+      if (!contentType.plugin) {
+        await getService('content-types').generateAPI({
+          displayName: contentType!.displayName,
+          singularName: contentType!.singularName,
+          pluralName: contentType!.pluralName,
+          kind: contentType!.kind,
+        });
+      }
+    }
+
+    if (action === 'update') {
+      builder.editContentType({
+        ...contentType,
+        attributes: contentType.attributes.reduce((acc: any, attr: any) => {
+          // NOTE: handle renaming migrations here by comparing attr name & attr.properties.name
+
+          if (attr.action === 'delete') {
+            return acc;
+          }
+
+          acc[attr.name] = attr.properties;
+          return acc;
+        }, {}),
+      });
+    }
+
+    if (action === 'delete') {
+      builder.deleteContentType(uid);
+      await apiHandler.backup(uid);
+    }
+  }
+
+  for (const component of components) {
+    const { action, uid } = component;
+
+    if (action === 'create') {
+      builder.createComponentAttributes(
+        uid,
+        component.attributes.reduce((acc: any, attr: any) => {
+          acc[attr.name] = attr.properties;
+          return acc;
+        }, {})
+      );
+    }
+
+    if (action === 'update') {
+      builder.editComponent({
+        ...component,
+        attributes: component.attributes.reduce((acc: any, attr: any) => {
+          if (attr.action === 'delete') {
+            return acc;
+          }
+
+          acc[attr.name] = attr.properties;
+          return acc;
+        }, {}),
+      });
+    }
+
+    if (action === 'delete') {
+      builder.deleteComponent(uid);
+    }
+  }
+
+  // run sanity checks on the schema
+  // Relations target existing types
+  // Bidirectional relation have their counterpart in the schema
+  // Components target existing components
+  // Nested components target existing components
+  // Dynamic zones target existing components
+
+  const APIsToDelete = contentTypes
+    .filter((ct: any) => ct.action === 'delete')
+    .map((ct: any) => ct.uid);
+
+  await builder.writeFiles();
+
+  try {
+    for (const uid of APIsToDelete) {
+      await apiHandler.clear(uid);
+    }
+  } catch (error) {
     strapi.log.error(error);
+    for (const uid of APIsToDelete) {
+      await apiHandler.rollback(uid);
+    }
   }
 
   for (const contentType of contentTypes) {

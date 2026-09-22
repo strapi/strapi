@@ -2,17 +2,16 @@ import { Images } from '@strapi/icons';
 
 import pluginPkg from '../../package.json';
 
-import { UploadProgressDialog } from './components/UploadProgressDialog';
+import { MediaLibraryDialog } from './components/MediaLibraryDialog/MediaLibraryDialog';
+import { MediaLibraryInput } from './components/MediaLibraryInput/MediaLibraryInput';
 import { PERMISSIONS } from './constants';
-import { MediaLibraryDialog } from './legacy/components/MediaLibraryDialog/MediaLibraryDialog';
-import { MediaLibraryInput } from './legacy/components/MediaLibraryInput/MediaLibraryInput';
-import { prefixPluginTranslations } from './legacy/utils/prefixPluginTranslations';
+import { UploadProgressDialog } from './future/components/UploadProgressDialog';
+import { uploadProgressReducer } from './future/store/uploadProgress';
 import { pluginId } from './pluginId';
-import { uploadProgressReducer } from './store/uploadProgress';
-import { getTranslationKey } from './utils/translations';
+import { getTrad, prefixPluginTranslations } from './utils';
 
-import type { MediaLibraryDialogProps } from './legacy/components/MediaLibraryDialog/MediaLibraryDialog';
-import type { MediaLibraryInputProps } from './legacy/components/MediaLibraryInput/MediaLibraryInput';
+import type { MediaLibraryDialogProps } from './components/MediaLibraryDialog/MediaLibraryDialog';
+import type { MediaLibraryInputProps } from './components/MediaLibraryInput/MediaLibraryInput';
 import type { StrapiApp } from '@strapi/admin/strapi-admin';
 import type { Plugin } from '@strapi/types';
 
@@ -38,11 +37,11 @@ const admin: Plugin.Config.AdminInput = {
       permissions: PERMISSIONS.main,
       Component: isLegacyMediaLibrary
         ? () => {
-            return import('./legacy/pages/App/App').then((mod) => ({ default: mod.Upload }));
+            return import('./pages/App/App').then((mod) => ({ default: mod.Upload }));
           }
         : () => {
-            return import('./App').then((mod) => ({
-              default: mod.MediaLibrary,
+            return import('./future/App').then((mod) => ({
+              default: mod.BetaMediaLibrary,
             }));
           },
       position: 4,
@@ -63,7 +62,7 @@ const admin: Plugin.Config.AdminInput = {
       id: 'media-library-settings',
       to: 'media-library',
       intlLabel: {
-        id: getTranslationKey('plugin.name'),
+        id: getTrad('plugin.name'),
         defaultMessage: 'Media Library',
       },
       Component() {

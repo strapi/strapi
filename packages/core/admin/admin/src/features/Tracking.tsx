@@ -17,7 +17,6 @@ export interface TelemetryProperties {
   numberOfAllContentTypes?: number;
   numberOfComponents?: number;
   numberOfDynamicZones?: number;
-  numberOfContentTypeFolders?: number;
 }
 
 export interface TrackingContextValue {
@@ -197,8 +196,7 @@ export interface EventWithoutProperties {
     | 'didLaunchGuidedtour'
     | 'didEditAICaption'
     | 'didEditAIAlternativeText'
-    | 'didGenerateMetadataRetroactively'
-    | 'didActOnFolders';
+    | 'didGenerateMetadataRetroactively';
 
   properties?: never;
 }

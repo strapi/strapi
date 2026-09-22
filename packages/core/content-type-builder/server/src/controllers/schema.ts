@@ -24,11 +24,7 @@ export default () => {
       try {
         const { data } = await validateUpdateSchema(ctx.request.body);
 
-        if (
-          isEmpty(data.components) &&
-          isEmpty(data.contentTypes) &&
-          isEmpty(data.contentStructure)
-        ) {
+        if (isEmpty(data.components) && isEmpty(data.contentTypes)) {
           ctx.body = {};
           return;
         }

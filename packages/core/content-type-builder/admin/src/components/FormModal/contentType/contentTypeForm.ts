@@ -9,20 +9,6 @@ const nameField = {
   },
 };
 
-const contentStructureFolderField = {
-  name: 'folder',
-  type: 'content-type-folder-select',
-  size: 6,
-  intlLabel: {
-    id: getTrad('contentType.folder.label'),
-    defaultMessage: 'Select a folder or enter a value to create a new one',
-  },
-  placeholder: {
-    id: getTrad('contentType.folder.placeholder'),
-    defaultMessage: 'Select or enter a value',
-  },
-};
-
 export const contentTypeForm = {
   advanced: {
     default() {
@@ -71,7 +57,12 @@ export const contentTypeForm = {
                 name: 'singularName',
                 type: 'text-singular',
               },
-              contentStructureFolderField,
+              {
+                type: 'pushRight',
+                size: 6,
+                intlLabel: { id: '', defaultMessage: '' },
+                name: 'pushRight',
+              },
               {
                 description: {
                   id: getTrad('contentType.apiId-plural.description'),
@@ -110,7 +101,12 @@ export const contentTypeForm = {
                 name: 'singularName',
                 type: 'text',
               },
-              contentStructureFolderField,
+              {
+                type: 'pushRight',
+                size: 6,
+                intlLabel: { id: '', defaultMessage: '' },
+                name: 'pushRight',
+              },
               {
                 disabled: true,
                 description: {

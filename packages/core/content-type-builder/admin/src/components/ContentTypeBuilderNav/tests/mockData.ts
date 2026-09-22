@@ -1,56 +1,62 @@
-import type { FlatMenuSection, FolderMenuSection } from '../hooks/useContentTypeBuilderMenu';
-import type { ContentTypeLink } from '../lib/buildFolderTree';
-import type { UID } from '@strapi/types';
-
-const collectionTypeLinks: ContentTypeLink[] = [
+export const mockData = [
   {
-    uid: 'api::address.address' as UID.ContentType,
-    to: '/plugins/content-type-builder/content-types/api::address.address',
-    title: 'address',
-    status: 'UNCHANGED',
+    name: 'models',
+    title: {
+      id: 'content-type-builder.menu.section.models.name.',
+      defaultMessage: 'Collection Types',
+    },
+    customLink: {
+      id: 'content-type-builder.button.model.create',
+      defaultMessage: 'Create new collection type',
+    },
+    links: [
+      {
+        visible: true,
+        name: 'application::address.address',
+        title: 'address',
+        plugin: null,
+        uid: 'application::address.address',
+        to: '/plugins/content-type-builder/content-types/application::address.address',
+        kind: 'collectionType',
+        restrictRelationsTo: null,
+      },
+      {
+        visible: true,
+        name: 'application::category.category',
+        title: 'category',
+        plugin: null,
+        uid: 'application::category.category',
+        to: '/plugins/content-type-builder/content-types/application::category.category',
+        kind: 'collectionType',
+        restrictRelationsTo: null,
+      },
+    ],
+    linksCount: 2,
   },
   {
-    uid: 'api::category.category' as UID.ContentType,
-    to: '/plugins/content-type-builder/content-types/api::category.category',
-    title: 'category',
-    status: 'UNCHANGED',
+    name: 'singleTypes',
+    title: {
+      id: 'content-type-builder.menu.section.single-types.name.',
+      defaultMessage: 'Single Types',
+    },
+    customLink: {
+      id: 'content-type-builder.button.single-types.create',
+      defaultMessage: 'Create new single type',
+    },
+    links: [
+      {
+        visible: true,
+        name: 'application::homepage.homepage',
+        title: 'Homepage',
+        plugin: null,
+        uid: 'application::homepage.homepage',
+        to: '/plugins/content-type-builder/content-types/application::homepage.homepage',
+        kind: 'singleType',
+        restrictRelationsTo: null,
+      },
+    ],
+    linksCount: 1,
   },
-];
-
-const singleTypeLinks: ContentTypeLink[] = [
-  {
-    uid: 'api::homepage.homepage' as UID.ContentType,
-    to: '/plugins/content-type-builder/content-types/api::homepage.homepage',
-    title: 'Homepage',
-    status: 'UNCHANGED',
-  },
-];
-
-export const mockCreateCollectionType = jest.fn();
-export const mockCreateSingleType = jest.fn();
-
-// The folder-backed sections (collection & single types), rendered through <FolderNavSection />.
-export const mockFolderSections: FolderMenuSection[] = [
-  {
-    section: 'collectionTypes',
-    sectionId: 'models',
-    title: 'Collection Types',
-    createTypeLabel: 'New Collection-Type',
-    onCreateContentType: mockCreateCollectionType,
-    links: collectionTypeLinks,
-  },
-  {
-    section: 'singleTypes',
-    sectionId: 'singleTypes',
-    title: 'Single Types',
-    createTypeLabel: 'New Single-Type',
-    onCreateContentType: mockCreateSingleType,
-    links: singleTypeLinks,
-  },
-];
-
-// The flat (non-folder) sections. Only "components" is rendered by the nav.
-export const mockFlatSections: FlatMenuSection[] = [
   {
     name: 'components',
     title: {
@@ -60,7 +66,6 @@ export const mockFlatSections: FlatMenuSection[] = [
     customLink: {
       id: 'content-type-builder.button.component.create',
       defaultMessage: 'Create a new component',
-      onClick: () => {},
     },
     links: [
       {
@@ -71,7 +76,6 @@ export const mockFlatSections: FlatMenuSection[] = [
             name: 'basic.simple',
             to: '/plugins/content-type-builder/component-categories/basic/basic.simple',
             title: 'simple',
-            status: 'UNCHANGED',
           },
         ],
       },
@@ -83,13 +87,11 @@ export const mockFlatSections: FlatMenuSection[] = [
             name: 'default.closingperiod',
             to: '/plugins/content-type-builder/component-categories/default/default.closingperiod',
             title: 'closingperiod',
-            status: 'UNCHANGED',
           },
           {
             name: 'default.dish',
             to: '/plugins/content-type-builder/component-categories/default/default.dish',
             title: 'dish',
-            status: 'UNCHANGED',
           },
         ],
       },

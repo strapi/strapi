@@ -3,8 +3,7 @@ import * as z from 'zod/v4';
 
 import { createContentApiRoutesFactory } from '@strapi/utils';
 
-import { CONTENT_TYPE_UID_REGEX } from '../controllers/validation/common';
-
+const ctUIDRegexp = /^((strapi|admin)::[\w-]+|(api|plugin)::[\w-]+\.[\w-]+)$/;
 const componentUIDRegexp = /^[\w-]+\.[\w-]+$/;
 
 const baseAttributeSchema = z.object({
@@ -24,7 +23,7 @@ const mediaAttributeSchema = baseAttributeSchema.extend({
 const relationAttributeSchema = baseAttributeSchema.extend({
   type: z.literal('relation'),
   relation: z.string(),
-  target: z.string().regex(CONTENT_TYPE_UID_REGEX),
+  target: z.string().regex(ctUIDRegexp),
   targetAttribute: z.string().nullable(),
   autoPopulate: z.boolean().optional(),
   mappedBy: z.string().optional(),
@@ -98,7 +97,7 @@ const contentTypeSchemaBase = z.object({
 });
 
 const formattedContentTypeSchema = z.object({
-  uid: z.string().regex(CONTENT_TYPE_UID_REGEX),
+  uid: z.string().regex(ctUIDRegexp),
   plugin: z.string().optional(),
   apiID: z.string(),
   schema: contentTypeSchemaBase,
@@ -138,7 +137,7 @@ const createRoutes = createContentApiRoutesFactory((): Core.RouterInput['routes'
       handler: 'content-types.getContentType',
       request: {
         params: {
-          uid: z.string().regex(CONTENT_TYPE_UID_REGEX),
+          uid: z.string().regex(ctUIDRegexp),
         },
       },
       response: z.object({ data: formattedContentTypeSchema }),

@@ -4,9 +4,8 @@ import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { resetFiles } from '../../../utils/file-reset';
 import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
 import { waitForRestart } from '../../../utils/restart';
-import { startCreateContentType } from '../../../utils/content-types';
 import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../constants';
-import { AssetsPage } from '../media-library/page-objects/AssetsPage';
+import { AssetsPage } from '../media-library/future/page-objects/AssetsPage';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
@@ -224,7 +223,7 @@ test.describe('Home as super admin — key statistics', () => {
 
       // Create a content type and a component
       await navToHeader(page, ['Content-Type Builder'], 'Content-Type Builder');
-      await startCreateContentType(page, 'collection');
+      await page.getByRole('button', { name: /create new collection type/i }).click();
       await expect(page.getByRole('heading', { name: 'Create a collection type' })).toBeVisible();
       await page.getByRole('textbox', { name: /display name/i }).fill('NewType');
       await expect(page.getByLabel('API ID (Singular)')).toHaveValue('new-type');

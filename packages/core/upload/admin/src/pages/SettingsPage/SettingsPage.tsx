@@ -1,3 +1,4 @@
+// TODO: find a better naming convention for the file that was an index file before
 import * as React from 'react';
 
 import {
@@ -31,13 +32,13 @@ import { AIMetadataJob } from '../../../../shared/contracts/ai-metadata-jobs';
 import { GetAIMetadataPendingCount, CreateAIMetadataJob } from '../../../../shared/contracts/files';
 import { UpdateSettings } from '../../../../shared/contracts/settings';
 import { PERMISSIONS } from '../../constants';
-import { useSettings } from '../../legacy/hooks/useSettings';
-import { useTracking } from '../../legacy/hooks/useTracking';
-import { getTranslationKey } from '../../utils/translations';
+import { useAIMetadataJob } from '../../hooks/useAIMetadataJob';
+import { useSettings } from '../../hooks/useSettings';
+import { useTracking } from '../../hooks/useTracking';
+import { getTrad } from '../../utils';
 
 import { init } from './init';
 import { initialState, reducer } from './reducer';
-import { useAIMetadataJob } from './useAIMetadataJob';
 
 import type { InitialState } from './reducer';
 
@@ -88,7 +89,7 @@ const MetadataAction = ({
       <Flex gap={2} alignItems="center">
         <Typography variant="pi" textColor="neutral600">
           {formatMessage({
-            id: getTranslationKey('settings.form.aiMetadata.generatingMetadata'),
+            id: getTrad('settings.form.aiMetadata.generatingMetadata'),
             defaultMessage: 'AI is generating your metadata',
           })}
         </Typography>
@@ -103,7 +104,7 @@ const MetadataAction = ({
         <Flex gap={2} alignItems="center">
           <Check width="16px" height="16px" />
           {formatMessage({
-            id: getTranslationKey('settings.form.aiMetadata.metadataGenerated'),
+            id: getTrad('settings.form.aiMetadata.metadataGenerated'),
             defaultMessage: 'Your metadata has been generated',
           })}
         </Flex>
@@ -116,7 +117,7 @@ const MetadataAction = ({
       <Dialog.Trigger>
         <TextButton disabled={imagesWithoutMetadataCount === 0}>
           {formatMessage({
-            id: getTranslationKey('settings.form.aiMetadata.generateButton'),
+            id: getTrad('settings.form.aiMetadata.generateButton'),
             defaultMessage: 'Generate metadata',
           })}
         </TextButton>
@@ -128,7 +129,7 @@ const MetadataAction = ({
           <Flex gap={2}>
             <BetaStatus />
             {formatMessage({
-              id: getTranslationKey('settings.form.aiMetadata.confirmDialog.title'),
+              id: getTrad('settings.form.aiMetadata.confirmDialog.title'),
               defaultMessage: 'Generate AI Metadata',
             })}
           </Flex>
@@ -136,7 +137,7 @@ const MetadataAction = ({
       >
         {formatMessage(
           {
-            id: getTranslationKey('settings.form.aiMetadata.confirmDialog.message'),
+            id: getTrad('settings.form.aiMetadata.confirmDialog.message'),
             defaultMessage:
               'This will start a process in the background to generate captions and alternative text for {count, plural, one {# image} other {# images}}. AI can make mistakes, be sure to review the generated content.',
           },
@@ -287,14 +288,14 @@ export const SettingsPage = () => {
     <Page.Main tabIndex={-1}>
       <Page.Title>
         {formatMessage({
-          id: getTranslationKey('page.title'),
+          id: getTrad('page.title'),
           defaultMessage: 'Settings - Media Library',
         })}
       </Page.Title>
       <form onSubmit={handleSubmit}>
         <Layouts.Header
           title={formatMessage({
-            id: getTranslationKey('settings.header.label'),
+            id: getTrad('settings.header.label'),
             defaultMessage: 'Media Library',
           })}
           primaryAction={
@@ -313,7 +314,7 @@ export const SettingsPage = () => {
             </Button>
           }
           subtitle={formatMessage({
-            id: getTranslationKey('settings.sub-header.label'),
+            id: getTrad('settings.sub-header.label'),
             defaultMessage: 'Configure the settings for the Media Library',
           })}
         />
@@ -332,7 +333,7 @@ export const SettingsPage = () => {
                           </Box>
                           <Typography variant="delta" tag="h2">
                             {formatMessage({
-                              id: getTranslationKey('settings.form.aiMetadata.label'),
+                              id: getTrad('settings.form.aiMetadata.label'),
                               defaultMessage:
                                 'Generate AI captions and alt texts automatically on upload!',
                             })}
@@ -341,7 +342,7 @@ export const SettingsPage = () => {
                         <Flex paddingTop={1}>
                           <Typography variant="pi" textColor="neutral600">
                             {formatMessage({
-                              id: getTranslationKey('settings.form.aiMetadata.description'),
+                              id: getTrad('settings.form.aiMetadata.description'),
                               defaultMessage:
                                 'Enable this feature to save time, optimize your SEO and increase accessibility by letting our AI generate captions and alternative texts for you.',
                             })}
@@ -387,14 +388,12 @@ export const SettingsPage = () => {
                               <Typography variant="pi" textColor="neutral500">
                                 {imagesWithoutMetadataCount === 0
                                   ? formatMessage({
-                                      id: getTranslationKey(
-                                        'settings.form.aiMetadata.allAssetsHaveMetadata'
-                                      ),
+                                      id: getTrad('settings.form.aiMetadata.allAssetsHaveMetadata'),
                                       defaultMessage: 'All assets have caption and alt text',
                                     })
                                   : formatMessage(
                                       {
-                                        id: getTranslationKey(
+                                        id: getTrad(
                                           'settings.form.aiMetadata.imagesWithoutMetadata'
                                         ),
                                         defaultMessage:
@@ -426,7 +425,7 @@ export const SettingsPage = () => {
                   <Flex>
                     <Typography variant="delta" tag="h2">
                       {formatMessage({
-                        id: getTranslationKey('settings.blockTitle'),
+                        id: getTrad('settings.blockTitle'),
                         defaultMessage: 'Asset management',
                       })}
                     </Typography>
@@ -435,7 +434,7 @@ export const SettingsPage = () => {
                     <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                       <Field.Root
                         hint={formatMessage({
-                          id: getTranslationKey('settings.form.responsiveDimensions.description'),
+                          id: getTrad('settings.form.responsiveDimensions.description'),
                           defaultMessage:
                             'Enabling this option will generate multiple formats (small, medium and large) of the uploaded asset.',
                         })}
@@ -443,7 +442,7 @@ export const SettingsPage = () => {
                       >
                         <Field.Label>
                           {formatMessage({
-                            id: getTranslationKey('settings.form.responsiveDimensions.label'),
+                            id: getTrad('settings.form.responsiveDimensions.label'),
                             defaultMessage: 'Responsive friendly upload',
                           })}
                         </Field.Label>
@@ -469,7 +468,7 @@ export const SettingsPage = () => {
                     <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                       <Field.Root
                         hint={formatMessage({
-                          id: getTranslationKey('settings.form.sizeOptimization.description'),
+                          id: getTrad('settings.form.sizeOptimization.description'),
                           defaultMessage:
                             'Enabling this option will reduce the image size and slightly reduce its quality.',
                         })}
@@ -477,7 +476,7 @@ export const SettingsPage = () => {
                       >
                         <Field.Label>
                           {formatMessage({
-                            id: getTranslationKey('settings.form.sizeOptimization.label'),
+                            id: getTrad('settings.form.sizeOptimization.label'),
                             defaultMessage: 'Size optimization',
                           })}
                         </Field.Label>
@@ -503,7 +502,7 @@ export const SettingsPage = () => {
                     <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                       <Field.Root
                         hint={formatMessage({
-                          id: getTranslationKey('settings.form.autoOrientation.description'),
+                          id: getTrad('settings.form.autoOrientation.description'),
                           defaultMessage:
                             'Enabling this option will automatically rotate the image according to EXIF orientation tag.',
                         })}
@@ -511,7 +510,7 @@ export const SettingsPage = () => {
                       >
                         <Field.Label>
                           {formatMessage({
-                            id: getTranslationKey('settings.form.autoOrientation.label'),
+                            id: getTrad('settings.form.autoOrientation.label'),
                             defaultMessage: 'Auto orientation',
                           })}
                         </Field.Label>

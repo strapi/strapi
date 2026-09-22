@@ -7,7 +7,6 @@ import type { ContentManagerLink } from '../hooks/useContentManagerInitData';
 interface AppState {
   collectionTypeLinks: ContentManagerLink[];
   components: GetInitData.Response['data']['components'];
-  contentStructure?: GetInitData.Response['data']['contentStructure'];
   fieldSizes: GetInitData.Response['data']['fieldSizes'];
   models: GetInitData.Response['data']['contentTypes'];
   singleTypeLinks: ContentManagerLink[];
@@ -17,7 +16,6 @@ interface AppState {
 const initialState: AppState = {
   collectionTypeLinks: [],
   components: [],
-  contentStructure: undefined,
   fieldSizes: {},
   models: [],
   singleTypeLinks: [],
@@ -34,7 +32,6 @@ const appSlice = createSlice({
         authorizedCollectionTypeLinks: AppState['collectionTypeLinks'];
         authorizedSingleTypeLinks: AppState['singleTypeLinks'];
         components: AppState['components'];
-        contentStructure?: AppState['contentStructure'];
         contentTypeSchemas: AppState['models'];
         fieldSizes: AppState['fieldSizes'];
       }>
@@ -43,7 +40,6 @@ const appSlice = createSlice({
         authorizedCollectionTypeLinks,
         authorizedSingleTypeLinks,
         components,
-        contentStructure,
         contentTypeSchemas,
         fieldSizes,
       } = action.payload;
@@ -52,7 +48,6 @@ const appSlice = createSlice({
       );
       state.singleTypeLinks = authorizedSingleTypeLinks.filter(({ isDisplayed }) => isDisplayed);
       state.components = components;
-      state.contentStructure = contentStructure;
       state.models = contentTypeSchemas;
       state.fieldSizes = fieldSizes;
       state.isLoading = false;

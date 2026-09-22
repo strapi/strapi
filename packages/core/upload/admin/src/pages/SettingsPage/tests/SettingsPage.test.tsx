@@ -1,3 +1,4 @@
+// TODO: find a better naming convention for the file that was an index file before
 import { useAIAvailability } from '@strapi/admin/strapi-admin/ee';
 import { render, screen, waitFor } from '@tests/utils';
 

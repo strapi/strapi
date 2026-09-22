@@ -5,10 +5,7 @@ import type { Internal } from '@strapi/types';
 /**
  * Deletes the API folder of a contentType
  */
-export async function clear(
-  uid: Internal.UID.ContentType,
-  { preserveBackup = false }: { preserveBackup?: boolean } = {}
-) {
+export async function clear(uid: Internal.UID.ContentType) {
   // TODO double check if this is the correct way to get the apiName
   const { apiName, modelName } = strapi.contentTypes[uid] as any;
 
@@ -18,17 +15,6 @@ export async function clear(
   const apiFolder = path.join(strapi.dirs.app.api, apiName);
 
   await recursiveRemoveFiles(apiFolder, createDeleteApiFunction(modelName));
-  if (!preserveBackup) {
-    await deleteBackup(uid);
-  }
-}
-
-/**
- * Deletes an inactive rollback backup after the enclosing schema mutation has committed.
- * A failed cleanup leaves only housekeeping residue; it does not alter committed schema, API,
- * or groups.json artifacts.
- */
-export async function finalize(uid: Internal.UID.ContentType) {
   await deleteBackup(uid);
 }
 
@@ -43,29 +29,10 @@ export async function backup(uid: Internal.UID.ContentType) {
   if (!apiName) return;
 
   const apiFolder = path.join(strapi.dirs.app.api, apiName);
-  const backupRoot = path.join(strapi.dirs.app.api, '.backup');
-  const backupFolder = path.join(backupRoot, apiName);
-  const stagingFolder = path.join(backupRoot, `.${apiName}.staging`);
+  const backupFolder = path.join(strapi.dirs.app.api, '.backup', apiName);
 
-  // Never copy into the canonical backup directly: a retained or failed prior attempt could
-  // otherwise merge stale files into the next rollback source.
-  await fse.ensureDir(backupRoot);
-  await fse.remove(stagingFolder);
-
-  try {
-    await fse.copy(apiFolder, stagingFolder);
-  } catch (error) {
-    await fse.remove(stagingFolder);
-    throw error;
-  }
-
-  try {
-    await fse.remove(backupFolder);
-    await fse.move(stagingFolder, backupFolder);
-  } catch (error) {
-    await fse.remove(stagingFolder);
-    throw error;
-  }
+  // backup the api folder
+  await fse.copy(apiFolder, backupFolder);
 }
 
 /**
@@ -109,13 +76,6 @@ export async function rollback(uid: Internal.UID.ContentType) {
   await fse.remove(apiFolder);
   await fse.copy(backupFolder, apiFolder);
   await deleteBackup(uid);
-}
-
-/**
- * Removes an API skeleton created for a new content type before its schema mutation commits.
- */
-export async function clearGenerated(apiName: string) {
-  await fse.remove(path.join(strapi.dirs.app.api, apiName));
 }
 
 /**

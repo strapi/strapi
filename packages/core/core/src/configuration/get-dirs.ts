@@ -22,7 +22,6 @@ export const getDirs = (
     policies: join(distDir, 'src', 'policies'),
     middlewares: join(distDir, 'src', 'middlewares'),
     config: join(distDir, 'config'),
-    contentStructure: join(distDir, 'src', 'content-structure'),
   },
   app: {
     root: appDir,
@@ -33,7 +32,6 @@ export const getDirs = (
     policies: join(appDir, 'src', 'policies'),
     middlewares: join(appDir, 'src', 'middlewares'),
     config: join(appDir, 'config'),
-    contentStructure: join(appDir, 'src', 'content-structure'),
   },
   static: {
     public: resolve(appDir, get('server.dirs.public', config)),

@@ -1,5 +1,4 @@
 import components from './components';
-import contentStructure from './content-structure';
 import contentTypes from './content-types';
 import dataMapper from './data-mapper';
 import fieldSizes from './field-sizes';
@@ -16,7 +15,6 @@ import documentManager from './document-manager';
 
 export default {
   components,
-  'content-structure': contentStructure,
   'content-types': contentTypes,
   'data-mapper': dataMapper,
   'document-metadata': documentMetadata,

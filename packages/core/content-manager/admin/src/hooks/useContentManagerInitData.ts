@@ -117,8 +117,7 @@ const useContentManagerInitData = (): AppState => {
       components: Component[],
       contentTypes: ContentType[],
       fieldSizes: GetInitData.Response['data']['fieldSizes'],
-      contentTypeConfigurations: FindContentTypesSettings.Response['data'],
-      contentStructure: GetInitData.Response['data']['contentStructure']
+      contentTypeConfigurations: FindContentTypesSettings.Response['data']
     ) => {
       /**
        * We group these by the two types we support. We do with an object because we can use default
@@ -173,7 +172,6 @@ const useContentManagerInitData = (): AppState => {
           authorizedCollectionTypeLinks: ctLinks,
           authorizedSingleTypeLinks: stLinks,
           components,
-          contentStructure,
           contentTypeSchemas: contentTypes,
           fieldSizes,
         })
@@ -188,8 +186,7 @@ const useContentManagerInitData = (): AppState => {
         initialDataQuery.data.components,
         initialDataQuery.data.contentTypes,
         initialDataQuery.data.fieldSizes,
-        contentTypeSettingsQuery.data,
-        initialDataQuery.data.contentStructure
+        contentTypeSettingsQuery.data
       ).catch((error) => {
         toggleNotification({
           type: 'danger',

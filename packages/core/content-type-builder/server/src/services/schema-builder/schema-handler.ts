@@ -17,19 +17,6 @@ export type Infos = {
 
 export type SchemaHandler = ReturnType<typeof createSchemaHandler>;
 
-const removeDirectoryIfEmpty = async (dir: string) => {
-  try {
-    const list = await fse.readdir(dir);
-    if (list.length === 0) {
-      await fse.remove(dir);
-    }
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
-      throw error;
-    }
-  }
-};
-
 export default function createSchemaHandler(infos: Infos) {
   const { category, modelName, plugin, uid, dir, filename, schema } = infos;
 
@@ -252,7 +239,10 @@ export default function createSchemaHandler(infos: Infos) {
       if (deleted) {
         await fse.remove(initialPath);
 
-        await removeDirectoryIfEmpty(initialState.dir);
+        const list = await fse.readdir(initialState.dir);
+        if (list.length === 0) {
+          await fse.remove(initialState.dir);
+        }
 
         return;
       }
@@ -282,7 +272,10 @@ export default function createSchemaHandler(infos: Infos) {
         if (initialPath !== filePath) {
           await fse.remove(initialPath);
 
-          await removeDirectoryIfEmpty(initialState.dir);
+          const list = await fse.readdir(initialState.dir);
+          if (list.length === 0) {
+            await fse.remove(initialState.dir);
+          }
         }
 
         return;
@@ -304,7 +297,10 @@ export default function createSchemaHandler(infos: Infos) {
       if (!initialState.uid) {
         await fse.remove(filePath);
 
-        await removeDirectoryIfEmpty(state.dir);
+        const list = await fse.readdir(state.dir);
+        if (list.length === 0) {
+          await fse.remove(state.dir);
+        }
         return;
       }
 
@@ -316,7 +312,10 @@ export default function createSchemaHandler(infos: Infos) {
         if (initialPath !== filePath) {
           await fse.remove(filePath);
 
-          await removeDirectoryIfEmpty(state.dir);
+          const list = await fse.readdir(state.dir);
+          if (list.length === 0) {
+            await fse.remove(state.dir);
+          }
         }
       }
 

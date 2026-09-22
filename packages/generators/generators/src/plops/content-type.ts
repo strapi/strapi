@@ -1,7 +1,6 @@
 import { join } from 'path';
 import type { NodePlopAPI, ActionType } from 'plop';
 import slugify from '@sindresorhus/slugify';
-import handlebars from 'handlebars';
 import fs from 'fs-extra';
 import { strings } from '@strapi/utils';
 
@@ -12,9 +11,7 @@ import ctNamesPrompts from './prompts/ct-names-prompts';
 import kindPrompts from './prompts/kind-prompts';
 import getAttributesPrompts from './prompts/get-attributes-prompts';
 import bootstrapApiPrompts from './prompts/bootstrap-api-prompts';
-import getFolderPrompts from './prompts/get-folder-prompts';
 import { appendToFile } from './utils/extend-plugin-index-files';
-import { planContentTypeToFolder } from './utils/content-structure';
 
 export default (plop: NodePlopAPI) => {
   // Model generator
@@ -57,15 +54,9 @@ export default (plop: NodePlopAPI) => {
         ...bootstrapApiPrompts,
       ]);
 
-      const folder = await getFolderPrompts(inquirer, plop, {
-        destination: api.destination,
-        kind: config.kind,
-      });
-
       return {
         ...config,
         ...api,
-        ...folder,
         attributes,
       };
     },
@@ -92,23 +83,10 @@ export default (plop: NodePlopAPI) => {
       const filePath = getFilePath(answers.destination);
       const language = getGeneratorLanguage({ plugin: answers.plugin, filePath }, plop);
 
-      const { singularName } = answers;
-
-      const schemaActionPath = `${filePath}/content-types/{{ singularName }}/schema.json`;
-
-      let uid;
-      if (answers.destination === 'new') {
-        uid = `api::${answers.id}.${singularName}`;
-      } else if (answers.api) {
-        uid = `api::${answers.api}.${singularName}`;
-      } else if (answers.plugin) {
-        uid = `plugin::${answers.plugin}.${singularName}`;
-      }
-
       const baseActions: Array<ActionType> = [
         {
           type: 'add',
-          path: schemaActionPath,
+          path: `${filePath}/content-types/{{ singularName }}/schema.json`,
           templateFile: `templates/${language}/content-type.schema.json.hbs`,
           data: {
             collectionName: slugify(answers.pluralName, { separator: '_' }),
@@ -119,7 +97,7 @@ export default (plop: NodePlopAPI) => {
       if (Object.entries(attributes).length > 0) {
         baseActions.push({
           type: 'modify',
-          path: schemaActionPath,
+          path: `${filePath}/content-types/{{ singularName }}/schema.json`,
           transform(template: string) {
             const parsedTemplate = JSON.parse(template);
             parsedTemplate.attributes = attributes;
@@ -159,6 +137,17 @@ export default (plop: NodePlopAPI) => {
       }
 
       if (answers.bootstrapApi) {
+        const { singularName } = answers;
+
+        let uid;
+        if (answers.destination === 'new') {
+          uid = `api::${answers.id}.${singularName}`;
+        } else if (answers.api) {
+          uid = `api::${answers.api}.${singularName}`;
+        } else if (answers.plugin) {
+          uid = `plugin::${answers.plugin}.${singularName}`;
+        }
+
         baseActions.push(
           {
             type: 'add',
@@ -252,39 +241,6 @@ export default (plop: NodePlopAPI) => {
             });
           });
         }
-      }
-
-      if (answers.folder) {
-        if (!uid) {
-          throw new Error(
-            'Cannot assign a folder: could not determine the content type uid from the given destination.'
-          );
-        }
-
-        const contentTypeAlreadyExists = fs.existsSync(
-          join(plop.getDestBasePath(), handlebars.compile(schemaActionPath)(answers))
-        );
-
-        if (contentTypeAlreadyExists) {
-          throw new Error(
-            `Content type "${uid}" already exists — refusing to reassign its folder from the generator.`
-          );
-        }
-
-        const assignedUid = uid;
-
-        const commitFolderAssignment = planContentTypeToFolder({
-          destBasePath: plop.getDestBasePath(),
-          folder: answers.folder,
-          kind: answers.kind,
-          uid: assignedUid,
-        });
-
-        baseActions.push(() => {
-          commitFolderAssignment();
-
-          return `assigned "${assignedUid}" to folder`;
-        });
       }
 
       return baseActions;

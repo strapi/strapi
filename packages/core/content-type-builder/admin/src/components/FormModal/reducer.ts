@@ -10,7 +10,6 @@ import { createComponentUid } from './utils/createUid';
 import { customFieldDefaultOptionsReducer } from './utils/customFieldDefaultOptionsReducer';
 import { shouldPluralizeName, shouldPluralizeTargetAttribute } from './utils/relations';
 
-import type { FolderSelection } from '../DataManager/utils/contentStructure';
 import type { Schema, Struct, UID } from '@strapi/types';
 import type { MessageDescriptor, PrimitiveType } from 'react-intl';
 
@@ -37,7 +36,6 @@ export type FormModalData = Record<string, unknown> & {
   displayName?: string;
   draftAndPublish?: boolean;
   enum?: string[];
-  folder?: FolderSelection;
   icon?: string;
   kind?: Struct.ContentTypeKind;
   multiple?: boolean;
@@ -174,13 +172,6 @@ const slice = createSlice({
         if (previousType !== undefined && ['date', 'datetime', 'time'].includes(previousType)) {
           // return obj.updateIn(keys, () => value).remove('default');
           delete state.modifiedData.default;
-        }
-      }
-
-      // If the user changes the content type kind (single vs. collecton), the folder selection becomes stale and should be deleted from the pending action.
-      if (keys.length === 1 && keys.includes('kind') && value !== obj.kind) {
-        if (obj.folder && 'targetGroupId' in obj.folder) {
-          delete state.modifiedData.folder;
         }
       }
 

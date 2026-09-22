@@ -27,41 +27,22 @@ import { DataManagerContext, type DataManagerContextValue } from './DataManagerC
 import { actions, initialState, type State } from './reducer';
 import { useServerRestartWatcher } from './useServerRestartWatcher';
 import { sortContentType, stateToRequestData } from './utils/cleanData';
-import { fromServerFile, generateGroupId } from './utils/contentStructure';
 import { retrieveComponentsThatHaveComponents } from './utils/retrieveComponentsThatHaveComponents';
 import { retrieveNestedComponents } from './utils/retrieveNestedComponents';
 import { retrieveSpecificInfoFromComponents } from './utils/retrieveSpecificInfoFromComponents';
 
 import type { AnyAttribute, ContentTypes, ContentType, Components } from '../../types';
-import type { FolderSelection } from './utils/contentStructure';
 import type { FormAPI } from '../../utils/formAPI';
-import type { Internal, Modules } from '@strapi/types';
+import type { Internal } from '@strapi/types';
 
 interface DataManagerProviderProps {
   children: React.ReactNode;
 }
 
-/**
- * Including the new folder state in the same payload as create/edit transactions ensures the
- * folder assignment is subject to the same undo/redo operations as the content type mutation
- */
-const toFolderAssignment = (folder?: FolderSelection) => {
-  if (!folder) {
-    return undefined;
-  }
-
-  if ('newFolderName' in folder) {
-    return { newFolderId: generateGroupId(), newFolderName: folder.newFolderName };
-  }
-
-  return { targetGroupId: folder.targetGroupId };
-};
-
 type SchemaResponse = {
   data: {
     components: Components;
     contentTypes: ContentTypes;
-    contentStructure?: Modules.ContentStructure.ContentStructureFile | null;
   };
 };
 
@@ -101,8 +82,6 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     reservedNames,
     initialComponents,
     initialContentTypes,
-    contentStructure,
-    initialContentStructure,
     isLoading,
   } = state.current;
 
@@ -122,19 +101,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const previousLocationRef = React.useRef<string | null>(null);
 
   const isModified = React.useMemo(() => {
-    return !(
-      isEqual(components, initialComponents) &&
-      isEqual(contentTypes, initialContentTypes) &&
-      isEqual(contentStructure, initialContentStructure)
-    );
-  }, [
-    components,
-    contentTypes,
-    initialComponents,
-    initialContentTypes,
-    contentStructure,
-    initialContentStructure,
-  ]);
+    return !(isEqual(components, initialComponents) && isEqual(contentTypes, initialContentTypes));
+  }, [components, contentTypes, initialComponents, initialContentTypes]);
 
   const fetchClient = useFetchClient();
 
@@ -149,7 +117,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
         fetchClient.get<ReservedNamesResponse>(`/content-type-builder/reserved-names`),
       ]);
 
-      const { components, contentTypes, contentStructure } = schemaResponse.data.data;
+      const { components, contentTypes } = schemaResponse.data.data;
 
       dispatch(
         actions.init({
@@ -162,7 +130,6 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
             status: 'UNCHANGED',
           })) as ContentTypes,
           reservedNames: reservedNamesResponse.data,
-          contentStructure: fromServerFile(contentStructure),
         })
       );
 
@@ -251,8 +218,6 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     const { requestData, trackingEventProperties } = stateToRequestData({
       components: state.current.components,
       contentTypes: mutatedCTs,
-      contentStructure: state.current.contentStructure,
-      initialContentStructure: state.current.initialContentStructure,
     });
 
     // Track that the save button was clicked (includes session ID via useCTBTracking)
@@ -342,7 +307,6 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     contentTypes,
     initialComponents,
     initialContentTypes,
-    contentStructure,
     isSaving,
     isModified,
     isInDevelopmentMode,
@@ -386,8 +350,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       dispatch(actions.addCreatedComponentToDynamicZone(payload));
     },
     createSchema(payload) {
-      const { folder, ...rest } = payload;
-      dispatch(actions.createSchema({ ...rest, folder: toFolderAssignment(folder) }));
+      dispatch(actions.createSchema(payload));
     },
     createComponentSchema({ data, uid, componentCategory }) {
       dispatch(actions.createComponentSchema({ data, uid, componentCategory }));
@@ -440,28 +403,6 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       }
     },
 
-    createFolder({ section, name, parentId }) {
-      dispatch(actions.createFolder({ section, name, parentId, id: generateGroupId() }));
-    },
-    renameFolder(payload) {
-      dispatch(actions.renameFolder(payload));
-    },
-    moveFolder(payload) {
-      dispatch(actions.moveFolder(payload));
-    },
-    deleteFolderOnly(payload) {
-      dispatch(actions.deleteFolderOnly(payload));
-    },
-    deleteFolderAndContent({ section, id, contentTypeUids }) {
-      dispatch(actions.deleteFolderAndContent({ section, id, contentTypeUids }));
-    },
-    assignContentTypeToFolder(payload) {
-      dispatch(actions.assignContentTypeToFolder(payload));
-    },
-    reorderFolderChildren(payload) {
-      dispatch(actions.reorderFolderChildren(payload));
-    },
-
     updateComponentSchema({ data, componentUID }) {
       dispatch(
         actions.updateComponentSchema({
@@ -481,8 +422,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     },
 
     updateSchema(args) {
-      const { folder, ...rest } = args;
-      dispatch(actions.updateSchema({ ...rest, folder: toFolderAssignment(folder) }));
+      dispatch(actions.updateSchema(args));
     },
 
     moveAttribute(args) {
