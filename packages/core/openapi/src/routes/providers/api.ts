@@ -48,9 +48,8 @@ export class ApiRoutesProvider extends AbstractRoutesProvider {
             : (router.prefix ?? apiPrefix);
 
           const fullPath =
-            (`${effectivePrefix}${route.path}` || '/')
-              .replace(/\/+/g, '/')
-              .replace(/\/$/, '') || '/';
+            (`${effectivePrefix}${route.path}` || '/').replace(/\/+/g, '/').replace(/\/$/, '') ||
+            '/';
 
           return {
             ...route,
