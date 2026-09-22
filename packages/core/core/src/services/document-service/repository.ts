@@ -16,7 +16,7 @@ import { copyNonLocalizedFields } from './internationalization';
 import * as components from './components';
 
 import { createEntriesService } from './entries';
-import { ALLOWED_DOCUMENT_ROOT_PARAM_KEYS, pickSelectionParams } from './params';
+import { ALLOWED_DOCUMENT_ROOT_PARAM_KEYS, isParamEmpty, pickSelectionParams } from './params';
 import { createDocumentId } from '../../utils/transform-content-types-to-models';
 import { getDeepPopulate } from './utils/populate';
 import { transformParamsToQuery } from './transform/query';
@@ -40,9 +40,6 @@ const getModel = ((schema: UID.Schema) => strapi.getModel(schema)) as (schema: s
 // BCP 47–style locale format: 2–3 letter language code (any case), optional subtags (-XX or -XXX...), max 35 chars
 const LOCALE_FORMAT = /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*$/;
 const MAX_LOCALE_LENGTH = 35;
-
-/** Treat as "param not provided": null, undefined, or empty string (e.g. from query/JSON). */
-const isParamEmpty = (v: unknown): boolean => v === undefined || v === null || v === '';
 
 export const createContentTypeRepository: RepositoryFactoryMethod = (
   uid,
