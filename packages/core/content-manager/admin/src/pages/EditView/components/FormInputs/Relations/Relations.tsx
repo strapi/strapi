@@ -747,8 +747,8 @@ const RelationModalWithContext = ({
       {({ dispatch }) => (
         <Combobox
           ref={fieldRef}
-          creatable="visible"
-          creatableDisabled={!canCreate || isTargetSingleType}
+          creatable={isTargetSingleType ? false : 'visible'}
+          creatableDisabled={!canCreate}
           createMessage={() =>
             formatMessage({
               id: getTranslation('relation.create'),

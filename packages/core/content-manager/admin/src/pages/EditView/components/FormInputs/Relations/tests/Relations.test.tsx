@@ -293,7 +293,7 @@ describe('Relations', () => {
         })
       );
 
-    it('disables the "Create a relation" option even when the user can create', async () => {
+    it('hides the "Create a relation" option even when the user can create', async () => {
       server.use(mockSingleTypeSchema(), mockCreatePermission('api::profile.profile'));
 
       const { user } = render({ attribute: singleTypeAttribute });
@@ -304,14 +304,31 @@ describe('Relations', () => {
 
       await user.click(await screen.findByRole('combobox', { name: /relations/i }));
 
-      expect(await screen.findByRole('option', { name: 'Create a relation' })).toHaveAttribute(
-        'aria-disabled',
-        'true'
-      );
+      expect(screen.queryByRole('option', { name: 'Create a relation' })).not.toBeInTheDocument();
     });
 
+    const mockCollectionTypeSchema = () =>
+      http.get('/content-manager/init', () =>
+        HttpResponse.json({
+          data: {
+            components: [],
+            contentTypes: [
+              {
+                uid: 'api::category.category',
+                kind: 'collectionType',
+                isDisplayed: true,
+                apiID: 'category',
+                info: { displayName: 'Category' },
+                options: {},
+                attributes: {},
+              },
+            ],
+          },
+        })
+      );
+
     it('does not disable "Create a relation" for a Collection Type target when the user can create', async () => {
-      server.use(mockCreatePermission('api::category.category'));
+      server.use(mockCollectionTypeSchema(), mockCreatePermission('api::category.category'));
 
       const { user } = render({});
 
