@@ -138,8 +138,7 @@ const finalize = async (trx: Knex.Transaction, event: 'commit' | 'rollback') => 
 const transactionCtx = {
   async run<TCallback extends Callback>(trx: Knex.Transaction, cb: TCallback) {
     const parentStore = getActiveStore();
-    const store =
-      parentStore?.trx === trx ? parentStore : getOrCreateTransactionStore(trx);
+    const store = parentStore?.trx === trx ? parentStore : getOrCreateTransactionStore(trx);
 
     if (store.phase !== 'active') {
       throw new Error(`Transaction is ${store.phase}; new work is not allowed.`);
