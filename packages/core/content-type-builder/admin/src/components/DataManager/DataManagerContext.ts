@@ -2,6 +2,7 @@
 import { createContext } from 'react';
 
 import type { AttributeRenameMigrationMode } from './RenameMigrationModal';
+import type { ContentStructure, FolderSelection, SectionKey } from './utils/contentStructure';
 import type { Component, ContentType } from '../../types';
 import type { ComponentWithChildren } from './utils/retrieveComponentsThatHaveComponents';
 import type { NestedComponent } from './utils/retrieveNestedComponents';
@@ -78,6 +79,7 @@ export interface DataManagerContextValue {
       pluginOptions: Record<string, unknown>;
     };
     uid: Internal.UID.Schema;
+    folder?: FolderSelection;
   }) => void;
   changeDynamicZoneComponents: (opts: {
     forTarget: Struct.ModelType;
@@ -92,6 +94,33 @@ export interface DataManagerContextValue {
   }) => void;
   deleteComponent(uid: Internal.UID.Component): void;
   deleteContentType(uid: Internal.UID.ContentType): void;
+  contentStructure: ContentStructure;
+  createFolder: (opts: { section: SectionKey; name: string; parentId: string | null }) => void;
+  renameFolder: (opts: { section: SectionKey; id: string; name: string }) => void;
+  moveFolder: (opts: {
+    section: SectionKey;
+    id: string;
+    newParentId: string | null;
+    index?: number;
+  }) => void;
+  deleteFolderOnly: (opts: { section: SectionKey; id: string }) => void;
+  deleteFolderAndContent: (opts: {
+    section: SectionKey;
+    id: string;
+    contentTypeUids: Internal.UID.ContentType[];
+  }) => void;
+  assignContentTypeToFolder: (opts: {
+    section: SectionKey;
+    uid: Internal.UID.ContentType;
+    targetGroupId: string | null;
+    index?: number;
+  }) => void;
+  reorderFolderChildren: (opts: {
+    section: SectionKey;
+    groupId: string;
+    from: number;
+    to: number;
+  }) => void;
   removeComponentFromDynamicZone: (opts: {
     forTarget: Struct.ModelType;
     targetUid: Internal.UID.Schema;
@@ -129,6 +158,7 @@ export interface DataManagerContextValue {
       pluginOptions: Record<string, unknown>;
     };
     uid: Internal.UID.ContentType;
+    folder?: FolderSelection;
   }) => void;
   initialComponents: Record<Internal.UID.Component, Component>;
   components: Record<Internal.UID.Component, Component>;

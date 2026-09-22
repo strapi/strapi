@@ -39,6 +39,7 @@ import {
 } from './RenameMigrationModal';
 import { useServerRestartWatcher } from './useServerRestartWatcher';
 import { sortContentType, stateToRequestData } from './utils/cleanData';
+import { fromServerFile, generateGroupId } from './utils/contentStructure';
 import { getRenamedComponentUid } from './utils/getRenamedComponentUid';
 import { groupRenameChains } from './utils/groupRenameChains';
 import { resolveAfterEditRenameConsent } from './utils/resolveAfterEditRenameConsent';
@@ -51,17 +52,35 @@ import {
 } from './utils/splitChainsByInheritedConsent';
 
 import type { AnyAttribute, Component, ContentTypes, ContentType, Components } from '../../types';
+import type { FolderSelection } from './utils/contentStructure';
 import type { FormAPI } from '../../utils/formAPI';
-import type { Internal } from '@strapi/types';
+import type { Internal, Modules } from '@strapi/types';
 
 interface DataManagerProviderProps {
   children: React.ReactNode;
 }
 
+/**
+ * Including the new folder state in the same payload as create/edit transactions ensures the
+ * folder assignment is subject to the same undo/redo operations as the content type mutation
+ */
+const toFolderAssignment = (folder?: FolderSelection) => {
+  if (!folder) {
+    return undefined;
+  }
+
+  if ('newFolderName' in folder) {
+    return { newFolderId: generateGroupId(), newFolderName: folder.newFolderName };
+  }
+
+  return { targetGroupId: folder.targetGroupId };
+};
+
 type SchemaResponse = {
   data: {
     components: Components;
     contentTypes: ContentTypes;
+    contentStructure?: Modules.ContentStructure.ContentStructureFile | null;
     settings?: {
       renameMigrations?: {
         attributes?: AttributeRenameMigrationMode;
@@ -109,6 +128,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     reservedNames,
     initialComponents,
     initialContentTypes,
+    contentStructure,
+    initialContentStructure,
     isLoading,
   } = state.current;
 
@@ -137,8 +158,19 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   } | null>(null);
 
   const isModified = React.useMemo(() => {
-    return !(isEqual(components, initialComponents) && isEqual(contentTypes, initialContentTypes));
-  }, [components, contentTypes, initialComponents, initialContentTypes]);
+    return !(
+      isEqual(components, initialComponents) &&
+      isEqual(contentTypes, initialContentTypes) &&
+      isEqual(contentStructure, initialContentStructure)
+    );
+  }, [
+    components,
+    contentTypes,
+    initialComponents,
+    initialContentTypes,
+    contentStructure,
+    initialContentStructure,
+  ]);
 
   const fetchClient = useFetchClient();
 
@@ -153,7 +185,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
         fetchClient.get<ReservedNamesResponse>(`/content-type-builder/reserved-names`),
       ]);
 
-      const { components, contentTypes, settings } = schemaResponse.data.data;
+      const { components, contentTypes, contentStructure, settings } = schemaResponse.data.data;
 
       if (settings?.renameMigrations?.attributes) {
         renameMigrationModeRef.current = settings.renameMigrations.attributes;
@@ -170,6 +202,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
             status: 'UNCHANGED',
           })) as ContentTypes,
           reservedNames: reservedNamesResponse.data,
+          contentStructure: fromServerFile(contentStructure),
         })
       );
 
@@ -267,6 +300,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     const { requestData, trackingEventProperties } = stateToRequestData({
       components: state.current.components,
       contentTypes: mutatedCTs,
+      contentStructure: state.current.contentStructure,
+      initialContentStructure: state.current.initialContentStructure,
     });
 
     if (shouldPromptForRenamesBeforeSave(renameMigrationModeRef.current)) {
@@ -396,6 +431,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     contentTypes,
     initialComponents,
     initialContentTypes,
+    contentStructure,
     isSaving,
     isModified,
     isInDevelopmentMode,
@@ -481,7 +517,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       dispatch(actions.addCreatedComponentToDynamicZone(payload));
     },
     createSchema(payload) {
-      dispatch(actions.createSchema(payload));
+      const { folder, ...rest } = payload;
+      dispatch(actions.createSchema({ ...rest, folder: toFolderAssignment(folder) }));
     },
     createComponentSchema({ data, uid, componentCategory }) {
       dispatch(actions.createComponentSchema({ data, uid, componentCategory }));
@@ -534,6 +571,28 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       }
     },
 
+    createFolder({ section, name, parentId }) {
+      dispatch(actions.createFolder({ section, name, parentId, id: generateGroupId() }));
+    },
+    renameFolder(payload) {
+      dispatch(actions.renameFolder(payload));
+    },
+    moveFolder(payload) {
+      dispatch(actions.moveFolder(payload));
+    },
+    deleteFolderOnly(payload) {
+      dispatch(actions.deleteFolderOnly(payload));
+    },
+    deleteFolderAndContent({ section, id, contentTypeUids }) {
+      dispatch(actions.deleteFolderAndContent({ section, id, contentTypeUids }));
+    },
+    assignContentTypeToFolder(payload) {
+      dispatch(actions.assignContentTypeToFolder(payload));
+    },
+    reorderFolderChildren(payload) {
+      dispatch(actions.reorderFolderChildren(payload));
+    },
+
     updateComponentSchema({ data, componentUID }) {
       dispatch(
         actions.updateComponentSchema({
@@ -553,7 +612,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     },
 
     updateSchema(args) {
-      dispatch(actions.updateSchema(args));
+      const { folder, ...rest } = args;
+      dispatch(actions.updateSchema({ ...rest, folder: toFolderAssignment(folder) }));
     },
 
     moveAttribute(args) {
