@@ -147,6 +147,8 @@ function createSchemaBuilder({ components, contentTypes }: SchemaBuilderOptions)
 
     /**
      * Write all type to files
+     * @returns boolean true if all files have been written correctly, false if an error occurred
+     * @throws ApplicationError if an error occurred and rollback failed
      */
     writeFiles() {
       const schemas = [
@@ -155,10 +157,11 @@ function createSchemaBuilder({ components, contentTypes }: SchemaBuilderOptions)
       ];
 
       return Promise.all(schemas.map((schema) => schema.flush()))
+        .then(() => true)
         .catch((error) => {
           strapi.log.error('Error writing schema files');
           strapi.log.error(error);
-          return this.rollback();
+          return this.rollback().then(() => false);
         })
         .catch((error) => {
           strapi.log.error(
