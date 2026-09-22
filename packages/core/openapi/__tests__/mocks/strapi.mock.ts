@@ -1,6 +1,18 @@
 import { routes } from '../fixtures';
 
 export class StrapiMock {
+  get config() {
+    return {
+      get: (path: string, defaultValue: unknown) => {
+        if (path === 'api.rest.prefix') {
+          return '/api';
+        }
+
+        return defaultValue;
+      },
+    };
+  }
+
   get apis() {
     return {
       'api-a': {
