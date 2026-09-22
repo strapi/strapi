@@ -74,7 +74,10 @@ describe('callback-free transaction finalization', () => {
       const competing = handle[opposite]();
 
       try {
-        await assert.rejects(competing, /Transaction is finalizing; another finalizer is not allowed/);
+        await assert.rejects(
+          competing,
+          /Transaction is finalizing; another finalizer is not allowed/
+        );
         assert.equal(calls[opposite], 0);
       } finally {
         release();
