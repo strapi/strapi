@@ -1,12 +1,12 @@
-import type { DefaultServiceRegistry, ServiceRegistry } from '..';
+import type * as Public from '../public';
 import type { Module, Route, Router, Service, ServiceFor } from '.';
 
 type ServiceNames<TPlugin extends string> = string extends TPlugin
   ? never
   : keyof {
       [TUID in
-        | keyof ServiceRegistry
-        | keyof DefaultServiceRegistry as TUID extends `plugin::${TPlugin}.${infer TService}`
+        | keyof Public.ServiceRegistry
+        | keyof Public.DefaultServiceRegistry as TUID extends `plugin::${TPlugin}.${infer TService}`
         ? TService
         : never]: ServiceFor<TUID>;
     };

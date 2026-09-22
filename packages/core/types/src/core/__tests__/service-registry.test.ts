@@ -1,26 +1,35 @@
-import type { Core } from '../..';
+import type { Core, Public } from '../..';
+import type * as DeclaredRegistries from '../../public';
+
+// @ts-expect-error Registries are exposed only through Public.
+type DirectRegistry = import('../..').ServiceRegistry;
+declare const directRegistry: DirectRegistry;
+directRegistry satisfies unknown;
 
 type GreetingService = {
   greet(name: string): Promise<string>;
 };
 
 declare module '../..' {
-  interface DefaultServiceRegistry {
-    'plugin::type-lab.greeting': {
-      greet(value: number): number;
-      defaultOnly(): void;
-    };
-    'plugin::type-lab.counter': {
-      count(): number;
-    };
-    'api::type-lab.greeting': { greet(value: number): number };
-    'admin::type-lab': { greet(value: number): number };
-  }
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Public {
+    interface DefaultServiceRegistry {
+      'plugin::type-lab.greeting': {
+        greet(value: number): number;
+        defaultOnly(): void;
+      };
+      'plugin::type-lab.counter': {
+        count(): number;
+      };
+      'api::type-lab.greeting': { greet(value: number): number };
+      'admin::type-lab': { greet(value: number): number };
+    }
 
-  interface ServiceRegistry {
-    'plugin::type-lab.greeting': GreetingService;
-    'api::type-lab.greeting': GreetingService;
-    'admin::type-lab': GreetingService;
+    interface ServiceRegistry {
+      'plugin::type-lab.greeting': GreetingService;
+      'api::type-lab.greeting': GreetingService;
+      'admin::type-lab': GreetingService;
+    }
   }
 }
 
@@ -91,3 +100,13 @@ strapi.service('plugin::type-lab.counter').count() satisfies string;
 strapi.service('plugin::type-lab.greeting').defaultOnly();
 // @ts-expect-error Plugin-scoped lookup also drops the replaced default methods.
 strapi.plugin('type-lab').service('greeting').defaultOnly();
+
+// Internal lookups must use the Public barrel, where namespace augmentation is applied.
+declare const original: DeclaredRegistries.ServiceRegistry['plugin::type-lab.greeting'];
+original.greet('Nico') satisfies Promise<string>;
+// @ts-expect-error Direct declaration imports must also reject wrong arguments.
+original.greet(123);
+declare const publicRegistry: Public.ServiceRegistry['plugin::type-lab.greeting'];
+publicRegistry satisfies typeof original;
+declare const unrelatedPublic: Public.ContentTypeSchemas;
+unrelatedPublic satisfies DeclaredRegistries.ContentTypeSchemas;

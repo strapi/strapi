@@ -1,10 +1,10 @@
-import type { DefaultServiceRegistry, ServiceRegistry } from '..';
+import type * as Public from '../public';
 
 /** Resolves application overrides before package defaults, then falls back to the legacy service. */
-export type ServiceFor<TUID extends string> = TUID extends keyof ServiceRegistry
-  ? ServiceRegistry[TUID]
-  : TUID extends keyof DefaultServiceRegistry
-    ? DefaultServiceRegistry[TUID]
+export type ServiceFor<TUID extends string> = TUID extends keyof Public.ServiceRegistry
+  ? Public.ServiceRegistry[TUID]
+  : TUID extends keyof Public.DefaultServiceRegistry
+    ? Public.DefaultServiceRegistry[TUID]
     : Service;
 
 export type Service = {

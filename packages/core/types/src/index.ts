@@ -1,7 +1,5 @@
 import type { Strapi } from './core';
 
-export type { DefaultServiceRegistry, ServiceRegistry } from './public/registries';
-
 export type * as Core from './core';
 export type * as Data from './data';
 export type * as Internal from './internal';

@@ -43,7 +43,7 @@ Both subpaths are type-only. Use type imports, not runtime imports. They support
 
 ### Register an application service
 
-`ServiceRegistry` maps full service UIDs to service instances. Add entries to the interface exported by `@strapi/types` and re-exported by `@strapi/strapi`:
+`Public.ServiceRegistry` maps full service UIDs to service instances. Add entries to the interface exported by `@strapi/types` and re-exported by `@strapi/strapi`:
 
 ```ts
 import type {} from '@strapi/strapi';
@@ -53,17 +53,19 @@ type GreetingService = {
 };
 
 declare module '@strapi/strapi' {
-  interface ServiceRegistry {
-    'plugin::greetings.greeting': GreetingService;
+  namespace Public {
+    interface ServiceRegistry {
+      'plugin::greetings.greeting': GreetingService;
+    }
   }
 }
 ```
 
 Both `strapi.service('plugin::greetings.greeting')` and `strapi.plugin('greetings').service('greeting')` now return `GreetingService`. Where possible, derive the instance type from the actual service implementation, for example with `ReturnType<typeof createGreetingService>`.
 
-Package-provided contracts are registered separately in `DefaultServiceRegistry`. Lookup selects an application entry in `ServiceRegistry` first, then a package default, then the permissive fallback. An application entry replaces the whole default contract rather than intersecting with it.
+Package-provided contracts are registered separately in `Public.DefaultServiceRegistry`. Lookup selects an application entry in `Public.ServiceRegistry` first, then a package default, then the permissive fallback. An application entry replaces the whole default contract rather than intersecting with it.
 
-The separate registries are deliberate. Existing `Public.Services` augmentations keep their previous behavior. The new interface avoids relying on nested namespace augmentation through re-exported aliases.
+The separate registries are deliberate. Existing `Public.Services` augmentations keep their previous behavior. Both new registries are exposed only through the `Public` namespace. Internal lookup types must import them from the public barrel (`src/public/index.ts`), not directly from `src/public/registries.ts`: TypeScript applies this namespace augmentation at the barrel. Direct imports from the declaration file do not receive those entries.
 
 ### Build compatibility and extensions
 
@@ -81,8 +83,10 @@ type ExtendedLocales = LocaleService & {
 };
 
 declare module '@strapi/strapi' {
-  interface ServiceRegistry {
-    'plugin::i18n.locales': ExtendedLocales;
+  namespace Public {
+    interface ServiceRegistry {
+      'plugin::i18n.locales': ExtendedLocales;
+    }
   }
 }
 ```
@@ -93,7 +97,7 @@ Two declarations for the same UID within the same registry must still agree. Thi
 
 ### Moving toward default typing
 
-When package contracts become enabled by default, existing application entries in `ServiceRegistry` continue to take precedence. Applications do not have to delete their overrides to avoid duplicate-property conflicts with built-in types. However, an override can hide later corrections to the default contract, so applications remain responsible for matching their actual implementation.
+When package contracts become enabled by default, existing application entries in `Public.ServiceRegistry` continue to take precedence. Applications do not have to delete their overrides to avoid duplicate-property conflicts with built-in types. However, an override can hide later corrections to the default contract, so applications remain responsible for matching their actual implementation.
 
 The `/types` export should remain available and point to the same registration module if that module later becomes part of the normal declaration graph. Existing opt-in imports can then remain in application code without a second migration. Enabling default contracts can still reveal errors in applications without overrides, so it remains a potentially breaking type change.
 
