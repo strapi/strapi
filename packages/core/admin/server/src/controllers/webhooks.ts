@@ -2,9 +2,11 @@ import isLocalhostIp from 'is-localhost-ip';
 import type { Context } from 'koa';
 import _ from 'lodash';
 
-import { yup, validateYupSchema } from '@strapi/utils';
+import { yup, validateYupSchema, emitAudit } from '@strapi/utils';
 
 import type { Modules } from '@strapi/types';
+
+import { AUDITED_EVENTS, getWebhookChanges, toAuditedWebhook } from '../audit-logs/webhooks';
 
 import {
   CreateWebhook,
@@ -91,6 +93,8 @@ export default {
 
     strapi.get('webhookRunner').add(webhook);
 
+    await emitAudit({ strapi }, AUDITED_EVENTS.WEBHOOK_CREATE, toAuditedWebhook(webhook));
+
     ctx.created({ data: webhook } satisfies CreateWebhook.Response);
   },
 
@@ -117,6 +121,16 @@ export default {
 
     strapi.get('webhookRunner').update(updatedWebhook);
 
+    const changes = getWebhookChanges(webhook, updatedWebhook);
+
+    if (!_.isEmpty(changes)) {
+      await emitAudit({ strapi }, AUDITED_EVENTS.WEBHOOK_UPDATE, {
+        webhookId: updatedWebhook.id,
+        name: updatedWebhook.name,
+        changes,
+      });
+    }
+
     ctx.send({ data: updatedWebhook } satisfies UpdateWebhook.Response);
   },
 
@@ -131,6 +145,11 @@ export default {
     await strapi.get('webhookStore').deleteWebhook(id);
 
     strapi.get('webhookRunner').remove(webhook);
+
+    await emitAudit({ strapi }, AUDITED_EVENTS.WEBHOOK_DELETE, {
+      webhookId: webhook.id,
+      name: webhook.name,
+    });
 
     ctx.body = { data: webhook } satisfies DeleteWebhook.Response;
   },
@@ -148,6 +167,11 @@ export default {
       if (webhook) {
         await strapi.get('webhookStore').deleteWebhook(id);
         strapi.get('webhookRunner').remove(webhook);
+
+        await emitAudit({ strapi }, AUDITED_EVENTS.WEBHOOK_DELETE, {
+          webhookId: webhook.id,
+          name: webhook.name,
+        });
       }
     }
 
