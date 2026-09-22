@@ -145,6 +145,30 @@ describe('convert-query-params', () => {
         'Invalid sort parameter. Expected a string, an array of strings, a sort object or an array of sort objects'
       );
     });
+
+    test.each([
+      ['toString.call', Object.prototype.toString],
+      ['hasOwnProperty.call', Object.prototype.hasOwnProperty],
+    ])('rejects inherited built-in function sort path %s', (sortPath, target) => {
+      const originalCallDescriptor = Object.getOwnPropertyDescriptor(target, 'call');
+
+      try {
+        expect(() => transformer.private_convertSortQueryParams(sortPath)).toThrow(ValidationError);
+      } finally {
+        if (originalCallDescriptor) {
+          Object.defineProperty(target, 'call', originalCallDescriptor);
+        } else {
+          Reflect.deleteProperty(target, 'call');
+        }
+      }
+    });
+
+    test.each(['constructor', 'prototype', '__proto__'])(
+      'rejects inherited or dangerous terminal sort field %s',
+      (sortPath) => {
+        expect(() => transformer.private_convertSortQueryParams(sortPath)).toThrow(ValidationError);
+      }
+    );
   });
 
   describe('convertStartQueryParams', () => {
@@ -608,6 +632,18 @@ describe('convert-query-params', () => {
           limit: 5,
         },
       });
+    });
+
+    it('rejects an inherited built-in function sort path in nested populate', () => {
+      expect(() =>
+        transformer.transformQueryParams('api::dog.dog', {
+          populate: {
+            one_to_one: {
+              sort: 'toString.call',
+            },
+          },
+        })
+      ).toThrow(ValidationError);
     });
 
     it('drops trailing comma segments in nested populate sort', () => {

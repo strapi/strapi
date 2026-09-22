@@ -5,9 +5,10 @@
  * to run scheduled jobs.
  *
  * The cron format consists of:
- * [MINUTE] [HOUR] [DAY OF MONTH] [MONTH OF YEAR] [DAY OF WEEK] [YEAR (optional)]
+ * [MINUTE] [HOUR] [DAY OF MONTH] [MONTH OF YEAR] [DAY OF WEEK]
+ * or six fields with seconds first.
  *
- * It uses https://github.com/node-schedule/node-schedule under the hood
+ * It uses https://github.com/Hexagon/croner under the hood
  */
 
 module.exports = {

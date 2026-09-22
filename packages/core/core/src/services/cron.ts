@@ -1,39 +1,266 @@
-import type { Job, Spec } from 'node-schedule';
 import { isFunction } from 'lodash/fp';
-import type { Core } from '@strapi/types';
+import type { Modules } from '@strapi/types';
+import type { Cron } from 'croner';
 
-// Lazy: only required when a cron task is actually scheduled
-let lazyNs: typeof import('node-schedule') | undefined;
-const ns = (): typeof import('node-schedule') => {
-  if (!lazyNs) {
+type RecurrenceSpecObjLit = Modules.Cron.RecurrenceSpecObjLit;
+type CronRuleOptions = Modules.Cron.CronRuleOptions;
+type CronSchedule = Modules.Cron.CronSchedule;
+type CronJob = Modules.Cron.CronJob;
+type JobSpec = Modules.Cron.JobSpec;
+type TaskFn = Modules.Cron.CronTaskFn;
+type Tasks = Modules.Cron.CronTasks;
+
+let lazyCroner: typeof import('croner') | undefined;
+const getCroner = (): typeof import('croner') => {
+  if (!lazyCroner) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    lazyNs = require('node-schedule');
+    lazyCroner = require('croner');
   }
-  return lazyNs as typeof import('node-schedule');
+  return lazyCroner as typeof import('croner');
 };
 
-interface JobSpec {
-  job: Job;
-  options: Spec;
-  name: string | null;
-}
+const RECURRENCE_KEYS = [
+  'date',
+  'dayOfWeek',
+  'hour',
+  'minute',
+  'month',
+  'second',
+  'year',
+  'recurs',
+] as const;
 
-type TaskFn = ({ strapi }: { strapi: Core.Strapi }, ...args: unknown[]) => Promise<unknown>;
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !(value instanceof Date);
 
-type Task =
-  | TaskFn
-  | {
-      task: TaskFn;
-      options: Spec;
+const isRuleOptions = (value: unknown): value is CronRuleOptions =>
+  isPlainObject(value) && 'rule' in value;
+
+const isRecurrenceSpec = (value: unknown): value is RecurrenceSpecObjLit =>
+  isPlainObject(value) && !('rule' in value) && RECURRENCE_KEYS.some((key) => key in value);
+
+const toDate = (value: Date | number | string): Date =>
+  value instanceof Date ? value : new Date(value);
+
+const toSegmentPart = (value: unknown, offset = 0): string | null => {
+  if (typeof value === 'number') {
+    return String(value + offset);
+  }
+  return typeof value === 'string' ? value : null;
+};
+
+const segmentToField = (segment: unknown, fallback = '*', offset = 0): string => {
+  if (segment == null) {
+    return fallback;
+  }
+
+  const part = toSegmentPart(segment, offset);
+  if (part !== null) {
+    return part;
+  }
+
+  if (Array.isArray(segment)) {
+    return segment.map((item) => segmentToField(item, fallback, offset)).join(',');
+  }
+
+  if (isPlainObject(segment)) {
+    const start = toSegmentPart(segment.start ?? segment.from, offset);
+    const end = toSegmentPart(segment.end ?? segment.to, offset);
+    if (start !== null && end !== null) {
+      const range = `${start}-${end}`;
+      const step = toSegmentPart(segment.step);
+      return step === null ? range : `${range}/${step}`;
+    }
+  }
+
+  return fallback;
+};
+
+const recurrenceToCron = (spec: RecurrenceSpecObjLit): string => {
+  const second = segmentToField(spec.second, '0');
+  const minute = segmentToField(spec.minute);
+  const hour = segmentToField(spec.hour);
+  const date = segmentToField(spec.date);
+  const month = segmentToField(spec.month, '*', 1);
+  const dayOfWeek = segmentToField(spec.dayOfWeek);
+  const fields = `${second} ${minute} ${hour} ${date} ${month} ${dayOfWeek}`;
+
+  return spec.year == null ? fields : `${fields} ${segmentToField(spec.year)}`;
+};
+
+type ScheduleWindow = {
+  tz?: string;
+  start?: Date | number | string;
+  end?: Date | number | string;
+};
+
+const toCronerOptions = ({ tz, start, end }: ScheduleWindow): Record<string, unknown> => {
+  const cronerOptions: Record<string, unknown> = {};
+
+  if (tz) {
+    cronerOptions.timezone = tz;
+  }
+  if (start != null) {
+    cronerOptions.startAt = toDate(start);
+  }
+  if (end != null) {
+    cronerOptions.stopAt = toDate(end);
+  }
+
+  return cronerOptions;
+};
+
+const ruleToPattern = (
+  rule: CronRuleOptions['rule']
+): { pattern: string | Date; oneShot: boolean } => {
+  if (typeof rule === 'number') {
+    return { pattern: new Date(rule), oneShot: true };
+  }
+  if (rule instanceof Date) {
+    return { pattern: rule, oneShot: true };
+  }
+  if (typeof rule === 'string') {
+    return { pattern: rule, oneShot: false };
+  }
+  if (isRecurrenceSpec(rule)) {
+    return { pattern: recurrenceToCron(rule), oneShot: false };
+  }
+  throw new Error('Unsupported cron rule');
+};
+
+const toCronerArgs = (
+  options: CronSchedule
+): { pattern: string | Date; cronerOptions: Record<string, unknown> } => {
+  if (typeof options === 'number') {
+    return { pattern: new Date(options), cronerOptions: { maxRuns: 1 } };
+  }
+
+  if (options instanceof Date) {
+    return { pattern: options, cronerOptions: { maxRuns: 1 } };
+  }
+
+  if (typeof options === 'string') {
+    return { pattern: options, cronerOptions: {} };
+  }
+
+  if (isRecurrenceSpec(options)) {
+    return {
+      pattern: recurrenceToCron(options),
+      cronerOptions: toCronerOptions(options),
     };
+  }
 
-interface Tasks {
-  [key: string]: Task;
-}
+  if (isRuleOptions(options)) {
+    const cronerOptions = toCronerOptions(options);
+    const { pattern, oneShot } = ruleToPattern(options.rule);
+    if (oneShot) {
+      cronerOptions.maxRuns = 1;
+    }
+
+    return { pattern, cronerOptions };
+  }
+
+  throw new Error('Unsupported cron schedule');
+};
 
 const createCronService = () => {
   let jobsSpecs: JobSpec[] = [];
   let running = false;
+
+  const createRunner = (fn: TaskFn) => {
+    let nextFireDate: Date | null = null;
+
+    return {
+      async run(self?: Cron): Promise<void> {
+        const fireDate = nextFireDate ?? self?.currentRun() ?? new Date();
+        nextFireDate = self?.nextRun(fireDate) ?? null;
+        await fn({ strapi }, fireDate);
+      },
+      setNextRun(date: Date | null) {
+        nextFireDate = date;
+      },
+    };
+  };
+
+  const createCronJob = (
+    pattern: string | Date,
+    cronerOptions: Record<string, unknown>,
+    fn: TaskFn,
+    jobLabel: string
+  ) => {
+    const { Cron: CronCtor } = getCroner();
+    const runner = createRunner(fn);
+    const job = new CronCtor(
+      pattern,
+      {
+        paused: !running,
+        // cron-parser (via node-schedule) accepted numeric-prefix stepping
+        // like `5/15` as `5-59/15`. Croner 10 rejects it unless this is set.
+        sloppyRanges: true,
+        ...cronerOptions,
+        catch(error: unknown) {
+          strapi.log.error(`Cron job "${jobLabel}" failed`, error);
+        },
+      },
+      runner.run
+    );
+    runner.setNextRun(job.nextRun());
+    return job;
+  };
+
+  const attachHandle = (job: Cron, fn: TaskFn, jobLabel: string): CronJob => {
+    let current = job;
+    let handle: CronJob;
+
+    const invoke = async () => {
+      const fireDate = current.currentRun() ?? new Date();
+      return fn({ strapi }, fireDate);
+    };
+
+    const cancel = () => {
+      current.stop();
+      return true;
+    };
+
+    const nextInvocation = () => current.nextRun();
+
+    const reschedule = (spec: CronSchedule) => {
+      try {
+        const idx = jobsSpecs.findIndex((jobSpec) => jobSpec.job === handle);
+        if (idx === -1) {
+          return false;
+        }
+
+        const { pattern, cronerOptions } = toCronerArgs(spec);
+        const next = createCronJob(pattern, cronerOptions, fn, jobLabel);
+
+        current.stop();
+        current = next;
+        jobsSpecs[idx] = {
+          ...jobsSpecs[idx],
+          options: spec,
+        };
+        return true;
+      } catch (error) {
+        strapi.log.error(`Could not reschedule cron job "${jobLabel}"`, error);
+        return false;
+      }
+    };
+
+    handle = new Proxy(job as CronJob, {
+      get(_target, property) {
+        if (property === 'invoke') return invoke;
+        if (property === 'cancel') return cancel;
+        if (property === 'nextInvocation') return nextInvocation;
+        if (property === 'reschedule') return reschedule;
+
+        const value = Reflect.get(current, property, current);
+        return typeof value === 'function' ? value.bind(current) : value;
+      },
+    });
+
+    return handle;
+  };
 
   return {
     add(tasks: Tasks = {}) {
@@ -41,15 +268,13 @@ const createCronService = () => {
         const taskValue = tasks[taskExpression];
 
         let fn: TaskFn;
-        let options: Spec;
+        let options: CronSchedule;
         let taskName: string | null;
         if (isFunction(taskValue)) {
-          // don't use task name if key is the rule
           taskName = null;
           fn = taskValue.bind(tasks);
           options = taskExpression;
         } else if (isFunction(taskValue.task)) {
-          // set task name if key is not the rule
           taskName = taskExpression;
           fn = taskValue.task.bind(taskValue);
           options = taskValue.options;
@@ -59,17 +284,19 @@ const createCronService = () => {
           );
         }
 
-        const fnWithStrapi = (...args: unknown[]) => fn({ strapi }, ...args);
+        const jobLabel = taskName ?? taskExpression;
 
-        // const job = new Job(null, fnWithStrapi);
-        const job: Job = new (ns().Job)(fnWithStrapi);
-        job.on('error', (error) => {
-          strapi.log.error(`Cron job "${taskName ?? taskExpression}" failed`, error);
-        });
-        jobsSpecs.push({ job, options, name: taskName });
+        try {
+          const { pattern, cronerOptions } = toCronerArgs(options);
+          const job = createCronJob(pattern, cronerOptions, fn, jobLabel);
 
-        if (running) {
-          job.schedule(options);
+          jobsSpecs.push({
+            job: attachHandle(job, fn, jobLabel),
+            options,
+            name: taskName,
+          });
+        } catch (error) {
+          strapi.log.error(`Could not schedule cron job "${jobLabel}": invalid schedule`, error);
         }
       }
       return this;
@@ -77,35 +304,40 @@ const createCronService = () => {
 
     remove(name: string) {
       if (!name) throw new Error('You must provide a name to remove a cron job.');
-      const matchingJobsSpecs = jobsSpecs.filter(({ name: jobSpecName }, index) => {
-        if (jobSpecName === name) {
-          jobsSpecs.splice(index, 1);
-          return true;
+      const remaining: JobSpec[] = [];
+      for (const jobSpec of jobsSpecs) {
+        if (jobSpec.name === name) {
+          jobSpec.job.stop();
+        } else {
+          remaining.push(jobSpec);
         }
-        return false;
-      });
-      matchingJobsSpecs.forEach(({ job }) => job.cancel());
+      }
+      jobsSpecs = remaining;
       return this;
     },
 
     start() {
-      jobsSpecs.forEach(({ job, options }) => job.schedule(options));
+      jobsSpecs.forEach(({ job }) => job.resume());
       running = true;
       return this;
     },
 
     stop() {
-      jobsSpecs.forEach(({ job }) => job.cancel());
+      jobsSpecs.forEach(({ job }) => job.pause());
       running = false;
       return this;
     },
 
     destroy() {
       this.stop();
+      jobsSpecs.forEach(({ job }) => job.stop());
       jobsSpecs = [];
       return this;
     },
-    jobs: jobsSpecs,
+
+    get jobs() {
+      return jobsSpecs;
+    },
   };
 };
 
