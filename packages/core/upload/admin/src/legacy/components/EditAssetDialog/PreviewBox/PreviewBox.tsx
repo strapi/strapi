@@ -210,7 +210,7 @@ export const PreviewBox = ({
     };
   };
 
-  const handleFocalPointClick = (e: React.MouseEvent<HTMLElement>): FocalPoint | void => {
+  const handleFocalPointClick = (e: React.MouseEvent<HTMLElement>) => {
     if (!isInFocalPointMode) return;
     setFocalPoint(calculateFocalPointFromEvent(e));
   };
