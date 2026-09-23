@@ -1,7 +1,7 @@
 import type { PropertyPath } from 'lodash';
 import type { Controller, ControllerFor } from './controller';
 import type { Module } from './module';
-import type { Route } from './route';
+import type { HandlerReference, Route } from './route';
 import type { Router } from './router';
 import type { Service, ServiceFor } from './service';
 import type { ConfigFor, ConfigNamespace, ConfigPathValue } from './strapi';
@@ -59,6 +59,20 @@ type PluginServiceLookup<TPlugin extends string, TServiceName, T> = [
     : TServiceName extends ServiceNames<TPlugin>
       ? ServiceFor<`plugin::${TPlugin}.${TServiceName}`>
       : T;
+
+/**
+ * `'<controller>.<action>'` for every action of the plugin's registered controllers,
+ * or any handler reference when the plugin registers no controller.
+ */
+// TODO @Nico absolute references ('plugin::<plugin>.<controller>.<action>') and references to other plugins' controllers also resolve at runtime but are rejected here
+export type PluginHandlerReference<TPlugin extends string> = [ControllerNames<TPlugin>] extends [
+  never,
+]
+  ? HandlerReference
+  : {
+      [TController in ControllerNames<TPlugin>]: `${TController}.${keyof ControllerFor<`plugin::${TPlugin}.${TController}`> &
+        string}`;
+    }[ControllerNames<TPlugin>];
 
 /** The registered contract when `TControllerName` is a registered controller of the plugin, `T` otherwise. */
 type PluginControllerLookup<TPlugin extends string, TControllerName, T> = [

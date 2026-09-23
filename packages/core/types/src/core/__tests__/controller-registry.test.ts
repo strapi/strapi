@@ -1,5 +1,6 @@
 import type { Controller, ControllerHandler } from '../controller';
 import type { Plugin } from '../plugin';
+import type { PluginRouterInput } from '../router';
 import type { Strapi as StrapiInstance } from '../strapi';
 
 type LabController = {
@@ -61,3 +62,28 @@ getUnregisteredController('items').list satisfies ControllerHandler;
 
 // @ts-expect-error Assigned functions are checked against the generic signature, as before registries.
 legacyPlugin.controller = () => ({ list: () => undefined });
+
+// Plugin routers check string handlers against the plugin's registered controller actions.
+declare const middleware: ControllerHandler;
+({
+  type: 'admin',
+  routes: [
+    { method: 'GET', path: '/items', handler: 'items.list' },
+    { method: 'POST', path: '/tags', handler: 'tags.create' },
+    { method: 'GET', path: '/inline', handler: middleware },
+  ],
+}) satisfies PluginRouterInput<'controller-lab'>;
+({
+  type: 'admin',
+  // @ts-expect-error Unknown actions are rejected.
+  routes: [{ method: 'GET', path: '/items', handler: 'items.missing' }],
+}) satisfies PluginRouterInput<'controller-lab'>;
+({
+  type: 'admin',
+  // @ts-expect-error Actions from a replaced default are rejected.
+  routes: [{ method: 'GET', path: '/items', handler: 'items.defaultOnly' }],
+}) satisfies PluginRouterInput<'controller-lab'>;
+({
+  type: 'content-api',
+  routes: [{ method: 'GET', path: '/anything', handler: 'anything.goes' }],
+}) satisfies PluginRouterInput<'unregistered'>;
