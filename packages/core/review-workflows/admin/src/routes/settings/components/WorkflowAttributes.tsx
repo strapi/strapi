@@ -17,6 +17,14 @@ import { useGetContentTypesQuery } from '../../../services/content-manager';
 import { useReviewWorkflows } from '../hooks/useReviewWorkflows';
 
 import type { WorkflowStage } from './Stages';
+import type { Workflow } from '../../../../../shared/contracts/review-workflows';
+
+type WorkflowFormValues = {
+  id?: Workflow['id'];
+  contentTypes: string[];
+  stages: WorkflowStage[];
+  stageRequiredToPublish: string | null;
+};
 
 /* -------------------------------------------------------------------------------------------------
  * WorkflowAttributes
@@ -63,9 +71,12 @@ const ContentTypesSelector = ({ disabled }: ContentTypesSelectorProps) => {
   const { formatMessage, locale } = useIntl();
   const { data: contentTypes, isLoading } = useGetContentTypesQuery();
   const { workflows } = useReviewWorkflows();
-  const currentWorkflow = useForm('ContentTypesSelector', (state) => state.values);
+  const currentWorkflow = useForm(
+    'ContentTypesSelector',
+    (state) => state.values as Partial<WorkflowFormValues>
+  );
 
-  const { error, value, onChange } = useField('contentTypes');
+  const { error, value = [], onChange } = useField<string[]>('contentTypes');
 
   const formatter = useCollator(locale, {
     sensitivity: 'base',
@@ -214,7 +225,7 @@ const StageSelector = ({ disabled }: StageSelectorProps) => {
   const { value: stages = [] } = useField<WorkflowStage[]>('stages');
   const { formatMessage } = useIntl();
 
-  const { error, value, onChange } = useField('stageRequiredToPublish');
+  const { error, value, onChange } = useField<string | number | null>('stageRequiredToPublish');
 
   // stages with empty names are not valid, so we avoid them from being used to avoid errors
   const validStages = stages.filter((stage) => stage.name);
@@ -248,7 +259,7 @@ const StageSelector = ({ disabled }: StageSelectorProps) => {
             defaultMessage: 'Any stage',
           })}
         </SingleSelectOption>
-        {validStages.map((stage, i) => (
+        {validStages.map((stage) => (
           <SingleSelectOption
             key={`requiredToPublishStage-${stage.id || stage.__temp_key__}`}
             value={stage.id?.toString() || stage.__temp_key__}

@@ -3,12 +3,17 @@
 /** @type {import('eslint').Linter.Config} */
 const config = {
   root: true,
-  extends: ['eslint-config-custom/back'],
+  extends: ['eslint-config-custom/back/typescript'],
+  parserOptions: {
+    tsconfigRootDir: __dirname,
+  },
   ignorePatterns: [
     'node_modules/',
-    '.eslintrc.cjs',
-    'index.d.ts',
+    'dist/',
     'coverage/',
+    '.eslintrc.cjs',
+    'jest.config.js',
+    'rollup.config.mjs',
     'lint-staged.config.mjs',
   ],
 };

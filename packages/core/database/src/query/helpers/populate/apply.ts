@@ -424,7 +424,7 @@ const morphX = async (
 
     if (_.isEmpty(referencedValues)) {
       results.forEach((result) => {
-        result[attributeName] = null;
+        result[attributeName] = attribute.relation === 'morphOne' ? null : [];
       });
 
       return;
@@ -442,8 +442,9 @@ const morphX = async (
     results.forEach((result) => {
       const matchingRows = map[result[idColumn.referencedColumn] as string];
 
+      // Match oneToMany/manyToMany: empty morphMany collections serialize as [], not null.
       const matchingValue =
-        attribute.relation === 'morphOne' ? _.first(matchingRows) : matchingRows;
+        attribute.relation === 'morphOne' ? _.first(matchingRows) : matchingRows || [];
 
       result[attributeName] = fromTargetRow(matchingValue);
     });
@@ -480,7 +481,7 @@ const morphX = async (
         rootColumn: joinColumn.referencedColumn,
         rootTable: qb.alias,
         on: {
-          ...(joinTable.on || {}),
+          ...joinTable.on,
           field: attributeName,
         },
         orderBy: getJoinTableOrderBy(populateValue, joinTable),
@@ -497,8 +498,9 @@ const morphX = async (
     results.forEach((result) => {
       const matchingRows = map[result[idColumn.referencedColumn] as string];
 
+      // Match oneToMany/manyToMany: empty morphMany collections serialize as [], not null.
       const matchingValue =
-        attribute.relation === 'morphOne' ? _.first(matchingRows) : matchingRows;
+        attribute.relation === 'morphOne' ? _.first(matchingRows) : matchingRows || [];
 
       result[attributeName] = fromTargetRow(matchingValue);
     });
@@ -506,7 +508,7 @@ const morphX = async (
 };
 
 const morphToMany = async (input: Input<Relation.MorphToMany>, ctx: Context) => {
-  const { attribute, attributeName, results, populateValue } = input;
+  const { attribute, attributeName, results, populateValue, isCount } = input;
   const { db } = ctx;
 
   // find with join table
@@ -526,7 +528,7 @@ const morphToMany = async (input: Input<Relation.MorphToMany>, ctx: Context) => 
   const joinRowsRaw = await qb
     .where({
       [joinColumn.name]: referencedValues,
-      ...(joinTable.on || {}),
+      ...joinTable.on,
     })
     .orderBy([joinColumn.name, 'order'])
     .execute<Row[]>({ mapResults: false });
@@ -537,6 +539,18 @@ const morphToMany = async (input: Input<Relation.MorphToMany>, ctx: Context) => 
   const joinRows = allowedTypes
     ? joinRowsRaw.filter((row) => allowedTypes.has(row[typeColumn.name] as string))
     : joinRowsRaw;
+
+  if (isCount) {
+    const joinMap = _.groupBy(joinColumn.name, joinRows);
+
+    results.forEach((result) => {
+      result[attributeName] = {
+        count: (joinMap[result[joinColumn.referencedColumn] as string] || []).length,
+      };
+    });
+
+    return;
+  }
 
   const joinMap = _.groupBy(joinColumn.name, joinRows);
 
@@ -605,7 +619,7 @@ const morphToMany = async (input: Input<Relation.MorphToMany>, ctx: Context) => 
 };
 
 const morphToOne = async (input: Input<Relation.MorphToOne>, ctx: Context) => {
-  const { attribute, attributeName, results, populateValue } = input;
+  const { attribute, attributeName, results, populateValue, isCount } = input;
   const { db } = ctx;
 
   const { morphColumn } = attribute;
@@ -633,9 +647,30 @@ const morphToOne = async (input: Input<Relation.MorphToOne>, ctx: Context) => {
 
   const map: MorphIdMap = {};
   const { on, ...typePopulate } = populateValue;
+  const typeRestrictedTypes =
+    on && typeof on === 'object'
+      ? Object.keys(idsByType).filter((type) => type in on)
+      : Object.keys(idsByType);
+  const allowedTypes = new Set(typeRestrictedTypes);
+
+  if (isCount) {
+    results.forEach((result) => {
+      const id = result[idColumn.name] as ID;
+      const type = result[typeColumn.name] as string;
+
+      result[attributeName] = { count: id && type && allowedTypes.has(type) ? 1 : 0 };
+    });
+
+    return;
+  }
 
   for (const type of Object.keys(idsByType)) {
     const ids = idsByType[type];
+
+    if (!allowedTypes.has(type)) {
+      map[type] = {};
+      continue;
+    }
 
     // type was removed but still in morph relation
     if (!db.metadata.get(type)) {

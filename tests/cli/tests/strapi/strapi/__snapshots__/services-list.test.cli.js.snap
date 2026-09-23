@@ -3,6 +3,7 @@
 exports[`services:list should output list of services 1`] = `
 "│ Name                                                 │
 │ plugin::content-manager.components                   │
+│ plugin::content-manager.content-structure            │
 │ plugin::content-manager.content-types                │
 │ plugin::content-manager.data-mapper                  │
 │ plugin::content-manager.document-metadata            │
@@ -22,6 +23,7 @@ exports[`services:list should output list of services 1`] = `
 │ plugin::content-type-builder.builder                 │
 │ plugin::content-type-builder.api-handler             │
 │ plugin::content-type-builder.schema                  │
+│ plugin::content-type-builder.content-structure       │
 │ plugin::email.email                                  │
 │ plugin::upload.provider                              │
 │ plugin::upload.upload                                │
@@ -42,6 +44,7 @@ exports[`services:list should output list of services 1`] = `
 │ plugin::i18n.iso-locales                             │
 │ plugin::i18n.content-types                           │
 │ plugin::i18n.ai-localizations                        │
+│ plugin::i18n.ai-translations                         │
 │ plugin::i18n.ai-localization-jobs                    │
 │ plugin::i18n.settings                                │
 │ plugin::i18n.fill-from-locale                        │

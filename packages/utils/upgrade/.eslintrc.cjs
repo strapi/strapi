@@ -10,6 +10,7 @@ const config = {
     'coverage/',
     'dist',
     'rollup.config.mjs',
+    'jest.config.js',
     'lint-staged.config.mjs',
   ],
   parserOptions: {

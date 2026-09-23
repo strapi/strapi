@@ -1,3 +1,5 @@
+import type { ChangeEventHandler } from 'react';
+
 import { useNotification } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 
@@ -10,13 +12,13 @@ import type { IntlLabel } from '../types';
 interface Radio {
   title: IntlLabel;
   description: IntlLabel;
-  value: any;
+  value: string | boolean;
 }
 
 interface ContentTypeRadioGroupProps {
   intlLabel: IntlLabel;
   name: string;
-  onChange: (value: any) => void;
+  onChange: ChangeEventHandler<HTMLInputElement>;
   radios?: Radio[];
   value?: string | boolean;
 }
@@ -25,7 +27,7 @@ export const ContentTypeRadioGroup = ({ onChange, ...rest }: ContentTypeRadioGro
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
 
-  const handleChange = (e: any) => {
+  const handleChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     toggleNotification({
       type: 'info',
       message: formatMessage({

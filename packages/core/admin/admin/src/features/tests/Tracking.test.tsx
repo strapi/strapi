@@ -115,6 +115,29 @@ describe('useTracking', () => {
     expect(result.current.trackUsage).not.toThrow();
   });
 
+  it('should keep trackUsage stable when the device type changes', async () => {
+    jest.mocked(useDeviceType).mockReturnValue('desktop');
+    const { result, rerender } = setup();
+    const trackUsage = result.current.trackUsage;
+
+    jest.mocked(useDeviceType).mockReturnValue('mobile');
+    rerender();
+
+    expect(result.current.trackUsage).toBe(trackUsage);
+
+    await result.current.trackUsage('didSaveContentType');
+
+    expect(axios.post).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        userProperties: {
+          deviceType: 'mobile',
+        },
+      }),
+      expect.any(Object)
+    );
+  });
+
   it('should not track if there is no uuid set in the context', async () => {
     jest.mocked(useInitQuery).mockReturnValue({
       data: {

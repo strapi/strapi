@@ -31,7 +31,24 @@ describe('FromModalNavigationProvider', () => {
     });
 
     const currentStateWithoutFunctions = removeFunctionsFromObject(result.current);
-    expect(currentStateWithoutFunctions).toEqual(INITIAL_STATE_DATA);
+    // Asserted against explicit literals rather than the imported INITIAL_STATE_DATA constant:
+    // the lint cleanup flipped these defaults from `null` to concrete values, and comparing the
+    // state to the same constant it is built from could never catch a regression in those defaults.
+    expect(currentStateWithoutFunctions).toEqual({
+      actionType: 'create',
+      attributeName: '',
+      attributeType: '',
+      dynamicZoneTarget: '',
+      forTarget: 'contentType',
+      modalType: null,
+      isOpen: true,
+      showBackLink: false,
+      kind: 'collectionType',
+      step: null,
+      targetUid: '',
+      customFieldUid: '',
+      activeTab: 'basic',
+    });
   });
 
   it('updates the state when selecting a custom field for a new attribute', () => {

@@ -4,6 +4,7 @@ export type * as Documents from './documents';
 export type * as AI from './ai';
 
 // individual files
+export type * as AuditLogs from './audit-logs';
 export type * as Auth from './auth';
 export type * as ContentAPI from './content-api';
 export type * as CoreStore from './core-store';
@@ -23,3 +24,4 @@ export type * as Validators from './validators';
 export type * as WebhookRunner from './webhook-runner';
 export type * as WebhookStore from './webhook-store';
 export type * as Permissions from './permissions';
+export type * as ContentStructure from './content-structure';

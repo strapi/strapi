@@ -9,7 +9,13 @@ import {
 } from '@strapi/data-transfer';
 
 import importAction from '../action';
+import { UPLOAD_CONTENT_TYPE_UIDS } from '../../../utils/data-transfer';
 import { expectExit } from '../../__tests__/commands.test.utils';
+
+jest.mock('@strapi/core', () => ({
+  createStrapi: jest.fn(),
+  compileStrapi: jest.fn(),
+}));
 
 jest.mock('../../../utils/data-transfer', () => {
   return {
@@ -22,7 +28,11 @@ jest.mock('../../../utils/data-transfer', () => {
         send: jest.fn(),
       },
       destroy: jest.fn(),
-      contentTypes: {},
+      contentTypes: {
+        'api::article.article': {},
+        'plugin::upload.file': {},
+        'plugin::upload.folder': {},
+      },
     }),
     buildTransferTable: jest.fn(() => {
       return {
@@ -178,5 +188,29 @@ describe('Import', () => {
       }
     );
     expect(fileDataTransfer.providers.createLocalFileSourceProvider).not.toHaveBeenCalled();
+  });
+
+  it('excludes upload types from restore for issue #25008-style import', async () => {
+    const options = {
+      file: 'test.tar',
+      exclude: ['files'],
+      excludeContentTypes: [...UPLOAD_CONTENT_TYPE_UIDS],
+      only: [],
+    };
+
+    await expectExit(0, async () => {
+      await importAction(options);
+    });
+
+    expect(strapiDataTransfer.providers.createLocalStrapiDestinationProvider).toHaveBeenCalledWith(
+      expect.objectContaining({
+        restore: expect.objectContaining({
+          assets: false,
+          entities: expect.objectContaining({
+            exclude: expect.arrayContaining([...UPLOAD_CONTENT_TYPE_UIDS]),
+          }),
+        }),
+      })
+    );
   });
 });

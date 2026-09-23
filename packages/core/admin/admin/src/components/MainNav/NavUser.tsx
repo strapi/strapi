@@ -77,9 +77,8 @@ export const NavUser = ({
   };
 
   const handleLogout = () => {
-    const redirection = '/auth/login';
+    // Auth.logout navigates to login after confirm + mutation (and may prompt first).
     logout();
-    navigate(redirection);
   };
 
   return (
@@ -107,7 +106,9 @@ export const NavUser = ({
               {user?.email}
             </StyledTypography>
             <BadgeWrapper>
-              {user?.roles?.map((role) => <Badge key={role.id}>{role.name}</Badge>)}
+              {user?.roles?.map((role) => (
+                <Badge key={role.id}>{role.name}</Badge>
+              ))}
             </BadgeWrapper>
           </UserInfo>
 

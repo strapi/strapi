@@ -127,6 +127,7 @@ export interface CreateContentTypeOptions {
   name: string;
   singularId?: string;
   pluralId?: string;
+  folder?: string;
   attributes: AddAttribute[];
 }
 
@@ -629,12 +630,17 @@ export const addAttributes = async (
           page.getByRole('button', { name: new RegExp('^Add Another Field$', 'i'), exact: true })
         );
       }
-    } else if (
-      options?.clickFinish !== false &&
-      // Creating a DZ closes the modal when components are added; there is no Finish on the CT field list.
-      !isDynamicZoneAttribute(attribute)
-    ) {
-      await clickAndWait(page, page.getByRole('button', { name: 'Finish' }));
+    } else if (options?.clickFinish !== false) {
+      // Some attribute flows finalize themselves and leave no "Finish" on the CT field list:
+      //  - relation: addRelationAttribute clicks Finish internally,
+      //  - new component: addComponentAttribute clicks Finish once its first field is added,
+      //  - dynamic zone: adding its components closes the modal.
+      // Others (e.g. an existing `useExisting` component) do NOT, so the outer Finish is still
+      // required. Rather than encode every case, click Finish only when it is actually present.
+      const finishButton = page.getByRole('button', { name: 'Finish' });
+      if (await finishButton.isVisible({ timeout: 1000 })) {
+        await clickAndWait(page, finishButton);
+      }
     }
   }
 };
@@ -684,6 +690,12 @@ export const createComponent = async (page: Page, options: CreateComponentOption
   await saveAndVerifyContent(page, options);
 };
 
+export const startCreateContentType = async (page: Page, type: 'single' | 'collection') => {
+  const label = type === 'single' ? 'New Single-Type' : 'New Collection-Type';
+  await page.getByRole('button', { name: label }).click();
+  await page.getByRole('menuitem', { name: label }).click();
+};
+
 // Helper function for creating content types
 const createContentType = async (
   page: Page,
@@ -692,10 +704,9 @@ const createContentType = async (
 ) => {
   const { name, singularId, pluralId } = options;
 
-  const buttonName = type === 'single' ? 'Create new single type' : 'Create new collection type';
   const headingName = type === 'single' ? 'Create a single type' : 'Create a collection type';
 
-  await page.getByRole('button', { name: buttonName }).click();
+  await startCreateContentType(page, type);
   await expect(page.getByRole('heading', { name: headingName })).toBeVisible();
 
   const displayName = page.getByLabel('Display name');
@@ -711,6 +722,11 @@ const createContentType = async (
   await expect(pluralIdField).toHaveValue(pluralId || pluralize(kebabCase(name)));
   if (pluralId) {
     await pluralIdField.fill(pluralId);
+  }
+
+  if (options.folder) {
+    await page.getByLabel('Select a folder or enter a value to create a new one').click();
+    await page.getByRole('option', { name: options.folder }).click();
   }
 
   await page.getByRole('button', { name: 'Continue' }).click();

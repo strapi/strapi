@@ -5,7 +5,9 @@ import {
   PreviewFieldError,
 } from '../fieldUtils';
 
-import type { Schema, Modules } from '@strapi/types';
+import type { Schema, Modules, UID } from '@strapi/types';
+
+type GetAttributeSchemaArgs = Parameters<typeof getAttributeSchemaFromPath>[0];
 
 describe('fieldUtils', () => {
   describe('parsePathWithIndices', () => {
@@ -68,37 +70,41 @@ describe('fieldUtils', () => {
       description: mockTextAttribute,
     };
 
+    const textComponentUid = 'basic.text-component' as UID.Component;
+    const nestedComponentUid = 'basic.nested-component' as UID.Component;
+    const articleUid = 'api::article.article' as UID.ContentType;
+
     // Simplified mock objects that satisfy the function's needs without complex typing
-    const mockComponents: any = {
-      'basic.text-component': {
+    const mockComponents = {
+      [textComponentUid]: {
         attributes: mockComponentAttributes,
       },
-    };
+    } as unknown as GetAttributeSchemaArgs['components'];
 
     const mockRepeatableComponent = {
       type: 'component' as const,
       repeatable: true,
-      component: 'basic.text-component' as any,
+      component: textComponentUid,
     };
 
     const mockNonRepeatableComponent: Schema.Attribute.Component = {
       type: 'component',
       repeatable: false,
-      component: 'basic.text-component' as any,
+      component: textComponentUid,
     };
 
     const mockDynamicZone: Schema.Attribute.DynamicZone = {
       type: 'dynamiczone',
-      components: ['basic.text-component' as any],
+      components: [textComponentUid],
     };
 
     const mockRelation: Schema.Attribute.Relation = {
       type: 'relation',
       relation: 'oneToMany',
-      target: 'api::article.article' as any,
+      target: articleUid,
     };
 
-    const mockSchema: any = {
+    const mockSchema = {
       attributes: {
         title: mockTextAttribute,
         components: mockRepeatableComponent,
@@ -106,7 +112,7 @@ describe('fieldUtils', () => {
         dynamicZone: mockDynamicZone,
         relation: mockRelation,
       },
-    };
+    } as unknown as GetAttributeSchemaArgs['schema'];
 
     const mockDocument: Modules.Documents.AnyDocument = {
       id: 1,
@@ -198,7 +204,11 @@ describe('fieldUtils', () => {
           components: mockComponents,
           document: mockDocument,
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
+        if (error instanceof PreviewFieldError === false) {
+          throw error;
+        }
+
         expect(error.messageKey).toBe('INVALID_FIELD_PATH');
       }
     });
@@ -220,7 +230,11 @@ describe('fieldUtils', () => {
           components: mockComponents,
           document: mockDocument,
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
+        if (error instanceof PreviewFieldError === false) {
+          throw error;
+        }
+
         expect(error.messageKey).toBe('RELATIONS_NOT_HANDLED');
       }
     });
@@ -242,7 +256,11 @@ describe('fieldUtils', () => {
           components: mockComponents,
           document: mockDocument,
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
+        if (error instanceof PreviewFieldError === false) {
+          throw error;
+        }
+
         expect(error.messageKey).toBe('INVALID_FIELD_PATH');
       }
     });
@@ -264,7 +282,11 @@ describe('fieldUtils', () => {
           components: mockComponents,
           document: mockDocument,
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
+        if (error instanceof PreviewFieldError === false) {
+          throw error;
+        }
+
         expect(error.messageKey).toBe('INVALID_FIELD_PATH');
       }
     });
@@ -276,10 +298,10 @@ describe('fieldUtils', () => {
 
       const nestedComponents = {
         ...mockComponents,
-        'basic.nested-component': {
+        [nestedComponentUid]: {
           attributes: nestedComponentAttributes,
         },
-      };
+      } as unknown as GetAttributeSchemaArgs['components'];
 
       const nestedSchema = {
         attributes: {
@@ -287,10 +309,10 @@ describe('fieldUtils', () => {
           nestedComp: {
             type: 'component' as const,
             repeatable: false,
-            component: 'basic.nested-component' as any,
+            component: nestedComponentUid,
           },
         },
-      };
+      } as unknown as GetAttributeSchemaArgs['schema'];
 
       const nestedDocument = {
         ...mockDocument,
@@ -306,8 +328,8 @@ describe('fieldUtils', () => {
 
       const result = getAttributeSchemaFromPath({
         path: 'nestedComp.nested.title',
-        schema: nestedSchema as any,
-        components: nestedComponents as any,
+        schema: nestedSchema,
+        components: nestedComponents,
         document: nestedDocument,
       });
 

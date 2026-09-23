@@ -1,0 +1,5 @@
+{
+  "plugin.description.long": "기본 API 메서드를 포함한 GraphQL 엔드포인트를 추가합니다.",
+  "plugin.description.short": "기본 API 메서드를 포함한 GraphQL 엔드포인트를 추가합니다.",
+  "plugin.name": "GraphQL"
+}

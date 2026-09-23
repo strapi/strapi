@@ -1,4 +1,4 @@
-import { render as renderRTL, screen, waitFor, fireEvent } from '@tests/utils';
+import { render as renderRTL, screen, waitFor } from '@tests/utils';
 import { Route, Routes } from 'react-router-dom';
 
 import { Header, HeaderProps } from '../Header';

@@ -23,4 +23,11 @@ describe('CTB | utils | getRelationType', () => {
     // @ts-expect-error
     expect(getRelationType(relation, 'test')).toEqual('test');
   });
+
+  it('Should return undefined when the relation is undefined', () => {
+    expect(getRelationType(undefined)).toBeUndefined();
+    expect(getRelationType()).toBeUndefined();
+    // relation absence short-circuits before the target attribute is considered
+    expect(getRelationType(undefined, 'someTarget')).toBeUndefined();
+  });
 });

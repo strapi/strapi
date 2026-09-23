@@ -11,6 +11,15 @@ interface MutateEditViewArgs {
   layout: EditLayout;
 }
 
+type I18nLayoutOptions = EditLayout['options'] & {
+  i18n?: {
+    localized?: boolean;
+  };
+};
+
+const hasI18nLayoutOptions = (options: EditLayout['options']): options is I18nLayoutOptions =>
+  'i18n' in options && typeof options.i18n === 'object' && options.i18n !== null;
+
 const mutateEditViewHook = ({ layout }: MutateEditViewArgs): MutateEditViewArgs => {
   // If i18n isn't explicitly enabled on the content type, then no field can be localized
   if (
@@ -49,7 +58,7 @@ const mutateEditViewHook = ({ layout }: MutateEditViewArgs): MutateEditViewArgs 
 
 const isFieldLocalized = (attribute: EditFieldLayout['attribute'], layout: EditLayout) => {
   const contentTypeLocalized =
-    !!(layout.options as any)?.i18n && !!(layout.options as any).i18n.localized;
+    hasI18nLayoutOptions(layout.options) && layout.options.i18n?.localized === true;
 
   if (!contentTypeLocalized) {
     return false;

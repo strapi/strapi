@@ -39,6 +39,7 @@ import {
   getComponentTypeColumn,
   getDzJoinTableName,
 } from '../../utils/transform-content-types-to-models';
+import { serializeJsonColumns } from './serialize-json-columns';
 
 type DocumentVersion = { documentId: string; locale: string };
 type Knex = Parameters<Migration['up']>[0];
@@ -363,7 +364,7 @@ async function copyMorphRowsByIdMap({
       if (originalId == null) continue;
       const newId = idMap.get(originalId);
       if (newId == null) continue;
-      const { id, ...rest } = row;
+      const { id: _id, ...rest } = row;
       toInsert.push({ ...rest, [columnToRewrite]: newId });
     }
     if (toInsert.length > 0) {
@@ -413,7 +414,7 @@ async function copyMorphRowsByPairs({
       if (originalId == null) continue;
       const draftIds = pairs.filter((p) => p.originalId === originalId).map((p) => p.draftId);
       for (const draftId of draftIds) {
-        const { id, ...rest } = row;
+        const { id: _id, ...rest } = row;
         toInsert.push({ ...rest, [columnToRewrite]: draftId });
       }
     }
@@ -675,6 +676,84 @@ const applyJoinTableOrdering = (qb: any, joinTable: any, sourceColumnName: strin
 };
 
 /**
+ * v4 join rows often only persisted order on one side of a bidirectional join table.
+ * When cloning relations for draft rows, derive missing order values from the other side
+ * so populate does not fall back to primary-key order.
+ */
+const assignMissingOrderColumnFromFallback = (
+  relations: Array<Record<string, any>>,
+  {
+    orderColumn,
+    fallbackOrderColumn,
+    groupByColumn,
+    tieBreakerColumn,
+  }: {
+    orderColumn: string;
+    fallbackOrderColumn: string;
+    groupByColumn: string;
+    tieBreakerColumn?: string;
+  }
+) => {
+  if (!orderColumn || !fallbackOrderColumn || relations.length === 0) {
+    return relations;
+  }
+
+  const byGroup = new Map<string | number, Array<Record<string, any>>>();
+
+  for (const relation of relations) {
+    const groupId = relation[groupByColumn];
+    const key = groupId ?? 'null';
+    const group = byGroup.get(key);
+
+    if (group) {
+      group.push(relation);
+    } else {
+      byGroup.set(key, [relation]);
+    }
+  }
+
+  for (const group of byGroup.values()) {
+    if (!group.some((relation) => relation[orderColumn] == null)) {
+      continue;
+    }
+
+    const sorted = [...group].sort((left, right) => {
+      const leftOrder = left[fallbackOrderColumn];
+      const rightOrder = right[fallbackOrderColumn];
+
+      if (leftOrder != null && rightOrder != null) {
+        if (leftOrder !== rightOrder) {
+          return leftOrder - rightOrder;
+        }
+      } else if (leftOrder != null) {
+        return -1;
+      } else if (rightOrder != null) {
+        return 1;
+      }
+
+      if (tieBreakerColumn) {
+        const leftTie = normalizeId(left[tieBreakerColumn]) ?? left[tieBreakerColumn];
+        const rightTie = normalizeId(right[tieBreakerColumn]) ?? right[tieBreakerColumn];
+
+        if (leftTie != null && rightTie != null && leftTie !== rightTie) {
+          return leftTie < rightTie ? -1 : 1;
+        }
+      }
+
+      return 0;
+    });
+
+    sorted.forEach((relation, index) => {
+      if (relation[orderColumn] == null) {
+        relation[orderColumn] = index + 1;
+      }
+    });
+  }
+
+  return relations;
+};
+
+/**
  * Builds a stable key for join-table relations to detect duplicates.
  * Key format: sourceId::targetId::field::componentType
  */
@@ -698,23 +777,26 @@ async function getExistingRelationKeys({
   joinTable,
   sourceColumnName,
   targetColumnName,
-  sourceIds,
+  filterIds,
+  filterColumnName,
 }: {
   trx: Knex;
   joinTable: any;
   sourceColumnName: string;
   targetColumnName: string;
-  sourceIds: number[];
+  filterIds: number[];
+  filterColumnName?: string;
 }): Promise<Set<string>> {
   const existingKeys = new Set<string>();
+  const columnName = filterColumnName ?? sourceColumnName;
 
-  if (sourceIds.length === 0) {
+  if (filterIds.length === 0) {
     return existingKeys;
   }
 
-  const idChunks = chunkArray(sourceIds, getBatchSize(trx, 1000));
+  const idChunks = chunkArray(filterIds, getBatchSize(trx, 1000));
   for (const chunk of idChunks) {
-    const existingRelationsQuery = trx(joinTable.name).select('*').whereIn(sourceColumnName, chunk);
+    const existingRelationsQuery = trx(joinTable.name).select('*').whereIn(columnName, chunk);
 
     applyJoinTableOrdering(existingRelationsQuery, joinTable, sourceColumnName);
 
@@ -1779,11 +1861,15 @@ async function cloneComponentInstance({
     );
   }
 
+  // mysql2 deserializes JSON columns on SELECT but knex does not re-serialize
+  // them on INSERT. Ensure any object values in JSON/blocks columns are stringified.
+  serializeJsonColumns(newComponentRow, componentMeta);
+
   let insertResult;
   if (supportsReturning(trx)) {
     try {
       insertResult = await trx(componentTableName).insert(newComponentRow, ['id']);
-    } catch (error: any) {
+    } catch {
       insertResult = await trx(componentTableName).insert(newComponentRow);
     }
   } else {
@@ -1875,7 +1961,7 @@ async function cloneComponentInstance({
             isForDraftEntity,
             reverseMapCache,
           });
-          const { id, ...rest } = row;
+          const { id: _id, ...rest } = row;
           await insertRowWithDuplicateHandling(trx, nestedJoinTableName, {
             ...rest,
             [entityIdCol]: newComponentId,
@@ -1904,7 +1990,7 @@ async function cloneComponentInstance({
             isForDraftEntity,
             reverseMapCache,
           });
-          const { id, ...rest } = row;
+          const { id: _id, ...rest } = row;
           await insertRowWithDuplicateHandling(trx, dzJoinTableName, {
             ...rest,
             [entityIdCol]: newComponentId,
@@ -2088,7 +2174,7 @@ async function copyRelationsForContentType({
           }
 
           // Create new relation object without the 'id' field
-          const { id, ...relationWithoutId } = relation;
+          const { id: _id, ...relationWithoutId } = relation;
           return {
             ...relationWithoutId,
             [sourceColumnName]: newSourceId,
@@ -2106,7 +2192,7 @@ async function copyRelationsForContentType({
         joinTable,
         sourceColumnName,
         targetColumnName,
-        sourceIds: draftSourceIds,
+        filterIds: draftSourceIds,
       });
 
       const relationsToInsert = newRelations.filter((relation) => {
@@ -2207,7 +2293,8 @@ async function copyRelationsFromOtherContentTypes({
         joinTable,
         sourceColumnName,
         targetColumnName,
-        sourceIds: draftTargetIds,
+        filterIds: draftTargetIds,
+        filterColumnName: targetColumnName,
       });
 
       const publishedIdChunks = chunkArray(publishedTargetIds, getBatchSize(trx, 1000));
@@ -2237,7 +2324,7 @@ async function copyRelationsFromOtherContentTypes({
 
           existingKeys.add(key);
 
-          const { id, ...relationWithoutId } = relation;
+          const { id: _id, ...relationWithoutId } = relation;
           newRelations.push({
             ...relationWithoutId,
             [targetColumnName]: newTargetId,
@@ -2247,6 +2334,13 @@ async function copyRelationsFromOtherContentTypes({
         if (newRelations.length === 0) {
           continue;
         }
+
+        assignMissingOrderColumnFromFallback(newRelations, {
+          orderColumn: joinTable.inverseOrderColumnName,
+          fallbackOrderColumn: joinTable.orderColumnName,
+          groupByColumn: targetColumnName,
+          tieBreakerColumn: sourceColumnName,
+        });
 
         await insertRelationsWithDuplicateHandling({
           trx,
@@ -2365,7 +2459,7 @@ async function copyRelationsToOtherContentTypes({
           }
 
           // Create new relation object without the 'id' field
-          const { id, ...relationWithoutId } = relation;
+          const { id: _id, ...relationWithoutId } = relation;
           return {
             ...relationWithoutId,
             [sourceColumnName]: newSourceId,
@@ -2407,7 +2501,7 @@ async function copyRelationsToOtherContentTypes({
         joinTable,
         sourceColumnName,
         targetColumnName,
-        sourceIds: draftSourceIds,
+        filterIds: draftSourceIds,
       });
 
       // Filter out relations that already exist
@@ -2418,6 +2512,13 @@ async function copyRelationsToOtherContentTypes({
       });
 
       if (relationsToInsert.length > 0) {
+        assignMissingOrderColumnFromFallback(relationsToInsert as Array<Record<string, any>>, {
+          orderColumn: joinTable.orderColumnName,
+          fallbackOrderColumn: joinTable.inverseOrderColumnName,
+          groupByColumn: sourceColumnName,
+          tieBreakerColumn: targetColumnName,
+        });
+
         await insertRelationsWithDuplicateHandling({
           trx,
           tableName: joinTable.name,
@@ -3287,7 +3388,7 @@ async function copyComponentRelations({
             cloneMap.set(componentKey, newComponentId);
           }
 
-          const { id, ...relationWithoutId } = relation;
+          const { id: _id, ...relationWithoutId } = relation;
           return {
             ...relationWithoutId,
             [entityIdColumn]: newEntityId,

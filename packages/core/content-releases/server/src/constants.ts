@@ -68,3 +68,24 @@ export const ACTIONS = [
 export const ALLOWED_WEBHOOK_EVENTS = {
   RELEASES_PUBLISH: 'releases.publish',
 };
+
+/**
+ * Audit Log events, transformed in audit-logs.ts and registered during bootstrap.
+ *
+ * RELEASE_TRIGGER is different from the releases.publish webhook.
+ * The webhook has its own payload format, which is already a public contract.
+ *
+ * TODO: Decide whether these should eventually converge when the
+ * releases.publish payload is revised: replace it with release.trigger,
+ * or keep both formats permanently.
+ */
+export const AUDITED_EVENTS = {
+  RELEASE_CREATE: 'release.create',
+  RELEASE_UPDATE: 'release.update',
+  RELEASE_DELETE: 'release.delete',
+  RELEASE_TRIGGER: 'release.trigger',
+  RELEASE_ENTRY_ADD: 'release.entry.add',
+  RELEASE_ENTRY_UPDATE: 'release.entry.update',
+  RELEASE_ENTRY_REMOVE: 'release.entry.remove',
+  RELEASE_SETTINGS_UPDATE: 'release.settings.update',
+} as const;

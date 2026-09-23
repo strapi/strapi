@@ -135,7 +135,7 @@ interface HeaderComboboxProps extends Omit<ComboboxProps, 'children' | 'name'> {
 const HeaderCombobox = ({ name, label, ...restProps }: HeaderComboboxProps) => {
   const [options, setOptions] = React.useState<HTTPHeaders[]>([...HTTP_HEADERS]);
   const { value: headers } = useField<Header[]>('headers');
-  const field = useField(name);
+  const field = useField<string>(name);
 
   React.useEffect(() => {
     const headerOptions = HTTP_HEADERS.filter(

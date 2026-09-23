@@ -1,12 +1,7 @@
-import type { If, StrictEqual } from '../../utils';
-
-export type ClientKind = 'mysql' | 'postgres' | 'sqlite';
-
-type IfClientIs<TClient extends ClientKind, TClientKind extends ClientKind, TOnTrue, TOnFalse> = If<
-  StrictEqual<TClient, TClientKind>,
-  TOnTrue,
-  TOnFalse
->;
+// eslint-disable-next-line @typescript-eslint/no-namespace
+export namespace Database {
+  export type ClientKind = 'mysql' | 'postgres' | 'sqlite';
+}
 
 type SSLConfig = {
   rejectUnauthorized?: boolean;
@@ -30,7 +25,7 @@ type PoolConfig = {
   afterCreate?: (conn: unknown, done: (err?: Error, conn?: unknown) => void) => void;
 };
 
-type Connection<TClient extends ClientKind> = {
+type SharedConnection = {
   database: string;
   user: string;
   password: string;
@@ -39,25 +34,33 @@ type Connection<TClient extends ClientKind> = {
   ssl?: SSLConfig | boolean;
   connectionString?: string;
   timezone?: string;
-} & { [key: string]: unknown } & IfClientIs<TClient, 'postgres', { schema?: string }, unknown>;
+};
 
-type SqliteConnection = {
-  filename: string;
-} & { [key: string]: unknown };
+type Connection<TClient extends Database.ClientKind> = {
+  mysql: SharedConnection;
+  postgres: SharedConnection & { schema?: string };
+  sqlite: { filename: string };
+}[TClient] & { [key: string]: unknown };
 
-export interface Database<TClient extends ClientKind = ClientKind> {
-  connection: {
-    client: TClient;
-    connection: IfClientIs<TClient, 'sqlite', SqliteConnection, Connection<TClient>>;
-    debug?: boolean;
-    pool?: PoolConfig;
-    acquireConnectionTimeout?: number;
-  } & { [key: string]: unknown } & IfClientIs<
-      TClient,
-      'sqlite',
-      { useNullAsDefault?: boolean },
-      unknown
-    >;
+type SharedDatabaseConnection<TClient extends Database.ClientKind> = {
+  client: TClient;
+  connection:
+    | Connection<TClient>
+    | (() => Promise<Connection<TClient>>)
+    | (() => Connection<TClient>);
+  debug?: boolean;
+  pool?: PoolConfig;
+  acquireConnectionTimeout?: number;
+};
+
+type DatabaseConnection<TClient extends Database.ClientKind> = {
+  mysql: SharedDatabaseConnection<'mysql'>;
+  postgres: SharedDatabaseConnection<'postgres'>;
+  sqlite: SharedDatabaseConnection<'sqlite'> & { useNullAsDefault?: boolean };
+}[TClient] & { [key: string]: unknown };
+
+export interface Database<TClient extends Database.ClientKind = Database.ClientKind> {
+  connection: DatabaseConnection<TClient>;
   settings?: {
     forceMigration?: boolean;
     runMigrations?: boolean;

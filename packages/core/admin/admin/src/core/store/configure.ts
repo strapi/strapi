@@ -10,6 +10,7 @@ import {
 
 import { reducer as appReducer, AppState, logout } from '../../reducer';
 import { adminApi } from '../../services/api';
+import { triggerSessionExpired } from '../../utils/getFetchClient';
 import { getBasename } from '../utils/basename';
 
 /**
@@ -48,6 +49,11 @@ type PreloadState = Partial<{
   admin_app: AppState;
 }>;
 
+type DefaultMiddlewareOptions = {
+  serializableCheck?: boolean;
+  immutableCheck?: boolean;
+};
+
 /**
  * @description This is the main store configuration function, injected Reducers use our legacy app.addReducer API,
  * which we're trying to phase out. App Middlewares could potentially be improved...?
@@ -59,7 +65,7 @@ const configureStoreImpl = (
 ) => {
   const coreReducers = { ...staticReducers, ...injectedReducers } as const;
 
-  const defaultMiddlewareOptions = {} as any;
+  const defaultMiddlewareOptions: DefaultMiddlewareOptions = {};
 
   // These are already disabled in 'production' env but we also need to disable it in test environments
   // However, we want to leave them on for development so any issues can still be caught
@@ -86,12 +92,24 @@ const configureStoreImpl = (
   return store;
 };
 
+/**
+ * A 401 here means the fetch layer already tried to refresh the access token and
+ * the server refused: the session is over. Hand that to `AuthProvider`, which
+ * can warn about unsaved changes before clearing auth state. Reloading the page
+ * instead (as this used to) unmounts every form first, so the warning — and the
+ * user's edits — never make it to the screen. Falls back to the hard redirect
+ * when no provider is listening, so the user is never stranded on a dead page.
+ *
+ * `triggerSessionExpired` is idempotent per dead session (baseQuery often
+ * already called it for this 401). The `!` check is only the no-listener
+ * fallback; it must not run logout a second time.
+ */
 const rtkQueryUnauthorizedMiddleware: Middleware =
   ({ dispatch }: MiddlewareAPI) =>
   (next) =>
   (action) => {
     // isRejectedWithValue Or isRejected
-    if (isRejected(action) && action.payload?.status === 401) {
+    if (isRejected(action) && action.payload?.status === 401 && !triggerSessionExpired()) {
       dispatch(logout());
       const basename = getBasename();
       window.location.href = `${basename}/auth/login`;

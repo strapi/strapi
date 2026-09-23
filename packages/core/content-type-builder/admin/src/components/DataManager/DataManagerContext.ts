@@ -1,18 +1,21 @@
 /* eslint-disable check-file/filename-naming-convention */
 import { createContext } from 'react';
 
+import type { ContentStructure, FolderSelection, SectionKey } from './utils/contentStructure';
 import type { Component, ContentType } from '../../types';
+import type { ComponentWithChildren } from './utils/retrieveComponentsThatHaveComponents';
+import type { NestedComponent } from './utils/retrieveNestedComponents';
 import type { Internal, Struct } from '@strapi/types';
 
 export interface DataManagerContextValue {
   isLoading: boolean;
   addAttribute: (opts: {
-    attributeToSet: Record<string, any>;
+    attributeToSet: Record<string, unknown>;
     forTarget: Struct.ModelType;
     targetUid: Internal.UID.Schema;
   }) => void;
   editAttribute: (opts: {
-    attributeToSet: Record<string, any>;
+    attributeToSet: Record<string, unknown>;
     forTarget: Struct.ModelType;
     targetUid: Internal.UID.Schema;
     name: string;
@@ -24,12 +27,12 @@ export interface DataManagerContextValue {
     to: number;
   }) => void;
   addCustomFieldAttribute: (params: {
-    attributeToSet: Record<string, any>;
+    attributeToSet: Record<string, unknown>;
     forTarget: Struct.ModelType;
     targetUid: Internal.UID.Schema;
   }) => void;
   editCustomFieldAttribute: (params: {
-    attributeToSet: Record<string, any>;
+    attributeToSet: Record<string, unknown>;
     forTarget: Struct.ModelType;
     targetUid: Internal.UID.Schema;
     name: string;
@@ -42,7 +45,7 @@ export interface DataManagerContextValue {
   }) => void;
   createComponentSchema: (opts: {
     data: {
-      icon: string;
+      icon?: string;
       displayName: string;
     };
     componentCategory: string;
@@ -55,9 +58,10 @@ export interface DataManagerContextValue {
       pluralName: string;
       kind: Struct.ContentTypeKind;
       draftAndPublish: boolean;
-      pluginOptions: Record<string, any>;
+      pluginOptions: Record<string, unknown>;
     };
     uid: Internal.UID.Schema;
+    folder?: FolderSelection;
   }) => void;
   changeDynamicZoneComponents: (opts: {
     forTarget: Struct.ModelType;
@@ -72,6 +76,33 @@ export interface DataManagerContextValue {
   }) => void;
   deleteComponent(uid: Internal.UID.Component): void;
   deleteContentType(uid: Internal.UID.ContentType): void;
+  contentStructure: ContentStructure;
+  createFolder: (opts: { section: SectionKey; name: string; parentId: string | null }) => void;
+  renameFolder: (opts: { section: SectionKey; id: string; name: string }) => void;
+  moveFolder: (opts: {
+    section: SectionKey;
+    id: string;
+    newParentId: string | null;
+    index?: number;
+  }) => void;
+  deleteFolderOnly: (opts: { section: SectionKey; id: string }) => void;
+  deleteFolderAndContent: (opts: {
+    section: SectionKey;
+    id: string;
+    contentTypeUids: Internal.UID.ContentType[];
+  }) => void;
+  assignContentTypeToFolder: (opts: {
+    section: SectionKey;
+    uid: Internal.UID.ContentType;
+    targetGroupId: string | null;
+    index?: number;
+  }) => void;
+  reorderFolderChildren: (opts: {
+    section: SectionKey;
+    groupId: string;
+    from: number;
+    to: number;
+  }) => void;
   removeComponentFromDynamicZone: (opts: {
     forTarget: Struct.ModelType;
     targetUid: Internal.UID.Schema;
@@ -91,7 +122,7 @@ export interface DataManagerContextValue {
   }[];
   updateComponentSchema: (opts: {
     data: {
-      icon: string;
+      icon?: string;
       displayName: string;
     };
     componentUID: Internal.UID.Component;
@@ -105,23 +136,24 @@ export interface DataManagerContextValue {
       displayName: string;
       kind: Struct.ContentTypeKind;
       draftAndPublish: boolean;
-      pluginOptions: Record<string, any>;
+      pluginOptions: Record<string, unknown>;
     };
     uid: Internal.UID.ContentType;
+    folder?: FolderSelection;
   }) => void;
   initialComponents: Record<Internal.UID.Component, Component>;
   components: Record<Internal.UID.Component, Component>;
   componentsGroupedByCategory: Record<string, Component[]>;
-  componentsThatHaveOtherComponentInTheirAttributes: any[]; // Define the actual type
+  componentsThatHaveOtherComponentInTheirAttributes: ComponentWithChildren[];
   initialContentTypes: Record<Internal.UID.ContentType, ContentType>;
   contentTypes: Record<Internal.UID.ContentType, ContentType>;
   isInDevelopmentMode?: boolean;
-  nestedComponents: any[]; // Define the actual type
+  nestedComponents: NestedComponent[];
   reservedNames: {
     models: string[];
     attributes: string[];
   };
-  allComponentsCategories: any[];
+  allComponentsCategories: string[];
   saveSchema(): Promise<void>;
   isModified: boolean;
   isSaving: boolean;

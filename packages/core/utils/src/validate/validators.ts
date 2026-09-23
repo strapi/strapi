@@ -17,7 +17,7 @@ import { throwPassword, throwPrivate, throwDynamicZones, throwMorphToRelations }
 import { isOperator } from '../operators';
 import { asyncCurry, throwInvalidKey } from './utils';
 import type { Attribute, Model } from '../types';
-import parseType from '../parse-type';
+import { isBooleanLike } from '../parse-type';
 import type { Parent, Path } from '../traverse/factory';
 
 const { ID_ATTRIBUTE, DOC_ID_ATTRIBUTE } = constants;
@@ -496,21 +496,21 @@ export const validatePopulate = asyncCurry(
 
           // Ensure count is a boolean
           if (key === 'count') {
-            try {
-              parseType({ type: 'boolean', value });
+            if (isBooleanLike(value)) {
               return;
-            } catch {
-              throwInvalidKey({ key, path: path.attribute });
             }
+
+            throwInvalidKey({ key, path: path.attribute });
           }
 
-          // Allowed boolean-like keywords should be ignored
-          try {
-            parseType({ type: 'boolean', value: key });
-            // Key is an allowed boolean-like keyword, skipping validation...
+          // Allowed boolean-like keywords should be ignored.
+          //
+          // Asked as a predicate rather than by catching `parseType`'s error: this runs
+          // once per populate key, and almost no key is boolean-like, so the previous
+          // try/catch built and threw away an Error — including a stack capture — on
+          // essentially every key of every populate tree of every request.
+          if (isBooleanLike(key)) {
             return;
-          } catch {
-            // Continue, because it's not a boolean-like
           }
 
           // Handle nested `sort` validation with custom or default traversals

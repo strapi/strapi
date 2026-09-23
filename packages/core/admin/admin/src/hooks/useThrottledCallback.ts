@@ -21,7 +21,7 @@ type ThrottleSettings = Parameters<typeof throttle>[2];
  * <Button onClick={myThrottledCallback} />
  * ```
  */
-const useThrottledCallback = <T extends (...args: any[]) => any>(
+const useThrottledCallback = <T extends (...args: never[]) => unknown>(
   callback: T,
   wait: number,
   options: ThrottleSettings

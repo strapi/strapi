@@ -34,7 +34,13 @@ const getSessionManager = () => {
  */
 const sanitizeUser = (user: AdminUser): SanitizedAdminUser => {
   return {
-    ..._.omit(user, ['password', 'resetPasswordToken', 'registrationToken', 'roles']),
+    ..._.omit(user, [
+      'password',
+      'resetPasswordToken',
+      'resetPasswordTokenExpiresAt',
+      'registrationToken',
+      'roles',
+    ]),
     roles: user.roles && user.roles.map(sanitizeUserRoles),
   };
 };
@@ -197,7 +203,7 @@ const resetPasswordByEmail = async (email: string, password: string) => {
 
   try {
     await passwordValidator.validate(password);
-  } catch (error) {
+  } catch {
     throw new ValidationError(
       'Invalid password. Expected a minimum of 8 characters with at least one number and one uppercase letter'
     );

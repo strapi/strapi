@@ -268,7 +268,7 @@ export const StageSelect = ({ isCompact }: { isCompact?: boolean }) => {
           }
         }
       }
-    } catch (error) {
+    } catch {
       toggleNotification({
         type: 'danger',
         message: formatMessage({

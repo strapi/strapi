@@ -1,26 +1,32 @@
 /* eslint-disable check-file/filename-naming-convention */
 import { useState } from 'react';
 
-import { Layouts } from '@strapi/admin/strapi-admin';
 import { render, screen } from '@strapi/admin/strapi-admin/test';
 import { userEvent } from '@testing-library/user-event';
 
+import { CTBSessionProvider } from '../../CTBSession/ctbSession';
 import { useDataManager } from '../../DataManager/useDataManager';
+import { createEmptyContentStructure } from '../../DataManager/utils/contentStructure';
 import { ContentTypeBuilderNav } from '../ContentTypeBuilderNav';
 
-import { mockData } from './mockData';
+import { mockFlatSections, mockFolderSections } from './mockData';
+
+import type { DataManagerContextValue } from '../../DataManager/DataManagerContext';
+import type { UID } from '@strapi/types';
 
 const mockSearchOnChange = jest.fn(); // Spy function
 
-jest.mock('../useContentTypeBuilderMenu.ts', () => {
+jest.mock('../hooks/useContentTypeBuilderMenu', () => {
   return {
     useContentTypeBuilderMenu: jest.fn(() => {
       const [searchValue, setSearchValue] = useState('');
 
       return {
-        menu: mockData,
+        flatSections: mockFlatSections,
+        folderSections: mockFolderSections,
         search: {
           value: searchValue,
+          clear: () => setSearchValue(''),
           onChange: (v: string) => {
             setSearchValue(v);
             mockSearchOnChange(v);
@@ -34,56 +40,104 @@ jest.mock('../useContentTypeBuilderMenu.ts', () => {
 const mockUndo = jest.fn();
 const mockRedo = jest.fn();
 const mockDiscardAllChanges = jest.fn();
+const mockDeleteFolderOnly = jest.fn();
+
+type DataManagerMockOptions = Partial<Omit<DataManagerContextValue, 'history'>> & {
+  history?: Partial<DataManagerContextValue['history']>;
+};
+
+const mockDataManager = ({
+  history,
+  ...overrides
+}: DataManagerMockOptions = {}): DataManagerContextValue => ({
+  isLoading: false,
+  addAttribute() {},
+  editAttribute() {},
+  moveAttribute() {},
+  addCustomFieldAttribute() {},
+  editCustomFieldAttribute() {},
+  addCreatedComponentToDynamicZone() {},
+  createComponentSchema() {},
+  createSchema() {},
+  changeDynamicZoneComponents() {},
+  removeAttribute() {},
+  deleteComponent() {},
+  deleteContentType() {},
+  removeComponentFromDynamicZone() {},
+  sortedContentTypesList: [],
+  updateComponentSchema() {},
+  updateComponentUid() {},
+  updateSchema() {},
+  initialComponents: {},
+  components: {},
+  componentsGroupedByCategory: {},
+  componentsThatHaveOtherComponentInTheirAttributes: [],
+  initialContentTypes: {},
+  contentTypes: {},
+  isInDevelopmentMode: true,
+  nestedComponents: [],
+  reservedNames: {
+    models: [],
+    attributes: [],
+  },
+  allComponentsCategories: [],
+  async saveSchema() {},
+  isModified: false,
+  isSaving: false,
+  applyChange() {},
+  contentStructure: createEmptyContentStructure(),
+  createFolder() {},
+  renameFolder() {},
+  moveFolder() {},
+  deleteFolderOnly: mockDeleteFolderOnly,
+  deleteFolderAndContent() {},
+  assignContentTypeToFolder() {},
+  reorderFolderChildren() {},
+  ...overrides,
+  history: {
+    canUndo: true,
+    canRedo: true,
+    canDiscardAll: true,
+    undo: mockUndo,
+    redo: mockRedo,
+    discardAllChanges: mockDiscardAllChanges,
+    ...history,
+  },
+});
 
 jest.mock('../../DataManager/useDataManager.ts', () => {
   return {
-    useDataManager: jest.fn(() => ({
-      saveSchema() {},
-      isModified: false,
-      history: {
-        canUndo: true,
-        canRedo: true,
-        canDiscardAll: true,
-        undo: mockUndo,
-        redo: mockRedo,
-        discardAllChanges: mockDiscardAllChanges,
-      },
-      isInDevelopmentMode: true,
-    })),
+    useDataManager: jest.fn(() => mockDataManager()),
   };
 });
 
 const mockedUseDataManager = jest.mocked(useDataManager);
 
-const App = <ContentTypeBuilderNav />;
+const App = (
+  <CTBSessionProvider>
+    <ContentTypeBuilderNav />
+  </CTBSessionProvider>
+);
 
 describe('<ContentTypeBuilderNav />', () => {
   beforeEach(() => {
     mockUndo.mockClear();
     mockRedo.mockClear();
     mockDiscardAllChanges.mockClear();
-    mockedUseDataManager.mockImplementation(
-      () =>
-        ({
-          saveSchema() {},
-          isModified: true,
-          history: {
-            canUndo: true,
-            canRedo: true,
-            canDiscardAll: true,
-            undo: mockUndo,
-            redo: mockRedo,
-            discardAllChanges: mockDiscardAllChanges,
-          },
-          isInDevelopmentMode: true,
-        }) as any
-    );
+    mockDeleteFolderOnly.mockClear();
+    mockedUseDataManager.mockImplementation(() => mockDataManager({ isModified: true }));
 
     mockSearchOnChange.mockClear();
   });
 
   it('renders and matches the snapshot', () => {
     const { container } = render(App);
+
+    // Normalize hidden DnD instructions so formatting does not create snapshot-only whitespace.
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+    container.querySelectorAll('[id^="DndDescribedBy"]').forEach((node) => {
+      node.textContent = node.textContent?.trim() ?? '';
+    });
 
     expect(container).toMatchSnapshot();
   });
@@ -97,16 +151,13 @@ describe('<ContentTypeBuilderNav />', () => {
     });
 
     it('should be disabled when there are no changes', () => {
-      mockedUseDataManager.mockImplementationOnce(
-        () =>
-          ({
-            saveSchema() {},
-            isModified: false,
-            history: {
-              undo() {},
-            },
-            isInDevelopmentMode: true,
-          }) as any
+      mockedUseDataManager.mockImplementationOnce(() =>
+        mockDataManager({
+          isModified: false,
+          history: {
+            undo() {},
+          },
+        })
       );
 
       const { getByRole } = render(App);
@@ -118,16 +169,14 @@ describe('<ContentTypeBuilderNav />', () => {
     it.each([true, false])(
       'should be disabled when not in development mode & isModified=%s',
       (isModified) => {
-        mockedUseDataManager.mockImplementation(
-          () =>
-            ({
-              saveSchema() {},
-              isModified,
-              history: {
-                undo() {},
-              },
-              isInDevelopmentMode: false,
-            }) as any
+        mockedUseDataManager.mockImplementation(() =>
+          mockDataManager({
+            isModified,
+            history: {
+              undo() {},
+            },
+            isInDevelopmentMode: false,
+          })
         );
 
         const { getByRole } = render(App);
@@ -138,16 +187,13 @@ describe('<ContentTypeBuilderNav />', () => {
     );
 
     it('should be enabled when there are changes', () => {
-      mockedUseDataManager.mockImplementation(
-        () =>
-          ({
-            saveSchema() {},
-            isModified: true,
-            history: {
-              undo() {},
-            },
-            isInDevelopmentMode: true,
-          }) as any
+      mockedUseDataManager.mockImplementation(() =>
+        mockDataManager({
+          isModified: true,
+          history: {
+            undo() {},
+          },
+        })
       );
 
       const { getByRole } = render(App);
@@ -155,6 +201,60 @@ describe('<ContentTypeBuilderNav />', () => {
       const saveButton = getByRole('button', { name: /save/i });
       expect(saveButton).toBeEnabled();
     });
+  });
+
+  it('blocks folder-only deletion from navigation when reparenting would collide by case', async () => {
+    const user = userEvent.setup();
+    const contentStructure = createEmptyContentStructure();
+    contentStructure.sections.collectionTypes.groups = [
+      {
+        id: 'grp_root',
+        name: 'Root',
+        parent: null,
+        status: 'UNCHANGED',
+        children: [
+          { type: 'group', id: 'grp_delete' },
+          { type: 'group', id: 'grp_existing' },
+        ],
+      },
+      {
+        id: 'grp_delete',
+        name: 'Delete',
+        parent: 'grp_root',
+        status: 'UNCHANGED',
+        children: [{ type: 'group', id: 'grp_child' }],
+      },
+      {
+        id: 'grp_child',
+        name: 'Blog',
+        parent: 'grp_delete',
+        status: 'UNCHANGED',
+        children: [],
+      },
+      {
+        id: 'grp_existing',
+        name: 'blog',
+        parent: 'grp_root',
+        status: 'UNCHANGED',
+        children: [],
+      },
+    ];
+    mockedUseDataManager.mockImplementation(() =>
+      mockDataManager({ contentStructure, deleteFolderOnly: mockDeleteFolderOnly })
+    );
+
+    render(App);
+
+    await user.click(screen.getByRole('button', { name: 'Actions for Delete' }));
+    await user.click(await screen.findByRole('menuitem', { name: 'Delete folder' }));
+
+    expect(
+      screen.getByText(
+        'This folder cannot be deleted because these folder names already exist in its destination: Blog.'
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Yes, delete' })).toBeDisabled();
+    expect(mockDeleteFolderOnly).not.toHaveBeenCalled();
   });
 
   describe('unde redo discardAllChanges', () => {
@@ -193,16 +293,14 @@ describe('<ContentTypeBuilderNav />', () => {
     it('should render the undo item as disabled if not in development mode', async () => {
       const user = userEvent.setup();
 
-      mockedUseDataManager.mockImplementation(
-        () =>
-          ({
-            saveSchema() {},
-            history: {
-              canUndo: true,
-              undo: mockUndo,
-            },
-            isInDevelopmentMode: false,
-          }) as any
+      mockedUseDataManager.mockImplementation(() =>
+        mockDataManager({
+          history: {
+            canUndo: true,
+            undo: mockUndo,
+          },
+          isInDevelopmentMode: false,
+        })
       );
 
       render(App);
@@ -217,16 +315,14 @@ describe('<ContentTypeBuilderNav />', () => {
     it('should render the redo item as disabled if not in development mode', async () => {
       const user = userEvent.setup();
 
-      mockedUseDataManager.mockImplementation(
-        () =>
-          ({
-            saveSchema() {},
-            history: {
-              canRedo: true,
-              redo: mockRedo,
-            },
-            isInDevelopmentMode: false,
-          }) as any
+      mockedUseDataManager.mockImplementation(() =>
+        mockDataManager({
+          history: {
+            canRedo: true,
+            redo: mockRedo,
+          },
+          isInDevelopmentMode: false,
+        })
       );
 
       render(App);
@@ -241,16 +337,14 @@ describe('<ContentTypeBuilderNav />', () => {
     it('should render the discard item as disabled if not in development mode', async () => {
       const user = userEvent.setup();
 
-      mockedUseDataManager.mockImplementation(
-        () =>
-          ({
-            saveSchema() {},
-            history: {
-              canDiscardAll: true,
-              discardAllChanges: mockDiscardAllChanges,
-            },
-            isInDevelopmentMode: false,
-          }) as any
+      mockedUseDataManager.mockImplementation(() =>
+        mockDataManager({
+          history: {
+            canDiscardAll: true,
+            discardAllChanges: mockDiscardAllChanges,
+          },
+          isInDevelopmentMode: false,
+        })
       );
 
       render(App);
@@ -272,17 +366,15 @@ describe('<ContentTypeBuilderNav />', () => {
     ])('should enable the undo item when there are changes to undo', async (opts) => {
       const user = userEvent.setup();
 
-      mockedUseDataManager.mockImplementation(
-        () =>
-          ({
-            ...opts,
-            saveSchema() {},
-            history: {
-              canUndo: true,
-              undo: mockUndo,
-            },
-            isInDevelopmentMode: true,
-          }) as any
+      mockedUseDataManager.mockImplementation(() =>
+        mockDataManager({
+          ...opts,
+          history: {
+            canUndo: true,
+            undo: mockUndo,
+          },
+          isInDevelopmentMode: true,
+        })
       );
 
       render(App);
@@ -304,17 +396,15 @@ describe('<ContentTypeBuilderNav />', () => {
     ])('should enable the redo item when there are changes to redo', async (opts) => {
       const user = userEvent.setup();
 
-      mockedUseDataManager.mockImplementation(
-        () =>
-          ({
-            ...opts,
-            saveSchema() {},
-            history: {
-              canRedo: true,
-              redo: mockRedo,
-            },
-            isInDevelopmentMode: true,
-          }) as any
+      mockedUseDataManager.mockImplementation(() =>
+        mockDataManager({
+          ...opts,
+          history: {
+            canRedo: true,
+            redo: mockRedo,
+          },
+          isInDevelopmentMode: true,
+        })
       );
 
       render(App);
@@ -336,17 +426,15 @@ describe('<ContentTypeBuilderNav />', () => {
     ])('should enable the discard item when there are changes to discard', async (opts) => {
       const user = userEvent.setup();
 
-      mockedUseDataManager.mockImplementation(
-        () =>
-          ({
-            ...opts,
-            saveSchema() {},
-            history: {
-              canDiscardAll: true,
-              discardAllChanges: mockDiscardAllChanges,
-            },
-            isInDevelopmentMode: true,
-          }) as any
+      mockedUseDataManager.mockImplementation(() =>
+        mockDataManager({
+          ...opts,
+          history: {
+            canDiscardAll: true,
+            discardAllChanges: mockDiscardAllChanges,
+          },
+          isInDevelopmentMode: true,
+        })
       );
 
       render(App);
@@ -478,6 +566,87 @@ describe('<ContentTypeBuilderNav />', () => {
 
       expect(input).toHaveValue('');
       expect(mockSearchOnChange).toHaveBeenCalledTimes(5);
+    });
+  });
+
+  describe('folder navigation', () => {
+    // A collection-types structure where "category" is nested inside a "Blog"
+    // folder and "address" is left at the section root.
+    const withBlogFolder = (): DataManagerContextValue['contentStructure'] => {
+      const structure = createEmptyContentStructure();
+
+      structure.sections.collectionTypes.groups = [
+        {
+          id: 'grp_blog',
+          name: 'Blog',
+          parent: null,
+          status: 'UNCHANGED',
+          children: [{ type: 'contentType', uid: 'api::category.category' as UID.ContentType }],
+        },
+      ];
+
+      return structure;
+    };
+
+    it('renders each folder section with its content-type links', () => {
+      render(App);
+
+      expect(screen.getByRole('link', { name: 'address' })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'category' })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'Homepage' })).toBeInTheDocument();
+    });
+
+    it('nests a content type inside its folder', () => {
+      mockedUseDataManager.mockImplementation(() =>
+        mockDataManager({ isModified: true, contentStructure: withBlogFolder() })
+      );
+
+      render(App);
+
+      // The folder row exposes a toggle button labelled with the folder name.
+      expect(screen.getByRole('button', { name: 'Blog' })).toBeInTheDocument();
+      // Grouped and ungrouped content types both render.
+      expect(screen.getByRole('link', { name: 'category' })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'address' })).toBeInTheDocument();
+    });
+
+    it('collapses a folder, hiding its content types', async () => {
+      const user = userEvent.setup();
+
+      mockedUseDataManager.mockImplementation(() =>
+        mockDataManager({ isModified: true, contentStructure: withBlogFolder() })
+      );
+
+      render(App);
+
+      const folderToggle = screen.getByRole('button', { name: 'Blog' });
+      expect(folderToggle).toHaveAttribute('aria-expanded', 'true');
+      expect(screen.getByRole('link', { name: 'category' })).toBeInTheDocument();
+
+      await user.click(folderToggle);
+
+      expect(screen.getByRole('button', { name: 'Blog' })).toHaveAttribute(
+        'aria-expanded',
+        'false'
+      );
+      // The nested content type is gone; the ungrouped one stays.
+      expect(screen.queryByRole('link', { name: 'category' })).not.toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'address' })).toBeInTheDocument();
+    });
+
+    it('filters the folder tree by the search value', async () => {
+      const user = userEvent.setup();
+
+      render(App);
+
+      expect(screen.getByRole('link', { name: 'address' })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'category' })).toBeInTheDocument();
+
+      const input = screen.getByRole('searchbox', { name: /search/i });
+      await user.type(input, 'address');
+
+      expect(screen.getByRole('link', { name: 'address' })).toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: 'category' })).not.toBeInTheDocument();
     });
   });
 });

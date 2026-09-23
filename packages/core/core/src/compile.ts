@@ -23,7 +23,7 @@ export default async function compile(options?: Options) {
       await tsUtils().compile(appDir, {
         configOptions: { options: { incremental: true }, ignoreDiagnostics },
       });
-    } catch (err: unknown) {
+    } catch {
       // we exit here to maintain the same behavior as before.
       process.exit(1);
     }

@@ -22,13 +22,7 @@ import { getTranslation } from '../../../../../utils/translations';
 import { EditorToolbarObserver, type ObservedComponent } from '../../EditorToolbarObserver';
 
 import { insertLink } from './Blocks/Link';
-import {
-  type BlocksStore,
-  type SelectorBlock,
-  type SelectorBlockKey,
-  isSelectorBlockKey,
-  useBlocksEditorContext,
-} from './BlocksEditor';
+import { type BlocksStore, type SelectorBlock, useBlocksEditorContext } from './BlocksEditor';
 import { type Block, getEntries, getKeys } from './utils/types';
 
 const ToolbarWrapper = styled<FlexComponent>(Flex)`
@@ -208,19 +202,11 @@ const BlocksDropdown = () => {
       editor.children.length === 1 && Editor.isEmpty(editor, editor.children[0]);
 
     if (!editor.selection && !editorIsEmpty) {
-      // When there is no selection, create an empty block at the end of the editor
-      // so that it can be converted to the selected block
-      Transforms.insertNodes(
-        editor,
-        {
-          type: 'quote',
-          children: [{ type: 'text', text: '' }],
-        },
-        {
-          select: true,
-          // Since there's no selection, Slate will automatically insert the node at the end
-        }
-      );
+      // Toolbar buttons steal focus in Playwright (and sometimes in real browsers), clearing
+      // selection. Convert the last existing block — do not insert a new empty block, which
+      // would leave the user's content behind and convert a blank node instead.
+      const [, lastPath] = Editor.last(editor, []);
+      Transforms.select(editor, Editor.range(editor, lastPath));
     } else if (!editor.selection && editorIsEmpty) {
       // When there is no selection and the editor is empty,
       // select the empty paragraph from Slate's initialValue so it gets converted
@@ -753,6 +739,7 @@ const BlocksToolbar = () => {
   const { editor, blocks, modifiers, disabled } = useBlocksEditorContext('BlocksToolbar');
   const { formatMessage } = useIntl();
   const isMobile = useIsMobile();
+  const toolbarContainerRef = React.useRef<HTMLElement>(null);
 
   /**
    * The modifier buttons are disabled when an image is selected.
@@ -853,8 +840,11 @@ const BlocksToolbar = () => {
         )}
         <ToolbarSeparator />
         <Toolbar.ToggleGroup type="multiple" asChild>
-          <Flex direction="row" gap={1} grow={1} overflow="hidden">
-            <EditorToolbarObserver observedComponents={observedComponents} />
+          <Flex ref={toolbarContainerRef} direction="row" gap={1} grow={1} overflow="hidden">
+            <EditorToolbarObserver
+              observedComponents={observedComponents}
+              containerRef={toolbarContainerRef}
+            />
           </Flex>
         </Toolbar.ToggleGroup>
       </ToolbarWrapper>

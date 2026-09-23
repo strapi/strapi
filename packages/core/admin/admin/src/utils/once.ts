@@ -1,4 +1,4 @@
-export const once = <TFunc extends (...args: any) => any>(fn: TFunc) => {
+export const once = <TFunc extends (...args: never[]) => unknown>(fn: TFunc) => {
   const func = fn;
   let called = false;
 
@@ -6,7 +6,7 @@ export const once = <TFunc extends (...args: any) => any>(fn: TFunc) => {
     throw new TypeError(`once requires a function parameter`);
   }
 
-  return (...args: any) => {
+  return (...args: Parameters<TFunc>) => {
     if (!called && process.env.NODE_ENV === 'development') {
       func(...args);
       called = true;

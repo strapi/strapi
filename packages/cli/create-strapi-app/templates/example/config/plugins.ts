@@ -11,7 +11,8 @@ const allowedMediaTypes = [
   'text/csv',
 ];
 
-const deniedExecutableTypes = [
+const deniedTypes = [
+  'image/svg+xml',
   'application/vnd.microsoft.portable-executable',
   'application/x-msdownload',
   'application/x-msdos-program',
@@ -35,7 +36,7 @@ const config = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Plugin =>
     config: {
       security: {
         allowedTypes: allowedMediaTypes,
-        deniedTypes: deniedExecutableTypes,
+        deniedTypes,
       },
     },
   },

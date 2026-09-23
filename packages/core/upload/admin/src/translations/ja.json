@@ -2,7 +2,7 @@
   "ai.modal.error": "アップロードされたファイルのAIメタデータを生成できませんでした。",
   "ai.modal.title": "{count, plural, one {# 件のアセット} other {# 件のアセット}}をアップロードしました。AIが生成したメタデータを確認してください",
   "ai.modal.uploading.title": "アップロードしてAIで処理中...",
-  "apiError.FileTooBig": "アップロードされたファイルが許可されている最大アセットサイズを超えています。",
+  "apiError.FileTooBig": "ファイルが大きすぎるためアップロードできません。サーバーが許可する最大リクエストサイズを超えています。",
   "asset-details.alternativeText": "代替テキスト",
   "asset-details.assetId": "アセットID",
   "asset-details.caption": "キャプション",

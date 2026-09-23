@@ -1,4 +1,5 @@
 import { createTransformer, type Params } from '../convert-query-params';
+import { ValidationError } from '../errors';
 import { Model } from '../types';
 
 const models = {
@@ -113,8 +114,24 @@ describe('convert-query-params', () => {
       ['unsupported order value on a nested sort object', { title: 'ascending' }],
     ])('rejects with a ValidationError: %s', (key, input) => {
       expect(() => transformer.private_convertSortQueryParams(input as never)).toThrow(
+        ValidationError
+      );
+      expect(() => transformer.private_convertSortQueryParams(input as never)).toThrow(
         'Invalid order. order can only be one of asc|desc|ASC|DESC'
       );
+    });
+
+    test.each<[string, unknown, string]>([
+      [
+        'invalid nested sort value type',
+        { title: 123 },
+        'Invalid sort type expected object or string got number',
+      ],
+    ])('rejects with a ValidationError: %s', (key, input, message) => {
+      expect(() => transformer.private_convertSortQueryParams(input as never)).toThrow(
+        ValidationError
+      );
+      expect(() => transformer.private_convertSortQueryParams(input as never)).toThrow(message);
     });
 
     test.each<[string, unknown]>([
@@ -122,9 +139,36 @@ describe('convert-query-params', () => {
       ['null', null],
     ])('rejects with a ValidationError: %s', (key, input) => {
       expect(() => transformer.private_convertSortQueryParams(input as never)).toThrow(
+        ValidationError
+      );
+      expect(() => transformer.private_convertSortQueryParams(input as never)).toThrow(
         'Invalid sort parameter. Expected a string, an array of strings, a sort object or an array of sort objects'
       );
     });
+
+    test.each([
+      ['toString.call', Object.prototype.toString],
+      ['hasOwnProperty.call', Object.prototype.hasOwnProperty],
+    ])('rejects inherited built-in function sort path %s', (sortPath, target) => {
+      const originalCallDescriptor = Object.getOwnPropertyDescriptor(target, 'call');
+
+      try {
+        expect(() => transformer.private_convertSortQueryParams(sortPath)).toThrow(ValidationError);
+      } finally {
+        if (originalCallDescriptor) {
+          Object.defineProperty(target, 'call', originalCallDescriptor);
+        } else {
+          Reflect.deleteProperty(target, 'call');
+        }
+      }
+    });
+
+    test.each(['constructor', 'prototype', '__proto__'])(
+      'rejects inherited or dangerous terminal sort field %s',
+      (sortPath) => {
+        expect(() => transformer.private_convertSortQueryParams(sortPath)).toThrow(ValidationError);
+      }
+    );
   });
 
   describe('convertStartQueryParams', () => {
@@ -214,6 +258,21 @@ describe('convert-query-params', () => {
   });
 
   describe('convertPopulateQueryParams', () => {
+    test.each<[string, unknown]>([
+      ['a number', 1234],
+      ['null', null],
+      ['an array with a non-string entry', ['title', 1234]],
+    ])('rejects with a ValidationError: %s', (key, input) => {
+      expect(() =>
+        transformer.private_convertPopulateQueryParams(input as never, models['api::dog.dog'])
+      ).toThrow(ValidationError);
+      expect(() =>
+        transformer.private_convertPopulateQueryParams(input as never, models['api::dog.dog'])
+      ).toThrow(
+        'Invalid populate parameter. Expected a string, an array of strings, a populate object'
+      );
+    });
+
     describe('Fields selection', () => {
       test('should not select documentId when selecting fields for components', () => {
         const populate = {
@@ -573,6 +632,18 @@ describe('convert-query-params', () => {
           limit: 5,
         },
       });
+    });
+
+    it('rejects an inherited built-in function sort path in nested populate', () => {
+      expect(() =>
+        transformer.transformQueryParams('api::dog.dog', {
+          populate: {
+            one_to_one: {
+              sort: 'toString.call',
+            },
+          },
+        })
+      ).toThrow(ValidationError);
     });
 
     it('drops trailing comma segments in nested populate sort', () => {

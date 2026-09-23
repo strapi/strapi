@@ -142,7 +142,12 @@ class LocalStrapiSourceProvider implements ISourceProvider {
     assertValidStrapi(this.strapi, 'Not able to stream links');
     this.#reportInfo('creating links read stream');
 
-    return createLinksStream(this.strapi);
+    return createLinksStream(this.strapi, {
+      onWarning: (message) => {
+        this.strapi?.log.warn(message);
+        this.#reportWarning(message);
+      },
+    });
   }
 
   createConfigurationReadStream(): Readable {

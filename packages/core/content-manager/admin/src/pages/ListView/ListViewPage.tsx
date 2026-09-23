@@ -16,9 +16,9 @@ import {
   Layouts,
   useTable,
   useIsMobile,
-  useIsDesktop,
   useClipboard,
   tours,
+  withEncodedUserParams,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -74,6 +74,21 @@ const LayoutsHeaderCustom = styled(Layouts.Header)`
   overflow-wrap: anywhere;
 `;
 
+type ListViewQuery = {
+  filters?: {
+    $and?: Array<{
+      __status?: {
+        $eq?: unknown;
+      };
+    }>;
+  };
+  plugins?: Record<string, unknown>;
+  page?: string;
+  pageSize?: string;
+  sort?: string;
+  _q?: string;
+};
+
 const ListViewPage = () => {
   const { trackUsage } = useTracking();
   const navigate = useNavigate();
@@ -124,7 +139,10 @@ const ListViewPage = () => {
     null
   );
 
-  const mapDisplayedHeaders = (headers: ListFieldLayout[]) => headers.map((header) => header.name);
+  const mapDisplayedHeaders = React.useCallback(
+    (headers: ListFieldLayout[]) => headers.map((header) => header.name),
+    []
+  );
 
   const displayedHeaders: ListFieldLayout[] = React.useMemo(() => {
     if (
@@ -148,13 +166,16 @@ const ListViewPage = () => {
     );
   }, [displayedHeaderNames, schema, list, listViewConversionContext]);
 
-  const handleSetHeaders = (headers: string[]) => {
-    setDisplayedHeaderNames(headers);
-  };
+  const handleSetHeaders = React.useCallback(
+    (headers: string[]) => {
+      setDisplayedHeaderNames(headers);
+    },
+    [setDisplayedHeaderNames]
+  );
 
-  const handleResetHeaders = () => {
+  const handleResetHeaders = React.useCallback(() => {
     setDisplayedHeaderNames(mapDisplayedHeaders(list.layout));
-  };
+  }, [list.layout, mapDisplayedHeaders, setDisplayedHeaderNames]);
 
   /**
    * If the persistent displayedHeaders are not yet initialized, set them to list.layout
@@ -168,7 +189,7 @@ const ListViewPage = () => {
     if (!displayedHeaderNames) {
       handleResetHeaders();
     }
-  }, [list.layout]);
+  }, [displayedHeaderNames, handleResetHeaders, list.layout]);
 
   React.useEffect(() => {
     if (!schema?.attributes) return;
@@ -182,14 +203,9 @@ const ListViewPage = () => {
     if (allowedDisplayHeaders.length !== displayedHeaderNames.length) {
       handleSetHeaders(allowedDisplayHeaders);
     }
-  }, [displayedHeaderNames]);
+  }, [displayedHeaderNames, handleSetHeaders, model, schema?.attributes, schema?.uid]);
 
-  const [{ query }, setQuery] = useQueryParams<{
-    plugins?: Record<string, unknown>;
-    page?: string;
-    pageSize?: string;
-    sort?: string;
-  }>({
+  const [{ query }, setQuery] = useQueryParams<ListViewQuery>({
     page: '1',
     pageSize: list.settings.pageSize.toString(),
     sort: list.settings.defaultSortBy
@@ -198,9 +214,11 @@ const ListViewPage = () => {
   });
 
   const params = React.useMemo(() => buildValidParams(query), [query]);
-  const hasAppliedFilters = Boolean((query as any)?.filters?.$and?.length);
+  const hasAppliedFilters = (query.filters?.$and?.length ?? 0) > 0;
   const hasStatusFilter = Boolean(
-    (query as any)?.filters?.$and?.some((f: any) => f?.__status?.$eq != null)
+    query.filters?.$and?.some(
+      (filter) => filter.__status?.$eq !== undefined && filter.__status.$eq !== null
+    )
   );
 
   // If a __status filter becomes active while sort=status:* is in the URL, strip the status sort.
@@ -215,9 +233,9 @@ const ListViewPage = () => {
         .map((s) => s.trim())
         .filter((s) => !/^status:(ASC|DESC)$/i.test(s))
         .join(',');
-      setQuery({ sort: cleaned || undefined }, 'push', true);
+      setQuery(withEncodedUserParams(query, { sort: cleaned || undefined }), 'push', true);
     }
-  }, [hasStatusFilter, query.sort, setQuery]);
+  }, [hasStatusFilter, query, setQuery]);
 
   const { data, error, isLoading, isFetching } = useGetAllDocumentsQuery(
     {
@@ -605,6 +623,7 @@ const ListViewPage = () => {
               </Table.Root>
               <Pagination.Root
                 {...pagination}
+                defaultPageSize={list.settings.pageSize}
                 onPageSizeChange={() => trackUsage('willChangeNumberOfEntriesPerPage')}
               >
                 <Pagination.PageSize />

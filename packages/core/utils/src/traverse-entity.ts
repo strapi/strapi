@@ -186,7 +186,16 @@ const traverseEntity = async (
       allowedExtraRootKeys,
     };
 
-    await visitor(visitorOptions, visitorUtils);
+    // Awaited only when the visitor actually returns something thenable. Most visitors
+    // finish synchronously for most keys — a scalar is not a relation, so the relation
+    // visitor returns immediately — and `await` on a non-thenable still allocates a
+    // promise and defers the rest of the loop to a microtask. Over every key of every
+    // node of every entity in a page that was the largest single source of promise churn.
+    const visited = visitor(visitorOptions, visitorUtils) as unknown;
+
+    if (visited != null && typeof (visited as PromiseLike<void>).then === 'function') {
+      await visited;
+    }
 
     // Extract the value for the current key (after calling the visitor)
     const value = copy[key];

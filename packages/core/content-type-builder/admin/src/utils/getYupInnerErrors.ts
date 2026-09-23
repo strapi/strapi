@@ -7,16 +7,23 @@ interface TranslationMessage extends MessageDescriptor {
 
 const extractValuesFromYupError = (
   errorType?: string | undefined,
-  errorParams?: Record<string, any> | undefined
+  errorParams?: Record<string, unknown> | undefined
 ) => {
-  if (!errorType || !errorParams) {
+  if (errorType === undefined || errorParams === undefined) {
     return {};
   }
 
-  return {
-    [errorType]: errorParams[errorType],
-  };
+  const value = errorParams[errorType];
+
+  return isPrimitiveType(value) ? { [errorType]: value } : {};
 };
+
+const isPrimitiveType = (value: unknown): value is PrimitiveType =>
+  value === null ||
+  value === undefined ||
+  typeof value === 'string' ||
+  typeof value === 'number' ||
+  typeof value === 'boolean';
 
 const getYupInnerErrors = (error: ValidationError) =>
   (error?.inner || []).reduce<Record<string, TranslationMessage>>((acc, currentError) => {

@@ -48,6 +48,12 @@ import { ConfirmDialogPublishAll, ConfirmDialogPublishAllProps } from './Confirm
 import type { BulkActionComponent } from '../../../../content-manager';
 import type { Document } from '../../../../hooks/useDocument';
 
+type ContentManagerQueryPlugins = {
+  i18n?: {
+    locale?: string;
+  };
+} & Record<string, Record<string, unknown> | undefined>;
+
 const TypographyMaxWidth = styled<TypographyComponent>(Typography)`
   max-width: 300px;
 `;
@@ -87,13 +93,20 @@ export const formatErrorMessages = (
       const defaultMessage = isErrorMessageDescriptor
         ? (value.defaultMessage as string)
         : (value as string);
+      /**
+       * The descriptor carries its own values (e.g. `{ min: 8 }`). They have to be forwarded,
+       * otherwise a locale without the `.withField` variant falls back to a `defaultMessage`
+       * that still contains `{min}` and react-intl renders the raw placeholder.
+       * See strapi/strapi#19030.
+       */
+      const values = isErrorMessageDescriptor ? value.values : undefined;
       messages.push(
         formatMessage(
           {
             id: `${id}.withField`,
             defaultMessage,
           },
-          { field: currentKey }
+          { ...values, field: currentKey }
         )
       );
     } else {
@@ -411,7 +424,7 @@ const SelectedEntriesModalContent = ({
   const documentIds = listViewSelectedEntries.map(({ documentId }) => documentId);
 
   // We want to keep the selected entries order same as the list view
-  const [{ query }] = useQueryParams<{ sort?: string; plugins?: Record<string, any> }>();
+  const [{ query }] = useQueryParams<{ sort?: string; plugins?: ContentManagerQueryPlugins }>();
   const params = React.useMemo(() => buildValidParams(query), [query]);
 
   // Fetch via findOne (same as edit view) so we get the exact same data structure.
@@ -473,7 +486,7 @@ const SelectedEntriesModalContent = ({
   const { publishMany: bulkPublishAction, isLoading: isPublishing } = useDocumentActions();
   const [, { isLoading: isSubmittingForm }] = usePublishManyDocumentsMutation();
 
-  const selectedRows = useTable('publishAction', (state) => state.selectedRows);
+  const selectedRows = useTable('publishAction', (state) => state.selectedRows) as Document[];
 
   // Filter selected entries from the updated modal table rows
   const selectedEntries = rows.filter((entry) =>

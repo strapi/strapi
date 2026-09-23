@@ -225,7 +225,13 @@ const isLastSuperAdminUser = async (userId: unknown) => {
  */
 const sanitizeUser = (user: any) => {
   return {
-    ..._.omit(user, ['password', 'resetPasswordToken', 'registrationToken', 'roles']),
+    ..._.omit(user, [
+      'password',
+      'resetPasswordToken',
+      'resetPasswordTokenExpiresAt',
+      'registrationToken',
+      'roles',
+    ]),
     roles: user.roles && user.roles.map(sanitizeUserRoles),
   };
 };

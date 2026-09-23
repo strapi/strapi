@@ -296,7 +296,13 @@ export default {
       },
     } = await this.extractAndValidateRequestInfo(ctx, id);
 
-    const { idsToOmit, idsToInclude, _q, ...query } = ctx.request.query;
+    const {
+      idsToOmit,
+      idsToInclude,
+      // `_q` is the public query parameter name; keep the alias grep-able.
+      _q: search,
+      ...query
+    } = ctx.request.query;
 
     const permissionChecker = getService('permission-checker').create({
       userAbility: ctx.state.userAbility,
@@ -346,6 +352,11 @@ export default {
        */
       if (sourceModelType === 'contentType') {
         where.document_id = id;
+
+        const sourcePublishedAt = getPublishedAtClause(status, sourceUid);
+        if (!isEmpty(sourcePublishedAt)) {
+          where.published_at = sourcePublishedAt;
+        }
       } else {
         where.id = id;
       }
@@ -389,9 +400,9 @@ export default {
      * Apply a filter to the mainField based on the search query and filter operator
      * searching should be allowed only on mainField for permission reasons
      */
-    if (_q) {
-      const _filter = isOperatorOfType('where', query._filter) ? query._filter : '$containsi';
-      addFiltersClause(queryParams, { [mainField]: { [_filter]: _q } });
+    if (search) {
+      const filter = isOperatorOfType('where', query._filter) ? query._filter : '$containsi';
+      addFiltersClause(queryParams, { [mainField]: { [filter]: search } });
     }
 
     if (idsToOmit?.length > 0) {

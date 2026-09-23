@@ -49,9 +49,9 @@ export interface Folder {
   name: string;
   pathId: number;
   /**
-   * parent id
+   * parent id, or null when the folder sits at the media library root
    */
-  parent?: number;
+  parent?: number | null;
   /**
    * children ids
    */
@@ -69,7 +69,10 @@ export interface Config {
     cache?: boolean;
     concurrency?: number;
   };
+  /** Server-side ceiling: files processed in parallel within a single request. */
   concurrentUploadSize?: number;
+  /** Client-side parallelism: how many upload requests the admin fires at once. */
+  concurrentUploadRequests?: number;
   security?: {
     allowedTypes?: string[];
     deniedTypes?: string[];

@@ -22,7 +22,7 @@ const applyHeadersToRequest = (rq, headers) => {
     }
   }
 
-  const { Authorization, authorization, ...rest } = headers;
+  const { Authorization: _Authorization, authorization: _authorization, ...rest } = headers;
   if (Object.keys(rest).length > 0) {
     rq.set(rest);
   }

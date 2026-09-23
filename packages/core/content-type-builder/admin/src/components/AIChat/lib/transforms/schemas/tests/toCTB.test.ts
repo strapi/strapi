@@ -1,7 +1,8 @@
-import { transformChatToCTB } from '../toCTB';
+import { transformAttributesFromChatToCTB, transformChatToCTB } from '../toCTB';
 
-import type { ContentType } from '../../../../../../types';
+import type { ContentType, Component } from '../../../../../../types';
 import type { Schema } from '../../../types/schema';
+import type { UID } from '@strapi/types';
 
 const makeSchema = (overrides: Partial<Schema> = {}): Schema => ({
   action: 'create',
@@ -46,10 +47,82 @@ describe('transformChatToCTB', () => {
     });
   });
 
+  describe('private search default', () => {
+    it.each([
+      {
+        action: 'create' as const,
+        oldSchema: undefined,
+        status: 'NEW' as const,
+      },
+      {
+        action: 'update' as const,
+        oldSchema: {
+          ...(transformChatToCTB(makeSchema()) as ContentType),
+          status: 'UNCHANGED',
+          attributes: [{ name: 'secret', type: 'text', status: 'UNCHANGED' }],
+        } satisfies ContentType,
+        status: 'CHANGED' as const,
+      },
+    ])(
+      'defaults private searchable scalar attributes during AI $action transforms',
+      ({ action, oldSchema, status }) => {
+        const attributes = transformAttributesFromChatToCTB(
+          makeSchema({
+            action,
+            attributes: { secret: { type: 'text', private: true } },
+          }),
+          oldSchema
+        );
+
+        expect(attributes).toEqual([
+          {
+            name: 'secret',
+            type: 'text',
+            private: true,
+            searchable: false,
+            status,
+          },
+        ]);
+      }
+    );
+
+    it.each([true, false])('preserves explicit searchable: %s from AI', (searchable) => {
+      const attributes = transformAttributesFromChatToCTB(
+        makeSchema({
+          attributes: { secret: { type: 'text', private: true, searchable } },
+        })
+      );
+
+      expect(attributes[0]).toMatchObject({ private: true, searchable });
+    });
+
+    it.each([
+      ['json', { type: 'json' }],
+      [
+        'relation',
+        {
+          type: 'relation',
+          relation: 'oneWay',
+          target: 'api::category.category',
+        },
+      ],
+    ] as const)('does not add searchable to private AI-created %s attributes', (_type, data) => {
+      const attributes = transformAttributesFromChatToCTB(
+        makeSchema({
+          attributes: {
+            secret: { ...data, private: true } as Schema['attributes'][string],
+          },
+        })
+      );
+
+      expect(attributes[0]).not.toHaveProperty('searchable');
+    });
+  });
+
   describe('plugin content-types', () => {
     it('preserves identity fields when updating an existing plugin content-type', () => {
       const oldSchema: ContentType = {
-        uid: 'plugin::my-plugin.my-thing' as any,
+        uid: 'plugin::my-plugin.my-thing' as UID.ContentType,
         modelType: 'contentType',
         kind: 'collectionType',
         plugin: 'my-plugin',
@@ -86,6 +159,46 @@ describe('transformChatToCTB', () => {
       expect(result.info.pluralName).toBe('my-things');
       expect(result.options).toMatchObject({ draftAndPublish: false });
       expect(result.pluginOptions?.i18n).toMatchObject({ localized: true });
+    });
+  });
+
+  describe('kind fallback', () => {
+    it('keeps a valid content-type kind', () => {
+      const result = transformChatToCTB(makeSchema({ kind: 'singleType' })) as ContentType;
+
+      expect(result.kind).toBe('singleType');
+    });
+
+    it('falls back to collectionType when the kind is not a content-type kind', () => {
+      // AI can emit `kind: 'component'` (or omit it) on a contentType payload; the guard coerces
+      // any non-content-type kind to 'collectionType' rather than passing it through.
+      const componentKind = transformChatToCTB(makeSchema({ kind: 'component' })) as ContentType;
+      expect(componentKind.kind).toBe('collectionType');
+
+      const missingKind = transformChatToCTB(makeSchema({ kind: undefined })) as ContentType;
+      expect(missingKind.kind).toBe('collectionType');
+    });
+  });
+
+  describe('singularName / pluralName preservation', () => {
+    it('does not carry identity from an old *component* schema into a content-type', () => {
+      // previousContentType is only set when oldSchema.modelType === 'contentType', so a component
+      // oldSchema must NOT leak its names — the content-type falls back to names computed from the
+      // schema name ("Product" -> product / products).
+      const oldComponent = {
+        modelType: 'component',
+        uid: 'default.thing',
+        info: { singularName: 'leaked-singular', pluralName: 'leaked-plural' },
+        attributes: [],
+      } as unknown as Component;
+
+      const result = transformChatToCTB(
+        makeSchema({ name: 'Product', action: 'update' }),
+        oldComponent
+      ) as ContentType;
+
+      expect(result.info.singularName).toBe('product');
+      expect(result.info.pluralName).toBe('products');
     });
   });
 });

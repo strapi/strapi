@@ -242,7 +242,7 @@ export const extendExpectForDataTransferTests = () => {
           pass: true,
           message: () => 'Expected source provider not to have all stages called',
         };
-      } catch (e) {
+      } catch {
         return {
           pass: false,
           message: () =>
@@ -258,7 +258,7 @@ export const extendExpectForDataTransferTests = () => {
             // expect(provider[stage]).toHaveBeenCalledOnce();
             expect(provider[stage].mock.results.length).toEqual(times);
             return false;
-          } catch (e) {
+          } catch {
             return true;
           }
         }
@@ -290,7 +290,7 @@ export const extendExpectForDataTransferTests = () => {
           pass: true,
           message: () => 'Expected destination provider not to have all stages called',
         };
-      } catch (e) {
+      } catch {
         return {
           pass: false,
           message: () =>
@@ -306,7 +306,7 @@ export const extendExpectForDataTransferTests = () => {
             // expect(provider[stage]).toHaveBeenCalledOnce();
             expect(provider[stage].mock.results.length).toEqual(times);
             return false;
-          } catch (e) {
+          } catch {
             return true;
           }
         }

@@ -7,6 +7,7 @@ import * as types from '../../utils/types';
 import { createField } from '../../fields';
 import { createJoin } from './join';
 import { toColumnName } from './transform';
+import { escapeQuery } from './search';
 import { isKnexQuery } from '../../utils/knex';
 
 import type { Ctx } from '../types';
@@ -275,7 +276,7 @@ const applyOperator = (
         qb.whereNull(column);
         break;
       }
-      qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)`, [column, `${value}`]);
+      qb.whereRaw(`${fieldLowerFn(qb)} = LOWER(?)`, [column, `${value}`]);
       break;
     }
     case '$ne': {
@@ -292,7 +293,7 @@ const applyOperator = (
         qb.whereNotNull(column);
         break;
       }
-      qb.whereRaw(`${fieldLowerFn(qb)} NOT LIKE LOWER(?)`, [column, `${value}`]);
+      qb.whereRaw(`${fieldLowerFn(qb)} <> LOWER(?)`, [column, `${value}`]);
       break;
     }
     case '$gt': {
@@ -332,38 +333,50 @@ const applyOperator = (
       break;
     }
     case '$startsWith': {
-      qb.where(column, 'like', `${value}%`);
+      qb.whereRaw(`?? LIKE ?${likeEscapeClause(qb)}`, [column, `${escapeLike(value)}%`]);
       break;
     }
     case '$startsWithi': {
-      qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)`, [column, `${value}%`]);
+      qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)${likeEscapeClause(qb)}`, [
+        column,
+        `${escapeLike(value)}%`,
+      ]);
       break;
     }
     case '$endsWith': {
-      qb.where(column, 'like', `%${value}`);
+      qb.whereRaw(`?? LIKE ?${likeEscapeClause(qb)}`, [column, `%${escapeLike(value)}`]);
       break;
     }
     case '$endsWithi': {
-      qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)`, [column, `%${value}`]);
+      qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)${likeEscapeClause(qb)}`, [
+        column,
+        `%${escapeLike(value)}`,
+      ]);
       break;
     }
     case '$contains': {
-      qb.where(column, 'like', `%${value}%`);
+      qb.whereRaw(`?? LIKE ?${likeEscapeClause(qb)}`, [column, `%${escapeLike(value)}%`]);
       break;
     }
 
     case '$notContains': {
-      qb.whereNot(column, 'like', `%${value}%`);
+      qb.whereRaw(`?? NOT LIKE ?${likeEscapeClause(qb)}`, [column, `%${escapeLike(value)}%`]);
       break;
     }
 
     case '$containsi': {
-      qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)`, [column, `%${value}%`]);
+      qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)${likeEscapeClause(qb)}`, [
+        column,
+        `%${escapeLike(value)}%`,
+      ]);
       break;
     }
 
     case '$notContainsi': {
-      qb.whereRaw(`${fieldLowerFn(qb)} NOT LIKE LOWER(?)`, [column, `%${value}%`]);
+      qb.whereRaw(`${fieldLowerFn(qb)} NOT LIKE LOWER(?)${likeEscapeClause(qb)}`, [
+        column,
+        `%${escapeLike(value)}%`,
+      ]);
       break;
     }
 
@@ -463,4 +476,59 @@ const fieldLowerFn = (qb: Knex.QueryBuilder) => {
   return 'LOWER(??)';
 };
 
-export { applyWhere, processWhere };
+// SQL LIKE wildcards (and the backslash escape character itself) that must be
+// escaped so a user-supplied value is matched literally instead of as a pattern.
+const LIKE_SPECIAL_CHARS = '%_\\';
+
+const escapeLike = (value: unknown) => escapeQuery(`${value}`, LIKE_SPECIAL_CHARS);
+
+// SQLite has no default LIKE escape character and requires an explicit clause.
+// PostgreSQL and MySQL both default to backslash, matching helpers/search.ts.
+const likeEscapeClause = (qb: Knex.QueryBuilder) =>
+  qb.client.dialect === 'sqlite3' ? " ESCAPE '\\'" : '';
+
+/**
+ * Prefix unaliased root column keys with `alias` (e.g. `published_at` → `t0.published_at`).
+ * Used for update/delete subqueries that join other tables sharing column names.
+ * Group operators are walked; already-qualified keys (`t1.title`) and operator keys are left as-is.
+ */
+function qualifyRootColumns(where: Record<string, unknown>, alias: string): Record<string, unknown>;
+function qualifyRootColumns(
+  where: Record<string, unknown>[],
+  alias: string
+): Record<string, unknown>[];
+function qualifyRootColumns(
+  where: Record<string, unknown> | Record<string, unknown>[],
+  alias: string
+): Record<string, unknown> | Record<string, unknown>[] {
+  if (isArray(where)) {
+    return where.map((sub) => qualifyRootColumns(sub, alias));
+  }
+
+  const result: Record<string, unknown> = {};
+
+  for (const key of Object.keys(where)) {
+    const value = where[key];
+
+    if (isOperatorOfType('group', key)) {
+      if (Array.isArray(value)) {
+        result[key] = value.map((sub) => (isRecord(sub) ? qualifyRootColumns(sub, alias) : sub));
+      } else {
+        result[key] = value;
+      }
+      continue;
+    }
+
+    if (key === '$not' && isRecord(value)) {
+      result[key] = qualifyRootColumns(value, alias);
+      continue;
+    }
+
+    const qualifiedKey = key.includes('.') || isOperator(key) ? key : `${alias}.${key}`;
+    result[qualifiedKey] = value;
+  }
+
+  return result;
+}
+
+export { applyWhere, processWhere, qualifyRootColumns };

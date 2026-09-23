@@ -16,32 +16,40 @@ const rolesDeleteSchema = yup
       .of(yup.strapiID())
       .min(1)
       .required()
-      .test('roles-deletion-checks', 'Roles deletion checks have failed', async function (ids) {
-        try {
-          await strapi.service('admin::role').checkRolesIdForDeletion(ids);
-        } catch (e) {
-          // @ts-expect-error yup types
-          return this.createError({ path: 'ids', message: e.message });
-        }
+      .test(
+        'roles-deletion-checks',
+        'Roles deletion checks have failed',
+        async function checkRolesDeletion(ids) {
+          try {
+            await strapi.service('admin::role').checkRolesIdForDeletion(ids);
+          } catch (e) {
+            // @ts-expect-error yup types
+            return this.createError({ path: 'ids', message: e.message });
+          }
 
-        return true;
-      }),
+          return true;
+        }
+      ),
   })
   .noUnknown();
 
 const roleDeleteSchema = yup
   .strapiID()
   .required()
-  .test('no-admin-single-delete', 'Role deletion checks have failed', async function (id) {
-    try {
-      await strapi.service('admin::role').checkRolesIdForDeletion([id]);
-    } catch (e) {
-      // @ts-expect-error yup types
-      return this.createError({ path: 'id', message: e.message });
-    }
+  .test(
+    'no-admin-single-delete',
+    'Role deletion checks have failed',
+    async function checkRoleDeletion(id) {
+      try {
+        await strapi.service('admin::role').checkRolesIdForDeletion([id]);
+      } catch (e) {
+        // @ts-expect-error yup types
+        return this.createError({ path: 'id', message: e.message });
+      }
 
-    return true;
-  });
+      return true;
+    }
+  );
 
 const roleUpdateSchema = yup
   .object()

@@ -217,14 +217,14 @@ const uploadLogoFromTransferBuffer = async (strapi: Core.Strapi, logo: ProjectSe
     return logo;
   }
 
-  const { __transferBuffer, ...logoWithoutBuffer } = logo;
+  const { __transferBuffer: transferBuffer, ...logoWithoutBuffer } = logo;
   const provider = getConfiguredUploadProvider(strapi);
   const mime = getLogoMimeType(logoWithoutBuffer);
 
   const file = {
     ...logoWithoutBuffer,
     ...(mime ? { mime } : {}),
-    stream: Readable.from(Buffer.from(__transferBuffer, 'base64')),
+    stream: Readable.from(Buffer.from(transferBuffer, 'base64')),
     provider,
   };
 

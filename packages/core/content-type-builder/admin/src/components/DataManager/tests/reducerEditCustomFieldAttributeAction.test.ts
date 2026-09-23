@@ -29,7 +29,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_CUSTOM_FIELD_A
       },
       name: 'color_picker_hex',
       customField: 'plugin::mycustomfields.color',
-    };
+    } as const;
 
     const action = actions.editCustomFieldAttribute({
       attributeToSet: updatedCustomFieldAttribute,

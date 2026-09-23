@@ -21,8 +21,8 @@ export default class MysqlDialect extends Dialect {
     this.databaseInspector = new MysqlDatabaseInspector(db);
   }
 
-  configure() {
-    const connection = this.db.config.connection.connection as Knex.MySqlConnectionConfig;
+  configure(conn?: Knex.MySqlConnectionConfig) {
+    const connection = conn || (this.db.config.connection.connection as Knex.MySqlConnectionConfig);
 
     connection.supportBigNumbers = true;
     // Only allow bigNumberStrings option set to be true if no connection option passed
@@ -57,7 +57,7 @@ export default class MysqlDialect extends Dialect {
       await this.db.connection
         .raw(`set session sql_require_primary_key = 0;`)
         .connection(nativeConnection);
-    } catch (err) {
+    } catch {
       // Ignore error due to lack of session permissions
     }
 
@@ -76,7 +76,7 @@ export default class MysqlDialect extends Dialect {
     try {
       await this.db.connection.raw(`set foreign_key_checks = 0;`);
       await this.db.connection.raw(`set session sql_require_primary_key = 0;`);
-    } catch (err) {
+    } catch {
       // Ignore error due to lack of session permissions
     }
   }

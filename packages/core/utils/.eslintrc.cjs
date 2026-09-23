@@ -15,6 +15,8 @@ const config = {
     'coverage/',
     'rollup.config.mjs',
     'lint-staged.config.mjs',
+    // Plain-JS tooling run by hand, outside the TS project.
+    'scripts/',
   ],
 };
 

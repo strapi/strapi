@@ -22,7 +22,7 @@ import type {
   MapEntriesToReleases,
 } from '../../../shared/contracts/releases';
 import type { GetSettings, UpdateSettings } from '../../../shared/contracts/settings';
-import type { EndpointDefinition } from '@reduxjs/toolkit/query';
+import type { EndpointDefinitions } from '@reduxjs/toolkit/query';
 
 export interface GetReleasesQueryParams {
   page?: number;
@@ -47,7 +47,7 @@ type GetReleasesTabResponse = GetReleases.Response & {
   };
 };
 
-type AnyEndpointDefinition = EndpointDefinition<any, any, any, any>;
+type AnyEndpointDefinition = EndpointDefinitions[string];
 
 // TODO: move this into the admin code & expose an improved version of enhanceEndpoints or a new function
 const extendInvalidatesTags = (

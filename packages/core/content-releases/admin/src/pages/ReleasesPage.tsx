@@ -233,7 +233,6 @@ const ReleasesPage = () => {
 
   const handleTabChange = (tabValue: string) => {
     setQuery({
-      ...query,
       page: 1,
       pageSize: response?.currentData?.meta?.pagination?.pageSize || 16,
       filters: {

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { type ChangeEventHandler, useEffect, useRef, useState } from 'react';
 
 import {
   Box,
@@ -19,11 +19,11 @@ import { getTrad } from '../../utils';
 
 import { COMPONENT_ICONS } from './constants';
 
-import type { IntlLabel } from '../../types';
+import type { FormChangeHandler, IntlLabel } from '../../types';
 
 const IconPickerWrapper = styled(Flex)`
   label {
-    ${inputFocusStyle() as any}
+    ${inputFocusStyle()}
     border-radius: ${({ theme }) => theme.borderRadius};
     border: 1px solid ${({ theme }) => theme.colors.neutral100};
   }
@@ -34,7 +34,7 @@ type Icons = keyof typeof COMPONENT_ICONS;
 interface IconPickProps {
   iconKey: Icons;
   name: string;
-  onChange: (value: any) => void;
+  onChange: ChangeEventHandler<HTMLInputElement>;
   isSelected: boolean;
   ariaLabel: string;
 }
@@ -73,7 +73,7 @@ const IconPick = ({ iconKey, name, onChange, isSelected, ariaLabel }: IconPickPr
 export interface IconPickerProps {
   intlLabel: IntlLabel;
   name: string;
-  onChange: (value: { target: { name: string; value: string } }) => void;
+  onChange: FormChangeHandler<string>;
   value?: string;
 }
 

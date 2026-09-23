@@ -115,7 +115,7 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
 
   const layout = useForm<ConfigurationFormData['layout']>(
     'Fields',
-    (state) => state.values.layout ?? []
+    (state) => (state.values as ConfigurationFormData).layout ?? []
   );
 
   const onChange = useForm('Fields', (state) => state.onChange);
@@ -334,7 +334,8 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
             activeIndex !== -1 &&
             overIndex !== -1;
           const canCreateNewRowForItem =
-            activeContainerIndex !== overContainerIndex && GRID_COLUMNS - spaceTaken === 0;
+            activeContainerIndex !== overContainerIndex &&
+            GRID_COLUMNS - spaceTaken < draggedItem.size;
           const isHoveringOverSpacer = overItem?.name === TEMP_FIELD_NAME;
 
           /**
@@ -396,7 +397,14 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
               }
 
               const newContainerPrototype = draft[overContainerIndex];
-              const newContainerId = `container-${draft.length}`;
+
+              // Using draft.length directly can collide with an existing container id
+              // (e.g. after rows were removed), causing React key conflicts and flicker.
+              const findFreeContainerId = (i: number): string =>
+                containersAsDictionary[`container-${i}`]
+                  ? findFreeContainerId(i + 1)
+                  : `container-${i}`;
+              const newContainerId = findFreeContainerId(draft.length);
 
               draft.splice(insertIndex, 0, {
                 ...newContainerPrototype,
@@ -419,7 +427,7 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
           targetChildren.splice(overIndex, 0, draggedItem);
         });
 
-        setContainers(update);
+        setContainers(update.filter((container) => container.children.length > 0));
       }}
       onDragEnd={(event) => {
         const { active, over } = event;

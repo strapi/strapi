@@ -1,43 +1,15 @@
-import fse from 'fs-extra';
-import type { Umzug } from 'umzug';
+import path from 'path';
 
+import fse from 'fs-extra';
+
+import { discoverMigrationFiles } from './discover';
+import { createMigrationRunner } from './runner';
+import { resolveMigrationFiles } from './resolver';
 import { createStorage } from './storage';
-import { wrapTransaction } from './common';
 import { transformLogMessage } from './logger';
 
-import type { MigrationResolver, UserMigrationProvider } from './common';
+import type { UserMigrationProvider } from './common';
 import type { Database } from '..';
-
-// TODO: check multiple commands in one sql statement
-const migrationResolver: MigrationResolver = ({ name, path, context }) => {
-  const { db } = context;
-
-  if (!path) {
-    throw new Error(`Migration ${name} has no path`);
-  }
-
-  // if sql file run with knex raw
-  if (path.match(/\.sql$/)) {
-    const sql = fse.readFileSync(path, 'utf8');
-
-    return {
-      name,
-      up: wrapTransaction(db)((knex) => knex.raw(sql)),
-      async down() {
-        throw new Error('Down migration is not supported for sql files');
-      },
-    };
-  }
-
-  // NOTE: we can add some ts register if we want to handle ts migration files at some point
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const migration = require(path);
-  return {
-    name,
-    up: wrapTransaction(db)(migration.up),
-    down: wrapTransaction(db)(migration.down),
-  };
-};
 
 export const createUserMigrationProvider = (db: Database): UserMigrationProvider => {
   const dir = db.config.settings.migrations.dir;
@@ -46,48 +18,29 @@ export const createUserMigrationProvider = (db: Database): UserMigrationProvider
 
   const context = { db };
 
-  // Lazy: defer `umzug` (and its inquirer / @rushstack chain) until first call
-  let lazyProvider: Umzug<typeof context> | undefined;
-  const provider = (): Umzug<typeof context> => {
-    if (lazyProvider) return lazyProvider;
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { Umzug: UmzugCtor } = require('umzug') as typeof import('umzug');
-    lazyProvider = new UmzugCtor({
-      storage: createStorage({ db, tableName: 'strapi_migrations' }),
-      logger: {
-        info(message) {
-          // NOTE: only log internal migration in debug mode
-          db.logger.info(transformLogMessage('info', message));
-        },
-        warn(message) {
-          db.logger.warn(transformLogMessage('warn', message));
-        },
-        error(message) {
-          db.logger.error(transformLogMessage('error', message));
-        },
-        debug(message) {
-          db.logger.debug(transformLogMessage('debug', message));
-        },
+  const runner = createMigrationRunner({
+    storage: createStorage({ db, tableName: 'strapi_migrations' }),
+    logger: {
+      info(message) {
+        db.logger.info(transformLogMessage('info', message));
       },
-      context,
-      migrations: {
-        glob: ['*.{js,sql}', { cwd: dir }],
-        resolve: migrationResolver,
-      },
-    });
-    return lazyProvider;
-  };
+    },
+    async getMigrations() {
+      const filepaths = discoverMigrationFiles(path.resolve(dir));
+      return resolveMigrationFiles(filepaths, context);
+    },
+  });
 
   return {
     async shouldRun() {
-      const pendingMigrations = await provider().pending();
+      const pendingMigrations = await runner.pending();
       return pendingMigrations.length > 0 && db.config?.settings?.runMigrations === true;
     },
     async up() {
-      await provider().up();
+      await runner.up();
     },
     async down() {
-      await provider().down();
+      await runner.down();
     },
   };
 };

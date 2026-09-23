@@ -105,6 +105,42 @@ describe('Pagination API', () => {
         expect(body.data).toEqual(data.product.slice(0, 2));
       });
     });
+
+    describe('Use configured page defaults', () => {
+      let defaultLimit;
+      let maxLimit;
+
+      beforeEach(() => {
+        defaultLimit = strapi.config.get('api.rest.defaultLimit');
+        maxLimit = strapi.config.get('api.rest.maxLimit');
+      });
+
+      afterEach(() => {
+        strapi.config.set('api.rest.defaultLimit', defaultLimit);
+        strapi.config.set('api.rest.maxLimit', maxLimit);
+      });
+
+      test('uses defaultLimit when pageSize is omitted', async () => {
+        strapi.config.set('api.rest.defaultLimit', 2);
+        strapi.config.set('api.rest.maxLimit', -1);
+
+        const { body } = await getProductAPI({ page: 2 });
+
+        expect(body.meta.pagination).toEqual({ page: 2, pageSize: 2, pageCount: 2, total: 4 });
+        expect(body.data).toEqual(data.product.slice(2, 4));
+      });
+
+      test('uses the capped defaultLimit to calculate the page offset', async () => {
+        strapi.config.set('api.rest.defaultLimit', 3);
+        strapi.config.set('api.rest.maxLimit', 2);
+
+        const { body } = await getProductAPI({ page: 2 });
+
+        expect(body.meta.pagination).toEqual({ page: 2, pageSize: 2, pageCount: 2, total: 4 });
+        expect(body.data).toEqual(data.product.slice(2, 4));
+      });
+    });
+
     describe('Use start & limit', () => {
       test('First page', async () => {
         const { body } = await getProductAPI({ start: 0, limit: 2 });

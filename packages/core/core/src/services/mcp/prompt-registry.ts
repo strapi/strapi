@@ -1,5 +1,4 @@
-// eslint-disable-next-line import/extensions
-import type { McpServer, RegisteredPrompt } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { McpServer, RegisteredPrompt, ServerContext } from '@modelcontextprotocol/server';
 import type { Core, Modules } from '@strapi/types';
 
 import { McpCapabilityDefinitionRegistry } from './internal/McpCapabilityDefinitionRegistry';
@@ -9,6 +8,8 @@ import {
 } from './internal/McpCapabilityRegistry';
 import { createSafeCapabilityRegistration } from './utils/createSafeCapabilityRegistration';
 import { wrapCapabilityHandlerForMetrics } from './metrics/wrapCapabilityHandlerForMetrics';
+import { createMcpCapabilityHandlerContext } from './utils/createMcpCapabilityHandlerContext';
+import { toSdkPromptResult } from './utils/toSdkMcpCapabilityResult';
 
 /**
  * Defines a Strapi MCP prompt with full type inference, ready to pass to
@@ -95,23 +96,47 @@ export class McpPromptRegistry
           };
         },
         registerWithSdk(safeHandler) {
+          if (argsSchema === undefined) {
+            const handler = safeHandler as unknown as Modules.MCP.McpPromptCallback<undefined>;
+            const sdkHandler = wrapCapabilityHandlerForMetrics(
+              strapi,
+              'prompt',
+              name,
+              definition.telemetry,
+              async (context: Modules.MCP.McpCapabilityHandlerContext) =>
+                toSdkPromptResult(await handler(context))
+            );
+
+            return mcpServer.registerPrompt(
+              name,
+              { title, description },
+              (argsOrContext: unknown, context?: ServerContext) => {
+                // The SDK types omit the no-schema callback overload, but the runtime passes only
+                // ServerContext when argsSchema is absent.
+                const sdkContext = context ?? (argsOrContext as ServerContext);
+                return sdkHandler(createMcpCapabilityHandlerContext(sdkContext));
+              }
+            );
+          }
+
+          const handler = safeHandler as unknown as Modules.MCP.McpPromptCallback<
+            typeof argsSchema
+          >;
           const sdkHandler = wrapCapabilityHandlerForMetrics(
             strapi,
             'prompt',
             name,
             definition.telemetry,
-            safeHandler
+            async (
+              args: Parameters<typeof handler>[0],
+              context: Modules.MCP.McpCapabilityHandlerContext
+            ) => toSdkPromptResult(await handler(args, context))
           );
 
           return mcpServer.registerPrompt(
             name,
-            {
-              title,
-              description,
-              // @ts-expect-error - Internal handler type mismatch due to optional argsSchema
-              argsSchema,
-            },
-            sdkHandler
+            { title, description, argsSchema },
+            (args, context) => sdkHandler(args, createMcpCapabilityHandlerContext(context))
           );
         },
       });

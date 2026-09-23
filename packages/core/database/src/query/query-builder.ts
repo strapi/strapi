@@ -11,10 +11,11 @@ import type { Join } from './helpers/join';
 import type { OrderByValue } from './helpers/order-by';
 
 interface State {
-  type: 'select' | 'insert' | 'update' | 'delete' | 'count' | 'max' | 'truncate';
+  type: 'select' | 'insert' | 'update' | 'delete' | 'count' | 'max' | 'min' | 'truncate';
   select: Array<string | Knex.Raw>;
   count: string | null;
   max: string | null;
+  min: string | null;
   first: boolean;
   data: Record<string, unknown> | (null | Record<string, unknown>)[] | null;
   where: Record<string, unknown>[];
@@ -73,6 +74,8 @@ export interface QueryBuilder {
   count(count?: string): QueryBuilder;
 
   max(column: string): QueryBuilder;
+
+  min(column: string): QueryBuilder;
 
   where(where?: object): QueryBuilder;
 
@@ -139,6 +142,7 @@ const createQueryBuilder = (
       select: [],
       count: null,
       max: null,
+      min: null,
       first: false,
       data: null,
       where: [],
@@ -263,6 +267,13 @@ const createQueryBuilder = (
       return this;
     },
 
+    min(column: string) {
+      state.type = 'min';
+      state.min = column;
+
+      return this;
+    },
+
     where(where: Record<string, unknown> = {}) {
       if (!_.isPlainObject(where)) {
         throw new Error('Where must be an object');
@@ -314,14 +325,24 @@ const createQueryBuilder = (
     },
 
     init(params = {}) {
-      const { _q, filters, where, select, limit, offset, orderBy, groupBy, populate } = params;
+      const {
+        _q: searchQuery,
+        filters,
+        where,
+        select,
+        limit,
+        offset,
+        orderBy,
+        groupBy,
+        populate,
+      } = params;
 
       if (!_.isNil(where)) {
         this.where(where);
       }
 
-      if (!_.isNil(_q)) {
-        this.search(_q);
+      if (!_.isNil(searchQuery)) {
+        this.search(searchQuery);
       }
 
       if (!_.isNil(select)) {
@@ -417,13 +438,22 @@ const createQueryBuilder = (
     runSubQuery() {
       const originalType = state.type;
 
-      this.select('id');
-      const subQB = this.getKnexQuery();
+      // Build the inner SELECT from a clone that stays `select`, so the outer write
+      // state is never mutated. clone() shallow-merges state (shared where/joins,
+      // new alias) — preserve the original alias because joins were already baked
+      // against it. The clone inherits processed: true and must only read shared arrays.
+      const sub = this.clone();
+      sub.alias = this.alias;
+      const subQB = sub.select('id').getKnexQuery();
 
       const nestedSubQuery = db.getConnection().select('id').from(subQB.as('subQuery'));
-      const connection = db.getConnection(tableName);
+      const qb = db.getConnection(tableName);
 
-      return (connection[originalType] as Knex)().whereIn('id', nestedSubQuery);
+      if (originalType === 'update') {
+        return qb.update(state.data).whereIn('id', nestedSubQuery);
+      }
+
+      return qb.delete().whereIn('id', nestedSubQuery);
     },
 
     processState() {
@@ -446,6 +476,14 @@ const createQueryBuilder = (
       }
 
       state.where = helpers.processWhere(state.where, { qb: this, uid, db });
+
+      // processWhere emits bare root columns while type is still update/delete
+      // (mustUseAlias is false). Qualify them now that joins from the relation
+      // predicate are known, so overlapping names (published_at, locale, id) are not ambiguous.
+      if (this.shouldUseSubQuery()) {
+        state.where = helpers.qualifyRootColumns(state.where, this.alias);
+      }
+
       state.populate = helpers.processPopulate(state.populate, { qb: this, uid, db });
 
       state.data = helpers.toRow(meta, state.data);
@@ -539,12 +577,25 @@ const createQueryBuilder = (
         const joinsOrderByColumns = state.joins.flatMap((join) => {
           return _.keys(join.orderBy).map((key) => this.aliasColumn(key, join.alias));
         });
-        // Only include column-based orderBy entries (skip raw expressions like status)
+        // Only include column-based orderBy entries here (raw expressions are handled below)
         const orderByColumns = state.orderBy
           .filter((ob: any) => 'column' in ob)
           .map((ob: any) => ob.column);
 
         state.select = _.uniq([...joinsOrderByColumns, ...orderByColumns, ...state.select]);
+
+        // PostgreSQL requires every ORDER BY expression to appear in the SELECT list when
+        // SELECT DISTINCT is used. Raw expressions (e.g. the `status` CASE ranking) are not
+        // plain columns, so add them explicitly — using the same builder/alias as the ORDER BY
+        // so the rendered SQL matches and PostgreSQL accepts the query. The deep-sort path
+        // dedupes via row numbering instead of DISTINCT, so it strips these out later.
+        const rawOrderByExpressions = state.orderBy
+          .filter((ob: any) => 'rawExpression' in ob)
+          .map((ob: any) =>
+            helpers.buildStatusSortExpression(db, tableName, this.alias, ob.isI18n)
+          );
+
+        state.select = [...state.select, ...rawOrderByExpressions];
       }
     },
 
@@ -588,6 +639,11 @@ const createQueryBuilder = (
         case 'max': {
           const dbColumnName = this.aliasColumn(helpers.toColumnName(meta, state.max));
           qb.max({ max: dbColumnName });
+          break;
+        }
+        case 'min': {
+          const dbColumnName = this.aliasColumn(helpers.toColumnName(meta, state.min));
+          qb.min({ min: dbColumnName });
           break;
         }
         case 'insert': {

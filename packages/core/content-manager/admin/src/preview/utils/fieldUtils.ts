@@ -5,6 +5,7 @@ import type { PreviewContextValue } from '../pages/Preview';
 import type { Modules, Schema, Struct, UID } from '@strapi/types';
 
 type PreviewErrorMessage = keyof typeof PREVIEW_ERROR_MESSAGES;
+type FieldData = Record<string, unknown>;
 
 // Generic error class for preview field operations
 export class PreviewFieldError extends Error {
@@ -67,7 +68,7 @@ export function getAttributeSchemaFromPath({
   const visitor = (
     currentPathParts: PathPart[],
     currentAttributes: Schema.Attributes,
-    currentData: any
+    currentData: FieldData
   ): Schema.Attribute.AnyAttribute => {
     const [currentPart, ...remainingParts] = currentPathParts;
 
@@ -89,15 +90,20 @@ export function getAttributeSchemaFromPath({
         if (currentPart.index === undefined) {
           throw new PreviewFieldError('INVALID_FIELD_PATH');
         }
+
         return visitor(
           remainingParts,
           componentAttributes,
-          currentData[currentPart.name][currentPart.index]
+          (currentData[currentPart.name] as FieldData[])[currentPart.index]
         );
       }
 
       // Non repeatable component
-      return visitor(remainingParts, componentAttributes, currentData[currentPart.name]);
+      return visitor(
+        remainingParts,
+        componentAttributes,
+        currentData[currentPart.name] as FieldData
+      );
     }
 
     if (currentAttribute.type === 'dynamiczone') {
@@ -106,8 +112,8 @@ export function getAttributeSchemaFromPath({
         throw new PreviewFieldError('INVALID_FIELD_PATH');
       }
 
-      const componentData = currentData[currentPart.name][currentPart.index];
-      const componentAttributes = components[componentData.__component].attributes;
+      const componentData = (currentData[currentPart.name] as FieldData[])[currentPart.index];
+      const componentAttributes = components[componentData.__component as UID.Component].attributes;
       return visitor(remainingParts, componentAttributes, componentData);
     }
 
@@ -115,7 +121,7 @@ export function getAttributeSchemaFromPath({
     return currentAttributes[currentPart.name];
   };
 
-  return visitor(parsePathWithIndices(path), schema.attributes, document);
+  return visitor(parsePathWithIndices(path), schema.attributes, document as FieldData);
 }
 
 export function parseFieldMetaData(strapiSource: string): FieldContentSourceMap | null {

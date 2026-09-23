@@ -1,8 +1,10 @@
-import { renderHook } from '@tests/utils';
+import { act, fireEvent } from '@testing-library/react';
+import { render, renderHook, screen, waitFor } from '@tests/utils';
 
-import { Form, useField } from '../Form';
+import { clearUnsavedChangesChecks, hasUnsavedChanges } from '../../utils/unsavedChangesRegistry';
+import { Blocker, Form, useField } from '../Form';
 
-const createFormWrapper = (initialErrors: Record<string, any>) =>
+const createFormWrapper = (initialErrors: React.ComponentProps<typeof Form>['initialErrors']) =>
   function ({ children }: { children: React.ReactNode }) {
     return (
       <Form method="POST" initialErrors={initialErrors}>
@@ -122,5 +124,83 @@ describe('useField hook', () => {
     });
 
     expect(result.current.error).toBeUndefined();
+  });
+
+  it('handles multi-select change events from input-like targets', () => {
+    const { result } = renderHook(() => useField('options'), {
+      wrapper: createFormWrapper({}),
+    });
+
+    act(() => {
+      result.current.onChange({
+        target: {
+          name: 'options',
+          type: 'select-multiple',
+          value: '',
+          multiple: true,
+          options: [
+            { selected: true, value: 'first' },
+            { selected: false, value: 'second' },
+            { selected: true, value: 'third' },
+          ],
+        },
+      } as unknown as React.ChangeEvent<HTMLInputElement>);
+    });
+
+    expect(result.current.value).toEqual(['first', 'third']);
+  });
+});
+
+describe('Blocker unsaved-changes registration', () => {
+  const NameField = () => {
+    const field = useField<string>('name');
+
+    return (
+      <input aria-label="name" name="name" value={field.value ?? ''} onChange={field.onChange} />
+    );
+  };
+
+  const renderForm = (onSubmit: React.ComponentProps<typeof Form>['onSubmit']) =>
+    render(
+      <Form method="PUT" initialValues={{ name: 'initial' }} onSubmit={onSubmit}>
+        <NameField />
+        <Blocker />
+        <button type="submit">Save</button>
+      </Form>
+    );
+
+  afterEach(() => {
+    clearUnsavedChangesChecks();
+  });
+
+  it('reports nothing to lose while the form is untouched', () => {
+    renderForm(jest.fn());
+
+    expect(hasUnsavedChanges()).toBe(false);
+  });
+
+  it('reports unsaved edits once a field changes', async () => {
+    const { user } = renderForm(jest.fn());
+
+    await user.type(screen.getByLabelText('name'), '-edited');
+
+    expect(hasUnsavedChanges()).toBe(true);
+  });
+
+  /**
+   * A session that dies mid-save must still warn: the submit that would have
+   * cleared the edits is the one that just failed.
+   */
+  it('still reports unsaved edits while a submit is in flight', async () => {
+    const neverSettles = jest.fn(() => new Promise<void>(() => {}));
+    const { user } = renderForm(neverSettles);
+
+    await user.type(screen.getByLabelText('name'), '-edited');
+    // jsdom doesn't submit a form when its submit button is clicked.
+    // eslint-disable-next-line testing-library/no-node-access
+    fireEvent.submit(screen.getByLabelText('name').closest('form')!);
+
+    await waitFor(() => expect(neverSettles).toHaveBeenCalled());
+    expect(hasUnsavedChanges()).toBe(true);
   });
 });

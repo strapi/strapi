@@ -66,7 +66,7 @@ export const EditPage = () => {
       toggleNotification({
         type: 'success',
         message: formatMessage({
-          id: getTrad('Settings.roles.created'),
+          id: getTrad('Settings.roles.edited'),
           defaultMessage: 'Role edited',
         }),
       });

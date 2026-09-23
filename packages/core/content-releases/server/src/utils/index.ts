@@ -47,11 +47,21 @@ export const isEntryValid = async (
   { strapi }: { strapi: Core.Strapi }
 ) => {
   try {
+    // Mirror the document-service publish path: when `api.documents.strictRelations`
+    // is on, required media/relations are enforced on non-draft writes. Reading the
+    // flag here keeps the release "valid" badge consistent with what publish will
+    // actually accept (otherwise the UI can mark an entry valid that publish rejects).
+    const rawStrictRelations: unknown = strapi.config.get(
+      'api.documents.strictRelations',
+      undefined
+    );
+    const strictRelations = rawStrictRelations === true;
+
     // @TODO: When documents service has validateEntityCreation method, use it instead
     await strapi.entityValidator.validateEntityCreation(
       strapi.getModel(contentTypeUid as UID.ContentType),
       entry,
-      undefined,
+      { isDraft: false, locale: entry?.locale, strictRelations },
       // @ts-expect-error - FIXME: entity here is unnecessary
       entry
     );

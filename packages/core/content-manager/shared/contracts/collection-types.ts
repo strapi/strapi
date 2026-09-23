@@ -2,7 +2,6 @@ import { errors } from '@strapi/utils';
 import type { Modules, Struct, UID } from '@strapi/types';
 
 type PaginatedDocuments = Modules.Documents.PaginatedResult<UID.Schema>;
-type PaginationQuery = Modules.Documents.Params.Pagination.PageNotation;
 type SortQuery = Modules.Documents.Params.Sort.StringNotation<UID.Schema> & string;
 
 // Admin document response follows the same format as the document service

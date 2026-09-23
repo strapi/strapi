@@ -38,6 +38,8 @@
     // Do not include test files
     "**/*.test.*",
     // Do not include plugins in the server compilation
-    "src/plugins/**"
+    "src/plugins/**",
+    // Migration/bench helpers run via `node --import tsx`; keep out of Strapi compileStrapi
+    "scripts/"
   ]
 }

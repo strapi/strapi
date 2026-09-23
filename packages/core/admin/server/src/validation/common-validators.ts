@@ -23,20 +23,25 @@ export const username = yup.string().min(1);
 export const password = yup
   .string()
   .min(8)
-  .test('required-byte-size', '${path} must be less than 73 bytes', function (value) {
+  // eslint-disable-next-line no-template-curly-in-string -- Yup interpolation placeholder
+  .test('required-byte-size', '${path} must be less than 73 bytes', function checkByteSize(value) {
     if (!value) return true;
+
     const byteSize = new TextEncoder().encode(value).length;
     return byteSize <= 72;
   })
+  // eslint-disable-next-line no-template-curly-in-string -- Yup interpolation placeholder
   .matches(/[a-z]/, '${path} must contain at least one lowercase character')
+  // eslint-disable-next-line no-template-curly-in-string -- Yup interpolation placeholder
   .matches(/[A-Z]/, '${path} must contain at least one uppercase character')
+  // eslint-disable-next-line no-template-curly-in-string -- Yup interpolation placeholder
   .matches(/\d/, '${path} must contain at least one number');
 
 export const roles = yup.array(yup.strapiID()).min(1);
 
 const isAPluginName = yup
   .string()
-  .test('is-a-plugin-name', 'is not a plugin name', function (value) {
+  .test('is-a-plugin-name', 'is not a plugin name', function checkPluginName(value) {
     return [undefined, 'admin', ...Object.keys(strapi.plugins)].includes(value)
       ? true
       : this.createError({ path: this.path, message: `${this.path} is not an existing plugin` });
@@ -45,7 +50,7 @@ const isAPluginName = yup
 export const arrayOfConditionNames = yup
   .array()
   .of(yup.string())
-  .test('is-an-array-of-conditions', 'is not a plugin name', function (value) {
+  .test('is-an-array-of-conditions', 'is not a plugin name', function checkConditionNames(value) {
     const ids = strapi.service('admin::permission').conditionProvider.keys();
     return _.isUndefined(value) || _.difference(value, ids).length === 0
       ? true
@@ -62,7 +67,7 @@ const checkNoDuplicatedPermissions = (permissions: unknown) =>
   );
 
 const checkNilFields = (action: Action) =>
-  function (fields: typeof actionFields) {
+  function checkNilActionFields(fields: typeof actionFields) {
     // If the parent has no action field, then we ignore this test
     if (isNil(action)) {
       return true;
@@ -88,6 +93,7 @@ const fieldsPropertyValidation = (action: Action) =>
     )
     .test(
       'fields-restriction',
+      // eslint-disable-next-line no-template-curly-in-string -- Yup interpolation placeholder
       'The permission at ${path} must have fields set to null or undefined',
       // @ts-expect-error yup types
       checkNilFields(action)
@@ -99,63 +105,79 @@ export const permission = yup
     action: yup
       .string()
       .required()
-      .test('action-validity', 'action is not an existing permission action', function (actionId) {
-        // If the action field is Nil, ignore the test and let the required check handle the error
-        if (isNil(actionId)) {
-          return true;
-        }
+      .test(
+        'action-validity',
+        'action is not an existing permission action',
+        function checkActionValidity(actionId) {
+          // If the action field is Nil, ignore the test and let the required check handle the error
+          if (isNil(actionId)) {
+            return true;
+          }
 
-        return !!getActionFromProvider(actionId);
-      }),
+          const action = getActionFromProvider(actionId);
+
+          return action !== undefined && action !== null;
+        }
+      ),
     actionParameters: yup.object().nullable(),
     subject: yup
       .string()
       .nullable()
-      .test('subject-validity', 'Invalid subject submitted', function (subject) {
-        // @ts-expect-error yup types
-        const action = getActionFromProvider(this.options.parent.action);
+      .test(
+        'subject-validity',
+        'Invalid subject submitted',
+        function checkSubjectValidity(subject) {
+          // @ts-expect-error yup types
+          const action = getActionFromProvider(this.options.parent.action);
 
-        if (!action) {
-          return true;
-        }
+          if (!action) {
+            return true;
+          }
 
-        if (isNil(action.subjects)) {
-          return isNil(subject);
-        }
+          if (isNil(action.subjects)) {
+            return isNil(subject);
+          }
 
-        if (isArray(action.subjects) && !isNil(subject)) {
-          return action.subjects.includes(subject);
-        }
+          if (isArray(action.subjects) && !isNil(subject)) {
+            return action.subjects.includes(subject);
+          }
 
-        return false;
-      }),
-    properties: yup
-      .object()
-      .test('properties-structure', 'Invalid property set at ${path}', function (properties) {
-        // @ts-expect-error yup types
-        const action = getActionFromProvider(this.options.parent.action) as any;
-        const hasNoProperties = isEmpty(properties) || isNil(properties);
-
-        if (!has('options.applyToProperties', action)) {
-          return hasNoProperties;
-        }
-
-        if (hasNoProperties) {
-          return true;
-        }
-
-        const { applyToProperties } = action.options;
-
-        if (!isArray(applyToProperties)) {
           return false;
         }
+      ),
+    properties: yup
+      .object()
+      .test(
+        'properties-structure',
+        // eslint-disable-next-line no-template-curly-in-string -- Yup interpolation placeholder
+        'Invalid property set at ${path}',
+        function checkPropertiesStructure(properties) {
+          // @ts-expect-error yup types
+          const action = getActionFromProvider(this.options.parent.action) as any;
+          const hasNoProperties = isEmpty(properties) || isNil(properties);
 
-        return Object.keys(properties).every((property) => applyToProperties.includes(property));
-      })
+          if (!has('options.applyToProperties', action)) {
+            return hasNoProperties;
+          }
+
+          if (hasNoProperties) {
+            return true;
+          }
+
+          const { applyToProperties } = action.options;
+
+          if (!isArray(applyToProperties)) {
+            return false;
+          }
+
+          return Object.keys(properties).every((property) => applyToProperties.includes(property));
+        }
+      )
       .test(
         'fields-property',
+        // eslint-disable-next-line no-template-curly-in-string -- Yup interpolation placeholder
         'Invalid fields property at ${path}',
-        async function (properties = {}) {
+        async function checkFieldsProperty(properties = {}) {
           // @ts-expect-error yup types
           const action = getActionFromProvider(this.options.parent.action) as any;
 

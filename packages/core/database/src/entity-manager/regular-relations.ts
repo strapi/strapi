@@ -39,7 +39,7 @@ const getDocumentSiblingIdsQuery = (tableName: string, id: ID) => {
 
   // NOTE: SubQueries are wrapped in a function to not reuse the same connection,
   // which causes infinite self references
-  return function (query) {
+  return function findDocumentSiblingIds(query) {
     query
       .select('id')
       .from(tableName)

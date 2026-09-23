@@ -1,3 +1,5 @@
+import type { MouseEvent } from 'react';
+
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { Cross } from '@strapi/icons';
 import get from 'lodash/get';
@@ -86,7 +88,7 @@ export const ComponentCard = ({
   const type = get(components, component);
   const { icon, displayName } = type?.info || {};
 
-  const onClose = (e: any) => {
+  const onClose = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     removeComponentFromDynamicZone({
       forTarget,

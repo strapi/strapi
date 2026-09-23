@@ -43,7 +43,7 @@ describe.each<{ forTarget: Struct.ModelType; targetUid: string }>([
       name: 'color',
       options: { format: 'hex' },
       customField: 'plugin::mycustomfields.color',
-    };
+    } as const;
 
     const state = reducer(
       initializedState,
@@ -75,8 +75,8 @@ describe.each<{ forTarget: Struct.ModelType; targetUid: string }>([
       name: 'color',
       options: { format: 'hex' },
       customField: 'plugin::mycustomfields.color',
-      status: 'SOMETHING_ELSE', // Attempt to override status
-    };
+      status: 'REMOVED', // Attempt to override status
+    } as const;
 
     const state = reducer(
       initializedState,
@@ -115,7 +115,7 @@ describe.each<{ forTarget: Struct.ModelType; targetUid: string }>([
         customField: 'plugin::mycustomfields.location',
         options: { defaultLat: 0, defaultLng: 0 },
       },
-    ];
+    ] as const;
 
     let state = initializedState;
 
