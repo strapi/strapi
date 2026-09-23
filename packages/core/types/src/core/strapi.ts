@@ -9,6 +9,8 @@ import type * as Schema from '../schema';
 import type * as UID from '../uid';
 
 import type { Container } from './container';
+import type { ControllerFor } from './controller';
+import type { ServiceFor } from './service';
 import type { SuggestedString } from '../utils/string';
 
 export interface Strapi extends Container {
@@ -69,9 +71,9 @@ export interface Strapi extends Container {
   reload: Reloader;
   config: ConfigProvider;
   services: Record<string, Core.Service>;
-  service<TUID extends UID.Service>(uid: TUID): Core.ServiceFor<TUID>;
+  service<TUID extends UID.Service>(uid: TUID): ServiceFor<TUID>;
   controllers: Record<string, Core.Controller>;
-  controller(uid: UID.Controller): Core.Controller;
+  controller<TUID extends UID.Controller>(uid: TUID): ControllerFor<TUID>;
   contentTypes: Schema.ContentTypes;
   contentType<TContentTypeUID extends UID.ContentType>(
     name: TContentTypeUID

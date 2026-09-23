@@ -1,9 +1,9 @@
 import * as utils from '@strapi/utils';
 import { pick } from 'lodash/fp';
-import type { Core } from '@strapi/types';
 import { getService } from '../utils';
 import { validateCreateLocaleInput, validateUpdateLocaleInput } from '../validation/locales';
 import { formatLocale } from '../domain/locale';
+import type { LocalesController } from '../types/controllers';
 import type { Locale } from '../types/services';
 
 const { setCreatorFields } = utils;
@@ -16,7 +16,7 @@ const sanitizeLocale = <T extends Locale | Locale[]>(locale: T) => {
   return strapi.contentAPI.sanitize.output(locale, model) as Promise<T>;
 };
 
-const controller: Core.Controller = {
+const controller: LocalesController = {
   async listLocales(ctx) {
     const localesService = getService('locales');
 

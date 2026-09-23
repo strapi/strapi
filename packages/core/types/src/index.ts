@@ -71,6 +71,25 @@ declare global {
        */
       // eslint-disable-next-line @typescript-eslint/no-empty-interface
       interface Configs {}
+
+      /**
+       * Controller contracts supplied by Strapi and plugin packages, keyed by full controller UID
+       * (e.g. `'plugin::my-plugin.my-controller'`).
+       * Application entries in {@link Controllers} take precedence over these defaults.
+       */
+      // eslint-disable-next-line @typescript-eslint/no-empty-interface
+      interface DefaultControllers {}
+
+      /**
+       * Application controller contracts and overrides, keyed by full controller UID.
+       * Each entry replaces the entire default contract for that UID; it is not intersected with it.
+       * Controllers absent from both registries retain their existing permissive types.
+       *
+       * Not to be confused with the legacy `Public.Controllers`, which lists controller UIDs
+       * and narrows `UID.Controller` when augmented.
+       */
+      // eslint-disable-next-line @typescript-eslint/no-empty-interface
+      interface Controllers {}
     }
   }
 
