@@ -1,3 +1,4 @@
+import type { SentryConfig } from './types/config';
 import type { SentryService } from './types/services';
 
 /** Import this module from an application declaration file to opt in to stricter Sentry types. */
@@ -8,6 +9,10 @@ declare global {
     namespace Registries {
       interface DefaultServices {
         'plugin::sentry.sentry': SentryService;
+      }
+
+      interface DefaultConfigs {
+        'plugin::sentry': SentryConfig;
       }
     }
   }

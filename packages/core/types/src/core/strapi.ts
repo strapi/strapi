@@ -141,8 +141,29 @@ export interface StrapiFS {
   appendFile(optPath: string | string[], data: string): void;
 }
 
+/** Config namespaces that have a registered contract, e.g. `'plugin::my-plugin'`. */
+export type ConfigNamespace =
+  | keyof Strapi.Registries.Configs
+  | keyof Strapi.Registries.DefaultConfigs;
+
+/** Resolves application overrides before package defaults. */
+export type ConfigFor<TNamespace extends ConfigNamespace> =
+  TNamespace extends keyof Strapi.Registries.Configs
+    ? Strapi.Registries.Configs[TNamespace]
+    : TNamespace extends keyof Strapi.Registries.DefaultConfigs
+      ? Strapi.Registries.DefaultConfigs[TNamespace]
+      : never;
+
+/** The registered contract when `TPath` is a registered namespace, `T` otherwise. */
+type ConfigLookup<TPath, T> = TPath extends ConfigNamespace ? ConfigFor<TPath> : T;
+
 export interface ConfigProvider {
-  get<T = unknown>(key: PropertyPath, defaultVal?: T): T;
+  // A single signature, not overloads: overloads make existing mocks of `get` fail to type check.
+  // TODO @Nico dotted paths into a registered namespace (e.g. 'plugin::my-plugin.key') still resolve to `T`
+  get<T = unknown, TPath extends PropertyPath = PropertyPath>(
+    key: TPath,
+    defaultVal?: ConfigLookup<TPath, T>
+  ): ConfigLookup<TPath, T>;
   set(path: string, val: unknown): this;
   has(path: string): boolean;
   [key: string]: any;

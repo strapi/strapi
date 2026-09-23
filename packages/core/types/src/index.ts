@@ -55,6 +55,22 @@ declare global {
        */
       // eslint-disable-next-line @typescript-eslint/no-empty-interface
       interface Services {}
+
+      /**
+       * Resolved configuration contracts supplied by Strapi and plugin packages, keyed by
+       * config namespace (e.g. `'plugin::my-plugin'`).
+       * Application entries in {@link Configs} take precedence over these defaults.
+       */
+      // eslint-disable-next-line @typescript-eslint/no-empty-interface
+      interface DefaultConfigs {}
+
+      /**
+       * Application configuration contracts and overrides, keyed by config namespace.
+       * Each entry replaces the entire default contract for that namespace; it is not intersected with it.
+       * Namespaces absent from both registries retain their existing permissive types.
+       */
+      // eslint-disable-next-line @typescript-eslint/no-empty-interface
+      interface Configs {}
     }
   }
 
