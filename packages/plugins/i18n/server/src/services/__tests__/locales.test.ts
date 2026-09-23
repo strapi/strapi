@@ -45,6 +45,23 @@ describe('Locales', () => {
         isDefault: true,
       });
     });
+
+    test('Replaces an existing isDefault flag', async () => {
+      const get = jest.fn(() => Promise.resolve('en'));
+      global.strapi = { store: () => ({ get }) } as any;
+
+      const locale = { code: 'en', name: 'English', isDefault: false as const };
+      const locales = [{ code: 'en', name: 'English', isDefault: 'no' }];
+
+      const enrichedLocale = await localesService.setIsDefault(locale);
+      const [enrichedListItem] = await localesService.setIsDefault(locales);
+
+      // The computed flag replaces the input's, so its type must not keep the input's.
+      true satisfies typeof enrichedLocale.isDefault;
+      true satisfies typeof enrichedListItem.isDefault;
+      expect(enrichedLocale.isDefault).toBe(true);
+      expect(enrichedListItem.isDefault).toBe(true);
+    });
   });
 
   describe('getDefaultLocale', () => {

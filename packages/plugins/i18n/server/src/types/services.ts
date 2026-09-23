@@ -24,12 +24,15 @@ export type LocaleUpdateData = {
   updatedBy?: Data.ID;
 };
 
-/** A locale-like record, or a list of them, with `isDefault` added to each. `null` and `undefined` are kept as-is. */
+/** `TLocale` with its `isDefault` property set to the computed flag, replacing any existing one. */
+type ReplaceIsDefault<TLocale> = Omit<TLocale, 'isDefault'> & { isDefault: boolean };
+
+/** A locale-like record, or a list of them, with `isDefault` set on each. `null` and `undefined` are kept as-is. */
 export type WithIsDefault<T> = T extends null | undefined
   ? T
   : T extends readonly (infer TLocale)[]
-    ? (TLocale & { isDefault: boolean })[]
-    : T & { isDefault: boolean };
+    ? ReplaceIsDefault<TLocale>[]
+    : ReplaceIsDefault<T>;
 
 /** The locales service instance. */
 export type LocaleService = {
