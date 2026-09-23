@@ -109,7 +109,13 @@ export default async () => {
   }
 
   // AI Localizations
-  if (strapi.ai.admin.isEnabled() === true) {
+  if (strapi.ai.admin.isAvailable()) {
+    const aiTranslations = getService('ai-translations');
+
+    if (!aiTranslations.hasProvider() && strapi.ai.admin.isStrapiManagedAiEnabled()) {
+      aiTranslations.registerStrapiManagedProvider();
+    }
+
     getService('ai-localizations').setupMiddleware();
   }
 

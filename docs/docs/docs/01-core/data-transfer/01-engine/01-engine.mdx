@@ -318,7 +318,7 @@ const options = {
   schemaStrategy: 'strict', // see schemaStragey documentation
   exclude: [], // exclude these classifications of data; see CLI documentation of `--exclude` for list
   only: [], // transfer only these classifications of data; see CLI documentation of `--only` for list
-  throttle: 0, // add a delay of this many millseconds between each item transferred
+  throttle: 0, // add a delay of this many milliseconds between each item transferred
 
   // the keys of `transforms` are the stage names for which they are run
   transforms: {
@@ -452,7 +452,7 @@ The following events are available:
 
 `stage::start` - at the start of each stage
 `stage::finish` - at the end of each stage
-`stage::progress` - after each entitity in that stage has been transferred
+`stage::progress` - after each entity in that stage has been transferred
 `stage::skip` - when an entire stage is skipped (eg, when 'only' or 'exclude' are used)
 `stage::error` - when there is an error thrown during a stage
 `transfer::init` - at the very beginning of engine.transfer()
@@ -626,7 +626,7 @@ By mapping schemas as well as entities, it's even possible (although complex!) t
 
 ## Running a transfer
 
-Running a transfer simply involves calling the asynchrounous engine.transfer() method.
+Running a transfer simply involves calling the asynchronous engine.transfer() method.
 
 ```typescript
 const engine = createTransferEngine(source, destination, options);

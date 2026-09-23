@@ -14,6 +14,12 @@ export interface Settings {
 
 export type SettingsData = Settings['data'];
 
+export interface SettingsWithAvailability {
+  data: SettingsData & {
+    aiLocalizationsAvailable: boolean;
+  };
+}
+
 /**
  * GET /i18n/settings
  *
@@ -25,7 +31,7 @@ export declare namespace GetSettings {
   }
 
   export interface Response {
-    data: Settings;
+    data: SettingsWithAvailability;
   }
 }
 

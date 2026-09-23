@@ -27,6 +27,11 @@ interface BrowserStrapi {
     REVIEW_WORKFLOWS: 'review-workflows';
     isEnabled: (featureName?: string) => boolean;
   };
+  isTrial: boolean;
+  /**
+   * @deprecated Use `isTrial`. Alias kept for third-party admin code that read
+   * this before the rename; removed in the next major.
+   */
   isTrialLicense: boolean;
   flags: {
     promoteEE?: boolean;

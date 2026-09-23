@@ -17,7 +17,6 @@ import {
 } from '@strapi/design-system';
 import { SignOut } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useNavigate } from 'react-router-dom';
 
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { Layouts } from '../components/Layouts/Layout';
@@ -41,7 +40,6 @@ import type { SanitizedAdminSession } from '../../../shared/contracts/sessions';
 
 const SessionsPage = () => {
   const { formatMessage } = useIntl();
-  const navigate = useNavigate();
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const logout = useAuth('SessionsPage', (state) => state.logout);
@@ -51,9 +49,9 @@ const SessionsPage = () => {
   const [revokeAllSessions] = useRevokeAllSessionsMutation();
 
   const handleLogoutAndRedirect = React.useCallback(async () => {
+    // Auth.logout navigates to login after confirm + mutation (and may prompt first).
     await logout();
-    navigate('/auth/login');
-  }, [logout, navigate]);
+  }, [logout]);
 
   const notifyError = React.useCallback(
     (error?: unknown) => {

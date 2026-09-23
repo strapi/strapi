@@ -1,5 +1,6 @@
 {
   "apiError.FileTooBig": "The file is too large to be uploaded. It exceeds the maximum request size allowed by the server.",
+  "apiError.FolderContainsUnauthorizedAssetsError": "The selected folders contain assets that you do not have permission to delete.",
   "assets.uploaded": "{number, plural, one {# asset} other {# assets}} uploaded successfully",
   "asset-details.title": "File details",
   "asset-details.description": "Displays file information and metadata",
@@ -100,9 +101,6 @@
   "upload.progress.maximize": "Maximize",
   "upload.progress.minimize": "Minimize",
   "upload.progress.close": "Close",
-  "beta.badge": "Beta",
-  "beta.notice.close": "Close",
-  "beta.notice.content": "This is a beta version of the Media Library. Some features are still in progress — please report any issue you run into.",
   "bulk.select.label": "Select all assets",
   "button.next": "Next",
   "new": "New",
