@@ -26,7 +26,7 @@ declare global {
    * declare global {
    *   namespace Strapi {
    *     namespace Registries {
-   *       interface DefaultServiceRegistry {
+   *       interface DefaultServices {
    *         'plugin::my-plugin.my-service': MyService;
    *       }
    *     }
@@ -40,18 +40,21 @@ declare global {
     namespace Registries {
       /**
        * Service contracts supplied by Strapi and plugin packages, keyed by full service UID.
-       * Application entries in ServiceRegistry take precedence over these defaults.
+       * Application entries in {@link Services} take precedence over these defaults.
        */
       // eslint-disable-next-line @typescript-eslint/no-empty-interface
-      interface DefaultServiceRegistry {}
+      interface DefaultServices {}
 
       /**
        * Application service contracts and overrides, keyed by full service UID.
        * Each entry replaces the entire default contract for that UID; it is not intersected with it.
        * Services absent from both registries retain their existing permissive types.
+       *
+       * Not to be confused with the legacy `Public.Services`, which lists service UIDs
+       * and narrows `UID.Service` when augmented.
        */
       // eslint-disable-next-line @typescript-eslint/no-empty-interface
-      interface ServiceRegistry {}
+      interface Services {}
     }
   }
 

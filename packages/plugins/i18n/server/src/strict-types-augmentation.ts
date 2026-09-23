@@ -6,7 +6,7 @@ declare global {
   namespace Strapi {
     // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace Registries {
-      interface DefaultServiceRegistry {
+      interface DefaultServices {
         'plugin::i18n.locales': LocaleService;
       }
     }

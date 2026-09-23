@@ -1,8 +1,8 @@
 /** Resolves application overrides before package defaults, then falls back to the legacy service. */
-export type ServiceFor<TUID extends string> = TUID extends keyof Strapi.Registries.ServiceRegistry
-  ? Strapi.Registries.ServiceRegistry[TUID]
-  : TUID extends keyof Strapi.Registries.DefaultServiceRegistry
-    ? Strapi.Registries.DefaultServiceRegistry[TUID]
+export type ServiceFor<TUID extends string> = TUID extends keyof Strapi.Registries.Services
+  ? Strapi.Registries.Services[TUID]
+  : TUID extends keyof Strapi.Registries.DefaultServices
+    ? Strapi.Registries.DefaultServices[TUID]
     : Service;
 
 export type Service = {

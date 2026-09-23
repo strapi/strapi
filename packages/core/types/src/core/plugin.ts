@@ -4,8 +4,8 @@ type ServiceNames<TPlugin extends string> = string extends TPlugin
   ? never
   : keyof {
       [TUID in
-        | keyof Strapi.Registries.ServiceRegistry
-        | keyof Strapi.Registries.DefaultServiceRegistry as TUID extends `plugin::${TPlugin}.${infer TService}`
+        | keyof Strapi.Registries.Services
+        | keyof Strapi.Registries.DefaultServices as TUID extends `plugin::${TPlugin}.${infer TService}`
         ? TService
         : never]: ServiceFor<TUID>;
     };
