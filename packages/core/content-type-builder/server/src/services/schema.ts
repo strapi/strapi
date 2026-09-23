@@ -241,18 +241,19 @@ const describeUnsupportedReason = (reason: UnsupportedRename['reason']): string 
 /**
  * Generates a single data-preserving rename migration for the accepted renames
  * in this save. Must run before the server reloads, while `strapi.db.metadata`
- * still reflects the old (pre-rename) schema.
+ * still reflects the old (pre-rename) schema. Resolves to the written file's
+ * path (so a failed save can remove it), or `null` when nothing was written.
  */
-const generateRenameMigrations = async (schema: CTBSchema): Promise<void> => {
+const generateRenameMigrations = async (schema: CTBSchema): Promise<string | null> => {
   // In prompt modes the admin strips refused renames before sending the payload.
   if (getAttributeRenameMigrationMode() === 'never') {
-    return;
+    return null;
   }
 
   const renames = collectRenames(schema);
   const componentRenames = collectComponentRenames(schema);
   if (renames.length === 0 && componentRenames.length === 0) {
-    return;
+    return null;
   }
 
   const migrationBuilder = createMigrationBuilder({ strapi });
@@ -276,8 +277,10 @@ const generateRenameMigrations = async (schema: CTBSchema): Promise<void> => {
   }
 
   if (migrationBuilder.hasChanges()) {
-    await migrationBuilder.writeFiles();
+    return migrationBuilder.writeFiles();
   }
+
+  return null;
 };
 
 /**
@@ -560,6 +563,7 @@ export const updateSchema = async (schema: CTBSchema) => {
   const generatedApiNames: string[] = [];
   const backedUpApiUids: string[] = [];
   let schemaAlreadyRolledBack = false;
+  let migrationFilePath: string | null = null;
   const APIsToDelete = contentTypes
     .filter((contentType) => contentType.action === 'delete')
     .map((contentType) => contentType.uid);
@@ -695,7 +699,7 @@ export const updateSchema = async (schema: CTBSchema) => {
 
     // Generate rename migrations before reloading, while strapi.db.metadata still
     // reflects the pre-rename schema (the controller triggers the reload after this).
-    await generateRenameMigrations(schema);
+    migrationFilePath = await generateRenameMigrations(schema);
 
     const schemaFilesWritten = await builder.writeFiles();
 
@@ -720,6 +724,7 @@ export const updateSchema = async (schema: CTBSchema) => {
       backedUpApiUids,
       generatedApiNames,
       schemaAlreadyRolledBack,
+      migrationFilePath,
     });
 
     throw error;

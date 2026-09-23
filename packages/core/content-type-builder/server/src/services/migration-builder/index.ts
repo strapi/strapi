@@ -220,10 +220,11 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
   // definition the chain started from.
   const inFlightDefinitions = new Map<string, Map<string, RenameAttributeDefinition>>();
 
-  // Logical names vacated by an earlier hop of this batch (per uid). A hop may
-  // only target a name that is free: not live in the pre-reload schema (unless
-  // an earlier hop vacated it) and not produced by an earlier hop still in
-  // flight. At migration time the schema-sync drop of a still-live field has
+  // Logical names vacated by an earlier accepted hop of this batch (per uid). A
+  // refused hop never vacates its source: the artifact stays live until schema
+  // sync drops it. A hop may only target a name that is free: not live in the
+  // pre-reload schema (unless an earlier accepted hop vacated it) and not
+  // produced by an earlier hop still in flight. At migration time the schema-sync drop of a still-live field has
   // not happened yet, so renaming onto it would collide and the runtime guard
   // would silently skip the hop. Refusing it here surfaces the problem (e.g. a
   // truncated chain sent by a client) instead of losing data.
@@ -476,20 +477,17 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
     }
 
     if (isTargetOccupied(uid, newName)) {
-      trackVacated(uid, oldName, newName);
       unsupported.push({ uid, oldName, newName, reason: 'target-occupied' });
-      // Keep the chain consistent so a later continuation hop stays silent.
+      // Keep the chain consistent so a later continuation hop stays silent. The
+      // source is not vacated: its artifact was not moved.
       markInFlight(uid, newName, { kind: 'unsupported', reason: 'target-occupied' });
       return;
     }
-    trackVacated(uid, oldName, newName);
 
     const entries = inFlight.get(uid);
     const definitions = inFlightDefinitions.get(uid);
     const oldAttribute = definitions?.get(oldName) ?? schemaAttributeOf(uid, oldName);
     let resolved = entries?.get(oldName) ?? classify(uid, oldName);
-    entries?.delete(oldName);
-    definitions?.delete(oldName);
 
     // A rename that also changes the attribute's storage cannot be expressed as a
     // rename of the physical artifact: leave it to the drop-and-recreate path.
@@ -508,10 +506,17 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
 
     if (resolved.kind === 'unsupported') {
       unsupported.push({ uid, oldName, newName, reason: resolved.reason });
-      // Keep the chain consistent so a later continuation hop stays silent.
+      // Keep the chain consistent so a later continuation hop stays silent. The
+      // source keeps its in-flight entry and is not vacated: its physical
+      // artifact stays where it is until schema sync drops it.
       markInFlight(uid, newName, resolved);
       return;
     }
+
+    // Accepted from here on: the source name is free and the field moves.
+    entries?.delete(oldName);
+    definitions?.delete(oldName);
+    trackVacated(uid, oldName, newName);
 
     if (resolved.kind === 'skip') {
       markInFlight(uid, newName, resolved);

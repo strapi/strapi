@@ -99,10 +99,17 @@ export const SchemaChatProvider = ({ children }: { children: ReactNode }) => {
         }
 
         // eslint-disable-next-line no-await-in-loop
-        await applyChange({
+        const applied = await applyChange({
           action: TYPE_TO_ACTION[change.type]!,
           schema: newSchema,
         });
+
+        // The user cancelled a rename prompt: stop here. Earlier changes in this
+        // batch stay applied (they are in the undo history); the message is not
+        // marked as revised.
+        if (!applied) {
+          return;
+        }
       }
 
       setLastRevisedId(latestMessage.id);

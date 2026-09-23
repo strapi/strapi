@@ -576,6 +576,58 @@ describe('MigrationBuilder', () => {
         ['summary', 'old_title'],
       ]);
     });
+
+    it('does not vacate the source of a hop refused as type-changed', () => {
+      const strapi = createStrapiMock({ metas: scalarMeta, schema: scalarSchema });
+      const builder = createMigrationBuilder({ strapi });
+
+      // oldTitle -> views changes the type, so old_title stays live until sync drops it.
+      builder.addRenameAttribute(uid, {
+        oldName: 'oldTitle',
+        newName: 'views',
+        newAttribute: { type: 'integer' },
+      });
+      builder.addRenameAttribute(uid, { oldName: 'summary', newName: 'oldTitle' });
+
+      expect(builder.getUnsupported()).toEqual([
+        { uid, oldName: 'oldTitle', newName: 'views', reason: 'type-changed' },
+        { uid, oldName: 'summary', newName: 'oldTitle', reason: 'target-occupied' },
+      ]);
+      expect(columnRenamesOf(builder)).toEqual([]);
+    });
+
+    it('keeps the source of a refused continuation hop occupied (a -> b, b -> c refused, x -> b)', () => {
+      const strapi = createStrapiMock({ metas: scalarMeta, schema: scalarSchema });
+      const builder = createMigrationBuilder({ strapi });
+
+      builder.addRenameAttribute(uid, { oldName: 'oldTitle', newName: 'heading' });
+      builder.addRenameAttribute(uid, {
+        oldName: 'heading',
+        newName: 'views',
+        newAttribute: { type: 'integer' },
+      });
+      builder.addRenameAttribute(uid, { oldName: 'summary', newName: 'heading' });
+
+      expect(builder.getUnsupported()).toEqual([
+        { uid, oldName: 'heading', newName: 'views', reason: 'type-changed' },
+        { uid, oldName: 'summary', newName: 'heading', reason: 'target-occupied' },
+      ]);
+      expect(columnRenamesOf(builder)).toEqual([['old_title', 'heading']]);
+    });
+
+    it('does not vacate the source of a hop refused as target-occupied', () => {
+      const strapi = createStrapiMock({ metas: scalarMeta, schema: scalarSchema });
+      const builder = createMigrationBuilder({ strapi });
+
+      builder.addRenameAttribute(uid, { oldName: 'oldTitle', newName: 'summary' });
+      builder.addRenameAttribute(uid, { oldName: 'summary', newName: 'oldTitle' });
+
+      expect(builder.getUnsupported()).toEqual([
+        { uid, oldName: 'oldTitle', newName: 'summary', reason: 'target-occupied' },
+        { uid, oldName: 'summary', newName: 'oldTitle', reason: 'target-occupied' },
+      ]);
+      expect(columnRenamesOf(builder)).toEqual([]);
+    });
   });
 
   describe('relations, components & dynamic zones', () => {

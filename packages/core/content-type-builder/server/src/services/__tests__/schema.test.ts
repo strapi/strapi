@@ -1,3 +1,4 @@
+import * as fse from 'fs-extra';
 import type { UID } from '@strapi/types';
 
 import { getSchema, updateSchema, renameAttribute, renameComponent } from '../schema';
@@ -49,6 +50,35 @@ jest.mock('../migration-builder', () => ({
 const { createMigrationBuilder } = require('../migration-builder');
 
 let renameMode = 'prompt-before-save';
+
+// The rollback removes the generated migration with `fse.remove`; keep it off the disk.
+jest.mock('fs-extra', () => ({
+  ...jest.requireActual('fs-extra'),
+  remove: jest.fn().mockResolvedValue(undefined),
+}));
+
+const schemaWithRenames = (renames: Array<{ oldName: string; newName: string }>): CTBSchema => ({
+  contentTypes: [
+    {
+      action: 'update',
+      uid: 'api::article.article',
+      displayName: 'Article',
+      kind: 'collectionType',
+      draftAndPublish: false,
+      pluginOptions: {},
+      options: {},
+      renames,
+      attributes: [
+        {
+          action: 'update',
+          name: 'heading',
+          properties: { type: 'string' },
+        } as any,
+      ],
+    } as any,
+  ],
+  components: [],
+});
 
 const contentStructureServiceMock = {
   validateFromUpdate: jest.fn(),
@@ -796,100 +826,63 @@ describe('Content Type Builder - Schema service', () => {
     });
 
     it('rolls back the schema files when the folder commit fails after writeFiles', async () => {
-      const contentTypeUid = 'api::test.test';
-      const mockContentType = {
-        uid: contentTypeUid,
-        kind: 'collectionType',
-        info: { displayName: 'Test' },
-        attributes: {},
-      };
-
-      jest.mocked(builderServiceMock.contentTypes.get).mockReturnValue(mockContentType);
       contentStructureServiceMock.commitFromUpdate.mockRejectedValueOnce(
         new Error('groups.json write failed')
       );
 
-      const schema: CTBSchema = {
-        contentTypes: [
-          {
-            action: 'create',
-            uid: contentTypeUid,
-            displayName: 'Test',
-            singularName: 'test',
-            pluralName: 'tests',
-            kind: 'collectionType',
-            draftAndPublish: false,
-            pluginOptions: {},
-            options: {},
-            attributes: [],
-          },
-        ],
-        components: [],
-        contentStructure: {
-          version: 1,
-          sections: {
-            collectionTypes: { groups: [] },
-            singleTypes: { groups: [] },
-          },
-        },
-      };
-
-      await expect(updateSchema(schema)).rejects.toThrow('groups.json write failed');
+      await expect(
+        updateSchema(schemaWithRenames([{ oldName: 'title', newName: 'heading' }]))
+      ).rejects.toThrow('groups.json write failed');
 
       expect(builderServiceMock.writeFiles).toHaveBeenCalledTimes(1);
       expect(builderServiceMock.rollback).toHaveBeenCalledTimes(1);
+      expect(fse.remove).toHaveBeenCalledWith('/migrations/file.js');
 
       const writeFilesOrder = jest.mocked(builderServiceMock.writeFiles).mock
         .invocationCallOrder[0];
       const commitOrder = contentStructureServiceMock.commitFromUpdate.mock.invocationCallOrder[0];
+      const removeOrder = jest.mocked(fse.remove).mock.invocationCallOrder[0];
       const rollbackOrder = jest.mocked(builderServiceMock.rollback).mock.invocationCallOrder[0];
 
       expect(writeFilesOrder).toBeLessThan(commitOrder);
-      expect(commitOrder).toBeLessThan(rollbackOrder);
+      expect(commitOrder).toBeLessThan(removeOrder);
+      expect(removeOrder).toBeLessThan(rollbackOrder);
     });
 
     it('does not commit the folder file when writeFiles rolls the schema back', async () => {
-      const contentTypeUid = 'api::test.test';
-      const mockContentType = {
-        uid: contentTypeUid,
-        kind: 'collectionType',
-        info: { displayName: 'Test' },
-        attributes: {},
-      };
-
-      jest.mocked(builderServiceMock.contentTypes.get).mockReturnValue(mockContentType);
       builderServiceMock.writeFiles.mockResolvedValueOnce(false);
 
-      const schema: CTBSchema = {
-        contentTypes: [
-          {
-            action: 'create',
-            uid: contentTypeUid,
-            displayName: 'Test',
-            singularName: 'test',
-            pluralName: 'tests',
-            kind: 'collectionType',
-            draftAndPublish: false,
-            pluginOptions: {},
-            options: {},
-            attributes: [],
-          },
-        ],
-        components: [],
-        contentStructure: {
-          version: 1,
-          sections: {
-            collectionTypes: { groups: [] },
-            singleTypes: { groups: [] },
-          },
-        },
-      };
-
-      await expect(updateSchema(schema)).rejects.toThrow('Invalid schema edition');
+      await expect(
+        updateSchema(schemaWithRenames([{ oldName: 'title', newName: 'heading' }]))
+      ).rejects.toThrow('Invalid schema edition');
 
       expect(builderServiceMock.writeFiles).toHaveBeenCalledTimes(1);
       expect(contentStructureServiceMock.commitFromUpdate).not.toHaveBeenCalled();
       expect(builderServiceMock.rollback).not.toHaveBeenCalled();
+      expect(fse.remove).toHaveBeenCalledWith('/migrations/file.js');
+    });
+
+    it('keeps the generated migration when the save succeeds', async () => {
+      await updateSchema(schemaWithRenames([{ oldName: 'title', newName: 'heading' }]));
+
+      expect(migrationBuilderMock.writeFiles).toHaveBeenCalledTimes(1);
+      expect(contentStructureServiceMock.commitFromUpdate).toHaveBeenCalledTimes(1);
+      expect(fse.remove).not.toHaveBeenCalled();
+    });
+
+    it('removes no migration on rollback when none was generated', async () => {
+      migrationBuilderMock.hasChanges.mockReturnValue(false);
+      contentStructureServiceMock.commitFromUpdate.mockRejectedValueOnce(
+        new Error('groups.json write failed')
+      );
+
+      await expect(
+        updateSchema(schemaWithRenames([{ oldName: 'title', newName: 'heading' }]))
+      ).rejects.toThrow('groups.json write failed');
+
+      expect(migrationBuilderMock.writeFiles).not.toHaveBeenCalled();
+      expect(builderServiceMock.rollback).toHaveBeenCalledTimes(1);
+      expect(fse.remove).not.toHaveBeenCalled();
     });
 
     it('removes a partial generated API before an absent schema directory prevents rollback', async () => {
@@ -1096,31 +1089,6 @@ describe('Content Type Builder - Schema service', () => {
   });
 
   describe('rename migrations', () => {
-    const schemaWithRenames = (
-      renames: Array<{ oldName: string; newName: string }>
-    ): CTBSchema => ({
-      contentTypes: [
-        {
-          action: 'update',
-          uid: 'api::article.article',
-          displayName: 'Article',
-          kind: 'collectionType',
-          draftAndPublish: false,
-          pluginOptions: {},
-          options: {},
-          renames,
-          attributes: [
-            {
-              action: 'update',
-              name: 'heading',
-              properties: { type: 'string' },
-            } as any,
-          ],
-        } as any,
-      ],
-      components: [],
-    });
-
     it('generates a rename migration from the ordered renames array', async () => {
       await updateSchema(schemaWithRenames([{ oldName: 'title', newName: 'heading' }]));
 
