@@ -39,7 +39,10 @@
       "require": "./dist/server/index.js",
       "default": "./dist/server/index.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./strapi-server/strict-types": {
+      "types": "./dist/server/src/strict-types-augmentation.d.ts"
+    }
   },
   "files": [
     "./dist"
@@ -66,6 +69,7 @@
   "devDependencies": {
     "@strapi/admin": "5.53.0",
     "@strapi/strapi": "5.53.0",
+    "@strapi/types": "5.53.0",
     "@types/node": "20.19.41",
     "react": "18.3.1",
     "react-dom": "18.3.1",
