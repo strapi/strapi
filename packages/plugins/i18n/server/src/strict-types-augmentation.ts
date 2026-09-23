@@ -1,9 +1,7 @@
-import type { LocaleService } from './public-services';
+import type { LocaleService } from './types/services';
 import type {} from '@strapi/types';
 
-export type { Locale, LocaleFilters, LocaleService } from './public-services';
-
-/** Import this module from an application declaration file to opt in to service inference. */
+/** Import this module from an application declaration file to opt in to stricter i18n types. */
 declare module '@strapi/types' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Public {

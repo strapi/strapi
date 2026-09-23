@@ -1,1 +1,1 @@
-import type {} from '@strapi/i18n/types';
+import type {} from '@strapi/i18n/strapi-server/strict-types';
