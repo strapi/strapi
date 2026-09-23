@@ -1,3 +1,5 @@
+import type { Core } from '@strapi/types';
+import type { controllers } from '../controllers';
 import { ACTIONS } from '../constants';
 
 export const routes = {
@@ -28,4 +30,4 @@ export const routes = {
       },
     },
   ],
-};
+} satisfies Core.RouterInputFor<typeof controllers, 'plugin::upload'>;
