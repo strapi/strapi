@@ -1,3 +1,7 @@
+import type { Core } from '@strapi/types';
+// Loads the admin policy contracts so that route policies are checked against them.
+import type {} from '@strapi/admin/strapi-server/strict-types';
+import type { coreControllers } from '../controllers';
 import { routing } from '../middlewares';
 
 export default {
@@ -468,4 +472,4 @@ export default {
       },
     },
   ],
-};
+} satisfies Core.RouterInputFor<typeof coreControllers, 'plugin::content-manager'>;
