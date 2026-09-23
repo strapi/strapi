@@ -1,5 +1,15 @@
 import type { PropertyPath } from 'lodash';
-import type { ConfigFor, ConfigNamespace, Module, Route, Router, Service, ServiceFor } from '.';
+import type {
+  ConfigFor,
+  ConfigNamespace,
+  ConfigPathValue,
+  Module,
+  Route,
+  Router,
+  Service,
+  ServiceFor,
+} from '.';
+import type { SuggestedString } from '../utils/string';
 
 type ServiceNames<TPlugin extends string> = string extends TPlugin
   ? never
@@ -15,27 +25,54 @@ type PluginConfigNamespace<TPlugin extends string> = string extends TPlugin
   ? never
   : Extract<`plugin::${TPlugin}`, ConfigNamespace>;
 
-/** The registered value when `TKey` is a key of the plugin's config contract, `T` otherwise. */
+/** Top-level keys of the plugin's registered config contract, listed for completion. */
+type PluginConfigKey<TPlugin extends string> = [PluginConfigNamespace<TPlugin>] extends [never]
+  ? never
+  : keyof ConfigFor<PluginConfigNamespace<TPlugin>> & string;
+
+/** Any plugin config key. Top-level keys of the registered contract are listed for completion. */
+type PluginConfigPath<TPlugin extends string> =
+  | SuggestedString<PluginConfigKey<TPlugin>>
+  | Exclude<PropertyPath, string>;
+
+/** The registered value when `TKey` is a key or dotted path of the plugin's config contract, `T` otherwise. */
 type PluginConfigLookup<TPlugin extends string, TKey, T> = [
   PluginConfigNamespace<TPlugin>,
 ] extends [never]
   ? T
-  : TKey extends keyof ConfigFor<PluginConfigNamespace<TPlugin>>
-    ? ConfigFor<PluginConfigNamespace<TPlugin>>[TKey]
-    : T;
+  : PluginConfigPath<TPlugin> extends TKey
+    ? T
+    : TKey extends string
+      ? ConfigPathValue<PluginConfigNamespace<TPlugin>, TKey, T>
+      : T;
+
+/** The registered contract when `TServiceName` is a registered service of the plugin, `T` otherwise. */
+type PluginServiceLookup<TPlugin extends string, TServiceName, T> = [
+  ServiceNames<TPlugin>,
+] extends [never]
+  ? T
+  : SuggestedString<ServiceNames<TPlugin>> extends TServiceName
+    ? T
+    : TServiceName extends ServiceNames<TPlugin>
+      ? ServiceFor<`plugin::${TPlugin}.${TServiceName}`>
+      : T;
 
 export type Plugin<TName extends string = string> = Omit<
   Module,
   'routes' | 'service' | 'config'
 > & {
   routes: Route[] | Record<string, Router>;
-  config<T = unknown, TKey extends PropertyPath = PropertyPath>(
+  config<T = unknown, TKey extends PluginConfigPath<TName> = PluginConfigPath<TName>>(
     key: TKey,
     defaultVal?: PluginConfigLookup<TName, TKey, T>
   ): PluginConfigLookup<TName, TKey, T>;
-  service<TServiceName extends ServiceNames<TName>>(
+  service<
+    T extends Service = Service,
+    TServiceName extends SuggestedString<ServiceNames<TName>> = SuggestedString<
+      ServiceNames<TName>
+    >,
+  >(
     name: TServiceName
-  ): ServiceFor<`plugin::${TName}.${TServiceName}`>;
-  service<T extends Service>(name: string): T;
+  ): PluginServiceLookup<TName, TServiceName, T>;
   [key: string]: any;
 };

@@ -13,6 +13,9 @@ declare global {
       interface DefaultConfigs {
         'plugin::config-lab': { enabled: string; defaultOnly: true };
         'plugin::config-lab-default': LabConfig;
+        'plugin::config-lab-nested': {
+          provider: { name: string; options?: { port: number } | null };
+        };
       }
 
       interface Configs {
@@ -45,15 +48,34 @@ strapi.plugin('config-lab').config('limit') satisfies string;
 // @ts-expect-error Plugin-scoped default values must match the registered value type.
 strapi.plugin('config-lab').config('limit', 'ten');
 
+// Dotted paths resolve inside the registered contract, like lodash `get`.
+strapi.config.get('plugin::config-lab.limit') satisfies number;
+strapi.config.get('plugin::config-lab-nested.provider.name') satisfies string;
+strapi.config.get('plugin::config-lab-nested.provider.options.port') satisfies number | undefined;
+strapi.plugin('config-lab-nested').config('provider.name') satisfies string;
+strapi.plugin('config-lab-nested').config('provider.options') satisfies
+  | { port: number }
+  | null
+  | undefined;
+// @ts-expect-error Values behind an optional key may be undefined.
+strapi.config.get('plugin::config-lab-nested.provider.options.port') satisfies number;
+// @ts-expect-error Dotted default values must match the registered value type.
+strapi.config.get('plugin::config-lab.limit', 'ten');
+// @ts-expect-error Paths outside the contract resolve to unknown.
+strapi.config.get('plugin::config-lab.missing').anything satisfies unknown;
+// @ts-expect-error Plugin-scoped paths outside the contract resolve to unknown.
+strapi.plugin('config-lab-nested').config('provider.missing').anything satisfies unknown;
+
 // An override replaces the default contract rather than intersecting it.
 // @ts-expect-error Keys from the replaced default are not retained.
 strapi.config.get('plugin::config-lab').defaultOnly satisfies unknown;
 
-// Unregistered namespaces, dotted paths and dynamic lookups keep the permissive signature.
+// Explicit generics, unregistered namespaces, array paths and dynamic lookups keep the permissive signature.
 strapi.config.get('plugin::unregistered') satisfies unknown;
 strapi.config.get<number>('server.port') satisfies number;
 strapi.config.get<number>('plugin::config-lab.limit') satisfies number;
 strapi.config.get<number>(dynamicKey) satisfies number;
+strapi.config.get<number>(['plugin::config-lab', 'limit']) satisfies number;
 strapi.plugin('unregistered').config<number>('limit') satisfies number;
 strapi.plugin('config-lab').config<string>('unregistered') satisfies string;
 strapi.plugin(dynamicPlugin).config<number>('limit') satisfies number;
@@ -62,6 +84,11 @@ const legacyPlugin: Core.Plugin = strapi.plugin('config-lab');
 legacyPlugin.config<number>('limit') satisfies number;
 const contextual: { port: number } = strapi.config.get('server');
 strapi.config.get('server.port', 1337) satisfies number;
+
+// Generic helpers that forward a config path keep inferring from their declared return type.
+const getLabConfig = <TKey extends keyof LabConfig>(key: TKey): LabConfig[TKey] =>
+  strapi.plugin('unregistered').config(key);
+getLabConfig('limit') satisfies number;
 
 // Implementations and mocks written against the permissive signature still type check.
 const provider: Core.ConfigProvider = {
@@ -72,6 +99,8 @@ const provider: Core.ConfigProvider = {
   has: () => true,
 };
 provider.get('plugin::config-lab').limit satisfies number;
+// @ts-expect-error Assigned functions are checked against the generic signature, as before registries.
+provider.get = () => ({ limit: 1 });
 contextual.port satisfies number;
 
 // The global `strapi` instance resolves through the same registries.

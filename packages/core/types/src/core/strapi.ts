@@ -9,6 +9,7 @@ import type * as Schema from '../schema';
 import type * as UID from '../uid';
 
 import type { Container } from './container';
+import type { SuggestedString } from '../utils/string';
 
 export interface Strapi extends Container {
   server: Modules.Server.Server;
@@ -154,13 +155,49 @@ export type ConfigFor<TNamespace extends ConfigNamespace> =
       ? Strapi.Registries.DefaultConfigs[TNamespace]
       : never;
 
-/** The registered contract when `TPath` is a registered namespace, `T` otherwise. */
-type ConfigLookup<TPath, T> = TPath extends ConfigNamespace ? ConfigFor<TPath> : T;
+/** `undefined` when `TValue` can be `null` or `undefined`: lodash `get` resolves through them to `undefined`. */
+type Nullish<TValue> = [Extract<TValue, null | undefined>] extends [never] ? never : undefined;
+
+/** The value at a dotted path such as `'a.b'` inside `TValue`, or `never` when the path does not exist. */
+type PathValue<TValue, TPath extends string> = TPath extends `${infer THead}.${infer TRest}`
+  ? THead extends keyof NonNullable<TValue>
+    ? PathValue<NonNullable<TValue>[THead] | Nullish<TValue>, TRest>
+    : never
+  : TPath extends keyof NonNullable<TValue>
+    ? NonNullable<TValue>[TPath] | Nullish<TValue>
+    : never;
+
+/**
+ * The value at a dotted path inside a registered config contract, e.g. `'providerOptions.localServer'`.
+ * Resolves to `TFallback` when the path is not part of the contract.
+ */
+export type ConfigPathValue<TNamespace extends ConfigNamespace, TPath extends string, TFallback> = [
+  PathValue<ConfigFor<TNamespace>, TPath>,
+] extends [never]
+  ? TFallback
+  : PathValue<ConfigFor<TNamespace>, TPath>;
+
+/** Any config path. Registered namespaces are listed for completion. */
+export type ConfigPath = SuggestedString<ConfigNamespace> | Exclude<PropertyPath, string>;
+
+/**
+ * Resolves a config path against the registries: a registered namespace, or a dotted path inside one.
+ * Array paths, unregistered namespaces, unknown paths and the unresolved default path resolve to `T`.
+ */
+type ConfigLookup<TPath, T> = [ConfigNamespace] extends [never]
+  ? T
+  : ConfigPath extends TPath
+    ? T
+    : TPath extends ConfigNamespace
+      ? ConfigFor<TPath>
+      : TPath extends `${infer TNamespace}.${infer TKey}`
+        ? TNamespace extends ConfigNamespace
+          ? ConfigPathValue<TNamespace, TKey, T>
+          : T
+        : T;
 
 export interface ConfigProvider {
-  // A single signature, not overloads: overloads make existing mocks of `get` fail to type check.
-  // TODO @Nico dotted paths into a registered namespace (e.g. 'plugin::my-plugin.key') still resolve to `T`
-  get<T = unknown, TPath extends PropertyPath = PropertyPath>(
+  get<T = unknown, TPath extends ConfigPath = ConfigPath>(
     key: TPath,
     defaultVal?: ConfigLookup<TPath, T>
   ): ConfigLookup<TPath, T>;

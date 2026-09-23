@@ -77,6 +77,16 @@ const contextualDynamic: GreetingService = strapi.plugin(dynamicPlugin).service(
 const legacyPlugin: Core.Plugin = strapi.plugin('type-lab');
 const contextualLegacy: GreetingService = legacyPlugin.service('greeting');
 contextual.greet('Nico');
+// Generic helpers that forward a service name keep inferring from their declared return type.
+type LabServices = { greeting: GreetingService; unregistered: GreetingService };
+const getUnregisteredService = <TName extends keyof LabServices>(name: TName): LabServices[TName] =>
+  strapi.plugin('unregistered').service(name);
+const getRegisteredService = <TName extends keyof LabServices>(name: TName): LabServices[TName] =>
+  strapi.plugin('type-lab').service(name);
+getUnregisteredService('greeting').greet('Nico') satisfies Promise<string>;
+getRegisteredService('unregistered').greet('Nico') satisfies Promise<string>;
+// @ts-expect-error Assigned functions are checked against the generic signature, as before registries.
+legacyPlugin.service = () => ({ greet: () => 'Nico' });
 contextualDynamic.greet('Nico');
 contextualLegacy.greet('Nico');
 
