@@ -1,7 +1,11 @@
-import type { Core, Public } from '../..';
+import type * as PublicRegistries from '../../public/registries';
+import type { Controller } from '../controller';
+import type { Module } from '../module';
+import type { Plugin } from '../plugin';
+import type { Strapi as StrapiInstance } from '../strapi';
 
-// @ts-expect-error Service contract registries are global, not part of the Public barrel.
-type BarrelRegistry = Public.DefaultServices;
+// @ts-expect-error Service contract registries are global, not part of the Public registries.
+type BarrelRegistry = PublicRegistries.DefaultServices;
 declare const barrelRegistry: BarrelRegistry;
 barrelRegistry satisfies unknown;
 
@@ -42,7 +46,7 @@ declare module '../../public/registries' {
   }
 }
 
-declare const strapi: Core.Strapi;
+declare const strapi: StrapiInstance;
 declare const dynamicPlugin: string;
 declare const dynamicService: string;
 
@@ -74,7 +78,7 @@ strapi.plugin('type-lab').service<GreetingService>('greeting').greet('Nico');
 strapi.plugin('unregistered').service<GreetingService>('greeting').greet('Nico');
 const contextual: GreetingService = strapi.plugin('type-lab').service('unregistered');
 const contextualDynamic: GreetingService = strapi.plugin(dynamicPlugin).service('greeting');
-const legacyPlugin: Core.Plugin = strapi.plugin('type-lab');
+const legacyPlugin: Plugin = strapi.plugin('type-lab');
 const contextualLegacy: GreetingService = legacyPlugin.service('greeting');
 contextual.greet('Nico');
 // Generic helpers that forward a service name keep inferring from their declared return type.
@@ -92,11 +96,11 @@ contextualLegacy.greet('Nico');
 
 // Parameterizing Plugin must preserve its explicitly declared Module members.
 strapi.plugin('type-lab').config<number>('limit') satisfies number;
-strapi.plugin('type-lab').contentTypes satisfies Core.Module['contentTypes'];
-strapi.plugin('type-lab').controller('example') satisfies Core.Controller;
+strapi.plugin('type-lab').contentTypes satisfies Module['contentTypes'];
+strapi.plugin('type-lab').controller('example') satisfies Controller;
 strapi.log.info('typed service registry');
-strapi.documents satisfies Core.Strapi['documents'];
-strapi.db satisfies Core.Strapi['db'];
+strapi.documents satisfies StrapiInstance['documents'];
+strapi.db satisfies StrapiInstance['db'];
 
 // Defaults are available when the application has not supplied an override.
 strapi.service('plugin::type-lab.counter').count() satisfies number;

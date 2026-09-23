@@ -1,14 +1,9 @@
 import type { PropertyPath } from 'lodash';
-import type {
-  ConfigFor,
-  ConfigNamespace,
-  ConfigPathValue,
-  Module,
-  Route,
-  Router,
-  Service,
-  ServiceFor,
-} from '.';
+import type { Module } from './module';
+import type { Route } from './route';
+import type { Router } from './router';
+import type { Service, ServiceFor } from './service';
+import type { ConfigFor, ConfigNamespace, ConfigPathValue } from './strapi';
 import type { SuggestedString } from '../utils/string';
 
 type ServiceNames<TPlugin extends string> = string extends TPlugin

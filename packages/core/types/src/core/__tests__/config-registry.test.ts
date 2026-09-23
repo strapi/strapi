@@ -1,4 +1,5 @@
-import type { Core } from '../..';
+import type { Plugin } from '../plugin';
+import type { ConfigProvider, Strapi as StrapiInstance } from '../strapi';
 
 type LabConfig = {
   enabled: boolean;
@@ -25,7 +26,7 @@ declare global {
   }
 }
 
-declare const strapi: Core.Strapi;
+declare const strapi: StrapiInstance;
 declare const dynamicPlugin: string;
 declare const dynamicKey: string;
 
@@ -80,7 +81,7 @@ strapi.plugin('unregistered').config<number>('limit') satisfies number;
 strapi.plugin('config-lab').config<string>('unregistered') satisfies string;
 strapi.plugin(dynamicPlugin).config<number>('limit') satisfies number;
 strapi.plugin('config-lab').config<number>(dynamicKey) satisfies number;
-const legacyPlugin: Core.Plugin = strapi.plugin('config-lab');
+const legacyPlugin: Plugin = strapi.plugin('config-lab');
 legacyPlugin.config<number>('limit') satisfies number;
 const contextual: { port: number } = strapi.config.get('server');
 strapi.config.get('server.port', 1337) satisfies number;
@@ -91,7 +92,7 @@ const getLabConfig = <TKey extends keyof LabConfig>(key: TKey): LabConfig[TKey] 
 getLabConfig('limit') satisfies number;
 
 // Implementations and mocks written against the permissive signature still type check.
-const provider: Core.ConfigProvider = {
+const provider: ConfigProvider = {
   get: () => ({}) as any,
   set() {
     return this;
