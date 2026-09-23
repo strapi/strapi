@@ -2,6 +2,7 @@ import { createCommand } from 'commander';
 
 import type { StrapiCommand } from '../../types';
 import { runAction } from '../../utils/helpers';
+import { getTypeArtifacts } from '../../utils/typescript-artifacts';
 
 interface CmdOptions {
   debug?: boolean;
@@ -33,7 +34,7 @@ const action = async ({ debug, silent, verbose, outDir }: CmdOptions) => {
       silent,
       debug,
     },
-    artifacts: { contentTypes: true, components: true, services: true },
+    artifacts: getTypeArtifacts(app),
   });
 
   await app.destroy();

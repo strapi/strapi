@@ -10,6 +10,7 @@ import { getTimer, prettyTime, type TimeMeasurer } from './core/timer';
 import type { WebpackWatcher } from './webpack/watch';
 import type { ViteWatcher } from './vite/watch';
 import type { Logger } from '../cli/utils/logger';
+import { getTypeArtifacts } from '../cli/utils/typescript-artifacts';
 
 // Lazy: worker-only deps; primary cluster process should not pay for them
 const lazy = <T>(spec: string): (() => T) => {
@@ -278,7 +279,7 @@ const develop = async ({
           pwd: cwd,
           rootDir: undefined,
           logger: { silent: true, debug: false },
-          artifacts: { contentTypes: true, components: true, services: true },
+          artifacts: getTypeArtifacts(strapiInstance),
         });
 
         const generatingDuration = timer.end('generatingTS');
