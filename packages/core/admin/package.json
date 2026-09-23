@@ -60,7 +60,10 @@
       "require": "./dist/server/index.js",
       "default": "./dist/server/index.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./strapi-server/strict-types": {
+      "types": "./dist/server/src/strict-type-augmentations.d.ts"
+    }
   },
   "files": [
     "dist/"
@@ -195,6 +198,16 @@
           "{projectRoot}/build"
         ]
       }
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "strapi-server": [
+        "./dist/server/src/index.d.ts"
+      ],
+      "strapi-server/strict-types": [
+        "./dist/server/src/strict-type-augmentations.d.ts"
+      ]
     }
   }
 }
