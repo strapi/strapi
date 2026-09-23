@@ -41,7 +41,7 @@
     },
     "./package.json": "./package.json",
     "./strapi-server/strict-types": {
-      "types": "./dist/server/src/strict-types-augmentation.d.ts"
+      "types": "./dist/server/src/strict-type-augmentations.d.ts"
     }
   },
   "files": [
@@ -102,7 +102,7 @@
         "./dist/server/src/index.d.ts"
       ],
       "strapi-server/strict-types": [
-        "./dist/server/src/strict-types-augmentation.d.ts"
+        "./dist/server/src/strict-type-augmentations.d.ts"
       ]
     }
   }
