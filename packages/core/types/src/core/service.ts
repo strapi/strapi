@@ -1,10 +1,8 @@
-import type * as Public from '../public';
-
 /** Resolves application overrides before package defaults, then falls back to the legacy service. */
-export type ServiceFor<TUID extends string> = TUID extends keyof Public.ServiceRegistry
-  ? Public.ServiceRegistry[TUID]
-  : TUID extends keyof Public.DefaultServiceRegistry
-    ? Public.DefaultServiceRegistry[TUID]
+export type ServiceFor<TUID extends string> = TUID extends keyof Strapi.Registries.ServiceRegistry
+  ? Strapi.Registries.ServiceRegistry[TUID]
+  : TUID extends keyof Strapi.Registries.DefaultServiceRegistry
+    ? Strapi.Registries.DefaultServiceRegistry[TUID]
     : Service;
 
 export type Service = {
