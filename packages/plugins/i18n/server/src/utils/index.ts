@@ -1,4 +1,4 @@
-import type { LocaleService } from '../services/locales';
+import type locales from '../services/locales';
 import type { PermissionsService } from '../services/permissions';
 import type { ContentTypesService } from '../services/content-types';
 import type { MetricsService } from '../services/metrics';
@@ -14,7 +14,7 @@ import type { createFillFromLocaleService } from '../services/fill-from-locale';
 type S = {
   permissions: PermissionsService;
   metrics: MetricsService;
-  locales: LocaleService;
+  locales: ReturnType<typeof locales>;
   localizations: LocalizationsService;
   settings: SettingsService;
   ['iso-locales']: ISOLocalesService;

@@ -1,11 +1,7 @@
 import { isNil } from 'lodash/fp';
 import type { Data } from '@strapi/types';
 import { emitAudit } from '@strapi/utils';
-import type {
-  Locale,
-  LocaleFilters,
-  LocaleService as PublicLocaleService,
-} from '../types/services';
+import type { Locale, LocaleFilters, LocaleService } from '../types/services';
 import { AUDITED_EVENTS, DEFAULT_LOCALE } from '../constants';
 import { getService, getCoreStore } from '../utils';
 
@@ -157,9 +153,6 @@ const locales = () =>
     setIsDefault,
     delete: deleteFn,
     initDefaultLocale,
-  }) satisfies PublicLocaleService;
-
-type LocaleService = typeof locales;
+  }) satisfies LocaleService;
 
 export default locales;
-export type { LocaleService };
