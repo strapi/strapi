@@ -1,7 +1,7 @@
 import type { z } from 'zod/v4';
 import type { LiteralUnion } from '../utils/string';
 import type { MiddlewareHandler } from './middleware';
-import type { PluginHandlerReference } from './plugin';
+import type { ControllerActionReference } from './controller';
 
 export type RouteInfo = {
   apiName?: string;
@@ -20,9 +20,15 @@ export type HandlerReference = string;
 
 export type RouteInput = Omit<Route, 'info'> & { info?: Partial<RouteInfo> };
 
-/** A route of a plugin whose string handlers are checked against the plugin's registered controllers. */
-export type PluginRouteInput<TPlugin extends string> = Omit<RouteInput, 'handler'> & {
-  handler: PluginHandlerReference<TPlugin> | MiddlewareHandler | MiddlewareHandler[];
+/** A route whose string handlers must reference an action of `TControllers`. See {@link ControllerActionReference}. */
+export type RouteInputFor<TControllers, TNamespace extends string = never> = Omit<
+  RouteInput,
+  'handler'
+> & {
+  handler:
+    | ControllerActionReference<TControllers, TNamespace>
+    | MiddlewareHandler
+    | MiddlewareHandler[];
 };
 
 export type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'ALL' | 'OPTIONS' | 'HEAD';

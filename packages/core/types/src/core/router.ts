@@ -1,5 +1,5 @@
 import type { Strapi } from './strapi';
-import type { PluginRouteInput, Route, RouteInput } from './route';
+import type { Route, RouteInput, RouteInputFor } from './route';
 
 export type RouterType = 'admin' | 'content-api';
 
@@ -13,9 +13,10 @@ export interface RouterInput extends Omit<Router, 'routes'> {
   routes: RouteInput[];
 }
 
-/** A router of a plugin whose string handlers are checked against the plugin's registered controllers. */
-export interface PluginRouterInput<TPlugin extends string> extends Omit<Router, 'routes'> {
-  routes: PluginRouteInput<TPlugin>[];
+/** A router whose string handlers must reference an action of `TControllers`. See {@link ControllerActionReference}. */
+export interface RouterInputFor<TControllers, TNamespace extends string = never>
+  extends Omit<Router, 'routes'> {
+  routes: RouteInputFor<TControllers, TNamespace>[];
 }
 
 export type RouterConfig = RouterInput | ((params: { strapi: Strapi }) => RouterInput);

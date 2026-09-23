@@ -1,4 +1,5 @@
 import type { Core } from '@strapi/types';
+import type controllers from '../controllers';
 
 export default {
   type: 'admin',
@@ -122,4 +123,4 @@ export default {
       },
     },
   ],
-} satisfies Core.PluginRouterInput<'i18n'>;
+} satisfies Core.RouterInputFor<typeof controllers, 'plugin::i18n'>;

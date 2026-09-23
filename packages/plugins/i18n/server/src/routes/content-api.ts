@@ -1,9 +1,10 @@
 import type { Core } from '@strapi/types';
 import { createContentApiRoutesFactory } from '@strapi/utils';
+import type controllers from '../controllers';
 import { I18nLocaleRouteValidator } from './validation';
 
 const createContentApiRoutes = createContentApiRoutesFactory(
-  (): Core.PluginRouterInput<'i18n'>['routes'] => {
+  (): Core.RouterInputFor<typeof controllers, 'plugin::i18n'>['routes'] => {
     const validator = new I18nLocaleRouteValidator(strapi);
     return [
       {
