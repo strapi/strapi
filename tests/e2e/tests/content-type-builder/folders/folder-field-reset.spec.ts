@@ -10,9 +10,12 @@ const ROOT_TYPE = 'Author';
 const FOLDER_FIELD_LABEL = 'Select a folder or enter a value to create a new one';
 
 // Going through the main nav raises the discard dialog while the builder holds unsaved
-// changes, so move between content types inside the plugin instead.
+// changes, so move between content types inside the plugin instead. The link has to be scoped
+// to the sub navigation: a content type page also links to its relation targets by name.
 const openContentType = async (page: Page, name: string) => {
-  await clickAndWait(page, page.getByRole('link', { name, exact: true }));
+  const subNav = page.getByRole('navigation', { name: 'Content-Type Builder' });
+
+  await clickAndWait(page, subNav.getByRole('link', { name, exact: true }));
   await expect(page.getByRole('heading', { name, exact: true })).toBeVisible();
 };
 
