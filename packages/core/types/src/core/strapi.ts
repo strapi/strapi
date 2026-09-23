@@ -211,6 +211,13 @@ type ConfigLookup<TPath, T> = [ConfigNamespace] extends [never]
         : T;
 
 export interface ConfigProvider {
+  /**
+   * Reads a config value. A registered namespace, or a dotted path inside one, resolves to its contract.
+   *
+   * A default value does not remove `undefined` from a registered result, although it replaces an
+   * `undefined` value at runtime.
+   */
+  // TODO @Nico default-aware results need a third type parameter that keeps `get<T>(key, default)` calls working
   get<T = unknown, TPath extends ConfigPath = ConfigPath>(
     key: TPath,
     defaultVal?: ConfigLookup<TPath, T>

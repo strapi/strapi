@@ -76,6 +76,12 @@ export type Plugin<TName extends string = string> = Omit<
   'routes' | 'service' | 'config' | 'controller'
 > & {
   routes: Route[] | Record<string, Router>;
+  /**
+   * Reads a key or dotted path of the plugin config. A registered contract resolves the value type.
+   *
+   * A default value does not remove `undefined` from a registered result, although it replaces an
+   * `undefined` value at runtime.
+   */
   config<T = unknown, TKey extends PluginConfigPath<TName> = PluginConfigPath<TName>>(
     key: TKey,
     defaultVal?: PluginConfigLookup<TName, TKey, T>

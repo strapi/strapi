@@ -81,6 +81,14 @@ tupleElementHost satisfies string;
 strapi.config.get('plugin::config-lab-nested.items.0.port') satisfies number;
 // @ts-expect-error Non-numeric segments into an array are outside the contract.
 strapi.config.get('plugin::config-lab-nested.items.first').anything satisfies unknown;
+// A default value does not remove `undefined` from the result, although the runtime returns the default.
+const optionalPortWithDefault = strapi.config.get(
+  'plugin::config-lab-nested.provider.options.port',
+  1337
+);
+optionalPortWithDefault satisfies number | undefined;
+// @ts-expect-error Known limitation: the result keeps `undefined`.
+optionalPortWithDefault satisfies number;
 // @ts-expect-error Dotted default values must match the registered value type.
 strapi.config.get('plugin::config-lab.limit', 'ten');
 // @ts-expect-error Paths outside the contract resolve to unknown.
