@@ -89,6 +89,23 @@ const getRegisteredService = <TName extends keyof LabServices>(name: TName): Lab
   strapi.plugin('type-lab').service(name);
 getUnregisteredService('greeting').greet('Nico') satisfies Promise<string>;
 getRegisteredService('unregistered').greet('Nico') satisfies Promise<string>;
+
+// A conditional return type needs the explicit generic when the plugin has registered services:
+// the lookup cannot resolve until the name is known.
+type LabServiceFactories = { greeting: () => GreetingService };
+type LabServiceInstance<TName extends keyof LabServiceFactories> = ReturnType<
+  LabServiceFactories[TName]
+>;
+const getRegisteredFactoryService = <TName extends keyof LabServiceFactories>(
+  name: TName
+): LabServiceInstance<TName> => strapi.plugin('type-lab').service<LabServiceInstance<TName>>(name);
+const getRegisteredFactoryServiceInferred = <TName extends keyof LabServiceFactories>(
+  name: TName
+): LabServiceInstance<TName> =>
+  // @ts-expect-error Without the explicit generic, the deferred lookup is not assignable.
+  strapi.plugin('type-lab').service(name);
+getRegisteredFactoryService('greeting').greet('Nico') satisfies Promise<string>;
+getRegisteredFactoryServiceInferred('greeting').greet('Nico') satisfies Promise<string>;
 // @ts-expect-error Assigned functions are checked against the generic signature, as before registries.
 legacyPlugin.service = () => ({ greet: () => 'Nico' });
 contextualDynamic.greet('Nico');
