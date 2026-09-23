@@ -64,12 +64,12 @@
   "dependencies": {
     "@sentry/node": "7.112.2",
     "@strapi/design-system": "2.2.4",
-    "@strapi/icons": "2.2.4"
+    "@strapi/icons": "2.2.4",
+    "@strapi/types": "5.53.0"
   },
   "devDependencies": {
     "@strapi/admin": "5.53.0",
     "@strapi/strapi": "5.53.0",
-    "@strapi/types": "5.53.0",
     "@types/node": "20.19.41",
     "react": "18.3.1",
     "react-dom": "18.3.1",
