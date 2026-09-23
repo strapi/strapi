@@ -45,24 +45,10 @@ export interface ComponentSchemas {
 }
 
 /**
- * Service contracts supplied by Strapi and plugin packages.
- * Packages augment Public.DefaultServiceRegistry in `declare module '@strapi/types'` using full UIDs.
- * Application entries in ServiceRegistry take precedence over these defaults.
- */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DefaultServiceRegistry {}
-
-/**
- * Application service contracts and overrides, keyed by full service UID.
- * Applications augment Public.ServiceRegistry in `declare module '@strapi/strapi'`.
- * Each entry replaces the entire default contract for that UID; it is not intersected with it.
- * Services absent from both registries retain their existing permissive types.
- */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ServiceRegistry {}
-
-/**
  * Shared service registry
+ *
+ * Augmenting it narrows `UID.Service` to the declared keys. Strict service contracts
+ * are declared in the global `Strapi.Registries.Services` and `Strapi.Registries.DefaultServices`.
  */
 export interface Services {
   [uid: UID.Service]: Service;

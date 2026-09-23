@@ -5,7 +5,7 @@ import type {
   Locale,
   LocaleFilters,
   LocaleService as PublicLocaleService,
-} from '../public-services';
+} from '../types/services';
 import { AUDITED_EVENTS, DEFAULT_LOCALE } from '../constants';
 import { getService, getCoreStore } from '../utils';
 

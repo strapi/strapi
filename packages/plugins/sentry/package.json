@@ -39,7 +39,10 @@
       "require": "./dist/server/index.js",
       "default": "./dist/server/index.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./strapi-server/strict-types": {
+      "types": "./dist/server/src/strict-types-augmentation.d.ts"
+    }
   },
   "files": [
     "./dist"
@@ -61,7 +64,8 @@
   "dependencies": {
     "@sentry/node": "7.112.2",
     "@strapi/design-system": "2.2.4",
-    "@strapi/icons": "2.2.4"
+    "@strapi/icons": "2.2.4",
+    "@strapi/types": "5.53.0"
   },
   "devDependencies": {
     "@strapi/admin": "5.53.0",
@@ -91,5 +95,15 @@
     "displayName": "Sentry",
     "description": "Send Strapi error events to Sentry.",
     "kind": "plugin"
+  },
+  "typesVersions": {
+    "*": {
+      "strapi-server": [
+        "./dist/server/src/index.d.ts"
+      ],
+      "strapi-server/strict-types": [
+        "./dist/server/src/strict-types-augmentation.d.ts"
+      ]
+    }
   }
 }

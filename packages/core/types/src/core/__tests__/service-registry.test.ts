@@ -1,34 +1,36 @@
 import type { Core, Public } from '../..';
-import type * as DeclaredRegistries from '../../public';
 
-// @ts-expect-error Registries are exposed only through Public.
-type DirectRegistry = import('../..').ServiceRegistry;
-declare const directRegistry: DirectRegistry;
-directRegistry satisfies unknown;
+// @ts-expect-error Service contract registries are global, not part of the Public barrel.
+type BarrelRegistry = Public.DefaultServices;
+declare const barrelRegistry: BarrelRegistry;
+barrelRegistry satisfies unknown;
 
 type GreetingService = {
   greet(name: string): Promise<string>;
 };
 
-declare module '../..' {
+declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace Public {
-    interface DefaultServiceRegistry {
-      'plugin::type-lab.greeting': {
-        greet(value: number): number;
-        defaultOnly(): void;
-      };
-      'plugin::type-lab.counter': {
-        count(): number;
-      };
-      'api::type-lab.greeting': { greet(value: number): number };
-      'admin::type-lab': { greet(value: number): number };
-    }
+  namespace Strapi {
+    // eslint-disable-next-line @typescript-eslint/no-namespace
+    namespace Registries {
+      interface DefaultServices {
+        'plugin::type-lab.greeting': {
+          greet(value: number): number;
+          defaultOnly(): void;
+        };
+        'plugin::type-lab.counter': {
+          count(): number;
+        };
+        'api::type-lab.greeting': { greet(value: number): number };
+        'admin::type-lab': { greet(value: number): number };
+      }
 
-    interface ServiceRegistry {
-      'plugin::type-lab.greeting': GreetingService;
-      'api::type-lab.greeting': GreetingService;
-      'admin::type-lab': GreetingService;
+      interface Services {
+        'plugin::type-lab.greeting': GreetingService;
+        'api::type-lab.greeting': GreetingService;
+        'admin::type-lab': GreetingService;
+      }
     }
   }
 }
@@ -101,12 +103,22 @@ strapi.service('plugin::type-lab.greeting').defaultOnly();
 // @ts-expect-error Plugin-scoped lookup also drops the replaced default methods.
 strapi.plugin('type-lab').service('greeting').defaultOnly();
 
-// Internal lookups must use the Public barrel, where namespace augmentation is applied.
-declare const original: DeclaredRegistries.ServiceRegistry['plugin::type-lab.greeting'];
-original.greet('Nico') satisfies Promise<string>;
-// @ts-expect-error Direct declaration imports must also reject wrong arguments.
-original.greet(123);
-declare const publicRegistry: Public.ServiceRegistry['plugin::type-lab.greeting'];
-publicRegistry satisfies typeof original;
-declare const unrelatedPublic: Public.ContentTypeSchemas;
-unrelatedPublic satisfies DeclaredRegistries.ContentTypeSchemas;
+// Separate declarations merge into one registry: every augmentation contributes its keys.
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Strapi {
+    // eslint-disable-next-line @typescript-eslint/no-namespace
+    namespace Registries {
+      interface DefaultServices {
+        'plugin::type-lab-other.counter': { total(): number };
+      }
+    }
+  }
+}
+strapi.service('plugin::type-lab-other.counter').total() satisfies number;
+strapi.service('plugin::type-lab.counter').count() satisfies number;
+// @ts-expect-error Merged defaults stay strict.
+strapi.service('plugin::type-lab-other.counter').missing();
+
+// The global `strapi` instance resolves through the same registries.
+globalThis.strapi.service('plugin::type-lab.greeting').greet('Nico') satisfies Promise<string>;
