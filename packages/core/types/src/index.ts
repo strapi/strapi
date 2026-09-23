@@ -90,6 +90,26 @@ declare global {
        */
       // eslint-disable-next-line @typescript-eslint/no-empty-interface
       interface Controllers {}
+
+      /**
+       * Policies supplied by Strapi and plugin packages, keyed by full policy UID
+       * (e.g. `'admin::hasPermissions'`). Each value is the config the policy accepts,
+       * `undefined` when it takes none.
+       * Application entries in {@link Policies} take precedence over these defaults.
+       *
+       * Unlike the other registries, policy references are checked as a complete inventory:
+       * once any policy is registered, typed route configs accept registered policies only.
+       * A package that registers policies must register all of them.
+       */
+      // eslint-disable-next-line @typescript-eslint/no-empty-interface
+      interface DefaultPolicies {}
+
+      /**
+       * Application policies and overrides, keyed by full policy UID. Each value is the config
+       * the policy accepts. An entry replaces the default config contract for that UID.
+       */
+      // eslint-disable-next-line @typescript-eslint/no-empty-interface
+      interface Policies {}
     }
   }
 
