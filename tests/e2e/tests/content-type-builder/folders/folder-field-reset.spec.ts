@@ -1,13 +1,20 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { resetFiles } from '../../../../utils/file-reset';
 import { waitForRestart } from '../../../../utils/restart';
 import { sharedSetup } from '../../../../utils/setup';
-import { clickAndWait, navToHeader } from '../../../../utils/shared';
+import { clickAndWait } from '../../../../utils/shared';
 
 const FOLDER_NAME = 'Reset Folder';
 const FOLDERED_TYPE = 'Article';
 const ROOT_TYPE = 'Author';
 const FOLDER_FIELD_LABEL = 'Select a folder or enter a value to create a new one';
+
+// Going through the main nav raises the discard dialog while the builder holds unsaved
+// changes, so move between content types inside the plugin instead.
+const openContentType = async (page: Page, name: string) => {
+  await clickAndWait(page, page.getByRole('link', { name, exact: true }));
+  await expect(page.getByRole('heading', { name, exact: true })).toBeVisible();
+};
 
 test.describe('Content type folder field', () => {
   test.describe.configure({ timeout: 500000 });
@@ -37,7 +44,7 @@ test.describe('Content type folder field', () => {
     await expect(page.getByRole('button', { name: FOLDER_NAME, exact: true })).toBeVisible();
 
     // Move a first content type into the folder, so the form holds a folder selection.
-    await navToHeader(page, ['Content-Type Builder', FOLDERED_TYPE], FOLDERED_TYPE);
+    await openContentType(page, FOLDERED_TYPE);
     await clickAndWait(page, page.getByRole('button', { name: 'Edit', exact: true }));
     await page.getByLabel(FOLDER_FIELD_LABEL).click();
     await page.getByRole('option', { name: FOLDER_NAME }).click();
@@ -46,7 +53,7 @@ test.describe('Content type folder field', () => {
     await waitForRestart(page);
 
     // The next content type edited is still at the root, so it must show no folder.
-    await navToHeader(page, ['Content-Type Builder', ROOT_TYPE], ROOT_TYPE);
+    await openContentType(page, ROOT_TYPE);
     await clickAndWait(page, page.getByRole('button', { name: 'Edit', exact: true }));
     await expect(page.getByLabel(FOLDER_FIELD_LABEL)).toHaveValue('');
   });
