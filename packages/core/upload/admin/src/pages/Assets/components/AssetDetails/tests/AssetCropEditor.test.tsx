@@ -456,4 +456,40 @@ describe('AssetCropEditor rotation', () => {
       expect(button.tagName).toBe('BUTTON');
     }
   });
+
+  // On a quarter turn the image is positioned absolutely, so the crop area needs an
+  // in-flow sibling to size it; `aspect-ratio` then derives the other side.
+  it('adds an in-flow spacer only while the image is out of flow', async () => {
+    await renderEditor();
+    const spacer = () => screen.getByTestId('crop-editor-image').previousElementSibling;
+
+    expect(spacer()).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Rotate right' }));
+    expect(spacer()).toHaveAttribute('aria-hidden');
+
+    // Half turn: back in flow, no spacer needed.
+    fireEvent.click(screen.getByRole('button', { name: 'Rotate right' }));
+    expect(spacer()).toBeNull();
+  });
+
+  // Rotating remaps the focal point, and nothing re-seeds it once the image loads,
+  // so a turn taken before then would leave the focal point out of step with it.
+  it('stays disabled until the image has loaded', () => {
+    render(
+      <AssetCropEditor
+        asset={asset}
+        onClose={jest.fn()}
+        onApply={jest.fn()}
+        onSaveAsCopy={jest.fn()}
+        canSaveAsCopy
+      />
+    );
+
+    // The design system marks a disabled IconButton with `aria-disabled` and drops the
+    // click, rather than using the native attribute.
+    for (const name of ['Rotate left', 'Rotate right']) {
+      expect(screen.getByRole('button', { name })).toHaveAttribute('aria-disabled', 'true');
+    }
+  });
 });
