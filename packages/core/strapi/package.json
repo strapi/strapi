@@ -84,7 +84,17 @@
       "require": "./dist/admin-test.js",
       "default": "./dist/admin-test.js"
     },
+    "./plugins": {
+      "types": "./dist/plugins.d.ts"
+    },
     "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "plugins": [
+        "./dist/plugins.d.ts"
+      ]
+    }
   },
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

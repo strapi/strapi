@@ -41,6 +41,21 @@ import type { LocaleService } from '@strapi/i18n/services';
 
 Both subpaths are type-only. Use type imports, not runtime imports. They support legacy Node and Node16 TypeScript module resolution.
 
+### Opt in through `@strapi/strapi`
+
+Applications depend on `@strapi/strapi`, not on the bundled plugins, which `@strapi/core` resolves from the `@strapi/strapi` package at runtime. Under a strict `node_modules` layout such as pnpm's, only declared packages get a top-level link, so `import type {} from '@strapi/i18n/types'` does not resolve from application code. `@strapi/strapi/plugins` is a type-only entry that forwards to the bundled plugins' registrations and contracts through `@strapi/strapi`, which can see its own dependencies wherever they are installed:
+
+```ts
+// types/strapi-plugins.ts
+import type {} from '@strapi/strapi/plugins';
+```
+
+Contracts are namespaced by plugin: `import type { i18n } from '@strapi/strapi/plugins'` gives `i18n.Locale` and `i18n.LocaleService`. The entry is exposed through both `exports` and `typesVersions`, so it resolves under legacy Node resolution, which generated applications use, as well as `Node16` and `Bundler`.
+
+Prefer a `.ts` file over a `.d.ts` for the opt-in import. With `skipLibCheck` enabled, which is the default in generated applications, a `.d.ts` reports no diagnostic when the module fails to resolve, and the opt-in silently does nothing; a `.ts` reports `TS2307`.
+
+The entry is not re-exported from the package's main entry: importing `@strapi/strapi` alone does not opt in.
+
 ### Register an application service
 
 `Public.ServiceRegistry` maps full service UIDs to service instances. Add entries to the interface exported by `@strapi/types` and re-exported by `@strapi/strapi`:
