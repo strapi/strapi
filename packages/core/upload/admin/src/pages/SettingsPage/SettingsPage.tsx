@@ -7,7 +7,6 @@ import {
   Layouts,
   ConfirmDialog,
 } from '@strapi/admin/strapi-admin';
-import { useAIAvailability } from '@strapi/admin/strapi-admin/ee';
 import {
   Box,
   Button,
@@ -31,6 +30,7 @@ import { AIMetadataJob } from '../../../../shared/contracts/ai-metadata-jobs';
 import { GetAIMetadataPendingCount, CreateAIMetadataJob } from '../../../../shared/contracts/files';
 import { UpdateSettings } from '../../../../shared/contracts/settings';
 import { PERMISSIONS } from '../../constants';
+import { useAIMetadataAvailability } from '../../legacy/hooks/useAIMetadataAvailability';
 import { useSettings } from '../../legacy/hooks/useSettings';
 import { useTracking } from '../../legacy/hooks/useTracking';
 import { getTranslationKey } from '../../utils/translations';
@@ -161,7 +161,7 @@ export const SettingsPage = () => {
   const [{ initialData, modifiedData }, dispatch] = React.useReducer(reducer, initialState, init);
 
   const { data, isLoading, refetch } = useSettings();
-  const isAIAvailable = useAIAvailability();
+  const isAIAvailable = useAIMetadataAvailability();
 
   const { data: imageCountResponse, isLoading: isLoadingImagesWithoutMetadataCount } = useQuery<
     GetAIMetadataPendingCount.Response['data'],

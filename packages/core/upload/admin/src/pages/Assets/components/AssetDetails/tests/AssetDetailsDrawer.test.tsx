@@ -6,13 +6,6 @@ import { AssetDetails, AssetDetailsDrawer, getBusyMessage } from '../AssetDetail
 
 import type { AssetWithPopulatedCreatedBy } from '../../../../../../../shared/contracts/files';
 
-const mockAIAvailability = jest.fn(() => true);
-
-jest.mock('@strapi/admin/strapi-admin/ee', () => ({
-  ...jest.requireActual('@strapi/admin/strapi-admin/ee'),
-  useAIAvailability: () => mockAIAvailability(),
-}));
-
 const baseAsset = {
   id: 1,
   name: 'photo.png',
@@ -69,7 +62,7 @@ const captureUpdateRequest = (responseAsset: AssetWithPopulatedCreatedBy = baseA
   return requestPromise;
 };
 
-const buildSettingsHandler = (aiMetadata = false) =>
+const buildSettingsHandler = (aiMetadata = false, aiMetadataAvailable = true) =>
   http.get('/upload/settings', () =>
     HttpResponse.json({
       data: {
@@ -77,13 +70,13 @@ const buildSettingsHandler = (aiMetadata = false) =>
         responsiveDimensions: true,
         autoOrientation: true,
         aiMetadata,
+        aiMetadataAvailable,
       },
     })
   );
 
 describe('AssetDetails (asset details drawer body)', () => {
   beforeEach(() => {
-    mockAIAvailability.mockReturnValue(true);
     server.use(buildFoldersHandler(), buildSettingsHandler());
   });
 
@@ -533,11 +526,10 @@ describe('AssetDetails (asset details drawer body)', () => {
   });
 
   // The setting is stored (and defaults to on) regardless of licensing, so it
-  // has to be ANDed with EE AI availability — otherwise plans without AI were
+  // has to be ANDed with a registered provider — otherwise plans without AI were
   // promised metadata that never gets generated.
-  it('hides the AI variant when the license has no AI, even with the setting on', async () => {
-    mockAIAvailability.mockReturnValue(false);
-    server.use(buildSettingsHandler(true));
+  it('hides the AI variant when no provider is registered, even with the setting on', async () => {
+    server.use(buildSettingsHandler(true, false));
 
     const { user } = render(<AssetDetails asset={baseAsset} closeDetails={jest.fn()} />);
     await screen.findByRole('combobox');

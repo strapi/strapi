@@ -12,7 +12,7 @@ tags:
 
 The remote websocket server only accepts specific websocket messages which we call transfer commands. These commands must also be sent in a specific order, and an error messages will be returned if an unexpected message is received by the server.
 
-A message dispatcher object should be created to send messages to the server. See `packages/core/data-transfer/src/strapi/providers/utils.ts` for more inofrmation on the dispatcher.
+A message dispatcher object should be created to send messages to the server. See `packages/core/data-transfer/src/strapi/providers/utils.ts` for more information on the dispatcher.
 
 The dispatcher includes
 
