@@ -90,7 +90,6 @@
     "@radix-ui/react-toolbar": "1.1.11",
     "@radix-ui/react-tooltip": "1.0.7",
     "@reduxjs/toolkit": "1.9.7",
-    "@strapi/database": "5.54.0",
     "@strapi/design-system": "2.2.4",
     "@strapi/icons": "2.2.4",
     "@strapi/permissions": "5.54.0",

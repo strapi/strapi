@@ -351,7 +351,7 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
       };
     },
 
-    deleteExpiredEvents(expirationDate: Date) {
+    deleteExpiredEvents(expirationDate: Date): Promise<{ count: number }> {
       return strapi.db.query('admin::audit-log').deleteMany({
         where: {
           date: {

@@ -8882,7 +8882,6 @@ __metadata:
     "@reduxjs/toolkit": "npm:1.9.7"
     "@strapi/admin-test-utils": "npm:5.54.0"
     "@strapi/data-transfer": "npm:5.54.0"
-    "@strapi/database": "npm:5.54.0"
     "@strapi/design-system": "npm:2.2.4"
     "@strapi/icons": "npm:2.2.4"
     "@strapi/permissions": "npm:5.54.0"
