@@ -58,4 +58,32 @@ describe('EnumerationInput (via InputRenderer)', () => {
     expect(await screen.findByRole('option', { name: 'morning' })).toBeInTheDocument();
     expect(screen.getByRole('option', { name: 'evening' })).toBeInTheDocument();
   });
+
+  it('uses the placeholder as the label of the empty option', async () => {
+    const { user } = render(<InputRenderer {...enumerationField} placeholder="Select" />, {
+      renderOptions: {
+        wrapper: ({ children }) => <Form method="POST">{children}</Form>,
+      },
+    });
+
+    const combobox = screen.getByRole('combobox', { name: 'Period' });
+    expect(combobox).toHaveTextContent(/^Select$/);
+
+    await user.click(combobox);
+
+    expect(await screen.findByRole('option', { name: 'Select' })).toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: 'Choose here' })).not.toBeInTheDocument();
+  });
+
+  it('falls back to "Choose here" for the empty option when no placeholder is given', async () => {
+    const { user } = render(<InputRenderer {...enumerationField} placeholder="" />, {
+      renderOptions: {
+        wrapper: ({ children }) => <Form method="POST">{children}</Form>,
+      },
+    });
+
+    await user.click(screen.getByRole('combobox', { name: 'Period' }));
+
+    expect(await screen.findByRole('option', { name: 'Choose here' })).toBeInTheDocument();
+  });
 });
