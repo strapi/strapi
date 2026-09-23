@@ -160,14 +160,26 @@ export type ConfigFor<TNamespace extends ConfigNamespace> =
 /** `undefined` when `TValue` can be `null` or `undefined`: lodash `get` resolves through them to `undefined`. */
 type Nullish<TValue> = [Extract<TValue, null | undefined>] extends [never] ? never : undefined;
 
-/** The value at a dotted path such as `'a.b'` inside `TValue`, or `never` when the path does not exist. */
-type PathValue<TValue, TPath extends string> = TPath extends `${infer THead}.${infer TRest}`
-  ? THead extends keyof NonNullable<TValue>
-    ? PathValue<NonNullable<TValue>[THead] | Nullish<TValue>, TRest>
-    : never
-  : TPath extends keyof NonNullable<TValue>
-    ? NonNullable<TValue>[TPath] | Nullish<TValue>
+/**
+ * The value at one path segment of `TValue`, or `never` when the segment does not exist.
+ * A numeric segment into an array resolves to the element or `undefined`, since the element may be absent.
+ */
+type SegmentValue<TValue, TSegment extends string> = TSegment extends keyof TValue
+  ? TValue[TSegment]
+  : TValue extends readonly (infer TElement)[]
+    ? TSegment extends `${number}`
+      ? TElement | undefined
+      : never
     : never;
+
+/** The value at a dotted path such as `'a.b'` or `'items.0.port'` inside `TValue`, or `never` when the path does not exist. */
+type PathValue<TValue, TPath extends string> = TPath extends `${infer THead}.${infer TRest}`
+  ? [SegmentValue<NonNullable<TValue>, THead>] extends [never]
+    ? never
+    : PathValue<SegmentValue<NonNullable<TValue>, THead> | Nullish<TValue>, TRest>
+  : [SegmentValue<NonNullable<TValue>, TPath>] extends [never]
+    ? never
+    : SegmentValue<NonNullable<TValue>, TPath> | Nullish<TValue>;
 
 /**
  * The value at a dotted path inside a registered config contract, e.g. `'providerOptions.localServer'`.
