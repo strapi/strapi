@@ -96,17 +96,11 @@ const Body = styled(Box)`
 // Wrapper sized to the image's natural aspect ratio so the <img> inside fills
 // it without letterboxing. Percentage-based positioning of the crop overlay
 // then maps directly to natural-px coordinates.
-const CropArea = styled.div<{ $aspect?: number; $rotation?: number }>`
+const CropArea = styled.div<{ $aspect?: number }>`
   position: relative;
   max-width: 100%;
   max-height: 100%;
   ${({ $aspect }) => ($aspect ? `aspect-ratio: ${$aspect};` : '')}
-
-  /**
-   * A definite height, because on a quarter turn the image is taken out of flow and
-   * this flex item would otherwise have no in-flow content left to size it.
-   */
-  ${({ $rotation }) => ($rotation === 90 || $rotation === 270 ? 'height: 100%;' : '')}
 
   img {
     display: block;
@@ -346,6 +340,8 @@ export const AssetCropEditor = ({
       ? `${rawImageUrl}${rawImageUrl.includes('?') ? '&' : '?'}updatedAt=${cacheKey}`
       : rawImageUrl;
 
+  const isQuarterTurn = rotation === 90 || rotation === 270;
+
   /**
    * Applied inline rather than through the styled component: the admin's global
    * `img { max-width: 100% }` reset would otherwise clamp the reciprocal sizing and
@@ -356,7 +352,6 @@ export const AssetCropEditor = ({
   const rotatedImageStyle = React.useMemo((): React.CSSProperties | undefined => {
     if (!rotation) return undefined;
 
-    const isQuarterTurn = rotation === 90 || rotation === 270;
     const aspect =
       naturalSize.width && naturalSize.height ? naturalSize.width / naturalSize.height : undefined;
 
@@ -376,7 +371,7 @@ export const AssetCropEditor = ({
       height: `${100 * aspect}%`,
       transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
     };
-  }, [rotation, naturalSize.width, naturalSize.height]);
+  }, [rotation, isQuarterTurn, naturalSize.width, naturalSize.height]);
 
   const handleImageLoad = () => {
     if (imgRef.current) {
@@ -519,12 +514,6 @@ export const AssetCropEditor = ({
   };
 
   /**
-   * Forces a focal field to redisplay the state on blur.
-   *
-   * One key per axis: a shared key remounted both fields, so tabbing out of X
-   * destroyed Y before it could take focus and it was unreachable by keyboard.
-   */
-  /**
    * The design system's `NumberInput` stops adopting an external `value` once the
    * user has typed into it, so a rotation that swaps width and height leaves the
    * fields showing the old numbers. Remounting on rotation re-seeds them — the
@@ -532,6 +521,12 @@ export const AssetCropEditor = ({
    */
   const sizeFieldsKey = rotation;
 
+  /**
+   * Forces a focal field to redisplay the state on blur.
+   *
+   * One key per axis: a shared key remounted both fields, so tabbing out of X
+   * destroyed Y before it could take focus and it was unreachable by keyboard.
+   */
   const [focalXKey, setFocalXKey] = React.useState(0);
   const [focalYKey, setFocalYKey] = React.useState(0);
   const syncFocalX = () => setFocalXKey((key) => key + 1);
@@ -593,6 +588,7 @@ export const AssetCropEditor = ({
           <Body>
             <RotateControls direction="column" gap={1}>
               <IconButton
+                disabled={!isReady}
                 onClick={() => handleRotate('right')}
                 label={formatMessage({
                   id: getTranslationKey('asset-details.crop.rotate-right'),
@@ -602,6 +598,7 @@ export const AssetCropEditor = ({
                 <ArrowClockwise />
               </IconButton>
               <IconButton
+                disabled={!isReady}
                 onClick={() => handleRotate('left')}
                 label={formatMessage({
                   id: getTranslationKey('asset-details.crop.rotate-left'),
@@ -614,13 +611,21 @@ export const AssetCropEditor = ({
 
             <CropArea
               ref={cropAreaRef}
-              $rotation={rotation}
               $aspect={
                 naturalSize.width && naturalSize.height
                   ? naturalSize.width / naturalSize.height
                   : undefined
               }
             >
+              {isQuarterTurn ? (
+                /**
+                 * On a quarter turn the image is taken out of flow, leaving the box with no
+                 * in-flow content to size it. A definite height instead of this would fight
+                 * `max-width`: `aspect-ratio` only holds while one side stays `auto`.
+                 */
+                <div aria-hidden style={{ width: naturalSize.width, maxWidth: '100%' }} />
+              ) : null}
+
               <img
                 ref={imgRef}
                 data-testid="crop-editor-image"
