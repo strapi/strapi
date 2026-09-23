@@ -32,7 +32,12 @@ const getRequiredAttributes = (allAttributes: Struct.SchemaAttributes) => {
  *
  * @returns {object} Open API schemas
  */
-const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }: ApiInfo) => {
+const getAllSchemasForContentType = ({
+  routeInfo,
+  attributes,
+  uniqueName,
+  relationTargetSchemaNames,
+}: ApiInfo & { relationTargetSchemaNames: Map<string, string> }) => {
   // Store response and request schemas in an object
   let strapiComponentSchemas = {};
   const schemas: OpenAPIV3.ComponentsObject = {};
@@ -134,7 +139,10 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }: ApiI
       properties: {
         id: { oneOf: [{ type: 'string' }, { type: 'number' }] },
         documentId: { type: 'string' },
-        ...cleanSchemaAttributes(attributes, { didAddStrapiComponentsToSchemas }),
+        ...cleanSchemaAttributes(attributes, {
+          relationTargetSchemaNames,
+          didAddStrapiComponentsToSchemas,
+        }),
       },
     },
 
@@ -152,11 +160,28 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }: ApiI
   return { ...schemas, ...strapiComponentSchemas };
 };
 
-const buildComponentSchema = (api: Api) => {
+const getRelationTargetSchemaNames = (api: Api) => {
+  const relationTargetSchemaNames = new Map<string, string>();
+
+  loopContentTypeNames(api, ({ uid, uniqueName }) => {
+    relationTargetSchemaNames.set(uid, pascalCase(uniqueName));
+    return {};
+  });
+
+  return relationTargetSchemaNames;
+};
+
+const buildComponentSchema = (
+  api: Api,
+  relationTargetSchemaNames = getRelationTargetSchemaNames(api)
+) => {
   // A reusable loop for building paths and component schemas
   // Uses the api param to build a new set of params for each content type
   // Passes these new params to the function provided
-  return loopContentTypeNames(api, getAllSchemasForContentType);
+  return loopContentTypeNames(api, (apiInfo) =>
+    getAllSchemasForContentType({ ...apiInfo, relationTargetSchemaNames })
+  );
 };
 
 export default buildComponentSchema;
+export { getRelationTargetSchemaNames };
