@@ -8,6 +8,7 @@ import {
   parseFirstParentLog,
   pinRange,
 } from '../lib/range.ts';
+import { classifyFailure } from '../lib/journal.ts';
 
 import type { ExecResult, GitAdapter, GitExec } from '../lib/types.ts';
 
@@ -106,6 +107,111 @@ describe('createGitAdapter', () => {
     );
   });
 
+  it('deletes a remote branch under a lease on the head it expects', () => {
+    const seen: string[][] = [];
+    const exec: GitExec = (args) => {
+      seen.push(args);
+
+      return { status: 0, stdout: '', stderr: '' };
+    };
+
+    createGitAdapter(exec).deleteBranch('releases/5.52.4', 'face0000');
+
+    assert.deepEqual(seen, [
+      [
+        'push',
+        '--force-with-lease=refs/heads/releases/5.52.4:face0000',
+        'origin',
+        ':refs/heads/releases/5.52.4',
+      ],
+    ]);
+  });
+
+  it('forces the remote-tracking ref when fetching a branch, since it is only a read cache', () => {
+    const seen: string[] = [];
+    const exec: GitExec = (args) => {
+      seen.push(args.join(' '));
+
+      return { status: 0, stdout: '', stderr: '' };
+    };
+
+    createGitAdapter(exec).fetchBranch('releases/5.53.0');
+
+    assert.equal(
+      seen[0],
+      'fetch --force origin refs/heads/releases/5.53.0:refs/remotes/origin/releases/5.53.0'
+    );
+  });
+
+  it('marks a failed push as refused after the remote confirms the branch is absent', () => {
+    const exec = execStub({
+      push: { status: 1, stdout: '', stderr: 'GH013 rule violations' },
+      'ls-remote': { status: 2, stdout: '', stderr: '' },
+    });
+
+    assert.throws(
+      () => createGitAdapter(exec).pushBranch('abc', 'releases/5.53.0', null),
+      (error: unknown) => classifyFailure(error) === 'failed'
+    );
+  });
+
+  it('accepts a failed push when the remote already has the intended head', () => {
+    const exec = execStub({
+      push: { status: 1, stdout: '', stderr: 'remote status lost' },
+      'ls-remote': {
+        status: 0,
+        stdout: 'abc\trefs/heads/releases/5.53.0\n',
+        stderr: '',
+      },
+    });
+
+    assert.doesNotThrow(() => createGitAdapter(exec).pushBranch('abc', 'releases/5.53.0', null));
+  });
+
+  it('marks a failed refresh as refused when the remote still has its preflight head', () => {
+    const exec = execStub({
+      push: { status: 1, stdout: '', stderr: 'GH013 rule violations' },
+      'ls-remote': {
+        status: 0,
+        stdout: 'previous\trefs/heads/releases/5.53.0\n',
+        stderr: '',
+      },
+    });
+
+    assert.throws(
+      () => createGitAdapter(exec).pushBranch('desired', 'releases/5.53.0', 'previous'),
+      (error: unknown) => classifyFailure(error) === 'failed'
+    );
+  });
+
+  it('keeps a failed push indeterminate when the remote cannot be read', () => {
+    const exec = execStub({
+      push: { status: 1, stdout: '', stderr: 'connection closed' },
+      'ls-remote': { status: 1, stdout: '', stderr: 'network unavailable' },
+    });
+
+    assert.throws(
+      () => createGitAdapter(exec).pushBranch('abc', 'releases/5.53.0', null),
+      (error: unknown) => classifyFailure(error) === 'indeterminate'
+    );
+  });
+
+  it('keeps a failed push indeterminate when the remote moved to an unexpected head', () => {
+    const exec = execStub({
+      push: { status: 1, stdout: '', stderr: 'remote status lost' },
+      'ls-remote': {
+        status: 0,
+        stdout: 'third\trefs/heads/releases/5.53.0\n',
+        stderr: '',
+      },
+    });
+
+    assert.throws(
+      () => createGitAdapter(exec).pushBranch('desired', 'releases/5.53.0', 'previous'),
+      (error: unknown) => classifyFailure(error) === 'indeterminate'
+    );
+  });
+
   it('reports a missing remote branch when ls-remote finds nothing', () => {
     const exec = execStub({ 'ls-remote': { status: 2, stdout: '', stderr: '' } });
 
@@ -142,6 +248,8 @@ describe('pinRange', () => {
       isAncestor: () => true,
       listIntegrations: () => [],
       pushBranch() {},
+      deleteBranch() {},
+      fetchBranch() {},
       remoteBranchExists: () => false,
       ...overrides,
     };

@@ -1,13 +1,15 @@
-import { useAIAvailability } from '@strapi/admin/strapi-admin/ee';
 import { render, screen, server } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
-jest.mock('@strapi/admin/strapi-admin/ee', () => ({
-  ...jest.requireActual('@strapi/admin/strapi-admin/ee'),
-  useAIAvailability: jest.fn(),
-}));
-
 import { SettingsPage } from '../SettingsPage';
+
+const mockSettings = (aiLocalizationsAvailable: boolean) => {
+  server.use(
+    http.get('/i18n/settings', () =>
+      HttpResponse.json({ data: { aiLocalizations: false, aiLocalizationsAvailable } })
+    )
+  );
+};
 
 describe('Settings Page', () => {
   beforeEach(() => {
@@ -58,7 +60,7 @@ describe('Settings Page', () => {
   });
 
   it('should display AI translations section when AI is available', async () => {
-    (useAIAvailability as jest.Mock).mockReturnValue(true);
+    mockSettings(true);
 
     render(<SettingsPage />);
 
@@ -75,7 +77,7 @@ describe('Settings Page', () => {
   });
 
   it('should not display AI translations section when AI is not available', async () => {
-    (useAIAvailability as jest.Mock).mockReturnValue(false);
+    mockSettings(false);
 
     render(<SettingsPage />);
 

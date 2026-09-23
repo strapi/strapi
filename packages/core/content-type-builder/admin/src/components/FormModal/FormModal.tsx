@@ -23,6 +23,7 @@ import { pluginId } from '../../pluginId';
 import { getTrad, isAllowedContentTypesForRelations } from '../../utils';
 import { getFirstVisibleConditionEntry } from '../../utils/conditions';
 import { findAttribute } from '../../utils/findAttribute';
+import { DID_ACT_ON_FOLDERS, folderTelemetryOperation } from '../../utils/folderTelemetry';
 import { getYupInnerErrors } from '../../utils/getYupInnerErrors';
 // New compos
 import { AllowedTypesSelect } from '../AllowedTypesSelect';
@@ -36,6 +37,7 @@ import { useCTBTracking } from '../CTBSession/ctbSession';
 import { CustomRadioGroup } from '../CustomRadioGroup';
 import { useDataManager } from '../DataManager/useDataManager';
 import { DraftAndPublishToggle } from '../DraftAndPublishToggle';
+import { FolderSelect } from '../FolderSelect';
 import { FormModalEndActions } from '../FormModalEndActions';
 import { FormModalHeader } from '../FormModalHeader';
 import { useFormModalNavigation } from '../FormModalNavigation/useFormModalNavigation';
@@ -68,6 +70,7 @@ import { getFormInputNames } from './utils/getFormInputNames';
 
 import type { AnyAttribute, ContentType } from '../../types';
 import type { FormAPI } from '../../utils/formAPI';
+import type { FolderSelection } from '../DataManager/utils/contentStructure';
 import type { Tab } from '../FormModalNavigation/FormModalNavigationProvider';
 import type { Internal, Struct } from '@strapi/types';
 
@@ -567,6 +570,19 @@ export const FormModal = () => {
 
       const ctTargetUid = targetUid;
 
+      const folderSelection = modifiedData.folder as FolderSelection | undefined;
+      const trackFolderAssignment = () => {
+        if (!folderSelection) {
+          return;
+        }
+
+        if ('newFolderName' in folderSelection) {
+          trackUsage(DID_ACT_ON_FOLDERS, { operation: folderTelemetryOperation('create') });
+        }
+
+        trackUsage(DID_ACT_ON_FOLDERS, { operation: folderTelemetryOperation('assign') });
+      };
+
       if (isCreatingContentType) {
         // Create the content type schema
         if (isCreating) {
@@ -580,7 +596,10 @@ export const FormModal = () => {
               pluralName: toStringValue(modifiedData.pluralName),
             },
             uid,
+            folder: folderSelection,
           });
+
+          trackFolderAssignment();
 
           // Redirect the user to the created content type
           navigate({ pathname: `/plugins/${pluginId}/content-types/${uid}` });
@@ -601,7 +620,10 @@ export const FormModal = () => {
                 draftAndPublish: toBooleanValue(modifiedData.draftAndPublish),
                 pluginOptions: toRecordValue(modifiedData.pluginOptions),
               },
+              folder: folderSelection,
             });
+
+            trackFolderAssignment();
           } else {
             toggleNotification({
               type: 'danger',
@@ -1052,6 +1074,7 @@ export const FormModal = () => {
       'checkbox-with-number-field': CheckboxWithNumberField,
       'icon-picker': IconPicker,
       'content-type-radio-group': ContentTypeRadioGroup,
+      'content-type-folder-select': FolderSelect,
       'radio-group': CustomRadioGroup,
       relation: Relation,
       'select-category': SelectCategory,

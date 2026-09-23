@@ -161,6 +161,7 @@ export interface StrapiDirectories {
     policies: string;
     middlewares: string;
     config: string;
+    contentStructure: string;
   };
   dist: {
     root: string;
@@ -171,5 +172,6 @@ export interface StrapiDirectories {
     policies: string;
     middlewares: string;
     config: string;
+    contentStructure: string;
   };
 }
