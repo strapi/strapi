@@ -20,6 +20,6 @@ module.exports = {
   setupFilesAfterEnv: ['./admin/tests/setup.ts'],
   // file-type (and its tokenizer stack) is ESM-only; Jest must transform it to sniff bytes in admin tests.
   transformIgnorePatterns: [
-    frontPreset.transformIgnorePatterns[0].replace(')/)', `|${esmDependencies.join('|')})/)`),
+    frontPreset.transformIgnorePatterns?.[0]?.replace(')/)', `|${esmDependencies.join('|')})/)`),
   ],
 };

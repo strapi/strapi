@@ -3,6 +3,10 @@ const path = require('path');
 const { devices } = require('@playwright/test');
 const { parseType } = require('@strapi/utils');
 
+/**
+ * @param {string | undefined} envVar
+ * @param {number} defaultValue
+ */
 const getEnvNum = (envVar, defaultValue) => {
   if (envVar !== undefined && envVar !== null) {
     return Number(envVar);
@@ -10,6 +14,10 @@ const getEnvNum = (envVar, defaultValue) => {
   return defaultValue;
 };
 
+/**
+ * @param {string | undefined} envVar
+ * @param {string} defaultValue
+ */
 const getEnvString = (envVar, defaultValue) => {
   if (envVar?.trim().length) {
     return envVar;
@@ -18,6 +26,10 @@ const getEnvString = (envVar, defaultValue) => {
   return defaultValue;
 };
 
+/**
+ * @param {string | undefined} envVar
+ * @param {boolean} defaultValue
+ */
 const getEnvBool = (envVar, defaultValue) => {
   if (!envVar || envVar === '') {
     return defaultValue;
@@ -45,7 +57,7 @@ const createConfig = ({ port, testDir, appDir, reportFileName, domain }) => {
   // so parallel `yarn test:e2e` runs overwrite each other without subfolders.
   const artifactKey = `${domain}-${port}`;
   const outputDirBase = getEnvString(
-    process.env.PLAYWRIGHT_OUTPUT_DIR,
+    process.env['PLAYWRIGHT_OUTPUT_DIR'],
     path.join('..', 'test-results')
   );
   const outputDir = path.join(outputDirBase, artifactKey);
@@ -56,7 +68,7 @@ const createConfig = ({ port, testDir, appDir, reportFileName, domain }) => {
     testMatch: '*.spec.ts',
 
     /* default timeout for a jest test */
-    timeout: getEnvNum(process.env.PLAYWRIGHT_TIMEOUT, 90 * 1000),
+    timeout: getEnvNum(process.env['PLAYWRIGHT_TIMEOUT'], 90 * 1000),
 
     /* Global setup to set localStorage for all tests */
     globalSetup: require.resolve('./tests/utils/global-setup.ts'),
@@ -66,14 +78,14 @@ const createConfig = ({ port, testDir, appDir, reportFileName, domain }) => {
        * Maximum time expect() should wait for the condition to be met.
        * For example in `await expect(locator).toHaveText();`
        */
-      timeout: getEnvNum(process.env.PLAYWRIGHT_EXPECT_TIMEOUT, 10 * 1000),
+      timeout: getEnvNum(process.env['PLAYWRIGHT_EXPECT_TIMEOUT'], 10 * 1000),
     },
     /* Run tests in files in parallel */
     fullyParallel: false,
     /* Fail the build on CI if you accidentally left test.only in the source code. */
-    forbidOnly: !!process.env.CI,
+    forbidOnly: !!process.env['CI'],
     /* Retry on CI only */
-    retries: process.env.CI ? 3 : 1,
+    retries: process.env['CI'] ? 3 : 1,
     /* Opt out of parallel tests on CI. */
     workers: 1,
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
@@ -85,7 +97,7 @@ const createConfig = ({ port, testDir, appDir, reportFileName, domain }) => {
         {
           outputFile: path.join(
             getEnvString(
-              process.env.PLAYWRIGHT_OUTPUT_DIR,
+              process.env['PLAYWRIGHT_OUTPUT_DIR'],
               path.join(__dirname, 'test-apps', 'junit-reports')
             ),
             reportFileName
@@ -102,10 +114,10 @@ const createConfig = ({ port, testDir, appDir, reportFileName, domain }) => {
       timezoneId: 'Europe/Paris',
 
       /* Default time each action such as `click()` can take */
-      actionTimeout: getEnvNum(process.env.PLAYWRIGHT_ACTION_TIMEOUT, 10 * 1000),
+      actionTimeout: getEnvNum(process.env['PLAYWRIGHT_ACTION_TIMEOUT'], 10 * 1000),
       // Only record trace when retrying a test to optimize test performance
-      trace: process.env.CI ? 'on-first-retry' : 'retain-on-failure',
-      video: getEnvBool(process.env.PLAYWRIGHT_VIDEO, false)
+      trace: process.env['CI'] ? 'on-first-retry' : 'retain-on-failure',
+      video: getEnvBool(process.env['PLAYWRIGHT_VIDEO'], false)
         ? {
             mode: 'on-first-retry', // Only save videos when retrying a test
             size: {
@@ -164,14 +176,14 @@ const createConfig = ({ port, testDir, appDir, reportFileName, domain }) => {
           HOST: '127.0.0.1',
         },
         /* default Strapi server startup timeout to 160s */
-        timeout: getEnvNum(process.env.PLAYWRIGHT_WEBSERVER_TIMEOUT, 160 * 1000),
+        timeout: getEnvNum(process.env['PLAYWRIGHT_WEBSERVER_TIMEOUT'], 160 * 1000),
         // If true, Playwright skips `command` when `url` already responds — you may get the wrong
         // edition or stale env (license / STRAPI_DISABLE_EE) vs this run. Default: never reuse;
         // set PLAYWRIGHT_REUSE_EXISTING_SERVER=true locally when you intentionally keep a matching
         // server up. CI always starts fresh.
-        reuseExistingServer: process.env.CI
+        reuseExistingServer: process.env['CI']
           ? false
-          : getEnvBool(process.env.PLAYWRIGHT_REUSE_EXISTING_SERVER, false),
+          : getEnvBool(process.env['PLAYWRIGHT_REUSE_EXISTING_SERVER'], false),
         stdout: 'pipe',
       },
     ],

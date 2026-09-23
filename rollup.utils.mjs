@@ -1,18 +1,22 @@
-import path from 'node:path';
+// @ts-nocheck - @rollup/plugin-* types are published wrong https://github.com/rollup/plugins/issues/1860
 
+/** @import { ExternalOption, InputOption, OutputOptions, RollupOptions } from 'rollup' */
+
+import path from 'node:path';
 import { defineConfig } from 'rollup';
 import swc from '@rollup/plugin-swc';
 import json from '@rollup/plugin-json';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import dynamicImportVars from '@rollup/plugin-dynamic-import-vars';
-
 import commonjs from '@rollup/plugin-commonjs';
 import image from '@rollup/plugin-image';
+// @ts-expect-error - rollup-plugin-html ships no type declarations
 import html from 'rollup-plugin-html';
 
+/** @type {ExternalOption} */
 const isExernal = (id) => !path.isAbsolute(id) && !id.startsWith('.');
 
-/** @returns {import('rollup').RollupOptions['plugins']} */
+/** @returns {RollupOptions['plugins']} */
 const basePlugins = () => [
   image(),
   html(),
@@ -43,6 +47,10 @@ const basePlugins = () => [
   dynamicImportVars({}),
 ];
 
+/**
+ * @param {string} id
+ * @param {InputOption} input
+ */
 const isInput = (id, input) => {
   if (typeof input === 'string') {
     return id.includes(path.resolve(input));
@@ -51,6 +59,12 @@ const isInput = (id, input) => {
   return Object.values(input).some((i) => id.includes(path.resolve(i)));
 };
 
+/**
+ * @param {RollupOptions & {
+ *   rootDir?: OutputOptions['preserveModulesRoot'];
+ *   outDir?: OutputOptions['dir'];
+ * }} [opts]
+ */
 const baseConfig = (opts = {}) => {
   const { rootDir, outDir = './dist', input = './src/index.ts', ...rest } = opts;
 
@@ -82,7 +96,13 @@ const baseConfig = (opts = {}) => {
   });
 };
 
-/** @returns {import('rollup').RollupOptions['output']} */
+/**
+ * @param {{
+ *   outDir: OutputOptions['dir'];
+ *   rootDir: OutputOptions['preserveModulesRoot'];
+ * }} options
+ * @returns {RollupOptions['output']}
+ */
 const baseOutput = ({ outDir, rootDir }) => {
   return [
     {
