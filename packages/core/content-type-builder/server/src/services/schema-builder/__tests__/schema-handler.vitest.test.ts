@@ -66,4 +66,17 @@ describe('schema-handler flush', () => {
     expect(written.indexes).toBeUndefined();
     expect(written.foreignKeys).toBeUndefined();
   });
+
+  it('tolerates an already-removed directory while rolling back a newly created schema', async () => {
+    const handler = createSchemaHandler({
+      dir: '/tmp/api/new/content-types/new',
+      filename: 'schema.json',
+    });
+    handler.setUID('api::new.new');
+    vi.mocked(fse.readdir).mockRejectedValueOnce(
+      Object.assign(new Error('missing'), { code: 'ENOENT' })
+    );
+
+    await expect(handler.rollback()).resolves.toBeUndefined();
+  });
 });
