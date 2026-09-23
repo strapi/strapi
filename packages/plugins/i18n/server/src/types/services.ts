@@ -10,11 +10,28 @@ export type Locale = {
 /** Query Engine where filters. Filter operator validation is not part of this first contract. */
 export type LocaleFilters = Record<string, unknown>;
 
-/**
- * The locales service instance. Read operations expose stored locale records.
- * Write and enrichment operations retain their existing permissive signatures while
- * their contracts are migrated separately.
- */
+/** Data accepted when creating a locale. */
+export type LocaleCreateData = {
+  code: string;
+  name?: string | null;
+  createdBy?: Data.ID;
+  updatedBy?: Data.ID;
+};
+
+/** Data accepted when updating a locale. The code of a locale cannot change. */
+export type LocaleUpdateData = {
+  name?: string | null;
+  updatedBy?: Data.ID;
+};
+
+/** A locale-like record, or a list of them, with `isDefault` added to each. `null` and `undefined` are kept as-is. */
+export type WithIsDefault<T> = T extends null | undefined
+  ? T
+  : T extends readonly (infer TLocale)[]
+    ? (TLocale & { isDefault: boolean })[]
+    : T & { isDefault: boolean };
+
+/** The locales service instance. */
 export type LocaleService = {
   /** Finds stored locales using a Query Engine where filter. */
   find(filters?: LocaleFilters): Promise<Locale[]>;
@@ -24,11 +41,20 @@ export type LocaleService = {
   findByCode(code: string): Promise<Locale | null>;
   /** Counts locales matching a Query Engine where filter. */
   count(filters?: LocaleFilters): Promise<number>;
-  create(locale: any, options?: { isDefault?: boolean }): Promise<any>;
-  update(params: any, updates: any): Promise<any>;
-  delete(params: any): Promise<any>;
-  setDefaultLocale(locale: any): Promise<void>;
+  /** Creates a locale. `isDefault` is recorded in the audit log only; use `setDefaultLocale` to change the default. */
+  create(locale: LocaleCreateData, options?: { isDefault?: boolean }): Promise<Locale>;
+  /** Updates the first locale matching the filter, or resolves to null when none matches. */
+  update(filters: LocaleFilters, updates: LocaleUpdateData): Promise<Locale | null>;
+  /** Deletes a locale and every entry localized in it, or resolves to null when the ID does not exist. */
+  delete(params: { id: Data.ID }): Promise<Locale | null>;
+  /** Stores the code of the default locale. */
+  setDefaultLocale(locale: { code: string }): Promise<void>;
+  /** Returns the code of the default locale, or null when none is stored. */
   getDefaultLocale(): Promise<string | null>;
-  setIsDefault(locales: any): Promise<any>;
+  /** Adds `isDefault` to one locale or a list of locales. */
+  setIsDefault<T extends { code: string } | readonly { code: string }[] | null | undefined>(
+    locales: T
+  ): Promise<WithIsDefault<T>>;
+  /** Creates the initial locale and makes it the default when no locale exists. */
   initDefaultLocale(): Promise<void>;
 };

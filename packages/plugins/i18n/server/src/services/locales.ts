@@ -1,7 +1,14 @@
 import { isNil } from 'lodash/fp';
 import type { Data } from '@strapi/types';
 import { emitAudit } from '@strapi/utils';
-import type { Locale, LocaleFilters, LocaleService } from '../types/services';
+import type {
+  Locale,
+  LocaleCreateData,
+  LocaleFilters,
+  LocaleService,
+  LocaleUpdateData,
+  WithIsDefault,
+} from '../types/services';
 import { AUDITED_EVENTS, DEFAULT_LOCALE } from '../constants';
 import { getService, getCoreStore } from '../utils';
 
@@ -17,8 +24,11 @@ const findByCode = (code: string): Promise<Locale | null> =>
 const count = (params: LocaleFilters = {}): Promise<number> =>
   strapi.db.query('plugin::i18n.locale').count({ where: params });
 
-const create = async (locale: any, { isDefault = false }: { isDefault?: boolean } = {}) => {
-  const result = await strapi.db.query('plugin::i18n.locale').create({ data: locale });
+const create = async (
+  locale: LocaleCreateData,
+  { isDefault = false }: { isDefault?: boolean } = {}
+): Promise<Locale> => {
+  const result: Locale = await strapi.db.query('plugin::i18n.locale').create({ data: locale });
 
   getService('metrics').sendDidUpdateI18nLocalesEvent();
 
@@ -34,10 +44,12 @@ const create = async (locale: any, { isDefault = false }: { isDefault?: boolean 
   return result;
 };
 
-const update = async (params: any, updates: any) => {
-  const previous = await strapi.db.query('plugin::i18n.locale').findOne({ where: params });
+const update = async (params: LocaleFilters, updates: LocaleUpdateData): Promise<Locale | null> => {
+  const previous: Locale | null = await strapi.db
+    .query('plugin::i18n.locale')
+    .findOne({ where: params });
 
-  const result = await strapi.db
+  const result: Locale | null = await strapi.db
     .query('plugin::i18n.locale')
     .update({ where: params, data: updates });
 
@@ -55,12 +67,14 @@ const update = async (params: any, updates: any) => {
   return result;
 };
 
-const deleteFn = async ({ id }: any) => {
+const deleteFn = async ({ id }: { id: Data.ID }): Promise<Locale | null> => {
   const localeToDelete = await findById(id);
 
   if (localeToDelete) {
     await deleteAllLocalizedEntriesFor({ locale: localeToDelete.code });
-    const result = await strapi.db.query('plugin::i18n.locale').delete({ where: { id } });
+    const result: Locale | null = await strapi.db
+      .query('plugin::i18n.locale')
+      .delete({ where: { id } });
 
     getService('metrics').sendDidUpdateI18nLocalesEvent();
 
@@ -76,7 +90,7 @@ const deleteFn = async ({ id }: any) => {
   return localeToDelete;
 };
 
-const setDefaultLocale = async ({ code }: any) => {
+const setDefaultLocale = async ({ code }: { code: string }) => {
   const previousCode = await getDefaultLocale();
   const hasChanged = previousCode !== code;
 
@@ -107,18 +121,26 @@ const setDefaultLocale = async ({ code }: any) => {
 const getDefaultLocale = () =>
   getCoreStore().get({ key: 'default_locale' }) as Promise<string | null>;
 
-const setIsDefault = async (locales: any) => {
+const setIsDefault = async <
+  T extends { code: string } | readonly { code: string }[] | null | undefined,
+>(
+  locales: T
+): Promise<WithIsDefault<T>> => {
   if (isNil(locales)) {
-    return locales;
+    return locales as WithIsDefault<T>;
   }
 
   const actualDefault = await getDefaultLocale();
 
   if (Array.isArray(locales)) {
-    return locales.map((locale) => ({ ...locale, isDefault: actualDefault === locale.code }));
+    return locales.map((locale) => ({
+      ...locale,
+      isDefault: actualDefault === locale.code,
+    })) as WithIsDefault<T>;
   }
   // single locale
-  return { ...locales, isDefault: actualDefault === locales.code };
+  const locale = locales as { code: string };
+  return { ...locale, isDefault: actualDefault === locale.code } as WithIsDefault<T>;
 };
 
 const initDefaultLocale = async () => {
