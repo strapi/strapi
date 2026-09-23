@@ -489,9 +489,7 @@ export const createEntityManager = (db: Database): EntityManager => {
         throw new Error('Update requires data');
       }
 
-      // Only apply filter criteria (_q / where / filters), same as count and deleteMany.
-      // limit, offset, orderBy, populate, etc. must be ignored so updateMany does not
-      // diverge from count or update an unexpected slice.
+      // Same pick set as count and deleteMany. See deleteMany for why.
       const updatedRows = await this.createQueryBuilder(uid)
         .init(pick(['_q', 'where', 'filters'], params))
         .update(dataToUpdate)
