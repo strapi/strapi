@@ -1099,7 +1099,7 @@ describe('AssetsTable', () => {
       await waitFor(() =>
         expect(mockToggleNotification).toHaveBeenCalledWith({
           type: 'danger',
-          message: 'An error occurred while deleting the items.',
+          message: 'boom',
         })
       );
       // Dialog stays open for a direct retry (Confirm again) or Cancel. While
