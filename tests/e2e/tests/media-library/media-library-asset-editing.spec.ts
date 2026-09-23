@@ -9,7 +9,7 @@ import { describeOnCondition } from '../../../utils/shared';
 import { AssetsPage } from './page-objects/AssetsPage';
 
 /**
- * Journey 3 — Edit & refine an asset (CMS-1527, journey plan in CMS-1066).
+ * Journey 3 — Edit & refine an asset.
  *
  * Broad and shallow: one test chains every edit action a user performs on a
  * single asset, in the order they would perform them. The narrow per-feature
@@ -22,10 +22,10 @@ import { AssetsPage } from './page-objects/AssetsPage';
  * .jpg extension. They are fine as an upload or replace payload, but there is
  * nothing to crop in a 1x1 image and no room for a focal point at (10, 12).
  *
- * "I generate AI metadata" [CMS-145] is left as a comment: the AI
- * mock-testing approach for the e2e harness is still an open question in
- * CMS-1066, and there is nothing to assert without inventing a mocking
- * strategy that isn't this spec's call to make.
+ * "I generate AI metadata" is left as a comment: the mock-testing approach
+ * for AI in the e2e harness is still an open question, and there is nothing
+ * to assert without inventing a mocking strategy that isn't this spec's call
+ * to make.
  */
 
 const UPLOADS_DIR = path.join(__dirname, '../../../data/uploads');
@@ -157,7 +157,7 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
         // The copy is uploaded with `name: asset.name` (see
         // handleCropSaveAsCopy in AssetDetailsDrawer.tsx), so it lands under
         // the *exact same* name as the original: the "default-name convention
-        // TBC with design" flagged in CMS-1066 currently resolves to no rename
+        // TBC with design" flagged in the journey plan currently resolves to no rename
         // at all, and the two rows are indistinguishable by name in the list.
         // Hence a count of rows carrying the name, rather than a lookup of a
         // distinct copy name. The original is untouched — still one of them.
@@ -238,7 +238,7 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
         );
       });
 
-      // I generate AI metadata                                        [CMS-145]
+      // I generate AI metadata
       // Open question (AI mock-testing approach in the e2e harness) — nothing
       // to assert yet, see the file header.
 
