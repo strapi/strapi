@@ -33,6 +33,7 @@ jobs:
       api: ${{ steps.filter.outputs.api }}
       e2e: ${{ steps.filter.outputs.e2e }}
       cli: ${{ steps.filter.outputs.cli }}
+      dts: ${{ steps.filter.outputs.dts }}
       migrations: ${{ steps.filter.outputs.migrations }}
       docs: ${{ steps.filter.outputs.docs }}
       global: ${{ steps.filter.outputs.global }}
@@ -171,6 +172,30 @@ jobs:
         run: yarn nx affected --target=test:ts:back --nx-ignore-cycles
       - name: TSC for front
         run: yarn nx affected --target=test:ts:front --nx-ignore-cycles
+
+  # Type tests of the public API, against the built declaration files. Module resolution does not
+  # depend on the Node.js version, so a single version is enough.
+  dts:
+    name: 'dts (node: ${{ matrix.node }})'
+    needs: [conditions, build]
+    runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.dts == 'true'
+    strategy:
+      matrix:
+        node: [24]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+      - name: Type tests in the monorepo
+        run: yarn test:dts
+      - name: Type tests in an isolated application
+        run: yarn test:dts:userland
 
   unit_back:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true'
@@ -807,6 +832,7 @@ jobs:
         build,
         docs_build,
         typescript,
+        dts,
         unit_back,
         unit_back_vitest,
         unit_front,

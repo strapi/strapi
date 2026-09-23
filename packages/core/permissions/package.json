@@ -50,11 +50,20 @@
     "sift": "16.0.1"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.191",
     "@types/node": "20.19.41",
     "eslint-config-custom": "5.54.0",
     "tsconfig": "5.54.0",
     "vitest": "catalog:",
     "vitest-config": "5.54.0"
+  },
+  "peerDependencies": {
+    "@types/lodash": "^4.14.191"
+  },
+  "peerDependenciesMeta": {
+    "@types/lodash": {
+      "optional": true
+    }
   },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",

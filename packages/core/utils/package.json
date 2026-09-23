@@ -64,6 +64,7 @@
     "@types/http-errors": "2.0.4",
     "@types/jest": "29.5.2",
     "@types/koa": "2.15.2",
+    "@types/lodash": "^4.14.191",
     "@types/node": "20.19.41",
     "eslint-config-custom": "5.54.0",
     "jest": "29.6.0",
@@ -72,6 +73,18 @@
     "tsconfig": "5.54.0",
     "vitest": "catalog:",
     "vitest-config": "5.54.0"
+  },
+  "peerDependencies": {
+    "@types/http-errors": "^2.0.4",
+    "@types/lodash": "^4.14.191"
+  },
+  "peerDependenciesMeta": {
+    "@types/http-errors": {
+      "optional": true
+    },
+    "@types/lodash": {
+      "optional": true
+    }
   },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",

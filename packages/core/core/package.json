@@ -135,6 +135,7 @@
     "@types/lodash": "^4.14.191",
     "@types/mime-types": "2.1.1",
     "@types/node": "20.19.41",
+    "@types/qs": "6.9.7",
     "ajv": "8.20.0",
     "ajv-formats": "3.0.1",
     "eslint-config-custom": "5.54.0",
@@ -143,6 +144,18 @@
     "tsconfig": "5.54.0",
     "vitest": "catalog:",
     "vitest-config": "5.54.0"
+  },
+  "peerDependencies": {
+    "@types/koa": "^2.15.2",
+    "@types/qs": "^6.9.7"
+  },
+  "peerDependenciesMeta": {
+    "@types/koa": {
+      "optional": true
+    },
+    "@types/qs": {
+      "optional": true
+    }
   },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",
