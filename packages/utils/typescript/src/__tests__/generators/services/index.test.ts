@@ -58,8 +58,11 @@ describe('generateServicesDefinitions', () => {
 
     // The file must be a module for the module declaration to augment @strapi/strapi
     expect(normalized).toContain("import type { Core } from '@strapi/strapi'");
-    expect(normalized).toContain("declare module '@strapi/strapi' { interface ServiceRegistry {");
-    expect(normalized).not.toContain('namespace Public');
+    expect(normalized).toContain(
+      "declare module '@strapi/strapi' { export namespace Public { export interface ServiceRegistry {"
+    );
+    // TS 6 rejects the legacy `export module` form
+    expect(normalized).not.toMatch(/export module Public\b/);
 
     expect(normalized).toContain(
       "'api::article.article': ServiceInstance<typeof import('../../src/api/article/services/article')>"

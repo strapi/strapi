@@ -69,7 +69,7 @@ The separate registries are deliberate. Existing `Public.Services` augmentations
 
 ### Generated application service contracts
 
-`strapi develop` and `strapi ts:generate-types` emit `types/generated/services.d.ts` next to the content-type and component definitions. It registers every application service (`api::<api>.<service>`) in `ServiceRegistry`, typed from its source file:
+`strapi develop` and `strapi ts:generate-types` emit `types/generated/services.d.ts` next to the content-type and component definitions. It registers every application service (`api::<api>.<service>`) in `Public.ServiceRegistry`, typed from its source file:
 
 ```ts
 import type { Core } from '@strapi/strapi';
@@ -81,17 +81,21 @@ type ServiceInstance<TModule> = TModule extends { default: infer TExport }
   : Core.Service;
 
 declare module '@strapi/strapi' {
-  interface ServiceRegistry {
-    'api::article.article': ServiceInstance<
-      typeof import('../../src/api/article/services/article')
-    >;
+  export namespace Public {
+    export interface ServiceRegistry {
+      'api::article.article': ServiceInstance<
+        typeof import('../../src/api/article/services/article')
+      >;
+    }
   }
 }
 ```
 
 The registered type is the return type of the module's default export when it is a factory (`createCoreService(...)` or `({ strapi }) => ({ ... })`), or the default export itself when it is a plain object. A module without a default export keeps the permissive `Core.Service`, which matches the runtime: the loader registers `undefined` for it.
 
-The generator mirrors the API loader (`@strapi/core`, `loaders/apis.ts`): it walks `src/api/<api>/services/*.{ts,js}`, derives the uid with the same kebab-case normalization, and only emits entries for uids the running application registered. When a `.ts` and a `.js` file resolve to the same uid, the `.ts` one wins with a warning. Plugin and admin services are not emitted; their contracts belong to the packages, in `DefaultServiceRegistry`.
+The generator mirrors the API loader (`@strapi/core`, `loaders/apis.ts`): it walks `src/api/<api>/services/*.{ts,js}`, derives the uid with the same kebab-case normalization, and only emits entries for uids the running application registered. When a `.ts` and a `.js` file resolve to the same uid, the `.ts` one wins with a warning. Plugin and admin services are not emitted; their contracts belong to the packages, in `Public.DefaultServiceRegistry`.
+
+Like the content-type and component registries, this namespace-style augmentation shadows the base `Public.ServiceRegistry` rather than merging with it. That is harmless here because the base interface is declared empty: the generated entries are all it ever holds. Unregistered uids keep their permissive type through `ServiceFor`, which falls back to `Core.Service`, so `UID.Service` stays open and existing lookups are unaffected.
 
 #### Circular inference in `createCoreService`
 

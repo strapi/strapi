@@ -9,6 +9,7 @@ import type { GeneratorOptions, Logger } from '../utils';
 const { factory } = ts;
 
 const MODULE_DECLARATION = '@strapi/strapi';
+const PUBLIC_NAMESPACE = 'Public';
 const REGISTRY = 'ServiceRegistry';
 const INSTANCE_HELPER = 'ServiceInstance';
 
@@ -181,13 +182,17 @@ const generateInstanceHelperDefinition = () => {
 
 /**
  * declare module '@strapi/strapi' {
- *   interface ServiceRegistry {
- *     'api::<api>.<service>': ServiceInstance<typeof import('<relative path to the source>')>;
+ *   export namespace Public {
+ *     export interface ServiceRegistry {
+ *       'api::<api>.<service>': ServiceInstance<typeof import('<relative path to the source>')>;
+ *     }
  *   }
  * }
  *
- * ServiceRegistry is a direct export of @strapi/types (re-exported by @strapi/strapi), so the
- * augmentation merges with it instead of shadowing it like the Public.* namespace registries do.
+ * Same namespace-style augmentation as the content-type and component registries. It shadows the
+ * base interface rather than merging with it, but ServiceRegistry is declared empty, so the entries
+ * emitted here are all it ever holds. The permissive fallback for unregistered uids lives in
+ * ServiceFor, not in an index signature, so UID.Service stays open.
  */
 const generateRegistryExtensionDefinition = (sources: ServiceSource[]) => {
   const properties = sources.map(({ uid, specifier }) =>
@@ -211,14 +216,22 @@ const generateRegistryExtensionDefinition = (sources: ServiceSource[]) => {
     [factory.createModifier(ts.SyntaxKind.DeclareKeyword)],
     factory.createStringLiteral(MODULE_DECLARATION, true),
     factory.createModuleBlock([
-      factory.createInterfaceDeclaration(
-        undefined,
-        factory.createIdentifier(REGISTRY),
-        undefined,
-        undefined,
-        properties
+      factory.createModuleDeclaration(
+        [factory.createModifier(ts.SyntaxKind.ExportKeyword)],
+        factory.createIdentifier(PUBLIC_NAMESPACE),
+        factory.createModuleBlock([
+          factory.createInterfaceDeclaration(
+            [factory.createModifier(ts.SyntaxKind.ExportKeyword)],
+            factory.createIdentifier(REGISTRY),
+            undefined,
+            undefined,
+            properties
+          ),
+        ]),
+        ts.NodeFlags.Namespace
       ),
-    ])
+    ]),
+    ts.NodeFlags.ExportContext
   );
 };
 
