@@ -12,23 +12,7 @@ const FIXTURE_IMAGE = path.join(__dirname, '../../data/uploads/test-image.jpg');
 // Sub-pixel layout rounding only — the modifier centres the chip exactly.
 const CHIP_CENTRE_TOLERANCE_PX = 1;
 
-/**
- * Folder drag & drop is parked, so these are skipped everywhere rather than filtered out in
- * CI: with the new Media Library on by default they would otherwise run in the main e2e
- * jobs, which carry no grep filter.
- *
- * The gesture itself simulates correctly — a trace shows dnd-kit announcing
- * "Picked up <file>. Drop on a folder to move." What fails is the expected copy: this page
- * object waits for "Elements have been moved successfully" (the legacy string) while the
- * provider emits "N element(s) has/have been moved from X to Y". Fixing those assertions is
- * a follow-up; flip this to `true` with them.
- *
- * The drag-preview tests below are deliberately in their own describe: they pass, so parking
- * the folder moves must not take them with it.
- */
-const RUN_FOLDER_DRAG_SPECS = false;
-
-describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current' && RUN_FOLDER_DRAG_SPECS)(
+describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
   'Media Library - Drag and Drop Shallow',
   () => {
     test.beforeEach(async ({ page }) => {

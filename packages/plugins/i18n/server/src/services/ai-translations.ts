@@ -23,6 +23,8 @@ export interface AiTranslationsService {
   generateTranslations(params: GenerateTranslationsParams): Promise<GenerateTranslationsResult>;
 }
 
+// This service mirrors upload's ai-metadata-provider service on purpose. Keep the two in
+// sync, and only extract the shared logic once a third feature needs it.
 const createAITranslationsService = ({
   strapi,
 }: {

@@ -43,7 +43,7 @@ The first step of running the build command is to check if the required dependen
 - monorepos
 - incorrect/incompatible versions of packages for _certain_ packages like `styled-components` or `react`.
 
-The list of packages we explicity check for are:
+The list of packages we explicitly check for are:
 
 - `react`
 - `react-dom`
@@ -56,7 +56,7 @@ We run a prompt to encourage the user to install these deps – however, this fu
 
 ### BuildContext
 
-The build context is the heart of how the admin builds, as said above it's agnostic, it doesn't care if we're using webpack or vite or parcel. It's an object of data that can be used to preapre any bundler. It's shape looks like:
+The build context is the heart of how the admin builds, as said above it's agnostic, it doesn't care if we're using webpack or vite or parcel. It's an object of data that can be used to prepare any bundler. It's shape looks like:
 
 ```ts
 interface BuildContext {
