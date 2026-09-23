@@ -58,7 +58,7 @@ Feature flags for enabling and configuring future features that would be breakin
 
 #### typescript
 
-Controls TypeScript tooling during development (for example `autogenerate` to emit types for JavaScript projects).
+Controls TypeScript tooling during development: `autogenerate` emits types for JavaScript projects, `strictTypes` also generates the application service contracts and the opt-in to the bundled plugins' contracts (enabled by default in new projects).
 
 #### plugins
 

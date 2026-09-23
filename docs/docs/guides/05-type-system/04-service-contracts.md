@@ -56,6 +56,8 @@ Prefer a `.ts` file over a `.d.ts` for the opt-in import. With `skipLibCheck` en
 
 The entry is not re-exported from the package's main entry: importing `@strapi/strapi` alone does not opt in.
 
+With `typescript.strictTypes` enabled, `strapi develop` and `strapi ts:generate-types` write this import to `types/generated/plugins.d.ts`, so the opt-in needs no hand-written file. Projects created with `create-strapi-app` enable the flag in `config/typescript.ts`; existing projects can add it there, or keep the manual import.
+
 ### Register an application service
 
 `Public.ServiceRegistry` maps full service UIDs to service instances. Add entries to the interface exported by `@strapi/types` and re-exported by `@strapi/strapi`:
@@ -84,7 +86,7 @@ The separate registries are deliberate. Existing `Public.Services` augmentations
 
 ### Generated application service contracts
 
-`strapi develop` and `strapi ts:generate-types` emit `types/generated/services.d.ts` next to the content-type and component definitions. It registers every application service (`api::<api>.<service>`) in `Public.ServiceRegistry`, typed from its source file:
+When `typescript.strictTypes` is enabled, `strapi develop` and `strapi ts:generate-types` emit `types/generated/services.d.ts` next to the content-type and component definitions, together with the `plugins.d.ts` opt-in above. Unset or `false` keeps the previous behaviour and removes both files if a previous run generated them; content-type and component definitions are generated either way. Projects created with `create-strapi-app` ship `config/typescript.ts` with `strictTypes: true`. The file registers every application service (`api::<api>.<service>`) in `Public.ServiceRegistry`, typed from its source file:
 
 ```ts
 import type { Core } from '@strapi/strapi';
