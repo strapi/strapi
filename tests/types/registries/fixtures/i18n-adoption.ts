@@ -2,6 +2,9 @@ import type {} from '@strapi/admin/strapi-server';
 import type {} from '@strapi/content-manager/strapi-server';
 import type { Core, Schema } from '@strapi/strapi';
 import type { Services } from '@strapi/i18n/strapi-server';
+// Check the emitted private helper declaration; this is not a public package entry point.
+// eslint-disable-next-line node/no-unpublished-import
+import type { getService } from '../../../../packages/plugins/i18n/dist/server/src/utils/index.js';
 
 // Application additions remain visible through both lookup paths.
 declare global {
@@ -15,6 +18,8 @@ declare global {
     }
   }
 }
+
+declare const getI18nService: typeof getService;
 
 declare const app: Core.Strapi;
 declare const schema: Schema.ContentType;
@@ -97,6 +102,11 @@ async function checkServiceContracts() {
   permissions.actions.normalizeRolePermissionsLocales([{ subject: 'api::page.page' }]);
   // @ts-expect-error Sanitization requires an entity, not a scalar.
   plugin.service('sanitize').sanitizeLocalizationFields(schema, 123);
+  getI18nService('metrics').applicationMetric();
+  // @ts-expect-error Application overrides retain the helper's method argument checks.
+  getI18nService('metrics').sendDidInitializeEvent('unexpected');
+  // @ts-expect-error Registered helpers do not regain the permissive service index signature.
+  getI18nService('metrics').unknownMethod();
   plugin.service('metrics').applicationMetric();
   app.service('plugin::i18n.metrics').applicationMetric();
   // @ts-expect-error Known metrics retain their callable signatures through an override.
