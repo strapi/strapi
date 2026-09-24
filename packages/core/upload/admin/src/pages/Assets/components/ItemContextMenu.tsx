@@ -1,0 +1,111 @@
+import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+
+import { useAssetSelection } from '../hooks/useAssetSelection';
+
+import { AssetContextMenu } from './AssetContextMenu';
+import { SelectionContextMenu } from './SelectionContextMenu';
+
+import type { CursorPosition } from './CursorAnchoredMenu';
+import type { File } from '../../../../../shared/contracts/files';
+import type { DragFileData } from '../../../types/dnd';
+import type { ItemLocations } from '../../../utils/itemLocations';
+import type { ItemKey } from '../utils/selection';
+
+/**
+ * What a card or row hands over when it is right-clicked. It passes its own
+ * asset rather than a key alone, so nothing here has to resolve keys back to
+ * items — the item is already in scope where the gesture happens.
+ */
+export type ContextMenuPayload = { kind: 'asset'; asset: File; dragData: DragFileData };
+
+type OpenForItem = (event: React.MouseEvent, key: ItemKey, payload: ContextMenuPayload) => void;
+
+const ItemContextMenuContext = createContext<OpenForItem | null>(null);
+
+/**
+ * Called by the list items. Returns `null` outside the provider — the asset
+ * picker renders the same cards without a context menu, and a missing provider
+ * there should be a no-op rather than a crash.
+ */
+export const useItemContextMenuTrigger = (): OpenForItem | null =>
+  useContext(ItemContextMenuContext);
+
+interface OpenState {
+  position: CursorPosition;
+  payload: ContextMenuPayload | null;
+}
+
+interface ItemContextMenuProviderProps {
+  /**
+   * Real location of every loaded row, so a selection move validates each item
+   * against its own parent — same input the bulk bar takes.
+   */
+  locations: ItemLocations;
+  children: ReactNode;
+}
+
+/**
+ * Owns the right-click menu for the list, above both the grid and the table so
+ * one instance serves either view and the selection case has the `locations` it
+ * needs.
+ *
+ * The rule, in one place:
+ *
+ * - right-clicking an item **inside a multi-selection** opens the selection
+ *   menu, acting on all of it — the file-manager behaviour, and the menu leads
+ *   with the count so what it acts on is stated before the actions are
+ * - **anything else** replaces the selection with the clicked item and opens
+ *   that item's own menu. That includes right-clicking an unselected item while
+ *   others are selected: every file manager drops the old selection there, and
+ *   the visible deselection is what stops the menu looking like it applies to
+ *   items it doesn't
+ */
+export const ItemContextMenuProvider = ({ locations, children }: ItemContextMenuProviderProps) => {
+  const { isSelected, selectOnly, selectedKeys } = useAssetSelection();
+  const [state, setState] = useState<OpenState | null>(null);
+
+  const openForItem = useCallback<OpenForItem>(
+    (event, key, payload) => {
+      // Only once we know we're handling it — declining would otherwise cost the
+      // browser's own menu too.
+      event.preventDefault();
+
+      const position = { x: event.clientX, y: event.clientY };
+
+      if (isSelected(key) && selectedKeys.size > 1) {
+        setState({ position, payload: null });
+        return;
+      }
+
+      // Replace the selection *before* the menu renders, so the highlight has
+      // already moved by the time the user reads the menu.
+      selectOnly(key);
+      setState({ position, payload });
+    },
+    [isSelected, selectOnly, selectedKeys]
+  );
+
+  const close = useCallback(() => setState(null), []);
+
+  const value = useMemo(() => openForItem, [openForItem]);
+
+  return (
+    <ItemContextMenuContext.Provider value={value}>
+      {children}
+      {state !== null &&
+        (state.payload === null ? (
+          <SelectionContextMenu position={state.position} locations={locations} onClose={close} />
+        ) : (
+          <AssetContextMenu
+            // A fresh menu per gesture: the actions carry dialog state, and
+            // reusing the instance across two right-clicks would carry it over.
+            key={`${state.payload.asset.id}:${state.position.x}:${state.position.y}`}
+            asset={state.payload.asset}
+            dragData={state.payload.dragData}
+            position={state.position}
+            onClose={close}
+          />
+        ))}
+    </ItemContextMenuContext.Provider>
+  );
+};

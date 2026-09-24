@@ -725,18 +725,19 @@ describe('AssetsPage main-area context menu', () => {
     click.mockRestore();
   });
 
-  it('leaves an asset card to the browser', async () => {
+  it('opens the asset actions on a card rather than the create menu', async () => {
     respondWithAssets([createAsset(1, 'image.png')]);
 
     renderPage();
     await waitForCreatePermission();
 
     const card = (await screen.findByText('image.png')).closest('[data-native-context-menu]');
-    const event = fireEvent.contextMenu(card!, { clientX: 20, clientY: 20 });
+    fireEvent.contextMenu(card!, { clientX: 20, clientY: 20 });
 
-    // Nothing called preventDefault, so the browser's own menu still opens.
-    expect(event).toBe(true);
-    await waitFor(() => expect(screen.queryByRole('menuitem')).not.toBeInTheDocument());
+    // The card's own actions, not "New folder" / "File upload": the background
+    // gesture stays background-only.
+    expect(await screen.findByRole('menuitem', { name: 'Delete' })).toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: 'New folder' })).not.toBeInTheDocument();
   });
 
   it('stays shut without assets.create', async () => {
