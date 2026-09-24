@@ -48,5 +48,6 @@ model {
   manage_content -> publish_content 'prepares content for'
   publish_content -> deliver_content 'makes published content available to'
   govern_access -> manage_content 'controls editing permissions'
+  govern_access -> deliver_content 'controls Content API permissions'
   extend_strapi -> deliver_content 'adds application behaviour'
 }

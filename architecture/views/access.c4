@@ -3,9 +3,12 @@ views {
     title '01 Start here / Access boundaries'
     description '''
       **Audience:** everyone. **Type:** identity and credential map, not a runtime call sequence.
+      **Question:** who or what can access administration, content APIs or data transfer?
       Each arrow means a permitted access path, subject to the destination\'s authorization rules.
       Admin users, application users, Content API tokens, Admin API tokens and transfer tokens serve distinct purposes.
-      Users & Permissions must be installed/enabled. SSO requires configuration and its license feature; it is an alternative Admin login path.
+      People sign in with accounts; automation can use tokens. A website visitor is not automatically an Admin user.
+      The application-user/public-role path requires Users & Permissions. Content API tokens are a separate path.
+      SSO requires configuration and its license feature; it is an alternative Admin login path.
       Open Admin users for the local login journey, or Content API operations for a public-role example.
     '''
     include

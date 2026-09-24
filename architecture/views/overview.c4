@@ -3,8 +3,10 @@ views {
     title '01 Start here / Strapi in context'
     description '''
       **Audience:** everyone. **Scope:** a typical application built with Strapi.
+      **Question:** who uses this CMS, and what connects to it?
       Teams model and manage content in their own CMS; websites and apps request it through APIs.
-      Webhooks are optional outbound integrations. Open Strapi to see its runtime architecture.
+      The Strapi box represents one team’s application, including its customizations; it is not a shared service operated by Strapi.
+      Webhooks are optional outbound integrations. Open Strapi for runtime architecture or the webhook receiver for integrations.
     '''
     include
       content_editor,
@@ -12,7 +14,7 @@ views {
       administrator,
       public_client,
       strapi with { navigateTo strapi_containers },
-      external_system
+      external_system with { navigateTo strapi_providers }
     exclude * -> *
     include
       content_editor -> strapi with { title 'Edits and publishes content' },
@@ -27,7 +29,9 @@ views {
     title '01 Start here / Product capabilities'
     description '''
       **Audience:** product and engineering. **Type:** capability map, not a C4 container diagram.
+      **Question:** what can a team do with Strapi?
       Arrows describe how capabilities support one another, not function calls or deployment units.
+      Publishing is a separate step for content types with Draft & Publish enabled. Access controls apply to both editing and API use.
       Open a capability to explore its implementation or a representative journey.
     '''
     include
@@ -44,6 +48,8 @@ views {
     title '01 Start here / Runtime architecture'
     description '''
       **Audience:** everyone. **Type:** C4 container view of a typical Strapi application.
+      **Question:** what runs, and where are the runtime boundaries?
+      Here, a container means an application or data store; it does not imply Docker or a separate machine.
       The Admin executes in a browser and the server in Node.js, even when one server distributes both.
       The consuming application is outside the CMS. This baseline omits optional providers and development tooling.
       Open the Admin or server to go deeper; open the database for persistent state and a self-hosted deployment example.

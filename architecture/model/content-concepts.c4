@@ -6,7 +6,7 @@ model {
     link https://github.com/strapi/strapi/blob/develop/packages/core/types/src/struct/schema.ts 'Content-type schema'
   }
   content_document = concept 'Document' {
-    summary 'Logical content identity, addressed by documentId.'
+    summary 'One content item, shared across its locale and publication variants.'
     description 'Within a content type, documentId identifies content across its locale and publication variants. It is different from the database id of an individual entry. For example, one article may have English and French drafts and published variants.'
     link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/document-service/repository.ts 'Document operations'
   }

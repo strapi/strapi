@@ -1,15 +1,15 @@
 views {
   view admin_app_components of strapi.admin_web_app {
     title '03 Engineering / Admin / Application overview'
-    description 'Browser responsibilities. Core routing selects feature UIs; HTTP requests cross into the server. Open the foundation view for state and providers, or a feature for its code map.'
+    description 'Browser responsibilities. Core routing selects feature UIs; HTTP requests cross into the server. Open the Admin shell for frontend foundations, the server for feature API boundaries, or a feature for its code map.'
     include
-      admin_shell,
+      admin_shell with { navigateTo admin_frontend_foundation },
       admin_router,
       content_manager_ui,
       content_type_builder_ui,
       settings_api_tokens_ui,
       plugin_admin_extensions,
-      strapi.server_runtime
+      strapi.server_runtime with { navigateTo admin_feature_surfaces }
     exclude * -> *
     include
       admin_shell -> admin_router,
@@ -31,8 +31,8 @@ views {
     '''
 
     include
-      admin_shell,
-      admin_providers,
+      admin_shell with { navigateTo admin_shell_code },
+      admin_providers with { navigateTo admin_providers_code },
       admin_router,
       admin_store,
       admin_api_services,
