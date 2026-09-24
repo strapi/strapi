@@ -465,10 +465,7 @@ const buildDeepPopulate = async (uid: UID.CollectionType) => {
  */
 const getPopulateForLocalizations = (model: UID.Schema) => {
   const modelSchema = strapi.getModel(model);
-  if (
-    (modelSchema as unknown as { pluginOptions: { i18n: { localized?: boolean } } }).pluginOptions
-      ?.i18n?.localized
-  ) {
+  if (strapi.localization.isLocalizedContentType(modelSchema) === true) {
     return { localizations: { fields: ['locale', 'documentId', 'publishedAt', 'updatedAt'] } };
   }
 
