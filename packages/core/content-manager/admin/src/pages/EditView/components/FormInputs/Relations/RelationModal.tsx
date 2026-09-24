@@ -9,6 +9,7 @@ import {
   createContext,
   useForm,
   useQueryParams,
+  type StrapiAppContextValue,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
@@ -30,7 +31,7 @@ import { styled } from 'styled-components';
 import { COLLECTION_TYPES, SINGLE_TYPES } from '../../../../../constants/collections';
 import { PERMISSIONS } from '../../../../../constants/plugin';
 import { buildValidParams } from '../../../../../exports';
-import { DocumentRBAC } from '../../../../../features/DocumentRBAC';
+import { DocumentRBAC, useDocumentRBAC } from '../../../../../features/DocumentRBAC';
 import { useDoc, useDocument, type UseDocument } from '../../../../../hooks/useDocument';
 import { type DocumentMeta } from '../../../../../hooks/useDocumentContext';
 import { useDocumentLayout } from '../../../../../hooks/useDocumentLayout';
@@ -38,7 +39,7 @@ import { useLazyGetDocumentQuery } from '../../../../../services/documents';
 import { createYupSchema } from '../../../../../utils/validation';
 import { DocumentActionButton } from '../../../components/DocumentActions';
 import { DocumentStatus } from '../../DocumentStatus';
-import { FormLayout } from '../../FormLayout';
+import { FormLayout, type FormLayoutProps } from '../../FormLayout';
 import { ComponentProvider } from '../ComponentContext';
 
 import type { RelationOpenMode } from '../../../../../../../shared/contracts/content-types';
@@ -800,6 +801,56 @@ const RelationModalForm = () => {
 
   return (
     <DocumentRBAC permissions={permissions} model={currentDocumentMeta.model}>
+      <RelationModalFormBody
+        currentDocument={currentDocument}
+        documentTitle={documentTitle}
+        hasDraftAndPublished={hasDraftAndPublished}
+        layout={documentLayoutResponse.edit.layout}
+        plugins={plugins}
+        props={props}
+      />
+    </DocumentRBAC>
+  );
+};
+
+interface RelationModalFormBodyProps {
+  currentDocument: ReturnType<UseDocument>;
+  documentTitle: string;
+  hasDraftAndPublished: boolean;
+  layout: FormLayoutProps['layout'];
+  plugins: StrapiAppContextValue['plugins'];
+  props: DocumentActionProps;
+}
+
+/**
+ * Rendered as the child of `DocumentRBAC` so it can wait on `useDocumentRBAC`'s `isLoading`
+ * before showing the document actions and form — otherwise fields briefly render as
+ * not-allowed while permissions are still resolving.
+ */
+const RelationModalFormBody = ({
+  currentDocument,
+  documentTitle,
+  hasDraftAndPublished,
+  layout,
+  plugins,
+  props,
+}: RelationModalFormBodyProps) => {
+  const { formatMessage } = useIntl();
+  const isLoadingActionsRBAC = useDocumentRBAC('RelationModalFormBody', (state) => state.isLoading);
+
+  if (isLoadingActionsRBAC) {
+    return (
+      <Loader small>
+        {formatMessage({
+          id: 'content-manager.ListViewTable.relation-loading',
+          defaultMessage: 'Relations are loading',
+        })}
+      </Loader>
+    );
+  }
+
+  return (
+    <>
       <Flex alignItems="flex-start" direction="column" gap={2}>
         <Flex width="100%" justifyContent="space-between" gap={2}>
           <Typography tag="h2" variant="alpha">
@@ -858,14 +909,10 @@ const RelationModalForm = () => {
 
       <Flex flex={1} overflow="auto" alignItems="stretch" paddingTop={7}>
         <Box overflow="auto" flex={1}>
-          <FormLayout
-            layout={documentLayoutResponse.edit.layout}
-            document={currentDocument}
-            hasBackground={false}
-          />
+          <FormLayout layout={layout} document={currentDocument} hasBackground={false} />
         </Box>
       </Flex>
-    </DocumentRBAC>
+    </>
   );
 };
 
@@ -876,5 +923,6 @@ export {
   getFullPageUrl,
   generateCreateUrl,
   prefillParentRelation,
+  RelationModalFormBody,
 };
-export type { State, Action, RelationOpenMode };
+export type { State, Action, RelationOpenMode, RelationModalFormBodyProps };

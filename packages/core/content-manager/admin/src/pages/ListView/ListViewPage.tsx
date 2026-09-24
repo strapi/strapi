@@ -273,9 +273,13 @@ const ListViewPage = () => {
     }
   }, [pagination, formatMessage, query, navigate]);
 
-  const { canCreate } = useDocumentRBAC('ListViewPage', ({ canCreate }) => ({
-    canCreate,
-  }));
+  const { canCreate, isLoadingActionsRBAC } = useDocumentRBAC(
+    'ListViewPage',
+    ({ canCreate, isLoading }) => ({
+      canCreate,
+      isLoadingActionsRBAC: isLoading,
+    })
+  );
 
   const runHookWaterfall = useStrapiApp('ListViewPage', ({ runHookWaterfall }) => runHookWaterfall);
   /**
@@ -335,7 +339,7 @@ const ListViewPage = () => {
     model,
   ]);
 
-  if (isLoadingLayout || !isHydrated || isLoading) {
+  if (isLoadingLayout || !isHydrated || isLoading || isLoadingActionsRBAC) {
     return <Page.Loading />;
   }
 
