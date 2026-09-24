@@ -74,12 +74,12 @@ describe('content-types service', () => {
             relation: {
               type: 'relation',
               relation: 'oneToOne',
-              target: 'user',
+              target: 'admin::user',
             },
             secondRelation: {
               type: 'relation',
               relation: 'oneToMany',
-              target: 'user',
+              target: 'admin::user',
             },
           },
         })
@@ -112,7 +112,7 @@ describe('content-types service', () => {
             localizations: {
               type: 'relation',
               relation: 'oneToMany',
-              target: 'test-model',
+              target: 'api::test-model.test-model',
               visible: false,
             },
             publishedAt: {
@@ -417,7 +417,7 @@ describe('content-types service', () => {
       const getModel = jest.fn(() => modelDef);
       global.strapi = { getModel } as any;
 
-      fillNonLocalizedAttributes(entry, relatedEntry, { model: 'model' });
+      fillNonLocalizedAttributes(entry, relatedEntry, { model: 'api::model.model' });
 
       expect(entry).toEqual({
         a: 'a',
