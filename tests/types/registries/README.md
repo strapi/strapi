@@ -25,6 +25,13 @@ This prevents contextual inference from making a permissive generic lookup look 
 Handler references stay strict in both modes. Registered policy contracts and complete policy
 inventories apply only when the switch is on.
 
+Dedicated fixtures check config defaults against missing values, nullable values, possibly
+undefined defaults, and contextual inference. Policy namespace fixtures check relative plugin
+and API names, application overrides, exact-name precedence, and strict-off compatibility.
+The i18n and Content Manager adoption fixtures exercise service arguments and nullable results,
+controller actions, policy configuration, and application overrides through emitted package
+entries. Each provider also has a strict-off fixture to keep registration separate from activation.
+
 Generated applications use `skipLibCheck: true`, so the consumer programs do too. A small separate
 case checks the collision limit with both values: incompatible declarations for the same UID
 produce TS2717 even when the registry switch is off; `skipLibCheck` suppresses that error.
