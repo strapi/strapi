@@ -1,4 +1,12 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 
 import { useAssetSelection } from '../hooks/useAssetSelection';
 
@@ -31,6 +39,16 @@ export const useItemContextMenuTrigger = (): OpenForItem | null =>
   useContext(ItemContextMenuContext);
 
 interface OpenState {
+  /**
+   * Distinguishes one opening from the next.
+   *
+   * A right-click while a menu is open is two events: `pointerdown`, which
+   * Radix treats as "dismiss", then `contextmenu`, which opens the next menu.
+   * The dismissed menu's own effect runs *after* the new one has mounted, so a
+   * plain `close()` would clear state that no longer belongs to it — and the
+   * second right-click would appear to do nothing.
+   */
+  id: number;
   position: CursorPosition;
   payload: ContextMenuPayload | null;
 }
@@ -63,6 +81,7 @@ interface ItemContextMenuProviderProps {
 export const ItemContextMenuProvider = ({ locations, children }: ItemContextMenuProviderProps) => {
   const { isSelected, selectOnly, selectedKeys } = useAssetSelection();
   const [state, setState] = useState<OpenState | null>(null);
+  const nextId = useRef(0);
 
   const openForItem = useCallback<OpenForItem>(
     (event, key, payload) => {
@@ -71,21 +90,27 @@ export const ItemContextMenuProvider = ({ locations, children }: ItemContextMenu
       event.preventDefault();
 
       const position = { x: event.clientX, y: event.clientY };
+      nextId.current += 1;
+      const id = nextId.current;
 
       if (isSelected(key) && selectedKeys.size > 1) {
-        setState({ position, payload: null });
+        setState({ id, position, payload: null });
         return;
       }
 
       // Replace the selection *before* the menu renders, so the highlight has
       // already moved by the time the user reads the menu.
       selectOnly(key);
-      setState({ position, payload });
+      setState({ id, position, payload });
     },
     [isSelected, selectOnly, selectedKeys]
   );
 
-  const close = useCallback(() => setState(null), []);
+  // Only the menu that is still on screen may close it.
+  const close = useCallback(
+    (id: number) => setState((prev) => (prev?.id === id ? null : prev)),
+    []
+  );
 
   const value = useMemo(() => openForItem, [openForItem]);
 
@@ -94,16 +119,23 @@ export const ItemContextMenuProvider = ({ locations, children }: ItemContextMenu
       {children}
       {state !== null &&
         (state.payload === null ? (
-          <SelectionContextMenu position={state.position} locations={locations} onClose={close} />
+          <SelectionContextMenu
+            key={state.id}
+            position={state.position}
+            locations={locations}
+            onClose={() => close(state.id)}
+          />
         ) : (
           <AssetContextMenu
             // A fresh menu per gesture: the actions carry dialog state, and
             // reusing the instance across two right-clicks would carry it over.
-            key={`${state.payload.asset.id}:${state.position.x}:${state.position.y}`}
+            // Keyed on the opening rather than the asset, so right-clicking the
+            // same card twice still remounts.
+            key={state.id}
             asset={state.payload.asset}
             dragData={state.payload.dragData}
             position={state.position}
-            onClose={close}
+            onClose={() => close(state.id)}
           />
         ))}
     </ItemContextMenuContext.Provider>
