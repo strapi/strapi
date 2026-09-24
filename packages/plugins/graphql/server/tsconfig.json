@@ -1,7 +1,8 @@
 {
-  "extends": "tsconfig/base.json",
+  "extends": "tsconfig/server.json",
   "include": ["./src"],
   "compilerOptions": {
-    "types": ["node"]
+    // Tests run on vitest: drop the jest globals the server preset loads.
+    "types": ["node", "@strapi/strapi/strict-types"]
   }
 }

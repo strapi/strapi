@@ -183,7 +183,6 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
       const populateBuilderService = strapi.plugin('content-manager').service('populate-builder');
 
       const actionsWithEntry = await async.map(actions, async (action: ReleaseAction) => {
-        // @ts-expect-error - Core.Service type is not a function
         const populate = await populateBuilderService(action.contentType)
           .populateDeep(Infinity)
           .build();
