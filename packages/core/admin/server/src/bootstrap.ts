@@ -71,6 +71,19 @@ const registerModelHooks = () => {
       }
     },
   });
+
+  // Invalidate the per-role permissions cache on any write to permissions or roles
+  const clearRolePermissionsCache = () => getService('permission').clearRolePermissionsCache();
+
+  strapi.db.lifecycles.subscribe({
+    models: ['admin::permission', 'admin::role'],
+    afterCreate: clearRolePermissionsCache,
+    afterCreateMany: clearRolePermissionsCache,
+    afterUpdate: clearRolePermissionsCache,
+    afterUpdateMany: clearRolePermissionsCache,
+    afterDelete: clearRolePermissionsCache,
+    afterDeleteMany: clearRolePermissionsCache,
+  });
 };
 
 const syncAuthSettings = async () => {

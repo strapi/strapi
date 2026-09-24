@@ -6,9 +6,11 @@ import createPermissionEngine from './permission/engine';
 import createSectionsBuilder from './permission/sections-builder';
 import {
   cleanPermissionsInDatabase,
+  clearRolePermissionsCache,
   createMany,
   deleteByIds,
   deleteByRolesIds,
+  findCachedUserPermissions,
   findMany,
   findUserPermissions,
 } from './permission/queries';
@@ -31,6 +33,8 @@ export {
   deleteByRolesIds,
   findMany,
   findUserPermissions,
+  findCachedUserPermissions,
+  clearRolePermissionsCache,
   // Utils
   createPermissionsManager,
   sectionsBuilder,
