@@ -1,3 +1,5 @@
+import type { Core } from '@strapi/types';
+
 type ServiceName = keyof Strapi.Registries.PackageServices extends infer TUID
   ? TUID extends `plugin::i18n.${infer TName}`
     ? TName
@@ -9,8 +11,10 @@ const getCoreStore = () => {
 };
 
 /** Retrieves a registered i18n service, including application overrides. */
-const getService = <TName extends ServiceName>(name: TName) => {
-  return strapi.plugin('i18n').service(name);
+const getService = <TName extends ServiceName>(
+  name: TName
+): Core.ServiceFor<`plugin::i18n.${TName}`> => {
+  return strapi.plugin('i18n').service<Core.ServiceFor<`plugin::i18n.${TName}`>>(name);
 };
 
 export { getService, getCoreStore };
