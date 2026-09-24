@@ -45,6 +45,23 @@ describe('Locales', () => {
         isDefault: true,
       });
     });
+
+    test('Replaces an existing isDefault flag', async () => {
+      const get = jest.fn(() => Promise.resolve('en'));
+      global.strapi = { store: () => ({ get }) } as any;
+
+      const locale = { code: 'en', name: 'English', isDefault: false as const };
+      const locales = [{ code: 'en', name: 'English', isDefault: 'no' }];
+
+      const enrichedLocale = await localesService.setIsDefault(locale);
+      const [enrichedListItem] = await localesService.setIsDefault(locales);
+
+      // The computed flag replaces the input's, so its type must not keep the input's.
+      true satisfies typeof enrichedLocale.isDefault;
+      true satisfies typeof enrichedListItem.isDefault;
+      expect(enrichedLocale.isDefault).toBe(true);
+      expect(enrichedListItem.isDefault).toBe(true);
+    });
   });
 
   describe('getDefaultLocale', () => {
@@ -124,6 +141,23 @@ describe('Locales', () => {
   });
 
   describe('CRUD', () => {
+    test('returns null for missing locale lookups', async () => {
+      const findOne = jest.fn(() => Promise.resolve(null));
+      global.strapi = { db: { query: () => ({ findOne }) } } as any;
+
+      await expect(localesService.findByCode('missing')).resolves.toBeNull();
+      await expect(localesService.findById(999)).resolves.toBeNull();
+    });
+
+    test('returns stored locales without adding default status', async () => {
+      const locale = { id: 1, code: 'en', name: null };
+      const findMany = jest.fn(() => Promise.resolve([locale]));
+      global.strapi = { db: { query: () => ({ findMany }) } } as any;
+
+      await expect(localesService.find()).resolves.toEqual([locale]);
+      expect(locale).not.toHaveProperty('isDefault');
+    });
+
     test('find', async () => {
       const locales = [{ name: 'French', code: 'fr' }];
       const findMany = jest.fn(() => Promise.resolve(locales));

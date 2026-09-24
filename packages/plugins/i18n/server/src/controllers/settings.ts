@@ -2,8 +2,9 @@ import type { Context } from 'koa';
 
 import { getService } from '../utils';
 import validateSettings from '../validation/settings';
+import type { SettingsController } from '../types/controllers';
 
-export default {
+const controller: SettingsController = {
   async updateSettings(ctx: Context) {
     const {
       request: { body },
@@ -27,3 +28,5 @@ export default {
     };
   },
 };
+
+export default controller;
