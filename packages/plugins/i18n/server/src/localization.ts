@@ -12,12 +12,10 @@ export const createLocalizationProvider = (strapi: Core.Strapi): Core.Localizati
       return strapi.plugin('i18n').service('locales').getDefaultLocale();
     },
     async getLocales() {
-      const locales: Array<{ code: string; name: string }> | null | undefined = await strapi
-        .plugin('i18n')
-        .service('locales')
-        .find();
+      const locales = await strapi.plugin('i18n').service('locales').find();
 
-      return (locales ?? []).map(({ code, name }) => ({ code, name }));
+      // Stored names are optional, but core consumers need a display name for every locale.
+      return (locales ?? []).map(({ code, name }) => ({ code, name: name ?? code }));
     },
     getNestedPopulateOfNonLocalizedAttributes(modelUID) {
       return getContentTypesService().getNestedPopulateOfNonLocalizedAttributes(modelUID);

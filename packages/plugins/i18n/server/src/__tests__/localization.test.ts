@@ -61,3 +61,12 @@ it('returns no locales when the locale store yields nothing', async () => {
 
   await expect(createLocalizationProvider(strapi).getLocales()).resolves.toEqual([]);
 });
+
+it('uses the locale code as the display name when the stored name is null', async () => {
+  const locales = { find: jest.fn(async () => [{ id: 1, code: 'en', name: null }]) };
+  const strapi = { plugin: () => ({ service: () => locales }) } as unknown as Core.Strapi;
+
+  await expect(createLocalizationProvider(strapi).getLocales()).resolves.toEqual([
+    { code: 'en', name: 'en' },
+  ]);
+});
