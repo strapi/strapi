@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/types';
-import type { coreControllers } from '../controllers';
+import type { RegisteredControllers } from '../types/controllers';
 import { routing } from '../middlewares';
 
 export default {
@@ -470,4 +470,4 @@ export default {
       },
     },
   ],
-} satisfies Core.RouterInputFor<typeof coreControllers, 'plugin::content-manager'>;
+} satisfies Core.RouterInputFor<RegisteredControllers, 'plugin::content-manager'>;

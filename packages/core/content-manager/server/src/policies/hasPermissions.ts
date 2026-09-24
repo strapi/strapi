@@ -1,7 +1,7 @@
 import type { Context } from 'koa';
 import { policy } from '@strapi/utils';
 import { validateHasPermissionsInput } from '../validation/policies/hasPermissions';
-import type { HasPermissionsConfig } from '../types/policies';
+import type {} from '../types';
 
 const { createPolicy } = policy;
 
@@ -13,7 +13,10 @@ export default createPolicy({
    *       This is currently the intended behavior to avoid changing the behavior of API related permissions.
    *       If you want to add support for it, please create a dedicated RFC with a list of potential side effect this could have.
    */
-  handler(ctx: Context, config: HasPermissionsConfig = {}) {
+  handler(
+    ctx: Context,
+    config: Strapi.Registries.PackagePolicies['plugin::content-manager.hasPermissions'] = {}
+  ) {
     const { actions = [], hasAtLeastOne = false } = config;
 
     const { userAbility } = ctx.state;
