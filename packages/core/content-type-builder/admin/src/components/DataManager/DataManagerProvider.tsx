@@ -457,6 +457,13 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
           ? contentTypes[uid as Internal.UID.ContentType]
           : components[uid as Internal.UID.Component];
 
+      // A field that was never saved has no data to preserve: accept without
+      // prompting so neither name ends up in `declinedRenameNames`.
+      const initialAttribute = schema?.attributes.find((attribute) => attribute.name === oldName);
+      if (initialAttribute?.status === 'NEW') {
+        return true;
+      }
+
       // Consent inherits along a chain: a hop joining an accepted chain is
       // accepted, one touching a declined name is declined, neither prompts.
       const consent = resolveAfterEditRenameConsent({

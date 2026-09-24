@@ -588,6 +588,9 @@ export const FormModal = () => {
         !skipRenameMigration &&
         actionType === 'edit' &&
         (isCreatingAttribute || isCreatingCustomFieldAttribute) &&
+        // A field that was never saved has no data to preserve (and
+        // `recordRename` skips it), so there is nothing to ask about.
+        initialData.status !== 'NEW' &&
         toStringValue(initialData.name) !== toStringValue(modifiedData.name)
       ) {
         const decision = await confirmAttributeRenameMigration({

@@ -58,17 +58,26 @@ const mockSchema = (mode: AttributeRenameMigrationMode) => {
  * Drives the provider the way FormModal and the AI chat do: each click on
  * "rename" performs the next hop through `confirmAttributeRenameMigration`
  * and applies the decision with `editAttribute` (one submit per render, like
- * the form); "apply" sends a whole-type change through `applyChange`.
+ * the form); "apply" sends a whole-type change through `applyChange`; "add"
+ * creates `newAttribute` as an unsaved (NEW) field with `addAttribute`.
  */
 const Harness = ({
   hops,
   change,
+  newAttribute,
 }: {
   hops: Array<{ oldName: string; newName: string }>;
   change?: Partial<ContentType>;
+  newAttribute?: Record<string, unknown>;
 }) => {
-  const { contentTypes, confirmAttributeRenameMigration, editAttribute, applyChange, isLoading } =
-    useDataManager();
+  const {
+    contentTypes,
+    confirmAttributeRenameMigration,
+    addAttribute,
+    editAttribute,
+    applyChange,
+    isLoading,
+  } = useDataManager();
   const [step, setStep] = React.useState(0);
   const [log, setLog] = React.useState<string[]>([]);
   const [applied, setApplied] = React.useState<boolean | null>(null);
@@ -117,6 +126,15 @@ const Harness = ({
       </button>
       <button type="button" onClick={apply}>
         apply
+      </button>
+      <button
+        type="button"
+        onClick={() =>
+          newAttribute &&
+          addAttribute({ forTarget: 'contentType', targetUid: UID, attributeToSet: newAttribute })
+        }
+      >
+        add
       </button>
       <ul>
         {log.map((entry) => (
@@ -281,6 +299,39 @@ describe('CTB | DataManagerProvider | rename consent', () => {
 
       await screen.findByText('title->tmp:null');
       expect(article()?.renames).toBeUndefined();
+      expect(article()?.declinedRenameNames).toBeUndefined();
+    });
+  });
+
+  describe('prompt-after-edit: unsaved (NEW) fields', () => {
+    it('never prompts for and never declines a rename of a NEW field', async () => {
+      const { user } = setup('prompt-after-edit', {
+        newAttribute: { name: 'summary', type: 'string' },
+        hops: [
+          { oldName: 'summary', newName: 'draft' },
+          { oldName: 'body', newName: 'summary' },
+        ],
+      });
+      await screen.findByRole('button', { name: 'add' });
+
+      await user.click(screen.getByRole('button', { name: 'add' }));
+      await waitFor(() =>
+        expect(article()?.attributes.find((attr) => attr.name === 'summary')?.status).toBe('NEW')
+      );
+
+      // Renaming the NEW field is accepted without a prompt and records nothing.
+      await user.click(screen.getByRole('button', { name: 'rename' }));
+      await screen.findByText('summary->draft:true');
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      expect(article()?.renames).toBeUndefined();
+      expect(article()?.declinedRenameNames).toBeUndefined();
+
+      // A saved field renamed onto the name the NEW field vacated still prompts,
+      // rather than being declined silently.
+      await user.click(screen.getByRole('button', { name: 'rename' }));
+      await user.click(await screen.findByRole('button', { name: 'Preserve data' }));
+      await screen.findByText('body->summary:true');
+      expect(article()?.renames).toEqual([{ oldName: 'body', newName: 'summary' }]);
       expect(article()?.declinedRenameNames).toBeUndefined();
     });
   });

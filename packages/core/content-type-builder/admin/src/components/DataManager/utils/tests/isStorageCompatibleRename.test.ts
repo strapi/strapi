@@ -47,6 +47,33 @@ describe('CTB | DataManager | isStorageCompatibleRename', () => {
     ).toBe(false);
   });
 
+  it('rejects a direction change (manyWay -> bidirectional oneToMany)', () => {
+    expect(
+      isStorageCompatibleRename(
+        relation('tags', { targetAttribute: null }),
+        relation('labels', { targetAttribute: 'article' })
+      )
+    ).toBe(false);
+  });
+
+  it('rejects a direction change (bidirectional oneToMany -> manyWay)', () => {
+    expect(
+      isStorageCompatibleRename(
+        relation('tags', { targetAttribute: 'article' }),
+        relation('labels', { targetAttribute: undefined })
+      )
+    ).toBe(false);
+  });
+
+  it('accepts a bidirectional relation rename that keeps its direction', () => {
+    expect(
+      isStorageCompatibleRename(
+        relation('tags', { targetAttribute: 'article' }),
+        relation('labels', { targetAttribute: 'article' })
+      )
+    ).toBe(true);
+  });
+
   it('accepts a relation rename that keeps kind and target', () => {
     expect(isStorageCompatibleRename(relation('tags'), relation('labels'))).toBe(true);
   });
