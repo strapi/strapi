@@ -2,8 +2,9 @@ import _ from 'lodash';
 import slugify from '@sindresorhus/slugify';
 
 import type { Core, Schema, UID } from '@strapi/types';
+import type { UIDService } from '../types/services';
 
-export default ({ strapi }: { strapi: Core.Strapi }) => ({
+export default ({ strapi }: { strapi: Core.Strapi }): UIDService => ({
   async generateUIDField({
     contentTypeUID,
     field,
