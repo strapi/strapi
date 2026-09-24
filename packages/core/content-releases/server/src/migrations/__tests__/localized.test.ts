@@ -11,29 +11,28 @@ const createContentType = (localized: boolean) =>
     pluginOptions: { i18n: { localized } },
   }) as unknown as Schema.ContentType;
 
-const isLocalizedContentType = (model: { pluginOptions?: { i18n?: { localized?: boolean } } }) =>
+const isI18nLocalized = (model: { pluginOptions?: { i18n?: { localized?: boolean } } }) =>
   model.pluginOptions?.i18n?.localized === true;
 
 const execute = jest.fn();
 const where = jest.fn(() => ({ execute }));
 const update = jest.fn(() => ({ where }));
 const queryBuilder = jest.fn(() => ({ update }));
-const getDefaultLocale = jest.fn(async () => 'en');
+const getDefaultLocale = jest.fn();
 
+// Without a provider, `strapi.localization` answers with inert defaults (not localized, no default locale)
 const setupStrapi = ({ withI18n }: { withI18n: boolean }) => {
+  getDefaultLocale.mockResolvedValue(withI18n === true ? 'en' : null);
+
   global.strapi = {
     db: { queryBuilder },
-    plugins:
-      withI18n === true
-        ? {
-            i18n: {
-              services: {
-                'content-types': { isLocalizedContentType },
-                locales: { getDefaultLocale },
-              },
-            },
-          }
-        : {},
+    plugins: {},
+    localization: {
+      isEnabled: () => withI18n,
+      isLocalizedContentType: (model: Parameters<typeof isI18nLocalized>[0]) =>
+        withI18n === true ? isI18nLocalized(model) : false,
+      getDefaultLocale,
+    },
   } as unknown as typeof global.strapi;
 };
 
