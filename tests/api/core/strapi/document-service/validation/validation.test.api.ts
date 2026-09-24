@@ -230,6 +230,17 @@ describe('Document Service Validations', () => {
         expectValidResult(result, methodName);
       });
 
+      it('should not throw on private attribute in nested fields', async () => {
+        const result = await strapi.documents(ARTICLE_UID)[methodName]({
+          populate: {
+            createdBy: {
+              fields: ['email'],
+            },
+          },
+        });
+        expectValidResult(result, methodName);
+      });
+
       it('should not throw on wildcard *', async () => {
         const result = await strapi.documents(ARTICLE_UID)[methodName]({
           populate: '*',
