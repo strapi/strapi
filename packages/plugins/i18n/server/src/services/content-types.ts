@@ -1,6 +1,7 @@
 import { get, has, cloneDeep, pick } from 'lodash';
 import { errors, contentTypes as contentTypeUtils } from '@strapi/utils';
-import type { Struct } from '@strapi/types';
+import type { Struct, UID } from '@strapi/types';
+import type { ContentTypesService as ContentTypesContract } from '../types/services';
 import { getService } from '../utils';
 
 const {
@@ -16,7 +17,7 @@ const hasLocalizedOption = (modelOrAttribute: any) => {
   return get(modelOrAttribute, 'pluginOptions.i18n.localized') === true;
 };
 
-const getValidLocale = async (locale: any) => {
+const getValidLocale = async (locale?: string | null): Promise<string | null> => {
   const localesService = getService('locales');
 
   if (locale == null) {
@@ -157,7 +158,7 @@ const fillNonLocalizedAttributes = (entry: any, relatedEntry: any, { model }: an
  * build the populate param to
  * @param {String} modelUID uid of the model, could be of a content-type or a component
  */
-const getNestedPopulateOfNonLocalizedAttributes = (modelUID: any): string[] => {
+const getNestedPopulateOfNonLocalizedAttributes = (modelUID: UID.Schema): string[] => {
   const schema = strapi.getModel(modelUID);
   const scalarAttributes = getScalarAttributes(schema);
   const nonLocalizedAttributes = getNonLocalizedAttributes(schema);
@@ -194,7 +195,7 @@ const getNestedPopulateOfNonLocalizedAttributes = (modelUID: any): string[] => {
   return attributesToPopulate;
 };
 
-const contentTypes = () => ({
+const contentTypes = (): ContentTypesContract => ({
   isLocalizedContentType,
   getValidLocale,
   getLocalizedAttributes,
