@@ -18,6 +18,25 @@ describe('config', () => {
     expect(config.get(['default', 'child'])).toEqual('val');
   });
 
+  test('defaults replace undefined, including missing paths and array elements', () => {
+    const config = createConfigProvider({ options: { port: undefined }, items: [] });
+
+    expect(config.get('options.port', 1337)).toBe(1337);
+    expect(config.get('missing.port', 1337)).toBe(1337);
+    expect(config.get('items.0.port', 1337)).toBe(1337);
+    expect(config.get('options.port', undefined)).toBeUndefined();
+    expect(config.get('options.port')).toBeUndefined();
+  });
+
+  test('defaults preserve null and other defined values', () => {
+    const config = createConfigProvider({ port: null, enabled: false, count: 0, name: '' });
+
+    expect(config.get('port', 1337)).toBeNull();
+    expect(config.get('enabled', true)).toBe(false);
+    expect(config.get('count', 42)).toBe(0);
+    expect(config.get('name', 'fallback')).toBe('');
+  });
+
   test('accepts initial values', () => {
     const config = createConfigProvider({ default: 'val', foo: 'bar' });
     expect(config.get('default')).toEqual('val');
