@@ -3,12 +3,15 @@ views {
     title '02 Journeys / Managing content'
     description '''
       **Audience:** everyone. **Type:** capability map and journey selector, not a runtime call sequence.
+      **Question:** what can an editor do while managing content?
       Open a task to see its focused explanation. Preview requires an application-configured frontend;
       Content History requires its license feature. Editing and media management remain separate capabilities.
+      Edit entries opens the engineering view of editing and permissions; Publish content opens the editorial options map.
     '''
     include
       manage_content,
       edit_entries with { navigateTo content_manager_components },
+      publish_content with { navigateTo editorial_publishing },
       manage_media with { navigateTo media_upload_flow },
       preview_content with { navigateTo content_preview_flow },
       inspect_history with { navigateTo content_history }

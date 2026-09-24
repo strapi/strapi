@@ -28,10 +28,12 @@ views {
     title '02 Journeys / Access / Admin login and authorized request'
     description '''
       **Scenario:** successful local Admin login followed by a protected request. **Audience:** technical readers.
+      **Question:** how does signing in allow a later Admin API request?
       Login returns an access token and sets a refresh cookie. Later requests send the access token and require an active session and user.
       Request access groups authentication and server policies; arrows show responsibility handoffs, not exact internal function calls.
       Credential verification, user/session database reads, refresh rotation and logout are summarized. Failed checks stop the request.
       SSO and Admin API tokens are alternative paths described in Access boundaries, not additional steps in this sequence.
+      **Outcome:** the requested operation is allowed only after authentication and its route policies succeed. A successful login alone does not grant every Admin action.
     '''
     strapi.admin_web_app -> strapi.server_runtime.admin_login 'Submits local login credentials'
     strapi.server_runtime.admin_login -> strapi.server_runtime.admin_sessions 'After credential checks, creates session and tokens'
@@ -42,6 +44,9 @@ views {
     strapi.server_runtime.admin_request_access -> strapi.server_runtime.admin_permission_engine 'Builds active Admin user ability'
     strapi.server_runtime.admin_request_access -> strapi.server_runtime.admin_server_apis 'Route policies permit the requested action'
     strapi.admin_web_app <- strapi.server_runtime.admin_server_apis 'Authorized response'
+    include
+      strapi.admin_web_app with { navigateTo content_workspace },
+      strapi.server_runtime.admin_request_access with { navigateTo access_boundaries }
     autoLayout LeftRight 60 35
   }
 }

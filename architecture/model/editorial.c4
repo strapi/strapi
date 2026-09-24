@@ -37,10 +37,11 @@ model {
     }
 
     history_version_service = component 'Content history version service' {
-      summary 'Records and retrieves content history versions when the Enterprise feature is enabled.'
-      description 'The history model remains registered after a license changes to preserve existing data, but its routes, controllers, and services are loaded only while cms-content-history is enabled.'
+      summary 'Records, reads and restores content versions when the Enterprise feature is enabled.'
+      description 'The history model remains registered after a license changes to preserve existing data, but its routes, controllers, and services are loaded only while cms-content-history is enabled. Restoration adapts saved data to the current schema and resolves available relations/media before updating the document through Document Service.'
       technology 'TypeScript / Enterprise feature'
       link https://github.com/strapi/strapi/blob/develop/packages/core/content-manager/server/src/history/index.ts#L13 'Feature gate'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/content-manager/server/src/history/services/history.ts 'Version retrieval and restoration'
     }
   }
 
@@ -57,7 +58,8 @@ model {
   strapi.server_runtime.document_service -> strapi.server_runtime.localization_support 'selects and transforms document locales'
   strapi.admin_web_app.content_manager_ui -> strapi.server_runtime.content_manager_server.preview_url_resolver 'requests a configured preview URL'
   strapi.server_runtime.content_manager_server.preview_url_resolver -> strapi.admin_web_app.content_manager_ui 'returns the configured preview URL'
-  strapi.admin_web_app.content_manager_ui -> strapi.server_runtime.content_manager_server.history_version_service 'requests content history records'
-  strapi.server_runtime.content_manager_server.history_version_service -> strapi.database 'persists history versions'
+  strapi.admin_web_app.content_manager_ui -> strapi.server_runtime.content_manager_server.history_version_service 'Reads history or requests a restore'
+  strapi.server_runtime.content_manager_server.history_version_service -> strapi.database 'Records and reads history versions'
+  strapi.server_runtime.content_manager_server.history_version_service -> strapi.server_runtime.document_service 'Restores document data'
   strapi.server_runtime.upload_service -> strapi.database 'persists media metadata'
 }

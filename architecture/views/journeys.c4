@@ -3,8 +3,11 @@ views {
     title '02 Journeys / From draft to published content'
     description '''
       **Audience:** everyone. **Scenario:** an authorized editor saves then publishes an entry on a content type with Draft & Publish enabled.
+      **Question:** how does an edit become available to a consuming application?
       Later, an authorized consuming application requests published content. These are separate requests, shown together to explain the journey.
       The server groups routing, permissions and document operations; the Content API journey provides a deeper request view.
+      **Outcome:** saving changes the draft; publication writes the published variant. Publishing makes content available for a later API request;
+      it does not push it to a website or rebuild that website. Success acknowledgements and failure paths are omitted.
     '''
     content_editor -> strapi.admin_web_app 'Edits an entry and saves a draft'
     strapi.admin_web_app -> strapi.server_runtime 'Saves draft through the Admin API'
@@ -15,6 +18,9 @@ views {
     public_client -> strapi.server_runtime 'Requests published content' { navigateTo content_api_request_flow }
     strapi.server_runtime -> strapi.database 'Reads accessible published content'
     public_client <- strapi.server_runtime 'Receives content as JSON'
+    include
+      strapi.admin_web_app with { navigateTo content_workspace },
+      strapi.database with { navigateTo application_state }
     autoLayout LeftRight 70 40
   }
 }

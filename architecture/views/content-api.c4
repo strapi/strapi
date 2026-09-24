@@ -103,9 +103,13 @@ views {
     variant sequence
     title '02 Journeys / Content API / Public published-content request'
     description '''
-      A request with no bearer credentials reads published entries. With Users & Permissions enabled and
+      **Audience:** technical readers. **Scenario:** a successful REST collection request with no bearer credentials.
+      **Question:** how does a public request reach published content without bypassing permissions?
+      With Users & Permissions enabled and
       public `find` permission granted, the generated API validates and sanitizes input before the read,
       then sanitizes the output before returning JSON.
+      **Outcome:** the client receives the permitted published results. The response includes only the requested and permitted fields and populated relations.
+      This is not an authenticated-user, API-token or GraphQL request. Rejected requests are outside the success path shown here.
     '''
 
     public_client -> strapi.server_runtime.http_server 'GET /api/articles (no bearer credentials)'
@@ -117,5 +121,8 @@ views {
     strapi.server_runtime.document_service -> strapi.server_runtime.database_layer 'query content and relations'
     strapi.server_runtime.document_service <- strapi.server_runtime.database_layer 'published documents'
     public_client <- strapi.server_runtime.http_server 'sanitized JSON response'
+    include
+      strapi.server_runtime.users_permissions_strategy with { navigateTo access_boundaries },
+      strapi.server_runtime.core_api_layer with { navigateTo generated_core_api_code }
   }
 }
