@@ -234,22 +234,20 @@ export interface ConfigProvider {
    * Reads a config value. A registered namespace, or a dotted path inside one, resolves to its contract.
    *
    * A defined default replaces `undefined` in the result; `null` values are preserved.
-   * The argument tuple preserves possibly-undefined defaults. `NoInfer` prevents contextual return
-   * types from supplying a default that was never passed.
+   * The argument tuple tracks defaults that may be omitted; the intersection preserves legacy
+   * inference from their values. `NoInfer` prevents contextual return types from supplying a default
+   * that was never passed.
    */
   get<
     T = unknown,
     TPath extends ConfigPath = ConfigPath,
-    TDefault extends ConfigLookup<TPath, T> | undefined = ConfigLookup<TPath, T>,
+    TArgs extends [] | [ConfigLookup<TPath, T> | undefined] =
+      | []
+      | [ConfigLookup<TPath, T> | undefined],
   >(
     key: TPath,
-    ...args:
-      | []
-      | [
-          defaultVal: (ConfigLookup<TPath, T> | undefined) &
-            ([ConfigLookup<TPath, never>] extends [never] ? unknown : TDefault),
-        ]
-  ): ConfigLookup<TPath, T, NoInfer<TDefault>>;
+    ...args: TArgs & ([] | [defaultVal: ConfigLookup<TPath, T> | undefined])
+  ): ConfigLookup<TPath, T, NoInfer<TArgs[0]>>;
   set(path: string, val: unknown): this;
   has(path: string): boolean;
   [key: string]: any;
