@@ -1,16 +1,10 @@
-import type { NodeOptions } from '@sentry/node';
-
-export interface Config {
-  dsn: string | null;
-  sendMetadata: boolean;
-  init: NodeOptions;
-}
+import type { SentryConfig } from './types/config';
 
 export default {
   default: {
     dsn: null,
     sendMetadata: true,
     init: {},
-  } satisfies Config,
+  } satisfies SentryConfig,
   validator() {},
 };

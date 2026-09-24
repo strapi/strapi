@@ -49,7 +49,7 @@ describe('ai-localizations service', () => {
         globalId: 'Test',
         info: { displayName: 'Test', singularName: 'test', pluralName: 'tests' },
         attributes,
-      } as Schema.Schema;
+      };
     };
 
     describe('root-level unsupported fields', () => {
