@@ -1,3 +1,4 @@
+import { Form } from '@strapi/admin/strapi-admin';
 import {
   RenderOptions,
   fireEvent,
@@ -7,16 +8,21 @@ import {
   waitFor,
 } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useLocation } from 'react-router-dom';
 
+import { mockData } from '../../../../../../../tests/mockData';
 import { ComponentProvider } from '../../ComponentContext';
 import { RelationsInput, RelationsFieldProps } from '../Relations';
 
 const render = (
   {
     initialEntries,
+    initialValues,
     ...props
-  }: Partial<RelationsFieldProps> & Pick<RenderOptions, 'initialEntries'> = { initialEntries: [] }
+  }: Partial<RelationsFieldProps> &
+    Pick<RenderOptions, 'initialEntries'> & { initialValues?: Record<string, unknown> } = {
+    initialEntries: [],
+  }
 ) =>
   renderRTL(
     <RelationsInput
@@ -39,7 +45,18 @@ const render = (
       renderOptions: {
         wrapper: ({ children }) => (
           <Routes>
-            <Route path="/content-manager/:collectionType/:slug/:id" element={children} />
+            <Route
+              path="/content-manager/:collectionType/:slug/:id"
+              element={
+                initialValues ? (
+                  <Form method="POST" onSubmit={jest.fn()} initialValues={initialValues}>
+                    {children}
+                  </Form>
+                ) : (
+                  children
+                )
+              }
+            />
           </Routes>
         ),
       },
@@ -50,6 +67,76 @@ const render = (
   );
 
 describe('Relations', () => {
+  const renderRelationNavigation = (relation: {
+    documentId: string;
+    locale: string | null;
+    name: string;
+  }) => {
+    server.use(
+      http.get<{ model: string; id: string; fieldName: string }>(
+        '/content-manager/relations/:model/:id/:fieldName',
+        () =>
+          HttpResponse.json({
+            results: [
+              {
+                id: 1,
+                ...relation,
+                status: 'published',
+              },
+            ],
+            pagination: { page: 1, pageCount: 1, pageSize: 10, total: 1 },
+          })
+      )
+    );
+
+    const LocationProbe = () => {
+      const location = useLocation();
+
+      return <output data-testid="location">{`${location.pathname}${location.search}`}</output>;
+    };
+
+    return renderRTL(
+      <RelationsInput
+        attribute={{
+          type: 'relation',
+          relation: 'manyToMany',
+          target: 'api::category.category',
+          inversedBy: 'relation_locales',
+          // @ts-expect-error – this is what the API returns
+          targetModel: 'api::category.category',
+          relationType: 'manyToMany',
+        }}
+        label="relations"
+        mainField={{ name: 'name', type: 'string' }}
+        model="api::address.address"
+        name="relations"
+        type="relation"
+        isRelatedToCurrentDocument
+        onChange={jest.fn()}
+      />,
+      {
+        renderOptions: {
+          wrapper: ({ children }) => (
+            <Routes>
+              <Route
+                path="/content-manager/:collectionType/:slug/:id"
+                element={
+                  <>
+                    <LocationProbe />
+                    {children}
+                  </>
+                }
+              />
+            </Routes>
+          ),
+        },
+        initialEntries: [
+          '/content-manager/collection-types/api::address.address/12345?plugins[i18n][locale]=en',
+        ],
+      }
+    );
+  };
+
   /**
    * TODO: for some reason, we're not getting any data from MSW.
    */
@@ -91,6 +178,38 @@ describe('Relations', () => {
     expect(screen.getByRole('button', { name: 'Relation entity 3' })).toBeInTheDocument();
   });
 
+  it('renders localized fallback labels for fill-from-locale connect items', async () => {
+    render({
+      initialValues: {
+        relations: {
+          connect: [
+            {
+              id: 101,
+              documentId: 'internal-empty-key',
+              locale: 'fr',
+              name: '',
+              label: '',
+              __temp_key__: 'a0',
+            },
+            {
+              id: 102,
+              documentId: 'internal-null-key',
+              locale: 'fr',
+              name: null,
+              label: 'internal-null-key',
+              __temp_key__: 'a1',
+            },
+          ],
+          disconnect: [],
+        },
+      },
+    });
+
+    expect(await screen.findAllByRole('button', { name: 'Untitled' })).toHaveLength(2);
+    expect(screen.queryByText('internal-empty-key')).not.toBeInTheDocument();
+    expect(screen.queryByText('internal-null-key')).not.toBeInTheDocument();
+  });
+
   it('should be disabled when the prop is passed', async () => {
     render({ disabled: true });
 
@@ -129,6 +248,128 @@ describe('Relations', () => {
   it.todo('should connect a relation');
 
   it.todo('should disconnect a relation');
+
+  describe('relation targeting a Single Type', () => {
+    const mockCreatePermission = (subject: string) =>
+      http.get('/admin/users/me/permissions', () =>
+        HttpResponse.json({
+          data: [
+            {
+              id: 1,
+              action: 'plugin::content-manager.explorer.create',
+              subject,
+              properties: {},
+              conditions: [],
+            },
+          ],
+        })
+      );
+
+    // Reuses `api::category.category` as the relation's target (instead of an
+    // unrelated single type) because it's the target of the `categories` attribute
+    // already on the default fixture's `api::address.address` schema — the content
+    // type the test document is rendered as. Matching it keeps `isRelatedToCurrentDocument`
+    // true so the relation search actually runs and returns options, rather than the
+    // combobox silently rendering nothing regardless of the fix under test.
+    const singleTypeAttribute = {
+      type: 'relation',
+      relation: 'manyToMany',
+      target: 'api::category.category',
+      inversedBy: 'addresses',
+      targetModel: 'api::category.category',
+      relationType: 'manyToMany',
+    } as const;
+
+    // `api::category.category` is referenced as a relation target throughout the shared
+    // fixture (including by `api::address.address`'s own `categories` attribute above),
+    // but isn't itself defined as a content type there — so it has to be added, not just
+    // have its `kind` overridden. It's appended to the default fixture rather than
+    // replacing the whole list, so the current document's own schema
+    // (api::address.address) stays resolvable and relation search results still load.
+    const mockCategoryContentTypeKind = (kind: 'singleType' | 'collectionType') =>
+      http.get('/content-manager/init', () =>
+        HttpResponse.json({
+          data: {
+            components: mockData.contentManager.components,
+            contentTypes: [
+              ...mockData.contentManager.contentTypes,
+              {
+                uid: 'api::category.category',
+                kind,
+                isDisplayed: true,
+                apiID: 'category',
+                info: { displayName: 'Category' },
+                options: {},
+                attributes: {},
+              },
+            ],
+          },
+        })
+      );
+
+    // The shared fixture's generic `/content-manager/:collectionType/:uid/:id` document
+    // handler also matches `/content-manager/relations/:model/:fieldName` (same segment
+    // count) and is registered first, so it wins and 404s the relation search in these
+    // tests. `server.use` handlers take priority over the base fixture, so re-declaring
+    // this one here restores the intended 200 response without touching the shared file.
+    const mockSearchRelations = () =>
+      http.get('/content-manager/relations/:model/:fieldName', () =>
+        HttpResponse.json({
+          results: [
+            {
+              id: 1,
+              documentId: 'apples',
+              locale: 'en',
+              status: 'draft',
+              name: 'Relation entity 1',
+            },
+          ],
+          pagination: { page: 1, pageCount: 1, total: 1 },
+        })
+      );
+
+    it('hides the "Create a relation" option even when the user can create', async () => {
+      server.use(
+        mockCategoryContentTypeKind('singleType'),
+        mockCreatePermission('api::category.category'),
+        mockSearchRelations()
+      );
+
+      const { user } = render({ attribute: singleTypeAttribute });
+
+      await waitFor(() => {
+        expect(screen.queryByText('Relations are loading')).not.toBeInTheDocument();
+      });
+
+      await user.click(await screen.findByRole('combobox', { name: /relations/i }));
+
+      // A regular option still renders, so the missing "Create a relation" option isn't
+      // just a symptom of the combobox rendering no options at all. Its accessible name
+      // also includes the trailing status badge text (e.g. "Draft"), hence the regex.
+      expect(await screen.findByRole('option', { name: /Relation entity 1/ })).toBeInTheDocument();
+      expect(screen.queryByRole('option', { name: 'Create a relation' })).not.toBeInTheDocument();
+    });
+
+    it('does not disable "Create a relation" for a Collection Type target when the user can create', async () => {
+      server.use(
+        mockCategoryContentTypeKind('collectionType'),
+        mockCreatePermission('api::category.category')
+      );
+
+      const { user } = render({});
+
+      await waitFor(() => {
+        expect(screen.queryByText('Relations are loading')).not.toBeInTheDocument();
+      });
+
+      await user.click(await screen.findByRole('combobox', { name: /relations/i }));
+
+      expect(await screen.findByRole('option', { name: 'Create a relation' })).not.toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
+    });
+  });
 
   it('should search nested component relations using the component id', async () => {
     const relationSearchRequests: Array<{
@@ -200,6 +441,36 @@ describe('Relations', () => {
         id: '99',
       });
     });
+  });
+
+  it('preserves the active locale when opening a non-localized nested relation in full page', async () => {
+    const { user } = renderRelationNavigation({
+      documentId: 'non-localized-intermediate',
+      locale: null,
+      name: 'Non-localized intermediate',
+    });
+
+    await user.click(await screen.findByRole('button', { name: 'Non-localized intermediate' }));
+    await user.click(screen.getByRole('button', { name: 'Go to entry' }));
+
+    expect(screen.getByTestId('location')).toHaveTextContent(
+      '/content-manager/collection-types/api::category.category/non-localized-intermediate?plugins[i18n][locale]=en'
+    );
+  });
+
+  it('uses the related record locale when opening a localized nested relation in full page', async () => {
+    const { user } = renderRelationNavigation({
+      documentId: 'localized-intermediate',
+      locale: 'fr',
+      name: 'Localized intermediate',
+    });
+
+    await user.click(await screen.findByRole('button', { name: 'Localized intermediate' }));
+    await user.click(screen.getByRole('button', { name: 'Go to entry' }));
+
+    expect(screen.getByTestId('location')).toHaveTextContent(
+      '/content-manager/collection-types/api::category.category/localized-intermediate?plugins[i18n][locale]=fr'
+    );
   });
 
   describe.skip('Accessibility', () => {

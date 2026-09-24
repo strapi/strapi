@@ -161,6 +161,8 @@ const pickSchema = (model: Schema.ContentType) => {
       'pluginOptions',
       'attributes',
       'kind',
+      'indexes',
+      'foreignKeys',
     ])
   );
 

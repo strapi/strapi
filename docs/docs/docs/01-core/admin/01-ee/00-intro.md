@@ -17,7 +17,7 @@ import { useCurrentSidebarCategory } from '@docusaurus/theme-common';
 
 # Promoting EE features in CE projects
 
-Everytime a new EE feature is added in Strapi, in the settings menu, you should add the following condition to ensure that the feature promotes itself in CE:
+Every time a new EE feature is added in Strapi, in the settings menu, you should add the following condition to ensure that the feature promotes itself in CE:
 
 `packages/core/admin/admin/src/hooks/useSettingsMenu/index.js`
 

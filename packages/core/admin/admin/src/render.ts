@@ -2,9 +2,7 @@
 import { createRoot } from 'react-dom/client';
 
 import { StrapiApp, StrapiAppConstructorArgs } from './StrapiApp';
-import { getFetchClient } from './utils/getFetchClient';
-import { getProjectType } from './utils/getProjectType';
-import { createAbsoluteUrl } from './utils/urls';
+import { createBrowserStrapi } from './utils/browserStrapi';
 
 import type { Modules } from '@strapi/types';
 
@@ -26,91 +24,10 @@ const renderAdmin = async (
     throw new Error('[@strapi/admin]: Could not find the root element to mount the admin app');
   }
 
-  window.strapi = {
-    /**
-     * This ENV variable is passed from the strapi instance, by default no url is set
-     * in the config and therefore the instance returns you an empty string so URLs are relative.
-     *
-     * To ensure that the backendURL is always set, we use the window.location.origin as a fallback.
-     */
-    backendURL: createAbsoluteUrl(process.env.STRAPI_ADMIN_BACKEND_URL),
-    isEE: false,
-    isTrial: false,
-    telemetryDisabled: process.env.STRAPI_TELEMETRY_DISABLED === 'true',
-    future: {
-      isEnabled: (name: keyof NonNullable<Modules.Features.FeaturesConfig['future']>) => {
-        return features?.future?.[name] === true;
-      },
-    },
-    // eslint-disable-next-line
-    // @ts-ignore – there's pollution from the global scope of Node. Cannot use @ts-expect-error because of build:code and build:types context collision. Cannot use @ts-expect-error because of build:code and build:types context collision.
-    features: {
-      SSO: 'sso',
-      AUDIT_LOGS: 'audit-logs',
-      REVIEW_WORKFLOWS: 'review-workflows',
-      /**
-       * If we don't get the license then we know it's not EE
-       * so no feature is enabled.
-       */
-      isEnabled: () => false,
-    },
-    projectType: 'Community',
-    flags: {
-      nps: false,
-      promoteEE: true,
-      docLinks: true,
-    },
-    // eslint-disable-next-line
-    // @ts-ignore – there's pollution from the global scope of Node. Cannot use @ts-expect-error because of build:code and build:types context collision.
-    ai: {
-      enabled: true,
-    },
-  };
+  const browserStrapi = await createBrowserStrapi(features);
 
-  const { get } = getFetchClient();
-
-  interface ProjectType extends Pick<Window['strapi'], 'flags'> {
-    isEE: boolean;
-    isTrial: boolean;
-    /**
-     * The licensed plan price id, sent by the license registry (EE only).
-     * Used to distinguish the Growth plan from other Enterprise plans.
-     */
-    planPriceId?: string;
-    features: {
-      name: string;
-    }[];
-    ai: {
-      enabled: boolean;
-    };
-  }
-
-  try {
-    const {
-      data: {
-        data: { isEE, isTrial, features, flags, ai, planPriceId },
-      },
-    } = await get<{ data: ProjectType }>('/admin/project-type');
-
-    window.strapi.isEE = isEE;
-    window.strapi.isTrialLicense = isTrial;
-    window.strapi.flags = flags;
-    window.strapi.features = {
-      ...window.strapi.features,
-      isEnabled: (featureName: string | undefined) =>
-        features.some((feature) => feature.name === featureName),
-    };
-    window.strapi.projectType = getProjectType({ isEE, planPriceId });
-    // eslint-disable-next-line
-    // @ts-ignore – there's pollution from the global scope of Node. Cannot use @ts-expect-error because of build:code and build:types context collision.
-    window.strapi.ai = ai;
-  } catch (err) {
-    /**
-     * If this fails, we simply don't activate any EE features.
-     * Should we warn clearer in the UI?
-     */
-    console.error(err);
-  }
+  // @ts-expect-error - conflicting global.Strapi with window.BrowserStrapi
+  window.strapi = browserStrapi;
 
   const app = new StrapiApp({
     config: customisations?.config,

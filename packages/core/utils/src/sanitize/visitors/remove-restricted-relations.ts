@@ -1,13 +1,24 @@
 import { isArray, isObject } from 'lodash/fp';
 import * as contentTypeUtils from '../../content-types';
+import type { Model, RelationOrderingOptions } from '../../types';
 import type { Visitor } from '../../traverse/factory';
-import { RelationOrderingOptions } from '../../types';
 import { VALID_RELATION_ORDERING_KEYS } from '../../relations';
 
 const ACTIONS_TO_VERIFY = ['find'];
 const { CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } = contentTypeUtils.constants;
 
 type MorphArray = Array<{ __type: string }>;
+type MorphElement = Record<string, unknown> & { __type: string };
+type MorphMutationPayload = {
+  connect?: unknown;
+  set?: unknown;
+  disconnect?: unknown;
+  options?: Record<string, unknown> | null;
+};
+type MorphPopulatePayload = {
+  on: Record<string, unknown>;
+  count?: unknown;
+};
 
 export default (auth: unknown): Visitor =>
   (visitorOptions, visitorUtils) => {
@@ -36,13 +47,15 @@ const visitRelationAttribute = async (
   }
 
   const handleMorphRelation = async () => {
-    const elements: any = (data as Record<string, MorphArray>)[key];
+    const elements = (data as Record<string, MorphArray | MorphElement | MorphMutationPayload>)[
+      key
+    ];
 
     if (!elements) {
       return;
     }
 
-    if ('connect' in elements || 'set' in elements || 'disconnect' in elements) {
+    if (isMorphMutationPayload(elements)) {
       const newValue: Record<string, unknown> = {};
 
       const connect = await handleMorphElements(elements.connect || []);
@@ -62,48 +75,114 @@ const visitRelationAttribute = async (
       }
 
       // TODO: this should technically be in its own visitor to check morph options, but for now we'll handle it here
-      if (
-        'options' in elements &&
-        typeof elements.options === 'object' &&
-        elements.options !== null
-      ) {
+      const options = elements.options;
+      if (options && typeof options === 'object') {
         const filteredOptions: RelationOrderingOptions = {};
 
-        // Iterate through the keys of elements.options
-        Object.keys(elements.options).forEach((key) => {
-          const validator = VALID_RELATION_ORDERING_KEYS[key as keyof RelationOrderingOptions];
+        Object.keys(options).forEach((key) => {
+          const optionKey = key as keyof RelationOrderingOptions;
+          const validator = VALID_RELATION_ORDERING_KEYS[optionKey];
+          const optionValue = options[key];
 
-          // Ensure the key exists in VALID_RELATION_ORDERING_KEYS and the validator is defined before calling it
-          if (validator && validator(elements.options[key])) {
-            filteredOptions[key as keyof RelationOrderingOptions] = elements.options[key];
+          if (validator && validator(optionValue)) {
+            filteredOptions[optionKey] = optionValue as RelationOrderingOptions[typeof optionKey];
           }
         });
 
-        // Assign the filtered options back to newValue
         newValue.options = filteredOptions;
       } else {
         newValue.options = {};
       }
 
       set(key, newValue);
+    } else if (isMorphPopulatePayload(elements)) {
+      const newOn: Record<string, unknown> = {};
+
+      for (const [uid, subPopulate] of Object.entries(elements.on)) {
+        const scopes = ACTIONS_TO_VERIFY.map((action) => `${uid}.${action}`);
+        const isAllowed = await hasAccessToSomeScopes(scopes, auth);
+
+        if (isAllowed) {
+          newOn[uid] = subPopulate;
+        }
+      }
+
+      if (Object.keys(newOn).length === 0) {
+        remove(key);
+        return;
+      }
+
+      const count = isMorphPopulateCount(elements.count) ? true : elements.count;
+      set(key, { ...elements, count, on: newOn });
     } else {
       const newMorphValue = await handleMorphElements(elements);
 
-      if (newMorphValue.length) {
-        set(key, newMorphValue);
+      if (!newMorphValue.length) {
+        if (isArray(elements) && elements.length === 0) {
+          return;
+        }
+
+        remove(key);
+        return;
       }
+
+      if (isArray(elements)) {
+        set(key, newMorphValue);
+        return;
+      }
+
+      set(key, newMorphValue[0]);
     }
   };
 
-  const handleMorphElements = async (elements: any[]) => {
-    const allowedElements: Record<string, unknown>[] = [];
+  const isMorphMutationPayload = (value: unknown): value is MorphMutationPayload => {
+    return isObject(value) && ('connect' in value || 'set' in value || 'disconnect' in value);
+  };
 
-    if (!isArray(elements)) {
-      return allowedElements;
+  const isMorphPopulateCount = (value: unknown) => value === true || value === 'true';
+
+  const isMorphPopulatePayload = (value: unknown): value is MorphPopulatePayload => {
+    return isObject(value) && !('__type' in value) && 'on' in value && isObject(value.on);
+  };
+
+  const buildAllowedMorphPopulateFragment = async (subPopulate: unknown) => {
+    const newOn: Record<string, unknown> = {};
+
+    for (const uid of getRegisteredContentTypeUIDs()) {
+      const scopes = ACTIONS_TO_VERIFY.map((action) => `${uid}.${action}`);
+      const isAllowed = await hasAccessToSomeScopes(scopes, auth);
+
+      if (isAllowed) {
+        newOn[uid] = subPopulate;
+      }
     }
 
-    for (const element of elements) {
-      if (!isObject(element) || !('__type' in element)) {
+    return newOn;
+  };
+
+  const isMorphPopulateAllOrCount = (value: unknown): value is true | 'true' | { count: true } => {
+    return (
+      value === true ||
+      value === 'true' ||
+      (isObject(value) && 'count' in value && isMorphPopulateCount(value.count) && !('on' in value))
+    );
+  };
+
+  const isMorphCountOutput = (value: unknown): value is { count: number } => {
+    return (
+      isObject(value) &&
+      'count' in value &&
+      typeof value.count === 'number' &&
+      Object.keys(value).length === 1
+    );
+  };
+
+  const handleMorphElements = async (elements: unknown) => {
+    const allowedElements: Record<string, unknown>[] = [];
+    const elementsToCheck = isArray(elements) ? elements : [elements];
+
+    for (const element of elementsToCheck) {
+      if (!isObject(element) || !('__type' in element) || typeof element.__type !== 'string') {
         continue;
       }
 
@@ -120,10 +199,8 @@ const visitRelationAttribute = async (
 
   const handleRegularRelation = async () => {
     const scopes = ACTIONS_TO_VERIFY.map((action) => `${attribute.target}.${action}`);
-
     const isAllowed = await hasAccessToSomeScopes(scopes, auth);
 
-    // If the authenticated user don't have access to any of the scopes, then remove the field
     if (!isAllowed) {
       remove(key);
     }
@@ -131,19 +208,41 @@ const visitRelationAttribute = async (
 
   const isCreatorRelation = [CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE].includes(key);
 
-  // Polymorphic relations
   if (contentTypeUtils.isMorphToRelationalAttribute(attribute)) {
+    const value = (data as Record<string, unknown>)[key];
+
+    if (isMorphPopulatePayload(value)) {
+      await handleMorphRelation();
+      return;
+    }
+
+    if (isMorphPopulateAllOrCount(value)) {
+      const newOn = await buildAllowedMorphPopulateFragment(true);
+
+      if (Object.keys(newOn).length === 0) {
+        remove(key);
+        return;
+      }
+
+      set(
+        key,
+        value === true || value === 'true' ? { on: newOn } : { ...value, count: true, on: newOn }
+      );
+      return;
+    }
+
+    if (isMorphCountOutput(value)) {
+      return;
+    }
+
     await handleMorphRelation();
     return;
   }
 
-  // Creator relations
   if (isCreatorRelation && schema.options?.populateCreatorFields) {
-    // do nothing
     return;
   }
 
-  // Regular relations
   await handleRegularRelation();
 };
 
@@ -200,4 +299,10 @@ const hasAccessToSomeScopes = async (scopes: string[], auth: unknown) => {
   }
 
   return false;
+};
+
+const getRegisteredContentTypeUIDs = () => {
+  return (Object.values(strapi.contentTypes ?? {}) as Model[])
+    .map((model) => model.uid)
+    .filter((uid): uid is string => typeof uid === 'string');
 };

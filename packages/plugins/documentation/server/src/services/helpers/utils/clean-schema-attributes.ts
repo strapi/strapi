@@ -34,6 +34,10 @@ const cleanSchemaAttributes = (
   { typeMap = new Map(), isRequest = false, didAddStrapiComponentsToSchemas }: Options
 ): Record<string, OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject> => {
   const schemaAttributes: Record<string, OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject> = {};
+  const relationTargetCache = new Map<
+    string,
+    Record<string, OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject>
+  >();
 
   for (const prop of Object.keys(attributes)) {
     const attribute = attributes[prop];
@@ -233,17 +237,27 @@ const cleanSchemaAttributes = (
           break;
         }
 
-        typeMap.set(attribute.target, true);
-        const targetAttributes = strapi.contentType(attribute.target).attributes;
+        const cachedTargetAttributes = relationTargetCache.get(attribute.target);
+        if (cachedTargetAttributes) {
+          schemaAttributes[prop] = getSchemaData(isListOfEntities, cachedTargetAttributes);
 
-        schemaAttributes[prop] = getSchemaData(
-          isListOfEntities,
-          cleanSchemaAttributes(targetAttributes, {
+          break;
+        }
+
+        typeMap.set(attribute.target, true);
+        try {
+          const targetAttributes = strapi.contentType(attribute.target).attributes;
+          const cleanedTargetAttributes = cleanSchemaAttributes(targetAttributes, {
             typeMap,
             isRequest,
             didAddStrapiComponentsToSchemas,
-          })
-        );
+          });
+
+          relationTargetCache.set(attribute.target, cleanedTargetAttributes);
+          schemaAttributes[prop] = getSchemaData(isListOfEntities, cleanedTargetAttributes);
+        } finally {
+          typeMap.delete(attribute.target);
+        }
 
         break;
       }

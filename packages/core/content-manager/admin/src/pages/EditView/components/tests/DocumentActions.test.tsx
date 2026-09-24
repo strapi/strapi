@@ -7,7 +7,13 @@ const mockPublish = jest.fn();
 const mockUpdateParent = jest.fn();
 const mockDispatch = jest.fn();
 const mockCountDraftRelations = jest.fn();
+const mockNavigate = jest.fn();
+const mockParams: { id?: string } = {};
+let mockIsRelationModalContext = true;
 let parentInitialFormValues: Record<string, unknown> | undefined;
+let currentDocumentSchema: { options: { draftAndPublish: boolean } } = {
+  options: { draftAndPublish: true },
+};
 let relationModalState = {
   isModalOpen: true,
   fieldToConnect: 'relation',
@@ -28,6 +34,12 @@ let relationModalState = {
     },
   ],
 };
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useNavigate: () => mockNavigate,
+  useParams: () => mockParams,
+}));
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
@@ -63,7 +75,7 @@ jest.mock('../../../../hooks/useDocument', () => ({
 }));
 jest.mock('../../../../hooks/useDocumentContext', () => ({
   useDocumentContext: () => ({
-    currentDocument: { schema: { options: { draftAndPublish: true } }, components: {} },
+    currentDocument: { schema: currentDocumentSchema, components: {} },
     currentDocumentMeta: {
       documentId: undefined,
       model: 'api::child.child',
@@ -81,8 +93,12 @@ jest.mock('../../../../services/documents', () => ({
   useUpdateDocumentMutation: () => [mockUpdateParent],
 }));
 jest.mock('../FormInputs/Relations/RelationModal', () => ({
-  useRelationModal: (_name: string, selector: (state: Record<string, unknown>) => unknown) =>
-    selector({
+  useRelationModal: (_name: string, selector: (state: Record<string, unknown>) => unknown) => {
+    if (!mockIsRelationModalContext) {
+      return undefined;
+    }
+
+    return selector({
       dispatch: mockDispatch,
       currentDocument: { schema: { options: { draftAndPublish: true } } },
       rootDocumentMeta: {
@@ -94,7 +110,8 @@ jest.mock('../FormInputs/Relations/RelationModal', () => ({
       state: {
         ...relationModalState,
       },
-    }),
+    });
+  },
 }));
 
 import {
@@ -122,9 +139,55 @@ const ActionHarness = ({ Action, label }: { Action: typeof UpdateAction; label: 
   return <button onClick={() => action.onClick?.({} as React.SyntheticEvent)}>{label}</button>;
 };
 
+describe('PublishAction create navigation', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockIsRelationModalContext = false;
+    mockParams.id = 'create';
+    mockPublish.mockResolvedValue({ data: { documentId: 'published', locale: 'en' } });
+    mockCountDraftRelations.mockResolvedValue({
+      data: { unpublishedRelations: 0, draftM2mLinks: 0 },
+      error: undefined,
+    });
+  });
+
+  afterEach(() => {
+    mockIsRelationModalContext = true;
+    delete mockParams.id;
+  });
+
+  it('replaces the create route after publishing a new collection-type entry', async () => {
+    const { user } = render(<ActionHarness Action={PublishAction} label="Publish" />);
+
+    await user.click(screen.getByRole('button', { name: 'Publish' }));
+
+    await waitFor(() => expect(mockPublish).toHaveBeenCalled());
+    await waitFor(() =>
+      expect(mockNavigate).toHaveBeenCalledWith(
+        {
+          pathname: '../collection-types/api::child.child/published',
+          search: '',
+        },
+        { replace: true }
+      )
+    );
+  });
+
+  it('does not navigate after publishing an existing collection-type entry', async () => {
+    mockParams.id = 'existing-entry';
+    const { user } = render(<ActionHarness Action={PublishAction} label="Publish" />);
+
+    await user.click(screen.getByRole('button', { name: 'Publish' }));
+
+    await waitFor(() => expect(mockPublish).toHaveBeenCalled());
+    expect(mockNavigate).not.toHaveBeenCalled();
+  });
+});
+
 describe('relation parent updates', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockIsRelationModalContext = true;
     parentInitialFormValues = undefined;
     relationModalState = {
       isModalOpen: true,
@@ -243,6 +306,36 @@ describe('relation parent updates', () => {
         disconnect: [],
       },
     });
+  });
+});
+
+describe('draft relations count fetching', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockCountDraftRelations.mockResolvedValue({
+      data: { unpublishedRelations: 0, draftM2mLinks: 0 },
+      error: undefined,
+    });
+  });
+
+  afterEach(() => {
+    currentDocumentSchema = { options: { draftAndPublish: true } };
+  });
+
+  it('fetches the draft relations count for a Draft & Publish content type', async () => {
+    currentDocumentSchema = { options: { draftAndPublish: true } };
+
+    render(<ActionHarness Action={PublishAction} label="Publish child" />);
+
+    await waitFor(() => expect(mockCountDraftRelations).toHaveBeenCalled());
+  });
+
+  it('does not fetch the draft relations count for a non Draft & Publish content type', async () => {
+    currentDocumentSchema = { options: { draftAndPublish: false } };
+
+    render(<ActionHarness Action={PublishAction} label="Publish child" />);
+
+    expect(mockCountDraftRelations).not.toHaveBeenCalled();
   });
 });
 

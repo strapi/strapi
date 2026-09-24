@@ -17,6 +17,19 @@ export type Infos = {
 
 export type SchemaHandler = ReturnType<typeof createSchemaHandler>;
 
+const removeDirectoryIfEmpty = async (dir: string) => {
+  try {
+    const list = await fse.readdir(dir);
+    if (list.length === 0) {
+      await fse.remove(dir);
+    }
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+      throw error;
+    }
+  }
+};
+
 export default function createSchemaHandler(infos: Infos) {
   const { category, modelName, plugin, uid, dir, filename, schema } = infos;
 
@@ -239,10 +252,7 @@ export default function createSchemaHandler(infos: Infos) {
       if (deleted) {
         await fse.remove(initialPath);
 
-        const list = await fse.readdir(initialState.dir);
-        if (list.length === 0) {
-          await fse.remove(initialState.dir);
-        }
+        await removeDirectoryIfEmpty(initialState.dir);
 
         return;
       }
@@ -262,6 +272,8 @@ export default function createSchemaHandler(infos: Infos) {
             pluginOptions: state.schema.pluginOptions,
             attributes: state.schema.attributes,
             config: (state.schema as any).config,
+            indexes: (state.schema as Struct.ContentTypeSchema).indexes,
+            foreignKeys: (state.schema as Struct.ContentTypeSchema).foreignKeys,
           },
           { spaces: 2 }
         );
@@ -270,10 +282,7 @@ export default function createSchemaHandler(infos: Infos) {
         if (initialPath !== filePath) {
           await fse.remove(initialPath);
 
-          const list = await fse.readdir(initialState.dir);
-          if (list.length === 0) {
-            await fse.remove(initialState.dir);
-          }
+          await removeDirectoryIfEmpty(initialState.dir);
         }
 
         return;
@@ -295,10 +304,7 @@ export default function createSchemaHandler(infos: Infos) {
       if (!initialState.uid) {
         await fse.remove(filePath);
 
-        const list = await fse.readdir(state.dir);
-        if (list.length === 0) {
-          await fse.remove(state.dir);
-        }
+        await removeDirectoryIfEmpty(state.dir);
         return;
       }
 
@@ -310,10 +316,7 @@ export default function createSchemaHandler(infos: Infos) {
         if (initialPath !== filePath) {
           await fse.remove(filePath);
 
-          const list = await fse.readdir(state.dir);
-          if (list.length === 0) {
-            await fse.remove(state.dir);
-          }
+          await removeDirectoryIfEmpty(state.dir);
         }
       }
 

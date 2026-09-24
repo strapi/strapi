@@ -9,7 +9,8 @@ const allowedMediaTypes = [
   'text/csv',
 ];
 
-const deniedExecutableTypes = [
+const deniedTypes = [
+  'image/svg+xml',
   'application/vnd.microsoft.portable-executable',
   'application/x-msdownload',
   'application/x-msdos-program',
@@ -33,7 +34,7 @@ module.exports = () => ({
     config: {
       security: {
         allowedTypes: allowedMediaTypes,
-        deniedTypes: deniedExecutableTypes,
+        deniedTypes,
       },
     },
   },

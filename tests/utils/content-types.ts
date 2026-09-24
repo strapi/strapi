@@ -127,6 +127,7 @@ export interface CreateContentTypeOptions {
   name: string;
   singularId?: string;
   pluralId?: string;
+  folder?: string;
   attributes: AddAttribute[];
 }
 
@@ -689,6 +690,12 @@ export const createComponent = async (page: Page, options: CreateComponentOption
   await saveAndVerifyContent(page, options);
 };
 
+export const startCreateContentType = async (page: Page, type: 'single' | 'collection') => {
+  const label = type === 'single' ? 'New Single-Type' : 'New Collection-Type';
+  await page.getByRole('button', { name: label }).click();
+  await page.getByRole('menuitem', { name: label }).click();
+};
+
 // Helper function for creating content types
 const createContentType = async (
   page: Page,
@@ -697,10 +704,9 @@ const createContentType = async (
 ) => {
   const { name, singularId, pluralId } = options;
 
-  const buttonName = type === 'single' ? 'Create new single type' : 'Create new collection type';
   const headingName = type === 'single' ? 'Create a single type' : 'Create a collection type';
 
-  await page.getByRole('button', { name: buttonName }).click();
+  await startCreateContentType(page, type);
   await expect(page.getByRole('heading', { name: headingName })).toBeVisible();
 
   const displayName = page.getByLabel('Display name');
@@ -716,6 +722,11 @@ const createContentType = async (
   await expect(pluralIdField).toHaveValue(pluralId || pluralize(kebabCase(name)));
   if (pluralId) {
     await pluralIdField.fill(pluralId);
+  }
+
+  if (options.folder) {
+    await page.getByLabel('Select a folder or enter a value to create a new one').click();
+    await page.getByRole('option', { name: options.folder }).click();
   }
 
   await page.getByRole('button', { name: 'Continue' }).click();
