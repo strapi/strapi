@@ -49,6 +49,7 @@ import { FilterMenu } from './components/FilterMenu';
 import { FolderFormDialog } from './components/FolderFormDialog';
 import { FolderTree } from './components/FolderTree/FolderTree';
 import { ImportFromUrlDialog } from './components/ImportFromUrlDialog';
+import { ItemContextMenuProvider } from './components/ItemContextMenu';
 import { MainAreaContextMenu } from './components/MainAreaContextMenu';
 import { SortMenu } from './components/SortMenu';
 import { localStorageKeys, viewOptions } from './constants';
@@ -227,22 +228,26 @@ const AssetsView = ({
   }
   return (
     <>
-      {isGridView ? (
-        <AssetsGrid
-          folders={folders}
-          assets={assets}
-          renderedKeys={renderedKeys}
-          onAssetItemClick={onAssetItemClick}
-        />
-      ) : (
-        <AssetsTable
-          assets={assets}
-          folders={folders}
-          mixedItems={mixedItems}
-          renderedKeys={renderedKeys}
-          onAssetItemClick={onAssetItemClick}
-        />
-      )}
+      {/* Above both views so one instance serves either, and so the selection
+          menu has the `locations` its move dialog validates against. */}
+      <ItemContextMenuProvider locations={locations}>
+        {isGridView ? (
+          <AssetsGrid
+            folders={folders}
+            assets={assets}
+            renderedKeys={renderedKeys}
+            onAssetItemClick={onAssetItemClick}
+          />
+        ) : (
+          <AssetsTable
+            assets={assets}
+            folders={folders}
+            mixedItems={mixedItems}
+            renderedKeys={renderedKeys}
+            onAssetItemClick={onAssetItemClick}
+          />
+        )}
+      </ItemContextMenuProvider>
       <div ref={loadMoreRef} style={{ height: 1 }} />
       {isFetchingMore && (
         <Flex justifyContent="center" padding={4}>
