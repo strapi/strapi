@@ -28,7 +28,7 @@ import { AssetsPage } from './page-objects/AssetsPage';
  * to make.
  */
 
-const UPLOADS_DIR = path.join(__dirname, '../../../data/uploads');
+const UPLOADS_DIR = path.join(__dirname, '../../data/uploads');
 const REPLACEMENT = path.join(UPLOADS_DIR, 'test-image-2.jpg');
 const PDF = path.join(UPLOADS_DIR, 'test-document.pdf');
 
