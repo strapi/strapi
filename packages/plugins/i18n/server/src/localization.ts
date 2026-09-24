@@ -15,8 +15,7 @@ export const createLocalizationProvider = (strapi: Core.Strapi): Modules.Localiz
       return typeof value === 'string' ? value : null;
     },
     async getLocales() {
-      const locales: Array<{ code: string; name: string | null }> | null | undefined =
-        await getLocalesService().find();
+      const locales = await getLocalesService().find();
 
       // Stored names are optional, but core consumers need a display name for every locale.
       return (locales ?? []).map(({ code, name }) => ({ code, name: name ?? code }));
