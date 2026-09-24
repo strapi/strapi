@@ -114,6 +114,7 @@ const makePermissionChecker = (overrides: Record<string, jest.Mock> = {}) => ({
   sanitizeUpdateInput: jest.fn(() => jest.fn((data: unknown) => Promise.resolve(data))),
   sanitizedQuery: {
     read: jest.fn((q: unknown) => Promise.resolve(q)),
+    create: jest.fn((q: unknown) => Promise.resolve(q)),
     update: jest.fn((q: unknown) => Promise.resolve(q)),
     delete: jest.fn((q: unknown) => Promise.resolve(q)),
     publish: jest.fn((q: unknown) => Promise.resolve(q)),
@@ -2910,5 +2911,159 @@ describe('relation identity: shapeRelationsForMcp called on every op', () => {
   it('discard_article_draft routes output through shapeRelationsForMcp', async () => {
     const spy = await runHandler('discard_article_draft', { documentId: 'doc-1' });
     expect(spy).toHaveBeenCalled();
+  });
+});
+
+describe('write handlers pass populate to document-manager (fixes #27433)', () => {
+  // Without an explicit populate, document-manager falls back to buildDeepPopulate
+  // (count-shaped relations). reduceToIdentity then turns every to-many relation
+  // into [], so MCP write replies report relations as empty even though the write
+  // landed. Every write handler must pass its permission-scoped populate.
+  const uid = 'api::article.article';
+  const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [
+    baseModel({ uid, options: { draftAndPublish: true } }),
+  ]);
+  const strapi = makeStrapiWithDb();
+  const context = { userAbility: makeUserAbility(), user: mockUser };
+
+  const runTool = async (name: string, args: Record<string, unknown>) => {
+    const tool = tools.find((t) => t.name === name)!;
+    const handler = tool.createHandler(strapi, context);
+    return handler({ args, extra: mockExtra });
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockDocumentManager.exists.mockResolvedValue(true);
+    mockDocumentManager.findOne.mockResolvedValue({ documentId: 'doc-1' });
+    mockDocumentManager.publish.mockResolvedValue([{ documentId: 'doc-1' }]);
+    mockDocumentManager.unpublish.mockResolvedValue({ documentId: 'doc-1' });
+    mockDocumentManager.discardDraft.mockResolvedValue({ documentId: 'doc-1' });
+  });
+
+  it('create_article passes populate to documentManager.create', async () => {
+    await runTool('create_article', { data: { title: 'New' }, locale: 'en' });
+    expect(mockDocumentManager.create).toHaveBeenCalledWith(
+      uid,
+      expect.objectContaining({ populate: expect.anything() })
+    );
+  });
+
+  it('update_article passes populate to documentManager.update', async () => {
+    await runTool('update_article', { documentId: 'doc-1', data: { title: 'Up' }, locale: 'en' });
+    expect(mockDocumentManager.update).toHaveBeenCalledWith(
+      'doc-1',
+      uid,
+      expect.objectContaining({ populate: expect.anything() })
+    );
+  });
+
+  it('publish_article passes populate to documentManager.publish', async () => {
+    await runTool('publish_article', { documentId: 'doc-1', locale: 'en' });
+    expect(mockDocumentManager.publish).toHaveBeenCalledWith(
+      'doc-1',
+      uid,
+      expect.objectContaining({ populate: expect.anything() })
+    );
+  });
+
+  it('unpublish_article passes populate to documentManager.unpublish', async () => {
+    await runTool('unpublish_article', { documentId: 'doc-1', locale: 'en' });
+    expect(mockDocumentManager.unpublish).toHaveBeenCalledWith(
+      'doc-1',
+      uid,
+      expect.objectContaining({ populate: expect.anything() })
+    );
+  });
+
+  it('discard_article_draft passes populate to documentManager.discardDraft', async () => {
+    await runTool('discard_article_draft', { documentId: 'doc-1', locale: 'en' });
+    expect(mockDocumentManager.discardDraft).toHaveBeenCalledWith(
+      'doc-1',
+      uid,
+      expect.objectContaining({ populate: expect.anything() })
+    );
+  });
+});
+
+describe('single-type write handlers pass populate to document-manager (fixes #27433)', () => {
+  const uid = 'api::global.global';
+  const tools = deriveDisplayedContentTypeMcpToolDefinitions(mockStrapi, [
+    baseModel({ kind: 'singleType', uid, apiID: 'global', options: { draftAndPublish: true } }),
+  ]);
+  const context = { userAbility: makeUserAbility(), user: mockUser };
+
+  const makeStrapiForWrite = (findOneResult: unknown) => {
+    const strapi = makeStrapiWithDb({
+      db: {
+        transaction: jest.fn(async (cb: () => Promise<unknown>) => cb()),
+        query: jest.fn(() => ({ findOne: jest.fn(() => Promise.resolve(findOneResult)) })),
+      },
+    });
+    return strapi;
+  };
+
+  const runTool = async (name: string, args: Record<string, unknown>, strapi: Core.Strapi) => {
+    const tool = tools.find((t) => t.name === name)!;
+    const handler = tool.createHandler(strapi, context);
+    return handler({ args, extra: mockExtra });
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockDocumentManager.findMany.mockResolvedValue([{ documentId: 'st-1' }]);
+    mockDocumentManager.publish.mockResolvedValue([{ documentId: 'st-1' }]);
+    mockDocumentManager.unpublish.mockResolvedValue({ documentId: 'st-1' });
+    mockDocumentManager.discardDraft.mockResolvedValue({ documentId: 'st-1' });
+  });
+
+  it('write_global create branch passes populate to documentManager.create', async () => {
+    mockDocumentManager.findMany.mockResolvedValueOnce([]);
+    const strapi = makeStrapiForWrite(null);
+    await runTool('write_global', { data: { title: 'New' }, locale: 'en' }, strapi);
+    expect(mockDocumentManager.create).toHaveBeenCalledWith(
+      uid,
+      expect.objectContaining({ populate: expect.anything() })
+    );
+  });
+
+  it('write_global update branch passes populate to documentManager.update', async () => {
+    const strapi = makeStrapiForWrite({ documentId: 'st-1' });
+    await runTool('write_global', { data: { title: 'Up' }, locale: 'en' }, strapi);
+    expect(mockDocumentManager.update).toHaveBeenCalledWith(
+      'st-1',
+      uid,
+      expect.objectContaining({ populate: expect.anything() })
+    );
+  });
+
+  it('publish_global passes populate to documentManager.publish', async () => {
+    const strapi = makeStrapiWithDb();
+    await runTool('publish_global', { locale: 'en' }, strapi);
+    expect(mockDocumentManager.publish).toHaveBeenCalledWith(
+      'st-1',
+      uid,
+      expect.objectContaining({ populate: expect.anything() })
+    );
+  });
+
+  it('unpublish_global passes populate to documentManager.unpublish', async () => {
+    const strapi = makeStrapiWithDb();
+    await runTool('unpublish_global', { locale: 'en' }, strapi);
+    expect(mockDocumentManager.unpublish).toHaveBeenCalledWith(
+      'st-1',
+      uid,
+      expect.objectContaining({ populate: expect.anything() })
+    );
+  });
+
+  it('discard_global_draft passes populate to documentManager.discardDraft', async () => {
+    const strapi = makeStrapiWithDb();
+    await runTool('discard_global_draft', { locale: 'en' }, strapi);
+    expect(mockDocumentManager.discardDraft).toHaveBeenCalledWith(
+      'st-1',
+      uid,
+      expect.objectContaining({ populate: expect.anything() })
+    );
   });
 });
