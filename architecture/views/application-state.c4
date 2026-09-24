@@ -1,0 +1,33 @@
+views {
+  view application_state {
+    title '04 Deployment / Application code and persistent state'
+    description '''
+      **Audience:** product and engineering. **Type:** construction and state map, not a deployment topology or execution sequence.
+      **Example:** local upload provider. Source includes schemas, API code, plugin overrides and config files. Environment values vary by environment.
+      The Admin bundle is generated and can be replaced. Content, identities and database-backed settings must survive application replacement;
+      local media bytes must be retained separately. A remote provider substitutes object storage for local media.
+      Configuration combines defaults, application config and environment-specific config. Browser build values can require rebuilding;
+      a server restart alone does not rebuild the Admin. CTB edits source in development, not this production state.
+      Open source for assembly, build for plugin entrypoints, database for deployment, or media for the upload journey.
+    '''
+    include
+      strapi.application_source with { navigateTo strapi_construction },
+      environment_values,
+      strapi.cli_tooling.admin_build with { navigateTo strapi_extensions },
+      strapi.admin_browser_bundle with { navigateTo strapi_containers },
+      strapi.server_runtime with { navigateTo strapi_startup },
+      strapi.database with { navigateTo self_hosted_deployment },
+      strapi.local_media with { navigateTo media_upload_flow }
+    exclude * -> *
+    include
+      strapi.server_runtime -> strapi.application_source with { title 'Loads definitions and configuration' },
+      strapi.server_runtime -> environment_values,
+      strapi.cli_tooling.admin_build -> strapi.application_source,
+      strapi.cli_tooling.admin_build -> environment_values,
+      strapi.cli_tooling.admin_build -> strapi.admin_browser_bundle,
+      strapi.server_runtime -> strapi.admin_browser_bundle,
+      strapi.server_runtime -> strapi.database with { title 'Persists content, identities and settings' },
+      strapi.server_runtime -> strapi.local_media with { title 'Persists uploaded bytes via local provider' }
+    autoLayout LeftRight 65 40
+  }
+}

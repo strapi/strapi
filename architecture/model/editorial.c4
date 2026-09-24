@@ -1,0 +1,63 @@
+model {
+  extend strapi.server_runtime {
+    review_workflow_gate = component 'Review workflow document middleware' {
+      summary 'Enterprise feature: registers middleware that can block publication until an entry reaches its required stage.'
+      description 'Loaded only when the review-workflows feature is enabled; bootstrap registers its publish-stage middleware with strapi.documents.'
+      technology '@strapi/review-workflows'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/review-workflows/server/src/index.ts#L10 'Enterprise feature gate'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/review-workflows/server/src/bootstrap.ts#L55 'Document middleware registration'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/review-workflows/server/src/services/document-service-middleware.ts#L129 'Publish-stage check'
+    }
+
+    release_service = component 'Content release service and scheduler' {
+      summary 'Enterprise feature: schedules releases and publishes their actions through the Document Service.'
+      description 'When cms-content-releases is enabled, scheduled jobs call the release service; it publishes or unpublishes release actions through strapi.documents.'
+      technology '@strapi/content-releases'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/content-releases/server/src/index.ts#L10 'Enterprise feature gate'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/content-releases/server/src/services/scheduling.ts#L24 'Scheduled release execution'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/content-releases/server/src/services/release.ts#L353 'Release document publishing'
+    }
+
+    localization_support = component 'Localization support' {
+      summary 'Bundled i18n support adds locale fields; localization remains optional for each content type.'
+      description 'The i18n plugin adds locale and localization fields to content types. For a type that is not localized, those fields remain private.'
+      technology '@strapi/i18n'
+      link https://github.com/strapi/strapi/blob/develop/packages/plugins/i18n/server/src/register.ts#L49 'Content-type localization fields'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/document-service/internationalization.ts#L16 'Document Service locale selection'
+    }
+  }
+
+  extend strapi.server_runtime.content_manager_server {
+    preview_url_resolver = component 'Preview URL resolver' {
+      summary 'Validates a preview request and asks the configured application handler for a URL.'
+      description 'The configured handler returns a URL for the Admin to display. It does not establish how the external frontend authenticates, fetches, or renders draft content.'
+      technology 'TypeScript / admin.preview configuration'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/content-manager/server/src/preview/services/preview.ts#L14 'Configured preview handler'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/content-manager/server/src/preview/controllers/preview.ts#L26 'Preview URL response'
+    }
+
+    history_version_service = component 'Content history version service' {
+      summary 'Records and retrieves content history versions when the Enterprise feature is enabled.'
+      description 'The history model remains registered after a license changes to preserve existing data, but its routes, controllers, and services are loaded only while cms-content-history is enabled.'
+      technology 'TypeScript / Enterprise feature'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/content-manager/server/src/history/index.ts#L13 'Feature gate'
+    }
+  }
+
+  preview_frontend = external_system 'Preview frontend' {
+    summary 'External application embedded in the Admin preview iframe using the configured preview URL.'
+    description 'The Admin renders the configured URL as an iframe source. This model does not assume the application’s authentication, draft-data access, or rendering implementation.'
+    link https://github.com/strapi/strapi/blob/develop/packages/core/content-manager/admin/src/preview/pages/Preview.tsx#L452 'Admin preview iframe'
+  }
+
+  content_editor -> strapi.admin_web_app.content_manager_ui 'uses editorial tools'
+  strapi.admin_web_app.content_manager_ui -> strapi.server_runtime.cm_document_manager 'requests content operations through Content Manager Admin APIs'
+  strapi.server_runtime.document_service -> strapi.server_runtime.review_workflow_gate 'runs the registered publish-stage middleware'
+  strapi.server_runtime.release_service -> strapi.server_runtime.document_service 'publishes scheduled release actions'
+  strapi.server_runtime.document_service -> strapi.server_runtime.localization_support 'selects and transforms document locales'
+  strapi.admin_web_app.content_manager_ui -> strapi.server_runtime.content_manager_server.preview_url_resolver 'requests a configured preview URL'
+  strapi.server_runtime.content_manager_server.preview_url_resolver -> strapi.admin_web_app.content_manager_ui 'returns the configured preview URL'
+  strapi.admin_web_app.content_manager_ui -> strapi.server_runtime.content_manager_server.history_version_service 'requests content history records'
+  strapi.server_runtime.content_manager_server.history_version_service -> strapi.database 'persists history versions'
+  strapi.server_runtime.upload_service -> strapi.database 'persists media metadata'
+}

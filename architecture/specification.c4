@@ -71,6 +71,14 @@ specification {
     }
   }
 
+  element concept {
+    notation 'Domain concept (not a runtime unit)'
+    style {
+      shape rectangle
+      color secondary
+    }
+  }
+
   deploymentNode environment {
     notation 'Example environment'
     style { color slate }

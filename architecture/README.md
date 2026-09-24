@@ -20,6 +20,19 @@ The view browser groups diagrams into **01 Start here**, **02 Journeys**, **03 E
 complete view catalog. Implicit views are disabled: every navigation destination is authored.
 Existing view IDs are retained where practical so saved URLs continue to work.
 
+The entry views lead to these focused explanations without adding more landing-page entries:
+
+| Topic                                         | View                   | Next step                                                   |
+| --------------------------------------------- | ---------------------- | ----------------------------------------------------------- |
+| Documents, variants, components and relations | `content_model`        | Schema editing or Document Service                          |
+| Identities and token boundaries               | `access_boundaries`    | `admin_login_flow` or a Content API request                 |
+| Editorial publishing and localization         | `editorial_publishing` | Basic publishing or content concepts                        |
+| Editing, media, preview and history           | `content_workspace`    | Choose a task below                                         |
+| Media bytes versus database metadata          | `media_upload_flow`    | Application state and deployment                            |
+| Configured frontend preview                   | `content_preview_flow` | Content workspace                                           |
+| Licensed Content History                      | `content_history`      | Content workspace                                           |
+| Application code versus persistent state      | `application_state`    | Open the database in Runtime architecture to reach this map |
+
 ## What the model means
 
 The C4 system is a **typical application built with Strapi**, not a centrally operated SaaS.
@@ -34,6 +47,16 @@ Keep three perspectives distinct:
   A plugin or npm package is not automatically a container.
 - **Construction and extension:** CLI tooling, application files, plugin exports, and Admin builds.
   These supplementary views explain how the runtime is assembled. They are not deployment diagrams.
+
+Domain concept maps explain vocabulary and access scopes; their cards are not services or database
+tables. A document groups stored entries by identity, with locale and draft/published variants where
+enabled. Content History snapshots are a separate feature from those publication variants.
+
+Availability is part of the model. In this checkout, i18n is bundled but localization is configured per
+content type and field. Users & Permissions requires its plugin. Review Workflows, Content Releases,
+Content History and SSO depend on their license features as well as relevant configuration. Preview
+uses an application-defined frontend URL handler. A diagram showing these capabilities does not mean
+that every application enables them, or that every publishing action goes through a release.
 
 The deployment example deliberately chooses **one server, SQLite, and local media storage**.
 PostgreSQL/MySQL and remote upload providers are alternatives, not additional mandatory nodes.
@@ -86,6 +109,10 @@ also build and inspect the rendered views, including sequence mode and drill-dow
 - `model/capabilities.c4` contains the supplementary product vocabulary.
 - `model/extensions.c4` contains build artifacts, extension points, providers, and lifecycle roles.
 - `model/deployment.c4` defines the illustrative deployment and its storage choice.
+- `model/content-concepts.c4` defines the document vocabulary.
+- `model/access.c4` separates identity/credential concepts from Admin authentication responsibilities.
+- `model/editorial.c4` contains editorial, media, preview and history responsibilities.
+- `model/application-state.c4` connects application inputs, build output and persistent state.
 - `views/overview.c4` contains the introductory views and the server overview.
 - Other `views/` files contain focused engineering views and journeys.
 

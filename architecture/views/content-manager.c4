@@ -4,11 +4,11 @@ views {
     description 'Content Manager controllers coordinate admin permissions, response shaping and document operations. Routine content writes go through the Document Service; targeted count/existence queries also use the database abstraction. Routing and feature module details are in the server code reference.'
     include
       cm_controllers,
-      cm_permission_services,
+      cm_permission_services with { navigateTo access_boundaries },
       cm_schema_configuration,
       cm_populate_metadata,
-      cm_document_manager,
-      document_service,
+      cm_document_manager with { navigateTo editorial_publishing },
+      document_service with { navigateTo content_model },
       database_layer
     exclude * -> *
     include

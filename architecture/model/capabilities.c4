@@ -28,6 +28,22 @@ model {
     summary 'Adapt APIs, plugins, Admin UI and providers.'
 
   }
+  edit_entries = capability 'Edit entries' {
+    summary 'Create and edit structured content with Admin permissions.'
+  }
+  manage_media = capability 'Manage media' {
+    summary 'Upload files and manage their metadata and storage.'
+  }
+  preview_content = capability 'Preview content' {
+    summary 'View content in a configured frontend preview.'
+  }
+  inspect_history = capability 'Content history' {
+    summary 'Inspect earlier versions when the licensed feature is enabled.'
+  }
+  manage_content -> edit_entries 'includes'
+  manage_content -> manage_media 'includes'
+  manage_content -> preview_content 'can include configured preview'
+  manage_content -> inspect_history 'can include licensed history'
   model_content -> manage_content 'defines the structure of'
   manage_content -> publish_content 'prepares content for'
   publish_content -> deliver_content 'makes published content available to'

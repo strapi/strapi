@@ -31,11 +31,11 @@ views {
       Open a capability to explore its implementation or a representative journey.
     '''
     include
-      model_content with { navigateTo content_type_builder_schema_change_flow },
-      manage_content with { navigateTo content_manager_components },
-      publish_content with { navigateTo content_publishing_flow },
+      model_content with { navigateTo content_model },
+      manage_content with { navigateTo content_workspace },
+      publish_content with { navigateTo editorial_publishing },
       deliver_content with { navigateTo content_api_request_flow },
-      govern_access with { navigateTo settings_api_tokens_ui_code },
+      govern_access with { navigateTo access_boundaries },
       extend_strapi with { navigateTo strapi_extensions }
     autoLayout LeftRight 70 40
   }
@@ -46,7 +46,7 @@ views {
       **Audience:** everyone. **Type:** C4 container view of a typical Strapi application.
       The Admin executes in a browser and the server in Node.js, even when one server distributes both.
       The consuming application is outside the CMS. This baseline omits optional providers and development tooling.
-      Open the Admin or server to go deeper; open the database for a self-hosted deployment example.
+      Open the Admin or server to go deeper; open the database for persistent state and a self-hosted deployment example.
     '''
     include
       strapi,
@@ -54,7 +54,7 @@ views {
       public_client,
       admin_web_app with { navigateTo admin_app_components },
       server_runtime with { navigateTo strapi_container_internals },
-      database with { navigateTo self_hosted_deployment }
+      database with { navigateTo application_state }
     exclude * -> *
     include
       content_editor -> admin_web_app with { title 'Edits and publishes content' },
