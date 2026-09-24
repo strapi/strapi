@@ -89,6 +89,14 @@ model {
         metadata { implementation 'packages/core/core/src/services/content-api' }
         link https://github.com/strapi/strapi/tree/develop/packages/core/core/src/services/content-api 'Implementation'
 
+        ca_service_factory = code_package 'Content API service factory' {
+          summary 'Assembles the helpers exposed as strapi.contentAPI.'
+          description 'createContentAPI exposes route metadata, permission utilities, validation/sanitization helpers and extra parameter registration. These are responsibilities of the service, not a request pipeline.'
+          technology 'TypeScript'
+          metadata { implementation 'packages/core/core/src/services/content-api/index.ts' }
+          link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/content-api/index.ts 'Service factory'
+        }
+
         ca_route_metadata = code_package 'Route metadata' {
           summary 'Content API route information used to identify route type, action names, and permission scope'
           description 'Content API route information used to identify route type, action names, and permission scope.'
@@ -114,8 +122,8 @@ model {
         }
 
         ca_route_schemas = code_package 'Extra route schemas' {
-          summary 'Route-level schemas used by Content API validation and sanitization'
-          description 'Route-level schemas used by Content API validation and sanitization.'
+          summary 'Registers extra query and input parameters on matching routes.'
+          description 'addQueryParams and addInputParams retain extra parameter schemas; applyExtraParamsToRoutes merges them into route definitions during routing initialization.'
           technology 'TypeScript'
           metadata { implementation 'packages/core/core/src/services/content-api' }
           link https://github.com/strapi/strapi/tree/develop/packages/core/core/src/services/content-api 'Implementation'
@@ -417,16 +425,18 @@ model {
         link https://github.com/strapi/strapi/tree/develop/packages/core/core/src/services/document-service 'Implementation'
 
         ds_document_operations = code_package 'Document operations' {
-          summary 'High-level document read and write operations exposed through strapi.documents'
-          description 'High-level document read and write operations exposed through strapi.documents.'
+          summary 'Repository actions and entry helpers for document reads and writes.'
+          description 'repository.ts coordinates document operations; entries.ts handles individual entry persistence. Together they use transforms, attribute handlers, shared utilities and the database abstraction.'
           technology 'TypeScript'
           metadata { implementation 'packages/core/core/src/services/document-service' }
           link https://github.com/strapi/strapi/tree/develop/packages/core/core/src/services/document-service 'Implementation'
+          link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/document-service/repository.ts 'Document repository'
+          link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/document-service/entries.ts 'Entry helpers'
         }
 
         ds_transform_layer = code_package 'Transform layer' {
-          summary 'Transforms document params, data, relations, and response shapes around persistence operations'
-          description 'Transforms document params, data, relations, and response shapes around persistence operations.'
+          summary 'Resolves document references and prepares data and query parameters.'
+          description 'Transforms document identifiers into entry identifiers using locale/publication context, handles relation data and prepares query/populate parameters. Attribute-value transforms are a separate dependency of entry helpers.'
           technology 'TypeScript'
           metadata { implementation 'packages/core/core/src/services/document-service/transform' }
           link https://github.com/strapi/strapi/tree/develop/packages/core/core/src/services/document-service/transform 'Implementation'
@@ -446,6 +456,7 @@ model {
           technology 'TypeScript'
           metadata { implementation 'packages/core/core/src/services/document-service/middlewares' }
           link https://github.com/strapi/strapi/tree/develop/packages/core/core/src/services/document-service/middlewares 'Implementation'
+          link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/document-service/index.ts 'Repository wrapping'
         }
 
         ds_utils = code_package 'Document utilities' {
@@ -650,7 +661,7 @@ model {
         }
 
         cm_ui_router = code_package 'Content Manager router' {
-          summary 'Route definitions for collection types, single types, edit pages, list configuration, edit configuration, component configuration,.'
+          summary 'Routes to content lists, editing, configuration, history and preview.'
           description 'Route definitions for collection types, single types, edit pages, list configuration, edit configuration, component configuration, history, preview, and fallback states.'
           technology 'React / TypeScript'
           metadata { implementation 'packages/core/content-manager/admin/src/router.tsx' }
@@ -666,7 +677,7 @@ model {
         }
 
         cm_ui_list_view = code_package 'List view' {
-          summary 'Collection type browsing surface with filters, table actions, bulk actions, view settings, cloning behavior, and list data loading'
+          summary 'Browses collection entries and exposes list and bulk actions.'
           description 'Collection type browsing surface with filters, table actions, bulk actions, view settings, cloning behavior, and list data loading.'
           technology 'React / TypeScript'
           metadata { implementation 'packages/core/content-manager/admin/src/pages/ListView' }
@@ -674,7 +685,7 @@ model {
         }
 
         cm_ui_edit_view = code_package 'Edit view' {
-          summary 'Document editing surface with form layout, input rendering, document actions, header actions, panels, status, validation, and.'
+          summary 'Edits a document’s fields, relations and publication state.'
           description 'Document editing surface with form layout, input rendering, document actions, header actions, panels, status, validation, and document lifecycle actions.'
           technology 'React / TypeScript'
           metadata { implementation 'packages/core/content-manager/admin/src/pages/EditView' }
@@ -682,7 +693,7 @@ model {
         }
 
         cm_ui_configuration_views = code_package 'Configuration views' {
-          summary 'Admin pages for configuring collection type list view, edit view, and component layouts'
+          summary 'Configures content lists, edit views and component layouts.'
           description 'Admin pages for configuring collection type list view, edit view, and component layouts.'
           technology 'React / TypeScript'
           metadata { implementation 'packages/core/content-manager/admin/src/pages/ListConfiguration, EditConfigurationPage.tsx, ComponentConfigurationPage.tsx' }
@@ -926,12 +937,16 @@ model {
 
     server_runtime.content_api -> server_runtime.content_api_permissions 'owns permission action registry and ability engine'
     server_runtime.content_api -> server_runtime.content_api_validation 'exposes validate and sanitize helpers'
-    server_runtime.content_api.ca_route_metadata -> server_runtime.content_api.ca_permission_providers 'provides action names and route scopes'
-    server_runtime.content_api.ca_permission_providers -> server_runtime.content_api.ca_validation_helpers 'shares Content API context'
-    server_runtime.content_api.ca_route_schemas -> server_runtime.content_api.ca_validation_helpers 'provides route-level schemas'
+    server_runtime.content_api.ca_service_factory -> server_runtime.content_api.ca_route_metadata 'exposes route discovery'
+    server_runtime.content_api.ca_service_factory -> server_runtime.content_api.ca_permission_providers 'instantiates permission utilities'
+    server_runtime.content_api.ca_service_factory -> server_runtime.content_api.ca_validation_helpers 'creates validators and sanitizers'
+    server_runtime.content_api.ca_service_factory -> server_runtime.content_api.ca_route_schemas 'exposes extra-parameter registration'
     server_runtime.auth -> server_runtime.content_api_token_strategy 'uses strategy for bearer API tokens'
     server_runtime.auth -> server_runtime.users_permissions_strategy 'uses strategy for JWT users and public role access'
-    server_runtime.auth.auth_strategy_registry -> server_runtime.auth.auth_request_context 'creates request auth context'
+    server_runtime.auth.auth_strategy_registry -> server_runtime.content_api_token_strategy 'can select token strategy'
+    server_runtime.auth.auth_strategy_registry -> server_runtime.users_permissions_strategy 'can select user/public strategy'
+    server_runtime.content_api_token_strategy -> server_runtime.auth.auth_request_context 'returns token credentials and ability'
+    server_runtime.users_permissions_strategy -> server_runtime.auth.auth_request_context 'returns user/public credentials and ability'
     server_runtime.auth.auth_request_context -> server_runtime.auth.auth_authorization_step 'provides credentials and abilities'
     server_runtime.content_api_token_strategy -> server_runtime.content_api_permissions 'generates ability for custom token permissions'
     server_runtime.users_permissions_strategy -> server_runtime.content_api_permissions 'generates ability for role permissions'
@@ -969,10 +984,10 @@ model {
     server_runtime.cm_document_manager -> server_runtime.document_service 'uses strapi.documents for document operations'
     server_runtime.cm_document_manager -> server_runtime.database_layer 'uses targeted database queries for counts and existence checks'
     server_runtime.document_service -> server_runtime.database_layer 'uses database abstraction'
-    server_runtime.document_service.ds_document_operations -> server_runtime.document_service.ds_middlewares 'runs document middleware pipeline'
+    server_runtime.document_service.ds_middlewares -> server_runtime.document_service.ds_document_operations 'wraps repository actions'
     server_runtime.document_service.ds_document_operations -> server_runtime.document_service.ds_transform_layer 'transforms params and document data'
-    server_runtime.document_service.ds_transform_layer -> server_runtime.document_service.ds_attribute_handlers 'handles attribute-specific behavior'
-    server_runtime.document_service.ds_transform_layer -> server_runtime.document_service.ds_utils 'uses shared document utilities'
+    server_runtime.document_service.ds_document_operations -> server_runtime.document_service.ds_attribute_handlers 'applies attribute transforms in entry helpers'
+    server_runtime.document_service.ds_document_operations -> server_runtime.document_service.ds_utils 'uses populate and relation utilities'
     server_runtime.document_service.ds_document_operations -> server_runtime.database_layer 'persists through database abstraction'
     server_runtime.database_layer -> database 'persists and reads application data'
 

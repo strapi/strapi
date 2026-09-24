@@ -31,31 +31,40 @@ views {
   view content_api_service_code of strapi.server_runtime.content_api {
     title '05 Code reference / Content API / Service'
     description '''
-      Code-level organization of the Content API service: route metadata, permission providers, validation helpers, and extra route schemas.
+      **Question:** where are the helpers exposed by strapi.contentAPI assembled?
+      This source map follows the service factory and its four responsibilities. Several cards share index.ts; they are not separate packages or sequential request stages.
+      Use the cards’ source links for the factory, permission utilities, validation helpers and extra query/input parameter registration.
     '''
 
     include
+      ca_service_factory,
       ca_route_metadata,
       ca_permission_providers,
       ca_validation_helpers,
-      ca_route_schemas,
-      ca_route_metadata -> ca_permission_providers,
-      ca_permission_providers -> ca_validation_helpers,
-      ca_route_schemas -> ca_validation_helpers
+      ca_route_schemas
+    exclude * -> *
+    include
+      ca_service_factory -> ca_route_metadata,
+      ca_service_factory -> ca_permission_providers,
+      ca_service_factory -> ca_validation_helpers,
+      ca_service_factory -> ca_route_schemas
+    autoLayout LeftRight 65 35
   }
 
   view generated_core_api_code of strapi.server_runtime.core_api_layer {
     title '05 Code reference / Content API / Generated core API layer'
     description '''
-      Code-level organization of generated Content API routers, controllers, and services.
+      **Question:** where should a contributor look for generated REST routes, validation or persistence calls?
+      Router/controller/service factories provide the default CRUD behavior. Controllers validate and sanitize through Content API helpers; services call Document Service.
+      This is the default generated layer, not every custom route or GraphQL resolver. Open Content API or Document Service for their source maps.
     '''
 
     include
       core_api_routes,
       core_api_controllers,
       core_api_services,
-      strapi.server_runtime.content_api,
-      strapi.server_runtime.document_service,
+      strapi.server_runtime.content_api with { navigateTo content_api_service_code },
+      strapi.server_runtime.document_service with { navigateTo document_service_code },
       core_api_routes -> core_api_controllers,
       core_api_controllers -> core_api_services,
       core_api_controllers -> strapi.server_runtime.content_api,
@@ -65,9 +74,11 @@ views {
   view auth_code of strapi.server_runtime.auth {
     title '05 Code reference / Content API / Authentication and authorization'
     description '''
-      Code-level organization of route authentication. A full-access token permits every route scope; a
+      **Question:** how do Content API strategies supply credentials and abilities to route authorization?
+      The registry selects applicable strategies; the successful strategy supplies request context and its verify function checks the route configuration.
+      Token and user/public access are alternatives, not two required stages. A full-access token permits every route scope; a
       read-only token permits `find` and `findOne` scopes; a custom token creates an ability from its
-      configured permission actions.
+      configured permission actions. Other route policies and controller validation still apply. These cards group responsibilities; registry, context and verification share the auth service implementation.
     '''
 
     include
@@ -76,16 +87,26 @@ views {
       auth_authorization_step,
       strapi.server_runtime.content_api_token_strategy,
       strapi.server_runtime.users_permissions_strategy,
-      auth_strategy_registry -> auth_request_context,
+      strapi.server_runtime.content_api_permissions
+    exclude * -> *
+    include
+      auth_strategy_registry -> strapi.server_runtime.content_api_token_strategy,
+      auth_strategy_registry -> strapi.server_runtime.users_permissions_strategy,
+      strapi.server_runtime.content_api_token_strategy -> auth_request_context,
+      strapi.server_runtime.users_permissions_strategy -> auth_request_context,
       auth_request_context -> auth_authorization_step,
       strapi.server_runtime.content_api_token_strategy -> strapi.server_runtime.content_api_permissions,
       strapi.server_runtime.users_permissions_strategy -> strapi.server_runtime.content_api_permissions
+    autoLayout LeftRight 65 40
   }
 
   view document_service_code of strapi.server_runtime.document_service {
     title '05 Code reference / Content API / Document service'
     description '''
-      Code-level organization of strapi.documents: document operations, middleware, transforms, attribute handlers, and utilities.
+      **Question:** where do document operations, middleware and persistence transformations live?
+      The service factory wraps repository actions with middleware. Repository and entry helpers use the transform layer, attribute handlers and utilities before persistence.
+      Arrows describe wrapping and code dependencies, not the exact order of every operation. Attribute handlers are used by entry helpers, separately from relation-ID transforms.
+      Use Document operations for repository.ts and entries.ts; use the middleware card for its manager and the wrapping factory.
     '''
 
     include
@@ -94,12 +115,15 @@ views {
       ds_transform_layer,
       ds_attribute_handlers,
       ds_utils,
-      strapi.server_runtime.database_layer,
-      ds_document_operations -> ds_middlewares,
+      strapi.server_runtime.database_layer
+    exclude * -> *
+    include
+      ds_middlewares -> ds_document_operations,
       ds_document_operations -> ds_transform_layer,
-      ds_transform_layer -> ds_attribute_handlers,
-      ds_transform_layer -> ds_utils,
+      ds_document_operations -> ds_attribute_handlers,
+      ds_document_operations -> ds_utils,
       ds_document_operations -> strapi.server_runtime.database_layer
+    autoLayout LeftRight 65 35
   }
 
   dynamic view content_api_request_flow {

@@ -30,7 +30,10 @@ views {
   view content_manager_server_code of strapi.server_runtime.content_manager_server {
     title '05 Code reference / Content Manager / Server'
     description '''
-      Code-level organization of the Content Manager server package: routes, middlewares, controllers, services, and feature modules.
+      **Question:** where are Content Manager Admin routes, handlers and feature modules implemented?
+      Routes select middleware/controllers; controllers and feature modules use shared services. Content operations reach Document Service through those services.
+      This source map groups directories, not an ordered request trace. History, preview and homepage modules have their own routing and availability rules.
+      Open feature modules for editorial tasks or Document Service for the shared content implementation.
     '''
 
     include
@@ -38,8 +41,8 @@ views {
       cm_server_middlewares_code,
       cm_server_controllers_code,
       cm_server_services_code,
-      cm_server_feature_modules_code,
-      strapi.server_runtime.document_service,
+      cm_server_feature_modules_code with { navigateTo content_workspace },
+      strapi.server_runtime.document_service with { navigateTo document_service_code },
       cm_server_routes_code -> cm_server_middlewares_code,
       cm_server_routes_code -> cm_server_controllers_code,
       cm_server_routes_code -> cm_server_feature_modules_code,

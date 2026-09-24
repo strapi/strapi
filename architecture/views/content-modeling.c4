@@ -2,7 +2,9 @@ views {
   view content_type_builder_server_code of strapi.server_runtime.content_type_builder_server {
     title '05 Code reference / Content-Type Builder / Server'
     description '''
-      Code-level organization of the Content-Type Builder server package: routes, middlewares, controllers, services, and schema builder internals.
+      **Question:** where are schema-editing requests validated and turned into definition files?
+      Routes, middleware, controllers and services coordinate development-only schema edits. The schema builder writes definitions; the reload and database synchronization are subsequent responsibilities.
+      This source map does not describe production schema editing. Open schema files for the complete development change journey and use card links for the relevant source directories.
     '''
 
     include
@@ -12,7 +14,7 @@ views {
       ctb_server_services,
       ctb_schema_builder,
       strapi.application_source,
-      strapi.application_source.content_type_schema_files,
+      strapi.application_source.content_type_schema_files with { navigateTo content_type_builder_schema_change_flow },
       ctb_server_routes -> ctb_server_middlewares,
       ctb_server_routes -> ctb_server_controllers,
       ctb_server_controllers -> ctb_server_services,

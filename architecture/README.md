@@ -20,6 +20,11 @@ The view browser groups diagrams into **01 Start here**, **02 Journeys**, **03 E
 complete view catalog. Implicit views are disabled: every navigation destination is authored.
 Existing view IDs are retained where practical so saved URLs continue to work.
 
+**05 Code reference** contains contributor source maps, not exhaustive C4 class diagrams or generated
+call graphs. A card can group several files, and several responsibilities can share one file. Open
+the card’s implementation links to inspect the code; follow diagram links for related architecture
+or journeys. Curated arrows describe the dependency or wrapping relationship written on the label.
+
 The entry views lead to these focused explanations without adding more landing-page entries:
 
 | Topic                                         | View                   | Next step                                                   |
