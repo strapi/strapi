@@ -229,6 +229,21 @@ export type ConfigWithDefault<TValue, TDefault> = undefined extends TValue
   ? Exclude<TValue, undefined> | TDefault
   : TValue;
 
+/**
+ * Preserves primitive literal inference in default argument tuples without making objects readonly.
+ * The remaining members keep the constraint open to every config value, including unknown and void.
+ */
+export type ConfigDefaultValue =
+  | string
+  | number
+  | boolean
+  | bigint
+  | symbol
+  | NonNullable<unknown>
+  | null
+  | undefined
+  | void;
+
 export interface ConfigProvider {
   /**
    * Reads a config value. A registered namespace, or a dotted path inside one, resolves to its contract.
@@ -241,9 +256,7 @@ export interface ConfigProvider {
   get<
     T = unknown,
     TPath extends ConfigPath = ConfigPath,
-    TArgs extends [] | [ConfigLookup<TPath, T> | undefined] =
-      | []
-      | [ConfigLookup<TPath, T> | undefined],
+    TArgs extends [] | [ConfigDefaultValue] = [] | [ConfigLookup<TPath, T> | undefined],
   >(
     key: TPath,
     ...args: TArgs & ([] | [defaultVal: ConfigLookup<TPath, T> | undefined])

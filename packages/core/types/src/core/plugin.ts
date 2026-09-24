@@ -4,7 +4,7 @@ import type { Module } from './module';
 import type { Route } from './route';
 import type { Router } from './router';
 import type { Service, ServiceFor } from './service';
-import type { ConfigFor, ConfigNamespace, ConfigPathLookup } from './strapi';
+import type { ConfigDefaultValue, ConfigFor, ConfigNamespace, ConfigPathLookup } from './strapi';
 import type { SuggestedString } from '../utils/string';
 import type { IsStrict } from './strictness';
 
@@ -90,9 +90,7 @@ export type Plugin<TName extends string = string> = Omit<
   config<
     T = unknown,
     TKey extends PluginConfigPath<TName> = PluginConfigPath<TName>,
-    TArgs extends [] | [PluginConfigLookup<TName, TKey, T> | undefined] =
-      | []
-      | [PluginConfigLookup<TName, TKey, T> | undefined],
+    TArgs extends [] | [ConfigDefaultValue] = [] | [PluginConfigLookup<TName, TKey, T> | undefined],
   >(
     key: TKey,
     ...args: TArgs & ([] | [defaultVal: PluginConfigLookup<TName, TKey, T> | undefined])

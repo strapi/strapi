@@ -88,6 +88,32 @@ declare const configDefaultChecks: [
   Expect<Equal<typeof nullableConfig, number | null>>,
 ];
 configDefaultChecks satisfies unknown;
+const fallbackBoolean = strapi.config.get('plugin::legacy.enabled', false);
+const fallbackString = strapi.config.get('unregistered.label', 'fallback');
+const fallbackNumber = strapi.config.get('unregistered.limit', 42);
+const pluginFallbackBoolean = strapi.plugin('legacy').config('enabled', false);
+const pluginFallbackString = strapi.plugin('legacy').config('label', 'fallback');
+const pluginFallbackNumber = strapi.plugin('legacy').config('limit', 42);
+const fallbackObject = strapi.config.get('unregistered.options', { enabled: false });
+const pluginFallbackArray = strapi.plugin('legacy').config('labels', ['first']);
+fallbackObject.enabled = true;
+pluginFallbackArray.push('second');
+declare const fallbackChecks: [
+  Expect<Equal<typeof fallbackBoolean, false>>,
+  Expect<Equal<typeof fallbackString, 'fallback'>>,
+  Expect<Equal<typeof fallbackNumber, 42>>,
+  Expect<Equal<typeof pluginFallbackBoolean, false>>,
+  Expect<Equal<typeof pluginFallbackString, 'fallback'>>,
+  Expect<Equal<typeof pluginFallbackNumber, 42>>,
+  Expect<Equal<typeof fallbackObject, { enabled: boolean }>>,
+  Expect<Equal<typeof pluginFallbackArray, string[]>>,
+];
+fallbackChecks satisfies unknown;
+const forwardDefault = <T>(key: string, value: T): T => strapi.config.get<T>(key, value);
+const forwardPluginDefault = <T>(key: string, value: T): T =>
+  strapi.plugin('legacy').config<T>(key, value);
+forwardDefault<void>('unregistered', undefined) satisfies void;
+forwardPluginDefault<unknown>('unregistered', undefined) satisfies unknown;
 // @ts-expect-error Explicit result types still constrain defaults with registries disabled.
 strapi.config.get<number>('plugin::legacy.enabled', '123');
 // @ts-expect-error Explicit plugin result types still constrain defaults with registries disabled.
