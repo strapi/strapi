@@ -29,6 +29,24 @@ const nestedDefault = app.config.get('plugin::default-semantics.options.enabled'
 const pluginNestedDefault = app.plugin('default-semantics').config('options.enabled', false);
 const explicitDefault = app.config.get<number>('plugin::default-semantics.port', 1337);
 const explicitPluginDefault = app.plugin('default-semantics').config<number>('port', 1337);
+declare const conditionalDefaults: [] | [number];
+declare const optionalDefaults: [number?];
+const conditionalDefault = app.config.get('plugin::default-semantics.port', ...conditionalDefaults);
+const pluginConditionalDefault = app
+  .plugin('default-semantics')
+  .config('port', ...conditionalDefaults);
+const optionalSpreadDefault = app.config.get('plugin::default-semantics.port', ...optionalDefaults);
+const pluginOptionalSpreadDefault = app
+  .plugin('default-semantics')
+  .config('port', ...optionalDefaults);
+const explicitTupleDefault = app.config.get<
+  unknown,
+  'plugin::default-semantics.port',
+  [] | [number]
+>('plugin::default-semantics.port');
+const pluginExplicitTupleDefault = app
+  .plugin('default-semantics')
+  .config<unknown, 'port', [] | [number]>('port');
 
 type Equal<T, U> =
   (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;
@@ -46,8 +64,20 @@ declare const checks: [
   Expect<Equal<typeof pluginNestedDefault, boolean>>,
   Expect<Equal<typeof explicitDefault, number>>,
   Expect<Equal<typeof explicitPluginDefault, number>>,
+  Expect<Equal<typeof conditionalDefault, number | null | undefined>>,
+  Expect<Equal<typeof pluginConditionalDefault, number | null | undefined>>,
+  Expect<Equal<typeof optionalSpreadDefault, number | null | undefined>>,
+  Expect<Equal<typeof pluginOptionalSpreadDefault, number | null | undefined>>,
+  Expect<Equal<typeof explicitTupleDefault, number | null | undefined>>,
+  Expect<Equal<typeof pluginExplicitTupleDefault, number | null | undefined>>,
 ];
 checks satisfies unknown;
+// @ts-expect-error A required default tuple cannot be omitted, even with explicit type arguments.
+app.config.get<unknown, 'plugin::default-semantics.port', [number]>(
+  'plugin::default-semantics.port'
+);
+// @ts-expect-error Plugin config also requires the explicitly promised default.
+app.plugin('default-semantics').config<unknown, 'port', [number]>('port');
 // @ts-expect-error Defaults must match the registered value.
 app.config.get('plugin::default-semantics.port', '1337');
 // @ts-expect-error Plugin defaults must match the registered value.
