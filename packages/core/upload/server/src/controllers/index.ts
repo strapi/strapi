@@ -14,4 +14,4 @@ export const controllers = {
   'admin-upload': adminUpload,
   'content-api': contentApi,
   'view-configuration': viewConfiguration,
-};
+} as const;

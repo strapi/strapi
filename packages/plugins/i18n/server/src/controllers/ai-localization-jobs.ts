@@ -1,6 +1,11 @@
 import type { Core } from '@strapi/types';
+import type { AILocalizationJobsController } from '../types/controllers';
 
-const createAILocalizationJobsController = ({ strapi }: { strapi: Core.Strapi }) => {
+const createAILocalizationJobsController = ({
+  strapi,
+}: {
+  strapi: Core.Strapi;
+}): AILocalizationJobsController => {
   const getService = (name: string) => strapi.plugin('i18n').service(name);
   const aiLocalizationJobsService = getService('ai-localization-jobs');
 
