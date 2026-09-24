@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["tests/strict-off.ts"],
+  "compilerOptions": {
+    "types": ["node"]
+  }
+}

@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { policy } from '@strapi/utils';
 import { validateHasPermissionsInput } from '../validation/policies/hasPermissions';
+import type { HasPermissionsConfig } from '../types/policies';
 
 const { createPolicy } = policy;
 
@@ -23,7 +24,7 @@ const inputModifiers = [
 export default createPolicy({
   name: 'admin::hasPermissions',
   validator: validateHasPermissionsInput,
-  handler(ctx, config) {
+  handler(ctx, config: HasPermissionsConfig) {
     const { actions } = config;
     const { userAbility: ability } = ctx.state;
 
