@@ -241,6 +241,40 @@ pluginDynamicDefault satisfies number;
 unknownPathDefault satisfies number;
 pluginUnknownPathDefault satisfies number;
 
+// Unregistered defaults preserve primitive literals while objects and arrays remain mutable.
+const fallbackBoolean = strapi.config.get('uuid', false);
+const fallbackString = strapi.config.get('unregistered.label', 'fallback');
+const fallbackNumber = strapi.config.get('unregistered.limit', 42);
+const pluginFallbackBoolean = strapi.plugin('unregistered').config('enabled', false);
+const pluginFallbackString = strapi.plugin('unregistered').config('label', 'fallback');
+const pluginFallbackNumber = strapi.plugin('unregistered').config('limit', 42);
+const fallbackObject = strapi.config.get('unregistered.options', { enabled: false });
+const pluginFallbackObject = strapi.plugin('unregistered').config('options', { enabled: false });
+const fallbackArray = strapi.config.get('unregistered.labels', ['first']);
+const pluginFallbackArray = strapi.plugin('unregistered').config('labels', ['first']);
+fallbackObject.enabled = true;
+pluginFallbackObject.enabled = true;
+fallbackArray.push('second');
+pluginFallbackArray.push('second');
+declare const fallbackChecks: [
+  Expect<Equal<typeof fallbackBoolean, false>>,
+  Expect<Equal<typeof fallbackString, 'fallback'>>,
+  Expect<Equal<typeof fallbackNumber, 42>>,
+  Expect<Equal<typeof pluginFallbackBoolean, false>>,
+  Expect<Equal<typeof pluginFallbackString, 'fallback'>>,
+  Expect<Equal<typeof pluginFallbackNumber, 42>>,
+  Expect<Equal<typeof fallbackObject, { enabled: boolean }>>,
+  Expect<Equal<typeof pluginFallbackObject, { enabled: boolean }>>,
+  Expect<Equal<typeof fallbackArray, string[]>>,
+  Expect<Equal<typeof pluginFallbackArray, string[]>>,
+];
+fallbackChecks satisfies unknown;
+const forwardDefault = <T>(key: string, value: T): T => strapi.config.get<T>(key, value);
+const forwardPluginDefault = <T>(key: string, value: T): T =>
+  strapi.plugin('unregistered').config<T>(key, value);
+forwardDefault<void>('unregistered', undefined) satisfies void;
+forwardPluginDefault<unknown>('unregistered', undefined) satisfies unknown;
+
 // Generic helpers that forward a config path keep inferring from their declared return type.
 const getLabConfig = <TKey extends keyof LabConfig>(key: TKey): LabConfig[TKey] =>
   strapi.plugin('unregistered').config(key);
