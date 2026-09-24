@@ -20,7 +20,7 @@ describe('i18n settings controller', () => {
       global.strapi = createStrapiMock({ hasProvider: true });
       const ctx: any = {};
 
-      await controller.getSettings(ctx);
+      await controller.getSettings(ctx, async () => {});
 
       expect(ctx.body).toEqual({
         data: { aiLocalizations: { enabled: true }, aiLocalizationsAvailable: true },
@@ -31,7 +31,7 @@ describe('i18n settings controller', () => {
       global.strapi = createStrapiMock({ hasProvider: false });
       const ctx: any = {};
 
-      await controller.getSettings(ctx);
+      await controller.getSettings(ctx, async () => {});
 
       expect(ctx.body.data.aiLocalizationsAvailable).toBe(false);
     });
