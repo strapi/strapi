@@ -1,10 +1,8 @@
 import type { Core } from '@strapi/types';
-import type { ContentTypesService } from './services/content-types';
 
 /** Adapts i18n services to core's capability without resolving them before registration finishes. */
 export const createLocalizationProvider = (strapi: Core.Strapi): Core.LocalizationProvider => {
-  const getContentTypesService = () =>
-    strapi.plugin('i18n').service<ReturnType<ContentTypesService>>('content-types');
+  const getContentTypesService = () => strapi.plugin('i18n').service('content-types');
 
   return {
     isLocalizedContentType(model) {
