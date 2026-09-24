@@ -41,7 +41,7 @@ Discovery lists `*.js` and `*.sql` files in the migrations directory (non-recurs
 
 ### Generated rename migrations
 
-When a field or component is renamed in the Content-Type Builder, a migration named `YYYY.MM.DDTHH.mm.ss.SSS.rename-fields.<js|ts>` is written to the app's source `database/migrations` directory (`packages/core/database/src/migrations/file-builder.ts`). The file is written before the schema files. If the save fails after that (schema write or folder commit), the Content-Type Builder deletes the file while rolling the save back, so a rejected save never leaves a migration behind. The prefix is the same shape as the generator's, with milliseconds appended and expressed in **UTC**, so:
+When a field is renamed in the Content-Type Builder, a migration named `YYYY.MM.DDTHH.mm.ss.SSS.rename-fields.<js|ts>` is written to the app's source `database/migrations` directory (`packages/core/database/src/migrations/file-builder.ts`). The file is written before the schema files. If the save fails after that (schema write or folder commit), the Content-Type Builder deletes the file while rolling the save back, so a rejected save never leaves a migration behind. The prefix is the same shape as the generator's, with milliseconds appended and expressed in **UTC**, so:
 
 - generated files interleave predictably with hand-written ones by timestamp;
 - two saves within the same second do not collide;

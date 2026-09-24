@@ -29,18 +29,6 @@ export interface RenameNames {
   newAttribute?: RenameAttributeDefinition;
 }
 
-export interface ComponentRenameUids {
-  oldUid: string;
-  newUid: string;
-  /**
-   * Set when the component's own data table is renamed too (its collection name
-   * follows a display-name change). `oldCollectionName` is only a hint: the
-   * physical `from` is read from the live metadata / in-flight state.
-   */
-  oldCollectionName?: string;
-  newCollectionName?: string;
-}
-
 export type UnsupportedRenameReason =
   | 'model-not-found'
   | 'attribute-not-found'
@@ -89,14 +77,6 @@ export const isCompatibleRename = (
       return true;
   }
 };
-
-/**
- * Physical column that stores a component's uid in every `*_cmps` link table
- * (both plain component attributes and dynamic zones write it). It is generated
- * with `compressible: false`, so it is never hashed/shortened — see
- * `getComponentTypeColumn` in core's `transform-content-types-to-models`.
- */
-const COMPONENT_TYPE_COLUMN = 'component_type';
 
 export interface BuiltMigration {
   filename: string;
@@ -203,17 +183,6 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
   // and its current `from` identifier, so a continuation hop replays from the
   // right place instead of being treated as a brand-new, unknown attribute.
   const inFlight = new Map<string, Map<string, Resolved>>();
-
-  // Component-level renames (uid changes) discovered for the current save. Keyed
-  // by the *current* component uid, the value is the set of `*_cmps` link tables
-  // that hold a `component_type` referencing it. Tracking this lets a continuation
-  // hop (`b -> c` after `a -> b`) reuse the tables resolved for the original uid
-  // instead of re-scanning the schema (which no longer knows the intermediate uid).
-  const componentInFlight = new Map<string, string[]>();
-
-  // Current physical data table of each component renamed in this save (keyed
-  // by its *current* uid), so a continuation hop renames from the right table.
-  const componentTableInFlight = new Map<string, string>();
 
   // CTB-level definition of each in-flight field (per uid, by logical name), so
   // a continuation hop can still be checked for a storage change against the
@@ -527,119 +496,9 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
     markInFlight(uid, newName, next);
   };
 
-  /**
-   * Finds every `*_cmps` link table that stores a `component_type` referencing
-   * `componentUid`, by scanning the pre-reload schema for content-types and
-   * components that use it (as a `component` attribute or inside a `dynamiczone`)
-   * and resolving each owner's physical link table from `strapi.db.metadata`.
-   */
-  const resolveComponentCmpsTables = (componentUid: string): string[] => {
-    const tables = new Set<string>();
-
-    const scanOwner = (ownerUid: string, model: any): void => {
-      const attributes = model?.attributes as Record<string, any> | undefined;
-      if (!attributes) {
-        return;
-      }
-
-      let meta: any;
-      for (const [attributeName, attribute] of Object.entries(attributes)) {
-        const references =
-          (attribute?.type === 'component' && attribute.component === componentUid) ||
-          (attribute?.type === 'dynamiczone' &&
-            Array.isArray(attribute.components) &&
-            attribute.components.includes(componentUid));
-
-        if (!references) {
-          continue;
-        }
-
-        if (!meta) {
-          if (!db.metadata.has(ownerUid)) {
-            continue;
-          }
-          meta = db.metadata.get(ownerUid);
-        }
-
-        const table = meta.attributes?.[attributeName]?.joinTable?.name;
-        if (table) {
-          tables.add(table);
-        }
-      }
-    };
-
-    const contentTypes = strapi.contentTypes as Record<string, any> | undefined;
-    const components = strapi.components as Record<string, any> | undefined;
-    Object.entries(contentTypes ?? {}).forEach(([uid, model]) => scanOwner(uid, model));
-    Object.entries(components ?? {}).forEach(([uid, model]) => scanOwner(uid, model));
-
-    return [...tables];
-  };
-
-  /**
-   * Records a component-level rename (its uid changed: the user moved it to a
-   * new category and/or renamed it). The `component_type` reference in every
-   * link table that points at the old uid is rewritten; when the rename also
-   * changes the component's collection name (display-name change), its own data
-   * table is renamed as well. A category-only move keeps its collection name.
-   */
-  const addRenameComponentUid = ({
-    oldUid,
-    newUid,
-    newCollectionName,
-  }: ComponentRenameUids): void => {
-    const known = componentInFlight.get(oldUid);
-    const knownTable = componentTableInFlight.get(oldUid);
-    if (!known && !db.metadata.has(oldUid)) {
-      unsupported.push({
-        uid: oldUid,
-        oldName: oldUid,
-        newName: newUid,
-        reason: 'model-not-found',
-      });
-      return;
-    }
-
-    const tables = known ?? resolveComponentCmpsTables(oldUid);
-    const currentTable = knownTable ?? db.metadata.get(oldUid).tableName;
-
-    if (oldUid !== newUid) {
-      for (const table of tables) {
-        migrationFileBuilder.updateRows({
-          table,
-          guardColumn: COMPONENT_TYPE_COLUMN,
-          where: { [COMPONENT_TYPE_COLUMN]: oldUid },
-          set: { [COMPONENT_TYPE_COLUMN]: newUid },
-          comment: `rename component "${oldUid}" -> "${newUid}" in ${table}`,
-        });
-      }
-    }
-
-    // The component's own data table follows its collection name. The link
-    // tables reference it by `cmp_id` without a foreign key, so a plain table
-    // rename is enough.
-    const nextTable = newCollectionName ?? currentTable;
-    if (nextTable !== currentTable) {
-      migrationFileBuilder.renameTable({
-        from: currentTable,
-        to: nextTable,
-        comment: `rename component "${oldUid}" -> "${newUid}": data table ${currentTable} -> ${nextTable}`,
-      });
-    }
-
-    componentInFlight.delete(oldUid);
-    componentTableInFlight.delete(oldUid);
-    componentInFlight.set(newUid, tables);
-    componentTableInFlight.set(newUid, nextTable);
-  };
-
   return {
     addRenameAttribute(uid: string, names: RenameNames): void {
       addRename(uid, names);
-    },
-
-    addRenameComponent(rename: ComponentRenameUids): void {
-      addRenameComponentUid(rename);
     },
 
     hasChanges(): boolean {

@@ -142,7 +142,6 @@ export interface DataManagerContextValue {
     data: {
       icon?: string;
       displayName: string;
-      category?: string;
     };
     componentUID: Internal.UID.Component;
   }) => void;

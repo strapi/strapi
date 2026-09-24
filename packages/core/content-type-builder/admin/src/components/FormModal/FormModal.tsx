@@ -708,7 +708,6 @@ export const FormModal = () => {
             data: {
               icon: toOptionalStringValue(modifiedData.icon),
               displayName: toStringValue(modifiedData.displayName),
-              category: toStringValue(modifiedData.category),
             },
             componentUID: targetUid as Internal.UID.Component,
           });
