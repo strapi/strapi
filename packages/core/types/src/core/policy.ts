@@ -33,11 +33,24 @@ export type PolicyConfigFor<TName extends PolicyName> =
       ? Strapi.Registries.PackagePolicies[TName]
       : never;
 
+/** Runtime resolves exact names first, then relative plugin or API names. */
+type PolicyReferenceName<TName extends PolicyName, TNamespace extends string> =
+  | TName
+  | (TNamespace extends `plugin::${string}` | `api::${string}`
+      ? TName extends `${TNamespace}.${infer TRelative}`
+        ? TRelative extends PolicyName
+          ? never
+          : TRelative
+        : never
+      : never);
+
 /** A reference to a registered policy: its name alone only when its config is optional. */
-type RegisteredPolicyReference<TName extends PolicyName> =
+type RegisteredPolicyReference<TName extends PolicyName, TNamespace extends string> =
   undefined extends PolicyConfigFor<TName>
-    ? TName | { name: TName; config?: PolicyConfigFor<TName> }
-    : { name: TName; config: PolicyConfigFor<TName> };
+    ?
+        | PolicyReferenceName<TName, TNamespace>
+        | { name: PolicyReferenceName<TName, TNamespace>; config?: PolicyConfigFor<TName> }
+    : { name: PolicyReferenceName<TName, TNamespace>; config: PolicyConfigFor<TName> };
 
 /**
  * A policy reference in a typed route config.
@@ -45,9 +58,10 @@ type RegisteredPolicyReference<TName extends PolicyName> =
  * With strict types enabled, once any policy is registered, only
  * registered policies are accepted and their `config` is checked: a partial inventory cannot check
  * the `{ name, config }` form for known names while accepting unknown ones.
+ * A plugin or API namespace also accepts its relative policy names, with the same config checks.
  */
-export type PolicyReference = IsStrict extends false
+export type PolicyReference<TNamespace extends string = never> = IsStrict extends false
   ? string | { name: string; config: unknown }
   : [PolicyName] extends [never]
     ? string | { name: string; config: unknown }
-    : { [TName in PolicyName]: RegisteredPolicyReference<TName> }[PolicyName];
+    : { [TName in PolicyName]: RegisteredPolicyReference<TName, TNamespace> }[PolicyName];

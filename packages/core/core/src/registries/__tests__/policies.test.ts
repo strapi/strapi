@@ -40,6 +40,19 @@ describe('Policy util', () => {
 
       expect(registry.get('test-policy', { apiName: 'test-api' })).toBe(policyFn);
     });
+
+    test('Prefers an exact name over a relative policy in either namespace', () => {
+      const localRegistry = createPoliciesRegistry();
+      const exactPolicy = () => true;
+      const relativePolicy = () => false;
+
+      localRegistry.set('isAllowed', exactPolicy);
+      localRegistry.set('plugin::test-plugin.isAllowed', relativePolicy);
+      localRegistry.set('api::test-api.isAllowed', relativePolicy);
+
+      expect(localRegistry.get('isAllowed', { pluginName: 'test-plugin' })).toBe(exactPolicy);
+      expect(localRegistry.get('isAllowed', { apiName: 'test-api' })).toBe(exactPolicy);
+    });
   });
 
   describe('keys', () => {
