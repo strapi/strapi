@@ -1,0 +1,46 @@
+# SECURITY (read before editing):
+# Do NOT add actions/checkout of the PR head or it could expose repo secrets.
+# This workflow only mutates labels via the GitHub API.
+
+name: Invalidate qa-done on new commits
+
+# A new commit (push, rebase, merge of the base branch) means prior QA no longer
+# applies to HEAD. `qa-skipped` is left alone — that is an explicit skip, not a
+# SHA-bound QA result.
+on:
+  pull_request_target:
+    types: [synchronize]
+
+permissions: {}
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  remove-qa-done:
+    if: contains(github.event.pull_request.labels.*.name, 'qa-done')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Remove qa-done label
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const issue_number = context.payload.pull_request.number;
+            try {
+              await github.rest.issues.removeLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number,
+                name: 'qa-done',
+              });
+              core.info(`Removed qa-done from PR #${issue_number}`);
+            } catch (error) {
+              if (error.status === 404) {
+                core.info(`qa-done already absent on PR #${issue_number}`);
+                return;
+              }
+              throw error;
+            }
