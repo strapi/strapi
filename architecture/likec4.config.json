@@ -10,7 +10,7 @@
       "strapi_containers",
       "content_publishing_flow",
       "strapi_extensions",
-      "self_hosted_deployment"
+      "application_state"
     ]
   },
   "metadata": {

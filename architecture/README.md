@@ -6,19 +6,42 @@ answers one question; select an element or relationship to explore further.
 
 ## Reading paths
 
-| Start with                                             | Question                                             | Continue to                                      |
-| ------------------------------------------------------ | ---------------------------------------------------- | ------------------------------------------------ |
-| `index` — Strapi in context                            | Who uses the CMS, and what connects to it?           | Runtime architecture                             |
-| `strapi_capabilities` — Product capabilities           | What can teams accomplish?                           | A capability's journey or engineering view       |
-| `strapi_containers` — Runtime architecture             | What runs, and how does it communicate?              | Admin, server, or deployment                     |
-| `content_publishing_flow` — Draft to published content | How does an editor make content available?           | Content API request journey                      |
-| `strapi_extensions` — Extension mechanisms             | How can developers extend the application?           | Choose a mechanism, then its detail              |
-| `self_hosted_deployment` — Production hosting example  | What hosts production, and what survives a redeploy? | Application state and operating responsibilities |
+| Start with                                                  | Question                                                | Continue to                                |
+| ----------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------ |
+| `index` — Strapi in context                                 | Who uses the CMS, and what connects to it?              | Runtime architecture                       |
+| `strapi_capabilities` — Product capabilities                | What can teams accomplish?                              | A capability's journey or engineering view |
+| `strapi_containers` — Runtime architecture                  | What runs, and how does it communicate?                 | Admin, server, or deployment               |
+| `content_publishing_flow` — Draft to published content      | How does an editor make content available?              | Content API request journey                |
+| `strapi_extensions` — Extension mechanisms                  | How can developers extend the application?              | Choose a mechanism, then its detail        |
+| `application_state` — Application code and persistent state | What is deployed, built, and retained across redeploys? | Assembly, startup, hosting and operations  |
 
 The view browser groups diagrams into **01 Start here**, **02 Journeys**, **03 Engineering**,
 **04 Deployment**, and **05 Code reference**. The landing page is intentionally smaller than the
 complete view catalog. Implicit views are disabled: every navigation destination is authored.
 Existing view IDs are retained where practical so saved URLs continue to work.
+
+The numbers order reading categories; they are not C4 abstraction levels or required steps.
+Choose a category according to the question you want to answer:
+
+| Category              | Purpose                                                                          |
+| --------------------- | -------------------------------------------------------------------------------- |
+| **01 Start here**     | Establish context, capabilities, vocabulary and interface choices.               |
+| **02 Journeys**       | Explain user tasks and representative interactions, including their assumptions. |
+| **03 Engineering**    | Explain runtime responsibilities, application assembly and extension mechanisms. |
+| **04 Deployment**     | Explain application state, hosting examples and operating responsibilities.      |
+| **05 Code reference** | Connect selected responsibilities to implementation files.                       |
+
+These categories mix appropriate diagram types: for example, Journeys includes both task maps and
+dynamic sequences. Each view's description states its type. Titles use `/` to organize the view
+browser; stable view IDs identify navigation destinations independently of their display titles.
+The six landing entries serve different reader questions. Add deeper coverage beneath an existing
+entry where possible, rather than expanding the landing page for every new topic.
+
+The sixth entry starts with application code and persistent state because those boundaries explain
+what a team must deploy and retain across hosting choices. The PostgreSQL/S3 hosting topology is a
+deeper example, reached through the database card in that view. It illustrates one infrastructure
+choice rather than defining the application. The landing selection lives in `likec4.config.json`;
+changing it does not remove a view or change its URL.
 
 **05 Code reference** contains contributor source maps, not exhaustive C4 class diagrams or generated
 call graphs. A card can group several files, and several responsibilities can share one file. Open
@@ -27,41 +50,43 @@ or journeys. Curated arrows describe the dependency or wrapping relationship wri
 
 The entry views lead to these focused explanations without adding more landing-page entries:
 
-| Topic                                         | View                   | Next step                                                   |
-| --------------------------------------------- | ---------------------- | ----------------------------------------------------------- |
-| Documents, variants, components and relations | `content_model`        | Schema editing or Document Service                          |
-| Identities and token boundaries               | `access_boundaries`    | `admin_login_flow` or a Content API request                 |
-| Editorial publishing and localization         | `editorial_publishing` | Basic publishing or content concepts                        |
-| Editing, media, preview and history           | `content_workspace`    | Choose a task below                                         |
-| Media bytes versus database metadata          | `media_upload_flow`    | Application state and deployment                            |
-| Configured frontend preview                   | `content_preview_flow` | Content workspace                                           |
-| Licensed Content History                      | `content_history`      | Content workspace                                           |
-| Application code versus persistent state      | `application_state`    | Open the database in Runtime architecture to reach this map |
+| Topic                                         | View                     | Next step                                                  |
+| --------------------------------------------- | ------------------------ | ---------------------------------------------------------- |
+| Documents, variants, components and relations | `content_model`          | Schema editing or Document Service                         |
+| Identities and token boundaries               | `access_boundaries`      | `admin_login_flow` or a Content API request                |
+| Editorial publishing and localization         | `editorial_publishing`   | Basic publishing or content concepts                       |
+| Editing, media, preview and history           | `content_workspace`      | Choose a task below                                        |
+| Media bytes versus database metadata          | `media_upload_flow`      | Application state and deployment                           |
+| Configured frontend preview                   | `content_preview_flow`   | Content workspace                                          |
+| Licensed Content History                      | `content_history`        | Content workspace                                          |
+| A concrete production hosting topology        | `self_hosted_deployment` | Open the database in Application code and persistent state |
 
 ## Deeper reading
 
 The landing page stays small. **Diagram navigation controls** open the subject named on the card.
 **Related** and **Guide** links in the view details/links menu beside the title open other topics
 explicitly; they do not imply that the destination is inside the selected component. LikeC4 opens
-these links in a new tab. The two choice maps use a distinct **Guide topic** notation: their cards
+these links in a new tab. Look for the small chain-link icon and link count beside the title;
+this menu is less discoverable than a card, so document important routes here.
+The two choice maps use a distinct **Guide topic** notation: their cards
 and “explore” arrows describe reading choices, not runtime components or dependencies.
 
-| Topic                                       | View                                                 | Entry point in the guide                                         |
-| ------------------------------------------- | ---------------------------------------------------- | ---------------------------------------------------------------- |
-| Interface choices                           | `interface_overview`                                 | Runtime architecture → Related: compare application interfaces   |
-| REST and optional GraphQL                   | `content_api_runtime_components`, `graphql_delivery` | Application interfaces → named Content API                       |
-| MCP capability access and execution         | `mcp_interface`                                      | Application interfaces → MCP capabilities                        |
-| Import/export and remote data transfer      | `data_transfer`                                      | Application interfaces → Import export and transfer              |
-| Plugin packaging and entrypoints            | `plugin_entrypoints`                                 | Extension mechanisms → Plugin entrypoints                        |
-| Custom routes and document middleware       | `request_customization`                              | Extension mechanisms → Routes and document middleware            |
-| Custom field registration and storage types | `custom_fields`                                      | Extension mechanisms → Custom fields                             |
-| Events and webhook delivery                 | `events_and_jobs`                                    | Extension mechanisms → Providers and webhooks → Webhook delivery |
-| Scheduled application work                  | `scheduled_work`                                     | Extension mechanisms → Related: scheduled application work       |
-| Query, relation and transaction internals   | `database_persistence`                               | Document service → Database abstraction                          |
-| Startup database schema evolution           | `database_schema_evolution`                          | Startup → Schema synchronization                                 |
-| Operating responsibilities                  | `production_operations`                              | Production hosting example → Related: operating responsibilities |
-| Multiple application instances              | `replicated_deployment`                              | Operating responsibilities → Replicas                            |
-| Backup and recovery boundaries              | `backup_and_recovery`                                | Operating responsibilities → Recovery                            |
+| Topic                                       | View                                                 | Entry point in the guide                                                    |
+| ------------------------------------------- | ---------------------------------------------------- | --------------------------------------------------------------------------- |
+| Interface choices                           | `interface_overview`                                 | Runtime architecture → Related: compare application interfaces              |
+| REST and optional GraphQL                   | `content_api_runtime_components`, `graphql_delivery` | Application interfaces → named Content API                                  |
+| MCP capability access and execution         | `mcp_interface`                                      | Application interfaces → MCP capabilities                                   |
+| Import/export and remote data transfer      | `data_transfer`                                      | Application interfaces → Import export and transfer                         |
+| Plugin packaging and entrypoints            | `plugin_entrypoints`                                 | Extension mechanisms → Plugin entrypoints                                   |
+| Custom routes and document middleware       | `request_customization`                              | Extension mechanisms → Routes and document middleware                       |
+| Custom field registration and storage types | `custom_fields`                                      | Extension mechanisms → Custom fields                                        |
+| Events and webhook delivery                 | `events_and_jobs`                                    | Extension mechanisms → Providers and webhooks → Webhook delivery            |
+| Scheduled application work                  | `scheduled_work`                                     | Extension mechanisms → Related: scheduled application work                  |
+| Query, relation and transaction internals   | `database_persistence`                               | Document service → Database abstraction                                     |
+| Startup database schema evolution           | `database_schema_evolution`                          | Startup → Schema synchronization                                            |
+| Operating responsibilities                  | `production_operations`                              | Application code and persistent state → Related: operating responsibilities |
+| Multiple application instances              | `replicated_deployment`                              | Operating responsibilities → Replicas                                       |
+| Backup and recovery boundaries              | `backup_and_recovery`                                | Operating responsibilities → Recovery                                       |
 
 GraphQL, MCP and data transfer have different authentication and execution paths. GraphQL uses
 Content API authentication; MCP uses Admin tokens and capability/handler checks; remote transfer
@@ -110,8 +135,9 @@ uses the same remote-storage example to distinguish source, build output, runtim
 database records and uploaded files. Local uploads are an alternative: their directory needs
 persistent storage instead of an object-storage bucket.
 
-Read the two deployment views together: the hosting view answers **where things run**; the state map
-answers **what is replaced or retained**. Retaining the database does not freeze its schema—startup
+Read Production hosting example and Application code and persistent state together: the hosting
+view answers **where things run**; the state map answers **what is replaced or retained**.
+Retaining the database does not freeze its schema—startup
 can synchronize it with deployed content definitions. Private networking and database TLS are
 configured assumptions of the example, not automatic Strapi deployment behavior.
 
@@ -161,6 +187,16 @@ also build and inspect the rendered views, including sequence mode and drill-dow
 
 ## Maintaining the guide
 
+The files form one shared model. `specification.c4` defines the available notation; `model/`
+defines reusable elements and relationships; `views/` selects and presents them for particular
+questions. A file boundary is an authoring convenience, not a software or deployment boundary.
+Model blocks across files are merged, and `extend` adds detail to existing elements. Reuse their
+fully qualified IDs instead of creating a second element for another diagram.
+The two deployment files are an exception to the directory split: each contains both its
+`deployment` topology and its `deployment view`.
+
+- `likec4.config.json` defines the project, landing entries, disabled implicit views and default styles.
+- `package.json` defines the local development, build, export and formatting commands.
 - `specification.c4` defines the notation and deployment-node kinds.
 - `model/navigation.c4` and `views/navigation.c4` define explicit reading choices; the extension
   choice map is in `views/extensions.c4`.
@@ -179,6 +215,29 @@ also build and inspect the rendered views, including sequence mode and drill-dow
   responsibilities, recovery boundaries and an illustrative two-instance deployment.
 - `views/overview.c4` contains the introductory views and the server overview.
 - Other `views/` files contain focused engineering views and journeys.
+
+### Contributor and agent workflow
+
+1. Read this guide, the project configuration, and the relevant existing model/view files.
+   Inspect the current implementation before adding a behavioral claim; source links are pointers
+   to evidence, not a substitute for reading it. This is a curated explanation, not an exhaustive
+   package inventory or an automatically generated call graph.
+2. State the audience, question, scope, diagram type and assumptions. Choose a reading category,
+   then reuse existing elements or extend the relevant model file. Separate implemented behavior
+   from illustrative infrastructure and operating procedures the application team must supply.
+3. Author a focused view and provide a meaningful route from an existing entry. Use card navigation
+   for the named subject, relationship navigation for a dynamic journey, and labelled Related/Guide
+   links for alternatives. Preserve existing IDs and update the reading paths above.
+4. Run formatting, whole-workspace validation and the build using the commands above. Inspect
+   `totalErrors`; formatting or a successful build alone does not establish model validity.
+5. Inspect the rendered diagram at a normal browser size, including sequence mode for journeys.
+   Click changed navigation routes. Audit reachability from `landingPage.include` through node/edge
+   `navigateTo` targets and internal view links, and check that implementation links resolve.
+   Shared model changes can affect other views, so inspect their resulting nodes and relationships too.
+
+Treat code in the current checkout as the evidence for implementation claims. GitHub links follow
+the moving `develop` branch and may differ from this checkout; reconcile discrepancies when updating
+the guide. Recheck version-specific LikeC4 workarounds when upgrading the dependency.
 
 Before adding a diagram, state its audience, question, scope, and assumptions. Prefer a small
 view of existing model elements over copying them or growing a global map. Use roughly 5–9 main
