@@ -90,20 +90,13 @@ export type Plugin<TName extends string = string> = Omit<
   config<
     T = unknown,
     TKey extends PluginConfigPath<TName> = PluginConfigPath<TName>,
-    TDefault extends PluginConfigLookup<TName, TKey, T> | undefined = PluginConfigLookup<
-      TName,
-      TKey,
-      T
-    >,
+    TArgs extends [] | [PluginConfigLookup<TName, TKey, T> | undefined] =
+      | []
+      | [PluginConfigLookup<TName, TKey, T> | undefined],
   >(
     key: TKey,
-    ...args:
-      | []
-      | [
-          defaultVal: (PluginConfigLookup<TName, TKey, T> | undefined) &
-            ([PluginConfigLookup<TName, TKey, never>] extends [never] ? unknown : TDefault),
-        ]
-  ): PluginConfigLookup<TName, TKey, T, NoInfer<TDefault>>;
+    ...args: TArgs & ([] | [defaultVal: PluginConfigLookup<TName, TKey, T> | undefined])
+  ): PluginConfigLookup<TName, TKey, T, NoInfer<TArgs[0]>>;
   service<
     T extends Service = Service,
     TServiceName extends SuggestedString<ServiceNames<TName>> = SuggestedString<
