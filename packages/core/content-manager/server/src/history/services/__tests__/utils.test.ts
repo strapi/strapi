@@ -20,30 +20,26 @@ type LocalizationFixture = {
 
 const createStrapiWithLocalization = (fixture: LocalizationFixture) => {
   const isLocalizedContentType = jest.fn(() => fixture.isLocalized);
-  const services: Record<string, unknown> = {
-    locales: {
-      getDefaultLocale: jest.fn(async () => fixture.defaultLocale),
-      find: jest.fn(async () =>
-        fixture.locales.map((locale, index) => ({
-          id: index + 1,
-          ...locale,
-          isDefault: locale.code === fixture.defaultLocale,
-        }))
-      ),
-    },
-    'content-types': { isLocalizedContentType },
-  };
   const strapi = {
-    plugin: jest.fn((name: string) =>
-      name === 'i18n' ? { service: (serviceName: string) => services[serviceName] } : undefined
-    ),
+    localization: {
+      getDefaultLocale: jest.fn(async () => fixture.defaultLocale),
+      getLocales: jest.fn(async () => fixture.locales),
+      isLocalizedContentType,
+    },
   } as unknown as Core.Strapi;
 
   return { strapi, isLocalizedContentType };
 };
 
+// Mirrors core's inert defaults when no localization provider is registered
 const createStrapiWithoutLocalization = () => {
-  return { plugin: jest.fn(() => undefined) } as unknown as Core.Strapi;
+  return {
+    localization: {
+      getDefaultLocale: jest.fn(async () => null),
+      getLocales: jest.fn(async () => []),
+      isLocalizedContentType: jest.fn(() => false),
+    },
+  } as unknown as Core.Strapi;
 };
 
 describe('History utils', () => {
