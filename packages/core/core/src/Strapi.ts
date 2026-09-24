@@ -177,8 +177,8 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('services').getAll();
   }
 
-  service(uid: UID.Service) {
-    return this.get('services').get(uid);
+  service<TUID extends UID.Service>(uid: TUID): Core.ServiceFor<TUID> {
+    return this.get('services').get(uid) as Core.ServiceFor<TUID>;
   }
 
   get controllers() {
@@ -221,8 +221,8 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('plugins').getAll();
   }
 
-  plugin(name: string): Core.Plugin {
-    return this.get('plugins').get(name);
+  plugin<TName extends string>(name: TName): Core.Plugin<TName> {
+    return this.get('plugins').get(name) as Core.Plugin<TName>;
   }
 
   get hooks() {

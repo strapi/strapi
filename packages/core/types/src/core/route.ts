@@ -1,6 +1,8 @@
 import type { z } from 'zod/v4';
 import type { LiteralUnion } from '../utils/string';
 import type { MiddlewareHandler } from './middleware';
+import type { ControllerActionReference } from './controller';
+import type { PolicyReference } from './policy';
 
 export type RouteInfo = {
   apiName?: string;
@@ -18,6 +20,24 @@ export type RouteConfig = {
 export type HandlerReference = string;
 
 export type RouteInput = Omit<Route, 'info'> & { info?: Partial<RouteInfo> };
+
+/** Route config whose policy references are checked against the policy registries. See {@link PolicyReference}. */
+export type RouteConfigFor = Omit<RouteConfig, 'policies'> & { policies?: PolicyReference[] };
+
+/**
+ * A route whose string handlers must reference an action of `TControllers`, and whose policies must
+ * be registered once any policy is. See {@link ControllerActionReference} and {@link PolicyReference}.
+ */
+export type RouteInputFor<TControllers, TNamespace extends string = never> = Omit<
+  RouteInput,
+  'handler' | 'config'
+> & {
+  handler:
+    | ControllerActionReference<TControllers, TNamespace>
+    | MiddlewareHandler
+    | MiddlewareHandler[];
+  config?: RouteConfigFor;
+};
 
 export type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'ALL' | 'OPTIONS' | 'HEAD';
 

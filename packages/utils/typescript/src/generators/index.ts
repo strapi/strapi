@@ -5,10 +5,12 @@ import { TYPES_ROOT_DIR, GENERATED_OUT_DIR } from './constants';
 import { saveDefinitionToFileSystem, createLogger, timer } from './utils';
 import { generateContentTypesDefinitions } from './content-types';
 import { generateComponentsDefinitions } from './components';
+import { generatePluginDefinitions } from './plugins';
 
 const GENERATORS = {
   contentTypes: generateContentTypesDefinitions,
   components: generateComponentsDefinitions,
+  plugins: generatePluginDefinitions,
 };
 
 export interface GenerateConfig {
@@ -18,6 +20,7 @@ export interface GenerateConfig {
   artifacts?: {
     contentTypes?: boolean;
     components?: boolean;
+    plugins?: boolean;
     services?: boolean;
     controllers?: boolean;
     policies?: boolean;
@@ -40,7 +43,7 @@ export const generate = async (config: GenerateConfig = {} as GenerateConfig) =>
   const psTimer = timer().start();
 
   const registryPwd = path.join(pwd, rootDir, GENERATED_OUT_DIR);
-  const generatorConfig = { strapi, pwd: registryPwd, logger };
+  const generatorConfig = { strapi, pwd: registryPwd, appDir: pwd, logger };
 
   const returnWithMessage = () => {
     const nbWarnings = chalk.yellow(`${logger.warnings} warning(s)`);

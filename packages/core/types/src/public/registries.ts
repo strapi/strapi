@@ -46,6 +46,9 @@ export interface ComponentSchemas {
 
 /**
  * Shared service registry
+ *
+ * Augmenting it narrows `UID.Service` to the declared keys. Strict service contracts
+ * are declared in the global `Strapi.Registries.AppServices` and `Strapi.Registries.PackageServices`.
  */
 export interface Services {
   [uid: UID.Service]: Service;
