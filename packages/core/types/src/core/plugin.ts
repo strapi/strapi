@@ -4,7 +4,7 @@ import type { Module } from './module';
 import type { Route } from './route';
 import type { Router } from './router';
 import type { Service, ServiceFor } from './service';
-import type { ConfigFor, ConfigNamespace, ConfigPathValue } from './strapi';
+import type { ConfigFor, ConfigNamespace, ConfigPathLookup } from './strapi';
 import type { SuggestedString } from '../utils/string';
 import type { IsStrict } from './strictness';
 
@@ -40,14 +40,19 @@ type PluginConfigPath<TPlugin extends string> =
   | Exclude<PropertyPath, string>;
 
 /** The registered value when `TKey` is a key or dotted path of the plugin's config contract, `T` otherwise. */
-type PluginConfigLookup<TPlugin extends string, TKey, T> = IsStrict extends false
+type PluginConfigLookup<
+  TPlugin extends string,
+  TKey,
+  T,
+  TDefault = undefined,
+> = IsStrict extends false
   ? T
   : [PluginConfigNamespace<TPlugin>] extends [never]
     ? T
     : PluginConfigPath<TPlugin> extends TKey
       ? T
       : TKey extends string
-        ? ConfigPathValue<PluginConfigNamespace<TPlugin>, TKey, T>
+        ? ConfigPathLookup<PluginConfigNamespace<TPlugin>, TKey, T, TDefault>
         : T;
 
 /** The registered contract when `TServiceName` is a registered service of the plugin, `T` otherwise. */
@@ -80,13 +85,25 @@ export type Plugin<TName extends string = string> = Omit<
   /**
    * Reads a key or dotted path of the plugin config. A registered contract resolves the value type.
    *
-   * A default value does not remove `undefined` from a registered result, although it replaces an
-   * `undefined` value at runtime.
+   * A defined default replaces `undefined` in the result; `null` values are preserved.
    */
-  config<T = unknown, TKey extends PluginConfigPath<TName> = PluginConfigPath<TName>>(
+  config<
+    T = unknown,
+    TKey extends PluginConfigPath<TName> = PluginConfigPath<TName>,
+    TDefault extends PluginConfigLookup<TName, TKey, T> | undefined = PluginConfigLookup<
+      TName,
+      TKey,
+      T
+    >,
+  >(
     key: TKey,
-    defaultVal?: PluginConfigLookup<TName, TKey, T>
-  ): PluginConfigLookup<TName, TKey, T>;
+    ...args:
+      | []
+      | [
+          defaultVal: (PluginConfigLookup<TName, TKey, T> | undefined) &
+            ([PluginConfigLookup<TName, TKey, never>] extends [never] ? unknown : TDefault),
+        ]
+  ): PluginConfigLookup<TName, TKey, T, NoInfer<TDefault>>;
   service<
     T extends Service = Service,
     TServiceName extends SuggestedString<ServiceNames<TName>> = SuggestedString<

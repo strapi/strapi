@@ -200,32 +200,56 @@ export type ConfigPath = SuggestedString<ConfigNamespace> | Exclude<PropertyPath
  * Resolves a config path against the registries: a registered namespace, or a dotted path inside one.
  * Array paths, unregistered namespaces, unknown paths and the unresolved default path resolve to `T`.
  */
-type ConfigLookup<TPath, T> = IsStrict extends false
+type ConfigLookup<TPath, T, TDefault = undefined> = IsStrict extends false
   ? T
   : [ConfigNamespace] extends [never]
     ? T
     : ConfigPath extends TPath
       ? T
       : TPath extends ConfigNamespace
-        ? ConfigFor<TPath>
+        ? ConfigWithDefault<ConfigFor<TPath>, TDefault>
         : TPath extends `${infer TNamespace}.${infer TKey}`
           ? TNamespace extends ConfigNamespace
-            ? ConfigPathValue<TNamespace, TKey, T>
+            ? ConfigPathLookup<TNamespace, TKey, T, TDefault>
             : T
           : T;
+
+/** Applies defaults only to known config paths, preserving contextual inference for other paths. */
+export type ConfigPathLookup<
+  TNamespace extends ConfigNamespace,
+  TPath extends string,
+  T,
+  TDefault,
+> = [ConfigPathValue<TNamespace, TPath, never>] extends [never]
+  ? T
+  : ConfigWithDefault<ConfigPathValue<TNamespace, TPath, never>, TDefault>;
+
+/** Replaces an absent config value while preserving null and defined values. */
+export type ConfigWithDefault<TValue, TDefault> = undefined extends TValue
+  ? Exclude<TValue, undefined> | TDefault
+  : TValue;
 
 export interface ConfigProvider {
   /**
    * Reads a config value. A registered namespace, or a dotted path inside one, resolves to its contract.
    *
-   * A default value does not remove `undefined` from a registered result, although it replaces an
-   * `undefined` value at runtime.
+   * A defined default replaces `undefined` in the result; `null` values are preserved.
+   * The argument tuple preserves possibly-undefined defaults. `NoInfer` prevents contextual return
+   * types from supplying a default that was never passed.
    */
-  // TODO @Nico default-aware results need a third type parameter that keeps `get<T>(key, default)` calls working
-  get<T = unknown, TPath extends ConfigPath = ConfigPath>(
+  get<
+    T = unknown,
+    TPath extends ConfigPath = ConfigPath,
+    TDefault extends ConfigLookup<TPath, T> | undefined = ConfigLookup<TPath, T>,
+  >(
     key: TPath,
-    defaultVal?: ConfigLookup<TPath, T>
-  ): ConfigLookup<TPath, T>;
+    ...args:
+      | []
+      | [
+          defaultVal: (ConfigLookup<TPath, T> | undefined) &
+            ([ConfigLookup<TPath, never>] extends [never] ? unknown : TDefault),
+        ]
+  ): ConfigLookup<TPath, T, NoInfer<TDefault>>;
   set(path: string, val: unknown): this;
   has(path: string): boolean;
   [key: string]: any;
