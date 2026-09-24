@@ -13,8 +13,19 @@ export const createLocalizationProvider = (strapi: Core.Strapi): Core.Localizati
     getDefaultLocale() {
       return strapi.plugin('i18n').service('locales').getDefaultLocale();
     },
+    async getLocales() {
+      const locales: Array<{ code: string; name: string }> | null | undefined = await strapi
+        .plugin('i18n')
+        .service('locales')
+        .find();
+
+      return (locales ?? []).map(({ code, name }) => ({ code, name }));
+    },
     getNestedPopulateOfNonLocalizedAttributes(modelUID) {
       return getContentTypesService().getNestedPopulateOfNonLocalizedAttributes(modelUID);
+    },
+    getNonLocalizedAttributes(model) {
+      return getContentTypesService().getNonLocalizedAttributes(model);
     },
     fillNonLocalizedAttributes(entry, relatedEntry, options) {
       getContentTypesService().fillNonLocalizedAttributes(entry, relatedEntry, options);

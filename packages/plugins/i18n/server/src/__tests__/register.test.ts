@@ -26,7 +26,9 @@ it('installs localization during register before database initialization or boot
   expect(provider).toEqual({
     isLocalizedContentType: expect.any(Function),
     getDefaultLocale: expect.any(Function),
+    getLocales: expect.any(Function),
     getNestedPopulateOfNonLocalizedAttributes: expect.any(Function),
+    getNonLocalizedAttributes: expect.any(Function),
     fillNonLocalizedAttributes: expect.any(Function),
   });
   expect(plugin).not.toHaveBeenCalledWith('i18n');

@@ -8,14 +8,23 @@ export const createLocalizationService = (): Core.Localization => {
     register(localizationProvider) {
       provider = localizationProvider;
     },
+    isEnabled() {
+      return provider !== undefined;
+    },
     isLocalizedContentType(model) {
       return provider?.isLocalizedContentType(model) ?? false;
     },
     async getDefaultLocale() {
       return provider?.getDefaultLocale() ?? null;
     },
+    async getLocales() {
+      return provider?.getLocales() ?? [];
+    },
     getNestedPopulateOfNonLocalizedAttributes(modelUID) {
       return provider?.getNestedPopulateOfNonLocalizedAttributes(modelUID) ?? [];
+    },
+    getNonLocalizedAttributes(model) {
+      return provider?.getNonLocalizedAttributes(model) ?? [];
     },
     fillNonLocalizedAttributes(entry, relatedEntry, options) {
       provider?.fillNonLocalizedAttributes(entry, relatedEntry, options);
