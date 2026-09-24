@@ -322,6 +322,10 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
       const source = fs.readFileSync(filename, 'utf8');
       const service = ts.createLanguageService({
         ...ts.sys,
+        // ts.sys.useCaseSensitiveFileNames is a boolean, but LanguageServiceHost expects a function.
+        // Spreading ts.sys as-is crashes on case-sensitive file systems (Linux CI), where the value
+        // is `true` and TypeScript calls it.
+        useCaseSensitiveFileNames: () => ts.sys.useCaseSensitiveFileNames,
         getCompilationSettings: () => options,
         getCurrentDirectory: () => repository,
         getScriptFileNames: () =>
