@@ -29,10 +29,23 @@ export interface UpdateRowsOperation {
   comment?: string;
 }
 
+/**
+ * One logical operation per generated file: the composed `origin -> final`
+ * attribute renames of every model that received hops, keyed by model uid.
+ * Dispatched at runtime to the handlers registered on `db.schema` (e.g. admin
+ * field permissions); the database package itself stores nothing by attribute
+ * name.
+ */
+export interface AttributeRenamesOperation {
+  renames: Record<string, Record<string, string>>;
+  comment?: string;
+}
+
 export type MigrationFileOperation =
   | ({ kind: 'renameColumn' } & RenameColumnOperation)
   | ({ kind: 'renameTable' } & RenameTableOperation)
-  | ({ kind: 'updateRows' } & UpdateRowsOperation);
+  | ({ kind: 'updateRows' } & UpdateRowsOperation)
+  | ({ kind: 'attributeRenames' } & AttributeRenamesOperation);
 
 export type MigrationFileFormat = 'javascript' | 'typescript';
 
@@ -109,6 +122,11 @@ const UPDATE_ROWS_SNIPPET = `    // {{comment}}
       set: {{set}},
     });`;
 
+const ATTRIBUTE_RENAMES_SNIPPET = `    // {{comment}}
+    await db.schema.applyAttributeRenames(knex, {
+      renames: {{renames}},
+    });`;
+
 const interpolate = (template: string, values: Record<string, string>): string => {
   return template.replace(/\{\{\s*(\w+)\s*\}\}/g, (_match, key: string) => {
     return key in values ? values[key] : `{{${key}}}`;
@@ -135,6 +153,25 @@ const renderObject = (values: Record<string, string>): string => {
 };
 
 /**
+ * Renders `{ uid: { from: to } }` one entry per line, every key and value
+ * quoted (uids contain `:` and `.`).
+ */
+const renderNestedObject = (values: Record<string, Record<string, string>>): string => {
+  const lines = Object.entries(values).map(([key, inner]) => {
+    const entries = Object.entries(inner)
+      .map(([from, to]) => `${quote(from)}: ${quote(to)}`)
+      .join(', ');
+    return `        ${quote(key)}: { ${entries} },`;
+  });
+
+  if (lines.length === 0) {
+    return '{}';
+  }
+
+  return `{\n${lines.join('\n')}\n      }`;
+};
+
+/**
  * Comments are rendered after `//`; a line break (including the JS line
  * separators U+2028 / U+2029) would end the comment and let the rest run as
  * code, so every comment is flattened to a single line.
@@ -143,6 +180,8 @@ const sanitizeComment = (comment: string): string => comment.replace(/[\r\n\u202
 
 const getDefaultOperationComment = (op: MigrationFileOperation): string => {
   switch (op.kind) {
+    case 'attributeRenames':
+      return "Update stores keyed by attribute name (admin field permissions) for this save's renames";
     case 'renameTable':
       return `Rename table ${op.from} to ${op.to}`;
     case 'updateRows':
@@ -161,6 +200,11 @@ export const renderMigrationFileOperation = (op: MigrationFileOperation): string
   const comment = getOperationComment(op);
 
   switch (op.kind) {
+    case 'attributeRenames':
+      return interpolate(ATTRIBUTE_RENAMES_SNIPPET, {
+        comment,
+        renames: renderNestedObject(op.renames),
+      });
     case 'renameTable':
       return interpolate(RENAME_TABLE_SNIPPET, {
         comment,
@@ -249,6 +293,10 @@ export const createMigrationFileBuilder = ({ db }: MigrationFileBuilderDeps) => 
 
     updateRows(op: UpdateRowsOperation): void {
       operations.push({ kind: 'updateRows', ...op });
+    },
+
+    attributeRenames(op: AttributeRenamesOperation): void {
+      operations.push({ kind: 'attributeRenames', ...op });
     },
 
     hasChanges(): boolean {

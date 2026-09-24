@@ -186,6 +186,12 @@ interface JoinTableMeta {
 
 type SchemaModel = Parameters<typeof contentTypesUtils.getNonVisibleAttributes>[0];
 
+/**
+ * Per-uid `origin -> current name` of every received hop, accepted or refused:
+ * the logical field is the same field even when its data cannot be carried.
+ */
+export type AttributeRenamesMapping = Record<string, Record<string, string>>;
+
 const MIGRATION_NAME = 'rename-fields';
 
 export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
@@ -287,6 +293,30 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
       inFlight.set(uid, entries);
     }
     entries.set(name, resolved);
+  };
+
+  // Per uid, logical origin name -> current name, folded over every received hop.
+  const origins = new Map<string, Map<string, string>>();
+
+  const trackOrigin = (uid: string, oldName: string, newName: string): void => {
+    let byOrigin = origins.get(uid);
+    if (!byOrigin) {
+      byOrigin = new Map<string, string>();
+      origins.set(uid, byOrigin);
+    }
+
+    for (const [origin, current] of byOrigin) {
+      if (current === oldName) {
+        byOrigin.set(origin, newName);
+        return;
+      }
+    }
+
+    // A name that is already an origin but no longer current was re-occupied by
+    // something this save did not rename; do not overwrite its logical field.
+    if (!byOrigin.has(oldName)) {
+      byOrigin.set(oldName, newName);
+    }
   };
 
   const isMorphRelation = (attribute: AttributeMeta): boolean =>
@@ -574,6 +604,8 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
       return;
     }
 
+    trackOrigin(uid, oldName, newName);
+
     if (isTargetOccupied(uid, newName)) {
       unsupported.push({ uid, oldName, newName, reason: 'target-occupied' });
       // Keep the chain consistent so a later continuation hop stays silent. The
@@ -631,6 +663,44 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
   return {
     addRenameAttribute(uid: string, names: RenameNames): void {
       addRename(uid, names);
+    },
+
+    /**
+     * The composed `origin -> final` name of every schema attribute that
+     * received hops in this save, per uid. Identity entries (`a -> b -> a`) and
+     * origins that are not schema attributes are left out.
+     */
+    attributeRenamesMapping(): AttributeRenamesMapping {
+      const mapping: AttributeRenamesMapping = {};
+
+      for (const [uid, byOrigin] of origins) {
+        for (const [origin, final] of byOrigin) {
+          if (origin === final || !schemaAttributeOf(uid, origin)) {
+            continue;
+          }
+          mapping[uid] ??= {};
+          mapping[uid][origin] = final;
+        }
+      }
+
+      return mapping;
+    },
+
+    /**
+     * Adds the logical op that carries this save's renames to the stores keyed
+     * by attribute name (admin field permissions, via handlers registered on
+     * the database). Call it after every hop so it is the last operation.
+     */
+    addAttributeRenames(renames: AttributeRenamesMapping): void {
+      if (Object.keys(renames).length === 0) {
+        return;
+      }
+
+      migrationFileBuilder.attributeRenames({
+        renames,
+        comment:
+          "Update stores keyed by attribute name (admin field permissions) for this save's renames",
+      });
     },
 
     hasChanges(): boolean {

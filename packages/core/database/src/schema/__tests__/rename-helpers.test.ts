@@ -361,4 +361,75 @@ describe('schema rename helpers (sqlite)', () => {
       expect(indexes).toEqual([]);
     });
   });
+
+  describe('attribute renames', () => {
+    const op = {
+      renames: { 'api::article.article': { title: 'heading' } },
+      comment: 'remap field permissions',
+    };
+
+    it('dispatches to every registered handler, in order, with the transaction', async () => {
+      const calls: Array<[string, unknown, unknown]> = [];
+      const first = jest.fn(async (trx: unknown, renames: unknown) => {
+        calls.push(['first', trx, renames]);
+      });
+      const second = jest.fn(async (trx: unknown, renames: unknown) => {
+        calls.push(['second', trx, renames]);
+      });
+      const unregisterFirst = db.schema.registerAttributeRenameHandler(first);
+      const unregisterSecond = db.schema.registerAttributeRenameHandler(second);
+
+      let transaction: unknown;
+      const applied = await inTransaction((trx) => {
+        transaction = trx;
+        return db.schema.applyAttributeRenames(trx, op);
+      });
+
+      expect(applied).toBe(true);
+      expect(calls).toEqual([
+        ['first', transaction, op.renames],
+        ['second', transaction, op.renames],
+      ]);
+      expect(logger.info).toHaveBeenCalledWith(
+        '[rename migration] applied: remap field permissions'
+      );
+
+      unregisterFirst();
+      unregisterSecond();
+    });
+
+    it('stops calling a handler once it is unregistered', async () => {
+      const handler = jest.fn(async () => {});
+      const unregister = db.schema.registerAttributeRenameHandler(handler);
+      unregister();
+
+      const applied = await inTransaction((trx) => db.schema.applyAttributeRenames(trx, op));
+
+      expect(applied).toBe(false);
+      expect(handler).not.toHaveBeenCalled();
+    });
+
+    it('is a debug-level no-op without handlers', async () => {
+      const applied = await inTransaction((trx) => db.schema.applyAttributeRenames(trx, op));
+
+      expect(applied).toBe(false);
+      expect(logger.info).not.toHaveBeenCalled();
+      expect(logger.warn).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('[rename migration] skipped: remap field permissions')
+      );
+    });
+
+    it('propagates a handler failure so the migration transaction rolls back', async () => {
+      const unregister = db.schema.registerAttributeRenameHandler(async () => {
+        throw new Error('boom');
+      });
+
+      await expect(
+        inTransaction((trx) => db.schema.applyAttributeRenames(trx, op))
+      ).rejects.toThrow('boom');
+
+      unregister();
+    });
+  });
 });

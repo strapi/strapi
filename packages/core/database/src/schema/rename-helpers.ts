@@ -4,6 +4,7 @@ import { getOperationComment } from '../migrations/file-builder';
 
 import type { Database } from '..';
 import type {
+  AttributeRenamesOperation,
   RenameColumnOperation,
   RenameTableOperation,
   UpdateRowsOperation,
@@ -34,6 +35,23 @@ import type {
  */
 
 export type RenameSkipReason = 'source-missing' | 'target-exists';
+
+/**
+ * Attribute renames of one save, composed per model: `uid -> { origin: final }`.
+ */
+export interface AttributeRenames {
+  renames: Record<string, Record<string, string>>;
+  comment?: string;
+}
+
+/**
+ * Updates a store keyed by attribute name (e.g. admin field permissions) for
+ * the given renames. Runs inside the migration transaction `trx`.
+ */
+export type AttributeRenameHandler = (
+  trx: Knex,
+  renames: AttributeRenames['renames']
+) => Promise<void>;
 
 interface RenameHelpersDeps {
   db: Database;
@@ -89,6 +107,8 @@ export const createRenameHelpers = ({ db }: RenameHelpersDeps) => {
       }
     }
   };
+
+  const attributeRenameHandlers = new Set<AttributeRenameHandler>();
 
   return {
     /**
@@ -215,6 +235,39 @@ export const createRenameHelpers = ({ db }: RenameHelpersDeps) => {
       }
 
       await tableOf(trx, op.table).where(op.where).update(op.set);
+
+      logApplied(comment);
+      return true;
+    },
+
+    /**
+     * Registers a handler for `applyAttributeRenames`. Plugins that keep data
+     * keyed by attribute name register one during their register phase, before
+     * user migrations run. Returns a function that unregisters it.
+     */
+    registerAttributeRenameHandler(handler: AttributeRenameHandler): () => void {
+      attributeRenameHandlers.add(handler);
+      return () => {
+        attributeRenameHandlers.delete(handler);
+      };
+    },
+
+    /**
+     * Dispatches one save's attribute renames to every registered handler, in
+     * registration order, inside `trx`. The database package itself stores
+     * nothing keyed by attribute name, so with no handler this is a no-op.
+     */
+    async applyAttributeRenames(trx: Knex, op: AttributeRenamesOperation): Promise<boolean> {
+      const comment = getOperationComment({ kind: 'attributeRenames', ...op });
+
+      if (attributeRenameHandlers.size === 0) {
+        db.logger.debug(`[rename migration] skipped: ${comment} (no handler registered)`);
+        return false;
+      }
+
+      for (const handler of [...attributeRenameHandlers]) {
+        await handler(trx, op.renames);
+      }
 
       logApplied(comment);
       return true;

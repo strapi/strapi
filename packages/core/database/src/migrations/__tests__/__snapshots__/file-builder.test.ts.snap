@@ -26,6 +26,14 @@ module.exports = {
       where: { field: 'hero' },
       set: { field: 'banner' },
     });
+
+    // Update stores keyed by attribute name (admin field permissions) for this save's renames
+    await db.schema.applyAttributeRenames(knex, {
+      renames: {
+        'api::article.article': { 'bio': 'biography', 'tags': 'labels', 'hero': 'banner' },
+        'default.hero': { 'caption': 'label' },
+      },
+    });
   },
   async down(knex, db) {
     // Down migrations are not generated for automatically generated migrations.
@@ -50,6 +58,13 @@ export default {
   async up(knex: Knex, db: Core.Strapi['db']) {
     // api::article.article: rename field "bio" -> "biography"
     await db.schema.renameColumn(knex, { table: 'articles', from: 'bio', to: 'biography' });
+
+    // Update stores keyed by attribute name (admin field permissions) for this save's renames
+    await db.schema.applyAttributeRenames(knex, {
+      renames: {
+        'api::article.article': { 'bio': 'biography' },
+      },
+    });
   },
   async down(knex: Knex, db: Core.Strapi['db']) {
     // Down migrations are not generated for automatically generated migrations.

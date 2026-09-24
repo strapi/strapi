@@ -116,11 +116,12 @@ describe('MigrationFileBuilder', () => {
         builder.renameColumn({ table: 'articles', from: 'a', to: 'b', comment: payload });
         builder.renameTable({ from: 'a_lnk', to: 'b_lnk', comment: payload });
         builder.updateRows({ table: 't', where: { f: 'a' }, set: { f: 'b' }, comment: payload });
+        builder.attributeRenames({ renames: { 'api::a.a': { a: 'b' } }, comment: payload });
 
         const content = builder.build({ name: 'rename-fields' })!.content;
         const injected = content.split('\n').filter((line) => line.includes('execSync'));
 
-        expect(injected).toHaveLength(3);
+        expect(injected).toHaveLength(4);
         for (const line of injected) {
           expect(line.trimStart().startsWith('//')).toBe(true);
           expect(line).not.toMatch(/[\r\u2028\u2029]/);
@@ -136,6 +137,32 @@ describe('MigrationFileBuilder', () => {
 
       expect(content).toContain('// Rename table a process.exit(1) to b');
       expect(content).toContain("{ from: 'a\\nprocess.exit(1)', to: 'b' }");
+    });
+
+    it('renders attribute renames as one nested, fully quoted helper call', () => {
+      const builder = createMigrationFileBuilder({ db: createDbMock() });
+
+      builder.attributeRenames({
+        renames: {
+          'api::article.article': { title: 'heading', hero: 'banner' },
+          'default.hero': { "it's": 'label' },
+        },
+      });
+
+      const content = builder.build({ name: 'rename-fields' })!.content;
+
+      expect(content).toContain(
+        "    // Update stores keyed by attribute name (admin field permissions) for this save's renames\n" +
+          '    await db.schema.applyAttributeRenames(knex, {\n' +
+          '      renames: {\n' +
+          "        'api::article.article': { 'title': 'heading', 'hero': 'banner' },\n" +
+          "        'default.hero': { 'it\\'s': 'label' },\n" +
+          '      },\n' +
+          '    });'
+      );
+      expect(builder.getOperations()).toEqual([
+        expect.objectContaining({ kind: 'attributeRenames' }),
+      ]);
     });
 
     it('collapses multiple operations into one CommonJS file in order', () => {
@@ -175,6 +202,12 @@ describe('MigrationFileBuilder', () => {
         set: { field: 'banner' },
         comment: 'api::article.article: rename field "hero" -> "banner"',
       });
+      builder.attributeRenames({
+        renames: {
+          'api::article.article': { bio: 'biography', tags: 'labels', hero: 'banner' },
+          'default.hero': { caption: 'label' },
+        },
+      });
 
       const spy = jest.spyOn(Date.prototype, 'toJSON').mockReturnValue('2026-01-01T00:00:00.000Z');
       const result = builder.build({ name: 'rename-fields' })!;
@@ -191,6 +224,7 @@ describe('MigrationFileBuilder', () => {
         to: 'biography',
         comment: 'api::article.article: rename field "bio" -> "biography"',
       });
+      builder.attributeRenames({ renames: { 'api::article.article': { bio: 'biography' } } });
 
       const spy = jest.spyOn(Date.prototype, 'toJSON').mockReturnValue('2026-01-01T00:00:00.000Z');
       const result = builder.build({ name: 'rename-fields', format: 'typescript' })!;

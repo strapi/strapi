@@ -36,6 +36,8 @@ const contentTypeServiceMock = {
 
 const migrationBuilderMock = {
   addRenameAttribute: jest.fn(),
+  attributeRenamesMapping: jest.fn().mockReturnValue({}),
+  addAttributeRenames: jest.fn(),
   hasChanges: jest.fn().mockReturnValue(true),
   getUnsupported: jest.fn().mockReturnValue([]),
   writeFiles: jest.fn().mockResolvedValue('/migrations/file.js'),
@@ -1142,6 +1144,34 @@ describe('Content Type Builder - Schema service', () => {
         ['api::article.article', { oldName: 'b', newName: 'c', newAttribute: { type: 'string' } }],
         ['api::article.article', { oldName: 'x', newName: 'b', newAttribute: { type: 'integer' } }],
       ]);
+    });
+
+    it('adds the composed attribute renames after the hops, without deleted finals', async () => {
+      const schema = schemaWithRenames([
+        { oldName: 'title', newName: 'heading' },
+        { oldName: 'body', newName: 'content' },
+      ]);
+      // `content` is deleted in the same save.
+      (schema.contentTypes[0] as any).attributes.push({ action: 'delete', name: 'content' });
+      migrationBuilderMock.attributeRenamesMapping.mockReturnValueOnce({
+        'api::article.article': { title: 'heading', body: 'content' },
+      });
+
+      await updateSchema(schema);
+
+      expect(migrationBuilderMock.addAttributeRenames).toHaveBeenCalledWith({
+        'api::article.article': { title: 'heading' },
+      });
+      const lastHop = Math.max(...migrationBuilderMock.addRenameAttribute.mock.invocationCallOrder);
+      expect(migrationBuilderMock.addAttributeRenames.mock.invocationCallOrder[0]).toBeGreaterThan(
+        lastHop
+      );
+    });
+
+    it('adds no attribute renames when the mapping is empty', async () => {
+      await updateSchema(schemaWithRenames([{ oldName: 'title', newName: 'heading' }]));
+
+      expect(migrationBuilderMock.addAttributeRenames).not.toHaveBeenCalled();
     });
 
     it('does not pick a deleted attribute up as the new definition', async () => {

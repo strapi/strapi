@@ -11,7 +11,7 @@ import type { RenameHelpers } from './rename-helpers';
 import type { Database } from '..';
 
 export type * from './types';
-export type { RenameHelpers } from './rename-helpers';
+export type { AttributeRenameHandler, AttributeRenames, RenameHelpers } from './rename-helpers';
 
 const debug = createDebug('strapi::database');
 

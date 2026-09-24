@@ -18,8 +18,9 @@ import { createRepairManager, type RepairManager } from './repairs';
 export { isKnexQuery } from './utils/knex';
 export { isDatabaseClientKind } from './connection';
 export { attributeNaming } from './metadata';
-export type { AttributeNaming } from './metadata';
+export type { AttributeNaming, Meta } from './metadata';
 export type {
+  AttributeRenamesOperation,
   Migration,
   BuiltMigrationFile,
   MigrationFileBuilder,
@@ -27,7 +28,8 @@ export type {
   MigrationFileOperation,
 } from './migrations';
 export type { Event } from './lifecycles';
-export type { Model, JoinTable } from './types';
+export type { Attribute, Model, JoinTable } from './types';
+export type { AttributeRenameHandler, AttributeRenames } from './schema';
 export type { Identifiers } from './utils/identifiers';
 
 interface Settings {

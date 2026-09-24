@@ -7,6 +7,7 @@ import type { Database } from '..';
 
 export type { MigrationProvider, Migration } from './common';
 export type {
+  AttributeRenamesOperation,
   BuiltMigrationFile,
   MigrationFileBuilder,
   MigrationFileFormat,

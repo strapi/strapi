@@ -49,4 +49,21 @@ When a field is renamed in the Content-Type Builder, a migration named `YYYY.MM.
 
 Within the same second, a generated file (whose next characters are millisecond digits) sorts before a hand-written file whose name starts with a letter. To interleave your own migration deterministically with a generated one, use the same timestamp prefix and pick a later time.
 
-The generated file only calls the guarded helpers on `db.schema` (`renameColumn`, `renameTable`, `updateRows` — see `packages/core/database/src/schema/rename-helpers.ts`). Each helper checks that the source exists and the target does not before doing anything, so the file is a safe no-op on a fresh database. Skipped steps are logged: at `info` level when the source is missing (expected on a fresh database) and at `warn` level when the target already exists (the environment drifted and the rename was not applied).
+The generated file only calls the guarded helpers on `db.schema` (`renameColumn`, `renameTable`, `updateRows`, `applyAttributeRenames` — see `packages/core/database/src/schema/rename-helpers.ts`). Each helper checks that the source exists and the target does not before doing anything, so the file is a safe no-op on a fresh database. Skipped steps are logged: at `info` level when the source is missing (expected on a fresh database) and at `warn` level when the target already exists (the environment drifted and the rename was not applied).
+
+#### Stores keyed by attribute name
+
+Some data outside the content tables refers to fields by name, for example the `properties.fields` of admin role and admin API token permissions. The boot cleanup removes every stored field path that is not in the new schema, so after a rename every role but the super admin would lose access to the field.
+
+Every generated file therefore ends with one logical step that carries the save's renames, composed per model from the first name to the last (`a -> tmp, b -> a, tmp -> b` becomes `{ a: 'b', b: 'a' }`):
+
+```js
+await db.schema.applyAttributeRenames(knex, {
+  renames: {
+    'api::article.article': { title: 'heading' },
+    'default.hero': { caption: 'label' },
+  },
+});
+```
+
+`@strapi/database` only dispatches it: `applyAttributeRenames` calls every handler registered with `db.schema.registerAttributeRenameHandler(handler)`, in registration order, with the migration's transaction. Handlers must be registered during the register phase, because user migrations run during schema sync, before any plugin bootstrap. The admin registers one that rewrites permission field paths (including paths through components, so a parent rename and a rename inside its component compose) before its bootstrap cleanup runs. Other stores keyed by attribute name, such as Content Manager layouts, can register on the same hook. With no handler registered, the step is a logged no-op. The step is written even when every hop of the save was refused, since the logical field is the same field even when its data could not be carried.

@@ -5,7 +5,11 @@ import type { Schema } from '@strapi/types';
 
 import createBuilder from './schema-builder';
 import { createMigrationBuilder } from './migration-builder';
-import type { RenameAttributeDefinition, UnsupportedRename } from './migration-builder';
+import type {
+  AttributeRenamesMapping,
+  RenameAttributeDefinition,
+  UnsupportedRename,
+} from './migration-builder';
 import { finalizeSchemaMutation, rollbackSchemaMutation } from './schema-mutation';
 import { getService } from '../utils';
 import { validateUpdateSchema } from '../controllers/validation/schema';
@@ -153,6 +157,41 @@ const collectRenames = (schema: CTBSchema): CollectedRename[] => {
   return renames;
 };
 
+/**
+ * Drops renames whose final name is not an attribute after this save (it was
+ * deleted in the same save), so no store is pointed at a field that is gone.
+ */
+const keepSavedAttributes = (
+  schema: CTBSchema,
+  mapping: AttributeRenamesMapping
+): AttributeRenamesMapping => {
+  type Entry = { action?: string; uid: string; attributes?: { action?: string; name?: string }[] };
+  const entries = [
+    ...(schema.contentTypes as unknown as Entry[]),
+    ...(schema.components as unknown as Entry[]),
+  ];
+
+  const result: AttributeRenamesMapping = {};
+
+  for (const [uid, renames] of Object.entries(mapping)) {
+    const entry = entries.find((candidate) => candidate.uid === uid);
+    const saved = new Set(
+      (entry?.attributes ?? [])
+        .filter((attribute) => attribute.action !== 'delete' && attribute.name)
+        .map((attribute) => attribute.name as string)
+    );
+
+    for (const [origin, final] of Object.entries(renames)) {
+      if (saved.has(final)) {
+        result[uid] ??= {};
+        result[uid][origin] = final;
+      }
+    }
+  }
+
+  return result;
+};
+
 const describeUnsupportedReason = (reason: UnsupportedRename['reason']): string => {
   switch (reason) {
     case 'type-changed':
@@ -190,6 +229,11 @@ const generateRenameMigrations = async (schema: CTBSchema): Promise<string | nul
 
   for (const { uid, oldName, newName, newAttribute } of renames) {
     migrationBuilder.addRenameAttribute(uid, { oldName, newName, newAttribute });
+  }
+
+  const attributeRenames = keepSavedAttributes(schema, migrationBuilder.attributeRenamesMapping());
+  if (Object.keys(attributeRenames).length > 0) {
+    migrationBuilder.addAttributeRenames(attributeRenames);
   }
 
   const unsupported = migrationBuilder.getUnsupported();

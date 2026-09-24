@@ -1397,6 +1397,132 @@ describe('Content Type Builder - relation renames that reuse a join table name',
   });
 });
 
+describe('Content Type Builder - rename keeps admin field permissions', () => {
+  const COMP_UID = 'default.perm-hero';
+  const PERM_UID = 'api::permart.permart';
+  const READ_ACTION = 'plugin::content-manager.explorer.read';
+
+  let roleId;
+  let permissionId;
+
+  const findPermission = () =>
+    strapi.db.query('admin::permission').findOne({ where: { id: permissionId } });
+
+  beforeAll(async () => {
+    strapi = await createStrapiInstance();
+    rq = await createAuthRequest({ strapi });
+
+    await updateSchema({
+      components: [
+        {
+          action: 'create',
+          uid: COMP_UID,
+          category: 'default',
+          displayName: 'Perm Hero',
+          icon: 'apps',
+          attributes: [{ action: 'create', name: 'caption', properties: { type: 'string' } }],
+        },
+      ],
+      contentTypes: [
+        {
+          action: 'create',
+          uid: PERM_UID,
+          displayName: 'Perm Art',
+          singularName: 'permart',
+          pluralName: 'permarts',
+          kind: 'collectionType',
+          draftAndPublish: false,
+          attributes: [
+            { action: 'create', name: 'title', properties: { type: 'string' } },
+            { action: 'create', name: 'body', properties: { type: 'text' } },
+            {
+              action: 'create',
+              name: 'hero',
+              properties: { type: 'component', component: COMP_UID, repeatable: false },
+            },
+          ],
+        },
+      ],
+    });
+    await restart();
+
+    const role = await strapi.db.query('admin::role').create({
+      data: { name: 'Rename Perm Role', code: 'rename-perm-role', description: 'rename test' },
+    });
+    roleId = role.id;
+
+    const permission = await strapi.db.query('admin::permission').create({
+      data: {
+        action: READ_ACTION,
+        subject: PERM_UID,
+        properties: { fields: ['title', 'body', 'hero.caption'] },
+        conditions: [],
+        role: roleId,
+      },
+    });
+    permissionId = permission.id;
+  });
+
+  afterAll(async () => {
+    await strapi.db.query('admin::permission').delete({ where: { id: permissionId } });
+    await strapi.db.query('admin::role').delete({ where: { id: roleId } });
+    await updateSchema({
+      contentTypes: [{ action: 'delete', uid: PERM_UID }],
+      components: [{ action: 'delete', uid: COMP_UID }],
+    });
+    await strapi.destroy();
+    await builder.cleanup();
+  });
+
+  test('a role keeps read access to renamed fields, including component fields', async () => {
+    const res = await updateSchema({
+      contentTypes: [
+        {
+          action: 'update',
+          uid: PERM_UID,
+          displayName: 'Perm Art',
+          draftAndPublish: false,
+          renames: [{ oldName: 'title', newName: 'heading' }],
+          attributes: [
+            { action: 'update', name: 'heading', properties: { type: 'string' } },
+            { action: 'update', name: 'body', properties: { type: 'text' } },
+            {
+              action: 'update',
+              name: 'hero',
+              properties: { type: 'component', component: COMP_UID, repeatable: false },
+            },
+          ],
+        },
+      ],
+      components: [
+        {
+          action: 'update',
+          uid: COMP_UID,
+          category: 'default',
+          displayName: 'Perm Hero',
+          icon: 'apps',
+          renames: [{ oldName: 'caption', newName: 'label' }],
+          attributes: [{ action: 'update', name: 'label', properties: { type: 'string' } }],
+        },
+      ],
+    });
+    expect(res.statusCode).toBe(200);
+
+    const [migrationFile] = listRenameMigrationFiles().sort().slice(-1);
+    const migration = await fse.readFile(
+      `${strapi.db.config.settings.migrations.dir}/${migrationFile}`,
+      'utf8'
+    );
+    expect(migration).toContain('db.schema.applyAttributeRenames(knex');
+
+    await restart();
+
+    // The boot cleanup ran after the migration and kept the renamed paths.
+    const permission = await findPermission();
+    expect([...permission.properties.fields].sort()).toEqual(['body', 'heading', 'hero.label']);
+  });
+});
+
 describe('Content Type Builder - rename:field service', () => {
   // `strapi rename:field` calls this service; it rebuilds the update payload from
   // the formatted schema, so the payload must pass the admin's validation.

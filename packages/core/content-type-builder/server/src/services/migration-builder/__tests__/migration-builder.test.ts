@@ -15,7 +15,8 @@ type Operation =
       where: Record<string, string>;
       set: Record<string, string>;
       comment?: string;
-    };
+    }
+  | { kind: 'attributeRenames'; renames: Record<string, Record<string, string>>; comment?: string };
 
 /**
  * Stand-in for `db.migrations.createFileBuilder()` that only records the
@@ -35,6 +36,9 @@ const createTestMigrationFileBuilder = ({ migrationsDir }: { migrationsDir?: str
     },
     updateRows(op: Omit<Extract<Operation, { kind: 'updateRows' }>, 'kind'>): void {
       operations.push({ kind: 'updateRows', ...op });
+    },
+    attributeRenames(op: Omit<Extract<Operation, { kind: 'attributeRenames' }>, 'kind'>): void {
+      operations.push({ kind: 'attributeRenames', ...op });
     },
     hasChanges(): boolean {
       return operations.length > 0;
@@ -1083,6 +1087,92 @@ describe('MigrationBuilder', () => {
         ['heading', 'summary_2'],
         ['views', 'heading'],
       ]);
+    });
+  });
+
+  describe('attribute renames mapping', () => {
+    const abMeta = {
+      'api::article.article': {
+        tableName: 'articles',
+        attributes: {
+          a: { type: 'string', columnName: 'a' },
+          b: { type: 'string', columnName: 'b' },
+        },
+      },
+    };
+
+    const hops = (builder: ReturnType<typeof createMigrationBuilder>, ...names: string[][]) =>
+      names.forEach(([oldName, newName]) =>
+        builder.addRenameAttribute('api::article.article', { oldName, newName })
+      );
+
+    it('composes a swap routed through a temporary name', () => {
+      const builder = createMigrationBuilder({ strapi: createStrapiMock({ metas: abMeta }) });
+      hops(builder, ['a', 'tmp'], ['b', 'a'], ['tmp', 'b']);
+
+      expect(builder.attributeRenamesMapping()).toEqual({
+        'api::article.article': { a: 'b', b: 'a' },
+      });
+    });
+
+    it('composes a chain to its final name', () => {
+      const builder = createMigrationBuilder({ strapi: createStrapiMock({ metas: abMeta }) });
+      hops(builder, ['a', 'c'], ['c', 'd']);
+
+      expect(builder.attributeRenamesMapping()).toEqual({ 'api::article.article': { a: 'd' } });
+    });
+
+    it('drops a chain that comes back to its origin and adds no operation', () => {
+      const builder = createMigrationBuilder({ strapi: createStrapiMock({ metas: abMeta }) });
+      hops(builder, ['a', 'c'], ['c', 'a']);
+
+      expect(builder.attributeRenamesMapping()).toEqual({});
+
+      builder.addAttributeRenames(builder.attributeRenamesMapping());
+      expect(builder.getOperations().map((op) => op.kind)).toEqual([
+        'renameColumn',
+        'renameColumn',
+      ]);
+    });
+
+    it('keeps refused hops: the logical field is the same even when its data is not carried', () => {
+      const builder = createMigrationBuilder({ strapi: createStrapiMock({ metas: abMeta }) });
+      builder.addRenameAttribute('api::article.article', {
+        oldName: 'a',
+        newName: 'count',
+        newAttribute: { type: 'integer' },
+      });
+
+      expect(builder.getUnsupported()).toEqual([
+        expect.objectContaining({ oldName: 'a', reason: 'type-changed' }),
+      ]);
+      expect(builder.attributeRenamesMapping()).toEqual({
+        'api::article.article': { a: 'count' },
+      });
+    });
+
+    it('leaves out origins that are not schema attributes and unknown models', () => {
+      const builder = createMigrationBuilder({ strapi: createStrapiMock({ metas: abMeta }) });
+      hops(builder, ['ghost', 'spirit']);
+      builder.addRenameAttribute('api::missing.missing', { oldName: 'a', newName: 'b' });
+
+      expect(builder.attributeRenamesMapping()).toEqual({});
+    });
+
+    it('adds the logical op as the last operation of the file', () => {
+      const builder = createMigrationBuilder({ strapi: createStrapiMock({ metas: abMeta }) });
+      hops(builder, ['a', 'tmp'], ['b', 'a'], ['tmp', 'b']);
+
+      builder.addAttributeRenames(builder.attributeRenamesMapping());
+
+      const operations = builder.getOperations();
+      expect(operations).toHaveLength(4);
+      expect(operations.at(-1)).toEqual(
+        expect.objectContaining({
+          kind: 'attributeRenames',
+          renames: { 'api::article.article': { a: 'b', b: 'a' } },
+        })
+      );
     });
   });
 

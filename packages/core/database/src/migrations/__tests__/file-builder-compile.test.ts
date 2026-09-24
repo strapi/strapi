@@ -74,6 +74,9 @@ const writeRenameMigration = async (fixture: ReturnType<typeof createFixture>) =
     to: 'biography',
     comment: 'api::article.article: rename field "bio" -> "biography"',
   });
+  builder.attributeRenames({
+    renames: { 'api::article.article': { bio: 'biography' }, 'default.hero': { caption: 'label' } },
+  });
 
   return (await builder.writeFiles({ name: 'rename-fields', format: 'typescript' })) as string;
 };
@@ -110,9 +113,10 @@ describe('generated typescript migration', () => {
     // the assertion covers the resolver's `default` unwrapping as well as the
     // rendered helper call.
     const renameColumn = jest.fn();
+    const applyAttributeRenames = jest.fn();
     const db = {
       transaction: (fn: (ctx: { trx: unknown }) => Promise<void>) => fn({ trx: 'trx' }),
-      schema: { renameColumn },
+      schema: { renameColumn, applyAttributeRenames },
     } as any;
 
     const migration = migrationResolver({
@@ -127,6 +131,12 @@ describe('generated typescript migration', () => {
       table: 'articles',
       from: 'bio',
       to: 'biography',
+    });
+    expect(applyAttributeRenames).toHaveBeenCalledWith('trx', {
+      renames: {
+        'api::article.article': { bio: 'biography' },
+        'default.hero': { caption: 'label' },
+      },
     });
   });
 
