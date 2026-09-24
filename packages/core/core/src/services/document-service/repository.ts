@@ -41,6 +41,17 @@ const getModel = ((schema: UID.Schema) => strapi.getModel(schema)) as (schema: s
 const LOCALE_FORMAT = /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*$/;
 const MAX_LOCALE_LENGTH = 35;
 
+/**
+ * Publication actions look up every row matching `documentId`. An empty value would match
+ * all rows whose document_id is NULL (or '') — rows left behind by a past bug — and
+ * publish/discard them as if they were a single document, so reject it outright.
+ */
+const assertDocumentIdProvided = (documentId: unknown, action: string) => {
+  if (isParamEmpty(documentId)) {
+    throw new errors.ValidationError(`Cannot ${action} a document without a documentId`);
+  }
+};
+
 export const createContentTypeRepository: RepositoryFactoryMethod = (
   uid,
   validator = entityValidator
@@ -564,6 +575,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
 
   async function publish(opts = {} as any) {
     const { documentId, ...params } = opts;
+    assertDocumentIdProvided(documentId, 'publish');
 
     const queryParams = await async.pipe(
       validateParams,
@@ -654,6 +666,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
 
   async function unpublish(opts = {} as any) {
     const { documentId, ...params } = opts;
+    assertDocumentIdProvided(documentId, 'unpublish');
 
     const query = await async.pipe(
       validateParams,
@@ -673,6 +686,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
 
   async function discardDraft(opts = {} as any) {
     const { documentId, ...params } = opts;
+    assertDocumentIdProvided(documentId, 'discard the draft of');
 
     const queryParams = await async.pipe(
       validateParams,
