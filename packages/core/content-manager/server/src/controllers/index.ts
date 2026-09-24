@@ -1,3 +1,6 @@
+import type {} from '../types';
+import type { RegisteredControllers } from '../types/controllers';
+
 import collectionTypes from './collection-types';
 import components from './components';
 import contentTypes from './content-types';
@@ -18,7 +21,7 @@ export const coreControllers = {
   relations,
   'single-types': singleTypes,
   uid,
-} as const;
+} satisfies RegisteredControllers;
 
 export default {
   ...coreControllers,
