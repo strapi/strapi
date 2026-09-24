@@ -1,4 +1,8 @@
-import { getDeepPopulate, getDeepPopulateDraftCount } from '../populate';
+import {
+  getDeepPopulate,
+  getDeepPopulateDraftCount,
+  getPopulateForLocalizations,
+} from '../populate';
 
 describe('Populate', () => {
   const fakeModels = {
@@ -306,6 +310,54 @@ describe('Populate', () => {
           },
         },
       });
+    });
+  });
+
+  describe('getPopulateForLocalizations', () => {
+    const localizationsModels = {
+      'api::localized.localized': {
+        uid: 'api::localized.localized',
+        pluginOptions: { i18n: { localized: true } },
+        attributes: {},
+      },
+      'api::not-localized.not-localized': {
+        uid: 'api::not-localized.not-localized',
+        pluginOptions: { i18n: { localized: false } },
+        attributes: {},
+      },
+      'api::no-plugin-options.no-plugin-options': {
+        uid: 'api::no-plugin-options.no-plugin-options',
+        attributes: {},
+      },
+    } as any;
+
+    beforeEach(() => {
+      global.strapi = {
+        getModel: jest.fn((uid) => localizationsModels[uid]),
+        localization: {
+          isLocalizedContentType: jest.fn(
+            (model: { pluginOptions?: { i18n?: { localized?: boolean } } }) =>
+              model.pluginOptions?.i18n?.localized === true
+          ),
+        },
+      } as any;
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    test('restricts localizations to metadata fields for localized content types', () => {
+      expect(getPopulateForLocalizations('api::localized.localized' as any)).toEqual({
+        localizations: { fields: ['locale', 'documentId', 'publishedAt', 'updatedAt'] },
+      });
+    });
+
+    test('returns an empty populate for non-localized content types', () => {
+      expect(getPopulateForLocalizations('api::not-localized.not-localized' as any)).toEqual({});
+      expect(
+        getPopulateForLocalizations('api::no-plugin-options.no-plugin-options' as any)
+      ).toEqual({});
     });
   });
 });
