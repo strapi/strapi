@@ -1,7 +1,7 @@
 {
-  "extends": "tsconfig/base.json",
+  "extends": "tsconfig/server.json",
   "include": ["src", "custom.d.ts", "../shared"],
   "compilerOptions": {
-    "types": ["node"]
+    "types": ["node", "@strapi/strapi/strict-types"]
   }
 }
