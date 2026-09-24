@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { useClipboard, useNotification } from '@strapi/admin/strapi-admin';
@@ -38,11 +38,12 @@ interface AssetActionsRender {
    */
   hasActions: boolean;
   /**
-   * True while one of the dialogs is open. A cursor-anchored caller is mounted
-   * only as long as its menu is open, so it needs this to know it must stay
-   * around after the menu closes.
+   * True while anything the actions own is still in play — a dialog, or the
+   * native file picker. A cursor-anchored caller is mounted only as long as it
+   * has something on screen, so it needs this to know it must stay around
+   * after the menu closes.
    */
-  isDialogOpen: boolean;
+  isBusy: boolean;
 }
 
 /**
@@ -95,14 +96,37 @@ export const AssetActions = ({ asset, dragData, children }: AssetActionsProps) =
   const [isMoveOpen, setIsMoveOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  // The native picker is not a React thing: nothing re-renders while it is up.
+  // A cursor-anchored caller is mounted only while it has something on screen,
+  // and without this the input it owns would be unmounted the moment the
+  // confirm dialog closes — so the file would come back to nothing.
+  const [isAwaitingFile, setIsAwaitingFile] = useState(false);
 
   // Stable identity: the move dialog memoizes its destination walk on it.
   const moveItems = useMemo(() => [dragData], [dragData]);
 
   // Confirm first, then open the native picker, so the user only commits to
   // replacing after acknowledging the warning (same order as the drawer).
+  // Dismissing the picker fires `cancel`, not `change`, so without this the
+  // caller would stay mounted with nothing on screen. Attached natively: the
+  // React version here has no `onCancel` on the input types.
+  useEffect(() => {
+    const input = fileInputRef.current;
+
+    if (!input) {
+      return undefined;
+    }
+
+    const handleCancel = () => setIsAwaitingFile(false);
+
+    input.addEventListener('cancel', handleCancel);
+
+    return () => input.removeEventListener('cancel', handleCancel);
+  }, []);
+
   const handleReplaceContinue = () => {
     setIsReplaceOpen(false);
+    setIsAwaitingFile(true);
     fileInputRef.current?.click();
   };
 
@@ -110,6 +134,7 @@ export const AssetActions = ({ asset, dragData, children }: AssetActionsProps) =
     const file = event.target.files?.[0];
     // Reset the native input so the same file can be picked again later.
     event.target.value = '';
+    setIsAwaitingFile(false);
 
     if (!file) {
       return;
@@ -354,7 +379,7 @@ export const AssetActions = ({ asset, dragData, children }: AssetActionsProps) =
         // Every flag is `false` until the RBAC check settles, so wait for it —
         // otherwise the trigger unmounts and remounts on first paint for everyone.
         hasActions: isLoadingPermissions || hasTopGroup || hasBottomGroup,
-        isDialogOpen: isReplaceOpen || isMoveOpen || isDeleteOpen,
+        isBusy: isReplaceOpen || isMoveOpen || isDeleteOpen || isAwaitingFile,
       })}
     </>
   );

@@ -25,8 +25,9 @@ interface AssetContextMenuProps {
  *
  * Picking "Replace", "Move" or "Delete" closes the menu and opens a dialog in
  * the same tick, and that dialog is rendered here — so the menu being shut and
- * this being unmounted are two different things, tracked apart. Closing the
- * menu while a dialog is open would take the dialog with it.
+ * this being unmounted are two different things, tracked apart. Unmounting
+ * early would take the dialog with it, and for "Replace" the hidden file input
+ * too, which is why `isBusy` also covers the native picker.
  */
 export const AssetContextMenu = ({ asset, dragData, position, onClose }: AssetContextMenuProps) => {
   const { formatMessage } = useIntl();
@@ -34,10 +35,10 @@ export const AssetContextMenu = ({ asset, dragData, position, onClose }: AssetCo
 
   return (
     <AssetActions asset={asset} dragData={dragData}>
-      {({ items, dialogs, hasActions, isDialogOpen }) => (
+      {({ items, dialogs, hasActions, isBusy }) => (
         <AssetContextMenuBody
           hasActions={hasActions}
-          isDialogOpen={isDialogOpen}
+          isBusy={isBusy}
           isMenuOpen={isMenuOpen}
           onMenuClose={() => setIsMenuOpen(false)}
           onClose={onClose}
@@ -56,7 +57,7 @@ export const AssetContextMenu = ({ asset, dragData, position, onClose }: AssetCo
 
 interface AssetContextMenuBodyProps {
   hasActions: boolean;
-  isDialogOpen: boolean;
+  isBusy: boolean;
   isMenuOpen: boolean;
   onMenuClose: () => void;
   onClose: () => void;
@@ -72,7 +73,7 @@ interface AssetContextMenuBodyProps {
  */
 const AssetContextMenuBody = ({
   hasActions,
-  isDialogOpen,
+  isBusy,
   isMenuOpen,
   onMenuClose,
   onClose,
@@ -82,12 +83,12 @@ const AssetContextMenuBody = ({
   dialogs,
 }: AssetContextMenuBodyProps) => {
   useEffect(() => {
-    // The menu is shut and no dialog took its place — or the role has no
-    // permitted action, so there was never a menu to begin with.
-    if (!hasActions || (!isMenuOpen && !isDialogOpen)) {
+    // The menu is shut and nothing took its place — no dialog, no file picker
+    // — or the role has no permitted action, so there was never a menu at all.
+    if (!hasActions || (!isMenuOpen && !isBusy)) {
       onClose();
     }
-  }, [hasActions, isMenuOpen, isDialogOpen, onClose]);
+  }, [hasActions, isMenuOpen, isBusy, onClose]);
 
   if (!hasActions) {
     return null;
