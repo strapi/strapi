@@ -77,6 +77,8 @@ model {
     }
     webhook_delivery = component 'Webhook delivery' {
       summary 'Posts subscribed events to configured external endpoints.'
+      description 'The webhook runner listens to the local event hub and uses an in-memory worker queue. It sends HTTP requests with a timeout; the queue does not persist delivery state or automatically retry failed delivery.'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/worker-queue.ts 'In-memory worker queue'
       technology 'HTTP(S)'
       link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/webhook-runner.ts 'Webhook runner'
     }

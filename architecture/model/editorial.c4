@@ -11,7 +11,7 @@ model {
 
     release_service = component 'Content release service and scheduler' {
       summary 'Enterprise feature: schedules releases and publishes their actions through the Document Service.'
-      description 'When cms-content-releases is enabled, scheduled jobs call the release service; it publishes or unpublishes release actions through strapi.documents.'
+      description 'When cms-content-releases is enabled, scheduled jobs call the release service; it publishes or unpublishes release actions through strapi.documents. Release publication uses database row locking and released/failed-state checks; this is specific to releases, not a general distributed scheduler.'
       technology '@strapi/content-releases'
       link https://github.com/strapi/strapi/blob/develop/packages/core/content-releases/server/src/index.ts#L10 'Enterprise feature gate'
       link https://github.com/strapi/strapi/blob/develop/packages/core/content-releases/server/src/services/scheduling.ts#L24 'Scheduled release execution'

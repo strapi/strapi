@@ -16,7 +16,7 @@ views {
       strapi.server_runtime.schema_loader with { navigateTo strapi_startup },
       strapi.server_runtime.api_module_loader with { navigateTo strapi_startup },
       strapi.server_runtime.plugin_system with { navigateTo strapi_extensions },
-      plugin_package.server_entry with { navigateTo strapi_extensions },
+      plugin_package.server_entry with { navigateTo plugin_entrypoints },
       strapi.application_source.plugin_overrides
     exclude * -> *
     include
@@ -30,7 +30,36 @@ views {
   }
 
   view strapi_extensions {
+    title '03 Engineering / Extensions / Extension mechanisms'
+    link ../scheduled_work/ 'Related: scheduled application work'
+    link ../interface_overview/ 'Related: application interfaces'
+    description '''
+      **Audience:** developers and technical product readers. **Type:** reading guide, not a runtime architecture diagram.
+      **Question:** which extension mechanism fits the change you want to make?
+      Choose plugin packaging, request/document behavior, custom fields, external integrations or startup hooks. Scheduled application work is available as a related topic.
+      These mechanisms can be combined. A plugin can supply custom fields or routes, but no single example represents all plugin behavior.
+      Cards name the topic opened by their navigation control. Arrows mean “explore this mechanism”, not function calls or required execution stages.
+    '''
+    include
+      extension_guide,
+      plugin_guide with { navigateTo plugin_entrypoints },
+      request_guide with { navigateTo request_customization },
+      fields_guide with { navigateTo custom_fields },
+      providers_guide with { navigateTo strapi_providers },
+      startup_guide with { navigateTo strapi_startup }
+    exclude * -> *
+    include
+      extension_guide -> plugin_guide,
+      extension_guide -> request_guide,
+      extension_guide -> fields_guide,
+      extension_guide -> providers_guide,
+      extension_guide -> startup_guide
+    autoLayout LeftRight 55 30
+  }
+
+  view plugin_entrypoints {
     title '03 Engineering / Extensions / Plugin entrypoints'
+    link ../strapi_extensions/ 'Guide: choose an extension mechanism'
     description '''
       **Audience:** developers and technical product readers. **Type:** plugin construction and extension view.
       **Question:** how can one plugin contribute to both the Admin and the server?
@@ -74,7 +103,7 @@ views {
       media_storage with { navigateTo self_hosted_deployment },
       strapi.server_runtime.email_provider,
       email_service,
-      strapi.server_runtime.webhook_delivery,
+      strapi.server_runtime.webhook_delivery with { navigateTo events_and_jobs },
       external_system
     exclude * -> *
     include
@@ -87,20 +116,21 @@ views {
 
   view strapi_startup of strapi.server_runtime {
     title '03 Engineering / Server / Startup and registration'
+    link ../scheduled_work/ 'Related: scheduled work after startup'
     description '''
       **Scope:** startup responsibilities, not per-request execution. load() runs register() then bootstrap().
       **Audience:** engineers. **Question:** what must be prepared before the server accepts requests?
       Application and plugin definitions are loaded before database schema synchronization and route initialization;
       start() listens after loading completes. Edges summarize orchestration, not an exact call trace.
       Application/plugin register and bootstrap hooks participate in these phases. This map groups those responsibilities; it is not a full lifecycle or shutdown diagram.
-      Open plugin loading for extensions, application loaders for assembly, schema synchronization for the development journey, or HTTP server for request handling.
+      Open plugin loading for extensions, application loaders for assembly, schema synchronization for database evolution, or HTTP server for request handling.
     '''
     include
       application_lifecycle,
       plugin_system with { navigateTo strapi_extensions },
       api_module_loader with { navigateTo strapi_construction },
       schema_loader with { navigateTo strapi_construction },
-      schema_sync with { navigateTo content_type_builder_schema_change_flow },
+      schema_sync with { navigateTo database_schema_evolution },
       route_registration with { navigateTo content_api_runtime_components },
       http_server with { navigateTo strapi_container_internals }
     exclude * -> *

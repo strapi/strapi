@@ -38,6 +38,8 @@ deployment {
 views {
   deployment view self_hosted_deployment {
     title '04 Deployment / Production hosting example'
+    link ../application_state/ 'Related: application code and persistent state'
+    link ../production_operations/ 'Related: operating responsibilities'
     description '''
       **Audience:** product and engineering. **Type:** deployment example, mapping runtime elements to hosting infrastructure.
       **Question:** what hosts a production Strapi application, and what survives a redeploy?

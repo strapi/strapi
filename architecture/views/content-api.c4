@@ -11,11 +11,11 @@ views {
 
     include
       http_server with { navigateTo content_api_request_flow },
-      endpoint_composer,
+      endpoint_composer with { navigateTo request_customization },
       auth with { navigateTo auth_code },
       core_api_layer with { navigateTo generated_core_api_code },
       document_service with { navigateTo document_service_code },
-      database_layer,
+      database_layer with { navigateTo database_persistence },
       strapi.database with { navigateTo application_state }
     exclude * -> *
     include
@@ -115,7 +115,7 @@ views {
       ds_transform_layer,
       ds_attribute_handlers,
       ds_utils,
-      strapi.server_runtime.database_layer
+      strapi.server_runtime.database_layer with { navigateTo database_persistence }
     exclude * -> *
     include
       ds_middlewares -> ds_document_operations,

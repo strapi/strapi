@@ -77,7 +77,7 @@ views {
       strapi.server_runtime.content_manager_server,
       strapi.server_runtime.content_type_builder_server,
       strapi.server_runtime.admin_server_apis,
-      strapi.server_runtime.plugin_modules with { navigateTo strapi_extensions }
+      strapi.server_runtime.plugin_modules with { navigateTo plugin_entrypoints }
     exclude * -> *
     include
       content_manager_ui -> strapi.server_runtime.content_manager_server with { title 'Content operations' technology 'HTTP(S)' },

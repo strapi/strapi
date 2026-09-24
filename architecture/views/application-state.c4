@@ -1,6 +1,7 @@
 views {
   view application_state {
     title '04 Deployment / Application code and persistent state'
+    link ../production_operations/ 'Related: operating responsibilities'
     description '''
       **Audience:** product and engineering. **Type:** construction and state map, not a deployment topology or execution sequence.
       **Question:** what is deployed, what is built, and what must survive application replacement?
@@ -12,12 +13,12 @@ views {
       Configuration combines defaults, application config and environment-specific config. Browser build values can require rebuilding;
       a server restart alone does not rebuild the Admin. CTB edits source in development, not this production state.
       Selected build-time environment values become public in the Admin bundle; server credentials belong in runtime configuration. Existing runtime configuration must be supplied again when replacing the host.
-      Open source for assembly, build for plugin entrypoints, server for startup, database for deployment, or media for the upload journey.
+      Open source for assembly, build for plugin entrypoints, server for startup, database for deployment, media for the upload journey, or use the related Operating responsibilities link for production concerns.
     '''
     include
       strapi.application_source with { navigateTo strapi_construction },
       environment_values,
-      strapi.cli_tooling.admin_build with { navigateTo strapi_extensions },
+      strapi.cli_tooling.admin_build with { navigateTo plugin_entrypoints },
       strapi.admin_browser_bundle with { navigateTo strapi_containers },
       strapi.server_runtime with { navigateTo strapi_startup },
       strapi.database with { navigateTo self_hosted_deployment },

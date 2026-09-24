@@ -1,0 +1,96 @@
+model {
+  custom_field_definition = source_document 'Custom field registration code' {
+    summary 'Pairs a field UID and type across Admin and server.'
+    description '''
+        Application/plugin code registers the browser input and server definition separately. Matching plugin/name (UID) and supported underlying type tie them together. This is a code contract, not an HTTP call between registries.
+      '''
+    link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/registries/custom-fields.ts 'Server registration'
+    link https://github.com/strapi/strapi/blob/develop/packages/core/admin/admin/src/core/apis/CustomFields.ts 'Admin registration'
+  }
+  extend strapi.server_runtime {
+    event_hub = component 'In-process event hub' {
+      summary 'Dispatches events to local subscribers.'
+      description '''
+        Listeners and subscribers live in this Node.js process. Document Service schedules entry event emission after transaction commit. This is not a distributed event broker or persisted event log.
+      '''
+      link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/event-hub.ts 'Event hub'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/document-service/events.ts 'Document events after commit'
+    }
+    cron_scheduler = component 'In-process scheduler' {
+      summary 'Executes registered timed jobs in this process.'
+      description '''
+        Cron jobs are held in memory. Application tasks are loaded according to server.cron configuration; plugins can also register jobs programmatically. The provider starts the scheduler even when configured application tasks are disabled. No general cross-replica locking is supplied here.
+      '''
+      link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/cron.ts 'Scheduler'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/providers/cron.ts 'Task registration and start'
+    }
+    application_tasks = component 'Application cron tasks' {
+      summary 'Run application-defined scheduled work.'
+      description '''
+        Configured callbacks receive Strapi and can use its services. The document call shown is an example, not required of every job. Coordination, idempotency and durable recovery depend on the application.
+      '''
+      link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/providers/cron.ts 'Configured tasks'
+    }
+    custom_policies = component 'Route policies' {
+      summary 'Allow or reject a configured route request.'
+      description '''
+        The endpoint composer runs route policies after authentication/authorization. Policies govern access; their successful completion does not replace input validation or output sanitization.
+      '''
+      link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/policy.ts 'Route policies'
+    }
+    custom_route_middleware = component 'Route middleware' {
+      summary 'Wraps the configured controller action.'
+      description '''
+        Resolved route middleware runs after route policies in the composed chain. Global Koa middleware is installed separately and can wrap the broader request/response path.
+      '''
+      link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/middleware.ts 'Route middleware'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/register-middlewares.ts 'Global middleware'
+    }
+    custom_controller = component 'Application controller and service' {
+      summary 'Implements custom endpoint behavior.'
+      description '''
+        The configured controller may delegate to application services and Document Service. Custom handlers must validate/sanitize for the right content type and enforce relevant access rules. The diagram shows a document-based implementation, not a restriction on all custom handlers.
+      '''
+      link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/compose-endpoint.ts 'Handler resolution'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/factories.ts 'Core factories for extension'
+    }
+    custom_field_server = component 'Server custom-field registry' {
+      summary 'Registers a supported underlying data type.'
+      description '''
+        strapi.customFields.register delegates to the registry, which checks the field name and supported type. Custom fields do not introduce arbitrary new database column types.
+      '''
+      link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/custom-fields.ts 'Registration API'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/registries/custom-fields.ts 'Registry and allowed types'
+    }
+    custom_field_conversion = component 'Custom-field schema conversion' {
+      summary 'Resolves custom-field types before model creation.'
+      description '''
+        Loaded content-type/component attributes of type customField are converted to the registered underlying type. Normal model/database mapping then applies.
+      '''
+      link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/utils/convert-custom-field-type.ts 'Schema conversion'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/Strapi.ts 'Registration and bootstrap'
+    }
+  }
+  strapi.server_runtime.document_service -> strapi.server_runtime.event_hub 'emits entry events after commit'
+  strapi.server_runtime.event_hub -> strapi.server_runtime.webhook_delivery 'notifies subscribed webhook listener'
+  strapi.server_runtime.release_service -> strapi.database 'reloads future schedules at startup'
+  strapi.server_runtime.cron_scheduler -> strapi.server_runtime.release_service 'runs scheduled release callback'
+  strapi.server_runtime.cron_scheduler -> strapi.server_runtime.application_tasks 'runs configured callback'
+  strapi.server_runtime.application_tasks -> strapi.server_runtime.document_service 'may call document operations'
+  strapi.server_runtime.endpoint_composer -> strapi.server_runtime.custom_policies 'installs route policy checks'
+  strapi.server_runtime.endpoint_composer -> strapi.server_runtime.custom_route_middleware 'installs route middleware'
+  strapi.server_runtime.endpoint_composer -> strapi.server_runtime.custom_controller 'resolves configured handler'
+  strapi.server_runtime.custom_controller -> strapi.server_runtime.document_service.ds_middlewares 'calls wrapped Document Service'
+  custom_field_definition -> strapi.server_runtime.custom_field_server 'registers server definition'
+  strapi.server_runtime.custom_field_conversion -> strapi.server_runtime.custom_field_server 'resolves underlying type'
+  strapi.server_runtime.custom_field_conversion -> strapi.application_source.content_type_schema_files 'reads loaded field attributes'
+  extend strapi.admin_web_app {
+    custom_field_admin = component 'Admin custom-field registry' {
+      summary 'Registers field labels, options and a lazy input component.'
+      description 'Browser registration describes the custom field to Admin features. It must match the server registration UID and type.'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/admin/admin/src/core/apis/CustomFields.ts 'Admin custom fields'
+    }
+  }
+  custom_field_definition -> strapi.admin_web_app.custom_field_admin 'registers browser definition'
+  strapi.admin_web_app.content_manager_ui.cm_ui_edit_view -> strapi.admin_web_app.custom_field_admin 'loads the registered field input'
+}

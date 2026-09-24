@@ -1,6 +1,7 @@
 views {
   view access_boundaries {
     title '01 Start here / Access boundaries'
+    link ../interface_overview/ 'Related: application interfaces and protocols'
     description '''
       **Audience:** everyone. **Type:** identity and credential map, not a runtime call sequence.
       **Question:** who or what can access administration, content APIs or data transfer?
@@ -9,7 +10,7 @@ views {
       People sign in with accounts; automation can use tokens. A website visitor is not automatically an Admin user.
       The application-user/public-role path requires Users & Permissions. Content API tokens are a separate path.
       SSO requires configuration and its license feature; it is an alternative Admin login path.
-      Open Admin users for the local login journey, or Content API operations for a public-role example.
+      Open Admin users for local login, Content API operations for a public-role example, or Data transfer for import/export and remote transfer. Use the related Application interfaces link to compare protocols, including MCP.
     '''
     include
       admin_identity with { navigateTo admin_login_flow },
@@ -19,7 +20,7 @@ views {
       transfer_credential,
       admin_access_scope with { navigateTo content_manager_components },
       content_access_scope with { navigateTo content_api_request_flow },
-      transfer_access_scope
+      transfer_access_scope with { navigateTo data_transfer }
     autoLayout LeftRight 80 30
   }
 

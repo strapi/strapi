@@ -71,6 +71,14 @@ specification {
     }
   }
 
+  element guide_topic {
+    notation 'Guide topic (navigation, not a runtime unit)'
+    style {
+      shape rectangle
+      color slate
+    }
+  }
+
   element concept {
     notation 'Domain concept (not a runtime unit)'
     style {
@@ -94,6 +102,7 @@ specification {
 
   tag runtime_boundary
   tag deployment_path
+  tag replicated_deployment_path
 
   relationship reads
   relationship writes

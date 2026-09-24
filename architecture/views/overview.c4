@@ -1,6 +1,7 @@
 views {
   view index {
     title '01 Start here / Strapi in context'
+    link ../interface_overview/ 'Related: application interfaces'
     description '''
       **Audience:** everyone. **Scope:** a typical application built with Strapi.
       **Question:** who uses this CMS, and what connects to it?
@@ -27,6 +28,7 @@ views {
 
   view strapi_capabilities {
     title '01 Start here / Product capabilities'
+    link ../interface_overview/ 'Related: application interfaces'
     description '''
       **Audience:** product and engineering. **Type:** capability map, not a C4 container diagram.
       **Question:** what can a team do with Strapi?
@@ -46,12 +48,13 @@ views {
 
   view strapi_containers of strapi {
     title '01 Start here / Runtime architecture'
+    link ../interface_overview/ 'Related: compare application interfaces'
     description '''
       **Audience:** everyone. **Type:** C4 container view of a typical Strapi application.
       **Question:** what runs, and where are the runtime boundaries?
       Here, a container means an application or data store; it does not imply Docker or a separate machine.
       The Admin executes in a browser and the server in Node.js, even when one server distributes both.
-      The consuming application is outside the CMS. This baseline omits optional providers and development tooling.
+      The consuming application is outside the CMS. This baseline omits optional providers and development tooling. Use the related Application interfaces link to compare REST, GraphQL, Admin APIs, MCP and transfer. The request arrow opens a representative REST journey.
       Open the Admin or server to go deeper; open the database for persistent state and a self-hosted deployment example.
     '''
     include
@@ -64,7 +67,7 @@ views {
     exclude * -> *
     include
       content_editor -> admin_web_app with { title 'Edits and publishes content' },
-      public_client -> server_runtime with { title 'Requests content' technology 'HTTP(S) / JSON' navigateTo content_api_request_flow },
+      public_client -> server_runtime with { title 'Requests content via REST or optional GraphQL' technology 'HTTP(S)' navigateTo content_api_request_flow },
       admin_web_app -> server_runtime with { title 'Calls Admin APIs' technology 'HTTP(S) / JSON' navigateTo content_publishing_flow },
       server_runtime -> database with { title 'Reads and writes application data' technology 'SQL' }
     autoLayout LeftRight 70 40
@@ -73,6 +76,7 @@ views {
   // Keep the existing ID for saved links; show one runtime rather than every container's internals.
   view strapi_container_internals of strapi.server_runtime {
     title '03 Engineering / Server / Request handling'
+    link ../interface_overview/ 'Related: compare application interfaces'
     description '''
       **Audience:** engineers. **Scope:** major server responsibilities during requests.
       **Question:** how do Admin and generated Content API requests reach their handlers?

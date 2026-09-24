@@ -1,0 +1,83 @@
+views {
+  view graphql_delivery of strapi.server_runtime {
+    title '03 Engineering / Interfaces / GraphQL delivery'
+    link ../interface_overview/ 'Guide: compare application interfaces'
+    description '''
+      **Audience:** technical readers. **Question:** how does optional GraphQL reach content?
+      At bootstrap, the plugin generates a schema from enabled Shadow CRUD types and application extensions. At request time, the endpoint authenticates, then wrapped resolvers authorize and execute.
+      The arrows show responsibilities and dependencies, not every call in order. Generated resolvers use Content API helpers and Document Service directly; they do not call the generated REST controllers.
+      Custom resolvers and disabled Shadow CRUD change the available operations. Open the endpoint and resolver source links for schema generation and customization.
+    '''
+    include
+      public_client,
+      strapi.server_runtime.graphql_endpoint,
+      strapi.server_runtime.auth with { navigateTo auth_code },
+      strapi.server_runtime.graphql_wrappers,
+      strapi.server_runtime.graphql_resolvers,
+      strapi.server_runtime.content_api with { navigateTo content_api_service_code },
+      strapi.server_runtime.document_service with { navigateTo document_service_code }
+    exclude * -> *
+    include
+      public_client -> strapi.server_runtime.graphql_endpoint,
+      strapi.server_runtime.graphql_endpoint -> strapi.server_runtime.auth,
+      strapi.server_runtime.graphql_endpoint -> strapi.server_runtime.graphql_wrappers,
+      strapi.server_runtime.graphql_wrappers -> strapi.server_runtime.graphql_resolvers,
+      strapi.server_runtime.graphql_resolvers -> strapi.server_runtime.content_api,
+      strapi.server_runtime.graphql_resolvers -> strapi.server_runtime.document_service
+    autoLayout TopBottom 50 35
+  }
+  view mcp_interface of strapi.server_runtime {
+    title '03 Engineering / Interfaces / MCP access and execution'
+    link ../interface_overview/ 'Guide: compare application interfaces'
+    description '''
+      **Audience:** technical readers. **Question:** how can an MCP client safely reach enabled Strapi capabilities?
+      This checkout exposes MCP only when configured. Each authenticated POST gets a stateless SDK server using registered definitions and the Admin-token ability. Definition registration happens before service start, separately from request handling.
+      Capability availability is a coarse check; Content Manager tool handlers also enforce action, field and entity permissions and sanitization. The explicit development-only capability rule is separate.
+      The final branch illustrates built-in content tools, not every tool, prompt or resource. A token does not give blanket access to the CMS.
+    '''
+    include
+      mcp_client,
+      strapi.server_runtime.mcp_http,
+      strapi.server_runtime.mcp_auth with { navigateTo access_boundaries },
+      strapi.server_runtime.mcp_definitions,
+      strapi.server_runtime.mcp_dispatch,
+      strapi.server_runtime.mcp_content_handlers,
+      strapi.server_runtime.cm_document_manager with { navigateTo content_manager_components }
+    exclude * -> *
+    include
+      mcp_client -> strapi.server_runtime.mcp_http,
+      strapi.server_runtime.mcp_http -> strapi.server_runtime.mcp_auth,
+      strapi.server_runtime.mcp_http -> strapi.server_runtime.mcp_dispatch,
+      strapi.server_runtime.mcp_dispatch -> strapi.server_runtime.mcp_definitions,
+      strapi.server_runtime.mcp_dispatch -> strapi.server_runtime.mcp_content_handlers,
+      strapi.server_runtime.mcp_content_handlers -> strapi.server_runtime.cm_document_manager
+    autoLayout TopBottom 50 35
+  }
+  view data_transfer {
+    title '03 Engineering / Interfaces / Import export and transfer'
+    link ../interface_overview/ 'Guide: compare application interfaces'
+    description '''
+      **Audience:** developers and operators. **Question:** how does data move between applications or files?
+      Choose one source and one destination: export is local-to-file, import is file-to-local, and remote transfer pushes or pulls between local and remote Strapi. The CLI, engine and local providers share a short-lived process.
+      The engine checks version/schema compatibility and streams selected entities, relations, assets and supported configuration. Schema metadata is used for checks; application code and content-type definitions must be deployed separately.
+      Remote push/pull uses dedicated transfer tokens over WebSocket. Destination restore replaces selected data/assets; it is not a merge or live replication mechanism. Source assets are read from local files or remote URLs; the provider arrow shows destination restores. File storage and database writes are not one atomic transaction. Export is not a complete infrastructure backup.
+    '''
+    include
+      developer,
+      transfer_cli.engine,
+      transfer_archive,
+      transfer_cli.local,
+      strapi.server_runtime.transfer_endpoint,
+      strapi.database with { navigateTo application_state },
+      strapi.server_runtime.upload_provider with { navigateTo media_upload_flow }
+    exclude * -> *
+    include
+      developer -> transfer_cli.engine,
+      transfer_cli.engine -> transfer_archive,
+      transfer_cli.engine -> transfer_cli.local,
+      transfer_cli.engine -> strapi.server_runtime.transfer_endpoint,
+      strapi.server_runtime.transfer_endpoint -> strapi.database,
+      strapi.server_runtime.transfer_endpoint -> strapi.server_runtime.upload_provider
+    autoLayout LeftRight 65 40
+  }
+}
