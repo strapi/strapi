@@ -48,7 +48,7 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
       await login({ page });
     });
 
-    test('a user can edit and refine an asset', async ({ page }) => {
+    test('a user can edit and refine an asset', async ({ page, browserName }) => {
       const assetsPage = new AssetsPage(page);
       await assetsPage.goto();
 
@@ -115,7 +115,10 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
         await expect(assetsPage.getAssetDetailsDrawerTextField('Caption')).toHaveValue(CAPTION);
       });
 
-      const previewImage = assetsPage.assetDetailsDrawer.locator('img').first();
+      // Addressed by its alt text rather than by position: the preview renders
+      // `alt={alternativeText || asset.name}`, so this also proves the alt text saved above
+      // reached the preview.
+      const previewImage = assetsPage.assetDetailsDrawer.getByRole('img', { name: ALT_TEXT });
 
       await test.step('I crop an image — Apply overwrites the original', async () => {
         // The crop action is only offered for image assets (the non-image case
@@ -243,12 +246,23 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
       // to assert yet, see the file header.
 
       await test.step('I use the footer actions', async () => {
-        await expect(
-          assetsPage.assetDetailsDrawer.getByRole('button', { name: 'Download' })
-        ).toBeVisible();
+        // Download builds an <a download> from a blob URL and clicks it, so the browser
+        // reports a real download and the file lands under the asset's own name.
+        const downloadPromise = page.waitForEvent('download');
+        await assetsPage.assetDetailsDrawer.getByRole('button', { name: 'Download' }).click();
+        expect((await downloadPromise).suggestedFilename()).toBe(RENAMED);
 
         await assetsPage.assetDetailsDrawer.getByRole('button', { name: 'Copy link' }).click();
         await expect(assetsPage.getDrawerToast(/Link copied/i)).toBeVisible();
+
+        // What actually reached the clipboard, not just that the handler ran. Reading it
+        // back needs `clipboard-read`, which only Chromium grants — the toast above is the
+        // assertion everywhere else.
+        if (browserName === 'chromium') {
+          await page.context().grantPermissions(['clipboard-read']);
+          const copied = await page.evaluate(() => navigator.clipboard.readText());
+          expect(copied).toMatch(/^https?:\/\/.+\/uploads\/.+/);
+        }
       });
 
       await test.step('I delete the asset', async () => {
