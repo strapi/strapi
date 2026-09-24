@@ -13,9 +13,6 @@ const {
 const { isAnyToMany } = strapiUtils.relations;
 const { PUBLISHED_AT_ATTRIBUTE } = strapiUtils.contentTypes.constants;
 
-const isLocalizedContentType = (model: { pluginOptions?: unknown }) =>
-  (model.pluginOptions as { i18n?: { localized?: boolean } } | undefined)?.i18n?.localized === true;
-
 const isMorphToRelation = (attribute: any) =>
   isRelation(attribute) && attribute.relation.includes('morphTo');
 const isMedia = propEq('type', 'media');
@@ -349,7 +346,7 @@ const getDeepPopulateDraftCount = (uid: UID.Schema): { populate: any; hasRelatio
           // so we can distinguish truly unpublished targets from published documents that
           // still have a draft row (those links are kept on publish for M2M, or remapped for xToOne).
           const fields: string[] = ['documentId'];
-          if (isLocalizedContentType(targetModel)) {
+          if (strapi.localization.isLocalizedContentType(targetModel) === true) {
             fields.push('locale');
           }
           populateAcc[attributeName] = {
