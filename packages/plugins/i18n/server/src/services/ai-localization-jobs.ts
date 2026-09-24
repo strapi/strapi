@@ -1,8 +1,13 @@
 import type { Core } from '@strapi/types';
 import { AI_LOCALIZATION_JOB_UID } from '../models/ai-localization-job';
+import type { AILocalizationJobsService } from '../types/services';
 import type { AILocalizationJobs } from '../../../shared/contracts/ai-localization-jobs';
 
-export const createAILocalizationJobsService = ({ strapi }: { strapi: Core.Strapi }) => ({
+export const createAILocalizationJobsService = ({
+  strapi,
+}: {
+  strapi: Core.Strapi;
+}): AILocalizationJobsService => ({
   /**
    * Create a new AI localizations job or update an existing one for a document
    * Ensures only one job exists per document
