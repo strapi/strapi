@@ -743,6 +743,31 @@ describe('AssetsPage main-area context menu', () => {
     expect(screen.queryByRole('menuitem', { name: 'New folder' })).not.toBeInTheDocument();
   });
 
+  // Smoke cover only. The bug this came from — a second right-click doing
+  // nothing — needs `pointerdown` and `contextmenu` to land in one task so the
+  // dismissed menu's cleanup runs after the next one mounted. `fireEvent` acts
+  // between them, so jsdom always wins the race the browser loses. The real
+  // guard is the e2e.
+  it('opens a menu on a second right-click', async () => {
+    respondWithAssets([createAsset(1, 'image.png'), createAsset(2, 'photo.png')]);
+
+    renderPage();
+    await waitForCreatePermission();
+
+    // eslint-disable-next-line testing-library/no-node-access
+    const first = (await screen.findByText('image.png')).closest('[data-native-context-menu]');
+    fireEvent.contextMenu(first!, { clientX: 20, clientY: 20 });
+    expect(await screen.findByRole('menu')).toBeInTheDocument();
+
+    // A right-click while a menu is open is a dismiss *and* an open.
+    // eslint-disable-next-line testing-library/no-node-access
+    const second = (await screen.findByText('photo.png')).closest('[data-native-context-menu]');
+    fireEvent.pointerDown(second!, { button: 2 });
+    fireEvent.contextMenu(second!, { clientX: 80, clientY: 80 });
+
+    expect(await screen.findByRole('menu')).toBeInTheDocument();
+  });
+
   it('offers the selection actions when the clicked card is part of one', async () => {
     respondWithAssets([createAsset(1, 'image.png'), createAsset(2, 'photo.png')]);
 
