@@ -21,8 +21,6 @@ export const registerContentManagerMcpTools = async ({
   let localeCodes: [string, ...string[]] | null = null;
   let defaultLocale: string | null = null;
   if (strapi.localization.isEnabled() === true) {
-    // TODO @Nico zero locales yields `[]` cast as a non-empty tuple. Downstream copes at runtime
-    // (buildLocaleSchema checks length, getPermittedLocales returns null), but the type lies.
     localeCodes = (await strapi.localization.getLocales()).map((locale) => locale.code) as [
       string,
       ...string[],
