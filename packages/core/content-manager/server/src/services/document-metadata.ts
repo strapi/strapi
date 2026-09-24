@@ -10,7 +10,7 @@ const { getScalarAttributes, getMediaAttributes } = contentTypes;
 export interface DocumentVersion {
   id: string | number;
   documentId: Modules.Documents.ID;
-  locale?: string;
+  locale?: string | null;
   localizations?: DocumentVersion[];
   updatedAt?: string | null | Date;
   publishedAt?: string | null | Date;
@@ -54,7 +54,7 @@ const CONTENT_MANAGER_STATUS = {
   PUBLISHED: 'published',
   DRAFT: 'draft',
   MODIFIED: 'modified',
-};
+} as const;
 
 /**
  * Controls the metadata properties to be returned
@@ -74,8 +74,8 @@ export interface GetMetadataOptions {
  * Checks if the provided document version has been modified after all other versions.
  */
 const getIsVersionLatestModification = (
-  version?: DocumentVersion,
-  otherVersion?: DocumentVersion
+  version?: Partial<DocumentVersion>,
+  otherVersion?: Partial<DocumentVersion>
 ): boolean => {
   if (!version || !version.updatedAt) {
     return false;
@@ -104,7 +104,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
    */
   async getAvailableLocales(
     uid: UID.ContentType,
-    version: DocumentVersion,
+    version: Partial<DocumentVersion>,
     allVersions: DocumentVersion[]
   ) {
     // Group all versions by locale
@@ -171,7 +171,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   /**
    * Returns available status of a document for the current locale
    */
-  getAvailableStatus(version: DocumentVersion, allVersions: DocumentVersion[]) {
+  getAvailableStatus(version: Partial<DocumentVersion>, allVersions: DocumentVersion[]) {
     // Find the other status of the document
     const status =
       version.publishedAt !== null
@@ -232,9 +232,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     });
   },
 
-  getStatus(version: DocumentVersion, otherDocumentStatuses?: DocumentMetadata['availableStatus']) {
-    let draftVersion: DocumentVersion | undefined;
-    let publishedVersion: DocumentVersion | undefined;
+  getStatus(version: Partial<DocumentVersion>, otherDocumentStatuses?: Partial<DocumentVersion>[]) {
+    let draftVersion: Partial<DocumentVersion> | undefined;
+    let publishedVersion: Partial<DocumentVersion> | undefined;
 
     if (version.publishedAt) {
       publishedVersion = version;
@@ -265,7 +265,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   // needed. e.g. in the bulk locale action modal.
   async getMetadata(
     uid: UID.ContentType,
-    version: DocumentVersion,
+    version: Pick<DocumentVersion, 'documentId'> & Partial<DocumentVersion>,
     { availableLocales = true, availableStatus = true }: GetMetadataOptions = {}
   ) {
     const model = strapi.getModel(uid);

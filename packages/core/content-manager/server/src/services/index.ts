@@ -1,3 +1,6 @@
+import type { Core } from '@strapi/types';
+import type {} from '../types';
+
 import components from './components';
 import contentStructure from './content-structure';
 import contentTypes from './content-types';
@@ -15,7 +18,13 @@ import customOrder from '../custom-order';
 import documentMetadata from './document-metadata';
 import documentManager from './document-manager';
 
-export default {
+type RegisteredServices = {
+  [TUID in keyof Strapi.Registries.PackageServices as TUID extends `plugin::content-manager.${infer TName}`
+    ? TName
+    : never]: (context: { strapi: Core.Strapi }) => Strapi.Registries.PackageServices[TUID];
+};
+
+const services = {
   components,
   'content-structure': contentStructure,
   'content-types': contentTypes,
@@ -32,4 +41,6 @@ export default {
   ...(preview.services ? preview.services : {}),
   ...(customOrder.services ? customOrder.services : {}),
   ...homepage.services,
-};
+} satisfies RegisteredServices & Record<string, unknown>;
+
+export default services;
