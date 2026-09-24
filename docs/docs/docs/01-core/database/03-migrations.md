@@ -44,12 +44,21 @@ Discovery lists `*.js` and `*.sql` files in the migrations directory (non-recurs
 When a field is renamed in the Content-Type Builder, a migration named `YYYY.MM.DDTHH.mm.ss.SSS.rename-fields.<js|ts>` is written to the app's source `database/migrations` directory (`packages/core/database/src/migrations/file-builder.ts`). The file is written before the schema files. If the save fails after that (schema write or folder commit), the Content-Type Builder deletes the file while rolling the save back, so a rejected save never leaves a migration behind. The prefix is the same shape as the generator's, with milliseconds appended and expressed in **UTC**, so:
 
 - generated files interleave predictably with hand-written ones by timestamp;
-- two saves within the same second do not collide;
+- two saves within the same second do not collide (if the file name is still taken, the timestamp is bumped by one millisecond until it is free, so the names keep sorting in creation order);
 - developers in different time zones produce files that sort in creation order.
 
 Within the same second, a generated file (whose next characters are millisecond digits) sorts before a hand-written file whose name starts with a letter. To interleave your own migration deterministically with a generated one, use the same timestamp prefix and pick a later time.
 
-The generated file only calls the guarded helpers on `db.schema` (`renameColumn`, `renameTable`, `updateRows`, `applyAttributeRenames` — see `packages/core/database/src/schema/rename-helpers.ts`). Each helper checks that the source exists and the target does not before doing anything, so the file is a safe no-op on a fresh database. Skipped steps are logged: at `info` level when the source is missing (expected on a fresh database) and at `warn` level when the target already exists (the environment drifted and the rename was not applied).
+The generated file only calls the guarded helpers on `db.schema` (`renameColumn`, `renameTable`, `updateRows`, `applyAttributeRenames` — see `packages/core/database/src/schema/rename-helpers.ts`). Each helper checks that the source exists and the target does not before doing anything, so the file is a safe no-op on a fresh database. When both exist (the environment drifted), the step is skipped with a warning instead of failing: the migration still records as run, and schema sync then drops the old artifact. Skipped steps are logged: at `info` level when the source is missing (expected on a fresh database) and at `warn` level when the target already exists (the rename was not applied).
+
+Other behaviours worth knowing:
+
+- `renameColumn` and `renameTable` also deal with the indexes and constraints whose names embed the old identifier. On PostgreSQL they are renamed in place (a foreign-key constraint and the index of the same name are two objects there, so both are renamed). On SQLite and MySQL the old-named ones are dropped and schema sync creates them under the new name. Without this, re-using the old name later (for example renaming `a` to `b`, then adding a new `a`) would fail on every boot with an "already exists" error.
+- `updateRows` (component, dynamic zone and media fields, whose name is stored as a value in a link table) first deletes rows in the same scope that already carry the target value. Such rows are orphans left behind when a field with the target name was deleted earlier; merging them would resurrect deleted components or media.
+- MySQL does not run DDL inside transactions. If a generated file fails part-way, the steps before the failure stay applied, and re-running a file with multi-hop chains (for example a swap through a temporary name) is not guaranteed to be idempotent. This is the same as for any hand-written migration on MySQL.
+- With `database.settings.runMigrations: false`, generated files never run, so a renamed field falls back to the old behaviour: schema sync drops the old column or table and creates an empty new one.
+- A rename that cannot be carried (the type, relation or component also changed; polymorphic relations; system attributes such as `documentId` or `locale`) is left out of the file and logged when the schema is saved; schema sync then drops and re-creates that field. `strapi rename:field` refuses to run in that case, and when `renameMigrations.attributes` is `never`, instead of renaming the field without a migration.
+- Renaming a component or moving it to another category is not a rename migration: the component keeps its uid, file and table on a display-name edit.
 
 #### Stores keyed by attribute name
 
