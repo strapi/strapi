@@ -70,6 +70,29 @@ explicitPluginConfig satisfies number;
 defaultConfig satisfies number;
 defaultPluginConfig satisfies number;
 
+// Config defaults preserve legacy contextual inference and explicit result generics.
+const contextualConfig: { port: number } = strapi.config.get('plugin::legacy');
+const contextualPluginConfig: { port: number } = strapi.plugin('legacy').config('enabled');
+contextualConfig.port satisfies number;
+contextualPluginConfig.port satisfies number;
+const explicitDefaultConfig = strapi.config.get<number>('plugin::legacy.enabled', 123);
+const explicitDefaultPluginConfig = strapi.plugin('legacy').config<number>('enabled', 123);
+const explicitUndefinedConfig = strapi.config.get<number>('plugin::legacy.enabled', undefined);
+const explicitUndefinedPluginConfig = strapi.plugin('legacy').config<number>('enabled', undefined);
+const nullableConfig = strapi.config.get<number | null>('plugin::legacy.enabled', null);
+declare const configDefaultChecks: [
+  Expect<Equal<typeof explicitDefaultConfig, number>>,
+  Expect<Equal<typeof explicitDefaultPluginConfig, number>>,
+  Expect<Equal<typeof explicitUndefinedConfig, number>>,
+  Expect<Equal<typeof explicitUndefinedPluginConfig, number>>,
+  Expect<Equal<typeof nullableConfig, number | null>>,
+];
+configDefaultChecks satisfies unknown;
+// @ts-expect-error Explicit result types still constrain defaults with registries disabled.
+strapi.config.get<number>('plugin::legacy.enabled', '123');
+// @ts-expect-error Explicit plugin result types still constrain defaults with registries disabled.
+strapi.plugin('legacy').config<number>('enabled', '123');
+
 type Service = { custom(): string };
 type Controller = { custom: Core.ControllerHandler<string> };
 const service = strapi.plugin('legacy').service<Service>('example');
