@@ -97,7 +97,7 @@ model {
   strapi.server_runtime.application_lifecycle -> strapi.server_runtime.http_server 'starts listening after load'
   strapi.cli_tooling.development_supervisor -> strapi.server_runtime.application_lifecycle 'starts a fresh runtime after reload'
   strapi.server_runtime.upload_service -> strapi.server_runtime.upload_provider 'delegates file operations'
-  strapi.server_runtime.upload_provider -> media_storage 'stores and retrieves files when configured' 'Provider API'
+  strapi.server_runtime.upload_provider -> media_storage 'uploads and deletes files when configured' 'Provider API'
   strapi.server_runtime.email_provider -> email_service 'sends messages' 'Provider API'
   strapi.server_runtime.webhook_delivery -> external_system 'posts subscribed events' 'HTTP(S)'
 

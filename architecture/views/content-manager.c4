@@ -1,14 +1,19 @@
 views {
   view content_manager_components of strapi.server_runtime {
     title '03 Engineering / Content Manager / Editing and permissions'
-    description 'Content Manager controllers coordinate admin permissions, response shaping and document operations. Routine content writes go through the Document Service; targeted count/existence queries also use the database abstraction. Routing and feature module details are in the server code reference.'
+    description '''
+      **Audience:** backend engineers. **Question:** how does Admin editing enforce permissions and persist content?
+      **Scope:** Content Manager server responsibilities, not a call sequence. Controllers coordinate Admin permissions, editing configuration, response shaping and document operations.
+      Routine content writes go through Document Service; targeted count/existence queries also use the database abstraction. Content API roles and tokens are a different access path.
+      Open controllers for the server code map, permissions for access boundaries, document manager for editorial options, or Document Service for its implementation.
+    '''
     include
-      cm_controllers,
+      cm_controllers with { navigateTo content_manager_server_code },
       cm_permission_services with { navigateTo access_boundaries },
       cm_schema_configuration,
       cm_populate_metadata,
       cm_document_manager with { navigateTo editorial_publishing },
-      document_service with { navigateTo content_model },
+      document_service with { navigateTo document_service_code },
       database_layer
     exclude * -> *
     include

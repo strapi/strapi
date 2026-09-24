@@ -1,7 +1,12 @@
 views {
   view admin_app_components of strapi.admin_web_app {
     title '03 Engineering / Admin / Application overview'
-    description 'Browser responsibilities. Core routing selects feature UIs; HTTP requests cross into the server. Open the Admin shell for frontend foundations, the server for feature API boundaries, or a feature for its code map.'
+    description '''
+      **Audience:** engineers. **Question:** how does the Admin organize its browser features?
+      **Scope:** browser responsibilities and their HTTP boundary. Core routing selects feature UIs; HTTP requests cross into the server.
+      Feature cards are modules in one browser application, not separately deployed frontends. Server APIs enforce permissions even when the UI hides unavailable actions.
+      Open the Admin shell for frontend foundations, the server for feature API boundaries, or a feature for its code map.
+    '''
     include
       admin_shell with { navigateTo admin_frontend_foundation },
       admin_router,
@@ -27,19 +32,24 @@ views {
   view admin_frontend_foundation of strapi.admin_web_app {
     title '03 Engineering / Admin / Frontend foundation'
     description '''
-      Frontend foundation inside the Admin web application: providers, routing, state, API services, layouts, pages, and shared components.
+      **Audience:** frontend engineers. **Question:** what supplies routing, context, state and data access to Admin pages?
+      **Scope:** browser composition and dependencies, not a request sequence. React providers supply context and client state; they are unrelated to server upload/email providers.
+      Redux holds shared state and RTK Query cache state. Registering API reducers/middleware connects that cache to the store; it does not itself issue a request.
+      Pages use API services for data. Context providers also include React Query; the Redux store does not represent every browser cache.
+      Open the shell, providers, router or API services for their code references. Shared UI components remain in the feature code maps.
     '''
 
     include
       admin_shell with { navigateTo admin_shell_code },
       admin_providers with { navigateTo admin_providers_code },
-      admin_router,
+      admin_router with { navigateTo admin_router_code },
       admin_store,
-      admin_api_services,
+      admin_api_services with { navigateTo admin_api_services_code },
       admin_feature_providers,
       admin_layouts,
-      admin_pages,
-      admin_shared_components,
+      admin_pages
+    exclude * -> *
+    include
       admin_shell -> admin_providers,
       admin_shell -> admin_router,
       admin_shell -> admin_layouts,
@@ -47,14 +57,18 @@ views {
       admin_providers -> admin_feature_providers,
       admin_store -> admin_api_services,
       admin_router -> admin_pages,
-      admin_pages -> admin_api_services,
-      admin_pages -> admin_shared_components,
-      admin_layouts -> admin_shared_components
+      admin_pages -> admin_api_services
+    autoLayout LeftRight 65 40
   }
 
   view admin_feature_surfaces of strapi.admin_web_app {
     title '03 Engineering / Admin / Feature API boundaries'
-    description 'Each browser feature calls its server API. The plugin UI is bundled during the Admin build; the arrows here show only runtime HTTP calls.'
+    description '''
+      **Audience:** engineers. **Question:** which server API serves each Admin feature?
+      **Scope:** runtime HTTP boundaries. Browser modules call APIs hosted in the same Strapi server; the server cards are not separate services to deploy.
+      The plugin UI is bundled during the Admin build. Content-Type Builder mutation routes require development autoReload.
+      Open a server feature for its implementation; open plugin modules for how extension entrypoints are assembled.
+    '''
     include
       content_manager_ui,
       content_type_builder_ui,
@@ -63,7 +77,7 @@ views {
       strapi.server_runtime.content_manager_server,
       strapi.server_runtime.content_type_builder_server,
       strapi.server_runtime.admin_server_apis,
-      strapi.server_runtime.plugin_modules
+      strapi.server_runtime.plugin_modules with { navigateTo strapi_extensions }
     exclude * -> *
     include
       content_manager_ui -> strapi.server_runtime.content_manager_server with { title 'Content operations' technology 'HTTP(S)' },

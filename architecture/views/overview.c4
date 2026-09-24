@@ -75,10 +75,19 @@ views {
     title '03 Engineering / Server / Request handling'
     description '''
       **Audience:** engineers. **Scope:** major server responsibilities during requests.
+      **Question:** how do Admin and generated Content API requests reach their handlers?
       Content Manager and the generated Content API share document operations. Admin settings have their own APIs.
+      The router dispatches to the matching API family; it does not invoke all branches for one request. Authentication and route policies apply before the handler runs.
+      This responsibility map omits middleware detail and does not represent separate deployed services or a chronological call sequence.
       Open Document Service for persistence detail. Startup, authentication and plugin assembly have separate focused views.
     '''
-    include http_server, auth, admin_server_apis, content_manager_server, core_api_layer, document_service
+    include
+      http_server with { navigateTo content_api_runtime_components },
+      auth with { navigateTo access_boundaries },
+      admin_server_apis with { navigateTo admin_login_flow },
+      content_manager_server with { navigateTo content_manager_components },
+      core_api_layer with { navigateTo generated_core_api_code },
+      document_service with { navigateTo document_service_code }
     exclude * -> *
     include
       http_server -> auth,

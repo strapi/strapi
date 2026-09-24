@@ -2,18 +2,21 @@ views {
   view content_api_runtime_components of strapi.server_runtime {
     title '03 Engineering / Content API / Request-time components'
     description '''
-      The request-time path for Content API traffic, from an incoming HTTP request to a database read.
-      Startup loading and schema synchronization are documented separately.
+      **Audience:** backend engineers. **Question:** which responsibilities serve a generated REST Content API request?
+      **Scope:** request-time dependencies, not an exact execution sequence. The endpoint composer installs authentication, authorization, policies and route middleware before the controller action.
+      Generated controllers validate and sanitize requests and responses; services call Document Service, which uses the database abstraction.
+      These components execute within one server. Custom routes can choose different handlers; GraphQL is outside this generated REST path.
+      Open HTTP server for a request journey, generated APIs or Document Service for code, or the database for persistent application state.
     '''
 
     include
-      http_server,
+      http_server with { navigateTo content_api_request_flow },
       endpoint_composer,
-      auth,
-      core_api_layer,
-      document_service,
+      auth with { navigateTo auth_code },
+      core_api_layer with { navigateTo generated_core_api_code },
+      document_service with { navigateTo document_service_code },
       database_layer,
-      strapi.database,
+      strapi.database with { navigateTo application_state }
     exclude * -> *
     include
       http_server -> endpoint_composer,
