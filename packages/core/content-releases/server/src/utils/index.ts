@@ -33,7 +33,6 @@ export const getDraftEntryValidStatus = async (
   { strapi }: { strapi: Core.Strapi }
 ) => {
   const populateBuilderService = strapi.plugin('content-manager').service('populate-builder');
-  // @ts-expect-error - populateBuilderService should be a function but is returning service
   const populate = await populateBuilderService(contentType).populateDeep(Infinity).build();
 
   const entry = await getEntry({ contentType, documentId, locale, populate }, { strapi });
