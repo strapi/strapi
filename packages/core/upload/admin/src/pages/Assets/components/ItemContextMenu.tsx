@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 
+import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { useAssetSelection } from '../hooks/useAssetSelection';
 
 import { AssetContextMenu } from './AssetContextMenu';
@@ -84,6 +85,10 @@ interface ItemContextMenuProviderProps {
  */
 export const ItemContextMenuProvider = ({ locations, children }: ItemContextMenuProviderProps) => {
   const { isSelected, selectOnly, selectedKeys } = useAssetSelection();
+  // Resolved here, once, and handed to each menu as it opens. Mounted with the
+  // list, so by the time anyone right-clicks the answer is in — a menu that
+  // asked for itself would render empty for a tick.
+  const permissions = useMediaLibraryPermissions();
   const [state, setState] = useState<OpenState | null>(null);
   const nextId = useRef(0);
 
@@ -138,6 +143,7 @@ export const ItemContextMenuProvider = ({ locations, children }: ItemContextMenu
             key={state.id}
             asset={state.payload.asset}
             dragData={state.payload.dragData}
+            permissions={permissions}
             position={state.position}
             onClose={() => close(state.id)}
           />

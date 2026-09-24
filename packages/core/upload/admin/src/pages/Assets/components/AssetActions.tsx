@@ -66,14 +66,32 @@ interface AssetActionsRender {
  * `asset:<id>` key for a file that has been deleted — or has moved out of this
  * list — would linger.
  */
+/** The subset of the RBAC answer these actions are gated on. */
+export interface AssetActionPermissions {
+  isLoading: boolean;
+  canUpdate: boolean;
+  canDownload: boolean;
+  canCopyLink: boolean;
+}
+
 interface AssetActionsProps {
   asset: File;
   dragData: DragFileData;
+  /**
+   * Already-resolved permissions, for a caller that mounts on demand.
+   *
+   * `useRBAC` starts every instance at `isLoading: true` with each flag false,
+   * so a menu mounted by a right-click would render empty for a tick — an open
+   * popup with nothing in it. A caller that has been mounted all along (the
+   * context menu provider) has the answer already and passes it here. Omitted
+   * by the `•••` trigger, which is mounted with its row and has no such gap.
+   */
+  permissions?: AssetActionPermissions;
   /** Receives the items and dialogs to place around whichever trigger it owns. */
   children: (actions: AssetActionsRender) => ReactNode;
 }
 
-export const AssetActions = ({ asset, dragData, children }: AssetActionsProps) => {
+export const AssetActions = ({ asset, dragData, permissions, children }: AssetActionsProps) => {
   const { formatMessage } = useIntl();
   const getErrorMessage = useApiErrorMessage();
   const { copy } = useClipboard();
@@ -82,12 +100,15 @@ export const AssetActions = ({ asset, dragData, children }: AssetActionsProps) =
   // Absent in the asset picker and in unit tests: the replace still runs, it
   // just renders no row-level overlay.
   const markBusy = useBusyAssetsOptional()?.markBusy ?? (() => () => {});
+  // Always called — hooks can't be conditional — but ignored when the caller
+  // supplied an answer it resolved earlier.
+  const ownPermissions = useMediaLibraryPermissions();
   const {
     canUpdate,
     canDownload,
     canCopyLink,
     isLoading: isLoadingPermissions,
-  } = useMediaLibraryPermissions();
+  } = permissions ?? ownPermissions;
   const [replaceAsset, { isLoading: isReplacing }] = useReplaceAssetMutation();
   const aiEnabled = useAIMetadataEnabled({ mime: asset.mime });
 

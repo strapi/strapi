@@ -700,19 +700,15 @@ describe('AssetsPage main-area context menu', () => {
       renderPage();
       await waitForCreatePermission();
 
-      // The row's own actions trigger only appears once RBAC has settled, and
-      // the menu is gated on the same flags — right-clicking before then opens
-      // an empty popup.
-      await screen.findAllByRole('button', { name: 'More actions' });
-
       // eslint-disable-next-line testing-library/no-node-access
       const row = (await screen.findByText('image.png')).closest('[role="row"]');
       fireEvent.contextMenu(row!, { clientX: 40, clientY: 40 });
 
-      // `findBy`: a freshly mounted menu reads the permissions itself, so its
-      // items arrive a tick after the menu does.
+      // `getBy`, deliberately: the provider resolves the permissions and hands
+      // them to the menu, so the items are there the moment the menu is. A
+      // retry here would hide the empty-popup window coming back.
       const menu = within(await screen.findByRole('menu'));
-      expect(await menu.findByRole('menuitem', { name: 'Delete' })).toBeInTheDocument();
+      expect(menu.getByRole('menuitem', { name: 'Delete' })).toBeInTheDocument();
       expect(menu.queryByRole('menuitem', { name: 'New folder' })).not.toBeInTheDocument();
     } finally {
       window.localStorage.removeItem('STRAPI_UPLOAD_LIBRARY_VIEW');
