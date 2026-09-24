@@ -273,12 +273,14 @@ describe('Release Action service', () => {
         plugin: jest.fn().mockReturnValue({
           service: jest.fn().mockReturnValue({
             findConfiguration: jest.fn().mockReturnValue({ settings: { mainField: 'name' } }),
-            find: jest.fn().mockReturnValue([
-              { name: 'English (en)', code: 'en' },
-              { name: 'French (fr)', code: 'fr' },
-            ]),
           }),
         }),
+        localization: {
+          getLocales: jest.fn().mockResolvedValue([
+            { name: 'English (en)', code: 'en' },
+            { name: 'French (fr)', code: 'fr' },
+          ]),
+        },
       };
 
       const mockActions = [
@@ -355,17 +357,15 @@ describe('Release Action service', () => {
     it('should not resolve action locales without a localization plugin', async () => {
       const strapiMock = {
         ...baseStrapiMock,
-        plugin: jest.fn((name: string) => {
-          if (name === 'i18n') {
-            return undefined;
-          }
-
-          return {
-            service: jest.fn().mockReturnValue({
-              findConfiguration: jest.fn().mockReturnValue({ settings: { mainField: 'name' } }),
-            }),
-          };
+        plugin: jest.fn().mockReturnValue({
+          service: jest.fn().mockReturnValue({
+            findConfiguration: jest.fn().mockReturnValue({ settings: { mainField: 'name' } }),
+          }),
         }),
+        // Inert default of `strapi.localization` when no provider is registered
+        localization: {
+          getLocales: jest.fn().mockResolvedValue([]),
+        },
       };
 
       const mockActions = [
