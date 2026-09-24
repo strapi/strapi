@@ -159,7 +159,9 @@ const toAssocs = (data: Assocs) => {
     };
   }
 
-  if (data?.set) {
+  // `set` may legitimately be `null` ("clear all relations"), so test for
+  // `undefined` instead of truthiness (#27432).
+  if (data?.set !== undefined) {
     return {
       set: isNull(data.set) ? data.set : toIdArray(data.set),
     };
