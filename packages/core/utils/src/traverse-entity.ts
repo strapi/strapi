@@ -161,6 +161,12 @@ const traverseEntity = async (
   const keys = Object.keys(copy);
   for (let i = 0; i < keys.length; i += 1) {
     const key = keys[i];
+
+    // Reset the parent for every key: it is reassigned below when recursing into
+    // relational / media / component / dynamic-zone attributes, and must not leak
+    // into the visitor options of subsequent sibling keys (#27474).
+    parent = options.parent;
+
     // Retrieve the attribute definition associated to the key from the schema
     const attribute = schema.attributes[key] as AnyAttribute | undefined;
 

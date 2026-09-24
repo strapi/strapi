@@ -579,6 +579,80 @@ describe('traverse-entity', () => {
     });
   });
 
+  describe('Parent tracking across sibling keys (#27474)', () => {
+    const createSchemas = () => {
+      const quoteSchema = createComponentSchema({
+        title: { type: 'string' },
+        authorImage: { type: 'component', component: 'shared.media' },
+      });
+      const mediaComponentSchema = createComponentSchema({
+        file: { type: 'media', multiple: false },
+      });
+      const schema = createBaseSchema({
+        blocks: { type: 'dynamiczone', components: ['shared.quote'] },
+      });
+
+      mockGetModel.mockImplementation((uid: string) => {
+        if (uid === 'shared.quote') return quoteSchema;
+        if (uid === 'shared.media') return mediaComponentSchema;
+        return createMediaSchema();
+      });
+
+      return schema;
+    };
+
+    test('should not leak a component parent into subsequent sibling keys of a dynamic zone entry', async () => {
+      const schema = createSchemas();
+
+      const parentsByKey: Record<string, any> = {};
+      const parentTrackingVisitor = jest.fn(({ key, parent }: any) => {
+        parentsByKey[key] = parent;
+      });
+
+      // NOTE: key order matters — `authorImage` (a component) precedes `__component`.
+      const entity = {
+        blocks: [
+          {
+            authorImage: { file: { id: 1 } },
+            __component: 'shared.quote',
+            title: 'Hello',
+          },
+        ],
+      };
+
+      await traverseEntity(parentTrackingVisitor, { schema, getModel: mockGetModel }, entity);
+
+      // `__component` and `title` must be visited with the dynamic zone attribute
+      // as their parent, not the component attribute of the previously visited sibling.
+      expect(parentsByKey['__component']?.attribute?.type).toBe('dynamiczone');
+      expect(parentsByKey['title']?.attribute?.type).toBe('dynamiczone');
+    });
+
+    test('throwUnrecognizedFields should accept __component preceded by a component key', async () => {
+      const { default: throwUnrecognizedFields } = await import(
+        '../validate/visitors/throw-unrecognized-fields'
+      );
+
+      const schema = createSchemas();
+
+      // Mirrors the content API PUT body from the issue: a dynamic zone entry whose
+      // `__component` key comes after a nested component key.
+      const entity = {
+        blocks: [
+          {
+            authorImage: { file: { id: 1 } },
+            __component: 'shared.quote',
+            title: 'Hello',
+          },
+        ],
+      };
+
+      await expect(
+        traverseEntity(throwUnrecognizedFields, { schema, getModel: mockGetModel }, entity)
+      ).resolves.not.toThrow();
+    });
+  });
+
   describe('Array handling and index tracking', () => {
     test('should track array indices in rawWithIndices path', async () => {
       const relatedSchema = createBaseSchema({
