@@ -1,4 +1,4 @@
-import { getDeepPopulate } from '../populate';
+import { getDeepPopulate, getDeepPopulateDraftCount } from '../populate';
 
 describe('Populate', () => {
   const fakeModels = {
@@ -240,6 +240,65 @@ describe('Populate', () => {
         expect(result).toEqual({
           relationAttrName: { fields: ['id', 'name'] },
         });
+      });
+    });
+  });
+
+  describe('getDeepPopulateDraftCount', () => {
+    const draftCountModels = {
+      'api::article.article': {
+        uid: 'api::article.article',
+        attributes: {
+          category: {
+            type: 'relation',
+            relation: 'manyToOne',
+            target: 'api::category.category',
+          },
+          author: {
+            type: 'relation',
+            relation: 'manyToOne',
+            target: 'api::author.author',
+          },
+        },
+      },
+      'api::category.category': {
+        uid: 'api::category.category',
+        pluginOptions: { i18n: { localized: true } },
+        options: { draftAndPublish: true },
+        attributes: {},
+      },
+      'api::author.author': {
+        uid: 'api::author.author',
+        options: { draftAndPublish: true },
+        attributes: {},
+      },
+    } as any;
+
+    beforeEach(() => {
+      global.strapi = {
+        getModel: jest.fn((uid) => draftCountModels[uid]),
+      } as any;
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    test('selects locale only for relations targeting localized content types', () => {
+      const result = getDeepPopulateDraftCount('api::article.article' as any);
+
+      expect(result).toEqual({
+        hasRelations: true,
+        populate: {
+          category: {
+            fields: ['documentId', 'locale'],
+            filters: { publishedAt: { $null: true } },
+          },
+          author: {
+            fields: ['documentId'],
+            filters: { publishedAt: { $null: true } },
+          },
+        },
       });
     });
   });
