@@ -1,3 +1,5 @@
+import type { Schema } from '@strapi/types';
+
 import localizationsService from '../localizations';
 import localesService from '../locales';
 import contentTypesService from '../content-types';
@@ -6,8 +8,13 @@ const { syncNonLocalizedAttributes } = localizationsService();
 const locales = localesService();
 const contentTypes = contentTypesService();
 
-const model = {
-  uid: 'test-model',
+const model: Schema.ContentType = {
+  modelType: 'contentType',
+  uid: 'api::test-model.test-model',
+  kind: 'collectionType',
+  modelName: 'test-model',
+  globalId: 'TestModel',
+  info: { displayName: 'Test model', singularName: 'test-model', pluralName: 'test-models' },
   pluginOptions: {
     i18n: {
       localized: true,
@@ -28,8 +35,13 @@ const model = {
   },
 };
 
-const allLocalizedModel = {
-  uid: 'test-model',
+const allLocalizedModel: Schema.ContentType = {
+  modelType: 'contentType',
+  uid: 'api::test-model.test-model',
+  kind: 'collectionType',
+  modelName: 'test-model',
+  globalId: 'TestModel',
+  info: { displayName: 'Test model', singularName: 'test-model', pluralName: 'test-models' },
   pluginOptions: {
     i18n: {
       localized: true,

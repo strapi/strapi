@@ -9,6 +9,10 @@ import type * as Schema from '../schema';
 import type * as UID from '../uid';
 
 import type { Container } from './container';
+import type { ControllerFor } from './controller';
+import type { ServiceFor } from './service';
+import type { SuggestedString } from '../utils/string';
+import type { IsStrict } from './strictness';
 
 export interface Strapi extends Container {
   server: Modules.Server.Server;
@@ -69,9 +73,9 @@ export interface Strapi extends Container {
   reload: Reloader;
   config: ConfigProvider;
   services: Record<string, Core.Service>;
-  service(uid: UID.Service): Core.Service;
+  service<TUID extends UID.Service>(uid: TUID): ServiceFor<TUID>;
   controllers: Record<string, Core.Controller>;
-  controller(uid: UID.Controller): Core.Controller;
+  controller<TUID extends UID.Controller>(uid: TUID): ControllerFor<TUID>;
   contentTypes: Schema.ContentTypes;
   contentType<TContentTypeUID extends UID.ContentType>(
     name: TContentTypeUID
@@ -81,7 +85,7 @@ export interface Strapi extends Container {
   middlewares: Record<string, Core.MiddlewareFactory>;
   middleware(name: string): Core.MiddlewareFactory;
   plugins: Record<string, Core.Plugin>;
-  plugin(name: string): Core.Plugin;
+  plugin<TName extends string>(name: TName): Core.Plugin<TName>;
   hooks: Record<string, any>;
   hook(name: string): any;
   apis: Record<string, Core.Module>;
@@ -142,8 +146,86 @@ export interface StrapiFS {
   appendFile(optPath: string | string[], data: string): void;
 }
 
+/** Config namespaces that have a registered contract, e.g. `'plugin::my-plugin'`. */
+export type ConfigNamespace =
+  | keyof Strapi.Registries.AppConfigs
+  | keyof Strapi.Registries.PackageConfigs;
+
+/** Resolves application overrides before package defaults. */
+export type ConfigFor<TNamespace extends ConfigNamespace> =
+  TNamespace extends keyof Strapi.Registries.AppConfigs
+    ? Strapi.Registries.AppConfigs[TNamespace]
+    : TNamespace extends keyof Strapi.Registries.PackageConfigs
+      ? Strapi.Registries.PackageConfigs[TNamespace]
+      : never;
+
+/** `undefined` when `TValue` can be `null` or `undefined`: lodash `get` resolves through them to `undefined`. */
+type Nullish<TValue> = [Extract<TValue, null | undefined>] extends [never] ? never : undefined;
+
+/**
+ * The value at one path segment of `TValue`, or `never` when the segment does not exist.
+ * A numeric segment into an array resolves to the element or `undefined`, since the element may be absent.
+ */
+type SegmentValue<TValue, TSegment extends string> = TSegment extends keyof TValue
+  ? TValue[TSegment]
+  : TValue extends readonly (infer TElement)[]
+    ? TSegment extends `${number}`
+      ? TElement | undefined
+      : never
+    : never;
+
+/** The value at a dotted path such as `'a.b'` or `'items.0.port'` inside `TValue`, or `never` when the path does not exist. */
+type PathValue<TValue, TPath extends string> = TPath extends `${infer THead}.${infer TRest}`
+  ? [SegmentValue<NonNullable<TValue>, THead>] extends [never]
+    ? never
+    : PathValue<SegmentValue<NonNullable<TValue>, THead> | Nullish<TValue>, TRest>
+  : [SegmentValue<NonNullable<TValue>, TPath>] extends [never]
+    ? never
+    : SegmentValue<NonNullable<TValue>, TPath> | Nullish<TValue>;
+
+/**
+ * The value at a dotted path inside a registered config contract, e.g. `'providerOptions.localServer'`.
+ * Resolves to `TFallback` when the path is not part of the contract.
+ */
+export type ConfigPathValue<TNamespace extends ConfigNamespace, TPath extends string, TFallback> = [
+  PathValue<ConfigFor<TNamespace>, TPath>,
+] extends [never]
+  ? TFallback
+  : PathValue<ConfigFor<TNamespace>, TPath>;
+
+/** Any config path. Registered namespaces are listed for completion. */
+export type ConfigPath = SuggestedString<ConfigNamespace> | Exclude<PropertyPath, string>;
+
+/**
+ * Resolves a config path against the registries: a registered namespace, or a dotted path inside one.
+ * Array paths, unregistered namespaces, unknown paths and the unresolved default path resolve to `T`.
+ */
+type ConfigLookup<TPath, T> = IsStrict extends false
+  ? T
+  : [ConfigNamespace] extends [never]
+    ? T
+    : ConfigPath extends TPath
+      ? T
+      : TPath extends ConfigNamespace
+        ? ConfigFor<TPath>
+        : TPath extends `${infer TNamespace}.${infer TKey}`
+          ? TNamespace extends ConfigNamespace
+            ? ConfigPathValue<TNamespace, TKey, T>
+            : T
+          : T;
+
 export interface ConfigProvider {
-  get<T = unknown>(key: PropertyPath, defaultVal?: T): T;
+  /**
+   * Reads a config value. A registered namespace, or a dotted path inside one, resolves to its contract.
+   *
+   * A default value does not remove `undefined` from a registered result, although it replaces an
+   * `undefined` value at runtime.
+   */
+  // TODO @Nico default-aware results need a third type parameter that keeps `get<T>(key, default)` calls working
+  get<T = unknown, TPath extends ConfigPath = ConfigPath>(
+    key: TPath,
+    defaultVal?: ConfigLookup<TPath, T>
+  ): ConfigLookup<TPath, T>;
   set(path: string, val: unknown): this;
   has(path: string): boolean;
   [key: string]: any;
