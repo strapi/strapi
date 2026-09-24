@@ -31,29 +31,13 @@ const createStrapi = ({
   localization?: LocalizationFixture;
 }) => {
   const registerTool = jest.fn();
-  const services: Record<string, unknown> =
-    localization === undefined
-      ? {}
-      : {
-          locales: {
-            getDefaultLocale: jest.fn(async () => localization.defaultLocale),
-            find: jest.fn(async () =>
-              localization.locales.map((locale, index) => ({
-                id: index + 1,
-                ...locale,
-                isDefault: locale.code === localization.defaultLocale,
-              }))
-            ),
-          },
-        };
-
   const strapi = {
     ai: { mcp: { isEnabled: jest.fn(() => mcpEnabled), registerTool } },
-    plugin: jest.fn((name: string) =>
-      name === 'i18n' && localization !== undefined
-        ? { service: (serviceName: string) => services[serviceName] }
-        : undefined
-    ),
+    localization: {
+      isEnabled: jest.fn(() => localization !== undefined),
+      getDefaultLocale: jest.fn(async () => localization?.defaultLocale ?? null),
+      getLocales: jest.fn(async () => localization?.locales ?? []),
+    },
   } as unknown as Core.Strapi;
 
   return { strapi, registerTool };
