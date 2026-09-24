@@ -1,3 +1,4 @@
+import { within } from '@testing-library/react';
 import { act, fireEvent, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -715,6 +716,7 @@ describe('AssetsPage main-area context menu', () => {
     await waitForCreatePermission();
 
     // The hidden input the header "New > File upload" also clicks.
+    // eslint-disable-next-line testing-library/no-node-access
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
     const click = jest.spyOn(fileInput, 'click').mockImplementation(() => {});
 
@@ -731,6 +733,7 @@ describe('AssetsPage main-area context menu', () => {
     renderPage();
     await waitForCreatePermission();
 
+    // eslint-disable-next-line testing-library/no-node-access
     const card = (await screen.findByText('image.png')).closest('[data-native-context-menu]');
     fireEvent.contextMenu(card!, { clientX: 20, clientY: 20 });
 
@@ -738,6 +741,31 @@ describe('AssetsPage main-area context menu', () => {
     // gesture stays background-only.
     expect(await screen.findByRole('menuitem', { name: 'Delete' })).toBeInTheDocument();
     expect(screen.queryByRole('menuitem', { name: 'New folder' })).not.toBeInTheDocument();
+  });
+
+  it('offers the selection actions when the clicked card is part of one', async () => {
+    respondWithAssets([createAsset(1, 'image.png'), createAsset(2, 'photo.png')]);
+
+    const { user } = renderPage();
+    await waitForCreatePermission();
+
+    await user.click(await screen.findByRole('checkbox', { name: 'Select image.png' }));
+    await user.click(await screen.findByRole('checkbox', { name: 'Select photo.png' }));
+
+    // eslint-disable-next-line testing-library/no-node-access
+    const card = (await screen.findByText('image.png')).closest('[data-native-context-menu]');
+    fireEvent.contextMenu(card!, { clientX: 20, clientY: 20 });
+
+    // Scoped to the menu: the bulk actions bar shows the same count, which is
+    // the point — one wording for "what is selected", wherever it is stated.
+    const menu = within(await screen.findByRole('menu'));
+
+    // The count leads, and only the actions that mean something for a set.
+    expect(menu.getByText('2 items selected')).toBeInTheDocument();
+    expect(menu.getByRole('menuitem', { name: 'Move' })).toBeInTheDocument();
+    expect(menu.getByRole('menuitem', { name: 'Delete' })).toBeInTheDocument();
+    // Single-item actions have no meaning for a selection.
+    expect(menu.queryByRole('menuitem', { name: 'Replace media' })).not.toBeInTheDocument();
   });
 
   it('stays shut without assets.create', async () => {
