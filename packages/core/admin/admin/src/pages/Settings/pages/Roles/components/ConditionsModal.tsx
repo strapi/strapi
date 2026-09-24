@@ -11,7 +11,6 @@ import {
   Breadcrumbs,
   Crumb,
 } from '@strapi/design-system';
-import { produce } from 'immer';
 import get from 'lodash/get';
 import groupBy from 'lodash/groupBy';
 import upperFirst from 'lodash/upperFirst';
@@ -22,6 +21,12 @@ import {
   PermissionsDataManagerContextValue,
   usePermissionsDataManager,
 } from '../hooks/usePermissionsDataManager';
+import {
+  applyConditionsFormChange,
+  getNewStateFromChangedValues,
+  getSelectedValues,
+  mergeConditionsForm,
+} from '../utils/conditions-form';
 
 import type { HiddenCheckboxAction, VisibleCheckboxAction } from './ContentTypeCollapses';
 import type { ConditionForm } from '../utils/forms';
@@ -89,21 +94,14 @@ const ConditionsModal = ({
         return;
       }
 
-      setState(
-        produce((draft) => {
-          if (draft[name] === undefined) {
-            draft[name] = {};
-          }
-
-          if (draft[name].default === undefined) {
-            draft[name].default = {};
-          }
-
-          draft[name].default = values;
-        })
+      // Distribute the flat change map into its category buckets so a condition
+      // in a custom category is persisted instead of being clobbered by its
+      // stale bucket on submit (#27461).
+      setState((prevState) =>
+        applyConditionsFormChange(prevState, name, values, arrayOfOptionsGroupedByCategory)
       );
     },
-    [isReadOnly]
+    [isReadOnly, arrayOfOptionsGroupedByCategory]
   );
 
   const handleSubmit = React.useCallback(() => {
@@ -112,22 +110,7 @@ const ConditionsModal = ({
       return;
     }
 
-    const conditionsWithoutCategory = Object.entries(state).reduce<Record<string, ConditionForm>>(
-      (acc, current) => {
-        const [key, value] = current;
-
-        const merged = Object.values(value).reduce((acc1, current1) => {
-          return { ...acc1, ...current1 };
-        }, {});
-
-        acc[key] = merged;
-
-        return acc;
-      },
-      {}
-    );
-
-    onChangeConditions(conditionsWithoutCategory);
+    onChangeConditions(mergeConditionsForm(state));
     onClose?.();
   }, [isReadOnly, state, onChangeConditions, onClose]);
 
@@ -372,15 +355,6 @@ const ActionRow = ({
   );
 };
 
-const getSelectedValues = (rawValue: Record<string, ConditionForm>): string[] =>
-  Object.values(rawValue)
-    .map((x) =>
-      Object.entries(x)
-        .filter(([, value]) => value)
-        .map(([key]) => key)
-    )
-    .flat();
-
 const getNestedOptions = (options: ActionRowProps['arrayOfOptionsGroupedByCategory']) =>
   options.reduce<MultiSelectNestedProps['options']>((acc, [label, children]) => {
     acc.push({
@@ -393,18 +367,6 @@ const getNestedOptions = (options: ActionRowProps['arrayOfOptionsGroupedByCatego
 
     return acc;
   }, []);
-
-const getNewStateFromChangedValues = (
-  options: ActionRowProps['arrayOfOptionsGroupedByCategory'],
-  changedValues: string[]
-) =>
-  options
-    .map(([, values]) => values)
-    .flat()
-    .reduce<Record<string, boolean>>(
-      (acc, curr) => ({ [curr.id]: changedValues.includes(curr.id), ...acc }),
-      {}
-    );
 
 export { ConditionsModal };
 export type { ConditionsModalProps };
