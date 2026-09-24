@@ -60,17 +60,7 @@ async function main() {
         core.setFailed(
           'Community PRs must target `develop`, not `main`. Please edit the PR and change the base branch to `develop`.'
         );
-
-        return;
       }
-    }
-
-    const milestone = github.context.payload.pull_request?.milestone;
-    const requiresMilestone = baseRef === 'develop';
-    const isMissingMilestone = milestone === null || milestone === undefined;
-
-    if (requiresMilestone === true && isMissingMilestone === true) {
-      core.setFailed(`The PR must have a milestone.`);
     }
   } catch (error) {
     core.setFailed(error.message);
