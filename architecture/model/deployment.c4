@@ -1,34 +1,58 @@
 deployment {
   environment self_hosted {
-    title 'Example: single-host production'
+    title 'Example: self-hosted production'
     device browser {
       title 'Editor’s browser'
       admin = instanceOf strapi.admin_web_app
     }
-    host machine {
-      title 'Self-hosted application machine'
-      server = instanceOf strapi.server_runtime
-      database = instanceOf strapi.database {
-        title 'Application database (SQLite)'
-      }
-      media = instanceOf strapi.local_media
+    host ingress {
+      title 'HTTPS ingress'
+      description 'Reverse proxy or hosting ingress terminates TLS and forwards Admin and Content API requests to Strapi.'
+      technology 'Reverse proxy / TLS'
     }
+    host machine {
+      title 'Application host / container'
+      description 'One supervised Strapi process, built Admin assets and the configured AWS S3 upload provider. Application code and assets are replaced on deployment; durable data lives outside this host.'
+      server = instanceOf strapi.server_runtime
+    }
+    host database_host {
+      title 'PostgreSQL service'
+      description 'Separate persistent database storing content, identities, settings and media metadata. Database access is restricted to authorized application connections.'
+      technology 'PostgreSQL'
+      database = instanceOf strapi.database
+    }
+    host object_storage {
+      title 'Amazon S3 bucket'
+      description 'Durable uploaded files and generated image formats. Access policy and delivery URLs are configured for the application; replacing the Strapi host does not replace these objects.'
+      technology 'Amazon S3'
+      media = instanceOf media_storage
+    }
+
+    browser.admin -> ingress 'Calls Admin APIs' 'HTTPS' { #deployment_path }
+    ingress -> machine.server 'Forwards requests' 'HTTP / private network' { #deployment_path }
+    machine.server -> database_host.database 'Data and media metadata' 'SQL / TLS' { #deployment_path }
+    machine.server -> object_storage.media 'Files via S3 upload provider' 'HTTPS' { #deployment_path }
   }
 }
 
 views {
   deployment view self_hosted_deployment {
-    title '04 Deployment / Single-host example'
+    title '04 Deployment / Production hosting example'
     description '''
-      **Example configuration:** one production Node.js server, a persistent SQLite database, and the local upload provider.
-      The Admin JavaScript runs in the editor’s browser, even when served by the same server.
-      Retain the database and media across application replacement. Reverse proxies, TLS termination and backups are omitted.
-      PostgreSQL/MySQL and remote media providers are alternatives; this diagram makes no claim about a multi-replica topology.
-      Content-Type Builder changes happen in development and are delivered through deployment, not this production runtime.
+      **Question:** what hosts a production Strapi application, and what survives a redeploy?
+      **Example choices:** HTTPS ingress, one supervised Node.js process, a separate PostgreSQL service and Amazon S3 storage.
+      The AWS S3 upload provider runs inside Strapi; it is not a separately deployed service. Media metadata lives in PostgreSQL, while file bytes live in S3.
+      Built Admin assets are served through the ingress and execute in the editor’s browser. Content API clients use the same ingress; clients and media delivery paths are omitted for readability.
+      Database and uploaded objects survive replacement of application code and built assets. Secrets and environment configuration are supplied by the hosting environment.
+      This is an illustrative topology, not a complete operations design: backups and restore, monitoring, network policies and high availability require their own design.
+      Content-Type Builder changes happen in development and are delivered as application code. No multi-replica behavior is implied.
     '''
     include self_hosted.**
     exclude * -> *
-    include * -> * where tag is #runtime_boundary
-    autoLayout LeftRight 70 40
+    include
+      self_hosted.browser.admin -> self_hosted.ingress,
+      self_hosted.ingress -> self_hosted.machine.server
+    include * -> * where tag is #deployment_path
+    autoLayout LeftRight 60 35
   }
 }

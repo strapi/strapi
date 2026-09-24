@@ -6,14 +6,14 @@ answers one question; select an element or relationship to explore further.
 
 ## Reading paths
 
-| Start with                                             | Question                                       | Continue to                                |
-| ------------------------------------------------------ | ---------------------------------------------- | ------------------------------------------ |
-| `index` — Strapi in context                            | Who uses the CMS, and what connects to it?     | Runtime architecture                       |
-| `strapi_capabilities` — Product capabilities           | What can teams accomplish?                     | A capability's journey or engineering view |
-| `strapi_containers` — Runtime architecture             | What runs, and how does it communicate?        | Admin, server, or deployment               |
-| `content_publishing_flow` — Draft to published content | How does an editor make content available?     | Content API request journey                |
-| `strapi_extensions` — Plugin entrypoints               | How do plugins contribute to the application?  | Assembly, provider and code views          |
-| `self_hosted_deployment` — Single-host example         | Where do the runtime and persistent data live? | Runtime architecture                       |
+| Start with                                             | Question                                             | Continue to                                |
+| ------------------------------------------------------ | ---------------------------------------------------- | ------------------------------------------ |
+| `index` — Strapi in context                            | Who uses the CMS, and what connects to it?           | Runtime architecture                       |
+| `strapi_capabilities` — Product capabilities           | What can teams accomplish?                           | A capability's journey or engineering view |
+| `strapi_containers` — Runtime architecture             | What runs, and how does it communicate?              | Admin, server, or deployment               |
+| `content_publishing_flow` — Draft to published content | How does an editor make content available?           | Content API request journey                |
+| `strapi_extensions` — Plugin entrypoints               | How do plugins contribute to the application?        | Assembly, provider and code views          |
+| `self_hosted_deployment` — Production hosting example  | What hosts production, and what survives a redeploy? | Runtime architecture                       |
 
 The view browser groups diagrams into **01 Start here**, **02 Journeys**, **03 Engineering**,
 **04 Deployment**, and **05 Code reference**. The landing page is intentionally smaller than the
@@ -58,9 +58,16 @@ Content History and SSO depend on their license features as well as relevant con
 uses an application-defined frontend URL handler. A diagram showing these capabilities does not mean
 that every application enables them, or that every publishing action goes through a release.
 
-The deployment example deliberately chooses **one server, SQLite, and local media storage**.
-PostgreSQL/MySQL and remote upload providers are alternatives, not additional mandatory nodes.
-It does not describe every hosting topology or prescribe production infrastructure.
+The deployment example chooses **HTTPS ingress, one Strapi process, a separate PostgreSQL service,
+and Amazon S3 media storage**. The upload provider runs inside Strapi; file bytes and database-backed
+media metadata persist independently of application replacement. This illustrates production hosting
+boundaries, not a complete operations design or a mandatory hosting stack. Backups, restore,
+monitoring, network policies and high availability are outside this view. The application-state map
+separately illustrates the local-provider alternative.
+
+See the [Strapi deployment guide](https://docs.strapi.io/cms/deployment) and
+[media provider configuration](https://docs.strapi.io/cms/configurations/media-library-providers)
+for setup details.
 
 Journeys state their assumptions. Publishing assumes Draft & Publish is enabled. Public content
 requests assume Users & Permissions is enabled and the public role allows the action. Schema

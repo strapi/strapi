@@ -93,6 +93,7 @@ specification {
   }
 
   tag runtime_boundary
+  tag deployment_path
 
   relationship reads
   relationship writes
