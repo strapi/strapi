@@ -1,5 +1,6 @@
 specification {
   element person {
+    notation 'Person'
     style {
       shape person
       color slate
@@ -61,6 +62,29 @@ specification {
       color amber
     }
   }
+
+  element capability {
+    notation 'Product capability (not a runtime unit)'
+    style {
+      shape rectangle
+      color secondary
+    }
+  }
+
+  deploymentNode environment {
+    notation 'Example environment'
+    style { color slate }
+  }
+  deploymentNode device {
+    notation 'Browser device'
+    style { color slate }
+  }
+  deploymentNode host {
+    notation 'Self-hosted infrastructure'
+    style { color slate }
+  }
+
+  tag runtime_boundary
 
   relationship reads
   relationship writes

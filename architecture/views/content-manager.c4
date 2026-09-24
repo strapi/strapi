@@ -1,40 +1,29 @@
 views {
   view content_manager_components of strapi.server_runtime {
-    title 'Content Manager - Components'
-    description '''
-      Focused component view for the Content Manager capability: routes and controllers coordinate permission checks, schema/configuration services, populate metadata, and document operations.
-    '''
-
+    title '03 Engineering / Content Manager / Editing and permissions'
+    description 'Content Manager controllers coordinate admin permissions, response shaping and document operations. Routine content writes go through the Document Service; targeted count/existence queries also use the database abstraction. Routing and feature module details are in the server code reference.'
     include
-      content_manager_server,
-      cm_routes,
-      cm_routing_middleware,
       cm_controllers,
       cm_permission_services,
       cm_schema_configuration,
       cm_populate_metadata,
-      cm_history_preview_homepage,
       cm_document_manager,
       document_service,
-      database_layer,
-      strapi.database,
-      content_manager_server -> cm_routes,
-      cm_routes -> cm_routing_middleware,
-      cm_routes -> cm_controllers,
-      cm_routes -> cm_history_preview_homepage,
-      cm_controllers -> cm_permission_services,
-      cm_controllers -> cm_schema_configuration,
-      cm_controllers -> cm_populate_metadata,
-      cm_controllers -> cm_document_manager,
-      cm_history_preview_homepage -> cm_document_manager,
-      cm_document_manager -> document_service,
-      cm_document_manager -> database_layer,
-      document_service -> database_layer,
-      database_layer -> strapi.database
+      database_layer
+    exclude * -> *
+    include
+      cm_controllers -> cm_permission_services with { title 'Checks admin permissions' },
+      cm_controllers -> cm_schema_configuration with { title 'Loads editing configuration' },
+      cm_controllers -> cm_populate_metadata with { title 'Shapes the response' },
+      cm_controllers -> cm_document_manager with { title 'Runs document operations' },
+      cm_document_manager -> document_service with { title 'Calls strapi.documents' },
+      cm_document_manager -> database_layer with { title 'Runs targeted count / existence queries' },
+      document_service -> database_layer with { title 'Persists document entries' }
+    autoLayout LeftRight 70 40
   }
 
   view content_manager_server_code of strapi.server_runtime.content_manager_server {
-    title 'Content Manager Server - Code Organization'
+    title '05 Code reference / Content Manager / Server'
     description '''
       Code-level organization of the Content Manager server package: routes, middlewares, controllers, services, and feature modules.
     '''

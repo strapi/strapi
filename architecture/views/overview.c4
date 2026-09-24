@@ -1,89 +1,86 @@
 views {
   view index {
-    title 'Strapi CMS - System Context'
+    title '01 Start here / Strapi in context'
     description '''
-      Product-level view for the current architecture scope: Strapi lets teams model content, manage entries, configure administration, and expose Content APIs consumed by applications and integrations.
+      **Audience:** everyone. **Scope:** a typical application built with Strapi.
+      Teams model and manage content in their own CMS; websites and apps request it through APIs.
+      Webhooks are optional outbound integrations. Open Strapi to see its runtime architecture.
     '''
-
     include
       content_editor,
       developer,
       administrator,
       public_client,
-      external_system,
-      strapi,
-      content_editor -> strapi,
-      developer -> strapi,
-      administrator -> strapi,
-      public_client -> strapi,
-      external_system -> strapi
+      strapi with { navigateTo strapi_containers },
+      external_system
+    exclude * -> *
+    include
+      content_editor -> strapi with { title 'Edits and publishes content' },
+      developer -> strapi with { title 'Builds and customizes the CMS' },
+      administrator -> strapi with { title 'Manages access and settings' },
+      public_client -> strapi with { title 'Requests content' navigateTo content_api_request_flow },
+      strapi -> external_system with { title 'Sends optional webhook events' }
+    autoLayout LeftRight 70 40
+  }
+
+  view strapi_capabilities {
+    title '01 Start here / Product capabilities'
+    description '''
+      **Audience:** product and engineering. **Type:** capability map, not a C4 container diagram.
+      Arrows describe how capabilities support one another, not function calls or deployment units.
+      Open a capability to explore its implementation or a representative journey.
+    '''
+    include
+      model_content with { navigateTo content_type_builder_schema_change_flow },
+      manage_content with { navigateTo content_manager_components },
+      publish_content with { navigateTo content_publishing_flow },
+      deliver_content with { navigateTo content_api_request_flow },
+      govern_access with { navigateTo settings_api_tokens_ui_code },
+      extend_strapi with { navigateTo strapi_extensions }
+    autoLayout LeftRight 70 40
   }
 
   view strapi_containers of strapi {
-    title 'Strapi CMS - Containers'
+    title '01 Start here / Runtime architecture'
     description '''
-      Simple C4 container view. Containers are named by capability/runtime responsibility, not by package name. Package names appear as implementation technology on components.
+      **Audience:** everyone. **Type:** C4 container view of a typical Strapi application.
+      The Admin executes in a browser and the server in Node.js, even when one server distributes both.
+      The consuming application is outside the CMS. This baseline omits optional providers and development tooling.
+      Open the Admin or server to go deeper; open the database for a self-hosted deployment example.
     '''
-
     include
-      admin_web_app,
-      cli_tooling,
-      application_source,
-      server_runtime,
-      database,
-      admin_web_app -> server_runtime,
-      cli_tooling -> application_source,
-      application_source -> server_runtime,
-      server_runtime -> database
+      strapi,
+      content_editor,
+      public_client,
+      admin_web_app with { navigateTo admin_app_components },
+      server_runtime with { navigateTo strapi_container_internals },
+      database with { navigateTo self_hosted_deployment }
+    exclude * -> *
+    include
+      content_editor -> admin_web_app with { title 'Edits and publishes content' },
+      public_client -> server_runtime with { title 'Requests content' technology 'HTTP(S) / JSON' navigateTo content_api_request_flow },
+      admin_web_app -> server_runtime with { title 'Calls Admin APIs' technology 'HTTP(S) / JSON' navigateTo content_publishing_flow },
+      server_runtime -> database with { title 'Reads and writes application data' technology 'SQL' }
+    autoLayout LeftRight 70 40
   }
 
-  view strapi_container_internals of strapi {
-    title 'Strapi CMS - Container Internals'
+  // Keep the existing ID for saved links; show one runtime rather than every container's internals.
+  view strapi_container_internals of strapi.server_runtime {
+    title '03 Engineering / Server / Request handling'
     description '''
-      First level below the container view. Each container exposes its main internal component groups; feature files provide deeper focused views.
+      **Audience:** engineers. **Scope:** major server responsibilities during requests.
+      Content Manager and the generated Content API share document operations. Admin settings have their own APIs.
+      Open Document Service for persistence detail. Startup, authentication and plugin assembly have separate focused views.
     '''
-
+    include http_server, auth, admin_server_apis, content_manager_server, core_api_layer, document_service
+    exclude * -> *
     include
-      admin_web_app,
-      admin_web_app.admin_shell,
-      admin_web_app.admin_router,
-      admin_web_app.admin_providers,
-      admin_web_app.content_manager_ui,
-      admin_web_app.content_type_builder_ui,
-      admin_web_app.settings_api_tokens_ui,
-      server_runtime,
-      server_runtime.http_server,
-      server_runtime.route_registration,
-      server_runtime.endpoint_composer,
-      server_runtime.schema_loader,
-      server_runtime.content_api,
-      server_runtime.core_api_layer,
-      server_runtime.document_service,
-      server_runtime.database_layer,
-      cli_tooling,
-      cli_tooling.generators,
-      cli_tooling.create_strapi_app,
-      application_source,
-      application_source.content_type_schema_files,
-      application_source.api_module_files,
-      database,
-      admin_web_app.admin_shell -> admin_web_app.admin_router,
-      admin_web_app.admin_shell -> admin_web_app.admin_providers,
-      admin_web_app.admin_router -> admin_web_app.content_manager_ui,
-      admin_web_app.admin_router -> admin_web_app.content_type_builder_ui,
-      admin_web_app.admin_router -> admin_web_app.settings_api_tokens_ui,
-      admin_web_app.content_manager_ui -> server_runtime.content_manager_server,
-      admin_web_app.content_type_builder_ui -> server_runtime.content_type_builder_server,
-      admin_web_app.settings_api_tokens_ui -> server_runtime.admin_server_apis,
-      cli_tooling.generators -> application_source.content_type_schema_files,
-      cli_tooling.generators -> application_source.api_module_files,
-      server_runtime.schema_loader -> application_source.content_type_schema_files,
-      server_runtime.http_server -> server_runtime.route_registration,
-      server_runtime.route_registration -> server_runtime.endpoint_composer,
-      server_runtime.endpoint_composer -> server_runtime.core_api_layer,
-      server_runtime.core_api_layer -> server_runtime.content_api,
-      server_runtime.core_api_layer -> server_runtime.document_service,
-      server_runtime.document_service -> server_runtime.database_layer,
-      server_runtime.database_layer -> database
+      http_server -> auth,
+      http_server -> admin_server_apis,
+      http_server -> content_manager_server,
+      http_server -> core_api_layer,
+      content_manager_server -> document_service with { title 'Edits and publishes documents' },
+      core_api_layer -> document_service with { title 'Runs content operations' }
+    autoLayout LeftRight 70 40
   }
 }

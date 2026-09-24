@@ -1,55 +1,31 @@
 views {
   view admin_app_components of strapi.admin_web_app {
-    title 'Admin Web Application - Components'
-    description '''
-      Admin app components and the server-side capabilities they call.
-    '''
-
+    title '03 Engineering / Admin / Application overview'
+    description 'Browser responsibilities. Core routing selects feature UIs; HTTP requests cross into the server. Open the foundation view for state and providers, or a feature for its code map.'
     include
       admin_shell,
-      admin_providers,
       admin_router,
-      admin_store,
-      admin_api_services,
-      admin_feature_providers,
-      admin_layouts,
-      admin_pages,
-      admin_shared_components,
       content_manager_ui,
       content_type_builder_ui,
       settings_api_tokens_ui,
       plugin_admin_extensions,
-      strapi.server_runtime,
-      strapi.server_runtime.content_manager_server,
-      strapi.server_runtime.content_type_builder_server,
-      strapi.server_runtime.admin_server_apis,
-      strapi.server_runtime.plugin_modules,
-      admin_shell -> content_manager_ui,
-      admin_shell -> content_type_builder_ui,
-      admin_shell -> settings_api_tokens_ui,
-      admin_shell -> plugin_admin_extensions,
-      admin_shell -> admin_providers,
+      strapi.server_runtime
+    exclude * -> *
+    include
       admin_shell -> admin_router,
-      admin_shell -> admin_layouts,
-      admin_providers -> admin_store,
-      admin_providers -> admin_feature_providers,
-      admin_store -> admin_api_services,
-      admin_router -> admin_pages,
       admin_router -> content_manager_ui,
       admin_router -> content_type_builder_ui,
       admin_router -> settings_api_tokens_ui,
-      admin_pages -> admin_api_services,
-      settings_api_tokens_ui -> admin_api_services,
-      content_manager_ui -> admin_shared_components,
-      content_type_builder_ui -> admin_shared_components,
-      content_manager_ui -> strapi.server_runtime.content_manager_server,
-      content_type_builder_ui -> strapi.server_runtime.content_type_builder_server,
-      settings_api_tokens_ui -> strapi.server_runtime.admin_server_apis,
-      plugin_admin_extensions -> strapi.server_runtime.plugin_modules
+      admin_shell -> plugin_admin_extensions,
+      content_manager_ui -> strapi.server_runtime with { title 'Edits and publishes content' technology 'HTTP(S)' navigateTo content_publishing_flow },
+      content_type_builder_ui -> strapi.server_runtime with { title 'Changes schemas in development' technology 'HTTP(S)' navigateTo content_type_builder_schema_change_flow },
+      settings_api_tokens_ui -> strapi.server_runtime with { title 'Configures administration' technology 'HTTP(S)' },
+      plugin_admin_extensions -> strapi.server_runtime with { title 'Calls plugin endpoints' technology 'HTTP(S)' }
+    autoLayout LeftRight 70 40
   }
 
   view admin_frontend_foundation of strapi.admin_web_app {
-    title 'Admin Web Application - Frontend Foundation'
+    title '03 Engineering / Admin / Frontend foundation'
     description '''
       Frontend foundation inside the Admin web application: providers, routing, state, API services, layouts, pages, and shared components.
     '''
@@ -77,42 +53,28 @@ views {
   }
 
   view admin_feature_surfaces of strapi.admin_web_app {
-    title 'Admin Web Application - Feature Surfaces'
-    description '''
-      Admin feature surfaces: the router exposes core pages and feature/plugin UIs, which call server capabilities and reuse the shared admin UI layer.
-    '''
-
+    title '03 Engineering / Admin / Feature API boundaries'
+    description 'Each browser feature calls its server API. The plugin UI is bundled during the Admin build; the arrows here show only runtime HTTP calls.'
     include
-      admin_router,
-      admin_pages,
       content_manager_ui,
       content_type_builder_ui,
       settings_api_tokens_ui,
       plugin_admin_extensions,
-      admin_api_services,
-      admin_shared_components,
-      strapi.server_runtime,
       strapi.server_runtime.content_manager_server,
       strapi.server_runtime.content_type_builder_server,
       strapi.server_runtime.admin_server_apis,
-      strapi.server_runtime.plugin_modules,
-      admin_router -> admin_pages,
-      admin_router -> content_manager_ui,
-      admin_router -> content_type_builder_ui,
-      admin_router -> settings_api_tokens_ui,
-      admin_router -> plugin_admin_extensions,
-      admin_pages -> admin_api_services,
-      settings_api_tokens_ui -> admin_api_services,
-      content_manager_ui -> admin_shared_components,
-      content_type_builder_ui -> admin_shared_components,
-      content_manager_ui -> strapi.server_runtime.content_manager_server,
-      content_type_builder_ui -> strapi.server_runtime.content_type_builder_server,
-      settings_api_tokens_ui -> strapi.server_runtime.admin_server_apis,
-      plugin_admin_extensions -> strapi.server_runtime.plugin_modules
+      strapi.server_runtime.plugin_modules
+    exclude * -> *
+    include
+      content_manager_ui -> strapi.server_runtime.content_manager_server with { title 'Content operations' technology 'HTTP(S)' },
+      content_type_builder_ui -> strapi.server_runtime.content_type_builder_server with { title 'Schema editing (development)' technology 'HTTP(S)' },
+      settings_api_tokens_ui -> strapi.server_runtime.admin_server_apis with { title 'Settings and identity' technology 'HTTP(S)' },
+      plugin_admin_extensions -> strapi.server_runtime.plugin_modules with { title 'Plugin-specific requests' technology 'HTTP(S)' }
+    autoLayout LeftRight 70 40
   }
 
   view content_manager_ui_internals of strapi.admin_web_app.content_manager_ui {
-    title 'Content Manager UI - Code Organization'
+    title '05 Code reference / Admin / Content Manager UI'
     description '''
       Code organization for the Admin Content Manager frontend package: route entrypoints, layout, page surfaces, hooks, services, state, and shared UI modules.
     '''
@@ -151,13 +113,11 @@ views {
       cm_ui_hooks -> cm_ui_services,
       cm_ui_services -> strapi.server_runtime.content_manager_server,
       cm_ui_history_preview -> cm_ui_services
-    style cm_ui_router {
-      border none
-    }
+    autoLayout LeftRight 70 40
   }
 
   view admin_shell_code of strapi.admin_web_app.admin_shell {
-    title 'Admin Shell - Code Organization'
+    title '05 Code reference / Admin / Admin Shell'
     description '''
       Code-level organization of the Admin shell entrypoint and extension API.
     '''
@@ -171,7 +131,7 @@ views {
   }
 
   view admin_router_code of strapi.admin_web_app.admin_router {
-    title 'Admin Router - Code Organization'
+    title '05 Code reference / Admin / Admin Router'
     description '''
       Code-level organization of Admin routing: auth routes, authenticated layout routes, and feature/plugin routes.
     '''
@@ -185,7 +145,7 @@ views {
   }
 
   view admin_providers_code of strapi.admin_web_app.admin_providers {
-    title 'Admin Providers - Code Organization'
+    title '05 Code reference / Admin / Admin Providers'
     description '''
       Code-level organization of Admin app providers for context, configuration, Redux, and server data.
     '''
@@ -200,7 +160,7 @@ views {
   }
 
   view admin_api_services_code of strapi.admin_web_app.admin_api_services {
-    title 'Admin API Services - Code Organization'
+    title '05 Code reference / Admin / Admin API Services'
     description '''
       Code-level organization of Admin RTK Query services and settings/auth API modules.
     '''
@@ -217,7 +177,7 @@ views {
   }
 
   view content_type_builder_ui_code of strapi.admin_web_app.content_type_builder_ui {
-    title 'Content-Type Builder UI - Code Organization'
+    title '05 Code reference / Admin / Content-Type Builder UI'
     description '''
       Code-level organization of the Content-Type Builder frontend package: app pages, data manager, schema components, form modals, and utilities.
     '''
@@ -239,7 +199,7 @@ views {
   }
 
   view settings_api_tokens_ui_code of strapi.admin_web_app.settings_api_tokens_ui {
-    title 'Settings and API Tokens UI - Code Organization'
+    title '05 Code reference / Admin / Settings and API Tokens UI'
     description '''
       Code-level organization of settings pages for API tokens, roles, users, transfer tokens, and webhooks.
     '''
