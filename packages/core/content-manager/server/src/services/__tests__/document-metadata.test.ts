@@ -134,6 +134,117 @@ describe('document-metadata service', () => {
     });
   });
 
+  describe('getMetadata non-localized fields', () => {
+    const localizedModel = {
+      uid: 'api::article.article',
+      options: {},
+      pluginOptions: { i18n: { localized: true } },
+      attributes: {
+        title: { type: 'string' },
+        body: { type: 'text' },
+        cover: { type: 'media' },
+        author: { type: 'relation', relation: 'manyToOne', target: 'api::author.author' },
+      },
+    };
+
+    const createServiceWithFindMany = (overrides: Record<string, unknown> = {}) => {
+      const findMany = jest.fn().mockResolvedValue([]);
+      const service = createService({
+        getModel: () => localizedModel,
+        get: () => ({ transform: (_uid: string, params: unknown) => params }),
+        db: { query: () => ({ findMany }) },
+        ...overrides,
+      });
+
+      return { service, findMany };
+    };
+
+    const paramsOf = (findMany: jest.Mock) => findMany.mock.calls[0][0];
+
+    it('selects non-localized scalar fields and populates non-localized media fields', async () => {
+      const { service, findMany } = createServiceWithFindMany({
+        plugin: () => ({
+          service: () => ({
+            getDefaultLocale: async () => 'en',
+            // `author` is not scalar nor media and `unknown` is not an attribute: both dropped
+            getNonLocalizedAttributes: () => ['title', 'cover', 'author', 'unknown'],
+          }),
+        }),
+      });
+
+      await service.getMetadata('api::article.article', {
+        id: 1,
+        documentId: 'doc-1',
+        locale: 'en',
+      });
+
+      const params = paramsOf(findMany);
+      expect(params.fields).toEqual([
+        'id',
+        'documentId',
+        'locale',
+        'updatedAt',
+        'createdAt',
+        'publishedAt',
+        'title',
+      ]);
+      expect(params.populate).toEqual({
+        cover: { populate: { folder: true } },
+        createdBy: { select: ['id', 'firstname', 'lastname', 'email'] },
+        updatedBy: { select: ['id', 'firstname', 'lastname', 'email'] },
+      });
+    });
+
+    const expectNoNonLocalizedFields = (findMany: jest.Mock) => {
+      const params = paramsOf(findMany);
+      expect(params.fields).toEqual([
+        'id',
+        'documentId',
+        'locale',
+        'updatedAt',
+        'createdAt',
+        'publishedAt',
+      ]);
+      expect(params.populate).toEqual({
+        createdBy: { select: ['id', 'firstname', 'lastname', 'email'] },
+        updatedBy: { select: ['id', 'firstname', 'lastname', 'email'] },
+      });
+    };
+
+    it('adds no non-localized fields when the i18n plugin is unavailable', async () => {
+      const { service, findMany } = createServiceWithFindMany({ plugin: () => undefined });
+
+      await service.getMetadata('api::article.article', {
+        id: 1,
+        documentId: 'doc-1',
+        locale: 'en',
+      });
+
+      expectNoNonLocalizedFields(findMany);
+    });
+
+    it('adds no non-localized fields when getNonLocalizedAttributes throws', async () => {
+      const { service, findMany } = createServiceWithFindMany({
+        plugin: () => ({
+          service: () => ({
+            getDefaultLocale: async () => 'en',
+            getNonLocalizedAttributes() {
+              throw new Error('boom');
+            },
+          }),
+        }),
+      });
+
+      await service.getMetadata('api::article.article', {
+        id: 1,
+        documentId: 'doc-1',
+        locale: 'en',
+      });
+
+      expectNoNonLocalizedFields(findMany);
+    });
+  });
+
   describe('getManyAvailableStatus', () => {
     const createServiceWithQuery = () => {
       const findMany = jest.fn().mockResolvedValue([]);
