@@ -4,7 +4,7 @@ import { useIntl } from 'react-intl';
 
 import { getTranslationKey } from '../../../utils/translations';
 
-import { AssetActions } from './AssetActions';
+import { AssetActions, type AssetActionPermissions } from './AssetActions';
 import { CursorAnchoredMenu, type CursorPosition } from './CursorAnchoredMenu';
 
 import type { File } from '../../../../../shared/contracts/files';
@@ -13,6 +13,8 @@ import type { DragFileData } from '../../../types/dnd';
 interface AssetContextMenuProps {
   asset: File;
   dragData: DragFileData;
+  /** Resolved by the provider, so this menu never renders while RBAC loads. */
+  permissions: AssetActionPermissions;
   position: CursorPosition;
   /** Mounted only while it has something on screen, so the parent drops it on this. */
   onClose: () => void;
@@ -29,12 +31,18 @@ interface AssetContextMenuProps {
  * early would take the dialog with it, and for "Replace" the hidden file input
  * too, which is why `isBusy` also covers the native picker.
  */
-export const AssetContextMenu = ({ asset, dragData, position, onClose }: AssetContextMenuProps) => {
+export const AssetContextMenu = ({
+  asset,
+  dragData,
+  permissions,
+  position,
+  onClose,
+}: AssetContextMenuProps) => {
   const { formatMessage } = useIntl();
   const [isMenuOpen, setIsMenuOpen] = useState(true);
 
   return (
-    <AssetActions asset={asset} dragData={dragData}>
+    <AssetActions asset={asset} dragData={dragData} permissions={permissions}>
       {({ items, dialogs, hasActions, isBusy }) => (
         <AssetContextMenuBody
           hasActions={hasActions}
