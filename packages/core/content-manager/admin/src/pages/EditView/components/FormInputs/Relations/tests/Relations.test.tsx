@@ -10,6 +10,7 @@ import {
 import { http, HttpResponse } from 'msw';
 import { Route, Routes, useLocation } from 'react-router-dom';
 
+import { mockData } from '../../../../../../../tests/mockData';
 import { ComponentProvider } from '../../ComponentContext';
 import { RelationsInput, RelationsFieldProps } from '../Relations';
 
@@ -247,6 +248,128 @@ describe('Relations', () => {
   it.todo('should connect a relation');
 
   it.todo('should disconnect a relation');
+
+  describe('relation targeting a Single Type', () => {
+    const mockCreatePermission = (subject: string) =>
+      http.get('/admin/users/me/permissions', () =>
+        HttpResponse.json({
+          data: [
+            {
+              id: 1,
+              action: 'plugin::content-manager.explorer.create',
+              subject,
+              properties: {},
+              conditions: [],
+            },
+          ],
+        })
+      );
+
+    // Reuses `api::category.category` as the relation's target (instead of an
+    // unrelated single type) because it's the target of the `categories` attribute
+    // already on the default fixture's `api::address.address` schema — the content
+    // type the test document is rendered as. Matching it keeps `isRelatedToCurrentDocument`
+    // true so the relation search actually runs and returns options, rather than the
+    // combobox silently rendering nothing regardless of the fix under test.
+    const singleTypeAttribute = {
+      type: 'relation',
+      relation: 'manyToMany',
+      target: 'api::category.category',
+      inversedBy: 'addresses',
+      targetModel: 'api::category.category',
+      relationType: 'manyToMany',
+    } as const;
+
+    // `api::category.category` is referenced as a relation target throughout the shared
+    // fixture (including by `api::address.address`'s own `categories` attribute above),
+    // but isn't itself defined as a content type there — so it has to be added, not just
+    // have its `kind` overridden. It's appended to the default fixture rather than
+    // replacing the whole list, so the current document's own schema
+    // (api::address.address) stays resolvable and relation search results still load.
+    const mockCategoryContentTypeKind = (kind: 'singleType' | 'collectionType') =>
+      http.get('/content-manager/init', () =>
+        HttpResponse.json({
+          data: {
+            components: mockData.contentManager.components,
+            contentTypes: [
+              ...mockData.contentManager.contentTypes,
+              {
+                uid: 'api::category.category',
+                kind,
+                isDisplayed: true,
+                apiID: 'category',
+                info: { displayName: 'Category' },
+                options: {},
+                attributes: {},
+              },
+            ],
+          },
+        })
+      );
+
+    // The shared fixture's generic `/content-manager/:collectionType/:uid/:id` document
+    // handler also matches `/content-manager/relations/:model/:fieldName` (same segment
+    // count) and is registered first, so it wins and 404s the relation search in these
+    // tests. `server.use` handlers take priority over the base fixture, so re-declaring
+    // this one here restores the intended 200 response without touching the shared file.
+    const mockSearchRelations = () =>
+      http.get('/content-manager/relations/:model/:fieldName', () =>
+        HttpResponse.json({
+          results: [
+            {
+              id: 1,
+              documentId: 'apples',
+              locale: 'en',
+              status: 'draft',
+              name: 'Relation entity 1',
+            },
+          ],
+          pagination: { page: 1, pageCount: 1, total: 1 },
+        })
+      );
+
+    it('hides the "Create a relation" option even when the user can create', async () => {
+      server.use(
+        mockCategoryContentTypeKind('singleType'),
+        mockCreatePermission('api::category.category'),
+        mockSearchRelations()
+      );
+
+      const { user } = render({ attribute: singleTypeAttribute });
+
+      await waitFor(() => {
+        expect(screen.queryByText('Relations are loading')).not.toBeInTheDocument();
+      });
+
+      await user.click(await screen.findByRole('combobox', { name: /relations/i }));
+
+      // A regular option still renders, so the missing "Create a relation" option isn't
+      // just a symptom of the combobox rendering no options at all. Its accessible name
+      // also includes the trailing status badge text (e.g. "Draft"), hence the regex.
+      expect(await screen.findByRole('option', { name: /Relation entity 1/ })).toBeInTheDocument();
+      expect(screen.queryByRole('option', { name: 'Create a relation' })).not.toBeInTheDocument();
+    });
+
+    it('does not disable "Create a relation" for a Collection Type target when the user can create', async () => {
+      server.use(
+        mockCategoryContentTypeKind('collectionType'),
+        mockCreatePermission('api::category.category')
+      );
+
+      const { user } = render({});
+
+      await waitFor(() => {
+        expect(screen.queryByText('Relations are loading')).not.toBeInTheDocument();
+      });
+
+      await user.click(await screen.findByRole('combobox', { name: /relations/i }));
+
+      expect(await screen.findByRole('option', { name: 'Create a relation' })).not.toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
+    });
+  });
 
   it('should search nested component relations using the component id', async () => {
     const relationSearchRequests: Array<{
