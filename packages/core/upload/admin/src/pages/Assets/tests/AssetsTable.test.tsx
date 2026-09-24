@@ -13,17 +13,11 @@ import type { Folder } from '../../../../../shared/contracts/folders';
 const mockNavigateToFolder = jest.fn();
 const mockOnAssetItemClick = jest.fn();
 const mockToggleNotification = jest.fn();
-const mockUseAIAvailability = jest.fn(() => true);
 const mockTrackUsage = jest.fn();
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
   useNotification: () => ({ toggleNotification: mockToggleNotification }),
-}));
-
-jest.mock('@strapi/admin/strapi-admin/ee', () => ({
-  ...jest.requireActual('@strapi/admin/strapi-admin/ee'),
-  useAIAvailability: () => mockUseAIAvailability(),
 }));
 
 jest.mock('../../../hooks/useTracking', () => ({
@@ -119,7 +113,6 @@ describe('AssetsTable', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseAIAvailability.mockReturnValue(true);
   });
 
   describe('Table rendering', () => {
@@ -1106,7 +1099,7 @@ describe('AssetsTable', () => {
       await waitFor(() =>
         expect(mockToggleNotification).toHaveBeenCalledWith({
           type: 'danger',
-          message: 'An error occurred while deleting the items.',
+          message: 'boom',
         })
       );
       // Dialog stays open for a direct retry (Confirm again) or Cancel. While
@@ -1121,8 +1114,14 @@ describe('AssetsTable', () => {
       expect(await screen.findByRole('checkbox', { name: 'Select image1.png' })).toBeChecked();
     });
 
-    it('hides Create metadata when the license has no AI', async () => {
-      mockUseAIAvailability.mockReturnValue(false);
+    it('hides Create metadata when no AI metadata provider is registered', async () => {
+      server.use(
+        http.get('/upload/settings', () =>
+          HttpResponse.json({
+            data: { aiMetadata: true, aiMetadataAvailable: false, concurrentUploadRequests: 1 },
+          })
+        )
+      );
 
       const { user } = setup();
 
@@ -1133,12 +1132,14 @@ describe('AssetsTable', () => {
       expect(screen.getByRole('button', { name: 'Delete' })).toBeInTheDocument();
     });
 
-    // The other half of the gate: the license allows AI but the setting is off.
-    // Both conditions are required, so either one alone hides the action.
+    // The other half of the gate: a provider is registered but the setting is
+    // off. Both conditions are required, so either one alone hides the action.
     it('hides Create metadata when the aiMetadata setting is off', async () => {
       server.use(
         http.get('/upload/settings', () =>
-          HttpResponse.json({ data: { aiMetadata: false, concurrentUploadRequests: 1 } })
+          HttpResponse.json({
+            data: { aiMetadata: false, aiMetadataAvailable: true, concurrentUploadRequests: 1 },
+          })
         )
       );
 

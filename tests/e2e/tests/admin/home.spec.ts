@@ -269,7 +269,10 @@ test.describe('Home as super admin — key statistics', () => {
       await page
         .getByRole('textbox', { name: /url/i })
         .fill('http://localhost:1337/api/webhooks/new');
-      await page.getByRole('button', { name: /save/i }).click();
+      await Promise.all([
+        page.waitForURL(/\/admin\/settings\/webhooks\/(?!create)[^/]+/),
+        page.getByRole('button', { name: /save/i }).click(),
+      ]);
 
       // Create an API token
       await navToHeader(page, ['API Tokens'], 'API Tokens');
@@ -279,7 +282,10 @@ test.describe('Home as super admin — key statistics', () => {
       await page.getByRole('option', { name: '30 days' }).click();
       await page.getByRole('combobox', { name: 'Token type' }).click();
       await page.getByRole('option', { name: 'Full access' }).click();
-      await page.getByRole('button', { name: /save/i }).click();
+      await Promise.all([
+        page.waitForURL(/\/admin\/settings\/api-tokens\/(?!create)[^/]+/),
+        page.getByRole('button', { name: /save/i }).click(),
+      ]);
 
       // Go back to the home page and wait for refreshed statistics.
       // Avoid clickAndWait(networkidle): the homepage SPA often never reaches networkidle.
