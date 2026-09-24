@@ -327,7 +327,8 @@ describe('Content Manager | Layout', () => {
     expect(screen.queryByText('No permissions page')).not.toBeInTheDocument();
   });
 
-  it('renders the route instead of redirecting when the requested locale is accessible but the links are stale', async () => {    // The links are authorized asynchronously against the previous URL: an
+  it('renders the route instead of redirecting when the requested locale is accessible but the links are stale', async () => {
+    // The links are authorized asynchronously against the previous URL: an
     // accessible locale with no authorised links means they are out of date.
     mockInitData({ models: [ARTICLE_MODEL] });
 
