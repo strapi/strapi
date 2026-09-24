@@ -9450,9 +9450,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/design-system@npm:0.0.0-experimental.ad5a8b137716a7af7b8df6d2bc14640ac6e454a7":
-  version: 0.0.0-experimental.ad5a8b137716a7af7b8df6d2bc14640ac6e454a7
-  resolution: "@strapi/design-system@npm:0.0.0-experimental.ad5a8b137716a7af7b8df6d2bc14640ac6e454a7"
+"@strapi/design-system@npm:2.3.0-alpha.0":
+  version: 2.3.0-alpha.0
+  resolution: "@strapi/design-system@npm:2.3.0-alpha.0"
   dependencies:
     "@base-ui/react": "npm:1.7.0"
     "@codemirror/lang-json": "npm:6.0.1"
@@ -9478,7 +9478,7 @@ __metadata:
     "@radix-ui/react-tabs": "npm:1.0.4"
     "@radix-ui/react-tooltip": "npm:1.0.7"
     "@radix-ui/react-use-callback-ref": "npm:1.0.1"
-    "@strapi/ui-primitives": "npm:0.0.0-experimental.ad5a8b137716a7af7b8df6d2bc14640ac6e454a7"
+    "@strapi/ui-primitives": "npm:2.3.0-alpha.0"
     "@tanstack/react-virtual": "npm:^3.10.8"
     "@uiw/react-codemirror": "npm:4.22.2"
     class-variance-authority: "npm:0.7.1"
@@ -9487,7 +9487,7 @@ __metadata:
     react-remove-scroll: "npm:2.5.10"
     tailwind-merge: "npm:3.6.0"
   peerDependencies:
-    "@strapi/icons": 0.0.0-experimental.ad5a8b137716a7af7b8df6d2bc14640ac6e454a7
+    "@strapi/icons": ^2.0.0 || ^2.0.0-beta || ^2.0.0-alpha || ^2.3.0-alpha
     react: ^18.0.0
     react-dom: ^18.0.0
     styled-components: ^6.0.0
@@ -9495,7 +9495,7 @@ __metadata:
   peerDependenciesMeta:
     tailwindcss:
       optional: true
-  checksum: 10c0/0f4775e9c0ac825e84d50a56164510bae913358e6dc936949caf694fb6d14455690c5e08892b1b4ac8980d71a076a738940d68b9714277280a01aab7c841a579
+  checksum: 10c0/782b9c43abbd75f5617e36490a20474277da4422b7fa6ba517d65a056aedbc2ab32bdd69a7af3da6c8f1ddc5ef22ec7b5986d029a46371fae7d8c7a5e3f0fb1c
   languageName: node
   linkType: hard
 
@@ -10224,9 +10224,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/ui-primitives@npm:0.0.0-experimental.ad5a8b137716a7af7b8df6d2bc14640ac6e454a7":
-  version: 0.0.0-experimental.ad5a8b137716a7af7b8df6d2bc14640ac6e454a7
-  resolution: "@strapi/ui-primitives@npm:0.0.0-experimental.ad5a8b137716a7af7b8df6d2bc14640ac6e454a7"
+"@strapi/ui-primitives@npm:2.3.0-alpha.0":
+  version: 2.3.0-alpha.0
+  resolution: "@strapi/ui-primitives@npm:2.3.0-alpha.0"
   dependencies:
     "@radix-ui/number": "npm:1.0.1"
     "@radix-ui/primitive": "npm:1.0.1"
@@ -10251,7 +10251,7 @@ __metadata:
   peerDependencies:
     react: ^18.0.0
     react-dom: ^18.0.0
-  checksum: 10c0/14d85fed81de3ef68ee382d236079c2c54d86207c5673b687a094907dcbd24f118f8804fb15ebf9e69d79cb859469654865ef23159fe8be11821db42ffc8f380
+  checksum: 10c0/dae2ef11971389ec7713bb09df2417af2248f378747d3023b9d213d717b14e2daf319b6d0de22e69605c4c5f6064a98056bad8ce8047aa331580b037660f9fa3
   languageName: node
   linkType: hard
 

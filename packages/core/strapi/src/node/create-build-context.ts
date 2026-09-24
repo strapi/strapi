@@ -75,7 +75,7 @@ const assertNextDesignSystemEntry = (): void => {
         '',
         'npm and pnpm users use "overrides" in place of "resolutions", with the key at the top level of the object.',
         'An entry in "dependencies" is not enough. The override must be global, so that @strapi/admin gets the same copy.',
-        'The current release is the experimental dist-tag on npm, see `npm view @strapi/design-system dist-tags`.',
+        'The current release is the alpha dist-tag on npm, see `npm view @strapi/design-system dist-tags`.',
       ].join(os.EOL)
     );
   }

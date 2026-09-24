@@ -131,9 +131,13 @@ describe('createBuildContext', () => {
       });
       const strapi = buildStrapiMockWithFlags({ unstableNextDesignSystem: true });
 
-      await expect(
-        createBuildContext({ ...buildArgs(strapi), options: { bundler: 'vite' } })
-      ).rejects.toThrow(/"resolutions": \{ "@strapi\/design-system": "<version>" \}/);
+      const build = createBuildContext({ ...buildArgs(strapi), options: { bundler: 'vite' } });
+
+      await expect(build).rejects.toThrow(
+        /"resolutions": \{ "@strapi\/design-system": "<version>" \}/
+      );
+      await expect(build).rejects.toThrow(/alpha dist-tag/);
+      await expect(build).rejects.not.toThrow(/experimental/);
     });
 
     it('resolves the next entry from the admin closure when the flag is on', async () => {
