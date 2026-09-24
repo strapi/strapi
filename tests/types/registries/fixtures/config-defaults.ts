@@ -47,6 +47,16 @@ const explicitTupleDefault = app.config.get<
 const pluginExplicitTupleDefault = app
   .plugin('default-semantics')
   .config<unknown, 'port', [] | [number]>('port');
+const fallbackBoolean = app.config.get('uuid', false);
+const fallbackString = app.config.get('unregistered.label', 'fallback');
+const fallbackNumber = app.config.get('unregistered.limit', 42);
+const pluginFallbackBoolean = app.plugin('unregistered').config('enabled', false);
+const pluginFallbackString = app.plugin('unregistered').config('label', 'fallback');
+const pluginFallbackNumber = app.plugin('unregistered').config('limit', 42);
+const fallbackObject = app.config.get('unregistered.options', { enabled: false });
+const pluginFallbackArray = app.plugin('unregistered').config('labels', ['first']);
+fallbackObject.enabled = true;
+pluginFallbackArray.push('second');
 
 type Equal<T, U> =
   (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;
@@ -70,8 +80,21 @@ declare const checks: [
   Expect<Equal<typeof pluginOptionalSpreadDefault, number | null | undefined>>,
   Expect<Equal<typeof explicitTupleDefault, number | null | undefined>>,
   Expect<Equal<typeof pluginExplicitTupleDefault, number | null | undefined>>,
+  Expect<Equal<typeof fallbackBoolean, false>>,
+  Expect<Equal<typeof fallbackString, 'fallback'>>,
+  Expect<Equal<typeof fallbackNumber, 42>>,
+  Expect<Equal<typeof pluginFallbackBoolean, false>>,
+  Expect<Equal<typeof pluginFallbackString, 'fallback'>>,
+  Expect<Equal<typeof pluginFallbackNumber, 42>>,
+  Expect<Equal<typeof fallbackObject, { enabled: boolean }>>,
+  Expect<Equal<typeof pluginFallbackArray, string[]>>,
 ];
 checks satisfies unknown;
+const forwardDefault = <T>(key: string, value: T): T => app.config.get<T>(key, value);
+const forwardPluginDefault = <T>(key: string, value: T): T =>
+  app.plugin('unregistered').config<T>(key, value);
+forwardDefault<void>('unregistered', undefined) satisfies void;
+forwardPluginDefault<unknown>('unregistered', undefined) satisfies unknown;
 // @ts-expect-error A required default tuple cannot be omitted, even with explicit type arguments.
 app.config.get<unknown, 'plugin::default-semantics.port', [number]>(
   'plugin::default-semantics.port'
