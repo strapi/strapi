@@ -18,15 +18,16 @@ export const registerContentManagerMcpTools = async ({
     return;
   }
 
-  const i18nPlugin = strapi.plugin('i18n');
-
-  let localeCodes = null;
+  let localeCodes: [string, ...string[]] | null = null;
   let defaultLocale: string | null = null;
-  if (i18nPlugin !== undefined) {
-    localeCodes = (await i18nPlugin.service('locales').find()).map(
-      (locale: { code: string }) => locale.code
-    ) as [string, ...string[]];
-    defaultLocale = await i18nPlugin.service('locales').getDefaultLocale();
+  if (strapi.localization.isEnabled() === true) {
+    // TODO @Nico zero locales yields `[]` cast as a non-empty tuple. Downstream copes at runtime
+    // (buildLocaleSchema checks length, getPermittedLocales returns null), but the type lies.
+    localeCodes = (await strapi.localization.getLocales()).map((locale) => locale.code) as [
+      string,
+      ...string[],
+    ];
+    defaultLocale = await strapi.localization.getDefaultLocale();
   }
 
   const models = getService('content-types').findDisplayedContentTypes();
