@@ -65,7 +65,9 @@ const buildProviderConfig = (providerName, storedConfig, redirectUri) => {
 
 const redirectWithPayload = (ctx, callbackUrl, payload) => {
   const url = new URL(callbackUrl);
-  const params = new URLSearchParams();
+  // Keep query params already present in the configured callback URL so the
+  // payload is added on top of them instead of replacing them.
+  const params = new URLSearchParams(url.search);
 
   Object.entries(payload).forEach(([key, value]) => {
     if (key === 'raw') {
