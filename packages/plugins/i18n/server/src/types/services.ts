@@ -1,4 +1,8 @@
-import type { Data } from '@strapi/types';
+import type { Data, Modules, Schema, Struct, UID } from '@strapi/types';
+import type { AILocalizationJobs } from '../../../shared/contracts/ai-localization-jobs';
+import type { Settings } from '../validation/settings';
+import type permissions from '../services/permissions';
+import type sanitize from '../services/sanitize';
 
 /** A stored locale, before the HTTP controller adds `isDefault`. */
 export type Locale = {
@@ -61,3 +65,104 @@ export type LocaleService = {
   /** Creates the initial locale and makes it the default when no locale exists. */
   initDefaultLocale(): Promise<void>;
 };
+
+/** Schema properties inspected when listing localized attributes. */
+export type AttributeSchema = Pick<Struct.ContentTypeSchema, 'attributes'> & { uid?: string };
+
+/** Content-type localization operations. Missing defaults remain nullable. */
+export type ContentTypesService = {
+  isLocalizedContentType(model: unknown): boolean;
+  getValidLocale(locale?: string | null): Promise<string | null>;
+  getLocalizedAttributes(model: AttributeSchema): string[];
+  getNonLocalizedAttributes(model: AttributeSchema): string[];
+  copyNonLocalizedAttributes(
+    model: Struct.ComponentSchema | Struct.ContentTypeSchema,
+    entry: Record<string, unknown>
+  ): Record<string, unknown>;
+  fillNonLocalizedAttributes(
+    entry: Record<string, unknown>,
+    relatedEntry: Record<string, unknown> | null | undefined,
+    options: { model: UID.Schema }
+  ): void;
+  getNestedPopulateOfNonLocalizedAttributes(modelUID: UID.Schema): string[];
+};
+
+/** Locale catalog entries do not have database IDs. */
+export type ISOLocalesService = {
+  getIsoLocales(): { code: string; name: string }[];
+};
+
+/** Telemetry emitted after initialization or a locale change. */
+export type MetricsService = {
+  sendDidInitializeEvent(): Promise<void>;
+  sendDidUpdateI18nLocalesEvent(): Promise<void>;
+};
+
+/** Synchronizes the fields shared by all locales of a document. */
+export type LocalizationsService = {
+  syncNonLocalizedAttributes(
+    sourceEntry: Record<string, unknown>,
+    model: Schema.ContentType
+  ): Promise<void>;
+};
+
+/** Removes localization fields, supporting the existing curried invocation. */
+export type SanitizeService = ReturnType<typeof sanitize>;
+
+/** Settings are absent until first saved. */
+export type SettingsService = {
+  getSettings(): Promise<Settings | null>;
+  setSettings(value: Settings): Promise<void>;
+};
+
+/** Job fields shared by storage callers and HTTP responses. */
+export type AILocalizationJob = Pick<
+  AILocalizationJobs,
+  'id' | 'contentType' | 'relatedDocumentId' | 'sourceLocale' | 'targetLocales' | 'status'
+>;
+
+/** A missing job, or one deleted during an update, resolves to null. */
+export type AILocalizationJobsService = {
+  upsertJobForDocument(params: {
+    documentId: string;
+    contentType: string;
+    sourceLocale: string;
+    targetLocales: string[];
+    status?: AILocalizationJob['status'];
+  }): Promise<AILocalizationJob | null>;
+  getJobByDocument(contentType: string, documentId: string): Promise<AILocalizationJob | null>;
+  getJobByContentType(contentType: string): Promise<AILocalizationJob | null>;
+};
+
+/** Generates the configured AI localizations after document writes. */
+export type AILocalizationsService = {
+  isEnabled(): Promise<boolean>;
+  generateDocumentLocalizations(params: {
+    model: UID.ContentType;
+    document: Modules.Documents.AnyDocument | null;
+  }): Promise<void>;
+  setupMiddleware(): void;
+};
+
+/** Only permission checks needed to resolve relations in the target locale. */
+export type LocaleReadAbility = {
+  can(action: string, subject: string): boolean;
+};
+
+/** Fetches and prepares document data for filling another locale. */
+export type FillFromLocaleService = {
+  fetchRawDocument(
+    model: UID.ContentType,
+    sourceLocale: string,
+    documentId?: string
+  ): Promise<Modules.Documents.AnyDocument | null>;
+  transformDocument(
+    document: Record<string, unknown>,
+    model: UID.ContentType,
+    targetLocale: string,
+    userAbility: LocaleReadAbility
+  ): Promise<Record<string, unknown>>;
+};
+
+/** Existing permission action and engine hooks exposed by i18n. */
+export type PermissionsService = ReturnType<typeof permissions>;
