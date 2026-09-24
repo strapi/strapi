@@ -38,6 +38,7 @@ export interface Strapi extends Container {
    * @see {@link https://docs.strapi.io/dev-docs/api/document-service} Document Service API
    */
   documents: Modules.Documents.Service;
+  localization: Core.Localization;
   telemetry: Modules.Metrics.TelemetryService;
   requestContext: Modules.RequestContext.RequestContext;
   customFields: Modules.CustomFields.CustomFields;

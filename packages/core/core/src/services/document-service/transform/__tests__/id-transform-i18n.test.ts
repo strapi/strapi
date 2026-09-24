@@ -13,26 +13,9 @@ const findManyQueries = {
 describe('Transform relational data', () => {
   global.strapi = {
     getModel: (uid: string) => models[uid],
-    plugins: {
-      i18n: {
-        services: {
-          'content-types': {
-            isLocalizedContentType(model: any) {
-              // Localize category content type
-              if (model.uid === CATEGORY_UID) {
-                return true;
-              }
-              // Shop is not localized
-              return false;
-            },
-          },
-          locales: {
-            getDefaultLocale() {
-              return 'en';
-            },
-          },
-        },
-      },
+    localization: {
+      isLocalizedContentType: (model: { uid: string }) => model.uid === CATEGORY_UID,
+      getDefaultLocale: async () => 'en',
     },
     db: {
       query: jest.fn((uid) => ({ findMany: findManyQueries[uid] })),

@@ -30,14 +30,8 @@ describe('Extract document ids from relation data', () => {
       getModel: () => ({
         options: { draftAndPublish: true },
       }),
-      plugins: {
-        i18n: {
-          services: {
-            'content-types': {
-              isLocalizedContentType: () => true,
-            },
-          },
-        },
+      localization: {
+        isLocalizedContentType: () => true,
       },
     } as unknown as Core.Strapi;
   });
@@ -90,14 +84,8 @@ describe('Extract document ids from relation data', () => {
         uid: PRODUCT_UID,
         options: { draftAndPublish: true },
       }),
-      plugins: {
-        i18n: {
-          services: {
-            'content-types': {
-              isLocalizedContentType: () => false,
-            },
-          },
-        },
+      localization: {
+        isLocalizedContentType: () => false,
       },
     } as unknown as Core.Strapi;
 
