@@ -9,7 +9,8 @@ import history from '../history';
 import preview from '../preview';
 import homepage from '../homepage';
 
-export default {
+/** Controllers of the core Content Manager routes, without the history, preview and homepage features. */
+export const coreControllers = {
   'collection-types': collectionTypes,
   components,
   'content-types': contentTypes,
@@ -17,6 +18,10 @@ export default {
   relations,
   'single-types': singleTypes,
   uid,
+} as const;
+
+export default {
+  ...coreControllers,
   ...(history.controllers ? history.controllers : {}),
   ...(preview.controllers ? preview.controllers : {}),
   ...homepage.controllers,

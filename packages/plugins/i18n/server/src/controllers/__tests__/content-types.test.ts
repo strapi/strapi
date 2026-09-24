@@ -73,7 +73,7 @@ describe('i18n - Controller - content-types', () => {
       expect.assertions(2);
 
       try {
-        await controller.getNonLocalizedAttributes(ctx);
+        await controller.getNonLocalizedAttributes(ctx, async () => {});
       } catch (e: any) {
         expect(e instanceof ApplicationError).toBe(true);
         expect(e.message).toEqual('Model api::country.country is not localized');
@@ -98,7 +98,7 @@ describe('i18n - Controller - content-types', () => {
         },
         notFound,
       };
-      await controller.getNonLocalizedAttributes(ctx);
+      await controller.getNonLocalizedAttributes(ctx, async () => {});
 
       expect(notFound).toHaveBeenCalledWith();
     });
@@ -143,7 +143,7 @@ describe('i18n - Controller - content-types', () => {
           },
         },
       };
-      await controller.getNonLocalizedAttributes(ctx);
+      await controller.getNonLocalizedAttributes(ctx, async () => {});
       expect(findMany).toHaveBeenCalledWith({
         where: {
           action: ['read', 'create'],
