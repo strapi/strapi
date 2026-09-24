@@ -11,11 +11,13 @@ import {
 import { useAssetSelection } from '../hooks/useAssetSelection';
 
 import { AssetContextMenu } from './AssetContextMenu';
+import { FolderContextMenu } from './FolderContextMenu';
 import { SelectionContextMenu } from './SelectionContextMenu';
 
 import type { CursorPosition } from './CursorAnchoredMenu';
 import type { File } from '../../../../../shared/contracts/files';
-import type { DragFileData } from '../../../types/dnd';
+import type { Folder } from '../../../../../shared/contracts/folders';
+import type { DragFileData, DragFolderData } from '../../../types/dnd';
 import type { ItemLocations } from '../../../utils/itemLocations';
 import type { ItemKey } from '../utils/selection';
 
@@ -24,7 +26,9 @@ import type { ItemKey } from '../utils/selection';
  * asset rather than a key alone, so nothing here has to resolve keys back to
  * items — the item is already in scope where the gesture happens.
  */
-export type ContextMenuPayload = { kind: 'asset'; asset: File; dragData: DragFileData };
+export type ContextMenuPayload =
+  | { kind: 'asset'; asset: File; dragData: DragFileData }
+  | { kind: 'folder'; folder: Folder; dragData: DragFolderData };
 
 type OpenForItem = (event: React.MouseEvent, key: ItemKey, payload: ContextMenuPayload) => void;
 
@@ -125,14 +129,22 @@ export const ItemContextMenuProvider = ({ locations, children }: ItemContextMenu
             locations={locations}
             onClose={() => close(state.id)}
           />
-        ) : (
+        ) : state.payload.kind === 'asset' ? (
           <AssetContextMenu
             // A fresh menu per gesture: the actions carry dialog state, and
             // reusing the instance across two right-clicks would carry it over.
-            // Keyed on the opening rather than the asset, so right-clicking the
+            // Keyed on the opening rather than the item, so right-clicking the
             // same card twice still remounts.
             key={state.id}
             asset={state.payload.asset}
+            dragData={state.payload.dragData}
+            position={state.position}
+            onClose={() => close(state.id)}
+          />
+        ) : (
+          <FolderContextMenu
+            key={state.id}
+            folder={state.payload.folder}
             dragData={state.payload.dragData}
             position={state.position}
             onClose={() => close(state.id)}

@@ -239,6 +239,7 @@
   "list.assets.type-not-allowed": "This type of file is not allowed.",
   "list.assets.to-upload": "{number, plural, =0 {No asset} one {1 asset} other {# assets}} ready to upload",
   "list.folder.actions.copy-link": "Copy link to folder",
+  "list.folder.context-menu.label": "Folder actions",
   "list.folder.actions.copy-link.success": "Folder link copied.",
   "list.folder.actions.copy-link.error": "Failed to copy the folder link.",
   "list.folder.actions.rename": "Rename folder",

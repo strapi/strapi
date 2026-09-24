@@ -163,6 +163,7 @@ const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const { isSelected, toggle, selectRange } = useAssetSelection();
   const { canUpdate } = useMediaLibraryPermissions();
+  const openContextMenu = useItemContextMenuTrigger();
   const {
     dragData,
     draggable: { attributes, listeners, setNodeRef: setDragRef, isDragging },
@@ -242,9 +243,15 @@ const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
       }}
       role="listitem"
       tabIndex={0}
-      // Right-clicking an item is not the background gesture: the folder keeps
-      // the browser's own menu. See MainAreaContextMenu.
+      // Right-click opens this folder's own actions, or the selection's when it
+      // is part of one. Still marked as "not the background gesture" so
+      // MainAreaContextMenu's create menu stays out of it.
       data-native-context-menu
+      onContextMenu={(e: React.MouseEvent) => {
+        if (isEventFromWithin(e)) {
+          openContextMenu?.(e, key, { kind: 'folder', folder, dragData });
+        }
+      }}
     >
       {canUpdate && (
         <Flex onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}>

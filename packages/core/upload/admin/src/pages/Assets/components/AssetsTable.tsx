@@ -451,6 +451,7 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
   const { navigateToFolder } = useFolderNavigation();
   const { isSelected, toggle, selectRange } = useAssetSelection();
   const { canUpdate } = useMediaLibraryPermissions();
+  const openContextMenu = useItemContextMenuTrigger();
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const {
     dragData,
@@ -521,9 +522,15 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
       $isSelected={isSelected(key)}
       tabIndex={0}
       role="row"
-      // Right-clicking an item is not the background gesture: the row keeps the
-      // browser's own menu. See MainAreaContextMenu.
+      // Right-click opens this folder's own actions, or the selection's when it
+      // is part of one. Still marked as "not the background gesture" so
+      // MainAreaContextMenu's create menu stays out of it.
       data-native-context-menu
+      onContextMenu={(e: React.MouseEvent) => {
+        if (isEventFromWithin(e)) {
+          openContextMenu?.(e, key, { kind: 'folder', folder, dragData });
+        }
+      }}
       onDragStart={(e: React.DragEvent) => {
         if (isEventFromWithin(e)) {
           e.preventDefault();

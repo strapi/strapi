@@ -719,6 +719,24 @@ describe('AssetsPage main-area context menu', () => {
     }
   });
 
+  it('opens the folder actions on a folder card', async () => {
+    respondWithAssets([]);
+    respondWithFolders([createFolder(1, 'reports')]);
+
+    renderPage();
+    await waitForCreatePermission();
+
+    // eslint-disable-next-line testing-library/no-node-access
+    const card = (await screen.findByText('reports')).closest('[data-native-context-menu]');
+    fireEvent.contextMenu(card!, { clientX: 30, clientY: 30 });
+
+    const menu = within(await screen.findByRole('menu'));
+    expect(await menu.findByRole('menuitem', { name: 'Rename folder' })).toBeInTheDocument();
+    expect(menu.getByRole('menuitem', { name: 'Delete folder' })).toBeInTheDocument();
+    // Not the background create menu.
+    expect(menu.queryByRole('menuitem', { name: 'New folder' })).not.toBeInTheDocument();
+  });
+
   it('creates the folder inside the folder currently open', async () => {
     respondWithAssets([createAsset(1, 'image.png')]);
     respondWithFolders([]);
