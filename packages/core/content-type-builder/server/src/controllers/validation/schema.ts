@@ -673,13 +673,25 @@ const updateAttributeSchema = (meta: SchemaMeta) =>
 // Ordered list of attribute rename hops performed by the user for a given
 // content-type / component, used to generate a data-preserving rename migration.
 // The order is significant: the migration replays each hop verbatim.
+// Names end up in generated migration code, so they are held to the same rules
+// as a newly created attribute name.
+const renameHopNameSchema = z
+  .string()
+  .min(1)
+  .max(64)
+  .regex(NAME_REGEX)
+  .refine((value) => !isReservedAttributeName(value), 'Attribute name is reserved');
+
 const renamesSchema = z
   .array(
-    z.object({
-      oldName: z.string(),
-      newName: z.string(),
-    })
+    z
+      .object({
+        oldName: renameHopNameSchema,
+        newName: renameHopNameSchema,
+      })
+      .refine((hop) => hop.oldName !== hop.newName, 'A rename must change the attribute name')
   )
+  .max(200)
   .optional();
 
 const deleteAttributeSchema = z.object({

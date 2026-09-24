@@ -103,6 +103,24 @@ export default class Dialect {
   }
 
   /**
+   * Drops the index (and, where foreign keys are named, the foreign-key
+   * constraint) called `name` on `table`, if it exists. Used by the rename
+   * migration helpers on dialects that cannot rename schema objects in place,
+   * so a renamed table/column does not keep an index under its old name
+   * (schema sync never drops it and would collide when re-creating it). Runs on
+   * the given transaction. Returns whether anything was dropped.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async dropSchemaObject(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    trx: Knex,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    params: { table: string; name: string }
+  ): Promise<boolean> {
+    return false;
+  }
+
+  /**
    * Max rows per batch for bulk inserts.
    * Some databases limit multi-row insert size; override in dialect when a lower limit is required.
    */

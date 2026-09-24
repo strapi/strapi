@@ -95,6 +95,35 @@ describe('schema rename helpers (sqlite)', () => {
       expect(await db.connection.schema.hasColumn('articles', 'new_title')).toBe(true);
     });
 
+    it('drops indexes named after the old column so re-adding it cannot collide', async () => {
+      const { identifiers } = db.metadata;
+      const indexName = identifiers.getIndexName(['articles', 'old_title']);
+      const uniqueName = identifiers.getUniqueIndexName(['articles', 'old_title']);
+
+      await db.connection.schema.createTable('articles', (table) => {
+        table.increments('id');
+        table.string('old_title');
+        table.string('other');
+        table.index(['old_title'], indexName);
+        table.unique(['old_title'], { indexName: uniqueName });
+        table.index(['other'], 'articles_other_idx');
+      });
+
+      await inTransaction((trx) => db.schema.renameColumn(trx, op));
+
+      const indexes = await db.dialect.schemaInspector.getIndexes('articles');
+      expect(indexes.map((index) => index.name)).toEqual(['articles_other_idx']);
+
+      // What schema sync does when a later save re-adds `old_title`.
+      await expect(
+        db.connection.schema.alterTable('articles', (table) => {
+          table.string('old_title');
+          table.index(['old_title'], indexName);
+          table.unique(['old_title'], { indexName: uniqueName });
+        })
+      ).resolves.not.toThrow();
+    });
+
     it('warns and leaves both columns untouched when the target already exists', async () => {
       await db.connection.schema.createTable('articles', (table) => {
         table.increments('id');
@@ -220,6 +249,65 @@ describe('schema rename helpers (sqlite)', () => {
       ]);
     });
 
+    it('deletes orphan rows already carrying the target value before updating', async () => {
+      await db.connection.schema.createTable('files_related_mph', (table) => {
+        table.increments('id');
+        table.integer('file_id');
+        table.string('related_type');
+        table.string('field');
+      });
+      await db.connection('files_related_mph').insert([
+        // Left behind when an attribute named `image` was deleted earlier.
+        { file_id: 1, related_type: 'api::article.article', field: 'image' },
+        { file_id: 2, related_type: 'api::article.article', field: 'cover' },
+        { file_id: 3, related_type: 'api::page.page', field: 'image' },
+        { file_id: 4, related_type: 'api::page.page', field: 'cover' },
+      ]);
+
+      const applied = await inTransaction((trx) =>
+        db.schema.updateRows(trx, {
+          table: 'files_related_mph',
+          guardColumn: 'field',
+          where: { field: 'cover', related_type: 'api::article.article' },
+          set: { field: 'image' },
+        })
+      );
+
+      expect(applied).toBe(true);
+      expect(
+        await db
+          .connection('files_related_mph')
+          .select('file_id', 'related_type', 'field')
+          .orderBy('file_id')
+      ).toEqual([
+        { file_id: 2, related_type: 'api::article.article', field: 'image' },
+        { file_id: 3, related_type: 'api::page.page', field: 'image' },
+        { file_id: 4, related_type: 'api::page.page', field: 'cover' },
+      ]);
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining('[rename migration] removed 1 orphan row(s)')
+      );
+    });
+
+    it('does not log a removal when there are no orphan rows', async () => {
+      await db.connection.schema.createTable('articles_cmps', (table) => {
+        table.increments('id');
+        table.string('field');
+      });
+      await db.connection('articles_cmps').insert([{ field: 'hero' }]);
+
+      await inTransaction((trx) =>
+        db.schema.updateRows(trx, {
+          table: 'articles_cmps',
+          where: { field: 'hero' },
+          set: { field: 'banner' },
+        })
+      );
+
+      expect(await db.connection('articles_cmps').select('field')).toEqual([{ field: 'banner' }]);
+      expect(logger.info).not.toHaveBeenCalledWith(expect.stringContaining('orphan'));
+    });
+
     it('is a quiet no-op when the table or guard column does not exist', async () => {
       const missingTable = await inTransaction((trx) =>
         db.schema.updateRows(trx, {
@@ -246,6 +334,31 @@ describe('schema rename helpers (sqlite)', () => {
       expect(logger.info).toHaveBeenCalledWith(
         expect.stringContaining('column "articles_cmps.field" does not exist')
       );
+    });
+  });
+
+  describe('renameTable index names', () => {
+    it('drops indexes named after the old table so re-creating it cannot collide', async () => {
+      const { identifiers } = db.metadata;
+      const fk = identifiers.getFkIndexName('articles_a_lnk');
+      const invFk = identifiers.getInverseFkIndexName('articles_a_lnk');
+      const unique = identifiers.getUniqueIndexName('articles_a_lnk');
+
+      await db.connection.schema.createTable('articles_a_lnk', (table) => {
+        table.increments('id');
+        table.integer('article_id');
+        table.integer('tag_id');
+        table.index(['article_id'], fk);
+        table.index(['tag_id'], invFk);
+        table.unique(['article_id', 'tag_id'], { indexName: unique });
+      });
+
+      await inTransaction((trx) =>
+        db.schema.renameTable(trx, { from: 'articles_a_lnk', to: 'articles_b_lnk' })
+      );
+
+      const indexes = await db.dialect.schemaInspector.getIndexes('articles_b_lnk');
+      expect(indexes).toEqual([]);
     });
   });
 });

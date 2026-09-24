@@ -88,6 +88,7 @@ const createStrapiMock = ({
   useTypescriptMigrations = false,
   naming,
   schema,
+  customFields = {},
 }: {
   metas?: Record<string, any>;
   migrationsDir?: string;
@@ -98,7 +99,10 @@ const createStrapiMock = ({
   // used by the builder to distinguish e.g. media from components/dynamic zones
   // that share the same morph-join-table metadata shape, to resolve which owners
   // reference a renamed component, and to detect type changes.
+  // Merged over a schema derived from the metadata attributes.
   schema?: Record<string, Record<string, Record<string, unknown>>>;
+  // registered custom fields by uid (`strapi.get('custom-fields')`)
+  customFields?: Record<string, { type: string }>;
 } = {}) => {
   const metadata = new Map<string, any>(Object.entries(metas));
 
@@ -113,9 +117,23 @@ const createStrapiMock = ({
   (metadata as any).naming = namingRules;
   (metadata as any).identifiers = { FIELD_COLUMN: 'field' };
 
+  const SCHEMA_KEYS = ['type', 'relation', 'target', 'component', 'repeatable'];
+  const schemaFromMeta = (meta: any) =>
+    Object.fromEntries(
+      Object.entries(meta.attributes ?? {}).map(([name, attribute]: [string, any]) => [
+        name,
+        Object.fromEntries(
+          SCHEMA_KEYS.filter((key) => key in attribute).map((k) => [k, attribute[k]])
+        ),
+      ])
+    );
+
   const models: Record<string, { attributes: Record<string, unknown> }> = {};
+  for (const [uid, meta] of Object.entries(metas)) {
+    models[uid] = { attributes: schemaFromMeta(meta) };
+  }
   for (const [uid, attrs] of Object.entries(schema ?? {})) {
-    models[uid] = { attributes: attrs };
+    models[uid] = { attributes: { ...models[uid]?.attributes, ...attrs } };
   }
 
   const db = {
@@ -145,6 +163,18 @@ const createStrapiMock = ({
           appRoot ?? (migrationsDir ? path.dirname(path.dirname(migrationsDir)) : process.cwd()),
       },
     },
+    get: jest.fn((name: string) =>
+      name === 'custom-fields'
+        ? {
+            get(uid: string) {
+              if (!customFields[uid]) {
+                throw new Error(`Could not find Custom Field: ${uid}`);
+              }
+              return customFields[uid];
+            },
+          }
+        : undefined
+    ),
     log: { info: jest.fn(), warn: jest.fn(), error: jest.fn() },
   } as any;
 };
@@ -361,6 +391,80 @@ describe('MigrationBuilder', () => {
         expect(isCompatibleRename(undefined, { type: 'integer' })).toBe(true);
         expect(isCompatibleRename({ type: 'string' }, undefined)).toBe(true);
       });
+
+      it('requires the same direction for relations', () => {
+        const manyWay = { type: 'relation', relation: 'oneToMany', target: 'api::tag.tag' };
+        const bidirectional = { ...manyWay, targetAttribute: 'article' };
+
+        // `manyWay` and a bidirectional `oneToMany` share `relation: 'oneToMany'`.
+        expect(isCompatibleRename(manyWay, bidirectional)).toBe(false);
+        expect(isCompatibleRename(bidirectional, manyWay)).toBe(false);
+        // The live schema carries `inversedBy`, the payload `targetAttribute`.
+        expect(isCompatibleRename({ ...manyWay, inversedBy: 'article' }, bidirectional)).toBe(true);
+        expect(isCompatibleRename({ ...manyWay, mappedBy: 'articles' }, bidirectional)).toBe(true);
+      });
+
+      it('compares storage types through resolveType and requires the same custom field', () => {
+        const resolveType = (attribute: { type?: string; customField?: string }) =>
+          attribute.customField ? 'string' : attribute.type;
+        const live = { type: 'string', customField: 'plugin::color.color' };
+        const payload = { type: 'customField', customField: 'plugin::color.color' };
+
+        expect(isCompatibleRename(live, payload)).toBe(false);
+        expect(isCompatibleRename(live, payload, resolveType)).toBe(true);
+        expect(
+          isCompatibleRename(live, { ...payload, customField: 'plugin::other.field' }, resolveType)
+        ).toBe(false);
+        expect(isCompatibleRename({ type: 'string' }, payload, resolveType)).toBe(false);
+      });
+    });
+
+    describe('custom fields', () => {
+      const customFieldSchema = {
+        'api::article.article': {
+          oldTitle: { type: 'string', customField: 'plugin::color.color' },
+        },
+      };
+      const customFields = {
+        'plugin::color.color': { type: 'string' },
+        'plugin::other.field': { type: 'string' },
+      };
+
+      it('accepts renaming a custom field sent as customField over its underlying type', () => {
+        const strapi = createStrapiMock({
+          metas: scalarMeta,
+          schema: customFieldSchema,
+          customFields,
+        });
+        const builder = createMigrationBuilder({ strapi });
+        builder.addRenameAttribute('api::article.article', {
+          oldName: 'oldTitle',
+          newName: 'shade',
+          newAttribute: { type: 'customField', customField: 'plugin::color.color' },
+        });
+
+        expect(builder.getUnsupported()).toHaveLength(0);
+        expect(columnRenamesOf(builder)).toEqual([['old_title', 'shade']]);
+      });
+
+      it('refuses a switch to another custom field on the same underlying type', () => {
+        const strapi = createStrapiMock({
+          metas: scalarMeta,
+          schema: customFieldSchema,
+          customFields,
+        });
+        const builder = createMigrationBuilder({ strapi });
+        builder.addRenameAttribute('api::article.article', {
+          oldName: 'oldTitle',
+          newName: 'shade',
+          newAttribute: { type: 'customField', customField: 'plugin::other.field' },
+        });
+
+        expect(builder.getUnsupported()).toEqual([
+          expect.objectContaining({ oldName: 'oldTitle', reason: 'type-changed' }),
+        ]);
+        expect(columnRenamesOf(builder)).toEqual([]);
+      });
     });
   });
 
@@ -454,9 +558,9 @@ describe('MigrationBuilder', () => {
       const shiftMeta = {
         'api::foo.foo': {
           tableName: 'foos',
+          // `colB` is free (a live `colB` would make the first hop target-occupied).
           attributes: {
             colA: { type: 'string', columnName: 'col_a' },
-            colB: { type: 'string', columnName: 'col_b' },
             colC: { type: 'string', columnName: 'col_c' },
           },
         },
@@ -855,6 +959,129 @@ describe('MigrationBuilder', () => {
       expect(builder.hasChanges()).toBe(false);
       expect(builder.getUnsupported()).toEqual([
         expect.objectContaining({ oldName: 'tags', reason: 'type-changed' }),
+      ]);
+    });
+  });
+
+  describe('system and non-configurable attributes', () => {
+    const systemMeta = {
+      'api::article.article': {
+        tableName: 'articles',
+        attributes: {
+          title: { type: 'string', columnName: 'title' },
+          documentId: { type: 'string', columnName: 'document_id' },
+          createdBy: {
+            type: 'relation',
+            relation: 'oneToOne',
+            joinColumn: { name: 'created_by_id' },
+          },
+          locale: { type: 'string', columnName: 'locale' },
+          internal: { type: 'string', columnName: 'internal' },
+          // inverse side of a bidirectional join-column relation
+          profile: {
+            type: 'relation',
+            relation: 'oneToOne',
+            mappedBy: 'article',
+            joinColumn: { name: 'id' },
+          },
+        },
+      },
+    };
+    const systemSchema = {
+      'api::article.article': {
+        title: { type: 'string' },
+        documentId: { type: 'string' },
+        createdBy: {
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'admin::user',
+          configurable: false,
+          visible: false,
+        },
+        locale: { type: 'string', configurable: false, visible: false },
+        internal: { type: 'string', configurable: false },
+        profile: {
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'api::profile.profile',
+          mappedBy: 'article',
+        },
+      },
+    };
+
+    it.each(['documentId', 'createdBy', 'locale', 'internal'])(
+      'refuses to rename %s and emits no operation',
+      (oldName) => {
+        const strapi = createStrapiMock({ metas: systemMeta, schema: systemSchema });
+        const builder = createMigrationBuilder({ strapi });
+        builder.addRenameAttribute('api::article.article', { oldName, newName: 'renamed' });
+
+        expect(builder.getUnsupported()).toEqual([
+          expect.objectContaining({ oldName, reason: 'unsupported-type' }),
+        ]);
+        expect(builder.getOperations()).toEqual([]);
+      }
+    );
+
+    it('refuses an attribute that is in the metadata but not in the schema', () => {
+      const strapi = createStrapiMock({ metas: systemMeta, schema: systemSchema });
+      (strapi.contentTypes['api::article.article'].attributes as any).title = undefined;
+      const builder = createMigrationBuilder({ strapi });
+      builder.addRenameAttribute('api::article.article', { oldName: 'title', newName: 'heading' });
+
+      expect(builder.getUnsupported()).toEqual([
+        expect.objectContaining({ oldName: 'title', reason: 'attribute-not-found' }),
+      ]);
+      expect(builder.getOperations()).toEqual([]);
+    });
+
+    it('skips the inverse side of a join-column relation (it owns no column)', () => {
+      const strapi = createStrapiMock({ metas: systemMeta, schema: systemSchema });
+      const builder = createMigrationBuilder({ strapi });
+      builder.addRenameAttribute('api::article.article', { oldName: 'profile', newName: 'bio' });
+
+      expect(builder.getUnsupported()).toHaveLength(0);
+      expect(builder.getOperations()).toEqual([]);
+    });
+  });
+
+  describe('chains that reuse a name', () => {
+    const chainMeta = {
+      'api::article.article': {
+        tableName: 'articles',
+        attributes: {
+          oldTitle: { type: 'string', columnName: 'old_title' },
+          views: { type: 'integer', columnName: 'views' },
+        },
+      },
+    };
+
+    it('checks each hop against the definition of the field it produces', () => {
+      const strapi = createStrapiMock({ metas: chainMeta });
+      const builder = createMigrationBuilder({ strapi });
+
+      // What the schema service sends for `a -> b, b -> c, x -> b`: only the last
+      // hop onto `heading` carries `heading`'s final (integer) definition.
+      builder.addRenameAttribute('api::article.article', {
+        oldName: 'oldTitle',
+        newName: 'heading',
+      });
+      builder.addRenameAttribute('api::article.article', {
+        oldName: 'heading',
+        newName: 'summary2',
+        newAttribute: { type: 'string' },
+      });
+      builder.addRenameAttribute('api::article.article', {
+        oldName: 'views',
+        newName: 'heading',
+        newAttribute: { type: 'integer' },
+      });
+
+      expect(builder.getUnsupported()).toHaveLength(0);
+      expect(columnRenamesOf(builder)).toEqual([
+        ['old_title', 'heading'],
+        ['heading', 'summary_2'],
+        ['views', 'heading'],
       ]);
     });
   });

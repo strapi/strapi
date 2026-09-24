@@ -170,6 +170,57 @@ describe('Schema', () => {
     test('rejects a null searchable property', () => {
       expect(() => validateUpdateSchema(schemaWithSearchable(null))).toThrow();
     });
+
+    describe('renames', () => {
+      const schemaWithRenames = (renames: unknown) => ({
+        data: {
+          contentTypes: [
+            {
+              action: 'update',
+              uid: 'api::article.article',
+              displayName: 'Article',
+              draftAndPublish: false,
+              kind: 'collectionType',
+              renames,
+              attributes: [{ action: 'update', name: 'heading', properties: { type: 'string' } }],
+            },
+          ],
+        },
+      });
+
+      test('accepts valid rename hops', () => {
+        expect(
+          validateUpdateSchema(schemaWithRenames([{ oldName: 'title', newName: 'heading' }]))
+        ).toMatchObject({
+          data: { contentTypes: [{ renames: [{ oldName: 'title', newName: 'heading' }] }] },
+        });
+      });
+
+      test.each([
+        ['a newline in the new name', { oldName: 'title', newName: 'heading\nprocess.exit(1)' }],
+        ['a line separator in the new name', { oldName: 'title', newName: 'heading\u2028x' }],
+        [
+          'a name that does not match the attribute name rules',
+          { oldName: 'title', newName: '1x' },
+        ],
+        ['an empty name', { oldName: '', newName: 'heading' }],
+        ['a name longer than 64 characters', { oldName: 'title', newName: 'a'.repeat(65) }],
+        ['a reserved name', { oldName: 'title', newName: 'id' }],
+        ['a reserved old name', { oldName: 'documentId', newName: 'heading' }],
+        ['a hop that does not change the name', { oldName: 'title', newName: 'title' }],
+      ])('rejects %s', (_label, hop) => {
+        expect(() => validateUpdateSchema(schemaWithRenames([hop]))).toThrow();
+      });
+
+      test('rejects more than 200 hops', () => {
+        const hops = Array.from({ length: 201 }, (_value, index) => ({
+          oldName: `field${index}`,
+          newName: `field${index + 1}`,
+        }));
+
+        expect(() => validateUpdateSchema(schemaWithRenames(hops))).toThrow();
+      });
+    });
   });
 
   describe('maxLengthGreaterThanMinLength', () => {

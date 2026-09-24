@@ -8,6 +8,7 @@ import { createMigrationBuilder } from './migration-builder';
 import type { RenameAttributeDefinition, UnsupportedRename } from './migration-builder';
 import { finalizeSchemaMutation, rollbackSchemaMutation } from './schema-mutation';
 import { getService } from '../utils';
+import { validateUpdateSchema } from '../controllers/validation/schema';
 import type { Schema as CTBSchema } from '../controllers/validation/schema';
 import type { AttributeRenameMigrationMode } from '../config';
 import {
@@ -112,15 +113,28 @@ const collectRenames = (schema: CTBSchema): CollectedRename[] => {
     entries
       .filter((entry) => entry.action === 'update' && Array.isArray(entry.renames))
       .forEach((entry) => {
-        entry.renames!.forEach((hop) => {
+        // Only the last hop onto a name produces the field that carries the
+        // final definition: in `a -> b, b -> c, x -> b` the first `b` is `a`'s
+        // intermediate name and the final `b` is `x`'s field.
+        const lastHopByNewName = new Map<string, number>();
+        entry.renames!.forEach((hop, index) => {
+          if (hop.newName) {
+            lastHopByNewName.set(hop.newName, index);
+          }
+        });
+
+        entry.renames!.forEach((hop, index) => {
           if (hop.oldName && hop.newName && hop.oldName !== hop.newName) {
             // The definition the field ends up with in this save, so the builder
             // can refuse hops that also change the field's storage (type,
-            // relation target, component…). Intermediate hops of a chain have no
-            // matching attribute and are checked when the chain completes.
-            const newAttribute = entry.attributes?.find(
-              (attribute) => attribute.action !== 'delete' && attribute.name === hop.newName
-            )?.properties;
+            // relation target, component…). Intermediate hops of a chain get no
+            // definition and are checked when the chain completes.
+            const newAttribute =
+              lastHopByNewName.get(hop.newName) === index
+                ? entry.attributes?.find(
+                    (attribute) => attribute.action !== 'delete' && attribute.name === hop.newName
+                  )?.properties
+                : undefined;
 
             renames.push({
               uid: entry.uid,
@@ -144,7 +158,7 @@ const describeUnsupportedReason = (reason: UnsupportedRename['reason']): string 
     case 'type-changed':
       return 'the field type, relation or component also changed';
     case 'unsupported-type':
-      return 'polymorphic/morph relations are not supported';
+      return 'the field type cannot be migrated (e.g. polymorphic relation)';
     case 'attribute-not-found':
       return 'the field is not in the current schema';
     case 'target-occupied':
@@ -204,6 +218,9 @@ const generateRenameMigrations = async (schema: CTBSchema): Promise<string | nul
  * resolver via `generateRenameMigrations`), so the migration is resolved against
  * the pre-reload `strapi.db.metadata` exactly like the admin save. The caller is
  * responsible for not reloading before this resolves (the CLI simply exits).
+ *
+ * Unlike the admin, there is no one to confirm a data-losing rename, so it
+ * refuses before touching the schema when the rename cannot be migrated.
  */
 export const renameAttribute = async (
   uid: string,
@@ -218,6 +235,12 @@ export const renameAttribute = async (
 
   if (oldName === newName) {
     throw new ApplicationError(`Cannot rename "${oldName}" to itself`);
+  }
+
+  if (getAttributeRenameMigrationMode() === 'never') {
+    throw new ApplicationError(
+      'Rename migrations are disabled (`renameMigrations.attributes: never`); rename the field in the Content-Type Builder instead'
+    );
   }
 
   const contentType = (strapi.contentTypes as Record<string, any>)[uid];
@@ -244,11 +267,37 @@ export const renameAttribute = async (
     ? (formattedSchema.components as Record<string, any>)[uid]
     : (formattedSchema.contentTypes as Record<string, any>)[uid];
 
+  // Custom fields are exposed with their underlying type; the admin sends them
+  // back as `customField` so the schema file keeps them as custom fields.
+  const toPayloadProperties = (properties: Record<string, any>) =>
+    properties.customField ? { ...properties, type: 'customField' } : properties;
+
   const attributes = entry.attributes.map(({ name, ...properties }: Record<string, any>) => ({
     action: 'update',
     name: name === oldName ? newName : name,
-    properties,
+    properties: toPayloadProperties(properties),
   }));
+
+  // Dry run: the field keeps its definition, so only the rename itself can be
+  // refused (system attribute, unsupported relation, occupied target…).
+  const { name: _name, ...oldProperties } = entry.attributes.find(
+    (attribute: Record<string, any>) => attribute.name === oldName
+  ) ?? { name: oldName };
+  const probe = createMigrationBuilder({ strapi });
+  probe.addRenameAttribute(uid, {
+    oldName,
+    newName,
+    newAttribute: toPayloadProperties(oldProperties),
+  });
+
+  const refused = probe.getUnsupported();
+  if (refused.length > 0) {
+    throw new ApplicationError(
+      `Cannot rename "${oldName}" on "${uid}" without losing its data: ${refused
+        .map(({ reason }) => describeUnsupportedReason(reason))
+        .join(', ')}`
+    );
+  }
 
   const renames = [{ oldName, newName }];
 
@@ -287,7 +336,11 @@ export const renameAttribute = async (
         components: [],
       };
 
-  await updateSchema(payload as unknown as CTBSchema);
+  // Same checks as an admin save (name rules, reserved names, snake-case
+  // uniqueness: `fooBar` next to an existing `foo_bar` would share a column).
+  const { data } = await validateUpdateSchema({ data: payload });
+
+  await updateSchema(data as CTBSchema);
 };
 
 const formatAttributes = (model: any) => {
@@ -468,8 +521,6 @@ export const updateSchema = async (schema: CTBSchema) => {
         builder.editContentType({
           ...contentType,
           attributes: contentType.attributes.reduce((acc: any, attr: any) => {
-            // NOTE: handle renaming migrations here by comparing attr name & attr.properties.name
-
             if (attr.action === 'delete') {
               return acc;
             }

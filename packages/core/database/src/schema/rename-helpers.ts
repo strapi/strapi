@@ -26,8 +26,11 @@ import type {
  *   and the rename could not be applied — schema sync will then drop the old
  *   artifact, so this is worth a look);
  * - renames the indexes/constraints whose names embed the renamed identifier
- *   where the dialect supports it, so schema sync sees no diff afterwards. On
- *   other dialects sync drops and recreates them by name, which is safe.
+ *   where the dialect supports it (Postgres), so schema sync sees no diff
+ *   afterwards. On other dialects it drops them instead and schema sync
+ *   re-creates them under the new name. Leaving them under the old name is not
+ *   an option: sync only drops indexes it tracked on a table of the same name,
+ *   so re-adding the old table/column later would collide with them.
  */
 
 export type RenameSkipReason = 'source-missing' | 'target-exists';
@@ -63,24 +66,27 @@ export const createRenameHelpers = ({ db }: RenameHelpersDeps) => {
   };
 
   /**
-   * Renames every index / constraint from the `pairs` list that exists on
-   * `table`, when the dialect can do so in place. Returns silently otherwise.
+   * Brings every index / constraint from the `pairs` list that exists on
+   * `table` in line with a rename: renamed in place when the dialect can do so,
+   * dropped otherwise (schema sync then re-creates it under the new name).
    */
-  const renameSchemaObjects = async (
+  const syncSchemaObjectNames = async (
     trx: Knex,
     table: string,
     pairs: Array<{ from: string; to: string }>
   ): Promise<void> => {
-    if (!db.dialect.canRenameSchemaObjects()) {
-      return;
-    }
+    const canRename = db.dialect.canRenameSchemaObjects();
 
     for (const { from, to } of pairs) {
       if (from === to) {
         continue;
       }
 
-      await db.dialect.renameSchemaObject(trx, { table, from, to });
+      if (canRename) {
+        await db.dialect.renameSchemaObject(trx, { table, from, to });
+      } else {
+        await db.dialect.dropSchemaObject(trx, { table, name: from });
+      }
     }
   };
 
@@ -111,7 +117,7 @@ export const createRenameHelpers = ({ db }: RenameHelpersDeps) => {
         table.renameColumn(op.from, op.to);
       });
 
-      await renameSchemaObjects(trx, op.table, [
+      await syncSchemaObjectNames(trx, op.table, [
         {
           from: identifiers.getIndexName([op.table, op.from]),
           to: identifiers.getIndexName([op.table, op.to]),
@@ -162,7 +168,7 @@ export const createRenameHelpers = ({ db }: RenameHelpersDeps) => {
         (name) => identifiers.getIdColumnIndexName(name),
       ];
 
-      await renameSchemaObjects(
+      await syncSchemaObjectNames(
         trx,
         op.to,
         derived.map((derive) => ({ from: derive(op.from), to: derive(op.to) }))
@@ -190,6 +196,22 @@ export const createRenameHelpers = ({ db }: RenameHelpersDeps) => {
       if (!(await hasColumn(trx, op.table, guardColumn))) {
         logSkip(comment, `column "${op.table}.${guardColumn}" does not exist`, 'source-missing');
         return false;
+      }
+
+      // Rows already carrying the target value are orphans (left behind when
+      // an attribute with the target name was deleted earlier). Updating would
+      // merge them into the renamed field and resurrect deleted content, so
+      // they go first. Scope: every `where` key except the renamed column(s).
+      const scope = Object.fromEntries(
+        Object.entries(op.where).filter(([key]) => !(key in op.set))
+      );
+      const removed = await tableOf(trx, op.table)
+        .where({ ...scope, ...op.set })
+        .delete();
+      if (removed > 0) {
+        db.logger.info(
+          `[rename migration] removed ${removed} orphan row(s) already matching ${JSON.stringify(op.set)} in "${op.table}" before: ${comment}`
+        );
       }
 
       await tableOf(trx, op.table).where(op.where).update(op.set);

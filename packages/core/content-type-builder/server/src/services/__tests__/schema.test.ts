@@ -1123,6 +1123,27 @@ describe('Content Type Builder - Schema service', () => {
       ]);
     });
 
+    it('attaches the final definition only to the last hop onto a name', async () => {
+      const schema = schemaWithRenames([
+        { oldName: 'a', newName: 'b' },
+        { oldName: 'b', newName: 'c' },
+        { oldName: 'x', newName: 'b' },
+      ]);
+      (schema.contentTypes[0] as any).attributes = [
+        { action: 'update', name: 'b', properties: { type: 'integer' } },
+        { action: 'update', name: 'c', properties: { type: 'string' } },
+      ];
+
+      await updateSchema(schema);
+
+      // The first `b` is `a`'s intermediate name; the final `b` is `x`'s field.
+      expect(migrationBuilderMock.addRenameAttribute.mock.calls).toEqual([
+        ['api::article.article', { oldName: 'a', newName: 'b', newAttribute: undefined }],
+        ['api::article.article', { oldName: 'b', newName: 'c', newAttribute: { type: 'string' } }],
+        ['api::article.article', { oldName: 'x', newName: 'b', newAttribute: { type: 'integer' } }],
+      ]);
+    });
+
     it('does not pick a deleted attribute up as the new definition', async () => {
       const schema = schemaWithRenames([{ oldName: 'title', newName: 'heading' }]);
       (schema.contentTypes[0] as any).attributes = [{ action: 'delete', name: 'heading' }];
@@ -1248,14 +1269,70 @@ describe('Content Type Builder - Schema service', () => {
       expect(builderServiceMock.writeFiles).toHaveBeenCalledTimes(1);
     });
 
-    it('does not generate a migration when renameMigrations is never', async () => {
+    it('refuses to rename when renameMigrations is never, before touching the schema', async () => {
       renameMode = 'never';
       seedContentType();
 
-      await renameAttribute('api::article.article', 'title', 'heading');
+      await expect(renameAttribute('api::article.article', 'title', 'heading')).rejects.toThrow(
+        /renameMigrations\.attributes: never/
+      );
 
       expect(migrationBuilderMock.addRenameAttribute).not.toHaveBeenCalled();
-      expect(builderServiceMock.editContentType).toHaveBeenCalledTimes(1);
+      expect(builderServiceMock.editContentType).not.toHaveBeenCalled();
+      expect(builderServiceMock.writeFiles).not.toHaveBeenCalled();
+    });
+
+    it('refuses a rename the migration cannot carry, before touching the schema', async () => {
+      seedContentType();
+      migrationBuilderMock.getUnsupported.mockReturnValueOnce([
+        {
+          uid: 'api::article.article',
+          oldName: 'title',
+          newName: 'heading',
+          reason: 'unsupported-type',
+        },
+      ]);
+
+      await expect(renameAttribute('api::article.article', 'title', 'heading')).rejects.toThrow(
+        /without losing its data: the field type cannot be migrated/
+      );
+
+      expect(builderServiceMock.editContentType).not.toHaveBeenCalled();
+      expect(builderServiceMock.writeFiles).not.toHaveBeenCalled();
+    });
+
+    it('runs the payload through the update-schema validation', async () => {
+      seedContentType();
+      (global.strapi as any).contentTypes['api::article.article'].attributes.foo_bar = {
+        type: 'string',
+      };
+
+      // `fooBar` and `foo_bar` would share one column.
+      await expect(renameAttribute('api::article.article', 'title', 'fooBar')).rejects.toThrow();
+
+      expect(builderServiceMock.editContentType).not.toHaveBeenCalled();
+      expect(builderServiceMock.writeFiles).not.toHaveBeenCalled();
+    });
+
+    it('sends custom fields back as customField, like the admin', async () => {
+      seedContentType();
+      (global.strapi as any).contentTypes['api::article.article'].attributes.color = {
+        type: 'string',
+        customField: 'plugin::color-picker.color',
+      };
+
+      await renameAttribute('api::article.article', 'color', 'shade');
+
+      expect(migrationBuilderMock.addRenameAttribute).toHaveBeenCalledWith('api::article.article', {
+        oldName: 'color',
+        newName: 'shade',
+        newAttribute: { type: 'customField', customField: 'plugin::color-picker.color' },
+      });
+      const editArg = jest.mocked(builderServiceMock.editContentType).mock.calls[0][0] as any;
+      expect(editArg.attributes.shade).toEqual({
+        type: 'customField',
+        customField: 'plugin::color-picker.color',
+      });
     });
 
     it('throws when the uid is unknown', async () => {

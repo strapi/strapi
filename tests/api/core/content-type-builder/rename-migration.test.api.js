@@ -1034,3 +1034,455 @@ describe('Content Type Builder - rename migrations disabled', () => {
     expect(body.results[0].heading ?? null).toBeNull();
   });
 });
+
+describe('Content Type Builder - bidirectional relation renames keep their links', () => {
+  // Renaming either side of a bidirectional relation must keep the owning side
+  // (and therefore the join table) where it is. Renaming the inverse side used
+  // to make it the owner, so sync created a new, empty join table.
+  const CAT_UID = 'api::bicat.bicat';
+  const ART_UID = 'api::biart.biart';
+
+  const relation = (relationType, target, targetAttribute) => ({
+    type: 'relation',
+    relation: relationType,
+    target,
+    targetAttribute,
+  });
+
+  // Current attribute names, updated as the tests rename them.
+  const names = {
+    cats: 'cats',
+    arts: 'arts',
+    related: 'related',
+    relatedBy: 'relatedBy',
+    lead: 'lead',
+    leadArts: 'leadArts',
+    feature: 'feature',
+    featuredIn: 'featuredIn',
+  };
+
+  const artAttributes = (action = 'update') => [
+    { action, name: 'name', properties: { type: 'string' } },
+    { action, name: names.cats, properties: relation('manyToMany', CAT_UID, names.arts) },
+    { action, name: names.lead, properties: relation('manyToOne', CAT_UID, names.leadArts) },
+    { action, name: names.feature, properties: relation('oneToOne', CAT_UID, names.featuredIn) },
+    { action, name: names.related, properties: relation('manyToMany', ART_UID, names.relatedBy) },
+    { action, name: names.relatedBy, properties: relation('manyToMany', ART_UID, names.related) },
+  ];
+
+  const catAttributes = () => [
+    { action: 'update', name: 'name', properties: { type: 'string' } },
+    { action: 'update', name: names.arts, properties: relation('manyToMany', ART_UID, names.cats) },
+    {
+      action: 'update',
+      name: names.leadArts,
+      properties: relation('oneToMany', ART_UID, names.lead),
+    },
+    {
+      action: 'update',
+      name: names.featuredIn,
+      properties: relation('oneToOne', ART_UID, names.feature),
+    },
+  ];
+
+  const updateArt = (renames) =>
+    updateSchema({
+      contentTypes: [
+        {
+          action: 'update',
+          uid: ART_UID,
+          displayName: 'Bi Art',
+          draftAndPublish: false,
+          renames,
+          attributes: artAttributes(),
+        },
+      ],
+      components: [],
+    });
+
+  const updateCat = (renames) =>
+    updateSchema({
+      contentTypes: [
+        {
+          action: 'update',
+          uid: CAT_UID,
+          displayName: 'Bi Cat',
+          draftAndPublish: false,
+          renames,
+          attributes: catAttributes(),
+        },
+      ],
+      components: [],
+    });
+
+  const findOne = (uid, documentId, populate) =>
+    strapi.documents(uid).findOne({ documentId, populate });
+
+  const joinTableOf = (uid, attribute) =>
+    strapi.db.metadata.get(uid).attributes[attribute].joinTable.name;
+
+  let catDocId;
+  let firstArtDocId;
+  let secondArtDocId;
+
+  beforeAll(async () => {
+    strapi = await createStrapiInstance();
+    rq = await createAuthRequest({ strapi });
+
+    await updateSchema({
+      contentTypes: [
+        {
+          action: 'create',
+          uid: CAT_UID,
+          displayName: 'Bi Cat',
+          singularName: 'bicat',
+          pluralName: 'bicats',
+          kind: 'collectionType',
+          draftAndPublish: false,
+          attributes: [{ action: 'create', name: 'name', properties: { type: 'string' } }],
+        },
+        {
+          action: 'create',
+          uid: ART_UID,
+          displayName: 'Bi Art',
+          singularName: 'biart',
+          pluralName: 'biarts',
+          kind: 'collectionType',
+          draftAndPublish: false,
+          attributes: artAttributes('create'),
+        },
+      ],
+      components: [],
+    });
+    await restart();
+
+    const cat = await strapi.documents(CAT_UID).create({ data: { name: 'Cat' } });
+    catDocId = cat.documentId;
+
+    const first = await strapi.documents(ART_UID).create({
+      data: { name: 'First', cats: [catDocId], lead: catDocId, feature: catDocId },
+    });
+    firstArtDocId = first.documentId;
+
+    const second = await strapi.documents(ART_UID).create({
+      data: { name: 'Second', related: [firstArtDocId] },
+    });
+    secondArtDocId = second.documentId;
+  });
+
+  afterAll(async () => {
+    await updateSchema({
+      contentTypes: [
+        { action: 'delete', uid: ART_UID },
+        { action: 'delete', uid: CAT_UID },
+      ],
+      components: [],
+    });
+    await strapi.destroy();
+    await builder.cleanup();
+  });
+
+  test('renaming the owning side of a many-to-many keeps the links', async () => {
+    names.cats = 'categories';
+    const res = await updateArt([{ oldName: 'cats', newName: 'categories' }]);
+    expect(res.statusCode).toBe(200);
+
+    await restart();
+
+    expect(strapi.contentTypes[ART_UID].attributes.categories).toMatchObject({
+      inversedBy: 'arts',
+    });
+    const art = await findOne(ART_UID, firstArtDocId, ['categories']);
+    expect(art.categories.map((c) => c.documentId)).toEqual([catDocId]);
+    const cat = await findOne(CAT_UID, catDocId, ['arts']);
+    expect(cat.arts.map((a) => a.documentId)).toEqual([firstArtDocId]);
+  });
+
+  test('renaming the inverse side of a many-to-many keeps it inverse and keeps the links', async () => {
+    const joinTable = joinTableOf(ART_UID, 'categories');
+
+    names.arts = 'articles';
+    const res = await updateCat([{ oldName: 'arts', newName: 'articles' }]);
+    expect(res.statusCode).toBe(200);
+
+    await restart();
+
+    expect(strapi.contentTypes[CAT_UID].attributes.articles).toMatchObject({
+      mappedBy: 'categories',
+    });
+    expect(strapi.contentTypes[CAT_UID].attributes.articles).not.toHaveProperty('inversedBy');
+    expect(strapi.contentTypes[ART_UID].attributes.categories).toMatchObject({
+      inversedBy: 'articles',
+    });
+    // Still owned by the article side: same join table.
+    expect(joinTableOf(ART_UID, 'categories')).toBe(joinTable);
+
+    const cat = await findOne(CAT_UID, catDocId, ['articles']);
+    expect(cat.articles.map((a) => a.documentId)).toEqual([firstArtDocId]);
+    const art = await findOne(ART_UID, firstArtDocId, ['categories']);
+    expect(art.categories.map((c) => c.documentId)).toEqual([catDocId]);
+  });
+
+  test('renaming a side of a self-referencing many-to-many keeps the links', async () => {
+    names.related = 'linked';
+    const res = await updateArt([{ oldName: 'related', newName: 'linked' }]);
+    expect(res.statusCode).toBe(200);
+
+    await restart();
+
+    const second = await findOne(ART_UID, secondArtDocId, ['linked']);
+    expect(second.linked.map((a) => a.documentId)).toEqual([firstArtDocId]);
+    const first = await findOne(ART_UID, firstArtDocId, ['relatedBy']);
+    expect(first.relatedBy.map((a) => a.documentId)).toEqual([secondArtDocId]);
+  });
+
+  test('renaming many-to-one and one-to-one owners keeps the links', async () => {
+    names.lead = 'mainCat';
+    names.feature = 'highlight';
+    const res = await updateArt([
+      { oldName: 'lead', newName: 'mainCat' },
+      { oldName: 'feature', newName: 'highlight' },
+    ]);
+    expect(res.statusCode).toBe(200);
+
+    await restart();
+
+    const art = await findOne(ART_UID, firstArtDocId, ['mainCat', 'highlight']);
+    expect(art.mainCat.documentId).toBe(catDocId);
+    expect(art.highlight.documentId).toBe(catDocId);
+
+    const cat = await findOne(CAT_UID, catDocId, ['leadArts', 'featuredIn']);
+    expect(cat.leadArts.map((a) => a.documentId)).toEqual([firstArtDocId]);
+    expect(cat.featuredIn.documentId).toBe(firstArtDocId);
+  });
+});
+
+describe('Content Type Builder - relation renames that reuse a join table name', () => {
+  // A renamed join table used to keep indexes named after its old name on
+  // SQLite/MySQL (and the FK index on Postgres). Creating a table with the old
+  // name again then failed on every boot with "index … already exists".
+  const TAG_UID = 'api::reusetag.reusetag';
+  const OWNER_UID = 'api::reuseowner.reuseowner';
+
+  const m2m = { type: 'relation', relation: 'manyToMany', target: TAG_UID };
+
+  const updateOwner = ({ renames, attributes }) =>
+    updateSchema({
+      contentTypes: [
+        {
+          action: 'update',
+          uid: OWNER_UID,
+          displayName: 'Reuse Owner',
+          draftAndPublish: false,
+          renames,
+          attributes: [
+            { action: 'update', name: 'name', properties: { type: 'string' } },
+            ...attributes,
+          ],
+        },
+      ],
+      components: [],
+    });
+
+  const linkedTags = async (documentId, attribute) => {
+    const owner = await strapi.documents(OWNER_UID).findOne({ documentId, populate: [attribute] });
+    return owner[attribute].map((tag) => tag.name).sort();
+  };
+
+  let ownerDocId;
+
+  beforeAll(async () => {
+    strapi = await createStrapiInstance();
+    rq = await createAuthRequest({ strapi });
+
+    await updateSchema({
+      contentTypes: [
+        {
+          action: 'create',
+          uid: TAG_UID,
+          displayName: 'Reuse Tag',
+          singularName: 'reusetag',
+          pluralName: 'reusetags',
+          kind: 'collectionType',
+          draftAndPublish: false,
+          attributes: [{ action: 'create', name: 'name', properties: { type: 'string' } }],
+        },
+        {
+          action: 'create',
+          uid: OWNER_UID,
+          displayName: 'Reuse Owner',
+          singularName: 'reuseowner',
+          pluralName: 'reuseowners',
+          kind: 'collectionType',
+          draftAndPublish: false,
+          attributes: [
+            { action: 'create', name: 'name', properties: { type: 'string' } },
+            { action: 'create', name: 'first', properties: m2m },
+            { action: 'create', name: 'second', properties: m2m },
+          ],
+        },
+      ],
+      components: [],
+    });
+    await restart();
+
+    const red = await strapi.documents(TAG_UID).create({ data: { name: 'red' } });
+    const blue = await strapi.documents(TAG_UID).create({ data: { name: 'blue' } });
+    const owner = await strapi.documents(OWNER_UID).create({
+      data: { name: 'Owner', first: [red.documentId], second: [blue.documentId] },
+    });
+    ownerDocId = owner.documentId;
+  });
+
+  afterAll(async () => {
+    await updateSchema({
+      contentTypes: [
+        { action: 'delete', uid: OWNER_UID },
+        { action: 'delete', uid: TAG_UID },
+      ],
+      components: [],
+    });
+    await strapi.destroy();
+    await builder.cleanup();
+  });
+
+  test('swapping two relations in one save survives two restarts', async () => {
+    const res = await updateOwner({
+      renames: [
+        { oldName: 'first', newName: 'tmp' },
+        { oldName: 'second', newName: 'first' },
+        { oldName: 'tmp', newName: 'second' },
+      ],
+      attributes: [
+        { action: 'update', name: 'first', properties: m2m },
+        { action: 'update', name: 'second', properties: m2m },
+      ],
+    });
+    expect(res.statusCode).toBe(200);
+
+    await restart();
+    // The second boot is where stale index names used to crash.
+    await restart();
+
+    expect(await linkedTags(ownerDocId, 'first')).toEqual(['blue']);
+    expect(await linkedTags(ownerDocId, 'second')).toEqual(['red']);
+  });
+
+  test('renaming a relation, then re-adding its old name in a second save, survives two restarts', async () => {
+    const renamed = await updateOwner({
+      renames: [{ oldName: 'first', newName: 'third' }],
+      attributes: [
+        { action: 'update', name: 'third', properties: m2m },
+        { action: 'update', name: 'second', properties: m2m },
+      ],
+    });
+    expect(renamed.statusCode).toBe(200);
+    await restart();
+
+    const readded = await updateOwner({
+      renames: [],
+      attributes: [
+        { action: 'update', name: 'third', properties: m2m },
+        { action: 'update', name: 'second', properties: m2m },
+        { action: 'create', name: 'first', properties: m2m },
+      ],
+    });
+    expect(readded.statusCode).toBe(200);
+
+    await restart();
+    await restart();
+
+    expect(await linkedTags(ownerDocId, 'third')).toEqual(['blue']);
+    expect(await linkedTags(ownerDocId, 'first')).toEqual([]);
+  });
+});
+
+describe('Content Type Builder - rename:field service', () => {
+  // `strapi rename:field` calls this service; it rebuilds the update payload from
+  // the formatted schema, so the payload must pass the admin's validation.
+  const CLI_UID = 'api::cli-rename.cli-rename';
+
+  const renameField = (oldName, newName) =>
+    strapi
+      .plugin('content-type-builder')
+      .service('schema')
+      .renameAttribute(CLI_UID, oldName, newName);
+
+  let docId;
+
+  beforeAll(async () => {
+    strapi = await createStrapiInstance();
+    rq = await createAuthRequest({ strapi });
+
+    await updateSchema({
+      contentTypes: [
+        {
+          action: 'create',
+          uid: CLI_UID,
+          displayName: 'Cli Rename',
+          singularName: 'cli-rename',
+          pluralName: 'cli-renames',
+          kind: 'collectionType',
+          draftAndPublish: true,
+          attributes: [
+            { action: 'create', name: 'title', properties: { type: 'string', required: true } },
+            {
+              action: 'create',
+              name: 'kind',
+              properties: { type: 'enumeration', enum: ['a', 'b'], default: 'a' },
+            },
+            {
+              action: 'create',
+              name: 'parent',
+              properties: {
+                type: 'relation',
+                relation: 'manyToOne',
+                target: CLI_UID,
+                targetAttribute: 'children',
+              },
+            },
+          ],
+        },
+      ],
+      components: [],
+    });
+    await restart();
+
+    const entry = await strapi.documents(CLI_UID).create({ data: { title: 'Hello' } });
+    docId = entry.documentId;
+  });
+
+  afterAll(async () => {
+    strapi.config.set(
+      ['plugin::content-type-builder', 'renameMigrations', 'attributes'],
+      'prompt-before-save'
+    );
+    await updateSchema({ contentTypes: [{ action: 'delete', uid: CLI_UID }], components: [] });
+    await strapi.destroy();
+    await builder.cleanup();
+  });
+
+  test('renames a field and writes the migration', async () => {
+    await renameField('title', 'heading');
+
+    await restart();
+
+    const entry = await strapi.documents(CLI_UID).findOne({ documentId: docId });
+    expect(entry.heading).toBe('Hello');
+    expect(strapi.contentTypes[CLI_UID].attributes.parent).toMatchObject({
+      inversedBy: 'children',
+    });
+  });
+
+  test('refuses system attributes and disabled rename migrations before touching the schema', async () => {
+    const files = listRenameMigrationFiles();
+
+    await expect(renameField('publishedAt', 'releasedAt')).rejects.toThrow();
+
+    strapi.config.set(['plugin::content-type-builder', 'renameMigrations', 'attributes'], 'never');
+    await expect(renameField('heading', 'headline')).rejects.toThrow(/never/);
+
+    expect(listRenameMigrationFiles()).toEqual(files);
+    expect(strapi.contentTypes[CLI_UID].attributes).toHaveProperty('heading');
+  });
+});

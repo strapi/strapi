@@ -1,6 +1,9 @@
 import path from 'node:path';
 
+import { contentTypes as contentTypesUtils } from '@strapi/utils';
 import type { Core } from '@strapi/types';
+
+import { isReservedAttributeName } from '../builder';
 
 /**
  * The CTB-level attribute definition of the *new* side of a rename hop (the
@@ -13,6 +16,11 @@ export interface RenameAttributeDefinition {
   target?: string;
   component?: string;
   repeatable?: boolean;
+  customField?: string;
+  targetAttribute?: string | null;
+  inversedBy?: string;
+  mappedBy?: string;
+  configurable?: boolean;
   [key: string]: unknown;
 }
 
@@ -44,29 +52,58 @@ export interface UnsupportedRename {
 }
 
 /**
+ * Whether a relation definition has a counterpart on its target. The live
+ * schema carries `inversedBy` / `mappedBy`; the CTB payload carries
+ * `targetAttribute`.
+ */
+const isBidirectionalRelation = (attribute: RenameAttributeDefinition): boolean =>
+  Boolean(attribute.inversedBy || attribute.mappedBy || attribute.targetAttribute);
+
+/**
  * Whether the storage of `oldAttribute` can host `newAttribute` after a plain
  * rename of its physical artifact. Anything else must go through the legacy
  * drop-and-recreate path, so the hop is reported as `type-changed`.
+ *
+ * `resolveType` maps a definition to its storage type. The builder passes one
+ * that resolves custom fields (sent as `type: 'customField'` by the admin, but
+ * already converted to their underlying type in the live schema).
  */
 export const isCompatibleRename = (
   oldAttribute: RenameAttributeDefinition | undefined,
-  newAttribute: RenameAttributeDefinition | undefined
+  newAttribute: RenameAttributeDefinition | undefined,
+  resolveType: (attribute: RenameAttributeDefinition) => string | undefined = (attribute) =>
+    attribute.type
 ): boolean => {
+  const oldType = oldAttribute ? resolveType(oldAttribute) : undefined;
+  const newType = newAttribute ? resolveType(newAttribute) : undefined;
+
   // Without both definitions there is nothing to compare; the metadata-based
   // classification is the only guard we have.
-  if (!oldAttribute?.type || !newAttribute?.type) {
+  if (!oldAttribute || !newAttribute || !oldType || !newType) {
     return true;
   }
 
-  if (oldAttribute.type !== newAttribute.type) {
+  if (oldType !== newType) {
     return false;
   }
 
-  switch (newAttribute.type) {
+  // A different custom field on the same underlying type is still a different
+  // field.
+  if (
+    (oldAttribute.customField || newAttribute.customField) &&
+    oldAttribute.customField !== newAttribute.customField
+  ) {
+    return false;
+  }
+
+  switch (newType) {
     case 'relation':
+      // `manyWay` and a bidirectional `oneToMany` share `relation: 'oneToMany'`,
+      // but switching between them moves join-table ownership.
       return (
         oldAttribute.relation === newAttribute.relation &&
-        oldAttribute.target === newAttribute.target
+        oldAttribute.target === newAttribute.target &&
+        isBidirectionalRelation(oldAttribute) === isBidirectionalRelation(newAttribute)
       );
     case 'component':
       return (
@@ -122,6 +159,32 @@ type Resolved =
 interface MigrationBuilderDeps {
   strapi: Core.Strapi;
 }
+
+/**
+ * The database metadata shapes the builder reads, derived from `Core.Strapi`
+ * so the Content-Type Builder does not depend on `@strapi/database` directly.
+ */
+type ModelMeta = NonNullable<ReturnType<Core.Strapi['db']['metadata']['get']>>;
+
+/**
+ * A metadata attribute, widened with the relation/join keys the builder
+ * inspects (the metadata union only declares them on some members).
+ */
+type AttributeMeta = ModelMeta['attributes'][string] & {
+  relation?: string;
+  mappedBy?: string;
+  morphColumn?: unknown;
+  joinColumn?: { name?: string };
+  joinTable?: JoinTableMeta;
+};
+
+interface JoinTableMeta {
+  name?: string;
+  on?: Record<string, unknown>;
+  morphColumn?: { typeColumn?: { name?: string } };
+}
+
+type SchemaModel = Parameters<typeof contentTypesUtils.getNonVisibleAttributes>[0];
 
 const MIGRATION_NAME = 'rename-fields';
 
@@ -226,14 +289,41 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
     entries.set(name, resolved);
   };
 
-  const isMorphRelation = (attribute: any): boolean =>
-    typeof attribute?.relation === 'string' && attribute.relation.startsWith('morph');
+  const isMorphRelation = (attribute: AttributeMeta): boolean =>
+    typeof attribute.relation === 'string' && attribute.relation.startsWith('morph');
 
-  const schemaAttributeOf = (uid: string, name: string): RenameAttributeDefinition | undefined => {
-    const contentTypes = strapi.contentTypes as Record<string, any> | undefined;
-    const components = strapi.components as Record<string, any> | undefined;
-    const model = contentTypes?.[uid] ?? components?.[uid];
-    return model?.attributes?.[name] as RenameAttributeDefinition | undefined;
+  const schemaModelOf = (
+    uid: string
+  ): { attributes?: Record<string, RenameAttributeDefinition> } | undefined => {
+    const contentTypes = strapi.contentTypes as Record<string, unknown> | undefined;
+    const components = strapi.components as Record<string, unknown> | undefined;
+    return (contentTypes?.[uid] ?? components?.[uid]) as
+      | { attributes?: Record<string, RenameAttributeDefinition> }
+      | undefined;
+  };
+
+  const schemaAttributeOf = (uid: string, name: string): RenameAttributeDefinition | undefined =>
+    schemaModelOf(uid)?.attributes?.[name];
+
+  /**
+   * The type an attribute is stored as. Custom fields are sent by the admin as
+   * `type: 'customField'`, while the live schema already carries their
+   * underlying type, so both sides are resolved through the registry.
+   */
+  const storageTypeOf = (attribute: RenameAttributeDefinition): string | undefined => {
+    if (attribute.type !== 'customField' && typeof attribute.customField !== 'string') {
+      return attribute.type;
+    }
+
+    try {
+      const customField = strapi.get('custom-fields').get(attribute.customField as string) as
+        | { type?: string }
+        | undefined;
+      return customField?.type ?? attribute.type;
+    } catch {
+      // Unknown custom field (e.g. its plugin was removed).
+      return attribute.type;
+    }
   };
 
   const schemaTypeOf = (uid: string, name: string): string | undefined =>
@@ -250,7 +340,9 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
       return undefined;
     }
     const fileMeta = db.metadata.get('plugin::upload.file');
-    const related = (fileMeta.attributes as Record<string, any>)?.related;
+    const related = fileMeta.attributes?.related as
+      | (AttributeMeta & { morphColumn?: JoinTableMeta['morphColumn'] })
+      | undefined;
     const joinTable = related?.joinTable;
     const morphColumn = joinTable?.morphColumn ?? related?.morphColumn;
     if (!joinTable?.name || !morphColumn?.typeColumn?.name) {
@@ -271,7 +363,7 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
   const classifyMedia = (
     uid: string,
     oldName: string,
-    joinTable: any,
+    joinTable: JoinTableMeta | undefined,
     upload: ReturnType<typeof resolveUploadMorphTable>
   ): Resolved | undefined => {
     // Media: the attribute name is a value in the shared `files_related_morphs`
@@ -298,18 +390,26 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
     };
   };
 
-  const classifyComponent = (oldName: string, joinTable: any): Resolved | undefined => {
-    if (!joinTable?.on || typeof joinTable.on !== 'object') {
+  const classifyComponent = (
+    oldName: string,
+    joinTable: JoinTableMeta | undefined
+  ): Resolved | undefined => {
+    const on = joinTable?.on;
+    if (!joinTable?.name || !on || typeof on !== 'object') {
       return undefined;
     }
-    const fieldColumn = Object.keys(joinTable.on).find((key) => joinTable.on[key] === oldName);
+    const fieldColumn = Object.keys(on).find((key) => on[key] === oldName);
     if (!fieldColumn) {
       return undefined;
     }
     return { kind: 'component', table: joinTable.name, fieldColumn, from: oldName };
   };
 
-  const classifyRelation = (meta: any, attribute: any, joinTable: any): Resolved => {
+  const classifyRelation = (
+    meta: ModelMeta,
+    attribute: AttributeMeta,
+    joinTable: JoinTableMeta | undefined
+  ): Resolved => {
     // Polymorphic morph relations need shared-table handling and are not
     // creatable through the CTB UI, so they are left unsupported.
     if (isMorphRelation(attribute) || attribute.morphColumn) {
@@ -317,7 +417,12 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
     }
 
     // Join column on the owner's own table (`<field>_id`), e.g. useJoinTable:false.
+    // The inverse side of a bidirectional join-column relation also carries a
+    // `joinColumn` (pointing at `id`), but owns no column.
     if (attribute.joinColumn?.name && !joinTable) {
+      if (attribute.mappedBy) {
+        return { kind: 'skip' };
+      }
       return { kind: 'joinColumn', table: meta.tableName, from: attribute.joinColumn.name };
     }
 
@@ -333,9 +438,33 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
     return { kind: 'unsupported', reason: 'unsupported-type' };
   };
 
+  /**
+   * Whether the schema lets users rename this attribute at all. System
+   * attributes (`documentId`, `createdBy`, `locale`, `publishedAt`, review
+   * workflow stages…) are also in the metadata and would otherwise be renamed
+   * away, only for sync to re-add them empty.
+   */
+  const isRenamableAttribute = (uid: string, name: string): boolean => {
+    const schemaAttribute = schemaAttributeOf(uid, name);
+    if (schemaAttribute?.configurable === false || isReservedAttributeName(name)) {
+      return false;
+    }
+
+    const model = schemaModelOf(uid);
+    return !contentTypesUtils.getNonVisibleAttributes(model as SchemaModel).includes(name);
+  };
+
   const classify = (uid: string, oldName: string): Resolved => {
+    if (!schemaAttributeOf(uid, oldName)) {
+      return { kind: 'unsupported', reason: 'attribute-not-found' };
+    }
+
+    if (!isRenamableAttribute(uid, oldName)) {
+      return { kind: 'unsupported', reason: 'unsupported-type' };
+    }
+
     const meta = db.metadata.get(uid);
-    const attribute = meta.attributes?.[oldName] as any;
+    const attribute = meta.attributes?.[oldName] as AttributeMeta | undefined;
 
     if (!attribute) {
       return { kind: 'unsupported', reason: 'attribute-not-found' };
@@ -358,7 +487,7 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
     }
 
     // Plain scalar column on the model's own table.
-    if (attribute.columnName) {
+    if ('columnName' in attribute && attribute.columnName) {
       return { kind: 'scalarColumn', table: meta.tableName, from: attribute.columnName };
     }
 
@@ -460,7 +589,10 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
 
     // A rename that also changes the attribute's storage cannot be expressed as a
     // rename of the physical artifact: leave it to the drop-and-recreate path.
-    if (resolved.kind !== 'unsupported' && !isCompatibleRename(oldAttribute, newAttribute)) {
+    if (
+      resolved.kind !== 'unsupported' &&
+      !isCompatibleRename(oldAttribute, newAttribute, storageTypeOf)
+    ) {
       resolved = { kind: 'unsupported', reason: 'type-changed' };
     }
 

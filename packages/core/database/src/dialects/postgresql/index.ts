@@ -85,24 +85,25 @@ export default class PostgresDialect extends Dialect {
       return result.rows.length > 0;
     };
 
-    const isConstraint = await hasConstraint(from);
-    if (!isConstraint && !(await hasIndex(from))) {
-      return false;
+    let renamed = false;
+
+    // Unique constraints back their index with the same name, so renaming the
+    // constraint renames that index too. Foreign-key constraints do not: Strapi
+    // also creates a separate, same-named index on the FK column, which is
+    // renamed in the second step below.
+    if (await hasConstraint(from)) {
+      if (!(await hasConstraint(to)) && !(await hasIndex(to))) {
+        await trx.raw('ALTER TABLE ?? RENAME CONSTRAINT ?? TO ??', [table, from, to]);
+        renamed = true;
+      }
     }
 
-    if ((await hasConstraint(to)) || (await hasIndex(to))) {
-      return false;
-    }
-
-    // Unique and foreign-key constraints back their index with the same name;
-    // renaming the constraint renames that index too.
-    if (isConstraint) {
-      await trx.raw('ALTER TABLE ?? RENAME CONSTRAINT ?? TO ??', [table, from, to]);
-    } else {
+    if ((await hasIndex(from)) && !(await hasIndex(to))) {
       await trx.raw('ALTER INDEX ?? RENAME TO ??', [from, to]);
+      renamed = true;
     }
 
-    return true;
+    return renamed;
   }
 
   getSqlType(type: string) {

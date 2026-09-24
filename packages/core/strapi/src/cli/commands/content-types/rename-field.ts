@@ -42,21 +42,19 @@ const action = async (uid: string, oldName: string, newName: string) => {
     const after = await listMigrationFiles(migrationsDir);
     const created = [...after].filter((file) => !before.has(file));
 
-    console.log(chalk.green(`Renamed "${oldName}" to "${newName}" on ${uid}.`));
-
-    if (created.length > 0) {
-      created.forEach((file) => {
-        console.log(`Generated migration ${path.join(migrationsDir, file)}`);
-      });
-    } else {
-      console.log(
-        chalk.yellow(
-          'No rename migration was generated. This happens when renameMigrations is set to ' +
-            '"never", or when the field has no data to preserve (e.g. an unsupported polymorphic ' +
-            'relation). The field has still been renamed in the schema.'
-        )
+    // The service refuses renames it cannot migrate before touching the schema,
+    // so a rename without a migration file means something went wrong.
+    if (created.length === 0) {
+      throw new Error(
+        `Renamed "${oldName}" to "${newName}" on ${uid}, but no rename migration was written to ${migrationsDir}. Check the schema file before restarting.`
       );
     }
+
+    console.log(chalk.green(`Renamed "${oldName}" to "${newName}" on ${uid}.`));
+
+    created.forEach((file) => {
+      console.log(`Generated migration ${path.join(migrationsDir, file)}`);
+    });
   } finally {
     await app.destroy();
   }

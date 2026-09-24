@@ -55,14 +55,27 @@ describe('rename:field command', () => {
     log.mockRestore();
   });
 
-  it('warns when no migration file is generated', async () => {
+  it('fails when no migration file is generated', async () => {
     (fse.readdir as jest.Mock).mockRejectedValue(new Error('ENOENT'));
     const log = jest.spyOn(console, 'log').mockImplementation(() => {});
 
-    await renameField('api::article.article', 'title', 'heading');
+    await expect(renameField('api::article.article', 'title', 'heading')).rejects.toThrow(
+      /no rename migration was written/
+    );
 
-    expect(log).toHaveBeenCalledWith(expect.stringContaining('No rename migration was generated'));
+    expect(log).not.toHaveBeenCalledWith(expect.stringContaining('Renamed "title"'));
     expect(destroy).toHaveBeenCalled();
     log.mockRestore();
+  });
+
+  it('fails without a migration when the service refuses the rename', async () => {
+    (fse.readdir as jest.Mock).mockResolvedValue([]);
+    renameAttribute.mockRejectedValueOnce(new Error('Rename migrations are disabled'));
+
+    await expect(renameField('api::article.article', 'title', 'heading')).rejects.toThrow(
+      'Rename migrations are disabled'
+    );
+
+    expect(destroy).toHaveBeenCalled();
   });
 });

@@ -76,6 +76,14 @@ const GUARDED_UPDATE_ROWS_MIGRATION = generate([
   },
 ]);
 
+const RENAME_LINK_TABLE_MIGRATION = generate([
+  { kind: 'renameTable', from: 'articles_a_lnk', to: 'articles_b_lnk' },
+]);
+
+const RENAME_FK_COLUMN_MIGRATION = generate([
+  { kind: 'renameColumn', table: 'components', from: 'old_ref', to: 'new_ref' },
+]);
+
 const GUARDED_ORDER_MARKER_MIGRATION = `module.exports = {
   async up(knex) {
     if (await knex.schema.hasTable('internal_order_markers')) {
@@ -181,6 +189,9 @@ const resetMysqlTables = async (db: Database) => {
     'new_articles_tags_links',
     'articles_cmps',
     'internal_order_markers',
+    'articles_a_lnk',
+    'articles_b_lnk',
+    'components',
   ]) {
     await db.connection.schema.dropTableIfExists(table);
   }
@@ -511,6 +522,98 @@ describe.each(drivers)(
       expect(await db.connection('internal_order_markers').select('name')).toEqual([
         { name: 'internal-ran' },
       ]);
+    });
+
+    /**
+     * Mirrors a Strapi join table: a named FK constraint and a same-named index
+     * on the FK column (see `metadata/relations.ts` and `schema/schema.ts`).
+     */
+    const createLinkTable = async (name: string, fkName: string) => {
+      await db!.connection.schema.createTable(name, (table) => {
+        table.increments('id');
+        table.integer('article_id').unsigned();
+        table.index(['article_id'], fkName);
+        table
+          .foreign('article_id', fkName)
+          .references('id')
+          .inTable('articles')
+          .onDelete('CASCADE');
+      });
+    };
+
+    const listSchemaObjectNames = async (table: string) => {
+      const indexes = await db!.dialect.schemaInspector.getIndexes(table);
+      const foreignKeys = await db!.dialect.schemaInspector.getForeignKeys(table);
+      return [...indexes, ...foreignKeys].map((object) => object.name);
+    };
+
+    it('leaves no index named after a renamed table, so the old name can be re-created', async () => {
+      if (!db) {
+        return;
+      }
+
+      const { identifiers } = db.metadata;
+      const oldFk = identifiers.getFkIndexName('articles_a_lnk');
+      const newFk = identifiers.getFkIndexName('articles_b_lnk');
+
+      writeMigration(workDir, '2026.01.01.00.00.00.rename-fields.js', RENAME_LINK_TABLE_MIGRATION);
+
+      await db.connection.schema.createTable('articles', (table) => {
+        table.increments('id');
+      });
+      await createLinkTable('articles_a_lnk', oldFk);
+
+      await createUserMigrationProvider(db).up();
+
+      expect(await db.connection.schema.hasTable('articles_b_lnk')).toBe(true);
+      const names = await listSchemaObjectNames('articles_b_lnk');
+      expect(names.filter((name) => name.startsWith('articles_a_lnk'))).toEqual([]);
+      if (db.dialect.canRenameSchemaObjects()) {
+        // Postgres renames both the FK constraint and its same-named index.
+        expect(names).toEqual(expect.arrayContaining([newFk]));
+      }
+
+      // What schema sync does next when the same save re-adds the old name
+      // (rename `a -> b`, add a new `a`): must not collide.
+      await expect(createLinkTable('articles_a_lnk', oldFk)).resolves.not.toThrow();
+    });
+
+    it('leaves no index named after a renamed column, so the old name can be re-created', async () => {
+      if (!db) {
+        return;
+      }
+
+      const { identifiers } = db.metadata;
+      const oldFk = identifiers.getFkIndexName(['components', 'old_ref']);
+      const newFk = identifiers.getFkIndexName(['components', 'new_ref']);
+
+      writeMigration(workDir, '2026.01.01.00.00.00.rename-fields.js', RENAME_FK_COLUMN_MIGRATION);
+
+      await db.connection.schema.createTable('articles', (table) => {
+        table.increments('id');
+      });
+      await db.connection.schema.createTable('components', (table) => {
+        table.increments('id');
+        table.integer('old_ref').unsigned();
+        table.index(['old_ref'], oldFk);
+        table.foreign('old_ref', oldFk).references('id').inTable('articles').onDelete('SET NULL');
+      });
+
+      await createUserMigrationProvider(db).up();
+
+      expect(await db.connection.schema.hasColumn('components', 'new_ref')).toBe(true);
+      const names = await listSchemaObjectNames('components');
+      expect(names).not.toContain(oldFk);
+      if (db.dialect.canRenameSchemaObjects()) {
+        expect(names).toEqual(expect.arrayContaining([newFk]));
+      }
+
+      await expect(
+        db.connection.schema.alterTable('components', (table) => {
+          table.integer('old_ref').unsigned();
+          table.index(['old_ref'], oldFk);
+        })
+      ).resolves.not.toThrow();
     });
   }
 );

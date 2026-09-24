@@ -116,7 +116,13 @@ const interpolate = (template: string, values: Record<string, string>): string =
 };
 
 const quote = (value: string): string =>
-  `'${value.replaceAll('\\', String.raw`\\`).replaceAll("'", String.raw`\'`)}'`;
+  `'${value
+    .replaceAll('\\', String.raw`\\`)
+    .replaceAll("'", String.raw`\'`)
+    .replaceAll('\r', String.raw`\r`)
+    .replaceAll('\n', String.raw`\n`)
+    .replaceAll('\u2028', String.raw`\u2028`)
+    .replaceAll('\u2029', String.raw`\u2029`)}'`;
 
 const IDENTIFIER_KEY = /^[A-Za-z_$][\w$]*$/;
 
@@ -128,11 +134,14 @@ const renderObject = (values: Record<string, string>): string => {
     .join(', ')} }`;
 };
 
-export const getOperationComment = (op: MigrationFileOperation): string => {
-  if (op.comment) {
-    return op.comment;
-  }
+/**
+ * Comments are rendered after `//`; a line break (including the JS line
+ * separators U+2028 / U+2029) would end the comment and let the rest run as
+ * code, so every comment is flattened to a single line.
+ */
+const sanitizeComment = (comment: string): string => comment.replace(/[\r\n\u2028\u2029]/g, ' ');
 
+const getDefaultOperationComment = (op: MigrationFileOperation): string => {
   switch (op.kind) {
     case 'renameTable':
       return `Rename table ${op.from} to ${op.to}`;
@@ -142,6 +151,10 @@ export const getOperationComment = (op: MigrationFileOperation): string => {
     default:
       return `Rename column ${op.table}.${op.from} to ${op.to}`;
   }
+};
+
+export const getOperationComment = (op: MigrationFileOperation): string => {
+  return sanitizeComment(op.comment || getDefaultOperationComment(op));
 };
 
 export const renderMigrationFileOperation = (op: MigrationFileOperation): string => {
@@ -210,6 +223,8 @@ interface WriteOptions extends BuildOptions {
   dir?: string;
 }
 
+const MAX_WRITE_ATTEMPTS = 1000;
+
 interface MigrationFileBuilderDeps {
   db: Database;
 }
@@ -244,12 +259,15 @@ export const createMigrationFileBuilder = ({ db }: MigrationFileBuilderDeps) => 
       return [...operations];
     },
 
-    build({ name, format = 'javascript' }: BuildOptions): BuiltMigrationFile | null {
+    build(
+      { name, format = 'javascript' }: BuildOptions,
+      date: Date = new Date()
+    ): BuiltMigrationFile | null {
       if (operations.length === 0) {
         return null;
       }
 
-      const timestamp = getFormattedTimestamp();
+      const timestamp = getFormattedTimestamp(date);
       const content = renderMigrationFile({ timestamp, operations, format });
       const filename = `${timestamp}.${name}.${FILE_EXTENSIONS[format]}`;
 
@@ -257,27 +275,34 @@ export const createMigrationFileBuilder = ({ db }: MigrationFileBuilderDeps) => 
     },
 
     async writeFiles(options: WriteOptions): Promise<string | null> {
-      const built = this.build(options);
-      if (!built) {
-        return null;
-      }
-
       const dir = options.dir ?? resolveMigrationsDir();
-      await fse.ensureDir(dir);
+      const start = Date.now();
 
-      const extension = path.extname(built.filename);
-      const basename = built.filename.slice(0, -extension.length);
+      // On a collision, bump the timestamp by 1ms (filename and header) rather
+      // than suffixing the name: `…000.name-1.js` would sort before
+      // `…000.name.js` and run first.
+      for (let attempt = 0; attempt < MAX_WRITE_ATTEMPTS; attempt += 1) {
+        const built = this.build(options, new Date(start + attempt));
+        if (!built) {
+          return null;
+        }
 
-      let suffix = 0;
-      let filePath = path.join(dir, built.filename);
-      while (await fse.pathExists(filePath)) {
-        suffix += 1;
-        filePath = path.join(dir, `${basename}-${suffix}${extension}`);
+        if (attempt === 0) {
+          await fse.ensureDir(dir);
+        }
+
+        const filePath = path.join(dir, built.filename);
+        if (await fse.pathExists(filePath)) {
+          continue;
+        }
+
+        await fse.writeFile(filePath, built.content, 'utf8');
+        return filePath;
       }
 
-      await fse.writeFile(filePath, built.content, 'utf8');
-
-      return filePath;
+      throw new Error(
+        `Could not find a free migration filename in "${dir}" after ${MAX_WRITE_ATTEMPTS} attempts`
+      );
     },
   };
 };
