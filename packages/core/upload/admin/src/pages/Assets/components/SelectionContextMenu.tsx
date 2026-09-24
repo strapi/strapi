@@ -43,7 +43,7 @@ export const SelectionContextMenu = ({
 }: SelectionContextMenuProps) => {
   const { formatMessage } = useIntl();
   // Move and delete are both `assets.update` server-side — one flag gates both.
-  const { canUpdate } = useMediaLibraryPermissions();
+  const { canUpdate, isLoading: isLoadingPermissions } = useMediaLibraryPermissions();
   const { selectedIds, selectedFolderIds, clear } = useAssetSelection();
   const { currentFolderId } = useFolderNavigation();
   const [isMenuOpen, setIsMenuOpen] = useState(true);
@@ -52,6 +52,9 @@ export const SelectionContextMenu = ({
 
   const count = selectedIds.size + selectedFolderIds.size;
   const isDialogOpen = isMoveOpen || isDeleteOpen;
+  // `canUpdate` is `false` until the RBAC check settles. Closing on that would
+  // dismiss the menu on its first render, before it ever paints.
+  const hasActions = isLoadingPermissions || canUpdate;
 
   const moveItems = useMemo(
     () => buildDragSetFromSelection(selectedIds, selectedFolderIds, locations, currentFolderId),
@@ -67,12 +70,12 @@ export const SelectionContextMenu = ({
 
   // A role that can read but not update has nothing to offer for a selection.
   useEffect(() => {
-    if (!canUpdate) {
+    if (!hasActions) {
       onClose();
     }
-  }, [canUpdate, onClose]);
+  }, [hasActions, onClose]);
 
-  if (!canUpdate) {
+  if (!hasActions) {
     return null;
   }
 
