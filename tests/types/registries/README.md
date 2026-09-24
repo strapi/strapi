@@ -29,7 +29,7 @@ Generated applications use `skipLibCheck: true`, so the consumer programs do too
 case checks the collision limit with both values: incompatible declarations for the same UID
 produce TS2717 even when the registry switch is off; `skipLibCheck` suppresses that error.
 Applications must include only one contract version for each UID. Application overrides belong
-in `Services`, `Configs`, `Controllers`, or `Policies`, separate from package `Default*` entries.
+in `AppServices`, `AppConfigs`, `AppControllers`, or `AppPolicies`, separate from `Package*` entries.
 
 The package checks reject strict activation in emitted declarations and require imports in the
 four providers' public registry contracts to be declared dependencies. That dependency check is

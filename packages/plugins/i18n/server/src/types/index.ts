@@ -16,11 +16,11 @@ declare global {
   namespace Strapi {
     // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace Registries {
-      interface DefaultServices {
+      interface PackageServices {
         'plugin::i18n.locales': LocaleService;
       }
 
-      interface DefaultControllers {
+      interface PackageControllers {
         'plugin::i18n.locales': LocalesController;
         'plugin::i18n.iso-locales': IsoLocalesController;
         'plugin::i18n.content-types': ContentTypesController;

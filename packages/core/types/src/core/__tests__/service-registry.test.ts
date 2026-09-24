@@ -5,7 +5,7 @@ import type { Plugin } from '../plugin';
 import type { Strapi as StrapiInstance } from '../strapi';
 
 // @ts-expect-error Service contract registries are global, not part of the Public registries.
-type BarrelRegistry = PublicRegistries.DefaultServices;
+type BarrelRegistry = PublicRegistries.PackageServices;
 declare const barrelRegistry: BarrelRegistry;
 barrelRegistry satisfies unknown;
 
@@ -18,7 +18,7 @@ declare global {
   namespace Strapi {
     // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace Registries {
-      interface DefaultServices {
+      interface PackageServices {
         'plugin::type-lab.greeting': {
           greet(value: number): number;
           defaultOnly(): void;
@@ -30,7 +30,7 @@ declare global {
         'admin::type-lab': { greet(value: number): number };
       }
 
-      interface Services {
+      interface AppServices {
         'plugin::type-lab.greeting': GreetingService;
         'api::type-lab.greeting': GreetingService;
         'admin::type-lab': GreetingService;
@@ -140,7 +140,7 @@ declare global {
   namespace Strapi {
     // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace Registries {
-      interface DefaultServices {
+      interface PackageServices {
         'plugin::type-lab-other.counter': { total(): number };
       }
     }

@@ -16,12 +16,12 @@ type PluginEntryNames<TUID, TPlugin extends string> = string extends TPlugin
     : never;
 
 type ServiceNames<TPlugin extends string> = PluginEntryNames<
-  keyof Strapi.Registries.Services | keyof Strapi.Registries.DefaultServices,
+  keyof Strapi.Registries.AppServices | keyof Strapi.Registries.PackageServices,
   TPlugin
 >;
 
 type ControllerNames<TPlugin extends string> = PluginEntryNames<
-  keyof Strapi.Registries.Controllers | keyof Strapi.Registries.DefaultControllers,
+  keyof Strapi.Registries.AppControllers | keyof Strapi.Registries.PackageControllers,
   TPlugin
 >;
 

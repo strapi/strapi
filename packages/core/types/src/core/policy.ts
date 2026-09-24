@@ -23,14 +23,14 @@ export type Policy<TConfig = unknown> =
   | PolicyHandler<TConfig>;
 
 /** Policy UIDs that have a registered config contract. */
-type PolicyName = keyof Strapi.Registries.Policies | keyof Strapi.Registries.DefaultPolicies;
+type PolicyName = keyof Strapi.Registries.AppPolicies | keyof Strapi.Registries.PackagePolicies;
 
 /** Resolves application overrides before package defaults. */
 export type PolicyConfigFor<TName extends PolicyName> =
-  TName extends keyof Strapi.Registries.Policies
-    ? Strapi.Registries.Policies[TName]
-    : TName extends keyof Strapi.Registries.DefaultPolicies
-      ? Strapi.Registries.DefaultPolicies[TName]
+  TName extends keyof Strapi.Registries.AppPolicies
+    ? Strapi.Registries.AppPolicies[TName]
+    : TName extends keyof Strapi.Registries.PackagePolicies
+      ? Strapi.Registries.PackagePolicies[TName]
       : never;
 
 /** A reference to a registered policy: its name alone only when its config is optional. */

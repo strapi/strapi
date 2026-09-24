@@ -10,11 +10,11 @@ declare global {
   namespace Strapi {
     // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace Registries {
-      interface DefaultServices {
+      interface PackageServices {
         'plugin::sentry.sentry': SentryService;
       }
 
-      interface DefaultConfigs {
+      interface PackageConfigs {
         'plugin::sentry': SentryConfig;
       }
     }

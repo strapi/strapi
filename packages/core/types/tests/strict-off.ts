@@ -6,28 +6,28 @@ declare global {
   namespace Strapi {
     // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace Registries {
-      interface DefaultServices {
+      interface PackageServices {
         'plugin::legacy.example': { count(): number };
       }
-      interface Services {
+      interface AppServices {
         'plugin::legacy.example': { count(): string };
       }
-      interface DefaultControllers {
+      interface PackageControllers {
         'plugin::legacy.example': { list: Core.ControllerHandler };
       }
-      interface Controllers {
+      interface AppControllers {
         'plugin::legacy.example': { find: Core.ControllerHandler };
       }
-      interface DefaultConfigs {
+      interface PackageConfigs {
         'plugin::legacy': { enabled: boolean };
       }
-      interface Configs {
+      interface AppConfigs {
         'plugin::legacy': { enabled: string };
       }
-      interface DefaultPolicies {
+      interface PackagePolicies {
         'plugin::legacy.hasRole': { role: string };
       }
-      interface Policies {
+      interface AppPolicies {
         'plugin::legacy.hasRole': { roles: string[] };
       }
     }

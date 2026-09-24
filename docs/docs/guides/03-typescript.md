@@ -73,7 +73,7 @@ export type GreetingService = {
 declare global {
   namespace Strapi {
     namespace Registries {
-      interface DefaultServices {
+      interface PackageServices {
         'plugin::greetings.greeting': GreetingService;
       }
     }
@@ -86,8 +86,8 @@ declare global {
 export type * from './types';
 ```
 
-Use `DefaultConfigs` for configuration namespaces such as `plugin::greetings`,
-`DefaultControllers` for full controller UIDs, and `DefaultPolicies` for full policy UIDs.
+Use `PackageConfigs` for configuration namespaces such as `plugin::greetings`,
+`PackageControllers` for full controller UIDs, and `PackagePolicies` for full policy UIDs.
 Each policy entry describes its configuration, or `undefined` if it accepts none.
 Check implementations against their contracts with a type annotation or `satisfies`.
 Declare packages referenced by published contracts as dependencies.
@@ -98,9 +98,10 @@ this guarantee. Do not publish an augmentation of `Settings` through the server 
 Packages with an `exports` map also need a `typesVersions` mapping for `strapi-server` if they
 support the legacy `Node` module resolution mode.
 
-Applications use `Services`, `Configs`, `Controllers`, and `Policies` to add their own contracts
-or replace package defaults. Each application entry replaces the whole default for its key.
-Use one package contract version per UID per program. Conflicting `Default*` declarations fail
+Applications use `AppServices`, `AppConfigs`, `AppControllers`, and `AppPolicies` to add their own
+contracts or replace package contracts. Each application entry replaces the whole package contract
+for its key. Strapi and plugin packages contribute to the corresponding `Package*` registries.
+Use one package contract version per UID per program. Conflicting `Package*` declarations fail
 with TS2717 even with strict contracts disabled. `skipLibCheck` hides the conflict and can make
 the selected contract depend on declaration order.
 
@@ -114,7 +115,7 @@ Handler checking applies whenever this explicit type is used, including with the
 
 With the switch on, typed route policies use the loaded policy registry. Once any policy is
 registered, all referenced policies must be registered. Load every relevant provider and add
-application policies, including `global::` policies, to `Strapi.Registries.Policies`.
+application policies, including `global::` policies, to `Strapi.Registries.AppPolicies`.
 The generator loads enabled plugins' contracts; application policies still need their own
 declarations. Policies with required config must use `{ name, config }`; only policies whose
 config accepts `undefined` can be referenced by name alone. Existing untyped `Core.RouteConfig`

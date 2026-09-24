@@ -7,10 +7,10 @@ export type Controller = Record<string, ControllerHandler>;
 /** Resolves application overrides before package defaults, then falls back to the legacy controller. */
 export type ControllerFor<TUID extends string> = IsStrict extends false
   ? Controller
-  : TUID extends keyof Strapi.Registries.Controllers
-    ? Strapi.Registries.Controllers[TUID]
-    : TUID extends keyof Strapi.Registries.DefaultControllers
-      ? Strapi.Registries.DefaultControllers[TUID]
+  : TUID extends keyof Strapi.Registries.AppControllers
+    ? Strapi.Registries.AppControllers[TUID]
+    : TUID extends keyof Strapi.Registries.PackageControllers
+      ? Strapi.Registries.PackageControllers[TUID]
       : Controller;
 export interface ControllerHandler<TResponse = unknown> {
   (context: Context, next: Next): Promise<TResponse | void> | TResponse | void;

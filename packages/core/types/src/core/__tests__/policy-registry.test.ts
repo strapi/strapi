@@ -7,13 +7,13 @@ declare global {
   namespace Strapi {
     // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace Registries {
-      interface DefaultPolicies {
+      interface PackagePolicies {
         'plugin::policy-lab.isAuthenticated': undefined;
         'plugin::policy-lab.hasRole': { role: string };
         'plugin::policy-lab.hasLevel': { level?: number } | undefined;
       }
 
-      interface Policies {
+      interface AppPolicies {
         'plugin::policy-lab.hasRole': { roles: string[] };
       }
     }

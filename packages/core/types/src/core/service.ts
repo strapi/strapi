@@ -3,10 +3,10 @@ import type { IsStrict } from './strictness';
 /** Resolves application overrides before package defaults, then falls back to the legacy service. */
 export type ServiceFor<TUID extends string> = IsStrict extends false
   ? Service
-  : TUID extends keyof Strapi.Registries.Services
-    ? Strapi.Registries.Services[TUID]
-    : TUID extends keyof Strapi.Registries.DefaultServices
-      ? Strapi.Registries.DefaultServices[TUID]
+  : TUID extends keyof Strapi.Registries.AppServices
+    ? Strapi.Registries.AppServices[TUID]
+    : TUID extends keyof Strapi.Registries.PackageServices
+      ? Strapi.Registries.PackageServices[TUID]
       : Service;
 
 export type Service = {

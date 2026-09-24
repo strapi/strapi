@@ -12,12 +12,12 @@ declare global {
   namespace Strapi {
     // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace Registries {
-      interface DefaultControllers {
+      interface PackageControllers {
         'plugin::controller-lab.items': { list: ControllerHandler; defaultOnly: ControllerHandler };
         'plugin::controller-lab.tags': LabController;
       }
 
-      interface Controllers {
+      interface AppControllers {
         'plugin::controller-lab.items': LabController;
         'api::controller-lab.items': LabController;
       }

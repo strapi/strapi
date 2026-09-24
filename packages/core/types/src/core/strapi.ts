@@ -148,15 +148,15 @@ export interface StrapiFS {
 
 /** Config namespaces that have a registered contract, e.g. `'plugin::my-plugin'`. */
 export type ConfigNamespace =
-  | keyof Strapi.Registries.Configs
-  | keyof Strapi.Registries.DefaultConfigs;
+  | keyof Strapi.Registries.AppConfigs
+  | keyof Strapi.Registries.PackageConfigs;
 
 /** Resolves application overrides before package defaults. */
 export type ConfigFor<TNamespace extends ConfigNamespace> =
-  TNamespace extends keyof Strapi.Registries.Configs
-    ? Strapi.Registries.Configs[TNamespace]
-    : TNamespace extends keyof Strapi.Registries.DefaultConfigs
-      ? Strapi.Registries.DefaultConfigs[TNamespace]
+  TNamespace extends keyof Strapi.Registries.AppConfigs
+    ? Strapi.Registries.AppConfigs[TNamespace]
+    : TNamespace extends keyof Strapi.Registries.PackageConfigs
+      ? Strapi.Registries.PackageConfigs[TNamespace]
       : never;
 
 /** `undefined` when `TValue` can be `null` or `undefined`: lodash `get` resolves through them to `undefined`. */

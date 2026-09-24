@@ -11,7 +11,7 @@ declare global {
   namespace Strapi {
     // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace Registries {
-      interface DefaultConfigs {
+      interface PackageConfigs {
         'plugin::config-lab': { enabled: string; defaultOnly: true };
         'plugin::config-lab-default': LabConfig;
         'plugin::config-lab-nested': {
@@ -21,7 +21,7 @@ declare global {
         };
       }
 
-      interface Configs {
+      interface AppConfigs {
         'plugin::config-lab': LabConfig;
       }
     }

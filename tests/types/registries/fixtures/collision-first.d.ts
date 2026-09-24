@@ -3,7 +3,7 @@ export {};
 declare global {
   namespace Strapi {
     namespace Registries {
-      interface DefaultServices {
+      interface PackageServices {
         'plugin::collision.example': { version: 'first' };
       }
     }

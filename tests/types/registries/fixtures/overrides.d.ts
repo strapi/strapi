@@ -3,11 +3,11 @@ import type { Core } from '@strapi/strapi';
 declare global {
   namespace Strapi {
     namespace Registries {
-      interface Services {
+      interface AppServices {
         'plugin::sentry.sentry': { custom(): 'application' };
       }
 
-      interface Configs {
+      interface AppConfigs {
         'plugin::sentry': {
           dsn: string;
           sendMetadata: boolean;
@@ -15,11 +15,11 @@ declare global {
         };
       }
 
-      interface Controllers {
+      interface AppControllers {
         'plugin::i18n.settings': { custom: Core.ControllerHandler<'application'> };
       }
 
-      interface Policies {
+      interface AppPolicies {
         'admin::hasPermissions': { application: true };
         'global::isOwner': undefined;
       }

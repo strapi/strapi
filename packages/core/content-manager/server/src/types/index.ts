@@ -8,7 +8,7 @@ declare global {
   namespace Strapi {
     // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace Registries {
-      interface DefaultPolicies {
+      interface PackagePolicies {
         'plugin::content-manager.hasPermissions': HasPermissionsConfig | undefined;
       }
     }
