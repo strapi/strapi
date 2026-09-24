@@ -34,15 +34,9 @@ const createKeyStatisticsStrapi = (i18n: I18nMock) => {
     contentTypes: {},
     components: {},
     db: { query: () => ({ count }) },
-    plugin(name: string) {
-      if (name !== 'i18n' || i18n === undefined) {
-        return undefined;
-      }
-
-      return {
-        service: (serviceName: string) =>
-          serviceName === 'locales' ? { count: async () => i18n.locales.length } : undefined,
-      };
+    localization: {
+      isEnabled: () => i18n !== undefined,
+      getLocales: async () => i18n?.locales ?? [],
     },
   } as unknown as Core.Strapi;
 };
