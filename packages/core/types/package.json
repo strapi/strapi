@@ -39,10 +39,14 @@
       "default": "./dist/index.js"
     },
     "./package.json": "./package.json",
-    "./*": "./*"
+    "./*": "./*",
+    "./strict": {
+      "types": "./strict.d.ts"
+    }
   },
   "files": [
-    "dist/"
+    "dist/",
+    "strict.d.ts"
   ],
   "scripts": {
     "build": "run -T npm-run-all clean --parallel build:code build:types",
@@ -88,5 +92,12 @@
   "engines": {
     "node": ">=20.0.0 <=26.x.x",
     "npm": ">=6.0.0"
+  },
+  "typesVersions": {
+    "*": {
+      "strict": [
+        "strict.d.ts"
+      ]
+    }
   }
 }
