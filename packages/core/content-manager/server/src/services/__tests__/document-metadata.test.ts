@@ -8,11 +8,10 @@ const createService = (overrides: Record<string, unknown> = {}) => {
       pluginOptions: { i18n: { localized: true } },
       attributes: {},
     }),
-    plugin: () => ({
-      service: () => ({
-        getDefaultLocale: async () => 'en',
-      }),
-    }),
+    localization: {
+      getDefaultLocale: async () => 'en',
+      getNonLocalizedAttributes: () => [],
+    },
     ...overrides,
   } as unknown as Parameters<typeof documentMetadataServiceFactory>[0]['strapi'];
 
@@ -80,7 +79,11 @@ describe('document-metadata service', () => {
 
     it('no-ops when the i18n plugin is unavailable', async () => {
       const service = createService({
-        plugin: () => undefined,
+        // Inert default of `strapi.localization` when no provider is registered
+        localization: {
+          getDefaultLocale: async () => null,
+          getNonLocalizedAttributes: () => [],
+        },
       });
 
       const result = await service.getAvailableLocales(
@@ -97,13 +100,12 @@ describe('document-metadata service', () => {
 
     it('no-ops when getDefaultLocale throws', async () => {
       const service = createService({
-        plugin: () => ({
-          service: () => ({
-            async getDefaultLocale() {
-              throw new Error('boom');
-            },
-          }),
-        }),
+        localization: {
+          async getDefaultLocale() {
+            throw new Error('boom');
+          },
+          getNonLocalizedAttributes: () => [],
+        },
       });
 
       const result = await service.getAvailableLocales(
@@ -163,13 +165,11 @@ describe('document-metadata service', () => {
 
     it('selects non-localized scalar fields and populates non-localized media fields', async () => {
       const { service, findMany } = createServiceWithFindMany({
-        plugin: () => ({
-          service: () => ({
-            getDefaultLocale: async () => 'en',
-            // `author` is not scalar nor media and `unknown` is not an attribute: both dropped
-            getNonLocalizedAttributes: () => ['title', 'cover', 'author', 'unknown'],
-          }),
-        }),
+        localization: {
+          getDefaultLocale: async () => 'en',
+          // `author` is not scalar nor media and `unknown` is not an attribute: both dropped
+          getNonLocalizedAttributes: () => ['title', 'cover', 'author', 'unknown'],
+        },
       });
 
       await service.getMetadata('api::article.article', {
@@ -212,7 +212,13 @@ describe('document-metadata service', () => {
     };
 
     it('adds no non-localized fields when the i18n plugin is unavailable', async () => {
-      const { service, findMany } = createServiceWithFindMany({ plugin: () => undefined });
+      const { service, findMany } = createServiceWithFindMany({
+        // Inert default of `strapi.localization` when no provider is registered
+        localization: {
+          getDefaultLocale: async () => null,
+          getNonLocalizedAttributes: () => [],
+        },
+      });
 
       await service.getMetadata('api::article.article', {
         id: 1,
@@ -225,14 +231,12 @@ describe('document-metadata service', () => {
 
     it('adds no non-localized fields when getNonLocalizedAttributes throws', async () => {
       const { service, findMany } = createServiceWithFindMany({
-        plugin: () => ({
-          service: () => ({
-            getDefaultLocale: async () => 'en',
-            getNonLocalizedAttributes() {
-              throw new Error('boom');
-            },
-          }),
-        }),
+        localization: {
+          getDefaultLocale: async () => 'en',
+          getNonLocalizedAttributes() {
+            throw new Error('boom');
+          },
+        },
       });
 
       await service.getMetadata('api::article.article', {

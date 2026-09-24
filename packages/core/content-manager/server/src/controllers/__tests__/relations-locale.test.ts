@@ -28,7 +28,7 @@ const tagModel = {
 
 const findOne = jest.fn();
 
-const setupStrapi = (plugins: Record<string, unknown>) => {
+const setupStrapi = (isLocalizedContentType: () => boolean) => {
   global.strapi = {
     getModel: jest.fn((uid: string) => {
       if (uid === ARTICLE_UID) {
@@ -39,8 +39,8 @@ const setupStrapi = (plugins: Record<string, unknown>) => {
       }
       return null;
     }),
+    localization: { isLocalizedContentType: jest.fn(isLocalizedContentType) },
     plugins: {
-      ...plugins,
       'content-manager': {
         services: {
           'permission-checker': {
@@ -85,13 +85,7 @@ describe('extractAndValidateRequestInfo locale handling', () => {
   });
 
   test('filters the source entry and selects the target locale when both are localized', async () => {
-    setupStrapi({
-      i18n: {
-        services: {
-          'content-types': { isLocalizedContentType: jest.fn(() => true) },
-        },
-      },
-    });
+    setupStrapi(() => true);
 
     const info = await relations.extractAndValidateRequestInfo(createCtx(), 'article-doc');
 
@@ -105,13 +99,7 @@ describe('extractAndValidateRequestInfo locale handling', () => {
   });
 
   test('ignores the locale when neither side is localized', async () => {
-    setupStrapi({
-      i18n: {
-        services: {
-          'content-types': { isLocalizedContentType: jest.fn(() => false) },
-        },
-      },
-    });
+    setupStrapi(() => false);
 
     const info = await relations.extractAndValidateRequestInfo(createCtx(), 'article-doc');
 
@@ -124,11 +112,19 @@ describe('extractAndValidateRequestInfo locale handling', () => {
     );
   });
 
-  test('throws when the i18n plugin is not installed', async () => {
-    setupStrapi({});
+  // Previously threw a TypeError because `strapi.plugin('i18n')` was undefined
+  test('treats both sides as not localized when no localization provider is registered', async () => {
+    // Inert default of `strapi.localization` when no provider is registered
+    setupStrapi(() => false);
 
-    await expect(
-      relations.extractAndValidateRequestInfo(createCtx(), 'article-doc')
-    ).rejects.toThrow(TypeError);
+    const info = await relations.extractAndValidateRequestInfo(createCtx(), 'article-doc');
+
+    expect(info.locale).toBe('fr');
+    expect(info.source.isLocalized).toBe(false);
+    expect(info.target.isLocalized).toBe(false);
+    expect(info.fieldsToSelect).not.toContain('locale');
+    expect(findOne).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { documentId: 'article-doc' } })
+    );
   });
 });
