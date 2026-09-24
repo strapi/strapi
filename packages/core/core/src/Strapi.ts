@@ -32,6 +32,7 @@ import getNumberOfDynamicZones from './services/utils/dynamic-zones';
 import getNumberOfConditionalFields from './services/utils/conditional-fields';
 import { FeaturesService, createFeaturesService } from './services/features';
 import { createDocumentService } from './services/document-service';
+import { createLocalizationService } from './services/localization';
 import { createContentSourceMapsService } from './services/content-source-maps';
 
 import { coreStoreModel } from './services/core-store';
@@ -118,6 +119,10 @@ class Strapi extends Container implements Core.Strapi {
 
   get documents(): Modules.Documents.Service {
     return this.get('documents');
+  }
+
+  get localization(): Core.Localization {
+    return this.get('localization');
   }
 
   get features(): FeaturesService {
@@ -300,6 +305,7 @@ class Strapi extends Container implements Core.Strapi {
       .add('entityValidator', entityValidator)
       .add('entityService', () => createEntityService({ strapi: this, db: this.db }))
       .add('documents', () => createDocumentService(this))
+      .add('localization', () => createLocalizationService())
       .add('db', () => {
         const useTSM = this.config.get('database.settings.useTypescriptMigrations') === true;
         const tsDir = useTSM ? tsUtils().resolveOutDirSync(this.dirs.app.root) : null;

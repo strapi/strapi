@@ -2,8 +2,7 @@ import { Input } from './draft-publish';
 
 // if i18N enabled set default locale
 const enableI18n = async ({ oldContentTypes, contentTypes }: Input) => {
-  const { isLocalizedContentType } = strapi.plugin('i18n')?.service('content-types') ?? {};
-  const { getDefaultLocale } = strapi.plugin('i18n')?.service('locales') ?? {};
+  const { isLocalizedContentType, getDefaultLocale } = strapi.localization;
 
   if (!oldContentTypes) {
     return;
@@ -29,8 +28,7 @@ const enableI18n = async ({ oldContentTypes, contentTypes }: Input) => {
 };
 
 const disableI18n = async ({ oldContentTypes, contentTypes }: Input) => {
-  const { isLocalizedContentType } = strapi.plugin('i18n')?.service('content-types') ?? {};
-  const { getDefaultLocale } = strapi.plugin('i18n')?.service('locales') ?? {};
+  const { isLocalizedContentType, getDefaultLocale } = strapi.localization;
 
   if (!oldContentTypes) {
     return;
