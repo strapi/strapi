@@ -277,6 +277,12 @@ describe('Populate', () => {
     beforeEach(() => {
       global.strapi = {
         getModel: jest.fn((uid) => draftCountModels[uid]),
+        localization: {
+          isLocalizedContentType: jest.fn(
+            (model: { pluginOptions?: { i18n?: { localized?: boolean } } }) =>
+              model.pluginOptions?.i18n?.localized === true
+          ),
+        },
       } as any;
     });
 

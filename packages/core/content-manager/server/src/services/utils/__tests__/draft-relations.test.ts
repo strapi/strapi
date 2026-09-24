@@ -79,6 +79,12 @@ describe('draft-relations utils', () => {
           findMany,
         })),
       },
+      localization: {
+        isLocalizedContentType: jest.fn(
+          (model: { pluginOptions?: { i18n?: { localized?: boolean } } }) =>
+            model.pluginOptions?.i18n?.localized === true
+        ),
+      },
     } as any;
 
     beforeEach(() => {
