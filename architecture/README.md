@@ -187,6 +187,12 @@ also build and inspect the rendered views, including sequence mode and drill-dow
 
 ## Maintaining the guide
 
+The repository includes the LikeC4 DSL skill in [`.ai/skills/likec4-dsl`](../.ai/skills/likec4-dsl/SKILL.md),
+originally installed from `likec4.dev`. Run `yarn ai:sync` from the repository root to make it available
+through `.agents/skills/`, `.claude/skills/` and `.cursor/skills/`. Commit changes to `.ai/skills/`;
+the generated tool links are local-only. Use the skill for DSL syntax and tooling, and this README
+for the Strapi-specific modeling decisions and reading paths.
+
 The files form one shared model. `specification.c4` defines the available notation; `model/`
 defines reusable elements and relationships; `views/` selects and presents them for particular
 questions. A file boundary is an authoring convenience, not a software or deployment boundary.
