@@ -19,6 +19,7 @@ const strictPackages = [
   'packages/core/types',
   'packages/core/core',
   'packages/core/upload',
+  'packages/core/strapi',
 ];
 const resolutions = {
   Bundler: { moduleResolution: ts.ModuleResolutionKind.Bundler, module: ts.ModuleKind.ESNext },
@@ -108,7 +109,7 @@ function compiler(options) {
   };
   return (names, overrides = {}) =>
     ts.createProgram({
-      rootNames: names.map((name) => fixture(name)),
+      rootNames: names.map((name) => (path.isAbsolute(name) ? name : fixture(name))),
       options: { ...options, ...overrides },
       host,
     });
@@ -160,6 +161,112 @@ test('published registry contracts reference declared dependencies', () => {
 for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
   const options = { ...baseOptions, ...resolutionOptions };
   const compile = compiler(options);
+
+  test(`${resolution}: ordinary Strapi entry does not activate strict registries`, () => {
+    assertClean(compile(['normal-entry.ts']), `${resolution}, ordinary Strapi entry`);
+  });
+
+  test(`${resolution}: one application import enables bundled contracts`, () => {
+    assertClean(
+      compile([
+        'strapi-strict.d.ts',
+        'generated.d.ts',
+        'common.ts',
+        'strict.ts',
+        'bundled-providers.ts',
+      ]),
+      `${resolution}, single application opt-in`
+    );
+  });
+
+  test(`${resolution}: application opt-in works through compilerOptions.types`, () => {
+    assertClean(
+      compile(['generated.d.ts', 'common.ts', 'strict.ts', 'bundled-providers.ts'], {
+        types: ['@strapi/strapi/strict-types'],
+      }),
+      `${resolution}, application compilerOptions.types opt-in`
+    );
+  });
+
+  test(`${resolution}: generated plugin contracts follow installation without activating strictness`, async () => {
+    const { generators } = require('@strapi/typescript-utils');
+    const appDir = fs.mkdtempSync(path.join(__dirname, '.generated-'));
+    const generatedFile = path.join(appDir, 'types/generated/plugins.d.ts');
+    const manifest = readManifest('packages/plugins/sentry');
+    let enabledPlugins = {
+      sentry: {
+        enabled: true,
+        pathToPlugin: path.join(repository, 'packages/plugins/sentry'),
+        packageInfo: manifest,
+        info: { packageName: manifest.name },
+      },
+    };
+    const strapi = {
+      get plugins() {
+        return Object.fromEntries(Object.keys(enabledPlugins).map((name) => [name, {}]));
+      },
+      config: {
+        get(name) {
+          return name === 'enabledPlugins' ? enabledPlugins : { [manifest.name]: manifest.version };
+        },
+      },
+    };
+    const generate = () =>
+      generators.generate({
+        strapi,
+        pwd: appDir,
+        artifacts: { plugins: true },
+        logger: { silent: true },
+      });
+
+    try {
+      fs.writeFileSync(
+        path.join(appDir, 'tsconfig.json'),
+        JSON.stringify({
+          compilerOptions: {
+            module: ts.ModuleKind[resolutionOptions.module],
+            moduleResolution: resolution,
+          },
+        })
+      );
+      await generate();
+      assert.equal(
+        fs.readFileSync(generatedFile, 'utf8'),
+        "import type {} from '@strapi/plugin-sentry/strapi-server';\n"
+      );
+      assertClean(
+        compiler(options)([
+          generatedFile,
+          'normal-entry.ts',
+          'generated.d.ts',
+          'common.ts',
+          'permissive.ts',
+        ]),
+        `${resolution}, generated contracts without opt-in`
+      );
+      assertClean(
+        compiler(options)([
+          generatedFile,
+          'strapi-strict.d.ts',
+          'generated.d.ts',
+          'common.ts',
+          'strict.ts',
+          'defaults.ts',
+        ]),
+        `${resolution}, generated optional contracts with one opt-in`
+      );
+
+      enabledPlugins = {};
+      await generate();
+      assert.equal(fs.readFileSync(generatedFile, 'utf8'), 'export {};\n');
+      assertClean(
+        compiler(options)([generatedFile, 'strapi-strict.d.ts', 'bundled-providers.ts']),
+        `${resolution}, removed plugin contracts after regeneration`
+      );
+    } finally {
+      fs.rmSync(appDir, { recursive: true, force: true });
+    }
+  });
 
   test(`${resolution}: normal package entries resolve to emitted declarations`, () => {
     for (const directory of [...providers, 'packages/core/types', 'packages/core/strapi']) {

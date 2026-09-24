@@ -9,6 +9,14 @@ entries. They check Bundler, Node, and NodeNext resolution, with the registry sw
 Each resolver also checks all 24 declaration orders for generated schemas, the i18n provider,
 the Sentry provider, and application overrides. Separate cases check provider defaults and
 activation through `compilerOptions.types: ["@strapi/types/strict"]`.
+
+The application entry `@strapi/strapi/strict-types` is checked through both a declaration-file
+import and `compilerOptions.types`, without individual provider imports. These cases verify
+that bundled contracts are available while optional Sentry contracts remain unloaded. The
+ordinary Strapi entry is checked separately to catch accidental activation.
+The built generator also produces imports for the real Sentry package. Consumer programs check
+that generation leaves strict mode off, the single opt-in enables Sentry's contracts, and
+regeneration removes its contracts when the plugin is no longer enabled.
 Language service checks preserve suggestions for config namespaces, plugin config keys, and
 plugin service names with either switch setting.
 

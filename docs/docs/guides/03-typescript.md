@@ -6,32 +6,41 @@ title: TypeScript
 
 Strapi packages can publish service, configuration, controller, and policy contracts through
 `Strapi.Registries`. Loading these contracts does not change an application's lookup types.
-Applications enable them with a single setting in a declaration file included by their tsconfig:
+Applications enable them with one import in a declaration file included by their tsconfig:
 
 ```ts
 // types/strict.d.ts
-import type {} from '@strapi/i18n/strapi-server';
-import type {} from '@strapi/admin/strapi-server';
+import type {} from '@strapi/strapi/strict-types';
+```
 
-declare global {
-  namespace Strapi {
-    namespace Registries {
-      interface Settings {
-        strict: true;
-      }
-    }
+This types-only entry enables contracts across the TypeScript program and loads the bundled
+admin, content-manager, and i18n contracts. It changes no runtime behavior. The ordinary
+`@strapi/strapi` entry and new application templates leave strict mode disabled.
+
+Alternatively, append the entry to `compilerOptions.types`:
+
+```json
+{
+  "compilerOptions": {
+    "types": ["node", "@strapi/strapi/strict-types"]
   }
 }
 ```
 
-Load the normal server types of each plugin whose contracts the program needs. The setting
-enables contracts across the TypeScript program; it does not discover installed plugins or
-change runtime behavior. New application templates leave it disabled.
+Keep existing entries: this option replaces automatic inclusion of ambient type packages and
+does not merge arrays from an extended tsconfig.
 
-Alternatively, append `@strapi/types/strict` to `compilerOptions.types`. Keep existing entries,
-such as `node`: this option replaces automatic inclusion of ambient type packages and does not
-merge arrays from an extended tsconfig. Strapi's participating server packages use this option
-for their own checks and builds. They do not import the activation file from published source.
+Run `strapi ts:generate-types` to load optional plugins' contracts. Generation also runs during
+`strapi develop`. The generated `types/generated/plugins.d.ts` imports the normal server types
+of enabled plugins with resolvable server declaration files. Include the generated directory
+in your app's tsconfig. Plugins without server declarations are skipped. Regenerate after changing
+plugin configuration or dependencies; removed plugins' references are removed from the file.
+These generated imports do not enable strict mode on their own.
+
+Strapi's participating server packages use the lower-level `@strapi/types/strict` entry in
+their own tsconfigs. They do not depend on the application entry or import activation from
+their published source. Both entries enable the same `Strapi.Registries.Settings.strict`
+type setting.
 
 With strict contracts enabled, registered literal names resolve to their contracts:
 
@@ -106,9 +115,10 @@ Handler checking applies whenever this explicit type is used, including with the
 With the switch on, typed route policies use the loaded policy registry. Once any policy is
 registered, all referenced policies must be registered. Load every relevant provider and add
 application policies, including `global::` policies, to `Strapi.Registries.Policies`.
-The generator does not yet collect a complete policy inventory automatically. Policies with
-required config must use `{ name, config }`; only policies whose config accepts `undefined`
-can be referenced by name alone. Existing untyped `Core.RouteConfig` remains permissive.
+The generator loads enabled plugins' contracts; application policies still need their own
+declarations. Policies with required config must use `{ name, config }`; only policies whose
+config accepts `undefined` can be referenced by name alone. Existing untyped `Core.RouteConfig`
+remains permissive.
 
 ## Localization integration
 
