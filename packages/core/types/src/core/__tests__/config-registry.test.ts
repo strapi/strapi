@@ -136,6 +136,47 @@ declare const defaultChecks: [
   Expect<Equal<typeof pluginNullDefault, number | null>>,
 ];
 defaultChecks satisfies unknown;
+
+// A spread default may omit its argument entirely, even if its supplied value is always defined.
+declare const conditionalDefaults: [] | [number];
+declare const optionalDefaults: [number?];
+const conditionalPort = strapi.config.get(
+  'plugin::config-lab-nested.provider.options.port',
+  ...conditionalDefaults
+);
+const pluginConditionalPort = strapi
+  .plugin('config-lab-nested')
+  .config('provider.options.port', ...conditionalDefaults);
+const optionalSpreadPort = strapi.config.get(
+  'plugin::config-lab-nested.provider.options.port',
+  ...optionalDefaults
+);
+const pluginOptionalSpreadPort = strapi
+  .plugin('config-lab-nested')
+  .config('provider.options.port', ...optionalDefaults);
+const explicitTuplePort = strapi.config.get<
+  unknown,
+  'plugin::config-lab-nested.provider.options.port',
+  [] | [number]
+>('plugin::config-lab-nested.provider.options.port');
+const pluginExplicitTuplePort = strapi
+  .plugin('config-lab-nested')
+  .config<unknown, 'provider.options.port', [] | [number]>('provider.options.port');
+declare const tupleChecks: [
+  Expect<Equal<typeof conditionalPort, number | undefined>>,
+  Expect<Equal<typeof pluginConditionalPort, number | undefined>>,
+  Expect<Equal<typeof optionalSpreadPort, number | undefined>>,
+  Expect<Equal<typeof pluginOptionalSpreadPort, number | undefined>>,
+  Expect<Equal<typeof explicitTuplePort, number | undefined>>,
+  Expect<Equal<typeof pluginExplicitTuplePort, number | undefined>>,
+];
+tupleChecks satisfies unknown;
+// @ts-expect-error Explicit tuple types cannot promise a default without supplying it.
+strapi.config.get<unknown, 'plugin::config-lab-nested.nullable', [number]>(
+  'plugin::config-lab-nested.nullable'
+);
+// @ts-expect-error Plugin explicit tuples must supply the promised default too.
+strapi.plugin('config-lab-nested').config<unknown, 'nullable', [number]>('nullable');
 // @ts-expect-error A supplied default does not replace null.
 nullableDefault satisfies number;
 // @ts-expect-error A default that may be undefined cannot guarantee a defined result.
