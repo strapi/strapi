@@ -691,6 +691,34 @@ describe('AssetsPage main-area context menu', () => {
     }
   });
 
+  it('opens the asset actions on a table row too', async () => {
+    respondWithAssets([createAsset(1, 'image.png')]);
+    // Grid is the default view.
+    window.localStorage.setItem('STRAPI_UPLOAD_LIBRARY_VIEW', '1');
+
+    try {
+      renderPage();
+      await waitForCreatePermission();
+
+      // The row's own actions trigger only appears once RBAC has settled, and
+      // the menu is gated on the same flags — right-clicking before then opens
+      // an empty popup.
+      await screen.findAllByRole('button', { name: 'More actions' });
+
+      // eslint-disable-next-line testing-library/no-node-access
+      const row = (await screen.findByText('image.png')).closest('[role="row"]');
+      fireEvent.contextMenu(row!, { clientX: 40, clientY: 40 });
+
+      // `findBy`: a freshly mounted menu reads the permissions itself, so its
+      // items arrive a tick after the menu does.
+      const menu = within(await screen.findByRole('menu'));
+      expect(await menu.findByRole('menuitem', { name: 'Delete' })).toBeInTheDocument();
+      expect(menu.queryByRole('menuitem', { name: 'New folder' })).not.toBeInTheDocument();
+    } finally {
+      window.localStorage.removeItem('STRAPI_UPLOAD_LIBRARY_VIEW');
+    }
+  });
+
   it('creates the folder inside the folder currently open', async () => {
     respondWithAssets([createAsset(1, 'image.png')]);
     respondWithFolders([]);
