@@ -39,11 +39,14 @@ views {
   deployment view self_hosted_deployment {
     title '04 Deployment / Production hosting example'
     description '''
+      **Audience:** product and engineering. **Type:** deployment example, mapping runtime elements to hosting infrastructure.
       **Question:** what hosts a production Strapi application, and what survives a redeploy?
       **Example choices:** HTTPS ingress, one supervised Node.js process, a separate PostgreSQL service and Amazon S3 storage.
       The AWS S3 upload provider runs inside Strapi; it is not a separately deployed service. Media metadata lives in PostgreSQL, while file bytes live in S3.
       Built Admin assets are served through the ingress and execute in the editor’s browser. Content API clients use the same ingress; clients and media delivery paths are omitted for readability.
       Database and uploaded objects survive replacement of application code and built assets. Secrets and environment configuration are supplied by the hosting environment.
+      The private ingress-to-server connection and TLS database connection shown here are configured hosting choices, not guarantees supplied by Strapi.
+      Retaining the database does not prevent schema changes during application startup. Application code and persistent state are explained separately in the Application code and persistent state view.
       This is an illustrative topology, not a complete operations design: backups and restore, monitoring, network policies and high availability require their own design.
       Content-Type Builder changes happen in development and are delivered as application code. No multi-replica behavior is implied.
     '''

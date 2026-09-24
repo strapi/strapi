@@ -88,7 +88,7 @@ specification {
     style { color slate }
   }
   deploymentNode host {
-    notation 'Self-hosted infrastructure'
+    notation 'Hosting infrastructure'
     style { color slate }
   }
 

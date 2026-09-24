@@ -63,7 +63,14 @@ and Amazon S3 media storage**. The upload provider runs inside Strapi; file byte
 media metadata persist independently of application replacement. This illustrates production hosting
 boundaries, not a complete operations design or a mandatory hosting stack. Backups, restore,
 monitoring, network policies and high availability are outside this view. The application-state map
-separately illustrates the local-provider alternative.
+uses the same remote-storage example to distinguish source, build output, runtime configuration,
+database records and uploaded files. Local uploads are an alternative: their directory needs
+persistent storage instead of an object-storage bucket.
+
+Read the two deployment views together: the hosting view answers **where things run**; the state map
+answers **what is replaced or retained**. Retaining the database does not freeze its schema—startup
+can synchronize it with deployed content definitions. Private networking and database TLS are
+configured assumptions of the example, not automatic Strapi deployment behavior.
 
 See the [Strapi deployment guide](https://docs.strapi.io/cms/deployment) and
 [media provider configuration](https://docs.strapi.io/cms/configurations/media-library-providers)
