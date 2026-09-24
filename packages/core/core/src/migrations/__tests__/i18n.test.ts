@@ -1,4 +1,5 @@
 import { enable, disable } from '../i18n';
+import { createLocalizationService } from '../../services/localization';
 
 const createDBQueryMock = () => {
   const obj = {
@@ -13,21 +14,12 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
   beforeAll(() => {
     global.strapi = {
       db: {},
-      plugins: {
-        i18n: {
-          services: {
-            locales: {
-              getDefaultLocale: jest.fn(() => 'default-locale'),
-            },
-            'content-types': {
-              isLocalizedContentType: jest.fn(
-                (contentType) => contentType?.pluginOptions?.i18n?.localized === true
-              ),
-            },
-          },
-        },
+      localization: {
+        getDefaultLocale: jest.fn(async () => 'default-locale'),
+        isLocalizedContentType: jest.fn(
+          (contentType) => contentType?.pluginOptions?.i18n?.localized === true
+        ),
       },
-      plugin: jest.fn((name) => global.strapi.plugins[name]),
     } as any;
   });
 
@@ -88,7 +80,7 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
           contentTypes: { test: definition as any },
         });
 
-        expect(strapi.plugins.i18n.services.locales.getDefaultLocale).toHaveBeenCalled();
+        expect(strapi.localization.getDefaultLocale).toHaveBeenCalled();
         expect(strapi.db.query).toHaveBeenCalled();
       });
     });
@@ -148,9 +140,23 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
           contentTypes: { test: definition as any },
         });
 
-        expect(strapi.plugins.i18n.services.locales.getDefaultLocale).toHaveBeenCalled();
+        expect(strapi.localization.getDefaultLocale).toHaveBeenCalled();
         expect(strapi.db.query).toHaveBeenCalled();
       });
     });
+  });
+
+  it('skips localization migrations when no provider is registered', async () => {
+    strapi.localization = createLocalizationService();
+    strapi.db.query = createDBQueryMock();
+
+    const input = {
+      oldContentTypes: { test: { pluginOptions: { i18n: { localized: true } } } },
+      contentTypes: { test: {} },
+    } as unknown as Parameters<typeof enable>[0];
+    await enable(input);
+    await disable(input);
+
+    expect(strapi.db.query).not.toHaveBeenCalled();
   });
 });
