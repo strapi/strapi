@@ -22,7 +22,9 @@ export type HandlerReference = string;
 export type RouteInput = Omit<Route, 'info'> & { info?: Partial<RouteInfo> };
 
 /** Route config whose policy references are checked against the policy registries. See {@link PolicyReference}. */
-export type RouteConfigFor = Omit<RouteConfig, 'policies'> & { policies?: PolicyReference[] };
+export type RouteConfigFor<TNamespace extends string = never> = Omit<RouteConfig, 'policies'> & {
+  policies?: PolicyReference<TNamespace>[];
+};
 
 /**
  * A route whose string handlers must reference an action of `TControllers`, and whose policies must
@@ -36,7 +38,7 @@ export type RouteInputFor<TControllers, TNamespace extends string = never> = Omi
     | ControllerActionReference<TControllers, TNamespace>
     | MiddlewareHandler
     | MiddlewareHandler[];
-  config?: RouteConfigFor;
+  config?: RouteConfigFor<TNamespace>;
 };
 
 export type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'ALL' | 'OPTIONS' | 'HEAD';
