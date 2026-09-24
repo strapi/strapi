@@ -162,6 +162,37 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
   const options = { ...baseOptions, ...resolutionOptions };
   const compile = compiler(options);
 
+  for (const provider of ['i18n', 'content-manager']) {
+    test(`${resolution}: ${provider} contracts reach application consumers`, () => {
+      assertClean(
+        compile(['settings.d.ts', `${provider}-adoption.ts`]),
+        `${resolution}, ${provider} registered contracts`
+      );
+      assertClean(
+        compile([`${provider}-adoption-permissive.ts`]),
+        `${resolution}, ${provider} compatibility without strict contracts`
+      );
+    });
+  }
+
+  test(`${resolution}: config defaults preserve inferred nullability`, () => {
+    assertClean(
+      compile(['settings.d.ts', 'config-defaults.ts']),
+      `${resolution}, registered config defaults`
+    );
+  });
+
+  test(`${resolution}: relative policy names preserve registered config contracts`, () => {
+    assertClean(
+      compile(['strapi-strict.d.ts', 'policy-namespaces.ts']),
+      `${resolution}, relative policy contracts`
+    );
+    assertClean(
+      compile(['policies.d.ts', 'policy-namespaces-permissive.ts']),
+      `${resolution}, relative policy compatibility without strict contracts`
+    );
+  });
+
   test(`${resolution}: ordinary Strapi entry does not activate strict registries`, () => {
     assertClean(compile(['normal-entry.ts']), `${resolution}, ordinary Strapi entry`);
   });
@@ -189,6 +220,8 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
   });
 
   test(`${resolution}: generated plugin contracts follow installation without activating strictness`, async () => {
+    // This consumer test exercises the generator workspace's published entry.
+    // eslint-disable-next-line import/no-extraneous-dependencies
     const { generators } = require('@strapi/typescript-utils');
     const appDir = fs.mkdtempSync(path.join(__dirname, '.generated-'));
     const generatedFile = path.join(appDir, 'types/generated/plugins.d.ts');

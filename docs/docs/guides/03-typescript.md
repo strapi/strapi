@@ -49,11 +49,18 @@ const locales = strapi.plugin('i18n').service('locales');
 const defaultLocale = await locales.getDefaultLocale(); // string | null
 ```
 
+The bundled contracts cover i18n's services and controllers, including the possibility of missing
+settings, locales, and AI localization jobs. Content Manager registers its core controllers,
+permission policy, and services for content structure, document operations and metadata, field
+sizes, metrics, population, and UID generation. Its other services and feature-specific
+controllers retain the existing fallback types.
+
 Unregistered or dynamic names retain permissive lookup types. Explicit generic arguments on
 plugin lookups and config getters remain available. Dotted config paths resolve within the
 registered contract, including optional properties and array elements. Array paths and unknown
-paths retain the generic fallback. A default value currently does not remove `undefined` from
-a registered config result.
+paths retain the generic fallback. For registered paths, a defined default removes `undefined`
+from the result. A default that can itself be `undefined` preserves that possibility. Defaults
+do not replace `null`.
 
 Without `Settings.strict: true`, service, controller, config, and policy lookups keep their
 previous types, even if the program loads package contracts or application overrides. Editors
@@ -120,6 +127,17 @@ The generator loads enabled plugins' contracts; application policies still need 
 declarations. Policies with required config must use `{ name, config }`; only policies whose
 config accepts `undefined` can be referenced by name alone. Existing untyped `Core.RouteConfig`
 remains permissive.
+
+Pass the plugin or API namespace to the router type to check relative policy names as well:
+`Core.RouterInputFor<typeof controllers, 'plugin::greetings'>` checks `isOwner` against
+`plugin::greetings.isOwner`. Fully qualified policy names remain available. An exact registered
+name takes precedence over a relative match, as it does at runtime. Admin and global policies
+use their fully qualified names.
+
+Policy inventories are deliberately complete for explicitly typed routes: accepting arbitrary
+policy names would also let an invalid configuration for a known policy pass through the
+fallback. Services and controllers can adopt contracts incrementally because their lookups
+resolve one name at a time.
 
 ## Verifying changes
 
