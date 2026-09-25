@@ -59,6 +59,20 @@ describe('FolderTree', () => {
     expect(screen.getByText('Folders')).toBeInTheDocument();
   });
 
+  it('offers the folder actions on a tree row, without Rename', async () => {
+    const { user } = renderTree();
+
+    await user.click((await screen.findAllByRole('button', { name: /Actions for/ }))[0]);
+
+    expect(
+      await screen.findByRole('menuitem', { name: 'Copy link to folder' })
+    ).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: 'Move to folder' })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: 'Delete folder' })).toBeInTheDocument();
+    // Renaming is a list affordance; the tree does not offer it.
+    expect(screen.queryByRole('menuitem', { name: 'Rename folder' })).not.toBeInTheDocument();
+  });
+
   it('renders the top-level folder rows', () => {
     renderTree();
 

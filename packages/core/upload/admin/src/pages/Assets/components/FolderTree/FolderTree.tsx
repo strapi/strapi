@@ -12,6 +12,7 @@ import { getTranslationKey } from '../../../../utils/translations';
 import { useAssetsDndOptional } from '../Dnd/AssetsDndProvider';
 import { useFolderTreeDroppable } from '../Dnd/useFolderTreeDroppable';
 
+import { FolderTreeRowMenu } from './FolderTreeRowMenu';
 import { useSpringLoadedExpand } from './useSpringLoadedExpand';
 
 import type { FolderNode } from '../../../../../../shared/contracts/folders';
@@ -235,6 +236,8 @@ const RotatingChevron = styled(ChevronDown)<{ $expanded: boolean }>`
 
 interface FolderTreeItemProps {
   node: FolderNode;
+  /** Its parent's id, so the actions can validate a move against the real parent. */
+  parentId: number | null;
   level: number;
   currentFolderId: number | null;
   showActiveFolder: boolean;
@@ -254,6 +257,7 @@ interface FolderTreeItemInnerProps extends Omit<FolderTreeItemProps, 'node'> {
 const FolderTreeItemInner = ({
   id,
   name,
+  parentId,
   folderChildren,
   level,
   currentFolderId,
@@ -278,6 +282,10 @@ const FolderTreeItemInner = ({
 
   const handleExpand = useCallback(() => onExpand(id), [id, onExpand]);
 
+  // Tree rows carry no selection, so a right-click always means "this folder" —
+  // none of the list's selection rules apply here.
+  const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
+
   useSpringLoadedExpand({
     isOver,
     canExpand: hasChildren && !isFolderExpanded,
@@ -296,6 +304,10 @@ const FolderTreeItemInner = ({
         $isValidDropTarget={showValidDropHighlight}
         $isInvalidDropCursor={showInvalidDropCursor}
         $isMovePending={isMovePending}
+        onContextMenu={(event: React.MouseEvent) => {
+          event.preventDefault();
+          setMenuPosition({ x: event.clientX, y: event.clientY });
+        }}
       >
         <ChevronButton
           label={
@@ -346,6 +358,13 @@ const FolderTreeItemInner = ({
             </TruncatedText>
           </RowButton>
         </Box>
+
+        <FolderTreeRowMenu
+          folder={{ id, name }}
+          parentId={parentId}
+          menuPosition={menuPosition}
+          onCloseMenu={() => setMenuPosition(null)}
+        />
       </TreeRow>
 
       {hasChildren && isFolderExpanded && (
@@ -354,6 +373,7 @@ const FolderTreeItemInner = ({
             <FolderTreeItem
               key={child.id ?? child.name}
               node={child}
+              parentId={id}
               level={level + 1}
               currentFolderId={currentFolderId}
               showActiveFolder={showActiveFolder}
@@ -533,6 +553,8 @@ export const FolderTree = ({
                   <FolderTreeItem
                     key={node.id ?? node.name}
                     node={node}
+                    // Top of the tree — these sit at the library root.
+                    parentId={null}
                     level={0}
                     currentFolderId={currentFolderId}
                     showActiveFolder={showActiveFolder}

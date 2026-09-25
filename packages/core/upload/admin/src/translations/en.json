@@ -392,6 +392,7 @@
   "sidebar.tree.expand": "Expand {name}",
   "sidebar.tree.no-subfolders": "The folder {name} has no subfolders",
   "sidebar.tree.collapse": "Collapse {name}",
+  "sidebar.tree.actions": "Actions for {name}",
   "sidebar.tree.empty": "No folders yet",
   "sidebar.tree.loading": "Loading folders...",
   "sidebar.tree.error": "Could not load folders."

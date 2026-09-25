@@ -11,8 +11,10 @@ import type { Folder } from '../../../../../shared/contracts/folders';
 import type { DragFolderData } from '../../../types/dnd';
 
 interface FolderContextMenuProps {
-  folder: Folder;
+  folder: Pick<Folder, 'id' | 'name'>;
   dragData: DragFolderData;
+  /** Passed through — the folder tree offers the menu without Rename. */
+  showRename?: boolean;
   position: CursorPosition;
   /** Mounted only while it has something on screen, so the parent drops it on this. */
   onClose: () => void;
@@ -27,6 +29,7 @@ interface FolderContextMenuProps {
 export const FolderContextMenu = ({
   folder,
   dragData,
+  showRename,
   position,
   onClose,
 }: FolderContextMenuProps) => {
@@ -34,7 +37,7 @@ export const FolderContextMenu = ({
   const [isMenuOpen, setIsMenuOpen] = useState(true);
 
   return (
-    <FolderActions folder={folder} dragData={dragData}>
+    <FolderActions folder={folder} dragData={dragData} showRename={showRename}>
       {({ items, dialogs, isBusy }) => (
         <FolderContextMenuBody
           isBusy={isBusy}
