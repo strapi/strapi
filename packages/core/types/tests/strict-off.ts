@@ -1,4 +1,4 @@
-import type { Core } from '../src';
+import type { Core, UID } from '../src';
 import type { IsStrict } from '../src/core/strictness';
 
 declare global {
@@ -37,11 +37,15 @@ declare global {
 type Equal<T, U> =
   (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;
 type Expect<T extends true> = T;
+/** Suggested names widen a type for completion without changing which values it accepts. */
+type SameValues<T, U> = [T] extends [U] ? ([U] extends [T] ? true : false) : false;
 declare const checks: [
   Expect<Equal<IsStrict, false>>,
   Expect<Equal<Core.ServiceFor<'plugin::legacy.example'>, Core.Service>>,
   Expect<Equal<Core.ControllerFor<'plugin::legacy.example'>, Core.Controller>>,
-  Expect<Equal<Core.PolicyReference, string | { name: string; config: unknown }>>,
+  Expect<SameValues<Core.PolicyReference, string | { name: string; config: unknown }>>,
+  Expect<SameValues<Core.ServiceLookupUID, UID.Service>>,
+  Expect<SameValues<Core.ControllerLookupUID, UID.Controller>>,
   // Unregistered literal names keep the legacy types: only strict types close them to `never`.
   Expect<Equal<Core.ServiceFor<'plugin::unregistered.example'>, Core.Service>>,
   Expect<Equal<Core.ControllerFor<'plugin::unregistered.example'>, Core.Controller>>,
