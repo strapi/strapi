@@ -219,7 +219,7 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('middlewares').get(name);
   }
 
-  get plugins(): Record<string, Core.Plugin> {
+  get plugins(): Core.PluginMap {
     return this.get('plugins').getAll();
   }
 
@@ -239,7 +239,7 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('apis').getAll();
   }
 
-  api(name: string): Core.Module {
+  api<TName extends string>(name: TName): Core.Module<`api::${TName}`> {
     return this.get('apis').get(name);
   }
 

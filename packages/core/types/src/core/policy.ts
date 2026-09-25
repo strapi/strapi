@@ -1,7 +1,7 @@
 import { ExtendableContext } from 'koa';
 
 import type { Strapi } from '.';
-import type { IsStrict } from './strictness';
+import type { IsStrict, RegisteredRecord } from './strictness';
 
 export type PolicyContext = Omit<ExtendableContext, 'is'> & {
   type: string;
@@ -23,29 +23,39 @@ export type Policy<TConfig = unknown> =
   | PolicyHandler<TConfig>;
 
 /** Policy UIDs that have a registered config contract. */
-type PolicyName = keyof Strapi.Registries.AppPolicies | keyof Strapi.Registries.PackagePolicies;
+export type RegisteredPolicyName =
+  | keyof Strapi.Registries.AppPolicies
+  | keyof Strapi.Registries.PackagePolicies;
 
 /** Resolves application overrides before package defaults. */
-export type PolicyConfigFor<TName extends PolicyName> =
+export type PolicyConfigFor<TName extends RegisteredPolicyName> =
   TName extends keyof Strapi.Registries.AppPolicies
     ? Strapi.Registries.AppPolicies[TName]
     : TName extends keyof Strapi.Registries.PackagePolicies
       ? Strapi.Registries.PackagePolicies[TName]
       : never;
 
+/**
+ * Policies keyed by UID, e.g. `strapi.policies`. With strict types enabled, registered UIDs resolve to a
+ * policy that receives their config contract. Other keys, literal or dynamic, resolve to the legacy policy.
+ */
+export type PolicyMap = IsStrict extends false
+  ? Record<string, Policy>
+  : RegisteredRecord<{ [TName in RegisteredPolicyName]: Policy<PolicyConfigFor<TName>> }, Policy>;
+
 /** Runtime resolves exact names first, then relative plugin or API names. */
-type PolicyReferenceName<TName extends PolicyName, TNamespace extends string> =
+type PolicyReferenceName<TName extends RegisteredPolicyName, TNamespace extends string> =
   | TName
   | (TNamespace extends `plugin::${string}` | `api::${string}`
       ? TName extends `${TNamespace}.${infer TRelative}`
-        ? TRelative extends PolicyName
+        ? TRelative extends RegisteredPolicyName
           ? never
           : TRelative
         : never
       : never);
 
 /** A reference to a registered policy: its name alone only when its config is optional. */
-type RegisteredPolicyReference<TName extends PolicyName, TNamespace extends string> =
+type RegisteredPolicyReference<TName extends RegisteredPolicyName, TNamespace extends string> =
   undefined extends PolicyConfigFor<TName>
     ?
         | PolicyReferenceName<TName, TNamespace>
@@ -62,4 +72,6 @@ type RegisteredPolicyReference<TName extends PolicyName, TNamespace extends stri
  */
 export type PolicyReference<TNamespace extends string = never> = IsStrict extends false
   ? string | { name: string; config: unknown }
-  : { [TName in PolicyName]: RegisteredPolicyReference<TName, TNamespace> }[PolicyName];
+  : {
+      [TName in RegisteredPolicyName]: RegisteredPolicyReference<TName, TNamespace>;
+    }[RegisteredPolicyName];

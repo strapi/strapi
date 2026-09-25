@@ -37,3 +37,15 @@ app.plugin('sentry').config('sendMetadata', 'yes');
 }) satisfies Core.RouteConfigFor;
 const explicitFullUidService = app.service<{ greet(): string }>('plugin::i18n.unregistered');
 explicitFullUidService.greet() satisfies string;
+
+// Plural accessors keep the legacy records without the switch, including `undefined` under
+// `noUncheckedIndexedAccess` for registered keys.
+app.services['plugin::i18n.locales']?.anything();
+app.plugin('i18n').services.locales?.anything();
+app.plugins.i18n?.services.locales?.anything();
+app.controllers['plugin::i18n.locales']?.anything satisfies Core.ControllerHandler | undefined;
+// @ts-expect-error Registered keys are not narrowed without the switch.
+app.services['plugin::i18n.locales'].anything();
+const pluralServices: Record<string, Core.Service> = app.services;
+const legacyPluralServices: typeof app.services = pluralServices;
+legacyPluralServices satisfies Record<string, Core.Service>;
