@@ -8,7 +8,7 @@ export default () => ({
 
   strapiOperator: '$and',
 
-  add(t: Nexus.blocks.ObjectDefinitionBlock<string>, type: string) {
+  add(t: Nexus.blocks.InputDefinitionBlock<string>, type: string) {
     t.field(AND_FIELD_NAME, { type: list(type) });
   },
 });
