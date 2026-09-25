@@ -1,4 +1,4 @@
-import { pickBy, has } from 'lodash/fp';
+import { has, pickBy } from 'lodash';
 import type { Core, UID } from '@strapi/types';
 import { addNamespace, hasNamespace } from './namespace';
 
@@ -27,7 +27,7 @@ const middlewaresRegistry = () => {
      * Returns a map with all the middlewares in a namespace
      */
     getAll(namespace: string) {
-      return pickBy((_, uid) => hasNamespace(uid, namespace))(middlewares);
+      return pickBy(middlewares, (_, uid) => hasNamespace(uid, namespace));
     },
 
     /**
@@ -46,7 +46,7 @@ const middlewaresRegistry = () => {
         const middleware = rawMiddlewares[middlewareName];
         const uid = addNamespace(middlewareName, namespace) as UID.Middleware;
 
-        if (has(uid, middlewares)) {
+        if (has(middlewares, uid)) {
           throw new Error(`Middleware ${uid} has already been registered.`);
         }
         middlewares[uid] = middleware;

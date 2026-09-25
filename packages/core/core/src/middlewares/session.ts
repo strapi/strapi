@@ -1,4 +1,4 @@
-import { isEmpty, isArray } from 'lodash/fp';
+import { isArray, isEmpty } from 'lodash';
 import { type SessionOptions, createSession } from 'koa-session';
 import type { Core } from '@strapi/types';
 

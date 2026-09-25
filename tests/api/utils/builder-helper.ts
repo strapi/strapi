@@ -1,6 +1,6 @@
 import type { Core } from '@strapi/types';
 
-import { values } from 'lodash/fp';
+import { values } from 'lodash';
 
 import { createTestBuilder } from 'api-tests/builder';
 import { createStrapiInstance } from 'api-tests/strapi';
