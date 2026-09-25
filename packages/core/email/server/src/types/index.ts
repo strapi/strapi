@@ -1,4 +1,5 @@
 import type { Plugin } from '@strapi/types';
+import type EmailService from '../services/email';
 
 export interface EmailConfig extends Record<string, unknown> {
   provider: string;
@@ -41,3 +42,16 @@ export interface EmailTemplate {
 }
 
 export type SendOptions = EmailOptions & EmailTemplate;
+
+/** Default contracts loaded with the Email server types. */
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Strapi {
+    // eslint-disable-next-line @typescript-eslint/no-namespace
+    namespace Registries {
+      interface PackageServices {
+        'plugin::email.email': ReturnType<typeof EmailService>;
+      }
+    }
+  }
+}
