@@ -1,6 +1,6 @@
 import type { Core } from '@strapi/types';
 
-import type { Services } from '../types';
+import type { Services } from '../types/services';
 
 export const getService = <TName extends keyof Services>(
   name: TName,

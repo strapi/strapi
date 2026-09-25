@@ -1,7 +1,4 @@
 import type { File as FormidableFile } from 'formidable';
-import type { Services } from './services';
-
-export type { Services } from './services';
 
 export type InputFile = FormidableFile & {
   path?: string;
@@ -97,27 +94,3 @@ export type FileInfo = {
   focalPoint?: FocalPoint | null;
   folder?: number | null;
 };
-
-/** Default contracts loaded with the Upload server types. */
-declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace Strapi {
-    // eslint-disable-next-line @typescript-eslint/no-namespace
-    namespace Registries {
-      interface PackageServices {
-        'plugin::upload.aiMetadata': Services['aiMetadata'];
-        'plugin::upload.aiMetadataJobs': Services['aiMetadataJobs'];
-        'plugin::upload.aiMetadataProvider': Services['aiMetadataProvider'];
-        'plugin::upload.api-upload-folder': Services['api-upload-folder'];
-        'plugin::upload.extensions': Services['extensions'];
-        'plugin::upload.file': Services['file'];
-        'plugin::upload.folder': Services['folder'];
-        'plugin::upload.image-manipulation': Services['image-manipulation'];
-        'plugin::upload.metrics': Services['metrics'];
-        'plugin::upload.provider': Services['provider'];
-        'plugin::upload.upload': Services['upload'];
-        'plugin::upload.weeklyMetrics': Services['weeklyMetrics'];
-      }
-    }
-  }
-}
