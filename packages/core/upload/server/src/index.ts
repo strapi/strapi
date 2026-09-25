@@ -9,6 +9,8 @@ import { routes } from './routes';
 import { config } from './config';
 import { controllers } from './controllers';
 
+export type * from './types';
+
 export default () => ({
   register,
   bootstrap,
