@@ -31,9 +31,9 @@ export type Action = {
   displayName: string;
 
   /**
-   * The main category of an action
+   * The main category of an action (only for the settings section)
    */
-  category: string;
+  category?: string;
 
   /**
    * The secondary category of an action (only for settings and plugins section)
