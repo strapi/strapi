@@ -270,7 +270,10 @@ const FolderTreeItemInner = ({
 }: FolderTreeItemInnerProps) => {
   const { formatMessage } = useIntl();
   const hasChildren = folderChildren.length > 0;
-  const isFolderExpanded = isExpanded(id);
+  // A folder keeps its entry in the expanded set after its last subfolder is
+  // moved away, so "expanded" has to mean "expanded *and* still has something to
+  // show" — otherwise the chevron stays rotated on what is now a leaf.
+  const isFolderExpanded = isExpanded(id) && hasChildren;
   const isActive = showActiveFolder && currentFolderId === id;
 
   const {
