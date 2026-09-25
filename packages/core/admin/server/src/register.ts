@@ -5,11 +5,12 @@ import { createAiAdminService } from './ai/services/ai';
 import contentApiTokenAuthStrategy from './strategies/content-api-token';
 import adminTokenAuthStrategy from './strategies/admin-token';
 import { migrateAdminPreferedLanguageDkToDa } from './migrations/database/migrate-prefered-language-dk-to-da';
+import { getService } from './utils';
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   strapi.db.migrations.providers.internal.register(migrateAdminPreferedLanguageDkToDa);
 
-  const passportMiddleware = strapi.service('admin::passport').init();
+  const passportMiddleware = getService('passport').init();
 
   strapi.server.api('admin').use(passportMiddleware);
   strapi.get('auth').register('admin', adminAuthStrategy);
