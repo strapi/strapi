@@ -23,7 +23,9 @@ plugin service names with either switch setting.
 The fixtures assign inferred lookup results to constants before checking them with `satisfies`.
 This prevents contextual inference from making a permissive generic lookup look correctly typed.
 Handler references stay strict in both modes. Registered policy contracts and complete policy
-inventories apply only when the switch is on.
+inventories apply only when the switch is on; an empty inventory accepts no policy reference.
+With the switch on, unregistered literal service and controller names resolve to `never`, while
+explicit generics and dynamic names keep the permissive types.
 
 Dedicated fixtures check config defaults against missing values, nullable values, possibly
 undefined defaults, and contextual inference. Policy namespace fixtures check relative plugin

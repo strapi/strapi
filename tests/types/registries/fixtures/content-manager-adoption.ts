@@ -101,8 +101,9 @@ app.plugin('content-manager').controller('collection-types').findOn satisfies un
   policies: ['hasPermission'],
 }) satisfies Core.RouteConfigFor<'plugin::content-manager'>;
 
-// Services and controllers outside this adoption slice keep the legacy fallback.
-app.plugin('content-manager').service('unregistered').custom();
-app.plugin('content-manager').controller('unregistered').custom satisfies
-  | Core.ControllerHandler
-  | undefined;
+// Services and controllers outside this adoption slice resolve to `never`; explicit generics remain.
+const unregisteredService = app.plugin('content-manager').service('unregistered');
+unregisteredService satisfies never;
+const unregisteredController = app.plugin('content-manager').controller('unregistered');
+unregisteredController satisfies never;
+app.plugin('content-manager').service<{ custom(): void }>('unregistered').custom();

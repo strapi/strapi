@@ -182,6 +182,13 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
     );
   });
 
+  test(`${resolution}: an empty policy inventory accepts no reference`, () => {
+    assertClean(
+      compile(['settings.d.ts', 'policies-empty.ts']),
+      `${resolution}, empty policy inventory`
+    );
+  });
+
   test(`${resolution}: relative policy names preserve registered config contracts`, () => {
     assertClean(
       compile(['strapi-strict.d.ts', 'policy-namespaces.ts']),
