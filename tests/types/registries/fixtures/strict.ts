@@ -104,3 +104,38 @@ const permission = app.service('admin::permission');
 permission.actionProvider.registerMany satisfies (...args: never[]) => unknown;
 // @ts-expect-error The admin permission contract has no arbitrary members.
 permission.missing();
+
+// Plural accessors resolve registered keys to the same contracts as the singular lookups.
+const pluralLocales = app.services['plugin::i18n.locales'];
+const singularLocales = app.service('plugin::i18n.locales');
+pluralLocales satisfies typeof singularLocales;
+singularLocales satisfies typeof pluralLocales;
+pluralLocales.getDefaultLocale() satisfies Promise<string | null>;
+// @ts-expect-error Plural lookups use the registered service contract.
+pluralLocales.missing();
+const pluginLocales = app.plugin('i18n').services.locales;
+pluginLocales.getDefaultLocale() satisfies Promise<string | null>;
+// @ts-expect-error Plugin maps use the registered service contract.
+pluginLocales.missing();
+// @ts-expect-error The plugins map resolves `Plugin<'i18n'>` for registered plugins.
+app.plugins.i18n.services.locales.missing();
+// @ts-expect-error The global instance uses the same plural contracts.
+strapi.plugin('i18n').services.locales.missing();
+app.controllers['plugin::i18n.locales'].listLocales satisfies Core.ControllerHandler;
+// @ts-expect-error Plural controller lookups use the registered contract.
+app.plugin('i18n').controllers.locales.missing satisfies unknown;
+// @ts-expect-error Bundled admin contracts cover the plural accessors too.
+app.services['admin::permission'].missing();
+
+// Unregistered and dynamic keys keep the legacy types: records cannot close literal keys only.
+// With `noUncheckedIndexedAccess`, only these index-signature reads include `undefined`.
+app.services['plugin::i18n.unregistered']?.anything();
+app.services[dynamicName]?.anything();
+app.plugin('i18n').services[dynamicName]?.anything();
+app.plugins[dynamicName]?.services.greeting?.anything();
+app.controllers[dynamicName]?.anything satisfies Core.ControllerHandler | undefined;
+// @ts-expect-error Unregistered keys may be absent.
+app.services['plugin::i18n.unregistered'].anything();
+for (const service of Object.values(app.plugin(dynamicName).services)) {
+  service.anything();
+}
