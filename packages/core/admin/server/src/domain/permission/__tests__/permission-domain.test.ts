@@ -169,7 +169,7 @@ describe('Permission Domain', () => {
 
   describe('toPermission', () => {
     test('Normalizes missing array entries into default permissions', () => {
-      const permissions = new Array<CreatePermissionPayload>(2);
+      const permissions: CreatePermissionPayload[] = [];
       permissions[1] = { action: 'read' };
 
       const result = domain.toPermission(permissions);
