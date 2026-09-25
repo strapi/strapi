@@ -68,7 +68,7 @@ export interface Strapi extends Container {
   reload: Reloader;
   config: ConfigProvider;
   services: Record<string, Core.Service>;
-  service(uid: UID.Service): Core.Service;
+  service<TUID extends UID.Service>(uid: TUID): Core.ServiceFor<TUID>;
   controllers: Record<string, Core.Controller>;
   controller(uid: UID.Controller): Core.Controller;
   contentTypes: Schema.ContentTypes;
@@ -80,7 +80,7 @@ export interface Strapi extends Container {
   middlewares: Record<string, Core.MiddlewareFactory>;
   middleware(name: string): Core.MiddlewareFactory;
   plugins: Record<string, Core.Plugin>;
-  plugin(name: string): Core.Plugin;
+  plugin<TName extends string>(name: TName): Core.Plugin<TName>;
   hooks: Record<string, any>;
   hook(name: string): any;
   apis: Record<string, Core.Module>;
