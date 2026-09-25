@@ -115,5 +115,12 @@
     "name": "graphql",
     "description": "Adds GraphQL endpoint with default API methods.",
     "kind": "plugin"
+  },
+  "typesVersions": {
+    "*": {
+      "strapi-server": [
+        "dist/server/src/index.d.ts"
+      ]
+    }
   }
 }
