@@ -5,6 +5,8 @@ import routes from './routes';
 import controllers from './controllers';
 import { config } from './config';
 
+export type * from './types';
+
 export default {
   bootstrap,
   config,
