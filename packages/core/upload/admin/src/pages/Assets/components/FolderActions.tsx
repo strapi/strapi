@@ -6,7 +6,7 @@ import { ArrowRight, Link, Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { getTranslationKey } from '../../../utils/translations';
-import { useAssetSelection } from '../hooks/useAssetSelection';
+import { useAssetSelectionOptional } from '../hooks/useAssetSelection';
 import { folderKey } from '../utils/selection';
 
 import { BulkMoveDialog } from './BulkMoveDialog';
@@ -34,9 +34,15 @@ interface FolderActionsRender {
 }
 
 interface FolderActionsProps {
-  folder: Folder;
+  /** Only the id and name are read, so a tree node satisfies this too. */
+  folder: Pick<Folder, 'id' | 'name'>;
   /** Drag data for this folder, so the move dialog validates against its real parent. */
   dragData: DragFolderData;
+  /**
+   * Renaming is a list affordance. The folder tree offers the same menu without
+   * it, so the two entry points there stay identical to each other.
+   */
+  showRename?: boolean;
   /** Receives the items and dialogs to place around whichever trigger it owns. */
   children: (actions: FolderActionsRender) => ReactNode;
 }
@@ -55,11 +61,18 @@ interface FolderActionsProps {
  * it does would linger. A rename leaves the id valid and the folder in place, so
  * it touches the selection not at all.
  */
-export const FolderActions = ({ folder, dragData, children }: FolderActionsProps) => {
+export const FolderActions = ({
+  folder,
+  dragData,
+  showRename = true,
+  children,
+}: FolderActionsProps) => {
   const { formatMessage } = useIntl();
   const { copy } = useClipboard();
   const { toggleNotification } = useNotification();
-  const { deselect } = useAssetSelection();
+  // Optional: the folder tree renders these actions outside the list's
+  // selection, where there is nothing to deselect.
+  const deselect = useAssetSelectionOptional()?.deselect;
   const [isRenameOpen, setIsRenameOpen] = useState(false);
   const [isMoveOpen, setIsMoveOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -100,12 +113,14 @@ export const FolderActions = ({ folder, dragData, children }: FolderActionsProps
       </Menu.Item>
       <Menu.Separator />
       {/* TODO: gate Rename, Move and Delete on `assets.canUpdate` CMS-387 */}
-      <Menu.Item startIcon={<Pencil />} onSelect={() => setIsRenameOpen(true)}>
-        {formatMessage({
-          id: getTranslationKey('list.folder.actions.rename'),
-          defaultMessage: 'Rename folder',
-        })}
-      </Menu.Item>
+      {showRename && (
+        <Menu.Item startIcon={<Pencil />} onSelect={() => setIsRenameOpen(true)}>
+          {formatMessage({
+            id: getTranslationKey('list.folder.actions.rename'),
+            defaultMessage: 'Rename folder',
+          })}
+        </Menu.Item>
+      )}
       <Menu.Item startIcon={<ArrowRight />} onSelect={() => setIsMoveOpen(true)}>
         {formatMessage({
           id: getTranslationKey('list.folder.actions.move'),
@@ -127,7 +142,7 @@ export const FolderActions = ({ folder, dragData, children }: FolderActionsProps
           the row would take an open dialog with it. Nothing invalidates until
           the mutation resolves, and the dialog closes in the same tick, so the
           flows themselves can't trigger it. */}
-      {isRenameOpen && (
+      {showRename && isRenameOpen && (
         <FolderFormDialog
           open
           mode="rename"
@@ -142,7 +157,7 @@ export const FolderActions = ({ folder, dragData, children }: FolderActionsProps
           open
           onClose={() => setIsMoveOpen(false)}
           items={moveItems}
-          onSuccess={() => deselect(folderKey(folder.id))}
+          onSuccess={() => deselect?.(folderKey(folder.id))}
         />
       )}
       {isDeleteOpen && (
@@ -150,7 +165,7 @@ export const FolderActions = ({ folder, dragData, children }: FolderActionsProps
           open
           onClose={() => setIsDeleteOpen(false)}
           target={{ fileIds: [], folderIds: [folder.id] }}
-          onSuccess={() => deselect(folderKey(folder.id))}
+          onSuccess={() => deselect?.(folderKey(folder.id))}
         />
       )}
     </>
