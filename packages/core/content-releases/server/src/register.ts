@@ -12,6 +12,14 @@ import {
 } from './migrations';
 import { addEntryDocumentToReleaseActions } from './migrations/database/5.0.0-document-id-in-actions';
 
+/**
+ * `plugin::graphql.extension`. GraphQL is an optional plugin that content releases does not depend
+ * on, so its registered contract is not loaded here.
+ */
+type GraphQLExtensionService = {
+  shadowCRUD(uid: string): { disable(): void };
+};
+
 export const register = async ({ strapi }: { strapi: Core.Strapi }) => {
   if (strapi.ee.features.isEnabled('cms-content-releases')) {
     await strapi.service('admin::permission').actionProvider.registerMany(ACTIONS);
@@ -32,7 +40,9 @@ export const register = async ({ strapi }: { strapi: Core.Strapi }) => {
   }
 
   if (strapi.plugin('graphql')) {
-    const graphqlExtensionService = strapi.plugin('graphql').service('extension');
+    const graphqlExtensionService = strapi
+      .plugin('graphql')
+      .service<GraphQLExtensionService>('extension');
     // Exclude the release and release action models from the GraphQL schema
     graphqlExtensionService.shadowCRUD(RELEASE_MODEL_UID).disable();
     graphqlExtensionService.shadowCRUD(RELEASE_ACTION_MODEL_UID).disable();
