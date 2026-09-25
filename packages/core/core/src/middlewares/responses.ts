@@ -1,4 +1,4 @@
-import { isFunction } from 'lodash/fp';
+import { isFunction } from 'lodash';
 import type { Core } from '@strapi/types';
 
 export interface Config {

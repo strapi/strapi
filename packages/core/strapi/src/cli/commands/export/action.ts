@@ -1,5 +1,5 @@
 import path from 'path';
-import { isObject, isString, isFinite, toNumber } from 'lodash/fp';
+import { isFinite, isObject, isString, toNumber } from 'lodash';
 import fs from 'fs-extra';
 import chalk from 'chalk';
 import type { Core } from '@strapi/types';

@@ -1,6 +1,6 @@
 'use strict';
 
-const { isFunction, isNil, prop } = require('lodash/fp');
+const { isFunction, isNil, property } = require('lodash');
 const { createStrapiInstance } = require('./strapi');
 const componentData = require('../../core/core/src/services/document-service/components');
 
@@ -193,7 +193,7 @@ async function deleteFixturesFor(model, entries, { strapi: strapiIst } = {}) {
 
   await strapi.db
     .query(toContentTypeUID(model))
-    .deleteMany({ where: { id: entries.map(prop('id')) } });
+    .deleteMany({ where: { id: entries.map(property('id')) } });
 
   await cleanup();
 }

@@ -1,4 +1,4 @@
-import { isNil, isPlainObject } from 'lodash/fp';
+import { isNil, isPlainObject } from 'lodash';
 import type { UID, Struct, Data } from '@strapi/types';
 import { async } from '@strapi/utils';
 

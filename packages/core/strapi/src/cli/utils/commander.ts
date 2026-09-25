@@ -4,7 +4,7 @@
 
 import { Command, InvalidOptionArgumentError, Option } from 'commander';
 import chalk from 'chalk';
-import { isNaN } from 'lodash/fp';
+import { isNaN } from 'lodash';
 import { exitWith } from './helpers';
 import { getInquirer } from './get-inquirer';
 

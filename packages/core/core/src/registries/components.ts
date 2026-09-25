@@ -1,4 +1,4 @@
-import { has } from 'lodash/fp';
+import { has } from 'lodash';
 import type { Struct, UID } from '@strapi/types';
 
 const componentsRegistry = () => {
@@ -30,7 +30,7 @@ const componentsRegistry = () => {
      * Registers a component
      */
     set(uid: UID.Component, component: Struct.ComponentSchema) {
-      if (has(uid, components)) {
+      if (has(components, uid)) {
         throw new Error(`Component ${uid} has already been registered.`);
       }
 

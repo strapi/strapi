@@ -1,4 +1,4 @@
-import { isNil } from 'lodash/fp';
+import { isNil } from 'lodash';
 import Koa from 'koa';
 import createError from 'http-errors';
 import delegate from 'delegates';

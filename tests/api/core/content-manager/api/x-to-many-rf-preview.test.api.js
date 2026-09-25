@@ -1,11 +1,11 @@
 'use strict';
 
-const { prop, difference, map, uniq } = require('lodash/fp');
+const { difference, map, property, uniq } = require('lodash');
 const { createAuthRequest } = require('api-tests/request');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createTestBuilder } = require('api-tests/builder');
 
-const toIds = (arr) => uniq(map(prop('id'))(arr));
+const toIds = (arr) => uniq(map(arr, (item) => item.id));
 
 let strapi;
 let rq;
@@ -101,8 +101,8 @@ const fixtures = {
   product: ({ shop, category }) => [
     {
       name: 'PD.A',
-      categories: category.slice(0, PRODUCT_CATEGORY_COUNT).map(prop('id')),
-      shops: shop.slice(0, PRODUCT_SHOP_COUNT).map(prop('id')),
+      categories: category.slice(0, PRODUCT_CATEGORY_COUNT).map(property('id')),
+      shops: shop.slice(0, PRODUCT_SHOP_COUNT).map(property('id')),
     },
   ],
 };

@@ -1,6 +1,6 @@
 'use strict';
 
-const { prop, omit } = require('lodash/fp');
+const { omit, property } = require('lodash');
 
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
@@ -157,7 +157,7 @@ describe('Admin Permissions - Conditions', () => {
 
   const deleteFixtures = async () => {
     // Delete users
-    const usersId = localTestData.users.map(prop('id'));
+    const usersId = localTestData.users.map(property('id'));
     await utils.deleteUsersById(usersId);
 
     // Delete the foobar role
@@ -291,7 +291,7 @@ describe('Admin Permissions - Conditions', () => {
       method: 'POST',
       url: `/content-manager/collection-types/api::article.article`,
       body: {
-        ...omit('documentId', localTestData.cheapArticle),
+        ...omit(localTestData.cheapArticle, 'documentId'),
         category: localTestData.categories[0].documentId,
       },
     });
@@ -311,7 +311,7 @@ describe('Admin Permissions - Conditions', () => {
       method: 'POST',
       url: `/content-manager/collection-types/api::article.article`,
       body: {
-        ...omit('documentId', localTestData.expensiveArticle),
+        ...omit(localTestData.expensiveArticle, 'documentId'),
         category: localTestData.categories[1].documentId,
       },
     });

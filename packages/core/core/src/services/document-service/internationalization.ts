@@ -1,6 +1,6 @@
 import type { Struct, Modules, Schema } from '@strapi/types';
 import { errors } from '@strapi/utils';
-import { curry, assoc } from 'lodash/fp';
+import { assign, curry } from 'lodash';
 
 type Transform = (
   contentType: Struct.SingleTypeSchema | Struct.CollectionTypeSchema,
@@ -22,7 +22,7 @@ const defaultLocale: AsyncTransform = async (contentType, params) => {
   }
 
   if (!params.locale) {
-    return assoc('locale', await getDefaultLocale(), params);
+    return assign({}, params, { locale: await getDefaultLocale() });
   }
 
   return params;
@@ -48,7 +48,7 @@ const localeToLookup: Transform = (contentType, params) => {
     );
   }
 
-  return assoc(['lookup', 'locale'], params.locale, params);
+  return { ...params, lookup: { ...params.lookup, locale: params.locale } };
 };
 
 /**
@@ -64,7 +64,7 @@ const multiLocaleToLookup: Transform = (contentType, params) => {
       return params;
     }
 
-    return assoc(['lookup', 'locale'], params.locale, params);
+    return { ...params, lookup: { ...params.lookup, locale: params.locale } };
   }
 
   return params;
@@ -81,7 +81,7 @@ const localeToData: Transform = (contentType, params) => {
   if (params.locale) {
     const isValidLocale = typeof params.locale === 'string' && params.locale !== '*';
     if (isValidLocale) {
-      return assoc(['data', 'locale'], params.locale, params);
+      return { ...params, data: { ...params.data, locale: params.locale } };
     }
 
     throw new errors.ValidationError(

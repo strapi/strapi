@@ -1,6 +1,6 @@
 'use strict';
 
-const { values, zip, symmetricDifference } = require('lodash/fp');
+const { values, xor, zip } = require('lodash');
 
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
@@ -83,7 +83,7 @@ function checkAPIResultFields(res, fields) {
 
   res.body.data
     .map((entity) => Object.keys(entity))
-    .map(symmetricDifference(fields))
+    .map((value) => xor(fields, value))
     .forEach((diff) => {
       expect(diff).toStrictEqual([]);
     });

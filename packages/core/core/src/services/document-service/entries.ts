@@ -1,6 +1,6 @@
 import type { UID, Modules } from '@strapi/types';
 import { async, errors } from '@strapi/utils';
-import { assoc, omit } from 'lodash/fp';
+import { omit } from 'lodash';
 
 import * as components from './components';
 
@@ -151,10 +151,11 @@ const createEntriesService = (
 
   async function publishEntry(entry: any, params = {} as any) {
     clearTransformDataRequestCache();
+    const publishedAt = new Date();
 
     return async.pipe(
-      omit('id'),
-      assoc('publishedAt', new Date()),
+      (value) => omit(value, 'id'),
+      (value) => ({ ...value, publishedAt }),
       (draft) => {
         const opts = {
           uid,
@@ -174,8 +175,8 @@ const createEntriesService = (
     clearTransformDataRequestCache();
 
     return async.pipe(
-      omit('id'),
-      assoc('publishedAt', null),
+      (value) => omit(value, 'id'),
+      (value) => ({ ...value, publishedAt: null }),
       (entry) => {
         const opts = {
           uid,

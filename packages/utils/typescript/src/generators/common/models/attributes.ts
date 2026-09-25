@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import _ from 'lodash/fp';
+import _ from 'lodash';
 
 import { addImport } from '../imports';
 import { getTypeNode, toTypeLiteral, withAttributeNamespace, NAMESPACES } from './utils';
@@ -98,7 +98,7 @@ export const getAttributeModifiers = (attribute: Attribute): ts.TypeNode[] => {
 
   // Min / Max
   if (!_.isNil(attribute.min) || !_.isNil(attribute.max)) {
-    const minMaxProperties = _.pick(['min', 'max'], attribute);
+    const minMaxProperties = _.pick(attribute, ['min', 'max']);
     const { min, max } = minMaxProperties;
 
     const typeofMin = typeof min;
@@ -136,7 +136,7 @@ export const getAttributeModifiers = (attribute: Attribute): ts.TypeNode[] => {
 
   // Min length / Max length
   if (!_.isNil(attribute.minLength) || !_.isNil(attribute.maxLength)) {
-    const minMaxProperties = _.pick(['minLength', 'maxLength'], attribute);
+    const minMaxProperties = _.pick(attribute, ['minLength', 'maxLength']);
 
     modifiers.push(
       factory.createTypeReferenceNode(

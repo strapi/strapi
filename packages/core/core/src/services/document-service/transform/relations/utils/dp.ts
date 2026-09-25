@@ -1,4 +1,4 @@
-import { isNil } from 'lodash/fp';
+import { isNil } from 'lodash';
 
 import { contentTypes } from '@strapi/utils';
 import type { UID } from '@strapi/types';

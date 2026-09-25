@@ -1,4 +1,4 @@
-import { pick } from 'lodash/fp';
+import { pick } from 'lodash';
 import type { UID, Modules } from '@strapi/types';
 import { SHARED_QUERY_PARAM_KEYS } from '@strapi/utils';
 
@@ -37,7 +37,7 @@ export const ALLOWED_DOCUMENT_ROOT_PARAM_KEYS = [
 export const pickAllowedQueryParams = (
   params: Record<string, unknown>
 ): Record<(typeof ALLOWED_DOCUMENT_PARAM_KEYS)[number], unknown> =>
-  pick(ALLOWED_DOCUMENT_PARAM_KEYS as unknown as string[], params) as Record<
+  pick(params, ALLOWED_DOCUMENT_PARAM_KEYS as unknown as string[]) as Record<
     (typeof ALLOWED_DOCUMENT_PARAM_KEYS)[number],
     unknown
   >;
@@ -45,7 +45,7 @@ export const pickAllowedQueryParams = (
 const pickSelectionParams = <TUID extends UID.ContentType>(
   data: unknown
 ): Modules.Documents.Params.Pick<TUID, 'fields' | 'populate' | 'status'> => {
-  return pick(['fields', 'populate', 'status'], data);
+  return pick(data, ['fields', 'populate', 'status']);
 };
 
 export { pickSelectionParams };

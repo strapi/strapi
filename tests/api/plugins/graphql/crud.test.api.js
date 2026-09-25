@@ -1,6 +1,6 @@
 'use strict';
 
-const { omit, prop } = require('lodash/fp');
+const { omit, property } = require('lodash');
 
 // Helpers.
 const { createTestBuilder } = require('api-tests/builder');
@@ -147,7 +147,7 @@ describe('Test Graphql API End to End', () => {
           posts_connection: {
             data: postsPayload.map((entry) => ({
               documentId: expect.any(String),
-              attributes: omit('documentId', entry),
+              attributes: omit(entry, 'documentId'),
             })),
           },
         },
@@ -247,7 +247,7 @@ describe('Test Graphql API End to End', () => {
           posts: {
             data: postsPayload.map((entry) => ({
               id: expect.any(String),
-              attributes: omit('id', entry),
+              attributes: omit(entry, 'id'),
             })),
           },
         },
@@ -282,7 +282,7 @@ describe('Test Graphql API End to End', () => {
             data: [
               {
                 documentId: expectedPost.documentId,
-                attributes: omit('documentId', expectedPost),
+                attributes: omit(expectedPost, 'documentId'),
               },
             ],
           },
@@ -311,7 +311,7 @@ describe('Test Graphql API End to End', () => {
 
       const expectedPosts = [...data.posts].reverse().map((entry) => ({
         documentId: expect.any(String),
-        attributes: omit('documentId', entry),
+        attributes: omit(entry, 'documentId'),
       }));
 
       expect(res.statusCode).toBe(200);
@@ -352,7 +352,7 @@ describe('Test Graphql API End to End', () => {
             data: [
               {
                 documentId: expectedPost.documentId,
-                attributes: omit('documentId', expectedPost),
+                attributes: omit(expectedPost, 'documentId'),
               },
             ],
           },
@@ -396,7 +396,7 @@ describe('Test Graphql API End to End', () => {
             data: [
               {
                 documentId: expectedPost.documentId,
-                attributes: omit('documentId', expectedPost),
+                attributes: omit(expectedPost, 'documentId'),
               },
             ],
             meta: {
@@ -584,14 +584,16 @@ describe('Test Graphql API End to End', () => {
       expect(posts.length).toBe(expected.length);
 
       // all the posts returned are in the expected array
-      posts.map(prop('attributes')).forEach((post) => {
-        expect(expected.map(omit('documentId'))).toEqual(expect.arrayContaining([post]));
+      posts.map(property('attributes')).forEach((post) => {
+        expect(expected.map((value) => omit(value, 'documentId'))).toEqual(
+          expect.arrayContaining([post])
+        );
       });
 
       // all expected values are in the result
       expected.forEach((expectedPost) => {
-        expect(posts.map(prop('attributes'))).toEqual(
-          expect.arrayContaining([omit('documentId', expectedPost)])
+        expect(posts.map(property('attributes'))).toEqual(
+          expect.arrayContaining([omit(expectedPost, 'documentId')])
         );
       });
     });
@@ -624,7 +626,7 @@ describe('Test Graphql API End to End', () => {
           post: {
             data: {
               documentId: data.posts[0].documentId,
-              attributes: omit('documentId', data.posts[0]),
+              attributes: omit(data.posts[0], 'documentId'),
             },
           },
         },

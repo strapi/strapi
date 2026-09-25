@@ -1,19 +1,11 @@
-import { map, values, sumBy, pipe, flatMap } from 'lodash/fp';
+import { flatMap, sumBy, values } from 'lodash';
 import type { Schema, UID } from '@strapi/types';
 
 const getNumberOfDynamicZones = () => {
   const contentTypes: Record<UID.ContentType, Schema.ContentType> = strapi.contentTypes;
 
-  return pipe(
-    map('attributes'),
-    flatMap(values),
-    sumBy((item) => {
-      if (item.type === 'dynamiczone') {
-        return 1;
-      }
-      return 0;
-    })
-  )(contentTypes);
+  const attributes = flatMap(contentTypes, (contentType) => values(contentType.attributes));
+  return sumBy(attributes, (attribute) => (attribute.type === 'dynamiczone' ? 1 : 0));
 };
 
 export default getNumberOfDynamicZones;

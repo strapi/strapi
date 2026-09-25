@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import _ from 'lodash/fp';
+import _ from 'lodash';
 
 import { toTypeLiteral, withAttributeNamespace } from './utils';
 import type { Attribute } from './utils';

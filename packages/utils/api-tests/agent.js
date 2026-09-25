@@ -1,6 +1,6 @@
 'use strict';
 
-const { clone, has, concat, isNil } = require('lodash/fp');
+const { clone, concat, has, isNil } = require('lodash');
 const qs = require('qs');
 const request = require('supertest');
 const { createUtils } = require('./utils');
@@ -75,12 +75,12 @@ const createAgent = (strapi, initialState = {}) => {
 
     const rq = supertestAgent[method.toLowerCase()](fullUrl);
 
-    if (has('token', state)) {
+    if (has(state, 'token')) {
       rq.auth(state.token, { type: 'bearer' });
     }
     if (headers) {
       applyHeadersToRequest(rq, headers);
-    } else if (has('headers', state)) {
+    } else if (has(state, 'headers')) {
       const stateHeaders = state.headers;
       applyHeadersToRequest(rq, stateHeaders);
     }

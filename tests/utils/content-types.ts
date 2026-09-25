@@ -1,4 +1,4 @@
-import { isBoolean, isNumber, isString, kebabCase, snakeCase } from 'lodash/fp';
+import { isBoolean, isNumber, isString, kebabCase, snakeCase } from 'lodash';
 import { waitForRestart } from './restart';
 import pluralize from 'pluralize';
 import { expect, type Page } from '@playwright/test';
