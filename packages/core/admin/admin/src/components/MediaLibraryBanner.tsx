@@ -1,6 +1,7 @@
 import { LinkButton, Typography } from '@strapi/design-system';
 import { ExternalLink } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+import { useMatch } from 'react-router-dom';
 
 import { useScopedPersistentState } from '../hooks/usePersistentState';
 
@@ -101,7 +102,12 @@ const MediaLibraryBanner = () => {
     false
   );
 
-  if (isDismissed) {
+  // `AuthenticatedLayout` renders this banner on every admin page, but it's only
+  // relevant on the Media Library itself (both the new and legacy `upload` plugin
+  // route share the same `plugins/upload` mount point).
+  const isOnMediaLibraryPage = useMatch('/plugins/upload/*') !== null;
+
+  if (isDismissed || !isOnMediaLibraryPage) {
     return null;
   }
 
