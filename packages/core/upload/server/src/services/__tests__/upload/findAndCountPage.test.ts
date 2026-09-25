@@ -1,6 +1,7 @@
 import createUploadService from '../../upload';
 import imageManipulation from '../../image-manipulation';
 import fileService from '../../file';
+import type { File } from '../../../types';
 
 const files = [
   { id: 1, name: 'a.png', provider: 'local' },
@@ -139,7 +140,7 @@ describe('findAndCountPage', () => {
   });
 
   test('signs file urls for every returned result', async () => {
-    const signFileUrls = jest.fn((file: unknown) => file);
+    const signFileUrls = jest.fn(async (file: File) => file);
     global.strapi.plugins.upload.services.file.signFileUrls = signFileUrls;
     uploadService = createUploadService({ strapi: global.strapi } as any);
 
