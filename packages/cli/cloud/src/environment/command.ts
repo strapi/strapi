@@ -1,9 +1,10 @@
 import { Command } from 'commander';
 import { defineCloudNamespace } from '../cloud/command';
+import { CLIContext } from '../types';
 
 let environmentCmd: Command | null = null;
 
-export const initializeEnvironmentCommand = (command: Command, ctx: unknown): Command => {
+export const initializeEnvironmentCommand = (command: Command, ctx: CLIContext): Command => {
   if (!environmentCmd) {
     const cloud = defineCloudNamespace(command, ctx);
     environmentCmd = cloud.command('environment').description('Manage environments');

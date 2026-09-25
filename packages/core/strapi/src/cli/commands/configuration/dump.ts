@@ -3,7 +3,6 @@ import { createCommand } from 'commander';
 import { createStrapi, compileStrapi } from '@strapi/core';
 
 import type { StrapiCommand } from '../../types';
-import { runAction } from '../../utils/helpers';
 
 interface CmdOptions {
   file?: string;
@@ -81,7 +80,7 @@ const command: StrapiCommand = () => {
     .description('Dump configurations of your application')
     .option('-f, --file <file>', 'Output file, default output is stdout')
     .option('-p, --pretty', 'Format the output JSON with indentation and line breaks', false)
-    .action(runAction('configuration:dump', action));
+    .action(action);
 };
 
 export { action, command };

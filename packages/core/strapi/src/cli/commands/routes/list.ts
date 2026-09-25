@@ -6,7 +6,6 @@ import { toUpper } from 'lodash/fp';
 import { createStrapi, compileStrapi } from '@strapi/core';
 
 import type { StrapiCommand } from '../../types';
-import { runAction } from '../../utils/helpers';
 
 const action = async () => {
   const appContext = await compileStrapi();
@@ -34,9 +33,7 @@ const action = async () => {
  * `$ strapi routes:list``
  */
 const command: StrapiCommand = () => {
-  return createCommand('routes:list')
-    .description('List all the application routes')
-    .action(runAction('routes:list', action));
+  return createCommand('routes:list').description('List all the application routes').action(action);
 };
 
 export { action, command };
