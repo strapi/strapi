@@ -676,9 +676,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       });
 
       expect(res.statusCode).toBe(400);
-      expect(res.body.error.message).toBe(
-        'description must be a `string` type, but the final value was: `null`.'
-      );
+      expect(res.body.error.message).toBe('Release contains invalid entries');
     });
 
     test('retrieves relations correctly in content API after publishing release', async () => {

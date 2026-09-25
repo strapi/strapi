@@ -25,6 +25,7 @@ const baseStrapiMock = {
       set: mockSchedulingSet,
       cancel: mockSchedulingCancel,
       countActions: jest.fn(),
+      revalidateActions: jest.fn().mockResolvedValue(0),
     }),
   }),
   features: {
@@ -608,6 +609,108 @@ describe('Release service', () => {
         'resolve:childDoc',
       ]);
     });
+
+    it('revalidates the release actions and publishes when the entries are now valid', async () => {
+      mockExecute.mockReturnValueOnce({
+        id: 1,
+        name: 'Stale',
+        releasedAt: null,
+        status: 'blocked',
+      });
+
+      const revalidateActions = jest.fn().mockResolvedValue(0);
+      const publishMock = jest.fn();
+
+      const strapiMock = {
+        ...baseStrapiMock,
+        documents: jest.fn().mockReturnValue({
+          publish: publishMock,
+          unpublish: jest.fn(),
+        }),
+        plugin: jest.fn().mockReturnValue({
+          service: jest.fn().mockReturnValue({
+            countActions: jest.fn().mockResolvedValue(1),
+            revalidateActions,
+          }),
+        }),
+        db: {
+          ...baseStrapiMock.db,
+          query: jest.fn().mockReturnValue({
+            // The stored flag is stale: the entry was fixed outside the document lifecycle
+            findMany: jest.fn().mockResolvedValue([
+              {
+                contentType: 'collectionType',
+                type: 'publish',
+                entryDocumentId: 'doc1',
+                isEntryValid: false,
+              },
+            ]),
+            update: jest.fn().mockResolvedValue({ id: 1, status: 'done', releasedAt: new Date() }),
+          }),
+        },
+        contentTypes: { collectionType: { kind: 'collectionType' } },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      const { release } = await releaseService.publish(1);
+
+      expect(revalidateActions).toHaveBeenCalledWith(1);
+      expect(publishMock).toHaveBeenCalledTimes(1);
+      expect(release?.status).toBe('done');
+    });
+
+    it('refuses to publish when revalidation still finds invalid entries', async () => {
+      mockExecute.mockReturnValueOnce({
+        id: 1,
+        name: 'Blocked',
+        releasedAt: null,
+        status: 'blocked',
+      });
+
+      const publishMock = jest.fn();
+      const emitMock = jest.fn();
+
+      const strapiMock = {
+        ...baseStrapiMock,
+        eventHub: { emit: emitMock },
+        documents: jest.fn().mockReturnValue({
+          publish: publishMock,
+          unpublish: jest.fn(),
+        }),
+        plugin: jest.fn().mockReturnValue({
+          service: jest.fn().mockReturnValue({
+            countActions: jest.fn().mockResolvedValue(1),
+            revalidateActions: jest.fn().mockResolvedValue(1),
+          }),
+        }),
+        db: {
+          ...baseStrapiMock.db,
+          query: jest.fn().mockReturnValue({
+            findMany: jest
+              .fn()
+              .mockResolvedValue([
+                { contentType: 'collectionType', type: 'publish', entryDocumentId: 'doc1' },
+              ]),
+            update: jest.fn(),
+          }),
+        },
+        contentTypes: { collectionType: { kind: 'collectionType' } },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      await expect(releaseService.publish(1)).rejects.toThrow('Release contains invalid entries');
+      expect(publishMock).not.toHaveBeenCalled();
+      expect(emitMock).toHaveBeenCalledWith('release.trigger', {
+        releaseId: 1,
+        name: 'Blocked',
+        outcome: 'failure',
+        reason: 'ValidationError',
+      });
+    });
   });
 
   describe('update audit', () => {
@@ -647,6 +750,7 @@ describe('Release service', () => {
             countActions: jest.fn(({ filters }: { filters: { type: string } }) =>
               Promise.resolve(filters.type === 'publish' ? 2 : 1)
             ),
+            revalidateActions: jest.fn().mockResolvedValue(0),
           }),
         }),
         db: {
@@ -689,6 +793,7 @@ describe('Release service', () => {
         plugin: jest.fn().mockReturnValue({
           service: jest.fn().mockReturnValue({
             countActions: jest.fn().mockRejectedValue(new Error('db down')),
+            revalidateActions: jest.fn().mockResolvedValue(0),
           }),
         }),
         db: {
@@ -762,7 +867,10 @@ describe('Release service', () => {
         },
         log: { info: jest.fn(), error: jest.fn() },
         plugin: jest.fn().mockReturnValue({
-          service: jest.fn().mockReturnValue({ countActions: jest.fn().mockResolvedValue(1) }),
+          service: jest.fn().mockReturnValue({
+            countActions: jest.fn().mockResolvedValue(1),
+            revalidateActions: jest.fn().mockResolvedValue(0),
+          }),
         }),
         db: {
           ...baseStrapiMock.db,
