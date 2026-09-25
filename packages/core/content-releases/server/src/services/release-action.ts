@@ -17,6 +17,7 @@ import type {
 } from '../../../shared/contracts/release-actions';
 import type { Entity } from '../../../shared/types';
 import { getService, getDraftEntryValidStatus, getEntry, getEntryStatus } from '../utils';
+import type { WorkflowsService } from '../utils';
 
 const getGroupName = (queryValue: string) => {
   switch (queryValue) {
@@ -249,7 +250,9 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
         return acc;
       }, []);
 
-      const workflowsService = strapi.plugin('review-workflows').service('workflows');
+      const workflowsService = strapi
+        .plugin('review-workflows')
+        .service<WorkflowsService>('workflows');
 
       const contentTypeModelsMap = await async.reduce(contentTypeUids)(
         async (
