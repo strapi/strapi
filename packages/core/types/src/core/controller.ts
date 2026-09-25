@@ -1,6 +1,7 @@
 import 'koa-body';
 import type { Context, Next } from 'koa';
 import type * as UID from '../uid';
+import type { SuggestedString } from '../utils/string';
 import type { IsDynamicName, IsStrict, RegisteredRecord } from './strictness';
 
 export type Controller = Record<string, ControllerHandler>;
@@ -24,7 +25,7 @@ export type ControllerFor<TUID extends string> = IsStrict extends false
  * when the caller passes an explicit type argument (TypeScript then does not infer the UID) or a
  * dynamic UID; the registered lookup otherwise.
  */
-export type ControllerLookup<TUID extends UID.Controller, T> = UID.Controller extends TUID
+export type ControllerLookup<TUID extends ControllerLookupUID, T> = UID.Controller extends TUID
   ? T
   : ControllerFor<TUID>;
 
@@ -32,6 +33,9 @@ export type ControllerLookup<TUID extends UID.Controller, T> = UID.Controller ex
 export type RegisteredControllerUID =
   | keyof Strapi.Registries.AppControllers
   | keyof Strapi.Registries.PackageControllers;
+
+/** A UID accepted by `strapi.controller(uid)`. Registered UIDs are listed for completion. */
+export type ControllerLookupUID = SuggestedString<RegisteredControllerUID, UID.Controller>;
 
 /**
  * Controllers keyed by UID, e.g. `strapi.controllers`. With strict types enabled, registered UIDs

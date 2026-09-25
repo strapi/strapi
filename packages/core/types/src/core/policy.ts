@@ -1,6 +1,7 @@
 import { ExtendableContext } from 'koa';
 
 import type { Strapi } from '.';
+import type { SuggestedString } from '../utils/string';
 import type { IsStrict, RegisteredRecord } from './strictness';
 
 export type PolicyContext = Omit<ExtendableContext, 'is'> & {
@@ -62,16 +63,21 @@ type RegisteredPolicyReference<TName extends RegisteredPolicyName, TNamespace ex
         | { name: PolicyReferenceName<TName, TNamespace>; config?: PolicyConfigFor<TName> }
     : { name: PolicyReferenceName<TName, TNamespace>; config: PolicyConfigFor<TName> };
 
+/** Any policy name. Registered names, and their relative forms in `TNamespace`, are listed for completion. */
+type SuggestedPolicyName<TNamespace extends string> = SuggestedString<
+  PolicyReferenceName<RegisteredPolicyName, TNamespace>
+>;
+
 /**
  * A policy reference in a typed route config.
- * With strict types disabled, any policy name is accepted.
+ * With strict types disabled, any policy name is accepted; registered names are listed for completion.
  * With strict types enabled, only registered policies are accepted and their `config` is checked:
  * a partial inventory cannot check the `{ name, config }` form for known names while accepting
  * unknown ones. Without registered policies, no reference is accepted.
  * A plugin or API namespace also accepts its relative policy names, with the same config checks.
  */
 export type PolicyReference<TNamespace extends string = never> = IsStrict extends false
-  ? string | { name: string; config: unknown }
+  ? SuggestedPolicyName<TNamespace> | { name: SuggestedPolicyName<TNamespace>; config: unknown }
   : {
       [TName in RegisteredPolicyName]: RegisteredPolicyReference<TName, TNamespace>;
     }[RegisteredPolicyName];

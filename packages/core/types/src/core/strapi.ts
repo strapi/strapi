@@ -9,11 +9,11 @@ import type * as Schema from '../schema';
 import type * as UID from '../uid';
 
 import type { Container } from './container';
-import type { ControllerLookup, ControllerMap } from './controller';
-import type { ApiMap } from './module';
-import type { PluginMap } from './plugin';
-import type { PolicyMap } from './policy';
-import type { ServiceLookup, ServiceMap } from './service';
+import type { ControllerLookup, ControllerLookupUID, ControllerMap } from './controller';
+import type { ApiMap, RegisteredApiName } from './module';
+import type { PluginMap, RegisteredPluginName } from './plugin';
+import type { PolicyMap, RegisteredPolicyName } from './policy';
+import type { ServiceLookup, ServiceLookupUID, ServiceMap } from './service';
 import type { SuggestedString } from '../utils/string';
 import type { IsStrict } from './strictness';
 
@@ -84,7 +84,7 @@ export interface Strapi extends Container {
    * Resolves the registered contract of `uid`. An explicit type argument (`service<MyService>(uid)`)
    * wins over the registries, including for unregistered names with strict types enabled.
    */
-  service<T extends Core.Service = Core.Service, TUID extends UID.Service = UID.Service>(
+  service<T extends Core.Service = Core.Service, TUID extends ServiceLookupUID = ServiceLookupUID>(
     uid: TUID
   ): ServiceLookup<TUID, T>;
   /**
@@ -98,7 +98,7 @@ export interface Strapi extends Container {
    */
   controller<
     T extends Core.Controller = Core.Controller,
-    TUID extends UID.Controller = UID.Controller,
+    TUID extends ControllerLookupUID = ControllerLookupUID,
   >(
     uid: TUID
   ): ControllerLookup<TUID, T>;
@@ -111,7 +111,8 @@ export interface Strapi extends Container {
    * other keys keep the legacy policy.
    */
   policies: PolicyMap;
-  policy(name: string): Core.Policy;
+  /** Registered policy UIDs are listed for completion; the result keeps the legacy policy type. */
+  policy(name: SuggestedString<RegisteredPolicyName>): Core.Policy;
   middlewares: Record<string, Core.MiddlewareFactory>;
   middleware(name: string): Core.MiddlewareFactory;
   /**
@@ -119,7 +120,8 @@ export interface Strapi extends Container {
    * `Plugin<name>`, like `plugin(name)`; other names keep the legacy plugin.
    */
   plugins: PluginMap;
-  plugin<TName extends string>(name: TName): Core.Plugin<TName>;
+  /** Plugins with registered contracts are listed for completion. */
+  plugin<TName extends SuggestedString<RegisteredPluginName>>(name: TName): Core.Plugin<TName>;
   hooks: Record<string, any>;
   hook(name: string): any;
   /**
@@ -127,7 +129,8 @@ export interface Strapi extends Container {
    * `Module<'api::<name>'>`, like `api(name)`; other names keep the legacy module.
    */
   apis: ApiMap;
-  api<TName extends string>(name: TName): Core.Module<`api::${TName}`>;
+  /** APIs with registered contracts are listed for completion. */
+  api<TName extends SuggestedString<RegisteredApiName>>(name: TName): Core.Module<`api::${TName}`>;
   auth: Modules.Auth.AuthenticationService;
   /** Content API: permissions, route map, sanitize/validate, and registration of extra query/input params (see addQueryParams, addInputParams). */
   contentAPI: Modules.ContentAPI.ContentApi;

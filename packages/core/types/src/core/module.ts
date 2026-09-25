@@ -4,6 +4,7 @@ import type { ContentType } from '../schema';
 import type { ControllerFor, RegisteredControllerUID } from './controller';
 import type { PolicyConfigFor, RegisteredPolicyName } from './policy';
 import type { RegisteredServiceUID, ServiceFor } from './service';
+import type { SuggestedString } from '../utils/string';
 import type { IsDynamicName, IsStrict, RegisteredRecord } from './strictness';
 
 /**
@@ -80,8 +81,14 @@ export interface Module<TNamespace extends string = string> {
   middlewares: Record<string, Middleware>;
   contentTypes: Record<string, { schema: ContentType }>;
 
-  controller<T extends Controller>(name: string): T;
-  service<T extends Service>(name: string): T;
+  /** Registered controller names of the module are listed for completion; the result keeps the legacy type. */
+  controller<T extends Controller>(
+    name: SuggestedString<ModuleEntryNames<RegisteredControllerUID, TNamespace>>
+  ): T;
+  /** Registered service names of the module are listed for completion; the result keeps the legacy type. */
+  service<T extends Service>(
+    name: SuggestedString<ModuleEntryNames<RegisteredServiceUID, TNamespace>>
+  ): T;
 }
 
 /** The API name of an `api::<api>.<name>` UID. */

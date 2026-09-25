@@ -1,4 +1,5 @@
 import type * as UID from '../uid';
+import type { SuggestedString } from '../utils/string';
 import type { IsDynamicName, IsStrict, RegisteredRecord } from './strictness';
 
 /**
@@ -21,7 +22,7 @@ export type ServiceFor<TUID extends string> = IsStrict extends false
  * the caller passes an explicit type argument (TypeScript then does not infer the UID) or a dynamic
  * UID; the registered lookup otherwise.
  */
-export type ServiceLookup<TUID extends UID.Service, T> = UID.Service extends TUID
+export type ServiceLookup<TUID extends ServiceLookupUID, T> = UID.Service extends TUID
   ? T
   : ServiceFor<TUID>;
 
@@ -29,6 +30,9 @@ export type ServiceLookup<TUID extends UID.Service, T> = UID.Service extends TUI
 export type RegisteredServiceUID =
   | keyof Strapi.Registries.AppServices
   | keyof Strapi.Registries.PackageServices;
+
+/** A UID accepted by `strapi.service(uid)`. Registered UIDs are listed for completion. */
+export type ServiceLookupUID = SuggestedString<RegisteredServiceUID, UID.Service>;
 
 /**
  * Services keyed by UID, e.g. `strapi.services`. With strict types enabled, registered UIDs resolve to
