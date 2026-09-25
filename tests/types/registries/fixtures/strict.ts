@@ -66,3 +66,33 @@ jobs.getJobForCollectionType satisfies Core.ControllerHandler;
   // @ts-expect-error Content-manager's policy contract checks its optional config.
   policies: [{ name: 'plugin::content-manager.hasPermissions', config: { hasAtLeastOne: 'yes' } }],
 }) satisfies Core.RouteConfigFor;
+
+// Unregistered literal names resolve to `never`; the emitted declarations close the fallback too.
+const unregisteredService = app.service('plugin::i18n.unregistered');
+unregisteredService satisfies never;
+const unregisteredPluginService = app.plugin('i18n').service('unregistered');
+unregisteredPluginService satisfies never;
+const unknownPluginService = app.plugin('unregistered').service('greeting');
+unknownPluginService satisfies never;
+const unregisteredController = app.controller('plugin::i18n.unregistered');
+unregisteredController satisfies never;
+const unregisteredPluginController = app.plugin('i18n').controller('unregistered');
+unregisteredPluginController satisfies never;
+// @ts-expect-error Unregistered literal names expose no members.
+app.plugin('i18n').service('unregistered').anything();
+
+// Explicit generics and dynamic names keep the permissive signature.
+const explicitService = app.plugin('i18n').service<{ greet(): string }>('unregistered');
+explicitService.greet() satisfies string;
+declare const dynamicName: string;
+declare const patternUid: `plugin::i18n.${string}`;
+app.plugin('i18n').service(dynamicName).anything();
+app.plugin(dynamicName).service('greeting').anything();
+app.service(patternUid).anything();
+app.plugin('i18n').controller(dynamicName).anything satisfies Core.ControllerHandler | undefined;
+
+// Bundled admin contracts cover the permission service.
+const permission = app.service('admin::permission');
+permission.actionProvider.registerMany satisfies (...args: never[]) => unknown;
+// @ts-expect-error The admin permission contract has no arbitrary members.
+permission.missing();
