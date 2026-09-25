@@ -13,7 +13,17 @@ declare global {
     // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace Registries {
       interface PackageServices {
+        'plugin::content-manager.components': Services.ComponentsService;
         'plugin::content-manager.content-structure': Services.ContentStructureService;
+        'plugin::content-manager.content-types': Services.ContentTypesService;
+        'plugin::content-manager.data-mapper': Services.DataMapperService;
+        'plugin::content-manager.history': Services.HistoryService;
+        'plugin::content-manager.homepage': Services.HomepageService;
+        'plugin::content-manager.lifecycles': Services.LifecyclesService;
+        'plugin::content-manager.permission': Services.PermissionService;
+        'plugin::content-manager.permission-checker': Services.PermissionCheckerService;
+        'plugin::content-manager.preview': Services.PreviewService;
+        'plugin::content-manager.preview-config': Services.PreviewConfigService;
         'plugin::content-manager.document-manager': Services.DocumentManagerService;
         'plugin::content-manager.document-metadata': Services.DocumentMetadataService;
         'plugin::content-manager.field-sizes': Services.FieldSizesService;

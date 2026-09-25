@@ -32,7 +32,8 @@ export default ({
     return storeUtils.getModelConfiguration(storeKey);
   };
 
-  const setConfiguration = (uid: string, input: ConfigurationUpdate) => {
+  // The store merges the input into the stored configuration, so partial updates are valid.
+  const setConfiguration = (uid: string, input: Partial<ConfigurationUpdate>) => {
     const configuration = {
       ...input,
       uid,

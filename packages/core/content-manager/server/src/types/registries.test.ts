@@ -43,6 +43,7 @@ status satisfies 'draft' | 'published' | 'modified';
 // @ts-expect-error Metadata version input cannot be missing.
 getService('document-metadata').getMetadata('api::article.article', null);
 
+// @ts-expect-error Unregistered helper lookups resolve to `never` with strict types enabled.
 getService('unregistered').custom();
 
 ({
