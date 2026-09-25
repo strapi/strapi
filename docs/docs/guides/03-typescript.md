@@ -52,15 +52,28 @@ const defaultLocale = await locales.getDefaultLocale(); // string | null
 The bundled contracts cover i18n's services and controllers, including the possibility of missing
 settings, locales, and AI localization jobs. Content Manager registers its core controllers,
 permission policy, and services for content structure, document operations and metadata, field
-sizes, metrics, population, and UID generation. Its other services and feature-specific
-controllers retain the existing fallback types.
+sizes, metrics, population, and UID generation. The admin registers its permission policies and
+its `permission` and `transfer` services.
 
-Unregistered or dynamic names retain permissive lookup types. Explicit generic arguments on
-plugin lookups and config getters remain available. Dotted config paths resolve within the
-registered contract, including optional properties and array elements. Array paths and unknown
-paths retain the generic fallback. For registered paths, a defined default removes `undefined`
-from the result. A default that can itself be `undefined` preserves that possibility. Defaults
-do not replace `null`.
+Strict contracts are closed: an unregistered literal service or controller name resolves to
+`never`, for full UIDs such as `strapi.service('plugin::greetings.greeting')` and for plugin
+lookups such as `strapi.plugin('greetings').service('greeting')`. Register a contract for the
+name, or pass an explicit generic argument on plugin lookups:
+
+```ts
+const greeting = strapi.plugin('greetings').service<GreetingService>('greeting');
+```
+
+Dynamic names, such as a `string` variable or a template literal type like
+`` `plugin::${string}.greeting` ``, cannot be validated and retain the permissive lookup types.
+
+Config lookups stay open: core namespaces such as `server`, `admin`, and `api` have no
+registered contract, and unregistered namespaces or unknown paths resolve to the generic
+fallback, `unknown` by default. Explicit generic arguments on config getters remain available.
+Dotted config paths resolve within the registered contract, including optional properties and
+array elements. Array paths retain the generic fallback. For registered paths, a defined default
+removes `undefined` from the result. A default that can itself be `undefined` preserves that
+possibility. Defaults do not replace `null`.
 
 Without `Settings.strict: true`, service, controller, config, and policy lookups keep their
 previous types, even if the program loads package contracts or application overrides. Editors
@@ -120,8 +133,9 @@ such as `greeting.hello` and absolute handlers such as `plugin::greetings.greeti
 Preserve literal controller keys; a map typed as `Record<string, ...>` cannot detect name typos.
 Handler checking applies whenever this explicit type is used, including with the switch off.
 
-With the switch on, typed route policies use the loaded policy registry. Once any policy is
-registered, all referenced policies must be registered. Load every relevant provider and add
+With the switch on, typed route policies use the loaded policy registry: all referenced
+policies must be registered, and a program without registered policies accepts none. The admin
+contracts loaded by `@strapi/strapi/strict-types` register its policies. Load every relevant provider and add
 application policies, including `global::` policies, to `Strapi.Registries.AppPolicies`.
 The generator loads enabled plugins' contracts; application policies still need their own
 declarations. Policies with required config must use `{ name, config }`; only policies whose
@@ -136,8 +150,9 @@ use their fully qualified names.
 
 Policy inventories are deliberately complete for explicitly typed routes: accepting arbitrary
 policy names would also let an invalid configuration for a known policy pass through the
-fallback. Services and controllers can adopt contracts incrementally because their lookups
-resolve one name at a time.
+fallback. Service and controller lookups are closed the same way for literal names, but resolve
+one name at a time: a plugin lookup with an explicit generic argument keeps working while its
+contract is missing.
 
 ## Verifying changes
 
