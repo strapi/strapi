@@ -1,7 +1,7 @@
 import type { Core, Modules, UID } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
 
-import { omit, castArray } from 'lodash/fp';
+import { omit, castArray } from 'lodash';
 
 import { getService } from '../utils';
 import { FIELDS_TO_IGNORE, HISTORY_VERSION_UID } from '../constants';
@@ -84,7 +84,7 @@ const getSchemas = (uid: UID.CollectionType) => {
   );
 
   return {
-    schema: omit(FIELDS_TO_IGNORE, attributesSchema) as CreateHistoryVersion['schema'],
+    schema: omit(attributesSchema, FIELDS_TO_IGNORE) as CreateHistoryVersion['schema'],
     componentsSchemas,
   };
 };
@@ -158,7 +158,7 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
 
               await getService(strapi, 'history').createVersion({
                 contentType: uid,
-                data: omit(FIELDS_TO_IGNORE, entry) as Modules.Documents.AnyDocument,
+                data: omit(entry, FIELDS_TO_IGNORE) as Modules.Documents.AnyDocument,
                 relatedDocumentId: documentId,
                 locale: entry.locale,
                 status,

@@ -1,4 +1,4 @@
-import { isNil, omit } from 'lodash/fp';
+import { isNil, omit } from 'lodash';
 
 import {
   setCreatorFields,
@@ -359,7 +359,7 @@ export default {
 
     const { locale, status } = await getDocumentLocaleAndStatus(queryForValidation, model);
 
-    const paramsForDocumentService = omit(['publicationStatusFilter'], permissionQuery) as Record<
+    const paramsForDocumentService = omit(permissionQuery, ['publicationStatusFilter']) as Record<
       string,
       unknown
     >;

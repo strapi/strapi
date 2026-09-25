@@ -1,4 +1,5 @@
-import { isNil, mapValues } from 'lodash/fp';
+import { isNil, mapValues } from 'lodash';
+
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
 
 import type { UID, Struct, Core } from '@strapi/types';
@@ -15,7 +16,7 @@ const configurationService = createConfigurationService({
   getModels() {
     const { toContentManagerModel } = getService('data-mapper');
 
-    return mapValues(toContentManagerModel, strapi.contentTypes);
+    return mapValues(strapi.contentTypes, (value) => toContentManagerModel(value));
   },
 });
 

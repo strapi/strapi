@@ -1,4 +1,4 @@
-import { snakeCase } from 'lodash/fp';
+import snakeCase from 'lodash/snakeCase';
 import pluralize from 'pluralize';
 
 // TODO: create a utility for this

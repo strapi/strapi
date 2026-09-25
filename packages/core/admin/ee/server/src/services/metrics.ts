@@ -1,4 +1,5 @@
-import { assign } from 'lodash/fp';
+import { assign } from 'lodash';
+
 import type { Core } from '@strapi/types';
 import { getService } from '../utils';
 
@@ -17,7 +18,7 @@ const sendUpdateProjectInformation = async (strapi: Core.Strapi) => {
   if (strapi.ee.features.isEnabled('sso')) {
     const SSOProviders = await getSSOProvidersList();
 
-    groupProperties = assign(groupProperties, {
+    groupProperties = assign({}, groupProperties, {
       SSOProviders,
       isSSOConfigured: SSOProviders.length !== 0,
     });
@@ -34,13 +35,13 @@ const sendUpdateProjectInformation = async (strapi: Core.Strapi) => {
         filters: { releasedAt: { $notNull: true } },
       });
 
-    groupProperties = assign(groupProperties, {
+    groupProperties = assign({}, groupProperties, {
       numberOfContentReleases,
       numberOfPublishedContentReleases,
     });
   }
 
-  groupProperties = assign(groupProperties, { numberOfActiveAdminUsers, numberOfAdminUsers });
+  groupProperties = assign({}, groupProperties, { numberOfActiveAdminUsers, numberOfAdminUsers });
 
   strapi.telemetry.send('didUpdateProjectInformation', {
     groupProperties,

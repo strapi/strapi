@@ -1,7 +1,7 @@
 import type { Context } from 'koa';
 import { differenceInHours, parseISO } from 'date-fns';
 import { errors } from '@strapi/utils';
-import { castArray, isNil } from 'lodash/fp';
+import { castArray, isNil } from 'lodash';
 
 import { getService } from '../utils';
 

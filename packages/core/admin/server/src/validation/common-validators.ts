@@ -1,6 +1,6 @@
 import { yup } from '@strapi/utils';
-import _ from 'lodash';
-import { isEmpty, has, isNil, isArray } from 'lodash/fp';
+import _, { isEmpty, has, isNil, isArray } from 'lodash';
+
 import { getService } from '../utils';
 import actionDomain, { type Action } from '../domain/action';
 import { checkFieldsAreCorrectlyNested, checkFieldsDontHaveDuplicates } from './common-functions';
@@ -156,7 +156,7 @@ export const permission = yup
           const action = getActionFromProvider(this.options.parent.action) as any;
           const hasNoProperties = isEmpty(properties) || isNil(properties);
 
-          if (!has('options.applyToProperties', action)) {
+          if (!has(action, 'options.applyToProperties')) {
             return hasNoProperties;
           }
 

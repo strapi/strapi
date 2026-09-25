@@ -1,5 +1,6 @@
 import type { Context } from 'koa';
-import { isNil } from 'lodash/fp';
+import { isNil } from 'lodash';
+
 import { differenceInHours, parseISO } from 'date-fns';
 import { errors } from '@strapi/utils';
 

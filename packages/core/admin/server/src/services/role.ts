@@ -1,7 +1,6 @@
+import _, { omit, pick, property, isArray, differenceWith, differenceBy, isEqual } from 'lodash';
 /* eslint-disable @typescript-eslint/no-explicit-any */ // TODO: TS - Use database parameters interface when they are ready
 /* eslint-disable @typescript-eslint/default-param-last */
-import _ from 'lodash';
-import { set, omit, pick, prop, isArray, differenceWith, differenceBy, isEqual } from 'lodash/fp';
 
 import { dates, arrays, hooks as hooksUtils, errors } from '@strapi/utils';
 import type { Data } from '@strapi/types';
@@ -28,16 +27,13 @@ const ACTIONS = {
   publish: 'plugin::content-manager.explorer.publish',
 };
 
-// @ts-expect-error lodash types
-const sanitizeRole: <T extends object>(obj: T) => Omit<T, 'users' | 'permissions'> = omit([
-  'users',
-  'permissions',
-] as const);
+const sanitizeRole = <T extends object>(role: T): Omit<T, 'users' | 'permissions'> =>
+  omit(role, ['users', 'permissions']) as Omit<T, 'users' | 'permissions'>;
 
 export type AdminRoleWithUsersCount = AdminRole & { usersCount: number };
 
 const COMPARABLE_FIELDS = ['conditions', 'properties', 'subject', 'action', 'actionParameters'];
-const pickComparableFields = pick(COMPARABLE_FIELDS);
+const pickComparableFields = (permission: Permission) => pick(permission, COMPARABLE_FIELDS);
 
 const jsonClean = <T extends object>(data: T): T => JSON.parse(JSON.stringify(data));
 
@@ -340,13 +336,12 @@ const assignPermissions = async (
 
   const superAdmin = await getService('role').getSuperAdmin();
   const isSuperAdmin = superAdmin && superAdmin.id === roleId;
-  const assignRole = set('role', roleId);
+  const assignRole = <T extends object>(permission: T) => ({ ...permission, role: roleId });
 
   const permissionsWithRole = permissions
     // Add the role attribute to every permission
     .map(assignRole)
     // Transform each permission into a Permission instance
-    // @ts-expect-error - lodash set doesn't resolve the type appropriately
     .map(permissionDomain.create);
 
   const existingPermissions = await getService('permission').findMany({
@@ -355,22 +350,21 @@ const assignPermissions = async (
   });
 
   const permissionsToAdd = differenceWith(
-    arePermissionsEqual,
     permissionsWithRole,
-    existingPermissions
+    existingPermissions,
+    arePermissionsEqual
   ).filter((permission: Permission) => !internalActions.includes(permission.action));
 
   const permissionsToDelete = differenceWith(
-    arePermissionsEqual,
     existingPermissions,
-    permissionsWithRole
+    permissionsWithRole,
+    arePermissionsEqual
   ).filter((permission: Permission) => !internalActions.includes(permission.action));
 
-  const permissionsToReturn = differenceBy('id', permissionsToDelete, existingPermissions);
+  const permissionsToReturn = differenceBy(permissionsToDelete, existingPermissions, 'id');
 
   if (permissionsToDelete.length > 0) {
-    // @ts-expect-error - lodash prop doesn't resolve the type appropriately
-    await getService('permission').deleteByIds(permissionsToDelete.map(prop('id')));
+    await getService('permission').deleteByIds(permissionsToDelete.map(property('id')));
   }
 
   if (permissionsToAdd.length > 0) {
@@ -394,7 +388,7 @@ const addPermissions = async (roleId: Data.ID, permissions: any) => {
   const { sanitizeConditions } = permissionDomain;
 
   const permissionsWithRole = permissions
-    .map(set('role', roleId))
+    .map((permission: Permission) => ({ ...permission, role: roleId }))
     // @ts-expect-error - refactor domain/permission Condition type, as it's now expecting
     // a string but it should be a Condition interface
     .map(sanitizeConditions(conditionProvider))
@@ -457,7 +451,7 @@ const resetSuperAdminPermissions = async () => {
 const hasSuperAdminRole = (user: AdminUser): boolean => {
   const roles = _.get(user, 'roles', []) as AdminRole[];
 
-  return roles.map(prop('code')).includes(SUPER_ADMIN_CODE);
+  return roles.map(property('code')).includes(SUPER_ADMIN_CODE);
 };
 
 const constants = {

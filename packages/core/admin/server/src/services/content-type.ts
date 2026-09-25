@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import { uniq, startsWith } from 'lodash/fp';
+import _, { startsWith, uniq } from 'lodash';
+
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
 import type { Modules, Struct } from '@strapi/types';
 import { getService } from '../utils';
@@ -44,7 +44,8 @@ const getNestedFields = (
 
       const fieldPath = prefix ? `${prefix}.${key}` : key;
       const shouldBeIncluded = !requiredOnly || attr.required === true;
-      const insideExistingFields = existingFields && existingFields.some(startsWith(fieldPath));
+      const insideExistingFields =
+        existingFields && existingFields.some((field) => startsWith(field, fieldPath));
 
       if (attr.type === 'component') {
         if (shouldBeIncluded || insideExistingFields) {
@@ -185,7 +186,7 @@ const cleanPermissionFields = (
 
     const validUserFields: string[] = uniq(
       possibleFields.filter((pf) =>
-        currentFields.some((cf) => pf === cf || startsWith(`${cf}.`, pf))
+        currentFields.some((cf) => pf === cf || startsWith(pf, `${cf}.`))
       )
     );
 
@@ -195,7 +196,7 @@ const cleanPermissionFields = (
     const isNotNestedField = (field: string) =>
       !validUserFields.some(
         (validUserField: string) =>
-          validUserField !== field && startsWith(`${field}.`, validUserField)
+          validUserField !== field && startsWith(validUserField, `${field}.`)
       );
 
     // Filter out fields that are parent paths of other included fields.

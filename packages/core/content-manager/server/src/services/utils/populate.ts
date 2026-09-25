@@ -1,4 +1,5 @@
-import { merge, isEmpty, set, propEq } from 'lodash/fp';
+import { set, merge, isEmpty, matchesProperty } from 'lodash';
+
 import * as strapiUtils from '@strapi/utils';
 import type { UID, Schema, Modules } from '@strapi/types';
 import { getService } from '../../utils';
@@ -18,10 +19,10 @@ const isLocalizedContentType = (model: { pluginOptions?: unknown }) =>
 
 const isMorphToRelation = (attribute: any) =>
   isRelation(attribute) && attribute.relation.includes('morphTo');
-const isMedia = propEq('type', 'media');
-const isRelation = propEq('type', 'relation');
-const isComponent = propEq('type', 'component');
-const isDynamicZone = propEq('type', 'dynamiczone');
+const isMedia = matchesProperty('type', 'media');
+const isRelation = matchesProperty('type', 'relation');
+const isComponent = matchesProperty('type', 'component');
+const isDynamicZone = matchesProperty('type', 'dynamiczone');
 
 // TODO: Import from @strapi/types when it's available there
 type Model = Parameters<typeof isVisibleAttribute>[0];
@@ -179,6 +180,7 @@ const getDeepPopulate = (
   return Object.keys(model.attributes).reduce(
     (populateAcc, attributeName: string) =>
       merge(
+        {},
         populateAcc,
         getPopulateFor(
           attributeName,
@@ -426,7 +428,7 @@ const getQueryPopulate = async (uid: UID.Schema, query: object): Promise<Populat
       // Populate all relations, components and media
       if (isRelation(attribute) || isMedia(attribute) || isComponent(attribute)) {
         const populatePath = path.attribute.replace(/\./g, '.populate.');
-        populateQuery = merge(populateQuery, set(populatePath, {}, {}));
+        populateQuery = merge({}, populateQuery, set({}, populatePath, {}));
       }
     },
     { schema: strapi.getModel(uid), getModel: strapi.getModel.bind(strapi) },

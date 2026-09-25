@@ -1,4 +1,4 @@
-import { omit, pipe } from 'lodash/fp';
+import { omit, flow } from 'lodash';
 
 import { contentTypes, pagination } from '@strapi/utils';
 import type { Core, Modules, UID } from '@strapi/types';
@@ -13,8 +13,9 @@ export type Document = Modules.Documents.Result<UID.ContentType>;
 
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypes.constants;
 
-const omitPublishedAtField = omit(PUBLISHED_AT_ATTRIBUTE);
-const omitIdField = omit('id');
+const omitPublishedAtField = <T extends object>(document: T) =>
+  omit(document, PUBLISHED_AT_ATTRIBUTE);
+const omitIdField = <T extends object>(document: T) => omit(document, 'id');
 
 const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
   return {
@@ -96,7 +97,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       uid: UID.CollectionType,
       opts: Omit<DocServiceParams<'update'>, 'documentId'> = {} as any
     ) {
-      const publishData = pipe(omitPublishedAtField, omitIdField)(opts.data || {});
+      const publishData = flow(omitPublishedAtField, omitIdField)(opts.data || {});
       const populate = opts.populate ?? (await buildDeepPopulate(uid));
       const params = { ...opts, data: publishData, populate, status: 'draft' };
 
@@ -114,7 +115,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       const locale = body?.locale;
       const params = {
         // Ensure id and documentId are not copied to the clone
-        data: omit(['id', 'documentId'], body),
+        data: omit(body, ['id', 'documentId']),
         locale,
         populate,
       };

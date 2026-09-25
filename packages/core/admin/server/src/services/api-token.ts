@@ -1,5 +1,6 @@
-import crypto from 'crypto';
 import {
+  pick,
+  property,
   omit,
   difference,
   isNil,
@@ -10,9 +11,9 @@ import {
   isNumber,
   differenceWith,
   isEqual,
-  pick,
-  prop,
-} from 'lodash/fp';
+} from 'lodash';
+import crypto from 'crypto';
+
 import type { Core, Data } from '@strapi/types';
 import { errors, emitAudit } from '@strapi/utils';
 import type { Ability } from '@casl/ability';
@@ -390,7 +391,7 @@ const createApiTokenAdminPermissions = async (tokenId: Data.ID, permissions: Per
  * Fields to compare when checking if two permissions are equal
  */
 const COMPARABLE_FIELDS = ['conditions', 'properties', 'subject', 'action', 'actionParameters'];
-const pickComparableFields = pick(COMPARABLE_FIELDS);
+const pickComparableFields = (permission: Permission) => pick(permission, COMPARABLE_FIELDS);
 
 /**
  * Helper to clean JSON (remove undefined values)
@@ -433,19 +434,21 @@ const assignAdminPermissionsToToken = async (
   });
 
   const permissionsToAdd = differenceWith(
-    arePermissionsEqual,
     permissionsWithToken,
-    existingPermissions
+    existingPermissions,
+    arePermissionsEqual
   ) as any as Permission[];
 
   const permissionsToDelete = differenceWith(
-    arePermissionsEqual,
     existingPermissions,
-    permissionsWithToken
+    permissionsWithToken,
+    arePermissionsEqual
   ) as any as Permission[];
 
   if (permissionsToDelete.length > 0) {
-    await getService('permission').deleteByIds(permissionsToDelete.map(prop('id')) as Data.ID[]);
+    await getService('permission').deleteByIds(
+      permissionsToDelete.map(property('id')) as Data.ID[]
+    );
   }
 
   if (permissionsToAdd.length > 0) {
@@ -598,7 +601,7 @@ const syncApiTokenPermissionsForRole = async (roleId: Data.ID): Promise<void> =>
  * Flatten a token's database permissions objects to an array of strings
  */
 const flattenTokenPermissions = (permissions: { action: string }[] | undefined): string[] => {
-  return isArray(permissions) ? map('action', permissions) : [];
+  return isArray(permissions) ? map(permissions, 'action') : [];
 };
 
 type WhereParams = {
@@ -644,10 +647,14 @@ const getBy = async (
   // Tokens created before kind introduction case: force kind to be content-api
   const computedKind = token.kind ?? 'content-api';
 
-  const result = omit(
-    ['accessKey', 'encryptedKey', 'type', 'permissions', 'adminPermissions', 'adminUserOwner'],
-    token
-  );
+  const result = omit(token, [
+    'accessKey',
+    'encryptedKey',
+    'type',
+    'permissions',
+    'adminPermissions',
+    'adminUserOwner',
+  ]);
 
   if (computedKind === 'content-api') {
     Object.assign(result, {
@@ -775,7 +782,7 @@ const create = async <K extends AnyApiToken['kind']>(
       select: SELECT_FIELDS,
       populate: POPULATE_FIELDS,
       data: {
-        ...(omit(['permissions', 'adminPermissions', 'adminUserOwner'], attributes) as object),
+        ...(omit(attributes, ['permissions', 'adminPermissions', 'adminUserOwner']) as object),
         accessKey: hash(accessKey),
         encryptedKey,
         adminUserOwner: null,
@@ -819,7 +826,7 @@ const create = async <K extends AnyApiToken['kind']>(
     });
 
     // Casted to any to avoid complex type duplication
-    return omit(['adminPermissions', 'adminUserOwner'], result) as any;
+    return omit(result, ['adminPermissions', 'adminUserOwner']) as any;
   }
 
   // kind === 'admin'
@@ -851,7 +858,7 @@ const create = async <K extends AnyApiToken['kind']>(
     select: SELECT_FIELDS,
     populate: POPULATE_FIELDS,
     data: {
-      ...(omit(['permissions', 'adminPermissions', 'adminUserOwner'], attributes) as object),
+      ...(omit(attributes, ['permissions', 'adminPermissions', 'adminUserOwner']) as object),
       accessKey: hash(accessKey),
       encryptedKey,
       adminUserOwner: ownerId,
@@ -887,7 +894,7 @@ const create = async <K extends AnyApiToken['kind']>(
 
   // Casted to any to avoid complex type duplication
   return {
-    ...(omit(['permissions'], result) as object),
+    ...(omit(result, ['permissions']) as object),
     adminUserOwner: toAdminTokenOwner((result as AdminApiToken).adminUserOwner),
   } as any;
 };
@@ -923,7 +930,7 @@ const regenerate = async (id: string | number): Promise<ContentApiApiToken | Adm
   });
 
   return {
-    ...omit(['adminUserOwner'], apiToken),
+    ...omit(apiToken, ['adminUserOwner']),
     kind: (apiToken.kind ?? 'content-api') as AnyApiToken['kind'],
     accessKey,
   } as any;
@@ -986,14 +993,17 @@ const list = async <K extends AnyApiToken['kind']>(
 
   return tokens.map((token) =>
     token.kind === null || token.kind === 'content-api'
-      ? omit(['adminPermissions', 'adminUserOwner'], {
-          ...token,
-          // Tokens created before kind introduction case: force kind to be content-api
-          kind: 'content-api',
-          permissions: flattenTokenPermissions(token.permissions),
-        })
+      ? omit(
+          {
+            ...token,
+            // Tokens created before kind introduction case: force kind to be content-api
+            kind: 'content-api',
+            permissions: flattenTokenPermissions(token.permissions),
+          },
+          ['adminPermissions', 'adminUserOwner']
+        )
       : ({
-          ...(omit(['permissions'], token) as object),
+          ...(omit(token, ['permissions']) as object),
           adminUserOwner:
             token.adminUserOwner !== null && token.adminUserOwner !== undefined
               ? toAdminTokenOwner(token.adminUserOwner)
@@ -1048,11 +1058,14 @@ const revoke = async (id: string | number): Promise<AnyApiToken> => {
   }
 
   // content-api tokens (including legacy null-kind rows): normalise shape
-  return omit(['adminPermissions', 'adminUserOwner'], {
-    ...deletedToken,
-    kind: 'content-api' as const,
-    permissions: flattenTokenPermissions(deletedToken.permissions),
-  }) as ContentApiApiToken;
+  return omit(
+    {
+      ...deletedToken,
+      kind: 'content-api' as const,
+      permissions: flattenTokenPermissions(deletedToken.permissions),
+    },
+    ['adminPermissions', 'adminUserOwner']
+  ) as ContentApiApiToken;
 };
 
 /**
@@ -1189,7 +1202,7 @@ const update = async (
     }
   }
 
-  const baseData = pick(UPDATABLE_FIELDS, attributes) as Record<string, unknown>;
+  const baseData = pick(attributes, UPDATABLE_FIELDS) as Record<string, unknown>;
 
   // Migrate legacy null-kind rows to the explicit value on first write
   if (originalToken.kind === null) {
@@ -1214,7 +1227,7 @@ const update = async (
         .query('admin::api-token')
         .load(updatedToken, 'permissions');
 
-      const currentPermissions = map('action', currentPermissionsResult || []);
+      const currentPermissions = map(currentPermissionsResult || [], 'action');
       const newPermissions = uniq(incomingPermissions || []);
 
       const actionsToDelete = difference(currentPermissions, newPermissions);

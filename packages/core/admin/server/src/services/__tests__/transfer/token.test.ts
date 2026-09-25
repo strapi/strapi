@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import { errors, emitAudit } from '@strapi/utils';
-import { omit, uniq } from 'lodash/fp';
+import { omit, uniq } from 'lodash';
+
 import {
   create as tokenServiceCreate,
   list,
@@ -116,7 +117,7 @@ describe('Transfer Token', () => {
       expect(create).toHaveBeenNthCalledWith(1, {
         select: expect.arrayContaining([expect.any(String)]),
         data: {
-          ...omit('permissions', attributes),
+          ...omit(attributes, 'permissions'),
           accessKey: hash(mockedTransferToken.hexedString),
           expiresAt: null,
           lifespan: null,
@@ -253,7 +254,7 @@ describe('Transfer Token', () => {
         id: 1,
       };
 
-      const findOne = jest.fn().mockResolvedValue(omit('permissions', createTokenResult));
+      const findOne = jest.fn().mockResolvedValue(omit(createTokenResult, 'permissions'));
       const create = jest.fn().mockResolvedValue(createTokenResult);
       const load = jest.fn().mockResolvedValueOnce(
         Promise.resolve(
@@ -296,7 +297,7 @@ describe('Transfer Token', () => {
       expect(create).toHaveBeenNthCalledWith(1, {
         select: expect.arrayContaining([expect.any(String)]),
         data: {
-          ...omit('permissions', attributes),
+          ...omit(attributes, 'permissions'),
           accessKey: hash(mockedTransferToken.hexedString),
           expiresAt: null,
           lifespan: null,
@@ -327,7 +328,7 @@ describe('Transfer Token', () => {
         id: 1,
       };
 
-      const findOne = jest.fn().mockResolvedValue(omit('permissions', createTokenResult));
+      const findOne = jest.fn().mockResolvedValue(omit(createTokenResult, 'permissions'));
       const create = jest.fn().mockResolvedValue(createTokenResult);
       const load = jest.fn().mockResolvedValueOnce(
         Promise.resolve(
@@ -758,7 +759,7 @@ describe('Transfer Token', () => {
       expect(update).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
         where: { id },
-        data: omit(['permissions'], updatedAttributes),
+        data: omit(updatedAttributes, ['permissions']),
       });
 
       expect(res).toEqual(updatedAttributes);
@@ -788,7 +789,7 @@ describe('Transfer Token', () => {
       } as any;
 
       const update = jest.fn(({ data }) => Promise.resolve(data));
-      const findOne = jest.fn().mockResolvedValue(omit('permissions', originalToken));
+      const findOne = jest.fn().mockResolvedValue(omit(originalToken, 'permissions'));
       const deleteFn = jest.fn();
       const create = jest.fn();
       const load = jest
@@ -838,7 +839,7 @@ describe('Transfer Token', () => {
       expect(update).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
         where: { id },
-        data: omit(['permissions'], updatedAttributes),
+        data: omit(updatedAttributes, ['permissions']),
       });
 
       expect(res).toEqual({
@@ -862,7 +863,7 @@ describe('Transfer Token', () => {
           query() {
             return {
               update: jest.fn(({ data }) =>
-                Promise.resolve({ ...omit('permissions', originalToken), ...data })
+                Promise.resolve({ ...omit(originalToken, 'permissions'), ...data })
               ),
               findOne: jest.fn().mockResolvedValue(originalToken),
               delete: jest.fn(),
@@ -899,7 +900,7 @@ describe('Transfer Token', () => {
         permissions: ['push', 'unknown-permission'],
       } as any;
 
-      const findOne = jest.fn().mockResolvedValue(omit('permissions', originalToken));
+      const findOne = jest.fn().mockResolvedValue(omit(originalToken, 'permissions'));
       const update = jest.fn(({ data }) => Promise.resolve(data));
       const deleteFn = jest.fn();
       const create = jest.fn();
