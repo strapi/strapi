@@ -1,4 +1,5 @@
-import { merge, map, difference, uniq } from 'lodash/fp';
+import { map, merge, difference, uniq } from 'lodash';
+
 import type { Core } from '@strapi/types';
 import { async } from '@strapi/utils';
 import { getService } from './utils';
@@ -76,7 +77,7 @@ const registerModelHooks = () => {
 const syncAuthSettings = async () => {
   const adminStore = await strapi.store({ type: 'core', name: 'admin' });
   const adminAuthSettings = await adminStore.get({ key: 'auth' });
-  const newAuthSettings = merge(defaultAdminAuthSettings, adminAuthSettings);
+  const newAuthSettings = merge({}, defaultAdminAuthSettings, adminAuthSettings);
 
   const roleExists = await getService('role').exists({
     id: newAuthSettings.providers.defaultRole,
@@ -94,7 +95,7 @@ const syncAPITokensPermissions = async () => {
   const validPermissions = strapi.contentAPI.permissions.providers.action.keys();
   const permissionsInDB = await async.pipe(
     strapi.db.query('admin::api-token-permission').findMany,
-    map('action')
+    (permissions) => map(permissions, 'action')
   )();
 
   const unknownPermissions = uniq(difference(permissionsInDB, validPermissions));

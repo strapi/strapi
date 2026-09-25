@@ -1,4 +1,4 @@
-import pipe from 'lodash/fp/pipe';
+import flow from 'lodash/flow';
 // eslint-disable-next-line import/default
 import qs from 'qs';
 
@@ -546,7 +546,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
    * are unique to the individual request
    */
   const makeCreateRequestUrl = (options?: FetchOptions) =>
-    pipe(normalizeUrl, addBaseUrl, paramsSerializer(options?.params));
+    flow(normalizeUrl, addBaseUrl, paramsSerializer(options?.params));
 
   const fetchClient: FetchClient = {
     get: async <TData>(url: string, options?: FetchOptions): Promise<FetchResponse<TData>> => {

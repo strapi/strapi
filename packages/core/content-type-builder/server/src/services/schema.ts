@@ -1,5 +1,5 @@
 import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
-import { mapValues } from 'lodash/fp';
+import { mapValues } from 'lodash';
 
 import type { Schema } from '@strapi/types';
 
@@ -410,7 +410,7 @@ export const formatAttribute = (attribute: Schema.Attribute.AnyAttribute & Recor
 };
 
 export const getSchema = async () => {
-  const contentTypes = mapValues((contentType) => {
+  const contentTypes = mapValues(strapi.contentTypes, (contentType) => {
     const {
       uid,
       options,
@@ -439,9 +439,9 @@ export const getSchema = async () => {
       visible: isContentTypeVisible(contentType),
       restrictRelationsTo: getRestrictRelationsTo(contentType),
     };
-  }, strapi.contentTypes);
+  });
 
-  const components = mapValues((component) => {
+  const components = mapValues(strapi.components, (component) => {
     const { uid, globalId, modelName, collectionName, info, category, modelType } = component;
 
     return {
@@ -454,7 +454,7 @@ export const getSchema = async () => {
       info,
       attributes: formatAttributes(component),
     };
-  }, strapi.components);
+  });
 
   const coreContentStructure: CoreContentStructureService = strapi.get('content-structure');
   const contentStructure = await coreContentStructure.getCleanedFile();

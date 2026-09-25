@@ -1,4 +1,5 @@
-import { isNil, merge } from 'lodash/fp';
+import { isNil, merge } from 'lodash';
+
 import type { UID } from '@strapi/types';
 import { type Populate, getDeepPopulate, getQueryPopulate } from './utils/populate';
 
@@ -66,7 +67,7 @@ const populateBuilder = (uid: UID.Schema) => {
     withPopulateOverride(overrides: Record<string, any>) {
       const prev = getInitialPopulate;
       // merge(base, overrides): overrides win for overlapping keys, so e.g. localizations
-      getInitialPopulate = async () => merge((await prev()) || {}, overrides);
+      getInitialPopulate = async () => merge({}, (await prev()) || {}, overrides);
       return builder;
     },
 

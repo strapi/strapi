@@ -1,6 +1,6 @@
 import passport from 'koa-passport';
 import type { Strategy } from 'passport-local';
-import { isFunction } from 'lodash/fp';
+import { isFunction } from 'lodash';
 
 import createLocalStrategy from './passport/local-strategy';
 

@@ -1,16 +1,16 @@
-import { subject as asSubject } from '@casl/ability';
 import {
-  defaults,
   omit,
+  pick,
+  defaults,
   isArray,
   isEmpty,
   uniq,
   intersection,
-  pick,
-  getOr,
+  get,
   isObject,
   cloneDeep,
-} from 'lodash/fp';
+} from 'lodash';
+import { subject as asSubject } from '@casl/ability';
 
 import type { UID } from '@strapi/types';
 
@@ -231,19 +231,20 @@ export default ({ action, ability, model }: any) => {
   };
 
   const getDefaultOptions = (data: any, options: unknown) => {
-    return defaults({ subject: asSubject(model, data), action }, options);
+    return defaults({}, options, { subject: asSubject(model, data), action });
   };
 
   /**
    * Omit creator fields' (createdBy & updatedBy) roles from the admin API responses
    */
-  const omitCreatorRoles = omit([`${CREATED_BY_ATTRIBUTE}.roles`, `${UPDATED_BY_ATTRIBUTE}.roles`]);
+  const omitCreatorRoles = <T extends object>(data: T) =>
+    omit(data, [`${CREATED_BY_ATTRIBUTE}.roles`, `${UPDATED_BY_ATTRIBUTE}.roles`]);
 
   /**
    * Visitor used to remove hidden fields from the admin API responses
    */
   const omitHiddenFields = ({ key, schema }: any, { remove }: any) => {
-    const isHidden = getOr(false, ['config', 'attributes', key, 'hidden'], schema);
+    const isHidden = get(schema, ['config', 'attributes', key, 'hidden'], false);
 
     if (isHidden) {
       remove(key);
@@ -254,7 +255,7 @@ export default ({ action, ability, model }: any) => {
    * Visitor used to only select needed fields from the admin users entities & avoid leaking sensitive information
    */
   const pickAllowedAdminUserFields = ({ attribute, key, value }: any, { set }: any) => {
-    const pickAllowedFields = pick(ADMIN_USER_ALLOWED_FIELDS);
+    const pickAllowedFields = (user: object) => pick(user, ADMIN_USER_ALLOWED_FIELDS);
     if (!attribute) {
       return;
     }
@@ -281,7 +282,7 @@ export default ({ action, ability, model }: any) => {
     const nonVisibleAttributes = getNonVisibleAttributes(schema);
     const writableAttributes = getWritableAttributes(schema);
 
-    const nonVisibleWritableAttributes = intersection(nonVisibleAttributes, writableAttributes);
+    const nonVisibleWritableAttributes = intersection(writableAttributes, nonVisibleAttributes);
 
     return uniq([...fields, ...COMPONENT_FIELDS, ...nonVisibleWritableAttributes]);
   };
@@ -305,7 +306,7 @@ export default ({ action, ability, model }: any) => {
     const nonVisibleAttributes = getNonVisibleAttributes(schema);
     const writableAttributes = getWritableAttributes(schema);
 
-    const nonVisibleWritableAttributes = intersection(nonVisibleAttributes, writableAttributes);
+    const nonVisibleWritableAttributes = intersection(writableAttributes, nonVisibleAttributes);
 
     return uniq([
       ...fields,

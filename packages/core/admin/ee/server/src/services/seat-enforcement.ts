@@ -1,4 +1,5 @@
-import { take, drop, map, prop, pick, reverse, isNil } from 'lodash/fp';
+import { reverse, pick, take, drop, map, isNil } from 'lodash';
+
 import { getService } from '../utils';
 import constants from '../../../../server/src/services/constants';
 
@@ -13,16 +14,16 @@ const getDisabledUserList = async () => {
 
 const enableMaximumUserCount = async (numberOfUsersToEnable: number) => {
   const disabledUsers = (await getDisabledUserList()) as any;
-  const orderedDisabledUsers = reverse(disabledUsers);
+  const orderedDisabledUsers = reverse([...disabledUsers]);
 
-  const usersToEnable = take(numberOfUsersToEnable, orderedDisabledUsers);
+  const usersToEnable = take(orderedDisabledUsers, numberOfUsersToEnable);
 
   await strapi.db.query('admin::user').updateMany({
-    where: { id: map(prop('id'), usersToEnable) },
+    where: { id: map(usersToEnable, 'id') },
     data: { isActive: true },
   });
 
-  const remainingDisabledUsers = drop(numberOfUsersToEnable, orderedDisabledUsers);
+  const remainingDisabledUsers = drop(orderedDisabledUsers, numberOfUsersToEnable);
 
   await strapi.store.set({
     type: 'ee',
@@ -62,26 +63,30 @@ const disableUsersAboveLicenseLimit = async (numberOfUsersToDisable: number) => 
   }
 
   await strapi.db.query('admin::user').updateMany({
-    where: { id: map(prop('id'), usersToDisable) },
+    where: { id: map(usersToDisable, 'id') },
     data: { isActive: false },
   });
 
   await strapi.store.set({
     type: 'ee',
     key: 'disabled_users',
-    value: currentlyDisabledUsers.concat(map(pick(['id', 'isActive']), usersToDisable)),
+    value: currentlyDisabledUsers.concat(
+      map(usersToDisable, (user) => pick(user, ['id', 'isActive']))
+    ),
   });
 };
 
 const syncDisabledUserRecords = async () => {
-  const disabledUsers = await strapi.store.get({ type: 'ee', key: 'disabled_users' });
+  const disabledUsers = (await strapi.store.get({ type: 'ee', key: 'disabled_users' })) as
+    | { id: string | number; isActive: boolean }[]
+    | undefined;
 
   if (!disabledUsers) {
     return;
   }
 
   await strapi.db.query('admin::user').updateMany({
-    where: { id: map(prop('id'), disabledUsers) },
+    where: { id: map(disabledUsers, 'id') },
     data: { isActive: false },
   });
 };
