@@ -62,6 +62,12 @@ strapi.plugin('controller-lab').controller(dynamicController).anything satisfies
 strapi.plugin('controller-lab').controller(patternController).anything satisfies ControllerHandler;
 strapi.plugin('controller-lab').controller<LabController>('items').list satisfies ControllerHandler;
 strapi.plugin('unregistered').controller<LabController>('items').list satisfies ControllerHandler;
+strapi.controller<LabController>('plugin::unregistered.items').list satisfies ControllerHandler;
+strapi.controller<LabController>('api::unregistered.items').create satisfies ControllerHandler;
+// The explicit generic wins over a registered contract.
+strapi.controller<LabController>('plugin::controller-lab.items').create satisfies ControllerHandler;
+// @ts-expect-error The explicit contract is not widened by the permissive controller index signature.
+strapi.controller<LabController>('plugin::unregistered.items').missing satisfies unknown;
 const legacyPlugin: Plugin = strapi.plugin('controller-lab');
 legacyPlugin.controller('items') satisfies Controller;
 
