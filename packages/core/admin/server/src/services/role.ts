@@ -77,13 +77,61 @@ const create = async (attributes: Partial<AdminRole>): Promise<AdminRole> => {
   return result;
 };
 
+const ROLES_CACHE_TTL = 60 * 1000;
+
+const rolesCache = new Map<Data.ID, { role: AdminRole; expiresAt: number }>();
+
+// Incremented on every invalidation so that a lookup started before a role change
+// can't write its outdated result back into the cache once it resolves
+let rolesCacheGeneration = 0;
+
+/**
+ * Invalidate every cached role
+ */
+const clearRolesCache = (): void => {
+  rolesCache.clear();
+  rolesCacheGeneration += 1;
+};
+
+const isLookupById = (params: object): params is { id: Data.ID } => {
+  const keys = Object.keys(params);
+  const id = (params as { id?: unknown }).id;
+
+  return (
+    keys.length === 1 && keys[0] === 'id' && (typeof id === 'string' || typeof id === 'number')
+  );
+};
+
 /**
  * Find a role in database
+ * Lookups by id alone (without populate) are cached for 60 seconds. Missing roles are never cached.
  * @param params query params to find the role
  * @param populate
  */
-const findOne = (params = {}, populate?: unknown): Promise<AdminRole> => {
-  return strapi.db.query('admin::role').findOne({ where: params, populate });
+const findOne = async (params = {}, populate?: unknown): Promise<AdminRole> => {
+  if (populate !== undefined || !isLookupById(params)) {
+    return strapi.db.query('admin::role').findOne({ where: params, populate });
+  }
+
+  const cached = rolesCache.get(params.id);
+
+  if (cached && cached.expiresAt > Date.now()) {
+    return _.cloneDeep(cached.role);
+  }
+
+  rolesCache.delete(params.id);
+
+  const generation = rolesCacheGeneration;
+  const role = await strapi.db.query('admin::role').findOne({ where: params });
+
+  if (role && generation === rolesCacheGeneration) {
+    rolesCache.set(params.id, {
+      role: _.cloneDeep(role),
+      expiresAt: Date.now() + ROLES_CACHE_TTL,
+    });
+  }
+
+  return role;
 };
 
 /**
@@ -469,6 +517,7 @@ export default {
   sanitizeRole,
   create,
   findOne,
+  clearRolesCache,
   findOneWithUsersCount,
   find,
   findAllWithUsersCount,

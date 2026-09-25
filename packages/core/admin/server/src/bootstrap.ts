@@ -84,6 +84,19 @@ const registerModelHooks = () => {
     afterDelete: clearRolePermissionsCache,
     afterDeleteMany: clearRolePermissionsCache,
   });
+
+  // Invalidate the role lookup cache on any write to roles
+  const clearRolesCache = () => getService('role').clearRolesCache();
+
+  strapi.db.lifecycles.subscribe({
+    models: ['admin::role'],
+    afterCreate: clearRolesCache,
+    afterCreateMany: clearRolesCache,
+    afterUpdate: clearRolesCache,
+    afterUpdateMany: clearRolesCache,
+    afterDelete: clearRolesCache,
+    afterDeleteMany: clearRolesCache,
+  });
 };
 
 const syncAuthSettings = async () => {
