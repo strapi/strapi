@@ -237,6 +237,40 @@ export type ConfigPathValue<TNamespace extends ConfigNamespace, TPath extends st
 /** Any config path. Registered namespaces are listed for completion. */
 export type ConfigPath = SuggestedString<ConfigNamespace> | Exclude<PropertyPath, string>;
 
+/** `'<prefix><key>'` for each key of an object value. Arrays and primitives have no suggested keys. */
+type ChildPaths<TValue, TPrefix extends string> = TValue extends readonly unknown[]
+  ? never
+  : TValue extends object
+    ? `${TPrefix}${keyof TValue & string}`
+    : never;
+
+/** The part of a dotted path before its last dot: `'a.b'` for `'a.b.c'`, `''` for `'a'`. */
+type ParentPath<
+  TPath extends string,
+  TParent extends string = '',
+> = TPath extends `${infer THead}.${infer TRest}`
+  ? ParentPath<TRest, TParent extends '' ? THead : `${TParent}.${THead}`>
+  : TParent;
+
+/**
+ * Completion candidates for a partially typed dotted path inside `TValue`: the keys under the
+ * path's parent, e.g. `'init.debug'` for `'init.'` or `'init.de'`. Only the level being typed is
+ * computed, so large contracts do not expand into every nested path.
+ */
+export type ConfigPathSuggestion<TValue, TPath> = TPath extends string
+  ? ParentPath<TPath> extends infer TParent extends string
+    ? TParent extends ''
+      ? ChildPaths<NonNullable<TValue>, ''>
+      : ChildPaths<NonNullable<PathValue<TValue, TParent>>, `${TParent}.`>
+    : never
+  : never;
+
+/** Completion candidates for a partially typed path inside a registered namespace, e.g. `'plugin::sentry.dsn'`. */
+type ConfigGetPathSuggestion<TPath> =
+  TPath extends `${infer TNamespace extends ConfigNamespace}.${infer TKey}`
+    ? `${TNamespace}.${ConfigPathSuggestion<ConfigFor<TNamespace>, TKey>}`
+    : never;
+
 /**
  * Resolves a config path against the registries: a registered namespace, or a dotted path inside one.
  * Array paths, unregistered namespaces, unknown paths and the unresolved default path resolve to `T`.
@@ -288,6 +322,7 @@ export type ConfigDefaultValue =
 export interface ConfigProvider {
   /**
    * Reads a config value. A registered namespace, or a dotted path inside one, resolves to its contract.
+   * Editors list registered namespaces, then the keys under the path being typed.
    *
    * A defined default replaces `undefined` in the result; `null` values are preserved.
    * The argument tuple tracks defaults that may be omitted; the intersection preserves legacy
@@ -299,7 +334,7 @@ export interface ConfigProvider {
     TPath extends ConfigPath = ConfigPath,
     TArgs extends [] | [ConfigDefaultValue] = [] | [ConfigLookup<TPath, T> | undefined],
   >(
-    key: TPath,
+    key: TPath | ConfigGetPathSuggestion<TPath>,
     ...args: TArgs & ([] | [defaultVal: ConfigLookup<TPath, T> | undefined])
   ): ConfigLookup<TPath, T, NoInfer<TArgs[0]>>;
   set(path: string, val: unknown): this;

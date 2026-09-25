@@ -5,7 +5,13 @@ import type { Route } from './route';
 import type { Router } from './router';
 import type { RegisteredPolicyName } from './policy';
 import type { RegisteredServiceUID, Service, ServiceFor } from './service';
-import type { ConfigDefaultValue, ConfigFor, ConfigNamespace, ConfigPathLookup } from './strapi';
+import type {
+  ConfigDefaultValue,
+  ConfigFor,
+  ConfigNamespace,
+  ConfigPathLookup,
+  ConfigPathSuggestion,
+} from './strapi';
 import type { SuggestedString } from '../utils/string';
 import type { IsDynamicName, IsStrict, RegisteredRecord } from './strictness';
 
@@ -33,6 +39,13 @@ type PluginConfigKey<TPlugin extends string> = [PluginConfigNamespace<TPlugin>] 
 type PluginConfigPath<TPlugin extends string> =
   | SuggestedString<PluginConfigKey<TPlugin>>
   | Exclude<PropertyPath, string>;
+
+/** Completion candidates for a partially typed dotted path of the plugin's config contract, e.g. `'init.debug'`. */
+type PluginConfigPathSuggestion<TPlugin extends string, TKey> = [
+  PluginConfigNamespace<TPlugin>,
+] extends [never]
+  ? never
+  : ConfigPathSuggestion<ConfigFor<PluginConfigNamespace<TPlugin>>, TKey>;
 
 /** The registered value when `TKey` is a key or dotted path of the plugin's config contract, `T` otherwise. */
 type PluginConfigLookup<
@@ -98,6 +111,7 @@ export type Plugin<TName extends string = string> = Omit<
   routes: Route[] | Record<string, Router>;
   /**
    * Reads a key or dotted path of the plugin config. A registered contract resolves the value type.
+   * Editors list its top-level keys, then the keys under the path being typed.
    *
    * A defined default replaces `undefined` in the result; `null` values are preserved.
    */
@@ -106,7 +120,7 @@ export type Plugin<TName extends string = string> = Omit<
     TKey extends PluginConfigPath<TName> = PluginConfigPath<TName>,
     TArgs extends [] | [ConfigDefaultValue] = [] | [PluginConfigLookup<TName, TKey, T> | undefined],
   >(
-    key: TKey,
+    key: TKey | PluginConfigPathSuggestion<TName, TKey>,
     ...args: TArgs & ([] | [defaultVal: PluginConfigLookup<TName, TKey, T> | undefined])
   ): PluginConfigLookup<TName, TKey, T, NoInfer<TArgs[0]>>;
   service<
