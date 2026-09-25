@@ -33,7 +33,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       id: string | string[] | undefined,
       uid: UID.CollectionType,
       opts: {
-        populate?: Modules.Documents.Params.Pick<any, 'populate'>;
+        populate?: Modules.Documents.Params.Pick<UID.ContentType, 'populate'>['populate'];
         locale?: string | string[] | '*';
         isPublished?: boolean;
       }

@@ -53,7 +53,7 @@ const createHistoryVersionController = ({ strapi }: { strapi: Core.Strapi }) => 
        */
       const permissionChecker = getContentManagerService('permission-checker').create({
         userAbility: ctx.state.userAbility,
-        model: ctx.query.contentType,
+        model: contentTypeUid,
       });
 
       if (permissionChecker.cannot.read()) {

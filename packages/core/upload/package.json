@@ -143,5 +143,12 @@
     "description": "Media file management.",
     "required": true,
     "kind": "plugin"
+  },
+  "typesVersions": {
+    "*": {
+      "strapi-server": [
+        "dist/server/src/index.d.ts"
+      ]
+    }
   }
 }

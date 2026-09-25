@@ -2,6 +2,7 @@ import { merge, isEmpty, set, propEq } from 'lodash/fp';
 import * as strapiUtils from '@strapi/utils';
 import type { UID, Schema, Modules } from '@strapi/types';
 import { getService } from '../../utils';
+import type { Populate as BuilderPopulate } from '../../types/services';
 
 const {
   isVisibleAttribute,
@@ -402,8 +403,8 @@ const getDeepPopulateDraftCount = (uid: UID.Schema): { populate: any; hasRelatio
 /**
  *  Create a Strapi populate object which populates all attribute fields of a Strapi query.
  */
-const getQueryPopulate = async (uid: UID.Schema, query: object): Promise<Populate> => {
-  let populateQuery: Populate = {};
+const getQueryPopulate = async (uid: UID.Schema, query: object): Promise<BuilderPopulate> => {
+  let populateQuery: BuilderPopulate = {};
 
   await strapiUtils.traverse.traverseQueryFilters(
     /**
@@ -433,9 +434,9 @@ const getQueryPopulate = async (uid: UID.Schema, query: object): Promise<Populat
   return populateQuery;
 };
 
-const deepPopulateCache = new Map<string, object>();
+const deepPopulateCache = new Map<string, BuilderPopulate | undefined>();
 
-const buildDeepPopulate = async (uid: UID.CollectionType) => {
+const buildDeepPopulate = async (uid: UID.CollectionType): Promise<BuilderPopulate | undefined> => {
   const cached = deepPopulateCache.get(uid);
   if (cached) {
     return cached;
@@ -463,7 +464,7 @@ const buildDeepPopulate = async (uid: UID.CollectionType) => {
  * - publishedAt: to determine published/draft status
  * - updatedAt: to support the modified state indicator in the UI
  */
-const getPopulateForLocalizations = (model: UID.Schema) => {
+const getPopulateForLocalizations = (model: UID.Schema): BuilderPopulate => {
   const modelSchema = strapi.getModel(model);
   if (strapi.localization.isLocalizedContentType(modelSchema) === true) {
     return { localizations: { fields: ['locale', 'documentId', 'publishedAt', 'updatedAt'] } };

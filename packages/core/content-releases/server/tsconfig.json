@@ -1,7 +1,10 @@
 {
-  "extends": "tsconfig/base.json",
+  "extends": "tsconfig/server.json",
   "include": ["src", "custom.d.ts", "../shared"],
   "compilerOptions": {
-    "types": ["node", "jest"]
+    // Resolve our own contracts from source: `@strapi/strapi/strict-types` would load our dist instead.
+    "paths": {
+      "@strapi/content-releases/strapi-server": ["./src/index.ts"]
+    }
   }
 }

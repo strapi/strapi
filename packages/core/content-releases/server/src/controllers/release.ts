@@ -1,6 +1,6 @@
 import type Koa from 'koa';
 import { errors } from '@strapi/utils';
-import type { Schema } from '@strapi/types';
+import type { Schema, UID } from '@strapi/types';
 import { RELEASE_MODEL_UID } from '../constants';
 import { validateRelease, validatefindByDocumentAttachedParams } from './validation/release';
 import type {
@@ -11,6 +11,7 @@ import type {
   Release,
   DeleteRelease,
   GetReleases,
+  GetReleasesByDocumentAttached,
   MapEntriesToReleases,
 } from '../../../shared/contracts/releases';
 import type { UserInfo } from '../../../shared/types';
@@ -31,12 +32,15 @@ const releaseController = {
     });
     await permissionsManager.validateQuery(ctx.query);
     const releaseService = getService('release', { strapi });
-    const query = await permissionsManager.sanitizeQuery(ctx.query);
+    // The admin permissions manager returns sanitized queries as `unknown`.
+    const query = (await permissionsManager.sanitizeQuery(
+      ctx.query
+    )) as GetReleasesByDocumentAttached.Request['query'];
 
     await validatefindByDocumentAttachedParams(query);
 
     // If entry is a singleType, we need to manually add the entryDocumentId to the query
-    const model = strapi.getModel(query.contentType) as Schema.ContentType;
+    const model = strapi.getModel(query.contentType as UID.ContentType) as Schema.ContentType;
     if (model.kind && model.kind === 'singleType') {
       const document = await strapi.db.query(model.uid).findOne({ select: ['documentId'] });
 
@@ -115,7 +119,9 @@ const releaseController = {
 
     const releaseService = getService('release', { strapi });
 
-    const query: GetReleases.Request['query'] = await permissionsManager.sanitizeQuery(ctx.query);
+    const query = (await permissionsManager.sanitizeQuery(
+      ctx.query
+    )) as GetReleases.Request['query'];
     const { results, pagination } = await releaseService.findPage(query);
 
     const data = results.map((release: ReleaseWithPopulatedActions) => {

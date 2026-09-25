@@ -2,6 +2,7 @@ import type { Ability } from '@casl/ability';
 import { async } from '@strapi/utils';
 import { isEmpty } from 'lodash/fp';
 import type { Core, UID, Modules } from '@strapi/types';
+import type { PermissionCheckerService } from '../types/services';
 
 export const ACTIONS = {
   read: 'plugin::content-manager.explorer.read',
@@ -155,6 +156,7 @@ const createPermissionChecker =
     };
   };
 
-export default ({ strapi }: { strapi: Core.Strapi }) => ({
-  create: createPermissionChecker(strapi),
+export default ({ strapi }: { strapi: Core.Strapi }): PermissionCheckerService => ({
+  // The action shortcuts are attached at runtime, which the inferred type does not see.
+  create: createPermissionChecker(strapi) as PermissionCheckerService['create'],
 });

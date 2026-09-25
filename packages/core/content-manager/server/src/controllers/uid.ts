@@ -20,7 +20,12 @@ export default {
     const uidService = getService('uid');
 
     ctx.body = {
-      data: await uidService.generateUIDField({ contentTypeUID, field, data, locale }),
+      data: await uidService.generateUIDField({
+        contentTypeUID: contentTypeUID as UID.ContentType,
+        field,
+        data,
+        locale,
+      }),
     };
   },
 
@@ -37,7 +42,7 @@ export default {
     const uidService = getService('uid');
 
     const isAvailable = await uidService.checkUIDAvailability({
-      contentTypeUID,
+      contentTypeUID: contentTypeUID as UID.ContentType,
       field,
       value,
       locale,
@@ -46,7 +51,12 @@ export default {
     ctx.body = {
       isAvailable,
       suggestion: !isAvailable
-        ? await uidService.findUniqueUID({ contentTypeUID, field, value, locale })
+        ? await uidService.findUniqueUID({
+            contentTypeUID: contentTypeUID as UID.ContentType,
+            field,
+            value,
+            locale,
+          })
         : null,
     };
   },

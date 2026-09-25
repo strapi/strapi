@@ -208,10 +208,11 @@ export const timer = () => {
 export type Logger = ReturnType<typeof createLogger>;
 
 /**
- * Options passed to each artifact generator (content-types, components).
+ * Options passed to each artifact generator.
  */
 export interface GeneratorOptions {
   strapi: any;
   logger: Logger;
   pwd?: string;
+  appDir?: string;
 }

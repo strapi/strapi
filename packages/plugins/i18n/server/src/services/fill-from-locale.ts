@@ -1,6 +1,7 @@
 import { isArray } from 'lodash/fp';
 import { contentTypes } from '@strapi/utils';
 import type { UID, Schema, Core } from '@strapi/types';
+import type { FillFromLocaleService, LocaleReadAbility } from '../types/services';
 
 const READ_ACTION = 'plugin::content-manager.explorer.read';
 const TEMP_KEY_DIGITS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -9,7 +10,7 @@ const TEMP_KEY_DIGITS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrs
  * Returns the main display field for a model (e.g. title, name).
  * Uses content-manager configuration when available, falls back to first string attribute or 'id'.
  */
-const getMainField = async (targetUid: UID.Schema): Promise<string> => {
+const getMainField = async (targetUid: UID.ContentType): Promise<string> => {
   const contentManagerContentTypeService = strapi
     .plugin('content-manager')
     .service('content-types');
@@ -266,7 +267,7 @@ const collectRelationsByUid = (
 const resolveAllRelationsBatched = async (
   relationsByUid: RelationsByUid,
   targetLocale: string,
-  userAbility: any
+  userAbility: LocaleReadAbility
 ): Promise<Map<string, UidResolutionData>> => {
   const result = new Map<string, UidResolutionData>();
   await Promise.all(
@@ -284,7 +285,8 @@ const resolveAllRelationsBatched = async (
         return;
       }
 
-      const mainField = await getMainField(targetUid as UID.Schema);
+      // Relation targets are content types.
+      const mainField = await getMainField(targetUid as UID.ContentType);
       const validRels = allRels.filter(isValidRelation);
 
       if (validRels.length === 0) {
@@ -517,18 +519,18 @@ const processDocumentData = async (
   return result;
 };
 
-export const createFillFromLocaleService = ({ strapi }: { strapi: Core.Strapi }) => {
+export const createFillFromLocaleService = ({
+  strapi,
+}: {
+  strapi: Core.Strapi;
+}): FillFromLocaleService => {
   return {
     /**
      * Fetch the raw populated document for the given locale without any transformation.
      * The caller is responsible for sanitizing the output before passing it to transformDocument.
      */
     async fetchRawDocument(model: UID.ContentType, sourceLocale: string, documentId?: string) {
-      const populateBuilderService = strapi
-        .plugin('content-manager')
-        .service('populate-builder') as (uid: UID.ContentType) => {
-        populateDeep: (level: number) => { build: () => Promise<unknown> };
-      };
+      const populateBuilderService = strapi.plugin('content-manager').service('populate-builder');
       const modelDef = strapi.getModel(model);
 
       if (!modelDef) {
@@ -541,7 +543,7 @@ export const createFillFromLocaleService = ({ strapi }: { strapi: Core.Strapi })
       const docs = strapi.documents(model);
       const baseParams = {
         locale: sourceLocale,
-        populate: populate as never,
+        populate,
       };
 
       return documentId
@@ -557,7 +559,7 @@ export const createFillFromLocaleService = ({ strapi }: { strapi: Core.Strapi })
       document: Record<string, unknown>,
       model: UID.ContentType,
       targetLocale: string,
-      userAbility: any
+      userAbility: LocaleReadAbility
     ) {
       const schema = strapi.getModel(model) as Schema.ContentType;
       const getComponentSchema = (uid: string) =>

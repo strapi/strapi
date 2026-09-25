@@ -1,0 +1,82 @@
+import type { Controller, ControllerFor, ControllerHandler } from '../controller';
+import type { Plugin } from '../plugin';
+import type { Strapi as StrapiInstance } from '../strapi';
+
+type LabController = {
+  list: ControllerHandler;
+  create: ControllerHandler;
+};
+
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Strapi {
+    // eslint-disable-next-line @typescript-eslint/no-namespace
+    namespace Registries {
+      interface PackageControllers {
+        'plugin::controller-lab.items': { list: ControllerHandler; defaultOnly: ControllerHandler };
+        'plugin::controller-lab.tags': LabController;
+      }
+
+      interface AppControllers {
+        'plugin::controller-lab.items': LabController;
+        'api::controller-lab.items': LabController;
+      }
+    }
+  }
+}
+
+declare const strapi: StrapiInstance;
+declare const dynamicPlugin: string;
+declare const dynamicController: string;
+declare const patternController: `items-${string}`;
+declare const wideController: ControllerFor<string>;
+declare const patternUid: `plugin::${string}.items`;
+
+// Full UID and plugin-scoped lookups resolve the registered contract.
+strapi.controller('plugin::controller-lab.items') satisfies LabController;
+strapi.controller('api::controller-lab.items').create satisfies ControllerHandler;
+strapi.plugin('controller-lab').controller('items') satisfies LabController;
+strapi.plugin('controller-lab').controller('tags').list satisfies ControllerHandler;
+// @ts-expect-error Registered contracts reject nonexistent actions.
+strapi.controller('plugin::controller-lab.items').missing satisfies unknown;
+// @ts-expect-error Plugin-scoped lookups reject nonexistent actions.
+strapi.plugin('controller-lab').controller('tags').missing satisfies unknown;
+
+// An override replaces the default contract rather than intersecting it.
+// @ts-expect-error Actions from the replaced default are not retained.
+strapi.plugin('controller-lab').controller('items').defaultOnly satisfies unknown;
+
+// Unregistered literal names resolve to `never`, for full UIDs and plugin-scoped lookups alike.
+strapi.controller('plugin::unregistered.items') satisfies never;
+strapi.controller('api::unregistered.items') satisfies never;
+strapi.plugin('controller-lab').controller('unregistered') satisfies never;
+strapi.plugin('unregistered').controller('items') satisfies never;
+// @ts-expect-error Unregistered literal names expose no actions.
+strapi.controller('plugin::unregistered.items').anything satisfies unknown;
+
+// Dynamic and explicitly typed lookups keep the permissive signature.
+wideController.anything satisfies ControllerHandler;
+strapi.controller(patternUid).anything satisfies ControllerHandler;
+strapi.plugin(dynamicPlugin).controller('items').anything satisfies ControllerHandler;
+strapi.plugin('controller-lab').controller(dynamicController).anything satisfies ControllerHandler;
+strapi.plugin('controller-lab').controller(patternController).anything satisfies ControllerHandler;
+strapi.plugin('controller-lab').controller<LabController>('items').list satisfies ControllerHandler;
+strapi.plugin('unregistered').controller<LabController>('items').list satisfies ControllerHandler;
+strapi.controller<LabController>('plugin::unregistered.items').list satisfies ControllerHandler;
+strapi.controller<LabController>('api::unregistered.items').create satisfies ControllerHandler;
+// The explicit generic wins over a registered contract.
+strapi.controller<LabController>('plugin::controller-lab.items').create satisfies ControllerHandler;
+// @ts-expect-error The explicit contract is not widened by the permissive controller index signature.
+strapi.controller<LabController>('plugin::unregistered.items').missing satisfies unknown;
+const legacyPlugin: Plugin = strapi.plugin('controller-lab');
+legacyPlugin.controller('items') satisfies Controller;
+
+// Generic helpers that forward a controller name keep inferring from their declared return type.
+type LabControllers = { items: LabController; unregistered: LabController };
+const getUnregisteredController = <TName extends keyof LabControllers>(
+  name: TName
+): LabControllers[TName] => strapi.plugin('unregistered').controller(name);
+getUnregisteredController('items').list satisfies ControllerHandler;
+
+// @ts-expect-error Assigned functions are checked against the generic signature, as before registries.
+legacyPlugin.controller = () => ({ list: () => undefined });

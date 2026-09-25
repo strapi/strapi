@@ -1,3 +1,48 @@
+import type * as UID from '../uid';
+import type { SuggestedString } from '../utils/string';
+import type { IsDynamicName, IsStrict, RegisteredRecord } from './strictness';
+
+/**
+ * Resolves application overrides before package defaults. With strict types enabled, an unregistered
+ * literal UID resolves to `never`; with strict types disabled, every UID resolves to the legacy service.
+ */
+export type ServiceFor<TUID extends string> = IsStrict extends false
+  ? Service
+  : TUID extends keyof Strapi.Registries.AppServices
+    ? Strapi.Registries.AppServices[TUID]
+    : TUID extends keyof Strapi.Registries.PackageServices
+      ? Strapi.Registries.PackageServices[TUID]
+      : IsDynamicName<TUID> extends true
+        ? // TODO @Nico decide whether dynamic names should also close in strict mode
+          Service
+        : never;
+
+/**
+ * Return type of `strapi.service<T>(uid)`: `T` when the UID kept its wide default, which happens when
+ * the caller passes an explicit type argument (TypeScript then does not infer the UID) or a dynamic
+ * UID; the registered lookup otherwise.
+ */
+export type ServiceLookup<TUID extends ServiceLookupUID, T> = UID.Service extends TUID
+  ? T
+  : ServiceFor<TUID>;
+
+/** Service UIDs that have a registered contract. */
+export type RegisteredServiceUID =
+  | keyof Strapi.Registries.AppServices
+  | keyof Strapi.Registries.PackageServices;
+
+/** A UID accepted by `strapi.service(uid)`. Registered UIDs are listed for completion. */
+export type ServiceLookupUID = SuggestedString<RegisteredServiceUID, UID.Service>;
+
+/**
+ * Services keyed by UID, e.g. `strapi.services`. With strict types enabled, registered UIDs resolve to
+ * their contracts. Other keys, literal or dynamic, resolve to the legacy service: an index signature
+ * cannot close literal keys while keeping dynamic keys open, unlike `strapi.service(uid)`.
+ */
+export type ServiceMap = IsStrict extends false
+  ? Record<string, Service>
+  : RegisteredRecord<{ [TUID in RegisteredServiceUID]: ServiceFor<TUID> }, Service>;
+
 export type Service = {
   // TODO [V5] Consider changing the any value to unknown.
   // See: https://github.com/strapi/strapi/issues/16993 and https://github.com/strapi/strapi/pull/17020 for further information

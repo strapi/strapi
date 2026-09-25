@@ -3,7 +3,7 @@ import type { Core, Modules } from '@strapi/types';
 
 const { ApplicationError } = errors;
 
-type FieldSize = Modules.CustomFields.CustomFieldServerOptions['inputSize'];
+type FieldSize = NonNullable<Modules.CustomFields.CustomFieldServerOptions['inputSize']>;
 
 const needsFullSize: FieldSize = {
   default: 12,

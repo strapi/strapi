@@ -1,6 +1,7 @@
 import type { Core, Modules, Schema, UID } from '@strapi/types';
 import { traverseEntity } from '@strapi/utils';
 import { getService } from '../utils';
+import type { AILocalizationsService } from '../types/services';
 import type { GenerateTranslationsResult } from './ai-translations';
 
 const isLocalizedAttribute = (attribute: Schema.Attribute.Attribute | undefined): boolean => {
@@ -138,7 +139,11 @@ const mergeUnsupportedFields = async (
   return deepMerge(unsupportedFieldsOnly, targetData);
 };
 
-const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
+const createAILocalizationsService = ({
+  strapi,
+}: {
+  strapi: Core.Strapi;
+}): AILocalizationsService => {
   const aiLocalizationJobsService = getService('ai-localization-jobs');
 
   return {
@@ -162,7 +167,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
       document,
     }: {
       model: UID.ContentType;
-      document: Modules.Documents.AnyDocument;
+      document: Modules.Documents.AnyDocument | null;
     }) {
       const isFeatureEnabled = await this.isEnabled();
       if (!isFeatureEnabled) {
@@ -180,7 +185,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       // Don't trigger localizations if the update is on a derived locale, only do it on the default
       const defaultLocale = await localeService.getDefaultLocale();
-      if (document?.locale !== defaultLocale) {
+      if (document === null || document === undefined || document.locale !== defaultLocale) {
         return;
       }
 
@@ -315,7 +320,6 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       // Use populate-builder service for deep populate to fetch all nested fields
       const populateBuilderService = strapi.plugin('content-manager').service('populate-builder');
-      // @ts-expect-error - populate-builder service returns a callable function
       const deepPopulate = await populateBuilderService(model).populateDeep(Infinity).build();
       const getModelBound = strapi.getModel.bind(strapi);
 
@@ -397,7 +401,9 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
           .service('ai-localizations')
           .generateDocumentLocalizations({
             model: context.contentType.uid,
-            document: result,
+            // Middleware next() covers every action; the create/update filter above
+            // restricts this result to a single document, or null for a missing update.
+            document: result as Modules.Documents.AnyDocument | null,
           })
           .catch((error: any) => {
             strapi.log.error('AI Localizations generation failed', error);

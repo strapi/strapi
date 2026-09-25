@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json.schemastore.org/tsconfig",
+  "extends": "./base.json",
+  "compilerOptions": {
+    // Loads every contract bundled with Strapi, as an application sees them.
+    // Without this entry, registry checks silently fall back to loose types.
+    // A package listed in that entry maps its own name to its source with `paths`,
+    // otherwise its build reads its own dist and fails with TS5055.
+    "types": ["node", "jest", "@strapi/strapi/strict-types"]
+  }
+}

@@ -1,7 +1,8 @@
 import type { Core } from '@strapi/types';
+import type { SettingsService as SettingsContract } from '../types/services';
 import type { Settings } from '../validation/settings';
 
-const createSettingsService = ({ strapi }: { strapi: Core.Strapi }) => {
+const createSettingsService = ({ strapi }: { strapi: Core.Strapi }): SettingsContract => {
   const settings = strapi.store!({ type: 'plugin', name: 'i18n', key: 'settings' });
 
   async function getSettings() {

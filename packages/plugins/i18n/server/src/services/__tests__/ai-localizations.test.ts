@@ -1,4 +1,4 @@
-import type { Schema, UID } from '@strapi/types';
+import type { Core, Schema, UID } from '@strapi/types';
 
 import { createAILocalizationsService, mergeUnsupportedFields } from '../ai-localizations';
 
@@ -44,11 +44,12 @@ describe('ai-localizations service', () => {
       return {
         modelType: 'contentType',
         uid: 'api::test.test',
+        kind: 'collectionType',
         modelName: 'test',
         globalId: 'Test',
         info: { displayName: 'Test', singularName: 'test', pluralName: 'tests' },
         attributes,
-      } as Schema.Schema;
+      };
     };
 
     describe('root-level unsupported fields', () => {
@@ -519,7 +520,7 @@ describe('ai-localizations service', () => {
     });
   });
 
-  describe('generateDocumentLocalizations - issue #26579 (maxLength constraints)', () => {
+  describe('generateDocumentLocalizations', () => {
     const MODEL = 'api::article.article' as UID.ContentType;
 
     const buildSchema = (): Schema.Schema =>
@@ -609,6 +610,26 @@ describe('ai-localizations service', () => {
       // global.strapi is a non-configurable accessor from unit.setup — cannot delete;
       // each test reassigns its mock.
     });
+
+    it.each(['en', null])(
+      'ignores a missing update result with default locale %s',
+      async (defaultLocale) => {
+        const { mockStrapi, jobsService, documentsApi, generateTranslations } =
+          buildMockStrapi(buildSchema());
+        mockStrapi.plugins.i18n.services.locales.getDefaultLocale.mockResolvedValue(defaultLocale);
+        const strapi = mockStrapi as unknown as Core.Strapi;
+        global.strapi = strapi;
+        const service = createAILocalizationsService({ strapi });
+
+        await expect(
+          service.generateDocumentLocalizations({ model: MODEL, document: null })
+        ).resolves.toBeUndefined();
+
+        expect(generateTranslations).not.toHaveBeenCalled();
+        expect(jobsService.upsertJobForDocument).not.toHaveBeenCalled();
+        expect(documentsApi.update).not.toHaveBeenCalled();
+      }
+    );
 
     it('forwards maxLength/minLength to the AI so translations can respect the limit', async () => {
       const schema = buildSchema();

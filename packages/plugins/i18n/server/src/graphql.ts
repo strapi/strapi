@@ -7,6 +7,18 @@ const { ValidationError } = errors;
 const LOCALE_SCALAR_TYPENAME = 'I18NLocaleCode';
 const LOCALE_ARG_PLUGIN_NAME = 'I18NLocaleArg';
 
+/**
+ * `plugin::graphql.extension`. GraphQL is an optional plugin that i18n does not depend on, so its
+ * registered contract is not loaded here.
+ */
+type GraphQLExtensionService = {
+  shadowCRUD(uid: string): {
+    disableMutations(): void;
+    field(name: string): { disableInput(): void };
+  };
+  use(configuration: unknown): unknown;
+};
+
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   register() {
     const { service: getGraphQLService } = strapi.plugin('graphql');
@@ -14,7 +26,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
     const { isLocalizedContentType } = getI18NService('content-types');
 
-    const extensionService = getGraphQLService('extension');
+    const extensionService = getGraphQLService<GraphQLExtensionService>('extension');
 
     extensionService.shadowCRUD('plugin::i18n.locale').disableMutations();
 

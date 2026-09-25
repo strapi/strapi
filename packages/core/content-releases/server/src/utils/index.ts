@@ -2,17 +2,18 @@ import { contentTypes as contentTypesUtils } from '@strapi/utils';
 
 import type { UID, Data, Core } from '@strapi/types';
 
-import type { SettingsService } from '../services/settings';
-import type { ReleaseService } from '../services/release';
-import type { ReleaseActionService } from '../services/release-action';
+import type { Services } from '../types';
+import type { Stage } from '../../../shared/contracts/release-actions';
 
-type Services = {
-  release: ReleaseService;
-  'release-validation': any;
-  scheduling: any;
-  'release-action': ReleaseActionService;
-  'event-manager': any;
-  settings: SettingsService;
+/**
+ * `plugin::review-workflows.workflows`. Content releases does not depend on review workflows, so its
+ * registered contract is not loaded here.
+ */
+export type WorkflowsService = {
+  getAssignedWorkflow(
+    contentTypeUid: string,
+    options: { populate: string }
+  ): Promise<{ stageRequiredToPublish?: Stage } | null>;
 };
 
 interface Action {
@@ -25,7 +26,7 @@ export const getService = <TName extends keyof Services>(
   name: TName,
   { strapi }: { strapi: Core.Strapi }
 ): Services[TName] => {
-  return strapi.plugin('content-releases').service(name);
+  return strapi.plugin('content-releases').service<Services[TName]>(name);
 };
 
 export const getDraftEntryValidStatus = async (
@@ -33,7 +34,6 @@ export const getDraftEntryValidStatus = async (
   { strapi }: { strapi: Core.Strapi }
 ) => {
   const populateBuilderService = strapi.plugin('content-manager').service('populate-builder');
-  // @ts-expect-error - populateBuilderService should be a function but is returning service
   const populate = await populateBuilderService(contentType).populateDeep(Infinity).build();
 
   const entry = await getEntry({ contentType, documentId, locale, populate }, { strapi });
@@ -66,7 +66,9 @@ export const isEntryValid = async (
       entry
     );
 
-    const workflowsService = strapi.plugin('review-workflows').service('workflows');
+    const workflowsService = strapi
+      .plugin('review-workflows')
+      .service<WorkflowsService>('workflows');
     // Workflows service may not be available depending on the license
     const workflow = await workflowsService?.getAssignedWorkflow(contentTypeUid, {
       populate: 'stageRequiredToPublish',
