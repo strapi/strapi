@@ -9,8 +9,8 @@ import type * as Schema from '../schema';
 import type * as UID from '../uid';
 
 import type { Container } from './container';
-import type { ControllerFor } from './controller';
-import type { ServiceFor } from './service';
+import type { ControllerLookup } from './controller';
+import type { ServiceLookup } from './service';
 import type { SuggestedString } from '../utils/string';
 import type { IsStrict } from './strictness';
 
@@ -73,9 +73,24 @@ export interface Strapi extends Container {
   reload: Reloader;
   config: ConfigProvider;
   services: Record<string, Core.Service>;
-  service<TUID extends UID.Service>(uid: TUID): ServiceFor<TUID>;
+  /**
+   * Resolves the registered contract of `uid`. An explicit type argument (`service<MyService>(uid)`)
+   * wins over the registries, including for unregistered names with strict types enabled.
+   */
+  service<T extends Core.Service = Core.Service, TUID extends UID.Service = UID.Service>(
+    uid: TUID
+  ): ServiceLookup<TUID, T>;
   controllers: Record<string, Core.Controller>;
-  controller<TUID extends UID.Controller>(uid: TUID): ControllerFor<TUID>;
+  /**
+   * Resolves the registered contract of `uid`. An explicit type argument (`controller<MyController>(uid)`)
+   * wins over the registries, including for unregistered names with strict types enabled.
+   */
+  controller<
+    T extends Core.Controller = Core.Controller,
+    TUID extends UID.Controller = UID.Controller,
+  >(
+    uid: TUID
+  ): ControllerLookup<TUID, T>;
   contentTypes: Schema.ContentTypes;
   contentType<TContentTypeUID extends UID.ContentType>(
     name: TContentTypeUID

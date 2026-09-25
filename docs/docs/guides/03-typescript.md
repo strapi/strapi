@@ -58,10 +58,13 @@ its `permission` and `transfer` services.
 Strict contracts are closed: an unregistered literal service or controller name resolves to
 `never`, for full UIDs such as `strapi.service('plugin::greetings.greeting')` and for plugin
 lookups such as `strapi.plugin('greetings').service('greeting')`. Register a contract for the
-name, or pass an explicit generic argument on plugin lookups:
+name, or pass an explicit generic argument. Both lookup forms accept one, and it takes precedence
+over the registries, with or without the switch:
 
 ```ts
 const greeting = strapi.plugin('greetings').service<GreetingService>('greeting');
+const sameGreeting = strapi.service<GreetingService>('plugin::greetings.greeting');
+const items = strapi.controller<ItemsController>('api::item.item');
 ```
 
 Dynamic names, such as a `string` variable or a template literal type like
@@ -151,8 +154,8 @@ use their fully qualified names.
 Policy inventories are deliberately complete for explicitly typed routes: accepting arbitrary
 policy names would also let an invalid configuration for a known policy pass through the
 fallback. Service and controller lookups are closed the same way for literal names, but resolve
-one name at a time: a plugin lookup with an explicit generic argument keeps working while its
-contract is missing.
+one name at a time: a lookup with an explicit generic argument keeps working while its contract
+is missing.
 
 ## Verifying changes
 
