@@ -35,6 +35,17 @@ describe.skip('Relations', () => {
   const dbFindPage: jest.MockedFunction<() => Record<string, any[]>> = jest.fn(() => ({
     results: [],
   }));
+  const createPermissionChecker = jest.fn().mockReturnValue({
+    can: {
+      read: jest.fn().mockReturnValue(true),
+    },
+    cannot: {
+      read: jest.fn().mockReturnValue(false),
+    },
+    sanitizedQuery: {
+      read: jest.fn().mockReturnValue({}),
+    },
+  });
 
   beforeAll(() => {
     global.strapi = {
@@ -50,17 +61,7 @@ describe.skip('Relations', () => {
         'content-manager': {
           services: {
             'permission-checker': {
-              create: jest.fn().mockReturnValue({
-                can: {
-                  read: jest.fn().mockReturnValue(true),
-                },
-                cannot: {
-                  read: jest.fn().mockReturnValue(false),
-                },
-                sanitizedQuery: {
-                  read: jest.fn().mockReturnValue({}),
-                },
-              }),
+              create: createPermissionChecker,
             },
             'populate-builder': () => ({
               populateFromQuery: jest.fn().mockReturnThis(),
@@ -139,9 +140,7 @@ describe.skip('Relations', () => {
     });
 
     test('Replace mainField by id when mainField is not listable', async () => {
-      global.strapi.plugins['content-manager'].services[
-        'permission-checker'
-      ].create.mockReturnValue({
+      createPermissionChecker.mockReturnValue({
         can: {
           read: jest.fn().mockReturnValue(true),
         },
@@ -196,9 +195,7 @@ describe.skip('Relations', () => {
 
   describe('findExisting', () => {
     test('Query mainField when mainField is listable', async () => {
-      global.strapi.plugins['content-manager'].services[
-        'permission-checker'
-      ].create.mockReturnValue({
+      createPermissionChecker.mockReturnValue({
         can: {
           read: jest.fn().mockReturnValue(true),
         },
@@ -287,7 +284,7 @@ describe.skip('Relations', () => {
     });
 
     test.skip('Replace mainField by id when mainField is not accessible with RBAC', async () => {
-      global.strapi.plugins['content-manager'].services['permission-checker'].create
+      createPermissionChecker
         .mockReturnValueOnce({
           cannot: {
             read: jest.fn().mockReturnValue(false),
@@ -347,7 +344,7 @@ describe.skip('Relations', () => {
   });
 
   test('Replace mainField by id when mainField is not accessible with RBAC', async () => {
-    global.strapi.plugins['content-manager'].services['permission-checker'].create
+    createPermissionChecker
       .mockReturnValueOnce({
         can: {
           read: jest.fn().mockReturnValue(true),
