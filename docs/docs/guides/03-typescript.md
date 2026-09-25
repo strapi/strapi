@@ -51,9 +51,15 @@ const defaultLocale = await locales.getDefaultLocale(); // string | null
 
 The bundled contracts cover i18n's services and controllers, including the possibility of missing
 settings, locales, and AI localization jobs. Content Manager registers its core controllers,
-permission policy, and services for content structure, document operations and metadata, field
-sizes, metrics, population, and UID generation. The admin registers its permission policies and
-its `permission` and `transfer` services.
+permission policy, and every service. The admin registers its permission policies and every
+service. Email, Upload, Content-Type Builder, Review Workflows, and Content Releases register
+their services; GraphQL and Documentation register theirs through generated types when enabled.
+Most of these contracts are inferred from the implementation; some are deliberately loose and
+marked for tightening.
+
+The EE edition merges its members into the admin `auth`, `user`, `role`, `passport`, and `metrics`
+services. Their contracts are the CE shape, with the EE-only members optional. EE-only code passes
+the EE shape, `EnterpriseServices`, as an explicit generic argument.
 
 Strict contracts are closed: an unregistered literal service or controller name resolves to
 `never`, for full UIDs such as `strapi.service('plugin::greetings.greeting')` and for plugin
