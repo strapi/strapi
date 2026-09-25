@@ -11,14 +11,20 @@ const fixture = (name) => path.join(__dirname, 'fixtures', name);
 const providers = [
   'packages/plugins/i18n',
   'packages/plugins/sentry',
+  'packages/plugins/graphql',
+  'packages/plugins/documentation',
   'packages/core/admin',
   'packages/core/content-manager',
+  'packages/core/content-releases',
+  'packages/core/content-type-builder',
+  'packages/core/email',
+  'packages/core/review-workflows',
+  'packages/core/upload',
 ];
 const strictPackages = [
   ...providers,
   'packages/core/types',
   'packages/core/core',
-  'packages/core/upload',
   'packages/core/strapi',
 ];
 const resolutions = {
