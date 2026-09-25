@@ -41,6 +41,9 @@ produce TS2717 even when the registry switch is off; `skipLibCheck` suppresses t
 Applications must include only one contract version for each UID. Application overrides belong
 in `AppServices`, `AppConfigs`, `AppControllers`, or `AppPolicies`, separate from `Package*` entries.
 
-The package checks reject strict activation in emitted declarations and require imports in the
-four providers' public registry contracts to be declared dependencies. That dependency check is
-scoped to `dist/server/src/types`; it does not audit pre-existing declarations in the entire repo.
+The package checks cover every contract provider: the four above, plus GraphQL, Documentation,
+Content Releases, Content-Type Builder, Email, Review Workflows, and Upload. They reject strict
+activation in emitted declarations, resolve each `strapi-server` entry with every resolver, and
+require imports in the public registry contracts to be declared dependencies. That dependency check
+is scoped to `dist/server/src/types`; it does not audit pre-existing declarations in the entire
+repo. The application entry fixture also checks that every bundled provider's contracts load.
