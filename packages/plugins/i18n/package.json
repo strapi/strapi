@@ -57,12 +57,14 @@
     "test:ts:front": "run -T tsc -p admin/tsconfig.json",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "run -T rollup -c -w"
+    "watch": "run -T rollup -c -w",
+    "test:ts:back": "run -T tsc -p server/tsconfig.json"
   },
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
     "@strapi/design-system": "2.2.4",
     "@strapi/icons": "2.2.4",
+    "@strapi/types": "5.55.1",
     "@strapi/utils": "5.55.1",
     "lodash": "4.18.1",
     "qs": "6.15.3",
@@ -76,7 +78,6 @@
     "@strapi/admin-test-utils": "5.55.1",
     "@strapi/content-manager": "5.55.1",
     "@strapi/database": "5.55.1",
-    "@strapi/types": "5.55.1",
     "@testing-library/dom": "10.4.1",
     "@testing-library/jest-dom": "6.9.1",
     "@testing-library/react": "16.3.2",
@@ -110,5 +111,12 @@
     "description": "This plugin enables to create, to read and to update content in different languages, both from the Admin Panel and from the API.",
     "required": false,
     "kind": "plugin"
+  },
+  "typesVersions": {
+    "*": {
+      "strapi-server": [
+        "dist/server/src/index.d.ts"
+      ]
+    }
   }
 }

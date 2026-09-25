@@ -39,10 +39,14 @@
       "default": "./dist/index.js"
     },
     "./package.json": "./package.json",
-    "./*": "./*"
+    "./*": "./*",
+    "./strict": {
+      "types": "./strict.d.ts"
+    }
   },
   "files": [
-    "dist/"
+    "dist/",
+    "strict.d.ts"
   ],
   "scripts": {
     "build": "run -T npm-run-all clean --parallel build:code build:types",
@@ -52,7 +56,7 @@
     "doc:ts": "typedoc",
     "doc:ts:watch": "typedoc --watch",
     "lint": "run -T eslint . --max-warnings=0",
-    "test:ts": "run -T tsc -p tsconfig.json",
+    "test:ts": "run -T tsc -p tsconfig.json && run -T tsc -p tsconfig.strict-off.json",
     "watch": "run -T tsc -p tsconfig.build.json -w"
   },
   "dependencies": {
@@ -88,5 +92,12 @@
   "engines": {
     "node": ">=20.0.0 <=26.x.x",
     "npm": ">=6.0.0"
+  },
+  "typesVersions": {
+    "*": {
+      "strict": [
+        "strict.d.ts"
+      ]
+    }
   }
 }

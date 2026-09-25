@@ -33,7 +33,7 @@ const action = async ({ debug, silent, verbose, outDir }: CmdOptions) => {
       silent,
       debug,
     },
-    artifacts: { contentTypes: true, components: true },
+    artifacts: { contentTypes: true, components: true, plugins: true },
   });
 
   await app.destroy();
@@ -44,7 +44,7 @@ const action = async ({ debug, silent, verbose, outDir }: CmdOptions) => {
  */
 const command: StrapiCommand = () => {
   return createCommand('ts:generate-types')
-    .description(`Generate TypeScript typings for your schemas`)
+    .description(`Generate TypeScript typings for your schemas and plugin contracts`)
     .option('-d, --debug', `Run the generation with debug messages`, false)
     .option('-s, --silent', `Run the generation silently, without any output`, false)
     .option(

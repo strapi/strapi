@@ -2,7 +2,7 @@
   "extends": "tsconfig/base.json",
   "compilerOptions": {
     "noEmit": true,
-    "types": ["node"]
+    "types": ["node", "@strapi/types/strict"]
   },
   "include": ["src"],
   "exclude": ["node_modules"]
