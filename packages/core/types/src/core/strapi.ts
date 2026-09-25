@@ -9,8 +9,11 @@ import type * as Schema from '../schema';
 import type * as UID from '../uid';
 
 import type { Container } from './container';
-import type { ControllerLookup } from './controller';
-import type { ServiceLookup } from './service';
+import type { ControllerLookup, ControllerMap } from './controller';
+import type { ApiMap } from './module';
+import type { PluginMap } from './plugin';
+import type { PolicyMap } from './policy';
+import type { ServiceLookup, ServiceMap } from './service';
 import type { SuggestedString } from '../utils/string';
 import type { IsStrict } from './strictness';
 
@@ -72,7 +75,11 @@ export interface Strapi extends Container {
   components: Schema.Components;
   reload: Reloader;
   config: ConfigProvider;
-  services: Record<string, Core.Service>;
+  /**
+   * Services keyed by UID. With strict types enabled, registered UIDs resolve to their contracts;
+   * other keys keep the legacy service.
+   */
+  services: ServiceMap;
   /**
    * Resolves the registered contract of `uid`. An explicit type argument (`service<MyService>(uid)`)
    * wins over the registries, including for unregistered names with strict types enabled.
@@ -80,7 +87,11 @@ export interface Strapi extends Container {
   service<T extends Core.Service = Core.Service, TUID extends UID.Service = UID.Service>(
     uid: TUID
   ): ServiceLookup<TUID, T>;
-  controllers: Record<string, Core.Controller>;
+  /**
+   * Controllers keyed by UID. With strict types enabled, registered UIDs resolve to their contracts;
+   * other keys keep the legacy controller.
+   */
+  controllers: ControllerMap;
   /**
    * Resolves the registered contract of `uid`. An explicit type argument (`controller<MyController>(uid)`)
    * wins over the registries, including for unregistered names with strict types enabled.
@@ -95,16 +106,28 @@ export interface Strapi extends Container {
   contentType<TContentTypeUID extends UID.ContentType>(
     name: TContentTypeUID
   ): Schema.ContentType<TContentTypeUID>;
-  policies: Record<string, Core.Policy>;
+  /**
+   * Policies keyed by UID. With strict types enabled, registered UIDs receive their config contract;
+   * other keys keep the legacy policy.
+   */
+  policies: PolicyMap;
   policy(name: string): Core.Policy;
   middlewares: Record<string, Core.MiddlewareFactory>;
   middleware(name: string): Core.MiddlewareFactory;
-  plugins: Record<string, Core.Plugin>;
+  /**
+   * Plugins keyed by name. With strict types enabled, a plugin with registered contracts resolves to
+   * `Plugin<name>`, like `plugin(name)`; other names keep the legacy plugin.
+   */
+  plugins: PluginMap;
   plugin<TName extends string>(name: TName): Core.Plugin<TName>;
   hooks: Record<string, any>;
   hook(name: string): any;
-  apis: Record<string, Core.Module>;
-  api(name: string): Core.Module;
+  /**
+   * APIs keyed by name. With strict types enabled, an API with registered contracts resolves to
+   * `Module<'api::<name>'>`, like `api(name)`; other names keep the legacy module.
+   */
+  apis: ApiMap;
+  api<TName extends string>(name: TName): Core.Module<`api::${TName}`>;
   auth: Modules.Auth.AuthenticationService;
   /** Content API: permissions, route map, sanitize/validate, and registration of extra query/input params (see addQueryParams, addInputParams). */
   contentAPI: Modules.ContentAPI.ContentApi;

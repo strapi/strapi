@@ -1,12 +1,13 @@
 import type { PropertyPath } from 'lodash';
-import type { Controller, ControllerFor } from './controller';
+import type { Controller, ControllerFor, RegisteredControllerUID } from './controller';
 import type { Module } from './module';
 import type { Route } from './route';
 import type { Router } from './router';
-import type { Service, ServiceFor } from './service';
+import type { RegisteredPolicyName } from './policy';
+import type { RegisteredServiceUID, Service, ServiceFor } from './service';
 import type { ConfigDefaultValue, ConfigFor, ConfigNamespace, ConfigPathLookup } from './strapi';
 import type { SuggestedString } from '../utils/string';
-import type { IsDynamicName, IsStrict } from './strictness';
+import type { IsDynamicName, IsStrict, RegisteredRecord } from './strictness';
 
 /** Names of the plugin's entries in a registry keyed by full UID (`plugin::<plugin>.<name>`). */
 type PluginEntryNames<TUID, TPlugin extends string> = string extends TPlugin
@@ -15,15 +16,9 @@ type PluginEntryNames<TUID, TPlugin extends string> = string extends TPlugin
     ? TName
     : never;
 
-type ServiceNames<TPlugin extends string> = PluginEntryNames<
-  keyof Strapi.Registries.AppServices | keyof Strapi.Registries.PackageServices,
-  TPlugin
->;
+type ServiceNames<TPlugin extends string> = PluginEntryNames<RegisteredServiceUID, TPlugin>;
 
-type ControllerNames<TPlugin extends string> = PluginEntryNames<
-  keyof Strapi.Registries.AppControllers | keyof Strapi.Registries.PackageControllers,
-  TPlugin
->;
+type ControllerNames<TPlugin extends string> = PluginEntryNames<RegisteredControllerUID, TPlugin>;
 
 type PluginConfigNamespace<TPlugin extends string> = string extends TPlugin
   ? never
@@ -97,7 +92,7 @@ type PluginControllerLookup<TPlugin extends string, TControllerName, T> = IsStri
         : UnregisteredPluginEntry<TPlugin, TControllerName, T>;
 
 export type Plugin<TName extends string = string> = Omit<
-  Module,
+  Module<`plugin::${TName}`>,
   'routes' | 'service' | 'config' | 'controller'
 > & {
   routes: Route[] | Record<string, Router>;
@@ -132,3 +127,23 @@ export type Plugin<TName extends string = string> = Omit<
   ): PluginControllerLookup<TName, TControllerName, T>;
   [key: string]: any;
 };
+
+/** The plugin name of a `plugin::<plugin>.<name>` UID or a `plugin::<plugin>` config namespace. */
+type PluginNameOf<TUID> = TUID extends `plugin::${infer TPlugin}.${string}`
+  ? TPlugin
+  : TUID extends `plugin::${infer TPlugin}`
+    ? TPlugin
+    : never;
+
+/** Plugins with at least one registered service, controller, policy or config contract. */
+export type RegisteredPluginName = PluginNameOf<
+  RegisteredServiceUID | RegisteredControllerUID | RegisteredPolicyName | ConfigNamespace
+>;
+
+/**
+ * Plugins keyed by name, e.g. `strapi.plugins`. With strict types enabled, a registered plugin resolves
+ * to `Plugin<name>`, like `strapi.plugin(name)`; other names, literal or dynamic, resolve to `Plugin`.
+ */
+export type PluginMap = IsStrict extends false
+  ? Record<string, Plugin>
+  : RegisteredRecord<{ [TPlugin in RegisteredPluginName]: Plugin<TPlugin> }, Plugin>;
