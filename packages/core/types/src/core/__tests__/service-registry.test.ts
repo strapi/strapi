@@ -2,6 +2,7 @@ import type * as PublicRegistries from '../../public/registries';
 import type { Controller } from '../controller';
 import type { Module } from '../module';
 import type { Plugin } from '../plugin';
+import type { ServiceFor } from '../service';
 import type { Strapi as StrapiInstance } from '../strapi';
 
 // @ts-expect-error Service contract registries are global, not part of the Public registries.
@@ -49,6 +50,9 @@ declare module '../../public/registries' {
 declare const strapi: StrapiInstance;
 declare const dynamicPlugin: string;
 declare const dynamicService: string;
+declare const patternServiceName: `greeting-${string}`;
+declare const wideService: ServiceFor<string>;
+declare const patternService: ServiceFor<`plugin::${string}.greeting`>;
 
 strapi.service('api::type-lab.greeting').greet('Nico') satisfies Promise<string>;
 strapi.service('admin::type-lab').greet('Nico') satisfies Promise<string>;
@@ -66,17 +70,29 @@ strapi.plugin('type-lab').service('greeting').greet('Nico') satisfies Promise<nu
 // @ts-expect-error Plugin lookups do not inherit the permissive service index signature.
 strapi.plugin('type-lab').service('greeting').missing();
 
-strapi.service('plugin::legacy.greeting').missing();
+// Unregistered literal names resolve to `never`, including names only declared in `Public.Services`.
+strapi.service('plugin::legacy.greeting') satisfies never;
+strapi.service('plugin::unregistered.greeting') satisfies never;
+strapi.service('api::unregistered.greeting') satisfies never;
+strapi.plugin('legacy').service('greeting') satisfies never;
+strapi.plugin('type-lab').service('unregistered') satisfies never;
+// @ts-expect-error Unregistered literal names expose no members.
 strapi.service('plugin::unregistered.greeting').missing();
-strapi.plugin('legacy').service('greeting').missing();
+// @ts-expect-error Plugin-scoped unregistered literal names expose no members.
 strapi.plugin('type-lab').service('unregistered').missing();
+
+// Dynamic names cannot be validated and keep the permissive service.
+wideService.missing();
+patternService.missing();
 strapi.plugin(dynamicPlugin).service('greeting').missing();
 strapi.plugin('type-lab').service(dynamicService).missing();
+strapi.plugin('type-lab').service(patternServiceName).missing();
 
-// Preserve explicit generic overrides and contextual inference on legacy lookups.
+// Preserve explicit generic overrides and contextual inference on permissive lookups.
 strapi.plugin('type-lab').service<GreetingService>('greeting').greet('Nico');
 strapi.plugin('unregistered').service<GreetingService>('greeting').greet('Nico');
-const contextual: GreetingService = strapi.plugin('type-lab').service('unregistered');
+strapi.plugin('type-lab').service<GreetingService>('unregistered').greet('Nico');
+const contextual: GreetingService = strapi.plugin('type-lab').service(dynamicService);
 const contextualDynamic: GreetingService = strapi.plugin(dynamicPlugin).service('greeting');
 const legacyPlugin: Plugin = strapi.plugin('type-lab');
 const contextualLegacy: GreetingService = legacyPlugin.service('greeting');
@@ -114,7 +130,7 @@ contextualLegacy.greet('Nico');
 // Parameterizing Plugin must preserve its explicitly declared Module members.
 strapi.plugin('type-lab').config<number>('limit') satisfies number;
 strapi.plugin('type-lab').contentTypes satisfies Module['contentTypes'];
-strapi.plugin('type-lab').controller('example') satisfies Controller;
+strapi.plugin('type-lab').controller<Controller>('example') satisfies Controller;
 strapi.log.info('typed service registry');
 strapi.documents satisfies StrapiInstance['documents'];
 strapi.db satisfies StrapiInstance['db'];

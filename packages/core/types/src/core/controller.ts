@@ -1,17 +1,23 @@
 import 'koa-body';
 import type { Context, Next } from 'koa';
-import type { IsStrict } from './strictness';
+import type { IsDynamicName, IsStrict } from './strictness';
 
 export type Controller = Record<string, ControllerHandler>;
 
-/** Resolves application overrides before package defaults, then falls back to the legacy controller. */
+/**
+ * Resolves application overrides before package defaults. With strict types enabled, an unregistered
+ * literal UID resolves to `never`; with strict types disabled, every UID resolves to the legacy controller.
+ */
 export type ControllerFor<TUID extends string> = IsStrict extends false
   ? Controller
   : TUID extends keyof Strapi.Registries.AppControllers
     ? Strapi.Registries.AppControllers[TUID]
     : TUID extends keyof Strapi.Registries.PackageControllers
       ? Strapi.Registries.PackageControllers[TUID]
-      : Controller;
+      : IsDynamicName<TUID> extends true
+        ? // TODO @Nico decide whether dynamic names should also close in strict mode
+          Controller
+        : never;
 export interface ControllerHandler<TResponse = unknown> {
   (context: Context, next: Next): Promise<TResponse | void> | TResponse | void;
 }

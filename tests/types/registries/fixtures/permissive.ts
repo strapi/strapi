@@ -9,6 +9,10 @@ app.plugin('sentry').service('sentry').anything();
 strapi.plugin('sentry').service('sentry').anything();
 app.plugin('i18n').controller('locales').anything satisfies Core.ControllerHandler | undefined;
 app.controller('plugin::i18n.settings').anything satisfies Core.ControllerHandler | undefined;
+// Unregistered literal names keep the permissive signature without the switch.
+app.service('plugin::i18n.unregistered').anything();
+app.plugin('unregistered').service('greeting').anything();
+app.plugin('i18n').controller('unregistered').anything satisfies Core.ControllerHandler | undefined;
 
 const config = app.config.get('plugin::sentry');
 // @ts-expect-error Without an inferred generic, legacy config lookup returns unknown.

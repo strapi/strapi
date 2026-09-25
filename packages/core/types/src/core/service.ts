@@ -1,13 +1,19 @@
-import type { IsStrict } from './strictness';
+import type { IsDynamicName, IsStrict } from './strictness';
 
-/** Resolves application overrides before package defaults, then falls back to the legacy service. */
+/**
+ * Resolves application overrides before package defaults. With strict types enabled, an unregistered
+ * literal UID resolves to `never`; with strict types disabled, every UID resolves to the legacy service.
+ */
 export type ServiceFor<TUID extends string> = IsStrict extends false
   ? Service
   : TUID extends keyof Strapi.Registries.AppServices
     ? Strapi.Registries.AppServices[TUID]
     : TUID extends keyof Strapi.Registries.PackageServices
       ? Strapi.Registries.PackageServices[TUID]
-      : Service;
+      : IsDynamicName<TUID> extends true
+        ? // TODO @Nico decide whether dynamic names should also close in strict mode
+          Service
+        : never;
 
 export type Service = {
   // TODO [V5] Consider changing the any value to unknown.

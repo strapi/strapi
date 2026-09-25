@@ -6,7 +6,7 @@ import type { Router } from './router';
 import type { Service, ServiceFor } from './service';
 import type { ConfigDefaultValue, ConfigFor, ConfigNamespace, ConfigPathLookup } from './strapi';
 import type { SuggestedString } from '../utils/string';
-import type { IsStrict } from './strictness';
+import type { IsDynamicName, IsStrict } from './strictness';
 
 /** Names of the plugin's entries in a registry keyed by full UID (`plugin::<plugin>.<name>`). */
 type PluginEntryNames<TUID, TPlugin extends string> = string extends TPlugin
@@ -55,27 +55,46 @@ type PluginConfigLookup<
         ? ConfigPathLookup<PluginConfigNamespace<TPlugin>, TKey, T, TDefault>
         : T;
 
-/** The registered contract when `TServiceName` is a registered service of the plugin, `T` otherwise. */
+/**
+ * `never` when `plugin::<plugin>.<name>` is a literal UID, `T` when the plugin or the name is dynamic.
+ * The registries cannot validate dynamic names.
+ */
+type UnregisteredPluginEntry<TPlugin extends string, TName, T> = TName extends string
+  ? IsDynamicName<`plugin::${TPlugin}.${TName}`> extends true
+    ? // TODO @Nico decide whether dynamic names should also close in strict mode
+      T
+    : never
+  : T;
+
+/**
+ * The registered contract when `TServiceName` is a registered service of the plugin.
+ * With strict types enabled, an unregistered literal name resolves to `never`. An explicit generic
+ * (`service<MyService>('name')`) or a dynamic name resolves to `T`.
+ */
 type PluginServiceLookup<TPlugin extends string, TServiceName, T> = IsStrict extends false
   ? T
-  : [ServiceNames<TPlugin>] extends [never]
+  : SuggestedString<ServiceNames<TPlugin>> extends TServiceName
     ? T
-    : SuggestedString<ServiceNames<TPlugin>> extends TServiceName
-      ? T
+    : [ServiceNames<TPlugin>] extends [never]
+      ? UnregisteredPluginEntry<TPlugin, TServiceName, T>
       : TServiceName extends ServiceNames<TPlugin>
         ? ServiceFor<`plugin::${TPlugin}.${TServiceName}`>
-        : T;
+        : UnregisteredPluginEntry<TPlugin, TServiceName, T>;
 
-/** The registered contract when `TControllerName` is a registered controller of the plugin, `T` otherwise. */
+/**
+ * The registered contract when `TControllerName` is a registered controller of the plugin.
+ * With strict types enabled, an unregistered literal name resolves to `never`. An explicit generic
+ * (`controller<MyController>('name')`) or a dynamic name resolves to `T`.
+ */
 type PluginControllerLookup<TPlugin extends string, TControllerName, T> = IsStrict extends false
   ? T
-  : [ControllerNames<TPlugin>] extends [never]
+  : SuggestedString<ControllerNames<TPlugin>> extends TControllerName
     ? T
-    : SuggestedString<ControllerNames<TPlugin>> extends TControllerName
-      ? T
+    : [ControllerNames<TPlugin>] extends [never]
+      ? UnregisteredPluginEntry<TPlugin, TControllerName, T>
       : TControllerName extends ControllerNames<TPlugin>
         ? ControllerFor<`plugin::${TPlugin}.${TControllerName}`>
-        : T;
+        : UnregisteredPluginEntry<TPlugin, TControllerName, T>;
 
 export type Plugin<TName extends string = string> = Omit<
   Module,
