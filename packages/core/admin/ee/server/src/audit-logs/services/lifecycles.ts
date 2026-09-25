@@ -7,7 +7,9 @@ const DEFAULT_RETENTION_DAYS = 90;
 /**
  * Events audited before the payload standard; their stored shape is frozen for
  * compatibility. Do not add events here: new events come through registerEvent().
- * TODO: migrate these to the standard.
+ * The event hub still emits user.create, user.update and user.delete; the audit log
+ * records them as admin-user.* (server/src/audit-logs/admin-users.ts).
+ * TODO: migrate the rest to the standard.
  */
 const defaultEvents = [
   'entry.create',
@@ -21,9 +23,6 @@ const defaultEvents = [
   'media-folder.create',
   'media-folder.update',
   'media-folder.delete',
-  'user.create',
-  'user.update',
-  'user.delete',
   'admin.auth.success',
   'admin.logout',
   'content-type.create',
@@ -46,7 +45,21 @@ const defaultEvents = [
  */
 type EventRegistration =
   | { kind: 'legacy' }
-  | { kind: 'standard'; transform: Modules.AuditLogs.EventTransformer };
+  | {
+      kind: 'standard';
+      transform: Modules.AuditLogs.EventTransformer;
+      options: RegisterEventOptions;
+    };
+
+export interface RegisterEventOptions {
+  /**
+   * Records the event when the request has no authenticated user, with an
+   * `unknown` actor and no user column. For actions taken from public admin
+   * forms (password reset, invitation). Off by default: an event with no user
+   * is dropped.
+   */
+  allowUnknownActor?: boolean;
+}
 
 const getEventMap = (events: string[]) => {
   return events.reduce(
@@ -56,6 +69,26 @@ const getEventMap = (events: string[]) => {
     },
     {} as Record<string, EventRegistration>
   );
+};
+
+const getActor = (
+  systemOrigin: Modules.AuditLogs.SystemOrigin | undefined,
+  user: { id: string | number; email: string; firstname?: string; lastname?: string } | undefined
+): Modules.AuditLogs.Actor => {
+  if (systemOrigin) {
+    return { type: 'system' };
+  }
+
+  if (!user) {
+    return { type: 'unknown' };
+  }
+
+  // We copy the user data into the row so the history stays unchanged if the user
+  // changes later
+  return {
+    type: 'admin-user',
+    user: { id: user.id, email: user.email, name: getDisplayName(user) },
+  };
 };
 
 const getRetentionDays = (strapi: Core.Strapi) => {
@@ -120,15 +153,23 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
         ? (auditSource as Modules.AuditLogs.SystemOrigin)
         : undefined;
 
-    if (!systemOrigin && ((!isUsingAdminAuth && !isMcpAdminAction) || !user)) {
+    if (!systemOrigin && !isUsingAdminAuth && !isMcpAdminAction) {
+      return null;
+    }
+
+    const allowsUnknownActor =
+      registration.kind === 'standard' && registration.options.allowUnknownActor === true;
+
+    if (!systemOrigin && !user && !allowsUnknownActor) {
       return null;
     }
 
     const origin: Modules.AuditLogs.AuditSource = systemOrigin ?? auditSource ?? 'admin-panel';
     const date = new Date().toISOString();
     // Scheduled actions have no user, so a null user is expected. The earlier audit
-    // entry that set the schedule records who did it.
-    const userId = systemOrigin ? null : user.id;
+    // entry that set the schedule records who did it. Events allowing an unknown actor
+    // have no user either.
+    const userId = user ? user.id : null;
 
     if (registration.kind === 'legacy') {
       // TODO: What does this ignore in upload? Why would we want to ignore anything?
@@ -145,14 +186,7 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
       };
     }
 
-    const actor: Modules.AuditLogs.Actor = systemOrigin
-      ? { type: 'system' }
-      : {
-          type: 'admin-user',
-          // We copy the user data into the row so the history stays unchanged if the
-          // user changes later
-          user: { id: user.id, email: user.email, name: getDisplayName(user) },
-        };
+    const actor = getActor(systemOrigin, user);
 
     let shape: Modules.AuditLogs.EventShape | null = null;
 
@@ -202,7 +236,8 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
      */
     registerEvent<TDetails = unknown>(
       name: string,
-      transform: Modules.AuditLogs.EventTransformer<TDetails>
+      transform: Modules.AuditLogs.EventTransformer<TDetails>,
+      options: RegisterEventOptions = {}
     ) {
       if (eventMap[name]?.kind === 'legacy') {
         throw new Error(
@@ -217,6 +252,7 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
       eventMap[name] = {
         kind: 'standard',
         transform: transform as Modules.AuditLogs.EventTransformer,
+        options,
       };
     },
 
