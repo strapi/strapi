@@ -4,6 +4,24 @@ import { FILE_MODEL_UID } from './constants';
 
 const FILE_INFO_INPUT_TYPE_NAME = 'FileInfoInput';
 
+/**
+ * Members of `@strapi/plugin-graphql` services this extension calls. GraphQL is an optional plugin
+ * that upload does not depend on, so its registered contracts are not loaded here.
+ */
+type GraphQLShadowCRUD = {
+  disable(): void;
+  disableMutations(): void;
+};
+
+type GraphQLExtensionService = {
+  shadowCRUD(uid: string): GraphQLShadowCRUD;
+  use(configuration: unknown): unknown;
+};
+
+type GraphQLUtilsService = {
+  naming: { getTypeName(contentType: unknown): string };
+};
+
 export const installGraphqlExtension = ({ strapi }: { strapi: Core.Strapi }) => {
   const { service: getGraphQLService, config: graphQLConfig } = strapi.plugin('graphql');
   const { service: getUploadService } = strapi.plugin('upload');
@@ -14,17 +32,21 @@ export const installGraphqlExtension = ({ strapi }: { strapi: Core.Strapi }) => 
     return;
   }
 
-  getGraphQLService('extension').shadowCRUD('plugin::upload.folder').disable();
-  getGraphQLService('extension').shadowCRUD('plugin::upload.file').disableMutations();
+  getGraphQLService<GraphQLExtensionService>('extension')
+    .shadowCRUD('plugin::upload.folder')
+    .disable();
+  getGraphQLService<GraphQLExtensionService>('extension')
+    .shadowCRUD('plugin::upload.file')
+    .disableMutations();
 
-  const { getTypeName } = getGraphQLService('utils').naming;
+  const { getTypeName } = getGraphQLService<GraphQLUtilsService>('utils').naming;
 
   const fileModel = strapi.getModel(FILE_MODEL_UID);
   const fileTypeName = getTypeName(fileModel);
   /**
    * Register Upload's types, queries & mutations to the content API using the GraphQL extension API
    */
-  getGraphQLService('extension').use(({ nexus }: { nexus: any }) => {
+  getGraphQLService<GraphQLExtensionService>('extension').use(({ nexus }: { nexus: any }) => {
     const { inputObjectType, extendType, nonNull } = nexus;
 
     // Represents the input data payload for the file's information
