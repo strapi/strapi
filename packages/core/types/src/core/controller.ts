@@ -1,5 +1,6 @@
 import 'koa-body';
 import type { Context, Next } from 'koa';
+import type * as UID from '../uid';
 import type { IsDynamicName, IsStrict } from './strictness';
 
 export type Controller = Record<string, ControllerHandler>;
@@ -18,6 +19,15 @@ export type ControllerFor<TUID extends string> = IsStrict extends false
         ? // TODO @Nico decide whether dynamic names should also close in strict mode
           Controller
         : never;
+/**
+ * Return type of `strapi.controller<T>(uid)`: `T` when the UID kept its wide default, which happens
+ * when the caller passes an explicit type argument (TypeScript then does not infer the UID) or a
+ * dynamic UID; the registered lookup otherwise.
+ */
+export type ControllerLookup<TUID extends UID.Controller, T> = UID.Controller extends TUID
+  ? T
+  : ControllerFor<TUID>;
+
 export interface ControllerHandler<TResponse = unknown> {
   (context: Context, next: Next): Promise<TResponse | void> | TResponse | void;
 }

@@ -92,6 +92,19 @@ strapi.plugin('type-lab').service(patternServiceName).missing();
 strapi.plugin('type-lab').service<GreetingService>('greeting').greet('Nico');
 strapi.plugin('unregistered').service<GreetingService>('greeting').greet('Nico');
 strapi.plugin('type-lab').service<GreetingService>('unregistered').greet('Nico');
+// Full UID lookups accept the same explicit generic escape hatch, even for unregistered names.
+strapi
+  .service<GreetingService>('plugin::unregistered.greeting')
+  .greet('Nico') satisfies Promise<string>;
+strapi
+  .service<GreetingService>('api::unregistered.greeting')
+  .greet('Nico') satisfies Promise<string>;
+// The explicit generic wins over a registered contract.
+strapi.service<GreetingService>('plugin::type-lab.counter').greet('Nico') satisfies Promise<string>;
+// @ts-expect-error The explicit contract is not widened by the permissive service index signature.
+strapi.service<GreetingService>('plugin::unregistered.greeting').missing();
+// @ts-expect-error The UID is still checked against the service UID shape.
+strapi.service<GreetingService>('not-a-uid');
 const contextual: GreetingService = strapi.plugin('type-lab').service(dynamicService);
 const contextualDynamic: GreetingService = strapi.plugin(dynamicPlugin).service('greeting');
 const legacyPlugin: Plugin = strapi.plugin('type-lab');

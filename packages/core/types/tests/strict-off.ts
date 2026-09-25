@@ -131,6 +131,17 @@ type Controller = { custom: Core.ControllerHandler<string> };
 const service = strapi.plugin('legacy').service<Service>('example');
 const explicitController = strapi.plugin('legacy').controller<Controller>('example');
 service.custom() satisfies string;
+// Full UID lookups accept the explicit generic too; without it they keep the legacy types.
+strapi.service<Service>('plugin::unregistered.example').custom() satisfies string;
+strapi.controller<Controller>('plugin::unregistered.example')
+  .custom satisfies Core.ControllerHandler<string>;
+const fullUidService = strapi.service('plugin::unregistered.example');
+const fullUidController = strapi.controller('plugin::unregistered.example');
+declare const fullUidChecks: [
+  Expect<Equal<typeof fullUidService, Core.Service>>,
+  Expect<Equal<typeof fullUidController, Core.Controller>>,
+];
+fullUidChecks satisfies unknown;
 explicitController.custom satisfies Core.ControllerHandler<string>;
 const contextualService: Service = strapi.plugin('legacy').service('example');
 const contextualController: Controller = strapi.plugin('legacy').controller('example');
