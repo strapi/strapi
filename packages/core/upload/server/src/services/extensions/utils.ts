@@ -327,7 +327,7 @@ const unsignImage = async (image: File, cache: SignCache = createSignCache()) =>
   }
 
   const names = getQueryParamNames(signedUrl);
-  const { isUrlSigned, ...result }: File = {
+  const { isUrlSigned: _isUrlSigned, ...result }: File = {
     ...image,
     url: removeQueryParams(image.url ?? '', names),
   };
@@ -339,7 +339,7 @@ const unsignImage = async (image: File, cache: SignCache = createSignCache()) =>
           return [key, format];
         }
 
-        const { isUrlSigned: formatIsUrlSigned, ...unsignedFormat } = {
+        const { isUrlSigned: _formatIsUrlSigned, ...unsignedFormat } = {
           ...format,
           ...(format.url ? { url: removeQueryParams(format.url, names) } : {}),
         };
