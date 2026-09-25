@@ -134,5 +134,12 @@
     "description": "Modelize the data structure of your API. Create new fields and relations in just a minute. The files are automatically created and updated in your project.",
     "kind": "plugin",
     "required": true
+  },
+  "typesVersions": {
+    "*": {
+      "strapi-server": [
+        "dist/server/src/index.d.ts"
+      ]
+    }
   }
 }
