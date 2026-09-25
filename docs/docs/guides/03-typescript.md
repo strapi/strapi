@@ -107,6 +107,20 @@ Without `Settings.strict: true`, service, controller, config, and policy lookups
 previous types, even if the program loads package contracts or application overrides. Editors
 can still suggest registered names.
 
+Editors list registered names with either switch setting:
+
+- plugins and APIs with registered contracts, in `strapi.plugin(name)` and `strapi.api(name)`
+- full UIDs, in `strapi.service(uid)`, `strapi.controller(uid)`, and `strapi.policy(name)`
+- service and controller names, in `strapi.plugin(name)` and `strapi.api(name)` lookups
+- config namespaces, and plugin config keys
+- policy names in typed routes, including relative names for the router's namespace
+
+Dotted config paths are listed one level at a time: `strapi.config.get('plugin::sentry.')` lists
+the top-level keys of the contract, and `strapi.plugin('sentry').config('init.')` lists the keys
+of `init`. With the switch on, editors also list the keys of the plural maps and the config keys
+of registered policies. Suggestions change neither the accepted names nor the result types:
+`strapi.policy(name)` and API service and controller lookups keep their previous result types.
+
 ## Publishing a plugin's contracts
 
 Keep contracts in the package that implements them, under `server/src/types/`. Declare package
