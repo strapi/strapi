@@ -220,7 +220,7 @@
   "Settings.profile.form.section.experience.here": "qui",
   "Settings.profile.form.section.experience.interfaceLanguage": "Lingua dell'interfaccia",
   "Settings.profile.form.section.experience.interfaceLanguage.hint": "Verrà mostrata solo la tua interfaccia nella lingua scelta",
-  "Settings.profile.form.section.experience.interfaceLanguageHelp": "Le modifiche alle preferenze saranno applicate solo a te. Ulteriori informazioni sono disponibili {qui}.",
+  "Settings.profile.form.section.experience.interfaceLanguageHelp": "Le modifiche alle preferenze saranno applicate solo a te. Ulteriori informazioni sono disponibili {here}.",
   "Settings.profile.form.section.experience.mode.hint": "Mostra la tua interfaccia nella modalità scelta.",
   "Settings.profile.form.section.experience.mode.label": "Modalità dell'interfaccia",
   "Settings.profile.form.section.experience.mode.option-label": "Modalità {name}",
