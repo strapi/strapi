@@ -37,8 +37,6 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
 
   findDisplayedContentTypes() {
     return this.findAllContentTypes().filter(
-      // TODO
-      // @ts-expect-error should be resolved from data-mapper types
       ({ isDisplayed }: { isDisplayed: boolean }) => isDisplayed === true
     );
   },
@@ -52,7 +50,8 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
     return this.findAllContentTypes().filter(contentTypesUtils.isKind(kind));
   },
 
-  async findConfiguration(contentType: Struct.ContentTypeSchema) {
+  // Only the UID is read: callers outside the Content Manager pass `{ uid }`.
+  async findConfiguration(contentType: Pick<Struct.ContentTypeSchema, 'uid'>) {
     const configuration = await configurationService.getConfiguration(contentType.uid);
 
     return {
@@ -62,8 +61,8 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
   },
 
   async updateConfiguration(
-    contentType: Struct.ContentTypeSchema,
-    newConfiguration: ConfigurationUpdate
+    contentType: Pick<Struct.ContentTypeSchema, 'uid'>,
+    newConfiguration: Partial<ConfigurationUpdate>
   ) {
     await configurationService.setConfiguration(contentType.uid, newConfiguration);
 
