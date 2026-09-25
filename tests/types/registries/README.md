@@ -17,8 +17,10 @@ ordinary Strapi entry is checked separately to catch accidental activation.
 The built generator also produces imports for the real Sentry package. Consumer programs check
 that generation leaves strict mode off, the single opt-in enables Sentry's contracts, and
 regeneration removes its contracts when the plugin is no longer enabled.
-Language service checks preserve suggestions for config namespaces, plugin config keys, and
-plugin service names with either switch setting.
+Language service checks preserve suggestions with either switch setting: plugin and API names,
+full service, controller, and policy UIDs, plugin and API service and controller names, config
+namespaces and dotted config paths, route handlers, and route policy names. Dotted paths list one
+level at a time. With the switch on, they also cover the plural maps and policy config keys.
 
 The fixtures assign inferred lookup results to constants before checking them with `satisfies`.
 This prevents contextual inference from making a permissive generic lookup look correctly typed.

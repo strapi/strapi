@@ -386,11 +386,48 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
         getDefaultLibFileName: (settings) => ts.getDefaultLibFilePath(settings),
       });
       try {
-        for (const [prefix, expected] of [
+        const locations = [
+          ["app.plugin('", ['i18n', 'sentry', 'content-manager']],
+          ["app.api('", ['article']],
           ["app.config.get('", ['plugin::sentry']],
-          ["app.plugin('sentry').config('", ['dsn', 'sendMetadata', 'init']],
+          // Dotted paths list one level at a time, so large contracts stay out of the list.
+          [
+            "app.config.get('plugin::sentry.",
+            ['plugin::sentry.dsn', 'plugin::sentry.init'],
+            ['plugin::sentry.init.dsn'],
+          ],
+          ["app.config.get('plugin::sentry.init.", ['plugin::sentry.init.dsn']],
+          ["app.plugin('sentry').config('", ['dsn', 'sendMetadata', 'init'], ['init.dsn']],
+          ["app.plugin('sentry').config('init.", ['init.dsn', 'init.debug']],
           ["app.plugin('i18n').service('", ['locales']],
-        ]) {
+          ["app.plugin('i18n').controller('", ['locales', 'iso-locales']],
+          [
+            "app.service('",
+            ['plugin::i18n.locales', 'plugin::sentry.sentry', 'api::article.article'],
+          ],
+          ["app.controller('", ['plugin::i18n.locales', 'api::article.article']],
+          [
+            "app.policy('",
+            ['admin::isAuthenticatedAdmin', 'plugin::content-manager.hasPermissions'],
+          ],
+          ["app.api('article').service('", ['article']],
+          ["app.api('article').controller('", ['article']],
+          ["handler: '", ['locales.listLocales', 'plugin::i18n.locales.listLocales']],
+          ["policies: ['", ['admin::isAuthenticatedAdmin']],
+          [
+            "policies: [{ name: '",
+            ['admin::hasPermissions', 'plugin::content-manager.hasPermissions'],
+          ],
+          // The maps and policy config contracts are typed only with the switch on.
+          ...(strict
+            ? [
+                ["app.services['", ['plugin::i18n.locales', 'admin::auth']],
+                ['app.plugins.', ['i18n', 'sentry']],
+                ["hasPermissions', config: {", ['actions', 'hasAtLeastOne']],
+              ]
+            : []),
+        ];
+        for (const [prefix, expected, unexpected = []] of locations) {
           const offset = source.indexOf(prefix);
           assert.notEqual(offset, -1, `Missing completion location ${prefix}`);
           const completion = service.getCompletionsAtPosition(filename, offset + prefix.length, {});
@@ -400,6 +437,9 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
               names.includes(name),
               `${prefix} should suggest ${name}; got ${names.join(', ')}`
             );
+          }
+          for (const name of unexpected) {
+            assert.ok(names.includes(name) === false, `${prefix} should not suggest ${name}`);
           }
         }
       } finally {
