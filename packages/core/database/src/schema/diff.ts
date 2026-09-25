@@ -1,4 +1,4 @@
-import _ from 'lodash/fp';
+import _ from 'lodash';
 import type {
   Schema,
   Table,
@@ -90,7 +90,7 @@ export default (db: Database) => {
     const changes: string[] = [];
 
     // use xor to avoid differences in order
-    if (_.xor(oldIndex.columns, index.columns).length > 0) {
+    if (_.xor(index.columns, oldIndex.columns).length > 0) {
       changes.push('columns');
     }
 

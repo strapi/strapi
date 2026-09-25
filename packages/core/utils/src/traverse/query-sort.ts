@@ -1,17 +1,4 @@
-import {
-  curry,
-  isString,
-  isObject,
-  map,
-  trim,
-  split,
-  isEmpty,
-  flatten,
-  pipe,
-  isNil,
-  first,
-  cloneDeep,
-} from 'lodash/fp';
+import { curry, isString, isObject, trim, isEmpty, isNil, first, cloneDeep } from 'lodash';
 
 import { hasSort } from '../sort-query';
 import traverseFactory, { type Parent } from './factory';
@@ -42,7 +29,7 @@ const sort = traverseFactory()
       return Promise.all(
         sort
           .split(',')
-          .map(trim)
+          .map((value) => trim(value))
           .map((nestedSort) => recurse(visitor, options, nestedSort))
       ).then((res) => res.filter((part) => !isEmpty(part)).join(','));
     }
@@ -67,7 +54,7 @@ const sort = traverseFactory()
   )
   // Parse string values
   .parse(isString, () => {
-    const tokenize = pipe(split('.'), map(split(':')), flatten);
+    const tokenize = (value: string) => value.split('.').flatMap((part) => part.split(':'));
     const recompose = (parts: string[]) => {
       if (parts.length === 0) {
         return undefined;

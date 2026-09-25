@@ -1,5 +1,5 @@
 import type { Knex } from 'knex';
-import _ from 'lodash/fp';
+import _ from 'lodash';
 
 import type { Database } from '..';
 
@@ -136,36 +136,33 @@ const createQueryBuilder = (
   const meta = db.metadata.get(uid);
   const { tableName } = meta;
 
-  const state: State = _.defaults(
-    {
-      type: 'select',
-      select: [],
-      count: null,
-      max: null,
-      min: null,
-      first: false,
-      data: null,
-      where: [],
-      joins: [],
-      populate: null,
-      limit: null,
-      offset: null,
-      transaction: null,
-      forUpdate: false,
-      onConflict: null,
-      merge: null,
-      ignore: false,
-      orderBy: [],
-      groupBy: [],
-      increments: [],
-      decrements: [],
-      aliasCounter: 0,
-      filters: null,
-      search: null,
-      processed: false,
-    },
-    initialState
-  );
+  const state: State = _.defaults({}, initialState, {
+    type: 'select',
+    select: [],
+    count: null,
+    max: null,
+    min: null,
+    first: false,
+    data: null,
+    where: [],
+    joins: [],
+    populate: null,
+    limit: null,
+    offset: null,
+    transaction: null,
+    forUpdate: false,
+    onConflict: null,
+    merge: null,
+    ignore: false,
+    orderBy: [],
+    groupBy: [],
+    increments: [],
+    decrements: [],
+    aliasCounter: 0,
+    filters: null,
+    search: null,
+    processed: false,
+  });
 
   const getAlias = () => {
     const alias = `t${state.aliasCounter}`;
@@ -649,7 +646,7 @@ const createQueryBuilder = (
         case 'insert': {
           qb.insert(state.data);
 
-          if (db.dialect.useReturning() && _.has('id', meta.attributes)) {
+          if (db.dialect.useReturning() && _.has(meta.attributes, 'id')) {
             qb.returning('id');
           }
 

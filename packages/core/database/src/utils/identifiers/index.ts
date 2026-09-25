@@ -8,7 +8,7 @@
  * have access to the full length names, in particular for migration purposes, but also so that (in theory) the feature
  * could be disabled and stay compatible with v4 database structure.
  */
-import _, { isInteger, partition, snakeCase, sumBy } from 'lodash/fp';
+import _, { isInteger, partition, snakeCase, sumBy } from 'lodash';
 import { createHash } from './hash';
 import {
   IdentifiersOptions,
@@ -306,15 +306,15 @@ export class Identifiers {
 
     // Split tokens by compressibility
     const [compressible, incompressible] = partition(
-      (token: NameToken) => token.compressible,
-      nameTokens
+      nameTokens,
+      (token: NameToken) => token.compressible
     );
 
-    const totalIncompressibleLength = sumBy((token: NameToken) =>
+    const totalIncompressibleLength = sumBy(incompressible, (token: NameToken) =>
       token.compressible === false && token.shortName !== undefined
         ? token.shortName.length
         : token.name.length
-    )(incompressible);
+    );
     const totalSeparatorsLength = nameTokens.length * this.IDENTIFIER_SEPARATOR.length - 1;
     const available = maxLength - totalIncompressibleLength - totalSeparatorsLength;
     const availablePerToken = Math.floor(available / compressible.length);

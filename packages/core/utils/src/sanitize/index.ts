@@ -1,5 +1,4 @@
-import { CurriedFunction1 } from 'lodash';
-import { isArray, cloneDeep, omit, pick } from 'lodash/fp';
+import { CurriedFunction1, isArray, cloneDeep, omit, pick } from 'lodash';
 import type { z } from 'zod/v4';
 
 import { constants, getNonWritableAttributes } from '../content-types';
@@ -87,8 +86,8 @@ const createAPISanitizers = (opts: APIOptions) => {
 
     const transforms = [
       // Remove first level ID in inputs
-      omit(constants.ID_ATTRIBUTE),
-      omit(constants.DOC_ID_ATTRIBUTE),
+      (value: Record<string, unknown>) => omit(value, constants.ID_ATTRIBUTE),
+      (value: Record<string, unknown>) => omit(value, constants.DOC_ID_ATTRIBUTE),
       // Remove non-writable attributes
       traverseEntity(visitors.removeRestrictedFields(nonWritableAttributes), { schema, getModel }),
     ];
@@ -235,7 +234,7 @@ const createAPISanitizers = (opts: APIOptions) => {
 
     if (strictParams) {
       const allowedKeys = [...ALLOWED_QUERY_PARAM_KEYS, ...extraQueryKeys];
-      return pick(allowedKeys, sanitizedQuery) as Record<string, unknown>;
+      return pick(sanitizedQuery, allowedKeys) as Record<string, unknown>;
     }
 
     return sanitizedQuery;
