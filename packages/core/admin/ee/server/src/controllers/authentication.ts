@@ -9,6 +9,7 @@ import {
   AUDITED_EVENTS,
   getSsoSettingsChanges,
 } from '../../../../server/src/audit-logs/sso-settings';
+import type { EnterpriseServices } from '../../../../server/src/types';
 
 const toProviderDTO = (provider: object) => pick(provider, ['uid', 'displayName', 'icon']);
 const toProviderLoginOptionsDTO = (options: object) =>
@@ -23,7 +24,7 @@ const providerAuthenticationFlow = compose([
 
 export default {
   async getProviders(ctx: Context) {
-    const { providerRegistry } = strapi.service('admin::passport');
+    const { providerRegistry } = strapi.service<EnterpriseServices['passport']>('admin::passport');
 
     ctx.body = providerRegistry.getAll().map(toProviderDTO);
   },
@@ -67,7 +68,7 @@ export default {
       params: { provider: providerName },
     } = ctx;
 
-    const { providerRegistry } = strapi.service('admin::passport');
+    const { providerRegistry } = strapi.service<EnterpriseServices['passport']>('admin::passport');
 
     if (!providerRegistry.has(providerName)) {
       throw new ValidationError(`Invalid provider supplied: ${providerName}`);
