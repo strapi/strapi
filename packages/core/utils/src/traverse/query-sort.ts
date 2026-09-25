@@ -54,7 +54,8 @@ const sort = traverseFactory()
   )
   // Parse string values
   .parse(isString, () => {
-    const tokenize = (value: string) => value.split('.').flatMap((part) => part.split(':'));
+    const tokenize = (value: string | undefined) =>
+      (value ?? '').split('.').flatMap((part) => part.split(':'));
     const recompose = (parts: string[]) => {
       if (parts.length === 0) {
         return undefined;
