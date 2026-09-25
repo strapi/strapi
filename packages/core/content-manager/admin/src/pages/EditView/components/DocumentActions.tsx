@@ -39,6 +39,7 @@ import { CLONE_PATH, LIST_PATH } from '../../../router';
 import {
   useGetDraftRelationCountQuery,
   useLazyGetDocumentQuery,
+  useLazyGetDraftRelationCountQuery,
 } from '../../../services/documents';
 import { isBaseQueryError, buildValidParams } from '../../../utils/api';
 import { getIn, isObject } from '../../../utils/objects';
@@ -712,7 +713,8 @@ const PublishAction: DocumentActionComponent = ({
   const { publish, isLoading } = useDocumentActions();
   const onPreview = usePreviewContext('PublishAction', (state) => state.onPreview, false);
   const [fetchDraftDocument] = useLazyGetDocumentQuery();
-  const [countDraftRelations, { isError: isErrorDraftRelations }] = useGetDraftRelationCountQuery();
+  const [countDraftRelations, { isError: isErrorDraftRelations }] =
+    useLazyGetDraftRelationCountQuery();
   const [localDraftRelationCounts, setLocalDraftRelationCounts] =
     React.useState<DraftRelationCounts>(EMPTY_DRAFT_RELATION_COUNTS);
   const [serverDraftRelationCounts, setServerDraftRelationCounts] =
@@ -1696,13 +1698,35 @@ const DiscardAction: DocumentActionComponent = ({
   const { discard, isLoading } = useDocumentActions();
   const [{ query }] = useQueryParams();
   const params = React.useMemo(() => buildValidParams(query), [query]);
+  const { currentDocumentMeta } = useDocumentContext('DiscardAction');
+
+  // Same args as PublishAction so both share one cached request.
+  const {
+    data: draftRelationCountData,
+    isLoading: isLoadingDraftRelations,
+    isError: isErrorDraftRelations,
+  } = useGetDraftRelationCountQuery(
+    { collectionType, model, documentId, params: currentDocumentMeta.params },
+    { skip: !document?.documentId || !schema?.options?.draftAndPublish }
+  );
 
   if (!schema?.options?.draftAndPublish) {
     return null;
   }
 
+  const draftRelationCounts = normalizeDraftRelationCounts(draftRelationCountData);
+  // Discard rebuilds the draft from the published version, which never stores relations to
+  // unpublished entries, so these relations are lost.
+  const draftRelationCount =
+    draftRelationCounts.unpublishedRelations + draftRelationCounts.draftM2mLinks;
+  const hasDraftRelations = draftRelationCount > 0;
+
   return {
-    disabled: !canUpdate || activeTab === 'published' || document?.status !== 'modified',
+    disabled:
+      !canUpdate ||
+      isLoadingDraftRelations ||
+      activeTab === 'published' ||
+      document?.status !== 'modified',
     label: formatMessage({
       id: 'content-manager.actions.discard.label',
       defaultMessage: 'Discard changes',
@@ -1719,6 +1743,25 @@ const DiscardAction: DocumentActionComponent = ({
       content: (
         <Flex direction="column" gap={2}>
           <WarningCircle width="24px" height="24px" fill="danger600" />
+          {isErrorDraftRelations ? (
+            <Typography tag="p" variant="omega" textAlign="center">
+              {formatMessage({
+                id: 'content-manager.actions.discard.dialog.draft-relations-unknown',
+                defaultMessage: 'Any relations to unpublished entries will be removed.',
+              })}
+            </Typography>
+          ) : hasDraftRelations ? (
+            <Typography tag="p" variant="omega" textAlign="center">
+              {formatMessage(
+                {
+                  id: 'content-manager.actions.discard.dialog.draft-relations',
+                  defaultMessage:
+                    "{count, plural, one {# linked entry is} other {# linked entries are}} still in draft. Discarding will remove {count, plural, one {that relation} other {those relations}}, because unpublished entries aren't part of the published version.",
+                },
+                { count: draftRelationCount }
+              )}
+            </Typography>
+          ) : null}
           <Typography tag="p" variant="omega" textAlign="center">
             {formatMessage({
               id: 'content-manager.actions.discard.dialog.body',
@@ -1749,6 +1792,7 @@ export {
   DocumentActions,
   DocumentActionsMenu,
   DocumentActionButton,
+  DiscardAction,
   PublishAction,
   UpdateAction,
   DEFAULT_ACTIONS,
