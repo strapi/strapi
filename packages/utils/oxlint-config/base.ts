@@ -19,6 +19,7 @@ import type { OxlintConfig } from 'oxlint';
  */
 export const base = {
   plugins: ['typescript', 'react', 'import', 'unicorn'],
+  jsPlugins: ['./no-lodash-fp.js'],
   categories: {
     // Phase 1: correctness only (definitely-wrong code, lowest noise).
     // TODO @Nico Phase 2 — port the ESLint/Airbnb policy surface here
@@ -27,6 +28,19 @@ export const base = {
     correctness: 'error',
   },
   rules: {
+    'no-restricted-imports': [
+      'error',
+      {
+        patterns: [
+          {
+            group: ['lodash/fp', 'lodash/fp.js', 'lodash/fp/**'],
+            message: 'Use regular lodash methods or a focused helper instead.',
+          },
+        ],
+      },
+    ],
+    // Oxlint 1.72's native rule does not check require() or import() calls.
+    'strapi/no-lodash-fp-calls': 'error',
     // Yup `.when({ then, otherwise })` objects are not Promise thenables; the
     // rule cannot distinguish DSL keys from real thenable misuse.
     'unicorn/no-thenable': 'off',
