@@ -1,4 +1,5 @@
 import adminController from '../admin';
+import { getService } from '../../utils';
 
 describe('Admin Controller', () => {
   describe('getProjectType', () => {
@@ -71,7 +72,7 @@ describe('Admin Controller', () => {
         'packageJsonStrapi.telemetryDisabled',
         null
       );
-      expect(global.strapi.service('admin::user').exists).toHaveBeenCalled();
+      expect(getService('user').exists).toHaveBeenCalled();
       expect(result.data).toBeDefined();
       expect(result.data).toStrictEqual({
         uuid: 'foo',
