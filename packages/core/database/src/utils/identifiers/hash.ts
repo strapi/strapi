@@ -15,7 +15,7 @@
  */
 
 import crypto from 'node:crypto';
-import { isInteger } from 'lodash/fp';
+import { isInteger } from 'lodash';
 
 /**
  * Creates a hash of the given data with the specified string length as a string of hex characters

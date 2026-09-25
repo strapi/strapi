@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { isArray, castArray, isPlainObject } from 'lodash/fp';
+import { isArray, castArray, isPlainObject } from 'lodash';
 import type { Knex } from 'knex';
 
 import { isOperator, isOperatorOfType } from '@strapi/utils';
@@ -250,14 +250,14 @@ const applyOperator = (
     case '$in': {
       // @ts-ignore
       // TODO: fix in v5
-      qb.whereIn(column, isKnexQuery(value) ? value : castArray(value));
+      qb.whereIn(column, isKnexQuery(value) ? value : [...castArray(value)]);
       break;
     }
 
     case '$notIn': {
       // @ts-ignore
       // TODO: fix in v5
-      qb.whereNotIn(column, isKnexQuery(value) ? value : castArray(value));
+      qb.whereNotIn(column, isKnexQuery(value) ? value : [...castArray(value)]);
       break;
     }
 

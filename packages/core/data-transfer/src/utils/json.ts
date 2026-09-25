@@ -1,4 +1,4 @@
-import { isArray, isObject, zip, isEqual, uniq } from 'lodash/fp';
+import { isArray, isObject, zip, isEqual, uniq } from 'lodash';
 
 const createContext = (): Context => ({ path: [] });
 

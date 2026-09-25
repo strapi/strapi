@@ -1,4 +1,4 @@
-import { isArray, isObject } from 'lodash/fp';
+import { isArray, isObject } from 'lodash';
 import * as contentTypeUtils from '../../content-types';
 import type { Model, RelationOrderingOptions } from '../../types';
 import type { Visitor } from '../../traverse/factory';

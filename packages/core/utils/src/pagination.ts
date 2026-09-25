@@ -1,4 +1,4 @@
-import { merge, pipe, omit, isNil } from 'lodash/fp';
+import { merge, flow, omit, isNil } from 'lodash';
 import { PaginationError } from './errors';
 
 interface PaginationArgs {
@@ -70,16 +70,16 @@ const withDefaultPagination = <T extends Partial<PaginationArgs>>(
   args: T,
   { defaults = {}, maxLimit = -1 } = {}
 ) => {
-  const defaultValues = merge(STRAPI_DEFAULTS, defaults);
+  const defaultValues = merge({}, STRAPI_DEFAULTS, defaults);
 
   const usePagePagination = !isNil(args.page) || !isNil(args.pageSize);
   const useOffsetPagination = !isNil(args.start) || !isNil(args.limit);
 
-  const ensureValidValues = pipe(ensureMinValues, ensureMaxValues(maxLimit));
+  const ensureValidValues = flow(ensureMinValues, ensureMaxValues(maxLimit));
 
   // If there is no pagination attribute, don't modify the payload
   if (!usePagePagination && !useOffsetPagination) {
-    return merge(args, ensureValidValues(defaultValues.offset));
+    return merge({}, args, ensureValidValues(defaultValues.offset));
   }
 
   // If there is page & offset pagination attributes, throw an error
@@ -94,7 +94,7 @@ const withDefaultPagination = <T extends Partial<PaginationArgs>>(
 
   // Start / Limit
   if (useOffsetPagination) {
-    const { start, limit } = merge(defaultValues.offset, args);
+    const { start, limit } = merge({}, defaultValues.offset, args);
 
     Object.assign(pagination, { start, limit });
   }
@@ -102,9 +102,9 @@ const withDefaultPagination = <T extends Partial<PaginationArgs>>(
   // Page / PageSize
   if (usePagePagination) {
     const pageArgs = isNil(args.pageSize)
-      ? omit(['pageSize'], args)
+      ? omit(args, ['pageSize'])
       : { ...args, pageSize: Math.max(1, args.pageSize) };
-    const { page, pageSize } = merge(defaultValues.page, pageArgs);
+    const { page, pageSize } = merge({}, defaultValues.page, pageArgs);
     const pageLimit = ensureValidValues({ start: 0, limit: pageSize }).limit;
 
     Object.assign(pagination, {
@@ -116,14 +116,7 @@ const withDefaultPagination = <T extends Partial<PaginationArgs>>(
   // Handle -1 limit
   Object.assign(pagination, withNoLimit(pagination, maxLimit));
 
-  const replacePaginationAttributes = pipe(
-    // Remove pagination attributes
-    omit(paginationAttributes),
-    // Merge the object with the new pagination + ensure minimum & maximum values
-    merge(ensureValidValues(pagination))
-  );
-
-  return replacePaginationAttributes(args);
+  return merge({}, ensureValidValues(pagination), omit(args, paginationAttributes));
 };
 
 /**

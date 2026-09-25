@@ -1,8 +1,10 @@
-import _ from 'lodash/fp';
+import _ from 'lodash';
 
 const PERMISSION_FIELDS = ['action', 'subject', 'properties', 'conditions'] as const;
 
-const sanitizePermissionFields = _.pick(PERMISSION_FIELDS);
+/** Retains only fields supported by the permission domain. */
+const sanitizePermissionFields = <T extends Partial<Permission>>(permission: T) =>
+  _.pick(permission, PERMISSION_FIELDS);
 
 export interface Permission {
   action: string;
@@ -15,7 +17,9 @@ export interface Permission {
 /**
  * Creates a permission with default values for optional properties
  */
-const getDefaultPermission = (): Pick<Permission, 'conditions' | 'properties' | 'subject'> => ({
+const getDefaultPermission = (): Required<
+  Pick<Permission, 'conditions' | 'properties' | 'subject'>
+> => ({
   conditions: [],
   properties: {},
   subject: null,
@@ -26,7 +30,8 @@ const getDefaultPermission = (): Pick<Permission, 'conditions' | 'properties' | 
  *
  * @param {object} attributes
  */
-const create = _.pipe(_.pick(PERMISSION_FIELDS), _.merge(getDefaultPermission()));
+const create = <T extends Partial<Permission>>(attributes: T) =>
+  _.merge(getDefaultPermission(), sanitizePermissionFields(attributes));
 
 /**
  * Add a condition to a permission
@@ -38,7 +43,7 @@ const addCondition = _.curry((condition: string, permission: Permission): Permis
     ? _.uniq(conditions.concat(condition))
     : [condition];
 
-  return _.set('conditions', newConditions, permission);
+  return { ...permission, conditions: newConditions };
 });
 
 /**
@@ -48,7 +53,7 @@ const getProperty = _.curry(
   <T extends keyof Permission['properties']>(
     property: T,
     permission: Permission
-  ): Permission['properties'][T] => _.get(`properties.${property}`, permission)
+  ): Permission['properties'][T] => _.get(permission, `properties.${property}`)
 );
 
 export { create, sanitizePermissionFields, addCondition, getProperty };

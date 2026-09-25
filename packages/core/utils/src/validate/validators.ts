@@ -1,4 +1,4 @@
-import { isEmpty, isNil, isObject, trim } from 'lodash/fp';
+import { isEmpty, isNil, isObject, trim } from 'lodash';
 
 import { pipe as pipeAsync } from '../async';
 import {

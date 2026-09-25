@@ -1,4 +1,4 @@
-import _ from 'lodash/fp';
+import _ from 'lodash';
 import { hasSort } from '@strapi/utils';
 
 import { fromRow } from '../transform';
@@ -27,7 +27,7 @@ const getJoinTableOrderBy = (
     return undefined;
   }
 
-  return _.mapValues((v) => populateValue.ordering || v, joinTable.orderBy);
+  return _.mapValues(joinTable.orderBy, (v) => populateValue.ordering || v);
 };
 
 type Context = {
@@ -93,7 +93,7 @@ const XtoOne = async (
       .where({ [referencedColumnName]: referencedValues })
       .execute<Row[]>({ mapResults: false });
 
-    const map = _.groupBy<Row[]>(referencedColumnName)(rows);
+    const map = _.groupBy(rows, referencedColumnName);
 
     results.forEach((result) => {
       result[attributeName] = fromTargetRow(_.first(map[result[joinColumnName] as string]));
@@ -179,7 +179,7 @@ const XtoOne = async (
       .where({ [joinColAlias]: referencedValues })
       .execute<Row[]>({ mapResults: false });
 
-    const map = _.groupBy<Row>(joinColRenameAs)(rows);
+    const map = _.groupBy(rows, joinColRenameAs);
 
     results.forEach((result) => {
       result[attributeName] = fromTargetRow(_.first(map[result[referencedColumnName] as string]));
@@ -221,7 +221,7 @@ const oneToMany = async (input: InputWithTarget<Relation.OneToMany>, ctx: Contex
       })
       .execute<Row[]>({ mapResults: false });
 
-    const map = _.groupBy<Row>(referencedColumnName)(rows);
+    const map = _.groupBy(rows, referencedColumnName);
 
     results.forEach((result) => {
       result[attributeName] = fromTargetRow(map[result[joinColumnName] as string] || []);
@@ -306,7 +306,7 @@ const oneToMany = async (input: InputWithTarget<Relation.OneToMany>, ctx: Contex
       .where({ [joinColAlias]: referencedValues })
       .execute<Row[]>({ mapResults: false });
 
-    const map = _.groupBy<Row>(joinColRenameAs)(rows);
+    const map = _.groupBy(rows, joinColRenameAs);
 
     results.forEach((r) => {
       r[attributeName] = fromTargetRow(map[r[referencedColumnName] as string] || []);
@@ -395,7 +395,7 @@ const manyToMany = async (input: InputWithTarget<Relation.ManyToMany>, ctx: Cont
     .where({ [joinColAlias]: referencedValues })
     .execute<Row[]>({ mapResults: false });
 
-  const map = _.groupBy<Row>(joinColRenameAs)(rows);
+  const map = _.groupBy(rows, joinColRenameAs);
 
   results.forEach((result) => {
     result[attributeName] = fromTargetRow(map[result[referencedColumnName] as string] || []);
@@ -435,9 +435,9 @@ const morphX = async (
       .init(populateValue)
       // .addSelect(`${qb.alias}.${idColumn.referencedColumn}`)
       .where({ [idColumn.name]: referencedValues, [typeColumn.name]: uid })
-      .execute<Row>({ mapResults: false });
+      .execute<Row[]>({ mapResults: false });
 
-    const map = _.groupBy<Row>(idColumn.name)(rows);
+    const map = _.groupBy(rows, idColumn.name);
 
     results.forEach((result) => {
       const matchingRows = map[result[idColumn.referencedColumn] as string];
@@ -493,7 +493,7 @@ const morphX = async (
       })
       .execute<Row[]>({ mapResults: false });
 
-    const map = _.groupBy<Row>(idColumn.name)(rows);
+    const map = _.groupBy(rows, idColumn.name);
 
     results.forEach((result) => {
       const matchingRows = map[result[idColumn.referencedColumn] as string];
@@ -541,7 +541,7 @@ const morphToMany = async (input: Input<Relation.MorphToMany>, ctx: Context) => 
     : joinRowsRaw;
 
   if (isCount) {
-    const joinMap = _.groupBy(joinColumn.name, joinRows);
+    const joinMap = _.groupBy(joinRows, joinColumn.name);
 
     results.forEach((result) => {
       result[attributeName] = {
@@ -552,7 +552,7 @@ const morphToMany = async (input: Input<Relation.MorphToMany>, ctx: Context) => 
     return;
   }
 
-  const joinMap = _.groupBy(joinColumn.name, joinRows);
+  const joinMap = _.groupBy(joinRows, joinColumn.name);
 
   const idsByType = joinRows.reduce<Record<string, ID[]>>((acc, result) => {
     const idValue = result[morphColumn.idColumn.name] as ID;
@@ -562,7 +562,7 @@ const morphToMany = async (input: Input<Relation.MorphToMany>, ctx: Context) => 
       return acc;
     }
 
-    if (!_.has(typeValue, acc)) {
+    if (!_.has(acc, typeValue)) {
       acc[typeValue] = [];
     }
 
@@ -593,7 +593,7 @@ const morphToMany = async (input: Input<Relation.MorphToMany>, ctx: Context) => 
         .where({ [idColumn.referencedColumn]: ids })
         .execute<Row[]>({ mapResults: false });
 
-      map[type] = _.groupBy<Row>(idColumn.referencedColumn)(rows);
+      map[type] = _.groupBy(rows, idColumn.referencedColumn);
     })
   );
 
@@ -686,7 +686,7 @@ const morphToOne = async (input: Input<Relation.MorphToOne>, ctx: Context) => {
       .where({ [idColumn.referencedColumn]: ids })
       .execute<Row[]>({ mapResults: false });
 
-    map[type] = _.groupBy<Row>(idColumn.referencedColumn)(rows);
+    map[type] = _.groupBy(rows, idColumn.referencedColumn);
   }
 
   results.forEach((result) => {
@@ -726,7 +726,7 @@ const pickPopulateParams = (populate: Record<string, unknown>) => {
     fieldsToPick.push('limit', 'offset');
   }
 
-  return _.pick(fieldsToPick, populate);
+  return _.pick(populate, fieldsToPick);
 };
 
 const getPopulateValue = (populate: Record<string, any>, filters: Record<string, any>) => {
@@ -736,16 +736,13 @@ const getPopulateValue = (populate: Record<string, any>, filters: Record<string,
   };
 
   if ('on' in populateValue) {
-    populateValue.on = _.mapValues(
-      (value) => {
-        if (_.isPlainObject(value)) {
-          value.filters = filters;
-        }
+    populateValue.on = _.mapValues(populateValue.on as Record<string, any>, (value) => {
+      if (_.isPlainObject(value)) {
+        value.filters = filters;
+      }
 
-        return value;
-      },
-      populateValue.on as Record<string, any>
-    );
+      return value;
+    });
   }
 
   return populateValue;

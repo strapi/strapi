@@ -3,7 +3,7 @@ import type { Readable } from 'stream';
 import { PassThrough } from 'stream';
 
 import fs from 'fs-extra';
-import { isEmpty, keyBy } from 'lodash/fp';
+import { isEmpty, keyBy } from 'lodash';
 import { chain } from 'stream-chain';
 import { parser } from 'stream-json/jsonl/Parser';
 import type { Struct } from '@strapi/types';
@@ -140,7 +140,7 @@ class LocalDirectorySourceProvider implements ISourceProvider {
       throw new ProviderInitializationError('Could not load schemas from Strapi data export.');
     }
 
-    const schemas = keyBy('uid', schemaCollection);
+    const schemas = keyBy(schemaCollection, 'uid');
     return utils.schema.schemasToValidJSON(schemas);
   }
 

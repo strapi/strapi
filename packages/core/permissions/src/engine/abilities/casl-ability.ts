@@ -1,7 +1,7 @@
 import * as sift from 'sift';
 import qs from 'qs';
 import { AbilityBuilder, Ability } from '@casl/ability';
-import { pick, isNil, isObject } from 'lodash/fp';
+import { pick, isNil, isObject } from 'lodash';
 import type { ParametrizedAction, PermissionRule } from '../../types';
 
 export interface CustomAbilityBuilder {
@@ -25,7 +25,7 @@ const allowedOperations = [
   '$elemMatch',
 ] as const;
 
-const operations = pick(allowedOperations, sift);
+const operations = pick(sift, allowedOperations);
 
 /**
  * Match an RBAC condition query against an entity in memory with sift.

@@ -1,4 +1,4 @@
-import { isArray, isObject } from 'lodash/fp';
+import { isArray, isObject } from 'lodash';
 import * as contentTypeUtils from '../../content-types';
 import { throwInvalidKey } from '../utils';
 import type { Visitor } from '../../traverse/factory';

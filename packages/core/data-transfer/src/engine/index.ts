@@ -4,7 +4,7 @@ import { extname } from 'path';
 import { EOL } from 'os';
 import type Chain from 'stream-chain';
 import { chain } from 'stream-chain';
-import { isEmpty, uniq, last, isNumber, set, pick } from 'lodash/fp';
+import { isEmpty, uniq, last, isNumber, pick } from 'lodash';
 import { diff as semverDiff } from 'semver';
 
 import type { Struct, Utils } from '@strapi/types';
@@ -1006,7 +1006,7 @@ class TransferEngine<
           const { type, data } = entity;
           const attributes = schemas[type].attributes;
           const attributesToKeep = Object.keys(attributes).concat('documentId');
-          const updatedEntity = set('data', pick(attributesToKeep, data), entity);
+          const updatedEntity = { ...entity, data: pick(data, attributesToKeep) };
 
           callback(null, updatedEntity);
         },

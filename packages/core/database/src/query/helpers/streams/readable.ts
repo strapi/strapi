@@ -1,5 +1,5 @@
 import { Readable } from 'stream';
-import { isFinite } from 'lodash/fp';
+import { isFinite } from 'lodash';
 import type { Knex } from 'knex';
 import type { QueryBuilder } from '../../query-builder';
 import type { Database } from '../../..';

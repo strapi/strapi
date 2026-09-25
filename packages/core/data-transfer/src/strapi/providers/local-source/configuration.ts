@@ -1,6 +1,5 @@
 import { Readable } from 'stream';
 import { chain } from 'stream-chain';
-import { set } from 'lodash/fp';
 import type { Core } from '@strapi/types';
 
 import type { IConfiguration } from '../../../types';
@@ -15,7 +14,7 @@ export const createConfigurationStream = (strapi: Core.Strapi): Readable => {
       // Core Store
       const coreStoreStream = chain([
         strapi.db.queryBuilder('strapi::core-store').stream(),
-        (data) => set('value', JSON.parse(data.value), data),
+        (data) => ({ ...data, value: JSON.parse(data.value) }),
         wrapConfigurationItem('core-store'),
       ]);
 

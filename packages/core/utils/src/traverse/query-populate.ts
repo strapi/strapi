@@ -3,16 +3,14 @@ import {
   isString,
   isArray,
   isEmpty,
-  split,
   isObject,
   trim,
   constant,
   isNil,
   identity,
   cloneDeep,
-  join,
   first,
-} from 'lodash/fp';
+} from 'lodash';
 
 import traverseFactory, { type Parent } from './factory';
 import { Attribute } from '../types';
@@ -129,8 +127,8 @@ const populate = traverseFactory()
 
   // Parse string values
   .parse(isString, () => {
-    const tokenize = split('.');
-    const recompose = join('.');
+    const tokenize = (value: string) => value.split('.');
+    const recompose = (parts: string[]) => parts.join('.');
 
     return {
       transform: trim,

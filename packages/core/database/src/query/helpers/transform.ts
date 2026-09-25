@@ -1,4 +1,4 @@
-import _ from 'lodash/fp';
+import _ from 'lodash';
 
 import * as types from '../../utils/types';
 import { createField } from '../../fields';
@@ -18,9 +18,7 @@ const fromSingleRow = (meta: Meta, row: Row): Rec => {
   const obj: Rec = {};
 
   for (const column in row) {
-    // `_.has` from lodash/fp treats its first argument as a property *path*, so every
-    // column of every row was run through lodash's path parser before this simple
-    // membership test. Column names are literal keys, never paths.
+    // Column names are literal keys, so test membership without parsing them as property paths.
     if (!Object.prototype.hasOwnProperty.call(meta.columnToAttribute, column)) {
       continue;
     }

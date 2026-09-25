@@ -5,8 +5,7 @@
  * You can read more here: https://docs.strapi.io/developer-docs/latest/developer-resources/database-apis-reference/rest-api.html#filters
  */
 
-import _ from 'lodash';
-import {
+import _, {
   cloneDeep,
   get,
   isArray,
@@ -16,7 +15,7 @@ import {
   isObject,
   isString,
   toNumber,
-} from 'lodash/fp';
+} from 'lodash';
 import {
   constants,
   hasDraftAndPublish,
@@ -734,7 +733,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
     // Here, `key` can either be an operator or an attribute name
     for (const [key, value] of Object.entries(filters)) {
-      const attribute = get(key, schema?.attributes);
+      const attribute = get(schema?.attributes, key);
       const validKey = isOperator(key) || isValidSchemaAttribute(key, schema);
 
       if (!validKey) {

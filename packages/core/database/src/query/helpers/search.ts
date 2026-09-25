@@ -1,4 +1,4 @@
-import _ from 'lodash/fp';
+import _ from 'lodash';
 import type { Knex } from 'knex';
 
 import * as types from '../../utils/types';

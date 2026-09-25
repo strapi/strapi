@@ -1,5 +1,5 @@
 import type { Knex } from 'knex';
-import { clone, isNil } from 'lodash/fp';
+import { clone, isNil } from 'lodash';
 import type { Core, UID } from '@strapi/types';
 
 import { ILink } from '../../types';
