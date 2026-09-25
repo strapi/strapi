@@ -32,15 +32,19 @@ const exampleMiddlewaresConfig = [
   },
 ];
 
+const mockProviderMethods = {
+  upload: jest.fn(),
+  uploadStream: jest.fn(),
+  replace: jest.fn(),
+  replaceStream: jest.fn(),
+  delete: jest.fn(),
+};
+
 jest.mock('@strapi/provider-upload-local', () => ({
   init() {
     global.strapi.config.set('middlewares', exampleMiddlewaresConfig);
 
-    return {
-      uploadStream: jest.fn(),
-      upload: jest.fn(),
-      delete: jest.fn(),
-    };
+    return mockProviderMethods;
   },
 }));
 
