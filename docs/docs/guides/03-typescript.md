@@ -76,6 +76,25 @@ const items = strapi.controller<ItemsController>('api::item.item');
 Dynamic names, such as a `string` variable or a template literal type like
 `` `plugin::${string}.greeting` ``, cannot be validated and retain the permissive lookup types.
 
+The plural accessors resolve registered keys through the same contracts: `strapi.services`,
+`strapi.controllers`, and `strapi.policies` are keyed by UID, and a plugin's or API's `services`,
+`controllers`, and `policies` maps are keyed by name. `strapi.plugins` and `strapi.apis` resolve a
+name with registered contracts to the same type as `strapi.plugin(name)` and `strapi.api(name)`:
+
+```ts
+strapi.services['plugin::i18n.locales']; // same contract as strapi.service('plugin::i18n.locales')
+strapi.plugin('i18n').services.locales; // same contract
+strapi.plugins.i18n.controllers.locales; // same contract as strapi.plugin('i18n').controller('locales')
+strapi.policies['plugin::content-manager.hasPermissions']; // Policy with its registered config
+```
+
+These maps stay open: any other key, literal or dynamic, keeps the legacy `Service`, `Controller`,
+`Policy`, `Plugin`, or `Module` type. An index signature cannot close literal keys while keeping
+dynamic keys open, and code routinely iterates or indexes these maps with computed names. Registered
+keys are declared properties, so `noUncheckedIndexedAccess` adds `undefined` only to other keys.
+Iterated values, as from `Object.values(strapi.services)`, include every registered contract. Use
+the singular lookups to reject unregistered literal names.
+
 Config lookups stay open: core namespaces such as `server`, `admin`, and `api` have no
 registered contract, and unregistered namespaces or unknown paths resolve to the generic
 fallback, `unknown` by default. Explicit generic arguments on config getters remain available.
