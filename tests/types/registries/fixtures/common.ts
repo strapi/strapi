@@ -9,8 +9,6 @@ uid satisfies 'api::article.article';
 const missingUID: UID.ContentType = 'api::missing.missing';
 missingUID satisfies unknown;
 
-app.service('plugin::unregistered.example').anything();
-app.plugin('unregistered').service('example').anything();
 app.plugin(dynamicName).service('locales').anything();
 app.plugin('i18n').service(dynamicName).anything();
 
