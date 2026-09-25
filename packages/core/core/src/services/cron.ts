@@ -1,4 +1,4 @@
-import { isFunction } from 'lodash/fp';
+import { isFunction } from 'lodash';
 import type { Modules } from '@strapi/types';
 import type { Cron } from 'croner';
 

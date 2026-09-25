@@ -1,12 +1,12 @@
 'use strict';
 
-const { omit } = require('lodash/fp');
+const { omit } = require('lodash');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
 const { createUtils } = require('api-tests/utils');
 
-const omitTimestamps = omit(['updatedAt', 'createdAt']);
-const omitRegistrationToken = omit(['registrationToken']);
+const omitTimestamps = (value) => omit(value, ['updatedAt', 'createdAt']);
+const omitRegistrationToken = (value) => omit(value, ['registrationToken']);
 
 /**
  * == Test Suite Overview ==

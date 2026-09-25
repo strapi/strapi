@@ -1,5 +1,5 @@
 import { AxiosError } from 'axios';
-import { defaults } from 'lodash/fp';
+import { defaults } from 'lodash';
 import {
   CLIContext,
   CloudApiService,
@@ -132,11 +132,10 @@ export default async (ctx: CLIContext) => {
     ...getDefaultsFromQuestions(questions),
   };
 
-  const projectAnswersDefaulted = defaults(defaultValues);
   const { default: inquirer } = await import('inquirer');
   const projectAnswers = await inquirer.prompt<ProjectAnswers>(questions);
 
-  const projectInput: ProjectInput = projectAnswersDefaulted(projectAnswers);
+  const projectInput: ProjectInput = defaults({}, projectAnswers, defaultValues);
 
   try {
     return await createProject(ctx, cloudApi, projectInput, token, config);

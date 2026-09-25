@@ -1,4 +1,4 @@
-import { isNil, isObject } from 'lodash/fp';
+import { isNil, isObject } from 'lodash';
 
 import { relations } from '@strapi/utils';
 

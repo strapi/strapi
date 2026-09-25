@@ -1,5 +1,5 @@
 /* eslint-disable node/no-callback-literal */
-import { isObject, curry, isNil } from 'lodash/fp';
+import { curry, isNil, isObject } from 'lodash';
 
 import { traverseEntity, async } from '@strapi/utils';
 

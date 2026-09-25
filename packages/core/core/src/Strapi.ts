@@ -1,7 +1,6 @@
 import { bootstrap as bootstrapGlobalAgent } from 'global-agent';
 import path from 'path';
-import _ from 'lodash';
-import { isFunction } from 'lodash/fp';
+import _, { isFunction } from 'lodash';
 import { Logger, createLogger } from '@strapi/logger';
 import { Database } from '@strapi/database';
 
