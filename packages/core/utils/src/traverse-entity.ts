@@ -1,4 +1,4 @@
-import { clone, isObject, isArray, isNil, curry } from 'lodash/fp';
+import { clone, isObject, isArray, isNil, curry } from 'lodash';
 
 import type { Attribute, AnyAttribute, Model, Data } from './types';
 import { isRelationalAttribute, isMediaAttribute } from './content-types';

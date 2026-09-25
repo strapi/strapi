@@ -1,4 +1,4 @@
-import { isArray, isNil, isString, toPath } from 'lodash/fp';
+import { isArray, isNil, isString, toPath } from 'lodash';
 import type { Visitor } from '../../traverse/factory';
 
 export default (allowedFields: string[] | null = null): Visitor =>

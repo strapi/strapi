@@ -1,4 +1,4 @@
-import { curry, isObject, isEmpty, isArray, isNil, cloneDeep, omit } from 'lodash/fp';
+import { curry, isObject, isEmpty, isArray, isNil, cloneDeep, omit } from 'lodash';
 
 import { isScalarAttribute } from '../content-types';
 import { isOperator } from '../operators';
@@ -42,7 +42,7 @@ const filters = traverseFactory()
     transform: cloneDeep,
 
     remove(key, data) {
-      return omit(key, data);
+      return omit(data, key);
     },
 
     set(key, value, data) {

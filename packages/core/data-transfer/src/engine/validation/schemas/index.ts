@@ -1,5 +1,5 @@
 import type { Struct } from '@strapi/types';
-import { isArray, isObject, reject } from 'lodash/fp';
+import { isArray, isObject, reject } from 'lodash';
 import type { Diff } from '../../../utils/json';
 import * as utils from '../../../utils';
 
@@ -47,7 +47,7 @@ const strategies = {
   // - the property within a content type is an ignorable one
   // - those that are (not transferrable and optionally available), for example EE features such as audit logs
   strict(diffs: Diff[]) {
-    return reject(isIgnorableStrict, diffs);
+    return reject(diffs, isIgnorableStrict);
   },
 };
 

@@ -19,7 +19,7 @@ import {
   pick,
   uniqBy,
   uniqWith,
-} from 'lodash/fp';
+} from 'lodash';
 
 import * as types from '../utils/types';
 import { createField } from '../fields';
@@ -126,7 +126,7 @@ const toIdArray = (
       return datum;
     });
 
-  return uniqWith(isEqual, array);
+  return uniqWith(array, isEqual);
 };
 
 type ScalarAssoc = string | number | null;
@@ -270,7 +270,7 @@ const processData = (
         }
 
         if (!isUndefined(value)) {
-          if (!has('id', value) || !has(typeField, value)) {
+          if (!has(value, 'id') || !has(value, typeField)) {
             throw new Error(`Expects properties ${typeField} an id to make a morph association`);
           }
 
@@ -317,7 +317,7 @@ export const createEntityManager = (db: Database): EntityManager => {
       const states = await db.lifecycles.run('beforeCount', uid, { params });
 
       const res = await this.createQueryBuilder(uid)
-        .init(pick(['_q', 'where', 'filters'], params))
+        .init(pick(params, ['_q', 'where', 'filters']))
         .count()
         .first()
         .execute<{ count: number }>();
@@ -549,7 +549,7 @@ export const createEntityManager = (db: Database): EntityManager => {
       // limit, offset, orderBy, populate, etc. must be ignored: populate throws on delete results,
       // and pagination keys can make deleteMany diverge from findMany or delete an unexpected slice.
       const deletedRows = await this.createQueryBuilder(uid)
-        .init(pick(['_q', 'where', 'filters'], params))
+        .init(pick(params, ['_q', 'where', 'filters']))
         .delete()
         .execute<number>({ mapResults: false });
 
@@ -570,7 +570,7 @@ export const createEntityManager = (db: Database): EntityManager => {
       for (const attributeName of Object.keys(attributes)) {
         const attribute = attributes[attributeName];
 
-        const isValidLink = has(attributeName, data) && !isNil(data[attributeName]);
+        const isValidLink = has(data, attributeName) && !isNil(data[attributeName]);
 
         if (attribute.type !== 'relation' || !isValidLink) {
           continue;
@@ -756,7 +756,7 @@ export const createEntityManager = (db: Database): EntityManager => {
           }
 
           // prepare new relations to insert
-          const insert = uniqBy('id', relsToAdd).map((data) => {
+          const insert = uniqBy(relsToAdd, 'id').map((data) => {
             return {
               [joinColumn.name]: id,
               [inverseJoinColumn.name]: data.id,
@@ -831,7 +831,7 @@ export const createEntityManager = (db: Database): EntityManager => {
       for (const attributeName of Object.keys(attributes)) {
         const attribute = attributes[attributeName];
 
-        if (attribute.type !== 'relation' || !has(attributeName, data)) {
+        if (attribute.type !== 'relation' || !has(data, attributeName)) {
           continue;
         }
         const cleanRelationData = toAssocs(data[attributeName]);
@@ -1196,7 +1196,7 @@ export const createEntityManager = (db: Database): EntityManager => {
           if (isNull(cleanRelationData.set)) {
             await deleteRelations({ id, attribute, db, relIdsToDelete: 'all', transaction: trx });
           } else {
-            const isPartialUpdate = !has('set', cleanRelationData);
+            const isPartialUpdate = !has(cleanRelationData, 'set');
             let relIdsToaddOrMove: ID[];
 
             if (isPartialUpdate) {
@@ -1211,9 +1211,9 @@ export const createEntityManager = (db: Database): EntityManager => {
               // fails because connect items carry extra fields like `position`).
               const relIdsToDelete = toIds(
                 differenceWith(
-                  (a: { id: ID }, b: { id: ID }) => a.id === b.id,
                   cleanRelationData.disconnect,
-                  cleanRelationData.connect ?? []
+                  cleanRelationData.connect ?? [],
+                  (a: { id: ID }, b: { id: ID }) => a.id === b.id
                 )
               );
 
@@ -1372,7 +1372,7 @@ export const createEntityManager = (db: Database): EntityManager => {
               }
 
               // prepare relations to insert
-              const insert = uniqBy('id', cleanRelationData.connect).map((relToAdd) => ({
+              const insert = uniqBy(cleanRelationData.connect, 'id').map((relToAdd) => ({
                 [joinColumn.name]: id,
                 [inverseJoinColumn.name]: relToAdd.id,
                 ...joinTable.on,
@@ -1435,7 +1435,7 @@ export const createEntityManager = (db: Database): EntityManager => {
               if (hasInverseOrderColumn(attribute)) {
                 const nonExistingRelsIds: ID[] = difference(
                   relIdsToaddOrMove,
-                  map(inverseJoinColumn.name, currentMovingRels)
+                  map(currentMovingRels, inverseJoinColumn.name)
                 );
 
                 const maxResults = await db
@@ -1489,7 +1489,7 @@ export const createEntityManager = (db: Database): EntityManager => {
                 continue;
               }
 
-              const insert = uniqBy('id', cleanRelationData.set).map((relToAdd) => ({
+              const insert = uniqBy(cleanRelationData.set, 'id').map((relToAdd) => ({
                 [joinColumn.name]: id,
                 [inverseJoinColumn.name]: relToAdd.id,
                 ...joinTable.on,
@@ -1515,7 +1515,7 @@ export const createEntityManager = (db: Database): EntityManager => {
                   .transacting(trx)
                   .execute<Array<Record<string, ID>>>();
 
-                const inverseRelsIds = map(inverseJoinColumn.name, existingRels);
+                const inverseRelsIds = map(existingRels, inverseJoinColumn.name);
 
                 const nonExistingRelsIds = difference(relIdsToaddOrMove, inverseRelsIds);
 
@@ -1736,7 +1736,7 @@ export const createEntityManager = (db: Database): EntityManager => {
       }
 
       if (Array.isArray(fields)) {
-        return pick(fields, entry);
+        return pick(entry, fields);
       }
 
       return entry[fields];
