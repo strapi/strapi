@@ -10,7 +10,7 @@ const TEMP_KEY_DIGITS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrs
  * Returns the main display field for a model (e.g. title, name).
  * Uses content-manager configuration when available, falls back to first string attribute or 'id'.
  */
-const getMainField = async (targetUid: UID.Schema): Promise<string> => {
+const getMainField = async (targetUid: UID.ContentType): Promise<string> => {
   const contentManagerContentTypeService = strapi
     .plugin('content-manager')
     .service('content-types');
@@ -285,7 +285,8 @@ const resolveAllRelationsBatched = async (
         return;
       }
 
-      const mainField = await getMainField(targetUid as UID.Schema);
+      // Relation targets are content types.
+      const mainField = await getMainField(targetUid as UID.ContentType);
       const validRels = allRels.filter(isValidRelation);
 
       if (validRels.length === 0) {
