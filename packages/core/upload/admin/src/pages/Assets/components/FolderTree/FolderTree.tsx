@@ -34,13 +34,9 @@ const RowButton = styled.button<{
   min-height: 3.2rem;
   padding: ${({ theme }) => `${theme.spaces[1]} ${theme.spaces[2]}`};
   border: 0;
-  background: ${({ $isActive, $isValidDropTarget, theme }) => {
-    if ($isValidDropTarget) {
-      return theme.colors.primary100;
-    }
-
-    return $isActive ? theme.colors.primary100 : 'transparent';
-  }};
+  // The surface — hover, active, drop target — is painted by the row behind
+  // this, so it spans the chevron and the actions menu too, not just the label.
+  background: transparent;
   color: ${({ $isActive, theme }) =>
     $isActive ? theme.colors.primary700 : theme.colors.neutral800};
   border-radius: ${({ theme }) => theme.borderRadius};
@@ -62,16 +58,6 @@ const RowButton = styled.button<{
       outline-offset: -1px;
     `}
 
-  &:hover {
-    background: ${({ $isActive, $isValidDropTarget, theme }) => {
-      if ($isValidDropTarget) {
-        return theme.colors.primary100;
-      }
-
-      return $isActive ? theme.colors.primary100 : theme.colors.neutral100;
-    }};
-  }
-
   &:focus-visible {
     outline: 2px solid ${({ theme }) => theme.colors.primary600};
     outline-offset: -2px;
@@ -79,6 +65,7 @@ const RowButton = styled.button<{
 `;
 
 const TreeRow = styled(Flex)<{
+  $isActive?: boolean;
   $isValidDropTarget?: boolean;
   $isInvalidDropCursor?: boolean;
   $isMovePending?: boolean;
@@ -92,6 +79,14 @@ const TreeRow = styled(Flex)<{
   }};
   pointer-events: ${({ $isMovePending }) => ($isMovePending ? 'none' : 'auto')};
   border-radius: ${({ theme }) => theme.borderRadius};
+  background: ${({ $isActive, theme }) => ($isActive ? theme.colors.primary100 : 'transparent')};
+
+  // The whole row lights up, so pointing anywhere along it — chevron, label or
+  // the actions trigger — reads as one target.
+  &:hover {
+    background: ${({ $isActive, theme }) =>
+      $isActive ? theme.colors.primary100 : theme.colors.neutral100};
+  }
 
   ${({ $isValidDropTarget, theme }) =>
     $isValidDropTarget &&
@@ -99,6 +94,10 @@ const TreeRow = styled(Flex)<{
       background: ${theme.colors.primary100};
       outline: 1px dashed ${theme.colors.primary600};
       outline-offset: -1px;
+
+      &:hover {
+        background: ${theme.colors.primary100};
+      }
     `}
 `;
 
@@ -304,6 +303,7 @@ const FolderTreeItemInner = ({
         alignItems="center"
         paddingLeft={`${level * INDENT_PER_LEVEL_REM}rem`}
         gap={1}
+        $isActive={isActive}
         $isValidDropTarget={showValidDropHighlight}
         $isInvalidDropCursor={showInvalidDropCursor}
         $isMovePending={isMovePending}
