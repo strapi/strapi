@@ -10,18 +10,6 @@ const config = {
     strapi: false,
   },
   rules: {
-    'no-restricted-imports': [
-      'error',
-      {
-        patterns: [
-          {
-            group: ['lodash/fp', 'lodash/fp/**'],
-            message: 'Use regular lodash methods or a focused helper instead.',
-          },
-        ],
-      },
-    ],
-    'no-restricted-modules': ['error', { patterns: ['lodash/fp', 'lodash/fp/**'] }],
     'prettier/prettier': 'off',
     'import/no-dynamic-require': 'off',
     'global-require': 'off',
