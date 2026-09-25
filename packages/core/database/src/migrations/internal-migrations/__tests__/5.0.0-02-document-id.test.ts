@@ -1,5 +1,5 @@
 import type { Knex } from 'knex';
-import { snakeCase } from 'lodash/fp';
+import { snakeCase } from 'lodash';
 
 import { createdDocumentId } from '../5.0.0-02-document-id';
 

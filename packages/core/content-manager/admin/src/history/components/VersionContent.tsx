@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Form, Layouts, createRulesEngine, useForm, useIsMobile } from '@strapi/admin/strapi-admin';
 import { Box, Divider, Flex, Grid, Typography } from '@strapi/design-system';
-import pipe from 'lodash/fp/pipe';
+import flow from 'lodash/flow';
 import { useIntl } from 'react-intl';
 
 import { useDoc } from '../../hooks/useDocument';
@@ -276,7 +276,7 @@ const VersionContent = () => {
       (document: Omit<Document, 'id'>) => {
         const schema = { attributes: schemaAttributes };
 
-        const transformations = pipe(
+        const transformations = flow(
           removeFieldsThatDontExistOnSchema(schema),
           prepareTempKeys(schema, components)
         );

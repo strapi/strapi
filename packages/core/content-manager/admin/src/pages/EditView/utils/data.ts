@@ -1,6 +1,6 @@
 import { createRulesEngine } from '@strapi/admin/strapi-admin';
 import { generateNKeysBetween } from 'fractional-indexing';
-import pipe from 'lodash/fp/pipe';
+import flow from 'lodash/flow';
 
 import { DOCUMENT_META_FIELDS } from '../../../constants/attributes';
 
@@ -230,7 +230,7 @@ const removeNullValues = (schema: PartialSchema, components: ComponentsDictionar
 const transformDocument =
   (schema: PartialSchema, components: ComponentsDictionary = {}) =>
   (document: AnyData) => {
-    const transformations = pipe(
+    const transformations = flow(
       removeFieldsThatDontExistOnSchema(schema),
       removeProhibitedFields(['password'])(schema, components),
       removeNullValues(schema, components),

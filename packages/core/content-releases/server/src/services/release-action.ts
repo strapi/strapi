@@ -2,7 +2,7 @@ import { errors, async } from '@strapi/utils';
 
 import type { Core, Internal, Modules, UID, Data } from '@strapi/types';
 
-import _ from 'lodash/fp';
+import _ from 'lodash';
 
 import { AUDITED_EVENTS, RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';
 import { emitAuditOnCommit } from '../audit-logs';
@@ -25,7 +25,7 @@ const getGroupName = (queryValue: string) => {
     case 'type':
       return 'type';
     case 'locale':
-      return _.getOr('No locale', 'locale.name');
+      return (action: { locale?: Locale | null }) => _.get(action, 'locale.name', 'No locale');
     default:
       return 'contentType.displayName';
   }
@@ -242,7 +242,7 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
       });
 
       const groupName = getGroupName(groupBy);
-      return _.groupBy(groupName)(formattedData);
+      return _.groupBy(formattedData, groupName);
     },
 
     async getContentTypeModelsFromActions(actions: ReleaseAction[]) {

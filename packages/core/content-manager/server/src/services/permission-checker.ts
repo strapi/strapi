@@ -1,6 +1,7 @@
 import type { Ability } from '@casl/ability';
 import { async } from '@strapi/utils';
-import { isEmpty } from 'lodash/fp';
+import { isEmpty } from 'lodash';
+
 import type { Core, UID, Modules } from '@strapi/types';
 
 export const ACTIONS = {

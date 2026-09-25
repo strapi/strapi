@@ -1,7 +1,6 @@
 import { bootstrap as bootstrapGlobalAgent } from 'global-agent';
 import path from 'path';
 import _ from 'lodash';
-import { isFunction } from 'lodash/fp';
 import { Logger, createLogger } from '@strapi/logger';
 import { Database } from '@strapi/database';
 
@@ -582,7 +581,7 @@ class Strapi extends Container implements Core.Strapi {
   async runUserLifecycles(lifecycleName: 'register' | 'bootstrap' | 'destroy') {
     // user
     const userLifecycleFunction = this.app && this.app[lifecycleName];
-    if (isFunction(userLifecycleFunction)) {
+    if (typeof userLifecycleFunction === 'function') {
       await userLifecycleFunction({ strapi: this });
     }
   }

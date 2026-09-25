@@ -1,5 +1,5 @@
 import type { Core, Modules, UID, Struct } from '@strapi/types';
-import { getOr } from 'lodash/fp';
+import { get } from 'lodash';
 
 interface CoreContentStructureService {
   getCleanedFile(): Promise<Modules.ContentStructure.ContentStructureFile | null>;
@@ -16,7 +16,7 @@ const createContentStructureService = ({ strapi }: { strapi: Core.Strapi }) => {
   const coreContentStructure: CoreContentStructureService = strapi.get('content-structure');
 
   const isContentTypeVisible = (model: Struct.ContentTypeSchema) => {
-    return getOr(true, 'pluginOptions.content-manager.visible', model) === true;
+    return get(model, 'pluginOptions.content-manager.visible', true) === true;
   };
 
   /**

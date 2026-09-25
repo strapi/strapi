@@ -1,4 +1,4 @@
-import { propEq } from 'lodash/fp';
+import { matchesProperty } from 'lodash';
 import createSectionBuilder from './builder';
 import {
   subjectsHandlerFor,
@@ -8,7 +8,7 @@ import {
   settings as settingsHandler,
 } from './handlers';
 
-const sectionPropMatcher = propEq('section');
+const sectionPropMatcher = (section: string) => matchesProperty('section', section);
 
 const createContentTypesInitialState = () => ({
   actions: [],

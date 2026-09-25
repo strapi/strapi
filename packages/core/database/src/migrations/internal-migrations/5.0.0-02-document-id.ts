@@ -12,7 +12,7 @@
  *
  */
 import { createId } from '@paralleldrive/cuid2';
-import { snakeCase } from 'lodash/fp';
+import { snakeCase } from 'lodash';
 import type { Knex } from 'knex';
 
 import type { Migration } from '../common';

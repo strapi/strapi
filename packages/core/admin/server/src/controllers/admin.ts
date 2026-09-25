@@ -1,11 +1,11 @@
+import _ from 'lodash';
 import type { Context } from 'koa';
 
 import path from 'path';
 
-import { map, values, sumBy, pipe, flatMap, propEq } from 'lodash/fp';
-import _ from 'lodash';
 import { exists } from 'fs-extra';
 import { env } from '@strapi/utils';
+import type { Struct } from '@strapi/types';
 import {
   validateUpdateProjectSettings,
   validateUpdateProjectSettingsFiles,
@@ -118,12 +118,9 @@ export default {
     const numberOfComponents = _.size(strapi.components);
 
     const getNumberOfDynamicZones = () => {
-      return pipe(
-        map('attributes'),
-        flatMap(values),
-        // @ts-expect-error lodash types
-        sumBy(propEq('type', 'dynamiczone'))
-      )(strapi.contentTypes as any);
+      return Object.values(strapi.contentTypes)
+        .flatMap((contentType: Struct.ContentTypeSchema) => Object.values(contentType.attributes))
+        .filter((attribute) => attribute.type === 'dynamiczone').length;
     };
 
     const getNumberOfFolders = async (): Promise<number> => {

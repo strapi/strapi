@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable no-template-curly-in-string */
 import * as yup from 'yup';
-import { defaults } from 'lodash/fp';
+import { defaults } from 'lodash';
 import { YupValidationError } from './errors';
 
 const handleYupError = (error: yup.ValidationError, errorMessage?: string) => {
@@ -14,7 +14,7 @@ const validateYupSchema =
   <TSchema extends yup.AnySchema>(schema: TSchema, options = {}) =>
   async (body: unknown, errorMessage?: string): Promise<yup.InferType<TSchema>> => {
     try {
-      const optionsWithDefaults = defaults(defaultValidationParam, options);
+      const optionsWithDefaults = defaults({}, options, defaultValidationParam);
       const result = await schema.validate(body, optionsWithDefaults);
       return result;
     } catch (e) {
@@ -30,7 +30,7 @@ const validateYupSchemaSync =
   <TSchema extends yup.AnySchema>(schema: yup.AnySchema, options = {}) =>
   (body: unknown, errorMessage?: string): yup.InferType<TSchema> => {
     try {
-      const optionsWithDefaults = defaults(defaultValidationParam, options);
+      const optionsWithDefaults = defaults({}, options, defaultValidationParam);
       return schema.validateSync(body, optionsWithDefaults);
     } catch (e) {
       if (e instanceof yup.ValidationError) {

@@ -1,4 +1,4 @@
-import { get, getOr, isFunction, first, isNil } from 'lodash/fp';
+import { get, property } from 'lodash';
 import {
   GraphQLObjectType,
   GraphQLResolveInfo,
@@ -36,12 +36,12 @@ type GraphQLMiddleware = (
  * @return {function[]}
  */
 const parseMiddlewares = (resolverConfig: any, strapi: Core.Strapi): GraphQLMiddleware[] => {
-  const resolverMiddlewares = getOr([], 'middlewares', resolverConfig);
+  const resolverMiddlewares = get(resolverConfig, 'middlewares', []);
 
   // TODO: [v4] to factorize with compose endpoints (routes)
   return resolverMiddlewares.map(
     (middleware: string | Core.MiddlewareHandler | { name: string; options: any }) => {
-      if (isFunction(middleware)) {
+      if (typeof middleware === 'function') {
         return middleware;
       }
 
@@ -100,10 +100,10 @@ const wrapResolvers = ({
     const fieldsToProcess = Object.entries(fields).filter(([field]) => isValidFieldName(field));
 
     for (const [fieldName, fieldDefinition] of fieldsToProcess) {
-      const defaultResolver = get(fieldName);
+      const defaultResolver = property(fieldName);
 
       const path = `${type}.${fieldName}`;
-      const resolverConfig = getOr({}, path, resolversConfig);
+      const resolverConfig = get(resolversConfig, path, {});
 
       const { resolve: baseResolver = defaultResolver } = fieldDefinition;
 
@@ -135,11 +135,11 @@ const wrapResolvers = ({
        * @return {Promise<void>}
        */
       const authorize = async ({ context }: any) => {
-        const authConfig = get('auth', resolverConfig);
-        const authContext = get('state.auth', context);
+        const authConfig = resolverConfig?.auth;
+        const authContext = get(context, 'state.auth');
 
         const isValidType = ['Mutation', 'Query', 'Subscription'].includes(type);
-        const hasConfig = !isNil(authConfig);
+        const hasConfig = authConfig != null;
 
         const isAuthDisabled = authConfig === false;
 
@@ -160,7 +160,7 @@ const wrapResolvers = ({
         await authorize({ context });
 
         // Execute middlewares (including the policy middleware which will always be included)
-        return first(boundMiddlewares)!(parent, args, context, info);
+        return boundMiddlewares[0]!(parent, args, context, info);
       };
     }
   });

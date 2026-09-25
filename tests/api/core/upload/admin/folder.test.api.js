@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const { pick, map } = require('lodash/fp');
+const { pick } = require('lodash');
 
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
@@ -190,7 +190,7 @@ describe('Folder', () => {
       });
 
       expect(res.body.data).toMatchObject({
-        ...pick(['id', 'name', 'pathId', 'path', 'createAt', 'updatedAt'], data.folders[0]),
+        ...pick(data.folders[0], ['id', 'name', 'pathId', 'path', 'createAt', 'updatedAt']),
         children: {
           count: expect.anything(),
         },
@@ -210,7 +210,7 @@ describe('Folder', () => {
       });
 
       expect(res.body.data).toMatchObject({
-        ...pick(['id', 'name', 'pathId', 'path', 'createAt', 'updatedAt'], data.folders[1]),
+        ...pick(data.folders[1], ['id', 'name', 'pathId', 'path', 'createAt', 'updatedAt']),
         parent: {
           id: expect.any(Number),
         },
@@ -412,7 +412,11 @@ describe('Folder', () => {
         method: 'GET',
         url: '/upload/folders',
         qs: {
-          filters: { id: { $in: map('id', [folder0, folder00, folder01, folder02, folder000]) } },
+          filters: {
+            id: {
+              $in: [folder0, folder00, folder01, folder02, folder000].map((folder) => folder?.id),
+            },
+          },
           sort: 'id:asc',
           populate: { parent: '*' },
         },
@@ -480,7 +484,9 @@ describe('Folder', () => {
         method: 'GET',
         url: '/upload/folders',
         qs: {
-          filters: { id: { $in: map('id', [folder0, folder00, folder02, folder000]) } },
+          filters: {
+            id: { $in: [folder0, folder00, folder02, folder000].map((folder) => folder?.id) },
+          },
           sort: 'id:asc',
           populate: { parent: '*' },
         },

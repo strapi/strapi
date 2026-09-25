@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import { intersection } from 'lodash/fp';
+import _, { intersection } from 'lodash';
+
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
 
 const { getNonVisibleAttributes, getWritableAttributes } = contentTypesUtils;
@@ -180,8 +180,8 @@ const getSortableAttributes = (schema: any) => {
 
   const model = strapi.getModel(schema.uid);
   const nonVisibleWritableAttributes = intersection(
-    getNonVisibleAttributes(model),
-    getWritableAttributes(model)
+    getWritableAttributes(model),
+    getNonVisibleAttributes(model)
   );
 
   const identifierField = _.has(schema.attributes, 'documentId') ? 'documentId' : 'id';

@@ -1,13 +1,13 @@
-import { toUpper, snakeCase, pick, isEmpty } from 'lodash/fp';
+import { snakeCase, pick, isEmpty } from 'lodash';
 import { errors } from '@strapi/utils';
 import { unwrapResolverError } from '@apollo/server/errors';
 import { GraphQLError, type GraphQLFormattedError } from 'graphql';
 
 const { HttpError, ForbiddenError, UnauthorizedError, ApplicationError, ValidationError } = errors;
 
-const formatToCode = (name: string) => `STRAPI_${toUpper(snakeCase(name))}`;
+const formatToCode = (name: string) => `STRAPI_${snakeCase(name).toUpperCase()}`;
 const formatErrorToExtension = (error: any) => ({
-  error: pick(['name', 'message', 'details'])(error),
+  error: pick(error, ['name', 'message', 'details']),
 });
 
 function createFormattedError(

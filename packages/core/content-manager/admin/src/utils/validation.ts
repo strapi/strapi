@@ -1,5 +1,5 @@
 import { translatedErrors } from '@strapi/admin/strapi-admin';
-import pipe from 'lodash/fp/pipe';
+import flow from 'lodash/flow';
 import * as yup from 'yup';
 
 import { DOCUMENT_META_FIELDS } from '../constants/attributes';
@@ -102,7 +102,7 @@ const createYupSchema = (
             addRegexValidation,
           ].map((fn) => fn(attribute, options));
 
-          const transformSchema = pipe(...validations);
+          const transformSchema = flow(...validations);
 
           switch (attribute.type) {
             case 'component': {

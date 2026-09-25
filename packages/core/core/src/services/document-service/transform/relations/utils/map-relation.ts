@@ -1,5 +1,5 @@
 /* eslint-disable node/no-callback-literal */
-import { isObject, curry, isNil } from 'lodash/fp';
+import { curry, isObject } from 'lodash';
 
 import { traverseEntity, async } from '@strapi/utils';
 
@@ -13,7 +13,7 @@ const isNumeric = (value: any): value is number => {
 
 const toArray = (value: any) => {
   // Keep value as it is if it's a nullish value
-  if (isNil(value)) return value;
+  if (value == null) return value;
   if (Array.isArray(value)) return value;
 
   return [value];
@@ -51,7 +51,7 @@ const mapRelation = async (
   };
 
   // undefined | null
-  if (isNil(relation)) {
+  if (relation == null) {
     return callback(relation);
   }
 

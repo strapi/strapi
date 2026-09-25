@@ -1,4 +1,4 @@
-import { isNil, isObject } from 'lodash/fp';
+import { isObject } from 'lodash';
 
 import { relations } from '@strapi/utils';
 
@@ -16,7 +16,7 @@ export const normalizeXToOneRelationValue = (attribute: any, value: Relation): R
     return value;
   }
 
-  if (isNil(value)) {
+  if (value == null) {
     return value;
   }
 

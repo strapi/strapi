@@ -1,7 +1,7 @@
 'use strict';
 
 // Test an API with all the possible filed types and simple filterings (no deep filtering, no relations)
-const { omit } = require('lodash/fp');
+const { omit } = require('lodash');
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
@@ -163,7 +163,7 @@ describe('Search query', () => {
       expect(res.body.results[0]).toMatchObject(data.beds[2]);
     });
 
-    test.each(Object.keys(omit(['publishedAt', 'documentId'], bedFixtures[0])))(
+    test.each(Object.keys(omit(bedFixtures[0], ['publishedAt', 'documentId'])))(
       'search that target column %p',
       async (columnName) => {
         const res = await rq({
@@ -192,7 +192,9 @@ describe('Search query', () => {
       expect(Array.isArray(res.body.results)).toBe(true);
       expect(res.body.results.length).toBe(data.beds.length);
       expect(
-        res.body.results.map(omit([...CREATOR_FIELDS, 'locale', 'localizations', 'status']))
+        res.body.results.map((value) =>
+          omit(value, [...CREATOR_FIELDS, 'locale', 'localizations', 'status'])
+        )
       ).toEqual(expect.arrayContaining(data.beds));
     });
 

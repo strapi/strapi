@@ -1,7 +1,7 @@
 import * as z from 'zod/v4';
 import { strings, validateZodSchema, contentTypes } from '@strapi/utils';
 import type { Struct, UID } from '@strapi/types';
-import { isArray, isNil, isNull, isNumber, isObject, isUndefined, snakeCase } from 'lodash/fp';
+import { isNumber, isObject, snakeCase } from 'lodash';
 
 import { isReservedAttributeName, isReservedModelName } from '../../services/builder';
 import { coreUids, typeKinds, VALID_UID_TARGETS } from '../../services/constants';
@@ -149,8 +149,8 @@ export const maxLengthGreaterThanMinLength: SuperRefinement<Record<string, unkno
   ctx
 ) => {
   if (
-    !isNil(value.maxLength) &&
-    !isNil(value.minLength) &&
+    value.maxLength != null &&
+    value.minLength != null &&
     isNumber(value.maxLength) &&
     isNumber(value.minLength)
   ) {
@@ -165,7 +165,7 @@ export const maxLengthGreaterThanMinLength: SuperRefinement<Record<string, unkno
 };
 
 export const maxGreaterThanMin: SuperRefinement<Record<string, unknown>> = (value, ctx) => {
-  if (!isNil(value.max) && !isNil(value.min) && isNumber(value.max) && isNumber(value.min)) {
+  if (value.max != null && value.min != null && isNumber(value.max) && isNumber(value.min)) {
     if (value.max < value.min) {
       ctx.addIssue({
         code: 'custom',
@@ -186,7 +186,7 @@ const checkUserTarget: SuperRefinement<{
     return;
   }
 
-  if (isUndefined(value.target) || isUndefined(value.relation)) {
+  if (value.target === undefined || value.relation === undefined) {
     return;
   }
 
@@ -194,7 +194,7 @@ const checkUserTarget: SuperRefinement<{
 
   if (
     target === coreUids.STRAPI_USER &&
-    (!STRAPI_USER_RELATIONS.includes(relation) || !isUndefined(targetAttribute))
+    (!STRAPI_USER_RELATIONS.includes(relation) || targetAttribute !== undefined)
   ) {
     ctx.addIssue({
       code: 'custom',
@@ -209,7 +209,7 @@ const uidRefinement: SuperRefinement<{
   default?: unknown;
   targetField?: string | null;
 }> = (value, ctx) => {
-  if (!isNil(value.targetField) && !isNil(value.default)) {
+  if (value.targetField != null && value.default != null) {
     ctx.addIssue({
       code: 'custom',
       message: 'Cannot define a default UID if the targetField is set',
@@ -223,7 +223,7 @@ const enumRefinement: SuperRefinement<{
   default?: unknown;
   enum?: string[];
 }> = (value, ctx) => {
-  if (value.type === 'enumeration' && !isNil(value.default) && !isNil(value.enum)) {
+  if (value.type === 'enumeration' && value.default != null && value.enum != null) {
     if (value.default === '' || !value.enum.some((v) => v === value.default)) {
       ctx.addIssue({
         code: 'custom',
@@ -419,7 +419,7 @@ const jsonSchema = basePropertiesSchema.extend({
         return true;
       }
 
-      if (isNumber(value) || isNull(value) || isObject(value) || isArray(value)) {
+      if (isNumber(value) || value === null || isObject(value) || Array.isArray(value)) {
         return true;
       }
 

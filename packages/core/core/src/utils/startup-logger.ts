@@ -1,6 +1,5 @@
 import chalk from 'chalk';
 import CLITable from 'cli-table3';
-import _ from 'lodash/fp';
 
 import type { Core } from '@strapi/types';
 
@@ -27,7 +26,7 @@ export const createStartupLogger = (app: Core.Strapi) => {
     logStats() {
       const columns = Math.min(process.stderr.columns, 80) - 2;
       console.log();
-      console.log(chalk.black.bgWhite(_.padEnd(columns, ' Project information')));
+      console.log(chalk.black.bgWhite(' Project information'.padEnd(columns)));
       console.log();
 
       const infoTable = new CLITable({
@@ -62,7 +61,7 @@ export const createStartupLogger = (app: Core.Strapi) => {
 
       console.log(infoTable.toString());
       console.log();
-      console.log(chalk.black.bgWhite(_.padEnd(columns, ' Actions available')));
+      console.log(chalk.black.bgWhite(' Actions available'.padEnd(columns)));
       console.log();
     },
 

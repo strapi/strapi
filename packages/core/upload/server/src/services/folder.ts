@@ -1,4 +1,4 @@
-import { sortBy, map, isUndefined } from 'lodash/fp';
+import { map, sortBy } from 'lodash';
 import { strings, setCreatorFields } from '@strapi/utils';
 import { FOLDER_MODEL_UID, FILE_MODEL_UID } from '../constants';
 import { getService } from '../utils';
@@ -77,7 +77,7 @@ const deleteByIds = async (ids: number[] = [], { validateFiles }: DeleteByIdsOpt
     };
   }
 
-  const pathsToDelete = map('path', folders);
+  const pathsToDelete = map(folders, 'path');
 
   // delete files
   const filesToDelete = await strapi.db.query(FILE_MODEL_UID).findMany({
@@ -133,7 +133,7 @@ const update = async (
   { user }: { user: { id: string | number } }
 ) => {
   // only name is updated
-  if (isUndefined(parent)) {
+  if (parent === undefined) {
     const existingFolder = await strapi.db.query(FOLDER_MODEL_UID).findOne({ where: { id } });
 
     if (!existingFolder) {
@@ -142,7 +142,7 @@ const update = async (
 
     const newFolder = setCreatorFields({ user, isEdition: true })({ name, parent });
 
-    if (isUndefined(parent)) {
+    if (parent === undefined) {
       const folder = await strapi.db
         .query(FOLDER_MODEL_UID)
         .update({ where: { id }, data: newFolder });
@@ -297,7 +297,7 @@ const getStructure = async () => {
     }
 
     folderMap[parentId].children.push(folderMap[f.id]);
-    folderMap[parentId].children = sortBy('name', folderMap[parentId].children);
+    folderMap[parentId].children = sortBy(folderMap[parentId].children, 'name');
     delete folderMap[f.id].parent;
   });
 

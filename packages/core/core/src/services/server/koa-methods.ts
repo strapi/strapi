@@ -1,4 +1,4 @@
-import { camelCase } from 'lodash/fp';
+import { camelCase } from 'lodash';
 import { STATUS_CODES } from 'node:http';
 
 export interface ErrorMethodEntry {

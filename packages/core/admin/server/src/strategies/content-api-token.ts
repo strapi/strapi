@@ -1,5 +1,6 @@
 import type { Context } from 'koa';
-import { castArray } from 'lodash/fp';
+import { castArray } from 'lodash';
+
 import { errors } from '@strapi/utils';
 import constants from '../services/constants';
 import { getService } from '../utils';

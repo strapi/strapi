@@ -1,4 +1,4 @@
-import domain from '..';
+import domain, { type CreatePermissionPayload } from '..';
 
 describe('Permission Domain', () => {
   describe('addCondition', () => {
@@ -31,6 +31,17 @@ describe('Permission Domain', () => {
   });
 
   describe('removeCondition', () => {
+    test('Supports a reusable curried remover without changing its inputs', () => {
+      const removeFoo = domain.removeCondition('foo');
+      const first = domain.create({ action: 'read', conditions: ['foo', 'bar', 'foo'] });
+      const second = domain.create({ action: 'write', conditions: ['foo', 'baz'] });
+
+      expect(removeFoo(first).conditions).toEqual(['bar']);
+      expect(removeFoo(second).conditions).toEqual(['baz']);
+      expect(first.conditions).toEqual(['foo', 'bar', 'foo']);
+      expect(second.conditions).toEqual(['foo', 'baz']);
+    });
+
     test('Can remove added condition from permission.conditions', () => {
       const permission: any = { conditions: ['foo', 'bar'] };
 
@@ -78,6 +89,24 @@ describe('Permission Domain', () => {
   });
 
   describe('setProperty', () => {
+    test('Copies only the updated property path', () => {
+      const fields = ['title'];
+      const permission = domain.create({
+        action: 'read',
+        properties: { fields, nested: { enabled: false } },
+      });
+      Object.freeze(permission.properties.nested);
+      Object.freeze(permission.properties);
+      Object.freeze(permission);
+
+      const updated = domain.setProperty('nested.enabled', true, permission);
+
+      expect(updated.properties.nested).toEqual({ enabled: true });
+      expect(permission.properties.nested).toEqual({ enabled: false });
+      expect(updated.properties.fields).toBe(permission.properties.fields);
+      expect(updated.conditions).toBe(permission.conditions);
+    });
+
     test('Can set a new property and its value', () => {
       const permission: any = { properties: {} };
 
@@ -139,6 +168,19 @@ describe('Permission Domain', () => {
   });
 
   describe('toPermission', () => {
+    test('Normalizes missing array entries into default permissions', () => {
+      const permissions: CreatePermissionPayload[] = [];
+      permissions[1] = { action: 'read' };
+
+      const result = domain.toPermission(permissions);
+
+      expect(result).toEqual([
+        { actionParameters: {}, subject: null, properties: {}, conditions: [] },
+        { action: 'read', actionParameters: {}, subject: null, properties: {}, conditions: [] },
+      ]);
+      expect(0 in permissions).toBe(false);
+    });
+
     test('Handle single permission object and call domain.create', () => {
       const permission = {
         id: 1,

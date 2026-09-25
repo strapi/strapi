@@ -1,4 +1,4 @@
-import { isArray, getOr, prop } from 'lodash/fp';
+import { get } from 'lodash';
 import { getService } from '../../utils';
 
 const actions = [
@@ -51,12 +51,12 @@ const addLocalesPropertyIfNeeded = ({ value: action }: any) => {
   }
 
   // If the 'locales' property is already declared within the applyToProperties array, then ignore the next steps
-  if (isArray(applyToProperties) && applyToProperties.includes('locales')) {
+  if (Array.isArray(applyToProperties) && applyToProperties.includes('locales')) {
     return;
   }
 
   // Add the 'locales' property to the applyToProperties array (create it if necessary)
-  action.options.applyToProperties = isArray(applyToProperties)
+  action.options.applyToProperties = Array.isArray(applyToProperties)
     ? applyToProperties.concat('locales')
     : ['locales'];
 };
@@ -76,7 +76,7 @@ const addAllLocalesToPermissions = async (permissions: any) => {
   const { find: findAllLocales } = getService('locales');
 
   const allLocales = await findAllLocales();
-  const allLocalesCode = allLocales.map(prop('code'));
+  const allLocalesCode = allLocales.map((locale) => locale?.code);
 
   return Promise.all(
     permissions.map(async (permission: any) => {
@@ -92,7 +92,7 @@ const addAllLocalesToPermissions = async (permissions: any) => {
         return permission;
       }
 
-      const oldPermissionProperties = getOr({}, 'properties', permission);
+      const oldPermissionProperties = get(permission, 'properties', {});
 
       return { ...permission, properties: { ...oldPermissionProperties, locales: allLocalesCode } };
     })

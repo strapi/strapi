@@ -1,4 +1,5 @@
-import { isEqual, sortBy } from 'lodash/fp';
+import { isEqual, sortBy } from 'lodash';
+
 import type { Data, Modules } from '@strapi/types';
 
 import type { Permission } from '../../../shared/contracts/shared';
@@ -104,7 +105,7 @@ export interface TokenSnapshot {
  * field counts as a change.
  */
 const sortRefs = (refs: PermissionRef[]): PermissionRef[] =>
-  sortBy((ref: PermissionRef) => JSON.stringify(ref), JSON.parse(JSON.stringify(refs)));
+  sortBy(JSON.parse(JSON.stringify(refs)), (ref: PermissionRef) => JSON.stringify(ref));
 
 export const getTokenChanges = (previous: TokenSnapshot, next: TokenSnapshot): TokenChanges => {
   const changes: TokenChanges = {};

@@ -1,4 +1,4 @@
-import { merge, pipe, omit, isNil } from 'lodash/fp';
+import { merge, flow, omit } from 'lodash';
 import { PaginationError } from './errors';
 
 interface PaginationArgs {
@@ -70,16 +70,16 @@ const withDefaultPagination = <T extends Partial<PaginationArgs>>(
   args: T,
   { defaults = {}, maxLimit = -1 } = {}
 ) => {
-  const defaultValues = merge(STRAPI_DEFAULTS, defaults);
+  const defaultValues = merge({}, STRAPI_DEFAULTS, defaults);
 
-  const usePagePagination = !isNil(args.page) || !isNil(args.pageSize);
-  const useOffsetPagination = !isNil(args.start) || !isNil(args.limit);
+  const usePagePagination = args.page != null || args.pageSize != null;
+  const useOffsetPagination = args.start != null || args.limit != null;
 
-  const ensureValidValues = pipe(ensureMinValues, ensureMaxValues(maxLimit));
+  const ensureValidValues = flow(ensureMinValues, ensureMaxValues(maxLimit));
 
   // If there is no pagination attribute, don't modify the payload
   if (!usePagePagination && !useOffsetPagination) {
-    return merge(args, ensureValidValues(defaultValues.offset));
+    return merge({}, args, ensureValidValues(defaultValues.offset));
   }
 
   // If there is page & offset pagination attributes, throw an error
@@ -94,17 +94,18 @@ const withDefaultPagination = <T extends Partial<PaginationArgs>>(
 
   // Start / Limit
   if (useOffsetPagination) {
-    const { start, limit } = merge(defaultValues.offset, args);
+    const { start, limit } = merge({}, defaultValues.offset, args);
 
     Object.assign(pagination, { start, limit });
   }
 
   // Page / PageSize
   if (usePagePagination) {
-    const pageArgs = isNil(args.pageSize)
-      ? omit(['pageSize'], args)
-      : { ...args, pageSize: Math.max(1, args.pageSize) };
-    const { page, pageSize } = merge(defaultValues.page, pageArgs);
+    const pageArgs =
+      args.pageSize == null
+        ? omit(args, ['pageSize'])
+        : { ...args, pageSize: Math.max(1, args.pageSize) };
+    const { page, pageSize } = merge({}, defaultValues.page, pageArgs);
     const pageLimit = ensureValidValues({ start: 0, limit: pageSize }).limit;
 
     Object.assign(pagination, {
@@ -116,14 +117,7 @@ const withDefaultPagination = <T extends Partial<PaginationArgs>>(
   // Handle -1 limit
   Object.assign(pagination, withNoLimit(pagination, maxLimit));
 
-  const replacePaginationAttributes = pipe(
-    // Remove pagination attributes
-    omit(paginationAttributes),
-    // Merge the object with the new pagination + ensure minimum & maximum values
-    merge(ensureValidValues(pagination))
-  );
-
-  return replacePaginationAttributes(args);
+  return merge({}, ensureValidValues(pagination), omit(args, paginationAttributes));
 };
 
 /**
@@ -139,7 +133,7 @@ const transformPagedPaginationInfo = (
   paginationInfo: Partial<PaginationArgs>,
   total: number
 ): PagePatinationInformation => {
-  if (!isNil(paginationInfo.page)) {
+  if (paginationInfo.page != null) {
     const page = paginationInfo.page;
     const pageSize = paginationInfo.pageSize ?? total;
 
@@ -151,7 +145,7 @@ const transformPagedPaginationInfo = (
     };
   }
 
-  if (!isNil(paginationInfo.start)) {
+  if (paginationInfo.start != null) {
     const start = paginationInfo.start;
     const limit = paginationInfo.limit ?? total;
 
@@ -186,14 +180,14 @@ const transformOffsetPaginationInfo = (
   paginationInfo: Partial<PaginationArgs>,
   total: number
 ): OffsetPaginationInformation => {
-  if (!isNil(paginationInfo.page)) {
+  if (paginationInfo.page != null) {
     const limit = paginationInfo.pageSize ?? total;
     const start = (paginationInfo.page - 1) * limit;
 
     return { start, limit, total };
   }
 
-  if (!isNil(paginationInfo.start)) {
+  if (paginationInfo.start != null) {
     const start = paginationInfo.start;
     const limit = paginationInfo.limit ?? total;
 

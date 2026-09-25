@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-loop-func */
-import { isNil, pick } from 'lodash/fp';
+import { pick } from 'lodash';
 
 import {
   AnyAttribute,
@@ -155,10 +155,10 @@ export default () => {
 
       const newPath = { ...path };
 
-      newPath.raw = isNil(path.raw) ? key : `${path.raw}.${key}`;
+      newPath.raw = path.raw == null ? key : `${path.raw}.${key}`;
 
-      if (!isNil(attribute)) {
-        newPath.attribute = isNil(path.attribute) ? key : `${path.attribute}.${key}`;
+      if (attribute != null) {
+        newPath.attribute = path.attribute == null ? key : `${path.attribute}.${key}`;
       }
 
       // visitors
@@ -183,7 +183,7 @@ export default () => {
         recurse: traverse,
       };
 
-      await visitor(visitorOptions, pick(['remove', 'set'], transformUtils));
+      await visitor(visitorOptions, pick(transformUtils, ['remove', 'set']));
 
       const value = utils.get(key, out);
 
@@ -215,7 +215,7 @@ export default () => {
         const pass = await handler.predicate(ctx);
 
         if (pass) {
-          await handler.handler(ctx, pick(['recurse', 'set'], transformUtils));
+          await handler.handler(ctx, pick(transformUtils, ['recurse', 'set']));
         }
       }
     }

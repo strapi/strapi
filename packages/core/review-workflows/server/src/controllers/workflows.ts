@@ -1,5 +1,4 @@
 import type { Context } from 'koa';
-import { update, map } from 'lodash/fp';
 
 import type { Core } from '@strapi/types';
 import { async } from '@strapi/utils';
@@ -63,16 +62,16 @@ function formatWorkflowToAdmin(workflow: { stages?: PopulatedStage[]; [key: stri
     role: typeof role === 'object' ? role.id : role,
   });
 
-  const transformStages = map((stage: PopulatedStage) => {
+  const stages = workflow.stages.map((stage) => {
     const { permissions: allPermissions = [], ...rest } = stage;
 
     const fromPermissions = allPermissions
       .filter((p) => p.actionParameters?.from)
-      .map(transformRoleToId);
+      .map((permission) => transformRoleToId(permission));
 
     const toPermissions = allPermissions
       .filter((p) => p.actionParameters?.to)
-      .map(transformRoleToId);
+      .map((permission) => transformRoleToId(permission));
 
     return {
       ...rest,
@@ -81,7 +80,7 @@ function formatWorkflowToAdmin(workflow: { stages?: PopulatedStage[]; [key: stri
     };
   });
 
-  return update('stages', transformStages, workflow);
+  return { ...workflow, stages };
 }
 
 export default {
@@ -189,7 +188,11 @@ export default {
     const { populate, filters, sort } = await sanitizedQuery.read(query);
 
     const [workflows, workflowCount] = await Promise.all([
-      workflowService.find({ populate, filters, sort }).then(map(formatWorkflowToAdmin)),
+      workflowService
+        .find({ populate, filters, sort })
+        .then((workflows: Parameters<typeof formatWorkflowToAdmin>[0][]) =>
+          workflows.map((workflow) => formatWorkflowToAdmin(workflow))
+        ),
       workflowService.count(),
     ]);
 

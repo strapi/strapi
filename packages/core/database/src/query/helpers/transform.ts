@@ -1,5 +1,3 @@
-import _ from 'lodash/fp';
-
 import * as types from '../../utils/types';
 import { createField } from '../../fields';
 
@@ -11,16 +9,14 @@ export type Rec = Record<string, unknown> | null;
 const fromSingleRow = (meta: Meta, row: Row): Rec => {
   const { attributes } = meta;
 
-  if (_.isNil(row)) {
+  if (row == null) {
     return null;
   }
 
   const obj: Rec = {};
 
   for (const column in row) {
-    // `_.has` from lodash/fp treats its first argument as a property *path*, so every
-    // column of every row was run through lodash's path parser before this simple
-    // membership test. Column names are literal keys, never paths.
+    // Column names are literal keys, so test membership without parsing them as property paths.
     if (!Object.prototype.hasOwnProperty.call(meta.columnToAttribute, column)) {
       continue;
     }
@@ -45,7 +41,7 @@ const fromSingleRow = (meta: Meta, row: Row): Rec => {
 };
 
 const fromRow = (meta: Meta, row: Row | Row[] | undefined) => {
-  if (_.isNil(row)) {
+  if (row == null) {
     return null;
   }
 
@@ -57,7 +53,7 @@ const fromRow = (meta: Meta, row: Row | Row[] | undefined) => {
 };
 
 const toSingleRow = (meta: Meta, data: Rec = {}): Row => {
-  if (_.isNil(data)) {
+  if (data == null) {
     return data;
   }
 
@@ -87,11 +83,11 @@ function toRow<TData extends Rec | Rec[] | null>(
   data: TData
 ): TData extends null ? null : TData extends Rec[] ? Row[] : Rec;
 function toRow(meta: Meta, data: Rec | Rec[] | null): Row | Row[] | null {
-  if (_.isNil(data)) {
+  if (data == null) {
     return data;
   }
 
-  if (_.isArray(data)) {
+  if (Array.isArray(data)) {
     return data.map((datum) => toSingleRow(meta, datum));
   }
 

@@ -1,3 +1,4 @@
+import type { Core } from '@strapi/types';
 import workflowsFactory from '../workflows';
 
 const validateActionsByContentTypes = jest.fn();
@@ -5,6 +6,8 @@ const migrate = jest.fn();
 const deleteMany = jest.fn();
 const sendDidEditWorkflow = jest.fn();
 const validateWorkflowCount = jest.fn();
+const createMany = jest.fn();
+const replaceStages = jest.fn();
 
 jest.mock('../../utils', () => ({
   getService: jest.fn((name: string) => {
@@ -22,8 +25,8 @@ jest.mock('../../utils', () => ({
     }
     if (name === 'stages') {
       return {
-        createMany: jest.fn(),
-        replaceStages: jest.fn(),
+        createMany,
+        replaceStages,
         deleteMany,
       };
     }
@@ -84,6 +87,42 @@ describe('review-workflows workflows service', () => {
     migrate.mockResolvedValue(undefined);
     deleteMany.mockResolvedValue(undefined);
     validateActionsByContentTypes.mockResolvedValue(undefined);
+  });
+
+  it('creates stage references without changing the caller data', async () => {
+    const strapi = createStrapiMock({ releaseActionService: undefined });
+    const service = workflowsFactory({ strapi: strapi as unknown as Core.Strapi });
+    const stages = [{ name: 'Todo' }];
+    const data = Object.freeze({ name: 'Editorial', stages, stageRequiredToPublishName: 'Todo' });
+    createMany.mockResolvedValue([{ id: 10, name: 'Todo' }]);
+
+    await service.create({ data });
+
+    expect(strapi.db.query().create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: { ...data, stages: [10], stageRequiredToPublish: 10 },
+      })
+    );
+    expect(data.stages).toBe(stages);
+    expect(data).not.toHaveProperty('stageRequiredToPublish');
+  });
+
+  it('updates stage references and clears the publish requirement without changing caller data', async () => {
+    const strapi = createStrapiMock({ releaseActionService: undefined });
+    const service = workflowsFactory({ strapi: strapi as unknown as Core.Strapi });
+    const stages = [{ id: 10, name: 'Reviewed' }];
+    const data = Object.freeze({ stages, stageRequiredToPublishName: null });
+    replaceStages.mockResolvedValue(stages);
+
+    await service.update(workflow, { data });
+
+    expect(strapi.db.query().update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: { ...data, stages: [10], stageRequiredToPublish: null },
+      })
+    );
+    expect(data.stages).toBe(stages);
+    expect(data).not.toHaveProperty('stageRequiredToPublish');
   });
 
   describe('when release-action service is missing', () => {

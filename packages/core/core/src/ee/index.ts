@@ -1,4 +1,4 @@
-import { pick, isEqual } from 'lodash/fp';
+import { isEqual, pick } from 'lodash';
 import type { Logger } from '@strapi/logger';
 import type { Core } from '@strapi/types';
 import { createStrapiFetch } from '../utils/fetch';
@@ -41,7 +41,7 @@ const disable = (message: string) => {
 
   ee.logger?.warn(`${message} Switching to CE.`);
   // Only keep the license key and isTrial for potential re-enabling during a later check
-  ee.licenseInfo = pick(['licenseKey', 'isTrial'], ee.licenseInfo);
+  ee.licenseInfo = pick(ee.licenseInfo, ['licenseKey', 'isTrial']);
 
   ee.licenseInfo.isTrial = false;
 

@@ -1,4 +1,4 @@
-import { prop, uniq, uniqBy, concat, flow, isEmpty } from 'lodash/fp';
+import { property, uniqBy, concat, flow, isEmpty } from 'lodash';
 
 import { isOperatorOfType, contentTypes, relations, errors } from '@strapi/utils';
 import type { Data, Modules, UID } from '@strapi/types';
@@ -239,17 +239,14 @@ export default {
     const targetSchema = strapi.getModel(targetUid);
 
     const mainField = flow(
-      prop(`metadatas.${targetField}.edit.mainField`),
+      property(`metadatas.${targetField}.edit.mainField`),
       (mainField) => mainField || 'id',
       (mainField) => sanitizeMainField(targetSchema, mainField, userAbility)
     )(modelConfig);
 
-    const fieldsToSelect = uniq([
-      mainField,
-      PUBLISHED_AT_ATTRIBUTE,
-      UPDATED_AT_ATTRIBUTE,
-      'documentId',
-    ]);
+    const fieldsToSelect = [
+      ...new Set([mainField, PUBLISHED_AT_ATTRIBUTE, UPDATED_AT_ATTRIBUTE, 'documentId']),
+    ];
 
     if (isTargetLocalized) {
       fieldsToSelect.push('locale');
@@ -408,7 +405,7 @@ export default {
     if (idsToOmit?.length > 0) {
       // If we have ids to omit, we should filter them out
       addFiltersClause(queryParams, {
-        id: { $notIn: uniq(idsToOmit) },
+        id: { $notIn: [...new Set(idsToOmit)] },
       });
     }
 
@@ -514,7 +511,7 @@ export default {
     });
 
     // NOTE: the order is very important to make sure sanitized relations are kept in priority
-    const relationsUnion = uniqBy('id', concat(sanitizedRes.results, res.results));
+    const relationsUnion = uniqBy(concat(sanitizedRes.results, res.results), 'id');
 
     ctx.body = {
       pagination: res.pagination || {

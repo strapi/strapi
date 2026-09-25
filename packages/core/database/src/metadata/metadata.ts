@@ -1,4 +1,4 @@
-import { cloneDeep, snakeCase } from 'lodash/fp';
+import { cloneDeep, snakeCase } from 'lodash';
 import { identifiers } from '../utils/identifiers';
 import * as types from '../utils/types';
 import { createRelation } from './relations';

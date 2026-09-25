@@ -1,5 +1,5 @@
 import assert from 'assert/strict';
-import { has } from 'lodash/fp';
+import { has } from 'lodash';
 
 import { errors } from '@strapi/utils';
 import type { Core } from '@strapi/types';
@@ -34,10 +34,10 @@ const INVALID_STRATEGY_MSG =
   'Invalid auth strategy. Expecting an object with properties {name: string, authenticate: function, verify: function}';
 
 const validStrategy = (strategy: Strategy) => {
-  assert(has('authenticate', strategy), INVALID_STRATEGY_MSG);
+  assert(has(strategy, 'authenticate'), INVALID_STRATEGY_MSG);
   assert(typeof strategy.authenticate === 'function', INVALID_STRATEGY_MSG);
 
-  if (has('verify', strategy)) {
+  if (has(strategy, 'verify')) {
     assert(typeof strategy.verify === 'function', INVALID_STRATEGY_MSG);
   }
 };

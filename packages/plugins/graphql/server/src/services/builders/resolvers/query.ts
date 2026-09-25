@@ -1,4 +1,4 @@
-import { omit } from 'lodash/fp';
+import { omit } from 'lodash';
 import type { Schema } from '@strapi/types';
 import type { Context } from '../../types';
 
@@ -69,7 +69,7 @@ export default ({ strapi }: Context) => ({
         })) as Record<string, unknown>;
 
         const merged = mergeDocumentListParams(
-          omit(['id', 'documentId'], sanitizedQuery) as Record<string, unknown>,
+          omit(sanitizedQuery, ['id', 'documentId']) as Record<string, unknown>,
           args
         );
 

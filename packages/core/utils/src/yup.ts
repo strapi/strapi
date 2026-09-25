@@ -1,8 +1,7 @@
 /* eslint-disable no-template-curly-in-string */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import * as yup from 'yup';
-import _ from 'lodash';
-import { isNumber, isInteger, get } from 'lodash/fp';
+import _, { isNumber, get } from 'lodash';
 import { strings } from './primitives';
 import { printValue } from './print-value';
 
@@ -71,7 +70,7 @@ yup.addMethod(
 
       list?.forEach((element, index) => {
         const sameElements = list.filter(
-          (e) => get(propertyName, e) === get(propertyName, element)
+          (e) => get(e, propertyName) === get(element, propertyName)
         );
         if (sameElements.length > 1) {
           errors.push(
@@ -97,7 +96,7 @@ export class StrapiIDSchema extends yup.MixedSchema {
   }
 
   _typeCheck(value: unknown): value is string | number {
-    return typeof value === 'string' || (isNumber(value) && isInteger(value) && value >= 0);
+    return typeof value === 'string' || (isNumber(value) && Number.isInteger(value) && value >= 0);
   }
 }
 

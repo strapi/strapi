@@ -1,4 +1,4 @@
-import { get } from 'lodash/fp';
+import { get } from 'lodash';
 import metrics from '../index';
 
 const fetch = jest.fn(() => Promise.resolve());
@@ -14,7 +14,7 @@ describe('metrics', () => {
     const metricsInstance = metrics({
       config: {
         get(path: string | string[]) {
-          return get(path, this);
+          return get(this, path);
         },
         uuid: 'test',
         environment: 'dev',
@@ -53,7 +53,7 @@ describe('metrics', () => {
     const metricsInstance = metrics({
       config: {
         get(path: string | string[]) {
-          return get(path, this);
+          return get(this, path);
         },
         uuid: false,
         environment: 'dev',
@@ -89,7 +89,7 @@ describe('metrics', () => {
     const { send } = metrics({
       config: {
         get(path: string | string[]) {
-          return get(path, this);
+          return get(this, path);
         },
         uuid: 'test',
         environment: 'dev',
@@ -141,7 +141,7 @@ describe('metrics', () => {
     const { send } = metrics({
       config: {
         get(path: string | string[]) {
-          return get(path, this);
+          return get(this, path);
         },
         uuid: false,
         packageJsonStrapi: {},
@@ -176,7 +176,7 @@ describe('metrics', () => {
     const { send } = metrics({
       config: {
         get(path: string | string[]) {
-          return get(path, this);
+          return get(this, path);
         },
         uuid: 'test',
         environment: 'dev',
@@ -226,7 +226,7 @@ describe('metrics', () => {
     const { send } = metrics({
       config: {
         get(path: string | string[]) {
-          return get(path, this);
+          return get(this, path);
         },
         uuid: 'test',
         environment: 'dev',
@@ -265,7 +265,7 @@ describe('metrics', () => {
     const { send } = metrics({
       config: {
         get(path: string | string[]) {
-          return get(path, this);
+          return get(this, path);
         },
         uuid: 'test',
         environment: 'dev',

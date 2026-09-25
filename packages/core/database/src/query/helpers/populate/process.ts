@@ -1,4 +1,4 @@
-import _ from 'lodash/fp';
+import _ from 'lodash';
 
 import * as types from '../../../utils/types';
 import type { Meta } from '../../../metadata';
@@ -47,7 +47,7 @@ const processPopulate = (populate: unknown, ctx: Context) => {
 
   let populateMap: PopulateMap = {};
 
-  if (populate === false || _.isNil(populate)) {
+  if (populate === false || populate == null) {
     return null;
   }
 
@@ -105,7 +105,7 @@ const processPopulate = (populate: unknown, ctx: Context) => {
     }
 
     // Make sure id is present for future populate queries
-    if (_.has('id', meta.attributes)) {
+    if (_.has(meta.attributes, 'id')) {
       qb.addSelect('id');
     }
 

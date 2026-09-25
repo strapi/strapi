@@ -11,12 +11,12 @@ const bcrypt = require('bcryptjs');
 const urlJoin = require('url-join');
 
 const { sanitize, ALLOWED_QUERY_PARAM_KEYS } = require('@strapi/utils');
-const { toNumber, getOr, pick } = require('lodash/fp');
+const { pick, get, toNumber } = require('lodash');
 const { getService } = require('../utils');
 
 const USER_MODEL_UID = 'plugin::users-permissions.user';
 
-const pickAllowedQueryParams = pick(ALLOWED_QUERY_PARAM_KEYS);
+const pickAllowedQueryParams = (params) => pick(params, ALLOWED_QUERY_PARAM_KEYS);
 
 const getSessionManager = () => {
   const manager = strapi.sessionManager;
@@ -52,7 +52,7 @@ module.exports = ({ strapi }) => ({
     for (const key in values) {
       if (attributes[key] && attributes[key].type === 'password') {
         // Check if a custom encryption.rounds has been set on the password attribute
-        const rounds = toNumber(getOr(10, 'encryption.rounds', attributes[key]));
+        const rounds = toNumber(get(attributes[key], 'encryption.rounds', 10));
         values[key] = await bcrypt.hash(values[key], rounds);
       }
     }

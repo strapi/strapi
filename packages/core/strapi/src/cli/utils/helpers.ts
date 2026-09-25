@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import chalk from 'chalk';
-import { has, isString, isArray } from 'lodash/fp';
+import { has, isString } from 'lodash';
 import boxen from 'boxen';
 import type { Command } from 'commander';
 import { getInquirer } from './get-inquirer';
@@ -95,7 +95,7 @@ const exitWith = (code: number, message?: string | string[], options: ExitWithOp
 
   if (isString(message)) {
     log(message);
-  } else if (isArray(message)) {
+  } else if (Array.isArray(message)) {
     message.forEach((msg) => log(msg));
   }
 
@@ -167,8 +167,8 @@ const assertCwdContainsStrapiProject = (name: string) => {
   try {
     const pkgJSON = require(`${process.cwd()}/package.json`);
     if (
-      !has('dependencies.@strapi/strapi', pkgJSON) &&
-      !has('devDependencies.@strapi/strapi', pkgJSON)
+      !has(pkgJSON, 'dependencies.@strapi/strapi') &&
+      !has(pkgJSON, 'devDependencies.@strapi/strapi')
     ) {
       logErrorAndExit();
     }

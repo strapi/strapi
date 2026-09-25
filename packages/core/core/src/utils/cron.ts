@@ -1,4 +1,4 @@
-import { isEmpty, negate } from 'lodash/fp';
+import { isEmpty, negate } from 'lodash';
 
 const DATE_FUNCTIONS = [
   'getSeconds',

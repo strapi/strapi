@@ -1,8 +1,9 @@
-import { pick, map } from 'lodash/fp';
+import { pick } from 'lodash';
 
 // visible fields for the API
 const publicFields = ['id', 'displayName', 'category'];
 
-const formatConditions = map(pick(publicFields));
+const formatConditions = (conditions: object[]) =>
+  Array.from(conditions ?? [], (condition) => pick(condition, publicFields));
 
 export { formatConditions };

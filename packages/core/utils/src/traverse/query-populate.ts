@@ -1,18 +1,4 @@
-import {
-  curry,
-  isString,
-  isArray,
-  isEmpty,
-  split,
-  isObject,
-  trim,
-  constant,
-  isNil,
-  identity,
-  cloneDeep,
-  join,
-  first,
-} from 'lodash/fp';
+import { curry, isString, isEmpty, isObject, constant, identity, cloneDeep } from 'lodash';
 
 import traverseFactory, { type Parent } from './factory';
 import { Attribute } from '../types';
@@ -26,7 +12,7 @@ const DEFAULT_QS_ARRAY_LIMIT = 100;
  * produces when indexed array notation exceeds `arrayLimit` (see #25632).
  */
 const isQsArrayLimitPopulateObject = (value: unknown): value is Record<string, string> => {
-  if (!isObject(value) || isArray(value)) {
+  if (!isObject(value) || Array.isArray(value)) {
     return false;
   }
 
@@ -65,7 +51,7 @@ const isPopulateString = (value: unknown): value is string => {
 };
 
 const isStringArray = (value: unknown): value is string[] =>
-  isArray(value) && value.every(isString);
+  Array.isArray(value) && value.every(isString);
 
 const isObj = (value: unknown): value is Record<string, unknown> => isObject(value);
 
@@ -129,11 +115,11 @@ const populate = traverseFactory()
 
   // Parse string values
   .parse(isString, () => {
-    const tokenize = split('.');
-    const recompose = join('.');
+    const tokenize = (value: string) => value.split('.');
+    const recompose = (parts: string[]) => parts.join('.');
 
     return {
-      transform: trim,
+      transform: (value) => value.trim(),
 
       remove(key, data) {
         const [root] = tokenize(data);
@@ -148,11 +134,11 @@ const populate = traverseFactory()
           return data;
         }
 
-        return isNil(value) || isEmpty(value) ? root : `${root}.${value}`;
+        return value == null || isEmpty(value) ? root : `${root}.${value}`;
       },
 
       keys(data) {
-        const v = first(tokenize(data));
+        const v = tokenize(data)[0];
         return v ? [v] : [];
       },
 
@@ -236,7 +222,7 @@ const populate = traverseFactory()
   // Handle populate on relation
   .onRelation(
     async ({ key, value, attribute, visitor, path, schema, getModel }, { set, recurse }) => {
-      if (isNil(value)) {
+      if (value == null) {
         return;
       }
 
@@ -274,7 +260,7 @@ const populate = traverseFactory()
   )
   // Handle populate on media
   .onMedia(async ({ key, path, schema, attribute, visitor, value, getModel }, { recurse, set }) => {
-    if (isNil(value)) {
+    if (value == null) {
       return;
     }
 
@@ -294,7 +280,7 @@ const populate = traverseFactory()
   // Handle populate on components
   .onComponent(
     async ({ key, value, schema, visitor, path, attribute, getModel }, { recurse, set }) => {
-      if (isNil(value)) {
+      if (value == null) {
         return;
       }
 
@@ -314,7 +300,7 @@ const populate = traverseFactory()
   // Handle populate on dynamic zones
   .onDynamicZone(
     async ({ key, value, schema, visitor, path, attribute, getModel }, { set, recurse }) => {
-      if (isNil(value) || !isObject(value)) {
+      if (value == null || !isObject(value)) {
         return;
       }
 

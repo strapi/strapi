@@ -1,5 +1,5 @@
 import type { Context } from 'koa';
-import { isEmpty } from 'lodash/fp';
+import { isEmpty } from 'lodash';
 
 import { getService } from '../utils';
 import { validateUpdateSchema } from './validation/schema';
