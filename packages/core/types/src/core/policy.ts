@@ -54,14 +54,12 @@ type RegisteredPolicyReference<TName extends PolicyName, TNamespace extends stri
 
 /**
  * A policy reference in a typed route config.
- * With strict types disabled or without registered policies, any policy name is accepted.
- * With strict types enabled, once any policy is registered, only
- * registered policies are accepted and their `config` is checked: a partial inventory cannot check
- * the `{ name, config }` form for known names while accepting unknown ones.
+ * With strict types disabled, any policy name is accepted.
+ * With strict types enabled, only registered policies are accepted and their `config` is checked:
+ * a partial inventory cannot check the `{ name, config }` form for known names while accepting
+ * unknown ones. Without registered policies, no reference is accepted.
  * A plugin or API namespace also accepts its relative policy names, with the same config checks.
  */
 export type PolicyReference<TNamespace extends string = never> = IsStrict extends false
   ? string | { name: string; config: unknown }
-  : [PolicyName] extends [never]
-    ? string | { name: string; config: unknown }
-    : { [TName in PolicyName]: RegisteredPolicyReference<TName, TNamespace> }[PolicyName];
+  : { [TName in PolicyName]: RegisteredPolicyReference<TName, TNamespace> }[PolicyName];
