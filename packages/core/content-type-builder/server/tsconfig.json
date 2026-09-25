@@ -1,4 +1,10 @@
 {
   "extends": "tsconfig/server.json",
-  "include": ["src"]
+  "include": ["src"],
+  "compilerOptions": {
+    // Resolve our own contracts from source: `@strapi/strapi/strict-types` would load our dist instead.
+    "paths": {
+      "@strapi/content-type-builder/strapi-server": ["./src/index.ts"]
+    }
+  }
 }
