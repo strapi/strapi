@@ -6,6 +6,7 @@ import { config } from './config';
 import middlewares from './middlewares';
 
 export type * from './types';
+export type * from './types/services';
 
 export default {
   bootstrap,
