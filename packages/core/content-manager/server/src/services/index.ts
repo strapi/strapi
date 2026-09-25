@@ -17,11 +17,20 @@ import homepage from '../homepage';
 import documentMetadata from './document-metadata';
 import documentManager from './document-manager';
 
-type RegisteredServices = {
+type RegisteredServiceFactories = {
   [TUID in keyof Strapi.Registries.PackageServices as TUID extends `plugin::content-manager.${infer TName}`
     ? TName
     : never]: (context: { strapi: Core.Strapi }) => Strapi.Registries.PackageServices[TUID];
 };
+
+/**
+ * Feature modules type their services as a loose `LoadedPlugin` map, and history only registers
+ * its services when its feature is enabled: their factories are optional here.
+ */
+type FeatureServiceName = 'history' | 'lifecycles' | 'preview' | 'preview-config';
+
+type RegisteredServices = Omit<RegisteredServiceFactories, FeatureServiceName> &
+  Partial<Pick<RegisteredServiceFactories, FeatureServiceName>>;
 
 const services = {
   components,
