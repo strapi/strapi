@@ -1,9 +1,10 @@
 import { assign } from 'lodash/fp';
 import type { Core } from '@strapi/types';
 import { getService } from '../utils';
+import type { EnterpriseServices } from '../../../../server/src/types';
 
 const getSSOProvidersList = async () => {
-  const { providerRegistry } = strapi.service('admin::passport');
+  const { providerRegistry } = strapi.service<EnterpriseServices['passport']>('admin::passport');
 
   return providerRegistry.getAll().map(({ uid }: { uid: string }) => uid);
 };

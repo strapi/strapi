@@ -8,6 +8,7 @@ import { validateUserUpdateInput } from '../../../../server/src/validation/user'
 import { normalizeEmail } from '../../../../server/src/utils/normalize-email';
 import { getService } from '../utils';
 import { isSsoLocked } from '../utils/sso-lock';
+import type { EnterpriseServices } from '../../../../server/src/types';
 
 const { ApplicationError, ForbiddenError } = errors;
 
@@ -23,7 +24,9 @@ const hasAdminSeatsAvaialble = async () => {
     return true;
   }
 
-  const userCount = await strapi.service('admin::user').getCurrentActiveUserCount();
+  const userCount = await strapi
+    .service<EnterpriseServices['user']>('admin::user')
+    .getCurrentActiveUserCount();
 
   if (userCount < permittedSeats) {
     return true;
