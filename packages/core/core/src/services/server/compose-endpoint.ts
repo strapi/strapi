@@ -27,6 +27,10 @@ const createRouteInfoMiddleware =
 
 const getAuthConfig = prop('config.auth');
 
+const isStrapiAuthError = (error: unknown, name: 'UnauthorizedError' | 'ForbiddenError') => {
+  return error instanceof Error && error.name === name && 'details' in error;
+};
+
 const createAuthorizeMiddleware =
   (strapi: Core.Strapi): Core.MiddlewareHandler =>
   async (ctx, next) => {
@@ -39,11 +43,14 @@ const createAuthorizeMiddleware =
 
       return await next();
     } catch (error) {
-      if (error instanceof errors.UnauthorizedError) {
+      if (
+        error instanceof errors.UnauthorizedError ||
+        isStrapiAuthError(error, 'UnauthorizedError')
+      ) {
         return ctx.unauthorized();
       }
 
-      if (error instanceof errors.ForbiddenError) {
+      if (error instanceof errors.ForbiddenError || isStrapiAuthError(error, 'ForbiddenError')) {
         // allow PolicyError as an exception to throw a publicly visible message in the API
         if (error instanceof errors.PolicyError) {
           throw error;
