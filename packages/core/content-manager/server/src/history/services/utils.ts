@@ -170,7 +170,9 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
     document: Modules.Documents.AnyDocument | null
   ) => {
     const documentMetadataService = strapi.plugin('content-manager').service('document-metadata');
-    const meta = await documentMetadataService.getMetadata(contentTypeUid, document);
+    const meta = await documentMetadataService.getMetadata(contentTypeUid, document, {
+      availableLocales: false,
+    });
 
     return documentMetadataService.getStatus(document, meta.availableStatus);
   };

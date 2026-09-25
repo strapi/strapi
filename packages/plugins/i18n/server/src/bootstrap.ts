@@ -1,7 +1,9 @@
 import type { Schema } from '@strapi/types';
 import { isEqual } from 'lodash/fp';
+import { contentTypes as contentTypesUtils } from '@strapi/utils';
 import { registerAuditEvents } from './audit-logs';
 import { getService } from './utils';
+import { getOriginalNonLocalizedLookup } from './utils/non-localized-original-data';
 
 const registerModelsHooks = () => {
   strapi.db.lifecycles.subscribe({
@@ -32,14 +34,28 @@ const registerModelsHooks = () => {
       getService('content-types');
     const attributesToPopulate = getNestedPopulateOfNonLocalizedAttributes(schema.uid);
 
-    // Get original data before the update to compare what actually changed
-    const originalData =
-      'documentId' in context.params && context.params.documentId
-        ? await strapi.db.query(schema.uid).findOne({
-            where: { documentId: context.params.documentId },
-            populate: attributesToPopulate,
-          })
-        : null;
+    // Compare against this locale + status, not an arbitrary row of the document.
+    // Unscoped findOne can pick a published sibling while we write a draft (or
+    // the reverse), which makes i18n sync overwrite the other tree.
+    const localeParam = 'locale' in context.params ? context.params.locale : undefined;
+    const defaultLocale = await getService('locales').getDefaultLocale();
+    const originalWhere = getOriginalNonLocalizedLookup({
+      documentId:
+        'documentId' in context.params && typeof context.params.documentId === 'string'
+          ? context.params.documentId
+          : undefined,
+      locale: localeParam,
+      action: context.action,
+      hasDraftAndPublish: contentTypesUtils.hasDraftAndPublish(schema),
+      defaultLocale,
+    });
+
+    const originalData = originalWhere
+      ? await strapi.db.query(schema.uid).findOne({
+          where: originalWhere,
+          populate: attributesToPopulate,
+        })
+      : null;
 
     // Get the result of the document service action
     const result = (await next()) as any;
