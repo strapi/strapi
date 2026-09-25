@@ -285,13 +285,15 @@ jobs:
         uses: ./.github/actions/run-build
 
       - name: Run [CE] E2E tests
+        id: e2e
+        continue-on-error: true
         uses: ./.github/actions/run-e2e-tests
         with:
           runEE: false
           jestOptions: '--project=${{ matrix.project }} --shard=${{ matrix.shard }}'
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: failure()
+        if: ${{ steps.e2e.outcome == 'failure' }}
         with:
           name: ce-${{ matrix.project }}--playwright-trace-${{ github.run_id }}-${{ github.job }}
           path: test-apps/e2e/test-results/**/trace.zip
@@ -299,13 +301,20 @@ jobs:
 
         # Add the Trunk Analytics Uploader step
       - name: Upload results to trunk
+        id: trunk
         if: '!cancelled()'
         uses: trunk-io/analytics-uploader@385f1ccdf345b4532dc4b6c665dd432b702b8e28 # v2.1.2
         with:
           junit-paths: test-apps/junit-reports/*.xml
           org-slug: strapi
           token: ${{ secrets.TRUNK_API_TOKEN }}
+          previous-step-outcome: ${{ steps.e2e.outcome }}
         continue-on-error: true
+
+      - name: Fail on a non-quarantined E2E failure
+        if: ${{ !cancelled() && steps.e2e.outcome == 'failure' && steps.trunk.outcome != 'success' }}
+        run: exit 1
+
   # The Media Library specs run in dedicated jobs rather than the shared matrix, and each
   # job picks its suite explicitly with `mediaLibrarySuite`. Nothing about the product
   # default decides what runs here: the shared matrix sets neither suite, so it is
@@ -348,6 +357,8 @@ jobs:
         uses: ./.github/actions/run-build
 
       - name: Run [CE] e2e media library E2E tests
+        id: e2e
+        continue-on-error: true
         uses: ./.github/actions/run-e2e-tests
         with:
           runEE: false
@@ -357,20 +368,26 @@ jobs:
           jestOptions: '--project=chromium'
 
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
-        if: failure()
+        if: ${{ steps.e2e.outcome == 'failure' }}
         with:
           name: ce-media-library-playwright-trace-${{ github.run_id }}-${{ github.job }}
           path: test-apps/e2e/test-results/**/trace.zip
           retention-days: 1
 
       - name: Upload results to trunk
+        id: trunk
         if: '!cancelled()'
-        uses: trunk-io/analytics-uploader@1198efcc0976501147b10a7e343c3fa069527526 # v2.0.9
+        uses: trunk-io/analytics-uploader@385f1ccdf345b4532dc4b6c665dd432b702b8e28 # v2.1.2
         with:
           junit-paths: test-apps/junit-reports/*.xml
           org-slug: strapi
           token: ${{ secrets.TRUNK_API_TOKEN }}
+          previous-step-outcome: ${{ steps.e2e.outcome }}
         continue-on-error: true
+
+      - name: Fail on a non-quarantined E2E failure
+        if: ${{ !cancelled() && steps.e2e.outcome == 'failure' && steps.trunk.outcome != 'success' }}
+        run: exit 1
 
   e2e_media_library_legacy:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
@@ -395,6 +412,8 @@ jobs:
         uses: ./.github/actions/run-build
 
       - name: Run [CE] e2e media library (legacy) E2E tests
+        id: e2e
+        continue-on-error: true
         uses: ./.github/actions/run-e2e-tests
         with:
           runEE: false
@@ -404,20 +423,27 @@ jobs:
           jestOptions: '--project=chromium'
 
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
-        if: failure()
+        if: ${{ steps.e2e.outcome == 'failure' }}
         with:
           name: ce-media-library-legacy-playwright-trace-${{ github.run_id }}-${{ github.job }}
           path: test-apps/e2e/test-results/**/trace.zip
           retention-days: 1
 
       - name: Upload results to trunk
+        id: trunk
         if: '!cancelled()'
-        uses: trunk-io/analytics-uploader@1198efcc0976501147b10a7e343c3fa069527526 # v2.0.9
+        uses: trunk-io/analytics-uploader@385f1ccdf345b4532dc4b6c665dd432b702b8e28 # v2.1.2
         with:
           junit-paths: test-apps/junit-reports/*.xml
           org-slug: strapi
           token: ${{ secrets.TRUNK_API_TOKEN }}
+          previous-step-outcome: ${{ steps.e2e.outcome }}
         continue-on-error: true
+
+      - name: Fail on a non-quarantined E2E failure
+        if: ${{ !cancelled() && steps.e2e.outcome == 'failure' && steps.trunk.outcome != 'success' }}
+        run: exit 1
+
   e2e_ee:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
     timeout-minutes: 60
@@ -447,13 +473,15 @@ jobs:
       - name: Monorepo build
         uses: ./.github/actions/run-build
       - name: Run [EE] E2E tests
+        id: e2e
+        continue-on-error: true
         uses: ./.github/actions/run-e2e-tests
         with:
           runEE: true
           jestOptions: '--project=${{ matrix.project }} --shard=${{ matrix.shard }}'
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: failure()
+        if: ${{ steps.e2e.outcome == 'failure' }}
         with:
           name: ee-${{ matrix.project }}--playwright-trace-${{ github.run_id }}-${{ github.job }}
           path: test-apps/e2e/test-results/**/trace.zip
@@ -461,13 +489,19 @@ jobs:
 
       # Add the Trunk Analytics Uploader step
       - name: Upload results to trunk
+        id: trunk
         if: '!cancelled()'
         uses: trunk-io/analytics-uploader@385f1ccdf345b4532dc4b6c665dd432b702b8e28 # v2.1.2
         with:
           junit-paths: test-apps/junit-reports/*.xml
           org-slug: strapi
           token: ${{ secrets.TRUNK_API_TOKEN }}
+          previous-step-outcome: ${{ steps.e2e.outcome }}
         continue-on-error: true
+
+      - name: Fail on a non-quarantined E2E failure
+        if: ${{ !cancelled() && steps.e2e.outcome == 'failure' && steps.trunk.outcome != 'success' }}
+        run: exit 1
 
   migration_v5:
     if: needs.conditions.outputs.migrations == 'true'

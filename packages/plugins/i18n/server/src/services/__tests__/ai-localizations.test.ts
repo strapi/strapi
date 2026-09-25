@@ -43,6 +43,7 @@ describe('ai-localizations service', () => {
     ): Schema.Schema => {
       return {
         modelType: 'contentType',
+        kind: 'collectionType',
         uid: 'api::test.test',
         modelName: 'test',
         globalId: 'Test',

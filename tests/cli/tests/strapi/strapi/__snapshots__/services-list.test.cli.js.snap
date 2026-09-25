@@ -3,6 +3,7 @@
 exports[`services:list should output list of services 1`] = `
 "│ Name                                                 │
 │ plugin::content-manager.components                   │
+│ plugin::content-manager.content-structure            │
 │ plugin::content-manager.content-types                │
 │ plugin::content-manager.data-mapper                  │
 │ plugin::content-manager.document-metadata            │
@@ -22,6 +23,7 @@ exports[`services:list should output list of services 1`] = `
 │ plugin::content-type-builder.builder                 │
 │ plugin::content-type-builder.api-handler             │
 │ plugin::content-type-builder.schema                  │
+│ plugin::content-type-builder.content-structure       │
 │ plugin::email.email                                  │
 │ plugin::upload.provider                              │
 │ plugin::upload.upload                                │
@@ -34,6 +36,7 @@ exports[`services:list should output list of services 1`] = `
 │ plugin::upload.extensions                            │
 │ plugin::upload.aiMetadata                            │
 │ plugin::upload.aiMetadataJobs                        │
+│ plugin::upload.aiMetadataProvider                    │
 │ plugin::i18n.permissions                             │
 │ plugin::i18n.metrics                                 │
 │ plugin::i18n.localizations                           │

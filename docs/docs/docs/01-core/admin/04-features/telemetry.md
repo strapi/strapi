@@ -211,12 +211,27 @@ Do not add per-render or high-frequency tracking without an explicit product nee
 
 ## `window.strapi` telemetry fields
 
-Set in `packages/core/admin/admin/src/render.ts`:
+Built by `createBrowserStrapi` (`packages/core/admin/admin/src/utils/browserStrapi.ts`)
+with defaults, enriched from `/admin/project-type`, then assigned to `window.strapi` once
+by `render.ts`:
 
 ```typescript
-window.strapi.telemetryDisabled = process.env.STRAPI_TELEMETRY_DISABLED === 'true';
-window.strapi.projectType = 'Community' | 'Enterprise'; // updated after /admin/project-type
+const browserStrapi: Window['strapi'] = {
+  telemetryDisabled: process.env.STRAPI_TELEMETRY_DISABLED === 'true',
+  projectType: 'Community',
+  // …other fields
+};
+
+// after fetching /admin/project-type → { isEE, isTrial, planPriceId, features, flags, ai }
+browserStrapi.projectType = getProjectType({ isEE, planPriceId });
+
+// assigned exactly once, before the app renders
+window.strapi = browserStrapi;
 ```
+
+`projectType` is never derived from `isEE` alone — always call `getProjectType`, which
+returns `Growth` when `planPriceId` contains `growth` and `Enterprise` for other licensed
+plans.
 
 Typed in `packages/core/admin/admin/custom.d.ts`.
 
