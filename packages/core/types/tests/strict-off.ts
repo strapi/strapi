@@ -48,9 +48,30 @@ declare const checks: [
 ];
 checks satisfies unknown;
 
+// Plural accessors keep the legacy records, even for registered keys.
+declare const mapChecks: [
+  Expect<Equal<Core.Strapi['services'], Record<string, Core.Service>>>,
+  Expect<Equal<Core.Strapi['controllers'], Record<string, Core.Controller>>>,
+  Expect<Equal<Core.Strapi['policies'], Record<string, Core.Policy>>>,
+  Expect<Equal<Core.Strapi['plugins'], Record<string, Core.Plugin>>>,
+  Expect<Equal<Core.Strapi['apis'], Record<string, Core.Module>>>,
+  Expect<Equal<Core.Plugin<'legacy'>['services'], Record<string, Core.Service>>>,
+  Expect<Equal<Core.Plugin<'legacy'>['controllers'], Record<string, Core.Controller>>>,
+  Expect<Equal<Core.Plugin<'legacy'>['policies'], Record<string, Core.Policy>>>,
+  Expect<Equal<Core.Module<'api::legacy'>['services'], Record<string, Core.Service>>>,
+  Expect<Equal<Core.Strapi['services']['plugin::legacy.example'], Core.Service>>,
+  Expect<Equal<Core.Strapi['controllers']['plugin::legacy.example'], Core.Controller>>,
+  Expect<Equal<Core.Strapi['policies']['plugin::legacy.hasRole'], Core.Policy>>,
+];
+mapChecks satisfies unknown;
+
 declare const strapi: Core.Strapi;
 strapi.service('plugin::legacy.example').anything();
 strapi.plugin('legacy').service('example').anything();
+strapi.services['plugin::legacy.example'].anything();
+strapi.plugin('legacy').services.example.anything();
+strapi.plugins.legacy.services.example.anything();
+strapi.api('legacy').services.example.anything();
 
 const controller = strapi.controller('plugin::legacy.example');
 const pluginController = strapi.plugin('legacy').controller('example');

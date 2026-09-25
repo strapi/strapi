@@ -1,7 +1,7 @@
 import 'koa-body';
 import type { Context, Next } from 'koa';
 import type * as UID from '../uid';
-import type { IsDynamicName, IsStrict } from './strictness';
+import type { IsDynamicName, IsStrict, RegisteredRecord } from './strictness';
 
 export type Controller = Record<string, ControllerHandler>;
 
@@ -27,6 +27,20 @@ export type ControllerFor<TUID extends string> = IsStrict extends false
 export type ControllerLookup<TUID extends UID.Controller, T> = UID.Controller extends TUID
   ? T
   : ControllerFor<TUID>;
+
+/** Controller UIDs that have a registered contract. */
+export type RegisteredControllerUID =
+  | keyof Strapi.Registries.AppControllers
+  | keyof Strapi.Registries.PackageControllers;
+
+/**
+ * Controllers keyed by UID, e.g. `strapi.controllers`. With strict types enabled, registered UIDs
+ * resolve to their contracts. Other keys, literal or dynamic, resolve to the legacy controller: an
+ * index signature cannot close literal keys while keeping dynamic keys open, unlike `strapi.controller(uid)`.
+ */
+export type ControllerMap = IsStrict extends false
+  ? Record<string, Controller>
+  : RegisteredRecord<{ [TUID in RegisteredControllerUID]: ControllerFor<TUID> }, Controller>;
 
 export interface ControllerHandler<TResponse = unknown> {
   (context: Context, next: Next): Promise<TResponse | void> | TResponse | void;
