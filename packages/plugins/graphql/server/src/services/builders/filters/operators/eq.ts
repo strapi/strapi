@@ -11,10 +11,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
   strapiOperator: '$eq',
 
-  add(t: Nexus.blocks.ObjectDefinitionBlock<string>, type: string) {
+  add(t: Nexus.blocks.InputDefinitionBlock<string>, type: string) {
     const { GRAPHQL_SCALARS } = strapi.plugin('graphql').service('constants');
 
-    if (!GRAPHQL_SCALARS.includes(type)) {
+    if (!(GRAPHQL_SCALARS as readonly string[]).includes(type)) {
       throw new ValidationError(
         `Can't use "${EQ_FIELD_NAME}" operator. "${type}" is not a valid scalar`
       );

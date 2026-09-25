@@ -8,7 +8,7 @@ export default () => ({
 
   strapiOperator: '$notIn',
 
-  add(t: Nexus.blocks.ObjectDefinitionBlock<string>, type: string) {
+  add(t: Nexus.blocks.InputDefinitionBlock<string>, type: string) {
     t.field(NOT_IN_FIELD_NAME, { type: list(type) });
   },
 });
