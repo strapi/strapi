@@ -485,7 +485,7 @@ export const createEntityManager = (db: Database): EntityManager => {
 
       // Same pick set as count and deleteMany. See deleteMany for why.
       const updatedRows = await this.createQueryBuilder(uid)
-        .init(pick(['_q', 'where', 'filters'], params))
+        .init(pick(params, ['_q', 'where', 'filters']))
         .update(dataToUpdate)
         .execute<number>({ mapResults: false });
 
