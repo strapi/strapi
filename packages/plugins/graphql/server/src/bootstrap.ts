@@ -1,4 +1,4 @@
-import { isEmpty, mergeWith, isArray, isObject, isFunction } from 'lodash/fp';
+import { isArray, mergeWith, isFunction, isEmpty, isObject } from 'lodash';
 import { ApolloServer, type ApolloServerPlugin, type ApolloServerOptions } from '@apollo/server';
 import {
   ApolloServerPluginLandingPageLocalDefault,
@@ -14,12 +14,6 @@ import type { Options } from '@koa/cors';
 import type { BaseContext, DefaultContextExtends, DefaultStateExtends } from 'koa';
 
 import { formatGraphqlError } from './format-graphql-error';
-
-const merge = mergeWith((a, b) => {
-  if (isArray(a) && isArray(b)) {
-    return a.concat(b);
-  }
-});
 
 type StrapiGraphQLContext = BaseContext & {
   rootQueryArgsByPath?: Map<string | number, Record<string, unknown>>;
@@ -223,9 +217,16 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
     cache: 'bounded' as const,
   };
 
-  const serverConfig = merge(
+  const serverConfig = mergeWith(
+    {},
     defaultServerConfig,
-    config('apolloServer')
+    config('apolloServer'),
+    (a: unknown, b: unknown) => {
+      if (isArray(a) && isArray(b)) {
+        return a.concat(b);
+      }
+      return undefined;
+    }
   ) as ApolloServerOptions<StrapiGraphQLContext> & CustomOptions;
 
   // Create a new Apollo server

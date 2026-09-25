@@ -1,5 +1,5 @@
 import { unionType } from 'nexus';
-import { prop } from 'lodash/fp';
+import { property } from 'lodash';
 
 import type { Context } from '../types';
 
@@ -31,7 +31,7 @@ export default ({ strapi, registry }: Context) => {
             // Resolve every content-type or component
             .where(({ config }) => [KINDS.type, KINDS.component].includes(config.kind))
             // Only keep their name (the type's id)
-            .map(prop('name'));
+            .map(property('name'));
 
           t.members(...members);
         },

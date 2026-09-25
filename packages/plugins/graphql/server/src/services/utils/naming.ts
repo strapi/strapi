@@ -1,4 +1,4 @@
-import { camelCase, upperFirst, lowerFirst, pipe, get } from 'lodash/fp';
+import { get, camelCase, upperFirst, lowerFirst } from 'lodash';
 import { singular } from 'pluralize';
 import { errors } from '@strapi/utils';
 import type { Struct, Schema } from '@strapi/types';
@@ -34,12 +34,12 @@ export default ({ strapi }: Context) => {
       plurality?: 'singular' | 'plural';
     } = {}
   ) => {
-    const plugin = get('plugin', contentType);
-    const modelName = get('modelName', contentType);
+    const plugin = get(contentType, 'plugin');
+    const modelName = get(contentType, 'modelName');
     const name =
       plurality === 'singular'
-        ? get('info.singularName', contentType)
-        : get('info.pluralName', contentType);
+        ? get(contentType, 'info.singularName')
+        : get(contentType, 'info.pluralName');
 
     const transformedPlugin = plugin ? upperFirst(camelCase(plugin)) : '';
     const transformedModelName = upperFirst(camelCase(name || singular(modelName)));
@@ -194,10 +194,10 @@ export default ({ strapi }: Context) => {
       );
     }
 
-    const getCustomTypeName = pipe(
-      (ct) => getTypeName(ct, { plurality }),
-      firstLetterCase === 'upper' ? upperFirst : lowerFirst
-    );
+    const getCustomTypeName = (contentType: Struct.Schema) => {
+      const typeName = getTypeName(contentType, { plurality });
+      return firstLetterCase === 'upper' ? upperFirst(typeName) : lowerFirst(typeName);
+    };
 
     return (contentType: Struct.Schema) => `${prefix}${getCustomTypeName(contentType)}${suffix}`;
   };

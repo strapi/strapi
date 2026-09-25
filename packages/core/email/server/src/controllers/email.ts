@@ -1,4 +1,4 @@
-import { pick } from 'lodash/fp';
+import { pick } from 'lodash';
 import { errors } from '@strapi/utils';
 
 import type Koa from 'koa';
@@ -78,10 +78,12 @@ const emailController = {
     const isIdle = typeof provider?.isIdle === 'function' ? provider.isIdle() : undefined;
 
     ctx.send({
-      config: pick(
-        ['provider', 'settings.defaultFrom', 'settings.defaultReplyTo', 'settings.testAddress'],
-        config
-      ),
+      config: pick(config, [
+        'provider',
+        'settings.defaultFrom',
+        'settings.defaultReplyTo',
+        'settings.testAddress',
+      ]),
       supportsVerify,
       ...(capabilities ? { capabilities } : {}),
       ...(isIdle !== undefined ? { isIdle } : {}),

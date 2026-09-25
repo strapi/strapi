@@ -1,4 +1,4 @@
-import { isEmpty } from 'lodash/fp';
+import { isEmpty } from 'lodash';
 
 import { getService } from '../../utils';
 

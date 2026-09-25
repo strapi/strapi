@@ -1,5 +1,5 @@
 import { objectType } from 'nexus';
-import { prop } from 'lodash/fp';
+import { property } from 'lodash';
 import type { Schema } from '@strapi/types';
 import type { Context } from '../types';
 
@@ -21,7 +21,7 @@ export default ({ strapi }: Context) => {
           t.field('data', {
             type: typeName,
 
-            resolve: prop('value'),
+            resolve: property('value'),
           });
         },
       });

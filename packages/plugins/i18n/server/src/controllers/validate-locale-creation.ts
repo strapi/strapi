@@ -1,4 +1,4 @@
-import { get } from 'lodash/fp';
+import { get } from 'lodash';
 import { errors } from '@strapi/utils';
 import type { Core, Struct } from '@strapi/types';
 import { getService } from '../utils';
@@ -26,7 +26,7 @@ const validateLocaleCreation: Core.MiddlewareHandler = async (ctx, next) => {
   }
 
   // Prevent empty string locale
-  const locale = get('locale', query) || get('locale', body) || undefined;
+  const locale = get(query, 'locale') || get(body, 'locale') || undefined;
 
   // cleanup to avoid creating duplicates in single types
   ctx.request.query = {};

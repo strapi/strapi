@@ -1,4 +1,4 @@
-import { sortBy, map, isUndefined } from 'lodash/fp';
+import { map, isUndefined, sortBy } from 'lodash';
 import { strings, setCreatorFields } from '@strapi/utils';
 import { FOLDER_MODEL_UID, FILE_MODEL_UID } from '../constants';
 import { getService } from '../utils';
@@ -77,7 +77,7 @@ const deleteByIds = async (ids: number[] = [], { validateFiles }: DeleteByIdsOpt
     };
   }
 
-  const pathsToDelete = map('path', folders);
+  const pathsToDelete = map(folders, 'path');
 
   // delete files
   const filesToDelete = await strapi.db.query(FILE_MODEL_UID).findMany({
@@ -297,7 +297,7 @@ const getStructure = async () => {
     }
 
     folderMap[parentId].children.push(folderMap[f.id]);
-    folderMap[parentId].children = sortBy('name', folderMap[parentId].children);
+    folderMap[parentId].children = sortBy(folderMap[parentId].children, 'name');
     delete folderMap[f.id].parent;
   });
 

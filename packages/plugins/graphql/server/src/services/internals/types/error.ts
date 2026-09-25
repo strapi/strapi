@@ -1,5 +1,5 @@
 import { objectType } from 'nexus';
-import { get } from 'lodash/fp';
+import { get } from 'lodash';
 import { errors } from '@strapi/utils';
 
 import type { Context } from '../../types';
@@ -19,7 +19,7 @@ export default ({ strapi }: Context) => {
     definition(t) {
       t.nonNull.string('code', {
         resolve(parent) {
-          const code = get('code', parent);
+          const code = get(parent, 'code');
 
           const isValidPlaceholderCode = Object.values(ERROR_CODES).includes(code);
           if (!isValidPlaceholderCode) {

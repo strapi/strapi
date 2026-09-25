@@ -1,4 +1,4 @@
-import { defaultsDeep, filter, pipe } from 'lodash/fp';
+import { defaultsDeep } from 'lodash';
 
 import type { Core, UID } from '@strapi/types';
 
@@ -84,10 +84,9 @@ function persistRWOnDowngrade({ strapi }: { strapi: Core.Strapi }) {
       };
     };
 
-    const enabledRWContentTypes = pipe([
-      getVisibleContentTypesUID,
-      filter((uid: UID.ContentType) => hasStageAttribute(contentTypes[uid])),
-    ])(contentTypes);
+    const enabledRWContentTypes = getVisibleContentTypesUID(contentTypes).filter((uid) =>
+      hasStageAttribute(contentTypes[uid])
+    );
 
     // Remove previously created join tables and persist the new ones
     const stageJoinTablesToPersist = enabledRWContentTypes.map(getStageTableToPersist);
@@ -120,13 +119,10 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   extendReviewWorkflowContentTypes({ strapi });
 
   // License limits
-  const reviewWorkflowsOptions = defaultsDeep(
-    {
-      numberOfWorkflows: MAX_WORKFLOWS,
-      stagesPerWorkflow: MAX_STAGES_PER_WORKFLOW,
-    },
-    strapi.ee.features.get('review-workflows')
-  );
+  const reviewWorkflowsOptions = defaultsDeep({}, strapi.ee.features.get('review-workflows'), {
+    numberOfWorkflows: MAX_WORKFLOWS,
+    stagesPerWorkflow: MAX_STAGES_PER_WORKFLOW,
+  });
   const workflowsValidationService = getService('validation', { strapi });
   workflowsValidationService.register(reviewWorkflowsOptions);
 };

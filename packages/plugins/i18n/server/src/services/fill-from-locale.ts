@@ -1,4 +1,4 @@
-import { isArray } from 'lodash/fp';
+import { isArray } from 'lodash';
 import { contentTypes } from '@strapi/utils';
 import type { UID, Schema, Core } from '@strapi/types';
 
