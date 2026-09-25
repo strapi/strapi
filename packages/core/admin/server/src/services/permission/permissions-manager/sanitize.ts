@@ -1,15 +1,4 @@
-import {
-  omit,
-  pick,
-  defaults,
-  isArray,
-  isEmpty,
-  uniq,
-  intersection,
-  get,
-  isObject,
-  cloneDeep,
-} from 'lodash';
+import { omit, pick, defaults, isEmpty, intersection, get, isObject, cloneDeep } from 'lodash';
 import { subject as asSubject } from '@casl/ability';
 
 import type { UID } from '@strapi/types';
@@ -202,7 +191,7 @@ export default ({ action, ability, model }: any) => {
     const { getPermissionFields } = createPermissionFieldsCache(ability);
 
     const wrappedSanitize = async (data: unknown, options = {} as any): Promise<unknown> => {
-      if (isArray(data)) {
+      if (Array.isArray(data)) {
         return Promise.all(data.map((entity: unknown) => wrappedSanitize(entity, options)));
       }
 
@@ -284,22 +273,24 @@ export default ({ action, ability, model }: any) => {
 
     const nonVisibleWritableAttributes = intersection(writableAttributes, nonVisibleAttributes);
 
-    return uniq([...fields, ...COMPONENT_FIELDS, ...nonVisibleWritableAttributes]);
+    return [...new Set([...fields, ...COMPONENT_FIELDS, ...nonVisibleWritableAttributes])];
   };
 
   const getOutputFields = (fields = []) => {
     const nonWritableAttributes = getNonWritableAttributes(schema);
     const nonVisibleAttributes = getNonVisibleAttributes(schema);
 
-    return uniq([
-      ...fields,
-      ...STATIC_FIELDS,
-      ...COMPONENT_FIELDS,
-      ...nonWritableAttributes,
-      ...nonVisibleAttributes,
-      CREATED_AT_ATTRIBUTE,
-      UPDATED_AT_ATTRIBUTE,
-    ]);
+    return [
+      ...new Set([
+        ...fields,
+        ...STATIC_FIELDS,
+        ...COMPONENT_FIELDS,
+        ...nonWritableAttributes,
+        ...nonVisibleAttributes,
+        CREATED_AT_ATTRIBUTE,
+        UPDATED_AT_ATTRIBUTE,
+      ]),
+    ];
   };
 
   const getQueryFields = (fields = []) => {
@@ -308,17 +299,19 @@ export default ({ action, ability, model }: any) => {
 
     const nonVisibleWritableAttributes = intersection(writableAttributes, nonVisibleAttributes);
 
-    return uniq([
-      ...fields,
-      ...STATIC_FIELDS,
-      ...COMPONENT_FIELDS,
-      ...nonVisibleWritableAttributes,
-      CREATED_AT_ATTRIBUTE,
-      UPDATED_AT_ATTRIBUTE,
-      PUBLISHED_AT_ATTRIBUTE,
-      CREATED_BY_ATTRIBUTE,
-      UPDATED_BY_ATTRIBUTE,
-    ]);
+    return [
+      ...new Set([
+        ...fields,
+        ...STATIC_FIELDS,
+        ...COMPONENT_FIELDS,
+        ...nonVisibleWritableAttributes,
+        CREATED_AT_ATTRIBUTE,
+        UPDATED_AT_ATTRIBUTE,
+        PUBLISHED_AT_ATTRIBUTE,
+        CREATED_BY_ATTRIBUTE,
+        UPDATED_BY_ATTRIBUTE,
+      ]),
+    ];
   };
 
   return {

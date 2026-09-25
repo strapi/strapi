@@ -1,4 +1,4 @@
-import { omit, defaults, isArray, isEmpty, uniq, intersection, get, isObject } from 'lodash';
+import { omit, defaults, isEmpty, intersection, get, isObject } from 'lodash';
 import { subject as asSubject } from '@casl/ability';
 
 import {
@@ -161,7 +161,7 @@ export default ({ action, ability, model }: any) => {
     // TODO
     // @ts-expect-error define the correct return type
     const wrappedValidate = async (data, options = {}): Promise<unknown> => {
-      if (isArray(data)) {
+      if (Array.isArray(data)) {
         return Promise.all(data.map((entity: unknown) => wrappedValidate(entity, options)));
       }
 
@@ -225,18 +225,20 @@ export default ({ action, ability, model }: any) => {
 
     const nonVisibleWritableAttributes = intersection(writableAttributes, nonVisibleAttributes);
 
-    return uniq([...fields, ...COMPONENT_FIELDS, ...nonVisibleWritableAttributes]);
+    return [...new Set([...fields, ...COMPONENT_FIELDS, ...nonVisibleWritableAttributes])];
   };
 
   const getQueryFields = (fields = []) => {
-    return uniq([
-      ...fields,
-      ...STATIC_FIELDS,
-      ...COMPONENT_FIELDS,
-      CREATED_AT_ATTRIBUTE,
-      UPDATED_AT_ATTRIBUTE,
-      PUBLISHED_AT_ATTRIBUTE,
-    ]);
+    return [
+      ...new Set([
+        ...fields,
+        ...STATIC_FIELDS,
+        ...COMPONENT_FIELDS,
+        CREATED_AT_ATTRIBUTE,
+        UPDATED_AT_ATTRIBUTE,
+        PUBLISHED_AT_ATTRIBUTE,
+      ]),
+    ];
   };
 
   return {

@@ -1,4 +1,4 @@
-import { isNil, merge } from 'lodash';
+import { merge } from 'lodash';
 
 import type { UID } from '@strapi/types';
 import { type Populate, getDeepPopulate, getQueryPopulate } from './utils/populate';
@@ -40,10 +40,10 @@ const populateBuilder = (uid: UID.Schema) => {
      * @param [options.toOne] - Populate XtoOne relations as count if true.
      */
     countRelations({ toMany, toOne } = { toMany: true, toOne: true }) {
-      if (!isNil(toMany)) {
+      if (toMany != null) {
         deepPopulateOptions.countMany = toMany;
       }
-      if (!isNil(toOne)) {
+      if (toOne != null) {
         deepPopulateOptions.countOne = toOne;
       }
       return builder;

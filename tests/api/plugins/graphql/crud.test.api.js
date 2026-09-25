@@ -1,6 +1,6 @@
 'use strict';
 
-const { omit, property } = require('lodash');
+const { omit } = require('lodash');
 
 // Helpers.
 const { createTestBuilder } = require('api-tests/builder');
@@ -584,15 +584,17 @@ describe('Test Graphql API End to End', () => {
       expect(posts.length).toBe(expected.length);
 
       // all the posts returned are in the expected array
-      posts.map(property('attributes')).forEach((post) => {
-        expect(expected.map((value) => omit(value, 'documentId'))).toEqual(
-          expect.arrayContaining([post])
-        );
-      });
+      posts
+        .map((post) => post?.attributes)
+        .forEach((post) => {
+          expect(expected.map((value) => omit(value, 'documentId'))).toEqual(
+            expect.arrayContaining([post])
+          );
+        });
 
       // all expected values are in the result
       expected.forEach((expectedPost) => {
-        expect(posts.map(property('attributes'))).toEqual(
+        expect(posts.map((post) => post?.attributes)).toEqual(
           expect.arrayContaining([omit(expectedPost, 'documentId')])
         );
       });

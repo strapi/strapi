@@ -1,4 +1,4 @@
-import { property, uniq, uniqBy, concat, flow, isEmpty } from 'lodash';
+import { property, uniqBy, concat, flow, isEmpty } from 'lodash';
 
 import { isOperatorOfType, contentTypes, relations, errors } from '@strapi/utils';
 import type { Data, Modules, UID } from '@strapi/types';
@@ -244,12 +244,9 @@ export default {
       (mainField) => sanitizeMainField(targetSchema, mainField, userAbility)
     )(modelConfig);
 
-    const fieldsToSelect = uniq([
-      mainField,
-      PUBLISHED_AT_ATTRIBUTE,
-      UPDATED_AT_ATTRIBUTE,
-      'documentId',
-    ]);
+    const fieldsToSelect = [
+      ...new Set([mainField, PUBLISHED_AT_ATTRIBUTE, UPDATED_AT_ATTRIBUTE, 'documentId']),
+    ];
 
     if (isTargetLocalized) {
       fieldsToSelect.push('locale');
@@ -408,7 +405,7 @@ export default {
     if (idsToOmit?.length > 0) {
       // If we have ids to omit, we should filter them out
       addFiltersClause(queryParams, {
-        id: { $notIn: uniq(idsToOmit) },
+        id: { $notIn: [...new Set(idsToOmit)] },
       });
     }
 

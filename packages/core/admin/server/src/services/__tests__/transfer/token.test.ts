@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { errors, emitAudit } from '@strapi/utils';
-import { omit, uniq } from 'lodash';
+import { omit } from 'lodash';
 
 import {
   create as tokenServiceCreate,
@@ -169,7 +169,7 @@ describe('Transfer Token', () => {
       const create = jest.fn(({ data }) => Promise.resolve(data));
       const load = jest.fn().mockResolvedValueOnce(
         Promise.resolve(
-          uniq(attributes.permissions).map((p) => {
+          [...new Set(attributes.permissions)].map((p) => {
             return {
               action: p,
             };
@@ -332,7 +332,7 @@ describe('Transfer Token', () => {
       const create = jest.fn().mockResolvedValue(createTokenResult);
       const load = jest.fn().mockResolvedValueOnce(
         Promise.resolve(
-          uniq(attributes.permissions).map((p) => {
+          [...new Set(attributes.permissions)].map((p) => {
             return {
               action: p,
             };
@@ -381,7 +381,7 @@ describe('Transfer Token', () => {
       const create = jest.fn().mockResolvedValue(createTokenResult);
       const load = jest.fn().mockResolvedValueOnce(
         Promise.resolve(
-          uniq(attributes.permissions).map((p) => {
+          [...new Set(attributes.permissions)].map((p) => {
             return {
               action: p,
             };

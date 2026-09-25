@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-loop-func */
-import { isNil, pick } from 'lodash';
+import { pick } from 'lodash';
 
 import {
   AnyAttribute,
@@ -155,10 +155,10 @@ export default () => {
 
       const newPath = { ...path };
 
-      newPath.raw = isNil(path.raw) ? key : `${path.raw}.${key}`;
+      newPath.raw = path.raw == null ? key : `${path.raw}.${key}`;
 
-      if (!isNil(attribute)) {
-        newPath.attribute = isNil(path.attribute) ? key : `${path.attribute}.${key}`;
+      if (attribute != null) {
+        newPath.attribute = path.attribute == null ? key : `${path.attribute}.${key}`;
       }
 
       // visitors

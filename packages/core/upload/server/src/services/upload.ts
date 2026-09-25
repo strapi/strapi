@@ -2,7 +2,7 @@ import os from 'os';
 import path from 'path';
 import fs from 'fs';
 import fse from 'fs-extra';
-import _, { has, toNumber, isNil } from 'lodash';
+import _, { has, toNumber } from 'lodash';
 import { extension } from 'mime-types';
 import {
   async,
@@ -713,7 +713,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return {
       results: signedResults,
       // Omit total & pageCount when counting is disabled (withCount=false).
-      pagination: isNil(total) ? _.omit(paginationInfo, ['total', 'pageCount']) : paginationInfo,
+      pagination: total == null ? _.omit(paginationInfo, ['total', 'pageCount']) : paginationInfo,
     };
   }
 

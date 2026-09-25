@@ -1,4 +1,4 @@
-import _, { omit, pick, property, isArray, differenceWith, differenceBy, isEqual } from 'lodash';
+import _, { omit, pick, differenceWith, differenceBy, isEqual } from 'lodash';
 /* eslint-disable @typescript-eslint/no-explicit-any */ // TODO: TS - Use database parameters interface when they are ready
 /* eslint-disable @typescript-eslint/default-param-last */
 
@@ -364,7 +364,9 @@ const assignPermissions = async (
   const permissionsToReturn = differenceBy(permissionsToDelete, existingPermissions, 'id');
 
   if (permissionsToDelete.length > 0) {
-    await getService('permission').deleteByIds(permissionsToDelete.map(property('id')));
+    await getService('permission').deleteByIds(
+      permissionsToDelete.map((permission) => permission?.id)
+    );
   }
 
   if (permissionsToAdd.length > 0) {
@@ -425,7 +427,7 @@ const resetSuperAdminPermissions = async () => {
   const otherPermissions = otherActions.reduce((acc, action) => {
     const { actionId, subjects } = action;
 
-    if (isArray(subjects)) {
+    if (Array.isArray(subjects)) {
       acc.push(
         ...subjects.map((subject) => permissionDomain.create({ action: actionId, subject }))
       );
@@ -451,7 +453,7 @@ const resetSuperAdminPermissions = async () => {
 const hasSuperAdminRole = (user: AdminUser): boolean => {
   const roles = _.get(user, 'roles', []) as AdminRole[];
 
-  return roles.map(property('code')).includes(SUPER_ADMIN_CODE);
+  return roles.map((role) => role?.code).includes(SUPER_ADMIN_CODE);
 };
 
 const constants = {

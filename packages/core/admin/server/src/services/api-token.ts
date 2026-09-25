@@ -1,17 +1,4 @@
-import {
-  pick,
-  property,
-  omit,
-  difference,
-  isNil,
-  isEmpty,
-  map,
-  isArray,
-  uniq,
-  isNumber,
-  differenceWith,
-  isEqual,
-} from 'lodash';
+import { pick, omit, difference, isEmpty, isNumber, differenceWith, isEqual } from 'lodash';
 import crypto from 'crypto';
 
 import type { Core, Data } from '@strapi/types';
@@ -146,7 +133,7 @@ const assertCustomTokenPermissionsValidity = (
   }
 
   // Custom type tokens should always have permissions attached to them
-  if (type === constants.API_TOKEN_TYPE.CUSTOM && !isArray(permissions)) {
+  if (type === constants.API_TOKEN_TYPE.CUSTOM && !Array.isArray(permissions)) {
     throw new ValidationError('Missing permissions attribute for custom token');
   }
 
@@ -165,7 +152,7 @@ const assertCustomTokenPermissionsValidity = (
  * Check if a token's lifespan is valid
  */
 const isValidLifespan = (lifespan: unknown) => {
-  if (isNil(lifespan)) {
+  if (lifespan == null) {
     return true;
   }
 
@@ -316,9 +303,9 @@ const enforceAdminPermissionsCeiling = async (
     const requestedFields = requested.properties?.fields;
 
     if (!anyUserPermHasAllFields) {
-      const effectiveUserFields = uniq(
-        matchingUserPerms.flatMap((p) => p.properties?.fields || [])
-      );
+      const effectiveUserFields = [
+        ...new Set(matchingUserPerms.flatMap((p) => p.properties?.fields || [])),
+      ];
 
       // When the owner is field-restricted, omitting fields would widen access to all fields.
       // Force explicit field selection so token scope can't exceed the owner's ceiling.
@@ -347,7 +334,7 @@ const enforceAdminPermissionsCeiling = async (
 
     const enforcedConditions: string[] = anyUserPermIsUnconditional
       ? []
-      : (uniq(matchingUserPerms.flatMap((p) => p.conditions || [])) as string[]);
+      : ([...new Set(matchingUserPerms.flatMap((p) => p.conditions || []))] as string[]);
 
     return {
       ...requested,
@@ -447,7 +434,7 @@ const assignAdminPermissionsToToken = async (
 
   if (permissionsToDelete.length > 0) {
     await getService('permission').deleteByIds(
-      permissionsToDelete.map(property('id')) as Data.ID[]
+      permissionsToDelete.map((permission) => permission?.id) as Data.ID[]
     );
   }
 
@@ -504,9 +491,9 @@ const reconcileTokenPermissionsToUserCeiling = (
       tokenFields !== null &&
       tokenFields.length > 0 &&
       (() => {
-        const effectiveUserFields = uniq(
-          matchingUserPerms.flatMap((p) => p.properties?.fields || [])
-        );
+        const effectiveUserFields = [
+          ...new Set(matchingUserPerms.flatMap((p) => p.properties?.fields || [])),
+        ];
         return tokenFields.some((f) => !effectiveUserFields.includes(f));
       })();
 
@@ -521,7 +508,7 @@ const reconcileTokenPermissionsToUserCeiling = (
     );
     const enforcedConditions: string[] = anyUserPermIsUnconditional
       ? []
-      : (uniq(matchingUserPerms.flatMap((p) => p.conditions || [])) as string[]);
+      : ([...new Set(matchingUserPerms.flatMap((p) => p.conditions || []))] as string[]);
 
     const currentConditions: string[] = (tokenPerm.conditions as string[]) || [];
     const conditionsChanged =
@@ -601,7 +588,9 @@ const syncApiTokenPermissionsForRole = async (roleId: Data.ID): Promise<void> =>
  * Flatten a token's database permissions objects to an array of strings
  */
 const flattenTokenPermissions = (permissions: { action: string }[] | undefined): string[] => {
-  return isArray(permissions) ? map(permissions, 'action') : [];
+  return Array.isArray(permissions)
+    ? Array.from(permissions, (permission) => permission?.action)
+    : [];
 };
 
 type WhereParams = {
@@ -744,7 +733,7 @@ const authenticateAdminToken = async (
 const getExpirationFields = (lifespan: AnyApiToken['lifespan']) => {
   // it must be nil or a finite number >= 0
   const isValidNumber = isNumber(lifespan) && Number.isFinite(lifespan) && lifespan > 0;
-  if (!isValidNumber && !isNil(lifespan)) {
+  if (!isValidNumber && lifespan != null) {
     throw new ValidationError('lifespan must be a positive number or null');
   }
 
@@ -796,7 +785,7 @@ const create = async <K extends AnyApiToken['kind']>(
     if (castedContentApiApiTokenBody.type === constants.API_TOKEN_TYPE.CUSTOM) {
       // TODO: createMany doesn't seem to create relation properly, implement a better way rather than a ton of queries
       await Promise.all(
-        uniq(castedContentApiApiTokenBody.permissions).map((action) =>
+        [...new Set(castedContentApiApiTokenBody.permissions)].map((action) =>
           strapi.db.query('admin::api-token-permission').create({
             data: { action, token: apiToken },
           })
@@ -1227,8 +1216,11 @@ const update = async (
         .query('admin::api-token')
         .load(updatedToken, 'permissions');
 
-      const currentPermissions = map(currentPermissionsResult || [], 'action');
-      const newPermissions = uniq(incomingPermissions || []);
+      const currentPermissions = Array.from(
+        currentPermissionsResult || [],
+        (permission: Pick<Permission, 'action'>) => permission?.action
+      );
+      const newPermissions = [...new Set(incomingPermissions || [])];
 
       const actionsToDelete = difference(currentPermissions, newPermissions);
       const actionsToAdd = difference(newPermissions, currentPermissions);

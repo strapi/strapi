@@ -1,4 +1,4 @@
-import { flatMap, get, has, snakeCase } from 'lodash';
+import { get, has, snakeCase } from 'lodash';
 /* eslint-disable no-template-curly-in-string */ // yup templates need to be in this format
 
 import { yup, validateYupSchema } from '@strapi/utils';
@@ -157,8 +157,7 @@ const forbiddenContentTypeNameValidator = () => {
 };
 
 const nameIsAvailable = (isEdition: boolean) => {
-  // TODO TS: if strapi.contentTypes (ie, ContentTypes) works as an ArrayLike and is used like this, we may want to ensure it is typed so that it can be without using as
-  const usedNames = flatMap(strapi.contentTypes, (ct: Struct.ContentTypeSchema) => {
+  const usedNames = Object.values(strapi.contentTypes).flatMap((ct) => {
     return [ct.info?.singularName, ct.info?.pluralName];
   });
 

@@ -1,4 +1,3 @@
-import { property } from 'lodash';
 import { createTestBuilder } from 'api-tests/builder';
 import { createStrapiInstance } from 'api-tests/strapi';
 import { createRequest, createAuthRequest } from 'api-tests/request';
@@ -171,7 +170,7 @@ describe('Admin Permissions - Conditions', () => {
 
   const deleteFixtures = async (): Promise<void> => {
     // Delete users
-    const usersId = localTestData.users.map(property('id'));
+    const usersId = localTestData.users.map((user) => user?.id);
     await utils.deleteUsersById(usersId);
 
     // Delete the foobar role and otherRole

@@ -1,4 +1,4 @@
-import { isNil, get, omit, castArray } from 'lodash';
+import { omit, castArray } from 'lodash';
 import createDebug from 'debug';
 
 import type { Knex } from 'knex';
@@ -240,10 +240,10 @@ const createHelpers = (db: Database) => {
       col.unsigned();
     }
 
-    if (!isNil(defaultTo)) {
+    if (defaultTo != null) {
       const [value, opts] = castArray(defaultTo);
 
-      if (get(opts, 'isRaw')) {
+      if (opts?.isRaw) {
         col.defaultTo(db.connection.raw(value), omit(opts, 'isRaw'));
       } else {
         col.defaultTo(value, opts);
@@ -490,7 +490,7 @@ const createHelpers = (db: Database) => {
     // Apply default value
     if (column.defaultTo !== undefined) {
       const [defaultValue, defaultOpts] = castArray(column.defaultTo);
-      if (get(defaultOpts, 'isRaw')) {
+      if (defaultOpts?.isRaw) {
         await trx.raw(`ALTER TABLE ?? ALTER COLUMN ?? SET DEFAULT ${defaultValue}`, [
           tableName,
           columnName,

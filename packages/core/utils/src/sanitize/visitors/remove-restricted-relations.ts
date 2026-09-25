@@ -1,4 +1,4 @@
-import { isArray, isObject } from 'lodash';
+import { isObject } from 'lodash';
 import * as contentTypeUtils from '../../content-types';
 import type { Model, RelationOrderingOptions } from '../../types';
 import type { Visitor } from '../../traverse/factory';
@@ -118,7 +118,7 @@ const visitRelationAttribute = async (
       const newMorphValue = await handleMorphElements(elements);
 
       if (!newMorphValue.length) {
-        if (isArray(elements) && elements.length === 0) {
+        if (Array.isArray(elements) && elements.length === 0) {
           return;
         }
 
@@ -126,7 +126,7 @@ const visitRelationAttribute = async (
         return;
       }
 
-      if (isArray(elements)) {
+      if (Array.isArray(elements)) {
         set(key, newMorphValue);
         return;
       }
@@ -179,7 +179,7 @@ const visitRelationAttribute = async (
 
   const handleMorphElements = async (elements: unknown) => {
     const allowedElements: Record<string, unknown>[] = [];
-    const elementsToCheck = isArray(elements) ? elements : [elements];
+    const elementsToCheck = Array.isArray(elements) ? elements : [elements];
 
     for (const element of elementsToCheck) {
       if (!isObject(element) || !('__type' in element) || typeof element.__type !== 'string') {

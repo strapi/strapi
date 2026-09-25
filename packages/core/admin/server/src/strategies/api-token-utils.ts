@@ -1,5 +1,4 @@
 import type { Context } from 'koa';
-import { isNil } from 'lodash';
 
 import { differenceInHours, parseISO } from 'date-fns';
 import { errors } from '@strapi/utils';
@@ -23,7 +22,7 @@ export const extractToken = (ctx: Context): string | null => {
 export const checkExpiry = (apiToken: {
   expiresAt?: string | number | null;
 }): InstanceType<typeof UnauthorizedError> | null => {
-  if (!isNil(apiToken.expiresAt)) {
+  if (apiToken.expiresAt != null) {
     const expirationDate = new Date(apiToken.expiresAt);
     if (expirationDate < new Date()) {
       return new UnauthorizedError('Token expired');
@@ -39,7 +38,7 @@ export const updateLastUsedAt = async (apiToken: {
 }): Promise<void> => {
   const currentDate = new Date();
 
-  if (!isNil(apiToken.lastUsedAt)) {
+  if (apiToken.lastUsedAt != null) {
     const hoursSinceLastUsed = differenceInHours(currentDate, parseISO(apiToken.lastUsedAt));
     if (hoursSinceLastUsed >= 1) {
       await strapi.db.query('admin::api-token').update({

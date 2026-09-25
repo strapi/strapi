@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { sortBy, values } from 'lodash';
+import { sortBy } from 'lodash';
 
 import { models } from '../common';
 import { emitDefinitions, format, generateSharedExtensionDefinition } from '../utils';
@@ -22,7 +22,10 @@ export const generateContentTypesDefinitions = async (
 
   const { contentTypes } = strapi;
 
-  const contentTypesDefinitions = sortBy(values(contentTypes), 'uid').map((contentType) => ({
+  const contentTypesDefinitions = sortBy(
+    Object.values<models.utils.Schema>(contentTypes ?? {}),
+    'uid'
+  ).map((contentType) => ({
     uid: contentType.uid,
     definition: models.schema.generateSchemaDefinition(contentType),
   }));

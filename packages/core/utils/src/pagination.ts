@@ -1,4 +1,4 @@
-import { merge, flow, omit, isNil } from 'lodash';
+import { merge, flow, omit } from 'lodash';
 import { PaginationError } from './errors';
 
 interface PaginationArgs {
@@ -72,8 +72,8 @@ const withDefaultPagination = <T extends Partial<PaginationArgs>>(
 ) => {
   const defaultValues = merge({}, STRAPI_DEFAULTS, defaults);
 
-  const usePagePagination = !isNil(args.page) || !isNil(args.pageSize);
-  const useOffsetPagination = !isNil(args.start) || !isNil(args.limit);
+  const usePagePagination = args.page != null || args.pageSize != null;
+  const useOffsetPagination = args.start != null || args.limit != null;
 
   const ensureValidValues = flow(ensureMinValues, ensureMaxValues(maxLimit));
 
@@ -101,9 +101,10 @@ const withDefaultPagination = <T extends Partial<PaginationArgs>>(
 
   // Page / PageSize
   if (usePagePagination) {
-    const pageArgs = isNil(args.pageSize)
-      ? omit(args, ['pageSize'])
-      : { ...args, pageSize: Math.max(1, args.pageSize) };
+    const pageArgs =
+      args.pageSize == null
+        ? omit(args, ['pageSize'])
+        : { ...args, pageSize: Math.max(1, args.pageSize) };
     const { page, pageSize } = merge({}, defaultValues.page, pageArgs);
     const pageLimit = ensureValidValues({ start: 0, limit: pageSize }).limit;
 
@@ -132,7 +133,7 @@ const transformPagedPaginationInfo = (
   paginationInfo: Partial<PaginationArgs>,
   total: number
 ): PagePatinationInformation => {
-  if (!isNil(paginationInfo.page)) {
+  if (paginationInfo.page != null) {
     const page = paginationInfo.page;
     const pageSize = paginationInfo.pageSize ?? total;
 
@@ -144,7 +145,7 @@ const transformPagedPaginationInfo = (
     };
   }
 
-  if (!isNil(paginationInfo.start)) {
+  if (paginationInfo.start != null) {
     const start = paginationInfo.start;
     const limit = paginationInfo.limit ?? total;
 
@@ -179,14 +180,14 @@ const transformOffsetPaginationInfo = (
   paginationInfo: Partial<PaginationArgs>,
   total: number
 ): OffsetPaginationInformation => {
-  if (!isNil(paginationInfo.page)) {
+  if (paginationInfo.page != null) {
     const limit = paginationInfo.pageSize ?? total;
     const start = (paginationInfo.page - 1) * limit;
 
     return { start, limit, total };
   }
 
-  if (!isNil(paginationInfo.start)) {
+  if (paginationInfo.start != null) {
     const start = paginationInfo.start;
     const limit = paginationInfo.limit ?? total;
 

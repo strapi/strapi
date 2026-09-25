@@ -1,5 +1,5 @@
 import path from 'path';
-import { isFinite, isObject, isString, toNumber } from 'lodash';
+import { isObject, isString, toNumber } from 'lodash';
 import fs from 'fs-extra';
 import chalk from 'chalk';
 import type { Core } from '@strapi/types';
@@ -176,7 +176,7 @@ const createDestinationProvider = (opts: CmdOptions) => {
 
   const filepath = isString(file) && file.length > 0 ? file : getDefaultExportName();
 
-  const maxSizeJsonlInMb = isFinite(toNumber(maxSizeJsonl))
+  const maxSizeJsonlInMb = Number.isFinite(toNumber(maxSizeJsonl))
     ? toNumber(maxSizeJsonl) * BYTES_IN_MB
     : undefined;
 

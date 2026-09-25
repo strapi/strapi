@@ -1,5 +1,3 @@
-import { isNil } from 'lodash';
-
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
 import constants from './constants';
@@ -18,7 +16,7 @@ const { NotFoundError } = errors;
 const getAllowedActionsForRole = async (roleId?: string) => {
   const { actionProvider } = getService('permission');
 
-  if (!isNil(roleId)) {
+  if (roleId != null) {
     const role: AdminRole = await getService('role').findOne({ id: roleId });
 
     if (!role) {

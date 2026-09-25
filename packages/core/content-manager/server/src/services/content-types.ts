@@ -1,4 +1,4 @@
-import { isNil, mapValues } from 'lodash';
+import { mapValues } from 'lodash';
 
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
 
@@ -32,7 +32,7 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
 
     const contentType = strapi.contentTypes[uid];
 
-    return isNil(contentType) ? contentType : toContentManagerModel(contentType);
+    return contentType == null ? contentType : toContentManagerModel(contentType);
   },
 
   findDisplayedContentTypes() {

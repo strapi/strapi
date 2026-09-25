@@ -1,4 +1,4 @@
-import { map, merge, difference, uniq } from 'lodash';
+import { map, merge, difference } from 'lodash';
 
 import type { Core } from '@strapi/types';
 import { async } from '@strapi/utils';
@@ -98,7 +98,7 @@ const syncAPITokensPermissions = async () => {
     (permissions) => map(permissions, 'action')
   )();
 
-  const unknownPermissions = uniq(difference(permissionsInDB, validPermissions));
+  const unknownPermissions = [...new Set(difference(permissionsInDB, validPermissions))];
 
   if (unknownPermissions.length > 0) {
     await strapi.db
