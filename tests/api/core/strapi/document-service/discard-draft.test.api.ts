@@ -126,5 +126,31 @@ describe('Document Service', () => {
         }
       });
     });
+
+    describe.each([
+      ['null', null],
+      ['an empty string', ''],
+    ])('documentId is %s', (_label, documentId) => {
+      testInTransaction(
+        'rejects instead of matching legacy rows without a documentId',
+        async () => {
+          // Simulate rows left behind by the bug that persisted an empty document_id
+          const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
+          await strapi.db
+            .query(ARTICLE_UID)
+            .updateMany({ where: { documentId: articleDb.documentId }, data: { documentId } });
+          const legacyRows = await findArticlesDb({ documentId });
+
+          await expect(
+            strapi
+              .documents(ARTICLE_UID)
+              .discardDraft({ documentId: documentId as any, locale: '*' })
+          ).rejects.toThrow('Cannot discard the draft of a document without a documentId');
+
+          // Legacy rows are left untouched
+          expect(await findArticlesDb({ documentId })).toEqual(legacyRows);
+        }
+      );
+    });
   });
 });
