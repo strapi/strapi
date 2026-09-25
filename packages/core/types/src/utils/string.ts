@@ -206,13 +206,17 @@ export type StartsWith<TValue extends string, TPrefix extends Literal> = Extends
 export type LiteralUnion<T extends U, U = string> = T | (U & NonNullable<unknown>);
 
 /**
- * Any string, with the literals of `T` listed for completion when it constrains a type parameter.
+ * Any string of `TBase`, with the literals of `T` listed for completion when it constrains a type parameter.
  *
  * Unlike {@link LiteralUnion}, editors list the literals: TypeScript drops them for `string & NonNullable<unknown>`.
+ * A template literal `TBase`, such as `` `plugin::${string}` ``, keeps its pattern: the intersection
+ * stops TypeScript from removing the literals of `T` that match it.
  * Do not use it as a mapped type key: every literal of `T` would become a required key.
  *
  * @example
  * declare function service<TName extends SuggestedString<'locales' | 'iso-locales'>>(name: TName): void;
  * service(''); // editors list 'locales' and 'iso-locales'
  */
-export type SuggestedString<T extends string> = T | (string & Record<never, never>);
+export type SuggestedString<T extends string, TBase extends string = string> =
+  | T
+  | (TBase & Record<never, never>);
