@@ -216,7 +216,7 @@ with defaults, enriched from `/admin/project-type`, then assigned to `window.str
 by `render.ts`:
 
 ```typescript
-const browserStrapi: Window['strapi'] = {
+const browserStrapi: Admin.BrowserStrapi = {
   telemetryDisabled: process.env.STRAPI_TELEMETRY_DISABLED === 'true',
   projectType: 'Community',
   // …other fields
@@ -233,7 +233,9 @@ window.strapi = browserStrapi;
 returns `Growth` when `planPriceId` contains `growth` and `Enterprise` for other licensed
 plans.
 
-Typed in `packages/core/admin/admin/custom.d.ts`.
+Typed as `BrowserStrapi` in `packages/core/types/src/_internal/admin/browser-strapi.ts`
+(the global is declared in `packages/core/types/src/_internal/globals-admin.ts`).
+`_internal` is first-party plumbing, not plugin API.
 
 ---
 
