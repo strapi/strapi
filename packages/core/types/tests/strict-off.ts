@@ -42,6 +42,9 @@ declare const checks: [
   Expect<Equal<Core.ServiceFor<'plugin::legacy.example'>, Core.Service>>,
   Expect<Equal<Core.ControllerFor<'plugin::legacy.example'>, Core.Controller>>,
   Expect<Equal<Core.PolicyReference, string | { name: string; config: unknown }>>,
+  // Unregistered literal names keep the legacy types: only strict types close them to `never`.
+  Expect<Equal<Core.ServiceFor<'plugin::unregistered.example'>, Core.Service>>,
+  Expect<Equal<Core.ControllerFor<'plugin::unregistered.example'>, Core.Controller>>,
 ];
 checks satisfies unknown;
 
@@ -53,7 +56,11 @@ const controller = strapi.controller('plugin::legacy.example');
 const pluginController = strapi.plugin('legacy').controller('example');
 const config = strapi.config.get('plugin::legacy');
 const pluginConfig = strapi.plugin('legacy').config('enabled');
+const unregisteredService = strapi.plugin('legacy').service('unregistered');
+const unregisteredController = strapi.plugin('unregistered').controller('example');
 declare const results: [
+  Expect<Equal<typeof unregisteredService, Core.Service>>,
+  Expect<Equal<typeof unregisteredController, Core.Controller>>,
   Expect<Equal<typeof controller, Core.Controller>>,
   Expect<Equal<typeof pluginController, Core.Controller>>,
   Expect<Equal<typeof config, unknown>>,
