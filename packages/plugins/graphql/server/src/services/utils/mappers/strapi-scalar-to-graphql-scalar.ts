@@ -1,4 +1,4 @@
-import { get, difference } from 'lodash/fp';
+import { difference, get } from 'lodash';
 import { errors } from '@strapi/utils';
 import type { Context } from '../../types';
 
@@ -18,7 +18,7 @@ export default ({ strapi }: Context) => {
      * Used to transform a Strapi scalar type into its GraphQL equivalent
      */
     strapiScalarToGraphQLScalar(strapiScalar: string) {
-      return get(strapiScalar, SCALARS_ASSOCIATIONS);
+      return get(SCALARS_ASSOCIATIONS, strapiScalar);
     },
   };
 };

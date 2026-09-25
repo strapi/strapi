@@ -1,4 +1,4 @@
-import { isEqual } from 'lodash/fp';
+import { isEqual } from 'lodash';
 
 import type { Database, Migration } from '@strapi/database';
 import type { Struct } from '@strapi/types';

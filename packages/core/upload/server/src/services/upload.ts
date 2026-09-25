@@ -2,7 +2,7 @@ import os from 'os';
 import path from 'path';
 import fs from 'fs';
 import fse from 'fs-extra';
-import _ from 'lodash';
+import _, { has, toNumber, isNil } from 'lodash';
 import { extension } from 'mime-types';
 import {
   async,
@@ -12,7 +12,6 @@ import {
   file as fileUtils,
   pagination as paginationUtils,
 } from '@strapi/utils';
-import { has, toNumber, isNil } from 'lodash/fp';
 
 import type { Core, UID } from '@strapi/types';
 
@@ -638,7 +637,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
    * Defaults to the `api.rest.withCount` config (true) when not specified on the request.
    */
   function resolveWithCount(pagination: Record<string, unknown>): boolean {
-    if (has('withCount', pagination)) {
+    if (has(pagination, 'withCount')) {
       const withCount = pagination.withCount;
 
       if (typeof withCount === 'boolean') {
@@ -681,7 +680,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     const maxLimit = toNumber(strapi.config.get('api.rest.maxLimit')) || null;
 
     // Whether the consumer used page-based pagination (default) vs offset-based.
-    const isOffset = has('start', pagination) || has('limit', pagination);
+    const isOffset = has(pagination, 'start') || has(pagination, 'limit');
     const isPaged = !isOffset;
 
     // Resolve start/limit applying defaults and the maxLimit cap.

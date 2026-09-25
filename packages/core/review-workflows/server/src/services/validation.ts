@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/types';
-import { uniq } from 'lodash/fp';
+import { uniq } from 'lodash';
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
 import { ERRORS, MAX_WORKFLOWS, MAX_STAGES_PER_WORKFLOW } from '../constants/workflows';

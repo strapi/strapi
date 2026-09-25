@@ -1,4 +1,4 @@
-import { pick, pipe, has, prop, isNil, cloneDeep, isArray } from 'lodash/fp';
+import { get, isNil, has, cloneDeep, isArray, pick } from 'lodash';
 import { errors, contentTypes as contentTypeUtils } from '@strapi/utils';
 import type { Struct } from '@strapi/types';
 import { getService } from '../utils';
@@ -13,7 +13,7 @@ const {
 const { ApplicationError } = errors;
 
 const hasLocalizedOption = (modelOrAttribute: any) => {
-  return prop('pluginOptions.i18n.localized', modelOrAttribute) === true;
+  return get(modelOrAttribute, 'pluginOptions.i18n.localized') === true;
 };
 
 const getValidLocale = async (locale: any) => {
@@ -65,7 +65,7 @@ const getNonLocalizedAttributes = (model: any) => {
 };
 
 const removeId = (value: any) => {
-  if (typeof value === 'object' && has('id', value)) {
+  if (typeof value === 'object' && has(value, 'id')) {
     delete value.id;
   }
 };
@@ -87,7 +87,7 @@ const removeIdsMut = (
     const value = entry[attrName];
     if (attr.type === 'dynamiczone' && isArray(value)) {
       value.forEach((compo) => {
-        if (has('__component', compo)) {
+        if (has(compo, '__component')) {
           const model = strapi.components[compo.__component];
           removeIdsMut(model, compo);
         }
@@ -117,7 +117,7 @@ const copyNonLocalizedAttributes = (
 ) => {
   const nonLocalizedAttributes = getNonLocalizedAttributes(model);
 
-  return pipe(pick(nonLocalizedAttributes), removeIds(model))(entry);
+  return removeIds(model)(pick(entry, nonLocalizedAttributes));
 };
 
 /**

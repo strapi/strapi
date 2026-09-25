@@ -1,4 +1,4 @@
-import { isArray, getOr, prop } from 'lodash/fp';
+import { isArray, property, get } from 'lodash';
 import { getService } from '../../utils';
 
 const actions = [
@@ -76,7 +76,7 @@ const addAllLocalesToPermissions = async (permissions: any) => {
   const { find: findAllLocales } = getService('locales');
 
   const allLocales = await findAllLocales();
-  const allLocalesCode = allLocales.map(prop('code'));
+  const allLocalesCode = allLocales.map(property('code'));
 
   return Promise.all(
     permissions.map(async (permission: any) => {
@@ -92,7 +92,7 @@ const addAllLocalesToPermissions = async (permissions: any) => {
         return permission;
       }
 
-      const oldPermissionProperties = getOr({}, 'properties', permission);
+      const oldPermissionProperties = get(permission, 'properties', {});
 
       return { ...permission, properties: { ...oldPermissionProperties, locales: allLocalesCode } };
     })

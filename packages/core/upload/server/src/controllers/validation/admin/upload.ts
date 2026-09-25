@@ -1,5 +1,5 @@
 import { yup, validateYupSchema } from '@strapi/utils';
-import { isNil } from 'lodash/fp';
+import { isNil } from 'lodash';
 import { getService } from '../../../utils';
 
 const focalPointSchema = yup

@@ -1,4 +1,4 @@
-import { entries, mapValues, omit } from 'lodash/fp';
+import { entries, mapValues, omit } from 'lodash';
 import { idArg, nonNull } from 'nexus';
 import { hasSort, pagination } from '@strapi/utils';
 import type { Core, Struct } from '@strapi/types';
@@ -109,13 +109,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * @return {Object<string, string>}
      */
     scalarAttributesToFiltersMap(attributes: Struct.SchemaAttributes) {
-      return mapValues((attribute) => {
+      return mapValues(attributes, (attribute) => {
         const { mappers, naming } = getService('utils');
 
         const gqlScalar = mappers.strapiScalarToGraphQLScalar(attribute.type);
 
         return naming.getScalarFilterInputTypeName(gqlScalar);
-      }, attributes);
+      });
     },
 
     /**
@@ -133,7 +133,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const { pagination = {}, filters = {} } = args;
 
       // Init
-      const newArgs = omit(['pagination', 'filters'], args);
+      const newArgs = omit(args, ['pagination', 'filters']);
 
       // Pagination
       if (usePagination) {

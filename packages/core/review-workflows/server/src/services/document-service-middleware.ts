@@ -1,7 +1,7 @@
 import type { Modules } from '@strapi/types';
 import { errors } from '@strapi/utils';
 
-import { isNil } from 'lodash/fp';
+import { isNil } from 'lodash';
 import { ENTITY_STAGE_ATTRIBUTE } from '../constants/workflows';
 import { WORKFLOW_UPDATE_STAGE } from '../constants/webhook-events';
 import { getService } from '../utils';

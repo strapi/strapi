@@ -1,4 +1,4 @@
-import { get, getOr, isFunction, first, isNil } from 'lodash/fp';
+import { get, isFunction, property, isNil, first } from 'lodash';
 import {
   GraphQLObjectType,
   GraphQLResolveInfo,
@@ -36,7 +36,7 @@ type GraphQLMiddleware = (
  * @return {function[]}
  */
 const parseMiddlewares = (resolverConfig: any, strapi: Core.Strapi): GraphQLMiddleware[] => {
-  const resolverMiddlewares = getOr([], 'middlewares', resolverConfig);
+  const resolverMiddlewares = get(resolverConfig, 'middlewares', []);
 
   // TODO: [v4] to factorize with compose endpoints (routes)
   return resolverMiddlewares.map(
@@ -100,10 +100,10 @@ const wrapResolvers = ({
     const fieldsToProcess = Object.entries(fields).filter(([field]) => isValidFieldName(field));
 
     for (const [fieldName, fieldDefinition] of fieldsToProcess) {
-      const defaultResolver = get(fieldName);
+      const defaultResolver = property(fieldName);
 
       const path = `${type}.${fieldName}`;
-      const resolverConfig = getOr({}, path, resolversConfig);
+      const resolverConfig = get(resolversConfig, path, {});
 
       const { resolve: baseResolver = defaultResolver } = fieldDefinition;
 
@@ -135,8 +135,8 @@ const wrapResolvers = ({
        * @return {Promise<void>}
        */
       const authorize = async ({ context }: any) => {
-        const authConfig = get('auth', resolverConfig);
-        const authContext = get('state.auth', context);
+        const authConfig = get(resolverConfig, 'auth');
+        const authContext = get(context, 'state.auth');
 
         const isValidType = ['Mutation', 'Query', 'Subscription'].includes(type);
         const hasConfig = !isNil(authConfig);

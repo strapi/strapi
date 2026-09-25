@@ -1,6 +1,6 @@
 'use strict';
 
-const { trim } = require('lodash/fp');
+const { trim } = require('lodash');
 const {
   template: { createLooseInterpolationRegExp, createStrictInterpolationRegExp },
 } = require('@strapi/utils');

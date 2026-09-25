@@ -1,4 +1,4 @@
-import { isArray, isString, isUndefined, constant } from 'lodash/fp';
+import { constant, isUndefined, isArray, isString } from 'lodash';
 import { nonNull, list, objectType } from 'nexus';
 import { contentTypes } from '@strapi/utils';
 import type { Struct } from '@strapi/types';

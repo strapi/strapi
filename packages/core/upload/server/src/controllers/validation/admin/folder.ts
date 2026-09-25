@@ -1,4 +1,4 @@
-import { isUndefined, get, isNil } from 'lodash/fp';
+import { isUndefined, get, isNil } from 'lodash';
 import { yup, validateYupSchema } from '@strapi/utils';
 import { getService } from '../../../utils';
 import { FOLDER_MODEL_UID } from '../../../constants';
@@ -17,7 +17,7 @@ const isNameUniqueInFolder = (id?: number): yup.TestFunction<string | undefined>
 
       if (isUndefined(name)) {
         const existingFolder = await strapi.db.query(FOLDER_MODEL_UID).findOne({ where: { id } });
-        filters.name = get('name', existingFolder);
+        filters.name = get(existingFolder, 'name');
       }
     }
 

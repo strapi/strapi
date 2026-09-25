@@ -1,4 +1,4 @@
-import { isNil } from 'lodash/fp';
+import { isNil } from 'lodash';
 import { emitAudit } from '@strapi/utils';
 import { AUDITED_EVENTS, DEFAULT_LOCALE } from '../constants';
 import { getService, getCoreStore } from '../utils';

@@ -1,6 +1,6 @@
 import type { Core, UID } from '@strapi/types';
 import { errors } from '@strapi/utils';
-import { isNil } from 'lodash/fp';
+import { isNil } from 'lodash';
 import { ENTITY_ASSIGNEE_ATTRIBUTE } from '../constants/workflows';
 import { getService, getAdminService } from '../utils';
 

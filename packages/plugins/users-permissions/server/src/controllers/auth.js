@@ -9,7 +9,7 @@
 /* eslint-disable no-useless-escape */
 const crypto = require('crypto');
 const _ = require('lodash');
-const { concat, compact, isArray } = require('lodash/fp');
+const { isArray, concat, compact } = require('lodash');
 const utils = require('@strapi/utils');
 const { getService } = require('../utils');
 const { buildRefreshCookieOptions } = require('../utils/refresh-cookie-options');

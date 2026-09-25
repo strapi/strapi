@@ -1,6 +1,6 @@
 'use strict';
 
-const { toPlainObject } = require('lodash/fp');
+const { toPlainObject } = require('lodash');
 
 const { checkBadRequest } = require('../../../utils');
 

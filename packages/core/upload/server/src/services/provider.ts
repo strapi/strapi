@@ -1,4 +1,4 @@
-import { isFunction } from 'lodash/fp';
+import { isFunction } from 'lodash';
 import { file as fileUtils } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 

@@ -1,4 +1,4 @@
-import { isNil } from 'lodash/fp';
+import { isNil } from 'lodash';
 import { getService } from '../../../utils';
 
 const folderExists = async (folderId: number) => {
