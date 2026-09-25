@@ -16,8 +16,11 @@ const dtoFields = [
   'pluginOptions',
 ];
 
+/** Content types and components share the model shape this mapper reads. */
+type Model = Struct.ComponentSchema | Struct.ContentTypeSchema;
+
 export default () => ({
-  toContentManagerModel(contentType: Struct.ComponentSchema) {
+  toContentManagerModel<TModel extends Model>(contentType: TModel) {
     return {
       ...contentType,
       apiID: contentType.modelName,
@@ -37,7 +40,7 @@ export default () => ({
   toDto: pick(dtoFields),
 });
 
-const formatAttributes = (contentType: Struct.ComponentSchema) => {
+const formatAttributes = (contentType: Model) => {
   const { getVisibleAttributes, getTimestamps, getCreatorFields } = contentTypesUtils;
 
   // only get attributes that can be seen in the auto generated Edit view or List view
@@ -76,5 +79,5 @@ const toRelation = (attribute: Schema.Attribute.Relation) => {
   };
 };
 
-const isVisible = (model: Struct.ComponentSchema): boolean =>
+const isVisible = (model: Model): boolean =>
   getOr(true, 'pluginOptions.content-manager.visible', model) === true;
