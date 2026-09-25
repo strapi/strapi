@@ -7,7 +7,7 @@ export default () => ({
 
   strapiOperator: '$contains',
 
-  add(t: Nexus.blocks.ObjectDefinitionBlock<string>, type: string) {
+  add(t: Nexus.blocks.InputDefinitionBlock<string>, type: string) {
     t.field(CONTAINS_FIELD_NAME, { type });
   },
 });

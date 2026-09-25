@@ -8,7 +8,7 @@ export default () => ({
 
   strapiOperator: '$or',
 
-  add(t: Nexus.blocks.ObjectDefinitionBlock<string>, type: string) {
+  add(t: Nexus.blocks.InputDefinitionBlock<string>, type: string) {
     t.field(OR_FIELD_NAME, { type: list(type) });
   },
 });

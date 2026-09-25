@@ -7,7 +7,7 @@ export default () => ({
 
   strapiOperator: '$lt',
 
-  add(t: Nexus.blocks.ObjectDefinitionBlock<string>, type: string) {
+  add(t: Nexus.blocks.InputDefinitionBlock<string>, type: string) {
     t.field(LT_FIELD_NAME, { type });
   },
 });
