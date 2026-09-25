@@ -90,6 +90,54 @@ describe('validateQuery', () => {
     });
   });
 
+  describe('nested populate status', () => {
+    it.each(['draft', 'published'])('accepts status: %s on a nested populate', async (status) => {
+      const query = { populate: { createdBy: { status } } };
+
+      await expect(validators.query(query, schema, {})).resolves.not.toThrow();
+    });
+
+    it.each([['archived'], [true], [{ $in: ['draft'] }]])(
+      'rejects invalid nested status value %p',
+      async (status) => {
+        const query = { populate: { createdBy: { status } } };
+
+        await expect(validators.query(query, schema, {})).rejects.toThrow(ValidationError);
+      }
+    );
+
+    it('accepts status on a nested populate inside a fragment (on)', async () => {
+      const morphSchema = {
+        ...schema,
+        attributes: {
+          ...schema.attributes,
+          related: {
+            type: 'relation' as const,
+            relation: 'morphToOne' as const,
+          },
+        },
+      };
+
+      await expect(
+        validators.query(
+          {
+            populate: {
+              related: {
+                on: {
+                  'api::article.article': {
+                    populate: { createdBy: { status: 'draft' } },
+                  },
+                },
+              },
+            },
+          },
+          morphSchema,
+          {}
+        )
+      ).resolves.not.toThrow();
+    });
+  });
+
   it.each([
     ['boolean populate', true],
     ['count populate', { count: true }],
