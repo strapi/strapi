@@ -1,5 +1,5 @@
 import type * as UID from '../uid';
-import type { IsDynamicName, IsStrict } from './strictness';
+import type { IsDynamicName, IsStrict, RegisteredRecord } from './strictness';
 
 /**
  * Resolves application overrides before package defaults. With strict types enabled, an unregistered
@@ -24,6 +24,20 @@ export type ServiceFor<TUID extends string> = IsStrict extends false
 export type ServiceLookup<TUID extends UID.Service, T> = UID.Service extends TUID
   ? T
   : ServiceFor<TUID>;
+
+/** Service UIDs that have a registered contract. */
+export type RegisteredServiceUID =
+  | keyof Strapi.Registries.AppServices
+  | keyof Strapi.Registries.PackageServices;
+
+/**
+ * Services keyed by UID, e.g. `strapi.services`. With strict types enabled, registered UIDs resolve to
+ * their contracts. Other keys, literal or dynamic, resolve to the legacy service: an index signature
+ * cannot close literal keys while keeping dynamic keys open, unlike `strapi.service(uid)`.
+ */
+export type ServiceMap = IsStrict extends false
+  ? Record<string, Service>
+  : RegisteredRecord<{ [TUID in RegisteredServiceUID]: ServiceFor<TUID> }, Service>;
 
 export type Service = {
   // TODO [V5] Consider changing the any value to unknown.
