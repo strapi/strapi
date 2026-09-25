@@ -1,4 +1,5 @@
-import { isNil } from 'lodash/fp';
+import { isNil } from 'lodash';
+
 import { env } from '@strapi/utils';
 
 import { getService } from '../utils';

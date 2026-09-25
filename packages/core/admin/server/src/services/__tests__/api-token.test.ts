@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import { errors, emitAudit } from '@strapi/utils';
-import { omit, uniq } from 'lodash/fp';
+import { omit, uniq } from 'lodash';
+
 import type { AdminApiToken, ContentApiApiToken } from '../../../../shared/contracts/api-token';
 import constants from '../constants';
 import {
@@ -253,7 +254,7 @@ describe('API Token', () => {
         id: 1,
       };
 
-      const findOne = jest.fn().mockResolvedValue(omit('permissions', createTokenResult));
+      const findOne = jest.fn().mockResolvedValue(omit(createTokenResult, 'permissions'));
       const create = jest.fn().mockResolvedValue(createTokenResult);
       const load = jest.fn().mockResolvedValueOnce(
         Promise.resolve(
@@ -291,7 +292,7 @@ describe('API Token', () => {
       expect(create).toHaveBeenNthCalledWith(1, {
         select: expect.arrayContaining([expect.any(String)]),
         data: {
-          ...omit('permissions', attributes),
+          ...omit(attributes, 'permissions'),
           accessKey: hash(mockedApiToken.hexedString),
           encryptedKey: expect.any(String),
           adminUserOwner: null,
@@ -313,7 +314,7 @@ describe('API Token', () => {
       });
 
       expect(res).toEqual({
-        ...omit('adminUserOwner', createTokenResult),
+        ...omit(createTokenResult, 'adminUserOwner'),
         accessKey: mockedApiToken.hexedString,
         expiresAt: null,
         lifespan: null,
@@ -338,7 +339,7 @@ describe('API Token', () => {
         id: 1,
       };
 
-      const findOne = jest.fn().mockResolvedValue(omit('permissions', createTokenResult));
+      const findOne = jest.fn().mockResolvedValue(omit(createTokenResult, 'permissions'));
       const create = jest.fn().mockResolvedValue(createTokenResult);
       const load = jest.fn().mockResolvedValueOnce(
         Promise.resolve(
@@ -377,7 +378,7 @@ describe('API Token', () => {
       expect(create).toHaveBeenNthCalledWith(1, {
         select: expect.arrayContaining([expect.any(String)]),
         data: {
-          ...omit('permissions', attributes),
+          ...omit(attributes, 'permissions'),
           accessKey: hash(mockedApiToken.hexedString),
           encryptedKey: expect.any(String),
           adminUserOwner: null,
@@ -388,7 +389,7 @@ describe('API Token', () => {
       });
 
       expect(res).toEqual({
-        ...omit('adminUserOwner', createTokenResult),
+        ...omit(createTokenResult, 'adminUserOwner'),
         accessKey: mockedApiToken.hexedString,
         expiresAt: null,
         lifespan: null,
@@ -413,7 +414,7 @@ describe('API Token', () => {
         id: 1,
       };
 
-      const findOne = jest.fn().mockResolvedValue(omit('permissions', createTokenResult));
+      const findOne = jest.fn().mockResolvedValue(omit(createTokenResult, 'permissions'));
       const create = jest.fn().mockResolvedValue(createTokenResult);
       const load = jest.fn().mockResolvedValueOnce(
         Promise.resolve(
@@ -1726,7 +1727,7 @@ describe('API Token', () => {
         permissions: ['valid-permission-A', 'unknown-permission'],
       } as any;
 
-      const findOne = jest.fn().mockResolvedValue(omit('permissions', originalToken));
+      const findOne = jest.fn().mockResolvedValue(omit(originalToken, 'permissions'));
       const update = jest.fn(({ data }) => Promise.resolve(data));
       const deleteFn = jest.fn();
       const create = jest.fn();
@@ -1778,7 +1779,7 @@ describe('API Token', () => {
       } as any;
 
       const update = jest.fn(({ data }) => Promise.resolve(data));
-      const findOne = jest.fn().mockResolvedValue(omit('permissions', originalToken));
+      const findOne = jest.fn().mockResolvedValue(omit(originalToken, 'permissions'));
       const deleteFn = jest.fn();
       const create = jest.fn();
       const load = jest
@@ -1855,7 +1856,7 @@ describe('API Token', () => {
       } as any;
 
       const update = jest.fn(({ data }) => Promise.resolve(data));
-      const findOne = jest.fn().mockResolvedValue(omit('permissions', originalToken));
+      const findOne = jest.fn().mockResolvedValue(omit(originalToken, 'permissions'));
       const deleteFn = jest.fn();
       const create = jest.fn();
       const load = jest

@@ -1,4 +1,5 @@
-import { curry, isArray, isEmpty, difference } from 'lodash/fp';
+import { curry, isArray, isEmpty, difference } from 'lodash';
+
 import { engine } from '@strapi/permissions';
 import type { Ability } from '@casl/ability';
 import permissionDomain from '../../domain/permission';

@@ -1,4 +1,5 @@
-import { intersection, prop } from 'lodash/fp';
+import { intersection, get } from 'lodash';
+
 import { relations } from '@strapi/utils';
 import type { Core, Struct } from '@strapi/types';
 import type { Configuration } from '../../../shared/contracts/content-types';
@@ -10,11 +11,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     contentType: Struct.ContentTypeSchema,
     configuration: Configuration
   ) => {
-    const displayedFields = prop('length', configuration.layouts.list);
+    const displayedFields = get(configuration.layouts.list, 'length');
     const relationalFields = getRelationalFields(contentType);
     const displayedRelationalFields = intersection(
-      relationalFields,
-      configuration.layouts.list
+      configuration.layouts.list,
+      relationalFields
     ).length;
 
     const data = {

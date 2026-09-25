@@ -1,4 +1,4 @@
-import { prop, uniq, uniqBy, concat, flow, isEmpty } from 'lodash/fp';
+import { property, uniq, uniqBy, concat, flow, isEmpty } from 'lodash';
 
 import { isOperatorOfType, contentTypes, relations, errors } from '@strapi/utils';
 import type { Data, Modules, UID } from '@strapi/types';
@@ -239,7 +239,7 @@ export default {
     const targetSchema = strapi.getModel(targetUid);
 
     const mainField = flow(
-      prop(`metadatas.${targetField}.edit.mainField`),
+      property(`metadatas.${targetField}.edit.mainField`),
       (mainField) => mainField || 'id',
       (mainField) => sanitizeMainField(targetSchema, mainField, userAbility)
     )(modelConfig);
@@ -514,7 +514,7 @@ export default {
     });
 
     // NOTE: the order is very important to make sure sanitized relations are kept in priority
-    const relationsUnion = uniqBy('id', concat(sanitizedRes.results, res.results));
+    const relationsUnion = uniqBy(concat(sanitizedRes.results, res.results), 'id');
 
     ctx.body = {
       pagination: res.pagination || {

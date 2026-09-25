@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import assert from 'assert';
-import { map, isArray, omit, uniq, isNil, difference, isEmpty, isNumber } from 'lodash/fp';
+import { map, isArray, omit, uniq, isNil, difference, isEmpty, isNumber } from 'lodash';
+
 import { errors, emitAudit } from '@strapi/utils';
 import '@strapi/types';
 import constants from '../constants';
@@ -87,7 +88,7 @@ const create = async (attributes: TokenCreatePayload): Promise<TransferToken> =>
       select: SELECT_FIELDS,
       populate: POPULATE_FIELDS,
       data: {
-        ...omit('permissions', attributes),
+        ...omit(attributes, 'permissions'),
         accessKey: hash(accessKey),
         ...getExpirationFields(attributes.lifespan),
       },
@@ -106,7 +107,7 @@ const create = async (attributes: TokenCreatePayload): Promise<TransferToken> =>
       .load(transferToken, 'permissions');
 
     if (currentPermissions) {
-      Object.assign(transferToken, { permissions: map('action', currentPermissions) });
+      Object.assign(transferToken, { permissions: map(currentPermissions, 'action') });
     }
 
     return transferToken;
@@ -150,7 +151,7 @@ const update = async (
       select: SELECT_FIELDS,
       where: { id },
       data: {
-        ...omit('permissions', attributes),
+        ...omit(attributes, 'permissions'),
       },
     });
 
@@ -159,7 +160,7 @@ const update = async (
         .query(TRANSFER_TOKEN_UID)
         .load(updatedToken, 'permissions');
 
-      const currentPermissions = map('action', currentPermissionsResult || []);
+      const currentPermissions = map(currentPermissionsResult || [], 'action');
       const newPermissions = uniq(attributes.permissions);
 
       const actionsToDelete = difference(currentPermissions, newPermissions);
@@ -382,7 +383,7 @@ const flattenTokenPermissions = (token: DatabaseTransferToken): TransferToken =>
   return {
     ...token,
     permissions: isArray(token.permissions)
-      ? map('action', token.permissions as TransferTokenPermission[])
+      ? map(token.permissions as TransferTokenPermission[], 'action')
       : token.permissions,
   };
 };
