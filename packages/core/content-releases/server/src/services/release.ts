@@ -19,7 +19,7 @@ import type {
 } from '../../../shared/contracts/releases';
 import type { ReleaseAction } from '../../../shared/contracts/release-actions';
 import type { UserInfo } from '../../../shared/types';
-import { getService, getPublishOrderForContentTypes } from '../utils';
+import { getService, getPublishOrderForContentTypes, getDraftEntryValidStatus } from '../utils';
 import { getReleaseChanges } from '../audit-logs';
 
 const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
@@ -34,11 +34,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
     });
   };
 
-  /**
-   * Given a release id, it returns the actions formatted ready to be used to publish them.
-   * We split them by contentType and type (publish/unpublish) and extract only the documentIds and locales.
-   */
-  const getFormattedActions = async (releaseId: Release['id']) => {
+  const getReleaseActions = async (releaseId: Release['id']) => {
     const actions = (await strapi.db.query(RELEASE_ACTION_MODEL_UID).findMany({
       where: {
         release: {
@@ -51,9 +47,10 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
       throw new errors.ValidationError('No entries to publish');
     }
 
-    /**
-     * We separate publish and unpublish actions, grouping them by contentType and extracting only their documentIds and locales.
-     */
+    return actions;
+  };
+
+  const getFormattedActions = (actions: ReleaseAction[]) => {
     const formattedActions: {
       [key: UID.ContentType]: {
         publish: { documentId: ReleaseAction['entryDocumentId']; locale?: string }[];
@@ -65,10 +62,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
       const contentTypeUid: UID.ContentType = action.contentType;
 
       if (!formattedActions[contentTypeUid]) {
-        formattedActions[contentTypeUid] = {
-          publish: [],
-          unpublish: [],
-        };
+        formattedActions[contentTypeUid] = { publish: [], unpublish: [] };
       }
 
       formattedActions[contentTypeUid][action.type].push({
@@ -78,6 +72,27 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
     }
 
     return formattedActions;
+  };
+
+  const validatePublishActions = async (actions: ReleaseAction[]) => {
+    const validity = await Promise.all(
+      actions
+        .filter((action) => action.type === 'publish')
+        .map((action) =>
+          getDraftEntryValidStatus(
+            {
+              contentType: action.contentType,
+              documentId: action.entryDocumentId,
+              locale: action.locale,
+            },
+            { strapi }
+          )
+        )
+    );
+
+    if (validity.some((isValid) => !isValid)) {
+      throw new errors.ValidationError('Release is blocked');
+    }
   };
 
   return {
@@ -330,9 +345,15 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
         }
 
         try {
+          // Release action validity is cached for the admin UI and can become stale when
+          // content changes outside the document-service middleware. Read the actions once
+          // after locking the release, then validate and publish that exact snapshot.
+          const actions = await getReleaseActions(releaseId);
+          await validatePublishActions(actions);
+
           strapi.log.info(`[Content Releases] Starting to publish release ${lockedRelease.name}`);
 
-          const formattedActions = await getFormattedActions(releaseId);
+          const formattedActions = getFormattedActions(actions);
 
           // Publish content types in dependency order so that when entity A has a relation
           // to entity B, B is published first to keep this relation.
@@ -379,6 +400,13 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
 
           return { release, error: null, lockedRelease };
         } catch (error) {
+          // A fresh content validation failure is a pre-flight rejection, not a failed
+          // publish attempt. Throwing rolls back the locking transaction without changing
+          // the release status or emitting a publish-failure webhook/audit entry.
+          if (error instanceof errors.ValidationError && error.message === 'Release is blocked') {
+            throw error;
+          }
+
           dispatchWebhook(ALLOWED_WEBHOOK_EVENTS.RELEASES_PUBLISH, {
             isPublished: false,
             error,
