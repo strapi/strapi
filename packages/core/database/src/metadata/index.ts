@@ -7,10 +7,13 @@ import {
   hasInverseOrderColumn,
   isManyToAny,
 } from './relations';
-import { Metadata, Meta } from './metadata';
+import { Metadata } from './metadata';
 import type { Model } from '../types';
 
-export type { Metadata, Meta };
+export type { Meta } from './metadata';
+export type { AttributeNaming } from './attribute-naming';
+export { attributeNaming } from './attribute-naming';
+export { Metadata };
 export {
   isPolymorphic,
   isBidirectional,

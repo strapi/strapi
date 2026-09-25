@@ -28,3 +28,51 @@ export default {
   async down(knex: Knex, db: Database): void {},
 };
 ```
+
+## User migrations
+
+User migrations live in the application's `database/migrations` directory (or `<outDir>/database/migrations` when `database.settings.useTypescriptMigrations` is enabled, in which case the compiled output is discovered). They run before schema sync, inside a transaction, and receive `(knex, db)` where `db` is the `Database` instance. In `strapi develop`, the cluster primary recompiles the app before it forks the new worker on every reload, so a `.ts` migration written to the source directory (for example by the Content-Type Builder) is emitted to `<outDir>/database/migrations` and discovered on that same reload. `strapi build` does the same for production.
+
+### File ordering
+
+Discovery lists `*.js` and `*.sql` files in the migrations directory (non-recursively) and runs them **sorted by file name**. There is no other ordering mechanism, so the file name prefix decides the order.
+
+`strapi generate migration` names files `YYYY.MM.DDTHH.mm.ss.<name>.<js|ts>` (see `packages/generators/generators/src/plops/utils/get-formatted-date.ts`).
+
+### Generated rename migrations
+
+When a field is renamed in the Content-Type Builder, a migration named `YYYY.MM.DDTHH.mm.ss.SSS.rename-fields.<js|ts>` is written to the app's source `database/migrations` directory (`packages/core/database/src/migrations/file-builder.ts`). The file is written before the schema files. If the save fails after that (schema write or folder commit), the Content-Type Builder deletes the file while rolling the save back, so a rejected save never leaves a migration behind. The prefix is the same shape as the generator's, with milliseconds appended and expressed in **UTC**, so:
+
+- generated files interleave predictably with hand-written ones by timestamp;
+- two saves within the same second do not collide (if the file name is still taken, the timestamp is bumped by one millisecond until it is free, so the names keep sorting in creation order);
+- developers in different time zones produce files that sort in creation order.
+
+Within the same second, a generated file (whose next characters are millisecond digits) sorts before a hand-written file whose name starts with a letter. To interleave your own migration deterministically with a generated one, use the same timestamp prefix and pick a later time.
+
+The generated file only calls the guarded helpers on `db.schema` (`renameColumn`, `renameTable`, `updateRows`, `applyAttributeRenames` — see `packages/core/database/src/schema/rename-helpers.ts`). Each helper checks that the source exists and the target does not before doing anything, so the file is a safe no-op on a fresh database. When both exist (the environment drifted), the step is skipped with a warning instead of failing: the migration still records as run, and schema sync then drops the old artifact. Skipped steps are logged: at `info` level when the source is missing (expected on a fresh database) and at `warn` level when the target already exists (the rename was not applied).
+
+Other behaviours worth knowing:
+
+- `renameColumn` and `renameTable` also deal with the indexes and constraints whose names embed the old identifier. On PostgreSQL they are renamed in place (a foreign-key constraint and the index of the same name are two objects there, so both are renamed). On SQLite and MySQL the old-named ones are dropped and schema sync creates them under the new name. Without this, re-using the old name later (for example renaming `a` to `b`, then adding a new `a`) would fail on every boot with an "already exists" error.
+- `updateRows` (component, dynamic zone and media fields, whose name is stored as a value in a link table) first deletes rows in the same scope that already carry the target value. Such rows are orphans left behind when a field with the target name was deleted earlier; merging them would resurrect deleted components or media.
+- MySQL does not run DDL inside transactions. If a generated file fails part-way, the steps before the failure stay applied, and re-running a file with multi-hop chains (for example a swap through a temporary name) is not guaranteed to be idempotent. This is the same as for any hand-written migration on MySQL.
+- With `database.settings.runMigrations: false`, generated files never run, so a renamed field falls back to the old behaviour: schema sync drops the old column or table and creates an empty new one.
+- A rename that cannot be carried (the type, relation or component also changed; polymorphic relations; system attributes such as `documentId` or `locale`) is left out of the file and logged when the schema is saved; schema sync then drops and re-creates that field. `strapi rename:field` refuses to run in that case, and when `renameMigrations.attributes` is `never`, instead of renaming the field without a migration.
+- Renaming a component or moving it to another category is not a rename migration: the component keeps its uid, file and table on a display-name edit.
+
+#### Stores keyed by attribute name
+
+Some data outside the content tables refers to fields by name, for example the `properties.fields` of admin role and admin API token permissions. The boot cleanup removes every stored field path that is not in the new schema, so after a rename every role but the super admin would lose access to the field.
+
+Every generated file therefore ends with one logical step that carries the save's renames, composed per model from the first name to the last (`a -> tmp, b -> a, tmp -> b` becomes `{ a: 'b', b: 'a' }`):
+
+```js
+await db.schema.applyAttributeRenames(knex, {
+  renames: {
+    'api::article.article': { title: 'heading' },
+    'default.hero': { caption: 'label' },
+  },
+});
+```
+
+`@strapi/database` only dispatches it: `applyAttributeRenames` calls every handler registered with `db.schema.registerAttributeRenameHandler(handler)`, in registration order, with the migration's transaction. Handlers must be registered during the register phase, because user migrations run during schema sync, before any plugin bootstrap. The admin registers one that rewrites permission field paths (including paths through components, so a parent rename and a rename inside its component compose) before its bootstrap cleanup runs. Other stores keyed by attribute name, such as Content Manager layouts, can register on the same hook. With no handler registered, the step is a logged no-op. The step is written even when every hop of the save was refused, since the logical field is the same field even when its data could not be carried.

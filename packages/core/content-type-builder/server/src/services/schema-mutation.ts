@@ -1,3 +1,5 @@
+import * as fse from 'fs-extra';
+
 type SchemaBuilder = {
   rollback(): Promise<unknown>;
 };
@@ -29,7 +31,8 @@ export const finalizeSchemaMutation = async ({
 };
 
 /**
- * Restores the filesystem artifacts touched before content-structure reconciliation.
+ * Restores the filesystem artifacts touched before content-structure reconciliation: the
+ * generated rename migration, generated APIs, the schema files and API backups.
  * Folder reconciliation is deliberately the final mutation, so groups.json never needs a
  * compensating write when an earlier schema or API operation fails.
  */
@@ -39,12 +42,14 @@ export const rollbackSchemaMutation = async ({
   backedUpApiUids = [],
   generatedApiNames = [],
   schemaAlreadyRolledBack = false,
+  migrationFilePath = null,
 }: {
   builder: SchemaBuilder;
   apiHandler: ApiHandler;
   backedUpApiUids?: string[];
   generatedApiNames?: string[];
   schemaAlreadyRolledBack?: boolean;
+  migrationFilePath?: string | null;
 }) => {
   const errors: unknown[] = [];
   const attempt = async (operation: () => Promise<unknown>) => {
@@ -54,6 +59,12 @@ export const rollbackSchemaMutation = async ({
       errors.push(error);
     }
   };
+
+  // The rename migration is written before the schema files. Remove it first so a rejected
+  // save never leaves a migration that would rename columns on the next boot.
+  if (migrationFilePath) {
+    await attempt(() => fse.remove(migrationFilePath));
+  }
 
   // A generator can fail before a schema directory exists, so remove its partial API before
   // asking the schema handler to roll back. Every action is attempted even if an earlier one

@@ -67,6 +67,7 @@ import { canEditContentType } from './utils/canEditContentType';
 import { createComponentUid, createUid } from './utils/createUid';
 import { getAttributesToDisplay } from './utils/getAttributesToDisplay';
 import { getFormInputNames } from './utils/getFormInputNames';
+import { getRenameStorageChange, type RenameStorageChange } from './utils/getRenameStorageChange';
 
 import type { AnyAttribute, ContentType } from '../../types';
 import type { FormAPI } from '../../utils/formAPI';
@@ -168,6 +169,8 @@ export const FormModal = () => {
     updateComponentSchema,
     updateComponentUid,
     reservedNames,
+    confirmAttributeRenameMigration,
+    attributeRenameMigrationMode,
   } = useDataManager();
 
   const {
@@ -185,6 +188,19 @@ export const FormModal = () => {
 
   const [showWarningDialog, setShowWarningDialog] = useState(false);
   const [pendingSubmit, setPendingSubmit] = useState<PendingSubmit | null>(null);
+  // Set when the edit renames an existing field *and* changes its storage: the
+  // data cannot be preserved, so the user confirms before the field is recreated.
+  const [storageChangeWarning, setStorageChangeWarning] = useState<RenameStorageChange | null>(
+    null
+  );
+
+  const checkRenameStorageChange = (): RenameStorageChange | null => {
+    if (actionType !== 'edit' || (modalType !== 'attribute' && modalType !== 'customField')) {
+      return null;
+    }
+
+    return getRenameStorageChange(initialData, modifiedData, attributeRenameMigrationMode);
+  };
 
   const checkFieldNameChanges = (): AnyAttribute[] | false => {
     // Only check when editing an attribute
@@ -556,9 +572,41 @@ export const FormModal = () => {
     [dispatch, formErrors]
   );
 
-  const submitForm = async (e: React.SyntheticEvent, shouldContinue = isCreating) => {
+  const submitForm = async (
+    e: React.SyntheticEvent,
+    shouldContinue = isCreating,
+    // The user already confirmed the field will be recreated empty (rename +
+    // storage change): there is no data to preserve, so don't ask about it.
+    { skipRenameMigration = false }: { skipRenameMigration?: boolean } = {}
+  ) => {
     try {
       await checkFormValidity();
+
+      let recordRename = !skipRenameMigration;
+      let declineRename = false;
+      if (
+        !skipRenameMigration &&
+        actionType === 'edit' &&
+        (isCreatingAttribute || isCreatingCustomFieldAttribute) &&
+        // A field that was never saved has no data to preserve (and
+        // `recordRename` skips it), so there is nothing to ask about.
+        initialData.status !== 'NEW' &&
+        toStringValue(initialData.name) !== toStringValue(modifiedData.name)
+      ) {
+        const decision = await confirmAttributeRenameMigration({
+          forTarget,
+          uid: targetUid,
+          oldName: toStringValue(initialData.name),
+          newName: toStringValue(modifiedData.name),
+        });
+
+        if (decision === null) {
+          return;
+        }
+
+        recordRename = decision;
+        declineRename = !decision;
+      }
 
       dispatch(
         actions.setErrors({
@@ -694,6 +742,8 @@ export const FormModal = () => {
           forTarget,
           targetUid,
           name: toStringValue(initialData.name),
+          recordRename,
+          declineRename,
         };
 
         if (actionType === 'edit') {
@@ -729,6 +779,8 @@ export const FormModal = () => {
               forTarget,
               targetUid,
               name: toStringValue(initialData.name),
+              recordRename,
+              declineRename,
             });
           }
 
@@ -761,6 +813,8 @@ export const FormModal = () => {
               forTarget,
               targetUid,
               name: toStringValue(initialData.name),
+              recordRename,
+              declineRename,
             });
           }
 
@@ -825,6 +879,8 @@ export const FormModal = () => {
             forTarget,
             targetUid,
             name: toStringValue(initialData.name),
+            recordRename,
+            declineRename,
           });
         }
 
@@ -965,6 +1021,34 @@ export const FormModal = () => {
     }
   };
 
+  // Runs after the condition warning (if any): warn when the rename also
+  // changes the field's storage, otherwise submit.
+  const continueSubmit = async (e: React.SyntheticEvent, shouldContinue: boolean) => {
+    const storageChange = checkRenameStorageChange();
+    if (storageChange) {
+      setPendingSubmit({ e, shouldContinue });
+      setStorageChangeWarning(storageChange);
+      return;
+    }
+
+    await submitForm(e, shouldContinue);
+  };
+
+  const cancelStorageChange = () => {
+    setStorageChangeWarning(null);
+    setPendingSubmit(null);
+  };
+
+  const confirmStorageChange = () => {
+    if (pendingSubmit === null) {
+      return;
+    }
+
+    const { e, shouldContinue } = pendingSubmit;
+    cancelStorageChange();
+    submitForm(e, shouldContinue, { skipRenameMigration: true });
+  };
+
   const handleSubmit = async (e: React.SyntheticEvent, shouldContinue = isCreating) => {
     e.preventDefault();
 
@@ -976,7 +1060,7 @@ export const FormModal = () => {
       return;
     }
 
-    await submitForm(e, shouldContinue);
+    await continueSubmit(e, shouldContinue);
   };
 
   const handleConfirmClose = () => {
@@ -1164,7 +1248,7 @@ export const FormModal = () => {
                 const { e, shouldContinue } = pendingSubmit;
                 setShowWarningDialog(false);
                 setPendingSubmit(null);
-                submitForm(e, shouldContinue);
+                continueSubmit(e, shouldContinue);
               }
             }}
             onCancel={() => {
@@ -1227,6 +1311,56 @@ export const FormModal = () => {
                 </Box>
               );
             })()}
+          </ConfirmDialog>
+        </Dialog.Root>
+        <Dialog.Root
+          open={storageChangeWarning !== null}
+          onOpenChange={(open) => !open && cancelStorageChange()}
+        >
+          <ConfirmDialog
+            title={formatMessage({
+              id: getTrad('form.attribute.rename-type-change-warning.title'),
+              defaultMessage: 'Existing data will be lost',
+            })}
+            onCancel={cancelStorageChange}
+            endAction={
+              <Dialog.Action>
+                <Button fullWidth variant="danger" onClick={confirmStorageChange}>
+                  {formatMessage({
+                    id: getTrad('form.attribute.rename-type-change-warning.confirm'),
+                    defaultMessage: 'Continue',
+                  })}
+                </Button>
+              </Dialog.Action>
+            }
+          >
+            {storageChangeWarning && (
+              <Box>
+                <Typography>
+                  {formatMessage(
+                    {
+                      id: getTrad('form.attribute.rename-type-change-warning.body'),
+                      defaultMessage:
+                        'You are renaming {oldName} to {newName} and changing it from {oldType} to {newType}. Strapi cannot preserve the existing data of this field when both change at once. The field will be recreated empty when you save.',
+                    },
+                    {
+                      oldName: (
+                        <Typography fontWeight="bold">{storageChangeWarning.oldName}</Typography>
+                      ),
+                      newName: (
+                        <Typography fontWeight="bold">{storageChangeWarning.newName}</Typography>
+                      ),
+                      oldType: (
+                        <Typography fontWeight="bold">{storageChangeWarning.oldType}</Typography>
+                      ),
+                      newType: (
+                        <Typography fontWeight="bold">{storageChangeWarning.newType}</Typography>
+                      ),
+                    }
+                  )}
+                </Typography>
+              </Box>
+            )}
           </ConfirmDialog>
         </Dialog.Root>
         <FormModalHeader

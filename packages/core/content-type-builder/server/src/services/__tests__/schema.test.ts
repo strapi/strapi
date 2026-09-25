@@ -1,6 +1,7 @@
+import * as fse from 'fs-extra';
 import type { UID } from '@strapi/types';
 
-import { getSchema, updateSchema } from '../schema';
+import { getSchema, updateSchema, renameAttribute } from '../schema';
 import type { Schema as CTBSchema } from '../../controllers/validation/schema';
 
 const builderServiceMock = {
@@ -33,6 +34,53 @@ const contentTypeServiceMock = {
   generateAPI: jest.fn().mockResolvedValue(undefined),
 };
 
+const migrationBuilderMock = {
+  addRenameAttribute: jest.fn(),
+  attributeRenamesMapping: jest.fn().mockReturnValue({}),
+  addAttributeRenames: jest.fn(),
+  hasChanges: jest.fn().mockReturnValue(true),
+  getUnsupported: jest.fn().mockReturnValue([]),
+  writeFiles: jest.fn().mockResolvedValue('/migrations/file.js'),
+};
+
+jest.mock('../migration-builder', () => ({
+  createMigrationBuilder: jest.fn(() => migrationBuilderMock),
+}));
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires, node/no-missing-require
+const { createMigrationBuilder } = require('../migration-builder');
+
+let renameMode = 'prompt-before-save';
+
+// The rollback removes the generated migration with `fse.remove`; keep it off the disk.
+jest.mock('fs-extra', () => ({
+  ...jest.requireActual('fs-extra'),
+  remove: jest.fn().mockResolvedValue(undefined),
+}));
+
+const schemaWithRenames = (renames: Array<{ oldName: string; newName: string }>): CTBSchema => ({
+  contentTypes: [
+    {
+      action: 'update',
+      uid: 'api::article.article',
+      displayName: 'Article',
+      kind: 'collectionType',
+      draftAndPublish: false,
+      pluginOptions: {},
+      options: {},
+      renames,
+      attributes: [
+        {
+          action: 'update',
+          name: 'heading',
+          properties: { type: 'string' },
+        } as any,
+      ],
+    } as any,
+  ],
+  components: [],
+});
+
 const contentStructureServiceMock = {
   validateFromUpdate: jest.fn(),
   commitFromUpdate: jest.fn().mockResolvedValue(false),
@@ -64,10 +112,21 @@ jest.mock('../../utils', () => ({
   getService: jest.fn((name) => getServiceMock(name)),
 }));
 
+// `renameAttribute` calls `getSchema`, which formats content types through these
+// helpers. They are irrelevant to the rename wiring, so stub them out.
+jest.mock('../content-types', () => ({
+  ...jest.requireActual('../content-types'),
+  getRestrictRelationsTo: jest.fn(() => null),
+  isContentTypeVisible: jest.fn(() => true),
+}));
+
 describe('Content Type Builder - Schema service', () => {
   beforeEach(() => {
     // Reset mocks
     jest.clearAllMocks();
+    renameMode = 'prompt-before-save';
+    migrationBuilderMock.hasChanges.mockReturnValue(true);
+    migrationBuilderMock.getUnsupported.mockReturnValue([]);
 
     // Mock strapi global
     global.strapi = {
@@ -76,7 +135,34 @@ describe('Content Type Builder - Schema service', () => {
       },
       log: {
         error: jest.fn(),
+        warn: jest.fn(),
       },
+      // The global unit-test setup wires `strapi.plugin = (name) => strapi.plugins[name]`,
+      // so we expose the plugin config through `plugins` here.
+      plugins: {
+        'content-type-builder': {
+          config(key: string, defaultValue: unknown) {
+            if (key === 'renameMigrations.attributes') {
+              return renameMode;
+            }
+            return defaultValue;
+          },
+        },
+      },
+      contentTypes: {},
+      components: {
+        'default.hero': {
+          uid: 'default.hero',
+          category: 'default',
+          collectionName: 'components_default_heroes',
+          info: { displayName: 'Hero' },
+          attributes: {},
+        },
+      },
+      // `getSchema` (used by the CLI rename helpers) reads the folder file from the core service.
+      get: jest.fn((name: string) =>
+        name === 'content-structure' ? { getCleanedFile: jest.fn().mockResolvedValue(null) } : {}
+      ),
     } as any;
   });
 
@@ -741,100 +827,63 @@ describe('Content Type Builder - Schema service', () => {
     });
 
     it('rolls back the schema files when the folder commit fails after writeFiles', async () => {
-      const contentTypeUid = 'api::test.test';
-      const mockContentType = {
-        uid: contentTypeUid,
-        kind: 'collectionType',
-        info: { displayName: 'Test' },
-        attributes: {},
-      };
-
-      jest.mocked(builderServiceMock.contentTypes.get).mockReturnValue(mockContentType);
       contentStructureServiceMock.commitFromUpdate.mockRejectedValueOnce(
         new Error('groups.json write failed')
       );
 
-      const schema: CTBSchema = {
-        contentTypes: [
-          {
-            action: 'create',
-            uid: contentTypeUid,
-            displayName: 'Test',
-            singularName: 'test',
-            pluralName: 'tests',
-            kind: 'collectionType',
-            draftAndPublish: false,
-            pluginOptions: {},
-            options: {},
-            attributes: [],
-          },
-        ],
-        components: [],
-        contentStructure: {
-          version: 1,
-          sections: {
-            collectionTypes: { groups: [] },
-            singleTypes: { groups: [] },
-          },
-        },
-      };
-
-      await expect(updateSchema(schema)).rejects.toThrow('groups.json write failed');
+      await expect(
+        updateSchema(schemaWithRenames([{ oldName: 'title', newName: 'heading' }]))
+      ).rejects.toThrow('groups.json write failed');
 
       expect(builderServiceMock.writeFiles).toHaveBeenCalledTimes(1);
       expect(builderServiceMock.rollback).toHaveBeenCalledTimes(1);
+      expect(fse.remove).toHaveBeenCalledWith('/migrations/file.js');
 
       const writeFilesOrder = jest.mocked(builderServiceMock.writeFiles).mock
         .invocationCallOrder[0];
       const commitOrder = contentStructureServiceMock.commitFromUpdate.mock.invocationCallOrder[0];
+      const removeOrder = jest.mocked(fse.remove).mock.invocationCallOrder[0];
       const rollbackOrder = jest.mocked(builderServiceMock.rollback).mock.invocationCallOrder[0];
 
       expect(writeFilesOrder).toBeLessThan(commitOrder);
-      expect(commitOrder).toBeLessThan(rollbackOrder);
+      expect(commitOrder).toBeLessThan(removeOrder);
+      expect(removeOrder).toBeLessThan(rollbackOrder);
     });
 
     it('does not commit the folder file when writeFiles rolls the schema back', async () => {
-      const contentTypeUid = 'api::test.test';
-      const mockContentType = {
-        uid: contentTypeUid,
-        kind: 'collectionType',
-        info: { displayName: 'Test' },
-        attributes: {},
-      };
-
-      jest.mocked(builderServiceMock.contentTypes.get).mockReturnValue(mockContentType);
       builderServiceMock.writeFiles.mockResolvedValueOnce(false);
 
-      const schema: CTBSchema = {
-        contentTypes: [
-          {
-            action: 'create',
-            uid: contentTypeUid,
-            displayName: 'Test',
-            singularName: 'test',
-            pluralName: 'tests',
-            kind: 'collectionType',
-            draftAndPublish: false,
-            pluginOptions: {},
-            options: {},
-            attributes: [],
-          },
-        ],
-        components: [],
-        contentStructure: {
-          version: 1,
-          sections: {
-            collectionTypes: { groups: [] },
-            singleTypes: { groups: [] },
-          },
-        },
-      };
-
-      await expect(updateSchema(schema)).rejects.toThrow('Invalid schema edition');
+      await expect(
+        updateSchema(schemaWithRenames([{ oldName: 'title', newName: 'heading' }]))
+      ).rejects.toThrow('Invalid schema edition');
 
       expect(builderServiceMock.writeFiles).toHaveBeenCalledTimes(1);
       expect(contentStructureServiceMock.commitFromUpdate).not.toHaveBeenCalled();
       expect(builderServiceMock.rollback).not.toHaveBeenCalled();
+      expect(fse.remove).toHaveBeenCalledWith('/migrations/file.js');
+    });
+
+    it('keeps the generated migration when the save succeeds', async () => {
+      await updateSchema(schemaWithRenames([{ oldName: 'title', newName: 'heading' }]));
+
+      expect(migrationBuilderMock.writeFiles).toHaveBeenCalledTimes(1);
+      expect(contentStructureServiceMock.commitFromUpdate).toHaveBeenCalledTimes(1);
+      expect(fse.remove).not.toHaveBeenCalled();
+    });
+
+    it('removes no migration on rollback when none was generated', async () => {
+      migrationBuilderMock.hasChanges.mockReturnValue(false);
+      contentStructureServiceMock.commitFromUpdate.mockRejectedValueOnce(
+        new Error('groups.json write failed')
+      );
+
+      await expect(
+        updateSchema(schemaWithRenames([{ oldName: 'title', newName: 'heading' }]))
+      ).rejects.toThrow('groups.json write failed');
+
+      expect(migrationBuilderMock.writeFiles).not.toHaveBeenCalled();
+      expect(builderServiceMock.rollback).toHaveBeenCalledTimes(1);
+      expect(fse.remove).not.toHaveBeenCalled();
     });
 
     it('removes a partial generated API before an absent schema directory prevents rollback', async () => {
@@ -1039,6 +1088,316 @@ describe('Content Type Builder - Schema service', () => {
     });
   });
 
+  describe('rename migrations', () => {
+    it('generates a rename migration from the ordered renames array', async () => {
+      await updateSchema(schemaWithRenames([{ oldName: 'title', newName: 'heading' }]));
+
+      expect(createMigrationBuilder).toHaveBeenCalledTimes(1);
+      // The hop carries the definition the field ends up with (looked up by
+      // `newName` in the same entry) so the builder can refuse type changes.
+      expect(migrationBuilderMock.addRenameAttribute).toHaveBeenCalledWith('api::article.article', {
+        oldName: 'title',
+        newName: 'heading',
+        newAttribute: { type: 'string' },
+      });
+      expect(migrationBuilderMock.writeFiles).toHaveBeenCalledTimes(1);
+      expect(migrationBuilderMock.writeFiles).toHaveBeenCalledWith();
+    });
+
+    it('forwards every rename hop in order (e.g. a user-routed swap)', async () => {
+      await updateSchema(
+        schemaWithRenames([
+          { oldName: 'title', newName: 'tmp' },
+          { oldName: 'subtitle', newName: 'title' },
+          { oldName: 'tmp', newName: 'subtitle' },
+        ])
+      );
+
+      // Intermediate names (`tmp`, `title`, `subtitle`) are not in the final
+      // attributes array, so they carry no definition.
+      expect(migrationBuilderMock.addRenameAttribute.mock.calls).toEqual([
+        ['api::article.article', { oldName: 'title', newName: 'tmp', newAttribute: undefined }],
+        [
+          'api::article.article',
+          { oldName: 'subtitle', newName: 'title', newAttribute: undefined },
+        ],
+        ['api::article.article', { oldName: 'tmp', newName: 'subtitle', newAttribute: undefined }],
+      ]);
+    });
+
+    it('attaches the final definition only to the last hop onto a name', async () => {
+      const schema = schemaWithRenames([
+        { oldName: 'a', newName: 'b' },
+        { oldName: 'b', newName: 'c' },
+        { oldName: 'x', newName: 'b' },
+      ]);
+      (schema.contentTypes[0] as any).attributes = [
+        { action: 'update', name: 'b', properties: { type: 'integer' } },
+        { action: 'update', name: 'c', properties: { type: 'string' } },
+      ];
+
+      await updateSchema(schema);
+
+      // The first `b` is `a`'s intermediate name; the final `b` is `x`'s field.
+      expect(migrationBuilderMock.addRenameAttribute.mock.calls).toEqual([
+        ['api::article.article', { oldName: 'a', newName: 'b', newAttribute: undefined }],
+        ['api::article.article', { oldName: 'b', newName: 'c', newAttribute: { type: 'string' } }],
+        ['api::article.article', { oldName: 'x', newName: 'b', newAttribute: { type: 'integer' } }],
+      ]);
+    });
+
+    it('adds the composed attribute renames after the hops, without deleted finals', async () => {
+      const schema = schemaWithRenames([
+        { oldName: 'title', newName: 'heading' },
+        { oldName: 'body', newName: 'content' },
+      ]);
+      // `content` is deleted in the same save.
+      (schema.contentTypes[0] as any).attributes.push({ action: 'delete', name: 'content' });
+      migrationBuilderMock.attributeRenamesMapping.mockReturnValueOnce({
+        'api::article.article': { title: 'heading', body: 'content' },
+      });
+
+      await updateSchema(schema);
+
+      expect(migrationBuilderMock.addAttributeRenames).toHaveBeenCalledWith({
+        'api::article.article': { title: 'heading' },
+      });
+      const lastHop = Math.max(...migrationBuilderMock.addRenameAttribute.mock.invocationCallOrder);
+      expect(migrationBuilderMock.addAttributeRenames.mock.invocationCallOrder[0]).toBeGreaterThan(
+        lastHop
+      );
+    });
+
+    it('adds no attribute renames when the mapping is empty', async () => {
+      await updateSchema(schemaWithRenames([{ oldName: 'title', newName: 'heading' }]));
+
+      expect(migrationBuilderMock.addAttributeRenames).not.toHaveBeenCalled();
+    });
+
+    it('does not pick a deleted attribute up as the new definition', async () => {
+      const schema = schemaWithRenames([{ oldName: 'title', newName: 'heading' }]);
+      (schema.contentTypes[0] as any).attributes = [{ action: 'delete', name: 'heading' }];
+
+      await updateSchema(schema);
+
+      expect(migrationBuilderMock.addRenameAttribute).toHaveBeenCalledWith('api::article.article', {
+        oldName: 'title',
+        newName: 'heading',
+        newAttribute: undefined,
+      });
+    });
+
+    it('does not generate a migration when renameMigrations is never', async () => {
+      renameMode = 'never';
+
+      await updateSchema(schemaWithRenames([{ oldName: 'title', newName: 'heading' }]));
+
+      expect(migrationBuilderMock.addRenameAttribute).not.toHaveBeenCalled();
+      expect(migrationBuilderMock.writeFiles).not.toHaveBeenCalled();
+    });
+
+    it('ignores no-op renames where oldName equals newName', async () => {
+      await updateSchema(schemaWithRenames([{ oldName: 'title', newName: 'title' }]));
+
+      expect(migrationBuilderMock.addRenameAttribute).not.toHaveBeenCalled();
+    });
+
+    it('does not call writeFiles when the builder has no supported changes', async () => {
+      migrationBuilderMock.hasChanges.mockReturnValue(false);
+
+      await updateSchema(schemaWithRenames([{ oldName: 'title', newName: 'heading' }]));
+
+      expect(migrationBuilderMock.addRenameAttribute).toHaveBeenCalledTimes(1);
+      expect(migrationBuilderMock.writeFiles).not.toHaveBeenCalled();
+    });
+
+    it('warns when some renames are unsupported', async () => {
+      migrationBuilderMock.getUnsupported.mockReturnValue([
+        {
+          uid: 'api::article.article',
+          oldName: 'author',
+          newName: 'writer',
+          reason: 'unsupported-type',
+        },
+      ]);
+      migrationBuilderMock.hasChanges.mockReturnValue(false);
+
+      await updateSchema(schemaWithRenames([{ oldName: 'author', newName: 'writer' }]));
+
+      expect(strapi.log.warn).toHaveBeenCalled();
+    });
+
+    it('collects renames from updated components as well', async () => {
+      const schema: CTBSchema = {
+        contentTypes: [],
+        components: [
+          {
+            action: 'update',
+            uid: 'default.seo',
+            displayName: 'Seo',
+            renames: [{ oldName: 'title', newName: 'metaTitle' }],
+            attributes: [
+              {
+                action: 'update',
+                name: 'metaTitle',
+                properties: { type: 'string' },
+              } as any,
+            ],
+          } as any,
+        ],
+      };
+
+      await updateSchema(schema);
+
+      expect(migrationBuilderMock.addRenameAttribute).toHaveBeenCalledWith('default.seo', {
+        oldName: 'title',
+        newName: 'metaTitle',
+        newAttribute: { type: 'string' },
+      });
+    });
+  });
+
+  describe('renameAttribute (CLI single-step rename)', () => {
+    const seedContentType = () => {
+      (global.strapi as any).contentTypes = {
+        'api::article.article': {
+          uid: 'api::article.article',
+          modelType: 'contentType',
+          kind: 'collectionType',
+          modelName: 'article',
+          globalId: 'Article',
+          collectionName: 'articles',
+          info: { displayName: 'Article', singularName: 'article', pluralName: 'articles' },
+          options: { draftAndPublish: false },
+          pluginOptions: {},
+          attributes: {
+            title: { type: 'string' },
+            age: { type: 'integer' },
+          },
+        },
+      };
+      (global.strapi as any).components = {};
+    };
+
+    it('edits the schema with the renamed key and forwards the rename hop', async () => {
+      seedContentType();
+
+      await renameAttribute('api::article.article', 'title', 'heading');
+
+      expect(migrationBuilderMock.addRenameAttribute).toHaveBeenCalledWith('api::article.article', {
+        oldName: 'title',
+        newName: 'heading',
+        newAttribute: { type: 'string' },
+      });
+
+      expect(builderServiceMock.editContentType).toHaveBeenCalledTimes(1);
+      const editArg = jest.mocked(builderServiceMock.editContentType).mock.calls[0][0] as any;
+      expect(editArg.attributes).toHaveProperty('heading');
+      expect(editArg.attributes).not.toHaveProperty('title');
+      expect(editArg.attributes).toHaveProperty('age');
+
+      expect(builderServiceMock.writeFiles).toHaveBeenCalledTimes(1);
+    });
+
+    it('refuses to rename when renameMigrations is never, before touching the schema', async () => {
+      renameMode = 'never';
+      seedContentType();
+
+      await expect(renameAttribute('api::article.article', 'title', 'heading')).rejects.toThrow(
+        /renameMigrations\.attributes: never/
+      );
+
+      expect(migrationBuilderMock.addRenameAttribute).not.toHaveBeenCalled();
+      expect(builderServiceMock.editContentType).not.toHaveBeenCalled();
+      expect(builderServiceMock.writeFiles).not.toHaveBeenCalled();
+    });
+
+    it('refuses a rename the migration cannot carry, before touching the schema', async () => {
+      seedContentType();
+      migrationBuilderMock.getUnsupported.mockReturnValueOnce([
+        {
+          uid: 'api::article.article',
+          oldName: 'title',
+          newName: 'heading',
+          reason: 'unsupported-type',
+        },
+      ]);
+
+      await expect(renameAttribute('api::article.article', 'title', 'heading')).rejects.toThrow(
+        /without losing its data: the field type cannot be migrated/
+      );
+
+      expect(builderServiceMock.editContentType).not.toHaveBeenCalled();
+      expect(builderServiceMock.writeFiles).not.toHaveBeenCalled();
+    });
+
+    it('runs the payload through the update-schema validation', async () => {
+      seedContentType();
+      (global.strapi as any).contentTypes['api::article.article'].attributes.foo_bar = {
+        type: 'string',
+      };
+
+      // `fooBar` and `foo_bar` would share one column.
+      await expect(renameAttribute('api::article.article', 'title', 'fooBar')).rejects.toThrow();
+
+      expect(builderServiceMock.editContentType).not.toHaveBeenCalled();
+      expect(builderServiceMock.writeFiles).not.toHaveBeenCalled();
+    });
+
+    it('sends custom fields back as customField, like the admin', async () => {
+      seedContentType();
+      (global.strapi as any).contentTypes['api::article.article'].attributes.color = {
+        type: 'string',
+        customField: 'plugin::color-picker.color',
+      };
+
+      await renameAttribute('api::article.article', 'color', 'shade');
+
+      expect(migrationBuilderMock.addRenameAttribute).toHaveBeenCalledWith('api::article.article', {
+        oldName: 'color',
+        newName: 'shade',
+        newAttribute: { type: 'customField', customField: 'plugin::color-picker.color' },
+      });
+      const editArg = jest.mocked(builderServiceMock.editContentType).mock.calls[0][0] as any;
+      expect(editArg.attributes.shade).toEqual({
+        type: 'customField',
+        customField: 'plugin::color-picker.color',
+      });
+    });
+
+    it('throws when the uid is unknown', async () => {
+      seedContentType();
+
+      await expect(renameAttribute('api::missing.missing', 'title', 'heading')).rejects.toThrow(
+        /No content-type or component/
+      );
+    });
+
+    it('throws when the old attribute does not exist', async () => {
+      seedContentType();
+
+      await expect(renameAttribute('api::article.article', 'missing', 'heading')).rejects.toThrow(
+        /does not exist/
+      );
+    });
+
+    it('throws when the new attribute name is already taken', async () => {
+      seedContentType();
+
+      await expect(renameAttribute('api::article.article', 'title', 'age')).rejects.toThrow(
+        /already exists/
+      );
+    });
+
+    it('throws when renaming to the same name', async () => {
+      seedContentType();
+
+      await expect(renameAttribute('api::article.article', 'title', 'title')).rejects.toThrow(
+        /itself/
+      );
+    });
+  });
+
   describe('getSchema', () => {
     const getCleanedFile = jest.fn();
 
@@ -1046,6 +1405,11 @@ describe('Content Type Builder - Schema service', () => {
       global.strapi = {
         contentTypes: {},
         components: {},
+        plugins: {
+          'content-type-builder': {
+            config: (_key: string, defaultValue: unknown) => defaultValue,
+          },
+        },
         get: jest.fn((name: string) => (name === 'content-structure' ? { getCleanedFile } : {})),
       } as any;
     };

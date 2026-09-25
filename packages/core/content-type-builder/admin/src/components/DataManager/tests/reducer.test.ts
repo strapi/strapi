@@ -1,6 +1,8 @@
 import { actions, reducer, initialState } from '../reducer';
 import { CONTENT_STRUCTURE_VERSION } from '../utils/contentStructure';
 
+import { initCT } from './utils';
+
 import type { AnyAttribute, ContentType, Component } from '../../../types';
 import type { ContentStructure } from '../utils/contentStructure';
 import type { Internal, Schema } from '@strapi/types';
@@ -918,6 +920,89 @@ describe('Content Type Builder | DataManager | reducer', () => {
       const state = reducer(initializedState, action);
       expect(state.current.components['test.component']).toBeDefined();
       expect(state.current.components['test.component'].status).toBe('NEW');
+    });
+
+    describe('update keeps pending rename state', () => {
+      const uid = 'api::article.article';
+
+      const buildState = (extra: Partial<ContentType>) =>
+        reducer(
+          undefined,
+          actions.init({
+            components: {},
+            contentTypes: {
+              [uid]: initCT('article', {
+                status: 'CHANGED',
+                attributes: [{ name: 'headline', type: 'string', status: 'CHANGED' }],
+                ...extra,
+              }),
+            },
+            reservedNames: { models: [], attributes: [] },
+          })
+        );
+
+      const update = (extra: Partial<ContentType>) =>
+        actions.applyChange({
+          action: 'update',
+          schema: initCT('article', {
+            status: 'CHANGED',
+            attributes: [
+              { name: 'headline', type: 'string', status: 'CHANGED' },
+              { name: 'summary', type: 'text', status: 'NEW' },
+            ],
+            ...extra,
+          }),
+        });
+
+      it('keeps manual hops when the incoming schema declares no renames', () => {
+        const state = reducer(
+          buildState({ renames: [{ oldName: 'title', newName: 'headline' }] }),
+          update({})
+        );
+
+        expect(state.current.contentTypes[uid].renames).toEqual([
+          { oldName: 'title', newName: 'headline' },
+        ]);
+        expect(state.current.contentTypes[uid].attributes).toHaveLength(2);
+      });
+
+      it('appends incoming hops after the existing ones', () => {
+        const state = reducer(
+          buildState({ renames: [{ oldName: 'title', newName: 'headline' }] }),
+          update({ renames: [{ oldName: 'headline', newName: 'heading' }] })
+        );
+
+        expect(state.current.contentTypes[uid].renames).toEqual([
+          { oldName: 'title', newName: 'headline' },
+          { oldName: 'headline', newName: 'heading' },
+        ]);
+      });
+
+      it('merges and deduplicates declined rename names', () => {
+        const state = reducer(
+          buildState({ declinedRenameNames: ['title', 'tmp'] }),
+          update({ declinedRenameNames: ['tmp', 'heading'] })
+        );
+
+        expect(state.current.contentTypes[uid].declinedRenameNames).toEqual([
+          'title',
+          'tmp',
+          'heading',
+        ]);
+      });
+
+      it('leaves the rename state absent when neither side has any', () => {
+        const state = reducer(buildState({}), update({}));
+
+        expect(state.current.contentTypes[uid]).not.toHaveProperty('renames');
+        expect(state.current.contentTypes[uid]).not.toHaveProperty('declinedRenameNames');
+      });
+
+      it('keeps the NEW status of a type that was created in this session', () => {
+        const state = reducer(buildState({ status: 'NEW' }), update({ status: 'CHANGED' }));
+
+        expect(state.current.contentTypes[uid].status).toBe('NEW');
+      });
     });
 
     it('should relocate a foldered content type out of its old section when the kind changes', () => {

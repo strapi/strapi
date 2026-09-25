@@ -9165,6 +9165,7 @@ __metadata:
     koa-body: "npm:6.0.1"
     lodash: "npm:4.18.1"
     micromatch: "npm:^4.0.8"
+    msw: "npm:2.13.4"
     pluralize: "npm:8.0.0"
     qs: "npm:6.15.3"
     react: "npm:18.3.1"
@@ -9329,6 +9330,7 @@ __metadata:
   resolution: "@strapi/database@workspace:packages/core/database"
   dependencies:
     "@paralleldrive/cuid2": "npm:2.2.2"
+    "@strapi/typescript-utils": "npm:5.55.0"
     "@strapi/utils": "npm:5.55.1"
     "@types/fs-extra": "npm:11.0.4"
     "@types/jest": "npm:29.5.2"
@@ -10090,6 +10092,20 @@ __metadata:
     zod: "npm:4.4.3"
   languageName: unknown
   linkType: soft
+
+"@strapi/typescript-utils@npm:5.55.0":
+  version: 5.55.0
+  resolution: "@strapi/typescript-utils@npm:5.55.0"
+  dependencies:
+    chalk: "npm:4.1.2"
+    cli-table3: "npm:0.6.5"
+    fs-extra: "npm:11.3.4"
+    lodash: "npm:4.18.1"
+    prettier: "npm:3.6.2"
+    typescript: "npm:5.9.3"
+  checksum: 10c0/4bafe98160b1917578834f53c26c04123a5d79e975abf1f5a1956639935cbe3d30e62e2dc640b93b36de13cb6e069f10e5d15d64f2486d1d5f385e3d64d73f5b
+  languageName: node
+  linkType: hard
 
 "@strapi/typescript-utils@npm:5.55.1, @strapi/typescript-utils@workspace:packages/utils/typescript":
   version: 0.0.0-use.local
