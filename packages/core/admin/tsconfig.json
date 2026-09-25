@@ -3,5 +3,9 @@
   "compilerOptions": {
     "types": ["@testing-library/jest-dom"]
   },
-  "include": ["_internal"]
+  "include": [
+    "_internal",
+    "admin/src/components/DefaultDocument.tsx",
+    "admin/src/components/NoJavascript.tsx"
+  ]
 }
