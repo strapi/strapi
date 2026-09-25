@@ -1,8 +1,16 @@
-import type { Core } from '@strapi/types';
+import type { Core, Data } from '@strapi/types';
 import { async } from '@strapi/utils';
 import { difference, merge } from 'lodash/fp';
 import { getService } from '../utils';
 import { WORKFLOW_MODEL_UID } from '../constants/workflows';
+
+/** A workflow that lost content types to another one, as read after the write. */
+export interface ContentTypeTransfer {
+  workflowId: Data.ID;
+  name: string;
+  before: string[];
+  after: string[];
+}
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const contentManagerContentTypeService = strapi
@@ -28,9 +36,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * @param {Array<string>} options.destContentTypes - The content types assigned to the new workflow
      * @param {Workflow.Stage} options.stageId - The new stage to assign the entities to
      */
-    async migrate({ srcContentTypes = [], destContentTypes, stageId }: any) {
+    async migrate({
+      srcContentTypes = [],
+      destContentTypes,
+      stageId,
+    }: any): Promise<ContentTypeTransfer[]> {
       const workflowsService = getService('workflows', { strapi });
       const { created, deleted } = diffContentTypes(srcContentTypes, destContentTypes);
+      const transfers = new Map<Data.ID, ContentTypeTransfer>();
 
       await async.map(
         created,
@@ -43,9 +56,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
             // Updates all existing entities stages links to the new stage
             await stagesService.updateEntitiesStage(uid, { toStageId: stageId });
             // Transfer content types from the previous workflow(s)
-            await async.map(srcWorkflows, (srcWorkflow: any) =>
-              this.transferContentTypes(srcWorkflow, uid)
-            );
+            await async.map(srcWorkflows, async (srcWorkflow: any) => {
+              const transfer = await this.transferContentTypes(srcWorkflow, uid);
+              const previous = transfers.get(transfer.workflowId);
+              transfers.set(transfer.workflowId, {
+                ...transfer,
+                before: previous?.before ?? transfer.before,
+              });
+            });
           }
           await updateContentTypeConfig(uid, true);
 
@@ -63,6 +81,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         await updateContentTypeConfig(uid, false);
         await stagesService.deleteAllEntitiesStage(uid, {});
       });
+
+      return [...transfers.values()];
     },
 
     /**
@@ -70,9 +90,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * @param {Workflow} srcWorkflow - The workflow to transfer from
      * @param {string} uid - The content type uid
      */
-    async transferContentTypes(srcWorkflow: any, uid: any) {
+    async transferContentTypes(srcWorkflow: any, uid: any): Promise<ContentTypeTransfer> {
       // Update assignedContentTypes of the previous workflow
-      await strapi.db.query(WORKFLOW_MODEL_UID).update({
+      const updated = await strapi.db.query(WORKFLOW_MODEL_UID).update({
         where: {
           id: srcWorkflow.id,
         },
@@ -80,6 +100,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           contentTypes: srcWorkflow.contentTypes.filter((contentType: any) => contentType !== uid),
         },
       });
+
+      return {
+        workflowId: updated.id,
+        name: updated.name,
+        before: srcWorkflow.contentTypes,
+        after: updated.contentTypes,
+      };
     },
   };
 };
