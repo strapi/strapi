@@ -25,7 +25,8 @@ This prevents contextual inference from making a permissive generic lookup look 
 Handler references stay strict in both modes. Registered policy contracts and complete policy
 inventories apply only when the switch is on; an empty inventory accepts no policy reference.
 With the switch on, unregistered literal service and controller names resolve to `never`, while
-explicit generics and dynamic names keep the permissive types.
+explicit generics (`plugin(x).service<T>(name)` or `service<T>(uid)`) win and dynamic names keep
+the permissive types.
 
 Dedicated fixtures check config defaults against missing values, nullable values, possibly
 undefined defaults, and contextual inference. Policy namespace fixtures check relative plugin
