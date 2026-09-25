@@ -84,6 +84,14 @@ app.plugin('i18n').service('unregistered').anything();
 // Explicit generics and dynamic names keep the permissive signature.
 const explicitService = app.plugin('i18n').service<{ greet(): string }>('unregistered');
 explicitService.greet() satisfies string;
+const explicitFullUidService = app.service<{ greet(): string }>('plugin::i18n.unregistered');
+explicitFullUidService.greet() satisfies string;
+const explicitFullUidController = app.controller<{ list: Core.ControllerHandler }>(
+  'api::unregistered.items'
+);
+explicitFullUidController.list satisfies Core.ControllerHandler;
+// @ts-expect-error The explicit contract has no arbitrary members.
+explicitFullUidService.anything();
 declare const dynamicName: string;
 declare const patternUid: `plugin::i18n.${string}`;
 app.plugin('i18n').service(dynamicName).anything();

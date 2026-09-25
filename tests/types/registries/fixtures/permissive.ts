@@ -35,3 +35,5 @@ app.plugin('sentry').config('sendMetadata', 'yes');
     { name: 'plugin::content-manager.hasPermissions', config: { hasAtLeastOne: 'yes' } },
   ],
 }) satisfies Core.RouteConfigFor;
+const explicitFullUidService = app.service<{ greet(): string }>('plugin::i18n.unregistered');
+explicitFullUidService.greet() satisfies string;
