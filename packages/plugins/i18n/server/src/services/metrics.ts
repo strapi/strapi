@@ -1,4 +1,4 @@
-import { reduce } from 'lodash/fp';
+import { reduce } from 'lodash';
 import { getService } from '../utils';
 
 const sendDidInitializeEvent = async () => {
@@ -6,9 +6,10 @@ const sendDidInitializeEvent = async () => {
 
   // TODO: V5: This event should be renamed numberOfContentTypes in V5 as the name is already taken to describe the number of content types using i18n.
   const numberOfContentTypes = reduce(
+    strapi.contentTypes as any,
     (sum, contentType) => (isLocalizedContentType(contentType) ? sum + 1 : sum),
     0
-  )(strapi.contentTypes as any);
+  );
 
   strapi.telemetry
     .send('didInitializeI18n', { groupProperties: { numberOfContentTypes } })

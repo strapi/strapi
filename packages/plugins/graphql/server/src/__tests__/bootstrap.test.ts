@@ -85,7 +85,15 @@ describe('bootstrap operation-limit warning', () => {
     });
   });
 
-  const createStrapi = ({ depthLimit, maxLimit }: { depthLimit: unknown; maxLimit: unknown }) => {
+  const createStrapi = ({
+    depthLimit,
+    maxLimit,
+    apolloServer,
+  }: {
+    depthLimit: unknown;
+    maxLimit: unknown;
+    apolloServer?: Record<string, unknown>;
+  }) => {
     const operationWarning = jest.fn((message: string) => {
       if (message.startsWith('Built-in GraphQL operation limits')) {
         mockEvents.push('operation-warning');
@@ -98,7 +106,7 @@ describe('bootstrap operation-limit warning', () => {
           depthLimit,
           maxLimit,
           landingPage: false,
-          apolloServer: undefined,
+          apolloServer,
         };
 
         return config[key as keyof typeof config];
@@ -124,6 +132,26 @@ describe('bootstrap operation-limit warning', () => {
 
     return { strapi: strapi as unknown as Core.Strapi, operationWarning };
   };
+
+  it('appends custom plugins and validation rules without mutating configuration', async () => {
+    const customPlugin = { serverWillStart: jest.fn() };
+    const customRule = jest.fn();
+    const apolloServer = Object.freeze({
+      plugins: Object.freeze([customPlugin]),
+      validationRules: Object.freeze([customRule]),
+    });
+    const { strapi } = createStrapi({ depthLimit: 10, maxLimit: 100, apolloServer });
+
+    await bootstrap({ strapi });
+
+    const [config] = mockApolloServer.mock.calls[0];
+    expect(config.plugins).toHaveLength(3);
+    expect(config.plugins?.[2]).toEqual(customPlugin);
+    expect(config.validationRules).toHaveLength(2);
+    expect(config.validationRules?.[1]).toBe(customRule);
+    expect(apolloServer.plugins).toEqual([customPlugin]);
+    expect(apolloServer.validationRules).toEqual([customRule]);
+  });
 
   it('logs one warning before constructing Apollo when both built-in limits are unbounded', async () => {
     const { strapi, operationWarning } = createStrapi({ depthLimit: undefined, maxLimit: -1 });
