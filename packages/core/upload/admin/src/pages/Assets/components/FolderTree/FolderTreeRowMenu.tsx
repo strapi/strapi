@@ -27,6 +27,24 @@ const MenuSlot = styled.div`
   &:has([data-state='open']) {
     opacity: 1;
   }
+
+  // Square, matching the chevron at the other end of the row. Descendant rather
+  // than child: Menu.Root renders no element today, but that is Radix's
+  // business, not something to depend on.
+  && button {
+    width: 2.4rem;
+    height: 2.4rem;
+    min-width: 2.4rem;
+    min-height: 2.4rem;
+    padding: 0.4rem;
+  }
+
+  // The row paints its own hover, so the trigger needs a stronger one of its own
+  // to read as a separate target sitting on top of it.
+  && button:hover,
+  && button[data-state='open'] {
+    background: ${({ theme }) => theme.colors.primary200};
+  }
 `;
 
 interface FolderTreeRowMenuProps {

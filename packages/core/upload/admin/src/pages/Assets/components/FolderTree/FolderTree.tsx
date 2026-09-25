@@ -29,10 +29,15 @@ const RowButton = styled.button<{
 }>`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => theme.spaces[2]};
+  // Matches the row's own gap, so Home — the one row whose icon sits inside
+  // this button rather than beside it — puts its label on the same line as a
+  // folder's.
+  gap: ${({ theme }) => theme.spaces[1]};
   width: 100%;
   min-height: 3.2rem;
-  padding: ${({ theme }) => `${theme.spaces[1]} ${theme.spaces[2]}`};
+  // No padding of its own: the row owns the inset, so the label lines up with
+  // the icon boxes instead of being pushed in by a second layer of spacing.
+  padding: 0;
   border: 0;
   // The surface — hover, active, drop target — is painted by the row behind
   // this, so it spans the chevron and the actions menu too, not just the label.
@@ -215,12 +220,50 @@ const NavList = styled.ul`
 const INDENT_PER_LEVEL_REM = 1.6;
 
 /**
+ * Breathing room between the row's highlight and the controls at either end.
+ * Asymmetric on purpose: the chevron reads as part of the indent, while the
+ * actions trigger sits closer to the edge so it stays out of the name's way.
+ */
+const ROW_INSET_LEFT_REM = 0.8;
+const ROW_INSET_RIGHT_REM = 0.4;
+
+/**
+ * Every icon in the rail occupies the same 24px box, whether or not it is a
+ * control: the chevron and the actions trigger are buttons, the home and folder
+ * marks are not. Sizing the box rather than the glyph is what keeps the labels
+ * on one vertical line across rows that mix the two.
+ */
+const IconSlot = styled(Flex)`
+  width: 2.4rem;
+  height: 2.4rem;
+  min-width: 2.4rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+`;
+
+/**
  * A leaf's chevron is present only to keep the folder names aligned, so it
  * should read as absent. The design system's disabled state is built for real
  * controls — a filled, bordered pill — which draws more attention than the
  * enabled chevron next to it. Doubled selector to outrank that rule.
  */
 const ChevronButton = styled(IconButton)`
+  // Square, so it and the actions trigger read as one pair of controls.
+  && {
+    width: 2.4rem;
+    height: 2.4rem;
+    min-width: 2.4rem;
+    min-height: 2.4rem;
+    padding: 0.4rem;
+  }
+
+  // The row paints its own hover, so the control needs a stronger one of its own
+  // to read as a separate target sitting on top of it.
+  &&:hover:not([aria-disabled='true']) {
+    background: ${({ theme }) => theme.colors.primary200};
+  }
+
   &&[aria-disabled='true'] {
     background: transparent;
     border-color: transparent;
@@ -301,7 +344,10 @@ const FolderTreeItemInner = ({
       <TreeRow
         ref={setNodeRef}
         alignItems="center"
-        paddingLeft={`${level * INDENT_PER_LEVEL_REM}rem`}
+        // Indent plus the row's own inset, so the chevron never sits flush
+        // against the edge of the highlight at any depth.
+        paddingLeft={`${level * INDENT_PER_LEVEL_REM + ROW_INSET_LEFT_REM}rem`}
+        paddingRight={`${ROW_INSET_RIGHT_REM}rem`}
         gap={1}
         $isActive={isActive}
         $isValidDropTarget={showValidDropHighlight}
@@ -479,23 +525,39 @@ export const FolderTree = ({
       />
 
       <SubNav.Content>
-        <Flex direction="column" alignItems="stretch" gap={1} padding={3}>
-          <RowButton
+        <Flex direction="column" alignItems="stretch" padding={3}>
+          {/* Same row wrapper as a folder, so Home highlights across its whole
+              width rather than only behind the label. */}
+          <TreeRow
             ref={setHomeDropRef}
-            type="button"
+            alignItems="center"
+            // Level 0, so the indent contributes nothing — but the row's own
+            // inset still applies, exactly as it does for a top-level folder.
+            paddingLeft={`${ROW_INSET_LEFT_REM}rem`}
+            paddingRight={`${ROW_INSET_RIGHT_REM}rem`}
             $isActive={isHomeActive}
             $isValidDropTarget={showHomeValidDropHighlight}
             $isInvalidDropCursor={showHomeInvalidDropCursor}
             $isMovePending={isMovePending}
-            aria-current={isHomeActive ? 'page' : undefined}
-            onClick={() => onSelectFolder(null)}
-            data-testid="folder-tree-home"
           >
-            <House aria-hidden width="1.6rem" height="1.6rem" />
-            <Typography variant="omega" fontWeight={isHomeActive ? 'semiBold' : 'regular'}>
-              {homeLabel}
-            </Typography>
-          </RowButton>
+            <RowButton
+              type="button"
+              $isActive={isHomeActive}
+              $isValidDropTarget={showHomeValidDropHighlight}
+              $isInvalidDropCursor={showHomeInvalidDropCursor}
+              $isMovePending={isMovePending}
+              aria-current={isHomeActive ? 'page' : undefined}
+              onClick={() => onSelectFolder(null)}
+              data-testid="folder-tree-home"
+            >
+              <IconSlot>
+                <House aria-hidden width="1.6rem" height="1.6rem" />
+              </IconSlot>
+              <Typography variant="omega" fontWeight={isHomeActive ? 'semiBold' : 'regular'}>
+                {homeLabel}
+              </Typography>
+            </RowButton>
+          </TreeRow>
 
           <Box marginTop={4}>
             <Flex
@@ -505,9 +567,10 @@ export const FolderTree = ({
               paddingBottom={1}
               paddingLeft={2}
               paddingRight={2}
-              marginBottom={2}
             >
-              <FolderIcon aria-hidden width="1.6rem" height="1.6rem" fill="neutral500" />
+              <IconSlot>
+                <FolderIcon aria-hidden width="1.6rem" height="1.6rem" fill="neutral500" />
+              </IconSlot>
               <Typography
                 variant="sigma"
                 textColor="neutral600"
