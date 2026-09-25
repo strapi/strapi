@@ -4,7 +4,6 @@
 
 import { Command, InvalidOptionArgumentError, Option } from 'commander';
 import chalk from 'chalk';
-import { isNaN } from 'lodash';
 import { exitWith } from './helpers';
 import { getInquirer } from './get-inquirer';
 
@@ -45,7 +44,7 @@ const getParseListWithChoices = (choices: string[], errorMessage = 'Invalid opti
 const parseInteger = (value: string) => {
   // parseInt takes a string and a radix
   const parsedValue = parseInt(value, 10);
-  if (isNaN(parsedValue)) {
+  if (Number.isNaN(parsedValue)) {
     throw new InvalidOptionArgumentError(`Not an integer: ${value}`);
   }
   return parsedValue;

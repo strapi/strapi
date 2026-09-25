@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { dirname, join, resolve } from 'path';
 import { statSync, existsSync } from 'fs';
-import { defaultsDeep, get, map, pickBy } from 'lodash';
+import { defaultsDeep, get, pickBy } from 'lodash';
 import { strings } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 import { getUserPluginsConfig, PluginDeclaration } from './get-user-plugins-config';
@@ -150,7 +150,9 @@ export const getEnabledPlugins = async (strapi: Core.Strapi, { client } = { clie
     }
   }
 
-  const declaredPluginsResolves = map(declaredPlugins, (plugin) => plugin.pathToPlugin);
+  const declaredPluginsResolves = Object.values(declaredPlugins).map(
+    (plugin) => plugin.pathToPlugin
+  );
   const installedPluginsNotAlreadyUsed = pickBy(
     installedPlugins,
     (p) => !declaredPluginsResolves.includes(p.pathToPlugin)

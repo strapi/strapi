@@ -2,7 +2,6 @@ import { createHash, type Hash } from 'crypto';
 import { PassThrough, Readable, Writable } from 'stream';
 import type { Struct, Utils } from '@strapi/types';
 import { WebSocket } from 'ws';
-import { castArray } from 'lodash';
 
 import type {
   IAsset,
@@ -143,7 +142,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
         return;
       }
 
-      for (const item of castArray(data)) {
+      for (const item of Array.isArray(data) ? data : [data]) {
         stream.push(item as Parameters<PassThrough['push']>[0]);
       }
 

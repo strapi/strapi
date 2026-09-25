@@ -34,8 +34,8 @@ export default ({ strapi }: Context) => {
       plurality?: 'singular' | 'plural';
     } = {}
   ) => {
-    const plugin = get(contentType, 'plugin');
-    const modelName = get(contentType, 'modelName');
+    const plugin = contentType?.plugin;
+    const modelName = contentType?.modelName;
     const name =
       plurality === 'singular'
         ? get(contentType, 'info.singularName')

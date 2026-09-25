@@ -1,4 +1,4 @@
-import { isArray, isObject, zip, isEqual, uniq } from 'lodash';
+import { isObject, zip, isEqual } from 'lodash';
 
 const createContext = (): Context => ({ path: [] });
 
@@ -38,7 +38,7 @@ export const diff = (a: unknown, b: unknown, ctx: Context = createContext()): Di
     return diffs;
   };
 
-  if (isArray(a) && isArray(b)) {
+  if (Array.isArray(a) && Array.isArray(b)) {
     let k = 0;
 
     for (const [aItem, bItem] of zip(a, b)) {
@@ -54,7 +54,7 @@ export const diff = (a: unknown, b: unknown, ctx: Context = createContext()): Di
   }
 
   if (isObject(a) && isObject(b)) {
-    const keys = uniq(Object.keys(a).concat(Object.keys(b)));
+    const keys = [...new Set(Object.keys(a).concat(Object.keys(b)))];
 
     for (const key of keys) {
       const aValue = (a as Record<string, unknown>)[key];

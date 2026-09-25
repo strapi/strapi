@@ -1,5 +1,5 @@
 import type { Knex } from 'knex';
-import { clone, isNil } from 'lodash';
+import { clone } from 'lodash';
 import type { Core, UID } from '@strapi/types';
 
 import { ILink } from '../../types';
@@ -278,7 +278,7 @@ export const createLinkQuery = (
             columns.left.order,
             columns.right.ref,
             columns.right.order,
-          ].filter((column: string | null | undefined) => !isNil(column)) as string[];
+          ].filter((column: string | null | undefined) => column != null) as string[];
 
           const buildJoinTableLink = (entry: Record<string, unknown>): ILink => {
             const linkLeft: Partial<ILink['left']> = { type: uid, field: fieldName };
@@ -389,7 +389,7 @@ export const createLinkQuery = (
             columns.right.type,
             columns.right.field,
             columns.right.order,
-          ].filter((column: string | null | undefined) => !isNil(column));
+          ].filter((column: string | null | undefined) => column != null);
 
           qb.select(validColumns);
 

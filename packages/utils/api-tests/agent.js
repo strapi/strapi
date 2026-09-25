@@ -1,6 +1,6 @@
 'use strict';
 
-const { clone, concat, has, isNil } = require('lodash');
+const { clone, concat, has } = require('lodash');
 const qs = require('qs');
 const request = require('supertest');
 const { createUtils } = require('./utils');
@@ -99,7 +99,7 @@ const createAgent = (strapi, initialState = {}) => {
       });
     }
 
-    if (isNil(formData)) {
+    if (formData == null) {
       rq.type('application/json');
     }
 

@@ -1,4 +1,4 @@
-import { isEmpty, isNil, isObject, trim } from 'lodash';
+import { isEmpty, isObject } from 'lodash';
 
 import { pipe as pipeAsync } from '../async';
 import {
@@ -211,7 +211,7 @@ export const validateFields = asyncCurry(
             return;
           }
 
-          if (isNil(attribute) || !isScalarAttribute(attribute)) {
+          if (attribute == null || !isScalarAttribute(attribute)) {
             throwInvalidKey({ key, path: path.attribute });
           }
         }, ctx)
@@ -267,7 +267,7 @@ const flattenDotPopulatePaths = (populate: string | string[]) => {
   return items.flatMap((item) =>
     item
       .split(',')
-      .map((segment) => trim(segment))
+      .map((segment) => segment.trim())
       .filter(Boolean)
   );
 };
@@ -388,7 +388,7 @@ const validatePopulateDotPaths = (
   for (const path of flattenDotPopulatePaths(populate)) {
     const segments = path
       .split('.')
-      .map((segment) => trim(segment))
+      .map((segment) => segment.trim())
       .filter(Boolean);
 
     validatePopulateDotPathSegments(ctx, segments, '');
@@ -400,7 +400,7 @@ const validateMorphLikeNestedPopulate = (
   { path }: { path: string | null }
 ) => {
   // Keep in sync with convert-query-params polymorphic nested populate handling.
-  if (!isNil(populateValue) && populateValue !== '*') {
+  if (populateValue != null && populateValue !== '*') {
     throwInvalidKey({ key: 'populate', path });
   }
 };

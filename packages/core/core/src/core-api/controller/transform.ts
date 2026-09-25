@@ -1,4 +1,4 @@
-import { isNil, isPlainObject } from 'lodash';
+import { isPlainObject } from 'lodash';
 import type { UID, Struct, Data } from '@strapi/types';
 import { async } from '@strapi/utils';
 
@@ -44,7 +44,7 @@ const transformResponse = async (
     encodeSourceMaps: false,
   }
 ) => {
-  if (isNil(resource)) {
+  if (resource == null) {
     return resource;
   }
 
@@ -84,7 +84,7 @@ function transformComponent(
 
   const res = transformEntry(data, component);
 
-  if (isNil(res)) {
+  if (res == null) {
     return res;
   }
 
@@ -100,7 +100,7 @@ function transformEntry(
   entry: Entry | Entry[] | null,
   type?: Struct.Schema
 ): TransformedEntry | TransformedEntry[] | null {
-  if (isNil(entry)) {
+  if (entry == null) {
     return entry;
   }
 
@@ -127,7 +127,7 @@ function transformEntry(
     } else if (attribute && attribute.type === 'component' && isEntry(property)) {
       attributeValues[key] = transformComponent(property, strapi.components[attribute.component]);
     } else if (attribute && attribute.type === 'dynamiczone' && isDZEntries(property)) {
-      if (isNil(property)) {
+      if (property == null) {
         attributeValues[key] = property;
       }
 

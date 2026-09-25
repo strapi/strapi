@@ -1,4 +1,3 @@
-import { isFunction } from 'lodash';
 import type { Core } from '@strapi/types';
 
 export interface Config {
@@ -12,7 +11,7 @@ export const responses: Core.MiddlewareFactory<Config> = (config = {}) => {
     const { status } = ctx;
     const handler = config?.handlers?.[status];
 
-    if (isFunction(handler)) {
+    if (typeof handler === 'function') {
       await handler(ctx, next);
     }
   };

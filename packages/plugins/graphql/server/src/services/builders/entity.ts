@@ -1,5 +1,5 @@
 import { objectType } from 'nexus';
-import { property, isEmpty, identity } from 'lodash';
+import { isEmpty, identity } from 'lodash';
 import type { Schema } from '@strapi/types';
 
 import type { Context } from '../types';
@@ -24,7 +24,7 @@ export default ({ strapi }: Context) => {
 
         definition(t) {
           // Keep the ID attribute at the top level
-          t.id('id', { resolve: property('id') });
+          t.id('id', { resolve: (parent) => parent?.id });
 
           if (!isEmpty(attributes)) {
             // Keep the fetched object into a dedicated `attributes` field

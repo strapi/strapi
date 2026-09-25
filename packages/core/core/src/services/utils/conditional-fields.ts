@@ -1,4 +1,3 @@
-import { flatMap, sumBy, values } from 'lodash';
 import type { Schema, UID } from '@strapi/types';
 
 const getNumberOfConditionalFields = () => {
@@ -8,10 +7,12 @@ const getNumberOfConditionalFields = () => {
   const countConditionalFieldsInSchema = (
     schema: Record<string, Schema.ContentType | Schema.Component>
   ) => {
-    const attributes = flatMap(schema, (model) => values(model.attributes));
-    return sumBy(attributes, (attribute) =>
-      attribute.conditions && typeof attribute.conditions === 'object' ? 1 : 0
+    const attributes = Object.values(schema ?? {}).flatMap((model) =>
+      Object.values(model.attributes ?? {})
     );
+    return attributes.filter(
+      (attribute) => attribute.conditions && typeof attribute.conditions === 'object'
+    ).length;
   };
 
   const contentTypeCount = countConditionalFieldsInSchema(contentTypes);

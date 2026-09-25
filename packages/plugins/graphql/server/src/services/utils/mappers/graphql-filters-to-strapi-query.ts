@@ -1,4 +1,4 @@
-import { isDate, isObject, isNil, has, matchesProperty } from 'lodash';
+import { isDate, isObject, has, matchesProperty } from 'lodash';
 import type { Struct } from '@strapi/types';
 import type { Context } from '../../types';
 
@@ -48,7 +48,7 @@ export default ({ strapi }: Context) => {
       const ROOT_LEVEL_OPERATORS = [operators.and, operators.or, operators.not];
 
       // Handle unwanted scenario where there is no filters defined
-      if (isNil(filters)) {
+      if (filters == null) {
         return {};
       }
 

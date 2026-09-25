@@ -1,4 +1,4 @@
-import { get, isFunction, property, isNil, first } from 'lodash';
+import { get, property } from 'lodash';
 import {
   GraphQLObjectType,
   GraphQLResolveInfo,
@@ -41,7 +41,7 @@ const parseMiddlewares = (resolverConfig: any, strapi: Core.Strapi): GraphQLMidd
   // TODO: [v4] to factorize with compose endpoints (routes)
   return resolverMiddlewares.map(
     (middleware: string | Core.MiddlewareHandler | { name: string; options: any }) => {
-      if (isFunction(middleware)) {
+      if (typeof middleware === 'function') {
         return middleware;
       }
 
@@ -135,11 +135,11 @@ const wrapResolvers = ({
        * @return {Promise<void>}
        */
       const authorize = async ({ context }: any) => {
-        const authConfig = get(resolverConfig, 'auth');
+        const authConfig = resolverConfig?.auth;
         const authContext = get(context, 'state.auth');
 
         const isValidType = ['Mutation', 'Query', 'Subscription'].includes(type);
-        const hasConfig = !isNil(authConfig);
+        const hasConfig = authConfig != null;
 
         const isAuthDisabled = authConfig === false;
 
@@ -160,7 +160,7 @@ const wrapResolvers = ({
         await authorize({ context });
 
         // Execute middlewares (including the policy middleware which will always be included)
-        return first(boundMiddlewares)!(parent, args, context, info);
+        return boundMiddlewares[0]!(parent, args, context, info);
       };
     }
   });

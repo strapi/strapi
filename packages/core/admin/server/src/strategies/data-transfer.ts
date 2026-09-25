@@ -1,7 +1,7 @@
 import type { Context } from 'koa';
 import { differenceInHours, parseISO } from 'date-fns';
 import { errors } from '@strapi/utils';
-import { castArray, isNil } from 'lodash';
+import { castArray } from 'lodash';
 
 import { getService } from '../utils';
 
@@ -44,7 +44,7 @@ export const authenticate = async (ctx: Context) => {
   // Check if the token has expired
   const currentDate = new Date();
 
-  if (!isNil(transferToken.expiresAt)) {
+  if (transferToken.expiresAt != null) {
     const expirationDate = new Date(transferToken.expiresAt);
 
     if (expirationDate < currentDate) {
@@ -84,7 +84,7 @@ export const verify = async (auth: any, config: any = {}) => {
 
   const currentDate = new Date();
 
-  if (!isNil(transferToken.expiresAt)) {
+  if (transferToken.expiresAt != null) {
     const expirationDate = new Date(transferToken.expiresAt);
     // token has expired
     if (expirationDate < currentDate) {

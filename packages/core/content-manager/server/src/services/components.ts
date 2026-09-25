@@ -1,4 +1,4 @@
-import { isNil, mapValues } from 'lodash';
+import { mapValues } from 'lodash';
 
 import type { UID, Struct, Core } from '@strapi/types';
 import type { Configuration } from '../../../shared/contracts/content-types';
@@ -33,7 +33,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
     const component = strapi.components[uid];
 
-    return isNil(component) ? component : toContentManagerModel(component);
+    return component == null ? component : toContentManagerModel(component);
   },
 
   async findConfiguration(component: Struct.ComponentSchema) {

@@ -1,4 +1,4 @@
-import { constant, isUndefined, isArray, isString } from 'lodash';
+import { constant, isString } from 'lodash';
 import { nonNull, list, objectType } from 'nexus';
 import { contentTypes } from '@strapi/utils';
 import type { Struct } from '@strapi/types';
@@ -206,7 +206,7 @@ export default (context: Context) => {
     });
 
     // If there is no specific target specified, then use the GenericMorph type
-    if (isUndefined(target)) {
+    if (target === undefined) {
       builder.field(attributeName, {
         type: GENERIC_MORPH_TYPENAME,
         resolve,
@@ -214,7 +214,7 @@ export default (context: Context) => {
     }
 
     // If the target is an array of string, resolve the associated morph type and use it
-    else if (isArray(target) && target.every(isString)) {
+    else if (Array.isArray(target) && target.every(isString)) {
       const type = naming.getMorphRelationTypeName(contentType, attributeName);
 
       builder.field(attributeName, { type, resolve });

@@ -1,7 +1,7 @@
 import * as sift from 'sift';
 import qs from 'qs';
 import { AbilityBuilder, Ability } from '@casl/ability';
-import { pick, isNil, isObject } from 'lodash';
+import { pick, isObject } from 'lodash';
 import type { ParametrizedAction, PermissionRule } from '../../types';
 
 export interface CustomAbilityBuilder {
@@ -69,7 +69,7 @@ export const caslAbilityBuilder = (): CustomAbilityBuilder => {
 
       return can(
         caslAction,
-        isNil(subject) ? 'all' : subject,
+        subject == null ? 'all' : subject,
         fields,
         isObject(condition) ? condition : undefined
       );

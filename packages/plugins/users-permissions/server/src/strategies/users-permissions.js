@@ -1,6 +1,6 @@
 'use strict';
 
-const { map, every, castArray } = require('lodash');
+const { map, every } = require('lodash');
 const { ForbiddenError, UnauthorizedError } = require('@strapi/utils').errors;
 
 const { getService } = require('../utils');
@@ -108,7 +108,8 @@ const verify = async (auth, config) => {
     throw new UnauthorizedError();
   }
 
-  const isAllowed = every(castArray(config.scope), (scope) => ability.can(scope));
+  const scopes = Array.isArray(config.scope) ? config.scope : [config.scope];
+  const isAllowed = every(scopes, (scope) => ability.can(scope));
 
   if (!isAllowed) {
     throw new ForbiddenError();
