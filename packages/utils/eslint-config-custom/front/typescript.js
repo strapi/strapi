@@ -50,6 +50,17 @@ const config = {
         name: 'strapi',
         message: 'Use window.strapi instead.',
       },
+      {
+        /**
+         * `@types/react@19` removes the global `JSX` namespace, it only exists as `React.JSX`.
+         * A bare `JSX.Element` also leaks into our published `.d.ts` files, so it would break
+         * consumers once they move to v19. We're still on v18, this only stops us adding new
+         * usages before that migration. Importing it explicitly works on both versions.
+         */
+        name: 'JSX',
+        message:
+          "The global JSX namespace is removed in @types/react@19. Use `import { JSX } from 'react'`.",
+      },
     ],
     'react/display-name': 'off',
   },
