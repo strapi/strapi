@@ -39,6 +39,7 @@
  * @property {string} [STRAPI_HIGHLIGHT_ACTIVE_COLOR] Optional override for the highlight active color, injected by the admin.
  * @property {boolean} [STRAPI_DISABLE_STEGA_DECODING] Optional flag to disable steganography decoding, injected by the admin.
  * @property {() => void} [__strapi_previewCleanup] Optional cleanup function, injected by the admin.
+ * @property {number} [__strapi_previewRunId] Id of the latest run of this script in the page.
  */
 
 /**
@@ -49,6 +50,11 @@ function previewScript(config) {
 
   /** @type {typeof window & WindowExtensions} */
   const win = window;
+
+  // The script can be injected more than once in the same page (e.g. React StrictMode or a
+  // remount posting previewReady twice). Only the latest run may set up; see Orchestration.
+  const runId = (win.__strapi_previewRunId ?? 0) + 1;
+  win.__strapi_previewRunId = runId;
 
   /* -----------------------------------------------------------------------------------------------
    * Params
@@ -514,12 +520,6 @@ function previewScript(config) {
   };
 
   const createHighlightStyles = () => {
-    const existingStyles = document.getElementById(HIGHLIGHT_STYLES_ID);
-    // Remove existing styles to avoid duplicates
-    if (existingStyles) {
-      existingStyles.remove();
-    }
-
     const styleElement = document.createElement('style');
     styleElement.id = HIGHLIGHT_STYLES_ID;
     styleElement.textContent = `
@@ -548,8 +548,6 @@ function previewScript(config) {
   };
 
   const createOverlaySystem = () => {
-    // Clean up before creating a new overlay so we can safely call previewScript multiple times
-    win.__strapi_previewCleanup?.();
     document.getElementById(OVERLAY_ID)?.remove();
 
     const overlay = document.createElement('div');
@@ -1916,6 +1914,7 @@ function previewScript(config) {
   };
 
   /**
+   * @param {HTMLStyleElement} styleElement
    * @param {HTMLElement} overlay
    * @param {ReturnType<typeof setupObservers>} observers
    * @param {ReturnType<typeof setupScrollManagement>} scrollManager
@@ -1923,6 +1922,7 @@ function previewScript(config) {
    * @param {HighlightManager} highlightManager
    */
   const createCleanupSystem = (
+    styleElement,
     overlay,
     observers,
     scrollManager,
@@ -1948,11 +1948,9 @@ function previewScript(config) {
         element.removeEventListener(type, handler);
       });
 
-      // Clean up CSS styles
-      const existingStyles = document.getElementById(HIGHLIGHT_STYLES_ID);
-      if (existingStyles) {
-        existingStyles.remove();
-      }
+      // Remove this run's own element, not whatever currently holds the id: a newer run may
+      // already have created a stylesheet with the same id.
+      styleElement.remove();
 
       overlay.remove();
     };
@@ -1965,12 +1963,29 @@ function previewScript(config) {
   setupStegaDOMObserver()
     .catch(() => undefined)
     .then((stegaObserver) => {
-      createHighlightStyles();
+      // A newer run started while this one was loading the stega decoder: let it win, and
+      // don't leave this run's observer behind.
+      if (runId !== win.__strapi_previewRunId) {
+        stegaObserver?.disconnect();
+        return;
+      }
+
+      // Last run wins: tear the previous run down completely before setting up.
+      win.__strapi_previewCleanup?.();
+
+      const styleElement = createHighlightStyles();
       const overlay = createOverlaySystem();
       const highlightManager = createHighlightManager(overlay);
       const observers = setupObservers(highlightManager, stegaObserver);
       const scrollManager = setupScrollManagement(highlightManager);
       const eventHandlers = setupEventHandlers(highlightManager);
-      createCleanupSystem(overlay, observers, scrollManager, eventHandlers, highlightManager);
+      createCleanupSystem(
+        styleElement,
+        overlay,
+        observers,
+        scrollManager,
+        eventHandlers,
+        highlightManager
+      );
     });
 }
