@@ -31,6 +31,9 @@ const webhookModel: Model = {
     enabled: {
       type: 'boolean',
     },
+    secret: {
+      type: 'text',
+    },
   },
 };
 
@@ -45,6 +48,7 @@ const toDBObject = (data: Webhook): DBInput => {
     headers: data.headers,
     events: data.events,
     enabled: data.isEnabled,
+    secret: data.secret,
   };
 };
 
@@ -56,6 +60,7 @@ const fromDBObject = (row: DBOutput): Webhook => {
     headers: row.headers,
     events: row.events,
     isEnabled: row.enabled,
+    secret: row.secret,
   };
 };
 

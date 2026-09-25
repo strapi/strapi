@@ -5,6 +5,13 @@ export interface Webhook {
   headers: Record<string, string>;
   events: string[];
   isEnabled: boolean;
+  /**
+   * Optional secret used to sign the delivery payload with HMAC-SHA256.
+   * When set, each delivery includes an `X-Strapi-Signature-256` header so the
+   * receiver can verify the request originated from this Strapi instance.
+   * When empty/undefined, no signature header is sent (default behaviour).
+   */
+  secret?: string;
 }
 
 export interface WebhookStore {
