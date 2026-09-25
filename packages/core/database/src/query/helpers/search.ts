@@ -24,7 +24,7 @@ export const applySearch = (knex: Knex.QueryBuilder, query: string, ctx: Ctx) =>
 
   searchColumns.push(...stringColumns);
 
-  if (!_.isNaN(_.toNumber(query))) {
+  if (!Number.isNaN(_.toNumber(query))) {
     const numberColumns = Object.keys(attributes).filter((attributeName) => {
       const attribute = attributes[attributeName];
       return (

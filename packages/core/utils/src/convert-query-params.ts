@@ -5,17 +5,7 @@
  * You can read more here: https://docs.strapi.io/developer-docs/latest/developer-resources/database-apis-reference/rest-api.html#filters
  */
 
-import _, {
-  cloneDeep,
-  get,
-  isArray,
-  isEmpty,
-  isInteger,
-  isNil,
-  isObject,
-  isString,
-  toNumber,
-} from 'lodash';
+import _, { cloneDeep, get, isEmpty, isObject, isString, toNumber } from 'lodash';
 import {
   constants,
   hasDraftAndPublish,
@@ -232,7 +222,7 @@ const convertOrderingQueryParams = (ordering: unknown) => {
 };
 
 const isStringArray = (value: unknown): value is string[] =>
-  isArray(value) && value.every(isString);
+  Array.isArray(value) && value.every(isString);
 
 interface TransformerOptions {
   getModel: (uid: string) => Model | undefined;
@@ -372,7 +362,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
   const convertPageQueryParams = (page: unknown): number => {
     const pageVal = toNumber(page);
 
-    if (!isInteger(pageVal) || pageVal <= 0) {
+    if (!Number.isInteger(pageVal) || pageVal <= 0) {
       throw new PaginationError(
         `Invalid 'page' parameter. Expected an integer > 0, received: ${page}`
       );
@@ -385,7 +375,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
   const convertPageSizeQueryParams = (pageSize: unknown, _page: unknown): number => {
     const pageSizeVal = toNumber(pageSize);
 
-    if (!isInteger(pageSizeVal) || pageSizeVal <= 0) {
+    if (!Number.isInteger(pageSizeVal) || pageSizeVal <= 0) {
       throw new PaginationError(
         `Invalid 'pageSize' parameter. Expected an integer > 0, received: ${pageSize}`
       );
@@ -400,8 +390,8 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     start: unknown,
     limit: unknown
   ) => {
-    const isPagePagination = !isNil(page) || !isNil(pageSize);
-    const isOffsetPagination = !isNil(start) || !isNil(limit);
+    const isPagePagination = page != null || pageSize != null;
+    const isOffsetPagination = start != null || limit != null;
 
     if (isPagePagination && isOffsetPagination) {
       throw new PaginationError(
@@ -447,7 +437,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
   const hasPopulateFragmentDefined = (
     populate: PopulateObjectParams
   ): populate is PopulateObjectParams & Required<Pick<PopulateObjectParams, 'on'>> => {
-    return typeof populate === 'object' && 'on' in populate && !isNil(populate.on);
+    return typeof populate === 'object' && 'on' in populate && populate.on != null;
   };
 
   const hasCountDefined = (
@@ -509,7 +499,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
          */
         if (
           'populate' in subPopulate &&
-          !isNil(subPopulate.populate) &&
+          subPopulate.populate != null &&
           subPopulate.populate !== '*'
         ) {
           throw new ValidationError(
@@ -634,19 +624,19 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
     validatePaginationParams(page, pageSize, start, limit);
 
-    if (!isNil(page)) {
+    if (page != null) {
       query.page = convertPageQueryParams(page);
     }
 
-    if (!isNil(pageSize)) {
+    if (pageSize != null) {
       query.pageSize = convertPageSizeQueryParams(pageSize, page);
     }
 
-    if (!isNil(start)) {
+    if (start != null) {
       query.offset = convertStartQueryParams(start);
     }
 
-    if (!isNil(limit)) {
+    if (limit != null) {
       query.limit = convertLimitQueryParams(limit);
     }
 
@@ -677,7 +667,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
       // map convert
       const fieldsValues = fields
         .flatMap((value) => convertFieldsQueryParams(value, schema, depth + 1))
-        .filter((v) => !isNil(v)) as string[];
+        .filter((v) => v != null) as string[];
 
       // NOTE: Only include the doc id if it's a content type
       if (schema?.modelType === 'contentType') {
@@ -823,43 +813,43 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
       ...rest
     } = params;
 
-    if (!isNil(status)) {
+    if (status != null) {
       convertStatusParams(status, query);
     }
 
-    if (!isNil(searchQuery)) {
+    if (searchQuery != null) {
       query._q = searchQuery;
     }
 
     applySortToQuery(query, sort);
 
-    if (!isNil(filters)) {
+    if (filters != null) {
       query.where = convertFiltersQueryParams(filters, schema);
     }
 
-    if (!isNil(fields)) {
+    if (fields != null) {
       query.select = convertFieldsQueryParams(fields, schema);
     }
 
-    if (!isNil(populate)) {
+    if (populate != null) {
       query.populate = convertPopulateQueryParams(populate, schema);
     }
 
     validatePaginationParams(page, pageSize, start, limit);
 
-    if (!isNil(page)) {
+    if (page != null) {
       query.page = convertPageQueryParams(page);
     }
 
-    if (!isNil(pageSize)) {
+    if (pageSize != null) {
       query.pageSize = convertPageSizeQueryParams(pageSize, page);
     }
 
-    if (!isNil(start)) {
+    if (start != null) {
       query.offset = convertStartQueryParams(start);
     }
 
-    if (!isNil(limit)) {
+    if (limit != null) {
       query.limit = convertLimitQueryParams(limit);
     }
 

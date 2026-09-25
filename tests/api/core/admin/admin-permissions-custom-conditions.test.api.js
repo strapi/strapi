@@ -1,6 +1,6 @@
 'use strict';
 
-const { omit, property } = require('lodash');
+const { omit } = require('lodash');
 
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
@@ -157,7 +157,7 @@ describe('Admin Permissions - Conditions', () => {
 
   const deleteFixtures = async () => {
     // Delete users
-    const usersId = localTestData.users.map(property('id'));
+    const usersId = localTestData.users.map((user) => user?.id);
     await utils.deleteUsersById(usersId);
 
     // Delete the foobar role

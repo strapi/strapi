@@ -1,4 +1,4 @@
-import { isNil, omit } from 'lodash';
+import { omit } from 'lodash';
 
 import {
   setCreatorFields,
@@ -679,7 +679,7 @@ export default {
        * 2. User can update and publish a document
        *    Action will be allowed, but document will not be updated, only published with the latest draft
        */
-      const isCreate = isNil(id);
+      const isCreate = id == null;
       if (isCreate) {
         if (permissionChecker.cannot.create()) {
           throw new errors.ForbiddenError();

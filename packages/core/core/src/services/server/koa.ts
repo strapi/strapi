@@ -1,4 +1,3 @@
-import { isNil } from 'lodash';
 import Koa from 'koa';
 import createError from 'http-errors';
 import delegate from 'delegates';
@@ -32,7 +31,7 @@ const addCustomMethods = (app: Koa) => {
   };
 
   app.response.deleted = function deleted(data) {
-    if (isNil(data)) {
+    if (data == null) {
       this.status = 204;
     } else {
       this.status = 200;

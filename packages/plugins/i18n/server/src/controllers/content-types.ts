@@ -1,6 +1,6 @@
 import { get, property, flow, pick, uniq, flatten } from 'lodash';
 import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
-import type { Core, UID } from '@strapi/types';
+import type { Core, Data, UID } from '@strapi/types';
 import type { FillFromLocale } from '../../../shared/contracts/content-manager';
 import { getService } from '../utils';
 import {
@@ -67,7 +67,7 @@ const controller = {
         action: [READ_ACTION, CREATE_ACTION],
         subject: model,
         role: {
-          id: user.roles.map(property('id')),
+          id: user.roles.map((role: Pick<Data.Entity, 'id'>) => role?.id),
         },
       },
     });

@@ -1,4 +1,4 @@
-import _, { pick, isNil } from 'lodash';
+import _, { pick } from 'lodash';
 import type { Context } from 'koa';
 
 import { errors } from '@strapi/utils';
@@ -19,7 +19,7 @@ const hasAdminSeatsAvaialble = async () => {
   }
 
   const permittedSeats = strapi.ee.seats as any;
-  if (isNil(permittedSeats)) {
+  if (permittedSeats == null) {
     return true;
   }
 

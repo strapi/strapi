@@ -72,4 +72,14 @@ describe('users-permissions strategy', () => {
       strategy.verify({ ability: { can } }, { scope: ['article.find', 'article.delete'] })
     ).rejects.toThrow('Forbidden');
   });
+
+  it('checks sparse scope entries instead of skipping authorization', async () => {
+    const can = jest.fn().mockReturnValue(false);
+
+    await expect(strategy.verify({ ability: { can } }, { scope: Array(1) })).rejects.toThrow(
+      'Forbidden'
+    );
+
+    expect(can).toHaveBeenCalledWith(undefined);
+  });
 });

@@ -1,4 +1,4 @@
-import { get, isString, has, toLower } from 'lodash';
+import { get, isString, has } from 'lodash';
 import type { Context, Next } from 'koa';
 import path from 'path';
 import { errors } from '@strapi/utils';
@@ -30,7 +30,7 @@ export default (config: any, { strapi }: { strapi: Core.Strapi }) =>
       const userEmail = isString(requestEmail) ? requestEmail.toLowerCase() : 'unknownEmail';
 
       const requestPath = isString(ctx.request.path)
-        ? toLower(path.normalize(ctx.request.path)).replace(/\/$/, '')
+        ? path.normalize(ctx.request.path).toLowerCase().replace(/\/$/, '')
         : 'invalidPath';
 
       const loadConfig = {

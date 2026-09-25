@@ -97,7 +97,7 @@ export const getAttributeModifiers = (attribute: Attribute): ts.TypeNode[] => {
   }
 
   // Min / Max
-  if (!_.isNil(attribute.min) || !_.isNil(attribute.max)) {
+  if (attribute.min != null || attribute.max != null) {
     const minMaxProperties = _.pick(attribute, ['min', 'max']);
     const { min, max } = minMaxProperties;
 
@@ -135,7 +135,7 @@ export const getAttributeModifiers = (attribute: Attribute): ts.TypeNode[] => {
   }
 
   // Min length / Max length
-  if (!_.isNil(attribute.minLength) || !_.isNil(attribute.maxLength)) {
+  if (attribute.minLength != null || attribute.maxLength != null) {
     const minMaxProperties = _.pick(attribute, ['minLength', 'maxLength']);
 
     modifiers.push(
@@ -147,7 +147,7 @@ export const getAttributeModifiers = (attribute: Attribute): ts.TypeNode[] => {
   }
 
   // Default (ignore if default is a function)
-  if (!_.isNil(attribute.default) && !_.isFunction(attribute.default)) {
+  if (attribute.default != null && typeof attribute.default !== 'function') {
     const defaultLiteral = toTypeLiteral(attribute.default);
 
     modifiers.push(

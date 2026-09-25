@@ -4,17 +4,12 @@ import {
   difference,
   differenceWith,
   has,
-  isArray,
   isEmpty,
   isEqual,
-  isInteger,
-  isNil,
-  isNull,
   isNumber,
   isObject,
   isPlainObject,
   isString,
-  isUndefined,
   map,
   pick,
   uniqBy,
@@ -83,7 +78,7 @@ async function batchInsertJoinTable(
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
-  isObject(value) && !isNil(value);
+  isObject(value) && value != null;
 
 const toId = (value: unknown | { id: unknown }): ID => {
   if (isRecord(value) && 'id' in value && isValidId(value.id)) {
@@ -98,7 +93,7 @@ const toId = (value: unknown | { id: unknown }): ID => {
 };
 const toIds = (value: unknown): ID[] => castArray(value || []).map(toId);
 
-const isValidId = (value: unknown): value is ID => isString(value) || isInteger(value);
+const isValidId = (value: unknown): value is ID => isString(value) || Number.isInteger(value);
 
 const isValidObjectId = (value: unknown): value is Entity =>
   isRecord(value) && 'id' in value && isValidId(value.id);
@@ -111,7 +106,7 @@ const toIdArray = (
   [key: string]: any;
 }[] => {
   const array = castArray(data)
-    .filter((datum) => !isNil(datum))
+    .filter((datum) => datum != null)
     .map((datum) => {
       // if it is a string or an integer return an obj with id = to datum
       if (isValidId(datum)) {
@@ -148,20 +143,20 @@ type Assocs =
 
 const toAssocs = (data: Assocs) => {
   if (
-    isArray(data) ||
+    Array.isArray(data) ||
     isString(data) ||
     isNumber(data) ||
-    isNull(data) ||
+    data === null ||
     (isRecord(data) && 'id' in data)
   ) {
     return {
-      set: isNull(data) ? data : toIdArray(data),
+      set: data === null ? data : toIdArray(data),
     };
   }
 
   if (data?.set) {
     return {
-      set: isNull(data.set) ? data.set : toIdArray(data.set),
+      set: data.set === null ? data.set : toIdArray(data.set),
     };
   }
 
@@ -194,8 +189,8 @@ const processData = (
     if (types.isScalarAttribute(attribute)) {
       const field = createField(attribute);
 
-      if (isUndefined(data[attributeName])) {
-        if (!isUndefined(attribute.default) && withDefaults) {
+      if (data[attributeName] === undefined) {
+        if (attribute.default !== undefined && withDefaults) {
           if (typeof attribute.default === 'function') {
             obj[attributeName] = attribute.default();
           } else {
@@ -224,9 +219,8 @@ const processData = (
         const joinColumnName = attribute.joinColumn.name;
 
         // allow setting to null
-        let attrValue = !isUndefined(data[attributeName])
-          ? data[attributeName]
-          : data[joinColumnName];
+        let attrValue =
+          data[attributeName] !== undefined ? data[attributeName] : data[joinColumnName];
 
         // Legacy single-column storage: only one id fits. Take the last
         // and warn — modern schemas use a join table that can hold both
@@ -246,9 +240,9 @@ const processData = (
           attrValue = setIds.length > 0 ? setIds[setIds.length - 1] : null;
         }
 
-        if (isNull(attrValue)) {
+        if (attrValue === null) {
           obj[joinColumnName] = attrValue;
-        } else if (!isUndefined(attrValue)) {
+        } else if (attrValue !== undefined) {
           obj[joinColumnName] = toId(attrValue);
         }
 
@@ -269,7 +263,7 @@ const processData = (
           continue;
         }
 
-        if (!isUndefined(value)) {
+        if (value !== undefined) {
           if (!has(value, 'id') || !has(value, typeField)) {
             throw new Error(`Expects properties ${typeField} an id to make a morph association`);
           }
@@ -379,7 +373,7 @@ export const createEntityManager = (db: Database): EntityManager => {
       const metadata = db.metadata.get(uid);
       const { data } = params;
 
-      if (!isArray(data)) {
+      if (!Array.isArray(data)) {
         throw new Error('CreateMany expects data to be an array');
       }
 
@@ -570,7 +564,7 @@ export const createEntityManager = (db: Database): EntityManager => {
       for (const attributeName of Object.keys(attributes)) {
         const attribute = attributes[attributeName];
 
-        const isValidLink = has(data, attributeName) && !isNil(data[attributeName]);
+        const isValidLink = has(data, attributeName) && data[attributeName] != null;
 
         if (attribute.type !== 'relation' || !isValidLink) {
           continue;
@@ -853,7 +847,7 @@ export const createEntityManager = (db: Database): EntityManager => {
               .transacting(trx)
               .execute();
 
-            if (!isNull(cleanRelationData.set)) {
+            if (cleanRelationData.set !== null) {
               const relId = toIds(cleanRelationData.set?.[0]);
               await this.createQueryBuilder(target)
                 .update({ [idColumn.name]: id, [typeColumn.name]: uid })
@@ -1170,7 +1164,7 @@ export const createEntityManager = (db: Database): EntityManager => {
             .transacting(trx)
             .execute();
 
-          if (!isNull(cleanRelationData.set)) {
+          if (cleanRelationData.set !== null) {
             const relIdsToAdd = toIds(cleanRelationData.set);
             await this.createQueryBuilder(target)
               .where({ id: relIdsToAdd })
@@ -1193,7 +1187,7 @@ export const createEntityManager = (db: Database): EntityManager => {
           }
 
           // only delete relations
-          if (isNull(cleanRelationData.set)) {
+          if (cleanRelationData.set === null) {
             await deleteRelations({ id, attribute, db, relIdsToDelete: 'all', transaction: trx });
           } else {
             const isPartialUpdate = !has(cleanRelationData, 'set');
@@ -1710,7 +1704,7 @@ export const createEntityManager = (db: Database): EntityManager => {
     async load(uid, entity, fields, populate) {
       const { attributes } = db.metadata.get(uid);
 
-      const fieldsArr = castArray(fields);
+      const fieldsArr = Array.isArray(fields) ? fields : [fields];
       fieldsArr.forEach((field) => {
         const attribute = attributes[field];
 

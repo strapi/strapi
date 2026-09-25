@@ -1,5 +1,4 @@
 import type { Core } from '@strapi/types';
-import { property } from 'lodash';
 import { async, errors } from '@strapi/utils';
 import { getAdminService } from '../utils';
 import { STAGE_TRANSITION_UID, STAGE_MODEL_UID } from '../constants/workflows';
@@ -75,7 +74,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       return async.map(permissions, this.registerTo);
     },
     async unregister(permissions: { id: number }[]) {
-      const permissionIds = permissions.map(property('id'));
+      const permissionIds = permissions.map((permission) => permission?.id);
       await permissionService.deleteByIds(permissionIds);
     },
     can(action: string, fromStage: number) {

@@ -47,7 +47,7 @@ const routeUsesEmailIdentifier = (requestPath) => {
  */
 const normalizeRequestPathForRateLimit = (requestPath) => {
   const normalized = path.posix.normalize(requestPath);
-  const lower = toLower(normalized);
+  const lower = normalized.toLowerCase();
   return lower.replace(/\/+$/, '') || '/';
 };
 

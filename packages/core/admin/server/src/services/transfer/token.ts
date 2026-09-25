@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import assert from 'assert';
-import { map, isArray, omit, uniq, isNil, difference, isEmpty, isNumber } from 'lodash';
+import { omit, difference, isEmpty, isNumber } from 'lodash';
 
 import { errors, emitAudit } from '@strapi/utils';
 import '@strapi/types';
@@ -95,7 +95,7 @@ const create = async (attributes: TokenCreatePayload): Promise<TransferToken> =>
     });
 
     await Promise.all(
-      uniq(attributes.permissions).map((action) =>
+      [...new Set(attributes.permissions)].map((action) =>
         strapi.db
           .query(TRANSFER_TOKEN_PERMISSION_UID)
           .create({ data: { action, token: transferToken } })
@@ -107,7 +107,9 @@ const create = async (attributes: TokenCreatePayload): Promise<TransferToken> =>
       .load(transferToken, 'permissions');
 
     if (currentPermissions) {
-      Object.assign(transferToken, { permissions: map(currentPermissions, 'action') });
+      Object.assign(transferToken, {
+        permissions: Array.from(currentPermissions ?? [], (permission) => permission?.action),
+      });
     }
 
     return transferToken;
@@ -160,8 +162,11 @@ const update = async (
         .query(TRANSFER_TOKEN_UID)
         .load(updatedToken, 'permissions');
 
-      const currentPermissions = map(currentPermissionsResult || [], 'action');
-      const newPermissions = uniq(attributes.permissions);
+      const currentPermissions = Array.from(
+        currentPermissionsResult || [],
+        (permission: TransferTokenPermission) => permission?.action
+      );
+      const newPermissions = [...new Set(attributes.permissions)];
 
       const actionsToDelete = difference(currentPermissions, newPermissions);
       const actionsToAdd = difference(newPermissions, currentPermissions);
@@ -329,7 +334,7 @@ const regenerate = async (id: string | number): Promise<TransferToken> => {
 const getExpirationFields = (lifespan: TransferToken['lifespan']) => {
   // it must be nil or a finite number >= 0
   const isValidNumber = isNumber(lifespan) && Number.isFinite(lifespan) && lifespan > 0;
-  if (!isValidNumber && !isNil(lifespan)) {
+  if (!isValidNumber && lifespan != null) {
     throw new ValidationError('lifespan must be a positive number or null');
   }
 
@@ -382,8 +387,11 @@ const flattenTokenPermissions = (token: DatabaseTransferToken): TransferToken =>
 
   return {
     ...token,
-    permissions: isArray(token.permissions)
-      ? map(token.permissions as TransferTokenPermission[], 'action')
+    permissions: Array.isArray(token.permissions)
+      ? Array.from(
+          token.permissions as TransferTokenPermission[],
+          (permission) => permission?.action
+        )
       : token.permissions,
   };
 };
@@ -405,7 +413,7 @@ const assertTokenPermissionsValidity = (attributes: TokenUpdatePayload) => {
  * Check if a token's lifespan is valid
  */
 const isValidLifespan = (lifespan: unknown) => {
-  if (isNil(lifespan)) {
+  if (lifespan == null) {
     return true;
   }
 

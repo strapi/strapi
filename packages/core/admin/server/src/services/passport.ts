@@ -1,6 +1,5 @@
 import passport from 'koa-passport';
 import type { Strategy } from 'passport-local';
-import { isFunction } from 'lodash';
 
 import createLocalStrategy from './passport/local-strategy';
 
@@ -9,7 +8,7 @@ const authEventsMapper = {
   onConnectionError: 'admin.auth.error',
 };
 
-const valueIsFunctionType = ([, value]: [any, any]) => isFunction(value);
+const valueIsFunctionType = ([, value]: [any, any]) => typeof value === 'function';
 const keyIsValidEventName = ([key]: any) => {
   return Object.keys(strapi.service('admin::passport').authEventsMapper).includes(key);
 };

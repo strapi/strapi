@@ -121,7 +121,8 @@ const newEngine = (params: EngineParams): Engine => {
 
     const removeInvalidConditions = (conditions: (Condition | undefined)[]) =>
       conditions.filter(
-        (condition): condition is Condition => condition != null && _.isFunction(condition.handler)
+        (condition): condition is Condition =>
+          condition != null && typeof condition.handler === 'function'
       );
 
     const evaluateConditions = (conditions: Condition[]) => {

@@ -1,4 +1,4 @@
-import domain from '..';
+import domain, { type CreatePermissionPayload } from '..';
 
 describe('Permission Domain', () => {
   describe('addCondition', () => {
@@ -168,6 +168,19 @@ describe('Permission Domain', () => {
   });
 
   describe('toPermission', () => {
+    test('Normalizes missing array entries into default permissions', () => {
+      const permissions = new Array<CreatePermissionPayload>(2);
+      permissions[1] = { action: 'read' };
+
+      const result = domain.toPermission(permissions);
+
+      expect(result).toEqual([
+        { actionParameters: {}, subject: null, properties: {}, conditions: [] },
+        { action: 'read', actionParameters: {}, subject: null, properties: {}, conditions: [] },
+      ]);
+      expect(0 in permissions).toBe(false);
+    });
+
     test('Handle single permission object and call domain.create', () => {
       const permission = {
         id: 1,

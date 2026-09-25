@@ -1,5 +1,3 @@
-import { isUndefined } from 'lodash';
-
 import { yup, validateYupSchema } from '@strapi/utils';
 import validators from './common-validators';
 
@@ -25,7 +23,7 @@ const profileUpdateSchema = yup
     currentPassword: yup
       .string()
       .when('password', (password: string, schema: any) =>
-        !isUndefined(password) ? schema.required() : schema
+        password !== undefined ? schema.required() : schema
       )
       .notNull(),
     preferedLanguage: yup.string().nullable(),

@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { errors, emitAudit } from '@strapi/utils';
-import { omit, uniq } from 'lodash';
+import { omit } from 'lodash';
 
 import type { AdminApiToken, ContentApiApiToken } from '../../../../shared/contracts/api-token';
 import constants from '../constants';
@@ -418,7 +418,7 @@ describe('API Token', () => {
       const create = jest.fn().mockResolvedValue(createTokenResult);
       const load = jest.fn().mockResolvedValueOnce(
         Promise.resolve(
-          uniq(attributes.permissions).map((p: any) => {
+          [...new Set(attributes.permissions)].map((p: any) => {
             return {
               action: p,
             };
@@ -464,7 +464,7 @@ describe('API Token', () => {
       const create = jest.fn().mockResolvedValue(createTokenResult);
       const load = jest.fn().mockResolvedValueOnce(
         Promise.resolve(
-          uniq(attributes.permissions).map((p: any) => {
+          [...new Set(attributes.permissions)].map((p: any) => {
             return {
               action: p,
             };

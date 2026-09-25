@@ -1,4 +1,4 @@
-import { assign, isArray, isEmpty, isObject, omit, size } from 'lodash';
+import { assign, omit } from 'lodash';
 
 import type { Core, UID, Data, Struct } from '@strapi/types';
 import * as componentsService from '../../utils/components';
@@ -92,11 +92,11 @@ const createEntityQuery = (strapi: Core.Strapi): any => {
           const component = strapi.getModel(attribute.component);
           const subPopulate = getDeepPopulateComponentLikeQuery(component, params);
 
-          if ((isArray(subPopulate) || isObject(subPopulate)) && size(subPopulate) > 0) {
+          if (Object.keys(subPopulate).length > 0) {
             populate[key] = { ...params, populate: subPopulate };
           }
 
-          if (isArray(subPopulate) && isEmpty(subPopulate)) {
+          if (Array.isArray(subPopulate) && subPopulate.length === 0) {
             populate[key] = { ...params };
           }
         }
@@ -110,16 +110,16 @@ const createEntityQuery = (strapi: Core.Strapi): any => {
             const component = strapi.getModel(componentUID);
             const subPopulate = getDeepPopulateComponentLikeQuery(component, params);
 
-            if ((isArray(subPopulate) || isObject(subPopulate)) && size(subPopulate) > 0) {
+            if (Object.keys(subPopulate).length > 0) {
               on[componentUID] = { ...params, populate: subPopulate };
             }
 
-            if (isArray(subPopulate) && isEmpty(subPopulate)) {
+            if (Array.isArray(subPopulate) && subPopulate.length === 0) {
               on[componentUID] = { ...params };
             }
           }
 
-          populate[key] = size(on) > 0 ? { on } : true;
+          populate[key] = Object.keys(on).length > 0 ? { on } : true;
         }
       }
 

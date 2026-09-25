@@ -1,4 +1,4 @@
-import { padEnd, isString, toString } from 'lodash';
+import { isString, toString } from 'lodash';
 import * as dateFns from 'date-fns';
 
 import { InvalidDateTimeError, InvalidDateError, InvalidTimeError } from '../../errors';
@@ -77,7 +77,7 @@ export const parseTime = (value: unknown) => {
   }
 
   const [, hours, minutes, seconds, fraction = '.000'] = result;
-  const fractionPart = padEnd(fraction.slice(1), 3, '0');
+  const fractionPart = fraction.slice(1).padEnd(3, '0');
 
   return `${hours}:${minutes}:${seconds}.${fractionPart}`;
 };

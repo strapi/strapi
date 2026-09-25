@@ -1,5 +1,3 @@
-import { isNil } from 'lodash';
-
 import { contentTypes } from '@strapi/utils';
 import type { UID } from '@strapi/types';
 
@@ -30,7 +28,7 @@ export const getRelationTargetStatus = (
    * If both source and target have DP enabled,
    * connect it to the same status as the source status
    */
-  if (sourceHasDP && !isNil(opts.sourceStatus)) {
+  if (sourceHasDP && opts.sourceStatus != null) {
     return [opts.sourceStatus];
   }
 

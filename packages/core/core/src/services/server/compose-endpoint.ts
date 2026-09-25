@@ -1,4 +1,4 @@
-import { castArray, isNil, property, toLower, trim } from 'lodash';
+import { castArray, property, toLower, trim } from 'lodash';
 import type { Core, UID } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import Router from '@koa/router';
@@ -64,7 +64,7 @@ const createAuthenticateMiddleware =
 const returnBodyMiddleware: Core.MiddlewareHandler = async (ctx, next) => {
   const values = await next();
 
-  if (isNil(ctx.body) && !isNil(values)) {
+  if (ctx.body == null && values != null) {
     ctx.body = values;
   }
 };

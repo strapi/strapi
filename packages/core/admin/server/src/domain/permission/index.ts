@@ -1,5 +1,5 @@
 import { objects, providerFactory } from '@strapi/utils';
-import { pick, reject, merge, omit, get, uniq, isArray, map, curry } from 'lodash';
+import { pick, reject, merge, omit, get, curry } from 'lodash';
 import type { Utils } from '@strapi/types';
 
 import { Permission } from '../../../../shared/contracts/shared';
@@ -53,7 +53,7 @@ const getDefaultPermission = () => ({
 export const addCondition = curry((condition: string, permission: Permission): Permission => {
   const { conditions } = permission;
   const newConditions = Array.isArray(conditions)
-    ? uniq(conditions.concat(condition))
+    ? [...new Set(conditions.concat(condition))]
     : [condition];
 
   return { ...permission, conditions: newConditions };
@@ -120,7 +120,7 @@ export const create = (attributes: CreatePermissionPayload) => {
  */
 export const sanitizeConditions = curry(
   (provider: Provider, permission: Permission): Permission => {
-    if (!isArray(permission.conditions)) {
+    if (!Array.isArray(permission.conditions)) {
       return permission;
     }
 
@@ -143,8 +143,8 @@ function toPermission<T extends CreatePermissionPayload>(payload: T): Permission
 function toPermission<T extends CreatePermissionPayload>(
   payload: T[] | T
 ): Permission[] | Permission {
-  if (isArray(payload)) {
-    return map(payload, (value) => create(value));
+  if (Array.isArray(payload)) {
+    return Array.from(payload, (value) => create(value));
   }
 
   return create(payload);

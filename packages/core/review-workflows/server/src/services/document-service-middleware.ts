@@ -1,7 +1,6 @@
 import type { Modules } from '@strapi/types';
 import { errors } from '@strapi/utils';
 
-import { isNil } from 'lodash';
 import { ENTITY_STAGE_ATTRIBUTE } from '../constants/workflows';
 import { WORKFLOW_UPDATE_STAGE } from '../constants/webhook-events';
 import { getService } from '../utils';
@@ -54,7 +53,7 @@ const assignStageOnCreate: Middleware = async (ctx, next) => {
   const data = ctx.params.data as Record<string, any>;
 
   // Assign the default stage if the entity doesn't have one
-  if (ctx.params?.data && isNil(data[ENTITY_STAGE_ATTRIBUTE])) {
+  if (ctx.params?.data && data[ENTITY_STAGE_ATTRIBUTE] == null) {
     data[ENTITY_STAGE_ATTRIBUTE] = { id: workflow.stages[0].id };
   }
 
@@ -69,7 +68,7 @@ const handleStageOnUpdate: Middleware = async (ctx, next) => {
   const { documentId } = ctx.params;
   const data = ctx.params.data as any;
 
-  if (isNil(data?.[ENTITY_STAGE_ATTRIBUTE])) {
+  if (data?.[ENTITY_STAGE_ATTRIBUTE] == null) {
     delete data?.[ENTITY_STAGE_ATTRIBUTE];
     return next();
   }

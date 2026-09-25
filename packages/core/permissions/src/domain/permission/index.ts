@@ -40,7 +40,7 @@ const addCondition = _.curry((condition: string, permission: Permission): Permis
   const { conditions } = permission;
 
   const newConditions = Array.isArray(conditions)
-    ? _.uniq(conditions.concat(condition))
+    ? [...new Set(conditions.concat(condition))]
     : [condition];
 
   return { ...permission, conditions: newConditions };

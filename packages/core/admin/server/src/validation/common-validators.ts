@@ -1,5 +1,5 @@
 import { yup } from '@strapi/utils';
-import _, { isEmpty, has, isNil, isArray } from 'lodash';
+import _, { isEmpty, has } from 'lodash';
 
 import { getService } from '../utils';
 import actionDomain, { type Action } from '../domain/action';
@@ -69,11 +69,11 @@ const checkNoDuplicatedPermissions = (permissions: unknown) =>
 const checkNilFields = (action: Action) =>
   function checkNilActionFields(fields: typeof actionFields) {
     // If the parent has no action field, then we ignore this test
-    if (isNil(action)) {
+    if (action == null) {
       return true;
     }
 
-    return actionDomain.appliesToProperty('fields', action) || isNil(fields);
+    return actionDomain.appliesToProperty('fields', action) || fields == null;
   };
 
 const fieldsPropertyValidation = (action: Action) =>
@@ -110,7 +110,7 @@ export const permission = yup
         'action is not an existing permission action',
         function checkActionValidity(actionId) {
           // If the action field is Nil, ignore the test and let the required check handle the error
-          if (isNil(actionId)) {
+          if (actionId == null) {
             return true;
           }
 
@@ -134,11 +134,11 @@ export const permission = yup
             return true;
           }
 
-          if (isNil(action.subjects)) {
-            return isNil(subject);
+          if (action.subjects == null) {
+            return subject == null;
           }
 
-          if (isArray(action.subjects) && !isNil(subject)) {
+          if (Array.isArray(action.subjects) && subject != null) {
             return action.subjects.includes(subject);
           }
 
@@ -154,7 +154,7 @@ export const permission = yup
         function checkPropertiesStructure(properties) {
           // @ts-expect-error yup types
           const action = getActionFromProvider(this.options.parent.action) as any;
-          const hasNoProperties = isEmpty(properties) || isNil(properties);
+          const hasNoProperties = isEmpty(properties) || properties == null;
 
           if (!has(action, 'options.applyToProperties')) {
             return hasNoProperties;
@@ -166,7 +166,7 @@ export const permission = yup
 
           const { applyToProperties } = action.options;
 
-          if (!isArray(applyToProperties)) {
+          if (!Array.isArray(applyToProperties)) {
             return false;
           }
 

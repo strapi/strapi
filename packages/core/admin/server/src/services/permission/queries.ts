@@ -1,4 +1,4 @@
-import { property, get, isNil, isArray, xor, differenceWith } from 'lodash';
+import { get, xor, differenceWith } from 'lodash';
 
 import pmap from 'p-map';
 import type { Data } from '@strapi/types';
@@ -20,7 +20,7 @@ export const deleteByRolesIds = async (rolesIds: Data.ID[]): Promise<void> => {
   });
 
   if (permissionsToDelete.length > 0) {
-    await deleteByIds(permissionsToDelete.map(property('id')));
+    await deleteByIds(permissionsToDelete.map((permission) => permission?.id));
   }
 };
 
@@ -106,16 +106,17 @@ const filterPermissionsToRemove = async (permissions: Permission[]) => {
           permission.subject
         );
 
-        return applies && isNil(permissionDomain.getProperty(property, permission));
+        return applies && permissionDomain.getProperty(property, permission) == null;
       })
     );
 
     const isRegisteredAction = actionProvider.has(permission.action);
     const hasInvalidProperties =
-      isArray(applyToProperties) && invalidProperties.every((result) => result === true);
-    const isInvalidSubject = isArray(subjects) && !subjects.includes(permission.subject as string);
+      Array.isArray(applyToProperties) && invalidProperties.every((result) => result === true);
+    const isInvalidSubject =
+      Array.isArray(subjects) && !subjects.includes(permission.subject as string);
     // On an api token permission, nil properties mean "everything", not "invalid"
-    const hasApiToken = !isNil(get(permission, 'apiToken'));
+    const hasApiToken = get(permission, 'apiToken') != null;
 
     // If the permission has an invalid action, an invalid subject or invalid properties, then add it to the toBeRemoved collection
     if (!isRegisteredAction || isInvalidSubject || (hasInvalidProperties && !hasApiToken)) {

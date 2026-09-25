@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const { map, pick } = require('lodash');
+const { pick } = require('lodash');
 
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
@@ -412,7 +412,11 @@ describe('Folder', () => {
         method: 'GET',
         url: '/upload/folders',
         qs: {
-          filters: { id: { $in: map([folder0, folder00, folder01, folder02, folder000], 'id') } },
+          filters: {
+            id: {
+              $in: [folder0, folder00, folder01, folder02, folder000].map((folder) => folder?.id),
+            },
+          },
           sort: 'id:asc',
           populate: { parent: '*' },
         },
@@ -480,7 +484,9 @@ describe('Folder', () => {
         method: 'GET',
         url: '/upload/folders',
         qs: {
-          filters: { id: { $in: map([folder0, folder00, folder02, folder000], 'id') } },
+          filters: {
+            id: { $in: [folder0, folder00, folder02, folder000].map((folder) => folder?.id) },
+          },
           sort: 'id:asc',
           populate: { parent: '*' },
         },

@@ -1,4 +1,4 @@
-import { curry, isString, isObject, trim, isEmpty, isNil, first, cloneDeep } from 'lodash';
+import { curry, isString, isObject, isEmpty, cloneDeep } from 'lodash';
 
 import { hasSort } from '../sort-query';
 import traverseFactory, { type Parent } from './factory';
@@ -29,7 +29,7 @@ const sort = traverseFactory()
       return Promise.all(
         sort
           .split(',')
-          .map((value) => trim(value))
+          .map((value) => value.trim())
           .map((nestedSort) => recurse(visitor, options, nestedSort))
       ).then((res) => res.filter((part) => !isEmpty(part)).join(','));
     }
@@ -74,7 +74,7 @@ const sort = traverseFactory()
     };
 
     return {
-      transform: trim,
+      transform: (value) => value.trim(),
 
       remove(key, data) {
         const [root] = tokenize(data);
@@ -89,11 +89,11 @@ const sort = traverseFactory()
           return data;
         }
 
-        return isNil(value) ? root : `${root}.${value}`;
+        return value == null ? root : `${root}.${value}`;
       },
 
       keys(data) {
-        const v = first(tokenize(data));
+        const v = tokenize(data)[0];
         return v ? [v] : [];
       },
 

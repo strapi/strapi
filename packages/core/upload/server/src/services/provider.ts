@@ -1,4 +1,3 @@
-import { isFunction } from 'lodash';
 import { file as fileUtils } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
@@ -11,7 +10,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   },
 
   async upload(file: UploadableFile) {
-    if (isFunction(strapi.plugin('upload').provider.uploadStream)) {
+    if (typeof strapi.plugin('upload').provider.uploadStream === 'function') {
       file.stream = file.getStream();
       await strapi.plugin('upload').provider.uploadStream(file);
 
@@ -35,7 +34,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   async replace(newFile: UploadableFile, oldFile: File) {
     const provider = strapi.plugin('upload').provider;
 
-    if (isFunction(provider.replaceStream)) {
+    if (typeof provider.replaceStream === 'function') {
       newFile.stream = newFile.getStream();
       await provider.replaceStream(newFile, oldFile);
 
@@ -47,7 +46,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       return;
     }
 
-    if (isFunction(provider.replace)) {
+    if (typeof provider.replace === 'function') {
       newFile.buffer = await fileUtils.streamToBuffer(newFile.getStream());
       await provider.replace(newFile, oldFile);
 

@@ -1,5 +1,4 @@
 import { yup, validateYupSchema } from '@strapi/utils';
-import { isNil } from 'lodash';
 import { getService } from '../../../utils';
 
 const focalPointSchema = yup
@@ -19,7 +18,7 @@ const fileInfoSchema = yup.object({
     .strapiID()
     .nullable()
     .test('folder-exists', 'the folder does not exist', async (folderId) => {
-      if (isNil(folderId)) {
+      if (folderId == null) {
         return true;
       }
 

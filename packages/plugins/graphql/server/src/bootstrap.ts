@@ -1,4 +1,4 @@
-import { isArray, mergeWith, isFunction, isEmpty, isObject } from 'lodash';
+import { mergeWith, isEmpty, isObject } from 'lodash';
 import { ApolloServer, type ApolloServerPlugin, type ApolloServerOptions } from '@apollo/server';
 import {
   ApolloServerPluginLandingPageLocalDefault,
@@ -63,7 +63,9 @@ export const determineLandingPage = (
    * - undefined: default Apollo behavior (hide playground on production)
    * - a function that returns an Apollo plugin that implements renderLandingPage
    ** */
-  const configLandingPage = config('landingPage');
+  const configLandingPage = config<
+    boolean | ((strapi?: Core.Strapi) => ApolloServerPlugin | boolean)
+  >('landingPage');
 
   const isProduction = process.env.NODE_ENV === 'production';
 
@@ -120,7 +122,7 @@ export const determineLandingPage = (
   }
 
   // if user provided a landing page function, return that
-  if (isFunction(configLandingPage)) {
+  if (typeof configLandingPage === 'function') {
     return userLanding(configLandingPage);
   }
 
@@ -222,7 +224,7 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
     defaultServerConfig,
     config('apolloServer'),
     (a: unknown, b: unknown) => {
-      if (isArray(a) && isArray(b)) {
+      if (Array.isArray(a) && Array.isArray(b)) {
         return a.concat(b);
       }
       return undefined;

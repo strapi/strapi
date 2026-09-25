@@ -1,4 +1,3 @@
-import { isUndefined, get, isNil } from 'lodash';
 import { yup, validateYupSchema } from '@strapi/utils';
 import { getService } from '../../../utils';
 import { FOLDER_MODEL_UID } from '../../../constants';
@@ -15,9 +14,9 @@ const isNameUniqueInFolder = (id?: number): yup.TestFunction<string | undefined>
     if (id) {
       filters.id = { $ne: id };
 
-      if (isUndefined(name)) {
+      if (name === undefined) {
         const existingFolder = await strapi.db.query(FOLDER_MODEL_UID).findOne({ where: { id } });
-        filters.name = get(existingFolder, 'name');
+        filters.name = existingFolder?.name;
       }
     }
 
@@ -66,7 +65,7 @@ const validateUpdateFolderSchema = (id: number) =>
           'dont-move-inside-self',
           'folder cannot be moved inside itself',
           async function test(parent) {
-            if (isNil(parent)) return true;
+            if (parent == null) return true;
 
             const destinationFolder = await strapi.db.query(FOLDER_MODEL_UID).findOne({
               select: ['path'],

@@ -15,7 +15,6 @@
  */
 
 import crypto from 'node:crypto';
-import { isInteger } from 'lodash';
 
 /**
  * Creates a hash of the given data with the specified string length as a string of hex characters
@@ -32,7 +31,7 @@ import { isInteger } from 'lodash';
  * @internal
  */
 export function createHash(data: string, len: number): string {
-  if (!isInteger(len) || len <= 0) {
+  if (!Number.isInteger(len) || len <= 0) {
     throw new Error(`createHash length must be a positive integer, received ${len}`);
   }
 

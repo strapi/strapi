@@ -1,7 +1,7 @@
 /* eslint-disable no-template-curly-in-string */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import * as yup from 'yup';
-import _, { isNumber, isInteger, get } from 'lodash';
+import _, { isNumber, get } from 'lodash';
 import { strings } from './primitives';
 import { printValue } from './print-value';
 
@@ -96,7 +96,7 @@ export class StrapiIDSchema extends yup.MixedSchema {
   }
 
   _typeCheck(value: unknown): value is string | number {
-    return typeof value === 'string' || (isNumber(value) && isInteger(value) && value >= 0);
+    return typeof value === 'string' || (isNumber(value) && Number.isInteger(value) && value >= 0);
   }
 }
 

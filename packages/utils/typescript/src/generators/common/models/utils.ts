@@ -1,13 +1,10 @@
 import * as ts from 'typescript';
 import {
   camelCase,
-  isArray,
   isBoolean,
   isDate,
-  isNull,
   isNumber,
   isString,
-  isUndefined,
   matchesProperty,
   upperFirst,
 } from 'lodash';
@@ -86,11 +83,11 @@ export const getTypeNode = (typeName: string, params: ts.TypeNode[] = []): ts.Ty
  * Transform a regular JavaScript object or scalar value into a literal expression
  */
 export const toTypeLiteral = (data: any): any => {
-  if (isUndefined(data)) {
+  if (data === undefined) {
     return factory.createLiteralTypeNode(ts.SyntaxKind.UndefinedKeyword as any);
   }
 
-  if (isNull(data)) {
+  if (data === null) {
     return factory.createLiteralTypeNode(ts.SyntaxKind.NullKeyword as any);
   }
 
@@ -111,7 +108,7 @@ export const toTypeLiteral = (data: any): any => {
     return data ? factory.createTrue() : factory.createFalse();
   }
 
-  if (isArray(data)) {
+  if (Array.isArray(data)) {
     return factory.createTupleTypeNode(data.map((item) => toTypeLiteral(item)));
   }
 

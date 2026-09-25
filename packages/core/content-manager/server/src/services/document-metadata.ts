@@ -1,4 +1,4 @@
-import { groupBy, pick, uniq } from 'lodash';
+import { groupBy, pick } from 'lodash';
 
 import { async, contentTypes } from '@strapi/utils';
 import type { Core, UID, Modules } from '@strapi/types';
@@ -350,7 +350,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         ...mediaPopulate,
         ...AVAILABLE_STATUS_POPULATE,
       },
-      fields: uniq([...AVAILABLE_LOCALES_FIELDS, ...nonLocalizedFields]),
+      fields: [...new Set([...AVAILABLE_LOCALES_FIELDS, ...nonLocalizedFields])],
       filters: {
         documentId: version.documentId,
       },
