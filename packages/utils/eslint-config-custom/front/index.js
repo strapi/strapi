@@ -53,6 +53,12 @@ const config = {
     'no-restricted-imports': [
       'error',
       {
+        patterns: [
+          {
+            group: ['lodash/fp', 'lodash/fp/**'],
+            message: 'Use regular lodash methods or a focused helper instead.',
+          },
+        ],
         paths: [
           {
             name: 'lodash',
@@ -61,6 +67,7 @@ const config = {
         ],
       },
     ],
+    'no-restricted-modules': ['error', { patterns: ['lodash/fp', 'lodash/fp/**'] }],
     'no-restricted-globals': [
       'error',
       {
