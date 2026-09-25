@@ -32,7 +32,7 @@ export default ({ ability, action, model }: any) => ({
   },
 
   // eslint-disable-next-line @typescript-eslint/default-param-last
-  addPermissionsQueryTo(query = {} as any, action: unknown) {
+  addPermissionsQueryTo(query = {} as any, action?: unknown) {
     const newQuery = cloneDeep(query);
     const permissionQuery = this.getQuery(action) ?? undefined;
 
