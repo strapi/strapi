@@ -146,16 +146,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     >;
 
     // Sort the default locale first so `availableLocales[0]` is the canonical
-    // source for non-localized field inheritance in the admin. Guarded so that
-    // we no-op if the i18n plugin or its locales service is unavailable.
-    let defaultLocaleCode: string | undefined;
+    // source for non-localized field inheritance in the admin. Without a
+    // localization provider there is no default locale and the order is kept.
+    let defaultLocaleCode: string | null | undefined = null;
     try {
-      defaultLocaleCode = await strapi.plugin('i18n')?.service('locales')?.getDefaultLocale();
+      defaultLocaleCode = await strapi.localization.getDefaultLocale();
     } catch {
-      // i18n plugin disabled or service errored — leave order untouched.
+      // The provider (e.g. its locale store lookup) errored — leave order untouched.
     }
 
-    if (!defaultLocaleCode) {
+    // The provider may resolve `undefined` at runtime when no default locale is stored
+    if (defaultLocaleCode === null || defaultLocaleCode === undefined || defaultLocaleCode === '') {
       return filtered as DocumentMetadata['availableLocales'];
     }
 
@@ -307,29 +308,24 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     // Include non-translatable scalar and media fields in availableLocales for i18n prefilling
     let nonLocalizedFields: string[] = [];
     let nonLocalizedMediaFields: string[] = [];
+    // Without a localization provider there are no non-localized attributes.
     try {
-      const i18nPlugin = strapi.plugin('i18n');
-      if (i18nPlugin) {
-        const i18nService = i18nPlugin.service('content-types');
-        if (i18nService?.getNonLocalizedAttributes) {
-          if (model?.attributes) {
-            const allNonLocalized = i18nService.getNonLocalizedAttributes(model);
-            // Get scalar and media attributes separately
-            const scalarAttrs = getScalarAttributes(model);
-            const mediaAttrs = getMediaAttributes(model);
+      if (model?.attributes !== undefined) {
+        const allNonLocalized = strapi.localization.getNonLocalizedAttributes(model);
+        // Get scalar and media attributes separately
+        const scalarAttrs = getScalarAttributes(model);
+        const mediaAttrs = getMediaAttributes(model);
 
-            // Separate scalar fields (can be in fields array) from media fields (need to be populated)
-            nonLocalizedFields = allNonLocalized.filter(
-              (field: string) => field in model.attributes && scalarAttrs.includes(field)
-            );
-            nonLocalizedMediaFields = allNonLocalized.filter(
-              (field: string) => field in model.attributes && mediaAttrs.includes(field)
-            );
-          }
-        }
+        // Separate scalar fields (can be in fields array) from media fields (need to be populated)
+        nonLocalizedFields = allNonLocalized.filter(
+          (field) => field in model.attributes && scalarAttrs.includes(field)
+        );
+        nonLocalizedMediaFields = allNonLocalized.filter(
+          (field) => field in model.attributes && mediaAttrs.includes(field)
+        );
       }
     } catch {
-      // i18n plugin might not be enabled or might error, ignore silently
+      // The provider errored — fall back to no prefilled non-localized fields
     }
 
     // Build populate object for non-localized media fields

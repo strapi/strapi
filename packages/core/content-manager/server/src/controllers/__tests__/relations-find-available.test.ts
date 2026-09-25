@@ -45,14 +45,10 @@ const setupStrapi = (queryBuilder: ReturnType<typeof createQueryBuilder>) => {
       }
       return null;
     }),
+    localization: {
+      isLocalizedContentType: jest.fn(() => false),
+    },
     plugins: {
-      i18n: {
-        services: {
-          'content-types': {
-            isLocalizedContentType: jest.fn(() => false),
-          },
-        },
-      },
       'content-manager': {
         services: {
           'permission-checker': {

@@ -49,8 +49,7 @@ const createEntriesService = (
 
     // Check for uniqueness based on documentId and locale (if localized)
     if (data.documentId) {
-      const i18nService = strapi.plugin('i18n')?.service('content-types');
-      const isLocalized = i18nService?.isLocalizedContentType(contentType) ?? false;
+      const isLocalized = strapi.localization.isLocalizedContentType(contentType);
       const hasDraftAndPublish = contentType.options?.draftAndPublish === true;
 
       const whereClause: Record<string, unknown> = { documentId: data.documentId };
