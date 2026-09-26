@@ -30,6 +30,14 @@ module.exports = () => ({
       testConf: 3,
     },
   },
+  'google-translate': {
+    enabled: true,
+    resolve: './src/plugins/google-translate',
+  },
+  'html-editor': {
+    enabled: true,
+    resolve: './src/plugins/html-editor',
+  },
   // NOTE: set enabled:true to test with a pre-built plugin. Make sure to run yarn build in the plugin folder first
   todo: {
     enabled: false,

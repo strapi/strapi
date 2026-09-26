@@ -1,0 +1,19 @@
+{
+  "plugin.name": "Google Translate",
+  "settings.title": "Google Translate",
+  "settings.subtitle": "Paste your Google credentials here. They are stored in Strapi and never read from .env.",
+  "settings.json.label": "Service account JSON",
+  "settings.json.placeholder": "Paste the full JSON key file from Google Cloud",
+  "settings.apiKey.label": "Or API key",
+  "settings.apiKey.placeholder": "Optional if you use a simple API key instead of a service account",
+  "settings.save": "Save credentials",
+  "settings.test": "Test translation",
+  "settings.clear": "Remove credentials",
+  "settings.configured": "Credentials are saved",
+  "settings.notConfigured": "No credentials saved yet",
+  "panel.title": "Google Translate",
+  "panel.source": "Translate from",
+  "panel.action": "Translate this locale",
+  "panel.missingCredentials": "Add Google credentials in Settings first",
+  "panel.needLocales": "Add at least two locales in Settings → Internationalization"
+}
