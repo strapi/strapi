@@ -13,6 +13,11 @@ jest.mock('../../../src/services/admin', () => ({
 const KEY_OFF = 'STRAPI_MEDIA_LIBRARY_BANNER_DISMISSED_FOR_false:test-uuid';
 const KEY_ON = 'STRAPI_MEDIA_LIBRARY_BANNER_DISMISSED_FOR_true:test-uuid';
 
+// The banner only makes sense on the Media Library itself; render it there by default
+// and let the dedicated "other pages" test cover the rest of the admin.
+const renderOnMediaLibrary = (ui: Parameters<typeof render>[0]) =>
+  render(ui, { initialEntries: ['/plugins/upload'] });
+
 describe('MediaLibraryBanner', () => {
   beforeEach(() => {
     localStorage.removeItem(KEY_OFF);
@@ -20,8 +25,20 @@ describe('MediaLibraryBanner', () => {
     window.strapi.featureFlags.isEnabled = jest.fn(() => false);
   });
 
+  it('should not render outside of the Media Library pages', () => {
+    render(<MediaLibraryBanner />, { initialEntries: ['/content-manager'] });
+
+    expect(screen.queryByText('Introducing the new Media Library')).not.toBeInTheDocument();
+  });
+
+  it('should render on the legacy Media Library configuration page too', () => {
+    render(<MediaLibraryBanner />, { initialEntries: ['/plugins/upload/configuration'] });
+
+    expect(screen.getByText('Introducing the new Media Library')).toBeInTheDocument();
+  });
+
   it('should point the user to the blog post when not on the legacy Media Library', () => {
-    render(<MediaLibraryBanner />);
+    renderOnMediaLibrary(<MediaLibraryBanner />);
 
     expect(screen.getByText('Introducing the new Media Library')).toBeInTheDocument();
     expect(screen.getByText("You're now using the revamped version.")).toBeInTheDocument();
@@ -39,7 +56,7 @@ describe('MediaLibraryBanner', () => {
   it('should point the user to the docs when on the legacy Media Library', () => {
     window.strapi.featureFlags.isEnabled = jest.fn(() => true);
 
-    render(<MediaLibraryBanner />);
+    renderOnMediaLibrary(<MediaLibraryBanner />);
 
     expect(screen.getByText('Introducing the new Media Library')).toBeInTheDocument();
     expect(
@@ -54,7 +71,7 @@ describe('MediaLibraryBanner', () => {
   });
 
   it('should leave nothing behind when the close button is clicked', async () => {
-    const { user } = render(<MediaLibraryBanner />);
+    const { user } = renderOnMediaLibrary(<MediaLibraryBanner />);
 
     await user.click(screen.getByRole('button', { name: 'Close' }));
 
@@ -63,24 +80,24 @@ describe('MediaLibraryBanner', () => {
   });
 
   it('should stay dismissed after a remount', async () => {
-    const { unmount, user } = render(<MediaLibraryBanner />);
+    const { unmount, user } = renderOnMediaLibrary(<MediaLibraryBanner />);
 
     await user.click(screen.getByRole('button', { name: 'Close' }));
     unmount();
 
-    render(<MediaLibraryBanner />);
+    renderOnMediaLibrary(<MediaLibraryBanner />);
 
     expect(screen.queryByText('Introducing the new Media Library')).not.toBeInTheDocument();
   });
 
   it('should re-show the banner with the new message when the flag toggles after a dismissal', async () => {
-    const { user } = render(<MediaLibraryBanner />);
+    const { user } = renderOnMediaLibrary(<MediaLibraryBanner />);
 
     await user.click(screen.getByRole('button', { name: 'Close' }));
 
     window.strapi.featureFlags.isEnabled = jest.fn(() => true);
 
-    render(<MediaLibraryBanner />);
+    renderOnMediaLibrary(<MediaLibraryBanner />);
 
     expect(
       screen.getByText('Check the documentation to learn how to switch to the new one.')
@@ -88,13 +105,13 @@ describe('MediaLibraryBanner', () => {
   });
 
   it('should show the banner again after the dismissal key is cleared from storage', async () => {
-    const { unmount, user } = render(<MediaLibraryBanner />);
+    const { unmount, user } = renderOnMediaLibrary(<MediaLibraryBanner />);
 
     await user.click(screen.getByRole('button', { name: 'Close' }));
     unmount();
 
     localStorage.removeItem(KEY_OFF);
-    render(<MediaLibraryBanner />);
+    renderOnMediaLibrary(<MediaLibraryBanner />);
 
     expect(screen.getByText('Introducing the new Media Library')).toBeInTheDocument();
   });
@@ -106,7 +123,7 @@ describe('MediaLibraryBanner', () => {
     // forever. Dismissal is now always a plain boolean, so any falsy reset works.
     localStorage.setItem(KEY_OFF, 'false');
 
-    render(<MediaLibraryBanner />);
+    renderOnMediaLibrary(<MediaLibraryBanner />);
 
     expect(screen.getByText('Introducing the new Media Library')).toBeInTheDocument();
   });
