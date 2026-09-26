@@ -73,6 +73,49 @@ describe('ResetPassword', () => {
       expect(await findByText('Password must be at least 8 characters')).toBeInTheDocument();
     });
 
+    it('should fail if the password does not contain a lowercase letter', async () => {
+      const { getByRole, findByText, getByLabelText, user } = render(<ResetPassword />, {
+        initialEntries: [{ search: '?code=test' }],
+      });
+
+      await user.type(getByLabelText('Password*'), 'TESTING123!');
+      await user.type(getByLabelText('Confirm Password*'), 'TESTING123!');
+
+      fireEvent.click(getByRole('button', { name: 'Change password' }));
+
+      expect(
+        await findByText('Password must contain at least 1 lowercase letter')
+      ).toBeInTheDocument();
+    });
+
+    it('should fail if the password does not contain an uppercase letter', async () => {
+      const { getByRole, findByText, getByLabelText, user } = render(<ResetPassword />, {
+        initialEntries: [{ search: '?code=test' }],
+      });
+
+      await user.type(getByLabelText('Password*'), 'testing123!');
+      await user.type(getByLabelText('Confirm Password*'), 'testing123!');
+
+      fireEvent.click(getByRole('button', { name: 'Change password' }));
+
+      expect(
+        await findByText('Password must contain at least 1 uppercase letter')
+      ).toBeInTheDocument();
+    });
+
+    it('should fail if the password does not contain a number', async () => {
+      const { getByRole, findByText, getByLabelText, user } = render(<ResetPassword />, {
+        initialEntries: [{ search: '?code=test' }],
+      });
+
+      await user.type(getByLabelText('Password*'), 'TestingTesting!');
+      await user.type(getByLabelText('Confirm Password*'), 'TestingTesting!');
+
+      fireEvent.click(getByRole('button', { name: 'Change password' }));
+
+      expect(await findByText('Password must contain at least 1 number')).toBeInTheDocument();
+    });
+
     it('should fail if the password is too long', async () => {
       const { getByRole, findByText, getByLabelText, user } = render(<ResetPassword />, {
         initialEntries: [{ search: '?code=test' }],
