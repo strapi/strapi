@@ -8,6 +8,8 @@ const mockPublish = jest.fn();
 const mockSetParentFormValue = jest.fn();
 const mockDispatch = jest.fn();
 const mockCountDraftRelations = jest.fn();
+const mockUseDraftRelationCountQuery = jest.fn();
+const mockDiscard = jest.fn();
 const mockFetchDraftDocument = jest.fn();
 const mockNavigate = jest.fn();
 const mockParams: { id?: string } = {};
@@ -68,6 +70,7 @@ jest.mock('../../../../hooks/useDocumentActions', () => ({
     create: mockCreate,
     update: mockUpdateDocument,
     publish: mockPublish,
+    discard: mockDiscard,
     isLoading: false,
   }),
 }));
@@ -98,7 +101,8 @@ jest.mock('../../../../features/DocumentRBAC', () => ({
 }));
 jest.mock('../../../../preview/pages/Preview', () => ({ usePreviewContext: () => false }));
 jest.mock('../../../../services/documents', () => ({
-  useGetDraftRelationCountQuery: () => [mockCountDraftRelations, { isError: false }],
+  useGetDraftRelationCountQuery: (...args: unknown[]) => mockUseDraftRelationCountQuery(...args),
+  useLazyGetDraftRelationCountQuery: () => [mockCountDraftRelations, { isError: false }],
   useLazyGetDocumentQuery: () => [mockFetchDraftDocument],
 }));
 jest.mock('../FormInputs/Relations/RelationModal', () => ({
@@ -125,6 +129,7 @@ jest.mock('../FormInputs/Relations/RelationModal', () => ({
 }));
 
 import {
+  DiscardAction,
   DocumentActions,
   DocumentActionsMenu,
   openPublishConfirmDialog,
@@ -696,6 +701,103 @@ describe('draft relations count fetching', () => {
     render(<ActionHarness Action={PublishAction} label="Publish child" />);
 
     expect(mockCountDraftRelations).not.toHaveBeenCalled();
+  });
+});
+
+describe('DiscardAction draft relations warning', () => {
+  const DiscardHarness = () => {
+    const action = DiscardAction({
+      activeTab: 'draft',
+      documentId: 'child',
+      model: 'api::child.child',
+      collectionType: 'collection-types',
+      meta: { availableStatus: [], availableLocales: [] },
+      document: { documentId: 'child', id: 1, status: 'modified' },
+    });
+
+    if (!action) {
+      return null;
+    }
+
+    return <DocumentActions actions={[{ id: 'discard', ...action }]} />;
+  };
+
+  const mockCountQueryState = (state: Record<string, unknown>) => {
+    mockUseDraftRelationCountQuery.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: false,
+      ...state,
+    });
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('warns that relations to draft entries will be removed', async () => {
+    mockCountQueryState({ data: { data: { unpublishedRelations: 1, draftM2mLinks: 1 } } });
+
+    const { user } = render(<DiscardHarness />);
+
+    await user.click(screen.getByRole('button', { name: 'Discard changes' }));
+
+    const warning = screen.getByText(
+      "2 linked entries are still in draft. Discarding will remove those relations, because unpublished entries aren't part of the published version."
+    );
+    const confirmation = screen.getByText('Are you sure?');
+
+    expect(warning.compareDocumentPosition(confirmation)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  it('does not warn when there are no relations to draft entries', async () => {
+    mockCountQueryState({ data: { data: { unpublishedRelations: 0, draftM2mLinks: 0 } } });
+
+    const { user } = render(<DiscardHarness />);
+
+    await user.click(screen.getByRole('button', { name: 'Discard changes' }));
+
+    expect(screen.getByRole('heading', { name: 'Confirmation' })).toBeInTheDocument();
+    expect(screen.queryByText(/still in draft/)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Any relations to unpublished entries will be removed.')
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows a generic warning when the draft relations count fails to load', async () => {
+    mockCountQueryState({ isError: true });
+
+    const { user } = render(<DiscardHarness />);
+
+    await user.click(screen.getByRole('button', { name: 'Discard changes' }));
+
+    expect(
+      screen.getByText('Any relations to unpublished entries will be removed.')
+    ).toBeInTheDocument();
+  });
+
+  it('is disabled until the draft relations count has loaded', () => {
+    mockCountQueryState({ isLoading: true });
+
+    render(<DiscardHarness />);
+
+    expect(screen.getByRole('button', { name: 'Discard changes' })).toBeDisabled();
+  });
+
+  it('shares the draft relations count request with the publish action', () => {
+    mockCountQueryState({ data: { data: { unpublishedRelations: 0, draftM2mLinks: 0 } } });
+
+    render(<DiscardHarness />);
+
+    expect(mockUseDraftRelationCountQuery).toHaveBeenCalledWith(
+      {
+        collectionType: 'collection-types',
+        model: 'api::child.child',
+        documentId: 'child',
+        params: {},
+      },
+      { skip: false }
+    );
   });
 });
 

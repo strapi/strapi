@@ -7,6 +7,8 @@
   "actions.delete.label": "Delete entry{isLocalized, select, true { (all locales)} other {}}",
   "actions.discard.label": "Discard changes",
   "actions.discard.dialog.body": "Are you sure you want to discard the changes? This action is irreversible.",
+  "actions.discard.dialog.draft-relations": "{count, plural, one {# linked entry is} other {# linked entries are}} still in draft. Discarding will remove {count, plural, one {that relation} other {those relations}}, because unpublished entries aren't part of the published version.",
+  "actions.discard.dialog.draft-relations-unknown": "Any relations to unpublished entries will be removed.",
   "actions.edit.error": "An error occurred while trying to edit the document.",
   "actions.edit.label": "Edit",
   "actions.open-in-new-tab.label": "Open in new tab",
