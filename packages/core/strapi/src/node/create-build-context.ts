@@ -10,6 +10,8 @@ import { getStrapiAdminEnvVars, loadEnv } from './core/env';
 
 import { PluginMeta, getEnabledPlugins, getMapOfPluginsWithAdmin } from './core/plugins';
 import { AppFile, loadUserAppFile } from './core/admin-customisations';
+import { getScanRoots } from './core/scan-roots';
+import { getModulePath } from './core/resolve-module';
 import type { BaseContext } from './types';
 
 interface BaseOptions {
@@ -38,12 +40,46 @@ interface BuildContext extends BaseContext {
    * incl. internal plugins, third party plugins & local plugins
    */
   plugins: PluginMeta[];
+  /**
+   * True when the `unstableNextDesignSystem` future flag is on and the bundler is Vite. The single
+   * decision point for the Tailwind plugin, the host stylesheet and the scan roots
+   */
+  nextDesignSystem: boolean;
+  /** The directories Tailwind scans. Computed once: the stylesheet, Vite and the watcher share it */
+  scanRoots: string[];
 }
 
 interface CreateBuildContextArgs extends CLIContext {
   strapi?: Core.Strapi;
   options?: BaseOptions;
+  /** If true, Tailwind scans source and not `dist`. E.g. for Vite development server, which serves `admin/src` */
+  dev?: boolean;
 }
+
+const NEXT_DESIGN_SYSTEM_FLAG = 'unstableNextDesignSystem';
+
+/** The export the flag-on stylesheet imports. Only a design system release with the `next` entry has it */
+const NEXT_DESIGN_SYSTEM_ENTRY = '@strapi/design-system/next/source.css';
+
+/** Fails the build when @strapi/admin's closure has no next design system entry, the root the Vite alias resolves from */
+const assertNextDesignSystemEntry = (): void => {
+  try {
+    getModulePath(NEXT_DESIGN_SYSTEM_ENTRY);
+  } catch {
+    throw new Error(
+      [
+        `The ${NEXT_DESIGN_SYSTEM_FLAG} future flag needs a @strapi/design-system release that ships the "next" entry, but ${NEXT_DESIGN_SYSTEM_ENTRY} does not resolve.`,
+        'Point the application package.json at such a release:',
+        '',
+        '"resolutions": { "@strapi/design-system": "<version>" }',
+        '',
+        'npm and pnpm users use "overrides" in place of "resolutions", with the key at the top level of the object.',
+        'An entry in "dependencies" is not enough. The override must be global, so that @strapi/admin gets the same copy.',
+        'The current release is the alpha dist-tag on npm, see `npm view @strapi/design-system dist-tags`.',
+      ].join(os.EOL)
+    );
+  }
+};
 
 const DEFAULT_BROWSERSLIST = [
   'last 3 major versions',
@@ -58,6 +94,7 @@ const createBuildContext = async ({
   tsconfig,
   strapi,
   options = {},
+  dev = false,
 }: CreateBuildContextArgs): Promise<BuildContext> => {
   /**
    * If you make a new strapi instance when one already exists,
@@ -156,6 +193,28 @@ const createBuildContext = async ({
 
   const { bundler = 'vite', ...restOptions } = options;
 
+  const flagEnabled = strapiInstance.features.future.isEnabled(NEXT_DESIGN_SYSTEM_FLAG);
+
+  if (flagEnabled && bundler !== 'vite') {
+    logger.warn(
+      `The ${NEXT_DESIGN_SYSTEM_FLAG} future flag needs Vite. Tailwind is not available under ${bundler}, so this build has no next design system`
+    );
+  }
+
+  const nextDesignSystem = flagEnabled && bundler === 'vite';
+
+  if (nextDesignSystem) {
+    assertNextDesignSystemEntry();
+  }
+
+  const scanRoots = nextDesignSystem
+    ? await getScanRoots({ cwd, runtimeDir, plugins: pluginsWithFront, customisations }, dev)
+    : [];
+
+  if (nextDesignSystem) {
+    logger.debug('Tailwind scan roots', os.EOL, scanRoots);
+  }
+
   const buildContext: BuildContext = {
     appDir,
     adminPath,
@@ -169,9 +228,11 @@ const createBuildContext = async ({
     env,
     features,
     logger,
+    nextDesignSystem,
     options: restOptions,
     plugins: pluginsWithFront,
     runtimeDir,
+    scanRoots,
     strapi: strapiInstance,
     target,
     tsconfig,

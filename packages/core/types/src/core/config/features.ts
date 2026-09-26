@@ -5,6 +5,7 @@
  */
 export interface FeaturesFutureFlags {
   experimental_firstPublishedAt?: boolean;
+  unstableNextDesignSystem?: boolean;
   [futureFlagName: string]: boolean | undefined;
 }
 
