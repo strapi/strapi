@@ -1,4 +1,8 @@
-module.exports = ({ env }) => ({
+'use strict';
+
+const { factories } = require('@strapi/strapi');
+
+module.exports = factories.defineServerConfig(({ env }) => ({
   host: env('HOST', '0.0.0.0'),
   port: env.int('PORT', 1337),
   app: {
@@ -7,4 +11,4 @@ module.exports = ({ env }) => ({
   webhooks: {
     populateRelations: env.bool('WEBHOOKS_POPULATE_RELATIONS', false),
   },
-});
+}));

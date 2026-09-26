@@ -1,4 +1,8 @@
-module.exports = ({ env }) => ({
+'use strict';
+
+const { factories } = require('@strapi/strapi');
+
+module.exports = factories.defineAdminConfig(({ env }) => ({
   auth: {
     secret: env('ADMIN_JWT_SECRET'),
   },
@@ -18,4 +22,4 @@ module.exports = ({ env }) => ({
     promoteEE: env.bool('FLAG_PROMOTE_EE', true),
     docLinks: env.bool('FLAG_DOC_LINKS', true),
   },
-});
+}));
