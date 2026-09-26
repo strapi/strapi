@@ -1,5 +1,6 @@
 import type { ComponentWithChildren } from '../components/DataManager/utils/retrieveComponentsThatHaveComponents';
 import type { NestedComponent } from '../components/DataManager/utils/retrieveNestedComponents';
+import type { Components } from '../types';
 import type { Internal } from '@strapi/types';
 
 const findComponent = <T extends { component: Internal.UID.Component }>(
@@ -43,6 +44,106 @@ export const getChildrenMaxDepth = (
   });
 
   return maxDepth;
+};
+
+/**
+ * Returns the dynamic zone nesting depth for a component.
+ *
+ * Counts the maximum number of dynamiczone-type edges in any path from a root
+ * component down to the given component within the component graph.
+ *
+ * Examples:
+ * - ComponentA -> (component) -> ComponentB: getDzDepth(B) = 0
+ * - ComponentA -> (dz) -> ComponentB: getDzDepth(B) = 1
+ * - ComponentA -> (dz) -> ComponentB -> (component) -> ComponentC: getDzDepth(C) = 1
+ * - ComponentA -> (dz) -> ComponentB -> (dz) -> ComponentC: getDzDepth(C) = 2
+ *
+ * @param component - The UID of the component to check.
+ * @param components - The array of all nested components (from retrieveNestedComponents).
+ * @returns The number of dynamiczone transitions in the deepest parent chain.
+ */
+export const getDzDepth = (
+  component: Internal.UID.Schema,
+  components: Array<NestedComponent>
+): number => {
+  const inStack = new Set<Internal.UID.Schema>();
+
+  const walk = (uid: Internal.UID.Schema): number => {
+    // Cycle guard
+    if (inStack.has(uid)) return 0;
+
+    const comp = findComponent(uid, components);
+    if (!comp) return 0;
+
+    inStack.add(uid);
+
+    let maxDepth = 0;
+
+    if (comp.uidsOfAllParents) {
+      const dzParents = new Set(comp.dzParentUids ?? []);
+
+      for (const parentUid of comp.uidsOfAllParents) {
+        const isDzEdge = dzParents.has(parentUid);
+        const parentDepth = walk(parentUid);
+        const depth = parentDepth + (isDzEdge ? 1 : 0);
+        if (depth > maxDepth) {
+          maxDepth = depth;
+        }
+      }
+    }
+
+    inStack.delete(uid);
+    return maxDepth;
+  };
+
+  return walk(component);
+};
+
+/**
+ * Returns the maximum number of dynamic-zone edges reachable by walking
+ * *downward* through a component's attributes.
+ *
+ * - Component-type attributes are traversed without incrementing the counter.
+ * - Dynamic-zone attributes increment the counter by 1 for each child.
+ *
+ * This is the mirror of `getDzDepth` (which walks upward through parents).
+ *
+ * @param componentUid - The UID of the component to inspect.
+ * @param components   - The full component map (keyed by UID).
+ * @param visited      - Cycle guard (internal).
+ * @returns The deepest DZ chain below this component.
+ */
+export const getMaxDownwardDzDepth = (
+  componentUid: Internal.UID.Component,
+  components: Components,
+  visited = new Set<Internal.UID.Component>()
+): number => {
+  if (visited.has(componentUid)) return 0;
+  const comp = components[componentUid];
+  if (!comp) return 0;
+
+  visited.add(componentUid);
+  let max = 0;
+
+  for (const attr of comp.attributes) {
+    if (attr.type === 'dynamiczone' && 'components' in attr && Array.isArray(attr.components)) {
+      for (const childUid of attr.components) {
+        const depth =
+          1 +
+          getMaxDownwardDzDepth(childUid as Internal.UID.Component, components, new Set(visited));
+        if (depth > max) max = depth;
+      }
+    } else if (attr.type === 'component' && 'component' in attr) {
+      const depth = getMaxDownwardDzDepth(
+        attr.component as Internal.UID.Component,
+        components,
+        new Set(visited)
+      );
+      if (depth > max) max = depth;
+    }
+  }
+
+  return max;
 };
 
 /**
