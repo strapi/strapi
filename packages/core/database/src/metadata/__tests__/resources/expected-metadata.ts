@@ -308,7 +308,6 @@ export const expectedMetadataResults = {
             complex_order: {
               type: 'float',
               column: {
-                unsigned: true,
                 defaultTo: null,
               },
               columnName: 'complex_order',
@@ -603,7 +602,6 @@ export const expectedMetadataResults = {
             complex_order: {
               type: 'float',
               column: {
-                unsigned: true,
                 defaultTo: null,
               },
               columnName: 'complex_order',
@@ -611,7 +609,6 @@ export const expectedMetadataResults = {
             inv_complex_order: {
               type: 'float',
               column: {
-                unsigned: true,
                 defaultTo: null,
               },
               columnName: 'inv_complex_order',
@@ -881,7 +878,6 @@ export const expectedMetadataResults = {
             complex_order: {
               type: 'float',
               column: {
-                unsigned: true,
                 defaultTo: null,
               },
               columnName: 'complex_order',
@@ -1149,7 +1145,6 @@ export const expectedMetadataResults = {
             complex_order: {
               type: 'float',
               column: {
-                unsigned: true,
                 defaultTo: null,
               },
               columnName: 'complex_order',
@@ -1415,7 +1410,6 @@ export const expectedMetadataResults = {
             complex_order: {
               type: 'float',
               column: {
-                unsigned: true,
                 defaultTo: null,
               },
               columnName: 'complex_order',
@@ -1686,7 +1680,6 @@ export const expectedMetadataResults = {
           complex_order: {
             type: 'float',
             column: {
-              unsigned: true,
               defaultTo: null,
             },
             columnName: 'complex_order',
