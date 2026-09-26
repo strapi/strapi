@@ -4,7 +4,7 @@ import type { Modules } from '@strapi/types';
 import { buildSessionMetadata } from '@strapi/utils';
 
 import { resolveAuthCookieName } from './auth-cookie-name';
-import { resolveAuthCookiePath } from './auth-cookie-path';
+import { resolveAuthCookiePath, DEFAULT_AUTH_COOKIE_PATH } from './auth-cookie-path';
 import { resolveAuthCookieDomain } from './auth-cookie-domain';
 
 const ADMIN_ORIGIN = 'admin';
@@ -29,6 +29,12 @@ export const getAccessCookiePath = (): string => {
   return resolveAuthCookiePath(configured, warnViaStrapiLog);
 };
 
+export const getRefreshCookiePath = (): string => {
+  const configured: string | undefined =
+    strapi.config.get('admin.auth.cookie.refreshPath') || DEFAULT_AUTH_COOKIE_PATH;
+  return resolveAuthCookiePath(configured, warnViaStrapiLog);
+};
+
 export const getAccessCookieDomain = (): string | undefined => {
   const configured: string | undefined =
     strapi.config.get('admin.auth.cookie.domain') || strapi.config.get('admin.auth.domain');
@@ -45,7 +51,7 @@ export const getRefreshCookieOptions = (secureRequest?: boolean) => {
   const isProduction = process.env.NODE_ENV === 'production';
 
   const domain = getAccessCookieDomain();
-  const path = getAccessCookiePath();
+  const path = getRefreshCookiePath();
 
   const sameSite: boolean | 'lax' | 'strict' | 'none' =
     strapi.config.get('admin.auth.cookie.sameSite') ?? 'lax';
