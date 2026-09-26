@@ -71,7 +71,7 @@ export default (params: { providers: engine.EngineParams['providers'] }) => {
      * @param user
      */
     async generateUserAbility(user: AdminUser): Promise<Ability> {
-      const permissions = (await getService('permission').findUserPermissions(user)) as any;
+      const permissions = (await getService('permission').findCachedUserPermissions(user)) as any;
 
       return engineInstance.generateAbility(permissions, user);
     },

@@ -71,6 +71,32 @@ const registerModelHooks = () => {
       }
     },
   });
+
+  // Invalidate the per-role permissions cache on any write to permissions or roles
+  const clearRolePermissionsCache = () => getService('permission').clearRolePermissionsCache();
+
+  strapi.db.lifecycles.subscribe({
+    models: ['admin::permission', 'admin::role'],
+    afterCreate: clearRolePermissionsCache,
+    afterCreateMany: clearRolePermissionsCache,
+    afterUpdate: clearRolePermissionsCache,
+    afterUpdateMany: clearRolePermissionsCache,
+    afterDelete: clearRolePermissionsCache,
+    afterDeleteMany: clearRolePermissionsCache,
+  });
+
+  // Invalidate the role lookup cache on any write to roles
+  const clearRolesCache = () => getService('role').clearRolesCache();
+
+  strapi.db.lifecycles.subscribe({
+    models: ['admin::role'],
+    afterCreate: clearRolesCache,
+    afterCreateMany: clearRolesCache,
+    afterUpdate: clearRolesCache,
+    afterUpdateMany: clearRolesCache,
+    afterDelete: clearRolesCache,
+    afterDeleteMany: clearRolesCache,
+  });
 };
 
 const syncAuthSettings = async () => {

@@ -123,6 +123,19 @@ module.exports = async ({ strapi }) => {
     .service('admin::permission')
     .actionProvider.registerMany(usersPermissionsActions.actions);
 
+  // Invalidate the per-role permissions cache on any write to permissions or roles
+  const clearRolePermissionsCache = () => getService('permission').clearRolePermissionsCache();
+
+  strapi.db.lifecycles.subscribe({
+    models: ['plugin::users-permissions.permission', 'plugin::users-permissions.role'],
+    afterCreate: clearRolePermissionsCache,
+    afterCreateMany: clearRolePermissionsCache,
+    afterUpdate: clearRolePermissionsCache,
+    afterUpdateMany: clearRolePermissionsCache,
+    afterDelete: clearRolePermissionsCache,
+    afterDeleteMany: clearRolePermissionsCache,
+  });
+
   await getService('users-permissions').initialize();
 
   // Define users-permissions origin configuration for sessionManager
