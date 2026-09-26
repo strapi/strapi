@@ -34,6 +34,15 @@ const webhookValidator = yup
             return true;
           }
 
+          // Opt-in escape hatch for deployments whose webhook targets are only
+          // reachable on a private network (e.g. Kubernetes cluster URLs like
+          // `*.svc.cluster.local`). The SSRF guard stays on by default; users
+          // must explicitly set `server.webhooks.allowNonPublicUrls` to allow
+          // non-public URLs. (GH#26876)
+          if (strapi.config.get('server.webhooks.allowNonPublicUrls', false)) {
+            return true;
+          }
+
           try {
             const parsedUrl = new URL(url!);
             const isLocalUrl = await isLocalhostIp(parsedUrl.hostname);
@@ -64,6 +73,8 @@ const webhookValidator = yup
 const updateWebhookValidator = webhookValidator.shape({
   isEnabled: yup.boolean(),
 });
+
+export { webhookValidator, updateWebhookValidator };
 
 export default {
   async listWebhooks(ctx: Context) {
