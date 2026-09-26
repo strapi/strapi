@@ -7,7 +7,7 @@ const createStrapiManagedAiTranslationsProvider = ({
 }: {
   strapi: Core.Strapi;
 }): AiTranslationsProvider => {
-  // TODO: add a helper function to get the AI server URL
+  // TODO(ai): add a helper function to get the AI server URL
   const aiServerUrl = process.env.STRAPI_AI_URL || 'https://strapi-ai.apps.strapi.io';
 
   const getAiToken = async () => {

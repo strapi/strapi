@@ -130,6 +130,7 @@ test.describe('Create and Edit Operations', () => {
     const LIST_URL = /\/admin\/content-manager\/collection-types\/api::product.product(\?.*)?/;
     const EDIT_URL =
       /\/admin\/content-manager\/collection-types\/api::product.product\/[^/]+(\?.*)?/;
+    const NAME_ES = 'Camiseta de fuera 23/24 de Nike para hombres';
 
     /**
      * Navigate to our products list-view where there will be one document already made in the `en` locale
@@ -173,35 +174,47 @@ test.describe('Create and Edit Operations', () => {
       await page.getByRole('textbox', { name: 'name' }).press('Delete');
     }
 
-    await page
-      .getByRole('textbox', { name: 'name' })
-      .fill('Camiseta de fuera 23/24 de Nike para hombres');
+    await page.getByRole('textbox', { name: 'name' }).fill(NAME_ES);
 
     /**
      * Verify the UID works as expected due to issues with webkit above,
      * this has been kept.
      */
+    const regenerateBodies: Array<Record<string, any>> = [];
+    page.on('request', (request) => {
+      if (!request.url().includes('/content-manager/uid/generate?locale=es')) {
+        return;
+      }
+      const body = request.postDataJSON();
+      if (body?.data?.name === NAME_ES) {
+        regenerateBodies.push(body);
+      }
+    });
+
     await expect
       .poll(
         async () => {
-          const requestPromise = page.waitForRequest('**/content-manager/uid/generate?locale=es');
-          await page.getByRole('button', { name: 'Regenerate' }).click();
-          const body = (await requestPromise).postDataJSON();
-          return body;
+          if (regenerateBodies.length === 0) {
+            await page.getByRole('button', { name: 'Regenerate' }).click();
+          }
+          return regenerateBodies.length;
         },
         {
+          timeout: 30000,
           intervals: [1000, 2000, 4000, 8000],
         }
       )
-      .toMatchObject({
-        contentTypeUID: 'api::product.product',
-        data: {
-          id: expect.any(String),
-          name: 'Camiseta de fuera 23/24 de Nike para hombres',
-          slug: 'product',
-        },
-        field: 'slug',
-      });
+      .toBeGreaterThan(0);
+
+    expect(regenerateBodies[0]).toMatchObject({
+      contentTypeUID: 'api::product.product',
+      data: {
+        id: expect.any(String),
+        name: NAME_ES,
+        slug: 'product',
+      },
+      field: 'slug',
+    });
 
     await expect(page.getByRole('textbox', { name: 'slug' })).toHaveValue(
       'camiseta-de-fuera-23-24-de-nike-para-hombres'

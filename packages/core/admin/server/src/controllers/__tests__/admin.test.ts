@@ -49,6 +49,66 @@ describe('Admin Controller', () => {
     });
   });
 
+  describe('telemetryProperties', () => {
+    const setupStrapi = ({
+      isDisabled = false,
+      contentStructure,
+    }: {
+      isDisabled?: boolean;
+      contentStructure?: { countGroups: jest.Mock };
+    } = {}) => {
+      global.strapi = {
+        telemetry: { isDisabled },
+        dirs: { app: { root: '/tmp/app' } },
+        contentTypes: {},
+        components: {},
+        get: jest.fn((key: string) => (key === 'content-structure' ? contentStructure : undefined)),
+      } as any;
+    };
+
+    test('reports numberOfContentTypeFolders from the content-structure service', async () => {
+      const countGroups = jest.fn(async () => 4);
+      setupStrapi({ contentStructure: { countGroups } });
+
+      const ctx = {} as any;
+      const result = await adminController.telemetryProperties(ctx);
+
+      expect(countGroups).toHaveBeenCalled();
+      expect(result?.data).toMatchObject({ numberOfContentTypeFolders: 4 });
+    });
+
+    test('falls back to 0 folders when the content-structure service is unavailable', async () => {
+      setupStrapi({ contentStructure: undefined });
+
+      const ctx = {} as any;
+      const result = await adminController.telemetryProperties(ctx);
+
+      expect(result?.data).toMatchObject({ numberOfContentTypeFolders: 0 });
+    });
+
+    test('falls back to 0 folders when countGroups throws', async () => {
+      const countGroups = jest.fn(async () => {
+        throw new Error('unreadable groups.json');
+      });
+      setupStrapi({ contentStructure: { countGroups } });
+
+      const ctx = {} as any;
+      const result = await adminController.telemetryProperties(ctx);
+
+      expect(result?.data).toMatchObject({ numberOfContentTypeFolders: 0 });
+    });
+
+    test('returns 204 and no body when telemetry is disabled', async () => {
+      setupStrapi({ isDisabled: true });
+
+      const ctx = { status: 200 } as any;
+      const result = await adminController.telemetryProperties(ctx);
+
+      expect(ctx.status).toBe(204);
+      expect(result).toBeUndefined();
+    });
+  });
+
   describe('information', () => {
     beforeAll(() => {
       global.strapi = {
@@ -91,6 +151,20 @@ describe('Admin Controller', () => {
         },
         nodeVersion: process.version,
         communityEdition: false,
+      });
+    });
+  });
+
+  describe('getProjectType', () => {
+    beforeAll(() => {
+      global.strapi = { config: { get: jest.fn(() => ({})) } } as any;
+    });
+
+    test('CE getProjectType always returns isTrial: false', async () => {
+      const result = await adminController.getProjectType();
+
+      expect(result).toEqual({
+        data: { isEE: false, isTrial: false, features: [], flags: {}, ai: { enabled: false } },
       });
     });
   });

@@ -7,7 +7,7 @@ tags:
 
 # RFC Example Doc
 
-Interested in submitting your own public RFC? Use this template as your basis but feel free to expand on it should your needs require it.
+Proposing a new RFC? Open it as a [GitHub Discussion in the RFCs category](https://github.com/strapi/strapi/discussions/categories/rfcs). You can use this structure as a basis. Approved RFCs may later be archived in this section using this template.
 
 ---
 

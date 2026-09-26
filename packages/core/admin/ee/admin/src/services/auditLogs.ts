@@ -1,5 +1,6 @@
 import { adminApi } from '../../../../admin/src/services/api';
 import * as AuditLogs from '../../../../shared/contracts/audit-logs';
+import { expandLegacyActionFilters } from '../pages/SettingsPage/pages/AuditLogs/utils/legacyActions';
 
 const auditLogsService = adminApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -7,7 +8,7 @@ const auditLogsService = adminApi.injectEndpoints({
       query: (params) => ({
         url: `/admin/audit-logs`,
         config: {
-          params,
+          params: expandLegacyActionFilters(params),
         },
       }),
     }),

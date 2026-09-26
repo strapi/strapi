@@ -9,6 +9,7 @@ import {
   waitForGuidedTourCompletedInStorage,
 } from '../../../utils/shared';
 import { waitForRestart } from '../../../utils/restart';
+import { startCreateContentType } from '../../../utils/content-types';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
@@ -71,7 +72,7 @@ describeOnCondition(edition !== 'EE')('Guided tour', () => {
 
     // Create collection type — Continue persists the type and moves to the schema editor; wait for network
     // so the guided tour can attach the next step before we assert on the dialog (fast runners can race otherwise).
-    await page.getByRole('button', { name: 'Create new collection type' }).click();
+    await startCreateContentType(page, 'collection');
     await page
       .getByRole('textbox', { name: 'Display name' })
       .fill(GUIDED_TOUR_COLLECTION_DISPLAY_NAME);

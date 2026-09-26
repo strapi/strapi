@@ -24,3 +24,4 @@ export type * as Validators from './validators';
 export type * as WebhookRunner from './webhook-runner';
 export type * as WebhookStore from './webhook-store';
 export type * as Permissions from './permissions';
+export type * as ContentStructure from './content-structure';

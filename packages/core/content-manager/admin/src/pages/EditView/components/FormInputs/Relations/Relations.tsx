@@ -37,6 +37,7 @@ import { COLLECTION_TYPES } from '../../../../../constants/collections';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { PERMISSIONS } from '../../../../../constants/plugin';
 import { DocumentRBAC, useDocumentRBAC } from '../../../../../features/DocumentRBAC';
+import { useContentTypeSchema } from '../../../../../hooks/useContentTypeSchema';
 import { useDebounce } from '../../../../../hooks/useDebounce';
 import { useDocument } from '../../../../../hooks/useDocument';
 import { type DocumentMeta, useDocumentContext } from '../../../../../hooks/useDocumentContext';
@@ -715,12 +716,15 @@ const RelationModalWithContext = ({
     defaultMessage: 'Untitled',
   });
   const canCreate = useDocumentRBAC('RelationModalWrapper', (state) => state.canCreate);
+  const { schema: targetSchema } = useContentTypeSchema(relation.model);
+  const isTargetSingleType = targetSchema?.kind === 'singleType';
   const fieldRef = useFocusInputField<HTMLInputElement>(name);
   const componentUID = useComponent('RelationsField', (state) => state.uid);
   const getParentFormValues = useForm('RelationModalWrapper', (state) => state.getValues);
   const getParentFormValuesWithCurrentRelation = () => {
     return setIn(getParentFormValues(), name, fieldValue);
   };
+  const setParentFormValue = useForm('RelationModalWrapper', (state) => state.onChange);
 
   const handleLoadMore = () => {
     if (!data || !data.pagination) {
@@ -744,7 +748,7 @@ const RelationModalWithContext = ({
       {({ dispatch }) => (
         <Combobox
           ref={fieldRef}
-          creatable="visible"
+          creatable={isTargetSingleType ? false : 'visible'}
           creatableDisabled={!canCreate}
           createMessage={() =>
             formatMessage({
@@ -753,7 +757,7 @@ const RelationModalWithContext = ({
             })
           }
           onCreateOption={() => {
-            if (canCreate) {
+            if (canCreate && !isTargetSingleType) {
               dispatch({
                 type: 'GO_TO_RELATION',
                 payload: {
@@ -762,6 +766,7 @@ const RelationModalWithContext = ({
                   fieldToConnect: name,
                   fieldToConnectUID: componentUID,
                   getParentFormValues: getParentFormValuesWithCurrentRelation,
+                  setParentFormValue,
                 },
               });
             }

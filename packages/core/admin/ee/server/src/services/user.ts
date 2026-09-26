@@ -3,6 +3,12 @@ import { pipe, map, castArray, toNumber } from 'lodash/fp';
 import { arrays, errors } from '@strapi/utils';
 import { hasSuperAdminRole } from '../../../../server/src/domain/user';
 import constants from '../../../../server/src/services/constants';
+import {
+  LEGACY_USER_EVENTS,
+  emitAdminUserDeleted,
+  emitAdminUserUpdateAudits,
+  touchesTrackedFields,
+} from '../../../../server/src/audit-logs/admin-users';
 import { getService } from '../utils';
 
 const { ValidationError } = errors;
@@ -89,6 +95,11 @@ const updateById = async (id: any, attributes: any) => {
     }
   }
 
+  // The audit log records what changed, so it needs the row before the write
+  const previous = touchesTrackedFields(attributes)
+    ? await strapi.db.query('admin::user').findOne({ where: { id }, populate: ['roles'] })
+    : null;
+
   // hash password if a new one is sent
   if (_.has(attributes, 'password')) {
     const hashedPassword = await getService('auth').hashPassword(attributes.password);
@@ -102,7 +113,8 @@ const updateById = async (id: any, attributes: any) => {
       populate: ['roles'],
     });
 
-    strapi.eventHub.emit('user.update', { user: sanitizeUser(updatedUser) });
+    strapi.eventHub.emit(LEGACY_USER_EVENTS.UPDATE, { user: sanitizeUser(updatedUser) });
+    await emitAdminUserUpdateAudits({ strapi }, { previous, updated: updatedUser, attributes });
 
     return updatedUser;
   }
@@ -116,7 +128,8 @@ const updateById = async (id: any, attributes: any) => {
   await updateEEDisabledUsersList(id, attributes);
 
   if (updatedUser) {
-    strapi.eventHub.emit('user.update', { user: sanitizeUser(updatedUser) });
+    strapi.eventHub.emit(LEGACY_USER_EVENTS.UPDATE, { user: sanitizeUser(updatedUser) });
+    await emitAdminUserUpdateAudits({ strapi }, { previous, updated: updatedUser, attributes });
   }
 
   return updatedUser;
@@ -158,7 +171,8 @@ const deleteById = async (id: unknown) => {
 
   await removeFromEEDisabledUsersList(id);
 
-  strapi.eventHub.emit('user.delete', { user: sanitizeUser(deletedUser) });
+  strapi.eventHub.emit(LEGACY_USER_EVENTS.DELETE, { user: sanitizeUser(deletedUser) });
+  await emitAdminUserDeleted({ strapi }, deletedUser);
 
   return deletedUser;
 };
@@ -199,9 +213,13 @@ const deleteByIds = async (ids: any) => {
 
   await removeFromEEDisabledUsersList(ids);
 
-  strapi.eventHub.emit('user.delete', {
+  strapi.eventHub.emit(LEGACY_USER_EVENTS.DELETE, {
     users: deletedUsers.map((deletedUser) => sanitizeUser(deletedUser)),
   });
+
+  for (const deletedUser of deletedUsers) {
+    await emitAdminUserDeleted({ strapi }, deletedUser);
+  }
 
   return deletedUsers;
 };

@@ -1,17 +1,27 @@
-// TODO: find a better naming convention for the file that was an index file before
-import { useAIAvailability } from '@strapi/admin/strapi-admin/ee';
 import { render, screen, waitFor } from '@tests/utils';
 
-jest.mock('@strapi/admin/strapi-admin/ee', () => ({
-  ...jest.requireActual('@strapi/admin/strapi-admin/ee'),
-  useAIAvailability: jest.fn(),
-}));
-
+import { useSettings } from '../../../legacy/hooks/useSettings';
 import { SettingsPage } from '../SettingsPage';
+
+// `useSettings` is mocked for every admin test (see `admin/tests/setup.ts`).
+const mockSettings = (aiMetadataAvailable: boolean) => {
+  (useSettings as jest.Mock).mockReturnValue({
+    isLoading: false,
+    isError: false,
+    data: {
+      sizeOptimization: true,
+      responsiveDimensions: true,
+      autoOrientation: true,
+      aiMetadata: true,
+      aiMetadataAvailable,
+    },
+    error: null,
+  });
+};
 
 describe('SettingsPage', () => {
   beforeEach(() => {
-    (useAIAvailability as jest.Mock).mockReturnValue(false);
+    mockSettings(false);
   });
 
   it('renders', async () => {
@@ -41,8 +51,8 @@ describe('SettingsPage', () => {
     expect(getByRole('checkbox', { name: 'Auto orientation' })).toBeChecked();
   });
 
-  it('shows AI metadata section when AI is available', async () => {
-    (useAIAvailability as jest.Mock).mockReturnValue(true);
+  it('shows AI metadata section when an AI metadata provider is registered', async () => {
+    mockSettings(true);
 
     const { queryByText } = render(<SettingsPage />);
 
@@ -57,8 +67,8 @@ describe('SettingsPage', () => {
     ).toBeInTheDocument();
   });
 
-  it('hides AI metadata section when AI is not available', async () => {
-    (useAIAvailability as jest.Mock).mockReturnValue(false);
+  it('hides AI metadata section when no AI metadata provider is registered', async () => {
+    mockSettings(false);
 
     const { queryByRole, queryByText } = render(<SettingsPage />);
 

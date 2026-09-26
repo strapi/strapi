@@ -1,31 +1,16 @@
 import { useEffect } from 'react';
 
 import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
-import { Box, IconButton, LinkButton, Typography } from '@strapi/design-system';
-import { ArrowsOut } from '@strapi/icons';
+import { Flex, IconButton, LinkButton, Typography } from '@strapi/design-system';
+import { ChevronUp } from '@strapi/icons';
 import { isAfter, isValid, subDays } from 'date-fns';
 import { useIntl } from 'react-intl';
-import { styled } from 'styled-components';
 
 import { useGetLicenseTrialTimeLeftQuery } from '../../src/services/admin';
+import { RESPONSIVE_DEFAULT_SPACING } from '../constants/theme';
 import { useScopedPersistentState } from '../hooks/usePersistentState';
 
 import { DismissibleBanner } from './DismissibleBanner';
-
-/**
- * Unlike `DismissibleBanner`'s own close button, this has no banner box left to
- * anchor to once dismissed (the banner unmounts entirely), so it stays pinned
- * to the viewport instead.
- */
-const FixedButtonWrapper = styled(Box)`
-  position: fixed;
-  display: flex;
-  flex-direction: column;
-  z-index: 1;
-  align-items: flex-end;
-  top: 9px;
-  right: 16px;
-`;
 
 const Banner = ({
   isTrialEndedRecently,
@@ -167,8 +152,15 @@ const UpsellBanner = () => {
 
   if (isDismissed) {
     return (
-      <FixedButtonWrapper>
+      <Flex
+        justifyContent="flex-end"
+        paddingTop={1}
+        paddingBottom={1}
+        paddingLeft={RESPONSIVE_DEFAULT_SPACING}
+        paddingRight={RESPONSIVE_DEFAULT_SPACING}
+      >
         <IconButton
+          variant="ghost"
           withTooltip={false}
           label={formatMessage({
             id: 'app.components.UpsellBanner.reopen',
@@ -176,9 +168,9 @@ const UpsellBanner = () => {
           })}
           onClick={handleReopen}
         >
-          <ArrowsOut />
+          <ChevronUp />
         </IconButton>
-      </FixedButtonWrapper>
+      </Flex>
     );
   }
 

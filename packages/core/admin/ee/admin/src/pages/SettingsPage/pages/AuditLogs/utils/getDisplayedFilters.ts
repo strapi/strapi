@@ -5,6 +5,7 @@ import { GetUsers } from '../../../../../../../../shared/contracts/audit-logs';
 import { ComboboxFilter, ComboboxFilterProps } from '../components/ComboboxFilter';
 
 import { actionTypes, getDefaultMessage } from './getActionTypesDefaultMessages';
+import { isLegacyAction } from './legacyActions';
 
 type UsersFilterProps = Pick<ComboboxFilterProps, 'loading' | 'hasMoreItems' | 'onLoadMore'>;
 
@@ -45,16 +46,19 @@ export const getDisplayedFilters = ({
       }),
       name: 'action',
       operators,
-      options: (Object.keys(actionTypes) as (keyof typeof actionTypes)[]).map((action) => ({
-        label: formatMessage(
-          {
-            id: `Settings.permissions.auditLogs.${action}`,
-            defaultMessage: getDefaultMessage(action),
-          },
-          { model: undefined }
-        ),
-        value: action,
-      })),
+      // Legacy keys stay in actionTypes to label stored rows; the new key filters both
+      options: (Object.keys(actionTypes) as (keyof typeof actionTypes)[])
+        .filter((action) => !isLegacyAction(action))
+        .map((action) => ({
+          label: formatMessage(
+            {
+              id: `Settings.permissions.auditLogs.${action}`,
+              defaultMessage: getDefaultMessage(action),
+            },
+            { model: undefined }
+          ),
+          value: action,
+        })),
       type: 'enumeration',
     },
     {

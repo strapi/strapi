@@ -352,6 +352,11 @@ export default {
        */
       if (sourceModelType === 'contentType') {
         where.document_id = id;
+
+        const sourcePublishedAt = getPublishedAtClause(status, sourceUid);
+        if (!isEmpty(sourcePublishedAt)) {
+          where.published_at = sourcePublishedAt;
+        }
       } else {
         where.id = id;
       }

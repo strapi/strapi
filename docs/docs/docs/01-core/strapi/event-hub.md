@@ -54,7 +54,7 @@ type UnsubscribeCallback = () => void;
 type Subscribe = (subscriber: Subscriber) => UnsubscribeCallback;
 
 // Add a subscriber
-const unsubcribe = strapi.eventHub.subscribe((name: string, ...args: any[]) => {
+const unsubscribe = strapi.eventHub.subscribe((name: string, ...args: any[]) => {
   // Write your subscriber logic here
 });
 
@@ -76,7 +76,7 @@ const subscriber: Subscriber = (name, ...args) => {};
 strapi.eventHub.subscribe(subscriber);
 
 // Use its reference to remove it
-strapi.eventHub.unsubcribe(subscriber);
+strapi.eventHub.unsubscribe(subscriber);
 ```
 
 ### Listening to a single event

@@ -1,10 +1,11 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState, useMemo } from 'react';
 
 import {
   Badge,
   Box,
   Flex,
   IconButton,
+  Menu,
   ScrollArea,
   SubNav as DSSubNav,
   Typography,
@@ -20,6 +21,7 @@ import {
 } from '../constants/theme';
 
 import { tours } from './GuidedTour/Tours';
+import { SubNavFolder } from './SubNavFolder';
 
 const MainSubNav = styled(DSSubNav)<{ $isFullPage?: boolean }>`
   width: 100%;
@@ -55,7 +57,7 @@ const Main = ({
   </MainSubNav>
 );
 
-const StyledLink = styled(NavLink)`
+const StyledLink = styled(NavLink)<{ $depth?: number }>`
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -63,6 +65,11 @@ const StyledLink = styled(NavLink)`
   height: 32px;
 
   color: ${({ theme }) => theme.colors.neutral800};
+
+  & > div {
+    padding-left: ${({ theme, $depth = 0 }) =>
+      `calc(${$depth} * ${theme.spaces[6]} + ${theme.spaces[3]})`};
+  }
 
   &.active > div {
     ${({ theme }) => {
@@ -95,35 +102,53 @@ const StyledLink = styled(NavLink)`
   }
 `;
 
+const LinkBullet = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 16px;
+
+  &::before {
+    content: '';
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: currentColor;
+  }
+`;
+
 const Link = (
-  props: Omit<React.ComponentProps<typeof StyledLink>, 'label'> & {
-    label: React.ReactNode;
+  props: Omit<React.ComponentProps<typeof StyledLink>, 'label' | '$depth'> & {
     endAction?: React.ReactNode;
     handleClick?: () => void;
+    label: React.ReactNode;
+    depth?: number;
+    bulleted?: boolean;
   }
 ) => {
-  const { label, endAction, handleClick, ...rest } = props;
+  const { label, endAction, handleClick, depth, bulleted = false, ...rest } = props;
 
   return (
-    <StyledLink {...rest} onClick={handleClick}>
+    <StyledLink {...rest} $depth={depth} onClick={handleClick}>
       <Box
         width={'100%'}
-        paddingLeft={3}
         paddingRight={3}
         paddingTop={{ initial: 1, large: 0 }}
         paddingBottom={{ initial: 1, large: 0 }}
         borderRadius={1}
       >
         <Flex justifyContent="space-between" width="100%" gap={{ initial: 2, large: 1 }}>
-          <Typography
-            tag="div"
-            lineHeight="32px"
-            width={{ initial: '80dvw', medium: '100%' }}
-            overflow="hidden"
-            style={{ textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-          >
-            {label}
-          </Typography>
+          <Flex gap={2} flex="1" minWidth="0" alignItems="center">
+            {bulleted && <LinkBullet aria-hidden />}
+            <Typography
+              tag="div"
+              lineHeight="32px"
+              overflow="hidden"
+              style={{ textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}
+            >
+              {label}
+            </Typography>
+          </Flex>
           <Flex gap={2}>{endAction}</Flex>
         </Flex>
       </Box>
@@ -205,6 +230,23 @@ const GuidedTourTooltip = ({
   }
 };
 
+type SectionMenuItem = {
+  startIcon?: React.ReactNode;
+  onSelect: () => void;
+  label: string;
+};
+
+type SectionLink = {
+  label: string;
+  onClick?: () => void;
+  menu?: SectionMenuItem[];
+  /**
+   * This suppresses the default behavior, where input focus returns to the "+" trigger when the popover closes.
+   * This allows popover actions to change the focused element without it being immediately undone.
+   */
+  suppressFocusCaptureOnMenuClose?: boolean;
+};
+
 const Section = ({
   label,
   children,
@@ -214,11 +256,72 @@ const Section = ({
 }: {
   label: string;
   children: React.ReactNode[];
-  link?: { label: string; onClick: () => void };
+  link?: SectionLink;
   sectionId?: string;
   badgeLabel?: string;
 }) => {
   const listId = useId();
+
+  // Used to track the selection of an item within the popover menu (as opposed to a menu dismissal via escape, click outside, etc.)
+  const popoverMenuItemClicked = useRef(false);
+
+  const linkButton = useMemo(() => {
+    if (!link) return;
+
+    if (!link.menu) {
+      return (
+        <GuidedTourTooltip sectionId={sectionId}>
+          <IconButton
+            onClick={link.onClick}
+            label={link.label}
+            variant="ghost"
+            withTooltip
+            size="XS"
+          >
+            <Plus />
+          </IconButton>
+        </GuidedTourTooltip>
+      );
+    }
+
+    const onCloseMenuAutoFocus = (event: Event): void => {
+      // If the result of a popover menu close deliberately shifts focus, the default Radix behavior (immediately restore focus on the popover's trigger element when the popover closes) would compete.
+      if (link.suppressFocusCaptureOnMenuClose && popoverMenuItemClicked.current) {
+        event.preventDefault();
+      }
+
+      popoverMenuItemClicked.current = false;
+    };
+
+    return (
+      <GuidedTourTooltip sectionId={sectionId}>
+        <Menu.Root>
+          <Menu.Trigger
+            label={link.label}
+            tag={IconButton}
+            icon={<Plus />}
+            variant="ghost"
+            endIcon={null}
+            size="XS"
+          />
+          <Menu.Content onCloseAutoFocus={onCloseMenuAutoFocus} zIndex={2}>
+            {link.menu.map((item) => {
+              const onSelectMenuItem = () => {
+                popoverMenuItemClicked.current = true;
+                item.onSelect();
+              };
+
+              return (
+                <Menu.Item onSelect={onSelectMenuItem} startIcon={item.startIcon} key={item.label}>
+                  {item.label}
+                </Menu.Item>
+              );
+            })}
+          </Menu.Content>
+        </Menu.Root>
+      </GuidedTourTooltip>
+    );
+  }, [link, sectionId]);
 
   return (
     <Flex direction="column" alignItems="stretch" gap={2}>
@@ -233,33 +336,17 @@ const Section = ({
         }}
       >
         <Flex position="relative" justifyContent="space-between" gap={2}>
-          <Flex>
-            <Box>
-              <Typography variant="sigma" textColor="neutral600">
-                {label}
-              </Typography>
-            </Box>
-          </Flex>
-          <Flex gap={1}>
+          <Flex gap={2} alignItems="center" minWidth={0}>
+            <Typography variant="sigma" textColor="neutral600">
+              {label}
+            </Typography>
             {badgeLabel && (
               <Badge backgroundColor="neutral150" textColor="neutral600">
                 {badgeLabel}
               </Badge>
             )}
-            {link && (
-              <GuidedTourTooltip sectionId={sectionId}>
-                <IconButton
-                  label={link.label}
-                  variant="ghost"
-                  withTooltip
-                  onClick={link.onClick}
-                  size="XS"
-                >
-                  <Plus />
-                </IconButton>
-              </GuidedTourTooltip>
-            )}
           </Flex>
+          <Flex gap={1}>{linkButton}</Flex>
         </Flex>
       </Box>
       <Flex
@@ -395,5 +482,6 @@ export const SubNav = {
   Sections,
   Section,
   SubSection,
+  Folder: SubNavFolder,
   PageWrapper,
 };

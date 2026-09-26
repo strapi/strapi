@@ -58,7 +58,7 @@ interface DocumentRBACContextValue {
 ```
 
 :::note
-Because the `useRBAC` hook fetches data from the API to check against `conditions` of a permission, we optionally have the `isLoading` returned incase a component needs to await this.
+Because the `useRBAC` hook fetches data from the API to check against `conditions` of a permission, we optionally have the `isLoading` returned in case a component needs to await this.
 :::
 
 Using all this information, we can disabled & hide fields in the application based on the user's permissions.

@@ -26,19 +26,18 @@ async function fetchImageAsBlob(
 }
 
 /**
- * Builds FormData from an array of input files by fetching each image
+ * Fetches every input file as a Blob, in order. Sequential on purpose (same as before).
  */
-export async function buildFormDataFromFiles(
+export async function fetchImagesAsBlobs(
   files: InputFile[],
   serverAbsoluteUrl: string,
   logger: Core.Strapi['log']
-): Promise<FormData> {
-  const formData = new FormData();
+): Promise<Blob[]> {
+  const blobs: Blob[] = [];
 
   for (const file of files) {
-    const blob = await fetchImageAsBlob(file, serverAbsoluteUrl, logger);
-    formData.append('files', blob);
+    blobs.push(await fetchImageAsBlob(file, serverAbsoluteUrl, logger));
   }
 
-  return formData;
+  return blobs;
 }

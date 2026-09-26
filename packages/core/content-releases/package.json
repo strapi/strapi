@@ -1,6 +1,6 @@
 {
   "name": "@strapi/content-releases",
-  "version": "5.54.0",
+  "version": "5.55.1",
   "description": "Strapi plugin for organizing and releasing content",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -57,6 +57,7 @@
     "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",
     "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
     "test:front:watch:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
+    "test:ts:back": "run -T tsc -p server/tsconfig.json",
     "test:ts:front": "run -T tsc -p admin/tsconfig.json",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
@@ -64,11 +65,11 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
-    "@strapi/database": "5.54.0",
+    "@strapi/database": "5.55.1",
     "@strapi/design-system": "2.2.4",
     "@strapi/icons": "2.2.4",
-    "@strapi/types": "5.54.0",
-    "@strapi/utils": "5.54.0",
+    "@strapi/types": "5.55.1",
+    "@strapi/utils": "5.55.1",
     "date-fns": "2.30.0",
     "date-fns-tz": "2.0.1",
     "formik": "2.4.9",
@@ -79,9 +80,9 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "5.54.0",
-    "@strapi/admin-test-utils": "5.54.0",
-    "@strapi/content-manager": "5.54.0",
+    "@strapi/admin": "5.55.1",
+    "@strapi/admin-test-utils": "5.55.1",
+    "@strapi/content-manager": "5.55.1",
     "@testing-library/dom": "10.4.1",
     "@testing-library/jest-dom": "6.9.1",
     "@testing-library/react": "16.3.2",
@@ -102,8 +103,8 @@
   "peerDependencies": {
     "@strapi/admin": "^5.0.0",
     "@strapi/content-manager": "^5.0.0",
-    "react": "^17.0.0 || ^18.0.0",
-    "react-dom": "^17.0.0 || ^18.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
     "react-router-dom": "^6.30.3",
     "styled-components": "^6.0.0"
   },

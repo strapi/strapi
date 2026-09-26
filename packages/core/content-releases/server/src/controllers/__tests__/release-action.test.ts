@@ -90,7 +90,7 @@ describe('Release Action controller', () => {
         eventHub: {
           emit: jest.fn(),
         },
-      };
+      } as unknown as typeof global.strapi;
 
       jest.clearAllMocks();
     });

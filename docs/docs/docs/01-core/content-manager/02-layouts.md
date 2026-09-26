@@ -102,7 +102,7 @@ To handle the CM specific inputs, the EditView domain has its own `InputRenderer
 
 ### ListView
 
-Because the list view is essentailly a giant table, its data-structure is considerably simpler than the edit view:
+Because the list view is essentially a giant table, its data-structure is considerably simpler than the edit view:
 
 ```ts
 interface ListFieldLayout {

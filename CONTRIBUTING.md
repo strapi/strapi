@@ -14,7 +14,11 @@ Larger chunks of changes to Strapi that might affect many users require a thorou
 
 The Request For Comments process will help us create consensus among the core team and include as much feedback as possible from the community for these upcoming changes.
 
-A Request For Comments has to be created on the [strapi/rfcs](https://github.com/strapi/rfcs) repository.
+Requests For Comments are held in the [RFCs category of GitHub Discussions](https://github.com/strapi/strapi/discussions/categories/rfcs). Open a new discussion there describing the problem, the motivation and your proposed design. Listing the specific questions you'd like feedback on at the top helps reviewers focus.
+
+Please do not open a pull request containing an RFC document. Once an RFC has been discussed and approved, the core team may archive it in the [RFCs section of the contributor docs](./docs/docs/rfcs) as a record of the design decision.
+
+The [strapi/rfcs](https://github.com/strapi/rfcs) repository is no longer used for new proposals.
 
 ## Code of Conduct
 

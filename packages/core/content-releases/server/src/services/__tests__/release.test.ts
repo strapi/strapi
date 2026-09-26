@@ -102,6 +102,7 @@ global.strapi = {
 
 const mockUser = {
   id: 1,
+  documentId: 'user-1',
   username: 'user',
   email: 'user@strapi.io',
   firstname: 'John',

@@ -15,6 +15,10 @@ type FolderNode = Partial<Folder> & {
   children: FolderNode[];
 };
 
+type DeleteByIdsOptions = {
+  validateFiles?: (files: File[]) => Promise<void>;
+};
+
 const setPathIdAndPath = async (folder: Pick<Folder, 'parent'>) => {
   const { max } = await strapi.db
     .queryBuilder(FOLDER_MODEL_UID)
@@ -63,7 +67,7 @@ const create = async (
  * @param ids ids of the folders to delete
  * @returns {Promise<Object[]>}
  */
-const deleteByIds = async (ids: number[] = []) => {
+const deleteByIds = async (ids: number[] = [], { validateFiles }: DeleteByIdsOptions = {}) => {
   const folders = await strapi.db.query(FOLDER_MODEL_UID).findMany({ where: { id: { $in: ids } } });
   if (folders.length === 0) {
     return {
@@ -84,6 +88,10 @@ const deleteByIds = async (ids: number[] = []) => {
       ]),
     },
   });
+
+  // A folder deletion cascades to every file in its subtree. Let callers enforce
+  // request-scoped permissions against the complete set before the first destructive action.
+  await validateFiles?.(filesToDelete);
 
   await Promise.all(filesToDelete.map((file: File) => getService('upload').remove(file)));
 

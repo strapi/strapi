@@ -127,7 +127,7 @@ data for the API.
 
 The API to update the entity expects relations to be categorised into two groups, a `connect` array and `disconnect` array.
 You could do this as the user interacts with the input but we found this to be confusing and then involved us managing three
-different arrays which makes the code more complex. Instead, because the browser doesn't really care about whats new and removed
+different arrays which makes the code more complex. Instead, because the browser doesn't really care about what's new and removed
 and we have a copy of the slice of data we're mutating from the server we can run a small diff algorithm to determine which
 relations have been connected and which have been disconnected. Returning an object like so:
 
@@ -159,7 +159,7 @@ would otherwise have a negative impact on the overall performance of the content
 
 ## useRelation() hook
 
-This hook takes care of data-fetching and normalizes results relations aswell as search-results.
+This hook takes care of data-fetching and normalizes results relations as well as search-results.
 
 ```ts
 const { relations: RelationResults, search: RelationResults, searchFor } = useRelation(reactQueryCacheKey: Array<string | object>, options: Options);
@@ -213,7 +213,7 @@ type RelationResult = {
 #### `relations`
 
 `relations` refers to a [inifinite-query return type](https://tanstack.com/query/v4/docs/react/guides/infinite-queries) from react-query. It exposes paginated relational data
-aswell as methods to check if there are more pages or fetch more paginated results. Relations for a given field are fetched as soon as the hook is called.
+as well as methods to check if there are more pages or fetch more paginated results. Relations for a given field are fetched as soon as the hook is called.
 
 #### `search`
 

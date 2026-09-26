@@ -1,5 +1,6 @@
 {
   "apiError.FileTooBig": "The file is too large to be uploaded. It exceeds the maximum request size allowed by the server.",
+  "apiError.FolderContainsUnauthorizedAssetsError": "The selected folders contain assets that you do not have permission to delete.",
   "assets.uploaded": "{number, plural, one {# asset} other {# assets}} uploaded successfully",
   "asset-details.title": "File details",
   "asset-details.description": "Displays file information and metadata",

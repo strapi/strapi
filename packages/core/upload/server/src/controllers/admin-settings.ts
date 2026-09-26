@@ -44,6 +44,12 @@ export default {
     // need to bound this override the config.
     const { concurrentUploadRequests = 1 } = strapi.config.get<Config>('plugin::upload');
 
-    ctx.body = { data: { ...data, concurrentUploadRequests } };
+    ctx.body = {
+      data: {
+        ...data,
+        concurrentUploadRequests,
+        aiMetadataAvailable: getService('aiMetadataProvider').hasProvider(),
+      },
+    };
   },
 };

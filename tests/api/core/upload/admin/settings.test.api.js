@@ -116,6 +116,7 @@ describe('Settings', () => {
           sizeOptimization: true,
           responsiveDimensions: true,
           aiMetadata: true,
+          aiMetadataAvailable: false,
           // Read-only echo of the app config, defaulting to 1 (sequential).
           concurrentUploadRequests: 1,
         },
@@ -181,6 +182,7 @@ describe('Settings', () => {
         data: {
           sizeOptimization: true,
           responsiveDimensions: true,
+          aiMetadataAvailable: false,
           // Read-only echo of the app config, appended to every GET response.
           concurrentUploadRequests: 1,
         },

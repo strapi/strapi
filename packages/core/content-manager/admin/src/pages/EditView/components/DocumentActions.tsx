@@ -31,17 +31,17 @@ import { Create, Publish } from '../../../../../shared/contracts/collection-type
 import { PUBLISHED_AT_ATTRIBUTE_NAME } from '../../../constants/attributes';
 import { SINGLE_TYPES } from '../../../constants/collections';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
-import { useDoc, useDocument } from '../../../hooks/useDocument';
+import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
 import { useDocumentContext } from '../../../hooks/useDocumentContext';
 import { usePreviewContext } from '../../../preview/pages/Preview';
 import { CLONE_PATH, LIST_PATH } from '../../../router';
 import {
   useGetDraftRelationCountQuery,
-  useUpdateDocumentMutation,
+  useLazyGetDocumentQuery,
 } from '../../../services/documents';
 import { isBaseQueryError, buildValidParams } from '../../../utils/api';
-import { getIn, isObject, setIn } from '../../../utils/objects';
+import { getIn, isObject } from '../../../utils/objects';
 import { getTranslation } from '../../../utils/translations';
 import { AnyData, handleInvisibleAttributes } from '../utils/data';
 import {
@@ -54,7 +54,11 @@ import {
 } from '../utils/draftRelationCounts';
 import { getEditViewShortcut } from '../utils/keyboardShortcuts';
 
-import { useRelationModal } from './FormInputs/Relations/RelationModal';
+import {
+  isAnyRelationModalOpen,
+  useRelationModal,
+  type PendingConnectPatch,
+} from './FormInputs/Relations/RelationModal';
 
 import type { DocumentActionComponent } from '../../../content-manager';
 
@@ -145,30 +149,50 @@ interface DocumentActionsProps {
   actions: Action[];
 }
 
-const connectRelationToParent = (
-  parentDataToUpdate: AnyData,
+interface RelationConnectPatch {
+  relationValue: AnyData;
+  componentUIDPath?: string;
+}
+
+/**
+ * Builds the local-form patch needed to connect a newly created/published relation into the
+ * parent's own relation field, given that field's CURRENT (possibly unsaved) live value.
+ *
+ * This only ever touches the parent's in-memory form state (via `setParentFormValue`, sourced
+ * from the parent's own `useForm(...).onChange`) — it deliberately never persists the parent
+ * document to the server, so connecting a relation on the fly can't silently save unrelated
+ * unsaved edits made elsewhere in the parent's form.
+ */
+const buildRelationConnectPatch = (
+  currentFieldValue: unknown,
   fieldToConnect: string,
   data: Create.Response['data'] | Publish.Response['data'],
+  status: 'draft' | 'published' | undefined,
   fieldToConnectUID?: string
-) => {
+): RelationConnectPatch | null => {
+  // Spread the freshly created/published document first so its own mainField (e.g. `name`) and
+  // other attributes — including its real numeric `id`, not just `documentId` — are available.
+  // Without the real `id`, the relation field's "already connected" search filter (which keys off
+  // `rel.id`) can't recognize this item, so it would stay selectable in the relation combobox
+  // even after being connected. Keeping the label/status render correct needs the mainField too,
+  // which is why we still spread the whole document rather than only picking id/documentId/locale.
   const relationToConnect = {
-    id: data.documentId,
+    ...data,
     documentId: data.documentId,
     locale: data.locale,
+    ...(status ? { status } : {}),
   };
   /*
-   * Check if the fieldToConnect is already present in the parentDataToUpdate.
-   * This happens in particular when in the parentDocument you have created
-   * a new component without saving.
+   * Check if the fieldToConnect already has a value. This happens in particular when in the
+   * parent document you have created a new component without saving.
    */
-  const fieldValue = getIn<unknown>(parentDataToUpdate, fieldToConnect);
-  const relationFieldValue = isObject(fieldValue) ? fieldValue : undefined;
+  const relationFieldValue = isObject(currentFieldValue) ? currentFieldValue : undefined;
   const isFieldPresent = relationFieldValue !== undefined;
   const fieldPath = fieldToConnect.split('.');
   const fieldName = fieldPath.at(-1);
 
   if (!fieldName) {
-    return parentDataToUpdate;
+    return null;
   }
 
   const parentPath = fieldPath.slice(0, -1).join('.');
@@ -194,13 +218,12 @@ const connectRelationToParent = (
         connect,
         disconnect: [],
       };
-  const dataWithRelation = setIn(parentDataToUpdate, fieldToConnect, relationValue);
 
-  if (!isFieldPresent && fieldToConnectUID && parentPath) {
-    return setIn(dataWithRelation, `${parentPath}.__component`, fieldToConnectUID);
-  }
-
-  return dataWithRelation;
+  return {
+    relationValue,
+    componentUIDPath:
+      !isFieldPresent && fieldToConnectUID && parentPath ? `${parentPath}.__component` : undefined,
+  };
 };
 
 const DocumentActions = ({ actions }: DocumentActionsProps) => {
@@ -659,26 +682,6 @@ const transformData = (data: unknown): unknown => {
 
 const transformDocumentData = (data: object): AnyData => transformData(data) as AnyData;
 
-const prepareParentDataForRelationUpdate = (
-  parentFormValues: AnyData | undefined,
-  fallbackParentFormValues: AnyData | undefined,
-  options: Parameters<typeof handleInvisibleAttributes>[1]
-) => {
-  const parentDataToUpdate = parentFormValues ?? fallbackParentFormValues;
-
-  if (!parentDataToUpdate) {
-    return parentDataToUpdate;
-  }
-
-  const { data } = handleInvisibleAttributes(transformDocumentData(parentDataToUpdate), {
-    ...options,
-    // The live snapshot can omit saved invisible fields, so retain the parent's saved initial values.
-    initialValues: fallbackParentFormValues,
-  });
-
-  return data;
-};
-
 /* -------------------------------------------------------------------------------------------------
  * DocumentActionComponents
  * -----------------------------------------------------------------------------------------------*/
@@ -708,6 +711,7 @@ const PublishAction: DocumentActionComponent = ({
   );
   const { publish, isLoading } = useDocumentActions();
   const onPreview = usePreviewContext('PublishAction', (state) => state.onPreview, false);
+  const [fetchDraftDocument] = useLazyGetDocumentQuery();
   const [countDraftRelations, { isError: isErrorDraftRelations }] = useGetDraftRelationCountQuery();
   const [localDraftRelationCounts, setLocalDraftRelationCounts] =
     React.useState<DraftRelationCounts>(EMPTY_DRAFT_RELATION_COUNTS);
@@ -732,11 +736,6 @@ const PublishAction: DocumentActionComponent = ({
   // need to discriminate if the publish is coming from a relation modal or in the edit view
   const relationContext = useRelationModal('PublishAction', () => true, false);
   const fromRelationModal = relationContext != undefined;
-  const isRelationModalOpen = useRelationModal(
-    'PublishAction',
-    (state) => state.state.isModalOpen,
-    false
-  );
   const publishConfirmScope: PublishConfirmDialogScope = fromRelationModal
     ? 'relation-modal'
     : onPreview
@@ -759,18 +758,20 @@ const PublishAction: DocumentActionComponent = ({
     (state) => state.state.getParentFormValues,
     false
   );
+  const setParentFormValue = useRelationModal(
+    'PublishAction',
+    (state) => state.state.setParentFormValue,
+    false
+  );
   const documentHistory = useRelationModal(
     'PublishAction',
     (state) => state.state.documentHistory,
     false
   );
-  const rootDocumentMeta = useRelationModal('PublishAction', (state) => state.rootDocumentMeta);
 
   const dispatchGuidedTour = useGuidedTour('PublishAction', (s) => s.dispatch);
 
   const { currentDocumentMeta } = useDocumentContext('PublishAction');
-  const [updateDocumentMutation] = useUpdateDocumentMutation();
-  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   const idToPublish = currentDocumentMeta.documentId || id;
 
@@ -843,17 +844,6 @@ const PublishAction: DocumentActionComponent = ({
       window.removeEventListener('focus', handleWindowFocus);
     };
   }, [fetchDraftRelationsCount]);
-  const parentDocumentMetaToUpdate = documentHistory?.at(-2) ?? rootDocumentMeta;
-  const parentDocumentData = useDocument(
-    {
-      documentId: parentDocumentMetaToUpdate?.documentId,
-      model: parentDocumentMetaToUpdate?.model,
-      collectionType: parentDocumentMetaToUpdate?.collectionType,
-      params: parentDocumentMetaToUpdate?.params,
-    },
-    { skip: !parentDocumentMetaToUpdate }
-  );
-  const { getInitialFormValues } = useDoc();
 
   const isDocumentPublished =
     (document?.[PUBLISHED_AT_ATTRIBUTE_NAME] ||
@@ -932,6 +922,12 @@ const PublishAction: DocumentActionComponent = ({
       // Reset form with current values as new initial values (clears errors/submitting and sets modified to false)
       if ('data' in res) {
         resetForm(getValues());
+        // This document is now persisted with whatever local connect patches were merged into
+        // it, if any (see the pendingConnects explanation below) — they'd be stale from here on.
+        dispatch?.({
+          type: 'CLEAR_PENDING_CONNECTS',
+          payload: { documentMeta: { model, documentId: res.data.documentId } },
+        });
         dispatchGuidedTour({
           type: 'set_completed_actions',
           payload: [GUIDED_TOUR_REQUIRED_ACTIONS.contentManager.createContent],
@@ -959,71 +955,63 @@ const PublishAction: DocumentActionComponent = ({
           };
 
           /*
-           * Update, if needed, the parent relation with the newly published document.
-           * Check if in history we have the parent relation otherwise use the
-           * rootDocument
+           * Connect the newly published document to the parent's relation field, purely in local
+           * form state — never on the server. This must not persist the parent document,
+           * otherwise publishing here would silently save any of the parent's other unrelated
+           * unsaved edits too.
+           *
+           * The parent is either the root document that originally opened the modal (its own Form
+           * stays mounted for the whole session, so it's safe to write into directly) or a nested
+           * document still further up the modal's documentHistory (whose Form is the SAME shared
+           * instance the modal reuses at every level, wholesale-replaced on every navigation — a
+           * direct write there would land on the wrong document and be gone the moment we
+           * navigate). For the latter the patch is queued on GO_TO_CREATED_RELATION below instead,
+           * to be re-applied once that document becomes current again.
            */
-          if (
-            fieldToConnect &&
-            documentHistory &&
-            (parentDocumentMetaToUpdate.documentId ||
-              parentDocumentMetaToUpdate.collectionType === SINGLE_TYPES)
-          ) {
-            const fallbackParentFormValues =
-              parentDocumentMetaToUpdate.collectionType === SINGLE_TYPES
-                ? getInitialFormValues()
-                : parentDocumentData.getInitialFormValues();
-            const parentDataToUpdate = prepareParentDataForRelationUpdate(
-              getParentFormValues?.(),
-              fallbackParentFormValues,
-              {
-                schema: parentDocumentData.schema,
-                components: parentDocumentData.components,
-              }
+          const isNestedParent = Array.isArray(documentHistory) && documentHistory.length >= 2;
+
+          let connectPatch: PendingConnectPatch | undefined;
+
+          if (fieldToConnect && (setParentFormValue || isNestedParent)) {
+            const currentFieldValue = getIn<unknown>(getParentFormValues?.(), fieldToConnect);
+            // Publishing a brand-new document creates two rows sharing one documentId — a draft
+            // and a published one, each with its own numeric id. The parent's relation search
+            // (and its "already connected" filter) identifies items by the draft row's id, so
+            // connecting with the publish response's id would leave this relation still
+            // selectable there. Fetch the draft row to get the id the search actually expects.
+            const draftDocument = await fetchDraftDocument({
+              collectionType,
+              model,
+              documentId: res.data.documentId,
+              params: currentDocumentMeta.params,
+            });
+            const patch = buildRelationConnectPatch(
+              currentFieldValue,
+              fieldToConnect,
+              draftDocument.data?.data ?? res.data,
+              'published',
+              fieldToConnectUID
             );
-            const metaDocumentToUpdate = documentHistory.at(-2) ?? rootDocumentMeta;
 
-            if (parentDataToUpdate) {
-              const dataToUpdate = connectRelationToParent(
-                parentDataToUpdate,
+            if (patch && isNestedParent) {
+              connectPatch = {
                 fieldToConnect,
-                res.data,
-                fieldToConnectUID
-              );
+                relationValue: patch.relationValue,
+                componentUIDPath: patch.componentUIDPath,
+                componentUID: patch.componentUIDPath ? fieldToConnectUID : undefined,
+              };
+            } else if (patch && setParentFormValue) {
+              setParentFormValue(fieldToConnect, patch.relationValue);
 
-              try {
-                const updateRes = await updateDocumentMutation({
-                  collectionType: metaDocumentToUpdate.collectionType,
-                  model: metaDocumentToUpdate.model,
-                  documentId:
-                    metaDocumentToUpdate.collectionType !== SINGLE_TYPES
-                      ? metaDocumentToUpdate.documentId
-                      : undefined,
-                  params: metaDocumentToUpdate.params,
-                  data: dataToUpdate,
-                });
-
-                if ('error' in updateRes) {
-                  toggleNotification({ type: 'danger', message: formatAPIError(updateRes.error) });
-                  return;
-                }
-              } catch (err) {
-                toggleNotification({
-                  type: 'danger',
-                  message: formatMessage({
-                    id: 'notification.error',
-                    defaultMessage: 'An error occurred',
-                  }),
-                });
-
-                throw err;
+              if (patch.componentUIDPath) {
+                setParentFormValue(patch.componentUIDPath, fieldToConnectUID);
               }
             }
           }
 
           dispatch({
             type: 'GO_TO_CREATED_RELATION',
-            payload: { document: newRelation, shouldBypassConfirmation: true },
+            payload: { document: newRelation, shouldBypassConfirmation: true, connectPatch },
           });
         }
       } else if (
@@ -1095,7 +1083,9 @@ const PublishAction: DocumentActionComponent = ({
 
       e.preventDefault();
 
-      if (!fromRelationModal && isRelationModalOpen) {
+      // When a relation modal is open, only its own PublishAction instance (fromRelationModal)
+      // should react to the shortcut — otherwise the background entry publishes at the same time.
+      if (!fromRelationModal && isAnyRelationModalOpen()) {
         return;
       }
 
@@ -1120,7 +1110,6 @@ const PublishAction: DocumentActionComponent = ({
     fromRelationModal,
     getFreshDraftRelationCounts,
     isDisabled,
-    isRelationModalOpen,
     performPublish,
     publishConfirmScope,
     schema?.options?.draftAndPublish,
@@ -1241,7 +1230,6 @@ const UpdateAction: DocumentActionComponent = ({
   } = useDocumentContext('UpdateAction');
   const [{ rawQuery }] = useQueryParams();
   const onPreview = usePreviewContext('UpdateAction', (state) => state.onPreview, false);
-  const { getInitialFormValues } = useDoc();
 
   const isSubmitting = useForm('UpdateAction', ({ isSubmitting }) => isSubmitting);
   const modified = useForm('UpdateAction', ({ modified }) => modified);
@@ -1276,27 +1264,19 @@ const UpdateAction: DocumentActionComponent = ({
     (state) => state.state.getParentFormValues,
     false
   );
+  const setParentFormValue = useRelationModal(
+    'UpdateAction',
+    (state) => state.state.setParentFormValue,
+    false
+  );
   const documentHistory = useRelationModal(
     'UpdateAction',
     (state) => state.state.documentHistory,
     false
   );
-  const rootDocumentMeta = useRelationModal('UpdateAction', (state) => state.rootDocumentMeta);
   const fromRelationModal = relationContext != undefined;
 
   const { currentDocumentMeta } = useDocumentContext('UpdateAction');
-  const [updateDocumentMutation] = useUpdateDocumentMutation();
-  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
-  const parentDocumentMetaToUpdate = documentHistory?.at(-2) ?? rootDocumentMeta;
-  const parentDocumentData = useDocument(
-    {
-      documentId: parentDocumentMetaToUpdate?.documentId,
-      model: parentDocumentMetaToUpdate?.model,
-      collectionType: parentDocumentMetaToUpdate?.collectionType,
-      params: parentDocumentMetaToUpdate?.params,
-    },
-    { skip: !parentDocumentMetaToUpdate }
-  );
   const { schema } = useDoc();
 
   const suitableSchema = fromRelationModal ? relationalModalSchema : schema;
@@ -1394,6 +1374,12 @@ const UpdateAction: DocumentActionComponent = ({
           setErrors(formatValidationErrors(res.error));
         } else {
           resetForm(latestValues);
+          // This document is now persisted with whatever local connect patches were merged into
+          // it, if any (see the pendingConnects explanation below) — they'd be stale from here on.
+          dispatch?.({
+            type: 'CLEAR_PENDING_CONNECTS',
+            payload: { documentMeta: { model, documentId } },
+          });
         }
       } else {
         const { data } = handleInvisibleAttributes(transformDocumentData(latestValues), {
@@ -1418,74 +1404,52 @@ const UpdateAction: DocumentActionComponent = ({
               params: currentDocumentMeta.params,
             };
             /*
-             * Update, if needed, the parent relation with the newly published document.
-             * Check if in history we have the parent relation otherwise use the
-             * rootDocument
+             * Connect the newly created document to the parent's relation field, purely in local
+             * form state — never on the server. This must not persist the parent document,
+             * otherwise saving here would silently save any of the parent's other unrelated
+             * unsaved edits too.
+             *
+             * The parent is either the root document that originally opened the modal (its own
+             * Form stays mounted for the whole session, so it's safe to write into directly) or a
+             * nested document still further up the modal's documentHistory (whose Form is the
+             * SAME shared instance the modal reuses at every level, wholesale-replaced on every
+             * navigation — a direct write there would land on the wrong document and be gone the
+             * moment we navigate). For the latter the patch is queued on GO_TO_CREATED_RELATION
+             * below instead, to be re-applied once that document becomes current again.
              */
-            if (
-              fieldToConnect &&
-              documentHistory &&
-              (parentDocumentMetaToUpdate.documentId ||
-                parentDocumentMetaToUpdate.collectionType === SINGLE_TYPES)
-            ) {
-              const fallbackParentFormValues =
-                parentDocumentMetaToUpdate.collectionType === SINGLE_TYPES
-                  ? getInitialFormValues()
-                  : parentDocumentData.getInitialFormValues();
-              const parentDataToUpdate = prepareParentDataForRelationUpdate(
-                getParentFormValues?.(),
-                fallbackParentFormValues,
-                {
-                  schema: parentDocumentData.schema,
-                  components: parentDocumentData.components,
-                }
+            const isNestedParent = Array.isArray(documentHistory) && documentHistory.length >= 2;
+
+            let connectPatch: PendingConnectPatch | undefined;
+
+            if (fieldToConnect && (setParentFormValue || isNestedParent)) {
+              const currentFieldValue = getIn<unknown>(getParentFormValues?.(), fieldToConnect);
+              const patch = buildRelationConnectPatch(
+                currentFieldValue,
+                fieldToConnect,
+                res.data,
+                hasDraftAndPublished ? 'draft' : undefined,
+                fieldToConnectUID
               );
 
-              if (parentDataToUpdate) {
-                const dataToUpdate = connectRelationToParent(
-                  parentDataToUpdate,
+              if (patch && isNestedParent) {
+                connectPatch = {
                   fieldToConnect,
-                  res.data,
-                  fieldToConnectUID
-                );
+                  relationValue: patch.relationValue,
+                  componentUIDPath: patch.componentUIDPath,
+                  componentUID: patch.componentUIDPath ? fieldToConnectUID : undefined,
+                };
+              } else if (patch && setParentFormValue) {
+                setParentFormValue(fieldToConnect, patch.relationValue);
 
-                try {
-                  const updateRes = await updateDocumentMutation({
-                    collectionType: parentDocumentMetaToUpdate.collectionType,
-                    model: parentDocumentMetaToUpdate.model,
-                    documentId:
-                      parentDocumentMetaToUpdate.collectionType !== SINGLE_TYPES
-                        ? parentDocumentMetaToUpdate.documentId
-                        : undefined,
-                    params: parentDocumentMetaToUpdate.params,
-                    data: {
-                      ...dataToUpdate,
-                    },
-                  });
-                  if ('error' in updateRes) {
-                    toggleNotification({
-                      type: 'danger',
-                      message: formatAPIError(updateRes.error),
-                    });
-                    return;
-                  }
-                } catch (err) {
-                  toggleNotification({
-                    type: 'danger',
-                    message: formatMessage({
-                      id: 'notification.error',
-                      defaultMessage: 'An error occurred',
-                    }),
-                  });
-
-                  throw err;
+                if (patch.componentUIDPath) {
+                  setParentFormValue(patch.componentUIDPath, fieldToConnectUID);
                 }
               }
             }
 
             dispatch({
               type: 'GO_TO_CREATED_RELATION',
-              payload: { document: createdRelation, shouldBypassConfirmation: true },
+              payload: { document: createdRelation, shouldBypassConfirmation: true, connectPatch },
             });
           } else {
             navigate(
@@ -1524,6 +1488,8 @@ const UpdateAction: DocumentActionComponent = ({
   handleUpdateRef.current = handleUpdate;
   const isDisabledRef = React.useRef(isDisabled);
   isDisabledRef.current = isDisabled;
+  const fromRelationModalRef = React.useRef(fromRelationModal);
+  fromRelationModalRef.current = fromRelationModal;
 
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -1532,6 +1498,12 @@ const UpdateAction: DocumentActionComponent = ({
       }
 
       e.preventDefault();
+
+      // When a relation modal is open, only its own UpdateAction instance (fromRelationModal)
+      // should react to the shortcut — otherwise the background entry saves at the same time.
+      if (!fromRelationModalRef.current && isAnyRelationModalOpen()) {
+        return;
+      }
 
       if (!isDisabledRef.current) {
         handleUpdateRef.current();
