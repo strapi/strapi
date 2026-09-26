@@ -115,7 +115,8 @@ export default {
       // The public_id differs — upload the new file first, then destroy the old.
       await upload(newFile, customConfig);
 
-      if (oldPublicId) {
+      const newPublicId = newFile.provider_metadata?.public_id;
+      if (oldPublicId && newPublicId !== oldPublicId) {
         try {
           await cloudinary.uploader.destroy(`${oldPublicId}`, {
             resource_type: (oldResourceType || 'image') as string,
