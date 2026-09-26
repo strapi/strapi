@@ -1,4 +1,4 @@
-import type { Core } from '@strapi/strapi';
+import { factories } from '@strapi/strapi';
 
 const allowedMediaTypes = [
   'image/*',
@@ -23,7 +23,7 @@ const deniedTypes = [
   'application/x-mach-binary',
 ];
 
-const config = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Plugin => ({
+export default factories.definePluginsConfig(() => ({
   'users-permissions': {
     config: {
       jwtManagement: 'refresh',
@@ -40,6 +40,4 @@ const config = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Plugin =>
       },
     },
   },
-});
-
-export default config;
+}));
