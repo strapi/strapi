@@ -1,0 +1,4 @@
+import type { Knex } from 'knex'; /** * Post-sync migration `{{name}}` * * Runs after Strapi's
+schema sync — new content-type columns already exist. */ export default { async up(knex: Knex) { //
+Example backfill: // await knex('articles') // .whereNull('slug') // .update({ slug:
+knex.raw("LOWER(REPLACE(title, ' ', '-'))") }); }, };
