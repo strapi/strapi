@@ -53,6 +53,9 @@ for (const filepath of paths) {
 
 const configuration: JSONRunnerConfiguration = { dry: true, cwd };
 
+import { register } from 'esbuild-register/dist/node';
+
+import { INTERNAL_RESOURCES_DIRECTORY } from '../../codemod-repository/constants';
 import { transformJSON } from '../json/transform';
 
 import type { JSONRunnerConfiguration, JSONTransform } from '../json';
@@ -65,6 +68,20 @@ describe('JSON Transform', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  test('hookMatcher allows shared TypeScript under resources/', async () => {
+    const codemodPath = codemodFullPath(codemodNoUpdate.path);
+
+    await transformJSON(codemodPath, paths, configuration);
+
+    const [{ hookMatcher }] = (register as jest.Mock).mock.calls[0];
+
+    expect(hookMatcher(codemodPath)).toBe(true);
+    expect(hookMatcher(path.join(INTERNAL_RESOURCES_DIRECTORY, 'utils', 'json-smoke.ts'))).toBe(
+      true
+    );
+    expect(hookMatcher(path.join('/tmp', 'unrelated-outside-resources.ts'))).toBe(false);
   });
 
   test('Codemods that return nothing are considered as "errored" state', async () => {
