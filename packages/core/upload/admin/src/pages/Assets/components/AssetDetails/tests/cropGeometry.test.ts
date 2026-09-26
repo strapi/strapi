@@ -1,4 +1,4 @@
-import { resolveCornerResize } from '../useCropImg';
+import { nextRotation, resolveCornerResize, rotateCropRect, sourceCropRect } from '../useCropImg';
 
 describe('resolveCornerResize', () => {
   describe('free resize (no aspect lock)', () => {
@@ -71,5 +71,94 @@ describe('resolveCornerResize', () => {
       expect(rect).toEqual({ x: 0, y: 0, width: 200, height: 100 });
       expect(rect.width / rect.height).toBe(2);
     });
+  });
+});
+
+describe('rotateCropRect', () => {
+  // A 100x60 image with a rect hugging the top-left, deliberately asymmetric on
+  // both axes so a wrong sign or a swapped axis cannot pass by coincidence.
+  const size = { width: 100, height: 60 };
+  const crop = { x: 10, y: 5, width: 30, height: 20 };
+
+  it('maps the rect into the swapped space on a right turn', () => {
+    // Top-left of the image lands top-right, so x is measured from the far edge.
+    expect(rotateCropRect(crop, 'right', size)).toEqual({
+      x: 60 - (5 + 20),
+      y: 10,
+      width: 20,
+      height: 30,
+    });
+  });
+
+  it('maps the rect into the swapped space on a left turn', () => {
+    expect(rotateCropRect(crop, 'left', size)).toEqual({
+      x: 5,
+      y: 100 - (10 + 30),
+      width: 20,
+      height: 30,
+    });
+  });
+
+  it('returns to the original rect after four turns in either direction', () => {
+    for (const direction of ['left', 'right'] as const) {
+      let rect = crop;
+      let current = size;
+
+      for (let turn = 0; turn < 4; turn += 1) {
+        rect = rotateCropRect(rect, direction, current);
+        current = { width: current.height, height: current.width };
+      }
+
+      expect(rect).toEqual(crop);
+      expect(current).toEqual(size);
+    }
+  });
+
+  it('is reversible by the opposite turn', () => {
+    const turned = rotateCropRect(crop, 'right', size);
+    const back = rotateCropRect(turned, 'left', { width: size.height, height: size.width });
+
+    expect(back).toEqual(crop);
+  });
+
+  it('keeps the rect inside the rotated bounds', () => {
+    const turned = rotateCropRect(crop, 'right', size);
+
+    expect(turned.x).toBeGreaterThanOrEqual(0);
+    expect(turned.y).toBeGreaterThanOrEqual(0);
+    expect(turned.x + turned.width).toBeLessThanOrEqual(size.height);
+    expect(turned.y + turned.height).toBeLessThanOrEqual(size.width);
+  });
+});
+
+describe('sourceCropRect', () => {
+  const size = { width: 100, height: 60 };
+  const crop = { x: 10, y: 5, width: 30, height: 20 };
+
+  it('is the identity when nothing was rotated', () => {
+    expect(sourceCropRect(crop, 0, size)).toEqual(crop);
+  });
+
+  it.each([90, 180, 270] as const)('undoes %s degrees back to the source rect', (rotation) => {
+    // Rotate the rect forward by the same amount, then ask for the source rect
+    // back: the round trip must land on the rect we started from.
+    let rotated = crop;
+    let rotatedSize = size;
+
+    for (let turn = 0; turn < rotation / 90; turn += 1) {
+      rotated = rotateCropRect(rotated, 'right', rotatedSize);
+      rotatedSize = { width: rotatedSize.height, height: rotatedSize.width };
+    }
+
+    expect(sourceCropRect(rotated, rotation, rotatedSize)).toEqual(crop);
+  });
+});
+
+describe('nextRotation', () => {
+  it('advances and wraps in both directions', () => {
+    expect(nextRotation(0, 'right')).toBe(90);
+    expect(nextRotation(270, 'right')).toBe(0);
+    expect(nextRotation(0, 'left')).toBe(270);
+    expect(nextRotation(90, 'left')).toBe(0);
   });
 });

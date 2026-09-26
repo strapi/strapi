@@ -377,3 +377,119 @@ describe('AssetCropEditor drag cleanup on unmount', () => {
     removeSpy.mockRestore();
   });
 });
+
+describe('AssetCropEditor rotation', () => {
+  // The seeded image is 800x600 and the crop starts as the whole image, so a
+  // quarter turn has to show 600x800 for the swap to have reached the UI.
+  const cropFields = () => ({
+    width: screen.getByLabelText('Width (px)') as HTMLInputElement,
+    height: screen.getByLabelText('Height (px)') as HTMLInputElement,
+  });
+
+  it('swaps the crop dimensions on a right turn', async () => {
+    await renderEditor();
+    expect(cropFields().width.value).toBe('800');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Rotate right' }));
+
+    expect(cropFields().width.value).toBe('600');
+    expect(cropFields().height.value).toBe('800');
+  });
+
+  it('swaps the crop dimensions on a left turn', async () => {
+    await renderEditor();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Rotate left' }));
+
+    expect(cropFields().width.value).toBe('600');
+    expect(cropFields().height.value).toBe('800');
+  });
+
+  it('returns to the original dimensions after four turns', async () => {
+    await renderEditor();
+
+    for (let turn = 0; turn < 4; turn += 1) {
+      fireEvent.click(screen.getByRole('button', { name: 'Rotate right' }));
+    }
+
+    expect(cropFields().width.value).toBe('800');
+    expect(cropFields().height.value).toBe('600');
+  });
+
+  it('carries the focal point round with the image instead of resetting it', async () => {
+    // Focal is a percentage of the crop box, so it turns inside that box: a point
+    // near the top-left before a right turn sits near the top-right after it.
+    // Stored as a percentage, displayed in pixels of the (now swapped) crop.
+    await renderEditor({
+      asset: { ...asset, focalPoint: { x: 25, y: 10 } } as AssetWithPopulatedCreatedBy,
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Rotate right' }));
+
+    // x -> 100 - y = 90, y -> x = 25, against a 600x800 crop.
+    expect((screen.getByLabelText('Focal point X (px)') as HTMLInputElement).value).toBe('540');
+    expect((screen.getByLabelText('Focal point Y (px)') as HTMLInputElement).value).toBe('200');
+  });
+
+  it('keeps the size fields in sync after they have been typed into', async () => {
+    // The design system's NumberInput stops adopting an external `value` once its
+    // internal buffer diverges, so a field the user has edited kept showing the
+    // pre-rotation number while the crop underneath rotated correctly.
+    await renderEditor();
+
+    fireEvent.change(cropFields().width, { target: { value: '400' } });
+    expect(cropFields().width.value).toBe('400');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Rotate right' }));
+
+    // 800x600 cropped to 400 wide, turned: the fields must follow the swap.
+    expect(cropFields().width.value).toBe('600');
+    expect(cropFields().height.value).toBe('400');
+  });
+
+  it('labels both controls for assistive tech and keyboard use', async () => {
+    await renderEditor();
+
+    for (const name of ['Rotate left', 'Rotate right']) {
+      const button = screen.getByRole('button', { name });
+      expect(button).toBeEnabled();
+      expect(button.tagName).toBe('BUTTON');
+    }
+  });
+
+  // On a quarter turn the image is positioned absolutely, so the crop area needs an
+  // in-flow sibling to size it; `aspect-ratio` then derives the other side.
+  it('adds an in-flow spacer only while the image is out of flow', async () => {
+    await renderEditor();
+    const spacer = () => screen.getByTestId('crop-editor-image').previousElementSibling;
+
+    expect(spacer()).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Rotate right' }));
+    expect(spacer()).toHaveAttribute('aria-hidden');
+
+    // Half turn: back in flow, no spacer needed.
+    fireEvent.click(screen.getByRole('button', { name: 'Rotate right' }));
+    expect(spacer()).toBeNull();
+  });
+
+  // Rotating remaps the focal point, and nothing re-seeds it once the image loads,
+  // so a turn taken before then would leave the focal point out of step with it.
+  it('stays disabled until the image has loaded', () => {
+    render(
+      <AssetCropEditor
+        asset={asset}
+        onClose={jest.fn()}
+        onApply={jest.fn()}
+        onSaveAsCopy={jest.fn()}
+        canSaveAsCopy
+      />
+    );
+
+    // The design system marks a disabled IconButton with `aria-disabled` and drops the
+    // click, rather than using the native attribute.
+    for (const name of ['Rotate left', 'Rotate right']) {
+      expect(screen.getByRole('button', { name })).toHaveAttribute('aria-disabled', 'true');
+    }
+  });
+});
