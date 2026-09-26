@@ -1,5 +1,6 @@
 const rowCounts = require('./row-counts');
 const documentIdBackfill = require('./document-id-backfill');
+const localizedDocumentIdRecovery = require('./localized-document-id-recovery');
 const draftPublishPair = require('./draft-publish-pair');
 const relationTargets = require('./relation-targets');
 const joinTableParity = require('./join-table-parity');
@@ -23,6 +24,7 @@ type MigrationCheck = {
 const ALL_CHECKS: MigrationCheck[] = [
   rowCounts,
   documentIdBackfill,
+  localizedDocumentIdRecovery,
   draftPublishPair,
   relationTargets,
   joinTableParity,
