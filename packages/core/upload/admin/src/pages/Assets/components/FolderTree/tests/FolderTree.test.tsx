@@ -59,6 +59,67 @@ describe('FolderTree', () => {
     expect(screen.getByText('Folders')).toBeInTheDocument();
   });
 
+  it('unrotates the chevron when a folder loses its last subfolder', async () => {
+    const { user, rerender } = renderTree();
+
+    // Nested, so its parent has to be open before it is on screen.
+    await user.click(await screen.findByRole('button', { name: 'Expand Top A' }));
+    // Expand "Inner A1", which has one child.
+    await user.click(await screen.findByRole('button', { name: 'Expand Inner A1' }));
+    expect(screen.getByRole('button', { name: 'Collapse Inner A1' })).toHaveAttribute(
+      'aria-expanded',
+      'true'
+    );
+
+    // That child is moved away — the row is still in the expanded set, but has
+    // nothing left to show.
+    mockUseGetFolderStructureQuery.mockReturnValue({
+      data: [
+        {
+          id: 1,
+          name: 'Top A',
+          children: [
+            { id: 2, name: 'Inner A1', children: [] },
+            { id: 4, name: 'Inner A2', children: [] },
+          ],
+        },
+        { id: 5, name: 'Top B', children: [] },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+
+    rerender(
+      <DndContext>
+        <FolderTree currentFolderId={null} onSelectFolder={jest.fn()} />
+      </DndContext>
+    );
+
+    // Back to a leaf, and the chevron points at rest rather than staying turned
+    // down over an empty folder.
+    const leaf = await screen.findByRole('button', {
+      name: 'The folder Inner A1 has no subfolders',
+    });
+    // eslint-disable-next-line testing-library/no-node-access
+    const chevron = leaf.querySelector('svg') as SVGElement;
+
+    expect(window.getComputedStyle(chevron).transform).toBe('rotate(-90deg)');
+  });
+
+  it('offers the folder actions on a tree row, without Rename', async () => {
+    const { user } = renderTree();
+
+    await user.click((await screen.findAllByRole('button', { name: /Actions for/ }))[0]);
+
+    expect(
+      await screen.findByRole('menuitem', { name: 'Copy link to folder' })
+    ).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: 'Move to folder' })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: 'Delete folder' })).toBeInTheDocument();
+    // Renaming is a list affordance; the tree does not offer it.
+    expect(screen.queryByRole('menuitem', { name: 'Rename folder' })).not.toBeInTheDocument();
+  });
+
   it('renders the top-level folder rows', () => {
     renderTree();
 
