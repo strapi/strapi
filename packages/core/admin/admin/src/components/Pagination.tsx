@@ -55,10 +55,18 @@ interface RootProps {
    */
   defaultPage?: PaginationApi['page'];
   /**
+   * @description alias for `defaultPage` when spreading an API pagination object.
+   */
+  page?: PaginationApi['page'];
+  /**
    * @default 10
    * @description the initial number of items to display
    */
   defaultPageSize?: PaginationApi['pageSize'];
+  /**
+   * @description alias for `defaultPageSize` when spreading an API pagination object.
+   */
+  pageSize?: PaginationApi['pageSize'];
   /**
    * @description a callback that is called when the page size changes.
    */
@@ -88,14 +96,26 @@ interface RootProps {
  */
 const Root = React.forwardRef<HTMLDivElement, RootProps>(
   (
-    { children, defaultPageSize = 10, pageCount = 0, defaultPage = 1, onPageSizeChange, total = 0 },
+    {
+      children,
+      defaultPageSize,
+      pageSize,
+      pageCount = 0,
+      defaultPage,
+      page,
+      onPageSizeChange,
+      total = 0,
+    },
     forwardedRef
   ) => {
+    const resolvedPageSize = defaultPageSize ?? pageSize ?? 10;
+    const resolvedPage = defaultPage ?? page ?? 1;
+
     const [{ query }, setQuery] = useQueryParams<
       Pick<PaginationContextValue, 'page' | 'pageSize'> & { filters?: unknown; _q?: unknown }
     >({
-      pageSize: defaultPageSize.toString(),
-      page: defaultPage.toString(),
+      pageSize: resolvedPageSize.toString(),
+      page: resolvedPage.toString(),
     });
 
     const setPageSize = (pageSize: string) => {

@@ -75,6 +75,31 @@ describe('Pagination', () => {
       expect(screen.getByRole('combobox')).toHaveTextContent('50');
     });
 
+    it('should use pageSize from a spread pagination object when defaultPageSize is omitted', () => {
+      renderRTL(
+        <Pagination.Root pageCount={2} total={100} pageSize={100} page={1}>
+          <Pagination.PageSize />
+          <Pagination.Links />
+        </Pagination.Root>
+      );
+
+      expect(screen.getByRole('combobox')).toHaveTextContent('100');
+      expect(screen.getByRole('link', { name: 'Go to page 2' })).toHaveAttribute(
+        'href',
+        expect.stringContaining('pageSize=100')
+      );
+    });
+
+    it('should prefer defaultPageSize over a spread pageSize', () => {
+      renderRTL(
+        <Pagination.Root pageCount={2} total={100} pageSize={100} defaultPageSize={50}>
+          <Pagination.PageSize />
+        </Pagination.Root>
+      );
+
+      expect(screen.getByRole('combobox')).toHaveTextContent('50');
+    });
+
     it('should render a custom list of options if provided', async () => {
       const options = ['5', '10', '15'];
 
