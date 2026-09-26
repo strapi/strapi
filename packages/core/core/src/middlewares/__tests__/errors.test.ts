@@ -1,5 +1,31 @@
 import Koa from 'koa';
 import request from 'supertest';
+import { errors as utilsErrors } from '@strapi/utils';
+
+import { errors as errorMiddleware } from '../errors';
+
+const PLUGIN_ERROR_MESSAGE = 'Plugin middleware failed';
+const THIRD_PARTY_ERROR_MESSAGE = 'postgres://user:secret@db/app';
+const APPLICATION_ERROR_STATUS = 400;
+const POLICY_ERROR_STATUS = 403;
+const INTERNAL_SERVER_ERROR_STATUS = 500;
+
+class CustomPolicyError extends utilsErrors.PolicyError<'CustomPolicyError'> {
+  constructor() {
+    super(PLUGIN_ERROR_MESSAGE);
+    this.name = 'CustomPolicyError';
+  }
+}
+
+const LegacyApplicationError = class ApplicationError extends Error {
+  details = {};
+};
+
+const LegacyPolicyError = class PolicyError extends LegacyApplicationError {
+  name = 'PolicyError';
+};
+
+const LookalikeApplicationError = class ApplicationError extends Error {};
 
 describe('Errors middleware', () => {
   test('_explicitStatus still exists', async () => {
@@ -15,5 +41,94 @@ describe('Errors middleware', () => {
     expect.assertions(1);
 
     await request(app.callback()).get('/');
+  });
+
+  test('formats application errors created by another copy of @strapi/utils', async () => {
+    let DuplicateApplicationError: typeof import('@strapi/utils').errors.ApplicationError;
+
+    jest.isolateModules(() => {
+      DuplicateApplicationError =
+        jest.requireActual<typeof import('@strapi/utils')>('@strapi/utils').errors.ApplicationError;
+    });
+
+    const app = new Koa();
+    global.strapi = {
+      log: {
+        error: jest.fn(),
+      },
+    } as typeof global.strapi;
+
+    app.use(errorMiddleware());
+    app.use(async () => {
+      throw new DuplicateApplicationError(PLUGIN_ERROR_MESSAGE);
+    });
+
+    const response = await request(app.callback()).get('/');
+
+    expect(response.status).toBe(APPLICATION_ERROR_STATUS);
+    expect(response.body).toEqual({
+      data: null,
+      error: {
+        status: APPLICATION_ERROR_STATUS,
+        name: 'ApplicationError',
+        message: PLUGIN_ERROR_MESSAGE,
+        details: {},
+      },
+    });
+  });
+
+  test('preserves the status of policy errors created before cross-copy branding', async () => {
+    const app = new Koa();
+    global.strapi = {
+      log: {
+        error: jest.fn(),
+      },
+    } as typeof global.strapi;
+
+    app.use(errorMiddleware());
+    app.use(async () => {
+      throw new LegacyPolicyError(PLUGIN_ERROR_MESSAGE);
+    });
+
+    const response = await request(app.callback()).get('/');
+
+    expect(response.status).toBe(POLICY_ERROR_STATUS);
+    expect(response.body.error).toMatchObject({
+      status: POLICY_ERROR_STATUS,
+      name: 'PolicyError',
+      message: PLUGIN_ERROR_MESSAGE,
+    });
+  });
+
+  test('preserves the status of custom policy error subclasses', async () => {
+    const app = new Koa();
+
+    app.use(errorMiddleware());
+    app.use(async () => {
+      throw new CustomPolicyError();
+    });
+
+    const response = await request(app.callback()).get('/');
+
+    expect(response.status).toBe(POLICY_ERROR_STATUS);
+  });
+
+  test('formats third-party application errors as opaque internal errors', async () => {
+    const app = new Koa();
+
+    app.use(errorMiddleware());
+    app.use(async () => {
+      throw new LookalikeApplicationError(THIRD_PARTY_ERROR_MESSAGE);
+    });
+
+    const response = await request(app.callback()).get('/');
+
+    expect(response.status).toBe(INTERNAL_SERVER_ERROR_STATUS);
+    expect(response.body.error).toMatchObject({
+      status: INTERNAL_SERVER_ERROR_STATUS,
+      name: 'InternalServerError',
+      message: 'Internal Server Error',
+    });
+    expect(response.body.error.message).not.toBe(THIRD_PARTY_ERROR_MESSAGE);
   });
 });

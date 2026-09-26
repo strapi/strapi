@@ -1,6 +1,8 @@
 import createError from 'http-errors';
 import { errors } from '@strapi/utils';
 
+const FORBIDDEN_STATUS = 403;
+
 const mapErrorsAndStatus = [
   {
     classError: errors.UnauthorizedError,
@@ -8,7 +10,11 @@ const mapErrorsAndStatus = [
   },
   {
     classError: errors.ForbiddenError,
-    status: 403,
+    status: FORBIDDEN_STATUS,
+  },
+  {
+    classError: errors.PolicyError,
+    status: FORBIDDEN_STATUS,
   },
   {
     classError: errors.NotFoundError,
@@ -29,7 +35,9 @@ const mapErrorsAndStatus = [
 ];
 
 const formatApplicationError = (error: InstanceType<typeof errors.ApplicationError>) => {
-  const errorAndStatus = mapErrorsAndStatus.find((pair) => error instanceof pair.classError);
+  const errorAndStatus = mapErrorsAndStatus.find((pair) =>
+    errors.isErrorOfType(error, pair.classError)
+  );
   const status = errorAndStatus ? errorAndStatus.status : 400;
 
   return {
