@@ -30,16 +30,21 @@ const defaults: Config = {
 
 const mergeConfig = (existingConfig: Config, newConfig: Config) => {
   return mergeWith(
-    (obj, src) => (Array.isArray(obj) && Array.isArray(src) ? obj.concat(src) : undefined),
+    (obj, src) =>
+      Array.isArray(obj) && Array.isArray(src)
+        ? Array.from(new Set(obj.concat(src)))
+        : undefined,
     existingConfig,
     newConfig
   );
 };
 
-export const security: Core.MiddlewareFactory<Config> =
-  (config, { strapi }) =>
-  (ctx, next) => {
-    let helmetConfig: Config = defaultsDeep(defaults, config);
+export const security: Core.MiddlewareFactory<Config> = (config, { strapi }) => {
+  // AdityaOP007 solve issue #26250
+  const baseHelmetConfig: Config = defaultsDeep(defaults, config);
+
+  return (ctx, next) => {
+    let helmetConfig: Config = baseHelmetConfig;
     const specialPaths = ['/documentation'];
 
     const directives: {
@@ -82,15 +87,13 @@ export const security: Core.MiddlewareFactory<Config> =
      * connect to the HMR websocket & reconnect on failure
      * or when the server restarts.
      *
-     * It only applies in development, and only on GET requests
-     * that are part of the admin route.
+     * It only applies on GET requests that are part of the admin route.
+     * AdityaOP007 solve issue #26250: Removed NODE_ENV check to ensure admin panel
+     * always has the necessary CSP directives in all environments.
      */
 
-    if (
-      ['development', 'test'].includes(process.env.NODE_ENV ?? '') &&
-      ctx.method === 'GET' &&
-      ctx.path.startsWith(strapi.config.get('admin.path'))
-    ) {
+    const adminPath = strapi.config.get('admin.path');
+    if (ctx.method === 'GET' && ctx.path.startsWith(adminPath)) {
       helmetConfig = mergeConfig(helmetConfig, {
         contentSecurityPolicy: {
           directives: {
@@ -103,3 +106,4 @@ export const security: Core.MiddlewareFactory<Config> =
 
     return helmet(helmetConfig)(ctx, next);
   };
+};
