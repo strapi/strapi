@@ -97,6 +97,7 @@
     "test:unit:coverage": "nx run-many --target=test:unit --nx-ignore-cycles -- --coverage",
     "test:front:coverage": "cross-env IS_EE=true nx run-many --target=test:front --nx-ignore-cycles -- --runInBand --coverage",
     "test:coverage": "yarn test:unit:coverage && yarn test:front:coverage",
+    "test:e2e:vitest": "vitest run --config tests/e2e/vitest.e2e.config.ts",
     "test:unit:vitest": "vitest run",
     "test:unit:vitest:watch": "vitest --watch",
     "test:migrations": "node --import tsx tests/migration/scripts/run-migration-scenario.ts",
