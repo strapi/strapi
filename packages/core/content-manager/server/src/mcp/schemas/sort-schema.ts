@@ -45,6 +45,38 @@ export const getScalarAttributeKeys = (
 };
 
 /**
+ * Attribute types that can be returned via `fields` (read projection). Superset of
+ * {@link SCALAR_ATTRIBUTE_TYPES}: includes `json` and `blocks`, which are valid Document
+ * Service projections but excluded from sort/filter eligibility since they cannot be
+ * meaningfully sorted or filtered via simple operators.
+ */
+export const PROJECTABLE_ATTRIBUTE_TYPES = new Set([...SCALAR_ATTRIBUTE_TYPES, 'json', 'blocks']);
+
+/**
+ * Returns the list of projectable (i.e. `fields`-selectable) attribute keys from a
+ * content type's attributes. Like {@link getScalarAttributeKeys} but also includes
+ * `json` and `blocks`, which are valid read projections despite not being sortable/filterable.
+ */
+export const getProjectableAttributeKeys = (
+  attributes: Struct.SchemaAttributes,
+  permittedFields?: Set<string> | null
+): string[] => {
+  let keys = Object.entries(attributes)
+    .filter(
+      ([, attr]) =>
+        PROJECTABLE_ATTRIBUTE_TYPES.has(attr.type) &&
+        (attr as { private?: boolean }).private !== true
+    )
+    .map(([key]) => key);
+
+  if (permittedFields !== null && permittedFields !== undefined) {
+    keys = keys.filter((key) => permittedFields.has(key));
+  }
+
+  return keys;
+};
+
+/**
  * Builds a per-content-type sort Zod schema constrained to the model's scalar fields.
  *
  * Supports all four Strapi sort notations:
