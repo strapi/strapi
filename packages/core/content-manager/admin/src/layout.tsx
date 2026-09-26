@@ -88,8 +88,8 @@ const Layout = () => {
       )
     );
 
-    if (typeof requestedLocale === 'string' && accessibleLocales.length > 0) {
-      if (!accessibleLocales.includes(requestedLocale)) {
+    if (accessibleLocales.length > 0) {
+      if (typeof requestedLocale !== 'string' || !accessibleLocales.includes(requestedLocale)) {
         const search = stringify({
           ...query,
           plugins: {
