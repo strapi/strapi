@@ -84,22 +84,14 @@ const ConditionsModal = ({
   }, [isReadOnly, actionsToDisplay, modifiedData, arrayOfOptionsGroupedByCategory]);
 
   const handleChange = React.useCallback(
-    (name: string, values: ConditionForm) => {
+    (name: string, values: Record<string, ConditionForm>) => {
       if (isReadOnly === true) {
         return;
       }
 
       setState(
         produce((draft) => {
-          if (draft[name] === undefined) {
-            draft[name] = {};
-          }
-
-          if (draft[name].default === undefined) {
-            draft[name].default = {};
-          }
-
-          draft[name].default = values;
+          draft[name] = values;
         })
       );
     },
@@ -266,7 +258,7 @@ interface ActionRowProps {
   isReadOnly?: boolean;
   label: string;
   name: string;
-  onChange?: (name: string, values: Record<string, boolean>) => void;
+  onChange?: (name: string, values: Record<string, ConditionForm>) => void;
   value: Record<string, ConditionForm>;
 }
 
@@ -398,13 +390,15 @@ const getNewStateFromChangedValues = (
   options: ActionRowProps['arrayOfOptionsGroupedByCategory'],
   changedValues: string[]
 ) =>
-  options
-    .map(([, values]) => values)
-    .flat()
-    .reduce<Record<string, boolean>>(
-      (acc, curr) => ({ [curr.id]: changedValues.includes(curr.id), ...acc }),
-      {}
-    );
+  options.reduce<Record<string, ConditionForm>>((acc, [categoryName, values]) => {
+    acc[categoryName] = values.reduce<ConditionForm>((acc, current) => {
+      acc[current.id] = changedValues.includes(current.id);
+
+      return acc;
+    }, {});
+
+    return acc;
+  }, {});
 
 export { ConditionsModal };
 export type { ConditionsModalProps };
