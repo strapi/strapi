@@ -1,6 +1,7 @@
 import type { Core } from '@strapi/types';
 
 import { ACTIONS } from '../constants';
+import { assertAmbientInstance } from './ambient-instance';
 import type { UploadMcpTool } from './types';
 import {
   mediaListAssetsInputSchema,
@@ -54,7 +55,7 @@ import {
  * object. On the delete side that mistake is unrecoverable, and two tools also let each
  * description carry the warning matched to its own blast radius.
  */
-export const buildUploadMcpToolDefinitions = (): UploadMcpTool[] => [
+const UPLOAD_MCP_TOOLS: UploadMcpTool[] = [
   {
     name: 'media_list_assets',
     title: 'Media: list assets',
@@ -168,6 +169,29 @@ export const buildUploadMcpToolDefinitions = (): UploadMcpTool[] => [
     createHandler: createMediaDeleteFolderHandler,
   },
 ];
+
+/**
+ * The Media Library MCP tools, every handler factory wrapped in the ambient-instance guard.
+ *
+ * The guard is applied here rather than left to each factory so it is structural: a tool added
+ * to the array above cannot forget it. See `assertAmbientInstance` for what it defends against
+ * — the `folder` and `file` services query `global.strapi` regardless of the instance passed to
+ * `getService`, so a handler acting on any other instance would read or write the wrong app's
+ * media library.
+ *
+ * Wrapping the factory, not the handler, keeps the failure at handler construction: the MCP
+ * registry catches a factory throw, logs it and substitutes a fallback handler, so the invariant
+ * reaches the operator's log instead of an agent's tool output.
+ */
+export const buildUploadMcpToolDefinitions = (): UploadMcpTool[] =>
+  UPLOAD_MCP_TOOLS.map((tool) => ({
+    ...tool,
+    createHandler(strapi, context) {
+      assertAmbientInstance(strapi);
+
+      return tool.createHandler(strapi, context);
+    },
+  }));
 
 /**
  * Registers the Media Library MCP tools via `strapi.ai.mcp.registerTool()`.
