@@ -189,29 +189,49 @@ describe('EditFieldForm', () => {
       });
     });
 
-    ['json', 'dynamiczone'].forEach((type) => {
-      it(`should hide the placeholder and size fields for the attribute type: ${type}`, () => {
-        render({
-          attribute: {
-            // @ts-expect-error - ignore the error as we are testing the form for each attribute type
-            type,
-          },
-        });
-
-        expect(screen.getByRole('dialog', { name: 'Edit Field' })).toBeInTheDocument();
-        expect(screen.getByRole('heading', { name: 'Edit Field' })).toBeInTheDocument();
-
-        expect(screen.getByRole('button', { name: 'Close modal' })).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: 'Finish' })).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
-
-        expect(screen.getByRole('textbox', { name: 'Label' })).toBeInTheDocument();
-        expect(screen.getByRole('textbox', { name: 'Description' })).toBeInTheDocument();
-        expect(screen.getByRole('checkbox', { name: 'Editable' })).toBeInTheDocument();
-
-        expect(screen.queryByRole('combobox', { name: 'Size' })).not.toBeInTheDocument();
-        expect(screen.queryByRole('textbox', { name: 'Placeholder' })).not.toBeInTheDocument();
+    it(`should hide the placeholder and size fields for the attribute type: json`, () => {
+      render({
+        attribute: {
+          type: 'json',
+        },
       });
+
+      expect(screen.getByRole('dialog', { name: 'Edit Field' })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Edit Field' })).toBeInTheDocument();
+
+      expect(screen.getByRole('button', { name: 'Close modal' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Finish' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
+
+      expect(screen.getByRole('textbox', { name: 'Label' })).toBeInTheDocument();
+      expect(screen.getByRole('textbox', { name: 'Description' })).toBeInTheDocument();
+      expect(screen.getByRole('checkbox', { name: 'Editable' })).toBeInTheDocument();
+
+      expect(screen.queryByRole('combobox', { name: 'Size' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('textbox', { name: 'Placeholder' })).not.toBeInTheDocument();
+    });
+
+    it(`should show label, description, editable and size fields for the attribute type: dynamiczone`, () => {
+      render({
+        // @ts-expect-error - ignore the error as we are testing the form for each attribute type
+        attribute: {
+          type: 'dynamiczone',
+        },
+      });
+
+      expect(screen.getByRole('dialog', { name: 'Edit Field' })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Edit Field' })).toBeInTheDocument();
+
+      expect(screen.getByRole('button', { name: 'Close modal' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Finish' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
+
+      expect(screen.getByRole('textbox', { name: 'Label' })).toBeInTheDocument();
+      expect(screen.getByRole('textbox', { name: 'Description' })).toBeInTheDocument();
+      expect(screen.getByRole('checkbox', { name: 'Editable' })).toBeInTheDocument();
+      expect(screen.getByRole('combobox', { name: 'Size' })).toBeInTheDocument();
+
+      expect(screen.queryByRole('textbox', { name: 'Placeholder' })).not.toBeInTheDocument();
     });
 
     it("should render the mainField option for relation attributes and have a list of potential mainField attributes from it's targetModel", async () => {
