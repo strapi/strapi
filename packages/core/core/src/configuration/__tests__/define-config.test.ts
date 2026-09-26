@@ -2,6 +2,7 @@ import {
   defineAdminConfig,
   defineApiConfig,
   defineConfig,
+  defineMiddlewaresConfig,
   defineServerConfig,
 } from '../define-config';
 
@@ -111,5 +112,21 @@ describe('defineConfig factories', () => {
         env: (key, fallback) => fallback ?? '',
       })
     ).toThrow(/Invalid Strapi config "server"/);
+  });
+
+  it('validates middlewares as an array of names or config objects', () => {
+    const config = defineMiddlewaresConfig([
+      'strapi::logger',
+      { name: 'strapi::cors', config: { origin: ['*'] } },
+    ]);
+
+    expect(config).toHaveLength(2);
+  });
+
+  it('rejects a non-array middlewares config', () => {
+    expect(() =>
+      // @ts-expect-error intentional invalid runtime shape
+      defineMiddlewaresConfig({ name: 'strapi::logger' })
+    ).toThrow(/Invalid Strapi config "middlewares"/);
   });
 });

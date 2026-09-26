@@ -107,7 +107,7 @@ In Strapi v5, they will be used for:
 
 ### Config factories (opt-in)
 
-Prefer `factories.defineAdminConfig` / `defineServerConfig` / `defineConfig('admin', …)` from `@strapi/strapi` when authoring `config/*` files. These are identity helpers with Zod runtime validation:
+Prefer `factories.defineAdminConfig` / `defineServerConfig` / `defineMiddlewaresConfig` / `defineConfig('admin', …)` from `@strapi/strapi` when authoring `config/*` files. These are identity helpers with Zod runtime validation:
 
 - TypeScript users get inference without manual `: Core.Config.*` annotations
 - JavaScript users get the same runtime checks when the config loads
