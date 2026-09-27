@@ -7,6 +7,7 @@ import type { createStrapi as CreateStrapi } from '@strapi/core';
 import type { CLIContext } from '../cli/types';
 import { handleAdminDependencies } from './core/ensure-admin-dependencies';
 import { getTimer, prettyTime, type TimeMeasurer } from './core/timer';
+import { getTypesOutDir } from './core/types-out-dir';
 import type { WebpackWatcher } from './webpack/watch';
 import type { ViteWatcher } from './vite/watch';
 import type { Logger } from '../cli/utils/logger';
@@ -276,7 +277,7 @@ const develop = async ({
         await tsUtils().generators.generate({
           strapi: strapiInstance,
           pwd: cwd,
-          rootDir: undefined,
+          rootDir: getTypesOutDir(strapiInstance),
           logger: { silent: true, debug: false },
           artifacts: { contentTypes: true, components: true },
         });
