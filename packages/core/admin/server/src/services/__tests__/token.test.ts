@@ -109,7 +109,6 @@ describe('Token', () => {
         return {};
       });
 
-      // @ts-expect-error mock
       global.strapi.config.get = getFn;
 
       const res = getTokenOptions();
@@ -143,7 +142,6 @@ describe('Token', () => {
         return {};
       });
 
-      // @ts-expect-error mock
       global.strapi.config.get = getFn;
 
       const res = getTokenOptions();
@@ -184,7 +182,6 @@ describe('Token', () => {
         return {};
       });
 
-      // @ts-expect-error mock
       global.strapi.config.get = getFn;
 
       const res = getTokenOptions();
@@ -220,7 +217,6 @@ describe('Token', () => {
         return {};
       });
 
-      // @ts-expect-error mock
       global.strapi.config.get = getFn;
 
       const res = getTokenOptions();
@@ -258,7 +254,6 @@ describe('Token', () => {
         return {};
       });
 
-      // @ts-expect-error mock
       global.strapi.config.get = getFn;
 
       const res = getTokenOptions();
