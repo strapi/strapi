@@ -9,21 +9,20 @@ import { describeOnCondition } from '../../../utils/shared';
 import { AssetsPage } from './page-objects/AssetsPage';
 
 /**
- * Journey 4 — Organize many assets at once (CMS-1528, journey plan in CMS-1066).
+ * Journey 4 — Organize many assets at once.
  *
  * Bulk selection and actions across many assets. Broad and shallow: chains
  * every capability once in a single flow, per the journey's own framing.
  *
- * One correction to the ticket's pseudocode, verified in AssetsTable.tsx
+ * One note on row clicks, verified in AssetsTable.tsx
  * rather than assumed: "clicking a row anywhere except the file name selects
  * it" is not what the table does. `handleRowClick` opens the details drawer on
  * a plain click — exactly like clicking the name — and only selects when a
  * modifier is held (shift for a range, cmd/ctrl to toggle one). Selecting
  * without a modifier goes through the row's checkbox. Asserted as it behaves.
  *
- * "I bulk-generate AI metadata" [CMS-145] is left as a comment, same as in
- * Journey 3: the AI mock-testing approach in the e2e harness is still an open
- * question in CMS-1066.
+ * Bulk AI metadata generation is left as a comment, same as in Journey 3: the
+ * approach for mocking AI in the e2e harness is still an open question.
  */
 
 const UPLOADS_DIR = path.join(__dirname, '../../data/uploads');
@@ -92,37 +91,39 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
 
       await test.step('I multi-select assets', async () => {
         // A plain row click opens the drawer — it does not select. See the
-        // file header: this is the ticket's one factual error.
+        // file header.
         await assetsPage.clickAssetInTable('test-image.jpg');
         await expect(assetsPage.assetDetailsDrawer).toBeVisible();
         await assetsPage.closeAssetDetailsDrawer();
         await expect(assetsPage.getBulkActionsBar()).not.toBeVisible();
-
-        // The row checkbox is the unmodified way to select.
-        await assetsPage.selectAsset('test-image.jpg');
-        await expect(assetsPage.getBulkActionsBar()).toContainText('1 item selected');
 
         // shift+click on a row selects a range. Asserted against the size of
         // the range itself, derived from the rendered row order: a bare
         // "more than one selected" would pass just as well if shift merely
         // toggled the second row, which is the behaviour this step exists to
         // tell apart.
+        // Sort before reasoning about row order. The default is by most recent update, so
+        // three files uploaded in one batch land in whatever order their uploads finished —
+        // which is not stable between runs.
+        await assetsPage.pickSortOption('A to Z');
+
         const rowNames = await assetsPage.getTableRowNames();
-        const from = rowNames.indexOf('test-image.jpg');
-        const to = rowNames.indexOf('test-image-2.jpg');
-        expect(from).toBeGreaterThanOrEqual(0);
-        expect(to).toBeGreaterThanOrEqual(0);
-        const rangeSize = Math.abs(to - from) + 1;
-        expect(rangeSize).toBeGreaterThan(2);
+        expect(rowNames.length).toBeGreaterThan(2);
+        const firstRow = rowNames[0];
+        const lastRow = rowNames[rowNames.length - 1];
 
-        await assetsPage.getAssetRow('test-image-2.jpg').click({ modifiers: ['Shift'] });
-        await expect.poll(selectedCount, { timeout: 10_000 }).toBe(rangeSize);
-        const rangeCount = rangeSize;
+        // Anchoring on the first and last rendered rows makes the range the whole list, so
+        // the assertion holds wherever the uploaded files happen to sort.
+        await assetsPage.selectAsset(firstRow);
+        await expect(assetsPage.getBulkActionsBar()).toContainText('1 item selected');
 
-        // cmd/ctrl+click toggles one at a time — the row just added by the
-        // range comes back off, and nothing else changes.
-        await assetsPage.getAssetRow('test-image-2.jpg').click({ modifiers: ['ControlOrMeta'] });
-        await expect.poll(selectedCount, { timeout: 10_000 }).toBe(rangeCount - 1);
+        await assetsPage.getAssetRow(lastRow).click({ modifiers: ['Shift'] });
+        await expect.poll(selectedCount, { timeout: 10_000 }).toBe(rowNames.length);
+
+        // cmd/ctrl+click toggles one at a time — the row that closed the range comes back
+        // off, and nothing else changes.
+        await assetsPage.getAssetRow(lastRow).click({ modifiers: ['ControlOrMeta'] });
+        await expect.poll(selectedCount, { timeout: 10_000 }).toBe(rowNames.length - 1);
 
         // The bar carries a close button (a Cross icon labelled "Clear
         // selection"); it clears the selection and the bar goes away.
@@ -138,9 +139,11 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
         // header control is a checkbox, the bar's is a text button.
         const selectAllCheckbox = page.getByRole('checkbox', { name: 'Select all' });
 
+        const allRows = await assetsPage.getTableRowNames();
         await selectAllCheckbox.click();
         await expect(assetsPage.getBulkActionsBar()).toBeVisible();
-        expect(await selectedCount()).toBeGreaterThan(1);
+        // Exact, so this also checks "Select all" really takes everything on screen.
+        await expect.poll(selectedCount, { timeout: 10_000 }).toBe(allRows.length);
 
         // Clicking it again clears the whole selection.
         await selectAllCheckbox.click();
@@ -202,7 +205,7 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
         await assetsPage.getHomeTreeRow().click();
       });
 
-      // I bulk-generate AI metadata                                   [CMS-145]
+      // I bulk-generate AI metadata
       // Open question (AI mock-testing approach) — nothing to assert yet.
 
       await test.step('I bulk delete assets', async () => {
