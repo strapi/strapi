@@ -55,6 +55,13 @@ it('resolves services lazily on the injected Strapi instance', async () => {
   await expect(provider.getDefaultLocale()).resolves.toBe('fr');
 });
 
+it('returns no default locale when the store holds no code string', async () => {
+  const locales = { getDefaultLocale: jest.fn(async () => undefined) };
+  const strapi = { plugin: () => ({ service: () => locales }) } as unknown as Core.Strapi;
+
+  await expect(createLocalizationProvider(strapi).getDefaultLocale()).resolves.toBeNull();
+});
+
 it('returns no locales when the locale store yields nothing', async () => {
   const locales = { find: jest.fn(async () => null) };
   const strapi = { plugin: () => ({ service: () => locales }) } as unknown as Core.Strapi;
