@@ -10,12 +10,11 @@ import valid from 'semver/functions/valid';
 
 import { LazyOutlet } from '../components/LazyOutlet';
 import { LeftMenu } from '../components/LeftMenu';
-import { MediaLibraryBanner } from '../components/MediaLibraryBanner';
 import { NpsSurvey } from '../components/NpsSurvey';
 import { Page } from '../components/PageHelpers';
 import { PluginsInitializer } from '../components/PluginsInitializer';
 import { PrivateRoute } from '../components/PrivateRoute';
-import { UpsellBanner } from '../components/UpsellBanner';
+import { TopBanners } from '../components/TopBanners';
 import { AppInfoProvider } from '../features/AppInfo';
 import { useAuth } from '../features/Auth';
 import { useConfiguration } from '../features/Configuration';
@@ -32,9 +31,6 @@ const AdminLayout = () => {
   const userInfo = useAuth('AuthenticatedApp', (state) => state.user);
   const [userId, setUserId] = React.useState<string>();
   const { showReleaseNotification } = useConfiguration('AuthenticatedApp');
-  // Only one top banner is shown at a time: the Media Library one takes priority over the
-  // upsell one instead of stacking both.
-  const [isMediaLibraryBannerVisible, setIsMediaLibraryBannerVisible] = React.useState(false);
 
   const { data: appInfo, isLoading: isLoadingAppInfo } = useInformationQuery();
   const [tagName, setTagName] = React.useState<string>(strapiVersion);
@@ -137,8 +133,7 @@ const AdminLayout = () => {
                   large: '100%',
                 }}
               >
-                {!isMediaLibraryBannerVisible && <UpsellBanner />}
-                <MediaLibraryBanner onVisibilityChange={setIsMediaLibraryBannerVisible} />
+                <TopBanners />
                 {/*
                  * Top-level Suspense only — nested layouts (Settings, Content Manager) use
                  * LazyOutlet with useNavigation so in-app navigations show loading in the content
