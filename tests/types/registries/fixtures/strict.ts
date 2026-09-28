@@ -142,3 +142,74 @@ app.services['plugin::i18n.unregistered'].anything();
 for (const service of Object.values(app.plugin(dynamicName).services)) {
   service.anything();
 }
+
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Strapi {
+    // eslint-disable-next-line @typescript-eslint/no-namespace
+    namespace Registries {
+      interface AppServices {
+        'api::strict-fixture.items': { count(): number };
+      }
+      interface AppControllers {
+        'api::strict-fixture.items': { find: Core.ControllerHandler };
+      }
+    }
+  }
+}
+
+type Equal<T, U> =
+  (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;
+type Expect<T extends true> = T;
+type FixturePolicy = Core.PolicyHandler<{ custom: true }>;
+
+// Policy lookups resolve registered names to a policy that receives their config contract.
+// `strapi.policy` takes full names, plugin lookups relative names, as at runtime.
+const adminPolicy = app.policy('admin::isAuthenticatedAdmin');
+const permissionsPolicy = app.policy('plugin::content-manager.hasPermissions');
+const pluginPermissionsPolicy = app.plugin('content-manager').policy('hasPermissions');
+declare const policyChecks: [
+  Expect<Equal<typeof adminPolicy, Core.Policy<undefined>>>,
+  Expect<
+    Equal<
+      typeof permissionsPolicy,
+      Core.Policy<Core.PolicyConfigFor<'plugin::content-manager.hasPermissions'>>
+    >
+  >,
+  Expect<Equal<typeof pluginPermissionsPolicy, typeof permissionsPolicy>>,
+];
+policyChecks satisfies unknown;
+exactlyUnknown(app.policy('global::unregistered')) satisfies true;
+exactlyUnknown(app.policy('hasPermissions')) satisfies true;
+exactlyUnknown(app.policy(dynamicName)) satisfies true;
+exactlyUnknown(app.plugin('content-manager').policy('unregistered')) satisfies true;
+exactlyUnknown(app.plugin('content-manager').policy(dynamicName)) satisfies true;
+exactlyUnknown(app.plugin(dynamicName).policy('hasPermissions')) satisfies true;
+const explicitPolicy = app.policy<FixturePolicy>('global::unregistered');
+const explicitPluginPolicy = app.plugin('i18n').policy<FixturePolicy>('unregistered');
+declare const explicitPolicyChecks: [
+  Expect<Equal<typeof explicitPolicy, FixturePolicy>>,
+  Expect<Equal<typeof explicitPluginPolicy, FixturePolicy>>,
+];
+explicitPolicyChecks satisfies unknown;
+// @ts-expect-error A type annotation on the result does not replace the type argument.
+const contextualPolicy: FixturePolicy = app.policy('global::unregistered');
+contextualPolicy satisfies unknown;
+
+// API module lookups resolve registered names relative to the API.
+app.api('strict-fixture').service('items').count() satisfies number;
+// @ts-expect-error API service lookups use the registered contract.
+app.api('strict-fixture').service('items').missing();
+app.api('strict-fixture').controller('items').find satisfies Core.ControllerHandler;
+// @ts-expect-error API controller lookups use the registered contract.
+app.api('strict-fixture').controller('items').missing satisfies unknown;
+exactlyUnknown(app.api('strict-fixture').service('unregistered')) satisfies true;
+exactlyUnknown(app.api('strict-fixture').controller('unregistered')) satisfies true;
+exactlyUnknown(app.api('strict-fixture').service(dynamicName)) satisfies true;
+exactlyUnknown(app.api(dynamicName).controller('items')) satisfies true;
+app.api('strict-fixture').service<{ greet(): string }>('unregistered').greet() satisfies string;
+app.api('unregistered').controller<{ list: Core.ControllerHandler }>('items')
+  .list satisfies Core.ControllerHandler;
+// @ts-expect-error A type annotation on the result does not replace the type argument.
+const contextualApiService: { greet(): string } = app.api('strict-fixture').service('unregistered');
+contextualApiService satisfies unknown;

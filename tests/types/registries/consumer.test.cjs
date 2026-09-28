@@ -418,9 +418,10 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
             "policies: [{ name: '",
             ['admin::hasPermissions', 'plugin::content-manager.hasPermissions'],
           ],
-          // The maps and policy config contracts are typed only with the switch on.
+          // The maps, plugin policy lookups and policy config contracts are typed only with the switch on.
           ...(strict
             ? [
+                ["app.plugin('content-manager').policy('", ['hasPermissions']],
                 ["app.services['", ['plugin::i18n.locales', 'admin::auth']],
                 ['app.plugins.', ['i18n', 'sentry']],
                 ["hasPermissions', config: {", ['actions', 'hasAtLeastOne']],
