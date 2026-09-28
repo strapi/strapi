@@ -127,4 +127,49 @@ describe('MediaLibraryBanner', () => {
 
     expect(screen.getByText('Introducing the new Media Library')).toBeInTheDocument();
   });
+
+  describe('onVisibilityChange', () => {
+    // A parent (AuthenticatedLayout) uses this to hide UpsellBanner instead of stacking
+    // both banners, so its own visibility must always be reported accurately.
+    it('should report true once mounted visible on the Media Library', () => {
+      const onVisibilityChange = jest.fn();
+
+      renderOnMediaLibrary(<MediaLibraryBanner onVisibilityChange={onVisibilityChange} />);
+
+      expect(onVisibilityChange).toHaveBeenLastCalledWith(true);
+    });
+
+    it('should report false when mounted outside of the Media Library', () => {
+      const onVisibilityChange = jest.fn();
+
+      render(<MediaLibraryBanner onVisibilityChange={onVisibilityChange} />, {
+        initialEntries: ['/content-manager'],
+      });
+
+      expect(onVisibilityChange).toHaveBeenLastCalledWith(false);
+    });
+
+    it('should report false once already dismissed on mount', () => {
+      localStorage.setItem(KEY_OFF, 'true');
+      const onVisibilityChange = jest.fn();
+
+      renderOnMediaLibrary(<MediaLibraryBanner onVisibilityChange={onVisibilityChange} />);
+
+      expect(onVisibilityChange).toHaveBeenLastCalledWith(false);
+    });
+
+    it('should report false after the banner is dismissed', async () => {
+      const onVisibilityChange = jest.fn();
+
+      const { user } = renderOnMediaLibrary(
+        <MediaLibraryBanner onVisibilityChange={onVisibilityChange} />
+      );
+
+      expect(onVisibilityChange).toHaveBeenLastCalledWith(true);
+
+      await user.click(screen.getByRole('button', { name: 'Close' }));
+
+      expect(onVisibilityChange).toHaveBeenLastCalledWith(false);
+    });
+  });
 });

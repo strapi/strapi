@@ -32,6 +32,9 @@ const AdminLayout = () => {
   const userInfo = useAuth('AuthenticatedApp', (state) => state.user);
   const [userId, setUserId] = React.useState<string>();
   const { showReleaseNotification } = useConfiguration('AuthenticatedApp');
+  // Only one top banner is shown at a time: the Media Library one takes priority over the
+  // upsell one instead of stacking both.
+  const [isMediaLibraryBannerVisible, setIsMediaLibraryBannerVisible] = React.useState(false);
 
   const { data: appInfo, isLoading: isLoadingAppInfo } = useInformationQuery();
   const [tagName, setTagName] = React.useState<string>(strapiVersion);
@@ -134,8 +137,8 @@ const AdminLayout = () => {
                   large: '100%',
                 }}
               >
-                <UpsellBanner />
-                <MediaLibraryBanner />
+                {!isMediaLibraryBannerVisible && <UpsellBanner />}
+                <MediaLibraryBanner onVisibilityChange={setIsMediaLibraryBannerVisible} />
                 {/*
                  * Top-level Suspense only — nested layouts (Settings, Content Manager) use
                  * LazyOutlet with useNavigation so in-app navigations show loading in the content
