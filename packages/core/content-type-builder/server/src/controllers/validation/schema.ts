@@ -95,6 +95,7 @@ type ContentTypeSchemaAction = {
   action: 'create' | 'update' | 'delete';
   draftAndPublish?: boolean;
   uid?: UID.ContentType;
+  renames?: Array<{ oldName: string; newName: string }>;
   attributes?: Array<{ action: 'create' | 'update' | 'delete'; name: string }>;
 };
 
@@ -111,6 +112,13 @@ const getEffectiveAttributeNames = (contentType: ContentTypeSchemaAction): strin
 
   const existingContentType = strapi.contentTypes[contentType.uid];
   const names = new Set(existingContentType ? Object.keys(existingContentType.attributes) : []);
+
+  // A renamed attribute is sent as an `update` under its new name, with no `delete`
+  // for the old one, so the rename hops are the only record that the old name goes away.
+  for (const hop of contentType.renames ?? []) {
+    names.delete(hop.oldName);
+    names.add(hop.newName);
+  }
 
   for (const attribute of contentType.attributes ?? []) {
     if (attribute.action === 'delete') {
@@ -673,21 +681,29 @@ const updateAttributeSchema = (meta: SchemaMeta) =>
 // Ordered list of attribute rename hops performed by the user for a given
 // content-type / component, used to generate a data-preserving rename migration.
 // The order is significant: the migration replays each hop verbatim.
-// Names end up in generated migration code, so they are held to the same rules
-// as a newly created attribute name.
-const renameHopNameSchema = z
-  .string()
-  .min(1)
-  .max(64)
-  .regex(NAME_REGEX)
-  .refine((value) => !isReservedAttributeName(value), 'Attribute name is reserved');
+// Names end up in generated migration code, so they are held to the attribute
+// name rules. The new name is held to the same reserved-name rules as a newly
+// created attribute. The old name only has to be a name an attribute can
+// legally carry today: `status` is reserved only while draft and publish is
+// enabled, and renaming it away is exactly how a type gets to enable it.
+const renameHopNameSchema = z.string().min(1).max(64).regex(NAME_REGEX);
+
+const renameHopOldNameSchema = renameHopNameSchema.refine(
+  (value) => !contentTypes.isReservedAttributeName(value, { draftAndPublish: false }),
+  'Attribute name is reserved'
+);
+
+const renameHopNewNameSchema = renameHopNameSchema.refine(
+  (value) => !isReservedAttributeName(value),
+  'Attribute name is reserved'
+);
 
 const renamesSchema = z
   .array(
     z
       .object({
-        oldName: renameHopNameSchema,
-        newName: renameHopNameSchema,
+        oldName: renameHopOldNameSchema,
+        newName: renameHopNewNameSchema,
       })
       .refine((hop) => hop.oldName !== hop.newName, 'A rename must change the attribute name')
   )

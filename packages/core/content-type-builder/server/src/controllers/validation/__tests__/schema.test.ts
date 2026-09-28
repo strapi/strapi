@@ -196,6 +196,16 @@ describe('Schema', () => {
         });
       });
 
+      test('accepts a draft-and-publish-only reserved name as the old name of a hop', () => {
+        // `status` is a legal attribute while draft and publish is off; renaming it away
+        // is how a type becomes eligible to enable draft and publish.
+        expect(
+          validateUpdateSchema(schemaWithRenames([{ oldName: 'status', newName: 'state' }]))
+        ).toMatchObject({
+          data: { contentTypes: [{ renames: [{ oldName: 'status', newName: 'state' }] }] },
+        });
+      });
+
       test.each([
         ['a newline in the new name', { oldName: 'title', newName: 'heading\nprocess.exit(1)' }],
         ['a line separator in the new name', { oldName: 'title', newName: 'heading\u2028x' }],
@@ -206,6 +216,7 @@ describe('Schema', () => {
         ['an empty name', { oldName: '', newName: 'heading' }],
         ['a name longer than 64 characters', { oldName: 'title', newName: 'a'.repeat(65) }],
         ['a reserved name', { oldName: 'title', newName: 'id' }],
+        ['a draft-and-publish reserved new name', { oldName: 'title', newName: 'status' }],
         ['a reserved old name', { oldName: 'documentId', newName: 'heading' }],
         ['a hop that does not change the name', { oldName: 'title', newName: 'title' }],
       ])('rejects %s', (_label, hop) => {
@@ -346,6 +357,71 @@ describe('Schema', () => {
         },
         false
       );
+    });
+
+    test('allows enabling draft and publish when status is renamed away in the same update', () => {
+      expectError(
+        {
+          action: 'update',
+          uid: 'api::reservation.reservation',
+          draftAndPublish: true,
+          renames: [{ oldName: 'status', newName: 'state' }],
+          attributes: [{ action: 'update', name: 'state' }],
+        },
+        false
+      );
+    });
+
+    test('blocks enabling draft and publish when a later hop renames another field onto status', () => {
+      expectError(
+        {
+          action: 'update',
+          uid: 'api::reservation.reservation',
+          draftAndPublish: true,
+          renames: [
+            { oldName: 'status', newName: 'state' },
+            { oldName: 'title', newName: 'status' },
+          ],
+          attributes: [
+            { action: 'update', name: 'state' },
+            { action: 'update', name: 'status' },
+          ],
+        },
+        true
+      );
+    });
+
+    test('accepts a full update that renames status away while enabling draft and publish', () => {
+      expect(
+        validateUpdateSchema({
+          data: {
+            contentTypes: [
+              {
+                action: 'update',
+                uid: 'api::reservation.reservation',
+                displayName: 'Reservation',
+                draftAndPublish: true,
+                kind: 'collectionType',
+                renames: [{ oldName: 'status', newName: 'state' }],
+                attributes: [
+                  { action: 'update', name: 'title', properties: { type: 'string' } },
+                  {
+                    action: 'update',
+                    name: 'state',
+                    properties: { type: 'enumeration', enum: ['confirmed', 'canceled'] },
+                  },
+                ],
+              },
+            ],
+          },
+        })
+      ).toMatchObject({
+        data: {
+          contentTypes: [
+            { draftAndPublish: true, renames: [{ oldName: 'status', newName: 'state' }] },
+          ],
+        },
+      });
     });
 
     test('allows draft and publish when no reserved attributes are present', () => {
