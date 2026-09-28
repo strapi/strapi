@@ -112,16 +112,16 @@ const getController = (
 
   if (pluginName) {
     if (pluginName === 'admin') {
-      ctrl = strapi.controller(`admin::${name}`);
+      ctrl = strapi.controller<Core.Controller>(`admin::${name}`);
     } else {
-      ctrl = strapi.plugin(pluginName).controller(name);
+      ctrl = strapi.plugin(pluginName).controller<Core.Controller>(name);
     }
   } else if (apiName) {
-    ctrl = strapi.controller(`api::${apiName}.${name}`);
+    ctrl = strapi.controller<Core.Controller>(`api::${apiName}.${name}`);
   }
 
   if (!ctrl) {
-    return strapi.controller(name as UID.Controller);
+    return strapi.controller<Core.Controller>(name as UID.Controller);
   }
 
   return ctrl;

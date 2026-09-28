@@ -70,23 +70,30 @@ strapi.plugin('type-lab').service('greeting').greet('Nico') satisfies Promise<nu
 // @ts-expect-error Plugin lookups do not inherit the permissive service index signature.
 strapi.plugin('type-lab').service('greeting').missing();
 
-// Unregistered literal names resolve to `never`, including names only declared in `Public.Services`.
-strapi.service('plugin::legacy.greeting') satisfies never;
-strapi.service('plugin::unregistered.greeting') satisfies never;
-strapi.service('api::unregistered.greeting') satisfies never;
-strapi.plugin('legacy').service('greeting') satisfies never;
-strapi.plugin('type-lab').service('unregistered') satisfies never;
+/** `true` only for `unknown`: `any` and every other type give `false`. */
+declare function exactlyUnknown<T>(
+  value: T
+): [unknown] extends [T] ? (0 extends 1 & T ? false : true) : false;
+
+// Unregistered names resolve to `unknown`, including names only declared in `Public.Services`.
+// Callers pass a type argument to use them.
+exactlyUnknown(strapi.service('plugin::legacy.greeting')) satisfies true;
+exactlyUnknown(strapi.service('plugin::unregistered.greeting')) satisfies true;
+exactlyUnknown(strapi.service('api::unregistered.greeting')) satisfies true;
+exactlyUnknown(strapi.plugin('legacy').service('greeting')) satisfies true;
+exactlyUnknown(strapi.plugin('type-lab').service('unregistered')) satisfies true;
 // @ts-expect-error Unregistered literal names expose no members.
 strapi.service('plugin::unregistered.greeting').missing();
 // @ts-expect-error Plugin-scoped unregistered literal names expose no members.
 strapi.plugin('type-lab').service('unregistered').missing();
 
-// Dynamic names cannot be validated and keep the permissive service.
-wideService.missing();
-patternService.missing();
-strapi.plugin(dynamicPlugin).service('greeting').missing();
-strapi.plugin('type-lab').service(dynamicService).missing();
-strapi.plugin('type-lab').service(patternServiceName).missing();
+// Dynamic names cannot be validated, so they resolve to `unknown` too.
+exactlyUnknown(wideService) satisfies true;
+exactlyUnknown(patternService) satisfies true;
+exactlyUnknown(strapi.service(dynamicService as `plugin::${string}.${string}`)) satisfies true;
+exactlyUnknown(strapi.plugin(dynamicPlugin).service('greeting')) satisfies true;
+exactlyUnknown(strapi.plugin('type-lab').service(dynamicService)) satisfies true;
+exactlyUnknown(strapi.plugin('type-lab').service(patternServiceName)) satisfies true;
 
 // Preserve explicit generic overrides and contextual inference on permissive lookups.
 strapi.plugin('type-lab').service<GreetingService>('greeting').greet('Nico');
