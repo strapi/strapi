@@ -98,23 +98,8 @@ describe('extractAndValidateRequestInfo locale handling', () => {
     );
   });
 
+  // Also the no-provider case: the inert `isLocalizedContentType` answers false for every model
   test('ignores the locale when neither side is localized', async () => {
-    setupStrapi(() => false);
-
-    const info = await relations.extractAndValidateRequestInfo(createCtx(), 'article-doc');
-
-    expect(info.locale).toBe('fr');
-    expect(info.source.isLocalized).toBe(false);
-    expect(info.target.isLocalized).toBe(false);
-    expect(info.fieldsToSelect).not.toContain('locale');
-    expect(findOne).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { documentId: 'article-doc' } })
-    );
-  });
-
-  // Previously threw a TypeError because `strapi.plugin('i18n')` was undefined
-  test('treats both sides as not localized when no localization provider is registered', async () => {
-    // Inert default of `strapi.localization` when no provider is registered
     setupStrapi(() => false);
 
     const info = await relations.extractAndValidateRequestInfo(createCtx(), 'article-doc');
