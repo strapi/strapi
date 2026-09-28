@@ -9,6 +9,18 @@ import type { RelationResult } from '../../../../shared/contracts/relations';
 
 const DEFAULT_RETENTION_DAYS = 90;
 
+/**
+ * The retention window is turned into a cut-off date for the daily prune job, so any value that
+ * isn't a positive finite number would expire every history version at once. Both sources of a
+ * retention value are external — the license payload and the user's config — so normalize them
+ * here and treat anything else as "not configured".
+ */
+const toRetentionDays = (value: unknown): number | undefined => {
+  const days = Number(value);
+
+  return Number.isFinite(days) && days > 0 ? days : undefined;
+};
+
 type RelationResponse = {
   results: RelationResult[];
   meta: { missingCount: number };
@@ -152,9 +164,22 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
    */
   const getRetentionDays = () => {
     const featureConfig = strapi.ee.features.get('cms-content-history');
-    const licenseRetentionDays =
-      typeof featureConfig === 'object' && featureConfig?.options.retentionDays;
-    const userRetentionDays: number = strapi.config.get('admin.history.retentionDays');
+    /**
+     * `ee.disable()` strips `features` off the license info, so this is undefined whenever the
+     * license lapses — which the 12-hourly license check can trigger long after boot, while this
+     * plugin's prune cron is still running. A license may also grant the feature without pinning
+     * a retention window, in which case `options` is absent entirely.
+     */
+    const licenseRetentionDays = toRetentionDays(
+      typeof featureConfig === 'object' ? featureConfig?.options?.retentionDays : undefined
+    );
+    const userRetentionDays = toRetentionDays(strapi.config.get('admin.history.retentionDays'));
+
+    // The license sets no ceiling, so honor the user's value or fall back to the default.
+    // Never fall through to a retention of 0 here: that would delete every history version.
+    if (licenseRetentionDays == null) {
+      return userRetentionDays ?? DEFAULT_RETENTION_DAYS;
+    }
 
     // Allow users to override the license retention days, but not to increase it
     if (userRetentionDays && userRetentionDays < licenseRetentionDays) {
