@@ -23,6 +23,7 @@ export const registerContentManagerMcpTools = async ({
   let localeCodes: [string, ...string[]] | null = null;
   let defaultLocale: string | null = null;
   if (strapi.localization.isEnabled() === true) {
+    // The tuple type is a lie for zero locales; consumers guard on length > 0 before z.enum.
     localeCodes = (await strapi.localization.getLocales()).map((locale) => locale.code) as [
       string,
       ...string[],
