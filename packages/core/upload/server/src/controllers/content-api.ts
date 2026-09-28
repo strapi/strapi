@@ -34,6 +34,19 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return strapi.contentAPI.sanitize.query(data, schema, { auth, route });
   };
 
+  // Files can be addressed by numeric id or documentId (1:1, files have no draft & publish)
+  const resolveFileId = async (id: string | number) => {
+    if (/^\d+$/.test(String(id))) {
+      return id;
+    }
+
+    const file = await strapi.db
+      .query(FILE_MODEL_UID)
+      .findOne({ where: { documentId: id }, select: ['id'] });
+
+    return file?.id;
+  };
+
   return {
     async find(ctx: Context) {
       await validateQuery(ctx.query, ctx);
@@ -58,14 +71,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async findOne(ctx: Context) {
-      const {
-        params: { id },
-      } = ctx;
-
       await validateQuery(ctx.query, ctx);
       const sanitizedQuery = await sanitizeQuery(ctx.query, ctx);
 
-      const file = await getService('upload').findOne(id, sanitizedQuery.populate!);
+      const id = await resolveFileId(ctx.params.id);
+      const file = id ? await getService('upload').findOne(id, sanitizedQuery.populate!) : null;
 
       if (!file) {
         return ctx.notFound('file.notFound');
@@ -77,11 +87,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async destroy(ctx: Context) {
-      const {
-        params: { id },
-      } = ctx;
-
-      const file = await getService('upload').findOne(id);
+      const id = await resolveFileId(ctx.params.id);
+      const file = id ? await getService('upload').findOne(id) : null;
 
       if (!file) {
         return ctx.notFound('file.notFound');

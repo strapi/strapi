@@ -205,6 +205,100 @@ describe('Upload plugin', () => {
         .query('plugin::upload.file')
         .delete({ where: { id: dogEntity.profilePicture.id } });
     });
+
+    test('Get one file by documentId', async () => {
+      const res = await rq({
+        method: 'POST',
+        url: '/upload',
+        formData: {
+          files: fs.createReadStream(path.join(__dirname, '../utils/thumbnail_target.png')),
+        },
+      });
+
+      const { id, documentId } = res.body[0];
+
+      const getRes = await rq({
+        method: 'GET',
+        url: `/upload/files/${documentId}`,
+      });
+
+      expect(getRes.statusCode).toBe(200);
+      expect(getRes.body).toEqual(
+        expect.objectContaining({
+          id,
+          documentId,
+          url: expect.any(String),
+        })
+      );
+
+      await rq({ method: 'DELETE', url: `/upload/files/${id}` });
+    });
+
+    test('Get one file with an unknown documentId returns 404', async () => {
+      const getRes = await rq({
+        method: 'GET',
+        url: '/upload/files/unknowndocumentid0000000',
+      });
+
+      expect(getRes.statusCode).toBe(404);
+    });
+  });
+
+  describe('Delete', () => {
+    test('Delete a file by id', async () => {
+      const res = await rq({
+        method: 'POST',
+        url: '/upload',
+        formData: {
+          files: fs.createReadStream(path.join(__dirname, '../utils/thumbnail_target.png')),
+        },
+      });
+
+      const { id } = res.body[0];
+
+      const deleteRes = await rq({ method: 'DELETE', url: `/upload/files/${id}` });
+
+      expect(deleteRes.statusCode).toBe(200);
+      expect(deleteRes.body).toEqual(expect.objectContaining({ id }));
+
+      const getRes = await rq({ method: 'GET', url: `/upload/files/${id}` });
+
+      expect(getRes.statusCode).toBe(404);
+    });
+
+    test('Delete a file by documentId', async () => {
+      const res = await rq({
+        method: 'POST',
+        url: '/upload',
+        formData: {
+          files: fs.createReadStream(path.join(__dirname, '../utils/thumbnail_target.png')),
+        },
+      });
+
+      const { id, documentId } = res.body[0];
+
+      const deleteRes = await rq({ method: 'DELETE', url: `/upload/files/${documentId}` });
+
+      expect(deleteRes.statusCode).toBe(200);
+      expect(deleteRes.body).toEqual(expect.objectContaining({ id, documentId }));
+
+      const getRes = await rq({ method: 'GET', url: `/upload/files/${documentId}` });
+
+      expect(getRes.statusCode).toBe(404);
+
+      const dbFile = await strapi.db.query('plugin::upload.file').findOne({ where: { id } });
+
+      expect(dbFile).toBeNull();
+    });
+
+    test('Delete a file with an unknown documentId returns 404', async () => {
+      const deleteRes = await rq({
+        method: 'DELETE',
+        url: '/upload/files/unknowndocumentid0000000',
+      });
+
+      expect(deleteRes.statusCode).toBe(404);
+    });
   });
 
   describe('Filtering data based on media attributes', () => {
