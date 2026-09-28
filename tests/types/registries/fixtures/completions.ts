@@ -32,6 +32,7 @@ app.controller('');
 app.policy('');
 app.api('article').service('');
 app.api('article').controller('');
+app.plugin('content-manager').policy('');
 export const serviceEntry = app.services[''];
 export const pluginEntry = app.plugins.i18n;
 

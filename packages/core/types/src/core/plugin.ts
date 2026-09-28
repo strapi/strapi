@@ -3,7 +3,13 @@ import type { ControllerFor, ControllerLookupDefault, RegisteredControllerUID } 
 import type { Module } from './module';
 import type { Route } from './route';
 import type { Router } from './router';
-import type { RegisteredPolicyName } from './policy';
+import type {
+  Policy,
+  PolicyConfigFor,
+  PolicyLookupConstraint,
+  PolicyLookupDefault,
+  RegisteredPolicyName,
+} from './policy';
 import type { RegisteredServiceUID, ServiceFor, ServiceLookupDefault } from './service';
 import type {
   ConfigDefaultValue,
@@ -25,6 +31,8 @@ type PluginEntryNames<TUID, TPlugin extends string> = string extends TPlugin
 type ServiceNames<TPlugin extends string> = PluginEntryNames<RegisteredServiceUID, TPlugin>;
 
 type ControllerNames<TPlugin extends string> = PluginEntryNames<RegisteredControllerUID, TPlugin>;
+
+type PolicyNames<TPlugin extends string> = PluginEntryNames<RegisteredPolicyName, TPlugin>;
 
 type PluginConfigNamespace<TPlugin extends string> = string extends TPlugin
   ? never
@@ -86,6 +94,39 @@ type PluginControllerLookup<TPlugin extends string, TControllerName, T> = IsStri
     : TControllerName extends ControllerNames<TPlugin>
       ? ControllerFor<`plugin::${TPlugin}.${TControllerName}`>
       : T;
+
+/**
+ * The registered policy when `TPolicyName` is a registered policy of the plugin, `T` otherwise.
+ * `T` is an explicit generic (`policy<MyPolicy>('name')`), or `unknown` by default.
+ */
+type PluginPolicyLookup<TPlugin extends string, TPolicyName, T> =
+  SuggestedString<PolicyNames<TPlugin>> extends TPolicyName
+    ? T
+    : TPolicyName extends PolicyNames<TPlugin>
+      ? Policy<PolicyConfigFor<Extract<`plugin::${TPlugin}.${TPolicyName}`, RegisteredPolicyName>>>
+      : T;
+
+/**
+ * `policy` is declared with strict types enabled only. Without them, it keeps the `any` of the
+ * plugin index signature, as before registries.
+ */
+type PluginPolicyGetter<TName extends string> = IsStrict extends false
+  ? unknown
+  : {
+      /**
+       * Resolves the registered policy of the relative name `name`, i.e. `plugin::<plugin>.<name>`
+       * as at runtime, which receives its config contract. An explicit type argument
+       * (`policy<MyPolicy>(name)`) wins over the registries. Registered names are listed for completion.
+       */
+      policy<
+        T extends PolicyLookupConstraint = PolicyLookupDefault,
+        TPolicyName extends SuggestedString<PolicyNames<TName>> = SuggestedString<
+          PolicyNames<TName>
+        >,
+      >(
+        name: TPolicyName
+      ): PluginPolicyLookup<TName, TPolicyName, NoInfer<T>>;
+    };
 
 /**
  * Any key when the plugin has no registered config contract, `never` otherwise.
@@ -151,7 +192,8 @@ export type Plugin<TName extends string = string> = Omit<
     name: TControllerName
   ): PluginControllerLookup<TName, TControllerName, StrictNoInfer<T>>;
   [key: string]: any;
-} & PluginConfigGetter<TName>;
+} & PluginConfigGetter<TName> &
+  PluginPolicyGetter<TName>;
 
 /** The plugin name of a `plugin::<plugin>.<name>` UID or a `plugin::<plugin>` config namespace. */
 type PluginNameOf<TUID> = TUID extends `plugin::${infer TPlugin}.${string}`
