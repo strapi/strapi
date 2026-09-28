@@ -15,10 +15,10 @@ export const createLocalizationService = (): Core.Localization => {
       return provider?.isLocalizedContentType(model) ?? false;
     },
     async getDefaultLocale() {
-      return provider?.getDefaultLocale() ?? null;
+      return (await provider?.getDefaultLocale()) ?? null;
     },
     async getLocales() {
-      return provider?.getLocales() ?? [];
+      return (await provider?.getLocales()) ?? [];
     },
     getNestedPopulateOfNonLocalizedAttributes(modelUID) {
       return provider?.getNestedPopulateOfNonLocalizedAttributes(modelUID) ?? [];

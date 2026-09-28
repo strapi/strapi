@@ -83,4 +83,20 @@ describe('Localization capability', () => {
 
     await expect(localization.getDefaultLocale()).rejects.toThrow('Locale store unavailable');
   });
+
+  it('falls back to inert defaults when a provider resolves undefined', async () => {
+    const localization = createLocalizationService();
+    // Contract-violating provider, e.g. a JS plugin returning nothing
+    localization.register({
+      isLocalizedContentType: () => true,
+      getDefaultLocale: async () => undefined as unknown as null,
+      getLocales: async () => undefined as unknown as [],
+      getNestedPopulateOfNonLocalizedAttributes: () => [],
+      getNonLocalizedAttributes: () => [],
+      fillNonLocalizedAttributes() {},
+    });
+
+    await expect(localization.getDefaultLocale()).resolves.toBeNull();
+    await expect(localization.getLocales()).resolves.toEqual([]);
+  });
 });
