@@ -327,7 +327,37 @@ export type ConfigDefaultValue =
   | undefined
   | void;
 
-export interface ConfigProvider {
+/**
+ * `never` for paths inside a registered config namespace, so that they skip the legacy `get` overload.
+ * TODO @Nico An unknown path inside a registered namespace, e.g. `'server.nope'`, also skips it, so
+ * its default keeps a non-widening literal type. Rare, accepted for now.
+ */
+type LegacyConfigPath<TPath> = TPath extends ConfigNamespace | `${ConfigNamespace}.${string}`
+  ? never
+  : unknown;
+
+/**
+ * `get` without strict mode: develop's signature, so a default infers a widening literal, e.g.
+ * `let port = get('server.port', 1337)` is a `number`. Editors still list registered paths.
+ * A single signature keeps assigned implementations checked against the generic `T`.
+ */
+type LegacyConfigGetter = {
+  get<T = unknown, TPath extends ConfigPath = ConfigPath>(
+    key: TPath | ConfigGetPathSuggestion<TPath>,
+    defaultVal?: T
+  ): T;
+};
+
+/**
+ * `get` with strict mode. TODO @Nico TypeScript relates overloads with erased generics, so assigned
+ * implementations such as `config.get = () => ({})` are not checked against `T` in strict mode.
+ */
+type StrictConfigGetter = {
+  /** Reads a config value outside the registered namespaces, as without strict mode. */
+  get<T = unknown, TPath extends PropertyPath = PropertyPath>(
+    key: TPath & LegacyConfigPath<TPath>,
+    defaultVal?: T
+  ): T;
   /**
    * Reads a config value. A registered namespace, or a dotted path inside one, resolves to its contract.
    * Editors list registered namespaces, then the keys under the path being typed.
@@ -345,6 +375,11 @@ export interface ConfigProvider {
     key: TPath | ConfigGetPathSuggestion<TPath>,
     ...args: TArgs & ([] | [defaultVal: ConfigLookup<TPath, T> | undefined])
   ): ConfigLookup<TPath, T, NoInfer<TArgs[0]>>;
+};
+
+type ConfigGetter = IsStrict extends false ? LegacyConfigGetter : StrictConfigGetter;
+
+export interface ConfigProvider extends ConfigGetter {
   set(path: string, val: unknown): this;
   has(path: string): boolean;
   [key: string]: any;
