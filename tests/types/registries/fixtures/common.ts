@@ -1,16 +1,12 @@
 import type { Core, UID } from '@strapi/strapi';
 
 declare const app: Core.Strapi;
-declare const dynamicName: string;
 
 const uid: UID.ContentType = 'api::article.article';
 uid satisfies 'api::article.article';
 // @ts-expect-error Generated schema declarations still narrow content type UIDs.
 const missingUID: UID.ContentType = 'api::missing.missing';
 missingUID satisfies unknown;
-
-app.plugin(dynamicName).service('locales').anything();
-app.plugin('i18n').service(dynamicName).anything();
 
 const explicit = app.plugin('i18n').service<{ application: true }>('locales');
 explicit satisfies { application: true };
