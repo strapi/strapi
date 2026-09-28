@@ -77,13 +77,16 @@ strapi.controller<LabController>('plugin::controller-lab.items').create satisfie
 // @ts-expect-error The explicit contract is not widened by the permissive controller index signature.
 strapi.controller<LabController>('plugin::unregistered.items').missing satisfies unknown;
 const legacyPlugin: Plugin = strapi.plugin('controller-lab');
-legacyPlugin.controller('items') satisfies Controller;
+exactlyUnknown(legacyPlugin.controller('items')) satisfies true;
+// @ts-expect-error A type annotation on the result does not replace the type argument.
+const contextualController: Controller = legacyPlugin.controller('items');
+contextualController satisfies unknown;
 
-// Generic helpers that forward a controller name keep inferring from their declared return type.
+// Generic helpers that forward a controller name pass their return type as the type argument.
 type LabControllers = { items: LabController; unregistered: LabController };
 const getUnregisteredController = <TName extends keyof LabControllers>(
   name: TName
-): LabControllers[TName] => strapi.plugin('unregistered').controller(name);
+): LabControllers[TName] => strapi.plugin('unregistered').controller<LabControllers[TName]>(name);
 getUnregisteredController('items').list satisfies ControllerHandler;
 
 // @ts-expect-error Assigned functions are checked against the generic signature, as before registries.

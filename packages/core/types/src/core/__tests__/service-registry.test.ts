@@ -112,22 +112,34 @@ strapi.service<GreetingService>('plugin::type-lab.counter').greet('Nico') satisf
 strapi.service<GreetingService>('plugin::unregistered.greeting').missing();
 // @ts-expect-error The UID is still checked against the service UID shape.
 strapi.service<GreetingService>('not-a-uid');
+// A type annotation on the result does not replace the type argument.
+// @ts-expect-error `T` is not inferred from the annotation.
 const contextual: GreetingService = strapi.plugin('type-lab').service(dynamicService);
+// @ts-expect-error `T` is not inferred from the annotation, for a dynamic plugin either.
 const contextualDynamic: GreetingService = strapi.plugin(dynamicPlugin).service('greeting');
+// @ts-expect-error `T` is not inferred from the annotation, for a full UID either.
+const contextualUid: GreetingService = strapi.service('plugin::unregistered.greeting');
 const legacyPlugin: Plugin = strapi.plugin('type-lab');
+// @ts-expect-error `T` is not inferred from the annotation, for the default `Plugin` either.
 const contextualLegacy: GreetingService = legacyPlugin.service('greeting');
-contextual.greet('Nico');
-// Generic helpers that forward a service name keep inferring from their declared return type.
+contextual satisfies unknown;
+contextualDynamic satisfies unknown;
+contextualUid satisfies unknown;
+contextualLegacy satisfies unknown;
+// Generic helpers that forward a service name pass their return type as the type argument.
 type LabServices = { greeting: GreetingService; unregistered: GreetingService };
 const getUnregisteredService = <TName extends keyof LabServices>(name: TName): LabServices[TName] =>
-  strapi.plugin('unregistered').service(name);
+  strapi.plugin('unregistered').service<LabServices[TName]>(name);
 const getRegisteredService = <TName extends keyof LabServices>(name: TName): LabServices[TName] =>
-  strapi.plugin('type-lab').service(name);
+  strapi.plugin('type-lab').service<LabServices[TName]>(name);
+const getServiceInferred = <TName extends keyof LabServices>(name: TName): LabServices[TName] =>
+  // @ts-expect-error Without the type argument, the lookup is not assignable to the return type.
+  strapi.plugin('unregistered').service(name);
+getServiceInferred satisfies unknown;
 getUnregisteredService('greeting').greet('Nico') satisfies Promise<string>;
 getRegisteredService('unregistered').greet('Nico') satisfies Promise<string>;
 
-// A conditional return type needs the explicit generic when the plugin has registered services:
-// the lookup cannot resolve until the name is known.
+// A conditional return type needs the explicit generic too.
 type LabServiceFactories = { greeting: () => GreetingService };
 type LabServiceInstance<TName extends keyof LabServiceFactories> = ReturnType<
   LabServiceFactories[TName]
@@ -144,8 +156,6 @@ getRegisteredFactoryService('greeting').greet('Nico') satisfies Promise<string>;
 getRegisteredFactoryServiceInferred('greeting').greet('Nico') satisfies Promise<string>;
 // @ts-expect-error Assigned functions are checked against the generic signature, as before registries.
 legacyPlugin.service = () => ({ greet: () => 'Nico' });
-contextualDynamic.greet('Nico');
-contextualLegacy.greet('Nico');
 
 // Parameterizing Plugin must preserve its explicitly declared Module members.
 strapi.plugin('type-lab').config<number>('limit') satisfies number;
