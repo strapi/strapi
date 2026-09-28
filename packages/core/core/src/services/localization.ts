@@ -1,5 +1,14 @@
 import type { Core } from '@strapi/types';
 
+const PROVIDER_METHODS = [
+  'isLocalizedContentType',
+  'getDefaultLocale',
+  'getLocales',
+  'getNestedPopulateOfNonLocalizedAttributes',
+  'getNonLocalizedAttributes',
+  'fillNonLocalizedAttributes',
+] as const satisfies ReadonlyArray<keyof Core.LocalizationProvider>;
+
 /** Creates the localization capability used by core, including apps without a localization plugin. */
 export const createLocalizationService = (): Core.Localization => {
   let provider: Core.LocalizationProvider | undefined;
@@ -8,6 +17,13 @@ export const createLocalizationService = (): Core.Localization => {
     register(localizationProvider) {
       if (provider !== undefined) {
         throw new Error('A localization provider is already registered for this application.');
+      }
+
+      // Fail at registration rather than on first use, which can be inside a sync hook
+      for (const name of PROVIDER_METHODS) {
+        if (typeof localizationProvider[name] !== 'function') {
+          throw new Error(`Localization provider is missing "${name}"`);
+        }
       }
 
       provider = localizationProvider;

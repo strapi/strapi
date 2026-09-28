@@ -103,6 +103,22 @@ describe('Localization capability', () => {
     expect(localization.isLocalizedContentType(article)).toBe(true);
   });
 
+  it('rejects a provider missing a method', () => {
+    const localization = createLocalizationService();
+    const incompleteProvider = {
+      isLocalizedContentType: () => true,
+      getDefaultLocale: async () => 'en',
+      getLocales: async () => [],
+      getNestedPopulateOfNonLocalizedAttributes: () => [],
+      fillNonLocalizedAttributes() {},
+    } as unknown as Core.LocalizationProvider;
+
+    expect(() => localization.register(incompleteProvider)).toThrow(
+      'Localization provider is missing "getNonLocalizedAttributes"'
+    );
+    expect(localization.isEnabled()).toBe(false);
+  });
+
   it('falls back to inert defaults when a provider resolves undefined', async () => {
     const localization = createLocalizationService();
     // Contract-violating provider, e.g. a JS plugin returning nothing
