@@ -270,7 +270,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   ) {
     const model = strapi.getModel(uid);
     const hasDnP = contentTypes.hasDraftAndPublish(model);
-    const isLocalized = (model.pluginOptions?.i18n as any)?.localized === true;
+    const isLocalized = strapi.localization.isLocalizedContentType(model);
 
     if (!availableLocales && !availableStatus) {
       // Nothing to compute.
