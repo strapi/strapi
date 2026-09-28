@@ -3,6 +3,7 @@ import type { Core } from '@strapi/types';
 
 import { async } from '@strapi/utils';
 import { getService } from '../utils';
+import type { StageWithPermissions } from '../services/stage-permissions';
 import { validateUpdateStageOnEntity, validateLocale } from '../validation/review-workflows';
 import {
   STAGE_MODEL_UID,
@@ -205,10 +206,10 @@ export default {
     }
 
     const otherStages = workflowStages.filter(
-      (stage: { id: number; permissions?: unknown[] }) => stage.id !== entityStageId
+      (stage: { id: number } & StageWithPermissions) => stage.id !== entityStageId
     );
 
-    const data = otherStages.filter((stage: { id: number; permissions?: unknown[] }) =>
+    const data = otherStages.filter((stage: { id: number } & StageWithPermissions) =>
       stagePermissions.canTransitionToStageWithPermissions(stage)
     );
 
