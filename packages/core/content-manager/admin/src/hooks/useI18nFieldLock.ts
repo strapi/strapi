@@ -1,5 +1,6 @@
 import { useQueryParams } from '@strapi/admin/strapi-admin';
 
+import { useI18nSharedFieldsLock } from '../features/I18nSharedFieldsLock';
 import { useGetI18nLocalesQuery } from '../services/documents';
 
 import { useDocumentContext } from './useDocumentContext';
@@ -65,8 +66,12 @@ const useShouldLockNonLocalizedField = (
   options: { isInsideComponent?: boolean } = {}
 ): boolean => {
   const isDefaultLocale = useIsEditingDefaultLocale();
+  const isUnlocked = useI18nSharedFieldsLock(
+    'useShouldLockNonLocalizedField',
+    (state) => state.isUnlocked
+  );
 
-  if (isDefaultLocale || options.isInsideComponent) {
+  if (isDefaultLocale || options.isInsideComponent || isUnlocked) {
     return false;
   }
 

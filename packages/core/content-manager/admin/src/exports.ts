@@ -22,6 +22,7 @@ export type {
 } from './hooks/useDocumentLayout';
 export type { InjectableListViewFilter } from './constants/hooks';
 export * from './features/DocumentRBAC';
+export { useI18nSharedFieldsLock } from './features/I18nSharedFieldsLock';
 export type {
   EditViewContext,
   ListViewContext,
