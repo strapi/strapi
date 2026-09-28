@@ -22,6 +22,9 @@ export type Localization = LocalizationProvider & {
   /**
    * Install the provider before database migrations and content-type synchronization run.
    * Only one provider can be registered per application: a second registration throws.
+   * Reads made during the register lifecycle of a plugin ordered before the provider's own
+   * plugin (or of an API module) see the inert defaults; read from bootstrap onward, or
+   * check `isEnabled()` first.
    */
   register(provider: LocalizationProvider): void;
 };
