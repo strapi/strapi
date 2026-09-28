@@ -19,10 +19,11 @@ export const createLocalizationProvider = (strapi: Core.Strapi): Core.Localizati
       return typeof value === 'string' ? value : null;
     },
     async getLocales() {
-      const locales: Array<{ code: string; name: string }> | null | undefined =
+      const locales: Array<{ code: string; name: string | null }> | null | undefined =
         await getLocalesService().find();
 
-      return (locales ?? []).map(({ code, name }) => ({ code, name }));
+      // Stored names are optional, but core consumers need a display name for every locale.
+      return (locales ?? []).map(({ code, name }) => ({ code, name: name ?? code }));
     },
     getNestedPopulateOfNonLocalizedAttributes(modelUID) {
       return getContentTypesService().getNestedPopulateOfNonLocalizedAttributes(modelUID);
