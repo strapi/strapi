@@ -20,7 +20,7 @@ import type { PluginMap, RegisteredPluginName } from './plugin';
 import type { PolicyMap, RegisteredPolicyName } from './policy';
 import type { ServiceLookup, ServiceLookupDefault, ServiceLookupUID, ServiceMap } from './service';
 import type { SuggestedString } from '../utils/string';
-import type { IsStrict } from './strictness';
+import type { IsStrict, StrictNoInfer } from './strictness';
 
 export interface Strapi extends Container {
   server: Modules.Server.Server;
@@ -135,7 +135,7 @@ export interface Strapi extends Container {
     TUID extends ServiceLookupUID = ServiceLookupUID,
   >(
     uid: TUID
-  ): ServiceLookup<TUID, T>;
+  ): ServiceLookup<TUID, StrictNoInfer<T>>;
   /**
    * Controllers keyed by UID. With strict types enabled, registered UIDs resolve to their contracts;
    * other keys keep the legacy controller.
@@ -150,7 +150,7 @@ export interface Strapi extends Container {
     TUID extends ControllerLookupUID = ControllerLookupUID,
   >(
     uid: TUID
-  ): ControllerLookup<TUID, T>;
+  ): ControllerLookup<TUID, StrictNoInfer<T>>;
   contentTypes: Schema.ContentTypes;
   contentType<TContentTypeUID extends UID.ContentType>(
     name: TContentTypeUID
