@@ -102,6 +102,8 @@ export default {
     const createdWorkflow = await workflowService
       .create({
         data: await sanitizeCreateInput(workflowBody),
+        // TODO @Nico runtime bug, to report: `workflows.create` replaces `populate` with its own.
+        // @ts-expect-error -- kept as is until the bug is fixed
         populate,
       })
       .then(formatWorkflowToAdmin);
