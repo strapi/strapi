@@ -101,9 +101,9 @@ app.plugin('content-manager').controller('collection-types').findOn satisfies un
   policies: ['hasPermission'],
 }) satisfies Core.RouteConfigFor<'plugin::content-manager'>;
 
-// Services and controllers outside this adoption slice resolve to `never`; explicit generics remain.
-const unregisteredService = app.plugin('content-manager').service('unregistered');
-unregisteredService satisfies never;
-const unregisteredController = app.plugin('content-manager').controller('unregistered');
-unregisteredController satisfies never;
+// Services and controllers outside this adoption slice have no members; explicit generics remain.
+// @ts-expect-error Unregistered services resolve to `unknown`.
+app.plugin('content-manager').service('unregistered').anything();
+// @ts-expect-error Unregistered controllers resolve to `unknown`.
+app.plugin('content-manager').controller('unregistered').anything satisfies unknown;
 app.plugin('content-manager').service<{ custom(): void }>('unregistered').custom();

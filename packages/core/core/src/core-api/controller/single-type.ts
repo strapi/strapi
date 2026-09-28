@@ -24,7 +24,9 @@ const createSingleTypeController = ({
       await this.validateQuery(ctx);
       const sanitizedQuery = await this.sanitizeQuery(ctx);
 
-      const entity = await strapi.service(uid).find(sanitizedQuery);
+      const entity = await strapi
+        .service<Core.CoreAPI.Service.SingleType>(uid)
+        .find(sanitizedQuery);
 
       const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
 
@@ -48,9 +50,10 @@ const createSingleTypeController = ({
 
       const sanitizedInputData = await this.sanitizeInput(body.data, ctx);
 
-      const entity = await strapi.service(uid).createOrUpdate({
+      const entity = await strapi.service<Core.CoreAPI.Service.SingleType>(uid).createOrUpdate({
         ...sanitizedQuery,
-        data: sanitizedInputData,
+        // The `isObject` check above rejects non-object payloads.
+        data: sanitizedInputData as Record<string, unknown>,
       });
 
       const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
@@ -62,7 +65,7 @@ const createSingleTypeController = ({
       await this.validateQuery(ctx);
       const sanitizedQuery = await this.sanitizeQuery(ctx);
 
-      await strapi.service(uid).delete(sanitizedQuery);
+      await strapi.service<Core.CoreAPI.Service.SingleType>(uid).delete(sanitizedQuery);
 
       ctx.status = 204;
     },

@@ -1,10 +1,11 @@
 import type * as UID from '../uid';
 import type { SuggestedString } from '../utils/string';
-import type { IsDynamicName, IsStrict, RegisteredRecord } from './strictness';
+import type { IsStrict, RegisteredRecord } from './strictness';
 
 /**
  * Resolves application overrides before package defaults. With strict types enabled, an unregistered
- * literal UID resolves to `never`; with strict types disabled, every UID resolves to the legacy service.
+ * UID resolves to `unknown`, so callers pass a type argument; with strict types disabled, every UID
+ * resolves to the legacy service.
  */
 export type ServiceFor<TUID extends string> = IsStrict extends false
   ? Service
@@ -12,10 +13,7 @@ export type ServiceFor<TUID extends string> = IsStrict extends false
     ? Strapi.Registries.AppServices[TUID]
     : TUID extends keyof Strapi.Registries.PackageServices
       ? Strapi.Registries.PackageServices[TUID]
-      : IsDynamicName<TUID> extends true
-        ? // TODO @Nico decide whether dynamic names should also close in strict mode
-          Service
-        : never;
+      : unknown;
 
 /**
  * Return type of `strapi.service<T>(uid)`: `T` when the UID kept its wide default, which happens when
@@ -42,6 +40,9 @@ export type ServiceLookupUID = SuggestedString<RegisteredServiceUID, UID.Service
 export type ServiceMap = IsStrict extends false
   ? Record<string, Service>
   : RegisteredRecord<{ [TUID in RegisteredServiceUID]: ServiceFor<TUID> }, Service>;
+
+/** Default result of a lookup without type argument: `unknown` with strict types enabled. */
+export type ServiceLookupDefault = IsStrict extends false ? Service : unknown;
 
 export type Service = {
   // TODO [V5] Consider changing the any value to unknown.

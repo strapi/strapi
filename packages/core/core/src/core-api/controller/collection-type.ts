@@ -25,7 +25,9 @@ const createCollectionTypeController = ({
       await this.validateQuery(ctx);
       const sanitizedQuery = await this.sanitizeQuery(ctx);
 
-      const { results, pagination } = await strapi.service(uid).find(sanitizedQuery);
+      const { results, pagination } = await strapi
+        .service<Core.CoreAPI.Service.CollectionType>(uid)
+        .find(sanitizedQuery);
       const sanitizedResults = await this.sanitizeOutput(results, ctx);
       return this.transformResponse(sanitizedResults, { pagination });
     },
@@ -38,7 +40,9 @@ const createCollectionTypeController = ({
       await this.validateQuery(ctx);
       const sanitizedQuery = await this.sanitizeQuery(ctx);
 
-      const entity = await strapi.service(uid).findOne(id, sanitizedQuery);
+      const entity = await strapi
+        .service<Core.CoreAPI.Service.CollectionType>(uid)
+        .findOne(id, sanitizedQuery);
       const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
 
       return this.transformResponse(sanitizedEntity);
@@ -61,9 +65,10 @@ const createCollectionTypeController = ({
 
       const sanitizedInputData = await this.sanitizeInput(body.data, ctx);
 
-      const entity = await strapi.service(uid).create({
+      const entity = await strapi.service<Core.CoreAPI.Service.CollectionType>(uid).create({
         ...sanitizedQuery,
-        data: sanitizedInputData,
+        // The `isObject` check above rejects non-object payloads.
+        data: sanitizedInputData as Record<string, unknown>,
       });
 
       const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
@@ -90,9 +95,10 @@ const createCollectionTypeController = ({
 
       const sanitizedInputData = await this.sanitizeInput(body.data, ctx);
 
-      const entity = await strapi.service(uid).update(id, {
+      const entity = await strapi.service<Core.CoreAPI.Service.CollectionType>(uid).update(id, {
         ...sanitizedQuery,
-        data: sanitizedInputData,
+        // The `isObject` check above rejects non-object payloads.
+        data: sanitizedInputData as Record<string, unknown>,
       });
 
       const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
@@ -108,7 +114,7 @@ const createCollectionTypeController = ({
       await this.validateQuery(ctx);
       const sanitizedQuery = await this.sanitizeQuery(ctx);
 
-      await strapi.service(uid).delete(id, sanitizedQuery);
+      await strapi.service<Core.CoreAPI.Service.CollectionType>(uid).delete(id, sanitizedQuery);
 
       ctx.status = 204;
     },

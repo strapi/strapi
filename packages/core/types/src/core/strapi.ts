@@ -9,11 +9,16 @@ import type * as Schema from '../schema';
 import type * as UID from '../uid';
 
 import type { Container } from './container';
-import type { ControllerLookup, ControllerLookupUID, ControllerMap } from './controller';
+import type {
+  ControllerLookup,
+  ControllerLookupDefault,
+  ControllerLookupUID,
+  ControllerMap,
+} from './controller';
 import type { ApiMap, RegisteredApiName } from './module';
 import type { PluginMap, RegisteredPluginName } from './plugin';
 import type { PolicyMap, RegisteredPolicyName } from './policy';
-import type { ServiceLookup, ServiceLookupUID, ServiceMap } from './service';
+import type { ServiceLookup, ServiceLookupDefault, ServiceLookupUID, ServiceMap } from './service';
 import type { SuggestedString } from '../utils/string';
 import type { IsStrict } from './strictness';
 
@@ -125,7 +130,10 @@ export interface Strapi extends Container {
    * Resolves the registered contract of `uid`. An explicit type argument (`service<MyService>(uid)`)
    * wins over the registries, including for unregistered names with strict types enabled.
    */
-  service<T extends Core.Service = Core.Service, TUID extends ServiceLookupUID = ServiceLookupUID>(
+  service<
+    T extends ServiceLookupDefault = ServiceLookupDefault,
+    TUID extends ServiceLookupUID = ServiceLookupUID,
+  >(
     uid: TUID
   ): ServiceLookup<TUID, T>;
   /**
@@ -138,7 +146,7 @@ export interface Strapi extends Container {
    * wins over the registries, including for unregistered names with strict types enabled.
    */
   controller<
-    T extends Core.Controller = Core.Controller,
+    T extends ControllerLookupDefault = ControllerLookupDefault,
     TUID extends ControllerLookupUID = ControllerLookupUID,
   >(
     uid: TUID
