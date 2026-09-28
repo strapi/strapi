@@ -77,6 +77,11 @@ const sameGreeting = strapi.service<GreetingService>('plugin::greetings.greeting
 const items = strapi.controller<ItemsController>('api::item.item');
 ```
 
+With the switch on, a type annotation on the result does not replace the type argument:
+`const greeting: GreetingService = strapi.plugin('greetings').service('greeting')` is an error.
+A generic helper that forwards a name passes its return type as the type argument, as in
+`strapi.plugin('greetings').service<Services[TName]>(name)`.
+
 The plural accessors resolve registered keys through the same contracts: `strapi.services`,
 `strapi.controllers`, and `strapi.policies` are keyed by UID, and a plugin's or API's `services`,
 `controllers`, and `policies` maps are keyed by name. `strapi.plugins` and `strapi.apis` resolve a
