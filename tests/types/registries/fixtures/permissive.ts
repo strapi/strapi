@@ -60,3 +60,23 @@ app.services['plugin::i18n.locales'].anything();
 const pluralServices: Record<string, Core.Service> = app.services;
 const legacyPluralServices: typeof app.services = pluralServices;
 legacyPluralServices satisfies Record<string, Core.Service>;
+
+// Policy and API module lookups keep their previous types without the switch.
+type Equal<T, U> =
+  (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;
+type Expect<T extends true> = T;
+const adminPolicy = app.policy('admin::isAuthenticatedAdmin');
+const unregisteredPolicy = app.policy('global::unregistered');
+const pluginPolicy = app.plugin('content-manager').policy('hasPermissions');
+const apiService = app.api('article').service('article');
+const apiController = app.api('article').controller('article');
+declare const lookupChecks: [
+  Expect<Equal<typeof adminPolicy, Core.Policy>>,
+  Expect<Equal<typeof unregisteredPolicy, Core.Policy>>,
+  Expect<Equal<typeof pluginPolicy, any>>,
+  Expect<Equal<typeof apiService, Core.Service>>,
+  Expect<Equal<typeof apiController, Core.Controller>>,
+];
+lookupChecks satisfies unknown;
+const contextualApiService: { greet(): string } = app.api('article').service('article');
+contextualApiService.greet() satisfies string;

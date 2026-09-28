@@ -92,7 +92,7 @@ strapi.policy(dynamicName) satisfies unknown;
 strapi.plugin(dynamicName) satisfies unknown;
 strapi.plugin('unregistered') satisfies unknown;
 strapi.api('unregistered') satisfies unknown;
-const apiService = strapi.api('suggest-lab').service('greeting');
+const apiService = strapi.api('suggest-lab').service<{ anything(): void }>('unregistered');
 apiService.anything();
 const apiController = strapi.api('suggest-lab').controller<{ list(): void }>('unregistered');
 apiController.list();
