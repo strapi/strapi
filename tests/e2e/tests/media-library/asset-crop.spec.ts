@@ -24,7 +24,7 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')('Media Library 
     // Default crop area = full image; Apply replaces the binary.
     await assetsPage.applyCrop();
 
-    await expect(assetsPage.getDrawerToast(/File cropped/i)).toBeVisible({ timeout: 10000 });
+    await expect(assetsPage.getDrawerToast(/File updated/i)).toBeVisible({ timeout: 10000 });
     await expect(assetsPage.assetDetailsDrawer).toBeVisible();
   });
 

@@ -132,7 +132,7 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
 
         await assetsPage.openCropEditor();
         await assetsPage.applyCrop();
-        await expect(assetsPage.getDrawerToast(/File cropped/i)).toBeVisible({ timeout: 10_000 });
+        await expect(assetsPage.getDrawerToast(/File updated/i)).toBeVisible({ timeout: 10_000 });
 
         // The preview updates rather than serving a stale cached file: the
         // cache-busting `?v=<updatedAt>` query on the preview URL changes.
@@ -198,7 +198,7 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
         await focalY.blur();
 
         await assetsPage.applyCrop();
-        await expect(assetsPage.getDrawerToast(/File cropped/i)).toBeVisible({ timeout: 10_000 });
+        await expect(assetsPage.getDrawerToast(/File updated/i)).toBeVisible({ timeout: 10_000 });
 
         // It persists after Save. The field renders the number with the
         // locale's group separator ("1,404"), so compare the parsed value
