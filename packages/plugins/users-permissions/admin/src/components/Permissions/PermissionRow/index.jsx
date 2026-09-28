@@ -2,10 +2,10 @@ import React, { useMemo } from 'react';
 
 import { Box } from '@strapi/design-system';
 import sortBy from 'lodash/sortBy';
-import PropTypes from 'prop-types';
 
 import SubCategory from './SubCategory';
 
+/** @param {{ name: string, permissions: object }} props */
 const PermissionRow = ({ name, permissions }) => {
   const subCategories = useMemo(() => {
     return sortBy(
@@ -45,11 +45,6 @@ const PermissionRow = ({ name, permissions }) => {
       ))}
     </Box>
   );
-};
-
-PermissionRow.propTypes = {
-  name: PropTypes.string.isRequired,
-  permissions: PropTypes.object.isRequired,
 };
 
 export default PermissionRow;

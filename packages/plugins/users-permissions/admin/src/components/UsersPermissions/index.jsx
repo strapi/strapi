@@ -1,7 +1,6 @@
 import React, { forwardRef, memo, useImperativeHandle, useReducer } from 'react';
 
 import { Flex, Grid, Typography } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { UsersPermissionsProvider } from '../../contexts/UsersPermissionsContext';
@@ -12,6 +11,11 @@ import Policies from '../Policies';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
+/**
+ * @type {React.ForwardRefExoticComponent<
+ *   { permissions: object, routes: object } & React.RefAttributes<unknown>
+ * >}
+ */
 const UsersPermissions = forwardRef(({ permissions, routes }, ref) => {
   const { formatMessage } = useIntl();
   const [state, dispatch] = useReducer(reducer, initialState, (state) =>
@@ -95,10 +99,5 @@ const UsersPermissions = forwardRef(({ permissions, routes }, ref) => {
     </UsersPermissionsProvider>
   );
 });
-
-UsersPermissions.propTypes = {
-  permissions: PropTypes.object.isRequired,
-  routes: PropTypes.object.isRequired,
-};
 
 export default memo(UsersPermissions);

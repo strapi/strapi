@@ -8,20 +8,31 @@ import * as React from 'react';
 
 import { Button, Flex, Grid, Modal, Breadcrumbs, Crumb } from '@strapi/design-system';
 import { Form, Formik } from 'formik';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import Input from './Input';
 
+/**
+ * @param {{
+ *   headerBreadcrumbs: string[],
+ *   initialData?: object | null,
+ *   isSubmiting: boolean,
+ *   layout: { form?: unknown[][], schema?: object },
+ *   isOpen: boolean,
+ *   onSubmit: Function,
+ *   onToggle: Function,
+ *   providerToEditName?: string | null,
+ * }} props
+ */
 const FormModal = ({
   headerBreadcrumbs,
-  initialData,
+  initialData = null,
   isSubmiting,
   layout,
   isOpen,
   onSubmit,
   onToggle,
-  providerToEditName,
+  providerToEditName = null,
 }) => {
   const { formatMessage } = useIntl();
 
@@ -91,25 +102,6 @@ const FormModal = ({
       </Modal.Content>
     </Modal.Root>
   );
-};
-
-FormModal.defaultProps = {
-  initialData: null,
-  providerToEditName: null,
-};
-
-FormModal.propTypes = {
-  headerBreadcrumbs: PropTypes.arrayOf(PropTypes.string).isRequired,
-  initialData: PropTypes.object,
-  layout: PropTypes.shape({
-    form: PropTypes.arrayOf(PropTypes.array),
-    schema: PropTypes.object,
-  }).isRequired,
-  isOpen: PropTypes.bool.isRequired,
-  isSubmiting: PropTypes.bool.isRequired,
-  onSubmit: PropTypes.func.isRequired,
-  onToggle: PropTypes.func.isRequired,
-  providerToEditName: PropTypes.string,
 };
 
 export default FormModal;
