@@ -157,7 +157,14 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
     meta: ContentTypeMeta,
     populate?: string[]
   ) => {
-    return documents.map((document) => {
+    return documents.flatMap((document) => {
+      // Never emit "" / invalid timestamps: `new Date('')` is Invalid Date and crashes
+      // RelativeTime with "Start Date is invalid" (#27382). Drop entries we cannot date.
+      const updatedAt = toIsoDateString(document.updatedAt);
+      if (!updatedAt) {
+        return [];
+      }
+
       const additionalFields =
         populate?.reduce(
           (acc, key) => {
@@ -166,21 +173,24 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
           },
           {} as Record<string, any>
         ) || {};
-      return {
-        documentId: document.documentId,
-        locale: document.locale ?? null,
-        title: document[meta.mainField ?? 'documentId'],
-        contentTypeUid: meta.uid,
-        contentTypeDisplayName: meta.contentType.info.displayName,
-        kind: meta.contentType.kind,
-        ...additionalFields,
-        // Keep dates last so populate cannot overwrite with non-JSON-safe values
-        updatedAt: toIsoDateString(document.updatedAt) ?? '',
-        publishedAt:
-          meta.hasDraftAndPublish && document.publishedAt
-            ? toIsoDateString(document.publishedAt)
-            : null,
-      };
+
+      return [
+        {
+          documentId: document.documentId,
+          locale: document.locale ?? null,
+          title: document[meta.mainField ?? 'documentId'],
+          contentTypeUid: meta.uid,
+          contentTypeDisplayName: meta.contentType.info.displayName,
+          kind: meta.contentType.kind,
+          ...additionalFields,
+          // Keep dates last so populate cannot overwrite with non-JSON-safe values
+          updatedAt,
+          publishedAt:
+            meta.hasDraftAndPublish && document.publishedAt
+              ? toIsoDateString(document.publishedAt)
+              : null,
+        },
+      ];
     });
   };
 
