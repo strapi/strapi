@@ -6,7 +6,7 @@ jest.mock('../utils', () => ({
   getService: jest.fn(() => ({ isLocalizedContentType: jest.fn() })),
 }));
 
-it('installs localization during register before database initialization or bootstrap', async () => {
+it('installs the provider during register without resolving i18n services', async () => {
   const install = jest.fn();
   const plugin = jest.fn();
   const strapi = {
@@ -18,7 +18,6 @@ it('installs localization during register before database initialization or boot
     plugin,
   } as unknown as Core.Strapi;
 
-  // No db or bootstrap services are available on this fixture.
   await register({ strapi });
 
   expect(install).toHaveBeenCalledTimes(1);
