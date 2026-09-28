@@ -21,7 +21,8 @@ app.service('admin::role').getSuperAdmin satisfies (...args: never[]) => unknown
 // @ts-expect-error `ssoCheckRolesIdForDeletion` only exists in EE.
 app.service('admin::role').ssoCheckRolesIdForDeletion([]);
 // Optional plugins are not loaded by the app entry.
-app.plugin('graphql').service('utils') satisfies never;
+// @ts-expect-error Unregistered services resolve to `unknown`.
+app.plugin('graphql').service('utils').anything();
 
 declare const enabled: Strapi.Registries.Settings extends { strict: true } ? true : false;
 enabled satisfies true;
