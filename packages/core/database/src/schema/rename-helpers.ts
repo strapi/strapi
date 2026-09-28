@@ -265,7 +265,7 @@ export const createRenameHelpers = ({ db }: RenameHelpersDeps) => {
         return false;
       }
 
-      for (const handler of [...attributeRenameHandlers]) {
+      for (const handler of attributeRenameHandlers) {
         await handler(trx, op.renames);
       }
 
