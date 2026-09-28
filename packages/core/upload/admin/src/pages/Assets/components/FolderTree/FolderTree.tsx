@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 
 import { SubNav } from '@strapi/admin/strapi-admin';
 import { Box, Flex, IconButton, Loader, Typography } from '@strapi/design-system';
@@ -345,6 +345,7 @@ const FolderTreeItemInner = ({
     <li>
       <TreeRow
         ref={setNodeRef}
+        data-native-context-menu
         alignItems="center"
         // Indent plus the row's own inset, so the chevron never sits flush
         // against the edge of the highlight at any depth.
@@ -474,7 +475,11 @@ interface FolderTreeProps {
    * */
   showActiveFolder?: boolean;
   onSelectFolder: (folderId: number | null) => void;
+  /** Rendered inside the sidebar, which it can listen on through `FOLDER_TREE_ROOT_SELECTOR`. */
+  backgroundContextMenu?: ReactNode;
 }
+
+export const FOLDER_TREE_ROOT_SELECTOR = '[data-folder-tree-root]';
 
 /**
  * Left-rail navigation for the Media Library. Fetches folder structure internally
@@ -497,6 +502,7 @@ export const FolderTree = ({
   currentFolderId,
   showActiveFolder = true,
   onSelectFolder,
+  backgroundContextMenu,
 }: FolderTreeProps) => {
   const { formatMessage } = useIntl();
   const { data: folderStructure = [], isLoading, isError } = useGetFolderStructureQuery();
@@ -520,11 +526,13 @@ export const FolderTree = ({
 
   return (
     <SubNav.Main
+      data-folder-tree-root
       aria-label={formatMessage({
         id: getTranslationKey('sidebar.tree.aria-label'),
         defaultMessage: 'Media library folders',
       })}
     >
+      {backgroundContextMenu}
       <SubNav.Header
         label={formatMessage({
           id: getTranslationKey('sidebar.title'),
@@ -538,6 +546,7 @@ export const FolderTree = ({
               width rather than only behind the label. */}
           <TreeRow
             ref={setHomeDropRef}
+            data-native-context-menu
             alignItems="center"
             // Level 0, so the indent contributes nothing — but the row's own
             // inset still applies, exactly as it does for a top-level folder.

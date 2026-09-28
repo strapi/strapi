@@ -833,6 +833,46 @@ describe('AssetsPage main-area context menu', () => {
     await waitFor(() => expect(card).toHaveFocus());
   });
 
+  it('offers the creation actions on the empty parts of the folder tree sidebar', async () => {
+    respondWithAssets([createAsset(1, 'image.png')]);
+
+    renderPage();
+    await waitForCreatePermission();
+
+    // Text queries, not roles: the side nav is hidden below the medium breakpoint.
+    fireEvent.contextMenu(screen.getByText('Folders'), { clientX: 40, clientY: 200 });
+
+    const menu = within(await screen.findByRole('menu'));
+    expect(menu.getByRole('menuitem', { name: 'New folder' })).toBeInTheDocument();
+    expect(menu.getByRole('menuitem', { name: 'File upload' })).toBeInTheDocument();
+    expect(menu.getByRole('menuitem', { name: 'File upload from URL' })).toBeInTheDocument();
+  });
+
+  it('opens only the folder actions on a folder tree row', async () => {
+    respondWithAssets([]);
+    server.use(
+      http.get('*/upload/folder-structure', () =>
+        HttpResponse.json({ data: [{ id: 4, name: 'Photos', children: [] }] })
+      )
+    );
+
+    renderPage();
+    await waitForCreatePermission();
+
+    // The row itself rather than its button: buttons are skipped by the sidebar
+    // menu anyway, the row's padding is what the tree has to claim.
+    // eslint-disable-next-line testing-library/no-node-access
+    const row = (await screen.findByTestId('folder-tree-node-4')).closest(
+      '[data-native-context-menu]'
+    );
+    fireEvent.contextMenu(row!, { clientX: 40, clientY: 200 });
+
+    const menu = within(await screen.findByRole('menu'));
+    expect(menu.getByRole('menuitem', { name: 'Delete folder' })).toBeInTheDocument();
+    expect(menu.queryByRole('menuitem', { name: 'New folder' })).not.toBeInTheDocument();
+    expect(screen.getAllByRole('menu')).toHaveLength(1);
+  });
+
   // Smoke cover only. The bug this came from — a second right-click doing
   // nothing — needs `pointerdown` and `contextmenu` to land in one task so the
   // dismissed menu's cleanup runs after the next one mounted. `fireEvent` acts

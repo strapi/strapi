@@ -83,6 +83,11 @@ interface MainAreaContextMenuProps {
    * permission gate can't silently regress to permissive.
    */
   disabled: boolean;
+  /**
+   * The element to listen on, found from where this renders. Defaults to the
+   * scrolling main column.
+   */
+  containerSelector?: string;
 }
 
 /**
@@ -102,6 +107,7 @@ export const MainAreaContextMenu = ({
   onImportFiles,
   onImportFromUrl,
   disabled,
+  containerSelector = SCROLL_ROOT_SELECTOR,
 }: MainAreaContextMenuProps) => {
   const { formatMessage } = useIntl();
   const [position, setPosition] = useState<CursorPosition | null>(null);
@@ -110,7 +116,7 @@ export const MainAreaContextMenu = ({
   const anchorRef = useCallback((node: HTMLElement | null) => setLocator(node), []);
 
   useEffect(() => {
-    const container = locator?.closest<HTMLElement>(SCROLL_ROOT_SELECTOR);
+    const container = locator?.closest<HTMLElement>(containerSelector);
 
     if (!container || disabled) {
       return;
@@ -135,7 +141,7 @@ export const MainAreaContextMenu = ({
     container.addEventListener('contextmenu', handleContextMenu);
 
     return () => container.removeEventListener('contextmenu', handleContextMenu);
-  }, [locator, disabled]);
+  }, [locator, disabled, containerSelector]);
 
   return (
     <>
