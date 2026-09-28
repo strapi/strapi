@@ -148,7 +148,7 @@ const countLinksToUnpublishedDocuments = async (
       const documentIds = [...new Set(targetLinks.map((link) => link.documentId))];
 
       const publishedRows = await strapi.db.query(targetUid).findMany({
-        select: ['documentId', 'locale'],
+        select: targetIsLocalized === true ? ['documentId', 'locale'] : ['documentId'],
         where: {
           documentId: { $in: documentIds },
           publishedAt: { $notNull: true },

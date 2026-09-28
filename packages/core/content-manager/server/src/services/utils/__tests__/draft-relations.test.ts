@@ -205,6 +205,21 @@ describe('draft-relations utils', () => {
         unpublishedRelations: 0,
         draftM2mLinks: 0,
       });
+      expect(findMany).toHaveBeenCalledWith(expect.objectContaining({ select: ['documentId'] }));
+    });
+
+    it('selects locale only when the M2M target content type is localized', async () => {
+      findMany.mockResolvedValue([]);
+
+      await sumDraftCounts(
+        strapiMock,
+        { tags: [{ documentId: 'draft-tag', locale: 'en' }] },
+        'api::article.article'
+      );
+
+      expect(findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ select: ['documentId', 'locale'] })
+      );
     });
   });
 });
