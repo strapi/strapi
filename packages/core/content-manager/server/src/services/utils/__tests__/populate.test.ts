@@ -265,6 +265,17 @@ describe('Populate', () => {
           },
         },
       },
+      // Separate source model: results are cached per uid
+      'api::page.page': {
+        uid: 'api::page.page',
+        attributes: {
+          category: {
+            type: 'relation',
+            relation: 'manyToOne',
+            target: 'api::category.category',
+          },
+        },
+      },
       'api::category.category': {
         uid: 'api::category.category',
         pluginOptions: { i18n: { localized: true } },
@@ -309,6 +320,17 @@ describe('Populate', () => {
             filters: { publishedAt: { $null: true } },
           },
         },
+      });
+    });
+
+    test('follows the provider over a stale localized flag', () => {
+      jest.mocked(strapi.localization.isLocalizedContentType).mockReturnValue(false);
+
+      const result = getDeepPopulateDraftCount('api::page.page' as any);
+
+      expect(result.populate.category).toEqual({
+        fields: ['documentId'],
+        filters: { publishedAt: { $null: true } },
       });
     });
   });
@@ -358,6 +380,12 @@ describe('Populate', () => {
       expect(
         getPopulateForLocalizations('api::no-plugin-options.no-plugin-options' as any)
       ).toEqual({});
+    });
+
+    test('follows the provider over a stale localized flag', () => {
+      jest.mocked(strapi.localization.isLocalizedContentType).mockReturnValue(false);
+
+      expect(getPopulateForLocalizations('api::localized.localized' as any)).toEqual({});
     });
   });
 });
