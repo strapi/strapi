@@ -5,7 +5,9 @@ import { getService } from '../utils';
 
 /**
  * Registers derived content-type MCP tools via strapi.ai.mcp.registerTool().
- * Must be called from the plugin register phase, before the MCP HTTP server starts.
+ * Must be called from the plugin bootstrap phase: after every plugin's register (so the
+ * localization provider is installed and locale rows are readable) and before the MCP HTTP
+ * server starts.
  */
 export const registerContentManagerMcpTools = async ({
   strapi,
