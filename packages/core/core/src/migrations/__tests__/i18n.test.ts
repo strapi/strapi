@@ -144,6 +144,24 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
         expect(strapi.db.query).toHaveBeenCalled();
       });
     });
+
+    describe('Should abort', () => {
+      test('i18n => non i18n without a default locale', async () => {
+        const query = createDBQueryMock();
+        strapi.db.query = query;
+        jest.mocked(strapi.localization.getDefaultLocale).mockResolvedValueOnce(null);
+
+        await expect(
+          disable({
+            oldContentTypes: { test: { pluginOptions: { i18n: { localized: true } } } as any },
+            contentTypes: { test: {} as any },
+          })
+        ).rejects.toThrow('Cannot disable localization for "test"');
+
+        expect(query().deleteMany).not.toHaveBeenCalled();
+        expect(query().updateMany).not.toHaveBeenCalled();
+      });
+    });
   });
 
   it('skips localization migrations when no provider is registered', async () => {

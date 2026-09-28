@@ -46,6 +46,13 @@ const disableI18n = async ({ oldContentTypes, contentTypes }: Input) => {
     if (isLocalizedContentType(oldContentType) && !isLocalizedContentType(contentType)) {
       const defaultLocale = await getDefaultLocale();
 
+      // `$ne: null` would match every localized row and delete them all
+      if (defaultLocale === null) {
+        throw new Error(
+          `Cannot disable localization for "${uid}": no default locale is set, so non-default rows cannot be identified.`
+        );
+      }
+
       await Promise.all([
         // Delete all entities that are not in the default locale
         strapi.db.query(uid).deleteMany({
