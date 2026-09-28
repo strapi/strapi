@@ -63,20 +63,18 @@ The EE edition merges its members into the admin `auth`, `user`, `role`, `passpo
 services. Their contracts are the CE shape, with the EE-only members optional. EE-only code passes
 the EE shape, `EnterpriseServices`, as an explicit generic argument.
 
-Strict contracts are closed: an unregistered literal service or controller name resolves to
-`never`, for full UIDs such as `strapi.service('plugin::greetings.greeting')` and for plugin
-lookups such as `strapi.plugin('greetings').service('greeting')`. Register a contract for the
-name, or pass an explicit generic argument. Both lookup forms accept one, and it takes precedence
-over the registries, with or without the switch:
+Strict contracts are closed: an unregistered service or controller name resolves to `unknown`,
+for full UIDs such as `strapi.service('plugin::greetings.greeting')` and for plugin lookups such
+as `strapi.plugin('greetings').service('greeting')`. Dynamic names, such as a `string` variable or
+a template literal type like `` `plugin::${string}.greeting` ``, cannot be validated and resolve to
+`unknown` too. Register a contract for the name, or pass an explicit generic argument. Both lookup
+forms accept one, and it takes precedence over the registries, with or without the switch:
 
 ```ts
 const greeting = strapi.plugin('greetings').service<GreetingService>('greeting');
 const sameGreeting = strapi.service<GreetingService>('plugin::greetings.greeting');
 const items = strapi.controller<ItemsController>('api::item.item');
 ```
-
-Dynamic names, such as a `string` variable or a template literal type like
-`` `plugin::${string}.greeting` ``, cannot be validated and retain the permissive lookup types.
 
 The plural accessors resolve registered keys through the same contracts: `strapi.services`,
 `strapi.controllers`, and `strapi.policies` are keyed by UID, and a plugin's or API's `services`,

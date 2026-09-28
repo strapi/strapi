@@ -46,20 +46,28 @@ strapi.plugin('controller-lab').controller('tags').missing satisfies unknown;
 // @ts-expect-error Actions from the replaced default are not retained.
 strapi.plugin('controller-lab').controller('items').defaultOnly satisfies unknown;
 
-// Unregistered literal names resolve to `never`, for full UIDs and plugin-scoped lookups alike.
-strapi.controller('plugin::unregistered.items') satisfies never;
-strapi.controller('api::unregistered.items') satisfies never;
-strapi.plugin('controller-lab').controller('unregistered') satisfies never;
-strapi.plugin('unregistered').controller('items') satisfies never;
+/** `true` only for `unknown`: `any` and every other type give `false`. */
+declare function exactlyUnknown<T>(
+  value: T
+): [unknown] extends [T] ? (0 extends 1 & T ? false : true) : false;
+
+// Unregistered names resolve to `unknown`, for full UIDs and plugin-scoped lookups alike.
+// Callers pass a type argument to use them.
+exactlyUnknown(strapi.controller('plugin::unregistered.items')) satisfies true;
+exactlyUnknown(strapi.controller('api::unregistered.items')) satisfies true;
+exactlyUnknown(strapi.plugin('controller-lab').controller('unregistered')) satisfies true;
+exactlyUnknown(strapi.plugin('unregistered').controller('items')) satisfies true;
 // @ts-expect-error Unregistered literal names expose no actions.
 strapi.controller('plugin::unregistered.items').anything satisfies unknown;
 
-// Dynamic and explicitly typed lookups keep the permissive signature.
-wideController.anything satisfies ControllerHandler;
-strapi.controller(patternUid).anything satisfies ControllerHandler;
-strapi.plugin(dynamicPlugin).controller('items').anything satisfies ControllerHandler;
-strapi.plugin('controller-lab').controller(dynamicController).anything satisfies ControllerHandler;
-strapi.plugin('controller-lab').controller(patternController).anything satisfies ControllerHandler;
+// Dynamic names cannot be validated, so they resolve to `unknown` too.
+exactlyUnknown(wideController) satisfies true;
+exactlyUnknown(strapi.controller(patternUid)) satisfies true;
+exactlyUnknown(strapi.plugin(dynamicPlugin).controller('items')) satisfies true;
+exactlyUnknown(strapi.plugin('controller-lab').controller(dynamicController)) satisfies true;
+exactlyUnknown(strapi.plugin('controller-lab').controller(patternController)) satisfies true;
+
+// Explicitly typed lookups use the type argument.
 strapi.plugin('controller-lab').controller<LabController>('items').list satisfies ControllerHandler;
 strapi.plugin('unregistered').controller<LabController>('items').list satisfies ControllerHandler;
 strapi.controller<LabController>('plugin::unregistered.items').list satisfies ControllerHandler;
