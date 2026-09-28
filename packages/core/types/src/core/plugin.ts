@@ -13,7 +13,7 @@ import type {
   ConfigPathSuggestion,
 } from './strapi';
 import type { SuggestedString } from '../utils/string';
-import type { IsStrict, RegisteredRecord } from './strictness';
+import type { IsStrict, RegisteredRecord, StrictNoInfer } from './strictness';
 
 /** Names of the plugin's entries in a registry keyed by full UID (`plugin::<plugin>.<name>`). */
 type PluginEntryNames<TUID, TPlugin extends string> = string extends TPlugin
@@ -113,7 +113,7 @@ export type Plugin<TName extends string = string> = Omit<
     >,
   >(
     name: TServiceName
-  ): PluginServiceLookup<TName, TServiceName, T>;
+  ): PluginServiceLookup<TName, TServiceName, StrictNoInfer<T>>;
   controller<
     T extends ControllerLookupDefault = ControllerLookupDefault,
     TControllerName extends SuggestedString<ControllerNames<TName>> = SuggestedString<
@@ -121,7 +121,7 @@ export type Plugin<TName extends string = string> = Omit<
     >,
   >(
     name: TControllerName
-  ): PluginControllerLookup<TName, TControllerName, T>;
+  ): PluginControllerLookup<TName, TControllerName, StrictNoInfer<T>>;
   [key: string]: any;
 };
 
