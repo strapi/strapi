@@ -14,5 +14,7 @@ a second registration throws.
 Without a provider, `isEnabled()` is `false`, content types are treated as nonlocalized, the
 default locale is `null`, the locale list, populate paths and nonlocalized attributes are empty,
 and copying nonlocalized fields leaves the entry unchanged. Use `isEnabled()` when the absence of
-a localization plugin must be told apart from a plugin with zero locales.
-Each Strapi instance has its own provider.
+a localization plugin must be told apart from a plugin with zero locales. These defaults serve
+test fixtures, embeddings and providers from other plugins; the bundled i18n plugin cannot be
+disabled through configuration, so a stock application always has a provider. Each Strapi instance
+has its own provider.
