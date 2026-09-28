@@ -45,7 +45,9 @@ describe('Document localization capability', () => {
     localization.register({
       isLocalizedContentType: () => true,
       getDefaultLocale: async () => 'fr',
+      getLocales: async () => [],
       getNestedPopulateOfNonLocalizedAttributes: () => [],
+      getNonLocalizedAttributes: () => [],
       fillNonLocalizedAttributes() {},
     });
 
@@ -63,7 +65,9 @@ describe('Document localization capability', () => {
     localization.register({
       isLocalizedContentType: () => true,
       getDefaultLocale: async () => 'en',
+      getLocales: async () => [],
       getNestedPopulateOfNonLocalizedAttributes: () => ['cover'],
+      getNonLocalizedAttributes: () => [],
       fillNonLocalizedAttributes(entry, relatedEntry) {
         entry.cover = relatedEntry.cover;
       },
