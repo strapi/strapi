@@ -67,21 +67,21 @@ jobs.getJobForCollectionType satisfies Core.ControllerHandler;
   policies: [{ name: 'plugin::content-manager.hasPermissions', config: { hasAtLeastOne: 'yes' } }],
 }) satisfies Core.RouteConfigFor;
 
-// Unregistered literal names resolve to `never`; the emitted declarations close the fallback too.
-const unregisteredService = app.service('plugin::i18n.unregistered');
-unregisteredService satisfies never;
-const unregisteredPluginService = app.plugin('i18n').service('unregistered');
-unregisteredPluginService satisfies never;
-const unknownPluginService = app.plugin('unregistered').service('greeting');
-unknownPluginService satisfies never;
-const unregisteredController = app.controller('plugin::i18n.unregistered');
-unregisteredController satisfies never;
-const unregisteredPluginController = app.plugin('i18n').controller('unregistered');
-unregisteredPluginController satisfies never;
+/** `true` only for `unknown`: `any` and every other type give `false`. */
+declare function exactlyUnknown<T>(
+  value: T
+): [unknown] extends [T] ? (0 extends 1 & T ? false : true) : false;
+
+// Unregistered literal names resolve to `unknown` in the emitted declarations too.
+exactlyUnknown(app.service('plugin::i18n.unregistered')) satisfies true;
+exactlyUnknown(app.plugin('i18n').service('unregistered')) satisfies true;
+exactlyUnknown(app.plugin('unregistered').service('greeting')) satisfies true;
+exactlyUnknown(app.controller('plugin::i18n.unregistered')) satisfies true;
+exactlyUnknown(app.plugin('i18n').controller('unregistered')) satisfies true;
 // @ts-expect-error Unregistered literal names expose no members.
 app.plugin('i18n').service('unregistered').anything();
 
-// Explicit generics and dynamic names keep the permissive signature.
+// Explicit generics use the type argument.
 const explicitService = app.plugin('i18n').service<{ greet(): string }>('unregistered');
 explicitService.greet() satisfies string;
 const explicitFullUidService = app.service<{ greet(): string }>('plugin::i18n.unregistered');
@@ -92,12 +92,15 @@ const explicitFullUidController = app.controller<{ list: Core.ControllerHandler 
 explicitFullUidController.list satisfies Core.ControllerHandler;
 // @ts-expect-error The explicit contract has no arbitrary members.
 explicitFullUidService.anything();
+
+// Dynamic names cannot be validated, so they resolve to `unknown` too.
 declare const dynamicName: string;
 declare const patternUid: `plugin::i18n.${string}`;
-app.plugin('i18n').service(dynamicName).anything();
-app.plugin(dynamicName).service('greeting').anything();
-app.service(patternUid).anything();
-app.plugin('i18n').controller(dynamicName).anything satisfies Core.ControllerHandler | undefined;
+exactlyUnknown(app.plugin('i18n').service(dynamicName)) satisfies true;
+exactlyUnknown(app.plugin(dynamicName).service('greeting')) satisfies true;
+exactlyUnknown(app.plugin(dynamicName).service('locales')) satisfies true;
+exactlyUnknown(app.service(patternUid)) satisfies true;
+exactlyUnknown(app.plugin('i18n').controller(dynamicName)) satisfies true;
 
 // Bundled admin contracts cover the permission service.
 const permission = app.service('admin::permission');

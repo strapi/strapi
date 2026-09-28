@@ -177,9 +177,10 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('services').getAll();
   }
 
-  service<T extends Core.Service = Core.Service, TUID extends UID.Service = UID.Service>(
-    uid: TUID
-  ): Core.ServiceLookup<TUID, T> {
+  service<
+    T extends Core.ServiceLookupDefault = Core.ServiceLookupDefault,
+    TUID extends UID.Service = UID.Service,
+  >(uid: TUID): Core.ServiceLookup<TUID, T> {
     return this.get('services').get(uid) as Core.ServiceLookup<TUID, T>;
   }
 

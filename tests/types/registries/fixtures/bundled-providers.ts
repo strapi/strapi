@@ -3,9 +3,9 @@ import type { Core } from '@strapi/strapi';
 declare const app: Core.Strapi;
 
 // The app entry loads bundled providers without pulling in optional plugin contracts:
-// the unregistered Sentry service resolves to `never` with the switch on.
-const sentry = app.plugin('sentry').service('sentry');
-sentry satisfies never;
+// the unregistered Sentry service has no members with the switch on.
+// @ts-expect-error Unregistered services resolve to `unknown`.
+app.plugin('sentry').service('sentry').anything();
 // Bundled admin contracts are loaded.
 app.service('admin::permission').engine satisfies object;
 // Every bundled package that registers contracts is loaded, including EE-merged admin services.

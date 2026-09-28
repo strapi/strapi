@@ -2,13 +2,17 @@ import 'koa-body';
 import type { Context, Next } from 'koa';
 import type * as UID from '../uid';
 import type { SuggestedString } from '../utils/string';
-import type { IsDynamicName, IsStrict, RegisteredRecord } from './strictness';
+import type { IsStrict, RegisteredRecord } from './strictness';
 
 export type Controller = Record<string, ControllerHandler>;
 
+/** Default result of a lookup without type argument: `unknown` with strict types enabled. */
+export type ControllerLookupDefault = IsStrict extends false ? Controller : unknown;
+
 /**
  * Resolves application overrides before package defaults. With strict types enabled, an unregistered
- * literal UID resolves to `never`; with strict types disabled, every UID resolves to the legacy controller.
+ * UID resolves to `unknown`, so callers pass a type argument; with strict types disabled, every UID
+ * resolves to the legacy controller.
  */
 export type ControllerFor<TUID extends string> = IsStrict extends false
   ? Controller
@@ -16,10 +20,7 @@ export type ControllerFor<TUID extends string> = IsStrict extends false
     ? Strapi.Registries.AppControllers[TUID]
     : TUID extends keyof Strapi.Registries.PackageControllers
       ? Strapi.Registries.PackageControllers[TUID]
-      : IsDynamicName<TUID> extends true
-        ? // TODO @Nico decide whether dynamic names should also close in strict mode
-          Controller
-        : never;
+      : unknown;
 /**
  * Return type of `strapi.controller<T>(uid)`: `T` when the UID kept its wide default, which happens
  * when the caller passes an explicit type argument (TypeScript then does not infer the UID) or a
