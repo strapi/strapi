@@ -87,11 +87,28 @@ type PluginControllerLookup<TPlugin extends string, TControllerName, T> = IsStri
       ? ControllerFor<`plugin::${TPlugin}.${TControllerName}`>
       : T;
 
-export type Plugin<TName extends string = string> = Omit<
-  Module<`plugin::${TName}`>,
-  'routes' | 'service' | 'config' | 'controller'
-> & {
-  routes: Route[] | Record<string, Router>;
+/**
+ * Any key when the plugin has no registered config contract, `never` otherwise.
+ * TODO @Nico An unknown key of a registered plugin keeps a non-widening literal default. Rare, accepted.
+ */
+type LegacyPluginConfigPath<TName extends string> = [PluginConfigNamespace<TName>] extends [never]
+  ? PropertyPath
+  : never;
+
+/**
+ * `config` without strict mode: develop's signature, so a default infers a widening literal, e.g.
+ * `let limit = config('limit', 10)` is a `number`. Editors still list registered keys.
+ */
+type LegacyPluginConfigGetter<TName extends string> = {
+  config<T = unknown, TKey extends PluginConfigPath<TName> = PluginConfigPath<TName>>(
+    key: TKey | PluginConfigPathSuggestion<TName, TKey>,
+    defaultVal?: T
+  ): T;
+};
+
+type StrictPluginConfigGetter<TName extends string> = {
+  /** Reads the config of a plugin without a registered contract, as without strict mode. */
+  config<T = unknown>(key: LegacyPluginConfigPath<TName>, defaultVal?: T): T;
   /**
    * Reads a key or dotted path of the plugin config. A registered contract resolves the value type.
    * Editors list its top-level keys, then the keys under the path being typed.
@@ -106,6 +123,17 @@ export type Plugin<TName extends string = string> = Omit<
     key: TKey | PluginConfigPathSuggestion<TName, TKey>,
     ...args: TArgs & ([] | [defaultVal: PluginConfigLookup<TName, TKey, T> | undefined])
   ): PluginConfigLookup<TName, TKey, T, NoInfer<TArgs[0]>>;
+};
+
+type PluginConfigGetter<TName extends string> = IsStrict extends false
+  ? LegacyPluginConfigGetter<TName>
+  : StrictPluginConfigGetter<TName>;
+
+export type Plugin<TName extends string = string> = Omit<
+  Module<`plugin::${TName}`>,
+  'routes' | 'service' | 'config' | 'controller'
+> & {
+  routes: Route[] | Record<string, Router>;
   service<
     T extends ServiceLookupDefault = ServiceLookupDefault,
     TServiceName extends SuggestedString<ServiceNames<TName>> = SuggestedString<
@@ -123,7 +151,7 @@ export type Plugin<TName extends string = string> = Omit<
     name: TControllerName
   ): PluginControllerLookup<TName, TControllerName, StrictNoInfer<T>>;
   [key: string]: any;
-};
+} & PluginConfigGetter<TName>;
 
 /** The plugin name of a `plugin::<plugin>.<name>` UID or a `plugin::<plugin>` config namespace. */
 type PluginNameOf<TUID> = TUID extends `plugin::${infer TPlugin}.${string}`
