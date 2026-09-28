@@ -1,4 +1,4 @@
-import type { Core } from '@strapi/types';
+import type { Modules } from '@strapi/types';
 
 const PROVIDER_METHODS = [
   'isLocalizedContentType',
@@ -7,11 +7,11 @@ const PROVIDER_METHODS = [
   'getNestedPopulateOfNonLocalizedAttributes',
   'getNonLocalizedAttributes',
   'fillNonLocalizedAttributes',
-] as const satisfies ReadonlyArray<keyof Core.LocalizationProvider>;
+] as const satisfies ReadonlyArray<keyof Modules.Localization.Provider>;
 
 /** Creates the localization capability used by core, including apps without a localization plugin. */
-export const createLocalizationService = (): Core.Localization => {
-  let provider: Core.LocalizationProvider | undefined;
+export const createLocalizationService = (): Modules.Localization.Service => {
+  let provider: Modules.Localization.Provider | undefined;
 
   return {
     register(localizationProvider) {

@@ -1,4 +1,4 @@
-import type { Core, Struct } from '@strapi/types';
+import type { Core, Modules, Struct } from '@strapi/types';
 import { createLocalizationService } from '../../localization';
 import {
   copyNonLocalizedFields,
@@ -23,7 +23,7 @@ const article = {
 
 describe('Document localization capability', () => {
   const query = jest.fn();
-  let localization: Core.Localization;
+  let localization: Modules.Localization.Service;
 
   beforeEach(() => {
     localization = createLocalizationService();

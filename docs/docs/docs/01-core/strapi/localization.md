@@ -2,7 +2,7 @@
 title: Localization provider
 ---
 
-Core depends on `Core.LocalizationProvider`, exposed through `strapi.localization`, for localization
+Core depends on `Modules.Localization.Provider`, exposed through `strapi.localization`, for localization
 behavior. The i18n plugin registers its implementation during `register`, before database migrations
 and content-type synchronization. Plugins that register before i18n, and API modules, see the inert
 defaults during their own `register`. The adapter resolves i18n services when called, so services

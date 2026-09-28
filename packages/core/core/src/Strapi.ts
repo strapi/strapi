@@ -121,7 +121,7 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('documents');
   }
 
-  get localization(): Core.Localization {
+  get localization(): Modules.Localization.Service {
     return this.get('localization');
   }
 

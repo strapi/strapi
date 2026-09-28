@@ -1,4 +1,4 @@
-import type { Core } from '@strapi/types';
+import type { Core, Modules } from '@strapi/types';
 import register from '../register';
 
 jest.mock('../graphql', () => ({ __esModule: true, default: jest.fn() }));
@@ -21,7 +21,7 @@ it('installs the provider during register without resolving i18n services', asyn
   await register({ strapi });
 
   expect(install).toHaveBeenCalledTimes(1);
-  const provider: Core.LocalizationProvider = install.mock.calls[0][0];
+  const provider: Modules.Localization.Provider = install.mock.calls[0][0];
   expect(provider).toEqual({
     isLocalizedContentType: expect.any(Function),
     getDefaultLocale: expect.any(Function),

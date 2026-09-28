@@ -1,7 +1,7 @@
 import type { Struct, UID } from '..';
 
 /** Localization operations supplied by an optional plugin during its register lifecycle. */
-export type LocalizationProvider = {
+export type Provider = {
   /** Must agree with the schema flag i18n reads to add the `locale` attribute. */
   isLocalizedContentType(model: Struct.ContentTypeSchema | Struct.ComponentSchema): boolean;
   getDefaultLocale(): Promise<string | null>;
@@ -17,7 +17,7 @@ export type LocalizationProvider = {
 };
 
 /** Core's localization capability, with inert defaults when no provider is registered. */
-export type Localization = LocalizationProvider & {
+export type Service = Provider & {
   /** Whether a provider is registered, to tell "no localization plugin" from "zero locales". */
   isEnabled(): boolean;
   /**
@@ -27,5 +27,5 @@ export type Localization = LocalizationProvider & {
    * plugin (or of an API module) see the inert defaults; read from bootstrap onward, or
    * check `isEnabled()` first.
    */
-  register(provider: LocalizationProvider): void;
+  register(provider: Provider): void;
 };

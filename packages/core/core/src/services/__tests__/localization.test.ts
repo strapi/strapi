@@ -1,4 +1,4 @@
-import type { Core, Struct } from '@strapi/types';
+import type { Modules, Struct } from '@strapi/types';
 import { createLocalizationService } from '../localization';
 
 const article = {
@@ -39,7 +39,7 @@ describe('Localization capability', () => {
       fillNonLocalizedAttributes: jest.fn((entry, relatedEntry) => {
         entry.cover = relatedEntry.cover;
       }),
-    } satisfies Core.LocalizationProvider;
+    } satisfies Modules.Localization.Provider;
 
     localization.register(provider);
 
@@ -93,7 +93,7 @@ describe('Localization capability', () => {
       getNestedPopulateOfNonLocalizedAttributes: () => [],
       getNonLocalizedAttributes: () => [],
       fillNonLocalizedAttributes() {},
-    } satisfies Core.LocalizationProvider;
+    } satisfies Modules.Localization.Provider;
 
     localization.register(provider);
 
@@ -111,7 +111,7 @@ describe('Localization capability', () => {
       getLocales: async () => [],
       getNestedPopulateOfNonLocalizedAttributes: () => [],
       fillNonLocalizedAttributes() {},
-    } as unknown as Core.LocalizationProvider;
+    } as unknown as Modules.Localization.Provider;
 
     expect(() => localization.register(incompleteProvider)).toThrow(
       'Localization provider is missing "getNonLocalizedAttributes"'
