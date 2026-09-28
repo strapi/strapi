@@ -44,6 +44,35 @@ export type PolicyMap = IsStrict extends false
   ? Record<string, Policy>
   : RegisteredRecord<{ [TName in RegisteredPolicyName]: Policy<PolicyConfigFor<TName>> }, Policy>;
 
+/** Default result of a lookup without type argument: `unknown` with strict types enabled. */
+export type PolicyLookupDefault = IsStrict extends false ? Policy : unknown;
+
+/**
+ * Type arguments accepted by a policy lookup. Without strict types, any policy, whatever its config:
+ * `Policy<{ role: string }>` is not a `Policy`, whose handler accepts an `unknown` config.
+ */
+export type PolicyLookupConstraint = IsStrict extends false ? Policy<never> : unknown;
+
+/**
+ * A name accepted by `strapi.policy(name)`. Runtime resolves it as an exact name, so relative
+ * names are not accepted as registered names. Registered names are listed for completion.
+ */
+export type PolicyLookupName = SuggestedString<RegisteredPolicyName>;
+
+/**
+ * Return type of `strapi.policy<T>(name)`: `T` without strict types, and when the name kept its
+ * wide default, which happens when the caller passes an explicit type argument or a dynamic name.
+ * A registered name resolves to a policy that receives its config contract, like `strapi.policies`.
+ * Other literal names resolve to `T`, `unknown` by default.
+ */
+export type PolicyLookup<TName extends string, T> = IsStrict extends false
+  ? T
+  : PolicyLookupName extends TName
+    ? T
+    : TName extends RegisteredPolicyName
+      ? Policy<PolicyConfigFor<TName>>
+      : T;
+
 /** Runtime resolves exact names first, then relative plugin or API names. */
 type PolicyReferenceName<TName extends RegisteredPolicyName, TNamespace extends string> =
   | TName

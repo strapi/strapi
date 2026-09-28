@@ -91,3 +91,16 @@ getUnregisteredController('items').list satisfies ControllerHandler;
 
 // @ts-expect-error Assigned functions are checked against the generic signature, as before registries.
 legacyPlugin.controller = () => ({ list: () => undefined });
+
+// API module lookups resolve registered names relative to the API, like plugin lookups.
+strapi.api('controller-lab').controller('items') satisfies LabController;
+// @ts-expect-error API lookups reject nonexistent actions.
+strapi.api('controller-lab').controller('items').missing satisfies unknown;
+exactlyUnknown(strapi.api('controller-lab').controller('unregistered')) satisfies true;
+exactlyUnknown(strapi.api('unregistered').controller('items')) satisfies true;
+exactlyUnknown(strapi.api('controller-lab').controller(dynamicController)) satisfies true;
+exactlyUnknown(strapi.api(dynamicPlugin).controller('items')) satisfies true;
+strapi.api('unregistered').controller<LabController>('items').list satisfies ControllerHandler;
+// @ts-expect-error `T` is not inferred from the annotation, for API lookups either.
+const contextualApi: LabController = strapi.api('controller-lab').controller('unregistered');
+contextualApi satisfies unknown;
