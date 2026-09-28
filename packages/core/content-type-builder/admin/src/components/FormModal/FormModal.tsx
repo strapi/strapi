@@ -249,7 +249,7 @@ export const FormModal = () => {
   };
 
   React.useEffect(() => {
-    if (isOpen) {
+    if (isOpen && modalType) {
       const collectionTypesForRelation = sortedContentTypesList.filter(
         isAllowedContentTypesForRelations
       );
