@@ -9374,7 +9374,7 @@ __metadata:
     supertest: "npm:7.2.2"
     tsconfig: "npm:5.55.1"
     typescript: "npm:5.9.3"
-    undici: "npm:6.28.1"
+    undici: "npm:6.29.0"
     vitest: "catalog:"
     vitest-config: "npm:5.55.1"
     yup: "npm:0.32.9"
@@ -10199,7 +10199,7 @@ __metadata:
     typedoc-github-wiki-theme: "npm:2.1.0"
     typedoc-plugin-markdown: "npm:4.11.0"
     typescript: "npm:5.9.3"
-    undici: "npm:6.28.1"
+    undici: "npm:6.29.0"
     zod: "npm:4.4.3"
   languageName: unknown
   linkType: soft
@@ -10282,7 +10282,7 @@ __metadata:
     rimraf: "npm:6.1.3"
     semver: "npm:7.7.4"
     simple-git: "npm:3.36.0"
-    undici: "npm:6.28.1"
+    undici: "npm:6.29.0"
   bin:
     upgrade: ./bin/upgrade.js
   languageName: unknown
@@ -29582,10 +29582,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:6.28.1, undici@npm:^6.28.0":
-  version: 6.28.1
-  resolution: "undici@npm:6.28.1"
-  checksum: 10c0/9c7c277da83972f4f506d564b1d627e3e78aadf866915eab768d96fc70daeae8ff7d87d0cdb32403ae1afdf3aef0f11715e0847d66910fda62822c33c5a7e674
+"undici@npm:6.29.0":
+  version: 6.29.0
+  resolution: "undici@npm:6.29.0"
+  checksum: 10c0/3fb2117985be977ba8b6bd6a242fec915e1b1d0f9681f5adb3f508fb1717352452d65bcfd3bed09e7c776cfda403a4e8edb24a318492f8b2d793439af2b8699b
   languageName: node
   linkType: hard
 
@@ -29595,6 +29595,13 @@ __metadata:
   dependencies:
     "@fastify/busboy": "npm:^2.0.0"
   checksum: 10c0/e4e4d631ca54ee0ad82d2e90e7798fa00a106e27e6c880687e445cc2f13b4bc87c5eba2a88c266c3eecffb18f26e227b778412da74a23acc374fca7caccec49b
+  languageName: node
+  linkType: hard
+
+"undici@npm:^6.28.0":
+  version: 6.28.1
+  resolution: "undici@npm:6.28.1"
+  checksum: 10c0/9c7c277da83972f4f506d564b1d627e3e78aadf866915eab768d96fc70daeae8ff7d87d0cdb32403ae1afdf3aef0f11715e0847d66910fda62822c33c5a7e674
   languageName: node
   linkType: hard
 
