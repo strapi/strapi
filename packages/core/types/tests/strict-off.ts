@@ -141,6 +141,18 @@ declare const fallbackChecks: [
   Expect<Equal<typeof pluginFallbackArray, string[]>>,
 ];
 fallbackChecks satisfies unknown;
+// Defaults infer widening literals, as before registries, so mutable use sites keep compiling.
+let reassignedPort = strapi.config.get('plugin::legacy.port', 1337);
+reassignedPort = 4000;
+let reassignedPluginPort = strapi.plugin('legacy').config('port', 1337);
+reassignedPluginPort = 4000;
+let reassignedEnabled = strapi.config.get('plugin::legacy.enabled', false);
+reassignedEnabled = true;
+const mutableOptions = { port: strapi.config.get('unregistered.port', 1337) };
+mutableOptions.port = 4000;
+const mutableLabels = [strapi.config.get('plugin::legacy.label', 'first')];
+mutableLabels.push('second');
+[reassignedPort, reassignedPluginPort, reassignedEnabled] satisfies unknown;
 const forwardDefault = <T>(key: string, value: T): T => strapi.config.get<T>(key, value);
 const forwardPluginDefault = <T>(key: string, value: T): T =>
   strapi.plugin('legacy').config<T>(key, value);

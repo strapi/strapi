@@ -1,7 +1,9 @@
 import type { Core } from '@strapi/strapi';
 
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Strapi {
+    // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace Registries {
       interface PackageConfigs {
         'plugin::default-semantics': {
@@ -57,6 +59,18 @@ const fallbackObject = app.config.get('unregistered.options', { enabled: false }
 const pluginFallbackArray = app.plugin('unregistered').config('labels', ['first']);
 fallbackObject.enabled = true;
 pluginFallbackArray.push('second');
+// Unregistered defaults infer widening literals, as before registries, so mutable use sites compile.
+let reassignedPort = app.config.get('server.port', 1337);
+reassignedPort = 4000;
+let reassignedPluginPort = app.plugin('unregistered').config('port', 1337);
+reassignedPluginPort = 4000;
+let reassignedEnabled = app.config.get('unregistered.enabled', false);
+reassignedEnabled = true;
+const mutableOptions = { port: app.config.get('server.port', 1337) };
+mutableOptions.port = 4000;
+const mutableLabels = [app.config.get('unregistered.label', 'first')];
+mutableLabels.push('second');
+[reassignedPort, reassignedPluginPort, reassignedEnabled] satisfies unknown;
 
 type Equal<T, U> =
   (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;
