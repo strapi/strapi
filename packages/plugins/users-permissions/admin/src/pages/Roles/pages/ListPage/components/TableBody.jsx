@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import { Flex, IconButton, Link, Tbody, Td, Tr, Typography } from '@strapi/design-system';
 import { Pencil, Trash } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useNavigate, NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -34,6 +33,15 @@ const EditLink = styled(Link)`
   }
 `;
 
+/**
+ * @param {{
+ *   sortedRoles: object[],
+ *   canDelete?: boolean,
+ *   canUpdate?: boolean,
+ *   setRoleToDelete: Function,
+ *   onDelete: [boolean, Function],
+ * }} props
+ */
 const TableBody = ({ sortedRoles, canDelete, canUpdate, setRoleToDelete, onDelete }) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
@@ -104,16 +112,3 @@ const TableBody = ({ sortedRoles, canDelete, canUpdate, setRoleToDelete, onDelet
 };
 
 export default TableBody;
-
-TableBody.defaultProps = {
-  canDelete: false,
-  canUpdate: false,
-};
-
-TableBody.propTypes = {
-  onDelete: PropTypes.array.isRequired,
-  setRoleToDelete: PropTypes.func.isRequired,
-  sortedRoles: PropTypes.array.isRequired,
-  canDelete: PropTypes.bool,
-  canUpdate: PropTypes.bool,
-};

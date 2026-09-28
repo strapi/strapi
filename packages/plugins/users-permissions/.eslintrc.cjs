@@ -16,6 +16,8 @@ const config = {
       extends: ['eslint-config-custom/front'],
       rules: {
         'import/extensions': 'off',
+        // JSDoc replaces propTypes here
+        'react/prop-types': 'off',
       },
     },
     {

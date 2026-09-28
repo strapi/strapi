@@ -3,7 +3,6 @@ import React, { useCallback, useMemo } from 'react';
 import { Box, Checkbox, Flex, Typography, Grid, VisuallyHidden } from '@strapi/design-system';
 import { Cog } from '@strapi/icons';
 import get from 'lodash/get';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -17,6 +16,7 @@ const Border = styled.div`
   border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
+/** @param {{ subCategory: object }} props */
 const SubCategory = ({ subCategory }) => {
   const { formatMessage } = useIntl();
   const { onChange, onChangeSelectAll, onSelectedAction, selectedAction, modifiedData } =
@@ -120,10 +120,6 @@ const SubCategory = ({ subCategory }) => {
       </Flex>
     </Box>
   );
-};
-
-SubCategory.propTypes = {
-  subCategory: PropTypes.object.isRequired,
 };
 
 export default SubCategory;

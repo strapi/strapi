@@ -7,20 +7,33 @@
 import * as React from 'react';
 
 import { TextInput, Toggle, Field } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
+/**
+ * @param {{
+ *   description?: { id: string, defaultMessage: string, values?: object } | null,
+ *   disabled?: boolean,
+ *   intlLabel: { id: string, defaultMessage: string, values?: object },
+ *   error?: string,
+ *   name: string,
+ *   onChange: Function,
+ *   placeholder?: { id: string, defaultMessage: string, values?: object } | null,
+ *   providerToEditName: string,
+ *   type: string,
+ *   value?: boolean | string,
+ * }} props
+ */
 const Input = ({
-  description,
-  disabled,
+  description = null,
+  disabled = false,
   intlLabel,
-  error,
+  error = '',
   name,
   onChange,
-  placeholder,
+  placeholder = null,
   providerToEditName,
   type,
-  value,
+  value = '',
 }) => {
   const { formatMessage } = useIntl();
   const inputValue =
@@ -86,39 +99,6 @@ const Input = ({
       <Field.Error />
     </Field.Root>
   );
-};
-
-Input.defaultProps = {
-  description: null,
-  disabled: false,
-  error: '',
-  placeholder: null,
-  value: '',
-};
-
-Input.propTypes = {
-  description: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }),
-  disabled: PropTypes.bool,
-  error: PropTypes.string,
-  intlLabel: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }).isRequired,
-  name: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
-  placeholder: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }),
-  providerToEditName: PropTypes.string.isRequired,
-  type: PropTypes.string.isRequired,
-  value: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
 };
 
 export default Input;

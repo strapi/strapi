@@ -2,12 +2,28 @@ import * as React from 'react';
 
 import { Button, Grid, Modal, Breadcrumbs, Crumb, VisuallyHidden } from '@strapi/design-system';
 import { Form, InputRenderer } from '@strapi/strapi/admin';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { getTrad } from '../../../utils';
 import schema from '../utils/schema';
 
+/**
+ * @param {{
+ *   template?: {
+ *     display?: string,
+ *     icon?: string,
+ *     options?: {
+ *       from?: { name?: string, email?: string },
+ *       message?: string,
+ *       object?: string,
+ *       response_email?: string,
+ *     },
+ *   },
+ *   open: boolean,
+ *   onSubmit: Function,
+ *   onToggle: Function,
+ * }} props
+ */
 const EmailForm = ({ template = {}, onToggle, open, onSubmit }) => {
   const { formatMessage } = useIntl();
 
@@ -129,29 +145,6 @@ const EmailForm = ({ template = {}, onToggle, open, onSubmit }) => {
       </Modal.Content>
     </Modal.Root>
   );
-};
-
-EmailForm.defaultProps = {
-  template: {},
-};
-
-EmailForm.propTypes = {
-  template: PropTypes.shape({
-    display: PropTypes.string,
-    icon: PropTypes.string,
-    options: PropTypes.shape({
-      from: PropTypes.shape({
-        name: PropTypes.string,
-        email: PropTypes.string,
-      }),
-      message: PropTypes.string,
-      object: PropTypes.string,
-      response_email: PropTypes.string,
-    }),
-  }),
-  open: PropTypes.bool.isRequired,
-  onSubmit: PropTypes.func.isRequired,
-  onToggle: PropTypes.func.isRequired,
 };
 
 export default EmailForm;

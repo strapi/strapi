@@ -13,11 +13,11 @@ import {
   Box,
 } from '@strapi/design-system';
 import { Check, Pencil, ArrowClockwise as Refresh } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { getTrad } from '../../../utils';
 
+/** @param {{ canUpdate: boolean, onEditClick: Function }} props */
 const EmailTable = ({ canUpdate, onEditClick }) => {
   const { formatMessage } = useIntl();
 
@@ -121,11 +121,6 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
       </Tbody>
     </Table>
   );
-};
-
-EmailTable.propTypes = {
-  canUpdate: PropTypes.bool.isRequired,
-  onEditClick: PropTypes.func.isRequired,
 };
 
 export default EmailTable;
