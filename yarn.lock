@@ -9960,7 +9960,7 @@ __metadata:
     "@types/node": "npm:20.19.41"
     "@types/nodemailer": "npm:7.0.11"
     eslint-config-custom: "npm:5.55.1"
-    nodemailer: "npm:9.0.1"
+    nodemailer: "npm:10.0.2"
     tsconfig: "npm:5.55.1"
     vitest: "catalog:"
     vitest-config: "npm:5.55.1"
@@ -9986,7 +9986,7 @@ __metadata:
     "@types/node": "npm:20.19.41"
     "@types/nodemailer": "npm:7.0.11"
     eslint-config-custom: "npm:5.55.1"
-    nodemailer: "npm:9.0.1"
+    nodemailer: "npm:10.0.2"
     tsconfig: "npm:5.55.1"
     vitest: "catalog:"
     vitest-config: "npm:5.55.1"
@@ -23949,10 +23949,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nodemailer@npm:9.0.1":
-  version: 9.0.1
-  resolution: "nodemailer@npm:9.0.1"
-  checksum: 10c0/4213f01aa211127c1ce33243c5e45e7f831601a933d03fa864cd827b1bd5ea2782cb4b43722bee7028cbc193733d9802dad1120fe67181448eb0b7de52218a37
+"nodemailer@npm:10.0.2":
+  version: 10.0.2
+  resolution: "nodemailer@npm:10.0.2"
+  checksum: 10c0/dd95a9fef50652e724c7966517c537e0a207f5faa17a6c5daf7e392e74a1d01a9453747b03306d7e2e271ee3500cc42c8deca970859222d398a456c658b13592
   languageName: node
   linkType: hard
 
