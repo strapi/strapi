@@ -14,8 +14,9 @@ Applications enable them with one import in a declaration file included by their
 import type {} from '@strapi/strapi/strict-types';
 ```
 
-This types-only entry enables contracts across the TypeScript program and loads the bundled
-admin, content-manager, and i18n contracts. It changes no runtime behavior. The ordinary
+This types-only entry enables contracts across the TypeScript program and loads the contracts
+of every package bundled with `@strapi/strapi`: admin, Content Manager, Content Releases,
+Content-Type Builder, Email, i18n, Review Workflows, and Upload. It changes no runtime behavior. The ordinary
 `@strapi/strapi` entry and new application templates leave strict mode disabled.
 
 Alternatively, append the entry to `compilerOptions.types`:
@@ -38,10 +39,11 @@ in your app's tsconfig. Plugins without server declarations are skipped. Regener
 plugin configuration or dependencies; removed plugins' references are removed from the file.
 These generated imports do not enable strict mode on their own.
 
-Strapi's participating server packages use the lower-level `@strapi/types/strict` entry in
-their own tsconfigs. They do not depend on the application entry or import activation from
-their published source. Both entries enable the same `Strapi.Registries.Settings.strict`
-type setting.
+Strapi's server packages load the same `@strapi/strapi/strict-types` entry through the shared
+`tsconfig/server.json` preset, so they type-check against the contracts an application
+sees. They do not import activation from their published source. The entry enables strict mode
+through the lower-level `@strapi/types/strict` entry, which sets
+`Strapi.Registries.Settings.strict`.
 
 With strict contracts enabled, registered literal names resolve to their contracts:
 
