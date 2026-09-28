@@ -32,6 +32,7 @@ import getNumberOfDynamicZones from './services/utils/dynamic-zones';
 import getNumberOfConditionalFields from './services/utils/conditional-fields';
 import { FeaturesService, createFeaturesService } from './services/features';
 import { createDocumentService } from './services/document-service';
+import { createLocalizationService } from './services/localization';
 import { createContentSourceMapsService } from './services/content-source-maps';
 
 import { coreStoreModel } from './services/core-store';
@@ -120,6 +121,10 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('documents');
   }
 
+  get localization(): Core.Localization {
+    return this.get('localization');
+  }
+
   get features(): FeaturesService {
     return this.get('features');
   }
@@ -172,8 +177,8 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('services').getAll();
   }
 
-  service(uid: UID.Service) {
-    return this.get('services').get(uid);
+  service<TUID extends UID.Service>(uid: TUID): Core.ServiceFor<TUID> {
+    return this.get('services').get(uid) as Core.ServiceFor<TUID>;
   }
 
   get controllers() {
@@ -216,8 +221,8 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('plugins').getAll();
   }
 
-  plugin(name: string): Core.Plugin {
-    return this.get('plugins').get(name);
+  plugin<TName extends string>(name: TName): Core.Plugin<TName> {
+    return this.get('plugins').get(name) as Core.Plugin<TName>;
   }
 
   get hooks() {
@@ -300,6 +305,7 @@ class Strapi extends Container implements Core.Strapi {
       .add('entityValidator', entityValidator)
       .add('entityService', () => createEntityService({ strapi: this, db: this.db }))
       .add('documents', () => createDocumentService(this))
+      .add('localization', () => createLocalizationService())
       .add('db', () => {
         const useTSM = this.config.get('database.settings.useTypescriptMigrations') === true;
         const tsDir = useTSM ? tsUtils().resolveOutDirSync(this.dirs.app.root) : null;

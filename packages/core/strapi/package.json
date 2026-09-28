@@ -84,7 +84,17 @@
       "require": "./dist/admin-test.js",
       "default": "./dist/admin-test.js"
     },
+    "./strict-types": {
+      "types": "./strict-types.d.ts"
+    },
     "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "strict-types": [
+        "strict-types.d.ts"
+      ]
+    }
   },
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -95,7 +105,8 @@
     "dist/",
     "bin/",
     "resources/",
-    "index.js"
+    "index.js",
+    "strict-types.d.ts"
   ],
   "scripts": {
     "build": "run -T npm-run-all clean --parallel build:code build:types",

@@ -45,11 +45,12 @@ describe('ai-localizations service', () => {
         modelType: 'contentType',
         kind: 'collectionType',
         uid: 'api::test.test',
+        kind: 'collectionType',
         modelName: 'test',
         globalId: 'Test',
         info: { displayName: 'Test', singularName: 'test', pluralName: 'tests' },
         attributes,
-      } as Schema.Schema;
+      };
     };
 
     describe('root-level unsupported fields', () => {

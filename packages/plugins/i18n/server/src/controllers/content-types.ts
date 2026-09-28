@@ -1,7 +1,8 @@
 import { pick, uniq, prop, getOr, flatten, pipe, map } from 'lodash/fp';
 import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
-import type { Core, UID } from '@strapi/types';
+import type { UID } from '@strapi/types';
 import type { FillFromLocale } from '../../../shared/contracts/content-manager';
+import type { ContentTypesController } from '../types/controllers';
 import { getService } from '../utils';
 import {
   validateGetNonLocalizedAttributesInput,
@@ -17,7 +18,7 @@ const getFieldsProperty = prop('properties.fields');
 
 const getFirstLevelPath = map((path: string) => path.split('.')[0]);
 
-const controller = {
+const controller: ContentTypesController = {
   async getNonLocalizedAttributes(ctx) {
     const { user, userAbility } = ctx.state;
     const body = ctx.request.body as any;
@@ -154,6 +155,6 @@ const controller = {
 
     ctx.body = { data };
   },
-} satisfies Core.Controller;
+};
 
 export default controller;

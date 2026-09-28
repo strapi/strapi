@@ -1,20 +1,22 @@
 import * as utils from '@strapi/utils';
 import { pick } from 'lodash/fp';
-import type { Core } from '@strapi/types';
 import { getService } from '../utils';
 import { validateCreateLocaleInput, validateUpdateLocaleInput } from '../validation/locales';
 import { formatLocale } from '../domain/locale';
+import type { LocalesController } from '../types/controllers';
+import type { Locale } from '../types/services';
 
 const { setCreatorFields } = utils;
 const { ApplicationError } = utils.errors;
 
-const sanitizeLocale = (locale: any) => {
+// The output sanitizer only removes private attributes, and the `Locale` fields are public.
+const sanitizeLocale = <T extends Locale | Locale[]>(locale: T) => {
   const model = strapi.getModel('plugin::i18n.locale');
 
-  return strapi.contentAPI.sanitize.output(locale, model);
+  return strapi.contentAPI.sanitize.output(locale, model) as Promise<T>;
 };
 
-const controller: Core.Controller = {
+const controller: LocalesController = {
   async listLocales(ctx) {
     const localesService = getService('locales');
 
@@ -70,6 +72,9 @@ const controller: Core.Controller = {
     const cleanUpdates = setCreatorFields({ user, isEdition: true })(pick(allowedParams, updates));
 
     const updatedLocale = await localesService.update({ id }, cleanUpdates);
+    if (updatedLocale === null) {
+      return ctx.notFound('locale.notFound');
+    }
 
     if (isDefault) {
       await localesService.setDefaultLocale(updatedLocale);

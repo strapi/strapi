@@ -278,7 +278,7 @@ const develop = async ({
           pwd: cwd,
           rootDir: undefined,
           logger: { silent: true, debug: false },
-          artifacts: { contentTypes: true, components: true },
+          artifacts: { contentTypes: true, components: true, plugins: true },
         });
 
         const generatingDuration = timer.end('generatingTS');

@@ -11,6 +11,7 @@ export type {
   GenerateTranslationsParams,
   GenerateTranslationsResult,
 } from './services/ai-translations';
+export type * from './types';
 
 export default () => ({
   register,

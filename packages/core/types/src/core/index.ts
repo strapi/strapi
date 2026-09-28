@@ -13,4 +13,5 @@ export * from './plugin';
 export * from './module';
 export * from './api';
 export * from './strapi';
+export type * from './localization';
 export type * from './content-api-schema-registry';
