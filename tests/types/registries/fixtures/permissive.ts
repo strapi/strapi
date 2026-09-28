@@ -31,6 +31,12 @@ contextualConfig satisfies number;
 contextualPluginConfig satisfies number;
 app.config.get('plugin::sentry.sendMetadata', 'yes');
 app.plugin('sentry').config('sendMetadata', 'yes');
+// Defaults infer widening literals, as before registries, even for loaded provider contracts.
+let sendMetadata = app.config.get('plugin::sentry.sendMetadata', false);
+sendMetadata = true;
+let pluginSendMetadata = app.plugin('sentry').config('sendMetadata', false);
+pluginSendMetadata = true;
+[sendMetadata, pluginSendMetadata] satisfies unknown;
 
 ({
   policies: [
