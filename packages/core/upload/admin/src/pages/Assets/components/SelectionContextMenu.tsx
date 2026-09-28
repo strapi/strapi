@@ -18,6 +18,7 @@ import type { ItemLocations } from '../../../utils/itemLocations';
 
 interface SelectionContextMenuProps {
   position: CursorPosition;
+  returnFocusTo: HTMLElement | null;
   /**
    * Real location of every loaded row, so the move dialog validates each
    * selected item against its own parent — same input the bulk bar takes.
@@ -38,6 +39,7 @@ interface SelectionContextMenuProps {
  */
 export const SelectionContextMenu = ({
   position,
+  returnFocusTo,
   locations,
   onClose,
 }: SelectionContextMenuProps) => {
@@ -88,6 +90,7 @@ export const SelectionContextMenu = ({
           id: getTranslationKey('list.selection.context-menu.label'),
           defaultMessage: 'Selection actions',
         })}
+        returnFocusTo={returnFocusTo}
         onClose={() => setIsMenuOpen(false)}
       >
         {/* A label rather than a `Menu.Item`: it states what the actions below
@@ -96,10 +99,10 @@ export const SelectionContextMenu = ({
           <Typography variant="sigma" textColor="neutral600">
             {formatMessage(
               {
-                id: getTranslationKey('list.selection.context-menu.count'),
-                defaultMessage: '{number, plural, one {# item selected} other {# items selected}}',
+                id: getTranslationKey('list.bulk-actions.selected-count'),
+                defaultMessage: '{count, plural, =1 {# item selected} other {# items selected}}',
               },
-              { number: count }
+              { count }
             )}
           </Typography>
         </Menu.Label>

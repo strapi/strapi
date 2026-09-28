@@ -1,5 +1,5 @@
 import { DndContext } from '@dnd-kit/core';
-import { fireEvent, render, screen } from '@tests/utils';
+import { fireEvent, render, screen, waitFor } from '@tests/utils';
 
 import { FolderTree } from '../FolderTree';
 
@@ -118,6 +118,31 @@ describe('FolderTree', () => {
     expect(screen.getByRole('menuitem', { name: 'Delete folder' })).toBeInTheDocument();
     // Renaming is a list affordance; the tree does not offer it.
     expect(screen.queryByRole('menuitem', { name: 'Rename folder' })).not.toBeInTheDocument();
+  });
+
+  it('ignores a right-click inside the menu it opened', async () => {
+    renderTree();
+
+    fireEvent.contextMenu(screen.getByTestId('folder-tree-node-5'), { clientX: 10, clientY: 10 });
+    const item = await screen.findByRole('menuitem', { name: 'Delete folder' });
+
+    // The menu is portaled, but still bubbles through the row in the React tree.
+    // `true` means nothing called `preventDefault`.
+    expect(fireEvent.contextMenu(item, { clientX: 50, clientY: 50 })).toBe(true);
+    expect(screen.getAllByRole('menu')).toHaveLength(1);
+  });
+
+  it('gives focus back to the row when its right-click menu is closed with Escape', async () => {
+    const { user } = renderTree();
+    const row = screen.getByTestId('folder-tree-node-5');
+
+    fireEvent.contextMenu(row, { clientX: 10, clientY: 10 });
+    expect(await screen.findByRole('menu')).toBeInTheDocument();
+
+    await user.keyboard('{Escape}');
+
+    await waitFor(() => expect(screen.queryByRole('menu')).not.toBeInTheDocument());
+    await waitFor(() => expect(row).toHaveFocus());
   });
 
   it('renders the top-level folder rows', () => {

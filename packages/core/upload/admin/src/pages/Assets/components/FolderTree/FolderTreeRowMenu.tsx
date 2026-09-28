@@ -53,6 +53,7 @@ interface FolderTreeRowMenuProps {
   parentId: number | null;
   /** Set by the row's right-click; null when the menu is closed. */
   menuPosition: CursorPosition | null;
+  returnFocusTo: HTMLElement | null;
   onCloseMenu: () => void;
 }
 
@@ -70,6 +71,7 @@ export const FolderTreeRowMenu = ({
   folder,
   parentId,
   menuPosition,
+  returnFocusTo,
   onCloseMenu,
 }: FolderTreeRowMenuProps) => {
   const { formatMessage } = useIntl();
@@ -113,6 +115,7 @@ export const FolderTreeRowMenu = ({
                 id: getTranslationKey('list.folder.context-menu.label'),
                 defaultMessage: 'Folder actions',
               })}
+              returnFocusTo={returnFocusTo}
               onClose={onCloseMenu}
             >
               {items}

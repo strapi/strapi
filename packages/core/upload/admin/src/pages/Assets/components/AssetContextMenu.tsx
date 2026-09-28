@@ -16,6 +16,7 @@ interface AssetContextMenuProps {
   /** Resolved by the provider, so this menu never renders while RBAC loads. */
   permissions: AssetActionPermissions;
   position: CursorPosition;
+  returnFocusTo: HTMLElement | null;
   /** Mounted only while it has something on screen, so the parent drops it on this. */
   onClose: () => void;
 }
@@ -36,6 +37,7 @@ export const AssetContextMenu = ({
   dragData,
   permissions,
   position,
+  returnFocusTo,
   onClose,
 }: AssetContextMenuProps) => {
   const { formatMessage } = useIntl();
@@ -51,6 +53,7 @@ export const AssetContextMenu = ({
           onMenuClose={() => setIsMenuOpen(false)}
           onClose={onClose}
           position={position}
+          returnFocusTo={returnFocusTo}
           label={formatMessage({
             id: getTranslationKey('list.assets.context-menu.label'),
             defaultMessage: 'Asset actions',
@@ -70,6 +73,7 @@ interface AssetContextMenuBodyProps {
   onMenuClose: () => void;
   onClose: () => void;
   position: CursorPosition;
+  returnFocusTo: HTMLElement | null;
   label: string;
   items: React.ReactNode;
   dialogs: React.ReactNode;
@@ -86,6 +90,7 @@ const AssetContextMenuBody = ({
   onMenuClose,
   onClose,
   position,
+  returnFocusTo,
   label,
   items,
   dialogs,
@@ -104,7 +109,13 @@ const AssetContextMenuBody = ({
 
   return (
     <>
-      <CursorAnchoredMenu position={position} open={isMenuOpen} label={label} onClose={onMenuClose}>
+      <CursorAnchoredMenu
+        position={position}
+        open={isMenuOpen}
+        label={label}
+        returnFocusTo={returnFocusTo}
+        onClose={onMenuClose}
+      >
         {items}
       </CursorAnchoredMenu>
       {dialogs}

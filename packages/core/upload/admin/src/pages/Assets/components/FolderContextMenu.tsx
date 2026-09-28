@@ -16,6 +16,7 @@ interface FolderContextMenuProps {
   /** Passed through — the folder tree offers the menu without Rename. */
   showRename?: boolean;
   position: CursorPosition;
+  returnFocusTo: HTMLElement | null;
   /** Mounted only while it has something on screen, so the parent drops it on this. */
   onClose: () => void;
 }
@@ -31,6 +32,7 @@ export const FolderContextMenu = ({
   dragData,
   showRename,
   position,
+  returnFocusTo,
   onClose,
 }: FolderContextMenuProps) => {
   const { formatMessage } = useIntl();
@@ -45,6 +47,7 @@ export const FolderContextMenu = ({
           onMenuClose={() => setIsMenuOpen(false)}
           onClose={onClose}
           position={position}
+          returnFocusTo={returnFocusTo}
           label={formatMessage({
             id: getTranslationKey('list.folder.context-menu.label'),
             defaultMessage: 'Folder actions',
@@ -63,6 +66,7 @@ interface FolderContextMenuBodyProps {
   onMenuClose: () => void;
   onClose: () => void;
   position: CursorPosition;
+  returnFocusTo: HTMLElement | null;
   label: string;
   items: ReactNode;
   dialogs: ReactNode;
@@ -78,6 +82,7 @@ const FolderContextMenuBody = ({
   onMenuClose,
   onClose,
   position,
+  returnFocusTo,
   label,
   items,
   dialogs,
@@ -90,7 +95,13 @@ const FolderContextMenuBody = ({
 
   return (
     <>
-      <CursorAnchoredMenu position={position} open={isMenuOpen} label={label} onClose={onMenuClose}>
+      <CursorAnchoredMenu
+        position={position}
+        open={isMenuOpen}
+        label={label}
+        returnFocusTo={returnFocusTo}
+        onClose={onMenuClose}
+      >
         {items}
       </CursorAnchoredMenu>
       {dialogs}

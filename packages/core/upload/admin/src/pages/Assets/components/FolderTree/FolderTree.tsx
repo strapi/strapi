@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { SubNav } from '@strapi/admin/strapi-admin';
 import { Box, Flex, IconButton, Loader, Typography } from '@strapi/design-system';
@@ -8,6 +8,7 @@ import { css, styled } from 'styled-components';
 
 import { TruncatedText } from '../../../../components/TruncatedText';
 import { useGetFolderStructureQuery } from '../../../../services/folders';
+import { isEventFromWithin } from '../../../../utils/isEventFromWithin';
 import { getTranslationKey } from '../../../../utils/translations';
 import { useAssetsDndOptional } from '../Dnd/AssetsDndProvider';
 import { useFolderTreeDroppable } from '../Dnd/useFolderTreeDroppable';
@@ -330,6 +331,7 @@ const FolderTreeItemInner = ({
   // Tree rows carry no selection, so a right-click always means "this folder" —
   // none of the list's selection rules apply here.
   const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
+  const rowButtonRef = useRef<HTMLButtonElement>(null);
 
   useSpringLoadedExpand({
     isOver,
@@ -354,6 +356,10 @@ const FolderTreeItemInner = ({
         $isInvalidDropCursor={showInvalidDropCursor}
         $isMovePending={isMovePending}
         onContextMenu={(event: React.MouseEvent) => {
+          if (!isEventFromWithin(event)) {
+            return;
+          }
+
           event.preventDefault();
           setMenuPosition({ x: event.clientX, y: event.clientY });
         }}
@@ -392,6 +398,7 @@ const FolderTreeItemInner = ({
 
         <Box flex="1" minWidth={0}>
           <RowButton
+            ref={rowButtonRef}
             type="button"
             $isActive={isActive}
             $isValidDropTarget={showValidDropHighlight}
@@ -412,6 +419,7 @@ const FolderTreeItemInner = ({
           folder={{ id, name }}
           parentId={parentId}
           menuPosition={menuPosition}
+          returnFocusTo={rowButtonRef.current}
           onCloseMenu={() => setMenuPosition(null)}
         />
       </TreeRow>

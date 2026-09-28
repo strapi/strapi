@@ -15,6 +15,7 @@ import { AssetContextMenu } from './AssetContextMenu';
 import { FolderContextMenu } from './FolderContextMenu';
 import { SelectionContextMenu } from './SelectionContextMenu';
 
+import type { AssetActionPermissions } from './AssetActions';
 import type { CursorPosition } from './CursorAnchoredMenu';
 import type { File } from '../../../../../shared/contracts/files';
 import type { Folder } from '../../../../../shared/contracts/folders';
@@ -55,8 +56,30 @@ interface OpenState {
    */
   id: number;
   position: CursorPosition;
+  /** The card or row that was right-clicked. */
+  returnFocusTo: HTMLElement | null;
   payload: ContextMenuPayload | null;
 }
+
+/**
+ * Mirrors what each menu would render once open. Folders have no gated actions
+ * yet, so they always have a menu.
+ */
+const hasItemActions = (
+  permissions: AssetActionPermissions,
+  isForSelection: boolean,
+  payload: ContextMenuPayload
+) => {
+  if (isForSelection) {
+    return permissions.canUpdate;
+  }
+
+  if (payload.kind === 'asset') {
+    return permissions.canUpdate || permissions.canCopyLink || permissions.canDownload;
+  }
+
+  return true;
+};
 
 interface ItemContextMenuProviderProps {
   /**
@@ -94,25 +117,32 @@ export const ItemContextMenuProvider = ({ locations, children }: ItemContextMenu
 
   const openForItem = useCallback<OpenForItem>(
     (event, key, payload) => {
+      const isForSelection = isSelected(key) && selectedKeys.size > 1;
+
+      if (!permissions.isLoading && !hasItemActions(permissions, isForSelection, payload)) {
+        return;
+      }
+
       // Only once we know we're handling it — declining would otherwise cost the
       // browser's own menu too.
       event.preventDefault();
 
       const position = { x: event.clientX, y: event.clientY };
+      const returnFocusTo = event.currentTarget instanceof HTMLElement ? event.currentTarget : null;
       nextId.current += 1;
       const id = nextId.current;
 
-      if (isSelected(key) && selectedKeys.size > 1) {
-        setState({ id, position, payload: null });
+      if (isForSelection) {
+        setState({ id, position, returnFocusTo, payload: null });
         return;
       }
 
       // Replace the selection *before* the menu renders, so the highlight has
       // already moved by the time the user reads the menu.
       selectOnly(key);
-      setState({ id, position, payload });
+      setState({ id, position, returnFocusTo, payload });
     },
-    [isSelected, selectOnly, selectedKeys]
+    [isSelected, selectOnly, selectedKeys, permissions]
   );
 
   // Only the menu that is still on screen may close it.
@@ -131,6 +161,7 @@ export const ItemContextMenuProvider = ({ locations, children }: ItemContextMenu
           <SelectionContextMenu
             key={state.id}
             position={state.position}
+            returnFocusTo={state.returnFocusTo}
             locations={locations}
             onClose={() => close(state.id)}
           />
@@ -145,6 +176,7 @@ export const ItemContextMenuProvider = ({ locations, children }: ItemContextMenu
             dragData={state.payload.dragData}
             permissions={permissions}
             position={state.position}
+            returnFocusTo={state.returnFocusTo}
             onClose={() => close(state.id)}
           />
         ) : (
@@ -153,6 +185,7 @@ export const ItemContextMenuProvider = ({ locations, children }: ItemContextMenu
             folder={state.payload.folder}
             dragData={state.payload.dragData}
             position={state.position}
+            returnFocusTo={state.returnFocusTo}
             onClose={() => close(state.id)}
           />
         ))}

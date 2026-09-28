@@ -785,6 +785,54 @@ describe('AssetsPage main-area context menu', () => {
     expect(screen.queryByRole('menuitem', { name: 'New folder' })).not.toBeInTheDocument();
   });
 
+  it('leaves the browser menu alone on an asset the role has no action for', async () => {
+    respondWithAssets([createAsset(1, 'image.png')]);
+
+    render(<AssetsPage />, {
+      initialEntries: ['/'],
+      providerOptions: {
+        permissions: (defaults: Array<{ action: string }>) =>
+          defaults.filter(
+            (permission) =>
+              ![
+                'plugin::upload.assets.update',
+                'plugin::upload.assets.copy-link',
+                'plugin::upload.assets.download',
+              ].includes(permission.action)
+          ),
+      },
+    });
+    await waitForCreatePermission();
+
+    // eslint-disable-next-line testing-library/no-node-access
+    const card = (await screen.findByText('image.png')).closest('[data-native-context-menu]');
+
+    // `true` means nothing called `preventDefault`.
+    await waitFor(() =>
+      expect(fireEvent.contextMenu(card!, { clientX: 20, clientY: 20 })).toBe(true)
+    );
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+  });
+
+  it('gives focus back to the card when the menu is closed with Escape', async () => {
+    respondWithAssets([createAsset(1, 'image.png')]);
+
+    const { user } = renderPage();
+    await waitForCreatePermission();
+
+    // eslint-disable-next-line testing-library/no-node-access
+    const card = (await screen.findByText('image.png')).closest<HTMLElement>(
+      '[data-native-context-menu]'
+    );
+    fireEvent.contextMenu(card!, { clientX: 20, clientY: 20 });
+    expect(await screen.findByRole('menu')).toBeInTheDocument();
+
+    await user.keyboard('{Escape}');
+
+    await waitFor(() => expect(screen.queryByRole('menu')).not.toBeInTheDocument());
+    await waitFor(() => expect(card).toHaveFocus());
+  });
+
   // Smoke cover only. The bug this came from — a second right-click doing
   // nothing — needs `pointerdown` and `contextmenu` to land in one task so the
   // dismissed menu's cleanup runs after the next one mounted. `fireEvent` acts

@@ -40,6 +40,8 @@ interface CursorAnchoredMenuProps {
   open: boolean;
   /** Names the menu for assistive tech — Radix points `aria-labelledby` at the anchor. */
   label: string;
+  /** Where focus goes back on close — the element that was right-clicked. */
+  returnFocusTo?: HTMLElement | null;
   /**
    * Asked to close. Callers that opened a dialog from an item must defer
    * unmounting until the dialog is done, or the dialog goes with them.
@@ -59,6 +61,7 @@ export const CursorAnchoredMenu = ({
   position,
   open,
   label,
+  returnFocusTo,
   onClose,
   children,
 }: CursorAnchoredMenuProps) => {
@@ -86,8 +89,18 @@ export const CursorAnchoredMenu = ({
         zIndex={2}
         minWidth="22rem"
         // The anchor is invisible and sits wherever the cursor was, so handing
-        // focus back to it on close would be a focus ring nobody can see.
-        onCloseAutoFocus={(event) => event.preventDefault()}
+        // focus back to it on close would be a focus ring nobody can see. Focus
+        // is left alone when a click outside already moved it somewhere else.
+        onCloseAutoFocus={(event) => {
+          event.preventDefault();
+
+          const isFocusLost =
+            document.activeElement === null || document.activeElement === document.body;
+
+          if (isFocusLost && returnFocusTo?.isConnected) {
+            returnFocusTo.focus();
+          }
+        }}
       >
         {children}
       </ActionsMenuContent>

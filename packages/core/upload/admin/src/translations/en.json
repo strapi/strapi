@@ -361,7 +361,6 @@
   "list.bulk-actions.move.success-multiple-sources": "{count, plural, =1 {# element has} other {# elements have}} been moved to {destination}",
   "list.bulk-actions.move.error": "An error occurred while moving the items.",
   "list.bulk-actions.delete": "Delete",
-  "list.selection.context-menu.count": "{number, plural, one {# item selected} other {# items selected}}",
   "list.selection.context-menu.label": "Selection actions",
   "list.bulk-actions.delete.confirm.title": "Delete {count, plural, =1 {# item} other {# items}}?",
   "list.bulk-actions.delete.confirm.description.are-you-sure": "Are you sure you want to delete the selected items?",
