@@ -48,6 +48,9 @@ export const parsePathWithIndices = (path: string): PathPart[] => {
     }, []);
 };
 
+export const getComponentLevelFromPath = (path: string) =>
+  parsePathWithIndices(path).length > 1 ? 0 : -1;
+
 export function getAttributeSchemaFromPath({
   path,
   schema,
