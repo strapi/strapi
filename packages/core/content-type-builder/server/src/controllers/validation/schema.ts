@@ -13,6 +13,7 @@ import {
   KEBAB_BASE_REGEX,
   NAME_REGEX,
 } from './common';
+import { contentStructureFileSchema, type ContentStructureFileInput } from './content-structure';
 
 type SchemaMeta =
   | {
@@ -265,6 +266,8 @@ const basePropertiesSchema = z.object({
   ]),
   configurable: z.boolean().nullish(),
   private: z.boolean().nullish(),
+  // Keep null invalid so searchability is always an explicit boolean when provided.
+  searchable: z.boolean().optional(),
   pluginOptions: z.record(z.string(), z.unknown()).optional(),
   conditions: z.preprocess((val) => {
     return val;
@@ -848,6 +851,7 @@ const schemaSchema = z.object({
     )
     .optional()
     .default([]),
+  contentStructure: contentStructureFileSchema.optional(),
 });
 
 type CreateComponentType = z.infer<typeof createComponentSchema>;
@@ -868,6 +872,7 @@ export type Schema = {
     | UpdateCollectionType
     | DeleteContentType
   >;
+  contentStructure?: ContentStructureFileInput;
 };
 
 const updateSchemaInput = z.object(

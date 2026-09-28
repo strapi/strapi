@@ -40,6 +40,12 @@ For cloud projects, the retention days are determined by the license. In a cloud
 
 In both cases, if we want to set a custom retention days we can modify the Admin Panel API config file (`./config/admin.js`). You can find all the possible options as well as other configurations for the Admin Panel on the [documentation page](https://docs.strapi.io/dev-docs/configurations/admin-panel#available-options).
 
+### Export
+
+Audit logs can be exported as a single CSV file from the list view. The export honours the active filters and requires both the `admin::audit-logs.read` and `admin::audit-logs.export` permissions. Every export also records an `audit-log.export` event.
+
+By default, the export refuses to start when the matching set exceeds the maximum number of rows: 1,000,000. Self-hosted projects can change this limit with the `admin.auditLogs.exportMaxRows` configuration variable in the Admin Panel API config file (`./config/admin.js`).
+
 ### Audit Logs format
 
 Every Audit Log has the following format:

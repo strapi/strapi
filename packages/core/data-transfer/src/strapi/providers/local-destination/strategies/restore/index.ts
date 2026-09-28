@@ -57,7 +57,8 @@ const deleteEntitiesRecords = async (
       }
 
       if (entities?.filters) {
-        removeThisContentType = entities.filters.every((filter) => filter(contentType));
+        removeThisContentType =
+          removeThisContentType && entities.filters.every((filter) => filter(contentType));
       }
 
       return removeThisContentType;

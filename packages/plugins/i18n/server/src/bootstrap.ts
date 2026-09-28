@@ -1,5 +1,6 @@
 import type { Schema } from '@strapi/types';
 import { isEqual } from 'lodash/fp';
+import { registerAuditEvents } from './audit-logs';
 import { getService } from './utils';
 
 const registerModelsHooks = () => {
@@ -101,8 +102,20 @@ export default async () => {
   // Hooks & Models
   registerModelsHooks();
 
+  // Absent in CE, without the audit-logs license, or when disabled by config;
+  // get() throws for services that were never added, so probe first.
+  if (strapi.has('audit-logs-lifecycle')) {
+    registerAuditEvents(strapi.get('audit-logs-lifecycle'));
+  }
+
   // AI Localizations
-  if (strapi.ai.admin.isEnabled() === true) {
+  if (strapi.ai.admin.isAvailable()) {
+    const aiTranslations = getService('ai-translations');
+
+    if (!aiTranslations.hasProvider() && strapi.ai.admin.isStrapiManagedAiEnabled()) {
+      aiTranslations.registerStrapiManagedProvider();
+    }
+
     getService('ai-localizations').setupMiddleware();
   }
 

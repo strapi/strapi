@@ -1,4 +1,4 @@
-import { Fragment, useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, ReactNode } from 'react';
 
 import { ConfirmDialog, SubNav, tours } from '@strapi/admin/strapi-admin';
 import {
@@ -20,7 +20,8 @@ import { getTrad } from '../../utils/getTrad';
 import { useDataManager } from '../DataManager/useDataManager';
 import { Status } from '../Status';
 
-import { useContentTypeBuilderMenu } from './useContentTypeBuilderMenu';
+import { FolderNavSection } from './components/FolderNav/FolderNavSection';
+import { useContentTypeBuilderMenu } from './hooks/useContentTypeBuilderMenu';
 
 const ArrowCounterClockwise = styled(ArrowClockwise)`
   transform: scaleX(-1);
@@ -35,7 +36,7 @@ const DiscardAllMenuItem = styled(Menu.Item)`
 `;
 
 export const ContentTypeBuilderNav = () => {
-  const { menu, search } = useContentTypeBuilderMenu();
+  const { flatSections, search, folderSections } = useContentTypeBuilderMenu();
   const { saveSchema, isModified, history, isInDevelopmentMode } = useDataManager();
 
   const { formatMessage } = useIntl();
@@ -94,6 +95,97 @@ export const ContentTypeBuilderNav = () => {
     id: getTrad('plugin.name'),
     defaultMessage: 'Content-Type Builder',
   });
+
+  const subNavSections = useMemo(() => {
+    const sections: ReactNode[] = []; // SubNav.Sections wraps its children in a <li>, and multiple {x.maps()} produce multiple react fragments. So we need to collect sections into a single array of children.
+
+    for (const section of folderSections) {
+      sections.push(
+        <FolderNavSection
+          key={section.section}
+          section={section.section}
+          sectionId={section.sectionId}
+          title={section.title}
+          links={section.links}
+          createTypeLabel={section.createTypeLabel}
+          onCreateContentType={section.onCreateContentType}
+          searchValue={search.value}
+        />
+      );
+    }
+
+    for (const section of flatSections) {
+      if (section.name === 'components') {
+        sections.push(
+          <SubNav.Section
+            key={section.name}
+            label={formatMessage({
+              id: section.title.id,
+              defaultMessage: section.title.defaultMessage,
+            })}
+            link={
+              section.customLink && {
+                label: formatMessage({
+                  id: section.customLink?.id,
+                  defaultMessage: section.customLink?.defaultMessage,
+                }),
+                onClick: section.customLink?.onClick,
+              }
+            }
+            sectionId={section.name}
+          >
+            {section.links.map((link) => {
+              const linkLabel = formatMessage({
+                id: link.name,
+                defaultMessage: link.title,
+              });
+
+              if ('links' in link) {
+                return (
+                  <SubNav.SubSection key={link.name} label={link.title}>
+                    {link.links.map((subLink) => {
+                      const label = formatMessage({
+                        id: subLink.name,
+                        defaultMessage: subLink.title,
+                      });
+
+                      return (
+                        <SubNav.Link
+                          to={subLink.to}
+                          key={subLink.name}
+                          label={label}
+                          endAction={
+                            <Box tag="span" textAlign="center" width={'24px'}>
+                              <Status status={subLink.status} />
+                            </Box>
+                          }
+                        />
+                      );
+                    })}
+                  </SubNav.SubSection>
+                );
+              }
+
+              return (
+                <SubNav.Link
+                  to={link.to}
+                  key={link.name}
+                  label={linkLabel}
+                  endAction={
+                    <Box tag="span" textAlign="center" width={'24px'}>
+                      <Status status={link.status} />
+                    </Box>
+                  }
+                />
+              );
+            })}
+          </SubNav.Section>
+        );
+      }
+    }
+
+    return sections;
+  }, [folderSections, flatSections, formatMessage, search.value]);
 
   return (
     <SubNav.Main aria-label={pluginName}>
@@ -196,71 +288,7 @@ export const ContentTypeBuilderNav = () => {
         />
       </Flex>
       <SubNav.Content>
-        <SubNav.Sections>
-          {menu.map((section) => (
-            <Fragment key={section.name}>
-              <SubNav.Section
-                label={formatMessage({
-                  id: section.title.id,
-                  defaultMessage: section.title.defaultMessage,
-                })}
-                link={
-                  section.customLink && {
-                    label: formatMessage({
-                      id: section.customLink?.id,
-                      defaultMessage: section.customLink?.defaultMessage,
-                    }),
-                    onClick: section.customLink?.onClick,
-                  }
-                }
-                sectionId={section.name}
-              >
-                {section.links.map((link) => {
-                  const linkLabel = formatMessage({ id: link.name, defaultMessage: link.title });
-
-                  if ('links' in link) {
-                    return (
-                      <SubNav.SubSection key={link.name} label={link.title}>
-                        {link.links.map((subLink) => {
-                          const label = formatMessage({
-                            id: subLink.name,
-                            defaultMessage: subLink.title,
-                          });
-
-                          return (
-                            <SubNav.Link
-                              to={subLink.to}
-                              key={subLink.name}
-                              label={label}
-                              endAction={
-                                <Box tag="span" textAlign="center" width={'24px'}>
-                                  <Status status={subLink.status} />
-                                </Box>
-                              }
-                            />
-                          );
-                        })}
-                      </SubNav.SubSection>
-                    );
-                  }
-
-                  return (
-                    <SubNav.Link
-                      to={link.to}
-                      key={link.name}
-                      label={linkLabel}
-                      endAction={
-                        <Box tag="span" textAlign="center" width={'24px'}>
-                          <Status status={link.status} />
-                        </Box>
-                      }
-                    />
-                  );
-                })}
-              </SubNav.Section>
-            </Fragment>
-          ))}
-        </SubNav.Sections>
+        <SubNav.Sections>{subNavSections}</SubNav.Sections>
       </SubNav.Content>
       <Dialog.Root
         open={discardConfirmationModalIsOpen}

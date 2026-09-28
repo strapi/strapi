@@ -3,29 +3,30 @@ import { env } from '@strapi/utils';
 
 import { getService } from '../utils';
 
+import type { GetProjectType } from '../../../../shared/contracts/admin';
+
 export default {
   // NOTE: Overrides CE admin controller
-  async getProjectType() {
+  async getProjectType(): Promise<GetProjectType.Response> {
     const flags = strapi.config.get('admin.flags', {});
-    const isAILicense = strapi.ee.features.isEnabled('cms-ai');
-    const isAIConfigured = strapi.config.get('admin.ai', { enabled: isAILicense });
 
     try {
       return {
         data: {
-          isEE: strapi.EE,
+          // The license fields are nullable internally; the contract is not.
+          isEE: Boolean(strapi.EE),
           isTrial: strapi.ee.isTrial,
           features: strapi.ee.features.list(),
           flags,
-          type: strapi.ee.type,
-          planPriceId: strapi.ee.planPriceId,
+          type: strapi.ee.type ?? undefined,
+          planPriceId: strapi.ee.planPriceId ?? undefined,
           ai: {
-            enabled: isAILicense && isAIConfigured.enabled,
+            enabled: strapi.ai.admin.isStrapiManagedAiEnabled(),
           },
         },
       };
     } catch {
-      return { data: { isEE: false, features: [], flags, ai: { enabled: false } } };
+      return { data: { isEE: false, isTrial: false, features: [], flags, ai: { enabled: false } } };
     }
   },
 

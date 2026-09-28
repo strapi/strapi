@@ -257,6 +257,8 @@ describe('Admin Logout Sessions', () => {
       headers: { Cookie: cookiePairB },
     });
     expect(accessFromB.statusCode).toBe(200);
+    const rotatedRefreshCookieB = getCookie(accessFromB, cookieName)!;
+    const rotatedCookiePairB = rotatedRefreshCookieB.split(';')[0];
 
     // Logout device A specifically
     const refreshCookieA = getCookie(loginA, 'strapi_admin_refresh')!;
@@ -275,7 +277,7 @@ describe('Admin Logout Sessions', () => {
 
     // Device B should still be able to exchange and access protected route
     const newAccessFromB = await createRequest({ strapi }).post('/admin/access-token', {
-      headers: { Cookie: cookiePairB },
+      headers: { Cookie: rotatedCookiePairB },
     });
     expect(newAccessFromB.statusCode).toBe(200);
     const newAccessTokenB = newAccessFromB.body?.data?.token as string;

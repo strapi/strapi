@@ -113,19 +113,11 @@ const buildTransferTable = (resultData: ResultData) => {
   return table;
 };
 
-const IGNORED_CONTENT_TYPE_PREFIXES = ['admin::'];
-
-const IGNORED_CONTENT_TYPES = [
-  'plugin::content-releases.release',
-  'plugin::content-releases.release-action',
-];
-
 /** Media library content types — common target for `--exclude-content-types` (see issue #25008). */
 const UPLOAD_CONTENT_TYPE_UIDS = ['plugin::upload.file', 'plugin::upload.folder'] as const;
 
 const isIgnoredContentType = (type: string) =>
-  IGNORED_CONTENT_TYPE_PREFIXES.some((prefix) => type.startsWith(prefix)) ||
-  IGNORED_CONTENT_TYPES.includes(type);
+  strapiDataTransfer.isIgnoredOfficialTransferType(type);
 
 const abortTransfer = async ({
   engine,
@@ -193,7 +185,11 @@ const formatTransferPresetHelp = (types: string[]) =>
   types
     .map(
       (type) =>
-        `${type} (${TRANSFER_FILTER_PRESET_DESCRIPTIONS[type as keyof typeof TRANSFER_FILTER_PRESET_DESCRIPTIONS]})`
+        `${type} (${
+          TRANSFER_FILTER_PRESET_DESCRIPTIONS[
+            type as keyof typeof TRANSFER_FILTER_PRESET_DESCRIPTIONS
+          ]
+        })`
     )
     .join('; ');
 
@@ -219,7 +215,9 @@ const onlyOption = new Option(
 
 const excludeContentTypesOption = new Option(
   '--exclude-content-types <comma-separated UIDs>',
-  `Exclude content types from entities and links (e.g. ${UPLOAD_CONTENT_TYPE_UIDS.join(',')} to omit the media library; or use --exclude media-library to skip binaries and upload records — see issue #25008)`
+  `Exclude content types from entities and links (e.g. ${UPLOAD_CONTENT_TYPE_UIDS.join(
+    ','
+  )} to omit the media library; or use --exclude media-library to skip binaries and upload records — see issue #25008)`
 ).argParser(parseList);
 
 const onlyContentTypesOption = new Option(
@@ -388,7 +386,9 @@ const formatDiagnostic = (
       if (kind === 'info') {
         const { message, params, origin } = details;
 
-        const msg = `[${origin ?? 'transfer'}] ${message}\n${params ? JSON.stringify(params, null, 2) : ''}`;
+        const msg = `[${origin ?? 'transfer'}] ${message}\n${
+          params ? JSON.stringify(params, null, 2) : ''
+        }`;
 
         getLogger().info(msg);
       }
@@ -796,7 +796,7 @@ const parseRestoreFromOptions = (opts: TransferCliFilterOptions, strapi: Core.St
   const entitiesOptions: RestoreConfig['entities'] = {
     exclude: [
       ...Object.keys(strapi.contentTypes).filter(isIgnoredContentType),
-      ...IGNORED_CONTENT_TYPES,
+      ...strapiDataTransfer.getIgnoredOfficialTransferTypes(),
       ...(opts.excludeContentTypes ?? []),
     ],
     include: undefined,

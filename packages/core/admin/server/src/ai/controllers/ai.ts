@@ -3,7 +3,7 @@ import { GetAiFeatureConfig, GetAiToken } from '../../../../shared/contracts/ai'
 
 export default {
   async getAiToken(ctx: Context) {
-    if (strapi.ai.admin.isEnabled() === false) {
+    if (strapi.ai.admin.isStrapiManagedAiEnabled() === false) {
       return ctx.notFound();
     }
 
@@ -27,7 +27,7 @@ export default {
   },
 
   async getAiUsage(ctx: Context) {
-    if (strapi.ai.admin.isEnabled() === false) {
+    if (strapi.ai.admin.isStrapiManagedAiEnabled() === false) {
       return ctx.notFound();
     }
 
@@ -42,7 +42,7 @@ export default {
   },
 
   async getAiFeatureConfig(ctx: Context) {
-    if (strapi.ai.admin.isEnabled() === false) {
+    if (strapi.ai.admin.isAvailable() === false) {
       return ctx.notFound();
     }
 

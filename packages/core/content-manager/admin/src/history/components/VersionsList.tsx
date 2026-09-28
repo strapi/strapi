@@ -274,10 +274,6 @@ const VersionsList = () => {
           <VersionsListItems />
         </ActionsDrawer.Content>
       </ActionsDrawer.Root>
-      {/* Adding a fixed height to the bottom of the page to prevent 
-      the actions drawer from covering the content
-      (32px + 12px * 2 padding + 1px border) */}
-      <Box width="100%" height="5.7rem" />
     </>
   );
 };

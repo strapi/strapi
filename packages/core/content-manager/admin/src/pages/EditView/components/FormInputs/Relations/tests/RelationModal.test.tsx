@@ -1,5 +1,13 @@
 import { DocumentMeta } from '../../../../../../hooks/useDocumentContext';
-import { reducer, type State, type Action } from '../RelationModal';
+import {
+  reducer,
+  prefillParentRelation,
+  type State,
+  type Action,
+  type PendingConnectPatch,
+} from '../RelationModal';
+
+import type { AnyData } from '../../../../utils/data';
 
 describe('Document Modal Reducer', () => {
   // Sample documents for testing
@@ -26,6 +34,7 @@ describe('Document Modal Reducer', () => {
     confirmDialogIntent: null,
     isModalOpen: false,
     hasUnsavedChanges: false,
+    pendingConnects: {},
   };
 
   // State with history
@@ -34,6 +43,7 @@ describe('Document Modal Reducer', () => {
     confirmDialogIntent: null,
     isModalOpen: true,
     hasUnsavedChanges: false,
+    pendingConnects: {},
   };
 
   // State with unsaved changes
@@ -59,6 +69,7 @@ describe('Document Modal Reducer', () => {
         confirmDialogIntent: null,
         isModalOpen: true,
         hasUnsavedChanges: false,
+        pendingConnects: {},
       });
     });
 
@@ -78,6 +89,7 @@ describe('Document Modal Reducer', () => {
         confirmDialogIntent: null,
         isModalOpen: true,
         hasUnsavedChanges: false,
+        pendingConnects: {},
       });
     });
 
@@ -114,6 +126,7 @@ describe('Document Modal Reducer', () => {
         confirmDialogIntent: null,
         isModalOpen: true,
         hasUnsavedChanges: true,
+        pendingConnects: {},
       });
     });
 
@@ -152,6 +165,7 @@ describe('Document Modal Reducer', () => {
         confirmDialogIntent: null,
         isModalOpen: true,
         hasUnsavedChanges: false,
+        pendingConnects: {},
       });
     });
 
@@ -186,6 +200,7 @@ describe('Document Modal Reducer', () => {
         confirmDialogIntent: null,
         isModalOpen: true,
         hasUnsavedChanges: true,
+        pendingConnects: {},
       });
     });
   });
@@ -251,6 +266,7 @@ describe('Document Modal Reducer', () => {
         confirmDialogIntent: null,
         isModalOpen: false,
         hasUnsavedChanges: false,
+        pendingConnects: {},
       });
     });
 
@@ -285,6 +301,7 @@ describe('Document Modal Reducer', () => {
         confirmDialogIntent: null,
         isModalOpen: false,
         hasUnsavedChanges: false,
+        pendingConnects: {},
       });
     });
   });
@@ -323,6 +340,134 @@ describe('Document Modal Reducer', () => {
     });
   });
 
+  describe('GO_TO_CREATED_RELATION action', () => {
+    it('does not record a pending connect when the parent is the root document (history has fewer than 2 entries)', () => {
+      const stateWithOneEntry: State = {
+        ...initialState,
+        documentHistory: [doc2],
+      };
+      const connectPatch: PendingConnectPatch = {
+        fieldToConnect: 'products',
+        relationValue: { connect: [{ id: 1 }], disconnect: [] },
+      };
+      const action: Action = {
+        type: 'GO_TO_CREATED_RELATION',
+        payload: { document: doc2, shouldBypassConfirmation: true, connectPatch },
+      };
+
+      const result = reducer(stateWithOneEntry, action);
+
+      expect(result.pendingConnects).toEqual({});
+    });
+
+    it('records a pending connect for the nested parent when history has 2 or more entries', () => {
+      const stateWithTwoEntries: State = {
+        ...initialState,
+        documentHistory: [doc1, doc2],
+      };
+      const connectPatch: PendingConnectPatch = {
+        fieldToConnect: 'products',
+        relationValue: { connect: [{ id: 1 }], disconnect: [] },
+      };
+      const action: Action = {
+        type: 'GO_TO_CREATED_RELATION',
+        payload: { document: doc2, shouldBypassConfirmation: true, connectPatch },
+      };
+
+      const result = reducer(stateWithTwoEntries, action);
+
+      expect(result.pendingConnects).toEqual({
+        'api::articles.article::doc1': [connectPatch],
+      });
+    });
+
+    it('appends to any existing pending connects recorded for the same nested parent', () => {
+      const existingPatch: PendingConnectPatch = {
+        fieldToConnect: 'addresses',
+        relationValue: { connect: [{ id: 2 }], disconnect: [] },
+      };
+      const stateWithPending: State = {
+        ...initialState,
+        documentHistory: [doc1, doc2],
+        pendingConnects: { 'api::articles.article::doc1': [existingPatch] },
+      };
+      const newPatch: PendingConnectPatch = {
+        fieldToConnect: 'products',
+        relationValue: { connect: [{ id: 1 }], disconnect: [] },
+      };
+      const action: Action = {
+        type: 'GO_TO_CREATED_RELATION',
+        payload: { document: doc2, shouldBypassConfirmation: true, connectPatch: newPatch },
+      };
+
+      const result = reducer(stateWithPending, action);
+
+      expect(result.pendingConnects).toEqual({
+        'api::articles.article::doc1': [existingPatch, newPatch],
+      });
+    });
+
+    it('replaces the last history entry and resets the connect-trigger fields', () => {
+      const stateBefore: State = {
+        ...initialState,
+        documentHistory: [doc1],
+        fieldToConnect: 'products',
+        fieldToConnectUID: 'some.uid',
+        getParentFormValues: () => ({}),
+        setParentFormValue: () => {},
+      };
+      const action: Action = {
+        type: 'GO_TO_CREATED_RELATION',
+        payload: { document: doc2, shouldBypassConfirmation: true },
+      };
+
+      const result = reducer(stateBefore, action);
+
+      expect(result.documentHistory).toEqual([doc2]);
+      expect(result.fieldToConnect).toBeUndefined();
+      expect(result.fieldToConnectUID).toBeUndefined();
+      expect(result.getParentFormValues).toBeUndefined();
+      expect(result.setParentFormValue).toBeUndefined();
+    });
+  });
+
+  describe('CLEAR_PENDING_CONNECTS action', () => {
+    it('removes pending connects recorded for the given document, leaving others untouched', () => {
+      const patch: PendingConnectPatch = {
+        fieldToConnect: 'products',
+        relationValue: { connect: [{ id: 1 }], disconnect: [] },
+      };
+      const stateWithPending: State = {
+        ...initialState,
+        pendingConnects: {
+          'api::articles.article::doc1': [patch],
+          'api::products.product::doc2': [patch],
+        },
+      };
+      const action: Action = {
+        type: 'CLEAR_PENDING_CONNECTS',
+        payload: { documentMeta: { model: doc1.model, documentId: doc1.documentId } },
+      };
+
+      const result = reducer(stateWithPending, action);
+
+      expect(result.pendingConnects).toEqual({
+        'api::products.product::doc2': [patch],
+      });
+    });
+
+    it('is a no-op when there are no pending connects for the given document', () => {
+      const action: Action = {
+        type: 'CLEAR_PENDING_CONNECTS',
+        payload: { documentMeta: { model: doc1.model, documentId: doc1.documentId } },
+      };
+
+      const result = reducer(initialState, action);
+
+      expect(result).toBe(initialState);
+    });
+  });
+
   describe('Unknown action', () => {
     it('should return the current state for unknown action types', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -331,5 +476,75 @@ describe('Document Modal Reducer', () => {
 
       expect(result).toBe(stateWithHistory);
     });
+  });
+});
+
+describe('prefillParentRelation', () => {
+  const parentDocument = {
+    id: 12,
+    documentId: 'article-doc',
+    locale: 'en',
+    status: 'draft',
+    title: 'West Ham post match analysis',
+    authors: { count: 1 },
+  };
+  const childSchema = {
+    attributes: {
+      articles: {
+        type: 'relation',
+        target: 'api::article.article',
+        mappedBy: 'authors',
+      },
+    },
+  };
+  const initialValues = { articles: { connect: [], disconnect: [] } } as AnyData;
+  const params = {
+    initialValues,
+    childSchema,
+    parentDocument,
+    parentModel: 'api::article.article',
+  };
+
+  it('pre-fills the inverse field from a bidirectional parent', () => {
+    const result = prefillParentRelation({ ...params, fieldToConnect: 'authors' });
+
+    expect(result).toEqual({
+      articles: {
+        connect: [
+          expect.objectContaining({
+            id: 12,
+            documentId: 'article-doc',
+            title: 'West Ham post match analysis',
+            apiData: expect.objectContaining({ documentId: 'article-doc', isTemporary: true }),
+          }),
+        ],
+        disconnect: [],
+      },
+    });
+    expect((result as { articles: { connect: object[] } }).articles.connect[0]).not.toHaveProperty(
+      'authors'
+    );
+  });
+
+  it('does not treat a component path as the inverse of a top-level field with the same last segment', () => {
+    expect(prefillParentRelation({ ...params, fieldToConnect: 'seo.authors' })).toBe(initialValues);
+  });
+
+  it('does not pre-fill one-way relations, missing inverses, or unsaved parents', () => {
+    expect(prefillParentRelation({ ...params, fieldToConnect: 'cover' })).toBe(initialValues);
+    expect(
+      prefillParentRelation({
+        ...params,
+        fieldToConnect: 'authors',
+        childSchema: { attributes: { name: { type: 'string' } } },
+      })
+    ).toBe(initialValues);
+    expect(
+      prefillParentRelation({
+        ...params,
+        fieldToConnect: 'authors',
+        parentDocument: { title: 'Draft parent' },
+      })
+    ).toBe(initialValues);
   });
 });

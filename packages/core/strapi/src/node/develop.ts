@@ -33,7 +33,7 @@ interface DevelopOptions extends CLIContext {
   /**
    * Which bundler to use for building.
    *
-   * @default webpack
+   * @default vite
    */
   bundler?: 'webpack' | 'vite';
   polling?: boolean;
@@ -240,6 +240,7 @@ const develop = async ({
           strapi,
           tsconfig,
           options,
+          dev: true,
         });
         const contextDuration = timer.end('createBuildContext');
         contextSpinner.text = `Building build context (${prettyTime(contextDuration)})`;
