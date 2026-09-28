@@ -11,6 +11,10 @@ replaced or extended through the services registry after i18n's `register` are o
 i18n's contracts or look up the plugin by name. Only one provider can be registered per application:
 a second registration throws.
 
+i18n's own surface (the `locale` and `localizations` attributes it adds to content types, its
+routes, GraphQL extension and sanitizers) reads the schema flag through its own services and
+does not consult `strapi.localization`. A provider's `isLocalizedContentType` must therefore agree with that flag.
+
 Without a provider, `isEnabled()` is `false`, content types are treated as nonlocalized, the
 default locale is `null`, the locale list, populate paths and nonlocalized attributes are empty,
 and copying nonlocalized fields leaves the entry unchanged. Use `isEnabled()` when the absence of

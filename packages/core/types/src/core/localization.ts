@@ -2,6 +2,7 @@ import type { Struct, UID } from '..';
 
 /** Localization operations supplied by an optional plugin during its register lifecycle. */
 export type LocalizationProvider = {
+  /** Must agree with the schema flag i18n reads to add the `locale` attribute. */
   isLocalizedContentType(model: Struct.ContentTypeSchema | Struct.ComponentSchema): boolean;
   getDefaultLocale(): Promise<string | null>;
   getLocales(): Promise<Array<{ code: string; name: string }>>;
