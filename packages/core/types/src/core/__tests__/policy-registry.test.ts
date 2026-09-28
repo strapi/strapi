@@ -1,6 +1,9 @@
 import type { ControllerHandler } from '../controller';
+import type { Plugin } from '../plugin';
+import type { Policy, PolicyHandler } from '../policy';
 import type { RouteConfigFor, RouteInput } from '../route';
 import type { RouterInputFor } from '../router';
+import type { Strapi as StrapiInstance } from '../strapi';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -164,3 +167,63 @@ type LabRouter = RouterInputFor<typeof controllers>;
   // @ts-expect-error An alias cannot supply the config of a shadowed relative policy.
   policies: [{ name: 'policyLabCollision', config: { relative: true } }],
 }) satisfies RouteConfigFor<'plugin::policy-lab'>;
+
+type Equal<T, U> =
+  (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;
+type Expect<T extends true> = T;
+
+declare const strapi: StrapiInstance;
+declare const dynamicName: string;
+declare const patternName: `plugin::policy-lab.${string}`;
+type LabPolicy = PolicyHandler<{ custom: true }>;
+
+// Policy lookups resolve registered names to a policy that receives their config contract,
+// like `strapi.policies`. `strapi.policy` takes full names, plugin lookups relative names.
+const hasRole = strapi.policy('plugin::policy-lab.hasRole');
+const adminPolicy = strapi.policy('admin::policyLab');
+const pluginHasRole = strapi.plugin('policy-lab').policy('hasRole');
+const pluginHasLevel = strapi.plugin('policy-lab').policy('hasLevel');
+// Unregistered literal names, relative names in `strapi.policy`, and dynamic names resolve to `unknown`.
+const unregistered = strapi.policy('global::unregistered');
+const relative = strapi.policy('hasRole');
+const dynamic = strapi.policy(dynamicName);
+const pattern = strapi.policy(patternName);
+const pluginUnregistered = strapi.plugin('policy-lab').policy('unregistered');
+const pluginFullName = strapi.plugin('policy-lab').policy('plugin::policy-lab.hasRole');
+const pluginDynamic = strapi.plugin('policy-lab').policy(dynamicName);
+const dynamicPlugin = strapi.plugin(dynamicName).policy('hasRole');
+const unregisteredPlugin = strapi.plugin('unregistered').policy('hasRole');
+const legacyPlugin: Plugin = strapi.plugin('policy-lab');
+const legacyPluginPolicy = legacyPlugin.policy('hasRole');
+// An explicit type argument wins over the registries.
+const explicit = strapi.policy<LabPolicy>('global::unregistered');
+const explicitRegistered = strapi.policy<LabPolicy>('plugin::policy-lab.hasRole');
+const pluginExplicit = strapi.plugin('policy-lab').policy<LabPolicy>('unregistered');
+declare const lookupChecks: [
+  Expect<Equal<typeof hasRole, Policy<{ roles: string[] }>>>,
+  Expect<Equal<typeof adminPolicy, Policy<undefined>>>,
+  Expect<Equal<typeof pluginHasRole, Policy<{ roles: string[] }>>>,
+  Expect<Equal<typeof pluginHasLevel, Policy<{ level?: number } | undefined>>>,
+  Expect<Equal<typeof unregistered, unknown>>,
+  Expect<Equal<typeof relative, unknown>>,
+  Expect<Equal<typeof dynamic, unknown>>,
+  Expect<Equal<typeof pattern, unknown>>,
+  Expect<Equal<typeof pluginUnregistered, unknown>>,
+  Expect<Equal<typeof pluginFullName, unknown>>,
+  Expect<Equal<typeof pluginDynamic, unknown>>,
+  Expect<Equal<typeof dynamicPlugin, unknown>>,
+  Expect<Equal<typeof unregisteredPlugin, unknown>>,
+  Expect<Equal<typeof legacyPluginPolicy, unknown>>,
+  Expect<Equal<typeof explicit, LabPolicy>>,
+  Expect<Equal<typeof explicitRegistered, LabPolicy>>,
+  Expect<Equal<typeof pluginExplicit, LabPolicy>>,
+];
+lookupChecks satisfies unknown;
+
+// A type annotation on the result does not replace the type argument.
+// @ts-expect-error `T` is not inferred from the annotation.
+const contextual: LabPolicy = strapi.policy('global::unregistered');
+// @ts-expect-error `T` is not inferred from the annotation, for plugin lookups either.
+const pluginContextual: LabPolicy = strapi.plugin('policy-lab').policy('unregistered');
+contextual satisfies unknown;
+pluginContextual satisfies unknown;

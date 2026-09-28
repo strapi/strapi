@@ -199,3 +199,22 @@ strapi.service('plugin::type-lab-other.counter').missing();
 
 // The global `strapi` instance resolves through the same registries.
 globalThis.strapi.service('plugin::type-lab.greeting').greet('Nico') satisfies Promise<string>;
+
+// API module lookups resolve registered names relative to the API, like plugin lookups.
+strapi.api('type-lab').service('greeting').greet('Nico') satisfies Promise<string>;
+// @ts-expect-error API lookups use the registered contract.
+strapi.api('type-lab').service('greeting').missing();
+exactlyUnknown(strapi.api('type-lab').service('unregistered')) satisfies true;
+exactlyUnknown(strapi.api('unregistered').service('greeting')) satisfies true;
+exactlyUnknown(strapi.api('type-lab').service(dynamicService)) satisfies true;
+exactlyUnknown(strapi.api(dynamicPlugin).service('greeting')) satisfies true;
+strapi.api('type-lab').service<LabServices['greeting']>('unregistered').greet('Nico');
+// The explicit generic wins over a registered contract.
+strapi.api('type-lab').service<{ count(): number }>('greeting').count() satisfies number;
+// @ts-expect-error `T` is not inferred from the annotation, for API lookups either.
+const contextualApi: GreetingService = strapi.api('type-lab').service('unregistered');
+contextualApi satisfies unknown;
+// Modules other than APIs, such as `strapi.admin`, keep the legacy lookups.
+strapi.admin.service('type-lab').anything();
+const contextualAdmin: GreetingService = strapi.admin.service('type-lab');
+contextualAdmin satisfies GreetingService;
