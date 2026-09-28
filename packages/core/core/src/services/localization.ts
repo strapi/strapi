@@ -6,6 +6,10 @@ export const createLocalizationService = (): Core.Localization => {
 
   return {
     register(localizationProvider) {
+      if (provider !== undefined) {
+        throw new Error('A localization provider is already registered for this application.');
+      }
+
       provider = localizationProvider;
     },
     isEnabled() {

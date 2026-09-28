@@ -84,6 +84,25 @@ describe('Localization capability', () => {
     await expect(localization.getDefaultLocale()).rejects.toThrow('Locale store unavailable');
   });
 
+  it('rejects a second provider registration', () => {
+    const localization = createLocalizationService();
+    const provider = {
+      isLocalizedContentType: () => true,
+      getDefaultLocale: async () => 'en',
+      getLocales: async () => [],
+      getNestedPopulateOfNonLocalizedAttributes: () => [],
+      getNonLocalizedAttributes: () => [],
+      fillNonLocalizedAttributes() {},
+    } satisfies Core.LocalizationProvider;
+
+    localization.register(provider);
+
+    expect(() =>
+      localization.register({ ...provider, isLocalizedContentType: () => false })
+    ).toThrow('A localization provider is already registered for this application.');
+    expect(localization.isLocalizedContentType(article)).toBe(true);
+  });
+
   it('falls back to inert defaults when a provider resolves undefined', async () => {
     const localization = createLocalizationService();
     // Contract-violating provider, e.g. a JS plugin returning nothing

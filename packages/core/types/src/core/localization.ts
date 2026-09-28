@@ -21,7 +21,7 @@ export type Localization = LocalizationProvider & {
   isEnabled(): boolean;
   /**
    * Install the provider before database migrations and content-type synchronization run.
-   * A later registration replaces the previous provider for this application.
+   * Only one provider can be registered per application: a second registration throws.
    */
   register(provider: LocalizationProvider): void;
 };
