@@ -17,7 +17,13 @@ import type {
 } from './controller';
 import type { ApiMap, RegisteredApiName } from './module';
 import type { PluginMap, RegisteredPluginName } from './plugin';
-import type { PolicyMap, RegisteredPolicyName } from './policy';
+import type {
+  PolicyLookup,
+  PolicyLookupConstraint,
+  PolicyLookupDefault,
+  PolicyLookupName,
+  PolicyMap,
+} from './policy';
 import type { ServiceLookup, ServiceLookupDefault, ServiceLookupUID, ServiceMap } from './service';
 import type { SuggestedString } from '../utils/string';
 import type { IsStrict, StrictNoInfer } from './strictness';
@@ -119,8 +125,17 @@ export interface Strapi extends Container {
    * other keys keep the legacy policy.
    */
   policies: PolicyMap;
-  /** Registered policy UIDs are listed for completion; the result keeps the legacy policy type. */
-  policy(name: SuggestedString<RegisteredPolicyName>): Core.Policy;
+  /**
+   * Resolves the registered policy of the full name `name`, which receives its config contract.
+   * An explicit type argument (`policy<MyPolicy>(name)`) wins over the registries, including for
+   * unregistered names with strict types enabled. Registered names are listed for completion.
+   */
+  policy<
+    T extends PolicyLookupConstraint = PolicyLookupDefault,
+    TName extends PolicyLookupName = PolicyLookupName,
+  >(
+    name: TName
+  ): PolicyLookup<TName, StrictNoInfer<T>>;
   middlewares: Record<string, Core.MiddlewareFactory>;
   middleware(name: string): Core.MiddlewareFactory;
   /**

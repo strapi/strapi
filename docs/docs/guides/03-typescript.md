@@ -64,17 +64,26 @@ services. Their contracts are the CE shape, with the EE-only members optional. E
 the EE shape, `EnterpriseServices`, as an explicit generic argument.
 
 Strict contracts are closed: an unregistered service or controller name resolves to `unknown`,
-for full UIDs such as `strapi.service('plugin::greetings.greeting')` and for plugin lookups such
-as `strapi.plugin('greetings').service('greeting')`. Dynamic names, such as a `string` variable or
+for full UIDs such as `strapi.service('plugin::greetings.greeting')`, for plugin lookups such
+as `strapi.plugin('greetings').service('greeting')`, and for API lookups such as
+`strapi.api('item').service('item')`. Policy lookups follow the same rules: `strapi.policy(name)`
+takes a full name such as `plugin::greetings.isOwner`, `strapi.plugin('greetings').policy('isOwner')`
+a name relative to the plugin, as at runtime. A registered policy resolves to a policy that
+receives its config contract, like `strapi.policies`. Dynamic names, such as a `string` variable or
 a template literal type like `` `plugin::${string}.greeting` ``, cannot be validated and resolve to
-`unknown` too. Register a contract for the name, or pass an explicit generic argument. Both lookup
-forms accept one, and it takes precedence over the registries, with or without the switch:
+`unknown` too. Register a contract for the name, or pass an explicit generic argument. Every lookup
+form accepts one, and it takes precedence over the registries, with or without the switch:
 
 ```ts
 const greeting = strapi.plugin('greetings').service<GreetingService>('greeting');
 const sameGreeting = strapi.service<GreetingService>('plugin::greetings.greeting');
 const items = strapi.controller<ItemsController>('api::item.item');
+const sameItems = strapi.api('item').controller<ItemsController>('item');
+const isOwner = strapi.policy<Core.PolicyHandler>('global::isOwner');
 ```
+
+Other modules, such as `strapi.admin`, keep the legacy `service` and `controller` lookups. Use
+full UIDs, as in `strapi.service('admin::auth')`, to resolve their contracts.
 
 With the switch on, a type annotation on the result does not replace the type argument:
 `const greeting: GreetingService = strapi.plugin('greetings').service('greeting')` is an error.
@@ -109,8 +118,9 @@ removes `undefined` from the result. A default that can itself be `undefined` pr
 possibility. Defaults do not replace `null`.
 
 Without `Settings.strict: true`, service, controller, config, and policy lookups keep their
-previous types, even if the program loads package contracts or application overrides. Editors
-can still suggest registered names.
+previous types, even if the program loads package contracts or application overrides:
+`strapi.policy(name)` returns `Core.Policy`, and `strapi.plugin(name).policy` stays untyped.
+Editors can still suggest registered names.
 
 Editors list registered names with either switch setting:
 
@@ -123,8 +133,8 @@ Editors list registered names with either switch setting:
 Dotted config paths are listed one level at a time: `strapi.config.get('plugin::sentry.')` lists
 the top-level keys of the contract, and `strapi.plugin('sentry').config('init.')` lists the keys
 of `init`. With the switch on, editors also list the keys of the plural maps and the config keys
-of registered policies. Suggestions change neither the accepted names nor the result types:
-`strapi.policy(name)` and API service and controller lookups keep their previous result types.
+of registered policies and the policy names in `strapi.plugin(name).policy(name)`. Suggestions do
+not change the accepted names.
 
 ## Publishing a plugin's contracts
 
@@ -197,9 +207,9 @@ use their fully qualified names.
 
 Policy inventories are deliberately complete for explicitly typed routes: accepting arbitrary
 policy names would also let an invalid configuration for a known policy pass through the
-fallback. Service and controller lookups are closed the same way for literal names, but resolve
-one name at a time: a lookup with an explicit generic argument keeps working while its contract
-is missing.
+fallback. Service, controller, and policy lookups are closed the same way for literal names, but
+resolve one name at a time: a lookup with an explicit generic argument keeps working while its
+contract is missing.
 
 ## Verifying changes
 
