@@ -14,6 +14,11 @@ app.service('plugin::i18n.unregistered').anything();
 app.plugin('unregistered').service('greeting').anything();
 app.plugin('i18n').controller('unregistered').anything satisfies Core.ControllerHandler | undefined;
 
+// Dynamic names keep the permissive signature without the switch.
+declare const dynamicName: string;
+app.plugin(dynamicName).service('locales').anything();
+app.plugin('i18n').service(dynamicName).anything();
+
 const config = app.config.get('plugin::sentry');
 // @ts-expect-error Without an inferred generic, legacy config lookup returns unknown.
 config satisfies { dsn: string | null };
