@@ -11,12 +11,14 @@ declare global {
       }
       interface AppServices {
         'plugin::legacy.example': { count(): string };
+        'api::legacy.example': { count(): string };
       }
       interface PackageControllers {
         'plugin::legacy.example': { list: Core.ControllerHandler };
       }
       interface AppControllers {
         'plugin::legacy.example': { find: Core.ControllerHandler };
+        'api::legacy.example': { find: Core.ControllerHandler };
       }
       interface PackageConfigs {
         'plugin::legacy': { enabled: boolean };
@@ -209,3 +211,31 @@ const route: Core.RouteInputFor<{ example: Controller }> = {
 // Explicit controller maps still check handler names with strict types disabled.
 // @ts-expect-error The controller map has no missing action.
 route.handler = 'example.missing';
+
+// Policy and API module lookups keep their develop types: `Policy`, the legacy service and
+// controller, and `any` for plugin policies, which only the plugin index signature provides.
+declare const dynamicName: string;
+const registeredPolicy = strapi.policy('plugin::legacy.hasRole');
+const unregisteredPolicy = strapi.policy('global::unregistered');
+const dynamicPolicy = strapi.policy(dynamicName);
+const explicitPolicy = strapi.policy<Core.PolicyHandler>('global::unregistered');
+const explicitConfigPolicy = strapi.policy<Core.Policy<{ role: string }>>('global::unregistered');
+const pluginPolicy = strapi.plugin('legacy').policy('hasRole');
+const apiService = strapi.api('legacy').service('example');
+const apiController = strapi.api('legacy').controller('example');
+const explicitApiService = strapi.api('legacy').service<Service>('example');
+const contextualApiService: Service = strapi.api('legacy').service('example');
+declare const policyAndApiChecks: [
+  Expect<Equal<typeof registeredPolicy, Core.Policy>>,
+  Expect<Equal<typeof unregisteredPolicy, Core.Policy>>,
+  Expect<Equal<typeof dynamicPolicy, Core.Policy>>,
+  Expect<Equal<typeof explicitPolicy, Core.PolicyHandler>>,
+  Expect<Equal<typeof explicitConfigPolicy, Core.Policy<{ role: string }>>>,
+  Expect<Equal<Core.Plugin<'legacy'>['policy'], any>>,
+  Expect<Equal<typeof pluginPolicy, any>>,
+  Expect<Equal<typeof apiService, Core.Service>>,
+  Expect<Equal<typeof apiController, Core.Controller>>,
+  Expect<Equal<typeof explicitApiService, Service>>,
+  Expect<Equal<typeof contextualApiService, Service>>,
+];
+policyAndApiChecks satisfies unknown;
