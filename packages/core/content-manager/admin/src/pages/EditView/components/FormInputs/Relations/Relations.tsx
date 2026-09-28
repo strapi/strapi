@@ -245,6 +245,22 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       }
     );
 
+    /**
+     * The relations cache is shared by every instance of this field that targets the same
+     * document (e.g. the edit view and the same document opened again inside the relation modal)
+     * and it accumulates the pages that have been loaded. When another instance mounts it requests
+     * page 1, which resets that cache. Keep our page counter aligned with the cache, otherwise
+     * "Load More" would request page N + 1 on top of page 1 and the pages in between would never
+     * be loaded.
+     */
+    const loadedPage = data?.pagination?.page;
+
+    React.useEffect(() => {
+      if (loadedPage) {
+        setCurrentPage(loadedPage);
+      }
+    }, [loadedPage]);
+
     const handleLoadMore = () => {
       setCurrentPage((prev) => prev + 1);
     };
