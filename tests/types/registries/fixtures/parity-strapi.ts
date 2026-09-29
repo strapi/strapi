@@ -118,6 +118,7 @@ const plugins: Record<string, Core.Plugin> = strapi.plugins;
 const apis: Record<string, Core.Module> = strapi.apis;
 // @ts-expect-error TS2741 `find` is missing in `Service`
 const oneService: MyService = strapi.services['api::parity.example'];
+const oneOptional: Partial<MyService> = strapi.services['api::parity.example'];
 // @ts-expect-error TS2322 the `{ name, handler }` form is not a handler
 const oneHandler: Core.PolicyHandler = strapi.policies['global::is-owner'];
 const pluginEntry: Core.Plugin = strapi.plugins.parity;
@@ -138,5 +139,5 @@ export { service, controller, policy, plugin, api, partial, picked };
 export { annotatedService, annotatedController, annotatedHandler, annotatedPolicy };
 export { wrongPlugin, wrongApi, checks, getPlugin, getPolicy };
 export { pluginLookup, apiLookup, serviceLookup, policyLookup };
-export { services, controllers, policies, plugins, apis, oneService, oneHandler };
+export { services, controllers, policies, plugins, apis, oneService, oneOptional, oneHandler };
 export { pluginEntry, apiEntry, adminModule };
