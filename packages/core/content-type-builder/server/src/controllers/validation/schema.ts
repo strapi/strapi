@@ -5,6 +5,7 @@ import { isArray, isNil, isNull, isNumber, isObject, isUndefined, snakeCase } fr
 
 import { isReservedAttributeName, isReservedModelName } from '../../services/builder';
 import { coreUids, typeKinds, VALID_UID_TARGETS } from '../../services/constants';
+import { isConfigurable } from '../../utils/attributes';
 
 import {
   CATEGORY_NAME_REGEX,
@@ -99,32 +100,25 @@ type ContentTypeSchemaAction = {
   attributes?: Array<{ action: 'create' | 'update' | 'delete'; name: string }>;
 };
 
+// The payload carries the full attribute list and the saved schema is built from
+// it, so the names that will be written are the payload attributes that are not
+// deleted. The rename hops do not decide what is saved. The one exception is
+// non-configurable attributes: the builder keeps them from the current schema
+// whatever the payload says, so they are always part of the saved schema.
 const getEffectiveAttributeNames = (contentType: ContentTypeSchemaAction): string[] => {
-  if (contentType.action === 'create') {
-    return (contentType.attributes ?? [])
+  const names = new Set(
+    (contentType.attributes ?? [])
       .filter((attribute) => attribute.action !== 'delete')
-      .map((attribute) => attribute.name);
-  }
+      .map((attribute) => attribute.name)
+  );
 
-  if (contentType.action !== 'update' || !contentType.uid) {
-    return [];
-  }
+  if (contentType.action === 'update' && contentType.uid) {
+    const existingAttributes = strapi.contentTypes[contentType.uid]?.attributes ?? {};
 
-  const existingContentType = strapi.contentTypes[contentType.uid];
-  const names = new Set(existingContentType ? Object.keys(existingContentType.attributes) : []);
-
-  // A renamed attribute is sent as an `update` under its new name, with no `delete`
-  // for the old one, so the rename hops are the only record that the old name goes away.
-  for (const hop of contentType.renames ?? []) {
-    names.delete(hop.oldName);
-    names.add(hop.newName);
-  }
-
-  for (const attribute of contentType.attributes ?? []) {
-    if (attribute.action === 'delete') {
-      names.delete(attribute.name);
-    } else if (attribute.action === 'create') {
-      names.add(attribute.name);
+    for (const [name, attribute] of Object.entries(existingAttributes)) {
+      if (!isConfigurable(attribute)) {
+        names.add(name);
+      }
     }
   }
 

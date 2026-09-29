@@ -372,6 +372,68 @@ describe('Schema', () => {
       );
     });
 
+    test('allows enabling draft and publish when status is renamed away without rename hops', () => {
+      expectError(
+        {
+          action: 'update',
+          uid: 'api::reservation.reservation',
+          draftAndPublish: true,
+          attributes: [
+            { action: 'update', name: 'title' },
+            { action: 'update', name: 'state' },
+          ],
+        },
+        false
+      );
+    });
+
+    test('blocks enabling draft and publish when a rename hop drops status but the payload keeps it', () => {
+      expectError(
+        {
+          action: 'update',
+          uid: 'api::reservation.reservation',
+          draftAndPublish: true,
+          renames: [{ oldName: 'status', newName: 'state' }],
+          attributes: [
+            { action: 'update', name: 'title' },
+            { action: 'update', name: 'status' },
+          ],
+        },
+        true
+      );
+    });
+
+    test('blocks enabling draft and publish when a non-configurable status is left out of the payload', () => {
+      global.strapi.contentTypes['api::reservation.reservation'].attributes.status = {
+        type: 'enumeration',
+        enum: ['confirmed', 'canceled'],
+        configurable: false,
+      };
+
+      expectError(
+        {
+          action: 'update',
+          uid: 'api::reservation.reservation',
+          draftAndPublish: true,
+          attributes: [{ action: 'update', name: 'title' }],
+        },
+        true
+      );
+
+      expectError(
+        {
+          action: 'update',
+          uid: 'api::reservation.reservation',
+          draftAndPublish: true,
+          attributes: [
+            { action: 'update', name: 'title' },
+            { action: 'delete', name: 'status' },
+          ],
+        },
+        true
+      );
+    });
+
     test('blocks enabling draft and publish when a later hop renames another field onto status', () => {
       expectError(
         {
