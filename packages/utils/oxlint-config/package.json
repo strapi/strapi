@@ -16,10 +16,14 @@
   },
   "devDependencies": {
     "oxlint": "1.72.0",
-    "tsconfig": "5.55.1"
+    "tsconfig": "5.55.1",
+    "vitest": "catalog:",
+    "vitest-config": "5.55.1"
   },
   "scripts": {
-    "test:ts": "run -T tsc --noEmit"
+    "test:ts": "run -T tsc --noEmit",
+    "test:unit:vitest": "vitest run",
+    "test:unit:vitest:watch": "vitest --watch"
   },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",
