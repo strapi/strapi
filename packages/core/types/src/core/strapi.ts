@@ -14,6 +14,7 @@ import type {
   ControllerLookupDefault,
   ControllerLookupUID,
   ControllerMap,
+  RegisteredControllerUID,
 } from './controller';
 import type { ApiMap, RegisteredApiName } from './module';
 import type { PluginMap, RegisteredPluginName } from './plugin';
@@ -23,12 +24,76 @@ import type {
   PolicyLookupDefault,
   PolicyLookupName,
   PolicyMap,
+  RegisteredPolicyName,
 } from './policy';
-import type { ServiceLookup, ServiceLookupDefault, ServiceLookupUID, ServiceMap } from './service';
+import type {
+  RegisteredServiceUID,
+  ServiceLookup,
+  ServiceLookupDefault,
+  ServiceLookupUID,
+  ServiceMap,
+} from './service';
 import type { SuggestedString } from '../utils/string';
 import type { IsStrict, StrictNoInfer } from './strictness';
 
-export interface Strapi extends Container {
+/**
+ * Root lookups without strict mode: develop's signatures, so mocks such as `app.service = () => ({})`
+ * keep compiling and explicit type arguments stay rejected. Registered names are listed for completion.
+ */
+type LegacyLookups = {
+  service(
+    uid: SuggestedString<Extract<RegisteredServiceUID, UID.Service>, UID.Service>
+  ): Core.Service;
+  controller(
+    uid: SuggestedString<Extract<RegisteredControllerUID, UID.Controller>, UID.Controller>
+  ): Core.Controller;
+  policy(name: SuggestedString<RegisteredPolicyName>): Core.Policy;
+  plugin(name: SuggestedString<RegisteredPluginName>): Core.Plugin;
+  api(name: SuggestedString<RegisteredApiName>): Core.Module;
+};
+
+/** Root lookups with strict mode: registered names resolve to their contracts. */
+type StrictLookups = {
+  /**
+   * Resolves the registered contract of `uid`. An explicit type argument (`service<MyService>(uid)`)
+   * wins over the registries, including for unregistered names.
+   */
+  service<
+    T extends ServiceLookupDefault = ServiceLookupDefault,
+    TUID extends ServiceLookupUID = ServiceLookupUID,
+  >(
+    uid: TUID
+  ): ServiceLookup<TUID, StrictNoInfer<T>>;
+  /**
+   * Resolves the registered contract of `uid`. An explicit type argument (`controller<MyController>(uid)`)
+   * wins over the registries, including for unregistered names.
+   */
+  controller<
+    T extends ControllerLookupDefault = ControllerLookupDefault,
+    TUID extends ControllerLookupUID = ControllerLookupUID,
+  >(
+    uid: TUID
+  ): ControllerLookup<TUID, StrictNoInfer<T>>;
+  /**
+   * Resolves the registered policy of the full name `name`, which receives its config contract.
+   * An explicit type argument (`policy<MyPolicy>(name)`) wins over the registries, including for
+   * unregistered names. Registered names are listed for completion.
+   */
+  policy<
+    T extends PolicyLookupConstraint = PolicyLookupDefault,
+    TName extends PolicyLookupName = PolicyLookupName,
+  >(
+    name: TName
+  ): PolicyLookup<TName, StrictNoInfer<T>>;
+  /** Plugins with registered contracts are listed for completion. */
+  plugin<TName extends SuggestedString<RegisteredPluginName>>(name: TName): Core.Plugin<TName>;
+  /** APIs with registered contracts are listed for completion. */
+  api<TName extends SuggestedString<RegisteredApiName>>(name: TName): Core.Module<`api::${TName}`>;
+};
+
+type Lookups = IsStrict extends false ? LegacyLookups : StrictLookups;
+
+export interface Strapi extends Container, Lookups {
   server: Modules.Server.Server;
   log: Logger;
   fs: StrapiFS;
@@ -92,30 +157,10 @@ export interface Strapi extends Container {
    */
   services: ServiceMap;
   /**
-   * Resolves the registered contract of `uid`. An explicit type argument (`service<MyService>(uid)`)
-   * wins over the registries, including for unregistered names with strict types enabled.
-   */
-  service<
-    T extends ServiceLookupDefault = ServiceLookupDefault,
-    TUID extends ServiceLookupUID = ServiceLookupUID,
-  >(
-    uid: TUID
-  ): ServiceLookup<TUID, StrictNoInfer<T>>;
-  /**
    * Controllers keyed by UID. With strict types enabled, registered UIDs resolve to their contracts;
    * other keys keep the legacy controller.
    */
   controllers: ControllerMap;
-  /**
-   * Resolves the registered contract of `uid`. An explicit type argument (`controller<MyController>(uid)`)
-   * wins over the registries, including for unregistered names with strict types enabled.
-   */
-  controller<
-    T extends ControllerLookupDefault = ControllerLookupDefault,
-    TUID extends ControllerLookupUID = ControllerLookupUID,
-  >(
-    uid: TUID
-  ): ControllerLookup<TUID, StrictNoInfer<T>>;
   contentTypes: Schema.ContentTypes;
   contentType<TContentTypeUID extends UID.ContentType>(
     name: TContentTypeUID
@@ -125,17 +170,6 @@ export interface Strapi extends Container {
    * other keys keep the legacy policy.
    */
   policies: PolicyMap;
-  /**
-   * Resolves the registered policy of the full name `name`, which receives its config contract.
-   * An explicit type argument (`policy<MyPolicy>(name)`) wins over the registries, including for
-   * unregistered names with strict types enabled. Registered names are listed for completion.
-   */
-  policy<
-    T extends PolicyLookupConstraint = PolicyLookupDefault,
-    TName extends PolicyLookupName = PolicyLookupName,
-  >(
-    name: TName
-  ): PolicyLookup<TName, StrictNoInfer<T>>;
   middlewares: Record<string, Core.MiddlewareFactory>;
   middleware(name: string): Core.MiddlewareFactory;
   /**
@@ -143,8 +177,6 @@ export interface Strapi extends Container {
    * `Plugin<name>`, like `plugin(name)`; other names keep the legacy plugin.
    */
   plugins: PluginMap;
-  /** Plugins with registered contracts are listed for completion. */
-  plugin<TName extends SuggestedString<RegisteredPluginName>>(name: TName): Core.Plugin<TName>;
   hooks: Record<string, any>;
   hook(name: string): any;
   /**
@@ -152,8 +184,6 @@ export interface Strapi extends Container {
    * `Module<'api::<name>'>`, like `api(name)`; other names keep the legacy module.
    */
   apis: ApiMap;
-  /** APIs with registered contracts are listed for completion. */
-  api<TName extends SuggestedString<RegisteredApiName>>(name: TName): Core.Module<`api::${TName}`>;
   auth: Modules.Auth.AuthenticationService;
   /** Content API: permissions, route map, sanitize/validate, and registration of extra query/input params (see addQueryParams, addInputParams). */
   contentAPI: Modules.ContentAPI.ContentApi;

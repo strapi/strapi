@@ -397,10 +397,6 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
             ['plugin::sentry.init.dsn'],
           ],
           ["app.config.get('plugin::sentry.init.", ['plugin::sentry.init.dsn']],
-          ["app.plugin('sentry').config('", ['dsn', 'sendMetadata', 'init'], ['init.dsn']],
-          ["app.plugin('sentry').config('init.", ['init.dsn', 'init.debug']],
-          ["app.plugin('i18n').service('", ['locales']],
-          ["app.plugin('i18n').controller('", ['locales', 'iso-locales']],
           [
             "app.service('",
             ['plugin::i18n.locales', 'plugin::sentry.sentry', 'api::article.article'],
@@ -410,18 +406,24 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
             "app.policy('",
             ['admin::isAuthenticatedAdmin', 'plugin::content-manager.hasPermissions'],
           ],
-          ["app.api('article').service('", ['article']],
-          ["app.api('article').controller('", ['article']],
-          ["app.api('article').policy('", ['isOwner']],
           ["handler: '", ['locales.listLocales', 'plugin::i18n.locales.listLocales']],
           ["policies: ['", ['admin::isAuthenticatedAdmin']],
           [
             "policies: [{ name: '",
             ['admin::hasPermissions', 'plugin::content-manager.hasPermissions'],
           ],
-          // The maps, plugin policy lookups and policy config contracts are typed only with the switch on.
+          // The maps, plugin and API member lookups, and policy config contracts are typed only with
+          // the switch on: without it, `plugin(name)` and `api(name)` keep develop's non-generic
+          // signatures, so their result cannot depend on the name.
           ...(strict
             ? [
+                ["app.plugin('sentry').config('", ['dsn', 'sendMetadata', 'init'], ['init.dsn']],
+                ["app.plugin('sentry').config('init.", ['init.dsn', 'init.debug']],
+                ["app.plugin('i18n').service('", ['locales']],
+                ["app.plugin('i18n').controller('", ['locales', 'iso-locales']],
+                ["app.api('article').service('", ['article']],
+                ["app.api('article').controller('", ['article']],
+                ["app.api('article').policy('", ['isOwner']],
                 ["app.plugin('content-manager').policy('", ['hasPermissions']],
                 ["app.services['", ['plugin::i18n.locales', 'admin::auth']],
                 ['app.plugins.', ['i18n', 'sentry']],
