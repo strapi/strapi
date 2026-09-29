@@ -21,7 +21,10 @@ import type {
  *   be exhausted by that very transaction on single-connection pools);
  * - checks the source exists and the target does not before doing anything,
  *   so it is a safe no-op on a fresh database (schema sync creates the tables
- *   afterwards) or on one that already moved on;
+ *   afterwards) or on one that already moved on. For `updateRows` the source
+ *   is the rows matching `where`: with none, nothing is deleted or updated, so
+ *   re-running a partly applied migration (MySQL commits DDL implicitly)
+ *   cannot mistake the rows it already renamed for orphans;
  * - logs when it skips: `info` when the source is missing (expected on a fresh
  *   database), `warn` when the target already exists (the environment drifted
  *   and the rename could not be applied — schema sync will then drop the old
@@ -201,7 +204,7 @@ export const createRenameHelpers = ({ db }: RenameHelpersDeps) => {
     /**
      * Rewrites a stored value (e.g. the `field` or `component_type` column of a
      * component link table). Guarded on the table and `guardColumn` (defaults
-     * to the first updated column) existing.
+     * to the first updated column) existing, and on rows matching `where`.
      */
     async updateRows(trx: Knex, op: UpdateRowsOperation): Promise<boolean> {
       const comment = getOperationComment({ kind: 'updateRows', ...op });
@@ -218,13 +221,39 @@ export const createRenameHelpers = ({ db }: RenameHelpersDeps) => {
         return false;
       }
 
-      // Rows already carrying the target value are orphans (left behind when
-      // an attribute with the target name was deleted earlier). Updating would
-      // merge them into the renamed field and resurrect deleted content, so
-      // they go first. Scope: every `where` key except the renamed column(s).
+      // Scope: every `where` key except the renamed column(s).
       const scope = Object.fromEntries(
         Object.entries(op.where).filter(([key]) => !(key in op.set))
       );
+      const countRows = async (where: Record<string, unknown>): Promise<number> => {
+        const [row] = await tableOf(trx, op.table).where(where).count({ count: '*' });
+        return Number(row?.count ?? 0);
+      };
+
+      // Without source rows there is nothing to rename. Rows carrying the
+      // target value may then be the ones a previous run already renamed, so
+      // they must not be taken for orphans.
+      if ((await countRows(op.where)) === 0) {
+        if ((await countRows({ ...scope, ...op.set })) > 0) {
+          logSkip(
+            comment,
+            `no row matches ${JSON.stringify(op.where)} in "${op.table}"; rows already matching ${JSON.stringify(op.set)} were left untouched, the rename may already have run`,
+            'target-exists'
+          );
+        } else {
+          logSkip(
+            comment,
+            `no row matches ${JSON.stringify(op.where)} in "${op.table}"`,
+            'source-missing'
+          );
+        }
+        return false;
+      }
+
+      // Rows already carrying the target value are orphans (left behind when
+      // an attribute with the target name was deleted earlier). Updating would
+      // merge them into the renamed field and resurrect deleted content, so
+      // they go first.
       const removed = await tableOf(trx, op.table)
         .where({ ...scope, ...op.set })
         .delete();

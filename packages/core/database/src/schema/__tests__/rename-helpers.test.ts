@@ -308,6 +308,84 @@ describe('schema rename helpers (sqlite)', () => {
       expect(logger.info).not.toHaveBeenCalledWith(expect.stringContaining('orphan'));
     });
 
+    describe('without source rows', () => {
+      const op = {
+        table: 'files_related_mph',
+        guardColumn: 'field',
+        where: { field: 'cover', related_type: 'api::article.article' },
+        set: { field: 'image' },
+      };
+      const rows = () =>
+        db
+          .connection('files_related_mph')
+          .select('file_id', 'related_type', 'field')
+          .orderBy('file_id');
+
+      beforeEach(async () => {
+        await db.connection.schema.createTable('files_related_mph', (table) => {
+          table.increments('id');
+          table.integer('file_id');
+          table.string('related_type');
+          table.string('field');
+        });
+      });
+
+      // MySQL commits DDL implicitly: a migration failing after this step runs
+      // again on the next boot with the rows already renamed.
+      it('keeps every row when the same update runs twice', async () => {
+        await db.connection('files_related_mph').insert([
+          { file_id: 1, related_type: 'api::article.article', field: 'cover' },
+          { file_id: 2, related_type: 'api::article.article', field: 'cover' },
+          { file_id: 3, related_type: 'api::page.page', field: 'image' },
+        ]);
+
+        const first = await inTransaction((trx) => db.schema.updateRows(trx, op));
+        const second = await inTransaction((trx) => db.schema.updateRows(trx, op));
+
+        expect(first).toBe(true);
+        expect(second).toBe(false);
+        expect(await rows()).toEqual([
+          { file_id: 1, related_type: 'api::article.article', field: 'image' },
+          { file_id: 2, related_type: 'api::article.article', field: 'image' },
+          { file_id: 3, related_type: 'api::page.page', field: 'image' },
+        ]);
+        expect(logger.info).not.toHaveBeenCalledWith(expect.stringContaining('orphan'));
+      });
+
+      it('is a quiet (info-level) no-op when no row carries the target value either', async () => {
+        await db
+          .connection('files_related_mph')
+          .insert([{ file_id: 1, related_type: 'api::page.page', field: 'image' }]);
+
+        const applied = await inTransaction((trx) => db.schema.updateRows(trx, op));
+
+        expect(applied).toBe(false);
+        expect(logger.warn).not.toHaveBeenCalled();
+        expect(logger.info).toHaveBeenCalledWith(
+          expect.stringContaining('[rename migration] skipped')
+        );
+        expect(await rows()).toEqual([
+          { file_id: 1, related_type: 'api::page.page', field: 'image' },
+        ]);
+      });
+
+      it('warns and leaves rows carrying the target value untouched', async () => {
+        await db
+          .connection('files_related_mph')
+          .insert([{ file_id: 1, related_type: 'api::article.article', field: 'image' }]);
+
+        const applied = await inTransaction((trx) => db.schema.updateRows(trx, op));
+
+        expect(applied).toBe(false);
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('the rename may already have run')
+        );
+        expect(await rows()).toEqual([
+          { file_id: 1, related_type: 'api::article.article', field: 'image' },
+        ]);
+      });
+    });
+
     it('is a quiet no-op when the table or guard column does not exist', async () => {
       const missingTable = await inTransaction((trx) =>
         db.schema.updateRows(trx, {
