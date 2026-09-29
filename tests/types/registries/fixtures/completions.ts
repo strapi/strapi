@@ -11,6 +11,9 @@ declare global {
       interface AppControllers {
         'api::article.article': { find: Core.ControllerHandler };
       }
+      interface AppPolicies {
+        'api::article.isOwner': undefined;
+      }
     }
   }
 }
@@ -32,6 +35,7 @@ app.controller('');
 app.policy('');
 app.api('article').service('');
 app.api('article').controller('');
+app.api('article').policy('');
 app.plugin('content-manager').policy('');
 export const serviceEntry = app.services[''];
 export const pluginEntry = app.plugins.i18n;
