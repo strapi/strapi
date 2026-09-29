@@ -301,6 +301,86 @@ describe('Upload plugin', () => {
     });
   });
 
+  describe('Update', () => {
+    test('Update file info by documentId', async () => {
+      const res = await rq({
+        method: 'POST',
+        url: '/upload',
+        formData: {
+          files: fs.createReadStream(path.join(__dirname, '../utils/thumbnail_target.png')),
+        },
+      });
+
+      const { id, documentId } = res.body[0];
+
+      const updateRes = await rq({
+        method: 'POST',
+        url: `/upload?id=${documentId}`,
+        formData: {
+          fileInfo: JSON.stringify({ alternativeText: 'updated by documentId' }),
+        },
+      });
+
+      expect(updateRes.statusCode).toBe(200);
+      expect(updateRes.body).toEqual(
+        expect.objectContaining({ id, documentId, alternativeText: 'updated by documentId' })
+      );
+
+      await rq({ method: 'DELETE', url: `/upload/files/${id}` });
+    });
+
+    test('Replace a file by documentId', async () => {
+      const res = await rq({
+        method: 'POST',
+        url: '/upload',
+        formData: {
+          files: fs.createReadStream(path.join(__dirname, '../utils/thumbnail_target.png')),
+        },
+      });
+
+      const { id, documentId } = res.body[0];
+
+      const replaceRes = await rq({
+        method: 'POST',
+        url: `/upload?id=${documentId}`,
+        formData: {
+          files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+        },
+      });
+
+      expect(replaceRes.statusCode).toBe(200);
+      expect(replaceRes.body).toEqual(
+        expect.objectContaining({ id, documentId, mime: 'image/jpeg' })
+      );
+
+      await rq({ method: 'DELETE', url: `/upload/files/${id}` });
+    });
+
+    test('Update file info with an unknown documentId returns 404', async () => {
+      const updateRes = await rq({
+        method: 'POST',
+        url: '/upload?id=unknowndocumentid0000000',
+        formData: {
+          fileInfo: JSON.stringify({ alternativeText: 'nope' }),
+        },
+      });
+
+      expect(updateRes.statusCode).toBe(404);
+    });
+
+    test('Replace a file with an unknown documentId returns 404', async () => {
+      const replaceRes = await rq({
+        method: 'POST',
+        url: '/upload?id=unknowndocumentid0000000',
+        formData: {
+          files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+        },
+      });
+
+      expect(replaceRes.statusCode).toBe(404);
+    });
+  });
+
   describe('Filtering data based on media attributes', () => {
     let uploadRes;
     let dogRes;

@@ -10,7 +10,7 @@ import { validateUploadBody } from './validation/content-api/upload';
 import { FileInfo } from '../types';
 import { prepareUploadRequest } from '../utils/mime-validation';
 
-const { ValidationError } = errors;
+const { ValidationError, NotFoundError } = errors;
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const sanitizeOutput = async (data: unknown | unknown[], ctx: Context) => {
@@ -112,7 +112,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         throw new ValidationError('File id is required and must be a single value');
       }
 
-      const result = await getService('upload').updateFileInfo(id, data.fileInfo as any);
+      const fileId = await resolveFileId(id);
+
+      if (!fileId) {
+        throw new NotFoundError();
+      }
+
+      const result = await getService('upload').updateFileInfo(fileId, data.fileInfo as any);
 
       const signedResult = await getService('file').signFileUrls(result);
 
@@ -145,9 +151,18 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         throw new ValidationError('File id is required and must be a single value');
       }
 
+      const fileId = await resolveFileId(id);
+
+      if (!fileId) {
+        throw new NotFoundError();
+      }
+
       const data = (await validateUploadBody(filteredBody)) as { fileInfo: FileInfo };
 
-      const replacedFiles = await getService('upload').replace(id, { data, file: validFiles[0] });
+      const replacedFiles = await getService('upload').replace(fileId, {
+        data,
+        file: validFiles[0],
+      });
 
       const signedFiles = await getService('file').signFileUrls(replacedFiles);
 
