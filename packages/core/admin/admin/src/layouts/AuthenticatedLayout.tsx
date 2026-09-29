@@ -10,12 +10,11 @@ import valid from 'semver/functions/valid';
 
 import { LazyOutlet } from '../components/LazyOutlet';
 import { LeftMenu } from '../components/LeftMenu';
-import { MediaLibraryBanner } from '../components/MediaLibraryBanner';
 import { NpsSurvey } from '../components/NpsSurvey';
 import { Page } from '../components/PageHelpers';
 import { PluginsInitializer } from '../components/PluginsInitializer';
 import { PrivateRoute } from '../components/PrivateRoute';
-import { UpsellBanner } from '../components/UpsellBanner';
+import { TopBanners } from '../components/TopBanners';
 import { AppInfoProvider } from '../features/AppInfo';
 import { useAuth } from '../features/Auth';
 import { useConfiguration } from '../features/Configuration';
@@ -134,8 +133,7 @@ const AdminLayout = () => {
                   large: '100%',
                 }}
               >
-                <UpsellBanner />
-                <MediaLibraryBanner />
+                <TopBanners />
                 {/*
                  * Top-level Suspense only — nested layouts (Settings, Content Manager) use
                  * LazyOutlet with useNavigation so in-app navigations show loading in the content
