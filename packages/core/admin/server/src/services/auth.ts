@@ -1,8 +1,9 @@
 import bcrypt from 'bcryptjs';
 import _ from 'lodash';
-import { errors } from '@strapi/utils';
+import { errors, emitAudit } from '@strapi/utils';
 import { getService } from '../utils';
 import { expiresInToSeconds } from './token';
+import { AUDITED_EVENTS, toAdminUserEvent } from '../audit-logs/admin-users';
 import type { AdminUser } from '../../../shared/contracts/shared';
 import '@strapi/types';
 
@@ -36,12 +37,36 @@ const assignResetPasswordToken = async (userId: AdminUser['id']): Promise<string
   const resetPasswordToken = getService('token').createToken();
   const resetPasswordTokenExpiresAt = new Date(Date.now() + getResetPasswordTokenTTL());
 
-  await getService('user').updateById(userId, {
+  const user = await getService('user').updateById(userId, {
     resetPasswordToken,
     resetPasswordTokenExpiresAt,
   });
 
+  // null when the account was deleted between the caller's lookup and this write
+  if (user) {
+    await emitAudit({ strapi }, AUDITED_EVENTS.PASSWORD_RESET_CREATE, {
+      ...toAdminUserEvent(user),
+      expiresAt: user.resetPasswordTokenExpiresAt,
+    });
+  }
+
   return resetPasswordToken;
+};
+
+/**
+ * Set the new password and consume the reset token. Shared by the CE and EE auth
+ * services, after each has validated the token.
+ */
+const completePasswordReset = async (user: AdminUser, password: string): Promise<AdminUser> => {
+  const updatedUser = await getService('user').updateById(user.id, {
+    password,
+    resetPasswordToken: null,
+    resetPasswordTokenExpiresAt: null,
+  });
+
+  await emitAudit({ strapi }, AUDITED_EVENTS.PASSWORD_RESET_CONFIRM, toAdminUserEvent(updatedUser));
+
+  return updatedUser;
 };
 
 /**
@@ -162,12 +187,13 @@ const resetPassword = async (
 
   await assertResetPasswordTokenIsValid(matchingUser);
 
-  return getService('user').updateById(matchingUser.id, {
-    password,
-    resetPasswordToken: null,
-    resetPasswordTokenExpiresAt: null,
-  });
+  return completePasswordReset(matchingUser, password);
 };
 
 export default { checkCredentials, validatePassword, hashPassword, forgotPassword, resetPassword };
-export { getResetPasswordTokenTTL, assignResetPasswordToken, assertResetPasswordTokenIsValid };
+export {
+  getResetPasswordTokenTTL,
+  assignResetPasswordToken,
+  assertResetPasswordTokenIsValid,
+  completePasswordReset,
+};
