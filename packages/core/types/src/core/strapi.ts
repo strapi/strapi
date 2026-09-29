@@ -427,14 +427,12 @@ type LegacyConfigPath<TPath> = TPath extends ConfigNamespace | `${ConfigNamespac
 
 /**
  * `get` without strict mode: develop's signature, so a default infers a widening literal, e.g.
- * `let port = get('server.port', 1337)` is a `number`. Editors still list registered paths.
- * A single signature keeps assigned implementations checked against the generic `T`.
+ * `let port = get('server.port', 1337)` is a `number`. A single signature keeps assigned
+ * implementations checked against the generic `T`. Config paths are listed for completion only with
+ * strict mode: listing them needs the path as a type parameter, which develop's signature has not.
  */
 type LegacyConfigGetter = {
-  get<T = unknown, TPath extends ConfigPath = ConfigPath>(
-    key: TPath | ConfigGetPathSuggestion<TPath>,
-    defaultVal?: T
-  ): T;
+  get<T = unknown>(key: PropertyPath, defaultVal?: T): T;
 };
 
 /**
