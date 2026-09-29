@@ -412,6 +412,7 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
           ],
           ["app.api('article').service('", ['article']],
           ["app.api('article').controller('", ['article']],
+          ["app.api('article').policy('", ['isOwner']],
           ["handler: '", ['locales.listLocales', 'plugin::i18n.locales.listLocales']],
           ["policies: ['", ['admin::isAuthenticatedAdmin']],
           [
