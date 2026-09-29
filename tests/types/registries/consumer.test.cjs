@@ -471,11 +471,16 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
 
 // Strict-off parity fixtures (`parity-<surface>.ts`) compile against develop too: their expected
 // errors are develop's. `*.isolated.ts` fixtures augment registries that affect every file, so each
-// gets its own program. Options mirror the generated application tsconfig.
+// gets its own program. Fixtures starting with `// @parity-settings: strict` expect diagnostics that
+// only the `strict` compiler option reports. Options mirror the generated application tsconfig.
 const parityFixtures = fs
   .readdirSync(path.join(__dirname, 'fixtures'))
   .filter((name) => name.startsWith('parity-') && name.endsWith('.ts'))
   .sort();
+const isStrictParityFixture = (name) =>
+  fs
+    .readFileSync(path.join(__dirname, 'fixtures', name), 'utf8')
+    .startsWith('// @parity-settings: strict');
 const applicationOptions = {
   noEmit: true,
   module: ts.ModuleKind.CommonJS,
@@ -493,8 +498,11 @@ const applicationOptions = {
 for (const strict of [false, true]) {
   test(`switch off, develop parity with the application tsconfig (strict: ${strict})`, () => {
     const compile = compiler({ ...applicationOptions, strict });
-    const shared = parityFixtures.filter((name) => name.endsWith('.isolated.ts') === false);
-    const isolated = parityFixtures.filter((name) => name.endsWith('.isolated.ts'));
+    const fixtures = parityFixtures.filter(
+      (name) => strict === true || isStrictParityFixture(name) === false
+    );
+    const shared = fixtures.filter((name) => name.endsWith('.isolated.ts') === false);
+    const isolated = fixtures.filter((name) => name.endsWith('.isolated.ts'));
     for (const [registries, contracts] of [
       ['empty registries', []],
       ['provider contracts', ['i18n.d.ts', 'sentry.d.ts', 'policies.d.ts']],
