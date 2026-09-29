@@ -469,6 +469,46 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
   });
 }
 
+// Strict-off parity fixtures (`parity-<surface>.ts`) compile against develop too: their expected
+// errors are develop's. `*.isolated.ts` fixtures augment registries that affect every file, so each
+// gets its own program. Options mirror the generated application tsconfig.
+const parityFixtures = fs
+  .readdirSync(path.join(__dirname, 'fixtures'))
+  .filter((name) => name.startsWith('parity-') && name.endsWith('.ts'))
+  .sort();
+const applicationOptions = {
+  noEmit: true,
+  module: ts.ModuleKind.CommonJS,
+  moduleResolution: ts.ModuleResolutionKind.Node10,
+  lib: ['lib.es2020.d.ts'],
+  target: ts.ScriptTarget.ES2019,
+  strict: false,
+  skipLibCheck: true,
+  esModuleInterop: true,
+  resolveJsonModule: true,
+  noImplicitThis: true,
+  types: [],
+};
+
+for (const strict of [false, true]) {
+  test(`switch off, develop parity with the application tsconfig (strict: ${strict})`, () => {
+    const compile = compiler({ ...applicationOptions, strict });
+    const shared = parityFixtures.filter((name) => name.endsWith('.isolated.ts') === false);
+    const isolated = parityFixtures.filter((name) => name.endsWith('.isolated.ts'));
+    for (const [registries, contracts] of [
+      ['empty registries', []],
+      ['provider contracts', ['i18n.d.ts', 'sentry.d.ts', 'policies.d.ts']],
+    ]) {
+      for (const names of [shared, ...isolated.map((name) => [name])]) {
+        assertClean(
+          compile([...contracts, ...names]),
+          `strict: ${strict}, ${registries}, ${names.join(', ')}`
+        );
+      }
+    }
+  });
+}
+
 test('conflicting declaration files need one contract per UID, even with the switch off', () => {
   const compile = compiler({ ...baseOptions, ...resolutions.Bundler });
   for (const strict of [false, true]) {
