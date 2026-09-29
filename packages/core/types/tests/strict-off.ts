@@ -240,19 +240,15 @@ declare const policyAndApiChecks: [
 ];
 policyAndApiChecks satisfies unknown;
 
-// API module policy lookups, which develop lacks, return the legacy `Policy`, like `strapi.policy`.
-const apiPolicy = strapi.api('legacy').policy('hasRole');
-const unregisteredApiPolicy = strapi.api('legacy').policy('unregistered');
-const dynamicApiPolicy = strapi.api(dynamicName).policy(dynamicName);
-const explicitApiPolicy = strapi.api('legacy').policy<Core.Policy<{ role: string }>>('hasRole');
-const adminPolicy = strapi.admin.policy('unregistered');
-declare const apiPolicyChecks: [
-  Expect<Equal<typeof apiPolicy, Core.Policy>>,
-  Expect<Equal<typeof unregisteredApiPolicy, Core.Policy>>,
-  Expect<Equal<typeof dynamicApiPolicy, Core.Policy>>,
-  Expect<Equal<typeof explicitApiPolicy, Core.Policy<{ role: string }>>>,
-  Expect<Equal<typeof adminPolicy, Core.Policy>>,
-  // Plugins keep the `any` of their index signature.
+// Modules have no policy lookup, as on develop; plugins keep the `any` of their index signature.
+// @ts-expect-error Modules have no policy lookup without strict types, as on develop.
+strapi.api('legacy').policy('hasRole');
+// @ts-expect-error Modules have no policy lookup without strict types, as on develop.
+strapi.admin.policy('unregistered');
+declare const modulePolicyChecks: [
+  Expect<Equal<'policy' extends keyof Core.Module ? true : false, false>>,
   Expect<Equal<Core.Plugin<'legacy'>['policy'], any>>,
+  // The plugin name does not change the plugin type without strict types.
+  Expect<Equal<Core.Plugin<'legacy'>, Core.Plugin>>,
 ];
-apiPolicyChecks satisfies unknown;
+modulePolicyChecks satisfies unknown;

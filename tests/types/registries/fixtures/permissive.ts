@@ -70,14 +70,14 @@ const unregisteredPolicy = app.policy('global::unregistered');
 const pluginPolicy = app.plugin('content-manager').policy('hasPermissions');
 const apiService = app.api('article').service('article');
 const apiController = app.api('article').controller('article');
-const apiPolicy = app.api('article').policy('isOwner');
+// @ts-expect-error Modules have no policy lookup without the switch, as on develop.
+app.api('article').policy('isOwner');
 declare const lookupChecks: [
   Expect<Equal<typeof adminPolicy, Core.Policy>>,
   Expect<Equal<typeof unregisteredPolicy, Core.Policy>>,
   Expect<Equal<typeof pluginPolicy, any>>,
   Expect<Equal<typeof apiService, Core.Service>>,
   Expect<Equal<typeof apiController, Core.Controller>>,
-  Expect<Equal<typeof apiPolicy, Core.Policy>>,
 ];
 lookupChecks satisfies unknown;
 const contextualApiService: { greet(): string } = app.api('article').service('article');
