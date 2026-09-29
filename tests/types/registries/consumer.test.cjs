@@ -389,14 +389,6 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
         const locations = [
           ["app.plugin('", ['i18n', 'sentry', 'content-manager']],
           ["app.api('", ['article']],
-          ["app.config.get('", ['plugin::sentry']],
-          // Dotted paths list one level at a time, so large contracts stay out of the list.
-          [
-            "app.config.get('plugin::sentry.",
-            ['plugin::sentry.dsn', 'plugin::sentry.init'],
-            ['plugin::sentry.init.dsn'],
-          ],
-          ["app.config.get('plugin::sentry.init.", ['plugin::sentry.init.dsn']],
           [
             "app.service('",
             ['plugin::i18n.locales', 'plugin::sentry.sentry', 'api::article.article'],
@@ -412,11 +404,19 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
             "policies: [{ name: '",
             ['admin::hasPermissions', 'plugin::content-manager.hasPermissions'],
           ],
-          // The maps, plugin and API member lookups, and policy config contracts are typed only with
-          // the switch on: without it, `plugin(name)` and `api(name)` keep develop's non-generic
-          // signatures, so their result cannot depend on the name.
+          // Config paths, the maps, plugin and API member lookups, and policy config contracts are
+          // typed only with the switch on: without it, `config.get(path)`, `plugin(name)` and
+          // `api(name)` keep develop's non-generic signatures, so nothing can depend on the argument.
           ...(strict
             ? [
+                ["app.config.get('", ['plugin::sentry']],
+                // Dotted paths list one level at a time, so large contracts stay out of the list.
+                [
+                  "app.config.get('plugin::sentry.",
+                  ['plugin::sentry.dsn', 'plugin::sentry.init'],
+                  ['plugin::sentry.init.dsn'],
+                ],
+                ["app.config.get('plugin::sentry.init.", ['plugin::sentry.init.dsn']],
                 ["app.plugin('sentry').config('", ['dsn', 'sendMetadata', 'init'], ['init.dsn']],
                 ["app.plugin('sentry').config('init.", ['init.dsn', 'init.debug']],
                 ["app.plugin('i18n').service('", ['locales']],

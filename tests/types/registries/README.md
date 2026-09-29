@@ -18,9 +18,9 @@ The built generator also produces imports for the real Sentry package. Consumer 
 that generation leaves strict mode off, the single opt-in enables Sentry's contracts, and
 regeneration removes its contracts when the plugin is no longer enabled.
 Language service checks preserve suggestions with either switch setting: plugin and API names,
-full service, controller, and policy UIDs, config namespaces and dotted config paths, route
-handlers, and route policy names. Dotted paths list one level at a time. With the switch on, they
-also cover plugin and API member names, the plural maps, and policy config keys.
+full service, controller, and policy UIDs, route handlers, and route policy names. With the switch
+on, they also cover config namespaces and dotted config paths, listed one level at a time, plugin
+and API member names, the plural maps, and policy config keys.
 
 Strict-off parity fixtures (`fixtures/parity-<surface>.ts`) pin the develop types an upgrading
 application relies on: mocks, `@ts-expect-error` lines, annotations, and `Parameters`/`ReturnType`
