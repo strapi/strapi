@@ -22,7 +22,7 @@ const createService = (overrides: Record<string, unknown> = {}) => {
 describe('document-metadata service', () => {
   describe('getAvailableLocales', () => {
     /**
-     * Regression guard for CMS-540. The admin's
+     * Regression guard. The admin's
      * `useDocument.getInitialFormValues` inherits non-localized scalar/media
      * values from `meta.availableLocales[0]` when creating a new locale draft.
      * That selection is only meaningful if the default locale sits first —
