@@ -6,9 +6,6 @@ import type { IsStrict, RegisteredRecord } from './strictness';
 
 export type Controller = Record<string, ControllerHandler>;
 
-/** Default result of a lookup without type argument: `unknown` with strict types enabled. */
-export type ControllerLookupDefault = IsStrict extends false ? Controller : unknown;
-
 /**
  * Resolves application overrides before package defaults. With strict types enabled, an unregistered
  * UID resolves to `unknown`, so callers pass a type argument; with strict types disabled, every UID

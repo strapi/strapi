@@ -41,9 +41,6 @@ export type ServiceMap = IsStrict extends false
   ? Record<string, Service>
   : RegisteredRecord<{ [TUID in RegisteredServiceUID]: ServiceFor<TUID> }, Service>;
 
-/** Default result of a lookup without type argument: `unknown` with strict types enabled. */
-export type ServiceLookupDefault = IsStrict extends false ? Service : unknown;
-
 export type Service = {
   // TODO [V5] Consider changing the any value to unknown.
   // See: https://github.com/strapi/strapi/issues/16993 and https://github.com/strapi/strapi/pull/17020 for further information
