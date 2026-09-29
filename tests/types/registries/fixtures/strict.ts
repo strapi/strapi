@@ -96,6 +96,9 @@ explicitFullUidService.anything();
 // Dynamic names cannot be validated, so they resolve to `unknown` too.
 declare const dynamicName: string;
 declare const patternUid: `plugin::i18n.${string}`;
+// Template expressions keep matching the UID patterns next to an explicit contract.
+app.service<{ find(): void }>(`api::${dynamicName}.${dynamicName}`).find();
+app.controller<Core.Controller>(`admin::${dynamicName}`) satisfies Core.Controller;
 exactlyUnknown(app.plugin('i18n').service(dynamicName)) satisfies true;
 exactlyUnknown(app.plugin(dynamicName).service('greeting')) satisfies true;
 exactlyUnknown(app.plugin(dynamicName).service('locales')) satisfies true;
