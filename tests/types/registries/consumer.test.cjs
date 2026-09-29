@@ -1,5 +1,10 @@
 'use strict';
 
+// Consumer programs for registered contracts. They read emitted declarations and real package
+// manifests, so build the packages first (`yarn test:ts` runs this file after the builds).
+// Fixtures assign a lookup result to a constant before checking it with `satisfies`: contextual
+// inference would otherwise make a permissive generic lookup look correctly typed.
+
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
