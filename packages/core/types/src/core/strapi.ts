@@ -11,30 +11,16 @@ import type * as UID from '../uid';
 import type { Container } from './container';
 import type {
   ControllerLookup,
-  ControllerLookupDefault,
   ControllerLookupUID,
   ControllerMap,
   RegisteredControllerUID,
 } from './controller';
 import type { ApiMap, RegisteredApiName } from './module';
 import type { PluginMap, RegisteredPluginName } from './plugin';
-import type {
-  PolicyLookup,
-  PolicyLookupConstraint,
-  PolicyLookupDefault,
-  PolicyLookupName,
-  PolicyMap,
-  RegisteredPolicyName,
-} from './policy';
-import type {
-  RegisteredServiceUID,
-  ServiceLookup,
-  ServiceLookupDefault,
-  ServiceLookupUID,
-  ServiceMap,
-} from './service';
+import type { PolicyLookup, PolicyLookupName, PolicyMap, RegisteredPolicyName } from './policy';
+import type { RegisteredServiceUID, ServiceLookup, ServiceLookupUID, ServiceMap } from './service';
 import type { SuggestedString } from '../utils/string';
-import type { IsStrict, StrictNoInfer } from './strictness';
+import type { IsStrict } from './strictness';
 
 /**
  * Root lookups without strict mode: develop's signatures, so mocks such as `app.service = () => ({})`
@@ -58,33 +44,24 @@ type StrictLookups = {
    * Resolves the registered contract of `uid`. An explicit type argument (`service<MyService>(uid)`)
    * wins over the registries, including for unregistered names.
    */
-  service<
-    T extends ServiceLookupDefault = ServiceLookupDefault,
-    TUID extends ServiceLookupUID = ServiceLookupUID,
-  >(
+  service<T = unknown, TUID extends ServiceLookupUID = ServiceLookupUID>(
     uid: TUID
-  ): ServiceLookup<TUID, StrictNoInfer<T>>;
+  ): ServiceLookup<TUID, NoInfer<T>>;
   /**
    * Resolves the registered contract of `uid`. An explicit type argument (`controller<MyController>(uid)`)
    * wins over the registries, including for unregistered names.
    */
-  controller<
-    T extends ControllerLookupDefault = ControllerLookupDefault,
-    TUID extends ControllerLookupUID = ControllerLookupUID,
-  >(
+  controller<T = unknown, TUID extends ControllerLookupUID = ControllerLookupUID>(
     uid: TUID
-  ): ControllerLookup<TUID, StrictNoInfer<T>>;
+  ): ControllerLookup<TUID, NoInfer<T>>;
   /**
    * Resolves the registered policy of the full name `name`, which receives its config contract.
    * An explicit type argument (`policy<MyPolicy>(name)`) wins over the registries, including for
    * unregistered names. Registered names are listed for completion.
    */
-  policy<
-    T extends PolicyLookupConstraint = PolicyLookupDefault,
-    TName extends PolicyLookupName = PolicyLookupName,
-  >(
+  policy<T = unknown, TName extends PolicyLookupName = PolicyLookupName>(
     name: TName
-  ): PolicyLookup<TName, StrictNoInfer<T>>;
+  ): PolicyLookup<TName, NoInfer<T>>;
   /** Plugins with registered contracts are listed for completion. */
   plugin<TName extends SuggestedString<RegisteredPluginName>>(name: TName): Core.Plugin<TName>;
   /** APIs with registered contracts are listed for completion. */

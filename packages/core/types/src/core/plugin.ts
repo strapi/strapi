@@ -1,16 +1,10 @@
 import type { PropertyPath } from 'lodash';
-import type { ControllerFor, ControllerLookupDefault, RegisteredControllerUID } from './controller';
+import type { ControllerFor, RegisteredControllerUID } from './controller';
 import type { Module } from './module';
 import type { Route } from './route';
 import type { Router } from './router';
-import type {
-  Policy,
-  PolicyConfigFor,
-  PolicyLookupConstraint,
-  PolicyLookupDefault,
-  RegisteredPolicyName,
-} from './policy';
-import type { RegisteredServiceUID, ServiceFor, ServiceLookupDefault } from './service';
+import type { Policy, PolicyConfigFor, RegisteredPolicyName } from './policy';
+import type { RegisteredServiceUID, ServiceFor } from './service';
 import type {
   ConfigDefaultValue,
   ConfigFor,
@@ -19,7 +13,7 @@ import type {
   ConfigPathSuggestion,
 } from './strapi';
 import type { SuggestedString } from '../utils/string';
-import type { IsStrict, RegisteredRecord, StrictNoInfer } from './strictness';
+import type { IsStrict, RegisteredRecord } from './strictness';
 
 /** Names of the plugin's entries in a registry keyed by full UID (`plugin::<plugin>.<name>`). */
 type PluginEntryNames<TUID, TPlugin extends string> = string extends TPlugin
@@ -56,28 +50,22 @@ type PluginConfigPathSuggestion<TPlugin extends string, TKey> = [
   : ConfigPathSuggestion<ConfigFor<PluginConfigNamespace<TPlugin>>, TKey>;
 
 /** The registered value when `TKey` is a key or dotted path of the plugin's config contract, `T` otherwise. */
-type PluginConfigLookup<
-  TPlugin extends string,
-  TKey,
-  T,
-  TDefault = undefined,
-> = IsStrict extends false
+type PluginConfigLookup<TPlugin extends string, TKey, T, TDefault = undefined> = [
+  PluginConfigNamespace<TPlugin>,
+] extends [never]
   ? T
-  : [PluginConfigNamespace<TPlugin>] extends [never]
+  : PluginConfigPath<TPlugin> extends TKey
     ? T
-    : PluginConfigPath<TPlugin> extends TKey
-      ? T
-      : TKey extends string
-        ? ConfigPathLookup<PluginConfigNamespace<TPlugin>, TKey, T, TDefault>
-        : T;
+    : TKey extends string
+      ? ConfigPathLookup<PluginConfigNamespace<TPlugin>, TKey, T, TDefault>
+      : T;
 
 /**
  * The registered contract when `TServiceName` is a registered service of the plugin, `T` otherwise.
- * `T` is an explicit generic (`service<MyService>('name')`), or `unknown` with strict types enabled.
+ * `T` is an explicit generic (`service<MyService>('name')`), or `unknown` by default.
  */
-type PluginServiceLookup<TPlugin extends string, TServiceName, T> = IsStrict extends false
-  ? T
-  : SuggestedString<ServiceNames<TPlugin>> extends TServiceName
+type PluginServiceLookup<TPlugin extends string, TServiceName, T> =
+  SuggestedString<ServiceNames<TPlugin>> extends TServiceName
     ? T
     : TServiceName extends ServiceNames<TPlugin>
       ? ServiceFor<`plugin::${TPlugin}.${TServiceName}`>
@@ -85,11 +73,10 @@ type PluginServiceLookup<TPlugin extends string, TServiceName, T> = IsStrict ext
 
 /**
  * The registered contract when `TControllerName` is a registered controller of the plugin, `T` otherwise.
- * `T` is an explicit generic (`controller<MyController>('name')`), or `unknown` with strict types enabled.
+ * `T` is an explicit generic (`controller<MyController>('name')`), or `unknown` by default.
  */
-type PluginControllerLookup<TPlugin extends string, TControllerName, T> = IsStrict extends false
-  ? T
-  : SuggestedString<ControllerNames<TPlugin>> extends TControllerName
+type PluginControllerLookup<TPlugin extends string, TControllerName, T> =
+  SuggestedString<ControllerNames<TPlugin>> extends TControllerName
     ? T
     : TControllerName extends ControllerNames<TPlugin>
       ? ControllerFor<`plugin::${TPlugin}.${TControllerName}`>
@@ -107,28 +94,6 @@ type PluginPolicyLookup<TPlugin extends string, TPolicyName, T> =
       : T;
 
 /**
- * `policy` is declared with strict types enabled only. Without them, it keeps the `any` of the
- * plugin index signature, as before registries.
- */
-type PluginPolicyGetter<TName extends string> = IsStrict extends false
-  ? unknown
-  : {
-      /**
-       * Resolves the registered policy of the relative name `name`, i.e. `plugin::<plugin>.<name>`
-       * as at runtime, which receives its config contract. An explicit type argument
-       * (`policy<MyPolicy>(name)`) wins over the registries. Registered names are listed for completion.
-       */
-      policy<
-        T extends PolicyLookupConstraint = PolicyLookupDefault,
-        TPolicyName extends SuggestedString<PolicyNames<TName>> = SuggestedString<
-          PolicyNames<TName>
-        >,
-      >(
-        name: TPolicyName
-      ): PluginPolicyLookup<TName, TPolicyName, NoInfer<T>>;
-    };
-
-/**
  * Any key when the plugin has no registered config contract, `never` otherwise.
  * TODO @Nico An unknown key of a registered plugin keeps a non-widening literal default. Rare, accepted.
  */
@@ -137,14 +102,21 @@ type LegacyPluginConfigPath<TName extends string> = [PluginConfigNamespace<TName
   : never;
 
 /**
- * `config` without strict mode: develop's signature, so a default infers a widening literal, e.g.
- * `let limit = config('limit', 10)` is a `number`. Editors still list registered keys.
+ * The plugin's `policy` lookup with strict mode. Without it, `policy` keeps the `any` of the plugin
+ * index signature, as on develop.
  */
-type LegacyPluginConfigGetter<TName extends string> = {
-  config<T = unknown, TKey extends PluginConfigPath<TName> = PluginConfigPath<TName>>(
-    key: TKey | PluginConfigPathSuggestion<TName, TKey>,
-    defaultVal?: T
-  ): T;
+type StrictPluginPolicyGetter<TName extends string> = {
+  /**
+   * Resolves the registered policy of the relative name `name`, i.e. `plugin::<plugin>.<name>` as at
+   * runtime, which receives its config contract. An explicit type argument (`policy<MyPolicy>(name)`)
+   * wins over the registries. Registered names are listed for completion.
+   */
+  policy<
+    T = unknown,
+    TPolicyName extends SuggestedString<PolicyNames<TName>> = SuggestedString<PolicyNames<TName>>,
+  >(
+    name: TPolicyName
+  ): PluginPolicyLookup<TName, TPolicyName, NoInfer<T>>;
 };
 
 type StrictPluginConfigGetter<TName extends string> = {
@@ -166,34 +138,52 @@ type StrictPluginConfigGetter<TName extends string> = {
   ): PluginConfigLookup<TName, TKey, T, NoInfer<TArgs[0]>>;
 };
 
-type PluginConfigGetter<TName extends string> = IsStrict extends false
-  ? LegacyPluginConfigGetter<TName>
-  : StrictPluginConfigGetter<TName>;
+/**
+ * The `Module` members of a plugin. With strict types enabled, the lookups and `config` are the
+ * plugin's own.
+ */
+type PluginModule<TName extends string> = IsStrict extends false
+  ? Omit<Module, 'routes'>
+  : Omit<Module<`plugin::${TName}`>, 'routes' | 'service' | 'config' | 'controller' | 'policy'>;
 
-export type Plugin<TName extends string = string> = Omit<
-  Module<`plugin::${TName}`>,
-  'routes' | 'service' | 'config' | 'controller' | 'policy'
-> & {
-  routes: Route[] | Record<string, Router>;
-  service<
-    T extends ServiceLookupDefault = ServiceLookupDefault,
-    TServiceName extends SuggestedString<ServiceNames<TName>> = SuggestedString<
-      ServiceNames<TName>
-    >,
-  >(
-    name: TServiceName
-  ): PluginServiceLookup<TName, TServiceName, StrictNoInfer<T>>;
-  controller<
-    T extends ControllerLookupDefault = ControllerLookupDefault,
-    TControllerName extends SuggestedString<ControllerNames<TName>> = SuggestedString<
-      ControllerNames<TName>
-    >,
-  >(
-    name: TControllerName
-  ): PluginControllerLookup<TName, TControllerName, StrictNoInfer<T>>;
-  [key: string]: any;
-} & PluginConfigGetter<TName> &
-  PluginPolicyGetter<TName>;
+/**
+ * The plugin's own members. With strict types enabled, registered names of the plugin resolve to
+ * their contracts. Without them, members outside `Module`, such as `policy`, are `any`, as on develop.
+ */
+type PluginMembers<TName extends string> = IsStrict extends false
+  ? {
+      routes: Route[] | Record<string, Router>;
+      [key: string]: any;
+    }
+  : {
+      routes: Route[] | Record<string, Router>;
+      service<
+        T = unknown,
+        TServiceName extends SuggestedString<ServiceNames<TName>> = SuggestedString<
+          ServiceNames<TName>
+        >,
+      >(
+        name: TServiceName
+      ): PluginServiceLookup<TName, TServiceName, NoInfer<T>>;
+      controller<
+        T = unknown,
+        TControllerName extends SuggestedString<ControllerNames<TName>> = SuggestedString<
+          ControllerNames<TName>
+        >,
+      >(
+        name: TControllerName
+      ): PluginControllerLookup<TName, TControllerName, NoInfer<T>>;
+      [key: string]: any;
+    } & StrictPluginConfigGetter<TName> &
+      StrictPluginPolicyGetter<TName>;
+
+/**
+ * A loaded plugin. With strict types enabled, a literal `TName` types its lookups and maps from the
+ * registries. Without them, every plugin keeps develop's type, so mocks and `@ts-expect-error` lines
+ * written for develop keep compiling, and `config` defaults infer widening literals, e.g.
+ * `let limit = config('limit', 10)` is a `number`.
+ */
+export type Plugin<TName extends string = string> = PluginModule<TName> & PluginMembers<TName>;
 
 /** The plugin name of a `plugin::<plugin>.<name>` UID or a `plugin::<plugin>` config namespace. */
 type PluginNameOf<TUID> = TUID extends `plugin::${infer TPlugin}.${string}`

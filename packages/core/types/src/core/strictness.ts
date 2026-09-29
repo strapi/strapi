@@ -2,13 +2,6 @@
 export type IsStrict = Strapi.Registries.Settings extends { strict: true } ? true : false;
 
 /**
- * A lookup result type argument that the call's contextual type cannot infer in strict mode, so
- * `const s: MyService = strapi.service(uid)` does not replace `strapi.service<MyService>(uid)`.
- * Without strict mode, it is `T` and annotations keep inferring it, as before registries.
- */
-export type StrictNoInfer<T> = IsStrict extends false ? T : NoInfer<T>;
-
-/**
  * Whether `TName` is a wide or dynamic name, such as `string` or `` `plugin::${string}.x` ``, that a
  * registry cannot validate. Literal names, and unions of them, resolve to `false`.
  */

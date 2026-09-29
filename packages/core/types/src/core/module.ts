@@ -66,15 +66,13 @@ export type ModulePolicyMap<TNamespace extends string> = IsStrict extends false
     >;
 
 /**
- * Whether the module's `service`, `controller` and `policy` lookups resolve registered contracts:
- * API modules, e.g. `strapi.api(name)`, with strict types enabled. Other modules, such as
- * `strapi.admin`, keep the legacy lookups.
+ * Whether the module's `service`, `controller` and `policy` lookups resolve registered contracts, with
+ * strict types enabled: API modules, e.g. `strapi.api(name)`. Other modules, such as `strapi.admin`,
+ * keep the legacy lookups.
  */
-type IsClosedModule<TNamespace extends string> = IsStrict extends false
-  ? false
-  : [TNamespace] extends [`api::${string}`]
-    ? true
-    : false;
+type IsClosedModule<TNamespace extends string> = [TNamespace] extends [`api::${string}`]
+  ? true
+  : false;
 
 /** Default result of a module lookup without type argument: `unknown` for closed modules. */
 type ModuleLookupDefault<TNamespace extends string, TLegacy> =
@@ -137,26 +135,21 @@ type ModulePolicyLookup<TNamespace extends string, TName, T> =
       >;
 
 /**
- * A loaded module. `TNamespace` is its runtime namespace, e.g. `plugin::i18n` or `api::article`:
- * a literal namespace types the `services`, `controllers` and `policies` maps from the registries,
- * and the `service`, `controller` and `policy` lookups of API modules with strict types enabled.
+ * Module lookups without strict mode: develop's signatures, so mocks and `@ts-expect-error` lines
+ * written for develop keep compiling. Develop has no `policy` lookup, so object literals typed
+ * `Core.Module` need none.
  */
-export interface Module<TNamespace extends string = string> {
-  bootstrap: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
-  destroy: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
-  register: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
-  config<T = unknown>(key: PropertyPath, defaultVal?: T): T; // TODO: this mirrors ConfigProvider.get, we should use it directly
-  routes: Record<string, Router>;
-  controllers: ModuleControllerMap<TNamespace>;
-  services: ModuleServiceMap<TNamespace>;
-  policies: ModulePolicyMap<TNamespace>;
-  middlewares: Record<string, Middleware>;
-  contentTypes: Record<string, { schema: ContentType }>;
+type LegacyModuleLookups = {
+  controller<T extends Controller>(name: string): T;
+  service<T extends Service>(name: string): T;
+};
 
+/** Module lookups with strict mode: registered names of API modules resolve to their contracts. */
+type StrictModuleLookups<TNamespace extends string> = {
   /**
-   * Resolves the registered contract of the controller `name` in an API module, with strict types
-   * enabled. An explicit type argument (`controller<MyController>(name)`) wins over the registries.
-   * Registered controller names of the module are listed for completion.
+   * Resolves the registered contract of the controller `name` in an API module. An explicit type
+   * argument (`controller<MyController>(name)`) wins over the registries. Registered controller names
+   * of the module are listed for completion.
    */
   controller<
     T extends ModuleLookupDefault<TNamespace, Controller> = ModuleLookupDefault<
@@ -171,9 +164,9 @@ export interface Module<TNamespace extends string = string> {
     name: TName
   ): ModuleControllerLookup<TNamespace, TName, T>;
   /**
-   * Resolves the registered contract of the service `name` in an API module, with strict types
-   * enabled. An explicit type argument (`service<MyService>(name)`) wins over the registries.
-   * Registered service names of the module are listed for completion.
+   * Resolves the registered contract of the service `name` in an API module. An explicit type
+   * argument (`service<MyService>(name)`) wins over the registries. Registered service names of the
+   * module are listed for completion.
    */
   service<
     T extends ModuleLookupDefault<TNamespace, Service> = ModuleLookupDefault<TNamespace, Service>,
@@ -186,9 +179,9 @@ export interface Module<TNamespace extends string = string> {
   ): ModuleServiceLookup<TNamespace, TName, T>;
   /**
    * Resolves the registered policy of the relative name `name`, i.e. `<namespace>.<name>` as at
-   * runtime, which receives its config contract, in an API module with strict types enabled. An
-   * explicit type argument (`policy<MyPolicy>(name)`) wins over the registries. Otherwise, returns
-   * the legacy `Policy`. Registered policy names of the module are listed for completion.
+   * runtime, which receives its config contract, in an API module. An explicit type argument
+   * (`policy<MyPolicy>(name)`) wins over the registries. Otherwise, returns the legacy `Policy`.
+   * Registered policy names of the module are listed for completion.
    */
   policy<
     // Any policy, whatever its config, for legacy lookups, as in `strapi.policy`.
@@ -203,6 +196,28 @@ export interface Module<TNamespace extends string = string> {
   >(
     name: TName
   ): ModulePolicyLookup<TNamespace, TName, T>;
+};
+
+type ModuleLookups<TNamespace extends string> = IsStrict extends false
+  ? LegacyModuleLookups
+  : StrictModuleLookups<TNamespace>;
+
+/**
+ * A loaded module. `TNamespace` is its runtime namespace, e.g. `plugin::i18n` or `api::article`:
+ * with strict types enabled, a literal namespace types the `services`, `controllers` and `policies`
+ * maps from the registries, and the `service`, `controller` and `policy` lookups of API modules.
+ */
+export interface Module<TNamespace extends string = string> extends ModuleLookups<TNamespace> {
+  bootstrap: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
+  destroy: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
+  register: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
+  config<T = unknown>(key: PropertyPath, defaultVal?: T): T; // TODO: this mirrors ConfigProvider.get, we should use it directly
+  routes: Record<string, Router>;
+  controllers: ModuleControllerMap<TNamespace>;
+  services: ModuleServiceMap<TNamespace>;
+  policies: ModulePolicyMap<TNamespace>;
+  middlewares: Record<string, Middleware>;
+  contentTypes: Record<string, { schema: ContentType }>;
 }
 
 /** The API name of an `api::<api>.<name>` UID. */
