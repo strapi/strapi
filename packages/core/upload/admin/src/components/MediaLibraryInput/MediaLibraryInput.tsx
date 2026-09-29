@@ -11,12 +11,18 @@ import { useTracking } from '../../hooks/useTracking';
 // imports go when that modal lands.
 import { AssetDialog } from '../../legacy/components/AssetDialog/AssetDialog';
 import { EditFolderDialog } from '../../legacy/components/EditFolderDialog/EditFolderDialog';
-import { useUploadFilesMutation } from '../../services/api';
+import { ImportFromUrlDialog } from '../../pages/Assets/components/ImportFromUrlDialog';
+import { useUploadFilesMutation, useUploadFromUrlsMutation } from '../../services/api';
 import { useGetUploadSettingsQuery } from '../../services/settings';
-import { filterAllowedFiles, type AllowedMediaType } from '../../utils/allowedMediaTypes';
+import {
+  filterAllowedFiles,
+  isMediaTypeAllowed,
+  type AllowedMediaType,
+} from '../../utils/allowedMediaTypes';
 import { getTranslationKey } from '../../utils/translations';
 import { typeFromMime } from '../../utils/typeFromMime';
 
+import { AddAssetMenu } from './AddAssetMenu';
 import { AssetDropZone } from './AssetDropZone';
 import { AssetRow } from './AssetRow';
 
@@ -78,9 +84,11 @@ export const MediaLibraryInput = ({
 
   const [step, setStep] = useState<Step | undefined>(undefined);
   const [folderId, setFolderId] = useState<number | null>(null);
+  const [isUrlDialogOpen, setIsUrlDialogOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [uploadFiles] = useUploadFilesMutation();
+  const [uploadFromUrls] = useUploadFromUrlsMutation();
   // Echoes the app config; a missing payload (still loading) falls back to
   // sequential rather than outpacing what the server asked for.
   const { data: settings } = useGetUploadSettingsQuery();
@@ -128,24 +136,36 @@ export const MediaLibraryInput = ({
     });
   };
 
+  /**
+   * True when the batch is more than a single-value field can take. Counted on
+   * what was handed in rather than on what survives filtering: uploading one of
+   * several would leave the user guessing which one the field kept.
+   */
+  const rejectsBatch = (count: number) => {
+    if (multiple || count <= 1) {
+      return false;
+    }
+
+    toggleNotification({
+      type: 'danger',
+      timeout: 4000,
+      message: formatMessage({
+        id: getTranslationKey('content-manager.input.notification.single-file'),
+        defaultMessage: 'This field accepts only one file.',
+      }),
+    });
+
+    return true;
+  };
+
   const handleUpload = async (files: globalThis.File[]) => {
     if (disabled || files.length === 0) {
       return;
     }
 
-    // Counted before the type filter, on what was actually dropped: uploading
-    // one of several files would leave the user guessing which one the field
-    // kept. The device picker can't reach this — it carries `multiple` — so a
-    // drop is the only way in.
-    if (!multiple && files.length > 1) {
-      toggleNotification({
-        type: 'danger',
-        timeout: 4000,
-        message: formatMessage({
-          id: getTranslationKey('content-manager.input.notification.single-file'),
-          defaultMessage: 'This field accepts only one file.',
-        }),
-      });
+    // The device picker can't reach this — it carries `multiple` — so a drop is
+    // the only way in.
+    if (rejectsBatch(files.length)) {
       return;
     }
 
@@ -206,6 +226,44 @@ export const MediaLibraryInput = ({
     }
   };
 
+  /**
+   * The server fetches each URL and uploads what it finds, so the file's type
+   * is not known here — `allowedTypes` can only be enforced on what comes back.
+   * A URL whose file the field does not accept is uploaded to the library and
+   * left off the field, which is also what the Media Library page does with it.
+   */
+  const handleUrlUpload = async (urls: string[]) => {
+    if (disabled || urls.length === 0 || rejectsBatch(urls.length)) {
+      return;
+    }
+
+    trackUsage('didSelectFile', { source: 'url', location: CONTENT_MANAGER_LOCATION });
+    trackUsage('willAddMediaLibraryAssets', { location: CONTENT_MANAGER_LOCATION });
+
+    try {
+      const { data: uploadedFiles } = await uploadFromUrls({
+        urls,
+        folderId: UPLOAD_FOLDER_ID,
+        generateAiMetadata: Boolean(isAiMetadataEnabled),
+      }).unwrap();
+
+      const allowedFiles = uploadedFiles.filter((file) =>
+        isMediaTypeAllowed(allowedTypes, file.mime)
+      );
+
+      if (allowedFiles.length < uploadedFiles.length) {
+        notifyUnsupported();
+      }
+
+      if (allowedFiles.length > 0) {
+        setAssets(multiple ? [...assetsRef.current, ...allowedFiles] : [allowedFiles[0]]);
+      }
+    } catch {
+      // Errors reach the user through the progress dialog, which the mutation
+      // populates itself.
+    }
+  };
+
   const handleFileInputChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const { files } = event.target;
     // Reset first: picking the same file twice in a row fires no `change` event
@@ -218,7 +276,15 @@ export const MediaLibraryInput = ({
 
   return (
     <Field.Root name={name} error={error} hint={hint} required={required}>
-      <Field.Label action={labelAction}>{label}</Field.Label>
+      <Flex justifyContent="space-between" alignItems="center" gap={2}>
+        <Field.Label action={labelAction}>{label}</Field.Label>
+        <AddAssetMenu
+          disabled={disabled}
+          onBrowseLibrary={() => setStep('browse')}
+          onUploadFromDevice={() => fileInputRef.current?.click()}
+          onUploadFromUrl={() => setIsUrlDialogOpen(true)}
+        />
+      </Flex>
 
       <Flex direction="column" alignItems="stretch" gap={1}>
         {assets.map((asset) => (
@@ -273,6 +339,12 @@ export const MediaLibraryInput = ({
       {step === 'create-folder' && (
         <EditFolderDialog open onClose={() => setStep('browse')} parentFolderId={folderId} />
       )}
+
+      <ImportFromUrlDialog
+        open={isUrlDialogOpen}
+        onClose={() => setIsUrlDialogOpen(false)}
+        onUpload={handleUrlUpload}
+      />
     </Field.Root>
   );
 };
