@@ -3,221 +3,97 @@ title: TypeScript
 description: 'TypeScript usage conventions and guidelines for Strapi codebase.'
 ---
 
-## Registered contracts
+This guide covers how the monorepo's server packages use registered contracts. Strapi packages
+publish service, controller, policy, and config contracts through the global `Strapi.Registries`
+namespace. Contracts only change lookup types in strict mode, which applications enable with the
+`@strapi/strapi/strict-types` entry. Without strict mode, the `@strapi/types` and `@strapi/strapi`
+types must stay those of the previous release.
 
-Strapi packages can publish service, configuration, controller, and policy contracts through
-`Strapi.Registries`. Loading these contracts does not change an application's lookup types.
-Applications enable them with one import in a declaration file included by their tsconfig:
+## Strict mode in the monorepo
 
-```ts
-// types/strict.d.ts
-import type {} from '@strapi/strapi/strict-types';
-```
+Strapi's server packages type-check in strict mode. The shared `tsconfig/server.json` preset
+loads only the switch, `@strapi/types/strict`. It does not load `@strapi/strapi/strict-types`,
+which is the application entry. No published source imports the switch.
 
-This types-only entry enables contracts across the TypeScript program and loads the contracts
-of every package bundled with `@strapi/strapi`: admin, Content Manager, Content Releases,
-Content-Type Builder, Email, i18n, Review Workflows, and Upload. It changes no runtime behavior. The ordinary
-`@strapi/strapi` entry and new application templates leave strict mode disabled.
-
-Alternatively, append the entry to `compilerOptions.types`:
-
-```json
-{
-  "compilerOptions": {
-    "types": ["node", "@strapi/strapi/strict-types"]
-  }
-}
-```
-
-Keep existing entries: this option replaces automatic inclusion of ambient type packages and
-does not merge arrays from an extended tsconfig.
-
-Run `strapi ts:generate-types` to load optional plugins' contracts. Generation also runs during
-`strapi develop`. The generated `types/generated/plugins.d.ts` imports the normal server types
-of enabled plugins with resolvable server declaration files. Include the generated directory
-in your app's tsconfig. Plugins without server declarations are skipped. Regenerate after changing
-plugin configuration or dependencies; removed plugins' references are removed from the file.
-These generated imports do not enable strict mode on their own.
-
-Strapi's server packages load the same `@strapi/strapi/strict-types` entry through the shared
-`tsconfig/server.json` preset, so they type-check against the contracts an application
-sees. They do not import activation from their published source. The entry enables strict mode
-through the lower-level `@strapi/types/strict` entry, which sets
-`Strapi.Registries.Settings.strict`.
-
-Without strict mode, the `@strapi/types` and `@strapi/strapi` types are those of the previous
-release, even if the program loads package contracts or application overrides. Code that
-type-checks against the previous release, including mocks such as `app.service = () => ({})` and
-its `@ts-expect-error` lines, keeps type-checking. Everything below about lookups, the explicit
-type argument, the `unknown` fallback, and annotations applies in strict mode only.
-
-With strict contracts enabled, registered literal names resolve to their contracts:
+A package's own contracts come from its `src/` directory. A package that looks up another
+package's services, controllers, policies, or config loads that package's contracts from
+`server/src/registries.ts`:
 
 ```ts
-const locales = strapi.plugin('i18n').service('locales');
-const defaultLocale = await locales.getDefaultLocale(); // string | null
+// packages/core/content-releases/server/src/registries.ts
+// Contracts of the packages this package looks up. Each import must be a declared dependency.
+import type {} from '@strapi/admin/strapi-server';
+import type {} from '@strapi/content-manager/strapi-server';
 ```
 
-The bundled contracts cover i18n's services and controllers, including the possibility of missing
-settings, locales, and AI localization jobs. Content Manager registers its core controllers,
-permission policy, and every service. The admin registers its permission policies and every
-service. Email, Upload, Content-Type Builder, Review Workflows, and Content Releases register
-their services; GraphQL and Documentation register theirs through generated types when enabled.
-Most of these contracts are inferred from the implementation; some are deliberately loose and
-marked for tightening.
+This file makes each package's program follow its dependency graph. Nx builds a package's
+dependencies before the package, so `yarn build`, `yarn test:ts`, and cached Nx results check
+the same contracts. Follow these rules:
 
-The EE edition merges its members into the admin `auth`, `user`, `role`, `passport`, and `metrics`
-services. Their contracts are the CE shape, with the EE-only members optional. EE-only code passes
-the EE shape, `EnterpriseServices`, as an explicit generic argument.
+- Import only packages listed in `dependencies` or `peerDependencies`. The Oxlint rule
+  `strapi-registries/declared-dependencies` enforces this. An undeclared package still resolves
+  through workspace hoisting, but Nx does not build it first, so the result depends on the state
+  of its `dist/`.
+- Packages under `packages/core/` import each provider's `strapi-server` entry. Packages under
+  `packages/plugins/` that depend on `@strapi/strapi` can import `@strapi/strapi/strict-types`,
+  as an application does.
+- Keep the file a `.ts` source file. A missing provider declaration then fails with TS2307. In a
+  `.d.ts` file, `skipLibCheck` hides that error and the registry is silently empty.
+- Do not map a package's own `strapi-server` entry with `paths`. The package already includes its
+  contracts from `src/`, and loading its own `dist/` fails with TS5055.
+- When code starts to look up a package that is not in the file yet, add the import. Without it,
+  the lookup resolves to `unknown`.
 
-Strict contracts are closed: an unregistered service or controller name resolves to `unknown`,
-for full UIDs such as `strapi.service('plugin::greetings.greeting')`, for plugin lookups such
-as `strapi.plugin('greetings').service('greeting')`, and for API lookups such as
-`strapi.api('item').service('item')`. Policy lookups follow the same rules: `strapi.policy(name)`
-takes a full name such as `plugin::greetings.isOwner`, `strapi.plugin('greetings').policy('isOwner')`
-and `strapi.api('item').policy('isOwner')` a name relative to the plugin or API, as at runtime.
-A registered policy resolves to a policy that receives its config contract, like
-`strapi.policies`. Dynamic names, such as a `string` variable or
-a template literal type like `` `plugin::${string}.greeting` ``, cannot be validated and resolve to
-`unknown` too. Register a contract for the name, or pass an explicit generic argument. In strict
-mode, every lookup form accepts one, and it takes precedence over the registries:
+Declaration emit erases these imports, so the file publishes nothing. Applications load the same
+contracts through `@strapi/strapi/strict-types` or generated types.
 
-```ts
-const greeting = strapi.plugin('greetings').service<GreetingService>('greeting');
-const sameGreeting = strapi.service<GreetingService>('plugin::greetings.greeting');
-const items = strapi.controller<ItemsController>('api::item.item');
-const sameItems = strapi.api('item').controller<ItemsController>('item');
-const isOwner = strapi.policy<Core.PolicyHandler>('global::isOwner');
-```
+## Declaring a package's contracts
 
-Other modules, such as `strapi.admin`, keep the legacy `service`, `controller`, and `policy`
-lookups. Use full UIDs, as in `strapi.service('admin::auth')`, to resolve their contracts.
-
-With the switch on, a type annotation on the result does not replace the type argument:
-`const greeting: GreetingService = strapi.plugin('greetings').service('greeting')` is an error.
-A generic helper that forwards a name passes its return type as the type argument, as in
-`strapi.plugin('greetings').service<Services[TName]>(name)`.
-
-The plural accessors resolve registered keys through the same contracts: `strapi.services`,
-`strapi.controllers`, and `strapi.policies` are keyed by UID, and a plugin's or API's `services`,
-`controllers`, and `policies` maps are keyed by name. `strapi.plugins` and `strapi.apis` resolve a
-name with registered contracts to the same type as `strapi.plugin(name)` and `strapi.api(name)`:
-
-```ts
-strapi.services['plugin::i18n.locales']; // same contract as strapi.service('plugin::i18n.locales')
-strapi.plugin('i18n').services.locales; // same contract
-strapi.plugins.i18n.controllers.locales; // same contract as strapi.plugin('i18n').controller('locales')
-strapi.policies['plugin::content-manager.hasPermissions']; // Policy with its registered config
-```
-
-These maps stay open: any other key, literal or dynamic, keeps the legacy `Service`, `Controller`,
-`Policy`, `Plugin`, or `Module` type. An index signature cannot close literal keys while keeping
-dynamic keys open, and code routinely iterates or indexes these maps with computed names. Registered
-keys are declared properties, so `noUncheckedIndexedAccess` adds `undefined` only to other keys.
-Iterated values, as from `Object.values(strapi.services)`, include every registered contract. Use
-the singular lookups to reject unregistered literal names.
-
-In strict mode, config lookups stay open: core namespaces such as `server`, `admin`, and `api` have no
-registered contract, and unregistered namespaces or unknown paths resolve to the generic
-fallback, `unknown` by default. Explicit generic arguments on config getters remain available.
-Dotted config paths resolve within the registered contract, including optional properties and
-array elements. Array paths retain the generic fallback. For registered paths, a defined default
-removes `undefined` from the result. A default that can itself be `undefined` preserves that
-possibility. Defaults do not replace `null`.
-
-Without strict mode, editors list registered names only in the root lookups, whose parameters
-accept the same values as in the previous release:
-
-- plugins and APIs with registered contracts, in `strapi.plugin(name)` and `strapi.api(name)`
-- full UIDs, in `strapi.service(uid)`, `strapi.controller(uid)`, and `strapi.policy(name)`
-
-Routes typed with `Core.RouterInputFor` also list handlers and policy names, with either switch
-setting (see [Checking routes](#checking-routes)).
-
-In strict mode, editors also list:
-
-- service, controller, and policy names, in `strapi.plugin(name)` and `strapi.api(name)` lookups
-- config namespaces and dotted config paths, in `strapi.config.get(path)`, and plugin config keys
-- the keys of the plural maps, and the config keys of registered policies
-
-Dotted config paths are listed one level at a time: `strapi.config.get('plugin::sentry.')` lists
-the top-level keys of the contract, and `strapi.plugin('sentry').config('init.')` lists the keys
-of `init`. Suggestions do not change the accepted names.
-
-## Publishing a plugin's contracts
-
-Keep contracts in the package that implements them, under `server/src/types/`. Declare package
-defaults in `server/src/types/index.ts` and re-export that module from the normal server entry:
+Keep contracts in the package that implements them, under `server/src/types/`, and declare them
+in the `Package*` registries: `PackageServices`, `PackageControllers`, `PackagePolicies`, and
+`PackageConfigs`. The `App*` registries belong to applications.
 
 ```ts
 // server/src/types/index.ts
-export type GreetingService = {
-  greet(name: string): Promise<string>;
-};
-
 declare global {
   namespace Strapi {
     namespace Registries {
       interface PackageServices {
-        'plugin::greetings.greeting': GreetingService;
+        'plugin::i18n.locales': ServiceContracts.LocaleService;
       }
     }
   }
 }
 ```
 
+- Re-export the module from the server entry with `export type * from './types'`. The emitted
+  `strapi-server` declaration must keep that re-export, because it is what `registries.ts` files,
+  `@strapi/strapi/strict-types`, and generated application types load.
+- Packages with an `exports` map also map `strapi-server` in `typesVersions`, for consumers
+  that use the legacy `Node` module resolution.
+- Do not augment `Strapi.Registries.Settings` in published source. Only `@strapi/types/strict`
+  sets the switch.
+- Check implementations against their contracts with a type annotation or `satisfies`.
+- Declare one contract per UID. Conflicting `Package*` declarations fail with TS2717, and
+  `skipLibCheck` can hide the conflict in a consumer.
+- A package bundled with `@strapi/strapi` that registers contracts must also be imported by
+  `packages/core/strapi/strict-types.d.ts`.
+- EE code that merges members into admin services passes the EE shape, `EnterpriseServices`, as an
+  explicit type argument. The registered contract is the CE shape with the EE-only members
+  optional.
+
+## Keeping types unchanged without strict mode
+
+A type in `@strapi/types` or `@strapi/strapi` that behaves differently in strict mode resolves
+both shapes from `IsStrict` (`packages/core/types/src/core/strictness.ts`):
+
 ```ts
-// server/src/index.ts
-export type * from './types';
+type Lookup = IsStrict extends false ? LegacyLookup : StrictLookup;
 ```
 
-Use `PackageConfigs` for configuration namespaces such as `plugin::greetings`,
-`PackageControllers` for full controller UIDs, and `PackagePolicies` for full policy UIDs.
-Each policy entry describes its configuration, or `undefined` if it accepts none.
-Check implementations against their contracts with a type annotation or `satisfies`.
-Declare packages referenced by published contracts as dependencies.
-
-The emitted server entry must retain the re-export so consumer programs load the declarations.
-An unused `import type {}` in a source file is erased during declaration emit and cannot provide
-this guarantee. Do not publish an augmentation of `Settings` through the server entry.
-Packages with an `exports` map also need a `typesVersions` mapping for `strapi-server` if they
-support the legacy `Node` module resolution mode.
-
-Applications use `AppServices`, `AppConfigs`, `AppControllers`, and `AppPolicies` to add their own
-contracts or replace package contracts. Each application entry replaces the whole package contract
-for its key. Strapi and plugin packages contribute to the corresponding `Package*` registries.
-Use one package contract version per UID per program. Conflicting `Package*` declarations fail
-with TS2717 even with strict contracts disabled. `skipLibCheck` hides the conflict and can make
-the selected contract depend on declaration order.
-
-## Checking routes
-
-Use `Core.RouterInputFor<typeof controllers, 'plugin::greetings'>` to check string handlers
-against a controller map. It accepts controller objects and factories, with relative handlers
-such as `greeting.hello` and absolute handlers such as `plugin::greetings.greeting.hello`.
-Preserve literal controller keys; a map typed as `Record<string, ...>` cannot detect name typos.
-Handler checking applies whenever this explicit type is used, including with the switch off.
-
-With the switch on, typed route policies use the loaded policy registry: all referenced
-policies must be registered, and a program without registered policies accepts none. The admin
-contracts loaded by `@strapi/strapi/strict-types` register its policies. Load every relevant provider and add
-application policies, including `global::` policies, to `Strapi.Registries.AppPolicies`.
-The generator loads enabled plugins' contracts; application policies still need their own
-declarations. Policies with required config must use `{ name, config }`; only policies whose
-config accepts `undefined` can be referenced by name alone. Existing untyped `Core.RouteConfig`
-remains permissive.
-
-Pass the plugin or API namespace to the router type to check relative policy names as well:
-`Core.RouterInputFor<typeof controllers, 'plugin::greetings'>` checks `isOwner` against
-`plugin::greetings.isOwner`. Fully qualified policy names remain available. An exact registered
-name takes precedence over a relative match, as it does at runtime. Admin and global policies
-use their fully qualified names.
-
-Policy inventories are deliberately complete for explicitly typed routes: accepting arbitrary
-policy names would also let an invalid configuration for a known policy pass through the
-fallback. Service, controller, and policy lookups are closed the same way for literal names, but
-resolve one name at a time: a lookup with an explicit generic argument keeps working while its
-contract is missing.
+The legacy shape is the previous release's type, copied as is. The strict-off parity fixtures in
+`tests/types/registries/fixtures/parity-*.ts` pin that shape: they must compile against both the
+current code and the previous release. `tests/types/registries/consumer.test.cjs` compiles them.
 
 ## Verifying changes
 
