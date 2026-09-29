@@ -3,6 +3,6 @@
   "include": ["./src"],
   "compilerOptions": {
     // Tests run on vitest: drop the jest globals the server preset loads.
-    "types": ["node", "@strapi/strapi/strict-types"]
+    "types": ["node", "@strapi/types/strict"]
   }
 }
