@@ -45,6 +45,12 @@ sees. They do not import activation from their published source. The entry enabl
 through the lower-level `@strapi/types/strict` entry, which sets
 `Strapi.Registries.Settings.strict`.
 
+Without strict mode, the `@strapi/types` and `@strapi/strapi` types are those of the previous
+release, even if the program loads package contracts or application overrides. Code that
+type-checks against the previous release, including mocks such as `app.service = () => ({})` and
+its `@ts-expect-error` lines, keeps type-checking. Everything below about lookups, the explicit
+type argument, the `unknown` fallback, and annotations applies in strict mode only.
+
 With strict contracts enabled, registered literal names resolve to their contracts:
 
 ```ts
@@ -73,8 +79,8 @@ and `strapi.api('item').policy('isOwner')` a name relative to the plugin or API,
 A registered policy resolves to a policy that receives its config contract, like
 `strapi.policies`. Dynamic names, such as a `string` variable or
 a template literal type like `` `plugin::${string}.greeting` ``, cannot be validated and resolve to
-`unknown` too. Register a contract for the name, or pass an explicit generic argument. Every lookup
-form accepts one, and it takes precedence over the registries, with or without the switch:
+`unknown` too. Register a contract for the name, or pass an explicit generic argument. In strict
+mode, every lookup form accepts one, and it takes precedence over the registries:
 
 ```ts
 const greeting = strapi.plugin('greetings').service<GreetingService>('greeting');
@@ -111,7 +117,7 @@ keys are declared properties, so `noUncheckedIndexedAccess` adds `undefined` onl
 Iterated values, as from `Object.values(strapi.services)`, include every registered contract. Use
 the singular lookups to reject unregistered literal names.
 
-Config lookups stay open: core namespaces such as `server`, `admin`, and `api` have no
+In strict mode, config lookups stay open: core namespaces such as `server`, `admin`, and `api` have no
 registered contract, and unregistered namespaces or unknown paths resolve to the generic
 fallback, `unknown` by default. Explicit generic arguments on config getters remain available.
 Dotted config paths resolve within the registered contract, including optional properties and
@@ -119,26 +125,24 @@ array elements. Array paths retain the generic fallback. For registered paths, a
 removes `undefined` from the result. A default that can itself be `undefined` preserves that
 possibility. Defaults do not replace `null`.
 
-Without `Settings.strict: true`, service, controller, config, and policy lookups keep their
-previous types, even if the program loads package contracts or application overrides:
-`strapi.policy(name)` returns `Core.Policy`, and `strapi.plugin(name).policy` stays untyped.
-`strapi.api(name).policy(name)`, which had no type before, returns `Core.Policy` too. Editors can
-still suggest registered names.
-
-Editors list registered names with either switch setting:
+Without strict mode, editors list registered names only in the root lookups, whose parameters
+accept the same values as in the previous release:
 
 - plugins and APIs with registered contracts, in `strapi.plugin(name)` and `strapi.api(name)`
 - full UIDs, in `strapi.service(uid)`, `strapi.controller(uid)`, and `strapi.policy(name)`
-- service and controller names, in `strapi.plugin(name)` and `strapi.api(name)` lookups
-- policy names, in `strapi.api(name).policy(name)`
-- config namespaces, and plugin config keys
-- policy names in typed routes, including relative names for the router's namespace
+
+Routes typed with `Core.RouterInputFor` also list handlers and policy names, with either switch
+setting (see [Checking routes](#checking-routes)).
+
+In strict mode, editors also list:
+
+- service, controller, and policy names, in `strapi.plugin(name)` and `strapi.api(name)` lookups
+- config namespaces and dotted config paths, in `strapi.config.get(path)`, and plugin config keys
+- the keys of the plural maps, and the config keys of registered policies
 
 Dotted config paths are listed one level at a time: `strapi.config.get('plugin::sentry.')` lists
 the top-level keys of the contract, and `strapi.plugin('sentry').config('init.')` lists the keys
-of `init`. With the switch on, editors also list the keys of the plural maps and the config keys
-of registered policies and the policy names in `strapi.plugin(name).policy(name)`. Suggestions do
-not change the accepted names.
+of `init`. Suggestions do not change the accepted names.
 
 ## Publishing a plugin's contracts
 
