@@ -475,16 +475,6 @@ describe('Relations', () => {
     );
   });
 
-  it('shows the full relation label in a tooltip so clipped names can be read on hover', async () => {
-    const { user } = render({});
-
-    await user.hover(await screen.findByRole('button', { name: 'Relation entity 1' }));
-
-    expect(await screen.findByRole('tooltip', {}, { timeout: 3000 })).toHaveTextContent(
-      'Relation entity 1'
-    );
-  });
-
   describe('Load More', () => {
     const fieldProps: RelationsFieldProps = {
       attribute: {
@@ -548,7 +538,7 @@ describe('Relations', () => {
       expect(requestedPages).toEqual([1, 2]);
     });
 
-    it('keeps the page in sync with the shared cache when the same field is mounted again', async () => {
+    it('requests the page following the shared cache when the same field is mounted again', async () => {
       const requestedPages = usePaginatedRelations();
 
       /**

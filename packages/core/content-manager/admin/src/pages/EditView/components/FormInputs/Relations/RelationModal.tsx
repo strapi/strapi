@@ -18,7 +18,6 @@ import {
   IconButton,
   Loader,
   Modal,
-  Tooltip,
   Typography,
   TextButton,
 } from '@strapi/design-system';
@@ -798,15 +797,8 @@ const RelationModalTrigger = ({
 
   const fullPageUrl = getFullPageUrl(relation);
 
-  /**
-   * The label is clipped with an ellipsis when it does not fit in the row,
-   * so show the full text in a tooltip.
-   */
-  const withTooltip = (trigger: React.ReactElement) =>
-    typeof children === 'string' ? <Tooltip label={children}>{trigger}</Tooltip> : trigger;
-
   if (relationOpenMode === 'newTab') {
-    return withTooltip(
+    return (
       <StyledRelationLink to={fullPageUrl} target="_blank" rel="noopener noreferrer">
         {children}
       </StyledRelationLink>
@@ -814,10 +806,10 @@ const RelationModalTrigger = ({
   }
 
   if (relationOpenMode === 'page') {
-    return withTooltip(<StyledRelationLink to={fullPageUrl}>{children}</StyledRelationLink>);
+    return <StyledRelationLink to={fullPageUrl}>{children}</StyledRelationLink>;
   }
 
-  return withTooltip(
+  return (
     <StyledTextButton
       onClick={() =>
         dispatch({

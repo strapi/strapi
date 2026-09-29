@@ -227,7 +227,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           attribute.target === props.attribute.target
       ).length > 0;
 
-    const { data, isLoading, isFetching } = useGetRelationsQuery(
+    const { data, isLoading, isFetching, refetch } = useGetRelationsQuery(
       {
         model,
         targetField,
@@ -245,24 +245,22 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       }
     );
 
-    /**
-     * The relations cache is shared by every instance of this field that targets the same
-     * document (e.g. the edit view and the same document opened again inside the relation modal)
-     * and it accumulates the pages that have been loaded. When another instance mounts it requests
-     * page 1, which resets that cache. Keep our page counter aligned with the cache, otherwise
-     * "Load More" would request page N + 1 on top of page 1 and the pages in between would never
-     * be loaded.
-     */
-    const loadedPage = data?.pagination?.page;
-
-    React.useEffect(() => {
-      if (loadedPage) {
-        setCurrentPage(loadedPage);
-      }
-    }, [loadedPage]);
-
     const handleLoadMore = () => {
-      setCurrentPage((prev) => prev + 1);
+      /**
+       * The relations cache is shared by every instance of this field that targets the same
+       * document (e.g. the edit view and the same document opened again inside the relation
+       * modal), and another instance mounting resets it to page 1. Request the page that follows
+       * the one actually held by the cache rather than `currentPage + 1`, otherwise the pages in
+       * between would never be loaded.
+       */
+      const nextPage = (data?.pagination?.page ?? currentPage) + 1;
+
+      if (nextPage === currentPage) {
+        // Our query args already point at that page, so changing state would not fetch it
+        refetch();
+      } else {
+        setCurrentPage(nextPage);
+      }
     };
 
     const field = useField<RelationsFormValue>(props.name);
