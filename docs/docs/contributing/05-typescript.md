@@ -69,8 +69,9 @@ for full UIDs such as `strapi.service('plugin::greetings.greeting')`, for plugin
 as `strapi.plugin('greetings').service('greeting')`, and for API lookups such as
 `strapi.api('item').service('item')`. Policy lookups follow the same rules: `strapi.policy(name)`
 takes a full name such as `plugin::greetings.isOwner`, `strapi.plugin('greetings').policy('isOwner')`
-a name relative to the plugin, as at runtime. A registered policy resolves to a policy that
-receives its config contract, like `strapi.policies`. Dynamic names, such as a `string` variable or
+and `strapi.api('item').policy('isOwner')` a name relative to the plugin or API, as at runtime.
+A registered policy resolves to a policy that receives its config contract, like
+`strapi.policies`. Dynamic names, such as a `string` variable or
 a template literal type like `` `plugin::${string}.greeting` ``, cannot be validated and resolve to
 `unknown` too. Register a contract for the name, or pass an explicit generic argument. Every lookup
 form accepts one, and it takes precedence over the registries, with or without the switch:
@@ -83,8 +84,8 @@ const sameItems = strapi.api('item').controller<ItemsController>('item');
 const isOwner = strapi.policy<Core.PolicyHandler>('global::isOwner');
 ```
 
-Other modules, such as `strapi.admin`, keep the legacy `service` and `controller` lookups. Use
-full UIDs, as in `strapi.service('admin::auth')`, to resolve their contracts.
+Other modules, such as `strapi.admin`, keep the legacy `service`, `controller`, and `policy`
+lookups. Use full UIDs, as in `strapi.service('admin::auth')`, to resolve their contracts.
 
 With the switch on, a type annotation on the result does not replace the type argument:
 `const greeting: GreetingService = strapi.plugin('greetings').service('greeting')` is an error.
@@ -121,13 +122,15 @@ possibility. Defaults do not replace `null`.
 Without `Settings.strict: true`, service, controller, config, and policy lookups keep their
 previous types, even if the program loads package contracts or application overrides:
 `strapi.policy(name)` returns `Core.Policy`, and `strapi.plugin(name).policy` stays untyped.
-Editors can still suggest registered names.
+`strapi.api(name).policy(name)`, which had no type before, returns `Core.Policy` too. Editors can
+still suggest registered names.
 
 Editors list registered names with either switch setting:
 
 - plugins and APIs with registered contracts, in `strapi.plugin(name)` and `strapi.api(name)`
 - full UIDs, in `strapi.service(uid)`, `strapi.controller(uid)`, and `strapi.policy(name)`
 - service and controller names, in `strapi.plugin(name)` and `strapi.api(name)` lookups
+- policy names, in `strapi.api(name).policy(name)`
 - config namespaces, and plugin config keys
 - policy names in typed routes, including relative names for the router's namespace
 

@@ -154,6 +154,9 @@ declare global {
       interface AppControllers {
         'api::strict-fixture.items': { find: Core.ControllerHandler };
       }
+      interface AppPolicies {
+        'api::strict-fixture.isOwner': { field: string };
+      }
     }
   }
 }
@@ -213,3 +216,19 @@ app.api('unregistered').controller<{ list: Core.ControllerHandler }>('items')
 // @ts-expect-error A type annotation on the result does not replace the type argument.
 const contextualApiService: { greet(): string } = app.api('strict-fixture').service('unregistered');
 contextualApiService satisfies unknown;
+
+// API module policy lookups resolve relative names, like plugin lookups.
+const apiPolicy = app.api('strict-fixture').policy('isOwner');
+const explicitApiPolicy = app.api('strict-fixture').policy<FixturePolicy>('unregistered');
+declare const apiPolicyChecks: [
+  Expect<Equal<typeof apiPolicy, Core.Policy<{ field: string }>>>,
+  Expect<Equal<typeof explicitApiPolicy, FixturePolicy>>,
+];
+apiPolicyChecks satisfies unknown;
+exactlyUnknown(app.api('strict-fixture').policy('unregistered')) satisfies true;
+exactlyUnknown(app.api('strict-fixture').policy('api::strict-fixture.isOwner')) satisfies true;
+exactlyUnknown(app.api('strict-fixture').policy(dynamicName)) satisfies true;
+exactlyUnknown(app.api(dynamicName).policy('isOwner')) satisfies true;
+// @ts-expect-error A type annotation on the result does not replace the type argument.
+const contextualApiPolicy: FixturePolicy = app.api('strict-fixture').policy('unregistered');
+contextualApiPolicy satisfies unknown;
