@@ -46,8 +46,8 @@ pluginSendMetadata = true;
     { name: 'plugin::content-manager.hasPermissions', config: { hasAtLeastOne: 'yes' } },
   ],
 }) satisfies Core.RouteConfigFor;
-const explicitFullUidService = app.service<{ greet(): string }>('plugin::i18n.unregistered');
-explicitFullUidService.greet() satisfies string;
+// @ts-expect-error Full UID lookups take no type argument without the switch, as on develop.
+app.service<{ greet(): string }>('plugin::i18n.unregistered');
 
 // Plural accessors keep the legacy records without the switch, including `undefined` under
 // `noUncheckedIndexedAccess` for registered keys.

@@ -171,10 +171,11 @@ type Controller = { custom: Core.ControllerHandler<string> };
 const service = strapi.plugin('legacy').service<Service>('example');
 const explicitController = strapi.plugin('legacy').controller<Controller>('example');
 service.custom() satisfies string;
-// Full UID lookups accept the explicit generic too; without it they keep the legacy types.
-strapi.service<Service>('plugin::unregistered.example').custom() satisfies string;
-strapi.controller<Controller>('plugin::unregistered.example')
-  .custom satisfies Core.ControllerHandler<string>;
+// Full UID lookups keep develop's non-generic signatures.
+// @ts-expect-error Root lookups take no type argument, as on develop.
+strapi.service<Service>('plugin::unregistered.example');
+// @ts-expect-error Root lookups take no type argument, as on develop.
+strapi.controller<Controller>('plugin::unregistered.example');
 const fullUidService = strapi.service('plugin::unregistered.example');
 const fullUidController = strapi.controller('plugin::unregistered.example');
 declare const fullUidChecks: [
@@ -219,8 +220,8 @@ declare const dynamicName: string;
 const registeredPolicy = strapi.policy('plugin::legacy.hasRole');
 const unregisteredPolicy = strapi.policy('global::unregistered');
 const dynamicPolicy = strapi.policy(dynamicName);
-const explicitPolicy = strapi.policy<Core.PolicyHandler>('global::unregistered');
-const explicitConfigPolicy = strapi.policy<Core.Policy<{ role: string }>>('global::unregistered');
+// @ts-expect-error Root lookups take no type argument, as on develop.
+strapi.policy<Core.PolicyHandler>('global::unregistered');
 const pluginPolicy = strapi.plugin('legacy').policy('hasRole');
 const apiService = strapi.api('legacy').service('example');
 const apiController = strapi.api('legacy').controller('example');
@@ -230,8 +231,6 @@ declare const policyAndApiChecks: [
   Expect<Equal<typeof registeredPolicy, Core.Policy>>,
   Expect<Equal<typeof unregisteredPolicy, Core.Policy>>,
   Expect<Equal<typeof dynamicPolicy, Core.Policy>>,
-  Expect<Equal<typeof explicitPolicy, Core.PolicyHandler>>,
-  Expect<Equal<typeof explicitConfigPolicy, Core.Policy<{ role: string }>>>,
   Expect<Equal<Core.Plugin<'legacy'>['policy'], any>>,
   Expect<Equal<typeof pluginPolicy, any>>,
   Expect<Equal<typeof apiService, Core.Service>>,
