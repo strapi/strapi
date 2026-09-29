@@ -28,6 +28,7 @@ declare global {
       }
       interface PackagePolicies {
         'plugin::legacy.hasRole': { role: string };
+        'api::legacy.hasRole': { apiRole: string };
       }
       interface AppPolicies {
         'plugin::legacy.hasRole': { roles: string[] };
@@ -239,3 +240,20 @@ declare const policyAndApiChecks: [
   Expect<Equal<typeof contextualApiService, Service>>,
 ];
 policyAndApiChecks satisfies unknown;
+
+// API module policy lookups, which develop lacks, return the legacy `Policy`, like `strapi.policy`.
+const apiPolicy = strapi.api('legacy').policy('hasRole');
+const unregisteredApiPolicy = strapi.api('legacy').policy('unregistered');
+const dynamicApiPolicy = strapi.api(dynamicName).policy(dynamicName);
+const explicitApiPolicy = strapi.api('legacy').policy<Core.Policy<{ role: string }>>('hasRole');
+const adminPolicy = strapi.admin.policy('unregistered');
+declare const apiPolicyChecks: [
+  Expect<Equal<typeof apiPolicy, Core.Policy>>,
+  Expect<Equal<typeof unregisteredApiPolicy, Core.Policy>>,
+  Expect<Equal<typeof dynamicApiPolicy, Core.Policy>>,
+  Expect<Equal<typeof explicitApiPolicy, Core.Policy<{ role: string }>>>,
+  Expect<Equal<typeof adminPolicy, Core.Policy>>,
+  // Plugins keep the `any` of their index signature.
+  Expect<Equal<Core.Plugin<'legacy'>['policy'], any>>,
+];
+apiPolicyChecks satisfies unknown;
