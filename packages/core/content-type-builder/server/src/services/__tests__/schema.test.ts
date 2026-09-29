@@ -1299,6 +1299,24 @@ describe('Content Type Builder - Schema service', () => {
       expect(builderServiceMock.writeFiles).toHaveBeenCalledTimes(1);
     });
 
+    it('accepts renaming a legacy status attribute and forwards the rename hop', async () => {
+      seedContentType();
+      (global.strapi as any).contentTypes['api::article.article'].attributes.status = {
+        type: 'string',
+      };
+
+      await renameAttribute('api::article.article', 'status', 'state');
+
+      expect(migrationBuilderMock.addRenameAttribute).toHaveBeenCalledWith('api::article.article', {
+        oldName: 'status',
+        newName: 'state',
+        newAttribute: { type: 'string' },
+      });
+      const editArg = jest.mocked(builderServiceMock.editContentType).mock.calls[0][0] as any;
+      expect(editArg.attributes).toHaveProperty('state');
+      expect(editArg.attributes).not.toHaveProperty('status');
+    });
+
     it('refuses to rename when renameMigrations is never, before touching the schema', async () => {
       renameMode = 'never';
       seedContentType();

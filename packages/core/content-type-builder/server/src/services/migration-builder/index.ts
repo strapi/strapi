@@ -3,8 +3,6 @@ import path from 'node:path';
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
-import { isReservedAttributeName } from '../builder';
-
 /**
  * The CTB-level attribute definition of the *new* side of a rename hop (the
  * `properties` the admin sends for `newName`). Only the storage-relevant keys
@@ -476,7 +474,12 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
    */
   const isRenamableAttribute = (uid: string, name: string): boolean => {
     const schemaAttribute = schemaAttributeOf(uid, name);
-    if (schemaAttribute?.configurable === false || isReservedAttributeName(name)) {
+    // Same rule as payload validation applies to a hop's old name: `status` is
+    // only reserved with draft and publish, and a legacy field may carry it.
+    if (
+      schemaAttribute?.configurable === false ||
+      contentTypesUtils.isReservedAttributeName(name, { draftAndPublish: false })
+    ) {
       return false;
     }
 

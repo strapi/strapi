@@ -1612,3 +1612,66 @@ describe('Content Type Builder - rename:field service', () => {
     expect(strapi.contentTypes[CLI_UID].attributes).toHaveProperty('heading');
   });
 });
+
+describe('Content Type Builder - legacy status field rename', () => {
+  // `status` is reserved with draft and publish, so the route refuses to create
+  // it; a hand-written or v4-era schema can still carry it.
+  const STATUS_UID = 'api::status-rename.status-rename';
+  const statusBuilder = createTestBuilder();
+
+  beforeAll(async () => {
+    await statusBuilder
+      .addContentType({
+        displayName: 'Status Rename',
+        singularName: 'status-rename',
+        pluralName: 'status-renames',
+        draftAndPublish: false,
+        attributes: {
+          title: { type: 'string' },
+          status: { type: 'string' },
+        },
+      })
+      .build();
+
+    strapi = await createStrapiInstance();
+    rq = await createAuthRequest({ strapi });
+
+    await strapi.db.query(STATUS_UID).create({
+      data: { documentId: 'status-rename-doc', title: 'Hello', status: 'active' },
+    });
+  });
+
+  afterAll(async () => {
+    await strapi.destroy();
+    await statusBuilder.cleanup();
+  });
+
+  test('renaming status away while enabling draft and publish keeps its data', async () => {
+    const res = await updateSchema({
+      contentTypes: [
+        {
+          action: 'update',
+          uid: STATUS_UID,
+          displayName: 'Status Rename',
+          draftAndPublish: true,
+          renames: [{ oldName: 'status', newName: 'state' }],
+          attributes: [
+            { action: 'update', name: 'title', properties: { type: 'string' } },
+            { action: 'update', name: 'state', properties: { type: 'string' } },
+          ],
+        },
+      ],
+      components: [],
+    });
+    expect(res.statusCode).toBe(200);
+
+    await restart();
+
+    expect(strapi.contentTypes[STATUS_UID].options.draftAndPublish).toBe(true);
+    expect(strapi.contentTypes[STATUS_UID].attributes).not.toHaveProperty('status');
+
+    const rows = await strapi.db.query(STATUS_UID).findMany({ select: ['title', 'state'] });
+    expect(rows.length).toBeGreaterThan(0);
+    rows.forEach((row) => expect(row).toMatchObject({ title: 'Hello', state: 'active' }));
+  });
+});

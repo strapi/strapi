@@ -1027,6 +1027,24 @@ describe('MigrationBuilder', () => {
       }
     );
 
+    // `status` is only reserved with draft and publish: a legacy field may carry
+    // the name, and validation accepts it as the old name of a hop.
+    it('renames a legacy status attribute', () => {
+      const strapi = createStrapiMock({
+        metas: {
+          'api::author.author': {
+            tableName: 'authors',
+            attributes: { status: { type: 'string', columnName: 'status' } },
+          },
+        },
+      });
+      const builder = createMigrationBuilder({ strapi });
+      builder.addRenameAttribute('api::author.author', { oldName: 'status', newName: 'state' });
+
+      expect(builder.getUnsupported()).toEqual([]);
+      expect(columnRenamesOf(builder)).toEqual([['status', 'state']]);
+    });
+
     it('refuses an attribute that is in the metadata but not in the schema', () => {
       const strapi = createStrapiMock({ metas: systemMeta, schema: systemSchema });
       (strapi.contentTypes['api::article.article'].attributes as any).title = undefined;
