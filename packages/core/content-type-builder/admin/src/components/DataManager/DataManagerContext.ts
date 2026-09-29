@@ -22,6 +22,8 @@ export interface DataManagerContextValue {
     name: string;
     recordRename?: boolean;
     declineRename?: boolean;
+    recordTargetRename?: boolean;
+    declineTargetRename?: boolean;
   }) => void;
   moveAttribute: (opts: {
     forTarget: Struct.ModelType;

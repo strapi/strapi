@@ -20,6 +20,7 @@ import type { ContentType } from '../../../types';
 import type { AttributeRenameMigrationMode } from '../RenameMigrationModal';
 
 const UID = 'api::article.article';
+const TAG_UID = 'api::tag.tag';
 
 const articleSchema = {
   uid: UID,
@@ -37,12 +38,46 @@ const articleSchema = {
   ],
 };
 
-const mockSchema = (mode: AttributeRenameMigrationMode) => {
+// `article.tags` <-> `tag.articles`, only served to the counterpart tests.
+const articleWithTagsSchema = {
+  ...articleSchema,
+  attributes: [
+    ...articleSchema.attributes,
+    {
+      name: 'tags',
+      type: 'relation',
+      relation: 'manyToMany',
+      target: TAG_UID,
+      targetAttribute: 'articles',
+    },
+  ],
+};
+
+const tagSchema = {
+  ...articleSchema,
+  uid: TAG_UID,
+  modelName: 'tag',
+  globalId: 'Tag',
+  info: { displayName: 'Tag', singularName: 'tag', pluralName: 'tags' },
+  attributes: [
+    {
+      name: 'articles',
+      type: 'relation',
+      relation: 'manyToMany',
+      target: UID,
+      targetAttribute: 'tags',
+    },
+  ],
+};
+
+const mockSchema = (mode: AttributeRenameMigrationMode, withRelation = false) => {
   server.use(
     http.get('/content-type-builder/schema', () =>
       HttpResponse.json({
         data: {
-          contentTypes: { [UID]: articleSchema },
+          contentTypes: withRelation
+            ? { [UID]: articleWithTagsSchema, [TAG_UID]: tagSchema }
+            : { [UID]: articleSchema },
           components: {},
           settings: { renameMigrations: { attributes: mode } },
         },
@@ -58,15 +93,18 @@ const mockSchema = (mode: AttributeRenameMigrationMode) => {
  * Drives the provider the way FormModal and the AI chat do: each click on
  * "rename" performs the next hop through `confirmAttributeRenameMigration`
  * and applies the decision with `editAttribute` (one submit per render, like
- * the form); "apply" sends a whole-type change through `applyChange`; "add"
+ * the form); with `fromCounterpart` the hop renames the article's field from
+ * the tag's relation form (its `targetAttribute`); "apply" sends a whole-type change through `applyChange`; "add"
  * creates `newAttribute` as an unsaved (NEW) field with `addAttribute`.
  */
 const Harness = ({
   hops,
+  fromCounterpart = false,
   change,
   newAttribute,
 }: {
   hops: Array<{ oldName: string; newName: string }>;
+  fromCounterpart?: boolean;
   change?: Partial<ContentType>;
   newAttribute?: Record<string, unknown>;
 }) => {
@@ -93,6 +131,18 @@ const Harness = ({
     });
     setLog((previous) => [...previous, `${hop.oldName}->${hop.newName}:${decision}`]);
     if (decision === null) {
+      return;
+    }
+    if (fromCounterpart) {
+      const relation = contentTypes[TAG_UID].attributes.find((attr) => attr.name === 'articles');
+      editAttribute({
+        forTarget: 'contentType',
+        targetUid: TAG_UID,
+        name: 'articles',
+        attributeToSet: { ...relation, targetAttribute: hop.newName },
+        recordTargetRename: decision,
+        declineTargetRename: !decision,
+      });
       return;
     }
     const attribute = contentTypes[UID].attributes.find((attr) => attr.name === hop.oldName);
@@ -155,7 +205,7 @@ const StateSpy = () => {
 };
 
 const setup = (mode: AttributeRenameMigrationMode, props: React.ComponentProps<typeof Harness>) => {
-  mockSchema(mode);
+  mockSchema(mode, props.fromCounterpart);
   latestState = undefined;
 
   const base = defaultTestStoreConfig();
@@ -300,6 +350,33 @@ describe('CTB | DataManagerProvider | rename consent', () => {
       await screen.findByText('title->tmp:null');
       expect(article()?.renames).toBeUndefined();
       expect(article()?.declinedRenameNames).toBeUndefined();
+    });
+  });
+
+  describe('prompt-after-edit: counterpart renames', () => {
+    it('prompts for the target type and inherits consent along its chain', async () => {
+      const { user } = setup('prompt-after-edit', {
+        fromCounterpart: true,
+        hops: [
+          { oldName: 'tags', newName: 'tmp' },
+          { oldName: 'tmp', newName: 'labels' },
+        ],
+      });
+      await screen.findByRole('button', { name: 'rename' });
+
+      await user.click(screen.getByRole('button', { name: 'rename' }));
+      await user.click(await screen.findByRole('button', { name: 'Preserve data' }));
+      await screen.findByText('tags->tmp:true');
+
+      await user.click(screen.getByRole('button', { name: 'rename' }));
+      await screen.findByText('tmp->labels:true');
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+      expect(article()?.renames).toEqual([
+        { oldName: 'tags', newName: 'tmp' },
+        { oldName: 'tmp', newName: 'labels' },
+      ]);
+      expect(latestState?.current.contentTypes[TAG_UID]?.renames).toBeUndefined();
     });
   });
 

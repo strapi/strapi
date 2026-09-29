@@ -54,9 +54,12 @@ export const describeAttributeStorage = (attribute: AttributeFormData): string =
  * cannot be replayed as a data-preserving migration, so the field is dropped
  * and recreated empty — the user should be warned before saving.
  *
+ * For a relation, renaming the other side (`targetAttribute`) counts as well:
+ * the warning then names that field.
+ *
  * Returns `null` when there is nothing to warn about: rename migrations are
- * disabled, the field is brand new (no data yet), the name did not change, or
- * the storage is unchanged.
+ * disabled, the field is brand new (no data yet), no name changed, or the
+ * storage is unchanged.
  */
 export const getRenameStorageChange = (
   initial: AttributeFormData,
@@ -67,11 +70,18 @@ export const getRenameStorageChange = (
     return null;
   }
 
-  const oldName = initial.name;
-  const newName = modified.name;
-  if (!oldName || !newName || oldName === newName) {
+  const isRenamed = (oldName: unknown, newName: unknown) =>
+    Boolean(oldName) && Boolean(newName) && oldName !== newName;
+
+  const renamed = [
+    [initial.name, modified.name],
+    ...(initial.type === 'relation' ? [[initial.targetAttribute, modified.targetAttribute]] : []),
+  ].find(([oldName, newName]) => isRenamed(oldName, newName));
+  if (!renamed) {
     return null;
   }
+
+  const [oldName, newName] = renamed as [string, string];
 
   if (
     isStorageCompatibleRename(

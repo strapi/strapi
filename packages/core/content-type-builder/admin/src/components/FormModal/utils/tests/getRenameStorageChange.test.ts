@@ -44,6 +44,51 @@ describe('CTB | FormModal | getRenameStorageChange', () => {
     ).toBeNull();
   });
 
+  describe('counterpart rename (other side of a relation)', () => {
+    const relation = {
+      name: 'articles',
+      type: 'relation',
+      relation: 'manyToMany',
+      target: 'api::article.article',
+      targetAttribute: 'tags',
+      status: 'UNCHANGED' as const,
+    };
+
+    it('returns null when only the counterpart name changes', () => {
+      expect(
+        getRenameStorageChange(relation, { ...relation, targetAttribute: 'labels' }, 'always')
+      ).toBeNull();
+    });
+
+    it('names the counterpart when the relation kind or target changes too', () => {
+      expect(
+        getRenameStorageChange(
+          relation,
+          { ...relation, targetAttribute: 'labels', relation: 'oneToMany' },
+          'always'
+        )
+      ).toEqual({
+        oldName: 'tags',
+        newName: 'labels',
+        oldType: 'relation (manyToMany to api::article.article)',
+        newType: 'relation (oneToMany to api::article.article)',
+      });
+      expect(
+        getRenameStorageChange(
+          relation,
+          { ...relation, targetAttribute: 'labels', target: 'api::page.page' },
+          'always'
+        )
+      ).toMatchObject({ oldName: 'tags', newName: 'labels' });
+    });
+
+    it('returns null when the relation becomes one-way (no counterpart left)', () => {
+      expect(
+        getRenameStorageChange(relation, { ...relation, targetAttribute: null }, 'always')
+      ).toBeNull();
+    });
+  });
+
   it('describes a relation kind change with a rename', () => {
     const relation = {
       name: 'tags',

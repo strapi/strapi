@@ -198,6 +198,12 @@ type RenameConsentPayload = {
    * later hops of the same chain are declined without another prompt.
    */
   declineRename?: boolean;
+  /**
+   * Same pair for the other side of a bidirectional relation, when the edit
+   * renames it on the target type.
+   */
+  recordTargetRename?: boolean;
+  declineTargetRename?: boolean;
 };
 
 type EditAttributePayload = RenameConsentPayload & {
@@ -828,8 +834,16 @@ const slice = createUndoRedoSlice(
         attr.components = updatedComponents;
       },
       editAttribute: (state, action: PayloadAction<EditAttributePayload>) => {
-        const { name, attributeToSet, forTarget, targetUid, recordRename, declineRename } =
-          action.payload;
+        const {
+          name,
+          attributeToSet,
+          forTarget,
+          targetUid,
+          recordRename,
+          declineRename,
+          recordTargetRename,
+          declineTargetRename,
+        } = action.payload;
 
         const type = getType(state, { forTarget, targetUid });
 
@@ -903,6 +917,15 @@ const slice = createUndoRedoSlice(
 
           // create or recreate(at old index) targetAttribute
           if (previousTargetAttributeIndex !== -1 && previousTarget.uid === newTarget.uid) {
+            // The counterpart is renamed on the target type: without a hop
+            // there, the side owning the join table would lose its links.
+            if (previousTargetAttribute) {
+              applyRenameConsent(newTarget, previousTargetAttribute, newTargetAttribute, {
+                recordRename: recordTargetRename,
+                declineRename: declineTargetRename,
+              });
+            }
+
             // re-create at previousIdx if possible
             replaceAttributeAt(newTarget, previousTargetAttributeIndex, newTargetAttribute);
           } else {

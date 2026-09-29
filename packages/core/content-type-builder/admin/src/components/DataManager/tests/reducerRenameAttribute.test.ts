@@ -279,4 +279,135 @@ describe('CTB | DataManager | reducer | rename tracking (EDIT_ATTRIBUTE)', () =>
       expect(getDeclined(state)).toEqual(['color', 'shade']);
     });
   });
+
+  describe('counterpart renames (other side of a bidirectional relation)', () => {
+    const tagUid = 'api::tag.tag';
+    // `article.tags` owns the join table, `tag.articles` is the inverse side.
+    const tags = {
+      name: 'tags',
+      type: 'relation',
+      relation: 'manyToMany',
+      target: tagUid,
+      targetAttribute: 'articles',
+    };
+    const articles = {
+      name: 'articles',
+      type: 'relation',
+      relation: 'manyToMany',
+      target: uid,
+      targetAttribute: 'tags',
+    };
+
+    const withRelation = (status: 'UNCHANGED' | 'NEW' = 'UNCHANGED') =>
+      init({
+        contentTypes: {
+          [uid]: initCT('article', { attributes: [{ ...tags, status } as AnyAttribute] }),
+          [tagUid]: initCT('tag', { attributes: [{ ...articles, status } as AnyAttribute] }),
+          'api::label.label': initCT('label', { attributes: [] }),
+        },
+      });
+
+    const edit = (
+      targetUid: string,
+      attribute: Record<string, unknown>,
+      attributeToSet: Record<string, unknown>,
+      consent: Record<string, boolean> = {}
+    ) =>
+      actions.editAttribute({
+        attributeToSet: { ...attribute, ...attributeToSet } as AnyAttribute,
+        forTarget: 'contentType',
+        targetUid: targetUid as Internal.UID.ContentType,
+        name: attribute.name as string,
+        ...consent,
+      });
+
+    it('records the hop on the owning type when renamed from the inverse side', () => {
+      const state = reducer(withRelation(), edit(tagUid, articles, { targetAttribute: 'labels' }));
+
+      expect(getRenames(state, uid)).toEqual([{ oldName: 'tags', newName: 'labels' }]);
+      expect(getRenames(state, tagUid)).toBeUndefined();
+      expect(getAttr(state, uid, 'labels')).toMatchObject({ targetAttribute: 'articles' });
+    });
+
+    it('records the hop on the inverse type when renamed from the owning side', () => {
+      const state = reducer(withRelation(), edit(uid, tags, { targetAttribute: 'posts' }));
+
+      expect(getRenames(state, tagUid)).toEqual([{ oldName: 'articles', newName: 'posts' }]);
+      expect(getRenames(state, uid)).toBeUndefined();
+    });
+
+    it('does not record a hop when the counterpart is NEW', () => {
+      const state = reducer(
+        withRelation('NEW'),
+        edit(tagUid, articles, { targetAttribute: 'labels' })
+      );
+
+      expect(getRenames(state, uid)).toBeUndefined();
+    });
+
+    it('does not record a hop when the relation kind or target changes', () => {
+      const kind = reducer(
+        withRelation(),
+        edit(tagUid, articles, { targetAttribute: 'labels', relation: 'oneToMany' })
+      );
+      expect(getRenames(kind, uid)).toBeUndefined();
+
+      const target = reducer(
+        withRelation(),
+        edit(tagUid, articles, { targetAttribute: 'labels', target: 'api::label.label' })
+      );
+      expect(getRenames(target, uid)).toBeUndefined();
+      expect(getRenames(target, 'api::label.label')).toBeUndefined();
+    });
+
+    it('remembers a declined counterpart rename on the target type', () => {
+      const state = reducer(
+        withRelation(),
+        edit(tagUid, articles, { targetAttribute: 'labels' }, { declineTargetRename: true })
+      );
+
+      expect(getRenames(state, uid)).toBeUndefined();
+      expect(state.current.contentTypes[uid].declinedRenameNames).toEqual(['tags', 'labels']);
+      expect(state.current.contentTypes[tagUid].declinedRenameNames).toBeUndefined();
+    });
+
+    it('records one hop on each type when the field and its counterpart are renamed', () => {
+      const state = reducer(
+        withRelation(),
+        edit(tagUid, articles, { name: 'posts', targetAttribute: 'labels' })
+      );
+
+      expect(getRenames(state, tagUid)).toEqual([{ oldName: 'articles', newName: 'posts' }]);
+      expect(getRenames(state, uid)).toEqual([{ oldName: 'tags', newName: 'labels' }]);
+    });
+
+    it('records both hops on a self-referencing type, own rename first', () => {
+      const parent = {
+        name: 'parent',
+        type: 'relation',
+        relation: 'manyToOne',
+        target: uid,
+        targetAttribute: 'children',
+      };
+      const children = {
+        name: 'children',
+        type: 'relation',
+        relation: 'oneToMany',
+        target: uid,
+        targetAttribute: 'parent',
+      };
+      const state = reducer(
+        buildState([
+          { ...parent, status: 'UNCHANGED' } as AnyAttribute,
+          { ...children, status: 'UNCHANGED' } as AnyAttribute,
+        ]),
+        edit(uid, parent, { name: 'owner', targetAttribute: 'items' })
+      );
+
+      expect(getRenames(state, uid)).toEqual([
+        { oldName: 'parent', newName: 'owner' },
+        { oldName: 'children', newName: 'items' },
+      ]);
+    });
+  });
 });

@@ -608,6 +608,38 @@ export const FormModal = () => {
         declineRename = !decision;
       }
 
+      // Renaming the other side of a relation from this form renames a field
+      // of the target type, which may own the join table: ask for that one
+      // too, after the field's own prompt.
+      const oldTargetAttribute = toStringValue(initialData.targetAttribute);
+      const newTargetAttribute = toStringValue(modifiedData.targetAttribute);
+      let recordTargetRename = !skipRenameMigration;
+      let declineTargetRename = false;
+      if (
+        !skipRenameMigration &&
+        actionType === 'edit' &&
+        isCreatingAttribute &&
+        attributeType === 'relation' &&
+        oldTargetAttribute !== '' &&
+        newTargetAttribute !== '' &&
+        oldTargetAttribute !== newTargetAttribute &&
+        toStringValue(initialData.target) === toStringValue(modifiedData.target)
+      ) {
+        const decision = await confirmAttributeRenameMigration({
+          forTarget: 'contentType',
+          uid: toStringValue(modifiedData.target) as Internal.UID.ContentType,
+          oldName: oldTargetAttribute,
+          newName: newTargetAttribute,
+        });
+
+        if (decision === null) {
+          return;
+        }
+
+        recordTargetRename = decision;
+        declineTargetRename = !decision;
+      }
+
       dispatch(
         actions.setErrors({
           errors: {},
@@ -815,6 +847,8 @@ export const FormModal = () => {
               name: toStringValue(initialData.name),
               recordRename,
               declineRename,
+              recordTargetRename,
+              declineTargetRename,
             });
           }
 
