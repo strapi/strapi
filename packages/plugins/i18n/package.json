@@ -58,8 +58,7 @@
     "test:ts:front": "run -T tsc -p admin/tsconfig.json",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "run -T rollup -c -w",
-    "test:ts:back": "run -T tsc -p server/tsconfig.json"
+    "watch": "run -T rollup -c -w"
   },
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
