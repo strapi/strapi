@@ -5,7 +5,7 @@ const ARTICLE_UID = 'api::article.article';
 const CATEGORY_UID = 'api::category.category';
 
 const expectedQuery = (documentId: string, locale: string, status = 'draft') => ({
-  select: ['id', 'documentId', 'locale', 'publishedAt'],
+  select: ['id', 'documentId', 'publishedAt', 'locale'],
   where: {
     documentId: { $in: [documentId] },
     locale,
@@ -100,7 +100,7 @@ describe('Extract document ids from relation data', () => {
     await idMap.load();
 
     expect(findProducts).toHaveBeenCalledWith({
-      select: ['id', 'documentId', 'locale', 'publishedAt'],
+      select: ['id', 'documentId', 'publishedAt'],
       where: {
         documentId: { $in: [documentId] },
         publishedAt: null,

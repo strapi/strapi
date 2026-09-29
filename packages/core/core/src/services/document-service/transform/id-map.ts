@@ -92,13 +92,15 @@ const createIdMap = ({ strapi }: { strapi: Core.Strapi }): IdMap => {
         Object.values(idsByUidAndLocale),
         async ({ uid, locale, documentIds, status }: any) => {
           const findParams = {
-            select: ['id', 'documentId', 'locale', 'publishedAt'],
+            select: ['id', 'documentId', 'publishedAt'],
             where: {
               documentId: { $in: documentIds },
             },
           } as any;
 
+          // Without a localization provider, the model has no `locale` column
           if (isLocalizedContentType(uid)) {
+            findParams.select.push('locale');
             findParams.where.locale = locale || null;
           }
 
