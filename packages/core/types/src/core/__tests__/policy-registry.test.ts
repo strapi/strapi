@@ -1,4 +1,5 @@
 import type { ControllerHandler } from '../controller';
+import type { Module } from '../module';
 import type { Plugin } from '../plugin';
 import type { Policy, PolicyHandler } from '../policy';
 import type { RouteConfigFor, RouteInput } from '../route';
@@ -227,3 +228,31 @@ const contextual: LabPolicy = strapi.policy('global::unregistered');
 const pluginContextual: LabPolicy = strapi.plugin('policy-lab').policy('unregistered');
 contextual satisfies unknown;
 pluginContextual satisfies unknown;
+
+// API module lookups resolve relative names, i.e. `api::<api>.<name>`, like plugin lookups.
+const apiHasRole = strapi.api('policy-lab').policy('hasRole');
+const apiUnregistered = strapi.api('policy-lab').policy('unregistered');
+const apiFullName = strapi.api('policy-lab').policy('api::policy-lab.hasRole');
+const apiDynamic = strapi.api('policy-lab').policy(dynamicName);
+const dynamicApi = strapi.api(dynamicName).policy('hasRole');
+const unregisteredApi = strapi.api('unregistered').policy('hasRole');
+const apiExplicit = strapi.api('policy-lab').policy<LabPolicy>('unregistered');
+const apiExplicitRegistered = strapi.api('policy-lab').policy<LabPolicy>('hasRole');
+// Modules other than APIs, such as `strapi.admin`, keep the legacy policy.
+const adminModulePolicy = strapi.admin.policy('policyLab');
+declare const apiLookupChecks: [
+  Expect<Equal<typeof apiHasRole, Policy<{ apiRole: string }>>>,
+  Expect<Equal<typeof apiHasRole, Module<'api::policy-lab'>['policies']['hasRole']>>,
+  Expect<Equal<typeof apiUnregistered, unknown>>,
+  Expect<Equal<typeof apiFullName, unknown>>,
+  Expect<Equal<typeof apiDynamic, unknown>>,
+  Expect<Equal<typeof dynamicApi, unknown>>,
+  Expect<Equal<typeof unregisteredApi, unknown>>,
+  Expect<Equal<typeof apiExplicit, LabPolicy>>,
+  Expect<Equal<typeof apiExplicitRegistered, LabPolicy>>,
+  Expect<Equal<typeof adminModulePolicy, Policy>>,
+];
+apiLookupChecks satisfies unknown;
+// @ts-expect-error `T` is not inferred from the annotation, for API lookups either.
+const apiContextual: LabPolicy = strapi.api('policy-lab').policy('unregistered');
+apiContextual satisfies unknown;

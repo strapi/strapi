@@ -172,7 +172,7 @@ type PluginConfigGetter<TName extends string> = IsStrict extends false
 
 export type Plugin<TName extends string = string> = Omit<
   Module<`plugin::${TName}`>,
-  'routes' | 'service' | 'config' | 'controller'
+  'routes' | 'service' | 'config' | 'controller' | 'policy'
 > & {
   routes: Route[] | Record<string, Router>;
   service<

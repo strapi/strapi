@@ -66,9 +66,9 @@ export type ModulePolicyMap<TNamespace extends string> = IsStrict extends false
     >;
 
 /**
- * Whether the module's `service` and `controller` lookups resolve registered contracts: API modules,
- * e.g. `strapi.api(name)`, with strict types enabled. Other modules, such as `strapi.admin`, keep the
- * legacy lookups.
+ * Whether the module's `service`, `controller` and `policy` lookups resolve registered contracts:
+ * API modules, e.g. `strapi.api(name)`, with strict types enabled. Other modules, such as
+ * `strapi.admin`, keep the legacy lookups.
  */
 type IsClosedModule<TNamespace extends string> = IsStrict extends false
   ? false
@@ -122,9 +122,24 @@ type ModuleControllerLookup<TNamespace extends string, TName, T> =
       >;
 
 /**
+ * Return type of `module.policy<T>(name)`: `T` unless the module is closed. A registered name resolves
+ * to a policy that receives its config contract, like the `policies` map.
+ */
+type ModulePolicyLookup<TNamespace extends string, TName, T> =
+  IsClosedModule<TNamespace> extends false
+    ? T
+    : ClosedModuleLookup<
+        RegisteredPolicyName,
+        TNamespace,
+        TName,
+        T,
+        Policy<PolicyConfigFor<Extract<`${TNamespace}.${TName & string}`, RegisteredPolicyName>>>
+      >;
+
+/**
  * A loaded module. `TNamespace` is its runtime namespace, e.g. `plugin::i18n` or `api::article`:
  * a literal namespace types the `services`, `controllers` and `policies` maps from the registries,
- * and the `service` and `controller` lookups of API modules with strict types enabled.
+ * and the `service`, `controller` and `policy` lookups of API modules with strict types enabled.
  */
 export interface Module<TNamespace extends string = string> {
   bootstrap: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
@@ -169,6 +184,25 @@ export interface Module<TNamespace extends string = string> {
   >(
     name: TName
   ): ModuleServiceLookup<TNamespace, TName, T>;
+  /**
+   * Resolves the registered policy of the relative name `name`, i.e. `<namespace>.<name>` as at
+   * runtime, which receives its config contract, in an API module with strict types enabled. An
+   * explicit type argument (`policy<MyPolicy>(name)`) wins over the registries. Otherwise, returns
+   * the legacy `Policy`. Registered policy names of the module are listed for completion.
+   */
+  policy<
+    // Any policy, whatever its config, for legacy lookups, as in `strapi.policy`.
+    T extends ModuleLookupDefault<TNamespace, Policy<never>> = ModuleLookupDefault<
+      TNamespace,
+      Policy
+    >,
+    TName extends ModuleLookupName<RegisteredPolicyName, TNamespace> = ModuleLookupName<
+      RegisteredPolicyName,
+      TNamespace
+    >,
+  >(
+    name: TName
+  ): ModulePolicyLookup<TNamespace, TName, T>;
 }
 
 /** The API name of an `api::<api>.<name>` UID. */
