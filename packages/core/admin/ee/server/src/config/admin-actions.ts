@@ -26,5 +26,13 @@ export default {
       category: 'audit logs',
       subCategory: 'options',
     },
+    {
+      uid: 'audit-logs.export',
+      displayName: 'Export',
+      pluginName: 'admin',
+      section: 'settings',
+      category: 'audit logs',
+      subCategory: 'options',
+    },
   ],
 };

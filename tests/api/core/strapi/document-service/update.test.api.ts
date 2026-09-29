@@ -36,6 +36,11 @@ const resources = {
               },
             },
           },
+          images: {
+            type: 'component',
+            component: 'mixed-content.mixed-content-nested-media-leaf',
+            repeatable: true,
+          },
         },
       },
     },
@@ -206,6 +211,47 @@ describe('Document Service', () => {
         localizedText: 'Original Text',
         sharedText: 'Shared Content',
       });
+    });
+
+    it('Links media by documentId inside a repeatable component', async () => {
+      const MIXED_CONTENT_UID = 'api::mixed-content.mixed-content';
+      const uploadedFile = await strapi.db.query('plugin::upload.file').create({
+        data: {
+          name: 'thumbnail.jpg',
+          alternativeText: 'thumbnail',
+          caption: 'thumbnail',
+          folderPath: '/',
+          hash: 'thumbnail_hash',
+          ext: '.jpg',
+          mime: 'image/jpeg',
+          size: 1,
+          provider: 'local',
+          url: '/uploads/thumbnail.jpg',
+          publishedAt: new Date(),
+        },
+      });
+      const originalDoc = await strapi.documents(MIXED_CONTENT_UID).create({
+        data: {
+          localizedText: 'Original Text',
+        },
+      });
+
+      const updatedDoc = await strapi.documents(MIXED_CONTENT_UID).update({
+        documentId: originalDoc.documentId,
+        data: {
+          images: [{ media: uploadedFile.documentId }],
+        },
+        populate: ['images.media'],
+      });
+
+      expect(updatedDoc.images).toEqual([
+        expect.objectContaining({
+          media: expect.objectContaining({
+            id: uploadedFile.id,
+            documentId: uploadedFile.documentId,
+          }),
+        }),
+      ]);
     });
 
     it('Preserves non-localized media fields when creating a new locale', async () => {

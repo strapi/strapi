@@ -116,7 +116,7 @@ const resolveBaseConfig = async (ctx: BuildContext) => {
             configFile: ctx.tsconfig.path,
             configOverwrite: {
               compilerOptions: {
-                sourceMap: ctx.options.sourcemaps,
+                sourceMap: ctx.options.sourcemap,
               },
             },
           },
@@ -191,7 +191,7 @@ const resolveProductionConfig = async (ctx: BuildContext): Promise<Configuration
     stats: 'errors-only',
     mode: 'production',
     bail: true,
-    devtool: ctx.options.sourcemaps ? 'source-map' : false,
+    devtool: ctx.options.sourcemap ? 'source-map' : false,
     output: {
       path: ctx.distPath,
       publicPath: `${ctx.basePath.replace(/\/$/, '')}/`,

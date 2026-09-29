@@ -1,4 +1,4 @@
-import { transformChatToCTB } from '../toCTB';
+import { transformAttributesFromChatToCTB, transformChatToCTB } from '../toCTB';
 
 import type { ContentType, Component } from '../../../../../../types';
 import type { Schema } from '../../../types/schema';
@@ -44,6 +44,78 @@ describe('transformChatToCTB', () => {
       const result = transformChatToCTB(schema) as ContentType;
 
       expect(result).toMatchObject({ options: { draftAndPublish: true } });
+    });
+  });
+
+  describe('private search default', () => {
+    it.each([
+      {
+        action: 'create' as const,
+        oldSchema: undefined,
+        status: 'NEW' as const,
+      },
+      {
+        action: 'update' as const,
+        oldSchema: {
+          ...(transformChatToCTB(makeSchema()) as ContentType),
+          status: 'UNCHANGED',
+          attributes: [{ name: 'secret', type: 'text', status: 'UNCHANGED' }],
+        } satisfies ContentType,
+        status: 'CHANGED' as const,
+      },
+    ])(
+      'defaults private searchable scalar attributes during AI $action transforms',
+      ({ action, oldSchema, status }) => {
+        const attributes = transformAttributesFromChatToCTB(
+          makeSchema({
+            action,
+            attributes: { secret: { type: 'text', private: true } },
+          }),
+          oldSchema
+        );
+
+        expect(attributes).toEqual([
+          {
+            name: 'secret',
+            type: 'text',
+            private: true,
+            searchable: false,
+            status,
+          },
+        ]);
+      }
+    );
+
+    it.each([true, false])('preserves explicit searchable: %s from AI', (searchable) => {
+      const attributes = transformAttributesFromChatToCTB(
+        makeSchema({
+          attributes: { secret: { type: 'text', private: true, searchable } },
+        })
+      );
+
+      expect(attributes[0]).toMatchObject({ private: true, searchable });
+    });
+
+    it.each([
+      ['json', { type: 'json' }],
+      [
+        'relation',
+        {
+          type: 'relation',
+          relation: 'oneWay',
+          target: 'api::category.category',
+        },
+      ],
+    ] as const)('does not add searchable to private AI-created %s attributes', (_type, data) => {
+      const attributes = transformAttributesFromChatToCTB(
+        makeSchema({
+          attributes: {
+            secret: { ...data, private: true } as Schema['attributes'][string],
+          },
+        })
+      );
+
+      expect(attributes[0]).not.toHaveProperty('searchable');
     });
   });
 

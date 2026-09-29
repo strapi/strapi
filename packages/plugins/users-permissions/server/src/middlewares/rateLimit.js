@@ -46,7 +46,7 @@ const routeUsesEmailIdentifier = (requestPath) => {
  * `/api/auth/local/` share one bucket.
  */
 const normalizeRequestPathForRateLimit = (requestPath) => {
-  const normalized = path.normalize(requestPath);
+  const normalized = path.posix.normalize(requestPath);
   const lower = toLower(normalized);
   return lower.replace(/\/+$/, '') || '/';
 };

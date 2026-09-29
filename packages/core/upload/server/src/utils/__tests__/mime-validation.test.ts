@@ -269,6 +269,40 @@ describe('mime-validation', () => {
       expect(result.detectedMime).toBe('application/pdf');
     });
 
+    it('stores video/quicktime for a .mov declared as application/octet-stream when detection finds nothing (#23788)', async () => {
+      mockFileRead(Buffer.from('unknown binary'));
+      mockFileTypeFromBuffer.mockResolvedValue(undefined);
+
+      const movFile = {
+        name: 'sample_960x400_ocean_with_audio.mov',
+        path: '/tmp/sample.mov',
+        size: 100000,
+        mimetype: 'application/octet-stream',
+      };
+
+      const result = await validateFile(movFile, {}, mockStrapi);
+
+      expect(result.isValid).toBe(true);
+      expect(result.detectedMime).toBe('video/quicktime');
+    });
+
+    it('allows a .mov declared as application/octet-stream when video/* is in the allow list (#23788)', async () => {
+      mockFileRead(Buffer.from('unknown binary'));
+      mockFileTypeFromBuffer.mockResolvedValue(undefined);
+
+      const movFile = {
+        name: 'clip.mov',
+        path: '/tmp/clip.mov',
+        size: 100000,
+        mimetype: 'application/octet-stream',
+      };
+
+      const result = await validateFile(movFile, { allowedTypes: ['video/*'] }, mockStrapi);
+
+      expect(result.isValid).toBe(true);
+      expect(result.detectedMime).toBe('video/quicktime');
+    });
+
     it('should validate MIME type successfully', async () => {
       mockFileRead(Buffer.from('fake image'));
       mockFileTypeFromBuffer.mockResolvedValue({ mime: 'image/jpeg', ext: 'jpg' });

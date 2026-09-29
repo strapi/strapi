@@ -1,3 +1,5 @@
+import type { Core } from '@strapi/types';
+
 import type upload from '../services/upload';
 import type imageManipulation from '../services/image-manipulation';
 import type apiUploadFolder from '../services/api-upload-folder';
@@ -9,6 +11,7 @@ import type metrics from '../services/metrics';
 import type extensions from '../services/extensions';
 import type { createAIMetadataService } from '../services/ai-metadata';
 import type { createAIMetadataJobsService } from '../services/ai-metadata-jobs';
+import type { createAIMetadataProviderService } from '../services/ai-metadata-provider';
 
 type Services = {
   upload: ReturnType<typeof upload>;
@@ -22,8 +25,12 @@ type Services = {
   extensions: typeof extensions;
   aiMetadata: ReturnType<typeof createAIMetadataService>;
   aiMetadataJobs: ReturnType<typeof createAIMetadataJobsService>;
+  aiMetadataProvider: ReturnType<typeof createAIMetadataProviderService>;
 };
 
-export const getService = <TName extends keyof Services>(name: TName): Services[TName] => {
-  return strapi.plugin('upload').service<Services[TName]>(name);
+export const getService = <TName extends keyof Services>(
+  name: TName,
+  strapiInstance: Core.Strapi = strapi
+): Services[TName] => {
+  return strapiInstance.plugin('upload').service<Services[TName]>(name);
 };

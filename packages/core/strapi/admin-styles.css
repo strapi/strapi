@@ -1,0 +1,5 @@
+/**
+ * The entry the generated admin stylesheet imports. It ships in `@strapi/strapi`, so an application
+ * needs no Tailwind entry and no design system entry of its own
+ */
+@import '@strapi/design-system/next/source.css';

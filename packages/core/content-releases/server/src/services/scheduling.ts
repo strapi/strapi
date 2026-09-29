@@ -4,6 +4,7 @@ import { errors } from '@strapi/utils';
 import { Release } from '../../../shared/contracts/releases';
 import { getService } from '../utils';
 import { RELEASE_MODEL_UID } from '../constants';
+import { runAsSystem } from '../audit-logs';
 
 const createSchedulingService = ({ strapi }: { strapi: Core.Strapi }) => {
   const scheduledJobs = new Map<Release['id'], string>();
@@ -22,18 +23,23 @@ const createSchedulingService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       const taskName = `publishRelease_${id}`;
 
+      // Cancel first: strapi.cron.remove(name) stops every job with that name,
+      // and Croner also rejects duplicate names if the scheduler assigns them.
+      if (scheduledJobs.has(id)) {
+        this.cancel(id);
+      }
+
       strapi.cron.add({
         [taskName]: {
           async task() {
-            await getService('release', { strapi }).publish(releaseId);
+            const releaseService = getService('release', { strapi });
+
+            // The system context attributes this run and its entry.publish/unpublish events to the scheduler.
+            await runAsSystem({ strapi }, 'scheduler', () => releaseService.publish(releaseId));
           },
           options: scheduleDate,
         },
       });
-
-      if (scheduledJobs.has(id)) {
-        this.cancel(id);
-      }
 
       scheduledJobs.set(id, taskName);
 

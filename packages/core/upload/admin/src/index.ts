@@ -2,16 +2,17 @@ import { Images } from '@strapi/icons';
 
 import pluginPkg from '../../package.json';
 
-import { MediaLibraryDialog } from './components/MediaLibraryDialog/MediaLibraryDialog';
-import { MediaLibraryInput } from './components/MediaLibraryInput/MediaLibraryInput';
+import { UploadProgressDialog } from './components/UploadProgressDialog';
 import { PERMISSIONS } from './constants';
-import { UploadProgressDialog } from './future/components/UploadProgressDialog';
-import { uploadProgressReducer } from './future/store/uploadProgress';
+import { MediaLibraryDialog } from './legacy/components/MediaLibraryDialog/MediaLibraryDialog';
+import { MediaLibraryInput } from './legacy/components/MediaLibraryInput/MediaLibraryInput';
+import { prefixPluginTranslations } from './legacy/utils/prefixPluginTranslations';
 import { pluginId } from './pluginId';
-import { getTrad, prefixPluginTranslations } from './utils';
+import { uploadProgressReducer } from './store/uploadProgress';
+import { getTranslationKey } from './utils/translations';
 
-import type { MediaLibraryDialogProps } from './components/MediaLibraryDialog/MediaLibraryDialog';
-import type { MediaLibraryInputProps } from './components/MediaLibraryInput/MediaLibraryInput';
+import type { MediaLibraryDialogProps } from './legacy/components/MediaLibraryDialog/MediaLibraryDialog';
+import type { MediaLibraryInputProps } from './legacy/components/MediaLibraryInput/MediaLibraryInput';
 import type { StrapiApp } from '@strapi/admin/strapi-admin';
 import type { Plugin } from '@strapi/types';
 
@@ -20,11 +21,12 @@ const name = pluginPkg.strapi.name;
 const admin: Plugin.Config.AdminInput = {
   register(app: StrapiApp) {
     /**
-     * The beta Media Library owns `plugins/upload` outright when the flag is on:
-     * the legacy app is not registered at all, so there is exactly one Media
-     * Library entry in the menu and no route to rename at GA.
+     * Whichever Media Library is selected owns `plugins/upload` outright: the other is
+     * not registered at all, so there is exactly one Media Library entry in the menu.
+     *
+     * The new one is the default; `useLegacyMediaLibrary` opts back out.
      */
-    const isBetaMediaLibrary = window.strapi.future.isEnabled('betaMediaLibrary');
+    const isLegacyMediaLibrary = window.strapi.featureFlags.isEnabled('useLegacyMediaLibrary');
 
     app.addMenuLink({
       to: `plugins/${pluginId}`,
@@ -34,19 +36,19 @@ const admin: Plugin.Config.AdminInput = {
         defaultMessage: 'Media Library',
       },
       permissions: PERMISSIONS.main,
-      Component: isBetaMediaLibrary
+      Component: isLegacyMediaLibrary
         ? () => {
-            return import('./future/App').then((mod) => ({
-              default: mod.BetaMediaLibrary,
-            }));
+            return import('./legacy/pages/App/App').then((mod) => ({ default: mod.Upload }));
           }
         : () => {
-            return import('./pages/App/App').then((mod) => ({ default: mod.Upload }));
+            return import('./App').then((mod) => ({
+              default: mod.MediaLibrary,
+            }));
           },
       position: 4,
     });
 
-    if (isBetaMediaLibrary) {
+    if (!isLegacyMediaLibrary) {
       app.addReducers({ uploadProgress: uploadProgressReducer });
 
       app.addComponents([
@@ -61,7 +63,7 @@ const admin: Plugin.Config.AdminInput = {
       id: 'media-library-settings',
       to: 'media-library',
       intlLabel: {
-        id: getTrad('plugin.name'),
+        id: getTranslationKey('plugin.name'),
         defaultMessage: 'Media Library',
       },
       Component() {
