@@ -27,7 +27,8 @@ application relies on: mocks, `@ts-expect-error` lines, annotations, and `Parame
 extraction. They compile with the generated application tsconfig, with `strict` off and on, with
 empty registries and with provider contracts loaded. Their expected errors are develop's, so they
 must also compile against develop. `*.isolated.ts` fixtures augment registries for the whole
-program, so each gets its own.
+program, so each gets its own. Fixtures starting with `// @parity-settings: strict` expect diagnostics
+that only the `strict` compiler option reports, so they compile with it only.
 
 The fixtures assign inferred lookup results to constants before checking them with `satisfies`.
 This prevents contextual inference from making a permissive generic lookup look correctly typed.
