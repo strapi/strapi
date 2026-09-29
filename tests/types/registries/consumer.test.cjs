@@ -467,6 +467,11 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
     );
     assertClean(program, `${resolution}, compilerOptions.types activation`);
   });
+
+  test(`${resolution}: strict registries without contracts accept template UIDs`, () => {
+    const program = compile(['strict-empty.ts'], { types: ['@strapi/types/strict'] });
+    assertClean(program, `${resolution}, strict registries without contracts`);
+  });
 }
 
 // Strict-off parity fixtures (`parity-<surface>.ts`) compile against develop too: their expected
