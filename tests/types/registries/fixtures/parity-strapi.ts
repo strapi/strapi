@@ -141,3 +141,9 @@ export { wrongPlugin, wrongApi, checks, getPlugin, getPolicy };
 export { pluginLookup, apiLookup, serviceLookup, policyLookup };
 export { services, controllers, policies, plugins, apis, oneService, oneOptional, oneHandler };
 export { pluginEntry, apiEntry, adminModule };
+
+// Template expressions match the UID patterns, with or without registered contracts.
+declare const templateName: string;
+app.service(`api::${templateName}.${templateName}`);
+app.controller(`admin::${templateName}`);
+app.controller(`plugin::${templateName}.${templateName}`);

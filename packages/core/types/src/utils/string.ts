@@ -217,6 +217,8 @@ export type LiteralUnion<T extends U, U = string> = T | (U & NonNullable<unknown
  * declare function service<TName extends SuggestedString<'locales' | 'iso-locales'>>(name: TName): void;
  * service(''); // editors list 'locales' and 'iso-locales'
  */
-export type SuggestedString<T extends string, TBase extends string = string> =
-  | T
-  | (TBase & Record<never, never>);
+export type SuggestedString<T extends string, TBase extends string = string> = [T] extends [never]
+  ? // Without literals to list, the intersection would only stop a template expression argument
+    // (`` `api::${name}.x` ``) from matching a template literal `TBase`.
+    TBase
+  : T | (TBase & Record<never, never>);
