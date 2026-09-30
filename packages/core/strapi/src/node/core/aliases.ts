@@ -26,6 +26,18 @@ const devAliases: Record<string, string> = {
   '@strapi/review-workflows/strapi-admin': './packages/core/review-workflows/admin/src',
 };
 
+/**
+ * The Enterprise sources of `@strapi/admin`. They sit beside the `admin/src` the alias names, and
+ * the production build compiles both into one `dist/admin`
+ */
+const eeAdminSource = './packages/core/admin/ee/admin/src';
+
+const getMonorepoEeAdminSource = ({
+  monorepo,
+}: {
+  monorepo?: StrapiMonorepo;
+}): string | undefined => (monorepo?.path ? path.join(monorepo.path, eeAdminSource) : undefined);
+
 const getMonorepoAliases = ({ monorepo }: { monorepo?: StrapiMonorepo }) => {
   if (!monorepo?.path) {
     return {};
@@ -38,4 +50,4 @@ const getMonorepoAliases = ({ monorepo }: { monorepo?: StrapiMonorepo }) => {
   );
 };
 
-export { getMonorepoAliases };
+export { getMonorepoAliases, getMonorepoEeAdminSource };
