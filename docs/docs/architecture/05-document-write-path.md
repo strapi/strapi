@@ -179,6 +179,6 @@ When a webhook is created or updated, the webhook store rejects events that are 
 
 - [Extension points](./04-extension-points.md)
 - [Container and registries](./03-container-and-registries.md)
-- [Glossary](./09-glossary.md)
+- [Glossary](./11-glossary.md)
 - [`@strapi/core` package](../packages/core/core/index.md)
 - [`@strapi/database` package](../packages/core/database/index.md)

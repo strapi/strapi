@@ -151,5 +151,5 @@ The content-types registry also checks that each key equals the schema `info.sin
 
 - [Server lifecycle](./02-server-lifecycle.md)
 - [Extension points](./04-extension-points.md)
-- [Glossary](./09-glossary.md)
+- [Glossary](./11-glossary.md)
 - [`@strapi/core` package](../packages/core/core/index.md)

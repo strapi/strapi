@@ -27,7 +27,7 @@ Strapi is a Yarn workspaces and Nx monorepo. The workspace packages are in `pack
 | Provider packages | `packages/providers/*`                                                                                                                          | Implementations for the email and upload plugins, for example `upload-aws-s3` or `email-sendgrid`.                                                                                                                    |
 
 :::caution
-The word "provider" has two meanings. `packages/providers/*` are email and upload implementations. `packages/core/core/src/providers/` are internal lifecycle units of the server runtime. Read the [glossary](./09-glossary.md) for other naming traps.
+The word "provider" has two meanings. `packages/providers/*` are email and upload implementations. `packages/core/core/src/providers/` are internal lifecycle units of the server runtime. Read the [glossary](./11-glossary.md) for other naming traps.
 :::
 
 ## Server and admin split
@@ -67,10 +67,10 @@ Read [Container and registries](./03-container-and-registries.md) for details.
 | [Container and registries](./03-container-and-registries.md) | Container rules, registries, namespaces and UIDs.                |
 | [Extension points](./04-extension-points.md)                 | How plugins and applications extend Strapi.                      |
 | [Document write path](./05-document-write-path.md)           | What happens when code creates, updates or publishes a document. |
-| [Authentication](./06-authentication.md)                     | Sessions and JWT.                                                |
-| [Enterprise Edition](./07-enterprise-edition.md)             | How Enterprise features are gated.                               |
-| [Future flags](./08-future-flags.md)                         | Opt-in features.                                                 |
-| [Glossary](./09-glossary.md)                                 | Terms and naming traps.                                          |
+| [Authentication](./08-authentication.md)                     | Sessions and JWT.                                                |
+| [Enterprise Edition](./09-enterprise-edition.md)             | How Enterprise features are gated.                               |
+| [Future flags](./10-future-flags.md)                         | Opt-in features.                                                 |
+| [Glossary](./11-glossary.md)                                 | Terms and naming traps.                                          |
 
 ## Reading tracks
 
@@ -80,7 +80,7 @@ Read [Container and registries](./03-container-and-registries.md) for details.
 2. [Server lifecycle](./02-server-lifecycle.md)
 3. [Container and registries](./03-container-and-registries.md)
 4. [Document write path](./05-document-write-path.md)
-5. [Glossary](./09-glossary.md)
+5. [Glossary](./11-glossary.md)
 6. The [`@strapi/core`](../packages/core/core/index.md) and [`@strapi/database`](../packages/core/database/index.md) package pages.
 
 ### New admin contributor
@@ -88,9 +88,9 @@ Read [Container and registries](./03-container-and-registries.md) for details.
 1. This page, mainly [Server and admin split](#server-and-admin-split).
 2. [Package map](./01-package-map.mdx)
 3. The [`@strapi/admin`](../packages/core/admin/index.md) package page.
-4. [Authentication](./06-authentication.md)
-5. [Enterprise Edition](./07-enterprise-edition.md)
-6. [Glossary](./09-glossary.md)
+4. [Authentication](./08-authentication.md)
+5. [Enterprise Edition](./09-enterprise-edition.md)
+6. [Glossary](./11-glossary.md)
 
 ### Plugin author-contributor
 
@@ -99,7 +99,7 @@ Read [Container and registries](./03-container-and-registries.md) for details.
 3. [Extension points](./04-extension-points.md)
 4. [Container and registries](./03-container-and-registries.md)
 5. [Document write path](./05-document-write-path.md), for document middlewares and events.
-6. [Glossary](./09-glossary.md)
+6. [Glossary](./11-glossary.md)
 
 ## Code map
 
