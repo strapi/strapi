@@ -14,10 +14,6 @@ const { ApplicationError, ForbiddenError } = errors;
 const pickUserCreationAttributes = pick(['firstname', 'lastname', 'email', 'roles']);
 
 const hasAdminSeatsAvaialble = async () => {
-  if (!strapi.EE) {
-    return true;
-  }
-
   const permittedSeats = strapi.ee.seats as any;
   if (isNil(permittedSeats)) {
     return true;
@@ -82,6 +78,10 @@ export default {
     }
 
     const user = await getService('user').findOne(id, null);
+
+    if (user === null) {
+      return ctx.notFound('User does not exist');
+    }
 
     if (!(await hasAdminSeatsAvaialble()) && !user.isActive && data.isActive) {
       throw new ForbiddenError('License seat limit reached. You cannot active this user');

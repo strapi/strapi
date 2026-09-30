@@ -21,13 +21,26 @@ describe('EE user service audit events', () => {
   const setup = ({
     updated = previous,
     deleted = previous,
-  }: { updated?: Record<string, unknown>; deleted?: Record<string, unknown> } = {}) => {
-    const findOne = jest.fn(() => Promise.resolve(previous));
+    found = previous,
+    superAdminCount = 2,
+    seats,
+    disabledUsers = null,
+  }: {
+    updated?: Record<string, unknown> | null;
+    deleted?: Record<string, unknown>;
+    found?: Record<string, unknown> | null;
+    superAdminCount?: number;
+    seats?: number;
+    disabledUsers?: Array<{ id: number; isActive: boolean }> | null;
+  } = {}) => {
+    const findOne = jest.fn(() => Promise.resolve(found));
     const update = jest.fn(() => Promise.resolve(updated));
     const del = jest.fn(() => Promise.resolve(deleted));
     const count = jest.fn(() => Promise.resolve(0));
+    const getDisabledUserList = jest.fn(() => Promise.resolve(disabledUsers));
 
     global.strapi = {
+      ee: { seats },
       eventHub: { emit: jest.fn() },
       db: { query: () => ({ findOne, update, delete: del, count }) },
       store: { set: jest.fn() },
@@ -36,15 +49,17 @@ describe('EE user service audit events', () => {
         services: {
           auth: { hashPassword: jest.fn(() => Promise.resolve('hash')) },
           role: {
-            getSuperAdminWithUsersCount: jest.fn(() => Promise.resolve({ id: 9, usersCount: 2 })),
+            getSuperAdminWithUsersCount: jest.fn(() =>
+              Promise.resolve({ id: 9, usersCount: superAdminCount })
+            ),
           },
-          'seat-enforcement': { getDisabledUserList: jest.fn(() => Promise.resolve(null)) },
+          'seat-enforcement': { getDisabledUserList },
         },
       },
     } as any;
     jest.mocked(emitAudit).mockClear();
 
-    return { findOne, update, del };
+    return { findOne, update, del, getDisabledUserList };
   };
 
   const auditActions = () => jest.mocked(emitAudit).mock.calls.map((call) => call[1]);
@@ -117,4 +132,73 @@ describe('EE user service audit events', () => {
       expect.objectContaining({ users: expect.any(Array) })
     );
   });
+
+  describe('seat bookkeeping', () => {
+    const disabledUsers = [
+      { id: 1, isActive: true },
+      { id: 3, isActive: true },
+    ];
+
+    test('leaves the disabled users list alone without a seat limit', async () => {
+      const { getDisabledUserList } = setup({ disabledUsers });
+
+      await updateById(1, { isActive: false });
+      await deleteById(1);
+      await deleteByIds([1]);
+
+      expect(getDisabledUserList).not.toHaveBeenCalled();
+      expect(global.strapi.store.set).not.toHaveBeenCalled();
+    });
+
+    test('removes a deleted user from the disabled users list with a seat limit', async () => {
+      setup({ seats: 5, disabledUsers });
+
+      await deleteById(1);
+
+      expect(global.strapi.store.set).toHaveBeenCalledWith({
+        type: 'ee',
+        key: 'disabled_users',
+        value: [{ id: 3, isActive: true }],
+      });
+    });
+
+    test('removes deleted users from the disabled users list with a seat limit', async () => {
+      setup({ seats: 5, disabledUsers });
+
+      await deleteByIds([1, 3]);
+
+      expect(global.strapi.store.set).toHaveBeenCalledWith({
+        type: 'ee',
+        key: 'disabled_users',
+        value: [],
+      });
+    });
+
+    test.each([
+      ['an update', { isActive: false }],
+      ['a password update', { isActive: false, password: 'Secret1234' }],
+    ])(
+      'removes a listed user whose isActive changes in %s with a seat limit',
+      async (_label, attributes) => {
+        setup({ seats: 5, disabledUsers });
+
+        await updateById(1, attributes);
+
+        expect(global.strapi.store.set).toHaveBeenCalledWith({
+          type: 'ee',
+          key: 'disabled_users',
+          value: [{ id: 3, isActive: true }],
+        });
+      }
+    );
+  });
+
+  test.each([{ isActive: false }, { roles: ['2'] }])(
+    'updateById resolves to null for an unknown user with one super admin (%o)',
+    async (attributes) => {
+      setup({ found: null, updated: null, superAdminCount: 1 });
+
+      await expect(updateById(99, attributes)).resolves.toBeNull();
+    }
+  );
 });
