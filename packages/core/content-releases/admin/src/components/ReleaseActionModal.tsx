@@ -243,8 +243,12 @@ const ReleaseActionModalForm: DocumentActionComponent = ({
     edit: { options },
   } = useDocumentLayout(model);
 
-  // Project is not EE or contentType does not have draftAndPublish enabled
-  if (!window.strapi.isEE || !options?.draftAndPublish || !canCreateAction) {
+  // The license lacks releases or contentType does not have draftAndPublish enabled
+  if (
+    window.strapi.features.isEnabled('cms-content-releases') === false ||
+    !options?.draftAndPublish ||
+    !canCreateAction
+  ) {
     return null;
   }
 

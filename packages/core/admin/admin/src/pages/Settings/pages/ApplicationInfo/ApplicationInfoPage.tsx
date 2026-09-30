@@ -48,7 +48,7 @@ const ApplicationInfoPage = () => {
         )
       ).AdminSeatInfoEE
   );
-  const isAiEnabled = window.strapi.ai?.enabled !== false;
+  const isAiEnabled = window.strapi.ai?.enabled === true;
   const AIUsageData = useEnterprise(
     AIUageDataCE,
     async () =>

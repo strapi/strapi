@@ -2,6 +2,8 @@ import { unstable_useDocumentLayout as useDocumentLayout } from '@strapi/content
 import { Flex } from '@strapi/design-system';
 import { useParams } from 'react-router-dom';
 
+import { FEATURE_ID } from '../../../../../constants';
+
 import { AssigneeSelect } from './AssigneeSelect';
 import { StageSelect } from './StageSelect';
 
@@ -21,7 +23,7 @@ const Header = () => {
   } = useDocumentLayout(slug);
 
   if (
-    !window.strapi.isEE ||
+    window.strapi.features.isEnabled(FEATURE_ID) === false ||
     !options?.reviewWorkflows ||
     (collectionType !== 'single-types' && !id) ||
     id === 'create'
