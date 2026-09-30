@@ -1,8 +1,5 @@
 {
-  "extends": "tsconfig/base.json",
-  "compilerOptions": {
-    "types": ["node", "jest"]
-  },
+  "extends": "tsconfig/server.json",
   "include": ["src", "vitest.config.ts"],
   "exclude": ["**/__tests__/**"]
 }

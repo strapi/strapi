@@ -171,6 +171,8 @@ jobs:
         run: yarn nx affected --target=test:ts:back --nx-ignore-cycles
       - name: TSC for front
         run: yarn nx affected --target=test:ts:front --nx-ignore-cycles
+      - name: Published registry contracts
+        run: yarn test:types:registries
 
   unit_back:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true'

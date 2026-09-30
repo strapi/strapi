@@ -115,7 +115,8 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
 
               const permissionChecker = getContentManagerService('permission-checker').create({
                 userAbility: params.state.userAbility,
-                model: options.attribute.target,
+                // Morph relations are excluded above, so the relation has a target.
+                model: (options.attribute as Schema.Attribute.RelationWithTarget).target,
               });
 
               const response = await serviceUtils.buildRelationReponse(

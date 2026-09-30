@@ -5,6 +5,7 @@ import { getService } from '../utils';
 import { expiresInToSeconds } from './token';
 import { AUDITED_EVENTS, toAdminUserEvent } from '../audit-logs/admin-users';
 import type { AdminUser } from '../../../shared/contracts/shared';
+import type { EmailService } from '../types/plugin-services';
 import '@strapi/types';
 
 const { ApplicationError } = errors;
@@ -150,7 +151,7 @@ const forgotPassword = async ({ email } = {} as { email: string }) => {
 
   return strapi
     .plugin('email')
-    .service('email')
+    .service<EmailService>('email')
     .sendTemplatedEmail(
       {
         to: user.email,

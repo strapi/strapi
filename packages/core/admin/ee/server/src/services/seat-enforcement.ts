@@ -7,8 +7,15 @@ const { SUPER_ADMIN_CODE } = constants;
 /**
  * Keeps the list of users disabled by the seat enforcement service
  */
+/** A user disabled by the license limit, with its `isActive` value before it was disabled. */
+type DisabledUser = { id: number; isActive: boolean };
+
 const getDisabledUserList = async () => {
-  return strapi.store.get({ type: 'ee', key: 'disabled_users' });
+  // The store is untyped: `disableUsersAboveLicenseLimit` writes this shape.
+  return (await strapi.store.get({ type: 'ee', key: 'disabled_users' })) as
+    | DisabledUser[]
+    | null
+    | undefined;
 };
 
 const enableMaximumUserCount = async (numberOfUsersToEnable: number) => {

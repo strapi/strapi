@@ -8,7 +8,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
   strapiOperator: '$not',
 
-  add(t: Nexus.blocks.ObjectDefinitionBlock<string>, type: string) {
+  add(t: Nexus.blocks.InputDefinitionBlock<string>, type: string) {
     const { naming, attributes } = strapi.plugin('graphql').service('utils');
 
     if (attributes.isGraphQLScalar({ type })) {

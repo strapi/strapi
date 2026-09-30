@@ -1,3 +1,4 @@
+import type { UID } from '@strapi/types';
 import { isArray, getOr, prop } from 'lodash/fp';
 import { getService } from '../../utils';
 
@@ -116,7 +117,16 @@ const needsLocalesPatch = (properties: Record<string, unknown> = {}) => {
   return Array.isArray(locales) && locales.length === 0;
 };
 
-const normalizeRolePermissionsLocales = async (permissions: any[]): Promise<any[]> => {
+type LocalePermission = {
+  action: string;
+  subject?: string | null;
+  properties?: Record<string, unknown>;
+  [key: string]: unknown;
+};
+
+const normalizeRolePermissionsLocales = async (
+  permissions: LocalePermission[]
+): Promise<LocalePermission[]> => {
   const { isLocalizedContentType } = getService('content-types');
   const { actionProvider } = strapi.service('admin::permission');
   const defaultLocale = await getService('locales').getDefaultLocale();
@@ -129,7 +139,7 @@ const normalizeRolePermissionsLocales = async (permissions: any[]): Promise<any[
         return permission;
       }
 
-      const model = strapi.getModel(subject);
+      const model = strapi.getModel(subject as UID.ContentType);
 
       if (!model || !isLocalizedContentType(model)) {
         return permission;
@@ -164,8 +174,8 @@ const repairPermissionsForNewlyLocalizedTypes = async ({
   oldContentTypes,
   contentTypes,
 }: {
-  oldContentTypes: Record<string, any> | null | undefined;
-  contentTypes: Record<string, any>;
+  oldContentTypes: Record<string, unknown> | null | undefined;
+  contentTypes: Record<string, unknown>;
 }) => {
   if (!oldContentTypes) {
     return;

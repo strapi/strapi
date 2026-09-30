@@ -6,6 +6,14 @@ import type { Core } from '@strapi/types';
 
 export type Config = NonNullable<Parameters<KoaHelmet>[0]>;
 
+/**
+ * `plugin::graphql.utils`. GraphQL is an optional plugin that the core does not depend on, so its
+ * registered contract is not loaded here.
+ */
+type GraphQLUtilsService = {
+  playground: { isEnabled(): boolean };
+};
+
 const defaults: Config = {
   crossOriginEmbedderPolicy: false,
   crossOriginOpenerPolicy: false,
@@ -55,7 +63,7 @@ export const security: Core.MiddlewareFactory<Config> =
     };
 
     // if apollo graphql playground is enabled, add exceptions for it
-    if (strapi.plugin('graphql')?.service('utils').playground.isEnabled()) {
+    if (strapi.plugin('graphql')?.service<GraphQLUtilsService>('utils').playground.isEnabled()) {
       const { config: gqlConfig } = strapi.plugin('graphql');
       specialPaths.push(gqlConfig('endpoint'));
 

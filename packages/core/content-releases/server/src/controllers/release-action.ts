@@ -96,7 +96,10 @@ const releaseActionController = {
     ctx.query.sort = ctx.query.groupBy === 'action' ? 'type' : ctx.query.groupBy;
     delete ctx.query.groupBy;
 
-    const query = await permissionsManager.sanitizeQuery(ctx.query);
+    // TODO @Nico tighten contract: the admin permissions manager returns sanitized queries as
+    // `unknown`, and `sort` holds `type` for the `action` grouping, which `groupActions` does not type.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const query = (await permissionsManager.sanitizeQuery(ctx.query)) as Record<string, any>;
 
     const releaseActionService = getService('release-action', { strapi });
     const { results, pagination } = await releaseActionService.findPage(releaseId, {
