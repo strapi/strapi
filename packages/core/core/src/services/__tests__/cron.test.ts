@@ -1,101 +1,645 @@
 import type { Core } from '@strapi/types';
 import createCronService from '../cron';
 
+const FIXED_NOW = new Date('2026-09-14T12:34:56.000Z');
+const NEXT_MINUTE = new Date('2026-09-14T12:35:00.000Z');
+
+type CronJob = ReturnType<typeof createCronService>['jobs'][number]['job'];
+
+const advanceToNextRun = async (job: CronJob) => {
+  const nextRun = job.nextRun();
+  if (!nextRun) {
+    throw new Error('Expected the cron job to have a next run');
+  }
+
+  await jest.advanceTimersByTimeAsync(nextRun.getTime() - Date.now());
+};
+
 /**
  * These tests deliberately never assign `global.strapi`.
  *
  * The bug they guard against (#27469) is the cron service resolving the ambient
  * global `strapi` at call time: once `Strapi.destroy()` has run `delete global.strapi`,
- * a job that was still in flight rejects, `node-schedule` emits 'error', and the
- * handler throws instead of logging. Leaving the global unset reproduces that
- * exact condition.
+ * a job that was still in flight rejects and the error handler throws instead of
+ * logging. Leaving the global unset reproduces that exact condition.
  */
-const createMockStrapi = () => {
-  const error = jest.fn();
-  const strapi = { log: { error } } as unknown as Core.Strapi;
+describe('Cron service', () => {
+  let cron: ReturnType<typeof createCronService>;
+  let strapi: Core.Strapi;
 
-  return { strapi, error };
-};
+  beforeEach(() => {
+    jest.useFakeTimers({ now: FIXED_NOW });
 
-describe('Cron', () => {
-  it('logs a job failure through the injected strapi instance', () => {
-    const { strapi, error: logError } = createMockStrapi();
-    const cron = createCronService(strapi);
+    strapi = {
+      log: {
+        error: jest.fn(),
+      },
+    } as unknown as Core.Strapi;
 
-    cron.add({ myTask: { options: '* * * * * *', task: jest.fn() } });
-
-    const error = new Error('job failed');
-    expect(() => cron.jobs[0].job.emit('error', error)).not.toThrow();
-
-    expect(logError).toHaveBeenCalledWith('Cron job "myTask" failed', error);
+    cron = createCronService(strapi);
   });
 
-  it('uses the rule as the job name when the task is declared as a function', () => {
-    const { strapi, error: logError } = createMockStrapi();
-    const cron = createCronService(strapi);
+  afterEach(() => {
+    cron.destroy();
+    jest.clearAllTimers();
+    jest.useRealTimers();
+  });
 
-    cron.add({ '* * * * * *': jest.fn() });
+  it('exposes chainable lifecycle methods and named and unnamed job specs', () => {
+    const namedOptions = '0 0 * * *';
+    const unnamedOptions = '0 0 0 * * *';
 
-    const error = new Error('job failed');
-    cron.jobs[0].job.emit('error', error);
+    expect(
+      cron.add({
+        namedJob: {
+          task: jest.fn(),
+          options: namedOptions,
+        },
+        [unnamedOptions]: jest.fn(),
+      })
+    ).toBe(cron);
 
-    expect(logError).toHaveBeenCalledWith('Cron job "* * * * * *" failed', error);
+    expect(cron.jobs).toHaveLength(2);
+    expect(cron.jobs[0]).toEqual({
+      job: expect.any(Object),
+      name: 'namedJob',
+      options: namedOptions,
+    });
+    expect(cron.jobs[1]).toEqual({
+      job: expect.any(Object),
+      name: null,
+      options: unnamedOptions,
+    });
+    expect(cron.start()).toBe(cron);
+    expect(cron.stop()).toBe(cron);
+    expect(cron.remove('namedJob')).toBe(cron);
+    expect(cron.destroy()).toBe(cron);
+    expect(cron.jobs).toEqual([]);
+  });
+
+  it('does not load croner until the first task is added', () => {
+    jest.resetModules();
+
+    const loadCroner = jest.fn(() => {
+      class Cron {
+        pause = jest.fn();
+
+        resume = jest.fn();
+
+        stop = jest.fn();
+      }
+
+      return { Cron };
+    });
+
+    jest.doMock('croner', loadCroner);
+
+    jest.isolateModules(() => {
+      const createIsolatedCronService =
+        jest.requireActual<typeof import('../cron')>('../cron').default;
+      const isolatedCron = createIsolatedCronService(strapi);
+
+      expect(loadCroner).not.toHaveBeenCalled();
+
+      isolatedCron.add({ '0 0 * * *': jest.fn() });
+
+      expect(loadCroner).toHaveBeenCalledTimes(1);
+      isolatedCron.destroy();
+    });
+
+    jest.dontMock('croner');
+  });
+
+  it('schedules a slightly-future Date exactly once after start', async () => {
+    const task = jest.fn();
+
+    cron.start();
+    cron.add({
+      publishOnce: {
+        task,
+        options: NEXT_MINUTE,
+      },
+    });
+
+    expect(cron.jobs).toHaveLength(1);
+    expect(cron.jobs[0].name).toBe('publishOnce');
+
+    await advanceToNextRun(cron.jobs[0].job);
+
+    expect(task).toHaveBeenCalledTimes(1);
+    expect(task).toHaveBeenCalledWith({ strapi }, expect.any(Date));
+    expect(task.mock.calls[0][1]).toEqual(NEXT_MINUTE);
+    await jest.runOnlyPendingTimersAsync();
+    expect(task).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not run jobs added while stopped until start', async () => {
+    const task = jest.fn();
+
+    cron.add({
+      '*/1 * * * * *': task,
+    });
+
+    await jest.runOnlyPendingTimersAsync();
+    expect(task).not.toHaveBeenCalled();
+
+    cron.start();
+    await advanceToNextRun(cron.jobs[0].job);
+
+    expect(task).toHaveBeenCalledTimes(1);
+  });
+
+  it('runs jobs added after start', async () => {
+    const task = jest.fn();
+
+    cron.start();
+    cron.add({
+      runAfterStart: {
+        task,
+        options: NEXT_MINUTE,
+      },
+    });
+
+    await advanceToNextRun(cron.jobs[0].job);
+
+    expect(task).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not schedule a one-shot twice across stop and start cycles', async () => {
+    const task = jest.fn();
+
+    cron.add({
+      runOnce: {
+        task,
+        options: NEXT_MINUTE,
+      },
+    });
+
+    cron.start();
+    cron.stop();
+    cron.start();
+
+    await advanceToNextRun(cron.jobs[0].job);
+    expect(task).toHaveBeenCalledTimes(1);
+
+    cron.stop();
+    cron.start();
+
+    await jest.runOnlyPendingTimersAsync();
+    expect(task).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps a past Date job without running or throwing', async () => {
+    const task = jest.fn();
+
+    cron.start();
+
+    expect(() =>
+      cron.add({
+        missedOneShot: {
+          task,
+          options: new Date(Date.now() - 1000),
+        },
+      })
+    ).not.toThrow();
+
+    expect(cron.jobs).toHaveLength(1);
+    expect(cron.jobs[0].job.nextRun()).toBeNull();
+
+    await jest.runOnlyPendingTimersAsync();
+    expect(task).not.toHaveBeenCalled();
+  });
+
+  it('remove stops a named job', async () => {
+    const task = jest.fn();
+
+    cron.start();
+    cron.add({
+      namedJob: {
+        task,
+        options: '*/1 * * * * *',
+      },
+    });
+
+    const { job } = cron.jobs[0];
+    cron.remove('namedJob');
+
+    expect(cron.jobs).toHaveLength(0);
+    expect(job.isStopped()).toBe(true);
+
+    await jest.runOnlyPendingTimersAsync();
+    expect(task).not.toHaveBeenCalled();
+  });
+
+  it('remove ignores an unknown name', () => {
+    cron.add({
+      existingJob: {
+        task: jest.fn(),
+        options: '0 0 * * *',
+      },
+    });
+
+    expect(() => cron.remove('unknownJob')).not.toThrow();
+    expect(cron.jobs).toHaveLength(1);
+  });
+
+  it('allows duplicate façade names without throwing', () => {
+    const firstSchedule = new Date(Date.now() + 60_000);
+    const replacementSchedule = new Date(Date.now() + 120_000);
+
+    expect(() => {
+      cron.add({
+        publishRelease: {
+          task: jest.fn(),
+          options: firstSchedule,
+        },
+      });
+      cron.add({
+        publishRelease: {
+          task: jest.fn(),
+          options: replacementSchedule,
+        },
+      });
+    }).not.toThrow();
+
+    expect(cron.jobs).toHaveLength(2);
+  });
+
+  it('remove drops every job with the given name', () => {
+    cron.add({
+      publishRelease: {
+        task: jest.fn(),
+        options: new Date(Date.now() + 60_000),
+      },
+    });
+    cron.add({
+      publishRelease: {
+        task: jest.fn(),
+        options: new Date(Date.now() + 120_000),
+      },
+    });
+
+    cron.remove('publishRelease');
+
+    expect(cron.jobs).toHaveLength(0);
+  });
+
+  it('destroy clears jobs and prevents further runs', async () => {
+    const task = jest.fn();
+
+    cron.start();
+    cron.add({
+      namedJob: {
+        task,
+        options: '*/1 * * * * *',
+      },
+    });
+
+    const { job } = cron.jobs[0];
+    cron.destroy();
+
+    expect(cron.jobs).toHaveLength(0);
+    expect(job.isStopped()).toBe(true);
+
+    await jest.runOnlyPendingTimersAsync();
+    expect(task).not.toHaveBeenCalled();
+  });
+
+  it('logs errors thrown by job handlers', async () => {
+    cron.add({
+      boom: {
+        async task() {
+          throw new Error('cron-boom');
+        },
+        options: '0 0 1 1 *',
+      },
+    });
+
+    await cron.jobs[0].job.trigger();
+
+    expect(strapi.log.error).toHaveBeenCalledWith('Cron job "boom" failed', expect.any(Error));
   });
 
   // Regression test for #27469
-  it('still logs, without throwing, when a job rejects after destroy()', () => {
-    const { strapi, error: logError } = createMockStrapi();
-    const cron = createCronService(strapi);
+  it('still logs, without throwing, when an in-flight job rejects after destroy()', async () => {
+    let rejectTask: (error: Error) => void = () => {};
 
-    cron.add({ uploadWeekly: { options: '* * * * * *', task: jest.fn() } });
+    cron.add({
+      uploadWeekly: {
+        task: () =>
+          new Promise<void>((_resolve, reject) => {
+            rejectTask = reject;
+          }),
+        options: '0 0 1 1 *',
+      },
+    });
+
+    const inFlight = cron.jobs[0].job.trigger();
+
+    // Destroy cannot retract an invocation that is already running, so the
+    // rejection surfaces once teardown has completed.
+    cron.destroy();
+
+    const error = new Error('Cannot read db: connection destroyed');
+    rejectTask(error);
+
+    await expect(inFlight).resolves.toBeUndefined();
+    expect(strapi.log.error).toHaveBeenCalledWith('Cron job "uploadWeekly" failed', error);
+  });
+
+  it('accepts 5-field and 6-field cron strings', () => {
+    cron.start();
+    cron.add({
+      fiveField: {
+        task: jest.fn(),
+        options: '0 0 * * *',
+      },
+      sixField: {
+        task: jest.fn(),
+        options: '0 0 0 * * *',
+      },
+    });
+
+    expect(cron.jobs).toHaveLength(2);
+    expect(cron.jobs[0].job.nextRun()).toBeInstanceOf(Date);
+    expect(cron.jobs[1].job.nextRun()).toBeInstanceOf(Date);
+  });
+
+  it('accepts numeric-prefix stepping from cron-parser', () => {
+    cron.add({
+      stepped: {
+        task: jest.fn(),
+        options: '0 5/15 * * * *',
+      },
+    });
+
+    expect(cron.jobs).toHaveLength(1);
+    expect(cron.jobs[0].job.nextRun()).toBeInstanceOf(Date);
+    expect(strapi.log.error).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['Sunday as 0', '0 0 * * 0'],
+    ['Sunday as 7', '0 0 * * 7'],
+  ])('accepts %s', (_title, options) => {
+    expect(() =>
+      cron.add({
+        sundayJob: {
+          task: jest.fn(),
+          options,
+        },
+      })
+    ).not.toThrow();
+
+    expect(cron.jobs[0].job.nextRun()).toBeInstanceOf(Date);
+  });
+
+  it('accepts { rule, tz, start, end } object schedules', () => {
+    cron.start();
+
+    expect(() =>
+      cron.add({
+        objectSchedule: {
+          task: jest.fn(),
+          options: {
+            rule: '0 0 * * *',
+            start: new Date(Date.now() + 1000),
+            end: Date.now() + 86_400_000,
+            tz: 'UTC',
+          },
+        },
+      })
+    ).not.toThrow();
+
+    expect(cron.jobs).toHaveLength(1);
+    expect(cron.jobs[0].job.nextRun()).toBeInstanceOf(Date);
+  });
+
+  it('accepts node-schedule recurrence objects and string start/end', () => {
+    cron.start();
+
+    cron.add({
+      objLit: {
+        task: jest.fn(),
+        options: { dayOfWeek: 1, hour: 1, minute: 0, tz: 'UTC' },
+      },
+      recurrenceRuleShaped: {
+        task: jest.fn(),
+        options: {
+          recurs: true,
+          dayOfWeek: 1,
+          hour: 1,
+          minute: 0,
+          second: 0,
+          tz: 'UTC',
+        },
+      },
+      stringWindow: {
+        task: jest.fn(),
+        options: {
+          rule: '0 0 * * *',
+          start: '2027-06-01T00:00:00.000Z',
+          end: '2027-06-15T00:00:00.000Z',
+        },
+      },
+    });
+
+    expect(cron.jobs).toHaveLength(3);
+    expect(cron.jobs[0].job.nextRun()).toBeInstanceOf(Date);
+    expect(cron.jobs[1].job.nextRun()).toBeInstanceOf(Date);
+    expect(cron.jobs[2].job.nextRun()).toBeInstanceOf(Date);
+    expect(strapi.log.error).not.toHaveBeenCalled();
+  });
+
+  it('maps recurrence month ranges, arrays, and years to Croner fields', () => {
+    cron.add({
+      range: {
+        task: jest.fn(),
+        options: {
+          date: 1,
+          hour: 0,
+          minute: 0,
+          month: { start: 0, end: 2, step: 2 },
+          year: 2027,
+          tz: 'UTC',
+        },
+      },
+      array: {
+        task: jest.fn(),
+        options: {
+          date: 1,
+          hour: 0,
+          minute: 0,
+          month: [0, 1],
+          year: 2027,
+          tz: 'UTC',
+        },
+      },
+    });
+
+    expect(cron.jobs).toHaveLength(2);
+    expect(cron.jobs[0].job.nextRun(new Date('2026-12-31T00:00:00.000Z'))).toEqual(
+      new Date('2027-01-01T00:00:00.000Z')
+    );
+    expect(cron.jobs[1].job.nextRun(new Date('2027-01-15T00:00:00.000Z'))).toEqual(
+      new Date('2027-02-01T00:00:00.000Z')
+    );
+    expect(strapi.log.error).not.toHaveBeenCalled();
+  });
+
+  it('accepts Date and timestamp values nested in rule options', () => {
+    const date = new Date(Date.now() + 60_000);
+    const timestamp = Date.now() + 120_000;
+
+    cron.add({
+      dateRule: { task: jest.fn(), options: { rule: date } },
+      timestampRule: { task: jest.fn(), options: { rule: timestamp } },
+    });
+
+    expect(cron.jobs).toHaveLength(2);
+    expect(cron.jobs[0].job.getOnce()).toEqual(date);
+    expect(cron.jobs[1].job.getOnce()).toEqual(new Date(timestamp));
+  });
+
+  it('exposes node-schedule job aliases and rejects from invoke()', async () => {
+    cron.start();
+    cron.add({
+      boom: {
+        async task() {
+          throw new Error('cron-boom');
+        },
+        options: new Date(Date.now() + 60_000),
+      },
+    });
+
+    const { job } = cron.jobs[0];
+    expect(typeof job.invoke).toBe('function');
+    expect(typeof job.cancel).toBe('function');
+    expect(typeof job.nextInvocation).toBe('function');
+    expect(typeof job.reschedule).toBe('function');
+    expect(job.nextInvocation()).toBeInstanceOf(Date);
+
+    await expect(job.invoke()).rejects.toThrow('cron-boom');
+  });
+
+  it('cancel stops the current schedule', async () => {
+    const task = jest.fn();
+    cron.start();
+    cron.add({
+      cancelMe: {
+        task,
+        options: NEXT_MINUTE,
+      },
+    });
+
     const { job } = cron.jobs[0];
 
-    cron.destroy();
+    expect(job.cancel()).toBe(true);
+    expect(job.isStopped()).toBe(true);
 
-    // node-schedule cannot retract an invocation that is already running, so it
-    // emits 'error' from the rejected promise once teardown has completed.
-    const error = new Error('Cannot read db: connection destroyed');
-    expect(() => job.emit('error', error)).not.toThrow();
-
-    expect(logError).toHaveBeenCalledWith('Cron job "uploadWeekly" failed', error);
+    await jest.runOnlyPendingTimersAsync();
+    expect(task).not.toHaveBeenCalled();
   });
 
-  it('passes the injected strapi instance to the task', () => {
-    const { strapi } = createMockStrapi();
-    const task = jest.fn();
-    const cron = createCronService(strapi);
+  it('reschedule preserves the handle and keeps the old schedule on failure', () => {
+    cron.start();
+    cron.add({
+      first: {
+        task: jest.fn(),
+        options: '0 0 * * *',
+      },
+      second: {
+        task: jest.fn(),
+        options: new Date(Date.now() + 60_000),
+      },
+    });
 
-    cron.add({ myTask: { options: '* * * * * *', task } });
-    cron.jobs[0].job.invoke();
+    cron.remove('first');
+    const handle = cron.jobs[0].job;
+    const originalNextRun = handle.nextInvocation();
 
-    expect(task).toHaveBeenCalled();
-    expect(task.mock.calls[0][0].strapi).toBe(strapi);
+    expect(handle.reschedule('not a cron expression')).toBe(false);
+    expect(handle.nextInvocation()).toEqual(originalNextRun);
+    expect(handle.isStopped()).toBe(false);
+
+    const later = new Date(Date.now() + 120_000);
+    expect(handle.reschedule(later)).toBe(true);
+    expect(cron.jobs).toHaveLength(1);
+    expect(cron.jobs[0].job).toBe(handle);
+    expect(cron.jobs[0].options).toEqual(later);
+    expect(handle.nextInvocation()).toEqual(later);
+
+    const latest = new Date(Date.now() + 180_000);
+    expect(handle.reschedule(latest)).toBe(true);
+    expect(handle.nextInvocation()).toEqual(latest);
   });
 
-  it('cancels every job on stop()', () => {
-    const { strapi } = createMockStrapi();
-    const cron = createCronService(strapi);
+  it('does not reschedule a handle removed from the service', () => {
+    cron.add({
+      removeMe: {
+        task: jest.fn(),
+        options: new Date(Date.now() + 60_000),
+      },
+    });
 
-    cron.add({ first: { options: '* * * * * *', task: jest.fn() } });
-    cron.add({ second: { options: '* * * * * *', task: jest.fn() } });
+    const handle = cron.jobs[0].job;
+    cron.remove('removeMe');
 
-    const cancels = cron.jobs.map(({ job }) => jest.spyOn(job, 'cancel'));
-
-    cron.stop();
-
-    expect(cancels).toHaveLength(2);
-    cancels.forEach((cancel) => expect(cancel).toHaveBeenCalled());
+    expect(handle.reschedule(new Date(Date.now() + 120_000))).toBe(false);
   });
 
-  it('cancels every job on destroy()', () => {
-    const { strapi } = createMockStrapi();
-    const cron = createCronService(strapi);
+  it('rejects request as a task function property', () => {
+    expect(() =>
+      cron.add({
+        invalidTaskObject: {
+          request: jest.fn(),
+          options: '0 0 * * *',
+        },
+      } as never)
+    ).toThrow('Could not schedule a cron job for "invalidTaskObject": no function found.');
+  });
 
-    cron.add({ myTask: { options: '* * * * * *', task: jest.fn() } });
-    const cancel = jest.spyOn(cron.jobs[0].job, 'cancel');
+  it('keeps valid jobs when a later schedule in the same add() is invalid', () => {
+    expect(() =>
+      cron.add({
+        goodJob: {
+          task: jest.fn(),
+          options: '0 0 * * *',
+        },
+        badJob: {
+          task: jest.fn(),
+          options: 'not a cron expression',
+        },
+      })
+    ).not.toThrow();
 
-    cron.destroy();
+    expect(cron.jobs).toHaveLength(1);
+    expect(cron.jobs[0].name).toBe('goodJob');
+  });
 
-    expect(cancel).toHaveBeenCalled();
+  it('reschedules a named Date job when the caller removes first then adds', async () => {
+    const first = jest.fn();
+    const second = jest.fn();
+
+    cron.start();
+    cron.add({
+      publishRelease_1: {
+        task: first,
+        options: NEXT_MINUTE,
+      },
+    });
+    cron.remove('publishRelease_1');
+    cron.add({
+      publishRelease_1: {
+        task: second,
+        options: NEXT_MINUTE,
+      },
+    });
+
+    expect(cron.jobs).toHaveLength(1);
+    await advanceToNextRun(cron.jobs[0].job);
+
+    expect(first).not.toHaveBeenCalled();
+    expect(second).toHaveBeenCalledTimes(1);
   });
 });

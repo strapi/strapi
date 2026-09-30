@@ -35,14 +35,7 @@ export default {
   },
 
   async getSettings(ctx: Context) {
-    const {
-      state: { userAbility },
-    } = ctx;
-
-    if (userAbility.cannot(ACTIONS.readSettings, FILE_MODEL_UID)) {
-      return ctx.forbidden();
-    }
-
+    // Gated on `plugin::upload.read` by the route policy.
     const data = await getService('upload').getSettings();
 
     // Read-only echo of the app config so the admin knows how many upload
@@ -51,6 +44,12 @@ export default {
     // need to bound this override the config.
     const { concurrentUploadRequests = 1 } = strapi.config.get<Config>('plugin::upload');
 
-    ctx.body = { data: { ...data, concurrentUploadRequests } };
+    ctx.body = {
+      data: {
+        ...data,
+        concurrentUploadRequests,
+        aiMetadataAvailable: getService('aiMetadataProvider').hasProvider(),
+      },
+    };
   },
 };

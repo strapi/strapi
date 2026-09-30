@@ -5,6 +5,7 @@ import actions from './config/actions';
 import defaultStages from './constants/default-stages.json';
 import defaultWorkflow from './constants/default-workflow.json';
 import webhookEvents from './constants/webhook-events';
+import { registerAuditEvents } from './audit-logs';
 
 /**
  * Initialize the default workflow if there is no workflow in the database
@@ -46,6 +47,11 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
 
   // Webhooks and events
   await registerWebhookEvents();
+
+  // Absent in CE, without the audit-logs license, or when disabled by config
+  if (strapi.has('audit-logs-lifecycle')) {
+    registerAuditEvents({ strapi }, strapi.get('audit-logs-lifecycle'));
+  }
   await getService('workflow-weekly-metrics').registerCron();
 
   // Data initialization

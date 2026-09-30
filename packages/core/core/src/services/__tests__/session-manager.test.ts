@@ -716,6 +716,50 @@ describe('SessionManager Factory', () => {
     });
   });
 
+  describe('rotateRefreshToken', () => {
+    it('should reject replaying an already rotated refresh token', async () => {
+      const refreshToken = 'rotated-parent-refresh-token';
+      const userId = 'user123';
+      const parentSessionId = 'parent-session';
+      const childSessionId = 'child-session';
+
+      mockJwt.verify.mockReturnValue({
+        userId,
+        sessionId: parentSessionId,
+        type: 'refresh',
+        exp: Math.floor(Date.now() / 1000) + 3600,
+        iat: Math.floor(Date.now() / 1000),
+      } as any);
+      mockQuery.findOne
+        .mockResolvedValueOnce({
+          userId,
+          sessionId: parentSessionId,
+          origin: 'admin',
+          status: 'rotated',
+          childId: childSessionId,
+          expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+          absoluteExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+          createdAt: new Date(),
+        })
+        .mockResolvedValueOnce({
+          userId,
+          sessionId: childSessionId,
+          origin: 'admin',
+          status: 'active',
+          childId: null,
+          expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+          absoluteExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+          createdAt: new Date(),
+        });
+
+      const result = await sessionManager('admin').rotateRefreshToken(refreshToken);
+
+      expect(result).toEqual({ error: 'invalid_refresh_token' });
+      expect(mockQuery.findOne).toHaveBeenCalledTimes(1);
+      expect(mockJwt.sign).not.toHaveBeenCalled();
+    });
+  });
+
   describe('createSessionManager factory', () => {
     it('should create session manager with database provider', () => {
       const manager = createSessionManager({ db: mockDb });

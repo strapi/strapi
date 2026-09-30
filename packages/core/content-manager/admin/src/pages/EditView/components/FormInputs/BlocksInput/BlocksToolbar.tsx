@@ -739,6 +739,7 @@ const BlocksToolbar = () => {
   const { editor, blocks, modifiers, disabled } = useBlocksEditorContext('BlocksToolbar');
   const { formatMessage } = useIntl();
   const isMobile = useIsMobile();
+  const toolbarContainerRef = React.useRef<HTMLElement>(null);
 
   /**
    * The modifier buttons are disabled when an image is selected.
@@ -839,8 +840,11 @@ const BlocksToolbar = () => {
         )}
         <ToolbarSeparator />
         <Toolbar.ToggleGroup type="multiple" asChild>
-          <Flex direction="row" gap={1} grow={1} overflow="hidden">
-            <EditorToolbarObserver observedComponents={observedComponents} />
+          <Flex ref={toolbarContainerRef} direction="row" gap={1} grow={1} overflow="hidden">
+            <EditorToolbarObserver
+              observedComponents={observedComponents}
+              containerRef={toolbarContainerRef}
+            />
           </Flex>
         </Toolbar.ToggleGroup>
       </ToolbarWrapper>

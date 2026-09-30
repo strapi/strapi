@@ -78,6 +78,86 @@ describe('CTB | components | FormModal | reducer | actions', () => {
 
       expect(reducer(state, action)).toEqual(expected);
     });
+
+    it('should drop a pending folder target when the kind changes', () => {
+      const state: State = {
+        ...initialState,
+        modifiedData: {
+          displayName: 'Article',
+          kind: 'collectionType',
+          folder: { targetGroupId: 'grp_marketing' },
+        },
+      };
+
+      const action = actions.onChange({
+        keys: ['kind'],
+        value: 'singleType',
+      });
+
+      const expected = {
+        ...initialState,
+        modifiedData: {
+          displayName: 'Article',
+          kind: 'singleType',
+        },
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('should keep a pending new-folder name when the kind changes', () => {
+      const state: State = {
+        ...initialState,
+        modifiedData: {
+          displayName: 'Article',
+          kind: 'collectionType',
+          folder: { newFolderName: 'Marketing' },
+        },
+      };
+
+      const action = actions.onChange({
+        keys: ['kind'],
+        value: 'singleType',
+      });
+
+      const expected = {
+        ...initialState,
+        modifiedData: {
+          displayName: 'Article',
+          kind: 'singleType',
+          folder: { newFolderName: 'Marketing' },
+        },
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('should keep a pending folder target when the kind is unchanged', () => {
+      const state: State = {
+        ...initialState,
+        modifiedData: {
+          displayName: 'Article',
+          kind: 'collectionType',
+          folder: { targetGroupId: 'grp_marketing' },
+        },
+      };
+
+      const action = actions.onChange({
+        keys: ['kind'],
+        value: 'collectionType',
+      });
+
+      const expected = {
+        ...initialState,
+        modifiedData: {
+          displayName: 'Article',
+          kind: 'collectionType',
+          folder: { targetGroupId: 'grp_marketing' },
+        },
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
   });
 
   describe('ON_CHANGE_RELATION_TARGET', () => {

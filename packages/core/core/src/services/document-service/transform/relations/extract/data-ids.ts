@@ -10,6 +10,7 @@ import { normalizeXToOneRelationValue } from '../utils/xto-one';
 import { LongHandDocument } from '../utils/types';
 
 const { isPolymorphic } = relations;
+const MEDIA_UID = 'plugin::upload.file' as UID.ContentType;
 
 interface Options {
   uid: UID.Schema;
@@ -46,7 +47,7 @@ const addRelationDocId = curry(
 );
 
 /**
- * Iterate over all relations of a data object and extract all relational document ids.
+ * Iterate over all relations and media of a data object and extract their document ids.
  * Those will later be transformed to entity ids.
  */
 const extractDataIds = (idMap: IdMap, data: Record<string, any>, source: Options) => {
@@ -68,7 +69,14 @@ const extractDataIds = (idMap: IdMap, data: Record<string, any>, source: Options
 
         // Regular relations will always target the same target
         // if its a polymorphic relation we need to get it from the data itself
-        const targetUid = isPolymorphicRelation ? relation.__type : attribute.target;
+        let targetUid: UID.Schema;
+        if (attribute.type === 'media') {
+          targetUid = MEDIA_UID;
+        } else if (isPolymorphicRelation) {
+          targetUid = relation.__type;
+        } else {
+          targetUid = attribute.target;
+        }
 
         addDocId(targetUid, relation);
 
@@ -92,7 +100,11 @@ const extractDataIds = (idMap: IdMap, data: Record<string, any>, source: Options
         return relation;
       }, normalizedValue as any);
     },
-    { schema: strapi.getModel(source.uid), getModel: strapi.getModel.bind(strapi) },
+    {
+      schema: strapi.getModel(source.uid),
+      getModel: strapi.getModel.bind(strapi),
+      includeMedia: true,
+    },
     data
   );
 };

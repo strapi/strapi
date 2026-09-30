@@ -1,5 +1,5 @@
 import { statSync } from 'fs';
-import { resolve } from 'path';
+import { basename, resolve } from 'path';
 import { ALLOWED_CONTENT_TYPES, CUSTOM_TRANSFER_TOKEN_ACCESS_KEY } from '../e2e/constants';
 
 const {
@@ -11,6 +11,7 @@ const {
   },
   strapi: {
     providers: { createRemoteStrapiDestinationProvider, createLocalStrapiDestinationProvider },
+    isProtectedRemotePushType,
   },
   engine: { createTransferEngine },
 } = require('@strapi/data-transfer');
@@ -74,13 +75,19 @@ export const resetDatabaseAndImportDataFromPath = async (
   // If file is already an absolute path, use it; otherwise resolve relative to e2e/data
   const filePath =
     file.startsWith('/') || file.includes('\\') ? file : resolve(__dirname, '../e2e/data/', file);
+  const fixture = basename(filePath);
   const source = createSourceProvider(filePath);
-  const includedTypes = modifiedContentTypesFn(ALLOWED_CONTENT_TYPES);
+  const includedTypes = modifiedContentTypesFn(ALLOWED_CONTENT_TYPES).filter(
+    (uid) => !isProtectedRemotePushType(uid)
+  );
   const destination = createRemoteDestinationProvider(includedTypes, configuration);
 
   const engine = createTransferEngine(source, destination, {
     versionStrategy: 'ignore',
     schemaStrategy: 'ignore',
+    // The without-admin fixture only contains protected admin entities and links. Restore those
+    // locally above and keep the remote transfer for its configuration records only.
+    only: fixture === 'without-admin' ? ['config'] : undefined,
     transforms: {
       links: [
         {
@@ -109,6 +116,20 @@ export const resetDatabaseAndImportDataFromPath = async (
   });
 
   try {
+    const resetAdminRes = await fetch(
+      new URL('/api/config/reset-admin-fixture', getStrapiTestBaseUrl()),
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ fixture }),
+      }
+    );
+    if (!resetAdminRes.ok) {
+      throw new Error(
+        `Admin fixture reset failed: HTTP ${resetAdminRes.status} ${await resetAdminRes.text()}`
+      );
+    }
+
     // reset the transfer token to allow the transfer if it's been wiped (that is, not included in previous import data)
     await fetch(new URL('/api/config/resettransfertoken', getStrapiTestBaseUrl()), {
       method: 'POST',

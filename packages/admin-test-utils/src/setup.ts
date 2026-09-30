@@ -118,6 +118,11 @@ window.strapi = {
   future: {
     isEnabled: () => false,
   },
+  // Defaults to false, so tests see the shipped configuration: no flag set, which
+  // at GA means the current Media Library rather than the legacy one.
+  featureFlags: {
+    isEnabled: () => false,
+  },
   projectType: 'Community',
   telemetryDisabled: true,
   flags: {

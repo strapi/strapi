@@ -37,6 +37,7 @@ import { COLLECTION_TYPES } from '../../../../../constants/collections';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { PERMISSIONS } from '../../../../../constants/plugin';
 import { DocumentRBAC, useDocumentRBAC } from '../../../../../features/DocumentRBAC';
+import { useContentTypeSchema } from '../../../../../hooks/useContentTypeSchema';
 import { useDebounce } from '../../../../../hooks/useDebounce';
 import { useDocument } from '../../../../../hooks/useDocument';
 import { type DocumentMeta, useDocumentContext } from '../../../../../hooks/useDocumentContext';
@@ -171,6 +172,10 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
     const documentId = currentDocument.document?.documentId;
 
     const { formatMessage } = useIntl();
+    const emptyLabel = formatMessage({
+      id: 'content-manager.containers.empty-label',
+      defaultMessage: 'Untitled',
+    });
 
     const isMorph = props.attribute.relation.toLowerCase().includes('morph');
     const isDisabled = isMorph || disabled;
@@ -222,7 +227,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           attribute.target === props.attribute.target
       ).length > 0;
 
-    const { data, isLoading, isFetching } = useGetRelationsQuery(
+    const { data, isLoading, isFetching, refetch } = useGetRelationsQuery(
       {
         model,
         targetField,
@@ -241,7 +246,21 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
     );
 
     const handleLoadMore = () => {
-      setCurrentPage((prev) => prev + 1);
+      /**
+       * The relations cache is shared by every instance of this field that targets the same
+       * document (e.g. the edit view and the same document opened again inside the relation
+       * modal), and another instance mounting resets it to page 1. Request the page that follows
+       * the one actually held by the cache rather than `currentPage + 1`, otherwise the pages in
+       * between would never be loaded.
+       */
+      const nextPage = (data?.pagination?.page ?? currentPage) + 1;
+
+      if (nextPage === currentPage) {
+        // Our query args already point at that page, so changing state would not fetch it
+        refetch();
+      } else {
+        setCurrentPage(nextPage);
+      }
     };
 
     const field = useField<RelationsFormValue>(props.name);
@@ -274,6 +293,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
         field: field.value,
         href: `../${COLLECTION_TYPES}/${targetModel}`,
         mainField: props.mainField,
+        emptyLabel,
       };
 
       /**
@@ -290,9 +310,17 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       const connectItems = (field.value?.connect ?? []).map((rel: Relation) => {
         const urlLocaleParam = rel.locale ? `?plugins[i18n][locale]=${rel.locale}` : '';
         if (rel.href) return rel;
+
+        const mainFieldValue = props.mainField
+          ? (rel as RelationResult)[props.mainField.name]
+          : undefined;
+        const hasEmptyMainField = mainFieldValue === '' || mainFieldValue === null;
+
         return {
           ...rel,
-          label: rel.label ?? getRelationLabel(rel, props.mainField),
+          label: hasEmptyMainField
+            ? getRelationLabel(rel, props.mainField, emptyLabel)
+            : (rel.label ?? getRelationLabel(rel, props.mainField, emptyLabel)),
           href: `../${COLLECTION_TYPES}/${targetModel}/${rel.documentId}${urlLocaleParam}`,
         };
       });
@@ -306,7 +334,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
         if (a.__temp_key__ > b.__temp_key__) return 1;
         return 0;
       });
-    }, [serverData, field.value, targetModel, props.mainField]);
+    }, [serverData, field.value, targetModel, props.mainField, emptyLabel]);
 
     const handleDisconnect = useHandleDisconnect(props.name, 'RelationsField');
 
@@ -328,7 +356,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           __temp_key__: generateNKeysBetween(lastItemInList?.__temp_key__ ?? null, null, 1)[0],
           // Fallback to `id` if there is no `mainField` value, which will overwrite the above `id` property with the exact same data.
           [props.mainField?.name ?? 'documentId']: relation[props.mainField?.name ?? 'documentId'],
-          label: getRelationLabel(relation, props.mainField),
+          label: getRelationLabel(relation, props.mainField, emptyLabel),
           href: `../${COLLECTION_TYPES}/${targetModel}/${relation.documentId}?${relation.locale ? `plugins[i18n][locale]=${relation.locale}` : ''}`,
         };
 
@@ -343,6 +371,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
         }
       },
       [
+        emptyLabel,
         field,
         handleDisconnect,
         onChangeRelationField,
@@ -423,6 +452,7 @@ const StyledFlex = styled<FlexComponent>(Flex)`
 interface TransformationContext extends Pick<RelationsFieldProps, 'mainField'> {
   field?: RelationsFormValue;
   href: string;
+  emptyLabel: string;
 }
 
 /**
@@ -456,14 +486,14 @@ const removeDisconnected =
  * a better UI where we can link to the relation and display a human-readable label.
  */
 const addLabelAndHref =
-  ({ mainField, href }: TransformationContext) =>
+  ({ mainField, href, emptyLabel }: TransformationContext) =>
   (relations: RelationResult[]): Relation[] =>
     relations.map((relation) => {
       return {
         ...relation,
         // Fallback to `id` if there is no `mainField` value, which will overwrite the above `documentId` property with the exact same data.
         [mainField?.name ?? 'documentId']: relation[mainField?.name ?? 'documentId'],
-        label: getRelationLabel(relation, mainField),
+        label: getRelationLabel(relation, mainField, emptyLabel),
         href: `${href}/${relation.documentId}?${relation.locale ? `plugins[i18n][locale]=${relation.locale}` : ''}`,
       };
     });
@@ -695,13 +725,20 @@ const RelationModalWithContext = ({
 }: RelationModalWithContextProps) => {
   const [textValue, setTextValue] = React.useState<string | undefined>('');
   const { formatMessage } = useIntl();
+  const emptyLabel = formatMessage({
+    id: 'content-manager.containers.empty-label',
+    defaultMessage: 'Untitled',
+  });
   const canCreate = useDocumentRBAC('RelationModalWrapper', (state) => state.canCreate);
+  const { schema: targetSchema } = useContentTypeSchema(relation.model);
+  const isTargetSingleType = targetSchema?.kind === 'singleType';
   const fieldRef = useFocusInputField<HTMLInputElement>(name);
   const componentUID = useComponent('RelationsField', (state) => state.uid);
   const getParentFormValues = useForm('RelationModalWrapper', (state) => state.getValues);
   const getParentFormValuesWithCurrentRelation = () => {
     return setIn(getParentFormValues(), name, fieldValue);
   };
+  const setParentFormValue = useForm('RelationModalWrapper', (state) => state.onChange);
 
   const handleLoadMore = () => {
     if (!data || !data.pagination) {
@@ -725,7 +762,7 @@ const RelationModalWithContext = ({
       {({ dispatch }) => (
         <Combobox
           ref={fieldRef}
-          creatable="visible"
+          creatable={isTargetSingleType ? false : 'visible'}
           creatableDisabled={!canCreate}
           createMessage={() =>
             formatMessage({
@@ -734,7 +771,7 @@ const RelationModalWithContext = ({
             })
           }
           onCreateOption={() => {
-            if (canCreate) {
+            if (canCreate && !isTargetSingleType) {
               dispatch({
                 type: 'GO_TO_RELATION',
                 payload: {
@@ -743,6 +780,7 @@ const RelationModalWithContext = ({
                   fieldToConnect: name,
                   fieldToConnectUID: componentUID,
                   getParentFormValues: getParentFormValuesWithCurrentRelation,
+                  setParentFormValue,
                 },
               });
             }
@@ -784,7 +822,7 @@ const RelationModalWithContext = ({
           {...props}
         >
           {options?.map((opt) => {
-            const textValue = getRelationLabel(opt, mainField);
+            const textValue = getRelationLabel(opt, mainField, emptyLabel);
 
             return (
               <ComboboxOption key={opt.id} value={opt.id.toString()} textValue={textValue}>
@@ -1191,6 +1229,10 @@ const ListItem = React.memo(({ data, index, style }: ListItemProps) => {
   const isDesktop = useIsDesktop();
 
   const { formatMessage } = useIntl();
+  const emptyLabel = formatMessage({
+    id: 'content-manager.containers.empty-label',
+    defaultMessage: 'Untitled',
+  });
 
   const {
     href,
@@ -1218,7 +1260,8 @@ const ListItem = React.memo(({ data, index, style }: ListItemProps) => {
     },
     { skip: !isTemporary }
   );
-  const label = isTemporary && document ? getRelationLabel(document, mainField) : originalLabel;
+  const label =
+    isTemporary && document ? getRelationLabel(document, mainField, emptyLabel) : originalLabel;
   const status = isTemporary && document ? document?.status : originalStatus;
 
   const [{ handlerId, isDragging, handleKeyDown }, relationRef, dropRef, dragRef, dragPreviewRef] =
@@ -1248,7 +1291,7 @@ const ListItem = React.memo(({ data, index, style }: ListItemProps) => {
   }, [dragPreviewRef]);
 
   const safeDocumentId = documentId ?? apiData?.documentId;
-  const safeLocale = locale ?? apiData?.locale ?? null;
+  const relationLocale = locale ?? apiData?.locale;
   const documentMeta = React.useMemo(
     () =>
       ({
@@ -1256,10 +1299,10 @@ const ListItem = React.memo(({ data, index, style }: ListItemProps) => {
         model: targetModel,
         collectionType: getCollectionType(href)!,
         params: {
-          locale: safeLocale,
+          locale: relationLocale ?? documentParams?.locale ?? null,
         },
       }) as DocumentMeta,
-    [safeDocumentId, href, safeLocale, targetModel]
+    [safeDocumentId, href, relationLocale, documentParams, targetModel]
   );
 
   return (

@@ -2,6 +2,8 @@ import isEqual from 'lodash/isEqual';
 import omit from 'lodash/omit';
 import pluralize from 'pluralize';
 
+import { applyPrivateSearchDefault } from '../../../../../utils/applyPrivateSearchDefault';
+
 import type { ContentType, Component, AnyAttribute } from '../../../../../types';
 import type { Schema, SchemaAttribute } from '../../types/schema';
 import type { Struct, UID } from '@strapi/types';
@@ -42,7 +44,7 @@ const createAttributeWithStatus = (
   status: AnyAttribute['status']
 ): AnyAttribute =>
   ({
-    ...attributeData,
+    ...applyPrivateSearchDefault(attributeData),
     name,
     status,
   }) as AnyAttribute;

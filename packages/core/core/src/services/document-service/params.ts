@@ -48,4 +48,6 @@ const pickSelectionParams = <TUID extends UID.ContentType>(
   return pick(['fields', 'populate', 'status'], data);
 };
 
+export const isParamEmpty = (v: unknown): boolean => v === undefined || v === null || v === '';
+
 export { pickSelectionParams };

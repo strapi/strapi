@@ -27,4 +27,11 @@ const getInitLocale = () => {
 
 const DEFAULT_LOCALE = getInitLocale();
 
-export { isoLocales, DEFAULT_LOCALE, getInitLocale };
+const AUDITED_EVENTS = {
+  LOCALE_CREATE: 'locale.create',
+  LOCALE_UPDATE: 'locale.update',
+  LOCALE_DELETE: 'locale.delete',
+  LOCALE_DEFAULT_UPDATE: 'locale.default.update',
+} as const;
+
+export { isoLocales, DEFAULT_LOCALE, getInitLocale, AUDITED_EVENTS };
