@@ -2,6 +2,7 @@
 // eslint-disable-next-line import/no-relative-packages
 import createContext from '../../../../../../../../tests/helpers/create-context';
 import aiController from '../ai';
+import { createAiAdminService } from '../../services/ai';
 
 describe('AI Controller', () => {
   beforeEach(() => {
@@ -69,6 +70,23 @@ describe('AI Controller', () => {
       await aiController.getAiFeatureConfig(ctx as any);
 
       expect(ctx.notFound).toHaveBeenCalled();
+    });
+
+    test('getAiFeatureConfig returns notFound for a license without an AI feature', async () => {
+      const ctx = createMockContext();
+      const strapi = {
+        config: { get: jest.fn((_key: string, defaultValue?: unknown) => defaultValue) },
+        ee: { isEE: true, features: { isEnabled: jest.fn(() => false) } },
+      } as any;
+      const aiAdminService = createAiAdminService({ strapi });
+      jest.spyOn(aiAdminService, 'getAiFeatureConfig');
+      strapi.ai = { admin: aiAdminService };
+      global.strapi = strapi;
+
+      await aiController.getAiFeatureConfig(ctx as any);
+
+      expect(ctx.notFound).toHaveBeenCalled();
+      expect(aiAdminService.getAiFeatureConfig).not.toHaveBeenCalled();
     });
   });
 

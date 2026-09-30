@@ -16,6 +16,7 @@ const ONE_MINUTE = 1000 * 60;
 
 interface EE {
   enabled: boolean;
+  providedLicense?: string;
   licenseInfo: {
     licenseKey?: string;
     features?: ResolvedFeature[];
@@ -87,6 +88,7 @@ const init = (licenseDir: string, logger?: Logger) => {
     const license = process.env.STRAPI_LICENSE || readLicense(licenseDir);
 
     if (license) {
+      ee.providedLicense = license;
       ee.licenseInfo = verifyLicense(license);
       enable();
     }
@@ -299,6 +301,10 @@ export default Object.freeze<
 
   get subscriptionId() {
     return ee.licenseInfo.subscriptionId;
+  },
+
+  get providedLicense() {
+    return ee.providedLicense;
   },
 
   features: Object.freeze({ list, get, isEnabled }),
