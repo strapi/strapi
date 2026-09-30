@@ -47,7 +47,7 @@ const createEntriesService = (
       throw new Error('Create requires data attribute');
     }
 
-    const data = isParamEmpty(inputData.documentId) ? omit('documentId', inputData) : inputData;
+    const data = isParamEmpty(inputData.documentId) ? omit(inputData, 'documentId') : inputData;
 
     // Check for uniqueness based on documentId and locale (if localized)
     if (data.documentId) {
@@ -125,7 +125,7 @@ const createEntriesService = (
     const { data: inputData, ...restParams } = await transformParamsDocumentId(uid, params);
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams) as any); // select / populate
 
-    const data = inputData ? omit('documentId', inputData) : inputData;
+    const data = inputData ? omit(inputData, 'documentId') : inputData;
 
     const validData = await entityValidator.validateEntityUpdate(
       contentType,
