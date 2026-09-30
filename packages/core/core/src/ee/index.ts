@@ -1,7 +1,8 @@
 import { isEqual, pick } from 'lodash';
 import type { Logger } from '@strapi/logger';
-import type { Core } from '@strapi/types';
+import type { Core, Modules } from '@strapi/types';
 import { createStrapiFetch } from '../utils/fetch';
+import type { ResolvedFeature } from './features';
 import {
   readLicense,
   verifyLicense,
@@ -17,7 +18,7 @@ interface EE {
   enabled: boolean;
   licenseInfo: {
     licenseKey?: string;
-    features?: Array<{ name: string; [key: string]: any } | string>;
+    features?: ResolvedFeature[];
     expireAt?: string;
     seats?: number;
     type?: string;
@@ -261,17 +262,17 @@ const getTrialEndDate = async ({
   return data;
 };
 
-const list = () => {
-  return (
-    ee.licenseInfo.features?.map((feature) =>
-      typeof feature === 'object' ? feature : { name: feature }
-    ) || []
-  );
-};
+const list = (): ResolvedFeature[] => [...(ee.licenseInfo.features ?? [])];
 
-const get = (featureName: string) => list().find((feature) => feature.name === featureName);
+// The options shape of a known name is trusted from the license, it is not validated
+const get = <TName extends Modules.EE.FeatureName>(name: TName) =>
+  list().find((feature): feature is Modules.EE.Feature<TName> => feature.name === name);
 
-export default Object.freeze({
+const isEnabled = (name: Modules.EE.FeatureName) => get(name) !== undefined;
+
+export default Object.freeze<
+  Modules.EE.EEService & { init: typeof init; checkLicense: typeof checkLicense }
+>({
   init,
   checkLicense,
   getTrialEndDate,
@@ -300,9 +301,5 @@ export default Object.freeze({
     return ee.licenseInfo.subscriptionId;
   },
 
-  features: Object.freeze({
-    list,
-    get,
-    isEnabled: (featureName: string) => get(featureName) !== undefined,
-  }),
+  features: Object.freeze({ list, get, isEnabled }),
 });

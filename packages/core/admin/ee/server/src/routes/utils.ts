@@ -1,7 +1,7 @@
-import type { Core } from '@strapi/types';
+import type { Core, Modules } from '@strapi/types';
 
 export const enableFeatureMiddleware =
-  (featureName: string): Core.MiddlewareHandler =>
+  (featureName: Modules.EE.FeatureName): Core.MiddlewareHandler =>
   (ctx, next) => {
     if (strapi.ee.features.isEnabled(featureName)) {
       return next();

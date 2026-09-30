@@ -145,8 +145,10 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
    */
   const getRetentionDays = () => {
     const featureConfig = strapi.ee.features.get('cms-content-history');
-    const licenseRetentionDays =
-      typeof featureConfig === 'object' && featureConfig?.options.retentionDays;
+    // TODO @Nico `false` without the feature and `undefined` without a license retention make
+    // Math.min() below return 0 or NaN. The cast only types the existing behavior.
+    const licenseRetentionDays = (typeof featureConfig === 'object' &&
+      featureConfig?.options.retentionDays) as number;
     const userRetentionDays: number = strapi.config.get('admin.history.retentionDays');
 
     // Allow users to override the license retention days, but not to increase it
