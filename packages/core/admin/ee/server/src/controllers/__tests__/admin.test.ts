@@ -5,6 +5,7 @@ describe('EE admin controller', () => {
     isStrapiManagedAiEnabled = false,
     type = 'enterprise' as string | null,
     planPriceId = null as string | null,
+    edition = 'Enterprise',
   } = {}) => {
     global.strapi = {
       EE: true,
@@ -15,6 +16,7 @@ describe('EE admin controller', () => {
         isTrial: false,
         type,
         planPriceId,
+        edition,
         features: {
           isEnabled: jest.fn(() => false),
           list: jest.fn(() => []),
@@ -43,6 +45,14 @@ describe('EE admin controller', () => {
         expect(data.ai).toEqual({ enabled });
       }
     );
+
+    it.each(['Growth', 'Enterprise'])('reports the %s edition as projectType', async (edition) => {
+      setup({ edition });
+
+      const { data } = await adminController.getProjectType();
+
+      expect(data.projectType).toBe(edition);
+    });
 
     it('omits license fields that are null internally', async () => {
       setup({ type: null, planPriceId: null });

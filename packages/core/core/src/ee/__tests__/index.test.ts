@@ -20,7 +20,8 @@ const initEE = ({
   licenseInfo = { type: 'gold', isTrial: false, features: [] },
 }: {
   readLicense?: string;
-  licenseInfo?: Partial<LicenseInfo>;
+  /** An `Error` makes `verifyLicense` throw it. */
+  licenseInfo?: Partial<LicenseInfo> | Error;
 } = {}) => {
   let ee: (typeof import('../index'))['default'] | undefined;
   let license: jest.Mocked<typeof License> | undefined;
@@ -28,7 +29,13 @@ const initEE = ({
   jest.isolateModules(() => {
     license = jest.requireMock<jest.Mocked<typeof License>>('../license');
     license.readLicense.mockReturnValue(readLicense);
-    license.verifyLicense.mockReturnValue(licenseInfo as LicenseInfo);
+    license.verifyLicense.mockImplementation(() => {
+      if (licenseInfo instanceof Error) {
+        throw licenseInfo;
+      }
+
+      return licenseInfo as LicenseInfo;
+    });
 
     ee = jest.requireActual<typeof import('../index')>('../index').default;
     ee.init(LICENSE_DIR);
@@ -54,6 +61,50 @@ describe('ee', () => {
 
   afterAll(() => {
     process.env = ORIGINAL_ENV;
+  });
+
+  describe('edition', () => {
+    it('is Community without a license', () => {
+      expect(initEE().ee.edition).toBe('Community');
+    });
+
+    it('is Community when STRAPI_DISABLE_EE is true', () => {
+      process.env.STRAPI_DISABLE_EE = 'true';
+
+      const { ee } = initEE({
+        readLicense: 'file-license',
+        licenseInfo: { planPriceId: 'growth-monthly' },
+      });
+
+      expect(ee.edition).toBe('Community');
+    });
+
+    it('is Community when the license fails verification', () => {
+      const { ee } = initEE({
+        readLicense: 'file-license',
+        licenseInfo: new Error('Invalid license.'),
+      });
+
+      expect(ee.edition).toBe('Community');
+    });
+
+    it.each(['growth-monthly', 'price_Growth_Yearly', 'GROWTH'])(
+      'is Growth when the plan price id is %s',
+      (planPriceId) => {
+        const { ee } = initEE({ readLicense: 'file-license', licenseInfo: { planPriceId } });
+
+        expect(ee.edition).toBe('Growth');
+      }
+    );
+
+    it.each([undefined, 'enterprise-yearly', 'pro-monthly'])(
+      'is Enterprise when the plan price id is %p',
+      (planPriceId) => {
+        const { ee } = initEE({ readLicense: 'file-license', licenseInfo: { planPriceId } });
+
+        expect(ee.edition).toBe('Enterprise');
+      }
+    );
   });
 
   describe('providedLicense', () => {

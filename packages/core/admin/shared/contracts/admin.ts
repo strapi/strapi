@@ -1,4 +1,4 @@
-import type { Struct, UID } from '@strapi/types';
+import type { Modules, Struct, UID } from '@strapi/types';
 import type { errors } from '@strapi/utils';
 import type { File } from 'formidable';
 
@@ -94,6 +94,8 @@ export declare namespace GetProjectType {
       type?: string;
       /** EE only — distinguishes the Growth plan from other Enterprise plans. */
       planPriceId?: string;
+      /** Plan label for display: `Community`, `Growth` or `Enterprise`. */
+      projectType?: Modules.EE.Edition;
     };
     error?: errors.ApplicationError;
   }

@@ -19,13 +19,23 @@ export default {
           flags,
           type: strapi.ee.type ?? undefined,
           planPriceId: strapi.ee.planPriceId ?? undefined,
+          projectType: strapi.ee.edition,
           ai: {
             enabled: strapi.ai.admin.isStrapiManagedAiEnabled(),
           },
         },
       };
     } catch {
-      return { data: { isEE: false, isTrial: false, features: [], flags, ai: { enabled: false } } };
+      return {
+        data: {
+          isEE: false,
+          isTrial: false,
+          features: [],
+          flags,
+          projectType: 'Community',
+          ai: { enabled: false },
+        },
+      };
     }
   },
 
