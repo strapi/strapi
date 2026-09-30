@@ -52,8 +52,12 @@ const Panel: PanelComponent = ({
     return `success${shade}`;
   };
 
-  // Project is not EE or contentType does not have draftAndPublish enabled
-  if (!window.strapi.isEE || !options?.draftAndPublish || !canRead) {
+  // The license lacks releases or contentType does not have draftAndPublish enabled
+  if (
+    window.strapi.features.isEnabled('cms-content-releases') === false ||
+    !options?.draftAndPublish ||
+    !canRead
+  ) {
     return null;
   }
 

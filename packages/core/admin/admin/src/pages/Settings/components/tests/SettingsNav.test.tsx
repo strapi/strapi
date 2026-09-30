@@ -1,14 +1,7 @@
-import { render } from '@tests/utils';
+import { lightTheme } from '@strapi/design-system';
+import { render, screen } from '@tests/utils';
 
 import { SettingsNav } from '../SettingsNav';
-
-jest.mock('../../../../../../ee/admin/src/hooks/useLicenseLimits', () => ({
-  useLicenseLimits: jest.fn(() => ({
-    license: {
-      features: [],
-    },
-  })),
-}));
 
 const menu = [
   {
@@ -22,6 +15,14 @@ const menu = [
         isDisplayed: true,
         permissions: [],
         hasNotification: true,
+      },
+      {
+        intlLabel: { id: 'Settings.sso.title', defaultMessage: 'Single Sign-On' },
+        to: '/settings/single-sign-on',
+        id: 'sso',
+        isDisplayed: true,
+        permissions: [],
+        licenseOnly: true,
       },
     ],
   },
@@ -146,6 +147,42 @@ describe('SettingsNav', () => {
           expect(getByText(link.intlLabel.defaultMessage)).toBeInTheDocument();
         });
       }
+    });
+  });
+
+  describe('license marker', () => {
+    const originalIsEE = window.strapi.isEE;
+    const originalIsEnabled = window.strapi.features.isEnabled;
+
+    beforeEach(() => {
+      window.strapi.isEE = true;
+    });
+
+    afterEach(() => {
+      window.strapi.isEE = originalIsEE;
+      window.strapi.features.isEnabled = originalIsEnabled;
+    });
+
+    const getLightningFill = () =>
+      screen
+        .getByRole('link', { name: 'Single Sign-On' })
+        .querySelector('svg')
+        ?.getAttribute('fill');
+
+    it('highlights a license-only link when its feature is enabled', () => {
+      window.strapi.features.isEnabled = (name) => name === 'sso';
+
+      render(<SettingsNav />);
+
+      expect(getLightningFill()).toBe(lightTheme.colors.primary600);
+    });
+
+    it('greys out a license-only link when the license lacks its feature', () => {
+      window.strapi.features.isEnabled = () => false;
+
+      render(<SettingsNav />);
+
+      expect(getLightningFill()).toBe(lightTheme.colors.neutral300);
     });
   });
 });

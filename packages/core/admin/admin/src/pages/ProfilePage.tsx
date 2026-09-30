@@ -106,7 +106,7 @@ const ProfilePage = () => {
     data: dataSSO,
     error,
   } = useIsSSOLockedQuery(undefined, {
-    skip: !(window.strapi.isEE && window.strapi.features.isEnabled('sso')),
+    skip: window.strapi.features.isEnabled(window.strapi.features.SSO) === false,
   });
 
   React.useEffect(() => {
