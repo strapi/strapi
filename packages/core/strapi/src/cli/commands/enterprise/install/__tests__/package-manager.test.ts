@@ -41,6 +41,17 @@ describe('detectPackageManager', () => {
     expect(getPreferredMock).not.toHaveBeenCalled();
   });
 
+  it('stops with a one-line error when no package manager can be detected', async () => {
+    const appDir = await createApp();
+    getPreferredMock.mockRejectedValue(
+      new Error("Couldn't find a package manager in your project.")
+    );
+
+    await expect(detectPackageManager(appDir)).rejects.toThrow(
+      'Could not tell which package manager this app uses. Install its dependencies first, or set "packageManager" in package.json.'
+    );
+  });
+
   it('falls back to the lockfile detection', async () => {
     const appDir = await createApp();
     getPreferredMock.mockResolvedValue('pnpm');
