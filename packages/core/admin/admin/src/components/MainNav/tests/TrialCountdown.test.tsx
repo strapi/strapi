@@ -1,6 +1,8 @@
 import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
+import { communityLicenseLimits } from '@tests/mockData';
 import { screen, render } from '@tests/utils';
 
+import { useGetLicenseTrialTimeLeftQuery } from '../../../../src/services/admin';
 import { TrialCountdown } from '../TrialCountdown';
 
 jest.mock('@strapi/admin/strapi-admin/ee', () => ({
@@ -37,5 +39,18 @@ describe('TrialCountdown', () => {
     render(<TrialCountdown />);
 
     expect(screen.getByTestId('trial-countdown')).toBeInTheDocument();
+  });
+
+  it.each([
+    ['no license', undefined],
+    ['the Community license limits', communityLicenseLimits],
+  ])('should not render with %s', (_label, license) => {
+    // @ts-expect-error – mock
+    useLicenseLimits.mockImplementationOnce(() => ({ license }));
+
+    render(<TrialCountdown />);
+
+    expect(useGetLicenseTrialTimeLeftQuery).toHaveBeenLastCalledWith(undefined, { skip: true });
+    expect(screen.queryByTestId('trial-countdown')).not.toBeInTheDocument();
   });
 });
