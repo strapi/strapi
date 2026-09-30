@@ -744,6 +744,7 @@ export const AssetsPage = () => {
                         MainAreaContextMenu. */}
                     <MainAreaContextMenu
                       disabled={!canCreate}
+                      locations={itemLocations}
                       onCreateFolder={() => setIsCreateFolderDialogOpen(true)}
                       onImportFiles={handleFileSelect}
                       onImportFromUrl={() => setIsUrlDialogOpen(true)}

@@ -1,18 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 
-import { Menu, Typography } from '@strapi/design-system';
-import { ArrowRight, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
-import { buildDragSetFromSelection } from '../../../utils/buildDragSetFromSelection';
 import { getTranslationKey } from '../../../utils/translations';
-import { useAssetSelection } from '../hooks/useAssetSelection';
-import { useFolderNavigation } from '../hooks/useFolderNavigation';
 
-import { BulkMoveDialog } from './BulkMoveDialog';
 import { CursorAnchoredMenu, type CursorPosition } from './CursorAnchoredMenu';
-import { DeleteItemsDialog } from './DeleteItemsDialog';
+import { SelectionActions } from './SelectionActions';
 
 import type { ItemLocations } from '../../../utils/itemLocations';
 
@@ -29,13 +22,14 @@ interface SelectionContextMenuProps {
 
 /**
  * Right-clicking one of several selected items acts on the selection, the way a
- * file manager does. It offers the selection-scoped actions only — move and
- * delete — because the rest of the item menu has no meaning for a set: there is
- * no one link to copy and no one file to replace.
+ * file manager does.
  *
  * The count leads, so what the menu is about to act on is stated before the
  * actions are. Right-clicking an item that is *not* in the selection replaces
  * the selection with it first, and `AssetContextMenu` handles it instead.
+ *
+ * Right-clicking the background with a selection live is a different menu:
+ * `MainAreaContextMenu` shows these same actions above its creation ones.
  */
 export const SelectionContextMenu = ({
   position,
@@ -44,31 +38,61 @@ export const SelectionContextMenu = ({
   onClose,
 }: SelectionContextMenuProps) => {
   const { formatMessage } = useIntl();
-  // Move and delete are both `assets.update` server-side — one flag gates both.
-  const { canUpdate, isLoading: isLoadingPermissions } = useMediaLibraryPermissions();
-  const { selectedIds, selectedFolderIds, clear } = useAssetSelection();
-  const { currentFolderId } = useFolderNavigation();
-  const [isMenuOpen, setIsMenuOpen] = useState(true);
-  const [isMoveOpen, setIsMoveOpen] = useState(false);
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
-  const count = selectedIds.size + selectedFolderIds.size;
-  const isDialogOpen = isMoveOpen || isDeleteOpen;
-  // `canUpdate` is `false` until the RBAC check settles. Closing on that would
-  // dismiss the menu on its first render, before it ever paints.
-  const hasActions = isLoadingPermissions || canUpdate;
-
-  const moveItems = useMemo(
-    () => buildDragSetFromSelection(selectedIds, selectedFolderIds, locations, currentFolderId),
-    [selectedIds, selectedFolderIds, locations, currentFolderId]
+  return (
+    <SelectionActions locations={locations}>
+      {({ hasActions, items, dialogs, isBusy }) => (
+        <SelectionContextMenuBody
+          hasActions={hasActions}
+          isBusy={isBusy}
+          position={position}
+          returnFocusTo={returnFocusTo}
+          label={formatMessage({
+            id: getTranslationKey('list.selection.context-menu.label'),
+            defaultMessage: 'Selection actions',
+          })}
+          items={items}
+          dialogs={dialogs}
+          onClose={onClose}
+        />
+      )}
+    </SelectionActions>
   );
+};
+
+interface SelectionContextMenuBodyProps {
+  hasActions: boolean;
+  isBusy: boolean;
+  position: CursorPosition;
+  returnFocusTo: HTMLElement | null;
+  label: string;
+  items: ReactNode;
+  dialogs: ReactNode;
+  onClose: () => void;
+}
+
+/**
+ * Split out because the "nothing left on screen" effects can't run inside the
+ * render prop above — hooks don't belong in a callback.
+ */
+const SelectionContextMenuBody = ({
+  hasActions,
+  isBusy,
+  position,
+  returnFocusTo,
+  label,
+  items,
+  dialogs,
+  onClose,
+}: SelectionContextMenuBodyProps) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(true);
 
   // Nothing left on screen — the menu is shut and no dialog took its place.
   useEffect(() => {
-    if (!isMenuOpen && !isDialogOpen) {
+    if (!isMenuOpen && !isBusy) {
       onClose();
     }
-  }, [isMenuOpen, isDialogOpen, onClose]);
+  }, [isMenuOpen, isBusy, onClose]);
 
   // A role that can read but not update has nothing to offer for a selection.
   useEffect(() => {
@@ -86,59 +110,13 @@ export const SelectionContextMenu = ({
       <CursorAnchoredMenu
         position={position}
         open={isMenuOpen}
-        label={formatMessage({
-          id: getTranslationKey('list.selection.context-menu.label'),
-          defaultMessage: 'Selection actions',
-        })}
+        label={label}
         returnFocusTo={returnFocusTo}
         onClose={() => setIsMenuOpen(false)}
       >
-        {/* A label rather than a `Menu.Item`: it states what the actions below
-            will act on and is not itself selectable. */}
-        <Menu.Label>
-          <Typography variant="sigma" textColor="neutral600">
-            {formatMessage(
-              {
-                id: getTranslationKey('list.bulk-actions.selected-count'),
-                defaultMessage: '{count, plural, =1 {# item selected} other {# items selected}}',
-              },
-              { count }
-            )}
-          </Typography>
-        </Menu.Label>
-        <Menu.Separator />
-        <Menu.Item startIcon={<ArrowRight />} onSelect={() => setIsMoveOpen(true)}>
-          {formatMessage({
-            id: getTranslationKey('list.bulk-actions.move'),
-            defaultMessage: 'Move',
-          })}
-        </Menu.Item>
-        <Menu.Item startIcon={<Trash />} variant="danger" onSelect={() => setIsDeleteOpen(true)}>
-          {formatMessage({
-            id: getTranslationKey('list.bulk-actions.delete'),
-            defaultMessage: 'Delete',
-          })}
-        </Menu.Item>
+        {items}
       </CursorAnchoredMenu>
-      {isMoveOpen && (
-        <BulkMoveDialog
-          open
-          onClose={() => setIsMoveOpen(false)}
-          items={moveItems}
-          onSuccess={clear}
-        />
-      )}
-      {isDeleteOpen && (
-        <DeleteItemsDialog
-          open
-          onClose={() => setIsDeleteOpen(false)}
-          target={{
-            fileIds: Array.from(selectedIds),
-            folderIds: Array.from(selectedFolderIds),
-          }}
-          onSuccess={clear}
-        />
-      )}
+      {dialogs}
     </>
   );
 };

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 
 import { Menu } from '@strapi/design-system';
 import { Files, Folder as FolderIcon, Link } from '@strapi/icons';
@@ -7,6 +7,9 @@ import { useIntl } from 'react-intl';
 import { getTranslationKey } from '../../../utils/translations';
 
 import { ActionsMenuContent } from './ActionsMenuContent';
+import { SelectionActions } from './SelectionActions';
+
+import type { ItemLocations } from '../../../utils/itemLocations';
 
 /**
  * The admin layout marks the element that scrolls the main column. Listening on
@@ -88,6 +91,14 @@ interface MainAreaContextMenuProps {
    * scrolling main column.
    */
   containerSelector?: string;
+  /**
+   * Real location of every loaded row. Supplying it turns on the selection
+   * section: with items selected, their bulk actions lead the menu, above the
+   * creation ones. Omitted, the menu offers creation only — which is what the
+   * folder tree wants, where the asset selection is not what you are pointing
+   * at.
+   */
+  locations?: ItemLocations;
 }
 
 /**
@@ -108,6 +119,7 @@ export const MainAreaContextMenu = ({
   onImportFromUrl,
   disabled,
   containerSelector = SCROLL_ROOT_SELECTOR,
+  locations,
 }: MainAreaContextMenuProps) => {
   const { formatMessage } = useIntl();
   const [position, setPosition] = useState<CursorPosition | null>(null);
@@ -143,6 +155,71 @@ export const MainAreaContextMenu = ({
     return () => container.removeEventListener('contextmenu', handleContextMenu);
   }, [locator, disabled, containerSelector]);
 
+  const createItems = (
+    <>
+      <Menu.Item onSelect={onCreateFolder} startIcon={<FolderIcon />}>
+        {formatMessage({
+          id: getTranslationKey('folder.create.title'),
+          defaultMessage: 'New folder',
+        })}
+      </Menu.Item>
+      <Menu.Item onSelect={onImportFiles} startIcon={<Files />}>
+        {formatMessage({
+          id: getTranslationKey('import-files'),
+          defaultMessage: 'File upload',
+        })}
+      </Menu.Item>
+      <Menu.Item onSelect={onImportFromUrl} startIcon={<Link />}>
+        {formatMessage({
+          id: getTranslationKey('import-from-url'),
+          defaultMessage: 'File upload from URL',
+        })}
+      </Menu.Item>
+    </>
+  );
+
+  /**
+   * `selectionItems` leads the menu when something is selected, so the actions
+   * that apply to the selection come before the ones that create new things.
+   */
+  const renderMenu = (selectionItems: ReactNode) => (
+    <Menu.Root
+      modal={false}
+      open={position !== null}
+      onOpenChange={(open) => {
+        if (!open) {
+          setPosition(null);
+        }
+      }}
+    >
+      <Menu.Trigger
+        tabIndex={-1}
+        // No visible content, so the name has to come from `aria-label` —
+        // the trigger's `label` prop renders as button text, which would
+        // defeat the point of an invisible anchor. Radix points the menu's
+        // `aria-labelledby` at this element, so it names the menu too.
+        endIcon={null}
+        aria-label={formatMessage({
+          id: getTranslationKey('list.context-menu.label'),
+          defaultMessage: 'Media library actions',
+        })}
+        style={{ ...CURSOR_ANCHOR_STYLE, top: position?.y ?? 0, left: position?.x ?? 0 }}
+      />
+      <ActionsMenuContent
+        popoverPlacement="bottom-start"
+        zIndex={2}
+        minWidth="22rem"
+        // The anchor is invisible and sits wherever the cursor was, so
+        // handing focus back to it on close would be a focus ring nobody can
+        // see. Let it fall to the body instead.
+        onCloseAutoFocus={(event) => event.preventDefault()}
+      >
+        {selectionItems}
+        {createItems}
+      </ActionsMenuContent>
+    </Menu.Root>
+  );
+
   return (
     <>
       <div ref={anchorRef} style={LOCATOR_STYLE} aria-hidden />
@@ -151,59 +228,28 @@ export const MainAreaContextMenu = ({
           Skipped entirely without the permission — the anchor is a real
           (if invisible) button, and one that can never open is noise in the
           accessibility tree. */}
-      {!disabled && (
-        <Menu.Root
-          modal={false}
-          open={position !== null}
-          onOpenChange={(open) => {
-            if (!open) {
-              setPosition(null);
-            }
-          }}
-        >
-          <Menu.Trigger
-            tabIndex={-1}
-            // No visible content, so the name has to come from `aria-label` —
-            // the trigger's `label` prop renders as button text, which would
-            // defeat the point of an invisible anchor. Radix points the menu's
-            // `aria-labelledby` at this element, so it names the menu too.
-            endIcon={null}
-            aria-label={formatMessage({
-              id: getTranslationKey('list.context-menu.label'),
-              defaultMessage: 'Media library actions',
-            })}
-            style={{ ...CURSOR_ANCHOR_STYLE, top: position?.y ?? 0, left: position?.x ?? 0 }}
-          />
-          <ActionsMenuContent
-            popoverPlacement="bottom-start"
-            zIndex={2}
-            minWidth="22rem"
-            // The anchor is invisible and sits wherever the cursor was, so
-            // handing focus back to it on close would be a focus ring nobody can
-            // see. Let it fall to the body instead.
-            onCloseAutoFocus={(event) => event.preventDefault()}
-          >
-            <Menu.Item onSelect={onCreateFolder} startIcon={<FolderIcon />}>
-              {formatMessage({
-                id: getTranslationKey('folder.create.title'),
-                defaultMessage: 'New folder',
-              })}
-            </Menu.Item>
-            <Menu.Item onSelect={onImportFiles} startIcon={<Files />}>
-              {formatMessage({
-                id: getTranslationKey('import-files'),
-                defaultMessage: 'File upload',
-              })}
-            </Menu.Item>
-            <Menu.Item onSelect={onImportFromUrl} startIcon={<Link />}>
-              {formatMessage({
-                id: getTranslationKey('import-from-url'),
-                defaultMessage: 'File upload from URL',
-              })}
-            </Menu.Item>
-          </ActionsMenuContent>
-        </Menu.Root>
-      )}
+      {!disabled &&
+        (locations ? (
+          <SelectionActions locations={locations}>
+            {({ count, hasActions, items, dialogs }) => (
+              <>
+                {renderMenu(
+                  count > 0 && hasActions ? (
+                    <>
+                      {items}
+                      <Menu.Separator />
+                    </>
+                  ) : null
+                )}
+                {/* Outside the menu: Radix unmounts its content on close, and a
+                    dialog opened from an item has to outlive it. */}
+                {dialogs}
+              </>
+            )}
+          </SelectionActions>
+        ) : (
+          renderMenu(null)
+        ))}
     </>
   );
 };

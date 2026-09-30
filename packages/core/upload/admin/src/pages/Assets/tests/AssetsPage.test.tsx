@@ -923,6 +923,52 @@ describe('AssetsPage main-area context menu', () => {
     expect(menu.queryByRole('menuitem', { name: 'Replace media' })).not.toBeInTheDocument();
   });
 
+  it('leads the background menu with the selection actions when something is selected', async () => {
+    respondWithAssets([createAsset(1, 'image.png'), createAsset(2, 'photo.png')]);
+
+    const { user } = renderPage();
+    await waitForCreatePermission();
+
+    await user.click(await screen.findByRole('checkbox', { name: 'Select image.png' }));
+    await user.click(await screen.findByRole('checkbox', { name: 'Select photo.png' }));
+
+    rightClickBackground();
+
+    const menu = within(await screen.findByRole('menu'));
+    expect(menu.getByText('2 items selected')).toBeInTheDocument();
+
+    // Order is the point: what acts on the selection comes before what creates
+    // something new.
+    expect(menu.getAllByRole('menuitem').map((item) => item.textContent)).toEqual([
+      'Move',
+      'Delete',
+      'New folder',
+      'File upload',
+      'File upload from URL',
+    ]);
+  });
+
+  it('leaves the background menu to the creation actions once the selection is cleared', async () => {
+    respondWithAssets([createAsset(1, 'image.png')]);
+
+    const { user } = renderPage();
+    await waitForCreatePermission();
+
+    const checkbox = await screen.findByRole('checkbox', { name: 'Select image.png' });
+    await user.click(checkbox);
+    await user.click(checkbox);
+
+    rightClickBackground();
+
+    const menu = within(await screen.findByRole('menu'));
+    expect(menu.queryByText(/item(s)? selected/)).not.toBeInTheDocument();
+    expect(menu.getAllByRole('menuitem').map((item) => item.textContent)).toEqual([
+      'New folder',
+      'File upload',
+      'File upload from URL',
+    ]);
+  });
+
   it('stays shut without assets.create', async () => {
     respondWithAssets([createAsset(1, 'image.png')]);
 
