@@ -1,19 +1,23 @@
 ---
 title: '@strapi/cloud-cli'
 sidebar_label: 'cloud'
-description: 'Commands to interact with the Strapi Cloud'
+description: 'CLI commands for Strapi Cloud interactions'
 package: '@strapi/cloud-cli'
-status: stub
+status: draft
+review_notes:
+  - Written from the package source on develop; needs a maintainer review.
 ---
 
 ## Purpose
 
-_What problem this package solves, and who relies on it._
+Provides CLI commands for Strapi app developers to manage Strapi Cloud projects, deployments, and environments. Integrated into the main Strapi CLI.
 
 ## Key concepts
 
-_The main abstractions and terms a contributor needs before changing the code._
+- **Cloud commands**: `deployProject`, `link`, `login`, `logout`, `createProject`, `listProjects`, `listEnvironments`, `linkEnvironment`. See [index.ts](https://github.com/strapi/strapi/tree/develop/packages/cli/cloud).
+- **Command builder**: `buildStrapiCloudCommands()` adds cloud subcommands to the Commander command object at startup.
+- **Config management**: Local config stores installation ID and authentication state. Services handle API calls to Strapi Cloud backend.
 
 ## Related
 
-_Related packages, architecture pages and RFCs._
+- [Testing](../../../contributing/03-testing/index.md): CLI test infrastructure.
