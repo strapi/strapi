@@ -12,6 +12,7 @@ import * as projectSettings from '../services/project-settings';
 import * as transfer from '../services/transfer';
 import { homepageService } from '../services/homepage';
 import persistTablesService from '../services/persist-tables';
+import seatEnforcementService from '../services/seat-enforcement';
 
 type S = {
   role: typeof role;
@@ -32,6 +33,7 @@ type S = {
   'guided-tour': ReturnType<typeof createGuidedTourService>;
   homepage: ReturnType<typeof homepageService>;
   'persist-tables': typeof persistTablesService;
+  'seat-enforcement': typeof seatEnforcementService;
 };
 
 type Resolve<T> = T extends (...args: unknown[]) => unknown ? T : { [K in keyof T]: T[K] };
