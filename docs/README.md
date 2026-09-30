@@ -15,7 +15,6 @@ The content is in `docs/docs/`. Readers pick a section by intent.
 | Architecture  | `docs/docs/architecture/` | How several packages work together.                       |
 | Packages      | `docs/docs/packages/`     | One page per workspace package. Paths mirror `packages/`. |
 | API reference | `docs/docs/api/`          | The `Strapi` class and its parts.                         |
-| Exports       | `docs/docs/exports/`      | TypeDoc output. Generated at build time, not committed.   |
 
 ## Commands
 
