@@ -154,4 +154,18 @@ describe('Admin Controller', () => {
       });
     });
   });
+
+  describe('getProjectType', () => {
+    beforeAll(() => {
+      global.strapi = { config: { get: jest.fn(() => ({})) } } as any;
+    });
+
+    test('CE getProjectType always returns isTrial: false', async () => {
+      const result = await adminController.getProjectType();
+
+      expect(result).toEqual({
+        data: { isEE: false, isTrial: false, features: [], flags: {}, ai: { enabled: false } },
+      });
+    });
+  });
 });

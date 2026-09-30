@@ -40,7 +40,7 @@ import { FolderGridList } from '../../components/FolderGridList/FolderGridList';
 import { SortPicker } from '../../components/SortPicker/SortPicker';
 import { TableList } from '../../components/TableList/TableList';
 import { UploadAssetDialog } from '../../components/UploadAssetDialog/UploadAssetDialog';
-import { useAIAvailability } from '../../hooks/useAiAvailability';
+import { useAIMetadataEnabled } from '../../hooks/useAIMetadataEnabled';
 import { useAssets } from '../../hooks/useAssets';
 import { useFolder } from '../../hooks/useFolder';
 import { useFolders } from '../../hooks/useFolders';
@@ -91,7 +91,7 @@ export const MediaLibrary = () => {
     canConfigureView,
     isLoading: permissionsLoading,
   } = useMediaLibraryPermissions();
-  const { isEnabled: isAiEnabled, status: aiAvailabilityStatus } = useAIAvailability();
+  const { isEnabled: isAiEnabled, status: aiMetadataStatus } = useAIMetadataEnabled();
   const currentFolderToEditRef = React.useRef<HTMLDivElement>();
   const { formatMessage } = useIntl();
   const { pathname } = useLocation();
@@ -154,7 +154,7 @@ export const MediaLibrary = () => {
     foldersLoading ||
     permissionsLoading ||
     assetsLoading ||
-    aiAvailabilityStatus === 'loading';
+    aiMetadataStatus === 'loading';
   const [showUploadAssetDialog, setShowUploadAssetDialog] = React.useState(false);
   const [showEditFolderDialog, setShowEditFolderDialog] = React.useState(false);
   const [assetToEdit, setAssetToEdit] = React.useState<Asset | undefined>(undefined);
@@ -235,7 +235,7 @@ export const MediaLibrary = () => {
     return <Page.Loading />;
   }
 
-  if (assetsError || foldersError || aiAvailabilityStatus === 'error') {
+  if (assetsError || foldersError || aiMetadataStatus === 'error') {
     return <Page.Error />;
   }
 

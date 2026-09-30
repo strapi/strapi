@@ -44,6 +44,16 @@ export const actionTypes = {
   'token.update': 'Update token',
   'token.delete': 'Delete token',
   'token.regenerate': 'Regenerate token',
+  'admin-user.create': 'Create user',
+  'admin-user.update': 'Update user',
+  'admin-user.delete': 'Delete user',
+  'admin-user.invite.accept': 'Accept invitation',
+  'admin-user.password-reset.create': 'Request password reset',
+  'admin-user.password-reset.confirm': 'Reset password',
+  'admin-user.password.update': 'Update password',
+  'webhook.create': 'Create webhook',
+  'webhook.update': 'Update webhook',
+  'webhook.delete': 'Delete webhook',
 };
 
 export const getDefaultMessage = (value: keyof typeof actionTypes) => {

@@ -3,17 +3,11 @@ import { renderHook } from '@tests/utils';
 import { useTracking, MEDIA_LIBRARY_VERSION } from '../useTracking';
 
 const mockTrackStrapiUsage = jest.fn();
-const mockUseAIAvailability = jest.fn();
 const mockUseGetSettingsQuery = jest.fn();
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
   useTracking: () => ({ trackUsage: mockTrackStrapiUsage }),
-}));
-
-jest.mock('@strapi/admin/strapi-admin/ee', () => ({
-  ...jest.requireActual('@strapi/admin/strapi-admin/ee'),
-  useAIAvailability: () => mockUseAIAvailability(),
 }));
 
 jest.mock('../../services/settings', () => ({
@@ -23,8 +17,9 @@ jest.mock('../../services/settings', () => ({
 describe('future media library useTracking', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseAIAvailability.mockReturnValue(false);
-    mockUseGetSettingsQuery.mockReturnValue({ data: { data: { aiMetadata: false } } });
+    mockUseGetSettingsQuery.mockReturnValue({
+      data: { data: { aiMetadata: false, aiMetadataAvailable: false } },
+    });
   });
 
   it('stamps mediaLibraryVersion on every event and forwards name + properties', () => {
@@ -49,9 +44,10 @@ describe('future media library useTracking', () => {
     });
   });
 
-  it('adds isAiMediaLibraryConfigured when AI is available (mirrors the legacy wrapper)', () => {
-    mockUseAIAvailability.mockReturnValue(true);
-    mockUseGetSettingsQuery.mockReturnValue({ data: { data: { aiMetadata: true } } });
+  it('adds isAiMediaLibraryConfigured when a provider is registered (mirrors the legacy wrapper)', () => {
+    mockUseGetSettingsQuery.mockReturnValue({
+      data: { data: { aiMetadata: true, aiMetadataAvailable: true } },
+    });
 
     const { result } = renderHook(() => useTracking());
 
@@ -64,7 +60,7 @@ describe('future media library useTracking', () => {
     });
   });
 
-  it('omits isAiMediaLibraryConfigured when AI is unavailable', () => {
+  it('omits isAiMediaLibraryConfigured when no provider is registered', () => {
     const { result } = renderHook(() => useTracking());
 
     result.current.trackUsage('didReplaceMedia', { location: 'upload' });
