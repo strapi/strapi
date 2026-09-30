@@ -3,6 +3,9 @@ title: Content Releases Scheduling
 description: Content Releases Scheduling
 tags:
   - tech-design
+review_notes:
+  - 'Says scheduling needs the `contentReleasesScheduling` future flag. The name has no reference in the package code on develop; scheduling may be always on.'
+status: needs-review
 ---
 
 :::caution

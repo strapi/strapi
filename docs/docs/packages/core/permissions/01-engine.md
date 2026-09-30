@@ -4,6 +4,9 @@ description: Conceptual guide to the permission engine
 tags:
   - rbac
   - hooks
+review_notes:
+  - 'The usage example calls `engine.generate(...)`. The engine method is `generateAbility`.'
+status: needs-review
 ---
 
 # Permission Engine

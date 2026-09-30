@@ -7,6 +7,7 @@ tags:
 status: needs-review
 review_notes:
   - About 18 paths point to `packages/core/admin/ee/server/**/*.js`; the code now lives in `packages/core/review-workflows/server/src`.
+  - 'Says the MVP stores one workflow. The code supports many workflows (`multiple-workflows` migration, `workflows` and `workflow-content-types` services).'
 ---
 
 # Review Workflows

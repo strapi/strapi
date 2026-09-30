@@ -4,6 +4,9 @@ description: Content Releases backend
 tags:
   - tech-design
   - backend
+review_notes:
+  - 'Says scheduling needs the `contentReleasesScheduling` future flag. The name has no reference in the package code on develop; scheduling may be always on.'
+status: needs-review
 ---
 
 All backend code can be found in:
