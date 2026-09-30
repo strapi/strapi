@@ -219,11 +219,13 @@ export declare namespace GetLicenseLimitInformation {
       enforcementUserCount: number;
       features: LicenseFeature[];
       isHostedOnStrapiCloud: boolean;
-      licenseLimitStatus: unknown;
-      permittedSeats: number;
+      licenseLimitStatus: 'OVER_LIMIT' | 'AT_LIMIT' | null;
+      /** Undefined without a seat limit. */
+      permittedSeats?: number;
       shouldNotify: boolean;
       shouldStopCreate: boolean;
-      type: string;
+      /** EE only — the license type. */
+      type?: string;
       isTrial: boolean;
     };
     error?: errors.ApplicationError;

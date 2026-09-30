@@ -2,7 +2,7 @@ import type { Context } from 'koa';
 
 import path from 'path';
 
-import { map, values, sumBy, pipe, flatMap, propEq } from 'lodash/fp';
+import { map, values, sumBy, pipe, flatMap, propEq, isNil } from 'lodash/fp';
 import _ from 'lodash';
 import { exists } from 'fs-extra';
 import { env } from '@strapi/utils';
@@ -209,6 +209,51 @@ export default {
       }));
 
     ctx.send({ plugins } satisfies Plugins.Response);
+  },
+
+  // TODO @Nico the contract types `features` with the known feature names only, while this returns
+  // every license entry, like /project-type does
+  async licenseLimitInformation() {
+    const permittedSeats = strapi.ee.seats;
+
+    let shouldNotify = false;
+    let licenseLimitStatus: 'OVER_LIMIT' | 'AT_LIMIT' | null = null;
+    let enforcementUserCount;
+
+    const currentActiveUserCount = await getService('user').count({ isActive: true });
+
+    const eeDisabledUsers = await getService('seat-enforcement').getDisabledUserList();
+
+    if (Array.isArray(eeDisabledUsers)) {
+      enforcementUserCount = currentActiveUserCount + eeDisabledUsers.length;
+    } else {
+      enforcementUserCount = currentActiveUserCount;
+    }
+
+    if (!isNil(permittedSeats) && enforcementUserCount > permittedSeats) {
+      shouldNotify = true;
+      licenseLimitStatus = 'OVER_LIMIT';
+    }
+
+    if (!isNil(permittedSeats) && enforcementUserCount === permittedSeats) {
+      shouldNotify = true;
+      licenseLimitStatus = 'AT_LIMIT';
+    }
+
+    const data = {
+      enforcementUserCount,
+      currentActiveUserCount,
+      permittedSeats,
+      shouldNotify,
+      shouldStopCreate: isNil(permittedSeats) ? false : currentActiveUserCount >= permittedSeats,
+      licenseLimitStatus,
+      isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
+      type: strapi.ee.type,
+      isTrial: strapi.ee.isTrial,
+      features: strapi.ee.features.list() ?? [],
+    };
+
+    return { data };
   },
 
   async licenseTrialTimeLeft() {

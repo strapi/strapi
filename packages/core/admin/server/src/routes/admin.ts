@@ -68,6 +68,14 @@ export default [
   },
   {
     method: 'GET',
+    path: '/license-limit-information',
+    handler: 'admin.licenseLimitInformation',
+    config: {
+      policies: ['admin::isAuthenticatedAdmin'],
+    },
+  },
+  {
+    method: 'GET',
     path: '/license-trial-time-left',
     handler: 'admin.licenseTrialTimeLeft',
     config: {
