@@ -96,6 +96,11 @@ export declare namespace GetProjectType {
       planPriceId?: string;
       /** Plan label for display: `Community`, `Growth` or `Enterprise`. */
       projectType?: Modules.EE.Edition;
+      /**
+       * Whether the license limits the number of active admin users. The count itself is only
+       * served to authenticated admins, by /license-limit-information.
+       */
+      hasSeatLimit?: boolean;
     };
     error?: errors.ApplicationError;
   }

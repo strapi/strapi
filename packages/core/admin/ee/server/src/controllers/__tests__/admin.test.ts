@@ -6,6 +6,7 @@ describe('EE admin controller', () => {
     type = 'enterprise' as string | null,
     planPriceId = null as string | null,
     edition = 'Enterprise',
+    seats = undefined as number | null | undefined,
   } = {}) => {
     global.strapi = {
       EE: true,
@@ -17,6 +18,7 @@ describe('EE admin controller', () => {
         type,
         planPriceId,
         edition,
+        seats,
         features: {
           isEnabled: jest.fn(() => false),
           list: jest.fn(() => []),
@@ -52,6 +54,29 @@ describe('EE admin controller', () => {
       const { data } = await adminController.getProjectType();
 
       expect(data.projectType).toBe(edition);
+    });
+
+    it.each([
+      [undefined, false],
+      [null, false],
+      [5, true],
+    ])('reports hasSeatLimit for seats %s as %s', async (seats, hasSeatLimit) => {
+      setup({ seats });
+
+      const { data } = await adminController.getProjectType();
+
+      expect(data.hasSeatLimit).toBe(hasSeatLimit);
+    });
+
+    it('falls back to no seat limit when building the response throws', async () => {
+      setup({ seats: 5 });
+      jest.mocked(global.strapi.ai.admin.isStrapiManagedAiEnabled).mockImplementation(() => {
+        throw new Error('AI service unavailable');
+      });
+
+      const { data } = await adminController.getProjectType();
+
+      expect(data).toMatchObject({ isEE: false, projectType: 'Community', hasSeatLimit: false });
     });
 
     it('omits license fields that are null internally', async () => {

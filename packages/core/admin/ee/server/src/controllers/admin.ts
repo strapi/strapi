@@ -1,3 +1,5 @@
+import { isNil } from 'lodash/fp';
+
 import type { GetProjectType } from '../../../../shared/contracts/admin';
 
 export default {
@@ -16,6 +18,7 @@ export default {
           type: strapi.ee.type ?? undefined,
           planPriceId: strapi.ee.planPriceId ?? undefined,
           projectType: strapi.ee.edition,
+          hasSeatLimit: isNil(strapi.ee.seats) === false,
           ai: {
             enabled: strapi.ai.admin.isStrapiManagedAiEnabled(),
           },
@@ -29,6 +32,7 @@ export default {
           features: [],
           flags,
           projectType: 'Community',
+          hasSeatLimit: false,
           ai: { enabled: false },
         },
       };
