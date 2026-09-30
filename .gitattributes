@@ -109,3 +109,5 @@ AUTHORS text
 /.yarn/** linguist-vendored
 /.yarn/releases/* binary
 /.yarn/plugins/**/* binary
+
+.github/workflows/*.lock.yml linguist-generated=true

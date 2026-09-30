@@ -1,0 +1,198 @@
+# Companion workflow to auto-label: deterministic PR size labels, LGTM label,
+# and auto-merge label. No AI engine, no secrets, runs in seconds. Install by
+# copying this file to .github/workflows/ — no compile step needed.
+#
+# Toggles and thresholds live in the `env:` block below.
+#
+# SECURITY: this workflow uses pull_request_target so it can label PRs opened
+# from forks. That is safe ONLY because it never checks out or executes PR
+# code — it reads PR metadata and writes labels. Never add a checkout step or
+# run anything from the PR branch here.
+
+name: pr-labels
+run-name: 'pr-labels: PR #${{ github.event.pull_request.number }}'
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, auto_merge_enabled, auto_merge_disabled, enqueued, dequeued]
+  pull_request_review:
+    types: [submitted, dismissed]
+
+permissions:
+  pull-requests: write
+  issues: write
+  contents: read
+
+env:
+  # Feature toggles
+  SIZE_LABELS: 'true'
+  LGTM_LABEL: 'false'
+  AUTO_MERGE_LABEL: 'false'
+  # Label naming
+  LGTM_LABEL_NAME: 'LGTM'
+  SIZE_LABEL_PREFIX: 'size:'
+  AUTO_MERGE_LABEL_NAME: 'auto-merge'
+  # Size buckets: total changed lines (additions + deletions) strictly below
+  # the threshold falls in that bucket; at or above SIZE_XL is XXL.
+  SIZE_XS: '10'
+  SIZE_S: '50'
+  SIZE_M: '200'
+  SIZE_L: '500'
+  SIZE_XL: '1000'
+  # Files that do not reflect meaningful code changes (comma-separated globs;
+  # a pattern without "/" matches against the basename anywhere in the tree).
+  SIZE_EXCLUDE: 'package-lock.json,yarn.lock,pnpm-lock.yaml,*.lock,go.sum,Cargo.lock,poetry.lock,uv.lock,*.min.js,*.min.css,*.map,*.snap,*.svg,dist/**,build/**,vendor/**'
+
+jobs:
+  size:
+    if: github.event_name == 'pull_request_target' && contains(fromJSON('["opened", "synchronize"]'), github.event.action)
+    runs-on: ubuntu-latest
+    # Per-job concurrency (not workflow-level): size and lgtm respond to
+    # different events and must never cancel each other's in-flight work.
+    concurrency:
+      group: pr-size-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    steps:
+      - name: Apply size label
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v8
+        with:
+          script: |
+            if (process.env.SIZE_LABELS !== 'true') { core.info('size labels disabled'); return; }
+            const { owner, repo } = context.repo;
+            const pr = context.payload.pull_request;
+            const prefix = process.env.SIZE_LABEL_PREFIX || 'size:';
+
+            const esc = s => s.replace(/[.+^${}()|[\]\\]/g, '\\$&');
+            const globToRe = g => new RegExp('^' + esc(g)
+              .replace(/\*\*/g, '\x00')
+              .replace(/\*/g, '[^/]*')
+              .replace(/\?/g, '[^/]')
+              .replace(/\x00/g, '.*') + '$');
+            const patterns = (process.env.SIZE_EXCLUDE || '')
+              .split(',').map(s => s.trim()).filter(Boolean)
+              .map(g => ({ re: globToRe(g), basenameOnly: !g.includes('/') }));
+            const excluded = path => {
+              const base = path.split('/').pop();
+              return patterns.some(p => p.re.test(p.basenameOnly ? base : path));
+            };
+
+            const files = await github.paginate(github.rest.pulls.listFiles,
+              { owner, repo, pull_number: pr.number, per_page: 100 });
+            const counted = files.filter(f => !excluded(f.filename));
+            const total = counted.reduce((s, f) => s + f.additions + f.deletions, 0);
+            const t = k => parseInt(process.env['SIZE_' + k], 10);
+            const bucket = total < t('XS') ? 'XS' : total < t('S') ? 'S'
+              : total < t('M') ? 'M' : total < t('L') ? 'L'
+              : total < t('XL') ? 'XL' : 'XXL';
+            const want = prefix + bucket;
+            core.info(`${counted.length}/${files.length} files counted, ${total} changed lines -> ${want}`);
+
+            const live = await github.paginate(github.rest.issues.listLabelsOnIssue,
+              { owner, repo, issue_number: pr.number, per_page: 100 });
+            const sizeNames = live.map(l => l.name)
+              .filter(n => n.toLowerCase().startsWith(prefix.toLowerCase()));
+
+            for (const n of sizeNames.filter(n => n !== want)) {
+              await github.rest.issues.removeLabel({ owner, repo, issue_number: pr.number, name: n })
+                .catch(e => core.warning(`remove ${n}: ${e.message}`));
+            }
+            if (!sizeNames.includes(want)) {
+              await github.rest.issues.createLabel({ owner, repo, name: want,
+                  color: 'ededed', description: `Pull request size: ${bucket}` })
+                .catch(e => { if (e.status !== 422) throw e; });
+              await github.rest.issues.addLabels({ owner, repo, issue_number: pr.number, labels: [want] });
+              core.info(`applied ${want}`);
+            } else {
+              core.info(`already labeled ${want}`);
+            }
+
+  lgtm:
+    if: github.event_name == 'pull_request_review'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: pr-lgtm-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    steps:
+      - name: Reconcile LGTM label
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v8
+        with:
+          script: |
+            if (process.env.LGTM_LABEL !== 'true') { core.info('LGTM label disabled'); return; }
+            const { owner, repo } = context.repo;
+            const pr = context.payload.pull_request;
+            const name = process.env.LGTM_LABEL_NAME || 'LGTM';
+
+            // Recompute from full review state rather than trusting the single
+            // event: the latest state-changing review per reviewer wins, and at
+            // least one APPROVED from a user with write access earns the label.
+            const reviews = await github.paginate(github.rest.pulls.listReviews,
+              { owner, repo, pull_number: pr.number, per_page: 100 });
+            const latest = {};
+            for (const r of reviews) {
+              if (!r.user || r.user.type === 'Bot') continue;
+              if (['APPROVED', 'CHANGES_REQUESTED', 'DISMISSED'].includes(r.state)) {
+                latest[r.user.login] = r.state;
+              }
+            }
+            let approved = false;
+            for (const [login, state] of Object.entries(latest)) {
+              if (state !== 'APPROVED') continue;
+              const { data } = await github.rest.repos.getCollaboratorPermissionLevel(
+                { owner, repo, username: login });
+              if (['admin', 'write', 'maintain'].includes(data.permission)) { approved = true; break; }
+            }
+
+            const live = await github.paginate(github.rest.issues.listLabelsOnIssue,
+              { owner, repo, issue_number: pr.number, per_page: 100 });
+            const has = live.some(l => l.name === name);
+            core.info(`approved by write-access reviewer: ${approved}; currently labeled: ${has}`);
+
+            if (approved && !has) {
+              await github.rest.issues.createLabel({ owner, repo, name,
+                  color: '0e8a16', description: 'Approved by a reviewer with write access' })
+                .catch(e => { if (e.status !== 422) throw e; });
+              await github.rest.issues.addLabels({ owner, repo, issue_number: pr.number, labels: [name] });
+              core.info(`applied ${name}`);
+            } else if (!approved && has) {
+              await github.rest.issues.removeLabel({ owner, repo, issue_number: pr.number, name })
+                .catch(e => core.warning(`remove ${name}: ${e.message}`));
+              core.info(`removed ${name}`);
+            }
+
+  auto-merge:
+    if: github.event_name == 'pull_request_target' && contains(fromJSON('["auto_merge_enabled", "auto_merge_disabled", "enqueued", "dequeued"]'), github.event.action)
+    runs-on: ubuntu-latest
+    concurrency:
+      group: pr-automerge-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    steps:
+      - name: Reconcile auto-merge label
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v8
+        with:
+          script: |
+            if (process.env.AUTO_MERGE_LABEL !== 'true') { core.info('auto-merge label disabled'); return; }
+            const { owner, repo } = context.repo;
+            const pr = context.payload.pull_request;
+            const name = process.env.AUTO_MERGE_LABEL_NAME || 'auto-merge';
+
+            // Reconcile from current state rather than mirroring the single
+            // event: auto_merge is non-null exactly while auto-merge (or the
+            // merge queue) is armed, so a missed event self-heals on the next.
+            const armed = pr.auto_merge != null || context.payload.action === 'enqueued';
+
+            const live = await github.paginate(github.rest.issues.listLabelsOnIssue,
+              { owner, repo, issue_number: pr.number, per_page: 100 });
+            const has = live.some(l => l.name === name);
+            core.info(`auto-merge armed: ${armed}; currently labeled: ${has}`);
+
+            if (armed && !has) {
+              await github.rest.issues.createLabel({ owner, repo, name,
+                  color: 'FFA500', description: 'Auto-merge or merge queue is enabled' })
+                .catch(e => { if (e.status !== 422) throw e; });
+              await github.rest.issues.addLabels({ owner, repo, issue_number: pr.number, labels: [name] });
+              core.info(`applied ${name}`);
+            } else if (!armed && has) {
+              await github.rest.issues.removeLabel({ owner, repo, issue_number: pr.number, name })
+                .catch(e => core.warning(`remove ${name}: ${e.message}`));
+              core.info(`removed ${name}`);
+            }
