@@ -40,7 +40,6 @@ const createBrowserStrapi = async (
     features: {
       SSO: 'sso',
       AUDIT_LOGS: 'audit-logs',
-      REVIEW_WORKFLOWS: 'review-workflows',
       /**
        * If we don't get the license then we know it's not EE
        * so no feature is enabled.
@@ -85,8 +84,8 @@ const createBrowserStrapi = async (
     browserStrapi.flags = flags;
     browserStrapi.features = {
       ...browserStrapi.features,
-      isEnabled: (featureName: string | undefined) =>
-        licensedFeatures.some((feature) => feature.name === featureName),
+      isEnabled: (name: Modules.EE.FeatureName) =>
+        licensedFeatures.some((feature) => feature.name === name),
     };
     browserStrapi.projectType = getProjectType({ isEE, planPriceId });
     browserStrapi.ai = ai;

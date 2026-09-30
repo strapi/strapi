@@ -7,6 +7,7 @@ declare global {
       isEE: boolean;
       features: {
         SSO: 'sso';
+        // TODO @Nico type as `Modules.EE.FeatureName` once this package depends on @strapi/types
         isEnabled: (featureName?: string) => boolean;
       };
       future: {
