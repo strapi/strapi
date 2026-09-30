@@ -28,6 +28,8 @@ const LEGACY_TOP_LEVEL_OPTIONS: Record<string, string[]> = {
   'review-workflows': ['numberOfWorkflows', 'stagesPerWorkflow'],
 };
 
+const SEAT_LIMIT = 'seat-limit' satisfies Modules.EE.FeatureName;
+
 const isOptions = (value: unknown): value is Record<string, unknown> => isPlainObject(value);
 
 const isLicenseType = (value: unknown): value is Modules.EE.LicenseType =>
@@ -59,13 +61,29 @@ const toFeature = (entry: unknown): ResolvedFeature | undefined => {
 };
 
 /**
+ * The admin seat limit of the license: a finite number, or a string that converts to one.
+ */
+const toSeats = (value: unknown): number | undefined => {
+  const seats = typeof value === 'string' ? Number(value) : value;
+
+  if (typeof seats === 'number' && Number.isFinite(seats)) {
+    return seats;
+  }
+
+  // TODO @Nico a non-numeric `seats` sets no limit, while develop treated any non-nil value as one
+  return undefined;
+};
+
+/**
  * Turns a verified license payload into its features, each with an options object.
  * Without `features` (`undefined` or `null`), the features come from the legacy license `type`.
  * Malformed `features` (not an array) grant nothing.
+ * `seat-limit` comes from the top-level `seats` only, whatever `features` holds.
  */
 const resolveFeatures = (licenseInfo: {
   type?: unknown;
   features?: unknown;
+  seats?: unknown;
 }): ResolvedFeature[] => {
   let entries: unknown[] = [];
 
@@ -81,12 +99,21 @@ const resolveFeatures = (licenseInfo: {
 
   for (const entry of entries) {
     const feature = toFeature(entry);
+    // `seat-limit` comes from the top-level `seats` only
+    // TODO @Nico the registry may send it one day
+    const isListedSeatLimit = feature?.name === SEAT_LIMIT;
 
     // The first entry of a name wins
-    if (feature !== undefined && names.has(feature.name) === false) {
+    if (feature !== undefined && isListedSeatLimit === false && names.has(feature.name) === false) {
       names.add(feature.name);
       features.push(feature);
     }
+  }
+
+  const seats = toSeats(licenseInfo.seats);
+
+  if (seats !== undefined) {
+    features.push({ name: SEAT_LIMIT, options: { seats } });
   }
 
   return features;

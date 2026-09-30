@@ -31,7 +31,14 @@ describe('EE user controller', () => {
     };
 
     global.strapi = {
-      ee: { seats, features: { isEnabled: jest.fn(() => false) } },
+      ee: {
+        features: {
+          isEnabled: jest.fn(() => false),
+          get: jest.fn((name: string) =>
+            name === 'seat-limit' && seats !== undefined ? { name, options: { seats } } : undefined
+          ),
+        },
+      },
       admin: { services: { user: userService } },
     } as any;
 

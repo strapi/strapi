@@ -82,7 +82,11 @@ export declare namespace GetProjectType {
     data: {
       isEE: boolean;
       isTrial: boolean;
-      features: LicenseFeatureEntry[];
+      /**
+       * The name of every license feature, without options: the route is public. Options are
+       * only served to authenticated admins, by /license-limit-information.
+       */
+      features: Array<Pick<LicenseFeatureEntry, 'name'>>;
       flags: {
         promoteEE?: boolean;
         nps?: boolean;

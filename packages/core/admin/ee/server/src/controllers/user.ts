@@ -14,8 +14,8 @@ const pickUserCreationAttributes = <T extends object>(user: T) =>
   pick(user, ['firstname', 'lastname', 'email', 'roles', 'preferedLanguage']);
 
 const hasAdminSeatsAvaialble = async () => {
-  const permittedSeats = strapi.ee.seats as any;
-  if (permittedSeats == null) {
+  const permittedSeats = strapi.ee.features.get('seat-limit')?.options.seats;
+  if (permittedSeats === undefined) {
     return true;
   }
 

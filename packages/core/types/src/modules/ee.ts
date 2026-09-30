@@ -20,6 +20,7 @@ export type LicenseType = 'bronze' | 'silver' | 'gold';
 export type Edition = 'Community' | 'Growth' | 'Enterprise';
 
 export type EEService = {
+  /** @deprecated Use `features.get('seat-limit')`. */
   seats: number | null | undefined;
   type: string | null | undefined;
   isEE: boolean;

@@ -21,7 +21,13 @@ describe('seat-enforcement service', () => {
     };
 
     global.strapi = {
-      ee: { seats },
+      ee: {
+        features: {
+          get: jest.fn((name: string) =>
+            name === 'seat-limit' && seats !== undefined ? { name, options: { seats } } : undefined
+          ),
+        },
+      },
       store,
       db: { query: jest.fn(() => ({ updateMany, findMany })) },
       admin: { services: { user: { count } } },

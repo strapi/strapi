@@ -8,7 +8,7 @@ import { getService } from '../utils';
  * @param {object} input
  */
 const updateEEDisabledUsersList = async (id: Data.ID, input: any) => {
-  if (isNil(strapi.ee.seats) === true) {
+  if (strapi.ee.features.isEnabled('seat-limit') === false) {
     return;
   }
 
@@ -36,7 +36,7 @@ const updateEEDisabledUsersList = async (id: Data.ID, input: any) => {
 const castNumberArray = (ids: unknown) => castArray(ids).map((id) => toNumber(id));
 
 const removeFromEEDisabledUsersList = async (ids: unknown) => {
-  if (isNil(strapi.ee.seats) === true) {
+  if (strapi.ee.features.isEnabled('seat-limit') === false) {
     return;
   }
 
