@@ -60,15 +60,10 @@ const createCtx = (overrides: Record<string, unknown> = {}) =>
   }) as unknown as Context & { created: jest.Mock };
 
 describe('review-workflows workflows controller', () => {
-  const originalStrapi = global.strapi;
-
-  afterAll(() => {
-    global.strapi = originalStrapi;
-  });
-
   beforeEach(() => {
     jest.clearAllMocks();
 
+    // The controller reads the global `strapi`. Jest isolates globals per file, so no restore.
     // The unit setup derives `strapi.plugin(name).service(name)` from `strapi.plugins`
     global.strapi = {
       plugins: {
