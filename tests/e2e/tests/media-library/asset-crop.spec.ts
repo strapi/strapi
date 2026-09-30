@@ -79,7 +79,7 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')('Media Library 
                 Math.abs(measured.img.h - measured.area.h) <= 1,
             };
           },
-          { message: `image should fill the crop area after "${name}"` }
+          { message: `image should fill the crop area after ${turn + 1} right turn(s)` }
         )
         .toEqual({ collapsed: false, fills: true });
     }
