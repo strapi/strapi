@@ -48,6 +48,18 @@ const { ApplicationError, NotFoundError } = errors;
 const { bytesToKbytes } = fileUtils;
 
 /**
+ * Build a `where` clause that resolves a file by either its numeric primary key
+ * or its (string) documentId. A purely-numeric identifier is treated as an `id`,
+ * anything else as a `documentId`.
+ *
+ * A strict `/^\d+$/` test is used on purpose rather than `parseInt`, which would
+ * misclassify digit-leading documentIds as ids (see issue #27018). Upload files
+ * have no draftAndPublish, so `documentId` maps to exactly one row.
+ */
+const toFileLookup = (id: ID): { id: ID } | { documentId: ID } =>
+  /^\d+$/.test(String(id)) ? { id } : { documentId: id };
+
+/**
  * Queue a provider operation for a later `Promise.all`, with a rejection handler
  * attached in the same turn so a fast failure is never an unhandled rejection.
  *
@@ -468,7 +480,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         : await fileService.getFolderPath(folder),
     };
 
-    return update(id, newInfos, { user });
+    // `id` may be a documentId; use the resolved primary key for the update.
+    return update(dbFile.id, newInfos, { user });
   }
 
   async function replace(
@@ -550,7 +563,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       await fse.remove(tmpWorkingDirectory);
     }
 
-    return update(id, fileData, { user });
+    // `id` may be a documentId; use the resolved primary key for the update.
+    return update(dbFile.id, fileData, { user });
   }
 
   async function update(id: ID, values: Partial<File>, opts?: CommonOptions) {
@@ -598,7 +612,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     });
 
     const file = await strapi.db.query(FILE_MODEL_UID).findOne({
-      where: { id },
+      where: toFileLookup(id),
       ...query,
     });
 

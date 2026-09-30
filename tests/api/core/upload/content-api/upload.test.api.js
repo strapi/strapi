@@ -205,6 +205,78 @@ describe('Upload plugin', () => {
         .query('plugin::upload.file')
         .delete({ where: { id: dogEntity.profilePicture.id } });
     });
+
+    test('Get one file by documentId', async () => {
+      const res = await rq({
+        method: 'POST',
+        url: '/upload',
+        formData: {
+          files: fs.createReadStream(path.join(__dirname, '../utils/thumbnail_target.png')),
+        },
+      });
+      const { id, documentId } = res.body[0];
+
+      const getRes = await rq({
+        method: 'GET',
+        url: `/upload/files/${documentId}`,
+      });
+
+      expect(getRes.statusCode).toBe(200);
+      expect(getRes.body).toEqual(
+        expect.objectContaining({ id, documentId, url: expect.any(String) })
+      );
+
+      await strapi.db.query('plugin::upload.file').delete({ where: { id } });
+    });
+  });
+
+  describe('Delete', () => {
+    test('Delete a file by numeric id', async () => {
+      const res = await rq({
+        method: 'POST',
+        url: '/upload',
+        formData: {
+          files: fs.createReadStream(path.join(__dirname, '../utils/thumbnail_target.png')),
+        },
+      });
+      const { id } = res.body[0];
+
+      const deleteRes = await rq({ method: 'DELETE', url: `/upload/files/${id}` });
+
+      expect(deleteRes.statusCode).toBe(200);
+      expect(deleteRes.body).toEqual(expect.objectContaining({ id }));
+
+      const dbFile = await strapi.db.query('plugin::upload.file').findOne({ where: { id } });
+      expect(dbFile).toBeNull();
+    });
+
+    test('Delete a file by documentId (regression for #24037)', async () => {
+      const res = await rq({
+        method: 'POST',
+        url: '/upload',
+        formData: {
+          files: fs.createReadStream(path.join(__dirname, '../utils/thumbnail_target.png')),
+        },
+      });
+      const { id, documentId } = res.body[0];
+
+      const deleteRes = await rq({ method: 'DELETE', url: `/upload/files/${documentId}` });
+
+      expect(deleteRes.statusCode).toBe(200);
+      expect(deleteRes.body).toEqual(expect.objectContaining({ id, documentId }));
+
+      const dbFile = await strapi.db.query('plugin::upload.file').findOne({ where: { id } });
+      expect(dbFile).toBeNull();
+    });
+
+    test('Returns 404 when deleting a non-existent documentId', async () => {
+      const deleteRes = await rq({
+        method: 'DELETE',
+        url: '/upload/files/nonexistentdocumentid00',
+      });
+
+      expect(deleteRes.statusCode).toBe(404);
+    });
   });
 
   describe('Filtering data based on media attributes', () => {
