@@ -29,10 +29,14 @@ const PACKAGE_FIELD = /^package:[ \t]*(['"]?)(.+?)\1[ \t]*$/m;
 
 const SECTIONS = [
   ['Purpose', 'What problem this package solves, and who relies on it.'],
-  ['Key concepts', 'The main abstractions and terms a contributor needs before changing the code.'],
-  ['Code map', 'Entry points and key folders, with what lives where.'],
-  ['Testing', 'Which test suites cover this package, and the commands to run them.'],
-  ['Related', 'Related packages, architecture pages and RFCs.'],
+  [
+    'Key concepts',
+    'The main abstractions and terms a contributor needs before changing the code. Link to the sub-pages of the package.',
+  ],
+  [
+    'Related',
+    'Architecture pages and sibling packages. The package header already lists dependencies and dependents.',
+  ],
 ];
 
 /**

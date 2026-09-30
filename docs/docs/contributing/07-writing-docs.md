@@ -115,14 +115,14 @@ status: stub
 
 ## Key concepts
 
-## Code map
-
-## Testing
-
 ## Related
 ```
 
-Each heading carries one italic guidance line while the page is a stub. Replace the guidance with content. Delete a heading that you do not fill.
+Each heading carries one italic guidance line while the page is a stub. Replace the guidance with content, and keep the three headings:
+
+- **Purpose**: what problem the package solves, and who relies on it.
+- **Key concepts**: the main abstractions a contributor needs before changing the code. Link to the sub-pages of the package.
+- **Related**: architecture pages and sibling packages. Do not repeat the dependency lists from the package header.
 
 The `package` key drives the package header. The theme wrapper renders it between the title and the content. It shows the npm name, version, private flag, a link to the folder on GitHub, the description from `package.json`, the internal dependencies and dependents, and a link to the [package map](../architecture/01-package-map.mdx). Do not repeat this data in the page text.
 
