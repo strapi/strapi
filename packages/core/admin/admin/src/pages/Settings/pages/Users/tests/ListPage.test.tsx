@@ -19,7 +19,7 @@ describe('Users | ListPage', () => {
 
   describe('seat limit', () => {
     const originalIsEE = window.strapi.isEE;
-    const originalHasSeatLimit = window.strapi.hasSeatLimit;
+    const originalIsEnabled = window.strapi.features.isEnabled;
     let requestedPaths: string[];
 
     beforeEach(() => {
@@ -33,11 +33,11 @@ describe('Users | ListPage', () => {
     afterEach(() => {
       server.events.removeAllListeners();
       window.strapi.isEE = originalIsEE;
-      window.strapi.hasSeatLimit = originalHasSeatLimit;
+      window.strapi.features.isEnabled = originalIsEnabled;
     });
 
     it('renders the Community seat UI for a license without a seat limit', async () => {
-      window.strapi.hasSeatLimit = false;
+      window.strapi.features.isEnabled = (name) => name === 'sso';
 
       render(<ListPage />);
 
@@ -49,7 +49,7 @@ describe('Users | ListPage', () => {
     });
 
     it('renders the seat UI of the license under a seat limit', async () => {
-      window.strapi.hasSeatLimit = true;
+      window.strapi.features.isEnabled = (name) => name === 'seat-limit';
       server.use(
         http.get('/admin/license-limit-information', () =>
           HttpResponse.json({
@@ -62,6 +62,7 @@ describe('Users | ListPage', () => {
               shouldStopCreate: true,
               licenseLimitStatus: 'OVER_LIMIT',
               type: 'gold',
+              features: [{ name: 'seat-limit', options: { seats: 5 } }],
             },
           })
         )
