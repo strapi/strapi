@@ -268,7 +268,12 @@ export default {
     return { data };
   },
 
-  async licenseTrialTimeLeft() {
+  async licenseTrialTimeLeft(ctx: Context) {
+    // Only a trial license has a trial end date to ask the license registry for
+    if (strapi.ee.isTrial !== true) {
+      return ctx.notFound();
+    }
+
     const data = await strapi.ee.getTrialEndDate({
       strapi,
     });

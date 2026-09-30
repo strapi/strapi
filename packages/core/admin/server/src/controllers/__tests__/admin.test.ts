@@ -340,4 +340,34 @@ describe('Admin Controller', () => {
       });
     });
   });
+
+  describe('licenseTrialTimeLeft', () => {
+    const setup = (isTrial: boolean) => {
+      const getTrialEndDate = jest.fn(() => Promise.resolve({ trialEndsAt: '2026-10-07' }));
+      global.strapi = { ee: { isTrial, getTrialEndDate } } as any;
+
+      return { getTrialEndDate };
+    };
+
+    test('returns the trial end date of a trial license', async () => {
+      const { getTrialEndDate } = setup(true);
+      const ctx = { notFound: jest.fn() } as any;
+
+      const result = await adminController.licenseTrialTimeLeft(ctx);
+
+      expect(getTrialEndDate).toHaveBeenCalledWith({ strapi: global.strapi });
+      expect(result).toEqual({ trialEndsAt: '2026-10-07' });
+      expect(ctx.notFound).not.toHaveBeenCalled();
+    });
+
+    test('answers 404 without asking the license registry outside a trial', async () => {
+      const { getTrialEndDate } = setup(false);
+      const ctx = { notFound: jest.fn() } as any;
+
+      await adminController.licenseTrialTimeLeft(ctx);
+
+      expect(ctx.notFound).toHaveBeenCalled();
+      expect(getTrialEndDate).not.toHaveBeenCalled();
+    });
+  });
 });
