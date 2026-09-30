@@ -6,6 +6,7 @@ import adminContentTypes from './content-types';
 import services from './services';
 import controllers from './controllers';
 import routes from './routes';
+import ssoRoutes from './routes/sso';
 import auditLogsRoutes from './audit-logs/routes/audit-logs';
 import auditLogsController from './audit-logs/controllers/audit-logs';
 import { createAuditLogsService } from './audit-logs/services/audit-logs';
@@ -31,6 +32,9 @@ const getAdminEE = () => {
     routes,
   };
 
+  // Like audit logs, the SSO routes are only registered with the feature at load; their middleware
+  // answers 404 if the feature is lost at runtime
+  const isSSOEnabled = strapi.ee.features.isEnabled('sso');
   const isAuditLogsEnabled =
     strapi.config.get('admin.auditLogs.enabled', true) &&
     strapi.ee.features.isEnabled('audit-logs');
@@ -42,6 +46,7 @@ const getAdminEE = () => {
     },
     routes: {
       ...eeAdmin.routes,
+      ...(isSSOEnabled ? { sso: ssoRoutes } : {}),
       ...(isAuditLogsEnabled ? { 'audit-logs': auditLogsRoutes } : {}),
     },
     async register({ strapi }: { strapi: Core.Strapi }) {
