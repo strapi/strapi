@@ -124,6 +124,7 @@ window.strapi = {
     isEnabled: () => false,
   },
   projectType: 'Community',
+  hasSeatLimit: false,
   telemetryDisabled: true,
   flags: {
     nps: true,
