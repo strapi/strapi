@@ -71,8 +71,7 @@ export declare namespace UpdateProjectSettings {
 /**
  * /project-type - the edition, license and flags the admin boots with.
  *
- * Served by the CE controller and overridden by the EE one; both must satisfy
- * this shape, and the admin builds `window.strapi` from it.
+ * Served by the CE admin controller in every edition; the admin builds `window.strapi` from it.
  */
 export declare namespace GetProjectType {
   export interface Request {

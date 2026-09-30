@@ -41,25 +41,39 @@ const isUsingTypeScript: TsUtilsModule['isUsingTypeScript'] = (
  * A set of functions called "actions" for `Admin`
  */
 export default {
-  // TODO very temporary to check the switch ee/ce
-  // When removing this we need to update the /admin/src/index.js file
-  // whe,re we set the strapi.window.isEE value
-
-  // NOTE: admin/ee/server overrides this controller, and adds the EE features
-  // This returns an empty feature list for CE
   async getProjectType(): Promise<GetProjectType.Response> {
     const flags = strapi.config.get('admin.flags', {});
-    return {
-      data: {
-        isEE: false,
-        isTrial: false,
-        features: [],
-        flags,
-        projectType: 'Community',
-        hasSeatLimit: false,
-        ai: { enabled: false },
-      },
-    };
+
+    try {
+      return {
+        data: {
+          // The license fields are nullable internally; the contract is not.
+          isEE: Boolean(strapi.EE),
+          isTrial: strapi.ee.isTrial,
+          features: strapi.ee.features.list(),
+          flags,
+          type: strapi.ee.type ?? undefined,
+          planPriceId: strapi.ee.planPriceId ?? undefined,
+          projectType: strapi.ee.edition,
+          hasSeatLimit: isNil(strapi.ee.seats) === false,
+          ai: {
+            enabled: strapi.ai.admin.isStrapiManagedAiEnabled(),
+          },
+        },
+      };
+    } catch {
+      return {
+        data: {
+          isEE: false,
+          isTrial: false,
+          features: [],
+          flags,
+          projectType: 'Community',
+          hasSeatLimit: false,
+          ai: { enabled: false },
+        },
+      };
+    }
   },
 
   async init() {
