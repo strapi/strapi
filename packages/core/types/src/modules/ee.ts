@@ -32,6 +32,9 @@ export type Feature<TName extends FeatureName = FeatureName> = TName extends Fea
 
 export type LicenseType = 'bronze' | 'silver' | 'gold';
 
+/** Plan label for display. Never a gate. */
+export type Edition = 'Community' | 'Growth' | 'Enterprise';
+
 export type EEService = {
   seats: number | null | undefined;
   type: string | null | undefined;
@@ -47,6 +50,8 @@ export type EEService = {
    * @internal
    */
   providedLicense: string | undefined;
+  /** `Community` without an enabled license, `Growth` for a growth plan, else `Enterprise`. */
+  edition: Edition;
   getTrialEndDate: ({ strapi }: { strapi: Strapi }) => Promise<{ trialEndsAt: string } | null>;
   features: {
     isEnabled: (name: FeatureName) => boolean;

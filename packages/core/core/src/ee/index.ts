@@ -307,5 +307,15 @@ export default Object.freeze<
     return ee.providedLicense;
   },
 
+  get edition(): Modules.EE.Edition {
+    if (ee.enabled === false) {
+      return 'Community';
+    }
+
+    return ee.licenseInfo.planPriceId?.toLowerCase().includes('growth') === true
+      ? 'Growth'
+      : 'Enterprise';
+  },
+
   features: Object.freeze({ list, get, isEnabled }),
 });

@@ -164,7 +164,14 @@ describe('Admin Controller', () => {
       const result = await adminController.getProjectType();
 
       expect(result).toEqual({
-        data: { isEE: false, isTrial: false, features: [], flags: {}, ai: { enabled: false } },
+        data: {
+          isEE: false,
+          isTrial: false,
+          features: [],
+          flags: {},
+          projectType: 'Community',
+          ai: { enabled: false },
+        },
       });
     });
   });
