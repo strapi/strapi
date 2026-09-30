@@ -5,29 +5,16 @@ import { useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { SubNav } from '../../../components/SubNav';
+import { SETTINGS_LINKS_LICENSE_FEATURES } from '../../../constants';
 import { useTracking } from '../../../features/Tracking';
 import { useSettingsMenu } from '../../../hooks/useSettingsMenu';
 
+import type { LicensedSettingsLinkId } from '../../../constants';
 import type { Modules } from '@strapi/types';
-
-type LinkId =
-  | 'content-releases'
-  | 'review-workflows'
-  | 'sso'
-  | 'auditLogs'
-  | 'auditLogs-purchase-page';
-
-const linksIdsToLicenseFeaturesNames: Record<LinkId, Modules.EE.FeatureName> = {
-  'content-releases': 'cms-content-releases',
-  'review-workflows': 'review-workflows',
-  sso: 'sso',
-  auditLogs: 'audit-logs',
-  'auditLogs-purchase-page': 'audit-logs',
-};
 
 const isLinkFeatureEnabled = (linkId: string) => {
   const featureName: Modules.EE.FeatureName | undefined =
-    linksIdsToLicenseFeaturesNames[linkId as LinkId];
+    SETTINGS_LINKS_LICENSE_FEATURES[linkId as LicensedSettingsLinkId];
 
   return featureName !== undefined && window.strapi.features.isEnabled(featureName);
 };
@@ -55,7 +42,6 @@ const SettingsNav = ({ isFullPage = false }: { isFullPage?: boolean }) => {
       links: section.links.map((link) => {
         return {
           ...link,
-          id: link.id as LinkId,
           title: link.intlLabel,
           name: link.id,
           to: link.to.startsWith('/') ? link.to : `/settings/${link.to}`,
