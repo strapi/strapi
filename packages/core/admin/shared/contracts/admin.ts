@@ -83,7 +83,7 @@ export declare namespace GetProjectType {
     data: {
       isEE: boolean;
       isTrial: boolean;
-      features: { name: string }[];
+      features: LicenseFeatureEntry[];
       flags: {
         promoteEE?: boolean;
         nps?: boolean;
@@ -189,40 +189,22 @@ export declare namespace ProvidersOptions {
 }
 
 /**
- * /license-limit-information – get license limit information
+ * License features, from the catalog in `@strapi/types` (`Modules.EE.FeatureOptions`).
  */
+export type LicenseFeature = Modules.EE.Feature;
 
-export interface SSOFeature {
-  name: 'sso';
-}
+/** A feature as the license lists it, including names this version of Strapi does not know. */
+export type LicenseFeatureEntry = ReturnType<Modules.EE.EEService['features']['list']>[number];
 
-export interface AuditLogsFeature {
-  name: 'audit-logs';
-  options: {
-    retentionDays: number | null;
-  };
-}
-
-export interface ReviewWorkflowsFeature {
-  name: 'review-workflows';
-  options?: { numberOfWorkflows: number | null; stagesPerWorkflow: number | null };
-}
-
-export interface ContentReleasesFeature {
-  name: 'cms-content-releases';
-  options?: {
-    maximumReleases: number;
-  };
-}
-
-export interface ContentHistoryFeature {
-  name: 'cms-content-history';
-  options: {
-    retentionDays: number;
-  };
-}
+export type SSOFeature = Modules.EE.Feature<'sso'>;
+export type AuditLogsFeature = Modules.EE.Feature<'audit-logs'>;
+export type ReviewWorkflowsFeature = Modules.EE.Feature<'review-workflows'>;
+export type ContentReleasesFeature = Modules.EE.Feature<'cms-content-releases'>;
+export type ContentHistoryFeature = Modules.EE.Feature<'cms-content-history'>;
 
 /**
+ * /license-limit-information – get license limit information
+ *
  * TODO: this response needs refactoring because we're mixing the admin seat limit info with
  * regular EE feature info.
  */
@@ -235,13 +217,7 @@ export declare namespace GetLicenseLimitInformation {
     data: {
       currentActiveUserCount: number;
       enforcementUserCount: number;
-      features: (
-        | SSOFeature
-        | AuditLogsFeature
-        | ReviewWorkflowsFeature
-        | ContentReleasesFeature
-        | ContentHistoryFeature
-      )[];
+      features: LicenseFeature[];
       isHostedOnStrapiCloud: boolean;
       licenseLimitStatus: unknown;
       permittedSeats: number;
