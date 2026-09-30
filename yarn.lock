@@ -24591,6 +24591,8 @@ __metadata:
   dependencies:
     oxlint: "npm:1.72.0"
     tsconfig: "npm:5.55.1"
+    vitest: "catalog:"
+    vitest-config: "npm:5.55.1"
   languageName: unknown
   linkType: soft
 
