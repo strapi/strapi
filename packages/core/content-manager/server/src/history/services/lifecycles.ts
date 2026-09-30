@@ -175,6 +175,11 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
       strapi.cron.add({
         deleteHistoryDaily: {
           async task() {
+            // The license can be lost at runtime, or disabled by checkLicense after init
+            if (strapi.ee.features.isEnabled('cms-content-history') === false) {
+              return;
+            }
+
             const BATCH_SIZE = 1000;
 
             const retentionDaysInMilliseconds =

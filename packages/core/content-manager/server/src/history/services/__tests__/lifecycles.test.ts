@@ -121,6 +121,43 @@ describe('history lifecycles service', () => {
     );
   });
 
+  describe('deleteHistoryDaily cron', () => {
+    const runTask = async () => {
+      await lifecyclesService.bootstrap();
+
+      return mockStrapi.cron.add.mock.calls[0][0].deleteHistoryDaily.task();
+    };
+
+    let query: jest.SpyInstance;
+
+    afterEach(() => {
+      query.mockRestore();
+      mockStrapi.ee.features.isEnabled.mockReturnValue(false);
+    });
+
+    it('deletes nothing when the license does not have the history feature', async () => {
+      mockStrapi.ee.features.isEnabled.mockReturnValue(false);
+      query = jest.spyOn(mockStrapi.db, 'query');
+
+      await runTask();
+
+      expect(mockStrapi.ee.features.isEnabled).toHaveBeenCalledWith('cms-content-history');
+      expect(query).not.toHaveBeenCalled();
+    });
+
+    it('deletes the expired versions when the license has the history feature', async () => {
+      mockStrapi.ee.features.isEnabled.mockReturnValue(true);
+      const findMany = jest.fn().mockResolvedValue([{ id: 1 }]);
+      const deleteMany = jest.fn();
+      query = jest.spyOn(mockStrapi.db, 'query').mockReturnValue({ findMany, deleteMany } as any);
+
+      await runTask();
+
+      expect(findMany).toHaveBeenCalledTimes(1);
+      expect(deleteMany).toHaveBeenCalledWith({ where: { id: { $in: [1] } } });
+    });
+  });
+
   describe('publish dedup guard', () => {
     // The middleware suppresses the `update` history version that the publish
     // action emits as a side-effect on the draft, so users see one version per
