@@ -39,6 +39,14 @@ export type EEService = {
   isTrial: boolean;
   subscriptionId?: string | null | undefined;
   planPriceId?: string | null | undefined;
+  /**
+   * The license this project provides, read once at startup: `STRAPI_LICENSE`, else `license.txt`.
+   * The license registry does not refresh it. `undefined` when `STRAPI_DISABLE_EE=true` or no
+   * license is found. Only for forwarding to Strapi services: gate on a feature, never on this.
+   *
+   * @internal
+   */
+  providedLicense: string | undefined;
   getTrialEndDate: ({ strapi }: { strapi: Strapi }) => Promise<{ trialEndsAt: string } | null>;
   features: {
     isEnabled: (name: FeatureName) => boolean;
