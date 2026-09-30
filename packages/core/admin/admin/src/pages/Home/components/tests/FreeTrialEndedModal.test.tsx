@@ -1,3 +1,4 @@
+import { communityLicenseLimits } from '@tests/mockData';
 import { render, screen, waitFor } from '@tests/utils';
 
 import { useLicenseLimits } from '../../../../../../ee/admin/src/hooks/useLicenseLimits';
@@ -49,6 +50,22 @@ describe('FreeTrialEndedModal', () => {
         isTrial: false,
       },
     }));
+
+    render(<FreeTrialEndedModal />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Your trial has ended')).toBeInTheDocument();
+    });
+  });
+
+  it.each([
+    ['no license', undefined],
+    ['the Community license limits', communityLicenseLimits],
+  ])('should render when trial ended less than 7 days ago with %s', async (_label, license) => {
+    localStorage.setItem('STRAPI_FREE_TRIAL_ENDS_AT:test-uuid', '2025-05-21T09:50:00.000Z');
+
+    // @ts-expect-error – mock
+    useLicenseLimits.mockImplementationOnce(() => ({ license }));
 
     render(<FreeTrialEndedModal />);
 

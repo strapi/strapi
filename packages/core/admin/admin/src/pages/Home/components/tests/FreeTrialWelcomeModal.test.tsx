@@ -1,3 +1,4 @@
+import { communityLicenseLimits } from '@tests/mockData';
 import { render, screen, waitFor } from '@tests/utils';
 
 import { useLicenseLimits } from '../../../../../../ee/admin/src/hooks/useLicenseLimits';
@@ -35,6 +36,20 @@ describe('FreeTrialWelcomeModal', () => {
         isTrial: false,
       },
     }));
+
+    render(<FreeTrialWelcomeModal />);
+
+    await waitFor(() => {
+      expect(screen.queryByText("We're glad to have you on board")).not.toBeInTheDocument();
+    });
+  });
+
+  it.each([
+    ['no license', undefined],
+    ['the Community license limits', communityLicenseLimits],
+  ])('should not render with %s', async (_label, license) => {
+    // @ts-expect-error – mock
+    useLicenseLimits.mockImplementationOnce(() => ({ license }));
 
     render(<FreeTrialWelcomeModal />);
 
