@@ -227,7 +227,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           attribute.target === props.attribute.target
       ).length > 0;
 
-    const { data, isLoading, isFetching } = useGetRelationsQuery(
+    const { data, isLoading, isFetching, refetch } = useGetRelationsQuery(
       {
         model,
         targetField,
@@ -246,7 +246,21 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
     );
 
     const handleLoadMore = () => {
-      setCurrentPage((prev) => prev + 1);
+      /**
+       * The relations cache is shared by every instance of this field that targets the same
+       * document (e.g. the edit view and the same document opened again inside the relation
+       * modal), and another instance mounting resets it to page 1. Request the page that follows
+       * the one actually held by the cache rather than `currentPage + 1`, otherwise the pages in
+       * between would never be loaded.
+       */
+      const nextPage = (data?.pagination?.page ?? currentPage) + 1;
+
+      if (nextPage === currentPage) {
+        // Our query args already point at that page, so changing state would not fetch it
+        refetch();
+      } else {
+        setCurrentPage(nextPage);
+      }
     };
 
     const field = useField<RelationsFormValue>(props.name);
@@ -724,6 +738,7 @@ const RelationModalWithContext = ({
   const getParentFormValuesWithCurrentRelation = () => {
     return setIn(getParentFormValues(), name, fieldValue);
   };
+  const setParentFormValue = useForm('RelationModalWrapper', (state) => state.onChange);
 
   const handleLoadMore = () => {
     if (!data || !data.pagination) {
@@ -765,6 +780,7 @@ const RelationModalWithContext = ({
                   fieldToConnect: name,
                   fieldToConnectUID: componentUID,
                   getParentFormValues: getParentFormValuesWithCurrentRelation,
+                  setParentFormValue,
                 },
               });
             }
