@@ -1,19 +1,22 @@
 ---
 title: 'create-strapi'
 sidebar_label: 'create-strapi'
-description: 'Generate a new Strapi application.'
+description: 'Alias CLI for creating new Strapi projects via npm init'
 package: 'create-strapi'
-status: stub
+status: draft
+review_notes:
+  - Written from the package source on develop; needs a maintainer review.
 ---
 
 ## Purpose
 
-_What problem this package solves, and who relies on it._
+Provides an alternative entry point for Strapi app developers to create new projects. Delegates to `create-strapi-app`. Available via `npm init strapi@latest`, `yarn create strapi@latest`, and `npx create-strapi@latest`.
 
 ## Key concepts
 
-_The main abstractions and terms a contributor needs before changing the code._
+- **Wrapper package**: Delegates to create-strapi-app/bin at [index.js](https://github.com/strapi/strapi/tree/develop/packages/cli/create-strapi). Exists for npm init/pnpm create integration.
+- **Same functionality**: Offers the same project scaffolding and prompts as create-strapi-app.
 
 ## Related
 
-_Related packages, architecture pages and RFCs._
+- [`create-strapi-app`](../create-strapi-app/index.md): primary package that provides the actual CLI.

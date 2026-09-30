@@ -1,21 +1,21 @@
 ---
 title: 'eslint-config-custom'
 sidebar_label: 'eslint-config-custom'
-description: 'No description in package.json yet.'
+description: 'ESLint configuration for Strapi packages'
 package: 'eslint-config-custom'
-status: stub
+status: draft
 review_notes:
-  - 'package.json has no description.'
+  - Written from the package source on develop; needs a maintainer review.
 ---
 
 ## Purpose
 
-_What problem this package solves, and who relies on it._
+Provides custom ESLint configurations for the Strapi monorepo packages. Extends `@strapi/eslint-config` with rules and overrides specific to the project, separating back-end and front-end configurations.
 
 ## Key concepts
 
-_The main abstractions and terms a contributor needs before changing the code._
+- **Separate configurations**: Dedicated configs for back-end (JavaScript) and front-end (TypeScript/React). See [back/](https://github.com/strapi/strapi/tree/develop/packages/utils/eslint-config-custom) and `front/`.
+- **Extends Strapi's base**: Builds on `@strapi/eslint-config` with monorepo-specific rules: disabled Prettier plugin, relaxed dynamic require rules, and test file exceptions for imports.
+- **Consumed by**: Core packages, plugins, and providers use this in their ESLint configs, including `@strapi/database`, `@strapi/core`, `@strapi/permissions`.
 
 ## Related
-
-_Related packages, architecture pages and RFCs._

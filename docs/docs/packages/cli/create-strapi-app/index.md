@@ -1,19 +1,23 @@
 ---
 title: 'create-strapi-app'
 sidebar_label: 'create-strapi-app'
-description: 'Generate a new Strapi application.'
+description: 'CLI to scaffold a new Strapi project'
 package: 'create-strapi-app'
-status: stub
+status: draft
+review_notes:
+  - Written from the package source on develop; needs a maintainer review.
 ---
 
 ## Purpose
 
-_What problem this package solves, and who relies on it._
+Provides the official CLI for Strapi app developers to create new Strapi projects. Available via `yarn create strapi-app` or `npx create-strapi-app`. Handles project initialization, prompts for configuration, and can integrate with Strapi Cloud.
 
 ## Key concepts
 
-_The main abstractions and terms a contributor needs before changing the code._
+- **Entry point**: `run()` function processes CLI arguments and guides project creation. See [index.ts](https://github.com/strapi/strapi/tree/develop/packages/cli/create-strapi-app).
+- **Interactive prompts**: Collects project name, database choice, and optional Cloud integration via `prompts.ts`.
+- **Dual mode**: Supports local project creation and Strapi Cloud project creation with API integration.
 
 ## Related
 
-_Related packages, architecture pages and RFCs._
+- [Testing](../../../contributing/03-testing/index.md): CLI test infrastructure.
