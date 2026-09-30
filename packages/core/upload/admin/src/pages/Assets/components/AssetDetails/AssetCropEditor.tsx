@@ -60,10 +60,6 @@ const RotateControls = styled(Flex)`
   z-index: 1;
 `;
 
-const RotateLeftIcon = styled(ArrowClockwise)`
-  transform: scaleX(-1);
-`;
-
 const HeaderBar = styled(Flex)`
   width: 100%;
   gap: ${({ theme }) => theme.spaces[2]};
@@ -592,20 +588,10 @@ export const AssetCropEditor = ({
                 onClick={() => handleRotate('right')}
                 label={formatMessage({
                   id: getTranslationKey('asset-details.crop.rotate-right'),
-                  defaultMessage: 'Rotate right',
+                  defaultMessage: 'Rotate 90° right',
                 })}
               >
                 <ArrowClockwise />
-              </IconButton>
-              <IconButton
-                disabled={!isReady}
-                onClick={() => handleRotate('left')}
-                label={formatMessage({
-                  id: getTranslationKey('asset-details.crop.rotate-left'),
-                  defaultMessage: 'Rotate left',
-                })}
-              >
-                <RotateLeftIcon />
               </IconButton>
             </RotateControls>
 

@@ -61,8 +61,8 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')('Media Library 
 
     // Four consecutive right turns walk 90 -> 180 -> 270 -> 0, so the half turn is
     // covered too: it is the one rotation that must stay in flow.
-    for (const name of ['Rotate right', 'Rotate right', 'Rotate right', 'Rotate right']) {
-      await page.getByRole('button', { name }).click();
+    for (let turn = 0; turn < 4; turn += 1) {
+      await page.getByRole('button', { name: 'Rotate 90° right' }).click();
       await expect(editorImage).toBeVisible();
 
       // Polled rather than measured once: the click re-renders and styled-components

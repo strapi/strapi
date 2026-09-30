@@ -390,16 +390,7 @@ describe('AssetCropEditor rotation', () => {
     await renderEditor();
     expect(cropFields().width.value).toBe('800');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Rotate right' }));
-
-    expect(cropFields().width.value).toBe('600');
-    expect(cropFields().height.value).toBe('800');
-  });
-
-  it('swaps the crop dimensions on a left turn', async () => {
-    await renderEditor();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Rotate left' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Rotate 90° right' }));
 
     expect(cropFields().width.value).toBe('600');
     expect(cropFields().height.value).toBe('800');
@@ -409,7 +400,7 @@ describe('AssetCropEditor rotation', () => {
     await renderEditor();
 
     for (let turn = 0; turn < 4; turn += 1) {
-      fireEvent.click(screen.getByRole('button', { name: 'Rotate right' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Rotate 90° right' }));
     }
 
     expect(cropFields().width.value).toBe('800');
@@ -424,7 +415,7 @@ describe('AssetCropEditor rotation', () => {
       asset: { ...asset, focalPoint: { x: 25, y: 10 } } as AssetWithPopulatedCreatedBy,
     });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Rotate right' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Rotate 90° right' }));
 
     // x -> 100 - y = 90, y -> x = 25, against a 600x800 crop.
     expect((screen.getByLabelText('Focal point X (px)') as HTMLInputElement).value).toBe('540');
@@ -440,21 +431,19 @@ describe('AssetCropEditor rotation', () => {
     fireEvent.change(cropFields().width, { target: { value: '400' } });
     expect(cropFields().width.value).toBe('400');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Rotate right' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Rotate 90° right' }));
 
     // 800x600 cropped to 400 wide, turned: the fields must follow the swap.
     expect(cropFields().width.value).toBe('600');
     expect(cropFields().height.value).toBe('400');
   });
 
-  it('labels both controls for assistive tech and keyboard use', async () => {
+  it('labels the control for assistive tech and keyboard use', async () => {
     await renderEditor();
 
-    for (const name of ['Rotate left', 'Rotate right']) {
-      const button = screen.getByRole('button', { name });
-      expect(button).toBeEnabled();
-      expect(button.tagName).toBe('BUTTON');
-    }
+    const button = screen.getByRole('button', { name: 'Rotate 90° right' });
+    expect(button).toBeEnabled();
+    expect(button.tagName).toBe('BUTTON');
   });
 
   // On a quarter turn the image is positioned absolutely, so the crop area needs an
@@ -465,11 +454,11 @@ describe('AssetCropEditor rotation', () => {
 
     expect(spacer()).toBeNull();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Rotate right' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Rotate 90° right' }));
     expect(spacer()).toHaveAttribute('aria-hidden');
 
     // Half turn: back in flow, no spacer needed.
-    fireEvent.click(screen.getByRole('button', { name: 'Rotate right' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Rotate 90° right' }));
     expect(spacer()).toBeNull();
   });
 
@@ -488,8 +477,9 @@ describe('AssetCropEditor rotation', () => {
 
     // The design system marks a disabled IconButton with `aria-disabled` and drops the
     // click, rather than using the native attribute.
-    for (const name of ['Rotate left', 'Rotate right']) {
-      expect(screen.getByRole('button', { name })).toHaveAttribute('aria-disabled', 'true');
-    }
+    expect(screen.getByRole('button', { name: 'Rotate 90° right' })).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
   });
 });
