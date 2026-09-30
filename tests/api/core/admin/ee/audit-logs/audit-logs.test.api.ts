@@ -336,27 +336,3 @@ describeOnCondition(edition === 'EE')('Audit logs', () => {
     });
   });
 });
-
-describeOnCondition(edition === 'CE')('Audit logs (CE)', () => {
-  let strapi;
-  let rq;
-
-  beforeAll(async () => {
-    strapi = await createStrapiInstance();
-    rq = await createAuthRequest({ strapi });
-  });
-
-  afterAll(async () => {
-    await strapi.destroy();
-  });
-
-  test('Registers the audit-log content type so its data survives a downgrade', () => {
-    expect(strapi.contentType('admin::audit-log')).toBeDefined();
-  });
-
-  test('Does not register the audit-logs routes', async () => {
-    const res = await rq({ method: 'GET', url: '/admin/audit-logs' });
-
-    expect(res.statusCode).toBe(404);
-  });
-});

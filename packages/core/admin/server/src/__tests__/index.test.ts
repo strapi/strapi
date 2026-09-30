@@ -1,9 +1,12 @@
 import type { Modules } from '@strapi/types';
 
 describe('admin server module', () => {
-  const loadAdmin = async (enabledFeatures: Modules.EE.FeatureName[] = []) => {
+  const loadAdmin = async ({
+    isEE = false,
+    enabledFeatures = [],
+  }: { isEE?: boolean; enabledFeatures?: Modules.EE.FeatureName[] } = {}) => {
     global.strapi = {
-      EE: enabledFeatures.length > 0,
+      EE: isEE,
       config: { get: jest.fn((_key: string, defaultValue?: unknown) => defaultValue) },
       ee: {
         features: {
@@ -25,17 +28,25 @@ describe('admin server module', () => {
     const admin = await loadAdmin();
 
     expect(Object.keys(admin.routes)).toEqual(['admin']);
-    expect(admin.contentTypes).toHaveProperty('audit-log');
+    expect(admin.contentTypes).not.toHaveProperty('audit-log');
     expect(admin.services).toHaveProperty('seat-enforcement');
     expect(admin.services).toHaveProperty('persist-tables');
     expect(admin.services.user).toHaveProperty('removeFromEEDisabledUsersList');
     expect(admin.controllers.user).toHaveProperty('isSSOLocked');
   });
 
+  test('registers the audit-log content type with a license lacking the audit-logs feature', async () => {
+    const admin = await loadAdmin({ isEE: true });
+
+    expect(Object.keys(admin.routes)).toEqual(['admin']);
+    expect(admin.contentTypes).toHaveProperty('audit-log');
+  });
+
   test('adds the feature routes of the license', async () => {
-    const admin = await loadAdmin(['sso', 'audit-logs']);
+    const admin = await loadAdmin({ isEE: true, enabledFeatures: ['sso', 'audit-logs'] });
 
     expect(Object.keys(admin.routes).sort()).toEqual(['admin', 'audit-logs', 'sso']);
     expect(admin.controllers).toHaveProperty('audit-logs');
+    expect(admin.contentTypes).toHaveProperty('audit-log');
   });
 });

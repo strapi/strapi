@@ -10,6 +10,7 @@ import auditLogsRoutes from './audit-logs/routes/audit-logs';
 import auditLogsController from './audit-logs/controllers/audit-logs';
 import { createAuditLogsService } from './audit-logs/services/audit-logs';
 import { createAuditLogsLifecycleService } from './audit-logs/services/lifecycles';
+import { auditLog } from './audit-logs/content-types/audit-log';
 import { AUDIT_LOG_EXPORT_EVENT } from '../../../shared/utils/audit-log-export';
 import { registerTokenAuditEvents } from '../../../server/src/audit-logs/tokens';
 import { registerAdminUserAuditEvents } from '../../../server/src/audit-logs/admin-users';
@@ -20,7 +21,12 @@ const getAdminEE = () => {
     register,
     bootstrap,
     destroy,
-    contentTypes: adminContentTypes,
+    contentTypes: {
+      // Always register the audit-log content type when a license exists to prevent data loss
+      // Not in CE (it adds tables) nor on the audit-logs feature (schema sync would drop them)
+      ...(strapi.EE === true ? { 'audit-log': auditLog } : {}),
+      ...adminContentTypes,
+    },
     services,
     controllers,
   };
