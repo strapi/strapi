@@ -47,7 +47,7 @@ export const sendDidSendReviewWorkflowPropertiesOnceAWeek = async ({
   maxStagesCount,
   activatedContentTypes,
 }: WeeklyMetrics) => {
-  strapi.telemetry.send('didSendReviewWorkflowPropertiesOnceAWeek', {
+  await strapi.telemetry.send('didSendReviewWorkflowPropertiesOnceAWeek', {
     groupProperties: {
       numberOfActiveWorkflows,
       avgStagesCount,

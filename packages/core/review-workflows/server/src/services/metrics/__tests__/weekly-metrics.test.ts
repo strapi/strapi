@@ -51,4 +51,26 @@ describe('Review workflows weekly metrics', () => {
       expect.objectContaining({ value: { lastWeeklyUpdate: expect.any(Number) } })
     );
   });
+
+  test('sendMetrics stores lastWeeklyUpdate only after the telemetry send settles', async () => {
+    findWorkflows.mockResolvedValue([{ stages: [{}], contentTypes: [] }]);
+
+    let resolveSend: (value: boolean) => void = () => {};
+    send.mockReturnValueOnce(
+      new Promise<boolean>((resolve) => {
+        resolveSend = resolve;
+      })
+    );
+
+    const sending = weeklyMetricsFactory({ strapi: strapiMock }).sendMetrics();
+
+    await new Promise(setImmediate);
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(setStore).not.toHaveBeenCalled();
+
+    resolveSend(true);
+    await sending;
+
+    expect(setStore).toHaveBeenCalledTimes(1);
+  });
 });
