@@ -1,5 +1,6 @@
 import knex from 'knex';
 
+import { createMigrationRunner } from '../runner';
 import { createInternalMigrationProvider } from '../internal';
 import { internalMigrations } from '../internal-migrations';
 import { createStorage } from '../storage';
@@ -138,4 +139,50 @@ describe('internal migration upgrade simulation', () => {
 
     await sqlite.destroy();
   });
+
+  it('runs each pending internal migration only once when two runners start concurrently', async () => {
+    const { db, sqlite } = createTestDatabase();
+    const migrationName = 'core::concurrent-test-migration';
+    let resolveUpStarted: (() => void) | undefined;
+    const upStarted = new Promise<void>((resolve) => {
+      resolveUpStarted = resolve;
+    });
+
+    const migration = {
+      name: migrationName,
+      up: jest.fn().mockImplementation(async () => {
+        resolveUpStarted?.();
+        await new Promise((resolve) => {
+          setTimeout(resolve, 100);
+        });
+      }),
+      down: jest.fn().mockResolvedValue(undefined),
+    };
+
+    const storage = createStorage({ db, tableName: 'strapi_migrations_internal' });
+    await storage.executed();
+
+    const createRunner = () =>
+      createMigrationRunner({
+        storage,
+        logger: { info: jest.fn() },
+        getMigrations: jest.fn().mockResolvedValue([migration]),
+      });
+
+    const firstRunner = createRunner();
+    const secondRunner = createRunner();
+
+    const firstRun = firstRunner.up();
+    await upStarted;
+    const secondRun = secondRunner.up();
+
+    await Promise.all([firstRun, secondRun]);
+
+    expect(migration.up).toHaveBeenCalledTimes(1);
+    expect(await sqlite('strapi_migrations_internal').where({ name: migrationName })).toHaveLength(
+      1
+    );
+
+    await sqlite.destroy();
+  }, 10000);
 });

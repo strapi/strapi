@@ -6,6 +6,7 @@ describe('createMigrationRunner', () => {
   const createMocks = (migrations: RunnableMigration[], executed: string[] = []) => {
     const storage = {
       executed: jest.fn().mockResolvedValue([...executed]),
+      tryClaimMigration: jest.fn().mockResolvedValue(true),
       logMigration: jest.fn().mockResolvedValue(undefined),
       unlogMigration: jest.fn().mockResolvedValue(undefined),
     };
@@ -71,9 +72,9 @@ describe('createMigrationRunner', () => {
       expect(migrations[0].up).toHaveBeenCalledTimes(1);
       expect(migrations[1].up).toHaveBeenCalledTimes(1);
       expect(migrations[2].up).toHaveBeenCalledTimes(1);
-      expect(storage.logMigration).toHaveBeenNthCalledWith(1, { name: '001-first.js' });
-      expect(storage.logMigration).toHaveBeenNthCalledWith(2, { name: '002-second.js' });
-      expect(storage.logMigration).toHaveBeenNthCalledWith(3, { name: '003-third.js' });
+      expect(storage.tryClaimMigration).toHaveBeenNthCalledWith(1, { name: '001-first.js' });
+      expect(storage.tryClaimMigration).toHaveBeenNthCalledWith(2, { name: '002-second.js' });
+      expect(storage.tryClaimMigration).toHaveBeenNthCalledWith(3, { name: '003-third.js' });
       expect(logger.info).toHaveBeenCalledWith(
         expect.objectContaining({ event: 'migrating', name: '001-first.js' })
       );
@@ -112,17 +113,40 @@ describe('createMigrationRunner', () => {
       expect(failingMigrations[0].up).toHaveBeenCalledTimes(1);
       expect(failingMigrations[1].up).toHaveBeenCalledTimes(1);
       expect(failingMigrations[2].up).not.toHaveBeenCalled();
-      expect(storage.logMigration).toHaveBeenCalledTimes(1);
-      expect(storage.logMigration).toHaveBeenCalledWith({ name: '001-first.js' });
+      expect(storage.tryClaimMigration).toHaveBeenCalledTimes(2);
+      expect(storage.unlogMigration).toHaveBeenCalledWith({ name: '002-second.js' });
+    });
+
+    it('skips migrations that were already claimed by another runner', async () => {
+      const { runner, storage } = createMocks(migrations);
+      storage.tryClaimMigration.mockImplementation(async ({ name }: { name: string }) => {
+        return name !== '002-second.js';
+      });
+
+      const applied = await runner.up();
+
+      expect(migrations[0].up).toHaveBeenCalledTimes(1);
+      expect(migrations[1].up).not.toHaveBeenCalled();
+      expect(migrations[2].up).toHaveBeenCalledTimes(1);
+      expect(applied).toEqual([
+        { name: '001-first.js', path: undefined },
+        { name: '003-third.js', path: undefined },
+      ]);
     });
 
     it('is idempotent when re-run after successful up', async () => {
       const executed: string[] = [];
       const storage = {
         executed: jest.fn().mockImplementation(async () => [...executed]),
-        logMigration: jest.fn().mockImplementation(async ({ name }: { name: string }) => {
+        tryClaimMigration: jest.fn().mockImplementation(async ({ name }: { name: string }) => {
+          if (executed.includes(name)) {
+            return false;
+          }
+
           executed.push(name);
+          return true;
         }),
+        logMigration: jest.fn(),
         unlogMigration: jest.fn(),
       };
 
