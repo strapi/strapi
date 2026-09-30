@@ -15,7 +15,6 @@ Readers pick a section by intent. Put a page where its reader looks for it.
 | Architecture  | Understand how several packages work together | `docs/docs/architecture/`         | Authentication, future flags                                        |
 | Packages      | Understand or look up one package             | `docs/docs/packages/<repo path>/` | `packages/core/database` is documented in `packages/core/database/` |
 | API reference | Look up the `Strapi` class and its parts      | `docs/docs/api/`                  | Container, event hub                                                |
-| Exports       | Browse the generated TypeDoc output           | `docs/docs/exports/`              | Generated at build time and gitignored. Do not edit it.             |
 
 Design proposals (RFCs) are not in this repository. They happen in [GitHub Discussions](https://github.com/strapi/strapi/discussions/categories/rfcs).
 
@@ -225,6 +224,6 @@ Format changed files from the repo root: `yarn prettier --write <paths>`. CI run
 
 A skill links to the docs and never copies them. Two copies drift apart.
 
-The site publishes `/llms.txt` and `/llms-full.txt`, built from the page sources. The `exports/` output is excluded. They list pages by title and description, so write a precise `description`.
+The site publishes `/llms.txt` and `/llms-full.txt`, built from the page sources. They list pages by title and description, so write a precise `description`.
 
 An agent that works in a checkout reads the `.md` sources under `docs/docs/` directly. Before it changes a package, it reads the page in `docs/docs/packages/<repo path>/` and checks the `status` of that page.
