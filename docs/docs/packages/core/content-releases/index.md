@@ -24,10 +24,6 @@ Releases are assigned one of five statuses:
 
 These statuses are dynamically updated based on actions such as creation, addition/removal of entries, updates, and publishing attempts. They provide a concise overview of release readiness and validity, ensuring smooth operations and data integrity.
 
-## Code map
+### Built as a plugin
 
-As opposed to other EE features built in the [EE folder](../../../architecture/07-enterprise-edition.md), Releases is built as a plugin. The plugin can be found in:
-
-```
-packages/core/content-releases
-```
+Most EE features live in the [EE folders](../../../architecture/09-enterprise-edition.md) of their package. Releases is built as its own plugin instead.
