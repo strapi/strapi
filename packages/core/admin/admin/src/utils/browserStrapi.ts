@@ -1,4 +1,3 @@
-import { getProjectType } from './getProjectType';
 import { createAbsoluteUrl } from './urls';
 
 import type { GetProjectType } from '../../../shared/contracts/admin';
@@ -72,7 +71,7 @@ const createBrowserStrapi = async (
     }
 
     const {
-      data: { isEE, isTrial, features: licensedFeatures, flags, ai, planPriceId },
+      data: { isEE, isTrial, features: licensedFeatures, flags, ai, projectType },
     }: GetProjectType.Response = await response.json();
 
     // Runtime defense: the payload is only typed by convention, not validated.
@@ -87,7 +86,7 @@ const createBrowserStrapi = async (
       isEnabled: (name: Modules.EE.FeatureName) =>
         licensedFeatures.some((feature) => feature.name === name),
     };
-    browserStrapi.projectType = getProjectType({ isEE, planPriceId });
+    browserStrapi.projectType = projectType ?? 'Community';
     browserStrapi.ai = ai;
   } catch (err) {
     /**

@@ -15,6 +15,7 @@ const EE_TRIAL = {
   isEE: true,
   isTrial: true,
   planPriceId: 'price_growth_monthly',
+  projectType: 'Growth',
   features: [{ name: 'sso' }],
   flags: { nps: true, promoteEE: false, docLinks: true },
   ai: { enabled: true },
@@ -63,6 +64,23 @@ describe('createBrowserStrapi', () => {
     expect(browserStrapi.features.isEnabled('sso')).toBe(true);
     expect(browserStrapi.isTrial).toBe(true);
     expect(browserStrapi.isTrialLicense).toBe(true);
+  });
+
+  it('uses the edition label the server computed', async () => {
+    respondWith({ ...EE_TRIAL, projectType: 'Enterprise' });
+
+    const browserStrapi = await createBrowserStrapi();
+
+    expect(browserStrapi.projectType).toBe('Enterprise');
+  });
+
+  it('falls back to Community when the response omits the edition label', async () => {
+    const { projectType: _projectType, ...withoutProjectType } = EE_TRIAL;
+    respondWith(withoutProjectType);
+
+    const browserStrapi = await createBrowserStrapi();
+
+    expect(browserStrapi.projectType).toBe('Community');
   });
 
   it('keeps isTrial a boolean when the response omits it', async () => {
