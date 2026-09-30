@@ -1,34 +1,34 @@
-# Strapi contributor documentation
+# Strapi contributor docs
 
 > [!NOTE]
-> If you are looking for the official Strapi documentation, it is available [here](https://docs.strapi.io)
+> These are the docs for people who change the Strapi monorepo. For the official Strapi documentation, go to [docs.strapi.io](https://docs.strapi.io).
 
-This documentation is a contributor documentation made for anyone that wants to contribute to the project.
+This folder holds the [Docusaurus](https://docusaurus.io) site published at [contributor.strapi.io](https://contributor.strapi.io). It is a standalone Yarn project. Run the commands below in `docs/`.
 
-To run the documentation website, follow the instructions below.
+## Sections
 
-Otherwise, you can also access the documentation online at [contributor.strapi.io](https://contributor.strapi.io/).
+The content is in `docs/docs/`. Readers pick a section by intent.
 
-## Getting Started
+| Section       | Folder                    | Content                                                   |
+| ------------- | ------------------------- | --------------------------------------------------------- |
+| Contributing  | `docs/docs/contributing/` | How-to: testing, conventions, writing these docs.         |
+| Architecture  | `docs/docs/architecture/` | How several packages work together.                       |
+| Packages      | `docs/docs/packages/`     | One page per workspace package. Paths mirror `packages/`. |
+| API reference | `docs/docs/api/`          | The `Strapi` class and its parts.                         |
+| Exports       | `docs/docs/exports/`      | TypeDoc output. Generated at build time, not committed.   |
 
-### Installation
+## Commands
 
-```
-$ yarn install
-```
-
-### Local Development
-
-```
-$ yarn start
-```
-
-This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
-
-### Build
-
-```
-$ yarn build
+```bash
+yarn install            # install dependencies
+yarn start              # dev server with live reload
+yarn build              # production build; fails on broken links and invalid frontmatter
+yarn scaffold:packages  # create the missing package pages
+yarn tsc --noEmit       # type-check the components and plugins
 ```
 
-This command generates static content into the `build` directory and can be served using any static contents hosting service.
+Redirects for moved pages only work in a production build. To test them, run `yarn build && yarn serve`.
+
+## Writing docs
+
+Read [Writing docs](docs/contributing/07-writing-docs.md) before you add or move a page. It is also published at [contributor.strapi.io/contributing/writing-docs](https://contributor.strapi.io/contributing/writing-docs). Agents read [AGENTS.md](AGENTS.md) in this folder.
