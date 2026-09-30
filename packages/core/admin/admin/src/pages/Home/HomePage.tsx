@@ -11,6 +11,7 @@ import { GuidedTourHomepageOverview } from '../../components/GuidedTour/Overview
 import { Layouts } from '../../components/Layouts/Layout';
 import { Page } from '../../components/PageHelpers';
 import { WidgetResizeHandle } from '../../components/ResizeIndicator';
+import { WidgetErrorBoundary } from '../../components/WidgetErrorBoundary';
 import { Widget } from '../../components/WidgetHelpers';
 import { WidgetRoot } from '../../components/WidgetRoot';
 import { useEnterprise } from '../../ee';
@@ -97,7 +98,11 @@ export const WidgetComponent = ({
     return <Widget.Loading />;
   }
 
-  return <Component {...({ columnWidth } as Record<string, unknown>)} />;
+  return (
+    <WidgetErrorBoundary>
+      <Component {...({ columnWidth } as Record<string, unknown>)} />
+    </WidgetErrorBoundary>
+  );
 };
 
 /* -------------------------------------------------------------------------------------------------

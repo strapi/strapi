@@ -519,5 +519,117 @@ describe('homepage service', () => {
         { documentId: 'article-1', contentTypeUid: 'api::article.article' },
       ]);
     });
+
+    it('returns null for a missing updatedAt and sorts that row after real dates', async () => {
+      const contentTypes = {
+        'api::article.article': {
+          uid: 'api::article.article',
+          info: { displayName: 'Article' },
+          kind: 'collectionType',
+          options: {},
+          attributes: {},
+        },
+      };
+
+      const findArticleDocuments = jest.fn(async () => [
+        {
+          documentId: 'older',
+          title: 'Older',
+          updatedAt: '2026-01-01T00:00:00.000Z',
+          publishedAt: '2026-01-01T00:00:00.000Z',
+        },
+        {
+          documentId: 'missing',
+          title: 'Missing',
+          updatedAt: null,
+          publishedAt: null,
+        },
+        {
+          documentId: 'newer',
+          title: 'Newer',
+          updatedAt: '2026-06-01T00:00:00.000Z',
+          publishedAt: '2026-06-01T00:00:00.000Z',
+        },
+      ]);
+      const findConfigurations = jest.fn(async () => [
+        {
+          value: JSON.stringify({
+            uid: 'api::article.article',
+            settings: { mainField: 'title' },
+          }),
+        },
+      ]);
+
+      const strapi = {
+        admin: {
+          services: {
+            permission: {
+              findMany: jest.fn(async () => [{ subject: 'api::article.article' }]),
+            },
+          },
+        },
+        contentTypes,
+        requestContext: {
+          get: jest.fn(() => ({
+            state: {
+              user: { id: 1 },
+              userAbility: {},
+            },
+          })),
+        },
+        db: {
+          query: jest.fn(() => ({
+            findMany: findConfigurations,
+          })),
+        },
+        plugin: jest.fn(() => ({
+          service: jest.fn(() => ({
+            create: jest.fn(() => ({
+              cannot: {
+                read: jest.fn(() => false),
+              },
+              sanitizedQuery: {
+                read: jest.fn(async (query: unknown) => query),
+              },
+            })),
+          })),
+        })),
+        contentType: jest.fn((uid: keyof typeof contentTypes) => contentTypes[uid]),
+        documents: jest.fn(() => ({
+          findMany: findArticleDocuments,
+        })),
+      };
+
+      const service = createHomepageService({ strapi } as any);
+
+      const newestFirst = await service.queryLastDocuments({ sort: 'updatedAt:desc' });
+      expect(newestFirst.map((document) => document.documentId)).toEqual([
+        'newer',
+        'older',
+        'missing',
+      ]);
+      expect(newestFirst.find((document) => document.documentId === 'missing')?.updatedAt).toBe(
+        null
+      );
+      expect(JSON.parse(JSON.stringify(newestFirst))[2].updatedAt).toBeNull();
+
+      const oldestFirst = await service.queryLastDocuments({ sort: 'updatedAt:asc' });
+      expect(oldestFirst.map((document) => document.documentId)).toEqual([
+        'missing',
+        'older',
+        'newer',
+      ]);
+
+      (strapiContentTypes.hasDraftAndPublish as jest.Mock).mockImplementation(() => true);
+      const publishedNewestFirst = await service.queryLastDocuments(
+        { sort: 'publishedAt:desc' },
+        true
+      );
+      expect(publishedNewestFirst.map((document) => document.documentId)).toEqual([
+        'newer',
+        'older',
+        'missing',
+      ]);
+    });
   });
 });
