@@ -46,7 +46,8 @@ const ApplicationInfoPage = () => {
         await import(
           '../../../../../../ee/admin/src/pages/SettingsPage/pages/ApplicationInfoPage/components/AdminSeatInfo'
         )
-      ).AdminSeatInfoEE
+      ).AdminSeatInfoEE,
+    { enabled: window.strapi.hasSeatLimit === true }
   );
   const isAiEnabled = window.strapi.ai?.enabled === true;
   const AIUsageData = useEnterprise(

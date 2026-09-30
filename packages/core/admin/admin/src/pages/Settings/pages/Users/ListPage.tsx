@@ -54,7 +54,8 @@ const ListPageCE = () => {
         await import(
           '../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/components/CreateActionEE'
         )
-      ).CreateActionEE
+      ).CreateActionEE,
+    { enabled: window.strapi.hasSeatLimit === true }
   );
 
   const headers = TABLE_HEADERS.map((header) => ({
@@ -339,7 +340,8 @@ const ListPage = () => {
     async () =>
       // eslint-disable-next-line import/no-cycle
       (await import('../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/ListPage'))
-        .UserListPageEE
+        .UserListPageEE,
+    { enabled: window.strapi.hasSeatLimit === true }
   );
 
   // block rendering until the EE component is fully loaded

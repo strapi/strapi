@@ -17,6 +17,7 @@ declare global {
         isEnabled: (name: string) => boolean;
       };
       projectType: string;
+      hasSeatLimit: boolean;
       telemetryDisabled: boolean;
       flags: {
         nps: boolean;

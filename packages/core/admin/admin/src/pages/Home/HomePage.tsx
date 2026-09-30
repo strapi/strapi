@@ -422,7 +422,8 @@ const HomePage = () => {
   const Page = useEnterprise(
     HomePageCE,
     // eslint-disable-next-line import/no-cycle
-    async () => (await import('../../../../ee/admin/src/pages/HomePage')).HomePageEE
+    async () => (await import('../../../../ee/admin/src/pages/HomePage')).HomePageEE,
+    { enabled: window.strapi.hasSeatLimit === true }
   );
 
   // block rendering until the EE component is fully loaded

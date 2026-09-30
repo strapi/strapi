@@ -66,6 +66,22 @@ describe('createBrowserStrapi', () => {
     expect(browserStrapi.isTrialLicense).toBe(true);
   });
 
+  it('applies the seat limit the server reports', async () => {
+    respondWith({ ...EE_TRIAL, hasSeatLimit: true });
+
+    const browserStrapi = await createBrowserStrapi();
+
+    expect(browserStrapi.hasSeatLimit).toBe(true);
+  });
+
+  it('reports no seat limit when the response omits it', async () => {
+    respondWith(EE_TRIAL);
+
+    const browserStrapi = await createBrowserStrapi();
+
+    expect(browserStrapi.hasSeatLimit).toBe(false);
+  });
+
   it('uses the edition label the server computed', async () => {
     respondWith({ ...EE_TRIAL, projectType: 'Enterprise' });
 
@@ -102,5 +118,6 @@ describe('createBrowserStrapi', () => {
     expect(browserStrapi.isEE).toBe(false);
     expect(browserStrapi.projectType).toBe('Community');
     expect(browserStrapi.features.isEnabled('sso')).toBe(false);
+    expect(browserStrapi.hasSeatLimit).toBe(false);
   });
 });

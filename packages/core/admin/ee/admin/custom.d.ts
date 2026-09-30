@@ -25,6 +25,7 @@ declare global {
         AUDIT_LOGS: 'audit-logs';
         isEnabled: (name: Modules.EE.FeatureName) => boolean;
       };
+      hasSeatLimit: boolean;
       flags: {
         promoteEE?: boolean;
         nps?: boolean;
