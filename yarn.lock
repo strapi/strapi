@@ -8998,7 +8998,7 @@ __metadata:
     "@types/passport-local": "npm:1.0.36"
     "@types/pluralize": "npm:0.0.32"
     "@types/react-window": "npm:1.8.8"
-    axios: "npm:1.19.0"
+    axios: "npm:1.20.0"
     bcryptjs: "npm:2.4.3"
     boxen: "npm:5.1.2"
     chalk: "npm:^4.1.2"
@@ -9083,7 +9083,7 @@ __metadata:
     "@types/eventsource": "npm:1.1.15"
     "@types/lodash": "npm:^4.14.191"
     "@types/node": "npm:20.19.41"
-    axios: "npm:1.19.0"
+    axios: "npm:1.20.0"
     boxen: "npm:5.1.2"
     chalk: "npm:4.1.2"
     cli-progress: "npm:3.12.0"
@@ -13855,7 +13855,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:1.19.0, axios@npm:^1.6.0, axios@npm:^1.6.8, axios@npm:^1.8.3":
+"axios@npm:1.20.0":
+  version: 1.20.0
+  resolution: "axios@npm:1.20.0"
+  dependencies:
+    follow-redirects: "npm:^1.16.0"
+    form-data: "npm:^4.0.6"
+    https-proxy-agent: "npm:^5.0.1"
+    proxy-from-env: "npm:^2.1.0"
+  checksum: 10c0/976088acf532286356f4c2e65df1ef47ba7da3936d83e928d0d64357bbf5370456abd3eb5826c15df322335fcb1fe200d4a84b4fcf20ffccdd63b40d80fa495c
+  languageName: node
+  linkType: hard
+
+"axios@npm:^1.6.0, axios@npm:^1.6.8, axios@npm:^1.8.3":
   version: 1.19.0
   resolution: "axios@npm:1.19.0"
   dependencies:
