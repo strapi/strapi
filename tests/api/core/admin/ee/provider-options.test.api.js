@@ -2,9 +2,7 @@
 
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest, createRequest } = require('api-tests/request');
-const { createUtils, describeOnCondition } = require('api-tests/utils');
-
-const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
+const { createUtils } = require('api-tests/utils');
 
 let strapi;
 let utils;
@@ -47,7 +45,7 @@ const deleteFixtures = async () => {
   await utils.deleteRolesById([localData.restrictedRole.id]);
 };
 
-describeOnCondition(edition === 'EE')('SSO Provider Options', () => {
+describe('SSO Provider Options', () => {
   let hasSSO;
 
   beforeAll(async () => {
@@ -70,12 +68,12 @@ describeOnCondition(edition === 'EE')('SSO Provider Options', () => {
   describe('Get provider options', () => {
     test('Get the provider options as public user gives 401', async () => {
       const res = await requests.public.get('/admin/providers/options');
-      expect(res.status).toEqual(401);
+      expect(res.status).toEqual(hasSSO ? 401 : 404);
     });
 
     test('Get the provider options with no permissions gives 403', async () => {
       const res = await requests.noPermissions.get('/admin/providers/options');
-      expect(res.status).toEqual(403);
+      expect(res.status).toEqual(hasSSO ? 403 : 404);
     });
 
     test('Get the provider options as admin succeeds', async () => {
@@ -113,7 +111,7 @@ describeOnCondition(edition === 'EE')('SSO Provider Options', () => {
         const parsed = JSON.parse(res.text);
         expect(parsed.data).toMatchObject(newData);
       } else {
-        expect(res.status).toBe(404);
+        expect(res.status).toBe(405);
         expect(Array.isArray(res.body)).toBeFalsy();
       }
     });
@@ -133,7 +131,7 @@ describeOnCondition(edition === 'EE')('SSO Provider Options', () => {
       if (hasSSO) {
         expect(res.status).toEqual(400);
       } else {
-        expect(res.status).toBe(404);
+        expect(res.status).toBe(405);
         expect(Array.isArray(res.body)).toBeFalsy();
       }
     });
@@ -156,7 +154,7 @@ describeOnCondition(edition === 'EE')('SSO Provider Options', () => {
           const parsed = JSON.parse(res.text);
           expect(parsed.data).toMatchObject(newData);
         } else {
-          expect(res.status).toBe(404);
+          expect(res.status).toBe(405);
           expect(Array.isArray(res.body)).toBeFalsy();
         }
       });
@@ -176,7 +174,7 @@ describeOnCondition(edition === 'EE')('SSO Provider Options', () => {
         if (hasSSO) {
           expect(res.status).toEqual(400);
         } else {
-          expect(res.status).toBe(404);
+          expect(res.status).toBe(405);
           expect(Array.isArray(res.body)).toBeFalsy();
         }
       });
