@@ -12,7 +12,8 @@ import type { Core, UID } from '@strapi/types';
  *    validate structuredContent server-side; strict clients validate against tools/list,
  *    so declared-vs-runtime drift breaks them);
  *  - `localizations[].status` is computed BEFORE shaping strips `publishedAt`/`updatedAt`
- *    (calculate, then strip), so it matches what the admin Content Manager shows.
+ *    (calculate, then strip), so it matches what the admin Content Manager shows;
+ *  - the `locale` input advertised in tools/list follows the localization provider.
  */
 
 const MCP_PROTOCOL_VERSION = '2025-06-18';
@@ -90,13 +91,16 @@ type JsonSchema = {
   properties?: Record<string, JsonSchema>;
   items?: JsonSchema;
   anyOf?: JsonSchema[];
+  enum?: string[];
+  default?: unknown;
+  description?: string;
 };
 
 type JsonRpcResponse = {
   jsonrpc?: '2.0';
   id?: number | string | null;
   result?: {
-    tools?: Array<{ name: string; outputSchema?: JsonSchema }>;
+    tools?: Array<{ name: string; inputSchema?: JsonSchema; outputSchema?: JsonSchema }>;
     structuredContent?: Record<string, unknown>;
     content?: Array<{ type: string; text?: string }>;
     isError?: boolean;
@@ -404,6 +408,30 @@ describe('MCP content-manager relation shaping (api)', () => {
     // the shape↔schema agreement unit tests (output-schemas.test.ts) guarantee the
     // declared schema becomes an array, not a single object.
     expect(dataSchema!.properties?.morphTargets).toBeUndefined();
+  });
+
+  test('registered locale input comes from the localization provider', async () => {
+    const token = await createAdminToken([
+      readPermission(LOCALIZED_UID, null, ['en']),
+      readPermission(SOURCE_UID, null),
+    ]);
+    await initializeMcpSession(token.accessKey);
+
+    // Locale codes are read once at bootstrap: the extra locales created in beforeAll come
+    // later, so the boot-time default locale is the only enum member.
+    const localizedTool = await getRegisteredTool(token.accessKey, 'get_mcp-shape-localized');
+    const localeSchema = localizedTool.inputSchema?.properties?.locale;
+    expect(localeSchema?.enum).toEqual(['en']);
+    expect(localeSchema?.default).toBe('en');
+    expect(localeSchema?.description).toContain('Defaults to "en".');
+
+    const sourceTool = await getRegisteredTool(token.accessKey, 'get_mcp-shape-source');
+    const sourceLocaleSchema = sourceTool.inputSchema?.properties?.locale;
+    expect(sourceLocaleSchema?.type).toBe('string');
+    expect(sourceLocaleSchema?.enum).toBeUndefined();
+    expect(sourceLocaleSchema?.description).toBe(
+      'This content type is not localized. Locale is ignored.'
+    );
   });
 
   test('list tool returns identity-only relation arrays in results', async () => {

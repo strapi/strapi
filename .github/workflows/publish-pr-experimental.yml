@@ -26,11 +26,11 @@ jobs:
       contains(github.event.pull_request.labels.*.name, 'publish-experimental') &&
       (github.event.action == 'synchronize' || github.event.label.name == 'publish-experimental')
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
@@ -52,9 +52,9 @@ jobs:
         run: echo "short=$(git rev-parse --short=7 HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Update experimental build comment
-        uses: thollander/actions-comment-pull-request@v2
+        uses: thollander/actions-comment-pull-request@24bffb9b452ba05a4f3f77933840a6a841d1b32b # v3.0.1
         with:
-          comment_tag: experimental-pr-build
+          comment-tag: experimental-pr-build
           message: |
             ## Experimental build
 

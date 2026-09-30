@@ -205,7 +205,15 @@ module.exports = ({ strapi }) => ({
 
     // Connect the user with the third-party provider.
     try {
-      const user = await getService('providers').connect(provider, ctx.query);
+      const grantResponse = _.get(ctx, 'session.grant.response');
+
+      if (!grantResponse) {
+        throw new ApplicationError('OAuth authentication requires a completed provider session');
+      }
+
+      const user = await getService('providers').connect(provider, grantResponse, {
+        grantResponse,
+      });
 
       if (user.blocked) {
         throw new ForbiddenError('Your account has been blocked by an administrator');

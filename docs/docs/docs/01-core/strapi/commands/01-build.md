@@ -21,13 +21,14 @@ strapi build
 Build the strapi admin app
 
 Options:
-  -d, --debug        Enable debugging mode with verbose logs (default: false)
-  --minify           Minify the output (default: true)
-  --no-optimization  [deprecated]: use minify instead
-  --silent           Don't log anything (default: false)
-  --sourcemap        Produce sourcemaps (default: false)
-  --stats            Print build statistics to the console (default: false)
-  -h, --help         Display help for command
+  --bundler [bundler]  Bundler to use (webpack or vite) (default: "vite")
+  -d, --debug          Enable debugging mode with verbose logs (default: false)
+  --minify             Minify the output (default: true)
+  --silent             Don't log anything (default: false)
+  --sourcemap          Produce sourcemaps (default: false)
+  --stats              Print build statistics to the console (default: false)
+  --install-deps       Auto-install missing admin dependencies (default: false)
+  -h, --help           display help for command
 ```
 
 ## How it works
@@ -42,7 +43,7 @@ The first step of running the build command is to check if the required dependen
 - monorepos
 - incorrect/incompatible versions of packages for _certain_ packages like `styled-components` or `react`.
 
-The list of packages we explicity check for are:
+The list of packages we explicitly check for are:
 
 - `react`
 - `react-dom`
@@ -55,7 +56,7 @@ We run a prompt to encourage the user to install these deps – however, this fu
 
 ### BuildContext
 
-The build context is the heart of how the admin builds, as said above it's agnostic, it doesn't care if we're using webpack or vite or parcel. It's an object of data that can be used to preapre any bundler. It's shape looks like:
+The build context is the heart of how the admin builds, as said above it's agnostic, it doesn't care if we're using webpack or vite or parcel. It's an object of data that can be used to prepare any bundler. It's shape looks like:
 
 ```ts
 interface BuildContext {
@@ -68,6 +69,14 @@ interface BuildContext {
    * this path so all asset paths will be rewritten accordingly
    */
   basePath: string;
+  /**
+   * internal path to serve the admin panel
+   */
+  adminPath: string;
+  /**
+   * The bundler to use for building & watching
+   */
+  bundler: 'webpack' | 'vite';
   /**
    * The customisations defined by the user in their app.js file
    */
@@ -92,20 +101,21 @@ interface BuildContext {
    * The environment variables to be included in the JS bundle
    */
   env: Record<string, string>;
+  /**
+   * Features object with future flags
+   */
+  features?: Modules.Features.FeaturesService['config'];
   logger: CLIContext['logger'];
   /**
    * The build options
    */
-  options: Pick<BuildOptions, 'minify' | 'sourcemaps' | 'stats'> & Pick<DevelopOptions, 'open'>;
+  options: Pick<BuildOptions, 'bundler' | 'minify' | 'sourcemap' | 'stats'> &
+    Pick<DevelopOptions, 'open'>;
   /**
    * The plugins to be included in the JS bundle
    * incl. internal plugins, third party plugins & local plugins
    */
-  plugins: Array<{
-    path: string;
-    name: string;
-    importName: string;
-  }>;
+  plugins: PluginMeta[];
   /**
    * The absolute path to the runtime directory
    */
@@ -113,7 +123,7 @@ interface BuildContext {
   /**
    * The Strapi instance
    */
-  strapi: Strapi;
+  strapi: Core.Strapi;
   /**
    * The browserslist target either loaded from the user's workspace or falling back to the default
    */
@@ -133,7 +143,8 @@ We currently support both `webpack` & `vite` bundlers, with `vite` being the def
 ## Node Usage
 
 ```ts
-import { build, BuildOptions } from '@strapi/admin/_internal';
+// internal to @strapi/strapi – the CLI command imports it directly
+import { build, type BuildOptions } from '../../node/build';
 
 const args: BuildOptions = {
   // ...
@@ -155,6 +166,12 @@ interface BuildOptions extends CLIContext {
    */
   logger: Logger;
   /**
+   * Which bundler to use for building.
+   *
+   * @default vite
+   */
+  bundler?: 'webpack' | 'vite';
+  /**
    * Minify the output
    *
    * @default true
@@ -163,11 +180,17 @@ interface BuildOptions extends CLIContext {
   /**
    * Generate sourcemaps – useful for debugging bugs in the admin panel UI.
    */
-  sourcemaps?: boolean;
+  sourcemap?: boolean;
   /**
    * Print stats for build
    */
   stats?: boolean;
+  /**
+   * Auto-install missing admin dependencies
+   *
+   * @default false
+   */
+  installDeps?: boolean;
   /**
    * The tsconfig to use for the build. If undefined, this is not a TS project.
    */
@@ -179,10 +202,15 @@ interface Logger {
   errors: number;
   debug: (...args: unknown[]) => void;
   info: (...args: unknown[]) => void;
+  success: (...args: unknown[]) => void;
   warn: (...args: unknown[]) => void;
   error: (...args: unknown[]) => void;
   log: (...args: unknown[]) => void;
-  spinner: (text: string) => Pick<ora.Ora, 'succeed' | 'fail' | 'start' | 'text'>;
+  spinner: (text: string) => Pick<ora.Ora, 'succeed' | 'fail' | 'start' | 'text' | 'isSpinning'>;
+  progressBar: (
+    totalSize: number,
+    text: string
+  ) => Pick<cliProgress.SingleBar, 'start' | 'stop' | 'update'>;
 }
 
 interface TsConfig {

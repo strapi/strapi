@@ -287,6 +287,33 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
       expect(refreshRes.body.refreshToken).not.toBe(initialRefresh);
     });
 
+    test('returns 401 when replaying an already rotated refresh token', async () => {
+      const rqAuth = createAuthRequest();
+
+      const loginRes = await loginUser();
+      expect(loginRes.statusCode).toBe(200);
+      const initialRefresh = loginRes.body.refreshToken;
+      expect(initialRefresh).toEqual(expect.any(String));
+
+      const refreshRes = await rqAuth({
+        method: 'POST',
+        url: '/refresh',
+        body: { refreshToken: initialRefresh },
+      });
+      expect(refreshRes.statusCode).toBe(200);
+      expect(refreshRes.body.jwt).toEqual(expect.any(String));
+      expect(refreshRes.body.refreshToken).toEqual(expect.any(String));
+      expect(refreshRes.body.refreshToken).not.toBe(initialRefresh);
+
+      const replayRes = await rqAuth({
+        method: 'POST',
+        url: '/refresh',
+        body: { refreshToken: initialRefresh },
+      });
+      expect(replayRes.statusCode).toBe(401);
+      expect(replayRes.body.error.message).toBe('Invalid refresh token');
+    });
+
     test('With httpOnly header, sets cookie and omits refreshToken in body', async () => {
       const rqAuth = createAuthRequest();
 

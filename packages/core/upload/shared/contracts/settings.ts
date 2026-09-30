@@ -20,6 +20,12 @@ export interface Settings {
      * ignores it on updates.
      */
     concurrentUploadRequests?: number;
+    /**
+     * Read-only echo: whether an AI metadata provider is registered (Strapi-managed or custom).
+     * Not part of the stored settings; the server appends it to GET responses and ignores it
+     * on updates.
+     */
+    aiMetadataAvailable?: boolean;
   };
 }
 

@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { errors } from '@strapi/utils';
+import { errors, emitAudit } from '@strapi/utils';
 import { omit, uniq } from 'lodash/fp';
 import {
   create as tokenServiceCreate,
@@ -13,6 +13,13 @@ import {
   checkSaltIsDefined,
 } from '../../transfer/token';
 import constants from '../../constants';
+
+jest.mock('@strapi/utils', () => ({
+  ...jest.requireActual('@strapi/utils'),
+  emitAudit: jest.fn(() => Promise.resolve()),
+}));
+
+const emitAuditMock = emitAudit as jest.Mock;
 
 const getActionProvider = (actions = []) => {
   return {
@@ -49,6 +56,10 @@ describe('Transfer Token', () => {
   afterAll(() => {
     nowSpy.mockRestore();
     jest.clearAllMocks();
+  });
+
+  beforeEach(() => {
+    emitAuditMock.mockClear();
   });
 
   describe('create', () => {
@@ -130,6 +141,18 @@ describe('Transfer Token', () => {
         expiresAt: null,
         lifespan: null,
       });
+
+      expect(emitAuditMock).toHaveBeenCalledTimes(1);
+      const [, event, payload] = emitAuditMock.mock.calls[0];
+      expect(event).toBe('token.create');
+      expect(payload).toMatchObject({
+        tokenId: 1,
+        kind: 'transfer',
+        name: attributes.name,
+        permissions: ['push'],
+      });
+      expect(JSON.stringify(payload)).not.toContain(mockedTransferToken.hexedString);
+      expect(JSON.stringify(payload)).not.toMatch(/accessKey/);
     });
 
     test('Creates a new token with lifespan', async () => {
@@ -486,6 +509,11 @@ describe('Transfer Token', () => {
 
       const res = await revoke(token.id);
 
+      expect(emitAuditMock).toHaveBeenCalledWith(
+        { strapi: global.strapi },
+        'token.delete',
+        expect.objectContaining({ tokenId: token.id, name: token.name, kind: 'transfer' })
+      );
       expect(mockedDelete).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
         where: { id: token.id },
@@ -602,12 +630,20 @@ describe('Transfer Token', () => {
 
       expect(update).toHaveBeenCalledWith({
         where: { id },
-        select: ['id', 'accessKey'],
+        select: ['id', 'name', 'accessKey'],
         data: {
           accessKey: hash(mockedTransferToken.hexedString),
         },
       });
       expect(res).toEqual({ accessKey: mockedTransferToken.hexedString });
+      expect(emitAuditMock).toHaveBeenCalledWith(
+        { strapi: global.strapi },
+        'token.regenerate',
+        expect.objectContaining({ kind: 'transfer' })
+      );
+      expect(JSON.stringify(emitAuditMock.mock.calls[0][2])).not.toContain(
+        mockedTransferToken.hexedString
+      );
     });
 
     test('It throws a NotFound if the id is not found', async () => {
@@ -641,7 +677,7 @@ describe('Transfer Token', () => {
 
       expect(update).toHaveBeenCalledWith({
         where: { id },
-        select: ['id', 'accessKey'],
+        select: ['id', 'name', 'accessKey'],
         data: {
           accessKey: hash(mockedTransferToken.hexedString),
         },
@@ -670,7 +706,7 @@ describe('Transfer Token', () => {
       } as any;
 
       const update = jest.fn(({ data }) => Promise.resolve(data));
-      const findOne = jest.fn().mockResolvedValue(omit('permissions', originalToken));
+      const findOne = jest.fn().mockResolvedValue(originalToken);
       const deleteFn = jest.fn();
       const create = jest.fn();
       const load = jest
@@ -726,6 +762,15 @@ describe('Transfer Token', () => {
       });
 
       expect(res).toEqual(updatedAttributes);
+      expect(emitAuditMock).toHaveBeenCalledWith(
+        { strapi: global.strapi },
+        'token.update',
+        expect.objectContaining({
+          tokenId: id,
+          kind: 'transfer',
+          changes: { name: { before: originalToken.name, after: updatedAttributes.name } },
+        })
+      );
     });
 
     test('Updates a non-permissions field of a token', async () => {
@@ -800,6 +845,44 @@ describe('Transfer Token', () => {
         permissions: originalToken.permissions,
         ...updatedAttributes,
       });
+    });
+
+    test('Does not emit token.update when nothing changed', async () => {
+      const id = 1;
+      const originalToken = {
+        id,
+        name: 'transfer-token_tests-name',
+        description: 'transfer-token_tests-description',
+        permissions: ['push'],
+      };
+
+      global.strapi = {
+        ...getActionProvider(['push'] as any),
+        db: {
+          query() {
+            return {
+              update: jest.fn(({ data }) =>
+                Promise.resolve({ ...omit('permissions', originalToken), ...data })
+              ),
+              findOne: jest.fn().mockResolvedValue(originalToken),
+              delete: jest.fn(),
+              create: jest.fn(),
+              load: jest.fn().mockResolvedValue([{ action: 'push' }]),
+            };
+          },
+          transaction: jest.fn((cb) => cb()),
+        },
+        config: {
+          get: jest.fn(() => ''),
+        },
+      } as any;
+
+      await tokenServiceUpdate(id, {
+        name: originalToken.name,
+        description: originalToken.description,
+      } as any);
+
+      expect(emitAuditMock).not.toHaveBeenCalled();
     });
 
     test('Updates permissions field of a token with unknown permissions', async () => {

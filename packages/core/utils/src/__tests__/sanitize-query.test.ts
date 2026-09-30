@@ -7,6 +7,60 @@ describe('sanitizeQuery', () => {
   const sanitizers = createAPISanitizers({ getModel });
   const schema = articleModel;
 
+  beforeEach(() => {
+    global.strapi = {
+      contentTypes: {
+        'api::allowed.allowed': {
+          uid: 'api::allowed.allowed',
+          attributes: {
+            related: {
+              type: 'relation',
+              relation: 'morphOne',
+              target: 'api::article.article',
+              morphBy: 'related',
+            },
+          },
+        },
+        'admin::user': {
+          uid: 'admin::user',
+          attributes: {
+            related: {
+              type: 'relation',
+              relation: 'morphOne',
+              target: 'api::article.article',
+              morphBy: 'related',
+            },
+          },
+        },
+        'api::other.other': {
+          uid: 'api::other.other',
+          attributes: {
+            related: {
+              type: 'relation',
+              relation: 'morphOne',
+              target: 'api::article.article',
+              morphBy: 'unrelated',
+            },
+          },
+        },
+        'plugin::upload.file': {
+          uid: 'plugin::upload.file',
+          attributes: {},
+        },
+      },
+      components: {},
+      auth: {
+        verify(_auth: unknown, { scope }: { scope: string }) {
+          if (scope === 'admin::user.find') {
+            throw new Error('Unauthorized');
+          }
+
+          return true;
+        },
+      },
+    } as any;
+  });
+
   /**
    * When strictParams is true, only allowed query keys (and extra keys from route.request.query) are kept.
    * Extra params are sanitized via Zod safeParse; invalid values are omitted.
@@ -133,5 +187,254 @@ describe('sanitizeQuery', () => {
 
       expect(result).toHaveProperty('sort', 'title:asc');
     });
+  });
+
+  it('passes auth to populate sanitization', async () => {
+    const result = await sanitizers.query(
+      {
+        populate: {
+          createdBy: true,
+        },
+      },
+      schema,
+      { auth: {} }
+    );
+
+    expect(result).toEqual({ populate: {} });
+  });
+
+  it('sanitizes morph populate fragments with auth', async () => {
+    const morphSchema = {
+      ...schema,
+      attributes: {
+        ...schema.attributes,
+        related: {
+          type: 'relation' as const,
+          relation: 'morphToOne' as const,
+        },
+      },
+    };
+
+    const result = await sanitizers.query(
+      {
+        populate: {
+          related: {
+            on: {
+              'admin::user': true,
+              'api::article.article': true,
+            },
+          },
+        },
+      },
+      morphSchema,
+      { auth: {} }
+    );
+
+    expect(result).toEqual({
+      populate: {
+        related: {
+          on: {
+            'api::article.article': true,
+          },
+        },
+      },
+    });
+  });
+
+  it('preserves explicit morph count populate fragments while filtering unauthorized UIDs', async () => {
+    const morphSchema = {
+      ...schema,
+      attributes: {
+        ...schema.attributes,
+        related: {
+          type: 'relation' as const,
+          relation: 'morphToOne' as const,
+        },
+      },
+    };
+
+    const result = await sanitizers.query(
+      {
+        populate: {
+          related: {
+            count: true,
+            on: {
+              'admin::user': true,
+              'api::article.article': true,
+            },
+          },
+        },
+      },
+      morphSchema,
+      { auth: {} }
+    );
+
+    expect(result).toEqual({
+      populate: {
+        related: {
+          count: true,
+          on: {
+            'api::article.article': true,
+          },
+        },
+      },
+    });
+  });
+
+  it('normalizes explicit morph count string fragments while filtering unauthorized UIDs', async () => {
+    const morphSchema = {
+      ...schema,
+      attributes: {
+        ...schema.attributes,
+        related: {
+          type: 'relation' as const,
+          relation: 'morphToOne' as const,
+        },
+      },
+    };
+
+    const result = await sanitizers.query(
+      {
+        populate: {
+          related: {
+            count: 'true',
+            on: {
+              'admin::user': true,
+              'api::article.article': true,
+            },
+          },
+        },
+      },
+      morphSchema,
+      { auth: {} }
+    );
+
+    expect(result).toEqual({
+      populate: {
+        related: {
+          count: true,
+          on: {
+            'api::article.article': true,
+          },
+        },
+      },
+    });
+  });
+
+  it.each([
+    ['morphToOne boolean populate', 'morphToOne', true, { on: { 'api::allowed.allowed': true } }],
+    ['morphToMany boolean populate', 'morphToMany', true, { on: { 'api::allowed.allowed': true } }],
+    [
+      'morphToOne boolean string populate',
+      'morphToOne',
+      'true',
+      { on: { 'api::allowed.allowed': true } },
+    ],
+    [
+      'morphToMany boolean string populate',
+      'morphToMany',
+      'true',
+      { on: { 'api::allowed.allowed': true } },
+    ],
+    [
+      'morphToOne count populate',
+      'morphToOne',
+      { count: true },
+      { count: true, on: { 'api::allowed.allowed': true } },
+    ],
+    [
+      'morphToMany count populate',
+      'morphToMany',
+      { count: true },
+      { count: true, on: { 'api::allowed.allowed': true } },
+    ],
+    [
+      'morphToOne count string populate',
+      'morphToOne',
+      { count: 'true' },
+      { count: true, on: { 'api::allowed.allowed': true } },
+    ],
+    [
+      'morphToMany count string populate',
+      'morphToMany',
+      { count: 'true' },
+      { count: true, on: { 'api::allowed.allowed': true } },
+    ],
+  ])(
+    'rewrites morph %s into authorized on fragments for every findable content type',
+    async (_label, relation, populateValue, expected) => {
+      const morphSchema = {
+        ...schema,
+        attributes: {
+          ...schema.attributes,
+          related: {
+            type: 'relation' as const,
+            relation,
+          },
+        },
+      };
+
+      const result = await sanitizers.query(
+        {
+          populate: {
+            related: populateValue,
+          },
+        },
+        morphSchema,
+        { auth: {} }
+      );
+
+      expect(result).toEqual({
+        populate: {
+          related: {
+            ...expected,
+            on: {
+              'api::allowed.allowed': true,
+              'api::other.other': true,
+              'plugin::upload.file': true,
+            },
+          },
+        },
+      });
+    }
+  );
+
+  it('removes morph populate when no configured target UID is authorized', async () => {
+    const morphSchema = {
+      ...schema,
+      attributes: {
+        ...schema.attributes,
+        deniedRelated: {
+          type: 'relation' as const,
+          relation: 'morphToOne' as const,
+        },
+      },
+    };
+
+    global.strapi.contentTypes = {
+      'admin::user': {
+        uid: 'admin::user',
+        attributes: {
+          deniedRelated: {
+            type: 'relation',
+            relation: 'morphOne',
+            target: 'api::article.article',
+            morphBy: 'deniedRelated',
+          },
+        },
+      },
+    };
+
+    const result = await sanitizers.query(
+      {
+        populate: {
+          deniedRelated: true,
+        },
+      },
+      morphSchema,
+      { auth: {} }
+    );
+
+    expect(result).toEqual({ populate: {} });
   });
 });

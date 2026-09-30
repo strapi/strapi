@@ -352,6 +352,20 @@ describe('Sanitize visitors util', () => {
       target: 'admin::user',
     };
 
+    beforeEach(() => {
+      global.strapi = {
+        auth: {
+          verify(_auth: unknown, { scope }: { scope: string }) {
+            if (scope === 'admin::user.find') {
+              throw new Error('Unauthorized');
+            }
+
+            return true;
+          },
+        },
+      } as any;
+    });
+
     test('keeps creator relations with populateCreatorFields true', async () => {
       const remove = jest.fn();
       const set = jest.fn();
@@ -416,6 +430,228 @@ describe('Sanitize visitors util', () => {
 
       expect(remove).toHaveBeenCalledTimes(creatorKeys.length);
       creatorKeys.forEach((key) => expect(remove).toHaveBeenCalledWith(key));
+      expect(set).toHaveBeenCalledTimes(0);
+    });
+
+    test('removes unauthorized morphToOne relation targets from output', async () => {
+      const remove = jest.fn();
+      const set = jest.fn();
+      const morphToOneAttribute = {
+        type: 'relation',
+        relation: 'morphToOne',
+      };
+
+      await removeRestrictedRelationsFn(
+        {
+          data: {
+            related: {
+              id: 1,
+              __type: 'admin::user',
+              firstname: 'Private',
+              email: 'private@example.test',
+            },
+          },
+          key: 'related',
+          attribute: morphToOneAttribute,
+          schema: {
+            kind: 'collectionType',
+            info: {
+              singularName: 'test',
+              pluralName: 'tests',
+            },
+            options: {},
+            attributes: {
+              related: morphToOneAttribute,
+            },
+          },
+          value: {},
+          path: {
+            attribute: null,
+            raw: null,
+          },
+        },
+        { remove, set }
+      );
+
+      expect(remove).toHaveBeenCalledWith('related');
+      expect(set).toHaveBeenCalledTimes(0);
+    });
+
+    test('removes morphToMany relation output when all targets are unauthorized', async () => {
+      const remove = jest.fn();
+      const set = jest.fn();
+      const morphToManyAttribute = {
+        type: 'relation',
+        relation: 'morphToMany',
+      };
+
+      await removeRestrictedRelationsFn(
+        {
+          data: {
+            related: [
+              {
+                id: 1,
+                __type: 'admin::user',
+                firstname: 'Private',
+                email: 'private@example.test',
+              },
+            ],
+          },
+          key: 'related',
+          attribute: morphToManyAttribute,
+          schema: {
+            kind: 'collectionType',
+            info: {
+              singularName: 'test',
+              pluralName: 'tests',
+            },
+            options: {},
+            attributes: {
+              related: morphToManyAttribute,
+            },
+          },
+          value: {},
+          path: {
+            attribute: null,
+            raw: null,
+          },
+        },
+        { remove, set }
+      );
+
+      expect(remove).toHaveBeenCalledWith('related');
+      expect(set).toHaveBeenCalledTimes(0);
+    });
+
+    test('keeps authorized morphToOne relation target as an object', async () => {
+      const remove = jest.fn();
+      const set = jest.fn();
+      const morphToOneAttribute = {
+        type: 'relation',
+        relation: 'morphToOne',
+      };
+      const related = {
+        id: 1,
+        __type: 'api::allowed.allowed',
+        title: 'Allowed',
+      };
+
+      await removeRestrictedRelationsFn(
+        {
+          data: {
+            related,
+          },
+          key: 'related',
+          attribute: morphToOneAttribute,
+          schema: {
+            kind: 'collectionType',
+            info: {
+              singularName: 'test',
+              pluralName: 'tests',
+            },
+            options: {},
+            attributes: {
+              related: morphToOneAttribute,
+            },
+          },
+          value: {},
+          path: {
+            attribute: null,
+            raw: null,
+          },
+        },
+        { remove, set }
+      );
+
+      expect(remove).toHaveBeenCalledTimes(0);
+      expect(set).toHaveBeenCalledWith('related', related);
+    });
+
+    test('keeps mixed morphToMany relation output after stripping unauthorized targets', async () => {
+      const remove = jest.fn();
+      const set = jest.fn();
+      const morphToManyAttribute = {
+        type: 'relation',
+        relation: 'morphToMany',
+      };
+      const allowed = {
+        id: 1,
+        __type: 'api::allowed.allowed',
+        title: 'Allowed',
+      };
+      const denied = {
+        id: 2,
+        __type: 'admin::user',
+        firstname: 'Private',
+      };
+
+      await removeRestrictedRelationsFn(
+        {
+          data: {
+            related: [allowed, denied],
+          },
+          key: 'related',
+          attribute: morphToManyAttribute,
+          schema: {
+            kind: 'collectionType',
+            info: {
+              singularName: 'test',
+              pluralName: 'tests',
+            },
+            options: {},
+            attributes: {
+              related: morphToManyAttribute,
+            },
+          },
+          value: {},
+          path: {
+            attribute: null,
+            raw: null,
+          },
+        },
+        { remove, set }
+      );
+
+      expect(remove).toHaveBeenCalledTimes(0);
+      expect(set).toHaveBeenCalledWith('related', [allowed]);
+    });
+
+    test('preserves empty morphToMany relation output', async () => {
+      const remove = jest.fn();
+      const set = jest.fn();
+      const morphToManyAttribute = {
+        type: 'relation',
+        relation: 'morphToMany',
+      };
+
+      await removeRestrictedRelationsFn(
+        {
+          data: {
+            related: [],
+          },
+          key: 'related',
+          attribute: morphToManyAttribute,
+          schema: {
+            kind: 'collectionType',
+            info: {
+              singularName: 'test',
+              pluralName: 'tests',
+            },
+            options: {},
+            attributes: {
+              related: morphToManyAttribute,
+            },
+          },
+          value: {},
+          path: {
+            attribute: null,
+            raw: null,
+          },
+        },
+        { remove, set }
+      );
+
+      expect(remove).toHaveBeenCalledTimes(0);
       expect(set).toHaveBeenCalledTimes(0);
     });
   });

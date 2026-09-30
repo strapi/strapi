@@ -1,5 +1,4 @@
-// eslint-disable-next-line import/extensions
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { McpServer, type ServerCapabilities } from '@modelcontextprotocol/server';
 import type { Core, Modules } from '@strapi/types';
 import { McpPromptRegistry } from '../prompt-registry';
 import { McpResourceRegistry } from '../resource-registry';
@@ -48,12 +47,7 @@ export const createMcpServerWithRegistries = ({
   ability,
   user,
 }: CreateMcpServerWithRegistriesParams): McpServerWithRegistries => {
-  const capabilities: {
-    logging?: Record<string, unknown>;
-    tools?: Record<string, unknown>;
-    prompts?: Record<string, unknown>;
-    resources?: Record<string, unknown>;
-  } = {
+  const capabilities: ServerCapabilities = {
     logging: {},
   };
   // Advertise capability categories when definitions exist (server-level), not per-user enabled
