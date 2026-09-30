@@ -62,6 +62,12 @@ describe('License limit information', () => {
       });
     });
 
+    test('Answers 404 for the trial time left outside a trial', async () => {
+      const res = await rq({ method: 'GET', url: '/admin/license-trial-time-left' });
+
+      expect(res.statusCode).toBe(404);
+    });
+
     test('Leaves a stale disabled users list alone when a user is deleted', async () => {
       const utils = createUtils(strapi);
       const superAdminRole = await utils.getSuperAdminRole();
