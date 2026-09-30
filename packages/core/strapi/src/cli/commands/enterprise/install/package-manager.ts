@@ -3,6 +3,8 @@ import fse from 'fs-extra';
 import execa from 'execa';
 import { packageManager as packageManagerUtils } from '@strapi/utils';
 
+import { EnterpriseInstallError } from './errors';
+
 export type PackageManagerName = 'npm' | 'pnpm' | 'yarn';
 
 export interface DetectedPackageManager {
@@ -42,7 +44,13 @@ export const detectPackageManager = async (appDir: string): Promise<DetectedPack
     return packageManagerFromField;
   }
 
-  const packageManagerName = await packageManagerUtils.getPreferred(appDir);
+  // Detection reads the lockfile, then `node_modules`, and throws when it finds neither, as in a
+  // fresh clone whose dependencies are not installed yet.
+  const packageManagerName = await packageManagerUtils.getPreferred(appDir).catch(() => {
+    throw new EnterpriseInstallError(
+      'Could not tell which package manager this app uses. Install its dependencies first, or set "packageManager" in package.json.'
+    );
+  });
 
   if (packageManagerName === 'yarn') {
     return { name: 'yarn', majorVersion: await readYarnMajorVersion(appDir) };
