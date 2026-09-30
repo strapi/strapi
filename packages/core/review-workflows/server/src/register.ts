@@ -125,7 +125,7 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
       numberOfWorkflows: MAX_WORKFLOWS,
       stagesPerWorkflow: MAX_STAGES_PER_WORKFLOW,
     },
-    strapi.ee.features.get('review-workflows')
+    strapi.ee.features.get('review-workflows')?.options
   );
   const workflowsValidationService = getService('validation', { strapi });
   workflowsValidationService.register(reviewWorkflowsOptions);

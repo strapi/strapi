@@ -1,7 +1,10 @@
-export const enableFeatureMiddleware = (featureName: string) => (ctx: any, next: any) => {
-  if (strapi.ee.features.isEnabled(featureName)) {
-    return next();
-  }
+import type { Modules } from '@strapi/types';
 
-  ctx.status = 404;
-};
+export const enableFeatureMiddleware =
+  (featureName: Modules.EE.FeatureName) => (ctx: any, next: any) => {
+    if (strapi.ee.features.isEnabled(featureName)) {
+      return next();
+    }
+
+    ctx.status = 404;
+  };

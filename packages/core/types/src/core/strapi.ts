@@ -46,24 +46,7 @@ export interface Strapi extends Container {
   app: any;
   EE?: boolean;
   ai: Modules.AI.AiNamespace;
-  ee: {
-    seats: number | null | undefined;
-    type: string | null | undefined;
-    isEE: boolean;
-    isTrial: boolean;
-    subscriptionId?: string | null | undefined;
-    planPriceId?: string | null | undefined;
-    getTrialEndDate: ({
-      strapi,
-    }: {
-      strapi: Core.Strapi;
-    }) => Promise<{ trialEndsAt: string } | null>;
-    features: {
-      isEnabled: (feature: string) => boolean;
-      list: () => { name: string; [key: string]: any }[];
-      get: (feature: string) => string | { name: string; [key: string]: any } | undefined;
-    };
-  };
+  ee: Modules.EE.EEService;
   features: Modules.Features.FeaturesService;
   components: Schema.Components;
   reload: Reloader;
