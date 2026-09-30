@@ -1,7 +1,3 @@
-import { env } from '@strapi/utils';
-
-import { getService } from '../utils';
-
 import type { GetProjectType } from '../../../../shared/contracts/admin';
 
 export default {
@@ -37,48 +33,5 @@ export default {
         },
       };
     }
-  },
-
-  async licenseLimitInformation() {
-    const permittedSeats = strapi.ee.seats;
-
-    let shouldNotify = false;
-    let licenseLimitStatus = null;
-    let enforcementUserCount;
-
-    const currentActiveUserCount = await getService('user').getCurrentActiveUserCount();
-
-    const eeDisabledUsers = await getService('seat-enforcement').getDisabledUserList();
-
-    if (eeDisabledUsers) {
-      enforcementUserCount = currentActiveUserCount + eeDisabledUsers.length;
-    } else {
-      enforcementUserCount = currentActiveUserCount;
-    }
-
-    if (permittedSeats != null && enforcementUserCount > permittedSeats) {
-      shouldNotify = true;
-      licenseLimitStatus = 'OVER_LIMIT';
-    }
-
-    if (permittedSeats != null && enforcementUserCount === permittedSeats) {
-      shouldNotify = true;
-      licenseLimitStatus = 'AT_LIMIT';
-    }
-
-    const data = {
-      enforcementUserCount,
-      currentActiveUserCount,
-      permittedSeats,
-      shouldNotify,
-      shouldStopCreate: permittedSeats == null ? false : currentActiveUserCount >= permittedSeats,
-      licenseLimitStatus,
-      isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
-      type: strapi.ee.type,
-      isTrial: strapi.ee.isTrial,
-      features: strapi.ee.features.list() ?? [],
-    };
-
-    return { data };
   },
 };

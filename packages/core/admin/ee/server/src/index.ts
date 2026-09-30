@@ -5,7 +5,6 @@ import destroy from './destroy';
 import adminContentTypes from './content-types';
 import services from './services';
 import controllers from './controllers';
-import routes from './routes';
 import ssoRoutes from './routes/sso';
 import auditLogsRoutes from './audit-logs/routes/audit-logs';
 import auditLogsController from './audit-logs/controllers/audit-logs';
@@ -24,7 +23,6 @@ const getAdminEE = () => {
     contentTypes: adminContentTypes,
     services,
     controllers,
-    routes,
   };
 
   // Like audit logs, the SSO routes are only registered with the feature at load; their middleware
@@ -40,7 +38,6 @@ const getAdminEE = () => {
       ...(isAuditLogsEnabled ? { 'audit-logs': auditLogsController } : {}),
     },
     routes: {
-      ...eeAdmin.routes,
       ...(isSSOEnabled ? { sso: ssoRoutes } : {}),
       ...(isAuditLogsEnabled ? { 'audit-logs': auditLogsRoutes } : {}),
     },

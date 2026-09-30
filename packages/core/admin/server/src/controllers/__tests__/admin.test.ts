@@ -175,4 +175,83 @@ describe('Admin Controller', () => {
       });
     });
   });
+
+  describe('licenseLimitInformation', () => {
+    const setup = ({
+      seats,
+      activeUserCount = 2,
+      disabledUsers = null,
+    }: {
+      seats?: number;
+      activeUserCount?: number;
+      disabledUsers?: Array<{ id: number; isActive: boolean }> | null;
+    } = {}) => {
+      const count = jest.fn(() => Promise.resolve(activeUserCount));
+
+      global.strapi = {
+        ee: {
+          seats,
+          type: seats === undefined ? undefined : 'gold',
+          isTrial: false,
+          features: { list: jest.fn(() => []) },
+        },
+        admin: {
+          services: {
+            user: { count },
+            'seat-enforcement': {
+              getDisabledUserList: jest.fn(() => Promise.resolve(disabledUsers)),
+            },
+          },
+        },
+      } as any;
+
+      return { count };
+    };
+
+    test('reports no limit without a seat limit', async () => {
+      const { count } = setup();
+
+      const { data } = await adminController.licenseLimitInformation();
+
+      expect(count).toHaveBeenCalledWith({ isActive: true });
+      expect(JSON.parse(JSON.stringify(data))).toStrictEqual({
+        currentActiveUserCount: 2,
+        enforcementUserCount: 2,
+        shouldNotify: false,
+        shouldStopCreate: false,
+        licenseLimitStatus: null,
+        isHostedOnStrapiCloud: false,
+        isTrial: false,
+        features: [],
+      });
+    });
+
+    test('counts the users disabled by the seat enforcement', async () => {
+      setup({ seats: 3, disabledUsers: [{ id: 3, isActive: true }] });
+
+      const { data } = await adminController.licenseLimitInformation();
+
+      expect(data).toMatchObject({
+        permittedSeats: 3,
+        enforcementUserCount: 3,
+        shouldNotify: true,
+        shouldStopCreate: false,
+        licenseLimitStatus: 'AT_LIMIT',
+      });
+    });
+
+    test('reports over the limit and stops creation', async () => {
+      setup({ seats: 2, disabledUsers: [{ id: 3, isActive: true }] });
+
+      const { data } = await adminController.licenseLimitInformation();
+
+      expect(data).toMatchObject({
+        permittedSeats: 2,
+        enforcementUserCount: 3,
+        shouldNotify: true,
+        shouldStopCreate: true,
+        licenseLimitStatus: 'OVER_LIMIT',
+      });
+    });
+  });
 });
