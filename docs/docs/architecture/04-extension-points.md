@@ -163,4 +163,4 @@ Several unsubscribe helpers use `list.splice(list.indexOf(item), 1)`. If `item` 
 - [Server lifecycle](./02-server-lifecycle.md)
 - [Container and registries](./03-container-and-registries.md)
 - [Document write path](./05-document-write-path.md)
-- [Glossary](./09-glossary.md)
+- [Glossary](./11-glossary.md)
