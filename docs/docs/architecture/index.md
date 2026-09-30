@@ -67,6 +67,8 @@ Read [Container and registries](./03-container-and-registries.md) for details.
 | [Container and registries](./03-container-and-registries.md) | Container rules, registries, namespaces and UIDs.                |
 | [Extension points](./04-extension-points.md)                 | How plugins and applications extend Strapi.                      |
 | [Document write path](./05-document-write-path.md)           | What happens when code creates, updates or publishes a document. |
+| [HTTP request path](./06-http-request-path.md)               | What happens to a request from Koa to the response.              |
+| [Schema sync](./07-schema-sync.md)                           | How schemas become database tables at startup.                   |
 | [Authentication](./08-authentication.md)                     | Sessions and JWT.                                                |
 | [Enterprise Edition](./09-enterprise-edition.md)             | How Enterprise features are gated.                               |
 | [Future flags](./10-future-flags.md)                         | Opt-in features.                                                 |
@@ -79,9 +81,11 @@ Read [Container and registries](./03-container-and-registries.md) for details.
 1. This page.
 2. [Server lifecycle](./02-server-lifecycle.md)
 3. [Container and registries](./03-container-and-registries.md)
-4. [Document write path](./05-document-write-path.md)
-5. [Glossary](./11-glossary.md)
-6. The [`@strapi/core`](../packages/core/core/index.md) and [`@strapi/database`](../packages/core/database/index.md) package pages.
+4. [HTTP request path](./06-http-request-path.md)
+5. [Document write path](./05-document-write-path.md)
+6. [Schema sync](./07-schema-sync.md)
+7. [Glossary](./11-glossary.md)
+8. The [`@strapi/core`](../packages/core/core/index.md) and [`@strapi/database`](../packages/core/database/index.md) package pages.
 
 ### New admin contributor
 
@@ -98,8 +102,9 @@ Read [Container and registries](./03-container-and-registries.md) for details.
 2. [Server lifecycle](./02-server-lifecycle.md), mainly the register and bootstrap phases.
 3. [Extension points](./04-extension-points.md)
 4. [Container and registries](./03-container-and-registries.md)
-5. [Document write path](./05-document-write-path.md), for document middlewares and events.
-6. [Glossary](./11-glossary.md)
+5. [HTTP request path](./06-http-request-path.md), for routes, policies and route middlewares.
+6. [Document write path](./05-document-write-path.md), for document middlewares and events.
+7. [Glossary](./11-glossary.md)
 
 ## Code map
 
