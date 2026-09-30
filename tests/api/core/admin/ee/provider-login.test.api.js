@@ -2,9 +2,7 @@
 
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest, createRequest } = require('api-tests/request');
-const { createUtils, describeOnCondition } = require('api-tests/utils');
-
-const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
+const { createUtils } = require('api-tests/utils');
 
 let strapi;
 let utils;
@@ -47,7 +45,7 @@ const deleteFixtures = async () => {
   await utils.deleteRolesById([localData.restrictedRole.id]);
 };
 
-describeOnCondition(edition === 'EE')('Provider Login', () => {
+describe('Provider Login', () => {
   let hasSSO;
 
   beforeAll(async () => {

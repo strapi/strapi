@@ -70,13 +70,12 @@ describe('License limit information', () => {
 
     test('Leaves a stale disabled users list alone when a user is deleted', async () => {
       const utils = createUtils(strapi);
-      const superAdminRole = await utils.getSuperAdminRole();
       const user = await utils.createUser({
         email: 'license-limit@test.com',
         firstname: 'Seat',
         lastname: 'Less',
         password: 'Password123',
-        roles: [superAdminRole.id],
+        roles: [],
       });
       const staleList = [{ id: user.id, isActive: true }];
       await strapi.store.set({ type: 'ee', key: 'disabled_users', value: staleList });
@@ -90,6 +89,7 @@ describe('License limit information', () => {
         );
       } finally {
         await strapi.store.delete({ type: 'ee', key: 'disabled_users' });
+        await strapi.db.query('admin::user').delete({ where: { id: user.id } });
       }
     });
   });
