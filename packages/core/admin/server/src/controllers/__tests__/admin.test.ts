@@ -170,6 +170,7 @@ describe('Admin Controller', () => {
           features: [],
           flags: {},
           projectType: 'Community',
+          hasSeatLimit: false,
           ai: { enabled: false },
         },
       });

@@ -56,6 +56,7 @@ export default {
         features: [],
         flags,
         projectType: 'Community',
+        hasSeatLimit: false,
         ai: { enabled: false },
       },
     };
