@@ -6,7 +6,6 @@ package: '@strapi/content-releases'
 status: draft
 review_notes:
   - Written from the package source on develop; needs a maintainer review.
-  - 01-backend.md and 03-scheduling.md say scheduling needs the `contentReleasesScheduling` future flag. That name has no reference in the package code on develop. Check whether scheduling is now always on.
 ---
 
 ## Purpose

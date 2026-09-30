@@ -3,6 +3,9 @@ title: Providers
 description: 'Documentation of upload provider implementations.'
 tags:
   - backend
+review_notes:
+  - 'Says a provider exports a function that returns an object. The loader calls `init(providerOptions)` on the provider module (`createProvider` in `server/src/register.ts`).'
+status: needs-review
 ---
 
 # Provider

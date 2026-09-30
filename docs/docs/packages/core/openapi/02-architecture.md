@@ -1,6 +1,9 @@
 ---
 title: Architecture
 description: 'Architecture overview of Strapi OpenAPI generation and processing.'
+review_notes:
+  - 'Says `RegistriesFactory` returns an empty object. The code returns `{ extractedComponentSchemas: {} }` (`src/registries/factory.ts`).'
+status: needs-review
 ---
 
 This section explores the overall architecture and main components of the OpenAPI package.

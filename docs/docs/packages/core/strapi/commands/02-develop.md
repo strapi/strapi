@@ -3,6 +3,9 @@ title: Develop
 description: 'Documentation of the Strapi develop command.'
 tags:
   - cli
+review_notes:
+  - 'Lists `--watch-admin` without its default. The command sets it to `true`, and `--no-watch-admin` turns it off (`src/cli/commands/develop.ts`).'
+status: needs-review
 ---
 
 The `develop` command is used to develop your strapi node application e.g. creating content-types in the `content-type-builder` as well as "watching" the admin panel with webpack for local development whether in the strapi monorepo or in a standalone project.
