@@ -193,7 +193,7 @@ export declare namespace ProvidersOptions {
 }
 
 /**
- * License features, from the catalog in `@strapi/types` (`Modules.EE.FeatureOptions`).
+ * License features, from the catalog in `@strapi/types` (`Public.LicenseFeatures`).
  */
 export type LicenseFeature = Modules.EE.Feature;
 

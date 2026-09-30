@@ -1,28 +1,12 @@
 import type { Strapi } from '../core';
+import type * as Public from '../public';
 
 /**
  * Options of each license feature, keyed by feature name.
  *
- * An interface so other packages can augment it with their own features.
+ * Augment {@link Public.LicenseFeatures} to declare a feature, not this type.
  */
-export interface FeatureOptions {
-  /** `@strapi/admin` EE: SSO routes, passport strategies, provider actions, SSO lock and login. */
-  sso: Record<string, unknown>;
-  /** `@strapi/admin` EE: audit-log services, lifecycle, routes, actions and settings page. */
-  'audit-logs': { retentionDays?: number | null };
-  /** `@strapi/review-workflows`: the whole plugin (else content types only) and its webhook events. */
-  'review-workflows': { numberOfWorkflows?: number; stagesPerWorkflow?: number };
-  /** `@strapi/content-releases`: the whole plugin (else content types only) and its webhook events. */
-  'cms-content-releases': { maximumReleases?: number };
-  /** `@strapi/content-manager`: the content history module and its purge cron. */
-  'cms-content-history': { retentionDays?: number };
-  /** `@strapi/content-manager` admin: the preview side editor. */
-  'cms-advanced-preview': Record<string, unknown>;
-  /** `@strapi/admin` AI service: Strapi-managed AI. */
-  'cms-ai': Record<string, unknown>;
-  /** `@strapi/admin` AI service: custom AI providers (bring your own key). */
-  'cms-byok-ai': Record<string, unknown>;
-}
+export type FeatureOptions = Public.LicenseFeatures;
 
 export type FeatureName = keyof FeatureOptions;
 
