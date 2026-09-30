@@ -1,4 +1,4 @@
-import { take, drop, map, prop, pick, reverse, isNil } from 'lodash/fp';
+import { take, drop, map, prop, pick, reverse } from 'lodash/fp';
 import { getService } from '../utils';
 import constants from './constants';
 
@@ -87,8 +87,8 @@ const syncDisabledUserRecords = async () => {
 };
 
 const seatEnforcementWorkflow = async () => {
-  const adminSeats = strapi.ee.seats;
-  if (isNil(adminSeats)) {
+  const adminSeats = strapi.ee.features.get('seat-limit')?.options.seats;
+  if (adminSeats === undefined) {
     return;
   }
 

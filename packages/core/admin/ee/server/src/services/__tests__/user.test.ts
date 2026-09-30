@@ -40,7 +40,11 @@ describe('EE user service audit events', () => {
     const getDisabledUserList = jest.fn(() => Promise.resolve(disabledUsers));
 
     global.strapi = {
-      ee: { seats },
+      ee: {
+        features: {
+          isEnabled: jest.fn((name: string) => name === 'seat-limit' && seats !== undefined),
+        },
+      },
       eventHub: { emit: jest.fn() },
       db: { query: () => ({ findOne, update, delete: del, count }) },
       store: { set: jest.fn() },

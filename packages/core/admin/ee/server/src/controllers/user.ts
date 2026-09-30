@@ -1,7 +1,7 @@
 import type { Context } from 'koa';
 
 import _ from 'lodash';
-import { pick, isNil } from 'lodash/fp';
+import { pick } from 'lodash/fp';
 import { errors } from '@strapi/utils';
 import { validateUserCreationInput } from '../validation/user';
 import { validateUserUpdateInput } from '../../../../server/src/validation/user';
@@ -20,8 +20,8 @@ const pickUserCreationAttributes = pick([
 ]);
 
 const hasAdminSeatsAvaialble = async () => {
-  const permittedSeats = strapi.ee.seats as any;
-  if (isNil(permittedSeats)) {
+  const permittedSeats = strapi.ee.features.get('seat-limit')?.options.seats;
+  if (permittedSeats === undefined) {
     return true;
   }
 

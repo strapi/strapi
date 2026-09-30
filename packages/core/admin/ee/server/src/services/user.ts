@@ -1,4 +1,4 @@
-import { pipe, map, castArray, toNumber, isNil } from 'lodash/fp';
+import { pipe, map, castArray, toNumber } from 'lodash/fp';
 import type { Data } from '@strapi/types';
 import ceUser from '../../../../server/src/services/user';
 import { getService } from '../utils';
@@ -8,7 +8,7 @@ import { getService } from '../utils';
  * @param {object} input
  */
 const updateEEDisabledUsersList = async (id: Data.ID, input: any) => {
-  if (isNil(strapi.ee.seats) === true) {
+  if (strapi.ee.features.isEnabled('seat-limit') === false) {
     return;
   }
 
@@ -36,7 +36,7 @@ const updateEEDisabledUsersList = async (id: Data.ID, input: any) => {
 const castNumberArray = pipe(castArray, map(toNumber));
 
 const removeFromEEDisabledUsersList = async (ids: unknown) => {
-  if (isNil(strapi.ee.seats) === true) {
+  if (strapi.ee.features.isEnabled('seat-limit') === false) {
     return;
   }
 

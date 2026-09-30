@@ -2,7 +2,7 @@ import type { Context } from 'koa';
 
 import path from 'path';
 
-import { map, values, sumBy, pipe, flatMap, propEq, isNil } from 'lodash/fp';
+import { map, values, sumBy, pipe, flatMap, propEq } from 'lodash/fp';
 import _ from 'lodash';
 import { exists } from 'fs-extra';
 import { env } from '@strapi/utils';
@@ -50,12 +50,12 @@ export default {
           // The license fields are nullable internally; the contract is not.
           isEE: Boolean(strapi.EE),
           isTrial: strapi.ee.isTrial,
-          features: strapi.ee.features.list(),
+          // Names only: this route is public
+          features: strapi.ee.features.list().map(({ name }) => ({ name })),
           flags,
           type: strapi.ee.type ?? undefined,
           planPriceId: strapi.ee.planPriceId ?? undefined,
           projectType: strapi.ee.edition,
-          hasSeatLimit: isNil(strapi.ee.seats) === false,
           ai: {
             enabled: strapi.ai.admin.isStrapiManagedAiEnabled(),
           },
@@ -69,7 +69,6 @@ export default {
           features: [],
           flags,
           projectType: 'Community',
-          hasSeatLimit: false,
           ai: { enabled: false },
         },
       };
@@ -229,7 +228,7 @@ export default {
   // TODO @Nico the contract types `features` with the known feature names only, while this returns
   // every license entry, like /project-type does
   async licenseLimitInformation() {
-    const permittedSeats = strapi.ee.seats;
+    const permittedSeats = strapi.ee.features.get('seat-limit')?.options.seats;
 
     let shouldNotify = false;
     let licenseLimitStatus: 'OVER_LIMIT' | 'AT_LIMIT' | null = null;
@@ -245,12 +244,12 @@ export default {
       enforcementUserCount = currentActiveUserCount;
     }
 
-    if (!isNil(permittedSeats) && enforcementUserCount > permittedSeats) {
+    if (permittedSeats !== undefined && enforcementUserCount > permittedSeats) {
       shouldNotify = true;
       licenseLimitStatus = 'OVER_LIMIT';
     }
 
-    if (!isNil(permittedSeats) && enforcementUserCount === permittedSeats) {
+    if (permittedSeats !== undefined && enforcementUserCount === permittedSeats) {
       shouldNotify = true;
       licenseLimitStatus = 'AT_LIMIT';
     }
@@ -260,7 +259,8 @@ export default {
       currentActiveUserCount,
       permittedSeats,
       shouldNotify,
-      shouldStopCreate: isNil(permittedSeats) ? false : currentActiveUserCount >= permittedSeats,
+      shouldStopCreate:
+        permittedSeats === undefined ? false : currentActiveUserCount >= permittedSeats,
       licenseLimitStatus,
       isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
       type: strapi.ee.type,

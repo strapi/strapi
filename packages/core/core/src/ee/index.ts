@@ -283,6 +283,7 @@ export default Object.freeze<
     return ee.enabled;
   },
 
+  /** @deprecated Use `features.get('seat-limit')`. */
   get seats() {
     return ee.licenseInfo.seats;
   },

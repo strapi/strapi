@@ -162,7 +162,7 @@ describe('Admin Controller', () => {
       type = 'enterprise' as string | null,
       planPriceId = null as string | null,
       edition = 'Enterprise',
-      seats = undefined as number | null | undefined,
+      features = [] as Array<Record<string, unknown>>,
     } = {}) => {
       global.strapi = {
         EE: isEE,
@@ -174,10 +174,9 @@ describe('Admin Controller', () => {
           type,
           planPriceId,
           edition,
-          seats,
           features: {
             isEnabled: jest.fn(() => false),
-            list: jest.fn(() => []),
+            list: jest.fn(() => features),
           },
         },
         ai: {
@@ -211,27 +210,33 @@ describe('Admin Controller', () => {
       expect(data.projectType).toBe(edition);
     });
 
-    it.each([
-      [undefined, false],
-      [null, false],
-      [5, true],
-    ])('reports hasSeatLimit for seats %s as %s', async (seats, hasSeatLimit) => {
-      setup({ seats });
+    it('sends the feature names without their options', async () => {
+      setup({
+        features: [
+          { name: 'sso', options: {} },
+          { name: 'review-workflows', numberOfWorkflows: 3, options: { numberOfWorkflows: 3 } },
+          { name: 'seat-limit', options: { seats: 5 } },
+        ],
+      });
 
       const { data } = await adminController.getProjectType();
 
-      expect(data.hasSeatLimit).toBe(hasSeatLimit);
+      expect(data.features).toStrictEqual([
+        { name: 'sso' },
+        { name: 'review-workflows' },
+        { name: 'seat-limit' },
+      ]);
     });
 
-    it('falls back to no seat limit when building the response throws', async () => {
-      setup({ seats: 5 });
+    it('falls back to no features when building the response throws', async () => {
+      setup({ features: [{ name: 'seat-limit', options: { seats: 5 } }] });
       jest.mocked(global.strapi.ai.admin.isStrapiManagedAiEnabled).mockImplementation(() => {
         throw new Error('AI service unavailable');
       });
 
       const { data } = await adminController.getProjectType();
 
-      expect(data).toMatchObject({ isEE: false, projectType: 'Community', hasSeatLimit: false });
+      expect(data).toMatchObject({ isEE: false, projectType: 'Community', features: [] });
     });
 
     it('omits license fields that are null internally', async () => {
@@ -255,7 +260,6 @@ describe('Admin Controller', () => {
           features: [],
           flags: {},
           projectType: 'Community',
-          hasSeatLimit: false,
           ai: { enabled: false },
         },
       });
@@ -273,13 +277,16 @@ describe('Admin Controller', () => {
       disabledUsers?: Array<{ id: number; isActive: boolean }> | null;
     } = {}) => {
       const count = jest.fn(() => Promise.resolve(activeUserCount));
+      const features = seats === undefined ? [] : [{ name: 'seat-limit', options: { seats } }];
 
       global.strapi = {
         ee: {
-          seats,
           type: seats === undefined ? undefined : 'gold',
           isTrial: false,
-          features: { list: jest.fn(() => []) },
+          features: {
+            list: jest.fn(() => features),
+            get: jest.fn((name: string) => features.find((feature) => feature.name === name)),
+          },
         },
         admin: {
           services: {
@@ -338,6 +345,14 @@ describe('Admin Controller', () => {
         shouldStopCreate: true,
         licenseLimitStatus: 'OVER_LIMIT',
       });
+    });
+
+    test('sends the features with their options', async () => {
+      setup({ seats: 5 });
+
+      const { data } = await adminController.licenseLimitInformation();
+
+      expect(data.features).toStrictEqual([{ name: 'seat-limit', options: { seats: 5 } }]);
     });
   });
 

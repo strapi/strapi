@@ -187,6 +187,52 @@ describe('resolveFeatures', () => {
     });
   });
 
+  describe('seat limit, from the top-level seats', () => {
+    it.each([
+      [10, 10],
+      ['10', 10],
+      [0, 0],
+    ])('adds seat-limit for seats %p', (seats, expected) => {
+      expect(resolveFeatures({ features: ['sso'], seats })).toEqual([
+        { name: 'sso', options: {} },
+        { name: 'seat-limit', options: { seats: expected } },
+      ]);
+    });
+
+    it.each([[null], [undefined], ['ten'], [Number.NaN], [true], [{ seats: 10 }]])(
+      'adds no seat-limit for seats %p',
+      (seats) => {
+        expect(resolveFeatures({ features: ['sso'], seats })).toEqual([
+          { name: 'sso', options: {} },
+        ]);
+      }
+    );
+
+    it('drops a seat-limit listed in features', () => {
+      const listed = { name: 'seat-limit', options: { seats: 99 } };
+
+      expect(resolveFeatures({ features: [listed, 'sso'] })).toEqual([
+        { name: 'sso', options: {} },
+      ]);
+      expect(resolveFeatures({ features: ['seat-limit', listed], seats: 5 })).toEqual([
+        { name: 'seat-limit', options: { seats: 5 } },
+      ]);
+    });
+
+    it('adds seat-limit after the six features of a legacy gold license', () => {
+      expect(resolveFeatures({ type: 'gold', seats: 10 })).toEqual([
+        ...GOLD_FEATURES,
+        { name: 'seat-limit', options: { seats: 10 } },
+      ]);
+    });
+
+    it('adds only seat-limit to a legacy bronze license', () => {
+      expect(resolveFeatures({ type: 'bronze', seats: 3 })).toEqual([
+        { name: 'seat-limit', options: { seats: 3 } },
+      ]);
+    });
+  });
+
   describe('immutability', () => {
     it('does not mutate the license payload and returns fresh objects', () => {
       const entry = { name: 'audit-logs', extra: true, options: { retentionDays: 30 } };
