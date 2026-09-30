@@ -15,6 +15,7 @@ import { createTokenService } from './api-token';
 import * as transfer from './transfer';
 import * as projectSettings from './project-settings';
 import { homepageService } from './homepage';
+import persistTablesService from './persist-tables';
 
 const contentApiTokenService = createTokenService('content-api');
 const adminTokenService = createTokenService('admin');
@@ -40,4 +41,5 @@ export default {
   'project-settings': projectSettings,
   encryption,
   homepage: homepageService,
+  'persist-tables': persistTablesService,
 };
