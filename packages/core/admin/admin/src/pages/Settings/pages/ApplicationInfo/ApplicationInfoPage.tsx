@@ -47,7 +47,7 @@ const ApplicationInfoPage = () => {
           '../../../../../../ee/admin/src/pages/SettingsPage/pages/ApplicationInfoPage/components/AdminSeatInfo'
         )
       ).AdminSeatInfoEE,
-    { enabled: window.strapi.hasSeatLimit === true }
+    { enabled: window.strapi.features.isEnabled('seat-limit') }
   );
   const isAiEnabled = window.strapi.ai?.enabled === true;
   const AIUsageData = useEnterprise(

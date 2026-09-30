@@ -25,7 +25,6 @@ const createBrowserStrapi = async (
     isEE: false,
     isTrial: false,
     isTrialLicense: false,
-    hasSeatLimit: false,
     telemetryDisabled: process.env.STRAPI_TELEMETRY_DISABLED === 'true',
     future: {
       isEnabled: (name: keyof NonNullable<Modules.Features.FeaturesConfig['future']>) => {
@@ -72,7 +71,7 @@ const createBrowserStrapi = async (
     }
 
     const {
-      data: { isEE, isTrial, features: licensedFeatures, flags, ai, projectType, hasSeatLimit },
+      data: { isEE, isTrial, features: licensedFeatures, flags, ai, projectType },
     }: GetProjectType.Response = await response.json();
 
     // Runtime defense: the payload is only typed by convention, not validated.
@@ -81,7 +80,6 @@ const createBrowserStrapi = async (
     browserStrapi.isEE = isEE;
     browserStrapi.isTrial = trial;
     browserStrapi.isTrialLicense = trial;
-    browserStrapi.hasSeatLimit = hasSeatLimit === true;
     browserStrapi.flags = flags;
     browserStrapi.features = {
       ...browserStrapi.features,

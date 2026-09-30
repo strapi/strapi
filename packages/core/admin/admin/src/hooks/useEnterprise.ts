@@ -9,7 +9,7 @@ function isEnterprise() {
 export interface UseEnterpriseOptions<TCEData, TEEData, TDefaultValue, TCombinedValue> {
   defaultValue?: TDefaultValue;
   combine?: (ceData: TCEData, eeData: TEEData) => TCombinedValue;
-  /** ANDed with `isEE`; `enabled: hasSeatLimit` relies on a seat limit implying a license. */
+  /** ANDed with `isEE`; every license feature, `seat-limit` included, implies a license. */
   enabled?: boolean;
 }
 

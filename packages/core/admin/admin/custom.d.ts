@@ -32,11 +32,6 @@ interface BrowserStrapi {
    * this before the rename; removed in the next major.
    */
   isTrialLicense: boolean;
-  /**
-   * Whether the license limits the number of active admin users. Only a license can set
-   * a seat limit, so `true` implies `isEE`.
-   */
-  hasSeatLimit: boolean;
   flags: {
     promoteEE?: boolean;
     nps?: boolean;
