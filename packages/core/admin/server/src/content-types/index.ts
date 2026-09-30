@@ -6,7 +6,6 @@ import apiTokenPermission from './api-token-permission';
 import transferToken from './transfer-token';
 import transferTokenPermission from './transfer-token-permission';
 import session from './session';
-import { auditLog } from './audit-log';
 
 export default {
   permission: { schema: Permission },
@@ -17,6 +16,4 @@ export default {
   'transfer-token': { schema: transferToken },
   'transfer-token-permission': { schema: transferTokenPermission },
   session: { schema: session },
-  // Registered in every edition, so audit logs survive a license loss or a downgrade
-  'audit-log': auditLog,
 };
