@@ -1,6 +1,6 @@
 import { take, drop, map, prop, pick, reverse, isNil } from 'lodash/fp';
 import { getService } from '../utils';
-import constants from '../../../../server/src/services/constants';
+import constants from './constants';
 
 const { SUPER_ADMIN_CODE } = constants;
 
@@ -95,7 +95,7 @@ const seatEnforcementWorkflow = async () => {
   // TODO: we need to make sure an admin can decide to disable specific user and reactivate others
   await syncDisabledUserRecords();
 
-  const currentActiveUserCount = await getService('user').getCurrentActiveUserCount();
+  const currentActiveUserCount = await getService('user').count({ isActive: true });
 
   const adminSeatsLeft = adminSeats - currentActiveUserCount;
 
