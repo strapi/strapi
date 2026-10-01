@@ -35,25 +35,29 @@ describe('inspectNpmrc', () => {
   });
 
   it('plans the lines to add without writing them', async () => {
-    await expect(inspectNpmrc(npmrcPath, LICENSE)).resolves.toMatchObject({
-      status: 'not-configured',
-      linesToAdd: NPMRC_LINES.trimEnd(),
-    });
+    await expect(inspectNpmrc(npmrcPath, LICENSE, STRAPI_REGISTRY, LICENSE)).resolves.toMatchObject(
+      {
+        status: 'not-configured',
+        linesToAdd: NPMRC_LINES.trimEnd(),
+      }
+    );
     expect(await fse.pathExists(npmrcPath)).toBe(false);
   });
 
   it('recognizes the same license', async () => {
     await fse.writeFile(npmrcPath, NPMRC_LINES);
 
-    await expect(inspectNpmrc(npmrcPath, LICENSE)).resolves.toMatchObject({
-      status: 'already-configured',
-    });
+    await expect(inspectNpmrc(npmrcPath, LICENSE, STRAPI_REGISTRY, LICENSE)).resolves.toMatchObject(
+      {
+        status: 'already-configured',
+      }
+    );
   });
 
   it('recognizes another license, and shows the lines without the license', async () => {
     await fse.writeFile(npmrcPath, OTHER_LICENSE_NPMRC);
 
-    const outcome = await inspectNpmrc(npmrcPath, LICENSE);
+    const outcome = await inspectNpmrc(npmrcPath, LICENSE, STRAPI_REGISTRY, LICENSE);
 
     expect(outcome.status).toBe('different-license');
     expect(outcome.expectedConfiguration).toContain('<your license>');
@@ -61,19 +65,32 @@ describe('inspectNpmrc', () => {
   });
 
   it('recognizes a token read from an environment variable', async () => {
+    await fse.writeFile(
+      npmrcPath,
+      `@strapi-enterprise:registry=https://packages.strapi.io/\n${ENVIRONMENT_TOKEN_LINE}`
+    );
+
+    const outcome = await inspectNpmrc(npmrcPath, LICENSE, STRAPI_REGISTRY, LICENSE);
+
+    expect(outcome.status).toBe('uses-environment-variable');
+  });
+
+  it('asks for a manual edit when a token reference has no scope registry to use it', async () => {
     await fse.writeFile(npmrcPath, ENVIRONMENT_TOKEN_LINE);
 
-    await expect(inspectNpmrc(npmrcPath, LICENSE)).resolves.toMatchObject({
-      status: 'uses-environment-variable',
-    });
+    const outcome = await inspectNpmrc(npmrcPath, LICENSE, STRAPI_REGISTRY, LICENSE);
+
+    expect(outcome.status).toBe('manual-edit-needed');
   });
 
   it('asks for a manual edit when the configuration is incomplete', async () => {
     await fse.writeFile(npmrcPath, '@strapi-enterprise:registry=https://packages.strapi.io/\n');
 
-    await expect(inspectNpmrc(npmrcPath, LICENSE)).resolves.toMatchObject({
-      status: 'manual-edit-needed',
-    });
+    await expect(inspectNpmrc(npmrcPath, LICENSE, STRAPI_REGISTRY, LICENSE)).resolves.toMatchObject(
+      {
+        status: 'manual-edit-needed',
+      }
+    );
   });
 });
 
@@ -87,9 +104,11 @@ describe('inspectYarnrc', () => {
   it('plans the scope for a file without npmScopes, without writing it', async () => {
     await fse.writeFile(yarnrcPath, 'enableTelemetry: false\n');
 
-    await expect(inspectYarnrc(yarnrcPath, LICENSE)).resolves.toMatchObject({
+    await expect(
+      inspectYarnrc(yarnrcPath, LICENSE, STRAPI_REGISTRY, LICENSE)
+    ).resolves.toMatchObject({
       status: 'not-configured',
-      linesToAdd: buildYarnrcConfiguration(LICENSE),
+      linesToAdd: buildYarnrcConfiguration(LICENSE, STRAPI_REGISTRY),
     });
     expect(await fse.readFile(yarnrcPath, 'utf8')).toBe('enableTelemetry: false\n');
   });
@@ -100,18 +119,24 @@ describe('inspectYarnrc', () => {
       'npmScopes:\n  my-company:\n    npmRegistryServer: "https://npm.example.com"\n'
     );
 
-    await expect(inspectYarnrc(yarnrcPath, LICENSE)).resolves.toMatchObject({
+    await expect(
+      inspectYarnrc(yarnrcPath, LICENSE, STRAPI_REGISTRY, LICENSE)
+    ).resolves.toMatchObject({
       status: 'manual-edit-needed',
     });
   });
 
   it('recognizes the same and another license', async () => {
-    await fse.writeFile(yarnrcPath, buildYarnrcConfiguration(LICENSE));
+    await fse.writeFile(yarnrcPath, buildYarnrcConfiguration(LICENSE, STRAPI_REGISTRY));
 
-    await expect(inspectYarnrc(yarnrcPath, LICENSE)).resolves.toMatchObject({
+    await expect(
+      inspectYarnrc(yarnrcPath, LICENSE, STRAPI_REGISTRY, LICENSE)
+    ).resolves.toMatchObject({
       status: 'already-configured',
     });
-    await expect(inspectYarnrc(yarnrcPath, 'other-license')).resolves.toMatchObject({
+    await expect(
+      inspectYarnrc(yarnrcPath, 'other-license', STRAPI_REGISTRY, 'other-license')
+    ).resolves.toMatchObject({
       status: 'different-license',
     });
   });
@@ -122,9 +147,74 @@ describe('inspectYarnrc', () => {
       buildYarnrcConfiguration(LICENSE, describeRegistry('http://localhost:4873'))
     );
 
-    await expect(inspectYarnrc(yarnrcPath, LICENSE)).resolves.toMatchObject({
+    await expect(
+      inspectYarnrc(yarnrcPath, LICENSE, STRAPI_REGISTRY, LICENSE)
+    ).resolves.toMatchObject({
       status: 'manual-edit-needed',
     });
+  });
+
+  it('ignores a strapi-enterprise key outside npmScopes', async () => {
+    await fse.writeFile(
+      yarnrcPath,
+      [
+        'packageExtensions:',
+        '  strapi-enterprise:',
+        `    npmAuthToken: '${LICENSE}'`,
+        'npmScopes:',
+        '  acme:',
+        "    npmRegistryServer: 'https://npm.example.com'",
+        '',
+      ].join('\n')
+    );
+
+    const outcome = await inspectYarnrc(yarnrcPath, LICENSE, STRAPI_REGISTRY, LICENSE);
+
+    expect(outcome.status).toBe('manual-edit-needed');
+  });
+
+  it('reads the token set for the registry under npmRegistries', async () => {
+    await fse.writeFile(
+      yarnrcPath,
+      [
+        'npmScopes:',
+        '  strapi-enterprise:',
+        "    npmRegistryServer: 'https://packages.strapi.io/'",
+        'npmRegistries:',
+        '  "https://npm.example.com":',
+        `    npmAuthToken: '${LICENSE}'`,
+        '  "//packages.strapi.io":',
+        "    npmAuthToken: 'out-of-date-license'",
+        '',
+      ].join('\n')
+    );
+
+    const outcome = await inspectYarnrc(yarnrcPath, LICENSE, STRAPI_REGISTRY, LICENSE);
+
+    expect(outcome.status).toBe('different-license');
+  });
+
+  it.each([
+    // eslint-disable-next-line no-template-curly-in-string
+    ['a token read from an environment variable', "'${COMPANY_TOKEN}'"],
+    ['the license', `'${LICENSE}'`],
+  ])('reads only the strapi-enterprise scope when another scope holds %s', async (_case, token) => {
+    await fse.writeFile(
+      yarnrcPath,
+      [
+        'npmScopes:',
+        '  acme:',
+        `    npmAuthToken: ${token}`,
+        '  strapi-enterprise:',
+        "    npmRegistryServer: 'https://packages.strapi.io/'",
+        "    npmAuthToken: 'out-of-date-license'",
+        '',
+      ].join('\n')
+    );
+
+    await expect(
+      inspectYarnrc(yarnrcPath, LICENSE, STRAPI_REGISTRY, LICENSE)
+    ).resolves.toMatchObject({ status: 'different-license' });
   });
 });
 

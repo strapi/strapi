@@ -12,7 +12,6 @@ import { createPackument } from './test-helpers';
 
 const aiByokEntry = {
   packageName: '@strapi-enterprise/plugin-ai-byok',
-  pluginId: 'ai-byok',
   displayName: 'AI BYOK',
   summary: 'Runs Strapi AI features with a customer-owned provider key.',
 };
@@ -38,7 +37,7 @@ describe('buildPluginRow', () => {
     expect(rowFor(threeVersions)).toMatchObject({
       state: 'install',
       targetVersion: '1.2.0',
-      note: '1.3.0 is available but requires Strapi ^5.56.0.',
+      newerVersionNote: '1.3.0 is available but requires Strapi ^5.56.0.',
     });
   });
 
@@ -68,7 +67,7 @@ describe('buildPluginRow', () => {
   it('explains when no version fits the app Strapi version', () => {
     expect(rowFor(threeVersions, undefined, '5.50.0')).toMatchObject({
       state: 'no-compatible-version',
-      note: 'requires Strapi ^5.56.0',
+      requiredStrapiRange: '^5.56.0',
     });
   });
 
@@ -82,10 +81,10 @@ describe('buildPluginRow', () => {
 describe('orderVisibleRows', () => {
   it('puts upgrades first and drops hidden rows', () => {
     const rows: PluginRow[] = [
-      { entry: aiByokEntry, state: 'installed' },
+      { entry: aiByokEntry, state: 'installed', installedVersion: '1.2.0' },
       { entry: aiByokEntry, state: 'hidden' },
-      { entry: aiByokEntry, state: 'install' },
-      { entry: aiByokEntry, state: 'upgrade' },
+      { entry: aiByokEntry, state: 'install', targetVersion: '1.2.0' },
+      { entry: aiByokEntry, state: 'upgrade', installedVersion: '1.1.0', targetVersion: '1.2.0' },
     ];
 
     expect(orderVisibleRows(rows).map((row) => row.state)).toEqual([
@@ -132,7 +131,16 @@ describe('toCheckboxChoice', () => {
   });
 
   it('drops the newer-version note when that version is already installed', () => {
-    expect(rowFor(threeVersions, '1.3.0')).toMatchObject({ state: 'installed', note: undefined });
+    expect(rowFor(threeVersions, '1.3.0')).toMatchObject({
+      state: 'installed',
+      newerVersionNote: undefined,
+    });
+  });
+
+  it('says which Strapi version a plugin with no compatible version requires', () => {
+    expect(toCheckboxChoice(rowFor(threeVersions, undefined, '5.50.0')).disabled).toBe(
+      'requires Strapi ^5.56.0'
+    );
   });
 
   it('shows installed and unlicensed plugins as not selectable', () => {

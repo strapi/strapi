@@ -16,7 +16,7 @@ describe('resolvePluginStatus', () => {
     expect(resolvePluginStatus({ lookup: threeVersions, strapiVersion: '5.54.1' })).toEqual({
       state: 'install',
       targetVersion: '1.2.0',
-      note: '1.3.0 is available but requires Strapi ^5.56.0.',
+      newerVersionNote: '1.3.0 is available but requires Strapi ^5.56.0.',
     });
   });
 

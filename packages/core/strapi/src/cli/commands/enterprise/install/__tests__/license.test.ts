@@ -165,6 +165,8 @@ describe('resolveLicense', () => {
   });
 
   it('fails without a license when there is no terminal to ask in', async () => {
+    const prompt = jest.fn();
+
     await expect(
       resolveLicense({
         appDir: await createTemporaryDirectory(),
@@ -172,10 +174,12 @@ describe('resolveLicense', () => {
         logger: createTestLogger(),
         env: {},
         now: NOW,
+        prompt,
       })
     ).rejects.toThrow(
       'No Strapi license found. Set STRAPI_LICENSE, or run the command in a terminal to paste it.'
     );
+    expect(prompt).not.toHaveBeenCalled();
   });
 
   it('restricts an existing, empty license.txt to its owner when saving the pasted license', async () => {

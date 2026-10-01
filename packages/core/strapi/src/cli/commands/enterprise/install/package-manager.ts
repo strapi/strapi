@@ -7,10 +7,10 @@ import { EnterpriseInstallError } from './errors';
 
 export type PackageManagerName = 'npm' | 'pnpm' | 'yarn';
 
-export interface DetectedPackageManager {
-  name: PackageManagerName;
-  majorVersion?: number;
-}
+/** Yarn's major version matters: Yarn 2 and later read another configuration file. */
+export type DetectedPackageManager =
+  | { name: 'npm' | 'pnpm'; majorVersion?: number }
+  | { name: 'yarn'; majorVersion: number };
 
 /** Reads a `packageManager` field such as `yarn@4.5.0` or `pnpm@9.1.0+sha512...`. */
 export const parsePackageManagerField = (
@@ -29,15 +29,21 @@ export const parsePackageManagerField = (
   return { name: fieldMatch[1] as PackageManagerName, majorVersion: Number(fieldMatch[2]) };
 };
 
+const YARN_VERSION_UNKNOWN =
+  'Could not run yarn --version to tell Yarn 1 from Yarn 2+. Check that Yarn is installed, or set "packageManager" in package.json.';
+
 const readYarnMajorVersion = async (appDir: string): Promise<number> => {
   const { stdout } = await execa('yarn', ['--version'], { cwd: appDir }).catch(() => {
-    throw new EnterpriseInstallError(
-      'Could not run yarn --version to tell Yarn 1 from Yarn 2+. Check that Yarn is installed, or set "packageManager" in package.json.'
-    );
+    throw new EnterpriseInstallError(YARN_VERSION_UNKNOWN);
   });
   const majorVersion = Number.parseInt(stdout.trim(), 10);
 
-  return Number.isNaN(majorVersion) ? 1 : majorVersion;
+  // Guessing Yarn 1 would set up a file that Yarn 2+ never reads.
+  if (Number.isNaN(majorVersion)) {
+    throw new EnterpriseInstallError(YARN_VERSION_UNKNOWN);
+  }
+
+  return majorVersion;
 };
 
 export const detectPackageManager = async (appDir: string): Promise<DetectedPackageManager> => {
@@ -67,4 +73,4 @@ export const detectPackageManager = async (appDir: string): Promise<DetectedPack
  * Yarn 2 and later read `.yarnrc.yml`. npm, pnpm, and Yarn 1 read `.npmrc`.
  */
 export const readsYarnrcYml = (packageManager: DetectedPackageManager): boolean =>
-  packageManager.name === 'yarn' && (packageManager.majorVersion ?? 1) >= 2;
+  packageManager.name === 'yarn' && packageManager.majorVersion >= 2;

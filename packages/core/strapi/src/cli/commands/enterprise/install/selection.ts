@@ -4,31 +4,25 @@ import { resolvePluginStatus } from './plugin-status';
 import type { PackumentLookup } from './registry';
 import { isPrerelease } from './versions';
 
-export type PluginRowState =
+type PluginRowState =
   /** Installed, and a newer compatible version exists. Selected by default. */
-  | 'upgrade'
+  | { state: 'upgrade'; installedVersion: string; targetVersion: string; newerVersionNote?: string }
   /** Not installed, and the license includes it. */
-  | 'install'
+  | { state: 'install'; targetVersion: string; newerVersionNote?: string }
   /** Installed and up to date for this Strapi version. */
-  | 'installed'
+  | { state: 'installed'; installedVersion: string; newerVersionNote?: string }
   /** Installed, but the license does not include it anymore. */
-  | 'not-licensed'
+  | { state: 'not-licensed'; installedVersion: string }
   /** Not installed, and no stable version fits this Strapi version. */
-  | 'no-compatible-version'
+  | { state: 'no-compatible-version'; requiredStrapiRange: string }
   /** Not installed, and only prerelease versions exist. */
-  | 'no-stable-release'
+  | { state: 'no-stable-release' }
   /** Not installed, and not available to this license: not shown. */
-  | 'hidden';
+  | { state: 'hidden' };
 
-export interface PluginRow {
-  entry: EnterprisePluginEntry;
-  state: PluginRowState;
-  installedVersion?: string;
-  targetVersion?: string;
-  note?: string;
-  /** For a plugin with no version for this app: the Strapi range its newest version requires. */
-  requiredStrapiRange?: string;
-}
+export type PluginRow = { entry: EnterprisePluginEntry } & PluginRowState;
+
+export type SelectableRow = Extract<PluginRow, { state: 'upgrade' | 'install' }>;
 
 export const buildPluginRow = ({
   entry,
@@ -43,41 +37,42 @@ export const buildPluginRow = ({
 }): PluginRow => {
   const status = resolvePluginStatus({ lookup, installedVersion, strapiVersion });
 
-  switch (status.state) {
-    case 'install':
-      return { entry, state: 'install', targetVersion: status.targetVersion, note: status.note };
-    case 'upgrade':
-    case 'installed':
-      return { entry, ...status, installedVersion };
-    case 'not-licensed':
-      return installedVersion
-        ? { entry, state: 'not-licensed', installedVersion }
-        : { entry, state: 'hidden' };
-    case 'not-found':
-      return { entry, state: 'hidden', installedVersion };
-    default:
-      // No version for this app. An installed plugin stays listed as installed.
-      if (installedVersion) {
-        return {
-          entry,
-          state: 'installed',
-          installedVersion,
-          note: status.state === 'no-compatible-version' ? status.note : undefined,
-        };
-      }
+  if (status.state === 'not-licensed' || status.state === 'not-found') {
+    return status.state === 'not-licensed' && installedVersion
+      ? { entry, state: 'not-licensed', installedVersion }
+      : { entry, state: 'hidden' };
+  }
 
-      return status.state === 'no-compatible-version'
-        ? {
-            entry,
-            state: 'no-compatible-version',
-            note: `requires Strapi ${status.requiredStrapiRange}`,
-            requiredStrapiRange: status.requiredStrapiRange,
-          }
-        : { entry, state: 'no-stable-release' };
+  if (status.state === 'install') {
+    return { entry, ...status };
+  }
+
+  if (!installedVersion) {
+    // Only an installed plugin can be an upgrade or up to date.
+    return status.state === 'no-compatible-version'
+      ? { entry, state: 'no-compatible-version', requiredStrapiRange: status.requiredStrapiRange }
+      : { entry, state: 'no-stable-release' };
+  }
+
+  switch (status.state) {
+    case 'upgrade':
+      return { entry, ...status, installedVersion };
+    case 'no-compatible-version':
+      // No version for this app. An installed plugin stays listed as installed.
+      return {
+        entry,
+        state: 'installed',
+        installedVersion,
+        newerVersionNote: status.newerVersionNote,
+      };
+    case 'no-stable-release':
+      return { entry, state: 'installed', installedVersion };
+    default:
+      return { entry, ...status, installedVersion };
   }
 };
 
-const ROW_ORDER: PluginRowState[] = [
+const ROW_ORDER: PluginRow['state'][] = [
   'upgrade',
   'install',
   'installed',
@@ -86,10 +81,10 @@ const ROW_ORDER: PluginRowState[] = [
   'no-stable-release',
 ];
 
-export const isSelectable = (row: PluginRow): boolean =>
+export const isSelectable = (row: PluginRow): row is SelectableRow =>
   row.state === 'upgrade' || row.state === 'install';
 
-export const toInstallSpec = (row: PluginRow): string =>
+export const toInstallSpec = (row: SelectableRow): string =>
   `${row.entry.packageName}@${row.targetVersion}`;
 
 interface CheckboxChoice {
@@ -104,35 +99,34 @@ export const toCheckboxChoice = (row: PluginRow): CheckboxChoice => {
   const kindTag = kind && kind !== 'plugin' ? ` [${kind}]` : '';
   const label = `${displayName} (${packageName})${kindTag}`;
   // The note is a sentence of its own, such as "1.3.0 is available but requires Strapi ^5.56.0."
-  const noteSuffix = row.note ? `  ${row.note}` : '';
+  const noteSuffix = (note?: string) => (note ? `  ${note}` : '');
 
   switch (row.state) {
     case 'upgrade': {
       // Replacing a prerelease with the stable release can be a step back, so it is only offered.
-      const replacesPrerelease =
-        row.installedVersion !== undefined && isPrerelease(row.installedVersion);
+      const replacesPrerelease = isPrerelease(row.installedVersion);
 
       return {
-        name: `${label}  ${row.installedVersion} → ${row.targetVersion} ${replacesPrerelease ? '[stable release]' : '[upgrade]'}${noteSuffix}`,
+        name: `${label}  ${row.installedVersion} → ${row.targetVersion} ${replacesPrerelease ? '[stable release]' : '[upgrade]'}${noteSuffix(row.newerVersionNote)}`,
         value: toInstallSpec(row),
         checked: !replacesPrerelease,
       };
     }
     case 'install':
       return {
-        name: `${label}  ${row.targetVersion}  ${row.entry.summary}${noteSuffix}`,
+        name: `${label}  ${row.targetVersion}  ${row.entry.summary}${noteSuffix(row.newerVersionNote)}`,
         value: toInstallSpec(row),
         checked: false,
       };
     case 'installed':
       return {
         name: `${label}  ${row.installedVersion}`,
-        disabled: row.note ? `installed, ${row.note}` : 'installed',
+        disabled: row.newerVersionNote ? `installed, ${row.newerVersionNote}` : 'installed',
       };
     case 'not-licensed':
       return { name: `${label}  ${row.installedVersion}`, disabled: 'not in your license' };
     case 'no-compatible-version':
-      return { name: label, disabled: row.note ?? 'no compatible version' };
+      return { name: label, disabled: `requires Strapi ${row.requiredStrapiRange}` };
     case 'no-stable-release':
       return { name: label, disabled: 'no stable release yet' };
     default:

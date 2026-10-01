@@ -22,7 +22,10 @@ describe('searchPackageNames', () => {
         env: {},
         fetchImplementation,
       })
-    ).resolves.toEqual([packageName, '@strapi-enterprise/ai-workflows']);
+    ).resolves.toEqual({
+      status: 'available',
+      packageNames: [packageName, '@strapi-enterprise/ai-workflows'],
+    });
     expect(fetchImplementation).toHaveBeenCalledWith(
       'https://packages.strapi.io/-/v1/search?text=%40strapi-enterprise&size=250',
       expect.objectContaining({ headers: { Authorization: 'Bearer the-license' } })
@@ -32,7 +35,7 @@ describe('searchPackageNames', () => {
   it.each([
     ['answers with an error', jest.fn().mockResolvedValue(createFetchResponse(500))],
     ['cannot be reached', jest.fn().mockRejectedValue(new TypeError('fetch failed'))],
-  ])('returns undefined when the search %s', async (_case, fetchImplementation) => {
+  ])('reports the search as unavailable when it %s', async (_case, fetchImplementation) => {
     await expect(
       searchPackageNames({
         text: '@strapi-enterprise',
@@ -40,7 +43,21 @@ describe('searchPackageNames', () => {
         env: {},
         fetchImplementation,
       })
-    ).resolves.toBeUndefined();
+    ).resolves.toEqual({ status: 'unavailable' });
+  });
+
+  it('tells a rejected license apart from an unavailable search', async () => {
+    await expect(
+      searchPackageNames({
+        text: '@strapi-enterprise',
+        license: 'the-license',
+        env: {},
+        fetchImplementation: jest.fn().mockResolvedValue(createFetchResponse(401)),
+      })
+    ).resolves.toEqual({
+      status: 'license-rejected',
+      message: expect.stringContaining('https://packages.strapi.io rejected this Strapi license.'),
+    });
   });
 });
 

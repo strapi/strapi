@@ -1,9 +1,8 @@
-import os from 'os';
 import path from 'path';
 import fse from 'fs-extra';
 
 import type { Logger } from '../../../utils/logger';
-import { ENTERPRISE_REGISTRY_URL, ENTERPRISE_SCOPE } from './constants';
+import { ENTERPRISE_SCOPE } from './constants';
 import { EnterpriseInstallError } from './errors';
 import { listAncestorDirectories } from './directories';
 import type { ResolvedLicense } from './license';
@@ -28,21 +27,21 @@ const shouldReferenceLicense = (
   env: NodeJS.ProcessEnv
 ): boolean => licenseSource === 'environment' && Boolean(env.CI) && env.CI !== 'false';
 
-export type RegistryAccessStatus =
-  | 'not-configured'
+type ConfiguredStatus =
   | 'already-configured'
   | 'uses-environment-variable'
   | 'different-license'
   | 'manual-edit-needed';
 
-export interface RegistryAccessOutcome {
-  status: RegistryAccessStatus;
+export type RegistryAccessOutcome = {
   filePath: string;
   /** The configuration the file should contain, with a placeholder instead of the license. */
   expectedConfiguration: string;
-  /** For `not-configured`: the lines to add, with the license or a reference to it. */
-  linesToAdd?: string;
-}
+} & (
+  | { status: ConfiguredStatus }
+  /** `linesToAdd` holds the license, or a reference to it. */
+  | { status: 'not-configured'; linesToAdd: string }
+);
 
 export interface ConfiguredRegistry {
   /** Always ends with a slash, as npm expects for a scope registry. */
@@ -58,17 +57,10 @@ export const describeRegistry = (registryUrl: string): ConfiguredRegistry => {
   return { url: url.href, host: url.host, tokenKey: `//${url.host}${url.pathname}:_authToken` };
 };
 
-const STRAPI_REGISTRY = describeRegistry(ENTERPRISE_REGISTRY_URL);
+export const buildNpmrcConfiguration = (token: string, registry: ConfiguredRegistry): string =>
+  [`${SCOPE_REGISTRY_KEY}=${registry.url}`, `${registry.tokenKey}=${token}`].join('\n');
 
-export const buildNpmrcConfiguration = (
-  token: string,
-  registry: ConfiguredRegistry = STRAPI_REGISTRY
-): string => [`${SCOPE_REGISTRY_KEY}=${registry.url}`, `${registry.tokenKey}=${token}`].join('\n');
-
-export const buildYarnrcConfiguration = (
-  token: string,
-  registry: ConfiguredRegistry = STRAPI_REGISTRY
-): string =>
+export const buildYarnrcConfiguration = (token: string, registry: ConfiguredRegistry): string =>
   [
     'npmScopes:',
     `  ${YARNRC_SCOPE_NAME}:`,
@@ -77,13 +69,10 @@ export const buildYarnrcConfiguration = (
     `    npmAuthToken: '${token}'`,
   ].join('\n');
 
-export const getUserNpmrcPath = (
-  env: NodeJS.ProcessEnv = process.env,
-  homeDir: string = os.homedir()
-): string => env.NPM_CONFIG_USERCONFIG ?? env.npm_config_userconfig ?? path.join(homeDir, '.npmrc');
+export const getUserNpmrcPath = (env: NodeJS.ProcessEnv, homeDir: string): string =>
+  env.NPM_CONFIG_USERCONFIG ?? env.npm_config_userconfig ?? path.join(homeDir, '.npmrc');
 
-export const getUserYarnrcPath = (homeDir: string = os.homedir()): string =>
-  path.join(homeDir, '.yarnrc.yml');
+export const getUserYarnrcPath = (homeDir: string): string => path.join(homeDir, '.yarnrc.yml');
 
 const readFileIfExists = async (filePath: string): Promise<string> =>
   (await fse.pathExists(filePath)) ? fse.readFile(filePath, 'utf8') : '';
@@ -124,14 +113,14 @@ const isEnvironmentVariableReference = (value: string | undefined): boolean =>
 export const inspectNpmrc = async (
   filePath: string,
   license: string,
-  registry: ConfiguredRegistry = STRAPI_REGISTRY,
-  writtenToken: string = license
+  registry: ConfiguredRegistry,
+  writtenToken: string
 ): Promise<RegistryAccessOutcome> => {
   const content = await readFileIfExists(filePath);
   const entries = parseNpmrc(content);
   const scopeRegistry = entries.get(SCOPE_REGISTRY_KEY);
   const registryToken = entries.get(registry.tokenKey);
-  const outcome = (status: RegistryAccessStatus): RegistryAccessOutcome => ({
+  const outcome = (status: ConfiguredStatus): RegistryAccessOutcome => ({
     status,
     filePath,
     expectedConfiguration: buildNpmrcConfiguration(LICENSE_PLACEHOLDER, registry),
@@ -139,17 +128,19 @@ export const inspectNpmrc = async (
 
   if (scopeRegistry === undefined && registryToken === undefined) {
     return {
-      ...outcome('not-configured'),
+      status: 'not-configured',
+      filePath,
+      expectedConfiguration: buildNpmrcConfiguration(LICENSE_PLACEHOLDER, registry),
       linesToAdd: buildNpmrcConfiguration(writtenToken, registry),
     };
   }
 
-  if (isEnvironmentVariableReference(registryToken)) {
-    return outcome('uses-environment-variable');
-  }
-
   const isScopeRegistryCorrect =
     withoutTrailingSlash(scopeRegistry) === withoutTrailingSlash(registry.url);
+
+  if (isEnvironmentVariableReference(registryToken)) {
+    return outcome(isScopeRegistryCorrect ? 'uses-environment-variable' : 'manual-edit-needed');
+  }
 
   if (registryToken === license && isScopeRegistryCorrect) {
     return outcome('already-configured');
@@ -162,48 +153,80 @@ export const inspectNpmrc = async (
   return outcome('manual-edit-needed');
 };
 
-const YARNRC_SCOPE_LINE = new RegExp(`^\\s+["']?${YARNRC_SCOPE_NAME}["']?\\s*:`);
+const indentationOf = (line: string) => line.search(/\S/);
 
-const hasYarnrcScope = (content: string): boolean =>
-  content.split(/\r?\n/).some((line) => YARNRC_SCOPE_LINE.test(line));
+const isYarnrcContentLine = (line: string) => line.trim() !== '' && !line.trim().startsWith('#');
 
-const readYarnrcScopeToken = (content: string): string | undefined => {
+const readYarnrcKey = (line: string): string | undefined =>
+  /^\s*(["']?)([^"':]+(?::\/\/[^"']+)?)\1\s*:/.exec(line)?.[2];
+
+const readYarnrcEntry = (
+  content: string,
+  topLevelKey: string,
+  isWantedEntry: (entryKey: string) => boolean
+): Map<string, string> | undefined => {
   const lines = content.split(/\r?\n/);
-  const scopeLineIndex = lines.findIndex((line) => YARNRC_SCOPE_LINE.test(line));
+  const topLevelIndex = lines.findIndex((line) =>
+    new RegExp(`^${topLevelKey}\\s*:\\s*(#.*)?$`).test(line)
+  );
 
-  if (scopeLineIndex === -1) {
+  if (topLevelIndex === -1) {
     return undefined;
   }
 
-  const scopeIndentation = lines[scopeLineIndex].search(/\S/);
+  let entryIndentation: number | undefined;
+  let settings: Map<string, string> | undefined;
 
-  for (const line of lines.slice(scopeLineIndex + 1)) {
-    if (line.trim() === '' || line.trim().startsWith('#')) {
-      continue;
+  for (const line of lines.slice(topLevelIndex + 1).filter(isYarnrcContentLine)) {
+    const indentation = indentationOf(line);
+
+    if (indentation === 0) {
+      break;
     }
 
-    if (line.search(/\S/) <= scopeIndentation) {
-      return undefined;
-    }
+    entryIndentation ??= indentation;
 
-    const tokenMatch = /^\s*npmAuthToken\s*:\s*(.*)$/.exec(line);
+    if (indentation <= entryIndentation) {
+      if (settings) {
+        break;
+      }
 
-    if (tokenMatch) {
-      return unquote(tokenMatch[1].trim());
+      const entryKey = readYarnrcKey(line);
+      settings = entryKey !== undefined && isWantedEntry(entryKey) ? new Map() : undefined;
+    } else if (settings) {
+      const settingMatch = /^\s*([A-Za-z]+)\s*:\s*(.*)$/.exec(line);
+
+      if (settingMatch) {
+        settings.set(settingMatch[1], unquote(settingMatch[2].trim()));
+      }
     }
   }
 
-  return undefined;
+  return settings;
+};
+
+const readYarnrcScope = (content: string) =>
+  readYarnrcEntry(content, 'npmScopes', (entryKey) => entryKey === YARNRC_SCOPE_NAME);
+
+const readYarnrcToken = (content: string, registry: ConfiguredRegistry): string | undefined => {
+  const normalize = (url: string) => withoutTrailingSlash(url.replace(/^https?:/, ''));
+  const registryEntry = readYarnrcEntry(
+    content,
+    'npmRegistries',
+    (entryKey) => normalize(entryKey) === normalize(registry.url)
+  );
+
+  return readYarnrcScope(content)?.get('npmAuthToken') ?? registryEntry?.get('npmAuthToken');
 };
 
 export const inspectYarnrc = async (
   filePath: string,
   license: string,
-  registry: ConfiguredRegistry = STRAPI_REGISTRY,
-  writtenToken: string = license
+  registry: ConfiguredRegistry,
+  writtenToken: string
 ): Promise<RegistryAccessOutcome> => {
   const content = await readFileIfExists(filePath);
-  const outcome = (status: RegistryAccessStatus): RegistryAccessOutcome => ({
+  const outcome = (status: ConfiguredStatus): RegistryAccessOutcome => ({
     status,
     filePath,
     expectedConfiguration: buildYarnrcConfiguration(LICENSE_PLACEHOLDER, registry),
@@ -211,25 +234,36 @@ export const inspectYarnrc = async (
 
   if (!/^npmScopes\s*:/m.test(content)) {
     return {
-      ...outcome('not-configured'),
+      status: 'not-configured',
+      filePath,
+      expectedConfiguration: buildYarnrcConfiguration(LICENSE_PLACEHOLDER, registry),
       linesToAdd: buildYarnrcConfiguration(writtenToken, registry),
     };
   }
 
-  if (!hasYarnrcScope(content)) {
+  const scope = readYarnrcScope(content);
+
+  if (scope === undefined) {
     return outcome('manual-edit-needed');
   }
 
-  if (content.includes(license)) {
-    // The license may be set for another registry, such as a local one used for testing.
-    return outcome(content.includes(registry.url) ? 'already-configured' : 'manual-edit-needed');
+  const token = readYarnrcToken(content, registry);
+  const isScopeRegistryCorrect =
+    withoutTrailingSlash(scope.get('npmRegistryServer')) === withoutTrailingSlash(registry.url);
+
+  if (isEnvironmentVariableReference(token)) {
+    // A reference only works once the scope points to the registry.
+    return outcome(isScopeRegistryCorrect ? 'uses-environment-variable' : 'manual-edit-needed');
   }
 
-  if (/npmAuthToken\s*:\s*["']?\$\{/.test(content)) {
-    return outcome('uses-environment-variable');
+  if (token !== undefined && token !== license) {
+    return outcome('different-license');
   }
 
-  return outcome('different-license');
+  // The license may be set for another registry, such as a local one used for testing.
+  return outcome(
+    token === license && isScopeRegistryCorrect ? 'already-configured' : 'manual-edit-needed'
+  );
 };
 
 const assertRegistryAccessUsable = ({
@@ -327,7 +361,7 @@ export const findOverridingConfigFiles = async ({
 
     const content = await readFileIfExists(filePath);
     const token = usesYarnrcYml
-      ? readYarnrcScopeToken(content)
+      ? readYarnrcToken(content, registry)
       : parseNpmrc(content).get(registry.tokenKey);
 
     if (token !== undefined && token !== license && !isEnvironmentVariableReference(token)) {
@@ -350,16 +384,16 @@ export const prepareRegistryAccess = async ({
   license,
   licenseSource,
   logger,
-  env = process.env,
-  homeDir = os.homedir(),
+  env,
+  homeDir,
 }: {
   appDir: string;
   packageManager: DetectedPackageManager;
   license: string;
   licenseSource: ResolvedLicense['source'];
   logger: Logger;
-  env?: NodeJS.ProcessEnv;
-  homeDir?: string;
+  env: NodeJS.ProcessEnv;
+  homeDir: string;
 }): Promise<RegistryAccess> => {
   const registry = describeRegistry(getRegistryUrl(env));
   const usesYarnrcYml = readsYarnrcYml(packageManager);
@@ -400,7 +434,7 @@ export const prepareRegistryAccess = async ({
   return {
     outcome,
     async apply() {
-      if (outcome.status !== 'not-configured' || outcome.linesToAdd === undefined) {
+      if (outcome.status !== 'not-configured') {
         return;
       }
 

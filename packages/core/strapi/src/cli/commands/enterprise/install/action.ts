@@ -6,7 +6,7 @@ import { ENTERPRISE_SCOPE, STRAPI_PACKAGE_NAME } from './constants';
 import { discoverEnterprisePlugins } from './discovery';
 import { EnterpriseInstallError, PackageManagerError } from './errors';
 import { buildInstallCommand, installPackages } from './install-packages';
-import { resolveLicense } from './license';
+import { promptForLicense, resolveLicense } from './license';
 import { detectPackageManager } from './package-manager';
 import { resolvePluginStatus } from './plugin-status';
 import { prepareRegistryAccess } from './registry-access';
@@ -27,7 +27,7 @@ export interface InstallDependencies {
   homeDir: string;
   now: Date;
   fetchImplementation: typeof fetch;
-  promptForLicense?: () => Promise<string>;
+  promptForLicense: typeof promptForLicense;
   promptForPlugins: typeof promptForPlugins;
   installPackages: typeof installPackages;
 }
@@ -37,7 +37,7 @@ const describeNoStableRelease = (packageName: string) =>
 
 const describeStrapiMismatch = (
   packageName: string,
-  requiredStrapiRange: string | undefined,
+  requiredStrapiRange: string,
   strapiVersion: string | undefined
 ) =>
   `${packageName} requires Strapi ${requiredStrapiRange} and this app uses ${strapiVersion}. Upgrade Strapi first.`;
@@ -121,8 +121,8 @@ const resolveNamedPackages = async (
         break;
     }
 
-    if (status.note) {
-      logger.info(`${packageName}: ${status.note}`);
+    if (status.newerVersionNote) {
+      logger.info(`${packageName}: ${status.newerVersionNote}`);
     }
 
     if (status.state === 'installed') {
@@ -179,8 +179,8 @@ const selectPlugins = async ({
     visibleRows.forEach((row) => {
       const { packageName } = row.entry;
 
-      if (row.state === 'installed' && row.note) {
-        logger.info(`${packageName}: ${row.note}`);
+      if (row.state === 'installed' && row.newerVersionNote) {
+        logger.info(`${packageName}: ${row.newerVersionNote}`);
       } else if (row.state === 'no-stable-release') {
         logger.info(describeNoStableRelease(packageName));
       } else if (row.state === 'no-compatible-version') {
@@ -319,6 +319,7 @@ export const action = async (
         homeDir: os.homedir(),
         now: new Date(),
         fetchImplementation: fetch,
+        promptForLicense,
         promptForPlugins,
         installPackages,
       },

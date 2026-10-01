@@ -32,7 +32,7 @@ export type PackumentLookup =
   | { status: 'not-found' }
   | { status: 'unavailable'; message: string };
 
-export const getRegistryUrl = (env: NodeJS.ProcessEnv = process.env): string => {
+export const getRegistryUrl = (env: NodeJS.ProcessEnv): string => {
   const registryUrl = env.STRAPI_ENTERPRISE_REGISTRY_URL?.trim() || ENTERPRISE_REGISTRY_URL;
 
   if (!URL.canParse(registryUrl)) {
@@ -46,18 +46,28 @@ export const getRegistryUrl = (env: NodeJS.ProcessEnv = process.env): string => 
 
 const authorizationHeader = (license: string) => ({ Authorization: `Bearer ${license}` });
 
+const describeRejectedLicense = (registryUrl: string) =>
+  `${registryUrl} rejected this Strapi license. Check it at ${BILLING_URL}`;
+
+export type SearchResult =
+  | { status: 'available'; packageNames: string[] }
+  | { status: 'license-rejected'; message: string }
+  /** The search could not be reached, failed, or answered with invalid data. */
+  | { status: 'unavailable' };
+
 export const searchPackageNames = async ({
   text,
   license,
-  env = process.env,
-  fetchImplementation = fetch,
+  env,
+  fetchImplementation,
 }: {
   text: string;
   license: string;
-  env?: NodeJS.ProcessEnv;
-  fetchImplementation?: typeof fetch;
-}): Promise<string[] | undefined> => {
-  const searchUrl = `${getRegistryUrl(env)}/-/v1/search?text=${encodeURIComponent(text)}&size=${SEARCH_PAGE_SIZE}`;
+  env: NodeJS.ProcessEnv;
+  fetchImplementation: typeof fetch;
+}): Promise<SearchResult> => {
+  const registryUrl = getRegistryUrl(env);
+  const searchUrl = `${registryUrl}/-/v1/search?text=${encodeURIComponent(text)}&size=${SEARCH_PAGE_SIZE}`;
 
   try {
     const response = await fetchImplementation(searchUrl, {
@@ -65,32 +75,38 @@ export const searchPackageNames = async ({
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
 
+    if (response.status === 401) {
+      return { status: 'license-rejected', message: describeRejectedLicense(registryUrl) };
+    }
+
     if (!response.ok) {
-      return undefined;
+      return { status: 'unavailable' };
     }
 
     const { objects } = (await response.json()) as {
       objects?: Array<{ package?: { name?: unknown } }>;
     };
 
-    return (objects ?? [])
+    const packageNames = (objects ?? [])
       .map((searchResult) => searchResult.package?.name)
       .filter((packageName): packageName is string => typeof packageName === 'string');
+
+    return { status: 'available', packageNames };
   } catch {
-    return undefined;
+    return { status: 'unavailable' };
   }
 };
 
 export const fetchPackument = async ({
   packageName,
   license,
-  env = process.env,
-  fetchImplementation = fetch,
+  env,
+  fetchImplementation,
 }: {
   packageName: string;
   license: string;
-  env?: NodeJS.ProcessEnv;
-  fetchImplementation?: typeof fetch;
+  env: NodeJS.ProcessEnv;
+  fetchImplementation: typeof fetch;
 }): Promise<PackumentLookup> => {
   const registryUrl = getRegistryUrl(env);
   let response: Response;
@@ -111,7 +127,7 @@ export const fetchPackument = async ({
   if (response.status === 401) {
     return {
       status: 'license-rejected',
-      message: `${registryUrl} rejected this Strapi license. Check it at ${BILLING_URL}`,
+      message: describeRejectedLicense(registryUrl),
     };
   }
 
