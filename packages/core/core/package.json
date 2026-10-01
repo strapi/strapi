@@ -36,6 +36,13 @@
       "require": "./dist/index.js",
       "default": "./dist/index.js"
     },
+    "./_internal/license": {
+      "types": "./dist/ee/license.d.ts",
+      "source": "./src/ee/license.ts",
+      "import": "./dist/ee/license.mjs",
+      "require": "./dist/ee/license.js",
+      "default": "./dist/ee/license.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [

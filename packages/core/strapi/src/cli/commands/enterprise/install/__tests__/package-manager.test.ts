@@ -67,6 +67,16 @@ describe('detectPackageManager', () => {
     await expect(detectPackageManager(appDir)).resolves.toEqual({ name: 'yarn', majorVersion: 1 });
     expect(execaMock).toHaveBeenCalledWith('yarn', ['--version'], { cwd: appDir });
   });
+
+  it('stops with a one-line error when yarn --version fails', async () => {
+    const appDir = await createApp();
+    getPreferredMock.mockResolvedValue('yarn');
+    execaMock.mockRejectedValue(Object.assign(new Error('spawn yarn ENOENT'), { exitCode: 1 }));
+
+    await expect(detectPackageManager(appDir)).rejects.toThrow(
+      'Could not run yarn --version to tell Yarn 1 from Yarn 2+.'
+    );
+  });
 });
 
 describe('readsYarnrcYml', () => {

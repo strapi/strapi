@@ -1,4 +1,4 @@
-import { fetchPackument, searchPackageNames } from '../registry';
+import { fetchPackument, getRegistryUrl, searchPackageNames } from '../registry';
 import { createFetchResponse, createPackument } from './test-helpers';
 
 const packageName = '@strapi-enterprise/plugin-ai-byok';
@@ -107,5 +107,43 @@ describe('fetchPackument', () => {
     await expect(
       fetchPackument({ packageName, license: 'the-license', env: {}, fetchImplementation })
     ).rejects.toThrow('https://packages.strapi.io answered HTTP 500');
+  });
+});
+
+describe('getRegistryUrl', () => {
+  it('uses the Strapi registry when STRAPI_ENTERPRISE_REGISTRY_URL is unset or empty', () => {
+    expect(getRegistryUrl({})).toBe('https://packages.strapi.io');
+    expect(getRegistryUrl({ STRAPI_ENTERPRISE_REGISTRY_URL: '  ' })).toBe(
+      'https://packages.strapi.io'
+    );
+  });
+
+  it('stops with a one-line error for a value that is not a URL', () => {
+    expect(() => getRegistryUrl({ STRAPI_ENTERPRISE_REGISTRY_URL: 'not a url' })).toThrow(
+      'STRAPI_ENTERPRISE_REGISTRY_URL is not a valid URL: not a url'
+    );
+  });
+});
+
+describe('fetchPackument with invalid data', () => {
+  it('stops with a one-line error when the answer is not valid JSON', async () => {
+    const invalidResponse = {
+      status: 200,
+      ok: true,
+      async json() {
+        throw new SyntaxError('Unexpected token < in JSON');
+      },
+    } as unknown as Response;
+
+    await expect(
+      fetchPackument({
+        packageName: '@strapi-enterprise/plugin-ai-byok',
+        license: 'the-license',
+        env: {},
+        fetchImplementation: jest.fn().mockResolvedValue(invalidResponse),
+      })
+    ).rejects.toThrow(
+      'https://packages.strapi.io answered with invalid data for @strapi-enterprise/plugin-ai-byok. Try again later.'
+    );
   });
 });

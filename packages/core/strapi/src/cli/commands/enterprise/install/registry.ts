@@ -31,8 +31,17 @@ export type PackumentLookup =
   | { status: 'not-licensed' }
   | { status: 'not-found' };
 
-export const getRegistryUrl = (env: NodeJS.ProcessEnv = process.env): string =>
-  (env.STRAPI_ENTERPRISE_REGISTRY_URL ?? ENTERPRISE_REGISTRY_URL).replace(/\/+$/, '');
+export const getRegistryUrl = (env: NodeJS.ProcessEnv = process.env): string => {
+  const registryUrl = env.STRAPI_ENTERPRISE_REGISTRY_URL?.trim() || ENTERPRISE_REGISTRY_URL;
+
+  if (!URL.canParse(registryUrl)) {
+    throw new EnterpriseInstallError(
+      `STRAPI_ENTERPRISE_REGISTRY_URL is not a valid URL: ${registryUrl}`
+    );
+  }
+
+  return registryUrl.replace(/\/+$/, '');
+};
 
 const authorizationHeader = (license: string) => ({ Authorization: `Bearer ${license}` });
 
@@ -115,5 +124,13 @@ export const fetchPackument = async ({
     );
   }
 
-  return { status: 'available', packument: (await response.json()) as Packument };
+  const packument: unknown = await response.json().catch(() => undefined);
+
+  if (typeof packument !== 'object' || packument === null) {
+    throw new EnterpriseInstallError(
+      `${registryUrl} answered with invalid data for ${packageName}. Try again later.`
+    );
+  }
+
+  return { status: 'available', packument: packument as Packument };
 };

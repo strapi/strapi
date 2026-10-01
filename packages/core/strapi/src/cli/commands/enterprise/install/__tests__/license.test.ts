@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import fse from 'fs-extra';
-import { readLicense, verifyLicense } from '@strapi/core';
+import { readLicense, verifyLicense } from '@strapi/core/_internal/license';
 
 import { findLicense, resolveLicense, validateLicense } from '../license';
 import {
@@ -11,7 +11,10 @@ import {
   readFilePermissions,
 } from './test-helpers';
 
-jest.mock('@strapi/core', () => ({ readLicense: jest.fn(), verifyLicense: jest.fn() }));
+jest.mock('@strapi/core/_internal/license', () => ({
+  readLicense: jest.fn(),
+  verifyLicense: jest.fn(),
+}));
 
 const readLicenseMock = readLicense as jest.Mock;
 const verifyLicenseMock = verifyLicense as jest.Mock;
@@ -41,6 +44,37 @@ describe('findLicense', () => {
       license: 'from-license-file',
       source: 'license-file',
     });
+  });
+
+  it('tells a license loaded from .env apart from one set in the shell', async () => {
+    const appDir = await createTemporaryDirectory();
+    const env = { STRAPI_LICENSE: 'the-license' };
+
+    await expect(findLicense({ appDir, env })).resolves.toEqual({
+      license: 'the-license',
+      source: 'environment',
+    });
+
+    await fse.writeFile(path.join(appDir, '.env'), 'STRAPI_LICENSE=the-license\n');
+
+    await expect(findLicense({ appDir, env })).resolves.toEqual({
+      license: 'the-license',
+      source: 'env-file',
+    });
+
+    // The shell wins over .env, as when Strapi loads it.
+    await fse.writeFile(path.join(appDir, '.env'), 'STRAPI_LICENSE=another-license\n');
+
+    await expect(findLicense({ appDir, env })).resolves.toMatchObject({ source: 'environment' });
+  });
+
+  it('reads the .env file named by ENV_PATH, as Strapi does', async () => {
+    const appDir = await createTemporaryDirectory();
+    await fse.writeFile(path.join(appDir, 'custom.env'), 'STRAPI_LICENSE=the-license\n');
+
+    await expect(
+      findLicense({ appDir, env: { STRAPI_LICENSE: 'the-license', ENV_PATH: 'custom.env' } })
+    ).resolves.toMatchObject({ source: 'env-file' });
   });
 
   it('does not read .env itself, since the command loads it into the environment first', async () => {
@@ -125,7 +159,9 @@ describe('resolveLicense', () => {
       })
     ).resolves.toEqual({ license: 'the-license', source: 'environment' });
     expect(prompt).not.toHaveBeenCalled();
-    expect(logger.info).toHaveBeenCalledWith('Using the Strapi license from STRAPI_LICENSE.');
+    expect(logger.info).toHaveBeenCalledWith(
+      'Using the Strapi license from the STRAPI_LICENSE environment variable.'
+    );
   });
 
   it('fails without a license when there is no terminal to ask in', async () => {

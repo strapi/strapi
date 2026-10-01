@@ -4,6 +4,7 @@ import fse from 'fs-extra';
 
 import type { Logger } from '../../../utils/logger';
 import { ENTERPRISE_REGISTRY_URL, ENTERPRISE_SCOPE } from './constants';
+import { EnterpriseInstallError } from './errors';
 import { listAncestorDirectories } from './directories';
 import type { ResolvedLicense } from './license';
 import { readsYarnrcYml, type DetectedPackageManager } from './package-manager';
@@ -28,7 +29,7 @@ const shouldReferenceLicense = (
 ): boolean => licenseSource === 'environment' && Boolean(env.CI) && env.CI !== 'false';
 
 export type RegistryAccessStatus =
-  | 'written'
+  | 'not-configured'
   | 'already-configured'
   | 'uses-environment-variable'
   | 'different-license'
@@ -39,6 +40,8 @@ export interface RegistryAccessOutcome {
   filePath: string;
   /** The configuration the file should contain, with a placeholder instead of the license. */
   expectedConfiguration: string;
+  /** For `not-configured`: the lines to add, with the license or a reference to it. */
+  linesToAdd?: string;
 }
 
 export interface ConfiguredRegistry {
@@ -85,7 +88,8 @@ export const getUserYarnrcPath = (homeDir: string = os.homedir()): string =>
 const readFileIfExists = async (filePath: string): Promise<string> =>
   (await fse.pathExists(filePath)) ? fse.readFile(filePath, 'utf8') : '';
 
-const appendToFile = async (filePath: string, existingContent: string, text: string) => {
+const appendToFile = async (filePath: string, text: string) => {
+  const existingContent = await readFileIfExists(filePath);
   const separator = existingContent.length > 0 && !existingContent.endsWith('\n') ? '\n' : '';
 
   await fse.ensureDir(path.dirname(filePath));
@@ -117,7 +121,7 @@ const withoutTrailingSlash = (url: string | undefined) => url?.replace(/\/+$/, '
 const isEnvironmentVariableReference = (value: string | undefined): boolean =>
   value?.startsWith('${') ?? false;
 
-export const configureNpmrc = async (
+export const inspectNpmrc = async (
   filePath: string,
   license: string,
   registry: ConfiguredRegistry = STRAPI_REGISTRY,
@@ -134,8 +138,10 @@ export const configureNpmrc = async (
   });
 
   if (scopeRegistry === undefined && registryToken === undefined) {
-    await appendToFile(filePath, content, buildNpmrcConfiguration(writtenToken, registry));
-    return outcome('written');
+    return {
+      ...outcome('not-configured'),
+      linesToAdd: buildNpmrcConfiguration(writtenToken, registry),
+    };
   }
 
   if (isEnvironmentVariableReference(registryToken)) {
@@ -190,7 +196,7 @@ const readYarnrcScopeToken = (content: string): string | undefined => {
   return undefined;
 };
 
-export const configureYarnrc = async (
+export const inspectYarnrc = async (
   filePath: string,
   license: string,
   registry: ConfiguredRegistry = STRAPI_REGISTRY,
@@ -204,8 +210,10 @@ export const configureYarnrc = async (
   });
 
   if (!/^npmScopes\s*:/m.test(content)) {
-    await appendToFile(filePath, content, buildYarnrcConfiguration(writtenToken, registry));
-    return outcome('written');
+    return {
+      ...outcome('not-configured'),
+      linesToAdd: buildYarnrcConfiguration(writtenToken, registry),
+    };
   }
 
   if (!hasYarnrcScope(content)) {
@@ -224,39 +232,39 @@ export const configureYarnrc = async (
   return outcome('different-license');
 };
 
-const reportOutcome = (
-  { status, filePath, expectedConfiguration }: RegistryAccessOutcome,
-  { registryHost, referencesLicense }: { registryHost: string; referencesLicense: boolean },
-  logger: Logger
-) => {
-  switch (status) {
-    case 'written':
-      logger.success(
-        referencesLicense
-          ? `Configured access to ${registryHost} in ${filePath}, reading the license from STRAPI_LICENSE.`
-          : `Configured access to ${registryHost} in ${filePath}.`
-      );
-      break;
-    case 'already-configured':
-      logger.info(`Access to ${registryHost} is already configured in ${filePath}.`);
-      break;
-    case 'uses-environment-variable':
-      logger.info(
-        `${filePath} reads the ${registryHost} token from an environment variable. Make sure it holds your Strapi license.`
-      );
-      break;
-    case 'different-license':
-      logger.warn(
-        `${filePath} already configures ${registryHost} with a different license, so it was not changed. Installing will fail until it contains:\n\n${expectedConfiguration}\n`
-      );
-      break;
-    case 'manual-edit-needed':
-      logger.warn(
-        `${filePath} could not be updated automatically. Add this to it to access ${registryHost}:\n\n${expectedConfiguration}\n`
-      );
-      break;
-    default:
-      break;
+const assertRegistryAccessUsable = ({
+  outcome: { status, filePath, expectedConfiguration },
+  overridingFiles,
+  registryHost,
+  userConfigPath,
+}: {
+  outcome: RegistryAccessOutcome;
+  overridingFiles: string[];
+  registryHost: string;
+  userConfigPath: string;
+}): void => {
+  if (status === 'different-license') {
+    throw new EnterpriseInstallError(
+      `${filePath} already sets up ${registryHost} with another license, so installing would fail. Replace those lines with:\n\n${expectedConfiguration}\n`
+    );
+  }
+
+  if (status === 'manual-edit-needed') {
+    throw new EnterpriseInstallError(
+      `${filePath} could not be updated automatically. Add this to it, then run the command again:\n\n${expectedConfiguration}\n`
+    );
+  }
+
+  if (overridingFiles.length > 0) {
+    throw new EnterpriseInstallError(
+      [
+        ...overridingFiles.map(
+          (filePath) =>
+            `${filePath} sets another license for ${registryHost} and takes precedence over ${userConfigPath}.`
+        ),
+        'Update or remove that line, then run the command again.',
+      ].join('\n')
+    );
   }
 };
 
@@ -330,7 +338,13 @@ export const findOverridingConfigFiles = async ({
   return overridingFiles;
 };
 
-export const configureRegistryAccess = async ({
+export interface RegistryAccess {
+  outcome: RegistryAccessOutcome;
+  /** Adds the setup when it is missing. Called once the registry has accepted the license. */
+  apply: () => Promise<void>;
+}
+
+export const prepareRegistryAccess = async ({
   appDir,
   packageManager,
   license,
@@ -346,7 +360,7 @@ export const configureRegistryAccess = async ({
   logger: Logger;
   env?: NodeJS.ProcessEnv;
   homeDir?: string;
-}): Promise<RegistryAccessOutcome & { overridingFiles: string[] }> => {
+}): Promise<RegistryAccess> => {
   const registry = describeRegistry(getRegistryUrl(env));
   const usesYarnrcYml = readsYarnrcYml(packageManager);
   const userConfigPath = usesYarnrcYml
@@ -356,11 +370,8 @@ export const configureRegistryAccess = async ({
   const licenseReference = usesYarnrcYml ? YARNRC_LICENSE_REFERENCE : NPMRC_LICENSE_REFERENCE;
   const writtenToken = referencesLicense ? licenseReference : license;
   const outcome = usesYarnrcYml
-    ? await configureYarnrc(userConfigPath, license, registry, writtenToken)
-    : await configureNpmrc(userConfigPath, license, registry, writtenToken);
-
-  reportOutcome(outcome, { registryHost: registry.host, referencesLicense }, logger);
-
+    ? await inspectYarnrc(userConfigPath, license, registry, writtenToken)
+    : await inspectNpmrc(userConfigPath, license, registry, writtenToken);
   const overridingFiles = await findOverridingConfigFiles({
     appDir,
     packageManager,
@@ -369,11 +380,36 @@ export const configureRegistryAccess = async ({
     registry,
   });
 
-  overridingFiles.forEach((filePath) =>
-    logger.warn(
-      `${filePath} sets another license for ${registry.host} and takes precedence over ${userConfigPath}. Update or remove that line, or installing can fail with a 401 or 403.`
-    )
-  );
+  assertRegistryAccessUsable({
+    outcome,
+    overridingFiles,
+    registryHost: registry.host,
+    userConfigPath,
+  });
 
-  return { ...outcome, overridingFiles };
+  if (outcome.status === 'already-configured') {
+    logger.info(`Access to ${registry.host} is already configured in ${userConfigPath}.`);
+  }
+
+  if (outcome.status === 'uses-environment-variable') {
+    logger.info(
+      `${userConfigPath} reads the ${registry.host} token from an environment variable. Make sure it holds your Strapi license.`
+    );
+  }
+
+  return {
+    outcome,
+    async apply() {
+      if (outcome.status !== 'not-configured' || outcome.linesToAdd === undefined) {
+        return;
+      }
+
+      await appendToFile(userConfigPath, outcome.linesToAdd);
+      logger.success(
+        referencesLicense
+          ? `Configured access to ${registry.host} in ${userConfigPath}, reading the license from STRAPI_LICENSE.`
+          : `Configured access to ${registry.host} in ${userConfigPath}.`
+      );
+    },
+  };
 };

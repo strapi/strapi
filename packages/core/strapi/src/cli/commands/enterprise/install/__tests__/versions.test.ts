@@ -83,6 +83,16 @@ describe('describeNewerIncompatibleVersion', () => {
       describeNewerIncompatibleVersion(pickTargetVersion(aiByokPackument, '5.56.0'))
     ).toBeUndefined();
   });
+
+  it('says nothing when that version, or a later one, is already installed', () => {
+    const versionChoice = pickTargetVersion(aiByokPackument, '5.54.1');
+
+    expect(describeNewerIncompatibleVersion(versionChoice, '1.3.0')).toBeUndefined();
+    expect(describeNewerIncompatibleVersion(versionChoice, '1.4.0')).toBeUndefined();
+    expect(describeNewerIncompatibleVersion(versionChoice, '1.2.0')).toBe(
+      '1.3.0 is available but requires Strapi ^5.56.0.'
+    );
+  });
 });
 
 describe('isUpgrade', () => {
@@ -116,6 +126,16 @@ describe('readInstalledVersion', () => {
     await fse.ensureDir(appDir);
 
     await expect(readInstalledVersion(appDir, '@strapi/strapi')).resolves.toBe('5.54.1');
+  });
+
+  it('stops with a one-line error when an installed package.json is not valid JSON', async () => {
+    const appDir = await createTemporaryDirectory();
+    const packageJsonPath = path.join(appDir, 'node_modules', '@strapi', 'strapi', 'package.json');
+    await fse.outputFile(packageJsonPath, '{');
+
+    await expect(readInstalledVersion(appDir, '@strapi/strapi')).rejects.toThrow(
+      `Could not read ${packageJsonPath}. Reinstall the app's dependencies, then try again.`
+    );
   });
 
   it('returns undefined when the package is not installed', async () => {

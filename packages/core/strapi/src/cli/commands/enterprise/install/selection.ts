@@ -54,7 +54,7 @@ export const buildPluginRow = ({
   }
 
   const versionChoice = pickTargetVersion(lookup.packument, strapiVersion);
-  const note = describeNewerIncompatibleVersion(versionChoice);
+  const note = describeNewerIncompatibleVersion(versionChoice, installedVersion);
   const { targetVersion } = versionChoice;
 
   if (!targetVersion) {

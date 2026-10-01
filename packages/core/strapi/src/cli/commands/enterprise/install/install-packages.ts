@@ -1,5 +1,6 @@
 import execa from 'execa';
 
+import { EnterpriseInstallError, PackageManagerError } from './errors';
 import type { DetectedPackageManager } from './package-manager';
 
 export const buildInstallCommand = (
@@ -24,5 +25,15 @@ export const installPackages = async ({
 }): Promise<void> => {
   const { command, args } = buildInstallCommand(packageManager, installSpecs);
 
-  await execa(command, args, { cwd: appDir, stdio: 'inherit' });
+  try {
+    await execa(command, args, { cwd: appDir, stdio: 'inherit' });
+  } catch (error) {
+    const { code, exitCode } = (error ?? {}) as { code?: string; exitCode?: number };
+
+    if (code === 'ENOENT') {
+      throw new EnterpriseInstallError(`Could not run ${command}. Check that it is installed.`);
+    }
+
+    throw new PackageManagerError(typeof exitCode === 'number' && exitCode !== 0 ? exitCode : 1);
+  }
 };

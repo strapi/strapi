@@ -3,6 +3,7 @@ import fse from 'fs-extra';
 import semver from 'semver';
 
 import { STRAPI_PACKAGE_NAME } from './constants';
+import { EnterpriseInstallError } from './errors';
 import { listAncestorDirectories } from './directories';
 import type { Packument, PackumentVersion, StrapiPackageMetadata } from './registry';
 
@@ -24,7 +25,11 @@ export const readInstalledPackageJson = async (
     const packageJsonPath = path.join(nodeModulesDirectory, packageName, 'package.json');
 
     if (await fse.pathExists(packageJsonPath)) {
-      return fse.readJson(packageJsonPath);
+      return fse.readJson(packageJsonPath).catch(() => {
+        throw new EnterpriseInstallError(
+          `Could not read ${packageJsonPath}. Reinstall the app's dependencies, then try again.`
+        );
+      });
     }
   }
 
@@ -39,6 +44,28 @@ export const readInstalledVersion = async (
 
   return typeof version === 'string' ? version : undefined;
 };
+
+const DEPENDENCY_FIELDS = ['dependencies', 'devDependencies', 'optionalDependencies'] as const;
+
+/** The packages the app's own `package.json` depends on. */
+export const readAppDependencyNames = async (appDir: string): Promise<Set<string>> => {
+  const packageJson = await fse.readJson(path.join(appDir, 'package.json')).catch(() => ({}));
+
+  return new Set(DEPENDENCY_FIELDS.flatMap((field) => Object.keys(packageJson?.[field] ?? {})));
+};
+
+/**
+ * The installed version of a package the app depends on. Undefined when the app's `package.json`
+ * does not list it, even if a parent `node_modules` holds a copy hoisted for another app of the
+ * same monorepo: that copy is not the app's, so it is neither up to date nor an upgrade for it.
+ */
+export const readAppDependencyVersion = async (
+  appDir: string,
+  packageName: string
+): Promise<string | undefined> =>
+  (await readAppDependencyNames(appDir)).has(packageName)
+    ? readInstalledVersion(appDir, packageName)
+    : undefined;
 
 export const canCheckStrapiCompatibility = (strapiVersion: string | undefined): boolean =>
   strapiVersion !== undefined &&
@@ -90,12 +117,20 @@ export const pickTargetVersion = (
   };
 };
 
-export const describeNewerIncompatibleVersion = ({
-  targetVersion,
-  newestVersion,
-  newestVersionStrapiRange,
-}: VersionChoice): string | undefined => {
+export const describeNewerIncompatibleVersion = (
+  { targetVersion, newestVersion, newestVersionStrapiRange }: VersionChoice,
+  installedVersion?: string
+): string | undefined => {
   if (!newestVersion || newestVersion === targetVersion || !newestVersionStrapiRange) {
+    return undefined;
+  }
+
+  // Nothing to announce when that version, or a later one, is already installed.
+  if (
+    installedVersion &&
+    semver.valid(installedVersion) &&
+    semver.gte(installedVersion, newestVersion)
+  ) {
     return undefined;
   }
 

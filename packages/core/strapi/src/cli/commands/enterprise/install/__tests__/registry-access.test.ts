@@ -2,11 +2,13 @@ import path from 'path';
 import fse from 'fs-extra';
 
 import {
-  configureNpmrc,
-  configureRegistryAccess,
-  configureYarnrc,
+  buildYarnrcConfiguration,
   describeRegistry,
+  findOverridingConfigFiles,
   getUserNpmrcPath,
+  inspectNpmrc,
+  inspectYarnrc,
+  prepareRegistryAccess,
 } from '../registry-access';
 import type { DetectedPackageManager } from '../package-manager';
 import {
@@ -22,70 +24,46 @@ const LICENSE = 'license-abc';
 const ENVIRONMENT_TOKEN_LINE = '//packages.strapi.io/:_authToken=${STRAPI_LICENSE}\n';
 const NPMRC_LINES =
   '@strapi-enterprise:registry=https://packages.strapi.io/\n//packages.strapi.io/:_authToken=license-abc\n';
+const OTHER_LICENSE_NPMRC = NPMRC_LINES.replace(LICENSE, 'other-license');
+const STRAPI_REGISTRY = describeRegistry('https://packages.strapi.io/');
 
-describe('configureNpmrc', () => {
+describe('inspectNpmrc', () => {
   let npmrcPath: string;
 
   beforeEach(async () => {
     npmrcPath = path.join(await createTemporaryDirectory(), '.npmrc');
   });
 
-  it('creates the file, readable by its owner only', async () => {
-    await expect(configureNpmrc(npmrcPath, LICENSE)).resolves.toMatchObject({ status: 'written' });
-
-    expect(await fse.readFile(npmrcPath, 'utf8')).toBe(NPMRC_LINES);
-    expect(await readFilePermissions(npmrcPath)).toBe('600');
+  it('plans the lines to add without writing them', async () => {
+    await expect(inspectNpmrc(npmrcPath, LICENSE)).resolves.toMatchObject({
+      status: 'not-configured',
+      linesToAdd: NPMRC_LINES.trimEnd(),
+    });
+    expect(await fse.pathExists(npmrcPath)).toBe(false);
   });
 
-  it('appends to an existing file and keeps its content', async () => {
-    await fse.writeFile(npmrcPath, 'save-exact=true');
-
-    await configureNpmrc(npmrcPath, LICENSE);
-
-    expect(await fse.readFile(npmrcPath, 'utf8')).toBe(`save-exact=true\n${NPMRC_LINES}`);
-  });
-
-  it('restricts an existing file to its owner once it holds the license', async () => {
-    await fse.writeFile(npmrcPath, 'save-exact=true\n', { mode: 0o644 });
-
-    await configureNpmrc(npmrcPath, LICENSE);
-
-    expect(await readFilePermissions(npmrcPath)).toBe('600');
-  });
-
-  it('leaves the permissions of a file it does not change', async () => {
-    await fse.writeFile(npmrcPath, NPMRC_LINES, { mode: 0o644 });
-
-    await configureNpmrc(npmrcPath, LICENSE);
-
-    expect(await readFilePermissions(npmrcPath)).toBe('644');
-  });
-
-  it('changes nothing when the same license is already configured', async () => {
+  it('recognizes the same license', async () => {
     await fse.writeFile(npmrcPath, NPMRC_LINES);
 
-    await expect(configureNpmrc(npmrcPath, LICENSE)).resolves.toMatchObject({
+    await expect(inspectNpmrc(npmrcPath, LICENSE)).resolves.toMatchObject({
       status: 'already-configured',
     });
-    expect(await fse.readFile(npmrcPath, 'utf8')).toBe(NPMRC_LINES);
   });
 
-  it('does not overwrite another license', async () => {
-    const otherLicenseLines = NPMRC_LINES.replace(LICENSE, 'other-license');
-    await fse.writeFile(npmrcPath, otherLicenseLines);
+  it('recognizes another license, and shows the lines without the license', async () => {
+    await fse.writeFile(npmrcPath, OTHER_LICENSE_NPMRC);
 
-    const outcome = await configureNpmrc(npmrcPath, LICENSE);
+    const outcome = await inspectNpmrc(npmrcPath, LICENSE);
 
     expect(outcome.status).toBe('different-license');
     expect(outcome.expectedConfiguration).toContain('<your license>');
     expect(outcome.expectedConfiguration).not.toContain(LICENSE);
-    expect(await fse.readFile(npmrcPath, 'utf8')).toBe(otherLicenseLines);
   });
 
-  it('leaves a token read from an environment variable alone', async () => {
+  it('recognizes a token read from an environment variable', async () => {
     await fse.writeFile(npmrcPath, ENVIRONMENT_TOKEN_LINE);
 
-    await expect(configureNpmrc(npmrcPath, LICENSE)).resolves.toMatchObject({
+    await expect(inspectNpmrc(npmrcPath, LICENSE)).resolves.toMatchObject({
       status: 'uses-environment-variable',
     });
   });
@@ -93,161 +71,177 @@ describe('configureNpmrc', () => {
   it('asks for a manual edit when the configuration is incomplete', async () => {
     await fse.writeFile(npmrcPath, '@strapi-enterprise:registry=https://packages.strapi.io/\n');
 
-    await expect(configureNpmrc(npmrcPath, LICENSE)).resolves.toMatchObject({
+    await expect(inspectNpmrc(npmrcPath, LICENSE)).resolves.toMatchObject({
       status: 'manual-edit-needed',
     });
   });
 });
 
-describe('configureYarnrc', () => {
+describe('inspectYarnrc', () => {
   let yarnrcPath: string;
 
   beforeEach(async () => {
     yarnrcPath = path.join(await createTemporaryDirectory(), '.yarnrc.yml');
   });
 
-  it('adds the scope to a file without npmScopes and keeps its content', async () => {
+  it('plans the scope for a file without npmScopes, without writing it', async () => {
     await fse.writeFile(yarnrcPath, 'enableTelemetry: false\n');
 
-    await expect(configureYarnrc(yarnrcPath, LICENSE)).resolves.toMatchObject({
-      status: 'written',
+    await expect(inspectYarnrc(yarnrcPath, LICENSE)).resolves.toMatchObject({
+      status: 'not-configured',
+      linesToAdd: buildYarnrcConfiguration(LICENSE),
     });
-
-    expect(await fse.readFile(yarnrcPath, 'utf8')).toBe(
-      [
-        'enableTelemetry: false',
-        'npmScopes:',
-        '  strapi-enterprise:',
-        "    npmRegistryServer: 'https://packages.strapi.io/'",
-        '    npmAlwaysAuth: true',
-        "    npmAuthToken: 'license-abc'",
-        '',
-      ].join('\n')
-    );
+    expect(await fse.readFile(yarnrcPath, 'utf8')).toBe('enableTelemetry: false\n');
   });
 
-  it('does not edit an existing npmScopes, and prints the block instead', async () => {
-    const content = 'npmScopes:\n  my-company:\n    npmRegistryServer: "https://npm.example.com"\n';
-    await fse.writeFile(yarnrcPath, content);
+  it('asks for a manual edit when npmScopes only has other scopes', async () => {
+    await fse.writeFile(
+      yarnrcPath,
+      'npmScopes:\n  my-company:\n    npmRegistryServer: "https://npm.example.com"\n'
+    );
 
-    await expect(configureYarnrc(yarnrcPath, LICENSE)).resolves.toMatchObject({
+    await expect(inspectYarnrc(yarnrcPath, LICENSE)).resolves.toMatchObject({
       status: 'manual-edit-needed',
     });
-    expect(await fse.readFile(yarnrcPath, 'utf8')).toBe(content);
   });
 
   it('recognizes the same and another license', async () => {
-    await configureYarnrc(yarnrcPath, LICENSE);
+    await fse.writeFile(yarnrcPath, buildYarnrcConfiguration(LICENSE));
 
-    await expect(configureYarnrc(yarnrcPath, LICENSE)).resolves.toMatchObject({
+    await expect(inspectYarnrc(yarnrcPath, LICENSE)).resolves.toMatchObject({
       status: 'already-configured',
     });
-    await expect(configureYarnrc(yarnrcPath, 'other-license')).resolves.toMatchObject({
+    await expect(inspectYarnrc(yarnrcPath, 'other-license')).resolves.toMatchObject({
       status: 'different-license',
     });
   });
-});
 
-describe('configureYarnrc with another registry', () => {
   it('asks for a manual edit when the license is set for another registry', async () => {
-    const yarnrcPath = path.join(await createTemporaryDirectory(), '.yarnrc.yml');
-    await configureYarnrc(yarnrcPath, LICENSE, describeRegistry('http://localhost:4873'));
+    await fse.writeFile(
+      yarnrcPath,
+      buildYarnrcConfiguration(LICENSE, describeRegistry('http://localhost:4873'))
+    );
 
-    await expect(configureYarnrc(yarnrcPath, LICENSE)).resolves.toMatchObject({
+    await expect(inspectYarnrc(yarnrcPath, LICENSE)).resolves.toMatchObject({
       status: 'manual-edit-needed',
     });
   });
 });
 
-describe('configureRegistryAccess', () => {
-  it('uses ~/.npmrc for Yarn 1 and ~/.yarnrc.yml for Yarn 4', async () => {
+describe('prepareRegistryAccess', () => {
+  const prepare = async ({
+    homeDir,
+    packageManager = { name: 'npm' },
+    env = {},
+    licenseSource = 'license-file',
+    logger = createTestLogger(),
+  }: {
+    homeDir: string;
+    packageManager?: DetectedPackageManager;
+    env?: NodeJS.ProcessEnv;
+    licenseSource?: 'environment' | 'license-file';
+    logger?: ReturnType<typeof createTestLogger>;
+  }) =>
+    prepareRegistryAccess({
+      appDir: await createTemporaryDirectory(),
+      packageManager,
+      license: LICENSE,
+      licenseSource,
+      logger,
+      env,
+      homeDir,
+    });
+
+  it('writes nothing until apply, then adds the setup readable by its owner only', async () => {
     const homeDir = await createTemporaryDirectory();
+    const npmrcPath = path.join(homeDir, '.npmrc');
     const logger = createTestLogger();
 
-    await configureRegistryAccess({
-      packageManager: { name: 'yarn', majorVersion: 1 },
-      license: LICENSE,
-      licenseSource: 'license-file',
-      logger,
-      env: {},
-      homeDir,
-      appDir: await createTemporaryDirectory(),
-    });
-    await configureRegistryAccess({
-      packageManager: { name: 'yarn', majorVersion: 4 },
-      license: LICENSE,
-      licenseSource: 'license-file',
-      logger,
-      env: {},
-      homeDir,
-      appDir: await createTemporaryDirectory(),
-    });
+    const registryAccess = await prepare({ homeDir, logger });
+
+    expect(await fse.pathExists(npmrcPath)).toBe(false);
+
+    await registryAccess.apply();
+
+    expect(await fse.readFile(npmrcPath, 'utf8')).toBe(NPMRC_LINES);
+    expect(await readFilePermissions(npmrcPath)).toBe('600');
+    expect(logger.success).toHaveBeenCalledWith(
+      `Configured access to packages.strapi.io in ${npmrcPath}.`
+    );
+  });
+
+  it('appends to an existing file, keeps its content, and restricts it to its owner', async () => {
+    const homeDir = await createTemporaryDirectory();
+    const npmrcPath = path.join(homeDir, '.npmrc');
+    await fse.writeFile(npmrcPath, 'save-exact=true', { mode: 0o644 });
+
+    await (await prepare({ homeDir })).apply();
+
+    expect(await fse.readFile(npmrcPath, 'utf8')).toBe(`save-exact=true\n${NPMRC_LINES}`);
+    expect(await readFilePermissions(npmrcPath)).toBe('600');
+  });
+
+  it('leaves a file that already has this license as is', async () => {
+    const homeDir = await createTemporaryDirectory();
+    const npmrcPath = path.join(homeDir, '.npmrc');
+    await fse.writeFile(npmrcPath, NPMRC_LINES, { mode: 0o644 });
+    const logger = createTestLogger();
+
+    await (await prepare({ homeDir, logger })).apply();
+
+    expect(await fse.readFile(npmrcPath, 'utf8')).toBe(NPMRC_LINES);
+    expect(await readFilePermissions(npmrcPath)).toBe('644');
+    expect(logger.info).toHaveBeenCalledWith(
+      `Access to packages.strapi.io is already configured in ${npmrcPath}.`
+    );
+  });
+
+  it('uses ~/.npmrc for Yarn 1 and ~/.yarnrc.yml for Yarn 4', async () => {
+    const homeDir = await createTemporaryDirectory();
+
+    await (await prepare({ homeDir, packageManager: { name: 'yarn', majorVersion: 1 } })).apply();
+    await (await prepare({ homeDir, packageManager: { name: 'yarn', majorVersion: 4 } })).apply();
 
     expect(await fse.pathExists(path.join(homeDir, '.npmrc'))).toBe(true);
     expect(await fse.pathExists(path.join(homeDir, '.yarnrc.yml'))).toBe(true);
   });
 
-  it('warns about another license without ever printing the license', async () => {
+  it('stops when the user-level file holds another license, and leaves it as is', async () => {
     const homeDir = await createTemporaryDirectory();
+    const npmrcPath = path.join(homeDir, '.npmrc');
+    await fse.writeFile(npmrcPath, OTHER_LICENSE_NPMRC);
     const logger = createTestLogger();
+
+    const preparing = prepare({ homeDir, logger });
+
+    await expect(preparing).rejects.toThrow(
+      `${npmrcPath} already sets up packages.strapi.io with another license, so installing would fail.`
+    );
+    await expect(preparing).rejects.not.toThrow(LICENSE);
+    expect(await fse.readFile(npmrcPath, 'utf8')).toBe(OTHER_LICENSE_NPMRC);
+  });
+
+  it('stops when the file cannot be updated automatically', async () => {
+    const homeDir = await createTemporaryDirectory();
     await fse.writeFile(
       path.join(homeDir, '.npmrc'),
-      NPMRC_LINES.replace(LICENSE, 'other-license')
+      '@strapi-enterprise:registry=https://packages.strapi.io/\n'
     );
 
-    await configureRegistryAccess({
-      packageManager: { name: 'npm' },
-      license: LICENSE,
-      licenseSource: 'license-file',
-      logger,
-      env: {},
-      homeDir,
-      appDir: await createTemporaryDirectory(),
-    });
-
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('different license'));
-    expect(loggedText(logger)).not.toContain(LICENSE);
+    await expect(prepare({ homeDir })).rejects.toThrow('could not be updated automatically');
   });
 
   it('points to STRAPI_ENTERPRISE_REGISTRY_URL when it is set, like the registry lookups', async () => {
     const homeDir = await createTemporaryDirectory();
-    const logger = createTestLogger();
 
-    await configureRegistryAccess({
-      packageManager: { name: 'npm' },
-      license: LICENSE,
-      licenseSource: 'license-file',
-      logger,
-      env: { STRAPI_ENTERPRISE_REGISTRY_URL: 'http://localhost:4873' },
-      homeDir,
-      appDir: await createTemporaryDirectory(),
-    });
+    await (
+      await prepare({ homeDir, env: { STRAPI_ENTERPRISE_REGISTRY_URL: 'http://localhost:4873' } })
+    ).apply();
 
     expect(await fse.readFile(path.join(homeDir, '.npmrc'), 'utf8')).toBe(
       `@strapi-enterprise:registry=http://localhost:4873/\n//localhost:4873/:_authToken=${LICENSE}\n`
     );
-    expect(logger.success).toHaveBeenCalledWith(
-      expect.stringContaining('Configured access to localhost:4873')
-    );
   });
-});
-
-describe('configureRegistryAccess with the license in STRAPI_LICENSE', () => {
-  const configure = async (
-    packageManager: DetectedPackageManager,
-    env: NodeJS.ProcessEnv,
-    homeDir: string,
-    logger = createTestLogger()
-  ) =>
-    configureRegistryAccess({
-      appDir: await createTemporaryDirectory(),
-      packageManager,
-      license: LICENSE,
-      licenseSource: 'environment',
-      logger,
-      env,
-      homeDir,
-    });
 
   it.each([
     [
@@ -265,12 +259,20 @@ describe('configureRegistryAccess with the license in STRAPI_LICENSE', () => {
       "npmAuthToken: '${STRAPI_LICENSE:-}'",
     ],
   ])(
-    'writes a reference to the variable in CI, not the license, for %s',
+    'writes a reference to STRAPI_LICENSE in CI, not the license, for %s',
     async (_name, packageManager, fileName, expectedLine) => {
       const homeDir = await createTemporaryDirectory();
       const logger = createTestLogger();
 
-      await configure(packageManager, { STRAPI_LICENSE: LICENSE, CI: 'true' }, homeDir, logger);
+      await (
+        await prepare({
+          homeDir,
+          packageManager,
+          env: { STRAPI_LICENSE: LICENSE, CI: 'true' },
+          licenseSource: 'environment',
+          logger,
+        })
+      ).apply();
 
       const content = await fse.readFile(path.join(homeDir, fileName), 'utf8');
       expect(content).toContain(expectedLine);
@@ -289,7 +291,7 @@ describe('configureRegistryAccess with the license in STRAPI_LICENSE', () => {
     async (_case, env) => {
       const homeDir = await createTemporaryDirectory();
 
-      await configure({ name: 'npm' }, env, homeDir);
+      await (await prepare({ homeDir, env, licenseSource: 'environment' })).apply();
 
       expect(await fse.readFile(path.join(homeDir, '.npmrc'), 'utf8')).toContain(
         `//packages.strapi.io/:_authToken=${LICENSE}`
@@ -300,34 +302,23 @@ describe('configureRegistryAccess with the license in STRAPI_LICENSE', () => {
   it('reports the reference as set up on the next run', async () => {
     const homeDir = await createTemporaryDirectory();
     const env = { STRAPI_LICENSE: LICENSE, CI: 'true' };
-    await configure({ name: 'npm' }, env, homeDir);
 
-    await expect(configure({ name: 'npm' }, env, homeDir)).resolves.toMatchObject({
-      status: 'uses-environment-variable',
-    });
+    await (await prepare({ homeDir, env, licenseSource: 'environment' })).apply();
+    const nextRun = await prepare({ homeDir, env, licenseSource: 'environment' });
+
+    expect(nextRun.outcome.status).toBe('uses-environment-variable');
   });
-});
 
-describe('configureRegistryAccess with a project-level file', () => {
-  const OTHER_LICENSE_NPMRC = NPMRC_LINES.replace(LICENSE, 'other-license');
-
-  /** An app two folders below a root folder, with its own home folder. */
-  const setUp = async () => {
+  it('stops when a project file sets another license, and leaves it as is', async () => {
     const homeDir = await createTemporaryDirectory();
-    const rootDir = await createTemporaryDirectory();
-    const appDir = path.join(rootDir, 'apps', 'my-app');
-    await fse.ensureDir(appDir);
+    const appDir = await createTemporaryDirectory();
+    const projectNpmrcPath = path.join(appDir, '.npmrc');
+    await fse.writeFile(projectNpmrcPath, OTHER_LICENSE_NPMRC);
+    const logger = createTestLogger();
 
-    return { homeDir, rootDir, appDir, logger: createTestLogger() };
-  };
-
-  const configure = (
-    { homeDir, appDir, logger }: Awaited<ReturnType<typeof setUp>>,
-    packageManager: DetectedPackageManager = { name: 'npm' }
-  ) =>
-    configureRegistryAccess({
+    const preparing = prepareRegistryAccess({
       appDir,
-      packageManager,
+      packageManager: { name: 'npm' },
       license: LICENSE,
       licenseSource: 'license-file',
       logger,
@@ -335,22 +326,46 @@ describe('configureRegistryAccess with a project-level file', () => {
       homeDir,
     });
 
-  it('warns when the app has its own .npmrc with another license, and leaves it as is', async () => {
-    const context = await setUp();
-    const projectNpmrcPath = path.join(context.appDir, '.npmrc');
-    await fse.writeFile(projectNpmrcPath, OTHER_LICENSE_NPMRC);
-
-    const outcome = await configure(context);
-
-    expect(outcome.overridingFiles).toEqual([projectNpmrcPath]);
-    expect(context.logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining(`${projectNpmrcPath} sets another license for packages.strapi.io`)
+    await expect(preparing).rejects.toThrow(
+      `${projectNpmrcPath} sets another license for packages.strapi.io and takes precedence over ${path.join(homeDir, '.npmrc')}.`
     );
     expect(await fse.readFile(projectNpmrcPath, 'utf8')).toBe(OTHER_LICENSE_NPMRC);
-    expect(loggedText(context.logger)).not.toContain(LICENSE);
+    expect(await fse.pathExists(path.join(homeDir, '.npmrc'))).toBe(false);
+    expect(loggedText(logger)).not.toContain(LICENSE);
+  });
+});
+
+describe('findOverridingConfigFiles', () => {
+  /** An app two folders below a root folder, with its own home folder. */
+  const setUp = async () => {
+    const homeDir = await createTemporaryDirectory();
+    const rootDir = await createTemporaryDirectory();
+    const appDir = path.join(rootDir, 'apps', 'my-app');
+    await fse.ensureDir(appDir);
+
+    return { homeDir, rootDir, appDir };
+  };
+
+  const find = (
+    { homeDir, appDir }: Awaited<ReturnType<typeof setUp>>,
+    packageManager: DetectedPackageManager = { name: 'npm' }
+  ) =>
+    findOverridingConfigFiles({
+      appDir,
+      packageManager,
+      userConfigPaths: [path.join(homeDir, '.npmrc'), path.join(homeDir, '.yarnrc.yml')],
+      license: LICENSE,
+      registry: STRAPI_REGISTRY,
+    });
+
+  it('finds an app .npmrc with another license', async () => {
+    const context = await setUp();
+    await fse.writeFile(path.join(context.appDir, '.npmrc'), OTHER_LICENSE_NPMRC);
+
+    await expect(find(context)).resolves.toEqual([path.join(context.appDir, '.npmrc')]);
   });
 
-  it('still warns when another registry in the same file reads its token from a variable', async () => {
+  it('still finds it when another registry in the same file reads its token from a variable', async () => {
     const context = await setUp();
     await fse.writeFile(
       path.join(context.appDir, '.npmrc'),
@@ -358,23 +373,19 @@ describe('configureRegistryAccess with a project-level file', () => {
       `//registry.npmjs.org/:_authToken=\${NPM_TOKEN}\n${OTHER_LICENSE_NPMRC}`
     );
 
-    const outcome = await configure(context);
-
-    expect(outcome.overridingFiles).toEqual([path.join(context.appDir, '.npmrc')]);
+    await expect(find(context)).resolves.toEqual([path.join(context.appDir, '.npmrc')]);
   });
 
   it('reads the .npmrc of a workspace root, but not of any parent folder, for npm', async () => {
     const context = await setUp();
     await fse.writeFile(path.join(context.rootDir, 'apps', '.npmrc'), OTHER_LICENSE_NPMRC);
 
-    expect((await configure(context)).overridingFiles).toEqual([]);
+    await expect(find(context)).resolves.toEqual([]);
 
     await fse.writeJson(path.join(context.rootDir, 'package.json'), { workspaces: ['apps/*'] });
     await fse.writeFile(path.join(context.rootDir, '.npmrc'), OTHER_LICENSE_NPMRC);
 
-    expect((await configure(context)).overridingFiles).toEqual([
-      path.join(context.rootDir, '.npmrc'),
-    ]);
+    await expect(find(context)).resolves.toEqual([path.join(context.rootDir, '.npmrc')]);
   });
 
   it('ignores the app .npmrc inside a workspace, as npm and pnpm do', async () => {
@@ -382,17 +393,17 @@ describe('configureRegistryAccess with a project-level file', () => {
     await fse.writeJson(path.join(context.rootDir, 'package.json'), { workspaces: ['apps/*'] });
     await fse.writeFile(path.join(context.appDir, '.npmrc'), OTHER_LICENSE_NPMRC);
 
-    expect((await configure(context)).overridingFiles).toEqual([]);
-    expect((await configure(context, { name: 'pnpm' })).overridingFiles).toEqual([]);
+    await expect(find(context)).resolves.toEqual([]);
+    await expect(find(context, { name: 'pnpm' })).resolves.toEqual([]);
   });
 
   it('reads the .npmrc of every parent folder for Yarn 1', async () => {
     const context = await setUp();
     await fse.writeFile(path.join(context.rootDir, 'apps', '.npmrc'), OTHER_LICENSE_NPMRC);
 
-    const outcome = await configure(context, { name: 'yarn', majorVersion: 1 });
-
-    expect(outcome.overridingFiles).toEqual([path.join(context.rootDir, 'apps', '.npmrc')]);
+    await expect(find(context, { name: 'yarn', majorVersion: 1 })).resolves.toEqual([
+      path.join(context.rootDir, 'apps', '.npmrc'),
+    ]);
   });
 
   it('finds a .yarnrc.yml in a parent folder for Yarn 4, as in a monorepo', async () => {
@@ -403,9 +414,9 @@ describe('configureRegistryAccess with a project-level file', () => {
       "npmScopes:\n  other-scope:\n    npmAuthToken: 'unrelated'\n  strapi-enterprise:\n    npmAuthToken: 'other-license'\n"
     );
 
-    const outcome = await configure(context, { name: 'yarn', majorVersion: 4 });
-
-    expect(outcome.overridingFiles).toEqual([rootYarnrcPath]);
+    await expect(find(context, { name: 'yarn', majorVersion: 4 })).resolves.toEqual([
+      rootYarnrcPath,
+    ]);
   });
 
   it.each([
@@ -416,26 +427,21 @@ describe('configureRegistryAccess with a project-level file', () => {
       NPMRC_LINES.split('\n')[0],
     ],
     ['does not mention the Strapi registry', 'registry=https://registry.npmjs.org/\n'],
-  ])('says nothing when the project file %s', async (_case, content) => {
+  ])('finds nothing when the project file %s', async (_case, content) => {
     const context = await setUp();
     await fse.writeFile(path.join(context.appDir, '.npmrc'), content);
 
-    const outcome = await configure(context);
-
-    expect(outcome.overridingFiles).toEqual([]);
-    expect(context.logger.warn).not.toHaveBeenCalled();
+    await expect(find(context)).resolves.toEqual([]);
   });
 
-  it('says nothing for a .yarnrc.yml whose token belongs to another scope', async () => {
+  it('finds nothing for a .yarnrc.yml whose token belongs to another scope', async () => {
     const context = await setUp();
     await fse.writeFile(
       path.join(context.appDir, '.yarnrc.yml'),
       "npmScopes:\n  strapi-enterprise:\n    npmRegistryServer: 'https://packages.strapi.io/'\n  other-scope:\n    npmAuthToken: 'unrelated'\n"
     );
 
-    const outcome = await configure(context, { name: 'yarn', majorVersion: 4 });
-
-    expect(outcome.overridingFiles).toEqual([]);
+    await expect(find(context, { name: 'yarn', majorVersion: 4 })).resolves.toEqual([]);
   });
 });
 
