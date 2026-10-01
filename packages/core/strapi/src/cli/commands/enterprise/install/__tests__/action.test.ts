@@ -14,6 +14,7 @@ import {
   createRegistryFetch,
   createTemporaryDirectory,
   createTestLogger,
+  expectedSetupWarning,
   loggedText,
 } from './test-helpers';
 
@@ -127,9 +128,7 @@ describe('runInstall with package names', () => {
       `${AI_BYOK}: 1.3.0 is available but requires Strapi ^5.56.0.`
     );
     expect(logger.info).toHaveBeenCalledWith(`Running npm install --save-exact ${AI_BYOK}@1.2.0`);
-    expect(logger.info).toHaveBeenCalledWith(
-      'AI BYOK: visit https://docs.strapi.io/cms/plugins/ai-byok to set it up.'
-    );
+    expect(logger.warn).toHaveBeenCalledWith(expectedSetupWarning(AI_BYOK));
     expect(loggedText(logger)).not.toContain(LICENSE);
   });
 

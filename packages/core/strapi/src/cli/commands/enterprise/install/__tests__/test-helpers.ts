@@ -26,6 +26,16 @@ export const createTestLogger = () =>
 export const loggedText = (logger: jest.Mocked<Logger>): string =>
   JSON.stringify([logger.info, logger.success, logger.warn, logger.error].map((m) => m.mock.calls));
 
+const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/** The warning printed after installing a package, whatever setup URL it ends with. */
+export const expectedSetupWarning = (packageName: string) =>
+  expect.stringMatching(
+    new RegExp(
+      `^⚠️  Set up ${escapeRegExp(packageName)} before starting Strapi, following the guide at https?://\\S+$`
+    )
+  );
+
 /** The permission bits of a file, such as `600`. */
 export const readFilePermissions = async (filePath: string): Promise<string> =>
   (await fse.stat(filePath)).mode.toString(8).slice(-3);
