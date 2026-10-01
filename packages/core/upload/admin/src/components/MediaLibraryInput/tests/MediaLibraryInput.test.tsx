@@ -121,7 +121,7 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
 
     dropFiles([new File(['x'], 'notes.pdf', { type: 'application/pdf' })]);
 
-    expect(await screen.findByText(`You can't upload this type of file.`)).toBeInTheDocument();
+    expect(await screen.findByText(/You can't upload this type of file/)).toBeInTheDocument();
     expect(mockUploadFiles).not.toHaveBeenCalled();
   });
 
@@ -145,7 +145,7 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
     expect(fileInfo).toHaveLength(1);
     expect(fileInfo[0].name).toBe('photo.png');
 
-    expect(await screen.findByText(`You can't upload this type of file.`)).toBeInTheDocument();
+    expect(await screen.findByText(/You can't upload this type of file/)).toBeInTheDocument();
   });
 
   it('keeps both batches when a second drop lands while the first is still uploading', async () => {
@@ -256,6 +256,40 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
 
     expect(screen.queryByText('one.png')).not.toBeInTheDocument();
     expect(screen.getByText('two.png')).toBeInTheDocument();
+  });
+
+  it('uploads the files chosen from the hidden picker', async () => {
+    mockUploadFiles.mockReturnValue({
+      unwrap: () => Promise.resolve([asset(9, 'picked.png')]),
+    });
+
+    renderInput({ attribute: { multiple: true } });
+
+    // eslint-disable-next-line testing-library/no-node-access
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const file = new File(['x'], 'picked.png', { type: 'image/png' });
+
+    // jsdom's `files` is a plain stub, so a naive one would not reproduce the
+    // browser: there, `files` is live and assigning `value` empties it in place.
+    // Wiring the setter to clear the list is what makes this test able to fail.
+    const fileList: globalThis.File[] = [file];
+    Object.defineProperty(input, 'files', {
+      configurable: true,
+      get: () => fileList,
+    });
+    Object.defineProperty(input, 'value', {
+      configurable: true,
+      get: () => (fileList.length > 0 ? 'C:\\fakepath\\picked.png' : ''),
+      // Emptied in place, as the browser does: a handler that kept a reference
+      // to the list before the reset now sees it drained.
+      set: () => {
+        fileList.length = 0;
+      },
+    });
+    fireEvent.change(input);
+
+    await waitFor(() => expect(mockUploadFiles).toHaveBeenCalledTimes(1));
+    expect(await screen.findByText('picked.png')).toBeInTheDocument();
   });
 
   it('does not upload when the field is disabled', () => {

@@ -126,8 +126,10 @@ export const AssetDropZone = ({ disabled = false, onClick, onDropFiles }: AssetD
         <PlusCircle width="3.2rem" height="3.2rem" />
       </Flex>
       <Typography textColor="neutral600" fontWeight="bold" variant="pi">
+        {/* The legacy field's own key: identical wording, already translated in
+            every locale, where a new key would ship English to all of them. */}
         {formatMessage({
-          id: getTranslationKey('content-manager.input.drop-zone.label'),
+          id: getTranslationKey('mediaLibraryInput.placeholder'),
           defaultMessage: 'Click to add an asset or drag and drop one in this area',
         })}
       </Typography>

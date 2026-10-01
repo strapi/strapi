@@ -171,8 +171,12 @@ type AppDispatch = Dispatch &
   (<T>(thunk: T) => T extends (...args: never[]) => infer R ? R : never);
 
 type UploadPoolResult =
-  | { data: UploadedFile[]; error?: undefined }
-  | { error: UploadError; data?: undefined };
+  /**
+   * `own` is set only by a merged leg: `data` is the whole batch so far, for the
+   * next leg to chain from, while `own` is what this call uploaded.
+   */
+  | { data: UploadedFile[]; own?: UploadedFile[]; error?: undefined }
+  | { error: UploadError; data?: undefined; own?: undefined };
 
 /** Maps a server per-file outcome onto the row's terminal metadata status. */
 const METADATA_STATUS_BY_RESULT: Record<GenerateAIMetadata.FileStatus, FileMetadataResultStatus> = {
@@ -418,13 +422,21 @@ const runMergedUploadPool = async ({
         dispatch,
         concurrency,
         generateAiMetadata,
-      }).then((result) => (result.error ? result : { data: [...earlier, ...(result.data ?? [])] }));
+      }).then((result) =>
+        result.error
+          ? result
+          : { data: [...earlier, ...(result.data ?? [])], own: result.data ?? [] }
+      );
     }
   );
 
   trackPoolRun(uploadId, run);
 
-  return run;
+  // The chained value keeps every file in the batch, because the next merged leg
+  // reads it as its own `earlier`. The caller gets only what it handed in: a
+  // consumer that attaches the result — the Content Manager field — would
+  // otherwise re-attach the files the earlier drop already added.
+  return run.then((result) => (result.error ? result : { data: result.own ?? result.data }));
 };
 
 /* -------------------------------------------------------------------------------------------------
