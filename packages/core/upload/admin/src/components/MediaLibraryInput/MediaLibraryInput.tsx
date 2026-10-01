@@ -5,6 +5,7 @@ import { Field, Flex, VisuallyHidden } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { useAIMetadataEnabled } from '../../hooks/useAIMetadataEnabled';
+import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { useTracking } from '../../hooks/useTracking';
 // Temporary: the Content Manager's own asset picker is not built on this stack
 // yet, so browsing the library still goes through the legacy dialog. Both
@@ -83,7 +84,8 @@ export const MediaLibraryInput = ({
   const [uploadFiles] = useUploadFilesMutation();
   // Echoes the app config; a missing payload (still loading) falls back to
   // sequential rather than outpacing what the server asked for.
-  const { data: settings } = useGetUploadSettingsQuery();
+  const { canRead } = useMediaLibraryPermissions();
+  const { data: settings } = useGetUploadSettingsQuery(undefined, { skip: !canRead });
   const concurrency = settings?.data?.concurrentUploadRequests ?? 1;
   const isAiMetadataEnabled = useAIMetadataEnabled();
 
@@ -120,8 +122,10 @@ export const MediaLibraryInput = ({
       timeout: 4000,
       message: formatMessage(
         {
-          id: getTranslationKey('content-manager.input.notification.not-supported'),
-          defaultMessage: `You can't upload this type of file.`,
+          // Legacy key: translated everywhere, and it names the accepted types,
+          // which the field already passes as `fileTypes`.
+          id: getTranslationKey('input.notification.not-supported'),
+          defaultMessage: `You can't upload this type of file, only the following types are accepted – {fileTypes}`,
         },
         { fileTypes: (allowedTypes ?? []).join(',') }
       ),
@@ -207,12 +211,15 @@ export const MediaLibraryInput = ({
   };
 
   const handleFileInputChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    const { files } = event.target;
-    // Reset first: picking the same file twice in a row fires no `change` event
-    // otherwise.
+    // Copied before the reset, not after: `event.target.files` is the input's
+    // live FileList, and clearing `value` empties it in place. Reading it
+    // afterwards yields nothing and the upload never starts.
+    const files = Array.from(event.target.files ?? []);
+    // Reset so picking the same file twice in a row still fires `change`.
     event.target.value = '';
-    if (files && files.length > 0) {
-      await handleUpload(Array.from(files));
+
+    if (files.length > 0) {
+      await handleUpload(files);
     }
   };
 
