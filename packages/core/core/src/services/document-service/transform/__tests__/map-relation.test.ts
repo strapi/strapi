@@ -98,6 +98,31 @@ describe('map relation', () => {
       expect(await mapper(stringRelation)).toMatchObject(expectedRelation);
     });
 
+    it('short hand documentId starting with a digit is not treated as an id', async () => {
+      // parseInt('3d52c864df72fcc68ab62ebe', 10) === 3, which used to classify these as ids
+      const documentIds = ['3d52c864df72fcc68ab62ebe', '6goibolwpjtxzlc41vx2vvqa', '1a'];
+
+      for (const documentId of documentIds) {
+        expect(await mapper(documentId)).toMatchObject({ set: [{ documentId: 'mapped' }] });
+      }
+    });
+
+    it('short hand documentId starting with a letter is a documentId', async () => {
+      expect(await mapper('pj8pkr2nd6ptpga86y3bsdan')).toMatchObject({
+        set: [{ documentId: 'mapped' }],
+      });
+    });
+
+    it('short hand multiple with digit-leading documentIds', async () => {
+      const relation = [1, '2', '3d52c864df72fcc68ab62ebe'] as any;
+
+      const expectedRelation = {
+        set: [{ id: 'mapped' }, { id: 'mapped' }, { documentId: 'mapped' }],
+      };
+
+      expect(await mapper(relation)).toMatchObject(expectedRelation);
+    });
+
     it('short hand multiple', async () => {
       const relation = [1, '1', { id: 1 }] as any;
 
