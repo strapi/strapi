@@ -4,11 +4,11 @@ import { loadEnv } from '../../../../node/core/env';
 import type { Logger } from '../../../utils/logger';
 import { BILLING_URL, ENTERPRISE_SCOPE, STRAPI_PACKAGE_NAME } from './constants';
 import { discoverEnterprisePlugins } from './discovery';
-import { EnterpriseInstallError } from './errors';
+import { EnterpriseInstallError, PackageManagerError } from './errors';
 import { buildInstallCommand, installPackages } from './install-packages';
 import { resolveLicense } from './license';
 import { detectPackageManager } from './package-manager';
-import { configureRegistryAccess } from './registry-access';
+import { prepareRegistryAccess } from './registry-access';
 import { fetchPackument, getRegistryUrl, type PackumentLookup } from './registry';
 import { buildPluginRow, isSelectable, orderVisibleRows, promptForPlugins } from './selection';
 import { printSetupLinks } from './setup-links';
@@ -18,6 +18,7 @@ import {
   isPrerelease,
   isUpgrade,
   pickTargetVersion,
+  readAppDependencyVersion,
   readInstalledVersion,
   resolveRequestedVersion,
 } from './versions';
@@ -51,9 +52,13 @@ interface InstallContext {
   dependencies: InstallDependencies;
 }
 
-export const parsePackageArgument = (
-  packageArgument: string
-): { packageName: string; requestedVersion?: string } => {
+interface RequestedPackage {
+  packageName: string;
+  /** A version or a tag, when the argument names one. */
+  requestedVersion?: string;
+}
+
+export const parsePackageArgument = (packageArgument: string): RequestedPackage => {
   const scopedArgument = packageArgument.startsWith('@')
     ? packageArgument
     : `${ENTERPRISE_SCOPE}/${packageArgument}`;
@@ -84,13 +89,12 @@ function assertLicenseAccepted(
 }
 
 const resolveNamedPackages = async (
-  packageArguments: string[],
+  requestedPackages: RequestedPackage[],
   { appDir, license, strapiVersion, logger, dependencies }: InstallContext
 ): Promise<string[]> => {
   const installSpecs: string[] = [];
 
-  for (const packageArgument of packageArguments) {
-    const { packageName, requestedVersion } = parsePackageArgument(packageArgument);
+  for (const { packageName, requestedVersion } of requestedPackages) {
     const lookup = await fetchPackument({
       packageName,
       license,
@@ -115,7 +119,7 @@ const resolveNamedPackages = async (
 
       if (
         resolvedVersion &&
-        resolvedVersion === (await readInstalledVersion(appDir, packageName))
+        resolvedVersion === (await readAppDependencyVersion(appDir, packageName))
       ) {
         logger.info(`${packageName} ${resolvedVersion} is already installed.`);
         continue;
@@ -138,12 +142,13 @@ const resolveNamedPackages = async (
       );
     }
 
-    const newerVersionHint = describeNewerIncompatibleVersion(versionChoice);
+    const installedVersion = await readAppDependencyVersion(appDir, packageName);
+
+    const newerVersionHint = describeNewerIncompatibleVersion(versionChoice, installedVersion);
     if (newerVersionHint) {
       logger.info(`${packageName}: ${newerVersionHint}`);
     }
 
-    const installedVersion = await readInstalledVersion(appDir, packageName);
     if (installedVersion && !isUpgrade(installedVersion, targetVersion)) {
       logger.info(`${packageName} ${installedVersion} is already installed and up to date.`);
       continue;
@@ -245,11 +250,17 @@ export const runInstall = async ({
   logger: Logger;
   dependencies: InstallDependencies;
 }): Promise<void> => {
-  if (packageArguments.length === 0 && !dependencies.isInteractive) {
+  // The checks that need no license come first, so a mistake there writes nothing, not even the
+  // license.txt a pasted license is saved to.
+  const requestedPackages = packageArguments.map(parsePackageArgument);
+
+  if (requestedPackages.length === 0 && !dependencies.isInteractive) {
     throw new EnterpriseInstallError(
       'Pass package names, or run the command in an interactive terminal.'
     );
   }
+
+  const packageManager = await detectPackageManager(appDir);
 
   const { license, source: licenseSource } = await resolveLicense({
     appDir,
@@ -260,9 +271,7 @@ export const runInstall = async ({
     prompt: dependencies.promptForLicense,
   });
 
-  const packageManager = await detectPackageManager(appDir);
-
-  await configureRegistryAccess({
+  const registryAccess = await prepareRegistryAccess({
     appDir,
     packageManager,
     license,
@@ -277,14 +286,16 @@ export const runInstall = async ({
 
   const context: InstallContext = { appDir, license, strapiVersion, logger, dependencies };
   const installSpecs =
-    packageArguments.length > 0
-      ? await resolveNamedPackages(packageArguments, context)
+    requestedPackages.length > 0
+      ? await resolveNamedPackages(requestedPackages, context)
       : await selectPlugins(context);
 
   if (installSpecs.length === 0) {
     logger.info('Nothing to install.');
     return;
   }
+
+  await registryAccess.apply();
 
   const { command, args } = buildInstallCommand(packageManager, installSpecs);
   logger.info(`Running ${command} ${args.join(' ')}`);
@@ -298,11 +309,24 @@ export const runInstall = async ({
   });
 };
 
-const hasExitCode = (error: unknown): error is { exitCode: number } =>
-  typeof error === 'object' &&
-  error !== null &&
-  'exitCode' in error &&
-  typeof error.exitCode === 'number';
+/**
+ * The exit code for an error, after reporting it in one line. The package manager prints its own
+ * output when an install fails, so only its exit code is kept then.
+ */
+export const reportInstallError = (error: unknown, logger: Logger): number => {
+  if (error instanceof PackageManagerError) {
+    return error.exitCode;
+  }
+
+  if (error instanceof EnterpriseInstallError) {
+    logger.error(error.message);
+    return 1;
+  }
+
+  const message = error instanceof Error ? error.message : String(error);
+  logger.error(`strapi enterprise install failed: ${message}`);
+  return 1;
+};
 
 export const action = async (
   packageArguments: string[],
@@ -329,16 +353,6 @@ export const action = async (
       },
     });
   } catch (error) {
-    if (error instanceof EnterpriseInstallError) {
-      logger.error(error.message);
-      process.exit(1);
-    }
-
-    // The package manager already printed its own error, so only its exit code is kept.
-    if (hasExitCode(error)) {
-      process.exit(error.exitCode);
-    }
-
-    throw error;
+    process.exit(reportInstallError(error, logger));
   }
 };

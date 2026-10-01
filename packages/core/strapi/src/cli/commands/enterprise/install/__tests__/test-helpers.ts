@@ -96,9 +96,25 @@ export const createRegistryFetch = ({
       : createFetchResponse(200, packument);
   });
 
-/** Writes an installed package into the app's node_modules. */
-export const installFakePackage = (
+/**
+ * Writes an installed package into the app's node_modules and, like a package manager, lists it in
+ * the app's package.json. `asDependency: false` leaves it out, like a copy hoisted for another app.
+ */
+export const installFakePackage = async (
   appDir: string,
   packageName: string,
-  packageJson: Record<string, unknown>
-) => fse.outputJson(path.join(appDir, 'node_modules', packageName, 'package.json'), packageJson);
+  packageJson: Record<string, unknown>,
+  { asDependency = true }: { asDependency?: boolean } = {}
+) => {
+  await fse.outputJson(path.join(appDir, 'node_modules', packageName, 'package.json'), packageJson);
+
+  if (asDependency) {
+    const appPackageJsonPath = path.join(appDir, 'package.json');
+    const appPackageJson = await fse.readJson(appPackageJsonPath).catch(() => ({}));
+
+    await fse.outputJson(appPackageJsonPath, {
+      ...appPackageJson,
+      dependencies: { ...appPackageJson.dependencies, [packageName]: String(packageJson.version) },
+    });
+  }
+};

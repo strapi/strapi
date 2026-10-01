@@ -1,3 +1,6 @@
+import path from 'path';
+import fse from 'fs-extra';
+
 import {
   describeEnterprisePlugin,
   discoverEnterprisePlugins,
@@ -104,6 +107,58 @@ describe('discoverEnterprisePlugins', () => {
     ]);
   });
 
+  it('leaves out a package the registry fails to describe, and lists the others', async () => {
+    const logger = createTestLogger();
+
+    const discoveredPlugins = await discoverEnterprisePlugins({
+      appDir: await createTemporaryDirectory(),
+      license: 'the-license',
+      logger,
+      env: {},
+      fetchImplementation: createRegistryFetch({
+        searchResult: [AI_BYOK, NEW_PLUGIN],
+        packuments: { [AI_BYOK]: aiByokPackument, [NEW_PLUGIN]: 503 },
+      }),
+    });
+
+    expect(discoveredPlugins.map(({ entry }) => entry.packageName)).toEqual([AI_BYOK]);
+    expect(logger.warn).toHaveBeenCalledWith(
+      `${NEW_PLUGIN} is left out of the list: https://packages.strapi.io answered HTTP 503 for ${NEW_PLUGIN}. Try again later.`
+    );
+  });
+
+  it('does not count a copy hoisted for another app as installed, so it is no upgrade', async () => {
+    const rootDir = await createTemporaryDirectory();
+    const appDir = path.join(rootDir, 'apps', 'my-app');
+    await fse.outputJson(path.join(appDir, 'package.json'), { dependencies: {} });
+    await installFakePackage(
+      rootDir,
+      AI_BYOK,
+      { version: '0.9.0', strapi: { kind: 'plugin' } },
+      { asDependency: false }
+    );
+
+    const [discoveredPlugin] = await discover(
+      appDir,
+      createRegistryFetch({ searchResult: [AI_BYOK], packuments: { [AI_BYOK]: aiByokPackument } })
+    );
+
+    expect(discoveredPlugin).toMatchObject({ entry: { packageName: AI_BYOK } });
+    expect(discoveredPlugin?.installedVersion).toBeUndefined();
+  });
+
+  it('stops when the registry fails to describe every package', async () => {
+    await expect(
+      discover(
+        await createTemporaryDirectory(),
+        createRegistryFetch({
+          searchResult: [AI_BYOK, NEW_PLUGIN],
+          packuments: { [AI_BYOK]: 503, [NEW_PLUGIN]: 503 },
+        })
+      )
+    ).rejects.toThrow('answered HTTP 503');
+  });
+
   it('lists the installed plugins when the registry search is unavailable, and says so', async () => {
     const appDir = await createTemporaryDirectory();
     await installFakePackage(appDir, AI_BYOK, { version: '1.0.0', strapi: { kind: 'plugin' } });
@@ -158,6 +213,21 @@ describe('discoverEnterprisePlugins', () => {
 });
 
 describe('listInstalledEnterprisePlugins', () => {
+  it('leaves out a plugin hoisted for another app of the same monorepo', async () => {
+    const rootDir = await createTemporaryDirectory();
+    const appDir = path.join(rootDir, 'apps', 'my-app');
+    await fse.outputJson(path.join(appDir, 'package.json'), { dependencies: {} });
+    // Installed at the monorepo root because a sibling app depends on it.
+    await installFakePackage(
+      rootDir,
+      NEW_PLUGIN,
+      { version: '2.0.0', strapi: { kind: 'plugin' } },
+      { asDependency: false }
+    );
+
+    await expect(listInstalledEnterprisePlugins(appDir)).resolves.toEqual([]);
+  });
+
   it('finds installed plugins and leaves libraries out', async () => {
     const appDir = await createTemporaryDirectory();
     await installFakePackage(appDir, NEW_PLUGIN, { version: '2.0.0', strapi: { kind: 'plugin' } });

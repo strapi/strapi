@@ -1,6 +1,3 @@
-import path from 'path';
-import fse from 'fs-extra';
-
 import type { Logger } from '../../../utils/logger';
 import { ENTERPRISE_SCOPE } from './constants';
 import { EnterpriseInstallError } from './errors';
@@ -12,9 +9,9 @@ import {
   type PackumentLookup,
 } from './registry';
 import {
-  listNodeModulesDirectories,
+  readAppDependencyNames,
+  readAppDependencyVersion,
   readInstalledPackageJson,
-  readInstalledVersion,
 } from './versions';
 
 export interface EnterprisePluginEntry {
@@ -38,28 +35,26 @@ const toPluginId = (packageName: string) => packageName.slice(ENTERPRISE_SCOPE.l
 export const declaresStrapiKind = (strapiKind: unknown): strapiKind is string =>
   typeof strapiKind === 'string' && strapiKind.length > 0;
 
-/** Enterprise plugins installed in the app. Libraries the plugins depend on are left out. */
+/**
+ * Enterprise plugins the app depends on: listed in its own `package.json`, and installed. Libraries
+ * the plugins depend on are left out, as are copies hoisted for another app of the same monorepo.
+ */
 export const listInstalledEnterprisePlugins = async (appDir: string): Promise<string[]> => {
-  const installedPluginNames = new Set<string>();
+  const installedPluginNames: string[] = [];
 
-  for (const nodeModulesDirectory of listNodeModulesDirectories(appDir)) {
-    const scopeDirectory = path.join(nodeModulesDirectory, ENTERPRISE_SCOPE);
-
-    if (!(await fse.pathExists(scopeDirectory))) {
+  for (const packageName of await readAppDependencyNames(appDir)) {
+    if (!isEnterprisePackage(packageName)) {
       continue;
     }
 
-    for (const packageDirectoryName of await fse.readdir(scopeDirectory)) {
-      const packageName = `${ENTERPRISE_SCOPE}/${packageDirectoryName}`;
-      const packageJson = await readInstalledPackageJson(appDir, packageName);
+    const packageJson = await readInstalledPackageJson(appDir, packageName);
 
-      if (declaresStrapiKind(packageJson?.strapi?.kind)) {
-        installedPluginNames.add(packageName);
-      }
+    if (declaresStrapiKind(packageJson?.strapi?.kind)) {
+      installedPluginNames.push(packageName);
     }
   }
 
-  return [...installedPluginNames];
+  return installedPluginNames;
 };
 
 const findLatestManifest = (packument: Packument) => {
@@ -133,17 +128,36 @@ export const discoverEnterprisePlugins = async ({
     ...new Set([...(searchedPackageNames ?? []), ...installedPluginNames]),
   ].filter(isEnterprisePackage);
 
+  const lookupFailures: EnterpriseInstallError[] = [];
+
   const discoveredPlugins = await Promise.all(
     candidatePackageNames.map(async (packageName): Promise<DiscoveredPlugin | undefined> => {
-      const [lookup, installedVersion] = await Promise.all([
-        fetchPackument({ packageName, license, env, fetchImplementation }),
-        readInstalledVersion(appDir, packageName),
-      ]);
-      const entry = describeEnterprisePlugin(packageName, lookup);
+      try {
+        const [lookup, installedVersion] = await Promise.all([
+          fetchPackument({ packageName, license, env, fetchImplementation }),
+          readAppDependencyVersion(appDir, packageName),
+        ]);
+        const entry = describeEnterprisePlugin(packageName, lookup);
 
-      return entry ? { entry, lookup, installedVersion } : undefined;
+        return entry ? { entry, lookup, installedVersion } : undefined;
+      } catch (error) {
+        if (!(error instanceof EnterpriseInstallError)) {
+          throw error;
+        }
+
+        // One package the registry fails to describe should not hide the others.
+        lookupFailures.push(error);
+        logger.warn(`${packageName} is left out of the list: ${error.message}`);
+
+        return undefined;
+      }
     })
   );
+
+  // When every lookup fails, the registry itself is the problem, not the license.
+  if (candidatePackageNames.length > 0 && lookupFailures.length === candidatePackageNames.length) {
+    throw lookupFailures[0];
+  }
 
   return discoveredPlugins.filter(
     (discoveredPlugin): discoveredPlugin is DiscoveredPlugin => discoveredPlugin !== undefined

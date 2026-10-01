@@ -131,6 +131,10 @@ describe('toCheckboxChoice', () => {
     });
   });
 
+  it('drops the newer-version note when that version is already installed', () => {
+    expect(rowFor(threeVersions, '1.3.0')).toMatchObject({ state: 'installed', note: undefined });
+  });
+
   it('shows installed and unlicensed plugins as not selectable', () => {
     expect(toCheckboxChoice(rowFor(threeVersions, '1.2.0')).disabled).toContain('installed');
     expect(toCheckboxChoice(rowFor({ status: 'not-licensed' }, '1.2.0')).disabled).toBe(

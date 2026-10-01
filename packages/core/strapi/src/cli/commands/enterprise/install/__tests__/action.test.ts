@@ -1,7 +1,13 @@
 import path from 'path';
 import fse from 'fs-extra';
 
-import { parsePackageArgument, runInstall, type InstallDependencies } from '../action';
+import { EnterpriseInstallError, PackageManagerError } from '../errors';
+import {
+  parsePackageArgument,
+  reportInstallError,
+  runInstall,
+  type InstallDependencies,
+} from '../action';
 import {
   createFetchResponse,
   createPackument,
@@ -11,7 +17,7 @@ import {
   loggedText,
 } from './test-helpers';
 
-jest.mock('@strapi/core', () => ({
+jest.mock('@strapi/core/_internal/license', () => ({
   readLicense: jest.fn(() => undefined),
   verifyLicense: jest.fn(() => ({ type: 'gold', isTrial: false })),
 }));
@@ -61,7 +67,10 @@ const createApp = async ({
   installedPackages = {},
 }: { strapiVersion?: string; installedPackages?: Record<string, string> } = {}) => {
   const appDir = await createTemporaryDirectory();
-  await fse.writeJson(path.join(appDir, 'package.json'), { packageManager: 'npm@10.9.0' });
+  await fse.writeJson(path.join(appDir, 'package.json'), {
+    packageManager: 'npm@10.9.0',
+    dependencies: installedPackages,
+  });
   await fse.outputJson(path.join(appDir, 'node_modules', '@strapi', 'strapi', 'package.json'), {
     version: strapiVersion,
   });
@@ -238,6 +247,118 @@ describe('runInstall with package names', () => {
       })
     ).rejects.toThrow(message);
     expect(dependencies.installPackages).not.toHaveBeenCalled();
+    // The license was not accepted, so it is not saved for later runs.
+    expect(await fse.pathExists(path.join(dependencies.homeDir, '.npmrc'))).toBe(false);
+  });
+
+  it('stops before any request when ~/.npmrc holds another license, and leaves it as is', async () => {
+    const dependencies = await createDependencies();
+    const npmrcPath = path.join(dependencies.homeDir, '.npmrc');
+    const otherLicenseLines =
+      '@strapi-enterprise:registry=https://packages.strapi.io/\n//packages.strapi.io/:_authToken=other-license\n';
+    await fse.writeFile(npmrcPath, otherLicenseLines);
+
+    await expect(
+      runInstall({
+        appDir: await createApp(),
+        packageArguments: ['plugin-ai-byok'],
+        logger: createTestLogger(),
+        dependencies,
+      })
+    ).rejects.toThrow('already sets up packages.strapi.io with another license');
+    expect(dependencies.fetchImplementation).not.toHaveBeenCalled();
+    expect(dependencies.installPackages).not.toHaveBeenCalled();
+    expect(await fse.readFile(npmrcPath, 'utf8')).toBe(otherLicenseLines);
+  });
+
+  it('writes the license itself in CI when it comes from .env, which later steps do not load', async () => {
+    const dependencies = await createDependencies({ env: { STRAPI_LICENSE: LICENSE, CI: 'true' } });
+    const appDir = await createApp();
+    await fse.writeFile(path.join(appDir, '.env'), `STRAPI_LICENSE=${LICENSE}\n`);
+
+    await runInstall({
+      appDir,
+      packageArguments: ['plugin-ai-byok'],
+      logger: createTestLogger(),
+      dependencies,
+    });
+
+    const npmrc = await fse.readFile(path.join(dependencies.homeDir, '.npmrc'), 'utf8');
+    expect(npmrc).toContain(`//packages.strapi.io/:_authToken=${LICENSE}`);
+    // eslint-disable-next-line no-template-curly-in-string
+    expect(npmrc).not.toContain('${STRAPI_LICENSE}');
+  });
+
+  it('writes a reference in CI when STRAPI_LICENSE is set in the environment', async () => {
+    const dependencies = await createDependencies({ env: { STRAPI_LICENSE: LICENSE, CI: 'true' } });
+
+    await runInstall({
+      appDir: await createApp(),
+      packageArguments: ['plugin-ai-byok'],
+      logger: createTestLogger(),
+      dependencies,
+    });
+
+    expect(await fse.readFile(path.join(dependencies.homeDir, '.npmrc'), 'utf8')).toContain(
+      // eslint-disable-next-line no-template-curly-in-string
+      '//packages.strapi.io/:_authToken=${STRAPI_LICENSE}'
+    );
+  });
+
+  it('drops the newer-version note when that version is already installed', async () => {
+    const logger = createTestLogger();
+
+    await runInstall({
+      appDir: await createApp({ installedPackages: { [AI_BYOK]: '1.3.0' } }),
+      packageArguments: ['plugin-ai-byok'],
+      logger,
+      dependencies: await createDependencies(),
+    });
+
+    expect(logger.info).not.toHaveBeenCalledWith(
+      `${AI_BYOK}: 1.3.0 is available but requires Strapi ^5.56.0.`
+    );
+    expect(logger.info).toHaveBeenCalledWith(
+      `${AI_BYOK} 1.3.0 is already installed and up to date.`
+    );
+  });
+
+  it('installs a plugin whose only copy is hoisted for another app of the monorepo', async () => {
+    const rootDir = await createTemporaryDirectory();
+    const appDir = path.join(rootDir, 'apps', 'my-app');
+    await fse.outputJson(path.join(appDir, 'package.json'), { packageManager: 'npm@10.9.0' });
+    await fse.outputJson(path.join(rootDir, 'node_modules', '@strapi', 'strapi', 'package.json'), {
+      version: '5.54.1',
+    });
+    // A sibling app depends on 1.2.0, so it sits in the root node_modules.
+    await fse.outputJson(path.join(rootDir, 'node_modules', AI_BYOK, 'package.json'), {
+      version: '1.2.0',
+    });
+    const dependencies = await createDependencies();
+    const logger = createTestLogger();
+
+    await runInstall({ appDir, packageArguments: ['plugin-ai-byok'], logger, dependencies });
+
+    expect(logger.info).not.toHaveBeenCalledWith(
+      `${AI_BYOK} 1.2.0 is already installed and up to date.`
+    );
+    expect(dependencies.installPackages).toHaveBeenCalledWith(
+      expect.objectContaining({ installSpecs: [`${AI_BYOK}@1.2.0`] })
+    );
+  });
+
+  it('writes nothing to ~/.npmrc when there is nothing to install', async () => {
+    const dependencies = await createDependencies();
+
+    await runInstall({
+      appDir: await createApp({ installedPackages: { [AI_BYOK]: '1.2.0' } }),
+      packageArguments: ['plugin-ai-byok'],
+      logger: createTestLogger(),
+      dependencies,
+    });
+
+    expect(dependencies.installPackages).not.toHaveBeenCalled();
+    expect(await fse.pathExists(path.join(dependencies.homeDir, '.npmrc'))).toBe(false);
   });
 
   it('stops when no version fits the app Strapi version', async () => {
@@ -426,6 +547,30 @@ describe('runInstall with the checklist', () => {
   });
 });
 
+describe('runInstall checks that need no license', () => {
+  it('rejects a package outside the Enterprise scope before asking for a license', async () => {
+    const appDir = await createApp();
+    const dependencies = await createDependencies({
+      isInteractive: true,
+      env: {},
+      promptForLicense: jest.fn().mockResolvedValue(LICENSE),
+    });
+
+    await expect(
+      runInstall({
+        appDir,
+        packageArguments: ['@strapi/foo'],
+        logger: createTestLogger(),
+        dependencies,
+      })
+    ).rejects.toThrow('@strapi/foo is not an Enterprise package.');
+    expect(dependencies.promptForLicense).not.toHaveBeenCalled();
+    expect(await fse.pathExists(path.join(appDir, 'license.txt'))).toBe(false);
+    expect(await fse.pathExists(path.join(appDir, '.gitignore'))).toBe(false);
+    expect(await fse.pathExists(path.join(dependencies.homeDir, '.npmrc'))).toBe(false);
+  });
+});
+
 describe('parsePackageArgument', () => {
   it.each([
     ['plugin-ai-byok', { packageName: AI_BYOK }],
@@ -439,6 +584,43 @@ describe('parsePackageArgument', () => {
   it('rejects a package outside the Enterprise scope', () => {
     expect(() => parsePackageArgument('@other/plugin')).toThrow(
       '@other/plugin is not an Enterprise package. Enterprise packages start with @strapi-enterprise/.'
+    );
+  });
+});
+
+describe('reportInstallError', () => {
+  it('keeps the package manager exit code without logging, since it printed its own output', () => {
+    const logger = createTestLogger();
+
+    expect(reportInstallError(new PackageManagerError(2), logger)).toBe(2);
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('logs an EnterpriseInstallError as is, and exits with 1', () => {
+    const logger = createTestLogger();
+
+    expect(reportInstallError(new EnterpriseInstallError('Something to fix.'), logger)).toBe(1);
+    expect(logger.error).toHaveBeenCalledWith('Something to fix.');
+  });
+
+  it('logs any other error in one line, without its stack, and exits with 1', () => {
+    const logger = createTestLogger();
+
+    expect(reportInstallError(new TypeError('Cannot read properties of undefined'), logger)).toBe(
+      1
+    );
+    expect(logger.error).toHaveBeenCalledWith(
+      'strapi enterprise install failed: Cannot read properties of undefined'
+    );
+  });
+
+  it('does not treat another error with an exit code as a package manager failure', () => {
+    const logger = createTestLogger();
+    const execaError = Object.assign(new Error('Command failed: yarn --version'), { exitCode: 1 });
+
+    expect(reportInstallError(execaError, logger)).toBe(1);
+    expect(logger.error).toHaveBeenCalledWith(
+      'strapi enterprise install failed: Command failed: yarn --version'
     );
   });
 });

@@ -1,13 +1,14 @@
 import path from 'path';
 import fse from 'fs-extra';
-import { readLicense, verifyLicense } from '@strapi/core';
+import dotenv from 'dotenv';
+import { readLicense, verifyLicense } from '@strapi/core/_internal/license';
 
 import { getInquirer } from '../../../utils/get-inquirer';
 import type { Logger } from '../../../utils/logger';
 import { BILLING_URL, LICENSE_FILE_NAME } from './constants';
 import { EnterpriseInstallError } from './errors';
 
-export type LicenseSource = 'environment' | 'license-file';
+export type LicenseSource = 'environment' | 'env-file' | 'license-file';
 
 export interface FoundLicense {
   license: string;
@@ -21,11 +22,25 @@ export interface ResolvedLicense {
 }
 
 const LICENSE_SOURCE_LABELS: Record<LicenseSource, string> = {
-  environment: 'STRAPI_LICENSE',
+  environment: 'the STRAPI_LICENSE environment variable',
+  'env-file': 'STRAPI_LICENSE in .env',
   'license-file': LICENSE_FILE_NAME,
 };
 
 const cleanLicense = (value: string | undefined): string | undefined => value?.trim() || undefined;
+
+const readEnvFileLicense = async (
+  appDir: string,
+  env: NodeJS.ProcessEnv
+): Promise<string | undefined> => {
+  const envFilePath = env.ENV_PATH ? path.resolve(appDir, env.ENV_PATH) : path.join(appDir, '.env');
+
+  if (!(await fse.pathExists(envFilePath))) {
+    return undefined;
+  }
+
+  return cleanLicense(dotenv.parse(await fse.readFile(envFilePath)).STRAPI_LICENSE);
+};
 
 export const findLicense = async ({
   appDir,
@@ -36,7 +51,9 @@ export const findLicense = async ({
 }): Promise<FoundLicense | undefined> => {
   const licenseFromEnvironment = cleanLicense(env.STRAPI_LICENSE);
   if (licenseFromEnvironment) {
-    return { license: licenseFromEnvironment, source: 'environment' };
+    const isFromEnvFile = (await readEnvFileLicense(appDir, env)) === licenseFromEnvironment;
+
+    return { license: licenseFromEnvironment, source: isFromEnvFile ? 'env-file' : 'environment' };
   }
 
   let licenseFromLicenseFile: string | undefined;

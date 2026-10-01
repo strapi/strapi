@@ -30,7 +30,11 @@ export const parsePackageManagerField = (
 };
 
 const readYarnMajorVersion = async (appDir: string): Promise<number> => {
-  const { stdout } = await execa('yarn', ['--version'], { cwd: appDir });
+  const { stdout } = await execa('yarn', ['--version'], { cwd: appDir }).catch(() => {
+    throw new EnterpriseInstallError(
+      'Could not run yarn --version to tell Yarn 1 from Yarn 2+. Check that Yarn is installed, or set "packageManager" in package.json.'
+    );
+  });
   const majorVersion = Number.parseInt(stdout.trim(), 10);
 
   return Number.isNaN(majorVersion) ? 1 : majorVersion;
