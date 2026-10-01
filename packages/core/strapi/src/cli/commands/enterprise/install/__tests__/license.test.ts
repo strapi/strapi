@@ -142,6 +142,24 @@ describe('resolveLicense', () => {
     );
   });
 
+  it('restricts an existing, empty license.txt to its owner when saving the pasted license', async () => {
+    const appDir = await createTemporaryDirectory();
+    const licenseFilePath = path.join(appDir, 'license.txt');
+    await fse.writeFile(licenseFilePath, '', { mode: 0o644 });
+
+    await resolveLicense({
+      appDir,
+      isInteractive: true,
+      logger: createTestLogger(),
+      env: {},
+      now: NOW,
+      prompt: async () => 'pasted-license',
+    });
+
+    expect(await fse.readFile(licenseFilePath, 'utf8')).toBe('pasted-license\n');
+    expect(await readFilePermissions(licenseFilePath)).toBe('600');
+  });
+
   it('asks for a license, saves it to license.txt only, and ignores it in git', async () => {
     const appDir = await createTemporaryDirectory();
     const logger = createTestLogger();

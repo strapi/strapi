@@ -27,11 +27,6 @@ const LICENSE_SOURCE_LABELS: Record<LicenseSource, string> = {
 
 const cleanLicense = (value: string | undefined): string | undefined => value?.trim() || undefined;
 
-/**
- * Looks for a license the way Strapi does: `STRAPI_LICENSE`, then `license.txt`. The command loads
- * the app's `.env` into the environment first, as `strapi build` does, so `STRAPI_LICENSE` covers
- * both the shell and `.env`, and the shell wins.
- */
 export const findLicense = async ({
   appDir,
   env = process.env,
@@ -49,7 +44,6 @@ export const findLicense = async ({
   try {
     licenseFromLicenseFile = cleanLicense(readLicense(appDir));
   } catch {
-    // A missing file reads as no license. Any other failure, such as no read permission, lands here.
     throw new EnterpriseInstallError(
       `Could not read ${LICENSE_FILE_NAME}. Check its permissions, or set STRAPI_LICENSE instead.`
     );
@@ -62,10 +56,6 @@ export const findLicense = async ({
   return undefined;
 };
 
-/**
- * Checks the license signature with the same code Strapi uses, and rejects an expired license.
- * Nothing is written before this passes.
- */
 export const validateLicense = (license: string, now: Date = new Date()): void => {
   let licenseInfo: ReturnType<typeof verifyLicense>;
 
@@ -77,7 +67,6 @@ export const validateLicense = (license: string, now: Date = new Date()): void =
     );
   }
 
-  // Typed as a string, but licenses store it as milliseconds. `new Date` reads both, as Strapi does.
   const expiresAt = licenseInfo.expireAt === undefined ? undefined : new Date(licenseInfo.expireAt);
 
   if (expiresAt && !Number.isNaN(expiresAt.getTime()) && expiresAt.getTime() < now.getTime()) {
@@ -127,14 +116,14 @@ export const saveLicenseFile = async (
   license: string,
   logger: Logger
 ): Promise<void> => {
-  await fse.writeFile(path.join(appDir, LICENSE_FILE_NAME), `${license}\n`, { mode: 0o600 });
+  const licenseFilePath = path.join(appDir, LICENSE_FILE_NAME);
+
+  await fse.writeFile(licenseFilePath, `${license}\n`);
+  // Also restricts a license.txt that already existed, empty, with wider permissions.
+  await fse.chmod(licenseFilePath, 0o600);
   await ensureLicenseFileIsIgnored(appDir, logger);
 };
 
-/**
- * Returns a validated license. When none is found, asks for one in an interactive terminal and
- * saves it to `license.txt`, never to `.env`.
- */
 export const resolveLicense = async ({
   appDir,
   isInteractive,

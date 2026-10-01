@@ -2,18 +2,14 @@ import path from 'path';
 
 /** The app folder and each of its parents, up to the root of the file system. */
 export const listAncestorDirectories = (appDir: string): string[] => {
-  const directories: string[] = [];
   let directory = path.resolve(appDir);
+  const directories = [directory];
 
-  for (;;) {
+  // `path.dirname` of the root is the root itself, which ends the walk.
+  while (path.dirname(directory) !== directory) {
+    directory = path.dirname(directory);
     directories.push(directory);
-
-    const parentDirectory = path.dirname(directory);
-
-    if (parentDirectory === directory) {
-      return directories;
-    }
-
-    directory = parentDirectory;
   }
+
+  return directories;
 };

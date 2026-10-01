@@ -4,7 +4,6 @@ import { EnterpriseInstallError } from './errors';
 const REQUEST_TIMEOUT_MS = 15 * 1000;
 const SEARCH_PAGE_SIZE = 250;
 
-/** The `strapi` field of a plugin's `package.json`. */
 export interface StrapiPackageMetadata {
   name?: string;
   displayName?: string;
@@ -28,26 +27,15 @@ export interface Packument {
 
 export type PackumentLookup =
   | { status: 'available'; packument: Packument }
-  /** 401: the registry rejected the license itself. */
   | { status: 'license-rejected' }
-  /** 403: the license is valid but does not include this package. */
   | { status: 'not-licensed' }
   | { status: 'not-found' };
 
-/**
- * The license is sent as a token, so it only goes to the Strapi registry, or to an explicit
- * override used to test against a local registry.
- */
 export const getRegistryUrl = (env: NodeJS.ProcessEnv = process.env): string =>
   (env.STRAPI_ENTERPRISE_REGISTRY_URL ?? ENTERPRISE_REGISTRY_URL).replace(/\/+$/, '');
 
 const authorizationHeader = (license: string) => ({ Authorization: `Bearer ${license}` });
 
-/**
- * Lists the packages the registry search returns for this license. The registry filters results
- * with the same access rules as installs. Returns undefined when the search is unavailable, so the
- * caller can fall back to the packages it already knows.
- */
 export const searchPackageNames = async ({
   text,
   license,
@@ -83,10 +71,6 @@ export const searchPackageNames = async ({
   }
 };
 
-/**
- * Fetches the full package metadata. Unlike the abbreviated metadata, it keeps each version's
- * `strapi` field, which holds the plugin's display name and kind.
- */
 export const fetchPackument = async ({
   packageName,
   license,

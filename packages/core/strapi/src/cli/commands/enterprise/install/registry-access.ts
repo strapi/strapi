@@ -22,12 +22,6 @@ const NPMRC_LICENSE_REFERENCE = '${STRAPI_LICENSE}';
 const YARNRC_LICENSE_REFERENCE = '${STRAPI_LICENSE:-}';
 /* eslint-enable no-template-curly-in-string */
 
-/**
- * Whether the user-level file should reference STRAPI_LICENSE instead of holding the license: when
- * the license came from that variable in CI, where the machine is set up for the job and the
- * variable is set for every step. On a developer's machine another project's package manager could
- * read the same file without the variable, so the license is written as is there.
- */
 const shouldReferenceLicense = (
   licenseSource: ResolvedLicense['source'],
   env: NodeJS.ProcessEnv
@@ -47,7 +41,6 @@ export interface RegistryAccessOutcome {
   expectedConfiguration: string;
 }
 
-/** The registry the configuration points to: the Strapi one, unless STRAPI_ENTERPRISE_REGISTRY_URL is set. */
 export interface ConfiguredRegistry {
   /** Always ends with a slash, as npm expects for a scope registry. */
   url: string;
@@ -92,12 +85,14 @@ export const getUserYarnrcPath = (homeDir: string = os.homedir()): string =>
 const readFileIfExists = async (filePath: string): Promise<string> =>
   (await fse.pathExists(filePath)) ? fse.readFile(filePath, 'utf8') : '';
 
-/** Adds text at the end of a file, keeping its content. New files are readable by the owner only. */
 const appendToFile = async (filePath: string, existingContent: string, text: string) => {
   const separator = existingContent.length > 0 && !existingContent.endsWith('\n') ? '\n' : '';
 
   await fse.ensureDir(path.dirname(filePath));
-  await fse.writeFile(filePath, `${existingContent}${separator}${text}\n`, { mode: 0o600 });
+  await fse.appendFile(filePath, `${separator}${text}\n`);
+  // The file may now hold the license. A mode passed when writing only applies to a new file, so
+  // an existing one is restricted to its owner explicitly, as npm does when it saves this file.
+  await fse.chmod(filePath, 0o600);
 };
 
 const unquote = (value: string): string => value.replace(/^(['"])(.*)\1$/, '$2');
@@ -166,7 +161,6 @@ const YARNRC_SCOPE_LINE = new RegExp(`^\\s+["']?${YARNRC_SCOPE_NAME}["']?\\s*:`)
 const hasYarnrcScope = (content: string): boolean =>
   content.split(/\r?\n/).some((line) => YARNRC_SCOPE_LINE.test(line));
 
-/** The `npmAuthToken` set under the `strapi-enterprise` scope of a `.yarnrc.yml`, if any. */
 const readYarnrcScopeToken = (content: string): string | undefined => {
   const lines = content.split(/\r?\n/);
   const scopeLineIndex = lines.findIndex((line) => YARNRC_SCOPE_LINE.test(line));
@@ -196,10 +190,6 @@ const readYarnrcScopeToken = (content: string): string | undefined => {
   return undefined;
 };
 
-/**
- * `.yarnrc.yml` is edited only when it has no `npmScopes` key yet. Merging into an existing
- * `npmScopes` needs a YAML-aware edit, so the expected block is printed instead.
- */
 export const configureYarnrc = async (
   filePath: string,
   license: string,
@@ -283,11 +273,6 @@ const isWorkspaceRoot = async (directory: string): Promise<boolean> => {
   }
 };
 
-/**
- * The folders where the package manager reads a project-level file. Yarn, 1 and 2+ alike, reads
- * one in every parent folder. npm and pnpm read only the one at the root of the workspace when the
- * app is in one, and ignore the app's own, otherwise the one in the app folder.
- */
 export const listProjectConfigDirectories = async (
   appDir: string,
   packageManager: DetectedPackageManager
@@ -307,12 +292,6 @@ export const listProjectConfigDirectories = async (
   return [appDirectory];
 };
 
-/**
- * Project-level files that set this registry's token to something other than the license. The
- * package manager reads them before the user-level file, so the install would fail although the
- * lookups, which send the license themselves, succeeded. They may be committed, so they are only
- * reported, never edited. A token read from an environment variable is left to the user.
- */
 export const findOverridingConfigFiles = async ({
   appDir,
   packageManager,

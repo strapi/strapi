@@ -10,6 +10,7 @@ import {
 import { ENTERPRISE_SCOPE } from './constants';
 import {
   fetchPackument,
+  getRegistryUrl,
   searchPackageNames,
   type Packument,
   type PackumentLookup,
@@ -63,11 +64,6 @@ const findLatestManifest = (packument: Packument) => {
   return latestVersion ? packument.versions?.[latestVersion] : undefined;
 };
 
-/**
- * Describes a package for the checklist from its own `strapi` metadata, completed by what this CLI
- * knows about it. Returns undefined for a package that is not a plugin, such as a library the
- * plugins depend on.
- */
 export const describeEnterprisePlugin = (
   packageName: string,
   lookup: PackumentLookup
@@ -102,12 +98,6 @@ export const describeEnterprisePlugin = (
   };
 };
 
-/**
- * Finds the Enterprise plugins to show: the ones the registry search returns for this license, the
- * ones this CLI knows, and the ones already installed. The known ones keep the list working while
- * the registry search is unavailable, and the installed ones reveal a plugin that the license no
- * longer includes.
- */
 export const discoverEnterprisePlugins = async ({
   appDir,
   license,
@@ -127,8 +117,8 @@ export const discoverEnterprisePlugins = async ({
   ]);
 
   if (searchedPackageNames === undefined) {
-    logger.debug(
-      'The registry search is unavailable, so only the known and installed Enterprise plugins are listed.'
+    logger.warn(
+      `Could not search ${new URL(getRegistryUrl(env)).host}, so only the known and installed Enterprise plugins are listed.`
     );
   }
 
