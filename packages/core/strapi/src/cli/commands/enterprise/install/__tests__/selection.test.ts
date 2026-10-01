@@ -1,6 +1,5 @@
 import inquirer from 'inquirer';
 
-import { enterprisePluginCatalog } from '../catalog';
 import type { PackumentLookup } from '../registry';
 import {
   buildPluginRow,
@@ -11,7 +10,12 @@ import {
 } from '../selection';
 import { createPackument } from './test-helpers';
 
-const [aiByokEntry] = enterprisePluginCatalog;
+const aiByokEntry = {
+  packageName: '@strapi-enterprise/plugin-ai-byok',
+  pluginId: 'ai-byok',
+  displayName: 'AI BYOK',
+  summary: 'Runs Strapi AI features with a customer-owned provider key.',
+};
 
 const availableLookup = (
   versions: Array<{ version: string; strapiRange?: string }>
@@ -93,6 +97,19 @@ describe('orderVisibleRows', () => {
 });
 
 describe('toCheckboxChoice', () => {
+  it('tags a package that is not a plugin with its kind', () => {
+    const providerRow = buildPluginRow({
+      entry: { ...aiByokEntry, displayName: 'S3 Upload', kind: 'provider' },
+      lookup: threeVersions,
+      strapiVersion: '5.54.1',
+    });
+
+    expect(toCheckboxChoice(providerRow).name).toContain(
+      'S3 Upload (@strapi-enterprise/plugin-ai-byok) [provider]'
+    );
+    expect(toCheckboxChoice(rowFor(threeVersions)).name).not.toContain('[plugin]');
+  });
+
   it('selects upgrades by default, with an [upgrade] tag and an exact version', () => {
     expect(toCheckboxChoice(rowFor(threeVersions, '1.1.0'))).toMatchObject({
       name: expect.stringContaining('1.1.0 → 1.2.0 [upgrade]'),

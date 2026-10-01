@@ -1,5 +1,5 @@
 import { getInquirer } from '../../../utils/get-inquirer';
-import type { EnterprisePluginCatalogEntry } from './catalog';
+import type { EnterprisePluginEntry } from './discovery';
 import type { PackumentLookup } from './registry';
 import {
   describeNewerIncompatibleVersion,
@@ -25,7 +25,7 @@ export type PluginRowState =
   | 'hidden';
 
 export interface PluginRow {
-  entry: EnterprisePluginCatalogEntry;
+  entry: EnterprisePluginEntry;
   state: PluginRowState;
   installedVersion?: string;
   targetVersion?: string;
@@ -40,7 +40,7 @@ export const buildPluginRow = ({
   installedVersion,
   strapiVersion,
 }: {
-  entry: EnterprisePluginCatalogEntry;
+  entry: EnterprisePluginEntry;
   lookup: PackumentLookup;
   installedVersion?: string;
   strapiVersion?: string;
@@ -104,7 +104,9 @@ interface CheckboxChoice {
 }
 
 export const toCheckboxChoice = (row: PluginRow): CheckboxChoice => {
-  const label = `${row.entry.displayName} (${row.entry.packageName})`;
+  const { displayName, packageName, kind } = row.entry;
+  const kindTag = kind && kind !== 'plugin' ? ` [${kind}]` : '';
+  const label = `${displayName} (${packageName})${kindTag}`;
   // The note is a sentence of its own, such as "1.3.0 is available but requires Strapi ^5.56.0."
   const noteSuffix = row.note ? `  ${row.note}` : '';
 

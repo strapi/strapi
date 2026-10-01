@@ -2,8 +2,6 @@ import os from 'os';
 
 import { loadEnv } from '../../../../node/core/env';
 import type { Logger } from '../../../utils/logger';
-import { findCatalogEntry } from './catalog';
-import { printConfigurationHints } from './configuration-hints';
 import { BILLING_URL, ENTERPRISE_SCOPE, STRAPI_PACKAGE_NAME } from './constants';
 import { discoverEnterprisePlugins } from './discovery';
 import { EnterpriseInstallError } from './errors';
@@ -13,6 +11,7 @@ import { detectPackageManager } from './package-manager';
 import { configureRegistryAccess } from './registry-access';
 import { fetchPackument, getRegistryUrl, type PackumentLookup } from './registry';
 import { buildPluginRow, isSelectable, orderVisibleRows, promptForPlugins } from './selection';
+import { printSetupLinks } from './setup-links';
 import {
   canCheckStrapiCompatibility,
   describeNewerIncompatibleVersion,
@@ -292,11 +291,11 @@ export const runInstall = async ({
 
   await dependencies.installPackages({ appDir, packageManager, installSpecs });
 
-  const installedEntries = installSpecs
-    .map((installSpec) => findCatalogEntry(parsePackageArgument(installSpec).packageName))
-    .filter((entry) => entry !== undefined);
-
-  await printConfigurationHints({ appDir, entries: installedEntries, logger });
+  await printSetupLinks({
+    appDir,
+    packageNames: installSpecs.map((installSpec) => parsePackageArgument(installSpec).packageName),
+    logger,
+  });
 };
 
 const hasExitCode = (error: unknown): error is { exitCode: number } =>

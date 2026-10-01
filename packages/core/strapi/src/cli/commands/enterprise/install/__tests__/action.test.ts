@@ -19,12 +19,42 @@ jest.mock('@strapi/core', () => ({
 const LICENSE = 'the-license';
 const AI_BYOK = '@strapi-enterprise/plugin-ai-byok';
 
-const aiByokPackument = createPackument(AI_BYOK, [
-  { version: '1.1.0', strapiRange: '^5.52.0' },
-  { version: '1.2.0', strapiRange: '^5.54.0' },
-  { version: '1.3.0', strapiRange: '^5.56.0' },
-  { version: '0.0.0-experimental.8be2653', strapiRange: '>=5.52.0 <6.0.0' },
-]);
+const AI_BYOK_METADATA = { name: 'ai-byok', displayName: 'AI BYOK', kind: 'plugin' };
+
+const aiByokPackument = createPackument(
+  AI_BYOK,
+  [
+    { version: '1.1.0', strapiRange: '^5.52.0', strapi: AI_BYOK_METADATA },
+    { version: '1.2.0', strapiRange: '^5.54.0', strapi: AI_BYOK_METADATA },
+    { version: '1.3.0', strapiRange: '^5.56.0', strapi: AI_BYOK_METADATA },
+    {
+      version: '0.0.0-experimental.8be2653',
+      strapiRange: '>=5.52.0 <6.0.0',
+      strapi: AI_BYOK_METADATA,
+    },
+  ],
+  { latest: '1.3.0' }
+);
+
+/** Stands in for the package manager: writes each installed plugin's package.json. */
+const installLikeAPackageManager = async ({
+  appDir,
+  installSpecs,
+}: {
+  appDir: string;
+  installSpecs: string[];
+}) => {
+  for (const installSpec of installSpecs) {
+    const packageName = installSpec.slice(0, installSpec.lastIndexOf('@'));
+    const packageDirectory = path.join(appDir, 'node_modules', packageName);
+
+    await fse.outputJson(path.join(packageDirectory, 'package.json'), {
+      version: installSpec.slice(installSpec.lastIndexOf('@') + 1),
+      homepage: 'https://docs.strapi.io/cms/plugins/ai-byok',
+      strapi: AI_BYOK_METADATA,
+    });
+  }
+};
 
 const createApp = async ({
   strapiVersion = '5.54.1',
@@ -59,7 +89,7 @@ const createDependencies = async (
     }),
     promptForLicense: jest.fn(),
     promptForPlugins: jest.fn(),
-    installPackages: jest.fn().mockResolvedValue(undefined),
+    installPackages: jest.fn(installLikeAPackageManager),
     ...overrides,
   }) as jest.Mocked<InstallDependencies>;
 
@@ -89,9 +119,7 @@ describe('runInstall with package names', () => {
     );
     expect(logger.info).toHaveBeenCalledWith(`Running npm install --save-exact ${AI_BYOK}@1.2.0`);
     expect(logger.info).toHaveBeenCalledWith(
-      expect.stringContaining(
-        'AI BYOK is installed, and Strapi will not start until it is configured.'
-      )
+      'AI BYOK: visit https://docs.strapi.io/cms/plugins/ai-byok to set it up.'
     );
     expect(loggedText(logger)).not.toContain(LICENSE);
   });
@@ -337,9 +365,17 @@ describe('runInstall with the checklist', () => {
       fetchImplementation: createRegistryFetch({
         searchResult: [AI_BYOK],
         packuments: {
-          [AI_BYOK]: createPackument(AI_BYOK, [
-            { version: '0.0.0-experimental.658048e', strapiRange: '>=5.52.0 <6.0.0' },
-          ]),
+          [AI_BYOK]: createPackument(
+            AI_BYOK,
+            [
+              {
+                version: '0.0.0-experimental.658048e',
+                strapiRange: '>=5.52.0 <6.0.0',
+                strapi: AI_BYOK_METADATA,
+              },
+            ],
+            { latest: '0.0.0-experimental.658048e' }
+          ),
         },
       }),
     });
