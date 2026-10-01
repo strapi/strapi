@@ -52,9 +52,6 @@ interface InstallContext {
   dependencies: InstallDependencies;
 }
 
-/**
- * Accepts `plugin-ai-byok`, `@strapi-enterprise/plugin-ai-byok`, and either with `@<version>`.
- */
 export const parsePackageArgument = (
   packageArgument: string
 ): { packageName: string; requestedVersion?: string } => {
@@ -104,7 +101,6 @@ const resolveNamedPackages = async (
 
     assertLicenseAccepted(lookup, dependencies.env);
 
-    // The registry also answers 403 for a name that does not exist, so a typo lands here too.
     if (lookup.status === 'not-licensed') {
       throw new EnterpriseInstallError(
         `Your license does not include ${packageName}, or it does not exist. Run strapi enterprise install without a name to see the plugins you can install.`
@@ -115,8 +111,6 @@ const resolveNamedPackages = async (
       throw new EnterpriseInstallError(`${packageName} is not an Enterprise package.`);
     }
 
-    // An explicit version or tag is passed through as is, prereleases included, unless it is
-    // the version already installed.
     if (requestedVersion) {
       const resolvedVersion = resolveRequestedVersion(lookup.packument, requestedVersion);
 
@@ -156,7 +150,6 @@ const resolveNamedPackages = async (
       continue;
     }
 
-    // The package was named, so this goes ahead, unlike the list where it is not preselected.
     if (installedVersion && isPrerelease(installedVersion)) {
       logger.info(
         `${packageName}: replacing the installed prerelease ${installedVersion} with the stable release ${targetVersion}.`
@@ -312,9 +305,6 @@ const hasExitCode = (error: unknown): error is { exitCode: number } =>
   'exitCode' in error &&
   typeof error.exitCode === 'number';
 
-/**
- * `$ strapi enterprise install [packages...]`
- */
 export const action = async (
   packageArguments: string[],
   { logger }: { logger: Logger }

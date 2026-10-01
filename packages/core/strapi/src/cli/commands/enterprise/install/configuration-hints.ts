@@ -53,10 +53,6 @@ export const formatConfigurationHint = (
   ].join('\n');
 };
 
-/**
- * Prints the configuration each installed plugin needs. Nothing is written: `config/plugins` can be
- * any shape of JavaScript or TypeScript, so the user adds the block.
- */
 export const printConfigurationHints = async ({
   appDir,
   entries,

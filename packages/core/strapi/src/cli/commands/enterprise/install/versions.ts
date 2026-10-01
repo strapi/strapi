@@ -11,10 +11,6 @@ export interface InstalledPackageJson {
   strapi?: StrapiPackageMetadata;
 }
 
-/**
- * Folders that can hold the app's `node_modules`: the app folder and each of its parents, in the
- * order Node looks when it resolves a package.
- */
 export const listNodeModulesDirectories = (appDir: string): string[] =>
   listAncestorDirectories(appDir).map((directory) => path.join(directory, 'node_modules'));
 
@@ -43,10 +39,6 @@ export const readInstalledVersion = async (
   return typeof version === 'string' ? version : undefined;
 };
 
-/**
- * Compatibility is checked against a released Strapi version only. Prerelease builds, such as
- * experimental ones, have no meaningful place in a plugin's peer range.
- */
 export const canCheckStrapiCompatibility = (strapiVersion: string | undefined): boolean =>
   strapiVersion !== undefined &&
   semver.valid(strapiVersion) !== null &&
@@ -97,7 +89,6 @@ export const pickTargetVersion = (
   };
 };
 
-/** A hint for a newer version that needs a newer Strapi, when there is one. */
 export const describeNewerIncompatibleVersion = ({
   targetVersion,
   newestVersion,
@@ -110,10 +101,6 @@ export const describeNewerIncompatibleVersion = ({
   return `${newestVersion} is available but requires Strapi ${newestVersionStrapiRange}.`;
 };
 
-/**
- * The version a requested version or dist-tag points to, such as `beta` → `2.1.0-beta.1`.
- * Undefined for anything else, such as a range, which the package manager resolves itself.
- */
 export const resolveRequestedVersion = (
   packument: Packument,
   requestedVersion: string

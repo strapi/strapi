@@ -45,6 +45,22 @@ describe('configureNpmrc', () => {
     expect(await fse.readFile(npmrcPath, 'utf8')).toBe(`save-exact=true\n${NPMRC_LINES}`);
   });
 
+  it('restricts an existing file to its owner once it holds the license', async () => {
+    await fse.writeFile(npmrcPath, 'save-exact=true\n', { mode: 0o644 });
+
+    await configureNpmrc(npmrcPath, LICENSE);
+
+    expect(await readFilePermissions(npmrcPath)).toBe('600');
+  });
+
+  it('leaves the permissions of a file it does not change', async () => {
+    await fse.writeFile(npmrcPath, NPMRC_LINES, { mode: 0o644 });
+
+    await configureNpmrc(npmrcPath, LICENSE);
+
+    expect(await readFilePermissions(npmrcPath)).toBe('644');
+  });
+
   it('changes nothing when the same license is already configured', async () => {
     await fse.writeFile(npmrcPath, NPMRC_LINES);
 

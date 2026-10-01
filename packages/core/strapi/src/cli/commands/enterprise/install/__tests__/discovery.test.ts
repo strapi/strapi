@@ -84,15 +84,25 @@ describe('discoverEnterprisePlugins', () => {
     });
   });
 
-  it('still lists the known plugins when the registry search is unavailable', async () => {
+  it('still lists the known plugins when the registry search is unavailable, and says so', async () => {
     const fetchImplementation = createRegistryFetch({
       searchResult: 500,
       packuments: { [AI_BYOK]: aiByokPackument },
     });
+    const logger = createTestLogger();
 
-    const discoveredPlugins = await discover(await createTemporaryDirectory(), fetchImplementation);
+    const discoveredPlugins = await discoverEnterprisePlugins({
+      appDir: await createTemporaryDirectory(),
+      license: 'the-license',
+      logger,
+      env: {},
+      fetchImplementation,
+    });
 
     expect(discoveredPlugins.map(({ entry }) => entry.packageName)).toEqual([AI_BYOK]);
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Could not search packages.strapi.io, so only the known and installed Enterprise plugins are listed.'
+    );
   });
 
   it('includes an installed plugin that the license no longer includes', async () => {
