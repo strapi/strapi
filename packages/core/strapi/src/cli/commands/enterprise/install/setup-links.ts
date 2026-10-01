@@ -4,7 +4,7 @@ import { declaresStrapiKind } from './discovery';
 import { readInstalledPackageJson } from './versions';
 
 export interface SetupLink {
-  displayName: string;
+  packageName: string;
   url: string;
 }
 
@@ -21,7 +21,7 @@ export const readSetupLink = async (
   const { homepage } = packageJson;
 
   return {
-    displayName: packageJson.strapi.displayName ?? packageName,
+    packageName,
     url:
       typeof homepage === 'string' && homepage.length > 0 ? homepage : ENTERPRISE_PLUGINS_DOCS_URL,
   };
@@ -40,7 +40,9 @@ export const printSetupLinks = async ({
     const setupLink = await readSetupLink(appDir, packageName);
 
     if (setupLink) {
-      logger.info(`${setupLink.displayName}: visit ${setupLink.url} to set it up.`);
+      logger.warn(
+        `⚠️  Set up ${setupLink.packageName} before starting Strapi, following the guide at ${setupLink.url}`
+      );
     }
   }
 };

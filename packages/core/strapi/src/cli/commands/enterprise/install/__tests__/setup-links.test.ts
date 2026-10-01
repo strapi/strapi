@@ -1,5 +1,10 @@
 import { printSetupLinks, readSetupLink } from '../setup-links';
-import { createTemporaryDirectory, createTestLogger, installFakePackage } from './test-helpers';
+import {
+  createTemporaryDirectory,
+  createTestLogger,
+  expectedSetupWarning,
+  installFakePackage,
+} from './test-helpers';
 
 const AI_BYOK = '@strapi-enterprise/plugin-ai-byok';
 const OTHER_PLUGIN = '@strapi-enterprise/plugin-other';
@@ -15,17 +20,17 @@ describe('readSetupLink', () => {
     });
 
     await expect(readSetupLink(appDir, AI_BYOK)).resolves.toEqual({
-      displayName: 'AI BYOK',
+      packageName: AI_BYOK,
       url: 'https://docs.strapi.io/cms/plugins/ai-byok',
     });
   });
 
-  it('falls back to the Strapi documentation and the package name', async () => {
+  it('falls back to the Strapi documentation', async () => {
     const appDir = await createTemporaryDirectory();
     await installFakePackage(appDir, AI_BYOK, { version: '1.0.0', strapi: { kind: 'plugin' } });
 
     await expect(readSetupLink(appDir, AI_BYOK)).resolves.toEqual({
-      displayName: AI_BYOK,
+      packageName: AI_BYOK,
       url: 'https://docs.strapi.io/',
     });
   });
@@ -39,7 +44,7 @@ describe('readSetupLink', () => {
     });
 
     await expect(readSetupLink(appDir, '@strapi-enterprise/provider-upload-s3')).resolves.toEqual({
-      displayName: 'S3 Upload',
+      packageName: '@strapi-enterprise/provider-upload-s3',
       url: 'https://docs.strapi.io/cms/providers/s3',
     });
   });
@@ -75,9 +80,9 @@ describe('printSetupLinks', () => {
       logger,
     });
 
-    expect(logger.info.mock.calls).toEqual([
-      ['AI BYOK: visit https://docs.strapi.io/cms/plugins/ai-byok to set it up.'],
-      ['Other: visit https://docs.strapi.io/cms/plugins/other to set it up.'],
+    expect(logger.warn.mock.calls).toEqual([
+      [expectedSetupWarning(AI_BYOK)],
+      [expectedSetupWarning(OTHER_PLUGIN)],
     ]);
   });
 });
