@@ -15,6 +15,7 @@ describe('Admin Controller', () => {
 
       expect(result.data).toStrictEqual({
         isEE: false,
+        isTrial: false,
         features: [],
         flags: {},
         ai: { enabled: false },
