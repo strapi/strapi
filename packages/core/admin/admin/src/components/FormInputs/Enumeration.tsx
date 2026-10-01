@@ -9,7 +9,7 @@ import { useField } from '../Form';
 import { EnumerationProps } from './types';
 
 const EnumerationInput = forwardRef<HTMLDivElement, EnumerationProps>(
-  ({ name, required, label, hint, labelAction, options = [], ...props }, ref) => {
+  ({ name, required, label, hint, labelAction, options = [], placeholder, ...props }, ref) => {
     const { formatMessage } = useIntl();
     const field = useField<string | number | null>(name);
     const fieldRef = useFocusInputField<HTMLDivElement>(name);
@@ -28,10 +28,11 @@ const EnumerationInput = forwardRef<HTMLDivElement, EnumerationProps>(
           {...props}
         >
           <SingleSelectOption value="" disabled={required} hidden={required}>
-            {formatMessage({
-              id: 'components.InputSelect.option.placeholder',
-              defaultMessage: 'Choose here',
-            })}
+            {placeholder ||
+              formatMessage({
+                id: 'components.InputSelect.option.placeholder',
+                defaultMessage: 'Choose here',
+              })}
           </SingleSelectOption>
           {options.map(({ value, label, disabled, hidden }) => {
             return (
