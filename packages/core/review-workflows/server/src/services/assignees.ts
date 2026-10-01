@@ -1,7 +1,8 @@
 import type { Core, UID } from '@strapi/types';
-import { errors } from '@strapi/utils';
+import { errors, emitAudit } from '@strapi/utils';
 import { isNil } from 'lodash/fp';
 import { ENTITY_ASSIGNEE_ATTRIBUTE } from '../constants/workflows';
+import { AUDITED_EVENTS } from '../audit-logs';
 import { getService, getAdminService } from '../utils';
 
 const { ApplicationError } = errors;
@@ -64,6 +65,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         .update({
           updated_at: new Date(entityToUpdate.updatedAt),
         });
+
+      const newAssigneeId = entity?.[ENTITY_ASSIGNEE_ATTRIBUTE]?.id ?? null;
+
+      if (oldAssigneeId !== newAssigneeId) {
+        await emitAudit({ strapi }, AUDITED_EVENTS.ENTRY_ASSIGNEE_UPDATE, {
+          uid: model,
+          documentId,
+          locale: locale ?? null,
+          changes: { assignee: { before: oldAssigneeId, after: newAssigneeId } },
+        });
+      }
 
       return entity;
     },

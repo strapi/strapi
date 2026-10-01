@@ -13,6 +13,9 @@ const createStrapiMock = (overrides: any = {}) => {
   const stored = overrides.stored ?? null;
   global.strapi = {
     EE: true,
+    // `getProjectType` reads the AI flag from here; without it the call throws into the
+    // controller's catch fallback and every field reads as Community.
+    ai: { admin: { isStrapiManagedAiEnabled: () => false } },
     config: {
       // Mirrors the real config provider's `get(key, defaultValue)` signature: with no
       // config set up, it just echoes back the caller's default.

@@ -24,6 +24,28 @@ describe('Audit Logs getDisplayedFilters', () => {
     expect(filterNames).toEqual(['action', 'date', 'user']);
   });
 
+  it('offers the new admin-user actions and hides the legacy user.* keys', () => {
+    const filters = getDisplayedFilters({
+      users: mockUsers,
+      // @ts-expect-error - mock
+      formatMessage: jest.fn(({ defaultMessage }) => defaultMessage),
+    });
+    const values = filters
+      .find((filter) => filter.name === 'action')
+      ?.options?.map((option) => (typeof option === 'string' ? option : option.value));
+
+    expect(values).toEqual(
+      expect.arrayContaining(['admin-user.create', 'admin-user.update', 'admin-user.delete'])
+    );
+    expect(values).not.toEqual(
+      expect.arrayContaining(['user.create', 'user.update', 'user.delete'])
+    );
+    // One "Create user" option, not two
+    expect(
+      values?.filter((value) => value === 'user.create' || value === 'admin-user.create')
+    ).toEqual(['admin-user.create']);
+  });
+
   it('should map the users to combobox options using their display name', () => {
     const filters = getDisplayedFilters({
       users: mockUsers,

@@ -16,6 +16,8 @@ import {
 import { auditLog } from './audit-logs/content-types/audit-log';
 import { AUDIT_LOG_EXPORT_EVENT } from '../../../shared/utils/audit-log-export';
 import { registerTokenAuditEvents } from '../../../server/src/audit-logs/tokens';
+import { registerAdminUserAuditEvents } from '../../../server/src/audit-logs/admin-users';
+import { registerWebhookAuditEvents } from '../../../server/src/audit-logs/webhooks';
 
 const getAdminEE = () => {
   const eeAdmin = {
@@ -65,6 +67,8 @@ const getAdminEE = () => {
         );
 
         registerTokenAuditEvents(auditLogsLifecycle);
+        registerAdminUserAuditEvents(auditLogsLifecycle);
+        registerWebhookAuditEvents(auditLogsLifecycle);
 
         await auditLogsLifecycle.register();
 

@@ -608,4 +608,45 @@ describe('updateMany relation filters', () => {
     const names = (await strapi.db.query(TEST_UID).findMany()).map((entry) => entry.name).sort();
     expect(names).toEqual(['CATEGORY B ROW', 'Hugo LLORIS', 'Lucas HERNANDEZ']);
   });
+
+  /**
+   * updateMany must pick `_q` / `filters` via query-builder `.init()`, same as deleteMany.
+   */
+  test('updateMany: _q updates matching rows only', async () => {
+    const result = await strapi.db.query(TEST_UID).updateMany({
+      _q: 'Hugo',
+      data: { name: 'Q UPDATED' },
+    });
+
+    expect(result.count).toBe(1);
+
+    const names = (await strapi.db.query(TEST_UID).findMany()).map((entry) => entry.name).sort();
+    expect(names).toEqual(['Lucas HERNANDEZ', 'Q UPDATED', 'Samuel UMTITI']);
+  });
+
+  test('updateMany: _q + relation where updates matching rows only', async () => {
+    const result = await strapi.db.query(TEST_UID).updateMany({
+      _q: 'Hugo',
+      where: { related: { title: 'Category A' } },
+      data: { name: 'Q UPDATED' },
+    });
+
+    expect(result.count).toBe(1);
+
+    const names = (await strapi.db.query(TEST_UID).findMany()).map((entry) => entry.name).sort();
+    expect(names).toEqual(['Lucas HERNANDEZ', 'Q UPDATED', 'Samuel UMTITI']);
+  });
+
+  test('updateMany: filters + relation where updates matching rows only', async () => {
+    const result = await strapi.db.query(TEST_UID).updateMany({
+      where: { related: { title: 'Category A' } },
+      filters: { name: 'Hugo LLORIS' },
+      data: { name: 'FILTERED' },
+    });
+
+    expect(result.count).toBe(1);
+
+    const names = (await strapi.db.query(TEST_UID).findMany()).map((entry) => entry.name).sort();
+    expect(names).toEqual(['FILTERED', 'Lucas HERNANDEZ', 'Samuel UMTITI']);
+  });
 });

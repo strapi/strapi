@@ -119,7 +119,7 @@ module.exports = {
     '!**/static/**',
   ],
   coverageDirectory: '<rootDir>/coverage',
-  coverageReporters: ['text', 'lcov', 'html'],
+  coverageReporters: ['text', ['lcov', { projectRoot: __dirname }], 'html'],
   coveragePathIgnorePatterns: [
     '<rootDir>/dist/',
     '<rootDir>/node_modules/',

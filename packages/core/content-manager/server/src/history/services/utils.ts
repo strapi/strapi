@@ -113,13 +113,10 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
       .findOne({ where: { id: versionRelationData.id } });
   };
 
-  const localesService = strapi.plugin('i18n')?.service('locales');
-  const i18nContentTypeService = strapi.plugin('i18n')?.service('content-types');
-
-  const getDefaultLocale = async () => (localesService ? localesService.getDefaultLocale() : null);
+  const getDefaultLocale = async () => strapi.localization.getDefaultLocale();
 
   const isLocalizedContentType = (model: Schema.ContentType) =>
-    i18nContentTypeService ? i18nContentTypeService.isLocalizedContentType(model) : false;
+    strapi.localization.isLocalizedContentType(model);
 
   /**
    *
@@ -129,20 +126,15 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
   const getLocaleDictionary = async (): Promise<{
     [key: string]: { name: string; code: string };
   }> => {
-    if (!localesService) return {};
+    const locales = await strapi.localization.getLocales();
 
-    const locales = (await localesService.find()) || [];
-    return locales.reduce(
-      (
-        acc: Record<string, NonNullable<HistoryVersions.HistoryVersionDataResponse['locale']>>,
-        locale: NonNullable<HistoryVersions.HistoryVersionDataResponse['locale']>
-      ) => {
-        acc[locale.code] = { name: locale.name, code: locale.code };
+    return locales.reduce<
+      Record<string, NonNullable<HistoryVersions.HistoryVersionDataResponse['locale']>>
+    >((acc, locale) => {
+      acc[locale.code] = { name: locale.name, code: locale.code };
 
-        return acc;
-      },
-      {}
-    );
+      return acc;
+    }, {});
   };
 
   /**

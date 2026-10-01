@@ -13,10 +13,77 @@ const createMockAdminStore = (initialValue?: any) => {
   };
 };
 
+type I18nMock = { locales: Array<{ code: string; name: string }> } | undefined;
+
+const createKeyStatisticsStrapi = (i18n: I18nMock) => {
+  const count = jest.fn(async () => 0);
+
+  // getService resolves admin services from the global strapi (see tests/setup/unit.setup.js)
+  global.strapi = {
+    admin: {
+      services: {
+        'api-token-admin': { countAll: jest.fn(async () => 2) },
+        user: { count: jest.fn(async () => 1) },
+      },
+    },
+    plugins: {},
+  } as unknown as Core.Strapi;
+
+  return {
+    store: () => createMockAdminStore(undefined),
+    contentTypes: {},
+    components: {},
+    db: { query: () => ({ count }) },
+    localization: {
+      isEnabled: () => i18n !== undefined,
+      getLocales: async () => i18n?.locales ?? [],
+    },
+  } as unknown as Core.Strapi;
+};
+
 describe('homepageService', () => {
   beforeEach(() => {
     jest.resetModules();
     jest.useRealTimers();
+  });
+
+  describe('getKeyStatistics', () => {
+    test('returns null locales when i18n is not installed', async () => {
+      const mockStrapi = createKeyStatisticsStrapi(undefined);
+
+      const result = await homepageService({ strapi: mockStrapi }).getKeyStatistics();
+
+      expect(result).toEqual({
+        assets: 0,
+        contentTypes: 0,
+        components: 0,
+        locales: null,
+        admins: 1,
+        webhooks: 0,
+        apiTokens: 2,
+      });
+    });
+
+    test('returns the locale count when i18n is installed', async () => {
+      const mockStrapi = createKeyStatisticsStrapi({
+        locales: [
+          { code: 'en', name: 'English (en)' },
+          { code: 'fr', name: 'French (fr)' },
+        ],
+      });
+
+      const result = await homepageService({ strapi: mockStrapi }).getKeyStatistics();
+
+      expect(result.locales).toBe(2);
+    });
+
+    test('returns 0 locales when i18n is installed without locales', async () => {
+      const mockStrapi = createKeyStatisticsStrapi({ locales: [] });
+
+      const result = await homepageService({ strapi: mockStrapi }).getKeyStatistics();
+
+      expect(result.locales).toBe(0);
+    });
   });
 
   describe('getHomepageLayout', () => {
