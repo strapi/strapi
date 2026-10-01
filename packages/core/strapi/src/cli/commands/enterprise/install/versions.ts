@@ -8,6 +8,7 @@ import type { Packument, PackumentVersion, StrapiPackageMetadata } from './regis
 
 export interface InstalledPackageJson {
   version?: string;
+  homepage?: string;
   strapi?: StrapiPackageMetadata;
 }
 

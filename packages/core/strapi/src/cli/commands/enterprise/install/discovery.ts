@@ -2,12 +2,8 @@ import path from 'path';
 import fse from 'fs-extra';
 
 import type { Logger } from '../../../utils/logger';
-import {
-  enterprisePluginCatalog,
-  findCatalogEntry,
-  type EnterprisePluginCatalogEntry,
-} from './catalog';
 import { ENTERPRISE_SCOPE } from './constants';
+import { EnterpriseInstallError } from './errors';
 import {
   fetchPackument,
   getRegistryUrl,
@@ -21,8 +17,16 @@ import {
   readInstalledVersion,
 } from './versions';
 
+export interface EnterprisePluginEntry {
+  packageName: string;
+  pluginId: string;
+  displayName: string;
+  summary: string;
+  kind?: string;
+}
+
 export interface DiscoveredPlugin {
-  entry: EnterprisePluginCatalogEntry;
+  entry: EnterprisePluginEntry;
   lookup: PackumentLookup;
   installedVersion?: string;
 }
@@ -31,8 +35,8 @@ const isEnterprisePackage = (packageName: string) => packageName.startsWith(`${E
 
 const toPluginId = (packageName: string) => packageName.slice(ENTERPRISE_SCOPE.length + 1);
 
-const isPluginPackage = (packageName: string, strapiKind: string | undefined): boolean =>
-  strapiKind === 'plugin' || findCatalogEntry(packageName) !== undefined;
+export const declaresStrapiKind = (strapiKind: unknown): strapiKind is string =>
+  typeof strapiKind === 'string' && strapiKind.length > 0;
 
 /** Enterprise plugins installed in the app. Libraries the plugins depend on are left out. */
 export const listInstalledEnterprisePlugins = async (appDir: string): Promise<string[]> => {
@@ -49,7 +53,7 @@ export const listInstalledEnterprisePlugins = async (appDir: string): Promise<st
       const packageName = `${ENTERPRISE_SCOPE}/${packageDirectoryName}`;
       const packageJson = await readInstalledPackageJson(appDir, packageName);
 
-      if (isPluginPackage(packageName, packageJson?.strapi?.kind)) {
+      if (declaresStrapiKind(packageJson?.strapi?.kind)) {
         installedPluginNames.add(packageName);
       }
     }
@@ -67,34 +71,29 @@ const findLatestManifest = (packument: Packument) => {
 export const describeEnterprisePlugin = (
   packageName: string,
   lookup: PackumentLookup
-): EnterprisePluginCatalogEntry | undefined => {
-  const knownEntry = findCatalogEntry(packageName);
-
+): EnterprisePluginEntry | undefined => {
   if (lookup.status !== 'available') {
-    return (
-      knownEntry ?? {
-        packageName,
-        pluginId: toPluginId(packageName),
-        displayName: packageName,
-        summary: '',
-      }
-    );
+    return {
+      packageName,
+      pluginId: toPluginId(packageName),
+      displayName: packageName,
+      summary: '',
+    };
   }
 
   const latestManifest = findLatestManifest(lookup.packument);
   const strapiMetadata = latestManifest?.strapi;
 
-  if (!isPluginPackage(packageName, strapiMetadata?.kind)) {
+  if (!strapiMetadata || !declaresStrapiKind(strapiMetadata.kind)) {
     return undefined;
   }
 
   return {
     packageName,
-    pluginId: strapiMetadata?.name ?? knownEntry?.pluginId ?? toPluginId(packageName),
-    displayName: strapiMetadata?.displayName ?? knownEntry?.displayName ?? packageName,
-    summary:
-      strapiMetadata?.description ?? knownEntry?.summary ?? latestManifest?.description ?? '',
-    configuration: knownEntry?.configuration,
+    pluginId: strapiMetadata.name ?? toPluginId(packageName),
+    displayName: strapiMetadata.displayName ?? packageName,
+    summary: strapiMetadata.description ?? latestManifest?.description ?? '',
+    kind: strapiMetadata.kind,
   };
 };
 
@@ -117,17 +116,21 @@ export const discoverEnterprisePlugins = async ({
   ]);
 
   if (searchedPackageNames === undefined) {
+    const registryHost = new URL(getRegistryUrl(env)).host;
+
+    if (installedPluginNames.length === 0) {
+      throw new EnterpriseInstallError(
+        `Could not search ${registryHost}. Try again later, or name the plugin to install.`
+      );
+    }
+
     logger.warn(
-      `Could not search ${new URL(getRegistryUrl(env)).host}, so only the known and installed Enterprise plugins are listed.`
+      `Could not search ${registryHost}, so only the installed Enterprise plugins are listed.`
     );
   }
 
   const candidatePackageNames = [
-    ...new Set([
-      ...(searchedPackageNames ?? []),
-      ...enterprisePluginCatalog.map((entry) => entry.packageName),
-      ...installedPluginNames,
-    ]),
+    ...new Set([...(searchedPackageNames ?? []), ...installedPluginNames]),
   ].filter(isEnterprisePackage);
 
   const discoveredPlugins = await Promise.all(

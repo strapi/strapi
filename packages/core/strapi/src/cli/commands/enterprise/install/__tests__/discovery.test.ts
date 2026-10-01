@@ -80,28 +80,60 @@ describe('discoverEnterprisePlugins', () => {
       pluginId: 'new',
       displayName: 'New plugin',
       summary: 'Does new things.',
-      configuration: undefined,
+      kind: 'plugin',
     });
   });
 
-  it('still lists the known plugins when the registry search is unavailable, and says so', async () => {
+  it('lists a package of another kind, such as a provider', async () => {
+    const provider = '@strapi-enterprise/provider-upload-s3';
     const fetchImplementation = createRegistryFetch({
-      searchResult: 500,
-      packuments: { [AI_BYOK]: aiByokPackument },
+      searchResult: [provider],
+      packuments: {
+        [provider]: createPackument(
+          provider,
+          [{ version: '1.0.0', strapi: { displayName: 'S3 Upload', kind: 'provider' } }],
+          { latest: '1.0.0' }
+        ),
+      },
     });
+
+    const discoveredPlugins = await discover(await createTemporaryDirectory(), fetchImplementation);
+
+    expect(discoveredPlugins.map(({ entry }) => entry)).toMatchObject([
+      { packageName: provider, displayName: 'S3 Upload', kind: 'provider' },
+    ]);
+  });
+
+  it('lists the installed plugins when the registry search is unavailable, and says so', async () => {
+    const appDir = await createTemporaryDirectory();
+    await installFakePackage(appDir, AI_BYOK, { version: '1.0.0', strapi: { kind: 'plugin' } });
     const logger = createTestLogger();
 
     const discoveredPlugins = await discoverEnterprisePlugins({
-      appDir: await createTemporaryDirectory(),
+      appDir,
       license: 'the-license',
       logger,
       env: {},
-      fetchImplementation,
+      fetchImplementation: createRegistryFetch({
+        searchResult: 500,
+        packuments: { [AI_BYOK]: aiByokPackument },
+      }),
     });
 
     expect(discoveredPlugins.map(({ entry }) => entry.packageName)).toEqual([AI_BYOK]);
     expect(logger.warn).toHaveBeenCalledWith(
-      'Could not search packages.strapi.io, so only the known and installed Enterprise plugins are listed.'
+      'Could not search packages.strapi.io, so only the installed Enterprise plugins are listed.'
+    );
+  });
+
+  it('stops when the registry search is unavailable and no plugin is installed', async () => {
+    await expect(
+      discover(
+        await createTemporaryDirectory(),
+        createRegistryFetch({ searchResult: 500, packuments: {} })
+      )
+    ).rejects.toThrow(
+      'Could not search packages.strapi.io. Try again later, or name the plugin to install.'
     );
   });
 
@@ -136,17 +168,22 @@ describe('listInstalledEnterprisePlugins', () => {
 });
 
 describe('describeEnterprisePlugin', () => {
-  it('uses the copy the package publishes, and the configuration this CLI knows', () => {
+  it('uses the name and copy the package publishes', () => {
     const entry = describeEnterprisePlugin(AI_BYOK, {
       status: 'available',
       packument: aiByokPackument,
     });
 
-    expect(entry).toMatchObject({ displayName: 'AI BYOK', summary: 'Bring your own key.' });
-    expect(entry?.configuration?.envLines).toContain('STRAPI_AI_PROVIDER_API_KEY=');
+    expect(entry).toEqual({
+      packageName: AI_BYOK,
+      pluginId: 'ai-byok',
+      displayName: 'AI BYOK',
+      summary: 'Bring your own key.',
+      kind: 'plugin',
+    });
   });
 
-  it('is undefined for a package that is not a plugin', () => {
+  it('is undefined for a library, which declares no kind', () => {
     expect(
       describeEnterprisePlugin(AI_WORKFLOWS, {
         status: 'available',
