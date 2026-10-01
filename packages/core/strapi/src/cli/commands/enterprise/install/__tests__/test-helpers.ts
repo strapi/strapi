@@ -84,8 +84,8 @@ export const createRegistryFetch = ({
   searchResult: string[] | number;
   packuments: Record<string, unknown>;
 }) =>
-  jest.fn(async (url: string) => {
-    const { pathname } = new URL(url);
+  jest.fn(async (input: Parameters<typeof fetch>[0]) => {
+    const { pathname } = new URL(input instanceof Request ? input.url : input);
 
     if (pathname === '/-/v1/search') {
       return typeof searchResult === 'number'

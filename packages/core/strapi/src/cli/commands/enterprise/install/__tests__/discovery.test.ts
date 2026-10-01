@@ -80,7 +80,6 @@ describe('discoverEnterprisePlugins', () => {
     expect(discoveredPlugins.map(({ entry }) => entry.packageName)).toEqual([AI_BYOK, NEW_PLUGIN]);
     expect(discoveredPlugins[1]?.entry).toEqual({
       packageName: NEW_PLUGIN,
-      pluginId: 'new',
       displayName: 'New plugin',
       summary: 'Does new things.',
       kind: 'plugin',
@@ -181,6 +180,15 @@ describe('discoverEnterprisePlugins', () => {
     );
   });
 
+  it('stops with the license error when the search rejects the license', async () => {
+    await expect(
+      discover(
+        await createTemporaryDirectory(),
+        createRegistryFetch({ searchResult: 401, packuments: {} })
+      )
+    ).rejects.toThrow('https://packages.strapi.io rejected this Strapi license.');
+  });
+
   it('stops when the registry search is unavailable and no plugin is installed', async () => {
     await expect(
       discover(
@@ -246,7 +254,6 @@ describe('describeEnterprisePlugin', () => {
 
     expect(entry).toEqual({
       packageName: AI_BYOK,
-      pluginId: 'ai-byok',
       displayName: 'AI BYOK',
       summary: 'Bring your own key.',
       kind: 'plugin',

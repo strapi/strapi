@@ -44,10 +44,10 @@ const readEnvFileLicense = async (
 
 export const findLicense = async ({
   appDir,
-  env = process.env,
+  env,
 }: {
   appDir: string;
-  env?: NodeJS.ProcessEnv;
+  env: NodeJS.ProcessEnv;
 }): Promise<FoundLicense | undefined> => {
   const licenseFromEnvironment = cleanLicense(env.STRAPI_LICENSE);
   if (licenseFromEnvironment) {
@@ -73,7 +73,7 @@ export const findLicense = async ({
   return undefined;
 };
 
-export const validateLicense = (license: string, now: Date = new Date()): void => {
+export const validateLicense = (license: string, now: Date): void => {
   let licenseInfo: ReturnType<typeof verifyLicense>;
 
   try {
@@ -93,7 +93,7 @@ export const validateLicense = (license: string, now: Date = new Date()): void =
   }
 };
 
-const promptForLicense = async (): Promise<string> => {
+export const promptForLicense = async (): Promise<string> => {
   const inquirer = await getInquirer();
   const { license } = await inquirer.prompt<{ license: string }>([
     {
@@ -145,16 +145,16 @@ export const resolveLicense = async ({
   appDir,
   isInteractive,
   logger,
-  env = process.env,
-  now = new Date(),
-  prompt = promptForLicense,
+  env,
+  now,
+  prompt,
 }: {
   appDir: string;
   isInteractive: boolean;
   logger: Logger;
-  env?: NodeJS.ProcessEnv;
-  now?: Date;
-  prompt?: () => Promise<string>;
+  env: NodeJS.ProcessEnv;
+  now: Date;
+  prompt: () => Promise<string>;
 }): Promise<ResolvedLicense> => {
   const foundLicense = await findLicense({ appDir, env });
 

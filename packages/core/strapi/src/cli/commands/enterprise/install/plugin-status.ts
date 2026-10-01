@@ -4,13 +4,13 @@ import { describeNewerIncompatibleVersion, isUpgrade, pickTargetVersion } from '
 
 export type PluginStatus =
   /** Not installed, and a stable version fits this Strapi version. */
-  | { state: 'install'; targetVersion: string; note?: string }
+  | { state: 'install'; targetVersion: string; newerVersionNote?: string }
   /** Installed, and a newer compatible version exists. */
-  | { state: 'upgrade'; targetVersion: string; note?: string }
+  | { state: 'upgrade'; targetVersion: string; newerVersionNote?: string }
   /** Installed and up to date for this Strapi version. */
-  | { state: 'installed'; note?: string }
+  | { state: 'installed'; newerVersionNote?: string }
   /** No stable version fits this Strapi version. */
-  | { state: 'no-compatible-version'; requiredStrapiRange?: string; note?: string }
+  | { state: 'no-compatible-version'; requiredStrapiRange: string; newerVersionNote?: string }
   /** Only prerelease versions exist. */
   | { state: 'no-stable-release' }
   /** The license does not include it. */
@@ -36,24 +36,25 @@ export const resolvePluginStatus = ({
   }
 
   const versionChoice = pickTargetVersion(lookup.packument, strapiVersion);
-  const note = describeNewerIncompatibleVersion(versionChoice, installedVersion);
-  const { targetVersion } = versionChoice;
+  const newerVersionNote = describeNewerIncompatibleVersion(versionChoice, installedVersion);
+  const { targetVersion, newestVersionStrapiRange } = versionChoice;
 
   if (!targetVersion) {
-    return versionChoice.newestVersion
+    // A stable version only fails to fit when it declares a Strapi range, so the newest one has one.
+    return newestVersionStrapiRange
       ? {
           state: 'no-compatible-version',
-          requiredStrapiRange: versionChoice.newestVersionStrapiRange,
-          note,
+          requiredStrapiRange: newestVersionStrapiRange,
+          newerVersionNote,
         }
       : { state: 'no-stable-release' };
   }
 
   if (!installedVersion) {
-    return { state: 'install', targetVersion, note };
+    return { state: 'install', targetVersion, newerVersionNote };
   }
 
   return isUpgrade(installedVersion, targetVersion)
-    ? { state: 'upgrade', targetVersion, note }
-    : { state: 'installed', note };
+    ? { state: 'upgrade', targetVersion, newerVersionNote }
+    : { state: 'installed', newerVersionNote };
 };

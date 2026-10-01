@@ -16,7 +16,6 @@ import {
 
 export interface EnterprisePluginEntry {
   packageName: string;
-  pluginId: string;
   displayName: string;
   summary: string;
   kind?: string;
@@ -29,8 +28,6 @@ export interface DiscoveredPlugin {
 }
 
 const isEnterprisePackage = (packageName: string) => packageName.startsWith(`${ENTERPRISE_SCOPE}/`);
-
-const toPluginId = (packageName: string) => packageName.slice(ENTERPRISE_SCOPE.length + 1);
 
 export const declaresStrapiKind = (strapiKind: unknown): strapiKind is string =>
   typeof strapiKind === 'string' && strapiKind.length > 0;
@@ -70,7 +67,6 @@ export const describeEnterprisePlugin = (
   if (lookup.status !== 'available') {
     return {
       packageName,
-      pluginId: toPluginId(packageName),
       displayName: packageName,
       summary: '',
     };
@@ -85,7 +81,6 @@ export const describeEnterprisePlugin = (
 
   return {
     packageName,
-    pluginId: strapiMetadata.name ?? toPluginId(packageName),
     displayName: strapiMetadata.displayName ?? packageName,
     summary: strapiMetadata.description ?? latestManifest?.description ?? '',
     kind: strapiMetadata.kind,
@@ -105,12 +100,16 @@ export const discoverEnterprisePlugins = async ({
   env: NodeJS.ProcessEnv;
   fetchImplementation: typeof fetch;
 }): Promise<DiscoveredPlugin[]> => {
-  const [searchedPackageNames, installedPluginNames] = await Promise.all([
+  const [searchResult, installedPluginNames] = await Promise.all([
     searchPackageNames({ text: ENTERPRISE_SCOPE, license, env, fetchImplementation }),
     listInstalledEnterprisePlugins(appDir),
   ]);
 
-  if (searchedPackageNames === undefined) {
+  if (searchResult.status === 'license-rejected') {
+    throw new EnterpriseInstallError(searchResult.message);
+  }
+
+  if (searchResult.status === 'unavailable') {
     const registryHost = new URL(getRegistryUrl(env)).host;
 
     if (installedPluginNames.length === 0) {
@@ -125,7 +124,10 @@ export const discoverEnterprisePlugins = async ({
   }
 
   const candidatePackageNames = [
-    ...new Set([...(searchedPackageNames ?? []), ...installedPluginNames]),
+    ...new Set([
+      ...(searchResult.status === 'available' ? searchResult.packageNames : []),
+      ...installedPluginNames,
+    ]),
   ].filter(isEnterprisePackage);
 
   const lookupFailures: string[] = [];
