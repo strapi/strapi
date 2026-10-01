@@ -1,4 +1,4 @@
-import { ENTERPRISE_REGISTRY_URL } from './constants';
+import { BILLING_URL, ENTERPRISE_REGISTRY_URL } from './constants';
 import { EnterpriseInstallError } from './errors';
 
 const REQUEST_TIMEOUT_MS = 15 * 1000;
@@ -27,9 +27,10 @@ export interface Packument {
 
 export type PackumentLookup =
   | { status: 'available'; packument: Packument }
-  | { status: 'license-rejected' }
+  | { status: 'license-rejected'; message: string }
   | { status: 'not-licensed' }
-  | { status: 'not-found' };
+  | { status: 'not-found' }
+  | { status: 'unavailable'; message: string };
 
 export const getRegistryUrl = (env: NodeJS.ProcessEnv = process.env): string => {
   const registryUrl = env.STRAPI_ENTERPRISE_REGISTRY_URL?.trim() || ENTERPRISE_REGISTRY_URL;
@@ -101,13 +102,17 @@ export const fetchPackument = async ({
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
   } catch {
-    throw new EnterpriseInstallError(
-      `Could not reach ${registryUrl}. Check your network connection and try again.`
-    );
+    return {
+      status: 'unavailable',
+      message: `Could not reach ${registryUrl}. Check your network connection and try again.`,
+    };
   }
 
   if (response.status === 401) {
-    return { status: 'license-rejected' };
+    return {
+      status: 'license-rejected',
+      message: `${registryUrl} rejected this Strapi license. Check it at ${BILLING_URL}`,
+    };
   }
 
   if (response.status === 403) {
@@ -119,17 +124,19 @@ export const fetchPackument = async ({
   }
 
   if (!response.ok) {
-    throw new EnterpriseInstallError(
-      `${registryUrl} answered HTTP ${response.status} for ${packageName}. Try again later.`
-    );
+    return {
+      status: 'unavailable',
+      message: `${registryUrl} answered HTTP ${response.status} for ${packageName}. Try again later.`,
+    };
   }
 
   const packument: unknown = await response.json().catch(() => undefined);
 
   if (typeof packument !== 'object' || packument === null) {
-    throw new EnterpriseInstallError(
-      `${registryUrl} answered with invalid data for ${packageName}. Try again later.`
-    );
+    return {
+      status: 'unavailable',
+      message: `${registryUrl} answered with invalid data for ${packageName}. Try again later.`,
+    };
   }
 
   return { status: 'available', packument: packument as Packument };
