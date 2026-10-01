@@ -45,6 +45,14 @@ const useFetchClient = () => {
   }
 
   React.useEffect(() => {
+    /**
+     * React StrictMode runs the cleanup once before mounting again,
+     * so we need a fresh controller if the previous one was aborted.
+     */
+    if (controller.current!.signal.aborted) {
+      controller.current = new AbortController();
+    }
+
     return () => {
       controller.current!.abort();
     };
@@ -53,7 +61,10 @@ const useFetchClient = () => {
   return React.useMemo(
     () =>
       getFetchClient({
-        signal: controller.current!.signal,
+        // Read lazily so every request uses the current controller's signal.
+        get signal() {
+          return controller.current!.signal;
+        },
       }),
     []
   );
