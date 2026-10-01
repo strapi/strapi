@@ -66,7 +66,6 @@ describe('fetchPackument', () => {
   });
 
   it.each([
-    [401, 'license-rejected'],
     [403, 'not-licensed'],
     [404, 'not-found'],
   ])('maps HTTP %s to %s', async (status, expectedStatus) => {
@@ -75,6 +74,17 @@ describe('fetchPackument', () => {
     await expect(
       fetchPackument({ packageName, license: 'the-license', env: {}, fetchImplementation })
     ).resolves.toEqual({ status: expectedStatus });
+  });
+
+  it('explains a rejected license, with where to check it', async () => {
+    const fetchImplementation = jest.fn().mockResolvedValue(createFetchResponse(401));
+
+    await expect(
+      fetchPackument({ packageName, license: 'the-license', env: {}, fetchImplementation })
+    ).resolves.toEqual({
+      status: 'license-rejected',
+      message: expect.stringContaining('https://packages.strapi.io rejected this Strapi license.'),
+    });
   });
 
   it('uses STRAPI_ENTERPRISE_REGISTRY_URL when it is set', async () => {
@@ -98,7 +108,10 @@ describe('fetchPackument', () => {
 
     await expect(
       fetchPackument({ packageName, license: 'the-license', env: {}, fetchImplementation })
-    ).rejects.toThrow('Could not reach https://packages.strapi.io.');
+    ).resolves.toEqual({
+      status: 'unavailable',
+      message: expect.stringContaining('Could not reach https://packages.strapi.io.'),
+    });
   });
 
   it('reports other registry errors with their status', async () => {
@@ -106,7 +119,10 @@ describe('fetchPackument', () => {
 
     await expect(
       fetchPackument({ packageName, license: 'the-license', env: {}, fetchImplementation })
-    ).rejects.toThrow('https://packages.strapi.io answered HTTP 500');
+    ).resolves.toEqual({
+      status: 'unavailable',
+      message: expect.stringContaining('https://packages.strapi.io answered HTTP 500'),
+    });
   });
 });
 
@@ -126,7 +142,7 @@ describe('getRegistryUrl', () => {
 });
 
 describe('fetchPackument with invalid data', () => {
-  it('stops with a one-line error when the answer is not valid JSON', async () => {
+  it('explains in one line when the answer is not valid JSON', async () => {
     const invalidResponse = {
       status: 200,
       ok: true,
@@ -142,8 +158,10 @@ describe('fetchPackument with invalid data', () => {
         env: {},
         fetchImplementation: jest.fn().mockResolvedValue(invalidResponse),
       })
-    ).rejects.toThrow(
-      'https://packages.strapi.io answered with invalid data for @strapi-enterprise/plugin-ai-byok. Try again later.'
-    );
+    ).resolves.toEqual({
+      status: 'unavailable',
+      message:
+        'https://packages.strapi.io answered with invalid data for @strapi-enterprise/plugin-ai-byok. Try again later.',
+    });
   });
 });

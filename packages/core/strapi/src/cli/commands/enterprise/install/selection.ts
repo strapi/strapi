@@ -1,12 +1,8 @@
 import { getInquirer } from '../../../utils/get-inquirer';
 import type { EnterprisePluginEntry } from './discovery';
+import { resolvePluginStatus } from './plugin-status';
 import type { PackumentLookup } from './registry';
-import {
-  describeNewerIncompatibleVersion,
-  isPrerelease,
-  isUpgrade,
-  pickTargetVersion,
-} from './versions';
+import { isPrerelease } from './versions';
 
 export type PluginRowState =
   /** Installed, and a newer compatible version exists. Selected by default. */
@@ -45,40 +41,40 @@ export const buildPluginRow = ({
   installedVersion?: string;
   strapiVersion?: string;
 }): PluginRow => {
-  if (lookup.status !== 'available') {
-    const isNoLongerLicensed = lookup.status === 'not-licensed' && installedVersion !== undefined;
+  const status = resolvePluginStatus({ lookup, installedVersion, strapiVersion });
 
-    return isNoLongerLicensed
-      ? { entry, state: 'not-licensed', installedVersion }
-      : { entry, state: 'hidden', installedVersion };
-  }
-
-  const versionChoice = pickTargetVersion(lookup.packument, strapiVersion);
-  const note = describeNewerIncompatibleVersion(versionChoice, installedVersion);
-  const { targetVersion } = versionChoice;
-
-  if (!targetVersion) {
-    if (installedVersion) {
-      return { entry, state: 'installed', installedVersion, note };
-    }
-
-    return versionChoice.newestVersion
-      ? {
+  switch (status.state) {
+    case 'install':
+      return { entry, state: 'install', targetVersion: status.targetVersion, note: status.note };
+    case 'upgrade':
+    case 'installed':
+      return { entry, ...status, installedVersion };
+    case 'not-licensed':
+      return installedVersion
+        ? { entry, state: 'not-licensed', installedVersion }
+        : { entry, state: 'hidden' };
+    case 'not-found':
+      return { entry, state: 'hidden', installedVersion };
+    default:
+      // No version for this app. An installed plugin stays listed as installed.
+      if (installedVersion) {
+        return {
           entry,
-          state: 'no-compatible-version',
-          note: `requires Strapi ${versionChoice.newestVersionStrapiRange}`,
-          requiredStrapiRange: versionChoice.newestVersionStrapiRange,
-        }
-      : { entry, state: 'no-stable-release' };
-  }
+          state: 'installed',
+          installedVersion,
+          note: status.state === 'no-compatible-version' ? status.note : undefined,
+        };
+      }
 
-  if (!installedVersion) {
-    return { entry, state: 'install', targetVersion, note };
+      return status.state === 'no-compatible-version'
+        ? {
+            entry,
+            state: 'no-compatible-version',
+            note: `requires Strapi ${status.requiredStrapiRange}`,
+            requiredStrapiRange: status.requiredStrapiRange,
+          }
+        : { entry, state: 'no-stable-release' };
   }
-
-  return isUpgrade(installedVersion, targetVersion)
-    ? { entry, state: 'upgrade', installedVersion, targetVersion, note }
-    : { entry, state: 'installed', installedVersion, note };
 };
 
 const ROW_ORDER: PluginRowState[] = [

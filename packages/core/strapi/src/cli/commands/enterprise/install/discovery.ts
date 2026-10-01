@@ -24,7 +24,7 @@ export interface EnterprisePluginEntry {
 
 export interface DiscoveredPlugin {
   entry: EnterprisePluginEntry;
-  lookup: PackumentLookup;
+  lookup: Exclude<PackumentLookup, { status: 'unavailable' }>;
   installedVersion?: string;
 }
 
@@ -128,35 +128,32 @@ export const discoverEnterprisePlugins = async ({
     ...new Set([...(searchedPackageNames ?? []), ...installedPluginNames]),
   ].filter(isEnterprisePackage);
 
-  const lookupFailures: EnterpriseInstallError[] = [];
+  const lookupFailures: string[] = [];
 
   const discoveredPlugins = await Promise.all(
     candidatePackageNames.map(async (packageName): Promise<DiscoveredPlugin | undefined> => {
-      try {
-        const [lookup, installedVersion] = await Promise.all([
-          fetchPackument({ packageName, license, env, fetchImplementation }),
-          readAppDependencyVersion(appDir, packageName),
-        ]);
-        const entry = describeEnterprisePlugin(packageName, lookup);
+      const [lookup, installedVersion] = await Promise.all([
+        fetchPackument({ packageName, license, env, fetchImplementation }),
+        readAppDependencyVersion(appDir, packageName),
+      ]);
 
-        return entry ? { entry, lookup, installedVersion } : undefined;
-      } catch (error) {
-        if (!(error instanceof EnterpriseInstallError)) {
-          throw error;
-        }
-
+      if (lookup.status === 'unavailable') {
         // One package the registry fails to describe should not hide the others.
-        lookupFailures.push(error);
-        logger.warn(`${packageName} is left out of the list: ${error.message}`);
+        lookupFailures.push(lookup.message);
+        logger.warn(`${packageName} is left out of the list: ${lookup.message}`);
 
         return undefined;
       }
+
+      const entry = describeEnterprisePlugin(packageName, lookup);
+
+      return entry ? { entry, lookup, installedVersion } : undefined;
     })
   );
 
   // When every lookup fails, the registry itself is the problem, not the license.
   if (candidatePackageNames.length > 0 && lookupFailures.length === candidatePackageNames.length) {
-    throw lookupFailures[0];
+    throw new EnterpriseInstallError(lookupFailures[0]);
   }
 
   return discoveredPlugins.filter(

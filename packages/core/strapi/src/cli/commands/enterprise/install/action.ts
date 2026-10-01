@@ -2,22 +2,20 @@ import os from 'os';
 
 import { loadEnv } from '../../../../node/core/env';
 import type { Logger } from '../../../utils/logger';
-import { BILLING_URL, ENTERPRISE_SCOPE, STRAPI_PACKAGE_NAME } from './constants';
+import { ENTERPRISE_SCOPE, STRAPI_PACKAGE_NAME } from './constants';
 import { discoverEnterprisePlugins } from './discovery';
 import { EnterpriseInstallError, PackageManagerError } from './errors';
 import { buildInstallCommand, installPackages } from './install-packages';
 import { resolveLicense } from './license';
 import { detectPackageManager } from './package-manager';
+import { resolvePluginStatus } from './plugin-status';
 import { prepareRegistryAccess } from './registry-access';
-import { fetchPackument, getRegistryUrl, type PackumentLookup } from './registry';
+import { fetchPackument } from './registry';
 import { buildPluginRow, isSelectable, orderVisibleRows, promptForPlugins } from './selection';
 import { printSetupLinks } from './setup-links';
 import {
   canCheckStrapiCompatibility,
-  describeNewerIncompatibleVersion,
   isPrerelease,
-  isUpgrade,
-  pickTargetVersion,
   readAppDependencyVersion,
   readInstalledVersion,
   resolveRequestedVersion,
@@ -77,17 +75,6 @@ export const parsePackageArgument = (packageArgument: string): RequestedPackage 
   return { packageName, requestedVersion: requestedVersion || undefined };
 };
 
-function assertLicenseAccepted(
-  lookup: PackumentLookup,
-  env: NodeJS.ProcessEnv
-): asserts lookup is Exclude<PackumentLookup, { status: 'license-rejected' }> {
-  if (lookup.status === 'license-rejected') {
-    throw new EnterpriseInstallError(
-      `${getRegistryUrl(env)} rejected this Strapi license. Check it at ${BILLING_URL}`
-    );
-  }
-}
-
 const resolveNamedPackages = async (
   requestedPackages: RequestedPackage[],
   { appDir, license, strapiVersion, logger, dependencies }: InstallContext
@@ -101,26 +88,12 @@ const resolveNamedPackages = async (
       env: dependencies.env,
       fetchImplementation: dependencies.fetchImplementation,
     });
+    const installedVersion = await readAppDependencyVersion(appDir, packageName);
 
-    assertLicenseAccepted(lookup, dependencies.env);
-
-    if (lookup.status === 'not-licensed') {
-      throw new EnterpriseInstallError(
-        `Your license does not include ${packageName}, or it does not exist. Run strapi enterprise install without a name to see the plugins you can install.`
-      );
-    }
-
-    if (lookup.status === 'not-found') {
-      throw new EnterpriseInstallError(`${packageName} is not an Enterprise package.`);
-    }
-
-    if (requestedVersion) {
+    if (requestedVersion && lookup.status === 'available') {
       const resolvedVersion = resolveRequestedVersion(lookup.packument, requestedVersion);
 
-      if (
-        resolvedVersion &&
-        resolvedVersion === (await readAppDependencyVersion(appDir, packageName))
-      ) {
+      if (resolvedVersion && resolvedVersion === installedVersion) {
         logger.info(`${packageName} ${resolvedVersion} is already installed.`);
         continue;
       }
@@ -129,38 +102,41 @@ const resolveNamedPackages = async (
       continue;
     }
 
-    const versionChoice = pickTargetVersion(lookup.packument, strapiVersion);
-    const { targetVersion } = versionChoice;
+    const status = resolvePluginStatus({ lookup, installedVersion, strapiVersion });
 
-    if (!targetVersion) {
-      if (!versionChoice.newestVersion) {
+    switch (status.state) {
+      case 'not-licensed':
+        throw new EnterpriseInstallError(
+          `Your license does not include ${packageName}, or it does not exist. Run strapi enterprise install without a name to see the plugins you can install.`
+        );
+      case 'not-found':
+        throw new EnterpriseInstallError(`${packageName} is not an Enterprise package.`);
+      case 'no-stable-release':
         throw new EnterpriseInstallError(describeNoStableRelease(packageName));
-      }
-
-      throw new EnterpriseInstallError(
-        describeStrapiMismatch(packageName, versionChoice.newestVersionStrapiRange, strapiVersion)
-      );
+      case 'no-compatible-version':
+        throw new EnterpriseInstallError(
+          describeStrapiMismatch(packageName, status.requiredStrapiRange, strapiVersion)
+        );
+      default:
+        break;
     }
 
-    const installedVersion = await readAppDependencyVersion(appDir, packageName);
-
-    const newerVersionHint = describeNewerIncompatibleVersion(versionChoice, installedVersion);
-    if (newerVersionHint) {
-      logger.info(`${packageName}: ${newerVersionHint}`);
+    if (status.note) {
+      logger.info(`${packageName}: ${status.note}`);
     }
 
-    if (installedVersion && !isUpgrade(installedVersion, targetVersion)) {
+    if (status.state === 'installed') {
       logger.info(`${packageName} ${installedVersion} is already installed and up to date.`);
       continue;
     }
 
     if (installedVersion && isPrerelease(installedVersion)) {
       logger.info(
-        `${packageName}: replacing the installed prerelease ${installedVersion} with the stable release ${targetVersion}.`
+        `${packageName}: replacing the installed prerelease ${installedVersion} with the stable release ${status.targetVersion}.`
       );
     }
 
-    installSpecs.push(`${packageName}@${targetVersion}`);
+    installSpecs.push(`${packageName}@${status.targetVersion}`);
   }
 
   return installSpecs;
@@ -181,15 +157,10 @@ const selectPlugins = async ({
     fetchImplementation: dependencies.fetchImplementation,
   });
 
-  const lookedUpRows = discoveredPlugins.map(({ entry, lookup, installedVersion }) => ({
-    lookup,
-    row: buildPluginRow({ entry, lookup, installedVersion, strapiVersion }),
-  }));
-
-  lookedUpRows.forEach(({ lookup }) => assertLicenseAccepted(lookup, dependencies.env));
-
-  const isAnyPluginLicensed = lookedUpRows.some(({ lookup }) => lookup.status === 'available');
-  const rows = lookedUpRows.map(({ row }) => row);
+  const rows = discoveredPlugins.map(({ entry, lookup, installedVersion }) =>
+    buildPluginRow({ entry, lookup, installedVersion, strapiVersion })
+  );
+  const isAnyPluginLicensed = discoveredPlugins.some(({ lookup }) => lookup.status === 'available');
 
   rows
     .filter((row) => row.state === 'not-licensed')
