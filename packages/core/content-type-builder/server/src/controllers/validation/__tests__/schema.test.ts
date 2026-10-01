@@ -170,6 +170,60 @@ describe('Schema', () => {
     test('rejects a null searchable property', () => {
       expect(() => validateUpdateSchema(schemaWithSearchable(null))).toThrow();
     });
+
+    test('accepts a dynamic zone in a component schema', () => {
+      const schema = {
+        data: {
+          components: [
+            {
+              action: 'create',
+              uid: 'layout.two-columns',
+              displayName: 'Two columns',
+              category: 'layout',
+              attributes: [
+                {
+                  action: 'create',
+                  name: 'left',
+                  properties: {
+                    type: 'dynamiczone',
+                    components: ['blocks.text'],
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      };
+
+      expect(validateUpdateSchema(schema)).toMatchObject(schema);
+    });
+
+    test('rejects a component dynamic zone without allowed components', () => {
+      const schema = {
+        data: {
+          components: [
+            {
+              action: 'create',
+              uid: 'layout.two-columns',
+              displayName: 'Two columns',
+              category: 'layout',
+              attributes: [
+                {
+                  action: 'create',
+                  name: 'left',
+                  properties: {
+                    type: 'dynamiczone',
+                    components: [],
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      };
+
+      expect(() => validateUpdateSchema(schema)).toThrow();
+    });
   });
 
   describe('maxLengthGreaterThanMinLength', () => {

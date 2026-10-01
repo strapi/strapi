@@ -67,6 +67,44 @@ describe('Component validator', () => {
       });
     });
 
+    test('accepts a dynamic zone attribute', async () => {
+      const input = {
+        components: [],
+        component: {
+          category: 'default',
+          displayName: 'layout',
+          icon: 'calendar',
+          attributes: {
+            sections: {
+              type: 'dynamiczone',
+              components: ['blocks.text'],
+            },
+          },
+        },
+      } as any;
+
+      await expect(componentValidation[method](input)).resolves.toBe(input);
+    });
+
+    test('rejects a dynamic zone without allowed components', async () => {
+      const input = {
+        components: [],
+        component: {
+          category: 'default',
+          displayName: 'layout',
+          icon: 'calendar',
+          attributes: {
+            sections: {
+              type: 'dynamiczone',
+              components: [],
+            },
+          },
+        },
+      } as any;
+
+      await expect(componentValidation[method](input)).rejects.toBeDefined();
+    });
+
     test('cannot use custom keys at root', async () => {
       const input = {
         myCustomKey: true,
