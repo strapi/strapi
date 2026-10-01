@@ -60,4 +60,36 @@ describe('useUpload', () => {
     const [url] = uploadFileViaXHRMock.mock.calls[0];
     expect(url).toBe(`${window.strapi.backendURL}/upload`);
   });
+
+  test('cancel aborts the in-flight upload after progress re-renders the hook', async () => {
+    let capturedSignal: AbortSignal | undefined;
+    let capturedOnProgress: UploadProgressCallback | undefined;
+
+    uploadFileViaXHRMock.mockImplementation(
+      (_url, _token, _formData, signal: AbortSignal, onProgress: UploadProgressCallback) => {
+        capturedSignal = signal;
+        capturedOnProgress = onProgress;
+        return new Promise(() => {});
+      }
+    );
+
+    const { result } = renderHook(() => useUpload());
+
+    act(() => {
+      result.current.upload(FIXTURE_ASSET, null);
+    });
+
+    await waitFor(() => expect(uploadFileViaXHRMock).toHaveBeenCalledTimes(1));
+
+    act(() => {
+      capturedOnProgress?.(50, 100);
+    });
+    expect(result.current.progress).toBe(50);
+
+    act(() => {
+      result.current.cancel();
+    });
+
+    expect(capturedSignal?.aborted).toBe(true);
+  });
 });
