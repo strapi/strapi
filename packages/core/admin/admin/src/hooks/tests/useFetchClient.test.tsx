@@ -62,7 +62,11 @@ describe('useFetchClient', () => {
     expect(getByRole('heading')).toHaveTextContent('called data times 1');
   });
 
-  it('should not abort requests when mounted under React.StrictMode', async () => {
+  it('should still complete requests after a React.StrictMode remount', async () => {
+    /**
+     * StrictMode mounts, runs the effect cleanup (which aborts the controller),
+     * then mounts again. Requests made afterwards must not use the aborted signal.
+     */
     const { result } = renderHookWithoutProviders(() => useFetchClient(), {
       wrapper: React.StrictMode,
     });
