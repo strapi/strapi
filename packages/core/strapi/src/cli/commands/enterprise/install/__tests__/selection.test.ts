@@ -84,7 +84,13 @@ describe('orderVisibleRows', () => {
       { entry: aiByokEntry, state: 'installed', installedVersion: '1.2.0' },
       { entry: aiByokEntry, state: 'hidden' },
       { entry: aiByokEntry, state: 'install', targetVersion: '1.2.0' },
-      { entry: aiByokEntry, state: 'upgrade', installedVersion: '1.1.0', targetVersion: '1.2.0' },
+      {
+        entry: aiByokEntry,
+        state: 'upgrade',
+        installedVersion: '1.1.0',
+        targetVersion: '1.2.0',
+        isMajorUpgrade: false,
+      },
     ];
 
     expect(orderVisibleRows(rows).map((row) => row.state)).toEqual([
@@ -114,6 +120,13 @@ describe('toCheckboxChoice', () => {
       name: expect.stringContaining('1.1.0 → 1.2.0 [upgrade]'),
       value: '@strapi-enterprise/plugin-ai-byok@1.2.0',
       checked: true,
+    });
+  });
+
+  it('offers a major upgrade without selecting it, with a [major upgrade] tag', () => {
+    expect(toCheckboxChoice(rowFor(threeVersions, '0.9.0'))).toMatchObject({
+      name: expect.stringContaining('0.9.0 → 1.2.0 [major upgrade]'),
+      checked: false,
     });
   });
 

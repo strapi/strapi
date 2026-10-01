@@ -4,9 +4,11 @@ import fse from 'fs-extra';
 import {
   canCheckStrapiCompatibility,
   describeNewerIncompatibleVersion,
+  isMajorUpgrade,
   isUpgrade,
   pickTargetVersion,
   readInstalledVersion,
+  resolveRequestedVersion,
 } from '../versions';
 import { createPackument, createTemporaryDirectory } from './test-helpers';
 
@@ -92,6 +94,81 @@ describe('describeNewerIncompatibleVersion', () => {
     expect(describeNewerIncompatibleVersion(versionChoice, '1.2.0')).toBe(
       '1.3.0 is available but requires Strapi ^5.56.0.'
     );
+  });
+});
+
+describe('pickTargetVersion and dist-tags.latest', () => {
+  it('never goes above latest, like npm', () => {
+    const packument = createPackument(
+      '@strapi-enterprise/plugin-ai-byok',
+      [{ version: '1.2.0' }, { version: '3.0.0' }],
+      { latest: '1.2.0' }
+    );
+
+    expect(pickTargetVersion(packument, '5.54.1')).toMatchObject({
+      targetVersion: '1.2.0',
+      newestVersion: '1.2.0',
+    });
+  });
+
+  it('ignores a latest that points to a prerelease, which would hide every release', () => {
+    const packument = createPackument(
+      '@strapi-enterprise/plugin-ai-byok',
+      [{ version: '0.0.0-experimental.8be2653' }, { version: '0.1.0' }],
+      { latest: '0.0.0-experimental.8be2653' }
+    );
+
+    expect(pickTargetVersion(packument, '5.54.1').targetVersion).toBe('0.1.0');
+  });
+});
+
+describe('resolveRequestedVersion with a range', () => {
+  const packument = createPackument(
+    '@strapi-enterprise/plugin-ai-byok',
+    [
+      { version: '1.1.0', strapiRange: '^5.52.0' },
+      { version: '1.2.0', strapiRange: '^5.54.0' },
+      { version: '1.2.1', strapiRange: '^5.54.0', deprecated: 'Broken build' },
+      { version: '1.3.0', strapiRange: '^5.56.0' },
+    ],
+    { latest: '1.3.0' }
+  );
+
+  it('picks the highest version in the range that fits the app, skipping deprecated ones', () => {
+    expect(resolveRequestedVersion(packument, '^1.1.0', '5.54.1')).toBe('1.2.0');
+  });
+
+  it('prefers latest when it is in the range and fits, like npm', () => {
+    const withNext = {
+      ...packument,
+      versions: { ...packument.versions, '1.4.0': { version: '1.4.0' } },
+    };
+
+    expect(resolveRequestedVersion(withNext, '^1.0.0', '5.56.2')).toBe('1.3.0');
+  });
+
+  it('falls back to the highest version in the range when none fits the app', () => {
+    expect(resolveRequestedVersion(packument, '^1.3.0', '5.54.1')).toBe('1.3.0');
+  });
+
+  it('still resolves a range whose only versions are deprecated', () => {
+    expect(resolveRequestedVersion(packument, '~1.2.1', '5.54.1')).toBe('1.2.1');
+  });
+
+  it('is undefined for a range with no published version', () => {
+    expect(resolveRequestedVersion(packument, '^2.0.0', '5.54.1')).toBeUndefined();
+  });
+});
+
+describe('isMajorUpgrade', () => {
+  it.each([
+    ['1.2.0', '1.3.0', false],
+    ['1.9.0', '2.0.0', true],
+    ['0.1.0', '0.1.1', false],
+    ['0.1.0', '0.2.0', true],
+    ['not-a-version', '1.0.0', false],
+  ])('%s to %s: %s', (installedVersion, targetVersion, expected) => {
+    expect(isMajorUpgrade(installedVersion, targetVersion)).toBe(expected);
   });
 });
 

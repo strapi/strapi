@@ -76,7 +76,10 @@ describe('printSetupLinks', () => {
 
     await printSetupLinks({
       appDir,
-      packageNames: [AI_BYOK, OTHER_PLUGIN, AI_WORKFLOWS],
+      installedPackages: [AI_BYOK, OTHER_PLUGIN, AI_WORKFLOWS].map((packageName) => ({
+        packageName,
+        replacesInstalledVersion: false,
+      })),
       logger,
     });
 
@@ -84,5 +87,26 @@ describe('printSetupLinks', () => {
       [expectedSetupWarning(AI_BYOK)],
       [expectedSetupWarning(OTHER_PLUGIN)],
     ]);
+  });
+
+  it('points an upgraded plugin to what changed, since it is already set up', async () => {
+    const appDir = await createTemporaryDirectory();
+    const logger = createTestLogger();
+    await installFakePackage(appDir, AI_BYOK, {
+      version: '1.1.0',
+      homepage: 'https://docs.strapi.io/cms/plugins/ai-byok',
+      strapi: { kind: 'plugin', displayName: 'AI BYOK' },
+    });
+
+    await printSetupLinks({
+      appDir,
+      installedPackages: [{ packageName: AI_BYOK, replacesInstalledVersion: true }],
+      logger,
+    });
+
+    expect(logger.info).toHaveBeenCalledWith(
+      `Updated ${AI_BYOK}. See what changed at https://docs.strapi.io/cms/plugins/ai-byok`
+    );
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 });

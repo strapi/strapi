@@ -132,7 +132,87 @@ describe('runInstall with package names', () => {
     expect(loggedText(logger)).not.toContain(LICENSE);
   });
 
-  it('passes an explicit version through as is, prereleases included', async () => {
+  it.each([
+    ['a version that does not exist', '9.9.9'],
+    ['an alias to another package', 'npm:left-pad'],
+    ['a URL', 'https://example.com/plugin.tgz'],
+  ])('stops before writing anything for %s', async (_case, requestedVersion) => {
+    const dependencies = await createDependencies();
+
+    await expect(
+      runInstall({
+        appDir: await createApp(),
+        packageArguments: [`plugin-ai-byok@${requestedVersion}`],
+        logger: createTestLogger(),
+        dependencies,
+      })
+    ).rejects.toThrow(`${AI_BYOK} has no version or tag ${requestedVersion}.`);
+    expect(dependencies.installPackages).not.toHaveBeenCalled();
+    expect(await fse.pathExists(path.join(dependencies.homeDir, '.npmrc'))).toBe(false);
+  });
+
+  it('installs the highest version in a range that fits the app', async () => {
+    const dependencies = await createDependencies();
+    const logger = createTestLogger();
+
+    await runInstall({
+      appDir: await createApp({ strapiVersion: '5.54.1' }),
+      packageArguments: ['plugin-ai-byok@^1.1.0'],
+      logger,
+      dependencies,
+    });
+
+    expect(dependencies.installPackages).toHaveBeenCalledWith(
+      expect.objectContaining({ installSpecs: [`${AI_BYOK}@1.2.0`] })
+    );
+    expect(logger.warn).not.toHaveBeenCalledWith(expect.stringContaining('requires Strapi'));
+  });
+
+  it('warns when no version in the range fits the app, and installs the highest one', async () => {
+    const dependencies = await createDependencies();
+    const logger = createTestLogger();
+
+    await runInstall({
+      appDir: await createApp({ strapiVersion: '5.54.1' }),
+      packageArguments: ['plugin-ai-byok@^1.3.0'],
+      logger,
+      dependencies,
+    });
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      `${AI_BYOK} 1.3.0 requires Strapi ^5.56.0 and this app uses 5.54.1. Strapi may not start until you upgrade it.`
+    );
+    expect(dependencies.installPackages).toHaveBeenCalledWith(
+      expect.objectContaining({ installSpecs: [`${AI_BYOK}@1.3.0`] })
+    );
+  });
+
+  it('installs the exact version a tag points to', async () => {
+    const dependencies = await createDependencies({
+      fetchImplementation: createRegistryFetch({
+        searchResult: [AI_BYOK],
+        packuments: {
+          [AI_BYOK]: {
+            ...aiByokPackument,
+            'dist-tags': { latest: '1.2.0', experimental: '0.0.0-experimental.8be2653' },
+          },
+        },
+      }),
+    });
+
+    await runInstall({
+      appDir: await createApp(),
+      packageArguments: ['plugin-ai-byok@experimental'],
+      logger: createTestLogger(),
+      dependencies,
+    });
+
+    expect(dependencies.installPackages).toHaveBeenCalledWith(
+      expect.objectContaining({ installSpecs: [`${AI_BYOK}@0.0.0-experimental.8be2653`] })
+    );
+  });
+
+  it('installs an explicit version, prereleases included', async () => {
     const dependencies = await createDependencies();
 
     await runInstall({
@@ -144,6 +224,30 @@ describe('runInstall with package names', () => {
 
     expect(dependencies.installPackages).toHaveBeenCalledWith(
       expect.objectContaining({ installSpecs: [`${AI_BYOK}@0.0.0-experimental.8be2653`] })
+    );
+  });
+
+  it('warns before a named install makes a major upgrade', async () => {
+    const dependencies = await createDependencies();
+    const logger = createTestLogger();
+
+    await runInstall({
+      appDir: await createApp({ installedPackages: { [AI_BYOK]: '0.9.0' } }),
+      packageArguments: ['plugin-ai-byok'],
+      logger,
+      dependencies,
+    });
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      `${AI_BYOK}: upgrading from 0.9.0 to 1.2.0, a major upgrade that may include breaking changes.`
+    );
+    // Already set up: points to what changed, not to the setup guide.
+    expect(logger.info).toHaveBeenCalledWith(
+      expect.stringMatching(/^Updated .+\. See what changed at /)
+    );
+    expect(logger.warn).not.toHaveBeenCalledWith(expectedSetupWarning(AI_BYOK));
+    expect(dependencies.installPackages).toHaveBeenCalledWith(
+      expect.objectContaining({ installSpecs: [`${AI_BYOK}@1.2.0`] })
     );
   });
 
@@ -230,7 +334,7 @@ describe('runInstall with package names', () => {
 
   it.each([
     [403, `Your license does not include ${AI_BYOK}, or it does not exist.`],
-    [404, `${AI_BYOK} is not an Enterprise package.`],
+    [404, `No Enterprise package named ${AI_BYOK}.`],
     [401, 'https://packages.strapi.io rejected this Strapi license.'],
   ])('stops without installing when the registry answers %s', async (status, message) => {
     const dependencies = await createDependencies({
@@ -580,9 +684,27 @@ describe('parsePackageArgument', () => {
     expect(parsePackageArgument(packageArgument)).toEqual(expected);
   });
 
+  it('accepts a name of exactly 214 characters, the npm limit', () => {
+    const packageName = `@strapi-enterprise/${'a'.repeat(195)}`;
+
+    expect(parsePackageArgument(packageName)).toEqual({ packageName });
+  });
+
   it('rejects a package outside the Enterprise scope', () => {
     expect(() => parsePackageArgument('@other/plugin')).toThrow(
       '@other/plugin is not an Enterprise package. Enterprise packages start with @strapi-enterprise/.'
+    );
+  });
+
+  it.each([
+    '@strapi-enterprise/../x',
+    'plugin-ai-byok/../../x',
+    '@strapi-enterprise/Plugin-AI-BYOK',
+    '@strapi-enterprise/.hidden',
+    `@strapi-enterprise/${'a'.repeat(196)}`,
+  ])('rejects %s, which is not a valid package name', (packageArgument) => {
+    expect(() => parsePackageArgument(packageArgument)).toThrow(
+      `${packageArgument} is not a valid package name.`
     );
   });
 });

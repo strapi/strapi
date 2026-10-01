@@ -1,12 +1,18 @@
 import { EnterpriseInstallError } from './errors';
 import type { PackumentLookup } from './registry';
-import { describeNewerIncompatibleVersion, isUpgrade, pickTargetVersion } from './versions';
+import {
+  describeNewerIncompatibleVersion,
+  isMajorUpgrade,
+  isPrerelease,
+  isUpgrade,
+  pickTargetVersion,
+} from './versions';
 
 export type PluginStatus =
   /** Not installed, and a stable version fits this Strapi version. */
   | { state: 'install'; targetVersion: string; newerVersionNote?: string }
   /** Installed, and a newer compatible version exists. */
-  | { state: 'upgrade'; targetVersion: string; newerVersionNote?: string }
+  | { state: 'upgrade'; targetVersion: string; isMajorUpgrade: boolean; newerVersionNote?: string }
   /** Installed and up to date for this Strapi version. */
   | { state: 'installed'; newerVersionNote?: string }
   /** No stable version fits this Strapi version. */
@@ -55,6 +61,12 @@ export const resolvePluginStatus = ({
   }
 
   return isUpgrade(installedVersion, targetVersion)
-    ? { state: 'upgrade', targetVersion, newerVersionNote }
+    ? {
+        state: 'upgrade',
+        targetVersion,
+        isMajorUpgrade:
+          !isPrerelease(installedVersion) && isMajorUpgrade(installedVersion, targetVersion),
+        newerVersionNote,
+      }
     : { state: 'installed', newerVersionNote };
 };
