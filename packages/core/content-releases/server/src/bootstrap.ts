@@ -48,7 +48,7 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
           if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
             const { where } = event.params;
 
-            deleteReleasesActionsAndUpdateReleaseStatus({
+            await deleteReleasesActionsAndUpdateReleaseStatus({
               contentType: model.uid,
               locale: where?.locale ?? null,
               ...(where?.documentId && { entryDocumentId: where.documentId }),
