@@ -3,8 +3,9 @@
  *
  * Feature modules register a live resolver for each numeric limit they enforce;
  * the license endpoint and the support debug dump read the resolved, normalized
- * values. A resolved value that is nullish or greater than or equal to
- * UNLIMITED_ENTITLEMENT_THRESHOLD is reported as `null`, meaning "Unlimited".
+ * values. A numeric string is read as its number. A resolved value that is nullish,
+ * non-numeric, or greater than or equal to UNLIMITED_ENTITLEMENT_THRESHOLD is reported
+ * as `null`, meaning "Unlimited".
  */
 
 // The license registry ships a deliberately large number to mean "unlimited"
@@ -34,11 +35,16 @@ export interface Entitlement {
   limits: EntitlementLimit[];
 }
 
-const normalize = (value: number | null | undefined): number | null => {
-  if (typeof value !== 'number' || Number.isNaN(value)) {
+const normalize = (value: unknown): number | null => {
+  // License options are untyped JSON, and the registry has shipped some limits as numeric
+  // strings (`retentionDays: "90"`). Enforcement coerces those implicitly, so accepting only
+  // real numbers here showed a 90-day audit-logs cap as "Unlimited".
+  const limit = typeof value === 'string' && value.trim() !== '' ? Number(value) : value;
+
+  if (typeof limit !== 'number' || Number.isNaN(limit)) {
     return null;
   }
-  return value >= UNLIMITED_ENTITLEMENT_THRESHOLD ? null : value;
+  return limit >= UNLIMITED_ENTITLEMENT_THRESHOLD ? null : limit;
 };
 
 export const createEntitlementsRegistry = () => {

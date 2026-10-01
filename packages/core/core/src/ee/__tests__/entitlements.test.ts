@@ -44,6 +44,39 @@ describe('entitlements registry', () => {
     expect(registry.list()[0].limits[0].value).toBeNull();
   });
 
+  // License options are untyped JSON, and the registry ships some limits as strings (an
+  // audit-logs licence carried `retentionDays: "90"`). Enforcement coerces them, so dropping
+  // them here made a 90-day cap read as "Unlimited".
+  it('reads a numeric string from the license as its number', () => {
+    const registry = createEntitlementsRegistry();
+    registry.register({
+      feature: 'audit-logs',
+      limits: [{ key: 'retentionDays', unit: 'days', get: () => '90' as unknown as number }],
+    });
+    expect(registry.list()[0].limits[0].value).toBe(90);
+  });
+
+  it('normalizes a numeric string at/above the threshold to null (unlimited)', () => {
+    const registry = createEntitlementsRegistry();
+    registry.register({
+      feature: 'cms-content-history',
+      limits: [{ key: 'retentionDays', unit: 'days', get: () => '99999' as unknown as number }],
+    });
+    expect(registry.list()[0].limits[0].value).toBeNull();
+  });
+
+  it.each(['', '   ', 'ninety', '90 days'])(
+    'normalizes the non-numeric string %p to null',
+    (value) => {
+      const registry = createEntitlementsRegistry();
+      registry.register({
+        feature: 'x',
+        limits: [{ key: 'k', get: () => value as unknown as number }],
+      });
+      expect(registry.list()[0].limits[0].value).toBeNull();
+    }
+  );
+
   it('upserts by feature (re-register replaces, never duplicates)', () => {
     const registry = createEntitlementsRegistry();
     registry.register({ feature: 'f', limits: [{ key: 'k', get: () => 1 }] });

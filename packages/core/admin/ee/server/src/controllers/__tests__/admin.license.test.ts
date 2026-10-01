@@ -406,6 +406,30 @@ describe('licenseLimitInformation (planEntitlements)', () => {
     );
     expect(contentHistory.limits).toEqual([{ key: 'retentionDays', unit: 'days', value: null }]);
   });
+
+  it('a retained option stored as a numeric string reads as its number', async () => {
+    // The registry has shipped audit-logs retention as `"90"`; the expired-licence path must
+    // not turn that into "Unlimited" any more than the live registry does.
+    createStrapiMock({
+      stored: null,
+      ee: {
+        type: null,
+        licenseStatus: 'expired',
+        retainedLicense: {
+          type: 'gold',
+          isTrial: false,
+          features: [{ name: 'audit-logs', options: { retentionDays: '90' } }],
+        },
+        features: { list: () => [], isEnabled: () => false },
+        entitlements: { list: () => [] },
+      },
+    });
+    stubUserServices();
+
+    const data = (await adminController.licenseLimitInformation()).data as any;
+    const auditLogs = data.planEntitlements.find((entry: any) => entry.feature === 'audit-logs');
+    expect(auditLogs.limits).toEqual([{ key: 'retentionDays', unit: 'days', value: 90 }]);
+  });
 });
 
 describe('licenseLimitInformation (renewalDate)', () => {

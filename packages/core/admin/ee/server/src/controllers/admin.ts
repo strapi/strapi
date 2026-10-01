@@ -25,10 +25,14 @@ const RETAINED_LIMIT_UNITS: Record<string, 'days' | 'count'> = {
 };
 
 const normalizeRetainedLimitValue = (value: unknown): number | null => {
-  if (typeof value !== 'number' || Number.isNaN(value)) {
+  // Same reading as the live registry: the license can carry a limit as a numeric string
+  // (`retentionDays: "90"`), which must not turn into "Unlimited" once the license expires.
+  const limit = typeof value === 'string' && value.trim() !== '' ? Number(value) : value;
+
+  if (typeof limit !== 'number' || Number.isNaN(limit)) {
     return null;
   }
-  return value >= UNLIMITED_ENTITLEMENT_THRESHOLD ? null : value;
+  return limit >= UNLIMITED_ENTITLEMENT_THRESHOLD ? null : limit;
 };
 
 const deriveLimitsFromRetainedOptions = (
