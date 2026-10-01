@@ -205,6 +205,27 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
       });
     });
 
+    it('records a publish mode change on its own', async () => {
+      const release = await createRelease({ name: 'Mode change', timezone: 'Europe/Paris' });
+      await clearAuditLogs();
+
+      const res = await rq({
+        url: `/content-releases/${release.id}`,
+        method: 'PUT',
+        body: {
+          name: 'Mode change',
+          timezone: 'Europe/Paris',
+          publishMode: 'release_all_approved',
+        },
+      });
+      expect(res.statusCode).toBe(200);
+
+      const log = await expectExactlyOneLog('release.update');
+      expect(log.payload.details.changes).toEqual({
+        publishMode: { before: 'wait_for_all', after: 'release_all_approved' },
+      });
+    });
+
     it('reports which fields an edit changed', async () => {
       const release = await createRelease({ name: 'Which fields', timezone: 'Europe/Paris' });
       const scheduledAt = inFuture(60);

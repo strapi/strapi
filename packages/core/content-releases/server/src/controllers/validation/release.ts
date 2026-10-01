@@ -1,5 +1,7 @@
 import { yup, validateYupSchema } from '@strapi/utils';
 
+import { RELEASE_PUBLISH_MODES } from '../../constants';
+
 export const RELEASE_SCHEMA = yup
   .object()
   .shape({
@@ -10,6 +12,7 @@ export const RELEASE_SCHEMA = yup
       then: yup.string().required(),
       otherwise: yup.string().nullable(),
     }),
+    publishMode: yup.string().oneOf([...RELEASE_PUBLISH_MODES]),
   })
   .required()
   .noUnknown();

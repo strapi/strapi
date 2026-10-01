@@ -1,6 +1,9 @@
 export const RELEASE_MODEL_UID = 'plugin::content-releases.release';
 export const RELEASE_ACTION_MODEL_UID = 'plugin::content-releases.release-action';
 
+export const RELEASE_PUBLISH_MODES = ['release_all_approved', 'wait_for_all'] as const;
+export const DEFAULT_RELEASE_PUBLISH_MODE = 'wait_for_all';
+
 export const ACTIONS = [
   {
     section: 'plugins',

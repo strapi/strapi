@@ -6,6 +6,7 @@ import { describeOnCondition } from 'api-tests/utils';
 import { createTestBuilder } from 'api-tests/builder';
 
 import { CreateRelease } from '../../../../packages/core/content-releases/shared/contracts/releases';
+import { migratePublishModeReleases } from '../../../../packages/core/content-releases/server/src/migrations';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
@@ -209,6 +210,36 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       expect(res.statusCode).toBe(400);
       expect(res.body.error.message).toBe('Scheduled at must be later than now');
     });
+
+    test('defaults the publish mode to wait_for_all', async () => {
+      const res = await createRelease();
+
+      expect(res.statusCode).toBe(201);
+      expect(res.body.data.publishMode).toBe('wait_for_all');
+    });
+
+    test('create a release with an explicit publish mode', async () => {
+      const res = await createRelease({ publishMode: 'release_all_approved' });
+
+      expect(res.statusCode).toBe(201);
+      expect(res.body.data.publishMode).toBe('release_all_approved');
+
+      const findRes = await rq({ method: 'GET', url: `/content-releases/${res.body.data.id}` });
+      expect(findRes.body.data.publishMode).toBe('release_all_approved');
+    });
+
+    test.each(['publish_everything', null])(
+      'cannot create a release with publish mode %p',
+      async (publishMode) => {
+        const res = await rq({
+          method: 'POST',
+          url: '/content-releases/',
+          body: { name: `Test Release ${Math.random().toString(36)}`, publishMode },
+        });
+
+        expect(res.statusCode).toBe(400);
+      }
+    );
   });
 
   describe('Create Release Actions', () => {
@@ -613,6 +644,61 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       expect(res.body.error.message).toBe(
         `Release with name ${createSecondReleaseRes.body.data.name} already exists`
       );
+    });
+
+    test('changes the publish mode and keeps it when omitted', async () => {
+      const createReleaseRes = await createRelease();
+      const release = createReleaseRes.body.data;
+
+      const modeRes = await rq({
+        method: 'PUT',
+        url: `/content-releases/${release.id}`,
+        body: { name: release.name, publishMode: 'release_all_approved' },
+      });
+      expect(modeRes.statusCode).toBe(200);
+      expect(modeRes.body.data.publishMode).toBe('release_all_approved');
+
+      const renameRes = await rq({
+        method: 'PUT',
+        url: `/content-releases/${release.id}`,
+        body: { name: 'Renamed Release' },
+      });
+      expect(renameRes.statusCode).toBe(200);
+      expect(renameRes.body.data.publishMode).toBe('release_all_approved');
+    });
+
+    test('cannot change to an unknown publish mode', async () => {
+      const createReleaseRes = await createRelease();
+      const release = createReleaseRes.body.data;
+
+      const res = await rq({
+        method: 'PUT',
+        url: `/content-releases/${release.id}`,
+        body: { name: release.name, publishMode: 'publish_everything' },
+      });
+
+      expect(res.statusCode).toBe(400);
+    });
+  });
+
+  describe('Legacy releases', () => {
+    test('backfills a missing publish mode to wait_for_all and keeps explicit ones', async () => {
+      const legacy = (await createRelease()).body.data;
+      const tolerant = (await createRelease({ publishMode: 'release_all_approved' })).body.data;
+
+      // Releases created before the field existed have no value in the column
+      await strapi.db.query('plugin::content-releases.release').update({
+        where: { id: legacy.id },
+        data: { publishMode: null },
+      });
+
+      await migratePublishModeReleases();
+
+      const legacyRes = await rq({ method: 'GET', url: `/content-releases/${legacy.id}` });
+      const tolerantRes = await rq({ method: 'GET', url: `/content-releases/${tolerant.id}` });
+
+      expect(legacyRes.body.data.publishMode).toBe('wait_for_all');
+      expect(tolerantRes.body.data.publishMode).toBe('release_all_approved');
     });
   });
 
