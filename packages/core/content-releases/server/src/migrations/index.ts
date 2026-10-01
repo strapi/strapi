@@ -3,7 +3,11 @@ import { contentTypes as contentTypesUtils, async } from '@strapi/utils';
 import isEqual from 'lodash/isEqual';
 
 import { difference, keys } from 'lodash';
-import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';
+import {
+  DEFAULT_RELEASE_PUBLISH_MODE,
+  RELEASE_ACTION_MODEL_UID,
+  RELEASE_MODEL_UID,
+} from '../constants';
 import { getDraftEntryValidStatus, getService } from '../utils';
 import { Release } from '../../../shared/contracts/releases';
 import { ReleaseAction } from '../../../shared/contracts/release-actions';
@@ -121,6 +125,13 @@ export async function migrateIsValidAndStatusReleases() {
         status: 'done',
       },
     });
+  });
+}
+
+export async function migratePublishModeReleases() {
+  await strapi.db.query(RELEASE_MODEL_UID).updateMany({
+    where: { publishMode: null },
+    data: { publishMode: DEFAULT_RELEASE_PUBLISH_MODE },
   });
 }
 

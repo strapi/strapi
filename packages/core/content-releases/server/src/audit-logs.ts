@@ -29,7 +29,7 @@ export interface CreateDetails {
   timezone?: string | null;
 }
 
-export const RELEASE_EDITABLE_FIELDS = ['name', 'scheduledAt', 'timezone'] as const;
+export const RELEASE_EDITABLE_FIELDS = ['name', 'scheduledAt', 'timezone', 'publishMode'] as const;
 
 /** Audit rows are never pruned by size, so the failure reason is capped */
 const MAX_REASON_LENGTH = 100;
@@ -40,13 +40,20 @@ export interface UpdateDetails {
   changes: Partial<Record<ReleaseChangedField, Modules.AuditLogs.FieldChange>>;
 }
 
+interface ReleaseEditableValues {
+  name?: string;
+  scheduledAt?: string | null;
+  timezone?: string | null;
+  publishMode?: string | null;
+}
+
 /**
  * Returns the fields that changed in a release update.
  * `isScheduled` is included when the release changes between scheduled and unscheduled.
  */
 export const getReleaseChanges = (
-  previous: { name?: string; scheduledAt?: string | null; timezone?: string | null } | null,
-  next: { name?: string; scheduledAt?: string | null; timezone?: string | null }
+  previous: ReleaseEditableValues | null,
+  next: ReleaseEditableValues
 ) => {
   const changes: Partial<Record<ReleaseChangedField, Modules.AuditLogs.FieldChange>> = {};
 
