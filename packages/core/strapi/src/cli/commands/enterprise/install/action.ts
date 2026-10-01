@@ -15,6 +15,7 @@ import { buildPluginRow, isSelectable, orderVisibleRows, promptForPlugins } from
 import { printSetupLinks } from './setup-links';
 import {
   canCheckStrapiCompatibility,
+  findUnsupportedStrapiRange,
   isPrerelease,
   readAppDependencyVersion,
   readInstalledVersion,
@@ -50,6 +51,12 @@ interface InstallContext {
   dependencies: InstallDependencies;
 }
 
+const ENTERPRISE_PACKAGE_NAME = new RegExp(`^${ENTERPRISE_SCOPE}/[a-z0-9-][a-z0-9._-]*$`);
+const MAX_PACKAGE_NAME_LENGTH = 214;
+
+const isValidPackageName = (packageName: string) =>
+  packageName.length <= MAX_PACKAGE_NAME_LENGTH && ENTERPRISE_PACKAGE_NAME.test(packageName);
+
 interface RequestedPackage {
   packageName: string;
   /** A version or a tag, when the argument names one. */
@@ -72,6 +79,10 @@ export const parsePackageArgument = (packageArgument: string): RequestedPackage 
     );
   }
 
+  if (!isValidPackageName(packageName)) {
+    throw new EnterpriseInstallError(`${packageArgument} is not a valid package name.`);
+  }
+
   return { packageName, requestedVersion: requestedVersion || undefined };
 };
 
@@ -85,20 +96,41 @@ const resolveNamedPackages = async (
     const lookup = await fetchPackument({
       packageName,
       license,
-      env: dependencies.env,
       fetchImplementation: dependencies.fetchImplementation,
     });
     const installedVersion = await readAppDependencyVersion(appDir, packageName);
 
     if (requestedVersion && lookup.status === 'available') {
-      const resolvedVersion = resolveRequestedVersion(lookup.packument, requestedVersion);
+      const resolvedVersion = resolveRequestedVersion(
+        lookup.packument,
+        requestedVersion,
+        strapiVersion
+      );
 
-      if (resolvedVersion && resolvedVersion === installedVersion) {
+      if (!resolvedVersion) {
+        throw new EnterpriseInstallError(
+          `${packageName} has no version or tag ${requestedVersion}.`
+        );
+      }
+
+      if (resolvedVersion === installedVersion) {
         logger.info(`${packageName} ${resolvedVersion} is already installed.`);
         continue;
       }
 
-      installSpecs.push(`${packageName}@${requestedVersion}`);
+      const unsupportedStrapiRange = findUnsupportedStrapiRange(
+        lookup.packument,
+        resolvedVersion,
+        strapiVersion
+      );
+
+      if (unsupportedStrapiRange) {
+        logger.warn(
+          `${packageName} ${resolvedVersion} requires Strapi ${unsupportedStrapiRange} and this app uses ${strapiVersion}. Strapi may not start until you upgrade it.`
+        );
+      }
+
+      installSpecs.push(`${packageName}@${resolvedVersion}`);
       continue;
     }
 
@@ -110,7 +142,9 @@ const resolveNamedPackages = async (
           `Your license does not include ${packageName}, or it does not exist. Run strapi enterprise install without a name to see the plugins you can install.`
         );
       case 'not-found':
-        throw new EnterpriseInstallError(`${packageName} is not an Enterprise package.`);
+        throw new EnterpriseInstallError(
+          `No Enterprise package named ${packageName}. Run strapi enterprise install without a name to see the plugins you can install.`
+        );
       case 'no-stable-release':
         throw new EnterpriseInstallError(describeNoStableRelease(packageName));
       case 'no-compatible-version':
@@ -136,6 +170,12 @@ const resolveNamedPackages = async (
       );
     }
 
+    if (status.state === 'upgrade' && status.isMajorUpgrade) {
+      logger.warn(
+        `${packageName}: upgrading from ${installedVersion} to ${status.targetVersion}, a major upgrade that may include breaking changes.`
+      );
+    }
+
     installSpecs.push(`${packageName}@${status.targetVersion}`);
   }
 
@@ -153,7 +193,6 @@ const selectPlugins = async ({
     appDir,
     license,
     logger,
-    env: dependencies.env,
     fetchImplementation: dependencies.fetchImplementation,
   });
 
@@ -271,13 +310,18 @@ export const runInstall = async ({
   const { command, args } = buildInstallCommand(packageManager, installSpecs);
   logger.info(`Running ${command} ${args.join(' ')}`);
 
+  const installedPackages = await Promise.all(
+    installSpecs.map(async (installSpec) => {
+      const { packageName } = parsePackageArgument(installSpec);
+      const previousVersion = await readAppDependencyVersion(appDir, packageName);
+
+      return { packageName, replacesInstalledVersion: previousVersion !== undefined };
+    })
+  );
+
   await dependencies.installPackages({ appDir, packageManager, installSpecs });
 
-  await printSetupLinks({
-    appDir,
-    packageNames: installSpecs.map((installSpec) => parsePackageArgument(installSpec).packageName),
-    logger,
-  });
+  await printSetupLinks({ appDir, installedPackages, logger });
 };
 
 /**

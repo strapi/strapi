@@ -1,5 +1,4 @@
 import { BILLING_URL, ENTERPRISE_REGISTRY_URL } from './constants';
-import { EnterpriseInstallError } from './errors';
 
 const REQUEST_TIMEOUT_MS = 15 * 1000;
 const SEARCH_PAGE_SIZE = 250;
@@ -32,17 +31,7 @@ export type PackumentLookup =
   | { status: 'not-found' }
   | { status: 'unavailable'; message: string };
 
-export const getRegistryUrl = (env: NodeJS.ProcessEnv): string => {
-  const registryUrl = env.STRAPI_ENTERPRISE_REGISTRY_URL?.trim() || ENTERPRISE_REGISTRY_URL;
-
-  if (!URL.canParse(registryUrl)) {
-    throw new EnterpriseInstallError(
-      `STRAPI_ENTERPRISE_REGISTRY_URL is not a valid URL: ${registryUrl}`
-    );
-  }
-
-  return registryUrl.replace(/\/+$/, '');
-};
+const REGISTRY_URL = ENTERPRISE_REGISTRY_URL.replace(/\/+$/, '');
 
 const authorizationHeader = (license: string) => ({ Authorization: `Bearer ${license}` });
 
@@ -58,15 +47,13 @@ export type SearchResult =
 export const searchPackageNames = async ({
   text,
   license,
-  env,
   fetchImplementation,
 }: {
   text: string;
   license: string;
-  env: NodeJS.ProcessEnv;
   fetchImplementation: typeof fetch;
 }): Promise<SearchResult> => {
-  const registryUrl = getRegistryUrl(env);
+  const registryUrl = REGISTRY_URL;
   const searchUrl = `${registryUrl}/-/v1/search?text=${encodeURIComponent(text)}&size=${SEARCH_PAGE_SIZE}`;
 
   try {
@@ -100,15 +87,13 @@ export const searchPackageNames = async ({
 export const fetchPackument = async ({
   packageName,
   license,
-  env,
   fetchImplementation,
 }: {
   packageName: string;
   license: string;
-  env: NodeJS.ProcessEnv;
   fetchImplementation: typeof fetch;
 }): Promise<PackumentLookup> => {
-  const registryUrl = getRegistryUrl(env);
+  const registryUrl = REGISTRY_URL;
   let response: Response;
 
   try {

@@ -67,7 +67,9 @@ export const readAppDependencyVersion = async (
     ? readInstalledVersion(appDir, packageName)
     : undefined;
 
-export const canCheckStrapiCompatibility = (strapiVersion: string | undefined): boolean =>
+export const canCheckStrapiCompatibility = (
+  strapiVersion: string | undefined
+): strapiVersion is string =>
   strapiVersion !== undefined &&
   semver.valid(strapiVersion) !== null &&
   semver.prerelease(strapiVersion) === null;
@@ -84,34 +86,45 @@ export interface VersionChoice {
 const getStrapiRange = (packumentVersion: PackumentVersion | undefined) =>
   packumentVersion?.peerDependencies?.[STRAPI_PACKAGE_NAME];
 
+const fitsStrapiVersion = (
+  packumentVersion: PackumentVersion,
+  strapiVersion: string | undefined
+) => {
+  const strapiRange = getStrapiRange(packumentVersion);
+
+  return (
+    !canCheckStrapiCompatibility(strapiVersion) ||
+    strapiRange === undefined ||
+    semver.satisfies(strapiVersion, strapiRange)
+  );
+};
+
 export const pickTargetVersion = (
   packument: Packument,
   strapiVersion: string | undefined
 ): VersionChoice => {
+  const latestVersion = packument['dist-tags']?.latest;
+  const versionCap =
+    latestVersion !== undefined && semver.valid(latestVersion) && !isPrerelease(latestVersion)
+      ? latestVersion
+      : undefined;
+
   const stableVersions = Object.values(packument.versions ?? {})
     .filter(
       (packumentVersion) =>
         semver.valid(packumentVersion.version) !== null &&
         semver.prerelease(packumentVersion.version) === null &&
-        !packumentVersion.deprecated
+        !packumentVersion.deprecated &&
+        (versionCap === undefined || semver.lte(packumentVersion.version, versionCap))
     )
     .sort((left, right) => semver.rcompare(left.version, right.version));
-
-  const shouldCheckCompatibility = canCheckStrapiCompatibility(strapiVersion);
-  const fitsStrapiVersion = (packumentVersion: PackumentVersion) => {
-    const strapiRange = getStrapiRange(packumentVersion);
-
-    return (
-      !shouldCheckCompatibility ||
-      strapiRange === undefined ||
-      semver.satisfies(strapiVersion as string, strapiRange)
-    );
-  };
 
   const newest = stableVersions[0];
 
   return {
-    targetVersion: stableVersions.find(fitsStrapiVersion)?.version,
+    targetVersion: stableVersions.find((packumentVersion) =>
+      fitsStrapiVersion(packumentVersion, strapiVersion)
+    )?.version,
     newestVersion: newest?.version,
     newestVersionStrapiRange: getStrapiRange(newest),
   };
@@ -139,12 +152,74 @@ export const describeNewerIncompatibleVersion = (
 
 export const resolveRequestedVersion = (
   packument: Packument,
-  requestedVersion: string
-): string | undefined =>
-  packument.versions?.[requestedVersion]?.version ?? packument['dist-tags']?.[requestedVersion];
+  requestedVersion: string,
+  strapiVersion: string | undefined
+): string | undefined => {
+  const publishedVersions = Object.keys(packument.versions ?? {});
+  const taggedVersion = packument['dist-tags']?.[requestedVersion];
+
+  if (publishedVersions.includes(requestedVersion)) {
+    return requestedVersion;
+  }
+
+  if (taggedVersion !== undefined && publishedVersions.includes(taggedVersion)) {
+    return taggedVersion;
+  }
+
+  if (!semver.validRange(requestedVersion)) {
+    return undefined;
+  }
+
+  // A range asks for "something in it", not for one version: like the automatic choice, prefer a
+  // version that is not deprecated and fits the app's Strapi, and like npm, prefer `latest`.
+  const inRange = Object.values(packument.versions ?? {}).filter(
+    (packumentVersion) =>
+      semver.valid(packumentVersion.version) !== null &&
+      semver.satisfies(packumentVersion.version, requestedVersion)
+  );
+  const notDeprecated = inRange.filter((packumentVersion) => !packumentVersion.deprecated);
+  const fitting = notDeprecated.filter((packumentVersion) =>
+    fitsStrapiVersion(packumentVersion, strapiVersion)
+  );
+  const pick = (candidates: PackumentVersion[]): string | undefined => {
+    const versions = candidates.map((packumentVersion) => packumentVersion.version);
+    const latestVersion = packument['dist-tags']?.latest;
+
+    if (latestVersion !== undefined && versions.includes(latestVersion)) {
+      return latestVersion;
+    }
+
+    return semver.maxSatisfying(versions, requestedVersion) ?? undefined;
+  };
+
+  return pick(fitting) ?? pick(notDeprecated) ?? pick(inRange);
+};
+
+/** The Strapi range a version requires, when the app's Strapi version is known not to fit it. */
+export const findUnsupportedStrapiRange = (
+  packument: Packument,
+  version: string,
+  strapiVersion: string | undefined
+): string | undefined => {
+  const strapiRange = getStrapiRange(packument.versions?.[version]);
+
+  if (!canCheckStrapiCompatibility(strapiVersion) || strapiRange === undefined) {
+    return undefined;
+  }
+
+  return semver.satisfies(strapiVersion, strapiRange) ? undefined : strapiRange;
+};
 
 /** A prerelease, such as an experimental build, is usually ahead of the latest stable release. */
 export const isPrerelease = (version: string): boolean => semver.prerelease(version) !== null;
+
+/**
+ * True when semver lets the target break the installed version: a new major, or a new minor in 0.x,
+ * as npm's `^` range reads it.
+ */
+export const isMajorUpgrade = (installedVersion: string, targetVersion: string): boolean =>
+  semver.valid(installedVersion) !== null &&
+  !semver.satisfies(targetVersion, `^${installedVersion}`);
 
 /** True when the target is newer than what is installed. A newer install is never downgraded. */
 export const isUpgrade = (installedVersion: string, targetVersion: string): boolean =>

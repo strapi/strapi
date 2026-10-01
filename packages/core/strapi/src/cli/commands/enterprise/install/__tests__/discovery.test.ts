@@ -60,7 +60,6 @@ const discover = async (appDir: string, fetchImplementation: typeof fetch) =>
     appDir,
     license: 'the-license',
     logger: createTestLogger(),
-    env: {},
     fetchImplementation,
   });
 
@@ -113,7 +112,6 @@ describe('discoverEnterprisePlugins', () => {
       appDir: await createTemporaryDirectory(),
       license: 'the-license',
       logger,
-      env: {},
       fetchImplementation: createRegistryFetch({
         searchResult: [AI_BYOK, NEW_PLUGIN],
         packuments: { [AI_BYOK]: aiByokPackument, [NEW_PLUGIN]: 503 },
@@ -167,7 +165,6 @@ describe('discoverEnterprisePlugins', () => {
       appDir,
       license: 'the-license',
       logger,
-      env: {},
       fetchImplementation: createRegistryFetch({
         searchResult: 500,
         packuments: { [AI_BYOK]: aiByokPackument },

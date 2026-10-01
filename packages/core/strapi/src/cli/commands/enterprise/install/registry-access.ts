@@ -2,12 +2,11 @@ import path from 'path';
 import fse from 'fs-extra';
 
 import type { Logger } from '../../../utils/logger';
-import { ENTERPRISE_SCOPE } from './constants';
+import { ENTERPRISE_REGISTRY_URL, ENTERPRISE_SCOPE } from './constants';
 import { EnterpriseInstallError } from './errors';
 import { listAncestorDirectories } from './directories';
 import type { ResolvedLicense } from './license';
 import { readsYarnrcYml, type DetectedPackageManager } from './package-manager';
-import { getRegistryUrl } from './registry';
 
 const SCOPE_REGISTRY_KEY = `${ENTERPRISE_SCOPE}:registry`;
 const YARNRC_SCOPE_NAME = ENTERPRISE_SCOPE.slice(1);
@@ -37,6 +36,7 @@ export type RegistryAccessOutcome = {
   filePath: string;
   /** The configuration the file should contain, with a placeholder instead of the license. */
   expectedConfiguration: string;
+  yarnrcScope?: 'missing' | 'present';
 } & (
   | { status: ConfiguredStatus }
   /** `linesToAdd` holds the license, or a reference to it. */
@@ -60,14 +60,16 @@ export const describeRegistry = (registryUrl: string): ConfiguredRegistry => {
 export const buildNpmrcConfiguration = (token: string, registry: ConfiguredRegistry): string =>
   [`${SCOPE_REGISTRY_KEY}=${registry.url}`, `${registry.tokenKey}=${token}`].join('\n');
 
-export const buildYarnrcConfiguration = (token: string, registry: ConfiguredRegistry): string =>
+const buildYarnrcScopeConfiguration = (token: string, registry: ConfiguredRegistry): string =>
   [
-    'npmScopes:',
     `  ${YARNRC_SCOPE_NAME}:`,
     `    npmRegistryServer: '${registry.url}'`,
     '    npmAlwaysAuth: true',
     `    npmAuthToken: '${token}'`,
   ].join('\n');
+
+export const buildYarnrcConfiguration = (token: string, registry: ConfiguredRegistry): string =>
+  ['npmScopes:', buildYarnrcScopeConfiguration(token, registry)].join('\n');
 
 export const getUserNpmrcPath = (env: NodeJS.ProcessEnv, homeDir: string): string =>
   env.NPM_CONFIG_USERCONFIG ?? env.npm_config_userconfig ?? path.join(homeDir, '.npmrc');
@@ -226,10 +228,12 @@ export const inspectYarnrc = async (
   writtenToken: string
 ): Promise<RegistryAccessOutcome> => {
   const content = await readFileIfExists(filePath);
+  const scope = readYarnrcScope(content);
   const outcome = (status: ConfiguredStatus): RegistryAccessOutcome => ({
     status,
     filePath,
-    expectedConfiguration: buildYarnrcConfiguration(LICENSE_PLACEHOLDER, registry),
+    expectedConfiguration: buildYarnrcScopeConfiguration(LICENSE_PLACEHOLDER, registry),
+    yarnrcScope: scope === undefined ? 'missing' : 'present',
   });
 
   if (!/^npmScopes\s*:/m.test(content)) {
@@ -240,8 +244,6 @@ export const inspectYarnrc = async (
       linesToAdd: buildYarnrcConfiguration(writtenToken, registry),
     };
   }
-
-  const scope = readYarnrcScope(content);
 
   if (scope === undefined) {
     return outcome('manual-edit-needed');
@@ -266,8 +268,16 @@ export const inspectYarnrc = async (
   );
 };
 
+const describeManualEdit = (yarnrcScope: RegistryAccessOutcome['yarnrcScope']): string => {
+  if (yarnrcScope === 'present') {
+    return `Replace its ${YARNRC_SCOPE_NAME} scope with this`;
+  }
+
+  return yarnrcScope === 'missing' ? 'Add this under its existing npmScopes key' : 'Add this to it';
+};
+
 const assertRegistryAccessUsable = ({
-  outcome: { status, filePath, expectedConfiguration },
+  outcome: { status, filePath, expectedConfiguration, yarnrcScope },
   overridingFiles,
   registryHost,
   userConfigPath,
@@ -278,14 +288,16 @@ const assertRegistryAccessUsable = ({
   userConfigPath: string;
 }): void => {
   if (status === 'different-license') {
+    const replacedLines = yarnrcScope ? `its ${YARNRC_SCOPE_NAME} scope` : 'those lines';
+
     throw new EnterpriseInstallError(
-      `${filePath} already sets up ${registryHost} with another license, so installing would fail. Replace those lines with:\n\n${expectedConfiguration}\n`
+      `${filePath} already sets up ${registryHost} with another license, so installing would fail. Replace ${replacedLines} with:\n\n${expectedConfiguration}\n`
     );
   }
 
   if (status === 'manual-edit-needed') {
     throw new EnterpriseInstallError(
-      `${filePath} could not be updated automatically. Add this to it, then run the command again:\n\n${expectedConfiguration}\n`
+      `${filePath} could not be updated automatically. ${describeManualEdit(yarnrcScope)}, then run the command again:\n\n${expectedConfiguration}\n`
     );
   }
 
@@ -395,7 +407,7 @@ export const prepareRegistryAccess = async ({
   env: NodeJS.ProcessEnv;
   homeDir: string;
 }): Promise<RegistryAccess> => {
-  const registry = describeRegistry(getRegistryUrl(env));
+  const registry = describeRegistry(ENTERPRISE_REGISTRY_URL);
   const usesYarnrcYml = readsYarnrcYml(packageManager);
   const userConfigPath = usesYarnrcYml
     ? getUserYarnrcPath(homeDir)

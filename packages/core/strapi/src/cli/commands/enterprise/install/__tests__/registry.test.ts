@@ -1,4 +1,4 @@
-import { fetchPackument, getRegistryUrl, searchPackageNames } from '../registry';
+import { fetchPackument, searchPackageNames } from '../registry';
 import { createFetchResponse, createPackument } from './test-helpers';
 
 const packageName = '@strapi-enterprise/plugin-ai-byok';
@@ -19,7 +19,6 @@ describe('searchPackageNames', () => {
       searchPackageNames({
         text: '@strapi-enterprise',
         license: 'the-license',
-        env: {},
         fetchImplementation,
       })
     ).resolves.toEqual({
@@ -40,7 +39,6 @@ describe('searchPackageNames', () => {
       searchPackageNames({
         text: '@strapi-enterprise',
         license: 'the-license',
-        env: {},
         fetchImplementation,
       })
     ).resolves.toEqual({ status: 'unavailable' });
@@ -51,7 +49,6 @@ describe('searchPackageNames', () => {
       searchPackageNames({
         text: '@strapi-enterprise',
         license: 'the-license',
-        env: {},
         fetchImplementation: jest.fn().mockResolvedValue(createFetchResponse(401)),
       })
     ).resolves.toEqual({
@@ -69,7 +66,6 @@ describe('fetchPackument', () => {
     const lookup = await fetchPackument({
       packageName,
       license: 'the-license',
-      env: {},
       fetchImplementation,
     });
 
@@ -89,7 +85,7 @@ describe('fetchPackument', () => {
     const fetchImplementation = jest.fn().mockResolvedValue(createFetchResponse(status));
 
     await expect(
-      fetchPackument({ packageName, license: 'the-license', env: {}, fetchImplementation })
+      fetchPackument({ packageName, license: 'the-license', fetchImplementation })
     ).resolves.toEqual({ status: expectedStatus });
   });
 
@@ -97,34 +93,18 @@ describe('fetchPackument', () => {
     const fetchImplementation = jest.fn().mockResolvedValue(createFetchResponse(401));
 
     await expect(
-      fetchPackument({ packageName, license: 'the-license', env: {}, fetchImplementation })
+      fetchPackument({ packageName, license: 'the-license', fetchImplementation })
     ).resolves.toEqual({
       status: 'license-rejected',
       message: expect.stringContaining('https://packages.strapi.io rejected this Strapi license.'),
     });
   });
 
-  it('uses STRAPI_ENTERPRISE_REGISTRY_URL when it is set', async () => {
-    const fetchImplementation = jest.fn().mockResolvedValue(createFetchResponse(404));
-
-    await fetchPackument({
-      packageName,
-      license: 'the-license',
-      env: { STRAPI_ENTERPRISE_REGISTRY_URL: 'http://localhost:4873/' },
-      fetchImplementation,
-    });
-
-    expect(fetchImplementation).toHaveBeenCalledWith(
-      'http://localhost:4873/@strapi-enterprise/plugin-ai-byok',
-      expect.anything()
-    );
-  });
-
   it('explains when the registry cannot be reached', async () => {
     const fetchImplementation = jest.fn().mockRejectedValue(new TypeError('fetch failed'));
 
     await expect(
-      fetchPackument({ packageName, license: 'the-license', env: {}, fetchImplementation })
+      fetchPackument({ packageName, license: 'the-license', fetchImplementation })
     ).resolves.toEqual({
       status: 'unavailable',
       message: expect.stringContaining('Could not reach https://packages.strapi.io.'),
@@ -135,26 +115,11 @@ describe('fetchPackument', () => {
     const fetchImplementation = jest.fn().mockResolvedValue(createFetchResponse(500));
 
     await expect(
-      fetchPackument({ packageName, license: 'the-license', env: {}, fetchImplementation })
+      fetchPackument({ packageName, license: 'the-license', fetchImplementation })
     ).resolves.toEqual({
       status: 'unavailable',
       message: expect.stringContaining('https://packages.strapi.io answered HTTP 500'),
     });
-  });
-});
-
-describe('getRegistryUrl', () => {
-  it('uses the Strapi registry when STRAPI_ENTERPRISE_REGISTRY_URL is unset or empty', () => {
-    expect(getRegistryUrl({})).toBe('https://packages.strapi.io');
-    expect(getRegistryUrl({ STRAPI_ENTERPRISE_REGISTRY_URL: '  ' })).toBe(
-      'https://packages.strapi.io'
-    );
-  });
-
-  it('stops with a one-line error for a value that is not a URL', () => {
-    expect(() => getRegistryUrl({ STRAPI_ENTERPRISE_REGISTRY_URL: 'not a url' })).toThrow(
-      'STRAPI_ENTERPRISE_REGISTRY_URL is not a valid URL: not a url'
-    );
   });
 });
 
@@ -172,7 +137,6 @@ describe('fetchPackument with invalid data', () => {
       fetchPackument({
         packageName: '@strapi-enterprise/plugin-ai-byok',
         license: 'the-license',
-        env: {},
         fetchImplementation: jest.fn().mockResolvedValue(invalidResponse),
       })
     ).resolves.toEqual({

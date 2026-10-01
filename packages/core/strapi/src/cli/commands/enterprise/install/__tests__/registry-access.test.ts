@@ -311,6 +311,43 @@ describe('prepareRegistryAccess', () => {
     expect(await fse.readFile(npmrcPath, 'utf8')).toBe(OTHER_LICENSE_NPMRC);
   });
 
+  it.each([
+    [
+      'adds the scope under the existing npmScopes key',
+      "npmScopes:\n  acme:\n    npmRegistryServer: 'https://npm.example.com'\n",
+      'Add this under its existing npmScopes key',
+    ],
+    [
+      'replaces an incomplete strapi-enterprise scope',
+      "npmScopes:\n  strapi-enterprise:\n    npmRegistryServer: 'https://packages.strapi.io/'\n",
+      'Replace its strapi-enterprise scope with this',
+    ],
+  ])(
+    'in a .yarnrc.yml with npmScopes, %s without repeating the key',
+    async (_case, content, edit) => {
+      const homeDir = await createTemporaryDirectory();
+      await fse.writeFile(path.join(homeDir, '.yarnrc.yml'), content);
+
+      const preparing = prepare({ homeDir, packageManager: { name: 'yarn', majorVersion: 4 } });
+
+      await expect(preparing).rejects.toThrow(edit);
+      await expect(preparing).rejects.toThrow(/:\n\n {2}strapi-enterprise:\n/);
+      await expect(preparing).rejects.not.toThrow(/npmScopes:\n {2}strapi-enterprise/);
+    }
+  );
+
+  it('replaces the strapi-enterprise scope of a .yarnrc.yml set up with another license', async () => {
+    const homeDir = await createTemporaryDirectory();
+    await fse.writeFile(
+      path.join(homeDir, '.yarnrc.yml'),
+      buildYarnrcConfiguration('other-license', STRAPI_REGISTRY)
+    );
+
+    await expect(
+      prepare({ homeDir, packageManager: { name: 'yarn', majorVersion: 4 } })
+    ).rejects.toThrow('Replace its strapi-enterprise scope with:\n\n  strapi-enterprise:');
+  });
+
   it('stops when the file cannot be updated automatically', async () => {
     const homeDir = await createTemporaryDirectory();
     await fse.writeFile(
@@ -319,18 +356,6 @@ describe('prepareRegistryAccess', () => {
     );
 
     await expect(prepare({ homeDir })).rejects.toThrow('could not be updated automatically');
-  });
-
-  it('points to STRAPI_ENTERPRISE_REGISTRY_URL when it is set, like the registry lookups', async () => {
-    const homeDir = await createTemporaryDirectory();
-
-    await (
-      await prepare({ homeDir, env: { STRAPI_ENTERPRISE_REGISTRY_URL: 'http://localhost:4873' } })
-    ).apply();
-
-    expect(await fse.readFile(path.join(homeDir, '.npmrc'), 'utf8')).toBe(
-      `@strapi-enterprise:registry=http://localhost:4873/\n//localhost:4873/:_authToken=${LICENSE}\n`
-    );
   });
 
   it.each([

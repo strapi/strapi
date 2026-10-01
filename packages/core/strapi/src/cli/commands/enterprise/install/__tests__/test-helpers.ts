@@ -32,7 +32,7 @@ const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&
 export const expectedSetupWarning = (packageName: string) =>
   expect.stringMatching(
     new RegExp(
-      `^⚠️  Set up ${escapeRegExp(packageName)} before starting Strapi, following the guide at https?://\\S+$`
+      `^Set up ${escapeRegExp(packageName)} before starting Strapi, following the guide at https?://\\S+$`
     )
   );
 

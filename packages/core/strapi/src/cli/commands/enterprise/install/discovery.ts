@@ -1,9 +1,8 @@
 import type { Logger } from '../../../utils/logger';
-import { ENTERPRISE_SCOPE } from './constants';
+import { ENTERPRISE_REGISTRY_URL, ENTERPRISE_SCOPE } from './constants';
 import { EnterpriseInstallError } from './errors';
 import {
   fetchPackument,
-  getRegistryUrl,
   searchPackageNames,
   type Packument,
   type PackumentLookup,
@@ -91,17 +90,15 @@ export const discoverEnterprisePlugins = async ({
   appDir,
   license,
   logger,
-  env,
   fetchImplementation,
 }: {
   appDir: string;
   license: string;
   logger: Logger;
-  env: NodeJS.ProcessEnv;
   fetchImplementation: typeof fetch;
 }): Promise<DiscoveredPlugin[]> => {
   const [searchResult, installedPluginNames] = await Promise.all([
-    searchPackageNames({ text: ENTERPRISE_SCOPE, license, env, fetchImplementation }),
+    searchPackageNames({ text: ENTERPRISE_SCOPE, license, fetchImplementation }),
     listInstalledEnterprisePlugins(appDir),
   ]);
 
@@ -110,7 +107,7 @@ export const discoverEnterprisePlugins = async ({
   }
 
   if (searchResult.status === 'unavailable') {
-    const registryHost = new URL(getRegistryUrl(env)).host;
+    const registryHost = new URL(ENTERPRISE_REGISTRY_URL).host;
 
     if (installedPluginNames.length === 0) {
       throw new EnterpriseInstallError(
@@ -135,7 +132,7 @@ export const discoverEnterprisePlugins = async ({
   const discoveredPlugins = await Promise.all(
     candidatePackageNames.map(async (packageName): Promise<DiscoveredPlugin | undefined> => {
       const [lookup, installedVersion] = await Promise.all([
-        fetchPackument({ packageName, license, env, fetchImplementation }),
+        fetchPackument({ packageName, license, fetchImplementation }),
         readAppDependencyVersion(appDir, packageName),
       ]);
 

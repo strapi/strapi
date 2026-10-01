@@ -6,7 +6,13 @@ import { isPrerelease } from './versions';
 
 type PluginRowState =
   /** Installed, and a newer compatible version exists. Selected by default. */
-  | { state: 'upgrade'; installedVersion: string; targetVersion: string; newerVersionNote?: string }
+  | {
+      state: 'upgrade';
+      installedVersion: string;
+      targetVersion: string;
+      isMajorUpgrade: boolean;
+      newerVersionNote?: string;
+    }
   /** Not installed, and the license includes it. */
   | { state: 'install'; targetVersion: string; newerVersionNote?: string }
   /** Installed and up to date for this Strapi version. */
@@ -87,6 +93,14 @@ export const isSelectable = (row: PluginRow): row is SelectableRow =>
 export const toInstallSpec = (row: SelectableRow): string =>
   `${row.entry.packageName}@${row.targetVersion}`;
 
+const describeUpgrade = (row: Extract<PluginRow, { state: 'upgrade' }>): string => {
+  if (isPrerelease(row.installedVersion)) {
+    return '[stable release]';
+  }
+
+  return row.isMajorUpgrade ? '[major upgrade]' : '[upgrade]';
+};
+
 interface CheckboxChoice {
   name: string;
   value?: string;
@@ -103,13 +117,12 @@ export const toCheckboxChoice = (row: PluginRow): CheckboxChoice => {
 
   switch (row.state) {
     case 'upgrade': {
-      // Replacing a prerelease with the stable release can be a step back, so it is only offered.
-      const replacesPrerelease = isPrerelease(row.installedVersion);
+      const upgradeTag = describeUpgrade(row);
 
       return {
-        name: `${label}  ${row.installedVersion} → ${row.targetVersion} ${replacesPrerelease ? '[stable release]' : '[upgrade]'}${noteSuffix(row.newerVersionNote)}`,
+        name: `${label}  ${row.installedVersion} → ${row.targetVersion} ${upgradeTag}${noteSuffix(row.newerVersionNote)}`,
         value: toInstallSpec(row),
-        checked: !replacesPrerelease,
+        checked: upgradeTag === '[upgrade]',
       };
     }
     case 'install':
