@@ -477,7 +477,7 @@ describe('AssetDetails (asset details drawer body)', () => {
 
       expect(screen.queryByText('Replacing the file…')).not.toBeInTheDocument();
       expect(screen.queryByText('Deleting the file…')).not.toBeInTheDocument();
-      expect(screen.queryByText('Saving the cropped copy…')).not.toBeInTheDocument();
+      expect(screen.queryByText('Saving the copy…')).not.toBeInTheDocument();
     });
 
     // Driven directly rather than through the drawer: the branch order only
@@ -493,7 +493,7 @@ describe('AssetDetails (asset details drawer body)', () => {
 
       it.each([
         ['delete', { ...idle, isDeleting: true }, 'Deleting the file…'],
-        ['crop copy', { ...idle, isCropCopying: true }, 'Saving the cropped copy…'],
+        ['crop copy', { ...idle, isCropCopying: true }, 'Saving the copy…'],
         ['replace', { ...idle, isReplacing: true }, 'Replacing the file…'],
       ])('names the %s when it is the only one running', (_label, state, expected) => {
         expect(getBusyMessage(state)?.defaultMessage).toBe(expected);
@@ -509,7 +509,7 @@ describe('AssetDetails (asset details drawer body)', () => {
       it('prefers crop copy over replace', () => {
         expect(
           getBusyMessage({ ...idle, isCropCopying: true, isReplacing: true })?.defaultMessage
-        ).toBe('Saving the cropped copy…');
+        ).toBe('Saving the copy…');
       });
     });
   });
