@@ -59,35 +59,43 @@ export const useEditAsset = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const queryClient = useQueryClient();
-  const abortController = new AbortController();
-  const signal = abortController.signal;
+  const abortControllerRef = React.useRef<AbortController | null>(null);
   const { post } = useFetchClient();
 
   const mutation = useMutation<
     UpdateFile.Response['data'],
     ErrorMutation,
     { asset: FileAsset; file: File }
-  >(({ asset, file }) => editAssetRequest(asset, file, signal, setProgress, post), {
-    onSuccess() {
-      queryClient.refetchQueries([pluginId, 'assets'], { active: true });
-      queryClient.refetchQueries([pluginId, 'asset-count'], { active: true });
-      queryClient.refetchQueries([pluginId, 'folders'], { active: true });
+  >(
+    ({ asset, file }) => {
+      // One controller per request, so `cancel` reaches it after the hook re-renders.
+      const abortController = new AbortController();
+      abortControllerRef.current = abortController;
+
+      return editAssetRequest(asset, file, abortController.signal, setProgress, post);
     },
-    onError(reason) {
-      if (reason?.response?.status === 403) {
-        toggleNotification({
-          type: 'info',
-          message: formatMessage({ id: getTrad('permissions.not-allowed.update') }),
-        });
-      } else {
-        toggleNotification({ type: 'danger', message: reason?.message });
-      }
-    },
-  });
+    {
+      onSuccess() {
+        queryClient.refetchQueries([pluginId, 'assets'], { active: true });
+        queryClient.refetchQueries([pluginId, 'asset-count'], { active: true });
+        queryClient.refetchQueries([pluginId, 'folders'], { active: true });
+      },
+      onError(reason) {
+        if (reason?.response?.status === 403) {
+          toggleNotification({
+            type: 'info',
+            message: formatMessage({ id: getTrad('permissions.not-allowed.update') }),
+          });
+        } else {
+          toggleNotification({ type: 'danger', message: reason?.message });
+        }
+      },
+    }
+  );
 
   const editAsset = (asset: FileAsset, file: File) => mutation.mutateAsync({ asset, file });
 
-  const cancel = () => abortController.abort();
+  const cancel = () => abortControllerRef.current?.abort();
 
   return { ...mutation, cancel, editAsset, progress, status: mutation.status };
 };
