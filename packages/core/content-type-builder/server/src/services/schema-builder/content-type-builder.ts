@@ -332,8 +332,11 @@ export default function createComponentBuilder() {
         .set(['info', 'displayName'], infos.displayName)
         .set(['info', 'description'], infos.description)
         .set('options', {
+          ...contentType.schema.options,
           ...infos.options,
-          draftAndPublish: infos.draftAndPublish,
+          ...(infos.draftAndPublish !== undefined && {
+            draftAndPublish: infos.draftAndPublish,
+          }),
         })
         .set('pluginOptions', infos.pluginOptions)
         .setAttributes(this.convertAttributes(newAttributes));
