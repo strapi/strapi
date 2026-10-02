@@ -181,7 +181,7 @@
   "Settings.profile.form.section.experience.documentation": "dokumentáció",
   "Settings.profile.form.section.experience.interfaceLanguage": "A felület nyelve",
   "Settings.profile.form.section.experience.interfaceLanguage.hint": "Ez csak a saját felületét jeleníti meg a kiválasztott nyelven.",
-  "Settings.profile.form.section.experience.interfaceLanguageHelp": "A kiválasztás csak az Ön számára módosítja a felület nyelvét. Kérjük, olvassa el ezt a {document}, hogy más nyelveket a csapata számára is elérhetővé tehesse.",
+  "Settings.profile.form.section.experience.interfaceLanguageHelp": "A kiválasztás csak az Ön számára módosítja a felület nyelvét. Kérjük, olvassa el ezt a {here}, hogy más nyelveket a csapata számára is elérhetővé tehesse.",
   "Settings.profile.form.section.experience.mode.label": "Felület mód",
   "Settings.profile.form.section.experience.mode.hint": "Megjeleníti a felhasználói felületedet a kiválasztott módban.",
   "Settings.profile.form.section.experience.mode.option-label": "{name} mód",
