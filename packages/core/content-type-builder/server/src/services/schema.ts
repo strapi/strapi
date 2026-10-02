@@ -4,9 +4,17 @@ import { mapValues } from 'lodash/fp';
 import type { Schema } from '@strapi/types';
 
 import createBuilder from './schema-builder';
+import { createMigrationBuilder } from './migration-builder';
+import type {
+  AttributeRenamesMapping,
+  RenameAttributeDefinition,
+  UnsupportedRename,
+} from './migration-builder';
 import { finalizeSchemaMutation, rollbackSchemaMutation } from './schema-mutation';
 import { getService } from '../utils';
+import { validateUpdateSchema } from '../controllers/validation/schema';
 import type { Schema as CTBSchema } from '../controllers/validation/schema';
+import type { AttributeRenameMigrationMode } from '../config';
 import {
   assertCTBOwnedApplicationContentType,
   getRestrictRelationsTo,
@@ -70,6 +78,313 @@ const removeDeletedUIDTargetFieldsOnUpdates = (schema: CTBSchema) => {
       }
     });
   });
+};
+
+interface CollectedRename {
+  uid: string;
+  oldName: string;
+  newName: string;
+  newAttribute?: RenameAttributeDefinition;
+}
+
+const getAttributeRenameMigrationMode = (): AttributeRenameMigrationMode => {
+  return strapi
+    .plugin('content-type-builder')
+    .config('renameMigrations.attributes', 'prompt-before-save');
+};
+
+/**
+ * Collects attribute renames from the update-schema payload. The admin sends an
+ * ordered `renames` array per updated content-type / component: the exact path
+ * of rename hops the user performed (e.g. `a -> tmp`, `b -> a`, `tmp -> b` for a
+ * swap). Order is preserved so the generated migration can replay each hop
+ * verbatim — which is inherently collision-free because the Content-Type Builder
+ * never allows two fields to share a name at any instant.
+ */
+const collectRenames = (schema: CTBSchema): CollectedRename[] => {
+  const renames: CollectedRename[] = [];
+
+  type RenameHop = { oldName?: string; newName?: string };
+  type AttributeEntry = { action?: string; name?: string; properties?: RenameAttributeDefinition };
+  type RenameAwareEntry = {
+    action?: string;
+    uid: string;
+    renames?: RenameHop[];
+    attributes?: AttributeEntry[];
+  };
+
+  const collectFrom = (entries: RenameAwareEntry[]) => {
+    entries
+      .filter((entry) => entry.action === 'update' && Array.isArray(entry.renames))
+      .forEach((entry) => {
+        // Only the last hop onto a name produces the field that carries the
+        // final definition: in `a -> b, b -> c, x -> b` the first `b` is `a`'s
+        // intermediate name and the final `b` is `x`'s field.
+        const lastHopByNewName = new Map<string, number>();
+        entry.renames!.forEach((hop, index) => {
+          if (hop.newName) {
+            lastHopByNewName.set(hop.newName, index);
+          }
+        });
+
+        entry.renames!.forEach((hop, index) => {
+          if (hop.oldName && hop.newName && hop.oldName !== hop.newName) {
+            // The definition the field ends up with in this save, so the builder
+            // can refuse hops that also change the field's storage (type,
+            // relation target, component…). Intermediate hops of a chain get no
+            // definition and are checked when the chain completes.
+            const newAttribute =
+              lastHopByNewName.get(hop.newName) === index
+                ? entry.attributes?.find(
+                    (attribute) => attribute.action !== 'delete' && attribute.name === hop.newName
+                  )?.properties
+                : undefined;
+
+            renames.push({
+              uid: entry.uid,
+              oldName: hop.oldName,
+              newName: hop.newName,
+              newAttribute,
+            });
+          }
+        });
+      });
+  };
+
+  collectFrom(schema.contentTypes as unknown as RenameAwareEntry[]);
+  collectFrom(schema.components as unknown as RenameAwareEntry[]);
+
+  return renames;
+};
+
+/**
+ * Drops renames whose final name is not an attribute after this save (it was
+ * deleted in the same save), so no store is pointed at a field that is gone.
+ */
+const keepSavedAttributes = (
+  schema: CTBSchema,
+  mapping: AttributeRenamesMapping
+): AttributeRenamesMapping => {
+  type Entry = { action?: string; uid: string; attributes?: { action?: string; name?: string }[] };
+  const entries = [
+    ...(schema.contentTypes as unknown as Entry[]),
+    ...(schema.components as unknown as Entry[]),
+  ];
+
+  const result: AttributeRenamesMapping = {};
+
+  for (const [uid, renames] of Object.entries(mapping)) {
+    const entry = entries.find((candidate) => candidate.uid === uid);
+    const saved = new Set(
+      (entry?.attributes ?? [])
+        .filter((attribute) => attribute.action !== 'delete' && attribute.name)
+        .map((attribute) => attribute.name as string)
+    );
+
+    for (const [origin, final] of Object.entries(renames)) {
+      if (saved.has(final)) {
+        result[uid] ??= {};
+        result[uid][origin] = final;
+      }
+    }
+  }
+
+  return result;
+};
+
+const describeUnsupportedReason = (reason: UnsupportedRename['reason']): string => {
+  switch (reason) {
+    case 'type-changed':
+      return 'the field type, relation or component also changed';
+    case 'unsupported-type':
+      return 'the field type cannot be migrated (e.g. polymorphic relation)';
+    case 'attribute-not-found':
+      return 'the field is not in the current schema';
+    case 'target-occupied':
+      return 'the target field still exists in the current schema';
+    case 'model-not-found':
+    default:
+      return 'the type is not in the current schema';
+  }
+};
+
+/**
+ * Generates a single data-preserving rename migration for the accepted renames
+ * in this save. Must run before the server reloads, while `strapi.db.metadata`
+ * still reflects the old (pre-rename) schema. Resolves to the written file's
+ * path (so a failed save can remove it), or `null` when nothing was written.
+ */
+const generateRenameMigrations = async (schema: CTBSchema): Promise<string | null> => {
+  // In prompt modes the admin strips refused renames before sending the payload.
+  if (getAttributeRenameMigrationMode() === 'never') {
+    return null;
+  }
+
+  const renames = collectRenames(schema);
+  if (renames.length === 0) {
+    return null;
+  }
+
+  const migrationBuilder = createMigrationBuilder({ strapi });
+
+  for (const { uid, oldName, newName, newAttribute } of renames) {
+    migrationBuilder.addRenameAttribute(uid, { oldName, newName, newAttribute });
+  }
+
+  const attributeRenames = keepSavedAttributes(schema, migrationBuilder.attributeRenamesMapping());
+  if (Object.keys(attributeRenames).length > 0) {
+    migrationBuilder.addAttributeRenames(attributeRenames);
+  }
+
+  const unsupported = migrationBuilder.getUnsupported();
+  if (unsupported.length > 0) {
+    const fields = unsupported
+      .map((u) => `${u.uid}.${u.oldName} (${describeUnsupportedReason(u.reason)})`)
+      .join(', ');
+    strapi.log.warn(
+      `[content-type-builder] Could not generate a rename migration for ${unsupported.length} field(s): ${fields}. Data in these fields may not be preserved.`
+    );
+  }
+
+  if (migrationBuilder.hasChanges()) {
+    return migrationBuilder.writeFiles();
+  }
+
+  return null;
+};
+
+/**
+ * Renames a single attribute on a content-type or component and generates the
+ * data-preserving migration in one step. Used by the `strapi rename:field` CLI
+ * command so scripted / non-UI workflows get the same behaviour as the admin.
+ *
+ * It reuses the regular `updateSchema` path (and therefore the same rename
+ * resolver via `generateRenameMigrations`), so the migration is resolved against
+ * the pre-reload `strapi.db.metadata` exactly like the admin save. The caller is
+ * responsible for not reloading before this resolves (the CLI simply exits).
+ *
+ * Unlike the admin, there is no one to confirm a data-losing rename, so it
+ * refuses before touching the schema when the rename cannot be migrated.
+ */
+export const renameAttribute = async (
+  uid: string,
+  oldName: string,
+  newName: string
+): Promise<void> => {
+  const { ApplicationError } = errors;
+
+  if (!oldName || !newName) {
+    throw new ApplicationError('Both an old and a new attribute name are required');
+  }
+
+  if (oldName === newName) {
+    throw new ApplicationError(`Cannot rename "${oldName}" to itself`);
+  }
+
+  if (getAttributeRenameMigrationMode() === 'never') {
+    throw new ApplicationError(
+      'Rename migrations are disabled (`renameMigrations.attributes: never`); rename the field in the Content-Type Builder instead'
+    );
+  }
+
+  const contentType = (strapi.contentTypes as Record<string, any>)[uid];
+  const component = (strapi.components as Record<string, any>)[uid];
+  const model = contentType ?? component;
+
+  if (!model) {
+    throw new ApplicationError(`No content-type or component found for uid "${uid}"`);
+  }
+
+  if (!model.attributes?.[oldName]) {
+    throw new ApplicationError(`Attribute "${oldName}" does not exist on "${uid}"`);
+  }
+
+  if (model.attributes?.[newName]) {
+    throw new ApplicationError(`Attribute "${newName}" already exists on "${uid}"`);
+  }
+
+  // Reuse the formatted, CTB-visible attributes (same shape the admin sends) so
+  // the schema edit matches an admin save and the renamed key is the only change.
+  const formattedSchema = await getSchema();
+  const isComponent = Boolean(component);
+  const entry = isComponent
+    ? (formattedSchema.components as Record<string, any>)[uid]
+    : (formattedSchema.contentTypes as Record<string, any>)[uid];
+
+  // Custom fields are exposed with their underlying type; the admin sends them
+  // back as `customField` so the schema file keeps them as custom fields.
+  const toPayloadProperties = (properties: Record<string, any>) =>
+    properties.customField ? { ...properties, type: 'customField' } : properties;
+
+  const attributes = entry.attributes.map(({ name, ...properties }: Record<string, any>) => ({
+    action: 'update',
+    name: name === oldName ? newName : name,
+    properties: toPayloadProperties(properties),
+  }));
+
+  // Dry run: the field keeps its definition, so only the rename itself can be
+  // refused (system attribute, unsupported relation, occupied target…).
+  const { name: _name, ...oldProperties } = entry.attributes.find(
+    (attribute: Record<string, any>) => attribute.name === oldName
+  ) ?? { name: oldName };
+  const probe = createMigrationBuilder({ strapi });
+  probe.addRenameAttribute(uid, {
+    oldName,
+    newName,
+    newAttribute: toPayloadProperties(oldProperties),
+  });
+
+  const refused = probe.getUnsupported();
+  if (refused.length > 0) {
+    throw new ApplicationError(
+      `Cannot rename "${oldName}" on "${uid}" without losing its data: ${refused
+        .map(({ reason }) => describeUnsupportedReason(reason))
+        .join(', ')}`
+    );
+  }
+
+  const renames = [{ oldName, newName }];
+
+  const payload = isComponent
+    ? {
+        contentTypes: [],
+        components: [
+          {
+            action: 'update',
+            uid,
+            category: model.category,
+            displayName: model.info?.displayName,
+            icon: model.info?.icon,
+            description: model.info?.description,
+            pluginOptions: model.pluginOptions,
+            renames,
+            attributes,
+          },
+        ],
+      }
+    : {
+        contentTypes: [
+          {
+            action: 'update',
+            uid,
+            kind: model.kind,
+            displayName: model.info?.displayName,
+            description: model.info?.description,
+            draftAndPublish: Boolean(model.options?.draftAndPublish),
+            options: model.options,
+            pluginOptions: model.pluginOptions,
+            renames,
+            attributes,
+          },
+        ],
+        components: [],
+      };
+
+  // Same checks as an admin save (name rules, reserved names, snake-case
+  // uniqueness: `fooBar` next to an existing `foo_bar` would share a column).
+  const { data } = await validateUpdateSchema({ data: payload });
+
+  await updateSchema(data as CTBSchema);
 };
 
 const formatAttributes = (model: any) => {
@@ -148,6 +463,11 @@ export const getSchema = async () => {
     contentStructure,
     contentTypes,
     components,
+    settings: {
+      renameMigrations: {
+        attributes: getAttributeRenameMigrationMode(),
+      },
+    },
   };
 };
 
@@ -172,6 +492,7 @@ export const updateSchema = async (schema: CTBSchema) => {
   const generatedApiNames: string[] = [];
   const backedUpApiUids: string[] = [];
   let schemaAlreadyRolledBack = false;
+  let migrationFilePath: string | null = null;
   const APIsToDelete = contentTypes
     .filter((contentType) => contentType.action === 'delete')
     .map((contentType) => contentType.uid);
@@ -244,8 +565,6 @@ export const updateSchema = async (schema: CTBSchema) => {
         builder.editContentType({
           ...contentType,
           attributes: contentType.attributes.reduce((acc: any, attr: any) => {
-            // NOTE: handle renaming migrations here by comparing attr name & attr.properties.name
-
             if (attr.action === 'delete') {
               return acc;
             }
@@ -302,6 +621,10 @@ export const updateSchema = async (schema: CTBSchema) => {
     // Nested components target existing components
     // Dynamic zones target existing components
 
+    // Generate rename migrations before reloading, while strapi.db.metadata still
+    // reflects the pre-rename schema (the controller triggers the reload after this).
+    migrationFilePath = await generateRenameMigrations(schema);
+
     const schemaFilesWritten = await builder.writeFiles();
 
     if (!schemaFilesWritten) {
@@ -325,6 +648,7 @@ export const updateSchema = async (schema: CTBSchema) => {
       backedUpApiUids,
       generatedApiNames,
       schemaAlreadyRolledBack,
+      migrationFilePath,
     });
 
     throw error;

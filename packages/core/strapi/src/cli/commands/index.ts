@@ -10,6 +10,7 @@ import { command as listComponents } from './components/list';
 import { command as configurationDump } from './configuration/dump';
 import { command as configurationRestore } from './configuration/restore';
 import { command as listContentTypes } from './content-types/list';
+import { command as renameField } from './content-types/rename-field';
 import { command as listControllers } from './controllers/list';
 import { command as listHooks } from './hooks/list';
 import { command as listMiddlewares } from './middlewares/list';
@@ -46,6 +47,7 @@ export const commands: StrapiCommand[] = [
   configurationRestore,
   consoleCommand,
   listContentTypes,
+  renameField,
   listControllers,
   generateCommand,
   listHooks,
