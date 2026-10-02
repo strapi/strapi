@@ -1,4 +1,4 @@
-import type { Modules, Schema, Struct } from '../src';
+import type { Modules, Schema, Struct } from '../../../..';
 
 interface Article extends Struct.CollectionTypeSchema {
   collectionName: 'articles';
@@ -15,7 +15,7 @@ interface Article extends Struct.CollectionTypeSchema {
   };
 }
 
-declare module '../src/public/registries' {
+declare module '../../../../public/registries' {
   export interface ContentTypeSchemas {
     'api::article.article': Article;
   }
