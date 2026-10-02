@@ -1,6 +1,7 @@
 import path from 'node:path';
 import assert from 'node:assert';
 import * as ts from 'typescript';
+import fs from 'node:fs/promises';
 import fse from 'fs-extra';
 import chalk from 'chalk';
 
@@ -203,6 +204,18 @@ export const timer = () => {
       return (((state.end ?? Date.now) as any) - (state.start as number)) / 1000;
     },
   };
+};
+
+/**
+ * Resolve to `true` when the given path exists, `false` otherwise
+ */
+export const pathExists = async (target: string): Promise<boolean> => {
+  try {
+    await fs.access(target);
+    return true;
+  } catch {
+    return false;
+  }
 };
 
 export type Logger = ReturnType<typeof createLogger>;
