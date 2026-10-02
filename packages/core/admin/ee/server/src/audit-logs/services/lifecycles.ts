@@ -93,9 +93,10 @@ const getActor = (
 
 const getRetentionDays = (strapi: Core.Strapi) => {
   const featureConfig = strapi.ee.features.get('audit-logs');
-  const licenseRetentionDays =
-    typeof featureConfig === 'object' && featureConfig?.options?.retentionDays;
-  const userRetentionDays = strapi.config.get('admin.auditLogs.retentionDays');
+  // `false` only when the feature is missing, which register() rules out before calling this
+  const licenseRetentionDays = (typeof featureConfig === 'object' &&
+    featureConfig?.options?.retentionDays) as number | null | undefined;
+  const userRetentionDays: number | undefined = strapi.config.get('admin.auditLogs.retentionDays');
 
   // For enterprise plans, use 90 days by default, but allow users to override it
   if (licenseRetentionDays == null) {

@@ -85,8 +85,8 @@ const createBrowserStrapi = async (
     browserStrapi.flags = flags;
     browserStrapi.features = {
       ...browserStrapi.features,
-      isEnabled: (featureName: string | undefined) =>
-        licensedFeatures.some((feature) => feature.name === featureName),
+      isEnabled: (name: Modules.EE.FeatureName) =>
+        licensedFeatures.some((feature) => feature.name === name),
     };
     browserStrapi.projectType = getProjectType({ isEE, planPriceId });
     browserStrapi.ai = ai;

@@ -3,6 +3,8 @@ import { Flex } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
 
+import { FEATURE_ID } from '../../../../../constants';
+
 import { AssigneeSelect } from './AssigneeSelect';
 import { StageSelect } from './StageSelect';
 
@@ -25,7 +27,7 @@ const Panel: PanelComponent = () => {
   const { formatMessage } = useIntl();
 
   if (
-    !window.strapi.isEE ||
+    window.strapi.features.isEnabled(FEATURE_ID) === false ||
     !options?.reviewWorkflows ||
     (collectionType !== 'single-types' && !id) ||
     id === 'create'

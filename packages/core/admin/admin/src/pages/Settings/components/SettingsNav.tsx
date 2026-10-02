@@ -6,17 +6,11 @@ import { styled } from 'styled-components';
 
 import { useLicenseLimits } from '../../../../../ee/admin/src/hooks/useLicenseLimits';
 import { SubNav } from '../../../components/SubNav';
+import { SETTINGS_LINKS_LICENSE_FEATURES } from '../../../constants';
 import { useTracking } from '../../../features/Tracking';
 import { useSettingsMenu } from '../../../hooks/useSettingsMenu';
 
-type LinkId =
-  | 'content-releases'
-  | 'review-workflows'
-  | 'sso'
-  | 'auditLogs'
-  | 'auditLogs-purchase-page';
-
-type FeatureName = 'cms-content-releases' | 'review-workflows' | 'sso' | 'audit-logs';
+import type { LicensedSettingsLinkId } from '../../../constants';
 
 const StyledBadge = styled(Badge)`
   border-radius: 50%;
@@ -31,15 +25,10 @@ const SettingsNav = ({ isFullPage = false }: { isFullPage?: boolean }) => {
   const { pathname } = useLocation();
   const { license } = useLicenseLimits();
 
-  const availableFeatureNames = license?.features.map((feature) => feature.name);
-
-  const linksIdsToLicenseFeaturesNames: Record<LinkId, FeatureName> = {
-    'content-releases': 'cms-content-releases',
-    'review-workflows': 'review-workflows',
-    sso: 'sso',
-    auditLogs: 'audit-logs',
-    'auditLogs-purchase-page': 'audit-logs',
-  };
+  const isLinkFeatureLicensed = (linkId: LicensedSettingsLinkId) =>
+    license?.features.some(
+      (feature) => feature.name === SETTINGS_LINKS_LICENSE_FEATURES[linkId]
+    ) === true;
 
   const filteredMenu = menu.filter(
     (section) => !section.links.every((link) => link.isDisplayed === false)
@@ -52,7 +41,7 @@ const SettingsNav = ({ isFullPage = false }: { isFullPage?: boolean }) => {
       links: section.links.map((link) => {
         return {
           ...link,
-          id: link.id as LinkId,
+          id: link.id as LicensedSettingsLinkId,
           title: link.intlLabel,
           name: link.id,
           to: link.to.startsWith('/') ? link.to : `/settings/${link.to}`,
@@ -99,13 +88,7 @@ const SettingsNav = ({ isFullPage = false }: { isFullPage?: boolean }) => {
                       <>
                         {link?.licenseOnly && (
                           <Lightning
-                            fill={
-                              (availableFeatureNames || []).includes(
-                                linksIdsToLicenseFeaturesNames[link.id]
-                              )
-                                ? 'primary600'
-                                : 'neutral300'
-                            }
+                            fill={isLinkFeatureLicensed(link.id) ? 'primary600' : 'neutral300'}
                             width="1.5rem"
                             height="1.5rem"
                           />

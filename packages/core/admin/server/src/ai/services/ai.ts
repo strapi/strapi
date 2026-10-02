@@ -90,11 +90,7 @@ const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
       throw new Error(`${errorPrefix.replace(/:$/, '')}. Check server logs for details.`);
     }
 
-    if (!strapi.ee?.isEE) {
-      strapi.log.error(`${errorPrefix} Enterprise Edition features are not enabled`);
-      throw new Error(`${errorPrefix.replace(/:$/, '')}. Check server logs for details.`);
-    }
-
+    // No `isEE` check: the license only lists `cms-ai` while EE is enabled
     let eeLicense = process.env.STRAPI_LICENSE;
 
     if (!eeLicense) {

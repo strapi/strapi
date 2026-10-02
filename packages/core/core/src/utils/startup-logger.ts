@@ -4,6 +4,8 @@ import _ from 'lodash/fp';
 
 import type { Core } from '@strapi/types';
 
+import { getEdition } from '../ee/edition';
+
 const ROUNDED_CHARS = {
   top: '─',
   'top-mid': '┬',
@@ -37,21 +39,13 @@ export const createStartupLogger = (app: Core.Strapi) => {
 
       const dbInfo = app.db?.getInfo();
 
-      const getPlan = () => {
-        if (!app.EE) {
-          return 'Community';
-        }
-
-        return app.ee.planPriceId?.toLowerCase().includes('growth') ? 'Growth' : 'Enterprise';
-      };
-
       infoTable.push(
         [chalk.blue('Time'), `${new Date()}`],
         [chalk.blue('Launched in'), `${Date.now() - app.config.launchedAt} ms`],
         [chalk.blue('Environment'), app.config.environment],
         [chalk.blue('Process PID'), process.pid],
         [chalk.blue('Version'), `${app.config.info.strapi} (node ${process.version})`],
-        [chalk.blue('Plan'), getPlan()],
+        [chalk.blue('Plan'), getEdition(app)],
         [chalk.blue('Database'), dbInfo?.client],
         [chalk.blue('Database name'), dbInfo?.displayName]
       );

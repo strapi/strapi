@@ -6,6 +6,8 @@ import type { Core } from '@strapi/types';
 
 import { generateInstallId } from '@strapi/utils';
 
+import { resolveFeatures } from './features';
+
 interface LicenseInfo {
   type: 'bronze' | 'silver' | 'gold';
   isTrial: boolean;
@@ -15,21 +17,6 @@ interface LicenseInfo {
   subscriptionId?: string;
   planPriceId?: string;
 }
-
-const DEFAULT_FEATURES = {
-  bronze: [],
-  silver: [],
-  gold: [
-    { name: 'sso' },
-    // Set a null retention duration to allow the user to override it
-    // The default of 90 days is set in the audit logs service
-    { name: 'audit-logs', options: { retentionDays: null } },
-    { name: 'review-workflows' },
-    { name: 'cms-content-releases' },
-    { name: 'cms-content-history', options: { retentionDays: 99999 } },
-    { name: 'cms-advanced-preview' },
-  ],
-};
 
 const LICENSE_REGISTRY_URI = 'https://license.strapi.io';
 
@@ -91,9 +78,7 @@ const verifyLicense = (license: string) => {
 
   const licenseInfo: LicenseInfo = JSON.parse(stringifiedContent);
 
-  if (!licenseInfo.features) {
-    licenseInfo.features = DEFAULT_FEATURES[licenseInfo.type];
-  }
+  licenseInfo.features = resolveFeatures(licenseInfo);
 
   if (!licenseInfo.isTrial) {
     licenseInfo.isTrial = false;

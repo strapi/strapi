@@ -78,24 +78,25 @@ describe('AI Container', () => {
   };
 
   describe('resolveAIContext (shared by getAiToken and getAiUsage)', () => {
-    test('Should throw when EE features are not enabled', async () => {
-      // isEnabled() must pass (config + license feature ok) so resolveAiContext runs;
-      // the isEE: false guard inside resolveAiContext is what this test exercises.
+    test('Should throw when the license does not include cms-ai', async () => {
+      // Without EE the license lists no feature, so the cms-ai check covers it
       const mockStrapi = createMockStrapi({
         ee: {
           isEE: false,
-          features: { isEnabled: jest.fn().mockReturnValue(true) },
+          features: { isEnabled: jest.fn().mockReturnValue(false) },
         },
       }) as any;
       setupValidEnvironment();
+      global.fetch = jest.fn();
       const aiContainer = createAiAdminService({ strapi: mockStrapi });
 
       await expect(aiContainer.getAiUsage()).rejects.toThrow(
         'AI usage data request failed. Check server logs for details.'
       );
       expect(mockStrapi.log.error).toHaveBeenCalledWith(
-        'AI usage data request failed: Enterprise Edition features are not enabled'
+        'AI usage data request failed: AI is not enabled'
       );
+      expect(global.fetch).not.toHaveBeenCalled();
     });
 
     test('Should throw when no EE license is found', async () => {
@@ -137,12 +138,12 @@ describe('AI Container', () => {
   });
 
   describe('getAiToken', () => {
-    test('Should throw error when EE features are not enabled', async () => {
-      // isEnabled() must pass so resolveAiContext runs; isEE: false is what resolveAiContext checks.
+    test('Should throw error when the license does not include cms-ai', async () => {
+      // Without EE the license lists no feature, so the cms-ai check covers it
       const mockStrapi = createMockStrapi({
         ee: {
           isEE: false,
-          features: { isEnabled: jest.fn().mockReturnValue(true) },
+          features: { isEnabled: jest.fn().mockReturnValue(false) },
         },
       }) as any;
       setupValidEnvironment();
@@ -153,7 +154,7 @@ describe('AI Container', () => {
       );
 
       expect(mockStrapi.log.error).toHaveBeenCalledWith(
-        'AI token request failed: Enterprise Edition features are not enabled'
+        'AI token request failed: AI is not enabled'
       );
     });
 

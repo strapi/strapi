@@ -1,7 +1,8 @@
 import { pick, isEqual } from 'lodash/fp';
 import type { Logger } from '@strapi/logger';
-import type { Core } from '@strapi/types';
+import type { Core, Modules } from '@strapi/types';
 import { createStrapiFetch } from '../utils/fetch';
+import { getFeature, listFeatures } from './features';
 import {
   readLicense,
   verifyLicense,
@@ -261,17 +262,15 @@ const getTrialEndDate = async ({
   return data;
 };
 
-const list = () => {
-  return (
-    ee.licenseInfo.features?.map((feature) =>
-      typeof feature === 'object' ? feature : { name: feature }
-    ) || []
-  );
-};
+const list = () => listFeatures(ee.licenseInfo.features);
 
-const get = (featureName: string) => list().find((feature) => feature.name === featureName);
+const get = <TName extends Modules.EE.FeatureName>(name: TName) => getFeature(ee.licenseInfo, name);
 
-export default Object.freeze({
+const isEnabled = (name: Modules.EE.FeatureName) => get(name) !== undefined;
+
+export default Object.freeze<
+  Modules.EE.EEService & { init: typeof init; checkLicense: typeof checkLicense }
+>({
   init,
   checkLicense,
   getTrialEndDate,
@@ -300,9 +299,5 @@ export default Object.freeze({
     return ee.licenseInfo.subscriptionId;
   },
 
-  features: Object.freeze({
-    list,
-    get,
-    isEnabled: (featureName: string) => get(featureName) !== undefined,
-  }),
+  features: Object.freeze({ list, get, isEnabled }),
 });

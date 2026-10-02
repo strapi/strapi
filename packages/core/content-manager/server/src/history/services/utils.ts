@@ -9,6 +9,9 @@ import type { RelationResult } from '../../../../shared/contracts/relations';
 
 const DEFAULT_RETENTION_DAYS = 90;
 
+const isPositiveNumber = (value: unknown): value is number =>
+  typeof value === 'number' && Number.isFinite(value) && value > 0;
+
 type RelationResponse = {
   results: RelationResult[];
   meta: { missingCount: number };
@@ -143,13 +146,20 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
    * Gets the number of retention days defined on the license or configured by the user
    */
   const getRetentionDays = () => {
-    const featureConfig = strapi.ee.features.get('cms-content-history');
     const licenseRetentionDays =
-      typeof featureConfig === 'object' && featureConfig?.options.retentionDays;
-    const userRetentionDays: number = strapi.config.get('admin.history.retentionDays');
+      strapi.ee.features.get('cms-content-history')?.options?.retentionDays;
+    // A string from an env config is a number of days too
+    const userRetentionDays = Number(strapi.config.get('admin.history.retentionDays'));
+    // Never 0, NaN or negative: a retention of 0 days would purge every version
+    const hasUserRetention = isPositiveNumber(userRetentionDays);
+
+    // Without a license retention, nothing caps the user one
+    if (isPositiveNumber(licenseRetentionDays) === false) {
+      return hasUserRetention === true ? userRetentionDays : DEFAULT_RETENTION_DAYS;
+    }
 
     // Allow users to override the license retention days, but not to increase it
-    if (userRetentionDays && userRetentionDays < licenseRetentionDays) {
+    if (hasUserRetention === true && userRetentionDays < licenseRetentionDays) {
       return userRetentionDays;
     }
 

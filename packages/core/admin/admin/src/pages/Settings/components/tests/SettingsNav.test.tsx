@@ -1,5 +1,7 @@
-import { render } from '@tests/utils';
+import { lightTheme } from '@strapi/design-system';
+import { render, screen } from '@tests/utils';
 
+import { useLicenseLimits } from '../../../../../../ee/admin/src/hooks/useLicenseLimits';
 import { SettingsNav } from '../SettingsNav';
 
 jest.mock('../../../../../../ee/admin/src/hooks/useLicenseLimits', () => ({
@@ -22,6 +24,14 @@ const menu = [
         isDisplayed: true,
         permissions: [],
         hasNotification: true,
+      },
+      {
+        intlLabel: { id: 'Settings.sso.title', defaultMessage: 'Single Sign-On' },
+        to: '/settings/single-sign-on',
+        id: 'sso',
+        isDisplayed: true,
+        permissions: [],
+        licenseOnly: true,
       },
     ],
   },
@@ -146,6 +156,40 @@ describe('SettingsNav', () => {
           expect(getByText(link.intlLabel.defaultMessage)).toBeInTheDocument();
         });
       }
+    });
+  });
+
+  describe('license marker', () => {
+    const getLightningFill = () =>
+      screen
+        .getByRole('link', { name: 'Single Sign-On' })
+        .querySelector('svg')
+        ?.getAttribute('fill');
+
+    it('highlights a license-only link when the license lists its feature', () => {
+      jest.mocked(useLicenseLimits).mockReturnValueOnce({
+        license: { features: [{ name: 'sso' }] },
+      } as ReturnType<typeof useLicenseLimits>);
+
+      render(<SettingsNav />);
+
+      expect(getLightningFill()).toBe(lightTheme.colors.primary600);
+    });
+
+    it('greys out a license-only link when the license lacks its feature', () => {
+      render(<SettingsNav />);
+
+      expect(getLightningFill()).toBe(lightTheme.colors.neutral300);
+    });
+
+    it('greys out a license-only link while the license is not loaded', () => {
+      jest.mocked(useLicenseLimits).mockReturnValueOnce({
+        license: undefined,
+      } as ReturnType<typeof useLicenseLimits>);
+
+      render(<SettingsNav />);
+
+      expect(getLightningFill()).toBe(lightTheme.colors.neutral300);
     });
   });
 });

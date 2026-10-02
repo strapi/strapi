@@ -1,6 +1,7 @@
 import { PermissionMap } from './types/permissions';
 
 import type { StrapiAppSettingLink } from './core/apis/router';
+import type { Modules } from '@strapi/types';
 
 export const ADMIN_PERMISSIONS_CE = {
   contentManager: {
@@ -237,3 +238,24 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
       : []),
   ],
 });
+
+export type LicensedSettingsLinkId =
+  | 'content-releases'
+  | 'review-workflows'
+  | 'sso'
+  | 'auditLogs'
+  | 'auditLogs-purchase-page';
+
+/**
+ * The license feature of each license-only settings link, which lights up its marker
+ */
+export const SETTINGS_LINKS_LICENSE_FEATURES: Record<
+  LicensedSettingsLinkId,
+  Modules.EE.FeatureName
+> = {
+  'content-releases': 'cms-content-releases',
+  'review-workflows': 'review-workflows',
+  sso: 'sso',
+  auditLogs: 'audit-logs',
+  'auditLogs-purchase-page': 'audit-logs',
+};

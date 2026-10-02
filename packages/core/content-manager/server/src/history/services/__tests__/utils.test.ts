@@ -42,7 +42,94 @@ const createStrapiWithoutLocalization = () => {
   } as unknown as Core.Strapi;
 };
 
+const createStrapiWithRetention = ({
+  feature,
+  userRetentionDays,
+}: {
+  feature?: { name: string; options?: Record<string, unknown> };
+  userRetentionDays?: unknown;
+}) => {
+  return {
+    ee: { features: { get: jest.fn(() => feature) } },
+    config: { get: jest.fn(() => userRetentionDays) },
+  } as unknown as Core.Strapi;
+};
+
+const historyFeature = (options: Record<string, unknown>) => ({
+  name: 'cms-content-history',
+  options,
+});
+
 describe('History utils', () => {
+  describe('getRetentionDays', () => {
+    const getRetentionDays = (fixture: Parameters<typeof createStrapiWithRetention>[0]) =>
+      createServiceUtils({ strapi: createStrapiWithRetention(fixture) }).getRetentionDays();
+
+    it('caps the license retention to 90 days', () => {
+      expect(getRetentionDays({ feature: historyFeature({ retentionDays: 99999 }) })).toBe(90);
+    });
+
+    it('uses the license retention when it is lower than 90 days', () => {
+      expect(getRetentionDays({ feature: historyFeature({ retentionDays: 30 }) })).toBe(30);
+    });
+
+    it('uses 90 days when the license has no retention', () => {
+      expect(getRetentionDays({ feature: historyFeature({}) })).toBe(90);
+    });
+
+    it.each([[0], [-1], [Number.NaN], [Number.POSITIVE_INFINITY], ['30'], [null]])(
+      'uses 90 days when the license retention is not a positive number (%p)',
+      (retentionDays) => {
+        expect(getRetentionDays({ feature: historyFeature({ retentionDays }) })).toBe(90);
+      }
+    );
+
+    it('uses the user retention when the license has no retention', () => {
+      expect(getRetentionDays({ feature: historyFeature({}), userRetentionDays: 365 })).toBe(365);
+    });
+
+    it('uses 90 days when the license lists the feature without options', () => {
+      expect(getRetentionDays({ feature: { name: 'cms-content-history' } })).toBe(90);
+    });
+
+    it('uses 90 days, never 0, when the feature is missing', () => {
+      expect(getRetentionDays({ feature: undefined })).toBe(90);
+    });
+
+    it('uses a user retention lower than the license one', () => {
+      expect(
+        getRetentionDays({
+          feature: historyFeature({ retentionDays: 99999 }),
+          userRetentionDays: 30,
+        })
+      ).toBe(30);
+    });
+
+    it('ignores a user retention higher than the license one', () => {
+      expect(
+        getRetentionDays({ feature: historyFeature({ retentionDays: 30 }), userRetentionDays: 60 })
+      ).toBe(30);
+    });
+
+    it('reads a user retention given as a string', () => {
+      expect(
+        getRetentionDays({
+          feature: historyFeature({ retentionDays: 99999 }),
+          userRetentionDays: '30',
+        })
+      ).toBe(30);
+    });
+
+    it.each([[0], [-5], [Number.NaN], ['abc']])(
+      'ignores a user retention that is not a positive number (%p)',
+      (userRetentionDays) => {
+        expect(
+          getRetentionDays({ feature: historyFeature({ retentionDays: 99999 }), userRetentionDays })
+        ).toBe(90);
+      }
+    );
+  });
+
   describe('getSchemaAttributesDiff', () => {
     const { getSchemaAttributesDiff } = createServiceUtils({
       // @ts-expect-error ignore

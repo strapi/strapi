@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 
-export {};
+import type { Modules } from '@strapi/types';
 
 declare global {
   interface Window {
@@ -11,7 +11,7 @@ declare global {
         SSO: 'sso';
         AUDIT_LOGS: 'audit-logs';
         REVIEW_WORKFLOWS: 'review-workflows';
-        isEnabled: (featureName?: string) => boolean;
+        isEnabled: (name: Modules.EE.FeatureName) => boolean;
       };
       future: {
         isEnabled: (name: string) => boolean;

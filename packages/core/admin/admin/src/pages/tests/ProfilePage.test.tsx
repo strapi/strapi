@@ -75,4 +75,25 @@ describe('Profile page', () => {
     expect(queryByLabelText(/^password$/)).not.toBeInTheDocument();
     expect(queryByLabelText(/confirm password/i)).not.toBeInTheDocument();
   });
+
+  it('should not check the SSO lock when the license lacks the sso feature', async () => {
+    window.strapi.features.isEnabled = () => false;
+    const onSSOLockedRequest = jest.fn();
+    server.use(
+      http.get('/admin/providers/isSSOLocked', () => {
+        onSSOLockedRequest();
+
+        return HttpResponse.json({ data: { isSSOLocked: true } });
+      })
+    );
+
+    const { getByRole, findByText } = render(<ProfilePage />);
+
+    await findByText('Interface language');
+
+    expect(onSSOLockedRequest).not.toHaveBeenCalled();
+    expect(getByRole('heading', { name: 'Change password' })).toBeInTheDocument();
+
+    window.strapi.features.isEnabled = () => true;
+  });
 });
