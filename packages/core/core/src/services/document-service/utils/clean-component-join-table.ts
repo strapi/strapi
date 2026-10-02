@@ -266,7 +266,7 @@ const findPublicationStateMismatches = async (
       let sourceState: 'draft' | 'published' | null;
       try {
         sourceState = await resolveSourcePublicationState(db, sourceModel, sourceId, strapi);
-      } catch (error) {
+      } catch {
         // Skip on error — better to leave data alone than to delete the wrong row
         // eslint-disable-next-line no-continue
         continue;
