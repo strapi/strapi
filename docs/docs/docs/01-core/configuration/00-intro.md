@@ -60,6 +60,9 @@ Feature flags for enabling and configuring future features that would be breakin
 
 Controls TypeScript tooling during development (for example `autogenerate` to emit types for JavaScript projects).
 
+- `autogenerate` — set to `false` to disable type generation during `strapi develop` in JavaScript projects. TypeScript projects always generate types.
+- `outDir` — directory, relative to the app root, in which `strapi develop` generates types (`<outDir>/generated`). Defaults to `types`, and matches the `--out-dir` option of `strapi ts:generate-types`.
+
 #### plugins
 
 Contains plugin configurations, with each root-level value the id of a plugin, for example, 'users-permissions'
