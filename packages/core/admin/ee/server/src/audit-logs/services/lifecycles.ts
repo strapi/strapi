@@ -2,7 +2,7 @@ import type { Core, Modules } from '@strapi/types';
 
 import { getDisplayName } from '../utils';
 
-const DEFAULT_RETENTION_DAYS = 90;
+export const DEFAULT_RETENTION_DAYS = 90;
 
 /**
  * Events audited before the payload standard; their stored shape is frozen for

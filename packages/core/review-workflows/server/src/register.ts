@@ -11,7 +11,12 @@ import migrateWorkflowsContentTypes from './migrations/multiple-workflows';
 import migrateDeletedCTInWorkflows from './migrations/handle-deleted-ct-in-workflows';
 import reviewWorkflowsMiddlewares from './middlewares/review-workflows';
 
-import { getVisibleContentTypesUID, hasStageAttribute } from './utils/review-workflows';
+import {
+  getVisibleContentTypesUID,
+  hasStageAttribute,
+  clampMaxWorkflows,
+  clampMaxStagesPerWorkflow,
+} from './utils/review-workflows';
 
 import {
   ENTITY_STAGE_ATTRIBUTE,
@@ -129,4 +134,34 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   );
   const workflowsValidationService = getService('validation', { strapi });
   workflowsValidationService.register(reviewWorkflowsOptions);
+
+  // Expose the effective (clamped) license limits to the license details view + debug dump.
+  // Resolvers are live: they re-read the current license on each entitlements.list() call.
+  strapi.ee.entitlements.register({
+    feature: 'review-workflows',
+    limits: [
+      {
+        key: 'numberOfWorkflows',
+        unit: 'count',
+        get() {
+          const featureCfg = strapi.ee.features.get('review-workflows');
+          const numberOfWorkflows =
+            (typeof featureCfg === 'object' && featureCfg?.options?.numberOfWorkflows) ||
+            MAX_WORKFLOWS;
+          return clampMaxWorkflows(numberOfWorkflows);
+        },
+      },
+      {
+        key: 'stagesPerWorkflow',
+        unit: 'count',
+        get() {
+          const featureCfg = strapi.ee.features.get('review-workflows');
+          const stagesPerWorkflow =
+            (typeof featureCfg === 'object' && featureCfg?.options?.stagesPerWorkflow) ||
+            MAX_STAGES_PER_WORKFLOW;
+          return clampMaxStagesPerWorkflow(stagesPerWorkflow);
+        },
+      },
+    ],
+  });
 };

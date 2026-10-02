@@ -60,36 +60,50 @@ describe('<AdminSeatInfo />', () => {
     expect(getByTextWithMarkup('10/100')).toBeInTheDocument();
   });
 
-  test('Render billing link (not on strapi cloud)', () => {
-    // @ts-expect-error – mocked
-    useLicenseLimits.mockReturnValue(LICENSE_MOCK);
-
-    const { getByText } = render(<AdminSeatInfoEE />);
-
-    expect(getByText('Manage subscription')).toBeInTheDocument();
-    // eslint-disable-next-line testing-library/no-node-access
-    expect(getByText('Manage subscription').closest('a')).toHaveAttribute(
-      'href',
-      'https://billing.strapi.io'
-    );
-  });
-
-  test('Render billing link (gold license)', () => {
+  test('Shows retained seats when live permittedSeats is wiped after expiry', () => {
     // @ts-expect-error – mocked
     useLicenseLimits.mockReturnValue({
       ...LICENSE_MOCK,
       license: {
         ...LICENSE_MOCK.license,
-        type: 'gold',
+        permittedSeats: null,
+        seats: 10,
+        licenseStatus: 'expired',
+        enforcementUserCount: 4,
       },
     });
 
     const { getByText } = render(<AdminSeatInfoEE />);
 
-    expect(getByText('Contact sales')).toBeInTheDocument();
-    expect(
-      // eslint-disable-next-line testing-library/no-node-access
-      getByText('Contact sales').closest('a')
-    ).toHaveAttribute('href', 'mailto:sales@strapi.io');
+    expect(getByText('Admin seats')).toBeInTheDocument();
+    expect(withMarkup(getByText)('4/10')).toBeInTheDocument();
+  });
+
+  test('Renders nothing when neither a live nor a retained seat limit exists', () => {
+    // @ts-expect-error – mocked
+    useLicenseLimits.mockReturnValue({
+      ...LICENSE_MOCK,
+      license: { ...LICENSE_MOCK.license, permittedSeats: null, seats: null },
+    });
+
+    const { queryByText } = render(<AdminSeatInfoEE />);
+
+    expect(queryByText('Admin seats')).not.toBeInTheDocument();
+  });
+
+  // The per-plan billing links that used to live under the seat count were removed: the Plan card
+  // now carries a single Manage/View subscription button that covers both cases.
+  test.each([['gold'], ['bronze']])('Render no billing link (%s license)', (type) => {
+    // @ts-expect-error – mocked
+    useLicenseLimits.mockReturnValue({
+      ...LICENSE_MOCK,
+      license: { ...LICENSE_MOCK.license, type },
+    });
+
+    const { queryByText, queryByRole } = render(<AdminSeatInfoEE />);
+
+    expect(queryByText('Manage subscription')).not.toBeInTheDocument();
+    expect(queryByText('Contact sales')).not.toBeInTheDocument();
+    expect(queryByRole('link')).not.toBeInTheDocument();
   });
 });
