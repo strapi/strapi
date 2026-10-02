@@ -33,12 +33,40 @@ const setup = (items: PendingRename[] = renames) => {
 };
 
 describe('CTB | RenameMigrationModal', () => {
+  it('gives the dialog an accessible name and description', () => {
+    setup();
+
+    const dialog = screen.getByRole('dialog', { name: 'Preserve data for renamed fields?' });
+    expect(dialog).toHaveAccessibleDescription(/You renamed the fields below/);
+  });
+
+  it('names the type in each checkbox label', () => {
+    setup([
+      { ...renames[0], key: 'api::chef.chef:chain:0', uid: 'api::chef.chef', typeName: 'Chef' },
+      {
+        ...renames[0],
+        key: 'api::ingredient.ingredient:chain:0',
+        uid: 'api::ingredient.ingredient',
+        typeName: 'Ingredient',
+      },
+    ]);
+
+    expect(screen.getByRole('checkbox', { name: 'Preserve data of title in Chef' })).toBeChecked();
+    expect(
+      screen.getByRole('checkbox', { name: 'Preserve data of title in Ingredient' })
+    ).toBeChecked();
+  });
+
   it('lists one checkbox per chain, ticked by default', () => {
     setup();
 
     expect(screen.getAllByRole('checkbox')).toHaveLength(2);
-    expect(screen.getByRole('checkbox', { name: 'Preserve data of title' })).toBeChecked();
-    expect(screen.getByRole('checkbox', { name: 'Preserve data of body, summary' })).toBeChecked();
+    expect(
+      screen.getByRole('checkbox', { name: 'Preserve data of title in Article' })
+    ).toBeChecked();
+    expect(
+      screen.getByRole('checkbox', { name: 'Preserve data of body, summary in Article' })
+    ).toBeChecked();
   });
 
   it('renders every pair of a chain and the names it routes through', () => {
@@ -83,7 +111,9 @@ describe('CTB | RenameMigrationModal', () => {
   it('drops the whole chain when its checkbox is unticked', async () => {
     const { onConfirm, user } = setup();
 
-    await user.click(screen.getByRole('checkbox', { name: 'Preserve data of body, summary' }));
+    await user.click(
+      screen.getByRole('checkbox', { name: 'Preserve data of body, summary in Article' })
+    );
     await user.click(screen.getByRole('button', { name: 'Preserve data' }));
 
     expect(onConfirm).toHaveBeenCalledWith(new Set(['api::article.article:chain:0']));
@@ -92,8 +122,10 @@ describe('CTB | RenameMigrationModal', () => {
   it('disables "Preserve data" when every row is unticked', async () => {
     const { user } = setup();
 
-    await user.click(screen.getByRole('checkbox', { name: 'Preserve data of title' }));
-    await user.click(screen.getByRole('checkbox', { name: 'Preserve data of body, summary' }));
+    await user.click(screen.getByRole('checkbox', { name: 'Preserve data of title in Article' }));
+    await user.click(
+      screen.getByRole('checkbox', { name: 'Preserve data of body, summary in Article' })
+    );
 
     expect(screen.getByRole('button', { name: 'Preserve data' })).toBeDisabled();
   });

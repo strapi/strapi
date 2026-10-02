@@ -173,7 +173,7 @@
   "migration.confirmation.title": "Preserve data for renamed fields?",
   "migration.confirmation.description": "You renamed the fields below. Strapi can generate a migration to preserve existing data by renaming the underlying database columns. Untick a rename to let those fields start empty instead.",
   "migration.confirmation.field.in": "in {typeName}",
-  "migration.confirmation.field.preserve": "Preserve data of {names}",
+  "migration.confirmation.field.preserve": "Preserve data of {names} in {typeName}",
   "migration.confirmation.field.via": "via {names}",
   "migration.confirmation.field.swap": "Fields swapped back to their original names; data still moves.",
   "migration.confirmation.cancel": "Cancel",

@@ -67,6 +67,7 @@ interface RenameMigrationModalProps {
 
 const RenameMigrationModal = ({ renames, onConfirm, onCancel }: RenameMigrationModalProps) => {
   const { formatMessage } = useIntl();
+  const descriptionId = React.useId();
 
   const [checkedKeys, setCheckedKeys] = React.useState<Set<string>>(
     () => new Set(renames.map((rename) => rename.key))
@@ -88,18 +89,18 @@ const RenameMigrationModal = ({ renames, onConfirm, onCancel }: RenameMigrationM
 
   return (
     <Modal.Root open onOpenChange={(open) => !open && onCancel()}>
-      <Modal.Content>
+      <Modal.Content aria-describedby={descriptionId}>
         <Modal.Header>
-          <Typography variant="omega" fontWeight="bold">
+          <Modal.Title>
             {formatMessage({
               id: getTrad('migration.confirmation.title'),
               defaultMessage: 'Preserve data for renamed fields?',
             })}
-          </Typography>
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Flex direction="column" alignItems="stretch" gap={4}>
-            <Typography variant="omega" textColor="neutral600">
+            <Typography id={descriptionId} variant="omega" textColor="neutral600">
               {formatMessage({
                 id: getTrad('migration.confirmation.description'),
                 defaultMessage:
@@ -163,9 +164,9 @@ const RenameMigrationModal = ({ renames, onConfirm, onCancel }: RenameMigrationM
                     aria-label={formatMessage(
                       {
                         id: getTrad('migration.confirmation.field.preserve'),
-                        defaultMessage: 'Preserve data of {names}',
+                        defaultMessage: 'Preserve data of {names} in {typeName}',
                       },
-                      { names: chainNames(rename) }
+                      { names: chainNames(rename), typeName: rename.typeName }
                     )}
                     checked={checkedKeys.has(rename.key)}
                     onCheckedChange={(checked) => toggle(rename.key, checked === true)}
@@ -184,7 +185,7 @@ const RenameMigrationModal = ({ renames, onConfirm, onCancel }: RenameMigrationM
               })}
             </Button>
           </Modal.Close>
-          <Button variant="secondary" onClick={() => onConfirm(new Set())}>
+          <Button variant="danger-light" onClick={() => onConfirm(new Set())}>
             {formatMessage({
               id: getTrad('migration.confirmation.decline'),
               defaultMessage: "Don't preserve data",

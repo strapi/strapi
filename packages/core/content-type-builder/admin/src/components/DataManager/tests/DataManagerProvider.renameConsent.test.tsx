@@ -478,7 +478,9 @@ describe('CTB | DataManagerProvider | rename consent', () => {
       // Only the `body` chain is listed.
       const dialog = await screen.findByRole('dialog');
       expect(screen.getAllByRole('checkbox')).toHaveLength(1);
-      expect(screen.getByRole('checkbox', { name: 'Preserve data of body' })).toBeChecked();
+      expect(
+        screen.getByRole('checkbox', { name: 'Preserve data of body in Article' })
+      ).toBeChecked();
       expect(dialog).not.toHaveTextContent('tmp');
 
       await user.click(screen.getByRole('button', { name: "Don't preserve data" }));
