@@ -713,4 +713,80 @@ describe('Document Service clone nested relation operation payloads', () => {
       expect(nestedMorphDocumentId(clonedProduct.details)).toBe(originalTag.documentId);
     }
   );
+
+  testInTransaction(
+    'clone removes a component that holds a populated morphToOne without copying it',
+    async () => {
+      const originalTag = await createTag('Removed Component Populated Morph');
+      const originalTagRow = await strapi.db.query(TAG_UID).findOne({
+        where: { documentId: originalTag.documentId, publishedAt: null },
+      });
+      const product = await strapi.documents(PRODUCT_UID).create({
+        data: {
+          name: 'Removed Component Populated Morph Source',
+          details: {
+            label: 'Source details',
+            mto: { id: originalTagRow!.id, __type: TAG_UID },
+          },
+        },
+        populate,
+      });
+
+      const result = await strapi.documents(PRODUCT_UID).clone({
+        documentId: product.documentId,
+        data: { details: null },
+        populate,
+      });
+
+      const originalProduct = (await findProduct(
+        product.documentId
+      )) as ProductWithNestedRelations | null;
+      const clonedProduct = result.entries[0] as ProductWithNestedRelations;
+
+      expect({
+        cloneDetails: clonedProduct.details ?? null,
+        originalMorphDocumentId: nestedMorphDocumentId(originalProduct?.details),
+      }).toEqual({
+        cloneDetails: null,
+        originalMorphDocumentId: originalTag.documentId,
+      });
+    }
+  );
+
+  testInTransaction(
+    'clone removes a component whose morphToOne is null',
+    async () => {
+      const product = await strapi.documents(PRODUCT_UID).create({
+        data: {
+          name: 'Removed Component Null Morph Source',
+          details: {
+            label: 'Source details',
+            mto: null,
+          },
+        },
+        populate,
+      });
+
+      const result = await strapi.documents(PRODUCT_UID).clone({
+        documentId: product.documentId,
+        data: { details: null },
+        populate,
+      });
+
+      const originalProduct = (await findProduct(
+        product.documentId
+      )) as ProductWithNestedRelations | null;
+      const clonedProduct = result.entries[0] as ProductWithNestedRelations;
+
+      expect({
+        cloneDetails: clonedProduct.details ?? null,
+        originalDetailsLabel: originalProduct?.details?.label ?? null,
+        originalMorphDocumentId: nestedMorphDocumentId(originalProduct?.details),
+      }).toEqual({
+        cloneDetails: null,
+        originalDetailsLabel: 'Source details',
+        originalMorphDocumentId: null,
+      });
+    }
+  );
 });

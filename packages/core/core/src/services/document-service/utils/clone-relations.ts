@@ -127,6 +127,38 @@ const isRelationUnchangedAtPath = (
 };
 
 /**
+ * The nested collector walks the source entry, so a relation under a component
+ * the clone payload set to null still looks omitted. That copy has no owner on
+ * the clone and must not be queued. Missing paths are not removal: those owners
+ * still need their deferred copy, and a later resolution failure must still throw.
+ */
+const isOwnerExplicitlyRemoved = (submitted: Record<string, unknown>, ownerPath: string) => {
+  const segments = ownerPath.split('.');
+  let current: unknown = submitted;
+
+  for (const segment of segments) {
+    if (Array.isArray(current)) {
+      const index = Number(segment);
+      if (!Number.isInteger(index) || index < 0 || index >= current.length) {
+        return false;
+      }
+
+      current = current[index];
+    } else if (isRecord(current) && Object.prototype.hasOwnProperty.call(current, segment)) {
+      current = current[segment];
+    } else {
+      return false;
+    }
+
+    if (current === null) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+/**
  * Like `traverseEntityRelations`, but also visits inline storage (`useJoinTable: false`
  * and `morphToOne`). Clone follow-up must see those relations; the shared transform
  * helper intentionally skips them because they are handled in processData.
@@ -198,6 +230,10 @@ const collectNestedCloneRelationAdjustments = async (
       const ownerPath = lastDot === -1 ? null : relationPath.slice(0, lastDot);
 
       if (ownerPath == null) {
+        return;
+      }
+
+      if (isOwnerExplicitlyRemoved(submitted, ownerPath)) {
         return;
       }
 
