@@ -1,7 +1,16 @@
 import { lightTheme } from '@strapi/design-system';
 import { render, screen } from '@tests/utils';
 
+import { useLicenseLimits } from '../../../../../../ee/admin/src/hooks/useLicenseLimits';
 import { SettingsNav } from '../SettingsNav';
+
+jest.mock('../../../../../../ee/admin/src/hooks/useLicenseLimits', () => ({
+  useLicenseLimits: jest.fn(() => ({
+    license: {
+      features: [],
+    },
+  })),
+}));
 
 const menu = [
   {
@@ -151,26 +160,16 @@ describe('SettingsNav', () => {
   });
 
   describe('license marker', () => {
-    const originalIsEE = window.strapi.isEE;
-    const originalIsEnabled = window.strapi.features.isEnabled;
-
-    beforeEach(() => {
-      window.strapi.isEE = true;
-    });
-
-    afterEach(() => {
-      window.strapi.isEE = originalIsEE;
-      window.strapi.features.isEnabled = originalIsEnabled;
-    });
-
     const getLightningFill = () =>
       screen
         .getByRole('link', { name: 'Single Sign-On' })
         .querySelector('svg')
         ?.getAttribute('fill');
 
-    it('highlights a license-only link when its feature is enabled', () => {
-      window.strapi.features.isEnabled = (name) => name === 'sso';
+    it('highlights a license-only link when the license lists its feature', () => {
+      jest.mocked(useLicenseLimits).mockReturnValueOnce({
+        license: { features: [{ name: 'sso' }] },
+      } as ReturnType<typeof useLicenseLimits>);
 
       render(<SettingsNav />);
 
@@ -178,7 +177,15 @@ describe('SettingsNav', () => {
     });
 
     it('greys out a license-only link when the license lacks its feature', () => {
-      window.strapi.features.isEnabled = () => false;
+      render(<SettingsNav />);
+
+      expect(getLightningFill()).toBe(lightTheme.colors.neutral300);
+    });
+
+    it('greys out a license-only link while the license is not loaded', () => {
+      jest.mocked(useLicenseLimits).mockReturnValueOnce({
+        license: undefined,
+      } as ReturnType<typeof useLicenseLimits>);
 
       render(<SettingsNav />);
 
