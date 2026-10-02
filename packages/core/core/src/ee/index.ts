@@ -2,7 +2,7 @@ import { isEqual, pick } from 'lodash';
 import type { Logger } from '@strapi/logger';
 import type { Core, Modules } from '@strapi/types';
 import { createStrapiFetch } from '../utils/fetch';
-import type { ResolvedFeature } from './features';
+import { getFeature, listFeatures } from './features';
 import {
   readLicense,
   verifyLicense,
@@ -19,7 +19,7 @@ interface EE {
   providedLicense?: string;
   licenseInfo: {
     licenseKey?: string;
-    features?: ResolvedFeature[];
+    features?: Array<{ name: string; [key: string]: any } | string>;
     expireAt?: string;
     seats?: number;
     type?: string;
@@ -264,11 +264,9 @@ const getTrialEndDate = async ({
   return data;
 };
 
-const list = (): ResolvedFeature[] => [...(ee.licenseInfo.features ?? [])];
+const list = () => listFeatures(ee.licenseInfo.features);
 
-// The options shape of a known name is trusted from the license, it is not validated
-const get = <TName extends Modules.EE.FeatureName>(name: TName) =>
-  list().find((feature): feature is Modules.EE.Feature<TName> => feature.name === name);
+const get = <TName extends Modules.EE.FeatureName>(name: TName) => getFeature(ee.licenseInfo, name);
 
 const isEnabled = (name: Modules.EE.FeatureName) => get(name) !== undefined;
 
@@ -283,7 +281,6 @@ export default Object.freeze<
     return ee.enabled;
   },
 
-  /** @deprecated Use `features.get('seat-limit')`. */
   get seats() {
     return ee.licenseInfo.seats;
   },

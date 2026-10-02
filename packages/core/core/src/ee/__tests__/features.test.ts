@@ -1,262 +1,118 @@
-import { cloneDeep } from 'lodash/fp';
+import { cloneDeep } from 'lodash';
 
-import { LEGACY_FEATURES, resolveFeatures } from '../features';
+import { LEGACY_FEATURES, getFeature, listFeatures, resolveFeatures } from '../features';
 
 const GOLD_FEATURES = [
-  { name: 'sso', options: {} },
+  { name: 'sso' },
   { name: 'audit-logs', options: { retentionDays: null } },
-  { name: 'review-workflows', options: {} },
-  { name: 'cms-content-releases', options: {} },
+  { name: 'review-workflows' },
+  { name: 'cms-content-releases' },
   { name: 'cms-content-history', options: { retentionDays: 99999 } },
-  { name: 'cms-advanced-preview', options: {} },
+  { name: 'cms-advanced-preview' },
 ];
 
 describe('resolveFeatures', () => {
-  describe('legacy license, without features', () => {
-    it('returns the gold features with their options', () => {
-      expect(resolveFeatures({ type: 'gold' })).toEqual(GOLD_FEATURES);
-      expect(resolveFeatures({ type: 'gold', features: undefined })).toEqual(GOLD_FEATURES);
-      expect(resolveFeatures({ type: 'gold', features: null })).toEqual(GOLD_FEATURES);
-    });
+  it('returns the features of the license as they are', () => {
+    const features = ['sso', { name: 'review-workflows', numberOfWorkflows: 3 }];
 
-    it.each(['silver', 'bronze'])('returns no features for a %s license', (type) => {
-      expect(resolveFeatures({ type })).toEqual([]);
-    });
-
-    it.each([['platinum'], [undefined], [42], ['toString'], ['constructor']])(
-      'returns no features for an unknown type (%p)',
-      (type) => {
-        expect(resolveFeatures({ type })).toEqual([]);
-      }
-    );
+    expect(resolveFeatures({ type: 'gold', features })).toBe(features);
+    expect(resolveFeatures({ type: 'gold', features: [] })).toEqual([]);
   });
 
-  describe('license with malformed features', () => {
-    it.each([['sso'], [42], [{ name: 'sso' }]])(
-      'returns no features when features is not an array (%p), even for gold',
-      (features) => {
-        expect(resolveFeatures({ type: 'gold', features })).toEqual([]);
-      }
-    );
+  it.each([undefined, null, '', 0, false])(
+    'returns the legacy gold features when features is %p',
+    (features) => {
+      expect(resolveFeatures({ type: 'gold', features: features as never })).toBe(
+        LEGACY_FEATURES.gold
+      );
+    }
+  );
+
+  it.each(['silver', 'bronze'] as const)('returns no features for a %s license', (type) => {
+    expect(resolveFeatures({ type })).toEqual([]);
   });
 
-  describe('license with a features array', () => {
-    it('returns exactly the listed features, whatever the type', () => {
-      expect(resolveFeatures({ type: 'gold', features: ['sso'] })).toEqual([
-        { name: 'sso', options: {} },
-      ]);
-      expect(resolveFeatures({ type: 'gold', features: [] })).toEqual([]);
-    });
+  it('returns undefined for an unknown type', () => {
+    expect(resolveFeatures({ type: 'platinum' as never })).toBeUndefined();
+  });
 
-    it('turns a string entry into a feature with empty options', () => {
-      expect(resolveFeatures({ features: ['sso', 'audit-logs'] })).toEqual([
-        { name: 'sso', options: {} },
-        { name: 'audit-logs', options: {} },
-      ]);
-    });
+  it('keeps the gold table', () => {
+    expect(LEGACY_FEATURES.gold).toEqual(GOLD_FEATURES);
+  });
+});
 
-    it('keeps the options of an object entry', () => {
-      expect(
-        resolveFeatures({
-          features: [{ name: 'cms-content-releases', options: { maximumReleases: 10 } }],
-        })
-      ).toEqual([{ name: 'cms-content-releases', options: { maximumReleases: 10 } }]);
-    });
+describe('listFeatures', () => {
+  it('turns a name into { name } and returns an object entry as is', () => {
+    const history = { name: 'cms-content-history' };
+    const reviewWorkflows = {
+      name: 'review-workflows',
+      numberOfWorkflows: 3,
+      options: { stagesPerWorkflow: 5 },
+    };
 
-    it('sets empty options when an object entry has none', () => {
-      expect(resolveFeatures({ features: [{ name: 'cms-content-history' }] })).toEqual([
-        { name: 'cms-content-history', options: {} },
-      ]);
-    });
+    const features = listFeatures(['sso', history, reviewWorkflows, 'a-future-feature']);
 
-    it.each([[null], ['7'], [7], [true], [['retentionDays']]])(
-      'sets empty options when the options are not an object (%p)',
-      (options) => {
-        expect(resolveFeatures({ features: [{ name: 'cms-content-history', options }] })).toEqual([
-          { name: 'cms-content-history', options: {} },
-        ]);
-      }
-    );
+    expect(features).toEqual([
+      { name: 'sso' },
+      { name: 'cms-content-history' },
+      { name: 'review-workflows', numberOfWorkflows: 3, options: { stagesPerWorkflow: 5 } },
+      { name: 'a-future-feature' },
+    ]);
+    expect(features[1]).toBe(history);
+    expect(features[2]).toBe(reviewWorkflows);
+  });
 
-    it('keeps the other top-level keys of an object entry on the feature', () => {
-      expect(
-        resolveFeatures({
-          features: [
-            { name: 'sso', extra: true, options: { a: 1 } },
-            { name: 'another', b: 2 },
-          ],
-        })
-      ).toEqual([
-        { name: 'sso', extra: true, options: { a: 1 } },
-        { name: 'another', b: 2, options: {} },
-      ]);
-    });
+  it('keeps every entry of a duplicated name', () => {
+    expect(listFeatures(['sso', { name: 'sso', options: { a: 1 } }])).toEqual([
+      { name: 'sso' },
+      { name: 'sso', options: { a: 1 } },
+    ]);
+  });
 
-    it('folds the legacy top-level limits of review-workflows into its options', () => {
-      expect(
-        resolveFeatures({
-          features: [{ name: 'review-workflows', numberOfWorkflows: 3, stagesPerWorkflow: 5 }],
-        })
-      ).toEqual([
-        {
-          name: 'review-workflows',
-          numberOfWorkflows: 3,
-          stagesPerWorkflow: 5,
-          options: { numberOfWorkflows: 3, stagesPerWorkflow: 5 },
-        },
-      ]);
-    });
+  it('returns no features without features', () => {
+    expect(listFeatures(undefined)).toEqual([]);
+  });
 
-    it('keeps the options of an object entry without other top-level keys', () => {
-      expect(
-        resolveFeatures({
-          features: [{ name: 'review-workflows', options: { numberOfWorkflows: 3 } }],
-        })
-      ).toEqual([{ name: 'review-workflows', options: { numberOfWorkflows: 3 } }]);
-    });
+  it('does not mutate the legacy features table', () => {
+    const snapshot = cloneDeep(LEGACY_FEATURES);
 
-    it('prefers options over the legacy top-level limits on a conflict', () => {
-      expect(
-        resolveFeatures({
-          features: [
-            {
-              name: 'review-workflows',
-              numberOfWorkflows: 3,
-              stagesPerWorkflow: 5,
-              options: { numberOfWorkflows: 10 },
-            },
-          ],
-        })
-      ).toEqual([
-        {
-          name: 'review-workflows',
-          numberOfWorkflows: 3,
-          stagesPerWorkflow: 5,
-          options: { numberOfWorkflows: 10, stagesPerWorkflow: 5 },
-        },
-      ]);
-    });
+    listFeatures(resolveFeatures({ type: 'gold' }));
 
-    it('folds the legacy top-level limits when the options are not an object', () => {
-      expect(
-        resolveFeatures({
-          features: [{ name: 'review-workflows', numberOfWorkflows: 3, options: 7 }],
-        })
-      ).toEqual([
-        { name: 'review-workflows', numberOfWorkflows: 3, options: { numberOfWorkflows: 3 } },
-      ]);
-    });
+    expect(LEGACY_FEATURES).toEqual(snapshot);
+  });
+});
 
-    it.each([
-      ['audit-logs', 'retentionDays', 30],
-      ['cms-content-history', 'retentionDays', 30],
-      ['cms-content-releases', 'maximumReleases', 3],
-    ])('does not fold a top-level key of %s into its options (%s)', (name, key, value) => {
-      expect(resolveFeatures({ features: [{ name, [key]: value }] })).toEqual([
-        { name, [key]: value, options: {} },
-      ]);
-    });
+describe('getFeature', () => {
+  it('returns the first listed feature of that name', () => {
+    const features = [{ name: 'audit-logs', options: { retentionDays: 30 } }, 'audit-logs'];
 
-    it('drops the entries without a string name', () => {
-      expect(
-        resolveFeatures({
-          features: [null, undefined, 42, true, [], {}, { name: 42 }, { options: {} }, 'sso'],
-        })
-      ).toEqual([{ name: 'sso', options: {} }]);
-    });
+    expect(getFeature({ features }, 'audit-logs')).toBe(features[0]);
+    expect(getFeature({ features: ['audit-logs'] }, 'audit-logs')).toEqual({ name: 'audit-logs' });
+  });
 
-    it('keeps the first entry of a duplicated name', () => {
-      expect(
-        resolveFeatures({
-          features: [
-            { name: 'audit-logs', options: { retentionDays: 30 } },
-            'audit-logs',
-            { name: 'audit-logs', options: { retentionDays: 90 } },
-          ],
-        })
-      ).toEqual([{ name: 'audit-logs', options: { retentionDays: 30 } }]);
-    });
+  it('returns undefined for a feature the license does not list', () => {
+    expect(getFeature({ features: ['sso'] }, 'audit-logs')).toBeUndefined();
+    expect(getFeature({}, 'sso')).toBeUndefined();
+  });
 
-    it('keeps the unknown names', () => {
-      expect(
-        resolveFeatures({ features: ['a-future-feature', { name: 'another', options: { a: 1 } }] })
-      ).toEqual([
-        { name: 'a-future-feature', options: {} },
-        { name: 'another', options: { a: 1 } },
-      ]);
+  it.each([10, 0, '10', 'unlimited'])('derives seat-limit from seats %p, kept as is', (seats) => {
+    expect(getFeature({ features: [], seats: seats as number }, 'seat-limit')).toEqual({
+      name: 'seat-limit',
+      options: { seats },
     });
   });
 
-  describe('seat limit, from the top-level seats', () => {
-    it.each([
-      [10, 10],
-      ['10', 10],
-      [0, 0],
-    ])('adds seat-limit for seats %p', (seats, expected) => {
-      expect(resolveFeatures({ features: ['sso'], seats })).toEqual([
-        { name: 'sso', options: {} },
-        { name: 'seat-limit', options: { seats: expected } },
-      ]);
-    });
-
-    it.each([[null], [undefined], ['ten'], [Number.NaN], [true], [{ seats: 10 }]])(
-      'adds no seat-limit for seats %p',
-      (seats) => {
-        expect(resolveFeatures({ features: ['sso'], seats })).toEqual([
-          { name: 'sso', options: {} },
-        ]);
-      }
-    );
-
-    it('drops a seat-limit listed in features', () => {
-      const listed = { name: 'seat-limit', options: { seats: 99 } };
-
-      expect(resolveFeatures({ features: [listed, 'sso'] })).toEqual([
-        { name: 'sso', options: {} },
-      ]);
-      expect(resolveFeatures({ features: ['seat-limit', listed], seats: 5 })).toEqual([
-        { name: 'seat-limit', options: { seats: 5 } },
-      ]);
-    });
-
-    it('adds seat-limit after the six features of a legacy gold license', () => {
-      expect(resolveFeatures({ type: 'gold', seats: 10 })).toEqual([
-        ...GOLD_FEATURES,
-        { name: 'seat-limit', options: { seats: 10 } },
-      ]);
-    });
-
-    it('adds only seat-limit to a legacy bronze license', () => {
-      expect(resolveFeatures({ type: 'bronze', seats: 3 })).toEqual([
-        { name: 'seat-limit', options: { seats: 3 } },
-      ]);
-    });
+  it.each([undefined, null])('has no seat-limit when seats is %p', (seats) => {
+    expect(getFeature({ features: ['sso'], seats }, 'seat-limit')).toBeUndefined();
   });
 
-  describe('immutability', () => {
-    it('does not mutate the license payload and returns fresh objects', () => {
-      const entry = { name: 'audit-logs', extra: true, options: { retentionDays: 30 } };
-      const licenseInfo = { type: 'gold', features: [entry, 'sso'] };
-      const snapshot = cloneDeep(licenseInfo);
+  it('ignores a seat-limit listed in features', () => {
+    const features = [{ name: 'seat-limit', options: { seats: 99 } }];
 
-      const [feature] = resolveFeatures(licenseInfo);
-
-      expect(licenseInfo).toEqual(snapshot);
-      expect(feature).not.toBe(entry);
-      expect(feature.options).not.toBe(entry.options);
-    });
-
-    it('does not mutate the legacy features table', () => {
-      const snapshot = cloneDeep(LEGACY_FEATURES);
-
-      const features = resolveFeatures({ type: 'gold' });
-      features.forEach((feature) => {
-        feature.options.retentionDays = 1;
-      });
-      features.push({ name: 'another', options: {} });
-
-      expect(LEGACY_FEATURES).toEqual(snapshot);
-      expect(resolveFeatures({ type: 'gold' })).toEqual(GOLD_FEATURES);
+    expect(getFeature({ features }, 'seat-limit')).toBeUndefined();
+    expect(getFeature({ features, seats: 5 }, 'seat-limit')).toEqual({
+      name: 'seat-limit',
+      options: { seats: 5 },
     });
   });
 });

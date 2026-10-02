@@ -1,7 +1,9 @@
-import { isPlainObject } from 'lodash/fp';
 import type { Modules } from '@strapi/types';
 
-type ResolvedFeature = { name: string; options: Record<string, unknown> };
+/**
+ * A feature as the license lists it: a name, or an object with a name (and often `options`).
+ */
+type LicenseFeature = { name: string; [key: string]: any } | string;
 
 type LegacyFeature = { name: Modules.EE.FeatureName; options?: Record<string, unknown> };
 
@@ -23,101 +25,57 @@ const LEGACY_FEATURES: Record<Modules.EE.LicenseType, LegacyFeature[]> = {
   ],
 };
 
-// The review-workflows server read these at the top level before; the registry shape is unverified
-const LEGACY_TOP_LEVEL_OPTIONS: Record<string, string[]> = {
-  'review-workflows': ['numberOfWorkflows', 'stagesPerWorkflow'],
-};
-
 const SEAT_LIMIT = 'seat-limit' satisfies Modules.EE.FeatureName;
 
-const isOptions = (value: unknown): value is Record<string, unknown> => isPlainObject(value);
-
-const isLicenseType = (value: unknown): value is Modules.EE.LicenseType =>
-  typeof value === 'string' && Object.hasOwn(LEGACY_FEATURES, value);
-
-const toFeature = (entry: unknown): ResolvedFeature | undefined => {
-  if (typeof entry === 'string') {
-    return { name: entry, options: {} };
-  }
-
-  if (isOptions(entry) === false || typeof entry.name !== 'string') {
-    return undefined;
-  }
-
-  const options: Record<string, unknown> = isOptions(entry.options) ? { ...entry.options } : {};
-  const legacyKeys = Object.hasOwn(LEGACY_TOP_LEVEL_OPTIONS, entry.name)
-    ? LEGACY_TOP_LEVEL_OPTIONS[entry.name]
-    : [];
-
-  // `options` wins over a legacy top-level key
-  for (const key of legacyKeys) {
-    if (Object.hasOwn(entry, key) === true && Object.hasOwn(options, key) === false) {
-      options[key] = entry[key];
-    }
-  }
-
-  // The other top-level keys stay on the feature, for the code that reads them there
-  return { ...entry, name: entry.name, options };
+/**
+ * The features of a verified license payload: its `features` as they are, else the legacy
+ * features of its `type`. Entries are kept as the license lists them.
+ */
+const resolveFeatures = <TFeatures extends LicenseFeature[]>(licenseInfo: {
+  type: Modules.EE.LicenseType;
+  features?: TFeatures;
+}) => {
+  // Falsy on purpose, not only missing: the legacy fallback has always used `!features`
+  return licenseInfo.features || LEGACY_FEATURES[licenseInfo.type];
 };
 
 /**
- * The admin seat limit of the license: a finite number, or a string that converts to one.
+ * Every license feature: a name becomes `{ name }`, an object is returned as the license lists it.
+ * `seat-limit` is not part of it, see {@link getFeature}.
  */
-const toSeats = (value: unknown): number | undefined => {
-  const seats = typeof value === 'string' ? Number(value) : value;
-
-  if (typeof seats === 'number' && Number.isFinite(seats)) {
-    return seats;
-  }
-
-  // TODO @Nico a non-numeric `seats` sets no limit, while develop treated any non-nil value as one
-  return undefined;
+const listFeatures = (features: LicenseFeature[] | undefined) => {
+  return (
+    features?.map((feature) => (typeof feature === 'object' ? feature : { name: feature })) || []
+  );
 };
 
 /**
- * Turns a verified license payload into its features, each with an options object.
- * Without `features` (`undefined` or `null`), the features come from the legacy license `type`.
- * Malformed `features` (not an array) grant nothing.
- * `seat-limit` comes from the top-level `seats` only, whatever `features` holds.
+ * The license feature of that name, else `undefined`. The options shape of a known name is
+ * trusted from the license, it is not validated.
+ *
+ * `seat-limit` comes from the top-level `seats` only: present when `seats` is neither `undefined`
+ * nor `null`, the condition under which the seat checks treat it as a limit, with `seats` as is.
+ * The license payload is signed, so the value is neither coerced nor validated.
  */
-const resolveFeatures = (licenseInfo: {
-  type?: unknown;
-  features?: unknown;
-  seats?: unknown;
-}): ResolvedFeature[] => {
-  let entries: unknown[] = [];
+const getFeature = <TName extends Modules.EE.FeatureName>(
+  licenseInfo: { features?: LicenseFeature[]; seats?: number | null },
+  name: TName
+): Modules.EE.Feature<TName> | undefined => {
+  if (name === SEAT_LIMIT) {
+    const { seats } = licenseInfo;
 
-  // `null` is legacy too: the previous `!licenseInfo.features` check treated it as missing
-  if (licenseInfo.features === undefined || licenseInfo.features === null) {
-    entries = isLicenseType(licenseInfo.type) ? LEGACY_FEATURES[licenseInfo.type] : [];
-  } else if (Array.isArray(licenseInfo.features)) {
-    entries = licenseInfo.features;
-  }
-
-  const features: ResolvedFeature[] = [];
-  const names = new Set<string>();
-
-  for (const entry of entries) {
-    const feature = toFeature(entry);
-    // `seat-limit` comes from the top-level `seats` only
-    // TODO @Nico the registry may send it one day
-    const isListedSeatLimit = feature?.name === SEAT_LIMIT;
-
-    // The first entry of a name wins
-    if (feature !== undefined && isListedSeatLimit === false && names.has(feature.name) === false) {
-      names.add(feature.name);
-      features.push(feature);
+    // TODO @Nico a `seat-limit` listed in `features` is ignored; the registry does not send one
+    if (seats === undefined || seats === null) {
+      return undefined;
     }
+
+    return { name, options: { seats } } as Modules.EE.Feature<TName>;
   }
 
-  const seats = toSeats(licenseInfo.seats);
-
-  if (seats !== undefined) {
-    features.push({ name: SEAT_LIMIT, options: { seats } });
-  }
-
-  return features;
+  return listFeatures(licenseInfo.features).find(
+    (feature): feature is Modules.EE.Feature<TName> => feature.name === name
+  );
 };
 
-export type { ResolvedFeature };
-export { LEGACY_FEATURES, resolveFeatures };
+export type { LicenseFeature };
+export { LEGACY_FEATURES, resolveFeatures, listFeatures, getFeature };

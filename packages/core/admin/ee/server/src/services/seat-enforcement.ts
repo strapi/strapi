@@ -98,8 +98,8 @@ const syncDisabledUserRecords = async () => {
 };
 
 const seatEnforcementWorkflow = async () => {
-  const adminSeats = strapi.ee.seats;
-  if (adminSeats == null) {
+  const adminSeats = strapi.ee.features.get('seat-limit')?.options?.seats;
+  if (adminSeats === undefined) {
     return;
   }
 

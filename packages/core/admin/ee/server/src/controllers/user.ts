@@ -18,8 +18,8 @@ const hasAdminSeatsAvaialble = async () => {
     return true;
   }
 
-  const permittedSeats = strapi.ee.seats as any;
-  if (permittedSeats == null) {
+  const permittedSeats = strapi.ee.features.get('seat-limit')?.options?.seats;
+  if (permittedSeats === undefined) {
     return true;
   }
 

@@ -10,8 +10,12 @@ export type FeatureOptions = Public.LicenseFeatures;
 
 export type FeatureName = keyof FeatureOptions;
 
+/**
+ * A license feature as `features.get` returns it: `options` and any other key are the ones the
+ * license lists.
+ */
 export type Feature<TName extends FeatureName = FeatureName> = TName extends FeatureName
-  ? { name: TName; options: FeatureOptions[TName] }
+  ? { name: TName; options?: FeatureOptions[TName]; [key: string]: any }
   : never;
 
 export type LicenseType = 'bronze' | 'silver' | 'gold';
@@ -20,7 +24,6 @@ export type LicenseType = 'bronze' | 'silver' | 'gold';
 export type Edition = 'Community' | 'Growth' | 'Enterprise';
 
 export type EEService = {
-  /** @deprecated Use `features.get('seat-limit')`. */
   seats: number | null | undefined;
   type: string | null | undefined;
   isEE: boolean;
@@ -40,8 +43,12 @@ export type EEService = {
   getTrialEndDate: ({ strapi }: { strapi: Strapi }) => Promise<{ trialEndsAt: string } | null>;
   features: {
     isEnabled: (name: FeatureName) => boolean;
+    /** `seat-limit` comes from `seats`, see {@link Public.LicenseFeatures}. */
     get: <TName extends FeatureName>(name: TName) => Feature<TName> | undefined;
-    /** Every license feature, including names this version of Strapi does not know. */
-    list: () => Array<{ name: string; options: Record<string, unknown> }>;
+    /**
+     * Every feature the license lists, including names this version of Strapi does not know.
+     * Without `seat-limit`, which only `get` and `isEnabled` derive from `seats`.
+     */
+    list: () => { name: string; [key: string]: any }[];
   };
 };

@@ -2,18 +2,18 @@ import fs from 'fs';
 import { join, resolve } from 'path';
 import crypto from 'crypto';
 import * as z from 'zod/v4';
-import type { Core, Modules } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 import { generateInstallId } from '@strapi/utils';
 
-import { resolveFeatures, type ResolvedFeature } from './features';
+import { resolveFeatures } from './features';
 
 interface LicenseInfo {
-  type: Modules.EE.LicenseType;
+  type: 'bronze' | 'silver' | 'gold';
   isTrial: boolean;
   expireAt?: string;
   seats?: number;
-  features: ResolvedFeature[];
+  features?: Array<{ name: string; options?: Record<string, unknown> }>;
   subscriptionId?: string;
   planPriceId?: string;
 }
@@ -76,8 +76,9 @@ const verifyLicense = (license: string) => {
     throw new Error('Invalid license.');
   }
 
-  const payload = JSON.parse(stringifiedContent);
-  const licenseInfo: LicenseInfo = { ...payload, features: resolveFeatures(payload) };
+  const licenseInfo: LicenseInfo = JSON.parse(stringifiedContent);
+
+  licenseInfo.features = resolveFeatures(licenseInfo);
 
   if (!licenseInfo.isTrial) {
     licenseInfo.isTrial = false;

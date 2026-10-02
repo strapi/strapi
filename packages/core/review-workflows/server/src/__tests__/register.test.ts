@@ -23,28 +23,23 @@ const registerWithFeature = async (feature: unknown) => {
 
 describe('register', () => {
   describe('license limits', () => {
-    it('reads the workflow limits from the feature options', async () => {
+    it('reads the workflow limits from the top level of the feature', async () => {
       const limits = await registerWithFeature({
         name: 'review-workflows',
-        options: { numberOfWorkflows: 3 },
+        numberOfWorkflows: 3,
+        stagesPerWorkflow: 4,
       });
 
-      expect(limits).toEqual({ numberOfWorkflows: 3, stagesPerWorkflow: MAX_STAGES_PER_WORKFLOW });
+      expect(limits).toMatchObject({ numberOfWorkflows: 3, stagesPerWorkflow: 4 });
     });
 
-    it('reads the stage limit from the feature options', async () => {
+    it('ignores the limits in the feature options', async () => {
       const limits = await registerWithFeature({
         name: 'review-workflows',
-        options: { stagesPerWorkflow: 4 },
+        options: { numberOfWorkflows: 3, stagesPerWorkflow: 4 },
       });
 
-      expect(limits).toEqual({ numberOfWorkflows: MAX_WORKFLOWS, stagesPerWorkflow: 4 });
-    });
-
-    it('uses the maximum limits when the feature has no options', async () => {
-      const limits = await registerWithFeature({ name: 'review-workflows', options: {} });
-
-      expect(limits).toEqual({
+      expect(limits).toMatchObject({
         numberOfWorkflows: MAX_WORKFLOWS,
         stagesPerWorkflow: MAX_STAGES_PER_WORKFLOW,
       });
