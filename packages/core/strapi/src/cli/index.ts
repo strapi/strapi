@@ -17,6 +17,16 @@ const createCLI = async (argv: string[], command = new Command()) => {
 
   command.version(version, '-v, --version', 'Output the version number');
 
+  command.option(
+    '--skip-compile',
+    'Reuse the existing build output instead of compiling the TypeScript project (ignored by build and develop)'
+  );
+
+  // Commands read this through `compileStrapi`, so it must be set before any action runs
+  if (argv.includes('--skip-compile')) {
+    process.env.STRAPI_SKIP_COMPILE = 'true';
+  }
+
   const cwd = process.cwd();
 
   const hasDebug = argv.includes('--debug');
