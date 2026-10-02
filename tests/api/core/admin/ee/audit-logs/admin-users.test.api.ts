@@ -102,6 +102,10 @@ describeOnCondition(edition === 'EE')('Admin accounts in audit logs (api)', () =
   beforeAll(async () => {
     strapi = await createStrapiInstance();
 
+    // forgot-password sends the email without awaiting it. A real send to the test domain
+    // can reject after `strapi.destroy()`, failing the suite on the missing global.
+    jest.spyOn(strapi.plugin('email').service('email'), 'sendTemplatedEmail').mockResolvedValue();
+
     // Requests run as an admin of our own: with only the default super admin in the
     // database, asserting the actor would prove nothing.
     utils = createUtils(strapi);
