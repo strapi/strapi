@@ -1,6 +1,6 @@
 import type { UID } from '@strapi/types';
 
-import { updateSchema } from '../schema';
+import { getSchema, updateSchema } from '../schema';
 import type { Schema as CTBSchema } from '../../controllers/validation/schema';
 
 const builderServiceMock = {
@@ -12,7 +12,8 @@ const builderServiceMock = {
   createComponentAttributes: jest.fn(),
   editComponent: jest.fn(),
   deleteComponent: jest.fn(),
-  writeFiles: jest.fn().mockResolvedValue(undefined),
+  writeFiles: jest.fn().mockResolvedValue(true),
+  rollback: jest.fn().mockResolvedValue(undefined),
   contentTypes: new Map(),
   components: new Map(),
 };
@@ -24,10 +25,18 @@ const apiHandlerServiceMock = {
   clear: jest.fn().mockResolvedValue(undefined),
   backup: jest.fn().mockResolvedValue(undefined),
   rollback: jest.fn().mockResolvedValue(undefined),
+  clearGenerated: jest.fn().mockResolvedValue(undefined),
+  finalize: jest.fn().mockResolvedValue(undefined),
 };
 
 const contentTypeServiceMock = {
   generateAPI: jest.fn().mockResolvedValue(undefined),
+};
+
+const contentStructureServiceMock = {
+  validateFromUpdate: jest.fn(),
+  commitFromUpdate: jest.fn().mockResolvedValue(false),
+  validateContentTypeUidReferences: jest.fn(),
 };
 
 const getServiceMock = jest.fn().mockImplementation((service) => {
@@ -37,6 +46,10 @@ const getServiceMock = jest.fn().mockImplementation((service) => {
 
   if (service === 'api-handler') {
     return apiHandlerServiceMock;
+  }
+
+  if (service === 'content-structure') {
+    return contentStructureServiceMock;
   }
 
   return {};
@@ -217,7 +230,9 @@ describe('Content Type Builder - Schema service', () => {
       // Verify API operations
 
       expect(apiHandlerServiceMock.backup).toHaveBeenCalledWith(contentTypeUid);
-      expect(apiHandlerServiceMock.clear).toHaveBeenCalledWith(contentTypeUid);
+      expect(apiHandlerServiceMock.clear).toHaveBeenCalledWith(contentTypeUid, {
+        preserveBackup: true,
+      });
 
       // Verify event emission
       expect(strapi.eventHub.emit).toHaveBeenCalledWith('content-type.delete', {
@@ -231,6 +246,19 @@ describe('Content Type Builder - Schema service', () => {
         .invocationCallOrder[0];
       const clearCallOrder = jest.mocked(apiHandlerServiceMock.clear).mock.invocationCallOrder[0];
       expect(writeFilesCallOrder).toBeLessThan(clearCallOrder);
+    });
+
+    it('rejects a crafted protected plugin delete before any schema or API mutation', async () => {
+      const schema: CTBSchema = {
+        contentTypes: [{ action: 'delete', uid: 'plugin::example.article' as UID.ContentType }],
+        components: [],
+      };
+
+      await expect(updateSchema(schema)).rejects.toThrow(/not managed by CTB/);
+
+      expect(builderServiceMock.deleteContentType).not.toHaveBeenCalled();
+      expect(apiHandlerServiceMock.backup).not.toHaveBeenCalled();
+      expect(apiHandlerServiceMock.clear).not.toHaveBeenCalled();
     });
 
     it('should handle component creation and emit event', async () => {
@@ -385,21 +413,15 @@ describe('Content Type Builder - Schema service', () => {
         components: [],
       };
 
-      await updateSchema(schema);
+      await expect(updateSchema(schema)).rejects.toThrow('API clear failed');
 
       // Verify writeFiles is called before API operations
       expect(builderServiceMock.writeFiles).toHaveBeenCalledTimes(1);
 
-      // Verify error handling
-      expect(strapi.log.error).toHaveBeenCalled();
-
-      // Verify rollback was called
+      // The request must fail and all written artifacts must be compensated.
+      expect(builderServiceMock.rollback).toHaveBeenCalledWith();
       expect(apiHandlerServiceMock.rollback).toHaveBeenCalledWith(contentTypeUid);
-
-      // Events should still be emitted even after an error
-      expect(strapi.eventHub.emit).toHaveBeenCalledWith('content-type.delete', {
-        contentType: mockContentType,
-      });
+      expect(strapi.eventHub.emit).not.toHaveBeenCalled();
 
       // Verify the execution order: writeFiles should be called before clear attempt
       const writeFilesCallOrder = jest.mocked(builderServiceMock.writeFiles).mock
@@ -562,6 +584,303 @@ describe('Content Type Builder - Schema service', () => {
       expect(builderServiceMock.writeFiles).toHaveBeenCalledTimes(1);
     });
 
+    it('forwards a kind changed on update to the folder validate + commit steps', async () => {
+      const contentTypeUid = 'api::test.test';
+      const mockContentType = {
+        uid: contentTypeUid,
+        kind: 'singleType',
+        info: { displayName: 'Test' },
+        attributes: {},
+      };
+
+      jest.mocked(builderServiceMock.contentTypes.get).mockReturnValue(mockContentType);
+
+      const contentStructure: CTBSchema['contentStructure'] = {
+        version: 1,
+        sections: {
+          collectionTypes: { groups: [] },
+          singleTypes: {
+            groups: [
+              {
+                id: 'grp_s',
+                name: 'S',
+                parent: null,
+                children: [{ type: 'contentType', uid: contentTypeUid }],
+              },
+            ],
+          },
+        },
+      };
+
+      const schema: CTBSchema = {
+        contentTypes: [
+          {
+            action: 'update',
+            uid: contentTypeUid,
+            displayName: 'Test',
+            kind: 'singleType',
+            draftAndPublish: false,
+            pluginOptions: {},
+            options: {},
+            attributes: [],
+          },
+        ],
+        components: [],
+        contentStructure,
+      };
+
+      await updateSchema(schema);
+
+      expect(contentStructureServiceMock.validateFromUpdate).toHaveBeenCalledWith({
+        incomingStructure: contentStructure,
+        upsertedUids: new Map([[contentTypeUid, 'singleType']]),
+        deletedUids: new Set(),
+      });
+
+      expect(contentStructureServiceMock.commitFromUpdate).toHaveBeenCalledWith({
+        incomingStructure: contentStructure,
+        deletedUids: new Set(),
+      });
+    });
+
+    it('validates folder references before scaffolding and commits them after writeFiles', async () => {
+      const contentTypeUid = 'api::test.test';
+      const mockContentType = {
+        uid: contentTypeUid,
+        kind: 'collectionType',
+        info: { displayName: 'Test' },
+        attributes: {},
+      };
+
+      jest.mocked(builderServiceMock.contentTypes.get).mockReturnValue(mockContentType);
+
+      const schema: CTBSchema = {
+        contentTypes: [
+          {
+            action: 'create',
+            uid: contentTypeUid,
+            displayName: 'Test',
+            singularName: 'test',
+            pluralName: 'tests',
+            kind: 'collectionType',
+            draftAndPublish: false,
+            pluginOptions: {},
+            options: {},
+            attributes: [],
+          },
+        ],
+        components: [],
+        contentStructure: {
+          version: 1,
+          sections: {
+            collectionTypes: { groups: [] },
+            singleTypes: { groups: [] },
+          },
+        },
+      };
+
+      await updateSchema(schema);
+
+      // validate runs before the API is scaffolded; commit runs after schema files are written.
+      const validateOrder =
+        contentStructureServiceMock.validateFromUpdate.mock.invocationCallOrder[0];
+      const generateApiOrder = contentTypeServiceMock.generateAPI.mock.invocationCallOrder[0];
+      const writeFilesOrder = jest.mocked(builderServiceMock.writeFiles).mock
+        .invocationCallOrder[0];
+      const commitOrder = contentStructureServiceMock.commitFromUpdate.mock.invocationCallOrder[0];
+
+      expect(validateOrder).toBeLessThan(generateApiOrder);
+      expect(writeFilesOrder).toBeLessThan(commitOrder);
+    });
+
+    it('does not commit the folder file when folder validation rejects the payload', async () => {
+      const contentTypeUid = 'api::test.test';
+      const mockContentType = {
+        uid: contentTypeUid,
+        kind: 'collectionType',
+        info: { displayName: 'Test' },
+        attributes: {},
+      };
+
+      jest.mocked(builderServiceMock.contentTypes.get).mockReturnValue(mockContentType);
+      contentStructureServiceMock.validateFromUpdate.mockImplementationOnce(() => {
+        throw new Error('invalid folder reference');
+      });
+
+      const schema: CTBSchema = {
+        contentTypes: [
+          {
+            action: 'create',
+            uid: contentTypeUid,
+            displayName: 'Test',
+            singularName: 'test',
+            pluralName: 'tests',
+            kind: 'collectionType',
+            draftAndPublish: false,
+            pluginOptions: {},
+            options: {},
+            attributes: [],
+          },
+        ],
+        components: [],
+        contentStructure: {
+          version: 1,
+          sections: {
+            collectionTypes: { groups: [] },
+            singleTypes: { groups: [] },
+          },
+        },
+      };
+
+      await expect(updateSchema(schema)).rejects.toThrow('invalid folder reference');
+
+      // Nothing touched disk: no API scaffolded, no schema files written, no folder file committed.
+      expect(contentTypeServiceMock.generateAPI).not.toHaveBeenCalled();
+      expect(builderServiceMock.writeFiles).not.toHaveBeenCalled();
+      expect(contentStructureServiceMock.commitFromUpdate).not.toHaveBeenCalled();
+    });
+
+    it('rolls back the schema files when the folder commit fails after writeFiles', async () => {
+      const contentTypeUid = 'api::test.test';
+      const mockContentType = {
+        uid: contentTypeUid,
+        kind: 'collectionType',
+        info: { displayName: 'Test' },
+        attributes: {},
+      };
+
+      jest.mocked(builderServiceMock.contentTypes.get).mockReturnValue(mockContentType);
+      contentStructureServiceMock.commitFromUpdate.mockRejectedValueOnce(
+        new Error('groups.json write failed')
+      );
+
+      const schema: CTBSchema = {
+        contentTypes: [
+          {
+            action: 'create',
+            uid: contentTypeUid,
+            displayName: 'Test',
+            singularName: 'test',
+            pluralName: 'tests',
+            kind: 'collectionType',
+            draftAndPublish: false,
+            pluginOptions: {},
+            options: {},
+            attributes: [],
+          },
+        ],
+        components: [],
+        contentStructure: {
+          version: 1,
+          sections: {
+            collectionTypes: { groups: [] },
+            singleTypes: { groups: [] },
+          },
+        },
+      };
+
+      await expect(updateSchema(schema)).rejects.toThrow('groups.json write failed');
+
+      expect(builderServiceMock.writeFiles).toHaveBeenCalledTimes(1);
+      expect(builderServiceMock.rollback).toHaveBeenCalledTimes(1);
+
+      const writeFilesOrder = jest.mocked(builderServiceMock.writeFiles).mock
+        .invocationCallOrder[0];
+      const commitOrder = contentStructureServiceMock.commitFromUpdate.mock.invocationCallOrder[0];
+      const rollbackOrder = jest.mocked(builderServiceMock.rollback).mock.invocationCallOrder[0];
+
+      expect(writeFilesOrder).toBeLessThan(commitOrder);
+      expect(commitOrder).toBeLessThan(rollbackOrder);
+    });
+
+    it('does not commit the folder file when writeFiles rolls the schema back', async () => {
+      const contentTypeUid = 'api::test.test';
+      const mockContentType = {
+        uid: contentTypeUid,
+        kind: 'collectionType',
+        info: { displayName: 'Test' },
+        attributes: {},
+      };
+
+      jest.mocked(builderServiceMock.contentTypes.get).mockReturnValue(mockContentType);
+      builderServiceMock.writeFiles.mockResolvedValueOnce(false);
+
+      const schema: CTBSchema = {
+        contentTypes: [
+          {
+            action: 'create',
+            uid: contentTypeUid,
+            displayName: 'Test',
+            singularName: 'test',
+            pluralName: 'tests',
+            kind: 'collectionType',
+            draftAndPublish: false,
+            pluginOptions: {},
+            options: {},
+            attributes: [],
+          },
+        ],
+        components: [],
+        contentStructure: {
+          version: 1,
+          sections: {
+            collectionTypes: { groups: [] },
+            singleTypes: { groups: [] },
+          },
+        },
+      };
+
+      await expect(updateSchema(schema)).rejects.toThrow('Invalid schema edition');
+
+      expect(builderServiceMock.writeFiles).toHaveBeenCalledTimes(1);
+      expect(contentStructureServiceMock.commitFromUpdate).not.toHaveBeenCalled();
+      expect(builderServiceMock.rollback).not.toHaveBeenCalled();
+    });
+
+    it('removes a partial generated API before an absent schema directory prevents rollback', async () => {
+      const artifacts = { schema: false, api: false, groups: 'before' };
+      builderServiceMock.createContentType.mockImplementation(() => {
+        artifacts.schema = true;
+      });
+      builderServiceMock.rollback.mockImplementationOnce(async () => {
+        artifacts.schema = false;
+        throw new Error('schema directory does not exist');
+      });
+      contentTypeServiceMock.generateAPI.mockImplementationOnce(async () => {
+        artifacts.api = true;
+        throw new Error('generator failed');
+      });
+      apiHandlerServiceMock.clearGenerated.mockImplementationOnce(async () => {
+        artifacts.api = false;
+      });
+      contentStructureServiceMock.commitFromUpdate.mockImplementationOnce(async () => {
+        artifacts.groups = 'after';
+        return true;
+      });
+
+      await expect(
+        updateSchema({
+          contentTypes: [
+            {
+              action: 'create',
+              uid: 'api::test.test',
+              displayName: 'Test',
+              singularName: 'test',
+              pluralName: 'tests',
+              kind: 'collectionType',
+              draftAndPublish: false,
+              pluginOptions: {},
+              options: {},
+              attributes: [],
+            },
+          ],
+          components: [],
+        })
+      ).rejects.toThrow('schema directory does not exist');
+
+      expect(artifacts).toEqual({ schema: false, api: false, groups: 'before' });
+    });
+
     it('should handle attribute deletion during component update', async () => {
       const componentUid = 'component.test';
       const mockComponent = {
@@ -717,6 +1036,32 @@ describe('Content Type Builder - Schema service', () => {
       expect(strapi.eventHub.emit).toHaveBeenCalledWith('content-type.update', {
         contentType: mockContentType,
       });
+    });
+  });
+
+  describe('getSchema', () => {
+    const getCleanedFile = jest.fn();
+
+    const setupStrapi = () => {
+      global.strapi = {
+        contentTypes: {},
+        components: {},
+        get: jest.fn((name: string) => (name === 'content-structure' ? { getCleanedFile } : {})),
+      } as any;
+    };
+
+    it('returns the folder structure from the core service', async () => {
+      const file = {
+        version: 1,
+        sections: { collectionTypes: { groups: [] }, singleTypes: { groups: [] } },
+      };
+      getCleanedFile.mockResolvedValue(file);
+      setupStrapi();
+
+      const result = await getSchema();
+
+      expect(result.contentStructure).toBe(file);
+      expect(getCleanedFile).toHaveBeenCalledTimes(1);
     });
   });
 });

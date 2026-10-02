@@ -878,3 +878,93 @@ describe('previewScript — findBlockIndex resolves next to a large unmarked sib
     postMessageSpy.mockRestore();
   });
 });
+
+describe('previewScript — running the script more than once in the same page', () => {
+  type PreviewWindow = Window & {
+    STRAPI_DISABLE_STEGA_DECODING?: boolean;
+    __strapi_previewCleanup?: () => void;
+    __strapi_previewRunId?: number;
+  };
+  const win = window as PreviewWindow;
+
+  const runScript = () =>
+    previewScript({ colors: COLORS, events: INTERNAL_EVENTS, parentOrigin: PARENT_ORIGIN });
+
+  const flush = () =>
+    new Promise<void>((resolve) => {
+      setTimeout(resolve, 0);
+    });
+
+  const countIframeClicks = () => {
+    const postMessageSpy = jest.spyOn(window, 'postMessage');
+    document.body.click();
+    const count = postMessageSpy.mock.calls.filter(
+      ([data]) => (data as { type?: string })?.type === INTERNAL_EVENTS.STRAPI_IFRAME_CLICK
+    ).length;
+    postMessageSpy.mockRestore();
+    return count;
+  };
+
+  beforeEach(() => {
+    global.ResizeObserver = class {
+      observe() {}
+
+      unobserve() {}
+
+      disconnect() {}
+    } as unknown as typeof ResizeObserver;
+
+    win.STRAPI_DISABLE_STEGA_DECODING = true;
+    delete win.__strapi_previewCleanup;
+    document.head.innerHTML = '';
+    document.body.innerHTML = '<div id="root">Preview content</div>';
+  });
+
+  afterEach(() => {
+    win.__strapi_previewCleanup?.();
+    delete win.__strapi_previewCleanup;
+    delete win.STRAPI_DISABLE_STEGA_DECODING;
+  });
+
+  test('two runs back to back leave exactly one working stylesheet and overlay', async () => {
+    runScript();
+    runScript();
+    await flush();
+
+    const styles = document.querySelectorAll('#strapi-preview-highlight-styles');
+    expect(styles).toHaveLength(1);
+    expect(styles[0].textContent).toContain('pointer-events: auto');
+    expect(document.querySelectorAll('#strapi-preview-overlay')).toHaveLength(1);
+    expect(countIframeClicks()).toBe(1);
+  });
+
+  test('a run superseded before it finishes loading never sets up', async () => {
+    runScript();
+    // Simulate a newer run starting while this one is still in its async setup.
+    win.__strapi_previewRunId = (win.__strapi_previewRunId ?? 0) + 1;
+    await flush();
+
+    expect(document.getElementById('strapi-preview-highlight-styles')).toBeNull();
+    expect(document.getElementById('strapi-preview-overlay')).toBeNull();
+    expect(win.__strapi_previewCleanup).toBeUndefined();
+    expect(countIframeClicks()).toBe(0);
+  });
+
+  test('a later run replaces the one that already set up', async () => {
+    runScript();
+    await flush();
+    const firstStyles = document.getElementById('strapi-preview-highlight-styles');
+    const firstOverlay = document.getElementById('strapi-preview-overlay');
+
+    runScript();
+    await flush();
+
+    const styles = document.querySelectorAll('#strapi-preview-highlight-styles');
+    expect(styles).toHaveLength(1);
+    expect(styles[0]).not.toBe(firstStyles);
+    expect(firstStyles?.isConnected).toBe(false);
+    expect(document.querySelectorAll('#strapi-preview-overlay')).toHaveLength(1);
+    expect(firstOverlay?.isConnected).toBe(false);
+    expect(countIframeClicks()).toBe(1);
+  });
+});

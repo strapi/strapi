@@ -111,9 +111,9 @@ const validateLocale = (sourceUid: UID.Schema, targetUid: UID.ContentType, local
   const sourceModel = strapi.getModel(sourceUid);
   const targetModel = strapi.getModel(targetUid);
 
-  const isLocalized = strapi.plugin('i18n').service('content-types').isLocalizedContentType;
-  const isSourceLocalized = isLocalized(sourceModel);
-  const isTargetLocalized = isLocalized(targetModel);
+  // Without a localization provider, neither side is localized
+  const isSourceLocalized = strapi.localization.isLocalizedContentType(sourceModel);
+  const isTargetLocalized = strapi.localization.isLocalizedContentType(targetModel);
 
   return {
     locale,
@@ -352,6 +352,11 @@ export default {
        */
       if (sourceModelType === 'contentType') {
         where.document_id = id;
+
+        const sourcePublishedAt = getPublishedAtClause(status, sourceUid);
+        if (!isEmpty(sourcePublishedAt)) {
+          where.published_at = sourcePublishedAt;
+        }
       } else {
         where.id = id;
       }

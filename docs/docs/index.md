@@ -42,4 +42,4 @@ A growing section we intend to populate over time with public-facing RFCs once a
 Content should be added typically when you add any new feature – especially enterprise e.g.
 `Review Workflows` and also when you add new code other engineers may find another use for e.g. a
 new hook. There's no guidelines on what to add vs what not to add, as defined above we add a variety
-of material to help onboard contributers.
+of material to help onboard contributors.
