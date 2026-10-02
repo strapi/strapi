@@ -103,11 +103,18 @@ const PlanCard = () => {
 
     import(
       '../../../../../../../ee/admin/src/pages/SettingsPage/pages/ApplicationInfoPage/components/LicenseInfo'
-    ).then((mod) => {
-      if (active) {
-        setLicenseBody(() => mod.LicenseInfoEE);
-      }
-    });
+    )
+      .then((mod) => {
+        if (active) {
+          setLicenseBody(() => mod.LicenseInfoEE);
+        }
+      })
+      .catch((err) => {
+        // A chunk can stop loading mid-session (a redeploy replaced the bundle). The body stays
+        // empty rather than falling back to the CE body, which would label this instance
+        // Community.
+        console.error(err);
+      });
 
     return () => {
       active = false;
