@@ -218,6 +218,7 @@ describe('summarisePull', () => {
       baseRef: '',
       headRef: '',
       milestone: null,
+      milestoneNumber: null,
       mergedAt: '2026-09-05T09:59:00Z',
     });
   });

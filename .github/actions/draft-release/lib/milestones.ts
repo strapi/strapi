@@ -124,7 +124,13 @@ function planShipping(
     };
   }
 
-  assertTitleFree(allMilestones, version, shipping.number);
+  const occupiedByCurrentNext =
+    version === nextPatchOf(candidateVersion) &&
+    findByTitle(allMilestones, version)?.state !== 'closed';
+
+  if (occupiedByCurrentNext === false) {
+    assertTitleFree(allMilestones, version, shipping.number);
+  }
 
   return {
     action: 'rename',
@@ -227,7 +233,7 @@ export function planMilestones(input: {
  * which also covers a pull request that carries no milestone or the wrong one entirely.
  */
 export function planRealignment(
-  pullRequests: readonly Pick<AttributedPull, 'number' | 'milestone'>[],
+  pullRequests: readonly Pick<AttributedPull, 'number' | 'milestone' | 'milestoneNumber'>[],
   shipping: { number: number | null; title: string }
 ): RealignItem[] {
   return pullRequests.flatMap((pull) =>
@@ -236,7 +242,8 @@ export function planRealignment(
       : [
           {
             number: pull.number,
-            from: pull.milestone,
+            fromNumber: pull.milestoneNumber,
+            fromTitle: pull.milestone,
             toTitle: shipping.title,
           },
         ]
