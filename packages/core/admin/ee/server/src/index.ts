@@ -5,7 +5,7 @@ import destroy from './destroy';
 import adminContentTypes from './content-types';
 import services from './services';
 import controllers from './controllers';
-import ssoRoutes from './routes/sso';
+import routes from './routes';
 import auditLogsRoutes from './audit-logs/routes/audit-logs';
 import auditLogsController from './audit-logs/controllers/audit-logs';
 import { createAuditLogsService } from './audit-logs/services/audit-logs';
@@ -22,18 +22,15 @@ const getAdminEE = () => {
     bootstrap,
     destroy,
     contentTypes: {
-      // Always register the audit-log content type when a license exists to prevent data loss
-      // Not in CE (it adds tables) nor on the audit-logs feature (schema sync would drop them)
-      ...(strapi.EE === true ? { 'audit-log': auditLog } : {}),
+      // Always register the audit-log content type to prevent data loss
+      'audit-log': auditLog,
       ...adminContentTypes,
     },
     services,
     controllers,
+    routes,
   };
 
-  // Like audit logs, the SSO routes are only registered with the feature at load; their middleware
-  // answers 404 if the feature is lost at runtime
-  const isSSOEnabled = strapi.ee.features.isEnabled('sso');
   const isAuditLogsEnabled =
     strapi.config.get('admin.auditLogs.enabled', true) &&
     strapi.ee.features.isEnabled('audit-logs');
@@ -44,7 +41,7 @@ const getAdminEE = () => {
       ...(isAuditLogsEnabled ? { 'audit-logs': auditLogsController } : {}),
     },
     routes: {
-      ...(isSSOEnabled ? { sso: ssoRoutes } : {}),
+      ...eeAdmin.routes,
       ...(isAuditLogsEnabled ? { 'audit-logs': auditLogsRoutes } : {}),
     },
     async register({ strapi }: { strapi: Core.Strapi }) {

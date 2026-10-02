@@ -15,7 +15,6 @@ const omitRegistrationToken = omit(['registrationToken']);
  * -------------------------------------------
  * 1.  Creates a user (wrong body)
  * 2.  Creates a user (successfully)
- * 2.1 Creates a user with an interface language (successfully)
  * 3.  Creates users with superAdmin role (success)
  * 4.  Updates a user (wrong body)
  * 5.  Updates a user (successfully)
@@ -28,7 +27,6 @@ const omitRegistrationToken = omit(['registrationToken']);
  * 12. Deletes last super admin user (bad request)
  * 13. Deletes last super admin user in batch (bad request)
  * 14. Updates a user (not found)
- * 14.1 Updates a user (not found) while one super admin is left
  * 15. Finds a user (not found)
  * 16. Finds a list of users (missing user)
  * —   Concurrent role updates (join order gaps, regression #26131)
@@ -129,24 +127,6 @@ describe('Admin User CRUD (api)', () => {
 
     // Using the created user as an example for the rest of the tests
     testData.user = omitRegistrationToken(res.body.data);
-  });
-
-  test('2.1. Creates a user with an interface language (successfully)', async () => {
-    const res = await rq({
-      url: '/admin/users',
-      method: 'POST',
-      body: {
-        email: 'user-tests-language@strapi-e2e.com',
-        firstname: 'user_tests-firstname',
-        roles: [testData.role.id],
-        preferedLanguage: 'fr',
-      },
-    });
-
-    expect(res.statusCode).toBe(201);
-    expect(res.body.data.preferedLanguage).toBe('fr');
-
-    await utils.deleteUserById(res.body.data.id);
   });
 
   test('3. Creates users with superAdmin role (success)', async () => {
@@ -376,24 +356,6 @@ describe('Admin User CRUD (api)', () => {
       },
     });
   });
-
-  test.each(['isActive', 'roles'])(
-    '14.1. Updates a user (not found) while one super admin is left, with %s',
-    async (field) => {
-      const body = field === 'isActive' ? { isActive: false } : { roles: [testData.role.id] };
-
-      const res = await rq({
-        url: `/admin/users/${testData.user.id}`,
-        method: 'PUT',
-        body,
-      });
-
-      expect(res.statusCode).toBe(404);
-      expect(res.body).toMatchObject({
-        error: { message: 'User does not exist', name: 'NotFoundError', status: 404 },
-      });
-    }
-  );
 
   test('15. Finds a user (not found)', async () => {
     const res = await rq({

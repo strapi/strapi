@@ -1,17 +1,29 @@
+import _ from 'lodash';
 import { pipe, map, castArray, toNumber } from 'lodash/fp';
-import type { Data } from '@strapi/types';
-import ceUser from '../../../../server/src/services/user';
+import { arrays, errors } from '@strapi/utils';
+import { hasSuperAdminRole } from '../../../../server/src/domain/user';
+import constants from '../../../../server/src/services/constants';
+import {
+  LEGACY_USER_EVENTS,
+  emitAdminUserDeleted,
+  emitAdminUserUpdateAudits,
+  touchesTrackedFields,
+} from '../../../../server/src/audit-logs/admin-users';
 import { getService } from '../utils';
+
+const { ValidationError } = errors;
+const { SUPER_ADMIN_CODE } = constants;
+
+const getSessionManager = () => {
+  const manager = strapi.sessionManager;
+  return manager ?? null;
+};
 
 /** Checks if ee disabled users list needs to be updated
  * @param {string} id
  * @param {object} input
  */
-const updateEEDisabledUsersList = async (id: Data.ID, input: any) => {
-  if (strapi.ee.features.isEnabled('seat-limit') === false) {
-    return;
-  }
-
+const updateEEDisabledUsersList = async (id: string, input: any) => {
   const disabledUsers = await getService('seat-enforcement').getDisabledUserList();
 
   if (!disabledUsers) {
@@ -36,10 +48,6 @@ const updateEEDisabledUsersList = async (id: Data.ID, input: any) => {
 const castNumberArray = pipe(castArray, map(toNumber));
 
 const removeFromEEDisabledUsersList = async (ids: unknown) => {
-  if (strapi.ee.features.isEnabled('seat-limit') === false) {
-    return;
-  }
-
   let idsToCheck: any;
   if (typeof ids === 'object') {
     idsToCheck = castNumberArray(ids);
@@ -61,30 +69,196 @@ const removeFromEEDisabledUsersList = async (ids: unknown) => {
   });
 };
 
-const updateById: typeof ceUser.updateById = async (id, attributes) => {
-  const updatedUser = await ceUser.updateById(id, attributes);
+/**
+ * Update a user in database
+ * @param id query params to find the user to update
+ * @param attributes A partial user object
+ * @returns {Promise<user>}
+ */
+const updateById = async (id: any, attributes: any) => {
+  // Check at least one super admin remains
+  if (_.has(attributes, 'roles')) {
+    const lastAdminUser = await isLastSuperAdminUser(id);
+    const superAdminRole = await getService('role').getSuperAdminWithUsersCount();
+    const willRemoveSuperAdminRole = !arrays.includesString(attributes.roles, superAdminRole.id);
+
+    if (lastAdminUser && willRemoveSuperAdminRole) {
+      throw new ValidationError('You must have at least one user with super admin role.');
+    }
+  }
+
+  // cannot disable last super admin
+  if (attributes.isActive === false) {
+    const lastAdminUser = await isLastSuperAdminUser(id);
+    if (lastAdminUser) {
+      throw new ValidationError('You must have at least one user with super admin role.');
+    }
+  }
+
+  // The audit log records what changed, so it needs the row before the write
+  const previous = touchesTrackedFields(attributes)
+    ? await strapi.db.query('admin::user').findOne({ where: { id }, populate: ['roles'] })
+    : null;
+
+  // hash password if a new one is sent
+  if (_.has(attributes, 'password')) {
+    const hashedPassword = await getService('auth').hashPassword(attributes.password);
+
+    const updatedUser = await strapi.db.query('admin::user').update({
+      where: { id },
+      data: {
+        ...attributes,
+        password: hashedPassword,
+      },
+      populate: ['roles'],
+    });
+
+    strapi.eventHub.emit(LEGACY_USER_EVENTS.UPDATE, { user: sanitizeUser(updatedUser) });
+    await emitAdminUserUpdateAudits({ strapi }, { previous, updated: updatedUser, attributes });
+
+    return updatedUser;
+  }
+
+  const updatedUser = await strapi.db.query('admin::user').update({
+    where: { id },
+    data: attributes,
+    populate: ['roles'],
+  });
 
   await updateEEDisabledUsersList(id, attributes);
+
+  if (updatedUser) {
+    strapi.eventHub.emit(LEGACY_USER_EVENTS.UPDATE, { user: sanitizeUser(updatedUser) });
+    await emitAdminUserUpdateAudits({ strapi }, { previous, updated: updatedUser, attributes });
+  }
 
   return updatedUser;
 };
 
-const deleteById: typeof ceUser.deleteById = async (id) => {
-  const deletedUser = await ceUser.deleteById(id);
+/** Delete a user
+ * @param id id of the user to delete
+ * @returns {Promise<user>}
+ */
+const deleteById = async (id: unknown) => {
+  // Check at least one super admin remains
+  const userToDelete = await strapi.db.query('admin::user').findOne({
+    where: { id },
+    populate: ['roles'],
+  });
 
-  if (deletedUser !== null) {
-    await removeFromEEDisabledUsersList(id);
+  if (!userToDelete) {
+    return null;
   }
+
+  if (userToDelete) {
+    if (userToDelete.roles.some((r: any) => r.code === SUPER_ADMIN_CODE)) {
+      const superAdminRole = await getService('role').getSuperAdminWithUsersCount();
+      if (superAdminRole.usersCount === 1) {
+        throw new ValidationError('You must have at least one user with super admin role.');
+      }
+    }
+  }
+
+  const deletedUser = await strapi.db
+    .query('admin::user')
+    .delete({ where: { id }, populate: ['roles'] });
+
+  // Invalidate all sessions for the deleted user
+  const sessionManager = getSessionManager();
+  if (sessionManager && sessionManager.hasOrigin('admin')) {
+    await sessionManager('admin').invalidateRefreshToken(String(id));
+  }
+
+  await removeFromEEDisabledUsersList(id);
+
+  strapi.eventHub.emit(LEGACY_USER_EVENTS.DELETE, { user: sanitizeUser(deletedUser) });
+  await emitAdminUserDeleted({ strapi }, deletedUser);
 
   return deletedUser;
 };
 
-const deleteByIds: typeof ceUser.deleteByIds = async (ids) => {
-  const deletedUsers = await ceUser.deleteByIds(ids);
+/** Delete a user
+ * @param ids ids of the users to delete
+ * @returns {Promise<user>}
+ */
+const deleteByIds = async (ids: any) => {
+  // Check at least one super admin remains
+  const superAdminRole = await getService('role').getSuperAdminWithUsersCount();
+  const nbOfSuperAdminToDelete = await strapi.db.query('admin::user').count({
+    where: {
+      id: ids,
+      roles: { id: superAdminRole.id },
+    },
+  });
+
+  if (superAdminRole.usersCount === nbOfSuperAdminToDelete) {
+    throw new ValidationError('You must have at least one user with super admin role.');
+  }
+
+  const deletedUsers = [];
+  for (const id of ids) {
+    const deletedUser = await strapi.db.query('admin::user').delete({
+      where: { id },
+      populate: ['roles'],
+    });
+
+    // Invalidate all sessions for the deleted user
+    const sessionManager = getSessionManager();
+    if (sessionManager && sessionManager.hasOrigin('admin')) {
+      await sessionManager('admin').invalidateRefreshToken(String(id));
+    }
+
+    deletedUsers.push(deletedUser);
+  }
 
   await removeFromEEDisabledUsersList(ids);
 
+  strapi.eventHub.emit(LEGACY_USER_EVENTS.DELETE, {
+    users: deletedUsers.map((deletedUser) => sanitizeUser(deletedUser)),
+  });
+
+  for (const deletedUser of deletedUsers) {
+    await emitAdminUserDeleted({ strapi }, deletedUser);
+  }
+
   return deletedUsers;
+};
+
+const sanitizeUserRoles = (role: unknown) => _.pick(role, ['id', 'name', 'description', 'code']);
+
+/**
+ * Check if a user is the last super admin
+ * @param {int|string} userId user's id to look for
+ */
+const isLastSuperAdminUser = async (userId: unknown) => {
+  const user = (await findOne(userId)) as any;
+  const superAdminRole = await getService('role').getSuperAdminWithUsersCount();
+
+  return superAdminRole.usersCount === 1 && hasSuperAdminRole(user);
+};
+
+/**
+ * Remove private user fields
+ * @param {Object} user - user to sanitize
+ */
+const sanitizeUser = (user: any) => {
+  return {
+    ..._.omit(user, [
+      'password',
+      'resetPasswordToken',
+      'resetPasswordTokenExpiresAt',
+      'registrationToken',
+      'roles',
+    ]),
+    roles: user.roles && user.roles.map(sanitizeUserRoles),
+  };
+};
+
+/**
+ * Find one user
+ */
+const findOne = async (id: any, populate = ['roles']) => {
+  return strapi.db.query('admin::user').findOne({ where: { id }, populate });
 };
 
 const getCurrentActiveUserCount = async () => {

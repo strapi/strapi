@@ -15,8 +15,6 @@ import { createTokenService } from './api-token';
 import * as transfer from './transfer';
 import * as projectSettings from './project-settings';
 import { homepageService } from './homepage';
-import persistTablesService from './persist-tables';
-import seatEnforcementService from './seat-enforcement';
 
 const contentApiTokenService = createTokenService('content-api');
 const adminTokenService = createTokenService('admin');
@@ -42,6 +40,4 @@ export default {
   'project-settings': projectSettings,
   encryption,
   homepage: homepageService,
-  'persist-tables': persistTablesService,
-  'seat-enforcement': seatEnforcementService,
 };

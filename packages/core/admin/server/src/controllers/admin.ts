@@ -41,38 +41,15 @@ const isUsingTypeScript: TsUtilsModule['isUsingTypeScript'] = (
  * A set of functions called "actions" for `Admin`
  */
 export default {
+  // TODO very temporary to check the switch ee/ce
+  // When removing this we need to update the /admin/src/index.js file
+  // whe,re we set the strapi.window.isEE value
+
+  // NOTE: admin/ee/server overrides this controller, and adds the EE features
+  // This returns an empty feature list for CE
   async getProjectType(): Promise<GetProjectType.Response> {
     const flags = strapi.config.get('admin.flags', {});
-
-    try {
-      return {
-        data: {
-          // The license fields are nullable internally; the contract is not.
-          isEE: Boolean(strapi.EE),
-          isTrial: strapi.ee.isTrial,
-          // Names only: this route is public
-          features: strapi.ee.features.list().map(({ name }) => ({ name })),
-          flags,
-          type: strapi.ee.type ?? undefined,
-          planPriceId: strapi.ee.planPriceId ?? undefined,
-          projectType: strapi.ee.edition,
-          ai: {
-            enabled: strapi.ai.admin.isStrapiManagedAiEnabled(),
-          },
-        },
-      };
-    } catch {
-      return {
-        data: {
-          isEE: false,
-          isTrial: false,
-          features: [],
-          flags,
-          projectType: 'Community',
-          ai: { enabled: false },
-        },
-      };
-    }
+    return { data: { isEE: false, isTrial: false, features: [], flags, ai: { enabled: false } } };
   },
 
   async init() {
@@ -225,58 +202,7 @@ export default {
     ctx.send({ plugins } satisfies Plugins.Response);
   },
 
-  // TODO @Nico the contract types `features` with the known feature names only, while this returns
-  // every license entry, like /project-type does
-  async licenseLimitInformation() {
-    const permittedSeats = strapi.ee.features.get('seat-limit')?.options.seats;
-
-    let shouldNotify = false;
-    let licenseLimitStatus: 'OVER_LIMIT' | 'AT_LIMIT' | null = null;
-    let enforcementUserCount;
-
-    const currentActiveUserCount = await getService('user').count({ isActive: true });
-
-    const eeDisabledUsers = await getService('seat-enforcement').getDisabledUserList();
-
-    if (Array.isArray(eeDisabledUsers)) {
-      enforcementUserCount = currentActiveUserCount + eeDisabledUsers.length;
-    } else {
-      enforcementUserCount = currentActiveUserCount;
-    }
-
-    if (permittedSeats !== undefined && enforcementUserCount > permittedSeats) {
-      shouldNotify = true;
-      licenseLimitStatus = 'OVER_LIMIT';
-    }
-
-    if (permittedSeats !== undefined && enforcementUserCount === permittedSeats) {
-      shouldNotify = true;
-      licenseLimitStatus = 'AT_LIMIT';
-    }
-
-    const data = {
-      enforcementUserCount,
-      currentActiveUserCount,
-      permittedSeats,
-      shouldNotify,
-      shouldStopCreate:
-        permittedSeats === undefined ? false : currentActiveUserCount >= permittedSeats,
-      licenseLimitStatus,
-      isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
-      type: strapi.ee.type,
-      isTrial: strapi.ee.isTrial,
-      features: strapi.ee.features.list() ?? [],
-    };
-
-    return { data };
-  },
-
-  async licenseTrialTimeLeft(ctx: Context) {
-    // Only a trial license has a trial end date to ask the license registry for
-    if (strapi.ee.isTrial !== true) {
-      return ctx.notFound();
-    }
-
+  async licenseTrialTimeLeft() {
     const data = await strapi.ee.getTrialEndDate({
       strapi,
     });
