@@ -67,7 +67,7 @@ jobs:
   docs_build:
     name: 'docs build (node: ${{ matrix.node }})'
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
-    needs: [conditions, build]
+    needs: [conditions]
     if: ${{ needs.conditions.outputs.docs == 'true' || needs.conditions.outputs.global == 'true' }}
     strategy:
       matrix:
@@ -80,8 +80,6 @@ jobs:
 
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
-      - name: Monorepo build
-        uses: ./.github/actions/run-build
       - name: Install docs dependencies
         working-directory: docs
         run: yarn install --frozen-lockfile
