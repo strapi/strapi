@@ -23,7 +23,10 @@ export interface LicenseFeatures {
   /** `@strapi/admin` EE: SSO routes, passport strategies, provider actions, SSO lock and login. */
   sso: Record<string, unknown>;
   /** `@strapi/admin` EE: audit-log services, lifecycle, routes, actions and settings page. */
-  'audit-logs': { retentionDays?: number | null };
+  'audit-logs': {
+    /** The license registry sends a string, such as `"90"`. `null` lets the user setting apply. */
+    retentionDays?: number | string | null;
+  };
   /** `@strapi/review-workflows`: the whole plugin (else content types only) and its webhook events. */
   'review-workflows': { numberOfWorkflows?: number; stagesPerWorkflow?: number };
   /** `@strapi/content-releases`: the whole plugin (else content types only) and its webhook events. */

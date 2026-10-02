@@ -123,6 +123,58 @@ describe('Audit logs service', () => {
     });
   });
 
+  describe('retention', () => {
+    const DAY = 24 * 60 * 60 * 1000;
+    const NOW = new Date('2026-10-01T00:00:00.000Z').getTime();
+
+    /**
+     * Registers the service with the given license options, runs the purge cron task once and
+     * returns the expiration date it purged with.
+     */
+    const purgeWith = async (options: Record<string, unknown>) => {
+      const deleteExpiredEvents = jest.fn();
+      jest.mocked(strapi.get).mockReturnValue({ deleteExpiredEvents });
+      jest.mocked(strapi.ee.features.isEnabled).mockReturnValueOnce(true);
+      jest.mocked(strapi.ee.features.get).mockReturnValue({ name: 'audit-logs', options });
+      jest.mocked(strapi.cron.add).mockClear();
+
+      const lifecycle = createAuditLogsLifecycleService(strapi);
+      await lifecycle.register();
+      await jest.mocked(strapi.cron.add).mock.calls[0][0].deleteExpiredAuditLogs.task();
+
+      return deleteExpiredEvents.mock.calls[0][0] as Date;
+    };
+
+    beforeEach(() => {
+      jest.useFakeTimers().setSystemTime(NOW);
+    });
+
+    afterEach(() => {
+      jest.mocked(strapi.ee.features.get).mockReset();
+    });
+
+    it('purges with a license retention sent as a string', async () => {
+      const expirationDate = await purgeWith({ retentionDays: '30' });
+
+      expect(expirationDate.getTime()).toBe(NOW - 30 * DAY);
+    });
+
+    it('purges with a license retention sent as a number', async () => {
+      const expirationDate = await purgeWith({ retentionDays: 30 });
+
+      expect(expirationDate.getTime()).toBe(NOW - 30 * DAY);
+    });
+
+    it.each([null, undefined, '', 'abc'])(
+      'purges with the default retention when the license retention is %p',
+      async (retentionDays) => {
+        const expirationDate = await purgeWith({ retentionDays });
+
+        expect(expirationDate.getTime()).toBe(NOW - 90 * DAY);
+      }
+    );
+  });
+
   describe('registerEvent', () => {
     const saveEvent = jest.fn();
 
