@@ -42,11 +42,7 @@ type LocaleDictionary = {
 
 const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
   const getLocalesDataForActions = async () => {
-    if (!strapi.plugin('i18n')) {
-      return {};
-    }
-
-    const allLocales: Locale[] = (await strapi.plugin('i18n').service('locales').find()) || [];
+    const allLocales = await strapi.localization.getLocales();
     return allLocales.reduce<LocaleDictionary>((acc, locale) => {
       acc[locale.code] = { name: locale.name, code: locale.code };
 

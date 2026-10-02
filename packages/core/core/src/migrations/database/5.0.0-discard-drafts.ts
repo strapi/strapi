@@ -2045,9 +2045,8 @@ async function buildPublishedToDraftMap({
     return null;
   }
 
-  const i18nService = strapi.plugin('i18n')?.service('content-types');
   const contentType = strapi.contentTypes[uid as keyof typeof strapi.contentTypes] as any;
-  const isLocalized = i18nService?.isLocalizedContentType(contentType) ?? false;
+  const isLocalized = strapi.localization.isLocalizedContentType(contentType);
 
   const draftByDocumentId = new Map<string, (typeof draftEntries)[0]>();
   for (const draft of draftEntries) {

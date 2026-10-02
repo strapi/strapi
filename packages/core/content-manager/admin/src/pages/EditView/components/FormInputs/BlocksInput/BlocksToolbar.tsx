@@ -839,7 +839,8 @@ const BlocksToolbar = () => {
           </>
         )}
         <ToolbarSeparator />
-        <Toolbar.ToggleGroup type="multiple" asChild>
+        {/* A multiple toggle group defaults to role="toolbar" since react-toggle-group 1.1.19, which would nest a toolbar in this one */}
+        <Toolbar.ToggleGroup type="multiple" role="group" asChild>
           <Flex ref={toolbarContainerRef} direction="row" gap={1} grow={1} overflow="hidden">
             <EditorToolbarObserver
               observedComponents={observedComponents}

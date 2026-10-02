@@ -4,8 +4,17 @@
 
 import { ValidationError } from '../errors';
 
-export const throwInvalidKey = ({ key, path }: { key: string; path?: string | null }): never => {
-  const msg = path && path !== key ? `Invalid key ${key} at ${path}` : `Invalid key ${key}`;
+export const throwInvalidKey = ({
+  key,
+  path,
+  reason,
+}: {
+  key: string;
+  path?: string | null;
+  reason?: string;
+}): never => {
+  const location = path && path !== key ? `Invalid key ${key} at ${path}` : `Invalid key ${key}`;
+  const msg = reason ? `${location}: ${reason}` : location;
 
   throw new ValidationError(msg, {
     key,

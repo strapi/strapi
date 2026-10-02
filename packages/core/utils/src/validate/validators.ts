@@ -18,6 +18,7 @@ import { isOperator } from '../operators';
 import { asyncCurry, throwInvalidKey } from './utils';
 import type { Attribute, Model } from '../types';
 import { isBooleanLike } from '../parse-type';
+import type { SHARED_QUERY_PARAM_KEYS } from '../content-api-constants';
 import type { Parent, Path } from '../traverse/factory';
 
 const { ID_ATTRIBUTE, DOC_ID_ATTRIBUTE } = constants;
@@ -406,6 +407,14 @@ const validateMorphLikeNestedPopulate = (
 
 export const POPULATE_TRAVERSALS = ['nonAttributesOperators', 'private'];
 
+// Query params that only apply at the root of a query. They are inherited by populated
+// relations, so they are rejected inside `populate` with an explanation (see #21911).
+const ROOT_ONLY_QUERY_PARAMS: ReadonlyArray<(typeof SHARED_QUERY_PARAM_KEYS)[number]> = [
+  'status',
+  'publicationFilter',
+  'hasPublishedVersion',
+];
+
 export const validatePopulate = asyncCurry(
   async (
     ctx: PopulateContext,
@@ -581,7 +590,13 @@ export const validatePopulate = asyncCurry(
 
           // Throw an error if non-attribute operators are included in the populate array
           if (includes?.populate?.includes('nonAttributesOperators')) {
-            throwInvalidKey({ key, path: path.attribute });
+            throwInvalidKey({
+              key,
+              path: path.attribute,
+              reason: ROOT_ONLY_QUERY_PARAMS.some((param) => param === key)
+                ? `${key} is only accepted at the root of the query, and it also applies to populated relations`
+                : undefined,
+            });
           }
         },
         ctx
