@@ -1,6 +1,5 @@
 const STRICT_OPT_IN = `/*
- * Opts the application into registered server contracts: service, controller, config and policy
- * lookups resolve to the contracts declared by Strapi, plugins and this application.
+ * Opts the application into registered server contracts
  * Generated because \`typescript.strictTypes\` is enabled; disabling it removes this file.
  */
 import type {} from '@strapi/strapi/strict-types';

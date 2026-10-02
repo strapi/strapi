@@ -1,8 +1,9 @@
 import os from 'node:os';
 import path from 'node:path';
-import fse from 'fs-extra';
+import fs from 'node:fs/promises';
 
 import { generate } from '../../generators';
+import { pathExists } from '../../generators/utils';
 
 // prettier is loaded through a dynamic import that jest cannot run; the formatting is not under test
 jest.mock('../../generators/utils', () => ({
@@ -10,15 +11,20 @@ jest.mock('../../generators/utils', () => ({
   format: jest.fn(async (content: string) => content),
 }));
 
+const outputFile = async (file: string, content: string) => {
+  await fs.mkdir(path.dirname(file), { recursive: true });
+  await fs.writeFile(file, content);
+};
+
 describe('generate', () => {
   const roots: string[] = [];
 
   const createApp = async (generated: Record<string, string> = {}) => {
-    const root = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-typegen-'));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), 'strapi-typegen-'));
     roots.push(root);
 
     for (const [file, content] of Object.entries(generated)) {
-      await fse.outputFile(path.join(root, 'types', 'generated', file), content);
+      await outputFile(path.join(root, 'types', 'generated', file), content);
     }
 
     const strapi = {
@@ -36,7 +42,7 @@ describe('generate', () => {
   };
 
   afterEach(async () => {
-    await Promise.all(roots.splice(0).map((root) => fse.remove(root)));
+    await Promise.all(roots.splice(0).map((root) => fs.rm(root, { recursive: true, force: true })));
   });
 
   test('writes the strict opt-in when the artifact is enabled', async () => {
@@ -44,7 +50,7 @@ describe('generate', () => {
 
     await generate({ strapi, pwd: root, artifacts: { strict: true }, logger: { silent: true } });
 
-    expect(await fse.readFile(generated('strict.d.ts'), 'utf8')).toContain(
+    expect(await fs.readFile(generated('strict.d.ts'), 'utf8')).toContain(
       "import type {} from '@strapi/strapi/strict-types';"
     );
   });
@@ -64,10 +70,10 @@ describe('generate', () => {
       logger: { silent: true },
     });
 
-    expect(await fse.pathExists(generated('services.d.ts'))).toBe(false);
-    expect(await fse.pathExists(generated('strict.d.ts'))).toBe(false);
-    expect(await fse.pathExists(generated('plugins.d.ts'))).toBe(true);
-    expect(await fse.pathExists(generated('contentTypes.d.ts'))).toBe(true);
+    expect(await pathExists(generated('services.d.ts'))).toBe(false);
+    expect(await pathExists(generated('strict.d.ts'))).toBe(false);
+    expect(await pathExists(generated('plugins.d.ts'))).toBe(true);
+    expect(await pathExists(generated('contentTypes.d.ts'))).toBe(true);
   });
 
   test('leaves artifacts that are neither enabled nor disabled untouched', async () => {
@@ -75,7 +81,7 @@ describe('generate', () => {
 
     await generate({ strapi, pwd: root, artifacts: { strict: true }, logger: { silent: true } });
 
-    expect(await fse.readFile(generated('services.d.ts'), 'utf8')).toBe('// keep');
+    expect(await fs.readFile(generated('services.d.ts'), 'utf8')).toBe('// keep');
   });
 
   test('disabling an artifact that was never generated is a no-op', async () => {
@@ -89,6 +95,6 @@ describe('generate', () => {
     });
 
     expect(reports).toEqual({});
-    expect(await fse.pathExists(path.join(root, 'types', 'generated'))).toBe(false);
+    expect(await pathExists(path.join(root, 'types', 'generated'))).toBe(false);
   });
 });

@@ -24,20 +24,20 @@ const action = async ({ debug, silent, verbose, outDir }: CmdOptions) => {
   const { createStrapi, compileStrapi } = require('@strapi/core');
 
   const appContext = await compileStrapi({ ignoreDiagnostics: true });
-  const app = await createStrapi(appContext).register();
+  const strapiInstance = await createStrapi(appContext).register();
 
   await tsUtils.generators.generate({
-    strapi: app,
+    strapi: strapiInstance,
     pwd: appContext.appDir,
     rootDir: outDir ?? undefined,
     logger: {
       silent,
       debug,
     },
-    artifacts: getTypeArtifacts(app),
+    artifacts: getTypeArtifacts(strapiInstance),
   });
 
-  await app.destroy();
+  await strapiInstance.destroy();
 };
 
 /**

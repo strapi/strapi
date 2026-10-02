@@ -1,9 +1,9 @@
 import path from 'node:path';
+import fs, { type Dirent } from 'node:fs';
 import * as ts from 'typescript';
-import fse from 'fs-extra';
 import { kebabCase } from 'lodash/fp';
 
-import { emitDefinitions, format } from '../utils';
+import { emitDefinitions, format, pathExists } from '../utils';
 import type { GeneratorOptions, Logger } from '../utils';
 
 const { factory } = ts;
@@ -36,10 +36,10 @@ interface ServiceSource {
 const isKebabCase = (value: string) => /^([a-z][a-z0-9]*)(-[a-z0-9]+)*$/.test(value);
 const normalizeName = (name: string) => (isKebabCase(name) ? name : kebabCase(name));
 
-const isSourceFile = (fd: fse.Dirent) =>
+const isSourceFile = (fd: Dirent) =>
   fd.isFile() && !fd.name.endsWith('.d.ts') && SOURCE_EXTENSIONS.includes(path.extname(fd.name));
 
-const byExtensionPrecedence = (a: fse.Dirent, b: fse.Dirent) =>
+const byExtensionPrecedence = (a: Dirent, b: Dirent) =>
   SOURCE_EXTENSIONS.indexOf(path.extname(a.name)) - SOURCE_EXTENSIONS.indexOf(path.extname(b.name));
 
 const toImportSpecifier = (from: string, to: string) => {
@@ -57,11 +57,11 @@ const collectApiServiceSources = async (
   outDir: string,
   logger: Logger
 ): Promise<ServiceSource[]> => {
-  if (!(await fse.pathExists(apiDir))) {
+  if ((await pathExists(apiDir)) === false) {
     return [];
   }
 
-  const apiFDs = (await fse.readdir(apiDir, { withFileTypes: true })).filter(
+  const apiFDs = (await fs.promises.readdir(apiDir, { withFileTypes: true })).filter(
     (fd) => fd.isDirectory() && !fd.name.startsWith('.')
   );
 
@@ -71,11 +71,11 @@ const collectApiServiceSources = async (
     const apiName = normalizeName(apiFD.name);
     const servicesDir = path.join(apiDir, apiFD.name, 'services');
 
-    if (!(await fse.pathExists(servicesDir))) {
+    if ((await pathExists(servicesDir)) === false) {
       continue;
     }
 
-    const serviceFDs = (await fse.readdir(servicesDir, { withFileTypes: true }))
+    const serviceFDs = (await fs.promises.readdir(servicesDir, { withFileTypes: true }))
       .filter(isSourceFile)
       .sort(byExtensionPrecedence);
 

@@ -1,9 +1,9 @@
 import path from 'node:path';
-import fse from 'fs-extra';
+import fs from 'node:fs/promises';
 import chalk from 'chalk';
 
 import { TYPES_ROOT_DIR, GENERATED_OUT_DIR } from './constants';
-import { saveDefinitionToFileSystem, createLogger, timer } from './utils';
+import { saveDefinitionToFileSystem, createLogger, timer, pathExists } from './utils';
 import { generateContentTypesDefinitions } from './content-types';
 import { generateComponentsDefinitions } from './components';
 import { generatePluginDefinitions } from './plugins';
@@ -136,12 +136,12 @@ export const generate = async (config: GenerateConfig = {} as GenerateConfig) =>
     const boldArtifact = chalk.bold(artifact); // used for log messages
     const outPath = path.join(registryPwd, `${artifact}.d.ts`);
 
-    if (!(await fse.pathExists(outPath))) {
+    if ((await pathExists(outPath)) === false) {
       continue;
     }
 
     try {
-      await fse.remove(outPath);
+      await fs.rm(outPath);
 
       logger.info(
         `Removed ${boldArtifact} types from ${chalk.bold(path.relative(process.cwd(), outPath))} (artifact disabled)`

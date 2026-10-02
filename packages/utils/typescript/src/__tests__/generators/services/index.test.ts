@@ -1,6 +1,6 @@
 import os from 'node:os';
 import path from 'node:path';
-import fse from 'fs-extra';
+import fs from 'node:fs/promises';
 
 import { generateServicesDefinitions } from '../../../generators/services';
 import { createLogger } from '../../../generators/utils';
@@ -14,11 +14,16 @@ jest.mock('../../../generators/utils', () => ({
 // Compare on the printed structure rather than on prettier's line breaks
 const normalize = (content: string) => content.replace(/\s+/g, ' ').replace(/;/g, '');
 
+const outputFile = async (file: string, content: string) => {
+  await fs.mkdir(path.dirname(file), { recursive: true });
+  await fs.writeFile(file, content);
+};
+
 const createApp = async (files: Record<string, string>, services: string[]) => {
-  const root = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-typegen-services-'));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'strapi-typegen-services-'));
 
   for (const [file, content] of Object.entries(files)) {
-    await fse.outputFile(path.join(root, file), content);
+    await outputFile(path.join(root, file), content);
   }
 
   const strapi = {
@@ -33,7 +38,7 @@ describe('generateServicesDefinitions', () => {
   const roots: string[] = [];
 
   afterEach(async () => {
-    await Promise.all(roots.splice(0).map((root) => fse.remove(root)));
+    await Promise.all(roots.splice(0).map((root) => fs.rm(root, { recursive: true, force: true })));
   });
 
   const generate = async (files: Record<string, string>, services: string[]) => {
