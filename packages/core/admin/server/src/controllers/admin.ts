@@ -16,6 +16,7 @@ import { getService } from '../utils';
 import type {
   Init,
   GetProjectSettings,
+  GetProjectType,
   Information,
   Plugins,
   TelemetryProperties,
@@ -46,9 +47,9 @@ export default {
 
   // NOTE: admin/ee/server overrides this controller, and adds the EE features
   // This returns an empty feature list for CE
-  async getProjectType() {
+  async getProjectType(): Promise<GetProjectType.Response> {
     const flags = strapi.config.get('admin.flags', {});
-    return { data: { isEE: false, features: [], flags, ai: { enabled: false } } };
+    return { data: { isEE: false, isTrial: false, features: [], flags, ai: { enabled: false } } };
   },
 
   async init() {
@@ -125,6 +126,18 @@ export default {
       )(strapi.contentTypes as any);
     };
 
+    const getNumberOfFolders = async (): Promise<number> => {
+      try {
+        const contentStructure = strapi.get('content-structure') as
+          | { countGroups?: () => Promise<number> }
+          | undefined;
+
+        return (await contentStructure?.countGroups?.()) ?? 0;
+      } catch {
+        return 0;
+      }
+    };
+
     return {
       data: {
         useTypescriptOnServer,
@@ -133,6 +146,7 @@ export default {
         numberOfAllContentTypes, // TODO: V5: This event should be renamed numberOfContentTypes in V5 as the name is already taken to describe the number of content types using i18n.
         numberOfComponents,
         numberOfDynamicZones: getNumberOfDynamicZones(),
+        numberOfContentTypeFolders: await getNumberOfFolders(),
       },
     } satisfies TelemetryProperties.Response;
   },

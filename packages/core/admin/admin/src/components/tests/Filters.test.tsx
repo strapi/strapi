@@ -183,6 +183,16 @@ describe('Filters', () => {
     expect(await screen.findByRole('option', { name: 'Created At' })).toBeInTheDocument();
   });
 
+  it('should label the empty option of the Select field combobox with its placeholder', async () => {
+    const { user } = render();
+
+    await user.click(screen.getByRole('button', { name: 'Filters' }));
+    await user.click(await screen.findByRole('combobox', { name: 'Select field' }));
+
+    expect(await screen.findByRole('option', { name: 'Select field' })).toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: 'Choose here' })).not.toBeInTheDocument();
+  });
+
   it("should display a list of the operators when the combobox named Select filter is pressed & the 'Status' filter is selected", async () => {
     const { user } = render();
 

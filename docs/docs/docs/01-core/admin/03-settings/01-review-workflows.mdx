@@ -21,7 +21,7 @@ is integrated with redux, so that all input components are controlled components
 Most licenses have feature-based usage limits configured through Chargebee. These limits are exposed to the frontend through [`useLicenseLimits`](/docs/core/admin/ee/hooks/use-license-limits).
 Offline licenses do not have these limits and therefore the endpoint does not return any. For offline licenses hard-coded limits apply: max. 200 workflows, max. 200 stages per workflow.
 
-The frontend aswell as the admin API restrict actions on the settings pages in various ways (more below), if the license limits are about to exceed or already exceeded.
+The frontend as well as the admin API restrict actions on the settings pages in various ways (more below), if the license limits are about to exceed or already exceeded.
 
 ### List view
 
@@ -35,7 +35,7 @@ would exceed the limit.
 ### Edit & Create views
 
 The edit and create views allow workflows and stages to be edited (existing ones) and new workflows to be created. To enable a review-workflow on a content-type users select
-from a list of all content-types (collections aswell as single-types) for each workflow. In case a content-type is already assigned to another content-type, the content-type
+from a list of all content-types (collections as well as single-types) for each workflow. In case a content-type is already assigned to another content-type, the content-type
 will be re-assigned to the new workflow.
 
 Stages always have a color assigned to them. Colors are stored as hex-codes in the database, to avoid coupling with the design-system and developers to know about possible color-names. The
@@ -44,7 +44,7 @@ to be uppercase everywhere (e.g. if they are created via lifecycle methods), so 
 
 #### Form submission
 
-The form wrapping boths views submits all stages at once, because we expect the number of stages per workflow to be
+The form wrapping both views submits all stages at once, because we expect the number of stages per workflow to be
 rather small. Because of this we can simply re-order stages by sending them in a different order. Every stage that sends a corresponding `id`
 attribute will be re-ordered and not created.
 
