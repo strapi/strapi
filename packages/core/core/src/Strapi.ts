@@ -494,7 +494,7 @@ class Strapi extends Container implements Core.Strapi {
     });
 
     if (!alreadyRanComponentRepair) {
-      await this.db.repair.processUnidirectionalJoinTables(cleanComponentJoinTable);
+      await this.db.repair.processUnidirectionalJoinTables(cleanComponentJoinTable(this));
       await this.store.set({
         type: 'strapi',
         key: 'unidirectional-join-table-repair-ran',

@@ -6,163 +6,16 @@
  * published versions of the same target document for a single component instance.
  *
  * We validate that:
- * - Only the unintended duplicate is removed (published row when a draft row also exists)
+ * - Only the target row whose state differs from its source is removed
  * - Legitimate rows are never deleted (single relations remain)
  * - If the component's parent does not support D&P, nothing is deleted
  */
 import type { Core } from '@strapi/types';
+import { cleanComponentJoinTable } from '../../../../../packages/core/core/src/services/document-service/utils/clean-component-join-table';
 // Note: Avoid wrapping in a transaction to prevent pool deadlocks with SQLite
 
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
-
-// Local cleaner used for tests. Mirrors the parent-state-aware logic of the
-// production `cleanComponentJoinTable`: for each (source, target-document)
-// pair where both draft and published target rows exist, drop the row whose
-// target state disagrees with the source's own publication state.
-const testCleaner = async (
-  db: any,
-  joinTableName: string,
-  relation: any,
-  sourceModel: any
-): Promise<number> => {
-  try {
-    const targetModel = db.metadata.get(relation.target);
-    if (!targetModel) {
-      return 0;
-    }
-
-    // Check if target supports D&P
-    const targetCt = (strapi as any).contentTypes?.[relation.target];
-    const targetSupportsDP = !!targetCt?.options?.draftAndPublish;
-    if (!targetSupportsDP) {
-      return 0;
-    }
-
-    // Column names
-    const sourceColumn = relation.joinTable.joinColumn.name;
-    const targetColumn = relation.joinTable.inverseJoinColumn.name;
-
-    // Load join rows with target published_at
-    const rows = await db
-      .connection(joinTableName)
-      .select(
-        `${joinTableName}.id as join_id`,
-        `${joinTableName}.${sourceColumn} as source_id`,
-        `${joinTableName}.${targetColumn} as target_id`,
-        `${targetModel.tableName}.published_at as target_published_at`,
-        `${targetModel.tableName}.document_id as target_document_id`
-      )
-      .leftJoin(
-        targetModel.tableName,
-        `${joinTableName}.${targetColumn}`,
-        `${targetModel.tableName}.id`
-      );
-
-    // Group by component instance (source)
-    const bySource: Record<string, any[]> = {};
-    for (const r of rows) {
-      const key = String(r.source_id);
-      bySource[key] = bySource[key] || [];
-      bySource[key].push(r);
-    }
-
-    // Resolve cmps tables so we can find the owning entity for each component
-    // instance and read its publication state.
-    const productMd = db.metadata.get(PRODUCT_UID);
-    const boxMd = db.metadata.get(BOX_UID);
-    const articleMd = db.metadata.get(ARTICLE_UID);
-    const productTable = productMd?.tableName;
-    const productCmpsTable = productTable ? `${productTable}_cmps` : undefined;
-    const boxCmpsTable = boxMd?.tableName ? `${boxMd.tableName}_cmps` : undefined;
-    const articleTable = articleMd?.tableName;
-
-    const isComponentSource =
-      !sourceModel.uid?.startsWith('api::') && !sourceModel.uid?.startsWith('plugin::');
-
-    const toDelete: number[] = [];
-
-    for (const [sourceId, entries] of Object.entries(bySource)) {
-      if (entries.length <= 1) continue;
-
-      // Resolve source's effective publication state:
-      //   - component source: walk to owning entity, use its published_at
-      //   - direct content-type source: use the source row's published_at
-      //   - non-D&P parent / unknown: skip safely (do not delete)
-      let sourceState: 'draft' | 'published' | null = null;
-      try {
-        if (isComponentSource) {
-          if (productCmpsTable) {
-            const productParent = await db
-              .connection(productCmpsTable)
-              .select('entity_id')
-              .where('cmp_id', Number(sourceId))
-              .first();
-            if (productParent) {
-              const parentRow = await db
-                .connection(productTable as string)
-                .select('published_at')
-                .where('id', productParent.entity_id)
-                .first();
-              sourceState = parentRow?.published_at === null ? 'draft' : 'published';
-            }
-          }
-          if (sourceState === null && boxCmpsTable) {
-            const boxParent = await db
-              .connection(boxCmpsTable)
-              .select('entity_id')
-              .where('cmp_id', Number(sourceId))
-              .first();
-            if (boxParent) {
-              // Box has no D&P; do not act on these.
-              sourceState = null;
-            }
-          }
-        } else if (sourceModel.uid === ARTICLE_UID && articleTable) {
-          const sourceRow = await db
-            .connection(articleTable)
-            .select('published_at')
-            .where('id', Number(sourceId))
-            .first();
-          if (sourceRow) {
-            sourceState = sourceRow.published_at === null ? 'draft' : 'published';
-          }
-        }
-      } catch (e) {
-        sourceState = null;
-      }
-
-      if (sourceState === null) {
-        continue;
-      }
-
-      // Per-document mismatch rule
-      const byDoc: Record<string, any[]> = {};
-      for (const e of entries) {
-        const key = String(e.target_document_id ?? '');
-        byDoc[key] = byDoc[key] || [];
-        byDoc[key].push(e);
-      }
-      for (const [docId, docEntries] of Object.entries(byDoc)) {
-        if (!docId || docEntries.length <= 1) continue;
-        const publishedEntries = docEntries.filter((e) => e.target_published_at !== null);
-        const draftEntries = docEntries.filter((e) => e.target_published_at === null);
-        if (publishedEntries.length === 0 || draftEntries.length === 0) continue;
-
-        const ghostRows = sourceState === 'draft' ? publishedEntries : draftEntries;
-        for (const row of ghostRows) toDelete.push(row.join_id);
-      }
-    }
-
-    if (toDelete.length > 0) {
-      await db.connection(joinTableName).whereIn('id', toDelete).del();
-    }
-
-    return toDelete.length;
-  } catch (err) {
-    return 0;
-  }
-};
 
 let strapi: Core.Strapi;
 const builder = createTestBuilder();
@@ -374,7 +227,9 @@ describe('Unidirectional join-table repair (components)', () => {
     const targetIds = rows.map((r) => r[targetColumn]).sort();
     expect(targetIds).toEqual([draftTag.id, publishedTag.id].sort());
 
-    const removed = await strapi.db.repair.processUnidirectionalJoinTables(testCleaner);
+    const removed = await strapi.db.repair.processUnidirectionalJoinTables(
+      cleanComponentJoinTable(strapi)
+    );
 
     expect(removed).toBeGreaterThanOrEqual(1);
 
@@ -425,7 +280,9 @@ describe('Unidirectional join-table repair (components)', () => {
     const targetIds = rows.map((r) => r[targetColumn]).sort();
     expect(targetIds).toEqual([draftTag.id, publishedTag.id].sort());
 
-    const removed = await strapi.db.repair.processUnidirectionalJoinTables(testCleaner);
+    const removed = await strapi.db.repair.processUnidirectionalJoinTables(
+      cleanComponentJoinTable(strapi)
+    );
 
     expect(removed).toBeGreaterThanOrEqual(1);
 
@@ -483,7 +340,9 @@ describe('Unidirectional join-table repair (components)', () => {
     compoIdsByName['draft'] = Number(draftOnlySource);
     compoIdsByName['published'] = Number(publishedOnlySource);
 
-    const removed = await strapi.db.repair.processUnidirectionalJoinTables(testCleaner);
+    const removed = await strapi.db.repair.processUnidirectionalJoinTables(
+      cleanComponentJoinTable(strapi)
+    );
 
     expect(removed).toBeGreaterThanOrEqual(0);
 
@@ -552,7 +411,9 @@ describe('Unidirectional join-table repair (components)', () => {
     expect(rows.length).toBe(2);
 
     // Run repair - should skip because parent (BOX) has no draftAndPublish
-    const removed = await strapi.db.repair.processUnidirectionalJoinTables(testCleaner);
+    const removed = await strapi.db.repair.processUnidirectionalJoinTables(
+      cleanComponentJoinTable(strapi)
+    );
 
     expect(removed).toBeGreaterThanOrEqual(0);
 
@@ -616,7 +477,9 @@ describe('Unidirectional join-table repair (components)', () => {
     }
 
     // Run repair once, should remove the published duplicates for both sources
-    const removed = await strapi.db.repair.processUnidirectionalJoinTables(testCleaner);
+    const removed = await strapi.db.repair.processUnidirectionalJoinTables(
+      cleanComponentJoinTable(strapi)
+    );
     expect(removed).toBeGreaterThanOrEqual(2);
 
     // Verify only the draft relation remains for each source
@@ -695,7 +558,9 @@ describe('Unidirectional join-table repair (components)', () => {
     // We should have at least: R-draft, R-published, S-draft, S-published
     expect(rows.length).toBeGreaterThanOrEqual(4);
 
-    const removed = await strapi.db.repair.processUnidirectionalJoinTables(testCleaner);
+    const removed = await strapi.db.repair.processUnidirectionalJoinTables(
+      cleanComponentJoinTable(strapi)
+    );
     // Only the published duplicate for document R (which has both draft+published) should be removed
     expect(removed).toBeGreaterThanOrEqual(1);
 
@@ -744,7 +609,9 @@ describe('Unidirectional join-table repair (components)', () => {
     let rows = await selectBySource(joinTableName, sourceColumn, sourceId);
     expect(rows.length).toBe(2);
 
-    const removed = await strapi.db.repair.processUnidirectionalJoinTables(testCleaner);
+    const removed = await strapi.db.repair.processUnidirectionalJoinTables(
+      cleanComponentJoinTable(strapi)
+    );
     expect(removed).toBeGreaterThanOrEqual(1);
 
     // Expect only the draft relation to remain
@@ -817,7 +684,9 @@ describe('Unidirectional join-table repair (components)', () => {
     rows = await selectBySource(joinTableName, sourceColumn, publishedSourceId);
     expect(rows.length).toBe(2);
 
-    const removed = await strapi.db.repair.processUnidirectionalJoinTables(testCleaner);
+    const removed = await strapi.db.repair.processUnidirectionalJoinTables(
+      cleanComponentJoinTable(strapi)
+    );
     expect(removed).toBeGreaterThanOrEqual(1);
 
     // The legitimate published-target row must remain; the draft-target row
@@ -866,7 +735,9 @@ describe('Unidirectional join-table repair (components)', () => {
     rows = await selectBySource(joinTableName, sourceColumn, publishedSourceId);
     expect(rows.length).toBe(2);
 
-    const removed = await strapi.db.repair.processUnidirectionalJoinTables(testCleaner);
+    const removed = await strapi.db.repair.processUnidirectionalJoinTables(
+      cleanComponentJoinTable(strapi)
+    );
     expect(removed).toBeGreaterThanOrEqual(1);
 
     rows = await selectBySource(joinTableName, sourceColumn, publishedSourceId);
