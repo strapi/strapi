@@ -154,9 +154,15 @@ const LabelAction = ({ title, icon = 'earth' }: LabelActionProps) => {
   );
 };
 
-const NonLocalizedLabelAction = ({ title: _title }: Pick<LabelActionProps, 'title'>) => {
+const NonLocalizedLabelAction = ({ title }: Pick<LabelActionProps, 'title'>) => {
   const [{ query }] = useQueryParams<I18nBaseQuery>();
   const { data: locales = [] } = useGetLocalesQuery();
+
+  // History rewrites this title via cloneElement. Honor that copy so the
+  // restore-replaces-all-locales warning renders instead of the edit-view lock tooltip.
+  if (title?.id && title.id !== getTranslation('Field.not-localized')) {
+    return <LabelAction title={title} icon="lock" />;
+  }
 
   const currentLocale = query?.plugins?.i18n?.locale;
   const defaultLocale = Array.isArray(locales)
@@ -170,12 +176,12 @@ const NonLocalizedLabelAction = ({ title: _title }: Pick<LabelActionProps, 'titl
     return null;
   }
 
-  const title: MessageDescriptor = {
+  const lockedTitle: MessageDescriptor = {
     id: getTranslation('Field.not-localized-locked'),
     defaultMessage: 'This value is common to all locales. Edit it in the default locale.',
   };
 
-  return <LabelAction title={title} icon="lock" />;
+  return <LabelAction title={lockedTitle} icon="lock" />;
 };
 
 const Span = styled(Flex)`

@@ -61,6 +61,12 @@ describe('getLabelAction (history)', () => {
       screen.getByText(/If you restore this version and save the changes/i)
     ).toBeInTheDocument();
   });
+
+  it('does not throw when a shared-field lock action has no title', () => {
+    const LockAction = () => <span>lock</span>;
+
+    expect(getLabelAction(<LockAction />)).toBeTruthy();
+  });
 });
 
 const renderField = (

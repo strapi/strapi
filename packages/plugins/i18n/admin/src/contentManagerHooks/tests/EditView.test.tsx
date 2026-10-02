@@ -187,6 +187,31 @@ describe('mutateEditViewHook – label action injection and localization', () =>
     ).toBeInTheDocument();
   });
 
+  it('renders the history restore warning when a shared-field title is rewritten', () => {
+    const titleField = makeEditField({
+      attribute: { type: 'string', pluginOptions: { i18n: { localized: false } } },
+    });
+    const layout = makeEditLayout({ ctLocalized: true, topFields: [[titleField]] });
+    const { layout: mutated } = mutateEditViewHook({ layout });
+    const action = mutated.layout[0][0][0].labelAction as React.ReactElement<{
+      title: { id: string; defaultMessage: string };
+    }>;
+
+    render(
+      React.cloneElement(action, {
+        title: {
+          id: 'history.content.not-localized',
+          defaultMessage:
+            'This value is common to all locales. If you restore this version and save the changes, the content will be replaced for all locales.',
+        },
+      })
+    );
+
+    expect(
+      screen.getByText(/If you restore this version and save the changes/i)
+    ).toBeInTheDocument();
+  });
+
   it('shows a locked tooltip for non-localized dynamic zones on a non-default locale', () => {
     const dzField = makeEditField({
       attribute: {
