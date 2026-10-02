@@ -753,40 +753,37 @@ describe('Document Service clone nested relation operation payloads', () => {
     }
   );
 
-  testInTransaction(
-    'clone removes a component whose morphToOne is null',
-    async () => {
-      const product = await strapi.documents(PRODUCT_UID).create({
-        data: {
-          name: 'Removed Component Null Morph Source',
-          details: {
-            label: 'Source details',
-            mto: null,
-          },
+  testInTransaction('clone removes a component whose morphToOne is null', async () => {
+    const product = await strapi.documents(PRODUCT_UID).create({
+      data: {
+        name: 'Removed Component Null Morph Source',
+        details: {
+          label: 'Source details',
+          mto: null,
         },
-        populate,
-      });
+      },
+      populate,
+    });
 
-      const result = await strapi.documents(PRODUCT_UID).clone({
-        documentId: product.documentId,
-        data: { details: null },
-        populate,
-      });
+    const result = await strapi.documents(PRODUCT_UID).clone({
+      documentId: product.documentId,
+      data: { details: null },
+      populate,
+    });
 
-      const originalProduct = (await findProduct(
-        product.documentId
-      )) as ProductWithNestedRelations | null;
-      const clonedProduct = result.entries[0] as ProductWithNestedRelations;
+    const originalProduct = (await findProduct(
+      product.documentId
+    )) as ProductWithNestedRelations | null;
+    const clonedProduct = result.entries[0] as ProductWithNestedRelations;
 
-      expect({
-        cloneDetails: clonedProduct.details ?? null,
-        originalDetailsLabel: originalProduct?.details?.label ?? null,
-        originalMorphDocumentId: nestedMorphDocumentId(originalProduct?.details),
-      }).toEqual({
-        cloneDetails: null,
-        originalDetailsLabel: 'Source details',
-        originalMorphDocumentId: null,
-      });
-    }
-  );
+    expect({
+      cloneDetails: clonedProduct.details ?? null,
+      originalDetailsLabel: originalProduct?.details?.label ?? null,
+      originalMorphDocumentId: nestedMorphDocumentId(originalProduct?.details),
+    }).toEqual({
+      cloneDetails: null,
+      originalDetailsLabel: 'Source details',
+      originalMorphDocumentId: null,
+    });
+  });
 });
