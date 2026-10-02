@@ -11,7 +11,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
 
-    "tsBuildInfoFile": "./.tsbuildinfo",
+    "tsBuildInfoFile": "${configDir}/.tsbuildinfo",
     "incremental": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
