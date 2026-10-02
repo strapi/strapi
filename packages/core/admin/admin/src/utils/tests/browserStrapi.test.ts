@@ -15,7 +15,6 @@ const EE_TRIAL = {
   isEE: true,
   isTrial: true,
   planPriceId: 'price_growth_monthly',
-  projectType: 'Growth',
   features: [{ name: 'sso' }],
   flags: { nps: true, promoteEE: false, docLinks: true },
   ai: { enabled: true },
@@ -66,39 +65,6 @@ describe('createBrowserStrapi', () => {
     expect(browserStrapi.isTrialLicense).toBe(true);
   });
 
-  it('enables the seat limit the server lists', async () => {
-    respondWith({ ...EE_TRIAL, features: [{ name: 'sso' }, { name: 'seat-limit' }] });
-
-    const browserStrapi = await createBrowserStrapi();
-
-    expect(browserStrapi.features.isEnabled('seat-limit')).toBe(true);
-  });
-
-  it('reports no seat limit when the server does not list it', async () => {
-    respondWith(EE_TRIAL);
-
-    const browserStrapi = await createBrowserStrapi();
-
-    expect(browserStrapi.features.isEnabled('seat-limit')).toBe(false);
-  });
-
-  it('uses the edition label the server computed', async () => {
-    respondWith({ ...EE_TRIAL, projectType: 'Enterprise' });
-
-    const browserStrapi = await createBrowserStrapi();
-
-    expect(browserStrapi.projectType).toBe('Enterprise');
-  });
-
-  it('falls back to Community when the response omits the edition label', async () => {
-    const { projectType: _projectType, ...withoutProjectType } = EE_TRIAL;
-    respondWith(withoutProjectType);
-
-    const browserStrapi = await createBrowserStrapi();
-
-    expect(browserStrapi.projectType).toBe('Community');
-  });
-
   it('keeps isTrial a boolean when the response omits it', async () => {
     respondWith(LEGACY_CE);
 
@@ -118,6 +84,5 @@ describe('createBrowserStrapi', () => {
     expect(browserStrapi.isEE).toBe(false);
     expect(browserStrapi.projectType).toBe('Community');
     expect(browserStrapi.features.isEnabled('sso')).toBe(false);
-    expect(browserStrapi.features.isEnabled('seat-limit')).toBe(false);
   });
 });

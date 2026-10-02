@@ -1,3 +1,4 @@
+import { getProjectType } from './getProjectType';
 import { createAbsoluteUrl } from './urls';
 
 import type { GetProjectType } from '../../../shared/contracts/admin';
@@ -39,6 +40,7 @@ const createBrowserStrapi = async (
     features: {
       SSO: 'sso',
       AUDIT_LOGS: 'audit-logs',
+      REVIEW_WORKFLOWS: 'review-workflows',
       /**
        * If we don't get the license then we know it's not EE
        * so no feature is enabled.
@@ -71,7 +73,7 @@ const createBrowserStrapi = async (
     }
 
     const {
-      data: { isEE, isTrial, features: licensedFeatures, flags, ai, projectType },
+      data: { isEE, isTrial, features: licensedFeatures, flags, ai, planPriceId },
     }: GetProjectType.Response = await response.json();
 
     // Runtime defense: the payload is only typed by convention, not validated.
@@ -86,7 +88,7 @@ const createBrowserStrapi = async (
       isEnabled: (name: Modules.EE.FeatureName) =>
         licensedFeatures.some((feature) => feature.name === name),
     };
-    browserStrapi.projectType = projectType ?? 'Community';
+    browserStrapi.projectType = getProjectType({ isEE, planPriceId });
     browserStrapi.ai = ai;
   } catch (err) {
     /**
