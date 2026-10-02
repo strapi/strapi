@@ -1,5 +1,7 @@
 import type { Core } from '@strapi/types';
 import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
 import { AdminUser } from '../../../../shared/contracts/shared';
 
 const STRAPI_MANAGED_AI_LICENSE_FEATURE = 'cms-ai';
@@ -24,10 +26,7 @@ const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
   const isConfigEnabled = (): boolean => strapi.config.get('admin.ai.enabled', true) === true;
 
   const isAvailable = (): boolean =>
-    isConfigEnabled() &&
-    !isCustomProviderRejected &&
-    (strapi.ee?.features?.isEnabled(STRAPI_MANAGED_AI_LICENSE_FEATURE) === true ||
-      strapi.ee?.features?.isEnabled(CUSTOM_AI_PROVIDER_LICENSE_FEATURE) === true);
+    isConfigEnabled() && strapi.ee?.isEE === true && !isCustomProviderRejected;
 
   const isStrapiManagedAiEnabled = (): boolean =>
     isConfigEnabled() &&
@@ -92,9 +91,18 @@ const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
     }
 
     // No `isEE` check: the license only lists `cms-ai` while EE is enabled
-    const eeLicense = strapi.ee?.providedLicense;
+    let eeLicense = process.env.STRAPI_LICENSE;
 
-    if (eeLicense === undefined) {
+    if (!eeLicense) {
+      try {
+        const licensePath = path.join(strapi.dirs.app.root, 'license.txt');
+        eeLicense = fs.readFileSync(licensePath).toString();
+      } catch {
+        // License file doesn't exist or can't be read
+      }
+    }
+
+    if (!eeLicense) {
       strapi.log.error(
         `${errorPrefix} No EE license found. Please ensure STRAPI_LICENSE environment variable is set or license.txt file exists.`
       );
@@ -309,7 +317,7 @@ const createAiAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   return {
-    /* Requires `ai.enabled=true` + the `cms-ai` or `cms-byok-ai` license feature + no failed AI provider registration */
+    /* Requires `ai.enabled=true` + license + no failed AI provider registration */
     isAvailable,
     /* `true` only when the license has the `cms-ai` entitlement to globally enable AI features.
         TODO: once all AI features are migrated to the providers architecture, consider removing this flag */

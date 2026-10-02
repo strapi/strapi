@@ -20,9 +20,6 @@ export type Feature<TName extends FeatureName = FeatureName> = TName extends Fea
 
 export type LicenseType = 'bronze' | 'silver' | 'gold';
 
-/** Plan label for display. Never a gate. */
-export type Edition = 'Community' | 'Growth' | 'Enterprise';
-
 export type EEService = {
   seats: number | null | undefined;
   type: string | null | undefined;
@@ -30,16 +27,6 @@ export type EEService = {
   isTrial: boolean;
   subscriptionId?: string | null | undefined;
   planPriceId?: string | null | undefined;
-  /**
-   * The license this project provides, read once at startup: `STRAPI_LICENSE`, else `license.txt`.
-   * The license registry does not refresh it. `undefined` when `STRAPI_DISABLE_EE=true` or no
-   * license is found. Only for forwarding to Strapi services: gate on a feature, never on this.
-   *
-   * @internal
-   */
-  providedLicense: string | undefined;
-  /** `Community` without an enabled license, `Growth` for a growth plan, else `Enterprise`. */
-  edition: Edition;
   getTrialEndDate: ({ strapi }: { strapi: Strapi }) => Promise<{ trialEndsAt: string } | null>;
   features: {
     isEnabled: (name: FeatureName) => boolean;
