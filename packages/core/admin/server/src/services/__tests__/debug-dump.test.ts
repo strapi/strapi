@@ -168,4 +168,21 @@ describe('debug-dump service', () => {
     expect(dump.strapi.edition).toBe('CE');
     expect(dump.strapi.projectType).toBe('Community');
   });
+
+  it('reports Community when a license never validated and left no plan', async () => {
+    // disable() sets licenseStatus to "unknown" even when verification threw before a type
+    // existed, so there is no retained snapshot. projectType must not fall through to
+    // Enterprise just because the status is not "none".
+    const strapi = makeStrapi();
+    strapi.EE = false;
+    strapi.ee.licenseStatus = 'unknown';
+    strapi.ee.type = undefined;
+    strapi.ee.planPriceId = undefined;
+    strapi.ee.retainedLicense = null;
+
+    const dump = await debugDumpService({ strapi }).generate();
+
+    expect(dump.strapi.projectType).toBe('Community');
+    expect(dump.strapi.edition).toBe('CE');
+  });
 });

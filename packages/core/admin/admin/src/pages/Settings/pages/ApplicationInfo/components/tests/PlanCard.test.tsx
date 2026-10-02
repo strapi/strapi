@@ -12,7 +12,9 @@ jest.mock(
 type LicenseStatus = 'none' | 'active' | 'expired' | 'unknown';
 
 interface MockLicenseLimitsQueryResult {
-  data: { data: { licenseStatus: LicenseStatus; planPriceId: string | null } } | undefined;
+  data:
+    | { data: { licenseStatus: LicenseStatus; planPriceId: string | null; type: string | null } }
+    | undefined;
 }
 
 /**
@@ -27,9 +29,14 @@ jest.mock('../../../../../../services/admin', () => ({
   useGetLicenseLimitsQuery: () => mockQueryResult,
 }));
 
-const setLicenseLimits = (licenseStatus?: LicenseStatus, planPriceId: string | null = null) => {
+// `type` defaults to a verified plan; pass `null` for a license that never validated.
+const setLicenseLimits = (
+  licenseStatus?: LicenseStatus,
+  planPriceId: string | null = null,
+  type: string | null = 'gold'
+) => {
   mockQueryResult = licenseStatus
-    ? { data: { data: { licenseStatus, planPriceId } } }
+    ? { data: { data: { licenseStatus, planPriceId, type } } }
     : { data: undefined };
 };
 
@@ -77,5 +84,18 @@ describe('PlanCard', () => {
     expect(screen.getByRole('link', { name: /view subscription/i })).toBeInTheDocument();
     // isEE stays false: this is display-only, not a feature unlock.
     expect(window.strapi.isEE).toBe(false);
+  });
+
+  it('does not label an unreadable license as Enterprise when no plan type was verified', async () => {
+    // A corrupt license.txt fails verification before a type is stored, so licenseStatus is
+    // "unknown" and both type and planPriceId are null. That must stay Community. Treating
+    // every non-none status as licensed makes getProjectType fall through to Enterprise.
+    setStrapiFixture({ isEE: false, projectType: 'Community' });
+    setLicenseLimits('unknown', null, null);
+
+    render(<PlanCard />);
+
+    expect(await screen.findByRole('link', { name: /see all plans/i })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /view subscription/i })).not.toBeInTheDocument();
   });
 });

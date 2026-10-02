@@ -6,7 +6,7 @@ import { Discord, GitHub } from '@strapi/icons/symbols';
 import { useIntl, type MessageDescriptor } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { getProjectType } from '../../../../../../../shared/utils/get-project-type';
+import { getLicensedPlan } from '../../../../../../../shared/utils/get-project-type';
 import { useTypedSelector } from '../../../../../core/store/hooks';
 import { useRBAC } from '../../../../../hooks/useRBAC';
 import { useGetLicenseLimitsQuery } from '../../../../../services/admin';
@@ -212,7 +212,11 @@ const SupportCard = () => {
   const licenseStatus = licenseLimitsData?.data?.licenseStatus ?? 'none';
   const planPriceId = licenseLimitsData?.data?.planPriceId ?? undefined;
   const isTrial = licenseLimitsData?.data?.isTrial ?? false;
-  const licensedPlan = getProjectType({ isEE: licenseStatus !== 'none', planPriceId });
+  const licensedPlan = getLicensedPlan({
+    licenseStatus,
+    type: licenseLimitsData?.data?.type,
+    planPriceId,
+  });
   // A trial resolves to a paid plan name, but a trial does not come with Strapi support, so
   // it gets the community channels instead of the support portal.
   const hasStrapiSupport = licensedPlan !== 'Community' && !isTrial;

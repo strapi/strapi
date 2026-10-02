@@ -5,7 +5,7 @@ import { ExternalLink } from '@strapi/icons';
 import { useIntl, type MessageDescriptor } from 'react-intl';
 
 import {
-  getProjectType,
+  getLicensedPlan,
   type ProjectType,
 } from '../../../../../../../shared/utils/get-project-type';
 import { useGetLicenseLimitsQuery } from '../../../../../services/admin';
@@ -126,7 +126,11 @@ const PlanCard = () => {
   // details. Once we know for certain there is no license to show, fall back to the CE body.
   const PlanCardBody = LicenseBody ?? (shouldShowLicenseDetails ? null : PlanCardBodyCE);
 
-  const licensedPlan = getProjectType({ isEE: licenseStatus !== 'none', planPriceId });
+  const licensedPlan = getLicensedPlan({
+    licenseStatus,
+    type: licenseLimitsData?.data?.type,
+    planPriceId,
+  });
   const { label, href } = PLAN_LINK[licensedPlan] ?? PLAN_LINK.Community;
 
   return (

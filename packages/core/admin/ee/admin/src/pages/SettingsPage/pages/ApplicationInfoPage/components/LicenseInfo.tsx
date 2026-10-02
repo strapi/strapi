@@ -17,7 +17,7 @@ import { useIntl, type MessageDescriptor } from 'react-intl';
 
 import { PlanDetail } from '../../../../../../../../admin/src/pages/Settings/pages/ApplicationInfo/components/PlanCard';
 import { useGetLicenseTrialTimeLeftQuery } from '../../../../../../../../admin/src/services/admin';
-import { getProjectType } from '../../../../../../../../shared/utils/get-project-type';
+import { getLicensedPlan } from '../../../../../../../../shared/utils/get-project-type';
 import { useLicenseLimits } from '../../../../../hooks/useLicenseLimits';
 
 import { AdminSeatInfoEE } from './AdminSeatInfo';
@@ -150,9 +150,10 @@ const LicenseInfoEE = () => {
     registrySyncErrorKind,
   } = license;
 
-  const licensedPlan = getProjectType({
-    isEE: licenseStatus !== 'none',
-    planPriceId: license.planPriceId ?? undefined,
+  const licensedPlan = getLicensedPlan({
+    licenseStatus,
+    type: license.type,
+    planPriceId: license.planPriceId,
   });
   const isGrowth = licensedPlan === 'Growth';
 

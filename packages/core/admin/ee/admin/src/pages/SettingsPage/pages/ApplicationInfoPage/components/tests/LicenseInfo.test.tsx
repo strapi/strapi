@@ -191,8 +191,8 @@ describe('LicenseInfoEE', () => {
   it('shows the retained plan as the current plan for an expired license, even though isEE is false', async () => {
     // Mirrors what the Plan card feeds this component once a license expires: `window.strapi.isEE`
     // stays false (this is display-only, not a feature unlock) while the plan name is derived
-    // from the license's own `licenseStatus`/`planPriceId` - `licenseStatus: 'expired' !== 'none'`
-    // is enough to resolve "Enterprise" here, independently of `isEE`.
+    // from the license's own retained `type`, `licenseStatus` and `planPriceId`, independently
+    // of `isEE`.
     window.strapi.isEE = false;
     licenseData = { ...structuredClone(baseLicense), licenseStatus: 'expired' };
     render(<LicenseInfoEE />);
@@ -201,6 +201,22 @@ describe('LicenseInfoEE', () => {
     expect(screen.getByText('Enterprise')).toBeInTheDocument();
     expect(screen.queryByText('Community')).not.toBeInTheDocument();
     expect(window.strapi.isEE).toBe(false);
+  });
+
+  it('names no paid plan for an unreadable license that never verified a type', async () => {
+    // A corrupt license.txt sets licenseStatus "unknown" before any type is stored, and with no
+    // price id the plan would otherwise fall through to "Enterprise".
+    licenseData = {
+      ...structuredClone(baseLicense),
+      licenseStatus: 'unknown',
+      type: null,
+      planPriceId: null,
+    };
+    render(<LicenseInfoEE />);
+
+    expect(await screen.findByText('Unknown')).toBeInTheDocument();
+    expect(screen.getByText('Community')).toBeInTheDocument();
+    expect(screen.queryByText('Enterprise')).not.toBeInTheDocument();
   });
 
   it('shows the Unknown badge when licenseStatus is "unknown"', async () => {

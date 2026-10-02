@@ -7,7 +7,14 @@ type LicenseStatus = 'none' | 'active' | 'expired' | 'unknown';
 
 interface MockLicenseLimitsQueryResult {
   data:
-    | { data: { licenseStatus: LicenseStatus; planPriceId: string | null; isTrial: boolean } }
+    | {
+        data: {
+          licenseStatus: LicenseStatus;
+          planPriceId: string | null;
+          isTrial: boolean;
+          type: string | null;
+        };
+      }
     | undefined;
 }
 
@@ -19,13 +26,15 @@ interface MockLicenseLimitsQueryResult {
  */
 let mockLicenseLimitsResult: MockLicenseLimitsQueryResult = { data: undefined };
 
+// `type` defaults to a verified plan; pass `null` for a license that never validated.
 const setLicenseLimits = (
   licenseStatus?: LicenseStatus,
   planPriceId: string | null = null,
-  isTrial = false
+  isTrial = false,
+  type: string | null = 'gold'
 ) => {
   mockLicenseLimitsResult = licenseStatus
-    ? { data: { data: { licenseStatus, planPriceId, isTrial } } }
+    ? { data: { data: { licenseStatus, planPriceId, isTrial, type } } }
     : { data: undefined };
 };
 
@@ -155,6 +164,17 @@ describe('SupportCard', () => {
     } finally {
       window.strapi.isEE = original;
     }
+  });
+
+  it('shows the community tiles for an unreadable license that never verified a plan', async () => {
+    // A corrupt license.txt sets licenseStatus "unknown" before any type is stored. Treating
+    // that as a paid plan would point the customer at a support portal they have no access to.
+    setLicenseLimits('unknown', null, false, null);
+
+    render(<SupportCard />);
+
+    expect(await screen.findByRole('link', { name: /documentation/i })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /support portal/i })).not.toBeInTheDocument();
   });
 
   it('hides the diagnostic snapshot column without the debug-dump permission', async () => {

@@ -2,7 +2,7 @@ import os from 'os';
 import type { Core } from '@strapi/types';
 import { scrub } from '../utils/debug-dump/redact';
 import type { DebugDumpPayload } from '../../../shared/contracts/admin';
-import { getProjectType } from '../../../shared/utils/get-project-type';
+import { getLicensedPlan } from '../../../shared/utils/get-project-type';
 
 // Only these process.env keys are ever emitted (never the whole environment).
 const ENV_ALLOWLIST = [
@@ -75,9 +75,10 @@ const debugDumpService = ({ strapi }: { strapi: Core.Strapi }) => ({
         // still comes off the license, otherwise a dump from an expired Enterprise instance is
         // indistinguishable from a project that never had a license, which is exactly the case
         // Support is most likely to receive one for. `licenseStatus` below tells them apart.
-        projectType: getProjectType({
-          isEE: strapi.ee.licenseStatus !== 'none',
-          planPriceId: strapi.ee.planPriceId ?? retained?.planPriceId ?? undefined,
+        projectType: getLicensedPlan({
+          licenseStatus: strapi.ee.licenseStatus,
+          type: strapi.ee.type ?? retained?.type,
+          planPriceId: strapi.ee.planPriceId ?? retained?.planPriceId,
         }),
         environment: strapi.config.get('environment', '') as string,
         autoReload: strapi.config.get('autoReload', false) as boolean,
