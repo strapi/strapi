@@ -278,6 +278,45 @@ declare module '@strapi/strapi' {
 }
 ```
 
+###### Strict service contracts (`typescript.strictTypes`)
+
+With `strictTypes: true` in `config/typescript.ts` (typed on `Core.Config.TypeScript`, next to `autogenerate`), the same commands generate two more files, so that service lookups are checked against registered contracts:
+
+- `types/generated/strict.d.ts` holds `import type {} from '@strapi/strapi/strict-types'`. It enables strict mode for the whole program and loads the contracts of the plugins bundled with `@strapi/strapi`; optional plugins are loaded by `plugins.d.ts`. Going through `@strapi/strapi` keeps the application free of direct dependencies on the plugins, which it cannot resolve under a strict package manager layout such as pnpm's.
+- `types/generated/services.d.ts` registers every `api::*` service of the application in the global `Strapi.Registries.AppServices`, typed from its source file.
+
+```ts title="my-app/types/generated/services.d.ts"
+export {};
+
+type ServiceInstance<TModule> = TModule extends { default: infer TExport }
+  ? TExport extends (...args: any[]) => infer TInstance
+    ? TInstance
+    : TExport
+  : unknown;
+
+declare global {
+  namespace Strapi {
+    namespace Registries {
+      interface AppServices {
+        'api::article.article': ServiceInstance<
+          typeof import('../../src/api/article/services/article')
+        >;
+      }
+    }
+  }
+}
+```
+
+The generator mirrors the API loader: it walks `src/api/<api>/services/*.{ts,js}`, derives the uid with the same kebab-case normalization, and only emits uids the running application registered. A factory (`createCoreService(...)` or `({ strapi }) => ({ ... })`) registers its return type, a plain object registers itself, and a module without a default export resolves to `unknown`, like any unregistered service in strict mode. The registries are global interfaces, so the generated entries merge with the application's own `AppServices` declarations; declaring the same uid twice with different types is a TS2717 conflict.
+
+Unset or `false` keeps the previous behavior — content-type, component and plugin declarations are still generated — and removes `strict.d.ts` and `services.d.ts` if a previous run generated them, so the program leaves strict mode when the flag is turned off. Any other value is rejected. TypeScript templates of `create-strapi-app` ship `config/typescript.ts` with `strictTypes: true`.
+
+:::caution
+Strict mode is closed: a lookup without a registered contract resolves to `unknown`, including services of plugins that publish no contracts. Pass an explicit type argument (`strapi.plugin('x').service<MyService>('y')`) for those.
+
+A `createCoreService` service whose method returns the result of a lookup of the service itself is circular, because `TService` is inferred from the object literal that contains the lookup. The compiler reports `TS7022` on the default export and the whole service becomes `any`; annotate that method's return type to break the cycle.
+:::
+
 ---
 
 When coupling everything together, the end result is a TypeScript developer experience automatically adjusted to the current context.
