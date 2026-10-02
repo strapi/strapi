@@ -71,6 +71,13 @@ const traverseEntity = async (
     allowedExtraRootKeys,
   } = options;
 
+  // The parent of every direct key of `entity` is fixed for the whole call:
+  // it is `options.parent`. Keep a stable reference for the visitor so that
+  // visiting one relational/component/dynamic-zone key cannot leak its own
+  // parent context onto the sibling keys that follow it. The mutable `parent`
+  // below is only used to drive recursion into a key's own children. (#27474)
+  const nodeParent = options.parent;
+
   let parent = options.parent;
 
   const traverseMorphRelationTarget = async (visitor: Visitor, path: Path, entry: Data) => {
@@ -182,7 +189,7 @@ const traverseEntity = async (
       attribute,
       path: newPath,
       getModel,
-      parent,
+      parent: nodeParent,
       allowedExtraRootKeys,
     };
 
