@@ -12,12 +12,12 @@ type AsyncTransform = (
   params: Modules.Documents.Params.All
 ) => Promise<Modules.Documents.Params.All>;
 
-const getDefaultLocale = async (): Promise<string> => {
-  return strapi.plugin('i18n').service('locales').getDefaultLocale();
+const getDefaultLocale = async (): Promise<string | null> => {
+  return strapi.localization.getDefaultLocale();
 };
 
 const defaultLocale: AsyncTransform = async (contentType, params) => {
-  if (!strapi.plugin('i18n').service('content-types').isLocalizedContentType(contentType)) {
+  if (!strapi.localization.isLocalizedContentType(contentType)) {
     return params;
   }
 
@@ -32,10 +32,7 @@ const defaultLocale: AsyncTransform = async (contentType, params) => {
  * Add locale lookup query to the params
  */
 const localeToLookup: Transform = (contentType, params) => {
-  if (
-    !params.locale ||
-    !strapi.plugin('i18n').service('content-types').isLocalizedContentType(contentType)
-  ) {
+  if (!params.locale || !strapi.localization.isLocalizedContentType(contentType)) {
     return params;
   }
 
@@ -55,7 +52,7 @@ const localeToLookup: Transform = (contentType, params) => {
  * Add locale lookup query to the params
  */
 const multiLocaleToLookup: Transform = (contentType, params) => {
-  if (!strapi.plugin('i18n').service('content-types').isLocalizedContentType(contentType)) {
+  if (!strapi.localization.isLocalizedContentType(contentType)) {
     return params;
   }
 
@@ -74,7 +71,7 @@ const multiLocaleToLookup: Transform = (contentType, params) => {
  * Translate locale status parameter into the data that will be saved
  */
 const localeToData: Transform = (contentType, params) => {
-  if (!strapi.plugin('i18n').service('content-types').isLocalizedContentType(contentType)) {
+  if (!strapi.localization.isLocalizedContentType(contentType)) {
     return params;
   }
 
@@ -185,9 +182,7 @@ const copyNonLocalizedFields = async (
   dataToCreate: Record<string, any>,
   options: CopyNonLocalizedFieldsOptions = {}
 ): Promise<Record<string, any>> => {
-  // Check if this is a localized content type and if i18n plugin is available
-  const i18nService = strapi.plugin('i18n')?.service('content-types');
-  if (!i18nService?.isLocalizedContentType(contentType)) {
+  if (!strapi.localization.isLocalizedContentType(contentType)) {
     return dataToCreate;
   }
 
@@ -196,7 +191,7 @@ const copyNonLocalizedFields = async (
 
   // Select the default-locale sibling of the status being written. Ordering by
   // publishedAt is database-dependent because drafts store NULL.
-  const attributesToPopulate = i18nService.getNestedPopulateOfNonLocalizedAttributes(
+  const attributesToPopulate = strapi.localization.getNestedPopulateOfNonLocalizedAttributes(
     contentType.uid
   );
   const defaultLocaleCode = await getDefaultLocale();
@@ -225,12 +220,18 @@ const copyNonLocalizedFields = async (
   }
 
   if (strategy === 'replace') {
-    const copied = i18nService.copyNonLocalizedAttributes(contentType, existingEntry);
+    // The localization provider fills only unset fields. Copy onto an empty
+    // object, then overlay, so a first publish replaces draft shared values
+    // with the published sibling without a separate copy API.
+    const copied: Record<string, any> = {};
+    strapi.localization.fillNonLocalizedAttributes(copied, existingEntry, {
+      model: contentType.uid,
+    });
     return normalizeMediaIds(contentType, { ...dataToCreate, ...copied });
   }
 
   const mergedData = { ...dataToCreate };
-  i18nService.fillNonLocalizedAttributes(mergedData, existingEntry, {
+  strapi.localization.fillNonLocalizedAttributes(mergedData, existingEntry, {
     model: contentType.uid,
   });
   return normalizeMediaIds(contentType, mergedData);

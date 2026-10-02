@@ -6,7 +6,7 @@ import * as components from './components';
 
 import { transformParamsDocumentId } from './transform/id-transform';
 import { transformParamsToQuery } from './transform/query';
-import { pickSelectionParams } from './params';
+import { isParamEmpty, pickSelectionParams } from './params';
 import { applyTransforms } from './attributes';
 import { clearTransformDataRequestCache, transformData } from './transform/data';
 
@@ -39,18 +39,19 @@ const createEntriesService = (
   const contentType = strapi.contentType(uid);
 
   async function createEntry(params = {} as any) {
-    const { data, ...restParams } = await transformParamsDocumentId(uid, params);
+    const { data: inputData, ...restParams } = await transformParamsDocumentId(uid, params);
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams) as any); // select / populate
 
     // Validation
-    if (!data) {
+    if (!inputData) {
       throw new Error('Create requires data attribute');
     }
 
+    const data = isParamEmpty(inputData.documentId) ? omit('documentId', inputData) : inputData;
+
     // Check for uniqueness based on documentId and locale (if localized)
     if (data.documentId) {
-      const i18nService = strapi.plugin('i18n')?.service('content-types');
-      const isLocalized = i18nService?.isLocalizedContentType(contentType) ?? false;
+      const isLocalized = strapi.localization.isLocalizedContentType(contentType);
       const hasDraftAndPublish = contentType.options?.draftAndPublish === true;
 
       const whereClause: Record<string, unknown> = { documentId: data.documentId };
@@ -121,8 +122,10 @@ const createEntriesService = (
   }
 
   async function updateEntry(entryToUpdate: any, params = {} as any) {
-    const { data, ...restParams } = await transformParamsDocumentId(uid, params);
+    const { data: inputData, ...restParams } = await transformParamsDocumentId(uid, params);
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams) as any); // select / populate
+
+    const data = inputData ? omit('documentId', inputData) : inputData;
 
     const validData = await entityValidator.validateEntityUpdate(
       contentType,

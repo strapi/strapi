@@ -34,6 +34,7 @@ export interface Strapi extends Container {
    * @see {@link https://docs.strapi.io/dev-docs/api/document-service} Document Service API
    */
   documents: Modules.Documents.Service;
+  localization: Modules.Localization.Service;
   telemetry: Modules.Metrics.TelemetryService;
   requestContext: Modules.RequestContext.RequestContext;
   customFields: Modules.CustomFields.CustomFields;
@@ -161,6 +162,7 @@ export interface StrapiDirectories {
     policies: string;
     middlewares: string;
     config: string;
+    contentStructure: string;
   };
   dist: {
     root: string;
@@ -171,5 +173,6 @@ export interface StrapiDirectories {
     policies: string;
     middlewares: string;
     config: string;
+    contentStructure: string;
   };
 }

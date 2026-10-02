@@ -27782,9 +27782,16 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": false,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "exclusiveMinimum": 0,
-              "maximum": 9007199254740991,
-              "type": "integer",
+              "anyOf": [
+                {
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991,
+                  "type": "integer",
+                },
+                {
+                  "type": "string",
+                },
+              ],
             },
             "x-strapi-serialize": "querystring",
           },
@@ -28862,9 +28869,16 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "exclusiveMinimum": 0,
-              "maximum": 9007199254740991,
-              "type": "integer",
+              "anyOf": [
+                {
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991,
+                  "type": "integer",
+                },
+                {
+                  "type": "string",
+                },
+              ],
             },
           },
         ],
@@ -29035,9 +29049,16 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "exclusiveMinimum": 0,
-              "maximum": 9007199254740991,
-              "type": "integer",
+              "anyOf": [
+                {
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991,
+                  "type": "integer",
+                },
+                {
+                  "type": "string",
+                },
+              ],
             },
           },
           {

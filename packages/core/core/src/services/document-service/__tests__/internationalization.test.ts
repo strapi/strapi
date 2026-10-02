@@ -1,235 +1,209 @@
-import { copyNonLocalizedFields } from '../internationalization';
+import type { Core, Modules, Struct } from '@strapi/types';
+import { createLocalizationService } from '../../localization';
+import {
+  copyNonLocalizedFields,
+  defaultLocale,
+  localeToData,
+  localeToLookup,
+  multiLocaleToLookup,
+} from '../internationalization';
 
-describe('document service internationalization', () => {
-  describe('copyNonLocalizedFields', () => {
-    it('copies from the default-locale draft explicitly', async () => {
-      const defaultDraft = {
-        documentId: 'doc-1',
-        locale: 'en',
-        publishedAt: null,
-        shared: 'draft-value',
-      };
-      const findOne = jest.fn().mockResolvedValue(defaultDraft);
-      const fillNonLocalizedAttributes = jest.fn((entry, relatedEntry) => {
+const article = {
+  uid: 'api::article.article',
+  modelType: 'contentType',
+  modelName: 'article',
+  globalId: 'Article',
+  kind: 'collectionType',
+  info: { singularName: 'article', pluralName: 'articles', displayName: 'Article' },
+  attributes: {
+    title: { type: 'string' },
+    cover: { type: 'media', multiple: false },
+  },
+} satisfies Struct.CollectionTypeSchema;
+
+const draftAndPublishArticle = {
+  ...article,
+  options: { draftAndPublish: true },
+  attributes: {
+    shared: { type: 'string' },
+  },
+} satisfies Struct.CollectionTypeSchema;
+
+const registerProvider = (
+  localization: Modules.Localization.Service,
+  provider: Partial<Modules.Localization.Provider> &
+    Pick<Modules.Localization.Provider, 'fillNonLocalizedAttributes'>
+) => {
+  localization.register({
+    isLocalizedContentType: () => true,
+    getDefaultLocale: async () => 'en',
+    getLocales: async () => [],
+    getNestedPopulateOfNonLocalizedAttributes: () => [],
+    getNonLocalizedAttributes: () => [],
+    ...provider,
+  });
+};
+
+describe('Document localization capability', () => {
+  const query = jest.fn();
+  let localization: Modules.Localization.Service;
+
+  beforeEach(() => {
+    localization = createLocalizationService();
+    global.strapi = { localization, db: { query } } as unknown as Core.Strapi;
+    query.mockReset();
+  });
+
+  it('keeps documents unchanged without a localization provider', async () => {
+    const params = { data: { title: 'Hello' } };
+    expect(await defaultLocale(article, params)).toBe(params);
+    expect(localeToLookup(article, params)).toBe(params);
+    expect(multiLocaleToLookup(article, params)).toBe(params);
+    expect(localeToData(article, params)).toBe(params);
+    expect(await copyNonLocalizedFields(article, 'article-1', params.data)).toBe(params.data);
+    expect(query).not.toHaveBeenCalled();
+  });
+
+  it('uses the registered default locale for document lookups and writes', async () => {
+    localization.register({
+      isLocalizedContentType: () => true,
+      getDefaultLocale: async () => 'fr',
+      getLocales: async () => [],
+      getNestedPopulateOfNonLocalizedAttributes: () => [],
+      getNonLocalizedAttributes: () => [],
+      fillNonLocalizedAttributes() {},
+    });
+
+    const params = await defaultLocale(article, { data: { title: 'Bonjour' } });
+    expect(params.locale).toBe('fr');
+    expect(localeToLookup(article, params)).toMatchObject({ lookup: { locale: 'fr' } });
+    expect(localeToData(article, params)).toMatchObject({ data: { locale: 'fr' } });
+    expect(multiLocaleToLookup(article, { locale: ['en', 'fr'] })).toEqual({
+      locale: ['en', 'fr'],
+      lookup: { locale: ['en', 'fr'] },
+    });
+  });
+
+  it('copies nonlocalized media from the default locale as IDs without mutating the input', async () => {
+    registerProvider(localization, {
+      getNestedPopulateOfNonLocalizedAttributes: () => ['cover'],
+      fillNonLocalizedAttributes(entry, relatedEntry) {
+        entry.cover = relatedEntry.cover;
+      },
+    });
+    const findOne = jest.fn(async () => ({ title: 'Hello', cover: { id: 12 } }));
+    query.mockReturnValue({ findOne });
+    const input = { title: 'Bonjour' };
+
+    await expect(copyNonLocalizedFields(article, 'article-1', input)).resolves.toEqual({
+      title: 'Bonjour',
+      cover: 12,
+    });
+    expect(input).toEqual({ title: 'Bonjour' });
+    expect(query).toHaveBeenCalledWith(article.uid);
+    expect(findOne).toHaveBeenCalledWith({
+      where: { documentId: 'article-1', locale: 'en' },
+      populate: ['cover'],
+    });
+  });
+
+  it('copies from the default-locale draft explicitly', async () => {
+    registerProvider(localization, {
+      fillNonLocalizedAttributes(entry, relatedEntry) {
         entry.shared = relatedEntry.shared;
-      });
+      },
+    });
+    const findOne = jest.fn(async () => ({
+      documentId: 'doc-1',
+      locale: 'en',
+      publishedAt: null,
+      shared: 'draft-value',
+    }));
+    query.mockReturnValue({ findOne });
 
-      global.strapi = {
-        plugin: (name: string) => (global.strapi as any).plugins[name],
-        plugins: {
-          i18n: {
-            services: {
-              locales: { getDefaultLocale: jest.fn().mockResolvedValue('en') },
-              'content-types': {
-                isLocalizedContentType: () => true,
-                getNestedPopulateOfNonLocalizedAttributes: () => [],
-                fillNonLocalizedAttributes,
-              },
-            },
-            controllers: {},
-            contentTypes: {},
-            policies: {},
-          },
-        },
-        apis: {},
-        db: {
-          query: () => ({ findOne }),
-        },
-      } as any;
-
-      const result = await copyNonLocalizedFields(
-        {
-          uid: 'api::article.article',
-          options: { draftAndPublish: true },
-          attributes: {
-            shared: { type: 'string' },
-          },
-        } as any,
-        'doc-1',
-        { localized: 'fr' }
-      );
-
-      expect(findOne).toHaveBeenCalledTimes(1);
-      expect(findOne).toHaveBeenCalledWith({
-        where: {
-          documentId: 'doc-1',
-          locale: 'en',
-          publishedAt: { $null: true },
-        },
-        populate: [],
-      });
-      expect(result).toEqual({ localized: 'fr', shared: 'draft-value' });
+    const result = await copyNonLocalizedFields(draftAndPublishArticle, 'doc-1', {
+      localized: 'fr',
     });
 
-    it('falls back to another draft when the default locale does not exist', async () => {
-      const siblingDraft = {
-        documentId: 'doc-1',
-        locale: 'de',
-        publishedAt: null,
-        shared: 'sibling-value',
-      };
-      const findOne = jest.fn().mockResolvedValueOnce(null).mockResolvedValueOnce(siblingDraft);
-
-      global.strapi = {
-        plugin: (name: string) => (global.strapi as any).plugins[name],
-        plugins: {
-          i18n: {
-            services: {
-              locales: { getDefaultLocale: jest.fn().mockResolvedValue('en') },
-              'content-types': {
-                isLocalizedContentType: () => true,
-                getNestedPopulateOfNonLocalizedAttributes: () => [],
-                fillNonLocalizedAttributes(entry: Record<string, unknown>, relatedEntry: any) {
-                  entry.shared = relatedEntry.shared;
-                },
-              },
-            },
-            controllers: {},
-            contentTypes: {},
-            policies: {},
-          },
-        },
-        apis: {},
-        db: {
-          query: () => ({ findOne }),
-        },
-      } as any;
-
-      const result = await copyNonLocalizedFields(
-        {
-          uid: 'api::article.article',
-          options: { draftAndPublish: true },
-          attributes: {
-            shared: { type: 'string' },
-          },
-        } as any,
-        'doc-1',
-        {}
-      );
-
-      expect(findOne).toHaveBeenNthCalledWith(2, {
-        where: {
-          documentId: 'doc-1',
-          publishedAt: { $null: true },
-        },
-        populate: [],
-      });
-      expect(result.shared).toBe('sibling-value');
-    });
-
-    it('copies from the default-locale published sibling when writing published', async () => {
-      const defaultPublished = {
+    expect(findOne).toHaveBeenCalledTimes(1);
+    expect(findOne).toHaveBeenCalledWith({
+      where: {
         documentId: 'doc-1',
         locale: 'en',
-        publishedAt: '2026-01-01',
-        shared: 'published-value',
-      };
-      const findOne = jest.fn().mockResolvedValue(defaultPublished);
-      const fillNonLocalizedAttributes = jest.fn((entry, relatedEntry) => {
+        publishedAt: { $null: true },
+      },
+      populate: [],
+    });
+    expect(result).toEqual({ localized: 'fr', shared: 'draft-value' });
+  });
+
+  it('falls back to another draft when the default locale does not exist', async () => {
+    registerProvider(localization, {
+      fillNonLocalizedAttributes(entry, relatedEntry) {
         entry.shared = relatedEntry.shared;
-      });
-
-      global.strapi = {
-        plugin: (name: string) => (global.strapi as any).plugins[name],
-        plugins: {
-          i18n: {
-            services: {
-              locales: { getDefaultLocale: jest.fn().mockResolvedValue('en') },
-              'content-types': {
-                isLocalizedContentType: () => true,
-                getNestedPopulateOfNonLocalizedAttributes: () => [],
-                fillNonLocalizedAttributes,
-              },
-            },
-            controllers: {},
-            contentTypes: {},
-            policies: {},
-          },
-        },
-        apis: {},
-        db: {
-          query: () => ({ findOne }),
-        },
-      } as any;
-
-      const result = await copyNonLocalizedFields(
-        {
-          uid: 'api::article.article',
-          options: { draftAndPublish: true },
-          attributes: {
-            shared: { type: 'string' },
-          },
-        } as any,
-        'doc-1',
-        { localized: 'fr' },
-        { status: 'published' }
-      );
-
-      expect(findOne).toHaveBeenCalledWith({
-        where: {
-          documentId: 'doc-1',
-          locale: 'en',
-          publishedAt: { $ne: null },
-        },
-        populate: [],
-      });
-      expect(result.shared).toBe('published-value');
+      },
     });
+    const findOne = jest
+      .fn()
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({ shared: 'sibling-value' });
+    query.mockReturnValue({ findOne });
 
-    it('replaces present shared fields from the published sibling', async () => {
-      const defaultPublished = {
+    const result = await copyNonLocalizedFields(draftAndPublishArticle, 'doc-1', {});
+
+    expect(findOne).toHaveBeenNthCalledWith(2, {
+      where: {
+        documentId: 'doc-1',
+        publishedAt: { $null: true },
+      },
+      populate: [],
+    });
+    expect(result.shared).toBe('sibling-value');
+  });
+
+  it('copies from the default-locale published sibling when writing published', async () => {
+    registerProvider(localization, {
+      fillNonLocalizedAttributes(entry, relatedEntry) {
+        entry.shared = relatedEntry.shared;
+      },
+    });
+    const findOne = jest.fn(async () => ({ shared: 'published-value' }));
+    query.mockReturnValue({ findOne });
+
+    const result = await copyNonLocalizedFields(
+      draftAndPublishArticle,
+      'doc-1',
+      { localized: 'fr' },
+      { status: 'published' }
+    );
+
+    expect(findOne).toHaveBeenCalledWith({
+      where: {
         documentId: 'doc-1',
         locale: 'en',
-        publishedAt: '2026-01-01',
-        shared: 'published-value',
-      };
-      const findOne = jest.fn().mockResolvedValue(defaultPublished);
-
-      global.strapi = {
-        plugin: (name: string) => (global.strapi as any).plugins[name],
-        plugins: {
-          i18n: {
-            services: {
-              locales: { getDefaultLocale: jest.fn().mockResolvedValue('en') },
-              'content-types': {
-                isLocalizedContentType: () => true,
-                getNestedPopulateOfNonLocalizedAttributes: () => [],
-                copyNonLocalizedAttributes: (_schema: unknown, entry: { shared: string }) => ({
-                  shared: entry.shared,
-                }),
-                fillNonLocalizedAttributes: jest.fn(),
-              },
-            },
-            controllers: {},
-            contentTypes: {},
-            policies: {},
-          },
-        },
-        apis: {},
-        db: {
-          query: () => ({ findOne }),
-        },
-      } as any;
-
-      const fillNonLocalizedAttributes = (global.strapi as any).plugins.i18n.services[
-        'content-types'
-      ].fillNonLocalizedAttributes;
-
-      const result = await copyNonLocalizedFields(
-        {
-          uid: 'api::article.article',
-          options: { draftAndPublish: true },
-          attributes: {
-            shared: { type: 'string' },
-          },
-        } as any,
-        'doc-1',
-        { localized: 'fr', shared: 'draft-value' },
-        { status: 'published', strategy: 'replace' }
-      );
-
-      expect(fillNonLocalizedAttributes).not.toHaveBeenCalled();
-      expect(result).toEqual({ localized: 'fr', shared: 'published-value' });
+        publishedAt: { $ne: null },
+      },
+      populate: [],
     });
+    expect(result.shared).toBe('published-value');
+  });
+
+  it('replaces present shared fields from the published sibling', async () => {
+    const fillNonLocalizedAttributes = jest.fn((entry, relatedEntry) => {
+      entry.shared = relatedEntry.shared;
+    });
+    registerProvider(localization, { fillNonLocalizedAttributes });
+    const findOne = jest.fn(async () => ({ shared: 'published-value' }));
+    query.mockReturnValue({ findOne });
+
+    const result = await copyNonLocalizedFields(
+      draftAndPublishArticle,
+      'doc-1',
+      { localized: 'fr', shared: 'draft-value' },
+      { status: 'published', strategy: 'replace' }
+    );
+
+    expect(fillNonLocalizedAttributes).toHaveBeenCalled();
+    expect(result).toEqual({ localized: 'fr', shared: 'published-value' });
   });
 });
