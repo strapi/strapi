@@ -47,7 +47,7 @@ export const ADMIN_PERMISSIONS_EE = {
  * during build time.
  */
 export const getEERoutes = (): RouteObject[] =>
-  window.strapi.features.isEnabled(window.strapi.features.SSO)
+  window.strapi.isEE
     ? [
         {
           path: 'auth/login/:authResponse',

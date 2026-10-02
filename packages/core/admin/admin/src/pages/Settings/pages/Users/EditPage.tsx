@@ -62,8 +62,7 @@ const EditPage = () => {
         await import(
           '../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/components/MagicLinkEE'
         )
-      ).MagicLinkEE,
-    { enabled: window.strapi.features.isEnabled(window.strapi.features.SSO) }
+      ).MagicLinkEE
   );
   const {
     _unstableFormatAPIError: formatAPIError,
