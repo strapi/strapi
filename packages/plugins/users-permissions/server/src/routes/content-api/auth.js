@@ -1,5 +1,6 @@
 'use strict';
 
+const { z } = require('@strapi/utils');
 const { UsersPermissionsRouteValidator } = require('./validation');
 
 module.exports = (strapi) => {
@@ -138,6 +139,11 @@ module.exports = (strapi) => {
       path: '/auth/sessions/:sessionId',
       handler: 'auth.revokeSession',
       config: { prefix: '' },
+      request: {
+        params: {
+          sessionId: z.string(),
+        },
+      },
     },
   ];
 };
