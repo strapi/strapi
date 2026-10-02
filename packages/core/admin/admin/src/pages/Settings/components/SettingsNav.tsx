@@ -4,20 +4,13 @@ import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import { useLicenseLimits } from '../../../../../ee/admin/src/hooks/useLicenseLimits';
 import { SubNav } from '../../../components/SubNav';
 import { SETTINGS_LINKS_LICENSE_FEATURES } from '../../../constants';
 import { useTracking } from '../../../features/Tracking';
 import { useSettingsMenu } from '../../../hooks/useSettingsMenu';
 
 import type { LicensedSettingsLinkId } from '../../../constants';
-import type { Modules } from '@strapi/types';
-
-const isLinkFeatureEnabled = (linkId: string) => {
-  const featureName: Modules.EE.FeatureName | undefined =
-    SETTINGS_LINKS_LICENSE_FEATURES[linkId as LicensedSettingsLinkId];
-
-  return featureName !== undefined && window.strapi.features.isEnabled(featureName);
-};
 
 const StyledBadge = styled(Badge)`
   border-radius: 50%;
@@ -30,6 +23,12 @@ const SettingsNav = ({ isFullPage = false }: { isFullPage?: boolean }) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { pathname } = useLocation();
+  const { license } = useLicenseLimits();
+
+  const isLinkFeatureLicensed = (linkId: LicensedSettingsLinkId) =>
+    license?.features.some(
+      (feature) => feature.name === SETTINGS_LINKS_LICENSE_FEATURES[linkId]
+    ) === true;
 
   const filteredMenu = menu.filter(
     (section) => !section.links.every((link) => link.isDisplayed === false)
@@ -42,6 +41,7 @@ const SettingsNav = ({ isFullPage = false }: { isFullPage?: boolean }) => {
       links: section.links.map((link) => {
         return {
           ...link,
+          id: link.id as LicensedSettingsLinkId,
           title: link.intlLabel,
           name: link.id,
           to: link.to.startsWith('/') ? link.to : `/settings/${link.to}`,
@@ -88,7 +88,7 @@ const SettingsNav = ({ isFullPage = false }: { isFullPage?: boolean }) => {
                       <>
                         {link?.licenseOnly && (
                           <Lightning
-                            fill={isLinkFeatureEnabled(link.id) ? 'primary600' : 'neutral300'}
+                            fill={isLinkFeatureLicensed(link.id) ? 'primary600' : 'neutral300'}
                             width="1.5rem"
                             height="1.5rem"
                           />
