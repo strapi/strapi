@@ -54,6 +54,11 @@ describe('RelativeTime', () => {
   it('does not throw when the timestamp is an invalid Date', () => {
     render(<RelativeTime timestamp={new Date('')} />);
 
-    expect(screen.getByRole('time')).toHaveTextContent('-');
+    const fallback = screen.getByText('-');
+    expect(fallback).toHaveAttribute('aria-hidden', 'true');
+    expect(fallback).not.toHaveAttribute('datetime');
+    expect(fallback).not.toHaveAttribute('title');
+    expect(fallback).not.toHaveAttribute('role');
+    expect(screen.queryByRole('time')).not.toBeInTheDocument();
   });
 });
