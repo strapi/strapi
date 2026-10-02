@@ -5,8 +5,8 @@ import { mapRelation, traverseEntityRelations } from '../utils/map-relation';
 
 const setDefaultLocaleToRelation = <T extends Record<string, any>>(
   relation: T,
-  defaultLocale: string
-): T & { locale: string } => {
+  defaultLocale: string | null
+): T & { locale: string | null } => {
   const position = relation.position;
   if (position && typeof position === 'object' && !position.locale) {
     position.locale = defaultLocale;
