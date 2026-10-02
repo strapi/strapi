@@ -46,7 +46,7 @@ const createStrapiWithRetention = ({
   feature,
   userRetentionDays,
 }: {
-  feature?: { name: string; options: Record<string, unknown> };
+  feature?: { name: string; options?: Record<string, unknown> };
   userRetentionDays?: unknown;
 }) => {
   return {
@@ -86,6 +86,10 @@ describe('History utils', () => {
 
     it('uses the user retention when the license has no retention', () => {
       expect(getRetentionDays({ feature: historyFeature({}), userRetentionDays: 365 })).toBe(365);
+    });
+
+    it('uses 90 days when the license lists the feature without options', () => {
+      expect(getRetentionDays({ feature: { name: 'cms-content-history' } })).toBe(90);
     });
 
     it('uses 90 days, never 0, when the feature is missing', () => {

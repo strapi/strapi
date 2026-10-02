@@ -147,7 +147,7 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
    */
   const getRetentionDays = () => {
     const licenseRetentionDays =
-      strapi.ee.features.get('cms-content-history')?.options.retentionDays;
+      strapi.ee.features.get('cms-content-history')?.options?.retentionDays;
     // A string from an env config is a number of days too
     const userRetentionDays = Number(strapi.config.get('admin.history.retentionDays'));
     // Never 0, NaN or negative: a retention of 0 days would purge every version

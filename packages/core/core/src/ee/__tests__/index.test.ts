@@ -63,6 +63,53 @@ describe('ee', () => {
     process.env = ORIGINAL_ENV;
   });
 
+  describe('features', () => {
+    it('lists the license features with a name turned into { name }', () => {
+      const releases = { name: 'cms-content-releases', options: { maximumReleases: 5 } };
+
+      const { ee } = initEE({
+        readLicense: 'file-license',
+        licenseInfo: { type: 'gold', features: ['sso', releases] as never, seats: 10 },
+      });
+
+      expect(ee.features.list()).toEqual([{ name: 'sso' }, releases]);
+      expect(ee.features.get('cms-content-releases')).toBe(releases);
+      expect(ee.features.isEnabled('sso')).toBe(true);
+      expect(ee.features.isEnabled('audit-logs')).toBe(false);
+    });
+
+    it('derives seat-limit from the license seats, outside list()', () => {
+      const { ee } = initEE({
+        readLicense: 'file-license',
+        licenseInfo: { type: 'gold', features: [], seats: 10 },
+      });
+
+      expect(ee.seats).toBe(10);
+      expect(ee.features.get('seat-limit')).toEqual({ name: 'seat-limit', options: { seats: 10 } });
+      expect(ee.features.isEnabled('seat-limit')).toBe(true);
+      expect(ee.features.list()).toEqual([]);
+    });
+
+    it('has no seat-limit without seats', () => {
+      const { ee } = initEE({
+        readLicense: 'file-license',
+        licenseInfo: { type: 'gold', features: [] },
+      });
+
+      expect(ee.features.isEnabled('seat-limit')).toBe(false);
+    });
+
+    it('has no features once the license fails verification', () => {
+      const { ee } = initEE({
+        readLicense: 'file-license',
+        licenseInfo: new Error('Invalid license.'),
+      });
+
+      expect(ee.features.list()).toEqual([]);
+      expect(ee.features.isEnabled('seat-limit')).toBe(false);
+    });
+  });
+
   describe('edition', () => {
     it('is Community without a license', () => {
       expect(initEE().ee.edition).toBe('Community');

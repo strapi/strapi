@@ -37,9 +37,9 @@ export interface LicenseFeatures {
   /** `@strapi/admin` AI service: custom AI providers (bring your own key). */
   'cms-byok-ai': Record<string, unknown>;
   /**
-   * `@strapi/admin`: seat enforcement, the seat check on user creation and activation, and the
-   * seat UI. Derived by the resolver from the license's top-level `seats`; the registry does not
-   * send it. Present only when the license limits admin seats.
+   * `@strapi/admin` EE: seat enforcement and the seat check on user creation and activation.
+   * `features.get` and `features.isEnabled` derive it from the license's top-level `seats`, present
+   * when `seats` is neither `undefined` nor `null`; `features.list()` does not include it.
    */
   'seat-limit': { seats: number };
 }

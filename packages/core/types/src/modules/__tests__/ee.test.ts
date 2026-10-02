@@ -21,7 +21,10 @@ true satisfies Assert<
 >;
 true satisfies Assert<IsEqual<FeatureOptions['acme-feature'], { seats?: number }>>;
 true satisfies Assert<
-  IsEqual<Feature<'acme-feature'>, { name: 'acme-feature'; options: { seats?: number } }>
+  IsEqual<
+    Feature<'acme-feature'>,
+    { name: 'acme-feature'; options?: { seats?: number }; [key: string]: any }
+  >
 >;
 
 const checkFeatures = (features: EEService['features']) => {
@@ -34,8 +37,8 @@ const checkFeatures = (features: EEService['features']) => {
   return [
     features.isEnabled('sso'),
     features.isEnabled('acme-feature'),
-    auditLogs?.options.retentionDays,
-    acme?.options.seats,
+    auditLogs?.options?.retentionDays,
+    acme?.options?.seats,
     // @ts-expect-error A typo of a declared name is not a feature name.
     features.isEnabled('acme-featur'),
     // @ts-expect-error A name no package declares is not a feature name.
@@ -43,7 +46,7 @@ const checkFeatures = (features: EEService['features']) => {
     // @ts-expect-error A typo of a Strapi feature is not a feature name.
     features.get('ssoo'),
     // @ts-expect-error Options keep the shape their feature declares.
-    acme?.options.retentionDays,
+    acme?.options?.retentionDays,
   ];
 };
 
