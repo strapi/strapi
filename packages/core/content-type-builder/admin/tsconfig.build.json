@@ -5,6 +5,6 @@
     "outDir": "../dist",
     "noEmit": false
   },
-  "include": ["./src", "./custom.d.ts"],
+  "include": ["./src"],
   "exclude": ["**/tests/**"]
 }
