@@ -1,4 +1,4 @@
-import type { Modules, UID } from '@strapi/types';
+import type { Core, Modules, UID } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
 import { RELEASE_MODEL_UID, RELEASE_ACTION_MODEL_UID } from '../constants';
 import { getService, isEntryValid } from '../utils';
@@ -13,7 +13,8 @@ interface ReleaseActionsParams {
 
 const updateActionsStatusAndUpdateReleaseStatus = async (
   contentType: UID.ContentType,
-  entry: Modules.Documents.AnyDocument
+  entry: Modules.Documents.AnyDocument,
+  strapi: Core.Strapi
 ) => {
   const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
     where: {
@@ -40,11 +41,14 @@ const updateActionsStatusAndUpdateReleaseStatus = async (
   });
 
   for (const release of releases) {
-    getService('release', { strapi }).updateReleaseStatus(release.id);
+    await getService('release', { strapi }).updateReleaseStatus(release.id);
   }
 };
 
-const deleteActionsAndUpdateReleaseStatus = async (params: ReleaseActionsParams) => {
+const deleteActionsAndUpdateReleaseStatus = async (
+  params: ReleaseActionsParams,
+  strapi: Core.Strapi
+) => {
   const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
     where: {
       actions: params,
@@ -56,69 +60,76 @@ const deleteActionsAndUpdateReleaseStatus = async (params: ReleaseActionsParams)
   });
 
   for (const release of releases) {
-    getService('release', { strapi }).updateReleaseStatus(release.id);
+    await getService('release', { strapi }).updateReleaseStatus(release.id);
   }
 };
 
-const deleteActionsOnDelete: Middleware = async (ctx, next) => {
-  if (ctx.action !== 'delete') {
-    return next();
-  }
+const deleteActionsOnDelete =
+  (strapi: Core.Strapi): Middleware =>
+  async (ctx, next) => {
+    if (ctx.action !== 'delete') {
+      return next();
+    }
 
-  if (!contentTypes.hasDraftAndPublish(ctx.contentType)) {
-    return next();
-  }
+    if (!contentTypes.hasDraftAndPublish(ctx.contentType)) {
+      return next();
+    }
 
-  const contentType = ctx.contentType.uid;
-  const { documentId, locale } = ctx.params;
+    const contentType = ctx.contentType.uid;
+    const { documentId, locale } = ctx.params;
 
-  const result = await next();
+    const result = await next();
 
-  if (!result) {
+    if (!result) {
+      return result;
+    }
+
+    try {
+      await deleteActionsAndUpdateReleaseStatus(
+        {
+          contentType,
+          entryDocumentId: documentId,
+          ...(locale !== '*' && { locale }),
+        },
+        strapi
+      );
+    } catch (error) {
+      strapi.log.error('Error while deleting release actions after delete', {
+        error,
+      });
+    }
+
     return result;
-  }
+  };
 
-  try {
-    await deleteActionsAndUpdateReleaseStatus({
-      contentType,
-      entryDocumentId: documentId,
-      ...(locale !== '*' && { locale }),
-    });
-  } catch (error) {
-    strapi.log.error('Error while deleting release actions after delete', {
-      error,
-    });
-  }
+const updateActionsOnUpdate =
+  (strapi: Core.Strapi): Middleware =>
+  async (ctx, next) => {
+    if (ctx.action !== 'update') {
+      return next();
+    }
 
-  return result;
-};
+    if (!contentTypes.hasDraftAndPublish(ctx.contentType)) {
+      return next();
+    }
 
-const updateActionsOnUpdate: Middleware = async (ctx, next) => {
-  if (ctx.action !== 'update') {
-    return next();
-  }
+    const contentType = ctx.contentType.uid;
 
-  if (!contentTypes.hasDraftAndPublish(ctx.contentType)) {
-    return next();
-  }
+    const result = (await next()) as Modules.Documents.AnyDocument;
 
-  const contentType = ctx.contentType.uid;
+    if (!result) {
+      return result;
+    }
 
-  const result = (await next()) as Modules.Documents.AnyDocument;
+    try {
+      await updateActionsStatusAndUpdateReleaseStatus(contentType, result, strapi);
+    } catch (error) {
+      strapi.log.error('Error while updating release actions after update', {
+        error,
+      });
+    }
 
-  if (!result) {
     return result;
-  }
-
-  try {
-    await updateActionsStatusAndUpdateReleaseStatus(contentType, result);
-  } catch (error) {
-    strapi.log.error('Error while updating release actions after update', {
-      error,
-    });
-  }
-
-  return result;
-};
+  };
 
 export { deleteActionsOnDelete, updateActionsOnUpdate };
