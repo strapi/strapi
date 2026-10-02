@@ -1,4 +1,10 @@
+import fs from 'fs';
+import path from 'path';
 import { createAiAdminService } from '../ai';
+
+// Mock fs module
+jest.mock('fs');
+const mockFs = fs as jest.Mocked<typeof fs>;
 
 describe('AI Container', () => {
   const ORIGINAL_ENV = process.env;
@@ -9,6 +15,9 @@ describe('AI Container', () => {
 
     // Reset global fetch
     delete (global as any).fetch;
+
+    // Reset fs mocks
+    mockFs.readFileSync.mockReset();
   });
 
   afterAll(() => {
@@ -26,9 +35,9 @@ describe('AI Container', () => {
     return {
       ee: {
         isEE: true,
-        providedLicense: 'test-license',
         features: { isEnabled: jest.fn().mockReturnValue(true) },
       },
+      dirs: { app: { root: '/app' } },
       config: {
         get: jest.fn((key: string, defaultValue?: unknown) => {
           if (key === 'uuid') return 'test-project-id';
@@ -52,6 +61,7 @@ describe('AI Container', () => {
   };
 
   const setupValidEnvironment = () => {
+    process.env.STRAPI_LICENSE = 'test-license';
     process.env.STRAPI_AI_URL = 'http://ai-server.com';
   };
 
@@ -69,10 +79,10 @@ describe('AI Container', () => {
 
   describe('resolveAIContext (shared by getAiToken and getAiUsage)', () => {
     test('Should throw when the license does not include cms-ai', async () => {
+      // Without EE the license lists no feature, so the cms-ai check covers it
       const mockStrapi = createMockStrapi({
         ee: {
-          isEE: true,
-          providedLicense: 'test-license',
+          isEE: false,
           features: { isEnabled: jest.fn().mockReturnValue(false) },
         },
       }) as any;
@@ -91,7 +101,10 @@ describe('AI Container', () => {
 
     test('Should throw when no EE license is found', async () => {
       const mockStrapi = createMockStrapi() as any;
-      mockStrapi.ee.providedLicense = undefined;
+      delete process.env.STRAPI_LICENSE;
+      mockFs.readFileSync.mockImplementation(() => {
+        throw new Error('File not found');
+      });
       const aiContainer = createAiAdminService({ strapi: mockStrapi });
 
       await expect(aiContainer.getAiUsage()).rejects.toThrow(
@@ -126,10 +139,10 @@ describe('AI Container', () => {
 
   describe('getAiToken', () => {
     test('Should throw error when the license does not include cms-ai', async () => {
+      // Without EE the license lists no feature, so the cms-ai check covers it
       const mockStrapi = createMockStrapi({
         ee: {
-          isEE: true,
-          providedLicense: 'test-license',
+          isEE: false,
           features: { isEnabled: jest.fn().mockReturnValue(false) },
         },
       }) as any;
@@ -147,8 +160,12 @@ describe('AI Container', () => {
 
     test('Should throw error when no EE license is found', async () => {
       const mockStrapi = createMockStrapi() as any;
-      mockStrapi.ee.providedLicense = undefined;
       const aiContainer = createAiAdminService({ strapi: mockStrapi });
+
+      delete process.env.STRAPI_LICENSE;
+      mockFs.readFileSync.mockImplementation(() => {
+        throw new Error('File not found');
+      });
 
       await expect(aiContainer.getAiToken()).rejects.toThrow(
         'AI token request failed. Check server logs for details.'
@@ -159,19 +176,25 @@ describe('AI Container', () => {
       );
     });
 
-    test('Should send the license provided to EE, not the one set after startup', async () => {
+    test('Should read license from file when environment variable is not set', async () => {
       const mockStrapi = createMockStrapi() as any;
-      mockStrapi.ee.providedLicense = 'provided-license';
       const aiContainer = createAiAdminService({ strapi: mockStrapi });
 
-      setupValidEnvironment();
-      process.env.STRAPI_LICENSE = 'set-after-startup';
+      delete process.env.STRAPI_LICENSE;
+      process.env.STRAPI_AI_URL = 'http://ai-server.com';
+
+      mockFs.readFileSync.mockReturnValue(Buffer.from('file-license-content'));
       global.fetch = createSuccessfulTokenFetch();
 
       await aiContainer.getAiToken();
 
-      const [, request] = (global.fetch as jest.Mock).mock.calls[0];
-      expect(JSON.parse(request.body)).toMatchObject({ eeLicense: 'provided-license' });
+      expect(mockFs.readFileSync).toHaveBeenCalledWith(path.join('/app', 'license.txt'));
+      expect(global.fetch).toHaveBeenCalledWith(
+        'http://ai-server.com/auth/getAiJWT',
+        expect.objectContaining({
+          body: expect.stringContaining('file-license-content'),
+        })
+      );
     });
 
     test('Should throw error when no authenticated user in request context', async () => {
@@ -251,6 +274,7 @@ describe('AI Container', () => {
       const mockStrapi = createMockStrapi() as any;
       const aiContainer = createAiAdminService({ strapi: mockStrapi });
 
+      process.env.STRAPI_LICENSE = 'test-license';
       delete process.env.STRAPI_AI_URL;
 
       global.fetch = createSuccessfulTokenFetch();
@@ -428,10 +452,7 @@ describe('AI Container', () => {
   });
 
   describe('isAvailable', () => {
-    const createStrapi = ({
-      configEnabled = true,
-      licensedFeatures = ['cms-ai', 'cms-byok-ai'] as string[],
-    } = {}) =>
+    const createStrapi = ({ configEnabled = true, isEE = true } = {}) =>
       ({
         config: {
           get: jest.fn((key: string, defaultValue?: unknown) => {
@@ -439,25 +460,14 @@ describe('AI Container', () => {
             return defaultValue;
           }),
         },
-        ee: {
-          isEE: true,
-          features: { isEnabled: jest.fn((name: string) => licensedFeatures.includes(name)) },
-        },
+        ee: { isEE, features: { isEnabled: jest.fn().mockReturnValue(true) } },
       }) as any;
 
-    test.each([[['cms-ai']], [['cms-byok-ai']], [['cms-ai', 'cms-byok-ai']]])(
-      'returns true when the license lists %p',
-      (licensedFeatures) => {
-        expect(
-          createAiAdminService({ strapi: createStrapi({ licensedFeatures }) }).isAvailable()
-        ).toBe(true);
-      }
-    );
-
-    test('returns false for a license without an AI feature', () => {
-      expect(
-        createAiAdminService({ strapi: createStrapi({ licensedFeatures: ['sso'] }) }).isAvailable()
-      ).toBe(false);
+    test('follows the Enterprise license', () => {
+      expect(createAiAdminService({ strapi: createStrapi() }).isAvailable()).toBe(true);
+      expect(createAiAdminService({ strapi: createStrapi({ isEE: false }) }).isAvailable()).toBe(
+        false
+      );
     });
 
     test('returns false when config explicitly disables AI', () => {
@@ -601,109 +611,15 @@ describe('AI Container', () => {
     });
   });
 
-  describe('license truth table', () => {
-    type Row = {
-      isEE: boolean;
-      features: string[];
-      customProvider: boolean;
-      available: boolean;
-      managed: boolean;
-      authorized?: boolean;
-    };
-
-    // A license lists features only while EE is enabled, so the rows without EE list none
-    const rows: Row[] = [
-      { isEE: false, features: [], customProvider: false, available: false, managed: false },
-      {
-        isEE: false,
-        features: [],
-        customProvider: true,
-        available: false,
-        managed: false,
-        authorized: false,
-      },
-      { isEE: true, features: [], customProvider: false, available: false, managed: false },
-      {
-        isEE: true,
-        features: [],
-        customProvider: true,
-        available: false,
-        managed: false,
-        authorized: false,
-      },
-      { isEE: true, features: ['cms-ai'], customProvider: false, available: true, managed: true },
-      {
-        isEE: true,
-        features: ['cms-ai'],
-        customProvider: true,
-        available: false,
-        managed: false,
-        authorized: false,
-      },
-      {
-        isEE: true,
-        features: ['cms-byok-ai'],
-        customProvider: false,
-        available: true,
-        managed: false,
-      },
-      {
-        isEE: true,
-        features: ['cms-byok-ai'],
-        customProvider: true,
-        available: true,
-        managed: false,
-        authorized: true,
-      },
-      {
-        isEE: true,
-        features: ['cms-ai', 'cms-byok-ai'],
-        customProvider: false,
-        available: true,
-        managed: true,
-      },
-      {
-        isEE: true,
-        features: ['cms-ai', 'cms-byok-ai'],
-        customProvider: true,
-        available: true,
-        managed: true,
-        authorized: true,
-      },
-    ];
-
-    test.each(rows)(
-      'isEE: $isEE, features: $features, custom provider: $customProvider',
-      ({ isEE, features, customProvider, available, managed, authorized }) => {
-        const strapi = {
-          config: { get: jest.fn((_key: string, defaultValue?: unknown) => defaultValue) },
-          ee: {
-            isEE,
-            features: { isEnabled: jest.fn((name: string) => features.includes(name)) },
-          },
-          log: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), http: jest.fn() },
-        } as any;
-        const aiContainer = createAiAdminService({ strapi });
-
-        if (customProvider === true) {
-          expect(aiContainer.authorizeCustomProvider()).toBe(authorized);
-        }
-
-        expect(aiContainer.isAvailable()).toBe(available);
-        expect(aiContainer.isStrapiManagedAiEnabled()).toBe(managed);
-      }
-    );
-  });
-
   describe('getAiFeatureConfig', () => {
     const createStrapi = ({
-      hasAiFeature = true,
+      isEE = true,
       i18n,
       upload,
-    }: { hasAiFeature?: boolean; i18n?: unknown; upload?: unknown } = {}) =>
+    }: { isEE?: boolean; i18n?: unknown; upload?: unknown } = {}) =>
       ({
         config: { get: jest.fn((key: string, defaultValue?: unknown) => defaultValue) },
-        ee: { isEE: true, features: { isEnabled: jest.fn().mockReturnValue(hasAiFeature) } },
+        ee: { isEE, features: { isEnabled: jest.fn().mockReturnValue(true) } },
         plugin: jest.fn((name: string) => {
           if (name === 'i18n' && i18n !== undefined) return { service: jest.fn(() => i18n) };
           if (name === 'upload' && upload !== undefined) return { service: jest.fn(() => upload) };
@@ -744,9 +660,9 @@ describe('AI Container', () => {
       });
     });
 
-    test('skips the plugins without an AI license feature', async () => {
+    test('skips the plugins without an Enterprise license', async () => {
       const strapi = createStrapi({
-        hasAiFeature: false,
+        isEE: false,
         i18n: { isEnabled: jest.fn().mockResolvedValue(true) },
       });
 

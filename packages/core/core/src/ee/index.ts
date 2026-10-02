@@ -16,7 +16,6 @@ const ONE_MINUTE = 1000 * 60;
 
 interface EE {
   enabled: boolean;
-  providedLicense?: string;
   licenseInfo: {
     licenseKey?: string;
     features?: Array<{ name: string; [key: string]: any } | string>;
@@ -88,7 +87,6 @@ const init = (licenseDir: string, logger?: Logger) => {
     const license = process.env.STRAPI_LICENSE || readLicense(licenseDir);
 
     if (license) {
-      ee.providedLicense = license;
       ee.licenseInfo = verifyLicense(license);
       enable();
     }
@@ -299,20 +297,6 @@ export default Object.freeze<
 
   get subscriptionId() {
     return ee.licenseInfo.subscriptionId;
-  },
-
-  get providedLicense() {
-    return ee.providedLicense;
-  },
-
-  get edition(): Modules.EE.Edition {
-    if (ee.enabled === false) {
-      return 'Community';
-    }
-
-    return ee.licenseInfo.planPriceId?.toLowerCase().includes('growth') === true
-      ? 'Growth'
-      : 'Enterprise';
   },
 
   features: Object.freeze({ list, get, isEnabled }),

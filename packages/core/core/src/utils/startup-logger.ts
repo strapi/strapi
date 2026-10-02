@@ -3,6 +3,8 @@ import CLITable from 'cli-table3';
 
 import type { Core } from '@strapi/types';
 
+import { getEdition } from '../ee/edition';
+
 const ROUNDED_CHARS = {
   top: '─',
   'top-mid': '┬',
@@ -42,7 +44,7 @@ export const createStartupLogger = (app: Core.Strapi) => {
         [chalk.blue('Environment'), app.config.environment],
         [chalk.blue('Process PID'), process.pid],
         [chalk.blue('Version'), `${app.config.info.strapi} (node ${process.version})`],
-        [chalk.blue('Plan'), app.ee.edition],
+        [chalk.blue('Plan'), getEdition(app)],
         [chalk.blue('Database'), dbInfo?.client],
         [chalk.blue('Database name'), dbInfo?.displayName]
       );
