@@ -71,7 +71,7 @@ For **CI, scripts, or automation**, prefer `--reporter=line` after the inner `--
 
 ### Running specific browsers
 
-To run only a specific browser (to speed up test development, for example) you can pass `--project` to playwright with the value(s) `chromium`, `firefox`, or `webkit`
+To run only a specific browser (to speed up test development, for example) you can pass `--project` to playwright with the value(s) `chromium` or `webkit`
 
 ```shell
 yarn test:e2e --domains=admin -- login.spec.ts --project=chromium
