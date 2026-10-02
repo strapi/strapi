@@ -1,3 +1,5 @@
+import { describe, expect, test } from 'vitest';
+
 import getFilePath from '../get-file-path';
 
 describe('Get-File-Path util', () => {
