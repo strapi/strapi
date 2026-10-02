@@ -219,11 +219,10 @@ const useDocument: UseDocument = (args, opts) => {
    *     `pluginOptions.i18n.localized` is `undefined` count as non-localized
    *     (an attribute created without the i18n plugin has no i18n options at
    *     all but is still inherited at save by `copyNonLocalizedFields`).
-   *   - scalar or media — `component` / `dynamiczone` / `relation` are excluded
-   *     because the server doesn't populate them in `availableLocales` either,
-   *     so there'd be nothing to copy from.
+   *   - scalar, media, component, or dynamic zone — relations are excluded
+   *     because the server doesn't populate them in `availableLocales` either.
    */
-  const nonLocalizedScalarAndMediaFields = React.useMemo(() => {
+  const nonLocalizedFieldsToInherit = React.useMemo(() => {
     if (!schema?.attributes) {
       return [];
     }
@@ -235,11 +234,7 @@ const useDocument: UseDocument = (args, opts) => {
         return false;
       }
 
-      return (
-        attribute.type !== 'component' &&
-        attribute.type !== 'dynamiczone' &&
-        attribute.type !== 'relation'
-      );
+      return attribute.type !== 'relation';
     });
   }, [schema]);
 
@@ -251,12 +246,11 @@ const useDocument: UseDocument = (args, opts) => {
    *
    * We also prepare the form for new documents, so we need to:
    * - set default values on fields
-   * - inherit non-localized scalar/media values from a sibling locale.
-   *   Scope is intentionally limited to scalars and media — that is exactly
-   *   what the server populates into `meta.availableLocales` (see
+   * - inherit non-localized scalar/media/component/dynamic-zone values from a sibling locale.
+   *   Scope matches what the server populates into `meta.availableLocales` (see
    *   `packages/core/content-manager/server/src/services/document-metadata.ts`).
-   *   Components, dynamic zones, and relations are not in that payload; the
-   *   server fills them at save time via `copyNonLocalizedFields` (in
+   *   Relations are not in that payload; the server fills them at save time via
+   *   `copyNonLocalizedFields` (in
    *   `packages/core/core/src/services/document-service/internationalization.ts`)
    *   when the new locale row is first created.
    *   Baking the inheritance into `initialValues` here is what lets it survive
@@ -291,8 +285,8 @@ const useDocument: UseDocument = (args, opts) => {
       // - Avoids coupling this hook to `useGetLocalesQuery` just to find the
       //   default locale.
       const sibling = meta?.availableLocales?.[0] as Record<string, unknown> | undefined;
-      if (sibling && nonLocalizedScalarAndMediaFields.length > 0) {
-        const inherited = nonLocalizedScalarAndMediaFields.reduce<AnyData>((acc, name) => {
+      if (sibling && nonLocalizedFieldsToInherit.length > 0) {
+        const inherited = nonLocalizedFieldsToInherit.reduce<AnyData>((acc, name) => {
           if (name in sibling) {
             acc[name] = sibling[name];
           }
@@ -310,7 +304,7 @@ const useDocument: UseDocument = (args, opts) => {
       schema,
       components,
       meta?.availableLocales,
-      nonLocalizedScalarAndMediaFields,
+      nonLocalizedFieldsToInherit,
     ]
   );
 

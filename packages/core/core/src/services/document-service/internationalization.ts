@@ -1,5 +1,5 @@
 import type { Struct, Modules, Schema } from '@strapi/types';
-import { errors } from '@strapi/utils';
+import { errors, contentTypes } from '@strapi/utils';
 import { curry, assoc } from 'lodash/fp';
 
 type Transform = (
@@ -148,6 +148,30 @@ const normalizeMediaIds = (
 
   return data;
 };
+export type CopyNonLocalizedFieldsOptions = {
+  /**
+   * Which publication status to copy from. Locale insert of a draft must not
+   * pick an older published row; first publish of a locale must not pick the draft.
+   */
+  status?: 'draft' | 'published';
+  /**
+   * `fill` inherits only unset/empty shared fields (create-locale).
+   * `replace` overwrites shared fields from the sibling (first publish of a locale).
+   */
+  strategy?: 'fill' | 'replace';
+};
+
+const statusWhere = (
+  contentType: Struct.SingleTypeSchema | Struct.CollectionTypeSchema,
+  status: 'draft' | 'published'
+) => {
+  if (!contentTypes.hasDraftAndPublish(contentType)) {
+    return {};
+  }
+
+  return status === 'published' ? { publishedAt: { $ne: null } } : { publishedAt: { $null: true } };
+};
+
 /**
  * Copy non-localized fields from an existing entry to a new entry being created
  * for a different locale of the same document. Returns a new object with the merged data.
@@ -155,33 +179,62 @@ const normalizeMediaIds = (
 const copyNonLocalizedFields = async (
   contentType: Struct.SingleTypeSchema | Struct.CollectionTypeSchema,
   documentId: string,
-  dataToCreate: Record<string, any>
+  dataToCreate: Record<string, any>,
+  options: CopyNonLocalizedFieldsOptions = {}
 ): Promise<Record<string, any>> => {
   if (!strapi.localization.isLocalizedContentType(contentType)) {
     return dataToCreate;
   }
 
-  // Find an existing entry for the same document to copy unlocalized fields from
+  const status = options.status ?? 'draft';
+  const strategy = options.strategy ?? 'fill';
+
+  // Select the default-locale sibling of the status being written. Ordering by
+  // publishedAt is database-dependent because drafts store NULL.
   const attributesToPopulate = strapi.localization.getNestedPopulateOfNonLocalizedAttributes(
     contentType.uid
   );
-  const existingEntry = await strapi.db.query(contentType.uid).findOne({
-    where: { documentId },
-    // Prefer published entry, but fall back to any entry
-    orderBy: { publishedAt: 'desc' },
+  const defaultLocaleCode = await getDefaultLocale();
+  const publicationWhere = statusWhere(contentType, status);
+  const query = strapi.db.query(contentType.uid);
+  let existingEntry = await query.findOne({
+    where: {
+      documentId,
+      locale: defaultLocaleCode,
+      ...publicationWhere,
+    },
     populate: attributesToPopulate,
   });
 
-  // If an entry exists in another locale, copy its non-localized fields
-  if (existingEntry) {
-    const mergedData = { ...dataToCreate };
-    strapi.localization.fillNonLocalizedAttributes(mergedData, existingEntry, {
-      model: contentType.uid,
+  // A document can exist without its default locale. Keep locale creation
+  // functional in that case, but still prefer the matching status.
+  if (!existingEntry) {
+    existingEntry = await query.findOne({
+      where: { documentId, ...publicationWhere },
+      populate: attributesToPopulate,
     });
-    return normalizeMediaIds(contentType, mergedData);
   }
 
-  return dataToCreate;
+  if (!existingEntry) {
+    return dataToCreate;
+  }
+
+  if (strategy === 'replace') {
+    // The localization provider fills only unset fields. Copy onto an empty
+    // object, then overlay, so a first publish replaces draft shared values
+    // with the published sibling without a separate copy API.
+    const copied: Record<string, any> = {};
+    strapi.localization.fillNonLocalizedAttributes(copied, existingEntry, {
+      model: contentType.uid,
+    });
+    return normalizeMediaIds(contentType, { ...dataToCreate, ...copied });
+  }
+
+  const mergedData = { ...dataToCreate };
+  strapi.localization.fillNonLocalizedAttributes(mergedData, existingEntry, {
+    model: contentType.uid,
+  });
+  return normalizeMediaIds(contentType, mergedData);
 };
 
 const defaultLocaleCurry = curry(defaultLocale);
