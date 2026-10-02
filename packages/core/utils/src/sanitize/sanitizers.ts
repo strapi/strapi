@@ -89,6 +89,13 @@ const defaultSanitizeFilters = curry((ctx: Context, filters: unknown) => {
     traverseQueryFilters(({ key, value }, { remove }) => {
       const isEmptyPlainObject = isPlainObject(value) && isEmpty(value);
       const isEmptyArrayOperand = isArray(value) && isEmpty(value);
+      // An empty `$in` matches nothing and an empty `$notIn` matches everything.
+      // Both are meaningful and must reach the query layer, otherwise the filter
+      // is silently dropped and the query returns all records.
+      if ((key === '$in' || key === '$notIn') && isEmptyArrayOperand) {
+        return;
+      }
+
       if (isEmptyPlainObject || isEmptyArrayOperand) {
         remove(key);
       }
