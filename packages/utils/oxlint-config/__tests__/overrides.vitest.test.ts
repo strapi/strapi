@@ -40,6 +40,8 @@ beforeAll(() => {
   fs.readdirSync(packageDir)
     .filter((file) => file.endsWith('.ts') || file === 'package.json')
     .forEach((file) => fs.copyFileSync(path.join(packageDir, file), path.join(configDir, file)));
+  // The config loads local JS plugins from `plugins/`.
+  fs.cpSync(path.join(packageDir, 'plugins'), path.join(configDir, 'plugins'), { recursive: true });
 
   // The config imports `defineConfig` from `oxlint`.
   fs.mkdirSync(path.join(root, 'node_modules'));
