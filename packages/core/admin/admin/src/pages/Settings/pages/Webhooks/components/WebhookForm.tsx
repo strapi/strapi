@@ -54,12 +54,7 @@ const WebhookForm = ({
         await import(
           '../../../../../../../ee/admin/src/pages/SettingsPage/pages/Webhooks/components/EventsTable'
         )
-      ).EventsTableEE,
-    {
-      enabled:
-        window.strapi.features.isEnabled('review-workflows') ||
-        window.strapi.features.isEnabled('cms-content-releases'),
-    }
+      ).EventsTableEE
   );
 
   /**
