@@ -89,7 +89,7 @@ export const PreviewBox = ({
   // previously cached non-CORS response (which would taint the canvas and break
   // cropping). Signed URLs are excluded because modifying them invalidates the signature.
   const cropUrl = React.useMemo(() => {
-    if (!asset.isLocal && !asset.isUrlSigned && assetUrl) {
+    if (!asset.isLocal && !asset.isUrlSigned && assetUrl && !assetUrl.startsWith('blob:')) {
       return appendSearchParamsToUrl({ url: assetUrl, params: { updatedAt: asset.updatedAt } });
     }
 
