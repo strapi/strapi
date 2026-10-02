@@ -3,6 +3,32 @@ import { describe, it, expect } from 'vitest';
 import { create, addCondition, getProperty, sanitizePermissionFields } from '../index';
 
 describe('permission domain', () => {
+  it('does not share default conditions or properties between created permissions', () => {
+    const first = create({ action: 'first' });
+    first.conditions.push('only-first');
+    first.properties.modified = true;
+
+    expect(create({ action: 'second' })).toEqual({
+      action: 'second',
+      conditions: [],
+      properties: {},
+      subject: null,
+    });
+  });
+
+  it('supports partial application without changing the original permission', () => {
+    const properties = { fields: ['title'] };
+    const permission = { action: 'test', conditions: ['first'], properties };
+    const addSecond = addCondition('second');
+
+    const updated = addSecond(permission);
+
+    expect(updated.conditions).toEqual(['first', 'second']);
+    expect(permission.conditions).toEqual(['first']);
+    expect(updated.properties).toBe(properties);
+    expect(getProperty('fields')(updated)).toBe(properties.fields);
+  });
+
   it('create picks permission fields and applies defaults', () => {
     const permission = create({
       action: 'plugin::users-permissions.user.find',

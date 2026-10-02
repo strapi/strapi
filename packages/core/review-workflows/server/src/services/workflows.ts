@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/types';
-import { set, isString, map, get } from 'lodash/fp';
+import { isString, map } from 'lodash';
 import { errors, emitAudit } from '@strapi/utils';
 import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../constants/workflows';
 import {
@@ -104,9 +104,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const createdWorkflow = await strapi.db.transaction(async () => {
         // Create stages
         const stages = await getService('stages', { strapi }).createMany(opts.data.stages);
-        const mapIds = map(get('id'));
-
-        createOpts = set('data.stages', mapIds(stages), createOpts);
+        createOpts = { ...createOpts, data: { ...createOpts.data, stages: map(stages, 'id') } };
 
         if (opts.data.stageRequiredToPublishName) {
           const stageRequiredToPublish = stages.find(
@@ -116,7 +114,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
             throw new errors.ApplicationError('Stage required to publish does not exist');
           }
 
-          createOpts = set('data.stageRequiredToPublish', stageRequiredToPublish.id, createOpts);
+          createOpts = {
+            ...createOpts,
+            data: { ...createOpts.data, stageRequiredToPublish: stageRequiredToPublish.id },
+          };
         }
 
         // Update (un)assigned Content Types
@@ -188,14 +189,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           );
           updatedStageIds = updatedStages.map((stage: any) => stage.id);
 
-          updateOpts = set('data.stages', updatedStageIds, updateOpts);
+          updateOpts = { ...updateOpts, data: { ...updateOpts.data, stages: updatedStageIds } };
         }
 
         if (opts.data.stageRequiredToPublishName !== undefined) {
           const stages = updatedStages ?? workflow.stages;
 
           if (opts.data.stageRequiredToPublishName === null) {
-            updateOpts = set('data.stageRequiredToPublish', null, updateOpts);
+            updateOpts = {
+              ...updateOpts,
+              data: { ...updateOpts.data, stageRequiredToPublish: null },
+            };
           } else {
             const stageRequiredToPublish = stages.find(
               (stage: any) => stage.name === opts.data.stageRequiredToPublishName
@@ -205,7 +209,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
               throw new errors.ApplicationError('Stage required to publish does not exist');
             }
 
-            updateOpts = set('data.stageRequiredToPublish', stageRequiredToPublish.id, updateOpts);
+            updateOpts = {
+              ...updateOpts,
+              data: { ...updateOpts.data, stageRequiredToPublish: stageRequiredToPublish.id },
+            };
           }
         }
 

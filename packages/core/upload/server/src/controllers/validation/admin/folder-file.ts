@@ -1,4 +1,4 @@
-import { intersection, map, isEmpty } from 'lodash/fp';
+import { isEmpty, map, intersection } from 'lodash';
 import { yup, validateYupSchema } from '@strapi/utils';
 import { FOLDER_MODEL_UID } from '../../../constants';
 import { folderExists } from './utils';
@@ -45,7 +45,7 @@ const validateDuplicatesMoveManyFoldersFilesSchema = yup
       where: { parent: { id: destinationFolderId } },
     });
 
-    const duplicatedNames = intersection(map('name', folders), map('name', existingFolders));
+    const duplicatedNames = intersection(map(existingFolders, 'name'), map(folders, 'name'));
     if (duplicatedNames.length > 0) {
       return this.createError({
         message: `some folders already exists: ${duplicatedNames.join(', ')}`,

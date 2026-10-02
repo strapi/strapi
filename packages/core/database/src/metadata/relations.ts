@@ -1,4 +1,4 @@
-import _, { snakeCase } from 'lodash/fp';
+import _, { snakeCase } from 'lodash';
 
 import { identifiers } from '../utils/identifiers';
 import type { Meta, Metadata } from './metadata';
@@ -351,7 +351,7 @@ const createMorphOne = (
     throw new Error(`Morph target not found. Looking for ${attribute.target}`);
   }
 
-  if (attribute.morphBy && !_.has(attribute.morphBy, targetMeta.attributes)) {
+  if (attribute.morphBy && !_.has(targetMeta.attributes, attribute.morphBy)) {
     throw new Error(`Morph target attribute not found. Looking for ${attribute.morphBy}`);
   }
 };
@@ -371,7 +371,7 @@ const createMorphMany = (
     throw new Error(`Morph target not found. Looking for ${attribute.target}`);
   }
 
-  if (attribute.morphBy && !_.has(attribute.morphBy, targetMeta.attributes)) {
+  if (attribute.morphBy && !_.has(targetMeta.attributes, attribute.morphBy)) {
     throw new Error(`Morph target attribute not found. Looking for ${attribute.morphBy}`);
   }
 };
