@@ -237,6 +237,8 @@ one of these excluded fields fails the TypeScript check instead of receiving `un
 2. **Runtime errors** — if the handler throws while executing, `wrapSafeHandler` catches it and returns a capability-shaped error result (`isError: true` for tools) instead of crashing the request.
 3. **SDK registration errors** — if the MCP SDK itself rejects the registration call, the capability is replaced with a permanently-disabled no-op instead of aborting the whole registration loop.
 
+The SDK does not convert a prompt's `argsSchema` to JSON Schema at registration. It converts every enabled prompt while serving `prompts/list`, unguarded, so one unconvertible schema (`z.date()`, `z.bigint()`, `z.custom()`, a non-object root…) would fail the whole list. The prompt registry therefore probes the registered schema with `assertSchemaConvertsToJsonSchema` (`services/mcp/utils/assertSchemaConvertsToJsonSchema.ts`), which mirrors the SDK's list-time conversion, and a failure is handled as an SDK registration error (layer 3): the prompt is logged and disabled, and sibling prompts stay listed. Tool schemas are not probed; an unconvertible tool schema still fails `tools/list`.
+
 ## Built-in tools (core)
 
 | Tool  | Access        | Purpose                                                                                                                                                                                           |
