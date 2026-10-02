@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 
-import { useDebounce, useIsMobile, useQueryParams } from '@strapi/admin/strapi-admin';
+import { useDebounce, useIsMobile } from '@strapi/admin/strapi-admin';
 import { Box, Searchbar, SearchForm } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -8,6 +8,7 @@ import { styled } from 'styled-components';
 import { useTracking, MEDIA_LIBRARY_LOCATION } from '../../../hooks/useTracking';
 import { getTranslationKey } from '../../../utils/translations';
 import { useAssetSearch } from '../hooks/useAssetSearch';
+import { useListQueryParams } from '../hooks/useListQueryParams';
 
 const DEBOUNCE_MS = 300;
 
@@ -43,7 +44,7 @@ export const AssetsSearchInput = () => {
 
   // Read directly rather than through `useFolderNavigation`, which strips
   // malformed `?folder=` values as a side effect.
-  const [{ query }] = useQueryParams<{ folder?: string }>();
+  const [{ query }] = useListQueryParams<{ folder?: string }>();
   const folderParam = query?.folder ?? '';
   const lastFolderRef = useRef(folderParam);
 
