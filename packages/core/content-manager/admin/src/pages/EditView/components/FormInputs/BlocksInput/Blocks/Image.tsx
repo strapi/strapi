@@ -80,7 +80,12 @@ const Image = ({ attributes, children, element }: RenderElementProps) => {
         $isFocused={editorIsFocused && imageIsSelected}
         hasRadius
       >
-        <img src={url} alt={alternativeText} width={width} height={height} />
+        <img
+          src={prefixFileUrlWithBackendUrl(url)}
+          alt={alternativeText}
+          width={width}
+          height={height}
+        />
       </ImageWrapper>
     </Box>
   );
@@ -147,7 +152,7 @@ const ImageDialog = () => {
       const nodeImage: Block<'image'>['image'] = {
         ...expectedImage,
         alternativeText: expectedImage.alternativeText || expectedImage.name,
-        url: prefixFileUrlWithBackendUrl(image.url),
+        url: image.url,
       };
 
       return nodeImage;
