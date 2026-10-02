@@ -86,7 +86,12 @@ const defaultSanitizeFilters = curry((ctx: Context, filters: unknown) => {
     traverseQueryFilters(removePrivate, ctx),
     // Remove empty plain objects and empty arrays. Do not use lodash isObject+isEmpty: built-ins with no
     // enumerable keys (Date, RegExp, boxed primitives, etc.) are "empty" and would wrongly drop valid operands.
+    // An empty `$in` / `$notIn` operand is meaningful: it matches nothing / everything.
+    // Dropping it would silently return every entry instead of none.
     traverseQueryFilters(({ key, value }, { remove }) => {
+      if (key === '$in' || key === '$notIn') {
+        return;
+      }
       const isEmptyPlainObject = isPlainObject(value) && isEmpty(value);
       const isEmptyArrayOperand = isArray(value) && isEmpty(value);
       if (isEmptyPlainObject || isEmptyArrayOperand) {
