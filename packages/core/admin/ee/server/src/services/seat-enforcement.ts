@@ -1,8 +1,8 @@
 import { pick, take, drop } from 'lodash';
 
 import { getService } from '../utils';
-import constants from './constants';
-import type { AdminUser } from '../../../shared/contracts/shared';
+import constants from '../../../../server/src/services/constants';
+import type { AdminUser } from '../../../../shared/contracts/shared';
 
 const { SUPER_ADMIN_CODE } = constants;
 
@@ -98,15 +98,15 @@ const syncDisabledUserRecords = async () => {
 };
 
 const seatEnforcementWorkflow = async () => {
-  const adminSeats = strapi.ee.features.get('seat-limit')?.options.seats;
-  if (adminSeats === undefined) {
+  const adminSeats = strapi.ee.seats;
+  if (adminSeats == null) {
     return;
   }
 
   // TODO: we need to make sure an admin can decide to disable specific user and reactivate others
   await syncDisabledUserRecords();
 
-  const currentActiveUserCount = await getService('user').count({ isActive: true });
+  const currentActiveUserCount = await getService('user').getCurrentActiveUserCount();
 
   const adminSeatsLeft = adminSeats - currentActiveUserCount;
 

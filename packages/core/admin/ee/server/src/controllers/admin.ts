@@ -1,0 +1,74 @@
+import { env } from '@strapi/utils';
+
+import { getService } from '../utils';
+
+import type { GetProjectType } from '../../../../shared/contracts/admin';
+
+export default {
+  // NOTE: Overrides CE admin controller
+  async getProjectType(): Promise<GetProjectType.Response> {
+    const flags = strapi.config.get('admin.flags', {});
+
+    try {
+      return {
+        data: {
+          // The license fields are nullable internally; the contract is not.
+          isEE: Boolean(strapi.EE),
+          isTrial: strapi.ee.isTrial,
+          features: strapi.ee.features.list(),
+          flags,
+          type: strapi.ee.type ?? undefined,
+          planPriceId: strapi.ee.planPriceId ?? undefined,
+          ai: {
+            enabled: strapi.ai.admin.isStrapiManagedAiEnabled(),
+          },
+        },
+      };
+    } catch {
+      return { data: { isEE: false, isTrial: false, features: [], flags, ai: { enabled: false } } };
+    }
+  },
+
+  async licenseLimitInformation() {
+    const permittedSeats = strapi.ee.seats;
+
+    let shouldNotify = false;
+    let licenseLimitStatus = null;
+    let enforcementUserCount;
+
+    const currentActiveUserCount = await getService('user').getCurrentActiveUserCount();
+
+    const eeDisabledUsers = await getService('seat-enforcement').getDisabledUserList();
+
+    if (eeDisabledUsers) {
+      enforcementUserCount = currentActiveUserCount + eeDisabledUsers.length;
+    } else {
+      enforcementUserCount = currentActiveUserCount;
+    }
+
+    if (permittedSeats != null && enforcementUserCount > permittedSeats) {
+      shouldNotify = true;
+      licenseLimitStatus = 'OVER_LIMIT';
+    }
+
+    if (permittedSeats != null && enforcementUserCount === permittedSeats) {
+      shouldNotify = true;
+      licenseLimitStatus = 'AT_LIMIT';
+    }
+
+    const data = {
+      enforcementUserCount,
+      currentActiveUserCount,
+      permittedSeats,
+      shouldNotify,
+      shouldStopCreate: permittedSeats == null ? false : currentActiveUserCount >= permittedSeats,
+      licenseLimitStatus,
+      isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
+      type: strapi.ee.type,
+      isTrial: strapi.ee.isTrial,
+      features: strapi.ee.features.list() ?? [],
+    };
+
+    return { data };
+  },
+};

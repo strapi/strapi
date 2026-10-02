@@ -1,4 +1,4 @@
-import type { Modules, Struct, UID } from '@strapi/types';
+import type { Struct, UID } from '@strapi/types';
 import type { errors } from '@strapi/utils';
 import type { File } from 'formidable';
 
@@ -71,7 +71,8 @@ export declare namespace UpdateProjectSettings {
 /**
  * /project-type - the edition, license and flags the admin boots with.
  *
- * Served by the CE admin controller in every edition; the admin builds `window.strapi` from it.
+ * Served by the CE controller and overridden by the EE one; both must satisfy
+ * this shape, and the admin builds `window.strapi` from it.
  */
 export declare namespace GetProjectType {
   export interface Request {
@@ -82,11 +83,7 @@ export declare namespace GetProjectType {
     data: {
       isEE: boolean;
       isTrial: boolean;
-      /**
-       * The name of every license feature, without options: the route is public. Options are
-       * only served to authenticated admins, by /license-limit-information.
-       */
-      features: Array<Pick<LicenseFeatureEntry, 'name'>>;
+      features: { name: string }[];
       flags: {
         promoteEE?: boolean;
         nps?: boolean;
@@ -97,8 +94,6 @@ export declare namespace GetProjectType {
       type?: string;
       /** EE only — distinguishes the Growth plan from other Enterprise plans. */
       planPriceId?: string;
-      /** Plan label for display: `Community`, `Growth` or `Enterprise`. */
-      projectType?: Modules.EE.Edition;
     };
     error?: errors.ApplicationError;
   }
@@ -192,22 +187,40 @@ export declare namespace ProvidersOptions {
 }
 
 /**
- * License features, from the catalog in `@strapi/types` (`Public.LicenseFeatures`).
+ * /license-limit-information – get license limit information
  */
-export type LicenseFeature = Modules.EE.Feature;
 
-/** A feature as the license lists it, including names this version of Strapi does not know. */
-export type LicenseFeatureEntry = ReturnType<Modules.EE.EEService['features']['list']>[number];
+export interface SSOFeature {
+  name: 'sso';
+}
 
-export type SSOFeature = Modules.EE.Feature<'sso'>;
-export type AuditLogsFeature = Modules.EE.Feature<'audit-logs'>;
-export type ReviewWorkflowsFeature = Modules.EE.Feature<'review-workflows'>;
-export type ContentReleasesFeature = Modules.EE.Feature<'cms-content-releases'>;
-export type ContentHistoryFeature = Modules.EE.Feature<'cms-content-history'>;
+export interface AuditLogsFeature {
+  name: 'audit-logs';
+  options: {
+    retentionDays: number | null;
+  };
+}
+
+export interface ReviewWorkflowsFeature {
+  name: 'review-workflows';
+  options?: { numberOfWorkflows: number | null; stagesPerWorkflow: number | null };
+}
+
+export interface ContentReleasesFeature {
+  name: 'cms-content-releases';
+  options?: {
+    maximumReleases: number;
+  };
+}
+
+export interface ContentHistoryFeature {
+  name: 'cms-content-history';
+  options: {
+    retentionDays: number;
+  };
+}
 
 /**
- * /license-limit-information – get license limit information
- *
  * TODO: this response needs refactoring because we're mixing the admin seat limit info with
  * regular EE feature info.
  */
@@ -220,15 +233,19 @@ export declare namespace GetLicenseLimitInformation {
     data: {
       currentActiveUserCount: number;
       enforcementUserCount: number;
-      features: LicenseFeature[];
+      features: (
+        | SSOFeature
+        | AuditLogsFeature
+        | ReviewWorkflowsFeature
+        | ContentReleasesFeature
+        | ContentHistoryFeature
+      )[];
       isHostedOnStrapiCloud: boolean;
-      licenseLimitStatus: 'OVER_LIMIT' | 'AT_LIMIT' | null;
-      /** Undefined without a seat limit. */
-      permittedSeats?: number;
+      licenseLimitStatus: unknown;
+      permittedSeats: number;
       shouldNotify: boolean;
       shouldStopCreate: boolean;
-      /** EE only — the license type. */
-      type?: string;
+      type: string;
       isTrial: boolean;
     };
     error?: errors.ApplicationError;

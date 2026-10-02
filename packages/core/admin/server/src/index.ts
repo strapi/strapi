@@ -12,7 +12,8 @@ import contentTypes from './content-types';
 import middlewares from './middlewares';
 import getEEAdmin from '../../ee/server/src';
 
-const ceAdmin = {
+// eslint-disable-next-line import/no-mutable-exports
+let admin = {
   bootstrap,
   register,
   destroy,
@@ -29,8 +30,8 @@ const mergeRoutes = (a: any, b: any, key: string) => {
   return _.isArray(a) && _.isArray(b) && key === 'routes' ? a.concat(b) : undefined;
 };
 
-// The EE module loads in every edition; each of its elements checks its own license feature or
-// the seat limit
-const admin = _.mergeWith({}, ceAdmin, getEEAdmin(), mergeRoutes);
+if (strapi.EE) {
+  admin = _.mergeWith({}, admin, getEEAdmin(), mergeRoutes);
+}
 
 export default admin;

@@ -11,11 +11,15 @@ import { isSsoLocked } from '../utils/sso-lock';
 const { ApplicationError, ForbiddenError } = errors;
 
 const pickUserCreationAttributes = <T extends object>(user: T) =>
-  pick(user, ['firstname', 'lastname', 'email', 'roles', 'preferedLanguage']);
+  pick(user, ['firstname', 'lastname', 'email', 'roles']);
 
 const hasAdminSeatsAvaialble = async () => {
-  const permittedSeats = strapi.ee.features.get('seat-limit')?.options.seats;
-  if (permittedSeats === undefined) {
+  if (!strapi.EE) {
+    return true;
+  }
+
+  const permittedSeats = strapi.ee.seats as any;
+  if (permittedSeats == null) {
     return true;
   }
 
@@ -78,10 +82,6 @@ export default {
     }
 
     const user = await getService('user').findOne(id, null);
-
-    if (user === null) {
-      return ctx.notFound('User does not exist');
-    }
 
     if (!(await hasAdminSeatsAvaialble()) && !user.isActive && data.isActive) {
       throw new ForbiddenError('License seat limit reached. You cannot active this user');
