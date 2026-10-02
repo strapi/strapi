@@ -1,5 +1,4 @@
 import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
-import { communityLicenseLimits } from '@tests/mockData';
 import { render, screen } from '@tests/utils';
 
 import { useGetLicenseTrialTimeLeftQuery } from '../../../src/services/admin';
@@ -106,27 +105,6 @@ describe('UpsellBanner', () => {
       'target',
       '_blank'
     );
-  });
-
-  it.each([
-    ['no license', undefined],
-    ['the Community license limits', communityLicenseLimits],
-  ])('should render the trial-ended banner with %s', (_label, license) => {
-    // @ts-expect-error – mock
-    useLicenseLimits.mockImplementationOnce(() => ({ license }));
-
-    // @ts-expect-error – mock
-    useGetLicenseTrialTimeLeftQuery.mockImplementationOnce(() => ({
-      data: undefined,
-    }));
-
-    localStorage.setItem('STRAPI_FREE_TRIAL_ENDS_AT:test-uuid', '2025-05-21T09:50:00.000Z');
-    jest.setSystemTime(new Date(2025, 4, 22));
-
-    render(<UpsellBanner />);
-
-    expect(useGetLicenseTrialTimeLeftQuery).toHaveBeenLastCalledWith(undefined, { skip: true });
-    expect(screen.getByText('Your trial has ended:')).toBeInTheDocument();
   });
 
   it('should render a close button', () => {

@@ -17,12 +17,11 @@ function useLicenseLimits({ enabled }: UseLicenseLimitsArgs = { enabled: true })
   type GetFeatureType = <T>(name: FeatureNames) => Record<string, T> | undefined;
 
   const getFeature = React.useCallback<GetFeatureType>(
-    <T>(name: FeatureNames) => {
+    (name) => {
       const feature = data?.data?.features.find((feature) => feature.name === name);
 
       if (feature && 'options' in feature) {
-        // The caller picks the value type: license options are not validated.
-        return feature.options as Record<string, T>;
+        return feature.options;
       } else {
         return {};
       }
