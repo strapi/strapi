@@ -63,6 +63,15 @@ test.describe('Lock non-localized fields on secondary locales', () => {
       .locator('xpath=following::button[normalize-space(.)="variations"][1]')
       .click();
     const sharedDzName = page.locator('input[name="variationBlocks.0.name"]');
+    // Inherited dynamic-zone items have an id, so the accordion starts collapsed and
+    // the nested inputs are not mounted until it is opened.
+    const openSharedDynamicZone = async () => {
+      if ((await sharedDzName.count()) > 0) {
+        return;
+      }
+
+      await page.getByRole('button', { name: /^variations(?: - |$)/ }).click();
+    };
     await sharedDzName.fill('Shared DZ variation');
     await page.getByRole('button', { name: 'Save' }).click();
     await findAndClose(page, 'Saved');
@@ -85,6 +94,7 @@ test.describe('Lock non-localized fields on secondary locales', () => {
 
     await expect(page.getByText('variations (3)', { exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Add an entry' })).toBeDisabled();
+    await openSharedDynamicZone();
     await expect(sharedDzName).toHaveValue('Shared DZ variation');
     await expect(sharedDzName).toBeDisabled();
     await expect(
@@ -149,6 +159,7 @@ test.describe('Lock non-localized fields on secondary locales', () => {
     for (const name of variationNames) {
       await expect(page.getByRole('button', { name, exact: true })).toBeVisible();
     }
+    await openSharedDynamicZone();
     await expect(sharedDzName).toHaveValue('Shared DZ variation');
     await expect(sharedDzName).not.toBeDisabled();
 
