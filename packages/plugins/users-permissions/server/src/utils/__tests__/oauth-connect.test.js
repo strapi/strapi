@@ -103,6 +103,28 @@ describe('oauth-connect helpers', () => {
     expect(ctx.redirect).toHaveBeenCalledWith(expect.stringContaining('raw%5Baccess_token%5D=abc'));
   });
 
+  test('redirectWithPayload preserves existing callback URL query params', () => {
+    const ctx = { redirect: jest.fn() };
+    redirectWithPayload(ctx, 'http://localhost:3000/callback?tenant=acme', {
+      error: 'access_denied',
+    });
+
+    const url = ctx.redirect.mock.calls[0][0];
+    expect(url).toContain('tenant=acme');
+    expect(url).toContain('error=access_denied');
+  });
+
+  test('redirectWithPayload lets payload overwrite same-named callback params', () => {
+    const ctx = { redirect: jest.fn() };
+    redirectWithPayload(ctx, 'http://localhost:3000/callback?error=stale', {
+      error: 'oauth_error',
+    });
+
+    const url = ctx.redirect.mock.calls[0][0];
+    expect(url).toContain('error=oauth_error');
+    expect(url).not.toContain('error=stale');
+  });
+
   test('oauth2.buildAuthorizeUrl supports subdomain providers', () => {
     const url = oauth2.buildAuthorizeUrl(
       { ...oauthProviders.cognito, name: 'cognito' },
