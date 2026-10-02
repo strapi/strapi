@@ -181,6 +181,21 @@ describe('debug-dump scrub', () => {
     expect(scrub(config)).toEqual(config);
   });
 
+  it('masks URL credentials whose password itself contains a colon', () => {
+    expect(scrubObject({ url: 'postgres://user:pa:ss@db.internal/app' }).url).toBe('[REDACTED]');
+  });
+
+  it('scans a long colon run in a URL authority in linear time', () => {
+    // The user part used to accept colons, so a value like `a://::::…` with no `@` retried
+    // every split point between user and password: quadratic, ~70ms at 8k characters and
+    // seconds beyond that. The user part now stops at the first colon, as RFC 3986 does.
+    const value = `a://${':'.repeat(50_000)}`;
+
+    const start = performance.now();
+    expect(scrubObject({ value }).value).toBe(value);
+    expect(performance.now() - start).toBeLessThan(500);
+  });
+
   it('masks secret-bearing URLs, PEM keys, and more shapes found by the stress-test', () => {
     // credentials in a URL authority, including empty-user (Redis)
     expect(scrubObject({ redisUrl: 'redis://:passw0rd@cache.internal:6379/0' }).redisUrl).toBe(

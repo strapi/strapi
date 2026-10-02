@@ -28,8 +28,10 @@ const isSecretKey = (key: string): boolean =>
 const JWT_PATTERN = /^eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/;
 const LONG_TOKEN_PATTERN = /^[A-Fa-f0-9]{32,}$|^[A-Za-z0-9+/]{40,}={0,2}$/;
 // Credentials embedded in a URL authority: `user:pass@` or `:pass@` (empty user,
-// as in `redis://:password@host`).
-const URL_WITH_CREDENTIALS = /^[a-z][a-z0-9+.-]*:\/\/[^/@\s]*:[^/@\s]+@/i;
+// as in `redis://:password@host`). The user part stops at the first colon, as in
+// RFC 3986, so the split between user and password is fixed; letting it take colons
+// made a long colon run with no `@` retry every split point, which is quadratic.
+const URL_WITH_CREDENTIALS = /^[a-z][a-z0-9+.-]*:\/\/[^/@\s:]*:[^/@\s]+@/i;
 // PEM private key blocks (certificates are public, so only PRIVATE KEY is masked).
 const PEM_PRIVATE_KEY_PATTERN = /-----BEGIN(?: [A-Z0-9]+)* PRIVATE KEY-----/;
 // URLs whose secret is carried in the host/path rather than a `user:pass@` authority:
