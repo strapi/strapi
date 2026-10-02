@@ -83,7 +83,12 @@ describe('DiagnosticSnapshotModal', () => {
     setQueryState({ data: { dumpVersion: 1 }, isFetching: false });
     const createObjectURLSpy = jest.spyOn(URL, 'createObjectURL').mockReturnValue('blob:mock-url');
     URL.revokeObjectURL = jest.fn();
-    const clickSpy = jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    let downloadName = '';
+    const clickSpy = jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (
+      this: HTMLAnchorElement
+    ) {
+      downloadName = this.download;
+    });
 
     const { user } = render(<DiagnosticSnapshotModal isOpen onClose={jest.fn()} />);
 
@@ -92,6 +97,10 @@ describe('DiagnosticSnapshotModal', () => {
 
     expect(createObjectURLSpy).toHaveBeenCalled();
     expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock-url');
+    // Every `:` in the ISO timestamp is replaced, since Windows rejects it in file names.
+    expect(downloadName).toMatch(
+      /^strapi-debug-dump-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}\.\d{3}Z\.json$/
+    );
 
     clickSpy.mockRestore();
     createObjectURLSpy.mockRestore();

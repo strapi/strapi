@@ -72,7 +72,7 @@ const DiagnosticSnapshotModal = ({ isOpen, onClose }: DiagnosticSnapshotModalPro
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement('a');
     anchor.href = url;
-    anchor.download = `strapi-debug-dump-${new Date().toISOString().replace(/:/g, '-')}.json`;
+    anchor.download = `strapi-debug-dump-${new Date().toISOString().replaceAll(':', '-')}.json`;
     anchor.click();
     URL.revokeObjectURL(url);
   };
