@@ -225,6 +225,163 @@ describe('String validator', () => {
         });
       });
     });
+
+    describe('within a nested repeatable component', () => {
+      const options = { ...mockOptions, isDraft: false };
+
+      const fakeParentModel: Schema.ContentType = {
+        ...fakeModel,
+        uid: 'api::menu.menu',
+        attributes: {
+          menu_items: { type: 'component', repeatable: true, component: 'menu.menu-item-1' },
+        },
+      };
+
+      const validate = (pathToComponent: string[], repeatableData: any[], value: string) =>
+        strapiUtils.validateYupSchema(
+          Validators.string(
+            {
+              attr: { type: 'string', unique: true },
+              model: fakeModel,
+              updatedAttribute: { name: 'slug', value },
+              entity: null,
+              componentContext: {
+                parentContent: { model: fakeParentModel, options },
+                pathToComponent,
+                repeatableData,
+              },
+            },
+            options
+          )
+        )(value);
+
+      type Case = [string, string[], any[], string, 'accepts' | 'rejects'];
+
+      // `repeatableData` only holds the outermost repeatable, so a path reaching
+      // a nested component crosses arrays, optional branches and absent keys.
+      const cases: Case[] = [
+        [
+          'accepts a unique value in a flat repeatable',
+          ['menu_items'],
+          [{ slug: 'a' }, { slug: 'b' }],
+          'a',
+          'accepts',
+        ],
+        [
+          'rejects a value repeated in a flat repeatable',
+          ['menu_items'],
+          [{ slug: 'a' }, { slug: 'a' }],
+          'a',
+          'rejects',
+        ],
+
+        [
+          'accepts a unique value in a nested repeatable',
+          ['menu_items', 'children'],
+          [{ children: [{ slug: 'a' }] }, { children: [{ slug: 'b' }] }],
+          'a',
+          'accepts',
+        ],
+        [
+          'rejects a value repeated within one branch',
+          ['menu_items', 'children'],
+          [{ children: [{ slug: 'a' }, { slug: 'a' }] }],
+          'a',
+          'rejects',
+        ],
+        [
+          'rejects a value repeated across branches',
+          ['menu_items', 'children'],
+          [{ children: [{ slug: 'a' }] }, { children: [{ slug: 'a' }] }],
+          'a',
+          'rejects',
+        ],
+
+        [
+          'accepts a unique value in a single component',
+          ['menu_items', 'child'],
+          [{ child: { slug: 'a' } }, { child: { slug: 'b' } }],
+          'a',
+          'accepts',
+        ],
+        [
+          'rejects a value repeated in a single component',
+          ['menu_items', 'child'],
+          [{ child: { slug: 'a' } }, { child: { slug: 'a' } }],
+          'a',
+          'rejects',
+        ],
+
+        [
+          'accepts a unique value two repeatables deep',
+          ['menu_items', 'children', 'children'],
+          [
+            { children: [{ children: [{ slug: 'a' }] }] },
+            { children: [{ children: [{ slug: 'b' }] }] },
+          ],
+          'a',
+          'accepts',
+        ],
+        [
+          'rejects a value repeated two repeatables deep',
+          ['menu_items', 'children', 'children'],
+          [
+            { children: [{ children: [{ slug: 'a' }] }] },
+            { children: [{ children: [{ slug: 'a' }] }] },
+          ],
+          'a',
+          'rejects',
+        ],
+        [
+          'rejects a value repeated in a component inside a repeatable',
+          ['menu_items', 'children', 'child'],
+          [{ children: [{ child: { slug: 'a' } }, { child: { slug: 'a' } }] }],
+          'a',
+          'rejects',
+        ],
+
+        [
+          'ignores a branch without the nested component',
+          ['menu_items', 'children', 'children'],
+          [{ children: [{ children: [{ slug: 'a' }] }, { slug: 'no children here' }] }],
+          'a',
+          'accepts',
+        ],
+        [
+          'ignores a branch holding an empty repeatable',
+          ['menu_items', 'children', 'children'],
+          [{ children: [] }, { children: [{ children: [{ slug: 'a' }] }] }],
+          'a',
+          'accepts',
+        ],
+        [
+          'ignores a branch holding null',
+          ['menu_items', 'children', 'children'],
+          [{ children: null }, { children: [{ children: [{ slug: 'a' }] }] }],
+          'a',
+          'accepts',
+        ],
+        [
+          'ignores a branch without the unique attribute',
+          ['menu_items', 'children'],
+          [{ children: [{}] }, { children: [{ slug: 'a' }] }],
+          'a',
+          'accepts',
+        ],
+      ];
+
+      test.each(cases)('it %s', async (_name, pathToComponent, repeatableData, value, expected) => {
+        fakeFindOne.mockResolvedValue(null);
+
+        const result = validate(pathToComponent, repeatableData, value);
+
+        if (expected === 'rejects') {
+          await expect(result).rejects.toBeInstanceOf(errors.YupValidationError);
+        } else {
+          await expect(result).resolves.toBe(value);
+        }
+      });
+    });
   });
 
   describe('minLength', () => {
