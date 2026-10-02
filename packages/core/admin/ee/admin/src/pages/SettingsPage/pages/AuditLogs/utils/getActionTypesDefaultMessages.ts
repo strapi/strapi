@@ -51,6 +51,14 @@ export const actionTypes = {
   'admin-user.password-reset.create': 'Request password reset',
   'admin-user.password-reset.confirm': 'Reset password',
   'admin-user.password.update': 'Update password',
+  'webhook.create': 'Create webhook',
+  'webhook.update': 'Update webhook',
+  'webhook.delete': 'Delete webhook',
+  'workflow.create': 'Create workflow',
+  'workflow.update': 'Update workflow',
+  'workflow.delete': 'Delete workflow',
+  'review-workflows.updateEntryStage': 'Change entry stage',
+  'entry.assignee.update': 'Change entry assignee',
 };
 
 export const getDefaultMessage = (value: keyof typeof actionTypes) => {
