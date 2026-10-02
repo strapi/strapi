@@ -1,27 +1,37 @@
 import path from 'node:path';
+import fs from 'node:fs/promises';
 import chalk from 'chalk';
 
 import { TYPES_ROOT_DIR, GENERATED_OUT_DIR } from './constants';
-import { saveDefinitionToFileSystem, createLogger, timer } from './utils';
+import { saveDefinitionToFileSystem, createLogger, timer, pathExists } from './utils';
 import { generateContentTypesDefinitions } from './content-types';
 import { generateComponentsDefinitions } from './components';
 import { generatePluginDefinitions } from './plugins';
+import { generateServicesDefinitions } from './services';
+import { generateStrictDefinitions } from './strict';
 
 const GENERATORS = {
   contentTypes: generateContentTypesDefinitions,
   components: generateComponentsDefinitions,
   plugins: generatePluginDefinitions,
+  services: generateServicesDefinitions,
+  strict: generateStrictDefinitions,
 };
 
 export interface GenerateConfig {
   strapi: any;
   pwd: string;
   rootDir?: string;
+  /**
+   * Artifacts to generate. `true` generates the artifact, `false` removes the file a previous
+   * run may have generated for it, unset leaves it untouched.
+   */
   artifacts?: {
     contentTypes?: boolean;
     components?: boolean;
     plugins?: boolean;
     services?: boolean;
+    strict?: boolean;
     controllers?: boolean;
     policies?: boolean;
     middlewares?: boolean;
@@ -60,6 +70,9 @@ export const generate = async (config: GenerateConfig = {} as GenerateConfig) =>
 
   const enabledArtifacts = Object.keys(artifacts).filter(
     (p) => (artifacts as Record<string, boolean>)[p] === true
+  );
+  const disabledArtifacts = Object.keys(artifacts).filter(
+    (p) => (artifacts as Record<string, boolean>)[p] === false && p in GENERATORS
   );
 
   logger.info('Starting the type generation process');
@@ -111,6 +124,31 @@ export const generate = async (config: GenerateConfig = {} as GenerateConfig) =>
     } catch (e) {
       logger.error(
         `An error occurred while saving ${boldArtifact} types to the filesystem: ${
+          (e as any).message ?? (e as any).toString()
+        }. Exiting`
+      );
+      return returnWithMessage();
+    }
+  }
+
+  // Disabled artifacts are removed so that a stale generated file does not keep applying
+  for (const artifact of disabledArtifacts) {
+    const boldArtifact = chalk.bold(artifact); // used for log messages
+    const outPath = path.join(registryPwd, `${artifact}.d.ts`);
+
+    if ((await pathExists(outPath)) === false) {
+      continue;
+    }
+
+    try {
+      await fs.rm(outPath);
+
+      logger.info(
+        `Removed ${boldArtifact} types from ${chalk.bold(path.relative(process.cwd(), outPath))} (artifact disabled)`
+      );
+    } catch (e) {
+      logger.error(
+        `An error occurred while removing ${boldArtifact} types from the filesystem: ${
           (e as any).message ?? (e as any).toString()
         }. Exiting`
       );
