@@ -9,6 +9,48 @@ import createSchemaHandler from './schema-handler';
 
 const { ApplicationError } = errors;
 
+const createCollectionName = (category: string, displayName: string) =>
+  `components_${strings.nameToCollectionName(category)}_${strings.nameToCollectionName(
+    pluralize(displayName)
+  )}`;
+
+const createAvailableIdentity = (infos: any, components: Map<string, any>) => {
+  const category = strings.nameToSlug(infos.category);
+  const name = strings.nameToSlug(infos.displayName);
+
+  const duplicateDisplayName = Array.from(components.values()).some((component) => {
+    const [componentCategory] = component.uid.split('.');
+
+    return (
+      componentCategory === category &&
+      strings.nameToSlug(component.schema.info.displayName) === name
+    );
+  });
+
+  if (duplicateDisplayName) {
+    throw new ApplicationError('component.alreadyExists');
+  }
+
+  const baseCollectionName = createCollectionName(infos.category, infos.displayName);
+  const usedCollectionNames = new Set(
+    Array.from(components.values(), (component) => component.schema.collectionName)
+  );
+
+  for (let suffix = 0; ; suffix += 1) {
+    const identityName = suffix === 0 ? name : `${name}-${suffix}`;
+    const uid = `${category}.${identityName}` as Internal.UID.Component;
+    const collectionName = suffix === 0 ? baseCollectionName : `${baseCollectionName}_${suffix}`;
+
+    if (!components.has(uid) && !usedCollectionNames.has(collectionName)) {
+      return {
+        uid,
+        collectionName,
+        filename: `${identityName}.json`,
+      };
+    }
+  }
+};
+
 export default function createComponentBuilder() {
   return {
     createComponentUID({ category, displayName }: any) {
@@ -38,27 +80,11 @@ export default function createComponentBuilder() {
         throw new ApplicationError('component.invalidUID');
       }
 
-      const uid = infos.uid ?? this.createComponentUID(infos);
-
-      if (this.components.has(uid)) {
-        throw new ApplicationError('component.alreadyExists');
-      }
+      const { uid, collectionName, filename } = createAvailableIdentity(infos, this.components);
 
       const handler = createSchemaHandler({
         dir: path.join(strapi.dirs.app.components, strings.nameToSlug(infos.category)),
-        filename: `${strings.nameToSlug(infos.displayName)}.json`,
-      });
-
-      // TODO: create a utility for this
-      // Duplicate in admin/src/components/FormModal/forms/utils/createCollectionName.ts
-      const collectionName = `components_${strings.nameToCollectionName(
-        infos.category
-      )}_${strings.nameToCollectionName(pluralize(infos.displayName))}`;
-
-      this.components.forEach((compo: any) => {
-        if (compo.schema.collectionName === collectionName) {
-          throw new ApplicationError('component.alreadyExists');
-        }
+        filename,
       });
 
       handler
