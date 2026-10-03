@@ -46,10 +46,10 @@ export class PluginRoutesProvider extends AbstractRoutesProvider {
                   .replace(/\/+/g, '/')
                   .replace(/\/$/, '') || '/';
 
-              return {
+              return this.withContentApiPrefix({
                 ...route,
                 path: fullPath,
-              };
+              });
             });
           });
     });
