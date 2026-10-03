@@ -2,8 +2,11 @@ import { escapeCsvValue, serializeCsvLine } from '../csv';
 
 describe('csv', () => {
   describe('escapeCsvValue', () => {
-    it('returns an empty string for null and undefined', () => {
+    it('returns an empty string for null', () => {
       expect(escapeCsvValue(null)).toBe('');
+    });
+
+    it('returns an empty string for undefined', () => {
       expect(escapeCsvValue(undefined)).toBe('');
     });
 
@@ -33,6 +36,33 @@ describe('csv', () => {
       expect(escapeCsvValue('{"model":"article","id":1}')).toBe(
         '"{""model"":""article"",""id"":1}"'
       );
+    });
+
+    it('serializes objects and arrays as JSON instead of [object Object]', () => {
+      expect(escapeCsvValue({ model: 'article' })).toBe('"{""model"":""article""}"');
+      expect(escapeCsvValue({ id: 1 })).toBe('"{""id"":1}"');
+      expect(escapeCsvValue([1, 2])).toBe('"[1,2]"');
+      expect(escapeCsvValue({})).toBe('{}');
+    });
+
+    it('serializes dates as ISO strings', () => {
+      expect(escapeCsvValue(new Date('2026-09-16T10:20:30.000Z'))).toBe('2026-09-16T10:20:30.000Z');
+      expect(escapeCsvValue(new Date('not-a-date'))).toBe('');
+    });
+
+    it('returns an empty string for values JSON cannot represent', () => {
+      const circular: Record<string, unknown> = {};
+      circular.self = circular;
+
+      expect(escapeCsvValue(circular)).toBe('');
+      expect(escapeCsvValue(() => {})).toBe('');
+      expect(escapeCsvValue(Symbol('secret'))).toBe('');
+    });
+
+    it('keeps booleans and bigints readable', () => {
+      expect(escapeCsvValue(true)).toBe('true');
+      expect(escapeCsvValue(false)).toBe('false');
+      expect(escapeCsvValue(10n)).toBe('10');
     });
   });
 
