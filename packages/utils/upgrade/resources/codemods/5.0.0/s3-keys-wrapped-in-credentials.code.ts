@@ -2,46 +2,58 @@ import core, {
   Transform,
   ASTPath,
   Property,
+  ObjectProperty,
   ArrowFunctionExpression,
   ObjectExpression,
 } from 'jscodeshift';
 import path from 'node:path';
 
+type AnyObjectProperty = ObjectProperty | Property;
+
+/**
+ * This codemod parses with `tsx`, which produces a Babel AST: object members are
+ * `ObjectProperty` and strings are `StringLiteral`. The ESTree-only `j.Property` and
+ * `j.Literal` checks never match those nodes, so both shapes are accepted here.
+ */
+const isObjectProperty = (j: core.JSCodeshift, node: unknown): node is AnyObjectProperty =>
+  j.Property.check(node) || j.ObjectProperty.check(node);
+
+const hasKeyName = (j: core.JSCodeshift, node: unknown, name: string): node is AnyObjectProperty =>
+  isObjectProperty(j, node) && j.Identifier.check(node.key) && node.key.name === name;
+
+const isStringWithValue = (j: core.JSCodeshift, node: unknown, value: string): boolean =>
+  (j.Literal.check(node) || j.StringLiteral.check(node)) && node.value === value;
+
 const findUploadPropertyInBody = (j: core.JSCodeshift, body: ObjectExpression) => {
-  return body.properties.find(
-    (prop: any) =>
-      j.Property.check(prop) && j.Identifier.check(prop.key) && prop.key.name === 'upload'
-  );
+  return body.properties.find((prop) => hasKeyName(j, prop, 'upload'));
 };
 
 const findConfigInUpload = (j: core.JSCodeshift, upload: ObjectExpression) => {
-  return upload.properties.find(
-    (prop) => j.Property.check(prop) && j.Identifier.check(prop.key) && prop.key.name === 'config'
-  );
+  return upload.properties.find((prop) => hasKeyName(j, prop, 'config'));
 };
 
 const getProviderProperty = (j: core.JSCodeshift, config: ObjectExpression) => {
   return config.properties.find(
-    (prop) =>
-      j.Property.check(prop) &&
-      j.Identifier.check(prop.key) &&
-      prop.key.name === 'provider' &&
-      j.Literal.check(prop.value) &&
-      prop.value.value === 'aws-s3'
+    (prop) => hasKeyName(j, prop, 'provider') && isStringWithValue(j, prop.value, 'aws-s3')
   );
 };
 
 const getProviderOptions = (j: core.JSCodeshift, config: ObjectExpression) => {
-  return config.properties.find(
-    (prop) =>
-      j.Property.check(prop) && j.Identifier.check(prop.key) && prop.key.name === 'providerOptions'
-  );
+  return config.properties.find((prop) => hasKeyName(j, prop, 'providerOptions'));
 };
 
 const getPropertyByKeyName = (j: core.JSCodeshift, object: ObjectExpression, keyName: string) => {
-  return object.properties.find(
-    (prop) => j.Property.check(prop) && j.Identifier.check(prop.key) && prop.key.name === keyName
-  ) as Property;
+  return object.properties.find((prop) => hasKeyName(j, prop, keyName)) as AnyObjectProperty;
+};
+
+const removePropertiesByKeyName = (
+  j: core.JSCodeshift,
+  object: ObjectExpression,
+  keyNames: string[]
+) => {
+  object.properties = object.properties.filter(
+    (prop) => !keyNames.some((keyName) => hasKeyName(j, prop, keyName))
+  );
 };
 
 /**
@@ -74,13 +86,13 @@ const transform: Transform = (file, api) => {
       const uploadProperty = findUploadPropertyInBody(j, body);
 
       // Check that we found an upload property and that it is an object
-      if (!j.Property.check(uploadProperty) || !j.ObjectExpression.check(uploadProperty.value)) {
+      if (!isObjectProperty(j, uploadProperty) || !j.ObjectExpression.check(uploadProperty.value)) {
         return file.source;
       }
 
       const configProperty = findConfigInUpload(j, uploadProperty.value);
 
-      if (!j.Property.check(configProperty) || !j.ObjectExpression.check(configProperty.value)) {
+      if (!isObjectProperty(j, configProperty) || !j.ObjectExpression.check(configProperty.value)) {
         return file.source;
       }
 
@@ -93,12 +105,15 @@ const transform: Transform = (file, api) => {
 
       const providerOptions = getProviderOptions(j, configProperty.value);
 
-      if (!j.Property.check(providerOptions) || !j.ObjectExpression.check(providerOptions.value)) {
+      if (
+        !isObjectProperty(j, providerOptions) ||
+        !j.ObjectExpression.check(providerOptions.value)
+      ) {
         return file.source;
       }
 
-      let accessKeyId: Property | undefined;
-      let secretAccessKey: Property | undefined;
+      let accessKeyId: AnyObjectProperty | undefined;
+      let secretAccessKey: AnyObjectProperty | undefined;
 
       // Check for accessKeyId and secretAccessKey directly under providerOptions
       const directAccessKeyId = getPropertyByKeyName(j, providerOptions.value, 'accessKeyId');
@@ -113,7 +128,7 @@ const transform: Transform = (file, api) => {
 
       if (!s3Options) {
         // Create s3Options if it doesn't exist
-        s3Options = j.property('init', j.identifier('s3Options'), j.objectExpression([]));
+        s3Options = j.objectProperty(j.identifier('s3Options'), j.objectExpression([]));
         providerOptions.value.properties.push(s3Options);
       }
 
@@ -122,14 +137,8 @@ const transform: Transform = (file, api) => {
         secretAccessKey = directSecretAccessKey;
 
         // Remove these properties from providerOptions
-        providerOptions.value.properties = providerOptions.value.properties.filter(
-          (prop) =>
-            j.Property.check(prop) &&
-            j.Identifier.check(prop.key) &&
-            prop.key.name !== 'accessKeyId' &&
-            prop.key.name !== 'secretAccessKey'
-        );
-      } else if (j.Property.check(s3Options) && j.ObjectExpression.check(s3Options.value)) {
+        removePropertiesByKeyName(j, providerOptions.value, ['accessKeyId', 'secretAccessKey']);
+      } else if (isObjectProperty(j, s3Options) && j.ObjectExpression.check(s3Options.value)) {
         // Look inside s3Options
         accessKeyId = getPropertyByKeyName(j, s3Options.value, 'accessKeyId');
         secretAccessKey = getPropertyByKeyName(j, s3Options.value, 'secretAccessKey');
@@ -138,28 +147,20 @@ const transform: Transform = (file, api) => {
       if (
         accessKeyId &&
         secretAccessKey &&
-        j.Property.check(s3Options) &&
+        isObjectProperty(j, s3Options) &&
         j.ObjectExpression.check(s3Options.value)
       ) {
         // Create the credentials object
         const credentials = j.objectExpression([
-          j.property('init', j.identifier('accessKeyId'), accessKeyId.value),
-          j.property('init', j.identifier('secretAccessKey'), secretAccessKey.value),
+          j.objectProperty(j.identifier('accessKeyId'), accessKeyId.value),
+          j.objectProperty(j.identifier('secretAccessKey'), secretAccessKey.value),
         ]);
 
         // Remove the old properties from s3Options
-        s3Options.value.properties = s3Options.value.properties.filter(
-          (prop) =>
-            j.Property.check(prop) &&
-            j.Identifier.check(prop.key) &&
-            prop.key.name !== 'accessKeyId' &&
-            prop.key.name !== 'secretAccessKey'
-        );
+        removePropertiesByKeyName(j, s3Options.value, ['accessKeyId', 'secretAccessKey']);
 
         // Add the new credentials object to s3Options
-        s3Options.value.properties.push(
-          j.property('init', j.identifier('credentials'), credentials)
-        );
+        s3Options.value.properties.push(j.objectProperty(j.identifier('credentials'), credentials));
       }
     });
 
