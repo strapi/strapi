@@ -1,4 +1,8 @@
-module.exports = {
+'use strict';
+
+const { factories } = require('@strapi/strapi');
+
+module.exports = factories.defineApiConfig({
   rest: {
     defaultLimit: 25,
     maxLimit: 100,
@@ -9,4 +13,4 @@ module.exports = {
     strictParams: true,
     strictRelations: true,
   },
-};
+});

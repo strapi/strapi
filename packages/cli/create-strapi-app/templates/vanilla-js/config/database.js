@@ -1,9 +1,10 @@
-/** @import { Core } from '@strapi/strapi' */
+'use strict';
 
 const path = require('path');
+const { factories } = require('@strapi/strapi');
 const { isDatabaseClientKind } = require('@strapi/database');
 
-module.exports = ({ env }) => {
+module.exports = factories.defineDatabaseConfig(({ env }) => {
   const client = env('DATABASE_CLIENT', 'sqlite');
 
   if (!isDatabaseClientKind(client)) {
@@ -12,7 +13,6 @@ module.exports = ({ env }) => {
     );
   }
 
-  /** @type {Record<Core.Config.Database.ClientKind, Core.Config.Database['connection']>} */
   const connections = {
     mysql: {
       client: 'mysql',
@@ -69,4 +69,4 @@ module.exports = ({ env }) => {
       acquireConnectionTimeout: env.int('DATABASE_CONNECTION_TIMEOUT', 60000),
     },
   };
-};
+});
