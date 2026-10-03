@@ -5,6 +5,7 @@ import { packageManager } from '@strapi/utils';
 
 import { ProxyAgent } from 'undici';
 import * as constants from './constants';
+import { getRegistryAuthHeader } from './registry-token';
 import { isLiteralSemVer } from '../version';
 
 import type { Package as PackageInterface, NPMPackage, NPMPackageVersion } from './types';
@@ -138,9 +139,19 @@ export class Package implements PackageInterface {
   }
 
   async refresh() {
-    const packageURL = `${await this.determineRegistryUrl()}/${this.name}`;
+    const registryUrl = await this.determineRegistryUrl();
+    const packageURL = `${registryUrl}/${this.name}`;
+
+    // Reuse the credentials the user already configured for their registry
+    // (e.g. private registries that require authentication for reads).
+    const authHeader = getRegistryAuthHeader(registryUrl, this.cwd);
+    if (authHeader) {
+      this.logger.debug(`Using configured registry credentials for ${registryUrl}`);
+    }
 
     const response = await fetch(packageURL, {
+      ...(authHeader ? { headers: { authorization: authHeader } } : {}),
+      // @ts-expect-error Node.js fetch supports dispatcher (undici extension)
       dispatcher: agent,
     });
 
