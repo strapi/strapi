@@ -277,7 +277,6 @@ describe('import', () => {
   });
 
   test.todo('import from .tar.gz (compressed) and verify DB state');
-  test.todo('import from .tar.gz.enc (encrypted) with correct key and verify DB state');
   test.todo('import with wrong decryption key fails with clear error');
   test.todo('import with --only filter and verify only those types in DB');
   it('should preserve media library DB records when importing export with --exclude files', async () => {
