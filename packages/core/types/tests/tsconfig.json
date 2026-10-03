@@ -1,0 +1,10 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    // The repository default is `false`. These fixtures exist specifically to guarantee the
+    // published input types stay usable for consumers who turn the flag on.
+    "exactOptionalPropertyTypes": true
+  },
+  "include": ["."],
+  "exclude": ["node_modules"]
+}
