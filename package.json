@@ -45,7 +45,7 @@
     "format:other": "yarn prettier:other --write",
     "lint": "nx run-many --target=lint --nx-ignore-cycles && yarn lint:other",
     "lint:fix": "nx run-many --target=lint --nx-ignore-cycles -- --fix",
-    "lint:other": "npm run prettier:other -- --check",
+    "lint:other": "yarn prettier:other --check",
     "lint:oxlint": "oxlint --config packages/utils/oxlint-config/oxlint.config.ts",
     "version:check": "node scripts/check-package-versions.mjs && syncpack lint",
     "version:fix": "node scripts/check-package-versions.mjs --fix --prompt && syncpack prompt && syncpack fix-mismatches",
@@ -124,6 +124,11 @@
     "@types/node": "20.19.41",
     "@types/react": "18.3.2",
     "@strapi/design-system": "2.3.0-alpha.0"
+  },
+  "dependenciesMeta": {
+    "better-sqlite3": {
+      "built": true
+    }
   },
   "devDependencies": {
     "@babel/core": "7.29.7",
@@ -211,7 +216,7 @@
     "yalc": "1.0.0-pre.53",
     "yargs": "17.7.2"
   },
-  "packageManager": "yarn@4.12.0",
+  "packageManager": "yarn@4.18.1",
   "engines": {
     "node": ">=20.0.0 <=26.x.x",
     "npm": ">=6.0.0"
