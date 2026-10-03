@@ -16,6 +16,7 @@ type Event = Modules.WebhookRunner.Event;
 
 interface Config {
   defaultHeaders: Record<string, string>;
+  deduplicateReleaseWebhooks: boolean;
 }
 
 interface ConstructorParameters {
@@ -32,6 +33,7 @@ const debug = createdDebugger('strapi:webhook');
 
 const defaultConfiguration: Config = {
   defaultHeaders: {},
+  deduplicateReleaseWebhooks: false,
 };
 
 class WebhookRunner {
@@ -70,7 +72,7 @@ class WebhookRunner {
       );
     }
 
-    this.config = _.merge(defaultConfiguration, configuration);
+    this.config = _.merge({}, defaultConfiguration, configuration);
 
     this.queue = new WorkerQueue({ logger, concurrency: 5 });
 
@@ -97,6 +99,11 @@ class WebhookRunner {
     }
 
     const listen = async (info: Event['info']) => {
+      if (this.config.deduplicateReleaseWebhooks !== true) {
+        this.queue.enqueue({ event, info });
+        return;
+      }
+
       const context = this.requestContext.get();
       const releaseAction: Modules.WebhookRunner.ReleaseAction | undefined =
         context?.state?.releaseAction;
@@ -122,6 +129,7 @@ class WebhookRunner {
       (webhook) =>
         webhook.isEnabled === true &&
         !(
+          this.config.deduplicateReleaseWebhooks === true &&
           releaseId !== undefined &&
           ['entry.publish', 'entry.unpublish'].includes(event) &&
           webhook.events.includes('releases.publish')

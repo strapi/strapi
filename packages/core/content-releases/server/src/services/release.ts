@@ -340,12 +340,20 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
             { strapi }
           );
 
-          const context = strapi.requestContext.get();
+          const deduplicateReleaseWebhooks =
+            strapi.config.get<boolean>('server.webhooks.deduplicateReleaseWebhooks', false) ===
+            true;
           const runReleaseAction = (
             releaseAction: Modules.WebhookRunner.ReleaseAction,
             work: () => Promise<void>
-          ) =>
-            strapi.requestContext.run(
+          ) => {
+            if (!deduplicateReleaseWebhooks) {
+              return work();
+            }
+
+            const context = strapi.requestContext.get();
+
+            return strapi.requestContext.run(
               {
                 ...context,
                 request: context?.request ?? { url: '' },
@@ -353,6 +361,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
               } as ParameterizedContext,
               work
             );
+          };
 
           await strapi.db.transaction(async () => {
             for (const contentTypeUid of contentTypeUids) {

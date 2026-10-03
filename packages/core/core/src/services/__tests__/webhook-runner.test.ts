@@ -35,8 +35,79 @@ describe('Webhook runner', () => {
       requestContext,
       logger: createLogger({ silent: true }),
       fetch: mockFetch,
+      configuration: { deduplicateReleaseWebhooks: true },
     });
   });
+
+  it.each([
+    { configuration: {}, event: 'entry.publish' },
+    { configuration: {}, event: 'entry.unpublish' },
+    { configuration: { deduplicateReleaseWebhooks: false }, event: 'entry.publish' },
+    { configuration: { deduplicateReleaseWebhooks: false }, event: 'entry.unpublish' },
+  ])(
+    'preserves release $event payloads with configuration=$configuration',
+    async ({ configuration, event }) => {
+      const getContext = jest.fn();
+
+      runner = createWebhookRunner({
+        eventHub,
+        requestContext: { get: getContext, run: requestContext.run },
+        logger: createLogger({ silent: true }),
+        fetch: mockFetch,
+        configuration,
+      });
+
+      runner.add(createWebhook([event, 'releases.publish']));
+
+      await eventHub.emit(event, { entry: { id: 1 } });
+
+      await new Promise<void>((resolve) => {
+        setImmediate(resolve);
+      });
+
+      expect(getContext).not.toHaveBeenCalled();
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      expect(JSON.parse(String(mockFetch.mock.calls[0][1]?.body))).toEqual({
+        event,
+        createdAt: expect.any(String),
+        entry: { id: 1 },
+      });
+    }
+  );
+
+  it.each([
+    { configuration: {}, requests: 11 },
+    { configuration: { deduplicateReleaseWebhooks: false }, requests: 11 },
+    { configuration: { deduplicateReleaseWebhooks: true }, requests: 1 },
+  ])(
+    'sends $requests requests for ten released entries with configuration=$configuration',
+    async ({ configuration, requests }) => {
+      runner = createWebhookRunner({
+        eventHub,
+        requestContext,
+        logger: createLogger({ silent: true }),
+        fetch: mockFetch,
+        configuration,
+      });
+
+      runner.add(createWebhook(['entry.publish', 'releases.publish']));
+
+      for (const id of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) {
+        await runner.executeListener({
+          event: 'entry.publish',
+          info: { entry: { id } },
+          releaseId: 1,
+        });
+      }
+
+      await runner.executeListener({
+        event: 'releases.publish',
+        info: { isPublished: true, release: { id: 1 } },
+      });
+
+      expect(mockFetch).toHaveBeenCalledTimes(requests);
+    }
+  );
 
   it.each(['entry.create', 'entry.update', 'entry.delete', 'entry.publish', 'entry.unpublish'])(
     'delivers standalone %s to a webhook subscribed to releases',

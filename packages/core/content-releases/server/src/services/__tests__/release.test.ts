@@ -13,6 +13,7 @@ const mockUnpublish = jest.fn();
 const mockRequestStorage = new AsyncLocalStorage<ParameterizedContext>();
 
 const baseStrapiMock = {
+  config: { get: jest.fn().mockReturnValue(true) },
   requestContext: {
     get: () => mockRequestStorage.getStore(),
     run: (context: ParameterizedContext, work: () => Promise<void>) =>
@@ -625,14 +626,25 @@ describe('Release service', () => {
     });
 
     it.each([
-      { name: 'manual', state: { user: { id: 1 }, route: { info: { type: 'admin' } } } },
-      { name: 'scheduled', state: { auditSource: 'scheduler' } },
-      { name: 'programmatic', state: undefined },
-    ])('marks $name release actions and preserves the parent context', async ({ state }) => {
+      {
+        name: 'manual',
+        state: { user: { id: 1 }, route: { info: { type: 'admin' } } },
+        enabled: true,
+      },
+      { name: 'scheduled', state: { auditSource: 'scheduler' }, enabled: true },
+      { name: 'programmatic', state: undefined, enabled: true },
+      { name: 'disabled', state: { user: { id: 1 } }, enabled: false },
+      { name: 'unconfigured', state: undefined, enabled: undefined },
+    ])('preserves the $name release context', async ({ state, enabled }) => {
       mockExecute.mockReturnValueOnce({ id: 1, name: 'Release', releasedAt: null });
 
       const strapiMock = {
         ...baseStrapiMock,
+        config: { get: jest.fn().mockReturnValue(enabled) },
+        requestContext: {
+          get: jest.fn(baseStrapiMock.requestContext.get),
+          run: jest.fn(baseStrapiMock.requestContext.run),
+        },
         db: {
           ...baseStrapiMock.db,
           query: jest.fn().mockReturnValue({
@@ -667,30 +679,36 @@ describe('Release service', () => {
       const releaseService = createReleaseService({ strapi: strapiMock });
 
       mockPublish.mockImplementationOnce(async () => {
-        expect(mockRequestStorage.getStore()?.state).toEqual({
-          ...state,
-          releaseId: 1,
-          releaseAction: {
-            uid: 'collectionType',
-            documentId: 'one',
-            locale: undefined,
-            event: 'entry.publish',
-          },
-        });
-        expect(mockRequestStorage.getStore()?.request).toBeDefined();
+        expect(mockRequestStorage.getStore()?.state).toEqual(
+          enabled
+            ? {
+                ...state,
+                releaseId: 1,
+                releaseAction: {
+                  uid: 'collectionType',
+                  documentId: 'one',
+                  locale: undefined,
+                  event: 'entry.publish',
+                },
+              }
+            : state
+        );
       });
       mockUnpublish.mockImplementationOnce(async () => {
-        expect(mockRequestStorage.getStore()?.state).toEqual({
-          ...state,
-          releaseId: 1,
-          releaseAction: {
-            uid: 'collectionType',
-            documentId: 'two',
-            locale: undefined,
-            event: 'entry.unpublish',
-          },
-        });
-        expect(mockRequestStorage.getStore()?.request).toBeDefined();
+        expect(mockRequestStorage.getStore()?.state).toEqual(
+          enabled
+            ? {
+                ...state,
+                releaseId: 1,
+                releaseAction: {
+                  uid: 'collectionType',
+                  documentId: 'two',
+                  locale: undefined,
+                  event: 'entry.unpublish',
+                },
+              }
+            : state
+        );
       });
 
       const publishRelease = async () => {
@@ -709,6 +727,7 @@ describe('Release service', () => {
 
       expect(mockPublish).toHaveBeenCalledTimes(1);
       expect(mockUnpublish).toHaveBeenCalledTimes(1);
+      expect(strapiMock.requestContext.run).toHaveBeenCalledTimes(enabled ? 2 : 0);
       expect(strapiMock.eventHub.emit).toHaveBeenCalledWith(
         'releases.publish',
         expect.objectContaining({ isPublished: true })

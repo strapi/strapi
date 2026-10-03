@@ -18,10 +18,13 @@ describe('Document events', () => {
     jest.restoreAllMocks();
   });
 
-  const createEventManagerMock = () => {
+  const createEventManagerMock = (
+    configuration: { deduplicateReleaseWebhooks?: boolean } = { deduplicateReleaseWebhooks: true }
+  ) => {
     const commitCallbacks: (() => Promise<void>)[] = [];
     const eventHub = createEventHub();
     const strapi = {
+      config: { get: jest.fn(() => configuration.deduplicateReleaseWebhooks) },
       requestContext,
       eventHub,
       getModel: jest.fn(() => ({ uid, modelName: 'article' })),
@@ -38,6 +41,27 @@ describe('Document events', () => {
 
     return { eventHub, commitCallbacks, eventManager: createEventManager(strapi, uid) };
   };
+
+  it.each([{}, { deduplicateReleaseWebhooks: false }])(
+    'skips context tracking with configuration=%j',
+    async (configuration) => {
+      const { eventHub, commitCallbacks, eventManager } = createEventManagerMock(configuration);
+      const getContext = jest.spyOn(requestContext, 'get');
+      const runContext = jest.spyOn(requestContext, 'run');
+      const listener = jest.fn();
+
+      eventHub.on('entry.publish', listener);
+      eventManager.emitEvent('entry.publish', entry);
+
+      expect(listener).not.toHaveBeenCalled();
+
+      await commitCallbacks[0]();
+
+      expect(listener).toHaveBeenCalledWith({ model: 'article', uid, entry });
+      expect(getContext).not.toHaveBeenCalled();
+      expect(runContext).not.toHaveBeenCalled();
+    }
+  );
 
   it.each(['entry.publish', 'entry.unpublish'])(
     'preserves release context for %s after its operation scope ends',
