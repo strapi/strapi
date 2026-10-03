@@ -8,7 +8,7 @@ import { createSchema } from './model-schema';
 import { removeEmptyDefaults } from './data-transform';
 
 export const VALID_RELATIONS = ['oneToOne', 'oneToMany'];
-export const VALID_TYPES = [...DEFAULT_TYPES, 'component', 'customField'];
+export const VALID_TYPES = [...DEFAULT_TYPES, 'component', 'dynamiczone', 'customField'];
 
 export const componentSchema = createSchema(VALID_TYPES, VALID_RELATIONS, {
   modelType: modelTypes.COMPONENT,
