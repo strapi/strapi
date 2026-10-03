@@ -37,10 +37,9 @@ describeOnCondition(process.env.E2E_MEDIA_LIBRARY === 'current')(
 
         // Reload page
         await page.reload();
-        await page.waitForLoadState('networkidle');
 
         // Should still be in table view
-        expect(await assetsPage.isGridViewActive()).toBe(false);
+        await expect(assetsPage.gridViewButton).toHaveAttribute('aria-checked', 'false');
       });
 
       test('should keep the selection when switching views', async ({ page }) => {

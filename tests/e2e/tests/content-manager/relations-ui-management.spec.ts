@@ -149,7 +149,6 @@ test.describe('Relations UI - manage relations to existing entries', { tag: ['@e
     await findAndClose(page, 'Published Document');
 
     await page.reload();
-    await page.waitForLoadState('networkidle');
     await expect(page.getByRole('tab', { name: 'Draft' })).toHaveAttribute('aria-selected', 'true');
     await openProductCarousel(page);
     await expectRelationOrder(page, INITIAL_PRODUCT_ORDER);

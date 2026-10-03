@@ -21,8 +21,9 @@ const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
  * the document heading) did not catch this because the edit view displays the
  * same texts, so the tests only failed later on a preview-only element.
  *
- * Retry the click until the preview route is actually reached, then let the
- * page settle.
+ * Retry the click until the preview route is actually reached. Callers assert on the
+ * resulting UI (draft status, heading, iframe src, …) with web-first `expect()`, which
+ * already waits for the preview panel to finish rendering — no extra settle wait needed.
  */
 const openPreview = async (page: Page) => {
   await expect(async () => {
@@ -31,7 +32,6 @@ const openPreview = async (page: Page) => {
     }
     await page.waitForURL(/\/preview($|\?)/, { timeout: 5_000 });
   }).toPass({ timeout: 30_000 });
-  await page.waitForLoadState('networkidle');
 };
 
 test.describe('Preview', () => {

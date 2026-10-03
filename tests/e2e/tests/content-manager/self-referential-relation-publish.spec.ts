@@ -67,7 +67,6 @@ test.describe('Self-referential relation - publish reflects in the admin without
     // server-side. If the chip is missing before this reload but present after, the defect is
     // front-end only; if it is missing in both, the relation was lost on the server.
     await page.reload();
-    await page.waitForLoadState('networkidle');
     await expect(relationChip).toBeVisible();
   });
 });

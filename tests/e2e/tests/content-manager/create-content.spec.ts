@@ -67,10 +67,11 @@ test.describe('Adding content', () => {
 
     await createContent(page, 'Match', fields, { save: false, publish: false, verify: false });
 
-    await page.waitForLoadState('networkidle');
-
     const source = page.locator('li:has-text("variations")');
     const target = page.locator('li:has-text("player")');
+    // Wait for both dynamic-zone entries to render before computing drag bounding boxes.
+    await expect(source).toBeVisible();
+    await expect(target).toBeVisible();
     await dragElementAbove(page, {
       source,
       target,
