@@ -1,9 +1,10 @@
+import { describe, expect, test, vi } from 'vitest';
 import reviewWorkflowsMiddlewares from '../review-workflows';
 
 const strapiMock = {
   server: {
     router: {
-      use: jest.fn(),
+      use: vi.fn(),
     },
   },
 } as any;

@@ -1,36 +1,44 @@
-import { emitAudit } from '@strapi/utils';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import workflowsFactory from '../workflows';
 
-jest.mock('@strapi/utils', () => ({
-  ...jest.requireActual('@strapi/utils'),
-  emitAudit: jest.fn(),
-}));
+const { validateWorkflowCount, migrate, deleteMany, sendDidEditWorkflow, createMany, emitAudit } =
+  vi.hoisted(() => ({
+    validateWorkflowCount: vi.fn(),
+    migrate: vi.fn(),
+    deleteMany: vi.fn(),
+    sendDidEditWorkflow: vi.fn(),
+    createMany: vi.fn(),
+    emitAudit: vi.fn(),
+  }));
 
-const validateActionsByContentTypes = jest.fn();
-const createMany = jest.fn();
-const migrate = jest.fn();
-const deleteMany = jest.fn();
-const sendDidEditWorkflow = jest.fn();
-const validateWorkflowCount = jest.fn();
+const validateActionsByContentTypes = vi.fn();
 
-jest.mock('../../utils', () => ({
-  getService: jest.fn((name: string) => {
+vi.mock('@strapi/utils', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@strapi/utils')>();
+  return {
+    ...actual,
+    emitAudit,
+  };
+});
+
+vi.mock('../../utils', () => ({
+  getService: vi.fn((name: string) => {
     if (name === 'validation') {
       return {
-        validateWorkflowStages: jest.fn(),
+        validateWorkflowStages: vi.fn(),
         validateWorkflowCount,
       };
     }
     if (name === 'workflow-metrics') {
       return {
-        sendDidCreateWorkflow: jest.fn(),
+        sendDidCreateWorkflow: vi.fn(),
         sendDidEditWorkflow,
       };
     }
     if (name === 'stages') {
       return {
         createMany,
-        replaceStages: jest.fn(),
+        replaceStages: vi.fn(),
         deleteMany,
       };
     }
@@ -38,8 +46,10 @@ jest.mock('../../utils', () => ({
   }),
 }));
 
-jest.mock('../workflow-content-types', () => () => ({
-  migrate,
+vi.mock('../workflow-content-types', () => ({
+  default: () => ({
+    migrate,
+  }),
 }));
 
 const workflow = {
@@ -51,27 +61,27 @@ const workflow = {
 
 const createStrapiMock = ({ releaseActionService }: { releaseActionService?: unknown }) => {
   const dbQuery = {
-    update: jest.fn().mockResolvedValue(workflow),
-    delete: jest.fn().mockResolvedValue(workflow),
-    count: jest.fn().mockResolvedValue(2),
-    create: jest.fn().mockResolvedValue(workflow),
+    update: vi.fn().mockResolvedValue(workflow),
+    delete: vi.fn().mockResolvedValue(workflow),
+    count: vi.fn().mockResolvedValue(2),
+    create: vi.fn().mockResolvedValue(workflow),
   };
 
   return {
     db: {
-      transaction: jest.fn((fn: (args: unknown) => unknown) => fn({})),
-      query: jest.fn(() => dbQuery),
+      transaction: vi.fn((fn: (args: unknown) => unknown) => fn({})),
+      query: vi.fn(() => dbQuery),
     },
-    get: jest.fn((name: string) => {
+    get: vi.fn((name: string) => {
       if (name === 'query-params') {
-        return { transform: jest.fn((_uid: string, opts: unknown) => opts) };
+        return { transform: vi.fn((_uid: string, opts: unknown) => opts) };
       }
       return undefined;
     }),
-    plugin: jest.fn((name: string) => {
+    plugin: vi.fn((name: string) => {
       if (name === 'content-releases') {
         return {
-          service: jest.fn((serviceName: string) => {
+          service: vi.fn((serviceName: string) => {
             if (serviceName === 'release-action') {
               return releaseActionService;
             }
@@ -79,14 +89,14 @@ const createStrapiMock = ({ releaseActionService }: { releaseActionService?: unk
           }),
         };
       }
-      return { service: jest.fn() };
+      return { service: vi.fn() };
     }),
   };
 };
 
 describe('review-workflows workflows service', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     validateWorkflowCount.mockResolvedValue(undefined);
     migrate.mockResolvedValue([]);
     deleteMany.mockResolvedValue(undefined);

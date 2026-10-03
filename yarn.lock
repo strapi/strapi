@@ -10538,6 +10538,8 @@ __metadata:
     react-router-dom: "npm:6.30.6"
     semver: "npm:7.7.4"
     styled-components: "npm:6.4.1"
+    vitest: "catalog:"
+    vitest-config: "npm:5.56.0"
     yup: "npm:0.32.9"
   peerDependencies:
     "@strapi/admin": ^5.0.0
