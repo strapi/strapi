@@ -666,13 +666,32 @@ describe('Release service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: strapiMock });
 
-      const checkReleaseContext = async () => {
-        expect(mockRequestStorage.getStore()?.state).toEqual({ ...state, releaseId: 1 });
+      mockPublish.mockImplementationOnce(async () => {
+        expect(mockRequestStorage.getStore()?.state).toEqual({
+          ...state,
+          releaseId: 1,
+          releaseAction: {
+            uid: 'collectionType',
+            documentId: 'one',
+            locale: undefined,
+            event: 'entry.publish',
+          },
+        });
         expect(mockRequestStorage.getStore()?.request).toBeDefined();
-      };
-
-      mockPublish.mockImplementationOnce(checkReleaseContext);
-      mockUnpublish.mockImplementationOnce(checkReleaseContext);
+      });
+      mockUnpublish.mockImplementationOnce(async () => {
+        expect(mockRequestStorage.getStore()?.state).toEqual({
+          ...state,
+          releaseId: 1,
+          releaseAction: {
+            uid: 'collectionType',
+            documentId: 'two',
+            locale: undefined,
+            event: 'entry.unpublish',
+          },
+        });
+        expect(mockRequestStorage.getStore()?.request).toBeDefined();
+      });
 
       const publishRelease = async () => {
         const parentContext = mockRequestStorage.getStore();

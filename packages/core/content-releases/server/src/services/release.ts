@@ -1,4 +1,4 @@
-import type { Core, Data, Struct, UID } from '@strapi/types';
+import type { Core, Data, Modules, Struct, UID } from '@strapi/types';
 import { emitAudit, errors, setCreatorFields } from '@strapi/utils';
 import type { ParameterizedContext } from 'koa';
 import type { ReleaseAction } from '../../../shared/contracts/release-actions';
@@ -341,33 +341,47 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
           );
 
           const context = strapi.requestContext.get();
+          const runReleaseAction = (
+            releaseAction: Modules.WebhookRunner.ReleaseAction,
+            work: () => Promise<void>
+          ) =>
+            strapi.requestContext.run(
+              {
+                ...context,
+                request: context?.request ?? { url: '' },
+                state: { ...context?.state, releaseId, releaseAction },
+              } as ParameterizedContext,
+              work
+            );
 
-          await strapi.requestContext.run(
-            {
-              ...context,
-              request: context?.request ?? { url: '' },
-              state: { ...context?.state, releaseId },
-            } as ParameterizedContext,
-            async () =>
-              strapi.db.transaction(async () => {
-                for (const contentTypeUid of contentTypeUids) {
-                  const contentType = contentTypeUid as UID.ContentType;
-                  const { publish, unpublish } = formattedActions[contentType];
+          await strapi.db.transaction(async () => {
+            for (const contentTypeUid of contentTypeUids) {
+              const contentType = contentTypeUid as UID.ContentType;
+              const { publish, unpublish } = formattedActions[contentType];
 
-                  // Serialize within a content type: concurrent publishes of related documents
-                  // can race on shared join-table state (notably self-referential relations) and
-                  // leave inconsistent FK rows when one branch deletes a row another branch is
-                  // about to reference.
-                  for (const params of publish) {
+              // Serialize within a content type: concurrent publishes of related documents
+              // can race on shared join-table state (notably self-referential relations) and
+              // leave inconsistent FK rows when one branch deletes a row another branch is
+              // about to reference.
+              for (const params of publish) {
+                await runReleaseAction(
+                  { uid: contentType, ...params, event: 'entry.publish' },
+                  async () => {
                     await strapi.documents(contentType).publish(params);
                   }
+                );
+              }
 
-                  for (const params of unpublish) {
+              for (const params of unpublish) {
+                await runReleaseAction(
+                  { uid: contentType, ...params, event: 'entry.unpublish' },
+                  async () => {
                     await strapi.documents(contentType).unpublish(params);
                   }
-                }
-              })
-          );
+                );
+              }
+            }
+          });
 
           const release = await strapi.db.query(RELEASE_MODEL_UID).update({
             where: {

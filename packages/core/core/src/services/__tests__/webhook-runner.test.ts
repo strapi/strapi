@@ -16,6 +16,13 @@ const createWebhook = (events: string[]): Modules.WebhookStore.Webhook => ({
 });
 
 describe('Webhook runner', () => {
+  const releaseAction: Modules.WebhookRunner.ReleaseAction = {
+    uid: 'api::article.article',
+    documentId: 'released',
+    locale: 'en',
+    event: 'entry.publish',
+  };
+
   let eventHub: ReturnType<typeof createEventHub>;
   let runner: ReturnType<typeof createWebhookRunner>;
   let mockFetch: jest.MockedFunction<Modules.Fetch.Fetch>;
@@ -132,15 +139,105 @@ describe('Webhook runner', () => {
       const subscriber = jest.fn();
       eventHub.subscribe(subscriber);
 
-      await requestContext.run({ state: { releaseId: 1 } } as ParameterizedContext, async () => {
-        await eventHub.emit(event, { entry: { id: 1 } });
-      });
+      const info = {
+        uid: 'api::article.article',
+        entry: { documentId: 'released', locale: 'en' },
+      };
+
+      await requestContext.run(
+        {
+          state: {
+            releaseId: 1,
+            releaseAction: { ...releaseAction, event },
+          },
+        } as ParameterizedContext,
+        async () => {
+          await eventHub.emit(event, info);
+        }
+      );
 
       expect(subscriber).toHaveBeenCalledTimes(1);
-      expect(subscriber).toHaveBeenCalledWith(event, { entry: { id: 1 } });
+      expect(subscriber).toHaveBeenCalledWith(event, info);
       expect(mockFetch).not.toHaveBeenCalled();
     }
   );
+
+  it.each([undefined, 'en'])('recognizes the release action with locale=%s', async (locale) => {
+    runner.add(createWebhook(['entry.publish', 'releases.publish']));
+
+    const info = {
+      uid: 'api::article.article',
+      entry: { documentId: 'released', locale },
+    };
+
+    await requestContext.run(
+      {
+        state: {
+          releaseId: 1,
+          releaseAction: { ...releaseAction, locale },
+        },
+      } as ParameterizedContext,
+      async () => {
+        await eventHub.emit('entry.publish', info);
+      }
+    );
+
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    {
+      name: 'publish of another document',
+      event: 'entry.publish',
+      uid: 'api::article.article',
+      entry: { documentId: 'related', locale: 'en' },
+    },
+    {
+      name: 'unpublish of another document',
+      event: 'entry.unpublish',
+      uid: 'api::article.article',
+      entry: { documentId: 'related', locale: 'en' },
+    },
+    {
+      name: 'publish of another content type',
+      event: 'entry.publish',
+      uid: 'api::page.page',
+      entry: { documentId: 'released', locale: 'en' },
+    },
+    {
+      name: 'publish of another locale',
+      event: 'entry.publish',
+      uid: 'api::article.article',
+      entry: { documentId: 'released', locale: 'fr' },
+    },
+    {
+      name: 'unpublish during a publish action',
+      event: 'entry.unpublish',
+      uid: 'api::article.article',
+      entry: { documentId: 'released', locale: 'en' },
+    },
+  ])('delivers a nested $name', async ({ event, uid, entry }) => {
+    runner.add(createWebhook([event, 'releases.publish']));
+
+    await requestContext.run(
+      { state: { releaseId: 1, releaseAction } } as ParameterizedContext,
+      async () => {
+        await eventHub.emit(event, { uid, entry });
+      }
+    );
+
+    await new Promise<void>((resolve) => {
+      setImmediate(resolve);
+    });
+
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(JSON.parse(String(mockFetch.mock.calls[0][1]?.body))).toEqual({
+      event,
+      createdAt: expect.any(String),
+      uid,
+      entry,
+    });
+  });
 
   it.each(['entry.publish', 'entry.unpublish'])(
     'retains the release context for %s waiting in the queue',
@@ -164,9 +261,22 @@ describe('Webhook runner', () => {
 
       expect(mockFetch).toHaveBeenCalledTimes(5);
 
-      await requestContext.run({ state: { releaseId: 1 } } as ParameterizedContext, async () => {
-        await eventHub.emit(event, { entry: { id: 6 } });
-      });
+      const info = {
+        uid: 'api::article.article',
+        entry: { id: 6, documentId: 'released', locale: 'en' },
+      };
+
+      await requestContext.run(
+        {
+          state: {
+            releaseId: 1,
+            releaseAction: { ...releaseAction, event },
+          },
+        } as ParameterizedContext,
+        async () => {
+          await eventHub.emit(event, info);
+        }
+      );
 
       expect(requestContext.get()).toBeUndefined();
       expect(mockFetch).toHaveBeenCalledTimes(5);

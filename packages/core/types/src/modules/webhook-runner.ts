@@ -1,5 +1,13 @@
 import type { Webhook } from './webhook-store';
 import type * as Data from '../data';
+import type * as UID from '../uid';
+
+export interface ReleaseAction {
+  uid: UID.ContentType;
+  documentId: Data.DocumentID;
+  locale?: string;
+  event: Event['event'];
+}
 
 export interface Event {
   event: string;

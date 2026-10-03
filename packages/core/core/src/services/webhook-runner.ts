@@ -97,7 +97,17 @@ class WebhookRunner {
     }
 
     const listen = async (info: Event['info']) => {
-      const releaseId: Event['releaseId'] = this.requestContext.get()?.state?.releaseId;
+      const context = this.requestContext.get();
+      const releaseAction: Modules.WebhookRunner.ReleaseAction | undefined =
+        context?.state?.releaseAction;
+      const isReleaseAction =
+        releaseAction !== undefined &&
+        releaseAction.event === event &&
+        releaseAction.uid === info.uid &&
+        releaseAction.documentId === _.get(info, 'entry.documentId') &&
+        (releaseAction.locale ?? null) === (_.get(info, 'entry.locale') ?? null);
+      const releaseId: Event['releaseId'] = isReleaseAction ? context?.state?.releaseId : undefined;
+
       this.queue.enqueue({ event, info, releaseId });
     };
 
