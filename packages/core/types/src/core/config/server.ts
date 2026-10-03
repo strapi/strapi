@@ -69,6 +69,7 @@ export interface Proxy {
 
 export interface Webhooks {
   populateRelations?: boolean;
+  deduplicateReleaseWebhooks?: boolean;
   [key: string]: unknown;
 }
 
