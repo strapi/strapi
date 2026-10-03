@@ -54,22 +54,52 @@ const update = async (params: any, updates: any) => {
 const deleteFn = async ({ id }: any) => {
   const localeToDelete = await findById(id);
 
-  if (localeToDelete) {
-    await deleteAllLocalizedEntriesFor({ locale: localeToDelete.code });
-    const result = await strapi.db.query('plugin::i18n.locale').delete({ where: { id } });
-
-    getService('metrics').sendDidUpdateI18nLocalesEvent();
-
-    await emitAudit({ strapi }, AUDITED_EVENTS.LOCALE_DELETE, {
-      localeId: localeToDelete.id,
-      name: localeToDelete.name,
-      code: localeToDelete.code,
-    });
-
-    return result;
+  if (!localeToDelete) {
+    return localeToDelete;
   }
 
-  return localeToDelete;
+  const deletion = await strapi.db.transaction(async ({ trx }) => {
+    // Serialize deletions for every row sharing this code. Without the lock, two concurrent
+    // duplicate deletions can each observe the other row and both skip localized-content cleanup.
+    const localesWithSameCode = await strapi.db
+      .queryBuilder('plugin::i18n.locale')
+      .select(['id'])
+      .where({ code: localeToDelete.code })
+      .orderBy('id')
+      .transacting(trx)
+      .forUpdate()
+      .execute<{ id: number }[]>();
+
+    // Another transaction may have removed this exact row while this transaction was waiting for
+    // the code-level lock. In that case this delete is already satisfied and must not emit effects.
+    if (!localesWithSameCode.some((locale) => locale.id === localeToDelete.id)) {
+      return { localeToDelete: null, result: null };
+    }
+
+    // Content is keyed by locale code rather than the locale row id. If corrupted data contains
+    // duplicate locale rows, deleting one row must not remove content while that code is still in use.
+    if (localesWithSameCode.length === 1) {
+      await deleteAllLocalizedEntriesFor({ locale: localeToDelete.code });
+    }
+
+    const result = await strapi.db.query('plugin::i18n.locale').delete({ where: { id } });
+
+    return { localeToDelete, result };
+  });
+
+  if (!deletion.localeToDelete) {
+    return deletion.result;
+  }
+
+  getService('metrics').sendDidUpdateI18nLocalesEvent();
+
+  await emitAudit({ strapi }, AUDITED_EVENTS.LOCALE_DELETE, {
+    localeId: deletion.localeToDelete.id,
+    name: deletion.localeToDelete.name,
+    code: deletion.localeToDelete.code,
+  });
+
+  return deletion.result;
 };
 
 const setDefaultLocale = async ({ code }: any) => {
