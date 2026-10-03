@@ -17,7 +17,6 @@ const config = {
         '@typescript-eslint/no-namespace': 'off',
         '@typescript-eslint/ban-types': 'off',
         '@typescript-eslint/no-empty-interface': 'off',
-        '@typescript-eslint/naming-convention': 'off',
         'node/no-extraneous-import': 'off',
         // Upload's folder contract keeps a mid-file `import type` to break a
         // type-only cycle with ./files.

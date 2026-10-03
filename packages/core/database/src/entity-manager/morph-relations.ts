@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */ // allow __type
 import { curry, groupBy, pipe, mapValues, map, isEmpty } from 'lodash/fp';
 import type { Knex } from 'knex';
 
