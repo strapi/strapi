@@ -14,6 +14,10 @@ const mockRequestStorage = new AsyncLocalStorage<ParameterizedContext>();
 
 const baseStrapiMock = {
   config: { get: jest.fn().mockReturnValue(true) },
+  localization: {
+    isLocalizedContentType: jest.fn().mockReturnValue(false),
+    getDefaultLocale: jest.fn().mockResolvedValue('fr'),
+  },
   requestContext: {
     get: () => mockRequestStorage.getStore(),
     run: (context: ParameterizedContext, work: () => Promise<void>) =>
@@ -635,12 +639,25 @@ describe('Release service', () => {
       { name: 'programmatic', state: undefined, enabled: true },
       { name: 'disabled', state: { user: { id: 1 } }, enabled: false },
       { name: 'unconfigured', state: undefined, enabled: undefined },
-    ])('preserves the $name release context', async ({ state, enabled }) => {
+      { name: 'default locale', state: undefined, enabled: true, localized: true },
+      {
+        name: 'explicit locale',
+        state: undefined,
+        enabled: true,
+        localized: true,
+        locale: 'en',
+      },
+      { name: 'disabled localized', state: undefined, enabled: false, localized: true },
+    ])('preserves $name release context', async ({ state, enabled, localized = false, locale }) => {
       mockExecute.mockReturnValueOnce({ id: 1, name: 'Release', releasedAt: null });
 
       const strapiMock = {
         ...baseStrapiMock,
         config: { get: jest.fn().mockReturnValue(enabled) },
+        localization: {
+          isLocalizedContentType: jest.fn().mockReturnValue(localized),
+          getDefaultLocale: jest.fn().mockResolvedValue('fr'),
+        },
         requestContext: {
           get: jest.fn(baseStrapiMock.requestContext.get),
           run: jest.fn(baseStrapiMock.requestContext.run),
@@ -653,11 +670,13 @@ describe('Release service', () => {
                 contentType: 'collectionType',
                 type: 'publish',
                 entryDocumentId: 'one',
+                locale,
               },
               {
                 contentType: 'collectionType',
                 type: 'unpublish',
                 entryDocumentId: 'two',
+                locale,
               },
             ]),
             update: jest.fn().mockResolvedValue({ id: 1 }),
@@ -687,7 +706,7 @@ describe('Release service', () => {
                 releaseAction: {
                   uid: 'collectionType',
                   documentId: 'one',
-                  locale: undefined,
+                  locale: locale ?? (localized ? 'fr' : undefined),
                   event: 'entry.publish',
                 },
               }
@@ -703,7 +722,7 @@ describe('Release service', () => {
                 releaseAction: {
                   uid: 'collectionType',
                   documentId: 'two',
-                  locale: undefined,
+                  locale: locale ?? (localized ? 'fr' : undefined),
                   event: 'entry.unpublish',
                 },
               }
@@ -728,6 +747,9 @@ describe('Release service', () => {
       expect(mockPublish).toHaveBeenCalledTimes(1);
       expect(mockUnpublish).toHaveBeenCalledTimes(1);
       expect(strapiMock.requestContext.run).toHaveBeenCalledTimes(enabled ? 2 : 0);
+      expect(strapiMock.localization.getDefaultLocale).toHaveBeenCalledTimes(
+        enabled && localized && !locale ? 2 : 0
+      );
       expect(strapiMock.eventHub.emit).toHaveBeenCalledWith(
         'releases.publish',
         expect.objectContaining({ isPublished: true })

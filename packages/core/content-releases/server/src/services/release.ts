@@ -343,7 +343,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
           const deduplicateReleaseWebhooks =
             strapi.config.get<boolean>('server.webhooks.deduplicateReleaseWebhooks', false) ===
             true;
-          const runReleaseAction = (
+          const runReleaseAction = async (
             releaseAction: Modules.WebhookRunner.ReleaseAction,
             work: () => Promise<void>
           ) => {
@@ -351,13 +351,22 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
               return work();
             }
 
+            const locale =
+              releaseAction.locale ||
+              (strapi.localization.isLocalizedContentType(strapi.contentTypes[releaseAction.uid])
+                ? await strapi.localization.getDefaultLocale()
+                : undefined);
             const context = strapi.requestContext.get();
 
             return strapi.requestContext.run(
               {
                 ...context,
                 request: context?.request ?? { url: '' },
-                state: { ...context?.state, releaseId, releaseAction },
+                state: {
+                  ...context?.state,
+                  releaseId,
+                  releaseAction: { ...releaseAction, locale: locale ?? undefined },
+                },
               } as ParameterizedContext,
               work
             );
