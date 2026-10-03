@@ -12,6 +12,8 @@
  * 1, ...., 7, `8`, 9, 10
  * 1, ... 6, `7`, 8, 9, 10
  */
+import { JSX } from 'react';
+
 import { Typography, VisuallyHidden } from '@strapi/design-system';
 import { ChevronLeft, ChevronRight } from '@strapi/icons';
 import { useIntl } from 'react-intl';
