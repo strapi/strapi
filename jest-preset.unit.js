@@ -1,6 +1,8 @@
+// @ts-check
 'use strict';
 
-module.exports = {
+/** @type {import('jest').Config} */
+const config = {
   setupFilesAfterEnv: [__dirname + '/tests/setup/unit.setup.js'],
   modulePathIgnorePatterns: ['[/\\\\]\\.cache[/\\\\]', '[/\\\\]dist[/\\\\]'],
   testPathIgnorePatterns: [
@@ -15,10 +17,8 @@ module.exports = {
   prettierPath: require.resolve('prettier-2'),
   testMatch: ['**/__tests__/**/*.{js,ts,jsx,tsx}'],
   transform: {
-    '^.+\\.(t|j)sx?$': ['@swc/jest'],
+    '^.+\\.(t|j)sx?$': ['@swc/jest', {}],
   },
-  // Use `jest-watch-typeahead` version 0.6.5. Newest version 1.0.0 does not support jest@26
-  // Reference: https://github.com/jest-community/jest-watch-typeahead/releases/tag/v1.0.0
   watchPlugins: ['jest-watch-typeahead/filename', 'jest-watch-typeahead/testname'],
   // Coverage configuration for SonarQube
   collectCoverage: false, // Will be enabled via CLI flag
@@ -49,3 +49,5 @@ module.exports = {
     '<rootDir>/coverage/',
   ],
 };
+
+module.exports = config;
