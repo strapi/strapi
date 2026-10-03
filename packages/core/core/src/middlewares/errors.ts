@@ -18,7 +18,7 @@ const errorMiddleware: Core.MiddlewareFactory = (/* _, { strapi } */) => {
         return ctx.notFound();
       }
     } catch (error) {
-      if (error instanceof errors.ApplicationError) {
+      if (errors.isApplicationError(error)) {
         const { status, body } = formatApplicationError(error);
         ctx.status = status;
         ctx.body = body;
