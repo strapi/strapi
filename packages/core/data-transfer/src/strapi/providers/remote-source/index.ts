@@ -172,7 +172,6 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
 
     // Init the asset map
     const assets: {
-      // TODO: could we include filename in this for improved logging?
       [assetID: string]: IAsset & {
         stream: PassThrough;
         queue: Array<QueueableAction>;
