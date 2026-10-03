@@ -61,6 +61,7 @@ describe('WebhookForm', () => {
       url: 'https://google.fr',
       events: ['entry.create'],
       headers: [{ key: '', value: '' }],
+      secret: '',
     });
 
     expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();

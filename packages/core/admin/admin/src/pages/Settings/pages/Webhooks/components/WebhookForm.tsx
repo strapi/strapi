@@ -23,6 +23,7 @@ interface WebhookFormValues {
   url: Modules.WebhookStore.Webhook['url'];
   headers: Array<{ key: string; value: string }>;
   events: Modules.WebhookStore.Webhook['events'];
+  secret: string;
 }
 
 interface WebhookFormProps {
@@ -80,6 +81,7 @@ const WebhookForm = ({
         url: data?.url || '',
         headers: mapHeaders(data?.headers || {}),
         events: data?.events || [],
+        secret: data?.secret || '',
       }}
       method={isCreating ? 'POST' : 'PUT'}
       onSubmit={handleSubmit}
@@ -166,6 +168,21 @@ const WebhookForm = ({
                         required: true,
                         size: 12,
                         type: 'string' as const,
+                      },
+                      {
+                        label: formatMessage({
+                          id: 'Settings.webhooks.form.secret',
+                          defaultMessage: 'Secret',
+                        }),
+                        hint: formatMessage({
+                          id: 'Settings.webhooks.form.secret.hint',
+                          defaultMessage:
+                            'Used to sign the payload with HMAC-SHA256. When set, deliveries include an X-Strapi-Signature-256 header. Leave empty to disable signing.',
+                        }),
+                        name: 'secret',
+                        required: false,
+                        size: 12,
+                        type: 'password' as const,
                       },
                     ].map(({ size, ...field }) => (
                       <Grid.Item
@@ -264,6 +281,7 @@ const makeWebhookValidationSchema = ({ formatMessage }: Pick<IntlShape, 'formatM
       );
     }),
     events: yup.array(),
+    secret: yup.string().nullable(),
   });
 
 export { WebhookForm };
