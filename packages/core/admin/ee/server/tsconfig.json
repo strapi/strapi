@@ -1,6 +1,6 @@
 {
   "extends": "tsconfig/base.json",
-  "include": ["src"],
+  "include": ["src", "../../server/src", "../../server/test-utils", "../../shared"],
   "compilerOptions": {
     "types": ["node", "jest"]
   }
