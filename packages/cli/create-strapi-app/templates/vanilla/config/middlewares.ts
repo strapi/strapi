@@ -1,6 +1,6 @@
-import type { Core } from '@strapi/strapi';
+import { factories } from '@strapi/strapi';
 
-const config: Core.Config.Middlewares = [
+export default factories.defineMiddlewaresConfig([
   'strapi::logger',
   'strapi::errors',
   'strapi::security',
@@ -11,6 +11,4 @@ const config: Core.Config.Middlewares = [
   'strapi::session',
   'strapi::favicon',
   'strapi::public',
-];
-
-export default config;
+]);
