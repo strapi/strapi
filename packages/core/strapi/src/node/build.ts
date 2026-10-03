@@ -5,7 +5,7 @@ import { getTimer, prettyTime } from './core/timer';
 import { createBuildContext } from './create-build-context';
 import { writeStaticClientFiles } from './staticFiles';
 
-interface BuildOptions extends CLIContext {
+interface BuildOptions {
   /**
    * Which bundler to use for building.
    *
@@ -39,7 +39,10 @@ interface BuildOptions extends CLIContext {
  *
  * @description Builds the admin panel of the strapi application.
  */
-const build = async ({ logger, cwd, tsconfig, installDeps = false, ...options }: BuildOptions) => {
+const build = async (
+  { installDeps = false, ...options }: BuildOptions,
+  { logger, cwd, tsconfig }: CLIContext
+) => {
   const timer = getTimer();
 
   const shouldContinue = await handleAdminDependencies({

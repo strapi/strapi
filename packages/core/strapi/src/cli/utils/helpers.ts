@@ -177,20 +177,19 @@ const assertCwdContainsStrapiProject = (name: string) => {
   }
 };
 
-const runAction =
-  (name: string, action: (...args: any[]) => Promise<void>) =>
-  (...args: unknown[]) => {
+const runAction = (name: string, action: (this: Command, ...args: any[]) => Promise<void>) => {
+  // NOTE: Commander binds the Command to the action handler. Keep it a regular function.
+  return function handler(this: Command, ...args: unknown[]) {
     assertCwdContainsStrapiProject(name);
 
     Promise.resolve()
-      .then(() => {
-        return action(...args);
-      })
+      .then(() => action.apply(this, args))
       .catch((error) => {
         console.error(error);
         process.exit(1);
       });
   };
+};
 
 /**
  * @description Notify users this is an experimental command and get them to approve first
