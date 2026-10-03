@@ -5,7 +5,7 @@ import chalk from 'chalk';
 import { createCommand } from 'commander';
 
 import type { StrapiCommand } from '../../types';
-import { runAction } from '../../utils/helpers';
+
 import { sendEvent } from '../../utils/telemetry';
 
 type PackageJson = {
@@ -110,7 +110,7 @@ const action = async () => {
 const command: StrapiCommand = () => {
   return createCommand('telemetry:enable')
     .description('Enable anonymous telemetry and metadata sending to Strapi analytics')
-    .action(runAction('telemetry:enable', action));
+    .action(action);
 };
 
 export { action, command };

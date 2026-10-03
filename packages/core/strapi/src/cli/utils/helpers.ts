@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import chalk from 'chalk';
-import { has, isString, isArray } from 'lodash/fp';
+import { isString, isArray } from 'lodash/fp';
 import boxen from 'boxen';
 import type { Command } from 'commander';
 import { getInquirer } from './get-inquirer';
@@ -154,44 +154,6 @@ const ifOptions = (
   };
 };
 
-const assertCwdContainsStrapiProject = (name: string) => {
-  const logErrorAndExit = () => {
-    console.log(
-      `You need to run ${chalk.yellow(
-        `strapi ${name}`
-      )} in a Strapi project. Make sure you are in the right directory.`
-    );
-    process.exit(1);
-  };
-
-  try {
-    const pkgJSON = require(`${process.cwd()}/package.json`);
-    if (
-      !has('dependencies.@strapi/strapi', pkgJSON) &&
-      !has('devDependencies.@strapi/strapi', pkgJSON)
-    ) {
-      logErrorAndExit();
-    }
-  } catch {
-    logErrorAndExit();
-  }
-};
-
-const runAction =
-  (name: string, action: (...args: any[]) => Promise<void>) =>
-  (...args: unknown[]) => {
-    assertCwdContainsStrapiProject(name);
-
-    Promise.resolve()
-      .then(() => {
-        return action(...args);
-      })
-      .catch((error) => {
-        console.error(error);
-        process.exit(1);
-      });
-  };
-
 /**
  * @description Notify users this is an experimental command and get them to approve first
  * this can be opted out by passing `yes` as a property of the args object.
@@ -244,7 +206,5 @@ export {
   readableTime,
   formatElapsedAndMaybeRemainingLabel,
   TRANSFER_PROGRESS_FIELD_SEP,
-  runAction,
-  assertCwdContainsStrapiProject,
   notifyExperimentalCommand,
 };

@@ -3,7 +3,6 @@ import CLITable from 'cli-table3';
 import chalk from 'chalk';
 import { createStrapi, compileStrapi } from '@strapi/core';
 
-import { runAction } from '../../utils/helpers';
 import type { StrapiCommand } from '../../types';
 
 /**
@@ -56,7 +55,7 @@ const command: StrapiCommand = () => {
   return createCommand('admin:list-users')
     .alias('admin:list')
     .description('List all the admin users')
-    .action(runAction('admin:list-users', action));
+    .action(action);
 };
 
 export { action, command };

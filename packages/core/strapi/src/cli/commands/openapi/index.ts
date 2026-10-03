@@ -1,7 +1,6 @@
 import { createCommand } from 'commander';
 
 import type { StrapiCommand } from '../../types';
-import { runAction } from '../../utils/helpers';
 import { action as generate } from './generate';
 
 /**
@@ -17,7 +16,7 @@ const command: StrapiCommand = () => {
     .command('generate')
     .description('Generate an OpenAPI specification for the current Strapi application')
     .option('-o, --output <path>', 'Output file path for the OpenAPI specification')
-    .action(runAction('openapi:generate', generate));
+    .action(generate);
 
   return openapi;
 };

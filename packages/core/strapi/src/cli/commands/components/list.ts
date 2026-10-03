@@ -4,7 +4,6 @@ import chalk from 'chalk';
 import { createStrapi, compileStrapi } from '@strapi/core';
 
 import type { StrapiCommand } from '../../types';
-import { runAction } from '../../utils/helpers';
 
 const action = async () => {
   const appContext = await compileStrapi();
@@ -29,7 +28,7 @@ const action = async () => {
 const command: StrapiCommand = () => {
   return createCommand('components:list')
     .description('List all the application components')
-    .action(runAction('components:list', action));
+    .action(action);
 };
 
 export { action, command };

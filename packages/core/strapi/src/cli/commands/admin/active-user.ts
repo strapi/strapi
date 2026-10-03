@@ -4,7 +4,7 @@ import { createCommand } from 'commander';
 import { createStrapi, compileStrapi } from '@strapi/core';
 
 import type { StrapiCommand } from '../../types';
-import { runAction } from '../../utils/helpers';
+
 import { getInquirer } from '../../utils/get-inquirer';
 
 interface CmdOptions {
@@ -86,7 +86,7 @@ const command: StrapiCommand = () => {
     .description("Set a user's active status")
     .option('-e, --email <email>', 'The user email')
     .option('-a, --active <true/false>', 'The user active status')
-    .action(runAction('admin:active-user', action));
+    .action(action);
 };
 
 export { action, command };
