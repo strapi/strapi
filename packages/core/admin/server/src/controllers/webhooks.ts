@@ -60,6 +60,7 @@ const webhookValidator = yup
         .required();
     }),
     events: yup.array().of(yup.string()).required(),
+    contentTypes: yup.array().of(yup.string()).nullable(),
   })
   .noUnknown();
 
