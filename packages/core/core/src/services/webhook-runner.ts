@@ -12,6 +12,7 @@ import type { EventHub } from './event-hub';
 import type { Fetch } from '../utils/fetch';
 
 type Webhook = Modules.WebhookStore.Webhook;
+type Event = Modules.WebhookRunner.Event;
 
 interface Config {
   defaultHeaders: Record<string, string>;
@@ -19,14 +20,10 @@ interface Config {
 
 interface ConstructorParameters {
   eventHub: EventHub;
+  requestContext: Modules.RequestContext.RequestContext;
   logger: Logger;
   configuration?: Record<string, unknown>;
   fetch: Fetch;
-}
-
-interface Event {
-  event: string;
-  info: Record<string, unknown>;
 }
 
 type Listener = (info: Record<string, unknown>) => Promise<void>;
@@ -40,6 +37,8 @@ const defaultConfiguration: Config = {
 class WebhookRunner {
   private eventHub: EventHub;
 
+  private requestContext: Modules.RequestContext.RequestContext;
+
   private logger: Logger;
 
   private config: Config;
@@ -52,9 +51,16 @@ class WebhookRunner {
 
   private fetch: Fetch;
 
-  constructor({ eventHub, logger, configuration = {}, fetch }: ConstructorParameters) {
+  constructor({
+    eventHub,
+    requestContext,
+    logger,
+    configuration = {},
+    fetch,
+  }: ConstructorParameters) {
     debug('Initialized webhook runner');
     this.eventHub = eventHub;
+    this.requestContext = requestContext;
     this.logger = logger;
     this.fetch = fetch;
 
@@ -91,17 +97,26 @@ class WebhookRunner {
     }
 
     const listen = async (info: Event['info']) => {
-      this.queue.enqueue({ event, info });
+      const releaseId: Event['releaseId'] = this.requestContext.get()?.state?.releaseId;
+      this.queue.enqueue({ event, info, releaseId });
     };
 
     this.listeners.set(event, listen);
     this.eventHub.on(event, listen);
   }
 
-  async executeListener({ event, info }: Event) {
+  async executeListener({ event, info, releaseId }: Event) {
     debug(`Executing webhook for event '${event}'`);
     const webhooks = this.webhooksMap.get(event) || [];
-    const activeWebhooks = webhooks.filter((webhook) => webhook.isEnabled === true);
+    const activeWebhooks = webhooks.filter(
+      (webhook) =>
+        webhook.isEnabled === true &&
+        !(
+          releaseId !== undefined &&
+          ['entry.publish', 'entry.unpublish'].includes(event) &&
+          webhook.events.includes('releases.publish')
+        )
+    );
 
     for (const webhook of activeWebhooks) {
       await this.run(webhook, event, info).catch((error: unknown) => {

@@ -1,8 +1,10 @@
 import type { Webhook } from './webhook-store';
+import type * as Data from '../data';
 
-interface Event {
+export interface Event {
   event: string;
   info: Record<string, unknown>;
+  releaseId?: Data.ID;
 }
 export interface WebhookRunner {
   deleteListener(event: string): void;

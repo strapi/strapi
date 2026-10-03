@@ -52,8 +52,13 @@ const createEventManager = (strapi: Core.Strapi, uid: UID.Schema) => {
      * so this is executed after that transaction is committed.
      */
     emitEvent(eventName: EventName, entry: Modules.Documents.AnyDocument) {
+      const context = strapi.requestContext.get();
       strapi.db.transaction(({ onCommit }) => {
-        onCommit(() => emitEvent(eventName, entry));
+        onCommit(() =>
+          context
+            ? strapi.requestContext.run(context, () => emitEvent(eventName, entry))
+            : emitEvent(eventName, entry)
+        );
       });
     },
   };

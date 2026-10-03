@@ -1,3 +1,5 @@
+import { AsyncLocalStorage } from 'node:async_hooks';
+import type { ParameterizedContext } from 'koa';
 import { queryParams } from '@strapi/utils';
 
 import createReleaseService from '../release';
@@ -8,8 +10,14 @@ const mockSchedulingCancel = jest.fn();
 const mockExecute = jest.fn();
 const mockPublish = jest.fn();
 const mockUnpublish = jest.fn();
+const mockRequestStorage = new AsyncLocalStorage<ParameterizedContext>();
 
 const baseStrapiMock = {
+  requestContext: {
+    get: () => mockRequestStorage.getStore(),
+    run: (context: ParameterizedContext, work: () => Promise<void>) =>
+      mockRequestStorage.run(context, work),
+  },
   utils: {
     errors: {
       ValidationError: jest.fn(),
@@ -611,6 +619,125 @@ describe('Release service', () => {
     });
   });
 
+  describe('publish context', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it.each([
+      { name: 'manual', state: { user: { id: 1 }, route: { info: { type: 'admin' } } } },
+      { name: 'scheduled', state: { auditSource: 'scheduler' } },
+      { name: 'programmatic', state: undefined },
+    ])('marks $name release actions and preserves the parent context', async ({ state }) => {
+      mockExecute.mockReturnValueOnce({ id: 1, name: 'Release', releasedAt: null });
+
+      const strapiMock = {
+        ...baseStrapiMock,
+        db: {
+          ...baseStrapiMock.db,
+          query: jest.fn().mockReturnValue({
+            findMany: jest.fn().mockResolvedValue([
+              {
+                contentType: 'collectionType',
+                type: 'publish',
+                entryDocumentId: 'one',
+              },
+              {
+                contentType: 'collectionType',
+                type: 'unpublish',
+                entryDocumentId: 'two',
+              },
+            ]),
+            update: jest.fn().mockResolvedValue({ id: 1 }),
+          }),
+        },
+        contentTypes: {
+          collectionType: {
+            kind: 'collectionType',
+          },
+        },
+        eventHub: {
+          emit: jest.fn(async () => {
+            expect(mockRequestStorage.getStore()?.state).toEqual(state);
+          }),
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      const checkReleaseContext = async () => {
+        expect(mockRequestStorage.getStore()?.state).toEqual({ ...state, releaseId: 1 });
+        expect(mockRequestStorage.getStore()?.request).toBeDefined();
+      };
+
+      mockPublish.mockImplementationOnce(checkReleaseContext);
+      mockUnpublish.mockImplementationOnce(checkReleaseContext);
+
+      const publishRelease = async () => {
+        const parentContext = mockRequestStorage.getStore();
+
+        await releaseService.publish(1);
+
+        expect(mockRequestStorage.getStore()).toBe(parentContext);
+      };
+
+      if (state) {
+        await mockRequestStorage.run({ state } as ParameterizedContext, publishRelease);
+      } else {
+        await publishRelease();
+      }
+
+      expect(mockPublish).toHaveBeenCalledTimes(1);
+      expect(mockUnpublish).toHaveBeenCalledTimes(1);
+      expect(strapiMock.eventHub.emit).toHaveBeenCalledWith(
+        'releases.publish',
+        expect.objectContaining({ isPublished: true })
+      );
+      expect(mockRequestStorage.getStore()).toBeUndefined();
+    });
+
+    it('restores the parent context after a release action fails', async () => {
+      mockExecute.mockReturnValueOnce({ id: 1, name: 'Release', releasedAt: null });
+
+      const strapiMock = {
+        ...baseStrapiMock,
+        db: {
+          ...baseStrapiMock.db,
+          query: jest.fn().mockReturnValue({
+            findMany: jest.fn().mockResolvedValue([
+              {
+                contentType: 'collectionType',
+                type: 'publish',
+                entryDocumentId: 'one',
+              },
+            ]),
+          }),
+        },
+        contentTypes: {
+          collectionType: {
+            kind: 'collectionType',
+          },
+        },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+
+      mockPublish.mockRejectedValueOnce(new Error('Publish failed'));
+      const context = { state: { auditSource: 'scheduler' } } as ParameterizedContext;
+
+      await mockRequestStorage.run(context, async () => {
+        await expect(releaseService.publish(1)).rejects.toThrow('Publish failed');
+
+        expect(mockRequestStorage.getStore()).toBe(context);
+        expect(context.state).not.toHaveProperty('releaseId');
+      });
+
+      expect(mockRequestStorage.getStore()).toBeUndefined();
+    });
+  });
+
   describe('update audit', () => {
     it('reports nothing when the update matched no release', async () => {
       const strapiMock = {
@@ -661,7 +788,11 @@ describe('Release service', () => {
             update: jest.fn(),
           }),
         },
-        contentTypes: { collectionType: { kind: 'collectionType' } },
+        contentTypes: {
+          collectionType: {
+            kind: 'collectionType',
+          },
+        },
       };
 
       // @ts-expect-error Ignore missing properties
@@ -703,7 +834,11 @@ describe('Release service', () => {
             update: jest.fn(),
           }),
         },
-        contentTypes: { collectionType: { kind: 'collectionType' } },
+        contentTypes: {
+          collectionType: {
+            kind: 'collectionType',
+          },
+        },
       };
 
       // @ts-expect-error Ignore missing properties
@@ -776,7 +911,11 @@ describe('Release service', () => {
             update: jest.fn(),
           }),
         },
-        contentTypes: { collectionType: { kind: 'collectionType' } },
+        contentTypes: {
+          collectionType: {
+            kind: 'collectionType',
+          },
+        },
       };
 
       // @ts-expect-error Ignore missing properties
