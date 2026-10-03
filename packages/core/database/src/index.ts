@@ -16,6 +16,7 @@ import { validateDatabase } from './validations';
 import type { Model, JoinTable } from './types';
 import type { Identifiers } from './utils/identifiers';
 import { createRepairManager, type RepairManager } from './repairs';
+import { applyDefaultQueryTimeout } from './utils/knex';
 
 export { isKnexQuery } from './utils/knex';
 export { isDatabaseClientKind } from './connection';
@@ -26,6 +27,12 @@ interface Settings {
   migrations: {
     dir: string;
   };
+  /**
+   * Maximum time (in milliseconds) a single database query is allowed to run before it is
+   * cancelled. Applies to raw queries (`db.connection.raw()`) and to queries issued through
+   * the query builder/entity manager. Unset by default, meaning queries can run indefinitely.
+   */
+  queryTimeout?: number;
   [key: string]: unknown;
 }
 
@@ -114,6 +121,16 @@ class Database {
 
     this.connection = createConnection(knexConfig, {
       pool: { afterCreate: afterCreate(this) },
+    });
+
+    // `raw` is defined as a non-writable (but configurable) property by knex, so it must be
+    // redefined rather than assigned to.
+    const rawQuery = this.connection.raw.bind(this.connection);
+    Object.defineProperty(this.connection, 'raw', {
+      value: (...args: Parameters<Knex['raw']>) =>
+        applyDefaultQueryTimeout(rawQuery(...args), this),
+      writable: true,
+      configurable: true,
     });
 
     this.schema = createSchemaProvider(this);
