@@ -19,6 +19,14 @@ export interface AuthCookie {
   secure?: boolean;
   domain?: string;
   path?: string;
+  /**
+   * The path scope for the admin refresh-token cookie (`strapi_admin_refresh`).
+   * Independent of `path` (which scopes the access-token cookie and EE SSO only).
+   * Must be a prefix of the browser path to `POST /admin/access-token`.
+   *
+   * @default '/admin'
+   */
+  refreshPath?: string;
   sameSite?: 'strict' | 'lax' | 'none' | boolean | null;
 }
 
