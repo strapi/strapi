@@ -25,7 +25,7 @@ import { styled, useTheme } from 'styled-components';
 
 import { GetPreviewUrl } from '../../../../shared/contracts/preview';
 import { COLLECTION_TYPES } from '../../constants/collections';
-import { DocumentRBAC } from '../../features/DocumentRBAC';
+import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
 import { type UseDocument, useDocument } from '../../hooks/useDocument';
 import { type EditLayout, useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { Blocker } from '../../pages/EditView/components/Blocker';
@@ -258,10 +258,14 @@ const PreviewPage = () => {
     params,
   });
   const documentLayoutResponse = useDocumentLayout(model);
+  const isLoadingActionsRBAC = useDocumentRBAC('PreviewPage', (state) => state.isLoading);
 
   const isLoading =
     previewUrlResponse.isLoading || documentLayoutResponse.isLoading || documentResponse.isLoading;
-  if (isLoading && (!documentResponse.document?.documentId || previewUrlResponse.isLoading)) {
+  if (
+    isLoadingActionsRBAC ||
+    (isLoading && (!documentResponse.document?.documentId || previewUrlResponse.isLoading))
+  ) {
     return <Page.Loading />;
   }
 
