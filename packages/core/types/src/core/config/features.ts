@@ -10,7 +10,7 @@ export interface FeaturesFutureFlags {
 }
 
 /**
- * Input of `config/features.ts`. Resolved contract: `ResolvedFeaturesConfig` in `@strapi/core`.
+ * Input of `config/features.ts`. Resolved contract: `ResolvedConfig.Features` in `@strapi/core`.
  */
 export interface Features {
   future?: FeaturesFutureFlags;
