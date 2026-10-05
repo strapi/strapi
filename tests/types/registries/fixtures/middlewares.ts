@@ -15,6 +15,8 @@ declare const inline: Core.MiddlewareHandler;
       config: {
         middlewares: [
           'strapi::responseTime',
+          // Options merge over the factory defaults, so a config with required fields is optional.
+          'strapi::cors',
           'strapi::poweredBy',
           'admin::rateLimit',
           'plugin::email.rateLimit',
