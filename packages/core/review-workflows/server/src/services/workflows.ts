@@ -8,9 +8,13 @@ import {
   toWorkflowEvent,
   toWorkflowSnapshot,
 } from '../audit-logs';
+import type { Stage } from '../../../shared/contracts/review-workflows';
 import { getService } from '../utils';
 import { getWorkflowContentTypeFilter } from '../utils/review-workflows';
 import workflowsContentTypesFactory, { type ContentTypeTransfer } from './workflow-content-types';
+
+// `replaceStages` returns the input stages with their ids filled in, not full stage entities
+type ReplacedStage = Pick<Stage, 'id' | 'name'>;
 
 const processFilters = ({ strapi }: { strapi: Core.Strapi }, filters: any = {}) => {
   const processedFilters = { ...filters };
@@ -166,7 +170,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     async update(workflow: any, opts: any) {
       const stageService = getService('stages', { strapi });
       let updateOpts = { ...opts, populate: { ...WORKFLOW_POPULATE } };
-      let updatedStages: any = [];
+      let updatedStages: ReplacedStage[] | undefined;
       let updatedStageIds: any;
 
       await workflowValidator.validateWorkflowCount();
@@ -181,12 +185,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
             this.assertStageBelongsToWorkflow(stage.id, workflow)
           );
 
-          updatedStages = await stageService.replaceStages(
+          const replacedStages: ReplacedStage[] = await stageService.replaceStages(
             workflow.stages,
             opts.data.stages,
             workflow.contentTypes
           );
-          updatedStageIds = updatedStages.map((stage: any) => stage.id);
+          updatedStages = replacedStages;
+          updatedStageIds = replacedStages.map((stage) => stage.id);
 
           updateOpts = set('data.stages', updatedStageIds, updateOpts);
         }
