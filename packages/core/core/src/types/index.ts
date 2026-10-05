@@ -45,8 +45,6 @@ declare global {
       interface PackageMiddlewares {
         'strapi::body': FactoryConfig<typeof body>;
         'strapi::compression': FactoryConfig<typeof compression>;
-        // TODO @Nico `origin` is required by the factory's `Config`, but runtime merges defaults and
-        // passes `{}` for a bare `'strapi::cors'`. Typed routes need `{ name, config: { origin } }`.
         'strapi::cors': FactoryConfig<typeof cors>;
         'strapi::errors': undefined;
         'strapi::favicon': FactoryConfig<typeof favicon>;
