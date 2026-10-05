@@ -34,7 +34,7 @@ Loaders read plugins, APIs, components, middlewares, policies, sanitizers and va
 
 ### Core services
 
-Core services live in [`src/services`](https://github.com/strapi/strapi/tree/develop/packages/core/core/src/services). They are not in the `services` registry. Examples are the Document Service (`strapi.documents`), the HTTP `server`, `eventHub`, `webhookRunner`, `entityValidator` and `content-api`. The `db` entry creates the `Database` from `@strapi/database`. The `config` service holds the configuration that the loader reads from the `config/` folder of the application. Read [Document write path](../../../architecture/05-document-write-path.md), [Event hub](./event-hub.md), [MCP server](./mcp-server.md), [Server-side telemetry](./telemetry.md), [Configuration](./configuration/00-intro.md) and [Recommended security defaults](./configuration/01-security-defaults.md).
+Core services live in [`src/services`](https://github.com/strapi/strapi/tree/develop/packages/core/core/src/services). They are not in the `services` registry. Examples are the Document Service (`strapi.documents`), the HTTP `server`, `eventHub`, `webhookRunner`, `entityValidator` and `content-api`. The `db` entry creates the `Database` from `@strapi/database`. The `config` service holds the configuration that the loader reads from the `config/` folder of the application. Read [Document write path](../../../architecture/05-document-write-path.md), [Event hub](./event-hub.md), [MCP server](./mcp-server.md), [Localization provider](./localization.md), [Server-side telemetry](./telemetry.md), [Configuration](./configuration/00-intro.md) and [Recommended security defaults](./configuration/01-security-defaults.md).
 
 ### HTTP server
 
