@@ -1,13 +1,13 @@
 import _ from 'lodash';
 import { errors } from '@strapi/utils';
 import type { Data } from '@strapi/types';
-import type { ActionsMap, Permission, PluginContext, Role, RoleInput, User } from '../types';
+import type { Permission, PluginContext, Role, RoleInput, User } from '../types';
 import { getService } from '../utils';
 
-const enabledActions = (permissions: ActionsMap = {}) =>
-  Object.entries(permissions).flatMap(([typeName, type]) =>
-    Object.entries(type.controllers).flatMap(([controllerName, controller]) =>
-      Object.entries(controller)
+const enabledActions = (permissions: RoleInput['permissions']) =>
+  Object.entries(permissions ?? {}).flatMap(([typeName, type]) =>
+    Object.entries(type.controllers ?? {}).flatMap(([controllerName, controller]) =>
+      Object.entries(controller ?? {})
         .filter(([, action]) => action.enabled)
         .map(([actionName]) => `${typeName}.${controllerName}.${actionName}`)
     )

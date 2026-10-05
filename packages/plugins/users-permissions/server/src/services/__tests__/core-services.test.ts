@@ -1,5 +1,6 @@
 import { sanitize } from '@strapi/utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { RoleInput } from '../../types';
 import { createStrapiMock, createMockSessionManager } from '../../../tests/utils';
 
 import providersFactory from '../providers';
@@ -483,4 +484,31 @@ describe('action discovery and default permissions', () => {
     );
     expect(user.update).toHaveBeenCalledWith({ where: { id: 4 }, data: { role: 1 } });
   });
+});
+
+describe('sparse role permission input', () => {
+  const sparsePermissions: RoleInput['permissions'][] = [
+    undefined,
+    null,
+    { 'api::article': {} },
+    { 'api::article': { controllers: null } },
+    { 'api::article': { controllers: { article: null } } },
+  ];
+
+  it.each(sparsePermissions)(
+    'treats sparse permissions %j as no enabled actions during create and update',
+    async (permissions) => {
+      const { strapi, role, permission } = createStrapi();
+      role.create.mockResolvedValue({ id: 4 });
+      role.findOne.mockResolvedValue({
+        id: 4,
+        permissions: [{ id: 9, action: 'api::article.article.find' }],
+      });
+      const service = roleFactory({ strapi: createStrapiMock(strapi) });
+      await expect(service.createRole({ name: 'Editor', permissions })).resolves.toBeUndefined();
+      await expect(service.updateRole(4, { name: 'Editor', permissions })).resolves.toBeUndefined();
+      expect(permission.create).not.toHaveBeenCalled();
+      expect(permission.delete).toHaveBeenCalledExactlyOnceWith({ where: { id: 9 } });
+    }
+  );
 });

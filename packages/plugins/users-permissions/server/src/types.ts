@@ -32,12 +32,16 @@ export type Role = {
 
 export type Action = { enabled: boolean; policy?: string };
 export type ActionsMap = Record<string, { controllers: Record<string, Record<string, Action>> }>;
+export type RolePermissions = Record<
+  string,
+  { controllers?: Record<string, Record<string, Action> | null> | null }
+>;
 export type RoleInput = {
   users?: Data.ID[];
   name: string;
   description?: string;
   type?: string;
-  permissions?: ActionsMap;
+  permissions?: RolePermissions | null;
 };
 
 export type AdvancedSettings = {
