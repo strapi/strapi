@@ -1,9 +1,9 @@
 export const RELEASE_MODEL_UID = 'plugin::content-releases.release';
 export const RELEASE_ACTION_MODEL_UID = 'plugin::content-releases.release-action';
 
-export const RELEASE_STRATEGIES = ['partial', 'all_or_nothing'] as const;
-export type ReleaseStrategy = (typeof RELEASE_STRATEGIES)[number];
-export const DEFAULT_RELEASE_STRATEGY = 'all_or_nothing' satisfies ReleaseStrategy;
+export const RELEASE_CONDITIONS = ['partial', 'all_or_nothing'] as const;
+export type ReleaseCondition = (typeof RELEASE_CONDITIONS)[number];
+export const DEFAULT_RELEASE_CONDITION = 'all_or_nothing' satisfies ReleaseCondition;
 
 export const ACTIONS = [
   {

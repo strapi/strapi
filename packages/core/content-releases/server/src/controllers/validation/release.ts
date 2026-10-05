@@ -1,6 +1,6 @@
 import { yup, validateYupSchema } from '@strapi/utils';
 
-import { RELEASE_STRATEGIES } from '../../constants';
+import { RELEASE_CONDITIONS } from '../../constants';
 
 export const RELEASE_SCHEMA = yup
   .object()
@@ -12,7 +12,7 @@ export const RELEASE_SCHEMA = yup
       then: yup.string().required(),
       otherwise: yup.string().nullable(),
     }),
-    releaseStrategy: yup.string().oneOf([...RELEASE_STRATEGIES]),
+    releaseCondition: yup.string().oneOf([...RELEASE_CONDITIONS]),
   })
   .required()
   .noUnknown();

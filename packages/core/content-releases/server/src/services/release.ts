@@ -112,7 +112,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
           scheduledAt: release.scheduledAt,
           timezone: release.timezone,
         }),
-        releaseStrategy: release.releaseStrategy,
+        releaseCondition: release.releaseCondition,
       });
 
       if (releaseWithCreatorFields.scheduledAt) {
