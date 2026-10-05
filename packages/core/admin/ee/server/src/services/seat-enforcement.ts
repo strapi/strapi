@@ -14,7 +14,7 @@ const getDisabledUserList = async () => {
 
 const enableMaximumUserCount = async (numberOfUsersToEnable: number) => {
   const disabledUsers = (await getDisabledUserList()) as any;
-  const orderedDisabledUsers = [...disabledUsers].reverse();
+  const orderedDisabledUsers = [...(disabledUsers ?? [])].reverse();
 
   const usersToEnable = take(orderedDisabledUsers, numberOfUsersToEnable);
 
