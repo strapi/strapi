@@ -4,7 +4,6 @@ import _ from 'lodash';
 import type { QuestionCollection } from 'inquirer';
 import { createStrapi, compileStrapi } from '@strapi/core';
 
-import { runAction } from '../../utils/helpers';
 import { getInquirer } from '../../utils/get-inquirer';
 import type { StrapiCommand } from '../../types';
 
@@ -154,7 +153,7 @@ const command: StrapiCommand = () => {
     .option('-p, --password <password>', 'Password of the new admin')
     .option('-f, --firstname <first name>', 'First name of the new admin')
     .option('-l, --lastname <last name>', 'Last name of the new admin')
-    .action(runAction('admin:create-user', action));
+    .action(action);
 };
 
 export { action, command };
