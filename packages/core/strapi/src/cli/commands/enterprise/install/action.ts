@@ -1,4 +1,4 @@
-import os from 'os';
+import os from 'node:os';
 
 import { loadEnv } from '../../../../node/core/env';
 import type { Logger } from '../../../utils/logger';
@@ -22,7 +22,7 @@ import {
   resolveRequestedVersion,
 } from './versions';
 
-export interface InstallDependencies {
+interface InstallDependencies {
   isInteractive: boolean;
   env: NodeJS.ProcessEnv;
   homeDir: string;

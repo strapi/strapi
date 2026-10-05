@@ -1,4 +1,4 @@
-import path from 'path';
+import path from 'node:path';
 import fse from 'fs-extra';
 import execa from 'execa';
 import { packageManager as packageManagerUtils } from '@strapi/utils';

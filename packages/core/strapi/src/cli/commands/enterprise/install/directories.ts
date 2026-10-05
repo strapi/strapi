@@ -1,4 +1,4 @@
-import path from 'path';
+import path from 'node:path';
 
 /** The app folder and each of its parents, up to the root of the file system. */
 export const listAncestorDirectories = (appDir: string): string[] => {

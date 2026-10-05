@@ -1,4 +1,4 @@
-import { PassThrough } from 'stream';
+import { PassThrough } from 'node:stream';
 
 import { promptChecklist, type ChecklistChoice } from '../checklist-prompt';
 import { PromptCancelledError } from '../errors';

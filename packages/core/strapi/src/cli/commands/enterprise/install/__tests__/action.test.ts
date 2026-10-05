@@ -1,13 +1,8 @@
-import path from 'path';
+import path from 'node:path';
 import fse from 'fs-extra';
 
 import { EnterpriseInstallError, PackageManagerError, PromptCancelledError } from '../errors';
-import {
-  parsePackageArgument,
-  reportInstallError,
-  runInstall,
-  type InstallDependencies,
-} from '../action';
+import { parsePackageArgument, reportInstallError, runInstall } from '../action';
 import {
   createFetchResponse,
   createPackument,
@@ -18,6 +13,8 @@ import {
   expectedSetupWarning,
   loggedText,
 } from './test-helpers';
+
+type InstallDependencies = Parameters<typeof runInstall>[0]['dependencies'];
 
 const LICENSE = createTestLicense();
 const AI_BYOK = '@strapi-enterprise/plugin-ai-byok';
