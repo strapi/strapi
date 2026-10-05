@@ -10,6 +10,9 @@ import { server } from './server';
 
 expect.addSnapshotSerializer(styleSheetSerializer);
 
+// Node also exposes Web Storage globals, which Vitest leaves in place instead of JSDOM's.
+vi.stubGlobal('localStorage', jsdom.window.localStorage);
+vi.stubGlobal('sessionStorage', jsdom.window.sessionStorage);
 vi.stubGlobal('ResizeObserver', ResizeObserver);
 vi.stubGlobal(
   'IntersectionObserver',
