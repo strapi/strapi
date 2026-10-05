@@ -1,0 +1,173 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components generator with strict types, schemas augment the global Strapi.Registries namespace 1`] = `
+"import type { Schema, Struct } from "@strapi/strapi";
+
+export interface SharedSeo extends Struct.ComponentSchema {
+    collectionName: 'components_shared_seos';
+    info: {
+        displayName: 'Seo';
+    };
+    attributes: {
+        metaTitle: Schema.Attribute.String & Schema.Attribute.SetMinMaxLength<{
+            maxLength: 60;
+        }>;
+    };
+}
+
+declare global {
+    namespace Strapi {
+        namespace Registries {
+            interface ComponentSchemas {
+                'shared.seo': SharedSeo;
+            }
+        }
+    }
+}
+"
+`;
+
+exports[`components generator without strict types, output equals the develop output 1`] = `
+"import type { Schema, Struct } from "@strapi/strapi";
+
+export interface SharedSeo extends Struct.ComponentSchema {
+    collectionName: 'components_shared_seos';
+    info: {
+        displayName: 'Seo';
+    };
+    attributes: {
+        metaTitle: Schema.Attribute.String & Schema.Attribute.SetMinMaxLength<{
+            maxLength: 60;
+        }>;
+    };
+}
+
+declare module '@strapi/strapi' {
+    export namespace Public {
+        export interface ComponentSchemas {
+            'shared.seo': SharedSeo;
+        }
+    }
+}
+"
+`;
+
+exports[`content types generator with strict types, schemas augment the global Strapi.Registries namespace 1`] = `
+"import type { Schema, Struct } from "@strapi/strapi";
+
+export interface AdminUser extends Struct.CollectionTypeSchema {
+    collectionName: 'admin_users';
+    info: {
+        displayName: 'User';
+        pluralName: 'users';
+        singularName: 'user';
+    };
+    options: {
+        draftAndPublish: false;
+    };
+    attributes: {
+        email: Schema.Attribute.Email & Schema.Attribute.Required;
+    };
+}
+
+export interface ApiArticleArticle extends Struct.CollectionTypeSchema {
+    collectionName: 'articles';
+    info: {
+        displayName: 'Article';
+        pluralName: 'articles';
+        singularName: 'article';
+    };
+    options: {
+        draftAndPublish: true;
+    };
+    attributes: {
+        author: Schema.Attribute.Relation<'manyToOne', 'admin::user'>;
+        seo: Schema.Attribute.Component<'shared.seo', false>;
+        title: Schema.Attribute.String & Schema.Attribute.Required;
+    };
+}
+
+export interface ApiHomepageHomepage extends Struct.SingleTypeSchema {
+    collectionName: 'homepages';
+    info: {
+        displayName: 'Homepage';
+        pluralName: 'homepages';
+        singularName: 'homepage';
+    };
+    attributes: {
+        headline: Schema.Attribute.Text;
+    };
+}
+
+declare global {
+    namespace Strapi {
+        namespace Registries {
+            interface ContentTypeSchemas {
+                'admin::user': AdminUser;
+                'api::article.article': ApiArticleArticle;
+                'api::homepage.homepage': ApiHomepageHomepage;
+            }
+        }
+    }
+}
+"
+`;
+
+exports[`content types generator without strict types, output equals the develop output 1`] = `
+"import type { Schema, Struct } from "@strapi/strapi";
+
+export interface AdminUser extends Struct.CollectionTypeSchema {
+    collectionName: 'admin_users';
+    info: {
+        displayName: 'User';
+        pluralName: 'users';
+        singularName: 'user';
+    };
+    options: {
+        draftAndPublish: false;
+    };
+    attributes: {
+        email: Schema.Attribute.Email & Schema.Attribute.Required;
+    };
+}
+
+export interface ApiArticleArticle extends Struct.CollectionTypeSchema {
+    collectionName: 'articles';
+    info: {
+        displayName: 'Article';
+        pluralName: 'articles';
+        singularName: 'article';
+    };
+    options: {
+        draftAndPublish: true;
+    };
+    attributes: {
+        author: Schema.Attribute.Relation<'manyToOne', 'admin::user'>;
+        seo: Schema.Attribute.Component<'shared.seo', false>;
+        title: Schema.Attribute.String & Schema.Attribute.Required;
+    };
+}
+
+export interface ApiHomepageHomepage extends Struct.SingleTypeSchema {
+    collectionName: 'homepages';
+    info: {
+        displayName: 'Homepage';
+        pluralName: 'homepages';
+        singularName: 'homepage';
+    };
+    attributes: {
+        headline: Schema.Attribute.Text;
+    };
+}
+
+declare module '@strapi/strapi' {
+    export namespace Public {
+        export interface ContentTypeSchemas {
+            'admin::user': AdminUser;
+            'api::article.article': ApiArticleArticle;
+            'api::homepage.homepage': ApiHomepageHomepage;
+        }
+    }
+}
+"
+`;

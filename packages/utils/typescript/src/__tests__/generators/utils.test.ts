@@ -38,4 +38,41 @@ describe('generateSharedExtensionDefinition', () => {
 
     expect(output).toContain('export interface ComponentSchemas');
   });
+
+  test('emits a global Strapi.Registries augmentation with strict types', () => {
+    const node = generateSharedExtensionDefinition(
+      'ContentTypeSchemas',
+      [makeDefinition('api::foo.foo', 'ApiFooFoo')],
+      { strict: true }
+    );
+
+    const output = emitDefinitions([node]);
+
+    expect(output).toMatch(
+      /^declare global {\s*namespace Strapi {\s*namespace Registries {\s*interface ContentTypeSchemas {/
+    );
+    expect(output).toContain("'api::foo.foo': ApiFooFoo");
+    expect(output).not.toContain('@strapi/strapi');
+    expect(output).not.toContain('Public');
+    expect(output).not.toContain('export');
+  });
+
+  test('emits an empty Registries namespace with strict types and no definitions', () => {
+    const node = generateSharedExtensionDefinition('ComponentSchemas', [], { strict: true });
+
+    const output = emitDefinitions([node]);
+
+    expect(output).toMatch(/namespace Registries {\s*}/);
+    expect(output).not.toContain('ComponentSchemas');
+  });
+
+  test('keeps the Public augmentation when strict is false', () => {
+    const definitions = [makeDefinition('default.bar', 'DefaultBar')];
+
+    expect(
+      emitDefinitions([
+        generateSharedExtensionDefinition('ComponentSchemas', definitions, { strict: false }),
+      ])
+    ).toBe(emitDefinitions([generateSharedExtensionDefinition('ComponentSchemas', definitions)]));
+  });
 });
