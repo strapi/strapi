@@ -2,19 +2,27 @@ import { pick, take, drop } from 'lodash';
 
 import { getService } from '../utils';
 import constants from '../../../../server/src/services/constants';
+import type { AdminUser } from '../../../../shared/contracts/shared';
 
 const { SUPER_ADMIN_CODE } = constants;
 
+type DisabledUser = Pick<AdminUser, 'id' | 'isActive'>;
+
 /**
- * Keeps the list of users disabled by the seat enforcement service
+ * Returns users disabled by seat enforcement, or an empty list when none are stored.
  */
-const getDisabledUserList = async () => {
-  return strapi.store.get({ type: 'ee', key: 'disabled_users' });
+const getDisabledUserList = async (): Promise<DisabledUser[]> => {
+  const disabledUsers = (await strapi.store.get({ type: 'ee', key: 'disabled_users' })) as
+    | DisabledUser[]
+    | null
+    | undefined;
+
+  return disabledUsers ?? [];
 };
 
 const enableMaximumUserCount = async (numberOfUsersToEnable: number) => {
-  const disabledUsers = (await getDisabledUserList()) as any;
-  const orderedDisabledUsers = [...(disabledUsers ?? [])].reverse();
+  const disabledUsers = await getDisabledUserList();
+  const orderedDisabledUsers = [...disabledUsers].reverse();
 
   const usersToEnable = take(orderedDisabledUsers, numberOfUsersToEnable);
 
@@ -33,7 +41,7 @@ const enableMaximumUserCount = async (numberOfUsersToEnable: number) => {
 };
 
 const disableUsersAboveLicenseLimit = async (numberOfUsersToDisable: number) => {
-  const currentlyDisabledUsers: any = (await getDisabledUserList()) ?? [];
+  const currentlyDisabledUsers = await getDisabledUserList();
 
   const usersToDisable = [];
   const nonSuperAdminUsersToDisable = await strapi.db.query('admin::user').findMany({
@@ -77,11 +85,9 @@ const disableUsersAboveLicenseLimit = async (numberOfUsersToDisable: number) => 
 };
 
 const syncDisabledUserRecords = async () => {
-  const disabledUsers = (await strapi.store.get({ type: 'ee', key: 'disabled_users' })) as
-    | { id: string | number; isActive: boolean }[]
-    | undefined;
+  const disabledUsers = await getDisabledUserList();
 
-  if (!disabledUsers) {
+  if (disabledUsers.length === 0) {
     return;
   }
 

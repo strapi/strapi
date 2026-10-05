@@ -27,6 +27,15 @@ describe('seat enforcement', () => {
   };
 
   test.each([null, undefined])(
+    'returns an empty disabled-user list for %s',
+    async (disabledUsers) => {
+      setup(disabledUsers);
+
+      await expect(seatEnforcement.getDisabledUserList()).resolves.toEqual([]);
+    }
+  );
+
+  test.each([null, undefined])(
     'completes with available seats when the disabled-user list is %s',
     async (disabledUsers) => {
       const { updateMany, store } = setup(disabledUsers);
