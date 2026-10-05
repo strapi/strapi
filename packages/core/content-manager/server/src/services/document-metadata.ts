@@ -46,6 +46,41 @@ const AVAILABLE_LOCALES_FIELDS = [
   'publishedAt',
 ];
 
+/**
+ * Convert dotted populate paths (`comp.mid.inners`) into a nested populate object
+ * the query-params transformer understands.
+ */
+const dottedPathsToPopulate = (paths: string[]): Record<string, unknown> => {
+  const root: Record<string, unknown> = {};
+
+  for (const path of paths) {
+    const parts = path.split('.').filter(Boolean);
+    let node: Record<string, unknown> = root;
+
+    for (const [i, part] of parts.entries()) {
+      const isLast = i === parts.length - 1;
+
+      if (isLast) {
+        if (node[part] === undefined) {
+          node[part] = true;
+        }
+        continue;
+      }
+
+      const current = node[part];
+      if (current === true || current === undefined) {
+        node[part] = { populate: {} };
+      } else if (typeof current === 'object' && current !== null && !('populate' in current)) {
+        (current as Record<string, unknown>).populate = {};
+      }
+
+      node = (node[part] as { populate: Record<string, unknown> }).populate;
+    }
+  }
+
+  return root;
+};
+
 /** Returns a DB filter that matches the opposite publish status. */
 const oppositePublishStatus = (publishedAt: unknown) =>
   publishedAt !== null ? { $null: true } : { $notNull: true };
@@ -95,7 +130,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
    * The result is sorted with the default locale (as defined by the i18n plugin)
    * at index 0 when present. This is the canonical-source invariant relied on by
    * `useDocument.getInitialFormValues` in the admin: when creating a new locale
-   * draft, non-localized scalar/media values are inherited from
+   * draft, non-localized scalar/media/component/dynamic-zone values are inherited from
    * `availableLocales[0]`. Putting the default locale first means inheritance
    * stays predictable when sibling locales have drifted on non-localized fields
    * (which can happen because the server only syncs non-localized fields at
@@ -272,13 +307,34 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     const hasDnP = contentTypes.hasDraftAndPublish(model);
     const isLocalized = strapi.localization.isLocalizedContentType(model);
 
+    // Resolve once for all return paths — admin lock logic needs this even when
+    // the current locale is excluded from `availableLocales`.
+    let defaultLocale: string | null = null;
+    if (isLocalized) {
+      try {
+        defaultLocale = (await strapi.localization.getDefaultLocale()) ?? null;
+      } catch {
+        defaultLocale = null;
+      }
+    }
+
     if (!availableLocales && !availableStatus) {
       // Nothing to compute.
-      return { availableLocales: [], availableStatus: [], versions: [] as DocumentVersion[] };
+      return {
+        availableLocales: [],
+        availableStatus: [],
+        defaultLocale,
+        versions: [] as DocumentVersion[],
+      };
     }
     if (!isLocalized && !hasDnP) {
       // If there are no locales and no draft/publish, there's only ever 1 version of any document.
-      return { availableLocales: [], availableStatus: [], versions: [] as DocumentVersion[] };
+      return {
+        availableLocales: [],
+        availableStatus: [],
+        defaultLocale,
+        versions: [] as DocumentVersion[],
+      };
     }
 
     const onlyStatusIsRelevant = hasDnP && (!isLocalized || !availableLocales);
@@ -297,6 +353,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       return {
         availableLocales: [],
         availableStatus: otherVersion ? [pick(AVAILABLE_STATUS_FIELDS, otherVersion)] : [],
+        defaultLocale,
         versions: [] as DocumentVersion[],
       };
     }
@@ -305,10 +362,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     // TODO: Ignore publishedAt if availableStatus=false, and ignore locale if
     // i18n is disabled
 
-    // Include non-translatable scalar and media fields in availableLocales for i18n prefilling
+    // Include non-translatable fields in availableLocales for i18n prefilling
+    // (scalars + media + components + dynamic zones; relations stay server-filled).
     let nonLocalizedFields: string[] = [];
     let nonLocalizedMediaFields: string[] = [];
     // Without a localization provider there are no non-localized attributes.
+    let nestedPopulate: Record<string, unknown> = {};
     try {
       if (model?.attributes !== undefined) {
         const allNonLocalized = strapi.localization.getNonLocalizedAttributes(model);
@@ -318,17 +377,84 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
         // Separate scalar fields (can be in fields array) from media fields (need to be populated)
         nonLocalizedFields = allNonLocalized.filter(
-          (field) => field in model.attributes && scalarAttrs.includes(field)
+          (field: string) => field in model.attributes && scalarAttrs.includes(field)
         );
         nonLocalizedMediaFields = allNonLocalized.filter(
-          (field) => field in model.attributes && mediaAttrs.includes(field)
+          (field: string) => field in model.attributes && mediaAttrs.includes(field)
         );
+
+        const getNestedPopulate = strapi.localization.getNestedPopulateOfNonLocalizedAttributes;
+        if (typeof getNestedPopulate === 'function') {
+          const buildNestedPopulate = (
+            schemaUID: UID.Schema,
+            populate = dottedPathsToPopulate(getNestedPopulate(schemaUID))
+          ): Record<string, unknown> => {
+            const schema = strapi.getModel(schemaUID);
+
+            return Object.fromEntries(
+              Object.entries(populate).map(([field, value]) => {
+                const attribute = schema?.attributes[field];
+
+                if (attribute?.type === 'dynamiczone') {
+                  return [
+                    field,
+                    {
+                      on: attribute.components.reduce<
+                        Record<string, { populate: Record<string, unknown> }>
+                      >((acc, componentUID) => {
+                        acc[componentUID] = {
+                          populate: buildNestedPopulate(componentUID),
+                        };
+                        return acc;
+                      }, {}),
+                    },
+                  ];
+                }
+
+                if (
+                  attribute?.type === 'component' &&
+                  typeof value === 'object' &&
+                  value !== null &&
+                  'populate' in value
+                ) {
+                  return [
+                    field,
+                    {
+                      populate: buildNestedPopulate(
+                        attribute.component,
+                        (value as { populate: Record<string, unknown> }).populate
+                      ),
+                    },
+                  ];
+                }
+
+                return [field, value];
+              })
+            );
+          };
+
+          nestedPopulate = buildNestedPopulate(uid);
+        } else {
+          const componentAndDzFields = allNonLocalized.filter(
+            (field: string) =>
+              field in model.attributes &&
+              (model.attributes[field]?.type === 'component' ||
+                model.attributes[field]?.type === 'dynamiczone')
+          );
+          nestedPopulate = componentAndDzFields.reduce(
+            (acc: Record<string, true>, field: string) => {
+              acc[field] = true;
+              return acc;
+            },
+            {}
+          );
+        }
       }
     } catch {
       // The provider errored — fall back to no prefilled non-localized fields
     }
 
-    // Build populate object for non-localized media fields
+    // Build populate object for non-localized media + nested component/DZ fields
     const mediaPopulate = nonLocalizedMediaFields.reduce(
       (acc, field) => {
         acc[field] = {
@@ -338,11 +464,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         };
         return acc;
       },
-      {} as Record<string, { populate: { folder: boolean } }>
+      {} as Record<string, { populate: { folder: boolean } } | true>
     );
 
     const params = {
       populate: {
+        ...nestedPopulate,
         ...mediaPopulate,
         ...AVAILABLE_STATUS_POPULATE,
       },
@@ -367,6 +494,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     return {
       availableLocales: availableLocalesResult,
       availableStatus: availableStatusResult ? [availableStatusResult] : [],
+      defaultLocale,
       versions,
     };
   },
@@ -387,6 +515,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         meta: {
           availableLocales: [],
           availableStatus: [],
+          defaultLocale: null,
         },
       };
     }

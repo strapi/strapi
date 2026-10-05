@@ -131,6 +131,9 @@ const getLocalizedAttributes = (model: any) => {
   );
 };
 
+const isPresentObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
 /**
  * Fill non localized fields of an entry if there are nil
  * @param {Object} entry entry to fill
@@ -139,16 +142,44 @@ const getLocalizedAttributes = (model: any) => {
  * @param {Object} options.model corresponding model
  */
 const fillNonLocalizedAttributes = (entry: any, relatedEntry: any, { model }: any) => {
-  if (isNil(relatedEntry)) {
+  if (isNil(relatedEntry) || isNil(entry)) {
     return;
   }
 
   const modelDef = strapi.getModel(model);
+  if (!modelDef) {
+    return;
+  }
+
   const relatedEntryCopy = copyNonLocalizedAttributes(modelDef, relatedEntry);
 
   for (const [field, value] of Object.entries(relatedEntryCopy)) {
-    if (isNil(entry[field])) {
+    const attr = modelDef.attributes?.[field];
+    // Empty arrays are the admin create-locale default for required repeatable
+    // components and dynamic zones. Other array-valued fields, such as JSON and
+    // multiple media, may be intentionally cleared and must remain untouched.
+    const isEmptyComponentValue =
+      Array.isArray(entry[field]) &&
+      entry[field].length === 0 &&
+      ((attr?.type === 'component' && attr.repeatable) || attr?.type === 'dynamiczone');
+    const isUnset = isNil(entry[field]) || isEmptyComponentValue;
+
+    if (isUnset) {
       entry[field] = value;
+      continue;
+    }
+
+    // A present-but-shallow non-repeatable component (nested keys omitted or [])
+    // must still inherit those nested values. Otherwise saving a secondary locale
+    // syncs the shallow object to every locale and wipes nested data.
+    if (
+      attr?.type === 'component' &&
+      !attr.repeatable &&
+      isPresentObject(entry[field]) &&
+      isPresentObject(value)
+    ) {
+      fillNonLocalizedAttributes(entry[field], value, { model: attr.component });
+      continue;
     }
   }
 };
