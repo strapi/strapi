@@ -322,6 +322,48 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
     }
   });
 
+  test(`${resolution}: generated application controllers resolve in strict mode`, async () => {
+    // eslint-disable-next-line import/no-extraneous-dependencies
+    const { generators } = require('@strapi/typescript-utils');
+    const appDir = fs.mkdtempSync(path.join(__dirname, '.generated-'));
+    const generatedFile = path.join(appDir, 'types/generated/controllers.d.ts');
+    const strapi = {
+      dirs: { app: { api: fixture('app/src/api') } },
+      // `helpers` has no default export; plugin controllers are left to their packages.
+      controllers: Object.fromEntries(
+        [
+          'api::article.article',
+          'api::article.report',
+          'api::article.helpers',
+          'plugin::i18n.locales',
+        ].map((uid) => [uid, {}])
+      ),
+    };
+
+    try {
+      await generators.generate({
+        strapi,
+        pwd: appDir,
+        artifacts: { controllers: true },
+        logger: { silent: true },
+      });
+      const generated = fs.readFileSync(generatedFile, 'utf8');
+      assert.match(generated, /interface AppControllers/);
+      assert.doesNotMatch(generated, /plugin::/);
+      assertClean(
+        compiler(options)([
+          generatedFile,
+          'settings.d.ts',
+          'generated-strict.d.ts',
+          'controllers.ts',
+        ]),
+        `${resolution}, generated application controllers`
+      );
+    } finally {
+      fs.rmSync(appDir, { recursive: true, force: true });
+    }
+  });
+
   test(`${resolution}: normal package entries resolve to emitted declarations`, () => {
     for (const directory of [...providers, 'packages/core/types', 'packages/core/strapi']) {
       const manifest = readManifest(directory);
