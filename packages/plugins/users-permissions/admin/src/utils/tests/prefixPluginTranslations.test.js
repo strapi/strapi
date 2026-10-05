@@ -1,3 +1,5 @@
+import { describe, it, expect } from 'vitest';
+
 import { prefixPluginTranslations } from '../prefixPluginTranslations';
 
 describe('prefixPluginTranslations', () => {

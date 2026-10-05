@@ -1,3 +1,5 @@
+import { describe, it, expect } from 'vitest';
+
 import formatPolicies from '../formatPolicies';
 
 describe('USERS PERMISSIONS | utils | formatPolicies', () => {
