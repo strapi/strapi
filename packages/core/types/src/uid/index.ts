@@ -2,6 +2,7 @@ import type * as Internal from '../internal';
 import type * as Struct from '../struct';
 import type { Constants, Guard, Object, Extends, Or } from '../utils';
 import type * as Public from '../public';
+import type * as SchemaRegistries from '../schema/registries';
 
 /**
  * Combines ContentType and Component UID types in a single union type.
@@ -55,11 +56,13 @@ export type Schema = ContentType | Component;
  * // Now you can pass the unique identifier for a content type to fetch its schema
  * fetchSchema('api::foo.foo');
  * ```
+ * In strict mode, it reads `Strapi.Registries.ContentTypeSchemas` and ignores the public registry.
+ *
  * @see {@link Public.ContentTypeSchemas} Content-type public registry.
  * @see {@link UID.ContentType} ContentType UID format definition.
  */
 export type ContentType = Internal.Registry.Keys<
-  Public.ContentTypeSchemas,
+  SchemaRegistries.ContentTypeSchemas,
   Internal.UID.ContentType
 >;
 
@@ -84,10 +87,15 @@ export type ContentType = Internal.Registry.Keys<
  * // Now you can pass the unique identifier for a component to fetch its schema
  * fetchSchema('default.foo');
  * ```
+ * In strict mode, it reads `Strapi.Registries.ComponentSchemas` and ignores the public registry.
+ *
  * @see {@link Public.ComponentSchemas} Component public registry.
  * @see {@link UID.Component} Component UID format definition.
  */
-export type Component = Internal.Registry.Keys<Public.ComponentSchemas, Internal.UID.Component>;
+export type Component = Internal.Registry.Keys<
+  SchemaRegistries.ComponentSchemas,
+  Internal.UID.Component
+>;
 
 /**
  * Obtains a union of every component's category from the public component registry.
@@ -108,7 +116,10 @@ export type ComponentCategory =
  * If no collection type is found, it fallbacks to a generic content-type UID.
  */
 export type CollectionType = Guard.Never<
-  Extract<Object.KeysBy<Public.ContentTypeSchemas, Struct.CollectionTypeSchema>, ContentType>,
+  Extract<
+    Object.KeysBy<SchemaRegistries.ContentTypeSchemas, Struct.CollectionTypeSchema>,
+    ContentType
+  >,
   Internal.UID.ContentType
 >;
 
@@ -118,7 +129,7 @@ export type CollectionType = Guard.Never<
  * If no single type is found, it falls back to a generic content-type UID.
  */
 export type SingleType = Guard.Never<
-  Extract<Object.KeysBy<Public.ContentTypeSchemas, Struct.SingleTypeSchema>, ContentType>,
+  Extract<Object.KeysBy<SchemaRegistries.ContentTypeSchemas, Struct.SingleTypeSchema>, ContentType>,
   Internal.UID.ContentType
 >;
 
@@ -160,7 +171,7 @@ export type Middleware = Internal.Registry.Keys<Public.Middlewares, Internal.UID
  * @template TSchemaUID - The UID of the schema
  */
 export type IsCollectionType<TSchemaUID extends Schema> = TSchemaUID extends CollectionType
-  ? Extends<Public.ContentTypeSchemas[TSchemaUID], Struct.CollectionTypeSchema>
+  ? Extends<SchemaRegistries.ContentTypeSchemas[TSchemaUID], Struct.CollectionTypeSchema>
   : Constants.False;
 
 /**
@@ -173,7 +184,7 @@ export type IsCollectionType<TSchemaUID extends Schema> = TSchemaUID extends Col
  * @template TSchemaUID - The UID of the schema
  */
 export type IsSingleType<TSchemaUID extends Schema> = TSchemaUID extends SingleType
-  ? Extends<Public.ContentTypeSchemas[TSchemaUID], Struct.SingleTypeSchema>
+  ? Extends<SchemaRegistries.ContentTypeSchemas[TSchemaUID], Struct.SingleTypeSchema>
   : Constants.False;
 
 /**
@@ -184,7 +195,7 @@ export type IsSingleType<TSchemaUID extends Schema> = TSchemaUID extends SingleT
  * @template TSchemaUID - The UID of the schema
  */
 export type IsComponent<TSchemaUID extends Schema> = TSchemaUID extends Component
-  ? Extends<Public.ComponentSchemas[TSchemaUID], Struct.ComponentSchema>
+  ? Extends<SchemaRegistries.ComponentSchemas[TSchemaUID], Struct.ComponentSchema>
   : Constants.False;
 
 /**
