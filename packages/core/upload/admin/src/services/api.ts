@@ -408,7 +408,7 @@ const runMergedUploadPool = async ({
       const earlier = previous?.data ?? [];
 
       if (abortController.signal.aborted) {
-        return { data: earlier };
+        return { data: earlier, own: [] };
       }
 
       registerAbortController(uploadId, abortController);
