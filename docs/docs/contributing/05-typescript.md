@@ -4,7 +4,7 @@ description: 'TypeScript usage conventions and guidelines for Strapi codebase.'
 ---
 
 This guide covers how the monorepo's server packages use registered contracts. Strapi packages
-publish service, controller, policy, and config contracts through the global `Strapi.Registries`
+publish service, controller, policy, middleware, and config contracts through the global `Strapi.Registries`
 namespace. Contracts only change lookup types in strict mode, which applications enable with the
 `@strapi/strapi/strict-types` entry. Without strict mode, the `@strapi/types` and `@strapi/strapi`
 types must stay those of the previous release.
@@ -50,8 +50,8 @@ contracts through `@strapi/strapi/strict-types` or generated types.
 ## Declaring a package's contracts
 
 Keep contracts in the package that implements them, under `server/src/types/`, and declare them
-in the `Package*` registries: `PackageServices`, `PackageControllers`, `PackagePolicies`, and
-`PackageConfigs`. The `App*` registries belong to applications.
+in the `Package*` registries: `PackageServices`, `PackageControllers`, `PackagePolicies`,
+`PackageMiddlewares`, and `PackageConfigs`. The `App*` registries belong to applications.
 
 ```ts
 // server/src/types/index.ts
@@ -96,6 +96,25 @@ A config namespace has two types:
 
 The JSDoc of each type links to the other. `@strapi/core` keeps one file per core namespace in
 `packages/core/core/src/types/config/` and registers them in `packages/core/core/src/types/index.ts`.
+
+### Policy and middleware contracts
+
+`PackagePolicies` and `PackageMiddlewares` map a full UID to the config the policy or middleware
+accepts: the second parameter of a policy handler, the first parameter of a middleware factory,
+`undefined` when there is none. Typed route configs (`Core.RouterInputFor`, `Core.RouteConfigFor`)
+treat each registry as a complete inventory: once any entry is registered, they reject unregistered
+names. A package that registers policies or middlewares registers all of them.
+
+- A route references a middleware by name alone only when its config is optional. Runtime passes
+  `{}` when the config is omitted, so a config whose fields are all optional counts as optional.
+- `{ name, config }` checks `config` against the registered contract. Inline handlers and
+  `{ resolve, config }` entries are not checked. `Core.RouteConfig` keeps its unchecked type.
+- `strapi.middleware(name)` resolves a registered name to `MiddlewareFactory<Config>`, and an
+  unregistered or dynamic name to `unknown`. Code that resolves dynamic names passes the factory type
+  explicitly: `strapi.middleware<Core.MiddlewareFactory>(name)`.
+- `@strapi/core` registers the `strapi::*` middlewares in `packages/core/core/src/types/index.ts`.
+  Application middlewares (`global::*`, `api::*`) need type generation to be accepted by typed
+  routes.
 
 ## Keeping types unchanged without strict mode
 
