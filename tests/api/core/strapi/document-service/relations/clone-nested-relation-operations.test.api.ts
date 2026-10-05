@@ -6,6 +6,7 @@ import type { Core, UID } from '@strapi/types';
 import type { Knex } from 'knex';
 
 import { testInTransaction } from '../../../../utils';
+import { applyDeferredCloneRelationCopies } from '../../../../../../packages/core/core/src/services/document-service/utils/clone-relations';
 
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
@@ -16,6 +17,7 @@ const builder = createTestBuilder();
 const PRODUCT_UID = 'api::product.product' as UID.ContentType;
 const TAG_UID = 'api::tag.tag' as UID.ContentType;
 const RELATION_CONTAINER_UID = 'default.relation-container' as UID.Component;
+const PLAIN_BLOCK_UID = 'default.plain-block' as UID.Component;
 
 type RelationContainer = {
   id?: number;
@@ -57,6 +59,14 @@ const relationContainerModel = {
   displayName: 'relation-container',
 };
 
+const plainBlockModel = {
+  collectionName: 'components_plain_blocks',
+  attributes: {
+    label: { type: 'string' },
+  },
+  displayName: 'plain-block',
+};
+
 const productModel = {
   attributes: {
     name: { type: 'string' },
@@ -71,7 +81,7 @@ const productModel = {
     },
     sections: {
       type: 'dynamiczone',
-      components: [RELATION_CONTAINER_UID],
+      components: [RELATION_CONTAINER_UID, PLAIN_BLOCK_UID],
     },
   },
   draftAndPublish: true,
@@ -106,6 +116,7 @@ const populate = {
       [RELATION_CONTAINER_UID]: {
         populate: { tag: true, legacyTag: true, mto: true },
       },
+      [PLAIN_BLOCK_UID]: true,
     },
   },
 } as const;
@@ -133,6 +144,7 @@ describe('Document Service clone nested relation operation payloads', () => {
     await builder
       .addContentType(tagModel)
       .addComponent(relationContainerModel)
+      .addComponent(plainBlockModel)
       .addContentType(productModel)
       .build();
 
@@ -785,5 +797,153 @@ describe('Document Service clone nested relation operation payloads', () => {
       originalDetailsLabel: 'Source details',
       originalMorphDocumentId: null,
     });
+  });
+
+  testInTransaction(
+    'clone does not copy a morph onto another row when a dynamic zone block changes component',
+    async (trx: Knex.Transaction) => {
+      const victimTag = await createTag('Zone Swap Victim Tag');
+      const sourceTag = await createTag('Zone Swap Source Tag');
+      const victimTagRow = await strapi.db.query(TAG_UID).findOne({
+        where: { documentId: victimTag.documentId, publishedAt: null },
+      });
+      const sourceTagRow = await strapi.db.query(TAG_UID).findOne({
+        where: { documentId: sourceTag.documentId, publishedAt: null },
+      });
+
+      const victim = await strapi.documents(PRODUCT_UID).create({
+        data: {
+          name: 'Zone Swap Victim',
+          sections: [
+            {
+              __component: RELATION_CONTAINER_UID,
+              label: 'Victim block',
+              mto: { id: victimTagRow!.id, __type: TAG_UID },
+            },
+          ],
+        },
+        populate,
+      });
+      const source = await strapi.documents(PRODUCT_UID).create({
+        data: {
+          name: 'Zone Swap Source',
+          sections: [
+            {
+              __component: RELATION_CONTAINER_UID,
+              label: 'Source block',
+              mto: { id: sourceTagRow!.id, __type: TAG_UID },
+            },
+          ],
+        },
+        populate,
+      });
+
+      const componentMeta = strapi.db.metadata.get(RELATION_CONTAINER_UID);
+      const morphColumn = (
+        componentMeta.attributes.mto as {
+          morphColumn?: { idColumn?: { name?: string }; typeColumn?: { name?: string } };
+        }
+      ).morphColumn;
+      const idColumn = morphColumn!.idColumn!.name!;
+      const typeColumn = morphColumn!.typeColumn!.name!;
+      const readMorph = async (id: number) => {
+        const row = await strapi.db
+          .connection(componentMeta.tableName)
+          .where({ id })
+          .select([idColumn, typeColumn])
+          .transacting(trx)
+          .first();
+
+        return {
+          morphId: row?.[idColumn] ?? null,
+          morphType: row?.[typeColumn] ?? null,
+        };
+      };
+
+      const victimBlock = (victim as ProductWithNestedRelations).sections?.[0];
+      const sourceBlock = (source as ProductWithNestedRelations).sections?.[0];
+      const victimBefore = await readMorph(victimBlock!.id!);
+      const sourceBefore = await readMorph(sourceBlock!.id!);
+
+      // Component ids are per table. Pad the replacement component so the clone
+      // block id equals the victim row id; that is the row a bad copy would update.
+      const plainMeta = strapi.db.metadata.get(PLAIN_BLOCK_UID);
+      const plainMax = await strapi.db
+        .connection(plainMeta.tableName)
+        .max({ maxId: 'id' })
+        .transacting(trx)
+        .first();
+      let nextPlainId = Number(plainMax?.maxId ?? 0) + 1;
+      let pad = 0;
+      while (nextPlainId < victimBlock!.id!) {
+        pad += 1;
+        await strapi.documents(PRODUCT_UID).create({
+          data: {
+            name: `Zone swap pad ${pad}`,
+            sections: [{ __component: PLAIN_BLOCK_UID, label: 'pad' }],
+          },
+        });
+        nextPlainId += 1;
+      }
+
+      const result = await strapi.documents(PRODUCT_UID).clone({
+        documentId: source.documentId,
+        data: {
+          name: 'Zone Swap Clone',
+          sections: [{ __component: PLAIN_BLOCK_UID, label: 'Replaced block' }],
+        },
+        populate,
+      });
+
+      const clonedProduct = result.entries[0] as ProductWithNestedRelations;
+      const cloneBlock = clonedProduct.sections?.[0];
+      const victimAfter = await readMorph(victimBlock!.id!);
+      const sourceAfter = await readMorph(sourceBlock!.id!);
+
+      expect({
+        victimId: victimBlock?.id ?? null,
+        cloneBlockId: cloneBlock?.id ?? null,
+        cloneComponent: cloneBlock?.__component ?? null,
+        victimMorphBefore: victimBefore.morphId,
+        victimMorphAfter: victimAfter.morphId,
+        victimTypeAfter: victimAfter.morphType,
+        sourceMorphBefore: sourceBefore.morphId,
+        sourceMorphAfter: sourceAfter.morphId,
+        sourceTypeAfter: sourceAfter.morphType,
+      }).toEqual({
+        // The new block is the first row of its own table, so its id matches the
+        // first relation-container row. A wrong write lands on that victim.
+        victimId: victimBlock?.id,
+        cloneBlockId: victimBlock?.id,
+        cloneComponent: PLAIN_BLOCK_UID,
+        victimMorphBefore: victimTagRow?.id,
+        victimMorphAfter: victimTagRow?.id,
+        victimTypeAfter: TAG_UID,
+        sourceMorphBefore: sourceTagRow?.id,
+        sourceMorphAfter: sourceTagRow?.id,
+        sourceTypeAfter: TAG_UID,
+      });
+    }
+  );
+
+  testInTransaction('clone relation copy throws when a nested owner has no id', async () => {
+    await expect(
+      applyDeferredCloneRelationCopies(
+        strapi,
+        PRODUCT_UID,
+        1,
+        2,
+        { details: { id: 10 } },
+        { details: { label: 'missing id' } },
+        [
+          {
+            schemaUid: RELATION_CONTAINER_UID,
+            attributeName: 'mto',
+            kind: 'morphToOne',
+            ownerPath: 'details',
+          },
+        ]
+      )
+    ).rejects.toThrow('Unable to resolve clone relation owner for "mto" at path "details"');
   });
 });

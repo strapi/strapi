@@ -121,6 +121,7 @@ const plainModel = {
       target: TAG_UID,
       useJoinTable: false,
     },
+    mto: { type: 'relation', relation: 'morphToOne' },
     localizedTag: {
       type: 'relation',
       relation: 'oneToOne',
@@ -256,6 +257,33 @@ const findProductWithTags = (documentId: string) =>
     locale: 'en',
     populate: { tag: true, legacyTag: true },
   });
+
+const readPlainRelation = async (
+  trx: Knex.Transaction,
+  entryId: number,
+  attributeName: 'tag' | 'mto'
+) => {
+  const meta = strapi.db.metadata.get(PLAIN_UID);
+  const attribute = meta.attributes[attributeName] as {
+    joinColumn?: { name?: string };
+    morphColumn?: { idColumn?: { name?: string }; typeColumn?: { name?: string } };
+  };
+  const idColumn =
+    attributeName === 'tag' ? attribute.joinColumn?.name : attribute.morphColumn?.idColumn?.name;
+  const typeColumn = attribute.morphColumn?.typeColumn?.name;
+  const columns = [idColumn!, ...(typeColumn ? [typeColumn] : [])];
+  const row = await strapi.db
+    .connection(meta.tableName)
+    .where({ id: entryId })
+    .select(columns)
+    .transacting(trx)
+    .first();
+
+  return {
+    id: row?.[idColumn!] ?? null,
+    type: typeColumn ? (row?.[typeColumn] ?? null) : null,
+  };
+};
 
 describe('Document Service clone relation operation payloads', () => {
   beforeAll(async () => {
@@ -701,7 +729,7 @@ describe('Document Service clone relation operation payloads', () => {
 
   testInTransaction(
     'clone does not copy an inverse useJoinTable:false joinColumn as an FK',
-    async () => {
+    async (trx: Knex.Transaction) => {
       const inverse = await strapi.documents(FK_INVERSE_UID).create({
         data: { name: 'Inverse source' },
       });
@@ -729,15 +757,26 @@ describe('Document Service clone relation operation payloads', () => {
       });
       const clone = result.entries[0] as { owner?: { documentId?: string } | null };
 
+      const ownerMeta = strapi.db.metadata.get(FK_OWNER_UID);
+      const inverseColumn = (
+        ownerMeta.attributes.inverse as { joinColumn?: { name?: string } } | undefined
+      )?.joinColumn?.name;
+      const decoyRow = await strapi.db
+        .connection(ownerMeta.tableName)
+        .where({ id: decoy.id })
+        .select([inverseColumn!])
+        .transacting(trx)
+        .first();
+
       expect({
         cloneOwnerDocumentId: clone?.owner?.documentId ?? null,
         originalOwnerDocumentId: (original as { owner?: { documentId?: string } | null })?.owner
           ?.documentId,
-        decoyStillUnrelated: decoy.documentId,
+        decoyInverseId: decoyRow?.[inverseColumn!] ?? null,
       }).toEqual({
         cloneOwnerDocumentId: null,
         originalOwnerDocumentId: owner.documentId,
-        decoyStillUnrelated: decoy.documentId,
+        decoyInverseId: null,
       });
     }
   );
@@ -945,6 +984,240 @@ describe('Document Service clone relation operation payloads', () => {
       }).toEqual({
         cloneMorphTarget: targetA.documentId,
         originalMorphTarget: targetA.documentId,
+      });
+    }
+  );
+
+  testInTransaction(
+    'clone clears an inline FK when documentId disconnect matches the other publication row',
+    async (trx: Knex.Transaction) => {
+      const tag = await createTag('Draft row disconnect target');
+      await strapi.documents(TAG_UID).publish({ documentId: tag.documentId });
+      const draftRow = await strapi.db.query(TAG_UID).findOne({
+        where: { documentId: tag.documentId, publishedAt: null },
+      });
+      const publishedRow = await strapi.db.query(TAG_UID).findOne({
+        where: { documentId: tag.documentId, publishedAt: { $ne: null } },
+      });
+      expect(draftRow?.id).not.toBe(publishedRow?.id);
+
+      const source = await strapi.documents(PLAIN_UID).create({
+        data: { name: 'Plain draft FK source', tag: draftRow!.id },
+      });
+
+      const result = await strapi.documents(PLAIN_UID).clone({
+        documentId: source.documentId,
+        data: {
+          name: 'Plain draft FK clone',
+          tag: { disconnect: [{ documentId: tag.documentId }] },
+        },
+      });
+
+      const cloneTag = await readPlainRelation(trx, result.entries[0].id, 'tag');
+      const sourceTag = await readPlainRelation(trx, source.id, 'tag');
+
+      expect({
+        cloneTagId: cloneTag.id,
+        sourceTagId: sourceTag.id,
+        draftId: draftRow?.id ?? null,
+        publishedId: publishedRow?.id ?? null,
+      }).toEqual({
+        cloneTagId: null,
+        sourceTagId: draftRow?.id,
+        draftId: draftRow?.id,
+        publishedId: publishedRow?.id,
+      });
+    }
+  );
+
+  testInTransaction(
+    'clone keeps an inline FK when disconnect names only the other publication status',
+    async (trx: Knex.Transaction) => {
+      const tag = await createTag('Status specific disconnect target');
+      await strapi.documents(TAG_UID).publish({ documentId: tag.documentId });
+      const draftRow = await strapi.db.query(TAG_UID).findOne({
+        where: { documentId: tag.documentId, publishedAt: null },
+      });
+
+      const source = await strapi.documents(PLAIN_UID).create({
+        data: { name: 'Plain status disconnect source', tag: draftRow!.id },
+      });
+
+      const result = await strapi.documents(PLAIN_UID).clone({
+        documentId: source.documentId,
+        data: {
+          name: 'Plain status disconnect clone',
+          tag: { disconnect: [{ documentId: tag.documentId, status: 'published' }] },
+        },
+      });
+
+      const cloneTag = await readPlainRelation(trx, result.entries[0].id, 'tag');
+
+      expect(cloneTag.id).toBe(draftRow?.id);
+    }
+  );
+
+  testInTransaction(
+    'clone clears a morphToOne when documentId disconnect matches the other publication row',
+    async (trx: Knex.Transaction) => {
+      const tag = await createTag('Morph draft row disconnect target');
+      await strapi.documents(TAG_UID).publish({ documentId: tag.documentId });
+      const draftRow = await strapi.db.query(TAG_UID).findOne({
+        where: { documentId: tag.documentId, publishedAt: null },
+      });
+
+      const source = await strapi.documents(PLAIN_UID).create({
+        data: {
+          name: 'Plain morph draft source',
+          mto: { id: draftRow!.id, __type: TAG_UID },
+        },
+      });
+
+      const result = await strapi.documents(PLAIN_UID).clone({
+        documentId: source.documentId,
+        data: {
+          name: 'Plain morph draft clone',
+          mto: { disconnect: [{ documentId: tag.documentId, __type: TAG_UID }] },
+        },
+      });
+
+      const cloneMorph = await readPlainRelation(trx, result.entries[0].id, 'mto');
+      const sourceMorph = await readPlainRelation(trx, source.id, 'mto');
+
+      expect({
+        cloneMorphId: cloneMorph.id,
+        cloneMorphType: cloneMorph.type,
+        sourceMorphId: sourceMorph.id,
+        sourceMorphType: sourceMorph.type,
+      }).toEqual({
+        cloneMorphId: null,
+        cloneMorphType: null,
+        sourceMorphId: draftRow?.id,
+        sourceMorphType: TAG_UID,
+      });
+    }
+  );
+
+  testInTransaction(
+    'clone accepts a single object connect for an inline relation',
+    async (trx: Knex.Transaction) => {
+      const originalTag = await createTag('Object connect original');
+      const selectedTag = await createTag('Object connect selected');
+      const source = await strapi.documents(PLAIN_UID).create({
+        data: { name: 'Object connect source', tag: originalTag.id },
+      });
+
+      const result = await strapi.documents(PLAIN_UID).clone({
+        documentId: source.documentId,
+        data: {
+          name: 'Object connect clone',
+          tag: {
+            connect: { documentId: selectedTag.documentId },
+            disconnect: [{ documentId: originalTag.documentId }],
+          },
+        },
+        populate: { tag: true },
+      });
+
+      const original = await strapi.documents(PLAIN_UID).findOne({
+        documentId: source.documentId,
+        populate: { tag: true },
+      });
+      const cloneTag = await readPlainRelation(trx, result.entries[0].id, 'tag');
+
+      expect({
+        cloneTagDocumentId: (result.entries[0] as { tag?: { documentId?: string } | null }).tag
+          ?.documentId,
+        cloneTagId: cloneTag.id,
+        originalTagDocumentId: (original as { tag?: { documentId?: string } | null })?.tag
+          ?.documentId,
+      }).toEqual({
+        cloneTagDocumentId: selectedTag.documentId,
+        cloneTagId: selectedTag.id,
+        originalTagDocumentId: originalTag.documentId,
+      });
+    }
+  );
+
+  testInTransaction(
+    'clone accepts a single object set and a single object disconnect',
+    async (trx: Knex.Transaction) => {
+      const originalTag = await createTag('Object set original');
+      const selectedTag = await createTag('Object set selected');
+      const disconnectSource = await strapi.documents(PLAIN_UID).create({
+        data: { name: 'Object disconnect source', tag: originalTag.id },
+      });
+      const setSource = await strapi.documents(PLAIN_UID).create({
+        data: { name: 'Object set source', tag: originalTag.id },
+      });
+
+      const disconnected = await strapi.documents(PLAIN_UID).clone({
+        documentId: disconnectSource.documentId,
+        data: {
+          name: 'Object disconnect clone',
+          tag: { disconnect: { documentId: originalTag.documentId } },
+        },
+      });
+      const replaced = await strapi.documents(PLAIN_UID).clone({
+        documentId: setSource.documentId,
+        data: {
+          name: 'Object set clone',
+          tag: { set: { documentId: selectedTag.documentId } },
+        },
+      });
+
+      const disconnectedTag = await readPlainRelation(trx, disconnected.entries[0].id, 'tag');
+      const replacedTag = await readPlainRelation(trx, replaced.entries[0].id, 'tag');
+      const originalTagRow = await readPlainRelation(trx, setSource.id, 'tag');
+
+      expect({
+        disconnectedTagId: disconnectedTag.id,
+        replacedTagId: replacedTag.id,
+        sourceTagId: originalTagRow.id,
+      }).toEqual({
+        disconnectedTagId: null,
+        replacedTagId: selectedTag.id,
+        sourceTagId: originalTag.id,
+      });
+    }
+  );
+
+  testInTransaction(
+    'clone accepts a single object connect for a morphToOne',
+    async (trx: Knex.Transaction) => {
+      const originalTag = await createTag('Object morph original');
+      const selectedTag = await createTag('Object morph selected');
+      const originalRow = await strapi.db.query(TAG_UID).findOne({
+        where: { documentId: originalTag.documentId, publishedAt: null },
+      });
+      const source = await strapi.documents(PLAIN_UID).create({
+        data: {
+          name: 'Object morph source',
+          mto: { id: originalRow!.id, __type: TAG_UID },
+        },
+      });
+
+      const result = await strapi.documents(PLAIN_UID).clone({
+        documentId: source.documentId,
+        data: {
+          name: 'Object morph clone',
+          mto: {
+            connect: { documentId: selectedTag.documentId, __type: TAG_UID },
+          },
+        },
+      });
+
+      const cloneMorph = await readPlainRelation(trx, result.entries[0].id, 'mto');
+      const sourceMorph = await readPlainRelation(trx, source.id, 'mto');
+
+      expect({
+        cloneMorphId: cloneMorph.id,
+        cloneMorphType: cloneMorph.type,
+        sourceMorphId: sourceMorph.id,
+      }).toEqual({
+        cloneMorphId: selectedTag.id,
+        cloneMorphType: TAG_UID,
+        sourceMorphId: originalRow?.id,
       });
     }
   );
