@@ -44,7 +44,7 @@ Because every registry can be augmented (publicly exported), developers have the
 Doing so allows Strapi APIs to respond in a way that aligns with the developers' custom definitions.
 
 :::info[Did you know?]
-The `Schema` and `UID` namespaces rely solely on public registries to infer their type definitions.
+The `Schema` and `UID` namespaces rely solely on public registries to infer their type definitions. In strict mode, they read the global schema registries instead (see [Strict schema registries](#strict-schema-registries)).
 
 This is why it's heavily encouraged to use them over their low level counter-parts.
 :::
@@ -308,6 +308,39 @@ declare global {
 ```
 
 The generator mirrors the API loader: it walks `src/api/<api>/services/*.{ts,js}`, derives the uid with the same kebab-case normalization, and only emits uids the running application registered. A factory (`createCoreService(...)` or `({ strapi }) => ({ ... })`) registers its return type, a plain object registers itself, and a module without a default export resolves to `unknown`, like any unregistered service in strict mode. The registries are global interfaces, so the generated entries merge with the application's own `AppServices` declarations; declaring the same uid twice with different types is a TS2717 conflict.
+
+###### Strict schema registries
+
+With `strictTypes: true`, `contentTypes.d.ts` and `components.d.ts` keep their names and their schema interfaces, but register the schemas in the global `Strapi.Registries.ContentTypeSchemas` and `Strapi.Registries.ComponentSchemas` instead of `Public`:
+
+```ts title="my-app/types/generated/contentTypes.d.ts"
+import type { Struct } from '@strapi/strapi';
+
+export interface ApiArticleArticle extends Struct.CollectionTypeSchema {
+  // ...
+}
+
+declare global {
+  namespace Strapi {
+    namespace Registries {
+      interface ContentTypeSchemas {
+        'api::article.article': ApiArticleArticle;
+      }
+    }
+  }
+}
+```
+
+A global augmentation reaches the one declaration every package reads, whatever module the application resolves and in whatever order declaration files load. Augmenting `Public` through `@strapi/strapi` and through `@strapi/types` creates two copies, and the load order decides which one wins.
+
+Each schema registry is one interface, without a `Package*` and `App*` pair: type generation is the only producer, and applications do not override schemas.
+
+|                 | `UID.ContentType`, `Schema.ContentType`, … read                                                                   | No generated schema                               |
+| --------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| Strict mode off | `Public.ContentTypeSchemas`, `Public.ComponentSchemas`. Global entries are ignored.                               | Generic UIDs and schemas                          |
+| Strict mode on  | `Strapi.Registries.ContentTypeSchemas`, `Strapi.Registries.ComponentSchemas`. `Public` augmentations are ignored. | Generic UIDs and schemas, as with strict mode off |
+
+Toggling the flag rewrites both files in the other form on the next generation. A hand-written `Public` schema augmentation has no effect in strict mode: move it to the global registry.
 
 Unset or `false` keeps the previous behavior — content-type, component and plugin declarations are still generated — and removes `strict.d.ts` and `services.d.ts` if a previous run generated them, so the program leaves strict mode when the flag is turned off. Any other value is rejected. TypeScript templates of `create-strapi-app` ship `config/typescript.ts` with `strictTypes: true`.
 
