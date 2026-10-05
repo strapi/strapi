@@ -1,17 +1,22 @@
-'use strict';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import auth from '../auth';
 
-/* eslint-env jest */
-
-const createContext = require('../../../../../../../tests/helpers/create-context');
-const {
-  createMockSessionManager,
-} = require('../../../../../../../tests/helpers/create-session-manager-mock');
+const createContext = ({ params = {}, query = {}, body = {} }, overrides = {}) => ({
+  params,
+  query,
+  request: { query, body },
+  ...overrides,
+});
+const createMockSessionManager = (originApi) => ({
+  originApi,
+  sessionManager: vi.fn(() => originApi),
+});
 
 const setStrapi = (value) => {
   global.strapi = value;
 };
 
-const createAuthController = () => require('../auth')({ strapi: global.strapi });
+const createAuthController = () => auth({ strapi: global.strapi });
 
 describe('Auth controller - sessions', () => {
   let controller;
@@ -20,15 +25,15 @@ describe('Auth controller - sessions', () => {
 
   beforeEach(() => {
     ({ sessionManager: sessionManagerCallable, originApi } = createMockSessionManager({
-      listSessions: jest.fn(() => Promise.resolve([])),
-      revokeSessionById: jest.fn(() => Promise.resolve(true)),
-      validateRefreshToken: jest.fn(),
-      invalidateRefreshToken: jest.fn(() => Promise.resolve()),
+      listSessions: vi.fn(() => Promise.resolve([])),
+      revokeSessionById: vi.fn(() => Promise.resolve(true)),
+      validateRefreshToken: vi.fn(),
+      invalidateRefreshToken: vi.fn(() => Promise.resolve()),
     }));
 
     setStrapi({
       config: {
-        get: jest.fn((path, defaultValue) => {
+        get: vi.fn((path, defaultValue) => {
           if (path === 'plugin::users-permissions.jwtManagement') {
             return 'refresh';
           }
@@ -39,14 +44,14 @@ describe('Auth controller - sessions', () => {
         }),
       },
       sessionManager: sessionManagerCallable,
-      log: { error: jest.fn() },
+      log: { error: vi.fn() },
     });
 
     controller = createAuthController();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getSessions', () => {
@@ -58,7 +63,7 @@ describe('Auth controller - sessions', () => {
         return defaultValue;
       });
 
-      const notFound = jest.fn();
+      const notFound = vi.fn();
       const ctx = createContext({}, { notFound, state: { user: { id: 1 } } });
 
       await controller.getSessions(ctx);
@@ -67,7 +72,7 @@ describe('Auth controller - sessions', () => {
     });
 
     test('Requires authentication', async () => {
-      const unauthorized = jest.fn();
+      const unauthorized = vi.fn();
       const ctx = createContext({}, { unauthorized, state: {} });
 
       await controller.getSessions(ctx);
@@ -97,7 +102,7 @@ describe('Auth controller - sessions', () => {
         },
       ]);
 
-      const send = jest.fn();
+      const send = vi.fn();
       const ctx = createContext(
         {},
         {
@@ -138,7 +143,7 @@ describe('Auth controller - sessions', () => {
         return defaultValue;
       });
 
-      const notFound = jest.fn();
+      const notFound = vi.fn();
       const ctx = createContext(
         {},
         {
@@ -154,7 +159,7 @@ describe('Auth controller - sessions', () => {
     });
 
     test('Requires authentication', async () => {
-      const unauthorized = jest.fn();
+      const unauthorized = vi.fn();
       const ctx = createContext(
         {},
         { unauthorized, state: {}, params: { sessionId: 'session-1' } }
@@ -168,7 +173,7 @@ describe('Auth controller - sessions', () => {
     test('Returns 404 when the session does not exist', async () => {
       originApi.revokeSessionById.mockResolvedValue(false);
 
-      const notFound = jest.fn();
+      const notFound = vi.fn();
       const ctx = createContext(
         {},
         {
@@ -185,7 +190,7 @@ describe('Auth controller - sessions', () => {
     });
 
     test('Revokes the requested session', async () => {
-      const send = jest.fn();
+      const send = vi.fn();
       const ctx = createContext(
         {},
         {
@@ -207,11 +212,11 @@ describe('Auth controller - sessions', () => {
       createContext(
         {},
         {
-          send: jest.fn(),
+          send: vi.fn(),
           state: { user: { id: 5 }, session: { id: 'session-current' } },
           cookies: {
-            get: jest.fn(),
-            set: jest.fn(),
+            get: vi.fn(),
+            set: vi.fn(),
           },
           request: {
             body: {},
@@ -229,7 +234,7 @@ describe('Auth controller - sessions', () => {
         return defaultValue;
       });
 
-      const notFound = jest.fn();
+      const notFound = vi.fn();
       const ctx = createLogoutContext({ notFound });
 
       await controller.logout(ctx);
@@ -238,7 +243,7 @@ describe('Auth controller - sessions', () => {
     });
 
     test('Requires authentication', async () => {
-      const unauthorized = jest.fn();
+      const unauthorized = vi.fn();
       const ctx = createLogoutContext({ unauthorized, state: {} });
 
       await controller.logout(ctx);
@@ -287,8 +292,8 @@ describe('Auth controller - sessions', () => {
       const ctx = createLogoutContext({
         state: { user: { id: 5 } },
         cookies: {
-          get: jest.fn(() => 'refresh-token'),
-          set: jest.fn(),
+          get: vi.fn(() => 'refresh-token'),
+          set: vi.fn(),
         },
       });
 
@@ -332,8 +337,8 @@ describe('Auth controller - sessions', () => {
 
       const ctx = createLogoutContext({
         cookies: {
-          get: jest.fn(),
-          set: jest.fn(),
+          get: vi.fn(),
+          set: vi.fn(),
         },
       });
 

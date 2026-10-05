@@ -1,8 +1,8 @@
-'use strict';
+import { describe, expect, test } from 'vitest';
 
 /* eslint-disable no-template-curly-in-string */
 
-const { isValidEmailTemplate } = require('../email-template');
+import { isValidEmailTemplate } from '../email-template';
 
 describe('isValidEmailTemplate', () => {
   test('Accepts one valid pattern', () => {
