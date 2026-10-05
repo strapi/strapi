@@ -83,7 +83,7 @@ describe('Review workflows validation service - license limits', () => {
     ['the feature has no options', reviewWorkflowsFeature()],
     ['the options omit the limits', reviewWorkflowsFeature({})],
     ['the feature is not in the license', undefined],
-  ])('falls back to the maximum when %s', (_, feature) => {
+  ])('falls back to the default when %s', (_, feature) => {
     test('for workflows', async () => {
       const { strapi, countWorkflows } = createStrapiMock(feature);
       const validation = validationFactory({ strapi });
@@ -108,24 +108,41 @@ describe('Review workflows validation service - license limits', () => {
     });
   });
 
-  describe('a license limit above the maximum', () => {
-    const feature = reviewWorkflowsFeature({ numberOfWorkflows: 500, stagesPerWorkflow: 500 });
+  describe('a license limit above the default', () => {
+    const feature = reviewWorkflowsFeature({
+      numberOfWorkflows: 200_000,
+      stagesPerWorkflow: 200_000,
+    });
 
-    test('is clamped for workflows', async () => {
+    test('is applied in full for workflows', async () => {
       const { strapi, countWorkflows } = createStrapiMock(feature);
       const validation = validationFactory({ strapi });
-      countWorkflows.mockResolvedValue(MAX_WORKFLOWS);
 
+      countWorkflows.mockResolvedValue(MAX_WORKFLOWS);
+      await expect(validation.validateWorkflowCount(1)).resolves.toBeUndefined();
+
+      countWorkflows.mockResolvedValue(199_999);
+      await expect(validation.validateWorkflowCount(1)).resolves.toBeUndefined();
+
+      countWorkflows.mockResolvedValue(200_000);
       await expect(validation.validateWorkflowCount(1)).rejects.toThrow(ERRORS.WORKFLOWS_LIMIT);
     });
 
-    test('is clamped for stages', () => {
-      const { strapi } = createStrapiMock(feature);
+    test('is applied in full for stages', async () => {
+      const { strapi, countStages } = createStrapiMock(feature);
       const validation = validationFactory({ strapi });
 
       expect(() =>
         validation.validateWorkflowStages(stagesOf(MAX_STAGES_PER_WORKFLOW + 1))
-      ).toThrow(ERRORS.STAGES_LIMIT);
+      ).not.toThrow();
+
+      countStages.mockResolvedValue(199_999);
+      await expect(validation.validateWorkflowCountStages(1, 1)).resolves.toBeUndefined();
+
+      countStages.mockResolvedValue(200_000);
+      await expect(validation.validateWorkflowCountStages(1, 1)).rejects.toThrow(
+        ERRORS.STAGES_LIMIT
+      );
     });
   });
 

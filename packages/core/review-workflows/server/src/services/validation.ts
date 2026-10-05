@@ -9,7 +9,7 @@ const { ValidationError } = errors;
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   /**
    * Reads the limits from the current license on every check, so a license that changes after boot
-   * is enforced without a restart. A missing limit falls back to the maximum, as in the admin panel.
+   * is enforced without a restart. A missing limit falls back to the default, as in the admin panel.
    */
   const getLimits = () => {
     const feature = strapi.ee.features.get('review-workflows');

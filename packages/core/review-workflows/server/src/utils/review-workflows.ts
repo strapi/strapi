@@ -1,10 +1,6 @@
 import type { Core } from '@strapi/types';
-import { get, pickBy, has, clamp } from 'lodash';
-import {
-  ENTITY_STAGE_ATTRIBUTE,
-  MAX_WORKFLOWS,
-  MAX_STAGES_PER_WORKFLOW,
-} from '../constants/workflows';
+import { get, pickBy, has } from 'lodash';
+import { ENTITY_STAGE_ATTRIBUTE } from '../constants/workflows';
 
 /** Returns the content types that can use review workflow stages. */
 export const getVisibleContentTypesUID = (contentTypes: Core.Strapi['contentTypes']) =>
@@ -31,11 +27,10 @@ export const getWorkflowContentTypeFilter = (
   return { $contains: `"${contentType}"` };
 };
 
-/** Constrains the workflow limit to the supported range. */
-export const clampMaxWorkflows = (value: number) => clamp(value, 1, MAX_WORKFLOWS);
-/** Constrains the stage limit to the supported range. */
-export const clampMaxStagesPerWorkflow = (value: number) =>
-  clamp(value, 1, MAX_STAGES_PER_WORKFLOW);
+/** Keeps the workflow limit at one or more. The license sets the upper bound, uncapped. */
+export const clampMaxWorkflows = (value: number) => Math.max(value, 1);
+/** Keeps the stage limit at one or more. The license sets the upper bound, uncapped. */
+export const clampMaxStagesPerWorkflow = (value: number) => Math.max(value, 1);
 
 export default {
   clampMaxWorkflows,

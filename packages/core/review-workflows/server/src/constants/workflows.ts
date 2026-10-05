@@ -11,6 +11,7 @@ export const STAGE_DEFAULT_COLOR = '#4945FF';
 export const ENTITY_STAGE_ATTRIBUTE = 'strapi_stage';
 export const ENTITY_ASSIGNEE_ATTRIBUTE = 'strapi_assignee';
 
+// Applied when the license does not set a limit. A license value above these is used as is.
 export const MAX_WORKFLOWS = 200;
 export const MAX_STAGES_PER_WORKFLOW = 200;
 
