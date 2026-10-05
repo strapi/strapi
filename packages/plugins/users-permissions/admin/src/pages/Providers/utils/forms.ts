@@ -113,7 +113,7 @@ const forms = {
       [
         {
           intlLabel: hintLabel,
-          name: 'noName',
+          name: 'redirectUri',
           type: 'text',
           validations: {},
           size: 12,
@@ -230,7 +230,7 @@ const forms = {
       [
         {
           intlLabel: hintLabel,
-          name: 'noName',
+          name: 'redirectUri',
           type: 'text',
           validations: {},
           size: 12,

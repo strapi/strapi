@@ -57,3 +57,32 @@ it('saves an email provider change without removing other providers', async () =
   );
   await findByRole('heading', { name: 'Providers' });
 });
+
+it.each([
+  ['discord', ''],
+  ['auth0', 'tenant.auth0.com'],
+])('shows the server-provided OAuth callback for %s', async (provider, subdomain) => {
+  permissions.canUpdate = true;
+  const redirectUri = `https://cms.example.org/platform/content-api/connect/${provider}/callback`;
+  server.use(
+    http.get('*/users-permissions/providers', () =>
+      HttpResponse.json({
+        [provider]: {
+          enabled: false,
+          key: '',
+          secret: '',
+          callback: '',
+          subdomain,
+          redirectUri,
+        },
+      })
+    )
+  );
+  const { findByText, findByRole, user } = render(<ProvidersPage />);
+  await user.click(await findByText(provider));
+  const redirect = await findByRole('textbox', {
+    name: `The redirect URL to add in your ${provider} application configurations`,
+  });
+  expect(redirect).toHaveValue(redirectUri);
+  expect(redirect).toBeDisabled();
+});

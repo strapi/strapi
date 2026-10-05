@@ -74,9 +74,9 @@ const FormModal = ({
                             >
                               <Input
                                 {...input}
-                                error={input.name === 'noName' ? undefined : errors[input.name]}
+                                error={errors[input.name]}
                                 onChange={handleChange}
-                                value={input.name === 'noName' ? undefined : values[input.name]}
+                                value={values[input.name]}
                                 providerToEditName={providerToEditName}
                               />
                             </Grid.Item>
