@@ -1,97 +1,30 @@
-import type { Core } from '@strapi/types';
+import { createProtectedRoute } from './create-protected-route';
 
-const routes: Core.RouteInput[] = [
-  {
-    method: 'GET',
-    path: '/email-templates',
-    handler: 'settings.getEmailTemplate',
-    config: {
-      policies: [
-        {
-          name: 'admin::hasPermissions',
-          config: {
-            actions: ['plugin::users-permissions.email-templates.read'],
-          },
-        },
-      ],
-    },
-  },
-  {
-    method: 'PUT',
-    path: '/email-templates',
-    handler: 'settings.updateEmailTemplate',
-    config: {
-      policies: [
-        {
-          name: 'admin::hasPermissions',
-          config: {
-            actions: ['plugin::users-permissions.email-templates.update'],
-          },
-        },
-      ],
-    },
-  },
-  {
-    method: 'GET',
-    path: '/advanced',
-    handler: 'settings.getAdvancedSettings',
-    config: {
-      policies: [
-        {
-          name: 'admin::hasPermissions',
-          config: {
-            actions: ['plugin::users-permissions.advanced-settings.read'],
-          },
-        },
-      ],
-    },
-  },
-  {
-    method: 'PUT',
-    path: '/advanced',
-    handler: 'settings.updateAdvancedSettings',
-    config: {
-      policies: [
-        {
-          name: 'admin::hasPermissions',
-          config: {
-            actions: ['plugin::users-permissions.advanced-settings.update'],
-          },
-        },
-      ],
-    },
-  },
-  {
-    method: 'GET',
-    path: '/providers',
-    handler: 'settings.getProviders',
-    config: {
-      policies: [
-        {
-          name: 'admin::hasPermissions',
-          config: {
-            actions: ['plugin::users-permissions.providers.read'],
-          },
-        },
-      ],
-    },
-  },
-
-  {
-    method: 'PUT',
-    path: '/providers',
-    handler: 'settings.updateProviders',
-    config: {
-      policies: [
-        {
-          name: 'admin::hasPermissions',
-          config: {
-            actions: ['plugin::users-permissions.providers.update'],
-          },
-        },
-      ],
-    },
-  },
+export default [
+  createProtectedRoute(
+    'GET',
+    '/email-templates',
+    'settings.getEmailTemplate',
+    'email-templates.read'
+  ),
+  createProtectedRoute(
+    'PUT',
+    '/email-templates',
+    'settings.updateEmailTemplate',
+    'email-templates.update'
+  ),
+  createProtectedRoute(
+    'GET',
+    '/advanced',
+    'settings.getAdvancedSettings',
+    'advanced-settings.read'
+  ),
+  createProtectedRoute(
+    'PUT',
+    '/advanced',
+    'settings.updateAdvancedSettings',
+    'advanced-settings.update'
+  ),
+  createProtectedRoute('GET', '/providers', 'settings.getProviders', 'providers.read'),
+  createProtectedRoute('PUT', '/providers', 'settings.updateProviders', 'providers.update'),
 ];
-
-export default routes;
