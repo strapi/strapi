@@ -1,0 +1,5 @@
+{
+  "extends": "tsconfig/client.json",
+  "compilerOptions": { "types": ["@testing-library/jest-dom", "node"] },
+  "include": ["src", "tests", "custom.d.ts"]
+}
