@@ -364,6 +364,44 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
     }
   });
 
+  test(`${resolution}: generated application policies resolve in strict mode`, async () => {
+    // eslint-disable-next-line import/no-extraneous-dependencies
+    const { generators } = require('@strapi/typescript-utils');
+    const appDir = fs.mkdtempSync(path.join(__dirname, '.generated-'));
+    const generatedFile = path.join(appDir, 'types/generated/policies.d.ts');
+    const strapi = {
+      dirs: { app: { api: fixture('app/src/api'), policies: fixture('app/src/policies') } },
+      // Package policies are left to their packages.
+      policies: Object.fromEntries(
+        [
+          'global::isOwner',
+          'global::isPublic',
+          'global::legacy',
+          'api::article.has-role',
+          'admin::isAuthenticatedAdmin',
+        ].map((uid) => [uid, () => true])
+      ),
+    };
+
+    try {
+      await generators.generate({
+        strapi,
+        pwd: appDir,
+        artifacts: { policies: true },
+        logger: { silent: true },
+      });
+      const generated = fs.readFileSync(generatedFile, 'utf8');
+      assert.match(generated, /interface AppPolicies/);
+      assert.doesNotMatch(generated, /admin::/);
+      assertClean(
+        compiler(options)([generatedFile, 'strapi-strict.d.ts', 'app-policies.ts']),
+        `${resolution}, generated application policies`
+      );
+    } finally {
+      fs.rmSync(appDir, { recursive: true, force: true });
+    }
+  });
+
   test(`${resolution}: normal package entries resolve to emitted declarations`, () => {
     for (const directory of [...providers, 'packages/core/types', 'packages/core/strapi']) {
       const manifest = readManifest(directory);
