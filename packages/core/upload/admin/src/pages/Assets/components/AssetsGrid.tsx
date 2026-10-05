@@ -1,4 +1,13 @@
-import { Box, Card, CardBody, CardHeader, Checkbox, Flex } from '@strapi/design-system';
+import {
+  Box,
+  Card,
+  CardBody,
+  CardHeader,
+  Checkbox,
+  Divider,
+  Flex,
+  Typography,
+} from '@strapi/design-system';
 import { Folder as FolderIcon } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled, css } from 'styled-components';
@@ -14,6 +23,7 @@ import { ASSET_DETAILS_TRIGGER_PROPS, ASSET_ITEM_CONTROL_PROPS } from '../consta
 import { useAssetSelection } from '../hooks/useAssetSelection';
 import { useBusyAssetsOptional } from '../hooks/useBusyAssets';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
+import { useListSettings } from '../hooks/useListSettings';
 import { buildRenderedKeys } from '../utils/renderedKeys';
 import { assetKey, folderKey, type ItemKey } from '../utils/selection';
 
@@ -91,13 +101,18 @@ const FoldersRow = styled(Box)`
   grid-column: 1 / -1;
 `;
 
-const MIN_TILE_WIDTH = '240px';
-
-const ItemsGrid = styled(Box)`
+const StyledItemsGrid = styled(Box)<{ $minTileWidth: string }>`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(${MIN_TILE_WIDTH}, 100%), 1fr));
+  grid-template-columns: ${({ $minTileWidth }) =>
+    `repeat(auto-fill, minmax(min(${$minTileWidth}, 100%), 1fr))`};
   gap: ${({ theme }) => theme.spaces[4]};
 `;
+
+const ItemsGrid = (props: React.ComponentProps<typeof Box>) => {
+  const { gridMinTileWidth } = useListSettings();
+
+  return <StyledItemsGrid $minTileWidth={gridMinTileWidth} {...props} />;
+};
 
 const StyledFolderCard = styled(Flex)<{
   $isDragging?: boolean;
@@ -569,8 +584,25 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
  * AssetsGrid
  * -----------------------------------------------------------------------------------------------*/
 
+interface GridSectionProps {
+  title: string;
+  children: React.ReactNode;
+}
+
+// Headings sit outside the `role="list"` grid: a list may only contain items.
+const GridSection = ({ title, children }: GridSectionProps) => (
+  <Flex tag="section" direction="column" alignItems="stretch" gap={4}>
+    <Typography variant="delta" tag="h3">
+      {title}
+    </Typography>
+    <ItemsGrid role="list">{children}</ItemsGrid>
+  </Flex>
+);
+
 interface AssetsGridProps {
   assets: File[];
+  /** Shown in the "Assets (n)" heading; falls back to the loaded count. */
+  assetsTotal?: number;
   folders?: Folder[];
   /** Keys of the rendered items, in render order. Owned by the view. */
   renderedKeys?: ItemKey[];
@@ -579,10 +611,13 @@ interface AssetsGridProps {
 
 export const AssetsGrid = ({
   assets,
+  assetsTotal,
   folders = EMPTY_FOLDERS,
   renderedKeys,
   onAssetItemClick,
 }: AssetsGridProps) => {
+  const { formatMessage } = useIntl();
+  const { showSectionHeadings } = useListSettings();
   const totalItems = folders.length + assets.length;
 
   // Render order: folders always on top in the grid (mixing is table-only) —
@@ -595,30 +630,55 @@ export const AssetsGrid = ({
     return null;
   }
 
+  const folderCards = folders.map((folder) => (
+    <FolderCard folder={folder} orderedItemKeys={orderedItemKeys} key={`folder-${folder.id}`} />
+  ));
+  const assetCards = assets.map((asset) => (
+    <Flex key={asset.id} direction="column" alignItems="stretch">
+      <AssetCard
+        asset={asset}
+        orderedItemKeys={orderedItemKeys}
+        onAssetItemClick={onAssetItemClick}
+      />
+    </Flex>
+  ));
+
+  if (showSectionHeadings) {
+    return (
+      <Flex direction="column" alignItems="stretch" gap={6} data-testid="assets-grid">
+        {folders.length > 0 && (
+          <GridSection
+            title={formatMessage(
+              { id: getTranslationKey('list.folders.title'), defaultMessage: 'Folders ({count})' },
+              { count: folders.length }
+            )}
+          >
+            {folderCards}
+          </GridSection>
+        )}
+        {folders.length > 0 && assets.length > 0 && <Divider />}
+        {assets.length > 0 && (
+          <GridSection
+            title={formatMessage(
+              { id: getTranslationKey('list.assets.title'), defaultMessage: 'Assets ({count})' },
+              { count: assetsTotal ?? assets.length }
+            )}
+          >
+            {assetCards}
+          </GridSection>
+        )}
+      </Flex>
+    );
+  }
+
   return (
     <ItemsGrid role="list" data-testid="assets-grid">
       {folders.length > 0 && (
         <FoldersRow>
-          <ItemsGrid>
-            {folders.map((folder) => (
-              <FolderCard
-                folder={folder}
-                orderedItemKeys={orderedItemKeys}
-                key={`folder-${folder.id}`}
-              />
-            ))}
-          </ItemsGrid>
+          <ItemsGrid>{folderCards}</ItemsGrid>
         </FoldersRow>
       )}
-      {assets.map((asset) => (
-        <Flex key={asset.id} direction="column" alignItems="stretch">
-          <AssetCard
-            asset={asset}
-            orderedItemKeys={orderedItemKeys}
-            onAssetItemClick={onAssetItemClick}
-          />
-        </Flex>
-      ))}
+      {assetCards}
     </ItemsGrid>
   );
 };
