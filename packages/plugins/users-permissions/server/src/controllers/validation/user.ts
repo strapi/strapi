@@ -1,6 +1,4 @@
-'use strict';
-
-const { yup, validateYupSchema } = require('@strapi/utils');
+import { yup, validateYupSchema } from '@strapi/utils';
 
 const deleteRoleSchema = yup.object().shape({
   role: yup.strapiID().required(),
@@ -76,8 +74,9 @@ const updateUserBodySchema = yup.object().shape({
   ),
 });
 
-module.exports = {
-  validateCreateUserBody: validateYupSchema(createUserBodySchema),
-  validateUpdateUserBody: validateYupSchema(updateUserBodySchema),
-  validateDeleteRoleBody: validateYupSchema(deleteRoleSchema),
-};
+/** Validate a user creation request, including its required role relation. */
+export const validateCreateUserBody = validateYupSchema(createUserBodySchema);
+/** Validate user changes without allowing the role relation to be removed. */
+export const validateUpdateUserBody = validateYupSchema(updateUserBodySchema);
+/** Validate the role identifier before deletion. */
+export const validateDeleteRoleBody = validateYupSchema(deleteRoleSchema);

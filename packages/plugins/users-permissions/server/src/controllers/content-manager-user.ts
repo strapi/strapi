@@ -1,9 +1,11 @@
-'use strict';
+import type { Context } from 'koa';
+import type { Core, UID } from '@strapi/types';
+import _ from 'lodash';
+import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
+import type { PluginContext, AdvancedSettings } from '../types';
+import { validateCreateUserBody, validateUpdateUserBody } from './validation/user';
 
-const _ = require('lodash');
-const { contentTypes: contentTypesUtils } = require('@strapi/utils');
-const { ApplicationError, NotFoundError, ForbiddenError } = require('@strapi/utils').errors;
-const { validateCreateUserBody, validateUpdateUserBody } = require('./validation/user');
+const { ApplicationError, NotFoundError, ForbiddenError } = errors;
 
 const { UPDATED_BY_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
 
@@ -15,7 +17,13 @@ const ACTIONS = {
   delete: 'plugin::content-manager.explorer.delete',
 };
 
-const findEntityAndCheckPermissions = async (ability, action, model, id) => {
+const findEntityAndCheckPermissions = async (
+  strapi: Core.Strapi,
+  ability: Context['state']['userAbility'],
+  action: string,
+  model: UID.ContentType,
+  id: string
+) => {
   const doc = await strapi.service('plugin::content-manager.document-manager').findOne(id, model, {
     populate: [`${CREATED_BY_ATTRIBUTE}.roles`],
   });
@@ -37,12 +45,13 @@ const findEntityAndCheckPermissions = async (ability, action, model, id) => {
   return { pm, doc: docWithoutCreatorRoles };
 };
 
-module.exports = {
+/** Create controller actions for this Strapi instance. */
+export default ({ strapi }: PluginContext) => ({
   /**
    * Create a/an user record.
    * @return {Object}
    */
-  async create(ctx) {
+  async create(ctx: Context) {
     const { body } = ctx.request;
     const { user: admin, userAbility } = ctx.state;
 
@@ -62,7 +71,7 @@ module.exports = {
 
     const advanced = await strapi
       .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
-      .get();
+      .get<AdvancedSettings>();
 
     await validateCreateUserBody(ctx.request.body);
 
@@ -102,7 +111,7 @@ module.exports = {
 
       ctx.created(sanitizedData);
     } catch (error) {
-      throw new ApplicationError(error.message);
+      throw new ApplicationError(error instanceof Error ? error.message : undefined);
     }
   },
   /**
@@ -110,18 +119,19 @@ module.exports = {
    * @return {Object}
    */
 
-  async update(ctx) {
+  async update(ctx: Context) {
     const { id: documentId } = ctx.params;
     const { body } = ctx.request;
     const { user: admin, userAbility } = ctx.state;
 
     const advancedConfigs = await strapi
       .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
-      .get();
+      .get<AdvancedSettings>();
 
     const { email, username, password } = body;
 
     const { pm, doc } = await findEntityAndCheckPermissions(
+      strapi,
       userAbility,
       ACTIONS.edit,
       userModel,
@@ -169,4 +179,4 @@ module.exports = {
 
     ctx.body = await pm.sanitizeOutput(data, { action: ACTIONS.read });
   },
-};
+});

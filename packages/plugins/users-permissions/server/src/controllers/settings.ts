@@ -1,16 +1,19 @@
-'use strict';
+import type { Context } from 'koa';
+import _ from 'lodash';
+import { errors } from '@strapi/utils';
+import type { PluginContext, AdvancedSettings, GrantConfig } from '../types';
+import { getService } from '../utils';
+import { isValidEmailTemplate } from './validation/email-template';
 
-const _ = require('lodash');
-const { ValidationError } = require('@strapi/utils').errors;
-const { getService } = require('../utils');
-const { isValidEmailTemplate } = require('./validation/email-template');
+const { ValidationError } = errors;
 
-module.exports = {
-  async getEmailTemplate(ctx) {
+/** Create controller actions for this Strapi instance. */
+export default ({ strapi }: PluginContext) => ({
+  async getEmailTemplate(ctx: Context) {
     ctx.send(await strapi.store({ type: 'plugin', name: 'users-permissions', key: 'email' }).get());
   },
 
-  async updateEmailTemplate(ctx) {
+  async updateEmailTemplate(ctx: Context) {
     if (_.isEmpty(ctx.request.body)) {
       throw new ValidationError('Request body cannot be empty');
     }
@@ -32,17 +35,17 @@ module.exports = {
     ctx.send({ ok: true });
   },
 
-  async getAdvancedSettings(ctx) {
+  async getAdvancedSettings(ctx: Context) {
     const settings = await strapi
       .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
-      .get();
+      .get<AdvancedSettings>();
 
-    const roles = await getService('role').find();
+    const roles = await getService(strapi, 'role').find();
 
     ctx.send({ settings, roles });
   },
 
-  async updateAdvancedSettings(ctx) {
+  async updateAdvancedSettings(ctx: Context) {
     if (_.isEmpty(ctx.request.body)) {
       throw new ValidationError('Request body cannot be empty');
     }
@@ -54,24 +57,26 @@ module.exports = {
     ctx.send({ ok: true });
   },
 
-  async getProviders(ctx) {
+  async getProviders(ctx: Context) {
     const providers = await strapi
       .store({ type: 'plugin', name: 'users-permissions', key: 'grant' })
-      .get();
+      .get<GrantConfig>();
 
     for (const provider in providers) {
       if (provider !== 'email') {
-        providers[provider].redirectUri = strapi
-          .plugin('users-permissions')
-          .service('providers')
-          .buildRedirectUri(provider);
+        Object.assign(providers[provider], {
+          redirectUri: strapi
+            .plugin('users-permissions')
+            .service('providers')
+            .buildRedirectUri(provider),
+        });
       }
     }
 
     ctx.send(providers);
   },
 
-  async updateProviders(ctx) {
+  async updateProviders(ctx: Context) {
     if (_.isEmpty(ctx.request.body)) {
       throw new ValidationError('Request body cannot be empty');
     }
@@ -82,4 +87,4 @@ module.exports = {
 
     ctx.send({ ok: true });
   },
-};
+});

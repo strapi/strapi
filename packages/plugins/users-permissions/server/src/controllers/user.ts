@@ -1,48 +1,45 @@
-'use strict';
+import type { Context } from 'koa';
+import type { Core } from '@strapi/types';
 
-/**
- * User.js controller
- *
- * @description: A set of functions called "actions" for managing `User`.
- */
+import _ from 'lodash';
+import { errors } from '@strapi/utils';
+import type { PluginContext, AdvancedSettings } from '../types';
+import { getService } from '../utils';
+import { validateCreateUserBody, validateUpdateUserBody } from './validation/user';
 
-const _ = require('lodash');
-const utils = require('@strapi/utils');
-const { getService } = require('../utils');
-const { validateCreateUserBody, validateUpdateUserBody } = require('./validation/user');
+const { ApplicationError, ValidationError, NotFoundError } = errors;
 
-const { ApplicationError, ValidationError, NotFoundError } = utils.errors;
-
-const sanitizeOutput = async (user, ctx) => {
+const sanitizeOutput = async (strapi: Core.Strapi, user: unknown, ctx: Context) => {
   const schema = strapi.getModel('plugin::users-permissions.user');
   const { auth } = ctx.state;
 
   return strapi.contentAPI.sanitize.output(user, schema, { auth });
 };
 
-const validateQuery = async (query, ctx) => {
+const validateQuery = async (strapi: Core.Strapi, query: Context['query'], ctx: Context) => {
   const schema = strapi.getModel('plugin::users-permissions.user');
   const { auth } = ctx.state;
 
   return strapi.contentAPI.validate.query(query, schema, { auth });
 };
 
-const sanitizeQuery = async (query, ctx) => {
+const sanitizeQuery = async (strapi: Core.Strapi, query: Context['query'], ctx: Context) => {
   const schema = strapi.getModel('plugin::users-permissions.user');
   const { auth } = ctx.state;
 
   return strapi.contentAPI.sanitize.query(query, schema, { auth });
 };
 
-module.exports = {
+/** Create controller actions for this Strapi instance. */
+export default ({ strapi }: PluginContext) => ({
   /**
    * Create a/an user record.
    * @return {Object}
    */
-  async create(ctx) {
+  async create(ctx: Context) {
     const advanced = await strapi
       .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
-      .get();
+      .get<AdvancedSettings>();
 
     await validateCreateUserBody(ctx.request.body);
 
@@ -81,12 +78,12 @@ module.exports = {
     }
 
     try {
-      const data = await getService('user').add(user);
-      const sanitizedData = await sanitizeOutput(data, ctx);
+      const data = await getService(strapi, 'user').add(user);
+      const sanitizedData = await sanitizeOutput(strapi, data, ctx);
 
       ctx.created(sanitizedData);
     } catch (error) {
-      throw new ApplicationError(error.message);
+      throw new ApplicationError(error instanceof Error ? error.message : undefined);
     }
   },
 
@@ -94,15 +91,15 @@ module.exports = {
    * Update a/an user record.
    * @return {Object}
    */
-  async update(ctx) {
+  async update(ctx: Context) {
     const advancedConfigs = await strapi
       .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
-      .get();
+      .get<AdvancedSettings>();
 
     const { id } = ctx.params;
     const { email, username, password } = ctx.request.body;
 
-    const user = await getService('user').fetch(id);
+    const user = await getService(strapi, 'user').fetch(id);
     if (!user) {
       throw new NotFoundError(`User not found`);
     }
@@ -138,8 +135,8 @@ module.exports = {
       ...ctx.request.body,
     };
 
-    const data = await getService('user').edit(user.id, updateData);
-    const sanitizedData = await sanitizeOutput(data, ctx);
+    const data = await getService(strapi, 'user').edit(user.id, updateData);
+    const sanitizedData = await sanitizeOutput(strapi, data, ctx);
 
     ctx.send(sanitizedData);
   },
@@ -148,52 +145,48 @@ module.exports = {
    * Retrieve user records.
    * @return {Object|Array}
    */
-  async find(ctx) {
-    await validateQuery(ctx.query, ctx);
-    const sanitizedQuery = await sanitizeQuery(ctx.query, ctx);
-    const users = await getService('user').fetchAll(sanitizedQuery);
+  async find(ctx: Context) {
+    await validateQuery(strapi, ctx.query, ctx);
+    const sanitizedQuery = await sanitizeQuery(strapi, ctx.query, ctx);
+    const users = await getService(strapi, 'user').fetchAll(sanitizedQuery);
 
-    ctx.body = await Promise.all(users.map((user) => sanitizeOutput(user, ctx)));
+    ctx.body = await Promise.all(users.map((user) => sanitizeOutput(strapi, user, ctx)));
   },
 
   /**
    * Retrieve a user record.
    * @return {Object}
    */
-  async findOne(ctx) {
+  async findOne(ctx: Context) {
     const { id } = ctx.params;
-    await validateQuery(ctx.query, ctx);
-    const sanitizedQuery = await sanitizeQuery(ctx.query, ctx);
+    await validateQuery(strapi, ctx.query, ctx);
+    const sanitizedQuery = await sanitizeQuery(strapi, ctx.query, ctx);
 
-    let data = await getService('user').fetch(id, sanitizedQuery);
+    const data = await getService(strapi, 'user').fetch(id, sanitizedQuery);
 
-    if (data) {
-      data = await sanitizeOutput(data, ctx);
-    }
-
-    ctx.body = data;
+    ctx.body = data ? await sanitizeOutput(strapi, data, ctx) : data;
   },
 
   /**
    * Retrieve user count.
    * @return {Number}
    */
-  async count(ctx) {
-    await validateQuery(ctx.query, ctx);
-    const sanitizedQuery = await sanitizeQuery(ctx.query, ctx);
+  async count(ctx: Context) {
+    await validateQuery(strapi, ctx.query, ctx);
+    const sanitizedQuery = await sanitizeQuery(strapi, ctx.query, ctx);
 
-    ctx.body = await getService('user').count(sanitizedQuery);
+    ctx.body = await getService(strapi, 'user').count(sanitizedQuery);
   },
 
   /**
    * Destroy a/an user record.
    * @return {Object}
    */
-  async destroy(ctx) {
+  async destroy(ctx: Context) {
     const { id } = ctx.params;
 
-    const data = await getService('user').remove({ id });
-    const sanitizedUser = await sanitizeOutput(data, ctx);
+    const data = await getService(strapi, 'user').remove({ id });
+    const sanitizedUser = await sanitizeOutput(strapi, data, ctx);
 
     ctx.send(sanitizedUser);
   },
@@ -202,7 +195,7 @@ module.exports = {
    * Retrieve authenticated user.
    * @return {Object|Array}
    */
-  async me(ctx) {
+  async me(ctx: Context) {
     const authUser = ctx.state.user;
     const { query } = ctx;
 
@@ -210,10 +203,10 @@ module.exports = {
       return ctx.unauthorized();
     }
 
-    await validateQuery(query, ctx);
-    const sanitizedQuery = await sanitizeQuery(query, ctx);
-    const user = await getService('user').fetch(authUser.id, sanitizedQuery);
+    await validateQuery(strapi, query, ctx);
+    const sanitizedQuery = await sanitizeQuery(strapi, query, ctx);
+    const user = await getService(strapi, 'user').fetch(authUser.id, sanitizedQuery);
 
-    ctx.body = await sanitizeOutput(user, ctx);
+    ctx.body = await sanitizeOutput(strapi, user, ctx);
   },
-};
+});

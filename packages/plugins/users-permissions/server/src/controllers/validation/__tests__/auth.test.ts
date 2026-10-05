@@ -1,9 +1,14 @@
 import { beforeAll, describe, expect, test, vi } from 'vitest';
 
 import { errors } from '@strapi/utils';
+import type { Core } from '@strapi/types';
 import auth from '../../auth';
+import { createStrapiMock } from '../../../../tests/utils';
+import { createMockContext } from '../../__tests__/utils';
 
-const mockStrapi = {
+let strapi: Core.Strapi;
+
+const mockStrapi = createStrapiMock({
   contentAPI: {
     sanitize: {
       output: vi.fn((input) => input),
@@ -49,7 +54,7 @@ const mockStrapi = {
   },
   getModel: vi.fn(),
   plugin: () => ({
-    service(service) {
+    service(service: string) {
       if (service === 'user') {
         return {
           add: vi.fn((user) => {
@@ -73,11 +78,11 @@ const mockStrapi = {
       }
     },
   }),
-};
+});
 
 describe('user-permissions auth', () => {
   beforeAll(() => {
-    global.strapi = mockStrapi;
+    strapi = mockStrapi;
   });
 
   describe('register', () => {
@@ -98,7 +103,7 @@ describe('user-permissions auth', () => {
     ];
 
     test.each(registerCases)('$description', async ({ password }) => {
-      const ctx = {
+      const ctx = createMockContext({
         state: {
           auth: {},
         },
@@ -106,15 +111,15 @@ describe('user-permissions auth', () => {
           body: { username: 'testuser', email: 'test@example.com', password },
         },
         send: vi.fn(),
-      };
+      });
 
-      const authorization = auth({ strapi: global.strapi });
+      const authorization = auth({ strapi });
       await authorization.register(ctx);
       expect(ctx.send).toHaveBeenCalledTimes(1);
     });
 
     test('throws ValidationError when passed extra fields when allowedField is undefined', async () => {
-      global.strapi = {
+      strapi = createStrapiMock({
         ...mockStrapi,
         config: {
           get: vi.fn(() => {
@@ -125,9 +130,9 @@ describe('user-permissions auth', () => {
             };
           }),
         },
-      };
+      });
 
-      const ctx = {
+      const ctx = createMockContext({
         state: {
           auth: {},
         },
@@ -140,14 +145,14 @@ describe('user-permissions auth', () => {
           },
         },
         send: vi.fn(),
-      };
-      const authorization = auth({ strapi: global.strapi });
+      });
+      const authorization = auth({ strapi });
       await expect(authorization.register(ctx)).rejects.toThrow(errors.ValidationError);
       expect(ctx.send).toHaveBeenCalledTimes(0);
     });
 
     test('throws ValidationError when passed extra fields when allowedField is []', async () => {
-      global.strapi = {
+      strapi = createStrapiMock({
         ...mockStrapi,
         config: {
           get: vi.fn(() => {
@@ -158,9 +163,9 @@ describe('user-permissions auth', () => {
             };
           }),
         },
-      };
+      });
 
-      const ctx = {
+      const ctx = createMockContext({
         state: {
           auth: {},
         },
@@ -173,14 +178,14 @@ describe('user-permissions auth', () => {
           },
         },
         send: vi.fn(),
-      };
-      const authorization = auth({ strapi: global.strapi });
+      });
+      const authorization = auth({ strapi });
       await expect(authorization.register(ctx)).rejects.toThrow(errors.ValidationError);
       expect(ctx.send).toHaveBeenCalledTimes(0);
     });
 
     test('allows exceptions from config register.allowedFields', async () => {
-      global.strapi = {
+      strapi = createStrapiMock({
         ...mockStrapi,
         config: {
           get: vi.fn(() => {
@@ -191,9 +196,9 @@ describe('user-permissions auth', () => {
             };
           }),
         },
-      };
+      });
 
-      const ctx = {
+      const ctx = createMockContext({
         state: {
           auth: {},
         },
@@ -206,20 +211,20 @@ describe('user-permissions auth', () => {
           },
         },
         send: vi.fn(),
-      };
-      const authorization = auth({ strapi: global.strapi });
+      });
+      const authorization = auth({ strapi });
       await authorization.register(ctx);
       expect(ctx.send).toHaveBeenCalledTimes(1);
     });
 
     test('password does not follow custom validation pattern', async () => {
-      global.strapi = {
+      strapi = createStrapiMock({
         ...mockStrapi,
         config: {
           get: vi.fn((path) => {
             if (path === 'plugin::users-permissions.validationRules') {
               return {
-                validatePassword(value) {
+                validatePassword(value: string) {
                   // Custom validation logic: at least 1 uppercase, 1 lowercase, and 1 number
                   const hasUpperCase = /[A-Z]/.test(value);
                   const hasLowerCase = /[a-z]/.test(value);
@@ -235,9 +240,9 @@ describe('user-permissions auth', () => {
             };
           }),
         },
-      };
+      });
 
-      const ctx = {
+      const ctx = createMockContext({
         state: {
           auth: {},
         },
@@ -249,20 +254,20 @@ describe('user-permissions auth', () => {
           },
         },
         send: vi.fn(),
-      };
-      const authorization = auth({ strapi: global.strapi });
+      });
+      const authorization = auth({ strapi });
       await expect(authorization.register(ctx)).rejects.toThrow(errors.ValidationError);
       expect(ctx.send).toHaveBeenCalledTimes(0);
     });
 
     test('password follows custom validation pattern', async () => {
-      global.strapi = {
+      strapi = createStrapiMock({
         ...mockStrapi,
         config: {
           get: vi.fn((path) => {
             if (path === 'plugin::users-permissions.validationRules') {
               return {
-                validatePassword(value) {
+                validatePassword(value: string) {
                   // Custom validation logic: at least 1 uppercase, 1 lowercase, and 1 number
                   const hasUpperCase = /[A-Z]/.test(value);
                   const hasLowerCase = /[a-z]/.test(value);
@@ -278,9 +283,9 @@ describe('user-permissions auth', () => {
             };
           }),
         },
-      };
+      });
 
-      const ctx = {
+      const ctx = createMockContext({
         state: {
           auth: {},
         },
@@ -292,8 +297,8 @@ describe('user-permissions auth', () => {
           },
         },
         send: vi.fn(),
-      };
-      const authorization = auth({ strapi: global.strapi });
+      });
+      const authorization = auth({ strapi });
       await authorization.register(ctx);
       expect(ctx.send).toHaveBeenCalledTimes(1);
     });
@@ -317,7 +322,7 @@ describe('user-permissions auth', () => {
     ];
 
     test.each(cases)('$description', async ({ password, expectedMessage }) => {
-      global.strapi = {
+      strapi = createStrapiMock({
         ...mockStrapi,
         config: {
           get: vi.fn(() => {
@@ -328,9 +333,9 @@ describe('user-permissions auth', () => {
             };
           }),
         },
-      };
+      });
 
-      const ctx = {
+      const ctx = createMockContext({
         state: {
           auth: {},
         },
@@ -342,15 +347,15 @@ describe('user-permissions auth', () => {
           },
         },
         send: vi.fn(),
-      };
+      });
 
-      const authorization = auth({ strapi: global.strapi });
+      const authorization = auth({ strapi });
 
       await expect(authorization.register(ctx)).rejects.toThrow(errors.ValidationError);
       try {
         await authorization.register(ctx);
       } catch (error) {
-        expect(error.message).toBe(expectedMessage);
+        expect(error instanceof Error ? error.message : undefined).toBe(expectedMessage);
       }
 
       expect(ctx.send).toHaveBeenCalledTimes(0);
@@ -415,7 +420,7 @@ describe('user-permissions auth', () => {
     test.each(resetPasswordCases)(
       '$description',
       async ({ body, expectedMessage, expectedResponse }) => {
-        global.strapi = {
+        strapi = createStrapiMock({
           ...mockStrapi,
           db: {
             query: vi.fn(() => ({
@@ -449,17 +454,17 @@ describe('user-permissions auth', () => {
               }),
             },
           },
-        };
+        });
 
-        const ctx = {
+        const ctx = createMockContext({
           request: { body },
           state: {
             auth: {},
           },
           send: vi.fn(),
-        };
+        });
 
-        const authorization = auth({ strapi: global.strapi });
+        const authorization = auth({ strapi });
 
         if (expectedMessage) {
           await expect(authorization.resetPassword(ctx)).rejects.toThrowError(
@@ -535,7 +540,7 @@ describe('user-permissions auth', () => {
     test.each(changePasswordCases)(
       '$description',
       async ({ body, expectedMessage, expectedResponse }) => {
-        global.strapi = {
+        strapi = createStrapiMock({
           ...mockStrapi,
           db: {
             query: vi.fn(() => ({
@@ -570,17 +575,17 @@ describe('user-permissions auth', () => {
               }),
             },
           },
-        };
+        });
 
-        const ctx = {
+        const ctx = createMockContext({
           state: {
             user: { id: 1 },
           },
           request: { body },
           send: vi.fn(),
-        };
+        });
 
-        const authorization = auth({ strapi: global.strapi });
+        const authorization = auth({ strapi });
 
         if (expectedMessage) {
           await expect(authorization.changePassword(ctx)).rejects.toThrow(expectedMessage);
@@ -598,7 +603,7 @@ describe('user-permissions auth', () => {
         const generateRefreshToken = vi.fn(() => Promise.resolve({ token: 'new-refresh-token' }));
         const generateAccessToken = vi.fn(() => Promise.resolve({ token: 'new-access-token' }));
 
-        global.strapi = {
+        strapi = createStrapiMock({
           ...mockStrapi,
           config: {
             get: vi.fn((path) => {
@@ -626,9 +631,9 @@ describe('user-permissions auth', () => {
               output: vi.fn((user) => user),
             },
           },
-        };
+        });
 
-        const ctx = {
+        const ctx = createMockContext({
           state: { user: { id: 1 } },
           request: {
             body: {
@@ -638,9 +643,9 @@ describe('user-permissions auth', () => {
             },
           },
           send: vi.fn(),
-        };
+        });
 
-        const authorization = auth({ strapi: global.strapi });
+        const authorization = auth({ strapi });
         await authorization.changePassword(ctx);
 
         // Should invalidate all sessions (called without deviceId)
@@ -657,7 +662,7 @@ describe('user-permissions auth', () => {
       const generateRefreshToken = vi.fn(() => Promise.resolve({ token: 'new-refresh-token' }));
       const generateAccessToken = vi.fn(() => Promise.resolve({ token: 'new-access-token' }));
 
-      global.strapi = {
+      strapi = createStrapiMock({
         ...mockStrapi,
         config: {
           get: vi.fn((path) => {
@@ -687,9 +692,9 @@ describe('user-permissions auth', () => {
             output: vi.fn((user) => user),
           },
         },
-      };
+      });
 
-      const ctx = {
+      const ctx = createMockContext({
         state: { auth: {} },
         request: {
           body: {
@@ -699,9 +704,9 @@ describe('user-permissions auth', () => {
           },
         },
         send: vi.fn(),
-      };
+      });
 
-      const authorization = auth({ strapi: global.strapi });
+      const authorization = auth({ strapi });
       await authorization.resetPassword(ctx);
 
       // Should invalidate all sessions (called without deviceId)
@@ -713,7 +718,7 @@ describe('user-permissions auth', () => {
 
   describe('refresh', () => {
     test('returns not found when jwtManagement is not refresh mode', async () => {
-      global.strapi = {
+      strapi = createStrapiMock({
         ...mockStrapi,
         config: {
           get: vi.fn((key, defaultValue) => {
@@ -723,15 +728,15 @@ describe('user-permissions auth', () => {
             return defaultValue;
           }),
         },
-      };
+      });
 
-      const ctx = {
+      const ctx = createMockContext({
         request: { body: { refreshToken: 'token' } },
         notFound: vi.fn(),
         badRequest: vi.fn(),
-      };
+      });
 
-      const authorization = auth({ strapi: global.strapi });
+      const authorization = auth({ strapi });
 
       await authorization.refresh(ctx);
 
@@ -743,7 +748,7 @@ describe('user-permissions auth', () => {
       const rotateRefreshToken = vi.fn();
       const generateAccessToken = vi.fn();
 
-      global.strapi = {
+      strapi = createStrapiMock({
         ...mockStrapi,
         config: {
           get: vi.fn((key, defaultValue) => {
@@ -757,18 +762,18 @@ describe('user-permissions auth', () => {
           rotateRefreshToken,
           generateAccessToken,
         })),
-      };
+      });
 
-      const ctx = {
+      const ctx = createMockContext({
         request: { body: {} },
         cookies: {
           get: vi.fn(() => undefined),
         },
         badRequest: vi.fn(),
         notFound: vi.fn(),
-      };
+      });
 
-      const authorization = auth({ strapi: global.strapi });
+      const authorization = auth({ strapi });
 
       await authorization.refresh(ctx);
 
@@ -781,7 +786,7 @@ describe('user-permissions auth', () => {
     test('returns bad request when refresh token is not a string', async () => {
       const rotateRefreshToken = vi.fn();
 
-      global.strapi = {
+      strapi = createStrapiMock({
         ...mockStrapi,
         config: {
           get: vi.fn((key, defaultValue) => {
@@ -795,18 +800,18 @@ describe('user-permissions auth', () => {
           rotateRefreshToken,
           generateAccessToken: vi.fn(),
         })),
-      };
+      });
 
-      const ctx = {
+      const ctx = createMockContext({
         request: { body: { refreshToken: 123 } },
         cookies: {
           get: vi.fn(() => undefined),
         },
         badRequest: vi.fn(),
         notFound: vi.fn(),
-      };
+      });
 
-      const authorization = auth({ strapi: global.strapi });
+      const authorization = auth({ strapi });
 
       await authorization.refresh(ctx);
 

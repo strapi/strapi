@@ -1,47 +1,56 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import { createStrapiMock } from '../../../tests/utils';
+import { createMockContext } from './utils';
 import authController from '../auth';
+import { createOAuthConnectMiddleware } from '../../utils/oauth-connect';
 
-const createContext = (body = {}) => ({
-  params: {},
-  query: {},
-  request: { body, headers: { 'user-agent': 'test-client' }, header: {} },
-  state: { auth: {} },
-  cookies: { get: vi.fn(), set: vi.fn() },
-  send: vi.fn(),
-  redirect: vi.fn(),
-  notFound: vi.fn(),
-  badRequest: vi.fn(),
-  unauthorized: vi.fn(),
-});
+const oauthMiddleware = vi.hoisted(() => vi.fn());
+vi.mock('../../utils/oauth-connect', () => ({
+  createOAuthConnectMiddleware: vi.fn(() => oauthMiddleware),
+}));
 
-let strapi;
-let controller;
-let user;
-let userService;
-let query;
-let settings;
-let services;
-let sessionManager;
+const createContext = (body: Record<string, unknown> = {}) =>
+  createMockContext({
+    params: {},
+    query: {},
+    request: { body, headers: { 'user-agent': 'test-client' }, header: {} },
+    state: { auth: {} },
+    cookies: { get: vi.fn(), set: vi.fn() },
+    send: vi.fn(),
+    redirect: vi.fn(),
+    notFound: vi.fn(),
+    badRequest: vi.fn(),
+    unauthorized: vi.fn(),
+  });
 
-beforeEach(() => {
-  user = {
+let strapi: ReturnType<typeof createFixture>['strapi'];
+let controller: ReturnType<typeof createFixture>['controller'];
+let user: ReturnType<typeof createFixture>['user'];
+let userService: ReturnType<typeof createFixture>['userService'];
+let query: ReturnType<typeof createFixture>['query'];
+let settings: ReturnType<typeof createFixture>['settings'];
+let services: ReturnType<typeof createFixture>['services'];
+let sessionManager: ReturnType<typeof createFixture>['sessionManager'];
+
+const createFixture = () => {
+  const user = {
     id: 1,
     email: 'alice@example.com',
     username: 'alice',
-    password: 'hashed',
+    password: 'hashed' as string | null,
     provider: 'local',
     confirmed: true,
     blocked: false,
   };
-  userService = {
+  const userService = {
     validatePassword: vi.fn().mockResolvedValue(true),
     edit: vi.fn().mockResolvedValue(user),
     add: vi.fn().mockResolvedValue(user),
     fetchAll: vi.fn().mockResolvedValue([user]),
     sendConfirmationEmail: vi.fn(),
   };
-  query = { findOne: vi.fn().mockResolvedValue(user), count: vi.fn().mockResolvedValue(0) };
-  settings = {
+  const query = { findOne: vi.fn().mockResolvedValue(user), count: vi.fn().mockResolvedValue(0) };
+  const settings = {
     grant: { email: { enabled: true }, github: { enabled: true } },
     advanced: {
       allow_register: true,
@@ -49,6 +58,7 @@ beforeEach(() => {
       unique_email: true,
       email_confirmation: false,
       email_reset_password: 'https://example.com/reset',
+      email_confirmation_redirection: undefined as string | undefined,
     },
     email: {
       reset_password: {
@@ -61,42 +71,64 @@ beforeEach(() => {
       },
     },
   };
-  services = {
+  const services = {
     user: userService,
     jwt: { issue: vi.fn().mockReturnValue('legacy-jwt') },
     providers: { connect: vi.fn().mockResolvedValue(user) },
-    'users-permissions': { template: vi.fn((text) => `rendered:${text}`) },
+    'users-permissions': { template: vi.fn((text: string) => `rendered:${text}`) },
     email: { send: vi.fn() },
   };
-  sessionManager = {
+  const sessionManager = {
     generateRefreshToken: vi.fn().mockResolvedValue({ token: 'refresh-token' }),
     generateAccessToken: vi.fn().mockResolvedValue({ token: 'access-token' }),
     invalidateRefreshToken: vi.fn(),
     rotateRefreshToken: vi.fn().mockResolvedValue({ token: 'rotated' }),
   };
-  strapi = {
+  const validateCallback = vi.fn();
+  const strapi = createStrapiMock({
     db: { query: vi.fn(() => query) },
-    store: vi.fn((options) => ({ get: vi.fn((params) => settings[params?.key || options.key]) })),
+    store: vi.fn((options: { key?: keyof typeof settings }) => ({
+      get: vi.fn(
+        (params?: { key: keyof typeof settings }) =>
+          settings[params?.key || options.key || 'advanced']
+      ),
+    })),
     config: {
-      get: vi.fn((path, defaultValue) =>
+      server: { url: 'https://example.com' },
+      get: vi.fn((path: string, defaultValue?: unknown) =>
         path === 'plugin::users-permissions' ? { register: {} } : defaultValue
       ),
     },
     getModel: vi.fn(() => ({ uid: 'plugin::users-permissions.user' })),
-    plugin: vi.fn(() => ({ service: (name) => services[name] })),
+    plugin: vi.fn(() => ({
+      service: (name: keyof typeof services) => services[name],
+      config: () => ({ validate: validateCallback }),
+    })),
     contentAPI: {
-      sanitize: { output: vi.fn((record) => ({ id: record.id, email: record.email })) },
+      sanitize: {
+        output: vi.fn((record: { id: number; email: string }) => ({
+          id: record.id,
+          email: record.email,
+        })),
+      },
     },
     sessionManager: vi.fn(() => sessionManager),
-    log: { error: vi.fn() },
-  };
-  vi.stubGlobal('strapi', strapi);
-  controller = authController({ strapi });
+    log: { error: vi.fn(), warn: vi.fn() },
+  });
+  vi.stubGlobal('strapi', undefined);
+  const controller = authController({ strapi });
+  return { strapi, controller, user, userService, query, settings, services, sessionManager };
+};
+
+beforeEach(() => {
+  ({ strapi, controller, user, userService, query, settings, services, sessionManager } =
+    createFixture());
 });
+
 afterEach(() => vi.unstubAllGlobals());
 
-const enableRefresh = (sessions = {}) => {
-  strapi.config.get.mockImplementation((path, defaultValue) => {
+const enableRefresh = (sessions: Record<string, unknown> = {}) => {
+  strapi.config.get.mockImplementation((path: string, defaultValue?: unknown) => {
     if (path.endsWith('jwtManagement')) return 'refresh';
     if (path.endsWith('sessions')) return sessions;
     if (path === 'plugin::users-permissions') return { register: {} };
@@ -206,6 +238,22 @@ describe('login', () => {
     });
   });
 
+  test('allows clients to request httpOnly refresh cookies', async () => {
+    enableRefresh();
+    const ctx = createContext(credentials);
+    ctx.request.header['x-strapi-refresh-cookie'] = 'httpOnly';
+    await controller.callback(ctx);
+    expect(ctx.cookies.set).toHaveBeenCalledWith(
+      'strapi_up_refresh',
+      'refresh-token',
+      expect.objectContaining({ httpOnly: true })
+    );
+    expect(ctx.send).toHaveBeenCalledWith({
+      jwt: 'access-token',
+      user: { id: 1, email: 'alice@example.com' },
+    });
+  });
+
   test('keeps refresh tokens in configured httpOnly cookies', async () => {
     enableRefresh({ httpOnly: true, cookie: { name: 'refresh_cookie', sameSite: 'strict' } });
     const ctx = createContext(credentials);
@@ -276,6 +324,29 @@ describe('registration', () => {
     });
   });
 
+  test('creates refresh credentials with a generated device identifier after registration', async () => {
+    enableRefresh();
+    const ctx = createContext(body);
+    await controller.register(ctx);
+    expect(sessionManager.generateRefreshToken).toHaveBeenCalledWith('1', expect.any(String), {
+      type: 'refresh',
+      metadata: expect.objectContaining({ loginAt: expect.any(String) }),
+    });
+    expect(ctx.send).toHaveBeenCalledWith({
+      jwt: 'access-token',
+      refreshToken: 'refresh-token',
+      user: { id: 1, email: 'alice@example.com' },
+    });
+  });
+
+  test('does not return registration credentials after token generation fails', async () => {
+    enableRefresh();
+    sessionManager.generateAccessToken.mockResolvedValue({ error: 'invalid' });
+    const ctx = createContext(body);
+    await expect(controller.register(ctx)).rejects.toThrow('Invalid credentials');
+    expect(ctx.send).not.toHaveBeenCalled();
+  });
+
   test('withholds tokens until email confirmation', async () => {
     settings.advanced.email_confirmation = true;
     const ctx = createContext(body);
@@ -295,6 +366,62 @@ describe('registration', () => {
       'Error sending confirmation email'
     );
     expect(services.jwt.issue).not.toHaveBeenCalled();
+  });
+});
+
+describe('OAuth connection', () => {
+  test('rejects disabled providers before entering the OAuth middleware', async () => {
+    settings.grant.github.enabled = false;
+    const ctx = createContext();
+    ctx.request.url = '/connect/github';
+    oauthMiddleware.mockClear();
+    await expect(controller.connect(ctx, vi.fn())).rejects.toThrow('This provider is disabled');
+    expect(oauthMiddleware).not.toHaveBeenCalled();
+  });
+
+  test('validates and persists custom callbacks across the provider redirect', async () => {
+    const ctx = createContext();
+    ctx.request.url = '/connect/github?callback=https://app.example.com';
+    ctx.query = { callback: 'https://app.example.com' };
+    const next = vi.fn();
+    await controller.connect(ctx, next);
+    expect(strapi.plugin().config().validate).toHaveBeenCalledWith(
+      'https://app.example.com',
+      settings.grant.github
+    );
+    expect(ctx.session.grant.dynamic.callback).toBe('https://app.example.com');
+    expect(ctx.state.oauthConnect).toEqual({ callback: 'https://app.example.com' });
+    expect(createOAuthConnectMiddleware).toHaveBeenCalledWith(strapi);
+    expect(oauthMiddleware).toHaveBeenCalledWith(ctx, next);
+  });
+
+  test('rejects invalid callback URLs without entering the OAuth middleware', async () => {
+    strapi.plugin().config().validate.mockRejectedValue(new Error('Untrusted origin'));
+    const ctx = createContext();
+    ctx.request.url = '/connect/github';
+    ctx.query = { callback: 'https://untrusted.example.com' };
+    oauthMiddleware.mockClear();
+    await expect(controller.connect(ctx, vi.fn())).rejects.toThrow('Invalid callback URL provided');
+    expect(oauthMiddleware).not.toHaveBeenCalled();
+  });
+
+  test('revalidates callback URLs restored from the provider session', async () => {
+    const ctx = createContext();
+    ctx.request.url = '/connect/github/callback';
+    ctx.session = { grant: { dynamic: { callback: 'https://app.example.com' } } };
+    await controller.connect(ctx, vi.fn());
+    expect(strapi.plugin().config().validate).toHaveBeenCalledWith(
+      'https://app.example.com',
+      settings.grant.github
+    );
+  });
+
+  test('warns about relative server URLs while allowing configured providers', async () => {
+    strapi.config.server.url = '/';
+    const ctx = createContext();
+    ctx.request.url = '/connect/github';
+    await controller.connect(ctx, vi.fn());
+    expect(strapi.log.warn).toHaveBeenCalledWith(expect.stringContaining('absolute url'));
   });
 });
 
@@ -410,6 +537,19 @@ describe('token refresh', () => {
     await controller.refresh(ctx);
     expect(ctx.unauthorized).toHaveBeenCalledWith('Invalid refresh token');
     expect(ctx.send).not.toHaveBeenCalled();
+  });
+
+  test('rotates httpOnly cookies without returning refresh tokens in the body', async () => {
+    enableRefresh({ httpOnly: true, cookie: { name: 'refresh_cookie' } });
+    const ctx = createContext();
+    ctx.cookies.get.mockReturnValue('cookie-token');
+    await controller.refresh(ctx);
+    expect(ctx.cookies.set).toHaveBeenCalledWith(
+      'refresh_cookie',
+      'rotated',
+      expect.objectContaining({ httpOnly: true })
+    );
+    expect(ctx.send).toHaveBeenCalledWith({ jwt: 'access-token' });
   });
 
   test('prioritizes the refresh cookie over the request body', async () => {

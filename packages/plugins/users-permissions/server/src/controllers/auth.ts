@@ -1,18 +1,28 @@
-'use strict';
+import type { Context, Next } from 'koa';
+import type { Core, Data } from '@strapi/types';
 
-/**
- * Auth.js controller
- *
- * @description: A set of functions called "actions" for managing `Auth`.
- */
-
-/* eslint-disable no-useless-escape */
-const crypto = require('crypto');
-const _ = require('lodash');
-const utils = require('@strapi/utils');
-const { getService } = require('../utils');
-const { buildRefreshCookieOptions } = require('../utils/refresh-cookie-options');
-const {
+import crypto from 'crypto';
+import _ from 'lodash';
+import {
+  errors,
+  buildSessionMetadata,
+  sanitizeSessionEntry,
+  sortSessionsForDisplay,
+} from '@strapi/utils';
+import type {
+  PluginContext,
+  AdvancedSettings,
+  User,
+  SessionsConfig,
+  EmailSettings,
+  GrantConfig,
+  ProviderSettings,
+} from '../types';
+import { getService } from '../utils';
+import type { PasswordValidationRules } from './validation/auth';
+import { createOAuthConnectMiddleware } from '../utils/oauth-connect';
+import { buildRefreshCookieOptions } from '../utils/refresh-cookie-options';
+import {
   validateCallbackBody,
   validateRegisterBody,
   validateSendEmailConfirmationBody,
@@ -20,32 +30,36 @@ const {
   validateResetPasswordBody,
   validateEmailConfirmationBody,
   validateChangePasswordBody,
-} = require('./validation/auth');
+} from './validation/auth';
 
-const { ApplicationError, ValidationError, ForbiddenError } = utils.errors;
-const { buildSessionMetadata, sanitizeSessionEntry, sortSessionsForDisplay } = utils;
+const { ApplicationError, ValidationError, ForbiddenError } = errors;
 
-const sanitizeUser = (user, ctx) => {
+const sanitizeUser = (strapi: Core.Strapi, user: unknown, ctx: Context) => {
   const { auth } = ctx.state;
   const userSchema = strapi.getModel('plugin::users-permissions.user');
 
-  return strapi.contentAPI.sanitize.output(user, userSchema, { auth });
+  return strapi.contentAPI.sanitize.output(user, userSchema, { auth }) as Promise<User>;
 };
 
-const extractDeviceId = (requestBody) => {
+const extractDeviceId = (requestBody: Record<string, unknown> | undefined) => {
   const { deviceId } = requestBody || {};
 
   return typeof deviceId === 'string' && deviceId.length > 0 ? deviceId : undefined;
 };
 
-const buildSessionMetadataFromContext = (ctx) =>
+const buildSessionMetadataFromContext = (ctx: Context) =>
   buildSessionMetadata({
     userAgent: ctx.request.headers['user-agent'],
   });
 
-const sendRefreshAuthResponse = async (strapi, ctx, user, { metadata } = {}) => {
+const sendRefreshAuthResponse = async (
+  strapi: Core.Strapi,
+  ctx: Context,
+  user: { id: Data.ID },
+  { metadata }: { metadata?: ReturnType<typeof buildSessionMetadata> } = {}
+) => {
   const deviceId = extractDeviceId(ctx.request.body);
-  const tokenOptions = { type: 'refresh', ...(metadata ? { metadata } : {}) };
+  const tokenOptions = { type: 'refresh' as const, ...(metadata ? { metadata } : {}) };
 
   const refresh = await strapi
     .sessionManager('users-permissions')
@@ -58,24 +72,28 @@ const sendRefreshAuthResponse = async (strapi, ctx, user, { metadata } = {}) => 
     throw new ApplicationError('Invalid credentials');
   }
 
-  const upSessions = strapi.config.get('plugin::users-permissions.sessions');
+  const upSessions = strapi.config.get<SessionsConfig>('plugin::users-permissions.sessions', {});
   const requestHttpOnly = ctx.request.header['x-strapi-refresh-cookie'] === 'httpOnly';
 
   if (upSessions?.httpOnly || requestHttpOnly) {
     const cookieName = upSessions.cookie?.name || 'strapi_up_refresh';
     const isProduction = process.env.NODE_ENV === 'production';
     ctx.cookies.set(cookieName, refresh.token, buildRefreshCookieOptions(upSessions, isProduction));
-    return ctx.send({ jwt: access.token, user: await sanitizeUser(user, ctx) });
+    return ctx.send({ jwt: access.token, user: await sanitizeUser(strapi, user, ctx) });
   }
 
   return ctx.send({
     jwt: access.token,
     refreshToken: refresh.token,
-    user: await sanitizeUser(user, ctx),
+    user: await sanitizeUser(strapi, user, ctx),
   });
 };
 
-const reissueTokensAfterPasswordChange = async (strapi, ctx, user) => {
+const reissueTokensAfterPasswordChange = async (
+  strapi: Core.Strapi,
+  ctx: Context,
+  user: { id: Data.ID }
+) => {
   const deviceId = extractDeviceId(ctx.request.body);
 
   await strapi.sessionManager('users-permissions').invalidateRefreshToken(String(user.id));
@@ -95,13 +113,18 @@ const reissueTokensAfterPasswordChange = async (strapi, ctx, user) => {
   return ctx.send({
     jwt: access.token,
     refreshToken: refresh.token,
-    user: await sanitizeUser(user, ctx),
+    user: await sanitizeUser(strapi, user, ctx),
   });
 };
 
-const revokeLogoutSessions = async (strapi, ctx, userId, { scope, deviceId, body }) => {
+const revokeLogoutSessions = async (
+  strapi: Core.Strapi,
+  ctx: Context,
+  userId: string,
+  { scope, deviceId, body }: { scope?: string; deviceId?: string; body: Record<string, unknown> }
+) => {
   const sessionManager = strapi.sessionManager('users-permissions');
-  const upSessions = strapi.config.get('plugin::users-permissions.sessions');
+  const upSessions = strapi.config.get<SessionsConfig>('plugin::users-permissions.sessions', {});
 
   if (scope === 'all') {
     await sessionManager.invalidateRefreshToken(userId);
@@ -134,13 +157,14 @@ const revokeLogoutSessions = async (strapi, ctx, userId, { scope, deviceId, body
   await sessionManager.invalidateRefreshToken(userId);
 };
 
-module.exports = ({ strapi }) => ({
-  async callback(ctx) {
+/** Create authentication actions for this Strapi instance. */
+export default ({ strapi }: PluginContext) => ({
+  async callback(ctx: Context) {
     const provider = ctx.params.provider || 'local';
     const params = ctx.request.body;
 
     const store = strapi.store({ type: 'plugin', name: 'users-permissions' });
-    const grantSettings = await store.get({ key: 'grant' });
+    const grantSettings = await store.get<GrantConfig>({ key: 'grant' });
 
     const grantProvider = provider === 'local' ? 'email' : provider;
 
@@ -169,7 +193,7 @@ module.exports = ({ strapi }) => ({
         throw new ValidationError('Invalid identifier or password');
       }
 
-      const validPassword = await getService('user').validatePassword(
+      const validPassword = await getService(strapi, 'user').validatePassword(
         params.password,
         user.password
       );
@@ -178,7 +202,7 @@ module.exports = ({ strapi }) => ({
         throw new ValidationError('Invalid identifier or password');
       }
 
-      const advancedSettings = await store.get({ key: 'advanced' });
+      const advancedSettings = await store.get<AdvancedSettings>({ key: 'advanced' });
       const requiresConfirmation = _.get(advancedSettings, 'email_confirmation');
 
       if (requiresConfirmation && user.confirmed !== true) {
@@ -189,7 +213,10 @@ module.exports = ({ strapi }) => ({
         throw new ApplicationError('Your account has been blocked by an administrator');
       }
 
-      const mode = strapi.config.get('plugin::users-permissions.jwtManagement', 'legacy-support');
+      const mode = strapi.config.get<string>(
+        'plugin::users-permissions.jwtManagement',
+        'legacy-support'
+      );
       if (mode === 'refresh') {
         return sendRefreshAuthResponse(strapi, ctx, user, {
           metadata: buildSessionMetadataFromContext(ctx),
@@ -197,8 +224,8 @@ module.exports = ({ strapi }) => ({
       }
 
       return ctx.send({
-        jwt: getService('jwt').issue({ id: user.id }),
-        user: await sanitizeUser(user, ctx),
+        jwt: getService(strapi, 'jwt').issue({ id: user.id }),
+        user: await sanitizeUser(strapi, user, ctx),
       });
     }
 
@@ -210,7 +237,7 @@ module.exports = ({ strapi }) => ({
         throw new ApplicationError('OAuth authentication requires a completed provider session');
       }
 
-      const user = await getService('providers').connect(provider, grantResponse, {
+      const user = await getService(strapi, 'providers').connect(provider, grantResponse, {
         grantResponse,
       });
 
@@ -218,28 +245,33 @@ module.exports = ({ strapi }) => ({
         throw new ForbiddenError('Your account has been blocked by an administrator');
       }
 
-      const mode = strapi.config.get('plugin::users-permissions.jwtManagement', 'legacy-support');
+      const mode = strapi.config.get<string>(
+        'plugin::users-permissions.jwtManagement',
+        'legacy-support'
+      );
       if (mode === 'refresh') {
-        return sendRefreshAuthResponse(strapi, ctx, user, {
+        return await sendRefreshAuthResponse(strapi, ctx, user, {
           metadata: buildSessionMetadataFromContext(ctx),
         });
       }
 
       return ctx.send({
-        jwt: getService('jwt').issue({ id: user.id }),
-        user: await sanitizeUser(user, ctx),
+        jwt: getService(strapi, 'jwt').issue({ id: user.id }),
+        user: await sanitizeUser(strapi, user, ctx),
       });
     } catch (error) {
-      throw new ApplicationError(error.message);
+      throw new ApplicationError(error instanceof Error ? error.message : undefined);
     }
   },
 
-  async changePassword(ctx) {
+  async changePassword(ctx: Context) {
     if (!ctx.state.user) {
       throw new ApplicationError('You must be authenticated to reset your password');
     }
 
-    const validations = strapi.config.get('plugin::users-permissions.validationRules');
+    const validations = strapi.config.get<PasswordValidationRules>(
+      'plugin::users-permissions.validationRules'
+    );
 
     const { currentPassword, password } = await validateChangePasswordBody(
       ctx.request.body,
@@ -250,7 +282,10 @@ module.exports = ({ strapi }) => ({
       .query('plugin::users-permissions.user')
       .findOne({ where: { id: ctx.state.user.id } });
 
-    const validPassword = await getService('user').validatePassword(currentPassword, user.password);
+    const validPassword = await getService(strapi, 'user').validatePassword(
+      currentPassword,
+      user.password
+    );
 
     if (!validPassword) {
       throw new ValidationError('The provided current password is invalid');
@@ -260,21 +295,26 @@ module.exports = ({ strapi }) => ({
       throw new ValidationError('Your new password must be different than your current password');
     }
 
-    await getService('user').edit(user.id, { password });
+    await getService(strapi, 'user').edit(user.id, { password });
 
-    const mode = strapi.config.get('plugin::users-permissions.jwtManagement', 'legacy-support');
+    const mode = strapi.config.get<string>(
+      'plugin::users-permissions.jwtManagement',
+      'legacy-support'
+    );
     if (mode === 'refresh') {
       return reissueTokensAfterPasswordChange(strapi, ctx, user);
     }
 
     return ctx.send({
-      jwt: getService('jwt').issue({ id: user.id }),
-      user: await sanitizeUser(user, ctx),
+      jwt: getService(strapi, 'jwt').issue({ id: user.id }),
+      user: await sanitizeUser(strapi, user, ctx),
     });
   },
 
-  async resetPassword(ctx) {
-    const validations = strapi.config.get('plugin::users-permissions.validationRules');
+  async resetPassword(ctx: Context) {
+    const validations = strapi.config.get<PasswordValidationRules>(
+      'plugin::users-permissions.validationRules'
+    );
 
     const { password, passwordConfirmation, code } = await validateResetPasswordBody(
       ctx.request.body,
@@ -293,28 +333,34 @@ module.exports = ({ strapi }) => ({
       throw new ValidationError('Incorrect code provided');
     }
 
-    await getService('user').edit(user.id, {
+    await getService(strapi, 'user').edit(user.id, {
       resetPasswordToken: null,
       password,
     });
 
-    const mode = strapi.config.get('plugin::users-permissions.jwtManagement', 'legacy-support');
+    const mode = strapi.config.get<string>(
+      'plugin::users-permissions.jwtManagement',
+      'legacy-support'
+    );
     if (mode === 'refresh') {
       return reissueTokensAfterPasswordChange(strapi, ctx, user);
     }
 
     return ctx.send({
-      jwt: getService('jwt').issue({ id: user.id }),
-      user: await sanitizeUser(user, ctx),
+      jwt: getService(strapi, 'jwt').issue({ id: user.id }),
+      user: await sanitizeUser(strapi, user, ctx),
     });
   },
-  async refresh(ctx) {
-    const mode = strapi.config.get('plugin::users-permissions.jwtManagement', 'legacy-support');
+  async refresh(ctx: Context) {
+    const mode = strapi.config.get<string>(
+      'plugin::users-permissions.jwtManagement',
+      'legacy-support'
+    );
     if (mode !== 'refresh') {
       return ctx.notFound();
     }
 
-    const upSessions = strapi.config.get('plugin::users-permissions.sessions');
+    const upSessions = strapi.config.get<SessionsConfig>('plugin::users-permissions.sessions', {});
     const cookieName = upSessions?.cookie?.name || 'strapi_up_refresh';
 
     // Check for refresh token in cookie first (if httpOnly is configured), then in body
@@ -353,8 +399,11 @@ module.exports = ({ strapi }) => ({
     }
     return ctx.send({ jwt: result.token, refreshToken: rotation.token });
   },
-  async logout(ctx) {
-    const mode = strapi.config.get('plugin::users-permissions.jwtManagement', 'legacy-support');
+  async logout(ctx: Context) {
+    const mode = strapi.config.get<string>(
+      'plugin::users-permissions.jwtManagement',
+      'legacy-support'
+    );
     if (mode !== 'refresh') {
       return ctx.notFound();
     }
@@ -364,7 +413,7 @@ module.exports = ({ strapi }) => ({
     }
 
     const userId = String(ctx.state.user.id);
-    const upSessions = strapi.config.get('plugin::users-permissions.sessions');
+    const upSessions = strapi.config.get<SessionsConfig>('plugin::users-permissions.sessions', {});
     const body = ctx.request.body || {};
     const scope = typeof body.scope === 'string' ? body.scope : undefined;
     const deviceId = extractDeviceId(body);
@@ -389,8 +438,11 @@ module.exports = ({ strapi }) => ({
     }
     return ctx.send({ ok: true });
   },
-  async getSessions(ctx) {
-    const mode = strapi.config.get('plugin::users-permissions.jwtManagement', 'legacy-support');
+  async getSessions(ctx: Context) {
+    const mode = strapi.config.get<string>(
+      'plugin::users-permissions.jwtManagement',
+      'legacy-support'
+    );
     if (mode !== 'refresh') {
       return ctx.notFound();
     }
@@ -410,8 +462,11 @@ module.exports = ({ strapi }) => ({
 
     return ctx.send({ data });
   },
-  async revokeSession(ctx) {
-    const mode = strapi.config.get('plugin::users-permissions.jwtManagement', 'legacy-support');
+  async revokeSession(ctx: Context) {
+    const mode = strapi.config.get<string>(
+      'plugin::users-permissions.jwtManagement',
+      'legacy-support'
+    );
     if (mode !== 'refresh') {
       return ctx.notFound();
     }
@@ -431,10 +486,10 @@ module.exports = ({ strapi }) => ({
 
     return ctx.send({ data: {} });
   },
-  async connect(ctx, next) {
+  async connect(ctx: Context, next: Next) {
     const providers = await strapi
       .store({ type: 'plugin', name: 'users-permissions', key: 'grant' })
-      .get();
+      .get<GrantConfig>();
 
     const [requestPath] = ctx.request.url.split('?');
     const provider = requestPath.split('/connect/')[1].split('/')[0];
@@ -455,9 +510,9 @@ module.exports = ({ strapi }) => ({
 
     if (customCallback !== undefined) {
       try {
-        const { validate: validateCallback } = strapi
-          .plugin('users-permissions')
-          .config('callback');
+        const { validate: validateCallback } = strapi.plugin('users-permissions').config<{
+          validate: (callback: unknown, provider: ProviderSettings) => Promise<void>;
+        }>('callback');
 
         await validateCallback(customCallback, providers[provider]);
 
@@ -474,19 +529,18 @@ module.exports = ({ strapi }) => ({
       }
     }
 
-    const { createOAuthConnectMiddleware } = require('../utils/oauth-connect');
-    const oauthConnect = createOAuthConnectMiddleware();
+    const oauthConnect = createOAuthConnectMiddleware(strapi);
 
     return oauthConnect(ctx, next);
   },
 
-  async forgotPassword(ctx) {
+  async forgotPassword(ctx: Context) {
     const { email } = await validateForgotPasswordBody(ctx.request.body);
 
     const pluginStore = await strapi.store({ type: 'plugin', name: 'users-permissions' });
 
-    const emailSettings = await pluginStore.get({ key: 'email' });
-    const advancedSettings = await pluginStore.get({ key: 'advanced' });
+    const emailSettings = await pluginStore.get<EmailSettings>({ key: 'email' });
+    const advancedSettings = await pluginStore.get<AdvancedSettings>({ key: 'advanced' });
 
     // Find the user by email.
     const user = await strapi.db
@@ -498,12 +552,12 @@ module.exports = ({ strapi }) => ({
     }
 
     // Generate random token.
-    const userInfo = await sanitizeUser(user, ctx);
+    const userInfo = await sanitizeUser(strapi, user, ctx);
 
     const resetPasswordToken = crypto.randomBytes(64).toString('hex');
 
-    const resetPasswordSettings = _.get(emailSettings, 'reset_password.options', {});
-    const emailBody = await getService('users-permissions').template(
+    const resetPasswordSettings = emailSettings.reset_password.options;
+    const emailBody = await getService(strapi, 'users-permissions').template(
       resetPasswordSettings.message,
       {
         URL: advancedSettings.email_reset_password,
@@ -514,7 +568,7 @@ module.exports = ({ strapi }) => ({
       }
     );
 
-    const emailObject = await getService('users-permissions').template(
+    const emailObject = await getService(strapi, 'users-permissions').template(
       resetPasswordSettings.object,
       {
         USER: userInfo,
@@ -534,7 +588,7 @@ module.exports = ({ strapi }) => ({
     };
 
     // NOTE: Update the user before sending the email so an Admin can generate the link if the email fails
-    await getService('user').edit(user.id, { resetPasswordToken });
+    await getService(strapi, 'user').edit(user.id, { resetPasswordToken });
 
     // Send an email to the user.
     await strapi.plugin('email').service('email').send(emailToSend);
@@ -542,16 +596,18 @@ module.exports = ({ strapi }) => ({
     ctx.send({ ok: true });
   },
 
-  async register(ctx) {
+  async register(ctx: Context) {
     const pluginStore = await strapi.store({ type: 'plugin', name: 'users-permissions' });
 
-    const settings = await pluginStore.get({ key: 'advanced' });
+    const settings = await pluginStore.get<AdvancedSettings>({ key: 'advanced' });
 
     if (!settings.allow_register) {
       throw new ApplicationError('Register action is currently disabled');
     }
 
-    const { register } = strapi.config.get('plugin::users-permissions');
+    const { register } = strapi.config.get<{ register?: { allowedFields?: string[] } }>(
+      'plugin::users-permissions'
+    );
     const alwaysAllowedKeys = ['username', 'password', 'email'];
 
     // Note that we intentionally do not filter allowedFields to allow a project to explicitly accept private or other Strapi field on registration
@@ -568,14 +624,16 @@ module.exports = ({ strapi }) => ({
       throw new ValidationError(`Invalid parameters: ${invalidKeys.join(', ')}`);
     }
 
+    const validations = strapi.config.get<PasswordValidationRules>(
+      'plugin::users-permissions.validationRules'
+    );
     const params = {
-      ..._.pick(ctx.request.body, allowedKeys),
+      ...(await validateRegisterBody(
+        { ..._.pick(ctx.request.body, allowedKeys), provider: 'local' },
+        validations
+      )),
       provider: 'local',
     };
-
-    const validations = strapi.config.get('plugin::users-permissions.validationRules');
-
-    await validateRegisterBody(params, validations);
 
     const role = await strapi.db
       .query('plugin::users-permissions.role')
@@ -622,13 +680,13 @@ module.exports = ({ strapi }) => ({
       confirmed: !settings.email_confirmation,
     };
 
-    const user = await getService('user').add(newUser);
+    const user = await getService(strapi, 'user').add(newUser);
 
-    const sanitizedUser = await sanitizeUser(user, ctx);
+    const sanitizedUser = await sanitizeUser(strapi, user, ctx);
 
     if (settings.email_confirmation) {
       try {
-        await getService('user').sendConfirmationEmail(sanitizedUser);
+        await getService(strapi, 'user').sendConfirmationEmail(sanitizedUser);
       } catch (err) {
         strapi.log.error(err);
         throw new ApplicationError('Error sending confirmation email');
@@ -637,7 +695,10 @@ module.exports = ({ strapi }) => ({
       return ctx.send({ user: sanitizedUser });
     }
 
-    const mode = strapi.config.get('plugin::users-permissions.jwtManagement', 'legacy-support');
+    const mode = strapi.config.get<string>(
+      'plugin::users-permissions.jwtManagement',
+      'legacy-support'
+    );
     if (mode === 'refresh') {
       const deviceId = extractDeviceId(ctx.request.body) || crypto.randomUUID();
 
@@ -658,15 +719,15 @@ module.exports = ({ strapi }) => ({
       return ctx.send({ jwt: access.token, refreshToken: refresh.token, user: sanitizedUser });
     }
 
-    const jwt = getService('jwt').issue(_.pick(user, ['id']));
+    const jwt = getService(strapi, 'jwt').issue(_.pick(user, ['id']));
     return ctx.send({ jwt, user: sanitizedUser });
   },
 
-  async emailConfirmation(ctx, next, returnUser) {
+  async emailConfirmation(ctx: Context, next?: Next, returnUser?: boolean) {
     const { confirmation: confirmationToken } = await validateEmailConfirmationBody(ctx.query);
 
-    const userService = getService('user');
-    const jwtService = getService('jwt');
+    const userService = getService(strapi, 'user');
+    const jwtService = getService(strapi, 'jwt');
 
     const [user] = await userService.fetchAll({ filters: { confirmationToken } });
 
@@ -679,18 +740,18 @@ module.exports = ({ strapi }) => ({
     if (returnUser) {
       ctx.send({
         jwt: jwtService.issue({ id: user.id }),
-        user: await sanitizeUser(user, ctx),
+        user: await sanitizeUser(strapi, user, ctx),
       });
     } else {
       const settings = await strapi
         .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
-        .get();
+        .get<AdvancedSettings>();
 
       ctx.redirect(settings.email_confirmation_redirection || '/');
     }
   },
 
-  async sendEmailConfirmation(ctx) {
+  async sendEmailConfirmation(ctx: Context) {
     const { email } = await validateSendEmailConfirmationBody(ctx.request.body);
 
     const user = await strapi.db.query('plugin::users-permissions.user').findOne({
@@ -709,7 +770,7 @@ module.exports = ({ strapi }) => ({
       throw new ApplicationError('User blocked');
     }
 
-    await getService('user').sendConfirmationEmail(user);
+    await getService(strapi, 'user').sendConfirmationEmail(user);
 
     ctx.send({
       email: user.email,
