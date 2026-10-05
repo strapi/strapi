@@ -3,14 +3,15 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   oxc: { jsx: { runtime: 'automatic' } },
   test: {
-    name: 'Users & Permissions admin',
+    name: 'users-permissions-admin',
+    root: __dirname,
     globals: false,
     server: { deps: { inline: [/@strapi\//] } },
     environment: 'jsdom',
     environmentOptions: { jsdom: { url: 'http://localhost:1337/admin' } },
-    include: ['admin/src/**/*.test.{js,jsx,ts,tsx}'],
+    include: ['admin/src/**/*.test.{ts,tsx}'],
     setupFiles: ['./admin/tests/setup.ts'],
     env: { ADMIN_PATH: '/admin', TZ: 'UTC', LANG: 'en_US.UTF-8' },
-    coverage: { include: ['admin/src/**/*.{js,jsx,ts,tsx}'], exclude: ['**/tests/**'] },
+    coverage: { include: ['admin/src/**/*.{ts,tsx}'], exclude: ['**/tests/**'] },
   },
 });
