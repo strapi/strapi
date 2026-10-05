@@ -1,22 +1,23 @@
-/* eslint @typescript-eslint/no-var-requires: off */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const jwt = require('jsonwebtoken');
-const jwtService = require('../jwt');
-
-const createMockSessionManager = (originApi = {}) => ({
-  originApi,
-  sessionManager: Object.assign(
-    vi.fn(() => originApi),
-    { hasOrigin: vi.fn() }
-  ),
-});
+import jwt from 'jsonwebtoken';
+import {
+  createContextMock,
+  createMockSessionManager,
+  createStrapiMock,
+} from '../../../tests/utils';
+import jwtService from '../jwt';
 
 describe('JWT Service', () => {
-  let strapi;
-  let service;
-  let mockSessionManager;
-  let sessionManagerCallable;
+  const makeStrapi = () => ({
+    config: { get: vi.fn<(path: string, defaultValue?: unknown) => unknown>() },
+    sessionManager: createMockSessionManager().sessionManager,
+    db: { query: vi.fn() },
+  });
+  let strapi: ReturnType<typeof makeStrapi>;
+  let service: ReturnType<typeof jwtService>;
+  let mockSessionManager: ReturnType<typeof createMockSessionManager>['originApi'];
+  let sessionManagerCallable: ReturnType<typeof createMockSessionManager>['sessionManager'];
 
   beforeEach(() => {
     ({ sessionManager: sessionManagerCallable, originApi: mockSessionManager } =
@@ -37,7 +38,7 @@ describe('JWT Service', () => {
       },
     };
 
-    service = jwtService({ strapi });
+    service = jwtService({ strapi: createStrapiMock(strapi) });
   });
 
   describe('issue method for refresh mode', () => {
@@ -131,7 +132,7 @@ describe('JWT Service', () => {
       const result = await service.verify(token);
 
       expect(mockSessionManager.validateAccessToken).toHaveBeenCalledWith(token);
-      expect(global.strapi.db.query).toHaveBeenCalledWith('plugin::users-permissions.user');
+      expect(strapi.db.query).toHaveBeenCalledWith('plugin::users-permissions.user');
       expect(strapi.db.query().findOne).toHaveBeenCalledWith({
         where: { id: 123 },
       });
@@ -191,6 +192,44 @@ describe('JWT Service', () => {
       strapi.db.query().findOne.mockResolvedValue(null);
 
       await expect(service.verify(token)).rejects.toThrow('Invalid token.');
+    });
+  });
+
+  describe('bearer extraction and legacy issuance', () => {
+    beforeEach(() => {
+      strapi.config.get.mockImplementation((path, fallback) => {
+        if (path === 'plugin::users-permissions.jwtSecret') return 'legacy-secret';
+        if (path === 'plugin::users-permissions.jwt')
+          return { expiresIn: '1h', algorithm: 'HS256' };
+        return fallback;
+      });
+    });
+
+    it.each([undefined, 'Basic credentials', 'Bearer', 'Bearer token extra'])(
+      'ignores malformed authorization %s',
+      (authorization) => {
+        const verify = vi.spyOn(service, 'verify');
+        const ctx = createContextMock({ request: { header: { authorization } } });
+        expect(service.getToken(ctx)).toBeNull();
+        expect(verify).not.toHaveBeenCalled();
+      }
+    );
+
+    it('verifies bearer tokens case-insensitively', async () => {
+      const token = jwt.sign({ id: 1 }, 'legacy-secret');
+      const ctx = createContextMock({ request: { header: { authorization: `bEaReR ${token}` } } });
+      await expect(service.getToken(ctx)).resolves.toMatchObject({ id: 1 });
+    });
+
+    it('serializes model payloads and applies explicit expiry over configured defaults', () => {
+      const payload = { toJSON: () => ({ id: 8 }) };
+      const token = service.issue(payload, { expiresIn: '5m' });
+      expect(typeof token).toBe('string');
+      if (typeof token !== 'string') throw new Error('Expected a legacy token');
+      const decoded = jwt.verify(token, 'legacy-secret');
+      expect(decoded).toMatchObject({ id: 8 });
+      if (typeof decoded !== 'object') throw new Error('Expected an object payload');
+      expect(decoded.exp! - decoded.iat!).toBe(300);
     });
   });
 

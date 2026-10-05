@@ -1,31 +1,20 @@
-/* eslint @typescript-eslint/no-var-requires: off */
+import type { Core } from '@strapi/types';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 
-const crypto = require('crypto');
+import crypto from 'crypto';
 
-const { errors } = require('@strapi/utils');
+import { errors } from '@strapi/utils';
+import { createContextMock, createStrapiMock } from '../../../tests/utils';
 
-const { jwkToKeyObject, verifyJwtWithJwks } = require('../verify-jwt-with-jwks');
-const oauthProviders = require('../oauth-connect/providers');
-const oauth1 = require('../oauth-connect/oauth1');
-const oauth2 = require('../oauth-connect/oauth2');
-const {
+import { jwkToKeyObject, verifyJwtWithJwks } from '../verify-jwt-with-jwks';
+import oauthProviders from '../oauth-connect/providers';
+import * as oauth1 from '../oauth-connect/oauth1';
+import * as oauth2 from '../oauth-connect/oauth2';
+import {
   redirectWithPayload,
   buildProviderConfig,
   createOAuthConnectMiddleware,
-} = require('../oauth-connect');
-
-const mockProvidersService = () => {
-  vi.spyOn(require('..'), 'getService').mockImplementation((name) => {
-    if (name === 'providers') {
-      return {
-        buildRedirectUri: (providerName) =>
-          `http://localhost:1337/api/connect/${providerName}/callback`,
-      };
-    }
-    return {};
-  });
-};
+} from '../oauth-connect';
 
 describe('verify-jwt-with-jwks', () => {
   test('jwkToKeyObject converts RSA JWK to verifyable key', () => {
@@ -150,14 +139,21 @@ describe('oauth1 signature base string', () => {
 describe('createOAuthConnectMiddleware', () => {
   const originalFetch = global.fetch;
 
-  const setStrapi = (overrides = {}) => {
-    global.strapi = {
+  let strapi: Core.Strapi;
+  const setStrapi = (overrides: Record<string, unknown> = {}) => {
+    strapi = createStrapiMock({
+      plugin: () => ({
+        service: () => ({
+          buildRedirectUri: (providerName: string) =>
+            `http://localhost:1337/api/connect/${providerName}/callback`,
+        }),
+      }),
       plugins: {},
       apis: {},
       admin: { services: {} },
       config: { get: () => '/api' },
       ...overrides,
-    };
+    });
   };
 
   afterEach(() => {
@@ -174,7 +170,7 @@ describe('createOAuthConnectMiddleware', () => {
       }),
     });
 
-    const mw = createOAuthConnectMiddleware();
+    const mw = createOAuthConnectMiddleware(strapi);
     const ctx = {
       request: { url: '/api/connect/google' },
       session: {},
@@ -182,7 +178,9 @@ describe('createOAuthConnectMiddleware', () => {
       redirect: vi.fn(),
     };
 
-    await expect(mw(ctx, vi.fn())).rejects.toBeInstanceOf(errors.ApplicationError);
+    await expect(mw(createContextMock(ctx), vi.fn())).rejects.toBeInstanceOf(
+      errors.ApplicationError
+    );
   });
 
   test('rejects OAuth2 callback when session state is missing', async () => {
@@ -199,10 +197,9 @@ describe('createOAuthConnectMiddleware', () => {
         }),
       }),
     });
-    mockProvidersService();
     global.fetch = vi.fn();
 
-    const mw = createOAuthConnectMiddleware();
+    const mw = createOAuthConnectMiddleware(strapi);
     const ctx = {
       request: { url: '/api/connect/google/callback?code=abc&state=attacker' },
       query: { code: 'abc', state: 'attacker' },
@@ -211,7 +208,7 @@ describe('createOAuthConnectMiddleware', () => {
       redirect: vi.fn(),
     };
 
-    await mw(ctx, vi.fn());
+    await mw(createContextMock(ctx), vi.fn());
 
     expect(global.fetch).not.toHaveBeenCalled();
     expect(ctx.redirect).toHaveBeenCalledWith(expect.stringContaining('error=oauth_error'));
@@ -233,9 +230,8 @@ describe('createOAuthConnectMiddleware', () => {
         }),
       }),
     });
-    mockProvidersService();
 
-    const mw = createOAuthConnectMiddleware();
+    const mw = createOAuthConnectMiddleware(strapi);
     const ctx = {
       request: { url: '/api/connect/google/callback?code=abc&state=good' },
       query: { code: 'abc', state: 'good' },
@@ -244,7 +240,7 @@ describe('createOAuthConnectMiddleware', () => {
       redirect: vi.fn(),
     };
 
-    await expect(mw(ctx, vi.fn())).resolves.toBeUndefined();
+    await expect(mw(createContextMock(ctx), vi.fn())).resolves.toBeUndefined();
     expect(ctx.redirect).toHaveBeenCalledWith(expect.stringContaining('error=oauth_error'));
     expect(ctx.redirect).toHaveBeenCalledWith(expect.stringContaining('error_description=boom'));
   });
@@ -268,9 +264,8 @@ describe('createOAuthConnectMiddleware', () => {
         }),
       }),
     });
-    mockProvidersService();
 
-    const mw = createOAuthConnectMiddleware();
+    const mw = createOAuthConnectMiddleware(strapi);
     const ctx = {
       request: { url: '/api/connect/google/callback?code=abc&state=good' },
       query: { code: 'abc', state: 'good' },
@@ -284,7 +279,7 @@ describe('createOAuthConnectMiddleware', () => {
       redirect: vi.fn(),
     };
 
-    await mw(ctx, vi.fn());
+    await mw(createContextMock(ctx), vi.fn());
 
     expect(ctx.redirect).toHaveBeenCalledWith(
       expect.stringContaining('http://localhost:3000/custom-cb')
@@ -316,9 +311,8 @@ describe('createOAuthConnectMiddleware', () => {
         }),
       }),
     });
-    mockProvidersService();
 
-    const mw = createOAuthConnectMiddleware();
+    const mw = createOAuthConnectMiddleware(strapi);
     const ctx = {
       request: { url: '/api/connect/cognito/callback?code=abc&state=good' },
       query: { code: 'abc', state: 'good' },
@@ -327,7 +321,7 @@ describe('createOAuthConnectMiddleware', () => {
       redirect: vi.fn(),
     };
 
-    await mw(ctx, vi.fn());
+    await mw(createContextMock(ctx), vi.fn());
 
     expect(ctx.session.grant).toEqual({ response: { id_token: idToken } });
     expect(ctx.redirect).toHaveBeenCalledWith('http://localhost:3000/cb');
@@ -347,14 +341,14 @@ describe('createOAuthConnectMiddleware', () => {
         }),
       }),
     });
-    mockProvidersService();
 
-    const mw = createOAuthConnectMiddleware();
+    const mw = createOAuthConnectMiddleware(strapi);
     const ctx = {
       request: { url: '/api/connect/google' },
       query: {},
       session: {
         grant: {
+          state: undefined as string | undefined,
           dynamic: { callback: 'http://localhost:3000/custom-cb' },
         },
       },
@@ -362,12 +356,12 @@ describe('createOAuthConnectMiddleware', () => {
       redirect: vi.fn(),
     };
 
-    await mw(ctx, vi.fn());
+    await mw(createContextMock(ctx), vi.fn());
 
     expect(ctx.session.grant.dynamic).toEqual({
       callback: 'http://localhost:3000/custom-cb',
     });
-    expect(ctx.session.grant.state).toBeDefined();
+    expect(createContextMock(ctx).session.grant.state).toBeDefined();
     expect(ctx.redirect).toHaveBeenCalled();
   });
 });
