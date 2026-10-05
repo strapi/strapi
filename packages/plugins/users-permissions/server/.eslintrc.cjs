@@ -1,13 +1,15 @@
 // @ts-check
 
-/** @type {import('eslint').Linter.Config} */
+/** @import { Linter } from 'eslint' */
+
+/** @type {Linter.Config} */
 module.exports = {
   root: true,
   extends: ['eslint-config-custom/back/typescript'],
   ignorePatterns: ['.eslintrc.cjs'],
   parserOptions: {
     tsconfigRootDir: __dirname,
-    project: ['./tsconfig.eslint.json'],
+    project: ['./tsconfig.json'],
   },
   rules: {
     'no-restricted-globals': ['error', { name: 'strapi', message: 'Inject the Strapi instance.' }],
