@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { useAPIErrorHandler, useNotification } from '@strapi/admin/strapi-admin';
+import { useAPIErrorHandler, useForm, useNotification } from '@strapi/admin/strapi-admin';
 import {
   Button,
   EmptyStateLayout,
@@ -24,13 +24,21 @@ import {
   useLazyGetAllDocumentsQuery,
   useLazyGetDocumentQuery,
 } from '../../../../../services/documents';
-import { getIn } from '../../../../../utils/objects';
+import { useLazyGetAllRelationsQuery } from '../../../../../services/relations';
 import { getTranslation } from '../../../../../utils/translations';
-import { type AnyData, transformDocument } from '../../../utils/data';
+import { type AnyData } from '../../../utils/data';
 
-import type { ComponentsDictionary, Document } from '../../../../../hooks/useDocument';
+import {
+  cloneComponentData,
+  connectRelations,
+  getComponentInstances,
+  getCopyScope,
+  getRelationsToCopy,
+  type ComponentCopyMode,
+  type ComponentInstance,
+} from './utils/componentCopy';
 
-type ComponentCopyMode = 'component' | 'dynamiczone';
+import type { Document } from '../../../../../hooks/useDocument';
 
 interface ComponentCopyModalProps {
   componentUid: string;
@@ -41,35 +49,28 @@ interface ComponentCopyModalProps {
   sourceFieldName: string;
 }
 
-interface ComponentInstance {
-  data: AnyData;
-  label: string;
-  sourceIndex: number;
-}
-
 interface RecentComponentCopy {
   documentId: string;
   entryTitle: string;
   instanceLabel: string;
   savedAt: string;
-  sourceIndex: number;
+  sourcePath: string;
 }
 
-const COMPONENT_META_KEYS = ['id', '__temp_key__'];
 const RECENT_COMPONENT_COPY_STORAGE_PREFIX = 'STRAPI_COMPONENT_COPY_RECENT';
 
 const getRecentComponentCopyStorageKey = ({
   componentUid,
   mode,
   model,
-  sourceFieldName,
+  scope,
 }: {
   componentUid: string;
   mode: ComponentCopyMode;
   model: string;
-  sourceFieldName: string;
+  scope: string;
 }) =>
-  [RECENT_COMPONENT_COPY_STORAGE_PREFIX, model, sourceFieldName, componentUid, mode]
+  [RECENT_COMPONENT_COPY_STORAGE_PREFIX, model, scope, componentUid, mode]
     .map(encodeURIComponent)
     .join(':');
 
@@ -94,7 +95,7 @@ const readRecentComponentCopy = (key: string): RecentComponentCopy | null => {
     if (
       !parsedValue.documentId ||
       !parsedValue.entryTitle ||
-      typeof parsedValue.sourceIndex !== 'number'
+      typeof parsedValue.sourcePath !== 'string'
     ) {
       removeRecentComponentCopy(key);
       return null;
@@ -105,7 +106,7 @@ const readRecentComponentCopy = (key: string): RecentComponentCopy | null => {
       entryTitle: parsedValue.entryTitle,
       instanceLabel: parsedValue.instanceLabel ?? parsedValue.entryTitle,
       savedAt: parsedValue.savedAt ?? new Date().toISOString(),
-      sourceIndex: parsedValue.sourceIndex,
+      sourcePath: parsedValue.sourcePath,
     };
   } catch {
     removeRecentComponentCopy(key);
@@ -119,79 +120,6 @@ const writeRecentComponentCopy = (key: string, recentCopy: RecentComponentCopy) 
   } catch {
     // Ignore storage failures; copying still succeeds without the shortcut.
   }
-};
-
-const cloneComponentData = (
-  value: unknown,
-  componentUid: string,
-  components: ComponentsDictionary
-): AnyData => {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    return {};
-  }
-
-  const schema = components[componentUid];
-  const cloned = structuredClone(value) as AnyData;
-
-  const sanitize = (datum: AnyData, uid: string) => {
-    const componentSchema = components[uid];
-
-    for (const key of COMPONENT_META_KEYS) {
-      delete datum[key];
-    }
-
-    if (!componentSchema) {
-      return datum;
-    }
-
-    Object.entries(componentSchema.attributes).forEach(([attributeName, attribute]) => {
-      const currentValue = datum[attributeName];
-
-      if (currentValue == null) {
-        return;
-      }
-
-      if (attribute.type === 'component') {
-        if (attribute.repeatable && Array.isArray(currentValue)) {
-          datum[attributeName] = currentValue.map((item) =>
-            item && typeof item === 'object' ? sanitize(item as AnyData, attribute.component) : item
-          );
-        } else if (typeof currentValue === 'object' && !Array.isArray(currentValue)) {
-          datum[attributeName] = sanitize(currentValue as AnyData, attribute.component);
-        }
-      }
-
-      if (attribute.type === 'dynamiczone' && Array.isArray(currentValue)) {
-        datum[attributeName] = currentValue.map((item) => {
-          if (!item || typeof item !== 'object' || Array.isArray(item)) {
-            return item;
-          }
-
-          const dynamicComponent = item as AnyData & { __component?: string };
-          const dynamicComponentUid = dynamicComponent.__component;
-
-          if (!dynamicComponentUid) {
-            return dynamicComponent;
-          }
-
-          return {
-            ...sanitize(dynamicComponent, dynamicComponentUid),
-            __component: dynamicComponentUid,
-          };
-        });
-      }
-    });
-
-    return datum;
-  };
-
-  const sanitized = sanitize(cloned, componentUid);
-
-  if (!schema) {
-    return sanitized;
-  }
-
-  return transformDocument(schema, components)(sanitized);
 };
 
 const getDocumentTitle = (
@@ -211,89 +139,6 @@ const getDocumentTitle = (
   return fallback || untitled;
 };
 
-const getInstanceLabel = (
-  componentData: AnyData,
-  componentUid: string,
-  index: number,
-  mainField: string | undefined,
-  components: ComponentsDictionary,
-  fallback: string
-) => {
-  const fieldValue = mainField ? getIn(componentData, mainField) : undefined;
-
-  if (fieldValue !== undefined && fieldValue !== null && String(fieldValue).trim().length > 0) {
-    return String(fieldValue);
-  }
-
-  const displayName = components[componentUid]?.info?.displayName ?? componentUid;
-
-  return `${displayName} ${index + 1}` || fallback;
-};
-
-const getComponentInstances = ({
-  componentUid,
-  componentMainField,
-  components,
-  mode,
-  sourceDocument,
-  sourceFieldName,
-}: {
-  componentUid: string;
-  componentMainField?: string;
-  components: ComponentsDictionary;
-  mode: ComponentCopyMode;
-  sourceDocument?: Document;
-  sourceFieldName: string;
-}): ComponentInstance[] => {
-  if (!sourceDocument) {
-    return [];
-  }
-
-  const sourceValue = getIn(sourceDocument, sourceFieldName);
-
-  if (mode === 'dynamiczone') {
-    const dynamicComponents = Array.isArray(sourceValue) ? sourceValue : [];
-
-    return dynamicComponents
-      .map((componentData, sourceIndex) => ({ componentData, sourceIndex }))
-      .filter(({ componentData }) => componentData?.__component === componentUid)
-      .map(({ componentData, sourceIndex }, index) => ({
-        data: {
-          ...cloneComponentData(componentData, componentUid, components),
-          __component: componentUid,
-        },
-        label: getInstanceLabel(
-          componentData,
-          componentUid,
-          index,
-          componentMainField,
-          components,
-          `Component ${index + 1}`
-        ),
-        sourceIndex,
-      }));
-  }
-
-  const sourceComponents = Array.isArray(sourceValue)
-    ? sourceValue
-    : sourceValue
-      ? [sourceValue]
-      : [];
-
-  return sourceComponents.map((componentData, sourceIndex) => ({
-    data: cloneComponentData(componentData, componentUid, components),
-    label: getInstanceLabel(
-      componentData,
-      componentUid,
-      sourceIndex,
-      componentMainField,
-      components,
-      `Component ${sourceIndex + 1}`
-    ),
-    sourceIndex,
-  }));
-};
-
 const ComponentCopyModal = ({
   componentUid,
   mode,
@@ -309,13 +154,28 @@ const ComponentCopyModal = ({
   const {
     edit: { components: componentLayouts, settings },
   } = useDocumentLayout(currentDocumentMeta.model);
+  const targetValues = useForm('ComponentCopyModal', (state) => state.values);
 
   const [search, setSearch] = React.useState('');
   const [selectedDocument, setSelectedDocument] = React.useState<Document | null>(null);
   const [recentComponentCopy, setRecentComponentCopy] = React.useState<RecentComponentCopy | null>(
     null
   );
+  const [isCopying, setIsCopying] = React.useState(false);
   const debouncedSearch = useDebounce(search, 300);
+
+  /**
+   * Copying a component loads its relations first, the modal can be closed in the meantime.
+   */
+  const isOpenRef = React.useRef(open);
+
+  React.useEffect(() => {
+    isOpenRef.current = open;
+
+    return () => {
+      isOpenRef.current = false;
+    };
+  }, [open]);
 
   const [
     getDocuments,
@@ -327,6 +187,7 @@ const ComponentCopyModal = ({
     },
   ] = useLazyGetAllDocumentsQuery();
   const [getDocument, { isFetching: isFetchingDocument }] = useLazyGetDocumentQuery();
+  const [getAllRelations] = useLazyGetAllRelationsQuery();
 
   const componentDisplayName = currentDocument.components[componentUid]?.info?.displayName;
   const recentComponentCopyStorageKey = React.useMemo(
@@ -335,9 +196,9 @@ const ComponentCopyModal = ({
         componentUid,
         mode,
         model: currentDocumentMeta.model,
-        sourceFieldName,
+        scope: getCopyScope(sourceFieldName, targetValues),
       }),
-    [componentUid, currentDocumentMeta.model, mode, sourceFieldName]
+    [componentUid, currentDocumentMeta.model, mode, sourceFieldName, targetValues]
   );
 
   React.useEffect(() => {
@@ -377,6 +238,7 @@ const ComponentCopyModal = ({
     if (!open) {
       setSearch('');
       setSelectedDocument(null);
+      setIsCopying(false);
     }
   }, [open]);
 
@@ -387,24 +249,33 @@ const ComponentCopyModal = ({
   }, [open, recentComponentCopyStorageKey]);
 
   const documents = documentsData?.results ?? [];
-  const instances = React.useMemo(
-    () =>
+
+  const findInstances = React.useCallback(
+    (sourceDocument: Document) =>
       getComponentInstances({
         componentUid,
-        componentMainField: componentLayouts[componentUid]?.settings?.mainField,
         components: currentDocument.components,
+        getMainField: (uid) => componentLayouts[uid]?.settings?.mainField,
         mode,
-        sourceDocument: selectedDocument ?? undefined,
+        schema: currentDocument.schema,
+        sourceDocument,
         sourceFieldName,
+        targetValues,
       }),
     [
       componentLayouts,
       componentUid,
       currentDocument.components,
+      currentDocument.schema,
       mode,
-      selectedDocument,
       sourceFieldName,
+      targetValues,
     ]
+  );
+
+  const instances = React.useMemo(
+    () => (selectedDocument ? findInstances(selectedDocument) : []),
+    [findInstances, selectedDocument]
   );
 
   const untitled = formatMessage({
@@ -454,29 +325,72 @@ const ComponentCopyModal = ({
     }
   };
 
-  const handleInsert = (
-    componentData: AnyData,
-    recentCopy?: Omit<RecentComponentCopy, 'savedAt'>
-  ) => {
-    if (recentCopy) {
-      const nextRecentCopy = {
-        ...recentCopy,
-        savedAt: new Date().toISOString(),
-      };
+  /**
+   * The copy is a snapshot of the component, its relations are connected to the same entries.
+   * A relation that can't be loaded is left empty rather than failing the whole copy.
+   */
+  const copyInstance = async (instance: ComponentInstance) => {
+    const { components } = currentDocument;
+    const relations = getRelationsToCopy(instance.source, componentUid, components);
 
-      writeRecentComponentCopy(recentComponentCopyStorageKey, nextRecentCopy);
-      setRecentComponentCopy(nextRecentCopy);
+    const loadedRelations = await Promise.allSettled(
+      relations.map(({ model, id, targetField }) =>
+        getAllRelations({ model, id, targetField, params: currentDocumentMeta.params }).unwrap()
+      )
+    );
+
+    const data = loadedRelations.reduce(
+      (acc, result, index) =>
+        result.status === 'fulfilled'
+          ? connectRelations(acc, relations[index].path, result.value)
+          : acc,
+      cloneComponentData(instance.source, componentUid, components)
+    );
+
+    return {
+      data: mode === 'dynamiczone' ? { ...data, __component: componentUid } : data,
+      hasMissingRelations: loadedRelations.some((result) => result.status === 'rejected'),
+    };
+  };
+
+  const insertInstance = async (
+    instance: ComponentInstance,
+    source: Pick<RecentComponentCopy, 'documentId' | 'entryTitle'>
+  ) => {
+    setIsCopying(true);
+
+    const { data, hasMissingRelations } = await copyInstance(instance);
+
+    if (!isOpenRef.current) {
+      return;
     }
 
-    onInsert(componentData);
-    onClose();
-    toggleNotification({
-      type: 'success',
-      message: formatMessage({
-        id: getTranslation('components.ComponentCopyModal.success'),
-        defaultMessage: 'Component copied',
-      }),
+    writeRecentComponentCopy(recentComponentCopyStorageKey, {
+      ...source,
+      instanceLabel: instance.label,
+      savedAt: new Date().toISOString(),
+      sourcePath: instance.sourcePath,
     });
+
+    onInsert(data);
+    onClose();
+    toggleNotification(
+      hasMissingRelations
+        ? {
+            type: 'warning',
+            message: formatMessage({
+              id: getTranslation('components.ComponentCopyModal.relations-warning'),
+              defaultMessage: 'Component copied, but some of its relations could not be loaded.',
+            }),
+          }
+        : {
+            type: 'success',
+            message: formatMessage({
+              id: getTranslation('components.ComponentCopyModal.success'),
+              defaultMessage: 'Component copied',
+            }),
+          }
+    );
   };
 
   const handleRecentInsert = async () => {
@@ -490,14 +404,9 @@ const ComponentCopyModal = ({
       return;
     }
 
-    const recentInstance = getComponentInstances({
-      componentUid,
-      componentMainField: componentLayouts[componentUid]?.settings?.mainField,
-      components: currentDocument.components,
-      mode,
-      sourceDocument,
-      sourceFieldName,
-    }).find((instance) => instance.sourceIndex === recentComponentCopy.sourceIndex);
+    const recentInstance = findInstances(sourceDocument).find(
+      (instance) => instance.sourcePath === recentComponentCopy.sourcePath
+    );
 
     if (!recentInstance) {
       removeRecentComponentCopy(recentComponentCopyStorageKey);
@@ -513,7 +422,10 @@ const ComponentCopyModal = ({
       return;
     }
 
-    handleInsert(recentInstance.data);
+    await insertInstance(recentInstance, {
+      documentId: recentComponentCopy.documentId,
+      entryTitle: recentComponentCopy.entryTitle,
+    });
   };
 
   return (
@@ -536,14 +448,18 @@ const ComponentCopyModal = ({
               <>
                 {/* Keep the button at its own width: stretched, its focus ring overflows the modal body. */}
                 <Flex>
-                  <TextButton startIcon={<ArrowLeft />} onClick={() => setSelectedDocument(null)}>
+                  <TextButton
+                    disabled={isCopying}
+                    startIcon={<ArrowLeft />}
+                    onClick={() => setSelectedDocument(null)}
+                  >
                     {formatMessage({
                       id: 'global.back',
                       defaultMessage: 'Back',
                     })}
                   </TextButton>
                 </Flex>
-                {isFetchingDocument ? (
+                {isFetchingDocument || isCopying ? (
                   <Flex justifyContent="center" padding={6}>
                     <Loader small>
                       {formatMessage({
@@ -554,50 +470,57 @@ const ComponentCopyModal = ({
                   </Flex>
                 ) : instances.length > 0 ? (
                   <Flex direction="column" alignItems="stretch" gap={2}>
-                    {instances.map((instance, index) => (
-                      <InstanceButton
-                        key={`${instance.label}-${index}`}
-                        type="button"
-                        onClick={() =>
-                          handleInsert(instance.data, {
-                            documentId: selectedDocument.documentId,
-                            entryTitle: getDocumentTitle(
-                              selectedDocument,
-                              settings.mainField,
-                              selectedDocument.documentId,
-                              untitled
-                            ),
-                            instanceLabel: instance.label,
-                            sourceIndex: instance.sourceIndex,
-                          })
-                        }
-                      >
-                        <Flex justifyContent="space-between" alignItems="center" gap={4}>
-                          <Flex direction="column" alignItems="flex-start" gap={1}>
-                            <Typography variant="omega" fontWeight="bold" textColor="neutral800">
-                              {instance.label}
-                            </Typography>
-                            <Typography variant="pi" textColor="neutral600">
-                              {formatMessage(
-                                {
-                                  id: getTranslation('components.ComponentCopyModal.instanceHint'),
-                                  defaultMessage: 'From {entry}',
-                                },
-                                {
-                                  entry: getDocumentTitle(
-                                    selectedDocument,
-                                    settings.mainField,
-                                    selectedDocument.documentId,
-                                    untitled
-                                  ),
-                                }
-                              )}
-                            </Typography>
+                    {instances.map((instance) => {
+                      const entryTitle = getDocumentTitle(
+                        selectedDocument,
+                        settings.mainField,
+                        selectedDocument.documentId,
+                        untitled
+                      );
+
+                      return (
+                        <InstanceButton
+                          key={instance.sourcePath}
+                          type="button"
+                          onClick={() =>
+                            insertInstance(instance, {
+                              documentId: selectedDocument.documentId,
+                              entryTitle,
+                            })
+                          }
+                        >
+                          <Flex justifyContent="space-between" alignItems="center" gap={4}>
+                            <Flex direction="column" alignItems="flex-start" gap={1}>
+                              <Typography variant="omega" fontWeight="bold" textColor="neutral800">
+                                {instance.label}
+                              </Typography>
+                              <Typography variant="pi" textColor="neutral600">
+                                {instance.parentLabel
+                                  ? formatMessage(
+                                      {
+                                        id: getTranslation(
+                                          'components.ComponentCopyModal.instanceHint.nested'
+                                        ),
+                                        defaultMessage: 'From {entry}, in {parent}',
+                                      },
+                                      { entry: entryTitle, parent: instance.parentLabel }
+                                    )
+                                  : formatMessage(
+                                      {
+                                        id: getTranslation(
+                                          'components.ComponentCopyModal.instanceHint'
+                                        ),
+                                        defaultMessage: 'From {entry}',
+                                      },
+                                      { entry: entryTitle }
+                                    )}
+                              </Typography>
+                            </Flex>
+                            <Duplicate />
                           </Flex>
-                          <Duplicate />
-                        </Flex>
-                      </InstanceButton>
-                    ))}
+                        </InstanceButton>
+                      );
+                    })}
                   </Flex>
                 ) : (
                   <EmptyStateLayout
@@ -621,7 +544,7 @@ const ComponentCopyModal = ({
                     </Typography>
                     <RecentCopyButton
                       type="button"
-                      disabled={isFetchingDocument}
+                      disabled={isFetchingDocument || isCopying}
                       onClick={handleRecentInsert}
                     >
                       <Flex justifyContent="space-between" alignItems="center" gap={4}>
