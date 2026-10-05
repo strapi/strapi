@@ -630,8 +630,8 @@ describe('AssetsPage main-area context menu', () => {
   };
 
   /**
-   * The menu is gated on `assets.create`, which is `false` until the RBAC check
-   * settles — the "New" menu appearing is the signal that it has.
+   * The menu is gated on `assets.create`. The header "New" button is that
+   * grant, including while the RBAC round-trip is still in flight.
    */
   const waitForCreatePermission = () => screen.findByRole('button', { name: 'New' });
 
@@ -1002,9 +1002,9 @@ describe('AssetsPage RBAC gating', () => {
     respondWithAssets([createAsset(1, 'image.png')]);
 
     renderPage();
-    await findHeading();
 
-    expect(await screen.findByRole('button', { name: 'New' })).toBeInTheDocument();
+    // Unconditional create is known before the RBAC effect resolves.
+    expect(screen.getByRole('button', { name: 'New' })).toBeInTheDocument();
   });
 
   it('hides the New menu without assets.create', async () => {
