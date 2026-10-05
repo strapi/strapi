@@ -1,8 +1,6 @@
-import { defaultsDeep } from 'lodash';
-
 import type { Core, UID } from '@strapi/types';
 
-import { getService, getAdminService } from './utils';
+import { getAdminService } from './utils';
 import migrateReviewWorkflowStagesColor from './migrations/set-stages-default-color';
 import migrateReviewWorkflowStagesRoles from './migrations/set-stages-roles';
 import migrateReviewWorkflowStagesTransferToRoles from './migrations/setup-stage-transfer-to-roles';
@@ -17,8 +15,6 @@ import {
   ENTITY_STAGE_ATTRIBUTE,
   ENTITY_ASSIGNEE_ATTRIBUTE,
   STAGE_MODEL_UID,
-  MAX_WORKFLOWS,
-  MAX_STAGES_PER_WORKFLOW,
 } from './constants/workflows';
 
 const setRelation = (attributeName: any, target: any, contentType: any) => {
@@ -117,12 +113,4 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
 
   // Schema customization
   extendReviewWorkflowContentTypes({ strapi });
-
-  // License limits
-  const reviewWorkflowsOptions = defaultsDeep({}, strapi.ee.features.get('review-workflows'), {
-    numberOfWorkflows: MAX_WORKFLOWS,
-    stagesPerWorkflow: MAX_STAGES_PER_WORKFLOW,
-  });
-  const workflowsValidationService = getService('validation', { strapi });
-  workflowsValidationService.register(reviewWorkflowsOptions);
 };
