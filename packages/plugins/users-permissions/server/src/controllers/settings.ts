@@ -36,9 +36,9 @@ export default ({ strapi }: PluginContext) => ({
   },
 
   async getAdvancedSettings(ctx: Context) {
-    const settings = await strapi
+    const settings = (await strapi
       .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
-      .get<AdvancedSettings>();
+      .get()) as AdvancedSettings;
 
     const roles = await getService(strapi, 'role').find();
 
@@ -58,9 +58,9 @@ export default ({ strapi }: PluginContext) => ({
   },
 
   async getProviders(ctx: Context) {
-    const providers = await strapi
+    const providers = (await strapi
       .store({ type: 'plugin', name: 'users-permissions', key: 'grant' })
-      .get<GrantConfig>();
+      .get()) as GrantConfig;
 
     for (const provider in providers) {
       if (provider !== 'email') {
