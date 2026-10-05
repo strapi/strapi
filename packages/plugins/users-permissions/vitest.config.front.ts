@@ -1,4 +1,6 @@
-import { defineConfig } from 'vitest/config';
+import { resolve } from 'node:path';
+
+import { coverageConfigDefaults, defineConfig } from 'vitest/config';
 
 export default defineConfig({
   oxc: { jsx: { runtime: 'automatic' } },
@@ -12,6 +14,13 @@ export default defineConfig({
     include: ['admin/src/**/*.test.{ts,tsx}'],
     setupFiles: ['./admin/tests/setup.ts'],
     env: { ADMIN_PATH: '/admin', TZ: 'UTC', LANG: 'en_US.UTF-8' },
-    coverage: { include: ['admin/src/**/*.{ts,tsx}'], exclude: ['**/tests/**'] },
+    coverage: {
+      reporter: [
+        ...coverageConfigDefaults.reporter,
+        ['lcovonly', { projectRoot: resolve(__dirname, '../../..') }],
+      ],
+      include: ['admin/src/**/*.{ts,tsx}'],
+      exclude: ['**/tests/**'],
+    },
   },
 });
