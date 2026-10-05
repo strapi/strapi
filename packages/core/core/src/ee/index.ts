@@ -63,19 +63,16 @@ const disable = (message: string, status: 'expired' | 'unknown' = 'unknown') => 
   // still show which license this instance has and why it is unusable. Guarded on `type`
   // so a repeat disable() call cannot overwrite the snapshot with an already-wiped one.
   if (ee.licenseInfo.type) {
-    ee.retainedLicense = pick(
-      [
-        'features',
-        'expireAt',
-        'seats',
-        'type',
-        'isTrial',
-        'subscriptionId',
-        'planPriceId',
-        'renewalDate',
-      ],
-      ee.licenseInfo
-    );
+    ee.retainedLicense = pick(ee.licenseInfo, [
+      'features',
+      'expireAt',
+      'seats',
+      'type',
+      'isTrial',
+      'subscriptionId',
+      'planPriceId',
+      'renewalDate',
+    ]);
   }
   ee.licenseStatus = status;
 
