@@ -34,10 +34,7 @@ declare global {
       }
 
       interface PackageMiddlewares {
-        // TODO @Nico `isDevelopmentMode` is a Koa handler, not a factory: referenced by name, runtime
-        // would call it as a factory. `never` keeps typed routes from referencing it by name; routes
-        // use the handler inline.
-        'plugin::content-type-builder.isDevelopmentMode': never;
+        'plugin::content-type-builder.isDevelopmentMode': undefined;
       }
     }
   }
