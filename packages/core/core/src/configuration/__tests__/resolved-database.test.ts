@@ -4,7 +4,7 @@ import path from 'path';
 
 import { loadConfiguration } from '..';
 
-describe('ResolvedDatabaseConfig', () => {
+describe('ResolvedConfig.Database', () => {
   let appDir: string;
 
   beforeEach(() => {
@@ -18,7 +18,7 @@ describe('ResolvedDatabaseConfig', () => {
   });
 
   test('the loader sets no database default', () => {
-    // `ResolvedDatabaseConfig` marks no field as required: the loader defines nothing under
+    // `ResolvedConfig.Database` marks no field as required: the loader defines nothing under
     // `database`, so with an empty `config/` the namespace stays undefined.
     const config = loadConfiguration({ appDir, distDir: appDir });
 
