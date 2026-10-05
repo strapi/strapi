@@ -38,7 +38,8 @@ const setLicenseLimits = (
     : { data: undefined };
 };
 
-const trigger = jest.fn().mockResolvedValue({ data: undefined });
+// Shaped like RTK Query's lazy trigger result, which the modal unwraps
+const trigger = jest.fn(() => ({ unwrap: () => Promise.resolve(undefined) }));
 
 jest.mock('../../../../../../services/admin', () => ({
   useLazyGetDebugDumpQuery: () => [trigger, { data: undefined, isFetching: false, isError: false }],

@@ -26,7 +26,9 @@ const setQueryState = (state: Partial<MockQueryState>) => {
 
 describe('DiagnosticSnapshotModal', () => {
   beforeEach(() => {
-    trigger.mockClear();
+    trigger.mockReset();
+    // A request that has not settled yet
+    trigger.mockReturnValue({ unwrap: () => new Promise(() => {}) });
     setQueryState({ data: undefined, isFetching: true, isError: false });
   });
 
@@ -107,6 +109,7 @@ describe('DiagnosticSnapshotModal', () => {
   });
 
   it('notifies and closes the modal when the query fails', async () => {
+    trigger.mockReturnValue({ unwrap: () => Promise.reject(new Error('500')) });
     setQueryState({ data: undefined, isFetching: false, isError: true });
     const onClose = jest.fn();
 
@@ -114,5 +117,18 @@ describe('DiagnosticSnapshotModal', () => {
 
     expect(await screen.findByText(/failed to generate the debug dump/i)).toBeInTheDocument();
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it('lets the next open succeed after a failed one', async () => {
+    // The lazy query keeps `isError` from the failed request while the new one is in flight.
+    // Judging failure from it closed the next open in the same commit.
+    setQueryState({ data: undefined, isFetching: false, isError: true });
+    const onClose = jest.fn();
+
+    render(<DiagnosticSnapshotModal isOpen onClose={onClose} />);
+
+    expect(trigger).toHaveBeenCalled();
+    expect(await screen.findByText(/generating diagnostic snapshot/i)).toBeInTheDocument();
+    expect(onClose).not.toHaveBeenCalled();
   });
 });

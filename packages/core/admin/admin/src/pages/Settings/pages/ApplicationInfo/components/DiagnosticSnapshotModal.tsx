@@ -26,26 +26,39 @@ const DiagnosticSnapshotModal = ({ isOpen, onClose }: DiagnosticSnapshotModalPro
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { copy } = useClipboard();
-  const [triggerGetDump, { data, isFetching, isError }] = useLazyGetDebugDumpQuery();
+  const [triggerGetDump, { data, isFetching }] = useLazyGetDebugDumpQuery();
 
+  // Failure is read from this open's own request. The lazy query keeps `isError` from an earlier
+  // failed request while a new one is in flight, which closed the next open straight away.
   React.useEffect(() => {
-    if (isOpen) {
-      triggerGetDump();
+    if (!isOpen) {
+      return undefined;
     }
-  }, [isOpen, triggerGetDump]);
 
-  React.useEffect(() => {
-    if (isOpen && isError) {
-      toggleNotification({
-        type: 'danger',
-        message: formatMessage({
-          id: 'Settings.debug-dump.error',
-          defaultMessage: 'Failed to generate the debug dump. Check the server logs and try again.',
-        }),
+    let active = true;
+
+    triggerGetDump()
+      .unwrap()
+      .catch(() => {
+        if (!active) {
+          return;
+        }
+
+        toggleNotification({
+          type: 'danger',
+          message: formatMessage({
+            id: 'Settings.debug-dump.error',
+            defaultMessage:
+              'Failed to generate the debug dump. Check the server logs and try again.',
+          }),
+        });
+        onClose();
       });
-      onClose();
-    }
-  }, [isOpen, isError, toggleNotification, formatMessage, onClose]);
+
+    return () => {
+      active = false;
+    };
+  }, [isOpen, triggerGetDump, toggleNotification, formatMessage, onClose]);
 
   const serialized = React.useMemo(
     () => (data === undefined ? '' : JSON.stringify(data, null, 2)),
