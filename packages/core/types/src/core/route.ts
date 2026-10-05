@@ -1,6 +1,6 @@
 import type { z } from 'zod/v4';
 import type { LiteralUnion } from '../utils/string';
-import type { MiddlewareHandler } from './middleware';
+import type { MiddlewareHandler, MiddlewareReference } from './middleware';
 import type { ControllerActionReference } from './controller';
 import type { PolicyReference } from './policy';
 
@@ -21,14 +21,22 @@ export type HandlerReference = string;
 
 export type RouteInput = Omit<Route, 'info'> & { info?: Partial<RouteInfo> };
 
-/** Route config whose policy references are checked against the policy registries. See {@link PolicyReference}. */
-export type RouteConfigFor<TNamespace extends string = never> = Omit<RouteConfig, 'policies'> & {
+/**
+ * Route config whose policy and middleware references are checked against their registries.
+ * See {@link PolicyReference} and {@link MiddlewareReference}.
+ */
+export type RouteConfigFor<TNamespace extends string = never> = Omit<
+  RouteConfig,
+  'policies' | 'middlewares'
+> & {
   policies?: PolicyReference<TNamespace>[];
+  middlewares?: MiddlewareReference[];
 };
 
 /**
- * A route whose string handlers must reference an action of `TControllers`, and whose policies must
- * be registered once any policy is. See {@link ControllerActionReference} and {@link PolicyReference}.
+ * A route whose string handlers must reference an action of `TControllers`, and whose policies and
+ * middleware names must be registered once any policy or middleware is. See
+ * {@link ControllerActionReference}, {@link PolicyReference} and {@link MiddlewareReference}.
  */
 export type RouteInputFor<TControllers, TNamespace extends string = never> = Omit<
   RouteInput,
