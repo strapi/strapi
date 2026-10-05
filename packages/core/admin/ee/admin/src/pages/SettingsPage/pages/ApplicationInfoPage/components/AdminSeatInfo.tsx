@@ -34,7 +34,7 @@ export const AdminSeatInfoEE = () => {
     return null;
   }
 
-  const { licenseLimitStatus, enforcementUserCount, permittedSeats, seats } = license;
+  const { enforcementUserCount, permittedSeats, seats } = license;
 
   // `permittedSeats` is the live enforcement limit and is wiped once the licence stops being
   // usable, so fall back to the retained `seats` to keep showing the count on an expired
@@ -45,6 +45,10 @@ export const AdminSeatInfoEE = () => {
   if (!seatLimit) {
     return null;
   }
+
+  // The red count and the warning follow the same displayed limit. Server-side
+  // `licenseLimitStatus` tracks only the live limit, so it is empty once the licence expires.
+  const isOverLimit = enforcementUserCount > seatLimit;
 
   return (
     <Flex direction="column" alignItems="start" gap={2}>
@@ -68,7 +72,7 @@ export const AdminSeatInfoEE = () => {
                 text: (chunks: ReactNode) => (
                   <Typography
                     fontWeight="semiBold"
-                    textColor={enforcementUserCount > seatLimit ? 'danger500' : undefined}
+                    textColor={isOverLimit ? 'danger500' : undefined}
                   >
                     {chunks}
                   </Typography>
@@ -77,7 +81,7 @@ export const AdminSeatInfoEE = () => {
             )}
           </Typography>
         </Flex>
-        {licenseLimitStatus === 'OVER_LIMIT' && (
+        {isOverLimit && (
           <Tooltip
             label={formatMessage({
               id: 'Settings.application.ee.admin-seats.at-limit-tooltip',

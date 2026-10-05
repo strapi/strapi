@@ -79,6 +79,39 @@ describe('<AdminSeatInfo />', () => {
     expect(withMarkup(getByText)('4/10')).toBeInTheDocument();
   });
 
+  test('Shows the over-limit warning against the retained seats after expiry', () => {
+    // The count turns red against the displayed limit (live, or retained once expired); the
+    // warning icon followed only the live status, which is empty after expiry.
+    // @ts-expect-error – mocked
+    useLicenseLimits.mockReturnValue({
+      ...LICENSE_MOCK,
+      license: {
+        ...LICENSE_MOCK.license,
+        permittedSeats: null,
+        seats: 5,
+        licenseLimitStatus: null,
+        licenseStatus: 'expired',
+        enforcementUserCount: 8,
+      },
+    });
+
+    const { container, getByText } = render(<AdminSeatInfoEE />);
+
+    expect(withMarkup(getByText)('8/5')).toBeInTheDocument();
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+    expect(container.querySelector('svg')).toBeInTheDocument();
+  });
+
+  test('Shows no over-limit warning within the seat limit', () => {
+    // @ts-expect-error – mocked
+    useLicenseLimits.mockReturnValue(LICENSE_MOCK);
+
+    const { container } = render(<AdminSeatInfoEE />);
+
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+    expect(container.querySelector('svg')).not.toBeInTheDocument();
+  });
+
   test('Renders nothing when neither a live nor a retained seat limit exists', () => {
     // @ts-expect-error – mocked
     useLicenseLimits.mockReturnValue({
