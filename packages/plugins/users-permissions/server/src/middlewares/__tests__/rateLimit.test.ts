@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import utils from '@strapi/utils';
+import { errors } from '@strapi/utils';
 
 import {
   buildPrefixKey,
@@ -9,7 +9,7 @@ import {
   buildRateLimitLoadConfig,
 } from '../rateLimit';
 
-const { RateLimitError } = utils.errors;
+const { RateLimitError } = errors;
 
 const makeCtx = ({
   path: requestPath,
