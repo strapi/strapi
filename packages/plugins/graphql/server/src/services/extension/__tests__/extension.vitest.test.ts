@@ -1,10 +1,11 @@
 import type { Core } from '@strapi/types';
+import { describe, expect, it, vi } from 'vitest';
 import createExtension from '../extension';
 
 describe('GraphQL extension merging', () => {
   it('preserves resolver and policy precedence without mutating registered configurations', () => {
-    const firstResolver = jest.fn();
-    const secondResolver = jest.fn();
+    const firstResolver = vi.fn();
+    const secondResolver = vi.fn();
     const first = {
       resolvers: Object.freeze({ Query: Object.freeze({ article: firstResolver }) }),
       resolversConfig: Object.freeze({
