@@ -8,14 +8,11 @@ interface StrapiFetchOptions {
 }
 
 // Create a wrapper for Node's Fetch API that applies a global proxy
-export const createStrapiFetch = (
-  strapi: Core.Strapi,
-  options?: StrapiFetchOptions
-): Modules.Fetch.Fetch => {
+export const createStrapiFetch = (strapi: Core.Strapi, options?: StrapiFetchOptions): Fetch => {
   const { logs = true } = options ?? {};
 
-  function strapiFetch(url: RequestInfo | URL, options?: RequestInit) {
-    const fetchOptions = {
+  const strapiFetch: Fetch = (url, options) => {
+    const fetchOptions: RequestInit = {
       ...(strapiFetch.dispatcher ? { dispatcher: strapiFetch.dispatcher } : {}),
       ...options,
     };
@@ -25,7 +22,7 @@ export const createStrapiFetch = (
     }
 
     return fetch(url, fetchOptions);
-  }
+  };
 
   const proxy =
     strapi.config.get<ConstructorParameters<typeof ProxyAgent>[0]>('server.proxy.fetch') ||

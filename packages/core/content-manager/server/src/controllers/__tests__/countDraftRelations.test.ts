@@ -9,7 +9,11 @@ const createMocks = (overrides: Record<string, any> = {}) => {
   const buildPopulate = jest.fn().mockResolvedValue({ createdBy: true });
 
   const findOne = jest.fn().mockResolvedValue({ id: 1, createdBy: { id: 1 } });
-  const countDraftRelations = jest.fn().mockResolvedValue(3);
+  const findLocales = jest.fn().mockResolvedValue([]);
+  const countDraftRelations = jest.fn().mockResolvedValue({
+    unpublishedRelations: 3,
+    draftM2mLinks: 0,
+  });
   const sanitizedQueryRead = jest.fn().mockResolvedValue({});
 
   const cannotRead = jest.fn().mockReturnValue(false);
@@ -19,6 +23,7 @@ const createMocks = (overrides: Record<string, any> = {}) => {
     populateFromQuery,
     buildPopulate,
     findOne,
+    findLocales,
     countDraftRelations,
     sanitizedQueryRead,
     cannotRead,
@@ -49,6 +54,7 @@ const setupStrapi = (mocks: ReturnType<typeof createMocks>) => {
           }),
           'document-manager': {
             findOne: mocks.findOne,
+            findLocales: mocks.findLocales,
             countDraftRelations: mocks.countDraftRelations,
           },
         },
@@ -101,7 +107,7 @@ describe('countDraftRelations', () => {
 
     const res = await controller.countDraftRelations(createCtx());
 
-    expect(res.data).toBe(3);
+    expect(res.data).toEqual({ unpublishedRelations: 3, draftM2mLinks: 0 });
   });
 
   it('returns 403 when the user lacks read permission entirely', async () => {
@@ -115,14 +121,47 @@ describe('countDraftRelations', () => {
     expect(mocks.findOne).not.toHaveBeenCalled();
   });
 
-  it('returns 404 when the entity does not exist', async () => {
-    const mocks = createMocks({ findOne: jest.fn().mockResolvedValue(null) });
+  it('returns 404 when the document does not exist at all', async () => {
+    const mocks = createMocks({
+      findOne: jest.fn().mockResolvedValue(null),
+      findLocales: jest.fn().mockResolvedValue([]),
+    });
     setupStrapi(mocks);
 
     const ctx = createCtx();
     await controller.countDraftRelations(ctx);
 
     expect(ctx.status).toBe(404);
+    expect(mocks.countDraftRelations).not.toHaveBeenCalled();
+  });
+
+  it('returns zero counts when the document exists but not in the requested locale', async () => {
+    const mocks = createMocks({
+      findOne: jest.fn().mockResolvedValue(null),
+      findLocales: jest.fn().mockResolvedValue([{ id: 1, createdBy: { id: 1 } }]),
+    });
+    setupStrapi(mocks);
+
+    const ctx = createCtx();
+    const res = await controller.countDraftRelations(ctx);
+
+    expect(ctx.notFound).not.toHaveBeenCalled();
+    expect(res.data).toEqual({ unpublishedRelations: 0, draftM2mLinks: 0 });
+    expect(mocks.countDraftRelations).not.toHaveBeenCalled();
+  });
+
+  it('returns 403 when the requested locale is missing and entity-level RBAC denies the document', async () => {
+    const mocks = createMocks({
+      findOne: jest.fn().mockResolvedValue(null),
+      findLocales: jest.fn().mockResolvedValue([{ id: 1, createdBy: { id: 2 } }]),
+      cannotRead: jest.fn().mockImplementation((entity) => entity !== undefined),
+    });
+    setupStrapi(mocks);
+
+    const ctx = createCtx();
+    await controller.countDraftRelations(ctx);
+
+    expect(ctx.status).toBe(403);
     expect(mocks.countDraftRelations).not.toHaveBeenCalled();
   });
 
@@ -153,7 +192,7 @@ describe('countDraftRelations', () => {
 
     const res = await controller.countDraftRelations(createCtx());
 
-    expect(res.data).toBe(3);
+    expect(res.data).toEqual({ unpublishedRelations: 3, draftM2mLinks: 0 });
     expect(mocks.findOne).not.toHaveBeenCalled();
     expect(mocks.populateFromQuery).not.toHaveBeenCalled();
   });

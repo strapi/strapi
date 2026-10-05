@@ -1,0 +1,69 @@
+import * as ts from 'typescript';
+import { sortBy } from 'lodash';
+
+import { models } from '../common';
+import { emitDefinitions, format, generateSharedExtensionDefinition } from '../utils';
+import type { GeneratorOptions } from '../utils';
+
+const { factory } = ts;
+
+const NO_CONTENT_TYPE_PLACEHOLDER_COMMENT = `/*
+ * The app doesn't have any content-types yet.
+ */
+`;
+
+/**
+ * Generate type definitions for Strapi Content-Types
+ */
+export const generateContentTypesDefinitions = async (
+  options: GeneratorOptions = {} as GeneratorOptions
+) => {
+  const { strapi } = options;
+
+  const { contentTypes } = strapi;
+
+  const contentTypesDefinitions = sortBy(
+    Object.values<models.utils.Schema>(contentTypes ?? {}),
+    'uid'
+  ).map((contentType) => ({
+    uid: contentType.uid,
+    definition: models.schema.generateSchemaDefinition(contentType),
+  }));
+
+  options.logger.debug(`Found ${contentTypesDefinitions.length} content-types.`);
+
+  if (contentTypesDefinitions.length === 0) {
+    return { output: NO_CONTENT_TYPE_PLACEHOLDER_COMMENT, stats: {} };
+  }
+
+  const formattedSchemasDefinitions = contentTypesDefinitions.reduce<any[]>((acc, def) => {
+    acc.push(
+      // Definition
+      def.definition,
+
+      // Add a newline between each interface declaration
+      factory.createIdentifier('\n')
+    );
+
+    return acc;
+  }, []);
+
+  const allDefinitions = [
+    // Imports
+    ...models.imports.generateImportDefinition(),
+
+    // Add a newline after the import statement
+    factory.createIdentifier('\n'),
+
+    // Schemas
+    ...formattedSchemasDefinitions,
+
+    // Global
+    generateSharedExtensionDefinition('ContentTypeSchemas', contentTypesDefinitions),
+  ];
+
+  const output = emitDefinitions(allDefinitions);
+  const formattedOutput = await format(output);
+
+  return { output: formattedOutput, stats: {} };
+};

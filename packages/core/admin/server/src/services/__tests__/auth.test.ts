@@ -1,6 +1,11 @@
 import _ from 'lodash';
-import { errors } from '@strapi/utils';
+import { errors, emitAudit } from '@strapi/utils';
 import authService from '../auth';
+
+jest.mock('@strapi/utils', () => ({
+  ...jest.requireActual('@strapi/utils'),
+  emitAudit: jest.fn(),
+}));
 
 const { validatePassword, hashPassword, checkCredentials, forgotPassword, resetPassword } =
   authService;
@@ -178,7 +183,7 @@ describe('Auth', () => {
 
       const findOne = jest.fn(() => Promise.resolve(user));
       const send = jest.fn(() => Promise.resolve());
-      const updateById = jest.fn(() => Promise.resolve());
+      const updateById = jest.fn((_id, attributes) => Promise.resolve({ ...user, ...attributes }));
       const createToken = jest.fn(() => resetPasswordToken);
 
       const config = {
@@ -209,7 +214,64 @@ describe('Auth', () => {
 
       expect(findOne).toHaveBeenCalled();
       expect(createToken).toHaveBeenCalled();
-      expect(updateById).toHaveBeenCalledWith(user.id, { resetPasswordToken });
+      expect(updateById).toHaveBeenCalledWith(user.id, {
+        resetPasswordToken,
+        resetPasswordTokenExpiresAt: expect.any(Date),
+      });
+    });
+
+    test('Records the reset request in the audit log, without the token', async () => {
+      const user = { id: 1, email: 'test@strapi.io' };
+      const resetPasswordToken = 'secret-token';
+
+      const updateById = jest.fn((_id, attributes) => Promise.resolve({ ...user, ...attributes }));
+
+      global.strapi = {
+        config: { get: (_key: string, defaultValue: unknown) => defaultValue },
+        db: { query: () => ({ findOne: jest.fn(() => Promise.resolve(user)) }) },
+        admin: {
+          services: {
+            user: { updateById },
+            token: { createToken: jest.fn(() => resetPasswordToken) },
+          },
+        },
+        plugins: {
+          email: { services: { email: { sendTemplatedEmail: jest.fn(() => Promise.resolve()) } } },
+        },
+      } as any;
+      jest.mocked(emitAudit).mockClear();
+
+      await forgotPassword({ email: user.email });
+
+      expect(emitAudit).toHaveBeenCalledWith(
+        { strapi: global.strapi },
+        'admin-user.password-reset.create',
+        { userId: 1, email: 'test@strapi.io', expiresAt: expect.any(Date) }
+      );
+      expect(JSON.stringify(jest.mocked(emitAudit).mock.calls)).not.toContain(resetPasswordToken);
+    });
+
+    test('Records nothing and does not throw when the account vanished before the write', async () => {
+      const user = { id: 1, email: 'test@strapi.io' };
+
+      global.strapi = {
+        config: { get: (_key: string, defaultValue: unknown) => defaultValue },
+        db: { query: () => ({ findOne: jest.fn(() => Promise.resolve(user)) }) },
+        admin: {
+          services: {
+            user: { updateById: jest.fn(() => Promise.resolve(null)) },
+            token: { createToken: jest.fn(() => 'token') },
+          },
+        },
+        plugins: {
+          email: { services: { email: { sendTemplatedEmail: jest.fn(() => Promise.resolve()) } } },
+        },
+      } as any;
+      jest.mocked(emitAudit).mockClear();
+
+      await expect(forgotPassword({ email: user.email })).resolves.toBeUndefined();
+
+      expect(emitAudit).not.toHaveBeenCalled();
     });
 
     test('Will call the send service', async () => {
@@ -222,7 +284,7 @@ describe('Auth', () => {
       const findOne = jest.fn(() => Promise.resolve(user));
       const send = jest.fn(() => Promise.resolve());
       const sendTemplatedEmail = jest.fn(() => Promise.resolve());
-      const updateById = jest.fn(() => Promise.resolve());
+      const updateById = jest.fn((_id, attributes) => Promise.resolve({ ...user, ...attributes }));
       const createToken = jest.fn(() => resetPasswordToken);
 
       const config = {
@@ -307,9 +369,13 @@ describe('Auth', () => {
       }
     });
 
-    test('Changes password and clear reset token', async () => {
+    test('Fails if reset token has expired (#25711)', async () => {
       const resetPasswordToken = '123';
-      const user = { id: 1 };
+      const user = {
+        id: 1,
+        // Expired one minute ago
+        resetPasswordTokenExpiresAt: new Date(Date.now() - 60 * 1000).toISOString(),
+      };
 
       const findOne = jest.fn(() => Promise.resolve(user));
       const updateById = jest.fn(() => Promise.resolve());
@@ -321,7 +387,77 @@ describe('Auth', () => {
           },
         },
         admin: { services: { user: { updateById } } },
+        config: { get: (_key: string, defaultValue: unknown) => defaultValue },
       } as any;
+
+      expect.assertions(1);
+
+      try {
+        await resetPassword({ resetPasswordToken, password: 'Test1234' });
+      } catch (e) {
+        expect(e instanceof errors.ApplicationError).toBe(true);
+      }
+    });
+
+    test('Fails and clears the token for a legacy token with no expiry (#25711)', async () => {
+      const resetPasswordToken = '123';
+      // A token issued before expiry was introduced: set, but with no expiry.
+      const user = {
+        id: 1,
+        resetPasswordToken,
+      };
+
+      const findOne = jest.fn(() => Promise.resolve(user));
+      const updateById = jest.fn(() => Promise.resolve());
+
+      global.strapi = {
+        db: {
+          query() {
+            return { findOne };
+          },
+        },
+        admin: { services: { user: { updateById } } },
+        config: { get: (_key: string, defaultValue: unknown) => defaultValue },
+      } as any;
+
+      expect.assertions(2);
+
+      try {
+        await resetPassword({ resetPasswordToken, password: 'Test1234' });
+      } catch (e) {
+        expect(e instanceof errors.ApplicationError).toBe(true);
+      }
+
+      // The stale token must be cleared so it can no longer be retried.
+      expect(updateById).toHaveBeenCalledWith(user.id, {
+        resetPasswordToken: null,
+        resetPasswordTokenExpiresAt: null,
+      });
+    });
+
+    test('Changes password and clear reset token', async () => {
+      const resetPasswordToken = '123';
+      const user = {
+        id: 1,
+        // Valid for another hour
+        resetPasswordTokenExpiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+      };
+
+      const findOne = jest.fn(() => Promise.resolve(user));
+      const updateById = jest.fn(() =>
+        Promise.resolve({ id: 1, email: 'test@strapi.io', password: 'hash' })
+      );
+
+      global.strapi = {
+        db: {
+          query() {
+            return { findOne };
+          },
+        },
+        admin: { services: { user: { updateById } } },
+        config: { get: (_key: string, defaultValue: unknown) => defaultValue },
+      } as any;
+      jest.mocked(emitAudit).mockClear();
 
       const input = { resetPasswordToken, password: 'Test1234' };
       await resetPassword(input);
@@ -329,7 +465,26 @@ describe('Auth', () => {
       expect(updateById).toHaveBeenCalledWith(user.id, {
         password: input.password,
         resetPasswordToken: null,
+        resetPasswordTokenExpiresAt: null,
       });
+      expect(emitAudit).toHaveBeenCalledWith(
+        { strapi: global.strapi },
+        'admin-user.password-reset.confirm',
+        { userId: 1, email: 'test@strapi.io' }
+      );
+    });
+
+    test('Records nothing in the audit log when the token is invalid', async () => {
+      global.strapi = {
+        db: { query: () => ({ findOne: jest.fn(() => Promise.resolve(undefined)) }) },
+      } as any;
+      jest.mocked(emitAudit).mockClear();
+
+      await expect(
+        resetPassword({ resetPasswordToken: 'nope', password: 'Test1234' })
+      ).rejects.toThrow();
+
+      expect(emitAudit).not.toHaveBeenCalled();
     });
   });
 });

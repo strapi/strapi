@@ -5,15 +5,13 @@ import { useIntl } from 'react-intl';
 
 import { useDataManager } from './DataManager/useDataManager';
 
+import type { FormChangeHandler, IntlLabel } from '../types';
+
 interface SelectCategoryProps {
   error?: string | null;
-  intlLabel: {
-    id: string;
-    defaultMessage: string;
-    values?: Record<string, any>;
-  };
+  intlLabel: IntlLabel;
   name: string;
-  onChange: (value: { target: { name: string; value: any; type: string } }) => void;
+  onChange: FormChangeHandler<string, 'select-category'>;
   value?: string;
   isCreating?: boolean;
   dynamicZoneTarget?: string | null;
@@ -35,11 +33,19 @@ export const SelectCategory = ({
   const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
   const label = formatMessage(intlLabel);
 
-  const handleChange = (value: any) => {
+  const handleChange = (value?: string) => {
+    if (value === undefined) {
+      return;
+    }
+
     onChange({ target: { name, value, type: 'select-category' } });
   };
 
-  const handleCreateOption = (value: any) => {
+  const handleCreateOption = (value?: string) => {
+    if (value === undefined) {
+      return;
+    }
+
     setCategories((prev) => [...prev, value]);
     handleChange(value);
   };

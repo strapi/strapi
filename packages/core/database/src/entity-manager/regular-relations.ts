@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-namespace */
-import { map, isEmpty } from 'lodash/fp';
+import { map, isEmpty } from 'lodash';
 import type { Knex } from 'knex';
 
 import {
@@ -39,7 +39,7 @@ const getDocumentSiblingIdsQuery = (tableName: string, id: ID) => {
 
   // NOTE: SubQueries are wrapped in a function to not reuse the same connection,
   // which causes infinite self references
-  return function (query) {
+  return function findDocumentSiblingIds(query) {
     query
       .select('id')
       .from(tableName)
@@ -130,7 +130,7 @@ const deletePreviousAnyToOneRelations = async ({
       .where(joinTable.on || {})
       .transacting(trx);
 
-    const relIdsToDelete = map(inverseJoinColumn.name, relsToDelete);
+    const relIdsToDelete = map(relsToDelete, inverseJoinColumn.name);
 
     await createQueryBuilder(joinTable.name, db)
       .delete()
@@ -205,7 +205,7 @@ const deleteRelations = async ({
       done = batchToDelete.length < batchSize;
       lastId = batchToDelete[batchToDelete.length - 1]?.id || 0;
 
-      const batchIds = map(inverseJoinColumn.name, batchToDelete);
+      const batchIds = map(batchToDelete, inverseJoinColumn.name);
 
       await createQueryBuilder(joinTable.name, db)
         .delete()

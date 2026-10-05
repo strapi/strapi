@@ -1,6 +1,6 @@
-import _ from 'lodash';
-import { pick, pipe, has, prop, isNil, cloneDeep, isArray } from 'lodash/fp';
+import { get, has, cloneDeep, pick } from 'lodash';
 import { errors, contentTypes as contentTypeUtils } from '@strapi/utils';
+import type { Struct } from '@strapi/types';
 import { getService } from '../utils';
 
 const {
@@ -13,13 +13,13 @@ const {
 const { ApplicationError } = errors;
 
 const hasLocalizedOption = (modelOrAttribute: any) => {
-  return prop('pluginOptions.i18n.localized', modelOrAttribute) === true;
+  return get(modelOrAttribute, 'pluginOptions.i18n.localized') === true;
 };
 
 const getValidLocale = async (locale: any) => {
   const localesService = getService('locales');
 
-  if (isNil(locale)) {
+  if (locale == null) {
     return localesService.getDefaultLocale();
   }
 
@@ -65,38 +65,42 @@ const getNonLocalizedAttributes = (model: any) => {
 };
 
 const removeId = (value: any) => {
-  if (typeof value === 'object' && has('id', value)) {
+  if (typeof value === 'object' && has(value, 'id')) {
     delete value.id;
   }
 };
 
-const removeIds = (model: any) => (entry: any) => removeIdsMut(model, cloneDeep(entry));
+const removeIds = (model: Struct.ComponentSchema | Struct.ContentTypeSchema) => (entry: any) =>
+  removeIdsMut(model, cloneDeep(entry));
 
-const removeIdsMut = (model: any, entry: any) => {
-  if (isNil(entry)) {
-    return entry;
+const removeIdsMut = (
+  model: Struct.ComponentSchema | Struct.ContentTypeSchema,
+  entry: any
+): Record<string, any> => {
+  if (entry == null) {
+    return entry as unknown as Record<string, any>;
   }
 
   removeId(entry);
 
-  _.forEach(model.attributes, (attr, attrName) => {
+  for (const [attrName, attr] of Object.entries(model.attributes)) {
     const value = entry[attrName];
-    if (attr.type === 'dynamiczone' && isArray(value)) {
+    if (attr.type === 'dynamiczone' && Array.isArray(value)) {
       value.forEach((compo) => {
-        if (has('__component', compo)) {
+        if (has(compo, '__component')) {
           const model = strapi.components[compo.__component];
           removeIdsMut(model, compo);
         }
       });
     } else if (attr.type === 'component') {
       const model = strapi.components[attr.component];
-      if (isArray(value)) {
+      if (Array.isArray(value)) {
         value.forEach((compo) => removeIdsMut(model, compo));
       } else {
         removeIdsMut(model, value);
       }
     }
-  });
+  }
 
   return entry;
 };
@@ -107,10 +111,13 @@ const removeIdsMut = (model: any, entry: any) => {
  * @param {object} entry
  * @returns {object}
  */
-const copyNonLocalizedAttributes = (model: any, entry: any) => {
+const copyNonLocalizedAttributes = (
+  model: Struct.ComponentSchema | Struct.ContentTypeSchema,
+  entry: any
+) => {
   const nonLocalizedAttributes = getNonLocalizedAttributes(model);
 
-  return pipe(pick(nonLocalizedAttributes), removeIds(model))(entry);
+  return removeIds(model)(pick(entry, nonLocalizedAttributes));
 };
 
 /**
@@ -132,25 +139,25 @@ const getLocalizedAttributes = (model: any) => {
  * @param {Object} options.model corresponding model
  */
 const fillNonLocalizedAttributes = (entry: any, relatedEntry: any, { model }: any) => {
-  if (isNil(relatedEntry)) {
+  if (relatedEntry == null) {
     return;
   }
 
   const modelDef = strapi.getModel(model);
   const relatedEntryCopy = copyNonLocalizedAttributes(modelDef, relatedEntry);
 
-  _.forEach(relatedEntryCopy, (value, field) => {
-    if (isNil(entry[field])) {
+  for (const [field, value] of Object.entries(relatedEntryCopy)) {
+    if (entry[field] == null) {
       entry[field] = value;
     }
-  });
+  }
 };
 
 /**
  * build the populate param to
  * @param {String} modelUID uid of the model, could be of a content-type or a component
  */
-const getNestedPopulateOfNonLocalizedAttributes = (modelUID: any) => {
+const getNestedPopulateOfNonLocalizedAttributes = (modelUID: any): string[] => {
   const schema = strapi.getModel(modelUID);
   const scalarAttributes = getScalarAttributes(schema);
   const nonLocalizedAttributes = getNonLocalizedAttributes(schema);

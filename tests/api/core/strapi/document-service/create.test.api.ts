@@ -2,8 +2,15 @@ import type { Core, Modules } from '@strapi/types';
 
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
 import { testInTransaction } from '../../../utils/index';
-import resources from './resources/index';
+import { createMinimalArticleCategoryResources } from './resources/minimal-article-category';
 import { ARTICLE_UID, findArticlesDb, AUTHOR_UID } from './utils';
+
+const resources = createMinimalArticleCategoryResources({
+  withComponents: true,
+  withAuthor: true,
+  withCategory: false,
+  withFixtures: false,
+});
 
 let strapi: Core.Strapi;
 
@@ -105,6 +112,59 @@ describe('Document Service', () => {
         name: 'Author',
         locale: null, // should be null, as it is not a localized content type
       });
+    });
+
+    describe.each([
+      ['null', null],
+      ['an empty string', ''],
+      ['undefined', undefined],
+    ])('documentId is %s in data', (_label, documentId) => {
+      testInTransaction('generates a valid documentId instead of persisting it', async () => {
+        const article = await createArticle({
+          data: { documentId, title: 'Article' },
+        });
+
+        expect(article).toMatchObject({
+          title: 'Article',
+          documentId: expect.any(String),
+        });
+        expect(article.documentId).not.toBe('');
+
+        const articles = await findArticlesDb({ id: article.id });
+        expect(articles).toHaveLength(1);
+        expect(articles[0].documentId).toBe(article.documentId);
+      });
+    });
+
+    testInTransaction('keeps an explicitly provided documentId', async () => {
+      const article = await createArticle({
+        data: { documentId: 'my-document-id', title: 'Article' },
+      });
+
+      expect(article).toMatchObject({
+        title: 'Article',
+        documentId: 'my-document-id',
+      });
+    });
+  });
+
+  describe('Update', () => {
+    testInTransaction('cannot change the documentId of a document', async () => {
+      const article = await createArticle({ data: { title: 'Article' } });
+
+      const updatedArticle = await strapi.documents(ARTICLE_UID).update({
+        documentId: article.documentId,
+        data: { documentId: null, title: 'Updated Article' },
+      });
+
+      expect(updatedArticle).toMatchObject({
+        title: 'Updated Article',
+        documentId: article.documentId,
+      });
+
+      const articles = await findArticlesDb({ id: article.id });
+      expect(articles).toHaveLength(1);
+      expect(articles[0].documentId).toBe(article.documentId);
     });
   });
 });

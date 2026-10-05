@@ -20,8 +20,8 @@ const _requestIdleCallback =
 /* -------------------------------------------------------------------------------------------------
  * cancelIdleCallbackShim
  * -----------------------------------------------------------------------------------------------*/
-const cancelIdleCallbackShim: Window['cancelIdleCallback'] = (handle: unknown) => {
-  return clearTimeout(handle as any);
+const cancelIdleCallbackShim: Window['cancelIdleCallback'] = (handle) => {
+  return clearTimeout(handle);
 };
 
 const _cancelIdleCallback =

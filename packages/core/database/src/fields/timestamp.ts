@@ -1,5 +1,3 @@
-import * as dateFns from 'date-fns';
-
 import { parseDateTimeOrTimestamp } from './shared/parsers';
 import Field from './field';
 
@@ -9,7 +7,10 @@ export default class TimestampField extends Field {
   }
 
   fromDB(value: unknown) {
-    const cast = new Date(value as any);
-    return dateFns.isValid(cast) ? dateFns.format(cast, 'T') : null;
+    // Same redundant re-parse as `datetime`. `format(cast, 'T')` is the epoch in
+    // milliseconds as a string, which `getTime()` already gives us.
+    const cast = value instanceof Date ? value : new Date(value as any);
+    const time = cast.getTime();
+    return Number.isNaN(time) ? null : String(time);
   }
 }

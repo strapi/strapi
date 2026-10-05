@@ -1,4 +1,4 @@
-import permissions from '@strapi/permissions';
+import { engine as permissionsEngine } from '@strapi/permissions';
 import { providerFactory } from '@strapi/utils';
 
 const DEFAULT_TRANSFER_ACTIONS = ['push', 'pull'];
@@ -12,6 +12,6 @@ DEFAULT_TRANSFER_ACTIONS.forEach((action) => {
   providers.action.register(action, { action });
 });
 
-const engine = permissions.engine.new({ providers });
+const engine = permissionsEngine.new({ providers });
 
 export { engine, providers };

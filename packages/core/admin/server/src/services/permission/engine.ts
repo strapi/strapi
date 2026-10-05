@@ -1,5 +1,6 @@
-import { curry, isArray, isEmpty, difference } from 'lodash/fp';
-import permissions, { type engine } from '@strapi/permissions';
+import { curry, isEmpty, difference } from 'lodash';
+
+import { engine } from '@strapi/permissions';
 import type { Ability } from '@casl/ability';
 import permissionDomain from '../../domain/permission';
 import { getService } from '../../utils';
@@ -9,7 +10,7 @@ import type { AdminUser, Permission } from '../../../../shared/contracts/shared'
 export default (params: { providers: engine.EngineParams['providers'] }) => {
   const { providers } = params;
 
-  const engine = permissions.engine
+  const engineInstance = engine
     .new({ providers })
     /**
      * Validate the permission's action exists in the action registry
@@ -56,14 +57,14 @@ export default (params: { providers: engine.EngineParams['providers'] }) => {
     .on('after-format::validate.permission', ({ permission }) => {
       const { fields } = permission.properties;
 
-      if (isArray(fields) && isEmpty(fields)) {
+      if (Array.isArray(fields) && isEmpty(fields)) {
         return false;
       }
     });
 
   return {
     get hooks() {
-      return engine.hooks;
+      return engineInstance.hooks;
     },
 
     /**
@@ -73,7 +74,7 @@ export default (params: { providers: engine.EngineParams['providers'] }) => {
     async generateUserAbility(user: AdminUser): Promise<Ability> {
       const permissions = (await getService('permission').findUserPermissions(user)) as any;
 
-      return engine.generateAbility(permissions, user);
+      return engineInstance.generateAbility(permissions, user);
     },
 
     /**
@@ -81,7 +82,7 @@ export default (params: { providers: engine.EngineParams['providers'] }) => {
      * Token permissions are already validated and ceiling-clamped at write time.
      */
     async generateTokenAbility(tokenPermissions: Permission[], owner: AdminUser): Promise<Ability> {
-      return engine.generateAbility(tokenPermissions as any, owner);
+      return engineInstance.generateAbility(tokenPermissions as any, owner);
     },
 
     /**

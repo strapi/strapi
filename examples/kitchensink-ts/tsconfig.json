@@ -7,7 +7,7 @@
     "lib": ["ES2020"],
     "target": "ES2019",
 
-    "strict": false,
+    "strict": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
 

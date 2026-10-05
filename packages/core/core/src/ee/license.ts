@@ -1,6 +1,7 @@
 import fs from 'fs';
 import { join, resolve } from 'path';
 import crypto from 'crypto';
+import * as z from 'zod/v4';
 import type { Core } from '@strapi/types';
 
 import { generateInstallId } from '@strapi/utils';
@@ -31,6 +32,20 @@ const DEFAULT_FEATURES = {
 };
 
 const LICENSE_REGISTRY_URI = 'https://license.strapi.io';
+
+// Shape of a successful (200) response from the license registry.
+const licenseSuccessSchema = z.object({
+  data: z.object({
+    license: z.string(),
+  }),
+});
+
+// Shape of a bad-request (400) response from the license registry.
+const licenseErrorSchema = z.object({
+  error: z.object({
+    message: z.string(),
+  }),
+});
 
 const publicKey = fs.readFileSync(resolve(__dirname, '../../resources/key.pub'));
 
@@ -88,8 +103,12 @@ const verifyLicense = (license: string) => {
   return licenseInfo;
 };
 
-const throwError = () => {
-  throw new LicenseCheckError('Could not proceed to the online validation of your license.', true);
+const createShouldFallbackError = () => {
+  return new LicenseCheckError('Could not proceed to the online validation of your license.', true);
+};
+
+const throwShouldFallbackError = () => {
+  throw createShouldFallbackError();
 };
 
 const fetchLicense = async (
@@ -109,25 +128,31 @@ const fetchLicense = async (
         deviceId: generateInstallId(projectId, installIdFromPackageJson),
       }), // NOTE: Doing nothing on the LR with the installId
     })
-    .catch(throwError);
+    .catch(throwShouldFallbackError);
 
   const contentType = response.headers.get('Content-Type');
 
   if (contentType?.includes('application/json')) {
-    const { data, error } = await response.json();
+    const body = await response.json();
 
     switch (response.status) {
-      case 200:
-        return data.license;
-      case 400:
-        throw new LicenseCheckError(error.message);
+      case 200: {
+        const result = licenseSuccessSchema.safeParse(body);
+        if (!result.success) throw createShouldFallbackError();
+        return result.data.data.license;
+      }
+      case 400: {
+        const result = licenseErrorSchema.safeParse(body);
+        if (!result.success) throw createShouldFallbackError();
+        throw new LicenseCheckError(result.data.error.message);
+      }
       case 404:
         throw new LicenseCheckError('The license used does not exists.');
       default:
-        throwError();
+        throw createShouldFallbackError();
     }
   } else {
-    throwError();
+    throw createShouldFallbackError();
   }
 };
 

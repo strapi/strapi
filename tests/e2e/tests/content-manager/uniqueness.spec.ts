@@ -100,8 +100,8 @@ test.describe('Uniqueness', () => {
   const EDIT_URL = /\/admin\/content-manager\/collection-types\/api::unique.unique\/[^/]+(\?.*)?/;
 
   const clickSave = async (page: Page) => {
-    await page.getByRole('button', { name: 'Save' }).isEnabled();
     await clickAndWait(page, page.getByRole('tab', { name: 'Draft' }));
+    await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled();
     await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
     await expect(page.getByText('Saved document')).toBeVisible();
   };

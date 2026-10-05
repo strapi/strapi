@@ -207,6 +207,12 @@ describe('Homepage API', () => {
       expect(response.body.data[1].status).toBe('modified');
       expect(response.body.data[2].status).toBe('draft');
       expect(response.body.data[3].status).toBe(undefined);
+      // Dates must be ISO strings on the wire (not Date→{} after serialization)
+      for (const doc of response.body.data) {
+        expect(typeof doc.updatedAt).toBe('string');
+        expect(doc.updatedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+        expect(doc.updatedAt).not.toEqual({});
+      }
     });
 
     /**
@@ -267,6 +273,14 @@ describe('Homepage API', () => {
       // Assert the data is the published data, but the status should be modified
       expect(response.body.data[1].title).toBe('The Paperback Writer');
       expect(response.body.data[1].status).toBe('modified');
+      for (const doc of response.body.data) {
+        expect(typeof doc.updatedAt).toBe('string');
+        expect(typeof doc.publishedAt).toBe('string');
+        expect(doc.updatedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+        expect(doc.publishedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+        expect(doc.updatedAt).not.toEqual({});
+        expect(doc.publishedAt).not.toEqual({});
+      }
     });
 
     /**

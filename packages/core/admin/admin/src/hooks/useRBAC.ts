@@ -83,7 +83,11 @@ const useRBAC = (
     }, {});
   }, [actualPermissionsToCheck]);
 
-  const checkUserHasPermissions = useAuth('useRBAC', (state) => state.checkUserHasPermissions);
+  const checkUserHasPermissions = useAuth(
+    'useRBAC',
+    (state) => state.checkUserHasPermissions,
+    true
+  );
 
   const permssionsChecked = usePrev(actualPermissionsToCheck);
   const contextChecked = usePrev(rawQueryContext);

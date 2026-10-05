@@ -10,7 +10,7 @@ import { IconButton, Divider, VisuallyHidden } from '@strapi/design-system';
 import { Expand } from '@strapi/icons';
 import { flushSync } from 'react-dom';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import { Editor, type Descendant, createEditor, Transforms, Element } from 'slate';
+import { Editor, type Descendant, createEditor, Transforms, Element, Node } from 'slate';
 import { withHistory } from 'slate-history';
 import { type RenderElementProps, Slate, withReact, ReactEditor, useSlate } from 'slate-react';
 import { styled, type CSSProperties } from 'styled-components';
@@ -140,7 +140,10 @@ const EditorDivider = styled(Divider)`
  * Why not use the entity id as the key, since it's unique for each locale?
  * Because it would not solve the problem when using the "fill in from other locale" feature
  */
-function useResetKey(value?: Schema.Attribute.BlocksValue): {
+function useResetKey(
+  editor: Editor,
+  value?: Schema.Attribute.BlocksValue
+): {
   key: number;
   incrementSlateUpdatesCount: () => void;
 } {
@@ -156,14 +159,31 @@ function useResetKey(value?: Schema.Attribute.BlocksValue): {
 
     // If the 2 refs are not equal, it means the value was updated from outside
     if (valueUpdatesCount.current !== slateUpdatesCount.current) {
-      // So we change the key to force a rerender of the Slate editor,
+      // Bring the 2 refs back in sync
+      slateUpdatesCount.current = valueUpdatesCount.current;
+
+      // The update may just be an echo of the editor's own content coming back through the form
+      // (e.g. the debounced sync, or a re-render while document queries settle). Remounting in
+      // that case is pointless and destructive: it wipes pending input and the DOM under the
+      // user's caret. Only force a remount when the content is actually different.
+      const externalState = value?.length ? normalizeBlocksState(editor, value) : null;
+      const editorState = normalizeBlocksState(editor, editor.children);
+      if (JSON.stringify(externalState) === JSON.stringify(editorState)) {
+        return;
+      }
+
+      // The remount reuses the same editor instance, so a selection pointing into the old
+      // content would survive it and crash slate-react's toDOMPoint when the new content is
+      // shorter. Drop the selection before swapping the children.
+      if (editor.selection) {
+        Transforms.deselect(editor);
+      }
+
+      // Change the key to force a rerender of the Slate editor,
       // which will pick up the new value through its initialValue prop
       setKey((previousKey) => previousKey + 1);
-
-      // Then bring the 2 refs back in sync
-      slateUpdatesCount.current = valueUpdatesCount.current;
     }
-  }, [value]);
+  }, [editor, value]);
 
   const incrementSlateUpdatesCount = React.useCallback(() => {
     slateUpdatesCount.current += 1;
@@ -196,10 +216,27 @@ interface BlocksEditorProps
     BlocksContentProps {
   disabled?: boolean;
   name: string;
+  /** When true, sync form state on every keystroke (Live Preview popover). */
+  livePreviewSync?: boolean;
+  /** Index of the block that was double-clicked in the live preview. When provided,
+   *  the editor positions the Slate cursor at that block on mount instead of using autoFocus. */
+  blockIndex?: number | null;
 }
 
 const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
-  ({ disabled = false, name, onChange, value, error, ...contentProps }, forwardedRef) => {
+  (
+    {
+      disabled = false,
+      name,
+      onChange,
+      value,
+      error,
+      livePreviewSync = false,
+      blockIndex,
+      ...contentProps
+    },
+    forwardedRef
+  ) => {
     const { formatMessage } = useIntl();
     const isMobile = useIsMobile();
 
@@ -239,7 +276,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
       [editor]
     );
 
-    const { key, incrementSlateUpdatesCount } = useResetKey(value);
+    const { key, incrementSlateUpdatesCount } = useResetKey(editor, value);
 
     const debounceTimeout = React.useRef<NodeJS.Timeout | null>(null);
 
@@ -249,7 +286,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
       }
       clearTimeout(debounceTimeout.current);
       debounceTimeout.current = null;
-      incrementSlateUpdatesCount();
+      // Counter was already bumped when the AST changed; only push form state here.
       // Ensure Strapi Form state updates before the next event (e.g. Save click) reads values.
       flushSync(() => {
         onChange(
@@ -257,7 +294,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
           normalizeBlocksState(editor, editor.children) as Schema.Attribute.BlocksValue
         );
       });
-    }, [editor, incrementSlateUpdatesCount, name, onChange]);
+    }, [editor, name, onChange]);
 
     const handleSlateChange = React.useCallback(
       (state: Descendant[]) => {
@@ -269,22 +306,30 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
            * state in sync with it in order to make sure that things like the "modified" state
            * isn't broken. Updating the whole state on every change is very expensive however,
            * so we debounce calls to onChange to mitigate input lag.
+           *
+           * Bump the reset-key counter immediately (not inside the debounce). Otherwise any
+           * value-prop identity change during the 300ms window — e.g. clicking the blocks
+           * toolbar — looks like an external update with stale empty form state and remounts
+           * the editor, wiping the pending input (blocks e2e flake).
            */
+          incrementSlateUpdatesCount();
+          if (livePreviewSync) {
+            onChange(name, normalizeBlocksState(editor, state) as Schema.Attribute.BlocksValue);
+            return;
+          }
+
           if (debounceTimeout.current) {
             clearTimeout(debounceTimeout.current);
           }
 
-          // Set a new debounce timeout
           debounceTimeout.current = setTimeout(() => {
-            incrementSlateUpdatesCount();
-
             // Normalize the state (empty editor becomes null)
             onChange(name, normalizeBlocksState(editor, state) as Schema.Attribute.BlocksValue);
             debounceTimeout.current = null;
           }, 300);
         }
       },
-      [editor, incrementSlateUpdatesCount, name, onChange]
+      [editor, incrementSlateUpdatesCount, livePreviewSync, name, onChange]
     );
 
     // Clean up the timeout on unmount
@@ -295,6 +340,54 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
         }
       };
     }, []);
+
+    // When opened from a live-preview double-click, position the cursor at the clicked block
+    React.useEffect(() => {
+      if (blockIndex == null) return;
+
+      const targetIndex = Math.min(blockIndex, editor.children.length - 1);
+
+      try {
+        Transforms.select(editor, Editor.start(editor, [targetIndex]));
+      } catch {
+        // Slate tree not yet ready; skip cursor positioning and scroll
+        return;
+      }
+      try {
+        ReactEditor.focus(editor);
+      } catch {
+        // non-fatal — editor DOM not yet committed
+      }
+
+      // Defer scroll past the re-render triggered by Transforms.select above.
+      // Slate's handleScrollSelectionIntoView runs as a layout effect during
+      // that re-render; our rAF fires after it, letting us override the position.
+      const raf = requestAnimationFrame(() => {
+        try {
+          const blockNode = Node.get(editor, [targetIndex]);
+          const domEl = ReactEditor.toDOMNode(editor, blockNode as Element);
+          // Walk to BlocksContent's scroll container via the Slate editor root,
+          // bypassing scrollIntoView which can target overflow:hidden ancestors.
+          const editorDomEl = domEl.closest('[data-slate-editor]');
+          const scrollContainer = editorDomEl?.parentElement as HTMLElement | null;
+          if (scrollContainer) {
+            const blockRect = domEl.getBoundingClientRect();
+            const containerRect = scrollContainer.getBoundingClientRect();
+            // 24px = BlocksContent paddingTop={6} (design-system 4px scale)
+            scrollContainer.scrollTop =
+              blockRect.top - containerRect.top + scrollContainer.scrollTop - 24;
+          } else {
+            domEl.scrollIntoView({ block: 'start' });
+          }
+        } catch {
+          // scroll errors are non-fatal; the cursor is already positioned
+        }
+      });
+
+      return () => cancelAnimationFrame(raf);
+      // `key` is included so that if useResetKey remounts the Slate editor (clearing
+      // editor.selection to null), this effect re-runs and restores the cursor position.
+    }, [blockIndex, editor, key]);
 
     // Ensure the editor is in sync after discard
     React.useEffect(() => {
@@ -349,6 +442,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
               disabled={disabled}
               onToggleExpand={handleToggleExpand}
               ariaDescriptionId={ariaDescriptionId}
+              livePreviewSync={livePreviewSync}
             >
               <BlocksToolbar />
               <EditorDivider width="100%" />

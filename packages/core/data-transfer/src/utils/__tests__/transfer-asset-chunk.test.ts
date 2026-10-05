@@ -1,5 +1,6 @@
 import {
   createTransferAssetStreamChunk,
+  createTransferAssetStreamChunkLegacy,
   decodeTransferAssetStreamData,
   decodeTransferAssetStreamItem,
   transferAssetStreamChunkByteLength,
@@ -115,6 +116,36 @@ describe('transfer-asset-chunk', () => {
   test('decodeTransferAssetStreamData: encoding base64 with legacy object falls back (no throw)', () => {
     const legacy = { type: 'Buffer' as const, data: Array.from(bytes) };
     expect(decodeTransferAssetStreamData(legacy, 'base64')).toEqual(bytes);
+  });
+
+  test('createTransferAssetStreamChunkLegacy produces legacy Buffer JSON shape', () => {
+    const item = createTransferAssetStreamChunkLegacy('asset-1', bytes);
+    expect(item).toEqual({
+      action: 'stream',
+      assetID: 'asset-1',
+      data: { type: 'Buffer', data: Array.from(bytes) },
+    });
+    // No `encoding` field — that's what pre-#23479 remotes expect.
+    expect((item as { encoding?: unknown }).encoding).toBeUndefined();
+    // Round-trips via the legacy decode path.
+    expect(
+      decodeTransferAssetStreamItem(item as Parameters<typeof decodeTransferAssetStreamItem>[0])
+    ).toEqual(bytes);
+  });
+
+  test('createTransferAssetStreamChunkLegacy survives the WS replacer untouched', () => {
+    const item = createTransferAssetStreamChunkLegacy('a', bytes);
+    const wire = JSON.parse(JSON.stringify(item, replacerForTransferWebSocket)) as {
+      data: unknown;
+    };
+    // Pre-#23479 remotes do `Buffer.from(item.data.data)` — it must still see an array of bytes.
+    expect(wire.data).toEqual({ type: 'Buffer', data: Array.from(bytes) });
+  });
+
+  test('createTransferAssetStreamChunkLegacy rejects null/undefined chunks', () => {
+    expect(() => createTransferAssetStreamChunkLegacy('a', undefined as unknown as Buffer)).toThrow(
+      TypeError
+    );
   });
 
   test('decodeTransferAssetStreamItem: encoding base64 with legacy payload', () => {

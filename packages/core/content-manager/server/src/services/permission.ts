@@ -1,4 +1,3 @@
-import { prop } from 'lodash/fp';
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
 
 import type { Core, Struct } from '@strapi/types';
@@ -20,8 +19,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   },
 
   async registerPermissions() {
-    const displayedContentTypes = getService('content-types').findDisplayedContentTypes();
-    const contentTypesUids = displayedContentTypes.map(prop('uid'));
+    const allContentTypes = getService('content-types').findAllContentTypes();
+    const allContentTypesUids = allContentTypes.map(
+      (contentType: Struct.ContentTypeSchema) => contentType?.uid
+    );
+    const contentTypesUids = allContentTypes
+      .filter(({ isDisplayed }: { isDisplayed: boolean }) => isDisplayed)
+      .map((contentType: Struct.ContentTypeSchema) => contentType?.uid);
 
     const actions = [
       {
@@ -39,7 +43,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         displayName: 'Read',
         uid: 'explorer.read',
         pluginName: 'content-manager',
-        subjects: contentTypesUids,
+        subjects: allContentTypesUids,
         options: {
           applyToProperties: ['fields'],
         },

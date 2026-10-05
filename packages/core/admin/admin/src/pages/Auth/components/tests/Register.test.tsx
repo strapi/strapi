@@ -1,6 +1,8 @@
 import { render } from '@tests/utils';
 
-import { Register } from '../Register';
+import { Register, formatValidationMessage } from '../Register';
+
+import type { IntlShape } from 'react-intl';
 
 const FIELD_LABELS = ['Firstname', 'Lastname', 'Email', 'Password', 'Confirm Password'];
 
@@ -51,6 +53,59 @@ describe('Register', () => {
 
     FIELD_LABELS.forEach((label) => {
       expect(getByLabelText(new RegExp(`^${label}`, 'i'))).toBeEnabled();
+    });
+  });
+
+  describe('formatValidationMessage', () => {
+    /**
+     * `components.Input.error.validation.minLength` is translated as
+     * "The value is too short (min: {min})." — dropping the descriptor's `values` made react-intl
+     * render that raw pattern under the password field. See strapi/strapi#19030.
+     */
+    const MIN_LENGTH_DESCRIPTOR = {
+      id: 'components.Input.error.validation.minLength',
+      defaultMessage: 'Password must be at least 8 characters',
+      values: { min: 8 },
+    };
+
+    const formatMessage = ((
+      { id, defaultMessage }: { id: string; defaultMessage: string },
+      values?: Record<string, unknown>
+    ) => {
+      const pattern =
+        id === MIN_LENGTH_DESCRIPTOR.id ? 'The value is too short (min: {min}).' : defaultMessage;
+
+      return pattern.replace(/\{(\w+)\}/g, (match, key) =>
+        values && key in values ? String(values[key]) : match
+      );
+    }) as IntlShape['formatMessage'];
+
+    it('interpolates the values carried by a descriptor', () => {
+      expect(formatValidationMessage(MIN_LENGTH_DESCRIPTOR, formatMessage)).toBe(
+        'The value is too short (min: 8).'
+      );
+    });
+
+    it('interpolates the values of a wrapped descriptor', () => {
+      expect(formatValidationMessage({ message: MIN_LENGTH_DESCRIPTOR }, formatMessage)).toBe(
+        'The value is too short (min: 8).'
+      );
+    });
+
+    it('interpolates the values of the first descriptor of an errors array', () => {
+      expect(formatValidationMessage({ errors: [MIN_LENGTH_DESCRIPTOR] }, formatMessage)).toBe(
+        'The value is too short (min: 8).'
+      );
+    });
+
+    it('passes plain strings through untouched', () => {
+      expect(formatValidationMessage('Passwords must match', formatMessage)).toBe(
+        'Passwords must match'
+      );
+    });
+
+    it('returns an empty string for a missing message', () => {
+      expect(formatValidationMessage(undefined, formatMessage)).toBe('');
     });
   });
 });

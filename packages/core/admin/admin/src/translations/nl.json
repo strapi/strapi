@@ -143,7 +143,7 @@
   "Settings.application.description": "Beheerders dashboard's globale informatie",
   "Settings.application.edition-title": "huidige editie",
   "Settings.application.ee-or-ce": "{communityEdition, select, true {Community Edition} other {Enterprise Edition}}",
-  "Settings.application.ee.admin-seats.add-seats": "Licenties beheren",
+  "Settings.application.ee.admin-seats.add-seats": "Abonnement beheren",
   "Settings.application.ee.admin-seats.at-limit-tooltip": "Limiet bereikt: voeg licenties toe om meer gebruikers uit te nodigen",
   "Settings.application.ee.admin-seats.count": "<text>{enforcementUserCount}</text>/{permittedSeats}",
   "Settings.application.ee.admin-seats.support": "Neem contact op met sales",

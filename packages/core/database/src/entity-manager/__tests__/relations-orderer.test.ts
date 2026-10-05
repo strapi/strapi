@@ -37,7 +37,7 @@ describe('Given I have some relations in the database', () => {
       orderer.connect([{ id: 4, position: { start: true } }]);
 
       expect(orderer.get()).toMatchObject([
-        { id: 4, order: 0.5 },
+        { id: 4, order: 3.5 },
         { id: 2, order: 4 },
         { id: 3, order: 10 },
       ]);
@@ -138,6 +138,134 @@ describe('Given I have some relations in the database', () => {
         { id: 4, order: 0.5 },
         { id: 3, order: 1 },
         { id: 5, order: 1.5 },
+      ]);
+    });
+  });
+
+  describe('When the list starts at order 0', () => {
+    test('Then order 0 is preserved and a start connect is placed before it', () => {
+      const orderer = relationsOrderer(
+        [
+          { id: 1, order: 0 },
+          { id: 2, order: 5 },
+        ],
+        'id',
+        'order'
+      );
+
+      orderer.connect([{ id: 3, position: { start: true } }]);
+
+      expect(orderer.get()).toMatchObject([
+        { id: 3, order: -0.5 },
+        { id: 1, order: 0 },
+        { id: 2, order: 5 },
+      ]);
+    });
+  });
+
+  describe('When I reorder an item to the top of a list whose minimum order is fractional', () => {
+    test('Then it is persisted with an order strictly below the current minimum', () => {
+      const orderer = relationsOrderer(
+        [
+          { id: 1, order: 0.5 },
+          { id: 2, order: 2 },
+        ],
+        'id',
+        'order'
+      );
+
+      orderer.connect([{ id: 3, position: { start: true } }]);
+
+      expect(orderer.get()).toMatchObject([
+        { id: 3, order: 0 },
+        { id: 1, order: 0.5 },
+        { id: 2, order: 2 },
+      ]);
+      expect(orderer.getOrderMap()[3]).toBeLessThan(0.5);
+    });
+  });
+
+  describe('When I connect before a relation whose neighbours are not loaded', () => {
+    test('Then it is placed immediately before it', () => {
+      const orderer = relationsOrderer(
+        [
+          { id: 1, order: 1 },
+          { id: 9, order: 9 },
+          { id: 10, order: 10 },
+        ],
+        'id',
+        'order'
+      );
+
+      orderer.connect([{ id: 4, position: { before: 9 } }]);
+
+      const orderMap = orderer.getOrderMap();
+      expect(orderMap[4]).toBeGreaterThan(8);
+      expect(orderMap[4]).toBeLessThan(9);
+    });
+  });
+
+  describe('When I connect after a relation whose neighbours are not loaded', () => {
+    test('Then it is placed immediately after it', () => {
+      const orderer = relationsOrderer(
+        [
+          { id: 1, order: 1 },
+          { id: 5, order: 5 },
+          { id: 10, order: 10 },
+        ],
+        'id',
+        'order'
+      );
+
+      orderer.connect([{ id: 4, position: { after: 5 } }]);
+
+      const orderMap = orderer.getOrderMap();
+      expect(orderMap[4]).toBeGreaterThan(5);
+      expect(orderMap[4]).toBeLessThan(6);
+    });
+  });
+
+  describe('When I connect several relations before the same anchor', () => {
+    test('Then they are all placed immediately before it, in payload order', () => {
+      const orderer = relationsOrderer(
+        [
+          { id: 1, order: 1 },
+          { id: 5, order: 5 },
+          { id: 10, order: 10 },
+        ],
+        'id',
+        'order'
+      );
+
+      orderer.connect([
+        { id: 6, position: { before: 5 } },
+        { id: 7, position: { before: 5 } },
+      ]);
+
+      const orderMap = orderer.getOrderMap();
+      expect(orderMap[6]).toBeGreaterThan(4);
+      expect(orderMap[7]).toBeLessThan(5);
+      expect(orderMap[6]).toBeLessThan(orderMap[7]);
+    });
+  });
+
+  describe('When you connect a relation after one whose neighbour shares its order', () => {
+    test('Then it is placed strictly after the target', () => {
+      const orderer = relationsOrderer(
+        [
+          { id: 2, order: null },
+          { id: 3, order: null },
+        ],
+        'id',
+        'order'
+      );
+
+      orderer.connect([{ id: 4, position: { after: 2 } }]);
+
+      expect(orderer.get()).toMatchObject([
+        { id: 2, order: 1 },
+        { id: 4, order: 1.5 },
+        { id: 3, order: 1 },
       ]);
     });
   });

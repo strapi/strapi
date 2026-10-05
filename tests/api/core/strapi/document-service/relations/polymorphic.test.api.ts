@@ -1,8 +1,6 @@
 import type { Core } from '@strapi/types';
 
 import { createTestSetup, destroyTestSetup } from '../../../../utils/builder-helper';
-import baseResources from '../resources/index';
-
 const POLY_SOURCE_UID = 'api::poly-source.poly-source' as const;
 const POLY_TARGET_UID = 'api::poly-target.poly-target' as const;
 const MORPH_BOX_UID = 'api::morph-box.morph-box' as const;
@@ -76,20 +74,16 @@ const morphBoxContentType = {
 };
 
 const resources = {
-  locales: baseResources.locales,
   schemas: {
-    components: baseResources.schemas.components,
+    components: {},
     'content-types': {
-      ...baseResources.schemas['content-types'],
       [POLY_SOURCE_UID]: polySourceContentType,
       [POLY_TARGET_UID]: polyTargetContentType,
       [MORPH_BOX_UID]: morphBoxContentType,
     },
   },
   fixtures: {
-    ...baseResources.fixtures,
     'content-types': {
-      ...baseResources.fixtures['content-types'],
       [POLY_SOURCE_UID]: [],
       [POLY_TARGET_UID]: [],
       [MORPH_BOX_UID]: [],

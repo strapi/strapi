@@ -4,7 +4,7 @@ import { Box, Button, Flex, LinkButton, Modal, Typography } from '@strapi/design
 import { Cross } from '@strapi/icons';
 import { isAfter, subDays } from 'date-fns';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useLicenseLimits } from '../../../../../ee/admin/src/hooks/useLicenseLimits';
 import { useScopedPersistentState } from '../../../hooks/usePersistentState';
@@ -148,7 +148,7 @@ export const FreeTrialEndedModal = () => {
                 </ul>
               </Box>
               <Flex marginTop={4} gap={2}>
-                <LinkButton href="https://strapi.chargebeeportal.com/" target="_blank">
+                <LinkButton href="https://billing.strapi.io/" target="_blank">
                   {formatMessage({
                     id: 'app.components.FreeTrialEndedModal.button.upgrade',
                     defaultMessage: 'Stay on the Growth plan',

@@ -23,8 +23,8 @@ jest.mock('../../metrics/metrics', () => ({
   classifyMcpRequestFailure: jest.requireActual('../../metrics/metrics').classifyMcpRequestFailure,
 }));
 
-jest.mock('@modelcontextprotocol/sdk/server/streamableHttp.js', () => ({
-  StreamableHTTPServerTransport: jest.fn(),
+jest.mock('@modelcontextprotocol/node', () => ({
+  NodeStreamableHTTPServerTransport: jest.fn(),
 }));
 
 describe('handlePost', () => {
@@ -52,16 +52,18 @@ describe('handlePost', () => {
     mockConfig = new McpConfiguration(mockStrapi as Core.Strapi);
     mockAuthenticationStrategy = {
       authenticate: jest.fn().mockResolvedValue({
+        // Distinct ids so assertions can tell the token owner (user) apart
+        // from the token itself (credentials).
         authenticated: true,
-        credentials: { id: 1 },
-        user: { id: 1 },
+        credentials: { id: 7 },
+        user: { id: 42 },
         ability: { can: jest.fn(() => true) },
       }),
     };
   });
 
   const makeCtx = (req: IncomingMessage, res: ServerResponse, body?: unknown) =>
-    ({ req, res, request: { body }, respond: true }) as any;
+    ({ req, res, request: { body }, respond: true, state: {} }) as any;
 
   const makeRes = () => {
     const writeHeadSpy = jest.fn();
@@ -91,10 +93,8 @@ describe('handlePost', () => {
       capabilityDefinitions: {} as any,
     };
 
-    const { StreamableHTTPServerTransport } = jest.requireMock(
-      '@modelcontextprotocol/sdk/server/streamableHttp.js'
-    );
-    StreamableHTTPServerTransport.mockImplementation(() => ({
+    const { NodeStreamableHTTPServerTransport } = jest.requireMock('@modelcontextprotocol/node');
+    NodeStreamableHTTPServerTransport.mockImplementation(() => ({
       handleRequest: jest.fn().mockResolvedValue(undefined),
     }));
 
@@ -205,10 +205,8 @@ describe('handlePost', () => {
       registries: { tools: {}, prompts: {}, resources: {} },
     });
 
-    const { StreamableHTTPServerTransport } = jest.requireMock(
-      '@modelcontextprotocol/sdk/server/streamableHttp.js'
-    );
-    StreamableHTTPServerTransport.mockImplementation(() => mockTransport);
+    const { NodeStreamableHTTPServerTransport } = jest.requireMock('@modelcontextprotocol/node');
+    NodeStreamableHTTPServerTransport.mockImplementation(() => mockTransport);
 
     const capabilityDefinitions = {
       tools: {} as any,
@@ -238,13 +236,45 @@ describe('handlePost', () => {
       definitions: capabilityDefinitions,
       isDevMode: mockConfig.isDevMode(),
       ability: expect.objectContaining({ can: expect.any(Function) }),
-      user: { id: 1 },
+      user: { id: 42 },
     });
-    expect(StreamableHTTPServerTransport).toHaveBeenCalledWith({ sessionIdGenerator: undefined });
+    expect(NodeStreamableHTTPServerTransport).toHaveBeenCalledWith({
+      sessionIdGenerator: undefined,
+    });
     expect(mockMcpServer.connect).toHaveBeenCalledWith(mockTransport);
     expect(mockTransport.handleRequest).toHaveBeenCalledWith(req, res, requestBody);
     expect(sendDidUseMcpServer).toHaveBeenCalledWith(mockStrapi);
     expect(mockMcpServer.close).toHaveBeenCalledTimes(1);
+  });
+
+  test('should expose the authenticated user and mcp audit source on ctx.state', async () => {
+    const deps: McpHandlerDependencies = {
+      strapi: mockStrapi as Core.Strapi,
+      authenticationStrategy: mockAuthenticationStrategy,
+      config: mockConfig,
+      createServerWithRegistries: jest.fn().mockReturnValue({
+        mcpServer: {
+          connect: jest.fn().mockResolvedValue(undefined),
+          close: jest.fn().mockResolvedValue(undefined),
+        },
+        registries: {},
+      }),
+      capabilityDefinitions: {} as any,
+    };
+
+    const { NodeStreamableHTTPServerTransport } = jest.requireMock('@modelcontextprotocol/node');
+    NodeStreamableHTTPServerTransport.mockImplementation(() => ({
+      handleRequest: jest.fn().mockResolvedValue(undefined),
+    }));
+
+    const handler = createPostHandler(deps);
+    const ctx = makeCtx(makeReq(), { headersSent: false } as unknown as ServerResponse);
+
+    await handler(ctx, () => Promise.resolve());
+
+    // user (id 42), not credentials (id 7) — the actor is the token owner.
+    expect(ctx.state.user).toEqual({ id: 42 });
+    expect(ctx.state.auditSource).toBe('mcp');
   });
 
   test('should call withTimeout with connectTimeoutMs for connect and requestTimeoutMs for handleRequest', async () => {
@@ -259,10 +289,8 @@ describe('handlePost', () => {
       registries: {},
     });
 
-    const { StreamableHTTPServerTransport } = jest.requireMock(
-      '@modelcontextprotocol/sdk/server/streamableHttp.js'
-    );
-    StreamableHTTPServerTransport.mockImplementation(() => mockTransport);
+    const { NodeStreamableHTTPServerTransport } = jest.requireMock('@modelcontextprotocol/node');
+    NodeStreamableHTTPServerTransport.mockImplementation(() => mockTransport);
 
     const deps: McpHandlerDependencies = {
       strapi: mockStrapi as Core.Strapi,
@@ -304,10 +332,8 @@ describe('handlePost', () => {
       registries: {},
     });
 
-    const { StreamableHTTPServerTransport } = jest.requireMock(
-      '@modelcontextprotocol/sdk/server/streamableHttp.js'
-    );
-    StreamableHTTPServerTransport.mockImplementation(() => mockTransport);
+    const { NodeStreamableHTTPServerTransport } = jest.requireMock('@modelcontextprotocol/node');
+    NodeStreamableHTTPServerTransport.mockImplementation(() => mockTransport);
 
     const deps: McpHandlerDependencies = {
       strapi: mockStrapi as Core.Strapi,
@@ -342,10 +368,8 @@ describe('handlePost', () => {
         registries: {},
       });
 
-      const { StreamableHTTPServerTransport } = jest.requireMock(
-        '@modelcontextprotocol/sdk/server/streamableHttp.js'
-      );
-      StreamableHTTPServerTransport.mockImplementation(() => mockTransport);
+      const { NodeStreamableHTTPServerTransport } = jest.requireMock('@modelcontextprotocol/node');
+      NodeStreamableHTTPServerTransport.mockImplementation(() => mockTransport);
 
       const deps: McpHandlerDependencies = {
         strapi: mockStrapi as Core.Strapi,
@@ -381,10 +405,8 @@ describe('handlePost', () => {
         registries: {},
       });
 
-      const { StreamableHTTPServerTransport } = jest.requireMock(
-        '@modelcontextprotocol/sdk/server/streamableHttp.js'
-      );
-      StreamableHTTPServerTransport.mockImplementation(() => ({ handleRequest: jest.fn() }));
+      const { NodeStreamableHTTPServerTransport } = jest.requireMock('@modelcontextprotocol/node');
+      NodeStreamableHTTPServerTransport.mockImplementation(() => ({ handleRequest: jest.fn() }));
 
       const deps: McpHandlerDependencies = {
         strapi: mockStrapi as Core.Strapi,
@@ -420,10 +442,8 @@ describe('handlePost', () => {
         registries: {},
       });
 
-      const { StreamableHTTPServerTransport } = jest.requireMock(
-        '@modelcontextprotocol/sdk/server/streamableHttp.js'
-      );
-      StreamableHTTPServerTransport.mockImplementation(() => ({ handleRequest: jest.fn() }));
+      const { NodeStreamableHTTPServerTransport } = jest.requireMock('@modelcontextprotocol/node');
+      NodeStreamableHTTPServerTransport.mockImplementation(() => ({ handleRequest: jest.fn() }));
 
       const deps: McpHandlerDependencies = {
         strapi: mockStrapi as Core.Strapi,
@@ -458,10 +478,8 @@ describe('handlePost', () => {
         registries: {},
       });
 
-      const { StreamableHTTPServerTransport } = jest.requireMock(
-        '@modelcontextprotocol/sdk/server/streamableHttp.js'
-      );
-      StreamableHTTPServerTransport.mockImplementation(() => ({ handleRequest: jest.fn() }));
+      const { NodeStreamableHTTPServerTransport } = jest.requireMock('@modelcontextprotocol/node');
+      NodeStreamableHTTPServerTransport.mockImplementation(() => ({ handleRequest: jest.fn() }));
 
       const deps: McpHandlerDependencies = {
         strapi: mockStrapi as Core.Strapi,
@@ -495,10 +513,8 @@ describe('handlePost', () => {
         registries: {},
       });
 
-      const { StreamableHTTPServerTransport } = jest.requireMock(
-        '@modelcontextprotocol/sdk/server/streamableHttp.js'
-      );
-      StreamableHTTPServerTransport.mockImplementation(() => ({ handleRequest: jest.fn() }));
+      const { NodeStreamableHTTPServerTransport } = jest.requireMock('@modelcontextprotocol/node');
+      NodeStreamableHTTPServerTransport.mockImplementation(() => ({ handleRequest: jest.fn() }));
 
       const deps: McpHandlerDependencies = {
         strapi: mockStrapi as Core.Strapi,

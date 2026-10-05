@@ -78,7 +78,7 @@ const validateCheckUIDAvailabilityInput = (body: {
     `regex` in contentType.attributes[body.field] &&
     (contentType.attributes[body.field] as Schema.Attribute.UID).regex
   ) {
-    regex = (contentType?.attributes[body.field] as Schema.Attribute.UID).regex;
+    regex = (contentType.attributes[body.field] as Schema.Attribute.UID).regex;
   }
 
   const schema = createCheckUIDAvailabilityInputSchema(regex);

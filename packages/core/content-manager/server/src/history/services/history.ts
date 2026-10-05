@@ -1,6 +1,6 @@
 import type { Core, Data, Modules, Schema } from '@strapi/types';
 import { errors, traverseEntity } from '@strapi/utils';
-import { omit } from 'lodash/fp';
+import { omit } from 'lodash';
 
 import { FIELDS_TO_IGNORE, HISTORY_VERSION_UID } from '../constants';
 import type { HistoryVersions } from '../../../../shared/contracts';
@@ -43,9 +43,12 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
         locale = params.query.locale || defaultLocale;
       }
 
-      const [{ results, pagination }, localeDictionary] = await Promise.all([
+      // NOTE: We get the IDs first because sorting full rows runs MySQL/MariaDB out of sort memory
+      // See: https://github.com/strapi/strapi/issues/27393
+      const [{ results: versionRows, pagination }, localeDictionary] = await Promise.all([
         query.findPage({
           ...params.query,
+          select: ['id'],
           where: {
             $and: [
               { contentType: params.query.contentType },
@@ -53,11 +56,20 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
               ...(locale ? [{ locale }] : []),
             ],
           },
-          populate: ['createdBy'],
           orderBy: [{ createdAt: 'desc' }],
         }),
         serviceUtils.getLocaleDictionary(),
       ]);
+
+      const ids = versionRows.map((version) => version.id);
+      const versions = ids.length
+        ? await query.findMany({
+            where: { id: { $in: ids } },
+            populate: ['createdBy'],
+          })
+        : [];
+      const versionsById = new Map(versions.map((version) => [version.id, version]));
+      const results = ids.map((id) => versionsById.get(id)).filter(Boolean);
 
       const populateEntry = async (entry: HistoryVersionQueryResult) => {
         return traverseEntity(
@@ -187,7 +199,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       // Remove the schema attributes history should ignore
       const schema = structuredClone(version.schema);
-      schema.attributes = omit(FIELDS_TO_IGNORE, contentTypeSchemaAttributes);
+      schema.attributes = omit(contentTypeSchemaAttributes, FIELDS_TO_IGNORE);
 
       const dataWithoutMissingRelations = await traverseEntity(
         async (options, utils) => {
@@ -243,7 +255,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
         dataWithoutAddedAttributes
       );
 
-      const data = omit(['id', ...Object.keys(schemaDiff.removed)], dataWithoutMissingRelations);
+      const data = omit(dataWithoutMissingRelations, ['id', ...Object.keys(schemaDiff.removed)]);
       const restoredDocument = await strapi.documents(version.contentType).update({
         documentId: version.relatedDocumentId,
         locale: version.locale,

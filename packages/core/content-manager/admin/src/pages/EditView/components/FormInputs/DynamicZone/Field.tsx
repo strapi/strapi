@@ -8,7 +8,7 @@ import {
   useNotification,
 } from '@strapi/admin/strapi-admin';
 import { Box, Flex, VisuallyHidden } from '@strapi/design-system';
-import pipe from 'lodash/fp/pipe';
+import flow from 'lodash/flow';
 import { useIntl } from 'react-intl';
 
 import { COLLECTION_TYPES } from '../../../../../constants/collections';
@@ -81,7 +81,10 @@ const DynamicZone = ({
       __temp_key__: string;
     };
 
-  const { value = [], error } = useField<Array<DzWithTempKey>>(name);
+  const { value: rawValue, error } = useField<Array<DzWithTempKey>>(name);
+  // `value` can be `null` (for example after closing a relation modal). Match
+  // RepeatableComponent: only accept arrays, otherwise treat as empty. (#26815)
+  const value = React.useMemo(() => (Array.isArray(rawValue) ? rawValue : []), [rawValue]);
 
   /**
    * Track the previous value array to detect when a new component is added.
@@ -114,9 +117,20 @@ const DynamicZone = ({
     return attribute.components.reduce<
       NonNullable<DynamicComponentProps['dynamicComponentsByCategory']>
     >((acc, componentUid) => {
-      const { category, info } = components[componentUid] ?? { info: {} };
+      const componentSchema = components[componentUid];
 
-      const component = { uid: componentUid, displayName: info.displayName, icon: info.icon };
+      if (!componentSchema) {
+        return acc;
+      }
+
+      const { category, info } = componentSchema;
+
+      const component = {
+        uid: componentUid,
+        displayName: info.displayName,
+        icon: info.icon,
+        preview: info.preview,
+      };
 
       if (!acc[category]) {
         acc[category] = [];
@@ -136,11 +150,16 @@ const DynamicZone = ({
 
   const handleAddComponent = React.useCallback(
     (uid: string, position?: number) => {
+      const schema = components[uid];
+
+      if (!schema) {
+        return;
+      }
+
       setAddComponentIsOpen(false);
 
-      const schema = components[uid];
       const form = createDefaultForm(schema, components);
-      const transformations = pipe(transformDocument(schema, components), (data) => ({
+      const transformations = flow(transformDocument(schema, components), (data) => ({
         ...data,
         __component: uid,
       }));

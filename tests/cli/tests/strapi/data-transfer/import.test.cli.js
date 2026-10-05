@@ -8,6 +8,8 @@ const utils = require('../../../../utils');
 // eslint-disable-next-line
 const { resetDatabaseAndImportDataFromPathProgrammatic } = require('../../../../utils/dts-import');
 
+const UPLOAD_CONTENT_TYPES = 'plugin::upload.file,plugin::upload.folder';
+
 describe('import', () => {
   let appPath;
   let expectedDbState;
@@ -142,11 +144,192 @@ describe('import', () => {
     });
   });
 
+  it('should import export without media (issue #25008) and preserve existing upload records', async () => {
+    const excludedFilename = 'output-no-media-import';
+    const exportResult = spawnSync(
+      'npm',
+      [
+        'run',
+        '-s',
+        'strapi',
+        '--',
+        'export',
+        '--no-encrypt',
+        '--no-compress',
+        '-f',
+        excludedFilename,
+        '--exclude',
+        'files',
+        '--exclude-content-types',
+        UPLOAD_CONTENT_TYPES,
+      ],
+      {
+        cwd: appPath,
+        encoding: 'utf8',
+        maxBuffer: 1024 * 1024,
+      }
+    );
+    expect(exportResult.status).toBe(0);
+
+    const importTar = path.join(appPath, `${excludedFilename}.tar`);
+    const result = spawnSync(
+      'npm',
+      [
+        'run',
+        '-s',
+        'strapi',
+        '--',
+        'import',
+        '-f',
+        importTar,
+        '--force',
+        '--exclude',
+        'files',
+        '--exclude-content-types',
+        UPLOAD_CONTENT_TYPES,
+      ],
+      {
+        cwd: appPath,
+        encoding: 'utf8',
+        maxBuffer: 1024 * 1024,
+      }
+    );
+
+    expect(result.status).toBe(0);
+    const stateAfterImport = utils.getDbState(appPath);
+    if (stateAfterImport.error) {
+      throw new Error(`Failed to read DB after import: ${stateAfterImport.error}`);
+    }
+
+    expect(stateAfterImport.articles).toBe(expectedDbState.articles);
+    expect(stateAfterImport.categories).toBe(expectedDbState.categories);
+    expect(stateAfterImport.uploadFiles).toBe(expectedDbState.uploadFiles);
+    expect(stateAfterImport.uploadFolders).toBe(expectedDbState.uploadFolders);
+    expect(stateAfterImport.uploadFiles).toBeGreaterThan(0);
+  });
+
+  it('should import with --only-content-types and preserve other content types', async () => {
+    await resetDatabaseAndImportDataFromPathProgrammatic(appPath, 'with-admin');
+    const stateBeforeImport = utils.getDbState(appPath);
+    if (stateBeforeImport.error) {
+      throw new Error(`Failed to read DB before import: ${stateBeforeImport.error}`);
+    }
+    expect(stateBeforeImport.articles).toBeGreaterThan(0);
+    expect(stateBeforeImport.uploadFiles).toBeGreaterThan(0);
+
+    const onlyArticlesFilename = 'output-only-articles-import-scope';
+    const exportResult = spawnSync(
+      'npm',
+      [
+        'run',
+        '-s',
+        'strapi',
+        '--',
+        'export',
+        '--no-encrypt',
+        '--no-compress',
+        '-f',
+        onlyArticlesFilename,
+        '--only-content-types',
+        'api::article.article',
+      ],
+      {
+        cwd: appPath,
+        encoding: 'utf8',
+        maxBuffer: 1024 * 1024,
+      }
+    );
+    expect(exportResult.status).toBe(0);
+
+    const importTar = path.join(appPath, `${onlyArticlesFilename}.tar`);
+    const result = spawnSync(
+      'npm',
+      [
+        'run',
+        '-s',
+        'strapi',
+        '--',
+        'import',
+        '-f',
+        importTar,
+        '--force',
+        '--only-content-types',
+        'api::article.article',
+      ],
+      {
+        cwd: appPath,
+        encoding: 'utf8',
+        maxBuffer: 1024 * 1024,
+      }
+    );
+
+    expect(result.status).toBe(0);
+    const stateAfterImport = utils.getDbState(appPath);
+    if (stateAfterImport.error) {
+      throw new Error(`Failed to read DB after import: ${stateAfterImport.error}`);
+    }
+
+    expect(stateAfterImport.articles).toBe(stateBeforeImport.articles);
+    expect(stateAfterImport.categories).toBe(stateBeforeImport.categories);
+    expect(stateAfterImport.uploadFiles).toBe(stateBeforeImport.uploadFiles);
+    expect(stateAfterImport.uploadFolders).toBe(stateBeforeImport.uploadFolders);
+    expect(stateAfterImport.categoryIds).toEqual(stateBeforeImport.categoryIds);
+  });
+
   test.todo('import from .tar.gz (compressed) and verify DB state');
   test.todo('import from .tar.gz.enc (encrypted) with correct key and verify DB state');
   test.todo('import with wrong decryption key fails with clear error');
   test.todo('import with --only filter and verify only those types in DB');
-  test.todo('import with --exclude filter and verify excluded types not in DB');
+  it('should preserve media library DB records when importing export with --exclude files', async () => {
+    const excludedFilename = 'output-no-files';
+    const exportResult = spawnSync(
+      'npm',
+      [
+        'run',
+        '-s',
+        'strapi',
+        '--',
+        'export',
+        '--no-encrypt',
+        '--no-compress',
+        '-f',
+        excludedFilename,
+        '--exclude',
+        'files',
+      ],
+      {
+        cwd: appPath,
+        encoding: 'utf8',
+        maxBuffer: 1024 * 1024,
+      }
+    );
+    expect(exportResult.status).toBe(0);
+
+    const importTar = path.join(appPath, `${excludedFilename}.tar`);
+    const result = spawnSync(
+      'npm',
+      ['run', '-s', 'strapi', '--', 'import', '-f', importTar, '--force', '--exclude', 'files'],
+      {
+        cwd: appPath,
+        encoding: 'utf8',
+        maxBuffer: 1024 * 1024,
+      }
+    );
+
+    expect(result.status).toBe(0);
+    const stateAfterImport = utils.getDbState(appPath);
+    if (stateAfterImport.error) {
+      throw new Error(`Failed to read DB after import: ${stateAfterImport.error}`);
+    }
+
+    expect(stateAfterImport.articles).toBe(expectedDbState.articles);
+    expect(stateAfterImport.categories).toBe(expectedDbState.categories);
+    expect(stateAfterImport.uploadFiles).toBe(expectedDbState.uploadFiles);
+    expect(stateAfterImport.uploadFiles).toBeGreaterThan(0);
+    if (expectedDbState.uploadFolders > 0) {
+      expect(stateAfterImport.uploadFolders).toBe(expectedDbState.uploadFolders);
+    }
+  });
   test.todo(
     'import when schema differs (e.g. version mismatch) and verify diff handling / --force'
   );

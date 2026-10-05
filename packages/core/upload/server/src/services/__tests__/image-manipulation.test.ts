@@ -2,7 +2,7 @@ import path from 'path';
 import fs from 'fs';
 import fse from 'fs-extra';
 import _ from 'lodash';
-import sharp from 'sharp';
+import sharp, { type Metadata } from 'sharp';
 import imageManipulation from '../image-manipulation';
 
 import type { UploadableFile } from '../../types';
@@ -41,7 +41,7 @@ const staticPngPath = path.join(__dirname, 'upload', 'image.png');
 const tmpDir = path.join(__dirname, 'tmp-anim');
 
 const metadataFromUploadableStream = (file: UploadableFile, animated: boolean) =>
-  new Promise<sharp.Metadata>((resolve, reject) => {
+  new Promise<Metadata>((resolve, reject) => {
     const pipeline = animated ? sharp({ animated: true }) : sharp();
     pipeline.metadata().then(resolve).catch(reject);
     file.getStream().pipe(pipeline);

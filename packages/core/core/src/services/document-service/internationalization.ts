@@ -1,6 +1,6 @@
 import type { Struct, Modules, Schema } from '@strapi/types';
 import { errors } from '@strapi/utils';
-import { curry, assoc } from 'lodash/fp';
+import { assign, curry } from 'lodash';
 
 type Transform = (
   contentType: Struct.SingleTypeSchema | Struct.CollectionTypeSchema,
@@ -12,17 +12,17 @@ type AsyncTransform = (
   params: Modules.Documents.Params.All
 ) => Promise<Modules.Documents.Params.All>;
 
-const getDefaultLocale = async (): Promise<string> => {
-  return strapi.plugin('i18n').service('locales').getDefaultLocale();
+const getDefaultLocale = async (): Promise<string | null> => {
+  return strapi.localization.getDefaultLocale();
 };
 
 const defaultLocale: AsyncTransform = async (contentType, params) => {
-  if (!strapi.plugin('i18n').service('content-types').isLocalizedContentType(contentType)) {
+  if (!strapi.localization.isLocalizedContentType(contentType)) {
     return params;
   }
 
   if (!params.locale) {
-    return assoc('locale', await getDefaultLocale(), params);
+    return assign({}, params, { locale: await getDefaultLocale() });
   }
 
   return params;
@@ -32,10 +32,7 @@ const defaultLocale: AsyncTransform = async (contentType, params) => {
  * Add locale lookup query to the params
  */
 const localeToLookup: Transform = (contentType, params) => {
-  if (
-    !params.locale ||
-    !strapi.plugin('i18n').service('content-types').isLocalizedContentType(contentType)
-  ) {
+  if (!params.locale || !strapi.localization.isLocalizedContentType(contentType)) {
     return params;
   }
 
@@ -48,14 +45,14 @@ const localeToLookup: Transform = (contentType, params) => {
     );
   }
 
-  return assoc(['lookup', 'locale'], params.locale, params);
+  return { ...params, lookup: { ...params.lookup, locale: params.locale } };
 };
 
 /**
  * Add locale lookup query to the params
  */
 const multiLocaleToLookup: Transform = (contentType, params) => {
-  if (!strapi.plugin('i18n').service('content-types').isLocalizedContentType(contentType)) {
+  if (!strapi.localization.isLocalizedContentType(contentType)) {
     return params;
   }
 
@@ -64,7 +61,7 @@ const multiLocaleToLookup: Transform = (contentType, params) => {
       return params;
     }
 
-    return assoc(['lookup', 'locale'], params.locale, params);
+    return { ...params, lookup: { ...params.lookup, locale: params.locale } };
   }
 
   return params;
@@ -74,14 +71,14 @@ const multiLocaleToLookup: Transform = (contentType, params) => {
  * Translate locale status parameter into the data that will be saved
  */
 const localeToData: Transform = (contentType, params) => {
-  if (!strapi.plugin('i18n').service('content-types').isLocalizedContentType(contentType)) {
+  if (!strapi.localization.isLocalizedContentType(contentType)) {
     return params;
   }
 
   if (params.locale) {
     const isValidLocale = typeof params.locale === 'string' && params.locale !== '*';
     if (isValidLocale) {
-      return assoc(['data', 'locale'], params.locale, params);
+      return { ...params, data: { ...params.data, locale: params.locale } };
     }
 
     throw new errors.ValidationError(
@@ -99,7 +96,7 @@ const localeToData: Transform = (contentType, params) => {
 const normalizeMediaIds = (
   schema: Schema.ContentType | Schema.Component,
   data: Record<string, any>
-) => {
+): Record<string, any> => {
   if (!schema?.attributes || !data || typeof data !== 'object') {
     return data;
   }
@@ -160,14 +157,12 @@ const copyNonLocalizedFields = async (
   documentId: string,
   dataToCreate: Record<string, any>
 ): Promise<Record<string, any>> => {
-  // Check if this is a localized content type and if i18n plugin is available
-  const i18nService = strapi.plugin('i18n')?.service('content-types');
-  if (!i18nService?.isLocalizedContentType(contentType)) {
+  if (!strapi.localization.isLocalizedContentType(contentType)) {
     return dataToCreate;
   }
 
   // Find an existing entry for the same document to copy unlocalized fields from
-  const attributesToPopulate = i18nService.getNestedPopulateOfNonLocalizedAttributes(
+  const attributesToPopulate = strapi.localization.getNestedPopulateOfNonLocalizedAttributes(
     contentType.uid
   );
   const existingEntry = await strapi.db.query(contentType.uid).findOne({
@@ -180,7 +175,7 @@ const copyNonLocalizedFields = async (
   // If an entry exists in another locale, copy its non-localized fields
   if (existingEntry) {
     const mergedData = { ...dataToCreate };
-    i18nService.fillNonLocalizedAttributes(mergedData, existingEntry, {
+    strapi.localization.fillNonLocalizedAttributes(mergedData, existingEntry, {
       model: contentType.uid,
     });
     return normalizeMediaIds(contentType, mergedData);

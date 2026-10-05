@@ -1,4 +1,4 @@
-import { curry, isObject, isEmpty, isArray, isNil, cloneDeep, omit } from 'lodash/fp';
+import { curry, isObject, isEmpty, cloneDeep, omit } from 'lodash';
 
 import { isScalarAttribute } from '../content-types';
 import { isOperator } from '../operators';
@@ -14,7 +14,7 @@ const isFilterLikeObject = (value: Record<string, unknown>, schema?: Model) =>
 const filters = traverseFactory()
   .intercept(
     // Intercept filters arrays and apply the traversal to each one individually
-    isArray,
+    Array.isArray,
     async (visitor, options, filters, { recurse }) => {
       return Promise.all(
         filters.map((filter, i) => {
@@ -42,7 +42,7 @@ const filters = traverseFactory()
     transform: cloneDeep,
 
     remove(key, data) {
-      return omit(key, data);
+      return omit(data, key);
     },
 
     set(key, value, data) {
@@ -58,10 +58,10 @@ const filters = traverseFactory()
     },
   }))
   // Ignore null or undefined values
-  .ignore(({ value }) => isNil(value))
+  .ignore(({ value }) => value == null)
   // Recursion on operators (non attributes)
   .on(
-    ({ attribute }) => isNil(attribute),
+    ({ attribute }) => attribute == null,
     async ({ key, visitor, path, value, schema, getModel, attribute }, { set, recurse }) => {
       const parent: Parent = { key, path, schema, attribute };
 
@@ -74,7 +74,7 @@ const filters = traverseFactory()
         isOperator(key) &&
         key !== '$not' &&
         isObj(value) &&
-        !isArray(value) &&
+        !Array.isArray(value) &&
         !isFilterLikeObject(value, schema)
       ) {
         set(key, value);
@@ -139,7 +139,7 @@ const filters = traverseFactory()
   // Scalar fields: recurse into operator maps (e.g. { $contains: 'x' }) so visitors see nested keys.
   .onAttribute(
     ({ attribute, value }) =>
-      Boolean(isScalarAttribute(attribute)) && isObj(value) && !isArray(value),
+      Boolean(isScalarAttribute(attribute)) && isObj(value) && !Array.isArray(value),
     async ({ key, visitor, path, value, schema, getModel, attribute }, { set, recurse }) => {
       const parent: Parent = { key, path, schema, attribute };
 

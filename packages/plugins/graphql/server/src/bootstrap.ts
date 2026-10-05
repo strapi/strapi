@@ -1,4 +1,4 @@
-import { isEmpty, mergeWith, isArray, isObject, isFunction } from 'lodash/fp';
+import { mergeWith, isEmpty, isObject } from 'lodash';
 import { ApolloServer, type ApolloServerPlugin, type ApolloServerOptions } from '@apollo/server';
 import {
   ApolloServerPluginLandingPageLocalDefault,
@@ -15,14 +15,38 @@ import type { BaseContext, DefaultContextExtends, DefaultStateExtends } from 'ko
 
 import { formatGraphqlError } from './format-graphql-error';
 
-const merge = mergeWith((a, b) => {
-  if (isArray(a) && isArray(b)) {
-    return a.concat(b);
-  }
-});
-
 type StrapiGraphQLContext = BaseContext & {
   rootQueryArgsByPath?: Map<string | number, Record<string, unknown>>;
+};
+
+type OperationLimitConfig = {
+  depthLimit?: unknown;
+  maxLimit?: unknown;
+};
+
+export const getOperationLimitsWarning = ({
+  depthLimit: configuredDepthLimit,
+  maxLimit,
+}: OperationLimitConfig): string | undefined => {
+  const unboundedOrInvalidKeys: string[] = [];
+
+  if (
+    typeof configuredDepthLimit !== 'number' ||
+    !Number.isFinite(configuredDepthLimit) ||
+    configuredDepthLimit <= 0
+  ) {
+    unboundedOrInvalidKeys.push('depthLimit');
+  }
+
+  if (typeof maxLimit !== 'number' || !Number.isFinite(maxLimit) || maxLimit <= 0) {
+    unboundedOrInvalidKeys.push('maxLimit');
+  }
+
+  if (unboundedOrInvalidKeys.length === 0) {
+    return undefined;
+  }
+
+  return `Built-in GraphQL operation limits are unbounded or invalid for: ${unboundedOrInvalidKeys.join(', ')}. Configure these limits (for example: defaultLimit: 25, maxLimit: 100, depthLimit: 10). Custom Apollo validation rules may independently enforce limits. See https://docs.strapi.io/cms/configurations/plugins.`;
 };
 
 export const determineLandingPage = (
@@ -39,7 +63,9 @@ export const determineLandingPage = (
    * - undefined: default Apollo behavior (hide playground on production)
    * - a function that returns an Apollo plugin that implements renderLandingPage
    ** */
-  const configLandingPage = config('landingPage');
+  const configLandingPage = config<
+    boolean | ((strapi?: Core.Strapi) => ApolloServerPlugin | boolean)
+  >('landingPage');
 
   const isProduction = process.env.NODE_ENV === 'production';
 
@@ -96,7 +122,7 @@ export const determineLandingPage = (
   }
 
   // if user provided a landing page function, return that
-  if (isFunction(configLandingPage)) {
+  if (typeof configLandingPage === 'function') {
     return userLanding(configLandingPage);
   }
 
@@ -120,6 +146,16 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
   const { config } = strapi.plugin('graphql');
 
   const path: string = config('endpoint');
+  const configuredDepthLimit = config('depthLimit');
+  const maxLimit = config('maxLimit');
+  const operationLimitsWarning = getOperationLimitsWarning({
+    depthLimit: configuredDepthLimit,
+    maxLimit,
+  });
+
+  if (operationLimitsWarning) {
+    strapi.log.warn(operationLimitsWarning);
+  }
 
   const landingPage = determineLandingPage(strapi);
   /**
@@ -165,7 +201,9 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
     schema,
 
     // Validation
-    validationRules: [depthLimit(config('depthLimit') as number) as any],
+    // Keep v5 compatibility: depthLimit is passed through unchanged, so an unset or invalid value
+    // does not become an enforced finite limit during an upgrade.
+    validationRules: [depthLimit(configuredDepthLimit as number) as any],
 
     // Errors
     formatError: formatGraphqlError,
@@ -181,9 +219,16 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
     cache: 'bounded' as const,
   };
 
-  const serverConfig = merge(
+  const serverConfig = mergeWith(
+    {},
     defaultServerConfig,
-    config('apolloServer')
+    config('apolloServer'),
+    (a: unknown, b: unknown) => {
+      if (Array.isArray(a) && Array.isArray(b)) {
+        return a.concat(b);
+      }
+      return undefined;
+    }
   ) as ApolloServerOptions<StrapiGraphQLContext> & CustomOptions;
 
   // Create a new Apollo server

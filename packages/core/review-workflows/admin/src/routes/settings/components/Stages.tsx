@@ -7,7 +7,8 @@ import {
   ConfirmDialog,
   useNotification,
   InputRenderer as AdminInputRenderer,
-  InputProps,
+  type FormErrors,
+  type InputProps,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
@@ -45,6 +46,10 @@ interface WorkflowStage
   __temp_key__: string;
 }
 
+type WorkflowFormValues = {
+  stages: WorkflowStage[];
+};
+
 /* -------------------------------------------------------------------------------------------------
  * Stages
  * -----------------------------------------------------------------------------------------------*/
@@ -54,7 +59,7 @@ interface StagesProps {
   isCreating?: boolean;
 }
 
-const Stages = ({ canDelete = true, canUpdate = true, isCreating }: StagesProps) => {
+const Stages = ({ canDelete = true, canUpdate = true }: StagesProps) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const addFieldRow = useForm('Stages', (state) => state.addFieldRow);
@@ -140,8 +145,12 @@ const Stage = ({
   const [liveText, setLiveText] = React.useState<string>();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-  const stageErrors = useForm('Stages', (state) => state.errors.stages as object[]);
-  const error = stageErrors?.[index];
+  const stageErrors = useForm(
+    'Stages',
+    (state) => (state.errors as FormErrors<WorkflowFormValues>).stages
+  );
+  const stageError = Array.isArray(stageErrors) ? stageErrors[index] : undefined;
+  const error = typeof stageError === 'object' && stageError !== null ? stageError : undefined;
   const addFieldRow = useForm('Stage', (state) => state.addFieldRow);
   const moveFieldRow = useForm('Stage', (state) => state.moveFieldRow);
   const removeFieldRow = useForm('Stage', (state) => state.removeFieldRow);
@@ -532,7 +541,10 @@ const PermissionsField = ({
   const { toggleNotification } = useNotification();
   const [isApplyAllConfirmationOpen, setIsApplyAllConfirmationOpen] = React.useState(false);
   const { value = [], error, onChange } = useField<StagePermission[]>(name);
-  const allStages = useForm<WorkflowStage[]>('PermissionsField', (state) => state.values.stages);
+  const allStages = useForm(
+    'PermissionsField',
+    (state) => (state.values as Partial<WorkflowFormValues>).stages ?? []
+  );
   const onFormValueChange = useForm('PermissionsField', (state) => state.onChange);
 
   // Derive the field key (e.g. "fromPermissions" or "toPermissions") from the full field name

@@ -60,7 +60,7 @@ interface Logger {
 }
 ```
 
-The shared logger means that any command can accept `--debug` and `--silent` flags to control the output of the CLI. Due to incorperating `ora` into the logger, we can also provide a spinner for long running tasks but more importantly, easily silence them when `--silent` is passed.
+The shared logger means that any command can accept `--debug` and `--silent` flags to control the output of the CLI. Due to incorporating `ora` into the logger, we can also provide a spinner for long running tasks but more importantly, easily silence them when `--silent` is passed.
 
 ### `tsconfig`
 

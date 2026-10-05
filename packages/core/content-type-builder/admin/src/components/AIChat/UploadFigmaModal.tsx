@@ -277,7 +277,7 @@ export const UploadFigmaModal = () => {
 
   const { addAttachments } = useAttachments();
   const { isFigmaUploadOpen, closeFigmaUpload, submitOnFinish } = useUploadFigmaToChat();
-  const { input, setInput, setMessages, sendMessage, openChat } = useStrapiChat();
+  const { input, setInput, sendMessage, openChat } = useStrapiChat();
   const { processFigmaUrl, isLoading, error } = useFigmaUpload({
     onSuccess: (images) => {
       setFigmaImages(images);
@@ -298,7 +298,7 @@ export const UploadFigmaModal = () => {
     try {
       const urlObj = new URL(url);
       return urlObj.hostname === 'www.figma.com' || urlObj.hostname === 'figma.com';
-    } catch (e) {
+    } catch {
       return false;
     }
   };

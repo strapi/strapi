@@ -1,5 +1,5 @@
 import fse from 'fs-extra';
-import { defaultsDeep } from 'lodash/fp';
+import { defaultsDeep } from 'lodash';
 import { koaBody, KoaBodyMiddlewareOptions } from 'koa-body';
 import mime from 'mime-types';
 import type Koa from 'koa';
@@ -23,7 +23,7 @@ function getFiles(ctx: Koa.Context) {
 }
 
 const bodyMiddleware: Core.MiddlewareFactory<Config> = (config, { strapi }) => {
-  const bodyConfig: Config = defaultsDeep(defaults, config);
+  const bodyConfig: Config = defaultsDeep({}, config, defaults);
 
   let gqlEndpoint: string | undefined;
   if (strapi.plugin('graphql')) {
@@ -58,7 +58,8 @@ const bodyMiddleware: Core.MiddlewareFactory<Config> = (config, { strapi }) => {
         if (
           error instanceof Error &&
           error.message &&
-          error.message.includes('maxFileSize exceeded')
+          error.message.includes('maxFileSize') &&
+          error.message.includes('exceeded')
         ) {
           return ctx.payloadTooLarge('FileTooBig');
         }

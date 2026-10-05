@@ -11,7 +11,10 @@ export const routes = {
           {
             name: 'admin::hasPermissions',
             config: {
-              actions: ['plugin::upload.settings.read'],
+              // Not `settings.read`: the Media Library needs this payload to
+              // work, and the default Editor and Author roles don't hold that
+              // action. Writing still requires it (see the PUT below).
+              actions: ['plugin::upload.read'],
             },
           },
         ],
@@ -43,16 +46,8 @@ export const routes = {
     },
     {
       method: 'POST',
-      path: '/unstable/upload-file',
-      handler: 'admin-upload.unstable_uploadFile',
-      config: {
-        policies: ['admin::isAuthenticatedAdmin'],
-      },
-    },
-    {
-      method: 'POST',
-      path: '/unstable/stream-from-urls',
-      handler: 'admin-upload.unstable_uploadFromUrls',
+      path: '/actions/upload-from-urls',
+      handler: 'admin-upload.uploadFromUrls',
       config: {
         policies: ['admin::isAuthenticatedAdmin'],
       },
@@ -74,6 +69,14 @@ export const routes = {
       },
     },
     {
+      method: 'POST',
+      path: '/files',
+      handler: 'admin-upload.uploadFile',
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
+    {
       method: 'GET',
       path: '/files/:id',
       handler: 'admin-file.findOne',
@@ -87,6 +90,22 @@ export const routes = {
             },
           },
         ],
+      },
+    },
+    {
+      method: 'PUT',
+      path: '/files/:id',
+      handler: 'admin-upload.updateFileInfo',
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
+    {
+      method: 'POST',
+      path: '/files/:id/replace',
+      handler: 'admin-upload.replaceFile',
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
       },
     },
     {
@@ -250,9 +269,33 @@ export const routes = {
       },
     },
     {
+      method: 'POST',
+      path: '/ai-metadata-jobs',
+      handler: 'admin-file.createAIMetadataJob',
+      config: {
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['plugin::upload.assets.update'],
+            },
+          },
+        ],
+      },
+    },
+    {
       method: 'GET',
-      path: '/actions/generate-ai-metadata/count',
-      handler: 'admin-file.getAIMetadataCount',
+      path: '/ai-metadata-jobs/latest',
+      handler: 'admin-file.getLatestAIMetadataJob',
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/ai-metadata-jobs/pending-count',
+      handler: 'admin-file.getAIMetadataPendingCount',
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',
@@ -263,14 +306,6 @@ export const routes = {
             },
           },
         ],
-      },
-    },
-    {
-      method: 'GET',
-      path: '/actions/generate-ai-metadata/latest',
-      handler: 'admin-file.getLatestAIMetadataJob',
-      config: {
-        policies: ['admin::isAuthenticatedAdmin'],
       },
     },
   ],

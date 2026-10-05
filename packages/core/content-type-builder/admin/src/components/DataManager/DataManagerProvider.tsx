@@ -13,6 +13,8 @@ import {
 import groupBy from 'lodash/groupBy';
 import isEqual from 'lodash/isEqual';
 import mapValues from 'lodash/mapValues';
+import omit from 'lodash/omit';
+import uniq from 'lodash/uniq';
 import { useIntl } from 'react-intl';
 import { useSelector, useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
@@ -25,19 +27,68 @@ import { useFormModalNavigation } from '../FormModalNavigation/useFormModalNavig
 
 import { DataManagerContext, type DataManagerContextValue } from './DataManagerContext';
 import { actions, initialState, type State } from './reducer';
+import {
+  RenameMigrationModal,
+  applyRenameDecisions,
+  collectPendingRenames,
+  filterRenamesByAcceptedChains,
+  shouldPromptForRenamesBeforeSave,
+  toPendingRename,
+  type AttributeRenameMigrationMode,
+  type PendingRename,
+} from './RenameMigrationModal';
 import { useServerRestartWatcher } from './useServerRestartWatcher';
 import { sortContentType, stateToRequestData } from './utils/cleanData';
+import { fromServerFile, generateGroupId } from './utils/contentStructure';
+import { groupRenameChains } from './utils/groupRenameChains';
+import { resolveAfterEditRenameConsent } from './utils/resolveAfterEditRenameConsent';
 import { retrieveComponentsThatHaveComponents } from './utils/retrieveComponentsThatHaveComponents';
 import { retrieveNestedComponents } from './utils/retrieveNestedComponents';
 import { retrieveSpecificInfoFromComponents } from './utils/retrieveSpecificInfoFromComponents';
+import {
+  namesOfChains,
+  splitChainsByInheritedConsent,
+} from './utils/splitChainsByInheritedConsent';
 
-import type { ContentTypes, ContentType, Components } from '../../types';
+import type { AnyAttribute, Component, ContentTypes, ContentType, Components } from '../../types';
+import type { FolderSelection } from './utils/contentStructure';
 import type { FormAPI } from '../../utils/formAPI';
-import type { Internal } from '@strapi/types';
+import type { Internal, Modules } from '@strapi/types';
 
 interface DataManagerProviderProps {
   children: React.ReactNode;
 }
+
+/**
+ * Including the new folder state in the same payload as create/edit transactions ensures the
+ * folder assignment is subject to the same undo/redo operations as the content type mutation
+ */
+const toFolderAssignment = (folder?: FolderSelection) => {
+  if (!folder) {
+    return undefined;
+  }
+
+  if ('newFolderName' in folder) {
+    return { newFolderId: generateGroupId(), newFolderName: folder.newFolderName };
+  }
+
+  return { targetGroupId: folder.targetGroupId };
+};
+
+type SchemaResponse = {
+  data: {
+    components: Components;
+    contentTypes: ContentTypes;
+    contentStructure?: Modules.ContentStructure.ContentStructureFile | null;
+    settings?: {
+      renameMigrations?: {
+        attributes?: AttributeRenameMigrationMode;
+      };
+    };
+  };
+};
+
+type ReservedNamesResponse = DataManagerContextValue['reservedNames'];
 
 const selectState = (state: Record<string, unknown>) =>
   (state['content-type-builder_dataManagerProvider'] || initialState) as State;
@@ -55,6 +106,8 @@ const CONTENT_MANAGER_SCHEMA_CACHE_TAGS = [
   'ContentTypesConfiguration',
   'ContentTypeSettings',
   'ComponentConfiguration',
+  // Existing cached documents still use the pre-change field names.
+  'Document',
 ] as const;
 
 const invalidateContentManagerSchemaCaches = () =>
@@ -73,6 +126,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     reservedNames,
     initialComponents,
     initialContentTypes,
+    contentStructure,
+    initialContentStructure,
     isLoading,
   } = state.current;
 
@@ -91,9 +146,29 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const [isSaving, setIsSaving] = React.useState(false);
   const previousLocationRef = React.useRef<string | null>(null);
 
+  const renameMigrationModeRef = React.useRef<AttributeRenameMigrationMode>('prompt-before-save');
+
+  // When `modal` mode prompts the user, we hold the pending renames plus the
+  // promise resolver here so `saveSchema` can await the decision.
+  const [renameModal, setRenameModal] = React.useState<{
+    renames: PendingRename[];
+    resolve: (_acceptedKeys: Set<string> | null) => void;
+  } | null>(null);
+
   const isModified = React.useMemo(() => {
-    return !(isEqual(components, initialComponents) && isEqual(contentTypes, initialContentTypes));
-  }, [components, contentTypes, initialComponents, initialContentTypes]);
+    return !(
+      isEqual(components, initialComponents) &&
+      isEqual(contentTypes, initialContentTypes) &&
+      isEqual(contentStructure, initialContentStructure)
+    );
+  }, [
+    components,
+    contentTypes,
+    initialComponents,
+    initialContentTypes,
+    contentStructure,
+    initialContentStructure,
+  ]);
 
   const fetchClient = useFetchClient();
 
@@ -104,11 +179,15 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   getDataRef.current = async () => {
     try {
       const [schemaResponse, reservedNamesResponse] = await Promise.all([
-        fetchClient.get(`/content-type-builder/schema`),
-        fetchClient.get(`/content-type-builder/reserved-names`),
+        fetchClient.get<SchemaResponse>(`/content-type-builder/schema`),
+        fetchClient.get<ReservedNamesResponse>(`/content-type-builder/reserved-names`),
       ]);
 
-      const { components, contentTypes } = schemaResponse.data.data;
+      const { components, contentTypes, contentStructure, settings } = schemaResponse.data.data;
+
+      if (settings?.renameMigrations?.attributes) {
+        renameMigrationModeRef.current = settings.renameMigrations.attributes;
+      }
 
       dispatch(
         actions.init({
@@ -121,6 +200,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
             status: 'UNCHANGED',
           })) as ContentTypes,
           reservedNames: reservedNamesResponse.data,
+          contentStructure: fromServerFile(contentStructure),
         })
       );
 
@@ -189,6 +269,15 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     await refetchPermissions();
   };
 
+  const requestRenameDecision = async (renames: PendingRename[]) => {
+    const acceptedKeys = await new Promise<Set<string> | null>((resolve) => {
+      setRenameModal({ renames, resolve });
+    });
+    setRenameModal(null);
+
+    return acceptedKeys;
+  };
+
   const saveSchema = async () => {
     setIsSaving(true);
 
@@ -209,7 +298,25 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     const { requestData, trackingEventProperties } = stateToRequestData({
       components: state.current.components,
       contentTypes: mutatedCTs,
+      contentStructure: state.current.contentStructure,
+      initialContentStructure: state.current.initialContentStructure,
     });
+
+    if (shouldPromptForRenamesBeforeSave(renameMigrationModeRef.current)) {
+      const pendingRenames = collectPendingRenames(requestData);
+
+      if (pendingRenames.length > 0) {
+        const acceptedKeys = await requestRenameDecision(pendingRenames);
+
+        // The user cancelled the whole save — return to editing untouched.
+        if (acceptedKeys === null) {
+          setIsSaving(false);
+          return;
+        }
+
+        applyRenameDecisions(requestData, acceptedKeys);
+      }
+    }
 
     // Track that the save button was clicked (includes session ID via useCTBTracking)
     trackUsage('willUpdateCTBSchema', {
@@ -235,6 +342,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       regenerateSessionId();
       // refetch and update initial state after the data has been saved
       await getDataRef.current();
+
       // Update the app's permissions
       await updatePermissions();
       // Refresh content-manager caches that depend on the CT/component schema.
@@ -298,6 +406,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     contentTypes,
     initialComponents,
     initialContentTypes,
+    contentStructure,
     isSaving,
     isModified,
     isInDevelopmentMode,
@@ -305,23 +414,93 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     componentsGroupedByCategory,
     sortedContentTypesList,
     isLoading,
+    attributeRenameMigrationMode: renameMigrationModeRef.current,
     addAttribute(payload) {
-      dispatch(actions.addAttribute(payload));
+      dispatch(
+        actions.addAttribute({
+          ...payload,
+          attributeToSet: payload.attributeToSet as AnyAttribute,
+        })
+      );
     },
     editAttribute(payload) {
-      dispatch(actions.editAttribute(payload));
+      dispatch(
+        actions.editAttribute({
+          ...payload,
+          attributeToSet: payload.attributeToSet as AnyAttribute,
+        })
+      );
     },
     addCustomFieldAttribute(payload) {
-      dispatch(actions.addCustomFieldAttribute(payload));
+      dispatch(
+        actions.addCustomFieldAttribute({
+          ...payload,
+          attributeToSet: payload.attributeToSet as AnyAttribute,
+        })
+      );
     },
     editCustomFieldAttribute(payload) {
-      dispatch(actions.editCustomFieldAttribute(payload));
+      dispatch(
+        actions.editCustomFieldAttribute({
+          ...payload,
+          attributeToSet: payload.attributeToSet as AnyAttribute,
+        })
+      );
+    },
+    async confirmAttributeRenameMigration({ forTarget, uid, oldName, newName }) {
+      if (oldName === newName) {
+        return true;
+      }
+
+      const schema =
+        forTarget === 'contentType'
+          ? contentTypes[uid as Internal.UID.ContentType]
+          : components[uid as Internal.UID.Component];
+
+      // A field that was never saved has no data to preserve: accept without
+      // prompting so neither name ends up in `declinedRenameNames`.
+      const initialAttribute = schema?.attributes.find((attribute) => attribute.name === oldName);
+      if (initialAttribute?.status === 'NEW') {
+        return true;
+      }
+
+      // Consent inherits along a chain: a hop joining an accepted chain is
+      // accepted, one touching a declined name is declined, neither prompts.
+      const consent = resolveAfterEditRenameConsent({
+        renames: schema?.renames ?? [],
+        declinedRenameNames: schema?.declinedRenameNames ?? [],
+        oldName,
+        newName,
+        mode: renameMigrationModeRef.current,
+      });
+
+      if (consent !== 'prompt') {
+        return consent === 'accept';
+      }
+
+      const key = `${uid}:edit`;
+      const acceptedKeys = await requestRenameDecision([
+        {
+          key,
+          uid,
+          typeName: schema?.info.displayName ?? uid,
+          pairs: [{ oldName, newName }],
+          via: [],
+        },
+      ]);
+
+      if (acceptedKeys === null) {
+        return null;
+      }
+
+      return acceptedKeys.has(key);
     },
     addCreatedComponentToDynamicZone(payload) {
       dispatch(actions.addCreatedComponentToDynamicZone(payload));
     },
     createSchema(payload) {
-      dispatch(actions.createSchema(payload));
+      const { folder, ...rest } = payload;
+      dispatch(actions.createSchema({ ...rest, folder: toFolderAssignment(folder) }));
     },
     createComponentSchema({ data, uid, componentCategory }) {
       dispatch(actions.createComponentSchema({ data, uid, componentCategory }));
@@ -374,6 +553,28 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       }
     },
 
+    createFolder({ section, name, parentId }) {
+      dispatch(actions.createFolder({ section, name, parentId, id: generateGroupId() }));
+    },
+    renameFolder(payload) {
+      dispatch(actions.renameFolder(payload));
+    },
+    moveFolder(payload) {
+      dispatch(actions.moveFolder(payload));
+    },
+    deleteFolderOnly(payload) {
+      dispatch(actions.deleteFolderOnly(payload));
+    },
+    deleteFolderAndContent({ section, id, contentTypeUids }) {
+      dispatch(actions.deleteFolderAndContent({ section, id, contentTypeUids }));
+    },
+    assignContentTypeToFolder(payload) {
+      dispatch(actions.assignContentTypeToFolder(payload));
+    },
+    reorderFolderChildren(payload) {
+      dispatch(actions.reorderFolderChildren(payload));
+    },
+
     updateComponentSchema({ data, componentUID }) {
       dispatch(
         actions.updateComponentSchema({
@@ -393,15 +594,87 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     },
 
     updateSchema(args) {
-      dispatch(actions.updateSchema(args));
+      const { folder, ...rest } = args;
+      dispatch(actions.updateSchema({ ...rest, folder: toFolderAssignment(folder) }));
     },
 
     moveAttribute(args) {
       dispatch(actions.moveAttribute(args));
     },
 
-    applyChange(args) {
-      dispatch(actions.applyChange(args));
+    async applyChange({ action, schema }) {
+      const renames = schema.renames ?? [];
+
+      if (action !== 'update' || renames.length === 0) {
+        dispatch(actions.applyChange({ action, schema }));
+        return true;
+      }
+
+      const mode = renameMigrationModeRef.current;
+
+      if (mode === 'never') {
+        dispatch(
+          actions.applyChange({
+            action,
+            schema: omit(schema, ['renames']) as ContentType | Component,
+          })
+        );
+        return true;
+      }
+
+      // 'always' | 'prompt-before-save': the before-save modal decides per chain.
+      if (mode !== 'prompt-after-edit') {
+        dispatch(actions.applyChange({ action, schema }));
+        return true;
+      }
+
+      // 'prompt-after-edit': decide per chain now, inheriting consent already
+      // given (or refused) for the hops recorded on the type.
+      const existing =
+        schema.modelType === 'contentType'
+          ? contentTypes[schema.uid as Internal.UID.ContentType]
+          : components[schema.uid as Internal.UID.Component];
+      const chains = groupRenameChains(schema.uid, renames);
+      const { keep, prompt } = splitChainsByInheritedConsent({
+        recorded: existing?.renames ?? [],
+        declinedRenameNames: existing?.declinedRenameNames ?? [],
+        chains,
+        renames,
+      });
+
+      const accepted = new Set(keep.map((chain) => chain.id));
+      if (prompt.length > 0) {
+        const typeName = schema.info?.displayName ?? schema.uid;
+        const decision = await requestRenameDecision(
+          prompt.map((chain) => toPendingRename(chain, renames, { uid: schema.uid, typeName }))
+        );
+
+        // The user cancelled: apply nothing.
+        if (decision === null) {
+          return false;
+        }
+
+        decision.forEach((id) => accepted.add(id));
+      }
+
+      const declinedChains = chains.filter((chain) => !accepted.has(chain.id));
+      const keptRenames = filterRenamesByAcceptedChains(schema.uid, renames, accepted);
+      const declinedRenameNames = uniq([
+        ...(schema.declinedRenameNames ?? []),
+        ...namesOfChains(declinedChains, renames),
+      ]);
+
+      dispatch(
+        actions.applyChange({
+          action,
+          schema: {
+            ...omit(schema, ['renames', 'declinedRenameNames']),
+            ...(keptRenames.length > 0 ? { renames: keptRenames } : {}),
+            ...(declinedRenameNames.length > 0 ? { declinedRenameNames } : {}),
+          } as ContentType | Component,
+        })
+      );
+      return true;
     },
 
     history: {
@@ -423,7 +696,18 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     },
   };
 
-  return <DataManagerContext.Provider value={context}>{children}</DataManagerContext.Provider>;
+  return (
+    <DataManagerContext.Provider value={context}>
+      {children}
+      {renameModal && (
+        <RenameMigrationModal
+          renames={renameModal.renames}
+          onConfirm={(acceptedKeys) => renameModal.resolve(acceptedKeys)}
+          onCancel={() => renameModal.resolve(null)}
+        />
+      )}
+    </DataManagerContext.Provider>
+  );
 };
 
 // eslint-disable-next-line import/no-default-export

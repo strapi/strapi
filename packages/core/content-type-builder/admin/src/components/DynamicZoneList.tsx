@@ -1,4 +1,4 @@
-import { ComponentType, useState } from 'react';
+import { type ComponentType, useState } from 'react';
 
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
@@ -17,7 +17,7 @@ import type { Internal, Struct } from '@strapi/types';
 interface DynamicZoneListProps {
   addComponent: (name?: string) => void;
   components: Array<Internal.UID.Component>;
-  customRowComponent?: ComponentType<any>;
+  customRowComponent?: ComponentType<Record<string, unknown>>;
   name?: string;
   forTarget: Struct.ModelType;
   targetUid: Internal.UID.Schema;

@@ -10,6 +10,7 @@ import {
 import { setCookie, deleteCookie } from '../utils/cookies';
 
 jest.mock('../utils/cookies', () => ({
+  ...jest.requireActual('../utils/cookies'),
   setCookie: jest.fn(),
   deleteCookie: jest.fn(),
 }));

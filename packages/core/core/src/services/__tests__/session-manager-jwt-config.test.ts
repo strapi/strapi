@@ -37,6 +37,7 @@ describe('SessionManager JWT Configuration', () => {
       findMany: jest.fn(),
       delete: jest.fn(),
       deleteMany: jest.fn(),
+      update: jest.fn(),
     };
 
     mockDb = {
@@ -201,6 +202,33 @@ describe('SessionManager JWT Configuration', () => {
 
       expect(verified).toBeDefined();
       expect((verified as any).type).toBe('access');
+    });
+
+    test('Rotates refresh token using configured asymmetric algorithm (RS256)', async () => {
+      sessionManager.defineOrigin('test', {
+        jwtSecret: 'test-secret',
+        accessTokenLifespan: 3600,
+        maxRefreshTokenLifespan: 86400,
+        idleRefreshTokenLifespan: 3600,
+        maxSessionLifespan: 3600,
+        idleSessionLifespan: 1800,
+        algorithm: 'RS256',
+        jwtOptions: {
+          privateKey: testPrivateKey,
+          publicKey: testPublicKey,
+        },
+      });
+
+      const refreshResult = await sessionManager('test').generateRefreshToken(
+        'user123',
+        'session123'
+      );
+      expect(refreshResult.token).toBeDefined();
+
+      const rotateResult = await sessionManager('test').rotateRefreshToken(refreshResult.token);
+
+      expect(rotateResult).toHaveProperty('token');
+      expect(rotateResult).not.toHaveProperty('error');
     });
 
     test('Uses configured asymmetric algorithm (ES256) with proper keys', async () => {

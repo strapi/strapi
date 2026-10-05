@@ -125,12 +125,12 @@ export abstract class AbstractCoreRouteValidator<
   }
 
   /**
-   * Creates a Zod schema as a record with scalar fields as keys and the specified type as values.
+   * Creates a sparse Zod record with scalar fields as keys and the specified type as values.
    *
    * @param type - The Zod type to use for the record's values.
-   * @return A Zod record schema with scalar fields as keys and the specified type as values.
+   * @return A sparse Zod record schema with scalar fields as keys and the specified type as values.
    */
   public fieldRecord(type: z.ZodTypeAny) {
-    return z.record(this.scalarFieldsEnum, type);
+    return z.partialRecord(this.scalarFieldsEnum, type);
   }
 }

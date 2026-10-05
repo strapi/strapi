@@ -39,6 +39,9 @@ export const upgrade = async (options: UpgradeOptions) => {
   // Load all available versions from the NPM registry
   await npmPackage.refresh();
 
+  // Pin ranged @strapi/* dependencies before resolving upgrade targets
+  await prompts.pinVersions(project, options);
+
   // Initialize the upgrade instance
   // Throws during initialization if the provided target is incompatible with the current version
   const upgrader = upgraderFactory(project, options.target, npmPackage)
@@ -71,7 +74,7 @@ export const upgrade = async (options: UpgradeOptions) => {
 };
 
 const runUpgradePrompts = async (upgrader: Upgrader, options: UpgradeOptions) => {
-  if (options.target === Version.ReleaseType.Latest) {
+  if (options.target === Version.RELEASE_TYPES.Latest) {
     await prompts.latest(upgrader, options);
   }
 };
@@ -79,7 +82,7 @@ const runUpgradePrompts = async (upgrader: Upgrader, options: UpgradeOptions) =>
 const addUpgradeRequirements = (upgrader: Upgrader, options: UpgradeOptions): void => {
   // Major release upgrades enforce stepping through the latest patch for the current major.
   // Semver targets (via the "to" command) skip these checks intentionally.
-  if (options.target === Version.ReleaseType.Major) {
+  if (options.target === Version.RELEASE_TYPES.Major) {
     upgrader
       .addRequirement(requirements.major.REQUIRE_AVAILABLE_NEXT_MAJOR)
       .addRequirement(requirements.major.REQUIRE_LATEST_FOR_CURRENT_MAJOR);

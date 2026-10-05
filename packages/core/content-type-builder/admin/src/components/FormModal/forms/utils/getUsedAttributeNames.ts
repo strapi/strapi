@@ -1,10 +1,20 @@
 export type SchemaData = {
   initialData: {
     name?: string;
-    targetAttribute?: any;
+    targetAttribute?: string | null;
     [key: string]: unknown;
   };
-  modifiedData: object;
+  modifiedData: {
+    createComponent?: boolean;
+    enum?: string[];
+    name?: string;
+    relation?: string;
+    repeatable?: boolean;
+    targetAttribute?: string | null;
+    targetField?: string;
+    type?: string;
+    [key: string]: unknown;
+  };
 };
 
 export type Attribute = {

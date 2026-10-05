@@ -1,14 +1,23 @@
 import * as React from 'react';
 
+import { Dialog } from '@strapi/design-system';
+import { useIntl, type MessageDescriptor } from 'react-intl';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { Login } from '../../../shared/contracts/authentication';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 import { createContext } from '../components/Context';
 import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
 import { useStrapiApp } from '../features/StrapiApp';
-import { useIdleSessionLogout } from '../hooks/useIdleSessionLogout';
 import { useQueryParams } from '../hooks/useQueryParams';
-import { login as loginAction, logout as logoutAction, setLocale, setToken } from '../reducer';
+import { useSessionKeepalive } from '../hooks/useSessionKeepalive';
+import {
+  getStoredToken,
+  login as loginAction,
+  logout as logoutAction,
+  setLocale,
+  setToken,
+} from '../reducer';
 import { adminApi } from '../services/api';
 import {
   useGetMeQuery,
@@ -19,7 +28,14 @@ import {
 } from '../services/auth';
 import { normalizeAdminLocale } from '../translations/normalizeAdminLocale';
 import { getOrCreateDeviceId } from '../utils/deviceId';
-import { setOnSessionExpired, setOnTokenUpdate } from '../utils/getFetchClient';
+import {
+  attemptTokenRefresh,
+  getFetchClient,
+  resetSessionExpiredNotification,
+  setOnSessionExpired,
+  setOnTokenUpdate,
+} from '../utils/getFetchClient';
+import { hasUnsavedChanges } from '../utils/unsavedChangesRegistry';
 
 import type {
   Permission as PermissionContract,
@@ -94,11 +110,51 @@ const STORAGE_KEYS = {
   STATUS: 'isLoggedIn',
 };
 
+/**
+ * Why the session is ending.
+ * - `voluntary`: explicit user logout — cancelable when there are unsaved edits.
+ * - `session-dead`: server rejected the refresh (idle/max session window elapsed)
+ *   — forced; Cancel / dismiss still clears client state.
+ *
+ * Short-lived access-token expiry is NOT a logout reason: idle tabs leave the
+ * stale token in place and the next request refreshes (or hits session-dead).
+ */
+type LogoutReason = 'voluntary' | 'session-dead';
+
+const isForcedLogout = (reason: LogoutReason) => reason === 'session-dead';
+
+/**
+ * Copy for the unsaved-changes prompt. A server-confirmed dead session needs to
+ * say *why* the dialog appeared, otherwise it reads as the usual navigation
+ * blocker and users confirm straight through it.
+ */
+const LOGOUT_PROMPTS = {
+  voluntary: {
+    title: undefined,
+    body: {
+      id: 'global.prompt.unsaved',
+      defaultMessage: 'You have unsaved changes, are you sure you want to leave?',
+    },
+  },
+  'session-dead': {
+    title: {
+      id: 'app.session.ended.title',
+      defaultMessage: 'Session ended',
+    },
+    body: {
+      id: 'app.session.ended.unsaved',
+      defaultMessage:
+        "Your session has ended and can't be resumed. Your unsaved changes will be lost when you log out.",
+    },
+  },
+} satisfies Record<LogoutReason, { title?: MessageDescriptor; body: MessageDescriptor }>;
+
 const AuthProvider = ({
   children,
   _defaultPermissions = [],
   _disableRenewToken = false,
 }: AuthProviderProps) => {
+  const { formatMessage } = useIntl();
   const dispatch = useTypedDispatch();
   const runRbacMiddleware = useStrapiApp('AuthProvider', (state) => state.rbac.run);
   const location = useLocation();
@@ -135,11 +191,141 @@ const AuthProvider = ({
   const [loginMutation] = useLoginMutation();
   const [logoutMutation] = useLogoutMutation();
 
-  const clearStateAndLogout = React.useCallback(() => {
+  const pendingLogoutRef = React.useRef<(() => void) | null>(null);
+  const logoutGuardOpenRef = React.useRef(false);
+  const logoutGuardReasonRef = React.useRef<LogoutReason>('voluntary');
+  const [isSessionLogoutDialogOpen, setIsSessionLogoutDialogOpen] = React.useState(false);
+  const [sessionLogoutReason, setSessionLogoutReason] = React.useState<LogoutReason>('voluntary');
+
+  /**
+   * Prompt before discarding unsaved edits, then run `logoutFn`.
+   *
+   * - `voluntary`: Cancel leaves the user logged in (server session intact).
+   * - `session-dead`: the session is already unusable — Cancel (or dismiss)
+   *   still runs `logoutFn` so the client cannot keep a stale token. While the
+   *   dialog is open, a later `session-dead` request upgrades the pending action.
+   */
+  const runLogoutWithGuard = React.useCallback(
+    (logoutFn: () => void, reason: LogoutReason = 'voluntary') => {
+      if (logoutGuardOpenRef.current) {
+        pendingLogoutRef.current = logoutFn;
+        if (isForcedLogout(reason)) {
+          logoutGuardReasonRef.current = reason;
+          setSessionLogoutReason(reason);
+        }
+        return;
+      }
+
+      if (!hasUnsavedChanges()) {
+        logoutFn();
+        return;
+      }
+
+      logoutGuardOpenRef.current = true;
+      logoutGuardReasonRef.current = reason;
+      pendingLogoutRef.current = logoutFn;
+      setSessionLogoutReason(reason);
+      setIsSessionLogoutDialogOpen(true);
+    },
+    []
+  );
+
+  const performGlobalLogout = React.useCallback(() => {
+    void (async () => {
+      try {
+        const { post } = getFetchClient();
+        await post('/admin/logout');
+      } catch {
+        // The session may already be invalid.
+      }
+    })();
+
     dispatch(adminApi.util.resetApiState());
     dispatch(logoutAction());
     navigate('/auth/login');
   }, [dispatch, navigate]);
+
+  const clearStateAndLogout = React.useCallback(() => {
+    runLogoutWithGuard(performGlobalLogout, 'session-dead');
+  }, [performGlobalLogout, runLogoutWithGuard]);
+
+  const handleConfirmSessionLogout = React.useCallback(() => {
+    logoutGuardOpenRef.current = false;
+    logoutGuardReasonRef.current = 'voluntary';
+    setIsSessionLogoutDialogOpen(false);
+    setSessionLogoutReason('voluntary');
+    const logoutFn = pendingLogoutRef.current;
+    pendingLogoutRef.current = null;
+    logoutFn?.();
+  }, []);
+
+  const handleCancelSessionLogout = React.useCallback(() => {
+    const forced = isForcedLogout(logoutGuardReasonRef.current);
+    const logoutFn = pendingLogoutRef.current;
+    logoutGuardOpenRef.current = false;
+    logoutGuardReasonRef.current = 'voluntary';
+    pendingLogoutRef.current = null;
+    setIsSessionLogoutDialogOpen(false);
+    setSessionLogoutReason('voluntary');
+    // Forced paths: session is already dead — dismiss must still clear client state.
+    if (forced) {
+      logoutFn?.();
+    }
+  }, []);
+
+  const handleSessionLogoutDialogOpenChange = React.useCallback(
+    (open: boolean) => {
+      if (!open) {
+        handleCancelSessionLogout();
+      }
+    },
+    [handleCancelSessionLogout]
+  );
+
+  const resyncToken = React.useCallback(
+    (newToken: string) => {
+      dispatch(setToken(newToken));
+    },
+    [dispatch]
+  );
+
+  /**
+   * Track the timestamp of the user's last interaction. This is the activity
+   * signal `useSessionKeepalive` uses to tell an active user (silently renew
+   * their session) apart from a genuinely idle one (leave the stale access
+   * token alone until the next request). Successful API calls don't refresh
+   * the short-lived access token on their own, so without this an
+   * actively-working user would hit a 401 the moment the token expires.
+   */
+  const lastActivityRef = React.useRef(Date.now());
+  React.useEffect(() => {
+    const markActivity = () => {
+      lastActivityRef.current = Date.now();
+    };
+    const events = ['pointerdown', 'keydown', 'click', 'scroll', 'touchstart'];
+    events.forEach((event) =>
+      window.addEventListener(event, markActivity, { passive: true, capture: true })
+    );
+
+    return () => {
+      events.forEach((event) => window.removeEventListener(event, markActivity, { capture: true }));
+    };
+  }, []);
+  const getLastActivityAt = React.useCallback(() => lastActivityRef.current, []);
+
+  /**
+   * Silently rotate the refresh token and mint a new access token. Returns
+   * `true` on success (the resulting `setToken` re-arms the renew timer) and
+   * `false` when the server rejects it (session genuinely over).
+   */
+  const renewSession = React.useCallback(async () => {
+    try {
+      await attemptTokenRefresh();
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
 
   React.useEffect(() => {
     if (user) {
@@ -180,13 +366,21 @@ const AuthProvider = ({
   }, [clearStateAndLogout]);
 
   /**
-   * Proactive idle-session detection. See `useIdleSessionLogout` for the full
-   * rationale and the UX trade-off (a user actively typing in a form with no
-   * outgoing API calls will still be logged out at `exp`).
+   * Session keepalive around access-token expiry. The timer fires per-tab; the
+   * hook then either (1) re-syncs from a token another tab refreshed, (2)
+   * silently renews when the user has been active, or (3) does nothing when
+   * idle — leaving the stale access token in place so unsaved form state
+   * survives until the next request refreshes it. A server-confirmed dead
+   * session (renewal rejected) broadcasts globally via `onSessionDead`. See
+   * `useSessionKeepalive` for the full rationale.
    */
-  useIdleSessionLogout({
+  useSessionKeepalive({
     token,
-    onExpired: clearStateAndLogout,
+    onSessionDead: clearStateAndLogout,
+    getStoredToken,
+    onResync: resyncToken,
+    getLastActivityAt,
+    renewSession,
     disabled: _disableRenewToken,
   });
 
@@ -218,6 +412,7 @@ const AuthProvider = ({
       if ('data' in res) {
         const { token } = res.data;
 
+        resetSessionExpiredNotification();
         dispatch(
           loginAction({
             token,
@@ -231,10 +426,22 @@ const AuthProvider = ({
     [dispatch, loginMutation]
   );
 
+  /**
+   * Explicit user logout. Confirm unsaved changes *before* `logoutMutation` so
+   * Cancel leaves the server session and client token intact.
+   */
   const logout = React.useCallback(async () => {
-    await logoutMutation({ deviceId: getOrCreateDeviceId() });
-    clearStateAndLogout();
-  }, [clearStateAndLogout, logoutMutation]);
+    runLogoutWithGuard(() => {
+      void (async () => {
+        try {
+          await logoutMutation({ deviceId: getOrCreateDeviceId() });
+        } catch {
+          // The session may already be invalid.
+        }
+        performGlobalLogout();
+      })();
+    });
+  }, [logoutMutation, performGlobalLogout, runLogoutWithGuard]);
 
   const refetchPermissions = React.useCallback(async () => {
     if (!isUninitialized) {
@@ -321,18 +528,38 @@ const AuthProvider = ({
   const isLoading = isLoadingUser || isLoadingPermissions;
 
   return (
-    <Provider
-      token={token}
-      user={user}
-      login={login}
-      logout={logout}
-      permissions={userPermissions}
-      checkUserHasPermissions={checkUserHasPermissions ?? NOOP_CHECK_USER_HAS_PERMISSIONS}
-      refetchPermissions={refetchPermissions}
-      isLoading={isLoading}
-    >
-      {children}
-    </Provider>
+    <>
+      <Provider
+        token={token}
+        user={user}
+        login={login}
+        logout={logout}
+        permissions={userPermissions}
+        checkUserHasPermissions={checkUserHasPermissions ?? NOOP_CHECK_USER_HAS_PERMISSIONS}
+        refetchPermissions={refetchPermissions}
+        isLoading={isLoading}
+      >
+        {children}
+      </Provider>
+      <Dialog.Root
+        open={isSessionLogoutDialogOpen}
+        onOpenChange={handleSessionLogoutDialogOpenChange}
+      >
+        <ConfirmDialog
+          onConfirm={handleConfirmSessionLogout}
+          onCancel={handleCancelSessionLogout}
+          title={
+            LOGOUT_PROMPTS[sessionLogoutReason].title
+              ? formatMessage(LOGOUT_PROMPTS[sessionLogoutReason].title)
+              : undefined
+          }
+          // Forced session-dead: no Cancel that pretends the session is still valid.
+          startAction={isForcedLogout(sessionLogoutReason) ? <></> : undefined}
+        >
+          {formatMessage(LOGOUT_PROMPTS[sessionLogoutReason].body)}
+        </ConfirmDialog>
+      </Dialog.Root>
+    </>
   );
 };
 

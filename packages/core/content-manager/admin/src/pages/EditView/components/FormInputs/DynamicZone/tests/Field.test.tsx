@@ -4,8 +4,6 @@ import { Route, Routes } from 'react-router-dom';
 
 import { DynamicZone, DynamicZoneProps } from '../Field';
 
-const TEST_NAME = 'DynamicZoneComponent';
-
 /**
  * We _could_ unmock this and use it, but it requires more
  * harnessing then is necessary and it's not worth it for these
@@ -154,6 +152,73 @@ describe('DynamicZone', () => {
       expect(screen.getByText('dynamic description')).toBeInTheDocument();
 
       expect(screen.getByText('test comp - test')).toBeInTheDocument();
+    });
+
+    // Regression test for https://github.com/strapi/strapi/issues/26815
+    it('should not crash when the dynamic zone value is null', async () => {
+      render({
+        initialFormValues: {
+          DynamicZoneComponent: null,
+        },
+      });
+
+      // Before the fix, a `null` value bypassed the `value = []` default and crashed
+      // on `value.length` / `value.map`.
+      await waitForQueryToFinish();
+
+      expect(screen.getByRole('button', { name: /Add a component to/i })).toBeInTheDocument();
+    });
+
+    it('should ignore dynamic-zone component UIDs whose schema is unavailable', async () => {
+      const { user } = render({
+        attribute: {
+          ...defaultProps.attribute,
+          components: ['blog.test-como', 'shared.deleted-component'],
+        },
+      });
+
+      await waitForQueryToFinish();
+
+      await user.click(screen.getByRole('button', { name: /Add a component to/i }));
+
+      expect(screen.getByRole('button', { name: 'test comp' })).toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: 'shared.deleted-component' })
+      ).not.toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'test comp' }));
+
+      expect(await screen.findByText('test comp - toto')).toBeInTheDocument();
+    });
+
+    it('should render a preview image in the picker for a component whose info defines one', async () => {
+      useDocumentMock.mockReturnValue({
+        isLoading: false,
+        components: {
+          'blog.test-comp': {
+            category: 'blog',
+            info: { displayName: 'test comp', preview: '/_component-screenshots/test.png' },
+            attributes: {
+              name: { type: 'string', default: 'toto' },
+            },
+          },
+        },
+      });
+
+      const { user } = render({
+        attribute: {
+          ...defaultProps.attribute,
+          components: ['blog.test-comp'],
+        },
+      });
+
+      await waitForQueryToFinish();
+
+      await user.click(screen.getByRole('button', { name: /Add a component to/i }));
+
+      // info.preview must flow through Field -> ComponentCategory and render as an <img>.
+      const preview = screen.getByAltText('test comp');
+      expect(preview).toHaveAttribute('src', '/_component-screenshots/test.png');
     });
   });
 

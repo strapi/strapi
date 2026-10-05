@@ -12,9 +12,10 @@ const LocationDisplay = () => {
 };
 
 const RandomNavLink = () => {
-  const location = useLocation();
-
-  const to = useMemo(() => Math.random().toString(), [location]);
+  const { pathname } = useLocation();
+  const to = useMemo(() => {
+    return `/${pathname.length}-${Math.random()}`;
+  }, [pathname]);
 
   return <NavLink to={to}>Navigate</NavLink>;
 };

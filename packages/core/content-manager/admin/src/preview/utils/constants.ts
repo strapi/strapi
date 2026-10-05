@@ -1,21 +1,17 @@
 import { NotificationConfig } from '@strapi/admin/strapi-admin';
 import { MessageDescriptor } from 'react-intl';
 
-import { previewScript } from './previewScript';
-
-export const PREVIEW_HIGHLIGHT_COLORS = {
-  highlightHoverColor: 'transparent',
-  highlightActiveColor: 'transparent',
-} as const;
-
-const scriptResponse = previewScript({ shouldRun: false, colors: PREVIEW_HIGHLIGHT_COLORS });
-
 /**
- * These events can be changed safely. They're used by the content manager admin on one side, and by
- * the preview script on the other. We own both ends, and they're not documented to users, so we can
- * do what we want with them.
+ * These events are not part of the public API, changing them is not a breaking change.
  */
-export const INTERNAL_EVENTS = scriptResponse!.INTERNAL_EVENTS;
+export const INTERNAL_EVENTS = {
+  STRAPI_FIELD_FOCUS: 'strapiFieldFocus',
+  STRAPI_FIELD_BLUR: 'strapiFieldBlur',
+  STRAPI_FIELD_FOCUS_INTENT: 'strapiFieldFocusIntent',
+  STRAPI_FIELD_SINGLE_CLICK_HINT: 'strapiFieldSingleClickHint',
+  STRAPI_IFRAME_CLICK: 'strapiIframeClick',
+  STRAPI_RESCAN_HIGHLIGHTS: 'strapiRescanHighlights',
+} as const;
 
 /**
  * These events are documented to users, and will be hardcoded in their frontends.
@@ -25,6 +21,12 @@ export const PUBLIC_EVENTS = {
   PREVIEW_READY: 'previewReady',
   STRAPI_UPDATE: 'strapiUpdate',
   STRAPI_SCRIPT: 'strapiScript',
+  /**
+   * Dispatched as a CustomEvent on the iframe window when a blocks field changes.
+   * Host apps listen for this event to re-render their BlocksRenderer in real time.
+   * Also sent as a postMessage from the admin to the iframe (same event type).
+   */
+  STRAPI_FIELD_CHANGE: 'strapiFieldChange',
 } as const;
 
 /**

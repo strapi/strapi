@@ -1,4 +1,4 @@
-import _ from 'lodash/fp';
+import _ from 'lodash';
 import knex from 'knex';
 
 import * as types from '../../utils/types';
@@ -229,7 +229,7 @@ export const wrapWithDeepSort = (originalQuery: knex.Knex.QueryBuilder, ctx: Ord
     }));
 
     // partitionedQuery select must contain every column used for sorting
-    const orderByColumns = prefixedOrderBy.map<string>(_.prop('column'));
+    const orderByColumns = prefixedOrderBy.map((orderBy) => orderBy.column);
 
     partitionedQuery
       .select(
@@ -256,9 +256,8 @@ export const wrapWithDeepSort = (originalQuery: knex.Knex.QueryBuilder, ctx: Ord
   // Filter to string-only select items before diffing (Knex.Raw items are passed through as-is)
   const stringSelect = qb.state.select.filter((s): s is string => typeof s === 'string');
   const originalSelect = _.difference(
-    stringSelect,
-    // Remove column-based order by columns from the initial select (raw expressions are not in select)
-    columnOrderBy.map(_.prop('column'))
+    stringSelect, // Remove column-based order by columns from the initial select (raw expressions are not in select)
+    columnOrderBy.map((orderBy) => orderBy.column)
   )
     // Alias everything in resultQuery
     .map((col) => `${resultQueryAlias}.${col}`);
@@ -269,7 +268,7 @@ export const wrapWithDeepSort = (originalQuery: knex.Knex.QueryBuilder, ctx: Ord
     // Notes:
     // - Only select the first row for each partition
     // - Since we're applying the "where" statement directly on baseQuery (and not on resultQuery), we're using an inner join to avoid unwanted rows
-    .innerJoin(selectRowsAsNumberedPartitions, function () {
+    .innerJoin(selectRowsAsNumberedPartitions, function joinPartitionedRows() {
       this
         // Only select rows that are returned by T
         .on(`${partitionedQueryAlias}.id`, `${resultQueryAlias}.id`)

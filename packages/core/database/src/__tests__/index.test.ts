@@ -129,6 +129,21 @@ describe('Database', () => {
       const db = new Database(configConnectionFunction);
       expect(console.warn).toHaveBeenCalledWith(expect.stringMatching(/experimental/));
     });
+
+    it('should call dialect.configure with connection object when connection function is resolved', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires, node/no-missing-require
+      const createConnectionSpy = require('../connection').createConnection;
+      createConnectionSpy.mockClear();
+
+      const db = new Database(configConnectionFunction);
+      expect(createConnectionSpy).toHaveBeenCalledTimes(1);
+
+      const knexConfig = createConnectionSpy.mock.calls[0][0];
+      const wrappedConnectionFn = knexConfig.connection;
+      expect(typeof wrappedConnectionFn).toBe('function');
+      const conn = await wrappedConnectionFn();
+      expect(db.dialect.configure).toHaveBeenCalledWith(conn);
+    });
   });
 
   describe('Connection', () => {
@@ -400,6 +415,38 @@ describe('Query builder pagination order stability (GH #26030)', () => {
     const lower = sql.toLowerCase();
 
     expect(lower).toContain('case when');
+    expect(lower).toContain('`t0`.`id` asc');
+    expect(lower.indexOf('case when')).toBeLessThan(lower.indexOf('`t0`.`id` asc'));
+
+    await dbWithStatus.destroy();
+  });
+
+  it('includes status CASE in SELECT and id tie-break when paginated with a join (DISTINCT)', async () => {
+    const dbWithStatus = new Database(paginationQueryBuilderConfig);
+    await dbWithStatus.init({ models: [articleWithStatusSortModel] });
+
+    const qb = createQueryBuilder(articleWithStatusSortModel.uid, dbWithStatus)
+      .join({
+        alias: 't1',
+        referencedTable: 'articles_authors_lnk',
+        referencedColumn: 'article_id',
+        rootColumn: 'id',
+        rootTable: 't0',
+      })
+      .init({
+        limit: 5,
+        offset: 0,
+        orderBy: { status: 'desc' },
+      })
+      .getKnexQuery();
+
+    const { sql } = qb.toSQL();
+    const lower = sql.toLowerCase();
+    const orderIdx = lower.indexOf(' order by ');
+    const beforeOrder = orderIdx >= 0 ? lower.slice(0, orderIdx) : lower;
+
+    expect(lower).toContain('distinct');
+    expect(beforeOrder).toContain('case when');
     expect(lower).toContain('`t0`.`id` asc');
     expect(lower.indexOf('case when')).toBeLessThan(lower.indexOf('`t0`.`id` asc'));
 

@@ -1,5 +1,5 @@
 {
-  "apiError.FileTooBig": "Le fichier importé dépasse la taille maximale autorisée pour les médias.",
+  "apiError.FileTooBig": "Le fichier est trop volumineux pour être importé. Il dépasse la taille de requête maximale autorisée par le serveur.",
   "upload.generic-error": "Une erreur est survenue durant l'importation du fichier.",
   "bulk.select.label": "Sélectionner tous les médias",
   "button.next": "Suivant",

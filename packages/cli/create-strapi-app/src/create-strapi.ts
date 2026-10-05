@@ -11,6 +11,7 @@ import { copyTemplate } from './utils/template';
 import { tryGitInit } from './utils/git';
 import { trackUsage } from './utils/usage';
 import { createPackageJSON } from './utils/package-json';
+import { writePnpmWorkspaceConfig } from './utils/pnpm-config';
 import { generateDotEnv } from './utils/dot-env';
 import { isStderrError } from './types';
 
@@ -51,6 +52,24 @@ const shouldWriteYarnNodeModulesConfig = async (packageManager: Scope['packageMa
     return normalizedVersion ? semver.gte(normalizedVersion, '3.0.0') : false;
   } catch {
     return false;
+  }
+};
+
+const resolvePnpmVersion = async (packageManager: Scope['packageManager']) => {
+  if (packageManager !== 'pnpm') {
+    return null;
+  }
+
+  const userAgentVersion = getUserAgentPackageManagerVersion(packageManager);
+
+  if (userAgentVersion) {
+    return userAgentVersion;
+  }
+
+  try {
+    return await getPackageManagerVersion(packageManager);
+  } catch {
+    return null;
   }
 };
 
@@ -124,8 +143,11 @@ async function createApp(scope: Scope) {
 
   await trackUsage({ event: 'didCopyProjectFiles', scope });
 
+  const pnpmVersion = await resolvePnpmVersion(packageManager);
+  const scopeWithPnpmVersion = { ...scope, pnpmVersion };
+
   try {
-    await createPackageJSON(scope);
+    await createPackageJSON(scopeWithPnpmVersion);
 
     await trackUsage({ event: 'didWritePackageJSON', scope });
 
@@ -142,6 +164,8 @@ async function createApp(scope: Scope) {
       await fse.writeFile(join(rootPath, '.yarnrc.yml'), yarnNodeModulesConfig);
     }
 
+    await writePnpmWorkspaceConfig(scopeWithPnpmVersion, pnpmVersion);
+
     await trackUsage({ event: 'didCopyConfigurationFiles', scope });
   } catch (err) {
     await fse.remove(rootPath);
@@ -157,7 +181,7 @@ async function createApp(scope: Scope) {
         fse.writeFile(join(rootPath, 'license.txt'), data.license);
         logger.log('Your 30 days trial will be applied automatically to your project. Enjoy!');
       }
-    } catch (error) {
+    } catch {
       logger.error('Error while trying to create your trial. Please try again later.');
     }
   }
@@ -222,7 +246,7 @@ async function createApp(scope: Scope) {
           cwd: rootPath,
         });
         logger.success('Sample data added to your database');
-      } catch (error) {
+      } catch {
         logger.error('Failed to seed your database. Skipping');
       }
     }

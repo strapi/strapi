@@ -1,4 +1,4 @@
-import { omit, assoc, merge, curry, isEmpty, pick } from 'lodash/fp';
+import { curry, isEmpty, omit, pick } from 'lodash';
 
 import {
   async,
@@ -16,7 +16,7 @@ import { copyNonLocalizedFields } from './internationalization';
 import * as components from './components';
 
 import { createEntriesService } from './entries';
-import { ALLOWED_DOCUMENT_ROOT_PARAM_KEYS, pickSelectionParams } from './params';
+import { ALLOWED_DOCUMENT_ROOT_PARAM_KEYS, isParamEmpty, pickSelectionParams } from './params';
 import { createDocumentId } from '../../utils/transform-content-types-to-models';
 import { getDeepPopulate } from './utils/populate';
 import { transformParamsToQuery } from './transform/query';
@@ -28,6 +28,7 @@ import * as selfReferentialRelations from './utils/self-referential-relations';
 import entityValidator from '../entity-validator';
 import { addFirstPublishedAtToDraft, filterDataFirstPublishedAt } from './first-published-at';
 import { runParallelWithOrderedErrors } from './utils/ordered-parallel';
+import { copyCloneRelationRows, prepareCloneData } from './utils/clone-relations';
 
 const { validators } = validate;
 
@@ -40,8 +41,16 @@ const getModel = ((schema: UID.Schema) => strapi.getModel(schema)) as (schema: s
 const LOCALE_FORMAT = /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*$/;
 const MAX_LOCALE_LENGTH = 35;
 
-/** Treat as "param not provided": null, undefined, or empty string (e.g. from query/JSON). */
-const isParamEmpty = (v: unknown): boolean => v === undefined || v === null || v === '';
+/**
+ * Publication actions look up every row matching `documentId`. An empty value would match
+ * all rows whose document_id is NULL (or '') — rows left behind by a past bug — and
+ * publish/discard them as if they were a single document, so reject it outright.
+ */
+const assertDocumentIdProvided = (documentId: unknown, action: string) => {
+  if (isParamEmpty(documentId)) {
+    throw new errors.ValidationError(`Cannot ${action} a document without a documentId`);
+  }
+};
 
 export const createContentTypeRepository: RepositoryFactoryMethod = (
   uid,
@@ -220,7 +229,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     });
     const withCount = parseWithCount(params.withCount);
 
-    const result = { ...omit(PAGINATION_KEYS, params) };
+    const result = { ...omit(params, PAGINATION_KEYS) };
     if (page !== undefined) result.page = page;
     if (pageSize !== undefined) result.pageSize = pageSize;
     if (start !== undefined) result.start = start;
@@ -242,7 +251,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       return params;
     }
 
-    return pick(ALLOWED_DOCUMENT_ROOT_PARAM_KEYS as unknown as string[], params) as Record<
+    return pick(params, ALLOWED_DOCUMENT_ROOT_PARAM_KEYS as unknown as string[]) as Record<
       string,
       unknown
     >;
@@ -359,7 +368,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       i18n.localeToLookup(contentType),
       transformParamsDocumentId(uid),
       transformParamsToQuery(uid),
-      (query) => assoc('where', { ...query.where, documentId }, query)
+      (query) => ({ ...query, where: { ...query.where, documentId } })
     )(params);
 
     return strapi.db.query(uid).findOne(query);
@@ -370,16 +379,16 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
 
     const lookupQuery = await async.pipe(
       validateParams,
-      omit('status'),
+      (value) => omit(value, 'status'),
       i18n.defaultLocale(contentType),
       i18n.multiLocaleToLookup(contentType),
       transformParamsToQuery(uid),
-      (query) => assoc('where', { ...query.where, documentId }, query)
+      (query) => ({ ...query, where: { ...query.where, documentId } })
     )(params);
 
     const selectionQuery = await async.pipe(
       validateParams,
-      omit('status'),
+      (value) => omit(value, 'status'),
       pickSelectionParams,
       transformParamsToQuery(uid)
     )(params);
@@ -400,7 +409,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
   }
 
   async function create(opts = {} as any) {
-    const { documentId, ...params } = opts;
+    const { documentId: _documentId, ...params } = opts;
 
     const queryParams = await async.pipe(
       validateParams,
@@ -447,16 +456,42 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       populate: getDeepPopulate(uid, { relationalFields: ['id'] }),
     });
 
+    const newDocumentId = createDocumentId();
+
     const clonedEntries = await async.map(
       entriesToClone,
-      async.pipe(
-        omit(['id', 'createdAt', 'updatedAt']),
-        // assign new documentId
-        assoc('documentId', createDocumentId()),
-        // Merge new data into it
-        (data) => merge(data, queryParams.data),
-        (data) => entries.create({ ...queryParams, data, status: 'draft' })
-      )
+      async (entryToClone: Record<string, unknown>) => {
+        const sourceEntryId = entryToClone.id as number;
+        const originalData = omit(entryToClone, ['id', 'createdAt', 'updatedAt']) as Record<
+          string,
+          unknown
+        >;
+        const { data, relationsToCopy } = await prepareCloneData(
+          originalData,
+          queryParams.data,
+          contentType,
+          (modelUid) => strapi.getModel(modelUid as UID.Schema)
+        );
+        const dataWithDocumentId = { ...data, documentId: newDocumentId };
+        const doc = await entries.create({
+          ...queryParams,
+          data: dataWithDocumentId,
+          status: 'draft',
+        });
+
+        await copyCloneRelationRows(strapi, uid, sourceEntryId, doc.id, relationsToCopy);
+
+        if (relationsToCopy.length === 0) {
+          return doc;
+        }
+
+        const selectionQuery = transformParamsToQuery(
+          uid,
+          pickSelectionParams({ ...queryParams, status: 'draft' }) as any
+        );
+
+        return strapi.db.query(uid).findOne({ ...selectionQuery, where: { id: doc.id } });
+      }
     );
 
     clonedEntries.forEach(emitEvent('entry.create'));
@@ -480,7 +515,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       i18n.localeToData(contentType)
     )(params);
 
-    const { data, ...restParams } = await transformParamsDocumentId(uid, queryParams || {});
+    const { data: _data, ...restParams } = await transformParamsDocumentId(uid, queryParams || {});
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams || {}) as any);
 
     // Validation
@@ -540,6 +575,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
 
   async function publish(opts = {} as any) {
     const { documentId, ...params } = opts;
+    assertDocumentIdProvided(documentId, 'publish');
 
     const queryParams = await async.pipe(
       validateParams,
@@ -584,8 +620,11 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       oldVersions: oldPublishedVersions,
     });
 
-    // Load self-referential relations from draft entries before publishing
-    const selfRelationsToSync = await selfReferentialRelations.load(uid, draftsToPublish);
+    const selfRelationsToSync = await selfReferentialRelations.load(
+      uid,
+      draftsToPublish,
+      'published'
+    );
 
     // Delete old published versions
     await async.map(oldPublishedVersions, (entry: any) => entries.delete(entry.id));
@@ -613,8 +652,12 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       bidirectionalRelationsToSync
     );
 
-    // Sync self-referential relations with the new published entries
-    await selfReferentialRelations.sync(draftsToPublish, publishedEntries, selfRelationsToSync);
+    // Map both old published IDs and updated draft IDs to the new published entries.
+    await selfReferentialRelations.sync(
+      [...oldPublishedVersions, ...updatedDraft],
+      publishedEntries,
+      selfRelationsToSync
+    );
 
     publishedEntries.forEach(emitEvent('entry.publish'));
 
@@ -623,13 +666,14 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
 
   async function unpublish(opts = {} as any) {
     const { documentId, ...params } = opts;
+    assertDocumentIdProvided(documentId, 'unpublish');
 
     const query = await async.pipe(
       validateParams,
       i18n.defaultLocale(contentType),
       i18n.multiLocaleToLookup(contentType),
       transformParamsToQuery(uid),
-      (query) => assoc('where', { ...query.where, documentId, publishedAt: { $ne: null } }, query)
+      (query) => ({ ...query, where: { ...query.where, documentId, publishedAt: { $ne: null } } })
     )(params);
 
     // Delete all published versions
@@ -642,6 +686,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
 
   async function discardDraft(opts = {} as any) {
     const { documentId, ...params } = opts;
+    assertDocumentIdProvided(documentId, 'discard the draft of');
 
     const queryParams = await async.pipe(
       validateParams,
@@ -686,8 +731,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       oldVersions: oldDrafts,
     });
 
-    // Load self-referential relations from published entries before discarding
-    const selfRelationsToSync = await selfReferentialRelations.load(uid, versionsToDraft);
+    const selfRelationsToSync = await selfReferentialRelations.load(uid, versionsToDraft, 'draft');
 
     // Delete old drafts
     await async.map(oldDrafts, (entry: any) => entries.delete(entry.id));
@@ -710,8 +754,12 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       bidirectionalRelationsToSync
     );
 
-    // Sync self-referential relations with the new draft entries
-    await selfReferentialRelations.sync(versionsToDraft, draftEntries, selfRelationsToSync);
+    // Map both old draft IDs and published source IDs to the new draft entries.
+    await selfReferentialRelations.sync(
+      [...oldDrafts, ...versionsToDraft],
+      draftEntries,
+      selfRelationsToSync
+    );
 
     draftEntries.forEach(emitEvent('entry.draft-discard'));
     return { documentId, entries: draftEntries };

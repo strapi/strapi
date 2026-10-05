@@ -3,6 +3,12 @@ import type { Core } from '@strapi/types';
 
 import { formatApplicationError, formatHttpError, formatInternalError } from '../services/errors';
 
+declare module 'koa' {
+  interface BaseResponse {
+    _explicitStatus: boolean;
+  }
+}
+
 const errorMiddleware: Core.MiddlewareFactory = (/* _, { strapi } */) => {
   return async (ctx, next) => {
     try {

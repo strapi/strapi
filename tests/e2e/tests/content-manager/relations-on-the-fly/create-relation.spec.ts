@@ -31,6 +31,20 @@ test.describe('Relations on the fly - Create a Relation', () => {
     await expect(page.getByRole('heading', { name: 'Create an entry' })).toBeVisible();
   });
 
+  test('I want the parent pre-filled when creating a relation on the fly', async ({ page }) => {
+    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
+    await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
+
+    await page.getByRole('combobox', { name: 'authors' }).click();
+    await page.getByRole('option', { name: 'Create a relation' }).click();
+
+    await expect(page.getByRole('banner').getByText('Create a relation')).toBeVisible();
+    await expect(
+      page.getByRole('dialog').getByRole('button', { name: 'West Ham post match analysis' })
+    ).toBeVisible();
+  });
+
   test('I want to click on a new relation in the create relation modal without saving the data in the form', async ({
     page,
   }) => {
@@ -73,10 +87,12 @@ test.describe('Relations on the fly - Create a Relation', () => {
     const name = page.getByRole('textbox', { name: 'name' });
     await name.fill('Mr. Coach Hair');
 
-    // Open a new relation in the articles field
-    await clickAndWait(page, page.getByRole('combobox', { name: 'articles' }));
-    await page.getByRole('option', { name: 'West Ham post match analysis' }).click();
-    await clickAndWait(page, page.getByRole('button', { name: 'West Ham post match analysis' }));
+    // Parent article is already on the inverse; open it instead of re-adding from the combobox
+    const parentRelation = page
+      .getByRole('dialog')
+      .getByRole('button', { name: 'West Ham post match analysis' });
+    await expect(parentRelation).toBeVisible();
+    await clickAndWait(page, parentRelation);
 
     // Check the confirmation modal is shown and click confirm
     await clickAndWait(page, page.getByRole('button', { name: 'Confirm' }));

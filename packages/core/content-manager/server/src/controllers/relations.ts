@@ -1,4 +1,4 @@
-import { prop, uniq, uniqBy, concat, flow, isEmpty } from 'lodash/fp';
+import { property, uniqBy, concat, flow, isEmpty } from 'lodash';
 
 import { isOperatorOfType, contentTypes, relations, errors } from '@strapi/utils';
 import type { Data, Modules, UID } from '@strapi/types';
@@ -111,9 +111,9 @@ const validateLocale = (sourceUid: UID.Schema, targetUid: UID.ContentType, local
   const sourceModel = strapi.getModel(sourceUid);
   const targetModel = strapi.getModel(targetUid);
 
-  const isLocalized = strapi.plugin('i18n').service('content-types').isLocalizedContentType;
-  const isSourceLocalized = isLocalized(sourceModel);
-  const isTargetLocalized = isLocalized(targetModel);
+  // Without a localization provider, neither side is localized
+  const isSourceLocalized = strapi.localization.isLocalizedContentType(sourceModel);
+  const isTargetLocalized = strapi.localization.isLocalizedContentType(targetModel);
 
   return {
     locale,
@@ -239,17 +239,14 @@ export default {
     const targetSchema = strapi.getModel(targetUid);
 
     const mainField = flow(
-      prop(`metadatas.${targetField}.edit.mainField`),
+      property(`metadatas.${targetField}.edit.mainField`),
       (mainField) => mainField || 'id',
       (mainField) => sanitizeMainField(targetSchema, mainField, userAbility)
     )(modelConfig);
 
-    const fieldsToSelect = uniq([
-      mainField,
-      PUBLISHED_AT_ATTRIBUTE,
-      UPDATED_AT_ATTRIBUTE,
-      'documentId',
-    ]);
+    const fieldsToSelect = [
+      ...new Set([mainField, PUBLISHED_AT_ATTRIBUTE, UPDATED_AT_ATTRIBUTE, 'documentId']),
+    ];
 
     if (isTargetLocalized) {
       fieldsToSelect.push('locale');
@@ -296,7 +293,13 @@ export default {
       },
     } = await this.extractAndValidateRequestInfo(ctx, id);
 
-    const { idsToOmit, idsToInclude, _q, ...query } = ctx.request.query;
+    const {
+      idsToOmit,
+      idsToInclude,
+      // `_q` is the public query parameter name; keep the alias grep-able.
+      _q: search,
+      ...query
+    } = ctx.request.query;
 
     const permissionChecker = getService('permission-checker').create({
       userAbility: ctx.state.userAbility,
@@ -346,6 +349,11 @@ export default {
        */
       if (sourceModelType === 'contentType') {
         where.document_id = id;
+
+        const sourcePublishedAt = getPublishedAtClause(status, sourceUid);
+        if (!isEmpty(sourcePublishedAt)) {
+          where.published_at = sourcePublishedAt;
+        }
       } else {
         where.id = id;
       }
@@ -389,15 +397,15 @@ export default {
      * Apply a filter to the mainField based on the search query and filter operator
      * searching should be allowed only on mainField for permission reasons
      */
-    if (_q) {
-      const _filter = isOperatorOfType('where', query._filter) ? query._filter : '$containsi';
-      addFiltersClause(queryParams, { [mainField]: { [_filter]: _q } });
+    if (search) {
+      const filter = isOperatorOfType('where', query._filter) ? query._filter : '$containsi';
+      addFiltersClause(queryParams, { [mainField]: { [filter]: search } });
     }
 
     if (idsToOmit?.length > 0) {
       // If we have ids to omit, we should filter them out
       addFiltersClause(queryParams, {
-        id: { $notIn: uniq(idsToOmit) },
+        id: { $notIn: [...new Set(idsToOmit)] },
       });
     }
 
@@ -503,7 +511,7 @@ export default {
     });
 
     // NOTE: the order is very important to make sure sanitized relations are kept in priority
-    const relationsUnion = uniqBy('id', concat(sanitizedRes.results, res.results));
+    const relationsUnion = uniqBy(concat(sanitizedRes.results, res.results), 'id');
 
     ctx.body = {
       pagination: res.pagination || {

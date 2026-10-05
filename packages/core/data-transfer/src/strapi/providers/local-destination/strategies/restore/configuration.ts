@@ -1,18 +1,24 @@
 import { Writable } from 'stream';
-import { omit } from 'lodash/fp';
+import { omit } from 'lodash';
 import chalk from 'chalk';
 import type { Core } from '@strapi/types';
 import { ProviderTransferError } from '../../../../../errors/providers';
-import { IConfiguration, Transaction } from '../../../../../../types';
+import { IConfiguration, Transaction } from '../../../../../types';
+import { restoreProjectSettingsRow } from '../../../../utils/project-settings-logos';
 
-const omitInvalidCreationAttributes = omit(['id']);
+const omitInvalidCreationAttributes = <T extends object>(data: T) => omit(data, ['id']);
 
 const restoreCoreStore = async <T extends { value: unknown }>(strapi: Core.Strapi, values: T) => {
   const data = omitInvalidCreationAttributes(values);
+  const row = await restoreProjectSettingsRow(
+    strapi,
+    data as unknown as { key: string; value: unknown }
+  );
+
   return strapi.db.query('strapi::core-store').create({
     data: {
-      ...data,
-      value: JSON.stringify(data.value),
+      ...row,
+      value: JSON.stringify(row.value),
     },
   });
 };
@@ -51,7 +57,7 @@ export const createConfigurationWriteStream = async (
             new ProviderTransferError(
               `Failed to import ${chalk.yellowBright(config.type)} (${chalk.greenBright(
                 config.value.id
-              )}`
+              )}): ${error instanceof Error ? error.message : String(error)}`
             )
           );
         }

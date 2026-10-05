@@ -6,7 +6,7 @@ import { useNavigate, useMatch } from 'react-router-dom';
 import { Page } from '../../../../admin/src/components/PageHelpers';
 import { useTypedDispatch } from '../../../../admin/src/core/store/hooks';
 import { login } from '../../../../admin/src/reducer';
-import { getCookieValue } from '../../../../admin/src/utils/cookies';
+import { AUTH_COOKIE_NAME, getCookieValue } from '../../../../admin/src/utils/cookies';
 
 const AuthResponse = () => {
   const match = useMatch('/auth/login/:authResponse');
@@ -32,7 +32,7 @@ const AuthResponse = () => {
     }
 
     if (match?.params.authResponse === 'success') {
-      const jwtToken = getCookieValue('jwtToken');
+      const jwtToken = getCookieValue(AUTH_COOKIE_NAME);
 
       if (jwtToken) {
         dispatch(

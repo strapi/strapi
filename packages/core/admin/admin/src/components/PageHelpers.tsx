@@ -174,9 +174,9 @@ export interface ProtectProps {
 /**
  * @public
  * @description A wrapper component that should be used to protect a page. It will check the permissions
- * you pass to it and render the children if the user has the required permissions. If a user does not have ALL
- * the required permissions, it will redirect the user to the home page. Whilst these checks happen it will render
- * the loading component and should the check fail it will render the error component with a notification.
+ * you pass to it and render the children if any of the user's matching permissions grants access. If none do,
+ * it renders the NoPermissions component. Whilst these checks happen it will render the loading component
+ * and should the check fail it will render the error component with a notification.
  */
 const Protect = ({ permissions = [], children }: ProtectProps) => {
   const userPermissions = useAuth('Protect', (state) => state.permissions);
@@ -190,9 +190,10 @@ const Protect = ({ permissions = [], children }: ProtectProps) => {
       ) >= 0
   );
 
-  const shouldCheckConditions = matchingPermissions.some(
-    (perm) => Array.isArray(perm.conditions) && perm.conditions.length > 0
-  );
+  const hasConditions = (permission: Permission) =>
+    Array.isArray(permission.conditions) && permission.conditions.length > 0;
+
+  const shouldCheckConditions = matchingPermissions.some(hasConditions);
 
   const { isLoading, error, data } = useCheckPermissionsQuery(
     {
@@ -225,10 +226,12 @@ const Protect = ({ permissions = [], children }: ProtectProps) => {
 
   const { data: permissionsData } = data || {};
 
+  const hasUnconditionedPermission = matchingPermissions.some(
+    (permission) => !hasConditions(permission)
+  );
+
   const canAccess =
-    shouldCheckConditions && permissionsData
-      ? !permissionsData.includes(false)
-      : matchingPermissions.length > 0;
+    hasUnconditionedPermission || (permissionsData ?? []).some((perm) => perm === true);
 
   if (!canAccess) {
     return <NoPermissions />;

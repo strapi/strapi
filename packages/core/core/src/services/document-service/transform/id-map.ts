@@ -1,6 +1,8 @@
 import type { Core, Data, UID } from '@strapi/types';
 import { async, contentTypes } from '@strapi/utils';
 
+import { isLocalizedContentType } from './relations/utils/i18n';
+
 const hasDraftAndPublish = (uid: UID.CollectionType) => {
   const model = strapi.getModel(uid);
   return contentTypes.hasDraftAndPublish(model);
@@ -90,12 +92,17 @@ const createIdMap = ({ strapi }: { strapi: Core.Strapi }): IdMap => {
         Object.values(idsByUidAndLocale),
         async ({ uid, locale, documentIds, status }: any) => {
           const findParams = {
-            select: ['id', 'documentId', 'locale', 'publishedAt'],
+            select: ['id', 'documentId', 'publishedAt'],
             where: {
               documentId: { $in: documentIds },
-              locale: locale || null,
             },
           } as any;
+
+          // Without a localization provider, the model has no `locale` column
+          if (isLocalizedContentType(uid)) {
+            findParams.select.push('locale');
+            findParams.where.locale = locale || null;
+          }
 
           if (hasDraftAndPublish(uid)) {
             findParams.where.publishedAt = status === 'draft' ? null : { $ne: null };
@@ -104,11 +111,11 @@ const createIdMap = ({ strapi }: { strapi: Core.Strapi }): IdMap => {
           const result = await strapi?.db?.query(uid).findMany(findParams);
 
           // 3. Store result in loadedIds
-          result?.forEach(({ documentId, id, locale, publishedAt }: any) => {
+          result?.forEach(({ documentId, id, locale: entryLocale, publishedAt }: any) => {
             const key = encodeKey({
               documentId,
               uid,
-              locale,
+              locale: isLocalizedContentType(uid) ? entryLocale : null,
               status: publishedAt ? 'published' : 'draft',
             });
             loadedIds.set(key, id);

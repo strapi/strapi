@@ -97,7 +97,7 @@ const getErrorMessage = (err: Error) => {
   try {
     const error = JSON.parse(err.message);
     return error.error;
-  } catch (e) {
+  } catch {
     return err;
   }
 };
@@ -173,15 +173,8 @@ const ChatContent: React.FC<{
   return (
     <>
       <Flex direction="column" gap={5}>
-        {messages.map((message, idx) => (
-          <ChatMessage
-            key={message.id}
-            message={message}
-            // Chat loading and message is the last one
-            isLoading={
-              (status === 'streaming' || status === 'submitted') && idx === messages.length - 1
-            }
-          />
+        {messages.map((message) => (
+          <ChatMessage key={message.id} message={message} />
         ))}
         {status === 'error' && <ChatError />}
       </Flex>

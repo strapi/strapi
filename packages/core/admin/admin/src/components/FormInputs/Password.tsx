@@ -13,7 +13,7 @@ const PasswordInput = forwardRef<HTMLInputElement, StringProps>(
   ({ name, required, label, hint, labelAction, ...props }, ref) => {
     const [showPassword, setShowPassword] = useState(false);
     const { formatMessage } = useIntl();
-    const field = useField(name);
+    const field = useField<string>(name);
     const fieldRef = useFocusInputField<HTMLInputElement>(name);
 
     const composedRefs = useComposedRefs(ref, fieldRef);

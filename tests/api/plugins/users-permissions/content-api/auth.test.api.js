@@ -122,6 +122,8 @@ describe('Auth API', () => {
       });
       expect(bcrypt.compareSync(internals.newPassword, user.password)).toBe(true);
 
+      rq.setToken(res.body.jwt);
+
       // check results
       expect(res.statusCode).toBe(200);
       expect(res.body).toMatchObject({

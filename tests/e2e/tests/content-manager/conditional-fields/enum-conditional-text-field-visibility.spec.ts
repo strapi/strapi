@@ -39,7 +39,7 @@ test.describe('Conditional Fields - Enum-controlled conditional text fields and 
     await fillField(page, { name: 'personality', type: 'enumeration', value: 'lazy' });
 
     // Verify favoriteToy field is hidden
-    await page.getByLabel('favoriteToy').isHidden();
+    await expect(page.getByLabel('favoriteToy')).toBeHidden();
 
     // Save the content
     await page.getByRole('button', { name: 'Save' }).click();

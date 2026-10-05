@@ -9,6 +9,9 @@ import { AIMessage } from '../lib/types/messages';
 
 import { useStrapiChat } from './ChatProvider';
 
+import type { Schema } from '../lib/types/schema';
+import type { Internal } from '@strapi/types';
+
 interface SchemaContextType {
   lastRevisedId: string | null;
   setLastRevisedId: (id: string | null) => void;
@@ -22,6 +25,11 @@ const TYPE_TO_ACTION: Record<string, 'add' | 'update' | 'delete'> = {
   remove: 'delete',
 };
 
+type SchemaGenerationOutput = {
+  schemas?: Schema[];
+  error?: unknown;
+};
+
 function extractSchemaChangesFromMessage(message: AIMessage): SchemaChange[] {
   if (message.role !== 'assistant') return [];
 
@@ -31,7 +39,7 @@ function extractSchemaChangesFromMessage(message: AIMessage): SchemaChange[] {
     // We only care about the schema generation tool
     if (part && typeof part === 'object' && part.type === 'tool-schemaGenerationTool') {
       // Prefer validated schemas from output; ignore if there's an error or no output yet
-      const output = part.output as { schemas?: any[]; error?: unknown } | undefined;
+      const output = part.output as SchemaGenerationOutput | undefined;
       if (!output || output.error || !Array.isArray(output.schemas)) return;
 
       const baseId = part.toolCallId ?? `${message.id}-${partIndex}`;
@@ -69,28 +77,45 @@ export const SchemaChatProvider = ({ children }: { children: ReactNode }) => {
       GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.addField
     );
 
-    schemaChanges.forEach((change: SchemaChange) => {
-      const oldSchema =
-        contentTypes[change.schema.uid as any] || components[change.schema.uid as any];
-      const newSchema = transformChatToCTB(change.schema, oldSchema);
+    // Changes are applied one at a time: a change that renames existing fields
+    // may prompt the user for consent, and prompts must not overlap.
+    const applyChanges = async () => {
+      for (const change of schemaChanges) {
+        const oldSchema =
+          change.schema.modelType === 'contentType'
+            ? contentTypes[change.schema.uid as Internal.UID.ContentType]
+            : components[change.schema.uid as Internal.UID.Component];
+        const newSchema = transformChatToCTB(change.schema, oldSchema);
 
-      // Check if any attributes/fields are being added to any schema (existing or new)
-      if (!isAddFieldCompleted && change.schema.attributes) {
-        // If a field is being added or updated, dispatch guided tour action to show Save tooltip
-        if (change.type !== 'remove' && Object.keys(change.schema.attributes).length > 0) {
-          dispatch({
-            type: 'set_completed_actions',
-            payload: [GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.addField],
-          });
+        // Check if any attributes/fields are being added to any schema (existing or new)
+        if (!isAddFieldCompleted && change.schema.attributes) {
+          // If a field is being added or updated, dispatch guided tour action to show Save tooltip
+          if (change.type !== 'remove' && Object.keys(change.schema.attributes).length > 0) {
+            dispatch({
+              type: 'set_completed_actions',
+              payload: [GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.addField],
+            });
+          }
+        }
+
+        // eslint-disable-next-line no-await-in-loop
+        const applied = await applyChange({
+          action: TYPE_TO_ACTION[change.type]!,
+          schema: newSchema,
+        });
+
+        // The user cancelled a rename prompt: stop here. Earlier changes in this
+        // batch stay applied (they are in the undo history); the message is not
+        // marked as revised.
+        if (!applied) {
+          return;
         }
       }
 
-      applyChange({
-        action: TYPE_TO_ACTION[change.type]!,
-        schema: newSchema,
-      });
-    });
-    setLastRevisedId(latestMessage.id);
+      setLastRevisedId(latestMessage.id);
+    };
+
+    applyChanges();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages]);

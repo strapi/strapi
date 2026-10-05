@@ -17,6 +17,9 @@ declare global {
       future: {
         isEnabled: (name: keyof NonNullable<Modules.Features.FeaturesConfig['future']>) => boolean;
       };
+      featureFlags: {
+        isEnabled: (name: keyof Omit<Modules.Features.FeaturesConfig, 'future'>) => boolean;
+      };
       features: {
         SSO: 'sso';
         AUDIT_LOGS: 'audit-logs';
@@ -28,7 +31,7 @@ declare global {
         nps?: boolean;
         docLinks?: boolean;
       };
-      projectType: 'Community' | 'Enterprise';
+      projectType: 'Community' | 'Growth' | 'Enterprise';
       telemetryDisabled: boolean;
       ai: {
         enabled: boolean;

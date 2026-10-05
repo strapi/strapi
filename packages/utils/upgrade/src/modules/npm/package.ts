@@ -34,7 +34,7 @@ export class Package implements PackageInterface {
     return this.npmPackage !== null;
   }
 
-  private assertPackageIsLoaded(npmPackage: NPMPackage | null): asserts npmPackage is NPMPackage {
+  private assertPackageIsLoaded(_npmPackage: NPMPackage | null): asserts _npmPackage is NPMPackage {
     assert(this.isLoaded, 'The package is not loaded yet');
   }
 
@@ -109,7 +109,7 @@ export class Package implements PackageInterface {
 
       const { stdout } = await execa(packageManagerName, [...command], { timeout: 10_000 });
       return this.normalizeRegistryOutput(stdout);
-    } catch (error) {
+    } catch {
       this.logger.warn('Failed to determine registry URL from package manager');
       return undefined;
     }
@@ -141,7 +141,6 @@ export class Package implements PackageInterface {
     const packageURL = `${await this.determineRegistryUrl()}/${this.name}`;
 
     const response = await fetch(packageURL, {
-      // @ts-expect-error Node.js fetch supports dispatcher (undici extension)
       dispatcher: agent,
     });
 

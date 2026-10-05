@@ -1,8 +1,7 @@
 import { join, extname, basename } from 'path';
 import fse, { existsSync } from 'fs-extra';
-import _ from 'lodash';
+import _, { isEmpty } from 'lodash';
 import { strings, importDefault } from '@strapi/utils';
-import { isEmpty } from 'lodash/fp';
 import type { Core, Struct } from '@strapi/types';
 import { getGlobalId, type ContentTypeDefinition } from '../domain/content-type';
 
@@ -34,6 +33,8 @@ const normalizeName = (name: string) => (strings.isKebabCase(name) ? name : _.ke
 
 const isDirectory = (fd: fse.Dirent) => fd.isDirectory();
 const isDotFile = (fd: fse.Dirent) => fd.name.startsWith('.');
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 export default async function loadAPIs(strapi: Core.Strapi) {
   if (!existsSync(strapi.dirs.dist.api)) {
@@ -98,9 +99,10 @@ const loadAPI = async (apiName: string, dir: string) => {
       loadContentTypes(apiName, join(dir, 'content-types')),
     ])
   ).map((result) => result?.result);
+  const apiIndex = isRecord(index) ? index : {};
 
   return {
-    ...(index || {}),
+    ...apiIndex,
     config: config || {},
     routes: routes || [],
     controllers: controllers || {},

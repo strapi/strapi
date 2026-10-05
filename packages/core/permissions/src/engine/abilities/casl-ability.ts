@@ -1,7 +1,7 @@
 import * as sift from 'sift';
 import qs from 'qs';
 import { AbilityBuilder, Ability } from '@casl/ability';
-import { pick, isNil, isObject } from 'lodash/fp';
+import { pick, isObject } from 'lodash';
 import type { ParametrizedAction, PermissionRule } from '../../types';
 
 export interface CustomAbilityBuilder {
@@ -25,10 +25,29 @@ const allowedOperations = [
   '$elemMatch',
 ] as const;
 
-const operations = pick(allowedOperations, sift);
+const operations = pick(sift, allowedOperations);
 
+/**
+ * Match an RBAC condition query against an entity in memory with sift.
+ */
 const conditionsMatcher = (conditions: unknown) => {
-  return sift.createQueryTester(conditions, { operations });
+  try {
+    return sift.createQueryTester(conditions, { operations });
+  } catch (error) {
+    if (error instanceof Error) {
+      const [, operator] = error.message.match(/^Unsupported operation: (.+)$/) ?? [];
+
+      if (operator) {
+        throw new Error(
+          `RBAC condition uses unsupported operator "${operator}". Conditions are matched in memory and support only: ${allowedOperations.join(
+            ', '
+          )}.`
+        );
+      }
+    }
+
+    throw error;
+  }
 };
 
 const buildParametrizedAction = ({ name, params }: ParametrizedAction) => {
@@ -50,7 +69,7 @@ export const caslAbilityBuilder = (): CustomAbilityBuilder => {
 
       return can(
         caslAction,
-        isNil(subject) ? 'all' : subject,
+        subject == null ? 'all' : subject,
         fields,
         isObject(condition) ? condition : undefined
       );
@@ -64,7 +83,7 @@ export const caslAbilityBuilder = (): CustomAbilityBuilder => {
       const ability = build({ conditionsMatcher });
 
       function decorateCan(originalCan: Ability['can']) {
-        return function (...args: Parameters<Ability['can']>) {
+        return function canWithParametrizedAction(...args: Parameters<Ability['can']>) {
           const [action, ...rest] = args;
           const caslAction = typeof action === 'string' ? action : buildParametrizedAction(action);
 

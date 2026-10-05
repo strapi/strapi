@@ -9,6 +9,7 @@ import {
   createContext,
   useForm,
   useQueryParams,
+  type StrapiAppContextValue,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
@@ -22,6 +23,7 @@ import {
   TextButton,
 } from '@strapi/design-system';
 import { ArrowLeft, ArrowsOut, WarningCircle } from '@strapi/icons';
+import { generateNKeysBetween } from 'fractional-indexing';
 import { useIntl } from 'react-intl';
 import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -29,19 +31,21 @@ import { styled } from 'styled-components';
 import { COLLECTION_TYPES, SINGLE_TYPES } from '../../../../../constants/collections';
 import { PERMISSIONS } from '../../../../../constants/plugin';
 import { buildValidParams } from '../../../../../exports';
-import { DocumentRBAC } from '../../../../../features/DocumentRBAC';
+import { DocumentRBAC, useDocumentRBAC } from '../../../../../features/DocumentRBAC';
 import { useDoc, useDocument, type UseDocument } from '../../../../../hooks/useDocument';
 import { type DocumentMeta } from '../../../../../hooks/useDocumentContext';
 import { useDocumentLayout } from '../../../../../hooks/useDocumentLayout';
 import { useLazyGetDocumentQuery } from '../../../../../services/documents';
+import { setIn } from '../../../../../utils/objects';
 import { createYupSchema } from '../../../../../utils/validation';
 import { DocumentActionButton } from '../../../components/DocumentActions';
 import { DocumentStatus } from '../../DocumentStatus';
-import { FormLayout } from '../../FormLayout';
+import { FormLayout, type FormLayoutProps } from '../../FormLayout';
 import { ComponentProvider } from '../ComponentContext';
 
 import type { RelationOpenMode } from '../../../../../../../shared/contracts/content-types';
 import type { ContentManagerPlugin, DocumentActionProps } from '../../../../../content-manager';
+import type { AnyData } from '../../../utils/data';
 
 export function getCollectionType(url: string) {
   const regex = new RegExp(`(${COLLECTION_TYPES}|${SINGLE_TYPES})`);
@@ -69,6 +73,27 @@ const getFullPageUrl = (currentDocumentMeta: DocumentMeta): string => {
  * RelationModalRenderer
  * -----------------------------------------------------------------------------------------------*/
 
+/**
+ * A local "connect" edit waiting to be applied to a document that isn't the modal's current one.
+ * Needed because every level of a nested relation-on-the-fly chain (root document aside) shares
+ * one Form instance whose values get wholesale-replaced by fresh initialValues on every
+ * `documentHistory` navigation — writing the field directly while a different level is current
+ * would land on the wrong document and then immediately be discarded. Instead the patch is stashed
+ * here, keyed by the target document, and merged back into that document's initialValues once it
+ * becomes current again (see `RelationModal`'s `initialValues` below).
+ */
+interface PendingConnectPatch {
+  fieldToConnect: string;
+  relationValue: AnyData;
+  componentUIDPath?: string;
+  componentUID?: string;
+}
+
+const getDocumentHistoryKey = (meta: Pick<DocumentMeta, 'model' | 'documentId'>) =>
+  `${meta.model}::${meta.documentId}`;
+
+const EMPTY_PENDING_CONNECTS: PendingConnectPatch[] = [];
+
 interface State {
   documentHistory: DocumentMeta[];
   confirmDialogIntent:
@@ -81,6 +106,11 @@ interface State {
   hasUnsavedChanges: boolean;
   fieldToConnect?: string;
   fieldToConnectUID?: string;
+  getParentFormValues?: () => AnyData;
+  // Sets a field directly on the parent's own (live, unsaved) form state, so connecting a
+  // newly-created relation doesn't require persisting the whole parent document to the server.
+  setParentFormValue?: (path: string, value: unknown) => void;
+  pendingConnects: Record<string, PendingConnectPatch[]>;
 }
 
 type Action =
@@ -91,6 +121,8 @@ type Action =
         shouldBypassConfirmation: boolean;
         fieldToConnect?: string;
         fieldToConnectUID?: string;
+        getParentFormValues?: () => AnyData;
+        setParentFormValue?: (path: string, value: unknown) => void;
       };
     }
   | {
@@ -105,8 +137,9 @@ type Action =
       payload: {
         document: DocumentMeta;
         shouldBypassConfirmation: boolean;
-        fieldToConnect?: string;
-        fieldToConnectUID?: string;
+        // Present when the document being connected belongs to a NESTED parent (one still further
+        // up `documentHistory`, not the root document) — see `pendingConnects` on `State`.
+        connectPatch?: PendingConnectPatch;
       };
     }
   | {
@@ -119,6 +152,10 @@ type Action =
   | {
       type: 'SET_HAS_UNSAVED_CHANGES';
       payload: { hasUnsavedChanges: boolean };
+    }
+  | {
+      type: 'CLEAR_PENDING_CONNECTS';
+      payload: { documentMeta: Pick<DocumentMeta, 'model' | 'documentId'> };
     };
 
 function reducer(state: State, action: Action): State {
@@ -130,6 +167,8 @@ function reducer(state: State, action: Action): State {
           confirmDialogIntent: action.payload.document,
           fieldToConnect: action.payload.fieldToConnect,
           fieldToConnectUID: action.payload.fieldToConnectUID,
+          getParentFormValues: action.payload.getParentFormValues,
+          setParentFormValue: action.payload.setParentFormValue,
         };
       }
 
@@ -146,6 +185,12 @@ function reducer(state: State, action: Action): State {
         isModalOpen: true,
         fieldToConnect: hasToResetDocumentHistory ? undefined : action.payload.fieldToConnect,
         fieldToConnectUID: hasToResetDocumentHistory ? undefined : action.payload.fieldToConnectUID,
+        getParentFormValues: hasToResetDocumentHistory
+          ? undefined
+          : action.payload.getParentFormValues,
+        setParentFormValue: hasToResetDocumentHistory
+          ? undefined
+          : action.payload.setParentFormValue,
       };
     case 'GO_BACK':
       if (state.hasUnsavedChanges && !action.payload.shouldBypassConfirmation) {
@@ -168,8 +213,25 @@ function reducer(state: State, action: Action): State {
         hasUnsavedChanges: false,
         isModalOpen: false,
         confirmDialogIntent: null,
+        pendingConnects: {},
       };
-    case 'GO_TO_CREATED_RELATION':
+    case 'GO_TO_CREATED_RELATION': {
+      // Anything beyond the second-to-last history entry is a nested parent still open further up
+      // the stack — the root document (outside documentHistory entirely) is handled directly via
+      // setParentFormValue instead, since its Form never gets replaced by modal navigation.
+      const nestedParentMeta =
+        state.documentHistory.length >= 2 ? state.documentHistory.at(-2) : undefined;
+      const pendingConnects =
+        nestedParentMeta && action.payload.connectPatch
+          ? {
+              ...state.pendingConnects,
+              [getDocumentHistoryKey(nestedParentMeta)]: [
+                ...(state.pendingConnects[getDocumentHistoryKey(nestedParentMeta)] ?? []),
+                action.payload.connectPatch,
+              ],
+            }
+          : state.pendingConnects;
+
       return {
         ...state,
         // Reset document history if the last item has documentId undefined
@@ -180,7 +242,11 @@ function reducer(state: State, action: Action): State {
         isModalOpen: true,
         fieldToConnect: undefined,
         fieldToConnectUID: undefined,
+        getParentFormValues: undefined,
+        setParentFormValue: undefined,
+        pendingConnects,
       };
+    }
     case 'CANCEL_CONFIRM_DIALOG':
       return {
         ...state,
@@ -197,16 +263,46 @@ function reducer(state: State, action: Action): State {
         confirmDialogIntent: null,
         hasUnsavedChanges: false,
         isModalOpen: false,
+        fieldToConnect: undefined,
+        fieldToConnectUID: undefined,
+        getParentFormValues: undefined,
+        setParentFormValue: undefined,
+        pendingConnects: {},
       };
     case 'SET_HAS_UNSAVED_CHANGES':
       return {
         ...state,
         hasUnsavedChanges: action.payload.hasUnsavedChanges,
       };
+    case 'CLEAR_PENDING_CONNECTS': {
+      const key = getDocumentHistoryKey(action.payload.documentMeta);
+
+      if (!(key in state.pendingConnects)) {
+        return state;
+      }
+
+      const pendingConnects = { ...state.pendingConnects };
+      delete pendingConnects[key];
+
+      return { ...state, pendingConnects };
+    }
     default:
       return state;
   }
 }
+
+/**
+ * Whether any relation-on-the-fly modal is currently open, anywhere on the page.
+ *
+ * The modal's React context (`RelationModalProvider`, below) only reaches the modal's own subtree
+ * (the relation field that renders it), so components mounted outside that subtree — like the
+ * background entry's save/publish buttons in the side panel — can't read `state.isModalOpen` from
+ * context. This module-level counter is the cross-tree signal those components use instead, so
+ * they can tell a relation modal is open and suppress their own keyboard shortcuts while it is.
+ */
+let openRelationModalCount = 0;
+
+const isAnyRelationModalOpen = () => openRelationModalCount > 0;
 
 interface RelationModalContextValue {
   state: State;
@@ -255,6 +351,7 @@ const RootRelationRenderer = (props: RelationModalRendererProps) => {
     isModalOpen: false,
     hasUnsavedChanges: false,
     fieldToConnect: undefined,
+    pendingConnects: {},
   });
 
   const rootDocument = useDoc();
@@ -278,6 +375,20 @@ const RootRelationRenderer = (props: RelationModalRendererProps) => {
   // TODO: check if we can remove the single type check
   const isSingleType = currentDocumentMeta.collectionType === SINGLE_TYPES;
   const isCreating = !currentDocumentMeta.documentId && !isSingleType;
+
+  const { isModalOpen } = state;
+  React.useEffect(() => {
+    if (!isModalOpen) {
+      return;
+    }
+
+    openRelationModalCount += 1;
+
+    return () => {
+      openRelationModalCount -= 1;
+    };
+  }, [isModalOpen]);
+
   /**
    * There is no parent relation, so the relation modal doesn't exist. Create it and set up all the
    * pieces that will be used by potential child relations: the context, header, form, and footer.
@@ -336,6 +447,79 @@ const generateCreateUrl = (currentDocumentMeta: DocumentMeta) => {
   }`;
 };
 
+/**
+ * Pre-fill the inverse relation with the parent that opened create-on-the-fly.
+ * One-way relations have no inverse; unsaved parents have no documentId.
+ */
+const prefillParentRelation = ({
+  initialValues,
+  fieldToConnect,
+  childSchema,
+  parentDocument,
+  parentModel,
+}: {
+  initialValues?: AnyData;
+  fieldToConnect?: string;
+  childSchema?: { attributes?: Record<string, unknown> };
+  parentDocument?: Record<string, unknown>;
+  parentModel?: string;
+}): AnyData | undefined => {
+  const documentId = parentDocument?.documentId;
+  // mappedBy/inversedBy names a top-level attribute, not a component path.
+  const parentFieldName = fieldToConnect;
+
+  if (!initialValues || typeof documentId !== 'string' || !documentId || !parentFieldName) {
+    return initialValues;
+  }
+
+  const inverseField = Object.entries(childSchema?.attributes ?? {}).find(([, attribute]) => {
+    const relation = attribute as {
+      type?: string;
+      target?: string;
+      inversedBy?: string;
+      mappedBy?: string;
+    };
+
+    return (
+      relation.type === 'relation' &&
+      relation.target === parentModel &&
+      (relation.inversedBy === parentFieldName || relation.mappedBy === parentFieldName)
+    );
+  })?.[0];
+
+  if (!inverseField) {
+    return initialValues;
+  }
+
+  const id = parentDocument.id ?? documentId;
+
+  return {
+    ...initialValues,
+    [inverseField]: {
+      connect: [
+        {
+          ...Object.fromEntries(
+            Object.entries(parentDocument).filter(
+              ([, value]) =>
+                value === null || ['string', 'number', 'boolean'].includes(typeof value)
+            )
+          ),
+          id,
+          documentId,
+          apiData: {
+            id,
+            documentId,
+            locale: parentDocument.locale,
+            isTemporary: true,
+          },
+          __temp_key__: generateNKeysBetween(null, null, 1)[0],
+        },
+      ],
+      disconnect: [],
+    },
+  };
+};
+
 const RelationModal = ({ children }: { children: React.ReactNode }) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
@@ -347,6 +531,52 @@ const RelationModal = ({ children }: { children: React.ReactNode }) => {
   );
   const currentDocument = useRelationModal('RelationModalForm', (state) => state.currentDocument);
   const isCreating = useRelationModal('RelationModalForm', (state) => state.isCreating);
+  const rootDocumentMeta = useRelationModal('RelationModalForm', (state) => state.rootDocumentMeta);
+  const parentDocumentMeta = state.documentHistory.at(-2) ?? rootDocumentMeta;
+  const parentDocument = useDocument(parentDocumentMeta, {
+    skip: !isCreating || !state.fieldToConnect,
+  });
+
+  const pendingConnectsForCurrent =
+    useRelationModal(
+      'RelationModalForm',
+      (state) => state.state.pendingConnects[getDocumentHistoryKey(currentDocumentMeta)],
+      false
+    ) ?? EMPTY_PENDING_CONNECTS;
+
+  // Re-apply any local "connect" edits recorded for this document while a nested child was open,
+  // since navigating here just replaced the Form's values with a fresh, patch-less snapshot.
+  const initialValues = React.useMemo(() => {
+    const baseInitialValues = prefillParentRelation({
+      initialValues: currentDocument.getInitialFormValues(isCreating),
+      fieldToConnect: isCreating ? state.fieldToConnect : undefined,
+      childSchema: currentDocument.schema,
+      parentDocument: parentDocument.document,
+      parentModel: parentDocumentMeta.model,
+    });
+
+    // The document (and its default values) may still be loading, e.g. right after navigating
+    // back to a document that now has a real documentId. Let the loading guard below handle it
+    // instead of trying to patch a value that doesn't exist yet.
+    if (!baseInitialValues) {
+      return baseInitialValues;
+    }
+
+    return pendingConnectsForCurrent.reduce((values, patch) => {
+      const withRelation = setIn(values, patch.fieldToConnect, patch.relationValue);
+
+      return patch.componentUIDPath && patch.componentUID !== undefined
+        ? setIn(withRelation, patch.componentUIDPath, patch.componentUID)
+        : withRelation;
+    }, baseInitialValues);
+  }, [
+    currentDocument,
+    isCreating,
+    state.fieldToConnect,
+    parentDocument.document,
+    parentDocumentMeta.model,
+    pendingConnectsForCurrent,
+  ]);
 
   /*
    * We must wrap the modal window with Component Provider with reset values
@@ -424,7 +654,7 @@ const RelationModal = ({ children }: { children: React.ReactNode }) => {
           <Modal.Body>
             <FormContext
               method={isCreating ? 'POST' : 'PUT'}
-              initialValues={currentDocument.getInitialFormValues(isCreating)}
+              initialValues={initialValues}
               validate={(values: Record<string, unknown>, options: Record<string, string>) => {
                 const yupSchema = createYupSchema(
                   currentDocument.schema?.attributes,
@@ -524,7 +754,14 @@ const RelationModalBody = () => {
     } else if ('documentId' in state.confirmDialogIntent) {
       dispatch({
         type: 'GO_TO_RELATION',
-        payload: { document: state.confirmDialogIntent, shouldBypassConfirmation: true },
+        payload: {
+          document: state.confirmDialogIntent,
+          shouldBypassConfirmation: true,
+          fieldToConnect: state.fieldToConnect,
+          fieldToConnectUID: state.fieldToConnectUID,
+          getParentFormValues: state.getParentFormValues,
+          setParentFormValue: state.setParentFormValue,
+        },
       });
     }
   };
@@ -696,6 +933,56 @@ const RelationModalForm = () => {
 
   return (
     <DocumentRBAC permissions={permissions} model={currentDocumentMeta.model}>
+      <RelationModalFormBody
+        currentDocument={currentDocument}
+        documentTitle={documentTitle}
+        hasDraftAndPublished={hasDraftAndPublished}
+        layout={documentLayoutResponse.edit.layout}
+        plugins={plugins}
+        props={props}
+      />
+    </DocumentRBAC>
+  );
+};
+
+interface RelationModalFormBodyProps {
+  currentDocument: ReturnType<UseDocument>;
+  documentTitle: string;
+  hasDraftAndPublished: boolean;
+  layout: FormLayoutProps['layout'];
+  plugins: StrapiAppContextValue['plugins'];
+  props: DocumentActionProps;
+}
+
+/**
+ * Rendered as the child of `DocumentRBAC` so it can wait on `useDocumentRBAC`'s `isLoading`
+ * before showing the document actions and form — otherwise fields briefly render as
+ * not-allowed while permissions are still resolving.
+ */
+const RelationModalFormBody = ({
+  currentDocument,
+  documentTitle,
+  hasDraftAndPublished,
+  layout,
+  plugins,
+  props,
+}: RelationModalFormBodyProps) => {
+  const { formatMessage } = useIntl();
+  const isLoadingActionsRBAC = useDocumentRBAC('RelationModalFormBody', (state) => state.isLoading);
+
+  if (isLoadingActionsRBAC) {
+    return (
+      <Loader small>
+        {formatMessage({
+          id: 'content-manager.ListViewTable.relation-loading',
+          defaultMessage: 'Relations are loading',
+        })}
+      </Loader>
+    );
+  }
+
+  return (
+    <>
       <Flex alignItems="flex-start" direction="column" gap={2}>
         <Flex width="100%" justifyContent="space-between" gap={2}>
           <Typography tag="h2" variant="alpha">
@@ -754,16 +1041,21 @@ const RelationModalForm = () => {
 
       <Flex flex={1} overflow="auto" alignItems="stretch" paddingTop={7}>
         <Box overflow="auto" flex={1}>
-          <FormLayout
-            layout={documentLayoutResponse.edit.layout}
-            document={currentDocument}
-            hasBackground={false}
-          />
+          <FormLayout layout={layout} document={currentDocument} hasBackground={false} />
         </Box>
       </Flex>
-    </DocumentRBAC>
+    </>
   );
 };
 
-export { reducer, RelationModalRenderer, useRelationModal, getFullPageUrl, generateCreateUrl };
-export type { State, Action, RelationOpenMode };
+export {
+  reducer,
+  RelationModalRenderer,
+  useRelationModal,
+  isAnyRelationModalOpen,
+  getFullPageUrl,
+  generateCreateUrl,
+  prefillParentRelation,
+  RelationModalFormBody,
+};
+export type { State, Action, RelationOpenMode, PendingConnectPatch, RelationModalFormBodyProps };

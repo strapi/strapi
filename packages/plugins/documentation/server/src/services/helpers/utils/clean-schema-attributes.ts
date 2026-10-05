@@ -5,8 +5,8 @@ import getSchemaData from './get-schema-data';
 import pascalCase from './pascal-case';
 
 interface Options {
-  typeMap?: Map<string, boolean>;
   isRequest?: boolean;
+  relationTargetSchemaNames?: Map<string, string>;
   didAddStrapiComponentsToSchemas: (name: string, schema: object) => boolean;
 }
 
@@ -31,8 +31,8 @@ const convertComponentName = (component: string, isRef = false): string => {
  */
 const cleanSchemaAttributes = (
   attributes: Struct.SchemaAttributes,
-  { typeMap = new Map(), isRequest = false, didAddStrapiComponentsToSchemas }: Options
-) => {
+  { isRequest = false, relationTargetSchemaNames, didAddStrapiComponentsToSchemas }: Options
+): Record<string, OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject> => {
   const schemaAttributes: Record<string, OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject> = {};
 
   for (const prop of Object.keys(attributes)) {
@@ -110,8 +110,8 @@ const cleanSchemaAttributes = (
           properties: {
             ...(isRequest ? {} : { id: { oneOf: [{ type: 'string' }, { type: 'number' }] } }),
             ...cleanSchemaAttributes(componentAttributes, {
-              typeMap,
               isRequest,
+              relationTargetSchemaNames,
               didAddStrapiComponentsToSchemas,
             }),
           },
@@ -146,8 +146,8 @@ const cleanSchemaAttributes = (
               ...(isRequest ? {} : { id: { oneOf: [{ type: 'string' }, { type: 'number' }] } }),
               __component: { type: 'string', enum: [component] },
               ...cleanSchemaAttributes(componentAttributes, {
-                typeMap,
                 isRequest,
+                relationTargetSchemaNames,
                 didAddStrapiComponentsToSchemas,
               }),
             },
@@ -207,7 +207,10 @@ const cleanSchemaAttributes = (
 
         schemaAttributes[prop] = getSchemaData(
           isListOfEntities,
-          cleanSchemaAttributes(imageAttributes, { typeMap, didAddStrapiComponentsToSchemas })
+          cleanSchemaAttributes(imageAttributes, {
+            relationTargetSchemaNames,
+            didAddStrapiComponentsToSchemas,
+          })
         );
         break;
       }
@@ -227,23 +230,24 @@ const cleanSchemaAttributes = (
           break;
         }
 
-        if (!('target' in attribute) || !attribute.target || typeMap.has(attribute.target)) {
-          schemaAttributes[prop] = getSchemaData(isListOfEntities, {});
+        const targetSchemaName =
+          'target' in attribute && attribute.target
+            ? relationTargetSchemaNames?.get(attribute.target)
+            : undefined;
+
+        if (targetSchemaName) {
+          const targetSchema: OpenAPIV3.ReferenceObject = {
+            $ref: `#/components/schemas/${targetSchemaName}`,
+          };
+
+          schemaAttributes[prop] = isListOfEntities
+            ? { type: 'array', items: targetSchema }
+            : targetSchema;
 
           break;
         }
 
-        typeMap.set(attribute.target, true);
-        const targetAttributes = strapi.contentType(attribute.target).attributes;
-
-        schemaAttributes[prop] = getSchemaData(
-          isListOfEntities,
-          cleanSchemaAttributes(targetAttributes, {
-            typeMap,
-            isRequest,
-            didAddStrapiComponentsToSchemas,
-          })
-        );
+        schemaAttributes[prop] = getSchemaData(isListOfEntities, {});
 
         break;
       }

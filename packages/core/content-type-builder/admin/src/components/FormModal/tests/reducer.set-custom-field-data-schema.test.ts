@@ -37,7 +37,7 @@ describe('CTB | components | FormModal | reducer | actions | SET_CUSTOM_FIELD_DA
     const action = actions.setCustomFieldDataSchema({
       customField: mockCustomField,
       isEditing: false,
-      modifiedDataToSetForEditing: { name: null },
+      modifiedDataToSetForEditing: {},
       uid: 'apis::test.test',
     });
 
@@ -86,7 +86,7 @@ describe('CTB | components | FormModal | reducer | actions | SET_CUSTOM_FIELD_DA
     const action = actions.setCustomFieldDataSchema({
       customField: mockCustomFieldWithOptionsPath,
       isEditing: false,
-      modifiedDataToSetForEditing: { name: null },
+      modifiedDataToSetForEditing: {},
       uid: 'apis::test.test',
     });
 

@@ -8,7 +8,7 @@ const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
 const modelsUtils = require('api-tests/models');
 const { createTestBuilder } = require('api-tests/builder');
-const { kebabCase } = require('lodash/fp');
+const { kebabCase } = require('lodash');
 
 let strapi;
 let rq;
@@ -233,7 +233,7 @@ describe('Content Type Builder - Content types', () => {
               errors: [
                 {
                   message:
-                    'Attribute keys cannot be one of id, document_id, created_at, updated_at, published_at, created_by_id, updated_by_id, created_by, updated_by, entry_id, status, localizations, meta, locale, __component, __contentType, strapi*, _strapi*, __strapi*',
+                    'Attribute keys cannot be one of id, document_id, created_at, updated_at, published_at, created_by_id, updated_by_id, created_by, updated_by, entry_id, localizations, meta, locale, __component, __contentType, strapi*, _strapi*, __strapi*, status',
                   name: 'ValidationError',
                   path: ['contentType', 'attributes', prefix],
                   value: {

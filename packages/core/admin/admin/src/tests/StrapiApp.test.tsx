@@ -168,6 +168,50 @@ describe('ADMIN | new StrapiApp', () => {
       ]);
     });
 
+    it('should add an array of links via addSettingsLink to the global section', () => {
+      const app = new StrapiApp();
+      const links = [
+        {
+          Component: jest.fn(),
+          to: 'bar',
+          id: 'bar',
+          intlLabel: { id: 'bar', defaultMessage: 'bar' },
+          permissions: [],
+        },
+        {
+          Component: jest.fn(),
+          to: 'baz',
+          id: 'baz',
+          intlLabel: { id: 'baz', defaultMessage: 'baz' },
+          permissions: [],
+        },
+      ];
+
+      app.addSettingsLink('global', links);
+
+      expect(app.router.settings.global.links).toHaveLength(2);
+      expect(app.router.settings.global.links).toEqual([
+        {
+          id: 'bar',
+          intlLabel: {
+            defaultMessage: 'bar',
+            id: 'bar',
+          },
+          permissions: [],
+          to: 'bar',
+        },
+        {
+          id: 'baz',
+          intlLabel: {
+            defaultMessage: 'baz',
+            id: 'baz',
+          },
+          permissions: [],
+          to: 'baz',
+        },
+      ]);
+    });
+
     it('should warn if a user supplies an absolute link', () => {
       const originalWarn = console.warn;
       const consoleSpy = jest.fn();

@@ -2,7 +2,7 @@
  * @internal
  * @description Mutates a value to be a union of flat values, no arrays allowed.
  */
-type Flat<T> = T extends string ? T : T extends ArrayLike<any> ? never : T;
+type Flat<T> = T extends string ? T : T extends ArrayLike<unknown> ? never : T;
 
 /**
  * @internal

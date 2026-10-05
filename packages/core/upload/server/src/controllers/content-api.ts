@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import utils, { async, errors } from '@strapi/utils';
+import { async, errors } from '@strapi/utils';
 
 import type { Context } from 'koa';
 import type { Core } from '@strapi/types';
@@ -10,7 +10,7 @@ import { validateUploadBody } from './validation/content-api/upload';
 import { FileInfo } from '../types';
 import { prepareUploadRequest } from '../utils/mime-validation';
 
-const { ValidationError } = utils.errors;
+const { ValidationError, NotFoundError } = errors;
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const sanitizeOutput = async (data: unknown | unknown[], ctx: Context) => {
@@ -34,6 +34,19 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return strapi.contentAPI.sanitize.query(data, schema, { auth, route });
   };
 
+  // Files can be addressed by numeric id or documentId (1:1, files have no draft & publish)
+  const resolveFileId = async (id: string | number) => {
+    if (/^\d+$/.test(String(id))) {
+      return id;
+    }
+
+    const file = await strapi.db
+      .query(FILE_MODEL_UID)
+      .findOne({ where: { documentId: id }, select: ['id'] });
+
+    return file?.id;
+  };
+
   return {
     async find(ctx: Context) {
       await validateQuery(ctx.query, ctx);
@@ -46,15 +59,23 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       ctx.body = await sanitizeOutput(signedFiles, ctx);
     },
 
-    async findOne(ctx: Context) {
-      const {
-        params: { id },
-      } = ctx;
-
+    async findPage(ctx: Context) {
       await validateQuery(ctx.query, ctx);
       const sanitizedQuery = await sanitizeQuery(ctx.query, ctx);
 
-      const file = await getService('upload').findOne(id, sanitizedQuery.populate!);
+      const { results, pagination } = await getService('upload').findAndCountPage(sanitizedQuery);
+
+      const data = await sanitizeOutput(results, ctx);
+
+      ctx.body = { data, meta: { pagination } };
+    },
+
+    async findOne(ctx: Context) {
+      await validateQuery(ctx.query, ctx);
+      const sanitizedQuery = await sanitizeQuery(ctx.query, ctx);
+
+      const id = await resolveFileId(ctx.params.id);
+      const file = id ? await getService('upload').findOne(id, sanitizedQuery.populate!) : null;
 
       if (!file) {
         return ctx.notFound('file.notFound');
@@ -66,11 +87,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async destroy(ctx: Context) {
-      const {
-        params: { id },
-      } = ctx;
-
-      const file = await getService('upload').findOne(id);
+      const id = await resolveFileId(ctx.params.id);
+      const file = id ? await getService('upload').findOne(id) : null;
 
       if (!file) {
         return ctx.notFound('file.notFound');
@@ -94,7 +112,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         throw new ValidationError('File id is required and must be a single value');
       }
 
-      const result = await getService('upload').updateFileInfo(id, data.fileInfo as any);
+      const fileId = await resolveFileId(id);
+
+      if (!fileId) {
+        throw new NotFoundError();
+      }
+
+      const result = await getService('upload').updateFileInfo(fileId, data.fileInfo as any);
 
       const signedResult = await getService('file').signFileUrls(result);
 
@@ -107,27 +131,38 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         request: { body, files: { files: filesInput } = {} },
       } = ctx;
 
+      // cannot replace with more than one file
+      if (Array.isArray(filesInput) && filesInput.length > 1) {
+        throw new ValidationError('Cannot replace a file with multiple ones');
+      }
+
+      const files = Array.isArray(filesInput) ? filesInput[0] : filesInput;
+
       const {
         validFiles,
         filteredBody,
         errors: validationErrors,
-      } = await prepareUploadRequest(filesInput, body, strapi);
+      } = await prepareUploadRequest(files, body, strapi);
       if (validFiles.length === 0) {
         throw new errors.ValidationError(validationErrors[0].message);
-      }
-
-      // cannot replace with more than one file
-      if (Array.isArray(filesInput)) {
-        throw new ValidationError('Cannot replace a file with multiple ones');
       }
 
       if (!id || (typeof id !== 'string' && typeof id !== 'number')) {
         throw new ValidationError('File id is required and must be a single value');
       }
 
+      const fileId = await resolveFileId(id);
+
+      if (!fileId) {
+        throw new NotFoundError();
+      }
+
       const data = (await validateUploadBody(filteredBody)) as { fileInfo: FileInfo };
 
-      const replacedFiles = await getService('upload').replace(id, { data, file: validFiles[0] });
+      const replacedFiles = await getService('upload').replace(fileId, {
+        data,
+        file: validFiles[0],
+      });
 
       const signedFiles = await getService('file').signFileUrls(replacedFiles);
 

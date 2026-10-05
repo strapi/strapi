@@ -21,7 +21,7 @@ function getCountForRelation(
   return entity ? { count: 1 } : { count: 0 };
 }
 
-function getCountForDZ(entity: any) {
+function getCountForDZ(entity: any): Document[] {
   return entity.map((component: any) => {
     return getDeepRelationsCount(component, component.__component);
   });

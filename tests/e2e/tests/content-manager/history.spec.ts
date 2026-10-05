@@ -1,8 +1,10 @@
 import { test, expect, Page } from '@playwright/test';
 import {
   clickAndWait,
+  confirmRenameMigration,
   describeOnCondition,
   findAndClose,
+  locateFirstAfter,
   navToHeader,
 } from '../../../utils/shared';
 import { resetFiles } from '../../../utils/file-reset';
@@ -39,8 +41,26 @@ const goToHistoryPage = async (page: Page) => {
   }
 };
 
-const goToContentTypeBuilder = async (page: Page) => {
-  await clickAndWait(page, page.getByRole('link', { name: 'Content-Type Builder' }));
+const ARTICLE_CTB_URL =
+  /\/admin\/plugins\/content-type-builder\/content-types\/api::article\.article/;
+const HOMEPAGE_CTB_URL =
+  /\/admin\/plugins\/content-type-builder\/content-types\/api::homepage\.homepage/;
+
+/**
+ * CTB restores the last visited type on open. Open the plugin, then click the type under the
+ * correct sidebar section so we do not hit the Content Manager link with the same name.
+ */
+const goToContentTypeInBuilder = async (
+  page: Page,
+  section: 'Collection Types' | 'Single Types',
+  contentTypeLinkName: string,
+  contentTypeUrl: RegExp
+) => {
+  await clickAndWait(page, page.locator('role=link[name^="Content-Type Builder"]').last());
+  await page.waitForURL(/\/plugins\/content-type-builder/);
+  const contentTypeLink = await locateFirstAfter(page, section, contentTypeLinkName);
+  await clickAndWait(page, contentTypeLink);
+  await page.waitForURL(contentTypeUrl);
 };
 
 describeOnCondition(edition === 'EE')('History', () => {
@@ -266,14 +286,13 @@ describeOnCondition(edition === 'EE')('History', () => {
       /**
        * Rename field in content-type builder
        */
-      await goToContentTypeBuilder(page);
-      await page.waitForURL(
-        '/admin/plugins/content-type-builder/content-types/api::article.article'
-      );
+      await goToContentTypeInBuilder(page, 'Collection Types', 'Article', ARTICLE_CTB_URL);
       await page.getByRole('button', { name: 'Edit title' }).first().click();
       await page.getByRole('textbox', { name: 'name' }).fill('titleRename');
       await page.getByRole('button', { name: 'Finish' }).click();
       await page.getByRole('button', { name: 'Save' }).click();
+      // Decline data-preserving rename so history still sees delete+create (unknown fields).
+      await confirmRenameMigration(page, { preserve: false });
       await waitForRestart(page);
       await expect(page.getByLabel('titleRename')).toBeVisible();
 
@@ -419,12 +438,7 @@ describeOnCondition(edition === 'EE')('History', () => {
 
     test('A user should see the relations and whether some are missing', async ({ page }) => {
       // Create relation in Content-Type Builder
-      await goToContentTypeBuilder(page);
-
-      await clickAndWait(page, page.getByRole('link', { name: 'Homepage' }));
-      await page.waitForURL(
-        '/admin/plugins/content-type-builder/content-types/api::homepage.homepage'
-      );
+      await goToContentTypeInBuilder(page, 'Single Types', 'Homepage', HOMEPAGE_CTB_URL);
       await page.getByRole('button', { name: /add another field to this single type/i }).click();
       await page.getByRole('button', { name: /relation/i }).click();
       await page.getByLabel('Basic settings').getByRole('button').nth(1).click();
@@ -492,16 +506,13 @@ describeOnCondition(edition === 'EE')('History', () => {
       /**
        * Rename field in content-type builder
        */
-      await goToContentTypeBuilder(page);
-
-      await clickAndWait(page, page.getByRole('link', { name: 'Homepage' }));
-      await page.waitForURL(
-        '/admin/plugins/content-type-builder/content-types/api::homepage.homepage'
-      );
+      await goToContentTypeInBuilder(page, 'Single Types', 'Homepage', HOMEPAGE_CTB_URL);
       await page.getByRole('button', { name: 'Edit title' }).first().click();
       await page.getByRole('textbox', { name: 'name' }).fill('titleRename');
       await page.getByRole('button', { name: 'Finish' }).click();
       await page.getByRole('button', { name: 'Save' }).click();
+      // Decline data-preserving rename so history still sees delete+create (unknown fields).
+      await confirmRenameMigration(page, { preserve: false });
       await waitForRestart(page);
       await expect(page.getByLabel('titleRename')).toBeVisible();
 

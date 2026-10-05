@@ -6,6 +6,10 @@
  * Ensures create + publish succeed on all databases. On SQLite, batching keeps
  * join-table inserts ≤500 rows to avoid "too many terms in compound SELECT".
  *
+ * Member setup uses db.createMany (not N sequential CM HTTP creates) so MySQL CI
+ * stays under the per-test budget — the assertions still exercise CM update /
+ * publish / attachRelations at 550 links.
+ *
  * @see https://github.com/strapi/strapi/issues/25198
  */
 
@@ -77,21 +81,23 @@ const createOwnerWithMembers = async (name, memberDocumentIds) => {
   });
 };
 
+/**
+ * Bulk-create members for relation payload setup.
+ * Avoids hundreds of sequential CM HTTP round-trips (primary cause of MySQL
+ * 120s timeouts on this suite).
+ */
 const createMembers = async (count, namePrefix = 'member') => {
-  const documentIds = [];
-  for (let i = 0; i < count; i += 1) {
-    const res = await rq({
-      method: 'POST',
-      url: `/content-manager/collection-types/${UID_MEMBER}`,
-      body: { name: `${namePrefix}-${i}` },
-    });
-    expect(res.statusCode).toBe(201);
-    expect(res.body.data).toBeDefined();
-    const member = res.body.data;
-    documentIds.push(member.documentId);
-    data.members.push(member);
-  }
-  return documentIds;
+  const rows = Array.from({ length: count }, (_, i) => ({
+    documentId: `${namePrefix}-${i}`,
+    name: `${namePrefix}-${i}`,
+  }));
+
+  const res = await strapi.db.query(UID_MEMBER).createMany({ data: rows });
+  expect(res.count).toBe(count);
+  expect(res.ids).toHaveLength(count);
+
+  data.members.push(...rows);
+  return rows.map((row) => row.documentId);
 };
 
 describe('CM API - Many relations update (GH#25198)', () => {
@@ -145,7 +151,7 @@ describe('CM API - Many relations update (GH#25198)', () => {
   );
 
   /**
-   * Update (PUT) an entry with 550 relations exercises updateRelations + batched join-table insert.
+   * Update (PUT) an entry with 550 relations exercises updateRelations + dialect join-table insert.
    * On SQLite, batching keeps each batch ≤500 (GH#25198).
    */
   test('Update entry with 550 relations', async () => {

@@ -2,13 +2,25 @@ import { load, sync } from '../self-referential-relations';
 
 const ID_COLUMN = 'id';
 const BATCH_SIZE = 1000;
+type RelationData = Parameters<typeof sync>[2];
+
+const createJoinTable = () => ({
+  name: 'categories_parent_lnk',
+  joinColumn: { name: 'category_id', referencedColumn: 'id' },
+  inverseJoinColumn: { name: 'inv_category_id', referencedColumn: 'id' },
+  pivotColumns: ['category_id', 'inv_category_id'],
+  orderColumnName: 'category_order',
+  inverseOrderColumnName: 'inv_category_order',
+});
 
 const mockBatchInsert = jest.fn();
 
 // Handles trx(tableName).whereIn(...).select(...) for the idempotency check in sync()
 const mockKnexChain = {
   whereIn: jest.fn().mockReturnThis(),
+  where: jest.fn().mockReturnThis(),
   select: jest.fn().mockResolvedValue([]),
+  update: jest.fn().mockResolvedValue(1),
 };
 
 const mockTrx = Object.assign(jest.fn().mockReturnValue(mockKnexChain), {
@@ -20,6 +32,7 @@ const createChainedQuery = (result: any[]) => {
   chain.select = jest.fn().mockReturnValue(chain);
   chain.from = jest.fn().mockReturnValue(chain);
   chain.whereIn = jest.fn().mockReturnValue(chain);
+  chain.whereNotIn = jest.fn().mockReturnValue(chain);
   chain.transacting = jest.fn().mockResolvedValue(result);
   return chain;
 };
@@ -104,18 +117,14 @@ describe('self-referential-relations', () => {
 
       const sourceEntries = [{ id: 10, locale: 'en' }];
       const targetEntries = [{ id: 20, locale: 'en' }];
-      const relationData = [
+      const relationData: RelationData = [
         {
-          joinTable: {
-            name: 'categories_parent_lnk',
-            joinColumn: { name: 'category_id' },
-            inverseJoinColumn: { name: 'inv_category_id' },
-          },
+          joinTable: createJoinTable(),
           relations: [{ id: 1, category_id: 10, inv_category_id: 10, field_order: 1 }],
         },
       ];
 
-      await sync(sourceEntries, targetEntries, relationData as any);
+      await sync(sourceEntries, targetEntries, relationData);
 
       expect(mockBatchInsert).toHaveBeenCalledWith(
         'categories_parent_lnk',
@@ -135,18 +144,14 @@ describe('self-referential-relations', () => {
 
       const sourceEntries = [{ id: 10, locale: 'en' }];
       const targetEntries = [{ id: 20, locale: 'en' }];
-      const relationData = [
+      const relationData: RelationData = [
         {
-          joinTable: {
-            name: 'categories_parent_lnk',
-            joinColumn: { name: 'category_id' },
-            inverseJoinColumn: { name: 'inv_category_id' },
-          },
+          joinTable: createJoinTable(),
           relations: [{ id: 1, category_id: 10, inv_category_id: 99, field_order: 1 }],
         },
       ];
 
-      await sync(sourceEntries, targetEntries, relationData as any);
+      await sync(sourceEntries, targetEntries, relationData);
 
       expect(mockBatchInsert).not.toHaveBeenCalled();
     });
@@ -168,13 +173,9 @@ describe('self-referential-relations', () => {
         { id: 20, locale: 'en' },
         { id: 21, locale: 'fr' },
       ];
-      const relationData = [
+      const relationData: RelationData = [
         {
-          joinTable: {
-            name: 'categories_parent_lnk',
-            joinColumn: { name: 'category_id' },
-            inverseJoinColumn: { name: 'inv_category_id' },
-          },
+          joinTable: createJoinTable(),
           relations: [
             { id: 1, category_id: 10, inv_category_id: 10, field_order: 1 },
             { id: 2, category_id: 11, inv_category_id: 11, field_order: 1 },
@@ -182,7 +183,7 @@ describe('self-referential-relations', () => {
         },
       ];
 
-      await sync(sourceEntries, targetEntries, relationData as any);
+      await sync(sourceEntries, targetEntries, relationData);
 
       expect(mockBatchInsert).toHaveBeenCalledWith(
         'categories_parent_lnk',
@@ -192,6 +193,87 @@ describe('self-referential-relations', () => {
         ],
         1000
       );
+    });
+
+    it('should restore order columns when a remapped relation already exists', async () => {
+      mockKnexChain.select.mockResolvedValueOnce([{ category_id: 20, inv_category_id: 99 }]);
+
+      (global as any).strapi = {
+        db: {
+          metadata: { identifiers: { ID_COLUMN } },
+          dialect: { getBatchInsertSize: jest.fn().mockReturnValue(BATCH_SIZE) },
+          transaction: createMockTransaction(),
+        },
+      };
+
+      const sourceEntries = [
+        { id: 10, locale: 'en' },
+        { id: 11, locale: 'en' },
+      ];
+      const targetEntries = [{ id: 20, locale: 'en' }];
+      const relationData: RelationData = [
+        {
+          joinTable: createJoinTable(),
+          relations: [
+            {
+              id: 1,
+              category_id: 10,
+              inv_category_id: 99,
+              category_order: 2,
+              non_order_column: 'ignored',
+            },
+          ],
+          remap: { source: true, target: false },
+        },
+      ];
+
+      await sync(sourceEntries, targetEntries, relationData);
+
+      expect(mockKnexChain.where).toHaveBeenCalledWith({
+        category_id: 20,
+        inv_category_id: 99,
+      });
+      expect(mockKnexChain.update).toHaveBeenCalledWith({ category_order: 2 });
+      expect(mockBatchInsert).not.toHaveBeenCalled();
+    });
+
+    it('should restore order columns when only the target side is remapped', async () => {
+      mockKnexChain.select.mockResolvedValueOnce([{ category_id: 99, inv_category_id: 20 }]);
+
+      (global as any).strapi = {
+        db: {
+          metadata: { identifiers: { ID_COLUMN } },
+          dialect: { getBatchInsertSize: jest.fn().mockReturnValue(BATCH_SIZE) },
+          transaction: createMockTransaction(),
+        },
+      };
+
+      const sourceEntries = [{ id: 10, locale: 'en' }];
+      const targetEntries = [{ id: 20, locale: 'en' }];
+      const relationData: RelationData = [
+        {
+          joinTable: createJoinTable(),
+          relations: [
+            {
+              id: 1,
+              category_id: 99,
+              inv_category_id: 10,
+              inv_category_order: 2,
+              non_order_column: 'ignored',
+            },
+          ],
+          remap: { source: false, target: true },
+        },
+      ];
+
+      await sync(sourceEntries, targetEntries, relationData);
+
+      expect(mockKnexChain.where).toHaveBeenCalledWith({
+        category_id: 99,
+        inv_category_id: 20,
+      });
+      expect(mockKnexChain.update).toHaveBeenCalledWith({ inv_category_order: 2 });
+      expect(mockBatchInsert).not.toHaveBeenCalled();
     });
 
     it('should do nothing when relationData is empty', async () => {

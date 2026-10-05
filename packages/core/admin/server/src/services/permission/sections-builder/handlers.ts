@@ -74,11 +74,23 @@ const contentTypesBase = ({
 }) => {
   const { displayName, actionId, subjects, options } = action;
 
+  // Strip non-displayed content types so they don't appear as configurable subjects
+  // in the roles UI (e.g. plugin::users-permissions.role).
+  const allContentTypes = strapi.contentTypes as Record<string, any>;
+  const filteredSubjects = subjects?.filter(
+    (uid) =>
+      (
+        allContentTypes[uid as string]?.pluginOptions?.['content-manager'] as
+          | { visible?: boolean }
+          | undefined
+      )?.visible !== false
+  );
+
   section.actions.push({
     // @ts-expect-error - label should be displayName, TODO: Investigate at which point the label property
     label: displayName,
     actionId,
-    subjects,
+    subjects: filteredSubjects,
     ...getValidOptions(options),
   });
 };
@@ -103,6 +115,14 @@ const subjectsHandlerFor =
       .map(resolveContentType)
       // Only keep specific kind of content-types
       .filter(isOfKind(kind))
+      // Exclude content types hidden from the content manager (e.g. plugin::users-permissions.role).
+      // Those types are valid explorer.read subjects so that super admin can read relation targets,
+      // but they should not appear as configurable permissions in the roles UI.
+      .filter(
+        (ct) =>
+          (ct?.pluginOptions?.['content-manager'] as { visible?: boolean } | undefined)?.visible !==
+          false
+      )
       // Transform the content-types into section's subjects
       .map(toSubjectTemplate);
 

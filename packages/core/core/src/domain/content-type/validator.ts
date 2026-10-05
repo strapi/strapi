@@ -55,6 +55,7 @@ const contentTypeSchemaValidator = yup.object().shape({
       test(attributes: Schema.ContentType['attributes']) {
         for (const attrName of Object.keys(attributes)) {
           const attr = attributes[attrName];
+
           if (attr.type === 'enumeration') {
             const regressedValues = attr.enum.map(strings.toRegressedEnumValue);
 

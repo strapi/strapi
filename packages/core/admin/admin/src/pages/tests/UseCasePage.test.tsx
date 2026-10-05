@@ -16,7 +16,7 @@ describe('Admin | UseCasePage', () => {
   });
 
   it('should show Other input if select value is Other', async () => {
-    const { getByRole, user } = render(<UseCasePage />);
+    const { user } = render(<UseCasePage />);
 
     const selectInput = screen.getByRole('combobox', { name: 'What type of work do you do?' });
 

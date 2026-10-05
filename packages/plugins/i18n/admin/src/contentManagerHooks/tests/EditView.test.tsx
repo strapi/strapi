@@ -29,6 +29,23 @@ afterEach(() => {
 });
 
 describe('mutateEditViewHook – label action injection and localization', () => {
+  const makeEditField = (overrides: Record<string, unknown> = {}): EditFieldLayout =>
+    ({
+      attribute: { type: 'string', pluginOptions: { i18n: { localized: true } } },
+      disabled: false,
+      hint: '',
+      label: 'Title',
+      name: 'title',
+      mainField: 'id',
+      placeholder: '',
+      required: false,
+      size: 12,
+      unique: false,
+      visible: true,
+      type: 'string',
+      ...overrides,
+    }) as unknown as EditFieldLayout;
+
   const makeEditLayout = (opts: {
     ctLocalized: boolean;
     topFields?: EditFieldLayout[][];
@@ -54,20 +71,7 @@ describe('mutateEditViewHook – label action injection and localization', () =>
   };
 
   it('does nothing when content type is not localized', () => {
-    const titleField: EditFieldLayout = {
-      attribute: { type: 'string', pluginOptions: { i18n: { localized: true } } } as any,
-      disabled: false,
-      hint: '',
-      label: 'Title',
-      name: 'title',
-      mainField: 'id' as any,
-      placeholder: '',
-      required: false,
-      size: 12,
-      unique: false,
-      visible: true,
-      type: 'string' as any,
-    };
+    const titleField = makeEditField();
 
     const layout = makeEditLayout({ ctLocalized: false, topFields: [[titleField]] });
 
@@ -76,21 +80,8 @@ describe('mutateEditViewHook – label action injection and localization', () =>
     expect(mutatedField.labelAction).toBeUndefined();
   });
 
-  it('injects a labelAction element when content type is localized (root-level field)', () => {
-    const titleField: EditFieldLayout = {
-      attribute: { type: 'string', pluginOptions: { i18n: { localized: true } } } as any,
-      disabled: false,
-      hint: '',
-      label: 'Title',
-      name: 'title',
-      mainField: 'id' as any,
-      placeholder: '',
-      required: false,
-      size: 12,
-      unique: false,
-      visible: true,
-      type: 'string' as any,
-    };
+  it('shows the localized tooltip without a native title tooltip (root-level field)', async () => {
+    const titleField = makeEditField();
 
     const layout = makeEditLayout({ ctLocalized: true, topFields: [[titleField]] });
 
@@ -102,8 +93,17 @@ describe('mutateEditViewHook – label action injection and localization', () =>
     expect(React.isValidElement(action)).toBe(true);
 
     if (action) {
-      render(action);
+      const { user } = render(action);
       expect(screen.getByText(/This value is unique for the selected locale/i)).toBeInTheDocument();
+      const label = screen.getByText(
+        /This value is unique for the selected locale/i
+      ).parentElement!;
+      expect(label).not.toHaveAttribute('title');
+
+      await user.hover(label.lastElementChild!);
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(
+        'This value is unique for the selected locale'
+      );
     }
   });
 
@@ -114,30 +114,24 @@ describe('mutateEditViewHook – label action injection and localization', () =>
       ctLocalized: true,
       topFields: [
         [
-          {
+          makeEditField({
             attribute: {
               type: 'component',
               component: componentUid,
               pluginOptions: { i18n: { localized: false } },
-            } as any,
-            disabled: false,
-            hint: '',
+            },
             label: 'CTA',
             name: 'cta',
-            mainField: 'id' as any,
-            placeholder: '',
-            required: false,
-            size: 12,
-            unique: false,
-            visible: true,
-            type: 'component' as any,
-          },
+            type: 'component',
+          }),
         ],
       ],
       components: {
         [componentUid]: {
           layout: [],
-          settings: { displayName: 'Button' } as any,
+          settings: {
+            displayName: 'Button',
+          } as unknown as EditLayout['components'][string]['settings'],
         },
       },
     });

@@ -6,7 +6,7 @@ tags:
   - documents
 ---
 
-At the very core of the CM is the concept of a document. Although the logic for creating a document lives primarily within the `@strapi/core` package, we still need to understand what they are to interact with them. Introduced for the _new_ draft & publish feature in V5 (Q1 2024), documents are essentially a matrix of entries, this matrix grows in complexity based on the amount of dimensions your doucment has. For example, having Draft & Publish and Internationalisation (with 2 locales) enabled would give you 4 entries within the document – a draft for each locale and a published entry for each locale.
+At the very core of the CM is the concept of a document. Although the logic for creating a document lives primarily within the `@strapi/core` package, we still need to understand what they are to interact with them. Introduced for the _new_ draft & publish feature in V5 (Q1 2024), documents are essentially a matrix of entries, this matrix grows in complexity based on the amount of dimensions your document has. For example, having Draft & Publish and Internationalisation (with 2 locales) enabled would give you 4 entries within the document – a draft for each locale and a published entry for each locale.
 
 :::note
 Draft & Publish is optional on content-types

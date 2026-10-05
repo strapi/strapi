@@ -82,7 +82,7 @@ const ListPageCE = () => {
           message: formatAPIError(res.error),
         });
       }
-    } catch (err) {
+    } catch {
       toggleNotification({
         type: 'danger',
         message: formatMessage({
@@ -235,7 +235,7 @@ const ListPageCE = () => {
 };
 
 const TABLE_HEADERS: Array<
-  Omit<Table.Header<SanitizedAdminUser, any>, 'label'> & { label: MessageDescriptor }
+  Omit<Table.Header<SanitizedAdminUser, object>, 'label'> & { label: MessageDescriptor }
 > = [
   {
     name: 'firstname',

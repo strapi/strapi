@@ -25,7 +25,7 @@ import { styled, useTheme } from 'styled-components';
 
 import { GetPreviewUrl } from '../../../../shared/contracts/preview';
 import { COLLECTION_TYPES } from '../../constants/collections';
-import { DocumentRBAC } from '../../features/DocumentRBAC';
+import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
 import { type UseDocument, useDocument } from '../../hooks/useDocument';
 import { type EditLayout, useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { Blocker } from '../../pages/EditView/components/Blocker';
@@ -36,9 +36,8 @@ import { createYupSchema } from '../../utils/validation';
 import { InputPopover } from '../components/InputPopover';
 import { PreviewHeader } from '../components/PreviewHeader';
 import { useGetPreviewUrlQuery } from '../services/preview';
-import { PUBLIC_EVENTS } from '../utils/constants';
+import { INTERNAL_EVENTS, PUBLIC_EVENTS } from '../utils/constants';
 import { getSendMessage } from '../utils/getSendMessage';
-import { previewScript } from '../utils/previewScript';
 
 import type { Schema, UID } from '@strapi/types';
 
@@ -74,6 +73,7 @@ const DEVICES = [
 interface PopoverField extends FieldContentSourceMap {
   position: DOMRect;
   attribute: Schema.Attribute.AnyAttribute;
+  blockIndex: number | null;
 }
 
 interface PreviewContextValue {
@@ -90,7 +90,37 @@ interface PreviewContextValue {
   setPopoverField: (value: PopoverField | null) => void;
 }
 
+type PreviewHighlightColors = {
+  highlightHoverColor: string;
+  highlightActiveColor: string;
+};
+
 const [PreviewProvider, usePreviewContext] = createContext<PreviewContextValue>('PreviewPage');
+
+const getPreviewScript = (() => {
+  let previewScript = '';
+  return async (previewHighlightColors: PreviewHighlightColors) => {
+    if (!previewScript) {
+      const resp = await fetch(`${window.strapi.backendURL}/content-manager/preview/script`);
+
+      if (!resp.ok) {
+        throw new Error('Could not retrieve preview script from server.');
+      }
+
+      previewScript = await resp.text();
+
+      if (!previewScript) {
+        throw new Error('Could not retrieve preview script from server.');
+      }
+    }
+
+    return `(${previewScript})(${JSON.stringify({
+      colors: previewHighlightColors,
+      events: INTERNAL_EVENTS,
+      parentOrigin: window.location.origin,
+    })})`;
+  };
+})();
 
 /* -------------------------------------------------------------------------------------------------
  * PreviewPage
@@ -110,6 +140,26 @@ const PreviewPage = () => {
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
   const [isSideEditorOpen, setIsSideEditorOpen] = React.useState(true);
   const [popoverField, setPopoverField] = React.useState<PopoverField | null>(null);
+  const prevPopoverFieldRef = React.useRef<PopoverField | null>(null);
+
+  // When the popover closes, ask the iframe to rescan its stega element groups.
+  // Live-preview sync updates the iframe DOM while editing, which can change the
+  // rendered height of the field; groups need to reflect the current DOM so that
+  // hover highlights and double-click detection work on the updated content.
+  React.useEffect(() => {
+    const prev = prevPopoverFieldRef.current;
+    prevPopoverFieldRef.current = popoverField;
+
+    if (prev !== null && popoverField === null) {
+      const iframe = iframeRef.current;
+      if (!iframe?.src) return;
+      iframe.contentWindow?.postMessage(
+        { type: INTERNAL_EVENTS.STRAPI_RESCAN_HIGHLIGHTS },
+        new URL(iframe.src).origin
+      );
+    }
+  }, [popoverField, iframeRef]);
+
   const { toggleNotification } = useNotification();
 
   // Read all the necessary data from the URL to find the right preview URL
@@ -123,7 +173,7 @@ const PreviewPage = () => {
     collectionType: string;
   }>();
   const [{ query }] = useQueryParams<{
-    plugins?: Record<string, unknown>;
+    plugins?: { i18n?: { locale?: string } };
     status?: string;
   }>();
 
@@ -134,14 +184,14 @@ const PreviewPage = () => {
   );
   const device = DEVICES.find((d) => d.name === deviceName) ?? DEVICES[0];
 
-  const previewHighlightColors = {
+  const previewHighlightColors: PreviewHighlightColors = {
     highlightHoverColor: theme.colors.primary500,
     highlightActiveColor: theme.colors.primary600,
   };
 
   // Listen for ready message from iframe before injecting script
   React.useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
+    const handleMessage = async (event: MessageEvent) => {
       // Only listen to events from the preview iframe
       if (iframeRef.current) {
         const previewOrigin = new URL(iframeRef.current?.src).origin;
@@ -151,12 +201,21 @@ const PreviewPage = () => {
       }
 
       if (event.data?.type === PUBLIC_EVENTS.PREVIEW_READY) {
-        const script = `(${previewScript.toString()})(${JSON.stringify({
-          shouldRun: true,
-          colors: previewHighlightColors,
-        })})`;
-        const sendMessage = getSendMessage(iframeRef);
-        sendMessage(PUBLIC_EVENTS.STRAPI_SCRIPT, { script });
+        try {
+          const script = await getPreviewScript(previewHighlightColors);
+
+          const sendMessage = getSendMessage(iframeRef);
+          sendMessage(PUBLIC_EVENTS.STRAPI_SCRIPT, { script });
+        } catch {
+          toggleNotification({
+            type: 'danger',
+            message: formatMessage({
+              id: 'content-manager.preview.error.script-failed',
+              defaultMessage:
+                'Could not load the live preview script. Visual editing may not be available.',
+            }),
+          });
+        }
       }
     };
 
@@ -165,7 +224,9 @@ const PreviewPage = () => {
     return () => {
       window.removeEventListener('message', handleMessage);
     };
-  }, [documentId, toggleNotification, theme]);
+    // Preserve the existing dependency behavior: previewHighlightColors is derived from theme.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [documentId, toggleNotification, theme, formatMessage]);
 
   if (!collectionType) {
     throw new Error('Could not find collectionType in url params');
@@ -186,7 +247,7 @@ const PreviewPage = () => {
     },
     query: {
       documentId,
-      locale: params.locale,
+      locale: params.locale as GetPreviewUrl.Request['query']['locale'],
       status: params.status as GetPreviewUrl.Request['query']['status'],
     },
   });
@@ -197,10 +258,14 @@ const PreviewPage = () => {
     params,
   });
   const documentLayoutResponse = useDocumentLayout(model);
+  const isLoadingActionsRBAC = useDocumentRBAC('PreviewPage', (state) => state.isLoading);
 
   const isLoading =
     previewUrlResponse.isLoading || documentLayoutResponse.isLoading || documentResponse.isLoading;
-  if (isLoading && (!documentResponse.document?.documentId || previewUrlResponse.isLoading)) {
+  if (
+    isLoadingActionsRBAC ||
+    (isLoading && (!documentResponse.document?.documentId || previewUrlResponse.isLoading))
+  ) {
     return <Page.Loading />;
   }
 

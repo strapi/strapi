@@ -3,7 +3,7 @@ import { Command } from 'commander';
 import { commands as strapiCommands } from './commands';
 
 import { createLogger } from './utils/logger';
-import { loadTsConfig } from './utils/tsconfig';
+import { loadTsConfig, type TsConfig } from './utils/tsconfig';
 import { CLIContext } from './types';
 import { version } from '../../package.json';
 
@@ -24,17 +24,20 @@ const createCLI = async (argv: string[], command = new Command()) => {
 
   const logger = createLogger({ debug: hasDebug, silent: hasSilent, timestamp: false });
 
-  const tsconfig = loadTsConfig({
-    cwd,
-    path: 'tsconfig.json',
-    logger,
+  // Lazy: defer `loadTsConfig` (which loads `typescript`) until first read
+  let tsconfig: TsConfig | undefined;
+  let loaded = false;
+  const ctx = { cwd, logger } as CLIContext;
+  Object.defineProperty(ctx, 'tsconfig', {
+    enumerable: true,
+    get() {
+      if (!loaded) {
+        loaded = true;
+        tsconfig = loadTsConfig({ cwd, path: 'tsconfig.json', logger });
+      }
+      return tsconfig;
+    },
   });
-
-  const ctx = {
-    cwd,
-    logger,
-    tsconfig,
-  } satisfies CLIContext;
 
   // Load all commands
   for (const commandFactory of strapiCommands) {

@@ -1,0 +1,17 @@
+{
+  "$schema": "../scenario-schema.json",
+  "id": "v4-to-head",
+  "description": "Strapi v4 scaffold + seed, then workspace Strapi (current monorepo) with full migration validators. This is the canonical path exercised in CI.",
+  "dataOrigin": "v4",
+  "baseline": {
+    "type": "v4-scaffold",
+    "initialVersion": "legacy"
+  },
+  "stages": [
+    {
+      "id": "workspace",
+      "type": "workspace",
+      "validate": ["full"]
+    }
+  ]
+}

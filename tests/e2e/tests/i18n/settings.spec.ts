@@ -27,9 +27,9 @@ test.describe('Settings', () => {
     /**
      * Assert that the page has the expected elements & data, the locales installed in the test-app.
      */
-    expect(await page.getByRole('row').all()).toHaveLength(5);
+    await expect(page.getByRole('row')).toHaveCount(5);
     for (const locale of LOCALES) {
-      expect(page.getByRole('gridcell', { name: locale, exact: true })).toBeVisible();
+      await expect(page.getByRole('gridcell', { name: locale, exact: true })).toBeVisible();
     }
 
     /**
@@ -37,7 +37,7 @@ test.describe('Settings', () => {
      */
     await page.getByRole('button', { name: 'Add new locale' }).click();
     await expect(page.getByRole('dialog', { name: 'Add new locale' })).toBeVisible();
-    expect(page.getByRole('heading', { name: 'Configuration' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Configuration' })).toBeVisible();
     await page.getByRole('combobox', { name: 'Locales' }).click();
     await page.press('body', 'I');
     await page.getByRole('option', { name: 'Italian (it)' }).click();
@@ -50,7 +50,7 @@ test.describe('Settings', () => {
      */
     await navToHeader(page, ['Content Manager', 'Shop'], 'UK Shop');
     await page.getByRole('combobox', { name: 'Locales' }).click();
-    expect(await page.getByRole('option').all()).toHaveLength(5);
+    await expect(page.getByRole('option')).toHaveCount(5);
     for (const locale of [...LOCALES, 'Italian (it)']) {
       await expect(page.getByRole('option', { name: locale })).toBeVisible();
     }
@@ -135,8 +135,10 @@ test.describe('Settings', () => {
      * and that all the expected locales exist in the select dropdown.
      */
     await navToHeader(page, ['Content Manager', 'Article'], 'Article');
-    expect(page.getByRole('combobox', { name: 'Select a locale' })).toHaveText('English (en)');
-    expect(await page.getByRole('row').all()).toHaveLength(3);
+    await expect(page.getByRole('combobox', { name: 'Select a locale' })).toHaveText(
+      'English (en)'
+    );
+    await expect(page.getByRole('row')).toHaveCount(3);
     await page.getByRole('combobox', { name: 'Select a locale' }).click();
     for (const locale of LOCALES) {
       await expect(page.getByRole('option', { name: locale })).toBeVisible();
@@ -157,8 +159,10 @@ test.describe('Settings', () => {
      * but we should not see the french locale option anymore.
      */
     await navToHeader(page, ['Content Manager', 'Article'], 'Article');
-    expect(page.getByRole('combobox', { name: 'Select a locale' })).toHaveText('English (en)');
-    expect(await page.getByRole('row').all()).toHaveLength(3);
+    await expect(page.getByRole('combobox', { name: 'Select a locale' })).toHaveText(
+      'English (en)'
+    );
+    await expect(page.getByRole('row')).toHaveCount(3);
     await page.getByRole('combobox', { name: 'Select a locale' }).click();
     for (const locale of LOCALES) {
       if (locale !== 'French (fr)') {
@@ -201,7 +205,7 @@ test.describe('Settings', () => {
     /**
      * It is 4 because it contains also the header row
      */
-    expect(await page.getByRole('row').all()).toHaveLength(4);
+    await expect(page.getByRole('row')).toHaveCount(4);
     await expect(page.getByRole('combobox', { name: 'Select a locale' })).toHaveText('UK English');
     await page.getByRole('combobox', { name: 'Select a locale' }).click();
     for (const locale of ['UK English', ...LOCALES].filter((locale) => locale !== 'English (en)')) {

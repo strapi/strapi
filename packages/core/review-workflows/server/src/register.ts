@@ -1,9 +1,8 @@
-import { defaultsDeep, filter, pipe, map } from 'lodash/fp';
+import { defaultsDeep } from 'lodash';
 
 import type { Core, UID } from '@strapi/types';
 
 import { getService, getAdminService } from './utils';
-import migrateStageAttribute from './migrations/shorten-stage-attribute';
 import migrateReviewWorkflowStagesColor from './migrations/set-stages-default-color';
 import migrateReviewWorkflowStagesRoles from './migrations/set-stages-roles';
 import migrateReviewWorkflowStagesTransferToRoles from './migrations/setup-stage-transfer-to-roles';
@@ -85,10 +84,9 @@ function persistRWOnDowngrade({ strapi }: { strapi: Core.Strapi }) {
       };
     };
 
-    const enabledRWContentTypes = pipe([
-      getVisibleContentTypesUID,
-      filter((uid: UID.ContentType) => hasStageAttribute(contentTypes[uid])),
-    ])(contentTypes);
+    const enabledRWContentTypes = getVisibleContentTypesUID(contentTypes).filter((uid) =>
+      hasStageAttribute(contentTypes[uid])
+    );
 
     // Remove previously created join tables and persist the new ones
     const stageJoinTablesToPersist = enabledRWContentTypes.map(getStageTableToPersist);
@@ -104,7 +102,6 @@ function persistRWOnDowngrade({ strapi }: { strapi: Core.Strapi }) {
 
 export default async ({ strapi }: { strapi: Core.Strapi }) => {
   // Data Migrations
-  strapi.hook('strapi::content-types.beforeSync').register(migrateStageAttribute);
   strapi.hook('strapi::content-types.afterSync').register(persistRWOnDowngrade({ strapi }));
   strapi
     .hook('strapi::content-types.afterSync')
@@ -122,13 +119,10 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   extendReviewWorkflowContentTypes({ strapi });
 
   // License limits
-  const reviewWorkflowsOptions = defaultsDeep(
-    {
-      numberOfWorkflows: MAX_WORKFLOWS,
-      stagesPerWorkflow: MAX_STAGES_PER_WORKFLOW,
-    },
-    strapi.ee.features.get('review-workflows')
-  );
+  const reviewWorkflowsOptions = defaultsDeep({}, strapi.ee.features.get('review-workflows'), {
+    numberOfWorkflows: MAX_WORKFLOWS,
+    stagesPerWorkflow: MAX_STAGES_PER_WORKFLOW,
+  });
   const workflowsValidationService = getService('validation', { strapi });
   workflowsValidationService.register(reviewWorkflowsOptions);
 };

@@ -14,7 +14,7 @@ import { AttributeIcon, IconByType } from './AttributeIcon';
 import { useDataManager } from './DataManager/useDataManager';
 import { useFormModalNavigation } from './FormModalNavigation/useFormModalNavigation';
 
-import type { Internal } from '@strapi/types';
+import type { Internal, Struct } from '@strapi/types';
 
 interface Header {
   label: string;
@@ -32,11 +32,10 @@ type BaseProps = {
   showBackLink?: boolean;
 };
 
-type FormModalHeaderProps = BaseProps &
-  (
-    | { forTarget: 'component'; targetUid: Internal.UID.Component }
-    | { forTarget: 'contentType'; targetUid: Internal.UID.ContentType }
-  );
+type FormModalHeaderProps = BaseProps & {
+  forTarget: Struct.ModelType;
+  targetUid: Internal.UID.Schema;
+};
 
 export const FormModalHeader = ({
   actionType = null,
@@ -57,7 +56,10 @@ export const FormModalHeader = ({
   let icon: IconByType = 'component';
   let headers: Header[] = [];
 
-  const type = forTarget === 'component' ? components[targetUid] : contentTypes[targetUid];
+  const type =
+    forTarget === 'component'
+      ? components[targetUid as Internal.UID.Component]
+      : contentTypes[targetUid as Internal.UID.ContentType];
 
   const displayName = type?.info.displayName;
 

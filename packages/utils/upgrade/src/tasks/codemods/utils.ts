@@ -18,13 +18,13 @@ export const getRangeFromTarget = (
   const { major, minor, patch } = currentVersion;
 
   switch (target) {
-    case Version.ReleaseType.Latest:
+    case Version.RELEASE_TYPES.Latest:
       throw new Error("Can't use <latest> to create a codemods range: not implemented");
-    case Version.ReleaseType.Major:
+    case Version.RELEASE_TYPES.Major:
       return rangeFactory(`${major}`);
-    case Version.ReleaseType.Minor:
+    case Version.RELEASE_TYPES.Minor:
       return rangeFactory(`${major}.${minor}`);
-    case Version.ReleaseType.Patch:
+    case Version.RELEASE_TYPES.Patch:
       return rangeFactory(`${major}.${minor}.${patch}`);
     default:
       throw new Error(`Invalid target set: ${target}`);

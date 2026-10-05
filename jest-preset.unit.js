@@ -2,11 +2,11 @@
 
 module.exports = {
   setupFilesAfterEnv: [__dirname + '/tests/setup/unit.setup.js'],
-  modulePathIgnorePatterns: ['.cache', 'dist'],
+  modulePathIgnorePatterns: ['[/\\\\]\\.cache[/\\\\]', '[/\\\\]dist[/\\\\]'],
   testPathIgnorePatterns: [
     '.testdata.{js,ts}',
     '.test.utils.{js,ts}',
-    '.d.ts',
+    '\\.d\\.ts$',
     '__tests__/resources',
     'tests/resources',
     // Prevent Jest from running Vitest test files
@@ -39,7 +39,7 @@ module.exports = {
     '!**/*.spec.{js,ts,jsx,tsx}',
   ],
   coverageDirectory: '<rootDir>/coverage',
-  coverageReporters: ['text', 'lcov', 'html'],
+  coverageReporters: ['text', ['lcov', { projectRoot: __dirname }], 'html'],
   coveragePathIgnorePatterns: [
     '<rootDir>/dist/',
     '<rootDir>/node_modules/',

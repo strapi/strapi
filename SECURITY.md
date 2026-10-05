@@ -4,14 +4,13 @@
 
 As of May 2026 (and until this document is updated), v5.x.x _GA_ or _STABLE_ releases of Strapi are supported for updates and bug fixes. Any previous versions are not supported and users are advised to use them "at their own risk".
 
-| Version | Release Tag | Support Starts | Support Ends   | Security Updates Until | Notes       |
-| ------- | ----------- | -------------- | -------------- | ---------------------- | ----------- |
-| 5.x.x   | GA / Stable | September 2024 | Further Notice | Further Notice         | LTS         |
-| 5.x.x   | RC          | N/A            | September 2024 | N/A                    | End Of Life |
-| 5.x.x   | Beta        | N/A            | N/A            | N/A                    | End Of Life |
-| 5.x.x   | Alpha       | N/A            | N/A            | N/A                    | End Of Life |
-| 4.x.x   | GA / Stable | November 2021  | October 2025   | April 2026             | End Of Life |
-| 3.x.x   | GA / Stable | May 2020       | November 2022  | November 2022          | End Of Life |
+| Version | Support Starts | Support Ends  | Security Updates Until | Notes       |
+| ------- | -------------- | ------------- | ---------------------- | ----------- |
+| 5.x.x   | September 2024 |               |                        | LTS         |
+| 4.x.x   | November 2021  | October 2025  | April 2026             | End Of Life |
+| 3.x.x   | May 2020       | November 2022 | November 2022          | End Of Life |
+
+Non-stable releases (RC, Beta, Alpha) are considered End Of Life once the corresponding GA/Stable version is released.
 
 ## Scope
 
@@ -192,6 +191,7 @@ In addition to the CNA Operational Rules, the following classes of report are co
 - **Social-engineering attacks** against Strapi staff, contributors, or community members
 - **Physical-access attacks** against developer machines or production servers
 - **Best-practice recommendations** that do not correspond to an actual security boundary violation (e.g. "you should rotate keys more often")
+- **Unvalidated payload content accepted via a Data Transfer (DTS) transfer token** — a `push` or `pull` transfer token is an administrator-issued, RBAC-gated credential whose entire purpose is to fully mirror one environment's data onto another, exactly as sent. This includes, without limitation: path traversal or arbitrary file write via unsanitized asset metadata (`hash`/`ext`), and writing or overwriting rows in any content type — including administrative types such as `admin::user`, `admin::role`, and `admin::api-token` — since a legitimate environment mirror must be able to carry an application's real admin roster along with its content. The receiving side of a mirror operation has no way to distinguish an attacker-crafted payload from a legitimate one; the only thing it can verify, and the only thing it is designed to verify, is that the sender holds a valid token. That is the security boundary, not payload content. Reports in this class will be closed unless they demonstrate the token can be forged, guessed, or obtained without an administrator granting it.
 
 In addition to the above stated rules, we will also apply some generic rules as well:
 

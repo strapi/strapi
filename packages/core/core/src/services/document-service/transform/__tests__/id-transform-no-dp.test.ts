@@ -12,21 +12,9 @@ const findManyQueries = {
 describe('Transform relational data', () => {
   global.strapi = {
     getModel: (uid: string) => models[uid],
-    plugins: {
-      i18n: {
-        services: {
-          'content-types': {
-            isLocalizedContentType() {
-              return true;
-            },
-          },
-          locales: {
-            getDefaultLocale() {
-              return 'en';
-            },
-          },
-        },
-      },
+    localization: {
+      isLocalizedContentType: () => true,
+      getDefaultLocale: async () => 'en',
     },
     db: {
       query: jest.fn((uid) => ({ findMany: findManyQueries[uid] })),
@@ -80,6 +68,30 @@ describe('Transform relational data', () => {
         name: 'test',
         products: { set: [{ id: 'product-1-en-published' }, { id: 'product-2-en-draft' }] },
         product: { set: [{ id: 'product-1-en-draft' }] },
+      });
+    });
+
+    it('Connect relation operation to the published product version', async () => {
+      const { data } = await transformParamsDocumentId(SHOP_UID, {
+        data: {
+          name: 'test',
+          products: {
+            connect: {
+              documentId: 'product-1',
+              locale: 'en',
+              status: 'published',
+            },
+          },
+        },
+        locale: 'en',
+        status: 'draft',
+      });
+
+      expect(data).toMatchObject({
+        name: 'test',
+        products: {
+          connect: [{ id: 'product-1-en-published' }],
+        },
       });
     });
 

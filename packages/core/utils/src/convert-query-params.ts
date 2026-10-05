@@ -5,18 +5,7 @@
  * You can read more here: https://docs.strapi.io/developer-docs/latest/developer-resources/database-apis-reference/rest-api.html#filters
  */
 
-import _ from 'lodash';
-import {
-  cloneDeep,
-  get,
-  isArray,
-  isEmpty,
-  isInteger,
-  isNil,
-  isObject,
-  isString,
-  toNumber,
-} from 'lodash/fp';
+import _, { cloneDeep, get, isEmpty, isObject, isString, toNumber } from 'lodash';
 import {
   constants,
   hasDraftAndPublish,
@@ -49,6 +38,46 @@ export interface SortMap {
 type FieldsParams = string | string[];
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> => _.isPlainObject(value);
+
+const hasOwnProperty = (object: object, key: PropertyKey): boolean =>
+  Object.prototype.hasOwnProperty.call(object, key);
+
+const setSortMapValue = (field: string, order: SortOrder): SortMap => {
+  const path = _.toPath(field);
+  const sortMap: SortMap = {};
+  let current: SortMap | SortMap[] = sortMap;
+
+  for (const [index, key] of path.entries()) {
+    const isLastSegment = index === path.length - 1;
+
+    if (key === 'prototype' || (key in current && !hasOwnProperty(current, key))) {
+      throw new ValidationError('Invalid sort query');
+    }
+
+    if (isLastSegment) {
+      Object.defineProperty(current, key, {
+        configurable: true,
+        enumerable: true,
+        value: order,
+        writable: true,
+      });
+      continue;
+    }
+
+    const nextValue = /^\d+$/.test(path[index + 1]) ? [] : {};
+
+    Object.defineProperty(current, key, {
+      configurable: true,
+      enumerable: true,
+      value: nextValue,
+      writable: true,
+    });
+
+    current = nextValue;
+  }
+
+  return sortMap;
+};
 
 function isEmptySortMap(sortMap: SortMap): boolean {
   const keys = Object.keys(sortMap);
@@ -158,18 +187,23 @@ export interface Query {
   pageSize?: number;
 }
 
-class InvalidOrderError extends Error {
+class InvalidOrderError extends ValidationError {
   constructor() {
-    super();
-    this.message = 'Invalid order. order can only be one of asc|desc|ASC|DESC';
+    super('Invalid order. order can only be one of asc|desc|ASC|DESC');
   }
 }
 
-class InvalidSortError extends Error {
+class InvalidSortError extends ValidationError {
   constructor() {
-    super();
-    this.message =
-      'Invalid sort parameter. Expected a string, an array of strings, a sort object or an array of sort objects';
+    super(
+      'Invalid sort parameter. Expected a string, an array of strings, a sort object or an array of sort objects'
+    );
+  }
+}
+
+class InvalidPopulateError extends ValidationError {
+  constructor() {
+    super('Invalid populate parameter. Expected a string, an array of strings, a populate object');
   }
 }
 
@@ -188,7 +222,7 @@ const convertOrderingQueryParams = (ordering: unknown) => {
 };
 
 const isStringArray = (value: unknown): value is string[] =>
-  isArray(value) && value.every(isString);
+  Array.isArray(value) && value.every(isString);
 
 interface TransformerOptions {
   getModel: (uid: string) => Model | undefined;
@@ -232,7 +266,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     }
 
     if (!isString(trimmed)) {
-      throw new Error('Invalid sort query');
+      throw new ValidationError('Invalid sort query');
     }
 
     // split field and order param with default order to ascending
@@ -240,14 +274,14 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     const field = rawField.trim();
 
     if (field.length === 0) {
-      throw new Error('Field cannot be empty');
+      throw new ValidationError('Field cannot be empty');
     }
 
     validateOrder(order.trim());
 
     // TODO: field should be a valid path on an object model
 
-    return _.set({}, field, order.trim());
+    return setSortMapValue(field, order.trim() as SortOrder);
   };
 
   const convertNestedSortQueryParam = (sortQuery: SortParamsObject): SortMap => {
@@ -270,7 +304,9 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
           transformedSort[field] = trimmedOrder;
         }
       } else {
-        throw Error(`Invalid sort type expected object or string got ${typeof order}`);
+        throw new ValidationError(
+          `Invalid sort type expected object or string got ${typeof order}`
+        );
       }
     }
 
@@ -326,7 +362,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
   const convertPageQueryParams = (page: unknown): number => {
     const pageVal = toNumber(page);
 
-    if (!isInteger(pageVal) || pageVal <= 0) {
+    if (!Number.isInteger(pageVal) || pageVal <= 0) {
       throw new PaginationError(
         `Invalid 'page' parameter. Expected an integer > 0, received: ${page}`
       );
@@ -339,7 +375,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
   const convertPageSizeQueryParams = (pageSize: unknown, _page: unknown): number => {
     const pageSizeVal = toNumber(pageSize);
 
-    if (!isInteger(pageSizeVal) || pageSizeVal <= 0) {
+    if (!Number.isInteger(pageSizeVal) || pageSizeVal <= 0) {
       throw new PaginationError(
         `Invalid 'pageSize' parameter. Expected an integer > 0, received: ${pageSize}`
       );
@@ -354,8 +390,8 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     start: unknown,
     limit: unknown
   ) => {
-    const isPagePagination = !isNil(page) || !isNil(pageSize);
-    const isOffsetPagination = !isNil(start) || !isNil(limit);
+    const isPagePagination = page != null || pageSize != null;
+    const isOffsetPagination = start != null || limit != null;
 
     if (isPagePagination && isOffsetPagination) {
       throw new PaginationError(
@@ -363,14 +399,6 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
       );
     }
   };
-
-  class InvalidPopulateError extends Error {
-    constructor() {
-      super();
-      this.message =
-        'Invalid populate parameter. Expected a string, an array of strings, a populate object';
-    }
-  }
 
   // NOTE: we could support foo.* or foo.bar.* etc later on
   const convertPopulateQueryParams = (
@@ -409,7 +437,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
   const hasPopulateFragmentDefined = (
     populate: PopulateObjectParams
   ): populate is PopulateObjectParams & Required<Pick<PopulateObjectParams, 'on'>> => {
-    return typeof populate === 'object' && 'on' in populate && !isNil(populate.on);
+    return typeof populate === 'object' && 'on' in populate && populate.on != null;
   };
 
   const hasCountDefined = (
@@ -469,7 +497,11 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
          *
          * If 'populate' exists in subPopulate, its value should be constrained to a wildcard ('*').
          */
-        if ('populate' in subPopulate && subPopulate.populate !== '*') {
+        if (
+          'populate' in subPopulate &&
+          subPopulate.populate != null &&
+          subPopulate.populate !== '*'
+        ) {
           throw new ValidationError(
             `Invalid nested population query detected. When using 'populate' within polymorphic structures, ` +
               `its value must be '*' to indicate all second level links. Specific field targeting is not supported here. ` +
@@ -481,7 +513,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
         const newSubPopulate = {};
 
         // case: { populate: '*' }
-        if ('populate' in subPopulate) {
+        if ('populate' in subPopulate && subPopulate.populate === '*') {
           Object.assign(newSubPopulate, { populate: true });
         }
 
@@ -592,19 +624,19 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
     validatePaginationParams(page, pageSize, start, limit);
 
-    if (!isNil(page)) {
+    if (page != null) {
       query.page = convertPageQueryParams(page);
     }
 
-    if (!isNil(pageSize)) {
+    if (pageSize != null) {
       query.pageSize = convertPageSizeQueryParams(pageSize, page);
     }
 
-    if (!isNil(start)) {
+    if (start != null) {
       query.offset = convertStartQueryParams(start);
     }
 
-    if (!isNil(limit)) {
+    if (limit != null) {
       query.limit = convertLimitQueryParams(limit);
     }
 
@@ -635,7 +667,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
       // map convert
       const fieldsValues = fields
         .flatMap((value) => convertFieldsQueryParams(value, schema, depth + 1))
-        .filter((v) => !isNil(v)) as string[];
+        .filter((v) => v != null) as string[];
 
       // NOTE: Only include the doc id if it's a content type
       if (schema?.modelType === 'contentType') {
@@ -691,7 +723,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
     // Here, `key` can either be an operator or an attribute name
     for (const [key, value] of Object.entries(filters)) {
-      const attribute = get(key, schema?.attributes);
+      const attribute = get(schema?.attributes, key);
       const validKey = isOperator(key) || isValidSchemaAttribute(key, schema);
 
       if (!validKey) {
@@ -767,46 +799,57 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
     const query: Query = {};
 
-    const { _q, sort, filters, fields, populate, page, pageSize, start, limit, status, ...rest } =
-      params;
+    const {
+      _q: searchQuery,
+      sort,
+      filters,
+      fields,
+      populate,
+      page,
+      pageSize,
+      start,
+      limit,
+      status,
+      ...rest
+    } = params;
 
-    if (!isNil(status)) {
+    if (status != null) {
       convertStatusParams(status, query);
     }
 
-    if (!isNil(_q)) {
-      query._q = _q;
+    if (searchQuery != null) {
+      query._q = searchQuery;
     }
 
     applySortToQuery(query, sort);
 
-    if (!isNil(filters)) {
+    if (filters != null) {
       query.where = convertFiltersQueryParams(filters, schema);
     }
 
-    if (!isNil(fields)) {
+    if (fields != null) {
       query.select = convertFieldsQueryParams(fields, schema);
     }
 
-    if (!isNil(populate)) {
+    if (populate != null) {
       query.populate = convertPopulateQueryParams(populate, schema);
     }
 
     validatePaginationParams(page, pageSize, start, limit);
 
-    if (!isNil(page)) {
+    if (page != null) {
       query.page = convertPageQueryParams(page);
     }
 
-    if (!isNil(pageSize)) {
+    if (pageSize != null) {
       query.pageSize = convertPageSizeQueryParams(pageSize, page);
     }
 
-    if (!isNil(start)) {
+    if (start != null) {
       query.offset = convertStartQueryParams(start);
     }
 
-    if (!isNil(limit)) {
+    if (limit != null) {
       query.limit = convertLimitQueryParams(limit);
     }
 

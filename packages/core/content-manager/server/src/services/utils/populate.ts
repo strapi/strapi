@@ -1,5 +1,6 @@
-import { merge, isEmpty, set, propEq } from 'lodash/fp';
-import strapiUtils from '@strapi/utils';
+import { set, merge, isEmpty, matchesProperty } from 'lodash';
+
+import * as strapiUtils from '@strapi/utils';
 import type { UID, Schema, Modules } from '@strapi/types';
 import { getService } from '../../utils';
 
@@ -15,10 +16,10 @@ const { PUBLISHED_AT_ATTRIBUTE } = strapiUtils.contentTypes.constants;
 
 const isMorphToRelation = (attribute: any) =>
   isRelation(attribute) && attribute.relation.includes('morphTo');
-const isMedia = propEq('type', 'media');
-const isRelation = propEq('type', 'relation');
-const isComponent = propEq('type', 'component');
-const isDynamicZone = propEq('type', 'dynamiczone');
+const isMedia = matchesProperty('type', 'media');
+const isRelation = matchesProperty('type', 'relation');
+const isComponent = matchesProperty('type', 'component');
+const isDynamicZone = matchesProperty('type', 'dynamiczone');
 
 // TODO: Import from @strapi/types when it's available there
 type Model = Parameters<typeof isVisibleAttribute>[0];
@@ -84,7 +85,7 @@ function getPopulateForDZ(
   attribute: Schema.Attribute.DynamicZone,
   options: PopulateOptions,
   level: number
-) {
+): { on: { [key: string]: { populate: { [key: string]: boolean | object } } } } {
   // Use fragments to populate the dynamic zone components
   const populatedComponents = (attribute.components || []).reduce(
     (acc: any, componentUID: UID.Component) => ({
@@ -162,7 +163,7 @@ const getDeepPopulate = (
     maxLevel = Infinity,
   }: PopulateOptions = {},
   level = 1
-) => {
+): { [key: string]: boolean | object } => {
   if (level > maxLevel) {
     return {};
   }
@@ -176,6 +177,7 @@ const getDeepPopulate = (
   return Object.keys(model.attributes).reduce(
     (populateAcc, attributeName: string) =>
       merge(
+        {},
         populateAcc,
         getPopulateFor(
           attributeName,
@@ -302,7 +304,7 @@ const getPopulateForValidation = (uid: UID.Schema): Record<string, any> => {
  */
 const draftCountPopulateCache = new Map<string, { populate: any; hasRelations: boolean }>();
 
-const getDeepPopulateDraftCount = (uid: UID.Schema) => {
+const getDeepPopulateDraftCount = (uid: UID.Schema): { populate: any; hasRelations: boolean } => {
   const cached = draftCountPopulateCache.get(uid);
   if (cached) {
     return cached;
@@ -336,9 +338,21 @@ const getDeepPopulateDraftCount = (uid: UID.Schema) => {
           break;
         }
 
+        // Self-referential relations are preserved on publish (see self-referential-relations.ts).
+        if (attribute.target === uid) {
+          break;
+        }
+
         if (isVisibleAttribute(model, attributeName)) {
+          // Draft entries link to draft rows of related documents. Populate documentId/locale
+          // so we can distinguish truly unpublished targets from published documents that
+          // still have a draft row (those links are kept on publish for M2M, or remapped for xToOne).
+          const fields: string[] = ['documentId'];
+          if (strapi.localization.isLocalizedContentType(targetModel) === true) {
+            fields.push('locale');
+          }
           populateAcc[attributeName] = {
-            count: true,
+            fields,
             filters: { [PUBLISHED_AT_ATTRIBUTE]: { $null: true } },
           };
           hasRelations = true;
@@ -411,8 +425,7 @@ const getQueryPopulate = async (uid: UID.Schema, query: object): Promise<Populat
       // Populate all relations, components and media
       if (isRelation(attribute) || isMedia(attribute) || isComponent(attribute)) {
         const populatePath = path.attribute.replace(/\./g, '.populate.');
-        // @ts-expect-error - lodash doesn't resolve the Populate type correctly
-        populateQuery = set(populatePath, {}, populateQuery);
+        populateQuery = merge({}, populateQuery, set({}, populatePath, {}));
       }
     },
     { schema: strapi.getModel(uid), getModel: strapi.getModel.bind(strapi) },
@@ -454,10 +467,7 @@ const buildDeepPopulate = async (uid: UID.CollectionType) => {
  */
 const getPopulateForLocalizations = (model: UID.Schema) => {
   const modelSchema = strapi.getModel(model);
-  if (
-    (modelSchema as unknown as { pluginOptions: { i18n: { localized?: boolean } } }).pluginOptions
-      ?.i18n?.localized
-  ) {
+  if (strapi.localization.isLocalizedContentType(modelSchema) === true) {
     return { localizations: { fields: ['locale', 'documentId', 'publishedAt', 'updatedAt'] } };
   }
 

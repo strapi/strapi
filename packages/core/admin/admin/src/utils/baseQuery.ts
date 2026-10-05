@@ -1,7 +1,6 @@
 import { SerializedError } from '@reduxjs/toolkit';
 import { BaseQueryFn } from '@reduxjs/toolkit/query';
 
-import { logout as logoutAction } from '../reducer';
 import {
   getFetchClient,
   triggerSessionExpired,
@@ -28,11 +27,12 @@ type BaseQueryError = ApiError | UnknownApiError;
 
 const isAuthPath = (url: string) => /^\/admin\/(login|logout|access-token)\b/.test(url);
 
-const simpleQuery: BaseQueryFn<string | QueryArguments, unknown, BaseQueryError> = async (
-  query,
-  api
-) => {
-  const { signal, dispatch } = api as { signal?: AbortSignal; dispatch: (a: any) => void };
+const simpleQuery: BaseQueryFn<
+  string | QueryArguments,
+  unknown,
+  BaseQueryError | SerializedError
+> = async (query, api) => {
+  const { signal } = api;
 
   const executeQuery = async (queryToExecute: string | QueryArguments) => {
     const { get, post, del, put } = getFetchClient();
@@ -67,31 +67,19 @@ const simpleQuery: BaseQueryFn<string | QueryArguments, unknown, BaseQueryError>
         const url = typeof query === 'string' ? query : query.url;
 
         if (!isAuthPath(url)) {
-          try {
-            const { post } = getFetchClient();
-            await post('/admin/logout');
-          } catch {
-            // no-op
-          }
-
-          dispatch(logoutAction());
-          // Notify the React layer so the active tab redirects to /auth/login.
-          // Without this, only other tabs (via the storage event) would react;
-          // the tab that originated the failing request would stay put until
-          // the user clicked something or refreshed.
+          // Defer clearing auth state to AuthProvider so unsaved-change guards
+          // can run before token removal (which unmounts edit forms).
           triggerSessionExpired();
         }
       }
 
-      if (
-        typeof err.response?.data === 'object' &&
-        err.response?.data !== null &&
-        'error' in err.response?.data
-      ) {
+      const responseData = err.response?.data;
+
+      if (typeof responseData === 'object' && responseData !== null && 'error' in responseData) {
         /**
          * This will most likely be ApiError
          */
-        return { data: undefined, error: err.response?.data.error as any };
+        return { data: undefined, error: responseData.error as BaseQueryError };
       } else {
         return {
           data: undefined,
@@ -105,7 +93,7 @@ const simpleQuery: BaseQueryFn<string | QueryArguments, unknown, BaseQueryError>
       }
     }
 
-    const error = err as Error;
+    const error = err instanceof Error ? err : new Error('Unknown error');
     return {
       data: undefined,
       error: {

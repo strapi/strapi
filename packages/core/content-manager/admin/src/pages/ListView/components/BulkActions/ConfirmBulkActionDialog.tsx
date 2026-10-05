@@ -10,11 +10,9 @@ import { Button, Flex, Dialog, Typography } from '@strapi/design-system';
 import { Check, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { useDoc } from '../../../../hooks/useDocument';
+import { useDoc, type Document } from '../../../../hooks/useDocument';
 import { useGetManyDraftRelationCountQuery } from '../../../../services/documents';
 import { getTranslation } from '../../../../utils/translations';
-
-import { Emphasis } from './Actions';
 
 interface ConfirmBulkActionDialogProps {
   endAction: React.ReactNode;
@@ -87,7 +85,10 @@ const ConfirmDialogPublishAll = ({
   onConfirm,
 }: ConfirmDialogPublishAllProps) => {
   const { formatMessage } = useIntl();
-  const selectedEntries = useTable('ConfirmDialogPublishAll', (state) => state.selectedRows);
+  const selectedEntries = useTable(
+    'ConfirmDialogPublishAll',
+    (state) => state.selectedRows
+  ) as Document[];
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
   const { model } = useDoc();
@@ -98,10 +99,6 @@ const ConfirmDialogPublishAll = ({
       };
     };
   }>();
-
-  // TODO skipping this for now as there is a bug with the draft relation count that will be worked on separately
-  // see RFC "Count draft relations" in Notion
-  const enableDraftRelationsCount = false;
 
   const {
     data: countDraftRelations = 0,
@@ -114,7 +111,7 @@ const ConfirmDialogPublishAll = ({
       locale: query?.plugins?.i18n?.locale,
     },
     {
-      skip: !enableDraftRelationsCount || selectedEntries.length === 0,
+      skip: selectedEntries.length === 0,
     }
   );
 

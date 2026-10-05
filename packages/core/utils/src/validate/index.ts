@@ -1,5 +1,4 @@
-import { CurriedFunction1 } from 'lodash';
-import { isArray, isObject } from 'lodash/fp';
+import { CurriedFunction1, isObject } from 'lodash';
 import type { z } from 'zod/v4';
 
 import { getNonWritableAttributes, constants } from '../content-types';
@@ -16,7 +15,7 @@ import * as visitors from './visitors';
 import * as validators from './validators';
 import traverseEntity from '../traverse-entity';
 
-import { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate } from '../traverse';
+import { traverseQueryFilters, traverseQuerySort } from '../traverse';
 
 import { Model, Data } from '../types';
 import { ValidationError } from '../errors';
@@ -75,7 +74,7 @@ const createAPIValidators = (opts: APIOptions) => {
       throw new Error('Missing schema in validateInput');
     }
 
-    if (isArray(data)) {
+    if (Array.isArray(data)) {
       await Promise.all(data.map((entry) => validateInput(entry, schema, options)));
       return;
     }
@@ -233,7 +232,7 @@ const createAPIValidators = (opts: APIOptions) => {
     if (!schema) {
       throw new Error('Missing schema in validateFilters');
     }
-    if (isArray(filters)) {
+    if (Array.isArray(filters)) {
       await Promise.all(filters.map((filter) => validateFilters(filter, schema, { auth })));
       return;
     }
@@ -303,20 +302,11 @@ const createAPIValidators = (opts: APIOptions) => {
     }
   };
 
-  const validatePopulate: ValidateFunc = async (populate, schema: Model, { auth } = {}) => {
+  const validatePopulate: ValidateFunc = async (populate, schema: Model) => {
     if (!schema) {
       throw new Error('Missing schema in sanitizePopulate');
     }
     const transforms = [validators.defaultValidatePopulate({ schema, getModel })];
-
-    if (auth) {
-      transforms.push(
-        traverseQueryPopulate(visitors.throwRestrictedRelations(auth), {
-          schema,
-          getModel,
-        })
-      );
-    }
 
     try {
       await pipeAsync(...transforms)(populate);

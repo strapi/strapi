@@ -11,6 +11,19 @@ const defaults = {
 };
 
 describe('Pagination util', () => {
+  test('Does not change query arguments or defaults across calls', () => {
+    const filters = { title: { $eq: 'example' } };
+    const query = { page: 2, pageSize: 5, filters };
+    const customDefaults = { page: { pageSize: 20 }, offset: { limit: 30 } };
+
+    const result = withDefaultPagination(query, { defaults: customDefaults });
+
+    expect(result).toEqual({ start: 5, limit: 5, filters });
+    expect(query).toEqual({ page: 2, pageSize: 5, filters });
+    expect(customDefaults).toEqual({ page: { pageSize: 20 }, offset: { limit: 30 } });
+    expect(withDefaultPagination({})).toEqual({ start: 0, limit: 10 });
+  });
+
   describe('With maxLimit set', () => {
     const maxLimit = 50;
 
@@ -32,6 +45,41 @@ describe('Pagination util', () => {
         expect(defaultPagination).toEqual({
           start: 0,
           limit: pagination.pageSize,
+        });
+      });
+
+      test('Uses default pageSize when only page is provided', () => {
+        const pagination = { page: 2 };
+        const defaultPagination = withDefaultPagination(pagination, { defaults, maxLimit });
+
+        expect(defaultPagination).toEqual({
+          start: defaultLimit, // (page - 1) * defaultLimit
+          limit: defaultLimit,
+        });
+      });
+
+      test('Uses default pageSize when pageSize is null', () => {
+        const pagination = { page: 2, pageSize: null };
+        const defaultPagination = withDefaultPagination(pagination, { defaults, maxLimit });
+
+        expect(defaultPagination).toEqual({
+          start: defaultLimit,
+          limit: defaultLimit,
+        });
+      });
+
+      test('Uses the capped default pageSize to calculate the page offset', () => {
+        const pagination = { page: 2 };
+        const defaultPagination = withDefaultPagination(pagination, {
+          defaults: {
+            page: { pageSize: 3 },
+          },
+          maxLimit: 2,
+        });
+
+        expect(defaultPagination).toEqual({
+          start: 2,
+          limit: 2,
         });
       });
 

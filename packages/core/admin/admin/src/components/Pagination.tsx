@@ -16,7 +16,7 @@ import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 
-import { useQueryParams } from '../hooks/useQueryParams';
+import { useQueryParams, withEncodedUserParams } from '../hooks/useQueryParams';
 
 import { createContext } from './Context';
 
@@ -91,15 +91,15 @@ const Root = React.forwardRef<HTMLDivElement, RootProps>(
     { children, defaultPageSize = 10, pageCount = 0, defaultPage = 1, onPageSizeChange, total = 0 },
     forwardedRef
   ) => {
-    const [{ query }, setQuery] = useQueryParams<Pick<PaginationContextValue, 'page' | 'pageSize'>>(
-      {
-        pageSize: defaultPageSize.toString(),
-        page: defaultPage.toString(),
-      }
-    );
+    const [{ query }, setQuery] = useQueryParams<
+      Pick<PaginationContextValue, 'page' | 'pageSize'> & { filters?: unknown; _q?: unknown }
+    >({
+      pageSize: defaultPageSize.toString(),
+      page: defaultPage.toString(),
+    });
 
     const setPageSize = (pageSize: string) => {
-      setQuery({ pageSize, page: '1' });
+      setQuery(withEncodedUserParams(query, { pageSize, page: '1' }));
 
       if (onPageSizeChange) {
         onPageSizeChange(pageSize);

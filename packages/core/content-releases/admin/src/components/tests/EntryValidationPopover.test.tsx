@@ -10,6 +10,13 @@ jest.mock('@strapi/content-manager/strapi-admin', () => ({
 
 const mockUseDocument = unstable_useDocument as jest.MockedFunction<typeof unstable_useDocument>;
 
+const mockDocumentValidation = (errors: Record<string, string> = {}) => {
+  mockUseDocument.mockReturnValue({
+    validate: jest.fn(() => errors),
+    isLoading: false,
+  } as unknown as ReturnType<typeof unstable_useDocument>);
+};
+
 describe('EntryValidationPopover', () => {
   const defaultProps = {
     action: 'publish' as const,
@@ -28,10 +35,7 @@ describe('EntryValidationPopover', () => {
   };
 
   beforeEach(() => {
-    mockUseDocument.mockReturnValue({
-      validate: jest.fn(() => ({})),
-      isLoading: false,
-    } as any);
+    mockDocumentValidation();
   });
 
   it('renders correctly for a valid entry', async () => {
@@ -58,10 +62,7 @@ describe('EntryValidationPopover', () => {
   });
 
   it('renders correctly for an invalid entry', async () => {
-    mockUseDocument.mockReturnValue({
-      validate: jest.fn(() => ({ title: 'Title is required' })),
-      isLoading: false,
-    } as any);
+    mockDocumentValidation({ title: 'Title is required' });
 
     const { user } = render(
       <IntlProvider locale="en" messages={{}}>

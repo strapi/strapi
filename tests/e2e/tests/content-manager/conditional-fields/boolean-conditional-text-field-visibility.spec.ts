@@ -34,14 +34,14 @@ test.describe('Conditional Fields - Boolean-controlled conditional text fields',
       { save: false, publish: false, verify: false }
     );
 
-    await page.getByLabel('sku').isVisible();
+    await expect(page.getByLabel('sku')).toBeVisible();
     await page.getByLabel('sku').fill('5');
     await fillField(page, {
       name: 'isAvailable',
       type: 'boolean',
       value: false,
     });
-    await page.getByLabel('sku').isHidden();
+    await expect(page.getByLabel('sku')).toBeHidden();
     await page.getByRole('button', { name: 'Save' }).click();
     await fillField(page, {
       name: 'isAvailable',

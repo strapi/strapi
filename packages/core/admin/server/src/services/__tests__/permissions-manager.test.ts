@@ -1,5 +1,6 @@
 import { AbilityBuilder, Ability, subject } from '@casl/ability';
-import { pick } from 'lodash/fp';
+import { pick } from 'lodash';
+
 import sift from 'sift';
 import { buildStrapiQuery } from '../permission/permissions-manager/query-builders';
 import createPermissionsManager from '../permission/permissions-manager';
@@ -20,10 +21,10 @@ const allowedOperations = [
   '$elemMatch',
 ];
 
-const operations = pick(allowedOperations, sift);
+const operations = pick(sift, allowedOperations);
 
 const conditionsMatcher = (conditions: any) => {
-  // @ts-expect-error
+  // @ts-expect-error sift operation map is intentionally narrowed for tests
   return sift.createQueryTester(conditions, { operations });
 };
 
@@ -311,7 +312,7 @@ describe('Permissions Manager', () => {
       ],
     ];
 
-    // @ts-expect-error
+    // @ts-expect-error test matrix includes heterogeneous query fixtures
     test.each(tests)(`Test n°%#: %s`, (name, input, expected) => {
       expect(buildStrapiQuery(input)).toStrictEqual(expected);
     });

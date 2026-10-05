@@ -10,7 +10,7 @@ import {
 } from '@strapi/admin/strapi-admin';
 import { Button, Divider, Flex, Grid, Main, Typography } from '@strapi/design-system';
 import { generateNKeysBetween } from 'fractional-indexing';
-import pipe from 'lodash/fp/pipe';
+import flow from 'lodash/flow';
 import { useIntl } from 'react-intl';
 
 import { ATTRIBUTE_TYPES_THAT_CANNOT_BE_MAIN_FIELD } from '../../constants/attributes';
@@ -69,7 +69,7 @@ const ConfigurationForm = ({
   const { formatMessage } = useIntl();
 
   const initialValues: ConfigurationFormData = React.useMemo(() => {
-    const transformations = pipe(
+    const transformations = flow(
       flattenPanels,
       replaceMainFieldWithNameOnly,
       extractMetadata,
@@ -264,8 +264,8 @@ const extractMetadata = (
  */
 const addTmpSpaceToLayout = (
   layout: ReturnType<typeof extractMetadata>
-): Array<ConfigurationFormData['layout'][number]['children']> => [
-  ...layout.map((row) => {
+): Array<ConfigurationFormData['layout'][number]['children']> =>
+  layout.map((row) => {
     const totalSpaceTaken = row.reduce((acc, field) => acc + field.size, 0);
 
     if (totalSpaceTaken < 12) {
@@ -280,8 +280,7 @@ const addTmpSpaceToLayout = (
     }
 
     return row;
-  }),
-];
+  });
 
 /**
  * @internal

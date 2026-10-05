@@ -2,7 +2,6 @@ import { createHash, type Hash } from 'crypto';
 import { PassThrough, Readable, Writable } from 'stream';
 import type { Struct, Utils } from '@strapi/types';
 import { WebSocket } from 'ws';
-import { castArray } from 'lodash/fp';
 
 import type {
   IAsset,
@@ -14,9 +13,9 @@ import type {
   ProviderType,
   StageTotalsEstimate,
   TransferStage,
-} from '../../../../types';
+} from '../../../types';
 import type { IDiagnosticReporter } from '../../../utils/diagnostic';
-import { Client, Server, Auth } from '../../../../types/remote/protocol';
+import { Client, Server, Auth } from '../../../types/remote/protocol';
 import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
 import { TRANSFER_PATH } from '../../remote/constants';
 import { decodeTransferAssetStreamItem } from '../../../utils/transfer-asset-chunk';
@@ -143,7 +142,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
         return;
       }
 
-      for (const item of castArray(data)) {
+      for (const item of Array.isArray(data) ? data : [data]) {
         stream.push(item as Parameters<PassThrough['push']>[0]);
       }
 

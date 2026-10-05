@@ -28,7 +28,7 @@ test.describe('RBAC - Create Roles', () => {
   });
 
   // Test for verifying Super Admin can create a new role
-  test('Super Admin can create a new role', async ({ page }) => {
+  test('Super Admin can create a new role', { tag: ['@critical'] }, async ({ page }) => {
     // Step 1: click "Create new role"
     await clickAndWait(page, page.getByRole('button', { name: 'Add new role' }).first());
 

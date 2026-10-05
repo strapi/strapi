@@ -23,10 +23,7 @@ import {
   useDocLayout,
 } from '../../hooks/useDocumentLayout';
 import { useTypedSelector } from '../../modules/hooks';
-import {
-  useGetContentTypeConfigurationQuery,
-  useUpdateContentTypeConfigurationMutation,
-} from '../../services/contentTypes';
+import { useUpdateContentTypeConfigurationMutation } from '../../services/contentTypes';
 import { setIn } from '../../utils/objects';
 
 import { Header } from './components/Header';
@@ -52,12 +49,6 @@ const ListConfiguration = () => {
     `STRAPI_LIST_VIEW_DISPLAYED_HEADERS:${model}`,
     null
   );
-
-  const { metadata } = useGetContentTypeConfigurationQuery(model, {
-    selectFromResult: ({ data }) => ({
-      metadata: data?.contentType.metadatas ?? {},
-    }),
-  });
 
   const [updateContentTypeConfiguration] = useUpdateContentTypeConfigurationMutation();
   const handleSubmit: FormProps<FormData>['onSubmit'] = async (data) => {
@@ -127,7 +118,7 @@ const ListConfiguration = () => {
         : list.layout.map((field) => field.name);
 
     const headerMetadatas = headerNames.reduce<ListLayout['metadatas']>((acc, name) => {
-      acc[name] = metadata[name]?.list ?? list.metadatas[name] ?? { label: name };
+      acc[name] = list.metadatas[name] ?? { label: name };
       return acc;
     }, {});
 
@@ -156,7 +147,7 @@ const ListConfiguration = () => {
       })),
       settings: list.settings,
     } satisfies FormData;
-  }, [formatMessage, list, displayedHeaderNames, schema, metadata, listViewConversionContext]);
+  }, [formatMessage, list, displayedHeaderNames, schema, listViewConversionContext]);
 
   if (collectionType === SINGLE_TYPES) {
     return <Navigate to={`/single-types/${model}`} />;
@@ -192,7 +183,7 @@ const ListConfiguration = () => {
             >
               <Settings />
               <Divider />
-              <SortDisplayedFields />
+              <SortDisplayedFields metadatas={list.metadatas} />
             </Flex>
           </Layouts.Content>
         </Form>

@@ -2,7 +2,7 @@ import { Writable } from 'stream';
 import type { Core, UID } from '@strapi/types';
 
 import { ProviderTransferError } from '../../../../../errors/providers';
-import type { IEntity, Transaction } from '../../../../../../types';
+import type { IEntity, Transaction } from '../../../../../types';
 import * as queries from '../../../../queries';
 import { collectComponentIdMappings } from '../../../../../utils/components';
 

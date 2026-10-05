@@ -8,6 +8,7 @@ const config = {
     '.eslintrc.cjs',
     'rollup.config.mjs',
     'coverage/',
+    'lint-staged.config.mjs',
   ],
   overrides: [
     {
@@ -19,7 +20,7 @@ const config = {
     },
     {
       files: ['**'],
-      excludedFiles: ['admin/**/*', 'server/**/*'],
+      excludedFiles: ['admin/**/*', 'server/**/*', 'shared/**/*'],
       extends: ['eslint-config-custom/back'],
     },
   ],

@@ -35,7 +35,7 @@ test.describe('Cloning', () => {
     await page.getByRole('link', { name: 'Author' }).click();
     await page.waitForURL(LIST_URL_AUTHOR);
     await expect(page.getByRole('row', { name: 'Coach Beard' })).toBeVisible();
-    expect(await page.getByRole('row', { name: 'Coach Beard' }).all()).toHaveLength(1);
+    await expect(page.getByRole('row', { name: 'Coach Beard' })).toHaveCount(1);
 
     /**
      * Open the row actions menu and click on the duplicate button.
@@ -61,7 +61,7 @@ test.describe('Cloning', () => {
     await page.getByRole('link', { name: 'Author' }).click();
     await page.waitForURL(LIST_URL_AUTHOR);
     await expect(page.getByRole('heading', { name: 'Author' })).toBeVisible();
-    expect(await page.getByRole('row', { name: 'Coach Beard' }).all()).toHaveLength(2);
+    await expect(page.getByRole('row', { name: 'Coach Beard' })).toHaveCount(2);
   });
 
   test('As a user I want to auto-clone a document in a different locale than the default one', async ({
@@ -135,9 +135,7 @@ test.describe('Cloning', () => {
      */
     await navToHeader(page, ['Content Manager', 'Article'], 'Article');
     await expect(page.getByRole('row', { name: 'West ham post match analysis' })).toBeVisible();
-    expect(
-      await page.getByRole('row', { name: 'West ham post match analysis' }).all()
-    ).toHaveLength(1);
+    await expect(page.getByRole('row', { name: 'West ham post match analysis' })).toHaveCount(1);
 
     /**
      * Open the row actions menu and click on the duplicate button.
@@ -177,8 +175,6 @@ test.describe('Cloning', () => {
     await page.getByRole('link', { name: 'Article' }).click();
     await page.waitForURL(LIST_URL_ARTICLE);
     await expect(page.getByRole('grid')).toBeVisible();
-    expect(
-      await page.getByRole('row', { name: 'West ham post match analysis' }).all()
-    ).toHaveLength(2);
+    await expect(page.getByRole('row', { name: 'West ham post match analysis' })).toHaveCount(2);
   });
 });

@@ -53,4 +53,44 @@ namespace Get {
       };
 }
 
-export { AuditLog, GetAll, Get };
+namespace GetUsers {
+  export interface Request {
+    body: {};
+    query: {
+      page?: number;
+      pageSize?: number;
+    };
+  }
+
+  export type Response =
+    | {
+        pagination: Pagination;
+        results: Pick<SanitizedAdminUserForAuditLogs, 'id' | 'email' | 'displayName'>[];
+        error?: never;
+      }
+    | {
+        pagination?: never;
+        results?: never;
+        error?: errors.ApplicationError;
+      };
+}
+
+namespace Export {
+  export interface Request {
+    body: {};
+    query: {
+      cursor?: number;
+      pageSize?: number;
+      until?: number;
+      filters?: unknown;
+    };
+  }
+
+  export type Response =
+    | string
+    | {
+        error?: errors.ApplicationError;
+      };
+}
+
+export { AuditLog, GetAll, Get, GetUsers, Export };

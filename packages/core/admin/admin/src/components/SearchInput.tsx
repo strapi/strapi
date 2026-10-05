@@ -6,7 +6,7 @@ import { useIntl } from 'react-intl';
 
 import { TrackingEvent, useTracking } from '../features/Tracking';
 import { useIsMobile } from '../hooks/useMediaQuery';
-import { useQueryParams } from '../hooks/useQueryParams';
+import { useQueryParams, withEncodedUserParams } from '../hooks/useQueryParams';
 
 interface SearchInputProps {
   disabled?: boolean;
@@ -26,7 +26,11 @@ const SearchInput = ({
   const inputRef = React.useRef<HTMLInputElement>(null);
   const iconButtonRef = React.useRef<HTMLButtonElement>(null);
 
-  const [{ query }, setQuery] = useQueryParams<{ _q: string; page?: number }>();
+  const [{ query }, setQuery] = useQueryParams<{
+    _q?: string;
+    page?: number;
+    filters?: unknown;
+  }>();
 
   const [value, setValue] = React.useState(query?._q || '');
   const [isOpen, setIsOpen] = React.useState(!!value);
@@ -43,9 +47,11 @@ const SearchInput = ({
     }
   }, [isOpen]);
 
+  const clearSearch = () => setQuery(withEncodedUserParams(query, { _q: undefined }));
+
   const handleClear = () => {
     setValue('');
-    setQuery({ _q: '' }, 'remove');
+    clearSearch();
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -56,10 +62,10 @@ const SearchInput = ({
       if (trackedEvent) {
         trackUsage(trackedEvent, trackedEventDetails);
       }
-      setQuery({ _q: encodeURIComponent(value), page: 1 });
+      setQuery(withEncodedUserParams(query, { _q: encodeURIComponent(value), page: 1 }));
     } else {
       handleToggle();
-      setQuery({ _q: '' }, 'remove');
+      clearSearch();
     }
   };
 

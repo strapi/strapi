@@ -89,7 +89,7 @@ describe('updateFileInfo', () => {
   });
 
   test('moves the file to the root when folder is explicitly null', async () => {
-    await uploadService.updateFileInfo(1, { folder: null });
+    await uploadService.updateFileInfo(1, { folder: null as unknown as number });
 
     const [{ data }] = update.mock.calls[0];
     expect(data).toMatchObject({

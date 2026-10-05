@@ -54615,6 +54615,11 @@ async function updateTicket(issueId, pr2, analysis, labelMap, teamId) {
   const labelIds = await buildLabelIds(analysis, labelMap, teamId);
   await linearClient.updateIssue(issueId, { title, description, labelIds });
 }
+async function updateTicketMetadata(issueId, pr2, analysis) {
+  const title = `PR #${pr2.number}: ${pr2.title}`;
+  const description = buildDescription(pr2, analysis);
+  await linearClient.updateIssue(issueId, { title, description });
+}
 async function updateTicketLabels(issueId, analysis, labelMap, teamId) {
   const labelIds = await buildLabelIds(analysis, labelMap, teamId);
   await linearClient.updateIssue(issueId, { labelIds });
@@ -54910,8 +54915,10 @@ async function syncPR(prNumber, triggerLabel, inputs) {
     linearTicketId: null,
     linearTicketDbId: null
   };
+  const cprTicket = await findTicketByPRNumber(inputs.cprTeamId, prNumber);
+  const cmsTicket = cprTicket ? null : await findTicketByPRNumber(inputs.cmsTeamId, prNumber);
+  const existing = cprTicket ?? cmsTicket;
   const labelMap = await resolveTeamLabels(inputs.cprTeamId, inputs.labelMap);
-  const existing = await findTicketByPRNumber(inputs.cprTeamId, prNumber) ?? await findTicketByPRNumber(inputs.cmsTeamId, prNumber);
   if (!existing) {
     const ticket = await createTicket(
       pr2,
@@ -54930,7 +54937,11 @@ async function syncPR(prNumber, triggerLabel, inputs) {
   } else {
     analysis.linearTicketId = existing.identifier;
     analysis.linearTicketDbId = existing.id;
-    await updateTicket(existing.id, pr2, analysis, labelMap, inputs.cprTeamId);
+    if (cprTicket) {
+      await updateTicket(existing.id, pr2, analysis, labelMap, inputs.cprTeamId);
+    } else {
+      await updateTicketMetadata(existing.id, pr2, analysis);
+    }
   }
 }
 

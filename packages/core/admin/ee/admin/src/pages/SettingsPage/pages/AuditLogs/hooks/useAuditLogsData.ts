@@ -3,15 +3,14 @@ import * as React from 'react';
 import { useNotification } from '../../../../../../../../admin/src/features/Notifications';
 import { useAPIErrorHandler } from '../../../../../../../../admin/src/hooks/useAPIErrorHandler';
 import { useQueryParams } from '../../../../../../../../admin/src/hooks/useQueryParams';
-import { useAdminUsers } from '../../../../../../../../admin/src/services/users';
-import { useGetAuditLogsQuery } from '../../../../../services/auditLogs';
+import { useGetAuditLogsQuery, useGetAuditLogUsersQuery } from '../../../../../services/auditLogs';
 
 export const useAuditLogsData = ({
   canReadAuditLogs,
-  canReadUsers,
+  usersPageSize,
 }: {
   canReadAuditLogs: boolean;
-  canReadUsers: boolean;
+  usersPageSize: number;
 }) => {
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
@@ -22,13 +21,21 @@ export const useAuditLogsData = ({
     error,
     isError: isUsersError,
     isLoading: isLoadingUsers,
-  } = useAdminUsers(
-    {},
+  } = useGetAuditLogUsersQuery(
+    { pageSize: usersPageSize },
     {
-      skip: !canReadUsers,
+      skip: !canReadAuditLogs,
       refetchOnMountOrArgChange: true,
     }
   );
+
+  const [usersData, setUsersData] = React.useState<typeof data>();
+
+  React.useEffect(() => {
+    if (data) {
+      setUsersData(data);
+    }
+  }, [data]);
 
   React.useEffect(() => {
     if (error) {
@@ -54,8 +61,10 @@ export const useAuditLogsData = ({
 
   return {
     auditLogs,
-    users: data?.users ?? [],
-    isLoading: isLoadingUsers || isLoadingAuditLogs,
+    users: usersData?.results ?? [],
+    usersPagination: usersData?.pagination ?? undefined,
+    isLoadingUsers,
+    isLoading: (isLoadingUsers && !usersData) || isLoadingAuditLogs,
     hasError: isAuditLogsError || isUsersError,
   };
 };

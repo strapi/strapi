@@ -1,5 +1,5 @@
 import path from 'path';
-import _ from 'lodash/fp';
+import _ from 'lodash';
 import fse from 'fs-extra';
 // eslint-disable-next-line node/no-unpublished-import
 import SwaggerParser from '@apidevtools/swagger-parser';
@@ -79,6 +79,94 @@ describe('Documentation plugin | Documentation service', () => {
     const validatePromise = SwaggerParser.validate(_.cloneDeep(mockFinalDoc));
 
     await expect(validatePromise).resolves.not.toThrow();
+  });
+
+  it('references generated cross-API relation schemas and falls back for ungenerated targets', async () => {
+    const generatedApis = {
+      source: {
+        contentTypes: {
+          source: {
+            attributes: {
+              product: {
+                type: 'relation',
+                relation: 'oneToOne',
+                target: 'api::catalog.product',
+              },
+              hidden: {
+                type: 'relation',
+                relation: 'oneToOne',
+                target: 'api::hidden.hidden',
+              },
+            },
+            info: {},
+            kind: 'collectionType',
+          },
+        },
+        routes: {
+          source: { type: 'content-api', routes: [] },
+        },
+      },
+      catalog: {
+        contentTypes: {
+          product: {
+            attributes: { name: { type: 'string' } },
+            info: {},
+            kind: 'collectionType',
+          },
+        },
+        routes: {
+          product: { type: 'content-api', routes: [] },
+        },
+      },
+    };
+    const originalApis = global.strapi.apis;
+    const originalContentType = global.strapi.contentType;
+    const originalConfigGet = global.strapi.config.get;
+    const originalDocumentationService = global.strapi.plugins.documentation.service;
+    const overrideService = override({ strapi: global.strapi });
+
+    global.strapi.apis = generatedApis as any;
+    global.strapi.config.get = jest.fn((key) => {
+      if (key === 'plugin::documentation') {
+        return {
+          ...defaultConfig,
+          'x-strapi-config': { ...defaultConfig['x-strapi-config'], plugins: [] },
+        };
+      }
+
+      return undefined;
+    }) as any;
+    global.strapi.contentType = jest.fn((uid) => {
+      const [apiName, contentTypeName] = uid.replace('api::', '').split('.');
+      return (generatedApis as any)[apiName]?.contentTypes[contentTypeName];
+    }) as any;
+    global.strapi.plugins.documentation.service = jest.fn(() => overrideService) as any;
+
+    try {
+      const docService = documentation({ strapi: global.strapi });
+      await docService.generateFullDoc();
+      const lastMockCall = jest.mocked(fse.writeJson).mock.calls.at(-1)!;
+      const generatedDocument = lastMockCall[1] as any;
+
+      expect(generatedDocument.components.schemas.Source.properties.product).toStrictEqual({
+        $ref: '#/components/schemas/CatalogProduct',
+      });
+      expect(generatedDocument.components.schemas.CatalogProduct).toBeDefined();
+      expect(generatedDocument.components.schemas.Source.properties.hidden).toStrictEqual({
+        type: 'object',
+        properties: {
+          id: { oneOf: [{ type: 'string' }, { type: 'number' }] },
+          documentId: { type: 'string' },
+        },
+      });
+
+      await expect(SwaggerParser.validate(_.cloneDeep(generatedDocument))).resolves.not.toThrow();
+    } finally {
+      global.strapi.apis = originalApis;
+      global.strapi.contentType = originalContentType;
+      global.strapi.config.get = originalConfigGet;
+      global.strapi.plugins.documentation.service = originalDocumentationService;
+    }
   });
 
   it('generates the correct response component schema for a single type', async () => {
@@ -229,7 +317,7 @@ describe('Documentation plugin | Documentation service', () => {
       ];
       const mockFinalDoc = lastMockCall[1];
       // The generation data is dynamically added, it cannot be modified by the user
-      const { 'x-generation-date': generationConfig, ...mockFinalDocInfo } = mockFinalDoc.info;
+      const { 'x-generation-date': _generationConfig, ...mockFinalDocInfo } = mockFinalDoc.info;
       expect(mockFinalDocInfo).toEqual(userConfig.info);
       expect(mockFinalDoc['x-strapi-config']).toEqual(userConfig['x-strapi-config']);
       expect(mockFinalDoc.externalDocs).toEqual(userConfig.externalDocs);

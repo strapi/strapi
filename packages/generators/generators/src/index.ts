@@ -1,4 +1,4 @@
-import { join, dirname } from 'node:path';
+import { join, dirname, resolve } from 'node:path';
 import handlebars from 'handlebars';
 import fs from 'fs-extra';
 
@@ -27,7 +27,7 @@ type GenerateOptions = {
   plopFile?: string;
 };
 
-type GeneratorAction = {
+type GeneratorFileAction = {
   type: 'add' | 'modify';
   path: string;
   templateFile?: string;
@@ -35,11 +35,15 @@ type GeneratorAction = {
   transform?: (content: string) => string;
 };
 
+type GeneratorAction = GeneratorFileAction | ((options: Record<string, any>) => unknown);
+
 export const generate = async <T extends Record<string, any>>(
   generatorName: string,
   options: T,
   { dir = process.cwd(), plopFile = 'plopfile.js' }: GenerateOptions = {}
 ) => {
+  const resolvedDir = resolve(dir);
+
   // Resolve the absolute path to the plopfile (generator definitions)
   const plopfilePath = join(__dirname, plopFile);
   // Dynamically require the plopfile module.
@@ -62,7 +66,7 @@ export const generate = async <T extends Record<string, any>>(
       helpers[name] = fn;
     },
     getDestBasePath() {
-      return join(dir, 'src');
+      return join(resolvedDir, 'src');
     },
     setWelcomeMessage() {}, // no-op
   };
@@ -85,7 +89,7 @@ export const generate = async <T extends Record<string, any>>(
   const actions: GeneratorAction[] =
     typeof generator.actions === 'function' ? generator.actions(options) : generator.actions || [];
 
-  await executeActions(actions, options, dir);
+  await executeActions(actions, options, resolvedDir);
 
   return { success: true };
 };
@@ -101,6 +105,11 @@ const executeActions = async (
   dir: string
 ) => {
   for (const action of actions) {
+    if (typeof action === 'function') {
+      await action(options);
+      continue;
+    }
+
     const outputPath = handlebars.compile(action.path)(options);
     const fullPath = join(dir, 'src', outputPath);
 

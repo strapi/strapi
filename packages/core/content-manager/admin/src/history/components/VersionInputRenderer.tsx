@@ -63,6 +63,10 @@ const LinkEllipsis = styled(Link)`
 
 const CustomRelationInput = (props: RelationsFieldProps) => {
   const { formatMessage } = useIntl();
+  const emptyLabel = formatMessage({
+    id: 'content-manager.containers.empty-label',
+    defaultMessage: 'Untitled',
+  });
   const field = useField<
     { results: RelationResult[]; meta: { missingCount: number } } | RelationResult[]
   >(props.name);
@@ -126,7 +130,7 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
             // @ts-expect-error - targetModel does exist on the attribute. But it's not typed.
             const { targetModel } = props.attribute;
             const href = `../${COLLECTION_TYPES}/${targetModel}/${relationData.documentId}`;
-            const label = getRelationLabel(relationData, props.mainField);
+            const label = getRelationLabel(relationData, props.mainField, emptyLabel);
             const isAdminUserRelation = targetModel === 'admin::user';
 
             return (
@@ -190,10 +194,10 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
  * -----------------------------------------------------------------------------------------------*/
 
 //  Create an object with value at key path (i.e. 'a.b.c')
-const createInitialValuesForPath = (keyPath: string, value: any) => {
+const createInitialValuesForPath = (keyPath: string, value: unknown) => {
   const keys = keyPath.split('.');
   // The root level object
-  const root: Record<string, any> = {};
+  const root: Record<string, unknown> = {};
 
   // Make the first node the root
   let node = root;
@@ -205,18 +209,20 @@ const createInitialValuesForPath = (keyPath: string, value: any) => {
       node[key] = value;
     } else {
       // Ensure the key exists and is an object
-      node[key] = node[key] || {};
+      const nextNode =
+        typeof node[key] === 'object' && node[key] !== null && Array.isArray(node[key]) === false
+          ? (node[key] as Record<string, unknown>)
+          : {};
+      node[key] = nextNode;
+      node = nextNode;
     }
-
-    // Traverse down the tree
-    node = node[key];
   });
 
   return root;
 };
 
 const CustomMediaInput = (props: VersionInputRendererProps) => {
-  const { value } = useField(props.name);
+  const { value } = useField<{ results: unknown[]; meta: { missingCount: number } }>(props.name);
   const results = value?.results ?? [];
   const meta = value?.meta ?? { missingCount: 0 };
 

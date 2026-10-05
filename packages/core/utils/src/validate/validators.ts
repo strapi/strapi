@@ -1,7 +1,12 @@
-import { isEmpty, isNil, isObject } from 'lodash/fp';
+import { isEmpty, isObject } from 'lodash';
 
 import { pipe as pipeAsync } from '../async';
-import { isScalarAttribute, constants } from '../content-types';
+import {
+  isScalarAttribute,
+  constants,
+  isDynamicZoneAttribute,
+  isMorphToRelationalAttribute,
+} from '../content-types';
 import {
   traverseQueryFilters,
   traverseQuerySort,
@@ -11,8 +16,9 @@ import {
 import { throwPassword, throwPrivate, throwDynamicZones, throwMorphToRelations } from './visitors';
 import { isOperator } from '../operators';
 import { asyncCurry, throwInvalidKey } from './utils';
-import type { Model } from '../types';
-import parseType from '../parse-type';
+import type { Attribute, Model } from '../types';
+import { isBooleanLike } from '../parse-type';
+import type { SHARED_QUERY_PARAM_KEYS } from '../content-api-constants';
 import type { Parent, Path } from '../traverse/factory';
 
 const { ID_ATTRIBUTE, DOC_ID_ATTRIBUTE } = constants;
@@ -205,7 +211,7 @@ export const validateFields = asyncCurry(
             return;
           }
 
-          if (isNil(attribute) || !isScalarAttribute(attribute)) {
+          if (attribute == null || !isScalarAttribute(attribute)) {
             throwInvalidKey({ key, path: path.attribute });
           }
         }, ctx)
@@ -235,7 +241,179 @@ export const defaultValidateFields = asyncCurry(async (ctx: Context, fields: unk
   return validateFields(ctx, fields, FIELDS_TRAVERSALS);
 });
 
+const isMorphLikeAttribute = (attribute?: Attribute) =>
+  isDynamicZoneAttribute(attribute) || isMorphToRelationalAttribute(attribute);
+
+const isPopulatableAttribute = (attribute?: Attribute) =>
+  !!attribute && ['relation', 'dynamiczone', 'component', 'media'].includes(attribute.type);
+
+const isDotNotationPopulate = (populate: unknown): populate is string | string[] => {
+  if (populate === '*') {
+    return false;
+  }
+
+  if (typeof populate === 'string') {
+    return true;
+  }
+
+  return (
+    Array.isArray(populate) && populate.length > 0 && populate.every((p) => typeof p === 'string')
+  );
+};
+
+const flattenDotPopulatePaths = (populate: string | string[]) => {
+  const items = Array.isArray(populate) ? populate : [populate];
+
+  return items.flatMap((item) =>
+    item
+      .split(',')
+      .map((segment) => segment.trim())
+      .filter(Boolean)
+  );
+};
+
+const validatePopulateDotPathSegments = (
+  { schema, getModel }: { schema: Model; getModel: (uid: string) => Model },
+  segments: string[],
+  pathPrefix: string
+) => {
+  if (!segments.length) {
+    return;
+  }
+
+  const [head, ...tail] = segments;
+  const fullPath = pathPrefix ? `${pathPrefix}.${head}` : head;
+  const attribute = schema.attributes[head];
+
+  if (!attribute || !isPopulatableAttribute(attribute)) {
+    throwInvalidKey({ key: head, path: fullPath });
+  }
+
+  if (!tail.length) {
+    return;
+  }
+
+  if (attribute.type === 'component') {
+    if (!attribute.component) {
+      throwInvalidKey({ key: head, path: fullPath });
+    }
+
+    validatePopulateDotPathSegments(
+      { schema: getModel(attribute.component), getModel },
+      tail,
+      fullPath
+    );
+    return;
+  }
+
+  if (attribute.type === 'relation') {
+    if (isMorphLikeAttribute(attribute)) {
+      throwInvalidKey({ key: head, path: fullPath });
+    }
+
+    if (!attribute.target) {
+      throwInvalidKey({ key: head, path: fullPath });
+    }
+
+    validatePopulateDotPathSegments(
+      { schema: getModel(attribute.target!), getModel },
+      tail,
+      fullPath
+    );
+    return;
+  }
+
+  if (attribute.type === 'media') {
+    throwInvalidKey({ key: head, path: fullPath });
+  }
+
+  if (attribute.type === 'dynamiczone') {
+    const [nextSegment, ...rest] = tail;
+    const nextPath = `${fullPath}.${nextSegment}`;
+    const candidates = (attribute.components ?? [])
+      .map((uid) => getModel(uid))
+      .filter((model) => model?.attributes?.[nextSegment]);
+
+    if (!candidates.length) {
+      throwInvalidKey({ key: nextSegment, path: nextPath });
+    }
+
+    let validated = false;
+
+    for (const componentSchema of candidates) {
+      const nestedAttribute = componentSchema.attributes[nextSegment];
+
+      try {
+        if (!rest.length) {
+          if (nestedAttribute) {
+            validated = true;
+            break;
+          }
+        } else if (nestedAttribute?.type === 'component' && nestedAttribute.component) {
+          validatePopulateDotPathSegments(
+            { schema: getModel(nestedAttribute.component), getModel },
+            rest,
+            nextPath
+          );
+          validated = true;
+          break;
+        } else if (
+          nestedAttribute?.type === 'relation' &&
+          !isMorphLikeAttribute(nestedAttribute) &&
+          nestedAttribute.target
+        ) {
+          validatePopulateDotPathSegments(
+            { schema: getModel(nestedAttribute.target), getModel },
+            rest,
+            nextPath
+          );
+          validated = true;
+          break;
+        }
+      } catch {
+        // Try the next dynamic-zone component type.
+      }
+    }
+
+    if (!validated) {
+      throwInvalidKey({ key: nextSegment, path: nextPath });
+    }
+  }
+};
+
+const validatePopulateDotPaths = (
+  ctx: { schema: Model; getModel: (uid: string) => Model },
+  populate: string | string[]
+) => {
+  for (const path of flattenDotPopulatePaths(populate)) {
+    const segments = path
+      .split('.')
+      .map((segment) => segment.trim())
+      .filter(Boolean);
+
+    validatePopulateDotPathSegments(ctx, segments, '');
+  }
+};
+
+const validateMorphLikeNestedPopulate = (
+  populateValue: unknown,
+  { path }: { path: string | null }
+) => {
+  // Keep in sync with convert-query-params polymorphic nested populate handling.
+  if (populateValue != null && populateValue !== '*') {
+    throwInvalidKey({ key: 'populate', path });
+  }
+};
+
 export const POPULATE_TRAVERSALS = ['nonAttributesOperators', 'private'];
+
+// Query params that only apply at the root of a query. They are inherited by populated
+// relations, so they are rejected inside `populate` with an explanation (see #21911).
+const ROOT_ONLY_QUERY_PARAMS: ReadonlyArray<(typeof SHARED_QUERY_PARAM_KEYS)[number]> = [
+  'status',
+  'publicationFilter',
+  'hasPublishedVersion',
+];
 
 export const validatePopulate = asyncCurry(
   async (
@@ -251,6 +429,17 @@ export const validatePopulate = asyncCurry(
     if (!ctx.schema) {
       throw new Error('Missing schema in defaultValidatePopulate');
     }
+
+    if (isDotNotationPopulate(populate)) {
+      validatePopulateDotPaths({ schema: ctx.schema, getModel: ctx.getModel }, populate);
+
+      if (includes?.populate?.includes('private')) {
+        return traverseQueryPopulate(throwPrivate, ctx)(populate);
+      }
+
+      return populate;
+    }
+
     // Build the list of functions conditionally based on the include array
     const functionsToApply: Array<AnyFunc> = [];
 
@@ -271,6 +460,12 @@ export const validatePopulate = asyncCurry(
               'component',
               'media',
             ].includes(attribute.type);
+
+            if (isMorphLikeAttribute(attribute) && isObject(value) && 'populate' in value) {
+              validateMorphLikeNestedPopulate((value as Record<string, unknown>).populate, {
+                path: path.raw,
+              });
+            }
 
             // Throw on non-populate attributes
             if (!isPopulatableAttribute) {
@@ -310,21 +505,21 @@ export const validatePopulate = asyncCurry(
 
           // Ensure count is a boolean
           if (key === 'count') {
-            try {
-              parseType({ type: 'boolean', value });
+            if (isBooleanLike(value)) {
               return;
-            } catch {
-              throwInvalidKey({ key, path: path.attribute });
             }
+
+            throwInvalidKey({ key, path: path.attribute });
           }
 
-          // Allowed boolean-like keywords should be ignored
-          try {
-            parseType({ type: 'boolean', value: key });
-            // Key is an allowed boolean-like keyword, skipping validation...
+          // Allowed boolean-like keywords should be ignored.
+          //
+          // Asked as a predicate rather than by catching `parseType`'s error: this runs
+          // once per populate key, and almost no key is boolean-like, so the previous
+          // try/catch built and threw away an Error — including a stack capture — on
+          // essentially every key of every populate tree of every request.
+          if (isBooleanLike(key)) {
             return;
-          } catch {
-            // Continue, because it's not a boolean-like
           }
 
           // Handle nested `sort` validation with custom or default traversals
@@ -395,7 +590,13 @@ export const validatePopulate = asyncCurry(
 
           // Throw an error if non-attribute operators are included in the populate array
           if (includes?.populate?.includes('nonAttributesOperators')) {
-            throwInvalidKey({ key, path: path.attribute });
+            throwInvalidKey({
+              key,
+              path: path.attribute,
+              reason: ROOT_ONLY_QUERY_PARAMS.some((param) => param === key)
+                ? `${key} is only accepted at the root of the query, and it also applies to populated relations`
+                : undefined,
+            });
           }
         },
         ctx

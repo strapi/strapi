@@ -5,16 +5,16 @@ import { Box, Flex, SkipToContent } from '@strapi/design-system';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
-import { Outlet } from 'react-router-dom';
 import lt from 'semver/functions/lt';
 import valid from 'semver/functions/valid';
 
+import { LazyOutlet } from '../components/LazyOutlet';
 import { LeftMenu } from '../components/LeftMenu';
 import { NpsSurvey } from '../components/NpsSurvey';
 import { Page } from '../components/PageHelpers';
 import { PluginsInitializer } from '../components/PluginsInitializer';
 import { PrivateRoute } from '../components/PrivateRoute';
-import { UpsellBanner } from '../components/UpsellBanner';
+import { TopBanners } from '../components/TopBanners';
 import { AppInfoProvider } from '../features/AppInfo';
 import { useAuth } from '../features/Auth';
 import { useConfiguration } from '../features/Configuration';
@@ -75,7 +75,7 @@ const AdminLayout = () => {
     pluginsSectionLinks,
     topMobileNavigation,
     burgerMobileNavigation,
-  } = useMenu(checkLatestStrapiVersion(strapiVersion, tagName));
+  } = useMenu(checkLatestStrapiVersion(strapiVersion, tagName), appInfo?.currentEnvironment);
 
   const getAllWidgets = useStrapiApp('TrackingProvider', (state) => state.widgets.getAll);
   const projectId = appInfo?.projectId;
@@ -133,8 +133,13 @@ const AdminLayout = () => {
                   large: '100%',
                 }}
               >
-                <UpsellBanner />
-                <Outlet />
+                <TopBanners />
+                {/*
+                 * Top-level Suspense only — nested layouts (Settings, Content Manager) use
+                 * LazyOutlet with useNavigation so in-app navigations show loading in the content
+                 * column without hiding section side navs.
+                 */}
+                <LazyOutlet suspenseOnly />
               </Flex>
             </Flex>
           </Box>

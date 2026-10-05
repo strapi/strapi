@@ -42,7 +42,7 @@ interface ActionUpdateRoutes {
 
 interface ActionUpdatePermissions {
   type: 'UPDATE_PERMISSIONS';
-  value: any[];
+  value: string[];
 }
 
 interface ActionSetSelectedAction {

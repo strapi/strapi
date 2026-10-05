@@ -1,4 +1,13 @@
 import { traverseQueryPopulate } from '../traverse';
+import { removeRestrictedRelations } from '../sanitize/visitors';
+import {
+  defaultValidatePopulate,
+  POPULATE_TRAVERSALS,
+  FILTER_TRAVERSALS,
+  SORT_TRAVERSALS,
+  FIELDS_TRAVERSALS,
+  validatePopulate,
+} from '../validate/validators';
 
 describe('traverseQueryPopulate', () => {
   global.strapi = {
@@ -245,6 +254,144 @@ describe('traverseQueryPopulate', () => {
           name: 'test',
         },
       },
+    });
+  });
+
+  test.each([
+    ['boolean populate', true],
+    ['count populate', { count: true }],
+  ])('allows visitors to remove morphToOne %s', async (_label, populateValue) => {
+    const schema = {
+      kind: 'collectionType' as const,
+      attributes: {
+        related: {
+          type: 'relation' as const,
+          relation: 'morphToOne' as const,
+        },
+      },
+    };
+
+    const result = await traverseQueryPopulate(
+      ({ key }, { remove }) => {
+        if (key === 'related') {
+          remove(key);
+        }
+      },
+      {
+        schema,
+        getModel: jest.fn(() => schema),
+      }
+    )({
+      related: populateValue,
+    });
+
+    expect(result).toEqual({});
+  });
+
+  test('preserves authorized polymorphic fragments from string-array populate', async () => {
+    const allowedModel = {
+      uid: 'api::allowed.allowed',
+      kind: 'collectionType' as const,
+      attributes: {},
+    };
+    const deniedModel = {
+      uid: 'api::denied.denied',
+      kind: 'collectionType' as const,
+      attributes: {},
+    };
+    const schema = {
+      kind: 'collectionType' as const,
+      attributes: {
+        morphToOne: {
+          type: 'relation' as const,
+          relation: 'morphToOne' as const,
+        },
+        morphToMany: {
+          type: 'relation' as const,
+          relation: 'morphToMany' as const,
+        },
+      },
+    };
+    const auth = {};
+
+    global.strapi = {
+      auth: {
+        verify(_auth: unknown, { scope }: { scope: string }) {
+          if (scope === 'api::denied.denied.find') {
+            throw new Error('Unauthorized');
+          }
+        },
+      },
+      contentTypes: {
+        allowed: allowedModel,
+        denied: deniedModel,
+      },
+    } as any;
+
+    const result = await traverseQueryPopulate(removeRestrictedRelations(auth), {
+      schema,
+      getModel: jest.fn((uid) => {
+        return uid === allowedModel.uid ? allowedModel : deniedModel;
+      }),
+    })(['morphToOne', 'morphToMany']);
+
+    expect(result).toEqual({
+      morphToOne: { on: { [allowedModel.uid]: true } },
+      morphToMany: { on: { [allowedModel.uid]: true } },
+    });
+  });
+
+  /**
+   * When qs parses indexed populate keys beyond arrayLimit (default 100), populate is a plain
+   * object with consecutive numeric string keys instead of an array. Validation runs on that
+   * shape before convert-query-params — see #25632 / PR #25916.
+   */
+  describe('qs arrayLimit exceeded (indexed populate notation)', () => {
+    const schema = {
+      kind: 'collectionType' as const,
+      attributes: {
+        title: { type: 'string' as const },
+        slug: { type: 'string' as const },
+      },
+    };
+
+    const getModel = jest.fn(() => schema);
+
+    const populateAsQsObject = Object.fromEntries(
+      Array.from({ length: 101 }, (_, index) => [String(index), `field${index}`])
+    );
+
+    beforeEach(() => {
+      global.strapi = { getModel } as any;
+    });
+
+    test('defaultValidatePopulate throws a clear arrayLimit error', async () => {
+      await expect(
+        defaultValidatePopulate({ schema, getModel }, populateAsQsObject)
+      ).rejects.toThrow(
+        'Too many populate entries (101). The maximum number of populate entries when using array notation is 100.'
+      );
+    });
+
+    test('validatePopulate does not throw the misleading Invalid key 2 error', async () => {
+      await expect(
+        validatePopulate({ schema, getModel }, populateAsQsObject, {
+          filters: FILTER_TRAVERSALS,
+          sort: SORT_TRAVERSALS,
+          fields: FIELDS_TRAVERSALS,
+          populate: POPULATE_TRAVERSALS,
+        })
+      ).rejects.not.toThrow(/Invalid key 2/);
+    });
+
+    test('does not throw arrayLimit error when numeric-key object is within the limit', async () => {
+      const populateWithinLimit = Object.fromEntries(
+        Array.from({ length: 100 }, (_, index) => [String(index), `field${index}`])
+      );
+
+      await expect(
+        defaultValidatePopulate({ schema, getModel }, populateWithinLimit)
+      ).rejects.not.toThrow(/Too many populate entries/);
     });
   });
 });

@@ -127,6 +127,69 @@ describe('morphToOne populate', () => {
     expect(results[1][ATTRIBUTE_NAME]).toBeNull();
   });
 
+  it('returns one count for a morphToOne target without populate.on filtering', async () => {
+    const { ctx } = buildCtx([]);
+    const results: Record<string, unknown>[] = [
+      { id: 1, related_id: 10, related_type: TARGET_TYPE },
+    ];
+
+    await applyPopulate(
+      results,
+      {
+        [ATTRIBUTE_NAME]: {
+          count: true,
+        },
+      },
+      ctx as any
+    );
+
+    expect(results[0][ATTRIBUTE_NAME]).toEqual({ count: 1 });
+  });
+
+  it('returns one count for a morphToOne target included by populate.on', async () => {
+    const { ctx } = buildCtx([]);
+    const results: Record<string, unknown>[] = [
+      { id: 1, related_id: 20, related_type: TARGET_TYPE_B },
+    ];
+
+    await applyPopulate(
+      results,
+      {
+        [ATTRIBUTE_NAME]: {
+          count: true,
+          on: {
+            [TARGET_TYPE_B]: {},
+          },
+        },
+      },
+      ctx as any
+    );
+
+    expect(results[0][ATTRIBUTE_NAME]).toEqual({ count: 1 });
+  });
+
+  it('returns zero count for a morphToOne target excluded by populate.on', async () => {
+    const { ctx } = buildCtx([]);
+    const results: Record<string, unknown>[] = [
+      { id: 1, related_id: 20, related_type: TARGET_TYPE_B },
+    ];
+
+    await applyPopulate(
+      results,
+      {
+        [ATTRIBUTE_NAME]: {
+          count: true,
+          on: {
+            [TARGET_TYPE]: {},
+          },
+        },
+      },
+      ctx as any
+    );
+
+    expect(results[0][ATTRIBUTE_NAME]).toEqual({ count: 0 });
+  });
+
   it('morph type UID overwrites a same-named key on the target row (fromRow output)', async () => {
     const targetRow = {
       id: 10,
@@ -150,8 +213,15 @@ describe('morphToOne populate', () => {
 });
 
 const MORPH_TO_MANY_ATTRIBUTE_NAME = 'relatedMany';
+const TARGET_TYPE_B = 'api::tag.tag';
+const TARGET_TYPE_C = 'api::author.author';
 
-const buildMorphToManyAttribute = () => ({
+const buildMorphToManyAttribute = (
+  overrides: {
+    typeColumnName?: string;
+    joinTableOn?: Record<string, unknown>;
+  } = {}
+) => ({
   type: 'relation' as const,
   relation: 'morphToMany' as const,
   joinTable: {
@@ -166,15 +236,21 @@ const buildMorphToManyAttribute = () => ({
         referencedColumn: 'id',
       },
       typeColumn: {
-        name: 'related_type',
+        name: overrides.typeColumnName ?? 'related_type',
       },
+      ...(overrides.typeColumnName === 'component_type' ? { typeField: '__component' } : {}),
     },
+    ...(overrides.joinTableOn ? { on: overrides.joinTableOn } : {}),
   },
 });
 
 const buildMorphToManyCtx = (
   joinRows: Record<string, unknown>[],
-  targetRows: Record<string, unknown>[]
+  targetRowsByType: Record<string, Record<string, unknown>[]>,
+  options: {
+    typeColumnName?: string;
+    joinTableOn?: Record<string, unknown>;
+  } = {}
 ) => {
   const joinQb = {
     where: jest.fn().mockReturnThis(),
@@ -182,13 +258,16 @@ const buildMorphToManyCtx = (
     execute: jest.fn().mockResolvedValue(joinRows),
   };
 
-  const targetQb = {
-    alias: 't',
-    init: jest.fn().mockReturnThis(),
-    addSelect: jest.fn().mockReturnThis(),
-    where: jest.fn().mockReturnThis(),
-    execute: jest.fn().mockResolvedValue(targetRows),
-  };
+  const targetQbs: Record<
+    string,
+    {
+      alias: string;
+      init: jest.Mock;
+      addSelect: jest.Mock;
+      where: jest.Mock;
+      execute: jest.Mock;
+    }
+  > = {};
 
   const db = {
     metadata: {
@@ -196,12 +275,12 @@ const buildMorphToManyCtx = (
         if (uid === SOURCE_UID) {
           return {
             attributes: {
-              [MORPH_TO_MANY_ATTRIBUTE_NAME]: buildMorphToManyAttribute(),
+              [MORPH_TO_MANY_ATTRIBUTE_NAME]: buildMorphToManyAttribute(options),
             },
           };
         }
 
-        if (uid === TARGET_TYPE) {
+        if (uid in targetRowsByType) {
           return { columnToAttribute: {}, attributes: {} };
         }
 
@@ -214,7 +293,17 @@ const buildMorphToManyCtx = (
           return joinQb;
         }
 
-        return targetQb;
+        if (!targetQbs[uid]) {
+          targetQbs[uid] = {
+            alias: 't',
+            init: jest.fn().mockReturnThis(),
+            addSelect: jest.fn().mockReturnThis(),
+            where: jest.fn().mockReturnThis(),
+            execute: jest.fn().mockResolvedValue(targetRowsByType[uid] ?? []),
+          };
+        }
+
+        return targetQbs[uid];
       }),
     },
   };
@@ -225,7 +314,7 @@ const buildMorphToManyCtx = (
     qb: { state: { filters: {} } },
   };
 
-  return { ctx };
+  return { ctx, joinQb, targetQbs, createQueryBuilder: db.entityManager.createQueryBuilder };
 };
 
 describe('morphToMany populate', () => {
@@ -245,7 +334,7 @@ describe('morphToMany populate', () => {
           order: 1,
         },
       ],
-      [targetRow]
+      { [TARGET_TYPE]: [targetRow] }
     );
 
     const results: Record<string, unknown>[] = [{ id: 1 }];
@@ -257,6 +346,261 @@ describe('morphToMany populate', () => {
         ...targetRow,
         __type: TARGET_TYPE,
       },
+    ]);
+  });
+
+  it('does not add the morph type column to the join-table where when populate.on is set', async () => {
+    const { ctx, joinQb } = buildMorphToManyCtx(
+      [
+        {
+          article_id: 1,
+          related_id: 10,
+          related_type: TARGET_TYPE,
+          order: 1,
+        },
+      ],
+      { [TARGET_TYPE]: [{ id: 10, name: 'Category A' }] }
+    );
+
+    const results: Record<string, unknown>[] = [{ id: 1 }];
+
+    await applyPopulate(
+      results,
+      {
+        [MORPH_TO_MANY_ATTRIBUTE_NAME]: {
+          on: {
+            [TARGET_TYPE]: {},
+            [TARGET_TYPE_B]: {},
+          },
+        },
+      },
+      ctx as any
+    );
+
+    expect(joinQb.where).toHaveBeenCalledWith({
+      article_id: [1],
+    });
+    expect(joinQb.where).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        related_type: expect.anything(),
+      })
+    );
+  });
+
+  it('applies populate.on type restrictions in memory after loading join rows', async () => {
+    const categoryRow = { id: 10, name: 'Category A' };
+    const tagRow = { id: 20, name: 'Tag B' };
+    const authorRow = { id: 30, name: 'Author C' };
+
+    const { ctx, createQueryBuilder } = buildMorphToManyCtx(
+      [
+        {
+          article_id: 1,
+          related_id: 10,
+          related_type: TARGET_TYPE,
+          order: 1,
+        },
+        {
+          article_id: 1,
+          related_id: 20,
+          related_type: TARGET_TYPE_B,
+          order: 2,
+        },
+        {
+          article_id: 1,
+          related_id: 30,
+          related_type: TARGET_TYPE_C,
+          order: 3,
+        },
+      ],
+      {
+        [TARGET_TYPE]: [categoryRow],
+        [TARGET_TYPE_B]: [tagRow],
+        [TARGET_TYPE_C]: [authorRow],
+      }
+    );
+
+    const results: Record<string, unknown>[] = [{ id: 1 }];
+
+    await applyPopulate(
+      results,
+      {
+        [MORPH_TO_MANY_ATTRIBUTE_NAME]: {
+          on: {
+            [TARGET_TYPE]: {},
+            [TARGET_TYPE_B]: {},
+          },
+        },
+      },
+      ctx as any
+    );
+
+    expect(results[0][MORPH_TO_MANY_ATTRIBUTE_NAME]).toEqual([
+      { ...categoryRow, __type: TARGET_TYPE },
+      { ...tagRow, __type: TARGET_TYPE_B },
+    ]);
+    expect(createQueryBuilder).toHaveBeenCalledWith(TARGET_TYPE);
+    expect(createQueryBuilder).toHaveBeenCalledWith(TARGET_TYPE_B);
+    expect(createQueryBuilder).not.toHaveBeenCalledWith(TARGET_TYPE_C);
+  });
+
+  it('returns no components when populate.on is an empty object', async () => {
+    const { ctx } = buildMorphToManyCtx(
+      [
+        {
+          article_id: 1,
+          related_id: 10,
+          related_type: TARGET_TYPE,
+          order: 1,
+        },
+      ],
+      { [TARGET_TYPE]: [{ id: 10, name: 'Category A' }] }
+    );
+
+    const results: Record<string, unknown>[] = [{ id: 1 }];
+
+    await applyPopulate(
+      results,
+      {
+        [MORPH_TO_MANY_ATTRIBUTE_NAME]: {
+          on: {},
+        },
+      },
+      ctx as any
+    );
+
+    expect(results[0][MORPH_TO_MANY_ATTRIBUTE_NAME]).toEqual([]);
+  });
+
+  it('populates every join row type when populate has no on key', async () => {
+    const categoryRow = { id: 10, name: 'Category A' };
+    const tagRow = { id: 20, name: 'Tag B' };
+
+    const { ctx } = buildMorphToManyCtx(
+      [
+        {
+          article_id: 1,
+          related_id: 10,
+          related_type: TARGET_TYPE,
+          order: 1,
+        },
+        {
+          article_id: 1,
+          related_id: 20,
+          related_type: TARGET_TYPE_B,
+          order: 2,
+        },
+      ],
+      {
+        [TARGET_TYPE]: [categoryRow],
+        [TARGET_TYPE_B]: [tagRow],
+      }
+    );
+
+    const results: Record<string, unknown>[] = [{ id: 1 }];
+
+    await applyPopulate(results, { [MORPH_TO_MANY_ATTRIBUTE_NAME]: {} }, ctx as any);
+
+    expect(results[0][MORPH_TO_MANY_ATTRIBUTE_NAME]).toEqual([
+      { ...categoryRow, __type: TARGET_TYPE },
+      { ...tagRow, __type: TARGET_TYPE_B },
+    ]);
+  });
+
+  it('counts only morphToMany join rows whose target type is included by populate.on', async () => {
+    const { ctx, createQueryBuilder } = buildMorphToManyCtx(
+      [
+        {
+          article_id: 1,
+          related_id: 10,
+          related_type: TARGET_TYPE,
+          order: 1,
+        },
+        {
+          article_id: 1,
+          related_id: 20,
+          related_type: TARGET_TYPE_B,
+          order: 2,
+        },
+      ],
+      {
+        [TARGET_TYPE]: [{ id: 10, name: 'Category A' }],
+        [TARGET_TYPE_B]: [{ id: 20, name: 'Tag B' }],
+      }
+    );
+
+    const results: Record<string, unknown>[] = [{ id: 1 }];
+
+    await applyPopulate(
+      results,
+      {
+        [MORPH_TO_MANY_ATTRIBUTE_NAME]: {
+          count: true,
+          on: {
+            [TARGET_TYPE_B]: {},
+          },
+        },
+      },
+      ctx as any
+    );
+
+    expect(results[0][MORPH_TO_MANY_ATTRIBUTE_NAME]).toEqual({ count: 1 });
+    expect(createQueryBuilder).not.toHaveBeenCalledWith(TARGET_TYPE);
+    expect(createQueryBuilder).not.toHaveBeenCalledWith(TARGET_TYPE_B);
+  });
+
+  it('uses dynamic-zone join table metadata without SQL type filtering', async () => {
+    const heroRow = { id: 10, title: 'Hero' };
+
+    const { ctx, joinQb } = buildMorphToManyCtx(
+      [
+        {
+          article_id: 1,
+          related_id: 10,
+          component_type: TARGET_TYPE,
+          field: MORPH_TO_MANY_ATTRIBUTE_NAME,
+          order: 1,
+        },
+        {
+          article_id: 1,
+          related_id: 20,
+          component_type: TARGET_TYPE_C,
+          field: MORPH_TO_MANY_ATTRIBUTE_NAME,
+          order: 2,
+        },
+      ],
+      { [TARGET_TYPE]: [heroRow] },
+      {
+        typeColumnName: 'component_type',
+        joinTableOn: { field: MORPH_TO_MANY_ATTRIBUTE_NAME },
+      }
+    );
+
+    const results: Record<string, unknown>[] = [{ id: 1 }];
+
+    await applyPopulate(
+      results,
+      {
+        [MORPH_TO_MANY_ATTRIBUTE_NAME]: {
+          on: {
+            [TARGET_TYPE]: {},
+          },
+        },
+      },
+      ctx as any
+    );
+
+    expect(joinQb.where).toHaveBeenCalledWith({
+      article_id: [1],
+      field: MORPH_TO_MANY_ATTRIBUTE_NAME,
+    });
+    expect(joinQb.where).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        component_type: expect.anything(),
+      })
+    );
+    expect(results[0][MORPH_TO_MANY_ATTRIBUTE_NAME]).toEqual([
+      { ...heroRow, __component: TARGET_TYPE },
     ]);
   });
 });

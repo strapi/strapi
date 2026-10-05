@@ -84,9 +84,12 @@ const GuidedTourTooltipImpl = ({
     isCurrentStep &&
     isStepConditionMet;
 
-  // Lock the scroll
+  const anchorRef = React.useRef<HTMLDivElement>(null);
+
   React.useEffect(() => {
     if (!isPopoverOpen) return;
+
+    anchorRef.current?.scrollIntoView({ behavior: 'instant', block: 'center' });
 
     const originalStyle = window.getComputedStyle(document.body).overflow;
     document.body.style.overflow = 'hidden';
@@ -132,7 +135,7 @@ const GuidedTourTooltipImpl = ({
         </Portal>
       )}
       <Popover.Root open={isPopoverOpen}>
-        <Popover.Anchor>{children}</Popover.Anchor>
+        <Popover.Anchor ref={anchorRef}>{children}</Popover.Anchor>
         {content({ Step, state, dispatch })}
       </Popover.Root>
     </>

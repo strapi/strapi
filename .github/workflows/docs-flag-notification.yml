@@ -1,4 +1,4 @@
-name: Notify docs team on flag:documentation label
+name: 'Notify docs team on "flag: requires manual documentation" label'
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   notify-docs:
-    if: "github.event.label.name == 'flag: documentation'"
+    if: "github.event.label.name == 'flag: requires manual documentation'"
     runs-on: ubuntu-latest
     steps:
       - name: Notify Slack

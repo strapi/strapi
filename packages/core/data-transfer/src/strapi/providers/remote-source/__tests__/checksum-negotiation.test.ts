@@ -3,7 +3,7 @@ import { pipeline } from 'stream/promises';
 import { Writable } from 'stream';
 import type { Core } from '@strapi/types';
 
-import type { IAsset } from '../../../../../types';
+import type { IAsset } from '../../../../types';
 import { createRemoteStrapiSourceProvider } from '..';
 
 import { connectToWebsocket, createDispatcher } from '../../utils';

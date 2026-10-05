@@ -28,7 +28,7 @@ export default class JSONField extends Field {
 
         return parsedValue;
       }
-    } catch (error) {
+    } catch {
       // Just return the value if it's not a valid JSON string
       return value;
     }

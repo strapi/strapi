@@ -3,6 +3,11 @@ import {
   UpdateContentTypeConfiguration,
   FindContentTypesSettings,
 } from '../../../shared/contracts/content-types';
+import {
+  normalizeContentTypeConfigurationResponse,
+  normalizeContentTypeConfigurationUpdateResponse,
+  normalizeContentTypeSettingsResponse,
+} from '../utils/layouts/normalizeContentManagerLayout';
 
 import { contentManagerApi } from './api';
 
@@ -16,7 +21,8 @@ const contentTypesApi = contentManagerApi.injectEndpoints({
         url: `/content-manager/content-types/${uid}/configuration`,
         method: 'GET',
       }),
-      transformResponse: (response: FindContentTypeConfiguration.Response) => response.data,
+      transformResponse: (response: FindContentTypeConfiguration.Response, _meta, uid) =>
+        normalizeContentTypeConfigurationResponse(response.data, uid),
       providesTags: (_result, _error, uid) => [
         { type: 'ContentTypesConfiguration', id: uid },
         { type: 'ContentTypeSettings', id: 'LIST' },
@@ -24,7 +30,8 @@ const contentTypesApi = contentManagerApi.injectEndpoints({
     }),
     getAllContentTypeSettings: builder.query<FindContentTypesSettings.Response['data'], void>({
       query: () => '/content-manager/content-types-settings',
-      transformResponse: (response: FindContentTypesSettings.Response) => response.data,
+      transformResponse: (response: FindContentTypesSettings.Response) =>
+        normalizeContentTypeSettingsResponse(response.data),
       providesTags: [{ type: 'ContentTypeSettings', id: 'LIST' }],
     }),
     updateContentTypeConfiguration: builder.mutation<
@@ -38,7 +45,8 @@ const contentTypesApi = contentManagerApi.injectEndpoints({
         method: 'PUT',
         data: body,
       }),
-      transformResponse: (response: UpdateContentTypeConfiguration.Response) => response.data,
+      transformResponse: (response: UpdateContentTypeConfiguration.Response) =>
+        normalizeContentTypeConfigurationUpdateResponse(response.data),
       invalidatesTags: (_result, _error, { uid }) => [
         { type: 'ContentTypesConfiguration', id: uid },
         { type: 'ContentTypeSettings', id: 'LIST' },

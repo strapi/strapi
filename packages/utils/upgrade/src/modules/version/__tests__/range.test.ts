@@ -17,7 +17,7 @@ describe('Version Utilities', () => {
     it('should create a range for Major release type', () => {
       const currentVersion = new semver.SemVer('1.0.0');
 
-      const range = rangeFromReleaseType(currentVersion, Version.ReleaseType.Major);
+      const range = rangeFromReleaseType(currentVersion, Version.RELEASE_TYPES.Major);
       expect(range).toBeInstanceOf(semver.Range);
       expect(range.raw).toBe('>1.0.0 <=2');
     });
@@ -25,7 +25,7 @@ describe('Version Utilities', () => {
     it('should create a range for Minor release type', () => {
       const currentVersion = new semver.SemVer('1.0.0');
 
-      const range = rangeFromReleaseType(currentVersion, Version.ReleaseType.Minor);
+      const range = rangeFromReleaseType(currentVersion, Version.RELEASE_TYPES.Minor);
       expect(range).toBeInstanceOf(semver.Range);
       expect(range.raw).toBe('>1.0.0 <2.0.0');
     });
@@ -33,7 +33,7 @@ describe('Version Utilities', () => {
     it('should create a range for Patch release type', () => {
       const currentVersion = new semver.SemVer('1.0.0');
 
-      const range = rangeFromReleaseType(currentVersion, Version.ReleaseType.Patch);
+      const range = rangeFromReleaseType(currentVersion, Version.RELEASE_TYPES.Patch);
       expect(range).toBeInstanceOf(semver.Range);
       expect(range.raw).toBe('>1.0.0 <1.1.0');
     });
@@ -41,7 +41,7 @@ describe('Version Utilities', () => {
     it('should create a range for Latest release type', () => {
       const currentVersion = new semver.SemVer('1.0.0');
 
-      const range = rangeFromReleaseType(currentVersion, Version.ReleaseType.Latest);
+      const range = rangeFromReleaseType(currentVersion, Version.RELEASE_TYPES.Latest);
       expect(range).toBeInstanceOf(semver.Range);
       expect(range.raw).toBe('>1.0.0');
     });
@@ -65,7 +65,7 @@ describe('Version Utilities', () => {
       expect(range.raw).toBe(`>${currentVersion.raw} <=${targetVersion.raw}`);
     });
 
-    it.each([[Version.ReleaseType.Major, '>1.0.0 <=2']])(
+    it.each([[Version.RELEASE_TYPES.Major, '>1.0.0 <=2']])(
       'should create a range when target is %s',
       (releaseType, expectedRange) => {
         const currentVersion = new semver.SemVer('1.0.0');

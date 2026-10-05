@@ -17,6 +17,7 @@ export interface TelemetryProperties {
   numberOfAllContentTypes?: number;
   numberOfComponents?: number;
   numberOfDynamicZones?: number;
+  numberOfContentTypeFolders?: number;
 }
 
 export interface TrackingContextValue {
@@ -196,7 +197,8 @@ export interface EventWithoutProperties {
     | 'didLaunchGuidedtour'
     | 'didEditAICaption'
     | 'didEditAIAlternativeText'
-    | 'didGenerateMetadataRetroactively';
+    | 'didGenerateMetadataRetroactively'
+    | 'didActOnFolders';
 
   properties?: never;
 }
@@ -544,6 +546,8 @@ export interface UseTrackingReturn {
  */
 const useTracking = (): UseTrackingReturn => {
   const deviceType = useDeviceType();
+  const deviceTypeRef = React.useRef(deviceType);
+  deviceTypeRef.current = deviceType;
   const { uuid, telemetryProperties } = React.useContext(TrackingContext);
   const userId = useAppInfo('useTracking', (state) => state.userId);
   const trackUsage = React.useCallback(
@@ -560,7 +564,7 @@ const useTracking = (): UseTrackingReturn => {
               userId,
               eventProperties: { ...properties },
               userProperties: {
-                deviceType,
+                deviceType: deviceTypeRef.current,
               },
               groupProperties: {
                 ...telemetryProperties,
@@ -578,7 +582,7 @@ const useTracking = (): UseTrackingReturn => {
 
           return res;
         }
-      } catch (err) {
+      } catch {
         // Silence is golden
       }
 

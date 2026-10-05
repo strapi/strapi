@@ -1,5 +1,4 @@
-import _ from 'lodash';
-import { has, omit, pipe, assign, curry } from 'lodash/fp';
+import _, { assign, curry, has, omit } from 'lodash';
 import type { Utils, UID, Schema, Data, Modules } from '@strapi/types';
 import { contentTypes as contentTypesUtils, async, errors } from '@strapi/utils';
 import {
@@ -35,7 +34,7 @@ const omitComponentData = curry(
       contentTypesUtils.isComponentAttribute(attributes[attributeName])
     );
 
-    return omit(componentAttributes, data);
+    return omit(data, componentAttributes);
   }
 );
 
@@ -53,7 +52,7 @@ const createComponents = async <TUID extends UID.Schema, TData extends Input<TUI
   for (const attributeName of attributeNames) {
     const attribute = attributes[attributeName];
 
-    if (!has(attributeName, data) || !contentTypesUtils.isComponentAttribute(attribute)) {
+    if (!has(data, attributeName) || !contentTypesUtils.isComponentAttribute(attribute)) {
       continue;
     }
 
@@ -166,7 +165,7 @@ const updateComponents = async <TUID extends UID.Schema, TData extends Partial<I
   for (const attributeName of Object.keys(attributes)) {
     const attribute = attributes[attributeName];
 
-    if (!has(attributeName, data)) {
+    if (!has(data, attributeName)) {
       continue;
     }
 
@@ -254,8 +253,12 @@ const deleteOldComponents = async <TUID extends UID.Schema>(
   const previousValue = (await strapi.db
     .query(uid)
     .load(entityToUpdate, attributeName)) as ComponentValue;
-  const idsToKeep = _.castArray(componentValue).filter(has('id')).map(pickStringifiedId);
-  const allIds = _.castArray(previousValue).filter(has('id')).map(pickStringifiedId);
+  const idsToKeep = _.castArray(componentValue)
+    .filter((value) => has(value, 'id'))
+    .map(pickStringifiedId);
+  const allIds = _.castArray(previousValue)
+    .filter((value) => has(value, 'id'))
+    .map(pickStringifiedId);
 
   idsToKeep.forEach((id) => {
     if (!allIds.includes(id)) {
@@ -285,21 +288,21 @@ const deleteOldDZComponents = async <TUID extends UID.Schema>(
     .load(entityToUpdate, attributeName)) as DynamicZoneValue;
 
   const idsToKeep = _.castArray(dynamiczoneValues)
-    .filter(has('id'))
+    .filter((value) => has(value, 'id'))
     .map((v) => ({
       id: pickStringifiedId(v),
       __component: v.__component,
     }));
 
   const allIds = _.castArray(previousValue)
-    .filter(has('id'))
+    .filter((value) => has(value, 'id'))
     .map((v) => ({
       id: pickStringifiedId(v),
       __component: v.__component,
     }));
 
-  idsToKeep.forEach(({ id, __component }) => {
-    if (!allIds.find((el) => el.id === id && el.__component === __component)) {
+  idsToKeep.forEach(({ id, __component: componentUID }) => {
+    if (!allIds.find((el) => el.id === id && el.__component === componentUID)) {
       const err = new Error(
         `Some of the provided components in ${attributeName} are not related to the entity`
       );
@@ -311,9 +314,9 @@ const deleteOldDZComponents = async <TUID extends UID.Schema>(
 
   type IdsToDelete = DynamicZoneValue;
 
-  const idsToDelete = allIds.reduce((acc, { id, __component }) => {
-    if (!idsToKeep.find((el) => el.id === id && el.__component === __component)) {
-      acc.push({ id, __component });
+  const idsToDelete = allIds.reduce((acc, { id, __component: componentUID }) => {
+    if (!idsToKeep.find((el) => el.id === id && el.__component === componentUID)) {
+      acc.push({ id, __component: componentUID });
     }
 
     return acc;
@@ -321,8 +324,8 @@ const deleteOldDZComponents = async <TUID extends UID.Schema>(
 
   if (idsToDelete.length > 0) {
     for (const idToDelete of idsToDelete) {
-      const { id, __component } = idToDelete;
-      await deleteComponent(__component, { id });
+      const { id, __component: componentUID } = idToDelete;
+      await deleteComponent(componentUID, { id });
     }
   }
 };
@@ -373,18 +376,18 @@ const deleteComponents = async <TUID extends UID.Schema, TEntity extends Data.En
 ************************** */
 
 // components can have nested compos so this must be recursive
-const createComponent = async <TUID extends UID.Component>(uid: TUID, data: Input<TUID>) => {
+const createComponent = async <TUID extends UID.Component>(
+  uid: TUID,
+  data: Input<TUID>
+): Promise<Data.Component<TUID>> => {
   const schema = strapi.getModel(uid);
 
   const componentData = await createComponents(uid, data);
 
-  const transform = pipe(
-    // Make sure we don't save the component with a pre-defined ID
-    omit('id'),
-    assignComponentData(schema, componentData)
-  );
+  // Make sure we don't save the component with a pre-defined ID.
+  const entryData = assignComponentData(schema, componentData, omit(data, 'id'));
 
-  return strapi.db.query(uid).create({ data: transform(data) });
+  return strapi.db.query(uid).create({ data: entryData });
 };
 
 // components can have nested compos so this must be recursive
@@ -433,7 +436,7 @@ const deleteComponent = async <TUID extends UID.Component>(
 
 const assignComponentData = curry(
   (schema: Schema.Schema, componentData: ComponentBody, data: Input<UID.Schema>) => {
-    return pipe(omitComponentData(schema), assign(componentData))(data);
+    return assign({}, componentData, omitComponentData(schema, data));
   }
 );
 

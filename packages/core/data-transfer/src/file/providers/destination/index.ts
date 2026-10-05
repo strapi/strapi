@@ -14,7 +14,7 @@ import type {
   IMetadata,
   ProviderType,
   Stream,
-} from '../../../../types';
+} from '../../../types';
 import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 import { createFilePathFactory, createTarEntryStream } from './utils';
 import { ProviderTransferError } from '../../../errors/providers';
@@ -64,6 +64,8 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
   #diagnostics?: IDiagnosticReporter;
 
+  #closed = false;
+
   constructor(options: ILocalFileDestinationProviderOptions) {
     this.options = options;
   }
@@ -108,6 +110,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
   bootstrap(diagnostics: IDiagnosticReporter): void | Promise<void> {
     this.#diagnostics = diagnostics;
+    this.#closed = false;
     const { compression, encryption } = this.options;
 
     if (encryption.enabled && !encryption.key) {
@@ -143,6 +146,11 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   }
 
   async close() {
+    if (this.#closed) {
+      return;
+    }
+
+    this.#closed = true;
     const { stream, pipeline } = this.#archive;
 
     if (!stream) {

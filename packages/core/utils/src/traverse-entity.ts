@@ -1,4 +1,4 @@
-import { clone, isObject, isArray, isNil, curry } from 'lodash/fp';
+import { clone, isObject, curry } from 'lodash';
 
 import type { Attribute, AnyAttribute, Model, Data } from './types';
 import { isRelationalAttribute, isMediaAttribute } from './content-types';
@@ -59,7 +59,11 @@ export interface Parent {
   schema: Model;
 }
 
-const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity: Data) => {
+const traverseEntity = async (
+  visitor: Visitor,
+  options: TraverseOptions,
+  entity: Data
+): Promise<Data> => {
   const {
     path = { raw: null, attribute: null, rawWithIndices: null },
     schema,
@@ -124,6 +128,14 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
   };
 
   const visitDynamicZoneEntry = async (visitor: Visitor, path: Path, entry: Data) => {
+    // A dynamic zone array can contain a `null` entry (for example a relation
+    // created inline inside a dynamic zone component can leave a null item).
+    // Reading `__component` on it crashed traversal; pass nil entries through
+    // untouched, consistent with how `traverseEntity` ends recursion on nil. (#24303)
+    if (entry == null) {
+      return entry;
+    }
+
     const targetSchema = getModel(entry.__component!);
     const traverseOptions: TraverseOptions = {
       schema: targetSchema,
@@ -137,7 +149,7 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
   };
 
   // End recursion
-  if (!isObject(entity) || isNil(schema)) {
+  if (!isObject(entity) || schema == null) {
     return entity;
   }
 
@@ -154,11 +166,11 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
 
     const newPath = { ...path };
 
-    newPath.raw = isNil(path.raw) ? key : `${path.raw}.${key}`;
-    newPath.rawWithIndices = isNil(path.rawWithIndices) ? key : `${path.rawWithIndices}.${key}`;
+    newPath.raw = path.raw == null ? key : `${path.raw}.${key}`;
+    newPath.rawWithIndices = path.rawWithIndices == null ? key : `${path.rawWithIndices}.${key}`;
 
-    if (!isNil(attribute)) {
-      newPath.attribute = isNil(path.attribute) ? key : `${path.attribute}.${key}`;
+    if (attribute != null) {
+      newPath.attribute = path.attribute == null ? key : `${path.attribute}.${key}`;
     }
 
     // Visit the current attribute
@@ -174,13 +186,22 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
       allowedExtraRootKeys,
     };
 
-    await visitor(visitorOptions, visitorUtils);
+    // Awaited only when the visitor actually returns something thenable. Most visitors
+    // finish synchronously for most keys — a scalar is not a relation, so the relation
+    // visitor returns immediately — and `await` on a non-thenable still allocates a
+    // promise and defers the rest of the loop to a microtask. Over every key of every
+    // node of every entity in a page that was the largest single source of promise churn.
+    const visited = visitor(visitorOptions, visitorUtils) as unknown;
+
+    if (visited != null && typeof (visited as PromiseLike<void>).then === 'function') {
+      await visited;
+    }
 
     // Extract the value for the current key (after calling the visitor)
     const value = copy[key];
 
     // Ignore Nil values or attributes
-    if (isNil(value) || isNil(attribute)) {
+    if (value == null || attribute == null) {
       continue;
     }
 
@@ -192,15 +213,14 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
         ? traverseMorphRelationTarget
         : traverseRelationTarget(getModel(attribute.target!));
 
-      if (isArray(value)) {
+      if (Array.isArray(value)) {
         // Process array items in parallel with ordered error handling
         copy[key] = await parallelWithOrderedErrors(
           value.map((item, i) => {
             const arrayPath = {
               ...newPath,
-              rawWithIndices: isNil(newPath.rawWithIndices)
-                ? `${i}`
-                : `${newPath.rawWithIndices}.${i}`,
+              rawWithIndices:
+                newPath.rawWithIndices == null ? `${i}` : `${newPath.rawWithIndices}.${i}`,
             };
             return method(visitor, arrayPath, item);
           })
@@ -215,15 +235,14 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
     if (isMediaAttribute(attribute)) {
       parent = { schema, key, attribute, path: newPath };
 
-      if (isArray(value)) {
+      if (Array.isArray(value)) {
         // Process media array items in parallel with ordered error handling
         copy[key] = await parallelWithOrderedErrors(
           value.map((item, i) => {
             const arrayPath = {
               ...newPath,
-              rawWithIndices: isNil(newPath.rawWithIndices)
-                ? `${i}`
-                : `${newPath.rawWithIndices}.${i}`,
+              rawWithIndices:
+                newPath.rawWithIndices == null ? `${i}` : `${newPath.rawWithIndices}.${i}`,
             };
             return traverseMediaTarget(visitor, arrayPath, item);
           })
@@ -239,15 +258,14 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
       parent = { schema, key, attribute, path: newPath };
       const targetSchema = getModel(attribute.component);
 
-      if (isArray(value)) {
+      if (Array.isArray(value)) {
         // Process component array items in parallel with ordered error handling
         copy[key] = await parallelWithOrderedErrors(
           value.map((item, i) => {
             const arrayPath = {
               ...newPath,
-              rawWithIndices: isNil(newPath.rawWithIndices)
-                ? `${i}`
-                : `${newPath.rawWithIndices}.${i}`,
+              rawWithIndices:
+                newPath.rawWithIndices == null ? `${i}` : `${newPath.rawWithIndices}.${i}`,
             };
             return traverseComponent(visitor, arrayPath, targetSchema, item);
           })
@@ -259,7 +277,7 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
       continue;
     }
 
-    if (attribute.type === 'dynamiczone' && isArray(value)) {
+    if (attribute.type === 'dynamiczone' && Array.isArray(value)) {
       parent = { schema, key, attribute, path: newPath };
 
       // Process dynamic zone items in parallel with ordered error handling
@@ -267,9 +285,8 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
         value.map((item, i) => {
           const arrayPath = {
             ...newPath,
-            rawWithIndices: isNil(newPath.rawWithIndices)
-              ? `${i}`
-              : `${newPath.rawWithIndices}.${i}`,
+            rawWithIndices:
+              newPath.rawWithIndices == null ? `${i}` : `${newPath.rawWithIndices}.${i}`,
           };
           return visitDynamicZoneEntry(visitor, arrayPath, item);
         })

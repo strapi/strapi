@@ -1,4 +1,4 @@
-import { pick, isEqual } from 'lodash/fp';
+import { isEqual, pick } from 'lodash';
 import type { Logger } from '@strapi/logger';
 import type { Core } from '@strapi/types';
 import { createStrapiFetch } from '../utils/fetch';
@@ -41,7 +41,7 @@ const disable = (message: string) => {
 
   ee.logger?.warn(`${message} Switching to CE.`);
   // Only keep the license key and isTrial for potential re-enabling during a later check
-  ee.licenseInfo = pick(['licenseKey', 'isTrial'], ee.licenseInfo);
+  ee.licenseInfo = pick(ee.licenseInfo, ['licenseKey', 'isTrial']);
 
   ee.licenseInfo.isTrial = false;
 
@@ -104,7 +104,7 @@ const init = (licenseDir: string, logger?: Logger) => {
  * Store the result in database to avoid unecessary requests, and will fallback to that in case of a network failure.
  */
 const onlineUpdate = async ({ strapi }: { strapi: Core.Strapi }) => {
-  const { get, commit, rollback } = (await strapi.db?.transaction()) as any;
+  const { get, commit, rollback } = await strapi.db.transaction();
   const transaction = get();
 
   try {
@@ -190,7 +190,7 @@ const onlineUpdate = async ({ strapi }: { strapi: Core.Strapi }) => {
     }
 
     await commit();
-  } catch (error) {
+  } catch {
     // Example of errors: SQLite does not support FOR UPDATE
     await rollback();
   }
@@ -256,7 +256,7 @@ const getTrialEndDate = async ({
     );
   });
 
-  const data = await res.json();
+  const data = (await res.json()) as { trialEndsAt: string } | null;
 
   return data;
 };

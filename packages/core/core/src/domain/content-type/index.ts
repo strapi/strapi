@@ -1,5 +1,4 @@
-import { cloneDeep } from 'lodash/fp';
-import _ from 'lodash';
+import _, { cloneDeep } from 'lodash';
 import { yup, contentTypes as contentTypesUtils } from '@strapi/utils';
 import type { Schema } from '@strapi/types';
 import { validateContentTypeDefinition } from './validator';
@@ -53,7 +52,23 @@ const createContentType = (uid: string, definition: ContentTypeDefinition) => {
 
   addFirstPublishedAt(schema);
 
+  warnDraftAndPublishReservedAttributes(uid, schema);
+
   return schema;
+};
+
+const warnDraftAndPublishReservedAttributes = (uid: string, schema: Schema.ContentType) => {
+  if (schema.options?.draftAndPublish !== true) {
+    return;
+  }
+
+  for (const attributeName of contentTypesUtils.findDraftAndPublishReservedAttributeNames(
+    Object.keys(schema.attributes)
+  )) {
+    strapi.log.warn(
+      contentTypesUtils.getDraftAndPublishReservedAttributeWarning(uid, attributeName)
+    );
+  }
 };
 
 const addTimestamps = (schema: Schema.ContentType) => {
@@ -145,6 +160,8 @@ const pickSchema = (model: Schema.ContentType) => {
       'pluginOptions',
       'attributes',
       'kind',
+      'indexes',
+      'foreignKeys',
     ])
   );
 

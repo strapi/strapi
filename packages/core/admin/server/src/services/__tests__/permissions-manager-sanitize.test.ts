@@ -1,5 +1,6 @@
 import { AbilityBuilder, Ability } from '@casl/ability';
-import { pick } from 'lodash/fp';
+import { pick } from 'lodash';
+
 import sift from 'sift';
 import createSanitizeHelpers from '../permission/permissions-manager/sanitize';
 
@@ -18,10 +19,10 @@ const allowedOperations = [
   '$elemMatch',
 ];
 
-const operations = pick(allowedOperations, sift);
+const operations = pick(sift, allowedOperations);
 
 const conditionsMatcher = (conditions: any) => {
-  // @ts-expect-error
+  // @ts-expect-error sift operation map is intentionally narrowed for tests
   return sift.createQueryTester(conditions, { operations });
 };
 
@@ -121,7 +122,7 @@ describe('Permissions Manager - Sanitize', () => {
   describe('Sanitize Output', () => {
     it('Removes hidden fields', async () => {
       const data = { a: 'Foo', c: 'Bar' };
-      // @ts-expect-error
+      // @ts-expect-error helpers are assigned during test setup
       const result = await sanitizeHelpers.sanitizeOutput(data, { subject: fooModel.uid });
 
       expect(result).toEqual({ c: 'Bar' });
@@ -131,7 +132,7 @@ describe('Permissions Manager - Sanitize', () => {
   describe('Sanitize Input', () => {
     it('Removes hidden fields', async () => {
       const data = { a: 'Foo', c: 'Bar' };
-      // @ts-expect-error
+      // @ts-expect-error helpers are assigned during test setup
       const result = await sanitizeHelpers.sanitizeInput(data, { subject: fooModel.uid });
 
       expect(result).toEqual({ c: 'Bar' });
@@ -146,7 +147,7 @@ describe('Permissions Manager - Sanitize', () => {
         populate: { a: true, c: true },
         fields: ['a', 'c'],
       };
-      // @ts-expect-error
+      // @ts-expect-error helpers are assigned during test setup
       const result = await sanitizeHelpers.sanitizeQuery(data, { subject: fooModel.uid });
 
       expect(result.filters).toEqual({ c: 'Bar' });
