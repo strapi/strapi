@@ -10,6 +10,7 @@ import { generatePluginDefinitions } from './plugins';
 import { generateServicesDefinitions } from './services';
 import { generateControllersDefinitions } from './controllers';
 import { generatePoliciesDefinitions } from './policies';
+import { generateMiddlewaresDefinitions } from './middlewares';
 import { generateStrictDefinitions } from './strict';
 
 const GENERATORS = {
@@ -19,6 +20,7 @@ const GENERATORS = {
   services: generateServicesDefinitions,
   controllers: generateControllersDefinitions,
   policies: generatePoliciesDefinitions,
+  middlewares: generateMiddlewaresDefinitions,
   strict: generateStrictDefinitions,
 };
 
@@ -29,8 +31,8 @@ export interface GenerateConfig {
   /**
    * Artifacts to generate. `true` generates the artifact, `false` removes the file a previous
    * run may have generated for it, unset leaves it untouched.
-   * `services`, `controllers`, `policies` and `strict` are the strict types artifacts
-   * (`typescript.strictTypes`). `middlewares` has no generator yet and is skipped.
+   * `services`, `controllers`, `policies`, `middlewares` and `strict` are the strict types artifacts
+   * (`typescript.strictTypes`).
    */
   artifacts?: {
     contentTypes?: boolean;
