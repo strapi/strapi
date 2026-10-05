@@ -1,81 +1,9 @@
-import type { Core } from '@strapi/types';
+import { createProtectedRoute } from './create-protected-route';
 
-const routes: Core.RouteInput[] = [
-  {
-    method: 'GET',
-    path: '/roles/:id',
-    handler: 'role.findOne',
-    config: {
-      policies: [
-        {
-          name: 'admin::hasPermissions',
-          config: {
-            actions: ['plugin::users-permissions.roles.read'],
-          },
-        },
-      ],
-    },
-  },
-  {
-    method: 'GET',
-    path: '/roles',
-    handler: 'role.find',
-    config: {
-      policies: [
-        {
-          name: 'admin::hasPermissions',
-          config: {
-            actions: ['plugin::users-permissions.roles.read'],
-          },
-        },
-      ],
-    },
-  },
-  {
-    method: 'POST',
-    path: '/roles',
-    handler: 'role.createRole',
-    config: {
-      policies: [
-        {
-          name: 'admin::hasPermissions',
-          config: {
-            actions: ['plugin::users-permissions.roles.create'],
-          },
-        },
-      ],
-    },
-  },
-  {
-    method: 'PUT',
-    path: '/roles/:role',
-    handler: 'role.updateRole',
-    config: {
-      policies: [
-        {
-          name: 'admin::hasPermissions',
-          config: {
-            actions: ['plugin::users-permissions.roles.update'],
-          },
-        },
-      ],
-    },
-  },
-  {
-    method: 'DELETE',
-    path: '/roles/:role',
-    handler: 'role.deleteRole',
-    config: {
-      policies: [
-        {
-          name: 'admin::hasPermissions',
-          config: {
-            actions: ['plugin::users-permissions.roles.delete'],
-          },
-        },
-      ],
-    },
-  },
+export default [
+  createProtectedRoute('GET', '/roles/:id', 'role.findOne', 'roles.read'),
+  createProtectedRoute('GET', '/roles', 'role.find', 'roles.read'),
+  createProtectedRoute('POST', '/roles', 'role.createRole', 'roles.create'),
+  createProtectedRoute('PUT', '/roles/:role', 'role.updateRole', 'roles.update'),
+  createProtectedRoute('DELETE', '/roles/:role', 'role.deleteRole', 'roles.delete'),
 ];
-
-export default routes;
