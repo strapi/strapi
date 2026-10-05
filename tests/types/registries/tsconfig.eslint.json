@@ -8,5 +8,5 @@
     "strict": true,
     "types": []
   },
-  "include": ["fixtures/*.ts"]
+  "include": ["fixtures/**/*.ts"]
 }

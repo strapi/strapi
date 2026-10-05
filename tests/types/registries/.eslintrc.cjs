@@ -7,7 +7,7 @@ module.exports = {
       },
     },
     {
-      files: ['fixtures/*.ts'],
+      files: ['fixtures/**/*.ts'],
       extends: ['eslint-config-custom/back/typescript'],
       parserOptions: {
         tsconfigRootDir: __dirname,
