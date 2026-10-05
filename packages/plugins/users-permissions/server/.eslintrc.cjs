@@ -11,5 +11,10 @@ module.exports = {
   },
   rules: {
     'no-restricted-globals': ['error', { name: 'strapi', message: 'Inject the Strapi instance.' }],
+    'no-restricted-properties': [
+      'error',
+      { object: 'global', property: 'strapi', message: 'Inject the Strapi instance.' },
+      { object: 'globalThis', property: 'strapi', message: 'Inject the Strapi instance.' },
+    ],
   },
 };
