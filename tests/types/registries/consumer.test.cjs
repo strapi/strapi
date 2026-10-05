@@ -203,6 +203,20 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
     );
   });
 
+  test(`${resolution}: an empty middleware inventory accepts no name`, () => {
+    assertClean(
+      compile(['settings.d.ts', 'middlewares-empty.ts']),
+      `${resolution}, empty middleware inventory`
+    );
+  });
+
+  test(`${resolution}: bundled middleware contracts type route middlewares and lookups`, () => {
+    assertClean(
+      compile(['strapi-strict.d.ts', 'middlewares.ts']),
+      `${resolution}, bundled middleware contracts`
+    );
+  });
+
   test(`${resolution}: relative policy names preserve registered config contracts`, () => {
     assertClean(
       compile(['strapi-strict.d.ts', 'policy-namespaces.ts']),
@@ -488,6 +502,11 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
           ],
           ["handler: '", ['locales.listLocales', 'plugin::i18n.locales.listLocales']],
           ["policies: ['", ['admin::isAuthenticatedAdmin']],
+          ["app.middleware('", ['admin::rateLimit', 'admin::data-transfer']],
+          ["middlewares: ['", ['admin::rateLimit']],
+          // TODO @Nico With the switch on, `{ name: '` lists nothing: the inline handler member
+          // has `Function.name: string`, so editors narrow the object to the handler.
+          ...(strict ? [] : [["middlewares: [{ name: '", ['admin::rateLimit']]]),
           [
             "policies: [{ name: '",
             ['admin::hasPermissions', 'plugin::content-manager.hasPermissions'],
