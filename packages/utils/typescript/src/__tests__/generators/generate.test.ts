@@ -30,6 +30,7 @@ describe('generate', () => {
     const strapi = {
       dirs: { app: { api: path.join(root, 'src', 'api') } },
       services: {},
+      controllers: {},
       contentTypes: {},
       components: {},
     };
@@ -58,6 +59,7 @@ describe('generate', () => {
   test('removes previously generated strict artifacts when they are disabled', async () => {
     const { root, strapi, generated } = await createApp({
       'services.d.ts': '// stale',
+      'controllers.d.ts': '// stale',
       'strict.d.ts': '// stale',
       'plugins.d.ts': '// keep',
       'contentTypes.d.ts': '// keep',
@@ -66,11 +68,12 @@ describe('generate', () => {
     await generate({
       strapi,
       pwd: root,
-      artifacts: { services: false, strict: false },
+      artifacts: { services: false, controllers: false, strict: false },
       logger: { silent: true },
     });
 
     expect(await pathExists(generated('services.d.ts'))).toBe(false);
+    expect(await pathExists(generated('controllers.d.ts'))).toBe(false);
     expect(await pathExists(generated('strict.d.ts'))).toBe(false);
     expect(await pathExists(generated('plugins.d.ts'))).toBe(true);
     expect(await pathExists(generated('contentTypes.d.ts'))).toBe(true);
