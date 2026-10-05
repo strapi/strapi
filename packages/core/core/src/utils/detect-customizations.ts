@@ -79,6 +79,25 @@ const hasCustomRoutes = (strapi: Core.Strapi, apiName: string): boolean => {
   });
 };
 
+/**
+ * `createCoreController` sets the controller's prototype to the factory's base controller, and
+ * marks it when the app passed its own config. Anything else was not minted by the factory: a
+ * plain action map (`module.exports = { async find() {} }`) is entirely hand-written, and a
+ * factory that returned a non-object is not stock either. Neither may throw out of the dump.
+ */
+const isCustomApiController = (controller: unknown): boolean => {
+  if (controller === null || typeof controller !== 'object') {
+    return true;
+  }
+
+  const prototype = Object.getPrototypeOf(controller);
+  if (prototype === Object.prototype || prototype === null) {
+    return true;
+  }
+
+  return factories.isCustomController(controller as Core.Controller);
+};
+
 // Return shape is mirrored in @strapi/types Core.Strapi['getCustomizations'];
 // keep the two in sync.
 export const detectCustomizations = (strapi: Core.Strapi) => {
@@ -97,7 +116,7 @@ export const detectCustomizations = (strapi: Core.Strapi) => {
 
     return {
       uid,
-      customController: controller !== undefined && factories.isCustomController(controller),
+      customController: isCustomApiController(controller),
       customService: isCustomService(service),
       customRoutes: hasCustomRoutes(strapi, apiName),
     };

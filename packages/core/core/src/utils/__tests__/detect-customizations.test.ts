@@ -120,6 +120,25 @@ describe('detectCustomizations', () => {
       });
       expect(detectCustomizations(strapi).apis[0].customController).toBe(true);
     });
+
+    it('flags a plain action map that never went through the factory as custom', () => {
+      // `module.exports = { async find(ctx) { ... } }` is entirely hand-written, but carries no
+      // factory symbol at all.
+      const strapi = makeStrapi({
+        controllers: { [contentTypeUid]: { find: async () => 'hand-written' } },
+        apis: { a: { routes: {} } },
+      });
+      expect(detectCustomizations(strapi).apis[0].customController).toBe(true);
+    });
+
+    it('does not throw on a controller factory that returned nothing', () => {
+      const strapi = makeStrapi({
+        controllers: { [contentTypeUid]: null },
+        apis: { a: { routes: {} } },
+      });
+      expect(() => detectCustomizations(strapi)).not.toThrow();
+      expect(detectCustomizations(strapi).apis[0].customController).toBe(true);
+    });
   });
 
   describe('route detection', () => {
