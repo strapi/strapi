@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 
-import pluginId from '../src/pluginId';
+import { pluginId } from '../src/pluginId';
 
 const role = {
   id: 1,
