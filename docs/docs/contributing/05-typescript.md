@@ -82,6 +82,20 @@ declare global {
   explicit type argument. The registered contract is the CE shape with the EE-only members
   optional.
 
+### Config contracts
+
+A config namespace has two types:
+
+- The input type is what applications write in `config/*.ts`, e.g. `Core.Config.Server`. It lives
+  in `@strapi/types`.
+- The resolved contract is what `strapi.config.get` returns once the loader has merged defaults.
+  It lives in the package that loads the config and applies the defaults, is named `Resolved*`,
+  e.g. `ResolvedServerConfig`, and is the type registered in `PackageConfigs`. A field the loader
+  always defines is required, even when it is optional in the input type.
+
+The JSDoc of each type links to the other. `@strapi/core` keeps one file per core namespace in
+`packages/core/core/src/types/config/` and registers them in `packages/core/core/src/types/index.ts`.
+
 ## Keeping types unchanged without strict mode
 
 A type in `@strapi/types` or `@strapi/strapi` that behaves differently in strict mode resolves
