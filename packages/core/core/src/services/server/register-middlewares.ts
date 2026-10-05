@@ -2,8 +2,6 @@ import { yup } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 import { resolveMiddlewares } from './middleware';
 
-type MiddlewareConfig = (string | { name?: string; resolve?: string; config?: unknown })[];
-
 const defaultConfig = [
   'strapi::logger',
   'strapi::errors',
@@ -52,7 +50,8 @@ const middlewareConfigSchema = yup.array().of(
  * Register middlewares in router
  */
 const registerApplicationMiddlewares = async (strapi: Core.Strapi) => {
-  const middlewareConfig: MiddlewareConfig = strapi.config.get('middlewares', defaultConfig);
+  // TODO @Nico `Core.Config.Middlewares` accepts handler functions, which the validation below rejects.
+  const middlewareConfig = strapi.config.get('middlewares', defaultConfig);
 
   await validateMiddlewareConfig(middlewareConfig);
 
@@ -71,7 +70,7 @@ const registerApplicationMiddlewares = async (strapi: Core.Strapi) => {
  *
  * @param {MiddlewaresConfig} config
  */
-const validateMiddlewareConfig = async (config: MiddlewareConfig) => {
+const validateMiddlewareConfig = async (config: unknown) => {
   try {
     await middlewareConfigSchema.validate(config, { strict: true, abortEarly: false });
   } catch {
