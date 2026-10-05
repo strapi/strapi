@@ -4,7 +4,7 @@ import path from 'path';
 
 import { loadConfiguration } from '..';
 
-describe('ResolvedFeaturesConfig', () => {
+describe('ResolvedConfig.Features', () => {
   let appDir: string;
 
   beforeEach(() => {
@@ -17,7 +17,7 @@ describe('ResolvedFeaturesConfig', () => {
     fs.rmSync(appDir, { recursive: true, force: true });
   });
 
-  // The loader sets no `features` default, so `ResolvedFeaturesConfig` marks no field as
+  // The loader sets no `features` default, so `ResolvedConfig.Features` marks no field as
   // required. This test guards that: a new loader default must also update the type.
   it('leaves features undefined without a config file', () => {
     const config = loadConfiguration({ appDir, distDir: appDir });

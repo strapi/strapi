@@ -29,7 +29,7 @@ declare global {
 - One contract per UID. Conflicts fail with TS2717.
 - A bundled package that registers contracts must also be imported by `packages/core/strapi/strict-types.d.ts`.
 - EE code that merges members into admin services passes `EnterpriseServices` as an explicit type argument.
-- Config: the input type (what `config/*.ts` contains) lives in `@strapi/types` (`Core.Config.*`). The resolved contract (`Resolved*`, loader defaults required) lives in the package that applies the defaults and is what `PackageConfigs` registers. JSDoc on each links to the other. Core namespaces: one file each in `packages/core/core/src/types/config/`.
+- Config: the input type (what `config/*.ts` contains) lives in `@strapi/types` (`Core.Config.*`). The resolved contract (`ResolvedConfig.<Name>`, loader defaults required) lives in the package that applies the defaults and is what `PackageConfigs` registers. JSDoc on each links to the other. Core namespaces: one file each in `packages/core/core/src/types/config/`.
 
 ## Consuming another package's contracts
 

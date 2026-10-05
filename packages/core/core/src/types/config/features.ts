@@ -9,4 +9,4 @@ import type { Core } from '@strapi/types';
  * TODO @Nico Without `config/features.*`, `get('features')` returns `undefined`, not `{}`;
  * this type does not say so. Decide at the `PackageConfigs` level for all no-default namespaces.
  */
-export type ResolvedFeaturesConfig = Core.Config.Features;
+export type Features = Core.Config.Features;

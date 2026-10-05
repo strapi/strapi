@@ -1,5 +1,5 @@
 /**
- * Input type of `config/typescript.ts`. Resolved contract: `ResolvedTypeScriptConfig` in `@strapi/core`.
+ * Input type of `config/typescript.ts`. Resolved contract: `ResolvedConfig.TypeScript` in `@strapi/core`.
  */
 export interface TypeScript {
   /**

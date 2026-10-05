@@ -8,5 +8,5 @@ import type { Core } from '@strapi/types';
  * `path` and `absoluteUrl` from `src/configuration/urls.ts` (`url` defaults to `/admin`).
  * Every other field keeps its input type.
  */
-export type ResolvedAdminConfig = Core.Config.Admin &
+export type Admin = Core.Config.Admin &
   Required<Pick<Core.Config.Admin, 'serveAdminPanel' | 'url' | 'path' | 'absoluteUrl'>>;

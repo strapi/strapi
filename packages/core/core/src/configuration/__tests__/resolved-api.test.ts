@@ -4,7 +4,7 @@ import path from 'path';
 
 import { loadConfiguration } from '..';
 
-describe('ResolvedApiConfig', () => {
+describe('ResolvedConfig.Api', () => {
   let appDir: string;
 
   beforeEach(() => {

@@ -8,6 +8,6 @@ type RestConfig = NonNullable<Core.Config.Api['rest']>;
  * `loadConfiguration` (`src/configuration/index.ts`) merges `defaultConfig.api` under the user config,
  * so `rest` and `rest.prefix` (`'/api'`) are always defined. Other fields stay as in the input type.
  */
-export type ResolvedApiConfig = Omit<Core.Config.Api, 'rest'> & {
+export type Api = Omit<Core.Config.Api, 'rest'> & {
   rest: RestConfig & Required<Pick<RestConfig, 'prefix'>>;
 };

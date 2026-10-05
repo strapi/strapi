@@ -11,4 +11,4 @@ import type { Core } from '@strapi/types';
  * TODO @Nico Without `config/database.*`, `get('database')` returns `undefined` at runtime, but
  * Strapi cannot start without it. Kept non-optional like the input type.
  */
-export type ResolvedDatabaseConfig = Core.Config.Database;
+export type Database = Core.Config.Database;

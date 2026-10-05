@@ -4,7 +4,7 @@ import path from 'path';
 
 import { loadConfiguration } from '..';
 
-describe('ResolvedMiddlewaresConfig', () => {
+describe('ResolvedConfig.Middlewares', () => {
   let appDir: string;
 
   beforeEach(() => {
@@ -17,7 +17,7 @@ describe('ResolvedMiddlewaresConfig', () => {
     fs.rmSync(appDir, { recursive: true, force: true });
   });
 
-  // The loader sets no `middlewares` default, so `ResolvedMiddlewaresConfig` marks no field as
+  // The loader sets no `middlewares` default, so `ResolvedConfig.Middlewares` marks no field as
   // required; `register-middlewares.ts` applies its list at the read site. This test guards that:
   // a new loader default must also update the type.
   it('leaves middlewares undefined without a config file', () => {

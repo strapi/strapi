@@ -10,4 +10,4 @@ import type { Core } from '@strapi/types';
  * TODO @Nico Without `config/middlewares.*`, `get('middlewares')` returns `undefined`;
  * this type does not say so. Decide at the `PackageConfigs` level for all no-default namespaces.
  */
-export type ResolvedMiddlewaresConfig = Core.Config.Middlewares;
+export type Middlewares = Core.Config.Middlewares;

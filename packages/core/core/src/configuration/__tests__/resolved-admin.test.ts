@@ -2,10 +2,10 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 
-import type { ResolvedAdminConfig } from '../../types/config/admin';
+import type * as ResolvedConfig from '../../types/config';
 import { loadConfiguration } from '..';
 
-describe('ResolvedAdminConfig', () => {
+describe('ResolvedConfig.Admin', () => {
   let appDir: string;
 
   beforeAll(() => {
@@ -20,7 +20,7 @@ describe('ResolvedAdminConfig', () => {
 
   it('defines every field the contract marks as required with an empty user config', () => {
     // The loader's return type only knows the root `admin` object: read it as a partial contract.
-    const admin: Partial<ResolvedAdminConfig> = loadConfiguration({
+    const admin: Partial<ResolvedConfig.Admin> = loadConfiguration({
       appDir,
       distDir: appDir,
     }).admin;

@@ -34,7 +34,7 @@ export interface DocumentsProp {
 }
 
 /**
- * Input type of the `api` config, what applications write in `config/api.ts`. Resolved contract: `ResolvedApiConfig` in `@strapi/core`.
+ * Input type of the `api` config, what applications write in `config/api.ts`. Resolved contract: `ResolvedConfig.Api` in `@strapi/core`.
  */
 export interface Api {
   responses?: ResponsesProp;
