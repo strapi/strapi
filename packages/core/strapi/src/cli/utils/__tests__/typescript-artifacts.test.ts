@@ -24,6 +24,7 @@ describe('typescript.strictTypes', () => {
       components: true,
       plugins: true,
       services: false,
+      controllers: false,
       strict: false,
     });
   });
@@ -34,6 +35,7 @@ describe('typescript.strictTypes', () => {
       components: true,
       plugins: true,
       services: true,
+      controllers: true,
       strict: true,
     });
   });
