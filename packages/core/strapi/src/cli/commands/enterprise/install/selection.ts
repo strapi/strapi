@@ -1,5 +1,5 @@
-import { getInquirer } from '../../../utils/get-inquirer';
 import type { EnterprisePluginEntry } from './discovery';
+import { promptChecklist, type ChecklistChoice } from './checklist-prompt';
 import { resolvePluginStatus } from './plugin-status';
 import type { PackumentLookup } from './registry';
 import { isPrerelease } from './versions';
@@ -101,14 +101,7 @@ const describeUpgrade = (row: Extract<PluginRow, { state: 'upgrade' }>): string 
   return row.isMajorUpgrade ? '[major upgrade]' : '[upgrade]';
 };
 
-interface CheckboxChoice {
-  name: string;
-  value?: string;
-  checked?: boolean;
-  disabled?: string;
-}
-
-export const toCheckboxChoice = (row: PluginRow): CheckboxChoice => {
+export const toCheckboxChoice = (row: PluginRow): ChecklistChoice => {
   const { displayName, packageName, kind } = row.entry;
   const kindTag = kind && kind !== 'plugin' ? ` [${kind}]` : '';
   const label = `${displayName} (${packageName})${kindTag}`;
@@ -122,6 +115,7 @@ export const toCheckboxChoice = (row: PluginRow): CheckboxChoice => {
       return {
         name: `${label}  ${row.installedVersion} → ${row.targetVersion} ${upgradeTag}${noteSuffix(row.newerVersionNote)}`,
         value: toInstallSpec(row),
+        short: displayName,
         checked: upgradeTag === '[upgrade]',
       };
     }
@@ -129,6 +123,7 @@ export const toCheckboxChoice = (row: PluginRow): CheckboxChoice => {
       return {
         name: `${label}  ${row.targetVersion}  ${row.entry.summary}${noteSuffix(row.newerVersionNote)}`,
         value: toInstallSpec(row),
+        short: displayName,
         checked: false,
       };
     case 'installed':
@@ -153,16 +148,8 @@ export const orderVisibleRows = (rows: PluginRow[]): PluginRow[] =>
     .filter((row) => row.state !== 'hidden')
     .sort((left, right) => ROW_ORDER.indexOf(left.state) - ROW_ORDER.indexOf(right.state));
 
-export const promptForPlugins = async (rows: PluginRow[]): Promise<string[]> => {
-  const inquirer = await getInquirer();
-  const { selectedSpecs } = await inquirer.prompt<{ selectedSpecs: string[] }>([
-    {
-      type: 'checkbox',
-      name: 'selectedSpecs',
-      message: 'Which Enterprise plugins do you want to install or upgrade?',
-      choices: orderVisibleRows(rows).map(toCheckboxChoice),
-    },
-  ]);
-
-  return selectedSpecs;
-};
+export const promptForPlugins = (rows: PluginRow[]): Promise<string[]> =>
+  promptChecklist({
+    message: 'Which Enterprise plugins do you want to install or upgrade?',
+    choices: orderVisibleRows(rows).map(toCheckboxChoice),
+  });

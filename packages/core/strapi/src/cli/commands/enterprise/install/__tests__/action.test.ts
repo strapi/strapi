@@ -1,7 +1,7 @@
 import path from 'path';
 import fse from 'fs-extra';
 
-import { EnterpriseInstallError, PackageManagerError } from '../errors';
+import { EnterpriseInstallError, PackageManagerError, PromptCancelledError } from '../errors';
 import {
   parsePackageArgument,
   reportInstallError,
@@ -710,6 +710,13 @@ describe('reportInstallError', () => {
     const logger = createTestLogger();
 
     expect(reportInstallError(new PackageManagerError(2), logger)).toBe(2);
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('exits with 130 and logs nothing when the prompt is cancelled with Ctrl+C', () => {
+    const logger = createTestLogger();
+
+    expect(reportInstallError(new PromptCancelledError(), logger)).toBe(130);
     expect(logger.error).not.toHaveBeenCalled();
   });
 

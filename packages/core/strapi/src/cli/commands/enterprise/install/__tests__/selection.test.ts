@@ -1,5 +1,4 @@
-import inquirer from 'inquirer';
-
+import { promptChecklist } from '../checklist-prompt';
 import type { PackumentLookup } from '../registry';
 import {
   buildPluginRow,
@@ -9,6 +8,8 @@ import {
   type PluginRow,
 } from '../selection';
 import { createPackument } from './test-helpers';
+
+jest.mock('../checklist-prompt', () => ({ promptChecklist: jest.fn() }));
 
 const aiByokEntry = {
   packageName: '@strapi-enterprise/plugin-ai-byok',
@@ -165,17 +166,22 @@ describe('toCheckboxChoice', () => {
 });
 
 describe('promptForPlugins', () => {
-  it('asks with a checkbox list and returns the selected install specs', async () => {
-    const promptMock = inquirer.prompt as unknown as jest.Mock;
-    promptMock.mockResolvedValueOnce({
-      selectedSpecs: ['@strapi-enterprise/plugin-ai-byok@1.2.0'],
-    });
+  it('shows the visible rows as a checklist and returns the selected install specs', async () => {
+    const promptChecklistMock = promptChecklist as jest.Mock;
+    promptChecklistMock.mockResolvedValueOnce(['@strapi-enterprise/plugin-ai-byok@1.2.0']);
 
     await expect(promptForPlugins([rowFor(threeVersions, '1.1.0')])).resolves.toEqual([
       '@strapi-enterprise/plugin-ai-byok@1.2.0',
     ]);
-    expect(promptMock).toHaveBeenCalledWith([
-      expect.objectContaining({ type: 'checkbox', name: 'selectedSpecs' }),
-    ]);
+    expect(promptChecklistMock).toHaveBeenCalledWith({
+      message: 'Which Enterprise plugins do you want to install or upgrade?',
+      choices: [
+        expect.objectContaining({
+          value: '@strapi-enterprise/plugin-ai-byok@1.2.0',
+          short: 'AI BYOK',
+          checked: true,
+        }),
+      ],
+    });
   });
 });

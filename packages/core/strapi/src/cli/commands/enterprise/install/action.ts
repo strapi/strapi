@@ -4,7 +4,7 @@ import { loadEnv } from '../../../../node/core/env';
 import type { Logger } from '../../../utils/logger';
 import { ENTERPRISE_SCOPE, STRAPI_PACKAGE_NAME } from './constants';
 import { discoverEnterprisePlugins } from './discovery';
-import { EnterpriseInstallError, PackageManagerError } from './errors';
+import { EnterpriseInstallError, PackageManagerError, PromptCancelledError } from './errors';
 import { buildInstallCommand, installPackages } from './install-packages';
 import { promptForLicense, resolveLicense } from './license';
 import { detectPackageManager } from './package-manager';
@@ -331,6 +331,10 @@ export const runInstall = async ({
 export const reportInstallError = (error: unknown, logger: Logger): number => {
   if (error instanceof PackageManagerError) {
     return error.exitCode;
+  }
+
+  if (error instanceof PromptCancelledError) {
+    return 130;
   }
 
   if (error instanceof EnterpriseInstallError) {
