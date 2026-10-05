@@ -429,6 +429,7 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
           'global::rateLimit',
           'global::timer',
           'global::legacy',
+          'global::koaHandler',
           'api::article.audit-log',
           'strapi::cors',
         ].map((uid) => [uid, () => undefined])
