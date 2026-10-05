@@ -1,3 +1,6 @@
+/**
+ * Input type of `config/typescript.ts`. Resolved contract: `ResolvedTypeScriptConfig` in `@strapi/core`.
+ */
 export interface TypeScript {
   /**
    * When unset or `true`, Strapi generates TypeScript definitions during `strapi develop`
