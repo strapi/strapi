@@ -101,7 +101,7 @@ describe('LicenseInfoEE', () => {
   it('shows the AI usage meter on a non-Growth plan that has AI', async () => {
     // Enterprise licenses with cms-ai can see their usage too; only Growth did before.
     const originalAi = window.strapi.ai;
-    window.strapi.ai = { enabled: true };
+    window.strapi.ai = { ...originalAi, enabled: true };
     try {
       render(<LicenseInfoEE />);
 
