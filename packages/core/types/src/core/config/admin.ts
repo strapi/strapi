@@ -134,6 +134,10 @@ export interface Ai {
   enabled?: boolean;
 }
 
+/**
+ * Input of `config/admin.ts`. Resolved contract, with loader defaults: `ResolvedAdminConfig` in
+ * `@strapi/core`.
+ */
 export interface Admin {
   // required
   apiToken: ApiToken;
