@@ -1257,6 +1257,129 @@ describe('Content Type Builder - Schema service', () => {
     });
   });
 
+  describe('uid targetField on renames', () => {
+    const schemaWithSlug = ({
+      renames,
+      attributes,
+      targetField,
+    }: {
+      renames?: Array<{ oldName: string; newName: string }>;
+      attributes: Array<{ action: string; name: string; properties?: Record<string, unknown> }>;
+      targetField: string;
+    }): CTBSchema =>
+      ({
+        contentTypes: [
+          {
+            action: 'update',
+            uid: 'api::article.article',
+            displayName: 'Article',
+            kind: 'collectionType',
+            draftAndPublish: false,
+            pluginOptions: {},
+            options: {},
+            ...(renames ? { renames } : {}),
+            attributes: [
+              ...attributes,
+              { action: 'update', name: 'slug', properties: { type: 'uid', targetField } },
+            ],
+          },
+        ],
+        components: [],
+      }) as unknown as CTBSchema;
+
+    const savedSlug = () => {
+      const editArg = jest.mocked(builderServiceMock.editContentType).mock.calls[0][0] as {
+        attributes: Record<string, { targetField?: string }>;
+      };
+
+      return editArg.attributes.slug;
+    };
+
+    it('points the uid at the new name when its target field is renamed', async () => {
+      await updateSchema(
+        schemaWithSlug({
+          renames: [{ oldName: 'title', newName: 'heading' }],
+          attributes: [{ action: 'update', name: 'heading', properties: { type: 'string' } }],
+          targetField: 'title',
+        })
+      );
+
+      expect(savedSlug().targetField).toBe('heading');
+    });
+
+    it('resolves a multi-hop rename to the final name', async () => {
+      await updateSchema(
+        schemaWithSlug({
+          renames: [
+            { oldName: 'title', newName: 'a' },
+            { oldName: 'a', newName: 'heading' },
+          ],
+          attributes: [{ action: 'update', name: 'heading', properties: { type: 'string' } }],
+          targetField: 'title',
+        })
+      );
+
+      expect(savedSlug().targetField).toBe('heading');
+    });
+
+    it('follows the target when renames are disabled (never mode)', async () => {
+      renameMode = 'never';
+
+      await updateSchema(
+        schemaWithSlug({
+          renames: [{ oldName: 'title', newName: 'heading' }],
+          attributes: [{ action: 'update', name: 'heading', properties: { type: 'string' } }],
+          targetField: 'title',
+        })
+      );
+
+      expect(savedSlug().targetField).toBe('heading');
+    });
+
+    it('leaves a targetField that names an attribute of the saved type alone (swap)', async () => {
+      await updateSchema(
+        schemaWithSlug({
+          renames: [
+            { oldName: 'title', newName: 'tmp' },
+            { oldName: 'subtitle', newName: 'title' },
+            { oldName: 'tmp', newName: 'subtitle' },
+          ],
+          attributes: [
+            { action: 'update', name: 'title', properties: { type: 'string' } },
+            { action: 'update', name: 'subtitle', properties: { type: 'string' } },
+          ],
+          // The admin has already rewritten it to follow the swapped field.
+          targetField: 'subtitle',
+        })
+      );
+
+      expect(savedSlug().targetField).toBe('subtitle');
+    });
+
+    it('clears the targetField when the renamed target is deleted in the same save', async () => {
+      await updateSchema(
+        schemaWithSlug({
+          renames: [{ oldName: 'title', newName: 'heading' }],
+          attributes: [{ action: 'delete', name: 'heading' }],
+          targetField: 'title',
+        })
+      );
+
+      expect(savedSlug().targetField).toBeUndefined();
+    });
+
+    it('still clears the targetField when the target field is deleted', async () => {
+      await updateSchema(
+        schemaWithSlug({
+          attributes: [{ action: 'update', name: 'age', properties: { type: 'integer' } }],
+          targetField: 'title',
+        })
+      );
+
+      expect(savedSlug().targetField).toBeUndefined();
+    });
+  });
+
   describe('renameAttribute (CLI single-step rename)', () => {
     const seedContentType = () => {
       (global.strapi as any).contentTypes = {
@@ -1297,6 +1420,19 @@ describe('Content Type Builder - Schema service', () => {
       expect(editArg.attributes).toHaveProperty('age');
 
       expect(builderServiceMock.writeFiles).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps a uid attached to the renamed field', async () => {
+      seedContentType();
+      (global.strapi as any).contentTypes['api::article.article'].attributes.slug = {
+        type: 'uid',
+        targetField: 'title',
+      };
+
+      await renameAttribute('api::article.article', 'title', 'heading');
+
+      const editArg = jest.mocked(builderServiceMock.editContentType).mock.calls[0][0] as any;
+      expect(editArg.attributes.slug).toMatchObject({ type: 'uid', targetField: 'heading' });
     });
 
     it('accepts renaming a legacy status attribute and forwards the rename hop', async () => {

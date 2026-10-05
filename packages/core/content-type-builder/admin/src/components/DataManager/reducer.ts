@@ -397,6 +397,28 @@ const applyRenameConsent = (
   }
 };
 
+/**
+ * Keeps uid fields attached to a field when it is renamed, whether or not the
+ * rename is recorded as a data-preserving hop.
+ */
+const renameUIDTargetFields = (
+  type: ContentType | Component,
+  previousAttribute: AnyAttribute,
+  newAttribute: AnyAttribute
+): void => {
+  const oldName = previousAttribute.name;
+  const newName = newAttribute?.name;
+  if (!newName || oldName === newName) {
+    return;
+  }
+
+  type.attributes.forEach((attribute) => {
+    if (attribute.type === 'uid' && attribute.targetField === oldName) {
+      attribute.targetField = newName;
+    }
+  });
+};
+
 const setAttributeAt = (type: ContentType | Component, index: number, attribute: AnyAttribute) => {
   const previousAttribute = type.attributes[index];
 
@@ -861,6 +883,7 @@ const slice = createUndoRedoSlice(
         });
 
         setAttributeAt(type, initialAttributeIndex, attributeToSet as AnyAttribute);
+        renameUIDTargetFields(type, previousAttribute, attributeToSet as AnyAttribute);
 
         if (previousAttribute.type !== attributeToSet.type) {
           return;
@@ -951,6 +974,7 @@ const slice = createUndoRedoSlice(
           recordRename,
           declineRename,
         });
+        renameUIDTargetFields(type, previousAttribute, attributeToSet as AnyAttribute);
       },
       reloadPlugin: () => {
         return initialState;

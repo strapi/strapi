@@ -410,4 +410,117 @@ describe('CTB | DataManager | reducer | rename tracking (EDIT_ATTRIBUTE)', () =>
       ]);
     });
   });
+
+  describe('uid fields attached to the renamed field', () => {
+    const slug = { name: 'slug', type: 'uid', targetField: 'title', status: 'UNCHANGED' };
+
+    const getTargetField = (state: State, name = 'slug') =>
+      (getAttr(state, uid, name) as { targetField?: string } | undefined)?.targetField;
+
+    it('points the uid at the new name when its target field is renamed', () => {
+      const state = reducer(
+        buildState([
+          { name: 'title', type: 'string', status: 'UNCHANGED' },
+          slug,
+        ] as AnyAttribute[]),
+        editName(uid, 'title', 'heading')
+      );
+
+      expect(getTargetField(state)).toBe('heading');
+    });
+
+    it('follows the rename when the migration is not recorded or is declined', () => {
+      const edit = (consent: { recordRename?: boolean; declineRename?: boolean }) =>
+        reducer(
+          buildState([
+            { name: 'title', type: 'string', status: 'UNCHANGED' },
+            slug,
+          ] as AnyAttribute[]),
+          actions.editAttribute({
+            attributeToSet: { type: 'string', name: 'heading' } as AnyAttribute,
+            forTarget: 'contentType',
+            targetUid: uid as Internal.UID.ContentType,
+            name: 'title',
+            ...consent,
+          })
+        );
+
+      expect(getTargetField(edit({ recordRename: false }))).toBe('heading');
+      expect(getTargetField(edit({ declineRename: true }))).toBe('heading');
+    });
+
+    it('follows the rename of a NEW field, which records no hop', () => {
+      const state = reducer(
+        buildState([{ name: 'title', type: 'string', status: 'NEW' }, slug] as AnyAttribute[]),
+        editName(uid, 'title', 'heading')
+      );
+
+      expect(getRenames(state, uid)).toBeUndefined();
+      expect(getTargetField(state)).toBe('heading');
+    });
+
+    it('resolves a multi-hop rename to the final name (title -> a -> heading)', () => {
+      let state = reducer(
+        buildState([
+          { name: 'title', type: 'string', status: 'UNCHANGED' },
+          slug,
+        ] as AnyAttribute[]),
+        editName(uid, 'title', 'a')
+      );
+      state = reducer(state, editName(uid, 'a', 'heading'));
+
+      expect(getTargetField(state)).toBe('heading');
+    });
+
+    it('follows each field through a swap (title -> tmp, subtitle -> title, tmp -> subtitle)', () => {
+      let state = reducer(
+        buildState([
+          { name: 'title', type: 'string', status: 'UNCHANGED' },
+          { name: 'subtitle', type: 'string', status: 'UNCHANGED' },
+          slug,
+          { name: 'subSlug', type: 'uid', targetField: 'subtitle', status: 'UNCHANGED' },
+        ] as AnyAttribute[]),
+        editName(uid, 'title', 'tmp')
+      );
+      state = reducer(state, editName(uid, 'subtitle', 'title'));
+      state = reducer(state, editName(uid, 'tmp', 'subtitle'));
+
+      expect(getTargetField(state)).toBe('subtitle');
+      expect(getTargetField(state, 'subSlug')).toBe('title');
+    });
+
+    it('leaves uid fields attached to other fields alone', () => {
+      const state = reducer(
+        buildState([
+          { name: 'title', type: 'string', status: 'UNCHANGED' },
+          { name: 'subtitle', type: 'string', status: 'UNCHANGED' },
+          slug,
+        ] as AnyAttribute[]),
+        editName(uid, 'subtitle', 'summary')
+      );
+
+      expect(getTargetField(state)).toBe('title');
+    });
+
+    it('follows the rename of a custom field', () => {
+      const state = reducer(
+        buildState([
+          { name: 'title', type: 'string', customField: 'plugin::x.y', status: 'UNCHANGED' },
+          slug,
+        ] as AnyAttribute[]),
+        actions.editCustomFieldAttribute({
+          attributeToSet: {
+            type: 'string',
+            customField: 'plugin::x.y',
+            name: 'heading',
+          } as AnyAttribute,
+          forTarget: 'contentType',
+          targetUid: uid as Internal.UID.ContentType,
+          name: 'title',
+        })
+      );
+
+      expect(getTargetField(state)).toBe('heading');
+    });
+  });
 });
