@@ -44,14 +44,6 @@ const baseLicense: LicenseData = {
   shouldStopCreate: false,
 };
 
-// Absolute dates render as locale-independent `yyyy/mm/dd`; mirror that here rather than
-// asserting a locale-formatted string.
-const formatDate = (value: string | number) => {
-  const date = new Date(value);
-
-  return `${date.getFullYear()}/${`${date.getMonth() + 1}`.padStart(2, '0')}/${`${date.getDate()}`.padStart(2, '0')}`;
-};
-
 // Reassigned per-test (fresh deep copy) so mutating one test's fixture can never
 // bleed into another test — see the `beforeEach` below.
 let licenseData: LicenseData | null = baseLicense;
@@ -60,6 +52,10 @@ let isError = false;
 
 jest.mock('../../../../../../hooks/useLicenseLimits', () => ({
   useLicenseLimits: () => ({ license: licenseData, isLoading, isError }),
+}));
+
+jest.mock('../AIUsage', () => ({
+  AIUsage: () => <div>ai usage meter</div>,
 }));
 
 jest.mock('../../../../../../../../../admin/src/services/admin', () => ({
@@ -88,9 +84,31 @@ describe('LicenseInfoEE', () => {
 
     expect(await screen.findByText('Enterprise - offline')).toBeInTheDocument();
     expect(
-      screen.getByText(`License valid until ${formatDate(baseLicense.expireAt!)}`)
+      // `expireAt` is 2026-12-31T00:00:00.000Z; dates are absolute `yyyy/mm/dd` in UTC
+      screen.getByText('License valid until 2026/12/31')
     ).toBeInTheDocument();
     expect(screen.queryByText(/Last license validity check/)).not.toBeInTheDocument();
+  });
+
+  it('shows a check 31 minutes ago in minutes, not as an hour ago', async () => {
+    licenseData = { ...structuredClone(baseLicense), lastRegistrySyncAt: Date.now() - 31 * 60_000 };
+    render(<LicenseInfoEE />);
+
+    expect(await screen.findByText(/31 minutes ago/)).toBeInTheDocument();
+    expect(screen.queryByText(/1 hour ago/)).not.toBeInTheDocument();
+  });
+
+  it('shows the AI usage meter on a non-Growth plan that has AI', async () => {
+    // Enterprise licenses with cms-ai can see their usage too; only Growth did before.
+    const originalAi = window.strapi.ai;
+    window.strapi.ai = { enabled: true };
+    try {
+      render(<LicenseInfoEE />);
+
+      expect(await screen.findByText('ai usage meter')).toBeInTheDocument();
+    } finally {
+      window.strapi.ai = originalAi;
+    }
   });
 
   // `baseLicense` is deliberately an Enterprise plan id. Seats used to be gated on Growth, which

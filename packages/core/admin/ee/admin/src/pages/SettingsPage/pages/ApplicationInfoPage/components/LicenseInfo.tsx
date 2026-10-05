@@ -115,10 +115,12 @@ const formatAbsoluteDate = (value: string | number): string => {
     return '';
   }
 
-  const month = `${date.getMonth() + 1}`.padStart(2, '0');
-  const day = `${date.getDate()}`.padStart(2, '0');
+  // UTC, not the local calendar: license dates are UTC-midnight instants, which local getters
+  // turn into the previous day anywhere west of UTC.
+  const month = `${date.getUTCMonth() + 1}`.padStart(2, '0');
+  const day = `${date.getUTCDate()}`.padStart(2, '0');
 
-  return `${date.getFullYear()}/${month}/${day}`;
+  return `${date.getUTCFullYear()}/${month}/${day}`;
 };
 
 const LicenseInfoEE = () => {
@@ -199,12 +201,12 @@ const LicenseInfoEE = () => {
       return formatMessage({ id: 'Settings.license.checkin.never', defaultMessage: 'Not yet' });
     }
     const diffMs = timestamp - Date.now();
-    const diffHours = Math.round(diffMs / (60 * 60 * 1000));
-    if (Math.abs(diffHours) >= 1) {
-      return formatRelativeTime(diffHours, 'hour', { numeric: 'auto' });
-    }
+    // Minutes decide the unit: rounding hours first turned 31 minutes into "1 hour ago".
     const diffMinutes = Math.round(diffMs / (60 * 1000));
-    return formatRelativeTime(diffMinutes, 'minute', { numeric: 'auto' });
+    if (Math.abs(diffMinutes) < 60) {
+      return formatRelativeTime(diffMinutes, 'minute', { numeric: 'auto' });
+    }
+    return formatRelativeTime(Math.round(diffMs / (60 * 60 * 1000)), 'hour', { numeric: 'auto' });
   };
 
   const currentPlanValue = licenseMode === 'offline' ? `${licensedPlan} - offline` : licensedPlan;
@@ -310,10 +312,10 @@ const LicenseInfoEE = () => {
               without one (including an older licence the registry has not re-issued yet) has a
               null `permittedSeats`, and the component already renders nothing in that case. */}
           <AdminSeatInfoEE />
-          {/* AI usage stays Growth-only. The `ai.enabled` gate is preserved from before this
-              block moved onto the Plan card: without it an instance with AI disabled requests
-              usage it cannot have. */}
-          {isGrowth && window.strapi.ai?.enabled !== false && <AIUsage isTrial={isTrial} />}
+          {/* Any plan with AI, as before this moved onto the Plan card (AIUsage renders nothing
+              without it). The `ai.enabled` gate is kept: without it an instance with AI
+              disabled requests usage it cannot have. */}
+          {window.strapi.ai?.enabled !== false && <AIUsage isTrial={isTrial} />}
         </Flex>
         <Flex direction="column" alignItems="stretch" gap={5} flex="1">
           <Flex direction="column" alignItems="start" gap={2}>
