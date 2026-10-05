@@ -354,18 +354,26 @@ describe('SSO login failures', () => {
     expect(next).toHaveBeenCalled();
   });
 
-  test('emits unexpected_error with the account when the session cannot be created', async () => {
+  test('emits unexpected_error with the account, and no session user, when the session cannot be created', async () => {
     getSessionManager.mockImplementation(() => {
       throw new Error('session store down');
     });
 
     const ctx = {
       params: { provider: 'okta' },
-      state: { user: { id: 7, email: 'ana@acme.com', password: '$2a$10$hash' } },
+      state: { user: { id: 7, email: 'ana@acme.com', password: '$2a$10$hash' } } as {
+        user?: unknown;
+      },
       redirect: jest.fn(),
     };
+    let userWhenEmitted: unknown = 'not emitted';
+    emit.mockImplementationOnce(() => {
+      userWhenEmitted = ctx.state.user;
+    });
 
     await redirectWithAuth(ctx as any, jest.fn());
+
+    expect(userWhenEmitted).toBeUndefined();
 
     expect(emit).toHaveBeenCalledWith('admin.auth.error', {
       error: expect.any(Error),

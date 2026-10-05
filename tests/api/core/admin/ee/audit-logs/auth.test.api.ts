@@ -265,6 +265,29 @@ describeOnCondition(edition === 'EE')('Authentication events in audit logs (api)
       expect(log.payload).toEqual(failedLogin('sso_role_misconfigured', PROVIDER));
     });
 
+    test('records a session that cannot be created with an unknown actor and the account', async () => {
+      const account = await createAccount('ana@auth-audit.test');
+      const originSessionManager = Object.getPrototypeOf(strapi.sessionManager('admin'));
+      const generateRefreshToken = jest
+        .spyOn(originSessionManager, 'generateRefreshToken')
+        .mockRejectedValueOnce(new Error('session store down for ana@auth-audit.test'));
+
+      try {
+        const res = await ssoLogin({ profile: { email: account.email } });
+        expect(res.statusCode).toBe(302);
+        expect(res.headers.location).toMatch(/error/);
+      } finally {
+        generateRefreshToken.mockRestore();
+      }
+
+      const [log, ...rest] = await findLogs('admin.auth.error');
+      expect(rest).toHaveLength(0);
+      expect(log.user).toBeNull();
+      expect(log.payload).toEqual(failedLogin('unexpected_error', PROVIDER, account));
+      expectNoSecret(log, 'session store down');
+      expect(await findLogs('admin.auth.success')).toHaveLength(0);
+    });
+
     test('records nothing for a connection with no valid profile', async () => {
       const providerError = await ssoLogin({ error: new Error('idp unreachable') });
       const noEmail = await ssoLogin({ profile: { username: 'new' } });
