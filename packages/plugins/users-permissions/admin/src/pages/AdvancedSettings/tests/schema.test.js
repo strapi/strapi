@@ -1,11 +1,6 @@
-import schema from '../utils/schema';
+import { describe, it, expect } from 'vitest';
 
-/**
- * Mock the cropper import to avoid having an error
- */
-jest.mock('cropperjs/dist/cropper.css?raw', () => '', {
-  virtual: true,
-});
+import schema from '../utils/schema';
 
 describe('schema', () => {
   it('should failed to validate', () => {

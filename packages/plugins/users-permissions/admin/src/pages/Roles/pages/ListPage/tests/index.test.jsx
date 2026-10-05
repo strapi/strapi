@@ -2,22 +2,16 @@
 
 import * as React from 'react';
 
-import { render as renderAdmin } from '@strapi/strapi/admin/test';
 import { waitForElementToBeRemoved } from '@testing-library/react';
 import { useLocation } from 'react-router-dom';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
+import { render as renderAdmin } from '../../../../../../tests/utils';
 import { RolesListPage } from '../index';
 
-/**
- * Mock the cropper import to avoid having an error
- */
-jest.mock('cropperjs/dist/cropper.css?raw', () => '', {
-  virtual: true,
-});
-
-jest.mock('@strapi/strapi/admin', () => ({
-  ...jest.requireActual('@strapi/strapi/admin'),
-  useRBAC: jest.fn().mockImplementation(() => ({
+vi.mock('@strapi/strapi/admin', async (importOriginal) => ({
+  ...(await importOriginal()),
+  useRBAC: vi.fn().mockImplementation(() => ({
     isLoading: false,
     allowedActions: { canRead: true, canUpdate: true, canDelete: true, canCreate: true },
   })),
@@ -45,7 +39,7 @@ const render = () =>
 
 describe('Roles – ListPage', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders as expected with headers, actions and a table', async () => {

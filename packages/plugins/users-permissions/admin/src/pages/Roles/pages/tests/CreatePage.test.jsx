@@ -7,15 +7,9 @@ import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { CreatePage } from '../CreatePage';
-
-/**
- * Mock the cropper import to avoid having an error
- */
-jest.mock('cropperjs/dist/cropper.css?raw', () => '', {
-  virtual: true,
-});
 
 const render = () => ({
   ...renderRTL(<Route path="/settings/users-permissions/roles/new" element={<CreatePage />} />, {
@@ -47,7 +41,7 @@ const render = () => ({
 });
 
 describe('Roles – CreatePage', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('renders correctly', async () => {
     const { getByRole, user } = render();

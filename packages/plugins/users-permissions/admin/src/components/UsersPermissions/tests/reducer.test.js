@@ -1,4 +1,5 @@
 import { produce } from 'immer';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 import reducer from '../reducer';
 
@@ -138,5 +139,58 @@ describe('USERS PERMISSIONS | COMPONENTS | UsersPermissions | reducer', () => {
 
       expect(reducer(state, action)).toEqual(expected);
     });
+  });
+});
+
+describe('permission changes preserve unrelated selection and policy state', () => {
+  const permissions = {
+    'api::article': {
+      controllers: {
+        article: {
+          find: { enabled: true, policy: 'global::owner' },
+          findOne: { enabled: true, policy: '' },
+        },
+      },
+    },
+  };
+  const state = {
+    initialData: permissions,
+    modifiedData: permissions,
+    routes: {},
+    policies: [],
+    selectedAction: 'api::article.controllers.article.find',
+  };
+
+  it('deselects an already selected action', () => {
+    expect(
+      reducer(state, { type: 'SELECT_ACTION', actionToSelect: state.selectedAction }).selectedAction
+    ).toBe('');
+  });
+
+  it('keeps route details selected when disabling an action', () => {
+    const next = reducer(state, {
+      type: 'ON_CHANGE',
+      keys: ['api::article', 'controllers', 'article', 'find', 'enabled'],
+      value: false,
+    });
+    expect(next.selectedAction).toBe(state.selectedAction);
+    expect(next.modifiedData['api::article'].controllers.article.find).toEqual({
+      enabled: false,
+      policy: 'global::owner',
+    });
+    expect(state.modifiedData['api::article'].controllers.article.find.enabled).toBe(true);
+  });
+
+  it('can disable every action without losing configured policies', () => {
+    const next = reducer(state, {
+      type: 'ON_CHANGE_SELECT_ALL',
+      keys: ['api::article', 'controllers', 'article'],
+      value: false,
+    });
+    expect(next.modifiedData['api::article'].controllers.article).toEqual({
+      find: { enabled: false, policy: 'global::owner' },
+      findOne: { enabled: false, policy: '' },
+    });
+    expect(next.selectedAction).toBe(state.selectedAction);
   });
 });

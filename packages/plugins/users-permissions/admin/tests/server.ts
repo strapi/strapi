@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 
-import pluginId from '../pluginId';
+import pluginId from '../src/pluginId';
 
 const role = {
   id: 1,
@@ -175,12 +175,4 @@ const handlers = [
   }),
 ];
 
-const server = setupServer(...handlers);
-
-beforeAll(() => {
-  server.listen();
-});
-
-afterAll(() => {
-  server.close();
-});
+export const server = setupServer(...handlers);

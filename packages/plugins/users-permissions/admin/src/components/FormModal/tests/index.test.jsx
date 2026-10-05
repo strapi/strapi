@@ -9,6 +9,7 @@ import * as React from 'react';
 import { DesignSystemProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
+import { describe, it, expect, vi } from 'vitest';
 
 import FormModal from '../index';
 
@@ -21,9 +22,9 @@ const makeApp = (layout = { forms: [], schema: {} }, isOpen = false) => {
         <FormModal
           layout={layout}
           isOpen={isOpen}
-          onToggle={jest.fn()}
+          onToggle={vi.fn()}
           headerBreadcrumbs={['Edit', 'Email']}
-          onSubmit={jest.fn()}
+          onSubmit={vi.fn()}
           isSubmiting={false}
           initialData={{}}
           providerToEditName="test"

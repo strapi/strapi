@@ -1,19 +1,15 @@
 import * as React from 'react';
 
-import { render, waitFor } from '@strapi/strapi/admin/test';
+import { http, HttpResponse } from 'msw';
+import { describe, it, expect, afterAll, vi } from 'vitest';
 
+import { server } from '../../../../tests/server';
+import { render, waitFor } from '../../../../tests/utils';
 import { AdvancedSettingsPage } from '../index';
 
-/**
- * Mock the cropper import to avoid having an error
- */
-jest.mock('cropperjs/dist/cropper.css?raw', () => '', {
-  virtual: true,
-});
-
-jest.mock('@strapi/strapi/admin', () => ({
-  ...jest.requireActual('@strapi/strapi/admin'),
-  useRBAC: jest.fn().mockImplementation(() => ({
+vi.mock('@strapi/strapi/admin', async (importOriginal) => ({
+  ...(await importOriginal()),
+  useRBAC: vi.fn().mockImplementation(() => ({
     isLoading: false,
     allowedActions: { canUpdate: true },
   })),
@@ -21,7 +17,7 @@ jest.mock('@strapi/strapi/admin', () => ({
 
 describe('ADMIN | Pages | Settings | Advanced Settings', () => {
   afterAll(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', async () => {
@@ -43,4 +39,33 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
     expect(getByRole('textbox', { name: 'Reset password page' })).toBeInTheDocument();
     expect(getByRole('textbox', { name: 'Redirection url' })).toBeInTheDocument();
   });
+});
+
+it('clears a saved confirmation redirect when email confirmation is disabled', async () => {
+  const save = vi.fn();
+  server.use(
+    http.put('*/users-permissions/advanced', async ({ request }) => {
+      save(await request.json());
+
+      return HttpResponse.json({ ok: true });
+    })
+  );
+  const { getByRole, findByRole, user, findByText } = render(<AdvancedSettingsPage />);
+  const confirmation = await findByRole('checkbox', { name: 'Enable email confirmation' });
+  await user.click(confirmation);
+  await user.type(
+    getByRole('textbox', { name: 'Redirection url' }),
+    'https://example.com/confirmed'
+  );
+  await user.click(confirmation);
+  await user.click(getByRole('checkbox', { name: 'Enable sign-ups' }));
+  await user.click(getByRole('button', { name: 'Save' }));
+  expect(await findByText('Saved')).toBeInTheDocument();
+  expect(save).toHaveBeenCalledWith(
+    expect.objectContaining({
+      allow_register: true,
+      email_confirmation: false,
+      email_confirmation_redirection: '',
+    })
+  );
 });

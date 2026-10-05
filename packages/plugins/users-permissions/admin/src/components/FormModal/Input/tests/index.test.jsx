@@ -9,6 +9,7 @@ import * as React from 'react';
 import { DesignSystemProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
+import { describe, it, expect, vi } from 'vitest';
 
 import Input from '../index';
 
@@ -20,7 +21,7 @@ const makeApp = (name, type, value) => (
       <Input
         intlLabel={{ id: 'enabled', defaultMessage: 'Enabled' }}
         name={name}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         providerToEditName="email"
         type={type}
         value={value}

@@ -1,13 +1,8 @@
+import { describe, it, expect } from 'vitest';
+
 import forms from '../utils/forms';
 
 const { providers, providersWithSubdomain } = forms;
-
-/**
- * Mock the cropper import to avoid having an error
- */
-jest.mock('cropperjs/dist/cropper.css?raw', () => '', {
-  virtual: true,
-});
 
 describe('schema without subdomain', () => {
   it('should fail to validate', () => {
