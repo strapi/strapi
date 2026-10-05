@@ -1,13 +1,12 @@
-import { render } from '@tests/utils';
+import { lightTheme } from '@strapi/design-system';
+import { render, screen } from '@tests/utils';
 
 import { SettingsNav } from '../SettingsNav';
 
+let mockLicense: unknown = { features: [] };
+
 jest.mock('../../../../../../ee/admin/src/hooks/useLicenseLimits', () => ({
-  useLicenseLimits: jest.fn(() => ({
-    license: {
-      features: [],
-    },
-  })),
+  useLicenseLimits: jest.fn(() => ({ license: mockLicense })),
 }));
 
 const menu = [
@@ -79,6 +78,20 @@ const menu = [
     ],
   },
   {
+    id: 'audit',
+    intlLabel: { id: 'Settings.audit', defaultMessage: 'Audit' },
+    links: [
+      {
+        intlLabel: { id: 'global.auditLogs', defaultMessage: 'Audit Logs' },
+        to: '/settings/audit-logs',
+        id: 'auditLogs',
+        isDisplayed: true,
+        licenseOnly: true,
+        permissions: [],
+      },
+    ],
+  },
+  {
     id: 'email',
     intlLabel: { id: 'email.SettingsNav.section-label', defaultMessage: 'Email Plugin' },
     links: [
@@ -141,7 +154,47 @@ jest.mock('../../../../hooks/useSettingsMenu', () => ({
   })),
 }));
 
+const lightningFillFor = (label: string) =>
+  // eslint-disable-next-line testing-library/no-node-access
+  screen.getByText(label).closest('a')?.querySelector('svg')?.getAttribute('fill');
+
 describe('SettingsNav', () => {
+  afterEach(() => {
+    mockLicense = { features: [] };
+  });
+
+  it('marks a feature as licensed when a lapsed license granted it', () => {
+    // After expiry the live feature list is empty; the nav follows the same grant the Plan card
+    // shows until the license key or file is removed.
+    mockLicense = {
+      features: [],
+      planEntitlements: [{ feature: 'audit-logs', available: true, limits: [] }],
+    };
+
+    render(<SettingsNav />);
+
+    expect(lightningFillFor('Audit Logs')).toBe(lightTheme.colors.primary600);
+  });
+
+  it('leaves a feature unmarked when the license never granted it', () => {
+    mockLicense = {
+      features: [],
+      planEntitlements: [{ feature: 'audit-logs', available: false, limits: [] }],
+    };
+
+    render(<SettingsNav />);
+
+    expect(lightningFillFor('Audit Logs')).toBe(lightTheme.colors.neutral300);
+  });
+
+  it('marks a feature on the live license as licensed', () => {
+    mockLicense = { features: [{ name: 'audit-logs' }] };
+
+    render(<SettingsNav />);
+
+    expect(lightningFillFor('Audit Logs')).toBe(lightTheme.colors.primary600);
+  });
+
   it('should render and match snapshot', () => {
     const { getByText } = render(<SettingsNav />);
 

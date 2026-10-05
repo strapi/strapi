@@ -31,7 +31,14 @@ const SettingsNav = ({ isFullPage = false }: { isFullPage?: boolean }) => {
   const { pathname } = useLocation();
   const { license } = useLicenseLimits();
 
-  const availableFeatureNames = license?.features.map((feature) => feature.name);
+  // The live license's features, plus what a lapsed license granted: the same availability the
+  // Plan card shows, kept until the license key or file is removed.
+  const availableFeatureNames = [
+    ...(license?.features ?? []).map((feature) => feature.name),
+    ...(license?.planEntitlements ?? [])
+      .filter((entitlement) => entitlement.available)
+      .map((entitlement) => entitlement.feature),
+  ];
 
   const linksIdsToLicenseFeaturesNames: Record<LinkId, FeatureName> = {
     'content-releases': 'cms-content-releases',
