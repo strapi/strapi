@@ -51,6 +51,7 @@ const makeStrapi = () =>
       };
     })(),
     dirs: { app: { root: '/home/u/app' } },
+    get: (name: string) => (name === 'modules' ? { getAll: () => ({}) } : undefined),
     db: { getInfo: () => ({ client: 'sqlite', schema: undefined, displayName: '.tmp/data.db' }) },
     plugins: { 'users-permissions': {}, i18n: {} },
     plugin: () => ({ provider: { isPrivate: () => false } }),
@@ -205,5 +206,40 @@ describe('debug-dump service', () => {
     expect(dump.license?.entitlements).toEqual([
       { feature: 'audit-logs', limits: [{ key: 'retentionDays', unit: 'days', value: 90 }] },
     ]);
+  });
+
+  it('includes module config stored after the config provider was built, scrubbed', async () => {
+    // Module config (plugin::*, api::*) is stored with config.set after the provider object is
+    // created, so it is not an own property of that object; only config.get reaches it.
+    const strapi = makeStrapi();
+    const live: Record<string, unknown> = {
+      'plugin::upload': {
+        provider: 'aws-s3',
+        providerOptions: { s3Options: { credentials: { secretAccessKey: 'S3_SECRET' } } },
+      },
+      'plugin::email': {
+        provider: 'sendgrid',
+        providerOptions: { apiKey: 'SG_SECRET' },
+        settings: { defaultFrom: 'team@example.com' },
+      },
+    };
+    const config = strapi.config as any;
+    const originalGet = config.get;
+    delete config['plugin::upload'];
+    delete config['plugin::email'];
+    config.get = (key: string, def?: unknown) => (key in live ? live[key] : originalGet(key, def));
+    strapi.get = (name: string) =>
+      name === 'modules'
+        ? { getAll: () => ({ 'plugin::upload': {}, 'plugin::email': {} }) }
+        : undefined;
+
+    const dump = await debugDumpService({ strapi }).generate();
+    const dumpConfig = dump.config as Record<string, any>;
+
+    // `plugin::email.settings` is one of the wholesale-masked paths
+    expect(dumpConfig['plugin::email']).toMatchObject({ provider: 'sendgrid', settings: REDACTED });
+    expect(dumpConfig['plugin::upload']).toMatchObject({ provider: 'aws-s3' });
+    expect(JSON.stringify(dump)).not.toContain('SG_SECRET');
+    expect(JSON.stringify(dump)).not.toContain('S3_SECRET');
   });
 });

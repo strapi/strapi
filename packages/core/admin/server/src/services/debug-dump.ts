@@ -32,18 +32,21 @@ const debugDumpService = ({ strapi }: { strapi: Core.Strapi }) => ({
 
     const packageJson = (strapi.config.get('info', {}) ?? {}) as Record<string, unknown>;
 
-    // The config provider (packages/core/core/src/services/config.ts) exposes
-    // every config namespace as an own-enumerable property alongside its
-    // get/set/has methods. `get('', ...)` does NOT return the root, so build
-    // the full tree from the provider's own keys minus those three methods.
+    // The config provider (packages/core/core/src/services/config.ts) spreads the config it was
+    // built with onto itself, next to its get/set/has methods, and `get('')` does not return the
+    // root. Module config (plugin::*, api::*) is stored later with config.set, so it is never an
+    // own property of the provider. Take the top-level names from both places and read every
+    // value through config.get, which always sees the live tree.
+    const configNames = new Set([
+      ...Object.keys(strapi.config).filter((key) => !['get', 'set', 'has'].includes(key)),
+      ...Object.keys(strapi.get('modules').getAll()),
+    ]);
     const rawConfig: Record<string, unknown> = {};
-    for (const [key, value] of Object.entries(
-      strapi.config as unknown as Record<string, unknown>
-    )) {
-      if (key === 'get' || key === 'set' || key === 'has') {
-        continue;
+    for (const name of configNames) {
+      const value = strapi.config.get(name);
+      if (value !== undefined) {
+        rawConfig[name] = value;
       }
-      rawConfig[key] = value;
     }
     const fullConfig = scrub(rawConfig, {
       appRoot,
