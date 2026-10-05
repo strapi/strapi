@@ -95,7 +95,8 @@ export const security: Core.MiddlewareFactory<Config> =
     if (
       ['development', 'test'].includes(process.env.NODE_ENV ?? '') &&
       ctx.method === 'GET' &&
-      ctx.path.startsWith(strapi.config.get('admin.path'))
+      // TODO @Nico The loader always sets `admin.path`: drop the assertion once `ResolvedAdminConfig` requires it.
+      ctx.path.startsWith(strapi.config.get('admin.path') as string)
     ) {
       helmetConfig = mergeConfig(helmetConfig, {
         contentSecurityPolicy: {

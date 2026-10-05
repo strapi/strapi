@@ -2,6 +2,7 @@
 import type {} from '@strapi/types/strict';
 
 // Contract providers bundled with Strapi. Optional plugins are loaded by generated app types.
+import type {} from '@strapi/core';
 import type {} from '@strapi/admin/strapi-server';
 import type {} from '@strapi/content-manager/strapi-server';
 import type {} from '@strapi/content-releases/strapi-server';
