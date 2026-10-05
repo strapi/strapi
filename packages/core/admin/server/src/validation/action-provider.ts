@@ -1,5 +1,6 @@
 import { yup, validateYupSchemaSync } from '@strapi/utils';
 import validators from './common-validators';
+import { registerProviderActionSections } from '../domain/action';
 
 const registerProviderActionSchema = yup
   .array()
@@ -15,7 +16,10 @@ const registerProviderActionSchema = yup
             (v) => `${v.path}: The uid can only contain lowercase letters, dots and hyphens.`
           )
           .required(),
-        section: yup.string().oneOf(['contentTypes', 'plugins', 'settings', 'internal']).required(),
+        section: yup
+          .string()
+          .oneOf([...registerProviderActionSections])
+          .required(),
         pluginName: yup.mixed().when('section', {
           is: 'plugins',
           then: validators.isAPluginName.required(),
