@@ -160,6 +160,27 @@ Playwright’s `reuseExistingServer` is **off by default** (see **`PLAYWRIGHT_RE
 
 If you are writing tests for an unstable future feature you will need to add `app-template/config/features.js`. Currently the app template generation does not take the config folder into consideration. However, the run-e2e-tests script will apply the features config to the generated app. See the documentation for [features.js](https://docs.strapi.io/dev-docs/configurations/features#enabling-a-future-flag)
 
+## Vitest e2e pilot
+
+A subset of the suite is being piloted on **Vitest** instead of the Playwright test runner. These specs live next to the Playwright ones as `tests/e2e/tests/**/*.vitest.spec.ts` (currently `admin/login.vitest.spec.ts`) and run with:
+
+```shell
+yarn test:e2e:vitest
+```
+
+Key differences from `yarn test:e2e`:
+
+- **Vitest is the runner**, but the browser is still driven by the **`playwright` library** (`chromium.launch()` → context → page) via the fixture in `tests/e2e/vitest/browser-fixture.ts`. This is deliberate — Vitest _browser mode_ cannot read cookies, open multiple pages, or use `page.request`, all of which the e2e specs rely on. The library approach keeps full parity.
+- The config is `tests/e2e/vitest.e2e.config.ts` (node environment, serial). It is **not** matched by the root `vitest.config.ts` (`packages/**`), so it never runs during `yarn test:unit`.
+- `tests/e2e/vitest/global-setup.ts` boots the first test app (`test-apps/e2e/test-app-0`, port 8000) the same way `playwright.base.config.js`'s `webServer` does, seeds the shared storage state, and tears the server down afterwards. Run `yarn test:e2e --setup` once first so the app exists; install Chromium with `yarn playwright install chromium` if needed.
+- The same `PLAYWRIGHT_WEBSERVER_TIMEOUT` / `PLAYWRIGHT_TIMEOUT` env vars apply (used for the boot hook and per-test timeouts).
+
+Spec files are kept in sync with the acceptance criteria in [`docs/user-stories/`](../../../user-stories/README.md) by the `strapi user-stories:sync-e2e` CLI command — see that README for the stories → tests workflow.
+
+### Playwright MCP
+
+A [Playwright MCP](https://github.com/microsoft/playwright-mcp) server is declared in the repo-root `.mcp.json`; in Claude Code it shows up under `/mcp` as `playwright`. Use it to drive a running admin and read the accessible tree (prefer `getByRole` / `getByText` locators) when authoring or migrating specs. It is for discovering behaviour and selectors only — committed specs run through the runners above.
+
 ## What is Playwright?
 
 Playwright enables reliable end-to-end testing for modern web apps. It's cross browser, cross platform and cross language. At Strapi we use it for Javascript automated testing.
