@@ -1,11 +1,13 @@
 import type { Core } from '@strapi/types';
 
+type RestConfig = NonNullable<Core.Config.Api['rest']>;
+
 /**
  * The `api` config that `strapi.config.get('api')` returns, with loader defaults.
  * Input type, what applications write in `config/api.ts`: {@link Core.Config.Api}.
- * Loader defaults: `api.rest.prefix` in `src/configuration/index.ts`.
- *
- * First version: the input type as is.
- * TODO @Nico Mark the fields the loader always defines as required, and test them at runtime.
+ * `loadConfiguration` (`src/configuration/index.ts`) merges `defaultConfig.api` under the user config,
+ * so `rest` and `rest.prefix` (`'/api'`) are always defined. Other fields stay as in the input type.
  */
-export type ResolvedApiConfig = Core.Config.Api;
+export type ResolvedApiConfig = Omit<Core.Config.Api, 'rest'> & {
+  rest: RestConfig & Required<Pick<RestConfig, 'prefix'>>;
+};

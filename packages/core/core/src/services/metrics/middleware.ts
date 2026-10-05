@@ -22,8 +22,7 @@ const createMiddleware = ({ sendEvent, strapi }: { sendEvent: Sender; strapi: Co
     // Only track API requests (skip static assets)
     const shouldTrack =
       !url.includes('.') &&
-      // TODO @Nico The loader always sets `api.rest.prefix`: drop the assertion once `ResolvedApiConfig` requires it.
-      url.includes(strapi.config.get('api.rest.prefix') as string) &&
+      url.includes(strapi.config.get('api.rest.prefix')) &&
       ['GET', 'PUT', 'POST', 'DELETE'].includes(method);
 
     if (shouldTrack) {
