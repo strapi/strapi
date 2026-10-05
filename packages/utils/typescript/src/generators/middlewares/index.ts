@@ -148,7 +148,9 @@ const withDocComment = <TNode extends ts.Node>(node: TNode, comment: string) =>
 
 /**
  * type MiddlewareFactoryConfig<TFactory> = TFactory extends (...args: infer TArgs) => unknown
- *   ? TArgs['length'] extends 0 ? undefined : 0 extends 1 & TArgs[0] ? unknown : TArgs[0]
+ *   ? TFactory extends (config: never, ctx: { strapi: never }) => unknown
+ *     ? TArgs['length'] extends 0 ? undefined : 0 extends 1 & TArgs[0] ? unknown : TArgs[0]
+ *     : never
  *   : unknown;
  *
  * type MiddlewareConfig<TModule> = TModule extends { default: infer TExport }
@@ -162,6 +164,13 @@ const withDocComment = <TNode extends ts.Node>(node: TNode, comment: string) =>
  * PackageMiddlewares. An optional parameter keeps `undefined` in the config, so typed routes accept
  * the name alone. An untyped (`any`) config and a module without a default export resolve to
  * `unknown`, as for policies.
+ * A plain Koa handler `(ctx, next)` is not a factory: runtime calls it with the config and
+ * `{ strapi }`, which breaks. A function whose second parameter cannot take `{ strapi }`
+ * (Core.MiddlewareFactory) registers `never`, so typed routes reject its name. `never` stands for
+ * the Strapi instance, so that the file needs no import and any context type a factory declares
+ * accepts it.
+ * TODO @Nico a handler with one parameter `(ctx)`, or an untyped `next`, cannot be told apart from a
+ * factory and still registers its first parameter as config
  * TODO @Nico a module without a default export registers `undefined` at runtime (a reference to it
  * throws "Middleware <uid> not found"); `unknown` accepts any reference to it, like an untyped one
  */
@@ -170,6 +179,26 @@ const generateConfigHelpersDefinition = () => {
   const configArg = factory.createIndexedAccessTypeNode(
     args,
     factory.createLiteralTypeNode(factory.createNumericLiteral(0))
+  );
+
+  const never = () => factory.createKeywordTypeNode(ts.SyntaxKind.NeverKeyword);
+
+  // (config: never, ctx: { strapi: never }) => unknown, what runtime calls a middleware with
+  const factorySignature = factory.createFunctionTypeNode(
+    undefined,
+    [
+      factory.createParameterDeclaration(undefined, undefined, 'config', undefined, never()),
+      factory.createParameterDeclaration(
+        undefined,
+        undefined,
+        'ctx',
+        undefined,
+        factory.createTypeLiteralNode([
+          factory.createPropertySignature(undefined, 'strapi', undefined, never()),
+        ])
+      ),
+    ],
+    factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword)
   );
 
   const factoryConfig = factory.createConditionalTypeNode(
@@ -188,22 +217,28 @@ const generateConfigHelpersDefinition = () => {
       factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword)
     ),
     factory.createConditionalTypeNode(
-      factory.createIndexedAccessTypeNode(
-        args,
-        factory.createLiteralTypeNode(factory.createStringLiteral('length', true))
-      ),
-      factory.createLiteralTypeNode(factory.createNumericLiteral(0)),
-      factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword),
-      // 0 extends 1 & TArgs[0], true only when the config is `any`
+      factory.createTypeReferenceNode('TFactory'),
+      factorySignature,
       factory.createConditionalTypeNode(
+        factory.createIndexedAccessTypeNode(
+          args,
+          factory.createLiteralTypeNode(factory.createStringLiteral('length', true))
+        ),
         factory.createLiteralTypeNode(factory.createNumericLiteral(0)),
-        factory.createIntersectionTypeNode([
-          factory.createLiteralTypeNode(factory.createNumericLiteral(1)),
-          configArg,
-        ]),
-        factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword),
-        configArg
-      )
+        factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword),
+        // 0 extends 1 & TArgs[0], true only when the config is `any`
+        factory.createConditionalTypeNode(
+          factory.createLiteralTypeNode(factory.createNumericLiteral(0)),
+          factory.createIntersectionTypeNode([
+            factory.createLiteralTypeNode(factory.createNumericLiteral(1)),
+            configArg,
+          ]),
+          factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword),
+          configArg
+        )
+      ),
+      // A Koa handler (ctx, next): its `next` cannot take `{ strapi }`
+      never()
     ),
     factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword)
   );
@@ -232,7 +267,7 @@ const generateConfigHelpersDefinition = () => {
         [factory.createTypeParameterDeclaration(undefined, 'TFactory')],
         factoryConfig
       ),
-      '*\n * Config a middleware factory accepts: its first parameter, `undefined` when it has none,\n * `unknown` when it is untyped.\n '
+      '*\n * Config a middleware factory accepts: its first parameter, `undefined` when it has none,\n * `unknown` when it is untyped, `never` when the function is not a factory (a Koa handler).\n '
     ),
     withDocComment(
       factory.createTypeAliasDeclaration(
