@@ -1,7 +1,6 @@
 import path from 'path';
 import fse from 'fs-extra';
 import dotenv from 'dotenv';
-import { readLicense, verifyLicense } from '@strapi/core/_internal/license';
 
 import { getInquirer } from '../../../utils/get-inquirer';
 import type { Logger } from '../../../utils/logger';
@@ -28,6 +27,38 @@ const LICENSE_SOURCE_LABELS: Record<LicenseSource, string> = {
 };
 
 const cleanLicense = (value: string | undefined): string | undefined => value?.trim() || undefined;
+
+const readLicenseFile = async (appDir: string): Promise<string | undefined> => {
+  try {
+    return await fse.readFile(path.join(appDir, LICENSE_FILE_NAME), 'utf8');
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException)?.code === 'ENOENT') {
+      return undefined;
+    }
+
+    throw error;
+  }
+};
+
+interface LicenseInfo {
+  expireAt?: string | number;
+}
+
+const readLicenseInfo = (license: string): LicenseInfo => {
+  const [signature, base64Content] = Buffer.from(license, 'base64').toString().split('\n');
+
+  if (!signature || !base64Content) {
+    throw new Error('Invalid license.');
+  }
+
+  const licenseInfo: unknown = JSON.parse(Buffer.from(base64Content, 'base64').toString());
+
+  if (typeof licenseInfo !== 'object' || licenseInfo === null) {
+    throw new Error('Invalid license.');
+  }
+
+  return licenseInfo as LicenseInfo;
+};
 
 const readEnvFileLicense = async (
   appDir: string,
@@ -59,7 +90,7 @@ export const findLicense = async ({
   let licenseFromLicenseFile: string | undefined;
 
   try {
-    licenseFromLicenseFile = cleanLicense(readLicense(appDir));
+    licenseFromLicenseFile = cleanLicense(await readLicenseFile(appDir));
   } catch {
     throw new EnterpriseInstallError(
       `Could not read ${LICENSE_FILE_NAME}. Check its permissions, or set STRAPI_LICENSE instead.`
@@ -74,10 +105,10 @@ export const findLicense = async ({
 };
 
 export const validateLicense = (license: string, now: Date): void => {
-  let licenseInfo: ReturnType<typeof verifyLicense>;
+  let licenseInfo: LicenseInfo;
 
   try {
-    licenseInfo = verifyLicense(license);
+    licenseInfo = readLicenseInfo(license);
   } catch {
     throw new EnterpriseInstallError(
       `This Strapi license is not valid. Check that you copied all of it, or find it at ${BILLING_URL}`

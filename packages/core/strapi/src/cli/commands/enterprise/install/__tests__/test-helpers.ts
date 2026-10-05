@@ -41,6 +41,11 @@ export const readFilePermissions = async (filePath: string): Promise<string> =>
   (await fse.stat(filePath)).mode.toString(8).slice(-3);
 
 /** A minimal `fetch` response, since the Jest environment here does not provide `Response`. */
+export const createTestLicense = (licenseInfo: Record<string, unknown> = { type: 'gold' }) =>
+  Buffer.from(
+    `test-signature\n${Buffer.from(JSON.stringify(licenseInfo)).toString('base64')}`
+  ).toString('base64');
+
 export const createFetchResponse = (status: number, body?: unknown) =>
   ({
     status,

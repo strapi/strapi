@@ -1,35 +1,18 @@
-import fs from 'fs';
 import path from 'path';
 import fse from 'fs-extra';
-import { readLicense, verifyLicense } from '@strapi/core/_internal/license';
 
 import { findLicense, resolveLicense, validateLicense } from '../license';
 import {
   createTemporaryDirectory,
+  createTestLicense,
   createTestLogger,
   loggedText,
   readFilePermissions,
 } from './test-helpers';
 
-jest.mock('@strapi/core/_internal/license', () => ({
-  readLicense: jest.fn(),
-  verifyLicense: jest.fn(),
-}));
-
-const readLicenseMock = readLicense as jest.Mock;
-const verifyLicenseMock = verifyLicense as jest.Mock;
-
 const NOW = new Date('2026-09-28T12:00:00.000Z');
-
-beforeEach(() => {
-  jest.clearAllMocks();
-  // Behaves like the real `readLicense`: the content of license.txt, or undefined.
-  readLicenseMock.mockImplementation((appDir: string) => {
-    const licenseFilePath = path.join(appDir, 'license.txt');
-    return fs.existsSync(licenseFilePath) ? fs.readFileSync(licenseFilePath).toString() : undefined;
-  });
-  verifyLicenseMock.mockReturnValue({ type: 'gold', isTrial: false });
-});
+const LICENSE = createTestLicense();
+const PASTED_LICENSE = createTestLicense({ type: 'gold', subscriptionId: 'pasted' });
 
 describe('findLicense', () => {
   it('prefers STRAPI_LICENSE, then license.txt', async () => {
@@ -85,13 +68,10 @@ describe('findLicense', () => {
   });
 
   it('stops with a one-line error when license.txt cannot be read', async () => {
-    readLicenseMock.mockImplementation(() => {
-      throw new Error('License file not readable, review its format and access rules.');
-    });
+    const appDir = await createTemporaryDirectory();
+    await fse.mkdir(path.join(appDir, 'license.txt'));
 
-    await expect(
-      findLicense({ appDir: await createTemporaryDirectory(), env: {} })
-    ).rejects.toThrow(
+    await expect(findLicense({ appDir, env: {} })).rejects.toThrow(
       'Could not read license.txt. Check its permissions, or set STRAPI_LICENSE instead.'
     );
   });
@@ -104,42 +84,41 @@ describe('findLicense', () => {
 });
 
 describe('validateLicense', () => {
-  it('rejects a license whose signature does not verify', () => {
-    verifyLicenseMock.mockImplementation(() => {
-      throw new Error('Invalid license.');
-    });
+  it.each([['not-a-license'], [Buffer.from('one line only').toString('base64')]])(
+    'rejects %s, which is not in the Strapi license format',
+    (license) => {
+      expect(() => validateLicense(license, NOW)).toThrow('This Strapi license is not valid.');
+    }
+  );
 
-    expect(() => validateLicense('not-a-license', NOW)).toThrow(
-      'This Strapi license is not valid.'
-    );
+  it('leaves the signature to the registry, which verifies every license it receives', () => {
+    expect(() => validateLicense(createTestLicense({ type: 'gold' }), NOW)).not.toThrow();
   });
 
   it('rejects an expired license', () => {
-    verifyLicenseMock.mockReturnValue({ expireAt: '2026-09-01T00:00:00.000Z' });
+    const license = createTestLicense({ expireAt: '2026-09-01T00:00:00.000Z' });
 
-    expect(() => validateLicense('expired-license', NOW)).toThrow(
+    expect(() => validateLicense(license, NOW)).toThrow(
       'This Strapi license expired on 2026-09-01.'
     );
   });
 
   it('rejects an expired license whose expiry date is in milliseconds, as real licenses store it', () => {
-    verifyLicenseMock.mockReturnValue({ expireAt: Date.parse('2026-09-01T00:00:00.000Z') });
+    const license = createTestLicense({ expireAt: Date.parse('2026-09-01T00:00:00.000Z') });
 
-    expect(() => validateLicense('expired-license', NOW)).toThrow(
+    expect(() => validateLicense(license, NOW)).toThrow(
       'This Strapi license expired on 2026-09-01.'
     );
   });
 
   it('accepts a license without an expiry date or not expired yet', () => {
-    expect(() => validateLicense('license', NOW)).not.toThrow();
-
-    verifyLicenseMock.mockReturnValue({ expireAt: '2027-03-01T00:00:00.000Z' });
-
-    expect(() => validateLicense('license', NOW)).not.toThrow();
-
-    verifyLicenseMock.mockReturnValue({ expireAt: Date.parse('2027-03-01T00:00:00.000Z') });
-
-    expect(() => validateLicense('license', NOW)).not.toThrow();
+    expect(() => validateLicense(LICENSE, NOW)).not.toThrow();
+    expect(() =>
+      validateLicense(createTestLicense({ expireAt: '2027-03-01T00:00:00.000Z' }), NOW)
+    ).not.toThrow();
+    expect(() =>
+      validateLicense(createTestLicense({ expireAt: Date.parse('2027-03-01T00:00:00.000Z') }), NOW)
+    ).not.toThrow();
   });
 });
 
@@ -153,11 +132,11 @@ describe('resolveLicense', () => {
         appDir: await createTemporaryDirectory(),
         isInteractive: true,
         logger,
-        env: { STRAPI_LICENSE: 'the-license' },
+        env: { STRAPI_LICENSE: LICENSE },
         now: NOW,
         prompt,
       })
-    ).resolves.toEqual({ license: 'the-license', source: 'environment' });
+    ).resolves.toEqual({ license: LICENSE, source: 'environment' });
     expect(prompt).not.toHaveBeenCalled();
     expect(logger.info).toHaveBeenCalledWith(
       'Using the Strapi license from the STRAPI_LICENSE environment variable.'
@@ -193,10 +172,10 @@ describe('resolveLicense', () => {
       logger: createTestLogger(),
       env: {},
       now: NOW,
-      prompt: async () => 'pasted-license',
+      prompt: async () => PASTED_LICENSE,
     });
 
-    expect(await fse.readFile(licenseFilePath, 'utf8')).toBe('pasted-license\n');
+    expect(await fse.readFile(licenseFilePath, 'utf8')).toBe(`${PASTED_LICENSE}\n`);
     expect(await readFilePermissions(licenseFilePath)).toBe('600');
   });
 
@@ -213,18 +192,18 @@ describe('resolveLicense', () => {
         logger,
         env: {},
         now: NOW,
-        prompt: async () => 'pasted-license',
+        prompt: async () => PASTED_LICENSE,
       })
-    ).resolves.toEqual({ license: 'pasted-license', source: 'prompt' });
+    ).resolves.toEqual({ license: PASTED_LICENSE, source: 'prompt' });
 
     const licenseFilePath = path.join(appDir, 'license.txt');
-    expect(await fse.readFile(licenseFilePath, 'utf8')).toBe('pasted-license\n');
+    expect(await fse.readFile(licenseFilePath, 'utf8')).toBe(`${PASTED_LICENSE}\n`);
     expect(await readFilePermissions(licenseFilePath)).toBe('600');
     expect(await fse.readFile(path.join(appDir, '.gitignore'), 'utf8')).toBe(
       'node_modules\nlicense.txt\n'
     );
     expect(await fse.readFile(path.join(appDir, '.env'), 'utf8')).toBe('HOST=0.0.0.0\n');
-    expect(loggedText(logger)).not.toContain('pasted-license');
+    expect(loggedText(logger)).not.toContain(PASTED_LICENSE);
   });
 
   it('leaves .gitignore alone when it already ignores license.txt', async () => {
@@ -237,7 +216,7 @@ describe('resolveLicense', () => {
       logger: createTestLogger(),
       env: {},
       now: NOW,
-      prompt: async () => 'pasted-license',
+      prompt: async () => PASTED_LICENSE,
     });
 
     expect(await fse.readFile(path.join(appDir, '.gitignore'), 'utf8')).toBe('.env\nlicense.txt\n');
@@ -245,9 +224,6 @@ describe('resolveLicense', () => {
 
   it('writes nothing when the pasted license is not valid', async () => {
     const appDir = await createTemporaryDirectory();
-    verifyLicenseMock.mockImplementation(() => {
-      throw new Error('Invalid license.');
-    });
 
     await expect(
       resolveLicense({

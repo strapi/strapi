@@ -13,17 +13,13 @@ import {
   createPackument,
   createRegistryFetch,
   createTemporaryDirectory,
+  createTestLicense,
   createTestLogger,
   expectedSetupWarning,
   loggedText,
 } from './test-helpers';
 
-jest.mock('@strapi/core/_internal/license', () => ({
-  readLicense: jest.fn(() => undefined),
-  verifyLicense: jest.fn(() => ({ type: 'gold', isTrial: false })),
-}));
-
-const LICENSE = 'the-license';
+const LICENSE = createTestLicense();
 const AI_BYOK = '@strapi-enterprise/plugin-ai-byok';
 
 const AI_BYOK_METADATA = { name: 'ai-byok', displayName: 'AI BYOK', kind: 'plugin' };
