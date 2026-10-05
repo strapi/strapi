@@ -227,7 +227,6 @@ const Grid =
 
 const ComponentBox = styled<FlexComponent>(Flex)`
   color: ${({ theme }) => theme.colors.neutral600};
-  min-height: 10.8rem;
 
   @media (prefers-reduced-motion: no-preference) {
     transition: color 120ms ${(props) => props.theme.motion.easings.easeOutQuad};
@@ -243,7 +242,8 @@ const ComponentBox = styled<FlexComponent>(Flex)`
 
 const ComponentAddButton = styled.button`
   width: 100%;
-  min-height: 8.4rem;
+  /* 8.4rem tile (as without a copy action) minus the tile's 1px borders */
+  min-height: 8.2rem;
   border: 0;
   background: transparent;
   color: inherit;

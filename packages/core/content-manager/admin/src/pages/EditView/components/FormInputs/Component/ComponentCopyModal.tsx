@@ -534,17 +534,20 @@ const ComponentCopyModal = ({
           <Flex direction="column" alignItems="stretch" gap={4}>
             {selectedDocument ? (
               <>
-                <TextButton startIcon={<ArrowLeft />} onClick={() => setSelectedDocument(null)}>
-                  {formatMessage({
-                    id: 'global.back',
-                    defaultMessage: 'Back',
-                  })}
-                </TextButton>
+                {/* Keep the button at its own width: stretched, its focus ring overflows the modal body. */}
+                <Flex>
+                  <TextButton startIcon={<ArrowLeft />} onClick={() => setSelectedDocument(null)}>
+                    {formatMessage({
+                      id: 'global.back',
+                      defaultMessage: 'Back',
+                    })}
+                  </TextButton>
+                </Flex>
                 {isFetchingDocument ? (
                   <Flex justifyContent="center" padding={6}>
                     <Loader small>
                       {formatMessage({
-                        id: 'global.loading',
+                        id: getTranslation('components.ComponentCopyModal.loading'),
                         defaultMessage: 'Loading',
                       })}
                     </Loader>
@@ -670,7 +673,7 @@ const ComponentCopyModal = ({
                   <Flex justifyContent="center" padding={6}>
                     <Loader small>
                       {formatMessage({
-                        id: 'global.loading',
+                        id: getTranslation('components.ComponentCopyModal.loading'),
                         defaultMessage: 'Loading',
                       })}
                     </Loader>
