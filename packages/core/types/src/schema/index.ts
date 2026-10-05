@@ -1,8 +1,8 @@
-import type * as Public from '../public';
 import type * as UID from '../uid';
 import type { If, Object, Guard } from '../utils';
 
 import type * as Attribute from './attribute';
+import type * as Registries from './registries';
 
 export { Attribute };
 
@@ -11,23 +11,26 @@ export { Attribute };
  *
  * Enables mapping between a unique identifier and its corresponding schema.
  *
- @remark Schema definitions are pulled from the public registries
+ @remark Schema definitions are pulled from the public registries, or from the global
+ * `Strapi.Registries` schema registries in strict mode
  */
-export type Schemas = Public.ContentTypeSchemas & Public.ComponentSchemas;
+export type Schemas = Registries.ContentTypeSchemas & Registries.ComponentSchemas;
 
 /**
  * Content-type schema definitions.
  *
- * @remark Schema definitions are pulled from the public content-type registries
+ * @remark Schema definitions are pulled from the public content-type registries, or from
+ * `Strapi.Registries.ContentTypeSchemas` in strict mode
  */
-export type ContentTypes = Public.ContentTypeSchemas;
+export type ContentTypes = Registries.ContentTypeSchemas;
 
 /**
  * Component schema definitions.
  *
- * @remark Schema definitions are pulled from the public component registries
+ * @remark Schema definitions are pulled from the public component registries, or from
+ * `Strapi.Registries.ComponentSchemas` in strict mode
  */
-export type Components = Public.ComponentSchemas;
+export type Components = Registries.ComponentSchemas;
 
 export type ContentType<TContentTypeUID extends UID.ContentType = UID.ContentType> =
   ContentTypes[TContentTypeUID];

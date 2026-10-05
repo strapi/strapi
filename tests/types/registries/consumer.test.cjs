@@ -57,7 +57,10 @@ function permutations(values) {
   );
 }
 
-const orders = permutations(['generated.d.ts', 'i18n.d.ts', 'sentry.d.ts', 'overrides.d.ts']);
+// Type generation writes `Public` schemas with the switch off and global schemas with it on.
+const generatedSchemas = (strict) => (strict ? 'generated-strict.d.ts' : 'generated.d.ts');
+const orders = (strict) =>
+  permutations([generatedSchemas(strict), 'i18n.d.ts', 'sentry.d.ts', 'overrides.d.ts']);
 
 function declarations(directory) {
   assert.ok(fs.existsSync(directory), `Missing ${directory}. Build the packages before this test.`);
@@ -219,7 +222,7 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
     assertClean(
       compile([
         'strapi-strict.d.ts',
-        'generated.d.ts',
+        'generated-strict.d.ts',
         'common.ts',
         'strict.ts',
         'bundled-providers.ts',
@@ -230,7 +233,7 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
 
   test(`${resolution}: application opt-in works through compilerOptions.types`, () => {
     assertClean(
-      compile(['generated.d.ts', 'common.ts', 'strict.ts', 'bundled-providers.ts'], {
+      compile(['generated-strict.d.ts', 'common.ts', 'strict.ts', 'bundled-providers.ts'], {
         types: ['@strapi/strapi/strict-types'],
       }),
       `${resolution}, application compilerOptions.types opt-in`
@@ -299,7 +302,7 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
         compiler(options)([
           generatedFile,
           'strapi-strict.d.ts',
-          'generated.d.ts',
+          'generated-strict.d.ts',
           'common.ts',
           'strict.ts',
           'defaults.ts',
@@ -342,7 +345,7 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
 
     test(`${resolution}: switch ${mode}, package defaults`, () => {
       const program = compile([
-        'generated.d.ts',
+        generatedSchemas(strict),
         'i18n.d.ts',
         'sentry.d.ts',
         'policies.d.ts',
@@ -355,7 +358,7 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
     });
 
     test(`${resolution}: switch ${mode}, application overrides in all 24 declaration orders`, () => {
-      for (const order of orders) {
+      for (const order of orders(strict)) {
         const program = compile([
           ...order,
           'policies.d.ts',
@@ -460,7 +463,7 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
   test(`${resolution}: compilerOptions.types can enable strict registries`, () => {
     const program = compile(
       [
-        'generated.d.ts',
+        'generated-strict.d.ts',
         'i18n.d.ts',
         'sentry.d.ts',
         'policies.d.ts',
@@ -471,6 +474,13 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
       { types: ['@strapi/types/strict'] }
     );
     assertClean(program, `${resolution}, compilerOptions.types activation`);
+  });
+
+  test(`${resolution}: generated global schemas narrow schema lookups in strict mode`, () => {
+    assertClean(
+      compile(['settings.d.ts', 'schemas.ts']),
+      `${resolution}, strict generated schemas`
+    );
   });
 
   test(`${resolution}: strict registries without contracts accept template UIDs`, () => {

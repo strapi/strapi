@@ -1,4 +1,5 @@
-import type { Core, UID } from '../src';
+import type { Core, Schema, Struct, UID } from '../src';
+import type * as Internal from '../src/internal';
 import type { IsStrict } from '../src/core/strictness';
 
 declare global {
@@ -33,6 +34,12 @@ declare global {
       interface AppPolicies {
         'plugin::legacy.hasRole': { roles: string[] };
       }
+      interface ContentTypeSchemas {
+        'api::strict-only.page': Struct.SingleTypeSchema;
+      }
+      interface ComponentSchemas {
+        'strict-only.seo': Struct.ComponentSchema;
+      }
     }
   }
 }
@@ -54,6 +61,16 @@ declare const checks: [
   Expect<Equal<Core.ControllerFor<'plugin::unregistered.example'>, Core.Controller>>,
 ];
 checks satisfies unknown;
+
+// Global schema registries are strict-only: the Public registries keep their generic index signatures.
+declare const schemaChecks: [
+  Expect<Equal<UID.ContentType, Internal.UID.ContentType>>,
+  Expect<Equal<UID.Component, Internal.UID.Component>>,
+  Expect<Equal<UID.SingleType, Internal.UID.ContentType>>,
+  Expect<Equal<Schema.ContentType<'api::strict-only.page'>, Struct.ContentTypeSchema>>,
+  Expect<Equal<Schema.Component<'strict-only.seo'>, Struct.ComponentSchema>>,
+];
+schemaChecks satisfies unknown;
 
 // Plural accessors keep the legacy records, even for registered keys.
 declare const mapChecks: [
