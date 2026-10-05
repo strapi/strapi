@@ -1,53 +1,44 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import auth from '../auth';
+import { createStrapiMock } from '../../../tests/utils';
+import { createMockContext } from './utils';
 
-const createContext = ({ params = {}, query = {}, body = {} }, overrides = {}) => ({
-  params,
-  query,
-  request: { query, body },
-  ...overrides,
-});
-const createMockSessionManager = (originApi) => ({
-  originApi,
-  sessionManager: vi.fn(() => originApi),
-});
+const createContext = <T extends object>({ params = {}, query = {}, body = {} }, overrides: T) =>
+  createMockContext({
+    params,
+    query,
+    request: { query, body },
+    ...overrides,
+  });
 
-const setStrapi = (value) => {
-  global.strapi = value;
+const createFixture = () => {
+  const originApi = {
+    listSessions: vi.fn().mockResolvedValue([]),
+    revokeSessionById: vi.fn().mockResolvedValue(true),
+    validateRefreshToken: vi.fn(),
+    invalidateRefreshToken: vi.fn().mockResolvedValue(undefined),
+  };
+  const strapi = createStrapiMock({
+    config: {
+      get: vi.fn((path: string, defaultValue?: unknown) => {
+        if (path === 'plugin::users-permissions.jwtManagement') return 'refresh';
+        if (path === 'plugin::users-permissions.sessions') return { httpOnly: false };
+        return defaultValue;
+      }),
+    },
+    sessionManager: vi.fn(() => originApi),
+    log: { error: vi.fn() },
+  });
+  return { strapi, originApi, controller: auth({ strapi }) };
 };
 
-const createAuthController = () => auth({ strapi: global.strapi });
-
 describe('Auth controller - sessions', () => {
-  let controller;
-  let sessionManagerCallable;
-  let originApi;
+  let controller: ReturnType<typeof auth>;
+  let strapi: ReturnType<typeof createFixture>['strapi'];
+  let originApi: ReturnType<typeof createFixture>['originApi'];
 
   beforeEach(() => {
-    ({ sessionManager: sessionManagerCallable, originApi } = createMockSessionManager({
-      listSessions: vi.fn(() => Promise.resolve([])),
-      revokeSessionById: vi.fn(() => Promise.resolve(true)),
-      validateRefreshToken: vi.fn(),
-      invalidateRefreshToken: vi.fn(() => Promise.resolve()),
-    }));
-
-    setStrapi({
-      config: {
-        get: vi.fn((path, defaultValue) => {
-          if (path === 'plugin::users-permissions.jwtManagement') {
-            return 'refresh';
-          }
-          if (path === 'plugin::users-permissions.sessions') {
-            return { httpOnly: false };
-          }
-          return defaultValue;
-        }),
-      },
-      sessionManager: sessionManagerCallable,
-      log: { error: vi.fn() },
-    });
-
-    controller = createAuthController();
+    ({ strapi, originApi, controller } = createFixture());
   });
 
   afterEach(() => {
@@ -56,7 +47,7 @@ describe('Auth controller - sessions', () => {
 
   describe('getSessions', () => {
     test('Returns 404 outside refresh mode', async () => {
-      global.strapi.config.get.mockImplementation((path, defaultValue) => {
+      strapi.config.get.mockImplementation((path, defaultValue) => {
         if (path === 'plugin::users-permissions.jwtManagement') {
           return 'legacy-support';
         }
@@ -136,7 +127,7 @@ describe('Auth controller - sessions', () => {
 
   describe('revokeSession', () => {
     test('Returns 404 outside refresh mode', async () => {
-      global.strapi.config.get.mockImplementation((path, defaultValue) => {
+      strapi.config.get.mockImplementation((path, defaultValue) => {
         if (path === 'plugin::users-permissions.jwtManagement') {
           return 'legacy-support';
         }
@@ -227,7 +218,7 @@ describe('Auth controller - sessions', () => {
       );
 
     test('Returns 404 outside refresh mode', async () => {
-      global.strapi.config.get.mockImplementation((path, defaultValue) => {
+      strapi.config.get.mockImplementation((path, defaultValue) => {
         if (path === 'plugin::users-permissions.jwtManagement') {
           return 'legacy-support';
         }
@@ -314,8 +305,31 @@ describe('Auth controller - sessions', () => {
       expect(originApi.revokeSessionById).not.toHaveBeenCalled();
     });
 
+    test('Uses the body refresh token when a cookie is absent', async () => {
+      originApi.validateRefreshToken.mockResolvedValue({
+        isValid: true,
+        sessionId: 'body-session',
+      });
+      const ctx = createLogoutContext({
+        state: { user: { id: 5 } },
+        request: { body: { refreshToken: 'body-token' }, header: {} },
+      });
+      await controller.logout(ctx);
+      expect(originApi.validateRefreshToken).toHaveBeenCalledWith('body-token');
+      expect(originApi.revokeSessionById).toHaveBeenCalledWith('5', 'body-session');
+    });
+
+    test('Completes logout and logs session revocation errors', async () => {
+      const error = new Error('Session store unavailable');
+      originApi.revokeSessionById.mockRejectedValue(error);
+      const ctx = createLogoutContext();
+      await controller.logout(ctx);
+      expect(strapi.log.error).toHaveBeenCalledWith('UP logout failed', error);
+      expect(ctx.send).toHaveBeenCalledWith({ ok: true });
+    });
+
     test('Clears the refresh cookie when httpOnly sessions are enabled', async () => {
-      global.strapi.config.get.mockImplementation((path, defaultValue) => {
+      strapi.config.get.mockImplementation((path, defaultValue) => {
         if (path === 'plugin::users-permissions.jwtManagement') {
           return 'refresh';
         }

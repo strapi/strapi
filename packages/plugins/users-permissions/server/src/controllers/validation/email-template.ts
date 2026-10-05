@@ -1,8 +1,6 @@
-'use strict';
+import { template } from '@strapi/utils';
 
-const {
-  template: { createLooseInterpolationRegExp, createStrictInterpolationRegExp },
-} = require('@strapi/utils');
+const { createLooseInterpolationRegExp, createStrictInterpolationRegExp } = template;
 
 const invalidPatternsRegexes = [
   // Ignore "evaluation" patterns: <% ... %>
@@ -22,7 +20,7 @@ const authorizedKeys = [
   'TOKEN',
 ];
 
-const matchAll = (pattern, src) => {
+const matchAll = (pattern: RegExp, src: string) => {
   const matches = [];
   let match;
 
@@ -38,7 +36,8 @@ const matchAll = (pattern, src) => {
   return matches;
 };
 
-const isValidEmailTemplate = (template) => {
+/** Reject executable templates and interpolations outside the email variable allowlist. */
+const isValidEmailTemplate = (template: string) => {
   // Check for known invalid patterns
   for (const reg of invalidPatternsRegexes) {
     if (reg.test(template)) {
@@ -48,9 +47,9 @@ const isValidEmailTemplate = (template) => {
 
   const interpolation = {
     // Strict interpolation pattern to match only valid groups
-    strict: createStrictInterpolationRegExp(authorizedKeys),
+    strict: createStrictInterpolationRegExp(authorizedKeys, ''),
     // Weak interpolation pattern to match as many group as possible.
-    loose: createLooseInterpolationRegExp(),
+    loose: createLooseInterpolationRegExp(''),
   };
 
   // Compute both strict & loose matches
@@ -68,6 +67,4 @@ const isValidEmailTemplate = (template) => {
   return true;
 };
 
-module.exports = {
-  isValidEmailTemplate,
-};
+export { isValidEmailTemplate };
