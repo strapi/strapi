@@ -1,3 +1,4 @@
+import type { Core } from '@strapi/types';
 import createCronService from '../cron';
 
 const FIXED_NOW = new Date('2026-09-14T12:34:56.000Z');
@@ -14,19 +15,28 @@ const advanceToNextRun = async (job: CronJob) => {
   await jest.advanceTimersByTimeAsync(nextRun.getTime() - Date.now());
 };
 
+/**
+ * These tests deliberately never assign `global.strapi`.
+ *
+ * The bug they guard against (#27469) is the cron service resolving the ambient
+ * global `strapi` at call time: once `Strapi.destroy()` has run `delete global.strapi`,
+ * a job that was still in flight rejects and the error handler throws instead of
+ * logging. Leaving the global unset reproduces that exact condition.
+ */
 describe('Cron service', () => {
   let cron: ReturnType<typeof createCronService>;
+  let strapi: Core.Strapi;
 
   beforeEach(() => {
     jest.useFakeTimers({ now: FIXED_NOW });
 
-    global.strapi = {
+    strapi = {
       log: {
         error: jest.fn(),
       },
-    } as any;
+    } as unknown as Core.Strapi;
 
-    cron = createCronService();
+    cron = createCronService(strapi);
   });
 
   afterEach(() => {
@@ -87,7 +97,7 @@ describe('Cron service', () => {
     jest.isolateModules(() => {
       const createIsolatedCronService =
         jest.requireActual<typeof import('../cron')>('../cron').default;
-      const isolatedCron = createIsolatedCronService();
+      const isolatedCron = createIsolatedCronService(strapi);
 
       expect(loadCroner).not.toHaveBeenCalled();
 
@@ -117,7 +127,7 @@ describe('Cron service', () => {
     await advanceToNextRun(cron.jobs[0].job);
 
     expect(task).toHaveBeenCalledTimes(1);
-    expect(task).toHaveBeenCalledWith({ strapi: global.strapi }, expect.any(Date));
+    expect(task).toHaveBeenCalledWith({ strapi }, expect.any(Date));
     expect(task.mock.calls[0][1]).toEqual(NEXT_MINUTE);
     await jest.runOnlyPendingTimersAsync();
     expect(task).toHaveBeenCalledTimes(1);
@@ -307,10 +317,34 @@ describe('Cron service', () => {
 
     await cron.jobs[0].job.trigger();
 
-    expect(global.strapi.log.error).toHaveBeenCalledWith(
-      'Cron job "boom" failed',
-      expect.any(Error)
-    );
+    expect(strapi.log.error).toHaveBeenCalledWith('Cron job "boom" failed', expect.any(Error));
+  });
+
+  // Regression test for #27469
+  it('still logs, without throwing, when an in-flight job rejects after destroy()', async () => {
+    let rejectTask: (error: Error) => void = () => {};
+
+    cron.add({
+      uploadWeekly: {
+        task: () =>
+          new Promise<void>((_resolve, reject) => {
+            rejectTask = reject;
+          }),
+        options: '0 0 1 1 *',
+      },
+    });
+
+    const inFlight = cron.jobs[0].job.trigger();
+
+    // Destroy cannot retract an invocation that is already running, so the
+    // rejection surfaces once teardown has completed.
+    cron.destroy();
+
+    const error = new Error('Cannot read db: connection destroyed');
+    rejectTask(error);
+
+    await expect(inFlight).resolves.toBeUndefined();
+    expect(strapi.log.error).toHaveBeenCalledWith('Cron job "uploadWeekly" failed', error);
   });
 
   it('accepts 5-field and 6-field cron strings', () => {
@@ -341,7 +375,7 @@ describe('Cron service', () => {
 
     expect(cron.jobs).toHaveLength(1);
     expect(cron.jobs[0].job.nextRun()).toBeInstanceOf(Date);
-    expect(global.strapi.log.error).not.toHaveBeenCalled();
+    expect(strapi.log.error).not.toHaveBeenCalled();
   });
 
   it.each([
@@ -414,7 +448,7 @@ describe('Cron service', () => {
     expect(cron.jobs[0].job.nextRun()).toBeInstanceOf(Date);
     expect(cron.jobs[1].job.nextRun()).toBeInstanceOf(Date);
     expect(cron.jobs[2].job.nextRun()).toBeInstanceOf(Date);
-    expect(global.strapi.log.error).not.toHaveBeenCalled();
+    expect(strapi.log.error).not.toHaveBeenCalled();
   });
 
   it('maps recurrence month ranges, arrays, and years to Croner fields', () => {
@@ -450,7 +484,7 @@ describe('Cron service', () => {
     expect(cron.jobs[1].job.nextRun(new Date('2027-01-15T00:00:00.000Z'))).toEqual(
       new Date('2027-02-01T00:00:00.000Z')
     );
-    expect(global.strapi.log.error).not.toHaveBeenCalled();
+    expect(strapi.log.error).not.toHaveBeenCalled();
   });
 
   it('accepts Date and timestamp values nested in rule options', () => {

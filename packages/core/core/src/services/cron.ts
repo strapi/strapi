@@ -1,5 +1,5 @@
 import { isFunction } from 'lodash/fp';
-import type { Modules } from '@strapi/types';
+import type { Core, Modules } from '@strapi/types';
 import type { Cron } from 'croner';
 
 type RecurrenceSpecObjLit = Modules.Cron.RecurrenceSpecObjLit;
@@ -163,7 +163,7 @@ const toCronerArgs = (
   throw new Error('Unsupported cron schedule');
 };
 
-const createCronService = () => {
+const createCronService = (strapi: Core.Strapi) => {
   let jobsSpecs: JobSpec[] = [];
   let running = false;
 
