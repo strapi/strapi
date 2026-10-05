@@ -25,6 +25,7 @@ describe('typescript.strictTypes', () => {
       plugins: true,
       services: false,
       controllers: false,
+      policies: false,
       strict: false,
     });
   });
@@ -36,6 +37,7 @@ describe('typescript.strictTypes', () => {
       plugins: true,
       services: true,
       controllers: true,
+      policies: true,
       strict: true,
     });
   });
