@@ -1,23 +1,23 @@
-'use strict';
+import { beforeAll, describe, expect, test, vi } from 'vitest';
 
-const errors = require('@strapi/utils');
-const auth = require('../../auth');
+import { errors } from '@strapi/utils';
+import auth from '../../auth';
 
 const mockStrapi = {
   contentAPI: {
     sanitize: {
-      output: jest.fn((input) => input),
+      output: vi.fn((input) => input),
     },
   },
-  store: jest.fn(() => {
+  store: vi.fn(() => {
     return {
-      get: jest.fn(() => {
+      get: vi.fn(() => {
         return { allow_register: true };
       }),
     };
   }),
   config: {
-    get: jest.fn(() => {
+    get: vi.fn(() => {
       return {
         register: {
           // only set allowedFields on a per-test basis
@@ -26,14 +26,14 @@ const mockStrapi = {
     }),
   },
   db: {
-    query: jest.fn(() => {
+    query: vi.fn(() => {
       return {
-        findOne: jest.fn(() => {
+        findOne: vi.fn(() => {
           return {
             role: 1,
           };
         }),
-        count: jest.fn(() => {
+        count: vi.fn(() => {
           return 0;
         }),
       };
@@ -47,48 +47,33 @@ const mockStrapi = {
       services: {},
     },
   },
-  getModel: jest.fn(),
-};
-
-jest.mock('@strapi/utils', () => {
-  return {
-    ...jest.requireActual('@strapi/utils'),
-    sanitizeUser: jest.fn((input) => input),
-    sanitize: {
-      contentAPI: {
-        output: jest.fn((input) => input),
-      },
-    },
-  };
-});
-
-jest.mock('../../../utils', () => {
-  return {
-    getService: jest.fn((service) => {
+  getModel: vi.fn(),
+  plugin: () => ({
+    service(service) {
       if (service === 'user') {
         return {
-          add: jest.fn((user) => {
+          add: vi.fn((user) => {
             return user;
           }),
-          edit: jest.fn(async (id, data) => {
+          edit: vi.fn(async (id, data) => {
             if (id === 1 && data.password) {
               return { id };
             }
             throw new Error('Failed to edit user');
           }),
-          validatePassword: jest.fn((password, userPassword) => {
+          validatePassword: vi.fn((password, userPassword) => {
             return password === userPassword;
           }),
         };
       }
       if (service === 'jwt') {
         return {
-          issue: jest.fn((payload) => `fake-jwt-token-for-user-${payload.id}`),
+          issue: vi.fn((payload) => `fake-jwt-token-for-user-${payload.id}`),
         };
       }
-    }),
-  };
-});
+    },
+  }),
+};
 
 describe('user-permissions auth', () => {
   beforeAll(() => {
@@ -120,7 +105,7 @@ describe('user-permissions auth', () => {
         request: {
           body: { username: 'testuser', email: 'test@example.com', password },
         },
-        send: jest.fn(),
+        send: vi.fn(),
       };
 
       const authorization = auth({ strapi: global.strapi });
@@ -132,7 +117,7 @@ describe('user-permissions auth', () => {
       global.strapi = {
         ...mockStrapi,
         config: {
-          get: jest.fn(() => {
+          get: vi.fn(() => {
             return {
               register: {
                 // empty
@@ -154,7 +139,7 @@ describe('user-permissions auth', () => {
             password: 'Testpassword1!',
           },
         },
-        send: jest.fn(),
+        send: vi.fn(),
       };
       const authorization = auth({ strapi: global.strapi });
       await expect(authorization.register(ctx)).rejects.toThrow(errors.ValidationError);
@@ -165,7 +150,7 @@ describe('user-permissions auth', () => {
       global.strapi = {
         ...mockStrapi,
         config: {
-          get: jest.fn(() => {
+          get: vi.fn(() => {
             return {
               register: {
                 allowedFields: [],
@@ -187,7 +172,7 @@ describe('user-permissions auth', () => {
             password: 'Testpassword1!',
           },
         },
-        send: jest.fn(),
+        send: vi.fn(),
       };
       const authorization = auth({ strapi: global.strapi });
       await expect(authorization.register(ctx)).rejects.toThrow(errors.ValidationError);
@@ -198,7 +183,7 @@ describe('user-permissions auth', () => {
       global.strapi = {
         ...mockStrapi,
         config: {
-          get: jest.fn(() => {
+          get: vi.fn(() => {
             return {
               register: {
                 allowedFields: ['confirmed'],
@@ -220,7 +205,7 @@ describe('user-permissions auth', () => {
             password: 'Testpassword1!',
           },
         },
-        send: jest.fn(),
+        send: vi.fn(),
       };
       const authorization = auth({ strapi: global.strapi });
       await authorization.register(ctx);
@@ -231,7 +216,7 @@ describe('user-permissions auth', () => {
       global.strapi = {
         ...mockStrapi,
         config: {
-          get: jest.fn((path) => {
+          get: vi.fn((path) => {
             if (path === 'plugin::users-permissions.validationRules') {
               return {
                 validatePassword(value) {
@@ -263,7 +248,7 @@ describe('user-permissions auth', () => {
             password: 'TestingPassword',
           },
         },
-        send: jest.fn(),
+        send: vi.fn(),
       };
       const authorization = auth({ strapi: global.strapi });
       await expect(authorization.register(ctx)).rejects.toThrow(errors.ValidationError);
@@ -274,7 +259,7 @@ describe('user-permissions auth', () => {
       global.strapi = {
         ...mockStrapi,
         config: {
-          get: jest.fn((path) => {
+          get: vi.fn((path) => {
             if (path === 'plugin::users-permissions.validationRules') {
               return {
                 validatePassword(value) {
@@ -306,7 +291,7 @@ describe('user-permissions auth', () => {
             password: 'Password123',
           },
         },
-        send: jest.fn(),
+        send: vi.fn(),
       };
       const authorization = auth({ strapi: global.strapi });
       await authorization.register(ctx);
@@ -335,7 +320,7 @@ describe('user-permissions auth', () => {
       global.strapi = {
         ...mockStrapi,
         config: {
-          get: jest.fn(() => {
+          get: vi.fn(() => {
             return {
               register: {
                 allowedFields: [],
@@ -356,7 +341,7 @@ describe('user-permissions auth', () => {
             password,
           },
         },
-        send: jest.fn(),
+        send: vi.fn(),
       };
 
       const authorization = auth({ strapi: global.strapi });
@@ -433,8 +418,8 @@ describe('user-permissions auth', () => {
         global.strapi = {
           ...mockStrapi,
           db: {
-            query: jest.fn(() => ({
-              findOne: jest.fn((query) => {
+            query: vi.fn(() => ({
+              findOne: vi.fn((query) => {
                 if (query.where.resetPasswordToken === 'valid-reset-token') {
                   return { id: 1, resetPasswordToken: 'valid-reset-token' };
                 }
@@ -444,7 +429,7 @@ describe('user-permissions auth', () => {
           },
           services: {
             user: {
-              edit: jest.fn(async (id, data) => {
+              edit: vi.fn(async (id, data) => {
                 if (id === 1 && data.password) {
                   return { id, ...data }; // Simulate successful password update
                 }
@@ -452,12 +437,12 @@ describe('user-permissions auth', () => {
               }),
             },
             jwt: {
-              issue: jest.fn((payload) => `fake-jwt-token-for-user-${payload.id}`),
+              issue: vi.fn((payload) => `fake-jwt-token-for-user-${payload.id}`),
             },
           },
           contentAPI: {
             sanitize: {
-              output: jest.fn((user) => {
+              output: vi.fn((user) => {
                 // Simulate sanitizing the user object
                 const { resetPasswordToken: _resetPasswordToken, ...sanitizedUser } = user;
                 return sanitizedUser;
@@ -471,7 +456,7 @@ describe('user-permissions auth', () => {
           state: {
             auth: {},
           },
-          send: jest.fn(),
+          send: vi.fn(),
         };
 
         const authorization = auth({ strapi: global.strapi });
@@ -553,8 +538,8 @@ describe('user-permissions auth', () => {
         global.strapi = {
           ...mockStrapi,
           db: {
-            query: jest.fn(() => ({
-              findOne: jest.fn(() => {
+            query: vi.fn(() => ({
+              findOne: vi.fn(() => {
                 return {
                   id: 1,
                   password: 'CorrectPassword123', // Simulated hashed password
@@ -564,10 +549,10 @@ describe('user-permissions auth', () => {
           },
           services: {
             user: {
-              validatePassword: jest.fn(async (providedPassword, actualPassword) => {
+              validatePassword: vi.fn(async (providedPassword, actualPassword) => {
                 return providedPassword === actualPassword;
               }),
-              edit: jest.fn(async (id, data) => {
+              edit: vi.fn(async (id, data) => {
                 if (id === 1 && data.password) {
                   return { id, ...data };
                 }
@@ -575,12 +560,12 @@ describe('user-permissions auth', () => {
               }),
             },
             jwt: {
-              issue: jest.fn((payload) => `fake-jwt-token-for-user-${payload.id}`),
+              issue: vi.fn((payload) => `fake-jwt-token-for-user-${payload.id}`),
             },
           },
           contentAPI: {
             sanitize: {
-              output: jest.fn((user) => {
+              output: vi.fn((user) => {
                 return user;
               }),
             },
@@ -592,7 +577,7 @@ describe('user-permissions auth', () => {
             user: { id: 1 },
           },
           request: { body },
-          send: jest.fn(),
+          send: vi.fn(),
         };
 
         const authorization = auth({ strapi: global.strapi });
@@ -609,14 +594,14 @@ describe('user-permissions auth', () => {
 
     describe('refresh mode session invalidation', () => {
       test('invalidates all sessions when changing password in refresh mode', async () => {
-        const invalidateRefreshToken = jest.fn(() => Promise.resolve());
-        const generateRefreshToken = jest.fn(() => Promise.resolve({ token: 'new-refresh-token' }));
-        const generateAccessToken = jest.fn(() => Promise.resolve({ token: 'new-access-token' }));
+        const invalidateRefreshToken = vi.fn(() => Promise.resolve());
+        const generateRefreshToken = vi.fn(() => Promise.resolve({ token: 'new-refresh-token' }));
+        const generateAccessToken = vi.fn(() => Promise.resolve({ token: 'new-access-token' }));
 
         global.strapi = {
           ...mockStrapi,
           config: {
-            get: jest.fn((path) => {
+            get: vi.fn((path) => {
               if (path === 'plugin::users-permissions.jwtManagement') {
                 return 'refresh';
               }
@@ -624,21 +609,21 @@ describe('user-permissions auth', () => {
             }),
           },
           db: {
-            query: jest.fn(() => ({
-              findOne: jest.fn(() => ({
+            query: vi.fn(() => ({
+              findOne: vi.fn(() => ({
                 id: 1,
                 password: 'CorrectPassword123',
               })),
             })),
           },
-          sessionManager: jest.fn(() => ({
+          sessionManager: vi.fn(() => ({
             invalidateRefreshToken,
             generateRefreshToken,
             generateAccessToken,
           })),
           contentAPI: {
             sanitize: {
-              output: jest.fn((user) => user),
+              output: vi.fn((user) => user),
             },
           },
         };
@@ -652,7 +637,7 @@ describe('user-permissions auth', () => {
               passwordConfirmation: 'NewPassword123',
             },
           },
-          send: jest.fn(),
+          send: vi.fn(),
         };
 
         const authorization = auth({ strapi: global.strapi });
@@ -668,14 +653,14 @@ describe('user-permissions auth', () => {
 
   describe('resetPassword refresh mode', () => {
     test('invalidates all sessions when resetting password in refresh mode', async () => {
-      const invalidateRefreshToken = jest.fn(() => Promise.resolve());
-      const generateRefreshToken = jest.fn(() => Promise.resolve({ token: 'new-refresh-token' }));
-      const generateAccessToken = jest.fn(() => Promise.resolve({ token: 'new-access-token' }));
+      const invalidateRefreshToken = vi.fn(() => Promise.resolve());
+      const generateRefreshToken = vi.fn(() => Promise.resolve({ token: 'new-refresh-token' }));
+      const generateAccessToken = vi.fn(() => Promise.resolve({ token: 'new-access-token' }));
 
       global.strapi = {
         ...mockStrapi,
         config: {
-          get: jest.fn((path) => {
+          get: vi.fn((path) => {
             if (path === 'plugin::users-permissions.jwtManagement') {
               return 'refresh';
             }
@@ -683,8 +668,8 @@ describe('user-permissions auth', () => {
           }),
         },
         db: {
-          query: jest.fn(() => ({
-            findOne: jest.fn((query) => {
+          query: vi.fn(() => ({
+            findOne: vi.fn((query) => {
               if (query.where.resetPasswordToken === 'valid-reset-token') {
                 return { id: 1, resetPasswordToken: 'valid-reset-token' };
               }
@@ -692,14 +677,14 @@ describe('user-permissions auth', () => {
             }),
           })),
         },
-        sessionManager: jest.fn(() => ({
+        sessionManager: vi.fn(() => ({
           invalidateRefreshToken,
           generateRefreshToken,
           generateAccessToken,
         })),
         contentAPI: {
           sanitize: {
-            output: jest.fn((user) => user),
+            output: vi.fn((user) => user),
           },
         },
       };
@@ -713,7 +698,7 @@ describe('user-permissions auth', () => {
             code: 'valid-reset-token',
           },
         },
-        send: jest.fn(),
+        send: vi.fn(),
       };
 
       const authorization = auth({ strapi: global.strapi });
@@ -731,7 +716,7 @@ describe('user-permissions auth', () => {
       global.strapi = {
         ...mockStrapi,
         config: {
-          get: jest.fn((key, defaultValue) => {
+          get: vi.fn((key, defaultValue) => {
             if (key === 'plugin::users-permissions.jwtManagement') {
               return defaultValue;
             }
@@ -742,8 +727,8 @@ describe('user-permissions auth', () => {
 
       const ctx = {
         request: { body: { refreshToken: 'token' } },
-        notFound: jest.fn(),
-        badRequest: jest.fn(),
+        notFound: vi.fn(),
+        badRequest: vi.fn(),
       };
 
       const authorization = auth({ strapi: global.strapi });
@@ -755,20 +740,20 @@ describe('user-permissions auth', () => {
     });
 
     test('returns bad request when refresh token is missing', async () => {
-      const rotateRefreshToken = jest.fn();
-      const generateAccessToken = jest.fn();
+      const rotateRefreshToken = vi.fn();
+      const generateAccessToken = vi.fn();
 
       global.strapi = {
         ...mockStrapi,
         config: {
-          get: jest.fn((key, defaultValue) => {
+          get: vi.fn((key, defaultValue) => {
             if (key === 'plugin::users-permissions.jwtManagement') {
               return 'refresh';
             }
             return defaultValue;
           }),
         },
-        sessionManager: jest.fn(() => ({
+        sessionManager: vi.fn(() => ({
           rotateRefreshToken,
           generateAccessToken,
         })),
@@ -777,10 +762,10 @@ describe('user-permissions auth', () => {
       const ctx = {
         request: { body: {} },
         cookies: {
-          get: jest.fn(() => undefined),
+          get: vi.fn(() => undefined),
         },
-        badRequest: jest.fn(),
-        notFound: jest.fn(),
+        badRequest: vi.fn(),
+        notFound: vi.fn(),
       };
 
       const authorization = auth({ strapi: global.strapi });
@@ -794,31 +779,31 @@ describe('user-permissions auth', () => {
     });
 
     test('returns bad request when refresh token is not a string', async () => {
-      const rotateRefreshToken = jest.fn();
+      const rotateRefreshToken = vi.fn();
 
       global.strapi = {
         ...mockStrapi,
         config: {
-          get: jest.fn((key, defaultValue) => {
+          get: vi.fn((key, defaultValue) => {
             if (key === 'plugin::users-permissions.jwtManagement') {
               return 'refresh';
             }
             return defaultValue;
           }),
         },
-        sessionManager: jest.fn(() => ({
+        sessionManager: vi.fn(() => ({
           rotateRefreshToken,
-          generateAccessToken: jest.fn(),
+          generateAccessToken: vi.fn(),
         })),
       };
 
       const ctx = {
         request: { body: { refreshToken: 123 } },
         cookies: {
-          get: jest.fn(() => undefined),
+          get: vi.fn(() => undefined),
         },
-        badRequest: jest.fn(),
-        notFound: jest.fn(),
+        badRequest: vi.fn(),
+        notFound: vi.fn(),
       };
 
       const authorization = auth({ strapi: global.strapi });
