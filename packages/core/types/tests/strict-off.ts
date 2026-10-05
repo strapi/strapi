@@ -34,6 +34,13 @@ declare global {
       interface AppPolicies {
         'plugin::legacy.hasRole': { roles: string[] };
       }
+      interface PackageMiddlewares {
+        'plugin::legacy.timer': { ms: number };
+        'api::legacy.audit': { channel: string };
+      }
+      interface AppMiddlewares {
+        'plugin::legacy.timer': { seconds: number };
+      }
       interface ContentTypeSchemas {
         'api::strict-only.page': Struct.SingleTypeSchema;
       }
@@ -54,6 +61,17 @@ declare const checks: [
   Expect<Equal<Core.ServiceFor<'plugin::legacy.example'>, Core.Service>>,
   Expect<Equal<Core.ControllerFor<'plugin::legacy.example'>, Core.Controller>>,
   Expect<SameValues<Core.PolicyReference, string | { name: string; config: unknown }>>,
+  Expect<
+    SameValues<
+      Core.MiddlewareReference,
+      | string
+      | Core.MiddlewareHandler
+      | { name: string; config?: unknown }
+      | { resolve: string; config?: unknown }
+    >
+  >,
+  // Registered names are still listed for completion.
+  Expect<Equal<'plugin::legacy.timer' extends Core.MiddlewareReference ? true : false, true>>,
   Expect<SameValues<Core.ServiceLookupUID, UID.Service>>,
   Expect<SameValues<Core.ControllerLookupUID, UID.Controller>>,
   // Unregistered literal names keep the legacy types: only strict types close them to `never`.
@@ -86,6 +104,10 @@ declare const mapChecks: [
   Expect<Equal<Core.Strapi['services']['plugin::legacy.example'], Core.Service>>,
   Expect<Equal<Core.Strapi['controllers']['plugin::legacy.example'], Core.Controller>>,
   Expect<Equal<Core.Strapi['policies']['plugin::legacy.hasRole'], Core.Policy>>,
+  Expect<Equal<Core.Strapi['middlewares'], Record<string, Core.MiddlewareFactory>>>,
+  Expect<Equal<Core.Plugin<'legacy'>['middlewares'], Record<string, Core.Middleware>>>,
+  Expect<Equal<Core.Module<'api::legacy'>['middlewares'], Record<string, Core.Middleware>>>,
+  Expect<Equal<Core.Strapi['middlewares']['plugin::legacy.timer'], Core.MiddlewareFactory>>,
 ];
 mapChecks satisfies unknown;
 
@@ -256,6 +278,41 @@ declare const policyAndApiChecks: [
   Expect<Equal<typeof contextualApiService, Service>>,
 ];
 policyAndApiChecks satisfies unknown;
+
+// Middleware lookups keep their develop types: `MiddlewareFactory`, and `any` for plugin middlewares,
+// which only the plugin index signature provides. Typed routes accept any middleware name.
+const registeredMiddleware = strapi.middleware('plugin::legacy.timer');
+const unregisteredMiddleware = strapi.middleware('global::unregistered');
+const dynamicMiddleware = strapi.middleware(dynamicName);
+// @ts-expect-error Root lookups take no type argument, as on develop.
+strapi.middleware<Core.MiddlewareFactory>('global::unregistered');
+const pluginMiddleware = strapi.plugin('legacy').middleware('timer');
+declare const middlewareChecks: [
+  Expect<Equal<typeof registeredMiddleware, Core.MiddlewareFactory>>,
+  Expect<Equal<typeof unregisteredMiddleware, Core.MiddlewareFactory>>,
+  Expect<Equal<typeof dynamicMiddleware, Core.MiddlewareFactory>>,
+  Expect<Equal<typeof pluginMiddleware, any>>,
+  Expect<Equal<'middleware' extends keyof Core.Module ? true : false, false>>,
+];
+middlewareChecks satisfies unknown;
+// @ts-expect-error Modules have no middleware lookup without strict types, as on develop.
+strapi.api('legacy').middleware('audit');
+const middlewareRoute: Core.RouteInputFor<{ example: Controller }> = {
+  method: 'GET',
+  path: '/',
+  handler: 'example.custom',
+  config: {
+    middlewares: [
+      'global::unregistered',
+      'plugin::legacy.timer',
+      { name: 'plugin::legacy.timer', config: false },
+      { name: 'api::legacy.audit' },
+      { resolve: './src/custom', config: {} },
+      async (ctx, next) => next(),
+    ],
+  },
+};
+middlewareRoute satisfies unknown;
 
 // Modules have no policy lookup, as on develop; plugins keep the `any` of their index signature.
 // @ts-expect-error Modules have no policy lookup without strict types, as on develop.

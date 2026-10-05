@@ -1,5 +1,10 @@
 import type { PropertyPath } from 'lodash';
 import type { ControllerFor, RegisteredControllerUID } from './controller';
+import type {
+  MiddlewareConfigFor,
+  MiddlewareFactory,
+  RegisteredMiddlewareName,
+} from './middleware';
 import type { Module } from './module';
 import type { Route } from './route';
 import type { Router } from './router';
@@ -27,6 +32,8 @@ type ServiceNames<TPlugin extends string> = PluginEntryNames<RegisteredServiceUI
 type ControllerNames<TPlugin extends string> = PluginEntryNames<RegisteredControllerUID, TPlugin>;
 
 type PolicyNames<TPlugin extends string> = PluginEntryNames<RegisteredPolicyName, TPlugin>;
+
+type MiddlewareNames<TPlugin extends string> = PluginEntryNames<RegisteredMiddlewareName, TPlugin>;
 
 type PluginConfigNamespace<TPlugin extends string> = string extends TPlugin
   ? never
@@ -94,6 +101,21 @@ type PluginPolicyLookup<TPlugin extends string, TPolicyName, T> =
       : T;
 
 /**
+ * The registered middleware when `TMiddlewareName` is a registered middleware of the plugin, `T`
+ * otherwise. `T` is an explicit generic (`middleware<MyFactory>('name')`), or `unknown` by default.
+ */
+type PluginMiddlewareLookup<TPlugin extends string, TMiddlewareName, T> =
+  SuggestedString<MiddlewareNames<TPlugin>> extends TMiddlewareName
+    ? T
+    : TMiddlewareName extends MiddlewareNames<TPlugin>
+      ? MiddlewareFactory<
+          MiddlewareConfigFor<
+            Extract<`plugin::${TPlugin}.${TMiddlewareName}`, RegisteredMiddlewareName>
+          >
+        >
+      : T;
+
+/**
  * Any key when the plugin has no registered config contract, `never` otherwise.
  * TODO @Nico An unknown key of a registered plugin keeps a non-widening literal default. Rare, accepted.
  */
@@ -117,6 +139,27 @@ type StrictPluginPolicyGetter<TName extends string> = {
   >(
     name: TPolicyName
   ): PluginPolicyLookup<TName, TPolicyName, NoInfer<T>>;
+};
+
+/**
+ * The plugin's `middleware` lookup with strict mode. Without it, `middleware` keeps the `any` of the
+ * plugin index signature, as on develop.
+ */
+type StrictPluginMiddlewareGetter<TName extends string> = {
+  /**
+   * Resolves the registered middleware of the relative name `name`, i.e. `plugin::<plugin>.<name>` as
+   * at runtime, a factory that receives its config contract. An explicit type argument
+   * (`middleware<MyFactory>(name)`) wins over the registries. Registered names are listed for
+   * completion.
+   */
+  middleware<
+    T = unknown,
+    TMiddlewareName extends SuggestedString<MiddlewareNames<TName>> = SuggestedString<
+      MiddlewareNames<TName>
+    >,
+  >(
+    name: TMiddlewareName
+  ): PluginMiddlewareLookup<TName, TMiddlewareName, NoInfer<T>>;
 };
 
 type StrictPluginConfigGetter<TName extends string> = {
@@ -144,11 +187,15 @@ type StrictPluginConfigGetter<TName extends string> = {
  */
 type PluginModule<TName extends string> = IsStrict extends false
   ? Omit<Module, 'routes'>
-  : Omit<Module<`plugin::${TName}`>, 'routes' | 'service' | 'config' | 'controller' | 'policy'>;
+  : Omit<
+      Module<`plugin::${TName}`>,
+      'routes' | 'service' | 'config' | 'controller' | 'policy' | 'middleware'
+    >;
 
 /**
  * The plugin's own members. With strict types enabled, registered names of the plugin resolve to
- * their contracts. Without them, members outside `Module`, such as `policy`, are `any`, as on develop.
+ * their contracts. Without them, members outside `Module`, such as `policy` and `middleware`, are
+ * `any`, as on develop.
  */
 type PluginMembers<TName extends string> = IsStrict extends false
   ? {
@@ -175,7 +222,8 @@ type PluginMembers<TName extends string> = IsStrict extends false
       ): PluginControllerLookup<TName, TControllerName, NoInfer<T>>;
       [key: string]: any;
     } & StrictPluginConfigGetter<TName> &
-      StrictPluginPolicyGetter<TName>;
+      StrictPluginPolicyGetter<TName> &
+      StrictPluginMiddlewareGetter<TName>;
 
 /**
  * A loaded plugin. With strict types enabled, a literal `TName` types its lookups and maps from the
@@ -192,9 +240,13 @@ type PluginNameOf<TUID> = TUID extends `plugin::${infer TPlugin}.${string}`
     ? TPlugin
     : never;
 
-/** Plugins with at least one registered service, controller, policy or config contract. */
+/** Plugins with at least one registered service, controller, policy, middleware or config contract. */
 export type RegisteredPluginName = PluginNameOf<
-  RegisteredServiceUID | RegisteredControllerUID | RegisteredPolicyName | ConfigNamespace
+  | RegisteredServiceUID
+  | RegisteredControllerUID
+  | RegisteredPolicyName
+  | RegisteredMiddlewareName
+  | ConfigNamespace
 >;
 
 /**
