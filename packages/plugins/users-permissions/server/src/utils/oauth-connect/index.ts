@@ -243,9 +243,9 @@ const createOAuthConnectMiddleware = (strapi: Core.Strapi) => {
       ctx.throw(400, 'OAuth connect requires session middleware');
     }
 
-    const storedProviders = await strapi
+    const storedProviders = (await strapi
       .store({ type: 'plugin', name: 'users-permissions', key: 'grant' })
-      .get<GrantConfig>();
+      .get()) as GrantConfig;
 
     const storedConfig = storedProviders?.[parsed.provider];
     if (!storedConfig?.enabled) {
