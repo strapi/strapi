@@ -3,10 +3,11 @@ import type { Core } from '@strapi/types';
 /**
  * The `middlewares` config that `strapi.config.get('middlewares')` returns, with loader defaults.
  * Input type, what applications write in `config/middlewares.ts`: {@link Core.Config.Middlewares}.
- * Loader defaults: none in `src/configuration/index.ts`.
- * `src/services/server/register-middlewares.ts` passes its list as the `get` default instead.
+ * Loader defaults: none. `loadConfiguration` (`src/configuration/index.ts`) has no `middlewares`
+ * entry in `defaultConfig`, and the value is a list, so no field can be marked required.
+ * `src/services/server/register-middlewares.ts` passes its default list to `get` instead.
  *
- * First version: the input type as is.
- * TODO @Nico Mark the fields the loader always defines as required, and test them at runtime.
+ * TODO @Nico Without `config/middlewares.*`, `get('middlewares')` returns `undefined`;
+ * this type does not say so. Decide at the `PackageConfigs` level for all no-default namespaces.
  */
 export type ResolvedMiddlewaresConfig = Core.Config.Middlewares;
