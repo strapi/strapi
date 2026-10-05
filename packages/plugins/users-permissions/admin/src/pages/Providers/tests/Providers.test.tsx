@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
@@ -45,6 +46,7 @@ it('saves an email provider change without removing other providers', async () =
   );
   const { findByText, findByRole, getByRole, user } = render(<ProvidersPage />);
   await user.click(await findByText('email'));
+  expect(within(await findByRole('dialog')).queryAllByRole('textbox')).toEqual([]);
   await user.click(await findByRole('checkbox', { name: 'enabled' }));
   await user.click(getByRole('button', { name: 'Save' }));
   await waitFor(() =>
@@ -80,6 +82,20 @@ it.each([
   );
   const { findByText, findByRole, user } = render(<ProvidersPage />);
   await user.click(await findByText(provider));
+  const dialog = within(await findByRole('dialog'));
+  expect(dialog.getAllByRole('textbox').map((input) => input.getAttribute('name'))).toEqual([
+    'key',
+    'secret',
+    ...(provider === 'auth0' ? ['jwksurl', 'subdomain'] : []),
+    'callback',
+    'redirectUri',
+  ]);
+  expect(dialog.getByLabelText('Client ID')).toBeEnabled();
+  expect(dialog.getByLabelText('Client Secret')).toBeEnabled();
+  expect(dialog.getByLabelText('The redirect URL to your front-end app')).toHaveAttribute(
+    'placeholder',
+    'https://www.client-app.com'
+  );
   const redirect = await findByRole('textbox', {
     name: `The redirect URL to add in your ${provider} application configurations`,
   });
