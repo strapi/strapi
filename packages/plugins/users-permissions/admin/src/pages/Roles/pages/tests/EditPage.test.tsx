@@ -51,8 +51,8 @@ const render = () => ({
 describe('Roles – EditPage', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('renders correctly', async () => {
-    const { queryByText, getByRole, user } = render();
+  it('renders the role details and settings sections', async () => {
+    const { queryByText, getByRole } = render();
 
     await waitForElementToBeRemoved(() => queryByText('Loading content.'));
 
@@ -65,6 +65,12 @@ describe('Roles – EditPage', () => {
 
     expect(getByRole('textbox', { name: 'Name' })).toBeInTheDocument();
     expect(getByRole('textbox', { name: 'Description' })).toBeInTheDocument();
+  });
+
+  it('expands the available permission actions', async () => {
+    const { queryByText, getByRole, user } = render();
+
+    await waitForElementToBeRemoved(() => queryByText('Loading content.'));
 
     await user.click(
       getByRole('button', {
