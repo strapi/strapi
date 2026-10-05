@@ -1,7 +1,7 @@
 import path from 'node:path';
 import fs, { type Dirent } from 'node:fs';
 import * as ts from 'typescript';
-import { kebabCase } from 'lodash/fp';
+import { kebabCase } from 'lodash';
 
 import { emitDefinitions, format, pathExists } from '../utils';
 import type { GeneratorOptions, Logger } from '../utils';
