@@ -23,6 +23,7 @@ export interface TelemetryProperties {
 export interface TrackingContextValue {
   uuid?: string | boolean;
   telemetryProperties?: TelemetryProperties;
+  strapiVersion?: string | null;
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -86,8 +87,9 @@ const TrackingProvider = ({ children }: TrackingProviderProps) => {
     () => ({
       uuid,
       telemetryProperties: data,
+      strapiVersion,
     }),
-    [uuid, data]
+    [uuid, data, strapiVersion]
   );
 
   return <TrackingContext.Provider value={value}>{children}</TrackingContext.Provider>;
@@ -553,9 +555,8 @@ const useTracking = (): UseTrackingReturn => {
   const deviceType = useDeviceType();
   const deviceTypeRef = React.useRef(deviceType);
   deviceTypeRef.current = deviceType;
-  const { uuid, telemetryProperties } = React.useContext(TrackingContext);
+  const { uuid, telemetryProperties, strapiVersion } = React.useContext(TrackingContext);
   const userId = useAppInfo('useTracking', (state) => state.userId);
-  const strapiVersion = useAppInfo('useTracking', (state) => state.strapiVersion);
   const trackUsage = React.useCallback(
     async <TEvent extends TrackingEvent>(
       event: TEvent['name'],

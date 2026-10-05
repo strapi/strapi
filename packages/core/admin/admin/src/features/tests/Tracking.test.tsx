@@ -55,7 +55,6 @@ const setup = () =>
         <AppInfoProvider
           currentEnvironment="testing"
           userId="someTestUserId"
-          strapiVersion="5.0.0"
           shouldUpdateStrapi={false}
         >
           {children}
@@ -187,6 +186,23 @@ describe('useTracking', () => {
     });
 
     fetchSpy.mockRestore();
+  });
+
+  it('should send the strapi version when the caller is not under AppInfoProvider', async () => {
+    const { result } = renderHook(() => useTracking(), {
+      wrapper: ({ children }) => <TrackingProvider>{children}</TrackingProvider>,
+    });
+
+    await result.current.trackUsage('didSaveContentType');
+
+    expect(axios.post).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        event: 'didSaveContentType',
+        groupProperties: expect.objectContaining({ version: '5.0.0' }),
+      }),
+      expect.any(Object)
+    );
   });
 
   it('should not track if there is no uuid set in the context', async () => {
