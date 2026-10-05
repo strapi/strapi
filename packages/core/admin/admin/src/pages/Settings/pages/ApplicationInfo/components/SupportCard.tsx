@@ -208,7 +208,9 @@ const SupportCard = () => {
   // ever swaps which support links are shown; it gates no feature.
   // The authenticated license-limit-information endpoint is EE-only, so a CE instance gets a
   // 404 here; treat that (or any other error/missing data) the same as "no license" (Community).
-  const { data: licenseLimitsData } = useGetLicenseLimitsQuery();
+  // Until the first response, there is no telling which plan this is: painting the Community
+  // fallback and then swapping it out would name the wrong plan for a moment.
+  const { data: licenseLimitsData, isLoading: isLicenseLoading } = useGetLicenseLimitsQuery();
   const licenseStatus = licenseLimitsData?.data?.licenseStatus ?? 'none';
   const planPriceId = licenseLimitsData?.data?.planPriceId ?? undefined;
   const isTrial = licenseLimitsData?.data?.isTrial ?? false;
@@ -240,65 +242,69 @@ const SupportCard = () => {
           <Typography variant="delta" tag="h3">
             {formatMessage({ id: 'Settings.application.support.title', defaultMessage: 'Support' })}
           </Typography>
-          <Typography variant="pi" textColor="neutral600">
-            {formatMessage(
-              hasStrapiSupport
-                ? {
-                    id: 'Settings.application.support.subtitle.enterprise',
-                    defaultMessage:
-                      'Contact support, report a bug, or contribute to the Strapi community.',
-                  }
-                : {
-                    id: 'Settings.application.support.subtitle.community',
-                    defaultMessage:
-                      'Ask a question, report a bug, or contribute to the Strapi community.',
-                  }
-            )}
-          </Typography>
-        </Flex>
-        <Flex alignItems="stretch" gap={7}>
-          <Box flex="1 1 0%">
-            <TileGrid>
-              {tiles.map((tile) => (
-                <SupportLinkTile key={tile.id} {...tile} />
-              ))}
-            </TileGrid>
-          </Box>
-          {canRead && (
-            <>
-              <Box background="neutral150" width="0.1rem" />
-              <Flex direction="column" alignItems="start" gap={3} flex="1 1 0%">
-                <Typography variant="sigma" textColor="neutral600">
-                  {formatMessage({
-                    id: 'Settings.application.support.diagnostic-snapshot.label',
-                    defaultMessage: 'diagnostic snapshot',
-                  })}
-                </Typography>
-                <Typography>
-                  {formatMessage(
-                    hasStrapiSupport
-                      ? {
-                          id: 'Settings.application.support.diagnostic-snapshot.description.enterprise',
-                          defaultMessage:
-                            'Reporting a bug? A diagnostic snapshot describes how this project is built so it can be reproduced.',
-                        }
-                      : {
-                          id: 'Settings.application.support.diagnostic-snapshot.description.community',
-                          defaultMessage:
-                            "Reporting a bug? Generate a snapshot of your app's structure so the issue can be reproduced.",
-                        }
-                  )}
-                </Typography>
-                <Button onClick={() => setIsSnapshotModalOpen(true)}>
-                  {formatMessage({
-                    id: 'Settings.application.support.diagnostic-snapshot.generate',
-                    defaultMessage: 'Generate snapshot',
-                  })}
-                </Button>
-              </Flex>
-            </>
+          {!isLicenseLoading && (
+            <Typography variant="pi" textColor="neutral600">
+              {formatMessage(
+                hasStrapiSupport
+                  ? {
+                      id: 'Settings.application.support.subtitle.enterprise',
+                      defaultMessage:
+                        'Contact support, report a bug, or contribute to the Strapi community.',
+                    }
+                  : {
+                      id: 'Settings.application.support.subtitle.community',
+                      defaultMessage:
+                        'Ask a question, report a bug, or contribute to the Strapi community.',
+                    }
+              )}
+            </Typography>
           )}
         </Flex>
+        {!isLicenseLoading && (
+          <Flex alignItems="stretch" gap={7}>
+            <Box flex="1 1 0%">
+              <TileGrid>
+                {tiles.map((tile) => (
+                  <SupportLinkTile key={tile.id} {...tile} />
+                ))}
+              </TileGrid>
+            </Box>
+            {canRead && (
+              <>
+                <Box background="neutral150" width="0.1rem" />
+                <Flex direction="column" alignItems="start" gap={3} flex="1 1 0%">
+                  <Typography variant="sigma" textColor="neutral600">
+                    {formatMessage({
+                      id: 'Settings.application.support.diagnostic-snapshot.label',
+                      defaultMessage: 'diagnostic snapshot',
+                    })}
+                  </Typography>
+                  <Typography>
+                    {formatMessage(
+                      hasStrapiSupport
+                        ? {
+                            id: 'Settings.application.support.diagnostic-snapshot.description.enterprise',
+                            defaultMessage:
+                              'Reporting a bug? A diagnostic snapshot describes how this project is built so it can be reproduced.',
+                          }
+                        : {
+                            id: 'Settings.application.support.diagnostic-snapshot.description.community',
+                            defaultMessage:
+                              "Reporting a bug? Generate a snapshot of your app's structure so the issue can be reproduced.",
+                          }
+                    )}
+                  </Typography>
+                  <Button onClick={() => setIsSnapshotModalOpen(true)}>
+                    {formatMessage({
+                      id: 'Settings.application.support.diagnostic-snapshot.generate',
+                      defaultMessage: 'Generate snapshot',
+                    })}
+                  </Button>
+                </Flex>
+              </>
+            )}
+          </Flex>
+        )}
       </Flex>
       <DiagnosticSnapshotModal
         isOpen={isSnapshotModalOpen}

@@ -6,6 +6,7 @@ import { SupportCard } from '../SupportCard';
 type LicenseStatus = 'none' | 'active' | 'expired' | 'unknown';
 
 interface MockLicenseLimitsQueryResult {
+  isLoading?: boolean;
   data:
     | {
         data: {
@@ -175,6 +176,17 @@ describe('SupportCard', () => {
     render(<SupportCard />);
 
     expect(await screen.findByRole('link', { name: /documentation/i })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /support portal/i })).not.toBeInTheDocument();
+  });
+
+  it('shows no support channels while the license request is still loading', async () => {
+    // Community tiles painted first and then swapped to the support portal on a paid plan.
+    mockLicenseLimitsResult = { data: undefined, isLoading: true };
+
+    render(<SupportCard />);
+
+    expect(await screen.findByRole('heading', { name: 'Support' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /documentation/i })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /support portal/i })).not.toBeInTheDocument();
   });
 

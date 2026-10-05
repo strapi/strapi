@@ -12,6 +12,7 @@ jest.mock(
 type LicenseStatus = 'none' | 'active' | 'expired' | 'unknown';
 
 interface MockLicenseLimitsQueryResult {
+  isLoading?: boolean;
   data:
     | { data: { licenseStatus: LicenseStatus; planPriceId: string | null; type: string | null } }
     | undefined;
@@ -97,5 +98,19 @@ describe('PlanCard', () => {
 
     expect(await screen.findByRole('link', { name: /see all plans/i })).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /view subscription/i })).not.toBeInTheDocument();
+  });
+
+  it('names no plan while the license request is still loading', async () => {
+    // Before the response, a missing status used to default to "none" and paint Community,
+    // then swap to the real plan when it arrived.
+    setStrapiFixture({ isEE: false, projectType: 'Community' });
+    mockQueryResult = { data: undefined, isLoading: true };
+
+    render(<PlanCard />);
+
+    expect(await screen.findByRole('heading', { name: 'Plan' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /see all plans/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /view subscription/i })).not.toBeInTheDocument();
+    expect(screen.queryByText('Community')).not.toBeInTheDocument();
   });
 });

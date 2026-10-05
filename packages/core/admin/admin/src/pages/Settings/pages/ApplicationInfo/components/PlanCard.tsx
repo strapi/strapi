@@ -79,7 +79,9 @@ const PlanCard = () => {
 
   // The authenticated license-limit-information endpoint is EE-only, so a CE instance gets a
   // 404 here; treat that (or any other error/missing data) the same as "no license".
-  const { data: licenseLimitsData } = useGetLicenseLimitsQuery();
+  // Until the first response, there is no telling which plan this is: painting the Community
+  // fallback and then swapping it out would name the wrong plan for a moment.
+  const { data: licenseLimitsData, isLoading: isLicenseLoading } = useGetLicenseLimitsQuery();
   const licenseStatus = licenseLimitsData?.data?.licenseStatus ?? 'none';
   const planPriceId = licenseLimitsData?.data?.planPriceId ?? undefined;
 
@@ -124,7 +126,9 @@ const PlanCard = () => {
   // Render nothing for the body while the EE module is still loading (rather than the CE
   // body) so the card never briefly shows "Community" before swapping to the actual license
   // details. Once we know for certain there is no license to show, fall back to the CE body.
-  const PlanCardBody = LicenseBody ?? (shouldShowLicenseDetails ? null : PlanCardBodyCE);
+  const PlanCardBody = isLicenseLoading
+    ? null
+    : (LicenseBody ?? (shouldShowLicenseDetails ? null : PlanCardBodyCE));
 
   const licensedPlan = getLicensedPlan({
     licenseStatus,
@@ -150,15 +154,17 @@ const PlanCard = () => {
         <Typography variant="delta" tag="h3">
           {formatMessage({ id: 'Settings.application.plan.title', defaultMessage: 'Plan' })}
         </Typography>
-        <LinkButton
-          variant="secondary"
-          endIcon={<ExternalLink />}
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {formatMessage(label)}
-        </LinkButton>
+        {!isLicenseLoading && (
+          <LinkButton
+            variant="secondary"
+            endIcon={<ExternalLink />}
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {formatMessage(label)}
+          </LinkButton>
+        )}
       </Flex>
       {PlanCardBody && <PlanCardBody />}
     </Flex>
