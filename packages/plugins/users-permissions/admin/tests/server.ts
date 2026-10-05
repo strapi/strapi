@@ -122,6 +122,7 @@ const handlers = [
       email: { enabled: true, icon: 'envelope' },
       discord: {
         callback: '/auth/discord/callback',
+        redirectUri: 'http://localhost:1337/api/connect/discord/callback',
         enabled: false,
         icon: 'discord',
         key: '',

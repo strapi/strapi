@@ -24,7 +24,7 @@ type Props = {
   value?: boolean | string;
 };
 
-/** Renders a provider setting or the generated OAuth callback URL. */
+/** Renders a provider setting supplied by the server. */
 const Input = ({
   description,
   disabled = false,
@@ -38,10 +38,6 @@ const Input = ({
   value = '',
 }: Props) => {
   const { formatMessage } = useIntl();
-  const inputValue =
-    name === 'noName'
-      ? `${window.strapi.backendURL}/api/connect/${providerToEditName}/callback`
-      : value;
 
   const label = formatMessage(
     { id: intlLabel.id, defaultMessage: intlLabel.defaultMessage },
@@ -96,7 +92,7 @@ const Input = ({
         onChange={onChange}
         placeholder={formattedPlaceholder}
         type={type}
-        value={typeof inputValue === 'string' ? inputValue : ''}
+        value={typeof value === 'string' ? value : ''}
       />
       <Field.Error />
     </Field.Root>
