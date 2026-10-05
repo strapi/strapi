@@ -1,3 +1,7 @@
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+
 import type { Core } from '@strapi/types';
 
 import * as factories from '../../factories';
@@ -8,6 +12,7 @@ interface MakeStrapiOverrides {
   services?: Record<string, unknown>;
   apis?: Record<string, { routes: Record<string, unknown> }>;
   app?: Record<string, unknown>;
+  extensionsDir?: string;
 }
 
 const makeStrapi = (overrides: MakeStrapiOverrides = {}): Core.Strapi => {
@@ -17,6 +22,7 @@ const makeStrapi = (overrides: MakeStrapiOverrides = {}): Core.Strapi => {
     services: overrides.services ?? {},
     api: (name: string) => apis[name],
     app: overrides.app,
+    dirs: { dist: { extensions: overrides.extensionsDir ?? '/nonexistent/extensions' } },
   } as unknown as Core.Strapi;
 };
 
@@ -238,6 +244,90 @@ describe('detectCustomizations', () => {
         apis: { a: { routes: {} } },
       });
       expect(detectCustomizations(strapi).apis.map((a) => a.uid)).toEqual([contentTypeUid]);
+    });
+  });
+
+  // The dump is used to rebuild an app for debugging, so it covers every controller, not only
+  // the app's own api:: ones.
+  describe('all controllers', () => {
+    it('lists every controller, plugin and admin ones included', () => {
+      const stock = factories.createCoreController(contentTypeUid)({ strapi: minimalStrapi });
+      const strapi = makeStrapi({
+        controllers: {
+          [contentTypeUid]: stock,
+          // Plugin and admin controllers are plain objects even when stock
+          'plugin::users-permissions.auth': { callback: async () => 'stock' },
+          'admin::authentication': { login: async () => 'stock' },
+        },
+        apis: { a: { routes: {} } },
+      });
+
+      expect(detectCustomizations(strapi).controllers).toEqual([
+        { uid: contentTypeUid, custom: false },
+        { uid: 'plugin::users-permissions.auth', custom: false },
+        { uid: 'admin::authentication', custom: false },
+      ]);
+    });
+
+    it('counts custom controllers across every namespace', () => {
+      const pluginCustom = factories.createCoreController(
+        contentTypeUid,
+        {}
+      )({
+        strapi: minimalStrapi,
+      });
+      const strapi = makeStrapi({
+        controllers: {
+          [contentTypeUid]: { find: async () => 'hand-written' },
+          'plugin::some-plugin.thing': pluginCustom,
+          'plugin::users-permissions.auth': { callback: async () => 'stock' },
+        },
+        apis: { a: { routes: {} } },
+      });
+
+      const result = detectCustomizations(strapi);
+      expect(result.counts.customControllers).toBe(2);
+      expect(result.controllers.find((c) => c.uid === 'plugin::some-plugin.thing')?.custom).toBe(
+        true
+      );
+    });
+
+    it('does not throw on a non-object plugin controller', () => {
+      const strapi = makeStrapi({ controllers: { 'plugin::broken.thing': null } });
+      expect(detectCustomizations(strapi).controllers).toEqual([
+        { uid: 'plugin::broken.thing', custom: false },
+      ]);
+    });
+  });
+
+  // Plugin controllers are plain objects even when stock, so an override made through
+  // src/extensions cannot be told from the controller itself; the extension folder is the signal.
+  describe('extended plugins', () => {
+    let dir: string;
+
+    beforeEach(() => {
+      dir = fs.mkdtempSync(path.join(os.tmpdir(), 'strapi-extensions-'));
+    });
+
+    afterEach(() => {
+      fs.rmSync(dir, { recursive: true, force: true });
+    });
+
+    it('lists plugins with a strapi-server extension or content-type overrides', () => {
+      fs.mkdirSync(path.join(dir, 'users-permissions'));
+      fs.writeFileSync(path.join(dir, 'users-permissions', 'strapi-server.js'), '');
+      fs.mkdirSync(path.join(dir, 'upload', 'content-types', 'file'), { recursive: true });
+      fs.writeFileSync(path.join(dir, 'upload', 'content-types', 'file', 'schema.json'), '{}');
+      // An empty folder overrides nothing
+      fs.mkdirSync(path.join(dir, 'i18n'));
+
+      const strapi = makeStrapi({ extensionsDir: dir });
+
+      expect(detectCustomizations(strapi).extendedPlugins).toEqual(['upload', 'users-permissions']);
+    });
+
+    it('is empty when the app has no extensions folder', () => {
+      expect(detectCustomizations(makeStrapi()).extendedPlugins).toEqual([]);
     });
   });
 });

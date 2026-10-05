@@ -150,6 +150,11 @@ export interface Strapi extends Container {
       customService: boolean;
       customRoutes: boolean;
     }>;
+    // Every registered controller (api::, plugin::, admin::)
+    controllers: Array<{ uid: string; custom: boolean }>;
+    // Plugins overridden through src/extensions
+    extendedPlugins: string[];
+    // customControllers spans every namespace; the other two are per api
     counts: { customControllers: number; customServices: number; customRoutes: number };
     srcIndex: {
       present: boolean;

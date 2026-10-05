@@ -1,3 +1,6 @@
+import fs from 'fs';
+import path from 'path';
+
 import type { Core } from '@strapi/types';
 
 import * as factories from '../factories';
@@ -98,6 +101,39 @@ const isCustomApiController = (controller: unknown): boolean => {
   return factories.isCustomController(controller as Core.Controller);
 };
 
+/**
+ * Plugin and admin controllers are plain objects even when stock, so only the factory's
+ * custom-config mark can single one out here (the same test startup telemetry uses).
+ */
+const isCustomFactoryController = (controller: unknown): boolean =>
+  controller !== null &&
+  typeof controller === 'object' &&
+  factories.isCustomController(controller as Core.Controller);
+
+/**
+ * Plugins the app overrides through `src/extensions/<plugin>/`: a `strapi-server.js`, which can
+ * replace any controller, service or route, or content-type schema overrides. A plugin
+ * controller looks the same stock or overridden, so this folder is what tells Support a
+ * plugin was changed.
+ */
+const listExtendedPlugins = (strapi: Core.Strapi): string[] => {
+  const extensionsDir = strapi.dirs?.dist?.extensions;
+  if (!extensionsDir || !fs.existsSync(extensionsDir)) {
+    return [];
+  }
+
+  return fs
+    .readdirSync(extensionsDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .filter(
+      (name) =>
+        fs.existsSync(path.join(extensionsDir, name, 'strapi-server.js')) ||
+        fs.existsSync(path.join(extensionsDir, name, 'content-types'))
+    )
+    .sort();
+};
+
 // Return shape is mirrored in @strapi/types Core.Strapi['getCustomizations'];
 // keep the two in sync.
 export const detectCustomizations = (strapi: Core.Strapi) => {
@@ -122,6 +158,14 @@ export const detectCustomizations = (strapi: Core.Strapi) => {
     };
   });
 
+  // Every controller, not only the app's own: the dump is used to rebuild an app for debugging.
+  const allControllers = Object.keys(controllers).map((uid) => ({
+    uid,
+    custom: uid.startsWith(APP_UID_PREFIX)
+      ? isCustomApiController(controllers[uid])
+      : isCustomFactoryController(controllers[uid]),
+  }));
+
   const app = strapi.app;
   const registerDefined = typeof app?.register === 'function';
   const bootstrapDefined = typeof app?.bootstrap === 'function';
@@ -132,8 +176,10 @@ export const detectCustomizations = (strapi: Core.Strapi) => {
 
   return {
     apis,
+    controllers: allControllers,
+    extendedPlugins: listExtendedPlugins(strapi),
     counts: {
-      customControllers: apis.filter((a) => a.customController).length,
+      customControllers: allControllers.filter((c) => c.custom).length,
       customServices: apis.filter((a) => a.customService).length,
       customRoutes: apis.filter((a) => a.customRoutes).length,
     },
