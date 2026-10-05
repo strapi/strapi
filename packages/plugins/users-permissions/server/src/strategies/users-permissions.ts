@@ -13,9 +13,9 @@ const { ForbiddenError, UnauthorizedError } = errors;
 /** Authenticate Content API requests against services on the supplied Strapi instance. */
 const createStrategy = ({ strapi }: { strapi: Core.Strapi }) => {
   const getAdvancedSettings = async () => {
-    return strapi
+    return (await strapi
       .store({ type: 'plugin', name: 'users-permissions' })
-      .get<AdvancedSettings>({ key: 'advanced' });
+      .get({ key: 'advanced' })) as AdvancedSettings;
   };
 
   const authenticate = async (ctx: Context) => {
