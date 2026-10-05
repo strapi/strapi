@@ -86,6 +86,29 @@ describe('entitlements registry', () => {
     expect(registry.list()[0].limits[0].value).toBe(2);
   });
 
+  it('passes each resolver the feature the lookup returns for it', () => {
+    // The same resolvers serve the live license and a lapsed license's retained snapshot, so
+    // they read options from the feature they are handed rather than looking it up themselves.
+    const registry = createEntitlementsRegistry();
+    registry.register({
+      feature: 'audit-logs',
+      limits: [
+        {
+          key: 'retentionDays',
+          unit: 'days',
+          get: (feature) =>
+            (typeof feature === 'object' ? feature.options?.retentionDays : undefined) ?? 90,
+        },
+      ],
+    });
+
+    const lookup = (name: string) =>
+      name === 'audit-logs' ? { name, options: { retentionDays: 30 } } : undefined;
+
+    expect(registry.list(lookup)[0].limits[0].value).toBe(30);
+    expect(registry.list(() => undefined)[0].limits[0].value).toBe(90);
+  });
+
   it('resolves getters lazily on each list() call', () => {
     const registry = createEntitlementsRegistry();
     let current = 3;

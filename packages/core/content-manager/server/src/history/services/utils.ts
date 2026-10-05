@@ -10,6 +10,30 @@ import type { RelationResult } from '../../../../shared/contracts/relations';
 
 export const DEFAULT_RETENTION_DAYS = 90;
 
+/**
+ * The retention the history delete job applies, from the license's value and the admin setting.
+ * Shared with the Plan card's resolver (../entitlements.ts) so the card shows this same figure.
+ */
+export const computeRetentionDays = (
+  licenseRetentionDays: number | string | null | undefined,
+  userRetentionDays: number | null | undefined
+): number => {
+  if (licenseRetentionDays == null) {
+    return userRetentionDays ?? DEFAULT_RETENTION_DAYS;
+  }
+
+  // The registry can ship the value as a numeric string
+  const licenseDays = Number(licenseRetentionDays);
+
+  // Allow users to override the license retention days, but not to increase it
+  if (userRetentionDays && userRetentionDays < licenseDays) {
+    return userRetentionDays;
+  }
+
+  // User didn't provide retention days value, use the license or fallback to default
+  return Math.min(licenseDays, DEFAULT_RETENTION_DAYS);
+};
+
 type RelationResponse = {
   results: RelationResult[];
   meta: { missingCount: number };
@@ -145,17 +169,11 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
    */
   const getRetentionDays = () => {
     const featureConfig = strapi.ee.features.get('cms-content-history');
-    const licenseRetentionDays =
-      typeof featureConfig === 'object' && featureConfig?.options.retentionDays;
-    const userRetentionDays: number = strapi.config.get('admin.history.retentionDays');
 
-    // Allow users to override the license retention days, but not to increase it
-    if (userRetentionDays && userRetentionDays < licenseRetentionDays) {
-      return userRetentionDays;
-    }
-
-    // User didn't provide retention days value, use the license or fallback to default
-    return Math.min(licenseRetentionDays, DEFAULT_RETENTION_DAYS);
+    return computeRetentionDays(
+      typeof featureConfig === 'object' ? featureConfig?.options?.retentionDays : undefined,
+      strapi.config.get('admin.history.retentionDays')
+    );
   };
 
   const getVersionStatus = async (

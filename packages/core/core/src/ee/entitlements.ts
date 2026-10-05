@@ -13,10 +13,21 @@
 // content-releases validation). Kept server-side so the frontend never hard-codes it.
 export const UNLIMITED_ENTITLEMENT_THRESHOLD = 9999;
 
+/** A feature as a license lists it: a bare name, or `{ name, options }`. */
+export type EntitlementFeature =
+  | string
+  | { name: string; options?: Record<string, any>; [key: string]: unknown }
+  | undefined;
+
 export interface EntitlementLimitInput {
   key: string;
   unit?: 'days' | 'count';
-  get: () => number | null | undefined;
+  /**
+   * Resolves the limit the feature enforces from the feature as a license lists it. The same
+   * resolver serves the live license and a lapsed license's retained snapshot, so it must read
+   * options from the feature it is handed and apply its own defaults and clamps.
+   */
+  get: (feature?: EntitlementFeature) => unknown;
 }
 
 export interface EntitlementInput {
@@ -59,15 +70,21 @@ export const createEntitlementsRegistry = () => {
     }
   };
 
-  const list = (): Entitlement[] =>
-    registry.map((entry) => ({
-      feature: entry.feature,
-      limits: entry.limits.map((limit) => ({
-        key: limit.key,
-        unit: limit.unit,
-        value: normalize(limit.get()),
-      })),
-    }));
+  const list = (
+    getFeature: (name: string) => EntitlementFeature = () => undefined
+  ): Entitlement[] =>
+    registry.map((entry) => {
+      const feature = getFeature(entry.feature);
+
+      return {
+        feature: entry.feature,
+        limits: entry.limits.map((limit) => ({
+          key: limit.key,
+          unit: limit.unit,
+          value: normalize(limit.get(feature)),
+        })),
+      };
+    });
 
   return { register, list };
 };

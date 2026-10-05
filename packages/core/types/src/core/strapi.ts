@@ -83,10 +83,20 @@ export interface Strapi extends Container {
         limits: Array<{
           key: string;
           unit?: 'days' | 'count';
-          get: () => number | null | undefined;
+          // Handed the feature as the license lists it (live, or a lapsed license's retained
+          // snapshot); returns the limit the feature enforces.
+          get: (
+            feature?:
+              | string
+              | { name: string; options?: Record<string, any>; [key: string]: unknown }
+          ) => unknown;
         }>;
       }) => void;
       list: () => Array<{
+        feature: string;
+        limits: Array<{ key: string; unit?: 'days' | 'count'; value: number | null }>;
+      }>;
+      listRetained: () => Array<{
         feature: string;
         limits: Array<{ key: string; unit?: 'days' | 'count'; value: number | null }>;
       }>;

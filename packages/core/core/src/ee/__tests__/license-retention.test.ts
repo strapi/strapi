@@ -321,4 +321,55 @@ describe('ee license retention', () => {
       ]);
     });
   });
+
+  describe('entitlements', () => {
+    const registerAuditLogs = () =>
+      eeModule.entitlements.register({
+        feature: 'audit-logs',
+        limits: [
+          {
+            key: 'retentionDays',
+            unit: 'days',
+            // Mirrors a real resolver: the enforced default applies when the license grants none.
+            get: (feature) =>
+              (typeof feature === 'object' ? feature.options?.retentionDays : undefined) ?? 90,
+          },
+        ],
+      });
+
+    it('resolves a lapsed license through the same resolvers, only for features it listed', async () => {
+      const past = new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString();
+      process.env.STRAPI_LICENSE = 'fake-license-blob';
+      license.verifyLicense.mockReturnValue({
+        ...GOLD_LICENSE_INFO,
+        features: [{ name: 'sso' }, { name: 'audit-logs', options: { retentionDays: null } }],
+        expireAt: past,
+      });
+
+      eeModule.init('/fake/license/dir');
+      registerAuditLogs();
+      eeModule.entitlements.register({
+        feature: 'review-workflows',
+        limits: [{ key: 'numberOfWorkflows', unit: 'count', get: () => 200 }],
+      });
+
+      process.env.STRAPI_DISABLE_LICENSE_PING = 'true';
+      await eeModule.checkLicense({ strapi: mockStrapi });
+
+      expect(eeModule.licenseStatus).toBe('expired');
+      // The live view grants nothing once the license is disabled...
+      expect(eeModule.entitlements.list()).toEqual([]);
+      // ...while the retained view reports the limits the plan enforced, defaults included,
+      // and leaves out review-workflows, which the retained license never listed.
+      expect(eeModule.entitlements.listRetained()).toEqual([
+        { feature: 'audit-logs', limits: [{ key: 'retentionDays', unit: 'days', value: 90 }] },
+      ]);
+    });
+
+    it('listRetained() is empty when no license was ever retained', () => {
+      registerAuditLogs();
+
+      expect(eeModule.entitlements.listRetained()).toEqual([]);
+    });
+  });
 });
