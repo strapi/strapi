@@ -24,7 +24,13 @@ const NO_MIDDLEWARE_PLACEHOLDER_COMMENT = `/*
 /**
  * type MiddlewareFactoryConfig<TFactory> = TFactory extends (...args: infer TArgs) => unknown
  *   ? TFactory extends (config: never, ctx: { strapi: never }) => unknown
- *     ? TArgs['length'] extends 0 ? undefined : 0 extends 1 & TArgs[0] ? unknown : TArgs[0]
+ *     ? TArgs['length'] extends 0
+ *       ? undefined
+ *       : 0 extends 1 & TArgs[0]
+ *         ? unknown
+ *         : TArgs[0] extends { request: unknown; response: unknown; app: unknown }
+ *           ? never
+ *           : TArgs[0]
  *     : never
  *   : unknown;
  *
@@ -44,8 +50,10 @@ const NO_MIDDLEWARE_PLACEHOLDER_COMMENT = `/*
  * (Core.MiddlewareFactory) registers `never`, so typed routes reject its name. `never` stands for
  * the Strapi instance, so that the file needs no import and any context type a factory declares
  * accepts it.
- * TODO @Nico a handler with one parameter `(ctx)`, or an untyped `next`, cannot be told apart from a
- * factory and still registers its first parameter as config
+ * A handler with one parameter `(ctx)`, or an untyped `next`, takes `{ strapi }`: a first parameter
+ * with the required members of a Koa context (`request`, `response`, `app`) registers `never` too.
+ * TODO @Nico a handler whose context is `any` still registers as a factory with an untyped config
+ * (`unknown`); an opt-in `defineMiddleware` brand (new factory helpers, D15) would tell them apart
  * TODO @Nico a module without a default export registers `undefined` at runtime (a reference to it
  * throws "Middleware <uid> not found"); `unknown` accepts any reference to it, like an untyped one
  */
@@ -74,6 +82,18 @@ const generateConfigHelpersDefinition = () => {
       ),
     ],
     factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword)
+  );
+
+  // { request: unknown; response: unknown; app: unknown }, required members of a Koa context
+  const koaContextShape = factory.createTypeLiteralNode(
+    ['request', 'response', 'app'].map((member) =>
+      factory.createPropertySignature(
+        undefined,
+        member,
+        undefined,
+        factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword)
+      )
+    )
   );
 
   const factoryConfig = factory.createConditionalTypeNode(
@@ -109,7 +129,8 @@ const generateConfigHelpersDefinition = () => {
             configArg,
           ]),
           factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword),
-          configArg
+          // A Koa handler (ctx) or (ctx, next: any): its first parameter is a context
+          factory.createConditionalTypeNode(configArg, koaContextShape, never(), configArg)
         )
       ),
       // A Koa handler (ctx, next): its `next` cannot take `{ strapi }`
