@@ -1,13 +1,11 @@
-'use strict';
+import { describe, expect, it, vi } from 'vitest';
 
-/* eslint-env jest */
-
-const forgotPasswordMutation = require('../forgot-password');
-const resetPasswordMutation = require('../reset-password');
-const changePasswordMutation = require('../change-password');
-const loginMutation = require('../login');
-const registerMutation = require('../register');
-const { getRateLimitPath } = require('../rate-limit');
+import forgotPasswordMutation from '../forgot-password';
+import resetPasswordMutation from '../reset-password';
+import changePasswordMutation from '../change-password';
+import loginMutation from '../login';
+import registerMutation from '../register';
+import { getRateLimitPath } from '../rate-limit';
 
 const RATE_LIMIT_UID = 'plugin::users-permissions.rateLimit';
 
@@ -16,31 +14,31 @@ const nexus = {
 };
 
 const createStrapiMock = (restPrefix = '/api') => {
-  const forgotPassword = jest.fn(async (ctx) => {
+  const forgotPassword = vi.fn(async (ctx) => {
     ctx.body = { ok: true };
   });
 
-  const resetPassword = jest.fn(async (ctx) => {
+  const resetPassword = vi.fn(async (ctx) => {
     ctx.body = {
       jwt: 'jwt-token',
       user: { id: 1 },
     };
   });
 
-  const callback = jest.fn(async (ctx) => {
+  const callback = vi.fn(async (ctx) => {
     ctx.body = { jwt: 'jwt-token', user: { id: 1 } };
   });
 
-  const register = jest.fn(async (ctx) => {
+  const register = vi.fn(async (ctx) => {
     ctx.body = { jwt: 'jwt-token', user: { id: 1 } };
   });
 
-  const changePassword = jest.fn(async (ctx) => {
+  const changePassword = vi.fn(async (ctx) => {
     ctx.body = { jwt: 'jwt-token', user: { id: 1 } };
   });
 
-  const rateLimitHandler = jest.fn(async (ctx, next) => next());
-  const rateLimitFactory = jest.fn(() => rateLimitHandler);
+  const rateLimitHandler = vi.fn(async (ctx, next) => next());
+  const rateLimitFactory = vi.fn(() => rateLimitHandler);
 
   const authController = {
     forgotPassword,
@@ -52,22 +50,22 @@ const createStrapiMock = (restPrefix = '/api') => {
 
   const strapi = {
     config: {
-      get: jest.fn((key, defaultValue) => (key === 'api.rest.prefix' ? restPrefix : defaultValue)),
+      get: vi.fn((key, defaultValue) => (key === 'api.rest.prefix' ? restPrefix : defaultValue)),
     },
-    middleware: jest.fn((uid) => {
+    middleware: vi.fn((uid) => {
       if (uid === RATE_LIMIT_UID) {
         return rateLimitFactory;
       }
 
       return undefined;
     }),
-    plugin: jest.fn((pluginName) => {
+    plugin: vi.fn((pluginName) => {
       if (pluginName !== 'users-permissions') {
         return undefined;
       }
 
       return {
-        controller: jest.fn((controllerName) => {
+        controller: vi.fn((controllerName) => {
           if (controllerName !== 'auth') {
             return undefined;
           }

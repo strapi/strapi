@@ -1,17 +1,15 @@
-'use strict';
+import { describe, expect, it, vi } from 'vitest';
 
-/* eslint-env jest */
+import utils from '@strapi/utils';
 
-const utils = require('@strapi/utils');
-
-const { RateLimitError } = utils.errors;
-
-const {
+import {
   buildPrefixKey,
   ROUTES_WITHOUT_IDENTIFIER,
   normalizeRequestPathForRateLimit,
   buildRateLimitLoadConfig,
-} = require('../rateLimit');
+} from '../rateLimit';
+
+const { RateLimitError } = utils.errors;
 
 const makeCtx = ({ path: requestPath, ip = '203.0.113.1', body = {} } = {}) => ({
   request: {
@@ -221,7 +219,7 @@ describe('users-permissions rateLimit middleware', () => {
 
     it('always sets handler last so user config cannot replace the RateLimitError handler', () => {
       const ctx = makeCtx({ path: '/api/auth/forgot-password', body: { email: 'a@b.com' } });
-      const evilHandler = jest.fn();
+      const evilHandler = vi.fn();
 
       const loadConfig = buildRateLimitLoadConfig(ctx, { handler: evilHandler }, {});
 
