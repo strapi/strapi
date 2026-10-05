@@ -1,4 +1,5 @@
-'use strict';
+/* eslint @typescript-eslint/no-var-requires: off */
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { sanitizeUserRelationFromRoleEntities, defaultSanitizeOutput } = require('../sanitizers');
 
@@ -17,7 +18,7 @@ describe('users-permissions sanitizers', () => {
   const previousStrapi = global.strapi;
 
   beforeEach(() => {
-    global.strapi = { getModel: jest.fn() };
+    global.strapi = { getModel: vi.fn() };
   });
 
   afterEach(() => {

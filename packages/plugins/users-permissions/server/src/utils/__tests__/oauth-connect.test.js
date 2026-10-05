@@ -1,4 +1,5 @@
-'use strict';
+/* eslint @typescript-eslint/no-var-requires: off */
+import { afterEach, describe, expect, test, vi } from 'vitest';
 
 const crypto = require('crypto');
 
@@ -15,7 +16,7 @@ const {
 } = require('../oauth-connect');
 
 const mockProvidersService = () => {
-  jest.spyOn(require('..'), 'getService').mockImplementation((name) => {
+  vi.spyOn(require('..'), 'getService').mockImplementation((name) => {
     if (name === 'providers') {
       return {
         buildRedirectUri: (providerName) =>
@@ -93,7 +94,7 @@ describe('oauth-connect helpers', () => {
   });
 
   test('redirectWithPayload serializes token response for frontend callback', () => {
-    const ctx = { redirect: jest.fn() };
+    const ctx = { redirect: vi.fn() };
     redirectWithPayload(ctx, 'http://localhost:3000/callback', {
       access_token: 'abc',
       raw: { access_token: 'abc', token_type: 'bearer' },
@@ -161,7 +162,7 @@ describe('createOAuthConnectMiddleware', () => {
 
   afterEach(() => {
     global.fetch = originalFetch;
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   test('throws ApplicationError (not TypeError) when provider is disabled', async () => {
@@ -178,10 +179,10 @@ describe('createOAuthConnectMiddleware', () => {
       request: { url: '/api/connect/google' },
       session: {},
       state: {},
-      redirect: jest.fn(),
+      redirect: vi.fn(),
     };
 
-    await expect(mw(ctx, jest.fn())).rejects.toBeInstanceOf(errors.ApplicationError);
+    await expect(mw(ctx, vi.fn())).rejects.toBeInstanceOf(errors.ApplicationError);
   });
 
   test('rejects OAuth2 callback when session state is missing', async () => {
@@ -199,7 +200,7 @@ describe('createOAuthConnectMiddleware', () => {
       }),
     });
     mockProvidersService();
-    global.fetch = jest.fn();
+    global.fetch = vi.fn();
 
     const mw = createOAuthConnectMiddleware();
     const ctx = {
@@ -207,17 +208,17 @@ describe('createOAuthConnectMiddleware', () => {
       query: { code: 'abc', state: 'attacker' },
       session: { grant: {} },
       state: {},
-      redirect: jest.fn(),
+      redirect: vi.fn(),
     };
 
-    await mw(ctx, jest.fn());
+    await mw(ctx, vi.fn());
 
     expect(global.fetch).not.toHaveBeenCalled();
     expect(ctx.redirect).toHaveBeenCalledWith(expect.stringContaining('error=oauth_error'));
   });
 
   test('awaits callback handler so token-exchange failures redirect with oauth_error', async () => {
-    jest.spyOn(oauth2, 'exchangeAuthorizationCode').mockRejectedValue(new Error('boom'));
+    vi.spyOn(oauth2, 'exchangeAuthorizationCode').mockRejectedValue(new Error('boom'));
 
     setStrapi({
       store: () => ({
@@ -240,16 +241,16 @@ describe('createOAuthConnectMiddleware', () => {
       query: { code: 'abc', state: 'good' },
       session: { grant: { state: 'good' } },
       state: {},
-      redirect: jest.fn(),
+      redirect: vi.fn(),
     };
 
-    await expect(mw(ctx, jest.fn())).resolves.toBeUndefined();
+    await expect(mw(ctx, vi.fn())).resolves.toBeUndefined();
     expect(ctx.redirect).toHaveBeenCalledWith(expect.stringContaining('error=oauth_error'));
     expect(ctx.redirect).toHaveBeenCalledWith(expect.stringContaining('error_description=boom'));
   });
 
   test('preserves dynamic callback from session on callback leg', async () => {
-    jest.spyOn(oauth2, 'exchangeAuthorizationCode').mockResolvedValue({
+    vi.spyOn(oauth2, 'exchangeAuthorizationCode').mockResolvedValue({
       access_token: 'tok',
       token_type: 'bearer',
     });
@@ -280,10 +281,10 @@ describe('createOAuthConnectMiddleware', () => {
         },
       },
       state: {},
-      redirect: jest.fn(),
+      redirect: vi.fn(),
     };
 
-    await mw(ctx, jest.fn());
+    await mw(ctx, vi.fn());
 
     expect(ctx.redirect).toHaveBeenCalledWith(
       expect.stringContaining('http://localhost:3000/custom-cb')
@@ -294,7 +295,7 @@ describe('createOAuthConnectMiddleware', () => {
 
   test('keeps only the provider-specific token fields in the server session', async () => {
     const idToken = `header.${'x'.repeat(1800)}.signature`;
-    jest.spyOn(oauth2, 'exchangeAuthorizationCode').mockResolvedValue({
+    vi.spyOn(oauth2, 'exchangeAuthorizationCode').mockResolvedValue({
       id_token: idToken,
       access_token: 'access-token',
       refresh_token: 'refresh-token',
@@ -323,10 +324,10 @@ describe('createOAuthConnectMiddleware', () => {
       query: { code: 'abc', state: 'good' },
       session: { grant: { state: 'good' } },
       state: {},
-      redirect: jest.fn(),
+      redirect: vi.fn(),
     };
 
-    await mw(ctx, jest.fn());
+    await mw(ctx, vi.fn());
 
     expect(ctx.session.grant).toEqual({ response: { id_token: idToken } });
     expect(ctx.redirect).toHaveBeenCalledWith('http://localhost:3000/cb');
@@ -358,10 +359,10 @@ describe('createOAuthConnectMiddleware', () => {
         },
       },
       state: { oauthConnect: { callback: 'http://localhost:3000/custom-cb' } },
-      redirect: jest.fn(),
+      redirect: vi.fn(),
     };
 
-    await mw(ctx, jest.fn());
+    await mw(ctx, vi.fn());
 
     expect(ctx.session.grant.dynamic).toEqual({
       callback: 'http://localhost:3000/custom-cb',

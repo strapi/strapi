@@ -1,10 +1,10 @@
-'use strict';
+/* eslint @typescript-eslint/no-var-requires: off */
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 
-/* eslint-env jest */
-
-jest.mock('../../utils/provider-http');
-jest.mock('../../utils/verify-jwt-with-jwks');
-jest.mock('../../utils/oauth-connect/oauth1');
+vi.spyOn(require('../../utils/provider-http'), 'bearerGet');
+vi.spyOn(require('../../utils/provider-http'), 'fetchJson');
+vi.spyOn(require('../../utils/verify-jwt-with-jwks'), 'verifyJwtWithJwks');
+vi.spyOn(require('../../utils/oauth-connect/oauth1'), 'twitterGet');
 
 const { bearerGet, fetchJson } = require('../../utils/provider-http');
 const { verifyJwtWithJwks } = require('../../utils/verify-jwt-with-jwks');
@@ -19,7 +19,7 @@ const setRequestMock = (requestMock) => {
 // providers-registry reads global `strapi` at call time — provide a minimal stub
 global.strapi = {
   config: {
-    get: jest.fn().mockReturnValue('/api'),
+    get: vi.fn().mockReturnValue('/api'),
     server: { url: 'http://localhost:1337' },
   },
 };
@@ -130,7 +130,7 @@ describe('google authCallback — verified email guard', () => {
   let mockRequest;
 
   beforeAll(() => {
-    mockRequest = jest.fn();
+    mockRequest = vi.fn();
     setRequestMock(mockRequest);
 
     const registry = providersRegistry();
@@ -187,7 +187,7 @@ describe('discord authCallback — verified email guard', () => {
   let mockRequest;
 
   beforeAll(() => {
-    mockRequest = jest.fn();
+    mockRequest = vi.fn();
     setRequestMock(mockRequest);
     discordProvider = providersRegistry().get('discord');
   });
@@ -228,7 +228,7 @@ describe('github authCallback — verified email guard', () => {
   let mockRequest;
 
   beforeAll(() => {
-    mockRequest = jest.fn();
+    mockRequest = vi.fn();
     setRequestMock(mockRequest);
     githubProvider = providersRegistry().get('github');
   });
@@ -277,7 +277,7 @@ describe('auth0 authCallback — verified email guard', () => {
   let mockRequest;
 
   beforeAll(() => {
-    mockRequest = jest.fn();
+    mockRequest = vi.fn();
     setRequestMock(mockRequest);
     auth0Provider = providersRegistry().get('auth0');
   });
@@ -318,7 +318,7 @@ describe('keycloak authCallback — verified email guard', () => {
   let mockRequest;
 
   beforeAll(() => {
-    mockRequest = jest.fn();
+    mockRequest = vi.fn();
     setRequestMock(mockRequest);
     keycloakProvider = providersRegistry().get('keycloak');
   });
@@ -354,7 +354,7 @@ describe('patreon authCallback — verified email guard', () => {
   let mockRequest;
 
   beforeAll(() => {
-    mockRequest = jest.fn();
+    mockRequest = vi.fn();
     setRequestMock(mockRequest);
     patreonProvider = providersRegistry().get('patreon');
   });
@@ -409,7 +409,7 @@ describe('facebook authCallback — verified email guard', () => {
   let mockRequest;
 
   beforeAll(() => {
-    mockRequest = jest.fn();
+    mockRequest = vi.fn();
     setRequestMock(mockRequest);
     facebookProvider = providersRegistry().get('facebook');
   });
@@ -436,7 +436,7 @@ describe('github authCallback — public profile email verification', () => {
   let mockRequest;
 
   beforeAll(() => {
-    mockRequest = jest.fn();
+    mockRequest = vi.fn();
     setRequestMock(mockRequest);
     githubProvider = providersRegistry().get('github');
   });
@@ -471,7 +471,7 @@ describe('twitter authCallback — server-side OAuth session guard', () => {
   let mockRequest;
 
   beforeAll(() => {
-    mockRequest = jest.fn();
+    mockRequest = vi.fn();
     setRequestMock(mockRequest);
     twitterProvider = providersRegistry().get('twitter');
   });
@@ -527,7 +527,7 @@ describe('twitch authCallback — verified email guard', () => {
   let mockRequest;
 
   beforeAll(() => {
-    mockRequest = jest.fn();
+    mockRequest = vi.fn();
     setRequestMock(mockRequest);
     twitchProvider = providersRegistry().get('twitch');
   });
@@ -561,7 +561,7 @@ describe('linkedin authCallback — verified email guard', () => {
   let mockRequest;
 
   beforeAll(() => {
-    mockRequest = jest.fn();
+    mockRequest = vi.fn();
     setRequestMock(mockRequest);
     linkedinProvider = providersRegistry().get('linkedin');
   });
@@ -594,7 +594,7 @@ describe('cas authCallback — verified email guard', () => {
   let mockRequest;
 
   beforeAll(() => {
-    mockRequest = jest.fn();
+    mockRequest = vi.fn();
     setRequestMock(mockRequest);
     casProvider = providersRegistry().get('cas');
   });
@@ -635,7 +635,7 @@ describe('vk authCallback — server-side OAuth session guard', () => {
   let mockRequest;
 
   beforeAll(() => {
-    mockRequest = jest.fn();
+    mockRequest = vi.fn();
     setRequestMock(mockRequest);
     vkProvider = providersRegistry().get('vk');
   });

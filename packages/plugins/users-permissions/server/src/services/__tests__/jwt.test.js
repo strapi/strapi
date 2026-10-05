@@ -1,12 +1,16 @@
-'use strict';
-
-/* eslint-env jest */
+/* eslint @typescript-eslint/no-var-requires: off */
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const jwt = require('jsonwebtoken');
 const jwtService = require('../jwt');
-const {
-  createMockSessionManager,
-} = require('../../../../../../../tests/helpers/create-session-manager-mock');
+
+const createMockSessionManager = (originApi = {}) => ({
+  originApi,
+  sessionManager: Object.assign(
+    vi.fn(() => originApi),
+    { hasOrigin: vi.fn() }
+  ),
+});
 
 describe('JWT Service', () => {
   let strapi;
@@ -18,18 +22,18 @@ describe('JWT Service', () => {
     ({ sessionManager: sessionManagerCallable, originApi: mockSessionManager } =
       createMockSessionManager({
         // Only override methods used in this test suite
-        generateRefreshToken: jest.fn(),
-        generateAccessToken: jest.fn(),
-        validateAccessToken: jest.fn(),
+        generateRefreshToken: vi.fn(),
+        generateAccessToken: vi.fn(),
+        validateAccessToken: vi.fn(),
       }));
 
     strapi = {
       config: {
-        get: jest.fn(),
+        get: vi.fn(),
       },
       sessionManager: sessionManagerCallable,
       db: {
-        query: jest.fn(),
+        query: vi.fn(),
       },
     };
 
@@ -109,7 +113,7 @@ describe('JWT Service', () => {
       });
 
       strapi.db.query.mockReturnValue({
-        findOne: jest.fn(),
+        findOne: vi.fn(),
       });
     });
 
@@ -127,7 +131,7 @@ describe('JWT Service', () => {
       const result = await service.verify(token);
 
       expect(mockSessionManager.validateAccessToken).toHaveBeenCalledWith(token);
-      expect(strapi.db.query).toHaveBeenCalledWith('plugin::users-permissions.user');
+      expect(global.strapi.db.query).toHaveBeenCalledWith('plugin::users-permissions.user');
       expect(strapi.db.query().findOne).toHaveBeenCalledWith({
         where: { id: 123 },
       });
