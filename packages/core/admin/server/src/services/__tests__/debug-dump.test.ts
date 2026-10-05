@@ -242,4 +242,18 @@ describe('debug-dump service', () => {
     expect(JSON.stringify(dump)).not.toContain('SG_SECRET');
     expect(JSON.stringify(dump)).not.toContain('S3_SECRET');
   });
+
+  it('reports an ended trial as not a trial, matching the license endpoint', async () => {
+    // disable() clears the live trial flag but the retained snapshot still says it was one;
+    // the Plan card follows the live flag, so the dump must too.
+    const strapi = makeStrapi();
+    strapi.EE = false;
+    strapi.ee.isTrial = false;
+    strapi.ee.licenseStatus = 'expired';
+    strapi.ee.retainedLicense = { type: 'gold', isTrial: true, features: [] };
+
+    const dump = await debugDumpService({ strapi }).generate();
+
+    expect(dump.license?.isTrial).toBe(false);
+  });
 });

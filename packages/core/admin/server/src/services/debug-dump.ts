@@ -122,7 +122,8 @@ const debugDumpService = ({ strapi }: { strapi: Core.Strapi }) => ({
       payload.license = {
         licenseStatus: strapi.ee.licenseStatus,
         type: strapi.ee.type ?? retained?.type ?? null,
-        isTrial: strapi.ee.isTrial || Boolean(retained?.isTrial),
+        // Live only, like the license endpoint: disable() clears it, so an ended trial is not one.
+        isTrial: strapi.ee.isTrial,
         expireAt: strapi.ee.expireAt ?? retained?.expireAt ?? null,
         seats: strapi.ee.seats ?? retained?.seats ?? null,
         subscriptionId: strapi.ee.subscriptionId ?? retained?.subscriptionId ?? null,
