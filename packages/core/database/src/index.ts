@@ -285,4 +285,3 @@ class Database {
 }
 
 export { Database, errors };
-export { transactionCtx } from './transaction-context';

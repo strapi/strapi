@@ -2,7 +2,6 @@ import { get, has, merge, set, unset } from 'lodash';
 
 import type { Core, Schema, UID } from '@strapi/types';
 import { contentTypes, traverseEntity } from '@strapi/utils';
-import { transactionCtx } from '@strapi/database';
 import { traverseEntityRelations } from '../transform/relations/utils/map-relation';
 import {
   getDefaultLocale,
@@ -497,36 +496,29 @@ export const copyCloneRelationRows = async (
   const { joinTable } = attribute;
   const { joinColumn } = joinTable;
 
-  const trx = transactionCtx.get();
-  const rows = (await strapi.db
-    .connection(joinTable.name)
-    .where({
-      [joinColumn.name]: sourceEntryId,
-      ...('on' in joinTable && joinTable.on),
-    })
-    .select('*')
-    .modify((qb) => {
-      if (trx) {
-        qb.transacting(trx);
-      }
-    })) as Record<string, unknown>[];
+  await strapi.db.transaction(async ({ trx }) => {
+    const rows = (await strapi.db
+      .getConnection(joinTable.name)
+      .where({
+        [joinColumn.name]: sourceEntryId,
+        ...('on' in joinTable && joinTable.on),
+      })
+      .select('*')
+      .transacting(trx)) as Record<string, unknown>[];
 
-  const rowsToCopy = rows.map((row) => {
-    const copiedRow = { ...row, [joinColumn.name]: targetEntryId };
-    delete copiedRow[idColumn];
-    return copiedRow;
+    const rowsToCopy = rows.map((row) => {
+      const copiedRow = { ...row, [joinColumn.name]: targetEntryId };
+      delete copiedRow[idColumn];
+      return copiedRow;
+    });
+
+    for (let index = 0; index < rowsToCopy.length; index += batchSize) {
+      await strapi.db
+        .getConnection(joinTable.name)
+        .insert(rowsToCopy.slice(index, index + batchSize))
+        .transacting(trx);
+    }
   });
-
-  for (let index = 0; index < rowsToCopy.length; index += batchSize) {
-    await strapi.db
-      .connection(joinTable.name)
-      .insert(rowsToCopy.slice(index, index + batchSize))
-      .modify((qb) => {
-        if (trx) {
-          qb.transacting(trx);
-        }
-      });
-  }
 };
 
 const copyFkColumnRelation = async (
@@ -551,31 +543,29 @@ const copyFkColumnRelation = async (
   }
 
   const joinColumnName = attribute.joinColumn.name;
-  const trx = transactionCtx.get();
-  const sourceRow = await strapi.db
-    .connection(meta.tableName)
-    .where({ id: sourceEntryId })
-    .select([joinColumnName])
-    .modify((qb) => {
-      if (trx) {
-        qb.transacting(trx);
-      }
-    })
-    .first();
 
-  if (!sourceRow) {
-    return;
-  }
+  await strapi.db.transaction(async ({ trx }) => {
+    const sourceRow = await strapi.db
+      .getConnection(meta.tableName)
+      .where({ id: sourceEntryId })
+      .select([joinColumnName])
+      .transacting(trx)
+      .first();
 
-  const targetAttribute = strapi.db.metadata.get(targetUid).attributes[attributeName];
-  if (targetAttribute?.type !== 'relation' || targetAttribute.relation !== 'oneToOne') {
-    return;
-  }
+    if (!sourceRow) {
+      return;
+    }
 
-  // processData only accepts attribute names, not raw join-column names
-  await strapi.db.query(targetUid).update({
-    where: { id: targetEntryId },
-    data: { [attributeName]: sourceRow[joinColumnName] ?? null },
+    const targetAttribute = strapi.db.metadata.get(targetUid).attributes[attributeName];
+    if (targetAttribute?.type !== 'relation' || targetAttribute.relation !== 'oneToOne') {
+      return;
+    }
+
+    // processData only accepts attribute names, not raw join-column names
+    await strapi.db.query(targetUid).update({
+      where: { id: targetEntryId },
+      data: { [attributeName]: sourceRow[joinColumnName] ?? null },
+    });
   });
 };
 
@@ -602,33 +592,31 @@ const copyMorphToOneRelation = async (
 
   const { idColumn, typeColumn } = sourceAttribute.morphColumn;
   const typeField = targetAttribute.morphColumn?.typeField ?? '__type';
-  const trx = transactionCtx.get();
   const sourceMeta = strapi.db.metadata.get(sourceUid);
-  const sourceRow = await strapi.db
-    .connection(sourceMeta.tableName)
-    .where({ id: sourceEntryId })
-    .select([idColumn.name, typeColumn.name])
-    .modify((qb) => {
-      if (trx) {
-        qb.transacting(trx);
-      }
-    })
-    .first();
 
-  if (!sourceRow) {
-    return;
-  }
+  await strapi.db.transaction(async ({ trx }) => {
+    const sourceRow = await strapi.db
+      .getConnection(sourceMeta.tableName)
+      .where({ id: sourceEntryId })
+      .select([idColumn.name, typeColumn.name])
+      .transacting(trx)
+      .first();
 
-  const morphId = sourceRow[idColumn.name];
-  const morphType = sourceRow[typeColumn.name];
+    if (!sourceRow) {
+      return;
+    }
 
-  // processData only accepts the morph attribute ({ id, __type }), not raw column names
-  await strapi.db.query(targetUid).update({
-    where: { id: targetEntryId },
-    data: {
-      [attributeName]:
-        morphId != null && morphType != null ? { id: morphId, [typeField]: morphType } : null,
-    },
+    const morphId = sourceRow[idColumn.name];
+    const morphType = sourceRow[typeColumn.name];
+
+    // processData only accepts the morph attribute ({ id, __type }), not raw column names
+    await strapi.db.query(targetUid).update({
+      where: { id: targetEntryId },
+      data: {
+        [attributeName]:
+          morphId != null && morphType != null ? { id: morphId, [typeField]: morphType } : null,
+      },
+    });
   });
 };
 
