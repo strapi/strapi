@@ -95,9 +95,9 @@ describe('generateMiddlewaresDefinitions', () => {
     expect(normalized).toContain(
       'type MiddlewareConfig<TModule> = TModule extends { default: infer TExport } ? MiddlewareFactoryConfig<TExport> : unknown'
     );
-    // First parameter; `undefined` without one, `unknown` when untyped
+    // First parameter; `undefined` without one, `unknown` when untyped, `never` when not a factory
     expect(normalized).toContain(
-      "type MiddlewareFactoryConfig<TFactory> = TFactory extends (...args: infer TArgs) => unknown ? TArgs['length'] extends 0 ? undefined : 0 extends 1 & TArgs[0] ? unknown : TArgs[0] : unknown"
+      "type MiddlewareFactoryConfig<TFactory> = TFactory extends (...args: infer TArgs) => unknown ? TFactory extends (config: never, ctx: { strapi: never }) => unknown ? TArgs['length'] extends 0 ? undefined : 0 extends 1 & TArgs[0] ? unknown : TArgs[0] : never : unknown"
     );
   });
 
@@ -111,6 +111,11 @@ describe('generateMiddlewaresDefinitions', () => {
           'export default (config?: { soft: boolean }) => undefined;',
         'src/middlewares/untyped.ts': 'export default (config: any) => undefined;',
         'src/middlewares/noDefault.ts': 'export const helper = 1;',
+        'src/middlewares/strapiContext.ts':
+          'export default (config: { a: 1 }, { strapi }: { strapi: { log: (message: string) => void } }) => undefined;',
+        // Runtime calls a default export as a factory: a plain Koa handler breaks
+        'src/middlewares/koaHandler.ts':
+          'export default (ctx: { path: string }, next: () => void) => next();',
         // Without `allowJs`, the import of a JS middleware would not resolve
         'src/middlewares/legacy.js': 'module.exports = (config, { strapi }) => undefined;',
         'src/api/article/middlewares/auditLog.ts':
@@ -122,6 +127,8 @@ describe('generateMiddlewaresDefinitions', () => {
         'global::optionalConfig',
         'global::untyped',
         'global::noDefault',
+        'global::strapiContext',
+        'global::koaHandler',
         'global::legacy',
         'api::article.audit-log',
       ]
@@ -174,6 +181,8 @@ describe('generateMiddlewaresDefinitions', () => {
       'global::optionalConfig': '{ soft: boolean; } | undefined',
       'global::untyped': 'unknown',
       'global::noDefault': 'unknown',
+      'global::strapiContext': '{ a: 1; }',
+      'global::koaHandler': 'never',
       'global::legacy': 'unknown',
     });
   });
