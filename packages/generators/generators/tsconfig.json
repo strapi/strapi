@@ -1,7 +1,7 @@
 {
   "extends": "tsconfig/base.json",
   "include": ["src", "vitest.config.ts"],
-  "exclude": ["**/__tests__/**", "src/templates"],
+  "exclude": ["src/templates"],
   "compilerOptions": {
     "types": ["node"]
   }
