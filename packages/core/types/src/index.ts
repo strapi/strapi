@@ -123,6 +123,27 @@ declare global {
       interface AppPolicies {}
 
       /**
+       * Middlewares supplied by Strapi and plugin packages, keyed by full middleware UID
+       * (e.g. `'strapi::cors'`, `'admin::rateLimit'`). Each value is the config the factory accepts
+       * as its first parameter, `undefined` when it takes none.
+       * Application entries in {@link AppMiddlewares} take precedence over these contracts.
+       *
+       * With strict types enabled, middleware references are checked as a complete inventory:
+       * once any middleware is registered, typed route configs accept registered middleware names only.
+       * A package that registers middlewares must register all of them.
+       */
+      // eslint-disable-next-line @typescript-eslint/no-empty-interface
+      interface PackageMiddlewares {}
+
+      /**
+       * Application middlewares and overrides, keyed by full middleware UID (`global::<name>`,
+       * `api::<api>.<name>`). Each value is the config the factory accepts. An entry replaces the
+       * package config contract for that UID.
+       */
+      // eslint-disable-next-line @typescript-eslint/no-empty-interface
+      interface AppMiddlewares {}
+
+      /**
        * Content-type schemas keyed by UID, read in strict mode instead of `Public.ContentTypeSchemas`.
        * Type generation is the only producer: it writes `types/generated/contentTypes.d.ts`.
        * Applications do not override schemas, so there is no `Package*` and `App*` pair.
