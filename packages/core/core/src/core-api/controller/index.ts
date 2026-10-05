@@ -1,4 +1,4 @@
-import { prop } from 'lodash/fp';
+import { get } from 'lodash';
 import type Koa from 'koa';
 import { contentTypes as contentTypeUtils } from '@strapi/utils';
 import type { Core, Struct } from '@strapi/types';
@@ -12,7 +12,7 @@ const isSingleType = (
   contentType: Struct.ContentTypeSchema
 ): contentType is Struct.SingleTypeSchema => contentTypeUtils.isSingleType(contentType);
 
-const getAuthFromKoaContext = (ctx: Koa.Context) => prop('state.auth', ctx) ?? {};
+const getAuthFromKoaContext = (ctx: Koa.Context) => get(ctx, 'state.auth') ?? {};
 
 /** Build options for contentAPI.sanitize/validate from the request context (auth, route, strictParams). */
 const getContentAPIOptions = (ctx: Koa.Context) => {

@@ -1,7 +1,6 @@
 import { bootstrap as bootstrapGlobalAgent } from 'global-agent';
 import path from 'path';
 import _ from 'lodash';
-import { isFunction } from 'lodash/fp';
 import { Logger, createLogger } from '@strapi/logger';
 import { Database } from '@strapi/database';
 
@@ -32,6 +31,7 @@ import getNumberOfDynamicZones from './services/utils/dynamic-zones';
 import getNumberOfConditionalFields from './services/utils/conditional-fields';
 import { FeaturesService, createFeaturesService } from './services/features';
 import { createDocumentService } from './services/document-service';
+import { createLocalizationService } from './services/localization';
 import { createContentSourceMapsService } from './services/content-source-maps';
 
 import { coreStoreModel } from './services/core-store';
@@ -118,6 +118,10 @@ class Strapi extends Container implements Core.Strapi {
 
   get documents(): Modules.Documents.Service {
     return this.get('documents');
+  }
+
+  get localization(): Modules.Localization.Service {
+    return this.get('localization');
   }
 
   get features(): FeaturesService {
@@ -300,6 +304,7 @@ class Strapi extends Container implements Core.Strapi {
       .add('entityValidator', entityValidator)
       .add('entityService', () => createEntityService({ strapi: this, db: this.db }))
       .add('documents', () => createDocumentService(this))
+      .add('localization', () => createLocalizationService())
       .add('db', () => {
         const useTSM = this.config.get('database.settings.useTypescriptMigrations') === true;
         const tsDir = useTSM ? tsUtils().resolveOutDirSync(this.dirs.app.root) : null;
@@ -582,7 +587,7 @@ class Strapi extends Container implements Core.Strapi {
   async runUserLifecycles(lifecycleName: 'register' | 'bootstrap' | 'destroy') {
     // user
     const userLifecycleFunction = this.app && this.app[lifecycleName];
-    if (isFunction(userLifecycleFunction)) {
+    if (typeof userLifecycleFunction === 'function') {
       await userLifecycleFunction({ strapi: this });
     }
   }

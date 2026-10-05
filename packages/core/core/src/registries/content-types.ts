@@ -1,4 +1,4 @@
-import { pickBy, has } from 'lodash/fp';
+import { has, pickBy } from 'lodash';
 import type { UID, Struct } from '@strapi/types';
 import { createContentType, ContentTypeDefinition } from '../domain/content-type';
 import { addNamespace, hasNamespace } from './namespace';
@@ -40,7 +40,7 @@ const contentTypesRegistry = () => {
      * Returns a map with all the contentTypes in a namespace
      */
     getAll(namespace: string) {
-      return pickBy((_, uid) => hasNamespace(uid, namespace))(contentTypes);
+      return pickBy(contentTypes, (_, uid) => hasNamespace(uid, namespace));
     },
 
     /**
@@ -60,7 +60,7 @@ const contentTypesRegistry = () => {
       for (const rawCtName of Object.keys(newContentTypes)) {
         const uid = addNamespace(rawCtName, namespace);
 
-        if (has(uid, contentTypes)) {
+        if (has(contentTypes, uid)) {
           throw new Error(`Content-type ${uid} has already been registered.`);
         }
 

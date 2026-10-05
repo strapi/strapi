@@ -1,5 +1,5 @@
 import pMap from 'p-map';
-import { curry } from 'lodash/fp';
+import { curry } from 'lodash';
 
 type AnyFunc<TA extends any[] = any[], TR = any> = (...args: TA) => TR;
 
