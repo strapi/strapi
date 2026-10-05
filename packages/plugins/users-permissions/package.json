@@ -59,6 +59,16 @@
     "test:unit:watch": "run -T vitest --config vitest.config.ts",
     "watch": "run -T rollup -c -w"
   },
+  "nx": {
+    "targets": {
+      "test:front": {
+        "parallelism": false
+      },
+      "test:front:ce": {
+        "parallelism": false
+      }
+    }
+  },
   "dependencies": {
     "@strapi/design-system": "2.2.4",
     "@strapi/icons": "2.2.4",
