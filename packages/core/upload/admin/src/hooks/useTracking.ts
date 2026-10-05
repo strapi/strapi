@@ -3,16 +3,9 @@ import { useCallback } from 'react';
 import { useTracking as useStrapiTracking, type TrackingEvent } from '@strapi/admin/strapi-admin';
 
 import { useGetUploadSettingsQuery } from '../services/settings';
+import { getMediaLibraryVersion } from '../utils/mediaLibraryVersion';
 
 import { useAIMetadataAvailability } from './useAIMetadataAvailability';
-
-/**
- * Media Library version tag stamped on every event fired from the current
- * Media Library. Events from `legacy/` omit it, so analytics can filter new
- * usage from the old plan while both trees emit the SAME event names. Bump
- * this if a future revamp ever needs its own bucket.
- */
-export const MEDIA_LIBRARY_VERSION = 'v2';
 
 /**
  * `location` value for every new Media Library event. The new tree is the
@@ -45,7 +38,7 @@ export const useTracking = () => {
       return trackStrapiUsage(event, {
         ...properties,
         ...(isAiAvailable ? { isAiMediaLibraryConfigured: Boolean(data?.data?.aiMetadata) } : {}),
-        mediaLibraryVersion: MEDIA_LIBRARY_VERSION,
+        mediaLibraryVersion: getMediaLibraryVersion(),
       } as TEvent['properties']);
     },
     [trackStrapiUsage, isAiAvailable, data]
