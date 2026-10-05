@@ -2,7 +2,7 @@ import { renderHook } from '@tests/utils';
 import axios from 'axios';
 
 import { useDeviceType, type DeviceType } from '../../hooks/useDeviceType';
-import { useInitQuery } from '../../services/admin';
+import { useInformationQuery, useInitQuery } from '../../services/admin';
 import { AppInfoProvider } from '../AppInfo';
 import { TrackingProvider, useTracking } from '../Tracking';
 
@@ -24,7 +24,25 @@ jest.mock('../../services/admin', () => ({
       useTypescriptOnServer: true,
     },
   }),
+  useInformationQuery: jest.fn().mockReturnValue({
+    data: {
+      strapiVersion: '5.0.0',
+    },
+    isLoading: false,
+  }),
 }));
+
+jest.mock('../StrapiApp', () => {
+  const actual = jest.requireActual('../StrapiApp');
+
+  return {
+    ...actual,
+    useStrapiApp: (consumerName: string, selector: (state: unknown) => unknown) =>
+      consumerName === 'TrackingProvider'
+        ? selector({ widgets: { getAll: () => [] } })
+        : actual.useStrapiApp(consumerName, selector),
+  };
+});
 
 jest.mock('../../hooks/useDeviceType', () => ({
   useDeviceType: jest.fn().mockReturnValue('desktop'),
@@ -37,6 +55,7 @@ const setup = () =>
         <AppInfoProvider
           currentEnvironment="testing"
           userId="someTestUserId"
+          strapiVersion="5.0.0"
           shouldUpdateStrapi={false}
         >
           {children}
@@ -72,6 +91,7 @@ describe('useTracking', () => {
             useTypescriptOnServer: true,
             projectId: '1',
             projectType: 'Community',
+            version: '5.0.0',
           },
           userProperties: {
             deviceType,
@@ -136,6 +156,37 @@ describe('useTracking', () => {
       }),
       expect.any(Object)
     );
+  });
+
+  it('should send the strapi version with didInitializeAdministration once app info has loaded', () => {
+    const fetchSpy = jest.spyOn(global, 'fetch').mockResolvedValue(new Response());
+    jest.mocked(useInformationQuery).mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      refetch: jest.fn(),
+    });
+
+    const { rerender } = setup();
+
+    expect(fetchSpy).not.toHaveBeenCalled();
+
+    jest.mocked(useInformationQuery).mockReturnValue({
+      data: { strapiVersion: '5.0.0' },
+      isLoading: false,
+      refetch: jest.fn(),
+    });
+    rerender();
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(JSON.parse(fetchSpy.mock.calls[0][1]?.body as string)).toMatchObject({
+      event: 'didInitializeAdministration',
+      groupProperties: {
+        projectId: '1',
+        version: '5.0.0',
+      },
+    });
+
+    fetchSpy.mockRestore();
   });
 
   it('should not track if there is no uuid set in the context', async () => {
