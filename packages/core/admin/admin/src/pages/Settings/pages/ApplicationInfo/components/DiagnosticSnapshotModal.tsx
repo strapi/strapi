@@ -144,7 +144,12 @@ const DiagnosticSnapshotModal = ({ isOpen, onClose }: DiagnosticSnapshotModalPro
             </Flex>
           ) : (
             <Flex justifyContent="center" alignItems="center" padding={7}>
-              <Loader>Generating diagnostic snapshot</Loader>
+              <Loader>
+                {formatMessage({
+                  id: 'Settings.debug-dump.generating',
+                  defaultMessage: 'Generating diagnostic snapshot',
+                })}
+              </Loader>
             </Flex>
           )}
         </Modal.Body>

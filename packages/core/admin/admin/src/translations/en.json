@@ -183,6 +183,7 @@
   "Settings.debug-dump.copy-failed": "Could not copy to clipboard",
   "Settings.debug-dump.download": "Download",
   "Settings.debug-dump.error": "Failed to generate the debug dump. Check the server logs and try again.",
+  "Settings.debug-dump.generating": "Generating diagnostic snapshot",
   "Settings.debug-dump.payload-label": "payload",
   "Settings.debug-dump.snapshot-modal.description": "This snapshot describes how your project is built so a third party can reproduce the bug locally. It does not contain any of your app's content and no credentials.",
   "Settings.debug-dump.snapshot-modal.title": "Diagnostic snapshot",
