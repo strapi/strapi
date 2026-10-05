@@ -63,6 +63,7 @@ const plainBlockModel = {
   collectionName: 'components_plain_blocks',
   attributes: {
     label: { type: 'string' },
+    mto: { type: 'relation', relation: 'morphToOne' },
   },
   displayName: 'plain-block',
 };
@@ -116,7 +117,9 @@ const populate = {
       [RELATION_CONTAINER_UID]: {
         populate: { tag: true, legacyTag: true, mto: true },
       },
-      [PLAIN_BLOCK_UID]: true,
+      [PLAIN_BLOCK_UID]: {
+        populate: { mto: true },
+      },
     },
   },
 } as const;
@@ -922,6 +925,110 @@ describe('Document Service clone nested relation operation payloads', () => {
         sourceMorphBefore: sourceTagRow?.id,
         sourceMorphAfter: sourceTagRow?.id,
         sourceTypeAfter: TAG_UID,
+      });
+    }
+  );
+
+  testInTransaction(
+    'clone restores the source morph onto a replaced dynamic zone block when disconnect does not match',
+    async (trx: Knex.Transaction) => {
+      const decoyTag = await createTag('Zone swap decoy morph');
+      const sourceTag = await createTag('Zone swap kept morph');
+      const unrelatedTag = await createTag('Zone swap unrelated morph');
+      const decoyTagRow = await strapi.db.query(TAG_UID).findOne({
+        where: { documentId: decoyTag.documentId, publishedAt: null },
+      });
+      const sourceTagRow = await strapi.db.query(TAG_UID).findOne({
+        where: { documentId: sourceTag.documentId, publishedAt: null },
+      });
+
+      const decoy = await strapi.documents(PRODUCT_UID).create({
+        data: {
+          name: 'Zone swap plain decoy',
+          sections: [
+            {
+              __component: PLAIN_BLOCK_UID,
+              label: 'Decoy block',
+              mto: { id: decoyTagRow!.id, __type: TAG_UID },
+            },
+          ],
+        },
+        populate,
+      });
+      const source = await strapi.documents(PRODUCT_UID).create({
+        data: {
+          name: 'Zone swap restore source',
+          sections: [
+            {
+              __component: RELATION_CONTAINER_UID,
+              label: 'Source block',
+              mto: { id: sourceTagRow!.id, __type: TAG_UID },
+            },
+          ],
+        },
+        populate,
+      });
+
+      const plainMeta = strapi.db.metadata.get(PLAIN_BLOCK_UID);
+      const morphColumn = (
+        plainMeta.attributes.mto as {
+          morphColumn?: { idColumn?: { name?: string }; typeColumn?: { name?: string } };
+        }
+      ).morphColumn;
+      const idColumn = morphColumn!.idColumn!.name!;
+      const typeColumn = morphColumn!.typeColumn!.name!;
+      const readPlainMorph = async (id: number) => {
+        const row = await strapi.db
+          .connection(plainMeta.tableName)
+          .where({ id })
+          .select([idColumn, typeColumn])
+          .transacting(trx)
+          .first();
+
+        return {
+          morphId: row?.[idColumn] ?? null,
+          morphType: row?.[typeColumn] ?? null,
+        };
+      };
+
+      const decoyBlock = (decoy as ProductWithNestedRelations).sections?.[0];
+      const decoyBefore = await readPlainMorph(decoyBlock!.id!);
+
+      const result = await strapi.documents(PRODUCT_UID).clone({
+        documentId: source.documentId,
+        data: {
+          name: 'Zone swap restore clone',
+          sections: [
+            {
+              __component: PLAIN_BLOCK_UID,
+              label: 'Replaced block',
+              mto: {
+                disconnect: [{ documentId: unrelatedTag.documentId, __type: TAG_UID }],
+              },
+            },
+          ],
+        },
+        populate,
+      });
+
+      const cloneBlock = (result.entries[0] as ProductWithNestedRelations).sections?.[0];
+      const decoyAfter = await readPlainMorph(decoyBlock!.id!);
+      const cloneMorph = await readPlainMorph(cloneBlock!.id!);
+
+      expect({
+        decoyMorphBefore: decoyBefore.morphId,
+        decoyMorphAfter: decoyAfter.morphId,
+        decoyTypeAfter: decoyAfter.morphType,
+        cloneMorphId: cloneMorph.morphId,
+        cloneMorphType: cloneMorph.morphType,
+        cloneComponent: cloneBlock?.__component ?? null,
+      }).toEqual({
+        decoyMorphBefore: decoyTagRow?.id,
+        decoyMorphAfter: decoyTagRow?.id,
+        decoyTypeAfter: TAG_UID,
+        cloneMorphId: sourceTagRow?.id,
+        cloneMorphType: TAG_UID,
+        cloneComponent: PLAIN_BLOCK_UID,
       });
     }
   );

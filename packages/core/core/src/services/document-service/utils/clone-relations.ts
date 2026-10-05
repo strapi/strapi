@@ -531,12 +531,13 @@ export const copyCloneRelationRows = async (
 
 const copyFkColumnRelation = async (
   strapi: Core.Strapi,
-  uid: UID.Schema,
+  targetUid: UID.Schema,
   attributeName: string,
   sourceEntryId: number,
-  targetEntryId: number
+  targetEntryId: number,
+  sourceUid: UID.Schema = targetUid
 ) => {
-  const meta = strapi.db.metadata.get(uid);
+  const meta = strapi.db.metadata.get(sourceUid);
   const attribute = meta.attributes[attributeName];
 
   if (attribute?.type !== 'relation' || !('joinColumn' in attribute) || !attribute.joinColumn) {
@@ -566,8 +567,13 @@ const copyFkColumnRelation = async (
     return;
   }
 
+  const targetAttribute = strapi.db.metadata.get(targetUid).attributes[attributeName];
+  if (targetAttribute?.type !== 'relation' || targetAttribute.relation !== 'oneToOne') {
+    return;
+  }
+
   // processData only accepts attribute names, not raw join-column names
-  await strapi.db.query(uid).update({
+  await strapi.db.query(targetUid).update({
     where: { id: targetEntryId },
     data: { [attributeName]: sourceRow[joinColumnName] ?? null },
   });
@@ -575,26 +581,31 @@ const copyFkColumnRelation = async (
 
 const copyMorphToOneRelation = async (
   strapi: Core.Strapi,
-  uid: UID.Schema,
+  targetUid: UID.Schema,
   attributeName: string,
   sourceEntryId: number,
-  targetEntryId: number
+  targetEntryId: number,
+  sourceUid: UID.Schema = targetUid
 ) => {
-  const meta = strapi.db.metadata.get(uid);
-  const attribute = meta.attributes[attributeName];
+  const sourceAttribute = strapi.db.metadata.get(sourceUid).attributes[attributeName];
+  const targetAttribute = strapi.db.metadata.get(targetUid).attributes[attributeName];
 
   if (
-    attribute?.type !== 'relation' ||
-    attribute.relation !== 'morphToOne' ||
-    !attribute.morphColumn
+    sourceAttribute?.type !== 'relation' ||
+    sourceAttribute.relation !== 'morphToOne' ||
+    !sourceAttribute.morphColumn ||
+    targetAttribute?.type !== 'relation' ||
+    targetAttribute.relation !== 'morphToOne'
   ) {
     return;
   }
 
-  const { idColumn, typeColumn, typeField = '__type' } = attribute.morphColumn;
+  const { idColumn, typeColumn } = sourceAttribute.morphColumn;
+  const typeField = targetAttribute.morphColumn?.typeField ?? '__type';
   const trx = transactionCtx.get();
+  const sourceMeta = strapi.db.metadata.get(sourceUid);
   const sourceRow = await strapi.db
-    .connection(meta.tableName)
+    .connection(sourceMeta.tableName)
     .where({ id: sourceEntryId })
     .select([idColumn.name, typeColumn.name])
     .modify((qb) => {
@@ -612,7 +623,7 @@ const copyMorphToOneRelation = async (
   const morphType = sourceRow[typeColumn.name];
 
   // processData only accepts the morph attribute ({ id, __type }), not raw column names
-  await strapi.db.query(uid).update({
+  await strapi.db.query(targetUid).update({
     where: { id: targetEntryId },
     data: {
       [attributeName]:
@@ -933,6 +944,8 @@ const resolveInlineRelationAssignment = async (
   opts: {
     locale?: string;
     ownerUid: UID.Schema;
+    /** Schema to read the current association from. Differs from ownerUid after a dynamic-zone component swap. */
+    sourceSchemaUid?: UID.Schema;
     sourceUid: UID.Schema;
     originalValue?: unknown;
     sourceOwnerId?: number;
@@ -969,13 +982,16 @@ const resolveInlineRelationAssignment = async (
       );
     }
 
+    const readUid = opts.sourceSchemaUid ?? opts.ownerUid;
+
     if (isMorphToOneAttribute(attribute)) {
       await copyMorphToOneRelation(
         strapi,
         opts.ownerUid,
         opts.attributeName,
         opts.sourceOwnerId,
-        opts.targetOwnerId
+        opts.targetOwnerId,
+        readUid
       );
     } else {
       await copyFkColumnRelation(
@@ -983,7 +999,8 @@ const resolveInlineRelationAssignment = async (
         opts.ownerUid,
         opts.attributeName,
         opts.sourceOwnerId,
-        opts.targetOwnerId
+        opts.targetOwnerId,
+        readUid
       );
     }
 
@@ -1094,6 +1111,7 @@ export const applyPostCloneRelationUpdates = async (
     const assignment = await resolveInlineRelationAssignment(strapi, attribute, update.value, {
       locale,
       ownerUid: schemaUid,
+      sourceSchemaUid: update.schemaUid,
       sourceUid: rootUid,
       originalValue: get(update.dataPath, originalData),
       sourceOwnerId,
