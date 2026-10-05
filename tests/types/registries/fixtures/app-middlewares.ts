@@ -21,6 +21,8 @@ declare const legacy: Config<'global::legacy'>;
 exactlyUnknown(legacy) satisfies true;
 // A plain Koa handler is not a factory: no config can be passed to it.
 true satisfies Equals<Config<'global::koaHandler'>, never>;
+// Nor is a handler with only a context: its first parameter is a Koa context.
+true satisfies Equals<Config<'global::ctxHandler'>, never>;
 
 // Lookups receive the config contract.
 const rateLimit = app.middleware('global::rateLimit');
@@ -74,6 +76,10 @@ type Controllers = { article: { find: Core.ControllerHandler } };
 ({
   // @ts-expect-error A Koa handler is not a factory, runtime cannot call it by name.
   middlewares: ['global::koaHandler'],
+}) satisfies Core.RouteConfigFor<'api::article'>;
+({
+  // @ts-expect-error A handler with only a context is not a factory either.
+  middlewares: ['global::ctxHandler'],
 }) satisfies Core.RouteConfigFor<'api::article'>;
 declare const koaContext: Parameters<Core.MiddlewareHandler>[0];
 ({
