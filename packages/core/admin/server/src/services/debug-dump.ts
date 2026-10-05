@@ -1,4 +1,5 @@
 import os from 'os';
+import path from 'path';
 import type { Core } from '@strapi/types';
 import { scrub } from '../utils/debug-dump/redact';
 import type { DebugDumpPayload } from '../../../shared/contracts/admin';
@@ -68,6 +69,17 @@ const debugDumpService = ({ strapi }: { strapi: Core.Strapi }) => ({
 
     const retained = strapi.ee.retainedLicense;
 
+    // getInfo() makes a SQLite path relative to the working directory, which can still climb
+    // into a home directory (`../../home/<user>/...`). Resolve it and relativize it like every
+    // other path in the dump, so it reads `<app>/...` or `<home>/...`.
+    const databaseInfo = strapi.db.getInfo();
+    if (databaseInfo.client === 'sqlite' && databaseInfo.displayName) {
+      databaseInfo.displayName = scrub(path.resolve(process.cwd(), databaseInfo.displayName), {
+        appRoot,
+        homeDir,
+      }) as string;
+    }
+
     const payload: DebugDumpPayload = {
       dumpVersion: 1,
       generatedAt: new Date().toISOString(),
@@ -91,7 +103,7 @@ const debugDumpService = ({ strapi }: { strapi: Core.Strapi }) => ({
         os: { type: os.type(), platform: os.platform(), arch: os.arch(), release: os.release() },
         isHostedOnStrapiCloud: process.env.STRAPI_HOSTING === 'strapi.cloud',
       },
-      database: strapi.db.getInfo(),
+      database: databaseInfo,
       plugins: Object.keys(strapi.plugins),
       providers: {
         upload: {

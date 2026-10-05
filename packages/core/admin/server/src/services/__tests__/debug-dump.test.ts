@@ -1,3 +1,6 @@
+import os from 'os';
+import path from 'path';
+
 import { REDACTED } from '../../utils/debug-dump/redact';
 import debugDumpService from '../debug-dump';
 
@@ -255,5 +258,21 @@ describe('debug-dump service', () => {
     const dump = await debugDumpService({ strapi }).generate();
 
     expect(dump.license?.isTrial).toBe(false);
+  });
+
+  it('rewrites a SQLite file outside the project to a <home> placeholder', async () => {
+    // getInfo() makes the path relative to the working directory, which can still climb into
+    // the user's home directory (`../../home/<user>/...`).
+    const dbFile = path.join(os.homedir(), 'strapi-data', 'db.sqlite');
+    const strapi = makeStrapi();
+    strapi.db.getInfo = () => ({
+      client: 'sqlite',
+      schema: undefined,
+      displayName: path.relative(process.cwd(), dbFile),
+    });
+
+    const dump = await debugDumpService({ strapi }).generate();
+
+    expect(dump.database.displayName).toBe(`<home>${path.sep}strapi-data${path.sep}db.sqlite`);
   });
 });
