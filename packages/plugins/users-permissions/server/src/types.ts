@@ -3,6 +3,11 @@ import type { Context } from 'koa';
 
 export type CookieSetOptions = NonNullable<Parameters<Context['cookies']['set']>[2]>;
 
+/** Cookie attributes and the optional custom name used for refresh tokens. */
+export interface SessionCookieOptions extends CookieSetOptions {
+  name?: string;
+}
+
 export type PluginContext = { strapi: Core.Strapi };
 
 export type User = {
@@ -68,7 +73,7 @@ export type SessionsConfig = {
   idleRefreshTokenLifespan?: number;
   maxSessionLifespan?: number;
   idleSessionLifespan?: number;
-  cookie?: CookieSetOptions & { name?: string };
+  cookie?: SessionCookieOptions;
 };
 
 export type OAuthEndpoints = {

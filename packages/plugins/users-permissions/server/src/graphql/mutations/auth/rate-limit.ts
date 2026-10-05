@@ -16,7 +16,7 @@ export const getRateLimitPath = (strapi: Core.Strapi, routeSuffix: string) => {
 };
 
 const enqueueContextOperation = <T>(koaContext: Context, operation: () => Promise<T>) => {
-  const previous = contextQueues.get(koaContext) || Promise.resolve();
+  const previous = contextQueues.get(koaContext) ?? Promise.resolve();
   const result = previous.catch(() => undefined).then(operation);
 
   contextQueues.set(
