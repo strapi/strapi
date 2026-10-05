@@ -2,6 +2,7 @@ import _ from 'lodash/fp';
 import { hasSort } from '@strapi/utils';
 
 import { fromRow } from '../transform';
+import { transactionCtx } from '../../../transaction-context';
 import type { QueryBuilder } from '../../query-builder';
 import type { Database } from '../../..';
 import type { Meta } from '../../../metadata';
@@ -11,6 +12,27 @@ import { ID, RelationalAttribute, Relation } from '../../../types';
 // Therefore, we will prefix with something unlikely to conflict with a user attribute
 // TODO: ...and completely restrict the strapi_ prefix for an attribute name in the future
 const joinColPrefix = '__strapi' as const;
+
+/**
+ * Runs one populate task per key.
+ *
+ * Inside a transaction every query is bound to the transaction's single connection, and
+ * node-postgres deprecated (pg@8.19) and removes (pg@9) calling `client.query()` on a client
+ * that is already executing a query. The tasks therefore run one after another there, which
+ * costs nothing: the driver was already serialising them on that one connection. Outside a
+ * transaction they fan out over the pool as before.
+ */
+const forEachPopulate = async (keys: string[], task: (key: string) => Promise<void>) => {
+  if (transactionCtx.get()) {
+    for (const key of keys) {
+      await task(key);
+    }
+
+    return;
+  }
+
+  await Promise.all(keys.map(task));
+};
 
 /**
  * Join-table `order` preserves connect order when no explicit populate sort is set.
@@ -574,28 +596,26 @@ const morphToMany = async (input: Input<Relation.MorphToMany>, ctx: Context) => 
   const map: MorphIdMap = {};
   const { on, ...typePopulate } = populateValue;
 
-  await Promise.all(
-    Object.keys(idsByType).map(async (type) => {
-      const ids = idsByType[type];
+  await forEachPopulate(Object.keys(idsByType), async (type) => {
+    const ids = idsByType[type];
 
-      // type was removed but still in morph relation
-      if (!db.metadata.get(type)) {
-        map[type] = {};
+    // type was removed but still in morph relation
+    if (!db.metadata.get(type)) {
+      map[type] = {};
 
-        return;
-      }
+      return;
+    }
 
-      const qb = db.entityManager.createQueryBuilder(type);
+    const qb = db.entityManager.createQueryBuilder(type);
 
-      const rows = await qb
-        .init(on?.[type] ?? typePopulate)
-        .addSelect(`${qb.alias}.${idColumn.referencedColumn}`)
-        .where({ [idColumn.referencedColumn]: ids })
-        .execute<Row[]>({ mapResults: false });
+    const rows = await qb
+      .init(on?.[type] ?? typePopulate)
+      .addSelect(`${qb.alias}.${idColumn.referencedColumn}`)
+      .where({ [idColumn.referencedColumn]: ids })
+      .execute<Row[]>({ mapResults: false });
 
-      map[type] = _.groupBy<Row>(idColumn.referencedColumn)(rows);
-    })
-  );
+    map[type] = _.groupBy<Row>(idColumn.referencedColumn)(rows);
+  });
 
   results.forEach((result) => {
     const joinResults = joinMap[result[joinColumn.referencedColumn] as string] || [];
@@ -813,7 +833,7 @@ const applyPopulate = async (results: Row[], populate: Record<string, any>, ctx:
     }
   };
 
-  await Promise.all(Object.keys(populate).map(populateAttribute));
+  await forEachPopulate(Object.keys(populate), populateAttribute);
 };
 
 export default applyPopulate;
