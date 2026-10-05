@@ -1,6 +1,6 @@
 ---
 name: package-server-contracts
-description: Use when adding or changing a service, controller, policy, or config contract of a Strapi monorepo package, when a server package looks up another package, when a strict lookup resolves to `unknown`, when editing `server/src/types/` registry declarations or a `server/src/registries.ts` file, or when changing `types` or `paths` in a server tsconfig.
+description: Use when adding or changing a service, controller, policy, middleware, or config contract of a Strapi monorepo package, when a server package looks up another package, when a strict lookup resolves to `unknown`, when editing `server/src/types/` registry declarations or a `server/src/registries.ts` file, or when changing `types` or `paths` in a server tsconfig.
 ---
 
 # Package server contracts
@@ -22,7 +22,7 @@ declare global {
 }
 ```
 
-- Declare in `PackageServices`, `PackageControllers`, `PackagePolicies`, or `PackageConfigs`. `App*` registries belong to applications.
+- Declare in `PackageServices`, `PackageControllers`, `PackagePolicies`, `PackageMiddlewares`, or `PackageConfigs`. Policy and middleware registries are complete inventories: register every policy or middleware the package ships. `App*` registries belong to applications.
 - Re-export from the server entry with `export type * from './types'`, and map `strapi-server` in `typesVersions` when the package has an `exports` map.
 - Never augment `Strapi.Registries.Settings` in published source.
 - Check the implementation against its contract with an annotation or `satisfies`.
