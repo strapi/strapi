@@ -1,12 +1,11 @@
-/* eslint @typescript-eslint/no-var-requires: off */
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-const crypto = require('node:crypto');
-const jwt = require('jsonwebtoken');
-const { bearerGet, fetchJson } = require('../provider-http');
-const { verifyJwtWithJwks } = require('../verify-jwt-with-jwks');
-const { exchangeAuthorizationCode } = require('../oauth-connect/oauth2');
-const { requestToken, twitterGet } = require('../oauth-connect/oauth1');
+import crypto from 'node:crypto';
+import jwt from 'jsonwebtoken';
+import { bearerGet, fetchJson } from '../provider-http';
+import { verifyJwtWithJwks } from '../verify-jwt-with-jwks';
+import { exchangeAuthorizationCode } from '../oauth-connect/oauth2';
+import { requestToken, twitterGet } from '../oauth-connect/oauth1';
 
 afterEach(() => vi.unstubAllGlobals());
 

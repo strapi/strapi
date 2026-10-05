@@ -1,15 +1,24 @@
-'use strict';
+import type { Core } from '@strapi/types';
+import type { Context, Next } from 'koa';
+import { errors } from '@strapi/utils';
+import type {
+  GrantConfig,
+  GrantResponse,
+  OAuthEndpoints,
+  OAuthProvider,
+  ProviderSettings,
+} from '../../types';
+import { getService } from '..';
 
-const { errors } = require('@strapi/utils');
-
-const builtinProviderEndpoints = require('./providers');
-const oauth1 = require('./oauth1');
-const oauth2 = require('./oauth2');
-const { trimGrantSessionResponse } = require('../trim-grant-session-response');
+import builtinProviderEndpoints from './providers';
+import * as oauth1 from './oauth1';
+import * as oauth2 from './oauth2';
+import { trimGrantSessionResponse } from '../trim-grant-session-response';
 
 const CONNECT_PREFIX = '/connect';
 
-const parseConnectPath = (requestPath, apiPrefix) => {
+/** Identify the provider and callback stage for a connect request. */
+const parseConnectPath = (requestPath: string, apiPrefix: string) => {
   const prefix = `${apiPrefix}${CONNECT_PREFIX}/`;
   if (!requestPath.startsWith(prefix)) {
     return null;
@@ -32,8 +41,13 @@ const parseConnectPath = (requestPath, apiPrefix) => {
  * Resolve OAuth endpoint config from built-ins, falling back to store-defined
  * endpoints so custom providers registered via providers-registry still work.
  */
-const buildProviderConfig = (providerName, storedConfig, redirectUri) => {
-  const defaults = builtinProviderEndpoints[providerName];
+const buildProviderConfig = (
+  providerName: string,
+  storedConfig: ProviderSettings,
+  redirectUri: string
+): OAuthProvider | null => {
+  const endpointsMap: Record<string, OAuthEndpoints> = builtinProviderEndpoints;
+  const defaults = endpointsMap[providerName];
   const endpoints = defaults || {
     oauth: storedConfig.oauth,
     authorize_url: storedConfig.authorize_url,
@@ -54,6 +68,8 @@ const buildProviderConfig = (providerName, storedConfig, redirectUri) => {
   return {
     name: providerName,
     ...endpoints,
+    authorize_url: endpoints.authorize_url!,
+    access_url: endpoints.access_url!,
     key: storedConfig.key,
     secret: storedConfig.secret,
     scope: storedConfig.scope,
@@ -63,12 +79,17 @@ const buildProviderConfig = (providerName, storedConfig, redirectUri) => {
   };
 };
 
-const redirectWithPayload = (ctx, callbackUrl, payload) => {
+/** Redirect to the configured callback with encoded response parameters. */
+const redirectWithPayload = (
+  ctx: Pick<Context, 'redirect'>,
+  callbackUrl: string,
+  payload: Record<string, unknown>
+) => {
   const url = new URL(callbackUrl);
   const params = new URLSearchParams();
 
   Object.entries(payload).forEach(([key, value]) => {
-    if (key === 'raw') {
+    if (key === 'raw' && typeof value === 'object' && value !== null) {
       Object.entries(value).forEach(([rawKey, rawValue]) => {
         params.set(`raw[${rawKey}]`, String(rawValue));
       });
@@ -83,12 +104,17 @@ const redirectWithPayload = (ctx, callbackUrl, payload) => {
   ctx.redirect(url.toString());
 };
 
-const preserveGrantDynamic = (ctx) => {
+const preserveGrantDynamic = (ctx: Context) => {
   const dynamic = ctx.session.grant?.dynamic;
   return dynamic ? { dynamic } : {};
 };
 
-const redirectWithSessionResponse = (ctx, callbackUrl, provider, tokenResponse) => {
+const redirectWithSessionResponse = (
+  ctx: Context,
+  callbackUrl: string,
+  provider: OAuthProvider,
+  tokenResponse: GrantResponse
+) => {
   const grantResponse = oauth2.tokensToQueryPayload(provider, tokenResponse);
   ctx.session.grant = {
     response: trimGrantSessionResponse(grantResponse, provider.name),
@@ -97,9 +123,14 @@ const redirectWithSessionResponse = (ctx, callbackUrl, provider, tokenResponse) 
   return redirectWithPayload(ctx, callbackUrl, {});
 };
 
-const startOAuth1Flow = async (ctx, provider, parsed, redirectUri) => {
+const startOAuth1Flow = async (
+  ctx: Context,
+  provider: OAuthProvider,
+  parsed: { provider: string },
+  redirectUri: string
+) => {
   const requestToken = await oauth1.requestToken({
-    requestUrl: provider.request_url,
+    requestUrl: provider.request_url!,
     redirectUri,
     consumerKey: provider.key,
     clientCredential: provider.secret,
@@ -111,11 +142,16 @@ const startOAuth1Flow = async (ctx, provider, parsed, redirectUri) => {
     request: requestToken,
   };
 
-  const authorizeUrl = `${provider.authorize_url}?oauth_token=${encodeURIComponent(requestToken.oauth_token)}`;
+  const authorizeUrl = `${provider.authorize_url}?oauth_token=${encodeURIComponent(String(requestToken.oauth_token))}`;
   return ctx.redirect(authorizeUrl);
 };
 
-const startOAuth2Flow = (ctx, provider, parsed, redirectUri) => {
+const startOAuth2Flow = (
+  ctx: Context,
+  provider: OAuthProvider,
+  parsed: { provider: string },
+  redirectUri: string
+) => {
   const state = oauth2.generateState();
   ctx.session.grant = {
     ...preserveGrantDynamic(ctx),
@@ -134,7 +170,7 @@ const startOAuth2Flow = (ctx, provider, parsed, redirectUri) => {
   return ctx.redirect(authorizeUrl);
 };
 
-const handleOAuth1Callback = async (ctx, provider, callbackUrl) => {
+const handleOAuth1Callback = async (ctx: Context, provider: OAuthProvider, callbackUrl: string) => {
   const session = ctx.session.grant || {};
   const { oauth_token: oauthToken, oauth_verifier: oauthVerifier } = ctx.query;
   const requestToken = session.request;
@@ -147,15 +183,20 @@ const handleOAuth1Callback = async (ctx, provider, callbackUrl) => {
     accessUrl: provider.access_url,
     consumerKey: provider.key,
     clientCredential: provider.secret,
-    oauthToken,
-    oauthVerifier,
+    oauthToken: String(oauthToken),
+    oauthVerifier: typeof oauthVerifier === 'string' ? oauthVerifier : undefined,
     oauthTokenCredential: requestToken.oauth_token_secret,
   });
 
   return redirectWithSessionResponse(ctx, callbackUrl, provider, tokenResponse);
 };
 
-const handleOAuth2Callback = async (ctx, provider, callbackUrl, redirectUri) => {
+const handleOAuth2Callback = async (
+  ctx: Context,
+  provider: OAuthProvider,
+  callbackUrl: string,
+  redirectUri: string
+) => {
   const session = ctx.session.grant || {};
   const { code, state: queryState, error, error_description: errorDescription } = ctx.query;
 
@@ -180,16 +221,17 @@ const handleOAuth2Callback = async (ctx, provider, callbackUrl, redirectUri) => 
     key: provider.key,
     secret: provider.secret,
     redirectUri,
-    code,
+    code: String(code),
     subdomain: provider.subdomain,
   });
 
   return redirectWithSessionResponse(ctx, callbackUrl, provider, tokenResponse);
 };
 
-const createOAuthConnectMiddleware = () => {
-  return async (ctx, next) => {
-    const apiPrefix = strapi.config.get('api.rest.prefix');
+/** Create the OAuth middleware using the supplied Strapi instance. */
+const createOAuthConnectMiddleware = (strapi: Core.Strapi) => {
+  return async (ctx: Context, next: Next) => {
+    const apiPrefix = strapi.config.get<string>('api.rest.prefix');
     const [requestPath] = ctx.request.url.split('?');
     const parsed = parseConnectPath(requestPath, apiPrefix);
 
@@ -203,15 +245,14 @@ const createOAuthConnectMiddleware = () => {
 
     const storedProviders = await strapi
       .store({ type: 'plugin', name: 'users-permissions', key: 'grant' })
-      .get();
+      .get<GrantConfig>();
 
     const storedConfig = storedProviders?.[parsed.provider];
     if (!storedConfig?.enabled) {
       throw new errors.ApplicationError('This provider is disabled');
     }
 
-    const { getService } = require('..');
-    const redirectUri = getService('providers').buildRedirectUri(parsed.provider);
+    const redirectUri = getService(strapi, 'providers').buildRedirectUri(parsed.provider);
 
     const callbackOverride =
       ctx.state.oauthConnect?.callback ?? ctx.session.grant?.dynamic?.callback;
@@ -248,15 +289,10 @@ const createOAuthConnectMiddleware = () => {
       ctx.session.grant = {};
       return redirectWithPayload(ctx, callbackUrl, {
         error: 'oauth_error',
-        error_description: err.message,
+        error_description: err instanceof Error ? err.message : String(err),
       });
     }
   };
 };
 
-module.exports = {
-  createOAuthConnectMiddleware,
-  parseConnectPath,
-  buildProviderConfig,
-  redirectWithPayload,
-};
+export { createOAuthConnectMiddleware, parseConnectPath, buildProviderConfig, redirectWithPayload };

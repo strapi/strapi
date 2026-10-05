@@ -1,12 +1,15 @@
-'use strict';
+import { strict as assert } from 'assert';
+import urljoin from 'url-join';
+import type { AuthProvider, PluginContext, ProviderAuthContext } from '../types';
+import { twitterGet } from '../utils/oauth-connect/oauth1';
 
-const { strict: assert } = require('assert');
-const urljoin = require('url-join');
+import { verifyJwtWithJwks } from '../utils/verify-jwt-with-jwks';
+import { bearerGet, fetchJson } from '../utils/provider-http';
 
-const { verifyJwtWithJwks } = require('../utils/verify-jwt-with-jwks');
-const { bearerGet, fetchJson } = require('../utils/provider-http');
-
-const initProviders = ({ baseURL }) => ({
+const initProviders = ({
+  strapi,
+  baseURL,
+}: PluginContext & { baseURL: string }): Record<string, AuthProvider> => ({
   email: {
     enabled: true,
     icon: 'envelope',
@@ -22,7 +25,12 @@ const initProviders = ({ baseURL }) => ({
       scope: ['identify', 'email'],
     },
     async authCallback({ accessToken }) {
-      const { body } = await bearerGet('https://discord.com/api/users/@me', accessToken);
+      const { body } = await bearerGet<{
+        verified?: boolean;
+        discriminator?: string;
+        username?: string;
+        email?: string;
+      }>('https://discord.com/api/users/@me', accessToken);
       if (body.verified !== true) {
         throw new Error('Email not verified by Discord');
       }
@@ -46,9 +54,13 @@ const initProviders = ({ baseURL }) => ({
       scope: ['email'],
     },
     async authCallback({ accessToken }) {
-      const { body } = await bearerGet('https://graph.facebook.com/me', accessToken, {
-        qs: { fields: 'name,email' },
-      });
+      const { body } = await bearerGet<{ name?: string; email?: string }>(
+        'https://graph.facebook.com/me',
+        accessToken,
+        {
+          qs: { fields: 'name,email' },
+        }
+      );
       if (!body.email) {
         throw new Error('Email not verified by Facebook');
       }
@@ -68,8 +80,12 @@ const initProviders = ({ baseURL }) => ({
       scope: ['email'],
     },
     async authCallback({ accessToken }) {
-      const { body } = await fetchJson(
-        `https://oauth2.googleapis.com/tokeninfo?access_token=${encodeURIComponent(accessToken)}`
+      const { body } = await fetchJson<{
+        verified_email?: boolean | string;
+        email_verified?: boolean | string;
+        email: string;
+      }>(
+        `https://oauth2.googleapis.com/tokeninfo?access_token=${encodeURIComponent(String(accessToken))}`
       );
       const verified = body.verified_email ?? body.email_verified;
       if (verified !== true && verified !== 'true') {
@@ -91,17 +107,19 @@ const initProviders = ({ baseURL }) => ({
       scope: ['user', 'user:email'],
     },
     async authCallback({ accessToken }) {
-      const { body: userBody } = await bearerGet('https://api.github.com/user', accessToken, {
-        headers: { 'user-agent': 'strapi' },
-      });
-
-      const { body: emailBody } = await bearerGet(
-        'https://api.github.com/user/emails',
+      const { body: userBody } = await bearerGet<{ login?: string; email?: string }>(
+        'https://api.github.com/user',
         accessToken,
         {
           headers: { 'user-agent': 'strapi' },
         }
       );
+
+      const { body: emailBody } = await bearerGet<
+        { email: string; verified?: boolean; primary?: boolean }[]
+      >('https://api.github.com/user/emails', accessToken, {
+        headers: { 'user-agent': 'strapi' },
+      });
 
       if (userBody.email) {
         const verifiedPublicEmail = Array.isArray(emailBody)
@@ -142,7 +160,10 @@ const initProviders = ({ baseURL }) => ({
       scope: ['user.read'],
     },
     async authCallback({ accessToken }) {
-      const { body } = await bearerGet('https://graph.microsoft.com/v1.0/me', accessToken);
+      const { body } = await bearerGet<{ userPrincipalName?: string }>(
+        'https://graph.microsoft.com/v1.0/me',
+        accessToken
+      );
       return {
         username: body.userPrincipalName,
         email: body.userPrincipalName,
@@ -158,7 +179,7 @@ const initProviders = ({ baseURL }) => ({
       secret: '',
       callbackUrl: `${baseURL}/twitter/callback`,
     },
-    async authCallback({ accessToken, providers, grantResponse }) {
+    async authCallback({ accessToken, providers = {}, grantResponse }) {
       const accessSecret = grantResponse?.access_secret;
       const screenName = grantResponse?.raw?.screen_name;
 
@@ -166,7 +187,6 @@ const initProviders = ({ baseURL }) => ({
         throw new Error('Twitter authentication requires a completed OAuth session');
       }
 
-      const { twitterGet } = require('../utils/oauth-connect/oauth1');
       const { body } = await twitterGet({
         url: 'https://api.twitter.com/1.1/account/verify_credentials.json',
         accessToken,
@@ -196,9 +216,13 @@ const initProviders = ({ baseURL }) => ({
       scope: ['user_profile'],
     },
     async authCallback({ accessToken }) {
-      const { body } = await bearerGet('https://graph.instagram.com/me', accessToken, {
-        qs: { fields: 'id,username' },
-      });
+      const { body } = await bearerGet<{ username: string }>(
+        'https://graph.instagram.com/me',
+        accessToken,
+        {
+          qs: { fields: 'id,username' },
+        }
+      );
       return {
         username: body.username,
         email: `${body.username}@strapi.io`,
@@ -222,9 +246,13 @@ const initProviders = ({ baseURL }) => ({
         throw new Error('VK authentication requires a completed OAuth session');
       }
 
-      const { body } = await bearerGet('https://api.vk.com/method/users.get', accessToken, {
-        qs: { user_ids: userId, v: '5.122' },
-      });
+      const { body } = await bearerGet<{ response?: { last_name: string; first_name: string }[] }>(
+        'https://api.vk.com/method/users.get',
+        accessToken,
+        {
+          qs: { user_ids: userId, v: '5.122' },
+        }
+      );
 
       if (!body.response?.[0]) {
         throw new Error('Invalid VK access token');
@@ -246,18 +274,22 @@ const initProviders = ({ baseURL }) => ({
       callbackUrl: `${baseURL}/twitch/callback`,
       scope: ['user:read:email'],
     },
-    async authCallback({ accessToken, providers }) {
-      const { body } = await bearerGet('https://api.twitch.tv/helix/users', accessToken, {
-        headers: {
-          'Client-Id': providers.twitch.key,
-        },
-      });
+    async authCallback({ accessToken, providers = {} }) {
+      const { body } = await bearerGet<{ data?: { email?: string; login?: string }[] }>(
+        'https://api.twitch.tv/helix/users',
+        accessToken,
+        {
+          headers: {
+            'Client-Id': providers.twitch.key ?? '',
+          },
+        }
+      );
       const email = body.data?.[0]?.email;
       if (!email) {
         throw new Error('Email not verified by Twitch');
       }
       return {
-        username: body.data[0].login,
+        username: body.data?.[0]?.login,
         email,
       };
     },
@@ -273,8 +305,13 @@ const initProviders = ({ baseURL }) => ({
       scope: ['r_liteprofile', 'r_emailaddress'],
     },
     async authCallback({ accessToken }) {
-      const { body: profileBody } = await bearerGet('https://api.linkedin.com/v2/me', accessToken);
-      const { body: emailBody } = await bearerGet(
+      const { body: profileBody } = await bearerGet<{ localizedFirstName?: string }>(
+        'https://api.linkedin.com/v2/me',
+        accessToken
+      );
+      const { body: emailBody } = await bearerGet<{
+        elements: { 'handle~'?: { emailAddress?: string } }[];
+      }>(
         'https://api.linkedin.com/v2/emailAddress?q=members&projection=(elements*(handle~))',
         accessToken
       );
@@ -302,8 +339,8 @@ const initProviders = ({ baseURL }) => ({
       callback: `${baseURL}/cognito/callback`,
       scope: ['email', 'openid', 'profile'],
     },
-    async authCallback({ providers, grantResponse }) {
-      const jwksUrl = new URL(providers.cognito.jwksurl);
+    async authCallback({ providers = {}, grantResponse }) {
+      const jwksUrl = new URL(providers.cognito.jwksurl ?? '');
       const idToken = grantResponse?.id_token;
 
       if (!idToken) {
@@ -331,9 +368,13 @@ const initProviders = ({ baseURL }) => ({
       scope: ['identity'],
     },
     async authCallback({ accessToken }) {
-      const { body } = await bearerGet('https://oauth.reddit.com/api/v1/me', accessToken, {
-        headers: { 'user-agent': 'strapi' },
-      });
+      const { body } = await bearerGet<{ name: string }>(
+        'https://oauth.reddit.com/api/v1/me',
+        accessToken,
+        {
+          headers: { 'user-agent': 'strapi' },
+        }
+      );
       return {
         username: body.name,
         email: `${body.name}@strapi.io`,
@@ -351,11 +392,14 @@ const initProviders = ({ baseURL }) => ({
       callback: `${baseURL}/auth0/callback`,
       scope: ['openid', 'email', 'profile'],
     },
-    async authCallback({ accessToken, providers }) {
-      const { body } = await bearerGet(
-        `https://${providers.auth0.subdomain}.auth0.com/userinfo`,
-        accessToken
-      );
+    async authCallback({ accessToken, providers = {} }) {
+      const { body } = await bearerGet<{
+        username?: string;
+        nickname?: string;
+        name?: string;
+        email: string;
+        email_verified?: boolean;
+      }>(`https://${providers.auth0.subdomain}.auth0.com/userinfo`, accessToken);
       if (body.email && body.email_verified !== true) {
         throw new Error('Email not verified by Auth0');
       }
@@ -379,11 +423,21 @@ const initProviders = ({ baseURL }) => ({
       scope: ['openid email'],
       subdomain: 'my.subdomain.com/cas',
     },
-    async authCallback({ accessToken, providers }) {
-      const { body } = await bearerGet(
-        `https://${providers.cas.subdomain}/oidc/profile`,
-        accessToken
-      );
+    async authCallback({ accessToken, providers = {} }) {
+      const { body } = await bearerGet<{
+        id?: string;
+        sub?: string;
+        strapiusername?: string;
+        strapiemail?: string;
+        email?: string;
+        email_verified?: boolean;
+        attributes?: {
+          strapiusername?: string;
+          strapiemail?: string;
+          email?: string;
+          email_verified?: boolean;
+        };
+      }>(`https://${providers.cas.subdomain}/oidc/profile`, accessToken);
       const username = body.attributes
         ? body.attributes.strapiusername || body.id || body.sub
         : body.strapiusername || body.id || body.sub;
@@ -416,7 +470,9 @@ const initProviders = ({ baseURL }) => ({
       scope: ['identity', 'identity[email]'],
     },
     async authCallback({ accessToken }) {
-      const { body } = await bearerGet(
+      const { body } = await bearerGet<{
+        data: { attributes: { is_email_verified?: boolean; full_name?: string; email?: string } };
+      }>(
         'https://www.patreon.com/api/oauth2/v2/identity?fields[user]=full_name,email,is_email_verified',
         accessToken
       );
@@ -440,11 +496,12 @@ const initProviders = ({ baseURL }) => ({
       callback: `${baseURL}/keycloak/callback`,
       scope: ['openid', 'email', 'profile'],
     },
-    async authCallback({ accessToken, providers }) {
-      const { body } = await bearerGet(
-        `https://${providers.keycloak.subdomain}/protocol/openid-connect/userinfo`,
-        accessToken
-      );
+    async authCallback({ accessToken, providers = {} }) {
+      const { body } = await bearerGet<{
+        email_verified?: boolean;
+        preferred_username?: string;
+        email?: string;
+      }>(`https://${providers.keycloak.subdomain}/protocol/openid-connect/userinfo`, accessToken);
       if (body.email_verified !== true) {
         throw new Error('Email not verified by Keycloak');
       }
@@ -456,30 +513,38 @@ const initProviders = ({ baseURL }) => ({
   },
 });
 
-module.exports = () => {
-  const apiPrefix = strapi.config.get('api.rest.prefix');
-  const baseURL = urljoin(strapi.config.server.url, apiPrefix, 'auth');
+/** Manage built-in and custom provider profile callbacks. */
+export default ({ strapi }: PluginContext) => {
+  const apiPrefix = strapi.config.get<string>('api.rest.prefix');
+  const baseURL = urljoin(strapi.config.get<string>('server.url'), apiPrefix, 'auth');
 
-  const authProviders = initProviders({ baseURL });
+  const authProviders = initProviders({ strapi, baseURL });
 
   return {
     getAll() {
       return authProviders;
     },
-    get(name) {
+    get(name: string): AuthProvider | undefined {
       return authProviders[name];
     },
-    add(name, config) {
+    add(name: string, config: AuthProvider) {
       authProviders[name] = config;
     },
-    remove(name) {
+    remove(name: string) {
       delete authProviders[name];
     },
 
-    async run({ provider, accessToken, query, providers, grantResponse }) {
+    async run({
+      provider,
+      accessToken,
+      query,
+      providers,
+      grantResponse,
+    }: ProviderAuthContext & { provider: string }) {
       const authProvider = authProviders[provider];
 
       assert(authProvider, 'Unknown auth provider');
+      assert(authProvider.authCallback, 'Auth provider has no callback');
 
       return authProvider.authCallback({ accessToken, query, providers, grantResponse });
     },

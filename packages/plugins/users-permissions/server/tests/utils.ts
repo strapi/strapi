@@ -28,3 +28,7 @@ export const createMockSessionManager = (originApiOverrides = {}, rootOverrides 
   );
   return { sessionManager, originApi };
 };
+
+/** Give partial Koa context test doubles the framework type at the test boundary. */
+export const createContextMock = <T extends object>(mock: T): T & import('koa').Context =>
+  mock as T & import('koa').Context;

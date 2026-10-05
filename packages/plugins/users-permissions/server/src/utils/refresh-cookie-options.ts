@@ -1,6 +1,10 @@
-'use strict';
+import type { CookieSetOptions, SessionsConfig } from '../types';
 
-const buildRefreshCookieOptions = (upSessions, isProduction) => {
+/** Build refresh cookie attributes with secure defaults for production. */
+const buildRefreshCookieOptions = (
+  upSessions: SessionsConfig,
+  isProduction: boolean
+): CookieSetOptions => {
   const isSecure =
     typeof upSessions.cookie?.secure === 'boolean' ? upSessions.cookie?.secure : isProduction;
 
@@ -15,6 +19,4 @@ const buildRefreshCookieOptions = (upSessions, isProduction) => {
   };
 };
 
-module.exports = {
-  buildRefreshCookieOptions,
-};
+export { buildRefreshCookieOptions };

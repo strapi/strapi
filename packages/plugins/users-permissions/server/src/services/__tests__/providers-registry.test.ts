@@ -1,43 +1,49 @@
-/* eslint @typescript-eslint/no-var-requires: off */
+import type { Mock } from 'vitest';
+import type { JwtPayload } from 'jsonwebtoken';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
+import { createStrapiMock } from '../../../tests/utils';
 
-vi.spyOn(require('../../utils/provider-http'), 'bearerGet');
-vi.spyOn(require('../../utils/provider-http'), 'fetchJson');
-vi.spyOn(require('../../utils/verify-jwt-with-jwks'), 'verifyJwtWithJwks');
-vi.spyOn(require('../../utils/oauth-connect/oauth1'), 'twitterGet');
+import { bearerGet, fetchJson } from '../../utils/provider-http';
+import { verifyJwtWithJwks } from '../../utils/verify-jwt-with-jwks';
+import { twitterGet } from '../../utils/oauth-connect/oauth1';
 
-const { bearerGet, fetchJson } = require('../../utils/provider-http');
-const { verifyJwtWithJwks } = require('../../utils/verify-jwt-with-jwks');
-const { twitterGet } = require('../../utils/oauth-connect/oauth1');
+import providersRegistry from '../providers-registry';
 
-const setRequestMock = (requestMock) => {
-  bearerGet.mockImplementation(() => requestMock());
-  fetchJson.mockImplementation(() => requestMock());
-  twitterGet.mockImplementation(() => requestMock());
+vi.mock('../../utils/provider-http');
+vi.mock('../../utils/verify-jwt-with-jwks');
+vi.mock('../../utils/oauth-connect/oauth1');
+
+const setRequestMock = (requestMock: Mock) => {
+  vi.mocked(bearerGet).mockImplementation(() => requestMock());
+  vi.mocked(fetchJson).mockImplementation(() => requestMock());
+  vi.mocked(twitterGet).mockImplementation(() => requestMock());
 };
 
-// providers-registry reads global `strapi` at call time — provide a minimal stub
-global.strapi = {
+// Each registry receives its Strapi instance.
+const strapi = createStrapiMock({
   config: {
-    get: vi.fn().mockReturnValue('/api'),
+    get: vi.fn((key: string) => (key === 'server.url' ? 'http://localhost:1337' : '/api')),
     server: { url: 'http://localhost:1337' },
   },
-};
+});
 
-const providersRegistry = require('../providers-registry');
+const getProvider = (name: string) => {
+  const provider = providersRegistry({ strapi }).get(name);
+  if (!provider?.authCallback) throw new Error('Provider callback required');
+  return { ...provider, authCallback: provider.authCallback };
+};
 
 describe('cognito authCallback — email_verified guard', () => {
   const FAKE_ID_TOKEN = 'fake.id.token';
 
-  let cognitoProvider;
+  let cognitoProvider: ReturnType<typeof getProvider>;
 
   beforeAll(() => {
-    const registry = providersRegistry();
-    cognitoProvider = registry.get('cognito');
+    cognitoProvider = getProvider('cognito');
   });
 
-  const mockJwtVerifyWith = (payload) => {
-    verifyJwtWithJwks.mockResolvedValue(payload);
+  const mockJwtVerifyWith = (payload: JwtPayload) => {
+    vi.mocked(verifyJwtWithJwks).mockResolvedValue(payload);
   };
 
   it('returns username and email when email_verified is true (boolean)', async () => {
@@ -126,18 +132,17 @@ describe('cognito authCallback — email_verified guard', () => {
 });
 
 describe('google authCallback — verified email guard', () => {
-  let googleProvider;
-  let mockRequest;
+  let googleProvider: ReturnType<typeof getProvider>;
+  let mockRequest: Mock;
 
   beforeAll(() => {
     mockRequest = vi.fn();
     setRequestMock(mockRequest);
 
-    const registry = providersRegistry();
-    googleProvider = registry.get('google');
+    googleProvider = getProvider('google');
   });
 
-  const mockTokenInfo = (body) => {
+  const mockTokenInfo = (body: unknown) => {
     mockRequest.mockResolvedValue({ body });
   };
 
@@ -183,13 +188,13 @@ describe('google authCallback — verified email guard', () => {
 });
 
 describe('discord authCallback — verified email guard', () => {
-  let discordProvider;
-  let mockRequest;
+  let discordProvider: ReturnType<typeof getProvider>;
+  let mockRequest: Mock;
 
   beforeAll(() => {
     mockRequest = vi.fn();
     setRequestMock(mockRequest);
-    discordProvider = providersRegistry().get('discord');
+    discordProvider = getProvider('discord');
   });
 
   it('returns username and email when verified is true', async () => {
@@ -224,17 +229,17 @@ describe('discord authCallback — verified email guard', () => {
 });
 
 describe('github authCallback — verified email guard', () => {
-  let githubProvider;
-  let mockRequest;
+  let githubProvider: ReturnType<typeof getProvider>;
+  let mockRequest: Mock;
 
   beforeAll(() => {
     mockRequest = vi.fn();
     setRequestMock(mockRequest);
-    githubProvider = providersRegistry().get('github');
+    githubProvider = getProvider('github');
   });
 
   // First request resolves the /user body, second resolves the /user/emails body.
-  const mockUserThenEmails = (userBody, emailsBody) => {
+  const mockUserThenEmails = (userBody: unknown, emailsBody: unknown) => {
     mockRequest
       .mockResolvedValueOnce({ body: userBody })
       .mockResolvedValueOnce({ body: emailsBody });
@@ -273,13 +278,13 @@ describe('github authCallback — verified email guard', () => {
 });
 
 describe('auth0 authCallback — verified email guard', () => {
-  let auth0Provider;
-  let mockRequest;
+  let auth0Provider: ReturnType<typeof getProvider>;
+  let mockRequest: Mock;
 
   beforeAll(() => {
     mockRequest = vi.fn();
     setRequestMock(mockRequest);
-    auth0Provider = providersRegistry().get('auth0');
+    auth0Provider = getProvider('auth0');
   });
 
   const providersArg = { providers: { auth0: { subdomain: 'my-tenant.eu' } } };
@@ -314,13 +319,13 @@ describe('auth0 authCallback — verified email guard', () => {
 });
 
 describe('keycloak authCallback — verified email guard', () => {
-  let keycloakProvider;
-  let mockRequest;
+  let keycloakProvider: ReturnType<typeof getProvider>;
+  let mockRequest: Mock;
 
   beforeAll(() => {
     mockRequest = vi.fn();
     setRequestMock(mockRequest);
-    keycloakProvider = providersRegistry().get('keycloak');
+    keycloakProvider = getProvider('keycloak');
   });
 
   const providersArg = { providers: { keycloak: { subdomain: 'kc.example.com/realms/r' } } };
@@ -350,13 +355,13 @@ describe('keycloak authCallback — verified email guard', () => {
 });
 
 describe('patreon authCallback — verified email guard', () => {
-  let patreonProvider;
-  let mockRequest;
+  let patreonProvider: ReturnType<typeof getProvider>;
+  let mockRequest: Mock;
 
   beforeAll(() => {
     mockRequest = vi.fn();
     setRequestMock(mockRequest);
-    patreonProvider = providersRegistry().get('patreon');
+    patreonProvider = getProvider('patreon');
   });
 
   it('returns username and email when is_email_verified is true', async () => {
@@ -405,13 +410,13 @@ describe('patreon authCallback — verified email guard', () => {
 });
 
 describe('facebook authCallback — verified email guard', () => {
-  let facebookProvider;
-  let mockRequest;
+  let facebookProvider: ReturnType<typeof getProvider>;
+  let mockRequest: Mock;
 
   beforeAll(() => {
     mockRequest = vi.fn();
     setRequestMock(mockRequest);
-    facebookProvider = providersRegistry().get('facebook');
+    facebookProvider = getProvider('facebook');
   });
 
   it('returns username and email when Facebook returns a confirmed email', async () => {
@@ -432,13 +437,13 @@ describe('facebook authCallback — verified email guard', () => {
 });
 
 describe('github authCallback — public profile email verification', () => {
-  let githubProvider;
-  let mockRequest;
+  let githubProvider: ReturnType<typeof getProvider>;
+  let mockRequest: Mock;
 
   beforeAll(() => {
     mockRequest = vi.fn();
     setRequestMock(mockRequest);
-    githubProvider = providersRegistry().get('github');
+    githubProvider = getProvider('github');
   });
 
   it('accepts a public profile email only when it is verified', async () => {
@@ -467,13 +472,13 @@ describe('github authCallback — public profile email verification', () => {
 });
 
 describe('twitter authCallback — server-side OAuth session guard', () => {
-  let twitterProvider;
-  let mockRequest;
+  let twitterProvider: ReturnType<typeof getProvider>;
+  let mockRequest: Mock;
 
   beforeAll(() => {
     mockRequest = vi.fn();
     setRequestMock(mockRequest);
-    twitterProvider = providersRegistry().get('twitter');
+    twitterProvider = getProvider('twitter');
   });
 
   const providersArg = { providers: { twitter: { key: 'key', secret: 'secret' } } };
@@ -523,13 +528,13 @@ describe('twitter authCallback — server-side OAuth session guard', () => {
 });
 
 describe('twitch authCallback — verified email guard', () => {
-  let twitchProvider;
-  let mockRequest;
+  let twitchProvider: ReturnType<typeof getProvider>;
+  let mockRequest: Mock;
 
   beforeAll(() => {
     mockRequest = vi.fn();
     setRequestMock(mockRequest);
-    twitchProvider = providersRegistry().get('twitch');
+    twitchProvider = getProvider('twitch');
   });
 
   const providersArg = { providers: { twitch: { key: 'client-id' } } };
@@ -557,13 +562,13 @@ describe('twitch authCallback — verified email guard', () => {
 });
 
 describe('linkedin authCallback — verified email guard', () => {
-  let linkedinProvider;
-  let mockRequest;
+  let linkedinProvider: ReturnType<typeof getProvider>;
+  let mockRequest: Mock;
 
   beforeAll(() => {
     mockRequest = vi.fn();
     setRequestMock(mockRequest);
-    linkedinProvider = providersRegistry().get('linkedin');
+    linkedinProvider = getProvider('linkedin');
   });
 
   it('returns username and email when LinkedIn returns an email address', async () => {
@@ -590,13 +595,13 @@ describe('linkedin authCallback — verified email guard', () => {
 });
 
 describe('cas authCallback — verified email guard', () => {
-  let casProvider;
-  let mockRequest;
+  let casProvider: ReturnType<typeof getProvider>;
+  let mockRequest: Mock;
 
   beforeAll(() => {
     mockRequest = vi.fn();
     setRequestMock(mockRequest);
-    casProvider = providersRegistry().get('cas');
+    casProvider = getProvider('cas');
   });
 
   const providersArg = { providers: { cas: { subdomain: 'cas.example.com/cas' } } };
@@ -631,13 +636,13 @@ describe('cas authCallback — verified email guard', () => {
 });
 
 describe('vk authCallback — server-side OAuth session guard', () => {
-  let vkProvider;
-  let mockRequest;
+  let vkProvider: ReturnType<typeof getProvider>;
+  let mockRequest: Mock;
 
   beforeAll(() => {
     mockRequest = vi.fn();
     setRequestMock(mockRequest);
-    vkProvider = providersRegistry().get('vk');
+    vkProvider = getProvider('vk');
   });
 
   const grantSession = {

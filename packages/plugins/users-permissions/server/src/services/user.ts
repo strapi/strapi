@@ -1,36 +1,31 @@
-'use strict';
+import type { Core, Data, UID } from '@strapi/types';
 
-/**
- * User.js service
- *
- * @description: A set of functions similar to controller's actions to avoid code duplication.
- */
+import crypto from 'node:crypto';
+import bcrypt from 'bcryptjs';
+import urlJoin from 'url-join';
 
-const crypto = require('crypto');
-const bcrypt = require('bcryptjs');
-const urlJoin = require('url-join');
+import { sanitize, ALLOWED_QUERY_PARAM_KEYS } from '@strapi/utils';
+import _ from 'lodash';
+import type { EmailSettings, PluginContext, User } from '../types';
+import { getService } from '../utils';
 
-const { sanitize, ALLOWED_QUERY_PARAM_KEYS } = require('@strapi/utils');
-const { pick, get, toNumber } = require('lodash');
-const { getService } = require('../utils');
+const { pick, get, toNumber } = _;
 
 const USER_MODEL_UID = 'plugin::users-permissions.user';
 
-const pickAllowedQueryParams = (params) => pick(params, ALLOWED_QUERY_PARAM_KEYS);
+const pickAllowedQueryParams = (params: Record<string, unknown>) =>
+  pick(params, ALLOWED_QUERY_PARAM_KEYS);
 
-const getSessionManager = () => {
+const getSessionManager = (strapi: Core.Strapi) => {
   const manager = strapi.sessionManager;
   return manager ?? null;
 };
 
-module.exports = ({ strapi }) => ({
-  /**
-   * Promise to count users
-   *
-   * @return {Promise}
-   */
+/** Manage user accounts, passwords, and confirmation emails. */
+export default ({ strapi }: PluginContext) => ({
+  /** Count users after transforming supported Content API query parameters. */
 
-  count(params) {
+  count(params?: Record<string, unknown>) {
     const query = strapi
       .get('query-params')
       .transform(USER_MODEL_UID, pickAllowedQueryParams(params ?? {}));
@@ -38,33 +33,27 @@ module.exports = ({ strapi }) => ({
     return strapi.db.query(USER_MODEL_UID).count(query);
   },
 
-  /**
-   * Hashes password fields in the provided values object if they are present.
-   * It checks each key in the values object against the model's attributes and
-   * hashes it if the attribute type is 'password',
-   *
-   * @param {object} values - The object containing the fields to be hashed.
-   * @return {object} The values object with hashed password fields if they were present.
-   */
-  async ensureHashedPasswords(values) {
+  /** Hash password attributes in place using their configured encryption rounds. */
+  async ensureHashedPasswords(values: Record<string, unknown>) {
     const attributes = strapi.getModel(USER_MODEL_UID).attributes;
 
     for (const key in values) {
       if (attributes[key] && attributes[key].type === 'password') {
         // Check if a custom encryption.rounds has been set on the password attribute
         const rounds = toNumber(get(attributes[key], 'encryption.rounds', 10));
-        values[key] = await bcrypt.hash(values[key], rounds);
+        const value = values[key];
+        if (typeof value !== 'string') {
+          throw new TypeError('Password value must be a string');
+        }
+        Object.assign(values, { [key]: await bcrypt.hash(value, rounds) });
       }
     }
 
     return values;
   },
 
-  /**
-   * Promise to add a/an user.
-   * @return {Promise}
-   */
-  async add(values) {
+  /** Create a user, letting the Document Service process password and relation inputs. */
+  async add(values: Record<string, unknown>) {
     // Use the Document Service so relation inputs accept both the internal
     // numeric id (legacy) and the documentId (v5 default) syntax, consistent
     // with every other content-type endpoint. The Document Service hashes
@@ -75,13 +64,8 @@ module.exports = ({ strapi }) => ({
     });
   },
 
-  /**
-   * Promise to edit a/an user.
-   * @param {string} userId
-   * @param {object} params
-   * @return {Promise}
-   */
-  async edit(userId, params = {}) {
+  /** Update a user addressed by its database id through the Document Service. */
+  async edit(userId: Data.ID, params: Record<string, unknown> = {}) {
     // The user is addressed by its numeric id (e.g. the `/users/:id` route),
     // but the Document Service updates by documentId. Resolve it first so the
     // relation inputs are processed by the Document Service, which accepts both
@@ -102,11 +86,8 @@ module.exports = ({ strapi }) => ({
     });
   },
 
-  /**
-   * Promise to fetch a/an user.
-   * @return {Promise}
-   */
-  fetch(id, params) {
+  /** Fetch one user while retaining the id restriction alongside query filters. */
+  fetch(id: Data.ID, params?: Record<string, unknown>) {
     const query = strapi
       .get('query-params')
       .transform(USER_MODEL_UID, pickAllowedQueryParams(params ?? {}));
@@ -119,19 +100,13 @@ module.exports = ({ strapi }) => ({
     });
   },
 
-  /**
-   * Promise to fetch authenticated user.
-   * @return {Promise}
-   */
-  fetchAuthenticatedUser(id) {
+  /** Fetch an authenticated account with its role. */
+  fetchAuthenticatedUser(id: Data.ID): Promise<User | null> {
     return strapi.db.query(USER_MODEL_UID).findOne({ where: { id }, populate: ['role'] });
   },
 
-  /**
-   * Promise to fetch all users.
-   * @return {Promise}
-   */
-  fetchAll(params) {
+  /** Fetch users using supported Content API query parameters. */
+  fetchAll(params?: Record<string, unknown>) {
     const query = strapi
       .get('query-params')
       .transform(USER_MODEL_UID, pickAllowedQueryParams(params ?? {}));
@@ -139,13 +114,10 @@ module.exports = ({ strapi }) => ({
     return strapi.db.query(USER_MODEL_UID).findMany(query);
   },
 
-  /**
-   * Promise to remove a/an user.
-   * @return {Promise}
-   */
-  async remove(params) {
+  /** Invalidate an account's sessions before removing it. */
+  async remove(params: Record<string, unknown> & { id?: Data.ID }) {
     // Invalidate sessions for all affected users
-    const sessionManager = getSessionManager();
+    const sessionManager = getSessionManager(strapi);
     if (sessionManager && sessionManager.hasOrigin('users-permissions') && params.id) {
       await sessionManager('users-permissions').invalidateRefreshToken(String(params.id));
     }
@@ -153,24 +125,24 @@ module.exports = ({ strapi }) => ({
     return strapi.db.query(USER_MODEL_UID).delete({ where: params });
   },
 
-  validatePassword(password, hash) {
+  validatePassword(password: string, hash: string) {
     return bcrypt.compare(password, hash);
   },
 
-  async sendConfirmationEmail(user) {
-    const userPermissionService = getService('users-permissions');
+  async sendConfirmationEmail(user: User) {
+    const userPermissionService = getService(strapi, 'users-permissions');
     const pluginStore = await strapi.store({ type: 'plugin', name: 'users-permissions' });
     const userSchema = strapi.getModel(USER_MODEL_UID);
 
     const settings = await pluginStore
-      .get({ key: 'email' })
+      .get<EmailSettings>({ key: 'email' })
       .then((storeEmail) => storeEmail.email_confirmation.options);
 
     // Sanitize the template's user information
     const sanitizedUserInfo = await sanitize.sanitizers.defaultSanitizeOutput(
       {
         schema: userSchema,
-        getModel: strapi.getModel.bind(strapi),
+        getModel: (uid) => strapi.getModel(uid as UID.Schema),
       },
       user
     );
@@ -179,17 +151,17 @@ module.exports = ({ strapi }) => ({
 
     await this.edit(user.id, { confirmationToken });
 
-    const apiPrefix = strapi.config.get('api.rest.prefix');
+    const apiPrefix = strapi.config.get<string>('api.rest.prefix');
 
     try {
       settings.message = await userPermissionService.template(settings.message, {
         URL: urlJoin(
-          strapi.config.get('server.absoluteUrl'),
+          strapi.config.get<string>('server.absoluteUrl'),
           apiPrefix,
           '/auth/email-confirmation'
         ),
-        SERVER_URL: strapi.config.get('server.absoluteUrl'),
-        ADMIN_URL: strapi.config.get('admin.absoluteUrl'),
+        SERVER_URL: strapi.config.get<string>('server.absoluteUrl'),
+        ADMIN_URL: strapi.config.get<string>('admin.absoluteUrl'),
         USER: sanitizedUserInfo,
         CODE: confirmationToken,
       });

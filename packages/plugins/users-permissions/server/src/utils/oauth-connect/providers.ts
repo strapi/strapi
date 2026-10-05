@@ -1,10 +1,10 @@
-'use strict';
+import type { OAuthEndpoints } from '../../types';
 
 /**
  * OAuth endpoint definitions for built-in users-permissions providers.
  * Derived from grant's oauth.json (MIT) — inlined to drop the grant dependency.
  */
-module.exports = {
+const providers = {
   discord: {
     oauth: 2,
     authorize_url: 'https://discord.com/api/oauth2/authorize',
@@ -97,4 +97,5 @@ module.exports = {
     access_url: 'https://[subdomain]/protocol/openid-connect/token',
     scope_delimiter: ' ',
   },
-};
+} satisfies Record<string, OAuthEndpoints>;
+export default providers;

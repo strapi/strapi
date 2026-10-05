@@ -1,15 +1,24 @@
-'use strict';
+import crypto from 'node:crypto';
+import { URLSearchParams } from 'node:url';
+import type { GrantResponse } from '../../types';
 
-const crypto = require('node:crypto');
-const { URLSearchParams } = require('node:url');
+type OAuth1Request = {
+  method: string;
+  url: string;
+  params?: Record<string, string | undefined>;
+  consumerKey?: string;
+  clientCredential?: string;
+  token?: string;
+  tokenCredential?: string;
+};
 
-const encode = (str) =>
-  encodeURIComponent(str).replace(
+const encode = (str: string | undefined) =>
+  encodeURIComponent(String(str)).replace(
     /[!'()*]/g,
-    (c) => `%${c.codePointAt(0).toString(16).toUpperCase()}`
+    (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`
   );
 
-const sortKeys = (keys) =>
+const sortKeys = (keys: string[]) =>
   keys.sort((a, b) => {
     if (a < b) return -1;
     if (a > b) return 1;
@@ -20,11 +29,12 @@ const sortKeys = (keys) =>
  * OAuth 1.0 (RFC 5849) request signature — HMAC-SHA1 is required by the protocol.
  * This is not password storage or user-credential hashing (those use bcrypt).
  */
-const signRfc5849BaseString = (signatureBaseString, signingMaterial) => {
+const signRfc5849BaseString = (signatureBaseString: string, signingMaterial: string) => {
   // codeql[js/insufficient-password-hash] OAuth 1.0 signing material, not user password storage
   return crypto.createHmac('sha1', signingMaterial).update(signatureBaseString).digest('base64');
 };
 
+/** Build the signed OAuth 1 authorization header for a request. */
 const buildOAuth1Header = ({
   method,
   url,
@@ -33,8 +43,8 @@ const buildOAuth1Header = ({
   clientCredential,
   token,
   tokenCredential,
-}) => {
-  const requestParameters = {
+}: OAuth1Request) => {
+  const requestParameters: Record<string, string | undefined> = {
     oauth_consumer_key: consumerKey,
     oauth_nonce: crypto.randomBytes(16).toString('hex'),
     oauth_signature_method: 'HMAC-SHA1',
@@ -52,7 +62,10 @@ const buildOAuth1Header = ({
   const signingMaterial = `${encode(clientCredential)}&${encode(tokenCredential || '')}`;
   const signature = signRfc5849BaseString(signatureBaseString, signingMaterial);
 
-  const headerParameters = { ...requestParameters, oauth_signature: signature };
+  const headerParameters: Record<string, string | undefined> = {
+    ...requestParameters,
+    oauth_signature: signature,
+  };
   const header = `OAuth ${sortKeys(Object.keys(headerParameters))
     .map((key) => `${encode(key)}="${encode(headerParameters[key])}"`)
     .join(', ')}`;
@@ -68,7 +81,7 @@ const oauth1Request = async ({
   token,
   tokenCredential,
   params = {},
-}) => {
+}: OAuth1Request): Promise<GrantResponse> => {
   const authorization = buildOAuth1Header({
     method,
     url,
@@ -92,7 +105,18 @@ const oauth1Request = async ({
   return Object.fromEntries(new URLSearchParams(text));
 };
 
-const requestToken = async ({ requestUrl, redirectUri, consumerKey, clientCredential }) =>
+/** Request temporary OAuth 1 credentials tied to the callback URL. */
+const requestToken = async ({
+  requestUrl,
+  redirectUri,
+  consumerKey,
+  clientCredential,
+}: {
+  requestUrl: string;
+  redirectUri: string;
+  consumerKey?: string;
+  clientCredential?: string;
+}) =>
   oauth1Request({
     method: 'POST',
     url: requestUrl,
@@ -101,6 +125,7 @@ const requestToken = async ({ requestUrl, redirectUri, consumerKey, clientCreden
     params: { oauth_callback: redirectUri },
   });
 
+/** Exchange the OAuth 1 verifier and temporary credentials for access credentials. */
 const accessToken = async ({
   accessUrl,
   consumerKey,
@@ -108,6 +133,13 @@ const accessToken = async ({
   oauthToken,
   oauthVerifier,
   oauthTokenCredential,
+}: {
+  accessUrl: string;
+  consumerKey?: string;
+  clientCredential?: string;
+  oauthToken: string;
+  oauthVerifier?: string;
+  oauthTokenCredential?: string;
 }) =>
   oauth1Request({
     method: 'POST',
@@ -119,6 +151,7 @@ const accessToken = async ({
     params: { oauth_verifier: oauthVerifier },
   });
 
+/** Fetch a Twitter profile with signed OAuth 1 query parameters. */
 const twitterGet = async ({
   url,
   accessToken,
@@ -126,9 +159,16 @@ const twitterGet = async ({
   consumerKey,
   clientCredential,
   qs = {},
+}: {
+  url: string;
+  accessToken?: string;
+  accessCredential: string;
+  consumerKey?: string;
+  clientCredential?: string;
+  qs?: Record<string, string | number | null | undefined>;
 }) => {
   const target = new URL(url);
-  const signedParams = {};
+  const signedParams: Record<string, string> = {};
 
   Object.entries(qs).forEach(([key, value]) => {
     if (value !== undefined && value !== null) {
@@ -153,7 +193,11 @@ const twitterGet = async ({
     headers: { Authorization: authorization },
   });
 
-  const body = await response.json();
+  const body = (await response.json()) as {
+    email?: string;
+    screen_name?: string;
+    errors?: { message?: string }[];
+  };
   if (!response.ok) {
     throw new Error(body.errors?.[0]?.message || `Twitter API error (${response.status})`);
   }
@@ -161,9 +205,4 @@ const twitterGet = async ({
   return { body };
 };
 
-module.exports = {
-  buildOAuth1Header,
-  requestToken,
-  accessToken,
-  twitterGet,
-};
+export { buildOAuth1Header, requestToken, accessToken, twitterGet };
