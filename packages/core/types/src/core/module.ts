@@ -2,6 +2,11 @@ import type { PropertyPath } from 'lodash';
 import type { Router, Controller, Service, Policy, Middleware, Strapi } from '.';
 import type { ContentType } from '../schema';
 import type { ControllerFor, RegisteredControllerUID } from './controller';
+import type {
+  MiddlewareConfigFor,
+  MiddlewareFactory,
+  RegisteredMiddlewareName,
+} from './middleware';
 import type { PolicyConfigFor, RegisteredPolicyName } from './policy';
 import type { RegisteredServiceUID, ServiceFor } from './service';
 import type { SuggestedString } from '../utils/string';
@@ -66,7 +71,22 @@ export type ModulePolicyMap<TNamespace extends string> = IsStrict extends false
     >;
 
 /**
- * Whether the module's `service`, `controller` and `policy` lookups resolve registered contracts, with
+ * The module's middlewares keyed by name. With strict types enabled, registered names resolve to a
+ * factory that receives their config contract; other names resolve to the legacy middleware.
+ */
+export type ModuleMiddlewareMap<TNamespace extends string> = IsStrict extends false
+  ? Record<string, Middleware>
+  : RegisteredRecord<
+      {
+        [TName in ModuleEntryNames<RegisteredMiddlewareName, TNamespace>]: MiddlewareFactory<
+          MiddlewareConfigFor<Extract<`${TNamespace}.${TName}`, RegisteredMiddlewareName>>
+        >;
+      },
+      Middleware
+    >;
+
+/**
+ * Whether the module's `service`, `controller`, `policy` and `middleware` lookups resolve registered contracts, with
  * strict types enabled: API modules, e.g. `strapi.api(name)`. Other modules, such as `strapi.admin`,
  * keep the legacy lookups.
  */
@@ -135,9 +155,26 @@ type ModulePolicyLookup<TNamespace extends string, TName, T> =
       >;
 
 /**
+ * Return type of `module.middleware<T>(name)`: `T` unless the module is closed. A registered name
+ * resolves to a factory that receives its config contract, like the `middlewares` map.
+ */
+type ModuleMiddlewareLookup<TNamespace extends string, TName, T> =
+  IsClosedModule<TNamespace> extends false
+    ? T
+    : ClosedModuleLookup<
+        RegisteredMiddlewareName,
+        TNamespace,
+        TName,
+        T,
+        MiddlewareFactory<
+          MiddlewareConfigFor<Extract<`${TNamespace}.${TName & string}`, RegisteredMiddlewareName>>
+        >
+      >;
+
+/**
  * Module lookups without strict mode: develop's signatures, so mocks and `@ts-expect-error` lines
- * written for develop keep compiling. Develop has no `policy` lookup, so object literals typed
- * `Core.Module` need none.
+ * written for develop keep compiling. Develop has no `policy` or `middleware` lookup, so object
+ * literals typed `Core.Module` need none.
  */
 type LegacyModuleLookups = {
   controller<T extends Controller>(name: string): T;
@@ -196,6 +233,24 @@ type StrictModuleLookups<TNamespace extends string> = {
   >(
     name: TName
   ): ModulePolicyLookup<TNamespace, TName, T>;
+  /**
+   * Resolves the registered middleware of the relative name `name`, i.e. `<namespace>.<name>` as at
+   * runtime, a factory that receives its config contract, in an API module. An explicit type
+   * argument (`middleware<MyFactory>(name)`) wins over the registries. Otherwise, returns the legacy
+   * `Middleware`. Registered middleware names of the module are listed for completion.
+   */
+  middleware<
+    T extends ModuleLookupDefault<TNamespace, Middleware> = ModuleLookupDefault<
+      TNamespace,
+      Middleware
+    >,
+    TName extends ModuleLookupName<RegisteredMiddlewareName, TNamespace> = ModuleLookupName<
+      RegisteredMiddlewareName,
+      TNamespace
+    >,
+  >(
+    name: TName
+  ): ModuleMiddlewareLookup<TNamespace, TName, T>;
 };
 
 type ModuleLookups<TNamespace extends string> = IsStrict extends false
@@ -204,8 +259,9 @@ type ModuleLookups<TNamespace extends string> = IsStrict extends false
 
 /**
  * A loaded module. `TNamespace` is its runtime namespace, e.g. `plugin::i18n` or `api::article`:
- * with strict types enabled, a literal namespace types the `services`, `controllers` and `policies`
- * maps from the registries, and the `service`, `controller` and `policy` lookups of API modules.
+ * with strict types enabled, a literal namespace types the `services`, `controllers`, `policies` and
+ * `middlewares` maps from the registries, and the `service`, `controller`, `policy` and `middleware`
+ * lookups of API modules.
  */
 export interface Module<TNamespace extends string = string> extends ModuleLookups<TNamespace> {
   bootstrap: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
@@ -216,16 +272,16 @@ export interface Module<TNamespace extends string = string> extends ModuleLookup
   controllers: ModuleControllerMap<TNamespace>;
   services: ModuleServiceMap<TNamespace>;
   policies: ModulePolicyMap<TNamespace>;
-  middlewares: Record<string, Middleware>;
+  middlewares: ModuleMiddlewareMap<TNamespace>;
   contentTypes: Record<string, { schema: ContentType }>;
 }
 
 /** The API name of an `api::<api>.<name>` UID. */
 type ApiNameOf<TUID> = TUID extends `api::${infer TApi}.${string}` ? TApi : never;
 
-/** APIs with at least one registered service, controller or policy contract. */
+/** APIs with at least one registered service, controller, policy or middleware contract. */
 export type RegisteredApiName = ApiNameOf<
-  RegisteredServiceUID | RegisteredControllerUID | RegisteredPolicyName
+  RegisteredServiceUID | RegisteredControllerUID | RegisteredPolicyName | RegisteredMiddlewareName
 >;
 
 /**

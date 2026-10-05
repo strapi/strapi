@@ -1,5 +1,6 @@
 import type * as UID from '../../uid';
 import type { ControllerLookupUID } from '../controller';
+import type { MiddlewareLookupName, MiddlewareReference } from '../middleware';
 import type { Module } from '../module';
 import type { PolicyReference } from '../policy';
 import type { ServiceLookupUID } from '../service';
@@ -23,6 +24,9 @@ declare global {
       }
       interface PackagePolicies {
         'plugin::suggest-lab.isOwner': undefined;
+      }
+      interface PackageMiddlewares {
+        'plugin::suggest-lab.timer': undefined;
       }
       interface PackageConfigs {
         'plugin::suggest-lab': {
@@ -70,6 +74,9 @@ declare const nameChecks: [
   // Typed route policies list registered names in both switch states.
   Expect<Includes<PolicyReference, 'plugin::suggest-lab.isOwner'>>,
   Expect<Includes<PolicyReference<'plugin::suggest-lab'>, 'isOwner'>>,
+  // Middleware lookups and typed route middlewares list registered names in both switch states.
+  Expect<Includes<MiddlewareLookupName, 'plugin::suggest-lab.timer'>>,
+  Expect<Includes<MiddlewareReference, 'plugin::suggest-lab.timer'>>,
 ];
 nameChecks satisfies unknown;
 
@@ -89,6 +96,8 @@ strapi.config.get(dynamicName) satisfies unknown;
 // Suggested names do not restrict the accepted names, and keep the legacy results.
 strapi.policy('global::unregistered') satisfies unknown;
 strapi.policy(dynamicName) satisfies unknown;
+strapi.middleware('global::unregistered') satisfies unknown;
+strapi.middleware(dynamicName) satisfies unknown;
 strapi.plugin(dynamicName) satisfies unknown;
 strapi.plugin('unregistered') satisfies unknown;
 strapi.api('unregistered') satisfies unknown;
