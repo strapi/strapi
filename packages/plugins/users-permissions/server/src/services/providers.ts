@@ -22,9 +22,9 @@ export default ({ strapi }: PluginContext) => {
   ) => {
     const accessToken = oauthData.access_token || oauthData.code || oauthData.oauth_token;
 
-    const providers = await strapi
+    const providers = (await strapi
       .store({ type: 'plugin', name: 'users-permissions', key: 'grant' })
-      .get<GrantConfig>();
+      .get()) as GrantConfig;
 
     return getService(strapi, 'providers-registry').run({
       provider,
@@ -63,9 +63,9 @@ export default ({ strapi }: PluginContext) => {
       where: { email },
     });
 
-    const advancedSettings = await strapi
+    const advancedSettings = (await strapi
       .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
-      .get<AdvancedSettings>();
+      .get()) as AdvancedSettings;
 
     const user = _.find(users, { provider });
 

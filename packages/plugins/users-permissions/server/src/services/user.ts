@@ -134,9 +134,8 @@ export default ({ strapi }: PluginContext) => ({
     const pluginStore = await strapi.store({ type: 'plugin', name: 'users-permissions' });
     const userSchema = strapi.getModel(USER_MODEL_UID);
 
-    const settings = await pluginStore
-      .get<EmailSettings>({ key: 'email' })
-      .then((storeEmail) => storeEmail.email_confirmation.options);
+    const emailSettings = (await pluginStore.get({ key: 'email' })) as EmailSettings;
+    const settings = emailSettings.email_confirmation.options;
 
     // Sanitize the template's user information
     const sanitizedUserInfo = await sanitize.sanitizers.defaultSanitizeOutput(
