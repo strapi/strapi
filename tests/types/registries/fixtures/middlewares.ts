@@ -20,6 +20,8 @@ declare const inline: Core.MiddlewareHandler;
           'strapi::poweredBy',
           'admin::rateLimit',
           'plugin::email.rateLimit',
+          // A factory without config: the name alone is enough.
+          'plugin::content-type-builder.isDevelopmentMode',
           { name: 'strapi::cors', config: { origin: ['https://example.com'], maxAge: 60 } },
           { name: 'strapi::poweredBy', config: { poweredBy: 'Example' } },
           { name: 'admin::rateLimit', config: { max: 10 } },
@@ -38,10 +40,6 @@ declare const inline: Core.MiddlewareHandler;
 ({
   // @ts-expect-error The config is checked against the registered contract.
   middlewares: [{ name: 'strapi::poweredBy', config: { poweredBy: 1 } }],
-}) satisfies Core.RouteConfigFor;
-({
-  // @ts-expect-error A Koa handler registered as a middleware cannot be referenced by name.
-  middlewares: ['plugin::content-type-builder.isDevelopmentMode'],
 }) satisfies Core.RouteConfigFor;
 
 // `Core.RouteConfig` keeps develop's type: names are not checked.
