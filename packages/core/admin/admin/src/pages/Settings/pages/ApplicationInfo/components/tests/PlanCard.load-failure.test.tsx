@@ -27,7 +27,9 @@ describe('PlanCard when the EE license module fails to load', () => {
 
   it('reports the failure instead of leaving the rejection unhandled, and never shows Community', async () => {
     window.strapi.isEE = true;
-    window.strapi.projectType = 'Enterprise';
+    // The Community body prints `projectType`, so it must be Community here for the fallback to
+    // be visible if it ever renders.
+    window.strapi.projectType = 'Community';
     const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
     render(<PlanCard />);
@@ -37,6 +39,7 @@ describe('PlanCard when the EE license module fails to load', () => {
         expect.objectContaining({ message: 'Loading chunk failed' })
       )
     );
+    expect(screen.queryByText(/current plan/i)).not.toBeInTheDocument();
     expect(screen.queryByText('Community')).not.toBeInTheDocument();
 
     errorSpy.mockRestore();

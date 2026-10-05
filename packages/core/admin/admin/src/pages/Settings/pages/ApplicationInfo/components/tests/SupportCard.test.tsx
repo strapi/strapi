@@ -52,7 +52,7 @@ jest.mock('../../../../../../services/admin', () => ({
  * DebugDump page either), so we wire the permission into both the redux state the card reads from
  * and the auth permissions `useRBAC` checks against.
  */
-const withDebugDumpPermission = () => {
+const withDebugDumpCatalog = ({ granted }: { granted: boolean }) => {
   const preloadedState = initialState();
   // `initialState()` infers `settings` from the literal it ships, which has no `debug-dump`
   // key, so the spread needs the cast. The key IS part of `PermissionMap['settings']`
@@ -70,9 +70,13 @@ const withDebugDumpPermission = () => {
 
   return {
     storeConfig: { preloadedState },
-    permissions: [{ action: 'admin::debug-dump.read', subject: null }],
+    // The catalog entry is always present, as in production; only the user's grant varies, so
+    // `useRBAC` actually evaluates `admin::debug-dump.read`.
+    permissions: granted ? [{ action: 'admin::debug-dump.read', subject: null }] : [],
   };
 };
+
+const withDebugDumpPermission = () => withDebugDumpCatalog({ granted: true });
 
 describe('SupportCard', () => {
   afterEach(() => {
@@ -191,7 +195,7 @@ describe('SupportCard', () => {
   });
 
   it('hides the diagnostic snapshot column without the debug-dump permission', async () => {
-    render(<SupportCard />);
+    render(<SupportCard />, { providerOptions: withDebugDumpCatalog({ granted: false }) });
 
     expect(await screen.findByRole('link', { name: /documentation/i })).toBeInTheDocument();
     expect(screen.queryByText(/diagnostic snapshot/i)).not.toBeInTheDocument();
