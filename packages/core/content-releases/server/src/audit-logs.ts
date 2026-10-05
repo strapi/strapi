@@ -1,7 +1,7 @@
 import type { Core, Modules } from '@strapi/types';
 import { emitAudit } from '@strapi/utils';
 
-import { AUDITED_EVENTS } from './constants';
+import { AUDITED_EVENTS, type ReleaseStrategy } from './constants';
 
 /**
  * Transformers for the release audit events.
@@ -27,9 +27,15 @@ export interface CreateDetails {
   isScheduled: boolean;
   scheduledAt?: string | null;
   timezone?: string | null;
+  releaseStrategy: ReleaseStrategy;
 }
 
-export const RELEASE_EDITABLE_FIELDS = ['name', 'scheduledAt', 'timezone', 'publishMode'] as const;
+export const RELEASE_EDITABLE_FIELDS = [
+  'name',
+  'scheduledAt',
+  'timezone',
+  'releaseStrategy',
+] as const;
 
 /** Audit rows are never pruned by size, so the failure reason is capped */
 const MAX_REASON_LENGTH = 100;
@@ -44,7 +50,7 @@ interface ReleaseEditableValues {
   name?: string;
   scheduledAt?: string | null;
   timezone?: string | null;
-  publishMode?: string | null;
+  releaseStrategy?: ReleaseStrategy | null;
 }
 
 /**
@@ -199,11 +205,12 @@ export const registerAuditEvents = (auditLogsLifecycle: AuditLogsLifecycle) => {
 
   auditLogsLifecycle.registerEvent<CreateDetails>(
     AUDITED_EVENTS.RELEASE_CREATE,
-    (event: ReleaseEvent) => ({
+    (event: ReleaseEvent & { releaseStrategy: ReleaseStrategy }) => ({
       resource: releaseResource(event),
       details: {
         isScheduled: event.scheduledAt != null,
         ...(event.scheduledAt && { scheduledAt: event.scheduledAt, timezone: event.timezone }),
+        releaseStrategy: event.releaseStrategy,
       },
     })
   );

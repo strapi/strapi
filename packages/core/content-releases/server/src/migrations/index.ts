@@ -4,7 +4,7 @@ import isEqual from 'lodash/isEqual';
 
 import { difference, keys } from 'lodash';
 import {
-  DEFAULT_RELEASE_PUBLISH_MODE,
+  DEFAULT_RELEASE_STRATEGY,
   RELEASE_ACTION_MODEL_UID,
   RELEASE_MODEL_UID,
 } from '../constants';
@@ -128,10 +128,10 @@ export async function migrateIsValidAndStatusReleases() {
   });
 }
 
-export async function migratePublishModeReleases() {
+export async function migrateReleaseStrategyReleases() {
   await strapi.db.query(RELEASE_MODEL_UID).updateMany({
-    where: { publishMode: null },
-    data: { publishMode: DEFAULT_RELEASE_PUBLISH_MODE },
+    where: { releaseStrategy: null },
+    data: { releaseStrategy: DEFAULT_RELEASE_STRATEGY },
   });
 }
 

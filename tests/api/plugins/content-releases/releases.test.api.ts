@@ -6,7 +6,7 @@ import { describeOnCondition } from 'api-tests/utils';
 import { createTestBuilder } from 'api-tests/builder';
 
 import { CreateRelease } from '../../../../packages/core/content-releases/shared/contracts/releases';
-import { migratePublishModeReleases } from '../../../../packages/core/content-releases/server/src/migrations';
+import { migrateReleaseStrategyReleases } from '../../../../packages/core/content-releases/server/src/migrations';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
@@ -211,30 +211,30 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       expect(res.body.error.message).toBe('Scheduled at must be later than now');
     });
 
-    test('defaults the publish mode to wait_for_all', async () => {
+    test('defaults the release strategy to all_or_nothing', async () => {
       const res = await createRelease();
 
       expect(res.statusCode).toBe(201);
-      expect(res.body.data.publishMode).toBe('wait_for_all');
+      expect(res.body.data.releaseStrategy).toBe('all_or_nothing');
     });
 
-    test('create a release with an explicit publish mode', async () => {
-      const res = await createRelease({ publishMode: 'release_all_approved' });
+    test('create a release with an explicit release strategy', async () => {
+      const res = await createRelease({ releaseStrategy: 'partial' });
 
       expect(res.statusCode).toBe(201);
-      expect(res.body.data.publishMode).toBe('release_all_approved');
+      expect(res.body.data.releaseStrategy).toBe('partial');
 
       const findRes = await rq({ method: 'GET', url: `/content-releases/${res.body.data.id}` });
-      expect(findRes.body.data.publishMode).toBe('release_all_approved');
+      expect(findRes.body.data.releaseStrategy).toBe('partial');
     });
 
     test.each(['publish_everything', null])(
-      'cannot create a release with publish mode %p',
-      async (publishMode) => {
+      'cannot create a release with release strategy %p',
+      async (releaseStrategy) => {
         const res = await rq({
           method: 'POST',
           url: '/content-releases/',
-          body: { name: `Test Release ${Math.random().toString(36)}`, publishMode },
+          body: { name: `Test Release ${Math.random().toString(36)}`, releaseStrategy },
         });
 
         expect(res.statusCode).toBe(400);
@@ -646,17 +646,17 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       );
     });
 
-    test('changes the publish mode and keeps it when omitted', async () => {
+    test('changes the release strategy and keeps it when omitted', async () => {
       const createReleaseRes = await createRelease();
       const release = createReleaseRes.body.data;
 
-      const modeRes = await rq({
+      const strategyRes = await rq({
         method: 'PUT',
         url: `/content-releases/${release.id}`,
-        body: { name: release.name, publishMode: 'release_all_approved' },
+        body: { name: release.name, releaseStrategy: 'partial' },
       });
-      expect(modeRes.statusCode).toBe(200);
-      expect(modeRes.body.data.publishMode).toBe('release_all_approved');
+      expect(strategyRes.statusCode).toBe(200);
+      expect(strategyRes.body.data.releaseStrategy).toBe('partial');
 
       const renameRes = await rq({
         method: 'PUT',
@@ -664,41 +664,46 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         body: { name: 'Renamed Release' },
       });
       expect(renameRes.statusCode).toBe(200);
-      expect(renameRes.body.data.publishMode).toBe('release_all_approved');
+      expect(renameRes.body.data.releaseStrategy).toBe('partial');
     });
 
-    test('cannot change to an unknown publish mode', async () => {
-      const createReleaseRes = await createRelease();
-      const release = createReleaseRes.body.data;
+    test.each(['publish_everything', null])(
+      'cannot change to release strategy %p',
+      async (releaseStrategy) => {
+        const createReleaseRes = await createRelease({ releaseStrategy: 'partial' });
+        const release = createReleaseRes.body.data;
 
-      const res = await rq({
-        method: 'PUT',
-        url: `/content-releases/${release.id}`,
-        body: { name: release.name, publishMode: 'publish_everything' },
-      });
+        const res = await rq({
+          method: 'PUT',
+          url: `/content-releases/${release.id}`,
+          body: { name: release.name, releaseStrategy },
+        });
+        expect(res.statusCode).toBe(400);
 
-      expect(res.statusCode).toBe(400);
-    });
+        const findRes = await rq({ method: 'GET', url: `/content-releases/${release.id}` });
+        expect(findRes.body.data.releaseStrategy).toBe('partial');
+      }
+    );
   });
 
   describe('Legacy releases', () => {
-    test('backfills a missing publish mode to wait_for_all and keeps explicit ones', async () => {
+    test('backfills a missing release strategy to all_or_nothing and keeps explicit ones', async () => {
       const legacy = (await createRelease()).body.data;
-      const tolerant = (await createRelease({ publishMode: 'release_all_approved' })).body.data;
+      const partial = (await createRelease({ releaseStrategy: 'partial' })).body.data;
 
       // Releases created before the field existed have no value in the column
       await strapi.db.query('plugin::content-releases.release').update({
         where: { id: legacy.id },
-        data: { publishMode: null },
+        data: { releaseStrategy: null },
       });
 
-      await migratePublishModeReleases();
+      await migrateReleaseStrategyReleases();
 
       const legacyRes = await rq({ method: 'GET', url: `/content-releases/${legacy.id}` });
-      const tolerantRes = await rq({ method: 'GET', url: `/content-releases/${tolerant.id}` });
+      const partialRes = await rq({ method: 'GET', url: `/content-releases/${partial.id}` });
 
-      expect(legacyRes.body.data.publishMode).toBe('wait_for_all');
-      expect(tolerantRes.body.data.publishMode).toBe('release_all_approved');
+      expect(legacyRes.body.data.releaseStrategy).toBe('all_or_nothing');
+      expect(partialRes.body.data.releaseStrategy).toBe('partial');
     });
   });
 

@@ -46,13 +46,14 @@ describe('transformers', () => {
     ]);
   });
 
-  it('release.create carries the schedule when there is one', () => {
+  it('release.create carries the strategy, and the schedule when there is one', () => {
     expect(
       transformers['release.create']({
         releaseId: 1,
         name: 'March',
         scheduledAt: '2026-09-01T10:00:00.000Z',
         timezone: 'Europe/Paris',
+        releaseStrategy: 'partial',
       })
     ).toEqual({
       resource: { type: 'release', id: 1, name: 'March' },
@@ -60,12 +61,19 @@ describe('transformers', () => {
         isScheduled: true,
         scheduledAt: '2026-09-01T10:00:00.000Z',
         timezone: 'Europe/Paris',
+        releaseStrategy: 'partial',
       },
     });
 
-    expect(transformers['release.create']({ releaseId: 1, name: 'March' })).toEqual({
+    expect(
+      transformers['release.create']({
+        releaseId: 1,
+        name: 'March',
+        releaseStrategy: 'all_or_nothing',
+      })
+    ).toEqual({
       resource: { type: 'release', id: 1, name: 'March' },
-      details: { isScheduled: false },
+      details: { isScheduled: false, releaseStrategy: 'all_or_nothing' },
     });
   });
 

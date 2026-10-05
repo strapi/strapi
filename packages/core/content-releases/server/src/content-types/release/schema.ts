@@ -1,7 +1,7 @@
 import {
-  DEFAULT_RELEASE_PUBLISH_MODE,
+  DEFAULT_RELEASE_STRATEGY,
   RELEASE_ACTION_MODEL_UID,
-  RELEASE_PUBLISH_MODES,
+  RELEASE_STRATEGIES,
 } from '../../constants';
 
 export default {
@@ -41,10 +41,11 @@ export default {
       enum: ['ready', 'blocked', 'failed', 'done', 'empty'],
       required: true,
     },
-    publishMode: {
+    releaseStrategy: {
       type: 'enumeration',
-      enum: [...RELEASE_PUBLISH_MODES],
-      default: DEFAULT_RELEASE_PUBLISH_MODE,
+      enum: [...RELEASE_STRATEGIES],
+      default: DEFAULT_RELEASE_STRATEGY,
+      required: true,
     },
     actions: {
       type: 'relation',
