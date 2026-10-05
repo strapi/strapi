@@ -15,6 +15,12 @@ import type {
   ControllerMap,
   RegisteredControllerUID,
 } from './controller';
+import type {
+  MiddlewareLookup,
+  MiddlewareLookupName,
+  MiddlewareMap,
+  RegisteredMiddlewareName,
+} from './middleware';
 import type { ApiMap, RegisteredApiName } from './module';
 import type { PluginMap, RegisteredPluginName } from './plugin';
 import type { PolicyLookup, PolicyLookupName, PolicyMap, RegisteredPolicyName } from './policy';
@@ -34,6 +40,7 @@ type LegacyLookups = {
     uid: SuggestedString<Extract<RegisteredControllerUID, UID.Controller>, UID.Controller>
   ): Core.Controller;
   policy(name: SuggestedString<RegisteredPolicyName>): Core.Policy;
+  middleware(name: SuggestedString<RegisteredMiddlewareName>): Core.MiddlewareFactory;
   plugin(name: SuggestedString<RegisteredPluginName>): Core.Plugin;
   api(name: SuggestedString<RegisteredApiName>): Core.Module;
 };
@@ -62,6 +69,14 @@ type StrictLookups = {
   policy<T = unknown, TName extends PolicyLookupName = PolicyLookupName>(
     name: TName
   ): PolicyLookup<TName, NoInfer<T>>;
+  /**
+   * Resolves the registered middleware of the full name `name`, a factory that receives its config
+   * contract. An explicit type argument (`middleware<MyFactory>(name)`) wins over the registries,
+   * including for unregistered names. Registered names are listed for completion.
+   */
+  middleware<T = unknown, TName extends MiddlewareLookupName = MiddlewareLookupName>(
+    name: TName
+  ): MiddlewareLookup<TName, NoInfer<T>>;
   /** Plugins with registered contracts are listed for completion. */
   plugin<TName extends SuggestedString<RegisteredPluginName>>(name: TName): Core.Plugin<TName>;
   /** APIs with registered contracts are listed for completion. */
@@ -188,8 +203,11 @@ export interface Strapi extends Container, Lookups {
    * other keys keep the legacy policy.
    */
   policies: PolicyMap;
-  middlewares: Record<string, Core.MiddlewareFactory>;
-  middleware(name: string): Core.MiddlewareFactory;
+  /**
+   * Middlewares keyed by UID. With strict types enabled, registered UIDs receive their config
+   * contract; other keys keep the legacy factory.
+   */
+  middlewares: MiddlewareMap;
   /**
    * Plugins keyed by name. With strict types enabled, a plugin with registered contracts resolves to
    * `Plugin<name>`, like `plugin(name)`; other names keep the legacy plugin.
