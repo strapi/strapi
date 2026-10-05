@@ -26,6 +26,7 @@ describe('typescript.strictTypes', () => {
       services: false,
       controllers: false,
       policies: false,
+      middlewares: false,
       strict: false,
     });
   });
@@ -38,6 +39,7 @@ describe('typescript.strictTypes', () => {
       services: true,
       controllers: true,
       policies: true,
+      middlewares: true,
       strict: true,
     });
   });
