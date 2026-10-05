@@ -19,11 +19,11 @@ type Params = SetParams & GetParams;
 
 export interface CoreStore {
   (defaultParams: Partial<Params>): {
-    get<T = unknown>(params?: Partial<GetParams>): Promise<T>;
+    get(params?: Partial<GetParams>): Promise<unknown>;
     set(params?: Partial<SetParams>): Promise<void>;
     delete(params?: Partial<GetParams>): Promise<void>;
   };
-  get<T = unknown>(params: GetParams): Promise<T>;
+  get(params: GetParams): Promise<unknown>;
   set(params: SetParams): Promise<void>;
   delete(params: GetParams): Promise<void>;
 }

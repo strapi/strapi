@@ -36,7 +36,7 @@ const initGrant = async (strapi: Core.Strapi, pluginStore: PluginStore) => {
     return acc;
   }, {});
 
-  const prevGrantConfig = await pluginStore.get<GrantConfig | null>({ key: 'grant' });
+  const prevGrantConfig = (await pluginStore.get({ key: 'grant' })) as GrantConfig | null;
 
   if (!prevGrantConfig || !lodash.isEqual(prevGrantConfig, grantConfig)) {
     // merge with the previous provider config.
