@@ -1,6 +1,6 @@
-'use strict';
+/* eslint @typescript-eslint/no-var-requires: off */
+import { describe, expect, it } from 'vitest';
 
-/* eslint-env jest */
 /* eslint-disable import/no-extraneous-dependencies */
 
 const cookie = require('cookie');

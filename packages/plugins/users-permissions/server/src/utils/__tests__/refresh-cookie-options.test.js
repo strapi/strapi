@@ -1,6 +1,5 @@
-'use strict';
-
-/* eslint-env jest */
+/* eslint @typescript-eslint/no-var-requires: off */
+import { describe, expect, it } from 'vitest';
 
 const { buildRefreshCookieOptions } = require('../refresh-cookie-options');
 
