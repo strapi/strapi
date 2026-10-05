@@ -14,6 +14,12 @@ declare global {
       interface PackageServices {
         'plugin::email.email': Services['email'];
       }
+
+      interface PackageMiddlewares {
+        // TODO @Nico The factory spreads its config over the koa2-ratelimit options read from the
+        // `ratelimit` key of the plugin config; type it once those options have a contract.
+        'plugin::email.rateLimit': unknown;
+      }
     }
   }
 }

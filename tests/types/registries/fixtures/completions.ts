@@ -33,6 +33,7 @@ app.plugin('i18n').controller('');
 app.service('');
 app.controller('');
 app.policy('');
+app.middleware('');
 app.api('article').service('');
 app.api('article').controller('');
 app.api('article').policy('');
@@ -60,6 +61,18 @@ export const router: Core.RouterInputFor<typeof controllers, 'plugin::i18n'> = {
       path: '/config',
       handler: 'locales.listLocales',
       config: { policies: [{ name: 'plugin::content-manager.hasPermissions', config: {} }] },
+    },
+    {
+      method: 'GET',
+      path: '/middlewares',
+      handler: 'locales.listLocales',
+      config: { middlewares: [''] },
+    },
+    {
+      method: 'GET',
+      path: '/middleware-objects',
+      handler: 'locales.listLocales',
+      config: { middlewares: [{ name: '' }] },
     },
   ],
 };

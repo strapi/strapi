@@ -87,6 +87,13 @@ declare global {
         'admin::hasPermissions': HasPermissionsConfig;
         'admin::isTelemetryEnabled': undefined;
       }
+
+      interface PackageMiddlewares {
+        // TODO @Nico The factory spreads its config over the koa2-ratelimit options read from
+        // `admin.rateLimit`; type it once those options have a contract.
+        'admin::rateLimit': unknown;
+        'admin::data-transfer': undefined;
+      }
     }
   }
 }
