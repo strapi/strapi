@@ -4,6 +4,45 @@ import { forms } from '../utils/forms';
 
 const { providers, providersWithSubdomain } = forms;
 
+it.each([
+  ['email', ['enabled']],
+  ['providers', ['enabled', 'key', 'secret', 'callback']],
+  ['providersWithSubdomain', ['enabled', 'key', 'secret', 'callback', 'subdomain']],
+] as const)('requires each setting for an enabled %s provider', (layout, requiredFields) => {
+  const valid = {
+    enabled: true,
+    key: 'client-id',
+    secret: 'client-secret',
+    subdomain: 'tenant.example.com',
+    callback: 'https://client.example.com/callback',
+  };
+
+  for (const field of requiredFields) {
+    expect(() => forms[layout].schema.validateSync({ ...valid, [field]: undefined })).toThrow();
+  }
+});
+
+it.each(['providers', 'providersWithSubdomain'] as const)(
+  'accepts local and custom callback URLs for %s',
+  (layout) => {
+    for (const callback of [
+      'http://localhost:1337/callback',
+      'http://127.0.0.1/callback',
+      'myapp://callback',
+    ]) {
+      expect(() =>
+        forms[layout].schema.validateSync({
+          enabled: true,
+          key: 'client-id',
+          secret: 'client-secret',
+          subdomain: 'tenant.example.com',
+          callback,
+        })
+      ).not.toThrow();
+    }
+  }
+);
+
 describe('schema without subdomain', () => {
   it('should fail to validate', () => {
     const invalidCallbacks = [

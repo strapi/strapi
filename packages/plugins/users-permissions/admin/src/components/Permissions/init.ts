@@ -4,7 +4,7 @@ import type { Permissions } from '../../types';
 /** Initializes collapsed permission groups in alphabetical order. */
 const init = (initialState: State, permissions: Permissions) => {
   const collapses = Object.keys(permissions)
-    .sort()
+    .sort((left, right) => left.localeCompare(right))
     .map((name) => ({ name, isOpen: false }));
 
   return { ...initialState, collapses };

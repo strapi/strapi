@@ -1,42 +1,19 @@
+const methodColors = new Map([
+  ['POST', 'success'],
+  ['GET', 'secondary'],
+  ['PUT', 'warning'],
+  ['DELETE', 'danger'],
+]);
+
 /** Returns the design-system colors for an HTTP method badge. */
 const getMethodColor = (verb: string) => {
-  switch (verb) {
-    case 'POST': {
-      return {
-        text: 'success600',
-        border: 'success200',
-        background: 'success100',
-      };
-    }
-    case 'GET': {
-      return {
-        text: 'secondary600',
-        border: 'secondary200',
-        background: 'secondary100',
-      };
-    }
-    case 'PUT': {
-      return {
-        text: 'warning600',
-        border: 'warning200',
-        background: 'warning100',
-      };
-    }
-    case 'DELETE': {
-      return {
-        text: 'danger600',
-        border: 'danger200',
-        background: 'danger100',
-      };
-    }
-    default: {
-      return {
-        text: 'neutral600',
-        border: 'neutral200',
-        background: 'neutral100',
-      };
-    }
-  }
+  const color = methodColors.get(verb) ?? 'neutral';
+
+  return {
+    text: `${color}600`,
+    border: `${color}200`,
+    background: `${color}100`,
+  };
 };
 
 export { getMethodColor };

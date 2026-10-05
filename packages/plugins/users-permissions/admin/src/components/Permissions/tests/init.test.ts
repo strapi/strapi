@@ -31,4 +31,18 @@ describe('USERS PERMISSIONS | COMPONENTS | Permissions | init', () => {
 
     expect(init({ collapses: [] }, permissions)).toEqual(expected);
   });
+
+  it('sorts mixed-case permission group names alphabetically', () => {
+    const permissions = {
+      'api::Zebra': { controllers: {} },
+      'api::apple': { controllers: {} },
+      'api::Banana': { controllers: {} },
+    };
+
+    expect(init({ collapses: [] }, permissions).collapses).toEqual([
+      { name: 'api::apple', isOpen: false },
+      { name: 'api::Banana', isOpen: false },
+      { name: 'api::Zebra', isOpen: false },
+    ]);
+  });
 });
