@@ -416,6 +416,44 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
     }
   });
 
+  test(`${resolution}: generated application middlewares resolve in strict mode`, async () => {
+    // eslint-disable-next-line import/no-extraneous-dependencies
+    const { generators } = require('@strapi/typescript-utils');
+    const appDir = fs.mkdtempSync(path.join(__dirname, '.generated-'));
+    const generatedFile = path.join(appDir, 'types/generated/middlewares.d.ts');
+    const strapi = {
+      dirs: { app: { api: fixture('app/src/api'), middlewares: fixture('app/src/middlewares') } },
+      // Bundled middlewares are left to their packages.
+      middlewares: Object.fromEntries(
+        [
+          'global::rateLimit',
+          'global::timer',
+          'global::legacy',
+          'api::article.audit-log',
+          'strapi::cors',
+        ].map((uid) => [uid, () => undefined])
+      ),
+    };
+
+    try {
+      await generators.generate({
+        strapi,
+        pwd: appDir,
+        artifacts: { middlewares: true },
+        logger: { silent: true },
+      });
+      const generated = fs.readFileSync(generatedFile, 'utf8');
+      assert.match(generated, /interface AppMiddlewares/);
+      assert.doesNotMatch(generated, /strapi::/);
+      assertClean(
+        compiler(options)([generatedFile, 'strapi-strict.d.ts', 'app-middlewares.ts']),
+        `${resolution}, generated application middlewares`
+      );
+    } finally {
+      fs.rmSync(appDir, { recursive: true, force: true });
+    }
+  });
+
   test(`${resolution}: normal package entries resolve to emitted declarations`, () => {
     for (const directory of [...providers, 'packages/core/types', 'packages/core/strapi']) {
       const manifest = readManifest(directory);
