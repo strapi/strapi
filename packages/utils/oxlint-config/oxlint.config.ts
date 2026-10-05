@@ -23,7 +23,7 @@ import { tests } from './tests.ts';
  */
 export default defineConfig({
   ...base,
-  jsPlugins: ['./plugins/registries.ts'],
+  jsPlugins: [...base.jsPlugins, './plugins/registries.ts'],
   settings: {
     react: { version: '18' },
   },
