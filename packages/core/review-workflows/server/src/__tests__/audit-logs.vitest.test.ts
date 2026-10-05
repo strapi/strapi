@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import {
   getWorkflowChanges,
   registerAuditEvents,
@@ -5,8 +6,8 @@ import {
   type WorkflowRow,
 } from '../audit-logs';
 
-const findOne = jest.fn();
-const strapi = { db: { query: jest.fn(() => ({ findOne })) } } as any;
+const findOne = vi.fn();
+const strapi = { db: { query: vi.fn(() => ({ findOne })) } } as any;
 
 const getTransformers = () => {
   const transformers: Record<string, (...args: any[]) => any> = {};
