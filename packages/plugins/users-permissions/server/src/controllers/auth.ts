@@ -164,7 +164,7 @@ export default ({ strapi }: PluginContext) => ({
     const params = ctx.request.body;
 
     const store = strapi.store({ type: 'plugin', name: 'users-permissions' });
-    const grantSettings = await store.get<GrantConfig>({ key: 'grant' });
+    const grantSettings = (await store.get({ key: 'grant' })) as GrantConfig;
 
     const grantProvider = provider === 'local' ? 'email' : provider;
 
@@ -202,7 +202,7 @@ export default ({ strapi }: PluginContext) => ({
         throw new ValidationError('Invalid identifier or password');
       }
 
-      const advancedSettings = await store.get<AdvancedSettings>({ key: 'advanced' });
+      const advancedSettings = (await store.get({ key: 'advanced' })) as AdvancedSettings;
       const requiresConfirmation = _.get(advancedSettings, 'email_confirmation');
 
       if (requiresConfirmation && user.confirmed !== true) {
@@ -487,9 +487,9 @@ export default ({ strapi }: PluginContext) => ({
     return ctx.send({ data: {} });
   },
   async connect(ctx: Context, next: Next) {
-    const providers = await strapi
+    const providers = (await strapi
       .store({ type: 'plugin', name: 'users-permissions', key: 'grant' })
-      .get<GrantConfig>();
+      .get()) as GrantConfig;
 
     const [requestPath] = ctx.request.url.split('?');
     const provider = requestPath.split('/connect/')[1].split('/')[0];
@@ -539,8 +539,8 @@ export default ({ strapi }: PluginContext) => ({
 
     const pluginStore = await strapi.store({ type: 'plugin', name: 'users-permissions' });
 
-    const emailSettings = await pluginStore.get<EmailSettings>({ key: 'email' });
-    const advancedSettings = await pluginStore.get<AdvancedSettings>({ key: 'advanced' });
+    const emailSettings = (await pluginStore.get({ key: 'email' })) as EmailSettings;
+    const advancedSettings = (await pluginStore.get({ key: 'advanced' })) as AdvancedSettings;
 
     // Find the user by email.
     const user = await strapi.db
@@ -599,7 +599,7 @@ export default ({ strapi }: PluginContext) => ({
   async register(ctx: Context) {
     const pluginStore = await strapi.store({ type: 'plugin', name: 'users-permissions' });
 
-    const settings = await pluginStore.get<AdvancedSettings>({ key: 'advanced' });
+    const settings = (await pluginStore.get({ key: 'advanced' })) as AdvancedSettings;
 
     if (!settings.allow_register) {
       throw new ApplicationError('Register action is currently disabled');
@@ -743,9 +743,9 @@ export default ({ strapi }: PluginContext) => ({
         user: await sanitizeUser(strapi, user, ctx),
       });
     } else {
-      const settings = await strapi
+      const settings = (await strapi
         .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
-        .get<AdvancedSettings>();
+        .get()) as AdvancedSettings;
 
       ctx.redirect(settings.email_confirmation_redirection || '/');
     }

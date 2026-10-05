@@ -69,9 +69,9 @@ export default ({ strapi }: PluginContext) => ({
 
     const sanitizedBody = await pm.pickPermittedFieldsOf(body, { subject: userModel });
 
-    const advanced = await strapi
+    const advanced = (await strapi
       .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
-      .get<AdvancedSettings>();
+      .get()) as AdvancedSettings;
 
     await validateCreateUserBody(ctx.request.body);
 
@@ -124,9 +124,9 @@ export default ({ strapi }: PluginContext) => ({
     const { body } = ctx.request;
     const { user: admin, userAbility } = ctx.state;
 
-    const advancedConfigs = await strapi
+    const advancedConfigs = (await strapi
       .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
-      .get<AdvancedSettings>();
+      .get()) as AdvancedSettings;
 
     const { email, username, password } = body;
 

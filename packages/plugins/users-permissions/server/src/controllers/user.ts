@@ -37,9 +37,9 @@ export default ({ strapi }: PluginContext) => ({
    * @return {Object}
    */
   async create(ctx: Context) {
-    const advanced = await strapi
+    const advanced = (await strapi
       .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
-      .get<AdvancedSettings>();
+      .get()) as AdvancedSettings;
 
     await validateCreateUserBody(ctx.request.body);
 
@@ -92,9 +92,9 @@ export default ({ strapi }: PluginContext) => ({
    * @return {Object}
    */
   async update(ctx: Context) {
-    const advancedConfigs = await strapi
+    const advancedConfigs = (await strapi
       .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
-      .get<AdvancedSettings>();
+      .get()) as AdvancedSettings;
 
     const { id } = ctx.params;
     const { email, username, password } = ctx.request.body;
