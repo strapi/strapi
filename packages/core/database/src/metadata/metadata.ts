@@ -1,4 +1,4 @@
-import { cloneDeep } from 'lodash/fp';
+import { cloneDeep } from 'lodash';
 import { identifiers } from '../utils/identifiers';
 import * as types from '../utils/types';
 import { createRelation } from './relations';

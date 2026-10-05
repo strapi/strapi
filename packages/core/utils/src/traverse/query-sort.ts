@@ -1,17 +1,4 @@
-import {
-  curry,
-  isString,
-  isObject,
-  map,
-  trim,
-  split,
-  isEmpty,
-  flatten,
-  pipe,
-  isNil,
-  first,
-  cloneDeep,
-} from 'lodash/fp';
+import { curry, isString, isObject, isEmpty, cloneDeep } from 'lodash';
 
 import { hasSort } from '../sort-query';
 import traverseFactory, { type Parent } from './factory';
@@ -42,7 +29,7 @@ const sort = traverseFactory()
       return Promise.all(
         sort
           .split(',')
-          .map(trim)
+          .map((value) => value.trim())
           .map((nestedSort) => recurse(visitor, options, nestedSort))
       ).then((res) => res.filter((part) => !isEmpty(part)).join(','));
     }
@@ -67,7 +54,8 @@ const sort = traverseFactory()
   )
   // Parse string values
   .parse(isString, () => {
-    const tokenize = pipe(split('.'), map(split(':')), flatten);
+    const tokenize = (value: string | undefined) =>
+      (value ?? '').split('.').flatMap((part) => part.split(':'));
     const recompose = (parts: string[]) => {
       if (parts.length === 0) {
         return undefined;
@@ -87,7 +75,7 @@ const sort = traverseFactory()
     };
 
     return {
-      transform: trim,
+      transform: (value) => value.trim(),
 
       remove(key, data) {
         const [root] = tokenize(data);
@@ -102,11 +90,11 @@ const sort = traverseFactory()
           return data;
         }
 
-        return isNil(value) ? root : `${root}.${value}`;
+        return value == null ? root : `${root}.${value}`;
       },
 
       keys(data) {
-        const v = first(tokenize(data));
+        const v = tokenize(data)[0];
         return v ? [v] : [];
       },
 

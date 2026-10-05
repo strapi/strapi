@@ -4,7 +4,7 @@ import { extname } from 'path';
 import { EOL } from 'os';
 import type Chain from 'stream-chain';
 import { chain } from 'stream-chain';
-import { isEmpty, uniq, last, isNumber, set, pick } from 'lodash/fp';
+import { isEmpty, isNumber, pick } from 'lodash';
 import { diff as semverDiff } from 'semver';
 
 import type { Struct, Utils } from '@strapi/types';
@@ -501,7 +501,7 @@ class TransferEngine<
       return;
     }
 
-    const keys = uniq(Object.keys(sourceSchemas).concat(Object.keys(destinationSchemas)));
+    const keys = [...new Set(Object.keys(sourceSchemas).concat(Object.keys(destinationSchemas)))];
     const diffs: { [key: string]: Diff[] } = {};
 
     keys.forEach((key) => {
@@ -876,7 +876,7 @@ class TransferEngine<
     } catch (e: unknown) {
       this.#emitTransferUpdate('error', { error: e });
 
-      const lastDiagnostic = last(this.diagnostics.stack.items);
+      const lastDiagnostic = this.diagnostics.stack.items.at(-1);
       // Do not report an error diagnostic if the last one reported the same error
       if (
         e instanceof Error &&
@@ -1006,7 +1006,7 @@ class TransferEngine<
           const { type, data } = entity;
           const attributes = schemas[type].attributes;
           const attributesToKeep = Object.keys(attributes).concat('documentId');
-          const updatedEntity = set('data', pick(attributesToKeep, data), entity);
+          const updatedEntity = { ...entity, data: pick(data, attributesToKeep) };
 
           callback(null, updatedEntity);
         },

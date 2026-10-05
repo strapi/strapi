@@ -1,5 +1,4 @@
-import _ from 'lodash';
-import { has, getOr, union, snakeCase } from 'lodash/fp';
+import _, { has, get, union, snakeCase } from 'lodash';
 import type {
   Model,
   Kind,
@@ -172,11 +171,11 @@ const getDraftAndPublishEnableBlockedMessage = (attributeNames: string[]): strin
 const getTimestamps = (model: Model) => {
   const attributes: string[] = [];
 
-  if (has(CREATED_AT_ATTRIBUTE, model.attributes)) {
+  if (has(model.attributes, CREATED_AT_ATTRIBUTE)) {
     attributes.push(CREATED_AT_ATTRIBUTE);
   }
 
-  if (has(UPDATED_AT_ATTRIBUTE, model.attributes)) {
+  if (has(model.attributes, UPDATED_AT_ATTRIBUTE)) {
     attributes.push(UPDATED_AT_ATTRIBUTE);
   }
 
@@ -186,11 +185,11 @@ const getTimestamps = (model: Model) => {
 const getCreatorFields = (model: Model) => {
   const attributes: string[] = [];
 
-  if (has(CREATED_BY_ATTRIBUTE, model.attributes)) {
+  if (has(model.attributes, CREATED_BY_ATTRIBUTE)) {
     attributes.push(CREATED_BY_ATTRIBUTE);
   }
 
-  if (has(UPDATED_BY_ATTRIBUTE, model.attributes)) {
+  if (has(model.attributes, UPDATED_BY_ATTRIBUTE)) {
     attributes.push(UPDATED_BY_ATTRIBUTE);
   }
 
@@ -309,8 +308,8 @@ const storedPrivateAttributesCache = new WeakMap<object, Set<string>>();
 const computeStoredPrivateAttributes = (model: Model): Set<string> =>
   new Set(
     union(
-      (strapi?.config?.get('api.responses.privateAttributes', []) ?? []) as Array<string>,
-      getOr([], 'options.privateAttributes', model) as Array<string>
+      get(model, 'options.privateAttributes', []) as Array<string>,
+      (strapi?.config?.get('api.responses.privateAttributes', []) ?? []) as Array<string>
     )
   );
 

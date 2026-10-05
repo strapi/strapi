@@ -1,7 +1,7 @@
 import path from 'path';
 import os from 'os';
 import fs from 'fs-extra';
-import { snakeCase } from 'lodash/fp';
+import { snakeCase } from 'lodash';
 
 import { createMigrationBuilder, isCompatibleRename } from '..';
 
