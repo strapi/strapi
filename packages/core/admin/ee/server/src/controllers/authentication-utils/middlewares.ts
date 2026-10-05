@@ -2,6 +2,7 @@ import type { Core } from '@strapi/types';
 import passport from 'koa-passport';
 import { getService } from '../../utils';
 import utils from './utils';
+import { emitLoginFailure } from '../../../../../server/src/audit-logs/auth';
 import {
   REFRESH_COOKIE_NAME,
   buildCookieOptionsWithExpiry,
@@ -28,10 +29,10 @@ export const authenticate: Core.MiddlewareHandler = async (ctx, next) => {
         strapi.log.error(error);
       }
 
-      strapi.eventHub.emit('admin.auth.error', {
-        error: error || defaultConnectionError(),
-        provider,
-      });
+      await emitLoginFailure(
+        { strapi },
+        { error: error || defaultConnectionError(), provider, reason: 'sso_connection_error' }
+      );
 
       return ctx.redirect(redirectUrls.error);
     }
@@ -48,10 +49,15 @@ const existingUserScenario: Core.MiddlewareHandler =
     const redirectUrls = utils.getPrefixedRedirectUrls();
 
     if (!user.isActive) {
-      strapi.eventHub.emit('admin.auth.error', {
-        error: new Error(`Deactivated user tried to login (${user.id})`),
-        provider,
-      });
+      await emitLoginFailure(
+        { strapi },
+        {
+          error: new Error(`Deactivated user tried to login (${user.id})`),
+          provider,
+          reason: 'account_inactive',
+          user,
+        }
+      );
       return ctx.redirect(redirectUrls.error);
     }
 
@@ -70,7 +76,10 @@ const nonExistingUserScenario: Core.MiddlewareHandler =
     const isMissingRegisterFields = !username && (!firstname || !lastname);
 
     if (!providers.autoRegister || !providers.defaultRole || isMissingRegisterFields) {
-      strapi.eventHub.emit('admin.auth.error', { error: defaultConnectionError(), provider });
+      await emitLoginFailure(
+        { strapi },
+        { error: defaultConnectionError(), provider, reason: 'sso_registration_disabled' }
+      );
       return ctx.redirect(redirectUrls.error);
     }
 
@@ -78,7 +87,10 @@ const nonExistingUserScenario: Core.MiddlewareHandler =
 
     // If the default role has been misconfigured, redirect with an error
     if (!defaultRole) {
-      strapi.eventHub.emit('admin.auth.error', { error: defaultConnectionError(), provider });
+      await emitLoginFailure(
+        { strapi },
+        { error: defaultConnectionError(), provider, reason: 'sso_role_misconfigured' }
+      );
       return ctx.redirect(redirectUrls.error);
     }
 
@@ -160,10 +172,15 @@ export const redirectWithAuth: Core.MiddlewareHandler = async (ctx) => {
     ctx.redirect(redirectUrls.success);
   } catch (error) {
     strapi.log.error('SSO authentication failed during token generation', error);
-    strapi.eventHub.emit('admin.auth.error', {
-      error: error instanceof Error ? error : new Error('Unknown SSO error'),
-      provider,
-    });
+    await emitLoginFailure(
+      { strapi },
+      {
+        error: error instanceof Error ? error : new Error('Unknown SSO error'),
+        provider,
+        reason: 'unexpected_error',
+        user,
+      }
+    );
     return ctx.redirect(redirectUrls.error);
   }
 };

@@ -1,4 +1,5 @@
-import { redirectWithAuth } from '../middlewares';
+import passport from 'koa-passport';
+import { authenticate, redirectWithAuth } from '../middlewares';
 import { DEFAULT_AUTH_COOKIE_NAME } from '../../../../../../shared/utils/auth-cookie-name';
 import { REFRESH_COOKIE_NAME } from '../../../../../../shared/utils/session-auth';
 
@@ -9,8 +10,11 @@ jest.mock('../utils', () => ({
       success: '/admin/auth/login/success',
       error: '/admin/auth/login/error',
     })),
+    getAdminStore: jest.fn(),
   },
 }));
+
+jest.mock('koa-passport', () => ({ __esModule: true, default: { authenticate: jest.fn() } }));
 
 jest.mock('../../../../../../shared/utils/session-auth', () => {
   const actual = jest.requireActual('../../../../../../shared/utils/session-auth');
@@ -213,5 +217,162 @@ describe('redirectWithAuth', () => {
       'refresh-token',
       expect.objectContaining({ path: '/admin' })
     );
+  });
+});
+
+describe('SSO login failures', () => {
+  const { getAdminStore } = jest.requireMock('../utils').default as { getAdminStore: jest.Mock };
+  const findOneByEmail = jest.fn();
+  const createUser = jest.fn();
+  const findRole = jest.fn();
+  const emit = jest.fn();
+
+  const providers = { autoRegister: true, defaultRole: 3 };
+  const profile = { email: 'ana@acme.com', firstname: 'Ana', lastname: 'Doe' };
+
+  const createCtx = () => ({
+    params: { provider: 'okta' },
+    state: {} as Record<string, unknown>,
+    redirect: jest.fn(),
+  });
+
+  const runAuthenticate = async (error: unknown, idpProfile: unknown) => {
+    jest
+      .mocked(passport.authenticate)
+      .mockImplementation(
+        (_provider: any, _options: any, callback: any) => () => callback(error, idpProfile)
+      );
+
+    const ctx = createCtx();
+    const next = jest.fn();
+    await authenticate(ctx as any, next);
+    return { ctx, next };
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    global.strapi = {
+      admin: {
+        services: {
+          user: { findOneByEmail, create: createUser },
+          role: { findOne: findRole },
+        },
+      },
+      log: { error: jest.fn() },
+      eventHub: { emit },
+    } as any;
+
+    getAdminStore.mockResolvedValue({ get: jest.fn(async () => ({ providers })) });
+    findOneByEmail.mockResolvedValue(null);
+    findRole.mockResolvedValue({ id: 3 });
+  });
+
+  test('emits sso_connection_error when the provider returns no profile', async () => {
+    const providerError = new Error('idp down');
+    const { ctx } = await runAuthenticate(providerError, null);
+
+    expect(emit).toHaveBeenCalledWith('admin.auth.error', {
+      error: providerError,
+      provider: 'okta',
+      reason: 'sso_connection_error',
+    });
+    expect(ctx.redirect).toHaveBeenCalledWith('/admin/auth/login/error');
+  });
+
+  test('emits sso_connection_error with a default error when the profile has no email', async () => {
+    await runAuthenticate(null, { firstname: 'Ana' });
+
+    expect(emit).toHaveBeenCalledWith('admin.auth.error', {
+      error: expect.any(Error),
+      provider: 'okta',
+      reason: 'sso_connection_error',
+    });
+  });
+
+  test('emits account_inactive with the account id and email only for a deactivated user', async () => {
+    findOneByEmail.mockResolvedValue({
+      id: 7,
+      email: 'ana@acme.com',
+      isActive: false,
+      password: '$2a$10$hash',
+    });
+
+    const { ctx, next } = await runAuthenticate(null, profile);
+
+    expect(emit).toHaveBeenCalledWith('admin.auth.error', {
+      error: expect.any(Error),
+      provider: 'okta',
+      reason: 'account_inactive',
+      user: { id: 7, email: 'ana@acme.com' },
+    });
+    expect(next).not.toHaveBeenCalled();
+    expect(ctx.redirect).toHaveBeenCalledWith('/admin/auth/login/error');
+  });
+
+  test.each([
+    ['auto-registration is off', { autoRegister: false, defaultRole: 3 }, profile],
+    ['there is no default role', { autoRegister: true, defaultRole: null }, profile],
+    ['the profile has no name', providers, { email: 'ana@acme.com' }],
+  ])('emits sso_registration_disabled when %s', async (_, storedProviders, idpProfile) => {
+    getAdminStore.mockResolvedValue({ get: jest.fn(async () => ({ providers: storedProviders })) });
+
+    await runAuthenticate(null, idpProfile);
+
+    expect(emit).toHaveBeenCalledWith('admin.auth.error', {
+      error: expect.any(Error),
+      provider: 'okta',
+      reason: 'sso_registration_disabled',
+    });
+    expect(createUser).not.toHaveBeenCalled();
+  });
+
+  test('emits sso_role_misconfigured when the default role does not exist', async () => {
+    findRole.mockResolvedValue(null);
+
+    await runAuthenticate(null, profile);
+
+    expect(emit).toHaveBeenCalledWith('admin.auth.error', {
+      error: expect.any(Error),
+      provider: 'okta',
+      reason: 'sso_role_misconfigured',
+    });
+    expect(createUser).not.toHaveBeenCalled();
+  });
+
+  test('emits admin.auth.autoRegistration with the created user, unchanged', async () => {
+    const created = { id: 9, email: 'ana@acme.com', roles: [{ id: 3 }] };
+    createUser.mockResolvedValue(created);
+
+    const { ctx, next } = await runAuthenticate(null, profile);
+
+    expect(emit).toHaveBeenCalledWith('admin.auth.autoRegistration', {
+      user: created,
+      provider: 'okta',
+    });
+    expect(ctx.state.user).toBe(created);
+    expect(next).toHaveBeenCalled();
+  });
+
+  test('emits unexpected_error with the account when the session cannot be created', async () => {
+    getSessionManager.mockImplementation(() => {
+      throw new Error('session store down');
+    });
+
+    const ctx = {
+      params: { provider: 'okta' },
+      state: { user: { id: 7, email: 'ana@acme.com', password: '$2a$10$hash' } },
+      redirect: jest.fn(),
+    };
+
+    await redirectWithAuth(ctx as any, jest.fn());
+
+    expect(emit).toHaveBeenCalledWith('admin.auth.error', {
+      error: expect.any(Error),
+      provider: 'okta',
+      reason: 'unexpected_error',
+      user: { id: 7, email: 'ana@acme.com' },
+    });
+    expect(ctx.redirect).toHaveBeenCalledWith('/admin/auth/login/error');
   });
 });

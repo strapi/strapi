@@ -4,6 +4,7 @@ import compose from 'koa-compose';
 import '@strapi/types';
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
+import { emitLoginFailure, type LoginFailureReason } from '../audit-logs/auth';
 import {
   REFRESH_COOKIE_NAME,
   buildCookieOptionsWithExpiry,
@@ -36,6 +37,36 @@ import { AdminUser } from '../../../shared/contracts/shared';
 
 const { ApplicationError, ValidationError } = errors;
 
+/**
+ * Emits `admin.auth.error` without delaying the response. The account is looked up by
+ * the email of the request, as the local strategy does, because passport does not pass
+ * the user along with an error.
+ */
+const emitLocalLoginFailure = (ctx: Context, error: Error, reason: LoginFailureReason) => {
+  const { email } = (ctx.request.body ?? {}) as { email?: unknown };
+
+  Promise.resolve()
+    .then(() =>
+      typeof email === 'string'
+        ? strapi.db
+            .query('admin::user')
+            .findOne({ select: ['id', 'email'], where: { email: email.toLowerCase() } })
+        : null
+    )
+    .catch(() => null)
+    .then((user) =>
+      emitLoginFailure(
+        { strapi },
+        {
+          error,
+          reason,
+          provider: 'local',
+          ...(user ? { user: { id: user.id, email: user.email } } : {}),
+        }
+      )
+    );
+};
+
 export default {
   login: compose([
     async (ctx: Context, next: Next) => {
@@ -45,7 +76,11 @@ export default {
     (ctx: Context, next: Next) => {
       return passport.authenticate('local', { session: false }, (err, user, info) => {
         if (err) {
-          strapi.eventHub.emit('admin.auth.error', { error: err, provider: 'local' });
+          emitLocalLoginFailure(
+            ctx,
+            err,
+            err.details?.code === 'LOGIN_NOT_ALLOWED' ? 'login_not_allowed' : 'unexpected_error'
+          );
           // if this is a recognized error, allow it to bubble up to user
           if (err.details?.code === 'LOGIN_NOT_ALLOWED') {
             throw err;
@@ -56,10 +91,11 @@ export default {
         }
 
         if (!user) {
-          strapi.eventHub.emit('admin.auth.error', {
-            error: new Error(info.message),
-            provider: 'local',
-          });
+          emitLocalLoginFailure(
+            ctx,
+            new Error(info.message),
+            info.message === 'User not active' ? 'account_inactive' : 'invalid_credentials'
+          );
           throw new ApplicationError(info.message);
         }
 
