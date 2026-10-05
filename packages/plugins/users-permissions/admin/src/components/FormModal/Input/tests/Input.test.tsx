@@ -177,12 +177,15 @@ describe('<Input />', () => {
   });
 });
 
-it('shows the generated OAuth callback URL', () => {
+it('shows a read-only OAuth callback URL', () => {
   const { getByRole } = render(
-    makeApp('noName', 'text', '', { providerToEditName: 'discord', disabled: true })
+    makeApp('redirectUri', 'text', 'https://cms.example.org/content/connect/discord/callback', {
+      providerToEditName: 'discord',
+      disabled: true,
+    })
   );
   expect(getByRole('textbox', { name: 'Enabled' })).toHaveValue(
-    'http://localhost:1337/api/connect/discord/callback'
+    'https://cms.example.org/content/connect/discord/callback'
   );
   expect(getByRole('textbox', { name: 'Enabled' })).toBeDisabled();
 });

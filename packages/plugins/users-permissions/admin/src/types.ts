@@ -40,6 +40,7 @@ export type Provider = {
   key?: string;
   secret?: string;
   callback?: string;
+  redirectUri?: string;
   subdomain?: string;
   jwksurl?: string;
   scope?: string[];
@@ -48,7 +49,7 @@ export type Providers = Record<string, Provider>;
 export type ProviderFormValues = Omit<Provider, 'scope'>;
 export type Translation = MessageDescriptor & { values?: Record<string, PrimitiveType> };
 export type ProviderField = {
-  name: keyof ProviderFormValues | 'noName';
+  name: keyof ProviderFormValues;
   type: 'bool' | 'text';
   intlLabel: Translation;
   description?: Translation;
