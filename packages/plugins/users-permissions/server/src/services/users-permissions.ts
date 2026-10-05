@@ -1,15 +1,13 @@
-'use strict';
+import type { Core, Data } from '@strapi/types';
 
-const _ = require('lodash');
-const urlJoin = require('url-join');
-const {
-  template: { createStrictInterpolationRegExp },
-  errors,
-  objects,
-  sanitizeRoutesMapForSerialization,
-} = require('@strapi/utils');
+import _ from 'lodash';
+import urlJoin from 'url-join';
+import { template, errors, objects, sanitizeRoutesMapForSerialization } from '@strapi/utils';
+import type { ActionsMap, Permission, PluginContext, Role, User } from '../types';
 
-const { getService } = require('../utils');
+import { getService } from '../utils';
+
+const { createStrictInterpolationRegExp } = template;
 
 const DEFAULT_PERMISSIONS = [
   { action: 'plugin::users-permissions.auth.callback', roleType: 'public' },
@@ -27,7 +25,7 @@ const DEFAULT_PERMISSIONS = [
   { action: 'plugin::users-permissions.auth.changePassword', roleType: 'authenticated' },
 ];
 
-const transformRoutePrefixFor = (pluginName) => (route) => {
+const transformRoutePrefixFor = (pluginName: string) => (route: Core.Route) => {
   const prefix = route.config && route.config.prefix;
   const path = prefix !== undefined ? `${prefix}${route.path}` : `/${pluginName}${route.path}`;
 
@@ -37,16 +35,18 @@ const transformRoutePrefixFor = (pluginName) => (route) => {
   };
 };
 
-module.exports = ({ strapi }) => ({
-  getActions({ defaultEnable = false } = {}) {
-    const actionMap = {};
+/** Discover Content API permissions and manage default role setup. */
+export default ({ strapi }: PluginContext) => ({
+  getActions({ defaultEnable = false } = {}): ActionsMap {
+    const actionMap: ActionsMap = {};
 
-    const isContentApi = (action) => {
+    const isContentApi = (action: Core.Controller[string]) => {
       if (!_.has(action, Symbol.for('__type__'))) {
         return false;
       }
 
-      return action[Symbol.for('__type__')].includes('content-api');
+      const types: unknown = Reflect.get(action, Symbol.for('__type__'));
+      return Array.isArray(types) && types.includes('content-api');
     };
 
     for (const [apiName, api] of Object.entries(strapi.apis)) {
@@ -68,7 +68,7 @@ module.exports = ({ strapi }) => ({
 
           return acc;
         },
-        {}
+        {} as ActionsMap[string]['controllers']
       );
 
       if (!_.isEmpty(controllers)) {
@@ -95,7 +95,7 @@ module.exports = ({ strapi }) => ({
 
           return acc;
         },
-        {}
+        {} as ActionsMap[string]['controllers']
       );
 
       if (!_.isEmpty(controllers)) {
@@ -108,22 +108,18 @@ module.exports = ({ strapi }) => ({
   },
 
   async getRoutes() {
-    const routesMap = {};
+    const routesMap: Record<string, Core.Route[]> = {};
 
     for (const [apiName, api] of Object.entries(strapi.apis)) {
-      const routes = _.flatMap(api.routes, (route) => {
-        if (_.has(route, 'routes')) {
-          return route.routes;
-        }
-
-        return route;
-      }).filter((route) => route.info.type === 'content-api');
+      const routes = Object.values(api.routes)
+        .flatMap((route) => ('routes' in route ? route.routes : route))
+        .filter((route) => route.info.type === 'content-api');
 
       if (routes.length === 0) {
         continue;
       }
 
-      const apiPrefix = strapi.config.get('api.rest.prefix');
+      const apiPrefix = strapi.config.get<string>('api.rest.prefix');
       routesMap[`api::${apiName}`] = routes.map((route) => ({
         ...route,
         path: urlJoin(apiPrefix, route.path),
@@ -133,19 +129,16 @@ module.exports = ({ strapi }) => ({
     for (const [pluginName, plugin] of Object.entries(strapi.plugins)) {
       const transformPrefix = transformRoutePrefixFor(pluginName);
 
-      const routes = _.flatMap(plugin.routes, (route) => {
-        if (_.has(route, 'routes')) {
-          return route.routes.map(transformPrefix);
-        }
-
-        return transformPrefix(route);
-      }).filter((route) => route.info.type === 'content-api');
+      const routes = Object.values(plugin.routes)
+        .flatMap((route) => ('routes' in route ? route.routes : route))
+        .map((route) => transformPrefix(route))
+        .filter((route) => route.info.type === 'content-api');
 
       if (routes.length === 0) {
         continue;
       }
 
-      const apiPrefix = strapi.config.get('api.rest.prefix');
+      const apiPrefix = strapi.config.get<string>('api.rest.prefix');
       routesMap[`plugin::${pluginName}`] = routes.map((route) => ({
         ...route,
         path: urlJoin(apiPrefix, route.path),
@@ -156,8 +149,10 @@ module.exports = ({ strapi }) => ({
   },
 
   async syncPermissions() {
-    const roles = await strapi.db.query('plugin::users-permissions.role').findMany();
-    const dbPermissions = await strapi.db.query('plugin::users-permissions.permission').findMany();
+    const roles: Role[] = await strapi.db.query('plugin::users-permissions.role').findMany();
+    const dbPermissions: Permission[] = await strapi.db
+      .query('plugin::users-permissions.permission')
+      .findMany();
 
     const permissionsFoundInDB = _.uniq(_.map(dbPermissions, 'action'));
 
@@ -210,7 +205,7 @@ module.exports = ({ strapi }) => ({
     }
   },
 
-  async initialize() {
+  async initialize(): Promise<void> {
     const roleCount = await strapi.db.query('plugin::users-permissions.role').count();
 
     if (roleCount === 0) {
@@ -231,23 +226,23 @@ module.exports = ({ strapi }) => ({
       });
     }
 
-    return getService('users-permissions').syncPermissions();
+    return getService(strapi, 'users-permissions').syncPermissions();
   },
 
-  async updateUserRole(user, role) {
+  async updateUserRole(user: Pick<User, 'id'>, role: Data.ID) {
     return strapi.db
       .query('plugin::users-permissions.user')
       .update({ where: { id: user.id }, data: { role } });
   },
 
-  template(layout, data) {
+  template(layout: string, data: Record<string, unknown>) {
     const allowedTemplateVariables = objects.keysDeep(data);
 
     // Create a strict interpolation RegExp based on possible variable names
     const interpolate = createStrictInterpolationRegExp(allowedTemplateVariables, 'g');
 
     try {
-      return _.template(layout, { interpolate, evaluate: false, escape: false })(data);
+      return _.template(layout, { interpolate, evaluate: /($^)/, escape: /($^)/ })(data);
     } catch {
       throw new errors.ApplicationError('Invalid email template');
     }

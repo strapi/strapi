@@ -1,7 +1,6 @@
-/* eslint @typescript-eslint/no-var-requires: off */
 import { describe, expect, it } from 'vitest';
 
-const { buildRefreshCookieOptions } = require('../refresh-cookie-options');
+import { buildRefreshCookieOptions } from '../refresh-cookie-options';
 
 describe('buildRefreshCookieOptions', () => {
   it('forwards maxAge when configured', () => {

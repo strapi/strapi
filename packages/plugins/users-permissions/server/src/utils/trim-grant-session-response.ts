@@ -1,6 +1,6 @@
-'use strict';
+import type { GrantResponse } from '../types';
 
-const compact = (value) => {
+const compact = (value: unknown): unknown => {
   if (value === null || value === undefined) {
     return undefined;
   }
@@ -24,7 +24,10 @@ const compact = (value) => {
  *
  * Keep only fields that auth.callback / providers-registry actually read.
  */
-const trimGrantSessionResponse = (grantResponse, provider) => {
+const trimGrantSessionResponse = (
+  grantResponse: GrantResponse | null | undefined,
+  provider: string
+): GrantResponse | null | undefined => {
   if (!grantResponse || typeof grantResponse !== 'object') {
     return grantResponse;
   }
@@ -33,7 +36,7 @@ const trimGrantSessionResponse = (grantResponse, provider) => {
     case 'cognito':
       return compact({
         id_token: grantResponse.id_token,
-      });
+      }) as GrantResponse;
 
     case 'twitter':
       return compact({
@@ -42,7 +45,7 @@ const trimGrantSessionResponse = (grantResponse, provider) => {
         raw: grantResponse.raw?.screen_name
           ? { screen_name: grantResponse.raw.screen_name }
           : undefined,
-      });
+      }) as GrantResponse;
 
     case 'vk':
       return compact({
@@ -54,17 +57,15 @@ const trimGrantSessionResponse = (grantResponse, provider) => {
                 user_id: grantResponse.raw.user_id,
               }
             : undefined,
-      });
+      }) as GrantResponse;
 
     default:
       return compact({
         access_token: grantResponse.access_token,
         oauth_token: grantResponse.oauth_token,
         id_token: grantResponse.id_token,
-      });
+      }) as GrantResponse;
   }
 };
 
-module.exports = {
-  trimGrantSessionResponse,
-};
+export { trimGrantSessionResponse };

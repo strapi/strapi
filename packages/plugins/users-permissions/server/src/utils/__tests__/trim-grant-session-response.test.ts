@@ -1,20 +1,20 @@
-/* eslint @typescript-eslint/no-var-requires: off */
 import { describe, expect, it } from 'vitest';
 
 /* eslint-disable import/no-extraneous-dependencies */
 
-const cookie = require('cookie');
-const signature = require('cookie-signature');
+import cookie from 'cookie';
+import signature from 'cookie-signature';
+import type { GrantResponse } from '../../types';
 
-const { trimGrantSessionResponse } = require('../trim-grant-session-response');
-const { tokensToQueryPayload } = require('../oauth-connect/oauth2');
+import { trimGrantSessionResponse } from '../trim-grant-session-response';
+import { tokensToQueryPayload } from '../oauth-connect/oauth2';
 
 const BROWSER_COOKIE_LIMIT = 4096;
 const SESSION_COOKIE_NAME = 'koa.sess';
-const SESSION_COOKIE_SECRET = 'trim-grant-session-response-test-secret';
 const GRANT_PROVIDER_KEY = 'cognito-test-client';
+const SESSION_COOKIE_SECRET = 'trim-grant-session-response-test-secret';
 
-const toBase64Url = (value) =>
+const toBase64Url = (value: unknown) =>
   Buffer.from(JSON.stringify(value))
     .toString('base64')
     .replace(/=/g, '')
@@ -33,7 +33,7 @@ const makeJwt = (payloadPadding = 0, audience = GRANT_PROVIDER_KEY) => {
   return `${header}.${payload}.${signature}`;
 };
 
-const estimateSignedSessionCookieBytes = (sessionPayload) => {
+const estimateSignedSessionCookieBytes = (sessionPayload: unknown) => {
   const signed = signature.sign(
     Buffer.from(JSON.stringify(sessionPayload)).toString('base64'),
     SESSION_COOKIE_SECRET
@@ -42,8 +42,8 @@ const estimateSignedSessionCookieBytes = (sessionPayload) => {
   return cookie.serialize(SESSION_COOKIE_NAME, signed).length;
 };
 
-const buildGrantOAuth2Response = (tokenExchange) => {
-  return tokensToQueryPayload({ oauth: 2, key: GRANT_PROVIDER_KEY }, tokenExchange);
+const buildGrantOAuth2Response = (tokenExchange: GrantResponse) => {
+  return tokensToQueryPayload({ oauth: 2 }, tokenExchange);
 };
 
 describe('trimGrantSessionResponse', () => {

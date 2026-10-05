@@ -1,30 +1,32 @@
-'use strict';
+import _ from 'lodash';
+import urlJoin from 'url-join';
+import type {
+  AdvancedSettings,
+  GrantConfig,
+  GrantResponse,
+  OAuthQuery,
+  PluginContext,
+  User,
+} from '../types';
 
-/**
- * Module dependencies
- */
+import { getService, findValidUsername } from '../utils';
 
-// Public node modules.
-const _ = require('lodash');
-const urlJoin = require('url-join');
+/** Resolve provider identities and register users when allowed. */
+export default ({ strapi }: PluginContext) => {
+  /** Retrieve the provider profile associated with the completed OAuth exchange. */
 
-const { getService, findValidUsername } = require('../utils');
-
-module.exports = ({ strapi }) => {
-  /**
-   * Helper to get profiles
-   *
-   * @param {String}   provider
-   */
-
-  const getProfile = async (provider, oauthData, { grantResponse } = {}) => {
+  const getProfile = async (
+    provider: string,
+    oauthData: OAuthQuery,
+    { grantResponse }: { grantResponse?: GrantResponse } = {}
+  ) => {
     const accessToken = oauthData.access_token || oauthData.code || oauthData.oauth_token;
 
     const providers = await strapi
       .store({ type: 'plugin', name: 'users-permissions', key: 'grant' })
-      .get();
+      .get<GrantConfig>();
 
-    return getService('providers-registry').run({
+    return getService(strapi, 'providers-registry').run({
       provider,
       query: oauthData,
       accessToken,
@@ -33,17 +35,13 @@ module.exports = ({ strapi }) => {
     });
   };
 
-  /**
-   * Connect thanks to a third-party provider.
-   *
-   *
-   * @param {String}    provider
-   * @param {String}    accessToken
-   *
-   * @return  {*}
-   */
+  /** Find an existing provider account or register one when registration is enabled. */
 
-  const connect = async (provider, oauthData, { grantResponse } = {}) => {
+  const connect = async (
+    provider: string,
+    oauthData: OAuthQuery,
+    { grantResponse }: { grantResponse?: GrantResponse } = {}
+  ) => {
     const accessToken = oauthData.access_token || oauthData.code || oauthData.oauth_token;
     const idToken = oauthData.id_token;
 
@@ -61,13 +59,13 @@ module.exports = ({ strapi }) => {
       throw new Error('Email was not available.');
     }
 
-    const users = await strapi.db.query('plugin::users-permissions.user').findMany({
+    const users: User[] = await strapi.db.query('plugin::users-permissions.user').findMany({
       where: { email },
     });
 
     const advancedSettings = await strapi
       .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
-      .get();
+      .get<AdvancedSettings>();
 
     const user = _.find(users, { provider });
 
@@ -90,7 +88,7 @@ module.exports = ({ strapi }) => {
 
     // Username: prefer profile, else email prefix; findValidUsername ensures valid + unique
     const base = (profile.username && profile.username.trim()) || email.split('@')[0];
-    const username = await findValidUsername(base);
+    const username = await findValidUsername(strapi, base);
 
     // Create the new user.
     const newUser = {
@@ -110,9 +108,9 @@ module.exports = ({ strapi }) => {
   };
 
   const buildRedirectUri = (provider = '') => {
-    const apiPrefix = strapi.config.get('api.rest.prefix');
+    const apiPrefix = strapi.config.get<string>('api.rest.prefix');
     return urlJoin(
-      strapi.config.get('server.absoluteUrl'),
+      strapi.config.get<string>('server.absoluteUrl'),
       apiPrefix,
       'connect',
       provider,

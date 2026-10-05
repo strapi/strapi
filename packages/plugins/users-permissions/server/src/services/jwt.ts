@@ -1,16 +1,20 @@
-'use strict';
+import type { Context } from 'koa';
+import type { Data } from '@strapi/types';
 
-/**
- * Jwt.js service
- *
- * @description: A set of functions similar to controller's actions to avoid code duplication.
- */
+import _ from 'lodash';
+import jwt from 'jsonwebtoken';
+import type { PluginContext } from '../types';
 
-const _ = require('lodash');
-const jwt = require('jsonwebtoken');
+type TokenPayload = jwt.JwtPayload & {
+  id?: Data.ID;
+  userId?: Data.ID;
+  sessionId?: string;
+  toJSON?: () => object;
+};
 
-module.exports = ({ strapi }) => ({
-  getToken(ctx) {
+/** Issue and verify Content API tokens in legacy or session mode. */
+export default ({ strapi }: PluginContext) => ({
+  getToken(ctx: Pick<Context, 'request'>) {
     let token;
 
     if (ctx.request && ctx.request.header && ctx.request.header.authorization) {
@@ -28,8 +32,11 @@ module.exports = ({ strapi }) => ({
     return this.verify(token);
   },
 
-  issue(payload, jwtOptions = {}) {
-    const mode = strapi.config.get('plugin::users-permissions.jwtManagement', 'legacy-support');
+  issue(payload: TokenPayload, jwtOptions: jwt.SignOptions = {}) {
+    const mode = strapi.config.get<string>(
+      'plugin::users-permissions.jwtManagement',
+      'legacy-support'
+    );
 
     if (mode === 'refresh') {
       const userId = String(payload.id ?? payload.userId ?? '');
@@ -58,13 +65,16 @@ module.exports = ({ strapi }) => ({
     _.defaults(jwtOptions, strapi.config.get('plugin::users-permissions.jwt'));
     return jwt.sign(
       _.clone(payload.toJSON ? payload.toJSON() : payload),
-      strapi.config.get('plugin::users-permissions.jwtSecret'),
+      strapi.config.get<string>('plugin::users-permissions.jwtSecret'),
       jwtOptions
     );
   },
 
-  async verify(token) {
-    const mode = strapi.config.get('plugin::users-permissions.jwtManagement', 'legacy-support');
+  async verify(token: string): Promise<TokenPayload> {
+    const mode = strapi.config.get<string>(
+      'plugin::users-permissions.jwtManagement',
+      'legacy-support'
+    );
 
     if (mode === 'refresh') {
       // Accept only access tokens minted by the SessionManager for UP
@@ -85,17 +95,18 @@ module.exports = ({ strapi }) => ({
     }
 
     return new Promise((resolve, reject) => {
-      const jwtConfig = strapi.config.get('plugin::users-permissions.jwt', {});
-      const algorithms = [jwtConfig?.algorithm || 'HS256'];
+      const jwtConfig = strapi.config.get<jwt.SignOptions>('plugin::users-permissions.jwt', {});
+      const algorithms: jwt.Algorithm[] = [jwtConfig?.algorithm || 'HS256'];
 
       jwt.verify(
         token,
-        strapi.config.get('plugin::users-permissions.jwtSecret'),
+        strapi.config.get<string>('plugin::users-permissions.jwtSecret'),
         { algorithms },
         (err, tokenPayload = {}) => {
           if (err) {
             return reject(new Error('Invalid token.'));
           }
+          if (typeof tokenPayload !== 'object') return reject(new Error('Invalid token.'));
           resolve(tokenPayload);
         }
       );

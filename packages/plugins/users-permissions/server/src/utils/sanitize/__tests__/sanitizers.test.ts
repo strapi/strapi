@@ -1,29 +1,22 @@
-/* eslint @typescript-eslint/no-var-requires: off */
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import { createStrapiMock } from '../../../../tests/utils';
 
-const { sanitizeUserRelationFromRoleEntities, defaultSanitizeOutput } = require('../sanitizers');
+import { sanitizeUserRelationFromRoleEntities, defaultSanitizeOutput } from '../sanitizers';
 
 describe('users-permissions sanitizers', () => {
   const schema = {
+    modelType: 'contentType' as const,
     uid: 'plugin::users-permissions.role',
     attributes: {
-      name: { type: 'string' },
+      name: { type: 'string' as const },
       users: {
-        type: 'relation',
+        type: 'relation' as const,
         relation: 'oneToMany',
         target: 'plugin::users-permissions.user',
       },
     },
   };
-  const previousStrapi = global.strapi;
-
-  beforeEach(() => {
-    global.strapi = { getModel: vi.fn() };
-  });
-
-  afterEach(() => {
-    global.strapi = previousStrapi ?? {};
-  });
+  const strapi = createStrapiMock({ getModel: vi.fn() });
 
   it.each([sanitizeUserRelationFromRoleEntities, defaultSanitizeOutput])(
     'supports direct and curried calls while removing role users',
@@ -32,8 +25,8 @@ describe('users-permissions sanitizers', () => {
       const entity = Object.freeze({ id: 1, name: 'Public', users });
       const expected = { id: 1, name: 'Public' };
 
-      await expect(sanitize(schema, entity)).resolves.toEqual(expected);
-      await expect(sanitize(schema)(entity)).resolves.toEqual(expected);
+      await expect(sanitize(strapi, schema, entity)).resolves.toEqual(expected);
+      await expect(sanitize(strapi, schema)(entity)).resolves.toEqual(expected);
       expect(entity.users).toBe(users);
     }
   );
