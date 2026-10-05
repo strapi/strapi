@@ -238,6 +238,34 @@ describe('uploadFiles worker pool', () => {
       await expect(merged!.then((r) => r.data?.length)).resolves.toBe(1);
     });
 
+    it('resolves with no files when the batch is cancelled before this call starts', async () => {
+      const { inFlight, result } = setup(3);
+
+      await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(1));
+      await settle(inFlight, 1);
+      await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(2));
+
+      let merged: Promise<{ data?: unknown[] }>;
+      act(() => {
+        merged = (result.current[0] as (arg: unknown) => Promise<{ data?: unknown[] }>)({
+          formData: buildFormData(1),
+          totalFiles: 1,
+          concurrency: undefined,
+          generateAiMetadata: false,
+        });
+      });
+
+      await act(async () => {
+        abortUpload(1);
+        inFlight[1].reject(new UploadAbortedError());
+      });
+
+      // The first drop already attached its uploaded file; handing it to this
+      // caller too would attach it twice.
+      await expect(merged!.then((r) => r.data)).resolves.toEqual([]);
+      expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(2);
+    });
+
     it('cancelling the batch also cancels the files that were merged in', async () => {
       const { inFlight, result } = setup(3);
 
