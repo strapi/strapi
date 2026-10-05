@@ -53,7 +53,9 @@ export const generate = async (config: GenerateConfig = {} as GenerateConfig) =>
   const psTimer = timer().start();
 
   const registryPwd = path.join(pwd, rootDir, GENERATED_OUT_DIR);
-  const generatorConfig = { strapi, pwd: registryPwd, appDir: pwd, logger };
+  // Strict mode reads only the global schema registries, so schemas use that form with the opt-in.
+  const strict = artifacts.strict === true;
+  const generatorConfig = { strapi, pwd: registryPwd, appDir: pwd, logger, strict };
 
   const returnWithMessage = () => {
     const nbWarnings = chalk.yellow(`${logger.warnings} warning(s)`);

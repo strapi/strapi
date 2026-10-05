@@ -76,6 +76,50 @@ describe('generate', () => {
     expect(await pathExists(generated('contentTypes.d.ts'))).toBe(true);
   });
 
+  test('toggling strict types rewrites the schema registries in the same files', async () => {
+    const { root, strapi, generated } = await createApp();
+    strapi.contentTypes = {
+      'api::article.article': {
+        uid: 'api::article.article',
+        modelType: 'contentType',
+        kind: 'collectionType',
+        info: { singularName: 'article', pluralName: 'articles', displayName: 'Article' },
+        attributes: {},
+      },
+    };
+    strapi.components = {
+      'shared.seo': {
+        uid: 'shared.seo',
+        modelType: 'component',
+        category: 'shared',
+        info: { displayName: 'Seo' },
+        attributes: {},
+      },
+    };
+
+    const run = (strict: boolean) =>
+      generate({
+        strapi,
+        pwd: root,
+        artifacts: { contentTypes: true, components: true, strict },
+        logger: { silent: true },
+      });
+
+    await run(true);
+    for (const file of ['contentTypes.d.ts', 'components.d.ts']) {
+      const content = await fs.readFile(generated(file), 'utf8');
+      expect(content).toContain('declare global');
+      expect(content).not.toContain('namespace Public');
+    }
+
+    await run(false);
+    for (const file of ['contentTypes.d.ts', 'components.d.ts']) {
+      const content = await fs.readFile(generated(file), 'utf8');
+      expect(content).toContain("declare module '@strapi/strapi'");
+      expect(content).not.toContain('declare global');
+    }
+  });
+
   test('leaves artifacts that are neither enabled nor disabled untouched', async () => {
     const { root, strapi, generated } = await createApp({ 'services.d.ts': '// keep' });
 
