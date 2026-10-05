@@ -4,7 +4,7 @@ import type { RateLimitOptions } from 'koa2-ratelimit';
 import koa2Ratelimit from 'koa2-ratelimit';
 
 import path from 'path';
-import utils from '@strapi/utils';
+import { errors } from '@strapi/utils';
 import lodash from 'lodash';
 
 const { toLower, isString, has } = lodash;
@@ -12,7 +12,7 @@ const { toLower, isString, has } = lodash;
 type RateLimitConfig = Partial<RateLimitOptions> & { enabled?: boolean };
 type RequestContext = { request: { path?: unknown; ip?: string; body?: unknown } };
 
-const { RateLimitError } = utils.errors;
+const { RateLimitError } = errors;
 
 /**
  * Routes where the rate-limit key MUST NOT include a user identifier
