@@ -61,7 +61,7 @@ type DatabaseConnection<TClient extends Database.ClientKind> = {
 
 /**
  * Input type, what applications write in `config/database.ts`.
- * Resolved contract, what `strapi.config.get('database')` returns: `ResolvedDatabaseConfig` in `@strapi/core`.
+ * Resolved contract, what `strapi.config.get('database')` returns: `ResolvedConfig.Database` in `@strapi/core`.
  */
 export interface Database<TClient extends Database.ClientKind = Database.ClientKind> {
   connection: DatabaseConnection<TClient>;

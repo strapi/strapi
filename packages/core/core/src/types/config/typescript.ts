@@ -8,4 +8,4 @@ import type { Core } from '@strapi/types';
  * as `true` unless `false` (`strapi/src/node/develop.ts`), `strictTypes` as off unless `true`
  * (`strapi/src/cli/utils/typescript-artifacts.ts`).
  */
-export type ResolvedTypeScriptConfig = Core.Config.TypeScript;
+export type TypeScript = Core.Config.TypeScript;

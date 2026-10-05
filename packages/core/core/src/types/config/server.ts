@@ -20,7 +20,7 @@ type ResolvedOpenAPIEndpoint<TEndpoint extends OpenAPIEndpoint> = TEndpoint & {
  * `logger.{updates,startup}.enabled`, `openapi.{content-api,admin}.*`), then sets `url` and
  * `absoluteUrl` from `src/configuration/urls.ts`. Every other field keeps its input type.
  */
-export type ResolvedServerConfig = Omit<
+export type Server = Omit<
   ServerConfig,
   'url' | 'absoluteUrl' | 'proxy' | 'cron' | 'dirs' | 'transfer' | 'logger' | 'openapi'
 > & {

@@ -135,7 +135,7 @@ export interface Ai {
 }
 
 /**
- * Input of `config/admin.ts`. Resolved contract, with loader defaults: `ResolvedAdminConfig` in
+ * Input of `config/admin.ts`. Resolved contract, with loader defaults: `ResolvedConfig.Admin` in
  * `@strapi/core`.
  */
 export interface Admin {

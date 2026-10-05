@@ -5,7 +5,7 @@ import _ from 'lodash';
 
 import { loadConfiguration } from '..';
 
-describe('ResolvedServerConfig', () => {
+describe('ResolvedConfig.Server', () => {
   let appDir: string;
 
   beforeEach(() => {
@@ -18,7 +18,7 @@ describe('ResolvedServerConfig', () => {
     fs.rmSync(appDir, { recursive: true, force: true });
   });
 
-  // Every path `ResolvedServerConfig` marks as required. A new required field must be added here.
+  // Every path `ResolvedConfig.Server` marks as required. A new required field must be added here.
   it.each([
     'host',
     'port',

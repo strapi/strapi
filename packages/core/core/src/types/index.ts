@@ -1,6 +1,7 @@
-import type * as Config from './config';
+import type * as ResolvedConfig from './config';
 
-export type * from './config';
+/** Resolved config contracts, e.g. `ResolvedConfig.Server`. Input types are `Core.Config.*` in `@strapi/types`. */
+export type * as ResolvedConfig from './config';
 
 /**
  * Config contracts of the namespaces `@strapi/core` loads, keyed as `strapi.config.get` reads them.
@@ -12,13 +13,13 @@ declare global {
     // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace Registries {
       interface PackageConfigs {
-        server: Config.ResolvedServerConfig;
-        admin: Config.ResolvedAdminConfig;
-        api: Config.ResolvedApiConfig;
-        database: Config.ResolvedDatabaseConfig;
-        middlewares: Config.ResolvedMiddlewaresConfig;
-        features: Config.ResolvedFeaturesConfig;
-        typescript: Config.ResolvedTypeScriptConfig;
+        server: ResolvedConfig.Server;
+        admin: ResolvedConfig.Admin;
+        api: ResolvedConfig.Api;
+        database: ResolvedConfig.Database;
+        middlewares: ResolvedConfig.Middlewares;
+        features: ResolvedConfig.Features;
+        typescript: ResolvedConfig.TypeScript;
       }
     }
   }
