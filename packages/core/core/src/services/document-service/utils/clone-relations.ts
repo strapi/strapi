@@ -1,7 +1,7 @@
 import { merge, set } from 'lodash/fp';
 
 import type { Core, Schema, UID } from '@strapi/types';
-import type { traverseEntity } from '@strapi/utils';
+import { contentTypes, type traverseEntity } from '@strapi/utils';
 import { traverseEntityRelations } from '../transform/relations/utils/map-relation';
 
 const RELATION_OPERATIONS = ['connect', 'disconnect', 'set'] as const;
@@ -91,6 +91,13 @@ export const prepareCloneData = async (
     getModel
   );
   let data = merge(originalData, submitted) as Record<string, unknown>;
+
+  // firstPublishedAt describes the source document's publication history. A clone is a new
+  // document, so it must start without that timestamp and receive its own value on first publish.
+  if (contentTypes.hasFirstPublishedAtField(contentType)) {
+    delete data.firstPublishedAt;
+  }
+
   const relationsToCopy: string[] = [];
 
   for (const [attributeName, attribute] of Object.entries(contentType.attributes)) {
