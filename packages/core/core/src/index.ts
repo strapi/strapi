@@ -11,6 +11,8 @@ import type {
 export { default as compileStrapi } from './compile';
 export * as factories from './factories';
 export * as ai from './ai';
+// Config contracts, registered in `Strapi.Registries.PackageConfigs`.
+export type * from './types';
 
 export const createStrapi = (options: Partial<StrapiOptions> = {}): Core.Strapi => {
   const strapi = new Strapi({
