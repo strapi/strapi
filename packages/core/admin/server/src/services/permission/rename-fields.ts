@@ -1,4 +1,4 @@
-import { invert, isEmpty, uniq, xor } from 'lodash/fp';
+import { invert, isEmpty, uniq, xor } from 'lodash';
 import type { Core, Struct } from '@strapi/types';
 
 import { getNestedFieldsWithIntermediate } from '../content-type';
