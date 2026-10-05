@@ -30,9 +30,9 @@ import { AIMetadataJob } from '../../../../shared/contracts/ai-metadata-jobs';
 import { GetAIMetadataPendingCount, CreateAIMetadataJob } from '../../../../shared/contracts/files';
 import { UpdateSettings } from '../../../../shared/contracts/settings';
 import { PERMISSIONS } from '../../constants';
+import { useTracking } from '../../hooks/useTracking';
 import { useAIMetadataAvailability } from '../../legacy/hooks/useAIMetadataAvailability';
 import { useSettings } from '../../legacy/hooks/useSettings';
-import { useTracking } from '../../legacy/hooks/useTracking';
 import { getTranslationKey } from '../../utils/translations';
 
 import { init } from './init';

@@ -1,0 +1,46 @@
+// Domain vocabulary supplements the C4 runtime views; these are not services or tables.
+model {
+  content_type_definition = concept 'Content type' {
+    summary 'Defines fields and options for a collection or a single item.'
+    description 'A collection type supports multiple documents; a single type represents one item, with locale and publication variants where enabled. Application definitions live in schema files; plugins can contribute definitions too.'
+    link https://github.com/strapi/strapi/blob/develop/packages/core/types/src/struct/schema.ts 'Content-type schema'
+  }
+  content_document = concept 'Document' {
+    summary 'One content item, shared across its locale and publication variants.'
+    description 'Within a content type, documentId identifies content across its locale and publication variants. It is different from the database id of an individual entry. For example, one article may have English and French drafts and published variants.'
+    link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/document-service/repository.ts 'Document operations'
+  }
+  content_variant = concept 'Content variant' {
+    summary 'A stored entry for a locale and publication state.'
+    description 'With Draft & Publish enabled, a document can have draft and published entries, each with its own database id. Publishing creates replacement published entries and synchronizes relations; it does not merely flip a visibility flag. Without Draft & Publish there is no separate draft/published pair. This is not the Content History snapshot model.'
+    link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/document-service/repository.ts 'Publish and unpublish'
+    link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/document-service/draft-and-publish.ts 'Publication selection'
+  }
+  content_locale = concept 'Locale' {
+    summary 'Selects a language variant when localization is enabled.'
+    description 'i18n is bundled in this checkout; localization is enabled per content type and field. A locale selects a variant, not a separate CMS or deployment. Localization does not imply automatic translation.'
+    link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/document-service/internationalization.ts 'Locale selection'
+  }
+  content_component = concept 'Component data' {
+    summary 'Structured fields embedded in content; optionally repeatable.'
+    description 'A reusable component definition describes the structure. Its data belongs to the containing entry; components do not expose standalone generated Content API endpoints or document identities.'
+    link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/document-service/components.ts 'Component persistence'
+  }
+  content_dynamic_zone = concept 'Dynamic zone' {
+    summary 'An ordered mix of allowed component types.'
+    description 'Editors compose a sequence of component instances from the types allowed by the field definition. The component discriminator identifies the type of each item.'
+    link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/document-service/components.ts 'Dynamic-zone handling'
+  }
+  content_relation = concept 'Relation' {
+    summary 'Connects content to other documents.'
+    description 'Document-facing references are resolved to stored entry ids with locale and publication context. Populate controls the requested expansion of related data; the CMS does not return every nested relation automatically.'
+    link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/document-service/transform/id-transform.ts 'Document and entry identifiers'
+  }
+  content_type_definition -> content_document 'defines its structure'
+  content_document -> content_variant 'groups stored variants'
+  content_variant -> content_locale 'selects a locale when localized'
+  content_variant -> content_component 'can contain'
+  content_variant -> content_dynamic_zone 'can contain'
+  content_dynamic_zone -> content_component 'orders component instances'
+  content_variant -> content_relation 'can link to other content'
+}

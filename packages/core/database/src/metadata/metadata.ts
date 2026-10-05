@@ -1,7 +1,8 @@
-import { cloneDeep, snakeCase } from 'lodash/fp';
+import { cloneDeep } from 'lodash/fp';
 import { identifiers } from '../utils/identifiers';
 import * as types from '../utils/types';
 import { createRelation } from './relations';
+import { attributeNaming } from './attribute-naming';
 import type { Attribute, Model } from '../types';
 import type { ForeignKey, Index } from '../schema/types';
 import type { Action, SubscriberFn } from '../lifecycles';
@@ -19,6 +20,15 @@ export class Metadata extends Map<string, Meta> {
   // and access this one; currently they all access the global identifiers directly.
   get identifiers() {
     return identifiers;
+  }
+
+  /**
+   * The attribute-name -> physical-identifier rules used to build this
+   * metadata, for callers that need to predict a name for an attribute that is
+   * not registered (see `attribute-naming.ts`).
+   */
+  get naming() {
+    return attributeNaming;
   }
 
   get(key: string): Meta {
@@ -113,7 +123,7 @@ const createAttribute = (attributeName: string, attribute: Attribute) => {
     return;
   }
 
-  const columnName = identifiers.getColumnName(snakeCase(attributeName));
+  const columnName = attributeNaming.columnName(attributeName);
 
   Object.assign(attribute, { columnName });
 };
