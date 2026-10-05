@@ -32,6 +32,7 @@ describe('generate', () => {
       services: {},
       controllers: {},
       policies: {},
+      middlewares: {},
       contentTypes: {},
       components: {},
     };
@@ -62,6 +63,7 @@ describe('generate', () => {
       'services.d.ts': '// stale',
       'controllers.d.ts': '// stale',
       'policies.d.ts': '// stale',
+      'middlewares.d.ts': '// stale',
       'strict.d.ts': '// stale',
       'plugins.d.ts': '// keep',
       'contentTypes.d.ts': '// keep',
@@ -70,13 +72,20 @@ describe('generate', () => {
     await generate({
       strapi,
       pwd: root,
-      artifacts: { services: false, controllers: false, policies: false, strict: false },
+      artifacts: {
+        services: false,
+        controllers: false,
+        policies: false,
+        middlewares: false,
+        strict: false,
+      },
       logger: { silent: true },
     });
 
     expect(await pathExists(generated('services.d.ts'))).toBe(false);
     expect(await pathExists(generated('controllers.d.ts'))).toBe(false);
     expect(await pathExists(generated('policies.d.ts'))).toBe(false);
+    expect(await pathExists(generated('middlewares.d.ts'))).toBe(false);
     expect(await pathExists(generated('strict.d.ts'))).toBe(false);
     expect(await pathExists(generated('plugins.d.ts'))).toBe(true);
     expect(await pathExists(generated('contentTypes.d.ts'))).toBe(true);
