@@ -121,6 +121,22 @@ declare global {
        */
       // eslint-disable-next-line @typescript-eslint/no-empty-interface
       interface AppPolicies {}
+
+      /**
+       * Content-type schemas keyed by UID, read in strict mode instead of `Public.ContentTypeSchemas`.
+       * Type generation is the only producer: it writes `types/generated/contentTypes.d.ts`.
+       * Applications do not override schemas, so there is no `Package*` and `App*` pair.
+       */
+      // eslint-disable-next-line @typescript-eslint/no-empty-interface
+      interface ContentTypeSchemas {}
+
+      /**
+       * Component schemas keyed by UID, read in strict mode instead of `Public.ComponentSchemas`.
+       * Type generation is the only producer: it writes `types/generated/components.d.ts`.
+       * Applications do not override schemas, so there is no `Package*` and `App*` pair.
+       */
+      // eslint-disable-next-line @typescript-eslint/no-empty-interface
+      interface ComponentSchemas {}
     }
   }
 
