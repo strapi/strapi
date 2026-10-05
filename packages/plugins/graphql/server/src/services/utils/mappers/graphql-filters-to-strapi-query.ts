@@ -10,6 +10,8 @@ export default ({ strapi }: Context) => {
 
   const recursivelyReplaceScalarOperators = (data: any): any => {
     const { operators } = getService('builders').filters;
+    const operatorsByName: Record<string, (typeof operators)[keyof typeof operators] | undefined> =
+      operators;
 
     if (Array.isArray(data)) {
       return data.map(recursivelyReplaceScalarOperators);
@@ -24,9 +26,9 @@ export default ({ strapi }: Context) => {
     const result: any = {};
 
     for (const [key, value] of Object.entries(data)) {
-      const isOperator = !!operators[key];
+      const operator = operatorsByName[key];
 
-      const newKey = isOperator ? operators[key].strapiOperator : key;
+      const newKey = operator !== undefined ? operator.strapiOperator : key;
 
       result[newKey] = recursivelyReplaceScalarOperators(value);
     }
