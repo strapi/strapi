@@ -1,17 +1,18 @@
 import { ApolloServer } from '@apollo/server';
 import type { Core } from '@strapi/types';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { bootstrap, getOperationLimitsWarning } from '../bootstrap';
 
-jest.mock('@apollo/server', () => ({
-  ApolloServer: jest.fn(),
+vi.mock('@apollo/server', () => ({
+  ApolloServer: vi.fn(function ApolloServer() {}),
 }));
 
-jest.mock('@as-integrations/koa', () => ({
-  koaMiddleware: jest.fn(() => jest.fn()),
+vi.mock('@as-integrations/koa', () => ({
+  koaMiddleware: vi.fn(() => vi.fn()),
 }));
 
-const mockApolloServer = jest.mocked(ApolloServer);
+const mockApolloServer = vi.mocked(ApolloServer);
 
 describe('getOperationLimitsWarning', () => {
   const recommendation = 'defaultLimit: 25, maxLimit: 100, depthLimit: 10';
@@ -54,7 +55,7 @@ describe('getOperationLimitsWarning', () => {
     const configWithCustomRules = {
       depthLimit: undefined,
       maxLimit: -1,
-      apolloServer: { validationRules: [jest.fn()] },
+      apolloServer: { validationRules: [vi.fn()] },
     };
     const warning = getOperationLimitsWarning(configWithCustomRules);
 
@@ -66,7 +67,7 @@ describe('getOperationLimitsWarning', () => {
 
 describe('bootstrap operation-limit warning', () => {
   const mockEvents: string[] = [];
-  const mockApolloServerStart = jest.fn();
+  const mockApolloServerStart = vi.fn();
 
   beforeEach(() => {
     mockEvents.length = 0;
@@ -75,55 +76,83 @@ describe('bootstrap operation-limit warning', () => {
     mockApolloServerStart.mockImplementation(async () => {
       mockEvents.push('apollo-start');
     });
-    mockApolloServer.mockImplementation(() => {
+    mockApolloServer.mockImplementation(function ApolloServerMock() {
       mockEvents.push('apollo-construction');
 
       return {
         start: mockApolloServerStart,
-        stop: jest.fn(),
+        stop: vi.fn(),
       } as any;
     });
   });
 
-  const createStrapi = ({ depthLimit, maxLimit }: { depthLimit: unknown; maxLimit: unknown }) => {
-    const operationWarning = jest.fn((message: string) => {
+  const createStrapi = ({
+    depthLimit,
+    maxLimit,
+    apolloServer,
+  }: {
+    depthLimit: unknown;
+    maxLimit: unknown;
+    apolloServer?: Record<string, unknown>;
+  }) => {
+    const operationWarning = vi.fn((message: string) => {
       if (message.startsWith('Built-in GraphQL operation limits')) {
         mockEvents.push('operation-warning');
       }
     });
     const plugin = {
-      config: jest.fn((key: string) => {
+      config: vi.fn((key: string) => {
         const config = {
           endpoint: '/graphql',
           depthLimit,
           maxLimit,
           landingPage: false,
-          apolloServer: undefined,
+          apolloServer,
         };
 
         return config[key as keyof typeof config];
       }),
-      service: jest.fn((name: string) => {
+      service: vi.fn((name: string) => {
         if (name === 'content-api') {
-          return { buildSchema: jest.fn(() => ({ type: 'schema' })) };
+          return { buildSchema: vi.fn(() => ({ type: 'schema' })) };
         }
 
-        return { playground: { setEnabled: jest.fn() } };
+        return { playground: { setEnabled: vi.fn() } };
       }),
     };
     const strapi = {
-      plugin: jest.fn(() => plugin),
+      plugin: vi.fn(() => plugin),
       log: {
         warn: operationWarning,
-        debug: jest.fn(),
-        error: jest.fn(),
+        debug: vi.fn(),
+        error: vi.fn(),
       },
-      server: { routes: jest.fn() },
-      auth: { authenticate: jest.fn() },
+      server: { routes: vi.fn() },
+      auth: { authenticate: vi.fn() },
     };
 
     return { strapi: strapi as unknown as Core.Strapi, operationWarning };
   };
+
+  it('appends custom plugins and validation rules without mutating configuration', async () => {
+    const customPlugin = { serverWillStart: vi.fn() };
+    const customRule = vi.fn();
+    const apolloServer = Object.freeze({
+      plugins: Object.freeze([customPlugin]),
+      validationRules: Object.freeze([customRule]),
+    });
+    const { strapi } = createStrapi({ depthLimit: 10, maxLimit: 100, apolloServer });
+
+    await bootstrap({ strapi });
+
+    const [config] = mockApolloServer.mock.calls[0];
+    expect(config.plugins).toHaveLength(3);
+    expect(config.plugins?.[2]).toEqual(customPlugin);
+    expect(config.validationRules).toHaveLength(2);
+    expect(config.validationRules?.[1]).toBe(customRule);
+    expect(apolloServer.plugins).toEqual([customPlugin]);
+    expect(apolloServer.validationRules).toEqual([customRule]);
+  });
 
   it('logs one warning before constructing Apollo when both built-in limits are unbounded', async () => {
     const { strapi, operationWarning } = createStrapi({ depthLimit: undefined, maxLimit: -1 });

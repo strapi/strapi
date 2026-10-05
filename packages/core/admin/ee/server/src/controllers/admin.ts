@@ -1,4 +1,3 @@
-import { isNil } from 'lodash/fp';
 import { env } from '@strapi/utils';
 
 import type {
@@ -102,12 +101,12 @@ export default {
       enforcementUserCount = currentActiveUserCount;
     }
 
-    if (!isNil(permittedSeats) && enforcementUserCount > permittedSeats) {
+    if (permittedSeats != null && enforcementUserCount > permittedSeats) {
       shouldNotify = true;
       licenseLimitStatus = 'OVER_LIMIT';
     }
 
-    if (!isNil(permittedSeats) && enforcementUserCount === permittedSeats) {
+    if (permittedSeats != null && enforcementUserCount === permittedSeats) {
       shouldNotify = true;
       licenseLimitStatus = 'AT_LIMIT';
     }
@@ -185,7 +184,7 @@ export default {
       registrySyncError: eeInformation?.error ?? null,
       registrySyncErrorKind: eeInformation?.errorKind ?? null,
       shouldNotify,
-      shouldStopCreate: isNil(permittedSeats) ? false : currentActiveUserCount >= permittedSeats,
+      shouldStopCreate: permittedSeats == null ? false : currentActiveUserCount >= permittedSeats,
       licenseLimitStatus,
       isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
       type: licenseType,

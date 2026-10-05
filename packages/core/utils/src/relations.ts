@@ -1,4 +1,4 @@
-import { isBoolean } from 'lodash/fp';
+import { isBoolean } from 'lodash';
 import type { Attribute, Model } from './types';
 
 import { isRelationalAttribute } from './content-types';

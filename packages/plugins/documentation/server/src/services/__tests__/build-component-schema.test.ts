@@ -1,4 +1,4 @@
-import _ from 'lodash/fp';
+import _ from 'lodash';
 import buildComponentSchema from '../helpers/build-component-schema';
 
 const strapi = {

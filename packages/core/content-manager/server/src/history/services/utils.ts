@@ -1,4 +1,5 @@
-import { difference, omit } from 'lodash/fp';
+import { difference, omit } from 'lodash';
+
 import { contentTypes } from '@strapi/utils';
 import type { Core, Modules, Schema, Data, Struct, UID } from '@strapi/types';
 
@@ -25,8 +26,8 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
   ) => {
     // Omit the same fields that were omitted when creating a history version
     const sanitizedContentTypeSchemaAttributes = omit(
-      FIELDS_TO_IGNORE,
-      contentTypeSchemaAttributes
+      contentTypeSchemaAttributes,
+      FIELDS_TO_IGNORE
     );
 
     const reduceDifferenceToAttributesObject = (

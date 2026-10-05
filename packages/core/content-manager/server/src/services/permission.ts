@@ -1,4 +1,3 @@
-import { prop } from 'lodash/fp';
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
 
 import type { Core, Struct } from '@strapi/types';
@@ -21,10 +20,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
   async registerPermissions() {
     const allContentTypes = getService('content-types').findAllContentTypes();
-    const allContentTypesUids = allContentTypes.map(prop('uid'));
+    const allContentTypesUids = allContentTypes.map(
+      (contentType: Struct.ContentTypeSchema) => contentType?.uid
+    );
     const contentTypesUids = allContentTypes
       .filter(({ isDisplayed }: { isDisplayed: boolean }) => isDisplayed)
-      .map(prop('uid'));
+      .map((contentType: Struct.ContentTypeSchema) => contentType?.uid);
 
     const actions = [
       {

@@ -8,7 +8,7 @@
  * have access to the full length names, in particular for migration purposes, but also so that (in theory) the feature
  * could be disabled and stay compatible with v4 database structure.
  */
-import _, { isInteger, partition, snakeCase, sumBy } from 'lodash/fp';
+import { partition, snakeCase, sumBy } from 'lodash';
 import { createHash } from './hash';
 import {
   IdentifiersOptions,
@@ -79,7 +79,7 @@ export class Identifiers {
    * final string my_model which generally works but is not entirely safe
    * */
   getName = (names: NameInput, options?: NameOptions) => {
-    const tokens: NameToken[] = _.castArray(names).map((name) => {
+    const tokens: NameToken[] = (Array.isArray(names) ? names : [names]).map((name) => {
       return {
         name,
         compressible: true,
@@ -237,7 +237,7 @@ export class Identifiers {
    * @internal
    */
   getShortenedName = (name: string, len: number) => {
-    if (!isInteger(len) || len <= 0) {
+    if (!Number.isInteger(len) || len <= 0) {
       throw new Error(`tokenWithHash length must be a positive integer, received ${len}`);
     }
     if (name.length <= len) {
@@ -273,7 +273,7 @@ export class Identifiers {
   getNameFromTokens = (nameTokens: NameToken[]): string => {
     const { maxLength } = this.options;
 
-    if (!isInteger(maxLength) || maxLength < 0) {
+    if (!Number.isInteger(maxLength) || maxLength < 0) {
       throw new Error('maxLength must be a positive integer or 0 (for unlimited length)');
     }
 
@@ -306,15 +306,15 @@ export class Identifiers {
 
     // Split tokens by compressibility
     const [compressible, incompressible] = partition(
-      (token: NameToken) => token.compressible,
-      nameTokens
+      nameTokens,
+      (token: NameToken) => token.compressible
     );
 
-    const totalIncompressibleLength = sumBy((token: NameToken) =>
+    const totalIncompressibleLength = sumBy(incompressible, (token: NameToken) =>
       token.compressible === false && token.shortName !== undefined
         ? token.shortName.length
         : token.name.length
-    )(incompressible);
+    );
     const totalSeparatorsLength = nameTokens.length * this.IDENTIFIER_SEPARATOR.length - 1;
     const available = maxLength - totalIncompressibleLength - totalSeparatorsLength;
     const availablePerToken = Math.floor(available / compressible.length);
