@@ -86,16 +86,13 @@ const toResource = (user: { id: Data.ID; email?: string | null }): AdminUserReso
 });
 
 export const registerAuthAuditEvents = (auditLogsLifecycle: AuditLogsLifecycle) => {
-  // A failed login has no resource when the account is unknown
-  const transformLoginFailure = (event: LoginFailureEvent) => ({
-    ...(event.user ? { resource: toResource(event.user) } : {}),
-    outcome: 'failure' as const,
-    details: { provider: event.provider, reason: event.reason },
-  });
-
   auditLogsLifecycle.registerEvent<LoginFailureDetails>(
     AUTH_EVENTS.LOGIN_FAILURE,
-    transformLoginFailure as Modules.AuditLogs.EventTransformer<LoginFailureDetails>,
+    (event: LoginFailureEvent) => ({
+      ...(event.user ? { resource: toResource(event.user) } : {}),
+      outcome: 'failure',
+      details: { provider: event.provider, reason: event.reason },
+    }),
     { allowUnknownActor: true, shouldRecord: isRecordedLoginFailure }
   );
 
