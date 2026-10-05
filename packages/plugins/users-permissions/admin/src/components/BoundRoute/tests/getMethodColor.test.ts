@@ -9,6 +9,9 @@ describe('route method colors', () => {
     ['PUT', 'warning'],
     ['DELETE', 'danger'],
     ['PATCH', 'neutral'],
+    ['OPTIONS', 'neutral'],
+    ['get', 'neutral'],
+    ['toString', 'neutral'],
   ])('uses the %s method color for route details', (method, color) => {
     expect(getMethodColor(method)).toEqual({
       text: `${color}600`,
