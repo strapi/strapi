@@ -18,6 +18,8 @@ import type { ComponentSchema, ContentTypeSchema } from '../struct';
  *   }
  * }
  * ```
+ *
+ * Strict mode ignores this registry and reads `Strapi.Registries.ContentTypeSchemas`.
  */
 export interface ContentTypeSchemas {
   [TKey: UID.ContentType]: ContentTypeSchema;
@@ -39,6 +41,8 @@ export interface ContentTypeSchemas {
  *   }
  * }
  * ```
+ *
+ * Strict mode ignores this registry and reads `Strapi.Registries.ComponentSchemas`.
  */
 export interface ComponentSchemas {
   [TKey: UID.Component]: ComponentSchema;
