@@ -6,45 +6,7 @@ import type {
 } from '../../../../shared/contracts/admin';
 import { getService } from '../utils';
 
-type PlanEntitlementLimit = { key: string; unit?: 'days' | 'count'; value: number | null };
 type RetainedFeature = { name: string; [key: string]: any };
-
-// Mirrors UNLIMITED_ENTITLEMENT_THRESHOLD in packages/core/core/src/ee/entitlements.ts (kept
-// in sync manually, not imported: @strapi/admin does not depend on @strapi/core). A retained
-// option value that is nullish or >= this threshold means "Unlimited", same as the live registry.
-const UNLIMITED_ENTITLEMENT_THRESHOLD = 9999;
-
-// Known feature option keys and the unit they're reported in, using the same convention as
-// the entitlements registry (packages/core/core/src/ee/entitlements.ts).
-const RETAINED_LIMIT_UNITS: Record<string, 'days' | 'count'> = {
-  retentionDays: 'days',
-  numberOfWorkflows: 'count',
-  stagesPerWorkflow: 'count',
-  maximumReleases: 'count',
-};
-
-const normalizeRetainedLimitValue = (value: unknown): number | null => {
-  // Same reading as the live registry: the license can carry a limit as a numeric string
-  // (`retentionDays: "90"`), which must not turn into "Unlimited" once the license expires.
-  const limit = typeof value === 'string' && value.trim() !== '' ? Number(value) : value;
-
-  if (typeof limit !== 'number' || Number.isNaN(limit)) {
-    return null;
-  }
-  return limit >= UNLIMITED_ENTITLEMENT_THRESHOLD ? null : limit;
-};
-
-const deriveLimitsFromRetainedOptions = (
-  options: Record<string, unknown> | undefined
-): PlanEntitlementLimit[] => {
-  if (!options) {
-    return [];
-  }
-
-  return Object.entries(RETAINED_LIMIT_UNITS)
-    .filter(([key]) => key in options)
-    .map(([key, unit]) => ({ key, unit, value: normalizeRetainedLimitValue(options[key]) }));
-};
 
 const findRetainedFeature = (
   retainedFeatures: Array<RetainedFeature | string> | undefined,
@@ -86,6 +48,9 @@ export default {
     const retained = strapi.ee.retainedLicense;
     const isActiveLicense = strapi.ee.licenseStatus === 'active';
     const activeEntitlements = strapi.ee.entitlements.list();
+    // A lapsed license resolves through the same resolvers against its retained snapshot, so the
+    // card shows the defaulted, clamped limits the plan enforced rather than raw options.
+    const retainedEntitlements = isActiveLicense ? [] : strapi.ee.entitlements.listRetained();
 
     let shouldNotify = false;
     let licenseLimitStatus = null;
@@ -174,7 +139,9 @@ export default {
         return {
           feature,
           available: Boolean(retainedFeature),
-          limits: deriveLimitsFromRetainedOptions(retainedFeature?.options),
+          limits: retainedFeature
+            ? (retainedEntitlements.find((entry) => entry.feature === feature)?.limits ?? [])
+            : [],
         };
       }),
       licenseMode,

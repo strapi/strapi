@@ -47,6 +47,9 @@ const createStrapiMock = (overrides: any = {}) => {
     },
     ...overrides.strapi,
   } as any;
+  // Tests that override `entitlements` only care about one side; default the other to empty.
+  const { entitlements } = global.strapi.ee as any;
+  entitlements.listRetained = entitlements.listRetained ?? (() => []);
   return global.strapi;
 };
 
@@ -357,7 +360,12 @@ describe('licenseLimitInformation (planEntitlements)', () => {
           features: [{ name: 'sso' }, { name: 'audit-logs', options: { retentionDays: 90 } }],
         },
         features: { list: () => [], isEnabled: () => false },
-        entitlements: { list: () => [] },
+        entitlements: {
+          list: () => [],
+          listRetained: () => [
+            { feature: 'audit-logs', limits: [{ key: 'retentionDays', unit: 'days', value: 90 }] },
+          ],
+        },
       },
     });
     stubUserServices();
@@ -383,7 +391,9 @@ describe('licenseLimitInformation (planEntitlements)', () => {
     expect(reviewWorkflows).toEqual({ feature: 'review-workflows', available: false, limits: [] });
   });
 
-  it('a retained option value at/above the unlimited threshold normalizes to null', async () => {
+  it('a lapsed license takes its limits from the resolvers, not the raw retained options', async () => {
+    // The raw snapshot says "no audit retention" and lists no releases cap; the resolvers turn
+    // that into the 90-day default and the 3-release default the features enforce.
     createStrapiMock({
       stored: null,
       ee: {
@@ -392,43 +402,50 @@ describe('licenseLimitInformation (planEntitlements)', () => {
         retainedLicense: {
           type: 'gold',
           isTrial: false,
-          features: [{ name: 'cms-content-history', options: { retentionDays: 99999 } }],
+          features: [
+            { name: 'audit-logs', options: { retentionDays: null } },
+            { name: 'cms-content-releases' },
+          ],
         },
         features: { list: () => [], isEnabled: () => false },
-        entitlements: { list: () => [] },
+        entitlements: {
+          list: () => [],
+          listRetained: () => [
+            { feature: 'audit-logs', limits: [{ key: 'retentionDays', unit: 'days', value: 90 }] },
+            {
+              feature: 'cms-content-releases',
+              limits: [{ key: 'maximumReleases', unit: 'count', value: 3 }],
+            },
+            // Registered, but the retained license never listed it
+            {
+              feature: 'review-workflows',
+              limits: [{ key: 'numberOfWorkflows', unit: 'count', value: 200 }],
+            },
+          ],
+        },
       },
     });
     stubUserServices();
 
     const data = (await adminController.licenseLimitInformation()).data as any;
-    const contentHistory = data.planEntitlements.find(
-      (entry: any) => entry.feature === 'cms-content-history'
-    );
-    expect(contentHistory.limits).toEqual([{ key: 'retentionDays', unit: 'days', value: null }]);
-  });
+    const byFeature = (name: string) =>
+      data.planEntitlements.find((entry: any) => entry.feature === name);
 
-  it('a retained option stored as a numeric string reads as its number', async () => {
-    // The registry has shipped audit-logs retention as `"90"`; the expired-licence path must
-    // not turn that into "Unlimited" any more than the live registry does.
-    createStrapiMock({
-      stored: null,
-      ee: {
-        type: null,
-        licenseStatus: 'expired',
-        retainedLicense: {
-          type: 'gold',
-          isTrial: false,
-          features: [{ name: 'audit-logs', options: { retentionDays: '90' } }],
-        },
-        features: { list: () => [], isEnabled: () => false },
-        entitlements: { list: () => [] },
-      },
+    expect(byFeature('audit-logs')).toEqual({
+      feature: 'audit-logs',
+      available: true,
+      limits: [{ key: 'retentionDays', unit: 'days', value: 90 }],
     });
-    stubUserServices();
-
-    const data = (await adminController.licenseLimitInformation()).data as any;
-    const auditLogs = data.planEntitlements.find((entry: any) => entry.feature === 'audit-logs');
-    expect(auditLogs.limits).toEqual([{ key: 'retentionDays', unit: 'days', value: 90 }]);
+    expect(byFeature('cms-content-releases')).toEqual({
+      feature: 'cms-content-releases',
+      available: true,
+      limits: [{ key: 'maximumReleases', unit: 'count', value: 3 }],
+    });
+    expect(byFeature('review-workflows')).toEqual({
+      feature: 'review-workflows',
+      available: false,
+      limits: [],
+    });
   });
 });
 

@@ -14,7 +14,7 @@ const makeStrapi = () =>
       licenseStatus: 'active',
       retainedLicense: null,
       features: { list: () => [{ name: 'sso' }] },
-      entitlements: { list: () => [] },
+      entitlements: { list: () => [], listRetained: () => [] },
       licenseInfo: { licenseKey: 'SUPER_SECRET_KEY' },
     },
     config: (() => {
@@ -184,5 +184,26 @@ describe('debug-dump service', () => {
 
     expect(dump.strapi.projectType).toBe('Community');
     expect(dump.strapi.edition).toBe('CE');
+  });
+
+  it("reports a lapsed license's entitlements from the retained snapshot", async () => {
+    // The live list is empty once the license is disabled; Support still needs the limits the
+    // plan enforced, resolved with the same defaults and clamps.
+    const strapi = makeStrapi();
+    strapi.EE = false;
+    strapi.ee.licenseStatus = 'expired';
+    strapi.ee.retainedLicense = { type: 'gold', features: [{ name: 'audit-logs' }] };
+    strapi.ee.entitlements = {
+      list: () => [],
+      listRetained: () => [
+        { feature: 'audit-logs', limits: [{ key: 'retentionDays', unit: 'days', value: 90 }] },
+      ],
+    };
+
+    const dump = await debugDumpService({ strapi }).generate();
+
+    expect(dump.license?.entitlements).toEqual([
+      { feature: 'audit-logs', limits: [{ key: 'retentionDays', unit: 'days', value: 90 }] },
+    ]);
   });
 });

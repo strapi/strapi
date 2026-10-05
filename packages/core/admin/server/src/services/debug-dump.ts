@@ -124,7 +124,9 @@ const debugDumpService = ({ strapi }: { strapi: Core.Strapi }) => ({
         seats: strapi.ee.seats ?? retained?.seats ?? null,
         subscriptionId: strapi.ee.subscriptionId ?? retained?.subscriptionId ?? null,
         features: strapi.EE ? strapi.ee.features.list() : (retained?.features ?? []),
-        entitlements: strapi.ee.entitlements.list(),
+        entitlements: strapi.EE
+          ? strapi.ee.entitlements.list()
+          : strapi.ee.entitlements.listRetained(),
       };
     }
 
