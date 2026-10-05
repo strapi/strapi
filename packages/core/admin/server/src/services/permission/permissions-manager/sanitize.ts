@@ -1,16 +1,5 @@
+import { omit, pick, defaults, isEmpty, intersection, get, isObject, cloneDeep } from 'lodash';
 import { subject as asSubject } from '@casl/ability';
-import {
-  defaults,
-  omit,
-  isArray,
-  isEmpty,
-  uniq,
-  intersection,
-  pick,
-  getOr,
-  isObject,
-  cloneDeep,
-} from 'lodash/fp';
 
 import type { UID } from '@strapi/types';
 
@@ -202,7 +191,7 @@ export default ({ action, ability, model }: any) => {
     const { getPermissionFields } = createPermissionFieldsCache(ability);
 
     const wrappedSanitize = async (data: unknown, options = {} as any): Promise<unknown> => {
-      if (isArray(data)) {
+      if (Array.isArray(data)) {
         return Promise.all(data.map((entity: unknown) => wrappedSanitize(entity, options)));
       }
 
@@ -231,19 +220,20 @@ export default ({ action, ability, model }: any) => {
   };
 
   const getDefaultOptions = (data: any, options: unknown) => {
-    return defaults({ subject: asSubject(model, data), action }, options);
+    return defaults({}, options, { subject: asSubject(model, data), action });
   };
 
   /**
    * Omit creator fields' (createdBy & updatedBy) roles from the admin API responses
    */
-  const omitCreatorRoles = omit([`${CREATED_BY_ATTRIBUTE}.roles`, `${UPDATED_BY_ATTRIBUTE}.roles`]);
+  const omitCreatorRoles = <T extends object>(data: T) =>
+    omit(data, [`${CREATED_BY_ATTRIBUTE}.roles`, `${UPDATED_BY_ATTRIBUTE}.roles`]);
 
   /**
    * Visitor used to remove hidden fields from the admin API responses
    */
   const omitHiddenFields = ({ key, schema }: any, { remove }: any) => {
-    const isHidden = getOr(false, ['config', 'attributes', key, 'hidden'], schema);
+    const isHidden = get(schema, ['config', 'attributes', key, 'hidden'], false);
 
     if (isHidden) {
       remove(key);
@@ -254,7 +244,7 @@ export default ({ action, ability, model }: any) => {
    * Visitor used to only select needed fields from the admin users entities & avoid leaking sensitive information
    */
   const pickAllowedAdminUserFields = ({ attribute, key, value }: any, { set }: any) => {
-    const pickAllowedFields = pick(ADMIN_USER_ALLOWED_FIELDS);
+    const pickAllowedFields = (user: object) => pick(user, ADMIN_USER_ALLOWED_FIELDS);
     if (!attribute) {
       return;
     }
@@ -281,43 +271,47 @@ export default ({ action, ability, model }: any) => {
     const nonVisibleAttributes = getNonVisibleAttributes(schema);
     const writableAttributes = getWritableAttributes(schema);
 
-    const nonVisibleWritableAttributes = intersection(nonVisibleAttributes, writableAttributes);
+    const nonVisibleWritableAttributes = intersection(writableAttributes, nonVisibleAttributes);
 
-    return uniq([...fields, ...COMPONENT_FIELDS, ...nonVisibleWritableAttributes]);
+    return [...new Set([...fields, ...COMPONENT_FIELDS, ...nonVisibleWritableAttributes])];
   };
 
   const getOutputFields = (fields = []) => {
     const nonWritableAttributes = getNonWritableAttributes(schema);
     const nonVisibleAttributes = getNonVisibleAttributes(schema);
 
-    return uniq([
-      ...fields,
-      ...STATIC_FIELDS,
-      ...COMPONENT_FIELDS,
-      ...nonWritableAttributes,
-      ...nonVisibleAttributes,
-      CREATED_AT_ATTRIBUTE,
-      UPDATED_AT_ATTRIBUTE,
-    ]);
+    return [
+      ...new Set([
+        ...fields,
+        ...STATIC_FIELDS,
+        ...COMPONENT_FIELDS,
+        ...nonWritableAttributes,
+        ...nonVisibleAttributes,
+        CREATED_AT_ATTRIBUTE,
+        UPDATED_AT_ATTRIBUTE,
+      ]),
+    ];
   };
 
   const getQueryFields = (fields = []) => {
     const nonVisibleAttributes = getNonVisibleAttributes(schema);
     const writableAttributes = getWritableAttributes(schema);
 
-    const nonVisibleWritableAttributes = intersection(nonVisibleAttributes, writableAttributes);
+    const nonVisibleWritableAttributes = intersection(writableAttributes, nonVisibleAttributes);
 
-    return uniq([
-      ...fields,
-      ...STATIC_FIELDS,
-      ...COMPONENT_FIELDS,
-      ...nonVisibleWritableAttributes,
-      CREATED_AT_ATTRIBUTE,
-      UPDATED_AT_ATTRIBUTE,
-      PUBLISHED_AT_ATTRIBUTE,
-      CREATED_BY_ATTRIBUTE,
-      UPDATED_BY_ATTRIBUTE,
-    ]);
+    return [
+      ...new Set([
+        ...fields,
+        ...STATIC_FIELDS,
+        ...COMPONENT_FIELDS,
+        ...nonVisibleWritableAttributes,
+        CREATED_AT_ATTRIBUTE,
+        UPDATED_AT_ATTRIBUTE,
+        PUBLISHED_AT_ATTRIBUTE,
+        CREATED_BY_ATTRIBUTE,
+        UPDATED_BY_ATTRIBUTE,
+      ]),
+    ];
   };
 
   return {

@@ -1,4 +1,4 @@
-import { snakeCase } from 'lodash/fp';
+import { snakeCase } from 'lodash';
 
 import { identifiers } from '../utils/identifiers';
 

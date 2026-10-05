@@ -1,4 +1,4 @@
-import { get, has, merge, set, unset } from 'lodash/fp';
+import { get, has, merge, set, unset } from 'lodash';
 
 import type { Core, Schema, UID } from '@strapi/types';
 import { contentTypes, traverseEntity } from '@strapi/utils';
@@ -103,11 +103,11 @@ const hasPopulatedRelationList = (value: unknown) => {
 };
 
 const getSubmittedValueAtPath = (submitted: Record<string, unknown>, path: string) => {
-  return get(path, submitted);
+  return get(submitted, path);
 };
 
 const wasRelationSubmittedAtPath = (submitted: Record<string, unknown>, path: string) => {
-  return has(path, submitted);
+  return has(submitted, path);
 };
 
 const isRelationUnchangedAtPath = (
@@ -212,7 +212,7 @@ const collectNestedCloneRelationAdjustments = async (
   getModel: (uid: string) => Schema.Schema,
   data: Record<string, unknown>
 ) => {
-  let adjustedData = data;
+  const adjustedData = data;
   const deferredCopies: DeferredRelationCopy[] = [];
   const postCloneUpdates: PostCloneRelationUpdate[] = [];
 
@@ -250,7 +250,7 @@ const collectNestedCloneRelationAdjustments = async (
         usesJoinTable(attribute) &&
         hasPopulatedRelation(value)
       ) {
-        adjustedData = unset(relationPath, adjustedData) as Record<string, unknown>;
+        unset(adjustedData, relationPath);
         deferredCopies.push({
           schemaUid: schema.uid as UID.Schema,
           attributeName: key,
@@ -266,7 +266,7 @@ const collectNestedCloneRelationAdjustments = async (
         !usesJoinTable(attribute) &&
         hasPopulatedRelation(value)
       ) {
-        adjustedData = unset(relationPath, adjustedData) as Record<string, unknown>;
+        unset(adjustedData, relationPath);
         deferredCopies.push({
           schemaUid: schema.uid as UID.Schema,
           attributeName: key,
@@ -278,7 +278,7 @@ const collectNestedCloneRelationAdjustments = async (
 
       // Always defer morphToOne: populate can be null even when morph columns are set.
       if (relationIsUnchanged && isMorphToOneAttribute(attribute)) {
-        adjustedData = unset(relationPath, adjustedData) as Record<string, unknown>;
+        unset(adjustedData, relationPath);
         deferredCopies.push({
           schemaUid: schema.uid as UID.Schema,
           attributeName: key,
@@ -293,7 +293,7 @@ const collectNestedCloneRelationAdjustments = async (
         isBidirectionalOneToManyMappedBy(attribute) &&
         hasPopulatedRelationList(value)
       ) {
-        adjustedData = unset(relationPath, adjustedData) as Record<string, unknown>;
+        unset(adjustedData, relationPath);
         return;
       }
 
@@ -303,7 +303,7 @@ const collectNestedCloneRelationAdjustments = async (
         hasMeaningfulRelationOperations(submittedValue) &&
         (!usesJoinTable(attribute) || isMorphToOneAttribute(attribute))
       ) {
-        adjustedData = unset(relationPath, adjustedData) as Record<string, unknown>;
+        unset(adjustedData, relationPath);
         postCloneUpdates.push({
           dataPath: relationPath,
           value: submittedValue,
@@ -331,7 +331,7 @@ export const prepareCloneData = async (
     contentType,
     getModel
   );
-  let data = merge(originalData, submitted) as Record<string, unknown>;
+  let data = merge({}, originalData, submitted) as Record<string, unknown>;
   const deferredCopies: DeferredRelationCopy[] = [];
   const postCloneUpdates: PostCloneRelationUpdate[] = [];
 
@@ -429,7 +429,7 @@ export const prepareCloneData = async (
   postCloneUpdates.push(...nested.postCloneUpdates);
 
   for (const [path, value] of relationOperationOverrides) {
-    data = set(path, value, data) as Record<string, unknown>;
+    set(data, path, value);
   }
 
   return { data, deferredCopies, postCloneUpdates };
@@ -444,7 +444,7 @@ const resolveOwnerEntryId = (
     return fallbackId;
   }
 
-  const owner = get(ownerPath, entryData) as Record<string, unknown> | undefined;
+  const owner = get(entryData, ownerPath) as Record<string, unknown> | undefined;
   const ownerId = owner?.id;
 
   return typeof ownerId === 'number' ? ownerId : undefined;
@@ -472,8 +472,8 @@ const ownerComponentWasReplaced = (
     return false;
   }
 
-  const sourceComponent = ownerComponentUid(get(ownerPath, originalData));
-  const cloneComponent = ownerComponentUid(get(ownerPath, clonedData));
+  const sourceComponent = ownerComponentUid(get(originalData, ownerPath));
+  const cloneComponent = ownerComponentUid(get(clonedData, ownerPath));
 
   return sourceComponent != null && cloneComponent != null && sourceComponent !== cloneComponent;
 };
@@ -1082,7 +1082,7 @@ export const applyPostCloneRelationUpdates = async (
     let schemaUid = update.schemaUid;
 
     if (ownerComponentWasReplaced(originalData, clonedData, update.ownerPath)) {
-      const cloneComponent = ownerComponentUid(get(update.ownerPath!, clonedData));
+      const cloneComponent = ownerComponentUid(get(clonedData, update.ownerPath!));
       const cloneAttribute = cloneComponent
         ? (strapi.db.metadata.get(cloneComponent).attributes[attributeName] as
             | CloneRelationAttribute
@@ -1113,7 +1113,7 @@ export const applyPostCloneRelationUpdates = async (
       ownerUid: schemaUid,
       sourceSchemaUid: update.schemaUid,
       sourceUid: rootUid,
-      originalValue: get(update.dataPath, originalData),
+      originalValue: get(originalData, update.dataPath),
       sourceOwnerId,
       targetOwnerId: ownerEntryId,
       attributeName,

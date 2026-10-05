@@ -38,7 +38,7 @@ beforeAll(() => {
   const configDir = path.join(root, CONFIG_DIR);
   fs.mkdirSync(configDir, { recursive: true });
   fs.readdirSync(packageDir)
-    .filter((file) => file.endsWith('.ts') || file === 'package.json')
+    .filter((file) => file.endsWith('.ts') || file.endsWith('.js') || file === 'package.json')
     .forEach((file) => fs.copyFileSync(path.join(packageDir, file), path.join(configDir, file)));
 
   // The config imports `defineConfig` from `oxlint`.
