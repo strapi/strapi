@@ -1,4 +1,4 @@
-import { isNil, isArray, prop, xor, eq, differenceWith } from 'lodash/fp';
+import { isNil, isArray, prop, xor, eq, differenceWith, cloneDeep } from 'lodash/fp';
 import pmap from 'p-map';
 import type { Data } from '@strapi/types';
 import { getService } from '../../utils';
@@ -85,6 +85,67 @@ export const findMany = async (params = {}): Promise<Permission[]> => {
  */
 export const findUserPermissions = async (user: AdminUser): Promise<Permission[]> => {
   return findMany({ where: { role: { users: { id: user.id } } } });
+};
+
+const ROLE_PERMISSIONS_CACHE_TTL = 60 * 1000;
+
+const rolePermissionsCache = new Map<Data.ID, { permissions: Permission[]; expiresAt: number }>();
+
+// Incremented on every invalidation so that a lookup started before a permission change
+// can't write its outdated result back into the cache once it resolves
+let rolePermissionsCacheGeneration = 0;
+
+/**
+ * Invalidate every cached role permission set
+ */
+export const clearRolePermissionsCache = (): void => {
+  rolePermissionsCache.clear();
+  rolePermissionsCacheGeneration += 1;
+};
+
+/**
+ * Find the permissions of a role, cached for 60 seconds.
+ * A cache miss falls through to the database. A failing database lookup rejects
+ * (the request is denied) and is never cached.
+ * @param roleId - role id
+ */
+const findRolePermissions = async (roleId: Data.ID): Promise<Permission[]> => {
+  const cached = rolePermissionsCache.get(roleId);
+
+  if (cached && cached.expiresAt > Date.now()) {
+    return cloneDeep(cached.permissions);
+  }
+
+  rolePermissionsCache.delete(roleId);
+
+  const generation = rolePermissionsCacheGeneration;
+  const permissions = await findMany({ where: { role: { id: roleId } } });
+
+  if (generation === rolePermissionsCacheGeneration) {
+    rolePermissionsCache.set(roleId, {
+      permissions: cloneDeep(permissions),
+      expiresAt: Date.now() + ROLE_PERMISSIONS_CACHE_TTL,
+    });
+  }
+
+  return permissions;
+};
+
+/**
+ * Find all permissions for a user by resolving each of their roles through the per-role cache.
+ * Falls back to the uncached lookup when the user's roles haven't been populated.
+ * @param user - user
+ */
+export const findCachedUserPermissions = async (user: AdminUser): Promise<Permission[]> => {
+  if (!isArray(user.roles)) {
+    return findUserPermissions(user);
+  }
+
+  const permissionsByRole = await Promise.all(
+    user.roles.map((role) => findRolePermissions(role.id))
+  );
+
+  return permissionsByRole.flat();
 };
 
 const filterPermissionsToRemove = async (permissions: Permission[]) => {
@@ -194,5 +255,7 @@ export default {
   deleteByRolesIds,
   deleteByIds,
   findUserPermissions,
+  findCachedUserPermissions,
+  clearRolePermissionsCache,
   cleanPermissionsInDatabase,
 };
