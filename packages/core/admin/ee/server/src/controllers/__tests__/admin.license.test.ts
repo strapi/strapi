@@ -198,6 +198,29 @@ describe('licenseLimitInformation (extended fields)', () => {
     expect(data.licenseMode).toBe('offline');
   });
 
+  it('reports no registry error in offline mode, even with a stale one stored', async () => {
+    // An ee_information row from an earlier online run can still carry an error and a cached
+    // license. An offline instance never contacts the registry, so neither applies to it.
+    createStrapiMock({
+      stored: {
+        value: JSON.stringify({
+          license: 'cached',
+          error: 'network',
+          errorKind: 'unreachable',
+          lastCheckAt: 1,
+        }),
+      },
+    });
+    process.env.STRAPI_DISABLE_LICENSE_PING = 'true';
+    stubUserServices();
+
+    const data = (await adminController.licenseLimitInformation()).data as any;
+    expect(data.licenseMode).toBe('offline');
+    expect(data.usingCachedLicense).toBe(false);
+    expect(data.registrySyncError).toBeNull();
+    expect(data.registrySyncErrorKind).toBeNull();
+  });
+
   it('flags usingCachedLicense when the last sync errored but a cached license exists', async () => {
     createStrapiMock({
       stored: { value: JSON.stringify({ license: 'cached', error: 'network', lastCheckAt: 1 }) },

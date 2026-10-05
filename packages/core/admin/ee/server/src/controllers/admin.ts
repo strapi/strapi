@@ -115,6 +115,10 @@ export default {
       nextRegistrySyncAt = next;
     }
 
+    // An offline instance never contacts the registry, so an error (and the cached license that
+    // came with it) stored by an earlier online run says nothing about its current state.
+    const registryState = licenseMode === 'online' ? eeInformation : null;
+
     const data: GetLicenseLimitInformation.Response['data'] = {
       enforcementUserCount,
       currentActiveUserCount,
@@ -147,9 +151,9 @@ export default {
       licenseMode,
       lastRegistrySyncAt,
       nextRegistrySyncAt,
-      usingCachedLicense: Boolean(eeInformation?.error && eeInformation?.license),
-      registrySyncError: eeInformation?.error ?? null,
-      registrySyncErrorKind: eeInformation?.errorKind ?? null,
+      usingCachedLicense: Boolean(registryState?.error && registryState?.license),
+      registrySyncError: registryState?.error ?? null,
+      registrySyncErrorKind: registryState?.errorKind ?? null,
       shouldNotify,
       shouldStopCreate: permittedSeats == null ? false : currentActiveUserCount >= permittedSeats,
       licenseLimitStatus,
