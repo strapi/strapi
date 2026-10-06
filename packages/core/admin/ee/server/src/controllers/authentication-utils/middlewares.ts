@@ -1,8 +1,9 @@
 import type { Core } from '@strapi/types';
 import passport from 'koa-passport';
+import { emitAudit } from '@strapi/utils';
 import { getService } from '../../utils';
 import utils from './utils';
-import { emitLoginFailure } from '../../../../../server/src/audit-logs/auth';
+import { AUTH_EVENTS, emitLoginFailure } from '../../../../../server/src/audit-logs/auth';
 import {
   REFRESH_COOKIE_NAME,
   buildCookieOptionsWithExpiry,
@@ -105,7 +106,8 @@ const nonExistingUserScenario: Core.MiddlewareHandler =
       registrationToken: null,
     });
 
-    strapi.eventHub.emit('admin.auth.autoRegistration', {
+    // Awaited so the audit log reads the new user as actor before a failed session clears it
+    await emitAudit({ strapi }, AUTH_EVENTS.AUTO_REGISTRATION, {
       user: ctx.state.user,
       provider,
     });

@@ -334,5 +334,42 @@ describeOnCondition(edition === 'EE')('Authentication events in audit logs (api)
       expect(createLog.payload.actor).toEqual(unknownActor);
       expect(await findLogs('admin.auth.error')).toHaveLength(0);
     });
+
+    test('is recorded when a slow listener runs and the session then fails', async () => {
+      await setSsoSettings({ autoRegister: true, defaultRole: editorRoleId });
+      const removeListener = strapi.eventHub.on('admin.auth.autoRegistration', async () => {
+        await new Promise((resolve) => {
+          setTimeout(resolve, 300);
+        });
+      });
+      const originSessionManager = Object.getPrototypeOf(strapi.sessionManager('admin'));
+      const generateRefreshToken = jest
+        .spyOn(originSessionManager, 'generateRefreshToken')
+        .mockRejectedValueOnce(new Error('session store down'));
+
+      try {
+        const res = await ssoLogin({
+          profile: { email: 'new@auth-audit.test', firstname: 'New', lastname: 'Admin' },
+        });
+        expect(res.statusCode).toBe(302);
+      } finally {
+        generateRefreshToken.mockRestore();
+        removeListener();
+      }
+
+      const created = await strapi.db
+        .query('admin::user')
+        .findOne({ where: { email: 'new@auth-audit.test' } });
+
+      const [log, ...rest] = await findLogs('admin.auth.autoRegistration');
+      expect(rest).toHaveLength(0);
+      expect(log.payload.actor).toEqual({
+        type: 'admin-user',
+        user: { id: created.id, email: 'new@auth-audit.test', name: 'New Admin' },
+      });
+
+      const [failure] = await findLogs('admin.auth.error');
+      expect(failure.payload).toEqual(failedLogin('unexpected_error', PROVIDER, created));
+    });
   });
 });

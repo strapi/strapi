@@ -354,6 +354,32 @@ describe('SSO login failures', () => {
     expect(next).toHaveBeenCalled();
   });
 
+  test('waits for admin.auth.autoRegistration listeners before continuing', async () => {
+    createUser.mockResolvedValue({ id: 9, email: 'ana@acme.com', roles: [{ id: 3 }] });
+    let listenersDone = false;
+    emit.mockImplementationOnce(async () => {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 10);
+      });
+      listenersDone = true;
+    });
+
+    let doneWhenNextRan: boolean | undefined;
+    jest
+      .mocked(passport.authenticate)
+      .mockImplementation(
+        (_provider: any, _options: any, callback: any) => () => callback(null, profile)
+      );
+    await authenticate(
+      createCtx() as any,
+      jest.fn(async () => {
+        doneWhenNextRan = listenersDone;
+      })
+    );
+
+    expect(doneWhenNextRan).toBe(true);
+  });
+
   test('emits unexpected_error with the account, and no session user, when the session cannot be created', async () => {
     getSessionManager.mockImplementation(() => {
       throw new Error('session store down');
