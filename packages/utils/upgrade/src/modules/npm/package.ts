@@ -3,7 +3,7 @@ import semver from 'semver';
 import execa from 'execa';
 import { packageManager } from '@strapi/utils';
 
-import { ProxyAgent } from 'undici';
+import { Dispatcher1Wrapper, ProxyAgent } from 'undici';
 import * as constants from './constants';
 import { isLiteralSemVer } from '../version';
 
@@ -12,7 +12,8 @@ import type { Version } from '../version';
 import { Logger } from '../logger';
 
 const proxyUrl = process.env.HTTP_PROXY || process.env.HTTPS_PROXY;
-const agent = proxyUrl ? new ProxyAgent(proxyUrl) : undefined;
+// Wrapped so Node's built-in fetch (bundling its own undici) can use an undici 8 dispatcher
+const agent = proxyUrl ? new Dispatcher1Wrapper(new ProxyAgent(proxyUrl)) : undefined;
 
 export class Package implements PackageInterface {
   name: string;
@@ -141,7 +142,8 @@ export class Package implements PackageInterface {
     const packageURL = `${await this.determineRegistryUrl()}/${this.name}`;
 
     const response = await fetch(packageURL, {
-      dispatcher: agent,
+      // The global RequestInit types its dispatcher with Node's bundled undici types
+      dispatcher: agent as unknown as RequestInit['dispatcher'],
     });
 
     // TODO: Use a validation library to make sure the response structure is correct
