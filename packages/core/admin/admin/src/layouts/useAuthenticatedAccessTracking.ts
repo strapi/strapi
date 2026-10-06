@@ -2,19 +2,29 @@ import * as React from 'react';
 
 import { useStrapiApp } from '../features/StrapiApp';
 import { useTracking } from '../features/Tracking';
+import { useTelemetryPropertiesQuery } from '../services/admin';
 
 /**
- * Sends `didAccessAuthenticatedAdministration` once per mount, and only after
- * the Strapi version is ready to be attached. `trackUsage` changes identity
- * when that version arrives; depending on it alone sends the event twice.
+ * Sends `didAccessAuthenticatedAdministration` once per mount, after the Strapi
+ * version is ready and the telemetry-properties query has settled.
  */
 const useAuthenticatedAccessTracking = (projectId?: string | null) => {
   const { trackUsage, isStrapiVersionReady } = useTracking();
+  const { isSuccess: hasTelemetryProperties, isError: didTelemetryPropertiesFail } =
+    useTelemetryPropertiesQuery(undefined, {
+      skip: !isStrapiVersionReady,
+    });
   const getAllWidgets = useStrapiApp('TrackingProvider', (state) => state.widgets.getAll);
   const didTrackAccess = React.useRef(false);
+  const hasTelemetryPropertiesSettled = hasTelemetryProperties || didTelemetryPropertiesFail;
 
   React.useEffect(() => {
-    if (!projectId || !isStrapiVersionReady || didTrackAccess.current) {
+    if (
+      !projectId ||
+      !isStrapiVersionReady ||
+      !hasTelemetryPropertiesSettled ||
+      didTrackAccess.current
+    ) {
       return;
     }
 
@@ -23,7 +33,7 @@ const useAuthenticatedAccessTracking = (projectId?: string | null) => {
       registeredWidgets: getAllWidgets().map((widget) => widget.uid),
       projectId,
     });
-  }, [projectId, isStrapiVersionReady, getAllWidgets, trackUsage]);
+  }, [projectId, isStrapiVersionReady, hasTelemetryPropertiesSettled, getAllWidgets, trackUsage]);
 };
 
 export { useAuthenticatedAccessTracking };

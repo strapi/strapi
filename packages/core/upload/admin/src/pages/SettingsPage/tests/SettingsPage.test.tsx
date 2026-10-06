@@ -38,6 +38,14 @@ describe('SettingsPage', () => {
     mockSettings(false);
   });
 
+  afterEach(() => {
+    jest
+      .mocked(useGetUploadSettingsQuery)
+      .mockImplementation((...args: unknown[]) =>
+        jest.requireActual('../../../services/settings').useGetUploadSettingsQuery(...args)
+      );
+  });
+
   it('renders', async () => {
     const { getByRole, queryByText } = render(<SettingsPage />);
 
@@ -127,11 +135,5 @@ describe('SettingsPage', () => {
     fireEvent.click(save);
 
     await waitFor(() => expect(refetch).toHaveBeenCalledTimes(1));
-
-    jest
-      .mocked(useGetUploadSettingsQuery)
-      .mockImplementation((...args: unknown[]) =>
-        jest.requireActual('../../../services/settings').useGetUploadSettingsQuery(...args)
-      );
   });
 });

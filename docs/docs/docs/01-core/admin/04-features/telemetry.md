@@ -128,9 +128,9 @@ These fire automatically — you usually do not add them in feature code:
 | Event                                  | When                                        | Notes                                                        |
 | -------------------------------------- | ------------------------------------------- | ------------------------------------------------------------ |
 | `didInitializeAdministration`          | First load with uuid + telemetry properties | Anonymous (`userId: ''`); uses raw `fetch`, not `trackUsage` |
-| `didAccessAuthenticatedAdministration` | Authenticated layout mount                  | Includes `registeredWidgets`, `projectId`                    |
+| `didAccessAuthenticatedAdministration` | Once per authenticated load                 | `registeredWidgets`, `projectId`; after version is ready     |
 
-`didAccessAuthenticatedAdministration` is sent from `packages/core/admin/admin/src/layouts/AuthenticatedLayout.tsx` when `projectId` becomes available.
+`didAccessAuthenticatedAdministration` is sent from `packages/core/admin/admin/src/layouts/useAuthenticatedAccessTracking.ts` (called by `AuthenticatedLayout`) once `projectId` is set, the Strapi version is ready, and the telemetry-properties request has settled.
 
 ---
 
