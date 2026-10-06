@@ -1,25 +1,33 @@
-import { useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 
 import { usePersistentState } from '@strapi/admin/strapi-admin';
 import { Badge, Box, Button, Flex, Modal, Tabs, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
+import { AssetsGrid } from '../../pages/Assets/components/AssetsGrid';
 import { AssetsSearchInput } from '../../pages/Assets/components/AssetsSearchInput';
+import { AssetsTable } from '../../pages/Assets/components/AssetsTable';
 import { AssetsView } from '../../pages/Assets/components/AssetsView';
 import { FilterBadges } from '../../pages/Assets/components/FilterBadges';
 import { FilterMenu } from '../../pages/Assets/components/FilterMenu';
 import { SortMenu } from '../../pages/Assets/components/SortMenu';
 import { ViewToggle } from '../../pages/Assets/components/ViewToggle';
 import { localStorageKeys, viewOptions } from '../../pages/Assets/constants';
-import { AssetSelectionProvider } from '../../pages/Assets/hooks/useAssetSelection';
+import { useAssetSelection } from '../../pages/Assets/hooks/useAssetSelection';
 import { useAssetsList } from '../../pages/Assets/hooks/useAssetsList';
 import { ListQueryStateProvider } from '../../pages/Assets/hooks/useListQueryParams';
 import { ListSettingsProvider } from '../../pages/Assets/hooks/useListSettings';
+import { assetKey } from '../../pages/Assets/utils/selection';
+import { type MediaAllowedTypes } from '../../utils/isAllowedAssetType';
 import { buildItemLocations } from '../../utils/itemLocations';
 import { getTranslationKey } from '../../utils/translations';
 
 import { FolderBreadcrumbs } from './FolderBreadcrumbs';
+import { isSameSelection } from './pickerSelection';
+import { PickerSelectionProvider, usePickerSelection } from './PickerSelectionProvider';
+
+import type { File } from '../../../../shared/contracts/files';
 
 // Fixed height (design: 720 × 680) so the modal doesn't grow and shrink as the
 // list loads, filters empty it, or tabs switch.
@@ -93,10 +101,36 @@ const Footer = styled(Modal.Footer)`
 `;
 
 /* -------------------------------------------------------------------------------------------------
+ * Shared
+ * -----------------------------------------------------------------------------------------------*/
+
+type AssetsList = ReturnType<typeof useAssetsList>;
+
+// Both tabs share these; the Selected tab only drops the section headings.
+const PICKER_LIST_SETTINGS = {
+  showItemActions: false,
+  // Three tiles per row in the 672px content width.
+  gridMinTileWidth: '200px',
+} as const;
+
+/** In the picker a plain click on an asset picks it (or un-picks it). */
+const useToggleAsset = () => {
+  const { toggle } = useAssetSelection();
+
+  return useCallback((assetId: number) => toggle(assetKey(assetId)), [toggle]);
+};
+
+/* -------------------------------------------------------------------------------------------------
  * BrowseTab
  * -----------------------------------------------------------------------------------------------*/
 
-const BrowseTab = () => {
+interface BrowseTabProps {
+  list: AssetsList;
+  view: number;
+  onViewChange: (view: number) => void;
+}
+
+const BrowseTab = ({ list, view, onViewChange }: BrowseTabProps) => {
   const {
     currentFolderId,
     navigateToFolderId,
@@ -115,11 +149,8 @@ const BrowseTab = () => {
     assetsError,
     folders,
     isLoadingFolders,
-  } = useAssetsList();
-
-  // Shares the Media Library page's key: a user who prefers the table there
-  // gets it here too.
-  const [view, setView] = usePersistentState(localStorageKeys.view, viewOptions.GRID);
+  } = list;
+  const toggleAsset = useToggleAsset();
   const isGridView = view === viewOptions.GRID;
 
   const itemLocations = useMemo(() => buildItemLocations(assets, folders), [assets, folders]);
@@ -134,7 +165,7 @@ const BrowseTab = () => {
           </Flex>
           <Flex gap={2}>
             <SortMenu sort={listSort} showFoldersGroup={!isGridView} />
-            <ViewToggle view={view} onChange={setView} iconsOnly />
+            <ViewToggle view={view} onChange={onViewChange} iconsOnly />
           </Flex>
         </Flex>
         <FilterBadges listFilters={listFilters} />
@@ -168,8 +199,7 @@ const BrowseTab = () => {
           foldersPosition={listSort.foldersPosition}
           hasActiveFilters={listFilters.filters.length > 0}
           onClearFilters={listFilters.clearFilters}
-          // Selecting comes with the picker selection model.
-          onAssetItemClick={() => {}}
+          onAssetItemClick={toggleAsset}
           // Uploading from the picker is out of scope; the empty state hides its CTA.
           onAddAssets={() => {}}
           canAddAssets={false}
@@ -181,100 +211,216 @@ const BrowseTab = () => {
 };
 
 /* -------------------------------------------------------------------------------------------------
- * AssetPickerDialog
+ * SelectedTab
+ * -----------------------------------------------------------------------------------------------*/
+
+const SelectedTab = ({ view }: { view: number }) => {
+  const { formatMessage } = useIntl();
+  const { selection } = usePickerSelection();
+  const toggleAsset = useToggleAsset();
+
+  return (
+    <ScrollingBody>
+      {/* No toolbar above this tab, so the gap under the tabs lives here. */}
+      <Box paddingTop={6}>
+        {selection.length === 0 ? (
+          <Typography textColor="neutral600">
+            {formatMessage({
+              id: getTranslationKey('asset-picker.selected.empty'),
+              defaultMessage: 'No asset selected yet.',
+            })}
+          </Typography>
+        ) : (
+          <ListSettingsProvider {...PICKER_LIST_SETTINGS}>
+            {view === viewOptions.GRID ? (
+              <AssetsGrid assets={selection} onAssetItemClick={toggleAsset} />
+            ) : (
+              <AssetsTable assets={selection} onAssetItemClick={toggleAsset} />
+            )}
+          </ListSettingsProvider>
+        )}
+      </Box>
+    </ScrollingBody>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * PickerContent
  * -----------------------------------------------------------------------------------------------*/
 
 type PickerTab = 'browse' | 'selected';
+
+interface PickerContentProps {
+  title: string;
+  initialSelection: File[];
+  onClose: () => void;
+  onConfirm: (files: File[]) => void;
+}
+
+const PickerContent = ({ title, initialSelection, onClose, onConfirm }: PickerContentProps) => {
+  const { formatMessage } = useIntl();
+  const { selection } = usePickerSelection();
+  // An entry that already holds assets opens on them.
+  const [activeTab, setActiveTab] = useState<PickerTab>(
+    initialSelection.length > 0 ? 'selected' : 'browse'
+  );
+  // Shares the Media Library page's key: a user who prefers the table there
+  // gets it here too.
+  const [view, setView] = usePersistentState(localStorageKeys.view, viewOptions.GRID);
+  const list = useAssetsListContext();
+
+  return (
+    <>
+      <Modal.Header>
+        <Modal.Title>{title}</Modal.Title>
+      </Modal.Header>
+      <TabsRoot
+        variant="simple"
+        value={activeTab}
+        onValueChange={(value) => setActiveTab(value as PickerTab)}
+      >
+        <Box paddingLeft={7} paddingRight={7} paddingTop={2}>
+          <TabsList
+            aria-label={formatMessage({
+              id: getTranslationKey('asset-picker.tabs.label'),
+              defaultMessage: 'Asset picker tabs',
+            })}
+          >
+            <Tabs.Trigger value="browse">
+              {formatMessage({
+                id: getTranslationKey('asset-picker.tabs.browse'),
+                defaultMessage: 'Browse assets',
+              })}
+            </Tabs.Trigger>
+            <Tabs.Trigger value="selected">
+              {formatMessage({
+                id: getTranslationKey('asset-picker.tabs.selected'),
+                defaultMessage: 'Selected assets',
+              })}
+              <Badge marginLeft={2}>{selection.length}</Badge>
+            </Tabs.Trigger>
+          </TabsList>
+        </Box>
+        <TabPanel value="browse">
+          <BrowseTab list={list} view={view} onViewChange={setView} />
+        </TabPanel>
+        <TabPanel value="selected">
+          <SelectedTab view={view} />
+        </TabPanel>
+      </TabsRoot>
+      <Footer>
+        <Button variant="tertiary" onClick={onClose}>
+          {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+        </Button>
+        <Button
+          disabled={isSameSelection(selection, initialSelection)}
+          onClick={() => onConfirm(selection)}
+        >
+          {formatMessage({
+            id: getTranslationKey('asset-picker.confirm'),
+            defaultMessage: 'Add',
+          })}
+        </Button>
+      </Footer>
+    </>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * AssetPickerDialog
+ * -----------------------------------------------------------------------------------------------*/
+
+// The list is read above the selection provider (which resolves picked keys
+// against the loaded assets) and below it (the Browse tab renders it). One
+// instance, shared, so tab switches keep the pages already loaded.
+const AssetsListContext = createContext<AssetsList | null>(null);
+
+const useAssetsListContext = () => {
+  const context = useContext(AssetsListContext);
+
+  if (!context) {
+    throw new Error('useAssetsListContext must be used within the asset picker');
+  }
+
+  return context;
+};
+
+interface PickerSelectionRootProps {
+  children: ReactNode;
+  initialSelection: File[];
+  multiple: boolean;
+  allowedTypes?: MediaAllowedTypes | null;
+}
+
+const PickerSelectionRoot = ({
+  children,
+  initialSelection,
+  multiple,
+  allowedTypes,
+}: PickerSelectionRootProps) => {
+  const list = useAssetsList();
+
+  return (
+    <AssetsListContext.Provider value={list}>
+      <PickerSelectionProvider
+        initialSelection={initialSelection}
+        multiple={multiple}
+        allowedTypes={allowedTypes}
+        knownFiles={list.assets}
+      >
+        {children}
+      </PickerSelectionProvider>
+    </AssetsListContext.Provider>
+  );
+};
 
 export interface AssetPickerDialogProps {
   open: boolean;
   onClose: () => void;
   title: string;
+  /** What the field holds now; the picker starts with it selected. */
+  initialSelection?: File[];
+  multiple?: boolean;
+  allowedTypes?: MediaAllowedTypes | null;
+  /** The confirmed selection, in order. Always an array, even for a single field. */
+  onConfirm: (files: File[]) => void;
 }
+
+const NO_FILES: File[] = [];
 
 /**
  * Content Manager asset picker, built on the current Media Library list. Its
  * folder, search, filter and sort state lives in memory, so browsing never
  * touches the URL of the entry it is opened from.
  */
-export const AssetPickerDialog = ({ open, onClose, title }: AssetPickerDialogProps) => {
-  const { formatMessage } = useIntl();
-  const [activeTab, setActiveTab] = useState<PickerTab>('browse');
-
-  return (
-    <Modal.Root open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <StyledModalContent>
-        {/* Inside the content so every opening starts from a fresh list state. */}
-        <ListQueryStateProvider>
-          <ListSettingsProvider
-            showItemActions={false}
-            showSectionHeadings
-            // Three tiles per row in the 672px content width.
-            gridMinTileWidth="200px"
+export const AssetPickerDialog = ({
+  open,
+  onClose,
+  title,
+  initialSelection = NO_FILES,
+  multiple = false,
+  allowedTypes,
+  onConfirm,
+}: AssetPickerDialogProps) => (
+  <Modal.Root open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+    <StyledModalContent>
+      {/* Inside the content so every opening starts from fresh list and selection state. */}
+      <ListQueryStateProvider>
+        <ListSettingsProvider {...PICKER_LIST_SETTINGS} showSectionHeadings>
+          <PickerSelectionRoot
+            initialSelection={initialSelection}
+            multiple={multiple}
+            allowedTypes={allowedTypes}
           >
-            <AssetSelectionProvider disabled>
-              <Modal.Header>
-                <Modal.Title>{title}</Modal.Title>
-              </Modal.Header>
-              <TabsRoot
-                variant="simple"
-                value={activeTab}
-                onValueChange={(value) => setActiveTab(value as PickerTab)}
-              >
-                <Box paddingLeft={7} paddingRight={7} paddingTop={2}>
-                  <TabsList
-                    aria-label={formatMessage({
-                      id: getTranslationKey('asset-picker.tabs.label'),
-                      defaultMessage: 'Asset picker tabs',
-                    })}
-                  >
-                    <Tabs.Trigger value="browse">
-                      {formatMessage({
-                        id: getTranslationKey('asset-picker.tabs.browse'),
-                        defaultMessage: 'Browse assets',
-                      })}
-                    </Tabs.Trigger>
-                    <Tabs.Trigger value="selected">
-                      {formatMessage({
-                        id: getTranslationKey('asset-picker.tabs.selected'),
-                        defaultMessage: 'Selected assets',
-                      })}
-                      <Badge marginLeft={2}>0</Badge>
-                    </Tabs.Trigger>
-                  </TabsList>
-                </Box>
-                <TabPanel value="browse">
-                  <BrowseTab />
-                </TabPanel>
-                <TabPanel value="selected">
-                  <ScrollingBody>
-                    {/* No toolbar above this tab, so the gap under the tabs lives here. */}
-                    <Box paddingTop={6}>
-                      <Typography textColor="neutral600">
-                        {formatMessage({
-                          id: getTranslationKey('asset-picker.selected.empty'),
-                          defaultMessage: 'No asset selected yet.',
-                        })}
-                      </Typography>
-                    </Box>
-                  </ScrollingBody>
-                </TabPanel>
-              </TabsRoot>
-              <Footer>
-                <Button variant="tertiary" onClick={onClose}>
-                  {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
-                </Button>
-                <Button disabled>
-                  {formatMessage({
-                    id: getTranslationKey('asset-picker.confirm'),
-                    defaultMessage: 'Add',
-                  })}
-                </Button>
-              </Footer>
-            </AssetSelectionProvider>
-          </ListSettingsProvider>
-        </ListQueryStateProvider>
-      </StyledModalContent>
-    </Modal.Root>
-  );
-};
+            <PickerContent
+              title={title}
+              initialSelection={initialSelection}
+              onClose={onClose}
+              onConfirm={onConfirm}
+            />
+          </PickerSelectionRoot>
+        </ListSettingsProvider>
+      </ListQueryStateProvider>
+    </StyledModalContent>
+  </Modal.Root>
+);

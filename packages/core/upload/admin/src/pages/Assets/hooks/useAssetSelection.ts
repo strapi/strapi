@@ -32,7 +32,22 @@ import {
  * ordered key array from the caller (the view owns the rendered order), keeping
  * the context data-source-agnostic.
  */
+/**
+ * How an item takes part in selection: `enabled` shows a working checkbox,
+ * `disabled` shows it greyed out (the item cannot be chosen here), `hidden`
+ * shows none (the item is not something this selection is about).
+ */
+export type Selectability = 'enabled' | 'disabled' | 'hidden';
+
 export interface AssetSelection {
+  /**
+   * Whether selection is on at all. Views show the checkbox column and
+   * select-all only when it is.
+   */
+  isEnabled: boolean;
+  /** Whether the table offers a select-all header (not on a single-value picker). */
+  canSelectAll: boolean;
+  getSelectability: (key: ItemKey) => Selectability;
   /** Every selected item key (assets and folders), render-order agnostic. */
   selectedKeys: Set<ItemKey>;
   /** Selected asset ids, derived from {@link selectedKeys}. */
@@ -58,7 +73,11 @@ export interface AssetSelection {
   clear: () => void;
 }
 
-const AssetSelectionContext = createContext<AssetSelection | null>(null);
+/**
+ * Exported so a host with its own selection rules (the Content Manager asset
+ * picker) can feed the same views a different implementation.
+ */
+export const AssetSelectionContext = createContext<AssetSelection | null>(null);
 
 interface AssetSelectionProviderProps {
   children: ReactNode;
@@ -76,6 +95,7 @@ export const AssetSelectionProvider = ({
   disabled = false,
 }: AssetSelectionProviderProps) => {
   const [state, setState] = useState<SelectionState>(createEmptySelection);
+  const isEnabled = !disabled;
 
   const isSelected = useCallback(
     (key: ItemKey) => !disabled && state.selectedKeys.has(key),
@@ -129,8 +149,16 @@ export const AssetSelectionProvider = ({
     [state.selectedKeys]
   );
 
+  const getSelectability = useCallback(
+    (): Selectability => (isEnabled ? 'enabled' : 'hidden'),
+    [isEnabled]
+  );
+
   const value = useMemo<AssetSelection>(
     () => ({
+      isEnabled,
+      canSelectAll: true,
+      getSelectability,
       selectedKeys: state.selectedKeys,
       selectedIds,
       selectedFolderIds,
@@ -144,6 +172,8 @@ export const AssetSelectionProvider = ({
       clear,
     }),
     [
+      isEnabled,
+      getSelectability,
       state.selectedKeys,
       selectedIds,
       selectedFolderIds,

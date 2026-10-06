@@ -44,10 +44,16 @@ const LocationProbe = () => {
 const ENTRY_URL =
   '/content-manager/collection-types/api::article.article/1?plugins[i18n][locale]=en';
 
-const renderDialog = () =>
+const renderDialog = (props: Partial<React.ComponentProps<typeof AssetPickerDialog>> = {}) =>
   render(
     <>
-      <AssetPickerDialog open onClose={jest.fn()} title="Add asset for cover" />
+      <AssetPickerDialog
+        open
+        onClose={jest.fn()}
+        onConfirm={jest.fn()}
+        title="Add asset for cover"
+        {...props}
+      />
       <LocationProbe />
     </>,
     { initialEntries: [ENTRY_URL] }
@@ -204,6 +210,148 @@ describe('AssetPickerDialog', () => {
       expect(within(trail).queryByRole('button', { name: '2026' })).not.toBeInTheDocument();
       expect(within(trail).getByRole('button', { name: 'Q4' })).toBeInTheDocument();
       expect(within(trail).getByText('October')).toBeInTheDocument();
+    });
+  });
+
+  describe('selection', () => {
+    const hero = createAsset(1, 'hero.png');
+    const banner = createAsset(2, 'banner.png');
+    const brochure: File = {
+      ...createAsset(3, 'brochure.pdf'),
+      mime: 'application/pdf',
+      ext: '.pdf',
+    };
+
+    beforeEach(() => {
+      server.use(
+        http.get('*/upload/files', () =>
+          HttpResponse.json({
+            results: [hero, banner, brochure],
+            pagination: { page: 1, pageSize: 20, pageCount: 1, total: 3 },
+          })
+        )
+      );
+    });
+
+    const selectedTab = () => screen.getByRole('tab', { name: /Selected assets/ });
+    const addButton = () => screen.getByRole('button', { name: 'Add' });
+    const checkboxFor = (name: string) => screen.getByRole('checkbox', { name: `Select ${name}` });
+
+    it('picks an asset on click, counts it and confirms it', async () => {
+      const onConfirm = jest.fn();
+      renderDialog({ multiple: true, onConfirm });
+
+      fireEvent.click(await screen.findByText('hero.png'));
+
+      expect(within(selectedTab()).getByText('1')).toBeInTheDocument();
+      expect(checkboxFor('hero.png')).toBeChecked();
+
+      fireEvent.click(addButton());
+
+      expect(onConfirm).toHaveBeenCalledWith([hero]);
+    });
+
+    it('keeps the order picks were made in', async () => {
+      const onConfirm = jest.fn();
+      renderDialog({ multiple: true, initialSelection: [banner], onConfirm });
+
+      // Radix tabs switch on mouse down, not click.
+      fireEvent.mouseDown(screen.getByRole('tab', { name: 'Browse assets' }));
+      fireEvent.click(await screen.findByText('hero.png'));
+      fireEvent.click(addButton());
+
+      expect(onConfirm).toHaveBeenCalledWith([banner, hero]);
+    });
+
+    it('replaces the pick on a single-value field', async () => {
+      const onConfirm = jest.fn();
+      renderDialog({ onConfirm });
+
+      fireEvent.click(await screen.findByText('hero.png'));
+      fireEvent.click(screen.getByText('banner.png'));
+
+      expect(checkboxFor('hero.png')).not.toBeChecked();
+      expect(within(selectedTab()).getByText('1')).toBeInTheDocument();
+
+      fireEvent.click(addButton());
+
+      expect(onConfirm).toHaveBeenCalledWith([banner]);
+    });
+
+    it('greys out assets outside allowedTypes and ignores clicks on them', async () => {
+      renderDialog({ multiple: true, allowedTypes: ['images'] });
+
+      fireEvent.click(await screen.findByText('brochure.pdf'));
+
+      expect(checkboxFor('brochure.pdf')).toBeDisabled();
+      expect(within(selectedTab()).getByText('0')).toBeInTheDocument();
+    });
+
+    it('offers no checkbox and no actions on folders, and no actions on assets', async () => {
+      renderDialog({ multiple: true });
+
+      await screen.findByText('hero.png');
+
+      expect(
+        screen.queryByRole('checkbox', { name: 'Select Blog content' })
+      ).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'More actions' })).not.toBeInTheDocument();
+    });
+
+    it('keeps the selection while browsing into a folder', async () => {
+      renderDialog({ multiple: true });
+
+      fireEvent.click(await screen.findByText('hero.png'));
+      fireEvent.click(screen.getByText('Blog content'));
+
+      await screen.findByRole('navigation', { name: 'Folder navigation' });
+
+      expect(within(selectedTab()).getByText('1')).toBeInTheDocument();
+    });
+
+    it('offers no select-all in the table view, only a checkbox per asset', async () => {
+      window.localStorage.setItem('STRAPI_UPLOAD_LIBRARY_VIEW', JSON.stringify(1));
+
+      try {
+        renderDialog({ multiple: true });
+
+        expect(
+          await screen.findByRole('checkbox', { name: 'Select hero.png' })
+        ).toBeInTheDocument();
+        expect(screen.queryByRole('checkbox', { name: 'Select all' })).not.toBeInTheDocument();
+      } finally {
+        window.localStorage.removeItem('STRAPI_UPLOAD_LIBRARY_VIEW');
+      }
+    });
+
+    describe('with assets already in the field', () => {
+      it('opens on the Selected tab, listing them', async () => {
+        renderDialog({ multiple: true, initialSelection: [hero, banner] });
+
+        expect(selectedTab()).toHaveAttribute('aria-selected', 'true');
+        expect(within(selectedTab()).getByText('2')).toBeInTheDocument();
+        expect(screen.getByText('hero.png')).toBeInTheDocument();
+        expect(screen.getByText('banner.png')).toBeInTheDocument();
+      });
+
+      it('keeps Add disabled until the selection changes', async () => {
+        renderDialog({ multiple: true, initialSelection: [hero] });
+
+        expect(addButton()).toBeDisabled();
+      });
+
+      it('confirms what is left after unchecking, which removes it from the field', async () => {
+        const onConfirm = jest.fn();
+        renderDialog({ multiple: true, initialSelection: [hero, banner], onConfirm });
+
+        fireEvent.click(await screen.findByRole('checkbox', { name: 'Select hero.png' }));
+
+        expect(screen.queryByText('hero.png')).not.toBeInTheDocument();
+
+        fireEvent.click(addButton());
+
+        expect(onConfirm).toHaveBeenCalledWith([banner]);
+      });
     });
   });
 });

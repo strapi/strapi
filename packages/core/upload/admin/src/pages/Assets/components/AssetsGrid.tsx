@@ -68,14 +68,19 @@ const StyledCard = styled(Card)<{
   $isMovePending?: boolean;
   $isBusy?: boolean;
   $isSelected?: boolean;
+  /** Shown but not choosable here (the picker's `allowedTypes`). */
+  $isUnselectable?: boolean;
 }>`
   border: 1px solid
     ${({ theme, $isSelected }) => ($isSelected ? theme.colors.primary600 : theme.colors.neutral200)};
   border-radius: 8px;
   overflow: hidden;
   isolation: isolate;
-  cursor: ${({ $isMovePending, $isBusy }) => ($isMovePending || $isBusy ? 'wait' : 'pointer')};
-  opacity: ${({ $isDragging }) => ($isDragging ? 0.4 : 1)};
+  cursor: ${({ $isMovePending, $isBusy, $isUnselectable }) => {
+    if ($isMovePending || $isBusy) return 'wait';
+    return $isUnselectable ? 'not-allowed' : 'pointer';
+  }};
+  opacity: ${({ $isDragging, $isUnselectable }) => ($isDragging || $isUnselectable ? 0.4 : 1)};
   /* No opacity change while busy — the overlay does the dimming, and stacking
      one on the other would wash the card out. */
   pointer-events: ${({ $isMovePending, $isBusy }) => ($isMovePending || $isBusy ? 'none' : 'auto')};
@@ -178,7 +183,8 @@ const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
   const { formatMessage } = useIntl();
   const { navigateToFolder } = useFolderNavigation();
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
-  const { isSelected, toggle, selectRange } = useAssetSelection();
+  const { isSelected, toggle, selectRange, getSelectability } = useAssetSelection();
+  const { showItemActions } = useListSettings();
   const { canUpdate } = useMediaLibraryPermissions();
   const openContextMenu = useItemContextMenuTrigger();
   const {
@@ -190,6 +196,7 @@ const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
   } = useFolderDraggableDroppable(folder);
 
   const key = folderKey(folder.id);
+  const selectability = getSelectability(key);
 
   const setNodeRef = (node: HTMLElement | null) => {
     setDragRef(node);
@@ -270,10 +277,11 @@ const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
         }
       }}
     >
-      {canUpdate && (
+      {canUpdate && selectability !== 'hidden' && (
         <Flex onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}>
           <Checkbox
             checked={isSelected(key)}
+            disabled={selectability === 'disabled'}
             onClick={handleCheckboxClick}
             aria-label={formatMessage(
               {
@@ -289,9 +297,11 @@ const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
         <FolderIcon width={20} height={20} />
       </FolderIconContainer>
       <FolderName textColor="neutral800">{folder.name}</FolderName>
-      <Flex onClick={stopCardEvent} onKeyDown={stopCardEvent} onPointerDown={stopCardEvent}>
-        <FolderActionsMenu folder={folder} dragData={dragData} />
-      </Flex>
+      {showItemActions && (
+        <Flex onClick={stopCardEvent} onKeyDown={stopCardEvent} onPointerDown={stopCardEvent}>
+          <FolderActionsMenu folder={folder} dragData={dragData} />
+        </Flex>
+      )}
     </StyledFolderCard>
   );
 };
@@ -442,13 +452,15 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
   const TypeIcon = getAssetIcon(asset.mime, asset.ext);
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const { attributes, listeners, setNodeRef, isDragging, dragData } = useFileDraggable(asset);
-  const { isSelected, toggle, selectRange } = useAssetSelection();
+  const { isSelected, toggle, selectRange, getSelectability } = useAssetSelection();
+  const { showItemActions } = useListSettings();
   const { canUpdate } = useMediaLibraryPermissions();
   const busyMessage = useBusyAssetsOptional()?.getBusyMessage(asset.id) ?? null;
   const openContextMenu = useItemContextMenuTrigger();
 
   const key = assetKey(asset.id);
   const selected = isSelected(key);
+  const selectability = getSelectability(key);
 
   // Plain click opens the asset details; pointer selection lives on the
   // checkbox only. Modifier clicks keep the selection semantics: shift selects
@@ -512,6 +524,7 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
       $isMovePending={isMovePending}
       $isBusy={busyMessage !== null}
       $isSelected={selected}
+      $isUnselectable={selectability === 'disabled'}
       tabIndex={0}
       role="listitem"
       // Right-click opens this asset's own actions, or the selection's when it
@@ -533,13 +546,14 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
       }}
     >
       <StyledCardHeader>
-        {canUpdate && (
+        {canUpdate && selectability !== 'hidden' && (
           <CheckboxOverlay
             {...ASSET_ITEM_CONTROL_PROPS}
             onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}
           >
             <Checkbox
               checked={selected}
+              disabled={selectability === 'disabled'}
               onClick={handleCheckboxClick}
               aria-label={formatMessage(
                 {
@@ -566,14 +580,16 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
           <NameButton type="button" onClick={handleNameClick}>
             <FileName textColor="primary800">{asset.name}</FileName>
           </NameButton>
-          <Flex
-            {...ASSET_ITEM_CONTROL_PROPS}
-            onClick={stopCardEvent}
-            onKeyDown={stopCardEvent}
-            onPointerDown={stopCardEvent}
-          >
-            <AssetActionsMenu asset={asset} dragData={dragData} />
-          </Flex>
+          {showItemActions && (
+            <Flex
+              {...ASSET_ITEM_CONTROL_PROPS}
+              onClick={stopCardEvent}
+              onKeyDown={stopCardEvent}
+              onPointerDown={stopCardEvent}
+            >
+              <AssetActionsMenu asset={asset} dragData={dragData} />
+            </Flex>
+          )}
         </CardFooter>
       </CardBody>
     </StyledCard>
