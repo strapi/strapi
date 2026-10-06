@@ -241,7 +241,7 @@ describeOnCondition(edition === 'EE')('Authentication events in audit logs (api)
       const res = await ssoLogin({ profile: { email: account.email } });
       expect(res.statusCode).toBe(302);
 
-      const [log, ...rest] = await findLogs('admin.auth.error');
+      const [log, ...rest] = await waitForLogs('admin.auth.error');
       expect(rest).toHaveLength(0);
       expect(log.payload).toEqual(failedLogin('account_inactive', PROVIDER, account));
       expectNoSecret(log, 'Deactivated user');
@@ -250,7 +250,7 @@ describeOnCondition(edition === 'EE')('Authentication events in audit logs (api)
     test('records a new user with auto-registration off, without a resource', async () => {
       await ssoLogin({ profile: { email: 'new@auth-audit.test', username: 'new' } });
 
-      const [log, ...rest] = await findLogs('admin.auth.error');
+      const [log, ...rest] = await waitForLogs('admin.auth.error');
       expect(rest).toHaveLength(0);
       expect(log.payload).toEqual(failedLogin('sso_registration_disabled', PROVIDER));
       expectNoSecret(log, 'new@auth-audit.test');
@@ -261,7 +261,7 @@ describeOnCondition(edition === 'EE')('Authentication events in audit logs (api)
 
       await ssoLogin({ profile: { email: 'new@auth-audit.test', username: 'new' } });
 
-      const [log, ...rest] = await findLogs('admin.auth.error');
+      const [log, ...rest] = await waitForLogs('admin.auth.error');
       expect(rest).toHaveLength(0);
       expect(log.payload).toEqual(failedLogin('sso_role_misconfigured', PROVIDER));
     });
@@ -281,12 +281,33 @@ describeOnCondition(edition === 'EE')('Authentication events in audit logs (api)
         generateRefreshToken.mockRestore();
       }
 
-      const [log, ...rest] = await findLogs('admin.auth.error');
+      const [log, ...rest] = await waitForLogs('admin.auth.error');
       expect(rest).toHaveLength(0);
       expect(log.user).toBeNull();
       expect(log.payload).toEqual(failedLogin('unexpected_error', PROVIDER, account));
       expectNoSecret(log, 'session store down');
       expect(await findLogs('admin.auth.success')).toHaveLength(0);
+    });
+
+    test('redirects without waiting for a slow listener, and still records the row', async () => {
+      const account = await createAccount('ana@auth-audit.test', { isActive: false });
+      const removeListener = strapi.eventHub.on('admin.auth.error', async () => {
+        await new Promise((resolve) => {
+          setTimeout(resolve, 2000);
+        });
+      });
+
+      try {
+        const start = Date.now();
+        const res = await ssoLogin({ profile: { email: account.email } });
+        expect(res.statusCode).toBe(302);
+        expect(Date.now() - start).toBeLessThan(1000);
+
+        const [log] = await waitForLogs('admin.auth.error', 1, 40);
+        expect(log.payload).toEqual(failedLogin('account_inactive', PROVIDER, account));
+      } finally {
+        removeListener();
+      }
     });
 
     test('records nothing for a connection with no valid profile', async () => {
@@ -295,6 +316,9 @@ describeOnCondition(edition === 'EE')('Authentication events in audit logs (api)
 
       expect(providerError.statusCode).toBe(302);
       expect(noEmail.statusCode).toBe(302);
+      await new Promise((resolve) => {
+        setTimeout(resolve, 300);
+      });
       expect(await findLogs('admin.auth.error')).toHaveLength(0);
     });
   });
@@ -313,7 +337,7 @@ describeOnCondition(edition === 'EE')('Authentication events in audit logs (api)
         .findOne({ where: { email: 'new@auth-audit.test' } });
       expect(created).not.toBeNull();
 
-      const [log, ...rest] = await findLogs('admin.auth.autoRegistration');
+      const [log, ...rest] = await waitForLogs('admin.auth.autoRegistration');
       expect(rest).toHaveLength(0);
       expect(log.user.id).toBe(created.id);
       expect(log.payload).toEqual({
@@ -361,14 +385,14 @@ describeOnCondition(edition === 'EE')('Authentication events in audit logs (api)
         .query('admin::user')
         .findOne({ where: { email: 'new@auth-audit.test' } });
 
-      const [log, ...rest] = await findLogs('admin.auth.autoRegistration');
+      const [log, ...rest] = await waitForLogs('admin.auth.autoRegistration');
       expect(rest).toHaveLength(0);
       expect(log.payload.actor).toEqual({
         type: 'admin-user',
         user: { id: created.id, email: 'new@auth-audit.test', name: 'New Admin' },
       });
 
-      const [failure] = await findLogs('admin.auth.error');
+      const [failure] = await waitForLogs('admin.auth.error');
       expect(failure.payload).toEqual(failedLogin('unexpected_error', PROVIDER, created));
     });
   });

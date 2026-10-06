@@ -1,9 +1,8 @@
 import type { Core } from '@strapi/types';
 import passport from 'koa-passport';
-import { emitAudit } from '@strapi/utils';
 import { getService } from '../../utils';
 import utils from './utils';
-import { AUTH_EVENTS, emitLoginFailure } from '../../../../../server/src/audit-logs/auth';
+import { emitLoginFailure } from '../../../../../server/src/audit-logs/auth';
 import {
   REFRESH_COOKIE_NAME,
   buildCookieOptionsWithExpiry,
@@ -30,7 +29,7 @@ export const authenticate: Core.MiddlewareHandler = async (ctx, next) => {
         strapi.log.error(error);
       }
 
-      await emitLoginFailure(
+      emitLoginFailure(
         { strapi },
         { error: error || defaultConnectionError(), provider, reason: 'sso_connection_error' }
       );
@@ -50,7 +49,7 @@ const existingUserScenario: Core.MiddlewareHandler =
     const redirectUrls = utils.getPrefixedRedirectUrls();
 
     if (!user.isActive) {
-      await emitLoginFailure(
+      emitLoginFailure(
         { strapi },
         {
           error: new Error(`Deactivated user tried to login (${user.id})`),
@@ -77,7 +76,7 @@ const nonExistingUserScenario: Core.MiddlewareHandler =
     const isMissingRegisterFields = !username && (!firstname || !lastname);
 
     if (!providers.autoRegister || !providers.defaultRole || isMissingRegisterFields) {
-      await emitLoginFailure(
+      emitLoginFailure(
         { strapi },
         { error: defaultConnectionError(), provider, reason: 'sso_registration_disabled' }
       );
@@ -88,7 +87,7 @@ const nonExistingUserScenario: Core.MiddlewareHandler =
 
     // If the default role has been misconfigured, redirect with an error
     if (!defaultRole) {
-      await emitLoginFailure(
+      emitLoginFailure(
         { strapi },
         { error: defaultConnectionError(), provider, reason: 'sso_role_misconfigured' }
       );
@@ -106,8 +105,7 @@ const nonExistingUserScenario: Core.MiddlewareHandler =
       registrationToken: null,
     });
 
-    // Awaited so the audit log reads the new user as actor before a failed session clears it
-    await emitAudit({ strapi }, AUTH_EVENTS.AUTO_REGISTRATION, {
+    strapi.eventHub.emit('admin.auth.autoRegistration', {
       user: ctx.state.user,
       provider,
     });
@@ -174,10 +172,7 @@ export const redirectWithAuth: Core.MiddlewareHandler = async (ctx) => {
     ctx.redirect(redirectUrls.success);
   } catch (error) {
     strapi.log.error('SSO authentication failed during token generation', error);
-    // The audit log reads the actor from ctx.state.user; clear it so the failed login is
-    // recorded with an unknown actor.
-    ctx.state.user = undefined;
-    await emitLoginFailure(
+    emitLoginFailure(
       { strapi },
       {
         error: error instanceof Error ? error : new Error('Unknown SSO error'),

@@ -354,52 +354,28 @@ describe('SSO login failures', () => {
     expect(next).toHaveBeenCalled();
   });
 
-  test('waits for admin.auth.autoRegistration listeners before continuing', async () => {
-    createUser.mockResolvedValue({ id: 9, email: 'ana@acme.com', roles: [{ id: 3 }] });
-    let listenersDone = false;
-    emit.mockImplementationOnce(async () => {
-      await new Promise((resolve) => {
-        setTimeout(resolve, 10);
-      });
-      listenersDone = true;
-    });
+  test('does not wait for admin.auth.error listeners before redirecting', async () => {
+    findOneByEmail.mockResolvedValue({ id: 7, email: 'ana@acme.com', isActive: false });
+    emit.mockImplementationOnce(() => new Promise(() => {}));
 
-    let doneWhenNextRan: boolean | undefined;
-    jest
-      .mocked(passport.authenticate)
-      .mockImplementation(
-        (_provider: any, _options: any, callback: any) => () => callback(null, profile)
-      );
-    await authenticate(
-      createCtx() as any,
-      jest.fn(async () => {
-        doneWhenNextRan = listenersDone;
-      })
-    );
+    const { ctx } = await runAuthenticate(null, profile);
 
-    expect(doneWhenNextRan).toBe(true);
+    expect(emit).toHaveBeenCalledWith('admin.auth.error', expect.anything());
+    expect(ctx.redirect).toHaveBeenCalledWith('/admin/auth/login/error');
   });
 
-  test('emits unexpected_error with the account, and no session user, when the session cannot be created', async () => {
+  test('emits unexpected_error with the account when the session cannot be created', async () => {
     getSessionManager.mockImplementation(() => {
       throw new Error('session store down');
     });
 
     const ctx = {
       params: { provider: 'okta' },
-      state: { user: { id: 7, email: 'ana@acme.com', password: '$2a$10$hash' } } as {
-        user?: unknown;
-      },
+      state: { user: { id: 7, email: 'ana@acme.com', password: '$2a$10$hash' } },
       redirect: jest.fn(),
     };
-    let userWhenEmitted: unknown = 'not emitted';
-    emit.mockImplementationOnce(() => {
-      userWhenEmitted = ctx.state.user;
-    });
 
     await redirectWithAuth(ctx as any, jest.fn());
-
-    expect(userWhenEmitted).toBeUndefined();
 
     expect(emit).toHaveBeenCalledWith('admin.auth.error', {
       error: expect.any(Error),

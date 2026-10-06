@@ -4,7 +4,7 @@ import { emitLoginFailure, isRecordedLoginFailure, registerAuthAuditEvents } fro
 
 jest.mock('@strapi/utils', () => ({
   ...jest.requireActual('@strapi/utils'),
-  emitAudit: jest.fn(),
+  emitAudit: jest.fn(async () => {}),
 }));
 
 const getRegistrations = () => {
@@ -32,7 +32,7 @@ describe('authentication audit events', () => {
       'admin.auth.error',
     ]);
     expect(options['admin.auth.error']).toEqual({
-      allowUnknownActor: true,
+      alwaysUnknownActor: true,
       shouldRecord: isRecordedLoginFailure,
     });
     expect(options['admin.auth.autoRegistration']).toBeUndefined();

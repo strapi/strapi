@@ -52,13 +52,23 @@ export interface AutoRegistrationDetails {
 
 type AuditStrapi = Parameters<typeof emitAudit>[0]['strapi'];
 
-export const emitLoginFailure = ({ strapi }: { strapi: AuditStrapi }, event: LoginFailureEvent) =>
+/**
+ * Emits without waiting: listeners bound to the event, such as the `onConnectionError`
+ * config callback, run before the audit subscriber and must not hold the login.
+ */
+export const emitLoginFailure = (
+  { strapi }: { strapi: AuditStrapi },
+  event: LoginFailureEvent
+): void => {
   emitAudit({ strapi }, AUTH_EVENTS.LOGIN_FAILURE, {
     error: event.error,
     provider: event.provider,
     reason: event.reason,
     ...(event.user ? { user: { id: event.user.id, email: event.user.email } } : {}),
-  } satisfies LoginFailureEvent);
+  } satisfies LoginFailureEvent).catch((error) => {
+    strapi.log.error(`Failed to emit ${AUTH_EVENTS.LOGIN_FAILURE}`, { error });
+  });
+};
 
 /**
  * Whether the audit log records a failed login. Not recorded: failures anyone can produce
@@ -76,7 +86,11 @@ interface AuditLogsLifecycle {
   registerEvent<TDetails>(
     name: string,
     transform: Modules.AuditLogs.EventTransformer<TDetails>,
-    options?: { allowUnknownActor?: boolean; shouldRecord?: (...args: any[]) => boolean }
+    options?: {
+      allowUnknownActor?: boolean;
+      alwaysUnknownActor?: boolean;
+      shouldRecord?: (...args: any[]) => boolean;
+    }
   ): void;
 }
 
@@ -94,7 +108,7 @@ export const registerAuthAuditEvents = (auditLogsLifecycle: AuditLogsLifecycle) 
       outcome: 'failure',
       details: { provider: event.provider, reason: event.reason },
     }),
-    { allowUnknownActor: true, shouldRecord: isRecordedLoginFailure }
+    { alwaysUnknownActor: true, shouldRecord: isRecordedLoginFailure }
   );
 
   auditLogsLifecycle.registerEvent<AutoRegistrationDetails>(

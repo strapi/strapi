@@ -5,7 +5,7 @@ import authentication from '../authentication';
 
 jest.mock('@strapi/utils', () => ({
   ...jest.requireActual('@strapi/utils'),
-  emitAudit: jest.fn(),
+  emitAudit: jest.fn(async () => {}),
 }));
 
 jest.mock('koa-passport', () => ({ __esModule: true, default: { authenticate: jest.fn() } }));
