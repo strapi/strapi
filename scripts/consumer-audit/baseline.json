@@ -1,0 +1,80 @@
+{
+  "version": 1,
+  "notes": "Findings listed here are known. CI fails only on findings not present in accepted or known. Move fixed items out; add new holds to accepted with a reason. IDs must match kind:package (e.g. vulnerability:vite, deprecation:glob).",
+  "accepted": [
+    {
+      "id": "vulnerability:vite",
+      "kind": "vulnerability",
+      "package": "vite",
+      "reason": "Known hold — Vite major upgrade"
+    },
+    {
+      "id": "vulnerability:esbuild",
+      "kind": "vulnerability",
+      "package": "esbuild",
+      "reason": "Pulled by Vite — same hold"
+    },
+    {
+      "id": "vulnerability:react-router",
+      "kind": "vulnerability",
+      "package": "react-router",
+      "reason": "Known hold — React Router major"
+    },
+    {
+      "id": "vulnerability:react-router-dom",
+      "kind": "vulnerability",
+      "package": "react-router-dom",
+      "reason": "Known hold — React Router major"
+    },
+    {
+      "id": "deprecation:prebuild-install",
+      "kind": "deprecation",
+      "package": "prebuild-install",
+      "reason": "Pulled by better-sqlite3; not Strapi-owned"
+    }
+  ],
+  "known": [
+    {
+      "id": "vulnerability:@hono/node-server",
+      "kind": "vulnerability",
+      "package": "@hono/node-server",
+      "reason": "Track: bump @modelcontextprotocol/sdk to >=1.30.0"
+    },
+    {
+      "id": "vulnerability:@ai-sdk/provider-utils",
+      "kind": "vulnerability",
+      "package": "@ai-sdk/provider-utils",
+      "reason": "Track: AI SDK major in content-type-builder"
+    },
+    {
+      "id": "deprecation:inflight",
+      "kind": "deprecation",
+      "package": "inflight",
+      "reason": "Track: replace react-query with @tanstack/react-query"
+    },
+    {
+      "id": "deprecation:glob",
+      "kind": "deprecation",
+      "package": "glob",
+      "reason": "Track: replace react-query with @tanstack/react-query"
+    },
+    {
+      "id": "deprecation:rimraf",
+      "kind": "deprecation",
+      "package": "rimraf",
+      "reason": "Track: replace react-query with @tanstack/react-query"
+    },
+    {
+      "id": "deprecation:@koa/router",
+      "kind": "deprecation",
+      "package": "@koa/router",
+      "reason": "Track: bump @koa/router to v15 (path-to-regexp route audit)"
+    },
+    {
+      "id": "deprecation:cron-parser",
+      "kind": "deprecation",
+      "package": "cron-parser",
+      "reason": "Track: replace node-schedule (e.g. croner)"
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+# Consumer dependency audit
+#
+# Installs the third-party production dependency closure of a default
+# create-strapi-app (from develop package.json pins), runs npm audit, captures
+# deprecation warnings, and diffs against scripts/consumer-audit/baseline.json.
+#
+# Fails only on *novel* findings (not listed under accepted or known).
+
+name: Consumer dependency audit
+
+on:
+  schedule:
+    # Mondays 06:00 UTC — early in the week, after Dependabot Sunday night
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/consumer-audit/**'
+      - '.github/workflows/consumer-audit.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: consumer-audit-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: Audit CSA dependency closure
+    runs-on: ubuntu-latest
+    if: github.repository == 'strapi/strapi'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Run consumer audit
+        run: node scripts/consumer-audit/run.mjs --out "$RUNNER_TEMP/consumer-audit"
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: consumer-audit-report
+          path: ${{ runner.temp }}/consumer-audit/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Print summary
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/consumer-audit/report.md" ]; then
+            cat "$RUNNER_TEMP/consumer-audit/report.md" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No report.md produced" >> "$GITHUB_STEP_SUMMARY"
+          fi
