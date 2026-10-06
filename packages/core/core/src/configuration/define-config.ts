@@ -88,3 +88,7 @@ export const defineTypescriptConfig = <TConfig extends z.input<typeof configSche
 export const defineDatabaseConfig = <TConfig extends z.input<typeof configSchemas.database>>(
   config: TConfig | ((params: ConfigParams) => TConfig)
 ) => defineConfig('database', config);
+
+export const defineMiddlewaresConfig = <TConfig extends z.input<typeof configSchemas.middlewares>>(
+  config: TConfig | ((params: ConfigParams) => TConfig)
+) => defineConfig('middlewares', config);

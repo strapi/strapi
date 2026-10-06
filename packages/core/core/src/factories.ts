@@ -14,6 +14,7 @@ import {
   defineFeaturesConfig,
   defineTypescriptConfig,
   defineDatabaseConfig,
+  defineMiddlewaresConfig,
 } from './configuration/define-config';
 
 const symbols = {
@@ -148,4 +149,5 @@ export {
   defineFeaturesConfig,
   defineTypescriptConfig,
   defineDatabaseConfig,
+  defineMiddlewaresConfig,
 };
