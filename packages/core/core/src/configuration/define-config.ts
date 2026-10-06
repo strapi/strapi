@@ -92,3 +92,7 @@ export const defineDatabaseConfig = <TConfig extends z.input<typeof configSchema
 export const defineMiddlewaresConfig = <TConfig extends z.input<typeof configSchemas.middlewares>>(
   config: TConfig | ((params: ConfigParams) => TConfig)
 ) => defineConfig('middlewares', config);
+
+export const definePluginsConfig = <TConfig extends z.input<typeof configSchemas.plugins>>(
+  config: TConfig | ((params: ConfigParams) => TConfig)
+) => defineConfig('plugins', config);
