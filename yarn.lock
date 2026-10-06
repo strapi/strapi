@@ -9841,7 +9841,7 @@ __metadata:
     supertest: "npm:7.2.2"
     tsconfig: "npm:5.56.0"
     typescript: "npm:5.9.3"
-    undici: "npm:6.29.0"
+    undici: "npm:8.11.2"
     vitest: "catalog:"
     vitest-config: "npm:5.56.0"
     yup: "npm:0.32.9"
@@ -10669,7 +10669,7 @@ __metadata:
     typedoc-github-wiki-theme: "npm:2.1.0"
     typedoc-plugin-markdown: "npm:4.11.0"
     typescript: "npm:5.9.3"
-    undici: "npm:6.29.0"
+    undici: "npm:8.11.2"
     zod: "npm:4.4.3"
   languageName: unknown
   linkType: soft
@@ -10752,7 +10752,7 @@ __metadata:
     rimraf: "npm:6.1.3"
     semver: "npm:7.7.4"
     simple-git: "npm:3.36.0"
-    undici: "npm:6.29.0"
+    undici: "npm:8.11.2"
   bin:
     upgrade: ./bin/upgrade.js
   languageName: unknown
@@ -30174,10 +30174,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:6.29.0":
-  version: 6.29.0
-  resolution: "undici@npm:6.29.0"
-  checksum: 10c0/3fb2117985be977ba8b6bd6a242fec915e1b1d0f9681f5adb3f508fb1717352452d65bcfd3bed09e7c776cfda403a4e8edb24a318492f8b2d793439af2b8699b
+"undici@npm:8.11.2":
+  version: 8.11.2
+  resolution: "undici@npm:8.11.2"
+  checksum: 10c0/106f6991178fb7562fd90cdec7993c5f807a9428682306091f0c4b27fc474ec291f868e29972c6252988bf061ad193df943b3b99e775be157a28d92bbb95699d
   languageName: node
   linkType: hard
 
