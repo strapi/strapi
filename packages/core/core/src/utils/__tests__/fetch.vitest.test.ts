@@ -4,17 +4,8 @@ import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
 import type { Core } from '@strapi/types';
 import { createStrapiFetch } from '../fetch';
 
-const listen = (server: http.Server) =>
-  new Promise<string>((resolve) => {
-    server.listen(0, '127.0.0.1', () => {
-      resolve(`http://127.0.0.1:${(server.address() as AddressInfo).port}`);
-    });
-  });
-
-const close = (server: http.Server) =>
-  new Promise<void>((resolve) => {
-    server.close(() => resolve());
-  });
+// Unresolvable host: a response can only come from the proxy
+const TARGET_URL = 'http://strapi.test';
 
 const createStrapi = (config: Record<string, unknown>) =>
   ({
@@ -23,33 +14,24 @@ const createStrapi = (config: Record<string, unknown>) =>
   }) as unknown as Core.Strapi;
 
 describe('createStrapiFetch', () => {
-  const proxiedUrls: string[] = [];
-  let targetUrl: string;
   let proxyUrl: string;
 
-  const target = http.createServer((req, res) => {
-    res.end(`target:${req.method}`);
-  });
-
-  // Minimal forward proxy: plain http requests are sent with an absolute URL
+  // Fake forward proxy: answers plain http requests (sent with an absolute URL) itself
   const proxy = http.createServer((req, res) => {
-    proxiedUrls.push(req.url!);
-
-    const upstream = http.request(req.url!, { method: req.method, headers: req.headers }, (r) => {
-      res.writeHead(r.statusCode!, r.headers);
-      r.pipe(res);
-    });
-
-    req.pipe(upstream);
+    res.end(`proxied:${req.method} ${req.url}`);
   });
 
   beforeAll(async () => {
-    targetUrl = await listen(target);
-    proxyUrl = await listen(proxy);
+    await new Promise<void>((resolve) => {
+      proxy.listen(0, '127.0.0.1', () => resolve());
+    });
+    proxyUrl = `http://127.0.0.1:${(proxy.address() as AddressInfo).port}`;
   });
 
   afterAll(async () => {
-    await Promise.all([close(target), close(proxy)]);
+    await new Promise<void>((resolve) => {
+      proxy.close(() => resolve());
+    });
   });
 
   it('does not set a dispatcher when no proxy is configured', () => {
@@ -59,9 +41,9 @@ describe('createStrapiFetch', () => {
   });
 
   it.each([
-    ['a url string', () => `${targetUrl}/string`],
-    ['a Request object', () => new Request(`${targetUrl}/request`, { method: 'POST' })],
-  ])('routes requests made with %s through the configured proxy', async (_, getInput) => {
+    ['a url string', () => `${TARGET_URL}/string`, 'GET'],
+    ['a Request object', () => new Request(`${TARGET_URL}/request`, { method: 'POST' }), 'POST'],
+  ])('routes requests made with %s through the configured proxy', async (_, getInput, method) => {
     const strapiFetch = createStrapiFetch(createStrapi({ 'server.proxy.global': proxyUrl }), {
       logs: false,
     });
@@ -71,8 +53,7 @@ describe('createStrapiFetch', () => {
 
     expect(response.status).toBe(200);
     expect(await response.text()).toBe(
-      `target:${typeof input === 'string' ? 'GET' : input.method}`
+      `proxied:${method} ${typeof input === 'string' ? input : input.url}`
     );
-    expect(proxiedUrls).toContain(typeof input === 'string' ? input : input.url);
   });
 });
