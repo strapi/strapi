@@ -654,4 +654,73 @@ describe('Filters', () => {
       expect(screen.queryAllByText('Name $eq 100%')).toHaveLength(1);
     });
   });
+
+  describe('boolean filters', () => {
+    const BOOLEAN_FILTERS = [
+      { name: 'name', label: 'Name', type: 'string' },
+      { name: 'isArchived', label: 'Is Archived', type: 'boolean' },
+    ] satisfies Filters.Filter[];
+
+    const renderBoolean = (search?: string) =>
+      renderRTL(
+        <Filters.Root options={BOOLEAN_FILTERS}>
+          <Filters.Trigger />
+          <Filters.Popover />
+          <Filters.List />
+          <LocationSpy />
+        </Filters.Root>,
+        search ? { initialEntries: [{ search }] } : undefined
+      );
+
+    /**
+     * The toggle's input is visually hidden behind the track, so `user.click` can't reach it.
+     */
+    const openWithIsArchived = async (user: ReturnType<typeof renderBoolean>['user']) => {
+      await user.click(screen.getByRole('button', { name: 'Filters' }));
+      await user.click(await screen.findByRole('combobox', { name: 'Select field' }));
+      await user.click(await screen.findByRole('option', { name: 'Is Archived' }));
+
+      return screen.findByRole('checkbox', { name: 'Is Archived' });
+    };
+
+    it('should apply a false filter without touching the toggle', async () => {
+      const { user } = renderBoolean();
+
+      await openWithIsArchived(user);
+      fireEvent.click(await screen.findByRole('button', { name: 'Add filter' }));
+
+      await screen.findByText('Is Archived $eq false');
+      expect(getAppliedFilterEntries()).toEqual(['filters[$and][0][isArchived][$eq]=false']);
+    });
+
+    it('should apply a false filter after toggling true and back', async () => {
+      const { user } = renderBoolean();
+
+      const toggle = await openWithIsArchived(user);
+      fireEvent.click(toggle);
+      fireEvent.click(toggle);
+      fireEvent.click(await screen.findByRole('button', { name: 'Add filter' }));
+
+      await screen.findByText('Is Archived $eq false');
+      expect(getAppliedFilterEntries()).toEqual(['filters[$and][0][isArchived][$eq]=false']);
+    });
+
+    it('should apply a true filter', async () => {
+      const { user } = renderBoolean();
+
+      fireEvent.click(await openWithIsArchived(user));
+      fireEvent.click(await screen.findByRole('button', { name: 'Add filter' }));
+
+      await screen.findByText('Is Archived $eq true');
+      expect(getAppliedFilterEntries()).toEqual(['filters[$and][0][isArchived][$eq]=true']);
+    });
+
+    it('should open the edit form with the toggle matching the applied value', async () => {
+      const { user } = renderBoolean('?filters[$and][0][isArchived][$eq]=false');
+
+      await user.click(await screen.findByText('Is Archived $eq false'));
+
+      expect(await screen.findByRole('checkbox', { name: 'Is Archived' })).not.toBeChecked();
+    });
+  });
 });
