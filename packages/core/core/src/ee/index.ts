@@ -25,7 +25,7 @@ interface LicenseInfoState {
   subscriptionId?: string;
   planPriceId?: string;
   /** End of the subscription term, epoch milliseconds. */
-  renewalDate?: number;
+  renewalDate?: string | number;
 }
 
 type LicenseStatus = 'none' | 'active' | 'expired' | 'unknown';

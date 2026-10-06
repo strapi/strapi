@@ -15,7 +15,8 @@ interface LicenseInfo {
   subscriptionId?: string;
   planPriceId?: string;
   /** End of the subscription term, epoch milliseconds. */
-  renewalDate?: number;
+  // The registry sends an ISO date string; kept open to a timestamp
+  renewalDate?: string | number;
   // Present on the payload at runtime; declared here so the type reflects reality.
   licenseKey?: string;
   customerId?: string;
