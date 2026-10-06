@@ -2,6 +2,9 @@ import { errors } from '@strapi/utils';
 import type { SanitizedAdminUser } from '@strapi/admin/strapi-admin';
 import type { Entity, UserInfo } from '../types';
 import type { ReleaseAction } from './release-actions';
+import type { ReleaseCondition } from '../../server/src/constants';
+
+export type { ReleaseCondition };
 
 export interface Release extends Entity {
   name: string;
@@ -10,6 +13,7 @@ export interface Release extends Entity {
   status: 'ready' | 'blocked' | 'failed' | 'done' | 'empty';
   // We save scheduledAt always in UTC, but users can set the release in a different timezone to show that in the UI for everyone
   timezone: string | null;
+  releaseCondition: ReleaseCondition;
   actions: ReleaseAction[];
 }
 
@@ -122,6 +126,7 @@ export declare namespace CreateRelease {
       name: string;
       scheduledAt: Date | null;
       timezone: string | null;
+      releaseCondition?: ReleaseCondition;
     };
   }
 
@@ -147,6 +152,7 @@ export declare namespace UpdateRelease {
       // When editing a release, scheduledAt always need to be explicitly sended, so it can be null to unschedule it
       scheduledAt?: Date | null;
       timezone?: string | null;
+      releaseCondition?: ReleaseCondition;
     };
   }
 

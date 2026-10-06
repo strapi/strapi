@@ -1,4 +1,8 @@
-import { RELEASE_ACTION_MODEL_UID } from '../../constants';
+import {
+  DEFAULT_RELEASE_CONDITION,
+  RELEASE_ACTION_MODEL_UID,
+  RELEASE_CONDITIONS,
+} from '../../constants';
 
 export default {
   collectionName: 'strapi_releases',
@@ -35,6 +39,12 @@ export default {
     status: {
       type: 'enumeration',
       enum: ['ready', 'blocked', 'failed', 'done', 'empty'],
+      required: true,
+    },
+    releaseCondition: {
+      type: 'enumeration',
+      enum: [...RELEASE_CONDITIONS],
+      default: DEFAULT_RELEASE_CONDITION,
       required: true,
     },
     actions: {

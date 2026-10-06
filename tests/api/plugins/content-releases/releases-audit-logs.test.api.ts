@@ -177,7 +177,7 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
         actor: actingActor(),
         origin: 'admin-panel',
         resource: { type: 'release', id: release.id, name: 'Audited create' },
-        details: { isScheduled: false },
+        details: { isScheduled: false, releaseCondition: 'all_or_nothing' },
       });
       // The admin who made the request, not merely some admin
       expect(log.user.id).toBe(actingAdminId);
@@ -202,6 +202,27 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
       });
       expect(log.payload.details.changes).toEqual({
         name: { before: 'Before rename', after: 'After rename' },
+      });
+    });
+
+    it('records a release condition change on its own', async () => {
+      const release = await createRelease({ name: 'Condition change', timezone: 'Europe/Paris' });
+      await clearAuditLogs();
+
+      const res = await rq({
+        url: `/content-releases/${release.id}`,
+        method: 'PUT',
+        body: {
+          name: 'Condition change',
+          timezone: 'Europe/Paris',
+          releaseCondition: 'partial',
+        },
+      });
+      expect(res.statusCode).toBe(200);
+
+      const log = await expectExactlyOneLog('release.update');
+      expect(log.payload.details.changes).toEqual({
+        releaseCondition: { before: 'all_or_nothing', after: 'partial' },
       });
     });
 

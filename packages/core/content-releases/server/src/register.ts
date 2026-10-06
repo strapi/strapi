@@ -6,6 +6,7 @@ import {
   deleteActionsOnDeleteContentType,
   deleteActionsOnDisableDraftAndPublish,
   migrateIsValidAndStatusReleases,
+  migrateReleaseConditionReleases,
   revalidateChangedContentTypes,
   disableContentTypeLocalized,
   enableContentTypeLocalized,
@@ -28,7 +29,8 @@ export const register = async ({ strapi }: { strapi: Core.Strapi }) => {
       .register(deleteActionsOnDeleteContentType)
       .register(enableContentTypeLocalized)
       .register(revalidateChangedContentTypes)
-      .register(migrateIsValidAndStatusReleases);
+      .register(migrateIsValidAndStatusReleases)
+      .register(migrateReleaseConditionReleases);
   }
 
   if (strapi.plugin('graphql')) {
