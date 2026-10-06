@@ -275,4 +275,23 @@ describe('debug-dump service', () => {
 
     expect(dump.database.displayName).toBe(`<home>${path.sep}strapi-data${path.sep}db.sqlite`);
   });
+
+  it('rewrites absolute provider paths like the rest of the dump', async () => {
+    // A local provider is wired by its absolute path, which carries the username.
+    const strapi = makeStrapi();
+    const uploadPath = path.join(os.homedir(), 'providers', 'my-upload');
+    const emailPath = path.join(os.homedir(), 'providers', 'my-email');
+    const config = strapi.config as any;
+    const originalGet = config.get;
+    config.get = (key: string, def?: unknown) => {
+      if (key === 'plugin::upload.provider') return uploadPath;
+      if (key === 'plugin::email.provider') return emailPath;
+      return originalGet(key, def);
+    };
+
+    const dump = await debugDumpService({ strapi }).generate();
+
+    expect(dump.providers.upload.name).toBe(`<home>${path.sep}providers${path.sep}my-upload`);
+    expect(dump.providers.email.name).toBe(`<home>${path.sep}providers${path.sep}my-email`);
+  });
 });

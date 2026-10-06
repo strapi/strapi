@@ -106,11 +106,20 @@ const debugDumpService = ({ strapi }: { strapi: Core.Strapi }) => ({
       database: databaseInfo,
       plugins: Object.keys(strapi.plugins),
       providers: {
+        // A local provider is wired by its absolute path, so these go through scrub() too
         upload: {
-          name: strapi.config.get('plugin::upload.provider', 'local'),
+          name: scrub(strapi.config.get('plugin::upload.provider', 'local'), {
+            appRoot,
+            homeDir,
+          }) as string,
           isPrivate: uploadPrivate,
         },
-        email: { name: strapi.config.get('plugin::email.provider', undefined) },
+        email: {
+          name: scrub(strapi.config.get('plugin::email.provider', undefined), {
+            appRoot,
+            homeDir,
+          }) as string | undefined,
+        },
       },
       contentModel: {
         counts: {
