@@ -6,6 +6,7 @@ import type { Data } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
 import { emitLoginFailure, type LoginFailureReason } from '../audit-logs/auth';
+import { USER_NOT_ACTIVE_MESSAGE } from '../services/auth';
 import {
   REFRESH_COOKIE_NAME,
   buildCookieOptionsWithExpiry,
@@ -96,7 +97,7 @@ export default {
           emitLocalLoginFailure(
             ctx,
             new Error(info.message),
-            info.message === 'User not active' ? 'account_inactive' : 'invalid_credentials'
+            info.message === USER_NOT_ACTIVE_MESSAGE ? 'account_inactive' : 'invalid_credentials'
           );
           throw new ApplicationError(info.message);
         }
