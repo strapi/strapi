@@ -463,7 +463,6 @@ const findComponentParent = async (
 ): Promise<{ uid: string; table: string; parentId: number | string } | null> => {
   if (!componentSchema?.uid) return null;
 
-  const schemaBuilder = strapi.db.getSchemaConnection(opts?.trx);
   const withTrx = (qb: any) => (opts?.trx ? qb.transacting(opts.trx) : qb);
 
   for (const parent of parentSchemasForComponent) {
@@ -473,10 +472,12 @@ const findComponentParent = async (
     const identifiers = strapi.db.metadata.identifiers;
     const joinTableName = getComponentJoinTableName(parent.collectionName, identifiers);
 
-    try {
-      const tableExists = await schemaBuilder.hasTable(joinTableName);
-      if (!tableExists) continue;
+    // The join table is registered as a model of its own (see createCompoLinkModel) and schema
+    // sync creates every registered model, so the metadata knows whether it exists without
+    // querying the database schema
+    if (!strapi.db.metadata.has(joinTableName)) continue;
 
+    try {
       // Use the exact same functions that create the columns
       const entityIdColumn = getComponentJoinColumnEntityName(identifiers);
       const componentIdColumn = getComponentJoinColumnInverseName(identifiers);
