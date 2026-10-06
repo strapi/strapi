@@ -21,6 +21,11 @@ describe('Admin Homepage API', () => {
   });
 
   afterAll(async () => {
+    // The key statistics test adds an `es` locale as the default. Restore `en` so later
+    // suites don't create their documents in `es`.
+    await strapi.plugin('i18n').service('locales').setDefaultLocale({ code: 'en' });
+    await strapi.db.query('plugin::i18n.locale').deleteMany({ where: { code: { $ne: 'en' } } });
+
     await strapi.destroy();
     await builder.cleanup();
   });
