@@ -156,7 +156,9 @@ const fetchLicense = async (
   const contentType = response.headers.get('Content-Type');
 
   if (contentType?.includes('application/json')) {
-    const body = await response.json();
+    // A body that does not parse is an outage like any other malformed response, so it keeps
+    // the stored license instead of reading as a rejection.
+    const body = await response.json().catch(throwShouldFallbackError);
 
     switch (response.status) {
       case 200: {
