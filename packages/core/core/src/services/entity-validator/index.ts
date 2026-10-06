@@ -813,37 +813,47 @@ const buildRelationsStore = <TUID extends UID.Schema>({
  * mentioned exists
  */
 const checkRelationsExist = async (relationsStore: Record<string, ID[]> = {}) => {
-  const promises: Promise<void>[] = [];
+  const evaluate = async ([key, value]: [string, ID[]]) => {
+    const uniqueValues = uniqBy(value, `id`);
 
-  for (const [key, value] of Object.entries(relationsStore)) {
-    const evaluate = async () => {
-      const uniqueValues = uniqBy(value, `id`);
+    // Relations sent with empty connect and disconnect lists leave nothing to look up
+    if (uniqueValues.length === 0) {
+      return;
+    }
 
-      // Relations sent with empty connect and disconnect lists leave nothing to look up
-      if (uniqueValues.length === 0) {
-        return;
-      }
-
-      const count = await strapi.db.query(key as UID.Schema).count({
-        where: {
-          id: {
-            $in: uniqueValues.map((v) => v.id),
-          },
+    const count = await strapi.db.query(key as UID.Schema).count({
+      where: {
+        id: {
+          $in: uniqueValues.map((v) => v.id),
         },
-      });
+      },
+    });
 
-      if (count !== uniqueValues.length) {
-        throw new ValidationError(
-          `${
-            uniqueValues.length - count
-          } relation(s) of type ${key} associated with this entity do not exist`
-        );
-      }
-    };
-    promises.push(evaluate());
+    if (count !== uniqueValues.length) {
+      throw new ValidationError(
+        `${
+          uniqueValues.length - count
+        } relation(s) of type ${key} associated with this entity do not exist`
+      );
+    }
+  };
+
+  const entries = Object.entries(relationsStore);
+
+  // Inside a transaction every query is bound to the transaction's single connection, and
+  // node-postgres deprecated (pg@8.19) and removes (pg@9) calling `client.query()` on a client
+  // that is already executing a query. The checks therefore run one after another there, which
+  // costs nothing: the driver was already serialising them on that one connection. Outside a
+  // transaction they fan out over the pool as before.
+  if (strapi.db?.inTransaction?.()) {
+    for (const entry of entries) {
+      await evaluate(entry);
+    }
+
+    return;
   }
 
-  return Promise.all(promises);
+  await Promise.all(entries.map(evaluate));
 };
 
 const entityValidator: Modules.EntityValidator.EntityValidator = {
