@@ -107,6 +107,15 @@ describe('map relation', () => {
       }
     });
 
+    it('short hand documentId that looks like a number literal is not treated as an id', async () => {
+      // Number() and the global isFinite() accept these, so a looser numeric check would misclassify them
+      const documentIds = ['2e10', '1e5', '0x1A'];
+
+      for (const documentId of documentIds) {
+        expect(await mapper(documentId)).toMatchObject({ set: [{ documentId: 'mapped' }] });
+      }
+    });
+
     it('short hand documentId starting with a letter is a documentId', async () => {
       expect(await mapper('pj8pkr2nd6ptpga86y3bsdan')).toMatchObject({
         set: [{ documentId: 'mapped' }],
