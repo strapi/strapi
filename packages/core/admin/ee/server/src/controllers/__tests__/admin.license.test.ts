@@ -365,6 +365,34 @@ describe('licenseLimitInformation (planEntitlements)', () => {
     expect(sso).toEqual({ feature: 'sso', available: false, limits: [] });
   });
 
+  it('active license: a catalog feature the license omits shows no limits', async () => {
+    // Every resolver runs for an active license and returns its default for a missing feature
+    // (3 releases here). The row must read as not included, not as a 3-release cap.
+    createStrapiMock({
+      stored: null,
+      ee: {
+        type: 'silver',
+        planFeatureCatalog: ['cms-content-releases'],
+        features: { list: () => [], isEnabled: () => false },
+        entitlements: {
+          list: () => [
+            {
+              feature: 'cms-content-releases',
+              limits: [{ key: 'maximumReleases', unit: 'count', value: 3 }],
+            },
+          ],
+        },
+      },
+    });
+    stubUserServices();
+
+    const data = (await adminController.licenseLimitInformation()).data as any;
+
+    expect(data.planEntitlements).toEqual([
+      { feature: 'cms-content-releases', available: false, limits: [] },
+    ]);
+  });
+
   it('expired license: falls back to the retained snapshot for type/subscriptionId and planEntitlements', async () => {
     createStrapiMock({
       stored: null,

@@ -131,10 +131,15 @@ export default {
       renewalDate: strapi.ee.renewalDate,
       planEntitlements: strapi.ee.planFeatureCatalog.map((feature) => {
         if (isActiveLicense) {
+          // Every resolver runs for an active license and falls back to its default for a
+          // missing feature, so only an included feature keeps its limits.
+          const available = strapi.ee.features.isEnabled(feature);
           return {
             feature,
-            available: strapi.ee.features.isEnabled(feature),
-            limits: activeEntitlements.find((entry) => entry.feature === feature)?.limits ?? [],
+            available,
+            limits: available
+              ? (activeEntitlements.find((entry) => entry.feature === feature)?.limits ?? [])
+              : [],
           };
         }
 
