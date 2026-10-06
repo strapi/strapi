@@ -87,13 +87,17 @@ const PlanCard = () => {
 
   // `useEnterprise`'s `enabled` option only ANDs with `isEE` - it can never force the EE body
   // on for a non-EE instance. An expired/unknown license still needs to show its retained
-  // details even though `isEE` is (correctly) false, so the license body is loaded manually
+  // details even though `isEE` is (correctly) false, and an active one must show too when
+  // /admin/project-type failed and left `isEE` false. So the license body is loaded manually
   // here instead, gated on this wider predicate.
   // Deliberately an allowlist rather than `!== 'none'`: if `licenseStatus` is ever missing
   // (an older bundle, a consumer building `window.strapi` itself), this must fall back to the
   // Community body instead of loading the license section.
   const shouldShowLicenseDetails =
-    window.strapi.isEE || licenseStatus === 'expired' || licenseStatus === 'unknown';
+    window.strapi.isEE ||
+    licenseStatus === 'active' ||
+    licenseStatus === 'expired' ||
+    licenseStatus === 'unknown';
   const [LicenseBody, setLicenseBody] = React.useState<React.ComponentType | null>(null);
 
   React.useEffect(() => {

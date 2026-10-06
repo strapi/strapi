@@ -113,4 +113,16 @@ describe('PlanCard', () => {
     expect(screen.queryByRole('link', { name: /view subscription/i })).not.toBeInTheDocument();
     expect(screen.queryByText('Community')).not.toBeInTheDocument();
   });
+
+  it('shows the license body for an active license even when isEE is still false', async () => {
+    // If /admin/project-type failed or answered before the license loaded, window.strapi.isEE
+    // stays false while license-limit says active; that must not paint the Community body.
+    setStrapiFixture({ isEE: false, projectType: 'Community' });
+    setLicenseLimits('active', 'enterprise-plan');
+
+    render(<PlanCard />);
+
+    expect(await screen.findByText('ee license body')).toBeInTheDocument();
+    expect(screen.queryByText(/current plan/i)).not.toBeInTheDocument();
+  });
 });
