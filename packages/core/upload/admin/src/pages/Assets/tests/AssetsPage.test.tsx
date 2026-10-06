@@ -101,6 +101,22 @@ const renderPage = (search = '') =>
 
 const findHeading = () => screen.findByRole('heading', { level: 1 });
 
+/**
+ * The context menu stays shut until `useRBAC` commits `assets.create`. That
+ * commit is the effect's promise continuation, so yield once and then read
+ * the header button. A one-second `findBy` can expire while the coverage run
+ * is still inside that continuation.
+ */
+const waitForCreatePermission = async () => {
+  await act(async () => {
+    await new Promise((resolve) => {
+      setTimeout(resolve, 0);
+    });
+  });
+
+  expect(screen.getByRole('button', { name: 'New' })).toBeInTheDocument();
+};
+
 describe('AssetsPage search', () => {
   beforeEach(() => {
     respondWithAssets([createAsset(1, 'image.png')]);
@@ -629,12 +645,6 @@ describe('AssetsPage main-area context menu', () => {
     fireEvent.contextMenu(column, { clientX: 200, clientY: 300 });
   };
 
-  /**
-   * The menu is gated on `assets.create`. The header "New" button is that
-   * grant, including while the RBAC round-trip is still in flight.
-   */
-  const waitForCreatePermission = () => screen.findByRole('button', { name: 'New' });
-
   it('offers the same creation actions as the New menu', async () => {
     respondWithAssets([createAsset(1, 'image.png')]);
 
@@ -1002,9 +1012,8 @@ describe('AssetsPage RBAC gating', () => {
     respondWithAssets([createAsset(1, 'image.png')]);
 
     renderPage();
-
-    // Unconditional create is known before the RBAC effect resolves.
-    expect(screen.getByRole('button', { name: 'New' })).toBeInTheDocument();
+    await findHeading();
+    await waitForCreatePermission();
   });
 
   it('hides the New menu without assets.create', async () => {
