@@ -92,6 +92,28 @@ const menu = [
     ],
   },
   {
+    id: 'purchase',
+    intlLabel: { id: 'Settings.purchase', defaultMessage: 'Purchase' },
+    links: [
+      {
+        intlLabel: { id: 'Settings.sso.title', defaultMessage: 'Single Sign-On' },
+        to: '/settings/purchase-single-sign-on',
+        id: 'sso-purchase-page',
+        isDisplayed: true,
+        licenseOnly: true,
+        permissions: [],
+      },
+      {
+        intlLabel: { id: 'Settings.content-history.title', defaultMessage: 'Content History' },
+        to: '/settings/purchase-content-history',
+        id: 'content-history-purchase-page',
+        isDisplayed: true,
+        licenseOnly: true,
+        permissions: [],
+      },
+    ],
+  },
+  {
     id: 'email',
     intlLabel: { id: 'email.SettingsNav.section-label', defaultMessage: 'Email Plugin' },
     links: [
@@ -174,6 +196,22 @@ describe('SettingsNav', () => {
     render(<SettingsNav />);
 
     expect(lightningFillFor('Audit Logs')).toBe(lightTheme.colors.primary600);
+  });
+
+  it('marks the SSO and content-history purchase links a lapsed license granted', () => {
+    // After expiry these features render as purchase links, under their own ids.
+    mockLicense = {
+      features: [],
+      planEntitlements: [
+        { feature: 'sso', available: true, limits: [] },
+        { feature: 'cms-content-history', available: true, limits: [] },
+      ],
+    };
+
+    render(<SettingsNav />);
+
+    expect(lightningFillFor('Single Sign-On')).toBe(lightTheme.colors.primary600);
+    expect(lightningFillFor('Content History')).toBe(lightTheme.colors.primary600);
   });
 
   it('leaves a feature unmarked when the license never granted it', () => {

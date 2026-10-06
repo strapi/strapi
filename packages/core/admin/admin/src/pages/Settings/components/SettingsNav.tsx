@@ -14,9 +14,16 @@ type LinkId =
   | 'review-workflows'
   | 'sso'
   | 'auditLogs'
-  | 'auditLogs-purchase-page';
+  | 'auditLogs-purchase-page'
+  | 'sso-purchase-page'
+  | 'content-history-purchase-page';
 
-type FeatureName = 'cms-content-releases' | 'review-workflows' | 'sso' | 'audit-logs';
+type FeatureName =
+  | 'cms-content-releases'
+  | 'review-workflows'
+  | 'sso'
+  | 'audit-logs'
+  | 'cms-content-history';
 
 const StyledBadge = styled(Badge)`
   border-radius: 50%;
@@ -46,6 +53,9 @@ const SettingsNav = ({ isFullPage = false }: { isFullPage?: boolean }) => {
     sso: 'sso',
     auditLogs: 'audit-logs',
     'auditLogs-purchase-page': 'audit-logs',
+    // A lapsed license renders these as purchase links, under their own ids
+    'sso-purchase-page': 'sso',
+    'content-history-purchase-page': 'cms-content-history',
   };
 
   const filteredMenu = menu.filter(
