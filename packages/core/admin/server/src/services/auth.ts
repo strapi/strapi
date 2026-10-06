@@ -109,7 +109,6 @@ const validatePassword = (password: string, hash: string) => bcrypt.compare(pass
  * @param email the users email address
  * @param password the users password
  */
-/** Returned by checkCredentials for a right password on an inactive account. */
 export const USER_NOT_ACTIVE_MESSAGE = 'User not active';
 
 const checkCredentials = async ({ email, password }: { email: string; password: string }) => {
