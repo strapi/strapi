@@ -1,9 +1,14 @@
 type ProjectType = 'Community' | 'Growth' | 'Enterprise';
 
 /**
- * Resolves the plan label displayed across the admin panel, and reported in
- * the support debug dump, from the license information returned by the
+ * Resolves the plan label from the license information returned by the
  * `/admin/project-type` endpoint (browser) or `strapi.ee` (server).
+ *
+ * This labels the edition that is running: it follows `isEE`, so a lapsed license reads
+ * Community. Browser tracking and NPS report this label and the startup table applies the same
+ * rule; server metrics also label the running edition, but never say Growth. For the plan a
+ * license was issued for, lapsed or not (the Plan card, the Support card and the debug dump),
+ * use `getLicensedPlan` below.
  *
  * The label is intentionally limited to three values:
  * - `Community`  when there is no license (Community Edition).
