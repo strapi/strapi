@@ -121,7 +121,12 @@ describe('LicenseInfoEE', () => {
 
   it('omits the admin seat count when the licence carries no seat limit', async () => {
     // A licence the registry has not re-issued yet comes back with a null `permittedSeats`.
-    licenseData = { ...structuredClone(baseLicense), permittedSeats: null, seats: null };
+    // Published as `number`, null at runtime without a seat limit
+    licenseData = {
+      ...structuredClone(baseLicense),
+      permittedSeats: null as unknown as number,
+      seats: null,
+    };
     render(<LicenseInfoEE />);
 
     expect(await screen.findByText('Active')).toBeInTheDocument();
@@ -227,7 +232,8 @@ describe('LicenseInfoEE', () => {
     licenseData = {
       ...structuredClone(baseLicense),
       licenseStatus: 'unknown',
-      type: null,
+      // Published as `string`, null at runtime without a verified license
+      type: null as unknown as string,
       planPriceId: null,
     };
     render(<LicenseInfoEE />);

@@ -242,10 +242,13 @@ export declare namespace GetLicenseLimitInformation {
       )[];
       isHostedOnStrapiCloud: boolean;
       licenseLimitStatus: unknown;
-      permittedSeats: number | null;
+      // Published as `number` / `string` since before the plan details landed, and read by plugins
+      // through useLicenseLimits. Both are null at runtime without a seat limit or a license, as
+      // they always were; widening them here would break those readers' builds.
+      permittedSeats: number;
       shouldNotify: boolean;
       shouldStopCreate: boolean;
-      type: string | null;
+      type: string;
       isTrial: boolean;
       seats: number | null;
       subscriptionId: string | null;

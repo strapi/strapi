@@ -122,7 +122,8 @@ export default {
     const data: GetLicenseLimitInformation.Response['data'] = {
       enforcementUserCount,
       currentActiveUserCount,
-      permittedSeats: permittedSeats ?? null,
+      // Typed `number` in the published contract; null at runtime without a seat limit
+      permittedSeats: (permittedSeats ?? null) as number,
       seats: strapi.ee.seats ?? retained?.seats ?? null,
       subscriptionId: strapi.ee.subscriptionId ?? retained?.subscriptionId ?? null,
       expireAt: strapi.ee.expireAt ?? retained?.expireAt ?? null,
@@ -163,7 +164,8 @@ export default {
       shouldStopCreate: permittedSeats == null ? false : currentActiveUserCount >= permittedSeats,
       licenseLimitStatus,
       isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
-      type: licenseType,
+      // Typed `string` in the published contract; null at runtime without a license
+      type: licenseType as string,
       isTrial: strapi.ee.isTrial,
       // `features.list()` is loosely typed at the source (`{ name: string; [k]: any }[]`);
       // narrow it to the contract's named-feature union so consumers (e.g. useLicenseLimits) keep their types.
