@@ -130,7 +130,7 @@ These fire automatically — you usually do not add them in feature code:
 | `didInitializeAdministration`          | First load with uuid + telemetry properties | Anonymous (`userId: ''`); uses raw `fetch`, not `trackUsage` |
 | `didAccessAuthenticatedAdministration` | Once per authenticated load                 | `registeredWidgets`, `projectId`; after version is ready     |
 
-`didAccessAuthenticatedAdministration` is sent from `packages/core/admin/admin/src/layouts/useAuthenticatedAccessTracking.ts` (called by `AuthenticatedLayout`) once `projectId` is set and the information and telemetry-properties requests have succeeded or failed. If either request fails, the event is still sent without the unavailable version or telemetry properties.
+`didAccessAuthenticatedAdministration` is sent from `packages/core/admin/admin/src/layouts/useAuthenticatedAccessTracking.ts` (called by `AuthenticatedLayout`) once the information request has returned `projectId` and the telemetry-properties request has succeeded or failed. If the information request fails, the event is not sent because `projectId` comes from that response. If the telemetry-properties request fails, the event is still sent without telemetry properties.
 
 ---
 
