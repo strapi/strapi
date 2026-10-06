@@ -1,7 +1,7 @@
 import type { Core, Modules } from '@strapi/types';
 import { emitAudit } from '@strapi/utils';
 
-import { AUDITED_EVENTS } from './constants';
+import { AUDITED_EVENTS, type ReleaseCondition } from './constants';
 
 /**
  * Transformers for the release audit events.
@@ -27,9 +27,15 @@ export interface CreateDetails {
   isScheduled: boolean;
   scheduledAt?: string | null;
   timezone?: string | null;
+  releaseCondition: ReleaseCondition;
 }
 
-export const RELEASE_EDITABLE_FIELDS = ['name', 'scheduledAt', 'timezone'] as const;
+export const RELEASE_EDITABLE_FIELDS = [
+  'name',
+  'scheduledAt',
+  'timezone',
+  'releaseCondition',
+] as const;
 
 /** Audit rows are never pruned by size, so the failure reason is capped */
 const MAX_REASON_LENGTH = 100;
@@ -40,13 +46,20 @@ export interface UpdateDetails {
   changes: Partial<Record<ReleaseChangedField, Modules.AuditLogs.FieldChange>>;
 }
 
+interface ReleaseEditableValues {
+  name?: string;
+  scheduledAt?: string | null;
+  timezone?: string | null;
+  releaseCondition?: ReleaseCondition | null;
+}
+
 /**
  * Returns the fields that changed in a release update.
  * `isScheduled` is included when the release changes between scheduled and unscheduled.
  */
 export const getReleaseChanges = (
-  previous: { name?: string; scheduledAt?: string | null; timezone?: string | null } | null,
-  next: { name?: string; scheduledAt?: string | null; timezone?: string | null }
+  previous: ReleaseEditableValues | null,
+  next: ReleaseEditableValues
 ) => {
   const changes: Partial<Record<ReleaseChangedField, Modules.AuditLogs.FieldChange>> = {};
 
@@ -192,11 +205,12 @@ export const registerAuditEvents = (auditLogsLifecycle: AuditLogsLifecycle) => {
 
   auditLogsLifecycle.registerEvent<CreateDetails>(
     AUDITED_EVENTS.RELEASE_CREATE,
-    (event: ReleaseEvent) => ({
+    (event: ReleaseEvent & { releaseCondition: ReleaseCondition }) => ({
       resource: releaseResource(event),
       details: {
         isScheduled: event.scheduledAt != null,
         ...(event.scheduledAt && { scheduledAt: event.scheduledAt, timezone: event.timezone }),
+        releaseCondition: event.releaseCondition,
       },
     })
   );
