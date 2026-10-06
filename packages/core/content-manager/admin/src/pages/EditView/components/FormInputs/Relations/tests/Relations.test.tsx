@@ -445,6 +445,33 @@ describe('Relations', () => {
     });
   });
 
+  it('shows an error instead of "No relations available" when the relation search fails', async () => {
+    server.use(
+      http.get('/content-manager/relations/:model/:fieldName', () =>
+        HttpResponse.json(
+          {
+            data: null,
+            error: { status: 500, name: 'InternalServerError', message: 'Internal Server Error' },
+          },
+          { status: 500 }
+        )
+      )
+    );
+
+    const { user } = render({});
+
+    await user.click(await screen.findByRole('combobox', { name: /relations/i }));
+
+    expect(
+      await screen.findByText(
+        'Whoops! Something went wrong. Please, try again.',
+        {},
+        { timeout: 3000 }
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByText('No relations available')).not.toBeInTheDocument();
+  });
+
   it('preserves the active locale when opening a non-localized nested relation in full page', async () => {
     const { user } = renderRelationNavigation({
       documentId: 'non-localized-intermediate',
