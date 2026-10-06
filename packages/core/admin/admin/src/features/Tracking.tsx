@@ -24,6 +24,12 @@ export interface TrackingContextValue {
   uuid?: string | boolean;
   telemetryProperties?: TelemetryProperties;
   strapiVersion?: string | null;
+  /**
+   * True once the version that `trackUsage` will attach is known, or the
+   * information request has failed. Callers that must send a single event
+   * wait for this so a later version update does not send the event again.
+   */
+  isStrapiVersionReady: boolean;
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -32,6 +38,7 @@ export interface TrackingContextValue {
 
 const TrackingContext = React.createContext<TrackingContextValue>({
   uuid: false,
+  isStrapiVersionReady: false,
 });
 
 /* -------------------------------------------------------------------------------------------------
@@ -51,10 +58,17 @@ const TrackingProvider = ({ children }: TrackingProviderProps) => {
   const { data } = useTelemetryPropertiesQuery(undefined, {
     skip: !initData?.uuid || !token,
   });
-  const { data: appInfo, isLoading: isLoadingAppInfo } = useInformationQuery(undefined, {
-    skip: !initData?.uuid || !token,
+  const versionQueryEnabled = Boolean(initData?.uuid && token);
+  const {
+    data: appInfo,
+    isLoading: isLoadingAppInfo,
+    isError: isInformationError,
+  } = useInformationQuery(undefined, {
+    skip: !versionQueryEnabled,
   });
   const strapiVersion = appInfo?.strapiVersion;
+  const isStrapiVersionReady =
+    Boolean(strapiVersion) || (versionQueryEnabled && isInformationError);
   React.useEffect(() => {
     if (uuid && data && !isLoadingAppInfo) {
       const event = 'didInitializeAdministration';
@@ -88,8 +102,9 @@ const TrackingProvider = ({ children }: TrackingProviderProps) => {
       uuid,
       telemetryProperties: data,
       strapiVersion,
+      isStrapiVersionReady,
     }),
-    [uuid, data, strapiVersion]
+    [uuid, data, strapiVersion, isStrapiVersionReady]
   );
 
   return <TrackingContext.Provider value={value}>{children}</TrackingContext.Provider>;
@@ -515,6 +530,11 @@ type EventsWithProperties =
 export type TrackingEvent = EventWithoutProperties | EventsWithProperties;
 export interface UseTrackingReturn {
   /**
+   * True once `trackUsage` will attach the running Strapi version, or the
+   * information request has failed.
+   */
+  isStrapiVersionReady: boolean;
+  /**
    * This type helps show all the available event names before you start typing,
    * however autocomplete isn't great.
    */
@@ -555,7 +575,8 @@ const useTracking = (): UseTrackingReturn => {
   const deviceType = useDeviceType();
   const deviceTypeRef = React.useRef(deviceType);
   deviceTypeRef.current = deviceType;
-  const { uuid, telemetryProperties, strapiVersion } = React.useContext(TrackingContext);
+  const { uuid, telemetryProperties, strapiVersion, isStrapiVersionReady } =
+    React.useContext(TrackingContext);
   const userId = useAppInfo('useTracking', (state) => state.userId);
   const trackUsage = React.useCallback(
     async <TEvent extends TrackingEvent>(
@@ -599,7 +620,7 @@ const useTracking = (): UseTrackingReturn => {
     [strapiVersion, telemetryProperties, userId, uuid]
   );
 
-  return { trackUsage };
+  return { trackUsage, isStrapiVersionReady };
 };
 
 export { TrackingProvider, useTracking };
