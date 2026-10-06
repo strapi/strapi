@@ -211,7 +211,7 @@ class Database {
       return { commit, rollback, get: () => trx };
     }
 
-    return transactionCtx.run(trx, async () => {
+    return await transactionCtx.run(trx, async () => {
       try {
         const callbackParams = {
           trx,

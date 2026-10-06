@@ -62,7 +62,7 @@ const extractDataIds = (idMap: IdMap, data: Record<string, any>, source: Options
       // Skip looking up entries we're about to discard.
       const normalizedValue = normalizeXToOneRelationValue(attribute, value as any);
 
-      return mapRelation((relation) => {
+      return await mapRelation((relation) => {
         if (!relation || !relation.documentId) {
           return relation;
         }

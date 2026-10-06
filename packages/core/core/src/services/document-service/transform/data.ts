@@ -41,7 +41,7 @@ export const transformData = async (data: any, opts: any) => {
   await idMap.load();
 
   // Transform any relation ids to entity ids
-  return transformRelationDataIds(idMap, transformedData, opts);
+  return await transformRelationDataIds(idMap, transformedData, opts);
 };
 
 export { clearTransformDataRequestCache };
