@@ -1,4 +1,8 @@
-import { findComponentParent, getParentSchemasForComponent } from '../components';
+import {
+  createComponentRelationFilter,
+  findComponentParent,
+  getParentSchemasForComponent,
+} from '../components';
 
 type Row = Record<string, unknown>;
 
@@ -204,5 +208,100 @@ describe('findComponentParent', () => {
     );
 
     expect(parent).toEqual({ uid: PLAIN_HOST_UID, table: 'plain_hosts', parentId: 20 });
+  });
+});
+
+describe('createComponentRelationFilter', () => {
+  const filterRelationsToPropagate = createComponentRelationFilter();
+
+  /**
+   * Rows of the link component's relation join table, one per link instance id
+   */
+  const linkRelations = (ids: number[]) =>
+    ids.map((id) => ({ id: 1000 + id, link_id: id, dp_host_id: 99 }));
+
+  it('drops relations of instances owned by a draft and publish entry, directly or through a parent component', async () => {
+    setupStrapi({
+      tables: {
+        dp_hosts_cmps: [owns(10, LINK_UID, 1), owns(11, CARD_UID, 100)],
+        plain_hosts_cmps: [owns(20, LINK_UID, 2), owns(21, CARD_UID, 200)],
+        components_default_cards_cmps: [
+          owns(100, LINK_UID, 3),
+          owns(200, LINK_UID, 4),
+          owns(300, LINK_UID, 6),
+        ],
+      },
+    });
+
+    // 1: in a draft and publish entry                    -> dropped
+    // 2: in an entry without draft and publish           -> kept
+    // 3: in a card, in a draft and publish entry         -> dropped
+    // 4: in a card, in an entry without draft and publish -> kept
+    // 5: in nothing                                      -> kept
+    // 6: in a card that is in nothing                    -> kept
+    const kept = await filterRelationsToPropagate(
+      linkRelations([1, 2, 3, 4, 5, 6]),
+      linkSchema,
+      {}
+    );
+
+    expect(kept.map((relation) => relation.link_id)).toEqual([2, 4, 5, 6]);
+  });
+
+  it('queries each candidate parent once per nesting level, however many relations there are', async () => {
+    const linkIds = Array.from({ length: 50 }, (_, i) => i + 1);
+    const { queriedTables, getSchemaConnection } = setupStrapi({
+      tables: {
+        plain_hosts_cmps: [owns(20, CARD_UID, 100)],
+        components_default_cards_cmps: linkIds.map((id) => owns(100, LINK_UID, id)),
+      },
+    });
+
+    const kept = await filterRelationsToPropagate(linkRelations(linkIds), linkSchema, {});
+
+    expect(kept).toHaveLength(50);
+    expect(queriedTables).toEqual([
+      // parents of the links
+      'dp_hosts_cmps',
+      'plain_hosts_cmps',
+      'components_default_cards_cmps',
+      // parents of the card holding them
+      'dp_hosts_cmps',
+      'plain_hosts_cmps',
+    ]);
+    expect(getSchemaConnection).not.toHaveBeenCalled();
+  });
+
+  it('stops checking candidate parents once every instance has been found', async () => {
+    const { queriedTables } = setupStrapi({
+      tables: { dp_hosts_cmps: [owns(10, LINK_UID, 1), owns(10, LINK_UID, 2)] },
+    });
+
+    const kept = await filterRelationsToPropagate(linkRelations([1, 2]), linkSchema, {});
+
+    expect(kept).toEqual([]);
+    expect(queriedTables).toEqual(['dp_hosts_cmps']);
+  });
+
+  it('looks instances up in batches', async () => {
+    const linkIds = Array.from({ length: 501 }, (_, i) => i + 1);
+    const { queriedTables } = setupStrapi({
+      tables: { dp_hosts_cmps: linkIds.map((id) => owns(10, LINK_UID, id)) },
+    });
+
+    const kept = await filterRelationsToPropagate(linkRelations(linkIds), linkSchema, {});
+
+    expect(kept).toEqual([]);
+    expect(queriedTables).toEqual(['dp_hosts_cmps', 'dp_hosts_cmps']);
+  });
+
+  it('returns relations of content types unchanged without querying', async () => {
+    const { queriedTables } = setupStrapi();
+    const relations = linkRelations([1]);
+
+    const kept = await filterRelationsToPropagate(relations, contentTypes[DP_HOST_UID] as any, {});
+
+    expect(kept).toBe(relations);
+    expect(queriedTables).toEqual([]);
   });
 });
