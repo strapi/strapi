@@ -86,11 +86,24 @@ describe('DiagnosticSnapshotModal', () => {
     const createObjectURLSpy = jest.spyOn(URL, 'createObjectURL').mockReturnValue('blob:mock-url');
     URL.revokeObjectURL = jest.fn();
     let downloadName = '';
+    let wasInDocumentOnClick = false;
     const clickSpy = jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (
       this: HTMLAnchorElement
     ) {
       downloadName = this.download;
+      wasInDocumentOnClick = document.body.contains(this);
     });
+    // A plain wrapper rather than jest.spyOn: a mocked setTimeout makes Testing Library assume
+    // fake timers. The 60s revoke is recorded instead of scheduled.
+    const realSetTimeout = window.setTimeout;
+    const deferred: Array<{ callback: () => void; delay?: number }> = [];
+    window.setTimeout = ((callback: () => void, delay?: number, ...rest: unknown[]) => {
+      if (delay === 60000) {
+        deferred.push({ callback, delay });
+        return 0;
+      }
+      return realSetTimeout(callback, delay, ...rest);
+    }) as typeof window.setTimeout;
 
     const { user } = render(<DiagnosticSnapshotModal isOpen onClose={jest.fn()} />);
 
@@ -98,6 +111,13 @@ describe('DiagnosticSnapshotModal', () => {
     await user.click(downloadButton);
 
     expect(createObjectURLSpy).toHaveBeenCalled();
+    // Some browsers cancel a click on a detached anchor, or a download whose blob URL is revoked
+    // in the same turn; the audit-log export avoids both, so this does too.
+    expect(wasInDocumentOnClick).toBe(true);
+    expect(URL.revokeObjectURL).not.toHaveBeenCalled();
+    window.setTimeout = realSetTimeout;
+    expect(deferred).toHaveLength(1);
+    deferred[0].callback();
     expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock-url');
     // Every `:` in the ISO timestamp is replaced, since Windows rejects it in file names.
     expect(downloadName).toMatch(

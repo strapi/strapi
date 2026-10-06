@@ -86,8 +86,12 @@ const DiagnosticSnapshotModal = ({ isOpen, onClose }: DiagnosticSnapshotModalPro
     const anchor = document.createElement('a');
     anchor.href = url;
     anchor.download = `strapi-debug-dump-${new Date().toISOString().replaceAll(':', '-')}.json`;
+    // In the document for the click and revoked on a later turn, as the audit-log export does:
+    // some browsers cancel a click on a detached anchor or a download whose URL is gone.
+    document.body.appendChild(anchor);
     anchor.click();
-    URL.revokeObjectURL(url);
+    anchor.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
   };
 
   return (
