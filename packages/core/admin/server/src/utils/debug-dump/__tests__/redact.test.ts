@@ -234,7 +234,7 @@ describe('debug-dump scrub', () => {
         migrate: 'DATABASE_URL=postgres://strapi:hunter2@db.internal:5432/app knex migrate:latest',
       };
 
-      expect(scrubObject({ scripts }).scripts.migrate).toBe(
+      expect((scrubObject({ scripts }).scripts as typeof scripts).migrate).toBe(
         `DATABASE_URL=postgres://strapi:${REDACTED}@db.internal:5432/app knex migrate:latest`
       );
     });
