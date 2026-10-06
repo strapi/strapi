@@ -1559,6 +1559,14 @@ describe('Content Type Builder - rename:field service', () => {
             },
             {
               action: 'create',
+              name: 'details',
+              properties: {
+                type: 'text',
+                conditions: { visible: { '==': [{ var: 'kind' }, 'b'] } },
+              },
+            },
+            {
+              action: 'create',
               name: 'parent',
               properties: {
                 type: 'relation',
@@ -1597,6 +1605,16 @@ describe('Content Type Builder - rename:field service', () => {
     expect(entry.heading).toBe('Hello');
     expect(strapi.contentTypes[CLI_UID].attributes.parent).toMatchObject({
       inversedBy: 'children',
+    });
+  });
+
+  test('points the conditions that reference the renamed field at its new name', async () => {
+    await renameField('kind', 'category');
+
+    await restart();
+
+    expect(strapi.contentTypes[CLI_UID].attributes.details.conditions).toEqual({
+      visible: { '==': [{ var: 'category' }, 'b'] },
     });
   });
 

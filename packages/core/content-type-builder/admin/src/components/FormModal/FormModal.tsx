@@ -229,7 +229,8 @@ export const FormModal = () => {
         return false;
       }
 
-      // If it's an enum field, also check if the value is being deleted/changed
+      // Conditions follow a rename, so only an enum value being deleted/changed
+      // can break them
       if (oldEnum !== undefined && newEnum !== undefined) {
         const deletedOrChangedValues = oldEnum.filter(
           (oldValue: string) => !newEnum.includes(oldValue)
@@ -237,7 +238,7 @@ export const FormModal = () => {
         return typeof value === 'string' && deletedOrChangedValues.includes(value);
       }
 
-      return true;
+      return false;
     });
 
     // If any fields reference this field, return them
@@ -1327,23 +1328,7 @@ export const FormModal = () => {
                 );
               }
 
-              return (
-                <Box>
-                  <Typography>
-                    {formatMessage({
-                      id: 'form.attribute.condition.field-change-warning',
-                      defaultMessage:
-                        'The following fields have conditions that depend on this field: ',
-                    })}
-                    <Typography fontWeight="bold">{fieldNames}</Typography>
-                    {formatMessage({
-                      id: 'form.attribute.condition.field-change-warning-end',
-                      defaultMessage:
-                        '. Renaming it will break these conditions. Do you want to proceed?',
-                    })}
-                  </Typography>
-                </Box>
-              );
+              return null;
             })()}
           </ConfirmDialog>
         </Dialog.Root>

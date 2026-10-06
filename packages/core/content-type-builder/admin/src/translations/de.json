@@ -141,8 +141,6 @@
   "form.attribute.condition.enum-change-warning": "Die folgenden Felder haben Bedingungen, die von diesem Feld abhängen: {fieldNames}. Das Ändern oder Entfernen der Aufzählungswerte {values} wird diese Bedingungen brechen. Möchtest du fortfahren?",
   "form.attribute.condition.enum-change-warning-values": ". Das Ändern oder Entfernen der Aufzählungswerte ",
   "form.attribute.condition.enum-change-warning-end": " wird diese Bedingungen brechen. Möchtest du fortfahren?",
-  "form.attribute.condition.field-change-warning": "Die folgenden Felder haben Bedingungen, die von diesem Feld abhängen: {fieldNames}. Das Umbenennen wird diese Bedingungen brechen. Möchtest du fortfahren?",
-  "form.attribute.condition.field-change-warning-end": ". Das Umbenennen wird diese Bedingungen brechen. Möchtest du fortfahren?",
   "form.button.add-components-to-dynamiczone": "Komponenten zur Zone hinzufügen",
   "form.button.add-field": "Weiteres Feld hinzufügen",
   "form.button.add-first-field-to-created-component": "Erstes Feld zur Komponente hinzufügen",
