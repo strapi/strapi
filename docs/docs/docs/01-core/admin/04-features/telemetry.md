@@ -130,7 +130,7 @@ These fire automatically — you usually do not add them in feature code:
 | `didInitializeAdministration`          | First load with uuid + telemetry properties | Anonymous (`userId: ''`); uses raw `fetch`, not `trackUsage` |
 | `didAccessAuthenticatedAdministration` | Once per authenticated load                 | `registeredWidgets`, `projectId`; after version is ready     |
 
-`didAccessAuthenticatedAdministration` is sent from `packages/core/admin/admin/src/layouts/useAuthenticatedAccessTracking.ts` (called by `AuthenticatedLayout`) once `projectId` is set, the Strapi version is ready, and the telemetry-properties request has settled.
+`didAccessAuthenticatedAdministration` is sent from `packages/core/admin/admin/src/layouts/useAuthenticatedAccessTracking.ts` (called by `AuthenticatedLayout`) once `projectId` is set and the information and telemetry-properties requests have succeeded or failed. If either request fails, the event is still sent without the unavailable version or telemetry properties.
 
 ---
 

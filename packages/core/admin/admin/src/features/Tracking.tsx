@@ -530,11 +530,6 @@ type EventsWithProperties =
 export type TrackingEvent = EventWithoutProperties | EventsWithProperties;
 export interface UseTrackingReturn {
   /**
-   * True once `trackUsage` will attach the running Strapi version, or the
-   * information request has failed.
-   */
-  isStrapiVersionReady: boolean;
-  /**
    * This type helps show all the available event names before you start typing,
    * however autocomplete isn't great.
    */
@@ -575,8 +570,7 @@ const useTracking = (): UseTrackingReturn => {
   const deviceType = useDeviceType();
   const deviceTypeRef = React.useRef(deviceType);
   deviceTypeRef.current = deviceType;
-  const { uuid, telemetryProperties, strapiVersion, isStrapiVersionReady } =
-    React.useContext(TrackingContext);
+  const { uuid, telemetryProperties, strapiVersion } = React.useContext(TrackingContext);
   const userId = useAppInfo('useTracking', (state) => state.userId);
   const trackUsage = React.useCallback(
     async <TEvent extends TrackingEvent>(
@@ -620,7 +614,12 @@ const useTracking = (): UseTrackingReturn => {
     [strapiVersion, telemetryProperties, userId, uuid]
   );
 
-  return { trackUsage, isStrapiVersionReady };
+  return { trackUsage };
 };
 
-export { TrackingProvider, useTracking };
+/**
+ * Internal readiness signal for events that must wait for the provider's version.
+ */
+const useStrapiVersionReady = () => React.useContext(TrackingContext).isStrapiVersionReady;
+
+export { TrackingProvider, useTracking, useStrapiVersionReady };

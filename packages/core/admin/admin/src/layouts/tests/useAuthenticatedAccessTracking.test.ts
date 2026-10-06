@@ -1,12 +1,13 @@
 import { renderHook } from '@tests/utils';
 
 import { useStrapiApp } from '../../features/StrapiApp';
-import { useTracking } from '../../features/Tracking';
+import { useTracking, useStrapiVersionReady } from '../../features/Tracking';
 import { useTelemetryPropertiesQuery } from '../../services/admin';
 import { useAuthenticatedAccessTracking } from '../useAuthenticatedAccessTracking';
 
 jest.mock('../../features/Tracking', () => ({
   useTracking: jest.fn(),
+  useStrapiVersionReady: jest.fn(),
 }));
 
 jest.mock('../../services/admin', () => {
@@ -17,6 +18,7 @@ jest.mock('../../services/admin', () => {
     useTelemetryPropertiesQuery: jest.fn(() => ({
       isSuccess: true,
       isError: false,
+      refetch: jest.fn(),
     })),
   };
 });
@@ -37,23 +39,20 @@ describe('useAuthenticatedAccessTracking', () => {
   beforeEach(() => {
     trackUsage.mockClear();
     jest.mocked(useStrapiApp).mockReturnValue(getAllWidgets);
-    jest.mocked(useTracking).mockReturnValue({
-      trackUsage,
-      isStrapiVersionReady: false,
-    });
+    jest.mocked(useTracking).mockReturnValue({ trackUsage });
+    jest.mocked(useStrapiVersionReady).mockReturnValue(false);
     jest.mocked(useTelemetryPropertiesQuery).mockReturnValue({
       isSuccess: true,
       isError: false,
-    } as ReturnType<typeof useTelemetryPropertiesQuery>);
+      refetch: jest.fn(),
+    });
   });
 
   it('does not send the login event until the Strapi version is ready', () => {
     const { rerender } = renderHook(
       ({ projectId, ready }) => {
-        jest.mocked(useTracking).mockReturnValue({
-          trackUsage,
-          isStrapiVersionReady: ready,
-        });
+        jest.mocked(useTracking).mockReturnValue({ trackUsage });
+        jest.mocked(useStrapiVersionReady).mockReturnValue(ready);
 
         useAuthenticatedAccessTracking(projectId);
       },
@@ -84,11 +83,10 @@ describe('useAuthenticatedAccessTracking', () => {
         jest.mocked(useTelemetryPropertiesQuery).mockReturnValue({
           isSuccess: settled,
           isError: false,
-        } as ReturnType<typeof useTelemetryPropertiesQuery>);
-        jest.mocked(useTracking).mockReturnValue({
-          trackUsage: currentTrackUsage,
-          isStrapiVersionReady: true,
+          refetch: jest.fn(),
         });
+        jest.mocked(useTracking).mockReturnValue({ trackUsage: currentTrackUsage });
+        jest.mocked(useStrapiVersionReady).mockReturnValue(true);
 
         useAuthenticatedAccessTracking('project-1');
       },
@@ -113,11 +111,10 @@ describe('useAuthenticatedAccessTracking', () => {
     jest.mocked(useTelemetryPropertiesQuery).mockReturnValue({
       isSuccess: false,
       isError: true,
-    } as ReturnType<typeof useTelemetryPropertiesQuery>);
-    jest.mocked(useTracking).mockReturnValue({
-      trackUsage,
-      isStrapiVersionReady: true,
+      refetch: jest.fn(),
     });
+    jest.mocked(useTracking).mockReturnValue({ trackUsage });
+    jest.mocked(useStrapiVersionReady).mockReturnValue(true);
 
     renderHook(() => useAuthenticatedAccessTracking('project-1'));
 
@@ -130,10 +127,8 @@ describe('useAuthenticatedAccessTracking', () => {
 
     const { rerender } = renderHook(
       ({ currentTrackUsage }) => {
-        jest.mocked(useTracking).mockReturnValue({
-          trackUsage: currentTrackUsage,
-          isStrapiVersionReady: true,
-        });
+        jest.mocked(useTracking).mockReturnValue({ trackUsage: currentTrackUsage });
+        jest.mocked(useStrapiVersionReady).mockReturnValue(true);
 
         useAuthenticatedAccessTracking('project-1');
       },

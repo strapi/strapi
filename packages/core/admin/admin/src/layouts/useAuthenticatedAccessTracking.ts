@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { useStrapiApp } from '../features/StrapiApp';
-import { useTracking } from '../features/Tracking';
+import { useTracking, useStrapiVersionReady } from '../features/Tracking';
 import { useTelemetryPropertiesQuery } from '../services/admin';
 
 /**
@@ -9,7 +9,8 @@ import { useTelemetryPropertiesQuery } from '../services/admin';
  * version is ready and the telemetry-properties query has settled.
  */
 const useAuthenticatedAccessTracking = (projectId?: string | null) => {
-  const { trackUsage, isStrapiVersionReady } = useTracking();
+  const { trackUsage } = useTracking();
+  const isStrapiVersionReady = useStrapiVersionReady();
   const { isSuccess: hasTelemetryProperties, isError: didTelemetryPropertiesFail } =
     useTelemetryPropertiesQuery(undefined, {
       skip: !isStrapiVersionReady,
