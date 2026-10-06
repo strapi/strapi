@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 
+import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import {
   clearSelection,
   createEmptySelection,
@@ -95,7 +96,10 @@ export const AssetSelectionProvider = ({
   disabled = false,
 }: AssetSelectionProviderProps) => {
   const [state, setState] = useState<SelectionState>(createEmptySelection);
-  const isEnabled = !disabled;
+  // Every bulk action needs `assets.update`: without it the views show no
+  // checkboxes, whatever the host passes as `disabled`.
+  const { canUpdate } = useMediaLibraryPermissions();
+  const isEnabled = !disabled && canUpdate;
 
   const isSelected = useCallback(
     (key: ItemKey) => !disabled && state.selectedKeys.has(key),

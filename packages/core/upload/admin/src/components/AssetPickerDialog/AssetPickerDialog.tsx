@@ -1,10 +1,11 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 
-import { usePersistentState } from '@strapi/admin/strapi-admin';
-import { Badge, Box, Button, Flex, Modal, Tabs, Typography } from '@strapi/design-system';
+import { Page, usePersistentState } from '@strapi/admin/strapi-admin';
+import { Badge, Box, Button, Flex, Loader, Modal, Tabs, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
+import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { AssetsGrid } from '../../pages/Assets/components/AssetsGrid';
 import { AssetsSearchInput } from '../../pages/Assets/components/AssetsSearchInput';
 import { AssetsTable } from '../../pages/Assets/components/AssetsTable';
@@ -388,6 +389,45 @@ export interface AssetPickerDialogProps {
 
 const NO_FILES: File[] = [];
 
+interface ReadAccessGateProps {
+  children: ReactNode;
+  title: string;
+  onClose: () => void;
+}
+
+/**
+ * Picking only needs read access to the library. Without it the picker says so
+ * and mounts nothing that would fetch assets or folders.
+ */
+const ReadAccessGate = ({ children, title, onClose }: ReadAccessGateProps) => {
+  const { formatMessage } = useIntl();
+  const { canRead, isLoading } = useMediaLibraryPermissions();
+
+  if (canRead) {
+    return children;
+  }
+
+  return (
+    <>
+      <Modal.Header>
+        <Modal.Title>{title}</Modal.Title>
+      </Modal.Header>
+      <Flex flex={1} justifyContent="center" alignItems="center">
+        {isLoading ? (
+          <Loader>{formatMessage({ id: 'app.loading', defaultMessage: 'Loading...' })}</Loader>
+        ) : (
+          <Page.NoPermissions />
+        )}
+      </Flex>
+      <Footer>
+        <Button variant="tertiary" onClick={onClose}>
+          {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+        </Button>
+      </Footer>
+    </>
+  );
+};
+
 /**
  * Content Manager asset picker, built on the current Media Library list. Its
  * folder, search, filter and sort state lives in memory, so browsing never
@@ -404,23 +444,25 @@ export const AssetPickerDialog = ({
 }: AssetPickerDialogProps) => (
   <Modal.Root open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
     <StyledModalContent>
-      {/* Inside the content so every opening starts from fresh list and selection state. */}
-      <ListQueryStateProvider>
-        <ListSettingsProvider {...PICKER_LIST_SETTINGS} showSectionHeadings>
-          <PickerSelectionRoot
-            initialSelection={initialSelection}
-            multiple={multiple}
-            allowedTypes={allowedTypes}
-          >
-            <PickerContent
-              title={title}
+      <ReadAccessGate title={title} onClose={onClose}>
+        {/* Inside the content so every opening starts from fresh list and selection state. */}
+        <ListQueryStateProvider>
+          <ListSettingsProvider {...PICKER_LIST_SETTINGS} showSectionHeadings>
+            <PickerSelectionRoot
               initialSelection={initialSelection}
-              onClose={onClose}
-              onConfirm={onConfirm}
-            />
-          </PickerSelectionRoot>
-        </ListSettingsProvider>
-      </ListQueryStateProvider>
+              multiple={multiple}
+              allowedTypes={allowedTypes}
+            >
+              <PickerContent
+                title={title}
+                initialSelection={initialSelection}
+                onClose={onClose}
+                onConfirm={onConfirm}
+              />
+            </PickerSelectionRoot>
+          </ListSettingsProvider>
+        </ListQueryStateProvider>
+      </ReadAccessGate>
     </StyledModalContent>
   </Modal.Root>
 );

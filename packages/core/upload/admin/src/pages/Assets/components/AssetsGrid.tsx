@@ -14,7 +14,6 @@ import { styled, css } from 'styled-components';
 
 import { TruncatedText } from '../../../components/TruncatedText';
 import { ASSET_TYPES } from '../../../enums';
-import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { prefixFileUrlWithBackendUrl } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { isEventFromWithin } from '../../../utils/isEventFromWithin';
@@ -185,7 +184,6 @@ const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const { isSelected, toggle, selectRange, getSelectability } = useAssetSelection();
   const { showItemActions } = useListSettings();
-  const { canUpdate } = useMediaLibraryPermissions();
   const openContextMenu = useItemContextMenuTrigger();
   const {
     dragData,
@@ -277,7 +275,7 @@ const FolderCard = ({ folder, orderedItemKeys }: FolderCardProps) => {
         }
       }}
     >
-      {canUpdate && selectability !== 'hidden' && (
+      {selectability !== 'hidden' && (
         <Flex onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}>
           <Checkbox
             checked={isSelected(key)}
@@ -454,7 +452,6 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
   const { attributes, listeners, setNodeRef, isDragging, dragData } = useFileDraggable(asset);
   const { isSelected, toggle, selectRange, getSelectability } = useAssetSelection();
   const { showItemActions } = useListSettings();
-  const { canUpdate } = useMediaLibraryPermissions();
   const busyMessage = useBusyAssetsOptional()?.getBusyMessage(asset.id) ?? null;
   const openContextMenu = useItemContextMenuTrigger();
 
@@ -546,7 +543,7 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
       }}
     >
       <StyledCardHeader>
-        {canUpdate && selectability !== 'hidden' && (
+        {selectability !== 'hidden' && (
           <CheckboxOverlay
             {...ASSET_ITEM_CONTROL_PROPS}
             onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}

@@ -18,7 +18,6 @@ import { useIntl } from 'react-intl';
 import { styled, css } from 'styled-components';
 
 import { TruncatedText } from '../../../components/TruncatedText';
-import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { useTracking } from '../../../hooks/useTracking';
 import { formatBytes } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
@@ -259,7 +258,6 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
   const { attributes, listeners, setNodeRef, isDragging, dragData } = useFileDraggable(asset);
   const { isEnabled, isSelected, toggle, selectRange, getSelectability } = useAssetSelection();
   const { showItemActions } = useListSettings();
-  const { canUpdate } = useMediaLibraryPermissions();
   const busyMessage = useBusyAssetsOptional()?.getBusyMessage(asset.id) ?? null;
   const openContextMenu = useItemContextMenuTrigger();
 
@@ -358,7 +356,7 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
     >
       {/* The column exists whenever selection is on (at every viewport width);
           a row outside the selection keeps an empty cell so columns line up. */}
-      {isEnabled && canUpdate && (
+      {isEnabled && (
         <CheckboxTd {...ASSET_ITEM_CONTROL_PROPS} onClick={stopRowEvent} onKeyDown={stopRowEvent}>
           {selectability !== 'hidden' && (
             <Flex>
@@ -465,7 +463,6 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
   const { navigateToFolder } = useFolderNavigation();
   const { isEnabled, isSelected, toggle, selectRange, getSelectability } = useAssetSelection();
   const { showItemActions } = useListSettings();
-  const { canUpdate } = useMediaLibraryPermissions();
   const openContextMenu = useItemContextMenuTrigger();
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
   const {
@@ -559,7 +556,7 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
         }
       }}
     >
-      {isEnabled && canUpdate && (
+      {isEnabled && (
         <CheckboxTd onClick={stopRowEvent} onKeyDown={stopRowEvent}>
           {getSelectability(key) !== 'hidden' && (
             <Flex>
@@ -656,7 +653,6 @@ export const AssetsTable = ({
   const { isEnabled, canSelectAll, selectedKeys, selectAll, clear, getSelectability } =
     useAssetSelection();
   const { showItemActions } = useListSettings();
-  const { canUpdate } = useMediaLibraryPermissions();
   const { trackUsage } = useTracking();
 
   // Below the desktop breakpoint only the name (and actions) column is kept —
@@ -668,9 +664,8 @@ export const AssetsTable = ({
   ).filter((h) => showItemActions || h.name !== 'actions');
 
   // The checkbox column is a dedicated structural column (not part of
-  // TABLE_HEADERS), shown whenever selection is on. Every bulk action needs
-  // `assets.update`, so a read-only user has nothing to select for.
-  const showCheckboxColumn = isEnabled && canUpdate;
+  // TABLE_HEADERS), shown whenever selection is on.
+  const showCheckboxColumn = isEnabled;
   const colCount = visibleHeaders.length + (showCheckboxColumn ? 1 : 0);
 
   const totalRows = folders.length + assets.length;

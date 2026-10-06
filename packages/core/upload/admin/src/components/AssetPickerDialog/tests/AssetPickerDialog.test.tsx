@@ -44,7 +44,12 @@ const LocationProbe = () => {
 const ENTRY_URL =
   '/content-manager/collection-types/api::article.article/1?plugins[i18n][locale]=en';
 
-const renderDialog = (props: Partial<React.ComponentProps<typeof AssetPickerDialog>> = {}) =>
+type Permissions = Array<{ action: string }>;
+
+const renderDialog = (
+  props: Partial<React.ComponentProps<typeof AssetPickerDialog>> = {},
+  permissions?: (defaults: Permissions) => Permissions
+) =>
   render(
     <>
       <AssetPickerDialog
@@ -56,7 +61,7 @@ const renderDialog = (props: Partial<React.ComponentProps<typeof AssetPickerDial
       />
       <LocationProbe />
     </>,
-    { initialEntries: [ENTRY_URL] }
+    { initialEntries: [ENTRY_URL], providerOptions: permissions ? { permissions } : undefined }
   );
 
 describe('AssetPickerDialog', () => {
@@ -90,7 +95,8 @@ describe('AssetPickerDialog', () => {
     const dialog = await screen.findByRole('dialog');
 
     expect(within(dialog).getByText('Add asset for cover')).toBeInTheDocument();
-    expect(within(dialog).getByRole('tab', { name: 'Browse assets' })).toBeInTheDocument();
+    // The tabs appear once the read permission is confirmed.
+    expect(await within(dialog).findByRole('tab', { name: 'Browse assets' })).toBeInTheDocument();
     expect(within(dialog).getByRole('tab', { name: /Selected assets/ })).toBeInTheDocument();
     expect(within(dialog).getByRole('button', { name: 'Add' })).toBeDisabled();
   });
@@ -256,7 +262,7 @@ describe('AssetPickerDialog', () => {
       renderDialog({ multiple: true, initialSelection: [banner], onConfirm });
 
       // Radix tabs switch on mouse down, not click.
-      fireEvent.mouseDown(screen.getByRole('tab', { name: 'Browse assets' }));
+      fireEvent.mouseDown(await screen.findByRole('tab', { name: 'Browse assets' }));
       fireEvent.click(await screen.findByText('hero.png'));
       fireEvent.click(addButton());
 
@@ -328,7 +334,10 @@ describe('AssetPickerDialog', () => {
       it('opens on the Selected tab, listing them', async () => {
         renderDialog({ multiple: true, initialSelection: [hero, banner] });
 
-        expect(selectedTab()).toHaveAttribute('aria-selected', 'true');
+        expect(await screen.findByRole('tab', { name: /Selected assets/ })).toHaveAttribute(
+          'aria-selected',
+          'true'
+        );
         expect(within(selectedTab()).getByText('2')).toBeInTheDocument();
         expect(screen.getByText('hero.png')).toBeInTheDocument();
         expect(screen.getByText('banner.png')).toBeInTheDocument();
@@ -337,7 +346,7 @@ describe('AssetPickerDialog', () => {
       it('keeps Add disabled until the selection changes', async () => {
         renderDialog({ multiple: true, initialSelection: [hero] });
 
-        expect(addButton()).toBeDisabled();
+        expect(await screen.findByRole('button', { name: 'Add' })).toBeDisabled();
       });
 
       it('confirms what is left after unchecking, which removes it from the field', async () => {
@@ -352,6 +361,40 @@ describe('AssetPickerDialog', () => {
 
         expect(onConfirm).toHaveBeenCalledWith([banner]);
       });
+    });
+  });
+
+  describe('permissions', () => {
+    const without = (action: string) => (defaults: Permissions) =>
+      defaults.filter((permission) => permission.action !== action);
+
+    it('lets a user who can read but not update the library pick assets', async () => {
+      const onConfirm = jest.fn();
+      renderDialog({ onConfirm }, without('plugin::upload.assets.update'));
+
+      fireEvent.click(await screen.findByRole('checkbox', { name: 'Select hero.png' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Add' }));
+
+      expect(onConfirm).toHaveBeenCalledWith([expect.objectContaining({ id: 1 })]);
+    });
+
+    it('tells a user without read access, and fetches nothing', async () => {
+      const fileRequests: string[] = [];
+      server.use(
+        http.get('*/upload/files', ({ request }) => {
+          fileRequests.push(request.url);
+          return HttpResponse.json({ results: [], pagination: { total: 0 } });
+        })
+      );
+
+      renderDialog({}, without('plugin::upload.read'));
+
+      expect(
+        await screen.findByText("You don't have the permissions to access that content")
+      ).toBeInTheDocument();
+      expect(screen.getByText('Add asset for cover')).toBeInTheDocument();
+      expect(screen.queryByRole('tab', { name: 'Browse assets' })).not.toBeInTheDocument();
+      expect(fileRequests).toHaveLength(0);
     });
   });
 });

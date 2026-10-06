@@ -7,6 +7,10 @@ import { PERMISSIONS } from '../constants';
 // gain (it guards refetch with a deep `isEqual`, so this is wasted work, not a loop).
 const { main: _main, ...RBAC_PERMISSIONS } = PERMISSIONS;
 
+// Checked on its own: `useRBAC` names each result after the last segment of the
+// action, so `plugin::upload.settings.read` would also come back as `canRead`.
+const READ_PERMISSIONS = PERMISSIONS.read;
+
 /**
  * RBAC gate for the future Media Library UI. Mirrors the legacy hook of the
  * same name: the server already enforces every action route-side (assets and
@@ -15,6 +19,8 @@ const { main: _main, ...RBAC_PERMISSIONS } = PERMISSIONS;
  * hook is what keeps the UI honest so users don't discover a missing
  * permission through a 403.
  *
+ * - `canRead` — browse the library (the Content Manager asset picker needs
+ *   nothing more)
  * - `canCreate` — upload (files, from URL) and New folder
  * - `canUpdate` — edit details, replace, crop, move (dnd + bulk), delete
  *   (single + bulk), AI metadata — the `assets.update` action covers
@@ -23,13 +29,14 @@ const { main: _main, ...RBAC_PERMISSIONS } = PERMISSIONS;
  */
 export const useMediaLibraryPermissions = () => {
   const { allowedActions, isLoading } = useRBAC(RBAC_PERMISSIONS);
+  const { allowedActions: readActions, isLoading: isLoadingRead } = useRBAC(READ_PERMISSIONS);
 
   return {
-    isLoading,
+    isLoading: isLoading || isLoadingRead,
     // `plugin::upload.read` gates every Media Library endpoint, `GET /upload/settings`
     // included. Entry forms render a media field for roles that lack it, so callers
     // need to know before they ask the server and collect a 403.
-    canRead: Boolean(allowedActions.canRead),
+    canRead: Boolean(readActions.canRead),
     canCreate: Boolean(allowedActions.canCreate),
     canUpdate: Boolean(allowedActions.canUpdate),
     canDownload: Boolean(allowedActions.canDownload),
