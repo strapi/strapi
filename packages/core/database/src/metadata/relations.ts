@@ -1,6 +1,7 @@
-import _, { snakeCase } from 'lodash/fp';
+import _, { snakeCase } from 'lodash';
 
 import { identifiers } from '../utils/identifiers';
+import { attributeNaming } from './attribute-naming';
 import type { Meta, Metadata } from './metadata';
 import type { RelationalAttribute, Relation, MorphJoinTable } from '../types';
 
@@ -351,7 +352,7 @@ const createMorphOne = (
     throw new Error(`Morph target not found. Looking for ${attribute.target}`);
   }
 
-  if (attribute.morphBy && !_.has(attribute.morphBy, targetMeta.attributes)) {
+  if (attribute.morphBy && !_.has(targetMeta.attributes, attribute.morphBy)) {
     throw new Error(`Morph target attribute not found. Looking for ${attribute.morphBy}`);
   }
 };
@@ -371,7 +372,7 @@ const createMorphMany = (
     throw new Error(`Morph target not found. Looking for ${attribute.target}`);
   }
 
-  if (attribute.morphBy && !_.has(attribute.morphBy, targetMeta.attributes)) {
+  if (attribute.morphBy && !_.has(targetMeta.attributes, attribute.morphBy)) {
     throw new Error(`Morph target attribute not found. Looking for ${attribute.morphBy}`);
   }
 };
@@ -386,7 +387,7 @@ const createJoinColumn = (metadata: Metadata, { attribute, attributeName }: Join
     throw new Error(`Unknown target ${attribute.target}`);
   }
 
-  const joinColumnName = identifiers.getJoinColumnAttributeIdName(snakeCase(attributeName));
+  const joinColumnName = attributeNaming.joinColumnName(attributeName);
   const joinColumn = {
     name: joinColumnName,
     referencedColumn: ID,
@@ -433,10 +434,7 @@ const createJoinTable = (
     return;
   }
 
-  const joinTableName = identifiers.getJoinTableName(
-    snakeCase(meta.tableName),
-    snakeCase(attributeName)
-  );
+  const joinTableName = attributeNaming.joinTableName(meta.tableName, attributeName);
 
   const joinColumnName = identifiers.getJoinColumnAttributeIdName(snakeCase(meta.singularName));
 

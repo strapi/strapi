@@ -1,4 +1,4 @@
-import { pick } from 'lodash/fp';
+import { pick } from 'lodash';
 
 import type { Core, UID } from '@strapi/types';
 import { z, validateZodSchema, errors } from '@strapi/utils';
@@ -21,7 +21,7 @@ export const validatePreviewUrl = async (
   // Validate the request parameters format
   validateZodSchema(getPreviewUrlSchema)(params);
 
-  const newParams = pick(['documentId', 'locale', 'status'], params) as HandlerParams;
+  const newParams = pick(params, ['documentId', 'locale', 'status']) as HandlerParams;
   const model = strapi.getModel(uid);
 
   // If it's not a collection type or single type

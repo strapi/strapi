@@ -1,4 +1,4 @@
-import { merge } from 'lodash/fp';
+import { merge } from 'lodash';
 import { async } from '@strapi/utils';
 
 import type { Context } from 'koa';
@@ -33,7 +33,7 @@ export default {
       // Start by sanitizing the incoming query
       (q) => pm.sanitizeQuery(q),
       // Add the default query which should not be validated or sanitized
-      (q) => merge(defaultQuery, q),
+      (q) => merge({}, defaultQuery, q),
       // Add the dynamic filters based on permissions' conditions
       (q) => pm.addPermissionsQueryTo(q)
     )(ctx.query);

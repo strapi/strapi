@@ -1,6 +1,6 @@
 import { renderHook } from '@tests/utils';
 
-import { useTracking, MEDIA_LIBRARY_VERSION } from '../useTracking';
+import { useTracking } from '../useTracking';
 
 const mockTrackStrapiUsage = jest.fn();
 const mockUseGetSettingsQuery = jest.fn();
@@ -17,6 +17,9 @@ jest.mock('../../services/settings', () => ({
 describe('future media library useTracking', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // The flag decides the tag, not which tree fired the event — off means the
+    // project runs the current library.
+    window.strapi.featureFlags.isEnabled = jest.fn(() => false);
     mockUseGetSettingsQuery.mockReturnValue({
       data: { data: { aiMetadata: false, aiMetadataAvailable: false } },
     });
@@ -30,7 +33,7 @@ describe('future media library useTracking', () => {
     expect(mockTrackStrapiUsage).toHaveBeenCalledWith('didCropFile', {
       location: 'upload',
       duplicatedFile: false,
-      mediaLibraryVersion: MEDIA_LIBRARY_VERSION,
+      mediaLibraryVersion: 'v2',
     });
   });
 
@@ -40,7 +43,7 @@ describe('future media library useTracking', () => {
     result.current.trackUsage('didSelectAllMediaLibraryElements');
 
     expect(mockTrackStrapiUsage).toHaveBeenCalledWith('didSelectAllMediaLibraryElements', {
-      mediaLibraryVersion: MEDIA_LIBRARY_VERSION,
+      mediaLibraryVersion: 'v2',
     });
   });
 
@@ -56,7 +59,7 @@ describe('future media library useTracking', () => {
     expect(mockTrackStrapiUsage).toHaveBeenCalledWith('didReplaceMedia', {
       location: 'upload',
       isAiMediaLibraryConfigured: true,
-      mediaLibraryVersion: MEDIA_LIBRARY_VERSION,
+      mediaLibraryVersion: 'v2',
     });
   });
 

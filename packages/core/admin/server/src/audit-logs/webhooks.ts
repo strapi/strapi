@@ -1,4 +1,4 @@
-import { isEqual } from 'lodash/fp';
+import { isEqual } from 'lodash';
 import type { Modules } from '@strapi/types';
 
 export const AUDITED_EVENTS = {

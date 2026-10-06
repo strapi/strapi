@@ -1,4 +1,6 @@
-import { cloneDeep, get, has, set, merge, omit } from 'lodash/fp';
+import { cloneDeep, get, has, merge, omit } from 'lodash';
+
+import { objects } from '@strapi/utils';
 
 import type { Utils } from '@strapi/types';
 
@@ -18,15 +20,15 @@ export class JSONTransformAPI implements JSONTransformAPIInterface {
       return this.root() as T;
     }
 
-    return cloneDeep(get(path, this.json) ?? defaultValue) as T;
+    return cloneDeep(get(this.json, path) ?? defaultValue) as T;
   }
 
   has(path: string) {
-    return has(path, this.json);
+    return has(this.json, path);
   }
 
   merge(other: Utils.JSONObject) {
-    this.json = merge(other, this.json);
+    this.json = merge({}, other, this.json);
 
     return this;
   }
@@ -36,13 +38,13 @@ export class JSONTransformAPI implements JSONTransformAPIInterface {
   }
 
   set(path: string, value: Utils.JSONValue) {
-    this.json = set(path, value, this.json);
+    this.json = objects.set(this.json, path, value);
 
     return this;
   }
 
   remove(path: string) {
-    this.json = omit(path, this.json);
+    this.json = omit(this.json, path);
     return this;
   }
 }
