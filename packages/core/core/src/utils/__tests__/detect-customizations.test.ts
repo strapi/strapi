@@ -326,6 +326,15 @@ describe('detectCustomizations', () => {
       expect(detectCustomizations(strapi).extendedPlugins).toEqual(['upload', 'users-permissions']);
     });
 
+    it('does not list a plugin whose content-types folder holds no schema', () => {
+      // The loader only applies content-types/<name>/schema.json; an empty folder changes nothing.
+      fs.mkdirSync(path.join(dir, 'i18n', 'content-types', 'locale'), { recursive: true });
+
+      const strapi = makeStrapi({ extensionsDir: dir });
+
+      expect(detectCustomizations(strapi).extendedPlugins).toEqual([]);
+    });
+
     it('is empty when the app has no extensions folder', () => {
       expect(detectCustomizations(makeStrapi()).extendedPlugins).toEqual([]);
     });

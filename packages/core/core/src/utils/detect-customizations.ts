@@ -116,6 +116,21 @@ const isCustomFactoryController = (controller: unknown): boolean =>
  * controller looks the same stock or overridden, so this folder is what tells Support a
  * plugin was changed.
  */
+// The loader applies content-type overrides from `content-types/<name>/schema.json` only
+const hasSchemaOverride = (pluginDir: string): boolean => {
+  const contentTypesDir = path.join(pluginDir, 'content-types');
+  if (!fs.existsSync(contentTypesDir)) {
+    return false;
+  }
+
+  return fs
+    .readdirSync(contentTypesDir, { withFileTypes: true })
+    .some(
+      (entry) =>
+        entry.isDirectory() && fs.existsSync(path.join(contentTypesDir, entry.name, 'schema.json'))
+    );
+};
+
 const listExtendedPlugins = (strapi: Core.Strapi): string[] => {
   const extensionsDir = strapi.dirs?.dist?.extensions;
   if (!extensionsDir || !fs.existsSync(extensionsDir)) {
@@ -129,7 +144,7 @@ const listExtendedPlugins = (strapi: Core.Strapi): string[] => {
     .filter(
       (name) =>
         fs.existsSync(path.join(extensionsDir, name, 'strapi-server.js')) ||
-        fs.existsSync(path.join(extensionsDir, name, 'content-types'))
+        hasSchemaOverride(path.join(extensionsDir, name))
     )
     .sort();
 };
