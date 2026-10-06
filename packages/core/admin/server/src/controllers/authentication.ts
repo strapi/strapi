@@ -2,6 +2,7 @@ import type { Context, Next } from 'koa';
 import passport from 'koa-passport';
 import compose from 'koa-compose';
 import '@strapi/types';
+import type { Data } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
 import { emitLoginFailure, type LoginFailureReason } from '../audit-logs/auth';
@@ -45,6 +46,18 @@ const { ApplicationError, ValidationError } = errors;
 const emitLocalLoginFailure = (ctx: Context, error: Error, reason: LoginFailureReason) => {
   const { email } = (ctx.request.body ?? {}) as { email?: unknown };
 
+  const emit = (user?: { id: Data.ID; email: string } | null) =>
+    emitLoginFailure(
+      { strapi },
+      {
+        error,
+        reason,
+        provider: 'local',
+        ...(user ? { user: { id: user.id, email: user.email } } : {}),
+      }
+    );
+
+  // A failed lookup still emits, without the account
   Promise.resolve()
     .then(() =>
       typeof email === 'string'
@@ -53,18 +66,7 @@ const emitLocalLoginFailure = (ctx: Context, error: Error, reason: LoginFailureR
             .findOne({ select: ['id', 'email'], where: { email: email.toLowerCase() } })
         : null
     )
-    .catch(() => null)
-    .then((user) =>
-      emitLoginFailure(
-        { strapi },
-        {
-          error,
-          reason,
-          provider: 'local',
-          ...(user ? { user: { id: user.id, email: user.email } } : {}),
-        }
-      )
-    );
+    .then(emit, () => emit());
 };
 
 export default {
