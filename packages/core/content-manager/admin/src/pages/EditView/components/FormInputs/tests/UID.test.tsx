@@ -1,4 +1,6 @@
-import { Form } from '@strapi/admin/strapi-admin';
+import * as React from 'react';
+
+import { Form, useField } from '@strapi/admin/strapi-admin';
 import { render as renderRTL, waitFor, act, screen, server } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 import { Route, Routes } from 'react-router-dom';
@@ -7,13 +9,58 @@ import { UIDInput, UIDInputProps } from '../UID';
 
 const waitForInput = async () => {
   await waitFor(() => expect(screen.queryByTestId('loading-wrapper')).not.toBeInTheDocument());
-  await screen.findByRole('textbox');
+  await screen.findByRole('textbox', { name: 'Label' });
+};
+
+/**
+ * The UID input reads its target field off the form, so tests that exercise the
+ * generation need a sibling input to drive it. `/content-manager/uid/generate` is
+ * mocked to echo back `data.target`, so whatever is typed here is what the UID
+ * should end up holding.
+ */
+const TargetFieldInput = () => {
+  const field = useField<string>('target');
+
+  return (
+    <label>
+      Target
+      <input
+        type="text"
+        value={field.value ?? ''}
+        onChange={(event) => field.onChange('target', event.target.value)}
+      />
+    </label>
+  );
+};
+
+/**
+ * Stands in for `ConditionAwareInputRenderer`, which returns `null` when a visibility
+ * condition stops matching. The field is unmounted while the form keeps its value, so
+ * anything the input holds in local state is lost on the way back.
+ */
+const VisibilityToggle = ({ children }: { children: React.ReactNode }) => {
+  const [isVisible, setIsVisible] = React.useState(true);
+
+  return (
+    <>
+      <button type="button" onClick={() => setIsVisible((visible) => !visible)}>
+        Toggle visibility
+      </button>
+      {isVisible ? children : null}
+    </>
+  );
 };
 
 const render = ({
   initialValues = { name: 'test' },
+  withTargetField = false,
+  withVisibilityToggle = false,
   ...props
-}: Partial<UIDInputProps> & { initialValues?: object } = {}) =>
+}: Partial<UIDInputProps> & {
+  initialValues?: object;
+  withTargetField?: boolean;
+  withVisibilityToggle?: boolean;
+} = {}) =>
   renderRTL(<UIDInput label="Label" name="name" type="uid" {...props} />, {
     renderOptions: {
       wrapper: ({ children }) => (
@@ -22,7 +69,8 @@ const render = ({
             path="/content-manager/:collectionType/:slug/:id"
             element={
               <Form method="POST" onSubmit={jest.fn()} initialValues={initialValues}>
-                {children}
+                {withTargetField ? <TargetFieldInput /> : null}
+                {withVisibilityToggle ? <VisibilityToggle>{children}</VisibilityToggle> : children}
               </Form>
             }
           />
@@ -117,6 +165,151 @@ describe('UIDInput', () => {
     await waitForInput();
 
     expect(screen.getByRole('textbox', { name: 'Label' })).not.toHaveValue('regenerated');
+  });
+
+  test('Generates the value from the target field even when the field is not required', async () => {
+    render({
+      initialValues: { target: 'My Title' },
+      attribute: { targetField: 'target' },
+      withTargetField: true,
+    });
+    await waitForInput();
+
+    await waitFor(() =>
+      expect(screen.getByRole('textbox', { name: 'Label' })).toHaveValue('My Title')
+    );
+  });
+
+  test('Does not generate a value before the target field has one', async () => {
+    // Generating here would only produce the server's model-name fallback, which is
+    // what used to land in the field on mount.
+    render({
+      initialValues: {},
+      attribute: { targetField: 'target' },
+      required: true,
+      withTargetField: true,
+    });
+    await waitForInput();
+
+    expect(screen.getByRole('textbox', { name: 'Label' })).toHaveValue('');
+    expect(screen.getByRole('textbox', { name: 'Label' })).not.toHaveValue('regenerated');
+  });
+
+  test('Follows the target field until the user edits the value themselves', async () => {
+    // MSW v2 / undici use microtasks internally between request emission and handler
+    // resolution. Faking `queueMicrotask` / `setImmediate` doesn't block completion but
+    // stalls them long enough that each fetch here takes ~10s instead of ~100ms. Keep
+    // them real so the file runs in single-digit seconds.
+    jest.useFakeTimers({ doNotFake: ['queueMicrotask', 'setImmediate'] });
+    const { user } = render({
+      initialValues: {},
+      attribute: { targetField: 'target' },
+      withTargetField: true,
+    });
+    await waitForInput();
+
+    const uidInput = screen.getByRole('textbox', { name: 'Label' });
+    const targetInput = screen.getByRole('textbox', { name: 'Target' });
+
+    await user.type(targetInput, 'first');
+    act(() => {
+      jest.advanceTimersByTime(4000);
+    });
+    await waitFor(() => expect(uidInput).toHaveValue('first'));
+
+    // Still untouched, so it keeps tracking the target field.
+    await user.clear(targetInput);
+    await user.type(targetInput, 'second');
+    act(() => {
+      jest.advanceTimersByTime(4000);
+    });
+    await waitFor(() => expect(uidInput).toHaveValue('second'));
+
+    // Once the user owns the value, the target field must not overwrite it.
+    await user.clear(uidInput);
+    await user.type(uidInput, 'mine');
+    await user.clear(targetInput);
+    await user.type(targetInput, 'third');
+    act(() => {
+      jest.advanceTimersByTime(4000);
+    });
+
+    await waitFor(() => expect(screen.queryByTestId('loading-wrapper')).not.toBeInTheDocument());
+    expect(uidInput).toHaveValue('mine');
+
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+  });
+
+  test('Does not refill the value after the user clears it', async () => {
+    // MSW v2 / undici use microtasks internally between request emission and handler
+    // resolution. Faking `queueMicrotask` / `setImmediate` doesn't block completion but
+    // stalls them long enough that each fetch here takes ~10s instead of ~100ms. Keep
+    // them real so the file runs in single-digit seconds.
+    jest.useFakeTimers({ doNotFake: ['queueMicrotask', 'setImmediate'] });
+    const { user } = render({
+      initialValues: { target: 'My Title' },
+      attribute: { targetField: 'target' },
+      withTargetField: true,
+    });
+    await waitForInput();
+
+    const uidInput = screen.getByRole('textbox', { name: 'Label' });
+    await waitFor(() => expect(uidInput).toHaveValue('My Title'));
+
+    await user.clear(uidInput);
+    act(() => {
+      jest.advanceTimersByTime(4000);
+    });
+
+    await waitFor(() => expect(screen.queryByTestId('loading-wrapper')).not.toBeInTheDocument());
+    expect(uidInput).toHaveValue('');
+
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+  });
+
+  test('Does not refill a cleared value after a visibility condition remounts the field', async () => {
+    jest.useFakeTimers({ doNotFake: ['queueMicrotask', 'setImmediate'] });
+    const { user } = render({
+      initialValues: { target: 'My Title' },
+      attribute: { targetField: 'target' },
+      withTargetField: true,
+      withVisibilityToggle: true,
+    });
+    await waitForInput();
+
+    await waitFor(() =>
+      expect(screen.getByRole('textbox', { name: 'Label' })).toHaveValue('My Title')
+    );
+
+    await user.clear(screen.getByRole('textbox', { name: 'Label' }));
+    act(() => {
+      jest.advanceTimersByTime(4000);
+    });
+    await waitFor(() => expect(screen.queryByTestId('loading-wrapper')).not.toBeInTheDocument());
+    expect(screen.getByRole('textbox', { name: 'Label' })).toHaveValue('');
+
+    // Hide the field and bring it back, as a visibility condition flipping would.
+    const toggle = screen.getByRole('button', { name: 'Toggle visibility' });
+    await user.click(toggle);
+    expect(screen.queryByRole('textbox', { name: 'Label' })).not.toBeInTheDocument();
+    await user.click(toggle);
+    await waitForInput();
+
+    // Give a regeneration every chance to land: run the debounce timers and flush the
+    // promise chain a request would resolve through, so the assertion below is not just
+    // winning a race against it.
+    for (let i = 0; i < 3; i += 1) {
+      await act(async () => {
+        jest.advanceTimersByTime(4000);
+      });
+    }
+    await waitFor(() => expect(screen.queryByTestId('loading-wrapper')).not.toBeInTheDocument());
+    expect(screen.getByRole('textbox', { name: 'Label' })).toHaveValue('');
+
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
   });
 
   test('Checks the availability', async () => {
