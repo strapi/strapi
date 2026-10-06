@@ -62,6 +62,7 @@ describe('Webhooks controller audit events', () => {
       name: 'Deploy site',
       url: 'https://example.com',
       events: ['entry.create', 'entry.update'],
+      contentTypeEvents: {},
       headers: ['Authorization', 'X-Env'],
       isEnabled: true,
     });

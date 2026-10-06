@@ -23,6 +23,7 @@ interface WebhookFormValues {
   url: Modules.WebhookStore.Webhook['url'];
   headers: Array<{ key: string; value: string }>;
   events: Modules.WebhookStore.Webhook['events'];
+  contentTypeEvents: NonNullable<Modules.WebhookStore.Webhook['contentTypeEvents']>;
 }
 
 interface WebhookFormProps {
@@ -80,6 +81,7 @@ const WebhookForm = ({
         url: data?.url || '',
         headers: mapHeaders(data?.headers || {}),
         events: data?.events || [],
+        contentTypeEvents: data?.contentTypeEvents || {},
       }}
       method={isCreating ? 'POST' : 'PUT'}
       onSubmit={handleSubmit}
@@ -264,6 +266,7 @@ const makeWebhookValidationSchema = ({ formatMessage }: Pick<IntlShape, 'formatM
       );
     }),
     events: yup.array(),
+    contentTypeEvents: yup.object(),
   });
 
 export { WebhookForm };
