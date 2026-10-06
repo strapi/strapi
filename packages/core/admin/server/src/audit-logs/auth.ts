@@ -61,8 +61,9 @@ export const emitLoginFailure = ({ strapi }: { strapi: AuditStrapi }, event: Log
   } satisfies LoginFailureEvent);
 
 /**
- * Failures produced at will from outside, before any verification: a local login for
- * an email with no account, and an SSO connection with no valid profile.
+ * Whether the audit log records a failed login. Not recorded: failures anyone can produce
+ * from outside before any verification, a local login for an email with no account and an
+ * SSO connection with no valid profile.
  */
 export const isRecordedLoginFailure = (event: LoginFailureEvent) =>
   event.reason !== 'sso_connection_error' && !(event.provider === 'local' && !event.user);

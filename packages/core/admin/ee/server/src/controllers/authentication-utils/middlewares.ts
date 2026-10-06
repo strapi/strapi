@@ -172,7 +172,8 @@ export const redirectWithAuth: Core.MiddlewareHandler = async (ctx) => {
     ctx.redirect(redirectUrls.success);
   } catch (error) {
     strapi.log.error('SSO authentication failed during token generation', error);
-    // The login failed, so the request has no authenticated user
+    // The audit log reads the actor from ctx.state.user; clear it so the failed login is
+    // recorded with an unknown actor.
     ctx.state.user = undefined;
     await emitLoginFailure(
       { strapi },

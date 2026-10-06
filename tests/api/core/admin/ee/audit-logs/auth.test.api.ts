@@ -26,7 +26,7 @@ class FakeSsoStrategy extends Strategy {
   }
 }
 
-/** The passport instance @strapi/admin uses, so the strategy reaches its routes. */
+/** koa-passport as resolved from @strapi/admin: a strategy registered on another copy never reaches the admin routes. */
 const getAdminPassport = () => {
   const adminDir = path.dirname(require.resolve('@strapi/admin/package.json'));
   // eslint-disable-next-line import/no-dynamic-require, global-require
@@ -134,7 +134,7 @@ describeOnCondition(edition === 'EE')('Authentication events in audit logs (api)
       .findOne({ where: { code: 'strapi-editor' } });
     editorRoleId = editorRole.id;
 
-    // The provider registry refuses new providers after bootstrap; it is a Map
+    // register() throws after bootstrap; the registry is a Map, so set() adds the provider directly.
     const { providerRegistry } = strapi.service('admin::passport');
     providerRegistry.set(PROVIDER, { uid: PROVIDER, displayName: 'Fake SSO' });
     getAdminPassport().use(PROVIDER, strategy);
@@ -177,7 +177,8 @@ describeOnCondition(edition === 'EE')('Authentication events in audit logs (api)
       const account = await createAccount('ana@auth-audit.test');
 
       expect((await login('nobody@auth-audit.test', password)).statusCode).toBe(400);
-      // A recorded failure after it: once its row is there, the first one had its turn
+      // Failed local logins are recorded after the response: wait for the second login's row,
+      // then a little longer, before checking that the first wrote nothing.
       expect((await login(account.email, 'wrong')).statusCode).toBe(400);
 
       const logs = await waitForLogs('admin.auth.error');
@@ -328,7 +329,7 @@ describeOnCondition(edition === 'EE')('Authentication events in audit logs (api)
       });
       expectNoSecret(log);
 
-      // The account itself is created before anyone is logged in
+      // admin-user.create runs before ctx.state.user is set, so its actor is unknown.
       const [createLog] = await findLogs('admin-user.create');
       expect(createLog.payload.actor).toEqual(unknownActor);
       expect(await findLogs('admin.auth.error')).toHaveLength(0);
