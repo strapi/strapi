@@ -1,7 +1,20 @@
-import { render, screen, waitFor } from '@tests/utils';
+import { render, screen, waitFor, server, fireEvent } from '@tests/utils';
+import { http, HttpResponse } from 'msw';
 
 import { useSettings } from '../../../legacy/hooks/useSettings';
+import { useGetUploadSettingsQuery } from '../../../services/settings';
 import { SettingsPage } from '../SettingsPage';
+
+jest.mock('../../../services/settings', () => {
+  const actual = jest.requireActual('../../../services/settings');
+
+  return {
+    ...actual,
+    useGetUploadSettingsQuery: jest.fn((...args: unknown[]) =>
+      actual.useGetUploadSettingsQuery(...args)
+    ),
+  };
+});
 
 // `useSettings` is mocked for every admin test (see `admin/tests/setup.ts`).
 const mockSettings = (aiMetadataAvailable: boolean) => {
@@ -15,6 +28,7 @@ const mockSettings = (aiMetadataAvailable: boolean) => {
       aiMetadata: true,
       aiMetadataAvailable,
     },
+    refetch: jest.fn(),
     error: null,
   });
 };
@@ -80,5 +94,44 @@ describe('SettingsPage', () => {
         name: 'Generate AI captions and alt texts automatically on upload!',
       })
     ).not.toBeInTheDocument();
+  });
+
+  it('refreshes the upload settings cache the tracker reads when settings are saved', async () => {
+    const refetch = jest.fn().mockResolvedValue({});
+    jest.mocked(useGetUploadSettingsQuery).mockReturnValue({
+      data: { data: { aiMetadata: false, aiMetadataAvailable: true } },
+      refetch,
+    } as ReturnType<typeof useGetUploadSettingsQuery>);
+
+    server.use(
+      http.put('*/upload/settings', () => {
+        return HttpResponse.json({
+          data: {
+            sizeOptimization: true,
+            responsiveDimensions: false,
+            autoOrientation: true,
+            aiMetadata: true,
+          },
+        });
+      })
+    );
+
+    render(<SettingsPage />);
+
+    await waitFor(() => expect(screen.queryByText('Loading content.')).not.toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Responsive friendly upload' }));
+
+    const save = screen.getByRole('button', { name: 'Save' });
+    await waitFor(() => expect(save).toBeEnabled());
+    fireEvent.click(save);
+
+    await waitFor(() => expect(refetch).toHaveBeenCalledTimes(1));
+
+    jest
+      .mocked(useGetUploadSettingsQuery)
+      .mockImplementation((...args: unknown[]) =>
+        jest.requireActual('../../../services/settings').useGetUploadSettingsQuery(...args)
+      );
   });
 });
