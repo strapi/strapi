@@ -59,7 +59,9 @@ export interface Strapi extends Container {
     renewalDate: string | number | null;
     planFeatureCatalog: string[];
     retainedLicense: {
-      features?: Array<{ name: string; [key: string]: any } | string>;
+      features?: Array<
+        { name: string; options?: Record<string, unknown>; [key: string]: unknown } | string
+      >;
       expireAt?: string;
       seats?: number;
       type?: string;
@@ -89,7 +91,7 @@ export interface Strapi extends Container {
           get: (
             feature?:
               | string
-              | { name: string; options?: Record<string, any>; [key: string]: unknown }
+              | { name: string; options?: Record<string, unknown>; [key: string]: unknown }
           ) => unknown;
         }>;
       }) => void;

@@ -20,14 +20,15 @@ export const registerReviewWorkflowsEntitlements = (strapi: Core.Strapi) => {
       {
         key: 'numberOfWorkflows',
         unit: 'count',
-        get: (feature) => clampMaxWorkflows(optionsOf(feature)?.numberOfWorkflows || MAX_WORKFLOWS),
+        get: (feature) =>
+          clampMaxWorkflows(Number(optionsOf(feature)?.numberOfWorkflows) || MAX_WORKFLOWS),
       },
       {
         key: 'stagesPerWorkflow',
         unit: 'count',
         get: (feature) =>
           clampMaxStagesPerWorkflow(
-            optionsOf(feature)?.stagesPerWorkflow || MAX_STAGES_PER_WORKFLOW
+            Number(optionsOf(feature)?.stagesPerWorkflow) || MAX_STAGES_PER_WORKFLOW
           ),
       },
     ],

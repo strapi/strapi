@@ -96,7 +96,7 @@ const getActor = (
  * Shared with the Plan card's resolver (../entitlements.ts) so the card shows this same figure.
  */
 export const computeRetentionDays = (
-  licenseRetentionDays: number | string | null | undefined,
+  licenseRetentionDays: unknown,
   userRetentionDays: number | null | undefined
 ): number => {
   // For enterprise plans, use 90 days by default, but allow users to override it

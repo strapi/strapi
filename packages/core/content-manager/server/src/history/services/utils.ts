@@ -15,7 +15,7 @@ export const DEFAULT_RETENTION_DAYS = 90;
  * Shared with the Plan card's resolver (../entitlements.ts) so the card shows this same figure.
  */
 export const computeRetentionDays = (
-  licenseRetentionDays: number | string | null | undefined,
+  licenseRetentionDays: unknown,
   userRetentionDays: number | null | undefined
 ): number => {
   if (licenseRetentionDays == null) {

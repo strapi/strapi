@@ -16,7 +16,7 @@ export const UNLIMITED_ENTITLEMENT_THRESHOLD = 9999;
 /** A feature as a license lists it: a bare name, or `{ name, options }`. */
 export type EntitlementFeature =
   | string
-  | { name: string; options?: Record<string, any>; [key: string]: unknown }
+  | { name: string; options?: Record<string, unknown>; [key: string]: unknown }
   | undefined;
 
 export interface EntitlementLimitInput {
