@@ -2,7 +2,7 @@
 
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
-const { createAuthRequest } = require('api-tests/request');
+const { createAuthRequest, createRequest } = require('api-tests/request');
 const { createUtils } = require('api-tests/utils');
 
 const builder = createTestBuilder();
@@ -75,5 +75,16 @@ describe('Admin | debug-dump', () => {
   test('a user without admin::debug-dump.read is forbidden', async () => {
     const res = await restrictedRq({ method: 'GET', url: '/admin/debug-dump' });
     expect(res.statusCode).toBe(403);
+  });
+
+  // The 403 above only proves the permission check. A request with no admin session must be
+  // turned away before the dump is generated, and this fails if the route is ever made public.
+  test('a request without an admin session is rejected', async () => {
+    const anonymousRq = createRequest({ strapi });
+
+    const res = await anonymousRq({ method: 'GET', url: '/admin/debug-dump' });
+
+    expect(res.statusCode).toBe(401);
+    expect(res.body?.data?.dumpVersion).toBeUndefined();
   });
 });
