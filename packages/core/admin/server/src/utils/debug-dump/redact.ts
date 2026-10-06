@@ -108,6 +108,48 @@ const relativize = (value: string, appRoot?: string, homeDir?: string): string =
   return value;
 };
 
+// Characters that end a URL authority
+const AUTHORITY_END = new Set(['/', '?', '#', ' ', '\t', '\n', '\r', '"', "'", '`']);
+
+/**
+ * Masks the password of every `scheme://user:password@host` inside a longer string, such as a
+ * package.json script that inlines a database URL. Whole-value credential URLs are already
+ * caught by URL_WITH_CREDENTIALS; this covers the ones in the middle of a value. It is a single
+ * forward scan rather than a regex, because an unanchored pattern backtracks quadratically on
+ * long runs (the reason URL_WITH_CREDENTIALS is anchored and colon-free in the user part).
+ */
+const maskEmbeddedCredentials = (value: string): string => {
+  let result = '';
+  let copiedUpTo = 0;
+  let separator = value.indexOf('://');
+
+  while (separator !== -1) {
+    const authorityStart = separator + 3;
+    let firstColon = -1;
+    let lastAt = -1;
+    let end = authorityStart;
+
+    while (end < value.length && !AUTHORITY_END.has(value[end])) {
+      if (value[end] === ':' && firstColon === -1) {
+        firstColon = end;
+      } else if (value[end] === '@') {
+        lastAt = end;
+      }
+      end += 1;
+    }
+
+    // A colon before the last `@` separates user and password; one after it is a port.
+    if (firstColon !== -1 && lastAt > firstColon) {
+      result += `${value.slice(copiedUpTo, firstColon + 1)}${REDACTED}`;
+      copiedUpTo = lastAt;
+    }
+
+    separator = value.indexOf('://', end);
+  }
+
+  return copiedUpTo === 0 ? value : result + value.slice(copiedUpTo);
+};
+
 const deleteAtPath = (target: unknown, path: string): void => {
   const segments = path.split('.');
   let node: unknown = target;
@@ -135,7 +177,7 @@ const walk = (value: unknown, appRoot?: string, homeDir?: string): unknown => {
     if (relativized !== value) {
       return relativized;
     }
-    return looksSecret(value) ? REDACTED : value;
+    return looksSecret(value) ? REDACTED : maskEmbeddedCredentials(value);
   }
   if (Array.isArray(value)) {
     return value.map((item) => walk(item, appRoot, homeDir));

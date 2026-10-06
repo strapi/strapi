@@ -227,4 +227,38 @@ describe('debug-dump scrub', () => {
       scrubObject({ publishableKey: 'pk_live_51NxAAAAAAAAAAAAAAAAAAAAA' }).publishableKey
     ).toBe('pk_live_51NxAAAAAAAAAAAAAAAAAAAAA');
   });
+
+  describe('credentials embedded in a longer string', () => {
+    it('masks the password of a database URL inside a package.json script', () => {
+      const scripts = {
+        migrate: 'DATABASE_URL=postgres://strapi:hunter2@db.internal:5432/app knex migrate:latest',
+      };
+
+      expect(scrubObject({ scripts }).scripts.migrate).toBe(
+        `DATABASE_URL=postgres://strapi:${REDACTED}@db.internal:5432/app knex migrate:latest`
+      );
+    });
+
+    it('masks every credential URL in the string, including an empty user', () => {
+      const value = 'a mysql://u:p1@h/db then redis://:p2@cache:6379 done';
+
+      expect(scrubObject({ value }).value).toBe(
+        `a mysql://u:${REDACTED}@h/db then redis://:${REDACTED}@cache:6379 done`
+      );
+    });
+
+    it('leaves a URL without a password alone', () => {
+      const value = 'curl https://example.com/a and psql postgres://user@db:5432/app';
+
+      expect(scrubObject({ value }).value).toBe(value);
+    });
+
+    it('scans many scheme separators in linear time', () => {
+      const value = `run ${'a://b:'.repeat(20_000)} end`;
+
+      const start = performance.now();
+      scrubObject({ value });
+      expect(performance.now() - start).toBeLessThan(500);
+    });
+  });
 });
