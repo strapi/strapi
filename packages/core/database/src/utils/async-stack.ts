@@ -11,23 +11,35 @@ const CALLER_STACK_LIMIT = 50;
  * object itself (class, name, message) is unchanged.
  */
 export const appendCallerStack = (error: unknown): void => {
-  if (!(error instanceof Error) || typeof error.stack !== 'string' || Error.stackTraceLimit === 0) {
+  if (
+    !(error instanceof Error) ||
+    typeof error.stack !== 'string' ||
+    !(Error.stackTraceLimit > 0)
+  ) {
     return;
   }
 
-  const previousLimit = Error.stackTraceLimit;
-  Error.stackTraceLimit = Math.max(previousLimit, CALLER_STACK_LIMIT);
-
-  let callerStack: string | undefined;
   try {
-    callerStack = new Error().stack;
-  } finally {
-    Error.stackTraceLimit = previousLimit;
-  }
+    const previousLimit = Error.stackTraceLimit;
+    Error.stackTraceLimit = Math.max(previousLimit, CALLER_STACK_LIMIT);
 
-  // Drop the "Error" line and this function's own frame
-  const frames = callerStack?.split('\n').slice(2) ?? [];
-  if (frames.length > 0) {
-    error.stack = `${error.stack}\n${frames.join('\n')}`;
+    let callerStack: unknown;
+    try {
+      callerStack = new Error().stack;
+    } finally {
+      Error.stackTraceLimit = previousLimit;
+    }
+
+    if (typeof callerStack !== 'string') {
+      return;
+    }
+
+    // Drop the "Error" line and this function's own frame
+    const frames = callerStack.split('\n').slice(2);
+    if (frames.length > 0) {
+      error.stack = `${error.stack}\n${frames.join('\n')}`;
+    }
+  } catch {
+    // Extra frames are a convenience: never let them replace the error being reported
   }
 };

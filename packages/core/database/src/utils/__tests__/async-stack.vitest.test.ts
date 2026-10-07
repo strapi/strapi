@@ -38,9 +38,11 @@ async function outermostCaller() {
 
 describe('appendCallerStack', () => {
   const originalLimit = Error.stackTraceLimit;
+  const originalPrepareStackTrace = Error.prepareStackTrace;
 
   afterEach(() => {
     Error.stackTraceLimit = originalLimit;
+    Error.prepareStackTrace = originalPrepareStackTrace;
   });
 
   it('appends the frames of the code awaiting the failed operation', async () => {
@@ -74,6 +76,37 @@ describe('appendCallerStack', () => {
     appendCallerStack(error);
 
     expect(error.stack).toBe(before);
+  });
+
+  it('leaves the stack alone when stack traces are disabled with a negative limit', () => {
+    const error = new Error('no frames');
+    Object.defineProperty(error, 'stack', {
+      value: 'Error: no frames\n    at known',
+      writable: true,
+      configurable: true,
+    });
+    Error.stackTraceLimit = -1;
+
+    appendCallerStack(error);
+
+    expect(error.stack).toBe('Error: no frames\n    at known');
+  });
+
+  it('leaves the error untouched when another library makes stacks non-strings', () => {
+    // An APM or source map library can install a hook that returns call sites instead of a string
+    Error.prepareStackTrace = (_error, callSites) => callSites as unknown as string;
+    const error = new Error('x');
+    Object.defineProperty(error, 'stack', {
+      value: 'Error: x\n    at known',
+      writable: true,
+      configurable: true,
+    });
+
+    expect(() => appendCallerStack(error)).not.toThrow();
+
+    expect(error).toBeInstanceOf(Error);
+    expect(error.message).toBe('x');
+    expect(error.stack).toBe('Error: x\n    at known');
   });
 
   it('ignores values that are not errors', () => {
