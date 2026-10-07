@@ -1,4 +1,5 @@
-import { getProjectType } from './getProjectType';
+import { getProjectType } from '../../../shared/utils/get-project-type';
+
 import { createAbsoluteUrl } from './urls';
 
 import type { GetProjectType } from '../../../shared/contracts/admin';
