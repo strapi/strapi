@@ -15,6 +15,7 @@ describeOnCondition(edition === 'EE')('Admin accounts in audit logs (api)', () =
   let actingAdminId: number;
   let superAdminRoleId: number;
   let forgotPassword: jest.SpyInstance;
+  let sendEmail: jest.SpyInstance;
 
   const actingAdmin = {
     email: 'accounts-audit-actor@test.com',
@@ -54,9 +55,8 @@ describeOnCondition(edition === 'EE')('Admin accounts in audit logs (api)', () =
     expect(logs).toHaveLength(0);
   };
 
-  // forgot-password answers before the service runs, so its work, reset email included, is
-  // still in flight after the response. Left running, it outlives strapi.destroy() and fails
-  // whichever suite runs next.
+  // forgot-password answers before the service runs, so its work is still in flight after the
+  // response. Left running, it outlives strapi.destroy() and fails whichever suite runs next.
   const settleForgotPassword = () =>
     Promise.allSettled(forgotPassword.mock.results.map((result) => result.value));
 
@@ -95,6 +95,9 @@ describeOnCondition(edition === 'EE')('Admin accounts in audit logs (api)', () =
   beforeAll(async () => {
     strapi = await createStrapiInstance();
     forgotPassword = jest.spyOn(strapi.service('admin::auth'), 'forgotPassword');
+    // The reset emails go to @accounts-audit.test, which has no mail server: the real provider
+    // would make every reset wait on a DNS lookup that can only fail.
+    sendEmail = jest.spyOn(strapi.plugin('email').provider, 'send').mockResolvedValue(undefined);
 
     // Requests run as an admin of our own: with only the default super admin in the
     // database, asserting the actor would prove nothing.
@@ -118,6 +121,7 @@ describeOnCondition(edition === 'EE')('Admin accounts in audit logs (api)', () =
   });
 
   beforeEach(async () => {
+    sendEmail.mockClear();
     await deleteTestUsers();
     await clearAuditLogs();
   });
@@ -426,6 +430,14 @@ describeOnCondition(edition === 'EE')('Admin accounts in audit logs (api)', () =
       // The token assignment is a user update too, but not one the log tracks
       await expectNoLog('admin-user.update');
       await expectNoLegacyLog();
+
+      expect(sendEmail).toHaveBeenCalledTimes(1);
+      expect(sendEmail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: 'leo@accounts-audit.test',
+          text: expect.stringContaining(`?code=${row.resetPasswordToken}`),
+        })
+      );
     });
 
     test('records nothing for an unknown email', async () => {
@@ -438,6 +450,7 @@ describeOnCondition(edition === 'EE')('Admin accounts in audit logs (api)', () =
 
       await settleForgotPassword();
       await expectNoLog('admin-user.password-reset.create');
+      expect(sendEmail).not.toHaveBeenCalled();
     });
   });
 
