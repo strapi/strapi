@@ -118,7 +118,7 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@modelcontextprotocol/client": "2.0.0",
+    "@modelcontextprotocol/client": "2.2.0",
     "@swc/core": "1.13.5",
     "@types/bcryptjs": "2.4.3",
     "@types/configstore": "5.0.1",
