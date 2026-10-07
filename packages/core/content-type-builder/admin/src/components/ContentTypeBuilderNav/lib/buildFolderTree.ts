@@ -113,17 +113,15 @@ export function buildSectionTree(
   const ungrouped = links
     .filter((link) => !grouped.has(link.uid))
     .sort((a, b) => compareTitle(a.title, b.title))
-    .map(
-      (link): ContentTypeNode => ({
-        type: 'contentType',
-        status: link.status,
-        title: link.title,
-        parentId: null,
-        uid: link.uid,
-        to: link.to,
-        depth: 0,
-      })
-    );
+    .map((link): ContentTypeNode => ({
+      type: 'contentType',
+      status: link.status,
+      title: link.title,
+      parentId: null,
+      uid: link.uid,
+      to: link.to,
+      depth: 0,
+    }));
 
   return [...ungrouped, ...rootFolders];
 }

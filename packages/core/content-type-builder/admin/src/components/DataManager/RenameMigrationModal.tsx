@@ -11,10 +11,7 @@ import { groupRenameChains, type RenameChain, type RenamePair } from './utils/gr
 import type { RenameHop } from '../../types';
 
 export type AttributeRenameMigrationMode =
-  | 'always'
-  | 'never'
-  | 'prompt-after-edit'
-  | 'prompt-before-save';
+  'always' | 'never' | 'prompt-after-edit' | 'prompt-before-save';
 
 export type AttributeRenameDecision = boolean | 'prompt';
 

@@ -90,8 +90,7 @@ export interface Strapi extends Container {
           // snapshot); returns the limit the feature enforces.
           get: (
             feature?:
-              | string
-              | { name: string; options?: Record<string, unknown>; [key: string]: unknown }
+              string | { name: string; options?: Record<string, unknown>; [key: string]: unknown }
           ) => unknown;
         }>;
       }) => void;

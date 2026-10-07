@@ -174,8 +174,7 @@ type CreateComponentSchemaPayload = {
 };
 
 type FolderAssignmentPayload =
-  | { targetGroupId: string | null }
-  | { newFolderId: string; newFolderName: string };
+  { targetGroupId: string | null } | { newFolderId: string; newFolderName: string };
 
 type CreateSchemaPayload = {
   uid: string;

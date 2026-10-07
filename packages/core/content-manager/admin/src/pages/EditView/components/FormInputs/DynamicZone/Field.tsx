@@ -39,7 +39,8 @@ const [DynamicZoneProvider, useDynamicZone] = createContext<DynamicZoneContextVa
 );
 
 interface DynamicZoneProps
-  extends Omit<Extract<EditFieldLayout, { type: 'dynamiczone' }>, 'size' | 'hint'>,
+  extends
+    Omit<Extract<EditFieldLayout, { type: 'dynamiczone' }>, 'size' | 'hint'>,
     Pick<InputProps, 'hint'>,
     Pick<DynamicZoneLabelProps, 'labelAction'> {
   children?: (props: InputRendererProps) => React.ReactNode;

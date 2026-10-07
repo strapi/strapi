@@ -41,7 +41,9 @@ export default async function loadAPIs(strapi: Core.Strapi) {
     return;
   }
 
-  const apisFDs = await (await fse.readdir(strapi.dirs.dist.api, { withFileTypes: true }))
+  const apisFDs = await (
+    await fse.readdir(strapi.dirs.dist.api, { withFileTypes: true })
+  )
     .filter(isDirectory)
     .filter(_.negate(isDotFile));
 

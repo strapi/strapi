@@ -32,11 +32,10 @@ import { RowLabelWithCheckbox, RowLabelWithCheckboxProps } from './RowLabelWithC
  * CollapsePropertyMatrix
  * -----------------------------------------------------------------------------------------------*/
 
-interface CollapsePropertyMatrixProps
-  extends Pick<
-    ActionRowProps,
-    'childrenForm' | 'isFormDisabled' | 'label' | 'pathToData' | 'propertyName' | 'subject'
-  > {
+interface CollapsePropertyMatrixProps extends Pick<
+  ActionRowProps,
+  'childrenForm' | 'isFormDisabled' | 'label' | 'pathToData' | 'propertyName' | 'subject'
+> {
   availableActions?: Array<Action & { isDisplayed: boolean }>;
 }
 
@@ -127,11 +126,10 @@ const CollapsePropertyMatrix = ({
  * ActionRow
  * -----------------------------------------------------------------------------------------------*/
 
-interface ActionRowProps
-  extends Pick<
-    SubActionRowProps,
-    'childrenForm' | 'isFormDisabled' | 'propertyActions' | 'propertyName' | 'subject'
-  > {
+interface ActionRowProps extends Pick<
+  SubActionRowProps,
+  'childrenForm' | 'isFormDisabled' | 'propertyActions' | 'propertyName' | 'subject'
+> {
   label: string;
   name: string;
   required?: boolean;

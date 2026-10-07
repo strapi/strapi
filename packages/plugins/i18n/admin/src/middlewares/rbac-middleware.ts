@@ -21,13 +21,11 @@ const localeMiddleware: RBACMiddleware = (ctx) => (next) => (permissions) => {
     return next(permissions);
   }
 
-  if (
-    !(
-      'i18n' in search.plugins &&
-      typeof search.plugins.i18n === 'object' &&
-      !Array.isArray(search.plugins.i18n)
-    )
-  ) {
+  if (!(
+    'i18n' in search.plugins &&
+    typeof search.plugins.i18n === 'object' &&
+    !Array.isArray(search.plugins.i18n)
+  )) {
     return next(permissions);
   }
 
