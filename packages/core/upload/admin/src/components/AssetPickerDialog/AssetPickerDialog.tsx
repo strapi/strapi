@@ -171,19 +171,21 @@ const BrowseTab = ({ list, view, onViewChange }: BrowseTabProps) => {
           </Flex>
         </Flex>
         <FilterBadges listFilters={listFilters} />
-      </Box>
-      <ScrollingBody>
-        {/* Renders nothing — keeps every loaded page's query subscribed. */}
-        {subscribers}
-        {/* Search results are global, so a folder trail would be misleading. */}
+        {/* In the fixed header with the toolbar, so the way back up stays in
+            reach however far the list is scrolled. Search results are global,
+            so a folder trail would be misleading there. */}
         {currentFolderId !== null && !isSearching && (
-          <Box paddingBottom={6}>
+          <Box paddingTop={2}>
             <FolderBreadcrumbs
               currentFolderId={currentFolderId}
               onSelectFolder={navigateToFolderId}
             />
           </Box>
         )}
+      </Box>
+      <ScrollingBody>
+        {/* Renders nothing — keeps every loaded page's query subscribed. */}
+        {subscribers}
         <AssetsView
           view={view}
           folders={folders}
