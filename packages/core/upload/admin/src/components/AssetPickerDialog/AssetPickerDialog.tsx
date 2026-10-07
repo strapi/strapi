@@ -163,7 +163,7 @@ const BrowseTab = ({ list, view, onViewChange }: BrowseTabProps) => {
         <Flex justifyContent="space-between" gap={2} wrap="wrap">
           <Flex gap={2}>
             <FilterMenu listFilters={listFilters} />
-            <AssetsSearchInput />
+            <AssetsSearchInput collapsible />
           </Flex>
           <Flex gap={2}>
             <SortMenu sort={listSort} showFoldersGroup={!isGridView} />

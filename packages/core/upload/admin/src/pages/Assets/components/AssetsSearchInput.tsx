@@ -1,7 +1,15 @@
-import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type FocusEvent,
+  type FormEvent,
+} from 'react';
 
 import { useDebounce, useIsMobile } from '@strapi/admin/strapi-admin';
-import { Box, Searchbar, SearchForm } from '@strapi/design-system';
+import { Box, IconButton, Searchbar, SearchForm } from '@strapi/design-system';
+import { Search as SearchIcon } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -24,11 +32,21 @@ const StyledSearchForm = styled(SearchForm)`
   }
 `;
 
+interface AssetsSearchInputProps {
+  /**
+   * Starts as an icon button that opens the field, which folds back once it
+   * loses focus empty, like the admin's own `SearchInput` in list views. Used
+   * where the toolbar is narrow (the Content Manager asset picker). Mobile
+   * always shows the field.
+   */
+  collapsible?: boolean;
+}
+
 /**
  * Keyword search over the whole Media Library. Owns the typing state and the
  * debounce; `useAssetSearch` owns the `?_q=` URL param.
  */
-export const AssetsSearchInput = () => {
+export const AssetsSearchInput = ({ collapsible = false }: AssetsSearchInputProps) => {
   const { formatMessage } = useIntl();
   const { searchQuery, setSearchQuery } = useAssetSearch();
   const { trackUsage } = useTracking();
@@ -36,6 +54,33 @@ export const AssetsSearchInput = () => {
 
   const [value, setValue] = useState(searchQuery);
   const debouncedValue = useDebounce(value, DEBOUNCE_MS);
+
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
+  // A term keeps the field open: folding it would hide an active search.
+  const isCollapsed = collapsible && !isMobile && !isExpanded && value === '';
+
+  // Only after the button opened it: a field shown on mount must not take focus.
+  useEffect(() => {
+    if (isExpanded) {
+      inputRef.current?.focus();
+    }
+  }, [isExpanded]);
+
+  // Emptied from elsewhere (a folder opened, the empty state's "Clear search")
+  // after the field was left with a term in it: the blur already happened, so
+  // fold it here. Not while it has focus: that is the user clearing it to type.
+  useEffect(() => {
+    if (value === '' && document.activeElement !== inputRef.current) {
+      setIsExpanded(false);
+    }
+  }, [value]);
+
+  const handleBlur = (event: FocusEvent<HTMLInputElement>) => {
+    if (event.currentTarget.value === '') {
+      setIsExpanded(false);
+    }
+  };
 
   // Tracks the last value the URL and the input agreed on. Without it the two
   // effects below would ping-pong: each would see the other's write as a change
@@ -90,6 +135,7 @@ export const AssetsSearchInput = () => {
   const searchForm = (
     <StyledSearchForm onSubmit={(event: FormEvent<HTMLFormElement>) => event.preventDefault()}>
       <Searchbar
+        ref={inputRef}
         name="search-assets"
         value={value}
         onChange={(event: ChangeEvent<HTMLInputElement>) => setValue(event.target.value)}
@@ -100,6 +146,7 @@ export const AssetsSearchInput = () => {
           defaultMessage: 'Search',
         })}
         size="S"
+        onBlur={collapsible ? handleBlur : undefined}
       >
         {formatMessage({
           id: getTranslationKey('search.label'),
@@ -108,6 +155,17 @@ export const AssetsSearchInput = () => {
       </Searchbar>
     </StyledSearchForm>
   );
+
+  if (isCollapsed) {
+    return (
+      <IconButton
+        label={formatMessage({ id: 'global.search', defaultMessage: 'Search' })}
+        onClick={() => setIsExpanded(true)}
+      >
+        <SearchIcon />
+      </IconButton>
+    );
+  }
 
   // Mobile: fills the toolbar row (own line). Desktop: keeps its intrinsic size,
   // with empty space between it and the right-aligned Sort/Toggle group.

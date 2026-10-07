@@ -1,5 +1,5 @@
 import { within } from '@testing-library/react';
-import { fireEvent, render, screen, server, waitFor } from '@tests/utils';
+import { act, fireEvent, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 import { useLocation } from 'react-router-dom';
 
@@ -144,6 +144,108 @@ describe('AssetPickerDialog', () => {
       expect(folderRequests.some((search) => search.includes('[parent][id]=5'))).toBe(true)
     );
     expect(screen.getByTestId('location')).toHaveTextContent(ENTRY_URL);
+  });
+
+  describe('search', () => {
+    // The field folds into a button on desktop only. jsdom's matchMedia matches
+    // nothing, which the admin reads as mobile.
+    const { matchMedia } = window;
+
+    beforeAll(() => {
+      window.matchMedia = jest.fn().mockImplementation((query: string) => ({
+        matches: true,
+        media: query,
+        onchange: null,
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+        dispatchEvent: jest.fn(),
+      }));
+    });
+
+    afterAll(() => {
+      window.matchMedia = matchMedia;
+    });
+
+    it('starts as an icon button that opens a focused search field', async () => {
+      renderDialog();
+
+      await screen.findByText('hero.png');
+
+      expect(screen.queryByRole('searchbox')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Search' }));
+
+      expect(screen.getByRole('searchbox')).toHaveFocus();
+    });
+
+    it('searches in memory, leaving the entry URL alone', async () => {
+      const fileRequests: string[] = [];
+      server.use(
+        http.get('*/upload/files', ({ request }) => {
+          fileRequests.push(decodeURIComponent(new URL(request.url).search));
+          return HttpResponse.json({
+            results: [createAsset(1, 'hero.png')],
+            pagination: { page: 1, pageSize: 20, pageCount: 1, total: 1 },
+          });
+        })
+      );
+
+      renderDialog();
+
+      fireEvent.click(await screen.findByRole('button', { name: 'Search' }));
+      fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'hero' } });
+
+      await waitFor(() =>
+        expect(fileRequests.some((search) => search.includes('_q=hero'))).toBe(true)
+      );
+      expect(screen.getByTestId('location')).toHaveTextContent(ENTRY_URL);
+    });
+
+    it('folds back into the icon button when it loses focus empty', async () => {
+      renderDialog();
+
+      fireEvent.click(await screen.findByRole('button', { name: 'Search' }));
+      fireEvent.blur(screen.getByRole('searchbox'));
+
+      expect(screen.queryByRole('searchbox')).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Search' })).toBeInTheDocument();
+    });
+
+    it('folds back when opening a folder clears the search', async () => {
+      server.use(
+        http.get('*/upload/folders', () =>
+          HttpResponse.json({ data: [createFolder(5, 'Blog content')] })
+        )
+      );
+
+      renderDialog();
+
+      fireEvent.click(await screen.findByRole('button', { name: 'Search' }));
+      const field = screen.getByRole('searchbox');
+      fireEvent.change(field, { target: { value: 'blog' } });
+      // Move focus elsewhere in the dialog, as clicking another control would.
+      // (The dialog traps focus, so a plain blur would land back on the field.)
+      act(() => screen.getByRole('button', { name: 'Filter' }).focus());
+
+      // Search results include the folder; opening it drops the search.
+      fireEvent.click(await screen.findByText('Blog content'));
+
+      await waitFor(() => expect(screen.queryByRole('searchbox')).not.toBeInTheDocument());
+      expect(screen.getByRole('button', { name: 'Search' })).toBeInTheDocument();
+    });
+
+    it('stays open while it holds a term', async () => {
+      renderDialog();
+
+      fireEvent.click(await screen.findByRole('button', { name: 'Search' }));
+      const field = screen.getByRole('searchbox');
+      fireEvent.change(field, { target: { value: 'hero' } });
+      fireEvent.blur(field);
+
+      expect(screen.getByRole('searchbox')).toHaveValue('hero');
+    });
   });
 
   describe('breadcrumbs', () => {
