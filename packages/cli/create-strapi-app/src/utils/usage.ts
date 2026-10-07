@@ -52,8 +52,15 @@ const getProperties = (scope: Scope, error?: TrackError) => {
   };
 };
 
+function isTruthy(value: unknown): boolean {
+  return (
+    [1, true].includes(value as number | boolean) ||
+    ['true', '1'].includes(_.toLower(value as string))
+  );
+}
+
 function trackEvent(event: string, payload: Record<string, unknown>) {
-  if (process.env.NODE_ENV === 'test') {
+  if (process.env.NODE_ENV === 'test' || isTruthy(process.env.STRAPI_TELEMETRY_DISABLED)) {
     return;
   }
 

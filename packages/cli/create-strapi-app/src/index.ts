@@ -6,7 +6,7 @@ import crypto from 'crypto';
 import fse from 'fs-extra';
 
 import * as prompts from './prompts';
-import { handleCloudLogin } from './cloud';
+import { handleCloudLogin, shouldAttemptCloudLogin } from './cloud';
 import { createStrapi } from './create-strapi';
 import { checkNodeRequirements } from './utils/check-requirements';
 import { checkInstallPath } from './utils/check-install-path';
@@ -134,7 +134,14 @@ async function run(args: string[]): Promise<void> {
   const rootPath = await checkInstallPath(appDirectory);
 
   let shouldCreateGrowthSsoTrial = false;
-  if (!options.skipCloud && !options.nonInteractive) {
+  if (
+    shouldAttemptCloudLogin({
+      skipCloud: options.skipCloud,
+      nonInteractive: options.nonInteractive,
+      ci: process.env.CI,
+      stdinIsTTY: process.stdin.isTTY,
+    })
+  ) {
     shouldCreateGrowthSsoTrial = await handleCloudLogin();
   }
 
