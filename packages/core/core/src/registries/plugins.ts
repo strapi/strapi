@@ -1,4 +1,4 @@
-import { has } from 'lodash/fp';
+import { has } from 'lodash';
 
 import type { Core } from '@strapi/types';
 
@@ -15,7 +15,7 @@ const pluginsRegistry = (strapi: Core.Strapi) => {
       return plugins;
     },
     add(name: string, pluginConfig: Core.Plugin) {
-      if (has(name, plugins)) {
+      if (has(plugins, name)) {
         throw new Error(`Plugin ${name} has already been registered.`);
       }
 

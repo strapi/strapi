@@ -14,21 +14,9 @@ const findManyQueries = {
 describe('Transform relational data', () => {
   global.strapi = {
     getModel: (uid: string) => models[uid],
-    plugins: {
-      i18n: {
-        services: {
-          'content-types': {
-            isLocalizedContentType() {
-              return true;
-            },
-          },
-          locales: {
-            getDefaultLocale() {
-              return 'en';
-            },
-          },
-        },
-      },
+    localization: {
+      isLocalizedContentType: () => true,
+      getDefaultLocale: async () => 'en',
     },
     db: {
       query: jest.fn((uid) => ({ findMany: findManyQueries[uid] })),
@@ -56,6 +44,34 @@ describe('Transform relational data', () => {
       { id: 'doc2-en-draft', documentId: 'doc2', locale: 'en', publishedAt: null },
       { id: 'doc3-en-draft', documentId: 'doc3', locale: 'en', publishedAt: null },
     ]);
+  });
+
+  describe('Fields and populate', () => {
+    it('adds documentId to fields without mutating the caller params', async () => {
+      const params = {
+        fields: ['name'],
+        populate: {
+          categories: {
+            fields: ['name'],
+            populate: { relatedCategories: { fields: ['name'] } },
+          },
+        },
+      };
+      const before = structuredClone(params);
+
+      const { fields, populate } = await transformParamsDocumentId(PRODUCT_UID, params as any);
+
+      expect(fields).toEqual(['name', 'documentId']);
+      expect(populate).toEqual({
+        categories: {
+          fields: ['name', 'documentId'],
+          populate: { relatedCategories: { fields: ['name', 'documentId'] } },
+        },
+      });
+
+      // The caller still owns `params`; reusing it must not see the added documentId.
+      expect(params).toEqual(before);
+    });
   });
 
   describe('Shorthand syntax', () => {

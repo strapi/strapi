@@ -1,13 +1,12 @@
-import { render } from '@tests/utils';
+import { lightTheme } from '@strapi/design-system';
+import { render, screen } from '@tests/utils';
 
 import { SettingsNav } from '../SettingsNav';
 
+let mockLicense: unknown = { features: [] };
+
 jest.mock('../../../../../../ee/admin/src/hooks/useLicenseLimits', () => ({
-  useLicenseLimits: jest.fn(() => ({
-    license: {
-      features: [],
-    },
-  })),
+  useLicenseLimits: jest.fn(() => ({ license: mockLicense })),
 }));
 
 const menu = [
@@ -22,6 +21,13 @@ const menu = [
         isDisplayed: true,
         permissions: [],
         hasNotification: true,
+      },
+      {
+        intlLabel: { id: 'Settings.webhooks.title', defaultMessage: 'Webhooks' },
+        to: '/settings/webhooks',
+        id: 'webhooks',
+        isDisplayed: true,
+        permissions: [],
       },
     ],
   },
@@ -68,6 +74,42 @@ const menu = [
             subject: null,
           },
         ],
+      },
+    ],
+  },
+  {
+    id: 'audit',
+    intlLabel: { id: 'Settings.audit', defaultMessage: 'Audit' },
+    links: [
+      {
+        intlLabel: { id: 'global.auditLogs', defaultMessage: 'Audit Logs' },
+        to: '/settings/audit-logs',
+        id: 'auditLogs',
+        isDisplayed: true,
+        licenseOnly: true,
+        permissions: [],
+      },
+    ],
+  },
+  {
+    id: 'purchase',
+    intlLabel: { id: 'Settings.purchase', defaultMessage: 'Purchase' },
+    links: [
+      {
+        intlLabel: { id: 'Settings.sso.title', defaultMessage: 'Single Sign-On' },
+        to: '/settings/purchase-single-sign-on',
+        id: 'sso-purchase-page',
+        isDisplayed: true,
+        licenseOnly: true,
+        permissions: [],
+      },
+      {
+        intlLabel: { id: 'Settings.content-history.title', defaultMessage: 'Content History' },
+        to: '/settings/purchase-content-history',
+        id: 'content-history-purchase-page',
+        isDisplayed: true,
+        licenseOnly: true,
+        permissions: [],
       },
     ],
   },
@@ -134,7 +176,63 @@ jest.mock('../../../../hooks/useSettingsMenu', () => ({
   })),
 }));
 
+const lightningFillFor = (label: string) =>
+  // eslint-disable-next-line testing-library/no-node-access
+  screen.getByText(label).closest('a')?.querySelector('svg')?.getAttribute('fill');
+
 describe('SettingsNav', () => {
+  afterEach(() => {
+    mockLicense = { features: [] };
+  });
+
+  it('marks a feature as licensed when a lapsed license granted it', () => {
+    // After expiry the live feature list is empty; the nav follows the same grant the Plan card
+    // shows until the license key or file is removed.
+    mockLicense = {
+      features: [],
+      planEntitlements: [{ feature: 'audit-logs', available: true, limits: [] }],
+    };
+
+    render(<SettingsNav />);
+
+    expect(lightningFillFor('Audit Logs')).toBe(lightTheme.colors.primary600);
+  });
+
+  it('marks the SSO and content-history purchase links a lapsed license granted', () => {
+    // After expiry these features render as purchase links, under their own ids.
+    mockLicense = {
+      features: [],
+      planEntitlements: [
+        { feature: 'sso', available: true, limits: [] },
+        { feature: 'cms-content-history', available: true, limits: [] },
+      ],
+    };
+
+    render(<SettingsNav />);
+
+    expect(lightningFillFor('Single Sign-On')).toBe(lightTheme.colors.primary600);
+    expect(lightningFillFor('Content History')).toBe(lightTheme.colors.primary600);
+  });
+
+  it('leaves a feature unmarked when the license never granted it', () => {
+    mockLicense = {
+      features: [],
+      planEntitlements: [{ feature: 'audit-logs', available: false, limits: [] }],
+    };
+
+    render(<SettingsNav />);
+
+    expect(lightningFillFor('Audit Logs')).toBe(lightTheme.colors.neutral300);
+  });
+
+  it('marks a feature on the live license as licensed', () => {
+    mockLicense = { features: [{ name: 'audit-logs' }] };
+
+    render(<SettingsNav />);
+
+    expect(lightningFillFor('Audit Logs')).toBe(lightTheme.colors.primary600);
+  });
+
   it('should render and match snapshot', () => {
     const { getByText } = render(<SettingsNav />);
 

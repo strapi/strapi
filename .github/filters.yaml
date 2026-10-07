@@ -39,7 +39,9 @@ migrations:
   - 'examples/complex/package.json'
 docs:
   - 'docs/**'
-  - '**.mdx?'
+  - '**/*.{md,mdx}'
+  # The docs build reads every package manifest: renaming a package must fail the PR, not the deploy.
+  - 'packages/**/package.json'
 
 # Changes to these files cause all jobs to run
 # TODO: this needs a lot more in it

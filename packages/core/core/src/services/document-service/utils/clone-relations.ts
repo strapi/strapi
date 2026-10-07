@@ -1,4 +1,4 @@
-import { merge, set } from 'lodash/fp';
+import { merge, set } from 'lodash';
 
 import type { Core, Schema, UID } from '@strapi/types';
 import type { traverseEntity } from '@strapi/utils';
@@ -90,7 +90,7 @@ export const prepareCloneData = async (
     contentType,
     getModel
   );
-  let data = merge(originalData, submitted) as Record<string, unknown>;
+  const data = merge({}, originalData, submitted) as Record<string, unknown>;
   const relationsToCopy: string[] = [];
 
   for (const [attributeName, attribute] of Object.entries(contentType.attributes)) {
@@ -120,7 +120,7 @@ export const prepareCloneData = async (
   }
 
   for (const [path, value] of relationOperationOverrides) {
-    data = set(path, value, data) as Record<string, unknown>;
+    set(data, path, value);
   }
 
   return { data, relationsToCopy };
