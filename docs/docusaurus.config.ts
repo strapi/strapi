@@ -29,7 +29,7 @@ const presetClassicOptions: Preset.Options = {
   docs: {
     routeBasePath: '/',
     sidebarPath: require.resolve('./sidebars.ts'),
-    editUrl: 'https://github.com/strapi/strapi/tree/main/docs/',
+    editUrl: 'https://github.com/strapi/strapi/tree/develop/docs/',
     remarkPlugins: [remarkDesignSystemLinks],
   },
   blog: false,
@@ -86,7 +86,7 @@ const themeConfig: Preset.ThemeConfig = {
 
 const config: Config = {
   title: 'Doc',
-  tagline: 'Dinosaurs are cool',
+  tagline: 'Contributor documentation',
   url: 'https://contributor.strapi.io',
   baseUrl: '/',
   onBrokenLinks: 'warn',
