@@ -1,11 +1,18 @@
 import http from 'node:http';
 import type { AddressInfo } from 'node:net';
-import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, vi, beforeAll, afterAll, beforeEach } from 'vitest';
 import type { Core } from '@strapi/types';
 import { createStrapiFetch } from '../fetch';
 
 // Unresolvable host: a response can only come from the proxy
 const TARGET_URL = 'http://strapi.test';
+
+interface ReceivedRequest {
+  method?: string;
+  url?: string;
+  contentLength?: string;
+  body: string;
+}
 
 const createStrapi = (config: Record<string, unknown>) =>
   ({
@@ -13,25 +20,60 @@ const createStrapi = (config: Record<string, unknown>) =>
     log: { debug: vi.fn(), info: vi.fn() },
   }) as unknown as Core.Strapi;
 
-describe('createStrapiFetch', () => {
-  let proxyUrl: string;
+// Records every request it receives and answers with a fixed body
+const createRecordingServer = () => {
+  const requests: ReceivedRequest[] = [];
 
-  // Fake forward proxy: answers plain http requests (sent with an absolute URL) itself
-  const proxy = http.createServer((req, res) => {
-    res.end(`proxied:${req.method} ${req.url}`);
+  const server = http.createServer((req, res) => {
+    let body = '';
+
+    req.on('data', (chunk) => {
+      body += chunk;
+    });
+
+    req.on('end', () => {
+      requests.push({
+        method: req.method,
+        url: req.url,
+        contentLength: req.headers['content-length'],
+        body,
+      });
+      res.end('ok');
+    });
   });
 
+  return {
+    requests,
+    async listen() {
+      await new Promise<void>((resolve) => {
+        server.listen(0, '127.0.0.1', () => resolve());
+      });
+
+      return `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+    },
+    async close() {
+      await new Promise<void>((resolve) => {
+        server.close(() => resolve());
+      });
+    },
+  };
+};
+
+describe('createStrapiFetch', () => {
+  // Plain http requests are sent to a forward proxy with an absolute URL
+  const proxy = createRecordingServer();
+  let proxyUrl: string;
+
   beforeAll(async () => {
-    await new Promise<void>((resolve) => {
-      proxy.listen(0, '127.0.0.1', () => resolve());
-    });
-    proxyUrl = `http://127.0.0.1:${(proxy.address() as AddressInfo).port}`;
+    proxyUrl = await proxy.listen();
+  });
+
+  beforeEach(() => {
+    proxy.requests.length = 0;
   });
 
   afterAll(async () => {
-    await new Promise<void>((resolve) => {
-      proxy.close(() => resolve());
-    });
+    await proxy.close();
   });
 
   it('does not set a dispatcher when no proxy is configured', () => {
@@ -52,8 +94,75 @@ describe('createStrapiFetch', () => {
     const response = await strapiFetch(input);
 
     expect(response.status).toBe(200);
-    expect(await response.text()).toBe(
-      `proxied:${method} ${typeof input === 'string' ? input : input.url}`
-    );
+    expect(await response.text()).toBe('ok');
+    expect(proxy.requests).toEqual([
+      expect.objectContaining({ method, url: typeof input === 'string' ? input : input.url }),
+    ]);
+  });
+
+  it.each([
+    [
+      'init headers',
+      (body: string) =>
+        [
+          `${TARGET_URL}/init`,
+          {
+            method: 'POST',
+            body,
+            headers: { 'content-length': String(Buffer.byteLength(body)) },
+          },
+        ] as const,
+    ],
+    [
+      'a Request object',
+      (body: string) =>
+        [
+          new Request(`${TARGET_URL}/request`, {
+            method: 'POST',
+            body,
+            headers: { 'content-length': String(Buffer.byteLength(body)) },
+          }),
+        ] as const,
+    ],
+  ])('proxies a request that sets its own Content-Length in %s', async (_, getArgs) => {
+    const strapiFetch = createStrapiFetch(createStrapi({ 'server.proxy.global': proxyUrl }), {
+      logs: false,
+    });
+    const body = JSON.stringify({ hello: 'world' });
+
+    const response = await strapiFetch(...getArgs(body));
+
+    expect(response.status).toBe(200);
+    expect(proxy.requests).toEqual([
+      expect.objectContaining({
+        method: 'POST',
+        contentLength: String(Buffer.byteLength(body)),
+        body,
+      }),
+    ]);
+  });
+
+  // Loading undici's main entry replaces the dispatcher used by Node's built-in fetch, which then
+  // rejects requests that set their own Content-Length (https://github.com/nodejs/undici/issues/5500)
+  it('leaves global fetch able to send a request that sets Content-Length', async () => {
+    const server = createRecordingServer();
+    const url = await server.listen();
+
+    try {
+      const body = JSON.stringify({ hello: 'world' });
+      const response = await fetch(url, {
+        method: 'POST',
+        body,
+        headers: {
+          'content-type': 'application/json',
+          'content-length': String(Buffer.byteLength(body)),
+        },
+      });
+
+      expect(response.status).toBe(200);
+      expect(await response.text()).toBe('ok');
+    } finally {
+      await server.close();
+    }
   });
 });
