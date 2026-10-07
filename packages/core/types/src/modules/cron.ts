@@ -11,10 +11,7 @@ export interface RecurrenceRange {
 }
 
 export type RecurrenceSegment =
-  | number
-  | string
-  | RecurrenceRange
-  | Array<number | string | RecurrenceRange>;
+  number | string | RecurrenceRange | Array<number | string | RecurrenceRange>;
 export type CronDate = Date | number | string;
 
 export interface RecurrenceSpecObjLit {

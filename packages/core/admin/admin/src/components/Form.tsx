@@ -65,8 +65,9 @@ const isMultipleSelectTarget = (target: FormFieldTarget): target is MultipleSele
   );
 };
 
-interface FormContextValue<TFormValues extends FormValues = FormValues>
-  extends FormState<TFormValues> {
+interface FormContextValue<
+  TFormValues extends FormValues = FormValues,
+> extends FormState<TFormValues> {
   disabled: boolean;
   getValues: () => TFormValues;
   initialValues: TFormValues;
@@ -147,11 +148,14 @@ const [FormProvider, useForm] = createContext<FormContextValue>('Form', {
  * Form
  * -----------------------------------------------------------------------------------------------*/
 
-interface FormHelpers<TFormValues extends FormValues = FormValues>
-  extends Pick<FormContextValue<TFormValues>, 'setErrors' | 'setValues' | 'resetForm'> {}
+interface FormHelpers<TFormValues extends FormValues = FormValues> extends Pick<
+  FormContextValue<TFormValues>,
+  'setErrors' | 'setValues' | 'resetForm'
+> {}
 
 interface FormProps<TFormValues extends FormValues = FormValues>
-  extends Partial<Pick<FormContextValue<TFormValues>, 'disabled' | 'initialValues'>>,
+  extends
+    Partial<Pick<FormContextValue<TFormValues>, 'disabled' | 'initialValues'>>,
     Pick<BoxProps, 'width' | 'height'> {
   children:
     | React.ReactNode

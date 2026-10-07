@@ -171,8 +171,7 @@ type AppDispatch = Dispatch &
   (<T>(thunk: T) => T extends (...args: never[]) => infer R ? R : never);
 
 type UploadPoolResult =
-  | { data: UploadedFile[]; error?: undefined }
-  | { error: UploadError; data?: undefined };
+  { data: UploadedFile[]; error?: undefined } | { error: UploadError; data?: undefined };
 
 /** Maps a server per-file outcome onto the row's terminal metadata status. */
 const METADATA_STATUS_BY_RESULT: Record<GenerateAIMetadata.FileStatus, FileMetadataResultStatus> = {

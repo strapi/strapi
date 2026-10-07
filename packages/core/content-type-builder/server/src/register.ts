@@ -15,8 +15,7 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
 
     // Extend the security middleware configuration to include S3 domains + defaults
     const middlewares = strapi.config.get('middlewares') as (
-      | string
-      | { name?: string; config?: any }
+      string | { name?: string; config?: any }
     )[];
 
     const configuredMiddlewares = extendMiddlewareConfiguration(middlewares, {

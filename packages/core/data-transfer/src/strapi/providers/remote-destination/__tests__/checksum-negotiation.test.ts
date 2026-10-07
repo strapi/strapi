@@ -88,8 +88,7 @@ describe('Remote destination checksum negotiation', () => {
     });
 
     const endItem = streamBatches.flat().find((i) => (i as { action: string }).action === 'end') as
-      | { checksum?: unknown }
-      | undefined;
+      { checksum?: unknown } | undefined;
 
     expect(endItem?.checksum).toBeUndefined();
   });

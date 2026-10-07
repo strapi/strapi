@@ -51,9 +51,7 @@ const ListPageCE = () => {
     CreateActionCE,
     async () =>
       (
-        await import(
-          '../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/components/CreateActionEE'
-        )
+        await import('../../../../../../ee/admin/src/pages/SettingsPage/pages/Users/components/CreateActionEE')
       ).CreateActionEE
   );
 

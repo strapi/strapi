@@ -60,7 +60,8 @@ export interface Configuration {
  * would be a breaking change. But perhaps necessary?
  */
 export interface CMAdminConfiguration
-  extends Omit<Configuration, 'layouts'>,
+  extends
+    Omit<Configuration, 'layouts'>,
     Omit<Struct.ContentTypeSchema, 'uid' | 'collectionName' | 'globalId' | 'modelName'> {
   apiID: string;
   isDisplayed: boolean;

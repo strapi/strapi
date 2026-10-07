@@ -9,8 +9,7 @@ type TransformDataOptions = {
 
 const getRequestState = () =>
   strapi.requestContext?.get?.()?.state as
-    | { __documentServiceIdMap?: ReturnType<typeof createIdMap> }
-    | undefined;
+    { __documentServiceIdMap?: ReturnType<typeof createIdMap> } | undefined;
 
 const clearTransformDataRequestCache = () => {
   getRequestState()?.__documentServiceIdMap?.clear();

@@ -126,9 +126,9 @@ const UpsellBanner = () => {
   // We show the banner to encourage the user to upgrade (for 7 days after the trial ends)
   const isTrialEndedRecently = Boolean(
     !license?.isTrial &&
-      !window.strapi.isEE &&
-      cachedTrialEndsAt &&
-      isAfter(new Date(cachedTrialEndsAt), sevenDaysAgo)
+    !window.strapi.isEE &&
+    cachedTrialEndsAt &&
+    isAfter(new Date(cachedTrialEndsAt), sevenDaysAgo)
   );
 
   const trialEndsAt = timeLeftData.data?.trialEndsAt ?? cachedTrialEndsAt;

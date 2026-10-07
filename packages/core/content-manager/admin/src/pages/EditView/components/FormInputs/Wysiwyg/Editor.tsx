@@ -16,8 +16,7 @@ interface EditorApi {
 }
 
 interface EditorProps
-  extends Omit<FieldValue<string>, 'initialValue'>,
-    Omit<InputProps, 'type' | 'label'> {
+  extends Omit<FieldValue<string>, 'initialValue'>, Omit<InputProps, 'type' | 'label'> {
   editorRef: React.MutableRefObject<EditorFromTextArea>;
   isPreviewMode?: boolean;
   isExpandMode?: boolean;

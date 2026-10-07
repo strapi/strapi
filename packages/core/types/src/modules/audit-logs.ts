@@ -61,8 +61,10 @@ export interface EventShape<TDetails = unknown, TResource extends Resource = Res
  * action and date are also stored as table columns, but are repeated here so
  * the payload can be used on its own when exported or forwarded to another system.
  */
-export interface StoredPayload<TDetails = unknown, TResource extends Resource = Resource>
-  extends EventShape<TDetails, TResource> {
+export interface StoredPayload<
+  TDetails = unknown,
+  TResource extends Resource = Resource,
+> extends EventShape<TDetails, TResource> {
   action: string;
   date: string;
   actor: Actor;

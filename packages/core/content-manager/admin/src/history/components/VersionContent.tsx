@@ -56,8 +56,7 @@ const createLayoutFromFields = <T extends EditFieldLayout | UnknownField>(fields
  * -----------------------------------------------------------------------------------------------*/
 
 interface GetRemainingFieldsLayoutOptions
-  extends Pick<HistoryContextValue, 'layout'>,
-    Pick<GetInitData.Response['data'], 'fieldSizes'> {
+  extends Pick<HistoryContextValue, 'layout'>, Pick<GetInitData.Response['data'], 'fieldSizes'> {
   schemaAttributes: HistoryContextValue['schema']['attributes'];
   metadatas: Metadatas;
 }

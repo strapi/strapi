@@ -326,8 +326,7 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
     const contentTypes = strapi.contentTypes as Record<string, unknown> | undefined;
     const components = strapi.components as Record<string, unknown> | undefined;
     return (contentTypes?.[uid] ?? components?.[uid]) as
-      | { attributes?: Record<string, RenameAttributeDefinition> }
-      | undefined;
+      { attributes?: Record<string, RenameAttributeDefinition> } | undefined;
   };
 
   const schemaAttributeOf = (uid: string, name: string): RenameAttributeDefinition | undefined =>
@@ -345,8 +344,7 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
 
     try {
       const customField = strapi.get('custom-fields').get(attribute.customField as string) as
-        | { type?: string }
-        | undefined;
+        { type?: string } | undefined;
       return customField?.type ?? attribute.type;
     } catch {
       // Unknown custom field (e.g. its plugin was removed).
@@ -362,15 +360,13 @@ export const createMigrationBuilder = ({ strapi }: MigrationBuilderDeps) => {
   // is the single table every media field across all types writes to, keyed by
   // (`field` = attribute name, `related_type` = owning uid).
   const resolveUploadMorphTable = ():
-    | { table: string; fieldColumn: string; typeColumn: string }
-    | undefined => {
+    { table: string; fieldColumn: string; typeColumn: string } | undefined => {
     if (!db.metadata.has('plugin::upload.file')) {
       return undefined;
     }
     const fileMeta = db.metadata.get('plugin::upload.file');
     const related = fileMeta.attributes?.related as
-      | (AttributeMeta & { morphColumn?: JoinTableMeta['morphColumn'] })
-      | undefined;
+      (AttributeMeta & { morphColumn?: JoinTableMeta['morphColumn'] }) | undefined;
     const joinTable = related?.joinTable;
     const morphColumn = joinTable?.morphColumn ?? related?.morphColumn;
     if (!joinTable?.name || !morphColumn?.typeColumn?.name) {
