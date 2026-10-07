@@ -3,7 +3,12 @@ import semver from 'semver';
 import execa from 'execa';
 import { packageManager } from '@strapi/utils';
 
-import { Dispatcher1Wrapper, ProxyAgent } from 'undici';
+// Import undici's dispatchers from their own files: loading undici's main entry replaces the
+// dispatcher of Node's built-in fetch (https://github.com/nodejs/undici/issues/5500)
+/* eslint-disable import/extensions -- required by the ESM build: undici has no exports map */
+import ProxyAgent from 'undici/lib/dispatcher/proxy-agent.js';
+import Dispatcher1Wrapper from 'undici/lib/dispatcher/dispatcher1-wrapper.js';
+/* eslint-enable import/extensions */
 import * as constants from './constants';
 import { isLiteralSemVer } from '../version';
 
