@@ -64,6 +64,10 @@ const renderDialog = (
     { initialEntries: [ENTRY_URL], providerOptions: permissions ? { permissions } : undefined }
   );
 
+/** The picker opens on Browse; Radix tabs switch on mouse down, not click. */
+const openSelectedTab = async () =>
+  fireEvent.mouseDown(await screen.findByRole('tab', { name: /Selected assets/ }));
+
 describe('AssetPickerDialog', () => {
   let folderRequests: string[];
 
@@ -485,18 +489,6 @@ describe('AssetPickerDialog', () => {
     });
 
     describe('with assets already in the field', () => {
-      it('opens on the Selected tab, listing them', async () => {
-        renderDialog({ multiple: true, initialSelection: [hero, banner] });
-
-        expect(await screen.findByRole('tab', { name: /Selected assets/ })).toHaveAttribute(
-          'aria-selected',
-          'true'
-        );
-        expect(within(selectedTab()).getByText('2')).toBeInTheDocument();
-        expect(screen.getByText('hero.png')).toBeInTheDocument();
-        expect(screen.getByText('banner.png')).toBeInTheDocument();
-      });
-
       it('keeps Add disabled until the selection changes', async () => {
         renderDialog({ multiple: true, initialSelection: [hero] });
 
@@ -506,6 +498,7 @@ describe('AssetPickerDialog', () => {
       it('confirms what is left after unchecking, which removes it from the field', async () => {
         const onConfirm = jest.fn();
         renderDialog({ multiple: true, initialSelection: [hero, banner], onConfirm });
+        await openSelectedTab();
 
         fireEvent.click(await screen.findByRole('checkbox', { name: 'Select hero.png' }));
 
@@ -528,6 +521,7 @@ describe('AssetPickerDialog', () => {
 
     it('gives each selected asset a grip, and the browse list none', async () => {
       renderDialog({ multiple: true, initialSelection: [hero, banner] });
+      await openSelectedTab();
 
       const grips = await screen.findAllByRole('button', { name: /^Reorder / });
 
@@ -548,6 +542,7 @@ describe('AssetPickerDialog', () => {
       ['Space', ' '],
     ])('does not un-pick an asset when %s is pressed on its grip', async (code, key) => {
       renderDialog({ multiple: true, initialSelection: [hero, banner] });
+      await openSelectedTab();
 
       const grip = await screen.findByRole('button', { name: 'Reorder hero.png' });
       grip.focus();
@@ -567,6 +562,7 @@ describe('AssetPickerDialog', () => {
 
       try {
         renderDialog({ multiple: true, initialSelection: [hero, banner] });
+        await openSelectedTab();
 
         const grip = await screen.findByRole('button', { name: 'Reorder hero.png' });
         grip.focus();
@@ -580,6 +576,7 @@ describe('AssetPickerDialog', () => {
 
     it('does not un-pick an asset when its grip is clicked', async () => {
       renderDialog({ multiple: true, initialSelection: [hero, banner] });
+      await openSelectedTab();
 
       fireEvent.click(await screen.findByRole('button', { name: 'Reorder hero.png' }));
 

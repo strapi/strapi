@@ -265,10 +265,9 @@ interface PickerContentProps {
 const PickerContent = ({ title, initialSelection, onClose, onConfirm }: PickerContentProps) => {
   const { formatMessage } = useIntl();
   const { selection } = usePickerSelection();
-  // An entry that already holds assets opens on them.
-  const [activeTab, setActiveTab] = useState<PickerTab>(
-    initialSelection.length > 0 ? 'selected' : 'browse'
-  );
+  // Always Browse, even when the field already holds assets: the picker is
+  // opened to add some. What it holds is one tab away, and on the field itself.
+  const [activeTab, setActiveTab] = useState<PickerTab>('browse');
   const list = useAssetsListContext();
 
   return (
