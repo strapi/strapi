@@ -123,6 +123,9 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
   let invalidEntries = [];
   // Publishing one of these documents throws, through a test-only document middleware
   const documentIdsFailingToPublish = new Set<string>();
+  // Publishing one of these documents runs a query that fails in the database, inside the run's
+  // transaction: Postgres aborts the transaction, SQLite and MySQL only fail the statement
+  const documentIdsFailingInDatabase = new Set<string>();
 
   const createRelease = async (params: Partial<CreateRelease.Request['body']> = {}) => {
     return rq({
@@ -239,9 +242,17 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     rq = await createAuthRequest({ strapi });
     rqContent = createContentAPIRequest({ strapi });
 
-    strapi.documents.use((ctx, next) => {
+    strapi.documents.use(async (ctx, next) => {
       if (ctx.action === 'publish' && documentIdsFailingToPublish.has(ctx.params?.documentId)) {
         throw new Error('Test-only publish failure');
+      }
+
+      if (ctx.action === 'publish' && documentIdsFailingInDatabase.has(ctx.params?.documentId)) {
+        // Nested in the run, so this is the run's transaction
+        const { get } = await strapi.db.transaction();
+        await strapi.db.connection
+          .raw('SELECT * FROM table_that_does_not_exist')
+          .transacting(get());
       }
 
       return next();
@@ -1323,6 +1334,36 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         documentIdsFailingToPublish.delete(documentIds[0]);
       }
     });
+
+    // On Postgres the database error rolls the whole run back, and nothing stays published; on
+    // SQLite and MySQL the run goes on and the entry before it stays published. Either way the
+    // webhook must say what really happened.
+    test.each(['allow_partial', 'all_or_nothing'] as const)(
+      '%s run with a database error: the publish webhook reports only what stays published',
+      async (releaseCondition) => {
+        const publishedFirstId = await createProduct({ valid: true });
+        const failingId = await createProduct({ valid: true });
+        documentIdsFailingInDatabase.add(failingId);
+        const onPublishEvent = jest.fn();
+        const stopListening = strapi.eventHub.on('releases.publish', onPublishEvent);
+
+        try {
+          const release = await createReleaseWithActions(releaseCondition, [
+            { documentId: publishedFirstId },
+            { documentId: failingId },
+          ]);
+
+          await publishManually(release.id);
+
+          expect(onPublishEvent).toHaveBeenCalledTimes(1);
+          const [{ isPublished }] = onPublishEvent.mock.calls[0];
+          expect(isPublished).toBe(await hasPublishedVersion(productUID, publishedFirstId));
+        } finally {
+          stopListening();
+          documentIdsFailingInDatabase.delete(failingId);
+        }
+      }
+    );
 
     test('a scheduled run of a release with no entries ends done', async () => {
       const release = (await createRelease()).body.data;

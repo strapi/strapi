@@ -256,7 +256,7 @@ How a run ends:
 - Some entries released and some not: "Partial", with `releasedAt` set. This includes an `all_or_nothing` run stopped by an unexpected error after some entries went out: those stay published, and the request fails with the error.
 - No entry released (an `allow_partial` run whose entries all failed, or an `all_or_nothing` run stopped by an error on its first entry): "Failed", and the request fails. A failed release keeps `releasedAt` empty for now, so it stays pending.
 
-The `releases.publish` webhook is sent with `isPublished: true` when at least one entry was released.
+The `releases.publish` webhook is sent with `isPublished: true` when at least one entry was released. A failed run sends it once its status is written. A database error that aborts the run's transaction (on Postgres) rolls back every entry of the run and the status write with it: the webhook then has `isPublished: false`, and the release keeps its previous status.
 
 #### Listening to events on entries:
 

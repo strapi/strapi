@@ -37,7 +37,7 @@ type LockedPublishResult =
       release: Pick<Release, 'id' | 'releasedAt' | 'status'>;
       lockedRelease: LockedRelease;
     }
-  | { kind: 'failed'; error: unknown; lockedRelease: LockedRelease }
+  | { kind: 'failed'; error: Error; lockedRelease: LockedRelease }
   | { kind: 'rejected'; error: Error };
 
 const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
@@ -442,33 +442,43 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
           strapi.telemetry.send('didPublishContentRelease');
 
           return { kind: 'released', release, lockedRelease };
-        } catch (error) {
+        } catch (caught) {
+          // Anything can be thrown, even null: it's turned into an Error once, here, so a failed
+          // run is never mistaken for a success
+          const error =
+            caught instanceof Error
+              ? caught
+              : new Error('Release publish failed', { cause: caught });
+
+          // We need to run the update in the same transaction because the release is locked.
+          // A run stopped after releasing entries is partial: they stay released.
+          try {
+            await strapi.db
+              ?.queryBuilder(RELEASE_MODEL_UID)
+              .where({ id: releaseId })
+              .update(
+                releasedCount > 0
+                  ? { status: 'partial', releasedAt: new Date() }
+                  : { status: 'failed' }
+              )
+              .transacting(trx)
+              .execute();
+          } catch {
+            // The transaction can't be written to anymore (on Postgres, a database error aborts
+            // it): it rolls back, entries released by the run included
+            dispatchWebhook(ALLOWED_WEBHOOK_EVENTS.RELEASES_PUBLISH, { isPublished: false, error });
+            throw error;
+          }
+
+          // Sent once the outcome is written, so it never announces entries that get rolled back
           dispatchWebhook(ALLOWED_WEBHOOK_EVENTS.RELEASES_PUBLISH, {
             isPublished: releasedCount > 0,
             error,
           });
 
-          // We need to run the update in the same transaction because the release is locked.
-          // A run stopped after releasing entries is partial: they stay released.
-          await strapi.db
-            ?.queryBuilder(RELEASE_MODEL_UID)
-            .where({ id: releaseId })
-            .update(
-              releasedCount > 0
-                ? { status: 'partial', releasedAt: new Date() }
-                : { status: 'failed' }
-            )
-            .transacting(trx)
-            .execute();
-
           // At this point, we don't want to throw the error because if that happen we rollback the change in the release status
           // We want to throw the error after the transaction is finished, so we return the error
-          return {
-            kind: 'failed',
-            // A rejection can carry any value, even null: never mistake it for success
-            error: error ?? new Error('Release publish failed with an empty error'),
-            lockedRelease,
-          };
+          return { kind: 'failed', error, lockedRelease };
         }
       });
 
@@ -488,14 +498,10 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
           outcome: 'failure',
           // The error's name and nothing else from it: driver errors can carry row
           // contents in their properties
-          reason: error instanceof Error ? error.name : 'Error',
+          reason: error.name,
         });
 
-        // Swallowing a non-Error throwable would report the publish as successful
-        if (error instanceof Error) {
-          throw error;
-        }
-        throw new Error('Release publish failed', { cause: error });
+        throw error;
       }
 
       // Only a run that released its entries is left
