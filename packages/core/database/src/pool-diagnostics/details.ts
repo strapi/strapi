@@ -42,7 +42,8 @@ export interface TarnPoolLike {
 
 export interface KnexClientLike {
   config?: { acquireConnectionTimeout?: unknown; pool?: { acquireTimeoutMillis?: unknown } };
-  pool?: TarnPoolLike | null;
+  /** A tarn pool, or knex's wrapper around a native driver pool, which has no counters. */
+  pool?: Partial<TarnPoolLike> | null;
 }
 
 export interface CollectInput {
@@ -57,8 +58,17 @@ export interface CollectInput {
 const asNumber = (value: unknown) =>
   typeof value === 'number' && Number.isFinite(value) ? value : undefined;
 
-export const readPoolState = (pool: TarnPoolLike | null | undefined): PoolState | undefined => {
-  if (!pool) {
+const hasCounters = (pool: Partial<TarnPoolLike>): pool is TarnPoolLike =>
+  typeof pool.numUsed === 'function' &&
+  typeof pool.numFree === 'function' &&
+  typeof pool.numPendingAcquires === 'function' &&
+  typeof pool.numPendingCreates === 'function';
+
+export const readPoolState = (
+  pool: Partial<TarnPoolLike> | null | undefined
+): PoolState | undefined => {
+  // knex also accepts a pool that only has acquire, release and destroy
+  if (!pool || !hasCounters(pool)) {
     return undefined;
   }
 

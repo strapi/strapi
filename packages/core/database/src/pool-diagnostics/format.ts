@@ -16,7 +16,7 @@ export const formatPoolTimeoutWarning = (
   { suppressed }: { suppressed: number }
 ): string => {
   const lines = [
-    `[database] connection pool timeout: waited ${details.waitedMs} ms for a connection (acquire timeout ${valueOrUnknown(details.acquireTimeoutMs)} ms)`,
+    `[database] connection pool timeout: waited ${Math.round(details.waitedMs)} ms for a connection (acquire timeout ${valueOrUnknown(details.acquireTimeoutMs)} ms)`,
   ];
 
   if (details.pool) {
@@ -40,12 +40,14 @@ export const formatPoolTimeoutWarning = (
     );
   }
 
-  lines.push(`  - reason reported by the pool: ${details.poolReason ?? 'not available'}`);
+  // the reason comes from a driver error and can span lines; keep it to one bullet
+  const reason = details.poolReason?.replace(/\s+/g, ' ').trim();
+  lines.push(`  - reason reported by the pool: ${reason || 'not available'}`);
 
   if (details.eventLoopDelay) {
     const { maxMs, p99Ms, windowMs } = details.eventLoopDelay;
     lines.push(
-      `  - event loop delay over the last ${Math.round(windowMs / 1000)} s: max ${maxMs} ms, p99 ${p99Ms} ms`
+      `  - event loop delay over the last ${Math.round(windowMs / 1000)} s: max ${Math.round(maxMs)} ms, p99 ${Math.round(p99Ms)} ms`
     );
   }
 

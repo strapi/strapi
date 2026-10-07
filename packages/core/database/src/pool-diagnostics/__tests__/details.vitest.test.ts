@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { collectPoolTimeoutDetails, POOL_TIMEOUT_CODE, readPoolState } from '../details';
+import {
+  collectPoolTimeoutDetails,
+  POOL_TIMEOUT_CODE,
+  readPoolState,
+  type KnexClientLike,
+} from '../details';
 
 const pool = {
   min: 2,
@@ -69,5 +74,20 @@ describe('collectPoolTimeoutDetails', () => {
 describe('readPoolState', () => {
   it('returns undefined when the pool is not initialized', () => {
     expect(readPoolState(undefined)).toBeUndefined();
+  });
+
+  it('returns undefined for a pool that only has acquire, release and destroy', () => {
+    // knex wraps a native driver pool in an object with just these three methods
+    const wrappedNativePool = {
+      acquire: () => ({}),
+      release: () => undefined,
+      destroy: () => undefined,
+    } as unknown as NonNullable<KnexClientLike['pool']>;
+
+    expect(() => readPoolState(wrappedNativePool)).not.toThrow();
+    expect(readPoolState(wrappedNativePool)).toBeUndefined();
+    expect(
+      collectPoolTimeoutDetails({ config: {}, pool: wrappedNativePool }, input).pool
+    ).toBeUndefined();
   });
 });

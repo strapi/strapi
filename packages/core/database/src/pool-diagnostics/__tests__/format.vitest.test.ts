@@ -126,9 +126,48 @@ describe('formatPoolTimeoutWarning', () => {
     expect(text).toContain('  - host api-7f9c, pid 41');
   });
 
-  it('never names a cause', () => {
-    const text = formatPoolTimeoutWarning(details(), { suppressed: 0 });
+  it('rounds durations that are not whole milliseconds', () => {
+    const text = formatPoolTimeoutWarning(
+      details({
+        waitedMs: 60_012.6,
+        eventLoopDelay: { maxMs: 12.4, p99Ms: 3.6, windowMs: 30_000 },
+      }),
+      { suppressed: 0 }
+    );
 
-    expect(text).not.toMatch(/probably|likely|because|cause/i);
+    expect(text).toContain('waited 60013 ms for a connection');
+    expect(text).toContain('max 12 ms, p99 4 ms');
+  });
+
+  it('keeps a pool reason that spans lines on one bullet', () => {
+    const text = formatPoolTimeoutWarning(
+      details({ poolReason: 'connect ECONNREFUSED\n  10.0.3.4:5432' }),
+      { suppressed: 0 }
+    );
+
+    expect(text).toContain('  - reason reported by the pool: connect ECONNREFUSED 10.0.3.4:5432');
+  });
+
+  it('never names a cause', () => {
+    const outputs = [
+      formatPoolTimeoutWarning(details(), { suppressed: 0 }),
+      formatPoolTimeoutWarning(
+        details({ acquireConnectionTimeout: 2000, poolAcquireTimeoutMillis: 600_000 }),
+        { suppressed: 3 }
+      ),
+      formatPoolTimeoutWarning(
+        details({
+          pool: undefined,
+          poolReason: undefined,
+          eventLoopDelay: undefined,
+          phase: undefined,
+        }),
+        { suppressed: 0 }
+      ),
+    ];
+
+    for (const text of outputs) {
+      expect(text).not.toMatch(/probably|likely|because|cause/i);
+    }
   });
 });
