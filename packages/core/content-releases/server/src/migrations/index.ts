@@ -125,7 +125,7 @@ export async function migrateIsValidAndStatusReleases() {
 }
 
 export async function revalidateChangedContentTypes({ oldContentTypes, contentTypes }: Input) {
-  if (oldContentTypes !== undefined && contentTypes !== undefined) {
+  if (oldContentTypes !== undefined && oldContentTypes!==null && contentTypes !== undefined) {
     const contentTypesWithDraftAndPublish = Object.keys(oldContentTypes).filter(
       (uid) => oldContentTypes[uid]?.options?.draftAndPublish
     );
