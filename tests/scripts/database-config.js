@@ -1,6 +1,8 @@
 'use strict';
 
-const yargs = require('yargs/yargs');
+// The yargs/yargs subpath is an extensionless file in a "type": "module" package.
+// Node 26 loads it as ESM, so its require() throws. The package main is index.cjs.
+const yargs = require('yargs');
 
 const databases = {
   postgres: {
