@@ -3,7 +3,7 @@ import { performance } from 'node:perf_hooks';
 import type { Knex } from 'knex';
 
 import { createThrottle } from '../utils/throttle';
-import { collectPoolTimeoutDetails, type KnexClientLike } from './details';
+import { collectPoolTimeoutDetails, POOL_TIMEOUT_CODE, type KnexClientLike } from './details';
 import { createEventLoopMonitor, type EventLoopMonitor } from './event-loop';
 import { appendDocsLink, formatPoolTimeoutWarning } from './format';
 import { deepenStack } from './stack';
@@ -40,6 +40,10 @@ export const isPoolAcquireTimeout = (error: unknown): error is Error =>
   error.name === 'KnexTimeoutError' &&
   error.message.startsWith(ACQUIRE_TIMEOUT_PREFIX);
 
+/** An earlier install (for example another copy of this package) already described this error. */
+const isDescribed = (error: Error) =>
+  (error as { details?: { code?: unknown } | null }).details?.code === POOL_TIMEOUT_CODE;
+
 const replaceMessage = (error: Error, message: string) => {
   const previous = error.message;
   error.message = message;
@@ -53,8 +57,10 @@ const replaceMessage = (error: Error, message: string) => {
 /**
  * Wraps acquireConnection on the knex client Strapi created. On a pool acquire timeout, the same
  * error object gets a deeper stack, a docs link and `details`; at most one warning block per
- * interval goes to the logger. Any failure inside the diagnostics leaves the error's class, name and
- * message as knex made them (its stack may already be deeper).
+ * interval goes to the logger. Facts are collected before the error is changed, so a failure while
+ * collecting leaves the error's class, name and message as knex made them (its stack may already be
+ * deeper); a failing logger only loses the warning. An error that already carries `details` from
+ * an earlier install is passed through.
  */
 export const installPoolDiagnostics = (
   knex: Knex,
@@ -116,7 +122,8 @@ export const installPoolDiagnostics = (
     try {
       return await original.call(this);
     } catch (error) {
-      if (isPoolAcquireTimeout(error)) {
+      // An outer second install must not overwrite `details` or log a second block
+      if (isPoolAcquireTimeout(error) && !isDescribed(error)) {
         try {
           // Called here so this function is the first re-captured frame
           deepenStack(error);

@@ -26,7 +26,15 @@ const acquireTimeout = () =>
 
 type Annotated = Error & { details?: Record<string, any> };
 
-const setup = ({ fail, waitMs = 60_012 }: { fail?: () => Error; waitMs?: number } = {}) => {
+const setup = ({
+  fail,
+  waitMs = 60_012,
+  getPhase = () => 'runtime',
+}: {
+  fail?: () => Error;
+  waitMs?: number;
+  getPhase?: () => string | undefined;
+} = {}) => {
   let clock = 1_000_000;
   const thrown: Error[] = [];
   const pool = {
@@ -63,7 +71,7 @@ const setup = ({ fail, waitMs = 60_012 }: { fail?: () => Error; waitMs?: number 
     now: () => clock,
     hostname: 'api-7f9c',
     pid: 41,
-    getPhase: () => 'runtime',
+    getPhase,
     eventLoopMonitor,
   });
 
@@ -225,10 +233,72 @@ describe('installPoolDiagnostics', () => {
     expect(error.stack).toContain('deepCaller');
   });
 
+  it('does not describe an error twice when a second install wraps the first', async () => {
+    const { client, logger, thrown } = setup({ fail: acquireTimeout });
+    const outerLogger = { warn: vi.fn() };
+    let outerClock = 5_000_000;
+    installPoolDiagnostics({ client } as unknown as Knex, {
+      logger: outerLogger,
+      now() {
+        outerClock += 99;
+        return outerClock;
+      },
+      hostname: 'outer-host',
+      pid: 7,
+      eventLoopMonitor: null,
+    });
+
+    const error = await acquireError(client);
+
+    expect(error).toBe(thrown[0]);
+    // the inner wrapper described the timeout; the outer one left it alone
+    expect(error.details).toMatchObject({
+      code: POOL_TIMEOUT_CODE,
+      waitedMs: 60_012,
+      hostname: 'api-7f9c',
+      pid: 41,
+    });
+    expect(error.message).toBe(`${ACQUIRE_TIMEOUT_MESSAGE} See ${POOL_TIMEOUT_DOCS_URL}.`);
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(outerLogger.warn).not.toHaveBeenCalled();
+  });
+
+  it('still throws the same error with its details when the logger fails', async () => {
+    const { client, logger, thrown } = setup({ fail: acquireTimeout });
+    logger.warn.mockImplementation(() => {
+      throw new Error('logger down');
+    });
+
+    const error = await acquireError(client);
+
+    expect(error).toBe(thrown[0]);
+    expect(error.message).toBe(`${ACQUIRE_TIMEOUT_MESSAGE} See ${POOL_TIMEOUT_DOCS_URL}.`);
+    expect(error.details).toMatchObject({ code: POOL_TIMEOUT_CODE, waitedMs: 60_012 });
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the details and drops only the phase when getPhase fails', async () => {
+    const { client, logger } = setup({
+      fail: acquireTimeout,
+      getPhase() {
+        throw new Error('phase unavailable');
+      },
+    });
+
+    const error = await acquireError(client);
+
+    expect(error.details).toMatchObject({ code: POOL_TIMEOUT_CODE, waitedMs: 60_012 });
+    expect(error.details?.phase).toBeUndefined();
+    expect(error.message).toBe(`${ACQUIRE_TIMEOUT_MESSAGE} See ${POOL_TIMEOUT_DOCS_URL}.`);
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+  });
+
   it('returns the connection unchanged on success', async () => {
-    const { client } = setup();
+    const { client, original } = setup();
 
     await expect(client.acquireConnection()).resolves.toEqual({ __knexUid: '__knexUid1' });
+    // knex reads its own state through `this`, so the original must run on the client
+    expect(original.mock.contexts[0]).toBe(client);
   });
 
   it('restores acquireConnection and stops the event loop monitor on dispose', () => {
@@ -239,5 +309,25 @@ describe('installPoolDiagnostics', () => {
 
     expect(client.acquireConnection).toBe(original);
     expect(eventLoopMonitor.stop).toHaveBeenCalled();
+    expect(() => diagnostics.dispose()).not.toThrow();
+  });
+
+  it('removes its wrapper from a client that inherits acquireConnection from its prototype', () => {
+    const original = vi.fn(async () => ({ __knexUid: '__knexUid1' }));
+    const client = Object.assign(Object.create({ acquireConnection: original }), {
+      config: {},
+      pool: null,
+    }) as { acquireConnection(): Promise<unknown> };
+    const diagnostics = installPoolDiagnostics({ client } as unknown as Knex, {
+      logger: { warn: vi.fn() },
+      eventLoopMonitor: null,
+    });
+    expect(Object.prototype.hasOwnProperty.call(client, 'acquireConnection')).toBe(true);
+
+    diagnostics.dispose();
+
+    expect(Object.prototype.hasOwnProperty.call(client, 'acquireConnection')).toBe(false);
+    expect(client.acquireConnection).toBe(original);
+    expect(() => diagnostics.dispose()).not.toThrow();
   });
 });
