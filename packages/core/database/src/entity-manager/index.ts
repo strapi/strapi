@@ -38,6 +38,7 @@ import {
   deleteRelations,
   cleanOrderColumns,
 } from './regular-relations';
+import { idsFromInsertResult } from './inserted-ids';
 import { relationsOrderer } from './relations-orderer';
 import type { Database } from '..';
 import type { Meta } from '../metadata';
@@ -396,7 +397,7 @@ export const createEntityManager = (db: Database): EntityManager => {
             .transacting(trx.get())
             .execute<Array<ID | { id: ID }>>();
           createdEntries = createdEntries.concat(
-            Array.isArray(chunkResult) ? chunkResult : [chunkResult]
+            idsFromInsertResult(chunkResult, chunk.length, db.dialect.useReturning())
           );
         }
         await trx.commit();

@@ -413,6 +413,19 @@ const createHelpers = (db: Database) => {
       return;
     }
 
+    // Postgres rejects DROP TABLE while another table still references it.
+    // MySQL disables foreign_key_checks for the schema update, and SQLite does
+    // not enforce these dependencies. CASCADE drops the dependent constraints
+    // (and views), not the other tables. The schema builder's client is the
+    // transaction, so the statement stays inside the surrounding trx.
+    if (db.dialect.client === 'postgres') {
+      const schemaName = db.getSchemaName();
+      const qualified = schemaName ? `${schemaName}.${table.name}` : table.name;
+      const runner = (schemaBuilder as Knex.SchemaBuilder & { client: Knex }).client;
+
+      return runner.raw('DROP TABLE IF EXISTS ?? CASCADE', [qualified]);
+    }
+
     return schemaBuilder.dropTableIfExists(table.name);
   };
 
