@@ -6,15 +6,7 @@ const TOKEN_URL = 'https://oauth2.googleapis.com/token';
 const TRANSLATE_URL = 'https://translation.googleapis.com/language/translate/v2';
 const TRANSLATE_SCOPE = 'https://www.googleapis.com/auth/cloud-translation';
 
-const LOCALE_ALIASES = {
-  'zh-hans': 'zh-CN',
-  'zh-hant': 'zh-TW',
-  zh: 'zh-CN',
-  'en-gb': 'en',
-  'en-us': 'en',
-};
-
-const REGIONAL_GOOGLE_LOCALES = new Set(['zh-CN', 'zh-TW', 'pt-BR', 'pt-PT']);
+const { toGoogleLocale } = require('../utils/google-locale');
 
 const tokenCache = {
   token: null,
@@ -23,33 +15,7 @@ const tokenCache = {
 };
 
 const toBase64Url = (input) =>
-  Buffer.from(input)
-    .toString('base64')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/g, '');
-
-const toGoogleLocale = (locale) => {
-  if (!locale) {
-    return locale;
-  }
-
-  const lower = String(locale).toLowerCase();
-  if (LOCALE_ALIASES[lower]) {
-    return LOCALE_ALIASES[lower];
-  }
-
-  const parts = String(locale).split('-');
-  if (parts.length >= 2) {
-    const regional = `${parts[0].toLowerCase()}-${parts[1].toUpperCase()}`;
-    if (REGIONAL_GOOGLE_LOCALES.has(regional)) {
-      return regional;
-    }
-    return parts[0].toLowerCase();
-  }
-
-  return lower;
-};
+  Buffer.from(input).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
 
 const createServiceAccountJwt = (credentialsJson) => {
   const now = Math.floor(Date.now() / 1000);
@@ -92,7 +58,9 @@ const getAccessToken = async (credentialsJson) => {
 
   const payload = await response.json();
   if (!response.ok || !payload.access_token) {
-    throw new Error(payload.error_description || payload.error || 'Failed to get Google access token');
+    throw new Error(
+      payload.error_description || payload.error || 'Failed to get Google access token'
+    );
   }
 
   tokenCache.token = payload.access_token;
@@ -119,7 +87,9 @@ const translateWithApiKey = async ({ apiKey, texts, source, target, format }) =>
   });
 
   if (!response.ok) {
-    throw new Error(`Google Translate API failed (${response.status}): ${await parseGoogleError(response)}`);
+    throw new Error(
+      `Google Translate API failed (${response.status}): ${await parseGoogleError(response)}`
+    );
   }
 
   const payload = await response.json();
@@ -137,7 +107,9 @@ const translateWithAccessToken = async ({ accessToken, texts, source, target, fo
   });
 
   if (!response.ok) {
-    throw new Error(`Google Translate API failed (${response.status}): ${await parseGoogleError(response)}`);
+    throw new Error(
+      `Google Translate API failed (${response.status}): ${await parseGoogleError(response)}`
+    );
   }
 
   const payload = await response.json();

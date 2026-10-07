@@ -28036,6 +28036,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"strapi-plugin-google-translate@workspace:examples/getstarted/src/plugins/google-translate":
+  version: 0.0.0-use.local
+  resolution: "strapi-plugin-google-translate@workspace:examples/getstarted/src/plugins/google-translate"
+  languageName: unknown
+  linkType: soft
+
+"strapi-plugin-html-editor@workspace:examples/getstarted/src/plugins/html-editor":
+  version: 0.0.0-use.local
+  resolution: "strapi-plugin-html-editor@workspace:examples/getstarted/src/plugins/html-editor"
+  languageName: unknown
+  linkType: soft
+
 "strapi-plugin-local-plugin@workspace:examples/getstarted/src/plugins/local-plugin":
   version: 0.0.0-use.local
   resolution: "strapi-plugin-local-plugin@workspace:examples/getstarted/src/plugins/local-plugin"

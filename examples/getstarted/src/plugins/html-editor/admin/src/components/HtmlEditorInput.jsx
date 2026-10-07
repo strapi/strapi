@@ -16,7 +16,8 @@ const PRESET_COLORS = [
 ];
 
 const Shell = styled.div`
-  border: 1px solid ${({ theme, $error }) => ($error ? theme.colors.danger600 : theme.colors.neutral200)};
+  border: 1px solid
+    ${({ theme, $error }) => ($error ? theme.colors.danger600 : theme.colors.neutral200)};
   border-radius: ${({ theme }) => theme.borderRadius};
   background: ${({ theme }) => theme.colors.neutral0};
   overflow: hidden;
@@ -310,10 +311,20 @@ export const HtmlEditorInput = React.forwardRef((props, forwardedRef) => {
               <SingleSelectOption value="blockquote">Quote</SingleSelectOption>
             </SingleSelect>
             <Divider />
-            <ToolBtn type="button" disabled={disabled || sourceMode} onClick={() => run('bold')} title="Bold">
+            <ToolBtn
+              type="button"
+              disabled={disabled || sourceMode}
+              onClick={() => run('bold')}
+              title="Bold"
+            >
               B
             </ToolBtn>
-            <ToolBtn type="button" disabled={disabled || sourceMode} onClick={() => run('italic')} title="Italic">
+            <ToolBtn
+              type="button"
+              disabled={disabled || sourceMode}
+              onClick={() => run('italic')}
+              title="Italic"
+            >
               <em>I</em>
             </ToolBtn>
             <ToolBtn
@@ -349,7 +360,13 @@ export const HtmlEditorInput = React.forwardRef((props, forwardedRef) => {
                       value={color}
                       aria-label="Custom text color"
                       onChange={(event) => applyColor(event.target.value)}
-                      style={{ width: '100%', height: 32, border: 0, background: 'transparent', cursor: 'pointer' }}
+                      style={{
+                        width: '100%',
+                        height: 32,
+                        border: 0,
+                        background: 'transparent',
+                        cursor: 'pointer',
+                      }}
                     />
                   </Box>
                 </Box>
@@ -381,16 +398,36 @@ export const HtmlEditorInput = React.forwardRef((props, forwardedRef) => {
               ≡
             </ToolBtn>
             <Divider />
-            <ToolBtn type="button" disabled={disabled || sourceMode} onClick={handleLink} title="Insert link">
+            <ToolBtn
+              type="button"
+              disabled={disabled || sourceMode}
+              onClick={handleLink}
+              title="Insert link"
+            >
               🔗
             </ToolBtn>
-            <ToolBtn type="button" disabled={disabled || sourceMode} onClick={handleImage} title="Insert image">
+            <ToolBtn
+              type="button"
+              disabled={disabled || sourceMode}
+              onClick={handleImage}
+              title="Insert image"
+            >
               🖼
             </ToolBtn>
-            <ToolBtn type="button" disabled={disabled || sourceMode} onClick={handleVideo} title="Insert video">
+            <ToolBtn
+              type="button"
+              disabled={disabled || sourceMode}
+              onClick={handleVideo}
+              title="Insert video"
+            >
               ▶
             </ToolBtn>
-            <ToolBtn type="button" disabled={disabled || sourceMode} onClick={handleTable} title="Insert table">
+            <ToolBtn
+              type="button"
+              disabled={disabled || sourceMode}
+              onClick={handleTable}
+              title="Insert table"
+            >
               ⊞
             </ToolBtn>
             <div style={{ marginLeft: 'auto' }}>

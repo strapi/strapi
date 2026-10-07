@@ -54,7 +54,8 @@ const SettingsPage = () => {
     } catch (error) {
       toggleNotification({
         type: 'danger',
-        message: error?.response?.data?.error?.message || error.message || 'Could not save credentials',
+        message:
+          error?.response?.data?.error?.message || error.message || 'Could not save credentials',
       });
     } finally {
       setSaving(false);
@@ -72,7 +73,8 @@ const SettingsPage = () => {
     } catch (error) {
       toggleNotification({
         type: 'danger',
-        message: error?.response?.data?.error?.message || error.message || 'Translation test failed',
+        message:
+          error?.response?.data?.error?.message || error.message || 'Translation test failed',
       });
     } finally {
       setTesting(false);
@@ -154,19 +156,28 @@ const SettingsPage = () => {
                 onChange={(event) => setApiKey(event.target.value)}
                 placeholder={formatMessage({
                   id: getTrad('settings.apiKey.placeholder'),
-                  defaultMessage: 'Optional if you use a simple API key instead of a service account',
+                  defaultMessage:
+                    'Optional if you use a simple API key instead of a service account',
                 })}
               />
             </Field.Root>
 
             <Typography variant="pi" textColor="neutral600">
-              Paste either the service account JSON or an API key, then save. The private key is not shown
-              again after saving.
+              Paste either the service account JSON or an API key, then save. The private key is not
+              shown again after saving.
             </Typography>
 
             <Flex gap={2}>
-              <Button variant="secondary" loading={testing} disabled={!status?.configured} onClick={test}>
-                {formatMessage({ id: getTrad('settings.test'), defaultMessage: 'Test translation' })}
+              <Button
+                variant="secondary"
+                loading={testing}
+                disabled={!status?.configured}
+                onClick={test}
+              >
+                {formatMessage({
+                  id: getTrad('settings.test'),
+                  defaultMessage: 'Test translation',
+                })}
               </Button>
               <Button
                 variant="danger-light"
@@ -174,7 +185,10 @@ const SettingsPage = () => {
                 disabled={!status?.configured || saving}
                 onClick={() => save({ clear: true })}
               >
-                {formatMessage({ id: getTrad('settings.clear'), defaultMessage: 'Remove credentials' })}
+                {formatMessage({
+                  id: getTrad('settings.clear'),
+                  defaultMessage: 'Remove credentials',
+                })}
               </Button>
             </Flex>
           </Flex>
