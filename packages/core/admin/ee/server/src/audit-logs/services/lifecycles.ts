@@ -2,7 +2,7 @@ import type { Core, Modules } from '@strapi/types';
 
 import { getDisplayName } from '../utils';
 
-const DEFAULT_RETENTION_DAYS = 90;
+export const DEFAULT_RETENTION_DAYS = 90;
 
 /**
  * Events audited before the payload standard; their stored shape is frozen for
@@ -91,24 +91,38 @@ const getActor = (
   };
 };
 
-const getRetentionDays = (strapi: Core.Strapi) => {
-  const featureConfig = strapi.ee.features.get('audit-logs');
-  const licenseRetentionDays =
-    typeof featureConfig === 'object' && featureConfig?.options?.retentionDays;
-  const userRetentionDays = strapi.config.get('admin.auditLogs.retentionDays');
-
+/**
+ * The retention the daily delete job applies, from the license's value and the admin override.
+ * Shared with the Plan card's resolver (../entitlements.ts) so the card shows this same figure.
+ */
+export const computeRetentionDays = (
+  licenseRetentionDays: unknown,
+  userRetentionDays: number | null | undefined
+): number => {
   // For enterprise plans, use 90 days by default, but allow users to override it
   if (licenseRetentionDays == null) {
     return userRetentionDays ?? DEFAULT_RETENTION_DAYS;
   }
 
+  // The registry can ship the value as a numeric string
+  const licenseDays = Number(licenseRetentionDays);
+
   // Allow users to override the license retention days, but not to increase it
-  if (userRetentionDays && userRetentionDays <= licenseRetentionDays) {
+  if (userRetentionDays && userRetentionDays <= licenseDays) {
     return userRetentionDays;
   }
 
   // User didn't provide a retention days value, use the license one
-  return licenseRetentionDays;
+  return licenseDays;
+};
+
+const getRetentionDays = (strapi: Core.Strapi) => {
+  const featureConfig = strapi.ee.features.get('audit-logs');
+
+  return computeRetentionDays(
+    typeof featureConfig === 'object' ? featureConfig?.options?.retentionDays : undefined,
+    strapi.config.get('admin.auditLogs.retentionDays')
+  );
 };
 
 /**

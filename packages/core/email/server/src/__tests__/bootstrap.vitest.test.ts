@@ -1,34 +1,35 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Core } from '@strapi/types';
 
 import { bootstrap } from '../bootstrap';
 
-jest.mock('@strapi/provider-email-sendmail', () => ({
+vi.mock('@strapi/provider-email-sendmail', () => ({
   init() {
-    return { send: jest.fn() };
+    return { send: vi.fn() };
   },
 }));
 
 const createStrapiMock = (provider = 'sendmail') => {
-  const warn = jest.fn();
-  const registerMany = jest.fn().mockResolvedValue(undefined);
+  const warn = vi.fn();
+  const registerMany = vi.fn().mockResolvedValue(undefined);
   const emailPlugin = { provider: undefined as unknown };
 
   const strapi = {
     config: {
-      get: jest.fn().mockReturnValue({
+      get: vi.fn().mockReturnValue({
         provider,
         providerOptions: {},
         settings: { defaultFrom: 'Strapi <no-reply@strapi.io>' },
       }),
     },
     log: { warn },
-    plugin: jest.fn((name: string) => {
+    plugin: vi.fn((name: string) => {
       if (name === 'email') {
         return emailPlugin;
       }
       return {};
     }),
-    service: jest.fn(() => ({
+    service: vi.fn(() => ({
       actionProvider: { registerMany },
     })),
   } as unknown as Core.Strapi;
