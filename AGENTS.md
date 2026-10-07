@@ -171,7 +171,7 @@ yarn test:cli:update         # update snapshots
 E2E tests live in `tests/e2e/tests/` organized by domain (e.g. `admin`, `content-manager`, `i18n`).
 
 ```bash
-yarn playwright install                          # one-time browser install
+yarn playwright install chromium webkit          # one-time browser install
 yarn test:e2e --setup --concurrency=1            # run all domains sequentially
 yarn test:e2e --domains content-manager admin    # run specific domains only
 yarn test:e2e --concurrency=3                    # run 3 domains in parallel
