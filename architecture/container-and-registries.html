@@ -1,0 +1,367 @@
+<!doctype html><html lang=en dir=ltr class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-architecture/container-and-registries" data-has-hydrated=false><head><meta charset=UTF-8><meta name=generator content="Docusaurus v3.10.2"><title data-rh=true>Container and registries | Strapi contributor docs</title><meta data-rh=true name=viewport content="width=device-width, initial-scale=1.0"/><meta data-rh=true name=twitter:card content=summary_large_image /><meta data-rh=true property=og:url content=https://contributor.strapi.io/architecture/container-and-registries /><meta data-rh=true property=og:locale content=en /><meta data-rh=true name=docusaurus_locale content=en /><meta data-rh=true name=docsearch:language content=en /><meta data-rh=true name=docusaurus_version content=current /><meta data-rh=true name=docusaurus_tag content=docs-default-current /><meta data-rh=true name=docsearch:version content=current /><meta data-rh=true name=docsearch:docusaurus_tag content=docs-default-current /><meta data-rh=true property=og:title content="Container and registries | Strapi contributor docs"/><meta data-rh=true name=description content="How the Strapi container stores core subsystems, how registries store plugin, API and application artifacts, and how UIDs are built."/><meta data-rh=true property=og:description content="How the Strapi container stores core subsystems, how registries store plugin, API and application artifacts, and how UIDs are built."/><link data-rh=true rel=icon href=/img/favicon.svg /><link data-rh=true rel=canonical href=https://contributor.strapi.io/architecture/container-and-registries /><link data-rh=true rel=alternate href=https://contributor.strapi.io/architecture/container-and-registries hreflang=en /><link data-rh=true rel=alternate href=https://contributor.strapi.io/architecture/container-and-registries hreflang=x-default /><script data-rh=true type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","item":"https://contributor.strapi.io/architecture/container-and-registries","name":"Container and registries","position":1}]}</script><link rel=stylesheet href=/assets/css/styles.99e52e7f.css /><script src=/assets/js/runtime~main.b80dc77e.js defer></script><script src=/assets/js/main.4583c1e3.js defer></script></head><body><svg style="display: none;"><defs>
+<symbol id=theme-svg-external-link viewBox="0 0 24 24"><path fill=currentColor d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme-6c6")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||"light"),document.documentElement.setAttribute("data-theme-choice",t||"light")}(),function(){try{for(var[t,e]of new URLSearchParams(window.location.search).entries())if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id=__docusaurus><link rel=preload as=image href=/img/logo.svg /><link rel=preload as=image href=/img/logo_dark.svg /><div role=region aria-label="Skip to main content"><a class=skipToContent_fXgn href=#__docusaurus_skipToContent_fallback>Skip to main content</a></div><nav aria-label=Main class="theme-layout-navbar navbar navbar--fixed-top navbarHideable_m1mJ"><div class=navbar__inner><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded=false class="navbar__toggle clean-btn" type=button><svg width=30 height=30 viewBox="0 0 30 30" aria-hidden=true><path stroke=currentColor stroke-linecap=round stroke-miterlimit=10 stroke-width=2 d="M4 7h22M4 15h22M4 23h22"/></svg></button><a class=navbar__brand href=/><div class=navbar__logo><img src=/img/logo.svg alt=Strapi class="themedComponent_mlkZ themedComponent--light_NVdE" width=100 /><img src=/img/logo_dark.svg alt=Strapi class="themedComponent_mlkZ themedComponent--dark_xIcU" width=100 /></div><b class="navbar__title text--truncate">Contributor docs</b></a><a class="navbar__item navbar__link" href=/contributing>Contributing</a><a aria-current=page class="navbar__item navbar__link navbar__link--active" href=/architecture>Architecture</a><a class="navbar__item navbar__link" href=/packages>Packages</a><a class="navbar__item navbar__link" href=/api/Strapi>API reference</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><a href=https://docs.strapi.io target=_blank rel="noopener noreferrer" class="navbar__item navbar__link">User docs<svg width=13.5 height=13.5 aria-label="(opens in new tab)" class=iconExternalLink_nPIU><use href=#theme-svg-external-link /></svg></a><a href=https://github.com/strapi/strapi target=_blank rel="noopener noreferrer" class="navbar__item navbar__link header-github-link" aria-label="GitHub repository"></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type=button disabled title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width=24 height=24 aria-hidden=true class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill=currentColor d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"/></svg><svg viewBox="0 0 24 24" width=24 height=24 aria-hidden=true class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill=currentColor d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"/></svg><svg viewBox="0 0 24 24" width=24 height=24 aria-hidden=true class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill=currentColor d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"/></svg></button></div><div class=navbarSearchContainer_Bca1><div class="navbar__search searchBarContainer_NW3z" dir=ltr><svg aria-hidden=true class=searchIcon_T3tP focusable=false viewBox="0 0 16 16"><path fill=currentColor d="M6.02945 10.20327a4.17382 4.17382 0 1 1 4.17382-4.17382 4.15609 4.15609 0 0 1-4.17382 4.17382Zm9.69195 4.2199-4.8225-4.82338A5.88021 5.88021 0 0 0 12.058 6.02856 6.00467 6.00467 0 1 0 9.59979 10.8989l4.82338 4.82338a.89729.89729 0 0 0 1.29912 0 .89749.89749 0 0 0-.00087-1.29909Z"/></svg><input placeholder=Search aria-label=Search class="navbar__search-input searchInput_YFbd" value="" /><div class="loadingRing_RJI3 searchBarLoadingRing_YnHq"><div></div><div></div><div></div><div></div></div></div></div></div></div><div role=presentation class=navbar-sidebar__backdrop></div></nav><div id=__docusaurus_skipToContent_fallback class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class=docsWrapper_hBAB><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type=button></button><div class=docRoot_UBD9><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class=sidebarViewport_aRkj><div class="sidebar_njMd sidebarWithHideableNavbar_wUlq"><a tabindex=-1 class=sidebarLogo_isFc href=/><img src=/img/logo.svg alt=Strapi class="themedComponent_mlkZ themedComponent--light_NVdE" width=100 /><img src=/img/logo_dark.svg alt=Strapi class="themedComponent_mlkZ themedComponent--dark_xIcU" width=100 /><b>Contributor docs</b></a><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture><span class=linkLabel_WmDU>Architecture overview</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/package-map><span class=linkLabel_WmDU>Package map</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/server-lifecycle><span class=linkLabel_WmDU>Server lifecycle</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link menu__link--active" aria-current=page href=/architecture/container-and-registries><span class=linkLabel_WmDU>Container and registries</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/extension-points><span class=linkLabel_WmDU>Extension points</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/document-write-path><span class=linkLabel_WmDU>Document write path</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/http-request-path><span class=linkLabel_WmDU>HTTP request path</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/schema-sync><span class=linkLabel_WmDU>Schema sync</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/authentication><span class=linkLabel_WmDU>Sessions and JWT</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/enterprise-edition><span class=linkLabel_WmDU>Enterprise Edition</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/future-flags><span class=linkLabel_WmDU>Future Flags</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/glossary><span class=linkLabel_WmDU>Glossary</span></a></ul></nav></div></div></aside><main class=docMainContainer_TBSr><div class="container padding-top--md padding-bottom--lg"><div class=row><div class="col docItemCol_VOVn"><div class=docItemContainer_Djhp><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label=Breadcrumbs><ul class=breadcrumbs><li class=breadcrumbs__item><a aria-label="Home page" class=breadcrumbs__link href=/><svg viewBox="0 0 24 24" class=breadcrumbHomeIcon_YNFT><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill=currentColor /></svg></a><li class="breadcrumbs__item breadcrumbs__item--active"><span class=breadcrumbs__link>Container and registries</span></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type=button class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><aside class="alert alert--info banner_N8r1" role=note><p class=title_rkSp>Draft, not yet verified against the code<p class=body_aNf4>The content may be incomplete. Check it against the source before relying on it.<ul class=notes_l7eN><li>Drafted from internal research notes on Strapi v5 internals and spot-checked against the code on releases/5.56.0; needs a maintainer review.<li>The container key list reflects releases/5.56.0. It changes when a provider or an internal service is added.</ul><a class=link_fT1h href=/contributing/docs-health>See all flagged pages in Docs health</a></aside><div class="theme-doc-markdown markdown"><header><h1>Container and registries</h1></header><p>The <code>Strapi</code> instance is a container. The container holds core subsystems and registries. Registries hold the artifacts that plugins, APIs and the application define. This page describes both layers and the UID rules.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=the-container>The container<a href=#the-container class=hash-link aria-label="Direct link to The container" title="Direct link to The container" translate=no>​</a></h2>
+<p><code>Strapi</code> extends <code>Container</code>. The container is a small service locator with three methods.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Method<th>Behavior<tbody><tr><td><code>add(name, resolver)</code><td>Stores the resolver under <code>name</code>. Throws <code>Cannot register already registered service &lt;name></code> if <code>name</code> exists. Returns the container, so calls can chain.<tr><td><code>get(name, args?)</code><td>Returns the cached value if <code>name</code> was resolved before. Otherwise, if the resolver is a function, calls <code>resolver(container, args)</code> once and caches the result. If the resolver is not a function, caches it as the value. Throws <code>Could not resolve service &lt;name></code> if <code>name</code> is unknown.<tr><td><code>has(name)</code><td>Returns <code>true</code> if <code>name</code> is registered or resolved.</table>
+<p>The container has no <code>set</code> and no <code>remove</code>. After <code>add</code>, nothing can replace an entry. Every resolved value is a singleton. A <code>TODO</code> comment in <code>container.ts</code> notes that there is no per-call instantiation.</p>
+<div class="theme-admonition theme-admonition-caution admonition_xJq3 alert alert--warning"><div class=admonitionHeading_Gvgb><span class=admonitionIcon_Rf37><svg viewBox="0 0 16 16"><path fill-rule=evenodd d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"/></svg></span>caution</div><div class=admonitionContent_BuS1><p>The container always calls a function resolver. To store a function as the value, wrap it in a factory: <code>strapi.add('myFn', () => myFn)</code>.</div></div>
+<p>Controlled replacement happens one level down, in the registries. See <a href=#registry-operations class="">Registry operations</a>.</p>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=container-keys>Container keys<a href=#container-keys class=hash-link aria-label="Direct link to Container keys" title="Direct link to Container keys" translate=no>​</a></h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Origin<th>Keys<tbody><tr><td><code>Strapi.registerInternalServices()</code><td><code>config</code>, <code>query-params</code>, <code>content-api</code>, <code>content-api-schema-registry</code>, <code>auth</code>, <code>server</code>, <code>fs</code>, <code>eventHub</code>, <code>startupLogger</code>, <code>logger</code>, <code>fetch</code>, <code>features</code>, <code>requestContext</code>, <code>customFields</code>, <code>entityValidator</code>, <code>entityService</code>, <code>documents</code>, <code>db</code>, <code>reload</code>, <code>content-source-maps</code><tr><td><code>registries</code> provider<td><code>content-types</code>, <code>components</code>, <code>services</code>, <code>policies</code>, <code>middlewares</code>, <code>hooks</code>, <code>controllers</code>, <code>modules</code>, <code>plugins</code>, <code>custom-fields</code>, <code>apis</code>, <code>models</code>, <code>sanitizers</code>, <code>validators</code><tr><td>Other internal providers<td><code>admin</code>, <code>ai</code>, <code>content-structure</code>, <code>coreStore</code>, <code>sessionManager</code>, <code>webhookStore</code>, <code>webhookRunner</code>, <code>telemetry</code>, <code>cron</code>, <code>ai.mcp</code><tr><td><code>@strapi/admin</code> server <code>register</code><td><code>ai.admin</code></table>
+<p>The key style is mixed: camelCase (<code>eventHub</code>), kebab-case (<code>content-types</code>) and dotted (<code>ai.mcp</code>). The container treats a dot as a normal character.</p>
+<p>Many <code>strapi.*</code> getters read a container key, and some names differ:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Getter<th>Container key<tbody><tr><td><code>strapi.log</code><td><code>logger</code><tr><td><code>strapi.store</code><td><code>coreStore</code><tr><td><code>strapi.contentAPI</code><td><code>content-api</code><tr><td><code>strapi.customFields</code><td><code>customFields</code> (a service), not <code>custom-fields</code> (the registry)<tr><td><code>strapi.ai.mcp</code><td><code>ai.mcp</code></table>
+<p>Some getters read a registry instead: <code>strapi.services</code>, <code>strapi.controllers</code>, <code>strapi.contentTypes</code>, <code>strapi.components</code>, <code>strapi.policies</code>, <code>strapi.middlewares</code>, <code>strapi.plugins</code>, <code>strapi.hooks</code> and <code>strapi.apis</code> call <code>getAll()</code> on the matching registry.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=registries>Registries<a href=#registries class=hash-link aria-label="Direct link to Registries" title="Direct link to Registries" translate=no>​</a></h2>
+<p>The <code>registries</code> provider adds 14 registries to the container in its <code>init</code> step. <code>strapi.get('&lt;name>')</code> returns the registry object.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Key<th>Stores<th>Key format<th>Methods<tbody><tr><td><code>content-types</code><td>Content-type schemas<td><code>&lt;namespace>.&lt;name></code> or <code>admin::&lt;name></code><td><code>keys</code>, <code>get</code>, <code>getAll(ns)</code>, <code>set</code>, <code>add(ns, map)</code>, <code>extend</code><tr><td><code>components</code><td>Component schemas<td><code>&lt;category>.&lt;name></code><td><code>keys</code>, <code>get</code>, <code>getAll()</code>, <code>set</code>, <code>add(map)</code><tr><td><code>services</code><td>Service factories and instances<td>namespaced UID<td><code>keys</code>, <code>get</code>, <code>getAll(ns)</code>, <code>set</code>, <code>add(ns, map)</code>, <code>extend</code><tr><td><code>controllers</code><td>Controller factories and instances<td>namespaced UID<td><code>keys</code>, <code>get</code>, <code>getAll(ns)</code>, <code>set</code>, <code>add(ns, map)</code>, <code>extend</code><tr><td><code>policies</code><td>Policies<td>namespaced UID<td><code>keys</code>, <code>get</code>, <code>has</code>, <code>getAll(ns)</code>, <code>set</code>, <code>add(ns, map)</code>, <code>resolve</code><tr><td><code>middlewares</code><td>Middleware factories<td>namespaced UID<td><code>keys</code>, <code>get</code>, <code>getAll(ns)</code>, <code>set</code>, <code>add(ns, map)</code>, <code>extend</code><tr><td><code>hooks</code><td>Hook objects<td>namespaced UID<td><code>keys</code>, <code>get</code>, <code>getAll(ns)</code>, <code>set</code>, <code>add(ns, map)</code>, <code>extend</code><tr><td><code>modules</code><td>Runtime modules (plugins and APIs)<td><code>plugin::&lt;name></code>, <code>api::&lt;name></code><td><code>get</code>, <code>getAll(prefix)</code>, <code>add</code>, <code>register</code>, <code>bootstrap</code>, <code>destroy</code><tr><td><code>plugins</code><td>Plugin modules<td><code>&lt;name></code><td><code>get</code>, <code>getAll</code>, <code>add</code><tr><td><code>apis</code><td>API modules<td><code>&lt;name></code><td><code>get</code>, <code>getAll</code>, <code>add</code><tr><td><code>custom-fields</code><td>Custom field definitions<td><code>plugin::&lt;plugin>.&lt;name></code> or <code>global::&lt;name></code><td><code>get</code>, <code>getAll</code>, <code>add</code><tr><td><code>models</code><td>Extra database models (core store, webhooks, others)<td>none, it is a list<td><code>add</code>, <code>get</code><tr><td><code>sanitizers</code><td>Sanitizer lists by path<td>lodash path, for example <code>content-api.input</code><td><code>get</code>, <code>add</code>, <code>set</code>, <code>has</code><tr><td><code>validators</code><td>Validator lists by path<td>lodash path<td><code>get</code>, <code>add</code>, <code>set</code>, <code>has</code></table>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=registry-operations>Registry operations<a href=#registry-operations class=hash-link aria-label="Direct link to Registry operations" title="Direct link to Registry operations" translate=no>​</a></h3>
+<p>The method names are shared, but the behavior differs per registry.</p>
+<ul>
+<li class=""><strong><code>add</code></strong> registers many entries under one namespace. Most registries throw on a duplicate UID. The <code>hooks</code> registry does not check duplicates: its <code>add</code> calls <code>set</code>. The <code>components</code> registry takes a map keyed by full UID, with no namespace argument.</li>
+<li class=""><strong><code>get</code></strong> returns one entry. For <code>services</code> and <code>controllers</code>, the first <code>get</code> calls the factory with <code>{ strapi }</code> and caches the instance. For an unknown UID, most registries return <code>undefined</code>. <code>custom-fields</code> throws. <code>sanitizers</code> and <code>validators</code> return an empty array. The <code>policies</code> registry also accepts <code>{ pluginName, apiName }</code> and tries <code>plugin::&lt;pluginName>.&lt;name></code> or <code>api::&lt;apiName>.&lt;name></code> when the full name does not match.</li>
+<li class=""><strong><code>getAll(namespace)</code></strong> filters by namespace. For <code>services</code> and <code>controllers</code>, it returns lazy getters, so it does not instantiate anything.</li>
+<li class=""><strong><code>set</code></strong> writes one entry and overwrites the old one. For <code>services</code> and <code>controllers</code>, it also removes the cached instance. The <code>components</code> registry is the exception: its <code>set</code> throws on a duplicate.</li>
+<li class=""><strong><code>extend(uid, fn)</code></strong> throws if the UID is unknown. For <code>services</code> and <code>controllers</code>, it calls <code>get</code> (which instantiates the factory), then caches <code>fn(instance)</code> as the new instance. The factory does not change. For <code>middlewares</code> and <code>hooks</code>, it replaces the stored value with <code>fn(value)</code>. For <code>content-types</code>, it calls <code>fn(schema)</code> and ignores the return value, so <code>fn</code> must change the schema in place.</li>
+</ul>
+<div class="theme-admonition theme-admonition-caution admonition_xJq3 alert alert--warning"><div class=admonitionHeading_Gvgb><span class=admonitionIcon_Rf37><svg viewBox="0 0 16 16"><path fill-rule=evenodd d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"/></svg></span>caution</div><div class=admonitionContent_BuS1><p>For <code>services</code> and <code>controllers</code>, <code>set</code> after <code>extend</code> drops the extension, because <code>set</code> removes the cached instance.</div></div>
+<div class="theme-admonition theme-admonition-caution admonition_xJq3 alert alert--warning"><div class=admonitionHeading_Gvgb><span class=admonitionIcon_Rf37><svg viewBox="0 0 16 16"><path fill-rule=evenodd d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"/></svg></span>caution</div><div class=admonitionContent_BuS1><p>In the <code>sanitizers</code> and <code>validators</code> registries, <code>add(path, fn)</code> pushes to the list at <code>path</code>. If no list exists at <code>path</code>, <code>get</code> returns a new empty array that is not stored, and the entry is lost. The loaders create the <code>content-api</code> lists before any plugin code runs.</div></div>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=namespaces-and-uids>Namespaces and UIDs<a href=#namespaces-and-uids class=hash-link aria-label="Direct link to Namespaces and UIDs" title="Direct link to Namespaces and UIDs" translate=no>​</a></h2>
+<p><code>registries/namespace.ts</code> builds UIDs with one rule:</p>
+<ul>
+<li class="">If the namespace ends with <code>::</code>, the name follows it directly: <code>global::</code> + <code>is-owner</code> gives <code>global::is-owner</code>.</li>
+<li class="">Otherwise, a dot separates them: <code>plugin::upload</code> + <code>file</code> gives <code>plugin::upload.file</code>.</li>
+</ul>
+<p><code>@strapi/types</code> encodes the same rule. Scoped namespaces (<code>api::&lt;name></code>, <code>plugin::&lt;name></code>) use <code>.</code>. The other namespaces (<code>admin</code>, <code>strapi</code>, <code>global</code>) use <code>::</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Artifact<th>Example UID<tbody><tr><td>API content type or service<td><code>api::article.article</code><tr><td>Plugin content type<td><code>plugin::upload.file</code><tr><td>Plugin service<td><code>plugin::users-permissions.user</code><tr><td>Admin content type<td><code>admin::user</code><tr><td>Component<td><code>shared.seo</code> (category and name, no namespace)<tr><td>Application policy or middleware<td><code>global::is-owner</code><tr><td>Internal middleware<td><code>strapi::cors</code><tr><td>Core hook<td><code>strapi::content-types.beforeSync</code><tr><td>Custom field<td><code>plugin::color-picker.color</code>, or <code>global::&lt;name></code> when the plugin is unknown</table>
+<p>A module reads its own artifacts without the namespace. <code>strapi.plugin('upload').service('upload')</code> reads <code>plugin::upload.upload</code> from the <code>services</code> registry. <code>module.services</code> returns the map with the namespace removed from the keys.</p>
+<p>The content-types registry also checks that each key equals the schema <code>info.singularName</code>. It throws if they differ.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=folder-roles-in-strapicore>Folder roles in <code>@strapi/core</code><a href=#folder-roles-in-strapicore class=hash-link aria-label="Direct link to folder-roles-in-strapicore" title="Direct link to folder-roles-in-strapicore" translate=no>​</a></h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Folder<th>Role<th>Signal<tbody><tr><td><code>src/providers/</code><td>Internal lifecycle units. They add subsystems to the container and take part in <code>register</code>, <code>bootstrap</code> and <code>destroy</code>.<td>Exports <code>init</code>, <code>register</code>, <code>bootstrap</code> or <code>destroy</code>.<tr><td><code>src/registries/</code><td>Stores for named artifacts, with namespace rules and replacement methods.<td>Exports <code>add</code>, <code>get</code>, <code>getAll</code>, and sometimes <code>set</code> or <code>extend</code>.<tr><td><code>src/loaders/</code><td>Read the file system and the enabled plugins, then fill the registries.<td>Called from <code>loadApplicationContext()</code>.<tr><td><code>src/domain/</code><td>Wrappers that turn raw input into runtime objects: <code>module</code> (raw module to runtime module) and <code>content-type</code> (definition to schema).<td>Called by registries.<tr><td><code>src/services/</code><td>Implementations of core subsystems: Document Service, event hub, webhooks, HTTP server, entity validator, Content API helpers and others.<td>Mounted in the container by <code>Strapi</code> or by a provider, or imported directly.</table>
+<div class="theme-admonition theme-admonition-caution admonition_xJq3 alert alert--warning"><div class=admonitionHeading_Gvgb><span class=admonitionIcon_Rf37><svg viewBox="0 0 16 16"><path fill-rule=evenodd d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"/></svg></span>caution</div><div class=admonitionContent_BuS1><p>"Services" has two meanings. The <code>services</code> registry (<code>src/registries/services.ts</code>) holds the services of plugins, APIs and the application. You read it with <code>strapi.service(uid)</code>. The folder <code>src/services/**</code> holds core implementation code. Most of it is mounted in the container or imported directly. It is not in the <code>services</code> registry.</div></div>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=code-map>Code map<a href=#code-map class=hash-link aria-label="Direct link to Code map" title="Direct link to Code map" translate=no>​</a></h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Concern<th>Path<tbody><tr><td>Container<td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/container.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/core/src/container.ts</code></a><tr><td>Internal services and getters<td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/Strapi.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/core/src/Strapi.ts</code></a><tr><td>Registries added to the container<td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/providers/registries.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/core/src/providers/registries.ts</code></a><tr><td>Registry list<td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/registries/index.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/core/src/registries/index.ts</code></a><tr><td>Namespace rule<td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/registries/namespace.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/core/src/registries/namespace.ts</code></a><tr><td>Services registry<td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/registries/services.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/core/src/registries/services.ts</code></a><tr><td>Content-types registry<td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/registries/content-types.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/core/src/registries/content-types.ts</code></a><tr><td>Policies registry<td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/registries/policies.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/core/src/registries/policies.ts</code></a><tr><td>Custom-fields registry<td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/registries/custom-fields.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/core/src/registries/custom-fields.ts</code></a><tr><td>Module wrapper<td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/domain/module/index.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/core/src/domain/module/index.ts</code></a><tr><td>Content-type wrapper<td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/domain/content-type/index.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/core/src/domain/content-type/index.ts</code></a><tr><td>Admin artifacts under <code>admin::</code><td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/loaders/admin.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/core/src/loaders/admin.ts</code></a><tr><td>Namespace types<td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/types/src/internal/namespace.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/types/src/internal/namespace.ts</code></a><tr><td>Container type<td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/types/src/core/container.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/types/src/core/container.ts</code></a></table>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=related>Related<a href=#related class=hash-link aria-label="Direct link to Related" title="Direct link to Related" translate=no>​</a></h2>
+<ul>
+<li class=""><a class="" href=/architecture/server-lifecycle>Server lifecycle</a></li>
+<li class=""><a class="" href=/architecture/extension-points>Extension points</a></li>
+<li class=""><a class="" href=/architecture/glossary>Glossary</a></li>
+<li class=""><a class="" href=/packages/core/core><code>@strapi/core</code> package</a></li>
+</ul></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col noPrint_WFHX"><a href=https://github.com/strapi/strapi/tree/develop/docs/docs/architecture/03-container-and-registries.md target=_blank rel="noopener noreferrer" class=theme-edit-this-page><svg fill=currentColor height=20 width=20 viewBox="0 0 40 40" class=iconEdit_Z9Sw aria-hidden=true><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"/></g></svg>Edit this page</a></div><div class="col lastUpdated_JAkA"><span class=theme-last-updated>Last updated<!-- --> on <b><time datetime=2026-10-07T15:53:07.000Z itemprop=dateModified>Oct 7, 2026</time></b></span></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href=/architecture/server-lifecycle><div class=pagination-nav__sublabel>Previous</div><div class=pagination-nav__label>Server lifecycle</div></a><a class="pagination-nav__link pagination-nav__link--next" href=/architecture/extension-points><div class=pagination-nav__sublabel>Next</div><div class=pagination-nav__label>Extension points</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href=#the-container class="table-of-contents__link toc-highlight">The container</a><ul><li><a href=#container-keys class="table-of-contents__link toc-highlight">Container keys</a></ul><li><a href=#registries class="table-of-contents__link toc-highlight">Registries</a><ul><li><a href=#registry-operations class="table-of-contents__link toc-highlight">Registry operations</a></ul><li><a href=#namespaces-and-uids class="table-of-contents__link toc-highlight">Namespaces and UIDs</a><li><a href=#folder-roles-in-strapicore class="table-of-contents__link toc-highlight">Folder roles in <code>@strapi/core</code></a><li><a href=#code-map class="table-of-contents__link toc-highlight">Code map</a><li><a href=#related class="table-of-contents__link toc-highlight">Related</a></ul></div></div></div></div></main></div></div></div></div></body>

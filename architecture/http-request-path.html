@@ -1,0 +1,285 @@
+<!doctype html><html lang=en dir=ltr class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-architecture/http-request-path" data-has-hydrated=false><head><meta charset=UTF-8><meta name=generator content="Docusaurus v3.10.2"><title data-rh=true>HTTP request path | Strapi contributor docs</title><meta data-rh=true name=viewport content="width=device-width, initial-scale=1.0"/><meta data-rh=true name=twitter:card content=summary_large_image /><meta data-rh=true property=og:url content=https://contributor.strapi.io/architecture/http-request-path /><meta data-rh=true property=og:locale content=en /><meta data-rh=true name=docusaurus_locale content=en /><meta data-rh=true name=docsearch:language content=en /><meta data-rh=true name=docusaurus_version content=current /><meta data-rh=true name=docusaurus_tag content=docs-default-current /><meta data-rh=true name=docsearch:version content=current /><meta data-rh=true name=docsearch:docusaurus_tag content=docs-default-current /><meta data-rh=true property=og:title content="HTTP request path | Strapi contributor docs"/><meta data-rh=true name=description content="How Strapi handles an HTTP request from Koa to the response, for the Content API and the admin API."/><meta data-rh=true property=og:description content="How Strapi handles an HTTP request from Koa to the response, for the Content API and the admin API."/><link data-rh=true rel=icon href=/img/favicon.svg /><link data-rh=true rel=canonical href=https://contributor.strapi.io/architecture/http-request-path /><link data-rh=true rel=alternate href=https://contributor.strapi.io/architecture/http-request-path hreflang=en /><link data-rh=true rel=alternate href=https://contributor.strapi.io/architecture/http-request-path hreflang=x-default /><script data-rh=true type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","item":"https://contributor.strapi.io/architecture/http-request-path","name":"HTTP request path","position":1}]}</script><link rel=stylesheet href=/assets/css/styles.99e52e7f.css /><script src=/assets/js/runtime~main.b80dc77e.js defer></script><script src=/assets/js/main.4583c1e3.js defer></script></head><body><svg style="display: none;"><defs>
+<symbol id=theme-svg-external-link viewBox="0 0 24 24"><path fill=currentColor d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme-6c6")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||"light"),document.documentElement.setAttribute("data-theme-choice",t||"light")}(),function(){try{for(var[t,e]of new URLSearchParams(window.location.search).entries())if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id=__docusaurus><link rel=preload as=image href=/img/logo.svg /><link rel=preload as=image href=/img/logo_dark.svg /><div role=region aria-label="Skip to main content"><a class=skipToContent_fXgn href=#__docusaurus_skipToContent_fallback>Skip to main content</a></div><nav aria-label=Main class="theme-layout-navbar navbar navbar--fixed-top navbarHideable_m1mJ"><div class=navbar__inner><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded=false class="navbar__toggle clean-btn" type=button><svg width=30 height=30 viewBox="0 0 30 30" aria-hidden=true><path stroke=currentColor stroke-linecap=round stroke-miterlimit=10 stroke-width=2 d="M4 7h22M4 15h22M4 23h22"/></svg></button><a class=navbar__brand href=/><div class=navbar__logo><img src=/img/logo.svg alt=Strapi class="themedComponent_mlkZ themedComponent--light_NVdE" width=100 /><img src=/img/logo_dark.svg alt=Strapi class="themedComponent_mlkZ themedComponent--dark_xIcU" width=100 /></div><b class="navbar__title text--truncate">Contributor docs</b></a><a class="navbar__item navbar__link" href=/contributing>Contributing</a><a aria-current=page class="navbar__item navbar__link navbar__link--active" href=/architecture>Architecture</a><a class="navbar__item navbar__link" href=/packages>Packages</a><a class="navbar__item navbar__link" href=/api/Strapi>API reference</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><a href=https://docs.strapi.io target=_blank rel="noopener noreferrer" class="navbar__item navbar__link">User docs<svg width=13.5 height=13.5 aria-label="(opens in new tab)" class=iconExternalLink_nPIU><use href=#theme-svg-external-link /></svg></a><a href=https://github.com/strapi/strapi target=_blank rel="noopener noreferrer" class="navbar__item navbar__link header-github-link" aria-label="GitHub repository"></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type=button disabled title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width=24 height=24 aria-hidden=true class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill=currentColor d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"/></svg><svg viewBox="0 0 24 24" width=24 height=24 aria-hidden=true class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill=currentColor d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"/></svg><svg viewBox="0 0 24 24" width=24 height=24 aria-hidden=true class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill=currentColor d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"/></svg></button></div><div class=navbarSearchContainer_Bca1><div class="navbar__search searchBarContainer_NW3z" dir=ltr><svg aria-hidden=true class=searchIcon_T3tP focusable=false viewBox="0 0 16 16"><path fill=currentColor d="M6.02945 10.20327a4.17382 4.17382 0 1 1 4.17382-4.17382 4.15609 4.15609 0 0 1-4.17382 4.17382Zm9.69195 4.2199-4.8225-4.82338A5.88021 5.88021 0 0 0 12.058 6.02856 6.00467 6.00467 0 1 0 9.59979 10.8989l4.82338 4.82338a.89729.89729 0 0 0 1.29912 0 .89749.89749 0 0 0-.00087-1.29909Z"/></svg><input placeholder=Search aria-label=Search class="navbar__search-input searchInput_YFbd" value="" /><div class="loadingRing_RJI3 searchBarLoadingRing_YnHq"><div></div><div></div><div></div><div></div></div></div></div></div></div><div role=presentation class=navbar-sidebar__backdrop></div></nav><div id=__docusaurus_skipToContent_fallback class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class=docsWrapper_hBAB><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type=button></button><div class=docRoot_UBD9><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class=sidebarViewport_aRkj><div class="sidebar_njMd sidebarWithHideableNavbar_wUlq"><a tabindex=-1 class=sidebarLogo_isFc href=/><img src=/img/logo.svg alt=Strapi class="themedComponent_mlkZ themedComponent--light_NVdE" width=100 /><img src=/img/logo_dark.svg alt=Strapi class="themedComponent_mlkZ themedComponent--dark_xIcU" width=100 /><b>Contributor docs</b></a><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture><span class=linkLabel_WmDU>Architecture overview</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/package-map><span class=linkLabel_WmDU>Package map</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/server-lifecycle><span class=linkLabel_WmDU>Server lifecycle</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/container-and-registries><span class=linkLabel_WmDU>Container and registries</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/extension-points><span class=linkLabel_WmDU>Extension points</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/document-write-path><span class=linkLabel_WmDU>Document write path</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link menu__link--active" aria-current=page href=/architecture/http-request-path><span class=linkLabel_WmDU>HTTP request path</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/schema-sync><span class=linkLabel_WmDU>Schema sync</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/authentication><span class=linkLabel_WmDU>Sessions and JWT</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/enterprise-edition><span class=linkLabel_WmDU>Enterprise Edition</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/future-flags><span class=linkLabel_WmDU>Future Flags</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/glossary><span class=linkLabel_WmDU>Glossary</span></a></ul></nav></div></div></aside><main class=docMainContainer_TBSr><div class="container padding-top--md padding-bottom--lg"><div class=row><div class="col docItemCol_VOVn"><div class=docItemContainer_Djhp><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label=Breadcrumbs><ul class=breadcrumbs><li class=breadcrumbs__item><a aria-label="Home page" class=breadcrumbs__link href=/><svg viewBox="0 0 24 24" class=breadcrumbHomeIcon_YNFT><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill=currentColor /></svg></a><li class="breadcrumbs__item breadcrumbs__item--active"><span class=breadcrumbs__link>HTTP request path</span></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type=button class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><aside class="alert alert--info banner_N8r1" role=note><p class=title_rkSp>Draft, not yet verified against the code<p class=body_aNf4>The content may be incomplete. Check it against the source before relying on it.<ul class=notes_l7eN><li>Drafted from internal research notes on Strapi v5 internals and verified against the code on develop; needs a maintainer review.<li>The statement that `strapi::session` adds `koa-session` before every listed middleware comes from reading `registerApplicationMiddlewares` and the session factory. No test confirms it.<li>The page does not cover the GraphQL plugin request path or the upload plugin `/uploads` route.</ul><a class=link_fT1h href=/contributing/docs-health>See all flagged pages in Docs health</a></aside><div class="theme-doc-markdown markdown"><header><h1>HTTP request path</h1></header><p>This page follows one HTTP request through the server, from the Koa app to the response body. It covers the Content API (<code>/api/...</code>) and the admin API. What happens inside the Document Service is in <a class="" href=/architecture/document-write-path>Document write path</a>. Tokens and sessions are in <a class="" href=/architecture/authentication>Sessions and JWT</a>.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=overview>Overview<a href=#overview class=hash-link aria-label="Direct link to Overview" title="Direct link to Overview" translate=no>​</a></h2>
+<!-- -->
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=the-koa-app-and-global-middlewares>The Koa app and global middlewares<a href=#the-koa-app-and-global-middlewares class=hash-link aria-label="Direct link to The Koa app and global middlewares" title="Direct link to The Koa app and global middlewares" translate=no>​</a></h2>
+<p><code>createServer</code> in <a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/index.ts target=_blank rel="noopener noreferrer" class=""><code>services/server/index.ts</code></a> creates the Koa app with the <code>server.proxy.*</code> settings and <code>server.app.keys</code>. It adds response helpers such as <code>ctx.send</code> and <code>ctx.notFound</code> (see <a href=#response-and-errors class="">Response and errors</a>). The first middleware stores <code>ctx</code> in an <code>AsyncLocalStorage</code> (<code>services/request-context.ts</code>). Code that has no <code>ctx</code> argument can read the current request. For example, the core controller reads the <code>strapi-response-format</code> header this way.</p>
+<p>In the bootstrap phase, <code>server.initMiddlewares()</code> reads the <code>middlewares</code> config (<code>config/middlewares.ts</code> in the app). Each entry is a name (<code>'strapi::cors'</code>), an object <code>{ name, config }</code>, or an object <code>{ resolve, config }</code> that loads a package or a path. Names come from the <code>middlewares</code> registry: <code>strapi::</code> for internal middlewares, <code>global::</code> for <code>src/middlewares</code>, and <code>plugin::</code> or <code>api::</code> for module middlewares. Each factory is called once as <code>factory(config, { strapi })</code>, and the result is added with <code>app.use()</code> in list order. The new-project template uses this order:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Middleware<th>What it does<tbody><tr><td><code>strapi::logger</code><td>Logs method, URL, duration and status after the rest of the chain completes.<tr><td><code>strapi::errors</code><td>Catches the errors of every later middleware and writes the error body. Returns 404 when nothing set a status.<tr><td><code>strapi::security</code><td>Sets security headers (CSP, HSTS, frame options) with <code>koa-helmet</code>.<tr><td><code>strapi::cors</code><td>Handles CORS with <code>@koa/cors</code>. The default origin is <code>*</code>.<tr><td><code>strapi::poweredBy</code><td>Sets the <code>X-Powered-By</code> header.<tr><td><code>strapi::query</code><td>Replaces the Koa query getter with a <code>qs</code> parser, so <code>filters[title][$eq]=x</code> becomes a nested object.<tr><td><code>strapi::body</code><td>Parses JSON, form and multipart bodies with <code>koa-body</code>. Skips the GraphQL endpoint. Deletes uploaded temp files after the rest of the chain completes.<tr><td><code>strapi::session</code><td>Adds <code>koa-session</code>. Throws at boot if <code>app.keys</code> is empty.<tr><td><code>strapi::favicon</code><td>Serves the favicon.<tr><td><code>strapi::public</code><td>Registers two routes: <code>GET /</code> redirects to the admin URL, and a <code>GET</code> route serves the <code>public</code> folder (except <code>/uploads</code>).</table>
+<p>Without a <code>middlewares</code> config, Strapi uses the same list with <code>strapi::session</code> before <code>strapi::query</code>. The boot fails if <code>strapi::errors</code>, <code>strapi::security</code>, <code>strapi::cors</code>, <code>strapi::query</code>, <code>strapi::body</code>, <code>strapi::public</code> or <code>strapi::favicon</code> is missing. <code>strapi::compression</code>, <code>strapi::ip</code>, <code>strapi::responseTime</code> and <code>strapi::responses</code> exist but are not in the default list.</p>
+<div class="theme-admonition theme-admonition-note admonition_xJq3 alert alert--secondary"><div class=admonitionHeading_Gvgb><span class=admonitionIcon_Rf37><svg viewBox="0 0 14 16"><path fill-rule=evenodd d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"/></svg></span>note</div><div class=admonitionContent_BuS1><p><code>strapi::query</code>, <code>strapi::session</code> and <code>strapi::public</code> return no handler, so the list gets a pass-through handler at their position. <code>strapi::query</code> patches <code>app.request</code>. <code>strapi::public</code> registers routes. <code>strapi::session</code> calls <code>strapi.server.use()</code> while the list is resolved, which is before the listed handlers are added. Its position in the list does not change where <code>koa-session</code> runs.</div></div>
+<p>The Koa order is the order of the <code>app.use()</code> calls: the request context, then any <code>strapi.server.use()</code> call from a <code>register</code> function, then the configured list, then any <code>strapi.server.use()</code> call from a <code>bootstrap</code> function. <code>listen()</code> mounts the router after all of these. A middleware added in a <code>register</code> function runs before <code>strapi::errors</code>, so <code>strapi::errors</code> does not catch its errors.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=routers-and-route-registration>Routers and route registration<a href=#routers-and-route-registration class=hash-link aria-label="Direct link to Routers and route registration" title="Direct link to Routers and route registration" translate=no>​</a></h2>
+<p>The server has one root router and two API routers. <code>listen()</code> calls <code>mount()</code>, which attaches both API routers to the root router and adds the root router to the Koa app.</p>
+<ul>
+<li class="">The content API router has the prefix <code>api.rest.prefix</code> (default <code>/api</code>).</li>
+<li class="">The admin API router has no prefix. Each admin router sets its own prefix.</li>
+<li class="">The root router holds <code>/_health</code> (always 204) and routes passed as an array to <code>strapi.server.routes()</code>, such as the <code>strapi::public</code> routes.</li>
+</ul>
+<p>In the bootstrap phase, <code>server.initRouting()</code> calls <a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/register-routes.ts target=_blank rel="noopener noreferrer" class=""><code>register-routes.ts</code></a>. It registers admin routes, then API routes, then plugin routes, then the OpenAPI route. A router can be an object or a factory. Strapi calls a factory with <code>{ strapi }</code> and writes the result back on the module. Then <code>strapi.server.routes(router)</code> sends the router to the API router that matches <code>router.type</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Source<th><code>type</code><th>Router prefix<th>Example<tbody><tr><td>Admin package (<code>strapi.admin.routes</code>)<td><code>admin</code> if not set<td><code>/admin</code> if not set<td><code>POST /admin/login</code><tr><td>App API (<code>src/api/&lt;name>/routes</code>)<td>always <code>content-api</code><td>the router <code>prefix</code>, if any<td><code>GET /api/articles</code><tr><td>Plugin router with <code>type: 'content-api'</code><td><code>content-api</code><td><code>/&lt;pluginName></code> if not set<td><code>GET /api/upload/files</code><tr><td>Plugin router without <code>type</code><td><code>admin</code><td><code>/&lt;pluginName></code> if not set<td><code>GET /content-manager/collection-types/:model</code></table>
+<p>Plugin routes given as a plain array get the type <code>admin</code> and the prefix <code>/&lt;pluginName></code>. A route that has a <code>config.prefix</code> key skips the router prefix and goes on the API router directly. The users-permissions plugin sets <code>prefix: ''</code> on its auth routes, so the login route is <code>POST /api/auth/local</code>, not <code>/api/users-permissions/auth/local</code>.</p>
+<p>For each route, the registration step also:</p>
+<ul>
+<li class="">sets <code>route.info</code> to <code>{ apiName }</code> or <code>{ pluginName }</code> (<code>pluginName: 'admin'</code> for the admin package);</li>
+<li class="">generates <code>config.auth.scope</code> when the handler is a string (see <a href=#route-config class="">Route config</a>);</li>
+<li class="">for API and plugin routes, merges the extra params from <code>strapi.contentAPI.addQueryParams()</code> and <code>addInputParams()</code> into <code>route.request</code>.</li>
+</ul>
+<p>The route manager in <a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/routing.ts target=_blank rel="noopener noreferrer" class=""><code>routing.ts</code></a> validates each route with a Yup schema and adds <code>info.type</code> from the API router (<code>api</code> on the root router). An invalid route stops the boot with <code>Invalid route config</code>. An unknown handler, policy or middleware stops it with <code>Error creating endpoint &lt;METHOD> &lt;path></code>.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=route-config>Route config<a href=#route-config class=hash-link aria-label="Direct link to Route config" title="Direct link to Route config" translate=no>​</a></h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Key<th>Meaning<tbody><tr><td><code>method</code>, <code>path</code><td>HTTP method (<code>GET</code>, <code>POST</code>, <code>PUT</code>, <code>PATCH</code>, <code>DELETE</code>, <code>ALL</code>) and Koa router path.<tr><td><code>handler</code><td>A string <code>'&lt;controller>.&lt;action>'</code>, a full UID such as <code>'api::article.article.find'</code>, a function, or an array of functions.<tr><td><code>config.auth</code><td><code>false</code> for a public route, or <code>{ scope?, strategies? }</code>.<tr><td><code>config.policies</code><td>Policy names or <code>{ name, config }</code> objects.<tr><td><code>config.middlewares</code><td>Middleware UIDs, <code>{ name, config }</code> objects, or functions.<tr><td><code>request</code>, <code>response</code><td>Zod schemas. See <a href=#validation-and-sanitization class="">Validation and sanitization</a>.</table>
+<p>For a string handler, the generated scope is the handler prefixed with the module namespace, unless the handler already starts with it. In <code>src/api/article</code>, <code>article.find</code> gets the scope <code>api::article.article.find</code>. In the admin package, <code>admin.init</code> gets <code>admin::admin.init</code>. A scope set in the route wins. The scope has the same format as a Content API permission action, which is how the permission check matches a route.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=the-route-chain>The route chain<a href=#the-route-chain class=hash-link aria-label="Direct link to The route chain" title="Direct link to The route chain" translate=no>​</a></h2>
+<p><a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/server/compose-endpoint.ts target=_blank rel="noopener noreferrer" class=""><code>compose-endpoint.ts</code></a> builds one <code>koa-compose</code> chain per route, in this order:</p>
+<ol>
+<li class="">The route info middleware copies the route to <code>ctx.state.route</code>.</li>
+<li class=""><code>authenticate</code> runs the auth strategies.</li>
+<li class=""><code>authorize</code> calls <code>verify</code> on the strategy that authenticated the request.</li>
+<li class="">The policies middleware runs each policy in order.</li>
+<li class="">The route middlewares run in order.</li>
+<li class="">The return-body middleware waits for the controller and sets <code>ctx.body</code> from its return value if <code>ctx.body</code> is still empty.</li>
+<li class="">The controller action runs.</li>
+</ol>
+<p>Strapi resolves the policies, the route middlewares and the controller action when it registers the route, not per request. Configuration errors show at boot, and the route chain does no registry lookup per request.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=authentication-and-authorization>Authentication and authorization<a href=#authentication-and-authorization class=hash-link aria-label="Direct link to Authentication and authorization" title="Direct link to Authentication and authorization" translate=no>​</a></h2>
+<p>The <code>auth</code> container service (<a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/auth/index.ts target=_blank rel="noopener noreferrer" class=""><code>services/auth/index.ts</code></a>) stores strategies by route type. A strategy has a <code>name</code>, an <code>authenticate(ctx)</code> function and an optional <code>verify(auth, config)</code> function.</p>
+<p><code>authenticate</code> does this:</p>
+<ul>
+<li class="">If <code>config.auth</code> is <code>false</code>, it calls the next middleware and sets nothing.</li>
+<li class="">Otherwise it tries the strategies registered for <code>route.info.type</code>, in registration order. <code>config.auth.strategies</code> can restrict them by name.</li>
+<li class="">If a strategy returns <code>authenticated: true</code>, it sets <code>ctx.state.isAuthenticated</code> and <code>ctx.state.auth = { strategy, credentials, ability }</code> and stops.</li>
+<li class="">If a strategy returns an <code>error</code>, it responds 401 with that error at once.</li>
+<li class="">If no strategy authenticates, it responds 401 <code>Missing or invalid credentials</code>.</li>
+</ul>
+<p><code>verify</code> skips routes with <code>auth: false</code>, throws <code>UnauthorizedError</code> when <code>ctx.state.auth</code> is empty, and otherwise calls the <code>verify</code> function of the strategy, if it has one.</p>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=content-api>Content API<a href=#content-api class=hash-link aria-label="Direct link to Content API" title="Direct link to Content API" translate=no>​</a></h3>
+<p>Two strategies are registered for <code>content-api</code>. The admin package registers <code>content-api-token</code> in its <code>register</code> function, which runs as an internal provider before plugins. The users-permissions plugin then registers <code>users-permissions</code>.</p>
+<ul>
+<li class=""><strong><code>content-api-token</code></strong> looks up the bearer token as an API token. Its <code>verify</code> allows every scope for a full-access token, only scopes that end with <code>find</code> or <code>findOne</code> for a read-only token, and the token permissions for a custom token.</li>
+<li class=""><strong><code>users-permissions</code></strong> validates a users-permissions JWT, loads the user and builds an ability from the role permissions. Without a token, it builds an ability from the permissions of the Public role. If the Public role has no permissions, it does not authenticate the request. Its <code>verify</code> requires <code>ability.can(scope)</code> for each scope. A route without a scope requires a logged-in user.</li>
+</ul>
+<p>After <code>initRouting()</code>, <code>strapi.contentAPI.permissions.registerActions()</code> registers one action per controller action that a <code>content-api</code> route uses. When Strapi binds a controller action, it tags the function with the route type (the <code>Symbol.for('__type__')</code> property). The tag limits the actions in the Roles and API token settings to the actions that a Content API route can reach. The permission engine ignores a permission whose action is not registered.</p>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=admin-api>Admin API<a href=#admin-api class=hash-link aria-label="Direct link to Admin API" title="Direct link to Admin API" translate=no>​</a></h3>
+<p>The admin package registers two strategies for <code>admin</code>: <code>admin</code> validates a session access token, and <code>admin-token</code> validates an admin API token. Both set <code>ctx.state.user</code> and <code>ctx.state.userAbility</code>. The <code>admin</code> strategy has no <code>verify</code>, and <code>admin-token</code> only checks that the token exists and has not expired. The generated scope is not checked on admin routes.</p>
+<p>Admin routes authorize with policies instead. Most admin routes list <code>admin::isAuthenticatedAdmin</code>. Routes that need an RBAC action also list <code>admin::hasPermissions</code> with that action. Plugins use their own policies, for example <code>plugin::content-manager.hasPermissions</code>. These policies read <code>ctx.state.userAbility</code>.</p>
+<div class="theme-admonition theme-admonition-caution admonition_xJq3 alert alert--warning"><div class=admonitionHeading_Gvgb><span class=admonitionIcon_Rf37><svg viewBox="0 0 16 16"><path fill-rule=evenodd d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"/></svg></span>caution</div><div class=admonitionContent_BuS1><p><code>authorize</code> wraps the rest of the chain. When a later policy, middleware or controller throws <code>UnauthorizedError</code> or <code>ForbiddenError</code>, <code>authorize</code> replaces it with a generic 401 or 403 body and drops the message and details. <code>PolicyError</code> is the exception. It goes to <code>strapi::errors</code> with its message, so a policy can return a public reason.</div></div>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=policies-and-route-middlewares>Policies and route middlewares<a href=#policies-and-route-middlewares class=hash-link aria-label="Direct link to Policies and route middlewares" title="Direct link to Policies and route middlewares" translate=no>​</a></h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th><th>Policies<th>Route middlewares<tbody><tr><td>Runs<td>After <code>authorize</code>, before route middlewares<td>After policies, before the controller<tr><td>Signature<td><code>(policyContext, config, { strapi })</code><td>Koa <code>(ctx, next)</code>, made by <code>factory(config, { strapi })</code><tr><td>Result<td><code>true</code> or <code>undefined</code> continues. Any other value throws <code>PolicyError</code> (403).<td>Calls <code>next()</code>. Can act before and after the controller.<tr><td>Name lookup<td>Full name, or a short name resolved in the route plugin or API namespace<td>Full UID only (<code>plugin::users-permissions.rateLimit</code>)<tr><td>Config validation<td>The policy <code>validator</code> runs when the route is registered<td>The factory runs when the route is registered</table>
+<p>Use a policy for a yes or no decision. Use a route middleware when you need to change the request or the response.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=controller-resolution>Controller resolution<a href=#controller-resolution class=hash-link aria-label="Direct link to Controller resolution" title="Direct link to Controller resolution" translate=no>​</a></h2>
+<p>For a string handler, <code>getAction</code> splits the string at the last dot into a controller name and an action name. It then looks up the controller in the <code>controllers</code> registry:</p>
+<ol>
+<li class="">If <code>info.pluginName</code> is <code>admin</code>: <code>admin::&lt;controller></code>.</li>
+<li class="">If <code>info.pluginName</code> is another plugin: <code>plugin::&lt;pluginName>.&lt;controller></code>.</li>
+<li class="">If <code>info.apiName</code> is set: <code>api::&lt;apiName>.&lt;controller></code>.</li>
+<li class="">If nothing matched: the controller name as a full UID. This is how core routes, which use <code>'&lt;uid>.find'</code>, resolve.</li>
+</ol>
+<p>If the action is not a function, the boot fails with <code>Handler not found "&lt;handler>"</code>. Otherwise the route stores <code>controller[action].bind(controller)</code>. A function or array handler is used as is, gets no scope and no type tag.</p>
+<p>The first registry <code>get</code> instantiates the controller. Because the route keeps the bound function, a <code>set</code> or <code>extend</code> on the controller after <code>initRouting()</code> does not change the mounted route. Change controllers in a <code>register</code> function, because <code>initRouting()</code> runs in the bootstrap phase before any <code>bootstrap</code> function. See <a class="" href=/architecture/container-and-registries>Container and registries</a> for the registry operations.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=core-controllers>Core controllers<a href=#core-controllers class=hash-link aria-label="Direct link to Core controllers" title="Direct link to Core controllers" translate=no>​</a></h2>
+<p><code>createCoreController(uid, cfg)</code> in <a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/factories.ts target=_blank rel="noopener noreferrer" class=""><code>factories.ts</code></a> returns a controller factory. The factory builds the base controller for the content type, copies the base actions that <code>cfg</code> does not define, and sets the base controller as the prototype. A custom action can call the core action with <code>super.find(ctx)</code> and use <code>this.sanitizeQuery</code>, <code>this.sanitizeOutput</code> and <code>this.transformResponse</code>.</p>
+<p>The collection type <code>find</code> action in <a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/core-api/controller/collection-type.ts target=_blank rel="noopener noreferrer" class=""><code>core-api/controller/collection-type.ts</code></a>:</p>
+<ol>
+<li class="">calls <code>validateQuery(ctx)</code> and <code>sanitizeQuery(ctx)</code>;</li>
+<li class="">calls <code>strapi.service(uid).find(query)</code>, where <code>uid</code> is the content type UID;</li>
+<li class="">calls <code>sanitizeOutput(results, ctx)</code>;</li>
+<li class="">returns <code>transformResponse(results, { pagination })</code>, which is <code>{ data, meta }</code>.</li>
+</ol>
+<p><code>create</code> and <code>update</code> also throw <code>ValidationError</code> when <code>body.data</code> is not an object, then call <code>validateInput</code> and <code>sanitizeInput</code> on <code>body.data</code>. <code>create</code> sets status 201. <code>delete</code> sets status 204 and returns nothing.</p>
+<p>The core service (<code>createCoreService</code>) calls the Document Service: <code>strapi.documents(uid).findMany()</code>, <code>findOne()</code>, <code>create()</code>, <code>update()</code> or <code>delete()</code>. Its params default to <code>status: 'published'</code>, so the Content API reads published documents unless the query asks for drafts. For <code>create</code> and <code>update</code>, the same default makes the Document Service publish the document. The core service passes no auth to the Document Service. The route chain and the controller apply permissions before and after the call.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=validation-and-sanitization>Validation and sanitization<a href=#validation-and-sanitization class=hash-link aria-label="Direct link to Validation and sanitization" title="Direct link to Validation and sanitization" translate=no>​</a></h2>
+<p>The core controller helpers call <code>strapi.contentAPI.validate</code> and <code>strapi.contentAPI.sanitize</code> (<a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/content-api/index.ts target=_blank rel="noopener noreferrer" class=""><code>services/content-api/index.ts</code></a>), which wrap the functions in <code>@strapi/utils</code>. They pass <code>ctx.state.auth</code>, <code>ctx.state.route</code> and <code>api.rest.strictParams</code>.</p>
+<ul>
+<li class=""><strong><code>validateQuery</code></strong> checks <code>filters</code>, <code>sort</code>, <code>fields</code> and <code>populate</code> against the schema and throws <code>ValidationError</code> (400). It also rejects filters and sorts on relations whose target the caller cannot <code>find</code>. With <code>strictParams</code>, it rejects unknown top-level query keys.</li>
+<li class=""><strong><code>sanitizeQuery</code></strong> returns a copy of the query without private fields, invalid keys and restricted relations. With <code>strictParams</code>, it also drops unknown top-level keys.</li>
+<li class=""><strong><code>validateInput</code></strong> rejects <code>id</code>, <code>documentId</code>, non-writable attributes, unknown attributes and restricted relations.</li>
+<li class=""><strong><code>sanitizeInput</code></strong> removes the same data instead of throwing.</li>
+<li class=""><strong><code>sanitizeOutput</code></strong> removes passwords, private attributes and relations that the caller cannot <code>find</code>.</li>
+</ul>
+<p>Validation runs first, so a client gets a clear 400 for bad input. Sanitization then removes what the caller may not read or write. Plugins add steps through the <code>sanitizers</code> registry (<code>content-api.input</code>, <code>content-api.output</code>) and the <code>validators</code> registry (<code>content-api.input</code>).</p>
+<p>The Zod schemas in <code>route.request</code> and <code>route.response</code> are not a request validator. <code>createCoreRouter</code> builds them with <code>CoreContentTypeRouteValidator</code> from the content type schema. At runtime, Strapi only uses them to validate or sanitize the extra params added with <code>addQueryParams</code> and <code>addInputParams</code>, and to accept those keys in strict mode. <code>@strapi/openapi</code> uses them to generate the OpenAPI document.</p>
+<p>The Document Service runs the entity validator on every write. See <a class="" href=/architecture/document-write-path#validation>Document write path</a>.</p>
+<p>Admin controllers do not use <code>strapi.contentAPI</code>. The content-manager controllers build a permission checker from <code>ctx.state.userAbility</code> and use it to sanitize the query and the output.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=response-and-errors>Response and errors<a href=#response-and-errors class=hash-link aria-label="Direct link to Response and errors" title="Direct link to Response and errors" translate=no>​</a></h2>
+<p>A controller writes the response in one of three ways:</p>
+<ul>
+<li class="">It returns a value. The return-body middleware sets <code>ctx.body</code> if it is empty.</li>
+<li class="">It sets <code>ctx.body</code> and <code>ctx.status</code>.</li>
+<li class="">It calls a helper: <code>ctx.send(data, status)</code>, <code>ctx.created(data)</code>, <code>ctx.deleted(data)</code>, or an error helper such as <code>ctx.badRequest(message, details)</code> or <code>ctx.notFound()</code>. Strapi generates one error helper per 4xx and 5xx status of <code>node:http</code>.</li>
+</ul>
+<p>The <code>strapi::errors</code> middleware in <a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/middlewares/errors.ts target=_blank rel="noopener noreferrer" class=""><code>middlewares/errors.ts</code></a> handles the rest:</p>
+<ul>
+<li class="">If no middleware set a status, it responds 404.</li>
+<li class="">An <code>ApplicationError</code> from <code>@strapi/utils</code> gets its status from its class: <code>UnauthorizedError</code> 401, <code>ForbiddenError</code> and <code>PolicyError</code> 403, <code>NotFoundError</code> 404, <code>PayloadTooLargeError</code> 413, <code>RateLimitError</code> 429, <code>NotImplementedError</code> 501, and 400 for the others, such as <code>ValidationError</code>.</li>
+<li class="">An <code>http-errors</code> error keeps its status.</li>
+<li class="">Any other error is logged. If it carries a 4xx status, the status and message are kept. Otherwise the response has a generic message and status 500 (or the 5xx status of the error), so internal details do not leak.</li>
+</ul>
+<p><code>strapi::errors</code> and the error helpers on <code>ctx</code> write the same body: <code>{ data: null, error: { status, name, message, details } }</code>. A controller that sets <code>ctx.body</code> directly can use another shape.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=related>Related<a href=#related class=hash-link aria-label="Direct link to Related" title="Direct link to Related" translate=no>​</a></h2>
+<ul>
+<li class=""><a class="" href=/architecture/server-lifecycle>Server lifecycle</a></li>
+<li class=""><a class="" href=/architecture/container-and-registries>Container and registries</a></li>
+<li class=""><a class="" href=/architecture/extension-points>Extension points</a></li>
+<li class=""><a class="" href=/architecture/document-write-path>Document write path</a></li>
+<li class=""><a class="" href=/architecture/authentication>Sessions and JWT</a></li>
+<li class=""><a class="" href=/architecture/glossary>Glossary</a></li>
+<li class=""><a class="" href=/packages/core/core><code>@strapi/core</code> package</a></li>
+<li class=""><a class="" href=/packages/core/strapi><code>@strapi/strapi</code> package</a></li>
+<li class=""><a class="" href=/packages/core/admin><code>@strapi/admin</code> package</a></li>
+<li class=""><a class="" href=/packages/plugins/users-permissions><code>@strapi/plugin-users-permissions</code> package</a></li>
+<li class=""><a class="" href=/packages/core/utils><code>@strapi/utils</code> package</a></li>
+</ul></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col noPrint_WFHX"><a href=https://github.com/strapi/strapi/tree/develop/docs/docs/architecture/06-http-request-path.md target=_blank rel="noopener noreferrer" class=theme-edit-this-page><svg fill=currentColor height=20 width=20 viewBox="0 0 40 40" class=iconEdit_Z9Sw aria-hidden=true><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"/></g></svg>Edit this page</a></div><div class="col lastUpdated_JAkA"><span class=theme-last-updated>Last updated<!-- --> on <b><time datetime=2026-10-07T15:53:07.000Z itemprop=dateModified>Oct 7, 2026</time></b></span></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href=/architecture/document-write-path><div class=pagination-nav__sublabel>Previous</div><div class=pagination-nav__label>Document write path</div></a><a class="pagination-nav__link pagination-nav__link--next" href=/architecture/schema-sync><div class=pagination-nav__sublabel>Next</div><div class=pagination-nav__label>Schema sync</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href=#overview class="table-of-contents__link toc-highlight">Overview</a><li><a href=#the-koa-app-and-global-middlewares class="table-of-contents__link toc-highlight">The Koa app and global middlewares</a><li><a href=#routers-and-route-registration class="table-of-contents__link toc-highlight">Routers and route registration</a><li><a href=#route-config class="table-of-contents__link toc-highlight">Route config</a><li><a href=#the-route-chain class="table-of-contents__link toc-highlight">The route chain</a><li><a href=#authentication-and-authorization class="table-of-contents__link toc-highlight">Authentication and authorization</a><ul><li><a href=#content-api class="table-of-contents__link toc-highlight">Content API</a><li><a href=#admin-api class="table-of-contents__link toc-highlight">Admin API</a></ul><li><a href=#policies-and-route-middlewares class="table-of-contents__link toc-highlight">Policies and route middlewares</a><li><a href=#controller-resolution class="table-of-contents__link toc-highlight">Controller resolution</a><li><a href=#core-controllers class="table-of-contents__link toc-highlight">Core controllers</a><li><a href=#validation-and-sanitization class="table-of-contents__link toc-highlight">Validation and sanitization</a><li><a href=#response-and-errors class="table-of-contents__link toc-highlight">Response and errors</a><li><a href=#related class="table-of-contents__link toc-highlight">Related</a></ul></div></div></div></div></main></div></div></div></div></body>

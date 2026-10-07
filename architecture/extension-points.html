@@ -1,0 +1,295 @@
+<!doctype html><html lang=en dir=ltr class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-architecture/extension-points" data-has-hydrated=false><head><meta charset=UTF-8><meta name=generator content="Docusaurus v3.10.2"><title data-rh=true>Extension points | Strapi contributor docs</title><meta data-rh=true name=viewport content="width=device-width, initial-scale=1.0"/><meta data-rh=true name=twitter:card content=summary_large_image /><meta data-rh=true property=og:url content=https://contributor.strapi.io/architecture/extension-points /><meta data-rh=true property=og:locale content=en /><meta data-rh=true name=docusaurus_locale content=en /><meta data-rh=true name=docsearch:language content=en /><meta data-rh=true name=docusaurus_version content=current /><meta data-rh=true name=docusaurus_tag content=docs-default-current /><meta data-rh=true name=docsearch:version content=current /><meta data-rh=true name=docsearch:docusaurus_tag content=docs-default-current /><meta data-rh=true property=og:title content="Extension points | Strapi contributor docs"/><meta data-rh=true name=description content="The mechanisms that plugins and application code use to change Strapi server behavior, in the order in which they apply."/><meta data-rh=true property=og:description content="The mechanisms that plugins and application code use to change Strapi server behavior, in the order in which they apply."/><link data-rh=true rel=icon href=/img/favicon.svg /><link data-rh=true rel=canonical href=https://contributor.strapi.io/architecture/extension-points /><link data-rh=true rel=alternate href=https://contributor.strapi.io/architecture/extension-points hreflang=en /><link data-rh=true rel=alternate href=https://contributor.strapi.io/architecture/extension-points hreflang=x-default /><script data-rh=true type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","item":"https://contributor.strapi.io/architecture/extension-points","name":"Extension points","position":1}]}</script><link rel=stylesheet href=/assets/css/styles.99e52e7f.css /><script src=/assets/js/runtime~main.b80dc77e.js defer></script><script src=/assets/js/main.4583c1e3.js defer></script></head><body><svg style="display: none;"><defs>
+<symbol id=theme-svg-external-link viewBox="0 0 24 24"><path fill=currentColor d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme-6c6")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||"light"),document.documentElement.setAttribute("data-theme-choice",t||"light")}(),function(){try{for(var[t,e]of new URLSearchParams(window.location.search).entries())if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id=__docusaurus><link rel=preload as=image href=/img/logo.svg /><link rel=preload as=image href=/img/logo_dark.svg /><div role=region aria-label="Skip to main content"><a class=skipToContent_fXgn href=#__docusaurus_skipToContent_fallback>Skip to main content</a></div><nav aria-label=Main class="theme-layout-navbar navbar navbar--fixed-top navbarHideable_m1mJ"><div class=navbar__inner><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded=false class="navbar__toggle clean-btn" type=button><svg width=30 height=30 viewBox="0 0 30 30" aria-hidden=true><path stroke=currentColor stroke-linecap=round stroke-miterlimit=10 stroke-width=2 d="M4 7h22M4 15h22M4 23h22"/></svg></button><a class=navbar__brand href=/><div class=navbar__logo><img src=/img/logo.svg alt=Strapi class="themedComponent_mlkZ themedComponent--light_NVdE" width=100 /><img src=/img/logo_dark.svg alt=Strapi class="themedComponent_mlkZ themedComponent--dark_xIcU" width=100 /></div><b class="navbar__title text--truncate">Contributor docs</b></a><a class="navbar__item navbar__link" href=/contributing>Contributing</a><a aria-current=page class="navbar__item navbar__link navbar__link--active" href=/architecture>Architecture</a><a class="navbar__item navbar__link" href=/packages>Packages</a><a class="navbar__item navbar__link" href=/api/Strapi>API reference</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><a href=https://docs.strapi.io target=_blank rel="noopener noreferrer" class="navbar__item navbar__link">User docs<svg width=13.5 height=13.5 aria-label="(opens in new tab)" class=iconExternalLink_nPIU><use href=#theme-svg-external-link /></svg></a><a href=https://github.com/strapi/strapi target=_blank rel="noopener noreferrer" class="navbar__item navbar__link header-github-link" aria-label="GitHub repository"></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type=button disabled title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width=24 height=24 aria-hidden=true class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill=currentColor d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"/></svg><svg viewBox="0 0 24 24" width=24 height=24 aria-hidden=true class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill=currentColor d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"/></svg><svg viewBox="0 0 24 24" width=24 height=24 aria-hidden=true class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill=currentColor d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"/></svg></button></div><div class=navbarSearchContainer_Bca1><div class="navbar__search searchBarContainer_NW3z" dir=ltr><svg aria-hidden=true class=searchIcon_T3tP focusable=false viewBox="0 0 16 16"><path fill=currentColor d="M6.02945 10.20327a4.17382 4.17382 0 1 1 4.17382-4.17382 4.15609 4.15609 0 0 1-4.17382 4.17382Zm9.69195 4.2199-4.8225-4.82338A5.88021 5.88021 0 0 0 12.058 6.02856 6.00467 6.00467 0 1 0 9.59979 10.8989l4.82338 4.82338a.89729.89729 0 0 0 1.29912 0 .89749.89749 0 0 0-.00087-1.29909Z"/></svg><input placeholder=Search aria-label=Search class="navbar__search-input searchInput_YFbd" value="" /><div class="loadingRing_RJI3 searchBarLoadingRing_YnHq"><div></div><div></div><div></div><div></div></div></div></div></div></div><div role=presentation class=navbar-sidebar__backdrop></div></nav><div id=__docusaurus_skipToContent_fallback class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class=docsWrapper_hBAB><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type=button></button><div class=docRoot_UBD9><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class=sidebarViewport_aRkj><div class="sidebar_njMd sidebarWithHideableNavbar_wUlq"><a tabindex=-1 class=sidebarLogo_isFc href=/><img src=/img/logo.svg alt=Strapi class="themedComponent_mlkZ themedComponent--light_NVdE" width=100 /><img src=/img/logo_dark.svg alt=Strapi class="themedComponent_mlkZ themedComponent--dark_xIcU" width=100 /><b>Contributor docs</b></a><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture><span class=linkLabel_WmDU>Architecture overview</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/package-map><span class=linkLabel_WmDU>Package map</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/server-lifecycle><span class=linkLabel_WmDU>Server lifecycle</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/container-and-registries><span class=linkLabel_WmDU>Container and registries</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link menu__link--active" aria-current=page href=/architecture/extension-points><span class=linkLabel_WmDU>Extension points</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/document-write-path><span class=linkLabel_WmDU>Document write path</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/http-request-path><span class=linkLabel_WmDU>HTTP request path</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/schema-sync><span class=linkLabel_WmDU>Schema sync</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/authentication><span class=linkLabel_WmDU>Sessions and JWT</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/enterprise-edition><span class=linkLabel_WmDU>Enterprise Edition</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/future-flags><span class=linkLabel_WmDU>Future Flags</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/glossary><span class=linkLabel_WmDU>Glossary</span></a></ul></nav></div></div></aside><main class=docMainContainer_TBSr><div class="container padding-top--md padding-bottom--lg"><div class=row><div class="col docItemCol_VOVn"><div class=docItemContainer_Djhp><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label=Breadcrumbs><ul class=breadcrumbs><li class=breadcrumbs__item><a aria-label="Home page" class=breadcrumbs__link href=/><svg viewBox="0 0 24 24" class=breadcrumbHomeIcon_YNFT><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill=currentColor /></svg></a><li class="breadcrumbs__item breadcrumbs__item--active"><span class=breadcrumbs__link>Extension points</span></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type=button class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><aside class="alert alert--info banner_N8r1" role=note><p class=title_rkSp>Draft, not yet verified against the code<p class=body_aNf4>The content may be incomplete. Check it against the source before relying on it.<ul class=notes_l7eN><li>Drafted from internal research notes on Strapi v5 internals and spot-checked against the code on releases/5.56.0; needs a maintainer review.<li>The page covers the server runtime only. Admin panel extension (StrapiApp register, bootstrap and admin hooks) needs its own page.</ul><a class=link_fT1h href=/contributing/docs-health>See all flagged pages in Docs health</a></aside><div class="theme-doc-markdown markdown"><header><h1>Extension points</h1></header><p>Plugins and applications change Strapi behavior through a small set of mechanisms. Each mechanism applies at a specific moment of the <a class="" href=/architecture/server-lifecycle>server lifecycle</a>. This page lists them in that order.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Moment<th>Mechanism<th>Typical use<tbody><tr><td>Plugin loading (register phase)<td>Plugin selection, plugin config merge, <code>src/extensions</code><td>Turn plugins on, configure them, change a plugin before Strapi creates its module.<tr><td>Module load (register phase)<td>Raw module artifacts go into the registries<td>A plugin or API declares content types, services, controllers, policies, middlewares and routes.<tr><td><code>register</code> functions<td>Registry <code>set</code> and <code>extend</code>, content-type changes, sync hook handlers, custom fields<td>Change schemas or replace artifacts before the database starts.<tr><td><code>bootstrap</code> functions<td>Document middlewares, database lifecycle subscribers, event hub listeners, webhook events<td>Add behavior that needs the database or the server.</table>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=plugin-selection>Plugin selection<a href=#plugin-selection class=hash-link aria-label="Direct link to Plugin selection" title="Direct link to Plugin selection" translate=no>​</a></h2>
+<p>The plugins loader builds the list of enabled plugins from three sources:</p>
+<ol>
+<li class=""><strong>Always-enabled plugins.</strong> A fixed list in <code>get-enabled-plugins.ts</code>: content-manager, content-type-builder, email, upload, i18n, content-releases and review-workflows. A declaration with <code>enabled: false</code> in <code>config/plugins</code> does not turn them off.</li>
+<li class=""><strong>Installed plugins.</strong> Dependencies of the application whose <code>package.json</code> has <code>strapi.kind: 'plugin'</code>.</li>
+<li class=""><strong>Declared plugins.</strong> Entries in <code>config/plugins.js</code>, merged with <code>config/env/&lt;NODE_ENV>/plugins.js</code>. An entry with <code>resolve</code> points to a local folder or a module.</li>
+</ol>
+<p>Plugin names must be kebab-case. The loader throws otherwise.</p>
+<p>For each enabled plugin, the loader resolves the <code>strapi-server</code> export of the package. If the export is missing, it uses <code>./strapi-server.js</code>. It skips a plugin that has no server entry.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=plugin-config-merge>Plugin config merge<a href=#plugin-config-merge class=hash-link aria-label="Direct link to Plugin config merge" title="Direct link to Plugin config merge" translate=no>​</a></h2>
+<p>Each plugin can export <code>config.default</code> (an object, or a function that receives <code>{ env }</code>) and <code>config.validator</code>. The loader then:</p>
+<ol>
+<li class="">reads <code>&lt;plugin>.config</code> from the user plugin config;</li>
+<li class="">merges it with <code>defaultsDeep</code>: user values win, and defaults fill the missing keys;</li>
+<li class="">calls <code>config.validator(config)</code>. If it throws, the loader throws <code>Error regarding &lt;plugin> config: &lt;message></code>;</li>
+<li class="">stores the result in <code>plugin.config</code>.</li>
+</ol>
+<p>At module load, the config service stores this object under the module namespace. Read it with <code>strapi.plugin('&lt;name>').config('&lt;key>')</code> or <code>strapi.config.get('plugin::&lt;name>.&lt;key>')</code>.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=the-srcextensions-folder>The <code>src/extensions</code> folder<a href=#the-srcextensions-folder class=hash-link aria-label="Direct link to the-srcextensions-folder" title="Direct link to the-srcextensions-folder" translate=no>​</a></h2>
+<p>After the config merge, and before Strapi creates the plugin module, the loader applies application overrides from <code>&lt;distDir>/src/extensions</code>:</p>
+<ol>
+<li class=""><strong>Schema overrides.</strong> <code>src/extensions/&lt;plugin>/content-types/&lt;name>/schema.json</code> is merged into the plugin content type with a shallow spread (<code>{ ...original, ...override }</code>). A top-level key such as <code>attributes</code> replaces the original key as a whole. If the content type does not exist, the loader adds it.</li>
+<li class=""><strong>Server override.</strong> <code>src/extensions/&lt;plugin>/strapi-server.js</code> exports a function. The loader calls it with the plugin object and uses the return value as the new plugin object.</li>
+</ol>
+<p>This mechanism applies to plugins only. It does not apply to APIs or to the admin.</p>
+<p>Because the override runs before module creation, every later step sees the changed plugin: registries, lifecycles and routes.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=registry-replacement>Registry replacement<a href=#registry-replacement class=hash-link aria-label="Direct link to Registry replacement" title="Direct link to Registry replacement" translate=no>​</a></h2>
+<p>In <code>register</code> or <code>bootstrap</code>, code can replace or wrap entries in the registries. See <a class="" href=/architecture/container-and-registries#registry-operations>Container and registries</a> for the exact rules.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Registry<th>Replace<th>Wrap<tbody><tr><td><code>services</code>, <code>controllers</code><td><code>set(uid, factory)</code> replaces the factory and clears the instance.<td><code>extend(uid, fn)</code> instantiates the service and caches <code>fn(instance)</code>.<tr><td><code>middlewares</code>, <code>hooks</code><td><code>set(uid, value)</code><td><code>extend(uid, fn)</code> stores <code>fn(value)</code>.<tr><td><code>content-types</code><td><code>set(uid, schema)</code><td><code>extend(uid, fn)</code> calls <code>fn(schema)</code>. <code>fn</code> must change the schema in place.<tr><td><code>policies</code><td><code>set(uid, policy)</code><td>Not supported.<tr><td><code>components</code><td>Not supported. <code>set</code> throws on a duplicate.<td>Not supported.</table>
+<p>Content types can also change without the registry methods. In <code>register</code>, the database is not initialized, so changes to <code>strapi.contentTypes[uid].attributes</code> reach the database schema. The i18n plugin adds the <code>locale</code> and <code>localizations</code> attributes to every content type this way.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=hooks-registry>Hooks registry<a href=#hooks-registry class=hash-link aria-label="Direct link to Hooks registry" title="Direct link to Hooks registry" translate=no>​</a></h2>
+<p>A hook is a named list of handlers. <code>strapi.hook(uid)</code> returns the hook object from the <code>hooks</code> registry, or <code>undefined</code>.</p>
+<p>Hook objects come from the <code>hooks</code> module of <code>@strapi/utils</code>. Each object has <code>register(handler)</code>, <code>delete(handler)</code>, <code>getHandlers()</code> and <code>call(...)</code>. The factory sets how <code>call</code> runs the handlers:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Factory<th><code>call</code> behavior<tbody><tr><td><code>createAsyncSeriesHook</code><td>Runs handlers one after the other with the same context.<tr><td><code>createAsyncSeriesWaterfallHook</code><td>Runs handlers one after the other. Each handler receives the return value of the previous one.<tr><td><code>createAsyncParallelHook</code><td>Runs all handlers at the same time. Each handler receives a deep clone of the context.<tr><td><code>createAsyncBailHook</code><td>Runs handlers one after the other and returns the first result that is not <code>undefined</code>.</table>
+<p>Core defines two hooks. Both are parallel hooks. The <code>registries</code> provider creates them in its <code>register</code> step.</p>
+<ul>
+<li class=""><code>strapi::content-types.beforeSync</code> runs before the database schema sync.</li>
+<li class=""><code>strapi::content-types.afterSync</code> runs after it.</li>
+</ul>
+<p>Both receive <code>{ oldContentTypes, contentTypes }</code>. Core uses them to migrate data when draft and publish or i18n is turned on or off for a content type. The i18n, content-releases and review-workflows plugins also add handlers. Add handlers in <code>register</code>, because the hooks run before module <code>bootstrap</code>.</p>
+<div class="theme-admonition theme-admonition-caution admonition_xJq3 alert alert--warning"><div class=admonitionHeading_Gvgb><span class=admonitionIcon_Rf37><svg viewBox="0 0 16 16"><path fill-rule=evenodd d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"/></svg></span>caution</div><div class=admonitionContent_BuS1><p>The local <code>Hook</code> type in <code>registries/hooks.ts</code> declares a <code>handlers</code> property. The objects from <code>@strapi/utils</code> expose <code>getHandlers()</code> instead.</div></div>
+<div class="theme-admonition theme-admonition-note admonition_xJq3 alert alert--secondary"><div class=admonitionHeading_Gvgb><span class=admonitionIcon_Rf37><svg viewBox="0 0 14 16"><path fill-rule=evenodd d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"/></svg></span>note</div><div class=admonitionContent_BuS1><p>The admin panel has its own hooks, created in <code>StrapiApp</code> and registered with <code>registerHook</code>, for example <code>Admin/CM/pages/ListView/inject-column-in-table</code>. They run in the browser. They are not related to the server hooks registry.</div></div>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=database-lifecycles>Database lifecycles<a href=#database-lifecycles class=hash-link aria-label="Direct link to Database lifecycles" title="Direct link to Database lifecycles" translate=no>​</a></h2>
+<p><code>@strapi/database</code> runs lifecycle subscribers around each entity manager query: <code>create</code>, <code>createMany</code>, <code>update</code>, <code>updateMany</code>, <code>delete</code>, <code>deleteMany</code>, <code>findOne</code>, <code>findMany</code> and <code>count</code>. Each query has a <code>before*</code> and an <code>after*</code> action.</p>
+<p>There are two ways to add a subscriber:</p>
+<ul>
+<li class=""><code>strapi.db.lifecycles.subscribe(subscriber)</code>. A function subscriber receives all events. An object subscriber has action keys (<code>beforeCreate</code>, <code>afterUpdate</code> and so on) and an optional <code>models</code> list of UIDs.</li>
+<li class="">A <code>lifecycles</code> file next to a content-type schema, for example <code>src/api/article/content-types/article/lifecycles.js</code>. The built-in models subscriber calls it.</li>
+</ul>
+<p>A second built-in subscriber sets <code>createdAt</code> and <code>updatedAt</code>. Each subscriber gets its own <code>event.state</code> object, which carries data from the <code>before*</code> call to the <code>after*</code> call of the same query. <code>strapi.db.lifecycles.disable()</code> and <code>enable()</code> turn all subscribers off and on. The data-transfer package uses them.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=document-service-middlewares>Document Service middlewares<a href=#document-service-middlewares class=hash-link aria-label="Direct link to Document Service middlewares" title="Direct link to Document Service middlewares" translate=no>​</a></h2>
+<p><code>strapi.documents.use(middleware)</code> adds a middleware to the Document Service. A middleware is <code>(ctx, next) => result</code>. <code>ctx</code> holds <code>uid</code>, <code>contentType</code>, <code>action</code> (the method name, for example <code>create</code> or <code>publish</code>) and <code>params</code>. The function returns an unregister function.</p>
+<ul>
+<li class="">Middlewares run for every content type. Filter on <code>ctx.uid</code> and <code>ctx.action</code>.</li>
+<li class="">A middleware can change <code>ctx.params</code> before it calls <code>next()</code>, and it can change or replace the result.</li>
+<li class="">Middlewares run before the repository opens its transaction.</li>
+<li class="">The i18n, upload, content-manager (history), content-releases and review-workflows packages add middlewares.</li>
+</ul>
+<p>Read <a class="" href=/architecture/document-write-path>Document write path</a> for where middlewares sit in a write.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=event-hub-listeners>Event hub listeners<a href=#event-hub-listeners class=hash-link aria-label="Direct link to Event hub listeners" title="Direct link to Event hub listeners" translate=no>​</a></h2>
+<p><code>strapi.eventHub.on(name, listener)</code> adds a listener for one event. <code>strapi.eventHub.subscribe(fn)</code> adds a subscriber that receives every event as <code>(name, ...args)</code>. <code>emit</code> awaits each subscriber and each listener in order. It does not catch errors: if one throws, the next ones do not run for that event. Core emits the document events after the transaction commits. See <a class="" href=/architecture/document-write-path#events-and-webhooks>Document write path</a>.</p>
+<p>To offer an event to webhooks, a plugin calls <code>strapi.get('webhookStore').addAllowedEvent(key, value)</code>, usually in <code>bootstrap</code>.</p>
+<div class="theme-admonition theme-admonition-caution admonition_xJq3 alert alert--warning"><div class=admonitionHeading_Gvgb><span class=admonitionIcon_Rf37><svg viewBox="0 0 16 16"><path fill-rule=evenodd d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"/></svg></span>caution</div><div class=admonitionContent_BuS1><p>Several unsubscribe helpers use <code>list.splice(list.indexOf(item), 1)</code>. If <code>item</code> is not in the list, <code>indexOf</code> returns <code>-1</code> and <code>splice(-1, 1)</code> removes the last entry. This applies to <code>eventHub.off()</code>, to the function that <code>strapi.documents.use()</code> returns and to the function that <code>strapi.db.lifecycles.subscribe()</code> returns.<p><code>eventHub.once(name, listener)</code> registers a wrapper, but the wrapper calls <code>off(name, listener)</code> with the original listener. The original is not in the list, so the call removes the last listener for that event. If the wrapper is the last listener, it removes itself and the call looks correct. If another listener was added after it, that listener is removed and the wrapper stays. A local run of the code confirmed this: with <code>once</code> then <code>on</code>, two emits called the <code>once</code> listener twice and the other listener zero times.</div></div>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=three-hook-like-mechanisms-compared>Three hook-like mechanisms compared<a href=#three-hook-like-mechanisms-compared class=hash-link aria-label="Direct link to Three hook-like mechanisms compared" title="Direct link to Three hook-like mechanisms compared" translate=no>​</a></h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th><th>Hooks registry<th>Database lifecycles<th>Document Service middlewares<tbody><tr><td>Package<td><code>@strapi/core</code> registry, hook objects from <code>@strapi/utils</code><td><code>@strapi/database</code><td><code>@strapi/core</code> Document Service<tr><td>How to add<td><code>strapi.hook(uid).register(fn)</code><td><code>strapi.db.lifecycles.subscribe(...)</code> or a content-type <code>lifecycles</code> file<td><code>strapi.documents.use(fn)</code><tr><td>Trigger<td>An explicit <code>hook.call()</code> by the owner. Core calls each sync hook once per boot.<td>Each entity manager query<td>Each Document Service method call<tr><td>Filter<td>One hook per UID<td>By action, and optionally by model UID<td>None. Check <code>ctx.uid</code> and <code>ctx.action</code>.<tr><td>Input<td>Depends on the hook. Core sync hooks pass <code>{ oldContentTypes, contentTypes }</code>.<td>Database params with row <code>id</code> values<td>Document params with <code>documentId</code>, <code>status</code> and <code>locale</code><tr><td>Change input<td>Parallel hooks pass a clone, so no. Waterfall hooks pass return values forward.<td>Yes. Change <code>event.params</code> in <code>before*</code>.<td>Yes. Change <code>ctx.params</code> before <code>next()</code>.<tr><td>Change output<td>Waterfall and bail hooks return a value.<td>Change the <code>event.result</code> object in <code>after*</code>. It is the object the caller receives.<td>Yes. Return a different value.<tr><td>Transaction<td>Not related to transactions<td>Inside the caller transaction, if one exists<td>Outside the repository transaction, unless the caller opened one<tr><td>Calls per document operation<td>None<td>Many. For example, a publish deletes and creates rows, and each create runs a <code>findOne</code>.<td>One per public method call</table>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=code-map>Code map<a href=#code-map class=hash-link aria-label="Direct link to Code map" title="Direct link to Code map" translate=no>​</a></h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Concern<th>Path<tbody><tr><td>Enabled plugins<td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/loaders/plugins/get-enabled-plugins.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/core/src/loaders/plugins/get-enabled-plugins.ts</code></a><tr><td>User plugin config files<td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/loaders/plugins/get-user-plugins-config.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/core/src/loaders/plugins/get-user-plugins-config.ts</code></a><tr><td>Config merge and <code>src/extensions</code><td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/loaders/plugins/index.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/core/src/loaders/plugins/index.ts</code></a><tr><td>Hooks registry<td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/registries/hooks.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/core/src/registries/hooks.ts</code></a><tr><td>Hook factories<td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/utils/src/hooks.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/utils/src/hooks.ts</code></a><tr><td>Sync hooks creation<td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/providers/registries.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/core/src/providers/registries.ts</code></a><tr><td>Sync hook core handlers<td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/migrations/index.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/core/src/migrations/index.ts</code></a><tr><td>Database lifecycles<td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/database/src/lifecycles/index.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/database/src/lifecycles/index.ts</code></a><tr><td>Built-in subscribers<td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/database/src/lifecycles/subscribers/index.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/database/src/lifecycles/subscribers/index.ts</code></a><tr><td>Document middleware manager<td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/document-service/middlewares/middleware-manager.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/core/src/services/document-service/middlewares/middleware-manager.ts</code></a><tr><td>Event hub<td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/event-hub.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/core/src/services/event-hub.ts</code></a><tr><td>Webhook allowed events<td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/webhook-store.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/core/src/services/webhook-store.ts</code></a><tr><td>Example: i18n <code>register</code><td><a href=https://github.com/strapi/strapi/blob/develop/packages/plugins/i18n/server/src/register.ts target=_blank rel="noopener noreferrer" class=""><code>packages/plugins/i18n/server/src/register.ts</code></a></table>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=related>Related<a href=#related class=hash-link aria-label="Direct link to Related" title="Direct link to Related" translate=no>​</a></h2>
+<ul>
+<li class=""><a class="" href=/architecture/server-lifecycle>Server lifecycle</a></li>
+<li class=""><a class="" href=/architecture/container-and-registries>Container and registries</a></li>
+<li class=""><a class="" href=/architecture/document-write-path>Document write path</a></li>
+<li class=""><a class="" href=/architecture/glossary>Glossary</a></li>
+</ul></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col noPrint_WFHX"><a href=https://github.com/strapi/strapi/tree/develop/docs/docs/architecture/04-extension-points.md target=_blank rel="noopener noreferrer" class=theme-edit-this-page><svg fill=currentColor height=20 width=20 viewBox="0 0 40 40" class=iconEdit_Z9Sw aria-hidden=true><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"/></g></svg>Edit this page</a></div><div class="col lastUpdated_JAkA"><span class=theme-last-updated>Last updated<!-- --> on <b><time datetime=2026-10-07T15:53:07.000Z itemprop=dateModified>Oct 7, 2026</time></b></span></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href=/architecture/container-and-registries><div class=pagination-nav__sublabel>Previous</div><div class=pagination-nav__label>Container and registries</div></a><a class="pagination-nav__link pagination-nav__link--next" href=/architecture/document-write-path><div class=pagination-nav__sublabel>Next</div><div class=pagination-nav__label>Document write path</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href=#plugin-selection class="table-of-contents__link toc-highlight">Plugin selection</a><li><a href=#plugin-config-merge class="table-of-contents__link toc-highlight">Plugin config merge</a><li><a href=#the-srcextensions-folder class="table-of-contents__link toc-highlight">The <code>src/extensions</code> folder</a><li><a href=#registry-replacement class="table-of-contents__link toc-highlight">Registry replacement</a><li><a href=#hooks-registry class="table-of-contents__link toc-highlight">Hooks registry</a><li><a href=#database-lifecycles class="table-of-contents__link toc-highlight">Database lifecycles</a><li><a href=#document-service-middlewares class="table-of-contents__link toc-highlight">Document Service middlewares</a><li><a href=#event-hub-listeners class="table-of-contents__link toc-highlight">Event hub listeners</a><li><a href=#three-hook-like-mechanisms-compared class="table-of-contents__link toc-highlight">Three hook-like mechanisms compared</a><li><a href=#code-map class="table-of-contents__link toc-highlight">Code map</a><li><a href=#related class="table-of-contents__link toc-highlight">Related</a></ul></div></div></div></div></main></div></div></div></div></body>

@@ -1,0 +1,452 @@
+<!doctype html><html lang=en dir=ltr class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-packages/core/core/telemetry" data-has-hydrated=false><head><meta charset=UTF-8><meta name=generator content="Docusaurus v3.10.2"><title data-rh=true>Server-side telemetry | Strapi contributor docs</title><meta data-rh=true name=viewport content="width=device-width, initial-scale=1.0"/><meta data-rh=true name=twitter:card content=summary_large_image /><meta data-rh=true property=og:url content=https://contributor.strapi.io/packages/core/core/telemetry /><meta data-rh=true property=og:locale content=en /><meta data-rh=true name=docusaurus_locale content=en /><meta data-rh=true name=docsearch:language content=en /><meta data-rh=true name=docusaurus_version content=current /><meta data-rh=true name=docusaurus_tag content=docs-default-current /><meta data-rh=true name=docsearch:version content=current /><meta data-rh=true name=docsearch:docusaurus_tag content=docs-default-current /><meta data-rh=true property=og:title content="Server-side telemetry | Strapi contributor docs"/><meta data-rh=true name=description content="How server-side analytics works in the monorepo — strapi.telemetry.send, event naming, rate limiting, and package metrics services."/><meta data-rh=true property=og:description content="How server-side analytics works in the monorepo — strapi.telemetry.send, event naming, rate limiting, and package metrics services."/><link data-rh=true rel=icon href=/img/favicon.svg /><link data-rh=true rel=canonical href=https://contributor.strapi.io/packages/core/core/telemetry /><link data-rh=true rel=alternate href=https://contributor.strapi.io/packages/core/core/telemetry hreflang=en /><link data-rh=true rel=alternate href=https://contributor.strapi.io/packages/core/core/telemetry hreflang=x-default /><script data-rh=true type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","item":"https://contributor.strapi.io/packages/core","name":"Core","position":1},{"@type":"ListItem","item":"https://contributor.strapi.io/packages/core/core/","name":"core","position":2},{"@type":"ListItem","item":"https://contributor.strapi.io/packages/core/core/telemetry","name":"Server-side telemetry","position":3}]}</script><link rel=stylesheet href=/assets/css/styles.99e52e7f.css /><script src=/assets/js/runtime~main.b80dc77e.js defer></script><script src=/assets/js/main.4583c1e3.js defer></script></head><body><svg style="display: none;"><defs>
+<symbol id=theme-svg-external-link viewBox="0 0 24 24"><path fill=currentColor d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme-6c6")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||"light"),document.documentElement.setAttribute("data-theme-choice",t||"light")}(),function(){try{for(var[t,e]of new URLSearchParams(window.location.search).entries())if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id=__docusaurus><link rel=preload as=image href=/img/logo.svg /><link rel=preload as=image href=/img/logo_dark.svg /><div role=region aria-label="Skip to main content"><a class=skipToContent_fXgn href=#__docusaurus_skipToContent_fallback>Skip to main content</a></div><nav aria-label=Main class="theme-layout-navbar navbar navbar--fixed-top navbarHideable_m1mJ"><div class=navbar__inner><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded=false class="navbar__toggle clean-btn" type=button><svg width=30 height=30 viewBox="0 0 30 30" aria-hidden=true><path stroke=currentColor stroke-linecap=round stroke-miterlimit=10 stroke-width=2 d="M4 7h22M4 15h22M4 23h22"/></svg></button><a class=navbar__brand href=/><div class=navbar__logo><img src=/img/logo.svg alt=Strapi class="themedComponent_mlkZ themedComponent--light_NVdE" width=100 /><img src=/img/logo_dark.svg alt=Strapi class="themedComponent_mlkZ themedComponent--dark_xIcU" width=100 /></div><b class="navbar__title text--truncate">Contributor docs</b></a><a class="navbar__item navbar__link" href=/contributing>Contributing</a><a class="navbar__item navbar__link" href=/architecture>Architecture</a><a aria-current=page class="navbar__item navbar__link navbar__link--active" href=/packages>Packages</a><a class="navbar__item navbar__link" href=/api/Strapi>API reference</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><a href=https://docs.strapi.io target=_blank rel="noopener noreferrer" class="navbar__item navbar__link">User docs<svg width=13.5 height=13.5 aria-label="(opens in new tab)" class=iconExternalLink_nPIU><use href=#theme-svg-external-link /></svg></a><a href=https://github.com/strapi/strapi target=_blank rel="noopener noreferrer" class="navbar__item navbar__link header-github-link" aria-label="GitHub repository"></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type=button disabled title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width=24 height=24 aria-hidden=true class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill=currentColor d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"/></svg><svg viewBox="0 0 24 24" width=24 height=24 aria-hidden=true class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill=currentColor d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"/></svg><svg viewBox="0 0 24 24" width=24 height=24 aria-hidden=true class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill=currentColor d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"/></svg></button></div><div class=navbarSearchContainer_Bca1><div class="navbar__search searchBarContainer_NW3z" dir=ltr><svg aria-hidden=true class=searchIcon_T3tP focusable=false viewBox="0 0 16 16"><path fill=currentColor d="M6.02945 10.20327a4.17382 4.17382 0 1 1 4.17382-4.17382 4.15609 4.15609 0 0 1-4.17382 4.17382Zm9.69195 4.2199-4.8225-4.82338A5.88021 5.88021 0 0 0 12.058 6.02856 6.00467 6.00467 0 1 0 9.59979 10.8989l4.82338 4.82338a.89729.89729 0 0 0 1.29912 0 .89749.89749 0 0 0-.00087-1.29909Z"/></svg><input placeholder=Search aria-label=Search class="navbar__search-input searchInput_YFbd" value="" /><div class="loadingRing_RJI3 searchBarLoadingRing_YnHq"><div></div><div></div><div></div><div></div></div></div></div></div></div><div role=presentation class=navbar-sidebar__backdrop></div></nav><div id=__docusaurus_skipToContent_fallback class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class=docsWrapper_hBAB><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type=button></button><div class=docRoot_UBD9><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class=sidebarViewport_aRkj><div class="sidebar_njMd sidebarWithHideableNavbar_wUlq"><a tabindex=-1 class=sidebarLogo_isFc href=/><img src=/img/logo.svg alt=Strapi class="themedComponent_mlkZ themedComponent--light_NVdE" width=100 /><img src=/img/logo_dark.svg alt=Strapi class="themedComponent_mlkZ themedComponent--dark_xIcU" width=100 /><b>Contributor docs</b></a><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/packages><span class=linkLabel_WmDU>Overview</span></a><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--active" href=/packages/core><span class=categoryLinkLabel_W154>Core</span></a><button aria-label="Collapse sidebar category 'Core'" aria-expanded=true type=button class="clean-btn menu__caret"></button></div><ul class=menu__list><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" tabindex=0 href=/packages/core/admin><span class=categoryLinkLabel_W154>admin</span></a><button aria-label="Expand sidebar category 'admin'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" tabindex=0 href=/packages/core/content-manager><span class=categoryLinkLabel_W154>content-manager</span></a><button aria-label="Expand sidebar category 'content-manager'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" tabindex=0 href=/packages/core/content-releases><span class=categoryLinkLabel_W154>content-releases</span></a><button aria-label="Expand sidebar category 'content-releases'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" tabindex=0 href=/packages/core/content-type-builder><span class=categoryLinkLabel_W154>content-type-builder</span></a><button aria-label="Expand sidebar category 'content-type-builder'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--active" tabindex=0 href=/packages/core/core><span class=categoryLinkLabel_W154>core</span></a><button aria-label="Collapse sidebar category 'core'" aria-expanded=true type=button class="clean-btn menu__caret"></button></div><ul class=menu__list><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-3 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role=button aria-expanded=false tabindex=0 href=/packages/core/core/configuration/intro><span class=categoryLinkLabel_W154>Configuration</span></a></div><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-3 menu__list-item"><a class=menu__link tabindex=0 href=/packages/core/core/event-hub><span class=linkLabel_WmDU>Event Hub</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-3 menu__list-item"><a class=menu__link tabindex=0 href=/packages/core/core/localization><span class=linkLabel_WmDU>Localization provider</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-3 menu__list-item"><a class=menu__link tabindex=0 href=/packages/core/core/mcp-server><span class=linkLabel_WmDU>MCP Server</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-3 menu__list-item"><a class="menu__link menu__link--active" aria-current=page tabindex=0 href=/packages/core/core/telemetry><span class=linkLabel_WmDU>Server-side telemetry</span></a></ul><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" tabindex=0 href=/packages/core/data-transfer><span class=categoryLinkLabel_W154>data-transfer</span></a><button aria-label="Expand sidebar category 'data-transfer'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" tabindex=0 href=/packages/core/database><span class=categoryLinkLabel_W154>database</span></a><button aria-label="Expand sidebar category 'database'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class=menu__link tabindex=0 href=/packages/core/email><span class=linkLabel_WmDU>email</span></a><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" tabindex=0 href=/packages/core/openapi><span class=categoryLinkLabel_W154>openapi</span></a><button aria-label="Expand sidebar category 'openapi'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" tabindex=0 href=/packages/core/permissions><span class=categoryLinkLabel_W154>permissions</span></a><button aria-label="Expand sidebar category 'permissions'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" tabindex=0 href=/packages/core/review-workflows><span class=categoryLinkLabel_W154>review-workflows</span></a><button aria-label="Expand sidebar category 'review-workflows'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" tabindex=0 href=/packages/core/strapi><span class=categoryLinkLabel_W154>strapi</span></a><button aria-label="Expand sidebar category 'strapi'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" tabindex=0 href=/packages/core/types><span class=categoryLinkLabel_W154>types</span></a><button aria-label="Expand sidebar category 'types'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" tabindex=0 href=/packages/core/upload><span class=categoryLinkLabel_W154>upload</span></a><button aria-label="Expand sidebar category 'upload'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" tabindex=0 href=/packages/core/utils><span class=categoryLinkLabel_W154>utils</span></a><button aria-label="Expand sidebar category 'utils'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div></ul><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" href=/packages/plugins><span class=categoryLinkLabel_W154>Plugins</span></a><button aria-label="Expand sidebar category 'Plugins'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" href=/packages/providers><span class=categoryLinkLabel_W154>Providers</span></a><button aria-label="Expand sidebar category 'Providers'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" href=/packages/utils><span class=categoryLinkLabel_W154>Utilities</span></a><button aria-label="Expand sidebar category 'Utilities'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" href=/packages/cli><span class=categoryLinkLabel_W154>CLI</span></a><button aria-label="Expand sidebar category 'CLI'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" href=/packages/generators><span class=categoryLinkLabel_W154>Generators</span></a><button aria-label="Expand sidebar category 'Generators'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/packages/admin-test-utils><span class=linkLabel_WmDU>admin-test-utils</span></a></ul></nav></div></div></aside><main class=docMainContainer_TBSr><div class="container padding-top--md padding-bottom--lg"><div class=row><div class="col docItemCol_VOVn"><div class=docItemContainer_Djhp><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label=Breadcrumbs><ul class=breadcrumbs><li class=breadcrumbs__item><a aria-label="Home page" class=breadcrumbs__link href=/><svg viewBox="0 0 24 24" class=breadcrumbHomeIcon_YNFT><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill=currentColor /></svg></a><li class=breadcrumbs__item><a class=breadcrumbs__link href=/packages/core><span>Core</span></a><li class=breadcrumbs__item><a class=breadcrumbs__link href=/packages/core/core><span>core</span></a><li class="breadcrumbs__item breadcrumbs__item--active"><span class=breadcrumbs__link>Server-side telemetry</span></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type=button class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>Server-side telemetry</h1></header>
+<p>Strapi collects anonymous usage data to understand feature adoption and improve the product. This document describes how <strong>server-side</strong> telemetry works in the monorepo — where events are sent, how they are named, and the patterns used to avoid flooding the analytics backend.</p>
+<p>For the public-facing overview of what is collected, see <a href=https://docs.strapi.io/developer-docs/latest/getting-started/usage-information.html target=_blank rel="noopener noreferrer" class="">Usage information</a>.</p>
+<p>Admin panel (browser) events are a separate channel — see <a class="" href=/packages/core/admin/features/telemetry>Admin telemetry (frontend)</a>. MCP and other server-only features should use the <strong>server-side</strong> patterns below.</p>
+<hr/>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=architecture>Architecture<a href=#architecture class=hash-link aria-label="Direct link to Architecture" title="Direct link to Architecture" translate=no>​</a></h2>
+<div class="language-text codeBlockContainer_Ckt0 theme-code-block" style=--prism-color:#393A34;--prism-background-color:#f6f8fa><div class=codeBlockContent_QJqH><pre tabindex=0 class="prism-code language-text codeBlock_bY9V thin-scrollbar" style=color:#393A34;background-color:#f6f8fa><code class=codeBlockLines_e6Vv><div class=token-line style=color:#393A34><span class="token plain">┌─────────────────────────────────────────────────────────────────┐</span><br/></div><div class=token-line style=color:#393A34><span class="token plain">│  Feature code (controller, service, bootstrap, CLI, cron)       │</span><br/></div><div class=token-line style=color:#393A34><span class="token plain">│       strapi.telemetry.send('didSomething', { ...payload })     │</span><br/></div><div class=token-line style=color:#393A34><span class="token plain">└────────────────────────────┬────────────────────────────────────┘</span><br/></div><div class=token-line style=color:#393A34><span class="token plain">                             │</span><br/></div><div class=token-line style=color:#393A34><span class="token plain">┌────────────────────────────▼────────────────────────────────────┐</span><br/></div><div class=token-line style=color:#393A34><span class="token plain">│  packages/core/core/src/services/metrics/                       │</span><br/></div><div class=token-line style=color:#393A34><span class="token plain">│    index.ts        → createTelemetryInstance, LIMITED_EVENTS    │</span><br/></div><div class=token-line style=color:#393A34><span class="token plain">│    sender.ts       → POST body assembly + strapi.fetch()        │</span><br/></div><div class=token-line style=color:#393A34><span class="token plain">│    rate-limiter.ts → once-per-24h dedup for selected events    │</span><br/></div><div class=token-line style=color:#393A34><span class="token plain">│    middleware.ts   → didReceiveRequest (REST, capped at 1000/d) │</span><br/></div><div class=token-line style=color:#393A34><span class="token plain">└────────────────────────────┬────────────────────────────────────┘</span><br/></div><div class=token-line style=color:#393A34><span class="token plain">                             │</span><br/></div><div class=token-line style=color:#393A34><span class="token plain">                             ▼</span><br/></div><div class=token-line style=color:#393A34><span class="token plain">              https://analytics.strapi.io/api/v2/track</span><br/></div><div class=token-line style=color:#393A34><span class="token plain">              (override: STRAPI_ANALYTICS_URL)</span><br/></div></code></pre></div></div>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=registration>Registration<a href=#registration class=hash-link aria-label="Direct link to Registration" title="Direct link to Registration" translate=no>​</a></h3>
+<p>Telemetry is wired through the <code>telemetry</code> provider:</p>
+<ul>
+<li class=""><code>packages/core/core/src/providers/telemetry.ts</code> — registers <code>strapi.telemetry</code> on the Strapi container.</li>
+<li class=""><code>packages/core/core/src/services/metrics/index.ts</code> — factory that exposes <code>send()</code>, <code>register()</code>, <code>isDisabled</code>.</li>
+</ul>
+<p>On <code>register()</code> (when telemetry is enabled):</p>
+<ol>
+<li class="">A daily cron job sends a <code>ping</code> event (<code>0 0 12 * * *</code>).</li>
+<li class="">REST request middleware is mounted to emit <code>didReceiveRequest</code> (see <a href=#volume-controls class="">Volume controls</a>).</li>
+</ol>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=sending-an-event>Sending an event<a href=#sending-an-event class=hash-link aria-label="Direct link to Sending an event" title="Direct link to Sending an event" translate=no>​</a></h3>
+<div class="language-typescript codeBlockContainer_Ckt0 theme-code-block" style=--prism-color:#393A34;--prism-background-color:#f6f8fa><div class=codeBlockContent_QJqH><pre tabindex=0 class="prism-code language-typescript codeBlock_bY9V thin-scrollbar" style=color:#393A34;background-color:#f6f8fa><code class=codeBlockLines_e6Vv><div class=token-line style=color:#393A34><span class="token plain">strapi</span><span class="token punctuation" style=color:#393A34>.</span><span class="token plain">telemetry</span><span class="token punctuation" style=color:#393A34>.</span><span class="token function" style=color:#d73a49>send</span><span class="token punctuation" style=color:#393A34>(</span><span class="token string" style=color:#e3116c>'didCreateContentType'</span><span class="token punctuation" style=color:#393A34>,</span><span class="token plain"> </span><span class="token punctuation" style=color:#393A34>{</span><span class="token plain"></span><br/></div><div class=token-line style=color:#393A34><span class="token plain">  eventProperties</span><span class="token operator" style=color:#393A34>:</span><span class="token plain"> </span><span class="token punctuation" style=color:#393A34>{</span><span class="token plain"> kind</span><span class="token operator" style=color:#393A34>:</span><span class="token plain"> </span><span class="token string" style=color:#e3116c>'collectionType'</span><span class="token plain"> </span><span class="token punctuation" style=color:#393A34>}</span><span class="token punctuation" style=color:#393A34>,</span><span class="token plain"></span><br/></div><div class=token-line style=color:#393A34><span class="token plain">  userProperties</span><span class="token operator" style=color:#393A34>:</span><span class="token plain"> </span><span class="token punctuation" style=color:#393A34>{</span><span class="token plain"></span><br/></div><div class=token-line style=color:#393A34><span class="token plain">    </span><span class="token comment" style=color:#999988;font-style:italic>/* optional, per-user */</span><span class="token plain"></span><br/></div><div class=token-line style=color:#393A34><span class="token plain">  </span><span class="token punctuation" style=color:#393A34>}</span><span class="token punctuation" style=color:#393A34>,</span><span class="token plain"></span><br/></div><div class=token-line style=color:#393A34><span class="token plain">  groupProperties</span><span class="token operator" style=color:#393A34>:</span><span class="token plain"> </span><span class="token punctuation" style=color:#393A34>{</span><span class="token plain"></span><br/></div><div class=token-line style=color:#393A34><span class="token plain">    </span><span class="token comment" style=color:#999988;font-style:italic>/* optional, project-level */</span><span class="token plain"></span><br/></div><div class=token-line style=color:#393A34><span class="token plain">  </span><span class="token punctuation" style=color:#393A34>}</span><span class="token punctuation" style=color:#393A34>,</span><span class="token plain"></span><br/></div><div class=token-line style=color:#393A34><span class="token plain"></span><span class="token punctuation" style=color:#393A34>}</span><span class="token punctuation" style=color:#393A34>)</span><span class="token punctuation" style=color:#393A34>;</span><br/></div></code></pre></div></div>
+<p>Implementation: <code>packages/core/core/src/services/metrics/sender.ts</code>.</p>
+<p>Each request is a single HTTP <code>POST</code> with JSON body:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Field<th>Purpose<tbody><tr><td><code>event</code><td>Event name (also sent as <code>X-Strapi-Event</code> header)<tr><td><code>userId</code><td>Hashed admin user when available (<code>generateAdminUserHash</code>)<tr><td><code>installId</code><td>Stable install identifier from project uuid + package.json<tr><td><code>eventProperties</code><td>Context specific to this occurrence<tr><td><code>userProperties</code><td>User/environment traits (OS, Node version, etc.)<tr><td><code>groupProperties</code><td>Project traits (Strapi version, DB client, EE plan, counts, …)</table>
+<p>Default metadata is merged automatically (Docker/CI, TypeScript usage, <code>projectId</code>, <code>projectType</code>, EE subscription fields when present).</p>
+<p>Errors are swallowed — telemetry must never break application behaviour. Call sites often append <code>.catch(() => {})</code> or fire-and-forget without awaiting.</p>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=when-telemetry-is-disabled>When telemetry is disabled<a href=#when-telemetry-is-disabled class=hash-link aria-label="Direct link to When telemetry is disabled" title="Direct link to When telemetry is disabled" translate=no>​</a></h3>
+<p>Telemetry is <strong>off</strong> when any of the following is true (<code>packages/core/core/src/services/metrics/index.ts</code>):</p>
+<ul>
+<li class="">No project <code>uuid</code> in config (typical for fresh clones before first run).</li>
+<li class=""><code>STRAPI_TELEMETRY_DISABLED</code> env is truthy (<code>1</code>, <code>true</code>, etc.).</li>
+<li class=""><code>package.json</code> → <code>strapi.telemetryDisabled: true</code>.</li>
+</ul>
+<p><code>strapi.telemetry.isDisabled</code> reflects this. Admin routes that expose telemetry data use the <code>admin::isTelemetryEnabled</code> policy.</p>
+<hr/>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=event-naming-conventions>Event naming conventions<a href=#event-naming-conventions class=hash-link aria-label="Direct link to Event naming conventions" title="Direct link to Event naming conventions" translate=no>​</a></h2>
+<p>Server-side events follow a consistent vocabulary:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Pattern<th>Meaning<th>Examples<tbody><tr><td><code>did*</code><td>Completed action<td><code>didCreateContentType</code>, <code>didInviteUser</code><tr><td><code>didNot*</code><td>Failed or aborted action<td><code>didNotCreateContentType</code>, <code>didNotOpenTab</code><tr><td><code>didCreateFirst*</code><td>First occurrence in project lifetime<td><code>didCreateFirstAdmin</code>, <code>didCreateFirstContentType</code><tr><td><code>didInitialize*</code><td>Plugin/feature bootstrap snapshot<td><code>didInitializeI18n</code>, <code>didInitializePluginUpload</code><tr><td><code>did*ProcessStart/Finish/Fail</code><td>Long-running process lifecycle<td><code>didDEITSProcessStart</code> (data export/import/transfer)<tr><td><code>didSend*OnceAWeek</code><td>Weekly aggregated snapshot<td><code>didSendUploadPropertiesOnceAWeek</code><tr><td><code>ping</code><td>Heartbeat<td>Daily cron<tr><td><code>will*</code><td>Intent (mostly <strong>admin frontend</strong>, rare server-side)<td>—</table>
+<p>Casing is camelCase with no separators. Event names are flat strings — there is no namespacing prefix (e.g. no <code>mcp.didCallTool</code>).</p>
+<hr/>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=payload-conventions>Payload conventions<a href=#payload-conventions class=hash-link aria-label="Direct link to Payload conventions" title="Direct link to Payload conventions" translate=no>​</a></h2>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=eventproperties><code>eventProperties</code><a href=#eventproperties class=hash-link aria-label="Direct link to eventproperties" title="Direct link to eventproperties" translate=no>​</a></h3>
+<p>Action-specific, per-event context. Examples in the codebase:</p>
+<ul>
+<li class=""><code>kind</code> — content type kind on create</li>
+<li class=""><code>model</code> — content type UID on first entry create</li>
+<li class=""><code>url</code>, <code>success</code>, <code>statusCode</code> — REST middleware</li>
+<li class=""><code>source</code>, <code>destination</code> — data transfer providers</li>
+<li class=""><code>error</code> — failure messages</li>
+</ul>
+<p>Prefer <strong>categories and counts</strong> over identifiers when volume is a concern. Some existing events do include UIDs (<code>model</code>, <code>workflowId</code>); new features should avoid repeating user-specific or content-specific names when a category suffices.</p>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=userproperties><code>userProperties</code><a href=#userproperties class=hash-link aria-label="Direct link to userproperties" title="Direct link to userproperties" translate=no>​</a></h3>
+<p>Traits of the acting user or anonymous environment:</p>
+<ul>
+<li class="">Auto-attached on server: <code>environment</code>, <code>os</code>, <code>nodeVersion</code>, …</li>
+<li class="">Explicit: <code>languagesInUse</code> (<code>didChangeInterfaceLanguage</code>)</li>
+</ul>
+<p>Some events are explicitly anonymous (empty <code>userId</code>), e.g. <code>didStartServer</code>, <code>didChangeInterfaceLanguage</code>.</p>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=groupproperties><code>groupProperties</code><a href=#groupproperties class=hash-link aria-label="Direct link to groupproperties" title="Direct link to groupproperties" translate=no>​</a></h3>
+<p>Project/install-level state, often counts or configuration:</p>
+<ul>
+<li class=""><code>numberOfAllContentTypes</code>, <code>numberOfComponents</code>, <code>database</code>, <code>plugins</code> — startup</li>
+<li class=""><code>numberOfLocales</code> — i18n</li>
+<li class=""><code>uploadProvider</code>, <code>privateProvider</code> — upload init</li>
+<li class=""><code>numberOfActiveAdminUsers</code> — admin cron</li>
+<li class="">Aggregated weekly metrics objects — upload / review workflows</li>
+</ul>
+<hr/>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=where-server-events-are-emitted>Where server events are emitted<a href=#where-server-events-are-emitted class=hash-link aria-label="Direct link to Where server events are emitted" title="Direct link to Where server events are emitted" translate=no>​</a></h2>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=core--startup>Core / startup<a href=#core--startup class=hash-link aria-label="Direct link to Core / startup" title="Direct link to Core / startup" translate=no>​</a></h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Event<th>Location<th>Notes<tbody><tr><td><code>didStartServer</code><td><code>packages/core/core/src/Strapi.ts</code> → <code>sendStartupTelemetry()</code><td>Fired once per process start; rich <code>groupProperties</code><tr><td><code>didOpenTab</code> / <code>didNotOpenTab</code><td><code>Strapi.ts</code> → <code>openAdmin()</code><td>Dev auto-open browser only<tr><td><code>ping</code><td>metrics <code>register()</code> cron<td>Daily noon<tr><td><code>didReceiveRequest</code><td><code>packages/core/core/src/services/metrics/middleware.ts</code><td>REST API only; not MCP/GraphQL/admin</table>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=admin-packagescoreadminserver>Admin (<code>packages/core/admin/server</code>)<a href=#admin-packagescoreadminserver class=hash-link aria-label="Direct link to admin-packagescoreadminserver" title="Direct link to admin-packagescoreadminserver" translate=no>​</a></h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Event<th>Trigger<tbody><tr><td><code>didCreateFirstAdmin</code><td>First admin registration<tr><td><code>didInviteUser</code><td>User invitation<tr><td><code>didUpdateRolePermissions</code><td>Role permissions save<tr><td><code>didChangeInterfaceLanguage</code><td>Language preference change<tr><td><code>didUpdateProjectInformation</code><td>Bootstrap + daily midnight cron<tr><td><code>didUpdateSSOSettings</code><td>EE SSO settings (EE)<tr><td><code>didWatchAnAuditLog</code><td>EE audit log view (EE)</table>
+<p>Metrics service: <code>packages/core/admin/server/src/services/metrics.ts</code>.</p>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=content-type-builder>Content-type builder<a href=#content-type-builder class=hash-link aria-label="Direct link to Content-type builder" title="Direct link to Content-type builder" translate=no>​</a></h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Event<th>Trigger<tbody><tr><td><code>didCreateFirstContentType</code> / <code>didCreateContentType</code><td>Content type create (<code>_.isEmpty(strapi.apis)</code> → first)<tr><td><code>didNotCreateContentType</code><td>Create failure<tr><td><code>didCreateFirstComponent</code> / <code>didCreateComponent</code><td>Component create (registry size check)</table>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=content-manager>Content manager<a href=#content-manager class=hash-link aria-label="Direct link to Content manager" title="Direct link to Content manager" translate=no>​</a></h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Event<th>Trigger<tbody><tr><td><code>didCreateFirstContentTypeEntry</code><td>First document in a collection type (<code>totalEntries === 0</code>)<tr><td><code>didConfigureListView</code><td>List view configuration save</table>
+<p>Metrics service: <code>packages/core/content-manager/server/src/services/metrics.ts</code>.</p>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=content-releases>Content releases<a href=#content-releases class=hash-link aria-label="Direct link to Content releases" title="Direct link to Content releases" translate=no>​</a></h3>
+<p><code>didCreateContentRelease</code>, <code>didUpdateContentRelease</code>, <code>didDeleteContentRelease</code>, <code>didPublishContentRelease</code> — <code>packages/core/content-releases/server/src/services/release.ts</code>.</p>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=review-workflows-ee>Review workflows (EE)<a href=#review-workflows-ee class=hash-link aria-label="Direct link to Review workflows (EE)" title="Direct link to Review workflows (EE)" translate=no>​</a></h3>
+<p>Per-action: <code>didCreateStage</code>, <code>didEditStage</code>, <code>didDeleteStage</code>, <code>didChangeEntryStage</code>, <code>didCreateWorkflow</code>, <code>didEditWorkflow</code>, <code>didEditAssignee</code>.</p>
+<p>Weekly aggregate: <code>didSendReviewWorkflowPropertiesOnceAWeek</code> via cron in <code>packages/core/review-workflows/server/src/services/metrics/weekly-metrics.ts</code>.</p>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=upload>Upload<a href=#upload class=hash-link aria-label="Direct link to Upload" title="Direct link to Upload" translate=no>​</a></h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Event<th>Trigger<tbody><tr><td><code>didInitializePluginUpload</code><td>Plugin bootstrap (rate-limited daily)<tr><td><code>didSaveMediaWithCaption</code> / <code>didSaveMediaWithAlternativeText</code><td>Media save (rate-limited daily)<tr><td><code>didEnableResponsiveDimensions</code> / <code>didDisableResponsiveDimensions</code><td>Settings (rate-limited daily)<tr><td><code>didUploadImage</code><td>Image upload<tr><td><code>didBulkDeleteMediaLibraryElements</code> / <code>didBulkMoveMediaLibraryElements</code><td>Bulk operations<tr><td><code>didSendUploadPropertiesOnceAWeek</code><td>Weekly cron aggregate</table>
+<p>Metrics wrapper: <code>packages/core/upload/server/src/services/metrics.ts</code> → <code>trackUsage()</code>.</p>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=i18n>i18n<a href=#i18n class=hash-link aria-label="Direct link to i18n" title="Direct link to i18n" translate=no>​</a></h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Event<th>Trigger<tbody><tr><td><code>didInitializeI18n</code><td>Plugin bootstrap<tr><td><code>didUpdateI18nLocales</code><td>Locale CRUD</table>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=cli-in-process-strapi-or-standalone>CLI (in-process Strapi or standalone)<a href=#cli-in-process-strapi-or-standalone class=hash-link aria-label="Direct link to CLI (in-process Strapi or standalone)" title="Direct link to CLI (in-process Strapi or standalone)" translate=no>​</a></h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Event<th>Context<tbody><tr><td><code>didDEITSProcessStart/Finish/Fail</code><td>Export, import, transfer<tr><td><code>didOptOutTelemetry</code><td><code>strapi telemetry:disable</code><tr><td><code>will/did*</code> project creation<td><code>packages/cli/create-strapi-app</code><tr><td>Cloud CLI events<td>Proxied via Cloud API (<code>packages/cli/cloud</code>)</table>
+<hr/>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=mcp-core>MCP (core)<a href=#mcp-core class=hash-link aria-label="Direct link to MCP (core)" title="Direct link to MCP (core)" translate=no>​</a></h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Event<th>Trigger<tbody><tr><td><code>didStartMcpServer</code><td>MCP server started with <code>server.mcp.enabled: true</code> (<code>eventProperties.path</code>; <code>groupProperties.numberOfTools</code> / <code>numberOfPrompts</code> / <code>numberOfResources</code>; rate-limited daily)<tr><td><code>didUseMcpServer</code><td>Authenticated MCP HTTP request (<code>handlePost.ts</code>; rate-limited daily)<tr><td><code>didNotAuthenticateMcpRequest</code><td>MCP request rejected before handling (<code>eventProperties.errorClass</code>: <code>missing_token</code> | <code>invalid_token</code>; rate-limited daily)<tr><td><code>didNotHandleMcpRequest</code><td>Authenticated MCP request failed during connect/handle (<code>eventProperties.errorClass</code>: <code>timeout</code> | <code>error</code>; rate-limited daily)<tr><td><code>didExecuteMcpCapability</code><td>Successful capability execution (<code>eventProperties.type</code>: <code>tool</code> | <code>prompt</code> | <code>resource</code>; <code>action</code>; <code>source</code>)<tr><td><code>didNotExecuteMcpCapability</code><td>Capability returned <code>isError: true</code> (same shape + <code>errorClass</code>: <code>execution_error</code>)</table>
+<p>Implementation: <code>packages/core/core/src/services/mcp/metrics/</code>. Capability names are normalized to coarse <code>action</code> values — never content-type slugs. Request-level events use the core rate limiter; capability execute/not-execute events deduplicate <strong>per type + action + source</strong> in <code>metrics.ts</code>. Compare <code>didStartMcpServer</code> vs <code>didUseMcpServer</code> to see installs with MCP enabled but unused. Prompt/resource execution telemetry activates when normalization rules exist.</p>
+<hr/>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=package-level-metrics-services>Package-level metrics services<a href=#package-level-metrics-services class=hash-link aria-label="Direct link to Package-level metrics services" title="Direct link to Package-level metrics services" translate=no>​</a></h2>
+<p>Several packages wrap <code>strapi.telemetry.send</code> in a dedicated <code>metrics</code> service rather than calling telemetry directly from controllers:</p>
+<div class="language-text codeBlockContainer_Ckt0 theme-code-block" style=--prism-color:#393A34;--prism-background-color:#f6f8fa><div class=codeBlockContent_QJqH><pre tabindex=0 class="prism-code language-text codeBlock_bY9V thin-scrollbar" style=color:#393A34;background-color:#f6f8fa><code class=codeBlockLines_e6Vv><div class=token-line style=color:#393A34><span class="token plain">packages/core/admin/server/src/services/metrics.ts</span><br/></div><div class=token-line style=color:#393A34><span class="token plain">packages/core/content-manager/server/src/services/metrics.ts</span><br/></div><div class=token-line style=color:#393A34><span class="token plain">packages/core/upload/server/src/services/metrics.ts</span><br/></div><div class=token-line style=color:#393A34><span class="token plain">packages/core/core/src/services/mcp/metrics/metrics.ts</span><br/></div><div class=token-line style=color:#393A34><span class="token plain">packages/plugins/i18n/server/src/services/metrics.ts</span><br/></div><div class=token-line style=color:#393A34><span class="token plain">packages/core/review-workflows/server/src/services/metrics/index.ts</span><br/></div><div class=token-line style=color:#393A34><span class="token plain">packages/core/admin/ee/server/src/services/metrics.ts</span><br/></div></code></pre></div></div>
+<p>Pattern: thin service with <code>sendDid…()</code> helpers; controllers/services call the metrics service. Tests mock <code>strapi.telemetry.send</code> or the metrics service.</p>
+<hr/>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=volume-controls>Volume controls<a href=#volume-controls class=hash-link aria-label="Direct link to Volume controls" title="Direct link to Volume controls" translate=no>​</a></h2>
+<p>There is <strong>no batching API</strong> — each event is one HTTP request. Strapi uses several complementary strategies to limit volume:</p>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=1-daily-rate-limiter-per-event-name>1. Daily rate limiter (per event name)<a href=#1-daily-rate-limiter-per-event-name class=hash-link aria-label="Direct link to 1. Daily rate limiter (per event name)" title="Direct link to 1. Daily rate limiter (per event name)" translate=no>​</a></h3>
+<p><code>packages/core/core/src/services/metrics/rate-limiter.ts</code> wraps the sender for events listed in <code>LIMITED_EVENTS</code>.</p>
+<p>For listed events: <strong>at most one send per event name per 24 hours</strong> (in-memory cache, resets on rolling 24h window).</p>
+<p>Important: deduplication is by <strong>event name only</strong>, not by <code>eventProperties</code>. If one event name covers multiple categories (e.g. <code>didExecuteMcpCapability</code> with different <code>type</code> / <code>action</code> values), apply per-category dedup <strong>before</strong> calling <code>strapi.telemetry.send</code> (see MCP <code>metrics.ts</code>) rather than adding many names to <code>LIMITED_EVENTS</code>.</p>
+<p>To rate-limit a new high-frequency event, either:</p>
+<ul>
+<li class="">Add its exact event name to <code>LIMITED_EVENTS</code>, or</li>
+<li class="">Use separate event names per category (each added to <code>LIMITED_EVENTS</code>), or</li>
+<li class="">Dedupe locally by category before send (MCP tool actions), or</li>
+<li class="">Use weekly aggregation (below).</li>
+</ul>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=2-rest-middleware-cap>2. REST middleware cap<a href=#2-rest-middleware-cap class=hash-link aria-label="Direct link to 2. REST middleware cap" title="Direct link to 2. REST middleware cap" translate=no>​</a></h3>
+<p><code>didReceiveRequest</code> is capped at <strong>1000 events per 24 hours</strong> per process (<code>middleware.ts</code>). Counter resets on rolling 24h window. Only matches URLs under the REST API prefix; static assets and non-GET/PUT/POST/DELETE methods are skipped.</p>
+<p>MCP requests (<code>/mcp</code>) do <strong>not</strong> pass through this middleware.</p>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=3-weekly-aggregated-cron-jobs>3. Weekly aggregated cron jobs<a href=#3-weekly-aggregated-cron-jobs class=hash-link aria-label="Direct link to 3. Weekly aggregated cron jobs" title="Direct link to 3. Weekly aggregated cron jobs" translate=no>​</a></h3>
+<p>For noisy domains, compute metrics locally and send <strong>one event per week</strong>:</p>
+<ul>
+<li class="">Upload: <code>didSendUploadPropertiesOnceAWeek</code> — folder depth stats, asset counts (<code>weekly-metrics.ts</code> + <code>strapi.store</code> for schedule jitter).</li>
+<li class="">Review workflows: <code>didSendReviewWorkflowPropertiesOnceAWeek</code> — workflow/stage counts.</li>
+</ul>
+<p>Schedule is randomized per install (stored in <code>strapi.store</code>) to spread load.</p>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=4-first-vs-subsequent>4. First vs subsequent<a href=#4-first-vs-subsequent class=hash-link aria-label="Direct link to 4. First vs subsequent" title="Direct link to 4. First vs subsequent" translate=no>​</a></h3>
+<p>“First use” pattern without persistent store:</p>
+<ul>
+<li class=""><code>didCreateFirstContentType</code> when <code>_.isEmpty(strapi.apis)</code> before create.</li>
+<li class=""><code>didCreateFirstComponent</code> when component registry is empty.</li>
+<li class=""><code>didCreateFirstAdmin</code> on registration flow.</li>
+<li class=""><code>didCreateFirstContentTypeEntry</code> when <code>totalEntries === 0</code>.</li>
+</ul>
+<p>Subsequent actions use the non-<code>First</code> event (<code>didCreateContentType</code>, <code>didCreateComponent</code>, …).</p>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=5-fire-and-forget--non-blocking>5. Fire-and-forget / non-blocking<a href=#5-fire-and-forget--non-blocking class=hash-link aria-label="Direct link to 5. Fire-and-forget / non-blocking" title="Direct link to 5. Fire-and-forget / non-blocking" translate=no>​</a></h3>
+<p>Startup telemetry and many call sites do not <code>await</code> the send. Failures are ignored. Timeout on fetch defaults to 1s.</p>
+<hr/>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=admin-frontend-telemetry-separate-channel>Admin frontend telemetry (separate channel)<a href=#admin-frontend-telemetry-separate-channel class=hash-link aria-label="Direct link to Admin frontend telemetry (separate channel)" title="Direct link to Admin frontend telemetry (separate channel)" translate=no>​</a></h2>
+<p>See <a class="" href=/packages/core/admin/features/telemetry>Admin telemetry (frontend)</a> for <code>useTracking()</code>, event types, plugin wrappers, and lifecycle events.</p>
+<p>New <strong>server-side</strong> features (like MCP) should use <code>strapi.telemetry.send</code>, not the React tracking hook.</p>
+<hr/>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=adding-a-new-server-side-event--checklist>Adding a new server-side event — checklist<a href=#adding-a-new-server-side-event--checklist class=hash-link aria-label="Direct link to Adding a new server-side event — checklist" title="Direct link to Adding a new server-side event — checklist" translate=no>​</a></h2>
+<ol>
+<li class=""><strong>Name</strong> — <code>did*</code> past tense; use <code>didCreateFirst*</code> or <code>didInitialize*</code> when appropriate.</li>
+<li class=""><strong>Payload</strong> — put action context in <code>eventProperties</code>; project-level counts in <code>groupProperties</code>.</li>
+<li class=""><strong>Privacy</strong> — avoid PII, secrets, and high-cardinality identifiers (content type UIDs, document IDs) unless strictly necessary.</li>
+<li class=""><strong>Volume</strong> — if the action can happen frequently, apply rate limiting or weekly aggregation from day one.</li>
+<li class=""><strong>Location</strong> — prefer a <code>metrics</code> service in the owning package; call from controller/service after success.</li>
+<li class=""><strong>Disable guard</strong> — <code>strapi.telemetry.send</code> no-ops when disabled; no extra check needed unless you perform expensive metric computation first.</li>
+<li class=""><strong>Tests</strong> — mock <code>strapi.telemetry.send</code> in unit tests (see existing <code>__tests__/metrics.test.ts</code> files).</li>
+</ol>
+<hr/>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=api-reference>API reference<a href=#api-reference class=hash-link aria-label="Direct link to API reference" title="Direct link to API reference" translate=no>​</a></h2>
+<p>Public API: <a class="" href=/api/Telemetry>Telemetry Service</a>.</p>
+<p>Key types: <code>packages/core/core/src/services/metrics/sender.ts</code> → <code>Payload</code>, <code>Sender</code>.</div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-tags-row"><div class=col><b>Tags:</b><ul class="tags_jXut padding--none margin-left--sm"><li class=tag_QGVx><a rel=tag title="Usage analytics sent from the server and the admin panel." class="tag_zVej tagRegular_sFm0" href=/tags/telemetry>Telemetry</a></ul></div></div><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col noPrint_WFHX"><a href=https://github.com/strapi/strapi/tree/develop/docs/docs/packages/core/core/telemetry.md target=_blank rel="noopener noreferrer" class=theme-edit-this-page><svg fill=currentColor height=20 width=20 viewBox="0 0 40 40" class=iconEdit_Z9Sw aria-hidden=true><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"/></g></svg>Edit this page</a></div><div class="col lastUpdated_JAkA"><span class=theme-last-updated>Last updated<!-- --> on <b><time datetime=2026-10-07T15:53:07.000Z itemprop=dateModified>Oct 7, 2026</time></b></span></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href=/packages/core/core/mcp-server><div class=pagination-nav__sublabel>Previous</div><div class=pagination-nav__label>MCP Server</div></a><a class="pagination-nav__link pagination-nav__link--next" href=/packages/core/data-transfer><div class=pagination-nav__sublabel>Next</div><div class=pagination-nav__label>data-transfer</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href=#architecture class="table-of-contents__link toc-highlight">Architecture</a><ul><li><a href=#registration class="table-of-contents__link toc-highlight">Registration</a><li><a href=#sending-an-event class="table-of-contents__link toc-highlight">Sending an event</a><li><a href=#when-telemetry-is-disabled class="table-of-contents__link toc-highlight">When telemetry is disabled</a></ul><li><a href=#event-naming-conventions class="table-of-contents__link toc-highlight">Event naming conventions</a><li><a href=#payload-conventions class="table-of-contents__link toc-highlight">Payload conventions</a><ul><li><a href=#eventproperties class="table-of-contents__link toc-highlight"><code>eventProperties</code></a><li><a href=#userproperties class="table-of-contents__link toc-highlight"><code>userProperties</code></a><li><a href=#groupproperties class="table-of-contents__link toc-highlight"><code>groupProperties</code></a></ul><li><a href=#where-server-events-are-emitted class="table-of-contents__link toc-highlight">Where server events are emitted</a><ul><li><a href=#core--startup class="table-of-contents__link toc-highlight">Core / startup</a><li><a href=#admin-packagescoreadminserver class="table-of-contents__link toc-highlight">Admin (<code>packages/core/admin/server</code>)</a><li><a href=#content-type-builder class="table-of-contents__link toc-highlight">Content-type builder</a><li><a href=#content-manager class="table-of-contents__link toc-highlight">Content manager</a><li><a href=#content-releases class="table-of-contents__link toc-highlight">Content releases</a><li><a href=#review-workflows-ee class="table-of-contents__link toc-highlight">Review workflows (EE)</a><li><a href=#upload class="table-of-contents__link toc-highlight">Upload</a><li><a href=#i18n class="table-of-contents__link toc-highlight">i18n</a><li><a href=#cli-in-process-strapi-or-standalone class="table-of-contents__link toc-highlight">CLI (in-process Strapi or standalone)</a><li><a href=#mcp-core class="table-of-contents__link toc-highlight">MCP (core)</a></ul><li><a href=#package-level-metrics-services class="table-of-contents__link toc-highlight">Package-level metrics services</a><li><a href=#volume-controls class="table-of-contents__link toc-highlight">Volume controls</a><ul><li><a href=#1-daily-rate-limiter-per-event-name class="table-of-contents__link toc-highlight">1. Daily rate limiter (per event name)</a><li><a href=#2-rest-middleware-cap class="table-of-contents__link toc-highlight">2. REST middleware cap</a><li><a href=#3-weekly-aggregated-cron-jobs class="table-of-contents__link toc-highlight">3. Weekly aggregated cron jobs</a><li><a href=#4-first-vs-subsequent class="table-of-contents__link toc-highlight">4. First vs subsequent</a><li><a href=#5-fire-and-forget--non-blocking class="table-of-contents__link toc-highlight">5. Fire-and-forget / non-blocking</a></ul><li><a href=#admin-frontend-telemetry-separate-channel class="table-of-contents__link toc-highlight">Admin frontend telemetry (separate channel)</a><li><a href=#adding-a-new-server-side-event--checklist class="table-of-contents__link toc-highlight">Adding a new server-side event — checklist</a><li><a href=#api-reference class="table-of-contents__link toc-highlight">API reference</a></ul></div></div></div></div></main></div></div></div></div></body>

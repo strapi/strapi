@@ -1,0 +1,336 @@
+<!doctype html><html lang=en dir=ltr class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-architecture/schema-sync" data-has-hydrated=false><head><meta charset=UTF-8><meta name=generator content="Docusaurus v3.10.2"><title data-rh=true>Schema sync | Strapi contributor docs</title><meta data-rh=true name=viewport content="width=device-width, initial-scale=1.0"/><meta data-rh=true name=twitter:card content=summary_large_image /><meta data-rh=true property=og:url content=https://contributor.strapi.io/architecture/schema-sync /><meta data-rh=true property=og:locale content=en /><meta data-rh=true name=docusaurus_locale content=en /><meta data-rh=true name=docsearch:language content=en /><meta data-rh=true name=docusaurus_version content=current /><meta data-rh=true name=docusaurus_tag content=docs-default-current /><meta data-rh=true name=docsearch:version content=current /><meta data-rh=true name=docsearch:docusaurus_tag content=docs-default-current /><meta data-rh=true property=og:title content="Schema sync | Strapi contributor docs"/><meta data-rh=true name=description content="How Strapi turns content-type and component schemas into database tables at startup, with the schema diff, sync hooks and migrations."/><meta data-rh=true property=og:description content="How Strapi turns content-type and component schemas into database tables at startup, with the schema diff, sync hooks and migrations."/><link data-rh=true rel=icon href=/img/favicon.svg /><link data-rh=true rel=canonical href=https://contributor.strapi.io/architecture/schema-sync /><link data-rh=true rel=alternate href=https://contributor.strapi.io/architecture/schema-sync hreflang=en /><link data-rh=true rel=alternate href=https://contributor.strapi.io/architecture/schema-sync hreflang=x-default /><script data-rh=true type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","item":"https://contributor.strapi.io/architecture/schema-sync","name":"Schema sync","position":1}]}</script><link rel=stylesheet href=/assets/css/styles.99e52e7f.css /><script src=/assets/js/runtime~main.b80dc77e.js defer></script><script src=/assets/js/main.4583c1e3.js defer></script></head><body><svg style="display: none;"><defs>
+<symbol id=theme-svg-external-link viewBox="0 0 24 24"><path fill=currentColor d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme-6c6")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||"light"),document.documentElement.setAttribute("data-theme-choice",t||"light")}(),function(){try{for(var[t,e]of new URLSearchParams(window.location.search).entries())if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id=__docusaurus><link rel=preload as=image href=/img/logo.svg /><link rel=preload as=image href=/img/logo_dark.svg /><div role=region aria-label="Skip to main content"><a class=skipToContent_fXgn href=#__docusaurus_skipToContent_fallback>Skip to main content</a></div><nav aria-label=Main class="theme-layout-navbar navbar navbar--fixed-top navbarHideable_m1mJ"><div class=navbar__inner><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded=false class="navbar__toggle clean-btn" type=button><svg width=30 height=30 viewBox="0 0 30 30" aria-hidden=true><path stroke=currentColor stroke-linecap=round stroke-miterlimit=10 stroke-width=2 d="M4 7h22M4 15h22M4 23h22"/></svg></button><a class=navbar__brand href=/><div class=navbar__logo><img src=/img/logo.svg alt=Strapi class="themedComponent_mlkZ themedComponent--light_NVdE" width=100 /><img src=/img/logo_dark.svg alt=Strapi class="themedComponent_mlkZ themedComponent--dark_xIcU" width=100 /></div><b class="navbar__title text--truncate">Contributor docs</b></a><a class="navbar__item navbar__link" href=/contributing>Contributing</a><a aria-current=page class="navbar__item navbar__link navbar__link--active" href=/architecture>Architecture</a><a class="navbar__item navbar__link" href=/packages>Packages</a><a class="navbar__item navbar__link" href=/api/Strapi>API reference</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><a href=https://docs.strapi.io target=_blank rel="noopener noreferrer" class="navbar__item navbar__link">User docs<svg width=13.5 height=13.5 aria-label="(opens in new tab)" class=iconExternalLink_nPIU><use href=#theme-svg-external-link /></svg></a><a href=https://github.com/strapi/strapi target=_blank rel="noopener noreferrer" class="navbar__item navbar__link header-github-link" aria-label="GitHub repository"></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type=button disabled title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width=24 height=24 aria-hidden=true class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill=currentColor d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"/></svg><svg viewBox="0 0 24 24" width=24 height=24 aria-hidden=true class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill=currentColor d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"/></svg><svg viewBox="0 0 24 24" width=24 height=24 aria-hidden=true class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill=currentColor d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"/></svg></button></div><div class=navbarSearchContainer_Bca1><div class="navbar__search searchBarContainer_NW3z" dir=ltr><svg aria-hidden=true class=searchIcon_T3tP focusable=false viewBox="0 0 16 16"><path fill=currentColor d="M6.02945 10.20327a4.17382 4.17382 0 1 1 4.17382-4.17382 4.15609 4.15609 0 0 1-4.17382 4.17382Zm9.69195 4.2199-4.8225-4.82338A5.88021 5.88021 0 0 0 12.058 6.02856 6.00467 6.00467 0 1 0 9.59979 10.8989l4.82338 4.82338a.89729.89729 0 0 0 1.29912 0 .89749.89749 0 0 0-.00087-1.29909Z"/></svg><input placeholder=Search aria-label=Search class="navbar__search-input searchInput_YFbd" value="" /><div class="loadingRing_RJI3 searchBarLoadingRing_YnHq"><div></div><div></div><div></div><div></div></div></div></div></div></div><div role=presentation class=navbar-sidebar__backdrop></div></nav><div id=__docusaurus_skipToContent_fallback class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class=docsWrapper_hBAB><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type=button></button><div class=docRoot_UBD9><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class=sidebarViewport_aRkj><div class="sidebar_njMd sidebarWithHideableNavbar_wUlq"><a tabindex=-1 class=sidebarLogo_isFc href=/><img src=/img/logo.svg alt=Strapi class="themedComponent_mlkZ themedComponent--light_NVdE" width=100 /><img src=/img/logo_dark.svg alt=Strapi class="themedComponent_mlkZ themedComponent--dark_xIcU" width=100 /><b>Contributor docs</b></a><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture><span class=linkLabel_WmDU>Architecture overview</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/package-map><span class=linkLabel_WmDU>Package map</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/server-lifecycle><span class=linkLabel_WmDU>Server lifecycle</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/container-and-registries><span class=linkLabel_WmDU>Container and registries</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/extension-points><span class=linkLabel_WmDU>Extension points</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/document-write-path><span class=linkLabel_WmDU>Document write path</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/http-request-path><span class=linkLabel_WmDU>HTTP request path</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link menu__link--active" aria-current=page href=/architecture/schema-sync><span class=linkLabel_WmDU>Schema sync</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/authentication><span class=linkLabel_WmDU>Sessions and JWT</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/enterprise-edition><span class=linkLabel_WmDU>Enterprise Edition</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/future-flags><span class=linkLabel_WmDU>Future Flags</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/architecture/glossary><span class=linkLabel_WmDU>Glossary</span></a></ul></nav></div></div></aside><main class=docMainContainer_TBSr><div class="container padding-top--md padding-bottom--lg"><div class=row><div class="col docItemCol_VOVn"><div class=docItemContainer_Djhp><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label=Breadcrumbs><ul class=breadcrumbs><li class=breadcrumbs__item><a aria-label="Home page" class=breadcrumbs__link href=/><svg viewBox="0 0 24 24" class=breadcrumbHomeIcon_YNFT><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill=currentColor /></svg></a><li class="breadcrumbs__item breadcrumbs__item--active"><span class=breadcrumbs__link>Schema sync</span></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type=button class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><aside class="alert alert--info banner_N8r1" role=note><p class=title_rkSp>Draft, not yet verified against the code<p class=body_aNf4>The content may be incomplete. Check it against the source before relying on it.<ul class=notes_l7eN><li>Drafted from internal research notes on Strapi v5 internals and verified against the code on develop; needs a maintainer review.<li>Knex behavior per dialect was not checked. Open points are how SQLite applies `alterTable` and foreign keys added after `CREATE TABLE`, and whether a failed schema update rolls back on MySQL and MariaDB.<li>No test or local run confirms that user migrations run before internal migrations. The claim comes from the order of the `providers` array in `packages/core/database/src/migrations/index.ts`.</ul><a class=link_fT1h href=/contributing/docs-health>See all flagged pages in Docs health</a></aside><div class="theme-doc-markdown markdown"><header><h1>Schema sync</h1></header><p>At each boot, Strapi compares the content-type and component schemas with the database and changes the tables to match. This page explains the inputs, the conversion to database metadata, the diff, the hooks around it and the migrations. It also lists what Strapi never does automatically. Read it before you change the schema code of <code>@strapi/database</code>, the content-type transform in <code>@strapi/core</code>, or a sync hook handler.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=overview>Overview<a href=#overview class=hash-link aria-label="Direct link to Overview" title="Direct link to Overview" translate=no>​</a></h2>
+<p>Schema sync runs in the bootstrap phase. At that point, the registries are final. See <a class="" href=/architecture/server-lifecycle#bootstrap-phase>Server lifecycle</a> for the full list of bootstrap steps.</p>
+<!-- -->
+<p><code>db.init()</code> runs before Strapi reads the old content types, because the core store uses <code>db.query('strapi::core-store')</code>, and a query needs the metadata.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=where-schemas-come-from>Where schemas come from<a href=#where-schemas-come-from class=hash-link aria-label="Direct link to Where schemas come from" title="Direct link to Where schemas come from" translate=no>​</a></h2>
+<ul>
+<li class="">The <code>apis</code> loader reads <code>src/api/&lt;api>/content-types/&lt;name>/schema.json</code>. It sets <code>collectionName</code> to <code>info.singularName</code> when the schema has none. Plugins declare content types in their server entry.</li>
+<li class="">The <code>content-types</code> registry passes each schema to <code>createContentType()</code>. This function adds <code>createdAt</code>, <code>updatedAt</code>, <code>publishedAt</code>, <code>createdBy</code> and <code>updatedBy</code> to every content type. It adds <code>firstPublishedAt</code> only when that experimental option is on.</li>
+<li class="">The <code>components</code> loader reads <code>src/components/&lt;category>/&lt;name>.json</code>. A component must declare <code>collectionName</code>. If it does not, the loader stops Strapi.</li>
+<li class="">Plugins change schemas in <code>register</code>. The i18n plugin adds <code>locale</code> and <code>localizations</code> to every content type. At the end of the register phase, Strapi replaces each custom field type with its underlying type.</li>
+<li class="">The <code>models</code> registry holds database models that are not content types, for example the core store (<code>strapi_core_store_settings</code>) and the webhooks (<code>strapi_webhooks</code>).</li>
+</ul>
+<p><code>publishedAt</code> exists on every content type, also when draft and publish (D&P) is off. The code comment says that without D&P, entries are always published. The i18n plugin adds <code>locale</code> to every content type, localized or not. Thus, when a content type turns D&P or i18n on or off, the data changes but the table shape does not. The <a href=#sync-hooks class="">sync hooks</a> move that data.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=from-schemas-to-database-models>From schemas to database models<a href=#from-schemas-to-database-models class=hash-link aria-label="Direct link to From schemas to database models" title="Direct link to From schemas to database models" translate=no>​</a></h2>
+<p><a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/utils/transform-content-types-to-models.ts target=_blank rel="noopener noreferrer" class=""><code>transformContentTypesToModels()</code></a> converts content types and components into <code>@strapi/database</code> models. The database layer knows scalar attributes and relations only. It does not know components, dynamic zones or media, so the transform rewrites them as relations:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Schema attribute<th>Model attribute<th>Storage<tbody><tr><td><code>media</code><td><code>morphOne</code> or <code>morphMany</code> to <code>plugin::upload.file</code>, <code>morphBy: 'related'</code><td>The join table of the <code>related</code> attribute of the file model (<code>files_related_mph</code>)<tr><td><code>component</code><td><code>oneToOne</code> (single) or <code>oneToMany</code> (repeatable) to the component UID<td>The <code>&lt;collection>_cmps</code> join table<tr><td><code>dynamiczone</code><td><code>morphToMany</code><td>The same <code>&lt;collection>_cmps</code> table. <code>component_type</code> holds the component UID.</table>
+<p>The transform also does these things:</p>
+<ul>
+<li class="">It adds <code>id</code> (<code>increments</code>) to every model and <code>documentId</code> to each content type. Components have no <code>documentId</code>.</li>
+<li class="">It throws when the snake-case name of an attribute is <code>id</code> or <code>document_id</code>.</li>
+<li class="">It adds a <code>&lt;collection>_cmps</code> model for each content type or component that has a component or dynamic zone attribute. The table has the columns <code>entity_id</code>, <code>cmp_id</code>, <code>component_type</code>, <code>field</code> and <code>order</code>, a foreign key to the owner with <code>ON DELETE CASCADE</code>, and a unique index on the four link columns.</li>
+<li class="">It adds a <code>&lt;collection>_documents_idx</code> index on <code>document_id</code>, <code>locale</code> and <code>published_at</code> to each content type. The model declares this index so that schema sync owns it. The internal migration that created it before is now a no-op.</li>
+</ul>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=metadata>Metadata<a href=#metadata class=hash-link aria-label="Direct link to Metadata" title="Direct link to Metadata" translate=no>​</a></h2>
+<p><code>db.init({ models })</code> calls <code>metadata.loadModels()</code> and then <code>validateDatabase()</code>. <code>loadModels()</code> does these steps:</p>
+<ol>
+<li class="">It shortens table names with the identifiers service. A name longer than 55 characters gets a compressed form with a hash. Suffixes always use their short form, for example <code>lnk</code>, <code>mph</code>, <code>idx</code>, <code>uq</code> and <code>pk</code>.</li>
+<li class="">It skips attributes with <code>unstable_virtual</code>. The i18n <code>localizations</code> attribute is virtual, so it creates no column and no table.</li>
+<li class="">It sets a snake-case column name on each scalar attribute.</li>
+<li class="">It calls <code>createRelation()</code> for each relation. This adds join-table models to the metadata and join-column data to the attributes. It throws on an invalid shape, for example an unknown target, or a <code>oneToMany</code> that is the owner side of a bidirectional relation.</li>
+<li class="">It throws when two models have the same table name.</li>
+</ol>
+<p>The storage rules for relations are in <code>metadata/relations.ts</code>:</p>
+<ul>
+<li class="">By default, a relation uses a join table <code>&lt;table>_&lt;attribute>_lnk</code>. It has two id columns, a foreign key on each with <code>ON DELETE CASCADE</code>, and a unique index on the pair. A <code>oneToMany</code> or <code>manyToMany</code> relation adds an order column. A bidirectional <code>manyToOne</code> or <code>manyToMany</code> relation also adds an inverse order column.</li>
+<li class=""><code>useJoinTable: false</code> on a <code>oneToOne</code> or <code>manyToOne</code> owner creates a join column <code>&lt;attribute>_id</code> on the owner table, with a foreign key <code>ON DELETE SET NULL</code>. Core uses this for <code>createdBy</code> and <code>updatedBy</code>.</li>
+<li class="">In a bidirectional relation, only the owner side (<code>inversedBy</code>) creates storage. The <code>mappedBy</code> side reuses it.</li>
+<li class=""><code>morphToOne</code> stores a target id and a target type in two columns of the owner table. <code>morphToMany</code> creates a <code>&lt;table>_&lt;attribute>_mph</code> join table with id, type, <code>field</code> and <code>order</code> columns. <code>morphOne</code> and <code>morphMany</code> store nothing. See <a class="" href=/packages/core/database/relations/polymorphic-relations>Polymorphic relations</a>.</li>
+</ul>
+<p><code>validateDatabase()</code> checks one case: a bidirectional relation where both sides use <code>inversedBy</code>. It emits a warning that names the side to change, based on which link table is empty.</p>
+<p><code>metadataToSchema()</code> in <code>schema/schema.ts</code> turns the metadata into a plain <code>Schema</code>: a list of tables with columns, indexes and foreign keys. It maps attribute types to Knex column types. For example, <code>string</code>, <code>email</code>, <code>password</code>, <code>enumeration</code> and <code>uid</code> become <code>string</code>, <code>json</code> and <code>blocks</code> become <code>jsonb</code>, and <code>datetime</code> becomes <code>datetime</code> without time zone, with precision 6. A <code>unique</code> or <code>primary</code> column option adds an index.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=the-schema-diff>The schema diff<a href=#the-schema-diff class=hash-link aria-label="Direct link to The schema diff" title="Direct link to The schema diff" translate=no>​</a></h2>
+<p><a href=https://github.com/strapi/strapi/blob/develop/packages/core/database/src/schema/index.ts target=_blank rel="noopener noreferrer" class=""><code>db.schema.sync()</code></a> chooses between a full diff and a fast exit:</p>
+<ol>
+<li class="">If a migration is pending, it runs the migrations and then <code>syncSchema()</code>. It does not check the hash.</li>
+<li class="">If no snapshot is stored, it runs <code>syncSchema()</code>.</li>
+<li class="">It hashes the target schema (SHA-256 of the JSON, with tables sorted by name). If the hash equals the stored hash, it returns <code>UNCHANGED</code> and does not inspect the database schema. The sort makes the hash independent of the order in which content types were registered.</li>
+<li class="">Otherwise, it runs <code>syncSchema()</code>.</li>
+</ol>
+<p>The snapshot is in the <code>strapi_database_schema</code> table, with the columns <code>schema</code> (JSON), <code>hash</code> and <code>time</code>. Each write deletes the old rows first, so the table holds one snapshot.</p>
+<p><code>syncSchema()</code> compares three schemas:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Schema<th>Variable<th>Source<th>Meaning<tbody><tr><td>Live<td><code>databaseSchema</code><td><code>dialect.schemaInspector.getSchema()</code><td>What the database has now<tr><td>Previous<td><code>previousSchema</code><td>The stored snapshot<td>The target schema of the last sync<tr><td>Target<td><code>userSchema</code><td><code>metadataToSchema(metadata)</code><td>What the current schemas require</table>
+<p><a href=https://github.com/strapi/strapi/blob/develop/packages/core/database/src/schema/diff.ts target=_blank rel="noopener noreferrer" class=""><code>schema/diff.ts</code></a> applies the same rules to tables, columns, indexes and foreign keys:</p>
+<ul>
+<li class="">In the target and not in the database: added.</li>
+<li class="">In the target and in the database: compared, and updated if different.</li>
+<li class="">In the database, not in the target, and in the previous snapshot: removed.</li>
+<li class="">In the database, not in the target, and not in the previous snapshot: ignored. Strapi did not create this object, so it can be a table or a column that a user added. The code comment says: "it is a user custom table that we should not touch".</li>
+</ul>
+<p>The column comparison checks the type (through the dialect <code>getSqlType()</code>), <code>notNullable</code>, <code>defaultTo</code> and <code>unsigned</code>. It does not compare type arguments such as length or precision. The index comparison checks columns and type. The foreign key comparison checks columns, the referenced table and columns, <code>onDelete</code> and <code>onUpdate</code>.</p>
+<p>When the status is <code>CHANGED</code>, <a href=https://github.com/strapi/strapi/blob/develop/packages/core/database/src/schema/builder.ts target=_blank rel="noopener noreferrer" class=""><code>schema/builder.ts</code></a> applies the diff. Then <code>syncSchema()</code> stores the target schema as the new snapshot, also when nothing changed. The builder works in this order:</p>
+<ol>
+<li class="">It calls <code>dialect.startSchemaUpdate()</code>.</li>
+<li class="">It reads the current indexes and foreign keys of the updated tables. On PostgreSQL, it also reads the current column types. It does this before the transaction. The code comment says this avoids transaction timeouts on PostgreSQL.</li>
+<li class="">In one Knex transaction, it creates the added tables, then their foreign keys. It adds foreign keys after all tables exist, so a foreign key can point to a table that the same run creates.</li>
+<li class="">If <code>forceMigration</code> is on, it drops the foreign keys of the removed tables, then the tables.</li>
+<li class="">For each updated table, it drops foreign keys, drops indexes, drops columns, alters columns, adds columns, and then recreates the indexes and foreign keys. It drops foreign keys first to avoid foreign key errors when columns change.</li>
+<li class="">It calls <code>dialect.endSchemaUpdate()</code>.</li>
+</ol>
+<p>If the status is <code>CHANGED</code>, <code>Strapi.bootstrap()</code> then removes orphan morph rows (<code>component_type</code> and <code>related_type</code> pivots). A one-time repair of unidirectional join tables follows. See <a class="" href=/architecture/server-lifecycle#bootstrap-phase>Server lifecycle</a>.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=sync-hooks>Sync hooks<a href=#sync-hooks class=hash-link aria-label="Direct link to Sync hooks" title="Direct link to Sync hooks" translate=no>​</a></h2>
+<p>The <code>registries</code> provider creates <code>strapi::content-types.beforeSync</code> and <code>strapi::content-types.afterSync</code> in its <code>register</code> step. Both are parallel hooks: all handlers run at the same time, and each one receives a deep clone of <code>{ oldContentTypes, contentTypes }</code>. <code>oldContentTypes</code> holds the schemas that the previous boot saved in the core store. On the first boot, the core store table does not exist, so <code>oldContentTypes</code> is <code>undefined</code> and the core handlers return at once.</p>
+<p>The core handlers are in <a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/migrations/index.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/core/src/migrations</code></a>. Each hook has one core handler that runs its steps in series:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Hook<th>Step<th>Condition<th>Action<tbody><tr><td><code>beforeSync</code><td>i18n disable<td>The content type was localized and is not now<td>Deletes entries that are not in the default locale. Sets <code>locale</code> to <code>null</code> on the rest.<tr><td><code>beforeSync</code><td>D&P disable<td>D&P was on and is off now<td>Deletes the rows where <code>published_at</code> is <code>null</code> (the drafts).<tr><td><code>afterSync</code><td>i18n enable<td>The content type was not localized and is now<td>Sets the default locale where <code>locale</code> is <code>null</code>.<tr><td><code>afterSync</code><td>D&P enable<td>D&P was off and is on now<td>Calls <code>strapi.documents(uid).discardDraft()</code> for each entry, in batches, to create drafts.<tr><td><code>afterSync</code><td>firstPublishedAt<td>The experimental option is on<td>Copies <code>publishedAt</code> into <code>firstPublishedAt</code> for published documents that have no value.</table>
+<p>The disable steps delete data that the new configuration does not allow. They run before the schema changes. The enable steps can need a column that sync adds, for example <code>first_published_at</code>, so they run after sync.</p>
+<p>The hooks do not disable database lifecycles. The D&P enable step goes through the Document Service, so the subscribers and middlewares that exist at that time run for each entry. Only the data-transfer package calls <code>strapi.db.lifecycles.disable()</code>.</p>
+<p>Plugins also add handlers: i18n (<code>afterSync</code>, permissions of newly localized types), content-releases (both hooks, Enterprise Edition) and review-workflows (<code>afterSync</code> data migrations). Add handlers in <code>register</code>, because the hooks run before module <code>bootstrap</code>. See <a class="" href=/architecture/extension-points#hooks-registry>Extension points</a>.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=migrations>Migrations<a href=#migrations class=hash-link aria-label="Direct link to Migrations" title="Direct link to Migrations" translate=no>​</a></h2>
+<p>Two providers share one runner, <a href=https://github.com/strapi/strapi/blob/develop/packages/core/database/src/migrations/runner.ts target=_blank rel="noopener noreferrer" class=""><code>migrations/runner.ts</code></a>. Strapi used Umzug before. The internal runner replaced it and reuses the same storage tables.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th><th>User migrations<th>Internal migrations<tbody><tr><td>Source<td><code>.js</code> and <code>.sql</code> files in <code>database/migrations</code> of the app, sorted by name<td>The list in <code>internal-migrations/index.ts</code>, plus <code>db.migrations.providers.internal.register()</code><tr><td>Tracking table<td><code>strapi_migrations</code><td><code>strapi_migrations_internal</code><tr><td>Runs when<td>A migration is pending and <code>database.settings.runMigrations</code> is <code>true</code> (default)<td>A migration is pending<tr><td><code>down</code><td>Exported by a <code>.js</code> file. A <code>.sql</code> file has none.<td>Defined by each migration</table>
+<p>Each migration runs in its own transaction (<code>wrapTransaction</code>). The runner records the name after the migration succeeds. If a migration throws, the runner throws <code>Migration &lt;name> (up) failed</code> and the boot fails. With <code>database.settings.useTypescriptMigrations</code>, Strapi reads user migrations from the compiled output folder.</p>
+<p>Migrations run inside <code>db.schema.sync()</code>: after <code>beforeSync</code> and before the diff. User migrations run before internal migrations. Thus, a migration sees the database that the previous boot left, plus the <code>beforeSync</code> changes. The tables and columns of the new schemas do not exist yet.</p>
+<p>The internal list holds the v4 to v5 upgrade migrations, for example identifier shortening, <code>document_id</code>, <code>locale</code> and <code>published_at</code>. Core registers <code>core::5.0.0-discard-drafts</code> in the <code>registries</code> provider. To add an internal migration, see <a class="" href=/packages/core/database/migrations>Migrations</a>.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=dialects>Dialects<a href=#dialects class=hash-link aria-label="Direct link to Dialects" title="Direct link to Dialects" translate=no>​</a></h2>
+<p><code>createConnection()</code> maps <code>connection.client</code> to a Knex driver: <code>sqlite</code> to <code>better-sqlite3</code>, <code>mysql</code> to <code>mysql2</code> and <code>postgres</code> to <code>pg</code>. MariaDB uses the <code>mysql</code> client and dialect. Each dialect provides a schema inspector and capability flags. The diff and the builder read these flags instead of checking the client name, with a few exceptions noted below.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Behavior<th>SQLite<th>PostgreSQL<th>MySQL and MariaDB<tbody><tr><td>Foreign keys in the diff<td>No (<code>usesForeignKeys()</code> is <code>false</code>)<td>Yes<td>Yes<tr><td>Foreign keys inside <code>CREATE TABLE</code><td>Yes (<code>canAlterConstraints()</code> is <code>false</code>)<td>No, added after all new tables exist<td>No, added after all new tables exist<tr><td><code>unsigned</code> in the column comparison<td>No<td>No<td>Yes<tr><td>During a schema update<td><code>pragma foreign_keys = off</code><td>Nothing<td><code>foreign_key_checks = 0</code> and <code>sql_require_primary_key = 0</code><tr><td>New <code>increments</code> column on a table<td><code>integer</code> plus a primary key<td><code>increments</code><td><code>increments</code><tr><td>Type conversions with custom SQL<td>None<td><code>time</code> to <code>datetime</code> and back, with a logged warning<td>None</table>
+<p><code>getSqlType()</code> maps a Knex type to the name that the inspector reads back. For example, Knex creates <code>double</code> and <code>decimal</code> columns as <code>float</code> on SQLite, and the inspector reads <code>float</code> back. So the SQLite dialect maps both types to <code>float</code>. Without this mapping, the diff would report a type change at every sync.</p>
+<p>The builder also checks the client name directly for PostgreSQL and MySQL. On PostgreSQL, it runs the custom conversion SQL before the standard <code>ALTER</code>. On MySQL, dropping a foreign key can also drop an index with the same name. Strapi gives each foreign key and its index the same name, so the builder removes the dropped foreign keys from its list of existing indexes before it drops indexes.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=safety-rules>Safety rules<a href=#safety-rules class=hash-link aria-label="Direct link to Safety rules" title="Direct link to Safety rules" translate=no>​</a></h2>
+<p>Strapi never does these things automatically:</p>
+<ul>
+<li class=""><strong>Drop untracked objects.</strong> A table, column, index or foreign key that is not in the previous snapshot stays. On the first sync there is no snapshot, so Strapi drops nothing and starts to track the target schema.</li>
+<li class=""><strong>Drop reserved or persisted tables.</strong> The diff never removes <code>strapi_migrations</code>, <code>strapi_migrations_internal</code> and <code>strapi_database_schema</code>. It also keeps the tables that Enterprise Edition features list in the core store key <code>persisted_tables</code>, for example the audit logs table. This keeps their data after a downgrade to Community Edition.</li>
+<li class=""><strong>Detect renames.</strong> The diff matches objects by name. A renamed attribute or <code>collectionName</code> is a drop plus an add. When <code>forceMigration</code> is on, the data of the old column or table is lost.</li>
+<li class=""><strong>Convert data on a type change.</strong> The builder alters the column with Knex <code>.alter()</code>. Only the two PostgreSQL conversions above use custom SQL.</li>
+<li class=""><strong>Run <code>down</code> migrations.</strong> No code in the boot path calls <code>db.migrations.down()</code>.</li>
+<li class=""><strong>Check the live database when the hash matches.</strong> If someone changes a table by hand, Strapi does not repair it until the target schema changes or a migration runs.</li>
+</ul>
+<p>The <code>database.settings.forceMigration</code> setting is <code>true</code> by default. When it is <code>false</code>, the builder does not drop tables, columns or indexes. It still drops the foreign keys of updated tables.</p>
+<div class="theme-admonition theme-admonition-caution admonition_xJq3 alert alert--warning"><div class=admonitionHeading_Gvgb><span class=admonitionIcon_Rf37><svg viewBox="0 0 16 16"><path fill-rule=evenodd d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"/></svg></span>caution</div><div class=admonitionContent_BuS1><p>Core deletes content automatically in two cases. When a content type turns D&P off, the next boot deletes its drafts. When it turns localization off, the next boot deletes its entries that are not in the default locale. The <code>beforeSync</code> handlers do this before the schema sync.</div></div>
+<div class="theme-admonition theme-admonition-note admonition_xJq3 alert alert--secondary"><div class=admonitionHeading_Gvgb><span class=admonitionIcon_Rf37><svg viewBox="0 0 14 16"><path fill-rule=evenodd d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"/></svg></span>note</div><div class=admonitionContent_BuS1><p><code>schema/diff.ts</code> reads <code>persisted_tables</code> through the global <code>strapi.store</code>. This is the only link from the diff to <code>@strapi/core</code>. Keep it in mind if you change the diff or test it in isolation.</div></div>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=code-map>Code map<a href=#code-map class=hash-link aria-label="Direct link to Code map" title="Direct link to Code map" translate=no>​</a></h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Concern<th>Path<tbody><tr><td>Bootstrap, hooks call, repairs<td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/Strapi.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/core/src/Strapi.ts</code></a><tr><td>Attributes added to content types<td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/domain/content-type/index.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/core/src/domain/content-type/index.ts</code></a><tr><td>Sync hooks creation<td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/core/src/providers/registries.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/core/src/providers/registries.ts</code></a><tr><td>Metadata and relations<td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/database/src/metadata/relations.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/database/src/metadata/relations.ts</code></a><tr><td>Metadata to schema<td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/database/src/schema/schema.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/database/src/schema/schema.ts</code></a><tr><td>Snapshot storage<td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/database/src/schema/storage.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/database/src/schema/storage.ts</code></a><tr><td>Migration providers<td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/database/src/migrations/index.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/database/src/migrations/index.ts</code></a><tr><td>Dialect base class<td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/database/src/dialects/dialect.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/database/src/dialects/dialect.ts</code></a><tr><td>Identifier shortening<td><a href=https://github.com/strapi/strapi/blob/develop/packages/core/database/src/utils/identifiers/index.ts target=_blank rel="noopener noreferrer" class=""><code>packages/core/database/src/utils/identifiers/index.ts</code></a></table>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=related>Related<a href=#related class=hash-link aria-label="Direct link to Related" title="Direct link to Related" translate=no>​</a></h2>
+<ul>
+<li class=""><a class="" href=/architecture/server-lifecycle>Server lifecycle</a></li>
+<li class=""><a class="" href=/architecture/container-and-registries>Container and registries</a></li>
+<li class=""><a class="" href=/architecture/extension-points>Extension points</a></li>
+<li class=""><a class="" href=/architecture/glossary>Glossary</a></li>
+<li class=""><a class="" href=/packages/core/database><code>@strapi/database</code> package</a></li>
+<li class=""><a class="" href=/packages/core/database/migrations>Migrations</a></li>
+<li class=""><a class="" href=/packages/core/database/relations/polymorphic-relations>Polymorphic relations</a></li>
+<li class=""><a class="" href=/packages/core/core><code>@strapi/core</code> package</a></li>
+<li class=""><a class="" href=/packages/plugins/i18n>i18n plugin</a></li>
+</ul></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col noPrint_WFHX"><a href=https://github.com/strapi/strapi/tree/develop/docs/docs/architecture/07-schema-sync.md target=_blank rel="noopener noreferrer" class=theme-edit-this-page><svg fill=currentColor height=20 width=20 viewBox="0 0 40 40" class=iconEdit_Z9Sw aria-hidden=true><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"/></g></svg>Edit this page</a></div><div class="col lastUpdated_JAkA"><span class=theme-last-updated>Last updated<!-- --> on <b><time datetime=2026-10-07T15:53:07.000Z itemprop=dateModified>Oct 7, 2026</time></b></span></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href=/architecture/http-request-path><div class=pagination-nav__sublabel>Previous</div><div class=pagination-nav__label>HTTP request path</div></a><a class="pagination-nav__link pagination-nav__link--next" href=/architecture/authentication><div class=pagination-nav__sublabel>Next</div><div class=pagination-nav__label>Sessions and JWT</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href=#overview class="table-of-contents__link toc-highlight">Overview</a><li><a href=#where-schemas-come-from class="table-of-contents__link toc-highlight">Where schemas come from</a><li><a href=#from-schemas-to-database-models class="table-of-contents__link toc-highlight">From schemas to database models</a><li><a href=#metadata class="table-of-contents__link toc-highlight">Metadata</a><li><a href=#the-schema-diff class="table-of-contents__link toc-highlight">The schema diff</a><li><a href=#sync-hooks class="table-of-contents__link toc-highlight">Sync hooks</a><li><a href=#migrations class="table-of-contents__link toc-highlight">Migrations</a><li><a href=#dialects class="table-of-contents__link toc-highlight">Dialects</a><li><a href=#safety-rules class="table-of-contents__link toc-highlight">Safety rules</a><li><a href=#code-map class="table-of-contents__link toc-highlight">Code map</a><li><a href=#related class="table-of-contents__link toc-highlight">Related</a></ul></div></div></div></div></main></div></div></div></div></body>

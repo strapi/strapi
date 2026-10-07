@@ -1,0 +1,265 @@
+<!doctype html><html lang=en dir=ltr class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-contributing/writing-docs" data-has-hydrated=false><head><meta charset=UTF-8><meta name=generator content="Docusaurus v3.10.2"><title data-rh=true>Writing docs | Strapi contributor docs</title><meta data-rh=true name=viewport content="width=device-width, initial-scale=1.0"/><meta data-rh=true name=twitter:card content=summary_large_image /><meta data-rh=true property=og:url content=https://contributor.strapi.io/contributing/writing-docs /><meta data-rh=true property=og:locale content=en /><meta data-rh=true name=docusaurus_locale content=en /><meta data-rh=true name=docsearch:language content=en /><meta data-rh=true name=docusaurus_version content=current /><meta data-rh=true name=docusaurus_tag content=docs-default-current /><meta data-rh=true name=docsearch:version content=current /><meta data-rh=true name=docsearch:docusaurus_tag content=docs-default-current /><meta data-rh=true property=og:title content="Writing docs | Strapi contributor docs"/><meta data-rh=true name=description content="Conventions for these contributor docs, covering where content goes, frontmatter, page status, package pages, links and the local workflow."/><meta data-rh=true property=og:description content="Conventions for these contributor docs, covering where content goes, frontmatter, page status, package pages, links and the local workflow."/><link data-rh=true rel=icon href=/img/favicon.svg /><link data-rh=true rel=canonical href=https://contributor.strapi.io/contributing/writing-docs /><link data-rh=true rel=alternate href=https://contributor.strapi.io/contributing/writing-docs hreflang=en /><link data-rh=true rel=alternate href=https://contributor.strapi.io/contributing/writing-docs hreflang=x-default /><script data-rh=true type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","item":"https://contributor.strapi.io/contributing/writing-docs","name":"Writing docs","position":1}]}</script><link rel=stylesheet href=/assets/css/styles.99e52e7f.css /><script src=/assets/js/runtime~main.b80dc77e.js defer></script><script src=/assets/js/main.4583c1e3.js defer></script></head><body><svg style="display: none;"><defs>
+<symbol id=theme-svg-external-link viewBox="0 0 24 24"><path fill=currentColor d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme-6c6")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||"light"),document.documentElement.setAttribute("data-theme-choice",t||"light")}(),function(){try{for(var[t,e]of new URLSearchParams(window.location.search).entries())if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id=__docusaurus><link rel=preload as=image href=/img/logo.svg /><link rel=preload as=image href=/img/logo_dark.svg /><div role=region aria-label="Skip to main content"><a class=skipToContent_fXgn href=#__docusaurus_skipToContent_fallback>Skip to main content</a></div><nav aria-label=Main class="theme-layout-navbar navbar navbar--fixed-top navbarHideable_m1mJ"><div class=navbar__inner><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded=false class="navbar__toggle clean-btn" type=button><svg width=30 height=30 viewBox="0 0 30 30" aria-hidden=true><path stroke=currentColor stroke-linecap=round stroke-miterlimit=10 stroke-width=2 d="M4 7h22M4 15h22M4 23h22"/></svg></button><a class=navbar__brand href=/><div class=navbar__logo><img src=/img/logo.svg alt=Strapi class="themedComponent_mlkZ themedComponent--light_NVdE" width=100 /><img src=/img/logo_dark.svg alt=Strapi class="themedComponent_mlkZ themedComponent--dark_xIcU" width=100 /></div><b class="navbar__title text--truncate">Contributor docs</b></a><a aria-current=page class="navbar__item navbar__link navbar__link--active" href=/contributing>Contributing</a><a class="navbar__item navbar__link" href=/architecture>Architecture</a><a class="navbar__item navbar__link" href=/packages>Packages</a><a class="navbar__item navbar__link" href=/api/Strapi>API reference</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><a href=https://docs.strapi.io target=_blank rel="noopener noreferrer" class="navbar__item navbar__link">User docs<svg width=13.5 height=13.5 aria-label="(opens in new tab)" class=iconExternalLink_nPIU><use href=#theme-svg-external-link /></svg></a><a href=https://github.com/strapi/strapi target=_blank rel="noopener noreferrer" class="navbar__item navbar__link header-github-link" aria-label="GitHub repository"></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type=button disabled title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width=24 height=24 aria-hidden=true class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill=currentColor d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"/></svg><svg viewBox="0 0 24 24" width=24 height=24 aria-hidden=true class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill=currentColor d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"/></svg><svg viewBox="0 0 24 24" width=24 height=24 aria-hidden=true class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill=currentColor d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"/></svg></button></div><div class=navbarSearchContainer_Bca1><div class="navbar__search searchBarContainer_NW3z" dir=ltr><svg aria-hidden=true class=searchIcon_T3tP focusable=false viewBox="0 0 16 16"><path fill=currentColor d="M6.02945 10.20327a4.17382 4.17382 0 1 1 4.17382-4.17382 4.15609 4.15609 0 0 1-4.17382 4.17382Zm9.69195 4.2199-4.8225-4.82338A5.88021 5.88021 0 0 0 12.058 6.02856 6.00467 6.00467 0 1 0 9.59979 10.8989l4.82338 4.82338a.89729.89729 0 0 0 1.29912 0 .89749.89749 0 0 0-.00087-1.29909Z"/></svg><input placeholder=Search aria-label=Search class="navbar__search-input searchInput_YFbd" value="" /><div class="loadingRing_RJI3 searchBarLoadingRing_YnHq"><div></div><div></div><div></div><div></div></div></div></div></div></div><div role=presentation class=navbar-sidebar__backdrop></div></nav><div id=__docusaurus_skipToContent_fallback class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class=docsWrapper_hBAB><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type=button></button><div class=docRoot_UBD9><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class=sidebarViewport_aRkj><div class="sidebar_njMd sidebarWithHideableNavbar_wUlq"><a tabindex=-1 class=sidebarLogo_isFc href=/><img src=/img/logo.svg alt=Strapi class="themedComponent_mlkZ themedComponent--light_NVdE" width=100 /><img src=/img/logo_dark.svg alt=Strapi class="themedComponent_mlkZ themedComponent--dark_xIcU" width=100 /><b>Contributor docs</b></a><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/contributing><span class=linkLabel_WmDU>Overview</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/contributing/contributing-guide><span class=linkLabel_WmDU>Contributing to Strapi</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/contributing/code-of-conduct><span class=linkLabel_WmDU>Code of conduct</span></a><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" href=/contributing/testing><span class=categoryLinkLabel_W154>Testing</span></a><button aria-label="Expand sidebar category 'Testing'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/contributing/frontend-guidelines><span class=linkLabel_WmDU>FE Coding Guidelines</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/contributing/typescript><span class=linkLabel_WmDU>Typescript</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/contributing/design-system><span class=linkLabel_WmDU>Working with the Design System</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link menu__link--active" aria-current=page href=/contributing/writing-docs><span class=linkLabel_WmDU>Writing docs</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/contributing/docs-health><span class=linkLabel_WmDU>Docs health</span></a></ul></nav></div></div></aside><main class=docMainContainer_TBSr><div class="container padding-top--md padding-bottom--lg"><div class=row><div class="col docItemCol_VOVn"><div class=docItemContainer_Djhp><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label=Breadcrumbs><ul class=breadcrumbs><li class=breadcrumbs__item><a aria-label="Home page" class=breadcrumbs__link href=/><svg viewBox="0 0 24 24" class=breadcrumbHomeIcon_YNFT><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill=currentColor /></svg></a><li class="breadcrumbs__item breadcrumbs__item--active"><span class=breadcrumbs__link>Writing docs</span></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type=button class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>Writing docs</h1></header><p>This page is the source of truth for the conventions of these docs. It applies to people and to agents. The site is in <code>docs/</code> and the content is in <code>docs/docs/</code>. The file <a href=https://github.com/strapi/strapi/blob/develop/docs/AGENTS.md target=_blank rel="noopener noreferrer" class=""><code>docs/AGENTS.md</code></a> summarizes the rules.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=where-content-goes>Where content goes<a href=#where-content-goes class=hash-link aria-label="Direct link to Where content goes" title="Direct link to Where content goes" translate=no>​</a></h2>
+<p>Readers pick a section by intent. Put a page where its reader looks for it.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Section<th>Reader intent<th>Folder<th>Examples<tbody><tr><td>Contributing<td>Do a task in the monorepo (how-to)<td><code>docs/docs/contributing/</code><td>Testing, TypeScript conventions, this page<tr><td>Architecture<td>Understand how several packages work together<td><code>docs/docs/architecture/</code><td>Authentication, future flags<tr><td>Packages<td>Understand or look up one package<td><code>docs/docs/packages/&lt;repo path>/</code><td><code>packages/core/database</code> is documented in <code>packages/core/database/</code><tr><td>API reference<td>Look up the <code>Strapi</code> class and its parts<td><code>docs/docs/api/</code><td>Container, event hub</table>
+<p>Design proposals (RFCs) are not in this repository. They happen in <a href=https://github.com/strapi/strapi/discussions/categories/rfcs target=_blank rel="noopener noreferrer" class="">GitHub Discussions</a>.</p>
+<ul>
+<li class="">Packages mirror repo paths. The docs of <code>packages/core/database</code> live in <code>docs/docs/packages/core/database/</code>. Anyone can find them without searching.</li>
+<li class="">A topic that crosses package boundaries goes in Architecture. Link to it from the package pages that it concerns.</li>
+<li class="">Prefix files and folders with <code>01-</code>, <code>02-</code> to set the sidebar order. The prefix is not part of the URL. An <code>index.md</code> is the landing page of its folder.</li>
+<li class="">Do not set <code>slug</code>. The URL follows the file path. Only <code>docs/docs/api/</code> sets <code>slug</code>, to keep its existing URLs.</li>
+</ul>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=markdown-or-mdx>Markdown or MDX<a href=#markdown-or-mdx class=hash-link aria-label="Direct link to Markdown or MDX" title="Direct link to Markdown or MDX" translate=no>​</a></h2>
+<p><code>docs/docusaurus.config.ts</code> sets <code>markdown.format: 'detect'</code>. A <code>.md</code> file is CommonMark. A <code>.mdx</code> file is MDX.</p>
+<ul>
+<li class="">Write <code>.md</code> by default.</li>
+<li class="">Use <code>.mdx</code> only when the page imports a component, for example <code>import PackageTable from '@site/src/components/PackageTable'</code>. See <code>docs/docs/contributing/08-docs-health.mdx</code>.</li>
+<li class="">Admonitions (<code>:::note</code>, <code>:::caution</code>) work in <code>.md</code>.</li>
+<li class="">In MDX, <code>{</code> and <code>&lt;</code> in text start an expression or a tag. Escape them or put them in code.</li>
+<li class="">Never keep knowledge only inside a component. A component may render data, but the page must also state the facts in text. Readers on GitHub and agents read the source files and do not run the site.</li>
+</ul>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=frontmatter>Frontmatter<a href=#frontmatter class=hash-link aria-label="Direct link to Frontmatter" title="Direct link to Frontmatter" translate=no>​</a></h2>
+<p>Every page starts with frontmatter.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Key<th>Required<th>Value<th>Notes<tbody><tr><td><code>title</code><td>Yes<td>String<td>The page title.<tr><td><code>description</code><td>For new pages<td>One or two factual sentences<td>Feeds <code>llms.txt</code>, the page metadata and the cards of generated index pages. Keep it under 150 characters, because <code>llms.txt</code> cuts longer text. The build does not check it.<tr><td><code>sidebar_label</code><td>No<td>String<td>A shorter label for the sidebar.<tr><td><code>tags</code><td>No<td>List of tag keys from <code>docs/docs/tags.yml</code><td>An unknown tag fails the build.<tr><td><code>package</code><td>Package pages only<td>The npm name of a workspace package, for example <code>@strapi/database</code><td>Must match the <code>name</code> in the <code>package.json</code> of a workspace under <code>packages/</code>.<tr><td><code>status</code><td>No<td><code>stub</code>, <code>draft</code> or <code>needs-review</code><td>No <code>status</code> means the page is trusted.<tr><td><code>review_notes</code><td>No<td>List of strings<td>Why the page is flagged. Shown in the banner and on the Docs health page.</table>
+<p>Docusaurus keys such as <code>sidebar_position</code>, <code>hide_title</code> and <code>hide_table_of_contents</code> are also allowed. Use them only when you need them.</p>
+<p>The build throws when:</p>
+<ul>
+<li class=""><code>status</code> is not one of the three values.</li>
+<li class=""><code>review_notes</code> is not a list of strings.</li>
+<li class=""><code>package</code> is not a workspace package under <code>packages/</code>.</li>
+<li class="">Two pages set the same <code>package</code>.</li>
+<li class=""><code>tags</code> contains a key that is not in <code>docs/docs/tags.yml</code>.</li>
+</ul>
+<p>The build only warns when a workspace package has no page.</p>
+<div class="language-yaml codeBlockContainer_Ckt0 theme-code-block" style=--prism-color:#393A34;--prism-background-color:#f6f8fa><div class=codeBlockContent_QJqH><pre tabindex=0 class="prism-code language-yaml codeBlock_bY9V thin-scrollbar" style=color:#393A34;background-color:#f6f8fa><code class=codeBlockLines_e6Vv><div class=token-line style=color:#393A34><span class="token punctuation" style=color:#393A34>---</span><span class="token plain"></span><br/></div><div class=token-line style=color:#393A34><span class="token plain"></span><span class="token key atrule" style=color:#00a4db>title</span><span class="token punctuation" style=color:#393A34>:</span><span class="token plain"> Example page</span><br/></div><div class=token-line style=color:#393A34><span class="token plain"></span><span class="token key atrule" style=color:#00a4db>description</span><span class="token punctuation" style=color:#393A34>:</span><span class="token plain"> What this page explains</span><span class="token punctuation" style=color:#393A34>,</span><span class="token plain"> in one or two factual sentences.</span><br/></div><div class=token-line style=color:#393A34><span class="token plain"></span><span class="token key atrule" style=color:#00a4db>tags</span><span class="token punctuation" style=color:#393A34>:</span><span class="token plain"></span><br/></div><div class=token-line style=color:#393A34><span class="token plain">  </span><span class="token punctuation" style=color:#393A34>-</span><span class="token plain"> backend</span><br/></div><div class=token-line style=color:#393A34><span class="token plain"></span><span class="token key atrule" style=color:#00a4db>status</span><span class="token punctuation" style=color:#393A34>:</span><span class="token plain"> draft</span><br/></div><div class=token-line style=color:#393A34><span class="token plain"></span><span class="token key atrule" style=color:#00a4db>review_notes</span><span class="token punctuation" style=color:#393A34>:</span><span class="token plain"></span><br/></div><div class=token-line style=color:#393A34><span class="token plain">  </span><span class="token punctuation" style=color:#393A34>-</span><span class="token plain"> The retry rules are not verified against the code.</span><br/></div><div class=token-line style=color:#393A34><span class="token plain"></span><span class="token punctuation" style=color:#393A34>---</span><br/></div></code></pre></div></div>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=page-status>Page status<a href=#page-status class=hash-link aria-label="Direct link to Page status" title="Direct link to Page status" translate=no>​</a></h2>
+<p>A page with no <code>status</code> is trusted: someone checked it against the code. Any page that is not verified must carry a status.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Status<th>Meaning<th>Use it when<tbody><tr><td><code>stub</code><td>Headings only, no real content.<td>You create a placeholder. <code>yarn scaffold:packages</code> sets it.<tr><td><code>draft</code><td>Content exists but is incomplete or not verified against code.<td>You write a page and did not check every claim, or you seed a page.<tr><td><code>needs-review</code><td>Existing content that is suspected to be stale.<td>You find outdated claims and cannot fix them now, or your change makes them stale.</table>
+<p><code>review_notes</code> explains the flag. Write one item per problem. Name the claim or the missing part, and where to check it. Do not write "TODO" or "outdated".</p>
+<p>A theme wrapper (<code>docs/src/theme/DocItem/Content/</code>) renders a banner above the page. The banner shows the status, the notes, and a link to <a class="" href=/contributing/docs-health>Docs health</a>. That page lists every flagged page with its notes, and every package that has no page or only a stub. It is generated at build time.</p>
+<p>To promote a page to trusted:</p>
+<ol>
+<li class="">Read the code that the page describes.</li>
+<li class="">Check each claim: names, paths, flows, examples and commands. Run the commands and examples when you can.</li>
+<li class="">Fix or delete what is wrong. Add what is missing.</li>
+<li class="">Remove <code>status</code> and <code>review_notes</code> in the same pull request.</li>
+<li class="">State in the pull request description what you verified.</li>
+</ol>
+<p>Never remove a status only to hide the banner. If you change code that a page describes, update the page. If you cannot, set <code>status: needs-review</code> and add a note that says what changed.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=package-pages>Package pages<a href=#package-pages class=hash-link aria-label="Direct link to Package pages" title="Direct link to Package pages" translate=no>​</a></h2>
+<p>Each workspace package under <code>packages/</code> has one page at <code>docs/docs/&lt;repo path>/index.md</code>. Other pages of the package go in the same folder. Only <code>index.md</code> sets <code>package</code>. Package pages are plain <code>.md</code>.</p>
+<p>The scaffold script creates this template:</p>
+<div class="language-md codeBlockContainer_Ckt0 theme-code-block" style=--prism-color:#393A34;--prism-background-color:#f6f8fa><div class=codeBlockContent_QJqH><pre tabindex=0 class="prism-code language-md codeBlock_bY9V thin-scrollbar" style=color:#393A34;background-color:#f6f8fa><code class=codeBlockLines_e6Vv><div class=token-line style=color:#393A34><span class="token front-matter-block punctuation" style=color:#393A34>---</span><span class="token front-matter-block"></span><br/></div><div class=token-line style=color:#393A34><span class="token front-matter-block"></span><span class="token front-matter-block front-matter yaml language-yaml key atrule" style=color:#00a4db>title</span><span class="token front-matter-block front-matter yaml language-yaml punctuation" style=color:#393A34>:</span><span class="token front-matter-block front-matter yaml language-yaml"> </span><span class="token front-matter-block front-matter yaml language-yaml string" style=color:#e3116c>'@strapi/database'</span><span class="token front-matter-block front-matter yaml language-yaml"></span><br/></div><div class=token-line style=color:#393A34><span class="token front-matter-block front-matter yaml language-yaml"></span><span class="token front-matter-block front-matter yaml language-yaml key atrule" style=color:#00a4db>sidebar_label</span><span class="token front-matter-block front-matter yaml language-yaml punctuation" style=color:#393A34>:</span><span class="token front-matter-block front-matter yaml language-yaml"> database</span><br/></div><div class=token-line style=color:#393A34><span class="token front-matter-block front-matter yaml language-yaml"></span><span class="token front-matter-block front-matter yaml language-yaml key atrule" style=color:#00a4db>description</span><span class="token front-matter-block front-matter yaml language-yaml punctuation" style=color:#393A34>:</span><span class="token front-matter-block front-matter yaml language-yaml"> &lt;description from package.json</span><span class="token front-matter-block front-matter yaml language-yaml punctuation" style=color:#393A34>></span><span class="token front-matter-block front-matter yaml language-yaml"></span><br/></div><div class=token-line style=color:#393A34><span class="token front-matter-block front-matter yaml language-yaml"></span><span class="token front-matter-block front-matter yaml language-yaml key atrule" style=color:#00a4db>package</span><span class="token front-matter-block front-matter yaml language-yaml punctuation" style=color:#393A34>:</span><span class="token front-matter-block front-matter yaml language-yaml"> </span><span class="token front-matter-block front-matter yaml language-yaml string" style=color:#e3116c>'@strapi/database'</span><span class="token front-matter-block front-matter yaml language-yaml"></span><br/></div><div class=token-line style=color:#393A34><span class="token front-matter-block front-matter yaml language-yaml"></span><span class="token front-matter-block front-matter yaml language-yaml key atrule" style=color:#00a4db>status</span><span class="token front-matter-block front-matter yaml language-yaml punctuation" style=color:#393A34>:</span><span class="token front-matter-block front-matter yaml language-yaml"> stub</span><span class="token front-matter-block"></span><br/></div><div class=token-line style=color:#393A34><span class="token front-matter-block"></span><span class="token front-matter-block punctuation" style=color:#393A34>---</span><span class="token plain"></span><br/></div><div class=token-line style=color:#393A34><span class="token plain" style=display:inline-block></span><br/></div><div class=token-line style=color:#393A34><span class="token plain"></span><span class="token title important punctuation" style=color:#393A34>##</span><span class="token title important"> Purpose</span><span class="token plain"></span><br/></div><div class=token-line style=color:#393A34><span class="token plain" style=display:inline-block></span><br/></div><div class=token-line style=color:#393A34><span class="token plain"></span><span class="token title important punctuation" style=color:#393A34>##</span><span class="token title important"> Key concepts</span><span class="token plain"></span><br/></div><div class=token-line style=color:#393A34><span class="token plain" style=display:inline-block></span><br/></div><div class=token-line style=color:#393A34><span class="token plain"></span><span class="token title important punctuation" style=color:#393A34>##</span><span class="token title important"> Related</span><br/></div></code></pre></div></div>
+<p>Each heading carries one italic guidance line while the page is a stub. Replace the guidance with content, and keep the three headings:</p>
+<ul>
+<li class=""><strong>Purpose</strong>: what problem the package solves, and who relies on it.</li>
+<li class=""><strong>Key concepts</strong>: the main abstractions a contributor needs before changing the code. Link to the sub-pages of the package.</li>
+<li class=""><strong>Related</strong>: architecture pages and sibling packages. Do not repeat the dependency lists from the package header.</li>
+</ul>
+<p>The <code>package</code> key drives the package header. The theme wrapper renders it between the title and the content. It shows the npm name, version, private flag, a link to the folder on GitHub, the description from <code>package.json</code>, the internal dependencies and dependents, and a link to the <a class="" href=/architecture/package-map>package map</a>. Do not repeat this data in the page text.</p>
+<p>To add docs for a new package:</p>
+<ol>
+<li class="">Add the package under <code>packages/</code> with a <code>name</code> and a <code>description</code> in its <code>package.json</code>.</li>
+<li class="">Run <code>yarn scaffold:packages</code> in <code>docs/</code>. The script is idempotent. It creates the missing pages and the <code>_category_.json</code> of each group folder. It never changes an existing file.</li>
+<li class="">Fill in the page and set the honest status.</li>
+</ol>
+<p>A new group folder under <code>packages/</code> must be added to <code>PACKAGE_GROUPS</code> in <code>docs/plugins/workspace-packages/groups.mjs</code>, or the build throws. Workspaces outside <code>packages/</code>, such as <code>examples/</code>, have no package pages.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=links>Links<a href=#links class=hash-link aria-label="Direct link to Links" title="Direct link to Links" translate=no>​</a></h2>
+<ul>
+<li class="">Link to pages with relative file links that include the extension: <code>[Package map](../architecture/01-package-map.mdx)</code>. The build checks them (<code>onBrokenLinks</code> and <code>onBrokenMarkdownLinks</code> are <code>throw</code>). They also work on GitHub and in editors, and they survive a URL change.</li>
+<li class="">Broken anchors only warn. Read the warnings anyway.</li>
+<li class="">Link to code with <code>https://github.com/strapi/strapi/blob/develop/&lt;path></code> for a file and <code>https://github.com/strapi/strapi/tree/develop/&lt;path></code> for a folder. The site cannot resolve paths outside <code>docs/docs/</code>, and the site deploys from <code>develop</code>.</li>
+<li class="">Do not use line anchors. Lines move with every change, and the link then points at the wrong code without any error. Name the file and the symbol in the text instead.</li>
+<li class="">Repo-root markdown that the site imports, such as <code>CONTRIBUTING.md</code>, may use repo-relative links. <code>docs/repo-root-markdown-links.ts</code> rewrites links to a page under <code>docs/docs/</code> (<code>.md</code> or <code>.mdx</code>) into site links that the build checks, and every other link into a GitHub <code>develop</code> URL.</li>
+</ul>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=diagrams>Diagrams<a href=#diagrams class=hash-link aria-label="Direct link to Diagrams" title="Direct link to Diagrams" translate=no>​</a></h2>
+<p>Write diagrams as <code>mermaid</code> code fences. The config enables them (<code>markdown.mermaid: true</code>). The source is plain text, so reviewers can diff it and agents can read it. For an example, see <code>docs/docs/packages/core/permissions/index.md</code>.</p>
+<div class="language-md codeBlockContainer_Ckt0 theme-code-block" style=--prism-color:#393A34;--prism-background-color:#f6f8fa><div class=codeBlockContent_QJqH><pre tabindex=0 class="prism-code language-md codeBlock_bY9V thin-scrollbar" style=color:#393A34;background-color:#f6f8fa><code class=codeBlockLines_e6Vv><div class=token-line style=color:#393A34><span class="token code punctuation" style=color:#393A34>```</span><span class="token code code-language">mermaid</span><span class="token code"></span><br/></div><div class=token-line style=color:#393A34><span class="token code"></span><span class="token code code-block language-mermaid">graph LR</span><br/></div><div class=token-line style=color:#393A34><span class="token code code-block language-mermaid">  A[Request] --> B[Policy] --> C[Controller]</span><span class="token code"></span><br/></div><div class=token-line style=color:#393A34><span class="token code"></span><span class="token code punctuation" style=color:#393A34>```</span><br/></div></code></pre></div></div>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=images>Images<a href=#images class=hash-link aria-label="Direct link to Images" title="Direct link to Images" translate=no>​</a></h2>
+<p>Prefer a mermaid diagram when a text diagram is enough. For other images:</p>
+<ul>
+<li class="">Put the file in <code>docs/static/img/&lt;area>/</code>, where <code>&lt;area></code> is the package or topic folder, for example <code>docs/static/img/database/</code>.</li>
+<li class="">Reference it with an absolute path and always write alt text: <code>![Reordering example](/img/database/reordering.png)</code>.</li>
+<li class="">Keep the editable source (for example a <code>.drawio</code> or <code>.excalidraw</code> file) next to the exported image, with the same name.</li>
+</ul>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=tags>Tags<a href=#tags class=hash-link aria-label="Direct link to Tags" title="Direct link to Tags" translate=no>​</a></h2>
+<p>Tags are cross-cutting labels such as <code>backend</code>, <code>frontend</code>, <code>rbac</code> and <code>testing</code>. The vocabulary is in <a href=https://github.com/strapi/strapi/blob/develop/docs/docs/tags.yml target=_blank rel="noopener noreferrer" class=""><code>docs/docs/tags.yml</code></a>. The config sets <code>onInlineTags: 'throw'</code>, so a tag that is not in that file fails the build.</p>
+<p>To add a tag, add an entry with a <code>label</code> and a <code>description</code>. Keep the list short. Do not add a tag that repeats a package folder name, because the folder is the navigation. Do not add a tag for a status, because <code>status</code> covers it.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=components>Components<a href=#components class=hash-link aria-label="Direct link to Components" title="Direct link to Components" translate=no>​</a></h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Component<th>What it does<tbody><tr><td><code>PackageGraph</code><td>Interactive map of the workspace packages and their internal dependencies.<tr><td><code>PackageTable</code><td>Server-rendered table of the packages, grouped by folder.<tr><td><code>PackageHeader</code><td>Package header, rendered from the <code>package</code> key. Pages do not import it.<tr><td><code>DocsHealth</code><td>Report of the flagged pages and of the packages without docs.</table>
+<p>To add a component:</p>
+<ol>
+<li class="">Create it in <code>docs/src/components/&lt;Name>/</code>.</li>
+<li class="">Import it from an <code>.mdx</code> page: <code>import Name from '@site/src/components/Name';</code>.</li>
+<li class="">Read data from repo files, such as <code>package.json</code> or frontmatter. Load it in a plugin, as <code>docs/plugins/workspace-packages/</code> does, and read it in the component with the hook in <code>docs/src/lib/workspace-packages.ts</code>.</li>
+<li class="">State the same knowledge in the page text (see <a href=#markdown-or-mdx class="">Markdown or MDX</a>).</li>
+<li class="">Run <code>yarn tsc --noEmit</code> in <code>docs/</code>.</li>
+</ol>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=moving-or-renaming-pages>Moving or renaming pages<a href=#moving-or-renaming-pages class=hash-link aria-label="Direct link to Moving or renaming pages" title="Direct link to Moving or renaming pages" translate=no>​</a></h2>
+<p>Old URLs must keep working. When you move, rename or delete a page:</p>
+<ol>
+<li class="">Add an entry to <code>docs/redirects.ts</code>: <code>{ from: '/old/path', to: '/new/path' }</code>. Use site URLs, without numeric prefixes or extensions. Never list a <code>from</code> that is still a route. For a deleted page, redirect to the closest page.</li>
+<li class="">Fix the relative links to the page. The build lists the ones you miss.</li>
+<li class="">Fix the references outside <code>docs/</code>. Run <code>rg 'docs/docs/' --glob '!docs/**'</code> at the repo root. Typical places are <code>AGENTS.md</code>, <code>CONTRIBUTING.md</code>, <code>tests/e2e/README.md</code> and code comments.</li>
+</ol>
+<p>Redirects only work in a production build. <code>yarn start</code> does not serve them. Test them with <code>yarn build && yarn serve</code>.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=local-workflow>Local workflow<a href=#local-workflow class=hash-link aria-label="Direct link to Local workflow" title="Direct link to Local workflow" translate=no>​</a></h2>
+<p>Run these in <code>docs/</code>:</p>
+<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style=--prism-color:#393A34;--prism-background-color:#f6f8fa><div class=codeBlockContent_QJqH><pre tabindex=0 class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style=color:#393A34;background-color:#f6f8fa><code class=codeBlockLines_e6Vv><div class=token-line style=color:#393A34><span class="token plain">yarn install            # once</span><br/></div><div class=token-line style=color:#393A34><span class="token plain">yarn start              # dev server with live reload</span><br/></div><div class=token-line style=color:#393A34><span class="token plain">yarn build              # production build; fails on broken links and invalid frontmatter</span><br/></div><div class=token-line style=color:#393A34><span class="token plain">yarn serve              # serve the production build (redirects work here)</span><br/></div><div class=token-line style=color:#393A34><span class="token plain">yarn scaffold:packages  # create the missing package pages</span><br/></div><div class=token-line style=color:#393A34><span class="token plain">yarn tsc --noEmit       # type-check the components and plugins</span><br/></div></code></pre></div></div>
+<p>Format changed files from the repo root: <code>yarn prettier --write &lt;paths></code>. CI runs <code>yarn build</code> when a pull request changes <code>docs/</code> (job <code>docs_build</code> in <code>.github/workflows/tests.yml</code>). The deploy runs on each push to <code>develop</code>.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=writing-style>Writing style<a href=#writing-style class=hash-link aria-label="Direct link to Writing style" title="Direct link to Writing style" translate=no>​</a></h2>
+<ul>
+<li class="">Use plain technical English. Prefer short words.</li>
+<li class="">Use the active voice. Write one idea per sentence.</li>
+<li class="">Write headings in sentence case.</li>
+<li class="">Explain why, not only what.</li>
+<li class="">Point to the code instead of restating it. Name the real path, command or symbol.</li>
+<li class="">Do not use em dashes. Start a new sentence or use a comma.</li>
+<li class="">Do not use filler or promotional words.</li>
+</ul>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=docs-and-agents>Docs and agents<a href=#docs-and-agents class=hash-link aria-label="Direct link to Docs and agents" title="Direct link to Docs and agents" translate=no>​</a></h2>
+<p><code>docs/</code> holds knowledge: what Strapi internals are and why they work that way. It serves people and agents. <code>AGENTS.md</code> at the repo root holds the rules for agents that work in the repo. <code>docs/AGENTS.md</code> holds the rules for editing these docs. <code>.ai/skills/</code> holds procedures that tell an agent how to do a task. The skill <a href=https://github.com/strapi/strapi/blob/develop/.ai/skills/contributor-docs/SKILL.md target=_blank rel="noopener noreferrer" class=""><code>contributor-docs</code></a> is the procedure for this guide.</p>
+<p>A skill links to the docs and never copies them. Two copies drift apart.</p>
+<p>The site publishes <code>/llms.txt</code> and <code>/llms-full.txt</code>, built from the page sources. They list pages by title and description, so write a precise <code>description</code>.</p>
+<p>An agent that works in a checkout reads the <code>.md</code> sources under <code>docs/docs/</code> directly. Before it changes a package, it reads the page in <code>docs/docs/packages/&lt;repo path>/</code> and checks the <code>status</code> of that page.</div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col noPrint_WFHX"><a href=https://github.com/strapi/strapi/tree/develop/docs/docs/contributing/07-writing-docs.md target=_blank rel="noopener noreferrer" class=theme-edit-this-page><svg fill=currentColor height=20 width=20 viewBox="0 0 40 40" class=iconEdit_Z9Sw aria-hidden=true><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"/></g></svg>Edit this page</a></div><div class="col lastUpdated_JAkA"><span class=theme-last-updated>Last updated<!-- --> on <b><time datetime=2026-10-07T15:53:07.000Z itemprop=dateModified>Oct 7, 2026</time></b></span></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href=/contributing/design-system><div class=pagination-nav__sublabel>Previous</div><div class=pagination-nav__label>Working with the Design System</div></a><a class="pagination-nav__link pagination-nav__link--next" href=/contributing/docs-health><div class=pagination-nav__sublabel>Next</div><div class=pagination-nav__label>Docs health</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href=#where-content-goes class="table-of-contents__link toc-highlight">Where content goes</a><li><a href=#markdown-or-mdx class="table-of-contents__link toc-highlight">Markdown or MDX</a><li><a href=#frontmatter class="table-of-contents__link toc-highlight">Frontmatter</a><li><a href=#page-status class="table-of-contents__link toc-highlight">Page status</a><li><a href=#package-pages class="table-of-contents__link toc-highlight">Package pages</a><li><a href=#links class="table-of-contents__link toc-highlight">Links</a><li><a href=#diagrams class="table-of-contents__link toc-highlight">Diagrams</a><li><a href=#images class="table-of-contents__link toc-highlight">Images</a><li><a href=#tags class="table-of-contents__link toc-highlight">Tags</a><li><a href=#components class="table-of-contents__link toc-highlight">Components</a><li><a href=#moving-or-renaming-pages class="table-of-contents__link toc-highlight">Moving or renaming pages</a><li><a href=#local-workflow class="table-of-contents__link toc-highlight">Local workflow</a><li><a href=#writing-style class="table-of-contents__link toc-highlight">Writing style</a><li><a href=#docs-and-agents class="table-of-contents__link toc-highlight">Docs and agents</a></ul></div></div></div></div></main></div></div></div></div></body>

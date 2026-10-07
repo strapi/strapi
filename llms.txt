@@ -1,0 +1,170 @@
+# Strapi contributor docs
+
+> How Strapi is built, and how to contribute to it
+
+This file contains links to documentation sections following the llmstxt.org standard.
+
+## Table of Contents
+
+- [Strapi (WIP)](https://contributor.strapi.io/api/Strapi): Central Strapi class that manages project configuration, directories, and instance state.
+- [API (WIP)](https://contributor.strapi.io/api/API): Module that wraps functionalities around Strapi endpoint generation.
+- [Container](https://contributor.strapi.io/api/container): Container module that provides dependency injection and service registration.
+- [Cron Service](https://contributor.strapi.io/api/Cron): Service that provides a way to add, remove, start, and stop cron jobs.
+- [EventHub (WIP)](https://contributor.strapi.io/api/EventHub): Event Hub module for managing and dispatching events in Strapi.
+- [Startup Logger](https://contributor.strapi.io/api/StartupLogger): Logger that displays startup information and statistics about the Strapi instance.
+- [StrapiFS (WIP)](https://contributor.strapi.io/api/StrapiFS): Wrapper around Node.js FS module to manipulate and manage local files.
+- [Strapi server (WIP)](https://contributor.strapi.io/api/strapi-server): Module that generates and configures the Strapi HTTP server.
+- [Telemetry Service](https://contributor.strapi.io/api/Telemetry): Service that collects and sends anonymous usage data for Strapi improvement.
+- [Package map](https://contributor.strapi.io/architecture/package-map): Interactive map of the workspace packages under packages/ and their internal dependencies, built from each package.json.
+- [Server lifecycle](https://contributor.strapi.io/architecture/server-lifecycle): The order in which the Strapi server is constructed, loaded, started and destroyed, and what each phase makes available.
+- [Container and registries](https://contributor.strapi.io/architecture/container-and-registries): How the Strapi container stores core subsystems, how registries store plugin, API and application artifacts, and how UIDs are built.
+- [Extension points](https://contributor.strapi.io/architecture/extension-points): The mechanisms that plugins and application code use to change Strapi server behavior, in the order in which they apply.
+- [Document write path](https://contributor.strapi.io/architecture/document-write-path): What happens between a call to strapi.documents(uid).create, update or publish and the webhook that reports it.
+- [HTTP request path](https://contributor.strapi.io/architecture/http-request-path): How Strapi handles an HTTP request from Koa to the response, for the Content API and the admin API.
+- [Schema sync](https://contributor.strapi.io/architecture/schema-sync): How Strapi turns content-type and component schemas into database tables at startup, with the schema diff, sync hooks and migrations.
+- [Sessions and JWT](https://contributor.strapi.io/architecture/authentication): How admin and Content API authentication works with SessionManager, tokens, and configuration.
+- [Enterprise Edition](https://contributor.strapi.io/architecture/enterprise-edition): Overview of Strapi Enterprise Edition features and capabilities.
+- [Future Flags](https://contributor.strapi.io/architecture/future-flags): Feature flags that enable unstable features for testing and community feedback.
+- [Glossary](https://contributor.strapi.io/architecture/glossary): Terms used in the Strapi server codebase, with the naming traps that confuse new contributors.
+- [Architecture overview](https://contributor.strapi.io/architecture): How the main parts of Strapi fit together at runtime, and which architecture pages to read first.
+- [Contributing to Strapi](https://contributor.strapi.io/contributing/contributing-guide): The contribution process for the Strapi monorepo, imported from the CONTRIBUTING.md file at the repository root.
+- [Code of conduct](https://contributor.strapi.io/contributing/code-of-conduct): The rules for taking part in the Strapi community, imported from the CODE_OF_CONDUCT.md file at the repository root.
+- [Setup](https://contributor.strapi.io/contributing/testing/e2e/setup): Guide to setting up and running end-to-end tests with Playwright.
+- [App Template](https://contributor.strapi.io/contributing/testing/e2e/app-template): Template and configuration for e2e test applications.
+- [Data Transfer](https://contributor.strapi.io/contributing/testing/e2e/data-transfer): Guide to data transfer setup and usage in e2e testing.
+- [Testing](https://contributor.strapi.io/contributing/testing): The test types of the Strapi monorepo (unit, front-end, TypeScript, API integration, CLI and E2E) and the command that runs each one.
+- [FE Coding Guidelines](https://contributor.strapi.io/contributing/frontend-guidelines): Frontend coding guidelines and best practices for Strapi admin development.
+- [Typescript](https://contributor.strapi.io/contributing/typescript): TypeScript usage conventions and guidelines for Strapi codebase.
+- [Working with the Design System](https://contributor.strapi.io/contributing/design-system): Design system documentation and component usage guidelines.
+- [Writing docs](https://contributor.strapi.io/contributing/writing-docs): Conventions for these contributor docs, covering where content goes, frontmatter, page status, package pages, links and the local workflow.
+- [Docs health](https://contributor.strapi.io/contributing/docs-health): Generated report of the pages flagged as stub, draft or needs-review, and of the packages that have no real documentation yet.
+- [Contributing](https://contributor.strapi.io/contributing): How to contribute to the Strapi monorepo, with guides for testing, front-end and TypeScript conventions, and for writing these docs.
+- [@strapi/admin-test-utils](https://contributor.strapi.io/packages/admin-test-utils): Setup and fixtures for testing the admin panel
+- [@strapi/cloud-cli](https://contributor.strapi.io/packages/cli/cloud): CLI commands for Strapi Cloud interactions
+- [create-strapi](https://contributor.strapi.io/packages/cli/create-strapi): Alias CLI for creating new Strapi projects via npm init
+- [create-strapi-app](https://contributor.strapi.io/packages/cli/create-strapi-app): CLI to scaffold a new Strapi project
+- [Audit Logs](https://contributor.strapi.io/packages/core/admin/ee/audit-logs): Guide for Audit Logs
+- [useLicenseLimits](https://contributor.strapi.io/packages/core/admin/ee/hooks/use-license-limits): API reference for the useLicenseLimits hook
+- [useAdminRoles](https://contributor.strapi.io/packages/core/admin/features/hooks/use-admin-roles): API reference for the useAdminRoles hook
+- [useEnterprise](https://contributor.strapi.io/packages/core/admin/features/hooks/use-enterprise): API reference for the useEnterprise hook
+- [NPS](https://contributor.strapi.io/packages/core/admin/features/nps): Net Promoter Score survey that collects user feedback about Strapi.
+- [Admin telemetry (frontend)](https://contributor.strapi.io/packages/core/admin/features/telemetry): How the admin panel sends usage events from the browser — useTracking, event types, and plugin patterns.
+- [Guided Tour](https://contributor.strapi.io/packages/core/admin/guided-tour): Interactive onboarding system that guides new users through key features and workflows.
+- [useContentTypes](https://contributor.strapi.io/packages/core/admin/hooks/use-content-types): API reference for the useContentTypes hook in Strapi's Content Manager
+- [usePersistentState](https://contributor.strapi.io/packages/core/admin/hooks/use-persistent-state): API reference for the usePersistentState hook in Strapi
+- [@strapi/admin](https://contributor.strapi.io/packages/core/admin): React admin panel and its server part: admin users, roles, RBAC, tokens, admin authentication and admin routes.
+- [Introduction](https://contributor.strapi.io/packages/core/admin/permissions/intro): Introduction to admin panel permission system and access control.
+- [How Permissions Work](https://contributor.strapi.io/packages/core/admin/permissions/how-they-work): Explanation of how permissions are evaluated and enforced in admin.
+- [Fetching Permissions](https://contributor.strapi.io/packages/core/admin/permissions/frontend/fetching-permissions): Guide to fetching and retrieving user permissions in frontend.
+- [Using Permissions](https://contributor.strapi.io/packages/core/admin/permissions/frontend/using-permissions): Guide to checking and using permissions in frontend components.
+- [Documents](https://contributor.strapi.io/packages/core/content-manager/documents): An introduction to documents in the content-manager
+- [Layouts](https://contributor.strapi.io/packages/core/content-manager/layouts): How layouts work with the List & Edit view
+- [RBAC](https://contributor.strapi.io/packages/core/content-manager/RBAC): How RBAC work with documents in the content-manager
+- [Content Releases](https://contributor.strapi.io/packages/core/content-manager/content-releases): Guide for content releases in the content-manager.
+- [Relations](https://contributor.strapi.io/packages/core/content-manager/relations): Conceptual guide to relations in the Content Manager focussing on the technical decisions taken.
+- [Blocks editor](https://contributor.strapi.io/packages/core/content-manager/blocks): The modern JSON-based rich text editor
+- [Live preview](https://contributor.strapi.io/packages/core/content-manager/preview): Frontend-agnostic preview with visual editing
+- [useDocumentActions](https://contributor.strapi.io/packages/core/content-manager/hooks/use-document-actions): API reference for the useDocumentActions hook from Strapi's Content Manager
+- [useDocument](https://contributor.strapi.io/packages/core/content-manager/hooks/use-document): API reference for the useDocument hook from Strapi's Content Manager
+- [useDragAndDrop](https://contributor.strapi.io/packages/core/content-manager/hooks/use-drag-and-drop): API reference for the useDragAndDrop hook in Strapi's Content Manager
+- [@strapi/content-manager](https://contributor.strapi.io/packages/core/content-manager): Core plugin with the admin panel list, edit and configuration views for documents, and the admin API routes behind them.
+- [Permission Checker](https://contributor.strapi.io/packages/core/content-manager/services/permission-checker): Service that enforces access control by checking permissions and sanitizing user actions.
+- [Backend Design](https://contributor.strapi.io/packages/core/content-releases/backend): Content Releases backend
+- [Introduction](https://contributor.strapi.io/packages/core/content-releases/frontend/intro): Introduction to content releases frontend implementation and features.
+- [Releases page](https://contributor.strapi.io/packages/core/content-releases/frontend/releases-page): Documentation of the content releases page user interface.
+- [Release details page](https://contributor.strapi.io/packages/core/content-releases/frontend/release-details-page): Documentation of the release details page and its functionality.
+- [Content Releases Scheduling](https://contributor.strapi.io/packages/core/content-releases/scheduling): Content Releases Scheduling
+- [@strapi/content-releases](https://contributor.strapi.io/packages/core/content-releases): Enterprise core plugin that groups documents into releases and publishes or unpublishes them together, now or on a schedule.
+- [Content structure file](https://contributor.strapi.io/packages/core/content-type-builder/content-structure): The version 1 folder-group configuration for Content Type Builder
+- [@strapi/content-type-builder](https://contributor.strapi.io/packages/core/content-type-builder): Core plugin that creates and edits content types, components and folder groups from the admin panel by writing schema files.
+- [Introduction](https://contributor.strapi.io/packages/core/core/configuration/intro): Introduction to Strapi core configuration system and options.
+- [Recommended security defaults](https://contributor.strapi.io/packages/core/core/configuration/security-defaults): Documentation of default security settings and configurations.
+- [Event Hub](https://contributor.strapi.io/packages/core/core/event-hub): The event hub is a central system that processes a variety of events in a Strapi application
+- [@strapi/core](https://contributor.strapi.io/packages/core/core): Server runtime of Strapi: the Strapi class, container, providers, registries, loaders, Document Service, HTTP server and core-api factories.
+- [Localization provider](https://contributor.strapi.io/packages/core/core/localization): Core depends on `Modules.Localization.Provider`, exposed through `strapi.localization`, for localization
+- [MCP Server](https://contributor.strapi.io/packages/core/core/mcp-server): How Strapi's Model Context Protocol (MCP) server is registered, started, authenticated, and extended with tools, prompts, and resources.
+- [Server-side telemetry](https://contributor.strapi.io/packages/core/core/telemetry): How server-side analytics works in the monorepo — strapi.telemetry.send, event naming, rate limiting, and package metrics services.
+- [Stream Lifecycle](https://contributor.strapi.io/packages/core/data-transfer/engine/stream-lifecycle): Explanation of data transfer stream lifecycle and event flow.
+- [Transfer Engine](https://contributor.strapi.io/packages/core/data-transfer/engine): Conceptual guide to the data transfer engine
+- [Introduction](https://contributor.strapi.io/packages/core/data-transfer/providers/overview): Overview of data transfer provider interfaces and implementations.
+- [Source Providers](https://contributor.strapi.io/packages/core/data-transfer/providers/source-providers): Documentation of source providers for reading data transfers.
+- [Destination Providers](https://contributor.strapi.io/packages/core/data-transfer/providers/destination-providers): Documentation of destination providers for writing data transfers.
+- [Overview](https://contributor.strapi.io/packages/core/data-transfer/providers/strapi-file/overview): Overview of Strapi file-based data transfer provider.
+- [Strapi File Structure](https://contributor.strapi.io/packages/core/data-transfer/providers/strapi-file/file-structure): Documentation of Strapi file transfer format and structure.
+- [Source](https://contributor.strapi.io/packages/core/data-transfer/providers/strapi-file/source): Guide to using Strapi file provider as a data source.
+- [Destination](https://contributor.strapi.io/packages/core/data-transfer/providers/strapi-file/destination): Guide to using Strapi file provider as a data destination.
+- [Overview](https://contributor.strapi.io/packages/core/data-transfer/providers/local-strapi/overview): Overview of local Strapi instance data transfer provider.
+- [Source](https://contributor.strapi.io/packages/core/data-transfer/providers/local-strapi/source): Guide to using local Strapi instance as a data source.
+- [Destination](https://contributor.strapi.io/packages/core/data-transfer/providers/local-strapi/destination): Guide to using local Strapi instance as a data destination.
+- [Overview](https://contributor.strapi.io/packages/core/data-transfer/providers/remote-strapi/overview): Overview of remote Strapi instance data transfer provider.
+- [Websocket](https://contributor.strapi.io/packages/core/data-transfer/providers/remote-strapi/websocket): WebSocket protocol documentation for remote Strapi data transfer.
+- [Source](https://contributor.strapi.io/packages/core/data-transfer/providers/remote-strapi/source): Guide to using remote Strapi instance as a data source.
+- [Destination](https://contributor.strapi.io/packages/core/data-transfer/providers/remote-strapi/destination): Guide to using remote Strapi instance as a data destination.
+- [@strapi/data-transfer](https://contributor.strapi.io/packages/core/data-transfer): Streaming engine and providers that export, import and transfer Strapi data between files, directories and instances.
+- [Polymorphic relations](https://contributor.strapi.io/packages/core/database/relations/polymorphic-relations): Storage, read/write paths, and document service behavior for morph* relations
+- [Reordering](https://contributor.strapi.io/packages/core/database/relations/reordering): Conceptual guide to relations reordering in the Database
+- [Transactions](https://contributor.strapi.io/packages/core/database/transactions): Conceptual guide to transactions in Strapi
+- [Migrations](https://contributor.strapi.io/packages/core/database/migrations): Conceptual guide to migrations in Strapi
+- [Lifecycles](https://contributor.strapi.io/packages/core/database/lifecycles): TypeScript types for content-type lifecycle hooks
+- [@strapi/database](https://contributor.strapi.io/packages/core/database): Database layer on top of Knex: model metadata, schema sync, migrations, queries, relations, lifecycles and transactions.
+- [@strapi/email](https://contributor.strapi.io/packages/core/email): Core plugin that sends emails through a configurable provider and adds an admin settings page to check the setup.
+- [Technologies](https://contributor.strapi.io/packages/core/openapi/technologies): Technologies and frameworks used in Strapi OpenAPI implementation.
+- [Architecture](https://contributor.strapi.io/packages/core/openapi/architecture): Architecture overview of Strapi OpenAPI generation and processing.
+- [Usage](https://contributor.strapi.io/packages/core/openapi/usage): Guide to using OpenAPI specifications in Strapi.
+- [Overview](https://contributor.strapi.io/packages/core/openapi/contributing/overview): Overview of contributing to Strapi OpenAPI module.
+- [Routes Provider](https://contributor.strapi.io/packages/core/openapi/contributing/routes-provider): Documentation of routes provider in OpenAPI contribution.
+- [Routes Matcher Rule](https://contributor.strapi.io/packages/core/openapi/contributing/routes-matcher-rule): Documentation of routes matcher rule in OpenAPI contribution.
+- [Assemblers](https://contributor.strapi.io/packages/core/openapi/contributing/assemblers): Documentation of assemblers in OpenAPI generation.
+- [Context Factory](https://contributor.strapi.io/packages/core/openapi/contributing/context-factory): Documentation of context factory in OpenAPI module.
+- [Processors](https://contributor.strapi.io/packages/core/openapi/contributing/processors): Documentation of processors in OpenAPI generation.
+- [Testing](https://contributor.strapi.io/packages/core/openapi/contributing/testing): Guide to testing OpenAPI module contributions.
+- [@strapi/openapi](https://contributor.strapi.io/packages/core/openapi): Generates OpenAPI documents for Strapi applications through providers, matchers, assemblers and processors.
+- [Permission Engine](https://contributor.strapi.io/packages/core/permissions/engine): Conceptual guide to the permission engine
+- [@strapi/permissions](https://contributor.strapi.io/packages/core/permissions): Permission engine built on CASL. It takes action and condition providers and generates abilities from a list of permissions.
+- [Review Workflows](https://contributor.strapi.io/packages/core/review-workflows/backend): Review workflow technical design
+- [Review Workflows](https://contributor.strapi.io/packages/core/review-workflows/settings): Guide for review workflows in settings.
+- [Review Workflows](https://contributor.strapi.io/packages/core/review-workflows/content-manager): Guide for review workflows in the content-manager.
+- [@strapi/review-workflows](https://contributor.strapi.io/packages/core/review-workflows): Enterprise plugin that adds workflow stages and assignees to content entries, with stage-based permissions.
+- [Overview](https://contributor.strapi.io/packages/core/strapi/commands/overview): Overview of Strapi CLI commands and usage.
+- [Build](https://contributor.strapi.io/packages/core/strapi/commands/build): Documentation of the Strapi build command.
+- [Develop](https://contributor.strapi.io/packages/core/strapi/commands/develop): Documentation of the Strapi develop command.
+- [@strapi/strapi](https://contributor.strapi.io/packages/core/strapi): Framework entry package: the strapi CLI, the admin build tooling, and re-exports of @strapi/core and @strapi/types.
+- [@strapi/types](https://contributor.strapi.io/packages/core/types): Shared TypeScript types for Strapi internals: server runtime, schemas, UIDs, documents and public registries.
+- [Philosophy](https://contributor.strapi.io/packages/core/types/type-system/philosophy): Philosophy and design principles of Strapi type system.
+- [Schema](https://contributor.strapi.io/packages/core/types/type-system/concepts/schema): Explanation of schema concepts in Strapi type system.
+- [UID](https://contributor.strapi.io/packages/core/types/type-system/concepts/uid): Documentation of UID identifiers in Strapi type system.
+- [Public Registries](https://contributor.strapi.io/packages/core/types/type-system/concepts/public-registry): Documentation of the public type registry in Strapi.
+- [Concepts](https://contributor.strapi.io/packages/core/types/type-system/concepts): The building blocks of the Strapi type system, from schemas and UIDs to public registries.
+- [CheatSheet](https://contributor.strapi.io/packages/core/types/type-system/cheatsheet): Quick reference guide for Strapi type system concepts.
+- [Type System](https://contributor.strapi.io/packages/core/types/type-system): Principles, concepts and cheatsheet for the TypeScript type system of Strapi.
+- [Providers](https://contributor.strapi.io/packages/core/upload/backend/providers): Documentation of upload provider implementations.
+- [MIME type validation](https://contributor.strapi.io/packages/core/upload/backend/mime-validation): Guide to MIME type validation in file uploads.
+- [@strapi/upload](https://contributor.strapi.io/packages/core/upload): Upload plugin: the Media Library, file and folder storage, image processing, and upload providers.
+- [Async utils functions](https://contributor.strapi.io/packages/core/utils/async): Utility functions for handling asynchronous operations.
+- [@strapi/utils](https://contributor.strapi.io/packages/core/utils): Shared server helpers for Strapi packages: hooks, providers, errors, schema traversal, sanitize and validate.
+- [traverseEntity](https://contributor.strapi.io/packages/core/utils/traverse-entity): Utility functions for traversing entity structures.
+- [@strapi/generators](https://contributor.strapi.io/packages/generators/generators): Code generators for Strapi APIs and plugins
+- [Packages](https://contributor.strapi.io/packages): Catalog of the workspace packages under packages/, with one page per package that mirrors the repository tree.
+- [@strapi/plugin-cloud](https://contributor.strapi.io/packages/plugins/cloud): Admin-only plugin that adds a Deploy page with Strapi Cloud deployment instructions.
+- [@strapi/plugin-color-picker](https://contributor.strapi.io/packages/plugins/color-picker): Adds a color custom field that stores a HEX string and shows a color picker in the admin panel.
+- [@strapi/plugin-documentation](https://contributor.strapi.io/packages/plugins/documentation): Generates an OpenAPI document from routes and content types and serves it with Swagger UI at /documentation.
+- [@strapi/plugin-graphql](https://contributor.strapi.io/packages/plugins/graphql): Server plugin that builds a GraphQL schema from content types and serves it through Apollo Server.
+- [@strapi/i18n](https://contributor.strapi.io/packages/plugins/i18n): Adds locales and localized documents to content types, with Content Manager tools, locale permissions and API support.
+- [@strapi/plugin-sentry](https://contributor.strapi.io/packages/plugins/sentry): Server plugin that starts Sentry, reports errors thrown during HTTP requests, and exposes a sentry service.
+- [@strapi/plugin-users-permissions](https://contributor.strapi.io/packages/plugins/users-permissions): Content API authentication and authorization with users, roles, permissions, JWT and OAuth providers.
+- [@strapi/provider-email-amazon-ses](https://contributor.strapi.io/packages/providers/email-amazon-ses): Amazon SES provider for strapi email
+- [@strapi/provider-email-mailgun](https://contributor.strapi.io/packages/providers/email-mailgun): Mailgun provider for strapi email plugin
+- [@strapi/provider-email-nodemailer](https://contributor.strapi.io/packages/providers/email-nodemailer): Nodemailer provider for Strapi
+- [@strapi/provider-email-sendgrid](https://contributor.strapi.io/packages/providers/email-sendgrid): Sendgrid provider for strapi email
+- [@strapi/provider-email-sendmail](https://contributor.strapi.io/packages/providers/email-sendmail): Sendmail provider for strapi email
+- [@strapi/provider-upload-aws-s3](https://contributor.strapi.io/packages/providers/upload-aws-s3): AWS S3 provider for strapi upload
+- [@strapi/provider-upload-cloudinary](https://contributor.strapi.io/packages/providers/upload-cloudinary): Cloudinary provider for strapi upload
+- [@strapi/provider-upload-local](https://contributor.strapi.io/packages/providers/upload-local): Local provider for strapi upload
+- [api-tests](https://contributor.strapi.io/packages/utils/api-tests): Testing utilities for API integration tests
+- [eslint-config-custom](https://contributor.strapi.io/packages/utils/eslint-config-custom): ESLint configuration for Strapi packages
+- [@strapi/logger](https://contributor.strapi.io/packages/utils/logger): Strapi's logger built with Winston
+- [oxlint-config](https://contributor.strapi.io/packages/utils/oxlint-config): Shared Oxlint configuration for the Strapi monorepo
+- [tsconfig](https://contributor.strapi.io/packages/utils/tsconfig): Shared TypeScript configurations for Strapi packages
+- [@strapi/typescript-utils](https://contributor.strapi.io/packages/utils/typescript): TypeScript support utilities for Strapi applications
+- [@strapi/upgrade](https://contributor.strapi.io/packages/utils/upgrade): CLI tool to upgrade Strapi applications
+- [vitest-config](https://contributor.strapi.io/packages/utils/vitest-config): Shared Vitest configuration for Strapi unit tests

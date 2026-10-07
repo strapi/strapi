@@ -1,0 +1,487 @@
+<!doctype html><html lang=en dir=ltr class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-packages/core/core/mcp-server" data-has-hydrated=false><head><meta charset=UTF-8><meta name=generator content="Docusaurus v3.10.2"><title data-rh=true>MCP Server | Strapi contributor docs</title><meta data-rh=true name=viewport content="width=device-width, initial-scale=1.0"/><meta data-rh=true name=twitter:card content=summary_large_image /><meta data-rh=true property=og:url content=https://contributor.strapi.io/packages/core/core/mcp-server /><meta data-rh=true property=og:locale content=en /><meta data-rh=true name=docusaurus_locale content=en /><meta data-rh=true name=docsearch:language content=en /><meta data-rh=true name=docusaurus_version content=current /><meta data-rh=true name=docusaurus_tag content=docs-default-current /><meta data-rh=true name=docsearch:version content=current /><meta data-rh=true name=docsearch:docusaurus_tag content=docs-default-current /><meta data-rh=true property=og:title content="MCP Server | Strapi contributor docs"/><meta data-rh=true name=description content="How Strapi's Model Context Protocol (MCP) server is registered, started, authenticated, and extended with tools, prompts, and resources."/><meta data-rh=true property=og:description content="How Strapi's Model Context Protocol (MCP) server is registered, started, authenticated, and extended with tools, prompts, and resources."/><link data-rh=true rel=icon href=/img/favicon.svg /><link data-rh=true rel=canonical href=https://contributor.strapi.io/packages/core/core/mcp-server /><link data-rh=true rel=alternate href=https://contributor.strapi.io/packages/core/core/mcp-server hreflang=en /><link data-rh=true rel=alternate href=https://contributor.strapi.io/packages/core/core/mcp-server hreflang=x-default /><script data-rh=true type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","item":"https://contributor.strapi.io/packages/core","name":"Core","position":1},{"@type":"ListItem","item":"https://contributor.strapi.io/packages/core/core/","name":"core","position":2},{"@type":"ListItem","item":"https://contributor.strapi.io/packages/core/core/mcp-server","name":"MCP Server","position":3}]}</script><link rel=stylesheet href=/assets/css/styles.99e52e7f.css /><script src=/assets/js/runtime~main.b80dc77e.js defer></script><script src=/assets/js/main.4583c1e3.js defer></script></head><body><svg style="display: none;"><defs>
+<symbol id=theme-svg-external-link viewBox="0 0 24 24"><path fill=currentColor d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme-6c6")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||"light"),document.documentElement.setAttribute("data-theme-choice",t||"light")}(),function(){try{for(var[t,e]of new URLSearchParams(window.location.search).entries())if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id=__docusaurus><link rel=preload as=image href=/img/logo.svg /><link rel=preload as=image href=/img/logo_dark.svg /><div role=region aria-label="Skip to main content"><a class=skipToContent_fXgn href=#__docusaurus_skipToContent_fallback>Skip to main content</a></div><nav aria-label=Main class="theme-layout-navbar navbar navbar--fixed-top navbarHideable_m1mJ"><div class=navbar__inner><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded=false class="navbar__toggle clean-btn" type=button><svg width=30 height=30 viewBox="0 0 30 30" aria-hidden=true><path stroke=currentColor stroke-linecap=round stroke-miterlimit=10 stroke-width=2 d="M4 7h22M4 15h22M4 23h22"/></svg></button><a class=navbar__brand href=/><div class=navbar__logo><img src=/img/logo.svg alt=Strapi class="themedComponent_mlkZ themedComponent--light_NVdE" width=100 /><img src=/img/logo_dark.svg alt=Strapi class="themedComponent_mlkZ themedComponent--dark_xIcU" width=100 /></div><b class="navbar__title text--truncate">Contributor docs</b></a><a class="navbar__item navbar__link" href=/contributing>Contributing</a><a class="navbar__item navbar__link" href=/architecture>Architecture</a><a aria-current=page class="navbar__item navbar__link navbar__link--active" href=/packages>Packages</a><a class="navbar__item navbar__link" href=/api/Strapi>API reference</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><a href=https://docs.strapi.io target=_blank rel="noopener noreferrer" class="navbar__item navbar__link">User docs<svg width=13.5 height=13.5 aria-label="(opens in new tab)" class=iconExternalLink_nPIU><use href=#theme-svg-external-link /></svg></a><a href=https://github.com/strapi/strapi target=_blank rel="noopener noreferrer" class="navbar__item navbar__link header-github-link" aria-label="GitHub repository"></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type=button disabled title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width=24 height=24 aria-hidden=true class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill=currentColor d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"/></svg><svg viewBox="0 0 24 24" width=24 height=24 aria-hidden=true class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill=currentColor d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"/></svg><svg viewBox="0 0 24 24" width=24 height=24 aria-hidden=true class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill=currentColor d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"/></svg></button></div><div class=navbarSearchContainer_Bca1><div class="navbar__search searchBarContainer_NW3z" dir=ltr><svg aria-hidden=true class=searchIcon_T3tP focusable=false viewBox="0 0 16 16"><path fill=currentColor d="M6.02945 10.20327a4.17382 4.17382 0 1 1 4.17382-4.17382 4.15609 4.15609 0 0 1-4.17382 4.17382Zm9.69195 4.2199-4.8225-4.82338A5.88021 5.88021 0 0 0 12.058 6.02856 6.00467 6.00467 0 1 0 9.59979 10.8989l4.82338 4.82338a.89729.89729 0 0 0 1.29912 0 .89749.89749 0 0 0-.00087-1.29909Z"/></svg><input placeholder=Search aria-label=Search class="navbar__search-input searchInput_YFbd" value="" /><div class="loadingRing_RJI3 searchBarLoadingRing_YnHq"><div></div><div></div><div></div><div></div></div></div></div></div></div><div role=presentation class=navbar-sidebar__backdrop></div></nav><div id=__docusaurus_skipToContent_fallback class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class=docsWrapper_hBAB><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type=button></button><div class=docRoot_UBD9><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class=sidebarViewport_aRkj><div class="sidebar_njMd sidebarWithHideableNavbar_wUlq"><a tabindex=-1 class=sidebarLogo_isFc href=/><img src=/img/logo.svg alt=Strapi class="themedComponent_mlkZ themedComponent--light_NVdE" width=100 /><img src=/img/logo_dark.svg alt=Strapi class="themedComponent_mlkZ themedComponent--dark_xIcU" width=100 /><b>Contributor docs</b></a><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/packages><span class=linkLabel_WmDU>Overview</span></a><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--active" href=/packages/core><span class=categoryLinkLabel_W154>Core</span></a><button aria-label="Collapse sidebar category 'Core'" aria-expanded=true type=button class="clean-btn menu__caret"></button></div><ul class=menu__list><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" tabindex=0 href=/packages/core/admin><span class=categoryLinkLabel_W154>admin</span></a><button aria-label="Expand sidebar category 'admin'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" tabindex=0 href=/packages/core/content-manager><span class=categoryLinkLabel_W154>content-manager</span></a><button aria-label="Expand sidebar category 'content-manager'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" tabindex=0 href=/packages/core/content-releases><span class=categoryLinkLabel_W154>content-releases</span></a><button aria-label="Expand sidebar category 'content-releases'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" tabindex=0 href=/packages/core/content-type-builder><span class=categoryLinkLabel_W154>content-type-builder</span></a><button aria-label="Expand sidebar category 'content-type-builder'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--active" tabindex=0 href=/packages/core/core><span class=categoryLinkLabel_W154>core</span></a><button aria-label="Collapse sidebar category 'core'" aria-expanded=true type=button class="clean-btn menu__caret"></button></div><ul class=menu__list><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-3 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role=button aria-expanded=false tabindex=0 href=/packages/core/core/configuration/intro><span class=categoryLinkLabel_W154>Configuration</span></a></div><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-3 menu__list-item"><a class=menu__link tabindex=0 href=/packages/core/core/event-hub><span class=linkLabel_WmDU>Event Hub</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-3 menu__list-item"><a class=menu__link tabindex=0 href=/packages/core/core/localization><span class=linkLabel_WmDU>Localization provider</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-3 menu__list-item"><a class="menu__link menu__link--active" aria-current=page tabindex=0 href=/packages/core/core/mcp-server><span class=linkLabel_WmDU>MCP Server</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-3 menu__list-item"><a class=menu__link tabindex=0 href=/packages/core/core/telemetry><span class=linkLabel_WmDU>Server-side telemetry</span></a></ul><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" tabindex=0 href=/packages/core/data-transfer><span class=categoryLinkLabel_W154>data-transfer</span></a><button aria-label="Expand sidebar category 'data-transfer'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" tabindex=0 href=/packages/core/database><span class=categoryLinkLabel_W154>database</span></a><button aria-label="Expand sidebar category 'database'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class=menu__link tabindex=0 href=/packages/core/email><span class=linkLabel_WmDU>email</span></a><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" tabindex=0 href=/packages/core/openapi><span class=categoryLinkLabel_W154>openapi</span></a><button aria-label="Expand sidebar category 'openapi'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" tabindex=0 href=/packages/core/permissions><span class=categoryLinkLabel_W154>permissions</span></a><button aria-label="Expand sidebar category 'permissions'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" tabindex=0 href=/packages/core/review-workflows><span class=categoryLinkLabel_W154>review-workflows</span></a><button aria-label="Expand sidebar category 'review-workflows'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" tabindex=0 href=/packages/core/strapi><span class=categoryLinkLabel_W154>strapi</span></a><button aria-label="Expand sidebar category 'strapi'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" tabindex=0 href=/packages/core/types><span class=categoryLinkLabel_W154>types</span></a><button aria-label="Expand sidebar category 'types'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" tabindex=0 href=/packages/core/upload><span class=categoryLinkLabel_W154>upload</span></a><button aria-label="Expand sidebar category 'upload'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" tabindex=0 href=/packages/core/utils><span class=categoryLinkLabel_W154>utils</span></a><button aria-label="Expand sidebar category 'utils'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div></ul><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" href=/packages/plugins><span class=categoryLinkLabel_W154>Plugins</span></a><button aria-label="Expand sidebar category 'Plugins'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" href=/packages/providers><span class=categoryLinkLabel_W154>Providers</span></a><button aria-label="Expand sidebar category 'Providers'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" href=/packages/utils><span class=categoryLinkLabel_W154>Utilities</span></a><button aria-label="Expand sidebar category 'Utilities'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" href=/packages/cli><span class=categoryLinkLabel_W154>CLI</span></a><button aria-label="Expand sidebar category 'CLI'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" href=/packages/generators><span class=categoryLinkLabel_W154>Generators</span></a><button aria-label="Expand sidebar category 'Generators'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class=menu__link href=/packages/admin-test-utils><span class=linkLabel_WmDU>admin-test-utils</span></a></ul></nav></div></div></aside><main class=docMainContainer_TBSr><div class="container padding-top--md padding-bottom--lg"><div class=row><div class="col docItemCol_VOVn"><div class=docItemContainer_Djhp><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label=Breadcrumbs><ul class=breadcrumbs><li class=breadcrumbs__item><a aria-label="Home page" class=breadcrumbs__link href=/><svg viewBox="0 0 24 24" class=breadcrumbHomeIcon_YNFT><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill=currentColor /></svg></a><li class=breadcrumbs__item><a class=breadcrumbs__link href=/packages/core><span>Core</span></a><li class=breadcrumbs__item><a class=breadcrumbs__link href=/packages/core/core><span>core</span></a><li class="breadcrumbs__item breadcrumbs__item--active"><span class=breadcrumbs__link>MCP Server</span></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type=button class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>MCP Server</h1></header>
+<p>Strapi ships an opt-in <a href=https://modelcontextprotocol.io/ target=_blank rel="noopener noreferrer" class="">Model Context Protocol</a> server that exposes content and platform capabilities (tools, prompts, resources) to AI clients over HTTP. It is disabled by default and lives entirely in <code>@strapi/core</code>, with <code>@strapi/content-manager</code> as its main built-in consumer.</p>
+<p>Source: <code>packages/core/core/src/services/mcp/</code>, <code>packages/core/core/src/providers/mcp.ts</code>, <code>packages/core/core/src/mcp.ts</code>. Content-manager integration: <code>packages/core/content-manager/server/src/mcp/</code>. Shared types: <code>packages/core/types/src/modules/mcp.ts</code>.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=summary>Summary<a href=#summary class=hash-link aria-label="Direct link to Summary" title="Direct link to Summary" translate=no>​</a></h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Concern<th>Answer<tbody><tr><td>Enable<td><code>server.mcp.enabled</code> (default <code>false</code>)<tr><td>Endpoint<td><code>POST /mcp</code> (fixed path, not configurable)<tr><td>Transport<td>MCP SDK <code>NodeStreamableHTTPServerTransport</code>, stateless (one server instance per request)<tr><td>Auth<td>Admin API token (<code>Authorization: Bearer &lt;token></code>) — same store as Settings → API Tokens (admin)<tr><td>Authorization<td>Two layers: coarse session capability gate (CASL ability vs <code>auth.policies</code>) + fine-grained handler checks<tr><td>Extensibility<td>Any plugin or app can register tools/prompts/resources via <code>strapi.ai.mcp.register*</code> during the register phase<tr><td>Built-in<td>One dev-only <code>log</code> tool (core) + one CRUD tool set per displayed content type (content-manager)<tr><td>SDK<td><code>@modelcontextprotocol/server@2.0.0</code> + <code>@modelcontextprotocol/node@2.0.0</code></table>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=architecture>Architecture<a href=#architecture class=hash-link aria-label="Direct link to Architecture" title="Direct link to Architecture" translate=no>​</a></h2>
+<div class="language-text codeBlockContainer_Ckt0 theme-code-block" style=--prism-color:#393A34;--prism-background-color:#f6f8fa><div class=codeBlockContent_QJqH><pre tabindex=0 class="prism-code language-text codeBlock_bY9V thin-scrollbar" style=color:#393A34;background-color:#f6f8fa><code class=codeBlockLines_e6Vv><div class=token-line style=color:#393A34><span class="token plain">init        providers/mcp.ts          → strapi.add('ai.mcp', createMcpService)</span><br/></div><div class=token-line style=color:#393A34><span class="token plain">register    plugins / app             → strapi.ai.mcp.registerTool|Prompt|Resource(...)</span><br/></div><div class=token-line style=color:#393A34><span class="token plain">bootstrap   plugins (content-manager) → registerContentManagerMcpTools(...)</span><br/></div><div class=token-line style=color:#393A34><span class="token plain">            providers/mcp.ts          → strapi.ai.mcp.start() → mounts /mcp routes</span><br/></div><div class=token-line style=color:#393A34><span class="token plain">request     POST /mcp → authenticate → per-request McpServer → sync capabilities → handle → close</span><br/></div></code></pre></div></div>
+<p>Two pieces cooperate:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Piece<th>File<th>Responsibility<tbody><tr><td>Provider<td><code>packages/core/core/src/providers/mcp.ts</code><td>Lifecycle glue only: registers the <code>ai.mcp</code> DI key on <code>init</code>, calls <code>start()</code>/<code>stop()</code> on <code>bootstrap</code>/<code>destroy</code> if enabled.<tr><td>Service<td><code>packages/core/core/src/services/mcp/index.ts</code><td>The real implementation: capability registries, HTTP route mounting, the built-in <code>log</code> tool, status tracking (<code>idle</code> → <code>starting</code> → <code>running</code>).</table>
+<p>The provider is registered last in <code>packages/core/core/src/providers/index.ts</code>, after <code>ai</code> (which creates the <code>strapi.ai</code> namespace that <code>mcp</code> attaches to).</p>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=bootstrap-ordering-matters>Bootstrap ordering matters<a href=#bootstrap-ordering-matters class=hash-link aria-label="Direct link to Bootstrap ordering matters" title="Direct link to Bootstrap ordering matters" translate=no>​</a></h3>
+<p>Strapi's <code>bootstrap()</code> phase runs plugin lifecycles <strong>before</strong> provider lifecycles (<code>packages/core/core/src/Strapi.ts</code> — <code>runPluginsLifecycles(BOOTSTRAP)</code> runs, then the providers loop runs). Practically:</p>
+<ol>
+<li class="">Plugin <code>bootstrap()</code> hooks run — this is where content-manager derives and registers its per-content-type tools (<code>packages/core/content-manager/server/src/bootstrap.ts</code>).</li>
+<li class="">Provider <code>bootstrap()</code> hooks run — the <code>mcp</code> provider calls <code>strapi.ai.mcp.start()</code>, which mounts the <code>/mcp</code> routes.</li>
+<li class="">The app's own <code>bootstrap()</code> (<code>src/index.ts</code>) runs <strong>after</strong> providers — too late to register capabilities.</li>
+</ol>
+<div class="theme-admonition theme-admonition-caution admonition_xJq3 alert alert--warning"><div class=admonitionHeading_Gvgb><span class=admonitionIcon_Rf37><svg viewBox="0 0 16 16"><path fill-rule=evenodd d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"/></svg></span>caution</div><div class=admonitionContent_BuS1><p>Register tools, prompts, and resources from a plugin's <code>register()</code> phase (preferred) or <code>bootstrap()</code> phase (works, but only for plugins — app-level <code>bootstrap()</code> is too late). <code>strapi.ai.mcp.registerTool/Prompt/Resource</code> throw once the server has left the <code>idle</code> status.</div></div>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=configuration>Configuration<a href=#configuration class=hash-link aria-label="Direct link to Configuration" title="Direct link to Configuration" translate=no>​</a></h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Key<th>Default<th>Notes<tbody><tr><td><code>server.mcp.enabled</code><td><code>false</code><td>Must be <code>true</code> to start the server<tr><td><code>server.mcp.connectTimeoutMs</code><td><code>5000</code><td>Timeout for <code>mcpServer.connect(transport)</code> per request<tr><td><code>server.mcp.requestTimeoutMs</code><td><code>60000</code><td>Timeout for <code>transport.handleRequest(...)</code> per request</table>
+<p>Implementation: <code>packages/core/core/src/services/mcp/internal/McpConfiguration.ts</code>. Type: <code>McpConfig</code> in <code>packages/core/types/src/core/config/server.ts</code>.</p>
+<p>Dev mode (<code>autoReload</code> config) additionally unlocks <code>devModeOnly</code> capabilities like the built-in <code>log</code> tool — see <a href=#authorization class="">Authorization</a>.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=transport--routes>Transport & routes<a href=#transport--routes class=hash-link aria-label="Direct link to Transport & routes" title="Direct link to Transport & routes" translate=no>​</a></h2>
+<p>Routes (<code>packages/core/core/src/services/mcp/routes.ts</code>):</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Method<th>Path<th>Behavior<tbody><tr><td><code>POST</code><td><code>/mcp</code><td>Real handler — authenticate, then hand off to the MCP SDK transport<tr><td><code>GET</code> / <code>DELETE</code> / <code>PUT</code> / <code>PATCH</code><td><code>/mcp</code><td>JSON-RPC <code>METHOD_NOT_ALLOWED</code> (so MCP clients get a parseable error instead of a default 404/405)</table>
+<p>All five routes set <code>config: { auth: false }</code> — Strapi's own admin/content-API authentication is bypassed at the router level because MCP performs its <strong>own</strong> authentication inside the handler (see below).</p>
+<p>The transport is the MCP SDK's <code>NodeStreamableHTTPServerTransport</code> with <code>sessionIdGenerator: undefined</code>, i.e. <strong>stateless</strong>: a fresh <code>McpServer</code> instance is created and connected for every POST request, then closed in a <code>finally</code> block (<code>packages/core/core/src/services/mcp/handlers/handlePost.ts</code>).</p>
+<p>An OAuth discovery fallback middleware (<code>middleware/oauthDiscoveryFallback.ts</code>) intercepts <code>/.well-known/oauth-*</code> and <code>/register</code> with a plain JSON 404, since some MCP clients probe these paths and would otherwise hit Strapi's default HTML 404 page.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=authentication>Authentication<a href=#authentication class=hash-link aria-label="Direct link to Authentication" title="Direct link to Authentication" translate=no>​</a></h2>
+<p><code>packages/core/core/src/services/mcp/authentication.ts</code>:</p>
+<ol>
+<li class="">Extract <code>Authorization: Bearer &lt;token></code> — missing/malformed header → <code>missing_token</code>.</li>
+<li class="">Validate through <code>strapi.admin.services['api-token-admin'].authenticateAdminToken(token)</code> — the <strong>same admin API token store</strong> used by Settings → API Tokens. Invalid/expired token → <code>invalid_token</code>.</li>
+<li class="">On success, the handler receives the token's CASL <code>ability</code> and owning <code>user</code>.</li>
+</ol>
+<p>There is no separate "MCP token" type and no admin-panel screen dedicated to MCP — an admin creates a regular admin API token and uses it as the bearer credential for <code>/mcp</code>.</p>
+<p>Both failure reasons are reported through telemetry (<code>didNotAuthenticateMcpRequest</code>) but returned to the client as a single generic JSON-RPC <code>AUTHENTICATION_REQUIRED</code> error — the distinction is for observability, not client-facing signaling.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=authorization>Authorization<a href=#authorization class=hash-link aria-label="Direct link to Authorization" title="Direct link to Authorization" translate=no>​</a></h2>
+<p>Authorization happens in two layers.</p>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=1-session-capability-sync-coarse-allowlist>1. Session capability sync (coarse allowlist)<a href=#1-session-capability-sync-coarse-allowlist class=hash-link aria-label="Direct link to 1. Session capability sync (coarse allowlist)" title="Direct link to 1. Session capability sync (coarse allowlist)" translate=no>​</a></h3>
+<p>On every request, after authentication, <code>syncMcpSessionCapabilities</code> (<code>packages/core/core/src/services/mcp/internal/syncMcpSessionCapabilities.ts</code>) walks every registered tool/prompt/resource definition and enables or disables it <strong>for that session's <code>McpServer</code> instance</strong> based on:</p>
+<ul>
+<li class=""><code>devModeOnly: true</code> → enabled only if <code>config.isDevMode()</code> (i.e. <code>autoReload</code> is on); never exposed in production.</li>
+<li class=""><code>auth: { policies: [...] }</code> → enabled if the ability satisfies <strong>any</strong> policy (<code>ability.can(action, subject)</code>), OR'd across the array.</li>
+</ul>
+<p>This is deliberately coarse — it decides what a client sees in <code>tools/list</code> etc. It does <strong>not</strong> replace per-request checks; the source comment is explicit: <em>"Field/entity conditions must be enforced by capability handlers with request-specific context."</em></p>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=2-handler-level-checks-fine-grained>2. Handler-level checks (fine-grained)<a href=#2-handler-level-checks-fine-grained class=hash-link aria-label="Direct link to 2. Handler-level checks (fine-grained)" title="Direct link to 2. Handler-level checks (fine-grained)" translate=no>​</a></h3>
+<p>Content-manager's derived tools re-run the same <code>permission-checker</code> service used by REST controllers inside each handler: entity-level checks (can this user act on <em>this</em> document?), field-level filtering (<code>getPermittedFields</code>), and locale filtering (<code>resolvePermittedLocaleSchema</code>) — all computed <strong>per request</strong>, from the caller's ability, and folded directly into the tool's Zod input/output schema via <code>resolveInputSchema</code>/<code>resolveOutputSchema</code>. A user with <code>read</code> on an article but not on its <code>body</code> field never sees <code>body</code> in the tool's schema or output.</p>
+<p>Custom tools should follow the same pattern: use <code>auth.policies</code> for the coarse gate, then call into the same policy/permission services your REST controllers use for the fine-grained checks.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=advertised-schema-wire-contract>Advertised schema wire contract<a href=#advertised-schema-wire-contract class=hash-link aria-label="Direct link to Advertised schema wire contract" title="Direct link to Advertised schema wire contract" translate=no>​</a></h2>
+<p>The <code>inputSchema</code> and optional <code>outputSchema</code> returned by <code>tools/list</code> are JSON Schema 2020-12
+documents. A schema can declare this dialect with
+<code>https://json-schema.org/draft/2020-12/schema</code> or omit <code>$schema</code>; the MCP specification defines an
+absent declaration as 2020-12. Capability authors and clients must interpret the document
+structurally as 2020-12. For example, positional tuples use <code>prefixItems</code>, and generated recursive
+schemas use <code>$defs</code> rather than the older <code>definitions</code> container.</p>
+<p>Strapi passes each capability's authored Zod schema to the MCP SDK. Zod serializes it and the SDK
+advertises that result. Strapi does not rewrite or re-serialize advertised schemas. This boundary is
+covered by tests that enumerate through a real MCP client and through an authenticated <code>/mcp</code>
+request, then compile every advertised input and output schema as 2020-12.</p>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=current-content-manager-schema-observations>Current content-manager schema observations<a href=#current-content-manager-schema-observations class=hash-link aria-label="Direct link to Current content-manager schema observations" title="Direct link to Current content-manager schema observations" translate=no>​</a></h3>
+<p>The known SDK conversion hazards are tracked upstream in
+<a href=https://github.com/modelcontextprotocol/typescript-sdk/issues/2464 target=_blank rel="noopener noreferrer" class="">#2464</a> and
+<a href=https://github.com/modelcontextprotocol/typescript-sdk/issues/2636 target=_blank rel="noopener noreferrer" class="">#2636</a>. Authenticated
+enumeration of real content-manager tools currently shows:</p>
+<ul>
+<li class="">Date, datetime, time, and timestamp write fields are advertised as strings. Content-manager does
+not author these fields with <code>z.date()</code>, so the date conversion failure in #2464 is not present.</li>
+<li class="">Content-manager output schemas contain no defaulted fields, so the defaulted-output mismatch in
+#2464 is not present.</li>
+<li class="">Extra-property declarations follow the authored object behavior: strict write-data objects
+advertise <code>additionalProperties: false</code>, loose output objects advertise an open
+<code>additionalProperties</code> schema, and ordinary input objects can omit the keyword. The omission
+described in #2636 is present, but it remains valid JSON Schema 2020-12 and does not drop any
+content-manager tool in strict schema validation.</li>
+</ul>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=defining-and-registering-capabilities>Defining and registering capabilities<a href=#defining-and-registering-capabilities class=hash-link aria-label="Direct link to Defining and registering capabilities" title="Direct link to Defining and registering capabilities" translate=no>​</a></h2>
+<p>Public builders are re-exported from <code>@strapi/core</code> / <code>@strapi/strapi</code> as <code>ai.mcp.defineTool</code>, <code>ai.mcp.definePrompt</code>, <code>ai.mcp.defineResource</code> (<code>packages/core/core/src/mcp.ts</code> → <code>services/mcp/{tool,prompt,resource}-registry.ts</code>). They are identity functions at runtime — their only job is inferring/narrowing TypeScript types (input/output schema shape, <code>devModeOnly</code> vs <code>auth</code> access variant).</p>
+<div class="language-ts codeBlockContainer_Ckt0 theme-code-block" style=--prism-color:#393A34;--prism-background-color:#f6f8fa><div class=codeBlockContent_QJqH><pre tabindex=0 class="prism-code language-ts codeBlock_bY9V thin-scrollbar" style=color:#393A34;background-color:#f6f8fa><code class=codeBlockLines_e6Vv><div class=token-line style=color:#393A34><span class="token keyword" style=color:#00009f>import</span><span class="token plain"> </span><span class="token punctuation" style=color:#393A34>{</span><span class="token plain"> ai </span><span class="token punctuation" style=color:#393A34>}</span><span class="token plain"> </span><span class="token keyword" style=color:#00009f>from</span><span class="token plain"> </span><span class="token string" style=color:#e3116c>'@strapi/strapi'</span><span class="token punctuation" style=color:#393A34>;</span><span class="token plain"></span><br/></div><div class=token-line style=color:#393A34><span class="token plain"></span><span class="token keyword" style=color:#00009f>import</span><span class="token plain"> </span><span class="token punctuation" style=color:#393A34>{</span><span class="token plain"> z </span><span class="token punctuation" style=color:#393A34>}</span><span class="token plain"> </span><span class="token keyword" style=color:#00009f>from</span><span class="token plain"> </span><span class="token string" style=color:#e3116c>'@strapi/utils'</span><span class="token punctuation" style=color:#393A34>;</span><span class="token plain"></span><br/></div><div class=token-line style=color:#393A34><span class="token plain" style=display:inline-block></span><br/></div><div class=token-line style=color:#393A34><span class="token plain"></span><span class="token keyword" style=color:#00009f>const</span><span class="token plain"> greet </span><span class="token operator" style=color:#393A34>=</span><span class="token plain"> ai</span><span class="token punctuation" style=color:#393A34>.</span><span class="token plain">mcp</span><span class="token punctuation" style=color:#393A34>.</span><span class="token function" style=color:#d73a49>defineTool</span><span class="token punctuation" style=color:#393A34>(</span><span class="token punctuation" style=color:#393A34>{</span><span class="token plain"></span><br/></div><div class=token-line style=color:#393A34><span class="token plain">  name</span><span class="token operator" style=color:#393A34>:</span><span class="token plain"> </span><span class="token string" style=color:#e3116c>'greet'</span><span class="token punctuation" style=color:#393A34>,</span><span class="token plain"></span><br/></div><div class=token-line style=color:#393A34><span class="token plain">  title</span><span class="token operator" style=color:#393A34>:</span><span class="token plain"> </span><span class="token string" style=color:#e3116c>'Greet'</span><span class="token punctuation" style=color:#393A34>,</span><span class="token plain"></span><br/></div><div class=token-line style=color:#393A34><span class="token plain">  description</span><span class="token operator" style=color:#393A34>:</span><span class="token plain"> </span><span class="token string" style=color:#e3116c>'Greets a user by name'</span><span class="token punctuation" style=color:#393A34>,</span><span class="token plain"></span><br/></div><div class=token-line style=color:#393A34><span class="token plain">  auth</span><span class="token operator" style=color:#393A34>:</span><span class="token plain"> </span><span class="token punctuation" style=color:#393A34>{</span><span class="token plain"> policies</span><span class="token operator" style=color:#393A34>:</span><span class="token plain"> </span><span class="token punctuation" style=color:#393A34>[</span><span class="token punctuation" style=color:#393A34>{</span><span class="token plain"> action</span><span class="token operator" style=color:#393A34>:</span><span class="token plain"> </span><span class="token string" style=color:#e3116c>'plugin::my-plugin.greet'</span><span class="token plain"> </span><span class="token punctuation" style=color:#393A34>}</span><span class="token punctuation" style=color:#393A34>]</span><span class="token plain"> </span><span class="token punctuation" style=color:#393A34>}</span><span class="token punctuation" style=color:#393A34>,</span><span class="token plain"></span><br/></div><div class=token-line style=color:#393A34><span class="token plain">  </span><span class="token function-variable function" style=color:#d73a49>resolveInputSchema</span><span class="token operator" style=color:#393A34>:</span><span class="token plain"> </span><span class="token punctuation" style=color:#393A34>(</span><span class="token punctuation" style=color:#393A34>)</span><span class="token plain"> </span><span class="token operator" style=color:#393A34>=></span><span class="token plain"> z</span><span class="token punctuation" style=color:#393A34>.</span><span class="token function" style=color:#d73a49>object</span><span class="token punctuation" style=color:#393A34>(</span><span class="token punctuation" style=color:#393A34>{</span><span class="token plain"> name</span><span class="token operator" style=color:#393A34>:</span><span class="token plain"> z</span><span class="token punctuation" style=color:#393A34>.</span><span class="token function" style=color:#d73a49>string</span><span class="token punctuation" style=color:#393A34>(</span><span class="token punctuation" style=color:#393A34>)</span><span class="token plain"> </span><span class="token punctuation" style=color:#393A34>}</span><span class="token punctuation" style=color:#393A34>)</span><span class="token punctuation" style=color:#393A34>,</span><span class="token plain"></span><br/></div><div class=token-line style=color:#393A34><span class="token plain">  </span><span class="token function-variable function" style=color:#d73a49>resolveOutputSchema</span><span class="token operator" style=color:#393A34>:</span><span class="token plain"> </span><span class="token punctuation" style=color:#393A34>(</span><span class="token punctuation" style=color:#393A34>)</span><span class="token plain"> </span><span class="token operator" style=color:#393A34>=></span><span class="token plain"> z</span><span class="token punctuation" style=color:#393A34>.</span><span class="token function" style=color:#d73a49>object</span><span class="token punctuation" style=color:#393A34>(</span><span class="token punctuation" style=color:#393A34>{</span><span class="token plain"> message</span><span class="token operator" style=color:#393A34>:</span><span class="token plain"> z</span><span class="token punctuation" style=color:#393A34>.</span><span class="token function" style=color:#d73a49>string</span><span class="token punctuation" style=color:#393A34>(</span><span class="token punctuation" style=color:#393A34>)</span><span class="token plain"> </span><span class="token punctuation" style=color:#393A34>}</span><span class="token punctuation" style=color:#393A34>)</span><span class="token punctuation" style=color:#393A34>,</span><span class="token plain"></span><br/></div><div class=token-line style=color:#393A34><span class="token plain">  </span><span class="token function-variable function" style=color:#d73a49>createHandler</span><span class="token operator" style=color:#393A34>:</span><span class="token plain"></span><br/></div><div class=token-line style=color:#393A34><span class="token plain">    </span><span class="token punctuation" style=color:#393A34>(</span><span class="token plain">strapi</span><span class="token punctuation" style=color:#393A34>)</span><span class="token plain"> </span><span class="token operator" style=color:#393A34>=></span><span class="token plain"></span><br/></div><div class=token-line style=color:#393A34><span class="token plain">    </span><span class="token keyword" style=color:#00009f>async</span><span class="token plain"> </span><span class="token punctuation" style=color:#393A34>(</span><span class="token punctuation" style=color:#393A34>{</span><span class="token plain"> args </span><span class="token punctuation" style=color:#393A34>}</span><span class="token punctuation" style=color:#393A34>)</span><span class="token plain"> </span><span class="token operator" style=color:#393A34>=></span><span class="token plain"> </span><span class="token punctuation" style=color:#393A34>{</span><span class="token plain"></span><br/></div><div class=token-line style=color:#393A34><span class="token plain">      </span><span class="token keyword" style=color:#00009f>const</span><span class="token plain"> message </span><span class="token operator" style=color:#393A34>=</span><span class="token plain"> </span><span class="token template-string template-punctuation string" style=color:#e3116c>`</span><span class="token template-string string" style=color:#e3116c>Hello, </span><span class="token template-string interpolation interpolation-punctuation punctuation" style=color:#393A34>${</span><span class="token template-string interpolation">args</span><span class="token template-string interpolation punctuation" style=color:#393A34>.</span><span class="token template-string interpolation">name</span><span class="token template-string interpolation interpolation-punctuation punctuation" style=color:#393A34>}</span><span class="token template-string string" style=color:#e3116c>!</span><span class="token template-string template-punctuation string" style=color:#e3116c>`</span><span class="token punctuation" style=color:#393A34>;</span><span class="token plain"></span><br/></div><div class=token-line style=color:#393A34><span class="token plain">      </span><span class="token keyword" style=color:#00009f>return</span><span class="token plain"> </span><span class="token punctuation" style=color:#393A34>{</span><span class="token plain"> content</span><span class="token operator" style=color:#393A34>:</span><span class="token plain"> </span><span class="token punctuation" style=color:#393A34>[</span><span class="token punctuation" style=color:#393A34>{</span><span class="token plain"> type</span><span class="token operator" style=color:#393A34>:</span><span class="token plain"> </span><span class="token string" style=color:#e3116c>'text'</span><span class="token punctuation" style=color:#393A34>,</span><span class="token plain"> text</span><span class="token operator" style=color:#393A34>:</span><span class="token plain"> message </span><span class="token punctuation" style=color:#393A34>}</span><span class="token punctuation" style=color:#393A34>]</span><span class="token punctuation" style=color:#393A34>,</span><span class="token plain"> structuredContent</span><span class="token operator" style=color:#393A34>:</span><span class="token plain"> </span><span class="token punctuation" style=color:#393A34>{</span><span class="token plain"> message </span><span class="token punctuation" style=color:#393A34>}</span><span class="token plain"> </span><span class="token punctuation" style=color:#393A34>}</span><span class="token punctuation" style=color:#393A34>;</span><span class="token plain"></span><br/></div><div class=token-line style=color:#393A34><span class="token plain">    </span><span class="token punctuation" style=color:#393A34>}</span><span class="token punctuation" style=color:#393A34>,</span><span class="token plain"></span><br/></div><div class=token-line style=color:#393A34><span class="token plain"></span><span class="token punctuation" style=color:#393A34>}</span><span class="token punctuation" style=color:#393A34>)</span><span class="token punctuation" style=color:#393A34>;</span><span class="token plain"></span><br/></div><div class=token-line style=color:#393A34><span class="token plain" style=display:inline-block></span><br/></div><div class=token-line style=color:#393A34><span class="token plain"></span><span class="token comment" style=color:#999988;font-style:italic>// in a plugin's register() (preferred) or bootstrap():</span><span class="token plain"></span><br/></div><div class=token-line style=color:#393A34><span class="token plain">strapi</span><span class="token punctuation" style=color:#393A34>.</span><span class="token plain">ai</span><span class="token punctuation" style=color:#393A34>.</span><span class="token plain">mcp</span><span class="token punctuation" style=color:#393A34>.</span><span class="token function" style=color:#d73a49>registerTool</span><span class="token punctuation" style=color:#393A34>(</span><span class="token plain">greet</span><span class="token punctuation" style=color:#393A34>)</span><span class="token punctuation" style=color:#393A34>;</span><br/></div></code></pre></div></div>
+<p><code>registerPrompt</code> and <code>registerResource</code> follow the same shape (<code>argsSchema</code>/<code>createHandler</code> returning an <code>McpPromptResult</code>, and <code>uri</code>/<code>metadata</code>/<code>createHandler</code> returning an <code>McpResourceReadResult</code>, respectively). All three throw if called once <code>strapi.ai.mcp</code> has left the <code>idle</code> status.</p>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=capability-results>Capability results<a href=#capability-results class=hash-link aria-label="Direct link to Capability results" title="Direct link to Capability results" translate=no>​</a></h3>
+<p>Strapi owns every value a capability author constructs, so no result requires naming an MCP SDK
+type. All of them live in <code>@strapi/types</code> (<code>Modules.MCP</code>):</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Type<th>What it describes<tbody><tr><td><code>McpToolResult</code><td>Tool content plus either successful structured data or an <code>isError</code> flag<tr><td><code>McpPromptResult</code><td>A prompt's description and messages<tr><td><code>McpResourceReadResult</code><td>What a resource read returns<tr><td><code>McpResourceListingMetadata</code><td>What a resource advertises at registration, before anyone reads it<tr><td><code>McpContentBlock</code><td>One block of tool or prompt content</table>
+<p><code>McpToolHandlerReturn</code> remains an alias of <code>McpToolResult</code>, so existing handler annotations keep
+compiling unchanged.</p>
+<p><code>McpContentBlock</code> is a five-variant union: <code>text</code>, <code>image</code>, <code>audio</code>, <code>resource_link</code>, and
+<code>resource</code> (an embedded resource). Resource contents come in a <code>text</code> or a base64 <code>blob</code> form.
+Protocol extension metadata (<code>_meta</code>) and arbitrary extension fields on prompt and resource read
+results reach the client unchanged.</p>
+<p><code>services/mcp/utils/toSdkMcpCapabilityResult.ts</code> is the outbound counterpart to the handler-context
+translator: it maps each Strapi-owned variant onto the protocol shape the SDK transports. A variant
+the protocol gains later becomes available to capability authors only once Strapi adds it to the
+owned contract, so an SDK change cannot alter Strapi's public API on its own. The SDK remains the
+final protocol validator, and structured-output validation is unchanged: a successful tool result
+must still satisfy the advertised output schema.</p>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=handler-context>Handler context<a href=#handler-context class=hash-link aria-label="Direct link to Handler context" title="Direct link to Handler context" translate=no>​</a></h3>
+<p>Capability handlers retain Strapi's positional or <code>{ args, extra }</code> API. Strapi owns the <code>extra</code>
+handler-context contract and translates the underlying transport's request facts into it. Capability
+authors do not depend on an MCP SDK context type.</p>
+<p>Every member is optional because availability varies by request and transport:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Member<th>Meaning<tbody><tr><td><code>signal</code><td>Cancellation signal for the invocation<tr><td><code>requestId</code><td>JSON-RPC request identifier<tr><td><code>sessionId</code><td>Transport session identifier, when session state exists<tr><td><code>authInfo</code><td>Information about a token authenticated by the transport<tr><td><code>_meta</code><td>Complete request metadata<tr><td><code>requestInfo</code><td>Originating HTTP request information</table>
+<p>Strapi preserves the established meaning of these names. <code>_meta</code> includes ordinary request metadata
+and reserved MCP protocol keys, even when the SDK handles those groups separately. <code>requestInfo</code>
+uses <code>{ headers, url? }</code>; <code>headers</code> is a plain mapping, so existing access such as
+<code>extra.requestInfo?.headers.authorization</code> continues to work.</p>
+<p>Server-initiated client messaging, SSE stream-closing controls, and experimental task facilities are
+not part of Strapi's handler context. There is no escape hatch to the SDK context. Code that reads
+one of these excluded fields fails the TypeScript check instead of receiving <code>undefined</code> at runtime.</p>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=fault-isolation>Fault isolation<a href=#fault-isolation class=hash-link aria-label="Direct link to Fault isolation" title="Direct link to Fault isolation" translate=no>​</a></h3>
+<p><code>createSafeCapabilityRegistration</code> (<code>services/mcp/utils/createSafeCapabilityRegistration.ts</code>) wraps every registration in three layers of error containment so one broken plugin tool cannot take down the MCP server or other capabilities:</p>
+<ol>
+<li class=""><strong>Factory errors</strong> — if <code>createHandler(strapi)</code> throws while building the handler, a fallback handler is substituted that always returns an error result to the client.</li>
+<li class=""><strong>Runtime errors</strong> — if the handler throws while executing, <code>wrapSafeHandler</code> catches it and returns a capability-shaped error result (<code>isError: true</code> for tools) instead of crashing the request.</li>
+<li class=""><strong>SDK registration errors</strong> — if the MCP SDK itself rejects the registration call, the capability is replaced with a permanently-disabled no-op instead of aborting the whole registration loop.</li>
+</ol>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=built-in-tools-core>Built-in tools (core)<a href=#built-in-tools-core class=hash-link aria-label="Direct link to Built-in tools (core)" title="Direct link to Built-in tools (core)" translate=no>​</a></h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Tool<th>Access<th>Purpose<tbody><tr><td><code>log</code><td><code>devModeOnly</code><td>Writes a sanitized message to <code>strapi.log</code> at a given level; used for local debugging of MCP clients. Input is length-capped and stripped of control/ANSI characters and newlines before logging.</table>
+<p>Source: <code>packages/core/core/src/services/mcp/tools/log.ts</code>.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=content-manager-tools>Content Manager tools<a href=#content-manager-tools class=hash-link aria-label="Direct link to Content Manager tools" title="Direct link to Content Manager tools" translate=no>​</a></h2>
+<p>Content-manager derives one MCP tool set per <strong>displayed</strong> content type at bootstrap time (<code>packages/core/content-manager/server/src/mcp/register-content-manager-mcp-tools.ts</code> → <code>deriveDisplayedContentTypeMcpToolDefinitions</code> in <code>derive-content-type-mcp-tools.ts</code>). Nothing is derived if MCP is disabled — the (relatively expensive) derivation is skipped entirely.</p>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=tool-naming>Tool naming<a href=#tool-naming class=hash-link aria-label="Direct link to Tool naming" title="Direct link to Tool naming" translate=no>​</a></h3>
+<p><code>slugifyUidForMcpToolName</code> (<code>packages/core/content-manager/server/src/mcp/utils.ts</code>) turns a content-type UID into a tool-name segment:</p>
+<ul>
+<li class=""><code>api::article.article</code> → <code>article</code></li>
+<li class=""><code>api::writer.editor</code> → <code>writer_editor</code> (api name and content-type name differ, so both are kept)</li>
+<li class=""><code>plugin::i18n.locale</code> → <code>plugin-i18n_locale</code></li>
+</ul>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=collection-types>Collection types<a href=#collection-types class=hash-link aria-label="Direct link to Collection types" title="Direct link to Collection types" translate=no>​</a></h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Tool<th>Action<th>Notes<tbody><tr><td><code>list_{slug}</code><td>read<td>Paginated list with filters/sort/locale/status<tr><td><code>get_{slug}</code><td>read<td>Single document by <code>documentId</code><tr><td><code>create_{slug}</code><td>create<td>Sets creator fields from the token's user<tr><td><code>update_{slug}</code><td>update<td>Updates the draft, or creates a locale version<tr><td><code>delete_{slug}</code><td>delete<td>Deletes a document or a locale version<tr><td><code>publish_{slug}</code><td>publish<td>Only if <code>draftAndPublish</code> is enabled<tr><td><code>unpublish_{slug}</code><td>unpublish<td>Only if <code>draftAndPublish</code>; optional <code>discardDraft</code><tr><td><code>discard_{slug}_draft</code><td>discard<td>Only if <code>draftAndPublish</code>; restores published as draft</table>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=single-types>Single types<a href=#single-types class=hash-link aria-label="Direct link to Single types" title="Direct link to Single types" translate=no>​</a></h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Tool<th>Action<th>Notes<tbody><tr><td><code>get_{slug}</code><td>read<td>Reads the single document<tr><td><code>write_{slug}</code><td>create/update<td>Upserts the draft<tr><td><code>delete_{slug}</code><td>delete<td>Deletes / locale-deletes<tr><td><code>publish_{slug}</code> / <code>unpublish_{slug}</code> / <code>discard_{slug}_draft</code><td>—<td>Same semantics as collection types, if <code>draftAndPublish</code></table>
+<p>There are no content-manager MCP <em>prompts</em> or <em>resources</em>, and no separate "describe schema" tool — schema introspection is implicit in each tool's Zod input/output schema, which an MCP client reads from <code>tools/list</code>.</p>
+<h3 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=output-shaping>Output shaping<a href=#output-shaping class=hash-link aria-label="Direct link to Output shaping" title="Direct link to Output shaping" translate=no>​</a></h3>
+<p>Two extra steps run before a document is returned to an MCP client (<code>packages/core/content-manager/server/src/mcp/utils.ts</code> → <code>sanitizeFormatShape</code>; <code>sanitizers/shape-relations.ts</code>):</p>
+<ol>
+<li class="">Standard permission-checker sanitization (same as REST).</li>
+<li class="">Relations are reduced to <strong>identity-only</strong> references (<code>shapeRelationsForMcp</code>) rather than the fuller shapes REST responses use — relations are not meant to be traversed as full objects by an MCP client.</li>
+</ol>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=errors>Errors<a href=#errors class=hash-link aria-label="Direct link to Errors" title="Direct link to Errors" translate=no>​</a></h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Layer<th>Behavior<tbody><tr><td>Route-level (auth failure, method not allowed, uncaught error)<td><code>sendJsonRpcError</code> (<code>utils/jsonRpcErrors.ts</code>) — a real JSON-RPC error body (<code>AUTHENTICATION_REQUIRED</code> -32000, <code>METHOD_NOT_ALLOWED</code> -32601, <code>INTERNAL_ERROR</code> -32603), never a plain-text/HTML error, so MCP clients can parse it.<tr><td>Capability handler throws<td><code>wrapSafeHandler</code> catches it, logs, and returns a capability-shaped error result (<code>isError: true</code> for tools) instead of propagating.<tr><td>Registration-time errors<td>See <a href=#fault-isolation class="">Fault isolation</a> above.<tr><td>Slow connect/handle<td><code>withTimeout</code> (<code>utils/withTimeout.ts</code>) enforces <code>connectTimeoutMs</code> / <code>requestTimeoutMs</code>.</table>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=telemetry>Telemetry<a href=#telemetry class=hash-link aria-label="Direct link to Telemetry" title="Direct link to Telemetry" translate=no>​</a></h2>
+<p>MCP emits its own server-side telemetry events (<code>didStartMcpServer</code>, <code>didUseMcpServer</code>, <code>didNotAuthenticateMcpRequest</code>, <code>didNotHandleMcpRequest</code>, <code>didExecuteMcpCapability</code>, <code>didNotExecuteMcpCapability</code>) — see the <a class="" href=/packages/core/core/telemetry#mcp-core>MCP section</a> of the server-side telemetry doc for event shapes and rate-limiting details. Implementation: <code>packages/core/core/src/services/mcp/metrics/</code>.</p>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=tests>Tests<a href=#tests class=hash-link aria-label="Direct link to Tests" title="Direct link to Tests" translate=no>​</a></h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Path<th>Covers<tbody><tr><td><code>packages/core/core/src/services/mcp/__tests__/</code><td>Route registration, disabled skip, service integration<tr><td><code>packages/core/core/src/services/mcp/__tests__/authentication.test.ts</code><td>Bearer parsing, missing/invalid/valid token<tr><td><code>packages/core/core/src/services/mcp/handlers/__tests__/handlePost.test.ts</code><td>Auth failure, timeouts, transport wiring<tr><td><code>packages/core/core/src/services/mcp/internal/__tests__/</code><td>Configuration, server factory, capability sync, registries<tr><td><code>packages/core/content-manager/server/src/mcp/__tests__/derive-content-type-mcp-tools.test.ts</code><td>Tool derivation per content type<tr><td><code>packages/core/content-manager/server/src/mcp/sanitizers/__tests__/shape-relations.test.ts</code><td>Relation shaping<tr><td><code>tests/api/core/mcp/mcp-auth.test.api.ts</code><td>End-to-end admin-token auth + <code>tools/list</code><tr><td><code>tests/api/core/mcp/mcp-content-manager-rbac.test.api.ts</code><td>RBAC on derived tools<tr><td><code>tests/api/core/mcp/mcp-content-manager-shaping.test.api.ts</code><td>Relation shaping, end to end</table>
+<h2 class="anchor anchorTargetHideOnScrollNavbar_vjPI" id=alternatives>Alternatives<a href=#alternatives class=hash-link aria-label="Direct link to Alternatives" title="Direct link to Alternatives" translate=no>​</a></h2>
+<ul>
+<li class="">If you need to expose data to a human through the admin panel, this is not the right layer — build a normal admin UI / API route instead.</li>
+<li class="">If you need server-to-server automation without an AI client in the loop, use the <a class="" href=/packages/core/content-manager>Document Service</a> or REST/GraphQL APIs directly rather than going through MCP.</li>
+<li class="">If you only need request-scoped structured logging for debugging, prefer <code>strapi.log</code> directly; the <code>log</code> MCP tool exists specifically for MCP client-side debugging, not general application logging.</li>
+</ul></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col noPrint_WFHX"><a href=https://github.com/strapi/strapi/tree/develop/docs/docs/packages/core/core/mcp-server.md target=_blank rel="noopener noreferrer" class=theme-edit-this-page><svg fill=currentColor height=20 width=20 viewBox="0 0 40 40" class=iconEdit_Z9Sw aria-hidden=true><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"/></g></svg>Edit this page</a></div><div class="col lastUpdated_JAkA"><span class=theme-last-updated>Last updated<!-- --> on <b><time datetime=2026-10-07T15:53:07.000Z itemprop=dateModified>Oct 7, 2026</time></b></span></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href=/packages/core/core/localization><div class=pagination-nav__sublabel>Previous</div><div class=pagination-nav__label>Localization provider</div></a><a class="pagination-nav__link pagination-nav__link--next" href=/packages/core/core/telemetry><div class=pagination-nav__sublabel>Next</div><div class=pagination-nav__label>Server-side telemetry</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href=#summary class="table-of-contents__link toc-highlight">Summary</a><li><a href=#architecture class="table-of-contents__link toc-highlight">Architecture</a><ul><li><a href=#bootstrap-ordering-matters class="table-of-contents__link toc-highlight">Bootstrap ordering matters</a></ul><li><a href=#configuration class="table-of-contents__link toc-highlight">Configuration</a><li><a href=#transport--routes class="table-of-contents__link toc-highlight">Transport & routes</a><li><a href=#authentication class="table-of-contents__link toc-highlight">Authentication</a><li><a href=#authorization class="table-of-contents__link toc-highlight">Authorization</a><ul><li><a href=#1-session-capability-sync-coarse-allowlist class="table-of-contents__link toc-highlight">1. Session capability sync (coarse allowlist)</a><li><a href=#2-handler-level-checks-fine-grained class="table-of-contents__link toc-highlight">2. Handler-level checks (fine-grained)</a></ul><li><a href=#advertised-schema-wire-contract class="table-of-contents__link toc-highlight">Advertised schema wire contract</a><ul><li><a href=#current-content-manager-schema-observations class="table-of-contents__link toc-highlight">Current content-manager schema observations</a></ul><li><a href=#defining-and-registering-capabilities class="table-of-contents__link toc-highlight">Defining and registering capabilities</a><ul><li><a href=#capability-results class="table-of-contents__link toc-highlight">Capability results</a><li><a href=#handler-context class="table-of-contents__link toc-highlight">Handler context</a><li><a href=#fault-isolation class="table-of-contents__link toc-highlight">Fault isolation</a></ul><li><a href=#built-in-tools-core class="table-of-contents__link toc-highlight">Built-in tools (core)</a><li><a href=#content-manager-tools class="table-of-contents__link toc-highlight">Content Manager tools</a><ul><li><a href=#tool-naming class="table-of-contents__link toc-highlight">Tool naming</a><li><a href=#collection-types class="table-of-contents__link toc-highlight">Collection types</a><li><a href=#single-types class="table-of-contents__link toc-highlight">Single types</a><li><a href=#output-shaping class="table-of-contents__link toc-highlight">Output shaping</a></ul><li><a href=#errors class="table-of-contents__link toc-highlight">Errors</a><li><a href=#telemetry class="table-of-contents__link toc-highlight">Telemetry</a><li><a href=#tests class="table-of-contents__link toc-highlight">Tests</a><li><a href=#alternatives class="table-of-contents__link toc-highlight">Alternatives</a></ul></div></div></div></div></main></div></div></div></div></body>
