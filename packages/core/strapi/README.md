@@ -136,7 +136,7 @@ You can unlock additional features such as SSO, Audit Logs, Review Workflows in 
 
 ## Contributing
 
-Please read our [Contributing Guide](./CONTRIBUTING.md) before submitting a Pull Request to the project.
+Please read our [Contributing Guide](https://github.com/strapi/strapi/blob/develop/CONTRIBUTING.md) before submitting a Pull Request to the project.
 
 ## Community support
 
