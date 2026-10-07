@@ -5,7 +5,10 @@ import { createAuthRequest, createContentAPIRequest } from 'api-tests/request';
 import { describeOnCondition } from 'api-tests/utils';
 import { createTestBuilder } from 'api-tests/builder';
 
-import { CreateRelease } from '../../../../packages/core/content-releases/shared/contracts/releases';
+import type {
+  CreateRelease,
+  ReleaseCondition,
+} from '../../../../packages/core/content-releases/shared/contracts/releases';
 import { migrateReleaseConditionReleases } from '../../../../packages/core/content-releases/server/src/migrations';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
@@ -79,6 +82,38 @@ const pageModel = {
   },
 };
 
+// Only used by the review-workflow stage tests, so the workflow they assign doesn't affect the others
+const reviewItemUID = 'api::review-item.review-item';
+const reviewItemModel = {
+  draftAndPublish: true,
+  pluginOptions: {},
+  singularName: 'review-item',
+  pluralName: 'review-items',
+  displayName: 'Review Item',
+  kind: 'collectionType',
+  attributes: {
+    name: { type: 'string' },
+  },
+};
+
+// Only used by the unique-value tests: a `uid` field must be unique among published entries
+const slugItemUID = 'api::slug-item.slug-item';
+const slugItemModel = {
+  draftAndPublish: true,
+  pluginOptions: {},
+  singularName: 'slug-item',
+  pluralName: 'slug-items',
+  displayName: 'Slug Item',
+  kind: 'collectionType',
+  attributes: {
+    title: { type: 'string' },
+    slug: { type: 'uid' },
+  },
+};
+
+const INVALID_PRODUCT_MESSAGE =
+  'description must be a `string` type, but the final value was: `null`.';
+
 describeOnCondition(edition === 'EE')('Content Releases API', () => {
   const builder = createTestBuilder();
   let strapi;
@@ -86,6 +121,8 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
   let rqContent;
   let validEntries = [];
   let invalidEntries = [];
+  // Publishing one of these documents throws, through a test-only document middleware
+  const documentIdsFailingToPublish = new Set<string>();
 
   const createRelease = async (params: Partial<CreateRelease.Request['body']> = {}) => {
     return rq({
@@ -112,9 +149,12 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
   };
 
   const deleteAllReleases = async () => {
+    // Released (frozen) releases can't be deleted and pile up across tests: only list the
+    // pending ones, on a page large enough to hold them all
     const releases = await rq({
       method: 'GET',
       url: '/content-releases',
+      qs: { filters: { releasedAt: { $notNull: false } }, pageSize: 100 },
     });
 
     await Promise.all(
@@ -137,14 +177,75 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     return body;
   };
 
+  // A fresh product per test, so publishing it doesn't leak into other tests
+  const createProduct = async ({ valid }: { valid: boolean }): Promise<string> => {
+    const { data } = await createEntry(productUID, {
+      name: valid ? 'Valid product' : 'Invalid product',
+      ...(valid && { description: 'Description' }),
+    });
+
+    return data.documentId;
+  };
+
+  const createReleaseWithActions = async (
+    releaseCondition: ReleaseCondition,
+    actions: { documentId: string; type?: 'publish' | 'unpublish'; contentType?: string }[]
+  ) => {
+    const release = (await createRelease({ releaseCondition })).body.data;
+
+    // One at a time: a run handles the actions of a content type in the order they were added
+    for (const { documentId, type = 'publish', contentType = productUID } of actions) {
+      const res = await createReleaseAction(release.id, {
+        contentType,
+        entryDocumentId: documentId,
+        type,
+      });
+      expect(res.statusCode).toBe(201);
+    }
+
+    return release;
+  };
+
+  const getRelease = async (id) => {
+    const res = await rq({ method: 'GET', url: `/content-releases/${id}` });
+
+    return res.body.data;
+  };
+
+  const hasPublishedVersion = async (uid, documentId) => {
+    const published = await strapi.documents(uid).findOne({ documentId, status: 'published' });
+
+    return published !== null;
+  };
+
+  const publishManually = (releaseId) => {
+    return rq({ method: 'POST', url: `/content-releases/${releaseId}/publish` });
+  };
+
+  // What the scheduler's task runs when the release date is reached
+  const runScheduled = (releaseId) => {
+    return strapi
+      .plugin('content-releases')
+      .service('release')
+      .publish(releaseId, { trigger: 'scheduled' });
+  };
+
   beforeAll(async () => {
     await builder
       .addContentType(productModel)
-      .addContentTypes([categoryModel, articleModel, pageModel])
+      .addContentTypes([categoryModel, articleModel, pageModel, reviewItemModel, slugItemModel])
       .build();
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
     rqContent = createContentAPIRequest({ strapi });
+
+    strapi.documents.use((ctx, next) => {
+      if (ctx.action === 'publish' && documentIdsFailingToPublish.has(ctx.params?.documentId)) {
+        throw new Error('Test-only publish failure');
+      }
+
+      return next();
+    });
 
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2024-01-01T00:00:00.000Z'));
@@ -219,13 +320,13 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     });
 
     test('create a release with an explicit release condition', async () => {
-      const res = await createRelease({ releaseCondition: 'partial' });
+      const res = await createRelease({ releaseCondition: 'allow_partial' });
 
       expect(res.statusCode).toBe(201);
-      expect(res.body.data.releaseCondition).toBe('partial');
+      expect(res.body.data.releaseCondition).toBe('allow_partial');
 
       const findRes = await rq({ method: 'GET', url: `/content-releases/${res.body.data.id}` });
-      expect(findRes.body.data.releaseCondition).toBe('partial');
+      expect(findRes.body.data.releaseCondition).toBe('allow_partial');
     });
 
     test.each(['publish_everything', null])(
@@ -653,10 +754,10 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       const conditionRes = await rq({
         method: 'PUT',
         url: `/content-releases/${release.id}`,
-        body: { name: release.name, releaseCondition: 'partial' },
+        body: { name: release.name, releaseCondition: 'allow_partial' },
       });
       expect(conditionRes.statusCode).toBe(200);
-      expect(conditionRes.body.data.releaseCondition).toBe('partial');
+      expect(conditionRes.body.data.releaseCondition).toBe('allow_partial');
 
       const renameRes = await rq({
         method: 'PUT',
@@ -664,13 +765,13 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         body: { name: 'Renamed Release' },
       });
       expect(renameRes.statusCode).toBe(200);
-      expect(renameRes.body.data.releaseCondition).toBe('partial');
+      expect(renameRes.body.data.releaseCondition).toBe('allow_partial');
     });
 
     test.each(['publish_everything', null])(
       'cannot change to release condition %p',
       async (releaseCondition) => {
-        const createReleaseRes = await createRelease({ releaseCondition: 'partial' });
+        const createReleaseRes = await createRelease({ releaseCondition: 'allow_partial' });
         const release = createReleaseRes.body.data;
 
         const res = await rq({
@@ -681,7 +782,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         expect(res.statusCode).toBe(400);
 
         const findRes = await rq({ method: 'GET', url: `/content-releases/${release.id}` });
-        expect(findRes.body.data.releaseCondition).toBe('partial');
+        expect(findRes.body.data.releaseCondition).toBe('allow_partial');
       }
     );
   });
@@ -689,7 +790,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
   describe('Legacy releases', () => {
     test('backfills a missing release condition to all_or_nothing and keeps explicit ones', async () => {
       const legacy = (await createRelease()).body.data;
-      const partial = (await createRelease({ releaseCondition: 'partial' })).body.data;
+      const allowPartial = (await createRelease({ releaseCondition: 'allow_partial' })).body.data;
 
       // Releases created before the field existed have no value in the column
       await strapi.db.query('plugin::content-releases.release').update({
@@ -700,10 +801,13 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       await migrateReleaseConditionReleases();
 
       const legacyRes = await rq({ method: 'GET', url: `/content-releases/${legacy.id}` });
-      const partialRes = await rq({ method: 'GET', url: `/content-releases/${partial.id}` });
+      const allowPartialRes = await rq({
+        method: 'GET',
+        url: `/content-releases/${allowPartial.id}`,
+      });
 
       expect(legacyRes.body.data.releaseCondition).toBe('all_or_nothing');
-      expect(partialRes.body.data.releaseCondition).toBe('partial');
+      expect(allowPartialRes.body.data.releaseCondition).toBe('allow_partial');
     });
   });
 
@@ -755,6 +859,13 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     test('cannot publish a release if at least one action is invalid', async () => {
       const createFirstReleaseRes = await createRelease();
       const release = createFirstReleaseRes.body.data;
+      // Created before the invalid action, so it comes first in the run
+      const validDocumentId = await createProduct({ valid: true });
+      await createReleaseAction(release.id, {
+        contentType: productUID,
+        entryDocumentId: validDocumentId,
+        type: 'publish',
+      });
       await createReleaseAction(release.id, {
         contentType: productUID,
         entryDocumentId: invalidEntries[0].data.documentId,
@@ -770,6 +881,12 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       expect(res.body.error.message).toBe(
         'description must be a `string` type, but the final value was: `null`.'
       );
+
+      // Rejected before any write: the release stays planned
+      const found = await getRelease(release.id);
+      expect(found.status).toBe('blocked');
+      expect(found.releasedAt).toBeNull();
+      expect(await hasPublishedVersion(productUID, validDocumentId)).toBe(false);
     });
 
     test('retrieves relations correctly in content API after publishing release', async () => {
@@ -924,6 +1041,428 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
 
       expect(publishedChildRes.statusCode).toBe(200);
       expect(publishedChildRes.body.data.parent).toMatchObject({ count: 1 });
+    });
+  });
+
+  describe('Release status with a release condition', () => {
+    const switchCondition = (release, releaseCondition: ReleaseCondition) => {
+      return rq({
+        method: 'PUT',
+        url: `/content-releases/${release.id}`,
+        body: { name: release.name, releaseCondition },
+      });
+    };
+
+    test('an allow_partial release with an invalid entry among valid ones is ready, and switching the condition recalculates it', async () => {
+      const release = await createReleaseWithActions('allow_partial', [
+        { documentId: await createProduct({ valid: true }) },
+        { documentId: await createProduct({ valid: false }) },
+      ]);
+
+      expect((await getRelease(release.id)).status).toBe('ready');
+
+      expect((await switchCondition(release, 'all_or_nothing')).statusCode).toBe(200);
+      expect((await getRelease(release.id)).status).toBe('blocked');
+
+      expect((await switchCondition(release, 'allow_partial')).statusCode).toBe(200);
+      expect((await getRelease(release.id)).status).toBe('ready');
+    });
+
+    test('an allow_partial release with no publishable entry is blocked', async () => {
+      const release = await createReleaseWithActions('allow_partial', [
+        { documentId: await createProduct({ valid: false }) },
+        { documentId: await createProduct({ valid: false }) },
+      ]);
+
+      expect((await getRelease(release.id)).status).toBe('blocked');
+    });
+
+    test('an allow_partial release with only unpublish entries is ready', async () => {
+      const release = await createReleaseWithActions('allow_partial', [
+        { documentId: await createProduct({ valid: false }), type: 'unpublish' },
+      ]);
+
+      expect((await getRelease(release.id)).status).toBe('ready');
+    });
+  });
+
+  describe('Publish Release with a release condition', () => {
+    test('allow_partial publishes the publishable entries, skips the others and ends partial', async () => {
+      const validIds: string[] = [];
+      for (let i = 0; i < 7; i += 1) {
+        validIds.push(await createProduct({ valid: true }));
+      }
+      const invalidIds = [
+        await createProduct({ valid: false }),
+        await createProduct({ valid: false }),
+      ];
+      const failingId = await createProduct({ valid: true });
+      documentIdsFailingToPublish.add(failingId);
+
+      try {
+        // The failing entry sits in the middle of the run, with valid entries on both sides
+        const release = await createReleaseWithActions(
+          'allow_partial',
+          [
+            validIds[0],
+            invalidIds[0],
+            validIds[1],
+            validIds[2],
+            failingId,
+            validIds[3],
+            invalidIds[1],
+            validIds[4],
+            validIds[5],
+            validIds[6],
+          ].map((documentId) => ({ documentId }))
+        );
+
+        const res = await publishManually(release.id);
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data.status).toBe('partial');
+
+        const found = await getRelease(release.id);
+        expect(found.status).toBe('partial');
+        expect(found.releasedAt).not.toBeNull();
+
+        for (const documentId of validIds) {
+          expect(await hasPublishedVersion(productUID, documentId)).toBe(true);
+        }
+        for (const documentId of [...invalidIds, failingId]) {
+          expect(await hasPublishedVersion(productUID, documentId)).toBe(false);
+        }
+      } finally {
+        documentIdsFailingToPublish.delete(failingId);
+      }
+    });
+
+    test('allow_partial keeps the published version of an entry whose draft became invalid', async () => {
+      const documentId = await createProduct({ valid: true });
+      await strapi.documents(productUID).publish({ documentId });
+      await strapi.documents(productUID).update({ documentId, data: { description: null } });
+
+      const release = await createReleaseWithActions('allow_partial', [
+        { documentId },
+        { documentId: await createProduct({ valid: true }) },
+      ]);
+
+      const res = await publishManually(release.id);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.status).toBe('partial');
+
+      const published = await strapi.documents(productUID).findOne({
+        documentId,
+        status: 'published',
+      });
+      expect(published?.description).toBe('Description');
+    });
+
+    test('allow_partial with only an unpublish entry released ends partial', async () => {
+      const publishedId = await createProduct({ valid: true });
+      await strapi.documents(productUID).publish({ documentId: publishedId });
+
+      const release = await createReleaseWithActions('allow_partial', [
+        { documentId: await createProduct({ valid: false }) },
+        { documentId: await createProduct({ valid: false }) },
+        { documentId: publishedId, type: 'unpublish' },
+      ]);
+
+      const res = await publishManually(release.id);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.status).toBe('partial');
+      expect(await hasPublishedVersion(productUID, publishedId)).toBe(false);
+    });
+
+    test('allow_partial with no publishable entry: a manual publish is rejected and the release stays blocked', async () => {
+      const invalidIds = [
+        await createProduct({ valid: false }),
+        await createProduct({ valid: false }),
+      ];
+      const release = await createReleaseWithActions(
+        'allow_partial',
+        invalidIds.map((documentId) => ({ documentId }))
+      );
+
+      const res = await publishManually(release.id);
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error.message).toBe(INVALID_PRODUCT_MESSAGE);
+
+      const found = await getRelease(release.id);
+      expect(found.status).toBe('blocked');
+      expect(found.releasedAt).toBeNull();
+      for (const documentId of invalidIds) {
+        expect(await hasPublishedVersion(productUID, documentId)).toBe(false);
+      }
+    });
+
+    test('allow_partial with no publishable entry: a scheduled run fails', async () => {
+      const invalidIds = [
+        await createProduct({ valid: false }),
+        await createProduct({ valid: false }),
+      ];
+      const release = await createReleaseWithActions(
+        'allow_partial',
+        invalidIds.map((documentId) => ({ documentId }))
+      );
+
+      await expect(runScheduled(release.id)).rejects.toThrow('No entries were published');
+
+      const found = await getRelease(release.id);
+      expect(found.status).toBe('failed');
+      expect(found.releasedAt).toBeNull();
+      for (const documentId of invalidIds) {
+        expect(await hasPublishedVersion(productUID, documentId)).toBe(false);
+      }
+    });
+
+    test('scheduled all_or_nothing run with an invalid entry publishes nothing and ends failed', async () => {
+      // Ordered before the invalid entry: a run that wrote as it went would commit it
+      const validId = await createProduct({ valid: true });
+      const release = await createReleaseWithActions('all_or_nothing', [
+        { documentId: validId },
+        { documentId: await createProduct({ valid: false }) },
+      ]);
+
+      await expect(runScheduled(release.id)).rejects.toThrow(INVALID_PRODUCT_MESSAGE);
+
+      const found = await getRelease(release.id);
+      expect(found.status).toBe('failed');
+      expect(await hasPublishedVersion(productUID, validId)).toBe(false);
+    });
+
+    test('all_or_nothing manual publish stores the validity it found, so out-of-date state reads blocked', async () => {
+      const validId = await createProduct({ valid: true });
+      const invalidId = await createProduct({ valid: false });
+      const release = await createReleaseWithActions('all_or_nothing', [
+        { documentId: validId },
+        { documentId: invalidId },
+      ]);
+
+      // The stored validity no longer matches the entry, as when the entry changes through a
+      // path that doesn't revalidate its release actions
+      await strapi.db
+        .query('plugin::content-releases.release-action')
+        .updateMany({ where: { release: { id: release.id } }, data: { isEntryValid: true } });
+      await strapi.plugin('content-releases').service('release').updateReleaseStatus(release.id);
+      expect((await getRelease(release.id)).status).toBe('ready');
+
+      const res = await publishManually(release.id);
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error.message).toBe(INVALID_PRODUCT_MESSAGE);
+
+      const invalidAction = await strapi.db
+        .query('plugin::content-releases.release-action')
+        .findOne({ where: { release: { id: release.id }, entryDocumentId: invalidId } });
+      expect(invalidAction.isEntryValid).toBe(false);
+
+      const found = await getRelease(release.id);
+      expect(found.status).toBe('blocked');
+      expect(found.releasedAt).toBeNull();
+      expect(await hasPublishedVersion(productUID, validId)).toBe(false);
+    });
+
+    test('all_or_nothing run stopped by an error keeps what went out and ends partial', async () => {
+      const documentIds: string[] = [];
+      for (let i = 0; i < 5; i += 1) {
+        documentIds.push(await createProduct({ valid: true }));
+      }
+      documentIdsFailingToPublish.add(documentIds[2]);
+
+      try {
+        const release = await createReleaseWithActions(
+          'all_or_nothing',
+          documentIds.map((documentId) => ({ documentId }))
+        );
+
+        const res = await publishManually(release.id);
+
+        expect(res.statusCode).toBe(500);
+
+        const found = await getRelease(release.id);
+        expect(found.status).toBe('partial');
+        expect(found.releasedAt).not.toBeNull();
+
+        expect(await hasPublishedVersion(productUID, documentIds[0])).toBe(true);
+        expect(await hasPublishedVersion(productUID, documentIds[1])).toBe(true);
+        for (const documentId of documentIds.slice(2)) {
+          expect(await hasPublishedVersion(productUID, documentId)).toBe(false);
+        }
+      } finally {
+        documentIdsFailingToPublish.delete(documentIds[2]);
+      }
+    });
+
+    test('all_or_nothing run stopped by an error on its first entry ends failed', async () => {
+      const documentIds = [
+        await createProduct({ valid: true }),
+        await createProduct({ valid: true }),
+      ];
+      documentIdsFailingToPublish.add(documentIds[0]);
+
+      try {
+        const release = await createReleaseWithActions(
+          'all_or_nothing',
+          documentIds.map((documentId) => ({ documentId }))
+        );
+
+        const res = await publishManually(release.id);
+
+        expect(res.statusCode).toBe(500);
+
+        const found = await getRelease(release.id);
+        expect(found.status).toBe('failed');
+        for (const documentId of documentIds) {
+          expect(await hasPublishedVersion(productUID, documentId)).toBe(false);
+        }
+      } finally {
+        documentIdsFailingToPublish.delete(documentIds[0]);
+      }
+    });
+
+    test('a scheduled run of a release with no entries ends done', async () => {
+      const release = (await createRelease()).body.data;
+
+      await runScheduled(release.id);
+
+      const found = await getRelease(release.id);
+      expect(found.status).toBe('done');
+      expect(found.releasedAt).not.toBeNull();
+    });
+
+    test('a manual publish of an allow_partial release with no entries ends done', async () => {
+      const release = (await createRelease({ releaseCondition: 'allow_partial' })).body.data;
+
+      const res = await publishManually(release.id);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.status).toBe('done');
+    });
+
+    describe('with a required review stage', () => {
+      let workflow;
+
+      const createReviewItem = async ({ approved }: { approved: boolean }): Promise<string> => {
+        const { data } = await createEntry(reviewItemUID, { name: 'Review item' });
+
+        if (approved) {
+          const res = await rq({
+            method: 'PUT',
+            url: `/review-workflows/content-manager/collection-types/${reviewItemUID}/${data.documentId}/stage`,
+            body: { data: { id: workflow.stages[1].id } },
+          });
+          expect(res.statusCode).toBe(200);
+        }
+
+        return data.documentId;
+      };
+
+      beforeAll(async () => {
+        const res = await rq({
+          method: 'POST',
+          url: '/review-workflows/workflows?populate=*',
+          body: {
+            data: {
+              name: `release-stage-${Math.random().toString(36)}`,
+              contentTypes: [reviewItemUID],
+              stages: [{ name: 'Review' }, { name: 'Done' }],
+              stageRequiredToPublishName: 'Done',
+            },
+          },
+        });
+        expect(res.statusCode).toBe(201);
+        workflow = res.body.data;
+      });
+
+      afterAll(async () => {
+        await rq({ method: 'DELETE', url: `/review-workflows/workflows/${workflow.id}` });
+      });
+
+      test('allow_partial publishes the entry at the required stage and skips the other', async () => {
+        const approvedId = await createReviewItem({ approved: true });
+        const notApprovedId = await createReviewItem({ approved: false });
+        const release = await createReleaseWithActions('allow_partial', [
+          { documentId: notApprovedId, contentType: reviewItemUID },
+          { documentId: approvedId, contentType: reviewItemUID },
+        ]);
+
+        const res = await publishManually(release.id);
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data.status).toBe('partial');
+        expect(await hasPublishedVersion(reviewItemUID, approvedId)).toBe(true);
+        expect(await hasPublishedVersion(reviewItemUID, notApprovedId)).toBe(false);
+      });
+
+      test('all_or_nothing manual publish is rejected with the stage error and stays blocked', async () => {
+        const approvedId = await createReviewItem({ approved: true });
+        const notApprovedId = await createReviewItem({ approved: false });
+        const release = await createReleaseWithActions('all_or_nothing', [
+          { documentId: approvedId, contentType: reviewItemUID },
+          { documentId: notApprovedId, contentType: reviewItemUID },
+        ]);
+
+        const res = await publishManually(release.id);
+
+        expect(res.statusCode).toBe(400);
+        expect(res.body.error.message).toBe('Entry is not at the required stage to publish');
+
+        const found = await getRelease(release.id);
+        expect(found.status).toBe('blocked');
+        expect(await hasPublishedVersion(reviewItemUID, approvedId)).toBe(false);
+        expect(await hasPublishedVersion(reviewItemUID, notApprovedId)).toBe(false);
+      });
+    });
+
+    describe('with a unique field', () => {
+      // Published with this slug, then its draft edited: both versions hold the slug
+      const createPublishedSlugItemWithEditedDraft = async (slug: string): Promise<string> => {
+        const { data } = await createEntry(slugItemUID, { title: 'Published', slug });
+        await strapi.documents(slugItemUID).publish({ documentId: data.documentId });
+        await strapi
+          .documents(slugItemUID)
+          .update({ documentId: data.documentId, data: { title: 'Edited' } });
+
+        return data.documentId;
+      };
+
+      test('an entry whose published version holds its slug is publishable', async () => {
+        const documentId = await createPublishedSlugItemWithEditedDraft('published-and-edited');
+        const release = await createReleaseWithActions('all_or_nothing', [
+          { documentId, contentType: slugItemUID },
+        ]);
+
+        expect((await getRelease(release.id)).status).toBe('ready');
+
+        const res = await publishManually(release.id);
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data.status).toBe('done');
+        const published = await strapi
+          .documents(slugItemUID)
+          .findOne({ documentId, status: 'published' });
+        expect(published.title).toBe('Edited');
+      });
+
+      test('an entry whose slug another published entry holds is not publishable', async () => {
+        await createPublishedSlugItemWithEditedDraft('taken');
+        const { data } = await createEntry(slugItemUID, { title: 'Draft', slug: 'taken' });
+        const release = await createReleaseWithActions('all_or_nothing', [
+          { documentId: data.documentId, contentType: slugItemUID },
+        ]);
+
+        expect((await getRelease(release.id)).status).toBe('blocked');
+
+        const res = await publishManually(release.id);
+
+        expect(res.statusCode).toBe(400);
+        expect(res.body.error.message).toBe('This attribute must be unique');
+        expect(await hasPublishedVersion(slugItemUID, data.documentId)).toBe(false);
+      });
     });
   });
 

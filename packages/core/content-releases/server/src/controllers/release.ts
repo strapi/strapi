@@ -285,7 +285,9 @@ const releaseController = {
     const releaseService = getService('release', { strapi });
 
     // The service audits the run itself, whoever the caller is
-    const { release, counts, countsError } = await releaseService.publish(id);
+    const { release, counts, countsError } = await releaseService.publish(id, {
+      trigger: 'manual',
+    });
 
     // The publish is committed and audited; the response still needs the counts
     if (!counts) {

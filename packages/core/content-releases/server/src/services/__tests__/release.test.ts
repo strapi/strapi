@@ -1,7 +1,29 @@
-import { queryParams } from '@strapi/utils';
+import { setImmediate } from 'node:timers/promises';
+
+import { errors, queryParams } from '@strapi/utils';
 
 import createReleaseService from '../release';
 import releaseCT from '../../content-types/release/schema';
+import type * as utils from '../../utils';
+
+const PUBLISHABLE = {
+  publishable: true,
+  outcome: null,
+  reason: null,
+  error: null,
+} satisfies utils.EntryPublishability;
+
+// Typed as the real helper, so a change to its shape breaks this mock at compile time
+// instead of at run time. Every publish action is publishable unless a test says otherwise.
+const allPublishable: typeof utils.getPublishabilityForActions = async (actions) =>
+  actions.map((action) => ({ action, publishability: PUBLISHABLE }));
+const mockGetPublishabilityForActions = jest.fn(allPublishable);
+
+jest.mock('../../utils', () => ({
+  ...jest.requireActual<typeof utils>('../../utils'),
+  getPublishabilityForActions: (...args: Parameters<typeof utils.getPublishabilityForActions>) =>
+    mockGetPublishabilityForActions(...args),
+}));
 
 const mockSchedulingSet = jest.fn();
 const mockSchedulingCancel = jest.fn();
@@ -251,7 +273,9 @@ describe('Release service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: baseStrapiMock });
 
-      expect(() => releaseService.publish(1)).rejects.toThrow('No release found for id 1');
+      expect(() => releaseService.publish(1, { trigger: 'manual' })).rejects.toThrow(
+        'No release found for id 1'
+      );
     });
 
     it('throws an error if the release is already published', () => {
@@ -260,11 +284,14 @@ describe('Release service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: baseStrapiMock });
 
-      expect(() => releaseService.publish(1)).rejects.toThrow('Release already published');
+      expect(() => releaseService.publish(1, { trigger: 'manual' })).rejects.toThrow(
+        'Release already published'
+      );
     });
 
-    it('throws an error if the release have 0 actions', () => {
+    it('freezes a release with 0 actions as done', async () => {
       mockExecute.mockReturnValueOnce({ id: 1, releasedAt: null });
+      const update = jest.fn().mockResolvedValue({ id: 1, status: 'done' });
 
       const strapiMock = {
         ...baseStrapiMock,
@@ -272,6 +299,7 @@ describe('Release service', () => {
           ...baseStrapiMock.db,
           query: jest.fn().mockReturnValue({
             findMany: jest.fn().mockReturnValue([]),
+            update,
           }),
         },
       };
@@ -279,7 +307,12 @@ describe('Release service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: strapiMock });
 
-      expect(() => releaseService.publish(1)).rejects.toThrow('No entries to publish');
+      await releaseService.publish(1, { trigger: 'scheduled' });
+
+      expect(update).toHaveBeenCalledWith({
+        where: { id: 1 },
+        data: { status: 'done', releasedAt: expect.any(Date) },
+      });
     });
 
     it('calls publish for each collectionType with the right actions', async () => {
@@ -356,7 +389,7 @@ describe('Release service', () => {
         },
       ]);
 
-      await releaseService.publish(1);
+      await releaseService.publish(1, { trigger: 'manual' });
 
       expect(mockPublish).toHaveBeenCalledTimes(2);
       expect(mockUnpublish).toHaveBeenCalledTimes(2);
@@ -429,7 +462,7 @@ describe('Release service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: strapiMock });
 
-      await releaseService.publish(1);
+      await releaseService.publish(1, { trigger: 'manual' });
 
       // Category (relation target) must be published before Article (relation source)
       const categoryIndex = documentsCallOrder.indexOf(CATEGORY_UID);
@@ -518,7 +551,7 @@ describe('Release service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: strapiMock });
 
-      await releaseService.publish(1);
+      await releaseService.publish(1, { trigger: 'manual' });
 
       // Category must be published before Article (relation is in Article's component)
       const categoryIndex = documentsCallOrder.indexOf(CATEGORY_UID);
@@ -591,11 +624,10 @@ describe('Release service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: strapiMock });
 
-      const publishComplete = releaseService.publish(1);
+      const publishComplete = releaseService.publish(1, { trigger: 'manual' });
 
-      for (let i = 0; i < 5; i += 1) {
-        await Promise.resolve();
-      }
+      // Let the run go as far as it can while the first publish is held
+      await setImmediate();
 
       expect(callOrder).toEqual(['call:parentDoc']);
 
@@ -667,7 +699,7 @@ describe('Release service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: strapiMock });
 
-      const { counts, countsError } = await releaseService.publish(1);
+      const { counts, countsError } = await releaseService.publish(1, { trigger: 'manual' });
 
       expect(counts).toEqual({ published: 2, unpublished: 1 });
       expect(countsError).toBeNull();
@@ -711,7 +743,7 @@ describe('Release service', () => {
 
       // The committed publish must not fail because of an audit-only read: the
       // error travels in the return for the caller to decide
-      const { counts, countsError } = await releaseService.publish(1);
+      const { counts, countsError } = await releaseService.publish(1, { trigger: 'manual' });
 
       expect(counts).toBeNull();
       expect(countsError).toBeInstanceOf(Error);
@@ -727,20 +759,29 @@ describe('Release service', () => {
       const strapiMock = {
         ...baseStrapiMock,
         eventHub: { emit: jest.fn() },
+        documents: jest.fn().mockReturnValue({
+          publish: jest.fn().mockRejectedValue(new errors.ValidationError('Publish failed')),
+        }),
         db: {
           ...baseStrapiMock.db,
           query: jest.fn().mockReturnValue({
-            // No actions: the run starts and fails inside the service
-            findMany: jest.fn().mockReturnValue([]),
+            findMany: jest
+              .fn()
+              .mockReturnValue([
+                { id: 1, contentType: 'collectionType', type: 'publish', entryDocumentId: 'a' },
+              ]),
             update: jest.fn(),
           }),
         },
+        contentTypes: { collectionType: { kind: 'collectionType' } },
       };
 
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: strapiMock });
 
-      await expect(releaseService.publish(1)).rejects.toThrow('No entries to publish');
+      await expect(releaseService.publish(1, { trigger: 'manual' })).rejects.toThrow(
+        'Publish failed'
+      );
       expect(strapiMock.eventHub.emit).toHaveBeenCalledWith('release.trigger', {
         releaseId: 1,
         name: 'March',
@@ -782,7 +823,7 @@ describe('Release service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: strapiMock });
 
-      const { counts } = await releaseService.publish(1);
+      const { counts } = await releaseService.publish(1, { trigger: 'manual' });
 
       expect(counts).toEqual({ published: 1, unpublished: 1 });
       expect(strapiMock.log.error).toHaveBeenCalled();
@@ -806,7 +847,9 @@ describe('Release service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: strapiMock });
 
-      await expect(releaseService.publish(1)).rejects.toThrow('Release publish failed');
+      await expect(releaseService.publish(1, { trigger: 'manual' })).rejects.toThrow(
+        'Release publish failed'
+      );
       expect(strapiMock.eventHub.emit).toHaveBeenCalledWith(
         'release.trigger',
         expect.objectContaining({ outcome: 'failure', reason: 'Error' })
@@ -821,7 +864,9 @@ describe('Release service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: strapiMock });
 
-      await expect(releaseService.publish(1)).rejects.toThrow('Release already published');
+      await expect(releaseService.publish(1, { trigger: 'manual' })).rejects.toThrow(
+        'Release already published'
+      );
       expect(strapiMock.eventHub.emit).not.toHaveBeenCalled();
     });
   });

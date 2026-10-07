@@ -53,7 +53,7 @@ describe('transformers', () => {
         name: 'March',
         scheduledAt: '2026-09-01T10:00:00.000Z',
         timezone: 'Europe/Paris',
-        releaseCondition: 'partial',
+        releaseCondition: 'allow_partial',
       })
     ).toEqual({
       resource: { type: 'release', id: 1, name: 'March' },
@@ -61,7 +61,7 @@ describe('transformers', () => {
         isScheduled: true,
         scheduledAt: '2026-09-01T10:00:00.000Z',
         timezone: 'Europe/Paris',
-        releaseCondition: 'partial',
+        releaseCondition: 'allow_partial',
       },
     });
 

@@ -1,6 +1,7 @@
-import { contentTypes as contentTypesUtils } from '@strapi/utils';
+import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
 
-import type { UID, Data, Core } from '@strapi/types';
+import type { UID, Data, Core, Modules } from '@strapi/types';
+import type { ReleaseAction } from '../../../shared/contracts/release-actions';
 
 import type { SettingsService } from '../services/settings';
 import type { ReleaseService } from '../services/release';
@@ -41,11 +42,96 @@ export const getDraftEntryValidStatus = async (
   return isEntryValid(contentType, entry, { strapi });
 };
 
-export const isEntryValid = async (
-  contentTypeUid: string,
-  entry: any,
+type StageRef = { id: Data.ID; name: string };
+
+type WorkflowWithRequiredStage = { stageRequiredToPublish?: StageRef | null } | null | undefined;
+
+// A draft read through the document service, with its review stage when it has one
+type DraftEntry = Modules.Documents.AnyDocument & { strapi_stage?: StageRef | null };
+
+export type PublishabilityOutcome = 'skipped_invalid' | 'skipped_not_approved';
+
+export interface PublishabilityReason {
+  validation?: { errors: { path: string[]; message: string }[] };
+  stage?: { entryStage: StageRef | null; requiredStage: StageRef };
+}
+
+export type EntryPublishability =
+  | { publishable: true; outcome: null; reason: null; error: null }
+  | {
+      publishable: false;
+      outcome: PublishabilityOutcome;
+      reason: PublishabilityReason;
+      /** What publishing the entry would throw: its message is the one a rejected release reports */
+      error: Error;
+    };
+
+// Thrown by review-workflows when an entry that isn't at the required stage is published
+const STAGE_ERROR_MESSAGE = 'Entry is not at the required stage to publish';
+
+const getAssignedWorkflow = async (
+  contentTypeUid: UID.ContentType,
   { strapi }: { strapi: Core.Strapi }
-) => {
+): Promise<WorkflowWithRequiredStage> => {
+  // Workflows service may not be available depending on the license
+  const workflowsService = strapi.plugin('review-workflows')?.service('workflows');
+
+  return workflowsService?.getAssignedWorkflow(contentTypeUid, {
+    populate: 'stageRequiredToPublish',
+  });
+};
+
+// Only the field paths and messages: the details also carry the submitted values
+const getValidationErrors = (error: Error) => {
+  // `instanceof` on a generic class types `details` as `any`: read it as `unknown` and check its shape
+  const details: unknown = error instanceof errors.ValidationError ? error.details : null;
+  const detailErrors: unknown[] =
+    typeof details === 'object' &&
+    details !== null &&
+    'errors' in details &&
+    Array.isArray(details.errors)
+      ? details.errors
+      : [];
+
+  return detailErrors.map((detail) => {
+    const isObject = typeof detail === 'object' && detail !== null;
+    const path = isObject && 'path' in detail ? detail.path : undefined;
+    const message = isObject && 'message' in detail ? detail.message : undefined;
+
+    return {
+      path: Array.isArray(path) ? path.map(String) : [],
+      message: typeof message === 'string' ? message : '',
+    };
+  });
+};
+
+const computeEntryPublishability = async (
+  contentTypeUid: UID.ContentType,
+  entry: DraftEntry | null,
+  workflow: WorkflowWithRequiredStage,
+  { strapi }: { strapi: Core.Strapi }
+): Promise<EntryPublishability> => {
+  if (!entry) {
+    return {
+      publishable: false,
+      outcome: 'skipped_invalid',
+      reason: { validation: { errors: [] } },
+      error: new errors.ValidationError('Entry not found'),
+    };
+  }
+
+  // Publishing deletes the document's published version before it validates the draft, so
+  // a unique value the draft shares with that version is no clash: the validator leaves it out
+  const publishedVersion: { id: number } | null = await strapi.db.query(contentTypeUid).findOne({
+    where: {
+      documentId: entry.documentId,
+      publishedAt: { $notNull: true },
+      ...(entry.locale ? { locale: entry.locale } : {}),
+    },
+    select: ['id'],
+  });
+
+  let validationError: Error | null = null;
   try {
     // Mirror the document-service publish path: when `api.documents.strictRelations`
     // is on, required media/relations are enforced on non-draft writes. Reading the
@@ -59,27 +145,131 @@ export const isEntryValid = async (
 
     // @TODO: When documents service has validateEntityCreation method, use it instead
     await strapi.entityValidator.validateEntityCreation(
-      strapi.getModel(contentTypeUid as UID.ContentType),
+      strapi.getModel(contentTypeUid),
       entry,
-      { isDraft: false, locale: entry?.locale, strictRelations },
-      // @ts-expect-error - FIXME: entity here is unnecessary
-      entry
+      { isDraft: false, locale: entry.locale, strictRelations },
+      // @ts-expect-error - the validator takes the entry to leave out of unique checks, but its type doesn't declare it for creation
+      publishedVersion
     );
+  } catch (error) {
+    // Anything can be thrown: it's turned into an Error once, here
+    validationError =
+      error instanceof Error ? error : new errors.ValidationError('Entry is not valid');
+  }
 
-    const workflowsService = strapi.plugin('review-workflows').service('workflows');
-    // Workflows service may not be available depending on the license
-    const workflow = await workflowsService?.getAssignedWorkflow(contentTypeUid, {
-      populate: 'stageRequiredToPublish',
-    });
+  // Checked even when validation failed, so the reason can carry both
+  const requiredStage = workflow?.stageRequiredToPublish ?? null;
+  const entryStage = entry.strapi_stage ?? null;
+  const isAtRequiredStage = requiredStage === null || entryStage?.id === requiredStage.id;
 
-    if (workflow?.stageRequiredToPublish) {
-      return entry.strapi_stage.id === workflow.stageRequiredToPublish.id;
-    }
+  if (isAtRequiredStage) {
+    return validationError === null
+      ? { publishable: true, outcome: null, reason: null, error: null }
+      : {
+          publishable: false,
+          outcome: 'skipped_invalid',
+          reason: { validation: { errors: getValidationErrors(validationError) } },
+          error: validationError,
+        };
+  }
 
-    return true;
+  return {
+    publishable: false,
+    // Failing both checks counts as invalid
+    outcome: validationError ? 'skipped_invalid' : 'skipped_not_approved',
+    reason: {
+      ...(validationError && { validation: { errors: getValidationErrors(validationError) } }),
+      stage: {
+        entryStage: entryStage && { id: entryStage.id, name: entryStage.name },
+        requiredStage: { id: requiredStage.id, name: requiredStage.name },
+      },
+    },
+    // Same precedence as a publish: review-workflows rejects the stage before the entry is validated
+    error: new errors.ValidationError(STAGE_ERROR_MESSAGE),
+  };
+};
+
+/**
+ * Whether a publish action's entry can be published right now: its draft passes publish
+ * validation and, when its content type's workflow requires a stage to publish, it is at that
+ * stage. Without review workflows (e.g. on a license without them) only validation applies.
+ */
+export const getEntryPublishability = async (
+  contentTypeUid: UID.ContentType,
+  entry: DraftEntry | null,
+  { strapi }: { strapi: Core.Strapi }
+) => {
+  const workflow = await getAssignedWorkflow(contentTypeUid, { strapi });
+
+  return computeEntryPublishability(contentTypeUid, entry, workflow, { strapi });
+};
+
+export const isEntryValid = async (
+  contentTypeUid: UID.ContentType,
+  entry: DraftEntry | null,
+  { strapi }: { strapi: Core.Strapi }
+) => {
+  try {
+    const { publishable } = await getEntryPublishability(contentTypeUid, entry, { strapi });
+
+    return publishable;
   } catch {
     return false;
   }
+};
+
+type PublishActionRef = Pick<ReleaseAction, 'id' | 'contentType' | 'entryDocumentId' | 'locale'>;
+
+/**
+ * Publishability of each publish action, read from its current draft, in the order given.
+ * The deep populate and the workflow are looked up once per content type.
+ *
+ * Generic over the action type so callers get back their own actions, not a narrower shape.
+ */
+export const getPublishabilityForActions = async <TAction extends PublishActionRef>(
+  actions: readonly TAction[],
+  { strapi }: { strapi: Core.Strapi }
+): Promise<{ action: TAction; publishability: EntryPublishability }[]> => {
+  const populateBuilderService = strapi.plugin('content-manager').service('populate-builder');
+  const lookupsByContentType = new Map<
+    UID.ContentType,
+    { populate: unknown; workflow: WorkflowWithRequiredStage }
+  >();
+  const results: { action: TAction; publishability: EntryPublishability }[] = [];
+
+  for (const action of actions) {
+    let lookups = lookupsByContentType.get(action.contentType);
+    if (!lookups) {
+      lookups = {
+        // @ts-expect-error - populateBuilderService should be a function but is returning service
+        populate: await populateBuilderService(action.contentType).populateDeep(Infinity).build(),
+        workflow: await getAssignedWorkflow(action.contentType, { strapi }),
+      };
+      lookupsByContentType.set(action.contentType, lookups);
+    }
+
+    const entry = await getEntry(
+      {
+        contentType: action.contentType,
+        documentId: action.entryDocumentId,
+        locale: action.locale,
+        populate: lookups.populate,
+      },
+      { strapi }
+    );
+
+    results.push({
+      action,
+      publishability: await computeEntryPublishability(
+        action.contentType,
+        entry,
+        lookups.workflow,
+        { strapi }
+      ),
+    });
+  }
+
+  return results;
 };
 
 export const getEntry = async (
