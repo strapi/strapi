@@ -34,14 +34,16 @@ export type { Attribute, Model, JoinTable } from './types';
 export type { AttributeRenameHandler, AttributeRenames } from './schema';
 export type { Identifiers } from './utils/identifiers';
 export { POOL_TIMEOUT_CODE, POOL_TIMEOUT_DOCS_URL } from './pool-diagnostics';
-export type { PoolTimeoutDetails } from './pool-diagnostics';
+export type { PoolDiagnostics, PoolState, PoolTimeoutDetails } from './pool-diagnostics';
 
 interface Settings {
   forceMigration?: boolean;
   runMigrations?: boolean;
   /**
    * Describe the pool on knex connection pool timeouts (details on the error, a docs link, one
-   * warning block per 30 s). Defaults to true; false leaves knex's error untouched.
+   * warning block per 30 s). Defaults to true; false leaves knex's error untouched. Must be a
+   * boolean (for example `env.bool('DATABASE_POOL_TIMEOUT_DIAGNOSTICS', true)`): a string is not
+   * read as false.
    */
   poolTimeoutDiagnostics?: boolean;
   migrations: {
@@ -96,6 +98,7 @@ class Database {
 
   logger: Logger;
 
+  /** Set unless `settings.poolTimeoutDiagnostics` is false or the install failed. */
   poolDiagnostics?: PoolDiagnostics;
 
   private phase?: string;
@@ -144,10 +147,16 @@ class Database {
     });
 
     if (this.config.settings.poolTimeoutDiagnostics !== false) {
-      this.poolDiagnostics = installPoolDiagnostics(this.connection, {
-        logger: { warn: (message) => this.logger.warn(message) },
-        getPhase: () => this.phase ?? this.config.getPhase?.(),
-      });
+      try {
+        this.poolDiagnostics = installPoolDiagnostics(this.connection, {
+          logger: { warn: (message) => this.logger.warn(message) },
+          getPhase: () => this.phase ?? this.config.getPhase?.(),
+        });
+      } catch (error) {
+        // Diagnostics are optional: failing to install them must not stop the application booting
+        const reason = error instanceof Error ? error.message : String(error);
+        this.logger.debug(`[database] pool timeout diagnostics not installed: ${reason}`);
+      }
     }
 
     this.schema = createSchemaProvider(this);
@@ -317,8 +326,12 @@ class Database {
   }
 
   async destroy() {
-    await this.lifecycles.clear();
-    this.poolDiagnostics?.dispose();
+    try {
+      await this.lifecycles.clear();
+    } finally {
+      this.poolDiagnostics?.dispose();
+    }
+
     await this.connection.destroy();
   }
 }

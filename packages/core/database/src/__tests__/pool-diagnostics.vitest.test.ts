@@ -4,7 +4,7 @@ import path from 'node:path';
 import knex from 'knex';
 import { afterAll, afterEach, describe, expect, it, vi } from 'vitest';
 
-import { Database, POOL_TIMEOUT_DOCS_URL } from '..';
+import { Database, POOL_TIMEOUT_DOCS_URL, type PoolDiagnostics, type PoolTimeoutDetails } from '..';
 
 const ACQUIRE_TIMEOUT_MESSAGE =
   'Knex: Timeout acquiring a connection. The pool is probably full. Are you missing a .transacting(trx) call?';
@@ -53,7 +53,7 @@ const blocks = (logger: ReturnType<typeof createLogger>) =>
     .map(([message]) => String(message))
     .filter((message) => message.startsWith('[database] connection pool timeout'));
 
-type Annotated = Error & { details?: Record<string, any> };
+type Annotated = Error & { details?: Partial<PoolTimeoutDetails> };
 
 describe('Database pool timeout diagnostics', () => {
   let db: Database | undefined;
@@ -103,6 +103,37 @@ describe('Database pool timeout diagnostics', () => {
     expect(error.details?.phase).toBe('schema sync');
   });
 
+  it('keeps the outer label after a nested runInPhase returns', async () => {
+    const logger = createLogger();
+    db = createDb(logger, {}, () => 'runtime');
+    const database = db;
+
+    const error = (await database
+      .runInPhase('outer', async () => {
+        await database.runInPhase('inner', async () => undefined);
+        return queryOutsideTheTransaction(database);
+      })
+      .catch((e: Error) => e)) as Annotated;
+
+    expect(error.details?.phase).toBe('outer');
+  });
+
+  it('restores the previous label when the function passed to runInPhase throws', async () => {
+    const logger = createLogger();
+    db = createDb(logger, {}, () => 'runtime');
+    const database = db;
+
+    await expect(
+      database.runInPhase('schema sync', async () => {
+        throw new Error('migration failed');
+      })
+    ).rejects.toThrow('migration failed');
+
+    const error = (await queryOutsideTheTransaction(database).catch((e: Error) => e)) as Annotated;
+
+    expect(error.details?.phase).toBe('runtime');
+  });
+
   it('can be turned off', async () => {
     const logger = createLogger();
     db = createDb(logger, { poolTimeoutDiagnostics: false });
@@ -113,6 +144,42 @@ describe('Database pool timeout diagnostics', () => {
     expect(error.message).toBe(ACQUIRE_TIMEOUT_MESSAGE);
     expect(error.details).toBeUndefined();
     expect(blocks(logger)).toHaveLength(0);
+  });
+
+  it('still boots when the diagnostics cannot be installed', () => {
+    const logger = createLogger();
+    const hostname = vi.spyOn(os, 'hostname').mockImplementation(() => {
+      throw new Error('hostname unavailable');
+    });
+
+    try {
+      db = createDb(logger);
+    } finally {
+      hostname.mockRestore();
+    }
+
+    expect(db.poolDiagnostics).toBeUndefined();
+    expect(logger.debug).toHaveBeenCalledWith(
+      '[database] pool timeout diagnostics not installed: hostname unavailable'
+    );
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('disposes the diagnostics even when clearing the lifecycles throws', async () => {
+    const logger = createLogger();
+    const database = createDb(logger);
+    const diagnostics = database.poolDiagnostics as PoolDiagnostics;
+    const dispose = vi.spyOn(diagnostics, 'dispose');
+    vi.spyOn(database.lifecycles, 'clear').mockRejectedValueOnce(new Error('clear failed'));
+
+    await expect(database.destroy()).rejects.toThrow('clear failed');
+
+    expect(dispose).toHaveBeenCalledTimes(1);
+    expect(
+      Object.prototype.hasOwnProperty.call(database.connection.client, 'acquireConnection')
+    ).toBe(false);
+
+    await database.connection.destroy();
   });
 
   it('removes the wrapper on destroy', async () => {
