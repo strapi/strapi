@@ -22,7 +22,10 @@ describe('Configuration', () => {
       ],
     });
 
-    const strapi = getStrapiFactory({ db: { queryBuilder } })();
+    const get = jest.fn(() => {
+      throw new Error('DTS must not access Strapi services');
+    });
+    const strapi = getStrapiFactory({ db: { queryBuilder }, get })();
 
     const stream = createConfigurationStream(strapi);
 
@@ -31,6 +34,7 @@ describe('Configuration', () => {
     const results = await collect(stream);
 
     expect(results).toHaveLength(5);
+    expect(get).not.toHaveBeenCalled();
 
     results.forEach((result) => {
       expect(result).toMatchObject(

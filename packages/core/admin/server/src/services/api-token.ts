@@ -1,18 +1,6 @@
+import { pick, omit, difference, isEmpty, isNumber, differenceWith, isEqual } from 'lodash';
 import crypto from 'crypto';
-import {
-  omit,
-  difference,
-  isNil,
-  isEmpty,
-  map,
-  isArray,
-  uniq,
-  isNumber,
-  differenceWith,
-  isEqual,
-  pick,
-  prop,
-} from 'lodash/fp';
+
 import type { Core, Data } from '@strapi/types';
 import { errors, emitAudit } from '@strapi/utils';
 import type { Ability } from '@casl/ability';
@@ -145,7 +133,7 @@ const assertCustomTokenPermissionsValidity = (
   }
 
   // Custom type tokens should always have permissions attached to them
-  if (type === constants.API_TOKEN_TYPE.CUSTOM && !isArray(permissions)) {
+  if (type === constants.API_TOKEN_TYPE.CUSTOM && !Array.isArray(permissions)) {
     throw new ValidationError('Missing permissions attribute for custom token');
   }
 
@@ -164,7 +152,7 @@ const assertCustomTokenPermissionsValidity = (
  * Check if a token's lifespan is valid
  */
 const isValidLifespan = (lifespan: unknown) => {
-  if (isNil(lifespan)) {
+  if (lifespan == null) {
     return true;
   }
 
@@ -315,9 +303,9 @@ const enforceAdminPermissionsCeiling = async (
     const requestedFields = requested.properties?.fields;
 
     if (!anyUserPermHasAllFields) {
-      const effectiveUserFields = uniq(
-        matchingUserPerms.flatMap((p) => p.properties?.fields || [])
-      );
+      const effectiveUserFields = [
+        ...new Set(matchingUserPerms.flatMap((p) => p.properties?.fields || [])),
+      ];
 
       // When the owner is field-restricted, omitting fields would widen access to all fields.
       // Force explicit field selection so token scope can't exceed the owner's ceiling.
@@ -346,7 +334,7 @@ const enforceAdminPermissionsCeiling = async (
 
     const enforcedConditions: string[] = anyUserPermIsUnconditional
       ? []
-      : (uniq(matchingUserPerms.flatMap((p) => p.conditions || [])) as string[]);
+      : ([...new Set(matchingUserPerms.flatMap((p) => p.conditions || []))] as string[]);
 
     return {
       ...requested,
@@ -390,7 +378,7 @@ const createApiTokenAdminPermissions = async (tokenId: Data.ID, permissions: Per
  * Fields to compare when checking if two permissions are equal
  */
 const COMPARABLE_FIELDS = ['conditions', 'properties', 'subject', 'action', 'actionParameters'];
-const pickComparableFields = pick(COMPARABLE_FIELDS);
+const pickComparableFields = (permission: Permission) => pick(permission, COMPARABLE_FIELDS);
 
 /**
  * Helper to clean JSON (remove undefined values)
@@ -433,19 +421,21 @@ const assignAdminPermissionsToToken = async (
   });
 
   const permissionsToAdd = differenceWith(
-    arePermissionsEqual,
     permissionsWithToken,
-    existingPermissions
+    existingPermissions,
+    arePermissionsEqual
   ) as any as Permission[];
 
   const permissionsToDelete = differenceWith(
-    arePermissionsEqual,
     existingPermissions,
-    permissionsWithToken
+    permissionsWithToken,
+    arePermissionsEqual
   ) as any as Permission[];
 
   if (permissionsToDelete.length > 0) {
-    await getService('permission').deleteByIds(permissionsToDelete.map(prop('id')) as Data.ID[]);
+    await getService('permission').deleteByIds(
+      permissionsToDelete.map((permission) => permission?.id) as Data.ID[]
+    );
   }
 
   if (permissionsToAdd.length > 0) {
@@ -501,9 +491,9 @@ const reconcileTokenPermissionsToUserCeiling = (
       tokenFields !== null &&
       tokenFields.length > 0 &&
       (() => {
-        const effectiveUserFields = uniq(
-          matchingUserPerms.flatMap((p) => p.properties?.fields || [])
-        );
+        const effectiveUserFields = [
+          ...new Set(matchingUserPerms.flatMap((p) => p.properties?.fields || [])),
+        ];
         return tokenFields.some((f) => !effectiveUserFields.includes(f));
       })();
 
@@ -518,7 +508,7 @@ const reconcileTokenPermissionsToUserCeiling = (
     );
     const enforcedConditions: string[] = anyUserPermIsUnconditional
       ? []
-      : (uniq(matchingUserPerms.flatMap((p) => p.conditions || [])) as string[]);
+      : ([...new Set(matchingUserPerms.flatMap((p) => p.conditions || []))] as string[]);
 
     const currentConditions: string[] = (tokenPerm.conditions as string[]) || [];
     const conditionsChanged =
@@ -598,7 +588,9 @@ const syncApiTokenPermissionsForRole = async (roleId: Data.ID): Promise<void> =>
  * Flatten a token's database permissions objects to an array of strings
  */
 const flattenTokenPermissions = (permissions: { action: string }[] | undefined): string[] => {
-  return isArray(permissions) ? map('action', permissions) : [];
+  return Array.isArray(permissions)
+    ? Array.from(permissions, (permission) => permission?.action)
+    : [];
 };
 
 type WhereParams = {
@@ -644,10 +636,14 @@ const getBy = async (
   // Tokens created before kind introduction case: force kind to be content-api
   const computedKind = token.kind ?? 'content-api';
 
-  const result = omit(
-    ['accessKey', 'encryptedKey', 'type', 'permissions', 'adminPermissions', 'adminUserOwner'],
-    token
-  );
+  const result = omit(token, [
+    'accessKey',
+    'encryptedKey',
+    'type',
+    'permissions',
+    'adminPermissions',
+    'adminUserOwner',
+  ]);
 
   if (computedKind === 'content-api') {
     Object.assign(result, {
@@ -737,7 +733,7 @@ const authenticateAdminToken = async (
 const getExpirationFields = (lifespan: AnyApiToken['lifespan']) => {
   // it must be nil or a finite number >= 0
   const isValidNumber = isNumber(lifespan) && Number.isFinite(lifespan) && lifespan > 0;
-  if (!isValidNumber && !isNil(lifespan)) {
+  if (!isValidNumber && lifespan != null) {
     throw new ValidationError('lifespan must be a positive number or null');
   }
 
@@ -775,7 +771,7 @@ const create = async <K extends AnyApiToken['kind']>(
       select: SELECT_FIELDS,
       populate: POPULATE_FIELDS,
       data: {
-        ...(omit(['permissions', 'adminPermissions', 'adminUserOwner'], attributes) as object),
+        ...(omit(attributes, ['permissions', 'adminPermissions', 'adminUserOwner']) as object),
         accessKey: hash(accessKey),
         encryptedKey,
         adminUserOwner: null,
@@ -789,7 +785,7 @@ const create = async <K extends AnyApiToken['kind']>(
     if (castedContentApiApiTokenBody.type === constants.API_TOKEN_TYPE.CUSTOM) {
       // TODO: createMany doesn't seem to create relation properly, implement a better way rather than a ton of queries
       await Promise.all(
-        uniq(castedContentApiApiTokenBody.permissions).map((action) =>
+        [...new Set(castedContentApiApiTokenBody.permissions)].map((action) =>
           strapi.db.query('admin::api-token-permission').create({
             data: { action, token: apiToken },
           })
@@ -819,7 +815,7 @@ const create = async <K extends AnyApiToken['kind']>(
     });
 
     // Casted to any to avoid complex type duplication
-    return omit(['adminPermissions', 'adminUserOwner'], result) as any;
+    return omit(result, ['adminPermissions', 'adminUserOwner']) as any;
   }
 
   // kind === 'admin'
@@ -851,7 +847,7 @@ const create = async <K extends AnyApiToken['kind']>(
     select: SELECT_FIELDS,
     populate: POPULATE_FIELDS,
     data: {
-      ...(omit(['permissions', 'adminPermissions', 'adminUserOwner'], attributes) as object),
+      ...(omit(attributes, ['permissions', 'adminPermissions', 'adminUserOwner']) as object),
       accessKey: hash(accessKey),
       encryptedKey,
       adminUserOwner: ownerId,
@@ -887,7 +883,7 @@ const create = async <K extends AnyApiToken['kind']>(
 
   // Casted to any to avoid complex type duplication
   return {
-    ...(omit(['permissions'], result) as object),
+    ...(omit(result, ['permissions']) as object),
     adminUserOwner: toAdminTokenOwner((result as AdminApiToken).adminUserOwner),
   } as any;
 };
@@ -923,7 +919,7 @@ const regenerate = async (id: string | number): Promise<ContentApiApiToken | Adm
   });
 
   return {
-    ...omit(['adminUserOwner'], apiToken),
+    ...omit(apiToken, ['adminUserOwner']),
     kind: (apiToken.kind ?? 'content-api') as AnyApiToken['kind'],
     accessKey,
   } as any;
@@ -986,14 +982,17 @@ const list = async <K extends AnyApiToken['kind']>(
 
   return tokens.map((token) =>
     token.kind === null || token.kind === 'content-api'
-      ? omit(['adminPermissions', 'adminUserOwner'], {
-          ...token,
-          // Tokens created before kind introduction case: force kind to be content-api
-          kind: 'content-api',
-          permissions: flattenTokenPermissions(token.permissions),
-        })
+      ? omit(
+          {
+            ...token,
+            // Tokens created before kind introduction case: force kind to be content-api
+            kind: 'content-api',
+            permissions: flattenTokenPermissions(token.permissions),
+          },
+          ['adminPermissions', 'adminUserOwner']
+        )
       : ({
-          ...(omit(['permissions'], token) as object),
+          ...(omit(token, ['permissions']) as object),
           adminUserOwner:
             token.adminUserOwner !== null && token.adminUserOwner !== undefined
               ? toAdminTokenOwner(token.adminUserOwner)
@@ -1048,11 +1047,14 @@ const revoke = async (id: string | number): Promise<AnyApiToken> => {
   }
 
   // content-api tokens (including legacy null-kind rows): normalise shape
-  return omit(['adminPermissions', 'adminUserOwner'], {
-    ...deletedToken,
-    kind: 'content-api' as const,
-    permissions: flattenTokenPermissions(deletedToken.permissions),
-  }) as ContentApiApiToken;
+  return omit(
+    {
+      ...deletedToken,
+      kind: 'content-api' as const,
+      permissions: flattenTokenPermissions(deletedToken.permissions),
+    },
+    ['adminPermissions', 'adminUserOwner']
+  ) as ContentApiApiToken;
 };
 
 /**
@@ -1189,7 +1191,7 @@ const update = async (
     }
   }
 
-  const baseData = pick(UPDATABLE_FIELDS, attributes) as Record<string, unknown>;
+  const baseData = pick(attributes, UPDATABLE_FIELDS) as Record<string, unknown>;
 
   // Migrate legacy null-kind rows to the explicit value on first write
   if (originalToken.kind === null) {
@@ -1214,8 +1216,11 @@ const update = async (
         .query('admin::api-token')
         .load(updatedToken, 'permissions');
 
-      const currentPermissions = map('action', currentPermissionsResult || []);
-      const newPermissions = uniq(incomingPermissions || []);
+      const currentPermissions = Array.from(
+        currentPermissionsResult || [],
+        (permission: Pick<Permission, 'action'>) => permission?.action
+      );
+      const newPermissions = [...new Set(incomingPermissions || [])];
 
       const actionsToDelete = difference(currentPermissions, newPermissions);
       const actionsToAdd = difference(newPermissions, currentPermissions);

@@ -95,6 +95,17 @@ describe('fetchLicense', () => {
     });
   });
 
+  it('throws a fallback error when a JSON response body does not parse', async () => {
+    // A truncated or garbled body from the registry is an outage, not a rejection: it must
+    // keep the stored license rather than switch the instance to CE.
+    const fetchImpl = mockFetch(createResponse({ status: 200, body: '{"data": {"lic' }));
+
+    const promise = fetchLicense({ strapi: createStrapi(fetchImpl) }, 'key', 'project');
+
+    await expect(promise).rejects.toBeInstanceOf(LicenseCheckError);
+    await expect(promise).rejects.toMatchObject({ shouldFallback: true });
+  });
+
   it('throws a fallback error on an unexpected status code', async () => {
     const fetchImpl = mockFetch(createResponse({ status: 500, body: {} }));
 

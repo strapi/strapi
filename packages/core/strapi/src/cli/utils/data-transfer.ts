@@ -5,7 +5,7 @@ import { Command, Option } from 'commander';
 import { configs, createLogger, type winston, formats } from '@strapi/logger';
 import { createStrapi, compileStrapi } from '@strapi/core';
 import ora from 'ora';
-import { merge } from 'lodash/fp';
+import { merge } from 'lodash';
 import type { Core } from '@strapi/types';
 import { engine as engineDataTransfer, strapi as strapiDataTransfer } from '@strapi/data-transfer';
 
@@ -599,7 +599,7 @@ const getDiffHandler = (
     setSignalHandler(() => abortTransfer({ engine, strapi: strapi as Core.Strapi }));
 
     if (confirmed) {
-      context.ignoredDiffs = merge(context.diffs, context.ignoredDiffs);
+      context.ignoredDiffs = merge({}, context.diffs, context.ignoredDiffs);
     }
 
     return next(context);

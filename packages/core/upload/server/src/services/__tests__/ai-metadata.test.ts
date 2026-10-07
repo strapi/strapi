@@ -7,6 +7,9 @@ jest.mock('node:fs/promises');
 const mockReadFile = readFile as jest.MockedFunction<typeof readFile>;
 
 const mockGetSettings = jest.fn();
+const mockHasProvider = jest.fn();
+const mockGenerateMetadata = jest.fn();
+const mockUpdateFileInfo = jest.fn();
 
 // Mock fetch globally
 const mockArrayBuffer = jest.fn().mockResolvedValue(new ArrayBuffer(8));
@@ -26,11 +29,6 @@ const mockFetch = jest.fn().mockResolvedValue({
 
 global.fetch = mockFetch;
 
-// Mock FormData
-global.FormData = jest.fn().mockImplementation(() => ({
-  append: jest.fn(),
-}));
-
 // Mock Blob
 global.Blob = jest.fn().mockImplementation((parts, options) => ({
   parts,
@@ -48,12 +46,6 @@ describe('AI Metadata Service', () => {
       config: {
         get: jest.fn(),
       },
-      ai: {
-        admin: {
-          isStrapiManagedAiEnabled: jest.fn().mockReturnValue(true),
-          getAiToken: jest.fn().mockResolvedValue({ token: 'mock-token' }),
-        },
-      },
       log: {
         http: jest.fn(),
         warn: jest.fn(),
@@ -61,22 +53,29 @@ describe('AI Metadata Service', () => {
         error: jest.fn(),
         info: jest.fn(),
       },
-      plugin: jest.fn().mockImplementation((pluginName) => {
-        if (pluginName === 'upload') {
-          return {
-            service: jest.fn().mockImplementation((serviceName) => {
-              if (serviceName === 'upload') {
-                return { getSettings: mockGetSettings };
-              }
-              return {};
-            }),
-          };
-        }
-        return {};
-      }),
+      // `strapi.plugin()` / `plugin.service()` are wired by the global strapi
+      // setter in `tests/setup/unit.setup.js`.
+      plugins: {
+        upload: {
+          services: {
+            upload: { getSettings: mockGetSettings, updateFileInfo: mockUpdateFileInfo },
+            aiMetadataProvider: {
+              hasProvider: mockHasProvider,
+              generateMetadata: mockGenerateMetadata,
+            },
+          },
+        },
+      },
     };
 
     process.env.STRAPI_AI_URL = 'https://ai.strapi.com';
+
+    mockHasProvider.mockReturnValue(true);
+    mockGenerateMetadata.mockResolvedValue({ results: [] });
+    mockUpdateFileInfo.mockResolvedValue({});
+
+    // `getService` resolves through the global strapi, not the injected one.
+    global.strapi = mockStrapi;
 
     aiMetadataService = createAIMetadataService({ strapi: mockStrapi });
   });
@@ -86,30 +85,30 @@ describe('AI Metadata Service', () => {
   });
 
   describe('isEnabled', () => {
-    it('should return true when strapi.ai.admin.isStrapiManagedAiEnabled() is true and aiMetadata is true', async () => {
-      mockStrapi.ai.admin.isStrapiManagedAiEnabled.mockReturnValue(true);
+    it('should return true when a provider is registered and aiMetadata is true', async () => {
+      mockHasProvider.mockReturnValue(true);
       mockGetSettings.mockResolvedValue({ aiMetadata: true });
 
       expect(await aiMetadataService.isEnabled()).toBe(true);
       expect(mockGetSettings).toHaveBeenCalled();
     });
 
-    it('should return false when strapi.ai.admin.isStrapiManagedAiEnabled() is false', async () => {
-      mockStrapi.ai.admin.isStrapiManagedAiEnabled.mockReturnValue(false);
+    it('should return false when no provider is registered', async () => {
+      mockHasProvider.mockReturnValue(false);
 
       expect(await aiMetadataService.isEnabled()).toBe(false);
       expect(mockGetSettings).not.toHaveBeenCalled();
     });
 
-    it('should return false when strapi.ai.admin.isStrapiManagedAiEnabled() is true but aiMetadata is false', async () => {
-      mockStrapi.ai.admin.isStrapiManagedAiEnabled.mockReturnValue(true);
+    it('should return false when a provider is registered but aiMetadata is false', async () => {
+      mockHasProvider.mockReturnValue(true);
       mockGetSettings.mockResolvedValue({ aiMetadata: false });
 
       expect(await aiMetadataService.isEnabled()).toBe(false);
     });
 
     it('should default aiMetadata to true when not set in settings', async () => {
-      mockStrapi.ai.admin.isStrapiManagedAiEnabled.mockReturnValue(true);
+      mockHasProvider.mockReturnValue(true);
       mockGetSettings.mockResolvedValue({});
 
       expect(await aiMetadataService.isEnabled()).toBe(true);
@@ -155,7 +154,7 @@ describe('AI Metadata Service', () => {
       });
 
       // Mock service as enabled by default
-      mockStrapi.ai.admin.isStrapiManagedAiEnabled.mockReturnValue(true);
+      mockHasProvider.mockReturnValue(true);
       mockGetSettings.mockResolvedValue({ aiMetadata: true });
 
       const mockBuffer = Buffer.from('image-data');
@@ -164,7 +163,7 @@ describe('AI Metadata Service', () => {
 
     describe('error cases', () => {
       it('should throw error when service is disabled', async () => {
-        mockStrapi.ai.admin.isStrapiManagedAiEnabled.mockReturnValue(false);
+        mockHasProvider.mockReturnValue(false);
 
         await expect(aiMetadataService.processFiles([mockImageFile])).rejects.toThrow(
           'AI Metadata service is not enabled'
@@ -172,7 +171,7 @@ describe('AI Metadata Service', () => {
       });
 
       it('should throw if getSettings throws an error', async () => {
-        mockStrapi.ai.admin.isStrapiManagedAiEnabled.mockReturnValue(true);
+        mockHasProvider.mockReturnValue(true);
         mockGetSettings.mockRejectedValue(new Error('Settings error'));
 
         const files = [mockImageFile, mockPdfFile, mockImageFile2, mockPdfFile];
@@ -180,13 +179,11 @@ describe('AI Metadata Service', () => {
         await expect(aiMetadataService.processFiles(files)).rejects.toThrow('Settings error');
       });
 
-      it('should throw when getAiToken fails (fail-fast)', async () => {
-        mockStrapi.ai.admin.isStrapiManagedAiEnabled.mockReturnValue(true);
-        mockGetSettings.mockResolvedValue({ aiMetadata: true });
-        mockStrapi.ai.admin.getAiToken.mockRejectedValue(new Error('token error'));
+      it('should propagate provider failures', async () => {
+        mockGenerateMetadata.mockRejectedValue(new Error('provider error'));
 
         await expect(aiMetadataService.processFiles([mockImageFile])).rejects.toThrow(
-          'Failed to retrieve AI token'
+          'provider error'
         );
       });
     });
@@ -196,17 +193,13 @@ describe('AI Metadata Service', () => {
         const result = await aiMetadataService.processFiles([mockPdfFile]);
 
         expect(result).toEqual([null]);
-        expect(mockFetch).not.toHaveBeenCalled();
+        expect(mockGenerateMetadata).not.toHaveBeenCalled();
       });
 
       it('should return proper sparse array for mixed file types', async () => {
-        mockFetch.mockResolvedValue({
-          ok: true,
-          arrayBuffer: mockArrayBuffer,
-          json: jest.fn().mockResolvedValue({
-            results: [{ altText: 'image alt', caption: 'image caption' }],
-          }),
-        } as any);
+        mockGenerateMetadata.mockResolvedValue({
+          results: [{ altText: 'image alt', caption: 'image caption' }],
+        });
 
         const files = [mockPdfFile, mockImageFile, mockPdfFile];
         const result = await aiMetadataService.processFiles(files);
@@ -219,28 +212,15 @@ describe('AI Metadata Service', () => {
       it('should process single image file correctly', async () => {
         const expectedMetadata = { altText: 'A beautiful image', caption: 'Image caption' };
 
-        mockFetch.mockResolvedValue({
-          ok: true,
-          arrayBuffer: mockArrayBuffer,
-          json: jest.fn().mockResolvedValue({
-            results: [expectedMetadata],
-          }),
-        } as any);
+        mockGenerateMetadata.mockResolvedValue({ results: [expectedMetadata] });
 
         const result = await aiMetadataService.processFiles([mockImageFile]);
 
         expect(result).toEqual([expectedMetadata]);
         expect(mockFetch).toHaveBeenCalledWith('test-url/tmp/image.jpg');
-        expect(mockFetch).toHaveBeenCalledWith(
-          'https://ai.strapi.com/media-library/generate-metadata',
-          {
-            method: 'POST',
-            body: expect.any(Object),
-            headers: {
-              Authorization: 'Bearer mock-token',
-            },
-          }
-        );
+        expect(mockGenerateMetadata).toHaveBeenCalledWith({
+          images: [expect.objectContaining({ type: 'image/jpeg' })],
+        });
       });
 
       it('should process multiple image files correctly', async () => {
@@ -249,20 +229,20 @@ describe('AI Metadata Service', () => {
           { altText: 'Second image', caption: 'Second caption' },
         ];
 
-        mockFetch.mockResolvedValue({
-          ok: true,
-          arrayBuffer: mockArrayBuffer,
-          json: jest.fn().mockResolvedValue({
-            results: expectedMetadata,
-          }),
-        } as any);
+        mockGenerateMetadata.mockResolvedValue({ results: expectedMetadata });
 
         const result = await aiMetadataService.processFiles([mockImageFile, mockImageFile2]);
 
         expect(result).toEqual(expectedMetadata);
-        expect(mockFetch).toHaveBeenCalledTimes(3); // 2 files + 1 AI service call
+        expect(mockFetch).toHaveBeenCalledTimes(2); // one per image, the provider is mocked
         expect(mockFetch).toHaveBeenCalledWith('test-url/tmp/image.jpg');
         expect(mockFetch).toHaveBeenCalledWith('image2.png');
+        expect(mockGenerateMetadata).toHaveBeenCalledWith({
+          images: [
+            expect.objectContaining({ type: 'image/jpeg' }),
+            expect.objectContaining({ type: 'image/png' }),
+          ],
+        });
       });
 
       it('should handle mixed file types with correct sparse array mapping', async () => {
@@ -271,13 +251,7 @@ describe('AI Metadata Service', () => {
           { altText: 'Second image', caption: 'Second caption' },
         ];
 
-        mockFetch.mockResolvedValue({
-          ok: true,
-          arrayBuffer: mockArrayBuffer,
-          json: jest.fn().mockResolvedValue({
-            results: expectedMetadata,
-          }),
-        } as any);
+        mockGenerateMetadata.mockResolvedValue({ results: expectedMetadata });
 
         // Order: image, pdf, image, pdf
         const files = [mockImageFile, mockPdfFile, mockImageFile2, mockPdfFile];
@@ -291,8 +265,8 @@ describe('AI Metadata Service', () => {
         ]);
       });
 
-      it('should not call fetch and throw if aiMetadata is false', async () => {
-        mockStrapi.ai.admin.isStrapiManagedAiEnabled.mockReturnValue(true);
+      it('should not call the provider and throw if aiMetadata is false', async () => {
+        mockHasProvider.mockReturnValue(true);
         mockGetSettings.mockResolvedValue({ aiMetadata: false });
 
         const files = [mockImageFile, mockPdfFile, mockImageFile2, mockPdfFile];
@@ -301,38 +275,12 @@ describe('AI Metadata Service', () => {
           'AI Metadata service is not enabled'
         );
         expect(mockFetch).not.toHaveBeenCalled();
+        expect(mockGenerateMetadata).not.toHaveBeenCalled();
       });
     });
   });
 
   describe('updateFilesWithAIMetadata', () => {
-    const mockUpdateFileInfo = jest.fn().mockResolvedValue({});
-
-    beforeEach(() => {
-      mockUpdateFileInfo.mockClear();
-
-      // Mock the upload service with updateFileInfo method
-      mockStrapi.plugin = jest.fn().mockImplementation((pluginName) => {
-        if (pluginName === 'upload') {
-          return {
-            service: jest.fn().mockImplementation((serviceName) => {
-              if (serviceName === 'upload') {
-                return {
-                  getSettings: mockGetSettings,
-                  updateFileInfo: mockUpdateFileInfo,
-                };
-              }
-              return {};
-            }),
-          };
-        }
-        return {};
-      });
-
-      // Recreate service with updated mock
-      aiMetadataService = createAIMetadataService({ strapi: mockStrapi });
-    });
-
     it('should only update caption when alternativeText exists', async () => {
       const files: File[] = [
         {
