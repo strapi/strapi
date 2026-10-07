@@ -97,6 +97,8 @@ describe('Async stack traces on the query path', () => {
     expect(res.statusCode).toBe(500);
     expect(captured?.name).toBe('KnexTimeoutError');
     expect(captured?.stack).toMatch(/services[\\/]document-service[\\/]/);
+    expect(captured?.stack).toMatch(/middlewares[\\/]middleware-manager/);
+    expect(captured?.stack).toMatch(/document-service[\\/]common/);
     expect(captured?.stack).toMatch(/core-api[\\/]service[\\/]collection-type/);
     expect(captured?.stack).toMatch(/core-api[\\/]controller[\\/]collection-type/);
   });
