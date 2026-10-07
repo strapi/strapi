@@ -26,6 +26,12 @@ export const toggleFile = (
   return multiple ? [...selection, file] : [file];
 };
 
+/** Appends every file not already selected, keeping their order (select-all). */
+export const addFiles = (selection: PickerSelection, files: File[]): PickerSelection => [
+  ...selection,
+  ...files.filter((file) => !hasFile(selection, file.id)),
+];
+
 export const removeFile = (selection: PickerSelection, id: number): PickerSelection =>
   selection.filter((file) => file.id !== id);
 

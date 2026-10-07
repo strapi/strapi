@@ -14,12 +14,19 @@ interface ListSettings {
   showSectionHeadings: boolean;
   /** Narrowest a grid tile may get before the grid drops a column. */
   gridMinTileWidth: string;
+  /**
+   * A "Select all" checkbox beside the grid's "Assets (n)" heading, the grid's
+   * counterpart of the table's header checkbox. The page reaches select-all
+   * from its bulk actions bar instead.
+   */
+  showGridSelectAll: boolean;
 }
 
 const DEFAULT_LIST_SETTINGS: ListSettings = {
   showItemActions: true,
   showSectionHeadings: false,
   gridMinTileWidth: '240px',
+  showGridSelectAll: false,
 };
 
 const ListSettingsContext = createContext<ListSettings>(DEFAULT_LIST_SETTINGS);
@@ -33,10 +40,11 @@ export const ListSettingsProvider = ({
   showItemActions = DEFAULT_LIST_SETTINGS.showItemActions,
   showSectionHeadings = DEFAULT_LIST_SETTINGS.showSectionHeadings,
   gridMinTileWidth = DEFAULT_LIST_SETTINGS.gridMinTileWidth,
+  showGridSelectAll = DEFAULT_LIST_SETTINGS.showGridSelectAll,
 }: ListSettingsProviderProps) => {
   const value = useMemo(
-    () => ({ showItemActions, showSectionHeadings, gridMinTileWidth }),
-    [showItemActions, showSectionHeadings, gridMinTileWidth]
+    () => ({ showItemActions, showSectionHeadings, gridMinTileWidth, showGridSelectAll }),
+    [showItemActions, showSectionHeadings, gridMinTileWidth, showGridSelectAll]
   );
 
   return createElement(ListSettingsContext.Provider, { value }, children);

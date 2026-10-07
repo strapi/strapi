@@ -14,6 +14,7 @@ import { styled, css } from 'styled-components';
 
 import { TruncatedText } from '../../../components/TruncatedText';
 import { ASSET_TYPES } from '../../../enums';
+import { useTracking } from '../../../hooks/useTracking';
 import { prefixFileUrlWithBackendUrl } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { isEventFromWithin } from '../../../utils/isEventFromWithin';
@@ -24,7 +25,7 @@ import { useBusyAssetsOptional } from '../hooks/useBusyAssets';
 import { useFolderNavigation } from '../hooks/useFolderNavigation';
 import { useListSettings } from '../hooks/useListSettings';
 import { buildRenderedKeys } from '../utils/renderedKeys';
-import { assetKey, folderKey, type ItemKey } from '../utils/selection';
+import { assetKey, folderKey, getSelectAllState, type ItemKey } from '../utils/selection';
 
 import { AssetActionsMenu } from './AssetActionsMenu';
 import { BusyOverlay } from './BusyOverlay';
@@ -604,18 +605,61 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
 
 interface GridSectionProps {
   title: string;
+  /** Sits at the end of the heading row. */
+  action?: React.ReactNode;
   children: React.ReactNode;
 }
 
 // Headings sit outside the `role="list"` grid: a list may only contain items.
-const GridSection = ({ title, children }: GridSectionProps) => (
+const GridSection = ({ title, action, children }: GridSectionProps) => (
   <Flex tag="section" direction="column" alignItems="stretch" gap={4}>
-    <Typography variant="delta" tag="h3">
-      {title}
-    </Typography>
+    <Flex justifyContent="space-between" alignItems="center" gap={4}>
+      <Typography variant="delta" tag="h3">
+        {title}
+      </Typography>
+      {action}
+    </Flex>
     <ItemsGrid role="list">{children}</ItemsGrid>
   </Flex>
 );
+
+/**
+ * The grid's counterpart of the table's header checkbox: selects the loaded
+ * assets that can be selected, or un-selects them when they all are.
+ */
+const GridSelectAll = ({ assets }: { assets: File[] }) => {
+  const { formatMessage } = useIntl();
+  const { selectedKeys, selectAll, deselect, getSelectability } = useAssetSelection();
+  const { trackUsage } = useTracking();
+
+  const selectableKeys = assets
+    .map((asset) => assetKey(asset.id))
+    .filter((key) => getSelectability(key) === 'enabled');
+  const { allSelected, isIndeterminate } = getSelectAllState(selectedKeys, selectableKeys);
+
+  const handleChange = () => {
+    if (allSelected) {
+      // Only these: a picker's selection also holds assets from elsewhere.
+      selectableKeys.forEach(deselect);
+    } else {
+      trackUsage('didSelectAllMediaLibraryElements');
+      selectAll(selectableKeys);
+    }
+  };
+
+  return (
+    <Checkbox
+      checked={isIndeterminate ? 'indeterminate' : allSelected}
+      disabled={selectableKeys.length === 0}
+      onCheckedChange={handleChange}
+    >
+      {formatMessage({
+        id: getTranslationKey('list.table.header.select-all'),
+        defaultMessage: 'Select all',
+      })}
+    </Checkbox>
+  );
+};
 
 interface AssetsGridProps {
   assets: File[];
@@ -635,7 +679,8 @@ export const AssetsGrid = ({
   onAssetItemClick,
 }: AssetsGridProps) => {
   const { formatMessage } = useIntl();
-  const { showSectionHeadings } = useListSettings();
+  const { showSectionHeadings, showGridSelectAll } = useListSettings();
+  const { isEnabled, canSelectAll } = useAssetSelection();
   const totalItems = folders.length + assets.length;
 
   // Render order: folders always on top in the grid (mixing is table-only) —
@@ -681,6 +726,11 @@ export const AssetsGrid = ({
               { id: getTranslationKey('list.assets.title'), defaultMessage: 'Assets ({count})' },
               { count: assetsTotal ?? assets.length }
             )}
+            action={
+              showGridSelectAll && isEnabled && canSelectAll ? (
+                <GridSelectAll assets={assets} />
+              ) : undefined
+            }
           >
             {assetCards}
           </GridSection>

@@ -1,4 +1,4 @@
-import { isSameSelection, moveFile, removeFile, toggleFile } from '../pickerSelection';
+import { addFiles, isSameSelection, moveFile, removeFile, toggleFile } from '../pickerSelection';
 
 import type { File } from '../../../../../shared/contracts/files';
 
@@ -36,6 +36,10 @@ describe('pickerSelection', () => {
     it('clears a single field when its file is clicked again', () => {
       expect(toggleFile([file(1)], file(1), { multiple: false })).toEqual([]);
     });
+  });
+
+  it('addFiles appends only files not already selected, in their order', () => {
+    expect(ids(addFiles([file(1), file(2)], [file(2), file(3), file(4)]))).toEqual([1, 2, 3, 4]);
   });
 
   it('removeFile drops one file and keeps the order', () => {

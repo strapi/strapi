@@ -8,7 +8,14 @@ import {
 import { assetKey, type ItemKey } from '../../pages/Assets/utils/selection';
 import { isAllowedAssetType, type MediaAllowedTypes } from '../../utils/isAllowedAssetType';
 
-import { hasFile, moveFile, removeFile, toggleFile, type PickerSelection } from './pickerSelection';
+import {
+  addFiles,
+  hasFile,
+  moveFile,
+  removeFile,
+  toggleFile,
+  type PickerSelection,
+} from './pickerSelection';
 
 import type { File } from '../../../../shared/contracts/files';
 
@@ -106,6 +113,23 @@ export const PickerSelectionProvider = ({
     [multiple, resolveSelectableFile]
   );
 
+  // Select-all over the assets on screen that can be picked, appended in their
+  // on-screen order. Only a multiple-value field offers it.
+  const selectAll = useCallback(
+    (orderedKeys: ItemKey[]) => {
+      if (!multiple) {
+        return;
+      }
+
+      const files = orderedKeys
+        .map(resolveSelectableFile)
+        .filter((file): file is File => file !== null);
+
+      setSelection((prev) => addFiles(prev, files));
+    },
+    [multiple, resolveSelectableFile]
+  );
+
   const selectOnly = useCallback(
     (key: ItemKey) => {
       const file = resolveSelectableFile(key);
@@ -145,8 +169,8 @@ export const PickerSelectionProvider = ({
   const assetSelection = useMemo<AssetSelection>(
     () => ({
       isEnabled: true,
-      // Picking is deliberate, one asset at a time: no select-all header.
-      canSelectAll: false,
+      // A single-value field holds one asset: nothing to select all of.
+      canSelectAll: multiple,
       getSelectability,
       selectedKeys,
       selectedIds,
@@ -156,13 +180,23 @@ export const PickerSelectionProvider = ({
       toggle,
       // Picking is one asset at a time; a Shift+click range picks the target.
       selectRange: (_orderedKeys, targetKey) => toggle(targetKey),
-      // Unreachable: `canSelectAll` hides the only control that calls it.
-      selectAll: () => {},
+      selectAll,
       selectOnly,
       deselect,
       clear,
     }),
-    [getSelectability, selectedKeys, selectedIds, isSelected, toggle, selectOnly, deselect, clear]
+    [
+      multiple,
+      getSelectability,
+      selectedKeys,
+      selectedIds,
+      isSelected,
+      toggle,
+      selectAll,
+      selectOnly,
+      deselect,
+      clear,
+    ]
   );
 
   const moveSelectedFile = useCallback(

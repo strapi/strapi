@@ -417,19 +417,71 @@ describe('AssetPickerDialog', () => {
       expect(within(selectedTab()).getByText('1')).toBeInTheDocument();
     });
 
-    it('offers no select-all in the table view, only a checkbox per asset', async () => {
-      window.localStorage.setItem('STRAPI_UPLOAD_LIBRARY_VIEW', JSON.stringify(1));
+    describe('select all', () => {
+      const elsewhere = createAsset(7, 'elsewhere.png');
 
-      try {
-        renderDialog({ multiple: true });
+      afterEach(() => {
+        window.localStorage.removeItem('STRAPI_UPLOAD_LIBRARY_VIEW');
+      });
+
+      it.each([
+        ['grid', 0],
+        ['table', 1],
+      ])('picks every loaded asset that fits the field, in %s view', async (_name, view) => {
+        window.localStorage.setItem('STRAPI_UPLOAD_LIBRARY_VIEW', JSON.stringify(view));
+        const onConfirm = jest.fn();
+        renderDialog({
+          multiple: true,
+          allowedTypes: ['images'],
+          initialSelection: [elsewhere],
+          onConfirm,
+        });
+
+        fireEvent.mouseDown(await screen.findByRole('tab', { name: 'Browse assets' }));
+        fireEvent.click(await screen.findByRole('checkbox', { name: 'Select all' }));
+
+        // The PDF is outside allowedTypes; the asset from elsewhere stays first.
+        fireEvent.click(addButton());
+
+        expect(onConfirm).toHaveBeenCalledWith([elsewhere, hero, banner]);
+      });
+
+      it.each([
+        ['grid', 0],
+        ['table', 1],
+      ])('un-picks only the loaded assets once all are picked, in %s view', async (_name, view) => {
+        window.localStorage.setItem('STRAPI_UPLOAD_LIBRARY_VIEW', JSON.stringify(view));
+        const onConfirm = jest.fn();
+        renderDialog({
+          multiple: true,
+          allowedTypes: ['images'],
+          initialSelection: [elsewhere],
+          onConfirm,
+        });
+
+        fireEvent.mouseDown(await screen.findByRole('tab', { name: 'Browse assets' }));
+        const selectAll = await screen.findByRole('checkbox', { name: 'Select all' });
+        fireEvent.click(selectAll);
+        fireEvent.click(selectAll);
+
+        // Back to the field's value: the asset from another folder survived.
+        expect(addButton()).toBeDisabled();
+        expect(within(selectedTab()).getByText('1')).toBeInTheDocument();
+      });
+
+      it.each([
+        ['grid', 0],
+        ['table', 1],
+      ])('is not offered on a single-value field, in %s view', async (_name, view) => {
+        window.localStorage.setItem('STRAPI_UPLOAD_LIBRARY_VIEW', JSON.stringify(view));
+
+        renderDialog();
 
         expect(
           await screen.findByRole('checkbox', { name: 'Select hero.png' })
         ).toBeInTheDocument();
         expect(screen.queryByRole('checkbox', { name: 'Select all' })).not.toBeInTheDocument();
-      } finally {
-        window.localStorage.removeItem('STRAPI_UPLOAD_LIBRARY_VIEW');
-      }
+      });
     });
 
     describe('with assets already in the field', () => {

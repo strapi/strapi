@@ -450,7 +450,7 @@ export const AssetPickerDialog = ({
       <ReadAccessGate title={title} onClose={onClose}>
         {/* Inside the content so every opening starts from fresh list and selection state. */}
         <ListQueryStateProvider>
-          <ListSettingsProvider {...PICKER_LIST_SETTINGS} showSectionHeadings>
+          <ListSettingsProvider {...PICKER_LIST_SETTINGS} showSectionHeadings showGridSelectAll>
             <PickerSelectionRoot
               initialSelection={initialSelection}
               multiple={multiple}
