@@ -1,4 +1,3 @@
-import net from 'node:net';
 import os from 'node:os';
 import dotenv from 'dotenv';
 import knex from 'knex';
@@ -51,14 +50,8 @@ async function rawQueryOutsideTransaction(strapi: Core.Strapi) {
   return rows;
 }
 
-const closedPort = () =>
-  new Promise<number>((resolve) => {
-    const server = net.createServer();
-    server.listen(0, '127.0.0.1', () => {
-      const { port } = server.address() as net.AddressInfo;
-      server.close(() => resolve(port));
-    });
-  });
+// Privileged and never bound in a test environment, so connecting to it is refused
+const REFUSED_PORT = 1;
 
 describe('Pool timeout diagnostics', () => {
   const builder = createTestBuilder();
@@ -152,7 +145,7 @@ describe('Pool timeout diagnostics', () => {
     const db = new Database({
       connection: {
         ...base,
-        connection: { ...base.connection, host: '127.0.0.1', port: await closedPort() },
+        connection: { ...base.connection, host: '127.0.0.1', port: REFUSED_PORT },
         pool: { min: 0, max: 2 },
         acquireConnectionTimeout: 1500,
       },

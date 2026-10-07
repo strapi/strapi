@@ -4,7 +4,9 @@ import path from 'node:path';
 import knex from 'knex';
 import { afterAll, afterEach, describe, expect, it, vi } from 'vitest';
 
-import { Database, POOL_TIMEOUT_DOCS_URL, type PoolDiagnostics, type PoolTimeoutDetails } from '..';
+import * as databasePackage from '..';
+import { Database, type PoolDiagnostics, type PoolTimeoutDetails } from '..';
+import { POOL_TIMEOUT_DOCS_URL } from '../pool-diagnostics';
 
 const ACQUIRE_TIMEOUT_MESSAGE =
   'Knex: Timeout acquiring a connection. The pool is probably full. Are you missing a .transacting(trx) call?';
@@ -55,8 +57,17 @@ const blocks = (logger: ReturnType<typeof createLogger>) =>
 
 type Annotated = Error & { details?: Partial<PoolTimeoutDetails> };
 
+// poolDiagnostics is internal to Database, so the tests reach it through a cast
+const diagnosticsOf = (database: Database) =>
+  (database as unknown as { poolDiagnostics?: PoolDiagnostics }).poolDiagnostics;
+
 describe('Database pool timeout diagnostics', () => {
   let db: Database | undefined;
+
+  it('keeps the docs URL out of the public API', () => {
+    expect(databasePackage.POOL_TIMEOUT_CODE).toBe('DB_POOL_ACQUIRE_TIMEOUT');
+    expect(databasePackage).not.toHaveProperty('POOL_TIMEOUT_DOCS_URL');
+  });
 
   afterEach(async () => {
     await db?.destroy();
@@ -140,7 +151,7 @@ describe('Database pool timeout diagnostics', () => {
 
     const error = (await queryOutsideTheTransaction(db).catch((e: Error) => e)) as Annotated;
 
-    expect(db.poolDiagnostics).toBeUndefined();
+    expect(diagnosticsOf(db)).toBeUndefined();
     expect(error.message).toBe(ACQUIRE_TIMEOUT_MESSAGE);
     expect(error.details).toBeUndefined();
     expect(blocks(logger)).toHaveLength(0);
@@ -158,7 +169,7 @@ describe('Database pool timeout diagnostics', () => {
       hostname.mockRestore();
     }
 
-    expect(db.poolDiagnostics).toBeUndefined();
+    expect(diagnosticsOf(db)).toBeUndefined();
     expect(logger.debug).toHaveBeenCalledWith(
       '[database] pool timeout diagnostics not installed: hostname unavailable'
     );
@@ -168,7 +179,7 @@ describe('Database pool timeout diagnostics', () => {
   it('disposes the diagnostics even when clearing the lifecycles throws', async () => {
     const logger = createLogger();
     const database = createDb(logger);
-    const diagnostics = database.poolDiagnostics as PoolDiagnostics;
+    const diagnostics = diagnosticsOf(database) as PoolDiagnostics;
     const dispose = vi.spyOn(diagnostics, 'dispose');
     vi.spyOn(database.lifecycles, 'clear').mockRejectedValueOnce(new Error('clear failed'));
 

@@ -109,7 +109,7 @@ describe('formatPoolTimeoutWarning', () => {
     );
   });
 
-  it('says when the pool is not initialized and leaves out unknown facts', () => {
+  it('says when the pool counters are not available and leaves out unknown facts', () => {
     const text = formatPoolTimeoutWarning(
       details({
         pool: undefined,
@@ -120,7 +120,8 @@ describe('formatPoolTimeoutWarning', () => {
       { suppressed: 0 }
     );
 
-    expect(text).toContain('  - connections: the pool is not initialized');
+    expect(text).toContain('  - connections: pool counters not available');
+    expect(text).not.toContain('not initialized');
     expect(text).toContain('  - reason reported by the pool: not available');
     expect(text).not.toContain('event loop delay');
     expect(text).toContain('  - host api-7f9c, pid 41');
@@ -146,6 +147,14 @@ describe('formatPoolTimeoutWarning', () => {
     );
 
     expect(text).toContain('  - reason reported by the pool: connect ECONNREFUSED 10.0.3.4:5432');
+  });
+
+  it('keeps a phase that spans lines on one bullet', () => {
+    const text = formatPoolTimeoutWarning(details({ phase: 'schema sync\n  of  api::post' }), {
+      suppressed: 0,
+    });
+
+    expect(text).toContain('  - phase schema sync of api::post, host api-7f9c, pid 41');
   });
 
   it('never names a cause', () => {

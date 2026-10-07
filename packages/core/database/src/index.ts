@@ -33,8 +33,13 @@ export type { Event } from './lifecycles';
 export type { Attribute, Model, JoinTable } from './types';
 export type { AttributeRenameHandler, AttributeRenames } from './schema';
 export type { Identifiers } from './utils/identifiers';
-export { POOL_TIMEOUT_CODE, POOL_TIMEOUT_DOCS_URL } from './pool-diagnostics';
-export type { PoolDiagnostics, PoolState, PoolTimeoutDetails } from './pool-diagnostics';
+export { POOL_TIMEOUT_CODE } from './pool-diagnostics';
+export type {
+  EventLoopDelay,
+  PoolDiagnostics,
+  PoolState,
+  PoolTimeoutDetails,
+} from './pool-diagnostics';
 
 interface Settings {
   forceMigration?: boolean;
@@ -99,7 +104,7 @@ class Database {
   logger: Logger;
 
   /** Set unless `settings.poolTimeoutDiagnostics` is false or the install failed. */
-  poolDiagnostics?: PoolDiagnostics;
+  private poolDiagnostics?: PoolDiagnostics;
 
   private phase?: string;
 
@@ -212,6 +217,11 @@ class Database {
    * Labels pool timeout reports raised while `fn` runs, for example "schema sync". Nested calls
    * restore the outer label. Calls that overlap without nesting can restore the wrong label; core
    * only nests them (schema sync, then a migration).
+   *
+   * The label is process-wide, not per call: a call made at runtime relabels every concurrent
+   * timeout report until it returns. It is meant for boot-time work (schema sync, migrations).
+   *
+   * @internal
    */
   async runInPhase<T>(phase: string, fn: () => Promise<T>): Promise<T> {
     const previous = this.phase;

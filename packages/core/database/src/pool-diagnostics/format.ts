@@ -10,6 +10,9 @@ export const appendDocsLink = (message: string): string =>
 const valueOrUnknown = (value: number | undefined) =>
   value === undefined ? 'unknown' : String(value);
 
+// driver errors and labels can span lines; keep each to one bullet
+const singleLine = (text: string | undefined) => text?.replace(/\s+/g, ' ').trim();
+
 /** Facts only, one bullet per fact, in the house style of multi-line warnings. */
 export const formatPoolTimeoutWarning = (
   details: PoolTimeoutDetails,
@@ -28,7 +31,8 @@ export const formatPoolTimeoutWarning = (
       `  - waiting for a connection: ${pendingAcquires}, connections being opened: ${pendingCreates}`
     );
   } else {
-    lines.push('  - connections: the pool is not initialized');
+    // a timeout implies a pool exists, so this is a pool without tarn counters
+    lines.push('  - connections: pool counters not available');
   }
 
   if (
@@ -40,8 +44,7 @@ export const formatPoolTimeoutWarning = (
     );
   }
 
-  // the reason comes from a driver error and can span lines; keep it to one bullet
-  const reason = details.poolReason?.replace(/\s+/g, ' ').trim();
+  const reason = singleLine(details.poolReason);
   lines.push(`  - reason reported by the pool: ${reason || 'not available'}`);
 
   if (details.eventLoopDelay) {
@@ -51,8 +54,9 @@ export const formatPoolTimeoutWarning = (
     );
   }
 
+  const phase = singleLine(details.phase);
   const where = [
-    details.phase ? `phase ${details.phase}` : undefined,
+    phase ? `phase ${phase}` : undefined,
     `host ${details.hostname}`,
     `pid ${details.pid}`,
   ]

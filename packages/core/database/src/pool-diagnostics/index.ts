@@ -10,6 +10,7 @@ import { deepenStack } from './stack';
 
 export { POOL_TIMEOUT_CODE } from './details';
 export type { PoolState, PoolTimeoutDetails } from './details';
+export type { EventLoopDelay } from './event-loop';
 export { POOL_TIMEOUT_DOCS_URL } from './format';
 
 const ACQUIRE_TIMEOUT_PREFIX = 'Knex: Timeout acquiring a connection';
