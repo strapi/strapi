@@ -14,6 +14,7 @@ import { Callback, transactionCtx, TransactionObject } from './transaction-conte
 import { validateDatabase } from './validations';
 import type { Model } from './types';
 import { createRepairManager, type RepairManager } from './repairs';
+import { installPoolDiagnostics, type PoolDiagnostics } from './pool-diagnostics';
 import { withStrapiKnexLog } from './utils/knex-log';
 
 export { isKnexQuery } from './utils/knex';
@@ -32,10 +33,17 @@ export type { Event } from './lifecycles';
 export type { Attribute, Model, JoinTable } from './types';
 export type { AttributeRenameHandler, AttributeRenames } from './schema';
 export type { Identifiers } from './utils/identifiers';
+export { POOL_TIMEOUT_CODE, POOL_TIMEOUT_DOCS_URL } from './pool-diagnostics';
+export type { PoolTimeoutDetails } from './pool-diagnostics';
 
 interface Settings {
   forceMigration?: boolean;
   runMigrations?: boolean;
+  /**
+   * Describe the pool on knex connection pool timeouts (details on the error, a docs link, one
+   * warning block per 30 s). Defaults to true; false leaves knex's error untouched.
+   */
+  poolTimeoutDiagnostics?: boolean;
   migrations: {
     dir: string;
   };
@@ -51,6 +59,8 @@ export interface DatabaseConfig {
   connection: Knex.Config;
   settings: Settings;
   logger?: Logger;
+  /** Lifecycle phase of the host application, e.g. "boot" or "runtime", for pool timeout reports. */
+  getPhase?: () => string | undefined;
 }
 
 const afterCreate =
@@ -85,6 +95,10 @@ class Database {
   repair: RepairManager;
 
   logger: Logger;
+
+  poolDiagnostics?: PoolDiagnostics;
+
+  private phase?: string;
 
   constructor(config: DatabaseConfig) {
     this.config = {
@@ -128,6 +142,13 @@ class Database {
     this.connection = createConnection(withStrapiKnexLog(knexConfig, this.logger), {
       pool: { afterCreate: afterCreate(this) },
     });
+
+    if (this.config.settings.poolTimeoutDiagnostics !== false) {
+      this.poolDiagnostics = installPoolDiagnostics(this.connection, {
+        logger: { warn: (message) => this.logger.warn(message) },
+        getPhase: () => this.phase ?? this.config.getPhase?.(),
+      });
+    }
 
     this.schema = createSchemaProvider(this);
 
@@ -176,6 +197,22 @@ class Database {
 
   inTransaction() {
     return !!transactionCtx.get();
+  }
+
+  /**
+   * Labels pool timeout reports raised while `fn` runs, for example "schema sync". Nested calls
+   * restore the outer label. Calls that overlap without nesting can restore the wrong label; core
+   * only nests them (schema sync, then a migration).
+   */
+  async runInPhase<T>(phase: string, fn: () => Promise<T>): Promise<T> {
+    const previous = this.phase;
+    this.phase = phase;
+
+    try {
+      return await fn();
+    } finally {
+      this.phase = previous;
+    }
   }
 
   /**
@@ -281,6 +318,7 @@ class Database {
 
   async destroy() {
     await this.lifecycles.clear();
+    this.poolDiagnostics?.dispose();
     await this.connection.destroy();
   }
 }

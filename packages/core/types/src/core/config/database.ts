@@ -65,5 +65,7 @@ export interface Database<TClient extends Database.ClientKind = Database.ClientK
     forceMigration?: boolean;
     runMigrations?: boolean;
     useTypescriptMigrations?: boolean;
+    /** Describe the pool on connection pool timeouts. Defaults to true. */
+    poolTimeoutDiagnostics?: boolean;
   };
 }
