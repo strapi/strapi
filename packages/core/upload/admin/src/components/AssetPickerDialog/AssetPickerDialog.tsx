@@ -27,6 +27,7 @@ import { getTranslationKey } from '../../utils/translations';
 import { FolderBreadcrumbs } from './FolderBreadcrumbs';
 import { isSameSelection } from './pickerSelection';
 import { PickerSelectionProvider, usePickerSelection } from './PickerSelectionProvider';
+import { SortableSelection } from './SortableSelection';
 
 import type { File } from '../../../../shared/contracts/files';
 
@@ -233,10 +234,15 @@ const SelectedTab = ({ view }: { view: number }) => {
           </Typography>
         ) : (
           <ListSettingsProvider {...PICKER_LIST_SETTINGS}>
+            {/* The order here is the order the field will hold. */}
             {view === viewOptions.GRID ? (
-              <AssetsGrid assets={selection} onAssetItemClick={toggleAsset} />
+              <SortableSelection layout="grid">
+                <AssetsGrid assets={selection} onAssetItemClick={toggleAsset} />
+              </SortableSelection>
             ) : (
-              <AssetsTable assets={selection} onAssetItemClick={toggleAsset} />
+              <SortableSelection layout="list">
+                <AssetsTable assets={selection} onAssetItemClick={toggleAsset} />
+              </SortableSelection>
             )}
           </ListSettingsProvider>
         )}
@@ -302,10 +308,12 @@ const PickerContent = ({ title, initialSelection, onClose, onConfirm }: PickerCo
             </Tabs.Trigger>
           </TabsList>
         </Box>
-        <TabPanel value="browse">
+        {/* Radix makes a panel a Tab stop, meant for panels with nothing focusable
+            inside. These hold controls, so focus goes straight to them. */}
+        <TabPanel value="browse" tabIndex={-1}>
           <BrowseTab list={list} view={view} onViewChange={setView} />
         </TabPanel>
-        <TabPanel value="selected">
+        <TabPanel value="selected" tabIndex={selection.length > 0 ? -1 : undefined}>
           <SelectedTab view={view} />
         </TabPanel>
       </TabsRoot>

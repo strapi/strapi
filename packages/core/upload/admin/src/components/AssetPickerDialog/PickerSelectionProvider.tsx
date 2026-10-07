@@ -8,12 +8,13 @@ import {
 import { assetKey, type ItemKey } from '../../pages/Assets/utils/selection';
 import { isAllowedAssetType, type MediaAllowedTypes } from '../../utils/isAllowedAssetType';
 
-import { hasFile, removeFile, toggleFile, type PickerSelection } from './pickerSelection';
+import { hasFile, moveFile, removeFile, toggleFile, type PickerSelection } from './pickerSelection';
 
 import type { File } from '../../../../shared/contracts/files';
 
 interface PickerSelectionContextValue {
   selection: PickerSelection;
+  moveFile: (activeId: number, overId: number) => void;
 }
 
 const PickerSelectionContext = createContext<PickerSelectionContextValue | null>(null);
@@ -164,7 +165,15 @@ export const PickerSelectionProvider = ({
     [getSelectability, selectedKeys, selectedIds, isSelected, toggle, selectOnly, deselect, clear]
   );
 
-  const pickerSelection = useMemo(() => ({ selection }), [selection]);
+  const moveSelectedFile = useCallback(
+    (activeId: number, overId: number) => setSelection((prev) => moveFile(prev, activeId, overId)),
+    []
+  );
+
+  const pickerSelection = useMemo(
+    () => ({ selection, moveFile: moveSelectedFile }),
+    [selection, moveSelectedFile]
+  );
 
   return (
     <PickerSelectionContext.Provider value={pickerSelection}>

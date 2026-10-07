@@ -1,4 +1,4 @@
-import { isSameSelection, removeFile, toggleFile } from '../pickerSelection';
+import { isSameSelection, moveFile, removeFile, toggleFile } from '../pickerSelection';
 
 import type { File } from '../../../../../shared/contracts/files';
 
@@ -40,6 +40,23 @@ describe('pickerSelection', () => {
 
   it('removeFile drops one file and keeps the order', () => {
     expect(ids(removeFile([file(1), file(2), file(3)], 2))).toEqual([1, 3]);
+  });
+
+  describe('moveFile', () => {
+    it('moves a file forward, shifting the ones in between back', () => {
+      expect(ids(moveFile([file(1), file(2), file(3), file(4)], 1, 3))).toEqual([2, 3, 1, 4]);
+    });
+
+    it('moves a file backward, shifting the ones in between forward', () => {
+      expect(ids(moveFile([file(1), file(2), file(3), file(4)], 4, 2))).toEqual([1, 4, 2, 3]);
+    });
+
+    it('leaves the selection as is for an unknown id or a drop in place', () => {
+      const selection = [file(1), file(2)];
+
+      expect(moveFile(selection, 1, 9)).toBe(selection);
+      expect(moveFile(selection, 2, 2)).toBe(selection);
+    });
   });
 
   describe('isSameSelection', () => {

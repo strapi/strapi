@@ -29,6 +29,8 @@ import { assetKey, folderKey, type ItemKey } from '../utils/selection';
 import { AssetActionsMenu } from './AssetActionsMenu';
 import { BusyOverlay } from './BusyOverlay';
 import { useAssetsDndOptional } from './Dnd/AssetsDndProvider';
+import { isFromReorderHandle } from './Dnd/assetSortable';
+import { ReorderHandle } from './Dnd/ReorderHandle';
 import { useFileDraggable, useFolderDraggableDroppable } from './Dnd/useAssetDnd';
 import { FolderActionsMenu } from './FolderActionsMenu';
 import { useItemContextMenuTrigger } from './ItemContextMenu';
@@ -449,7 +451,8 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
   const { formatMessage } = useIntl();
   const TypeIcon = getAssetIcon(asset.mime, asset.ext);
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
-  const { attributes, listeners, setNodeRef, isDragging, dragData } = useFileDraggable(asset);
+  const { attributes, listeners, setNodeRef, isDragging, dragData, dragStyle, dragHandle } =
+    useFileDraggable(asset);
   const { isSelected, toggle, selectRange, getSelectability } = useAssetSelection();
   const { showItemActions } = useListSettings();
   const busyMessage = useBusyAssetsOptional()?.getBusyMessage(asset.id) ?? null;
@@ -482,7 +485,7 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
 
   // Space toggles selection (additive), Enter opens the details drawer.
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!isEventFromWithin(e)) {
+    if (!isEventFromWithin(e) || isFromReorderHandle(e)) {
       return;
     }
 
@@ -522,6 +525,7 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
       $isBusy={busyMessage !== null}
       $isSelected={selected}
       $isUnselectable={selectability === 'disabled'}
+      style={dragStyle}
       tabIndex={0}
       role="listitem"
       // Right-click opens this asset's own actions, or the selection's when it
@@ -571,6 +575,7 @@ const AssetCard = ({ asset, orderedItemKeys, onAssetItemClick }: AssetCardProps)
       </StyledCardHeader>
       <CardBody>
         <CardFooter alignItems="center" gap={2}>
+          {dragHandle && <ReorderHandle name={asset.name} handle={dragHandle} />}
           <FileTypeIcon>
             <TypeIcon width={20} height={20} />
           </FileTypeIcon>

@@ -5,6 +5,7 @@ import { useDndContext, useDraggable, useDroppable, type DraggableAttributes } f
 import { getRelationId } from '../../../../utils/getRelationId';
 
 import { useAssetsDndOptional } from './AssetsDndProvider';
+import { useAssetSortable } from './assetSortable';
 import { toFileDraggableId, toFolderDraggableId, toFolderTargetId } from './dndIds';
 
 import type { DragFileData, DragFolderData, FolderTargetData } from '../../../../types/dnd';
@@ -47,9 +48,31 @@ export const useFileDraggable = (asset: {
     disabled: !isDndEnabled || isMovePending,
   });
 
+  const sortable = useAssetSortable(asset.id);
+
+  // In a reorderable list (the picker's Selected tab) dragging reorders
+  // instead of moving between folders: the item takes the sortable's node,
+  // pointer listeners and transform, and exposes a grip for the keyboard.
+  if (sortable) {
+    return {
+      ...withoutDrag(draggable, false),
+      setNodeRef: sortable.setNodeRef,
+      isDragging: sortable.isDragging,
+      listeners: sortable.listeners,
+      dragStyle: sortable.style,
+      dragHandle: sortable.handle,
+      dragData: data,
+    };
+  }
+
   // `dragData` is re-exposed (like `useFolderDraggableDroppable` does) so the
   // row's actions menu can hand the move dialog the asset's real folder.
-  return { ...withoutDrag(draggable, isDndEnabled), dragData: data };
+  return {
+    ...withoutDrag(draggable, isDndEnabled),
+    dragStyle: undefined,
+    dragHandle: undefined,
+    dragData: data,
+  };
 };
 
 export const useFolderDraggableDroppable = (folder: {

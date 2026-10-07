@@ -364,6 +364,102 @@ describe('AssetPickerDialog', () => {
     });
   });
 
+  describe('reordering', () => {
+    const hero = createAsset(1, 'hero.png');
+    const banner = createAsset(2, 'banner.png');
+
+    afterEach(() => {
+      window.localStorage.removeItem('STRAPI_UPLOAD_LIBRARY_VIEW');
+    });
+
+    it('gives each selected asset a grip, and the browse list none', async () => {
+      renderDialog({ multiple: true, initialSelection: [hero, banner] });
+
+      const grips = await screen.findAllByRole('button', { name: /^Reorder / });
+
+      // In selection order, which is the order the field will hold.
+      expect(grips).toHaveLength(2);
+      expect(grips[0]).toHaveAccessibleName('Reorder hero.png');
+      expect(grips[1]).toHaveAccessibleName('Reorder banner.png');
+      expect(grips[0]).toHaveAttribute('aria-roledescription', 'sortable');
+
+      fireEvent.mouseDown(screen.getByRole('tab', { name: 'Browse assets' }));
+      await screen.findByText('Blog content');
+
+      expect(screen.queryByRole('button', { name: /^Reorder / })).not.toBeInTheDocument();
+    });
+
+    it.each([
+      ['Enter', 'Enter'],
+      ['Space', ' '],
+    ])('does not un-pick an asset when %s is pressed on its grip', async (code, key) => {
+      renderDialog({ multiple: true, initialSelection: [hero, banner] });
+
+      const grip = await screen.findByRole('button', { name: 'Reorder hero.png' });
+      grip.focus();
+      // The key starts a keyboard drag; it must not also reach the card, where
+      // Enter and Space un-pick.
+      fireEvent.keyDown(grip, { key, code });
+
+      expect(
+        within(screen.getByRole('tab', { name: /Selected assets/ })).getByText('2')
+      ).toBeInTheDocument();
+    });
+
+    it('lets keys pressed on a grip reach the document, where a keyboard drag reads them', async () => {
+      const documentKeys: string[] = [];
+      const recordKey = (event: KeyboardEvent) => documentKeys.push(event.key);
+      document.addEventListener('keydown', recordKey);
+
+      try {
+        renderDialog({ multiple: true, initialSelection: [hero, banner] });
+
+        const grip = await screen.findByRole('button', { name: 'Reorder hero.png' });
+        grip.focus();
+        fireEvent.keyDown(grip, { key: 'ArrowRight', code: 'ArrowRight' });
+
+        expect(documentKeys).toContain('ArrowRight');
+      } finally {
+        document.removeEventListener('keydown', recordKey);
+      }
+    });
+
+    it('keeps the table grips reachable with Tab and the arrows on the grip', async () => {
+      window.localStorage.setItem('STRAPI_UPLOAD_LIBRARY_VIEW', JSON.stringify(1));
+      const documentKeys: string[] = [];
+      const recordKey = (event: KeyboardEvent) => documentKeys.push(event.key);
+      document.addEventListener('keydown', recordKey);
+
+      try {
+        renderDialog({ multiple: true, initialSelection: [hero, banner] });
+
+        const grip = await screen.findByRole('button', { name: 'Reorder hero.png' });
+
+        // The design system's grid cells set their buttons to -1; this one must not.
+        expect(grip).toHaveAttribute('tabindex', '0');
+
+        grip.focus();
+        fireEvent.keyDown(grip, { key: 'ArrowDown', code: 'ArrowDown' });
+
+        expect(documentKeys).toContain('ArrowDown');
+        expect(grip).toHaveFocus();
+      } finally {
+        document.removeEventListener('keydown', recordKey);
+      }
+    });
+
+    it('does not un-pick an asset when its grip is clicked', async () => {
+      renderDialog({ multiple: true, initialSelection: [hero, banner] });
+
+      fireEvent.click(await screen.findByRole('button', { name: 'Reorder hero.png' }));
+
+      expect(
+        within(screen.getByRole('tab', { name: /Selected assets/ })).getByText('2')
+      ).toBeInTheDocument();
+      expect(screen.getByText('hero.png')).toBeInTheDocument();
+    });
+  });
+
   describe('permissions', () => {
     const without = (action: string) => (defaults: Permissions) =>
       defaults.filter((permission) => permission.action !== action);

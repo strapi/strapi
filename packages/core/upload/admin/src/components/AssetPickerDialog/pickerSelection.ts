@@ -29,6 +29,29 @@ export const toggleFile = (
 export const removeFile = (selection: PickerSelection, id: number): PickerSelection =>
   selection.filter((file) => file.id !== id);
 
+/**
+ * Moves one file to where another one is, the others shifting to make room.
+ * Unknown ids leave the selection as it is.
+ */
+export const moveFile = (
+  selection: PickerSelection,
+  activeId: number,
+  overId: number
+): PickerSelection => {
+  const from = selection.findIndex(({ id }) => id === activeId);
+  const to = selection.findIndex(({ id }) => id === overId);
+
+  if (from === -1 || to === -1 || from === to) {
+    return selection;
+  }
+
+  const next = [...selection];
+  const [file] = next.splice(from, 1);
+  next.splice(to, 0, file);
+
+  return next;
+};
+
 /** Same files in the same order: confirming would change nothing. */
 export const isSameSelection = (a: PickerSelection, b: PickerSelection) =>
   a.length === b.length && a.every((file, index) => file.id === b[index].id);
