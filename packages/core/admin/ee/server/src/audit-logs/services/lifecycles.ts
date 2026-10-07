@@ -59,6 +59,16 @@ export interface RegisterEventOptions {
    * is dropped.
    */
   allowUnknownActor?: boolean;
+  /**
+   * Records the event with an `unknown` actor and no user column even when the request
+   * has an authenticated user. For events about a login that did not complete.
+   */
+  alwaysUnknownActor?: boolean;
+  /**
+   * Receives the arguments passed to eventHub.emit(); returning false keeps the
+   * event out of the audit log. Listeners on the event hub still receive it.
+   */
+  shouldRecord?: (...args: any[]) => boolean;
 }
 
 const getEventMap = (events: string[]) => {
@@ -160,7 +170,9 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
     const isUsingAdminAuth = requestState?.route?.info?.type === 'admin';
     const auditSource = requestState?.auditSource;
     const isMcpAdminAction = auditSource === 'mcp';
-    const user = requestState?.user;
+    const options: RegisterEventOptions =
+      registration.kind === 'standard' ? registration.options : {};
+    const user = options.alwaysUnknownActor ? undefined : requestState?.user;
 
     const systemOrigin =
       auditSource && SYSTEM_ORIGINS.includes(auditSource)
@@ -172,9 +184,13 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
     }
 
     const allowsUnknownActor =
-      registration.kind === 'standard' && registration.options.allowUnknownActor === true;
+      options.allowUnknownActor === true || options.alwaysUnknownActor === true;
 
     if (!systemOrigin && !user && !allowsUnknownActor) {
+      return null;
+    }
+
+    if (options.shouldRecord?.(...args) === false) {
       return null;
     }
 
