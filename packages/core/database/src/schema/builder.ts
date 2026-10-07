@@ -179,6 +179,20 @@ const createHelpers = (db: Database) => {
   };
 
   /**
+   * Postgres DROP CONSTRAINT fails when the constraint is already gone.
+   * DROP TABLE ... CASCADE (used while force-migrating) removes foreign keys
+   * on tables that are still being altered, after their metadata was loaded.
+   */
+  const dropForeignKeyIfExists = async (runner: Knex, tableName: string, constraintName: string) => {
+    const schemaName = db.getSchemaName();
+    const qualified = schemaName ? `${schemaName}.${tableName}` : tableName;
+    await runner.raw('ALTER TABLE ?? DROP CONSTRAINT IF EXISTS ??', [qualified, constraintName]);
+  };
+
+  const schemaRunner = (schemaBuilder: Knex.SchemaBuilder) =>
+    (schemaBuilder as Knex.SchemaBuilder & { client: Knex }).client;
+
+  /**
    * Creates an index on a table
    */
   const createIndex = (tableBuilder: Knex.TableBuilder, index: Index) => {
@@ -317,6 +331,24 @@ const createHelpers = (db: Database) => {
     // Track dropped foreign keys
     const droppedForeignKeyNames: string[] = [];
 
+    if (db.dialect.client === 'postgres') {
+      const runner = schemaRunner(schemaBuilder);
+      const constraintNames = [
+        ...table.foreignKeys.removed.map((foreignKey) => foreignKey.name),
+        ...table.foreignKeys.updated.map((foreignKey) => foreignKey.object.name),
+      ];
+
+      for (const constraintName of constraintNames) {
+        await dropForeignKeyIfExists(runner, table.name, constraintName);
+        const index = existingForeignKeys.findIndex(
+          (foreignKey) => foreignKey?.name === constraintName
+        );
+        if (index >= 0) {
+          existingForeignKeys.splice(index, 1);
+        }
+      }
+    }
+
     await schemaBuilder.alterTable(table.name, async (tableBuilder) => {
       // Drop foreign keys first to avoid foreign key errors in the following steps
       for (const removedForeignKey of table.foreignKeys.removed) {
@@ -444,6 +476,14 @@ const createHelpers = (db: Database) => {
    */
   const dropTableForeignKeys = async (schemaBuilder: Knex.SchemaBuilder, table: Table) => {
     if (!db.config.settings.forceMigration) {
+      return;
+    }
+
+    if (db.dialect.client === 'postgres') {
+      const runner = schemaRunner(schemaBuilder);
+      for (const foreignKey of table.foreignKeys || []) {
+        await dropForeignKeyIfExists(runner, table.name, foreignKey.name);
+      }
       return;
     }
 
