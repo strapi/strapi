@@ -2,7 +2,8 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { createKnexWarn, withStrapiKnexLog } from '../knex-log';
 
-const ACQUIRE = 'Acquire connection error: TimeoutError: operation timed out for an unknown reason';
+const ACQUIRE =
+  'Acquire connection error: Error: operation timed out for an unknown reason\n    at Timeout._onTimeout (node_modules/tarn/dist/PendingOperation.js:17:27)';
 
 describe('createKnexWarn', () => {
   it('prefixes knex warnings and passes them through', () => {
@@ -31,8 +32,21 @@ describe('createKnexWarn', () => {
     expect(logger.warn).toHaveBeenCalledTimes(2);
     expect(logger.warn.mock.calls[0][0]).toBe(`[database] knex: ${ACQUIRE}`);
     expect(logger.warn.mock.calls[1][0]).toBe(
-      `[database] knex: ${ACQUIRE}\n  - similar knex warnings not logged since the previous one: 2`
+      `[database] knex: ${ACQUIRE}\n  - acquire connection errors not logged since the previous one: 2`
     );
+  });
+
+  it('does not let a failing logger replace the error knex is about to throw', () => {
+    const logger = {
+      warn: vi.fn(() => {
+        throw new Error('transport is down');
+      }),
+    };
+    const warn = createKnexWarn(logger, { now: () => 0 });
+
+    expect(() => warn('some warning')).not.toThrow();
+    expect(() => warn(ACQUIRE)).not.toThrow();
+    expect(logger.warn).toHaveBeenCalledTimes(2);
   });
 
   it('does not throttle other warnings', () => {

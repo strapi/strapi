@@ -68,6 +68,10 @@ describe('knex warnings', () => {
       const results = await timeoutsWhilePoolIsHeld(db, 5);
 
       expect(results.every((result) => result.status === 'rejected')).toBe(true);
+      // knex 3.3 keeps tarn's error as the cause of the one it throws (knex #5681)
+      expect((results[0] as PromiseRejectedResult).reason.cause.message).toBe(
+        'operation timed out for an unknown reason'
+      );
       const acquireWarnings = logger.warn.mock.calls.filter(([message]) =>
         String(message).startsWith('[database] knex: Acquire connection error:')
       );

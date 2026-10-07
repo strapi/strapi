@@ -27,23 +27,28 @@ export const createKnexWarn = (
   const acquireErrors = createThrottle({ intervalMs, now });
 
   return (message: unknown) => {
-    const text = typeof message === 'string' ? message : String(message);
+    try {
+      const text = typeof message === 'string' ? message : String(message);
 
-    if (!text.startsWith(KNEX_ACQUIRE_ERROR_PREFIX)) {
-      logger.warn(`[database] knex: ${text}`);
-      return;
+      if (!text.startsWith(KNEX_ACQUIRE_ERROR_PREFIX)) {
+        logger.warn(`[database] knex: ${text}`);
+        return;
+      }
+
+      const { emit, suppressed } = acquireErrors.take();
+      if (!emit) {
+        return;
+      }
+
+      const held =
+        suppressed > 0
+          ? `\n  - acquire connection errors not logged since the previous one: ${suppressed}`
+          : '';
+      logger.warn(`[database] knex: ${text}${held}`);
+    } catch {
+      // knex calls this from inside a catch block, right before it throws the error the caller
+      // needs to see. A failing logger (custom logger, broken transport) must not replace that error.
     }
-
-    const { emit, suppressed } = acquireErrors.take();
-    if (!emit) {
-      return;
-    }
-
-    const held =
-      suppressed > 0
-        ? `\n  - similar knex warnings not logged since the previous one: ${suppressed}`
-        : '';
-    logger.warn(`[database] knex: ${text}${held}`);
   };
 };
 
