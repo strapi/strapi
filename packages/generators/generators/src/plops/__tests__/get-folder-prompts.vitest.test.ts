@@ -1,3 +1,5 @@
+import { afterEach, describe, expect, test, vi } from 'vitest';
+
 import path from 'node:path';
 import { outputFile, outputJSON, remove } from 'fs-extra';
 
@@ -14,7 +16,7 @@ describe('getFolderPrompts', () => {
   } as unknown as NodePlopAPI;
 
   const makeInquirer = (...answers: Record<string, unknown>[]) => {
-    const prompt = jest.fn();
+    const prompt = vi.fn();
     for (const answer of answers) {
       prompt.mockResolvedValueOnce(answer);
     }
@@ -55,7 +57,7 @@ describe('getFolderPrompts', () => {
 
   afterEach(async () => {
     await remove(outputDirectory);
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   test('skips the prompt entirely for the plugin destination', async () => {
@@ -71,7 +73,7 @@ describe('getFolderPrompts', () => {
   });
 
   test('skips with a warning when the file is unreadable', async () => {
-    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     await outputFile(groupsPath, '{ not json');
     const inquirer = makeInquirer();
 
@@ -83,7 +85,7 @@ describe('getFolderPrompts', () => {
   });
 
   test('skips with a warning when the target section is malformed', async () => {
-    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     await outputJSON(groupsPath, {
       version: 1,
       sections: { collectionTypes: { groups: 'nope' }, singleTypes: { groups: [] } },
