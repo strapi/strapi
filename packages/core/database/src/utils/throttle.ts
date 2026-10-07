@@ -1,7 +1,13 @@
+import { performance } from 'node:perf_hooks';
+
 export interface ThrottleOptions {
   /** Minimum time between two emissions. */
   intervalMs: number;
-  /** Injectable clock for tests. */
+  /**
+   * Clock in milliseconds, injectable for tests. Defaults to performance.now(), which is monotonic:
+   * a wall clock stepping backwards (NTP, VM resume) would hold the throttle shut for the size of
+   * the step plus the interval.
+   */
   now?: () => number;
 }
 
@@ -23,7 +29,7 @@ export interface Throttle {
  */
 export const createThrottle = ({
   intervalMs,
-  now = () => Date.now(),
+  now = () => performance.now(),
 }: ThrottleOptions): Throttle => {
   let lastEmittedAt: number | undefined;
   let suppressed = 0;
