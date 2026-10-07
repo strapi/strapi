@@ -183,11 +183,11 @@ const captureQueries = async (fn: () => Promise<unknown>) => {
 
 const isSchemaQuery = (sql: string) => /sqlite_master|information_schema|pg_catalog/i.test(sql);
 
-// Ownership lookups read the owning entry id out of a `_cmps` table. Match them by shape: entry
-// events populate their entry after commit without being awaited, so their `_cmps` reads can
-// overlap the next publish.
+// Ownership lookups read the owning entry id out of a `_cmps` table, which Postgres qualifies with
+// its schema. Match them by shape: entry events populate their entry after commit without being
+// awaited, so their `_cmps` reads can overlap the next publish.
 const isOwnershipLookup = (sql: string) =>
-  /^select [`"]entity_id[`"].* from [`"]\w+_cmps[`"]/.test(sql);
+  /^select [`"]entity_id[`"].* from ([`"]\w+[`"]\.)?[`"]\w+_cmps[`"]/.test(sql);
 
 const sortIds = (ids: number[]) => [...ids].sort((a, b) => a - b);
 
