@@ -60,6 +60,7 @@ yarn ai:status  # read-only report: linked / missing / conflict / stale
 - **Content Types** — Defined using a JSON-based notation (not JSON Schema spec). Each content type has a `schema.json` file — see any `packages/core/content-manager/server/src/content-types/` for examples. The database layer auto-generates tables from them. Never write raw migrations for content type changes.
 - **EE / CE split** — Some features are Enterprise Edition only, gated at runtime. See EE toggles in the Testing section below.
 - **`@strapi/types`** — Single source of truth for shared TypeScript types. Import from here; improve these types rather than duplicating locally.
+- **MCP server** — Disabled by default (`server.mcp.enabled`). Requires an admin API token; content API tokens are rejected. Endpoint is `POST /mcp`. Contributor doc: [docs/docs/docs/01-core/strapi/mcp-server.md](docs/docs/docs/01-core/strapi/mcp-server.md).
 
 ---
 

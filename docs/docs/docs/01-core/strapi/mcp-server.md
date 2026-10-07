@@ -94,6 +94,8 @@ An OAuth discovery fallback middleware (`middleware/oauthDiscoveryFallback.ts`) 
 
 There is no separate "MCP token" type and no admin-panel screen dedicated to MCP — an admin creates a regular admin API token and uses it as the bearer credential for `/mcp`.
 
+Content API tokens are rejected. `authenticateAdminToken` returns unauthenticated when `apiToken.kind !== 'admin'` (`packages/core/admin/server/src/services/api-token.ts`). The MCP authenticator calls that method, so only an admin API token can call `POST /mcp`.
+
 Both failure reasons are reported through telemetry (`didNotAuthenticateMcpRequest`) but returned to the client as a single generic JSON-RPC `AUTHENTICATION_REQUIRED` error — the distinction is for observability, not client-facing signaling.
 
 ## Authorization
@@ -287,6 +289,23 @@ Two extra steps run before a document is returned to an MCP client (`packages/co
 
 1. Standard permission-checker sanitization (same as REST).
 2. Relations are reduced to **identity-only** references (`shapeRelationsForMcp`) rather than the fuller shapes REST responses use — relations are not meant to be traversed as full objects by an MCP client.
+
+## Upload tools
+
+The upload plugin registers Media Library tools during its register phase. `packages/core/upload/server/src/register.ts` calls `registerUploadMcpTools` (`packages/core/upload/server/src/mcp/register-upload-mcp-tools.ts`).
+
+| Tool                  | Role                  |
+| --------------------- | --------------------- |
+| `media_list_assets`   | List assets           |
+| `media_get_asset`     | Get one asset         |
+| `media_list_folders`  | List the folder tree  |
+| `media_update_asset`  | Update asset metadata |
+| `media_move_assets`   | Move assets           |
+| `media_delete_assets` | Delete assets         |
+| `media_create_folder` | Create a folder       |
+| `media_rename_folder` | Rename a folder       |
+| `media_move_folder`   | Move a folder         |
+| `media_delete_folder` | Delete a folder       |
 
 ## Errors
 
