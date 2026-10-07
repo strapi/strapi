@@ -8,7 +8,6 @@ import { styled } from 'styled-components';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { AssetsGrid } from '../../pages/Assets/components/AssetsGrid';
 import { AssetsSearchInput } from '../../pages/Assets/components/AssetsSearchInput';
-import { AssetsTable } from '../../pages/Assets/components/AssetsTable';
 import { AssetsView } from '../../pages/Assets/components/AssetsView';
 import { FilterBadges } from '../../pages/Assets/components/FilterBadges';
 import { FilterMenu } from '../../pages/Assets/components/FilterMenu';
@@ -128,11 +127,9 @@ const useToggleAsset = () => {
 
 interface BrowseTabProps {
   list: AssetsList;
-  view: number;
-  onViewChange: (view: number) => void;
 }
 
-const BrowseTab = ({ list, view, onViewChange }: BrowseTabProps) => {
+const BrowseTab = ({ list }: BrowseTabProps) => {
   const {
     currentFolderId,
     navigateToFolderId,
@@ -153,6 +150,9 @@ const BrowseTab = ({ list, view, onViewChange }: BrowseTabProps) => {
     isLoadingFolders,
   } = list;
   const toggleAsset = useToggleAsset();
+  // Shares the Media Library page's key: a user who prefers the table there
+  // gets it here too.
+  const [view, setView] = usePersistentState(localStorageKeys.view, viewOptions.GRID);
   const isGridView = view === viewOptions.GRID;
 
   const itemLocations = useMemo(() => buildItemLocations(assets, folders), [assets, folders]);
@@ -167,7 +167,7 @@ const BrowseTab = ({ list, view, onViewChange }: BrowseTabProps) => {
           </Flex>
           <Flex gap={2}>
             <SortMenu sort={listSort} showFoldersGroup={!isGridView} />
-            <ViewToggle view={view} onChange={onViewChange} iconsOnly />
+            <ViewToggle view={view} onChange={setView} iconsOnly />
           </Flex>
         </Flex>
         <FilterBadges listFilters={listFilters} />
@@ -218,7 +218,9 @@ const BrowseTab = ({ list, view, onViewChange }: BrowseTabProps) => {
  * SelectedTab
  * -----------------------------------------------------------------------------------------------*/
 
-const SelectedTab = ({ view }: { view: number }) => {
+// Always a grid, whatever view Browse uses: the selection is short, and its
+// order (which reordering changes) reads best as tiles.
+const SelectedTab = () => {
   const { formatMessage } = useIntl();
   const { selection } = usePickerSelection();
   const toggleAsset = useToggleAsset();
@@ -237,15 +239,9 @@ const SelectedTab = ({ view }: { view: number }) => {
         ) : (
           <ListSettingsProvider {...PICKER_LIST_SETTINGS}>
             {/* The order here is the order the field will hold. */}
-            {view === viewOptions.GRID ? (
-              <SortableSelection layout="grid">
-                <AssetsGrid assets={selection} onAssetItemClick={toggleAsset} />
-              </SortableSelection>
-            ) : (
-              <SortableSelection layout="list">
-                <AssetsTable assets={selection} onAssetItemClick={toggleAsset} />
-              </SortableSelection>
-            )}
+            <SortableSelection>
+              <AssetsGrid assets={selection} onAssetItemClick={toggleAsset} />
+            </SortableSelection>
           </ListSettingsProvider>
         )}
       </Box>
@@ -273,9 +269,6 @@ const PickerContent = ({ title, initialSelection, onClose, onConfirm }: PickerCo
   const [activeTab, setActiveTab] = useState<PickerTab>(
     initialSelection.length > 0 ? 'selected' : 'browse'
   );
-  // Shares the Media Library page's key: a user who prefers the table there
-  // gets it here too.
-  const [view, setView] = usePersistentState(localStorageKeys.view, viewOptions.GRID);
   const list = useAssetsListContext();
 
   return (
@@ -313,10 +306,10 @@ const PickerContent = ({ title, initialSelection, onClose, onConfirm }: PickerCo
         {/* Radix makes a panel a Tab stop, meant for panels with nothing focusable
             inside. These hold controls, so focus goes straight to them. */}
         <TabPanel value="browse" tabIndex={-1}>
-          <BrowseTab list={list} view={view} onViewChange={setView} />
+          <BrowseTab list={list} />
         </TabPanel>
         <TabPanel value="selected" tabIndex={selection.length > 0 ? -1 : undefined}>
-          <SelectedTab view={view} />
+          <SelectedTab />
         </TabPanel>
       </TabsRoot>
       <Footer>

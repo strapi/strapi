@@ -34,8 +34,6 @@ import { assetKey, folderKey, getSelectAllState, type ItemKey } from '../utils/s
 
 import { AssetActionsMenu } from './AssetActionsMenu';
 import { useAssetsDndOptional } from './Dnd/AssetsDndProvider';
-import { useIsSortableList, isFromReorderHandle } from './Dnd/assetSortable';
-import { ReorderHandle } from './Dnd/ReorderHandle';
 import { useFileDraggable, useFolderDraggableDroppable } from './Dnd/useAssetDnd';
 import { FolderActionsMenu } from './FolderActionsMenu';
 import { useItemContextMenuTrigger } from './ItemContextMenu';
@@ -106,16 +104,9 @@ const StyledTh = styled(RawTh)<{ $flex?: boolean }>`
   ${({ $flex }) => ($flex ? flexColumn : hugColumn)}
 `;
 
-// Shared by the design system's grid cell and the plain cell that holds the
-// reorder grip (`GripTd`, which must not be a `RawTd` — see there), so both
-// look the same.
-const cellStyles = css`
+const StyledTd = styled(RawTd)`
   padding: 0 ${({ theme }) => theme.spaces[4]};
   border-bottom: 1px solid ${({ theme }) => theme.colors.neutral150};
-`;
-
-const StyledTd = styled(RawTd)`
-  ${cellStyles}
 `;
 
 /** The name column: takes whatever the others leave and ellipsizes. */
@@ -170,8 +161,10 @@ const StyledTr = styled.tr<{
     outline-offset: -2px;
   }
 
-  &:last-child > td {
-    border-bottom: 0;
+  &:last-child {
+    ${StyledTd} {
+      border-bottom: 0;
+    }
   }
 `;
 
@@ -188,31 +181,13 @@ const CheckboxTh = styled(StyledTh)`
   white-space: nowrap;
 `;
 
-// Plain header cells for a column whose header has nothing to focus (no
-// select-all, the grip column). As a `RawTh`, the design system's grid would
-// make the empty cell itself a Tab stop.
-const plainHeaderCellAttrs = { role: 'gridcell' } as const;
-
-const EmptyCheckboxTh = styled.th.attrs(plainHeaderCellAttrs)`
+// The checkbox column's header when there is no select-all (a single-value
+// picker): a plain cell, since as an empty `RawTh` the design system's grid
+// would make the cell itself a Tab stop.
+const EmptyCheckboxTh = styled.th.attrs({ role: 'gridcell' })`
   ${headerCellStyles}
   width: 5.6rem;
   white-space: nowrap;
-`;
-
-// As narrow as the grip: the next cell's own padding is the gap to it.
-// A plain cell, not the design system's grid cell: `RawTd` sets every button in
-// a cell other than the grid's active one to `tabindex="-1"`, and the table
-// never sets an active cell, so the grip could never be reached with Tab.
-const GripTd = styled.td.attrs({ role: 'gridcell' })`
-  ${cellStyles}
-  ${hugColumn}
-  padding-inline-end: 0;
-`;
-
-const GripTh = styled.th.attrs(plainHeaderCellAttrs)`
-  ${headerCellStyles}
-  ${hugColumn}
-  padding-inline-end: 0;
 `;
 
 // Flags an asset whose caption or alternative text is empty — mirrors the
@@ -293,8 +268,7 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
   const isDesktop = useIsDesktop();
   const { formatDate, formatMessage } = useIntl();
   const { isMovePending } = useAssetsDndOptional() ?? { isMovePending: false };
-  const { attributes, listeners, setNodeRef, isDragging, dragData, dragStyle, dragHandle } =
-    useFileDraggable(asset);
+  const { attributes, listeners, setNodeRef, isDragging, dragData } = useFileDraggable(asset);
   const { isEnabled, isSelected, toggle, selectRange, getSelectability } = useAssetSelection();
   const { showItemActions } = useListSettings();
   const busyMessage = useBusyAssetsOptional()?.getBusyMessage(asset.id) ?? null;
@@ -335,7 +309,7 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
 
   // Desktop: Space toggles selection (additive), Enter opens the details drawer.
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!isEventFromWithin(e) || isFromReorderHandle(e)) {
+    if (!isEventFromWithin(e)) {
       return;
     }
 
@@ -373,7 +347,6 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
       $isBusy={busyMessage !== null}
       $isSelected={selected}
       $isUnselectable={selectability === 'disabled'}
-      style={dragStyle}
       tabIndex={0}
       role="row"
       // Right-click opens this asset's own actions, or the selection's when it
@@ -394,12 +367,6 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
         }
       }}
     >
-      {/* Pointer-down is left to reach the row: dragging from the grip is a drag. */}
-      {dragHandle && (
-        <GripTd {...ASSET_ITEM_CONTROL_PROPS}>
-          <ReorderHandle name={asset.name} handle={dragHandle} />
-        </GripTd>
-      )}
       {/* The column exists whenever selection is on (at every viewport width);
           a row outside the selection keeps an empty cell so columns line up. */}
       {isEnabled && (
@@ -699,8 +666,6 @@ export const AssetsTable = ({
   const { isEnabled, canSelectAll, selectedKeys, selectAll, clear, getSelectability } =
     useAssetSelection();
   const { showItemActions } = useListSettings();
-  // Reordering adds a leading column for the grips.
-  const isSortableList = useIsSortableList();
   const { trackUsage } = useTracking();
 
   // Below the desktop breakpoint only the name (and actions) column is kept —
@@ -714,7 +679,7 @@ export const AssetsTable = ({
   // The checkbox column is a dedicated structural column (not part of
   // TABLE_HEADERS), shown whenever selection is on.
   const showCheckboxColumn = isEnabled;
-  const colCount = visibleHeaders.length + (showCheckboxColumn ? 1 : 0) + (isSortableList ? 1 : 0);
+  const colCount = visibleHeaders.length + (showCheckboxColumn ? 1 : 0);
 
   const totalRows = folders.length + assets.length;
 
@@ -743,26 +708,9 @@ export const AssetsTable = ({
   }
 
   return (
-    <StyledTable
-      colCount={colCount}
-      rowCount={(mixedItems ? mixedItems.length : totalRows) + 1}
-      // While reordering, a no-op replaces the grid's own arrow-key navigation,
-      // which would read the arrows meant for the drag and pull focus off the
-      // grip. (`undefined` would not replace it: the styled wrapper drops it.)
-      {...(isSortableList ? { onKeyDown: () => {} } : {})}
-    >
+    <StyledTable colCount={colCount} rowCount={(mixedItems ? mixedItems.length : totalRows) + 1}>
       <StyledThead>
         <RawTr>
-          {isSortableList && (
-            <GripTh>
-              <VisuallyHidden>
-                {formatMessage({
-                  id: getTranslationKey('list.table.header.reorder'),
-                  defaultMessage: 'Reorder',
-                })}
-              </VisuallyHidden>
-            </GripTh>
-          )}
           {showCheckboxColumn && canSelectAll && (
             <CheckboxTh>
               <Flex>

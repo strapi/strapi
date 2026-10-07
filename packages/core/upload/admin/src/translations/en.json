@@ -359,7 +359,6 @@
   "list.table.header.lastModified": "Last Modified",
   "list.table.header.sort": "Sort on {label}",
   "list.table.header.select-all": "Select all",
-  "list.table.header.reorder": "Reorder",
   "list.table.row.select": "Select {name}",
   "list.table.row.metadata-missing": "This asset is missing metadata (caption or alternative text).",
   "list.table.content.empty-label": "This field is empty",

@@ -15,7 +15,6 @@ import {
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
-  verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useIntl } from 'react-intl';
@@ -71,11 +70,10 @@ const swallowNextClick = () => {
 
 interface SortableSelectionProps {
   children: ReactNode;
-  layout: 'grid' | 'list';
 }
 
-/** Makes the picker's selected assets reorderable, in grid or table view. */
-export const SortableSelection = ({ children, layout }: SortableSelectionProps) => {
+/** Makes the picker's selected assets reorderable (the Selected tab is always a grid). */
+export const SortableSelection = ({ children }: SortableSelectionProps) => {
   const { formatMessage } = useIntl();
   const { selection, moveFile } = usePickerSelection();
 
@@ -152,10 +150,7 @@ export const SortableSelection = ({ children, layout }: SortableSelectionProps) 
       onDragEnd={handleDragEnd}
       accessibility={{ announcements }}
     >
-      <SortableContext
-        items={ids}
-        strategy={layout === 'grid' ? rectSortingStrategy : verticalListSortingStrategy}
-      >
+      <SortableContext items={ids} strategy={rectSortingStrategy}>
         <AssetSortableContext.Provider value={usePickerSortableAsset}>
           {children}
         </AssetSortableContext.Provider>

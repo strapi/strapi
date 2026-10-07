@@ -42,9 +42,6 @@ export const useAssetSortable = (assetId: number) => {
   return useSortableAsset(assetId);
 };
 
-/** Whether the list is being reordered here (it then needs a column for the grips). */
-export const useIsSortableList = () => useContext(AssetSortableContext) !== useNotSortable;
-
 const REORDER_HANDLE_ATTRIBUTE = 'data-reorder-handle';
 
 /** Marks the reorder grip, so the item can tell its keys apart. */

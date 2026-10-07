@@ -526,30 +526,6 @@ describe('AssetPickerDialog', () => {
       }
     });
 
-    it('keeps the table grips reachable with Tab and the arrows on the grip', async () => {
-      window.localStorage.setItem('STRAPI_UPLOAD_LIBRARY_VIEW', JSON.stringify(1));
-      const documentKeys: string[] = [];
-      const recordKey = (event: KeyboardEvent) => documentKeys.push(event.key);
-      document.addEventListener('keydown', recordKey);
-
-      try {
-        renderDialog({ multiple: true, initialSelection: [hero, banner] });
-
-        const grip = await screen.findByRole('button', { name: 'Reorder hero.png' });
-
-        // The design system's grid cells set their buttons to -1; this one must not.
-        expect(grip).toHaveAttribute('tabindex', '0');
-
-        grip.focus();
-        fireEvent.keyDown(grip, { key: 'ArrowDown', code: 'ArrowDown' });
-
-        expect(documentKeys).toContain('ArrowDown');
-        expect(grip).toHaveFocus();
-      } finally {
-        document.removeEventListener('keydown', recordKey);
-      }
-    });
-
     it('does not un-pick an asset when its grip is clicked', async () => {
       renderDialog({ multiple: true, initialSelection: [hero, banner] });
 
