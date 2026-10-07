@@ -16,7 +16,6 @@ export interface EventLoopDelay {
 
 export interface EventLoopMonitor {
   read(): EventLoopDelay | undefined;
-  reset(): void;
   stop(): void;
 }
 
@@ -73,13 +72,6 @@ export const createEventLoopMonitor = ({
         p99Ms: toDelayMs(older.percentile(99)),
         windowMs: now() - olderStartedAt,
       };
-    },
-
-    reset() {
-      older.reset();
-      newer.reset();
-      olderStartedAt = now();
-      newerStartedAt = olderStartedAt;
     },
 
     stop() {

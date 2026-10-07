@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createEventLoopMonitor, toDelayMs, type EventLoopMonitor } from '../event-loop';
 
@@ -29,10 +29,20 @@ describe('toDelayMs', () => {
 describe('createEventLoopMonitor', () => {
   let monitor: EventLoopMonitor | undefined;
 
+  // The rotation timer is faked so a test can step through rotations. The histograms sample on a
+  // native timer, so a histogram that was just cleared still needs real ticks before it has data.
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
+  });
+
   afterEach(() => {
     monitor?.stop();
     monitor = undefined;
+    vi.useRealTimers();
   });
+
+  const untilSampled = (target: EventLoopMonitor) =>
+    vi.waitFor(() => expect(target.read()).toBeDefined());
 
   it('reports nothing before the first sample', () => {
     monitor = createEventLoopMonitor();
@@ -42,47 +52,62 @@ describe('createEventLoopMonitor', () => {
 
   it('sees a blocked event loop', async () => {
     monitor = createEventLoopMonitor();
-    await sleep(100);
+    await untilSampled(monitor);
     setTimeout(() => blockFor(200), 0);
     await sleep(300);
 
     expect(monitor.read()?.maxMs).toBeGreaterThanOrEqual(150);
   });
 
-  it('starts a new window after reset', async () => {
-    let clock = 1_000;
+  it('reports a window that starts at the previous rotation', async () => {
+    let clock = 0;
     monitor = createEventLoopMonitor({ now: () => clock });
-    await sleep(60);
+    await untilSampled(monitor);
 
-    clock = 31_000;
-    expect(monitor.read()?.windowMs).toBe(30_000);
+    clock = 30_000;
+    vi.advanceTimersByTime(30_000);
+    clock = 45_000;
+    expect(monitor.read()?.windowMs).toBe(45_000);
 
-    monitor.reset();
-    clock = 32_000;
-    await sleep(60);
-    expect(monitor.read()?.windowMs).toBe(1_000);
+    clock = 60_000;
+    vi.advanceTimersByTime(30_000);
+    await untilSampled(monitor);
+    clock = 70_000;
+    expect(monitor.read()?.windowMs).toBe(40_000);
   });
 
   it('forgets delays older than two rotations', async () => {
-    monitor = createEventLoopMonitor({ rotateEveryMs: 100 });
-    await sleep(50);
-    setTimeout(() => blockFor(200), 0);
-    await sleep(250);
+    const rotateEveryMs = 10_000;
+    monitor = createEventLoopMonitor({ rotateEveryMs });
+    await untilSampled(monitor);
+
+    blockFor(200);
+    await sleep(30);
     expect(monitor.read()?.maxMs).toBeGreaterThanOrEqual(150);
 
-    await sleep(350);
-    const later = monitor.read();
-    expect(later?.maxMs).toBeLessThan(150);
-    expect(later?.windowMs).toBeLessThanOrEqual(300);
+    // one rotation later the block is still inside the window
+    vi.advanceTimersByTime(rotateEveryMs);
+    expect(monitor.read()?.maxMs).toBeGreaterThanOrEqual(150);
+
+    // two rotations later it has been dropped
+    vi.advanceTimersByTime(rotateEveryMs);
+    await untilSampled(monitor);
+    expect(monitor.read()?.maxMs).toBeLessThan(150);
   });
 
   it('stops sampling after stop', async () => {
-    monitor = createEventLoopMonitor();
-    await sleep(60);
-    monitor.stop();
-    setTimeout(() => blockFor(200), 0);
-    await sleep(300);
+    monitor = createEventLoopMonitor({ now: () => 0 });
+    await untilSampled(monitor);
+    expect(vi.getTimerCount()).toBe(1);
 
-    expect(monitor.read()?.maxMs ?? 0).toBeLessThan(150);
+    monitor.stop();
+    const before = monitor.read();
+    expect(vi.getTimerCount()).toBe(0);
+
+    blockFor(200);
+    await sleep(30);
+
+    expect(before).toBeDefined();
+    expect(monitor.read()).toEqual(before);
   });
 });
