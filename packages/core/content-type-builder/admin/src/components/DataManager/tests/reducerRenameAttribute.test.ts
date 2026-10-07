@@ -489,6 +489,40 @@ describe('CTB | DataManager | reducer | rename tracking (EDIT_ATTRIBUTE)', () =>
       expect(getTargetField(state, 'subSlug')).toBe('title');
     });
 
+    it('stays attached when the renamed target changes from string to text', () => {
+      const state = reducer(
+        buildState([
+          { name: 'title', type: 'string', status: 'UNCHANGED' },
+          slug,
+        ] as AnyAttribute[]),
+        actions.editAttribute({
+          attributeToSet: { type: 'text', name: 'heading' } as AnyAttribute,
+          forTarget: 'contentType',
+          targetUid: uid as Internal.UID.ContentType,
+          name: 'title',
+        })
+      );
+
+      expect(getTargetField(state)).toBe('heading');
+    });
+
+    it('detaches the uid when the renamed target is no longer a string or text', () => {
+      const state = reducer(
+        buildState([
+          { name: 'title', type: 'string', status: 'UNCHANGED' },
+          slug,
+        ] as AnyAttribute[]),
+        actions.editAttribute({
+          attributeToSet: { type: 'integer', name: 'count' } as AnyAttribute,
+          forTarget: 'contentType',
+          targetUid: uid as Internal.UID.ContentType,
+          name: 'title',
+        })
+      );
+
+      expect(getTargetField(state)).toBeUndefined();
+    });
+
     it('leaves uid fields attached to other fields alone', () => {
       const state = reducer(
         buildState([

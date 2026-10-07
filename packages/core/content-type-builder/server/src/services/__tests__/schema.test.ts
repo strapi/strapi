@@ -1356,6 +1356,30 @@ describe('Content Type Builder - Schema service', () => {
       expect(savedSlug().targetField).toBe('subtitle');
     });
 
+    it('stays attached when the renamed target changes from string to text', async () => {
+      await updateSchema(
+        schemaWithSlug({
+          renames: [{ oldName: 'title', newName: 'heading' }],
+          attributes: [{ action: 'update', name: 'heading', properties: { type: 'text' } }],
+          targetField: 'title',
+        })
+      );
+
+      expect(savedSlug().targetField).toBe('heading');
+    });
+
+    it('clears the targetField when the renamed target is no longer a string or text', async () => {
+      await updateSchema(
+        schemaWithSlug({
+          renames: [{ oldName: 'title', newName: 'count' }],
+          attributes: [{ action: 'update', name: 'count', properties: { type: 'integer' } }],
+          targetField: 'title',
+        })
+      );
+
+      expect(savedSlug().targetField).toBeUndefined();
+    });
+
     it('clears the targetField when the renamed target is deleted in the same save', async () => {
       await updateSchema(
         schemaWithSlug({

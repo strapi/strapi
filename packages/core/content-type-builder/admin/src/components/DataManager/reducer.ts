@@ -397,9 +397,12 @@ const applyRenameConsent = (
   }
 };
 
+const UID_TARGET_TYPES = ['string', 'text'];
+
 /**
  * Keeps uid fields attached to a field when it is renamed, whether or not the
- * rename is recorded as a data-preserving hop.
+ * rename is recorded as a data-preserving hop. A rename that also turns the
+ * field into a type a uid cannot target detaches the uid, as deleting it would.
  */
 const renameUIDTargetFields = (
   type: ContentType | Component,
@@ -412,9 +415,15 @@ const renameUIDTargetFields = (
     return;
   }
 
+  const isValidTarget = UID_TARGET_TYPES.includes(newAttribute.type);
+
   type.attributes.forEach((attribute) => {
     if (attribute.type === 'uid' && attribute.targetField === oldName) {
-      attribute.targetField = newName;
+      if (isValidTarget) {
+        attribute.targetField = newName;
+      } else {
+        delete attribute.targetField;
+      }
     }
   });
 };

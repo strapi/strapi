@@ -12,6 +12,7 @@ import type {
 } from './migration-builder';
 import { finalizeSchemaMutation, rollbackSchemaMutation } from './schema-mutation';
 import { getService } from '../utils';
+import { VALID_UID_TARGETS } from './constants';
 import { validateUpdateSchema } from '../controllers/validation/schema';
 import type { Schema as CTBSchema } from '../controllers/validation/schema';
 import type { AttributeRenameMigrationMode } from '../config';
@@ -128,9 +129,20 @@ const renameUIDTargetFieldsOnUpdates = (schema: CTBSchema) => {
       const finalName = finalNames.get(properties.targetField);
 
       if (
-        finalName &&
-        !contentType.attributes.some((attr) => attr.name === properties.targetField) &&
-        contentType.attributes.some((attr) => attr.action !== 'delete' && attr.name === finalName)
+        !finalName ||
+        contentType.attributes.some((attr) => attr.name === properties.targetField)
+      ) {
+        return;
+      }
+
+      const target = contentType.attributes.find((attr) => attr.name === finalName);
+
+      // A target that is no longer a string or text is left on the old name,
+      // so `removeDeletedUIDTargetFieldsOnUpdates` detaches the uid.
+      if (
+        target &&
+        target.action !== 'delete' &&
+        VALID_UID_TARGETS.some((type) => type === target.properties.type)
       ) {
         properties.targetField = finalName;
       }
