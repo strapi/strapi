@@ -1,10 +1,12 @@
+import { describe, expect, test, vi } from 'vitest';
+
 import path from 'node:path';
 import { isUsingTypeScriptSync } from '@strapi/typescript-utils';
 
 import getGeneratorLanguage from '../get-generator-language';
 
-jest.mock('@strapi/typescript-utils', () => ({
-  isUsingTypeScriptSync: jest.fn(),
+vi.mock('@strapi/typescript-utils', () => ({
+  isUsingTypeScriptSync: vi.fn(),
 }));
 
 describe('getGeneratorLanguage', () => {
@@ -12,7 +14,7 @@ describe('getGeneratorLanguage', () => {
   const appPlop = {
     getDestBasePath: () => path.join(appRoot, 'src'),
   };
-  const isUsingTypeScriptSyncMock = jest.mocked(isUsingTypeScriptSync);
+  const isUsingTypeScriptSyncMock = vi.mocked(isUsingTypeScriptSync);
 
   test('non-plugin generation checks the generate dir', () => {
     isUsingTypeScriptSyncMock.mockReturnValue(true);

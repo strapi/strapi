@@ -1,10 +1,11 @@
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
+
 import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import process from 'node:process';
 import { outputFile, outputJSON, readFile, readJSON, remove, pathExists } from 'fs-extra';
-import * as strapiGenerators from '../../index';
-import '../../plopfile';
+import * as strapiGenerators from '../../../dist/index.js';
 
 describe('Content Type Generator — folder assignment', () => {
   let outputDirectory: string;
@@ -25,7 +26,7 @@ describe('Content Type Generator — folder assignment', () => {
     return strapiGenerators.generate(
       'content-type',
       { ...baseAnswers, ...answers },
-      { dir: outputDirectory, plopFile: 'plopfile.ts' }
+      { dir: outputDirectory }
     );
   };
 
@@ -62,7 +63,7 @@ describe('Content Type Generator — folder assignment', () => {
   });
 
   beforeAll(() => {
-    const spy = jest.spyOn(process, 'cwd');
+    const spy = vi.spyOn(process, 'cwd');
     spy.mockImplementation(() => outputDirectory);
   });
 
@@ -72,7 +73,7 @@ describe('Content Type Generator — folder assignment', () => {
   });
 
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   afterEach(async () => {
