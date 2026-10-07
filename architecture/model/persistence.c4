@@ -1,0 +1,79 @@
+model {
+  extend strapi.server_runtime {
+    db_repository = code_package 'Query repositories and relations' {
+      summary 'Run entry operations and maintain relation records.'
+      description '''
+        Database entity manager/repositories implement low-level entry operations, joins and relation writes. Document Service adds document identity, publication/locale semantics and component orchestration above this layer. Relations can require multiple queries.
+      '''
+      link https://github.com/strapi/strapi/blob/develop/packages/core/database/src/entity-manager/index.ts 'Entity manager and relation writes'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/database/src/entity-manager/entity-repository.ts 'Repositories'
+    }
+    db_query_builder = code_package 'Query builder and populate' {
+      summary 'Build SQL queries and populate related entries.'
+      description '''
+        Transforms filters and metadata into Knex queries, executes them, maps rows, and populates relations. Populate may issue additional queries; a document request is not necessarily one SQL statement.
+      '''
+      link https://github.com/strapi/strapi/blob/develop/packages/core/database/src/query/query-builder.ts 'Query builder'
+      link https://github.com/strapi/strapi/tree/develop/packages/core/database/src/query/helpers/populate 'Populate'
+    }
+    db_metadata = code_package 'Database metadata' {
+      summary 'Maps model attributes and relations to tables.'
+      description '''
+        Loaded models become metadata for table/column identifiers, joins and relations. Shared by query construction and schema generation; this is in-memory metadata, not the saved schema snapshot.
+      '''
+      link https://github.com/strapi/strapi/blob/develop/packages/core/database/src/metadata/index.ts 'Metadata loading'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/utils/transform-content-types-to-models.ts 'Content types to models'
+    }
+    db_lifecycles = code_package 'Database lifecycles' {
+      summary 'Runs before/after hooks for entry operations.'
+      description '''
+        Database entity-manager operations trigger subscribers. These hooks are distinct from document middleware and application startup hooks. Direct Knex SQL bypasses this lifecycle layer; raw database operations also bypass Document Service semantics.
+      '''
+      link https://github.com/strapi/strapi/blob/develop/packages/core/database/src/lifecycles/index.ts 'Lifecycle subscribers'
+    }
+    db_transactions = code_package 'Transaction context' {
+      summary 'Shares transactions and commit/rollback callbacks.'
+      description '''
+        Database.transaction supplies the transaction context; query execution attaches to it when present. Document Service operations use transaction wrappers. A transaction covers database work, not HTTP calls or object-storage writes.
+      '''
+      link https://github.com/strapi/strapi/blob/develop/packages/core/database/src/transaction-context.ts 'Transaction context'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/database/src/index.ts 'Transaction API'
+    }
+    db_connection = code_package 'Knex connection and dialect' {
+      summary 'Executes SQL for the configured database.'
+      description '''
+        Database configuration chooses the connection and dialect. The pool and transaction connections belong to the process; replicas need their own connection budgets.
+      '''
+      link https://github.com/strapi/strapi/blob/develop/packages/core/database/src/connection.ts 'Connection creation'
+      link https://github.com/strapi/strapi/tree/develop/packages/core/database/src/dialects 'Database dialects'
+    }
+    db_migrations = code_package 'Migration providers' {
+      summary 'Run pending user and internal migrations.'
+      description '''
+        The database migration provider evaluates configured user migrations and internal migrations. Schema sync invokes pending migrations before comparing/updating the database schema. Content-type changes remain schema definitions; this diagram does not prescribe raw migrations for them.
+      '''
+      link https://github.com/strapi/strapi/blob/develop/packages/core/database/src/migrations/index.ts 'Providers'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/database/src/migrations/users.ts 'User migration configuration'
+    }
+    db_schema_snapshot = code_package 'Stored schema snapshot' {
+      summary 'Remembers the last tracked database schema.'
+      description '''
+        The schema store saves the metadata-derived schema and its hash in the database. Synchronization compares desired metadata, previous tracked schema and inspected database state. This bookkeeping is not a content backup.
+      '''
+      link https://github.com/strapi/strapi/blob/develop/packages/core/database/src/schema/storage.ts 'Schema storage'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/database/src/schema/diff.ts 'Schema comparison'
+    }
+  }
+  strapi.server_runtime.document_service -> strapi.server_runtime.db_repository 'uses entry operations'
+  strapi.server_runtime.db_repository -> strapi.server_runtime.db_lifecycles 'runs before/after subscribers'
+  strapi.server_runtime.db_repository -> strapi.server_runtime.db_query_builder 'builds entry and relation queries'
+  strapi.server_runtime.db_query_builder -> strapi.server_runtime.db_metadata 'uses table and relation mapping'
+  strapi.server_runtime.db_query_builder -> strapi.server_runtime.db_transactions 'uses active transaction'
+  strapi.server_runtime.db_query_builder -> strapi.server_runtime.db_connection 'executes through Knex'
+  strapi.server_runtime.db_connection -> strapi.database 'reads and writes SQL rows'
+  strapi.server_runtime.db_metadata -> strapi.application_source.content_type_schema_files 'maps loaded model definitions'
+  strapi.server_runtime.schema_sync -> strapi.server_runtime.db_metadata 'derives desired schema'
+  strapi.server_runtime.schema_sync -> strapi.server_runtime.db_migrations 'runs pending migrations first'
+  strapi.server_runtime.schema_sync -> strapi.server_runtime.db_schema_snapshot 'compares and records tracked schema'
+  strapi.server_runtime.schema_sync -> strapi.database 'inspects and applies schema changes'
+}

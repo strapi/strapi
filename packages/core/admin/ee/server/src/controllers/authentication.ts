@@ -1,13 +1,14 @@
+import { pick } from 'lodash';
 import type { Context, Next } from 'koa';
 
-import { pick } from 'lodash/fp';
 import compose from 'koa-compose';
 import { errors } from '@strapi/utils';
 import { validateProviderOptionsUpdate } from '../validation/authentication';
 import { middlewares, utils } from './authentication-utils';
 
-const toProviderDTO = pick(['uid', 'displayName', 'icon']);
-const toProviderLoginOptionsDTO = pick(['autoRegister', 'defaultRole', 'ssoLockedRoles']);
+const toProviderDTO = (provider: object) => pick(provider, ['uid', 'displayName', 'icon']);
+const toProviderLoginOptionsDTO = (options: object) =>
+  pick(options, ['autoRegister', 'defaultRole', 'ssoLockedRoles']);
 
 const { ValidationError } = errors;
 

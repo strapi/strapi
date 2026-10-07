@@ -1,12 +1,14 @@
 import { useTracking as useStrapiTracking, TrackingEvent } from '@strapi/admin/strapi-admin';
-import { useAIAvailability } from '@strapi/admin/strapi-admin/ee';
 
+import { getMediaLibraryVersion } from '../../utils/mediaLibraryVersion';
+
+import { useAIMetadataAvailability } from './useAIMetadataAvailability';
 import { useSettings } from './useSettings';
 
 export const useTracking = () => {
   const { trackUsage: trackStrapiUsage } = useStrapiTracking();
   const { data } = useSettings();
-  const isAiAvailable = useAIAvailability();
+  const isAiAvailable = useAIMetadataAvailability();
 
   const trackUsage = <TEvent extends TrackingEvent>(
     event: TEvent['name'],
@@ -15,6 +17,7 @@ export const useTracking = () => {
     return trackStrapiUsage(event, {
       ...properties,
       ...(isAiAvailable ? { isAiMediaLibraryConfigured: Boolean(data?.aiMetadata) } : {}),
+      mediaLibraryVersion: getMediaLibraryVersion(),
     } as TEvent['properties']);
   };
 

@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import { getOr } from 'lodash/fp';
+import _, { get } from 'lodash';
+
 import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
 import type { UID, Struct } from '@strapi/types';
 import { formatAttributes, replaceTemporaryUIDs } from '../utils/attributes';
@@ -24,7 +24,7 @@ const pruneFolderReferences = (uids: UID.ContentType[]) => {
 };
 
 export const isContentTypeVisible = (model: Struct.ContentTypeSchema) =>
-  getOr(true, 'pluginOptions.content-type-builder.visible', model) === true;
+  get(model, 'pluginOptions.content-type-builder.visible', true) === true;
 
 export const getRestrictRelationsTo = (contentType: Struct.ContentTypeSchema) => {
   const { uid } = contentType;

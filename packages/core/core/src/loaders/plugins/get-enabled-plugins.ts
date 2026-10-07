@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { dirname, join, resolve } from 'path';
 import { statSync, existsSync } from 'fs';
-import { get, pickBy, defaultsDeep, map, prop, pipe } from 'lodash/fp';
+import { defaultsDeep, get, pickBy } from 'lodash';
 import { strings } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 import { getUserPluginsConfig, PluginDeclaration } from './get-user-plugins-config';
@@ -36,7 +36,7 @@ const INTERNAL_PLUGINS = [
   '@strapi/review-workflows',
 ];
 
-const isStrapiPlugin = (info: PluginInfo) => get('strapi.kind', info) === 'plugin';
+const isStrapiPlugin = (info: PluginInfo) => get(info, 'strapi.kind') === 'plugin';
 
 const validatePluginName = (pluginName: string) => {
   if (!strings.isKebabCase(pluginName)) {
@@ -150,17 +150,21 @@ export const getEnabledPlugins = async (strapi: Core.Strapi, { client } = { clie
     }
   }
 
-  const declaredPluginsResolves = map(prop('pathToPlugin'), declaredPlugins);
+  const declaredPluginsResolves = Object.values(declaredPlugins).map(
+    (plugin) => plugin.pathToPlugin
+  );
   const installedPluginsNotAlreadyUsed = pickBy(
-    (p) => !declaredPluginsResolves.includes(p.pathToPlugin),
-    installedPlugins
+    installedPlugins,
+    (p) => !declaredPluginsResolves.includes(p.pathToPlugin)
   );
 
-  const enabledPlugins = pipe(
-    defaultsDeep(declaredPlugins),
-    defaultsDeep(installedPluginsNotAlreadyUsed),
-    pickBy((p: PluginMeta) => p.enabled)
-  )(internalPlugins);
+  const allPlugins = defaultsDeep(
+    {},
+    internalPlugins,
+    declaredPlugins,
+    installedPluginsNotAlreadyUsed
+  );
+  const enabledPlugins = pickBy(allPlugins, (plugin: PluginMeta) => plugin.enabled);
 
   return enabledPlugins;
 };

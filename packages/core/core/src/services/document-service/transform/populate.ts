@@ -15,9 +15,13 @@ export const transformPopulate = async (data: Data, opts: { uid: UID.Schema }) =
         If the attribute is a relation
         Look for fields in the value
         and apply the relevant transformation to these objects
+
+        The transformed value is set as a new object: a visitor must not write into the
+        `value` it is handed, which may be shared with the data the traversal was given.
       */
       if ('fields' in value && Array.isArray(value.fields)) {
-        value.fields = transformFields(value.fields);
+        set(key, { ...value, fields: transformFields(value.fields) });
+        return;
       }
 
       set(key, value);

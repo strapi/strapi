@@ -1,6 +1,5 @@
 'use strict';
 
-const { isFunction, isNil, prop } = require('lodash/fp');
 const { createStrapiInstance } = require('./strapi');
 const componentData = require('../../core/core/src/services/document-service/components');
 
@@ -18,7 +17,7 @@ const createHelpers = async ({ strapi: strapiInstance = null, ...options } = {})
   const componentsService = strapi.plugin('content-type-builder').service('components');
 
   const cleanup = async () => {
-    if (isNil(strapiInstance)) {
+    if (strapiInstance == null) {
       await strapi.destroy();
     }
   };
@@ -170,7 +169,7 @@ async function createFixturesFor(model, entries, { strapi: strapiIst } = {}) {
   const results = [];
 
   for (const entry of entries) {
-    const dataToCreate = isFunction(entry) ? entry(results) : entry;
+    const dataToCreate = typeof entry === 'function' ? entry(results) : entry;
 
     const componentValidData = await componentData.createComponents(uid, dataToCreate);
     const entryData = Object.assign(
@@ -193,7 +192,7 @@ async function deleteFixturesFor(model, entries, { strapi: strapiIst } = {}) {
 
   await strapi.db
     .query(toContentTypeUID(model))
-    .deleteMany({ where: { id: entries.map(prop('id')) } });
+    .deleteMany({ where: { id: entries.map((entry) => entry?.id) } });
 
   await cleanup();
 }
