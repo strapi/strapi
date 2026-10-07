@@ -1,5 +1,5 @@
 import { join, resolve } from 'path';
-import { get } from 'lodash/fp';
+import { get } from 'lodash';
 
 import type { Core } from '@strapi/types';
 import type { StrapiOptions } from '../Strapi';
@@ -36,6 +36,6 @@ export const getDirs = (
     contentStructure: join(appDir, 'src', 'content-structure'),
   },
   static: {
-    public: resolve(appDir, get('server.dirs.public', config)),
+    public: resolve(appDir, get(config, 'server.dirs.public')!),
   },
 });

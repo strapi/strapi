@@ -1,4 +1,4 @@
-import { isEmpty, toPath } from 'lodash/fp';
+import { isEmpty, toPath } from 'lodash';
 import { ValidationError } from 'yup';
 
 const formatYupInnerError = (yupError: ValidationError) => ({

@@ -1,6 +1,6 @@
 import type { UID } from '@strapi/types';
 
-import { curry, assoc, omit } from 'lodash/fp';
+import { curry, omit } from 'lodash';
 import {
   parseHasPublishedVersionQueryParam,
   hasPublishedVersionBooleanToPublicationFilterMode,
@@ -33,7 +33,7 @@ const transformParamsToQuery = curry((uid: UID.Schema, params: any) => {
 
   // `transformQueryParams` leaves `publicationFilter` / `hasPublishedVersion` on the query object
   // via `...rest`; the DB layer must not receive them as extra top-level keys.
-  const stripPublicationParamsFromQuery = omit([
+  const queryWithoutPublicationParams = omit(query, [
     'publicationFilter',
     'hasPublishedVersion',
   ] as const);
@@ -68,18 +68,16 @@ const transformParamsToQuery = curry((uid: UID.Schema, params: any) => {
       return existingResult;
     };
 
-    const queryWithoutPublicationParams = stripPublicationParamsFromQuery(query);
-
-    const transformedQuery = assoc(
-      'where',
-      baseWhere,
-      assoc('filters', wrappedFilters, queryWithoutPublicationParams)
-    );
+    const transformedQuery = {
+      ...queryWithoutPublicationParams,
+      filters: wrappedFilters,
+      where: baseWhere,
+    };
 
     return transformedQuery;
   }
 
-  const transformedQuery = assoc('where', baseWhere, stripPublicationParamsFromQuery(query));
+  const transformedQuery = { ...queryWithoutPublicationParams, where: baseWhere };
 
   return transformedQuery;
 });

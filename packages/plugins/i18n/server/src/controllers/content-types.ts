@@ -1,6 +1,6 @@
-import { pick, uniq, prop, getOr, flatten, pipe, map } from 'lodash/fp';
+import { get, property, flow, pick, uniq, flatten } from 'lodash';
 import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
-import type { Core, UID } from '@strapi/types';
+import type { Core, Data, UID } from '@strapi/types';
 import type { FillFromLocale } from '../../../shared/contracts/content-manager';
 import { getService } from '../utils';
 import {
@@ -12,10 +12,11 @@ const { ApplicationError } = errors;
 
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 
-const getLocalesProperty = getOr<string[]>([], 'properties.locales');
-const getFieldsProperty = prop('properties.fields');
+const getLocalesProperty = (permission: { properties?: { locales?: string[] } }): string[] =>
+  get(permission, 'properties.locales', []);
+const getFieldsProperty = property('properties.fields');
 
-const getFirstLevelPath = map((path: string) => path.split('.')[0]);
+const getFirstLevelPath = (paths: string[]) => paths.map((path) => path.split('.')[0]);
 
 const controller = {
   async getNonLocalizedAttributes(ctx) {
@@ -66,7 +67,7 @@ const controller = {
         action: [READ_ACTION, CREATE_ACTION],
         subject: model,
         role: {
-          id: user.roles.map(prop('id')),
+          id: user.roles.map((role: Pick<Data.Entity, 'id'>) => role?.id),
         },
       },
     });
@@ -75,10 +76,10 @@ const controller = {
       .filter((perm: any) => getLocalesProperty(perm).includes(locale))
       .map(getFieldsProperty);
 
-    const permittedFields = pipe(flatten, getFirstLevelPath, uniq)(localePermissions);
+    const permittedFields = flow(flatten, getFirstLevelPath, uniq)(localePermissions);
 
     const nonLocalizedFields = copyNonLocalizedAttributes(modelDef, entity);
-    const pickedFields = pick(permittedFields, nonLocalizedFields);
+    const pickedFields = pick(nonLocalizedFields, permittedFields);
 
     // Guard relations: omit fields that point to content types the user cannot read
     const sanitizedNonLocalizedFields = Object.fromEntries(
@@ -98,13 +99,13 @@ const controller = {
       });
 
     const availableLocales = availableLocalesResult.availableLocales.map((localeResult: any) =>
-      pick(['id', 'locale', PUBLISHED_AT_ATTRIBUTE], localeResult)
+      pick(localeResult, ['id', 'locale', PUBLISHED_AT_ATTRIBUTE])
     );
 
     ctx.body = {
       nonLocalizedFields: sanitizedNonLocalizedFields,
       localizations: availableLocales.concat(
-        pick(['id', 'locale', PUBLISHED_AT_ATTRIBUTE], entity)
+        pick(entity, ['id', 'locale', PUBLISHED_AT_ATTRIBUTE])
       ),
     };
   },
