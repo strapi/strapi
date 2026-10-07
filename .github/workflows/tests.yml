@@ -280,7 +280,8 @@ jobs:
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps ${{ matrix.project }}
+        # globalSetup always launches Chromium to write storage state, even for WebKit shards.
+        run: npx playwright install --with-deps chromium ${{ matrix.project }}
       - name: Monorepo build
         uses: ./.github/actions/run-build
 
@@ -437,7 +438,8 @@ jobs:
         uses: ./.github/actions/yarn-nm-install
 
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps ${{ matrix.project }}
+        # globalSetup always launches Chromium to write storage state, even for WebKit shards.
+        run: npx playwright install --with-deps chromium ${{ matrix.project }}
 
       - name: Monorepo build
         uses: ./.github/actions/run-build

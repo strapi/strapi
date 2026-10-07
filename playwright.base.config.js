@@ -124,8 +124,7 @@ const createConfig = ({ port, testDir, appDir, reportFileName, domain }) => {
      * packages/core/strapi/src/node/create-build-context.ts), but it is not covered here: the
      * admin login flow does not complete under Firefox in local runs, so every test failed at
      * login before it could exercise anything else. Support and e2e coverage are tracked
-     * separately for now — see docs/docs/guides/e2e/00-setup.md for how to run against a browser
-     * manually if you need to check Firefox behavior.
+     * separately for now.
      */
     projects: [
       {
