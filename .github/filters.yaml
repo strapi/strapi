@@ -17,6 +17,9 @@ frontend:
 api:
   - 'tests/scripts/run-api-tests.js'
   - 'tests/scripts/generate-test-app.js'
+  - 'tests/scripts/database-config.js'
+  - 'tests/scripts/__tests__/resolve-database-config.test.js'
+  - '.github/actions/run-api-tests/**'
   - 'tests/api/**'
 e2e:
   - 'tests/scripts/run-e2e-tests.js'
