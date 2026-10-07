@@ -16,7 +16,7 @@ This document explains at a high level how we create our app instance, run the e
 To run the e2e tests, you must first install the playwright browsers.
 
 ```shell
-npx playwright install
+npx playwright install chromium webkit
 ```
 
 ### Running Enterprise (EE) tests locally
@@ -40,7 +40,7 @@ Full precedence and CI behavior are documented in [CE vs EE and environment vari
 
 ### Default run
 
-Because we require a "fresh" instance to assert our e2e tests against, that is included in the testing script. After `npx playwright install` (and optional EE `.env` above), run:
+Because we require a "fresh" instance to assert our e2e tests against, that is included in the testing script. After `npx playwright install chromium webkit` (and optional EE `.env` above), run:
 
 ```shell
 yarn test:e2e
@@ -71,7 +71,7 @@ For **CI, scripts, or automation**, prefer `--reporter=line` after the inner `--
 
 ### Running specific browsers
 
-To run only a specific browser (to speed up test development, for example) you can pass `--project` to playwright with the value(s) `chromium`, `firefox`, or `webkit`
+To run only a specific browser (to speed up test development, for example) you can pass `--project` to playwright with the value(s) `chromium` or `webkit`
 
 ```shell
 yarn test:e2e --domains=admin -- login.spec.ts --project=chromium

@@ -46,6 +46,34 @@ describe('Transform relational data', () => {
     ]);
   });
 
+  describe('Fields and populate', () => {
+    it('adds documentId to fields without mutating the caller params', async () => {
+      const params = {
+        fields: ['name'],
+        populate: {
+          categories: {
+            fields: ['name'],
+            populate: { relatedCategories: { fields: ['name'] } },
+          },
+        },
+      };
+      const before = structuredClone(params);
+
+      const { fields, populate } = await transformParamsDocumentId(PRODUCT_UID, params as any);
+
+      expect(fields).toEqual(['name', 'documentId']);
+      expect(populate).toEqual({
+        categories: {
+          fields: ['name', 'documentId'],
+          populate: { relatedCategories: { fields: ['name', 'documentId'] } },
+        },
+      });
+
+      // The caller still owns `params`; reusing it must not see the added documentId.
+      expect(params).toEqual(before);
+    });
+  });
+
   describe('Shorthand syntax', () => {
     it('Shorthand syntax', async () => {
       const { data } = await transformParamsDocumentId(PRODUCT_UID, {
