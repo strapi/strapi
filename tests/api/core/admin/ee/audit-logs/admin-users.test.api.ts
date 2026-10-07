@@ -14,6 +14,7 @@ describeOnCondition(edition === 'EE')('Admin accounts in audit logs (api)', () =
   let utils: ReturnType<typeof createUtils>;
   let actingAdminId: number;
   let superAdminRoleId: number;
+  let forgotPassword: jest.SpyInstance;
 
   const actingAdmin = {
     email: 'accounts-audit-actor@test.com',
@@ -53,19 +54,11 @@ describeOnCondition(edition === 'EE')('Admin accounts in audit logs (api)', () =
     expect(logs).toHaveLength(0);
   };
 
-  // forgot-password answers before the service runs, so the row lands after the response
-  const waitForLog = async (action: string, attempts = 30) => {
-    for (let i = 0; i < attempts; i += 1) {
-      const logs = await findLogs(action);
-      if (logs.length > 0) {
-        return logs;
-      }
-      await new Promise((resolve) => {
-        setTimeout(resolve, 100);
-      });
-    }
-    return findLogs(action);
-  };
+  // forgot-password answers before the service runs, so its work, reset email included, is
+  // still in flight after the response. Left running, it outlives strapi.destroy() and fails
+  // whichever suite runs next.
+  const settleForgotPassword = () =>
+    Promise.allSettled(forgotPassword.mock.results.map((result) => result.value));
 
   const expectNoSecret = (log: { payload: unknown }, ...values: string[]) => {
     const serialized = JSON.stringify(log.payload);
@@ -101,6 +94,7 @@ describeOnCondition(edition === 'EE')('Admin accounts in audit logs (api)', () =
 
   beforeAll(async () => {
     strapi = await createStrapiInstance();
+    forgotPassword = jest.spyOn(strapi.service('admin::auth'), 'forgotPassword');
 
     // Requests run as an admin of our own: with only the default super admin in the
     // database, asserting the actor would prove nothing.
@@ -116,6 +110,7 @@ describeOnCondition(edition === 'EE')('Admin accounts in audit logs (api)', () =
   });
 
   afterAll(async () => {
+    await settleForgotPassword();
     await deleteTestUsers();
     await clearAuditLogs();
     await utils.deleteUserById(actingAdminId);
@@ -409,7 +404,8 @@ describeOnCondition(edition === 'EE')('Admin accounts in audit logs (api)', () =
       });
       expect(res.statusCode).toBe(204);
 
-      const logs = await waitForLog('admin-user.password-reset.create');
+      await settleForgotPassword();
+      const logs = await findLogs('admin-user.password-reset.create');
       expect(logs).toHaveLength(1);
       const [log] = logs;
       expect(log.user).toBeNull();
@@ -440,14 +436,15 @@ describeOnCondition(edition === 'EE')('Admin accounts in audit logs (api)', () =
       });
       expect(res.statusCode).toBe(204);
 
-      expect(await waitForLog('admin-user.password-reset.create', 5)).toHaveLength(0);
+      await settleForgotPassword();
+      await expectNoLog('admin-user.password-reset.create');
     });
   });
 
   describe('admin-user.password-reset.confirm', () => {
     const requestReset = async (email: string, id: number) => {
       await publicRq({ url: '/admin/forgot-password', method: 'POST', body: { email } });
-      await waitForLog('admin-user.password-reset.create');
+      await settleForgotPassword();
       return (await getUserRow(id)).resetPasswordToken as string;
     };
 
