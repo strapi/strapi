@@ -55,12 +55,6 @@ const StyledTable = styled(RawTable)`
      so the dates never wrap. The name cell is what absorbs the leftover and
      ellipsizes — see NameTd. */
   table-layout: auto;
-
-  & td:last-child,
-  & th:last-child {
-    width: 5.6rem;
-    white-space: nowrap;
-  }
 `;
 
 const StyledThead = styled(RawThead)`
@@ -166,6 +160,19 @@ const StyledTr = styled.tr<{
       border-bottom: 0;
     }
   }
+`;
+
+// The trailing actions column ("..." menu), sized by name rather than as the
+// last column: where the column is hidden (the Content Manager asset picker),
+// the last column is the name or the size, which must not shrink to this.
+const ActionsTd = styled(StyledTd)`
+  width: 5.6rem;
+  white-space: nowrap;
+`;
+
+const ActionsTh = styled(StyledTh)`
+  width: 5.6rem;
+  white-space: nowrap;
 `;
 
 // Leading checkbox column. Fixed narrow width so it holds its own column under
@@ -444,7 +451,7 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
       {/* The row owns click, Enter and Space; none of them should reach it from
           the menu trigger (Enter would open the details drawer). */}
       {showItemActions && (
-        <StyledTd
+        <ActionsTd
           {...ASSET_ITEM_CONTROL_PROPS}
           onClick={stopRowEvent}
           onKeyDown={stopRowEvent}
@@ -453,7 +460,7 @@ const AssetRow = ({ asset, orderedItemKeys, onAssetItemClick }: AssetRowProps) =
           <Flex justifyContent="flex-end">
             <AssetActionsMenu asset={asset} dragData={dragData} />
           </Flex>
-        </StyledTd>
+        </ActionsTd>
       )}
     </StyledTr>
   );
@@ -631,11 +638,11 @@ const FolderRow = ({ folder, orderedItemKeys }: FolderRowProps) => {
       {/* The row owns click, Enter and Space; none of them should reach it from
           the menu trigger (Enter would navigate into the folder). */}
       {showItemActions && (
-        <StyledTd onClick={stopRowEvent} onKeyDown={stopRowEvent} onPointerDown={stopRowEvent}>
+        <ActionsTd onClick={stopRowEvent} onKeyDown={stopRowEvent} onPointerDown={stopRowEvent}>
           <Flex justifyContent="flex-end">
             <FolderActionsMenu folder={folder} dragData={dragData} />
           </Flex>
-        </StyledTd>
+        </ActionsTd>
       )}
     </FolderTr>
   );
@@ -735,14 +742,14 @@ export const AssetsTable = ({
 
             if (isVisuallyHidden) {
               return (
-                <StyledTh key={header.name} $flex={header.name === 'name'}>
+                <ActionsTh key={header.name}>
                   <VisuallyHidden>
                     {formatMessage({
                       id: getTranslationKey('table.header.actions'),
                       defaultMessage: 'actions',
                     })}
                   </VisuallyHidden>
-                </StyledTh>
+                </ActionsTh>
               );
             }
 
