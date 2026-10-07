@@ -304,4 +304,98 @@ describe('createComponentRelationFilter', () => {
     expect(kept).toBe(relations);
     expect(queriedTables).toEqual([]);
   });
+
+  it('keeps querying later parents for ids past the first batch', async () => {
+    const linkIds = Array.from({ length: 501 }, (_, i) => i + 1);
+    const plain = contentTypes[PLAIN_HOST_UID] as any;
+    const previous = plain.options.draftAndPublish;
+    plain.options.draftAndPublish = true;
+
+    try {
+      const { queriedTables } = setupStrapi({
+        tables: {
+          dp_hosts_cmps: linkIds.slice(0, 500).map((id) => owns(10, LINK_UID, id)),
+          plain_hosts_cmps: [owns(20, LINK_UID, 501)],
+        },
+      });
+
+      const kept = await filterRelationsToPropagate(linkRelations(linkIds), linkSchema, {});
+
+      expect(kept).toEqual([]);
+      expect(queriedTables).toEqual(['dp_hosts_cmps', 'dp_hosts_cmps', 'plain_hosts_cmps']);
+    } finally {
+      plain.options.draftAndPublish = previous;
+    }
+  });
+
+  it('does not stop before a later draft-and-publish parent that owns a remaining id', async () => {
+    const dp = contentTypes[DP_HOST_UID] as any;
+    const plain = contentTypes[PLAIN_HOST_UID] as any;
+    const previousDp = dp.options.draftAndPublish;
+    const previousPlain = plain.options.draftAndPublish;
+    dp.options.draftAndPublish = false;
+    plain.options.draftAndPublish = true;
+
+    try {
+      const { queriedTables } = setupStrapi({
+        tables: {
+          dp_hosts_cmps: [owns(10, LINK_UID, 1)],
+          plain_hosts_cmps: [owns(20, LINK_UID, 2)],
+        },
+      });
+
+      const kept = await filterRelationsToPropagate(linkRelations([1, 2]), linkSchema, {});
+
+      expect(kept.map((relation) => relation.link_id)).toEqual([1]);
+      expect(queriedTables).toEqual(['dp_hosts_cmps', 'plain_hosts_cmps']);
+    } finally {
+      dp.options.draftAndPublish = previousDp;
+      plain.options.draftAndPublish = previousPlain;
+    }
+  });
+
+  it('resolves two levels of nesting and does not confuse equal ids of different component types', async () => {
+    const SECTION_UID = 'default.section';
+    components[SECTION_UID] = {
+      uid: SECTION_UID,
+      modelType: 'component',
+      modelName: 'section',
+      collectionName: 'components_default_sections',
+      attributes: { card: { type: 'component', component: CARD_UID } },
+    } as any;
+
+    const dpBlocks = (contentTypes[DP_HOST_UID] as any).attributes.blocks.components as string[];
+    const plainBlocks = (contentTypes[PLAIN_HOST_UID] as any).attributes.blocks
+      .components as string[];
+    dpBlocks.push(SECTION_UID);
+    plainBlocks.push(SECTION_UID);
+
+    try {
+      // Link 5 → card 5 → section 5 → draft-and-publish host.
+      // Link 6 → card 6 → section 6 → plain host.
+      // The shared id 5 must not be treated as the link's direct parent.
+      setupStrapi({
+        tables: {
+          dp_hosts_cmps: [owns(10, SECTION_UID, 5)],
+          plain_hosts_cmps: [owns(20, SECTION_UID, 6)],
+          components_default_sections_cmps: [owns(5, CARD_UID, 5), owns(6, CARD_UID, 6)],
+          components_default_cards_cmps: [owns(5, LINK_UID, 5), owns(6, LINK_UID, 6)],
+        },
+        registeredTables: [
+          'dp_hosts_cmps',
+          'plain_hosts_cmps',
+          'components_default_cards_cmps',
+          'components_default_sections_cmps',
+        ],
+      });
+
+      const kept = await filterRelationsToPropagate(linkRelations([5, 6]), linkSchema, {});
+
+      expect(kept.map((relation) => relation.link_id)).toEqual([6]);
+    } finally {
+      delete components[SECTION_UID];
+      dpBlocks.pop();
+      plainBlocks.pop();
+    }
+  });
 });

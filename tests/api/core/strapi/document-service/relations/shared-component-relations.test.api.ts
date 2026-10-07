@@ -126,6 +126,36 @@ const getLinksTargeting = async (targetId: number) => {
   return rows.map((row) => row[linkColumn]).sort((a, b) => a - b);
 };
 
+/**
+ * Leave a single relation row for this link, pointing at one target version.
+ * Creating against a published document also stores a draft row; discard must see
+ * a published-only row.
+ */
+const pointLinkOnlyAt = async (linkId: number, targetId: number) => {
+  const { name, linkColumn, targetColumn } = getLinkJoinTable();
+  const rows = await strapi.db.connection(name).select('*').where(linkColumn, linkId);
+
+  if (rows.length === 0) {
+    throw new Error(`no link rows for ${linkId}`);
+  }
+
+  await strapi.db.connection(name).where(linkColumn, linkId).whereNot(targetColumn, targetId).del();
+
+  const remaining = await strapi.db.connection(name).select('*').where(linkColumn, linkId);
+
+  if (remaining.length === 1 && remaining[0][targetColumn] === targetId) {
+    return;
+  }
+
+  if (remaining.length !== 0) {
+    throw new Error(`expected one remaining link row for ${linkId}, found ${remaining.length}`);
+  }
+
+  const template = { ...rows[0] };
+  delete template.id;
+  await strapi.db.connection(name).insert({ ...template, [targetColumn]: targetId });
+};
+
 const getTargetVersions = async () => {
   const versions = await strapi.db.query(TARGET_UID).findMany({ where: { name: 'Target' } });
   return {
@@ -243,5 +273,62 @@ describe('Document Service relations held by a component shared across content t
       sortIds([...linkIds.draftAndPublishOwner, ...linkIds.plainOwner, linkIds.orphan])
     );
     expect(queries.filter(isSchemaQuery)).toEqual([]);
+  });
+
+  it('copies a published-only relation onto the new draft only when the owner has no draft and publish', async () => {
+    await strapi.documents(TARGET_UID).publish({ documentId: targetDocumentId });
+    const before = await getTargetVersions();
+
+    const plain = await strapi.documents(hostUid('plain-host-a')).create({
+      data: {
+        name: 'published-only-plain',
+        blocks: [
+          {
+            __component: LINK_UID,
+            label: 'published-only-plain',
+            target: { documentId: targetDocumentId },
+          },
+        ],
+      } as any,
+      populate: populateBlocks as any,
+    });
+    const dp = await strapi.documents(hostUid('dp-host-a')).create({
+      data: {
+        name: 'published-only-dp',
+        blocks: [
+          {
+            __component: LINK_UID,
+            label: 'published-only-dp',
+            target: { documentId: targetDocumentId },
+          },
+        ],
+      } as any,
+      populate: populateBlocks as any,
+    });
+
+    const plainLinkId = plain.blocks[0].id as number;
+    const dpLinkId = dp.blocks[0].id as number;
+
+    // Creating against the document id stores a draft row as well. Leave only the
+    // published row, so discard has to decide whether to copy it.
+    await pointLinkOnlyAt(plainLinkId, before.published.id);
+    await pointLinkOnlyAt(dpLinkId, before.published.id);
+
+    const draftLinksBefore = await getLinksTargeting(before.draft.id);
+    expect(draftLinksBefore).not.toContain(plainLinkId);
+    expect(draftLinksBefore).not.toContain(dpLinkId);
+    expect(await getLinksTargeting(before.published.id)).toEqual(
+      expect.arrayContaining([plainLinkId, dpLinkId])
+    );
+
+    await strapi.documents(TARGET_UID).discardDraft({ documentId: targetDocumentId });
+
+    const after = await getTargetVersions();
+    const newDraftLinks = await getLinksTargeting(after.draft.id);
+    const publishedLinks = await getLinksTargeting(after.published.id);
+
+    expect(newDraftLinks).toContain(plainLinkId);
+    expect(newDraftLinks).not.toContain(dpLinkId);
+    expect(publishedLinks).toEqual(expect.arrayContaining([plainLinkId, dpLinkId]));
   });
 });
