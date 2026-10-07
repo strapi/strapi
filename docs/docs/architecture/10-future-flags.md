@@ -5,31 +5,45 @@ description: 'Feature flags that enable unstable features for testing and commun
 
 In Strapi, we have incoming features that are not yet ready to be shipped to all users, but we aim to keep them updated with our codebase. Additionally, we want to offer community users the opportunity to provide early feedback on these new features or changes.
 
-To achieve this, we utilize future flags, which provide a way to enable unstable features **at your own risk**. Please considered that these flags may be subject to change, removal and it's possible that they contain breaking changes.
+To achieve this, we use future flags, which enable unstable features **at your own risk**. These flags may change or be removed, and they may contain breaking changes.
 
-Future flags can be used for unstable features that have not yet been shipped. So, if you decide to enable an unstable feature (prefixed with `unstable`), please be aware that this feature is likely to be modified or even removed. It's also highly probable that this unstable feature is not fully ready for use; some parts may still be under development or using mock data at the moment.
+A future flag gates a feature that has not shipped yet. Enabling one means the feature is likely to change or be removed, and parts of it may still be under development.
 
-Once such a feature is complete enough to be tested against real use, its flag is prefixed with `beta` instead. A beta feature is expected to work end to end and its opt-in surface (config key, route, menu entry) is already the one it will ship with, so enabling it does not commit you to a rename later. It may still change before general availability.
+The flags Strapi declares are listed in `FeaturesFutureFlags` ([`features.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/types/src/core/config/features.ts)):
 
-Additionally, future flags can be utilized for enabling coming breaking changes in upcoming versions (when prefixed by `vX`, with 'X' being the target version). In this scenario, if you decide to enable a future flag for a breaking change, please consider that you will need to migrate your application to adapt to this breaking change.
+| Flag                            | Gates                                                         |
+| ------------------------------- | ------------------------------------------------------------- |
+| `experimental_firstPublishedAt` | The `firstPublishedAt` attribute on draft and publish content |
+| `unstableNextDesignSystem`      | Building the admin panel against the next design system       |
 
-## How to enable a future flag.
+The type also accepts any other string key, so a plugin can read its own flag without changing `@strapi/types`.
 
-To enable a future flag, you should add it to your config/features.(js|ts) file in your Strapi application. If you don't have this file, create one.
+## How to enable a future flag
+
+Add the flag under `future` in the `config/features.(js|ts)` file of your Strapi application. Create the file if it does not exist.
 
 ```ts
 // config/features.ts
 
-export default {
+export default ({ env }) => ({
   future: {
-    unstableFeatureName: true,
-    v5breakingChange: env('STRAPI_FEATURES_FUTURE_V5BREAKINGCHANGE', false),
+    unstableNextDesignSystem: true,
+    experimental_firstPublishedAt: env.bool('STRAPI_FEATURES_FUTURE_FIRST_PUBLISHED_AT', false),
   },
-};
+});
 ```
 
-## How to add and start using a future flag.
+## How to add and read a future flag
 
-Developers are responsible for adding new future flags if they intend to introduce a new unstable feature into the Strapi codebase. Features config is part of the config object and can be easily accessed with `strapi.config.get('features')`.
+Developers who introduce an unstable feature add its flag to `FeaturesFutureFlags`. The features config is part of the config object, so `strapi.config.get('features')` returns it.
 
-We also provide an API in the strapi object that allows you to check if a future flag is enabled. You can do this using the following method: `strapi.future.isEnabled('featureName')`.
+To check a flag, use the API for your side of the code:
+
+- **Server**: `strapi.features.future.isEnabled('flagName')`. The `features` service is created in [`services/features.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/features.ts). There is no `strapi.future` object.
+- **Admin panel**: `window.strapi.future.isEnabled('flagName')`. The admin reads the features config that was passed in when the admin panel was built ([`browserStrapi.ts`](https://github.com/strapi/strapi/blob/develop/packages/core/admin/admin/src/utils/browserStrapi.ts)).
+
+Both return `true` only when the flag is set to `true`.
+
+## Permanent flags are not future flags
+
+A flag at the top level of `features` (for example `useLegacyMediaLibrary`) is supported configuration, not an unstable preview. Read it with `strapi.features.isEnabled('flagName')` on the server and `window.strapi.featureFlags.isEnabled('flagName')` in the admin panel.
