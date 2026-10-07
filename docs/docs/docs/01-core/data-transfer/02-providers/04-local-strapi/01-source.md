@@ -8,11 +8,11 @@ tags:
 
 # Local Strapi Source Provider
 
-This provider will retrieve data from an initialized `strapi` instance using its Entity Service and Query Engine.
+This provider will retrieve data from an initialized `strapi` instance using its Query Engine (`strapi.db.query`).
 
 ## Provider Options
 
-The accepted options are defined in `ILocalFileSourceProviderOptions`.
+The accepted options are defined in `ILocalStrapiSourceProviderOptions`.
 
 ```typescript
   getStrapi(): Strapi.Strapi | Promise<Strapi.Strapi>; // return an initialized instance of Strapi
