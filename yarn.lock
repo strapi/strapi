@@ -6310,6 +6310,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@piwitests/reporter@npm:0.45.0":
+  version: 0.45.0
+  resolution: "@piwitests/reporter@npm:0.45.0"
+  dependencies:
+    form-data: "npm:^4.0.0"
+  peerDependencies:
+    "@playwright/test": ^1.61.1
+  bin:
+    piwi: dist/cli/index.js
+  checksum: 10c0/c4a44ca9e664e02a907241af5695cca3ad529fbf40615dd952aca5511bd0d1ff8f9ddca82d94ef1f88621da15f02f44a6cdf09c8571ea27a6cab90ae05b0130b
+  languageName: node
+  linkType: hard
+
 "@pkgr/core@npm:^0.3.6":
   version: 0.3.6
   resolution: "@pkgr/core@npm:0.3.6"
@@ -28647,6 +28660,7 @@ __metadata:
     "@commitlint/config-conventional": "npm:19.1.0"
     "@commitlint/prompt-cli": "npm:19.2.0"
     "@nx/js": "npm:20.8.4"
+    "@piwitests/reporter": "npm:0.45.0"
     "@playwright/test": "npm:1.56.1"
     "@rollup/plugin-commonjs": "npm:28.0.9"
     "@rollup/plugin-dynamic-import-vars": "npm:2.1.5"

@@ -133,6 +133,7 @@
     "@commitlint/config-conventional": "19.1.0",
     "@commitlint/prompt-cli": "19.2.0",
     "@nx/js": "20.8.4",
+    "@piwitests/reporter": "0.45.0",
     "@playwright/test": "1.56.1",
     "@rollup/plugin-commonjs": "28.0.9",
     "@rollup/plugin-dynamic-import-vars": "2.1.5",
