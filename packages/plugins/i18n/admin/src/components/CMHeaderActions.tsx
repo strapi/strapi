@@ -8,7 +8,6 @@ import {
   useAPIErrorHandler,
   useForm,
 } from '@strapi/admin/strapi-admin';
-import { useAIAvailability } from '@strapi/admin/strapi-admin/ee';
 import {
   type DocumentActionComponent,
   type DocumentActionProps,
@@ -37,6 +36,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { useAILocalizationJobsPolling } from '../hooks/useAILocalizationJobsPolling';
+import { useAITranslationsAvailability } from '../hooks/useAITranslations';
 import { useI18n } from '../hooks/useI18n';
 import { useGetAILocalizationJobsByDocumentQuery } from '../services/aiLocalizationJobs';
 import { useLazyGetFillFromLocaleDataQuery } from '../services/fillFromLocale';
@@ -122,7 +122,7 @@ const LocaleOptionStartIcon = ({
   translationStatus?: 'processing' | 'failed' | 'completed' | undefined;
   index?: number;
 }) => {
-  const isAiAvailable = useAIAvailability();
+  const isAiAvailable = useAITranslationsAvailability();
 
   if (!entryWithLocaleExists) {
     return <Plus />;
@@ -159,7 +159,7 @@ const LocalePickerAction = ({
     collectionType: collectionType!,
   });
   const { data: settings } = useGetSettingsQuery();
-  const isAiAvailable = useAIAvailability();
+  const isAiAvailable = useAITranslationsAvailability();
 
   const handleSelect = React.useCallback(
     (value: string) => {
@@ -376,7 +376,7 @@ const SpinningLoader = styled(Loader)`
 
 const AITranslationStatusAction = ({ documentId, model, collectionType }: HeaderActionProps) => {
   const { formatMessage } = useIntl();
-  const isAIAvailable = useAIAvailability();
+  const isAIAvailable = useAITranslationsAvailability();
   const { data: settings } = useGetSettingsQuery();
   const isAISettingEnabled = settings?.data?.aiLocalizations;
   const { hasI18n } = useI18n();
@@ -494,7 +494,7 @@ const FillFromAnotherLocaleAction = ({
     useLazyGetFillFromLocaleDataQuery();
   const { data: locales = [] } = useGetLocalesQuery();
 
-  const isAIAvailable = useAIAvailability();
+  const isAIAvailable = useAITranslationsAvailability();
   const { data: settings } = useGetSettingsQuery();
   const isAISettingEnabled = settings?.data?.aiLocalizations;
 

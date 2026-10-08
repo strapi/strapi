@@ -44,7 +44,7 @@ jobs:
         id: app-token
         with:
           app-id: ${{ secrets.DRAFT_RELEASE_APP_ID }}
-          private-key: ${{ secrets.DRAFT_RELEASE_APP_SECRET }}
+          private-key: ${{ secrets.DRAFT_RELEASE_APP_PRIVATE_KEY }}
 
       - uses: actions/checkout@v6
         with:

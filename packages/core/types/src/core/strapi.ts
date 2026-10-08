@@ -34,6 +34,7 @@ export interface Strapi extends Container {
    * @see {@link https://docs.strapi.io/dev-docs/api/document-service} Document Service API
    */
   documents: Modules.Documents.Service;
+  localization: Modules.Localization.Service;
   telemetry: Modules.Metrics.TelemetryService;
   requestContext: Modules.RequestContext.RequestContext;
   customFields: Modules.CustomFields.CustomFields;
@@ -48,10 +49,27 @@ export interface Strapi extends Container {
   ee: {
     seats: number | null | undefined;
     type: string | null | undefined;
+    expireAt?: string | null | undefined;
     isEE: boolean;
     isTrial: boolean;
     subscriptionId?: string | null | undefined;
     planPriceId?: string | null | undefined;
+    licenseStatus: 'none' | 'active' | 'expired' | 'unknown';
+    // ISO date string from the license registry (a timestamp is also accepted)
+    renewalDate: string | number | null;
+    planFeatureCatalog: string[];
+    retainedLicense: {
+      features?: Array<
+        { name: string; options?: Record<string, unknown>; [key: string]: unknown } | string
+      >;
+      expireAt?: string;
+      seats?: number;
+      type?: string;
+      isTrial?: boolean;
+      subscriptionId?: string;
+      planPriceId?: string;
+      renewalDate?: string | number;
+    } | null;
     getTrialEndDate: ({
       strapi,
     }: {
@@ -61,6 +79,30 @@ export interface Strapi extends Container {
       isEnabled: (feature: string) => boolean;
       list: () => { name: string; [key: string]: any }[];
       get: (feature: string) => string | { name: string; [key: string]: any } | undefined;
+    };
+    entitlements: {
+      register: (input: {
+        feature: string;
+        limits: Array<{
+          key: string;
+          unit?: 'days' | 'count';
+          // Handed the feature as the license lists it (live, or a lapsed license's retained
+          // snapshot); returns the limit the feature enforces.
+          get: (
+            feature?:
+              | string
+              | { name: string; options?: Record<string, unknown>; [key: string]: unknown }
+          ) => unknown;
+        }>;
+      }) => void;
+      list: () => Array<{
+        feature: string;
+        limits: Array<{ key: string; unit?: 'days' | 'count'; value: number | null }>;
+      }>;
+      listRetained: () => Array<{
+        feature: string;
+        limits: Array<{ key: string; unit?: 'days' | 'count'; value: number | null }>;
+      }>;
     };
   };
   features: Modules.Features.FeaturesService;
@@ -102,6 +144,32 @@ export interface Strapi extends Container {
   start(): Promise<Strapi>;
   destroy(): Promise<void>;
   sendStartupTelemetry(): void;
+  // Keep this shape in sync with `detectCustomizations` in
+  // @strapi/core (packages/core/core/src/utils/detect-customizations.ts).
+  getCustomizations: () => {
+    apis: Array<{
+      uid: string;
+      customController: boolean;
+      customService: boolean;
+      customRoutes: boolean;
+    }>;
+    // Every registered controller (api::, plugin::, admin::)
+    controllers: Array<{ uid: string; custom: boolean }>;
+    // Plugins overridden through src/extensions
+    extendedPlugins: string[];
+    // customControllers spans every namespace; the other two are per api
+    counts: { customControllers: number; customServices: number; customRoutes: number };
+    srcIndex: {
+      present: boolean;
+      registerDefined: boolean;
+      registerNonEmpty: boolean;
+      bootstrapDefined: boolean;
+      bootstrapNonEmpty: boolean;
+      destroyDefined: boolean;
+      destroyNonEmpty: boolean;
+      beyondTemplate: boolean;
+    };
+  };
   openAdmin({ isInitialized }: { isInitialized: boolean }): void;
   postListen(): Promise<void>;
   listen(): Promise<void>;
@@ -161,6 +229,7 @@ export interface StrapiDirectories {
     policies: string;
     middlewares: string;
     config: string;
+    contentStructure: string;
   };
   dist: {
     root: string;
@@ -171,5 +240,6 @@ export interface StrapiDirectories {
     policies: string;
     middlewares: string;
     config: string;
+    contentStructure: string;
   };
 }

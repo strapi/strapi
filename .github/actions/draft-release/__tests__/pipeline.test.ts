@@ -1,7 +1,7 @@
 import * as assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { createJournal } from '../lib/journal.ts';
+import { createJournal, mutationFailure } from '../lib/journal.ts';
 import { EXPERIMENTAL_LABEL, preflightRelease, runDraftRelease } from '../lib/pipeline.ts';
 import { renderBody } from '../lib/report.ts';
 import { SHA, candidateHead, candidatePull } from '../lib/__fixtures__/fixtures.ts';
@@ -93,7 +93,7 @@ function scenario(overrides: Overrides = {}): {
         base: { ref: 'develop' },
         head: { ref: 'fix/upload-bulk-bar', sha: 'a'.repeat(40) },
         user: { login: 'dev-a' },
-        milestone: { title: '5.52.4' },
+        milestone: { number: 430, title: '5.52.4' },
       },
     ],
     [FEAT_SHA]: [
@@ -106,7 +106,7 @@ function scenario(overrides: Overrides = {}): {
         base: { ref: 'develop' },
         head: { ref: 'feat/audit-logs', sha: 'b'.repeat(40) },
         user: { login: 'dev-b' },
-        milestone: { title: '5.52.4' },
+        milestone: { number: 430, title: '5.52.4' },
       },
     ],
   };
@@ -275,6 +275,35 @@ describe('runDraftRelease', () => {
     assert.equal(firstMilestoneWrite, 3);
   });
 
+  it('records a GitHub server failure as indeterminate after earlier writes', async () => {
+    const context = scenario({
+      gh: {
+        async createPull() {
+          throw mutationFailure('GitHub POST failed: 503 service unavailable', 'unknown');
+        },
+      },
+    });
+    const journal = createJournal({ apply: true, clock: CLOCK });
+
+    await assert.rejects(
+      () =>
+        runDraftRelease({
+          inputs: { version: '', dryRun: false },
+          git: context.git,
+          gh: context.gh,
+          journal,
+          request: context.request,
+          logger: { info() {} },
+          clock: CLOCK,
+        }),
+      /503 service unavailable/u
+    );
+
+    assert.equal(journal.entries()[0]?.state, 'applied');
+    assert.equal(journal.entries()[1]?.op, 'pr.create');
+    assert.equal(journal.entries()[1]?.state, 'indeterminate');
+  });
+
   it('renames, opens the next milestone, then closes the shipping one', async () => {
     const { calls } = await run({ dryRun: false });
 
@@ -311,6 +340,31 @@ describe('runDraftRelease', () => {
     // on the one their authors picked.
     assert.equal(calls.includes('setIssueMilestone:27436:430'), true);
     assert.equal(calls.includes('setIssueMilestone:27509:430'), true);
+  });
+
+  it('records created IDs and numeric milestone assignments needed for rollback', async () => {
+    const { result } = await run({ dryRun: false });
+    const createdPull = result.journal.entries.find((entry) => entry.op === 'pr.create');
+    const createdMilestone = result.journal.entries.find(
+      (entry) => entry.op === 'milestone.create'
+    );
+    const realigned = result.journal.entries.find(
+      (entry) => entry.op === 'issue.milestone.set' && entry.target === 'issues/27436'
+    );
+    const moved = result.journal.entries.find(
+      (entry) => entry.op === 'issue.milestone.set' && entry.target === 'issues/27600'
+    );
+
+    assert.equal(createdPull?.target, 'pulls/27700');
+    assert.equal(createdMilestone?.target, 'milestone/431');
+    assert.deepEqual(
+      { before: realigned?.before, after: realigned?.after },
+      { before: '430', after: '430' }
+    );
+    assert.deepEqual(
+      { before: moved?.before, after: moved?.after },
+      { before: '430', after: '431' }
+    );
   });
 
   it('keeps the release back-merge out of the shipping set and out of the drift report', async () => {
@@ -636,6 +690,47 @@ describe('runDraftRelease, candidate in flight', () => {
     assert.equal(calls.includes('updatePullBody:27600'), true);
   });
 
+  it('revalidates a no-op candidate head before the first write', async () => {
+    let candidateReads = 0;
+    const context = scenario(
+      inFlight(FEAT_SHA, {
+        git: {
+          resolveSha(ref) {
+            if (ref === 'v5.52.3') {
+              return '0'.repeat(40);
+            }
+
+            if (ref.startsWith('origin/releases/') === true) {
+              candidateReads += 1;
+
+              return candidateReads === 1 ? FEAT_SHA : SHA.CANDIDATE_HEAD;
+            }
+
+            return FEAT_SHA;
+          },
+        },
+      })
+    );
+    const journal = createJournal({ apply: true, clock: CLOCK });
+
+    await assert.rejects(
+      () =>
+        runDraftRelease({
+          inputs: { version: '', dryRun: false },
+          git: context.git,
+          gh: context.gh,
+          journal,
+          request: context.request,
+          logger: { info() {} },
+          clock: CLOCK,
+        }),
+      /moved from the pinned head .* after preflight/u
+    );
+
+    assert.deepEqual(journal.entries(), []);
+    assert.deepEqual(context.calls, ['fetchBranch:releases/5.53.0', 'fetchBranch:releases/5.53.0']);
+  });
+
   // Only the containment check fails. The range pin asks the same question of the baseline tag,
   // and answering `false` there would stop the run for the wrong reason.
   const diverged: Partial<GitAdapter> = {
@@ -774,6 +869,16 @@ describe('runDraftRelease, redraft', () => {
     assert.deepEqual(
       calls.filter((call) => call.startsWith('updateMilestone:')),
       ['updateMilestone:430:{"title":"5.53.0"}', 'updateMilestone:431:{"title":"5.53.1"}']
+    );
+  });
+
+  it('moves the current next milestone before an adjacent-version redraft claims its title', async () => {
+    const { calls, result } = await run({ dryRun: false, version: '5.52.5' }, drifted());
+
+    assert.equal(result.mode, 'redraft');
+    assert.deepEqual(
+      calls.filter((call) => call.startsWith('updateMilestone:')),
+      ['updateMilestone:431:{"title":"5.52.6"}', 'updateMilestone:430:{"title":"5.52.5"}']
     );
   });
 

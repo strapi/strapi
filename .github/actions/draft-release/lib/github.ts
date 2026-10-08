@@ -1,3 +1,5 @@
+import { mutationFailure } from './journal.ts';
+
 import type { GithubAdapter, RepositoryCoords } from './types.ts';
 
 /**
@@ -50,11 +52,13 @@ export function parseNextLink(header: string | null): string | null {
 /**
  * A failure the server answered.
  *
- * The status travels on the error so the write journal can tell a refused mutation from one whose
- * outcome nobody can vouch for. See `classifyFailure` in [`journal.ts`](journal.ts).
+ * A 4xx response refuses the request. A 5xx response can arrive after the server applied a write,
+ * so its mutation outcome remains unknown.
  */
 function answeredFailure(message: string, status: number): Error {
-  return Object.assign(new Error(message), { status });
+  const outcome = status >= 400 && status < 500 ? 'refused' : 'unknown';
+
+  return Object.assign(mutationFailure(message, outcome), { status });
 }
 
 async function describeFailure(response: HttpResponse): Promise<string> {

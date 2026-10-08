@@ -27,13 +27,15 @@ type GenerateOptions = {
   plopFile?: string;
 };
 
-type GeneratorAction = {
+type GeneratorFileAction = {
   type: 'add' | 'modify';
   path: string;
   templateFile?: string;
   data?: Record<string, any>;
   transform?: (content: string) => string;
 };
+
+type GeneratorAction = GeneratorFileAction | ((options: Record<string, any>) => unknown);
 
 export const generate = async <T extends Record<string, any>>(
   generatorName: string,
@@ -103,6 +105,11 @@ const executeActions = async (
   dir: string
 ) => {
   for (const action of actions) {
+    if (typeof action === 'function') {
+      await action(options);
+      continue;
+    }
+
     const outputPath = handlebars.compile(action.path)(options);
     const fullPath = join(dir, 'src', outputPath);
 

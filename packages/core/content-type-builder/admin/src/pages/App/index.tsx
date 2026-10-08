@@ -9,7 +9,7 @@ import { useIntl } from 'react-intl';
 import { Route, Routes } from 'react-router-dom';
 
 import { Chat } from '../../components/AIChat/Chat';
-import { prefetchAIToken } from '../../components/AIChat/lib/aiClient';
+import { usePrefetchAIToken } from '../../components/AIChat/hooks/usePrefetchAIToken';
 import { ChatProvider } from '../../components/AIChat/providers/ChatProvider';
 import { AutoReloadOverlayBlockerProvider } from '../../components/AutoReloadOverlayBlocker';
 import { ContentTypeBuilderNav } from '../../components/ContentTypeBuilderNav/ContentTypeBuilderNav';
@@ -36,10 +36,7 @@ const App = () => {
   const state = useGuidedTour('ContentTypeBuilderApp', (s) => s.state);
   const dispatch = useGuidedTour('ContentTypeBuilderApp', (s) => s.dispatch);
 
-  // Prefetch AI token on initial load
-  useEffect(() => {
-    prefetchAIToken();
-  }, []);
+  usePrefetchAIToken();
 
   // Set tour type based on AI availability when the app loads
   useEffect(() => {

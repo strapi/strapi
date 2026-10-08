@@ -1,5 +1,5 @@
 /* eslint-disable no-continue */
-import { keyBy, omit } from 'lodash/fp';
+import { keyBy, omit } from 'lodash';
 import type { Data, UID } from '@strapi/types';
 import type { Database, JoinTable } from '@strapi/database';
 
@@ -63,7 +63,7 @@ const getCounterparts = async (
       ? await counterpartsQuery.whereNotNull('published_at')
       : await counterpartsQuery.whereNull('published_at');
 
-  const counterpartByDocument = keyBy(entryKey, counterparts);
+  const counterpartByDocument = keyBy(counterparts, entryKey);
 
   return drafts.reduce(
     (
@@ -251,7 +251,7 @@ const sync = async (
 ) => {
   if (relationData.length === 0) return;
 
-  const targetEntriesByLocale = keyBy('locale', targetEntries);
+  const targetEntriesByLocale = keyBy(targetEntries, 'locale');
 
   // Keys stringified for object lookup; values keep the original DB type so PostgreSQL integer columns receive integers, not strings
   const idMapping = sourceEntries.reduce(
@@ -282,7 +282,7 @@ const sync = async (
           if (newSourceId == null || newTargetId == null) return null;
 
           return {
-            ...omit(strapi.db.metadata.identifiers.ID_COLUMN, relation),
+            ...omit(relation, strapi.db.metadata.identifiers.ID_COLUMN),
             [sourceColumn]: newSourceId,
             [targetColumn]: newTargetId,
           };

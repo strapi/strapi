@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/types';
-import { flow, map, sum, size, mean, max, defaultTo } from 'lodash/fp';
+import { defaultTo, map, size, mean, max, sum } from 'lodash';
 import { add } from 'date-fns';
 import { getService } from '../../utils';
 
@@ -14,7 +14,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
   const getMetricsStoreValue = async () => {
     const value = await strapi.store.get({ type: 'plugin', name: 'ee', key: 'metrics' });
-    return defaultTo({}, value);
+    return defaultTo(value, {});
   };
 
   const setMetricsStoreValue = (value: unknown) =>
@@ -25,15 +25,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       // There will never be more than 200 workflow, so we can safely fetch them all
       const workflows = await workflowsService.find({ populate: 'stages' });
 
-      const stagesCount = flow(
-        map('stages'), // Number of stages per workflow
-        map(size)
-      )(workflows);
+      const stagesCount = map(workflows, (workflow) => size(workflow.stages));
 
-      const contentTypesCount = flow(
-        map('contentTypes'), // Number of content types per workflow
-        map(size)
-      )(workflows);
+      const contentTypesCount = map(workflows, (workflow) => size(workflow.contentTypes));
 
       return {
         numberOfActiveWorkflows: size(workflows),
