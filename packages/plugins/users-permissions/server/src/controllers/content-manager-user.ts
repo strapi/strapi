@@ -3,6 +3,7 @@ import type { Core, UID } from '@strapi/types';
 import _ from 'lodash';
 import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
 import type { PluginContext, AdvancedSettings } from '../types';
+import { createExtensibleController } from './create-extensible-controller';
 import { validateCreateUserBody, validateUpdateUserBody } from './validation/user';
 
 const { ApplicationError, NotFoundError, ForbiddenError } = errors;
@@ -46,7 +47,7 @@ const findEntityAndCheckPermissions = async (
 };
 
 /** Create controller actions for this Strapi instance. */
-export default ({ strapi }: PluginContext) => ({
+export default createExtensibleController(({ strapi }: PluginContext) => ({
   /**
    * Create a/an user record.
    * @return {Object}
@@ -179,4 +180,4 @@ export default ({ strapi }: PluginContext) => ({
 
     ctx.body = await pm.sanitizeOutput(data, { action: ACTIONS.read });
   },
-});
+}));

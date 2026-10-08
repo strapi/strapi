@@ -3,6 +3,7 @@ import type { Core } from '@strapi/types';
 import _ from 'lodash';
 import { async, errors } from '@strapi/utils';
 import type { PluginContext } from '../types';
+import { createExtensibleController } from './create-extensible-controller';
 import { getService } from '../utils';
 import { validateDeleteRoleBody } from './validation/user';
 
@@ -16,7 +17,7 @@ const sanitizeOutput = async (strapi: Core.Strapi, role: unknown) => {
 };
 
 /** Create controller actions for this Strapi instance. */
-export default ({ strapi }: PluginContext) => ({
+export default createExtensibleController(({ strapi }: PluginContext) => ({
   /**
    * Default action.
    *
@@ -89,4 +90,4 @@ export default ({ strapi }: PluginContext) => ({
 
     ctx.send({ ok: true });
   },
-});
+}));
