@@ -70,11 +70,9 @@ const createCustomOrderService = ({ strapi }: { strapi: Core.Strapi }) => {
 
     refresh()
       .catch((error: unknown) => {
-        strapi.log.warn(
-          `[custom-order] Could not refresh the list of ordered content types: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
+        strapi.log.warn('[custom-order] Could not refresh the list of ordered content types', {
+          error,
+        });
       })
       .finally(() => {
         state.isRefreshing = false;

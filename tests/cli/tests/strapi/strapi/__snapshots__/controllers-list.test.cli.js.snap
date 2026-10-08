@@ -10,6 +10,7 @@ exports[`controllers:list should output list of controllers 1`] = `
 │ plugin::content-manager.single-types                 │
 │ plugin::content-manager.uid                          │
 │ plugin::content-manager.preview                      │
+│ plugin::content-manager.custom-order                 │
 │ plugin::content-manager.homepage                     │
 │ plugin::content-type-builder.builder                 │
 │ plugin::content-type-builder.component-categories    │

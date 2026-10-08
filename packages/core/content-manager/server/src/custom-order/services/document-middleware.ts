@@ -1,5 +1,5 @@
 import type { Modules, UID } from '@strapi/types';
-import { omit } from 'lodash/fp';
+import { omit } from 'lodash';
 
 import { POSITION_ATTRIBUTE } from '../constants';
 import { isEmptySort } from './utils';
@@ -57,7 +57,7 @@ const createDocumentMiddleware =
 
       case 'update': {
         if (params.data && POSITION_ATTRIBUTE in params.data) {
-          setParams(context, { ...params, data: omit(POSITION_ATTRIBUTE, params.data) });
+          setParams(context, { ...params, data: omit(params.data, POSITION_ATTRIBUTE) });
         }
 
         const result = await next();

@@ -277,7 +277,7 @@ const Root = ({ children, state }: RootProps) => {
       return;
     }
 
-    state.moveToIndex(items.indexOf(String(active.id)), items.indexOf(String(over.id)));
+    void state.moveToIndex(items.indexOf(String(active.id)), items.indexOf(String(over.id)));
   };
 
   return (
@@ -409,7 +409,7 @@ const PositionCell = ({ documentId, position, total, ...props }: PositionCellPro
       const nextPosition = Number.parseInt(e.currentTarget.value, 10);
 
       if (!Number.isNaN(nextPosition)) {
-        moveToPosition(documentId, nextPosition);
+        void moveToPosition(documentId, nextPosition);
       }
     } else if (e.key === 'Escape') {
       shouldRestoreFocus.current = true;
@@ -572,7 +572,7 @@ const MoveToTopAction: DocumentActionComponent = ({ documentId }) => {
     }),
     position: 'table-row',
     onClick: () => {
-      moveToPosition(documentId, 1);
+      void moveToPosition(documentId, 1);
     },
   };
 };
@@ -597,7 +597,7 @@ const MoveToBottomAction: DocumentActionComponent = ({ documentId }) => {
     position: 'table-row',
     onClick: () => {
       // Positions past the end are brought back to the last one
-      moveToPosition(documentId, Number.MAX_SAFE_INTEGER);
+      void moveToPosition(documentId, Number.MAX_SAFE_INTEGER);
     },
   };
 };

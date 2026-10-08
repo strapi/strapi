@@ -96,6 +96,25 @@ type ListViewQuery = {
   _q?: string;
 };
 
+type ListSettings = ReturnType<typeof useDocumentLayout>['list']['settings'];
+
+/**
+ * When the entries of the collection type follow a custom order, that order is
+ * what the list shows unless the user sorts on a column.
+ */
+const hasCustomOrderEnabled = (collectionType: string, settings: ListSettings) =>
+  collectionType === COLLECTION_TYPES &&
+  settings.customOrder === true &&
+  isCustomOrderFeatureEnabled();
+
+const getDefaultSort = (settings: ListSettings, hasCustomOrder: boolean) => {
+  if (hasCustomOrder) {
+    return CUSTOM_ORDER_SORT;
+  }
+
+  return settings.defaultSortBy ? `${settings.defaultSortBy}:${settings.defaultSortOrder}` : '';
+};
+
 const ListViewPage = () => {
   const { trackUsage } = useTracking();
   const navigate = useNavigate();
@@ -212,23 +231,12 @@ const ListViewPage = () => {
     }
   }, [displayedHeaderNames, handleSetHeaders, model, schema?.attributes, schema?.uid]);
 
-  /**
-   * When the entries of the collection type follow a custom order, that order is
-   * what the list shows unless the user sorts on a column.
-   */
-  const hasCustomOrder =
-    collectionType === COLLECTION_TYPES &&
-    list.settings.customOrder === true &&
-    isCustomOrderFeatureEnabled();
-
-  const defaultSort = list.settings.defaultSortBy
-    ? `${list.settings.defaultSortBy}:${list.settings.defaultSortOrder}`
-    : '';
+  const hasCustomOrder = hasCustomOrderEnabled(collectionType, list.settings);
 
   const [{ query }, setQuery] = useQueryParams<ListViewQuery>({
     page: '1',
     pageSize: list.settings.pageSize.toString(),
-    sort: hasCustomOrder ? CUSTOM_ORDER_SORT : defaultSort,
+    sort: getDefaultSort(list.settings, hasCustomOrder),
   });
 
   // A sort on the custom order can be left over in the URL or in the saved view
