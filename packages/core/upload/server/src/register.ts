@@ -5,6 +5,7 @@ import { errors, file } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
 import registerUploadMiddleware from './middlewares/upload';
+import { unsignRichtextAndBlocksUrls } from './migrations/unsign-richtext-and-blocks-urls';
 import spec from '../../documentation/content-api.json';
 import type { Config, File, InputFile } from './types';
 import { aiMetadataJob } from './models/ai-metadata-job';
@@ -35,6 +36,9 @@ export async function register({ strapi }: { strapi: Core.Strapi }) {
   sharp.concurrency(concurrency);
 
   strapi.plugin('upload').provider = createProvider(uploadConfig);
+
+  // Rewrites richtext / blocks URLs persisted with a (now expired) signature
+  strapi.db.migrations.providers.internal.register(unsignRichtextAndBlocksUrls);
 
   await registerUploadMiddleware({ strapi });
 

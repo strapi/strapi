@@ -11,6 +11,7 @@ import type metrics from '../services/metrics';
 import type extensions from '../services/extensions';
 import type { createAIMetadataService } from '../services/ai-metadata';
 import type { createAIMetadataJobsService } from '../services/ai-metadata-jobs';
+import type { createAIMetadataProviderService } from '../services/ai-metadata-provider';
 
 type Services = {
   upload: ReturnType<typeof upload>;
@@ -24,6 +25,7 @@ type Services = {
   extensions: typeof extensions;
   aiMetadata: ReturnType<typeof createAIMetadataService>;
   aiMetadataJobs: ReturnType<typeof createAIMetadataJobsService>;
+  aiMetadataProvider: ReturnType<typeof createAIMetadataProviderService>;
 };
 
 export const getService = <TName extends keyof Services>(

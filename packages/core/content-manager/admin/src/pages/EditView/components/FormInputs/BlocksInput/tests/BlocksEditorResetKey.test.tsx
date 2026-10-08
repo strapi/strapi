@@ -51,7 +51,10 @@ const paragraph = (text: string): Schema.Attribute.BlocksValue => [
   },
 ];
 
-const setup = (value: Schema.Attribute.BlocksValue) => {
+const setup = (
+  value: Schema.Attribute.BlocksValue,
+  options: { blockIndex?: number | null } = {}
+) => {
   const onChange = jest.fn();
 
   const result = render(
@@ -61,6 +64,7 @@ const setup = (value: Schema.Attribute.BlocksValue) => {
       onChange={onChange}
       error={undefined}
       ariaLabelId="blocks-editor-label"
+      blockIndex={options.blockIndex}
     />
   );
 
@@ -138,5 +142,58 @@ describe('BlocksEditor value reset', () => {
 
     expect(editor.selection).toBeNull();
     expect(screen.getByText('Hi')).toBeInTheDocument();
+  });
+});
+
+describe('BlocksEditor blockIndex prop', () => {
+  beforeAll(() => {
+    Range.prototype.getBoundingClientRect = jest.fn(() => ({
+      x: 0,
+      y: 0,
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      width: 0,
+      height: 0,
+      toJSON: jest.fn(),
+    }));
+  });
+
+  beforeEach(() => {
+    createdEditors.length = 0;
+  });
+
+  it('positions the cursor at the specified block on mount', async () => {
+    const multiBlock: Schema.Attribute.BlocksValue = [
+      { type: 'paragraph', children: [{ type: 'text', text: 'First' }] },
+      { type: 'paragraph', children: [{ type: 'text', text: 'Second' }] },
+      { type: 'paragraph', children: [{ type: 'text', text: 'Third' }] },
+    ];
+
+    const { editor } = setup(multiBlock, { blockIndex: 1 });
+    await screen.findByRole('textbox');
+
+    expect(editor.selection).toEqual({
+      anchor: { path: [1, 0], offset: 0 },
+      focus: { path: [1, 0], offset: 0 },
+    });
+  });
+
+  it('clamps to the last block when blockIndex exceeds the block count', async () => {
+    const { editor } = setup(paragraph('Only block'), { blockIndex: 10 });
+    await screen.findByRole('textbox');
+
+    expect(editor.selection).toEqual({
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 0 },
+    });
+  });
+
+  it('leaves the selection null when blockIndex is null', async () => {
+    const { editor } = setup(paragraph('Content'), { blockIndex: null });
+    await screen.findByRole('textbox');
+
+    expect(editor.selection).toBeNull();
   });
 });

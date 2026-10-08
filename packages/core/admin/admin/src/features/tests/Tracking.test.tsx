@@ -2,7 +2,7 @@ import { renderHook } from '@tests/utils';
 import axios from 'axios';
 
 import { useDeviceType, type DeviceType } from '../../hooks/useDeviceType';
-import { useInitQuery } from '../../services/admin';
+import { useInformationQuery, useInitQuery } from '../../services/admin';
 import { AppInfoProvider } from '../AppInfo';
 import { TrackingProvider, useTracking } from '../Tracking';
 
@@ -24,7 +24,25 @@ jest.mock('../../services/admin', () => ({
       useTypescriptOnServer: true,
     },
   }),
+  useInformationQuery: jest.fn().mockReturnValue({
+    data: {
+      strapiVersion: '5.0.0',
+    },
+    isLoading: false,
+  }),
 }));
+
+jest.mock('../StrapiApp', () => {
+  const actual = jest.requireActual('../StrapiApp');
+
+  return {
+    ...actual,
+    useStrapiApp: (consumerName: string, selector: (state: unknown) => unknown) =>
+      consumerName === 'TrackingProvider'
+        ? selector({ widgets: { getAll: () => [] } })
+        : actual.useStrapiApp(consumerName, selector),
+  };
+});
 
 jest.mock('../../hooks/useDeviceType', () => ({
   useDeviceType: jest.fn().mockReturnValue('desktop'),
@@ -72,6 +90,7 @@ describe('useTracking', () => {
             useTypescriptOnServer: true,
             projectId: '1',
             projectType: 'Community',
+            version: '5.0.0',
           },
           userProperties: {
             deviceType,
@@ -90,6 +109,13 @@ describe('useTracking', () => {
       });
     });
   }
+
+  it('keeps the public hook compatible with trackUsage-only consumers', () => {
+    const { result } = setup();
+    const consumer: ReturnType<typeof useTracking> = { trackUsage: result.current.trackUsage };
+
+    expect(result.current).toEqual(consumer);
+  });
 
   it('should not fire axios.post if strapi.telemetryDisabled is true', async () => {
     window.strapi.telemetryDisabled = true;
@@ -133,6 +159,54 @@ describe('useTracking', () => {
         userProperties: {
           deviceType: 'mobile',
         },
+      }),
+      expect.any(Object)
+    );
+  });
+
+  it('should send the strapi version with didInitializeAdministration once app info has loaded', () => {
+    const fetchSpy = jest.spyOn(global, 'fetch').mockResolvedValue(new Response());
+    jest.mocked(useInformationQuery).mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      refetch: jest.fn(),
+    });
+
+    const { rerender } = setup();
+
+    expect(fetchSpy).not.toHaveBeenCalled();
+
+    jest.mocked(useInformationQuery).mockReturnValue({
+      data: { strapiVersion: '5.0.0' },
+      isLoading: false,
+      refetch: jest.fn(),
+    });
+    rerender();
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(JSON.parse(fetchSpy.mock.calls[0][1]?.body as string)).toMatchObject({
+      event: 'didInitializeAdministration',
+      groupProperties: {
+        projectId: '1',
+        version: '5.0.0',
+      },
+    });
+
+    fetchSpy.mockRestore();
+  });
+
+  it('should send the strapi version when the caller is not under AppInfoProvider', async () => {
+    const { result } = renderHook(() => useTracking(), {
+      wrapper: ({ children }) => <TrackingProvider>{children}</TrackingProvider>,
+    });
+
+    await result.current.trackUsage('didSaveContentType');
+
+    expect(axios.post).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        event: 'didSaveContentType',
+        groupProperties: expect.objectContaining({ version: '5.0.0' }),
       }),
       expect.any(Object)
     );

@@ -1,6 +1,7 @@
 import crypto from 'crypto';
-import { errors } from '@strapi/utils';
-import { omit, uniq } from 'lodash/fp';
+import { errors, emitAudit } from '@strapi/utils';
+import { omit } from 'lodash';
+
 import type { AdminApiToken, ContentApiApiToken } from '../../../../shared/contracts/api-token';
 import constants from '../constants';
 import {
@@ -19,6 +20,13 @@ import {
   enforceAdminPermissionsCeiling,
 } from '../api-token';
 import encryptionService from '../encryption';
+
+jest.mock('@strapi/utils', () => ({
+  ...jest.requireActual('@strapi/utils'),
+  emitAudit: jest.fn(() => Promise.resolve()),
+}));
+
+const emitAuditMock = emitAudit as jest.Mock;
 
 const getActionProvider = (actions = []) => {
   return {
@@ -97,6 +105,10 @@ describe('API Token', () => {
     jest.clearAllMocks();
   });
 
+  beforeEach(() => {
+    emitAuditMock.mockClear();
+  });
+
   describe('create', () => {
     test('Creates a new read-only token', async () => {
       const create = jest.fn(({ data }) => Promise.resolve(data));
@@ -139,6 +151,19 @@ describe('API Token', () => {
         expiresAt: null,
         lifespan: null,
       });
+
+      expect(emitAuditMock).toHaveBeenCalledTimes(1);
+      const [, event, payload] = emitAuditMock.mock.calls[0];
+      expect(event).toBe('token.create');
+      expect(payload).toMatchObject({
+        kind: 'content-api',
+        name: attributes.name,
+        description: attributes.description,
+        type: 'read-only',
+      });
+      expect(payload).not.toHaveProperty('permissions');
+      expect(JSON.stringify(payload)).not.toContain(mockedApiToken.hexedString);
+      expect(JSON.stringify(payload)).not.toMatch(/accessKey|encryptedKey/);
     });
 
     test('Creates a new token with lifespan', async () => {
@@ -229,7 +254,7 @@ describe('API Token', () => {
         id: 1,
       };
 
-      const findOne = jest.fn().mockResolvedValue(omit('permissions', createTokenResult));
+      const findOne = jest.fn().mockResolvedValue(omit(createTokenResult, 'permissions'));
       const create = jest.fn().mockResolvedValue(createTokenResult);
       const load = jest.fn().mockResolvedValueOnce(
         Promise.resolve(
@@ -267,7 +292,7 @@ describe('API Token', () => {
       expect(create).toHaveBeenNthCalledWith(1, {
         select: expect.arrayContaining([expect.any(String)]),
         data: {
-          ...omit('permissions', attributes),
+          ...omit(attributes, 'permissions'),
           accessKey: hash(mockedApiToken.hexedString),
           encryptedKey: expect.any(String),
           adminUserOwner: null,
@@ -289,7 +314,7 @@ describe('API Token', () => {
       });
 
       expect(res).toEqual({
-        ...omit('adminUserOwner', createTokenResult),
+        ...omit(createTokenResult, 'adminUserOwner'),
         accessKey: mockedApiToken.hexedString,
         expiresAt: null,
         lifespan: null,
@@ -314,7 +339,7 @@ describe('API Token', () => {
         id: 1,
       };
 
-      const findOne = jest.fn().mockResolvedValue(omit('permissions', createTokenResult));
+      const findOne = jest.fn().mockResolvedValue(omit(createTokenResult, 'permissions'));
       const create = jest.fn().mockResolvedValue(createTokenResult);
       const load = jest.fn().mockResolvedValueOnce(
         Promise.resolve(
@@ -353,7 +378,7 @@ describe('API Token', () => {
       expect(create).toHaveBeenNthCalledWith(1, {
         select: expect.arrayContaining([expect.any(String)]),
         data: {
-          ...omit('permissions', attributes),
+          ...omit(attributes, 'permissions'),
           accessKey: hash(mockedApiToken.hexedString),
           encryptedKey: expect.any(String),
           adminUserOwner: null,
@@ -364,7 +389,7 @@ describe('API Token', () => {
       });
 
       expect(res).toEqual({
-        ...omit('adminUserOwner', createTokenResult),
+        ...omit(createTokenResult, 'adminUserOwner'),
         accessKey: mockedApiToken.hexedString,
         expiresAt: null,
         lifespan: null,
@@ -389,11 +414,11 @@ describe('API Token', () => {
         id: 1,
       };
 
-      const findOne = jest.fn().mockResolvedValue(omit('permissions', createTokenResult));
+      const findOne = jest.fn().mockResolvedValue(omit(createTokenResult, 'permissions'));
       const create = jest.fn().mockResolvedValue(createTokenResult);
       const load = jest.fn().mockResolvedValueOnce(
         Promise.resolve(
-          uniq(attributes.permissions).map((p: any) => {
+          [...new Set(attributes.permissions)].map((p: any) => {
             return {
               action: p,
             };
@@ -439,7 +464,7 @@ describe('API Token', () => {
       const create = jest.fn().mockResolvedValue(createTokenResult);
       const load = jest.fn().mockResolvedValueOnce(
         Promise.resolve(
-          uniq(attributes.permissions).map((p: any) => {
+          [...new Set(attributes.permissions)].map((p: any) => {
             return {
               action: p,
             };
@@ -884,6 +909,11 @@ describe('API Token', () => {
         select: ['id'],
         populate: ['adminPermissions'],
       });
+      expect(emitAuditMock).toHaveBeenCalledWith(
+        { strapi: global.strapi },
+        'token.delete',
+        expect.objectContaining({ tokenId: token.id, name: token.name, kind: 'content-api' })
+      );
       expect(mockedDelete).toHaveBeenCalledWith({
         select: expect.arrayContaining([expect.any(String)]),
         where: { id: token.id },
@@ -1370,7 +1400,9 @@ describe('API Token', () => {
 
   describe('regenerate', () => {
     test('It regenerates the accessKey', async () => {
-      const update = jest.fn(({ data }) => Promise.resolve(data));
+      const update = jest.fn(({ data }) =>
+        Promise.resolve({ id: 1, name: 'api-token_tests-name', ...data })
+      );
 
       setupStrapiMock({
         db: {
@@ -1384,7 +1416,8 @@ describe('API Token', () => {
 
       expect(update).toHaveBeenCalledWith({
         where: { id },
-        select: ['id', 'accessKey', 'kind'],
+        select: ['id', 'name', 'accessKey', 'kind'],
+        populate: { adminUserOwner: { select: ['id'] } },
         data: {
           accessKey: hash(mockedApiToken.hexedString),
           encryptedKey: expect.any(String),
@@ -1395,6 +1428,14 @@ describe('API Token', () => {
         encryptedKey: expect.any(String),
         kind: 'content-api',
       });
+      expect(emitAuditMock).toHaveBeenCalledWith(
+        { strapi: global.strapi },
+        'token.regenerate',
+        expect.objectContaining({ tokenId: id, kind: 'content-api' })
+      );
+      expect(JSON.stringify(emitAuditMock.mock.calls[0][2])).not.toContain(
+        mockedApiToken.hexedString
+      );
     });
 
     test('It throws a NotFound if the id is not found', async () => {
@@ -1415,7 +1456,8 @@ describe('API Token', () => {
 
       expect(update).toHaveBeenCalledWith({
         where: { id },
-        select: ['id', 'accessKey', 'kind'],
+        select: ['id', 'name', 'accessKey', 'kind'],
+        populate: { adminUserOwner: { select: ['id'] } },
         data: {
           accessKey: hash(mockedApiToken.hexedString),
           encryptedKey: expect.any(String),
@@ -1437,6 +1479,34 @@ describe('API Token', () => {
       const res = await regenerate(1);
 
       expect((res as any).kind).toBe('content-api');
+    });
+
+    test('Records the owner id of an admin token and strips it from the response', async () => {
+      const update = jest.fn().mockResolvedValue({
+        id: 4,
+        name: 'bot',
+        accessKey: 'hash',
+        kind: 'admin',
+        adminUserOwner: { id: 7 },
+      });
+
+      setupStrapiMock({
+        db: {
+          query() {
+            return { update };
+          },
+        },
+      });
+
+      const res = await regenerate(4);
+
+      expect(res).not.toHaveProperty('adminUserOwner');
+      expect(emitAuditMock).toHaveBeenCalledWith({ strapi: global.strapi }, 'token.regenerate', {
+        tokenId: 4,
+        name: 'bot',
+        kind: 'admin',
+        adminUserOwner: 7,
+      });
     });
 
     test('Selects kind in the DB query', async () => {
@@ -1515,6 +1585,130 @@ describe('API Token', () => {
         },
       });
       expect(res).toEqual(attributes);
+      expect(emitAuditMock).toHaveBeenCalledWith(
+        { strapi: global.strapi },
+        'token.update',
+        expect.objectContaining({
+          tokenId: id,
+          kind: 'content-api',
+          changes: { name: { before: token.name, after: attributes.name } },
+        })
+      );
+    });
+
+    test('Does not emit token.update when nothing changed', async () => {
+      const token = {
+        id: 1,
+        kind: 'content-api',
+        name: 'api-token_tests-name',
+        description: 'api-token_tests-description',
+        type: 'read-only',
+      };
+
+      global.strapi = {
+        db: {
+          query() {
+            return {
+              update: jest.fn(({ data }) => Promise.resolve({ ...token, ...data })),
+              findOne: jest.fn().mockResolvedValue(token),
+              delete: jest.fn(),
+              load: jest.fn().mockResolvedValue([]),
+            };
+          },
+        },
+        config: { get: jest.fn(() => '') },
+      } as any;
+
+      await apiTokenUpdate(1, {
+        name: token.name,
+        description: token.description,
+        type: 'read-only',
+      } as any);
+
+      expect(emitAuditMock).not.toHaveBeenCalled();
+    });
+
+    // The guard validates the request body only. The stored permissions, populated for the
+    // audit diff, must not stand in for a missing `permissions` field.
+    const mockUpdateOf = (token: Record<string, unknown>, extra: Record<string, unknown> = {}) => {
+      const update = jest.fn(({ data }) => Promise.resolve({ ...token, ...data }));
+      const deleteFn = jest.fn();
+
+      global.strapi = {
+        ...getActionProvider(['valid-permission-A'] as any),
+        db: {
+          query() {
+            return {
+              update,
+              findOne: jest.fn().mockResolvedValue(token),
+              delete: deleteFn,
+              load: jest.fn().mockResolvedValue([]),
+              ...extra,
+            };
+          },
+        },
+        config: { get: jest.fn(() => '') },
+      } as any;
+
+      return { update, deleteFn };
+    };
+
+    test('Rejects switching to custom without permissions in the body', async () => {
+      const { update } = mockUpdateOf({
+        id: 1,
+        kind: 'content-api',
+        name: 'api-token_tests-name',
+        description: 'api-token_tests-description',
+        type: 'read-only',
+        permissions: [],
+      });
+
+      await expect(apiTokenUpdate(1, { type: 'custom' } as any)).rejects.toThrow(
+        'Missing permissions attribute for custom token'
+      );
+      expect(update).not.toHaveBeenCalled();
+    });
+
+    test('Switches a custom token to read-only with permissions: null (the admin UI body)', async () => {
+      const { deleteFn } = mockUpdateOf({
+        id: 1,
+        kind: 'content-api',
+        name: 'api-token_tests-name',
+        description: 'api-token_tests-description',
+        type: 'custom',
+        permissions: [{ action: 'valid-permission-A' }],
+      });
+
+      const res = await apiTokenUpdate(1, { type: 'read-only', permissions: null } as any);
+
+      expect(deleteFn).toHaveBeenCalledWith({ where: { token: 1 } });
+      expect(res).toMatchObject({ type: 'read-only', permissions: [] });
+      expect(emitAuditMock).toHaveBeenCalledWith(
+        { strapi: global.strapi },
+        'token.update',
+        expect.objectContaining({
+          changes: {
+            type: { before: 'custom', after: 'read-only' },
+            permissions: { before: ['valid-permission-A'], after: [] },
+          },
+        })
+      );
+    });
+
+    test('Rejects permissions: null on a custom token', async () => {
+      const { update } = mockUpdateOf({
+        id: 1,
+        kind: 'content-api',
+        name: 'api-token_tests-name',
+        description: 'api-token_tests-description',
+        type: 'custom',
+        permissions: [{ action: 'valid-permission-A' }],
+      });
+
+      await expect(apiTokenUpdate(1, { permissions: null } as any)).rejects.toThrow(
+        'Missing permissions attribute for custom token'
+      );
+      expect(update).not.toHaveBeenCalled();
     });
 
     test('Updates permissions field of a custom token with unknown permissions', async () => {
@@ -1533,7 +1727,7 @@ describe('API Token', () => {
         permissions: ['valid-permission-A', 'unknown-permission'],
       } as any;
 
-      const findOne = jest.fn().mockResolvedValue(omit('permissions', originalToken));
+      const findOne = jest.fn().mockResolvedValue(omit(originalToken, 'permissions'));
       const update = jest.fn(({ data }) => Promise.resolve(data));
       const deleteFn = jest.fn();
       const create = jest.fn();
@@ -1585,7 +1779,7 @@ describe('API Token', () => {
       } as any;
 
       const update = jest.fn(({ data }) => Promise.resolve(data));
-      const findOne = jest.fn().mockResolvedValue(omit('permissions', originalToken));
+      const findOne = jest.fn().mockResolvedValue(omit(originalToken, 'permissions'));
       const deleteFn = jest.fn();
       const create = jest.fn();
       const load = jest
@@ -1662,7 +1856,7 @@ describe('API Token', () => {
       } as any;
 
       const update = jest.fn(({ data }) => Promise.resolve(data));
-      const findOne = jest.fn().mockResolvedValue(omit('permissions', originalToken));
+      const findOne = jest.fn().mockResolvedValue(omit(originalToken, 'permissions'));
       const deleteFn = jest.fn();
       const create = jest.fn();
       const load = jest

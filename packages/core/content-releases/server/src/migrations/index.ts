@@ -187,11 +187,6 @@ export async function disableContentTypeLocalized({ oldContentTypes, contentType
     return;
   }
 
-  const i18nPlugin = strapi.plugin('i18n');
-  if (!i18nPlugin) {
-    return;
-  }
-
   for (const uid in contentTypes) {
     if (!oldContentTypes[uid]) {
       continue;
@@ -200,10 +195,11 @@ export async function disableContentTypeLocalized({ oldContentTypes, contentType
     const oldContentType = oldContentTypes[uid];
     const contentType = contentTypes[uid];
 
-    const { isLocalizedContentType } = i18nPlugin.service('content-types');
-
     // if i18N is disabled remove non default locales before sync
-    if (isLocalizedContentType(oldContentType) && !isLocalizedContentType(contentType)) {
+    if (
+      strapi.localization.isLocalizedContentType(oldContentType) === true &&
+      strapi.localization.isLocalizedContentType(contentType) === false
+    ) {
       await strapi.db
         .queryBuilder(RELEASE_ACTION_MODEL_UID)
         .update({
@@ -220,11 +216,6 @@ export async function enableContentTypeLocalized({ oldContentTypes, contentTypes
     return;
   }
 
-  const i18nPlugin = strapi.plugin('i18n');
-  if (!i18nPlugin) {
-    return;
-  }
-
   for (const uid in contentTypes) {
     if (!oldContentTypes[uid]) {
       continue;
@@ -233,12 +224,12 @@ export async function enableContentTypeLocalized({ oldContentTypes, contentTypes
     const oldContentType = oldContentTypes[uid];
     const contentType = contentTypes[uid];
 
-    const { isLocalizedContentType } = i18nPlugin.service('content-types');
-    const { getDefaultLocale } = i18nPlugin.service('locales');
-
     // if i18N is enabled remove non default locales before sync
-    if (!isLocalizedContentType(oldContentType) && isLocalizedContentType(contentType)) {
-      const defaultLocale = await getDefaultLocale();
+    if (
+      strapi.localization.isLocalizedContentType(oldContentType) === false &&
+      strapi.localization.isLocalizedContentType(contentType) === true
+    ) {
+      const defaultLocale = await strapi.localization.getDefaultLocale();
 
       await strapi.db
         .queryBuilder(RELEASE_ACTION_MODEL_UID)

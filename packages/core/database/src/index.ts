@@ -6,19 +6,31 @@ import { Dialect, getDialect } from './dialects';
 import { createSchemaProvider, SchemaProvider } from './schema';
 import { createMetadata, Metadata } from './metadata';
 import { createEntityManager, EntityManager } from './entity-manager';
-import { createMigrationsProvider, MigrationProvider, type Migration } from './migrations';
+import { createMigrationsProvider, MigrationProvider } from './migrations';
 import { createLifecyclesProvider, LifecycleProvider } from './lifecycles';
-import type { Event } from './lifecycles';
 import { createConnection } from './connection';
 import * as errors from './errors';
 import { Callback, transactionCtx, TransactionObject } from './transaction-context';
 import { validateDatabase } from './validations';
-import type { Model, JoinTable } from './types';
-import type { Identifiers } from './utils/identifiers';
+import type { Model } from './types';
 import { createRepairManager, type RepairManager } from './repairs';
 
 export { isKnexQuery } from './utils/knex';
 export { isDatabaseClientKind } from './connection';
+export { attributeNaming } from './metadata';
+export type { AttributeNaming, Meta } from './metadata';
+export type {
+  AttributeRenamesOperation,
+  Migration,
+  BuiltMigrationFile,
+  MigrationFileBuilder,
+  MigrationFileFormat,
+  MigrationFileOperation,
+} from './migrations';
+export type { Event } from './lifecycles';
+export type { Attribute, Model, JoinTable } from './types';
+export type { AttributeRenameHandler, AttributeRenames } from './schema';
+export type { Identifiers } from './utils/identifiers';
 
 interface Settings {
   forceMigration?: boolean;
@@ -273,4 +285,3 @@ class Database {
 }
 
 export { Database, errors };
-export type { Model, JoinTable, Identifiers, Migration, Event };

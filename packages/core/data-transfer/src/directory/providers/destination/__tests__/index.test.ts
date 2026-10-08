@@ -21,6 +21,24 @@ describe('Directory destination provider', () => {
     expect(provider.results.file?.path).toBe(dir);
   });
 
+  test('close does not recreate an export after rollback', async () => {
+    const dir = await fs.mkdtemp(path.join(tmpdir(), 'dts-dest-rollback-'));
+    const provider = createLocalDirectoryDestinationProvider({
+      directory: { path: dir },
+      file: {},
+    });
+    provider.setMetadata('source', {
+      createdAt: new Date().toISOString(),
+      strapi: { version: '5.0.0' },
+    });
+
+    await provider.bootstrap({ report: jest.fn() } as never);
+    await provider.rollback();
+    await provider.close();
+
+    expect(await fs.pathExists(dir)).toBe(false);
+  });
+
   test('createAssetsWriteStream surfaces sync fs errors as ProviderTransferError (engine-reportable)', async () => {
     const dir = await fs.mkdtemp(path.join(tmpdir(), 'dts-dest-assets-err-'));
     const provider = createLocalDirectoryDestinationProvider({

@@ -1,4 +1,4 @@
-import { writeFileSync } from 'node:fs';
+import { renameSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import {
@@ -33,7 +33,10 @@ function resolveJournalPath(env: ActionsEnv): string {
 }
 
 function writeJournal(target: string, payload: unknown): void {
-  writeFileSync(target, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
+  const temporary = `${target}.${process.pid}.tmp`;
+
+  writeFileSync(temporary, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
+  renameSync(temporary, target);
 }
 
 function describe(error: unknown): string {
@@ -53,11 +56,16 @@ function publishSummary(env: ActionsEnv, markdown: string): void {
 
 async function main(env: ActionsEnv): Promise<void> {
   const journalPath = resolveJournalPath(env);
-  const journal = createJournal({ apply: getBooleanInput(env, 'dry_run') === false });
+  const journal = createJournal({
+    apply: getBooleanInput(env, 'dry_run') === false,
+    persist: (snapshot) => writeJournal(journalPath, { status: 'running', ...snapshot }),
+  });
 
   setOutput(env, 'journal_path', journalPath);
 
   try {
+    writeJournal(journalPath, { status: 'running', ...journal.toJSON() });
+
     const result = await runDraftRelease({
       inputs: {
         version: getInput(env, 'version'),

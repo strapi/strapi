@@ -1,0 +1,53 @@
+views {
+  view content_manager_components of strapi.server_runtime {
+    title '03 Engineering / Content Manager / Editing and permissions'
+    description '''
+      **Audience:** backend engineers. **Question:** how does Admin editing enforce permissions and persist content?
+      **Scope:** Content Manager server responsibilities, not a call sequence. Controllers coordinate Admin permissions, editing configuration, response shaping and document operations.
+      Routine content writes go through Document Service; targeted count/existence queries also use the database abstraction. Content API roles and tokens are a different access path.
+      Open controllers for the server code map, permissions for access boundaries, document manager for editorial options, or Document Service for its implementation.
+    '''
+    include
+      cm_controllers with { navigateTo content_manager_server_code },
+      cm_permission_services with { navigateTo access_boundaries },
+      cm_schema_configuration,
+      cm_populate_metadata,
+      cm_document_manager with { navigateTo editorial_publishing },
+      document_service with { navigateTo document_service_code },
+      database_layer
+    exclude * -> *
+    include
+      cm_controllers -> cm_permission_services with { title 'Checks admin permissions' },
+      cm_controllers -> cm_schema_configuration with { title 'Loads editing configuration' },
+      cm_controllers -> cm_populate_metadata with { title 'Shapes the response' },
+      cm_controllers -> cm_document_manager with { title 'Runs document operations' },
+      cm_document_manager -> document_service with { title 'Calls strapi.documents' },
+      cm_document_manager -> database_layer with { title 'Runs targeted count / existence queries' },
+      document_service -> database_layer with { title 'Persists document entries' }
+    autoLayout LeftRight 70 40
+  }
+
+  view content_manager_server_code of strapi.server_runtime.content_manager_server {
+    title '05 Code reference / Content Manager / Server'
+    description '''
+      **Question:** where are Content Manager Admin routes, handlers and feature modules implemented?
+      Routes select middleware/controllers; controllers and feature modules use shared services. Content operations reach Document Service through those services.
+      This source map groups directories, not an ordered request trace. History, preview and homepage modules have their own routing and availability rules.
+      Open feature modules for editorial tasks or Document Service for the shared content implementation.
+    '''
+
+    include
+      cm_server_routes_code,
+      cm_server_middlewares_code,
+      cm_server_controllers_code,
+      cm_server_services_code,
+      cm_server_feature_modules_code with { navigateTo content_workspace },
+      strapi.server_runtime.document_service with { navigateTo document_service_code },
+      cm_server_routes_code -> cm_server_middlewares_code,
+      cm_server_routes_code -> cm_server_controllers_code,
+      cm_server_routes_code -> cm_server_feature_modules_code,
+      cm_server_controllers_code -> cm_server_services_code,
+      cm_server_feature_modules_code -> cm_server_services_code,
+      cm_server_services_code -> strapi.server_runtime.document_service
+  }
+}

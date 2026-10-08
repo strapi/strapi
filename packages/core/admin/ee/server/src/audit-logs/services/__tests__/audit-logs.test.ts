@@ -298,6 +298,125 @@ describe('Audit logs service', () => {
       );
     });
 
+    it('records an event allowing an unknown actor when the admin request has no user', async () => {
+      const { lifecycle, handleEvent } = await setup();
+
+      lifecycle.registerEvent('admin-user.password-reset.create', releaseTransform, {
+        allowUnknownActor: true,
+      });
+      jest.mocked(strapi.requestContext.get).mockReturnValueOnce({
+        state: { route: { info: { type: 'admin' } } },
+      } as any);
+      await handleEvent('admin-user.password-reset.create', { releaseId: 7 });
+
+      expect(saveEvent).toHaveBeenCalledWith({
+        action: 'admin-user.password-reset.create',
+        date: expect.any(String),
+        payload: {
+          action: 'admin-user.password-reset.create',
+          date: expect.any(String),
+          resource: { type: 'release', id: 7 },
+          actor: { type: 'unknown' },
+          origin: 'admin-panel',
+        },
+        userId: null,
+      });
+    });
+
+    it('keeps the user as actor on an event allowing an unknown one when there is a session', async () => {
+      const { lifecycle, handleEvent } = await setup();
+
+      lifecycle.registerEvent('admin-user.password.update', releaseTransform, {
+        allowUnknownActor: true,
+      });
+      await handleEvent('admin-user.password.update', { releaseId: 7 });
+
+      expect(saveEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: 1,
+          payload: expect.objectContaining({ actor: actingAdmin }),
+        })
+      );
+    });
+
+    it('still drops an event without the opt-in when the admin request has no user', async () => {
+      const { lifecycle, handleEvent } = await setup();
+
+      lifecycle.registerEvent('release.create', releaseTransform);
+      jest.mocked(strapi.requestContext.get).mockReturnValueOnce({
+        state: { route: { info: { type: 'admin' } } },
+      } as any);
+      await handleEvent('release.create', { releaseId: 1 });
+
+      expect(saveEvent).not.toHaveBeenCalled();
+    });
+
+    it('still drops a legacy event when the admin request has no user', async () => {
+      const { handleEvent } = await setup();
+
+      jest.mocked(strapi.requestContext.get).mockReturnValueOnce({
+        state: { route: { info: { type: 'admin' } } },
+      } as any);
+      await handleEvent('entry.update', { uid: 'api::article.article', entry: { id: 1 } });
+
+      expect(saveEvent).not.toHaveBeenCalled();
+    });
+
+    it('no longer records the legacy user events', async () => {
+      const { handleEvent } = await setup();
+
+      await handleEvent('user.create', { user: { id: 1 } });
+      await handleEvent('user.update', { user: { id: 1 } });
+      await handleEvent('user.delete', { user: { id: 1 } });
+
+      expect(saveEvent).not.toHaveBeenCalled();
+    });
+
+    it('records an event that always has an unknown actor without the session user', async () => {
+      const { lifecycle, handleEvent } = await setup();
+
+      lifecycle.registerEvent('admin.auth.error', releaseTransform, { alwaysUnknownActor: true });
+      await handleEvent('admin.auth.error', { releaseId: 7 });
+
+      expect(saveEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: null,
+          payload: expect.objectContaining({ actor: { type: 'unknown' } }),
+        })
+      );
+    });
+
+    it('drops an event its shouldRecord option rejects, before running the transformer', async () => {
+      const { lifecycle, handleEvent } = await setup();
+      const transform = jest.fn(releaseTransform);
+      const shouldRecord = jest.fn((event: { releaseId: number }) => event.releaseId !== 2);
+
+      lifecycle.registerEvent('release.trigger', transform, { shouldRecord });
+      await handleEvent('release.trigger', { releaseId: 2 }, 'second');
+
+      expect(shouldRecord).toHaveBeenCalledWith({ releaseId: 2 }, 'second');
+      expect(transform).not.toHaveBeenCalled();
+      expect(saveEvent).not.toHaveBeenCalled();
+
+      await handleEvent('release.trigger', { releaseId: 1 });
+
+      expect(saveEvent).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not let the opt-in bypass the admin route requirement', async () => {
+      const { lifecycle, handleEvent } = await setup();
+
+      lifecycle.registerEvent('admin-user.invite.accept', releaseTransform, {
+        allowUnknownActor: true,
+      });
+      jest.mocked(strapi.requestContext.get).mockReturnValueOnce({
+        state: { route: { info: { type: 'content-api' } } },
+      } as any);
+      await handleEvent('admin-user.invite.accept', { releaseId: 1 });
+
+      expect(saveEvent).not.toHaveBeenCalled();
+    });
+
     it('still requires a user when the context origin implies one', async () => {
       const { lifecycle, handleEvent } = await setup();
 

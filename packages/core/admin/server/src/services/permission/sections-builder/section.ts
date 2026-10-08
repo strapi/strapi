@@ -1,4 +1,3 @@
-import { eq } from 'lodash/fp';
 import { hooks } from '@strapi/utils';
 import type { Action } from '../../../domain/action';
 
@@ -37,7 +36,7 @@ const createSection = (
     async appliesToAction(action: Action): Promise<boolean> {
       const results = await state.hooks.matchers.call(action);
 
-      return results.some(eq(true));
+      return results.some((result) => result === true);
     },
 
     /**
