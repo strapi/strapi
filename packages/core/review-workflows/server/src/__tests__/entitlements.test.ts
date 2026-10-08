@@ -19,9 +19,9 @@ describe('review-workflows entitlements', () => {
     ).toEqual({ numberOfWorkflows: 5, stagesPerWorkflow: 8 });
   });
 
-  it('clamps an out-of-range license value and defaults a missing one', () => {
+  it('uses a license value above the default as is and defaults a missing one', () => {
     expect(resolveWith({ name: 'review-workflows', options: { numberOfWorkflows: 9999 } })).toEqual(
-      { numberOfWorkflows: 200, stagesPerWorkflow: 200 }
+      { numberOfWorkflows: 9999, stagesPerWorkflow: 200 }
     );
     expect(resolveWith(undefined)).toEqual({ numberOfWorkflows: 200, stagesPerWorkflow: 200 });
   });
