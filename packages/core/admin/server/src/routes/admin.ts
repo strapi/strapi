@@ -82,4 +82,15 @@ export default [
       policies: ['admin::isAuthenticatedAdmin'],
     },
   },
+  {
+    method: 'GET',
+    path: '/debug-dump',
+    handler: 'admin.debugDump',
+    config: {
+      policies: [
+        'admin::isAuthenticatedAdmin',
+        { name: 'admin::hasPermissions', config: { actions: ['admin::debug-dump.read'] } },
+      ],
+    },
+  },
 ];

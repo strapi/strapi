@@ -372,6 +372,37 @@ describe('Audit logs service', () => {
       expect(saveEvent).not.toHaveBeenCalled();
     });
 
+    it('records an event that always has an unknown actor without the session user', async () => {
+      const { lifecycle, handleEvent } = await setup();
+
+      lifecycle.registerEvent('admin.auth.error', releaseTransform, { alwaysUnknownActor: true });
+      await handleEvent('admin.auth.error', { releaseId: 7 });
+
+      expect(saveEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: null,
+          payload: expect.objectContaining({ actor: { type: 'unknown' } }),
+        })
+      );
+    });
+
+    it('drops an event its shouldRecord option rejects, before running the transformer', async () => {
+      const { lifecycle, handleEvent } = await setup();
+      const transform = jest.fn(releaseTransform);
+      const shouldRecord = jest.fn((event: { releaseId: number }) => event.releaseId !== 2);
+
+      lifecycle.registerEvent('release.trigger', transform, { shouldRecord });
+      await handleEvent('release.trigger', { releaseId: 2 }, 'second');
+
+      expect(shouldRecord).toHaveBeenCalledWith({ releaseId: 2 }, 'second');
+      expect(transform).not.toHaveBeenCalled();
+      expect(saveEvent).not.toHaveBeenCalled();
+
+      await handleEvent('release.trigger', { releaseId: 1 });
+
+      expect(saveEvent).toHaveBeenCalledTimes(1);
+    });
+
     it('does not let the opt-in bypass the admin route requirement', async () => {
       const { lifecycle, handleEvent } = await setup();
 
