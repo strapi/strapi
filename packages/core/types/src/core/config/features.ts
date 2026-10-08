@@ -1,7 +1,7 @@
 /**
  * Feature flags for enabling experimental or upcoming breaking changes.
  *
- * @see docs/docs/docs/06-future-flags.md
+ * @see docs/docs/architecture/10-future-flags.md
  */
 export interface FeaturesFutureFlags {
   experimental_firstPublishedAt?: boolean;
