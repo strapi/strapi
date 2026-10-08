@@ -21,7 +21,22 @@ describe('transformFields', () => {
 
   it('should handle empty field arrays', () => {
     const input: string[] = [];
-    expect(transformFields(input)).toEqual(input);
+
+    expect(transformFields(input)).toEqual(['documentId']);
+    expect(input).toEqual([]);
+  });
+
+  it('should not mutate the given array', () => {
+    const input = Object.freeze(['id', 'name']) as string[];
+
+    expect(transformFields(input)).toEqual(['id', 'name', 'documentId']);
+    expect(input).toEqual(['id', 'name']);
+  });
+
+  it('should return the given array when documentId is already present', () => {
+    const input = ['name', 'documentId'];
+
+    expect(transformFields(input)).toBe(input);
   });
 
   describe('string fields', () => {
