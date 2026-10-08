@@ -384,10 +384,41 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
         actor: actingActor(),
         resource: { type: 'release', id: release.id, name: 'Fails to publish' },
       });
-      // The error's name and nothing else from it: no message, no driver properties,
-      // and no entry counts, since a failed run is not atomic
+      // The error's name and nothing else from it: no message, no driver properties, and no
+      // entry counts, since a failed run released nothing
       expect(log.payload.details).toEqual({ reason: 'ValidationError' });
       expect(log.user.id).toBe(actingAdminId);
+    });
+
+    it('records an allow_partial run that left an entry out as partial, with what it released', async () => {
+      const release = await createRelease({
+        name: 'Partly published',
+        timezone: 'Europe/Paris',
+        releaseCondition: 'allow_partial',
+      });
+      const published = await createEntry('goes-out');
+      const failing = await createEntry('left-out');
+      for (const entry of [published, failing]) {
+        await rq({
+          url: `/content-releases/${release.id}/actions`,
+          method: 'POST',
+          body: releaseAction(entry.documentId),
+        });
+      }
+      documentIdsFailingToPublish.add(failing.documentId);
+      await clearAuditLogs();
+
+      const res = await rq({ url: `/content-releases/${release.id}/publish`, method: 'POST' });
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.status).toBe('partial');
+
+      const log = await expectExactlyOneLog('release.trigger');
+      expect(log.payload).toMatchObject({
+        outcome: 'partial',
+        resource: { type: 'release', id: release.id, name: 'Partly published' },
+      });
+      // What the run released, not every entry of the release
+      expect(log.payload.details).toEqual({ published: 1, unpublished: 0, failed: 1 });
     });
 
     it('records nothing for a publish attempt on an already published release', async () => {

@@ -1277,7 +1277,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       expect(await hasPublishedVersion(productUID, validId)).toBe(false);
     });
 
-    test('all_or_nothing run stopped by an error keeps what went out and ends partial', async () => {
+    test('all_or_nothing run stopped by an error rolls back what went out and ends failed', async () => {
       const documentIds: string[] = [];
       for (let i = 0; i < 5; i += 1) {
         documentIds.push(await createProduct({ valid: true }));
@@ -1295,12 +1295,11 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         expect(res.statusCode).toBe(500);
 
         const found = await getRelease(release.id);
-        expect(found.status).toBe('partial');
-        expect(found.releasedAt).not.toBeNull();
+        expect(found.status).toBe('failed');
+        expect(found.releasedAt).toBeNull();
 
-        expect(await hasPublishedVersion(productUID, documentIds[0])).toBe(true);
-        expect(await hasPublishedVersion(productUID, documentIds[1])).toBe(true);
-        for (const documentId of documentIds.slice(2)) {
+        // The two entries published before the error are rolled back with the run
+        for (const documentId of documentIds) {
           expect(await hasPublishedVersion(productUID, documentId)).toBe(false);
         }
       } finally {
@@ -1335,35 +1334,60 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       }
     });
 
-    // On Postgres the database error rolls the whole run back, and nothing stays published; on
-    // SQLite and MySQL the run goes on and the entry before it stays published. Either way the
-    // webhook must say what really happened.
-    test.each(['allow_partial', 'all_or_nothing'] as const)(
-      '%s run with a database error: the publish webhook reports only what stays published',
-      async (releaseCondition) => {
-        const publishedFirstId = await createProduct({ valid: true });
-        const failingId = await createProduct({ valid: true });
-        documentIdsFailingInDatabase.add(failingId);
-        const onPublishEvent = jest.fn();
-        const stopListening = strapi.eventHub.on('releases.publish', onPublishEvent);
+    // A database error is rolled back with its savepoint, so the outcome is the same on every
+    // database: on Postgres, it would otherwise abort the whole transaction
+    test('allow_partial run with a database error skips the entry and keeps the others', async () => {
+      const publishedId = await createProduct({ valid: true });
+      const failingId = await createProduct({ valid: true });
+      documentIdsFailingInDatabase.add(failingId);
+      const onPublishEvent = jest.fn();
+      const stopListening = strapi.eventHub.on('releases.publish', onPublishEvent);
 
-        try {
-          const release = await createReleaseWithActions(releaseCondition, [
-            { documentId: publishedFirstId },
-            { documentId: failingId },
-          ]);
+      try {
+        const release = await createReleaseWithActions('allow_partial', [
+          { documentId: publishedId },
+          { documentId: failingId },
+        ]);
 
-          await publishManually(release.id);
+        const res = await publishManually(release.id);
 
-          expect(onPublishEvent).toHaveBeenCalledTimes(1);
-          const [{ isPublished }] = onPublishEvent.mock.calls[0];
-          expect(isPublished).toBe(await hasPublishedVersion(productUID, publishedFirstId));
-        } finally {
-          stopListening();
-          documentIdsFailingInDatabase.delete(failingId);
-        }
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data.status).toBe('partial');
+        expect(await hasPublishedVersion(productUID, publishedId)).toBe(true);
+        expect(await hasPublishedVersion(productUID, failingId)).toBe(false);
+        expect(onPublishEvent).toHaveBeenCalledTimes(1);
+        expect(onPublishEvent.mock.calls[0][0].isPublished).toBe(true);
+      } finally {
+        stopListening();
+        documentIdsFailingInDatabase.delete(failingId);
       }
-    );
+    });
+
+    test('all_or_nothing run with a database error publishes nothing and ends failed', async () => {
+      const publishedFirstId = await createProduct({ valid: true });
+      const failingId = await createProduct({ valid: true });
+      documentIdsFailingInDatabase.add(failingId);
+      const onPublishEvent = jest.fn();
+      const stopListening = strapi.eventHub.on('releases.publish', onPublishEvent);
+
+      try {
+        const release = await createReleaseWithActions('all_or_nothing', [
+          { documentId: publishedFirstId },
+          { documentId: failingId },
+        ]);
+
+        const res = await publishManually(release.id);
+
+        expect(res.statusCode).toBe(500);
+        expect((await getRelease(release.id)).status).toBe('failed');
+        expect(await hasPublishedVersion(productUID, publishedFirstId)).toBe(false);
+        expect(onPublishEvent).toHaveBeenCalledTimes(1);
+        expect(onPublishEvent.mock.calls[0][0].isPublished).toBe(false);
+      } finally {
+        stopListening();
+        documentIdsFailingInDatabase.delete(failingId);
+      }
+    });
 
     test('a scheduled run of a release with no entries ends done', async () => {
       const release = (await createRelease()).body.data;
@@ -1503,6 +1527,77 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         expect(res.statusCode).toBe(400);
         expect(res.body.error.message).toBe('This attribute must be unique');
         expect(await hasPublishedVersion(slugItemUID, data.documentId)).toBe(false);
+      });
+
+      // Both entries pass the check before the run: nothing published holds the contested slug
+      // yet. The first one then publishes it, so the second one's publish, which removes its
+      // published version before it validates the new one, fails the unique check.
+      // Prefixed per test: a published slug stays taken for the tests after it.
+      const createContestedSlugItems = async (prefix: string) => {
+        const { data: first } = await createEntry(slugItemUID, {
+          title: 'Never published',
+          slug: `${prefix}-contested`,
+        });
+        const { data: second } = await createEntry(slugItemUID, {
+          title: 'Published',
+          slug: `${prefix}-original`,
+        });
+        await strapi.documents(slugItemUID).publish({ documentId: second.documentId });
+        await strapi
+          .documents(slugItemUID)
+          .update({ documentId: second.documentId, data: { slug: `${prefix}-contested` } });
+
+        return { firstId: first.documentId, secondId: second.documentId };
+      };
+
+      const getPublishedSlug = async (documentId: string) => {
+        const published = await strapi
+          .documents(slugItemUID)
+          .findOne({ documentId, status: 'published' });
+
+        return published?.slug ?? null;
+      };
+
+      test('allow_partial: an entry that fails the unique check at publish keeps its published version', async () => {
+        const { firstId, secondId } = await createContestedSlugItems('partial');
+        const release = await createReleaseWithActions('allow_partial', [
+          { documentId: firstId, contentType: slugItemUID },
+          { documentId: secondId, contentType: slugItemUID },
+        ]);
+
+        expect((await getRelease(release.id)).status).toBe('ready');
+
+        const res = await publishManually(release.id);
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data.status).toBe('partial');
+        expect(await getPublishedSlug(firstId)).toBe('partial-contested');
+        // Still online, as it was before the run
+        expect(await getPublishedSlug(secondId)).toBe('partial-original');
+      });
+
+      test('all_or_nothing: an entry that fails the unique check at publish rolls the whole run back', async () => {
+        const { firstId, secondId } = await createContestedSlugItems('all-or-nothing');
+        const release = await createReleaseWithActions('all_or_nothing', [
+          { documentId: firstId, contentType: slugItemUID },
+          { documentId: secondId, contentType: slugItemUID },
+        ]);
+        const onEntryPublish = jest.fn();
+        const stopListening = strapi.eventHub.on('entry.publish', onEntryPublish);
+
+        try {
+          const res = await publishManually(release.id);
+
+          expect(res.statusCode).toBe(400);
+          expect(res.body.error.message).toBe('This attribute must be unique');
+          expect((await getRelease(release.id)).status).toBe('failed');
+          expect(await getPublishedSlug(firstId)).toBeNull();
+          expect(await getPublishedSlug(secondId)).toBe('all-or-nothing-original');
+          // The rolled-back publish of the first entry announces nothing
+          expect(onEntryPublish).not.toHaveBeenCalled();
+        } finally {
+          stopListening();
+        }
       });
     });
   });

@@ -240,10 +240,10 @@ Whenever a release is updated, its status is recalculated, so switching the rele
 
 #### Publishing a release:
 
-A publish is either manual (the publish button or the API) or scheduled (the scheduler, at the release date). Under the release row lock, the run first reads every publish entry's current draft and checks whether it is publishable, before writing anything. Entries are then handled one at a time: content types in relation dependency order, publishes before unpublishes, each in the order they were added. They all share the lock transaction, so an entry released by the run stays released even if a later one fails.
+A publish is either manual (the publish button or the API) or scheduled (the scheduler, at the release date). Under the release row lock, the run first reads every publish entry's current draft and checks whether it is publishable, before writing anything. Entries are then handled one at a time: content types in relation dependency order, publishes before unpublishes, each in the order they were added. They share the lock transaction, and are written in savepoints (`strapi.db.savepoint`), so a failure rolls back exactly what it should.
 
-- `allow_partial`: entries that aren't publishable are skipped without being written. Each other entry is published or unpublished on its own: if that throws, the entry is skipped and the run moves on.
-- `all_or_nothing`: if any entry isn't publishable, no entry is written. Otherwise every entry is published or unpublished, and the first error stops the run.
+- `allow_partial`: entries that aren't publishable are skipped without being written. Each other entry is published or unpublished in its own savepoint: if that throws, only that entry is rolled back and skipped, and the run moves on. The check can pass an entry that still fails when written, for example when an earlier entry of the same run takes its unique value: since a publish removes the entry's published version before it validates the new one, the savepoint is what keeps that version online.
+- `all_or_nothing`: if any entry isn't publishable, no entry is written. Otherwise every entry is published or unpublished in one savepoint, and the first error rolls them all back.
 
 When the check finds that a run would release nothing (`all_or_nothing`: any entry not publishable; `allow_partial`: no entry publishable; never for a release with no entries):
 
@@ -253,10 +253,20 @@ When the check finds that a run would release nothing (`all_or_nothing`: any ent
 How a run ends:
 
 - Every entry released, or no entries at all: "Done", with `releasedAt` set.
-- Some entries released and some not: "Partial", with `releasedAt` set. This includes an `all_or_nothing` run stopped by an unexpected error after some entries went out: those stay published, and the request fails with the error.
-- No entry released (an `allow_partial` run whose entries all failed, or an `all_or_nothing` run stopped by an error on its first entry): "Failed", and the request fails. A failed release keeps `releasedAt` empty for now, so it stays pending.
+- Some entries released and some not (an `allow_partial` run that skipped entries): "Partial", with `releasedAt` set.
+- No entry released (an `allow_partial` run whose entries all failed, or an `all_or_nothing` run stopped by an error): "Failed", and the request fails. A failed release keeps `releasedAt` empty for now, so it stays pending.
 
-The `releases.publish` webhook is sent with `isPublished: true` when at least one entry was released. A failed run sends it once its status is written. A database error that aborts the run's transaction (on Postgres) rolls back every entry of the run and the status write with it: the webhook then has `isPublished: false`, and the release keeps its previous status.
+An error after the entries were released (writing the release's own status, for example) leaves the run "Partial": the entries stay released, and the request fails with the error.
+
+The status written, the `releases.publish` webhook and the `release.trigger` audit event always agree:
+
+| Status  | Webhook `isPublished` | Audit `outcome` | Audit `details`                                                                |
+| ------- | --------------------- | --------------- | ------------------------------------------------------------------------------ |
+| Done    | `true`                | `success`       | `published`, `unpublished`, `failed: 0`                                        |
+| Partial | `true`                | `partial`       | `published`, `unpublished`, `failed`, and `reason` if an error stopped the run |
+| Failed  | `false`               | `failure`       | `reason`: the error's name                                                     |
+
+The counts are what the run released, and `failed` the entries it left out: not publishable, or their publish or unpublish threw. A failed run sends the webhook once its status is written. Entry errors are rolled back with their savepoint, so on Postgres they don't abort the transaction; an error outside a savepoint that does (writing the status after a database error) rolls back the whole run and the status write with it: the webhook then has `isPublished: false`, and the release keeps its previous status.
 
 #### Listening to events on entries:
 

@@ -16,6 +16,7 @@ import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
 import {
   Alert,
   Badge,
+  type BadgeProps,
   Box,
   Button,
   Divider,
@@ -66,7 +67,8 @@ const RelativeTime = styled(BaseRelativeTime)`
 `;
 
 // Every status needs an entry: a new status without a color fails to compile instead of
-// silently falling back to a default
+// silently falling back to a default. Typed as the badge variants, the color scales a badge
+// can take, but rendered with their 100/200/600 shades rather than through `variant`.
 const BADGE_COLOR_BY_STATUS = {
   ready: 'success',
   blocked: 'warning',
@@ -74,7 +76,7 @@ const BADGE_COLOR_BY_STATUS = {
   done: 'primary',
   partial: 'alternative',
   empty: 'neutral',
-} satisfies Record<Release['status'], string>;
+} satisfies Record<Release['status'], NonNullable<BadgeProps['variant']>>;
 
 const getBadgeProps = (status: Release['status']) => {
   const color = BADGE_COLOR_BY_STATUS[status];

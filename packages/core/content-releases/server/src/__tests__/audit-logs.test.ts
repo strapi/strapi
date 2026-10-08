@@ -96,7 +96,7 @@ describe('transformers', () => {
     });
   });
 
-  it('release.trigger reports both outcomes', () => {
+  it('release.trigger reports each outcome', () => {
     expect(
       transformers['release.trigger']({
         releaseId: 1,
@@ -104,11 +104,27 @@ describe('transformers', () => {
         outcome: 'success',
         published: 2,
         unpublished: 1,
+        failed: 0,
       })
     ).toEqual({
       resource: { type: 'release', id: 1, name: 'March' },
       outcome: 'success',
       details: { published: 2, unpublished: 1, failed: 0 },
+    });
+
+    expect(
+      transformers['release.trigger']({
+        releaseId: 1,
+        name: 'March',
+        outcome: 'partial',
+        published: 7,
+        unpublished: 0,
+        failed: 3,
+      })
+    ).toEqual({
+      resource: { type: 'release', id: 1, name: 'March' },
+      outcome: 'partial',
+      details: { published: 7, unpublished: 0, failed: 3 },
     });
 
     expect(
@@ -124,7 +140,7 @@ describe('transformers', () => {
       details: { reason: 'ValidationError' },
     });
 
-    // A custom error class can put arbitrary text in its name
+    // A custom error class can put arbitrary text in its name, on a failed or a partial run
     expect(
       transformers['release.trigger']({
         releaseId: 1,
@@ -133,14 +149,17 @@ describe('transformers', () => {
         reason: 'X'.repeat(500),
       }).details.reason
     ).toHaveLength(100);
-
-    // No counts, no claims: a success whose counts could not be read omits details
     expect(
-      transformers['release.trigger']({ releaseId: 1, name: 'March', outcome: 'success' })
-    ).toEqual({
-      resource: { type: 'release', id: 1, name: 'March' },
-      outcome: 'success',
-    });
+      transformers['release.trigger']({
+        releaseId: 1,
+        name: 'March',
+        outcome: 'partial',
+        published: 1,
+        unpublished: 0,
+        failed: 0,
+        reason: 'X'.repeat(500),
+      }).details.reason
+    ).toHaveLength(100);
   });
 
   it('release.entry events carry the entry and the action type', () => {

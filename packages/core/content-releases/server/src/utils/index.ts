@@ -381,7 +381,7 @@ const collectRelationTargets = (
  *
  * Relations in components (nested or not) and dynamic zones are also considered.
  *
- * @param contentTypeUids - Content type UIDs that will be published in the release
+ * @param contentTypeUids - Content type UIDs that will be published in the release, repeats allowed
  * @param strapi - Strapi instance
  * @returns Content type UIDs in publish order (dependencies first)
  */
@@ -394,7 +394,7 @@ export const getPublishOrderForContentTypes = (
   // Build dependency graph: source depends on target (source must be published after target)
   const dependencies = new Map<UID.ContentType, Set<UID.ContentType>>();
 
-  for (const uid of contentTypeUids) {
+  for (const uid of uidSet) {
     const model = strapi.getModel(uid);
     if (model && contentTypesUtils.hasDraftAndPublish(model)) {
       const relationTargets = collectRelationTargets(uid, strapi);
@@ -437,7 +437,7 @@ export const getPublishOrderForContentTypes = (
     sorted.push(uid);
   };
 
-  for (const uid of contentTypeUids) {
+  for (const uid of uidSet) {
     visit(uid);
   }
 
