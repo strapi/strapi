@@ -2,13 +2,14 @@ import type { Context } from 'koa';
 import _ from 'lodash';
 import { errors } from '@strapi/utils';
 import type { PluginContext, AdvancedSettings, GrantConfig } from '../types';
+import { createExtensibleController } from './create-extensible-controller';
 import { getService } from '../utils';
 import { isValidEmailTemplate } from './validation/email-template';
 
 const { ValidationError } = errors;
 
 /** Create controller actions for this Strapi instance. */
-export default ({ strapi }: PluginContext) => ({
+export default createExtensibleController(({ strapi }: PluginContext) => ({
   async getEmailTemplate(ctx: Context) {
     ctx.send(await strapi.store({ type: 'plugin', name: 'users-permissions', key: 'email' }).get());
   },
@@ -87,4 +88,4 @@ export default ({ strapi }: PluginContext) => ({
 
     ctx.send({ ok: true });
   },
-});
+}));
