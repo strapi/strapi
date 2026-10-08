@@ -1,5 +1,5 @@
 {
   "extends": "tsconfig/client.json",
-  "compilerOptions": { "types": ["node", "vitest/jsdom", "vite/client"] },
+  "compilerOptions": { "types": ["vitest/jsdom", "vite/client"] },
   "include": ["src", "tests"]
 }
