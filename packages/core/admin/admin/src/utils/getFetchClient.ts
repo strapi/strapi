@@ -1,4 +1,4 @@
-import pipe from 'lodash/fp/pipe';
+import flow from 'lodash/flow';
 // eslint-disable-next-line import/default
 import qs from 'qs';
 
@@ -361,6 +361,37 @@ const isFetchError = (error: unknown): error is FetchError => {
   return error instanceof FetchError;
 };
 
+export type AbortError = DOMException & {
+  name: 'AbortError' | 'TimeoutError';
+};
+
+/**
+ * Type guard that checks whether an error comes from an aborted operation,
+ * such as a `fetch` cancelled via `AbortController` or timed out via
+ * `AbortSignal.timeout()`.
+ *
+ * Note: if the controller was aborted with a custom reason
+ * (`controller.abort(reason)`), the operation rejects with that reason
+ * instead of an `AbortError`, and this guard returns `false`. In that case,
+ * also check the signal itself:
+ *
+ * @example
+ * try {
+ *   await fetch(url, { signal: controller.signal });
+ * } catch (err) {
+ *   if (isAbortError(err) || controller.signal.aborted) return;
+ *   throw err;
+ * }
+ *
+ * @param error - The caught value to check.
+ * @returns `true` if `error` is a `DOMException` named `AbortError` or `TimeoutError`.
+ */
+export function isAbortError(error: unknown): error is AbortError {
+  return (
+    error instanceof DOMException && (error.name === 'AbortError' || error.name === 'TimeoutError')
+  );
+}
+
 type FetchClient = {
   get: {
     (url: string, config: FetchOptions & { responseType: 'blob' }): Promise<FetchResponse<Blob>>;
@@ -546,7 +577,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
    * are unique to the individual request
    */
   const makeCreateRequestUrl = (options?: FetchOptions) =>
-    pipe(normalizeUrl, addBaseUrl, paramsSerializer(options?.params));
+    flow(normalizeUrl, addBaseUrl, paramsSerializer(options?.params));
 
   const fetchClient: FetchClient = {
     get: async <TData>(url: string, options?: FetchOptions): Promise<FetchResponse<TData>> => {

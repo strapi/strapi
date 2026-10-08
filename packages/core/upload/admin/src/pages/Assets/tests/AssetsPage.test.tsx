@@ -1,3 +1,4 @@
+import { within } from '@testing-library/react';
 import { act, fireEvent, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -99,6 +100,22 @@ const renderPage = (search = '') =>
   );
 
 const findHeading = () => screen.findByRole('heading', { level: 1 });
+
+/**
+ * The context menu stays shut until `useRBAC` commits `assets.create`. That
+ * commit is the effect's promise continuation, so yield once and then read
+ * the header button. A one-second `findBy` can expire while the coverage run
+ * is still inside that continuation.
+ */
+const waitForCreatePermission = async () => {
+  await act(async () => {
+    await new Promise((resolve) => {
+      setTimeout(resolve, 0);
+    });
+  });
+
+  expect(screen.getByRole('button', { name: 'New' })).toBeInTheDocument();
+};
 
 describe('AssetsPage search', () => {
   beforeEach(() => {
@@ -628,12 +645,6 @@ describe('AssetsPage main-area context menu', () => {
     fireEvent.contextMenu(column, { clientX: 200, clientY: 300 });
   };
 
-  /**
-   * The menu is gated on `assets.create`, which is `false` until the RBAC check
-   * settles — the "New" menu appearing is the signal that it has.
-   */
-  const waitForCreatePermission = () => screen.findByRole('button', { name: 'New' });
-
   it('offers the same creation actions as the New menu', async () => {
     respondWithAssets([createAsset(1, 'image.png')]);
 
@@ -690,6 +701,48 @@ describe('AssetsPage main-area context menu', () => {
     }
   });
 
+  it('opens the asset actions on a table row too', async () => {
+    respondWithAssets([createAsset(1, 'image.png')]);
+    // Grid is the default view.
+    window.localStorage.setItem('STRAPI_UPLOAD_LIBRARY_VIEW', '1');
+
+    try {
+      renderPage();
+      await waitForCreatePermission();
+
+      // eslint-disable-next-line testing-library/no-node-access
+      const row = (await screen.findByText('image.png')).closest('[role="row"]');
+      fireEvent.contextMenu(row!, { clientX: 40, clientY: 40 });
+
+      // `getBy`, deliberately: the provider resolves the permissions and hands
+      // them to the menu, so the items are there the moment the menu is. A
+      // retry here would hide the empty-popup window coming back.
+      const menu = within(await screen.findByRole('menu'));
+      expect(menu.getByRole('menuitem', { name: 'Delete' })).toBeInTheDocument();
+      expect(menu.queryByRole('menuitem', { name: 'New folder' })).not.toBeInTheDocument();
+    } finally {
+      window.localStorage.removeItem('STRAPI_UPLOAD_LIBRARY_VIEW');
+    }
+  });
+
+  it('opens the folder actions on a folder card', async () => {
+    respondWithAssets([]);
+    respondWithFolders([createFolder(1, 'reports')]);
+
+    renderPage();
+    await waitForCreatePermission();
+
+    // eslint-disable-next-line testing-library/no-node-access
+    const card = (await screen.findByText('reports')).closest('[data-native-context-menu]');
+    fireEvent.contextMenu(card!, { clientX: 30, clientY: 30 });
+
+    const menu = within(await screen.findByRole('menu'));
+    expect(await menu.findByRole('menuitem', { name: 'Rename folder' })).toBeInTheDocument();
+    expect(menu.getByRole('menuitem', { name: 'Delete folder' })).toBeInTheDocument();
+    // Not the background create menu.
+    expect(menu.queryByRole('menuitem', { name: 'New folder' })).not.toBeInTheDocument();
+  });
+
   it('creates the folder inside the folder currently open', async () => {
     respondWithAssets([createAsset(1, 'image.png')]);
     respondWithFolders([]);
@@ -715,6 +768,7 @@ describe('AssetsPage main-area context menu', () => {
     await waitForCreatePermission();
 
     // The hidden input the header "New > File upload" also clicks.
+    // eslint-disable-next-line testing-library/no-node-access
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
     const click = jest.spyOn(fileInput, 'click').mockImplementation(() => {});
 
@@ -725,18 +779,204 @@ describe('AssetsPage main-area context menu', () => {
     click.mockRestore();
   });
 
-  it('leaves an asset card to the browser', async () => {
+  it('opens the asset actions on a card rather than the create menu', async () => {
     respondWithAssets([createAsset(1, 'image.png')]);
 
     renderPage();
     await waitForCreatePermission();
 
+    // eslint-disable-next-line testing-library/no-node-access
     const card = (await screen.findByText('image.png')).closest('[data-native-context-menu]');
-    const event = fireEvent.contextMenu(card!, { clientX: 20, clientY: 20 });
+    fireEvent.contextMenu(card!, { clientX: 20, clientY: 20 });
 
-    // Nothing called preventDefault, so the browser's own menu still opens.
-    expect(event).toBe(true);
-    await waitFor(() => expect(screen.queryByRole('menuitem')).not.toBeInTheDocument());
+    // The card's own actions, not "New folder" / "File upload": the background
+    // gesture stays background-only.
+    expect(await screen.findByRole('menuitem', { name: 'Delete' })).toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: 'New folder' })).not.toBeInTheDocument();
+  });
+
+  it('leaves the browser menu alone on an asset the role has no action for', async () => {
+    respondWithAssets([createAsset(1, 'image.png')]);
+
+    render(<AssetsPage />, {
+      initialEntries: ['/'],
+      providerOptions: {
+        permissions: (defaults: Array<{ action: string }>) =>
+          defaults.filter(
+            (permission) =>
+              ![
+                'plugin::upload.assets.update',
+                'plugin::upload.assets.copy-link',
+                'plugin::upload.assets.download',
+              ].includes(permission.action)
+          ),
+      },
+    });
+    await waitForCreatePermission();
+
+    // eslint-disable-next-line testing-library/no-node-access
+    const card = (await screen.findByText('image.png')).closest('[data-native-context-menu]');
+
+    // `true` means nothing called `preventDefault`.
+    await waitFor(() =>
+      expect(fireEvent.contextMenu(card!, { clientX: 20, clientY: 20 })).toBe(true)
+    );
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+  });
+
+  it('gives focus back to the card when the menu is closed with Escape', async () => {
+    respondWithAssets([createAsset(1, 'image.png')]);
+
+    const { user } = renderPage();
+    await waitForCreatePermission();
+
+    // eslint-disable-next-line testing-library/no-node-access
+    const card = (await screen.findByText('image.png')).closest<HTMLElement>(
+      '[data-native-context-menu]'
+    );
+    fireEvent.contextMenu(card!, { clientX: 20, clientY: 20 });
+    expect(await screen.findByRole('menu')).toBeInTheDocument();
+
+    await user.keyboard('{Escape}');
+
+    await waitFor(() => expect(screen.queryByRole('menu')).not.toBeInTheDocument());
+    await waitFor(() => expect(card).toHaveFocus());
+  });
+
+  it('offers the creation actions on the empty parts of the folder tree sidebar', async () => {
+    respondWithAssets([createAsset(1, 'image.png')]);
+
+    renderPage();
+    await waitForCreatePermission();
+
+    // Text queries, not roles: the side nav is hidden below the medium breakpoint.
+    fireEvent.contextMenu(screen.getByText('Folders'), { clientX: 40, clientY: 200 });
+
+    const menu = within(await screen.findByRole('menu'));
+    expect(menu.getByRole('menuitem', { name: 'New folder' })).toBeInTheDocument();
+    expect(menu.getByRole('menuitem', { name: 'File upload' })).toBeInTheDocument();
+    expect(menu.getByRole('menuitem', { name: 'File upload from URL' })).toBeInTheDocument();
+  });
+
+  it('opens only the folder actions on a folder tree row', async () => {
+    respondWithAssets([]);
+    server.use(
+      http.get('*/upload/folder-structure', () =>
+        HttpResponse.json({ data: [{ id: 4, name: 'Photos', children: [] }] })
+      )
+    );
+
+    renderPage();
+    await waitForCreatePermission();
+
+    // The row itself rather than its button: buttons are skipped by the sidebar
+    // menu anyway, the row's padding is what the tree has to claim.
+    // eslint-disable-next-line testing-library/no-node-access
+    const row = (await screen.findByTestId('folder-tree-node-4')).closest(
+      '[data-native-context-menu]'
+    );
+    fireEvent.contextMenu(row!, { clientX: 40, clientY: 200 });
+
+    const menu = within(await screen.findByRole('menu'));
+    expect(menu.getByRole('menuitem', { name: 'Delete folder' })).toBeInTheDocument();
+    expect(menu.queryByRole('menuitem', { name: 'New folder' })).not.toBeInTheDocument();
+    expect(screen.getAllByRole('menu')).toHaveLength(1);
+  });
+
+  // Smoke cover only. The bug this came from — a second right-click doing
+  // nothing — needs `pointerdown` and `contextmenu` to land in one task so the
+  // dismissed menu's cleanup runs after the next one mounted. `fireEvent` acts
+  // between them, so jsdom always wins the race the browser loses. The real
+  // guard is the e2e.
+  it('opens a menu on a second right-click', async () => {
+    respondWithAssets([createAsset(1, 'image.png'), createAsset(2, 'photo.png')]);
+
+    renderPage();
+    await waitForCreatePermission();
+
+    // eslint-disable-next-line testing-library/no-node-access
+    const first = (await screen.findByText('image.png')).closest('[data-native-context-menu]');
+    fireEvent.contextMenu(first!, { clientX: 20, clientY: 20 });
+    expect(await screen.findByRole('menu')).toBeInTheDocument();
+
+    // A right-click while a menu is open is a dismiss *and* an open.
+    // eslint-disable-next-line testing-library/no-node-access
+    const second = (await screen.findByText('photo.png')).closest('[data-native-context-menu]');
+    fireEvent.pointerDown(second!, { button: 2 });
+    fireEvent.contextMenu(second!, { clientX: 80, clientY: 80 });
+
+    expect(await screen.findByRole('menu')).toBeInTheDocument();
+  });
+
+  it('offers the selection actions when the clicked card is part of one', async () => {
+    respondWithAssets([createAsset(1, 'image.png'), createAsset(2, 'photo.png')]);
+
+    const { user } = renderPage();
+    await waitForCreatePermission();
+
+    await user.click(await screen.findByRole('checkbox', { name: 'Select image.png' }));
+    await user.click(await screen.findByRole('checkbox', { name: 'Select photo.png' }));
+
+    // eslint-disable-next-line testing-library/no-node-access
+    const card = (await screen.findByText('image.png')).closest('[data-native-context-menu]');
+    fireEvent.contextMenu(card!, { clientX: 20, clientY: 20 });
+
+    // Scoped to the menu: the bulk actions bar shows the same count, which is
+    // the point — one wording for "what is selected", wherever it is stated.
+    const menu = within(await screen.findByRole('menu'));
+
+    // The count leads, and only the actions that mean something for a set.
+    expect(menu.getByText('2 items selected')).toBeInTheDocument();
+    expect(menu.getByRole('menuitem', { name: 'Move' })).toBeInTheDocument();
+    expect(menu.getByRole('menuitem', { name: 'Delete' })).toBeInTheDocument();
+    // Single-item actions have no meaning for a selection.
+    expect(menu.queryByRole('menuitem', { name: 'Replace media' })).not.toBeInTheDocument();
+  });
+
+  it('leads the background menu with the selection actions when something is selected', async () => {
+    respondWithAssets([createAsset(1, 'image.png'), createAsset(2, 'photo.png')]);
+
+    const { user } = renderPage();
+    await waitForCreatePermission();
+
+    await user.click(await screen.findByRole('checkbox', { name: 'Select image.png' }));
+    await user.click(await screen.findByRole('checkbox', { name: 'Select photo.png' }));
+
+    rightClickBackground();
+
+    const menu = within(await screen.findByRole('menu'));
+    expect(menu.getByText('2 items selected')).toBeInTheDocument();
+
+    // Order is the point: what acts on the selection comes before what creates
+    // something new.
+    expect(menu.getAllByRole('menuitem').map((item) => item.textContent)).toEqual([
+      'Move',
+      'Delete',
+      'New folder',
+      'File upload',
+      'File upload from URL',
+    ]);
+  });
+
+  it('leaves the background menu to the creation actions once the selection is cleared', async () => {
+    respondWithAssets([createAsset(1, 'image.png')]);
+
+    const { user } = renderPage();
+    await waitForCreatePermission();
+
+    const checkbox = await screen.findByRole('checkbox', { name: 'Select image.png' });
+    await user.click(checkbox);
+    await user.click(checkbox);
+
+    rightClickBackground();
+
+    const menu = within(await screen.findByRole('menu'));
+    expect(menu.queryByText(/item(s)? selected/)).not.toBeInTheDocument();
+    expect(menu.getAllByRole('menuitem').map((item) => item.textContent)).toEqual([
+      'New folder',
+      'File upload',
+      'File upload from URL',
+    ]);
   });
 
   it('stays shut without assets.create', async () => {
@@ -773,8 +1013,7 @@ describe('AssetsPage RBAC gating', () => {
 
     renderPage();
     await findHeading();
-
-    expect(await screen.findByRole('button', { name: 'New' })).toBeInTheDocument();
+    await waitForCreatePermission();
   });
 
   it('hides the New menu without assets.create', async () => {

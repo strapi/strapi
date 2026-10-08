@@ -1,10 +1,16 @@
 import type { Core } from '@strapi/types';
-import { set, isString, map, get } from 'lodash/fp';
-import { errors } from '@strapi/utils';
+import { isString, map } from 'lodash';
+import { errors, emitAudit } from '@strapi/utils';
 import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../constants/workflows';
+import {
+  AUDITED_EVENTS,
+  getWorkflowChanges,
+  toWorkflowEvent,
+  toWorkflowSnapshot,
+} from '../audit-logs';
 import { getService } from '../utils';
 import { getWorkflowContentTypeFilter } from '../utils/review-workflows';
-import workflowsContentTypesFactory from './workflow-content-types';
+import workflowsContentTypesFactory, { type ContentTypeTransfer } from './workflow-content-types';
 
 const processFilters = ({ strapi }: { strapi: Core.Strapi }, filters: any = {}) => {
   const processedFilters = { ...filters };
@@ -30,6 +36,19 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   const workflowsContentTypes = workflowsContentTypesFactory({ strapi });
   const workflowValidator = getService('validation', { strapi });
   const metrics = getService('workflow-metrics', { strapi });
+
+  const emitContentTypeTransfers = async (transfers: ContentTypeTransfer[]) => {
+    for (const { workflowId, name, before, after } of transfers) {
+      const changes = getWorkflowChanges(
+        toWorkflowSnapshot({ id: workflowId, name, contentTypes: before }),
+        toWorkflowSnapshot({ id: workflowId, name, contentTypes: after })
+      );
+
+      if (Object.keys(changes).length > 0) {
+        await emitAudit({ strapi }, AUDITED_EVENTS.WORKFLOW_UPDATE, { workflowId, name, changes });
+      }
+    }
+  };
 
   return {
     /**
@@ -80,12 +99,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       workflowValidator.validateWorkflowStages(opts.data.stages);
       await workflowValidator.validateWorkflowCount(1);
 
-      return strapi.db.transaction(async () => {
+      let transfers: ContentTypeTransfer[] = [];
+
+      const createdWorkflow = await strapi.db.transaction(async () => {
         // Create stages
         const stages = await getService('stages', { strapi }).createMany(opts.data.stages);
-        const mapIds = map(get('id'));
-
-        createOpts = set('data.stages', mapIds(stages), createOpts);
+        createOpts = { ...createOpts, data: { ...createOpts.data, stages: map(stages, 'id') } };
 
         if (opts.data.stageRequiredToPublishName) {
           const stageRequiredToPublish = stages.find(
@@ -95,12 +114,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
             throw new errors.ApplicationError('Stage required to publish does not exist');
           }
 
-          createOpts = set('data.stageRequiredToPublish', stageRequiredToPublish.id, createOpts);
+          createOpts = {
+            ...createOpts,
+            data: { ...createOpts.data, stageRequiredToPublish: stageRequiredToPublish.id },
+          };
         }
 
         // Update (un)assigned Content Types
         if (opts.data.contentTypes) {
-          await workflowsContentTypes.migrate({
+          transfers = await workflowsContentTypes.migrate({
             destContentTypes: opts.data.contentTypes,
             stageId: stages[0].id,
           });
@@ -122,6 +144,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
         return createdWorkflow;
       });
+
+      const { contentTypes, stages, stageRequiredToPublish } = toWorkflowSnapshot(createdWorkflow);
+      await emitAudit({ strapi }, AUDITED_EVENTS.WORKFLOW_CREATE, {
+        ...toWorkflowEvent(createdWorkflow),
+        contentTypes,
+        stages,
+        stageRequiredToPublish,
+      });
+      await emitContentTypeTransfers(transfers);
+
+      return createdWorkflow;
     },
 
     /**
@@ -139,7 +172,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       await workflowValidator.validateWorkflowCount();
 
-      return strapi.db.transaction(async () => {
+      let transfers: ContentTypeTransfer[] = [];
+
+      const updatedWorkflow = await strapi.db.transaction(async () => {
         // Update stages
         if (opts.data.stages) {
           workflowValidator.validateWorkflowStages(opts.data.stages);
@@ -154,14 +189,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           );
           updatedStageIds = updatedStages.map((stage: any) => stage.id);
 
-          updateOpts = set('data.stages', updatedStageIds, updateOpts);
+          updateOpts = { ...updateOpts, data: { ...updateOpts.data, stages: updatedStageIds } };
         }
 
         if (opts.data.stageRequiredToPublishName !== undefined) {
           const stages = updatedStages ?? workflow.stages;
 
           if (opts.data.stageRequiredToPublishName === null) {
-            updateOpts = set('data.stageRequiredToPublish', null, updateOpts);
+            updateOpts = {
+              ...updateOpts,
+              data: { ...updateOpts.data, stageRequiredToPublish: null },
+            };
           } else {
             const stageRequiredToPublish = stages.find(
               (stage: any) => stage.name === opts.data.stageRequiredToPublishName
@@ -171,13 +209,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
               throw new errors.ApplicationError('Stage required to publish does not exist');
             }
 
-            updateOpts = set('data.stageRequiredToPublish', stageRequiredToPublish.id, updateOpts);
+            updateOpts = {
+              ...updateOpts,
+              data: { ...updateOpts.data, stageRequiredToPublish: stageRequiredToPublish.id },
+            };
           }
         }
 
         // Update (un)assigned Content Types
         if (opts.data.contentTypes) {
-          await workflowsContentTypes.migrate({
+          transfers = await workflowsContentTypes.migrate({
             srcContentTypes: workflow.contentTypes,
             destContentTypes: opts.data.contentTypes,
             stageId: updatedStageIds ? updatedStageIds[0] : workflow.stages[0].id,
@@ -204,6 +245,21 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
         return updatedWorkflow;
       });
+
+      const changes = getWorkflowChanges(
+        toWorkflowSnapshot(workflow),
+        toWorkflowSnapshot(updatedWorkflow)
+      );
+
+      if (Object.keys(changes).length > 0) {
+        await emitAudit({ strapi }, AUDITED_EVENTS.WORKFLOW_UPDATE, {
+          ...toWorkflowEvent(updatedWorkflow),
+          changes,
+        });
+      }
+      await emitContentTypeTransfers(transfers);
+
+      return updatedWorkflow;
     },
 
     /**
@@ -222,7 +278,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         throw new errors.ApplicationError('Can not delete the last workflow');
       }
 
-      return strapi.db.transaction(async () => {
+      const deletedWorkflow = await strapi.db.transaction(async () => {
         // Delete stages
         await stageService.deleteMany(workflow.stages);
 
@@ -247,7 +303,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
         return deletedWorkflow;
       });
+
+      await emitAudit({ strapi }, AUDITED_EVENTS.WORKFLOW_DELETE, toWorkflowEvent(workflow));
+
+      return deletedWorkflow;
     },
+
     /**
      * Returns the total count of workflows.
      * @returns {Promise<number>} - Total count of workflows.

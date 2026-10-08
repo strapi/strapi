@@ -1,5 +1,6 @@
 import type { Database } from '@strapi/database';
 import { createConnection } from '@strapi/database/src/connection';
+import { createLocalizationService } from '../../services/localization';
 
 import { discardDocumentDrafts } from '../database/5.0.0-discard-drafts';
 
@@ -222,7 +223,7 @@ const setupStrapi = (
     components: {},
     plugins: {},
     db,
-    plugin: () => undefined,
+    localization: createLocalizationService(),
   } as any;
 };
 
@@ -294,7 +295,7 @@ const setupArticleOwnsTagsStrapi = (db: Database) => {
     components: {},
     plugins: {},
     db,
-    plugin: () => undefined,
+    localization: createLocalizationService(),
   } as any;
 };
 
