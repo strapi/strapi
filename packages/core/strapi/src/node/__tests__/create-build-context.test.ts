@@ -223,26 +223,56 @@ describe('createBuildContext', () => {
     expect(ctx.env.STRAPI_ADMIN_AUTH_COOKIE_PATH).toBe('/strapi-de/admin');
   });
 
-  it('falls back to admin.path when admin.auth.cookie.path is unset', async () => {
-    const strapi = buildStrapiMock(undefined, undefined);
+  describe('STRAPI_ADMIN_AUTH_COOKIE_PATH when admin.auth.cookie.path is unset', () => {
+    // Overrides the URL config with what packages/core/core/src/configuration resolves.
+    const withUrls = (strapi: Core.Strapi, urls: Record<string, string>) => {
+      const get = strapi.config.get as jest.Mock;
+      const original = get.getMockImplementation()!;
+      get.mockImplementation((key: string, def?: unknown) =>
+        key in urls ? urls[key] : original(key, def)
+      );
+      return strapi;
+    };
 
-    const ctx = await createBuildContext(buildArgs(strapi));
+    it('uses the default admin panel path', async () => {
+      const ctx = await createBuildContext(buildArgs(buildStrapiMock()));
 
-    // The mock serves the admin panel from the default '/admin'.
-    expect(ctx.env.STRAPI_ADMIN_AUTH_COOKIE_PATH).toBe('/admin');
-  });
+      expect(ctx.env.STRAPI_ADMIN_AUTH_COOKIE_PATH).toBe('/admin');
+    });
 
-  it('follows a custom admin.path so the panel can read its own cookie', async () => {
-    const strapi = buildStrapiMock(undefined, undefined);
-    const get = strapi.config.get as jest.Mock;
-    const original = get.getMockImplementation()!;
-    get.mockImplementation((key: string, def?: unknown) =>
-      key === 'admin.path' ? '/dashboard' : original(key, def)
-    );
+    it('follows a custom admin.url so the panel can read its own cookie', async () => {
+      const strapi = withUrls(buildStrapiMock(), {
+        'admin.absoluteUrl': 'http://localhost:1337/dashboard',
+        'admin.path': '/dashboard',
+      });
 
-    const ctx = await createBuildContext(buildArgs(strapi));
+      const ctx = await createBuildContext(buildArgs(strapi));
 
-    expect(ctx.env.STRAPI_ADMIN_AUTH_COOKIE_PATH).toBe('/dashboard');
+      expect(ctx.env.STRAPI_ADMIN_AUTH_COOKIE_PATH).toBe('/dashboard');
+    });
+
+    it('includes a server.url subpath, which admin.path leaves out', async () => {
+      const strapi = withUrls(buildStrapiMock(), {
+        'server.absoluteUrl': 'https://example.com/strapi',
+        'admin.absoluteUrl': 'https://example.com/strapi/admin',
+        'admin.path': '/admin',
+      });
+
+      const ctx = await createBuildContext(buildArgs(strapi));
+
+      expect(ctx.env.STRAPI_ADMIN_AUTH_COOKIE_PATH).toBe('/strapi/admin');
+    });
+
+    it('treats a blank admin.auth.cookie.path as unset', async () => {
+      const strapi = withUrls(buildStrapiMock(undefined, '  '), {
+        'admin.absoluteUrl': 'http://localhost:1337/dashboard',
+        'admin.path': '/dashboard',
+      });
+
+      const ctx = await createBuildContext(buildArgs(strapi));
+
+      expect(ctx.env.STRAPI_ADMIN_AUTH_COOKIE_PATH).toBe('/dashboard');
+    });
   });
 
   it('overrides ambient STRAPI_ADMIN_AUTH_COOKIE_PATH from process.env with config', async () => {

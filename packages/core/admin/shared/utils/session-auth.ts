@@ -78,12 +78,14 @@ const cookiePathMatches = (cookiePath: string, requestPath: string): boolean => 
  * Path of the non-httpOnly access cookie. Only the admin panel reads it,
  * through `document.cookie`, which exposes a cookie only on pages its path
  * matches. So when `admin.auth.cookie.path` is unset it follows the path the
- * panel is served from (`admin.url`).
+ * browser loads the panel from (`admin.url`, behind any `server.url` subpath).
  * The admin build resolves the same value (create-build-context.ts).
  */
 export const getAccessCookiePath = (): string => {
-  const adminPath: string | undefined = strapi.config.get('admin.path');
-  return resolveAuthCookiePath(getConfiguredCookiePath() ?? adminPath, warnViaStrapiLog);
+  return resolveAuthCookiePath(
+    getConfiguredCookiePath() ?? getBrowserPath('admin.absoluteUrl'),
+    warnViaStrapiLog
+  );
 };
 
 const warnedRefreshCookiePaths = new Set<string>();
