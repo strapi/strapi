@@ -41,7 +41,7 @@ const defaultConfiguration: Config = {
  * Every event the webhook has to listen to, including the ones it only sends for some content types.
  */
 const getEvents = ({ events, contentTypeEvents = {} }: Webhook) => {
-  return _.uniq([...events, ...Object.values(contentTypeEvents).flat()]);
+  return [...new Set([...events, ...Object.values(contentTypeEvents).flat()])];
 };
 
 /**

@@ -1,4 +1,4 @@
-import { emitAudit } from '@strapi/utils';
+import { emitAudit, errors } from '@strapi/utils';
 // @ts-expect-error - types are not generated for this file
 // eslint-disable-next-line import/no-relative-packages
 import createContext from '../../../../../../../tests/helpers/create-context';
@@ -141,5 +141,94 @@ describe('Webhooks controller audit events', () => {
       ['webhook.delete', { webhookId: '4', name: 'Deploy site' }],
       ['webhook.delete', { webhookId: '5', name: 'Other' }],
     ]);
+  });
+});
+
+describe('Webhooks controller content type events', () => {
+  const ARTICLE_UID = 'api::article.article';
+  const DELETED_UID = 'api::deleted.deleted';
+
+  const setStrapiWithContentTypes = (
+    store: Record<string, jest.Mock>,
+    contentTypes: Record<string, unknown> = { [ARTICLE_UID]: {} }
+  ) => {
+    const runner = setStrapi(store);
+    (global.strapi as any).contentTypes = contentTypes;
+    return runner;
+  };
+
+  beforeEach(() => {
+    emitAuditMock.mockClear();
+  });
+
+  test('createWebhook accepts events for a content type that exists', async () => {
+    const contentTypeEvents = { [ARTICLE_UID]: ['entry.publish'] };
+    const created = { ...webhook, contentTypeEvents };
+    const createWebhook = jest.fn(async () => created);
+    const runner = setStrapiWithContentTypes({ createWebhook });
+    const ctx = createCtx({ body: { ...body, contentTypeEvents } });
+
+    await webhooksController.createWebhook(ctx as any);
+
+    expect(createWebhook).toHaveBeenCalledWith({ ...body, contentTypeEvents });
+    expect(runner.add).toHaveBeenCalledWith(created);
+    expect(ctx.created).toHaveBeenCalledWith({ data: created });
+  });
+
+  test('createWebhook rejects events for a content type that does not exist', async () => {
+    const createWebhook = jest.fn();
+    setStrapiWithContentTypes({ createWebhook });
+    const ctx = createCtx({
+      body: { ...body, contentTypeEvents: { 'api::missing.missing': ['entry.create'] } },
+    });
+
+    await expect(webhooksController.createWebhook(ctx as any)).rejects.toThrow(
+      new errors.ValidationError('Content type api::missing.missing does not exist')
+    );
+    expect(createWebhook).not.toHaveBeenCalled();
+    expect(emitAuditMock).not.toHaveBeenCalled();
+  });
+
+  test('createWebhook rejects per content type events that are not a list of events', async () => {
+    const createWebhook = jest.fn();
+    setStrapiWithContentTypes({ createWebhook });
+    const ctx = createCtx({
+      body: { ...body, contentTypeEvents: { [ARTICLE_UID]: 'entry.create' } },
+    });
+
+    await expect(webhooksController.createWebhook(ctx as any)).rejects.toThrow(
+      errors.ValidationError
+    );
+    expect(createWebhook).not.toHaveBeenCalled();
+  });
+
+  test('updateWebhook keeps the events of a content type deleted since the webhook was saved', async () => {
+    const contentTypeEvents = { [DELETED_UID]: ['entry.create'] };
+    const saved = { ...webhook, contentTypeEvents };
+    const updateWebhook = jest.fn(async () => saved);
+    setStrapiWithContentTypes(
+      { findWebhook: jest.fn(async () => saved), updateWebhook },
+      { [ARTICLE_UID]: {} }
+    );
+    const ctx = createCtx({ params: { id: '4' }, body: { ...body, contentTypeEvents } });
+
+    await webhooksController.updateWebhook(ctx as any);
+
+    expect(updateWebhook).toHaveBeenCalledWith('4', { ...saved, ...body, contentTypeEvents });
+    expect(ctx.send).toHaveBeenCalledWith({ data: saved });
+  });
+
+  test('updateWebhook rejects a new content type that does not exist', async () => {
+    const updateWebhook = jest.fn();
+    setStrapiWithContentTypes({ findWebhook: jest.fn(async () => webhook), updateWebhook });
+    const ctx = createCtx({
+      params: { id: '4' },
+      body: { ...body, contentTypeEvents: { 'api::missing.missing': ['entry.create'] } },
+    });
+
+    await expect(webhooksController.updateWebhook(ctx as any)).rejects.toThrow(
+      new errors.ValidationError('Content type api::missing.missing does not exist')
+    );
+    expect(updateWebhook).not.toHaveBeenCalled();
   });
 });
