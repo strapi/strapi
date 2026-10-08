@@ -30,6 +30,31 @@ const reuseUnsetPreviousProperties = (
   );
 };
 
+/**
+ * Maps each attribute name produced by this save's rename hops to the name it
+ * had before the save, by folding the hops in order (`a -> tmp, tmp -> b`
+ * gives `b -> a`).
+ */
+const getRenameOrigins = (renames: unknown): Map<string, string> => {
+  const originOf = new Map<string, string>();
+
+  if (!Array.isArray(renames)) {
+    return originOf;
+  }
+
+  for (const { oldName, newName } of renames as { oldName?: string; newName?: string }[]) {
+    if (!oldName || !newName || oldName === newName) {
+      continue;
+    }
+
+    const origin = originOf.get(oldName) ?? oldName;
+    originOf.delete(oldName);
+    originOf.set(newName, origin);
+  }
+
+  return originOf;
+};
+
 export default function createComponentBuilder() {
   return {
     setRelation(
@@ -211,6 +236,7 @@ export default function createComponentBuilder() {
       const newKeys = _.difference(Object.keys(newAttributes), Object.keys(oldAttributes));
       const deletedKeys = _.difference(Object.keys(oldAttributes), Object.keys(newAttributes));
       const remainingKeys = _.intersection(Object.keys(oldAttributes), Object.keys(newAttributes));
+      const renameOrigins = getRenameOrigins(infos.renames);
 
       // remove old relations
       deletedKeys.forEach((key) => {
@@ -300,7 +326,27 @@ export default function createComponentBuilder() {
         if (isRelation(attribute)) {
           const relationAttribute = attribute as InternalRelationAttribute;
           if (['manyToMany', 'oneToOne'].includes(relationAttribute.relation)) {
-            if (
+            // A renamed relation keeps the ownership of the attribute it was
+            // renamed from (same rule as a remaining key), so the join table
+            // stays with its owner and the rename migration can carry it.
+            const origin = renameOrigins.get(key);
+            const originAttribute =
+              origin !== undefined && _.has(oldAttributes, origin)
+                ? (oldAttributes[origin] as InternalRelationAttribute)
+                : undefined;
+            const originOwnership =
+              originAttribute !== undefined &&
+              isRelation(originAttribute) &&
+              originAttribute.relation === relationAttribute.relation &&
+              originAttribute.target === relationAttribute.target
+                ? originAttribute
+                : undefined;
+
+            if (originOwnership?.inversedBy) {
+              relationAttribute.dominant = true;
+            } else if (originOwnership?.mappedBy) {
+              relationAttribute.dominant = false;
+            } else if (
               relationAttribute.target === uid &&
               relationAttribute.targetAttribute !== undefined
             ) {

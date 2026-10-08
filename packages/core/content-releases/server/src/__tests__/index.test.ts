@@ -27,6 +27,9 @@ describe('register', () => {
       features: {
         isEnabled: jest.fn(),
       },
+      entitlements: {
+        register: jest.fn(),
+      },
     },
     features: {
       future: {
@@ -80,6 +83,19 @@ describe('register', () => {
 
     expect(strapi.service('admin::permission').actionProvider.registerMany).toHaveBeenCalledWith(
       ACTIONS
+    );
+  });
+
+  it('registers the releases limit even when the feature is disabled at boot', async () => {
+    // A license that is expired at boot can be renewed by the registry without a restart, and
+    // a lapsed Plan card resolves its retained limits through this resolver, so it cannot be
+    // tied to the boot-time license.
+    strapi.ee.features.isEnabled.mockReturnValue(false);
+
+    await register({ strapi });
+
+    expect(strapi.ee.entitlements.register).toHaveBeenCalledWith(
+      expect.objectContaining({ feature: 'cms-content-releases' })
     );
   });
 

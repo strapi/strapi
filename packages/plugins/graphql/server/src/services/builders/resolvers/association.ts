@@ -1,4 +1,4 @@
-import { get, merge } from 'lodash/fp';
+import { merge, property } from 'lodash';
 import {
   async,
   contentTypes,
@@ -151,7 +151,7 @@ export default ({ strapi }: Context) => {
           }
         }
 
-        const dbQuery = merge(merge(defaultFilters, publicationFilterWhere), transformedQuery);
+        const dbQuery = merge({}, defaultFilters, publicationFilterWhere, transformedQuery);
 
         // Sign media URLs if upload plugin is available and using private provider
         const data = await (async () => {
@@ -187,7 +187,7 @@ export default ({ strapi }: Context) => {
           const sanitizeData = (dataToSanitize: any) => {
             return strapi.contentAPI.sanitize.output(dataToSanitize, contentType, { auth });
           };
-          const unwrapData = get(attributeName);
+          const unwrapData = property(attributeName);
 
           // Sanitizer definition
           const sanitizeMorphAttribute = async.pipe(wrapData, sanitizeData, unwrapData);

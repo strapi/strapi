@@ -1,6 +1,6 @@
 {
   "name": "oxlint-config",
-  "version": "5.55.0",
+  "version": "5.57.0",
   "private": true,
   "license": "SEE LICENSE IN LICENSE",
   "type": "module",
@@ -16,10 +16,14 @@
   },
   "devDependencies": {
     "oxlint": "1.72.0",
-    "tsconfig": "5.55.0"
+    "tsconfig": "5.57.0",
+    "vitest": "catalog:",
+    "vitest-config": "5.57.0"
   },
   "scripts": {
-    "test:ts": "run -T tsc --noEmit"
+    "test:ts": "run -T tsc --noEmit",
+    "test:unit:vitest": "vitest run",
+    "test:unit:vitest:watch": "vitest --watch"
   },
   "engines": {
     "node": ">=20.0.0 <=26.x.x",

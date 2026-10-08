@@ -16,6 +16,7 @@ import {
   AUDIT_LOGS_EXPORT_TOKEN_HEADER,
   AUDIT_LOGS_EXPORT_UNTIL_HEADER,
 } from '../../../../../../../../shared/utils/audit-log-export';
+import { expandLegacyActionFilters } from '../utils/legacyActions';
 
 const DEFAULT_FILE_NAME = 'audit-logs.csv';
 
@@ -88,7 +89,7 @@ const useExportAuditLogs = () => {
       do {
         const { data, headers }: FetchResponse<Blob> = await get<Blob>('/admin/audit-logs/export', {
           params: {
-            ...(filters ? { filters } : {}),
+            ...(filters ? { filters: expandLegacyActionFilters(filters) } : {}),
             ...(cursor ? { cursor } : {}),
             ...(until ? { until } : {}),
             ...(token ? { token } : {}),
