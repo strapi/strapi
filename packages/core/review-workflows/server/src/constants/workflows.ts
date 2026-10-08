@@ -11,9 +11,10 @@ export const STAGE_DEFAULT_COLOR = '#4945FF';
 export const ENTITY_STAGE_ATTRIBUTE = 'strapi_stage';
 export const ENTITY_ASSIGNEE_ATTRIBUTE = 'strapi_assignee';
 
-// Applied when the license does not set a limit. A license value above these is used as is.
-export const MAX_WORKFLOWS = 200;
-export const MAX_STAGES_PER_WORKFLOW = 200;
+// Applied when the license does not set a limit. They are defaults, not caps: a license value
+// above or below them is used as is.
+export const DEFAULT_NUMBER_OF_WORKFLOWS = 200;
+export const DEFAULT_STAGES_PER_WORKFLOW = 200;
 
 export const ERRORS = {
   WORKFLOW_WITHOUT_STAGES: 'A workflow must have at least one stage.',

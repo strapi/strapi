@@ -1,27 +1,18 @@
 import type { Core } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
-import { ERRORS, MAX_WORKFLOWS, MAX_STAGES_PER_WORKFLOW } from '../constants/workflows';
-import { clampMaxWorkflows, clampMaxStagesPerWorkflow } from '../utils/review-workflows';
+import { ERRORS } from '../constants/workflows';
+import { resolveWorkflowLimits } from '../utils/review-workflows';
 
 const { ValidationError } = errors;
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   /**
    * Reads the limits from the current license on every check, so a license that changes after boot
-   * is enforced without a restart. A missing limit falls back to the default, as in the admin panel.
+   * is enforced without a restart. A license without limits, such as an offline license, gets the
+   * default limits.
    */
-  const getLimits = () => {
-    const feature = strapi.ee.features.get('review-workflows');
-    const options = typeof feature === 'object' ? feature.options : undefined;
-
-    return {
-      numberOfWorkflows: clampMaxWorkflows(options?.numberOfWorkflows || MAX_WORKFLOWS),
-      stagesPerWorkflow: clampMaxStagesPerWorkflow(
-        options?.stagesPerWorkflow || MAX_STAGES_PER_WORKFLOW
-      ),
-    };
-  };
+  const getLimits = () => resolveWorkflowLimits(strapi.ee.features.get('review-workflows'));
 
   return {
     /**

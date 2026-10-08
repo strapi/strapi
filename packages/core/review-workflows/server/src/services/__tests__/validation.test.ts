@@ -1,5 +1,9 @@
 import type { Core } from '@strapi/types';
-import { ERRORS, MAX_WORKFLOWS, MAX_STAGES_PER_WORKFLOW } from '../../constants/workflows';
+import {
+  ERRORS,
+  DEFAULT_NUMBER_OF_WORKFLOWS,
+  DEFAULT_STAGES_PER_WORKFLOW,
+} from '../../constants/workflows';
 import validationFactory from '../validation';
 
 type Feature = { name: string; options?: Record<string, unknown> } | undefined;
@@ -61,21 +65,54 @@ describe('Review workflows validation service - license limits', () => {
       expect(() => validation.validateWorkflowStages(stagesOf(5))).not.toThrow();
       expect(() => validation.validateWorkflowStages(stagesOf(6))).toThrow(ERRORS.STAGES_LIMIT);
     });
+
+    test('is read from a numeric string', async () => {
+      const { strapi, countWorkflows } = createStrapiMock(
+        reviewWorkflowsFeature({ numberOfWorkflows: '3', stagesPerWorkflow: '5' })
+      );
+      const validation = validationFactory({ strapi });
+
+      countWorkflows.mockResolvedValue(2);
+      await expect(validation.validateWorkflowCount(1)).resolves.toBeUndefined();
+
+      countWorkflows.mockResolvedValue(3);
+      await expect(validation.validateWorkflowCount(1)).rejects.toThrow(ERRORS.WORKFLOWS_LIMIT);
+
+      expect(() => validation.validateWorkflowStages(stagesOf(5))).not.toThrow();
+      expect(() => validation.validateWorkflowStages(stagesOf(6))).toThrow(ERRORS.STAGES_LIMIT);
+    });
   });
 
   describe.each([
     ['the feature has no options', reviewWorkflowsFeature()],
     ['the options omit the limits', reviewWorkflowsFeature({})],
     ['the feature is not in the license', undefined],
+    [
+      'the limits are null',
+      reviewWorkflowsFeature({ numberOfWorkflows: null, stagesPerWorkflow: null }),
+    ],
+    [
+      'the limits are empty strings',
+      reviewWorkflowsFeature({ numberOfWorkflows: '', stagesPerWorkflow: '' }),
+    ],
+    [
+      'the limits are not numbers',
+      reviewWorkflowsFeature({ numberOfWorkflows: 'abc', stagesPerWorkflow: 'abc' }),
+    ],
+    ['the limits are 0', reviewWorkflowsFeature({ numberOfWorkflows: 0, stagesPerWorkflow: 0 })],
+    [
+      'the limits are negative',
+      reviewWorkflowsFeature({ numberOfWorkflows: -1, stagesPerWorkflow: -1 }),
+    ],
   ])('falls back to the default when %s', (_, feature) => {
     test('for workflows', async () => {
       const { strapi, countWorkflows } = createStrapiMock(feature);
       const validation = validationFactory({ strapi });
 
-      countWorkflows.mockResolvedValue(MAX_WORKFLOWS - 1);
+      countWorkflows.mockResolvedValue(DEFAULT_NUMBER_OF_WORKFLOWS - 1);
       await expect(validation.validateWorkflowCount(1)).resolves.toBeUndefined();
 
-      countWorkflows.mockResolvedValue(MAX_WORKFLOWS);
+      countWorkflows.mockResolvedValue(DEFAULT_NUMBER_OF_WORKFLOWS);
       await expect(validation.validateWorkflowCount(1)).rejects.toThrow(ERRORS.WORKFLOWS_LIMIT);
     });
 
@@ -84,10 +121,10 @@ describe('Review workflows validation service - license limits', () => {
       const validation = validationFactory({ strapi });
 
       expect(() =>
-        validation.validateWorkflowStages(stagesOf(MAX_STAGES_PER_WORKFLOW))
+        validation.validateWorkflowStages(stagesOf(DEFAULT_STAGES_PER_WORKFLOW))
       ).not.toThrow();
       expect(() =>
-        validation.validateWorkflowStages(stagesOf(MAX_STAGES_PER_WORKFLOW + 1))
+        validation.validateWorkflowStages(stagesOf(DEFAULT_STAGES_PER_WORKFLOW + 1))
       ).toThrow(ERRORS.STAGES_LIMIT);
     });
   });
@@ -102,7 +139,7 @@ describe('Review workflows validation service - license limits', () => {
       const { strapi, countWorkflows } = createStrapiMock(feature);
       const validation = validationFactory({ strapi });
 
-      countWorkflows.mockResolvedValue(MAX_WORKFLOWS);
+      countWorkflows.mockResolvedValue(DEFAULT_NUMBER_OF_WORKFLOWS);
       await expect(validation.validateWorkflowCount(1)).resolves.toBeUndefined();
 
       countWorkflows.mockResolvedValue(199_999);
@@ -117,7 +154,7 @@ describe('Review workflows validation service - license limits', () => {
       const validation = validationFactory({ strapi });
 
       expect(() =>
-        validation.validateWorkflowStages(stagesOf(MAX_STAGES_PER_WORKFLOW + 1))
+        validation.validateWorkflowStages(stagesOf(DEFAULT_STAGES_PER_WORKFLOW + 1))
       ).not.toThrow();
       expect(() => validation.validateWorkflowStages(stagesOf(200_000))).not.toThrow();
       expect(() => validation.validateWorkflowStages(stagesOf(200_001))).toThrow(

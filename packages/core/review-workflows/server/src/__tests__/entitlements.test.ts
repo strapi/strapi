@@ -25,4 +25,19 @@ describe('review-workflows entitlements', () => {
     );
     expect(resolveWith(undefined)).toEqual({ numberOfWorkflows: 200, stagesPerWorkflow: 200 });
   });
+
+  it('reads a numeric string and defaults a value that is not a usable limit', () => {
+    expect(
+      resolveWith({
+        name: 'review-workflows',
+        options: { numberOfWorkflows: '300', stagesPerWorkflow: 'abc' },
+      })
+    ).toEqual({ numberOfWorkflows: 300, stagesPerWorkflow: 200 });
+    expect(
+      resolveWith({
+        name: 'review-workflows',
+        options: { numberOfWorkflows: -1, stagesPerWorkflow: null },
+      })
+    ).toEqual({ numberOfWorkflows: 200, stagesPerWorkflow: 200 });
+  });
 });
