@@ -19,7 +19,12 @@ import type {
 } from '../../../shared/contracts/releases';
 import type { ReleaseAction } from '../../../shared/contracts/release-actions';
 import type { UserInfo } from '../../../shared/types';
-import { getService, getPublishOrderForContentTypes, getPublishabilityForActions } from '../utils';
+import {
+  getService,
+  getPublishOrderForContentTypes,
+  getPublishabilityForActions,
+  isReleaseBlocked,
+} from '../utils';
 import { getReleaseChanges } from '../audit-logs';
 
 /** What started a publish: the publish button or API, or the scheduler at the release date */
@@ -375,16 +380,21 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
           const notPublishable = checks.flatMap(({ action, publishability }) =>
             publishability.publishable ? [] : [{ action, error: publishability.error }]
           );
-          const skippedActionIds = new Set(notPublishable.map(({ action }) => action.id));
+          const notPublishableIds = new Set(notPublishable.map(({ action }) => action.id));
 
+          // The rule of the `blocked` status: with all_or_nothing, one entry that isn't
+          // publishable holds back every other one; with allow_partial, only a release where no
+          // entry is publishable releases nothing. Checking `firstNotPublishable` first narrows
+          // it, and a blocked release always has one.
           const firstNotPublishable = notPublishable.at(0);
-          // A release with no actions runs, and ends done
-          const wouldReleaseNothing =
-            firstNotPublishable !== undefined &&
-            (!allowPartial || notPublishable.length === actions.length);
 
-          // TypeScript narrows `firstNotPublishable` to defined through this alias
-          if (wouldReleaseNothing) {
+          if (
+            firstNotPublishable &&
+            isReleaseBlocked(lockedRelease.releaseCondition, {
+              total: actions.length,
+              notPublishable: notPublishable.length,
+            })
+          ) {
             if (trigger === 'manual') {
               // Not a run: nothing is written and the release stays planned. The check's
               // result is stored first, so the status reads blocked even if what was stored
@@ -399,7 +409,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
                 });
               }
               await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
-                where: { id: { $in: [...skippedActionIds] } },
+                where: { id: { $in: [...notPublishableIds] } },
                 data: { isEntryValid: false },
               });
               await this.updateReleaseStatus(releaseId);
@@ -413,9 +423,10 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
               : firstNotPublishable.error;
           }
 
-          // Only an allow_partial run gets here with entries that aren't publishable: they're skipped
-          const releasable = actions.filter((action) => !skippedActionIds.has(action.id));
-          counts.failed = skippedActionIds.size;
+          // Not blocked: an all_or_nothing release has every entry publishable here, an
+          // allow_partial one leaves out those that aren't
+          const releasable = actions.filter((action) => !notPublishableIds.has(action.id));
+          counts.failed = notPublishableIds.size;
 
           // Serialized, also within a content type: concurrent publishes of related documents
           // can race on shared join-table state (notably self-referential relations) and
@@ -574,7 +585,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
     async updateReleaseStatus(releaseId: Release['id']) {
       const releaseActionService = getService('release-action', { strapi });
 
-      // The query layer returns `any`: the annotation makes the condition comparison below type-checked
+      // The query layer returns `any`: the annotation type-checks the condition passed below
       const releaseRead: Promise<Pick<Release, 'releaseCondition'> | null> = strapi.db
         .query(RELEASE_MODEL_UID)
         .findOne({ where: { id: releaseId }, select: ['releaseCondition'] });
@@ -597,13 +608,12 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
       let status: Release['status'] = 'empty';
 
       if (totalActions > 0) {
-        // Blocked: publishing now would release nothing. Unpublish actions are always valid.
-        const isBlocked =
-          release?.releaseCondition === 'allow_partial'
-            ? invalidActions === totalActions
-            : invalidActions > 0;
-
-        status = isBlocked ? 'blocked' : 'ready';
+        status = isReleaseBlocked(release?.releaseCondition, {
+          total: totalActions,
+          notPublishable: invalidActions,
+        })
+          ? 'blocked'
+          : 'ready';
       }
 
       return strapi.db.query(RELEASE_MODEL_UID).update({

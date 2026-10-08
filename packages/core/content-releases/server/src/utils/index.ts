@@ -2,6 +2,7 @@ import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
 
 import type { UID, Data, Core, Modules } from '@strapi/types';
 import type { ReleaseAction } from '../../../shared/contracts/release-actions';
+import type { ReleaseCondition } from '../constants';
 
 import type { SettingsService } from '../services/settings';
 import type { ReleaseService } from '../services/release';
@@ -271,6 +272,23 @@ export const getPublishabilityForActions = async <TAction extends PublishActionR
 
   return results;
 };
+
+/**
+ * Whether publishing the release now would release nothing, given how many of its entries
+ * aren't publishable. Unpublish entries are always publishable.
+ * - `all_or_nothing` (also a missing condition, on releases from before it existed): any entry
+ *   that isn't publishable holds back every other one.
+ * - `allow_partial`: entries that aren't publishable are left out, so only a release where no
+ *   entry is publishable releases nothing.
+ *
+ * The one rule behind the `blocked` status and the check that rejects or fails a run, so a
+ * release reads blocked exactly when a run of it would release nothing.
+ */
+export const isReleaseBlocked = (
+  releaseCondition: ReleaseCondition | null | undefined,
+  { total, notPublishable }: { total: number; notPublishable: number }
+) =>
+  releaseCondition === 'allow_partial' ? total > 0 && notPublishable === total : notPublishable > 0;
 
 export const getEntry = async (
   {
