@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { errors } from '@strapi/utils';
 
-import {
+import rateLimit, {
   buildPrefixKey,
   ROUTES_WITHOUT_IDENTIFIER,
   normalizeRequestPathForRateLimit,
@@ -24,6 +24,13 @@ const makeCtx = ({
 });
 
 describe('users-permissions rateLimit middleware', () => {
+  it('exposes its helpers on the registered middleware', () => {
+    expect(rateLimit.buildPrefixKey).toBe(buildPrefixKey);
+    expect(rateLimit.ROUTES_WITHOUT_IDENTIFIER).toBe(ROUTES_WITHOUT_IDENTIFIER);
+    expect(rateLimit.normalizeRequestPathForRateLimit).toBe(normalizeRequestPathForRateLimit);
+    expect(rateLimit.buildRateLimitLoadConfig).toBe(buildRateLimitLoadConfig);
+  });
+
   describe('buildPrefixKey', () => {
     describe('routes that use email as a legitimate identifier', () => {
       it('includes lower-cased email from body for /auth/local/register', () => {
