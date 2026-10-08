@@ -5300,52 +5300,49 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@modelcontextprotocol/client@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@modelcontextprotocol/client@npm:2.0.0"
+"@modelcontextprotocol/client@npm:2.3.1":
+  version: 2.3.1
+  resolution: "@modelcontextprotocol/client@npm:2.3.1"
   dependencies:
-    "@modelcontextprotocol/core": "npm:2.0.0"
+    "@modelcontextprotocol/core": "npm:2.3.1"
     cross-spawn: "npm:^7.0.5"
     eventsource: "npm:^3.0.2"
-    eventsource-parser: "npm:^3.0.0"
+    eventsource-parser: "npm:^3.0.8"
     jose: "npm:^6.1.3"
     pkce-challenge: "npm:^5.0.0"
     zod: "npm:^4.2.0"
-  checksum: 10c0/23d1d16539c76a69d1848dc67c495b3aa6d048946dd894ed449bca0de7ce9835a71904476c6eeb9f75fe8dfca1964c61372d9d7d283b7cabfa3258d288db6859
+  checksum: 10c0/256acec240dc90dd3d0f572dfc5ea17f10824e12241144a084025c92442e80b4333eec3f86c27568d57d439991760e60487e36d31c9264a3d58832a5cccb012c
   languageName: node
   linkType: hard
 
-"@modelcontextprotocol/core@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@modelcontextprotocol/core@npm:2.0.0"
+"@modelcontextprotocol/core@npm:2.3.1":
+  version: 2.3.1
+  resolution: "@modelcontextprotocol/core@npm:2.3.1"
   dependencies:
     zod: "npm:^4.2.0"
-  checksum: 10c0/1cb96fcebfb60651775bcaa3b1e92b47b9317239e9e0352a2d6a404f77d1abfb68ce5b462becd073cddc4db08f2f0024cd3c7dd2582e3463ddb958f65b73fbe3
+  checksum: 10c0/73b5b0b0b58cdb6b1cc59cdc702004ff881d00e065c182473a9e69507ec499ce5705ff494aa08b076e2151ba6bc039ecc514162ccb9d7a20d2fa98f2df7afedc
   languageName: node
   linkType: hard
 
-"@modelcontextprotocol/node@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@modelcontextprotocol/node@npm:2.0.0"
+"@modelcontextprotocol/node@npm:2.1.1":
+  version: 2.1.1
+  resolution: "@modelcontextprotocol/node@npm:2.1.1"
   dependencies:
     "@hono/node-server": "npm:^1.19.9"
+    hono: "npm:^4.11.4"
   peerDependencies:
-    "@modelcontextprotocol/server": ^2.0.0
-    hono: ^4.11.4
-  peerDependenciesMeta:
-    hono:
-      optional: true
-  checksum: 10c0/751be8a3af4f2c12d9335830ea4c8d92820d6b2b0db902ff705f98d437f32ac2a3bf5d1a135d6e2a893b4afcab13aa6f3445f535f9f6a4678036e1a663c6112a
+    "@modelcontextprotocol/server": ^2.3.0
+  checksum: 10c0/3ae1b8379f8479e2a524ed8e4cb7c524cec573dea39e987a789402eb72c7a2ce835b4ade223c4f765b735085d73b35412291953e17373fdacca2768b7f0942c4
   languageName: node
   linkType: hard
 
-"@modelcontextprotocol/server@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@modelcontextprotocol/server@npm:2.0.0"
+"@modelcontextprotocol/server@npm:2.3.1":
+  version: 2.3.1
+  resolution: "@modelcontextprotocol/server@npm:2.3.1"
   dependencies:
-    "@modelcontextprotocol/core": "npm:2.0.0"
+    "@modelcontextprotocol/core": "npm:2.3.1"
     zod: "npm:^4.2.0"
-  checksum: 10c0/18f5dbb4c533eda392a66565d8177d792c8018d3455d2cb241102917f660c0c73181e80cbf2b76b1c0e8efae22e7ee0fbb1c27e667d439ba596f1c6059c1d8af
+  checksum: 10c0/f3e8159af5cb51211109ae4817c0cfcdf349171c090d4a355dafe6117038f9a807052289cb1376d67ad4c005e3772cf1af076dbded498636a022d7c641253f12
   languageName: node
   linkType: hard
 
@@ -9765,9 +9762,9 @@ __metadata:
     "@casl/ability": "npm:6.7.5"
     "@koa/cors": "npm:5.0.0"
     "@koa/router": "npm:12.0.2"
-    "@modelcontextprotocol/client": "npm:2.0.0"
-    "@modelcontextprotocol/node": "npm:2.0.0"
-    "@modelcontextprotocol/server": "npm:2.0.0"
+    "@modelcontextprotocol/client": "npm:2.3.1"
+    "@modelcontextprotocol/node": "npm:2.1.1"
+    "@modelcontextprotocol/server": "npm:2.3.1"
     "@paralleldrive/cuid2": "npm:2.2.2"
     "@strapi/admin": "npm:5.57.0"
     "@strapi/database": "npm:5.57.0"
@@ -18298,7 +18295,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eventsource-parser@npm:^3.0.0, eventsource-parser@npm:^3.0.1, eventsource-parser@npm:^3.0.8":
+"eventsource-parser@npm:^3.0.1, eventsource-parser@npm:^3.0.8":
   version: 3.1.1
   resolution: "eventsource-parser@npm:3.1.1"
   checksum: 10c0/dd3236c61140587253dcaaf947de528ac0e7371caffdc53c77afaeee36a17661f00e251a6ea16af56c99be5ac138303e67b5d750630e7c41b02e3564e8ad8c44
@@ -19881,6 +19878,13 @@ __metadata:
   dependencies:
     parse-passwd: "npm:^1.0.0"
   checksum: 10c0/3c099844f94b8b438f124bd5698bdcfef32b2d455115fb8050d7148e7f7b95fc89ba9922586c491f0e1cdebf437b1053c84ecddb8d596e109e9ac69c5b4a9e27
+  languageName: node
+  linkType: hard
+
+"hono@npm:^4.11.4":
+  version: 4.13.13
+  resolution: "hono@npm:4.13.13"
+  checksum: 10c0/c8524e685a59b4f23a9bea15385eeac5622218949db251cb871b20fd9ef673b751b44ccdee6c22b3df56e5ed4c1b1cebad17b518bdc1823039da39b53ef9c1cf
   languageName: node
   linkType: hard
 
