@@ -1,4 +1,4 @@
-import { curry, isEmpty, isNil, isArray, isPlainObject } from 'lodash/fp';
+import { curry, isEmpty, isPlainObject } from 'lodash';
 
 import { pipe as pipeAsync } from '../async';
 import traverseEntity from '../traverse-entity';
@@ -88,7 +88,7 @@ const defaultSanitizeFilters = curry((ctx: Context, filters: unknown) => {
     // enumerable keys (Date, RegExp, boxed primitives, etc.) are "empty" and would wrongly drop valid operands.
     traverseQueryFilters(({ key, value }, { remove }) => {
       const isEmptyPlainObject = isPlainObject(value) && isEmpty(value);
-      const isEmptyArrayOperand = isArray(value) && isEmpty(value);
+      const isEmptyArrayOperand = Array.isArray(value) && value.length === 0;
       if (isEmptyPlainObject || isEmptyArrayOperand) {
         remove(key);
       }
@@ -151,7 +151,7 @@ const defaultSanitizeFields = curry((ctx: Context, fields: unknown) => {
         return;
       }
 
-      if (isNil(attribute) || !isScalarAttribute(attribute)) {
+      if (attribute == null || !isScalarAttribute(attribute)) {
         remove(key);
       }
     }, ctx),
@@ -160,7 +160,7 @@ const defaultSanitizeFields = curry((ctx: Context, fields: unknown) => {
     // Remove password fields
     traverseQueryFields(removePassword, ctx),
     // Remove nil values from fields array
-    (value) => (isArray(value) ? value.filter((field) => !isNil(field)) : value)
+    (value) => (Array.isArray(value) ? value.filter((field) => field != null) : value)
   )(fields);
 });
 

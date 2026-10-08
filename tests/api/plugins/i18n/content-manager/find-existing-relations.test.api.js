@@ -1,7 +1,5 @@
 'use strict';
 
-const { pick } = require('lodash/fp');
-
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');

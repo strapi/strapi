@@ -1,4 +1,4 @@
-import { groupBy, pick, uniq } from 'lodash/fp';
+import { groupBy, pick } from 'lodash';
 
 import { async, contentTypes } from '@strapi/utils';
 import type { Core, UID, Modules } from '@strapi/types';
@@ -108,7 +108,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     allVersions: DocumentVersion[]
   ) {
     // Group all versions by locale
-    const versionsByLocale = groupBy('locale', allVersions);
+    const versionsByLocale = groupBy(allVersions, 'locale');
 
     // Delete the current locale
     if (version.locale) {
@@ -187,8 +187,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
     if (!availableStatus) return availableStatus;
 
-    // Pick status fields (at fields, status, by fields), use lodash fp
-    return pick(AVAILABLE_STATUS_FIELDS, availableStatus);
+    // Pick status fields (at fields, status, by fields), use lodash
+    return pick(availableStatus, AVAILABLE_STATUS_FIELDS);
   },
 
   /**
@@ -296,7 +296,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         : null;
       return {
         availableLocales: [],
-        availableStatus: otherVersion ? [pick(AVAILABLE_STATUS_FIELDS, otherVersion)] : [],
+        availableStatus: otherVersion ? [pick(otherVersion, AVAILABLE_STATUS_FIELDS)] : [],
         versions: [] as DocumentVersion[],
       };
     }
@@ -346,7 +346,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         ...mediaPopulate,
         ...AVAILABLE_STATUS_POPULATE,
       },
-      fields: uniq([...AVAILABLE_LOCALES_FIELDS, ...nonLocalizedFields]),
+      fields: [...new Set([...AVAILABLE_LOCALES_FIELDS, ...nonLocalizedFields])],
       filters: {
         documentId: version.documentId,
       },

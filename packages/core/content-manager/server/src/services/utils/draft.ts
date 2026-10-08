@@ -1,4 +1,5 @@
-import { castArray } from 'lodash/fp';
+import { castArray } from 'lodash';
+
 import * as strapiUtils from '@strapi/utils';
 import type { Core, UID } from '@strapi/types';
 

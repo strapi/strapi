@@ -1,6 +1,6 @@
 'use strict';
 
-const { omit } = require('lodash/fp');
+const { omit } = require('lodash');
 
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createTestBuilder } = require('api-tests/builder');
@@ -69,7 +69,7 @@ describe('CM API - Basic', () => {
     });
 
     expect(res.statusCode).toBe(201);
-    expect(res.body.data).toMatchObject(omit('hiddenAttribute', product));
+    expect(res.body.data).toMatchObject(omit(product, 'hiddenAttribute'));
     expect(res.body.data).not.toHaveProperty('hiddenAttribute');
     expect(res.body.data.publishedAt).toBeDefined();
     data.products.push(res.body.data);
@@ -108,7 +108,7 @@ describe('CM API - Basic', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body.data).toMatchObject(omit('hiddenAttribute', product));
+    expect(res.body.data).toMatchObject(omit(product, 'hiddenAttribute'));
     expect(res.body.data.documentId).toEqual(data.products[0].documentId);
     expect(res.body.data.publishedAt).toBeDefined();
     data.products[0] = res.body.data;
@@ -143,7 +143,7 @@ describe('CM API - Basic', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body.data).toMatchObject(omit('hiddenAttribute', product));
+    expect(res.body.data).toMatchObject(omit(product, 'hiddenAttribute'));
   });
 
   test('Clone and update product', async () => {

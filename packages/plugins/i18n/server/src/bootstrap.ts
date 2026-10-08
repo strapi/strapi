@@ -1,5 +1,5 @@
 import type { Schema } from '@strapi/types';
-import { isEqual } from 'lodash/fp';
+import { isEqual } from 'lodash';
 import { registerAuditEvents } from './audit-logs';
 import { getService } from './utils';
 

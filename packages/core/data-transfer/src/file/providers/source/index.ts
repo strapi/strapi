@@ -7,7 +7,7 @@ import { pipeline, PassThrough } from 'stream';
 import { finished } from 'stream/promises';
 import fs from 'fs-extra';
 import { Parser, type ReadEntry } from 'tar';
-import { isEmpty, keyBy } from 'lodash/fp';
+import { isEmpty, keyBy } from 'lodash';
 import { chain } from 'stream-chain';
 import { parser } from 'stream-json/jsonl/Parser';
 import type { Struct } from '@strapi/types';
@@ -181,7 +181,7 @@ class LocalFileSourceProvider implements ISourceProvider {
     }
 
     // Group schema by UID
-    const schemas = keyBy('uid', schemaCollection);
+    const schemas = keyBy(schemaCollection, 'uid');
 
     // Transform to valid JSON
     return utils.schema.schemasToValidJSON(schemas);
