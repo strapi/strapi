@@ -441,6 +441,8 @@ class Strapi extends Container implements Core.Strapi {
     // @ts-expect-error: init is internal
     this.ee.init(this.dirs.app.root, this.log);
 
+    utils.warnOnDuplicatedUtils(this);
+
     for (const provider of providers) {
       await provider.register?.(this);
     }
