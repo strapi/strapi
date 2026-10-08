@@ -35,6 +35,27 @@ export default [
   },
   {
     method: 'GET',
+    path: '/password-policy',
+    handler: 'admin.getPasswordPolicy',
+    // Public on purpose: the registration and reset-password pages validate against it before login
+    config: { auth: false },
+  },
+  {
+    method: 'PUT',
+    path: '/password-policy',
+    handler: 'admin.updatePasswordPolicy',
+    config: {
+      policies: [
+        'admin::isAuthenticatedAdmin',
+        {
+          name: 'admin::hasPermissions',
+          config: { actions: ['admin::password-policy.update'] },
+        },
+      ],
+    },
+  },
+  {
+    method: 'GET',
     path: '/project-type',
     handler: 'admin.getProjectType',
     config: { auth: false },
