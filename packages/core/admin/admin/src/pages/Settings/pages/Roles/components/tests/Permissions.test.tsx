@@ -305,3 +305,351 @@ describe('Permissions — "Select all" in Admin Token mode (userPermissions prov
     expect(del).not.toBeChecked();
   });
 });
+
+/**
+ * On the role Create/Edit pages the matrix is rendered with the current user's
+ * `userPermissions` (unless they are a super admin) so that an admin cannot grant a
+ * permission they do not hold themselves. Unlike admin tokens, conditions are not
+ * inherited from the user and the conditions modal stays editable.
+ */
+describe('Permissions — role editing with userPermissions (non super admin)', () => {
+  const UNHELD_TOOLTIP = "You can't grant a permission you don't have yourself";
+  const INHERITED_NOTICE =
+    'These conditions are inherited from your permissions and are read-only.';
+
+  const permission = (
+    action: string,
+    subject: string | null = null,
+    properties: AuthPermission['properties'] = {},
+    conditions: string[] = []
+  ): AuthPermission => ({ action, subject, properties, conditions });
+
+  const openI18nLocales = async (user: ReturnType<typeof render>['user']) => {
+    await user.click(screen.getByRole('tab', { name: 'Settings' }));
+    await user.click(screen.getByRole('button', { name: /Internationalization/ }));
+  };
+
+  it('disables the checkboxes of permissions the user does not hold and explains why', async () => {
+    const userPermissions = [
+      permission('plugin::content-manager.explorer.read', 'api::address.address'),
+    ];
+
+    const { user } = render(
+      <Permissions layout={layout} userPermissions={userPermissions} isFormDisabled={false} />
+    );
+
+    const readAddress = screen.getByRole('checkbox', { name: 'Select Read address permission' });
+    const createAddress = screen.getByRole('checkbox', {
+      name: 'Select Create address permission',
+    });
+
+    expect(readAddress).toBeEnabled();
+    expect(createAddress).toBeDisabled();
+
+    await user.hover(createAddress);
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(UNHELD_TOOLTIP);
+  });
+
+  it('keeps a permission the role already holds checked, disabled and sent on save', async () => {
+    const ref = React.createRef<PermissionsAPI>();
+    const userPermissions = [
+      permission('plugin::i18n.locale.create'),
+      permission('plugin::i18n.locale.read'),
+    ];
+    const rolePermissions = [
+      {
+        id: 1,
+        createdAt: '',
+        updatedAt: '',
+        action: 'plugin::i18n.locale.delete',
+        actionParameters: {},
+        subject: null,
+        properties: {},
+        conditions: [],
+      },
+    ];
+
+    const { user } = render(
+      <Permissions
+        ref={ref}
+        layout={layout}
+        permissions={rolePermissions}
+        userPermissions={userPermissions}
+        isFormDisabled={false}
+      />
+    );
+
+    await openI18nLocales(user);
+
+    const del = screen.getByLabelText('Delete');
+
+    expect(del).toBeChecked();
+    expect(del).toBeDisabled();
+
+    // "Select all" only ticks what the user holds and leaves the existing permission as is
+    await user.click(screen.getByLabelText('Select all'));
+
+    expect(screen.getByLabelText('Create')).toBeChecked();
+    expect(screen.getByLabelText('Read')).toBeChecked();
+    expect(screen.getByLabelText('Update')).not.toBeChecked();
+    expect(del).toBeChecked();
+
+    expect(ref.current!.getPermissions().permissionsToSend).toEqual(
+      expect.arrayContaining([
+        { action: 'plugin::i18n.locale.delete', subject: null, conditions: [], properties: {} },
+        { action: 'plugin::i18n.locale.create', subject: null, conditions: [], properties: {} },
+      ])
+    );
+  });
+
+  it('does not let a property row checkbox tick an action the user does not hold', async () => {
+    const userPermissions = [
+      permission('plugin::content-manager.explorer.read', 'api::category.category', {
+        fields: ['name'],
+        locales: ['en'],
+      }),
+    ];
+
+    const { user } = render(
+      <Permissions layout={layout} userPermissions={userPermissions} isFormDisabled={false} />
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Category' }));
+
+    await user.click(screen.getByRole('checkbox', { name: 'Select all name permissions' }));
+    await user.click(screen.getByRole('checkbox', { name: 'Select all English (en) permissions' }));
+
+    expect(screen.getByRole('checkbox', { name: 'Select name Read permission' })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: 'Select en Read permission' })).toBeChecked();
+    expect(
+      screen.getByRole('checkbox', { name: 'Select name Create permission' })
+    ).not.toBeChecked();
+    expect(screen.getByRole('checkbox', { name: 'Select en Create permission' })).not.toBeChecked();
+    expect(screen.getByRole('checkbox', { name: 'Select en Delete permission' })).not.toBeChecked();
+  });
+
+  it('keeps the conditions modal editable', async () => {
+    const userPermissions = [permission('plugin::i18n.locale.create')];
+
+    const { user } = render(
+      <Permissions layout={layout} userPermissions={userPermissions} isFormDisabled={false} />
+    );
+
+    await openI18nLocales(user);
+    await user.click(screen.getByLabelText('Create'));
+    await user.click(screen.getByRole('button', { name: 'Settings' }));
+
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Apply' })).toBeInTheDocument();
+    expect(screen.queryByText(INHERITED_NOTICE)).not.toBeInTheDocument();
+  });
+
+  it('makes the conditions modal read-only only when conditions are inherited (admin tokens)', async () => {
+    const userPermissions = [permission('plugin::i18n.locale.create')];
+
+    const { user } = render(
+      <Permissions
+        layout={layout}
+        userPermissions={userPermissions}
+        inheritConditions
+        isFormDisabled={false}
+      />
+    );
+
+    await openI18nLocales(user);
+    await user.click(screen.getByLabelText('Create'));
+    await user.click(screen.getByRole('button', { name: 'Settings' }));
+
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByText(INHERITED_NOTICE)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Apply' })).not.toBeInTheDocument();
+  });
+
+  describe('conditions', () => {
+    const IS_CREATOR = 'admin::is-creator';
+    const SAME_ROLE = 'admin::has-same-role-as-creator';
+    const LOCALE_CREATE = 'plugin::i18n.locale.create';
+    const LOCALE_READ = 'plugin::i18n.locale.read';
+
+    const findSent = (ref: React.RefObject<PermissionsAPI>, action: string, subject = null) =>
+      ref
+        .current!.getPermissions()
+        .permissionsToSend.find((perm) => perm.action === action && perm.subject === subject);
+
+    const openConditionOptions = async (user: ReturnType<typeof render>['user']) => {
+      await user.click(screen.getByRole('button', { name: 'Settings' }));
+      await screen.findByRole('dialog');
+      await user.click(screen.getByRole('combobox'));
+    };
+
+    it('fills in the user conditions when ticking a permission they only hold with conditions', async () => {
+      const ref = React.createRef<PermissionsAPI>();
+      const userPermissions = [
+        permission(LOCALE_CREATE, null, {}, [IS_CREATOR]),
+        permission(LOCALE_CREATE, null, {}, [SAME_ROLE]),
+        permission(LOCALE_READ, null, {}, [IS_CREATOR]),
+        permission(LOCALE_READ),
+      ];
+
+      const { user } = render(
+        <Permissions
+          ref={ref}
+          layout={layout}
+          userPermissions={userPermissions}
+          isFormDisabled={false}
+        />
+      );
+
+      await openI18nLocales(user);
+      await user.click(screen.getByLabelText('Create'));
+      await user.click(screen.getByLabelText('Read'));
+
+      expect(findSent(ref, LOCALE_CREATE)?.conditions).toEqual(
+        expect.arrayContaining([IS_CREATOR, SAME_ROLE])
+      );
+      expect(findSent(ref, LOCALE_CREATE)?.conditions).toHaveLength(2);
+      // One of the user's read permissions is unconditional, so no condition is needed
+      expect(findSent(ref, LOCALE_READ)?.conditions).toEqual([]);
+    });
+
+    it('fills in the user conditions when ticking a content type action', async () => {
+      const ref = React.createRef<PermissionsAPI>();
+      const userPermissions = [
+        permission('plugin::content-manager.explorer.read', 'api::address.address', {}, [
+          IS_CREATOR,
+        ]),
+      ];
+
+      const { user } = render(
+        <Permissions
+          ref={ref}
+          layout={layout}
+          userPermissions={userPermissions}
+          isFormDisabled={false}
+        />
+      );
+
+      await user.click(screen.getByRole('checkbox', { name: 'Select Read address permission' }));
+
+      const sent = ref
+        .current!.getPermissions()
+        .permissionsToSend.find(
+          (perm) =>
+            perm.action === 'plugin::content-manager.explorer.read' &&
+            perm.subject === 'api::address.address'
+        );
+
+      expect(sent?.conditions).toEqual([IS_CREATOR]);
+    });
+
+    it('only lets the user select conditions they hold and keeps out-of-scope ones', async () => {
+      const ref = React.createRef<PermissionsAPI>();
+      const userPermissions = [permission(LOCALE_CREATE, null, {}, [IS_CREATOR])];
+      const rolePermissions = [
+        {
+          id: 1,
+          createdAt: '',
+          updatedAt: '',
+          action: LOCALE_CREATE,
+          actionParameters: {},
+          subject: null,
+          properties: {},
+          conditions: [SAME_ROLE],
+        },
+      ];
+
+      const { user } = render(
+        <Permissions
+          ref={ref}
+          layout={layout}
+          permissions={rolePermissions}
+          userPermissions={userPermissions}
+          isFormDisabled={false}
+        />
+      );
+
+      await openI18nLocales(user);
+      await openConditionOptions(user);
+
+      const isCreator = screen.getByRole('option', { name: 'Is creator' });
+      const sameRole = screen.getByRole('option', { name: 'Has same role as creator' });
+
+      expect(isCreator).not.toHaveAttribute('aria-disabled', 'true');
+      expect(sameRole).toHaveAttribute('aria-disabled', 'true');
+      expect(sameRole).toBeChecked();
+
+      await user.click(isCreator);
+      await user.keyboard('[Escape]');
+      await user.click(screen.getByRole('button', { name: 'Apply' }));
+
+      expect(findSent(ref, LOCALE_CREATE)?.conditions).toEqual(
+        expect.arrayContaining([IS_CREATOR, SAME_ROLE])
+      );
+    });
+
+    it('does not let the user remove the last condition they hold', async () => {
+      const userPermissions = [permission(LOCALE_CREATE, null, {}, [IS_CREATOR])];
+
+      const { user } = render(
+        <Permissions layout={layout} userPermissions={userPermissions} isFormDisabled={false} />
+      );
+
+      await openI18nLocales(user);
+      await user.click(screen.getByLabelText('Create'));
+      await openConditionOptions(user);
+
+      const isCreator = screen.getByRole('option', { name: 'Is creator' });
+
+      expect(isCreator).toBeChecked();
+      expect(isCreator).toHaveAttribute('aria-disabled', 'true');
+    });
+
+    it('leaves conditions empty and every condition selectable for super admins', async () => {
+      const ref = React.createRef<PermissionsAPI>();
+
+      const { user } = render(<Permissions ref={ref} layout={layout} isFormDisabled={false} />);
+
+      await openI18nLocales(user);
+      await user.click(screen.getByLabelText('Create'));
+
+      expect(findSent(ref, LOCALE_CREATE)?.conditions).toEqual([]);
+
+      await openConditionOptions(user);
+
+      expect(screen.getByRole('option', { name: 'Is creator' })).not.toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
+      expect(screen.getByRole('option', { name: 'Has same role as creator' })).not.toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
+    });
+
+    it('still copies the user conditions for admin tokens', async () => {
+      const ref = React.createRef<PermissionsAPI>();
+      const userPermissions = [
+        permission(LOCALE_CREATE, null, {}, [IS_CREATOR]),
+        permission(LOCALE_READ),
+      ];
+
+      const { user } = render(
+        <Permissions
+          ref={ref}
+          layout={layout}
+          userPermissions={userPermissions}
+          inheritConditions
+          isFormDisabled={false}
+        />
+      );
+
+      await openI18nLocales(user);
+      await user.click(screen.getByLabelText('Create'));
+      await user.click(screen.getByLabelText('Read'));
+
+      expect(findSent(ref, LOCALE_CREATE)?.conditions).toEqual([IS_CREATOR]);
+      expect(findSent(ref, LOCALE_READ)?.conditions).toEqual([]);
+    });
+  });
+});

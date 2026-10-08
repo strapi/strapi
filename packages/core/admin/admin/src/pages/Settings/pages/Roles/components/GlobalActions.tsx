@@ -13,6 +13,8 @@ import { cellWidth, firstRowWidth } from '../utils/constants';
 import { RecursiveRecordOfBooleans, getCheckboxState } from '../utils/getCheckboxState';
 import { removeConditionKeyFromData } from '../utils/removeConditionKeyFromData';
 
+import { UnheldPermissionTooltip } from './UnheldPermissionTooltip';
+
 interface GlobalActionsProps {
   actions: Action[];
   isFormDisabled?: boolean;
@@ -92,30 +94,35 @@ const GlobalActions = ({ actions = [], isFormDisabled, kind }: GlobalActionsProp
                   defaultMessage: label,
                 })}
               </Typography>
-              <Checkbox
-                disabled={isFormDisabled || !userHasPermissionForAll}
-                onCheckedChange={(value) => {
-                  onChangeCollectionTypeGlobalActionCheckbox(kind, actionId, !!value);
-                }}
-                name={actionId}
-                aria-label={formatMessage(
-                  {
-                    id: `Settings.permissions.select-all-by-permission`,
-                    defaultMessage: 'Select all {label} permissions',
-                  },
-                  {
-                    label: formatMessage({
-                      id: `Settings.roles.form.permissions.${label.toLowerCase()}`,
-                      defaultMessage: label,
-                    }),
+              <UnheldPermissionTooltip
+                isFormDisabled={isFormDisabled}
+                userHasPermission={userHasPermissionForAll}
+              >
+                <Checkbox
+                  disabled={isFormDisabled || !userHasPermissionForAll}
+                  onCheckedChange={(value) => {
+                    onChangeCollectionTypeGlobalActionCheckbox(kind, actionId, !!value);
+                  }}
+                  name={actionId}
+                  aria-label={formatMessage(
+                    {
+                      id: `Settings.permissions.select-all-by-permission`,
+                      defaultMessage: 'Select all {label} permissions',
+                    },
+                    {
+                      label: formatMessage({
+                        id: `Settings.roles.form.permissions.${label.toLowerCase()}`,
+                        defaultMessage: label,
+                      }),
+                    }
+                  )}
+                  checked={
+                    get(checkboxesState, [actionId, 'hasSomeActionsSelected'], false)
+                      ? 'indeterminate'
+                      : get(checkboxesState, [actionId, 'hasAllActionsSelected'], false)
                   }
-                )}
-                checked={
-                  get(checkboxesState, [actionId, 'hasSomeActionsSelected'], false)
-                    ? 'indeterminate'
-                    : get(checkboxesState, [actionId, 'hasAllActionsSelected'], false)
-                }
-              />
+                />
+              </UnheldPermissionTooltip>
             </Flex>
           );
         })}

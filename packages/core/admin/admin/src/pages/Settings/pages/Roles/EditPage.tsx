@@ -7,9 +7,11 @@ import { useIntl } from 'react-intl';
 import { Navigate, useMatch } from 'react-router-dom';
 import * as yup from 'yup';
 
+import { SUPER_ADMIN_CODE } from '../../../../../../shared/utils/super-admin';
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useAuth } from '../../../../features/Auth';
 import { BackButton } from '../../../../features/BackButton';
 import { useNotification } from '../../../../features/Notifications';
 import { useTracking } from '../../../../features/Tracking';
@@ -52,6 +54,15 @@ const EditPage = () => {
     _unstableFormatAPIError: formatAPIError,
     _unstableFormatValidationErrors: formatValidationErrors,
   } = useAPIErrorHandler();
+
+  /**
+   * An admin cannot grant a permission they do not hold themselves, so the permissions
+   * tree is restricted to the current user's own permissions unless they are a super admin.
+   */
+  const currentUserPermissions = useAuth('EditPage', (state) => state.permissions);
+  const currentUser = useAuth('EditPage', (state) => state.user);
+  const isCurrentUserSuperAdmin =
+    currentUser?.roles.some((role) => role.code === SUPER_ADMIN_CODE) ?? false;
 
   const { isLoading: isLoadingPermissionsLayout, data: permissionsLayout } =
     useGetRolePermissionLayoutQuery({
@@ -123,7 +134,7 @@ const EditPage = () => {
         return;
       }
 
-      if (role.code !== 'strapi-super-admin' && permissionsToSend) {
+      if (role.code !== SUPER_ADMIN_CODE && permissionsToSend) {
         const updateRes = await updateRolePermissions({
           id: res.data.id,
           permissions: permissionsToSend,
@@ -163,7 +174,7 @@ const EditPage = () => {
     }
   };
 
-  const isFormDisabled = !isRoleLoading && role.code === 'strapi-super-admin';
+  const isFormDisabled = !isRoleLoading && role.code === SUPER_ADMIN_CODE;
 
   if (isLoadingPermissionsLayout || isRoleLoading || isLoadingPermissions || !permissionsLayout) {
     return <Page.Loading />;
@@ -198,7 +209,7 @@ const EditPage = () => {
                 <Button
                   type="submit"
                   startIcon={<Check />}
-                  disabled={role.code === 'strapi-super-admin' || hasLocaleValidationErrors}
+                  disabled={role.code === SUPER_ADMIN_CODE || hasLocaleValidationErrors}
                   loading={isSubmitting}
                   fullWidth
                 >
@@ -240,6 +251,7 @@ const EditPage = () => {
                     permissions={permissions}
                     ref={permissionsRef}
                     layout={permissionsLayout}
+                    userPermissions={isCurrentUserSuperAdmin ? undefined : currentUserPermissions}
                   />
                 </Box>
               </Flex>
