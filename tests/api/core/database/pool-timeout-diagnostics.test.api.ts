@@ -5,7 +5,7 @@ import type { Core } from '@strapi/types';
 import { Database } from '@strapi/database';
 
 import { createStrapiInstance } from 'api-tests/strapi';
-import { createContentAPIRequest } from 'api-tests/request';
+import { createContentAPIRequest, createRequest } from 'api-tests/request';
 import { createTestBuilder } from 'api-tests/builder';
 
 // Read the test app's .env now: the refused-connection test is skipped on SQLite at definition time
@@ -17,6 +17,15 @@ const ACQUIRE_TIMEOUT_MESSAGE =
   'Knex: Timeout acquiring a connection. The pool is probably full. Are you missing a .transacting(trx) call?';
 const BLOCK_PREFIX = '[database] connection pool timeout';
 const isSqlite = process.env.DATABASE_CLIENT === 'sqlite';
+
+// __typename keeps the selection valid with and without the GraphQL v4 compatibility response shape
+const CREATE_POOL_ITEM = /* GraphQL */ `
+  mutation createPoolItem($data: PoolItemInput!) {
+    createPoolItem(data: $data) {
+      __typename
+    }
+  }
+`;
 
 const itemModel = {
   kind: 'collectionType',
@@ -57,6 +66,7 @@ describe('Pool timeout diagnostics', () => {
   const builder = createTestBuilder();
   let strapi: Core.Strapi;
   let rq: any;
+  let rqGraphql: any;
   let barrier: (() => Promise<void>) | undefined;
 
   beforeAll(async () => {
@@ -81,6 +91,8 @@ describe('Pool timeout diagnostics', () => {
     });
 
     rq = await createContentAPIRequest({ strapi });
+    // The GraphQL endpoint sits at /graphql, outside the /api prefix of the content API agent
+    rqGraphql = createRequest({ strapi });
   });
 
   afterAll(async () => {
@@ -137,6 +149,49 @@ describe('Pool timeout diagnostics', () => {
     expect(blocks).toHaveLength(1);
     expect(blocks[0]).toContain(`  - connections: ${max} in use, 0 free, max ${max}`);
     expect(blocks[0]).not.toContain('select');
+  });
+
+  test('the same pool timeout reaches GraphQL clients as a generic error without the internal details', async () => {
+    const errorSpy = jest.spyOn(strapi.log, 'error');
+    const { max } = (strapi.db.connection.client as any).pool;
+    barrier = createBarrier(max);
+
+    const responses = await Promise.all(
+      Array.from({ length: max }, (_, index) =>
+        rqGraphql({
+          method: 'POST',
+          url: '/graphql',
+          body: { query: CREATE_POOL_ITEM, variables: { data: { name: `item ${index}` } } },
+        })
+      )
+    );
+
+    for (const res of responses) {
+      expect(res.body.errors).toHaveLength(1);
+
+      const [error] = res.body.errors;
+      expect(error.message).toBe('Internal Server Error');
+      expect(error.extensions.code).toBe('INTERNAL_SERVER_ERROR');
+      expect(error.extensions.error).toEqual({
+        name: 'InternalServerError',
+        message: 'Internal Server Error',
+      });
+
+      const serialized = JSON.stringify(res.body);
+      expect(serialized).not.toContain('DB_POOL_ACQUIRE_TIMEOUT');
+      expect(serialized).not.toContain('Knex');
+      expect(serialized).not.toContain(os.hostname());
+    }
+
+    // The full error is still logged server side
+    const timeouts = errorSpy.mock.calls
+      .map(([error]) => error as any)
+      .filter((error) => error?.name === 'KnexTimeoutError');
+    expect(timeouts).toHaveLength(max);
+    expect(timeouts[0].details).toMatchObject({
+      code: 'DB_POOL_ACQUIRE_TIMEOUT',
+      phase: 'runtime',
+    });
   });
 
   (isSqlite ? test.skip : test)('names the refused connection behind the timeouts', async () => {
