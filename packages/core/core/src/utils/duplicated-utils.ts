@@ -28,13 +28,22 @@ const resolveCoreUtils = () => {
   }
 };
 
-const readVersion = (packageJSONPath: string): string | undefined => {
+interface PackageJSON {
+  version?: string;
+  dependencies?: Record<string, string>;
+  peerDependencies?: Record<string, string>;
+}
+
+const readPackageJSON = (packageJSONPath: string): PackageJSON | undefined => {
   try {
-    return JSON.parse(fs.readFileSync(packageJSONPath, 'utf8')).version;
+    return JSON.parse(fs.readFileSync(packageJSONPath, 'utf8'));
   } catch {
     return undefined;
   }
 };
+
+const usesUtils = (pkg: PackageJSON | undefined) =>
+  Boolean(pkg?.dependencies?.['@strapi/utils'] ?? pkg?.peerDependencies?.['@strapi/utils']);
 
 /**
  * Lists the app dependencies that load another copy of `@strapi/utils` than the one core uses.
@@ -54,7 +63,9 @@ const findDuplicatedUtils = (
   return Object.keys(dependencies).flatMap((name) => {
     const packageJSONPath = resolvePackageJSON(name, appRoot);
 
-    if (!packageJSONPath) {
+    const pkg = packageJSONPath ? readPackageJSON(packageJSONPath) : undefined;
+
+    if (!packageJSONPath || !usesUtils(pkg)) {
       return [];
     }
 
@@ -67,9 +78,9 @@ const findDuplicatedUtils = (
     return [
       {
         name,
-        version: readVersion(packageJSONPath),
+        version: pkg?.version,
         utilsPath,
-        utilsVersion: readVersion(utilsPath),
+        utilsVersion: readPackageJSON(utilsPath)?.version,
       },
     ];
   });

@@ -72,6 +72,34 @@ describe('findDuplicatedUtils', () => {
     ).toEqual([{ name: 'drifted-plugin', utilsVersion: '5.0.0' }]);
   });
 
+  it('ignores dependencies that do not use @strapi/utils', () => {
+    writePackage(modules('unrelated'), { name: 'unrelated', version: '1.0.0' });
+    writePackage(modules('unrelated', 'node_modules', '@strapi', 'utils'), {
+      name: '@strapi/utils',
+      version: '4.0.0',
+    });
+
+    expect(findDuplicatedUtils(appRoot, { unrelated: '1.0.0' }, hoistedUtils())).toEqual([]);
+  });
+
+  it('checks dependencies that use @strapi/utils as a peer dependency', () => {
+    writePackage(modules('peer-plugin'), {
+      name: 'peer-plugin',
+      version: '3.0.0',
+      peerDependencies: { '@strapi/utils': '^5.0.0' },
+    });
+    writePackage(modules('peer-plugin', 'node_modules', '@strapi', 'utils'), {
+      name: '@strapi/utils',
+      version: '5.1.0',
+    });
+
+    expect(
+      findDuplicatedUtils(appRoot, { 'peer-plugin': '3.0.0' }, hoistedUtils()).map(
+        ({ name }) => name
+      )
+    ).toEqual(['peer-plugin']);
+  });
+
   it('ignores dependencies that are not installed', () => {
     expect(findDuplicatedUtils(appRoot, { 'not-installed': '1.0.0' }, hoistedUtils())).toEqual([]);
   });
