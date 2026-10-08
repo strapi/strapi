@@ -223,6 +223,29 @@ describe('login', () => {
     );
   });
 
+  test('issues refresh tokens for OAuth logins', async () => {
+    enableRefresh();
+    const ctx = createContext();
+    ctx.params.provider = 'github';
+    ctx.session = { grant: { response: {} } };
+    await controller.callback(ctx);
+    expect(ctx.send).toHaveBeenCalledWith({
+      jwt: 'access-token',
+      refreshToken: 'refresh-token',
+      user: { id: 1, email: 'alice@example.com' },
+    });
+  });
+
+  test('keeps OAuth refresh-mode session failures unwrapped', async () => {
+    enableRefresh();
+    const failure = new Error('session store unavailable');
+    sessionManager.generateRefreshToken.mockRejectedValue(failure);
+    const ctx = createContext();
+    ctx.params.provider = 'github';
+    ctx.session = { grant: { response: {} } };
+    await expect(controller.callback(ctx)).rejects.toBe(failure);
+  });
+
   test('issues device-specific refresh tokens with request metadata', async () => {
     enableRefresh();
     const ctx = createContext({ ...credentials, deviceId: 'browser-1' });

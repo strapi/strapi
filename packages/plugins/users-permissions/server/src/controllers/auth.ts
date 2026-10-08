@@ -250,7 +250,10 @@ export default ({ strapi }: PluginContext) => ({
         'legacy-support'
       );
       if (mode === 'refresh') {
-        return await sendRefreshAuthResponse(strapi, ctx, user, {
+        // Not awaited on purpose: session and cookie failures keep their own error class and
+        // status instead of being re-thrown below as an ApplicationError with the internal message.
+        // eslint-disable-next-line @typescript-eslint/return-await
+        return sendRefreshAuthResponse(strapi, ctx, user, {
           metadata: buildSessionMetadataFromContext(ctx),
         });
       }
