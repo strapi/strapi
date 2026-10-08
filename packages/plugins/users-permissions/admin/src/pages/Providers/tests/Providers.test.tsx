@@ -102,3 +102,29 @@ it.each([
   expect(redirect).toHaveValue(redirectUri);
   expect(redirect).toBeDisabled();
 });
+
+it('lists and edits a provider under its store key when its settings carry a name', async () => {
+  permissions.canUpdate = true;
+  server.use(
+    http.get('*/users-permissions/providers', () =>
+      HttpResponse.json({
+        github: {
+          name: 'stored-name',
+          enabled: true,
+          key: 'github-client-id',
+          secret: 'github-secret',
+          callback: '',
+          redirectUri: 'http://localhost:1337/api/connect/github/callback',
+        },
+      })
+    )
+  );
+  const { findByText, findByRole, getByTestId, queryByText, user } = render(<ProvidersPage />);
+  await user.click(await findByText('github'));
+  expect(queryByText('stored-name')).not.toBeInTheDocument();
+  expect(getByTestId('enable-github')).toHaveTextContent('Enabled');
+  const dialog = within(await findByRole('dialog'));
+  expect(dialog.getByRole('checkbox', { name: 'enabled' })).toBeChecked();
+  expect(dialog.getByLabelText('Client ID')).toHaveValue('github-client-id');
+  expect(dialog.getByLabelText('Client Secret')).toHaveValue('github-secret');
+});
