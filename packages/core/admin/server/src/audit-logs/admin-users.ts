@@ -1,4 +1,4 @@
-import { isEqual, sortBy } from 'lodash/fp';
+import { isEqual, sortBy } from 'lodash';
 import type { Data, Modules } from '@strapi/types';
 import { emitAudit } from '@strapi/utils';
 
@@ -87,8 +87,8 @@ export type PasswordResetCreateEvent = AdminUserEvent & { expiresAt: string | Da
 /** Sorted, so order alone is not a change. */
 export const toRoleIds = (roles: AdminUserSnapshot['roles']): Data.ID[] =>
   sortBy(
-    (id: Data.ID) => String(id),
-    (roles ?? []).map((role) => (typeof role === 'object' ? role.id : role))
+    (roles ?? []).map((role) => (typeof role === 'object' ? role.id : role)),
+    (id: Data.ID) => String(id)
   );
 
 export const getAdminUserChanges = (

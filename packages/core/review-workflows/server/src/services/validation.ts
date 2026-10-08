@@ -1,5 +1,4 @@
 import type { Core } from '@strapi/types';
-import { uniq } from 'lodash/fp';
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
 import { ERRORS, MAX_WORKFLOWS, MAX_STAGES_PER_WORKFLOW } from '../constants/workflows';
@@ -38,7 +37,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       }
       // Validate stage names are not duplicated
       const stageNames = stages.map((stage: any) => stage.name);
-      if (uniq(stageNames).length !== stageNames.length) {
+      if (new Set(stageNames).size !== stageNames.length) {
         throw new ValidationError(ERRORS.DUPLICATED_STAGE_NAME);
       }
     },

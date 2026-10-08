@@ -87,6 +87,12 @@ describe('batch schema mutation compensation', () => {
     global.strapi = {
       eventHub: { emit: jest.fn() },
       log: { error: jest.fn() },
+      // `updateSchema` reads the rename-migration mode from the plugin config.
+      plugins: {
+        'content-type-builder': {
+          config: (_key: string, defaultValue: unknown) => defaultValue,
+        },
+      },
     } as any;
   });
 

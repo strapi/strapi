@@ -3,8 +3,7 @@
  * Module that will validate input data for entity creation or edition
  */
 
-import { uniqBy, castArray, isNil, isArray, mergeWith } from 'lodash';
-import { has, prop, isObject, isEmpty } from 'lodash/fp';
+import { uniqBy, castArray, isNil, isArray, mergeWith, get, has, isEmpty, isObject } from 'lodash';
 import jsonLogic from 'json-logic-js';
 import * as strapiUtils from '@strapi/utils';
 import type { Modules, UID, Struct, Schema } from '@strapi/types';
@@ -206,7 +205,7 @@ const createDzValidator =
 
     validator = yup.array().of(
       yup.lazy((item) => {
-        const model = strapi.getModel(prop('__component', item));
+        const model = strapi.getModel(get(item, '__component'));
         const schema = yup
           .object()
           .shape({
@@ -427,7 +426,7 @@ const createScalarAttributeValidator =
   (createOrUpdate: CreateOrUpdate) => (metas: ValidatorMeta, options: ValidatorContext) => {
     let validator;
 
-    if (has(metas.attr.type, Validators)) {
+    if (has(Validators, metas.attr.type)) {
       validator = (Validators as any)[metas.attr.type](metas, options);
     } else {
       // No validators specified - fall back to mixed
@@ -541,7 +540,7 @@ const createModelValidator =
       (validators, attributeName) => {
         const metas = {
           attr: model.attributes[attributeName],
-          updatedAttribute: { name: attributeName, value: prop(attributeName, data) },
+          updatedAttribute: { name: attributeName, value: get(data, attributeName) },
           data,
           model,
           entity,

@@ -1,6 +1,6 @@
 'use strict';
 
-const { getOr } = require('lodash/fp');
+const { get } = require('lodash');
 
 /**
  * Throws an ApolloError if context body contains a bad request
@@ -8,10 +8,10 @@ const { getOr } = require('lodash/fp');
  * @throws ApolloError if the body is a bad request
  */
 function checkBadRequest(contextBody) {
-  const statusCode = getOr(200, 'statusCode', contextBody);
+  const statusCode = get(contextBody, 'statusCode', 200);
 
   if (statusCode !== 200) {
-    const errorMessage = getOr('Bad Request', 'error', contextBody);
+    const errorMessage = get(contextBody, 'error', 'Bad Request');
 
     const exception = new Error(errorMessage);
 
