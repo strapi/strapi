@@ -110,6 +110,13 @@ describe('useTracking', () => {
     });
   }
 
+  it('keeps the public hook compatible with trackUsage-only consumers', () => {
+    const { result } = setup();
+    const consumer: ReturnType<typeof useTracking> = { trackUsage: result.current.trackUsage };
+
+    expect(result.current).toEqual(consumer);
+  });
+
   it('should not fire axios.post if strapi.telemetryDisabled is true', async () => {
     window.strapi.telemetryDisabled = true;
 
