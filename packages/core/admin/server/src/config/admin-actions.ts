@@ -222,6 +222,13 @@ export const actions = [
     category: 'project',
   },
   {
+    uid: 'debug-dump.read',
+    displayName: 'Generate a support debug dump',
+    pluginName: 'admin',
+    section: 'settings',
+    category: 'debug and support',
+  },
+  {
     uid: 'transfer.tokens.access',
     displayName: 'Access the transfer tokens settings page',
     pluginName: 'admin',
