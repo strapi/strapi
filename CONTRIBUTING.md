@@ -16,7 +16,7 @@ The Request For Comments process will help us create consensus among the core te
 
 Requests For Comments are held in the [RFCs category of GitHub Discussions](https://github.com/strapi/strapi/discussions/categories/rfcs). Open a new discussion there describing the problem, the motivation and your proposed design. Listing the specific questions you'd like feedback on at the top helps reviewers focus.
 
-Please do not open a pull request containing an RFC document. Once an RFC has been discussed and approved, the core team may archive it in the [RFCs section of the contributor docs](./docs/docs/rfcs) as a record of the design decision.
+Please do not open a pull request containing an RFC document. The [discussion](https://github.com/strapi/strapi/discussions/categories/rfcs) stays the record of the design decision once the RFC has been discussed and approved.
 
 The [strapi/rfcs](https://github.com/strapi/rfcs) repository is no longer used for new proposals.
 
@@ -70,7 +70,7 @@ The Strapi core team will review your pull request and either merge it, request 
   - `yarn test:front`
   - `yarn test:e2e --setup --concurrency=1`
     - you **_may_** need to install Playwright browsers first: `yarn playwright install chromium webkit`
-    - Enterprise (EE) e2e: set `STRAPI_LICENSE` in **`tests/e2e/.env`** (see [`docs/docs/guides/e2e/00-setup.md`](docs/docs/guides/e2e/00-setup.md))
+    - Enterprise (EE) e2e: set `STRAPI_LICENSE` in **`tests/e2e/.env`** (see [`docs/docs/contributing/03-testing/e2e/00-setup.md`](docs/docs/contributing/03-testing/e2e/00-setup.md))
 - Make sure your code lints by running `yarn lint`.
 - If your contribution fixes an existing issue, please make sure to link it in your pull request.
 
