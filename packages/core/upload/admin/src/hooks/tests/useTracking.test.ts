@@ -73,4 +73,31 @@ describe('future media library useTracking', () => {
       expect.not.objectContaining({ isAiMediaLibraryConfigured: expect.anything() })
     );
   });
+
+  it('picks up aiMetadata after the settings query the tracker reads is refreshed', () => {
+    mockUseGetSettingsQuery.mockReturnValue({
+      data: { data: { aiMetadata: false, aiMetadataAvailable: true } },
+    });
+
+    const { result, rerender } = renderHook(() => useTracking());
+
+    result.current.trackUsage('didGenerateMetadataRetroactively');
+
+    expect(mockTrackStrapiUsage).toHaveBeenCalledWith('didGenerateMetadataRetroactively', {
+      isAiMediaLibraryConfigured: false,
+      mediaLibraryVersion: 'v2',
+    });
+
+    mockUseGetSettingsQuery.mockReturnValue({
+      data: { data: { aiMetadata: true, aiMetadataAvailable: true } },
+    });
+    rerender();
+
+    result.current.trackUsage('didGenerateMetadataRetroactively');
+
+    expect(mockTrackStrapiUsage).toHaveBeenLastCalledWith('didGenerateMetadataRetroactively', {
+      isAiMediaLibraryConfigured: true,
+      mediaLibraryVersion: 'v2',
+    });
+  });
 });
