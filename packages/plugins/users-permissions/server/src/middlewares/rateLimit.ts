@@ -109,7 +109,8 @@ const buildRateLimitLoadConfig = (
   };
 };
 
-export default (config: RateLimitConfig, { strapi }: { strapi: Core.Strapi }) =>
+const rateLimitMiddleware =
+  (config: RateLimitConfig, { strapi }: { strapi: Core.Strapi }) =>
   async (ctx: Context, next: Next) => {
     let rateLimitConfig = strapi.config.get<RateLimitConfig>('plugin::users-permissions.ratelimit');
 
@@ -140,3 +141,11 @@ export {
   normalizeRequestPathForRateLimit,
   buildRateLimitLoadConfig,
 };
+
+// Keep the helpers on the registered middleware, where the JavaScript plugin exposed them.
+export default Object.assign(rateLimitMiddleware, {
+  buildPrefixKey,
+  ROUTES_WITHOUT_IDENTIFIER,
+  normalizeRequestPathForRateLimit,
+  buildRateLimitLoadConfig,
+});
