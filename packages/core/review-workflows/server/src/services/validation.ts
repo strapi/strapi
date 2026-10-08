@@ -43,15 +43,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       }
     },
 
-    async validateWorkflowCountStages(workflowId: any, countAddedStages = 0) {
-      const stagesService = getService('stages', { strapi });
-      const countWorkflowStages = await stagesService.count({ workflowId });
-
-      if (countWorkflowStages + countAddedStages > getLimits().stagesPerWorkflow) {
-        throw new ValidationError(ERRORS.STAGES_LIMIT);
-      }
-    },
-
     /**
      * Validates the count of existing and added workflows.
      * @param {number} [countAddedWorkflows=0] - The count of workflows to be added.

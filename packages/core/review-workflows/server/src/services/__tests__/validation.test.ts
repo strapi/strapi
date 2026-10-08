@@ -12,11 +12,9 @@ const reviewWorkflowsFeature = (options?: Record<string, unknown>): Feature => (
 const createStrapiMock = (initialFeature: Feature) => {
   let feature = initialFeature;
   const countWorkflows = jest.fn();
-  const countStages = jest.fn();
 
   const services: Record<string, unknown> = {
     workflows: { count: countWorkflows },
-    stages: { count: countStages },
   };
 
   const strapi = {
@@ -27,7 +25,6 @@ const createStrapiMock = (initialFeature: Feature) => {
   return {
     strapi,
     countWorkflows,
-    countStages,
     setFeature(next: Feature) {
       feature = next;
     },
@@ -63,19 +60,6 @@ describe('Review workflows validation service - license limits', () => {
 
       expect(() => validation.validateWorkflowStages(stagesOf(5))).not.toThrow();
       expect(() => validation.validateWorkflowStages(stagesOf(6))).toThrow(ERRORS.STAGES_LIMIT);
-    });
-
-    test('rejects adding stages beyond the license limit to an existing workflow', async () => {
-      const { strapi, countStages } = createStrapiMock(feature);
-      const validation = validationFactory({ strapi });
-
-      countStages.mockResolvedValue(4);
-      await expect(validation.validateWorkflowCountStages(1, 1)).resolves.toBeUndefined();
-
-      countStages.mockResolvedValue(5);
-      await expect(validation.validateWorkflowCountStages(1, 1)).rejects.toThrow(
-        ERRORS.STAGES_LIMIT
-      );
     });
   });
 
@@ -128,19 +112,15 @@ describe('Review workflows validation service - license limits', () => {
       await expect(validation.validateWorkflowCount(1)).rejects.toThrow(ERRORS.WORKFLOWS_LIMIT);
     });
 
-    test('is applied in full for stages', async () => {
-      const { strapi, countStages } = createStrapiMock(feature);
+    test('is applied in full for stages', () => {
+      const { strapi } = createStrapiMock(feature);
       const validation = validationFactory({ strapi });
 
       expect(() =>
         validation.validateWorkflowStages(stagesOf(MAX_STAGES_PER_WORKFLOW + 1))
       ).not.toThrow();
-
-      countStages.mockResolvedValue(199_999);
-      await expect(validation.validateWorkflowCountStages(1, 1)).resolves.toBeUndefined();
-
-      countStages.mockResolvedValue(200_000);
-      await expect(validation.validateWorkflowCountStages(1, 1)).rejects.toThrow(
+      expect(() => validation.validateWorkflowStages(stagesOf(200_000))).not.toThrow();
+      expect(() => validation.validateWorkflowStages(stagesOf(200_001))).toThrow(
         ERRORS.STAGES_LIMIT
       );
     });
