@@ -72,7 +72,10 @@ export const ProvidersPage = () => {
 
         toggleNotification({
           type: 'success',
-          message: formatMessage({ id: getTrad('notification.success.submit') }),
+          message: formatMessage({
+            id: getTrad('notification.success.submit'),
+            defaultMessage: 'Settings have been updated',
+          }),
         });
 
         trackUsage('didEditAuthenticationProvider');
@@ -88,8 +91,9 @@ export const ProvidersPage = () => {
     }
   );
 
+  // The store key names the provider; a `name` stored inside its settings must not override it.
   const providers = Object.entries(data ?? {})
-    .map(([name, provider]) => ({ name, ...provider }))
+    .map(([name, provider]) => ({ ...provider, name }))
     .sort((a, b) => formatter.compare(a.name, b.name));
 
   const isLoading = isLoadingData || isLoadingPermissions;
