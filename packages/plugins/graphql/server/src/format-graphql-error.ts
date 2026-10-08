@@ -1,4 +1,4 @@
-import { snakeCase, pick, isEmpty } from 'lodash';
+import { snakeCase, pick } from 'lodash';
 import { errors } from '@strapi/utils';
 import { unwrapResolverError } from '@apollo/server/errors';
 import { GraphQLError, type GraphQLFormattedError } from 'graphql';
@@ -36,8 +36,10 @@ function createFormattedError(
 export function formatGraphqlError(formattedError: GraphQLFormattedError, error: unknown) {
   const originalError = unwrapResolverError(error);
 
-  // If this error doesn't have an associated originalError, it
-  if (isEmpty(originalError)) {
+  // Nothing to inspect, so keep Apollo's own formatted error. This must not be an emptiness check:
+  // an Error only has non-enumerable fields (message, stack), so lodash isEmpty reports it as
+  // empty and a bare Error from a resolver would reach the client with its message
+  if (originalError === null || originalError === undefined) {
     return formattedError;
   }
 
@@ -65,11 +67,13 @@ export function formatGraphqlError(formattedError: GraphQLFormattedError, error:
   // Log the error
   strapi.log.error(originalError);
 
-  // Create a generic 500 to send so we don't risk leaking any data
+  // Create a generic 500 to send so we don't risk leaking any data. The error that went to the log
+  // is not passed on: its name, message and details can hold SQL with bound values, hostnames and
+  // driver reasons. The extension carries the same error shape as the REST 500 body.
   return createFormattedError(
     new GraphQLError('Internal Server Error'),
     'Internal Server Error',
     'INTERNAL_SERVER_ERROR',
-    originalError
+    { name: 'InternalServerError', message: 'Internal Server Error' }
   );
 }
