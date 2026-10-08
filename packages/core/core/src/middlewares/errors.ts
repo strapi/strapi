@@ -1,7 +1,12 @@
 import { errors } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
-import { formatApplicationError, formatHttpError, formatInternalError } from '../services/errors';
+import {
+  formatApplicationError,
+  formatHttpError,
+  formatInternalError,
+  isStrapiError,
+} from '../services/errors';
 
 declare module 'koa' {
   interface BaseResponse {
@@ -18,7 +23,7 @@ const errorMiddleware: Core.MiddlewareFactory = (/* _, { strapi } */) => {
         return ctx.notFound();
       }
     } catch (error) {
-      if (error instanceof errors.ApplicationError) {
+      if (isStrapiError(error, errors.ApplicationError)) {
         const { status, body } = formatApplicationError(error);
         ctx.status = status;
         ctx.body = body;

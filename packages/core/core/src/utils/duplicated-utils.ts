@@ -89,7 +89,7 @@ const warnOnDuplicatedUtils = (strapi: Core.Strapi) => {
         ({ name, version, utilsVersion }) =>
           `  - ${name}${version ? `@${version}` : ''} uses @strapi/utils${utilsVersion ? `@${utilsVersion}` : ''}`
       ),
-      'Several copies of @strapi/utils break error handling (e.g. 500 instead of 401/403).',
+      'Several copies of @strapi/utils can make errors and other checks behave unexpectedly.',
       'Use the same version for all @strapi/* packages, for example with `npx @strapi/upgrade`, then reinstall.',
     ].join('\n')
   );
