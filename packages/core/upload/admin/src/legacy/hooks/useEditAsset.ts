@@ -1,22 +1,18 @@
 import * as React from 'react';
 
-import { useNotification, useFetchClient, FetchClient } from '@strapi/admin/strapi-admin';
+import {
+  useNotification,
+  useFetchClient,
+  FetchClient,
+  isAbortError,
+  isFetchError,
+} from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { useMutation, useQueryClient } from 'react-query';
 
 import { UpdateFile, File as FileAsset } from '../../../../shared/contracts/files';
 import { pluginId } from '../../pluginId';
 import { getTrad } from '../utils';
-
-export type ErrorMutation = {
-  message: string;
-  response: {
-    status: number;
-    data: {
-      error: Error;
-    };
-  };
-} | null;
 
 const editAssetRequest = (
   asset: FileAsset,
@@ -64,7 +60,7 @@ export const useEditAsset = () => {
 
   const mutation = useMutation<
     UpdateFile.Response['data'],
-    ErrorMutation,
+    Error,
     { asset: FileAsset; file: File }
   >(
     ({ asset, file }) => {
@@ -81,13 +77,15 @@ export const useEditAsset = () => {
         queryClient.refetchQueries([pluginId, 'folders'], { active: true });
       },
       onError(reason) {
-        if (reason?.response?.status === 403) {
+        if (isAbortError(reason) || abortControllerRef.current?.signal.aborted) return;
+
+        if (isFetchError(reason) && reason.status === 403) {
           toggleNotification({
             type: 'info',
             message: formatMessage({ id: getTrad('permissions.not-allowed.update') }),
           });
         } else {
-          toggleNotification({ type: 'danger', message: reason?.message });
+          toggleNotification({ type: 'danger', message: reason.message });
         }
       },
     }
