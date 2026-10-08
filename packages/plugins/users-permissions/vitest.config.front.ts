@@ -14,6 +14,9 @@ export default defineConfig({
     include: ['admin/src/**/*.test.{ts,tsx}'],
     setupFiles: ['./admin/tests/setup.ts'],
     env: { ADMIN_PATH: '/admin', TZ: 'UTC', LANG: 'en_US.UTF-8' },
+    // Same budget as the shared Jest front preset these tests ran under before.
+    testTimeout: 60_000,
+    hookTimeout: 60_000,
     coverage: {
       reporter: [
         ...coverageConfigDefaults.reporter,
