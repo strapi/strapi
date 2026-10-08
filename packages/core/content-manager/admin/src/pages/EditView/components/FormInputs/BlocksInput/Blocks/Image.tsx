@@ -96,7 +96,7 @@ const ImageDialog = () => {
   const MediaLibraryDialog = components['media-library'] as React.ComponentType<{
     allowedTypes: Schema.Attribute.MediaKind[];
     onClose: () => void;
-    onSelectAssets: (_images: Schema.Attribute.MediaValue<true>) => void;
+    onSelectAssets: (_images: Block<'image'>['image'][]) => void;
   }>;
 
   const insertImages = (images: Block<'image'>['image'][]) => {
@@ -139,7 +139,7 @@ const ImageDialog = () => {
     Transforms.select(editor, pathToInsert);
   };
 
-  const handleSelectAssets = (images: Schema.Attribute.MediaValue<true>) => {
+  const handleSelectAssets = (images: Block<'image'>['image'][]) => {
     const formattedImages = images.map((image) => {
       // Create an object with imageSchema defined and exclude unnecessary props coming from media library config
       const expectedImage = pick(image, IMAGE_SCHEMA_FIELDS);
