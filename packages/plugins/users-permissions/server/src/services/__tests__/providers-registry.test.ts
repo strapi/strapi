@@ -691,3 +691,37 @@ describe('vk authCallback — server-side OAuth session guard', () => {
     ).rejects.toThrow('Invalid VK access token');
   });
 });
+
+describe('custom providers', () => {
+  const authContext = { provider: 'custom', accessToken: 'custom-token', query: {} };
+
+  it('runs a provider added by an application until it is removed', async () => {
+    const registry = providersRegistry({ strapi });
+    const authCallback = vi.fn().mockResolvedValue({ username: 'ada', email: 'ada@example.com' });
+
+    registry.add('custom', { enabled: true, icon: '', grantConfig: {}, authCallback });
+
+    await expect(registry.run(authContext)).resolves.toEqual({
+      username: 'ada',
+      email: 'ada@example.com',
+    });
+    expect(authCallback).toHaveBeenCalledWith({
+      accessToken: 'custom-token',
+      query: {},
+      providers: undefined,
+      grantResponse: undefined,
+    });
+
+    registry.remove('custom');
+
+    await expect(registry.run(authContext)).rejects.toThrow('Unknown auth provider');
+  });
+
+  it('rejects a provider added without a profile callback', async () => {
+    const registry = providersRegistry({ strapi });
+
+    registry.add('custom', { enabled: true, icon: '', grantConfig: {} });
+
+    await expect(registry.run(authContext)).rejects.toThrow('Auth provider has no callback');
+  });
+});

@@ -58,3 +58,27 @@ it('saves an edited template while retaining the other email template', async ()
     }),
   });
 });
+
+it('shows the error page and a danger notification when the templates cannot be loaded', async () => {
+  server.use(
+    http.get('*/users-permissions/email-templates', () =>
+      HttpResponse.json(
+        {
+          error: {
+            status: 500,
+            name: 'InternalServerError',
+            message: 'Email templates could not be loaded',
+            details: {},
+          },
+        },
+        { status: 500 }
+      )
+    )
+  );
+  const { findByText, queryByText } = render(<EmailTemplatesPage />);
+  expect(await findByText('Whoops! Something went wrong. Please, try again.')).toBeInTheDocument();
+  expect(
+    (await findByText('Email templates could not be loaded')).closest('[role="alert"]')
+  ).toBeInTheDocument();
+  expect(queryByText('Reset password')).not.toBeInTheDocument();
+});
