@@ -166,6 +166,8 @@ export default {
       input.permissions
     )) as typeof input.permissions;
 
+    await roleService.checkPermissionsCeiling(ctx.state.user, role.id, normalizedPermissions);
+
     const permissions = await roleService.assignPermissions(role.id, normalizedPermissions);
 
     const sanitizedPermissions = permissions.map(permissionService.sanitizePermission);
