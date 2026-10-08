@@ -157,18 +157,22 @@ describe('Role controller', () => {
         },
       ];
 
-      const ctx = createContext({
-        params: { id: roleID },
-        body: {
-          permissions: inputPermissions,
+      const ctx = createContext(
+        {
+          params: { id: roleID },
+          body: {
+            permissions: inputPermissions,
+          },
         },
-      }) as any;
+        { state: { user: { id: 10, roles: [{ code: 'strapi-editor' }] } } }
+      ) as any;
 
       global.strapi = {
         admin: {
           services: {
             role: {
               assignPermissions,
+              checkPermissionsCeiling: jest.fn(),
               findOne: findOneRole,
               getSuperAdmin: jest.fn(() => undefined),
               hooks: {
@@ -226,18 +230,22 @@ describe('Role controller', () => {
       ];
       const willValidateUpdatePermissions = jest.fn(() => Promise.resolve(normalizedPermissions));
 
-      const ctx = createContext({
-        params: { id: roleID },
-        body: {
-          permissions: inputPermissions,
+      const ctx = createContext(
+        {
+          params: { id: roleID },
+          body: {
+            permissions: inputPermissions,
+          },
         },
-      }) as any;
+        { state: { user: { id: 10, roles: [{ code: 'strapi-editor' }] } } }
+      ) as any;
 
       global.strapi = {
         admin: {
           services: {
             role: {
               assignPermissions,
+              checkPermissionsCeiling: jest.fn(),
               findOne: findOneRole,
               getSuperAdmin: jest.fn(() => undefined),
               hooks: {
@@ -275,6 +283,105 @@ describe('Role controller', () => {
       expect(assignPermissions).toHaveBeenCalledWith(roleID, normalizedPermissions);
       expect(ctx.body).toEqual({
         data: normalizedPermissions,
+      });
+    });
+
+    describe('permissions ceiling', () => {
+      const roleID = 1;
+      const user = { id: 10, roles: [{ code: 'strapi-editor' }] };
+      const inputPermissions = [
+        {
+          action: 'plugin::content-manager.explorer.read',
+          subject: 'api::article.article',
+          properties: { fields: ['title'], locales: [] },
+          conditions: [],
+        },
+      ];
+      const normalizedPermissions = [
+        {
+          ...inputPermissions[0],
+          properties: { fields: ['title'], locales: ['en'] },
+        },
+      ];
+
+      const setup = (checkPermissionsCeiling: jest.Mock) => {
+        const assignPermissions = jest.fn((roleID, permissions) => Promise.resolve(permissions));
+
+        const ctx = createContext(
+          {
+            params: { id: roleID },
+            body: {
+              permissions: inputPermissions,
+            },
+          },
+          { state: { user } }
+        ) as any;
+
+        global.strapi = {
+          admin: {
+            services: {
+              role: {
+                assignPermissions,
+                checkPermissionsCeiling,
+                findOne: jest.fn(() => Promise.resolve({ id: roleID })),
+                getSuperAdmin: jest.fn(() => undefined),
+                hooks: {
+                  willValidateUpdatePermissions: {
+                    call: jest.fn(() => Promise.resolve(normalizedPermissions)),
+                  },
+                },
+              },
+              permission: {
+                sanitizePermission: jest.fn((permissions) => permissions),
+                conditionProvider: {
+                  values: jest.fn(() => []),
+                },
+                actionProvider: {
+                  values: jest.fn(() => [
+                    {
+                      actionId: 'plugin::content-manager.explorer.read',
+                      subjects: ['api::article.article'],
+                    },
+                  ]),
+                  get: jest.fn(() => ({
+                    actionId: 'plugin::content-manager.explorer.read',
+                    subjects: ['api::article.article'],
+                    options: { applyToProperties: ['fields', 'locales'] },
+                  })),
+                },
+              },
+            },
+          },
+        } as any;
+
+        return { ctx, assignPermissions };
+      };
+
+      test('Checks the requester holds the normalized permissions before assigning them', async () => {
+        const checkPermissionsCeiling = jest.fn(() => Promise.resolve());
+        const { ctx, assignPermissions } = setup(checkPermissionsCeiling);
+
+        await roleController.updatePermissions(ctx);
+
+        expect(checkPermissionsCeiling).toHaveBeenCalledWith(user, roleID, normalizedPermissions);
+        expect(assignPermissions).toHaveBeenCalledWith(roleID, normalizedPermissions);
+        expect(checkPermissionsCeiling.mock.invocationCallOrder[0]).toBeLessThan(
+          assignPermissions.mock.invocationCallOrder[0]
+        );
+      });
+
+      test('Does not assign permissions the requester does not hold', async () => {
+        const forbiddenError = new errors.ForbiddenError(
+          'You cannot grant permissions you do not hold yourself',
+          { permissions: normalizedPermissions }
+        );
+        const checkPermissionsCeiling = jest.fn(() => Promise.reject(forbiddenError));
+        const { ctx, assignPermissions } = setup(checkPermissionsCeiling);
+
+        await expect(roleController.updatePermissions(ctx)).rejects.toBe(forbiddenError);
+
+        expect(assignPermissions).not.toHaveBeenCalled();
+        expect(ctx.body).toBeUndefined();
       });
     });
   });

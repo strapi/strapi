@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { queryParams } from '@strapi/utils';
+import { queryParams, errors } from '@strapi/utils';
 import constants from '../constants';
 import { create as createPermission, toPermission } from '../../domain/permission';
 import roleContentType from '../../content-types/Role';
@@ -20,6 +20,7 @@ const {
   displayWarningIfNoSuperAdmin,
   addPermissions,
   assignPermissions,
+  checkPermissionsCeiling,
   resetSuperAdminPermissions,
 } = roleService;
 
@@ -995,6 +996,514 @@ describe('Role', () => {
       const returnedPermissions = await assignPermissions(1, permissions);
       expect(deleteByIds).toHaveBeenCalledTimes(0);
       expect(returnedPermissions).toEqual(permissions);
+    });
+  });
+
+  describe('checkPermissionsCeiling', () => {
+    const ROLE_ID = 7;
+    const READ = 'plugin::content-manager.explorer.read';
+    const CREATE = 'plugin::content-manager.explorer.create';
+    const ARTICLE = 'api::article.article';
+    const AUTHOR = 'api::author.author';
+
+    const user = { id: 1, roles: [{ code: 'strapi-editor' }] } as any;
+    const superAdminUser = { id: 2, roles: [{ code: SUPER_ADMIN_CODE }] } as any;
+
+    const setupStrapi = ({
+      userPermissions = [],
+      rolePermissions = [],
+    }: {
+      userPermissions?: any[];
+      rolePermissions?: any[];
+    } = {}) => {
+      const findUserPermissions = jest.fn(() => Promise.resolve(toPermission(userPermissions)));
+      const findMany = jest.fn(() => Promise.resolve(toPermission(rolePermissions)));
+
+      global.strapi = {
+        admin: {
+          services: {
+            permission: { findUserPermissions, findMany },
+          },
+        },
+      } as any;
+
+      return { findUserPermissions, findMany };
+    };
+
+    const expectForbidden = async (promise: Promise<unknown>, rejectedPermissions: unknown[]) => {
+      let error: any;
+
+      try {
+        await promise;
+      } catch (e) {
+        error = e;
+      }
+
+      expect(error).toBeInstanceOf(errors.ForbiddenError);
+      expect(error.message).toBe('You cannot grant permissions you do not hold yourself');
+      expect(error.details).toEqual({ permissions: rejectedPermissions });
+    };
+
+    test('Super admins are not checked', async () => {
+      const { findUserPermissions, findMany } = setupStrapi();
+
+      await expect(
+        checkPermissionsCeiling(superAdminUser, ROLE_ID, [{ action: READ, subject: ARTICLE }])
+      ).resolves.toBeUndefined();
+
+      expect(findUserPermissions).not.toHaveBeenCalled();
+      expect(findMany).not.toHaveBeenCalled();
+    });
+
+    test('Loads the requester permissions and the current role permissions', async () => {
+      const { findUserPermissions, findMany } = setupStrapi({
+        userPermissions: [{ action: READ, subject: ARTICLE }],
+      });
+
+      await checkPermissionsCeiling(user, ROLE_ID, [{ action: READ, subject: ARTICLE }]);
+
+      expect(findUserPermissions).toHaveBeenCalledWith(user);
+      expect(findMany).toHaveBeenCalledWith({ where: { role: { id: ROLE_ID } } });
+    });
+
+    test('Rejects a permission the requester does not hold (action + subject)', async () => {
+      setupStrapi({ userPermissions: [{ action: READ, subject: ARTICLE }] });
+
+      await expectForbidden(
+        checkPermissionsCeiling(user, ROLE_ID, [
+          { action: READ, subject: ARTICLE },
+          { action: READ, subject: AUTHOR },
+          { action: CREATE, subject: ARTICLE },
+        ]),
+        [
+          { action: READ, subject: AUTHOR, properties: {}, conditions: [] },
+          { action: CREATE, subject: ARTICLE, properties: {}, conditions: [] },
+        ]
+      );
+    });
+
+    test('Matches null and undefined subjects', async () => {
+      setupStrapi({ userPermissions: [{ action: 'admin::roles.read', subject: null }] });
+
+      await expect(
+        checkPermissionsCeiling(user, ROLE_ID, [{ action: 'admin::roles.read' }])
+      ).resolves.toBeUndefined();
+    });
+
+    describe('properties', () => {
+      test('Allows any fields when the requester is not restricted on fields', async () => {
+        setupStrapi({
+          userPermissions: [
+            { action: READ, subject: ARTICLE, properties: {} },
+            { action: CREATE, subject: ARTICLE, properties: { fields: null } },
+          ],
+        });
+
+        await expect(
+          checkPermissionsCeiling(user, ROLE_ID, [
+            { action: READ, subject: ARTICLE, properties: { fields: ['title', 'body'] } },
+            { action: READ, subject: ARTICLE, properties: {} },
+            { action: CREATE, subject: ARTICLE, properties: { fields: ['title', 'body'] } },
+          ])
+        ).resolves.toBeUndefined();
+      });
+
+      test('Rejects everything when the requester only holds the permission with no fields', async () => {
+        setupStrapi({
+          userPermissions: [{ action: READ, subject: ARTICLE, properties: { fields: [] } }],
+        });
+
+        await expectForbidden(
+          checkPermissionsCeiling(user, ROLE_ID, [
+            { action: READ, subject: ARTICLE, properties: {} },
+            { action: READ, subject: ARTICLE, properties: { fields: ['title'] } },
+          ]),
+          [
+            { action: READ, subject: ARTICLE, properties: {}, conditions: [] },
+            { action: READ, subject: ARTICLE, properties: { fields: ['title'] }, conditions: [] },
+          ]
+        );
+      });
+
+      test('Ignores a requester permission with no fields when another one matches', async () => {
+        setupStrapi({
+          userPermissions: [
+            { action: READ, subject: ARTICLE, properties: { fields: [] } },
+            { action: READ, subject: ARTICLE, properties: { fields: ['title'] } },
+          ],
+        });
+
+        await expect(
+          checkPermissionsCeiling(user, ROLE_ID, [
+            { action: READ, subject: ARTICLE, properties: { fields: ['title'] } },
+          ])
+        ).resolves.toBeUndefined();
+
+        await expectForbidden(
+          checkPermissionsCeiling(user, ROLE_ID, [
+            { action: READ, subject: ARTICLE, properties: { fields: ['body'] } },
+          ]),
+          [{ action: READ, subject: ARTICLE, properties: { fields: ['body'] }, conditions: [] }]
+        );
+      });
+
+      test('Always allows requesting no fields, since it grants nothing', async () => {
+        setupStrapi({
+          userPermissions: [
+            { action: READ, subject: ARTICLE, properties: { fields: ['title'] } },
+            { action: CREATE, subject: ARTICLE, properties: { fields: [] } },
+          ],
+        });
+
+        await expect(
+          checkPermissionsCeiling(user, ROLE_ID, [
+            { action: READ, subject: ARTICLE, properties: { fields: [] } },
+            { action: CREATE, subject: ARTICLE, properties: { fields: [] } },
+            { action: READ, subject: AUTHOR, properties: { fields: [] } },
+          ])
+        ).resolves.toBeUndefined();
+      });
+
+      test('Allows a subset of the requester fields, including nested fields by prefix', async () => {
+        setupStrapi({
+          userPermissions: [
+            { action: READ, subject: ARTICLE, properties: { fields: ['title', 'seo'] } },
+          ],
+        });
+
+        await expect(
+          checkPermissionsCeiling(user, ROLE_ID, [
+            {
+              action: READ,
+              subject: ARTICLE,
+              properties: { fields: ['title', 'seo.description'] },
+            },
+          ])
+        ).resolves.toBeUndefined();
+      });
+
+      test('Rejects fields the requester does not hold', async () => {
+        setupStrapi({
+          userPermissions: [{ action: READ, subject: ARTICLE, properties: { fields: ['title'] } }],
+        });
+
+        await expectForbidden(
+          checkPermissionsCeiling(user, ROLE_ID, [
+            { action: READ, subject: ARTICLE, properties: { fields: ['title', 'body'] } },
+          ]),
+          [
+            {
+              action: READ,
+              subject: ARTICLE,
+              properties: { fields: ['title', 'body'] },
+              conditions: [],
+            },
+          ]
+        );
+      });
+
+      test('Rejects an omitted property when the requester is restricted on it', async () => {
+        setupStrapi({
+          userPermissions: [{ action: READ, subject: ARTICLE, properties: { fields: ['title'] } }],
+        });
+
+        await expectForbidden(
+          checkPermissionsCeiling(user, ROLE_ID, [
+            { action: READ, subject: ARTICLE, properties: {} },
+            { action: READ, subject: ARTICLE, properties: { fields: null } } as any,
+          ]),
+          [
+            { action: READ, subject: ARTICLE, properties: {}, conditions: [] },
+            { action: READ, subject: ARTICLE, properties: { fields: null }, conditions: [] },
+          ]
+        );
+      });
+
+      test('Uses the union of the requester permissions for the same action and subject', async () => {
+        setupStrapi({
+          userPermissions: [
+            { action: READ, subject: ARTICLE, properties: { fields: ['title'] } },
+            { action: READ, subject: ARTICLE, properties: { fields: ['body'] } },
+          ],
+        });
+
+        await expect(
+          checkPermissionsCeiling(user, ROLE_ID, [
+            { action: READ, subject: ARTICLE, properties: { fields: ['title', 'body'] } },
+          ])
+        ).resolves.toBeUndefined();
+      });
+
+      test('Applies the same rule to every property (locales)', async () => {
+        setupStrapi({
+          userPermissions: [
+            {
+              action: READ,
+              subject: ARTICLE,
+              properties: { fields: ['title'], locales: ['en', 'fr'] },
+            },
+          ],
+        });
+
+        await expect(
+          checkPermissionsCeiling(user, ROLE_ID, [
+            { action: READ, subject: ARTICLE, properties: { fields: ['title'], locales: ['fr'] } },
+          ])
+        ).resolves.toBeUndefined();
+
+        await expectForbidden(
+          checkPermissionsCeiling(user, ROLE_ID, [
+            {
+              action: READ,
+              subject: ARTICLE,
+              properties: { fields: ['title'], locales: ['fr', 'de'] },
+            },
+          ]),
+          [
+            {
+              action: READ,
+              subject: ARTICLE,
+              properties: { fields: ['title'], locales: ['fr', 'de'] },
+              conditions: [],
+            },
+          ]
+        );
+      });
+
+      test('Allows any locales when the requester locales are null (all locales)', async () => {
+        setupStrapi({
+          userPermissions: [
+            { action: READ, subject: ARTICLE, properties: { fields: ['title'], locales: null } },
+          ],
+        });
+
+        await expect(
+          checkPermissionsCeiling(user, ROLE_ID, [
+            {
+              action: READ,
+              subject: ARTICLE,
+              properties: { fields: ['title'], locales: ['en', 'fr', 'de'] },
+            },
+          ])
+        ).resolves.toBeUndefined();
+      });
+
+      test('Treats empty requester locales as no locales', async () => {
+        setupStrapi({
+          userPermissions: [
+            { action: READ, subject: ARTICLE, properties: { fields: ['title'], locales: [] } },
+          ],
+        });
+
+        await expect(
+          checkPermissionsCeiling(user, ROLE_ID, [
+            { action: READ, subject: ARTICLE, properties: { fields: ['title'], locales: [] } },
+          ])
+        ).resolves.toBeUndefined();
+
+        await expectForbidden(
+          checkPermissionsCeiling(user, ROLE_ID, [
+            { action: READ, subject: ARTICLE, properties: { fields: ['title'], locales: ['en'] } },
+            { action: READ, subject: ARTICLE, properties: { fields: ['title'] } },
+          ]),
+          [
+            {
+              action: READ,
+              subject: ARTICLE,
+              properties: { fields: ['title'], locales: ['en'] },
+              conditions: [],
+            },
+            { action: READ, subject: ARTICLE, properties: { fields: ['title'] }, conditions: [] },
+          ]
+        );
+      });
+
+      test('Uses the other requester permissions when one has empty locales', async () => {
+        setupStrapi({
+          userPermissions: [
+            { action: READ, subject: ARTICLE, properties: { fields: ['title'], locales: [] } },
+            { action: READ, subject: ARTICLE, properties: { fields: ['title'], locales: ['fr'] } },
+          ],
+        });
+
+        await expect(
+          checkPermissionsCeiling(user, ROLE_ID, [
+            { action: READ, subject: ARTICLE, properties: { fields: ['title'], locales: ['fr'] } },
+          ])
+        ).resolves.toBeUndefined();
+
+        await expectForbidden(
+          checkPermissionsCeiling(user, ROLE_ID, [
+            { action: READ, subject: ARTICLE, properties: { fields: ['title'], locales: ['en'] } },
+          ]),
+          [
+            {
+              action: READ,
+              subject: ARTICLE,
+              properties: { fields: ['title'], locales: ['en'] },
+              conditions: [],
+            },
+          ]
+        );
+      });
+    });
+
+    describe('conditions', () => {
+      test('Allows any conditions when the requester holds the permission unconditionally', async () => {
+        setupStrapi({
+          userPermissions: [
+            { action: READ, subject: ARTICLE, conditions: ['admin::is-creator'] },
+            { action: READ, subject: ARTICLE, conditions: [] },
+          ],
+        });
+
+        await expect(
+          checkPermissionsCeiling(user, ROLE_ID, [
+            { action: READ, subject: ARTICLE, conditions: [] },
+          ])
+        ).resolves.toBeUndefined();
+
+        await expect(
+          checkPermissionsCeiling(user, ROLE_ID, [
+            {
+              action: READ,
+              subject: ARTICLE,
+              conditions: ['admin::is-creator', 'admin::has-same-role-as-creator'],
+            },
+          ])
+        ).resolves.toBeUndefined();
+      });
+
+      test('Allows a non-empty subset of the requester conditions', async () => {
+        setupStrapi({
+          userPermissions: [
+            { action: READ, subject: ARTICLE, conditions: ['admin::is-creator'] },
+            { action: READ, subject: ARTICLE, conditions: ['admin::has-same-role-as-creator'] },
+          ],
+        });
+
+        await expect(
+          checkPermissionsCeiling(user, ROLE_ID, [
+            {
+              action: READ,
+              subject: ARTICLE,
+              conditions: ['admin::is-creator', 'admin::has-same-role-as-creator'],
+            },
+          ])
+        ).resolves.toBeUndefined();
+
+        await expect(
+          checkPermissionsCeiling(user, ROLE_ID, [
+            { action: READ, subject: ARTICLE, conditions: ['admin::is-creator'] },
+          ])
+        ).resolves.toBeUndefined();
+      });
+
+      test('Rejects no conditions when the requester only holds the permission with conditions', async () => {
+        setupStrapi({
+          userPermissions: [{ action: READ, subject: ARTICLE, conditions: ['admin::is-creator'] }],
+        });
+
+        await expectForbidden(
+          checkPermissionsCeiling(user, ROLE_ID, [{ action: READ, subject: ARTICLE }]),
+          [{ action: READ, subject: ARTICLE, properties: {}, conditions: [] }]
+        );
+      });
+
+      test('Rejects a condition the requester does not hold', async () => {
+        setupStrapi({
+          userPermissions: [{ action: READ, subject: ARTICLE, conditions: ['admin::is-creator'] }],
+        });
+
+        await expectForbidden(
+          checkPermissionsCeiling(user, ROLE_ID, [
+            {
+              action: READ,
+              subject: ARTICLE,
+              conditions: ['admin::is-creator', 'admin::has-same-role-as-creator'],
+            },
+          ]),
+          [
+            {
+              action: READ,
+              subject: ARTICLE,
+              properties: {},
+              conditions: ['admin::is-creator', 'admin::has-same-role-as-creator'],
+            },
+          ]
+        );
+      });
+    });
+
+    describe('permissions the role already holds', () => {
+      test('Preserves an existing out-of-scope permission and only rejects new ones', async () => {
+        setupStrapi({
+          userPermissions: [{ action: READ, subject: ARTICLE }],
+          rolePermissions: [
+            {
+              id: 1,
+              role: ROLE_ID,
+              action: CREATE,
+              subject: ARTICLE,
+              properties: { fields: ['title'] },
+            },
+          ],
+        });
+
+        await expect(
+          checkPermissionsCeiling(user, ROLE_ID, [
+            { action: READ, subject: ARTICLE },
+            { action: CREATE, subject: ARTICLE, properties: { fields: ['title'] } },
+          ])
+        ).resolves.toBeUndefined();
+
+        await expectForbidden(
+          checkPermissionsCeiling(user, ROLE_ID, [
+            { action: READ, subject: ARTICLE },
+            { action: CREATE, subject: ARTICLE, properties: { fields: ['title'] } },
+            { action: CREATE, subject: AUTHOR },
+          ]),
+          [{ action: CREATE, subject: AUTHOR, properties: {}, conditions: [] }]
+        );
+      });
+
+      test('Rejects a change to an existing out-of-scope permission', async () => {
+        setupStrapi({
+          userPermissions: [{ action: READ, subject: ARTICLE }],
+          rolePermissions: [
+            {
+              id: 1,
+              role: ROLE_ID,
+              action: CREATE,
+              subject: ARTICLE,
+              properties: { fields: ['title'] },
+            },
+          ],
+        });
+
+        await expectForbidden(
+          checkPermissionsCeiling(user, ROLE_ID, [
+            { action: CREATE, subject: ARTICLE, properties: { fields: ['title', 'body'] } },
+          ]),
+          [
+            {
+              action: CREATE,
+              subject: ARTICLE,
+              properties: { fields: ['title', 'body'] },
+              conditions: [],
+            },
+          ]
+        );
+      });
+
+      test('Allows removing an existing out-of-scope permission', async () => {
+        setupStrapi({
+          userPermissions: [{ action: READ, subject: ARTICLE }],
+          rolePermissions: [{ id: 1, role: ROLE_ID, action: CREATE, subject: ARTICLE }],
+        });
+
+        await expect(checkPermissionsCeiling(user, ROLE_ID, [])).resolves.toBeUndefined();
+      });
     });
   });
 
