@@ -279,8 +279,12 @@ export default {
     // Not awaited: the response must not reveal whether the email exists. The call runs
     // synchronously so a broken service still surfaces as a 500; only a rejection of the
     // returned promise is caught here, since nothing else would handle it.
+    // The logger is captured now: the rejection can land after the Strapi instance has been
+    // destroyed and the `strapi` global removed, and a throw here would be an unhandled rejection.
+    const { log } = strapi;
+
     Promise.resolve(getService('auth').forgotPassword(input)).catch((error: unknown) => {
-      strapi.log.error('Failed to process the forgot-password request', { error });
+      log.error('Failed to process the forgot-password request', { error });
     });
 
     ctx.status = 204;
