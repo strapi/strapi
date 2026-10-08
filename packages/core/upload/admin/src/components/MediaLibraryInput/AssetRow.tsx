@@ -1,35 +1,29 @@
-import { Box, Flex, IconButton, Typography } from '@strapi/design-system';
-import { Trash } from '@strapi/icons';
+import { Box, Button, Flex, IconButton, Typography } from '@strapi/design-system';
+import { ArrowClockwise, Cross, Link, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { ASSET_TYPES } from '../../enums';
-import { prefixFileUrlWithBackendUrl } from '../../utils/files';
-import { getAssetIcon } from '../../utils/getAssetIcon';
 import { getTranslationKey } from '../../utils/translations';
 
+import { AssetPreview, UploadPreview } from './AssetPreview';
+import { UploadProgressBar } from './UploadProgressBar';
+
+import type { FieldUpload } from './useFieldUploads';
 import type { File } from '../../../../shared/contracts/files';
 
-const Row = styled(Flex)`
-  background: ${({ theme }) => theme.colors.neutral0};
-  border: 1px solid ${({ theme }) => theme.colors.neutral200};
+type RowTone = 'neutral' | 'primary' | 'danger';
+
+const ROW_COLORS = {
+  neutral: { background: 'neutral100', border: 'neutral200' },
+  primary: { background: 'primary100', border: 'primary200' },
+  danger: { background: 'danger100', border: 'danger200' },
+} as const;
+
+const Row = styled(Flex)<{ $tone: RowTone }>`
+  min-height: 7.2rem;
+  background: ${({ theme, $tone }) => theme.colors[ROW_COLORS[$tone].background]};
+  border: 1px solid ${({ theme, $tone }) => theme.colors[ROW_COLORS[$tone].border]};
   border-radius: ${({ theme }) => theme.borderRadius};
-`;
-
-const Thumbnail = styled(Flex)`
-  width: 3.2rem;
-  height: 3.2rem;
-  flex-shrink: 0;
-  overflow: hidden;
-  border-radius: 4px;
-  color: ${({ theme }) => theme.colors.neutral500};
-  background: ${({ theme }) => theme.colors.neutral100};
-`;
-
-const ThumbnailImage = styled.img`
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 `;
 
 const Name = styled(Typography)`
@@ -39,77 +33,47 @@ const Name = styled(Typography)`
   white-space: nowrap;
 `;
 
-interface AssetThumbnailProps {
-  asset: File;
+interface RowFrameProps {
+  tone: RowTone;
+  children: React.ReactNode;
 }
 
-const AssetThumbnail = ({ asset }: AssetThumbnailProps) => {
-  const { alternativeText, ext, formats, mime, url, updatedAt, isLocal, isUrlSigned } = asset;
-
-  if (mime?.includes(ASSET_TYPES.Image)) {
-    // Same two rules the grid preview applies: a `updatedAt` cache-buster so a
-    // replaced asset stops serving its old thumbnail, skipped on signed URLs
-    // because an extra param invalidates the signature (#26581).
-    const rawUrl =
-      prefixFileUrlWithBackendUrl(formats?.thumbnail?.url) ?? prefixFileUrlWithBackendUrl(url);
-    const cacheKey = updatedAt && !isUrlSigned ? new Date(updatedAt).getTime() : undefined;
-    const src =
-      rawUrl && cacheKey !== undefined
-        ? `${rawUrl}${rawUrl.includes('?') ? '&' : '?'}v=${cacheKey}`
-        : rawUrl;
-
-    if (src) {
-      return (
-        <Thumbnail>
-          <ThumbnailImage
-            src={src}
-            alt={alternativeText || ''}
-            crossOrigin={!isLocal && isUrlSigned ? 'anonymous' : undefined}
-            draggable={false}
-          />
-        </Thumbnail>
-      );
-    }
-  }
-
-  const DocIcon = getAssetIcon(mime, ext);
-
-  return (
-    <Thumbnail justifyContent="center" alignItems="center">
-      <DocIcon width={20} height={20} />
-    </Thumbnail>
-  );
-};
+const RowFrame = ({ tone, children }: RowFrameProps) => (
+  <Row $tone={tone} alignItems="center" gap={4} padding={4}>
+    {children}
+  </Row>
+);
 
 interface AssetRowProps {
   asset: File;
   disabled?: boolean;
+  onCopyLink: (asset: File) => void;
   onRemove: (asset: File) => void;
 }
 
 /**
- * One asset already held by the field. The uploading and failed variants the
- * design also specifies are not here yet — while an upload runs, the global
- * progress dialog is what reports it.
+ * The asset a single-value field holds.
  */
-export const AssetRow = ({ asset, disabled = false, onRemove }: AssetRowProps) => {
+export const AssetRow = ({ asset, disabled = false, onCopyLink, onRemove }: AssetRowProps) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Row
-      alignItems="center"
-      justifyContent="space-between"
-      gap={3}
-      paddingLeft={3}
-      paddingRight={3}
-      paddingTop={2}
-      paddingBottom={2}
-    >
-      <Flex alignItems="center" gap={3} minWidth={0}>
-        <AssetThumbnail asset={asset} />
-        <Name textColor="neutral800">{asset.name}</Name>
-      </Flex>
-      <Box tag="span" shrink={0}>
+    <RowFrame tone="neutral">
+      <AssetPreview asset={asset} size="S" />
+      <Name textColor="neutral800" flex={1}>
+        {asset.name}
+      </Name>
+      <Flex gap={2} shrink={0}>
+        <IconButton
+          variant="ghost"
+          onClick={() => onCopyLink(asset)}
+          label={formatMessage({
+            id: getTranslationKey('list.assets.actions.copy-link'),
+            defaultMessage: 'Copy link to media',
+          })}
+        >
+          <Link />
+        </IconButton>
         <IconButton
           variant="ghost"
           disabled={disabled}
@@ -124,7 +88,103 @@ export const AssetRow = ({ asset, disabled = false, onRemove }: AssetRowProps) =
         >
           <Trash />
         </IconButton>
+      </Flex>
+    </RowFrame>
+  );
+};
+
+interface UploadRowProps {
+  upload: FieldUpload;
+  disabled?: boolean;
+  onCancel: (upload: FieldUpload) => void;
+  onRetry: (upload: FieldUpload) => void;
+  onRemove: (upload: FieldUpload) => void;
+}
+
+/**
+ * A file a single-value field is uploading, or failed to upload.
+ */
+export const UploadRow = ({
+  upload,
+  disabled = false,
+  onCancel,
+  onRetry,
+  onRemove,
+}: UploadRowProps) => {
+  const { formatMessage } = useIntl();
+  const canRetry = upload.isInStore || upload.sourceFile !== undefined;
+
+  if (upload.status === 'failed') {
+    return (
+      <RowFrame tone="danger">
+        <UploadPreview file={upload.sourceFile} size="S" />
+        <Name textColor="danger600" flex={1}>
+          {upload.name}
+        </Name>
+        <Flex gap={2} shrink={0}>
+          {canRetry && (
+            <Button
+              variant="ghost"
+              startIcon={<ArrowClockwise />}
+              disabled={disabled}
+              onClick={() => onRetry(upload)}
+            >
+              {formatMessage({
+                id: getTranslationKey('upload.progress.retry'),
+                defaultMessage: 'Retry',
+              })}
+            </Button>
+          )}
+          <Button
+            variant="danger-light"
+            startIcon={<Trash />}
+            disabled={disabled}
+            onClick={() => onRemove(upload)}
+          >
+            {formatMessage({
+              id: getTranslationKey('content-manager.input.actions.remove-failed'),
+              defaultMessage: 'Remove',
+            })}
+          </Button>
+        </Flex>
+      </RowFrame>
+    );
+  }
+
+  const uploadingLabel = formatMessage({
+    id: getTranslationKey('upload.progress.file.uploading'),
+    defaultMessage: 'Uploading...',
+  });
+
+  return (
+    <RowFrame tone="primary">
+      <UploadPreview file={upload.sourceFile} size="S" />
+      <Flex direction="column" alignItems="stretch" gap={2} flex={1} minWidth={0}>
+        <Flex justifyContent="space-between" gap={4}>
+          <Name textColor="neutral800">{upload.name}</Name>
+          <Box shrink={0}>
+            <Typography variant="pi" textColor="neutral600">
+              {uploadingLabel}
+            </Typography>
+          </Box>
+        </Flex>
+        <UploadProgressBar progress={upload.progress} label={uploadingLabel} />
+      </Flex>
+      <Box shrink={0}>
+        <IconButton
+          variant="ghost"
+          onClick={() => onCancel(upload)}
+          label={formatMessage(
+            {
+              id: getTranslationKey('content-manager.input.actions.cancel'),
+              defaultMessage: 'Cancel upload of {name}',
+            },
+            { name: upload.name }
+          )}
+        >
+          <Cross />
+        </IconButton>
       </Box>
-    </Row>
+    </RowFrame>
   );
 };

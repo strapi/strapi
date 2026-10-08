@@ -97,6 +97,7 @@ const FormLayout = React.memo(({ layout, document, hasBackground = true }: FormL
                         >
                           <InputRenderer
                             {...field}
+                            size={size}
                             label={getLabel(field.name, field.label)}
                             document={document}
                           />
