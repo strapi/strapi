@@ -62,6 +62,26 @@ await strapi.db.transaction(async () => {
 });
 ```
 
+A nested transaction has no savepoint of its own: an error inside it that is caught in the outer transaction does not undo the writes it made before the error.
+
+### Savepoints
+
+To undo only part of a transaction, run it in `strapi.db.savepoint`. If the callback throws, its writes are rolled back, the `onCommit` callbacks registered inside it are dropped (its `onRollback` callbacks run), and the error is rethrown; the transaction stays usable, on Postgres also after a database error. If it resolves, its writes and callbacks join the transaction. It throws outside a transaction.
+
+```js
+await strapi.db.transaction(async () => {
+  for (const entry of entries) {
+    try {
+      await strapi.db.savepoint(() =>
+        strapi.documents(uid).publish({ documentId: entry.documentId })
+      );
+    } catch {
+      // Only this entry's writes are rolled back, the others stay
+    }
+  }
+});
+```
+
 ### onCommit and onRollback
 
 The `onCommit` and `onRollback` hooks can be used to execute code after the transaction is committed or rolled back.
