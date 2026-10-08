@@ -1,4 +1,4 @@
-import { useRef, useState, type ChangeEvent, type ReactNode } from 'react';
+import { useId, useRef, useState, type ChangeEvent, type ReactNode } from 'react';
 
 import { useClipboard, useField, useNotification } from '@strapi/admin/strapi-admin';
 import { Field, Flex, VisuallyHidden } from '@strapi/design-system';
@@ -25,9 +25,12 @@ import { typeFromMime } from '../../utils/typeFromMime';
 import { AssetPickerDialog } from '../AssetPickerDialog/AssetPickerDialog';
 
 import { AddAssetMenu } from './AddAssetMenu';
-import { AssetDropZone } from './AssetDropZone';
-import { AssetRow } from './AssetRow';
+import { AssetCard, UploadCard } from './AssetCard';
+import { AssetCarousel } from './AssetCarousel';
+import { AssetDropZone, type ZoneVariant } from './AssetDropZone';
+import { AssetRow, UploadRow } from './AssetRow';
 import { NoLibraryAccessDialog } from './NoLibraryAccessDialog';
+import { useFieldUploads, type FieldUpload } from './useFieldUploads';
 
 import type { File } from '../../../../shared/contracts/files';
 
@@ -58,6 +61,8 @@ export interface MediaLibraryInputProps {
     allowedTypes?: AllowedMediaType[] | null;
     multiple?: boolean;
   };
+  /** The field's width in the edit layout, out of 12. Set by the Content Manager. */
+  layoutSize?: number;
 }
 
 const EMPTY_ATTRIBUTE: NonNullable<MediaLibraryInputProps['attribute']> = {};
@@ -81,6 +86,7 @@ export const MediaLibraryInput = ({
   required = false,
   disabled = false,
   attribute = EMPTY_ATTRIBUTE,
+  layoutSize,
 }: MediaLibraryInputProps) => {
   const { allowedTypes = null, multiple = false } = attribute;
   const { formatMessage } = useIntl();
@@ -88,6 +94,7 @@ export const MediaLibraryInput = ({
   const { toggleNotification } = useNotification();
   const { trackUsage } = useTracking();
   const { copy } = useClipboard();
+  const owner = useId();
 
   const [step, setStep] = useState<Step | undefined>(undefined);
   const [editedAsset, setEditedAsset] = useState<File | null>(null);
@@ -120,16 +127,19 @@ export const MediaLibraryInput = ({
     onChange(name, nextAssets[0] ?? null);
   };
 
-  const attachUploadedFile = (file: File) => {
-    const nextAssets = multiple ? [...assetsRef.current, file] : [file];
-    // Parallel uploads can finish before the next render refreshes the ref.
-    assetsRef.current = nextAssets;
-    setAssets(nextAssets);
-  };
-
   const handleRemove = (asset: File) => {
     setAssets(assets.filter((current) => current.id !== asset.id));
   };
+
+  // Uploads land on the field as each file completes, whichever way it got
+  // there: dropped, retried from the field, or retried from the progress dialog.
+  const { uploads, cancel, retry, dismiss } = useFieldUploads(owner, (uploadedFiles) => {
+    setAssets(
+      multiple
+        ? [...assetsRef.current, ...uploadedFiles]
+        : [uploadedFiles[uploadedFiles.length - 1]]
+    );
+  });
 
   const handleCopyLink = async (asset: File) => {
     const url = prefixFileUrlWithBackendUrl(asset.url);
@@ -220,7 +230,7 @@ export const MediaLibraryInput = ({
     return true;
   };
 
-  const handleUpload = async (files: globalThis.File[]) => {
+  const handleUpload = (files: globalThis.File[]) => {
     if (disabled || files.length === 0) {
       return;
     }
@@ -255,6 +265,14 @@ export const MediaLibraryInput = ({
       ...assetsCountByType,
     });
 
+    startUpload(allowedFiles);
+  };
+
+  /**
+   * Hands the files to the shared upload pool. The field picks the results up
+   * from the progress store (see `useFieldUploads`), not from this call.
+   */
+  const startUpload = (allowedFiles: globalThis.File[]) => {
     const formData = new FormData();
     allowedFiles.forEach((file) => formData.append('files', file));
     formData.append(
@@ -269,22 +287,18 @@ export const MediaLibraryInput = ({
       )
     );
 
-    try {
-      // Attached per file rather than from the result: a Retry in the progress
-      // dialog uploads cancelled files after this call has already resolved.
-      await uploadFiles({
-        formData,
-        totalFiles: allowedFiles.length,
-        concurrency,
-        generateAiMetadata: Boolean(isAiMetadataEnabled),
-        onFileUploaded: attachUploadedFile,
-      }).unwrap();
-    } catch {
-      // Errors reach the user through the progress dialog, which the mutation
-      // populates itself.
-    }
+    uploadFiles({
+      formData,
+      totalFiles: allowedFiles.length,
+      concurrency,
+      generateAiMetadata: Boolean(isAiMetadataEnabled),
+      owner,
+    });
   };
 
+  const handleRetry = (upload: FieldUpload) => retry(upload, (file) => startUpload([file]));
+
+  // Without read access the library browser has nothing to show.
   const handleZoneClick = () => {
     if (canRead) {
       setStep('browse');
@@ -349,7 +363,7 @@ export const MediaLibraryInput = ({
     }
   };
 
-  const handleFileInputChange = async (event: ChangeEvent<HTMLInputElement>) => {
+  const handleFileInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     // Copied before the reset, not after: `event.target.files` is the input's
     // live FileList, and clearing `value` empties it in place. Reading it
     // afterwards yields nothing and the upload never starts.
@@ -358,8 +372,73 @@ export const MediaLibraryInput = ({
     event.target.value = '';
 
     if (files.length > 0) {
-      await handleUpload(files);
+      handleUpload(files);
     }
+  };
+
+  const renderValue = () => {
+    const dropZone = (variant: ZoneVariant) => (
+      <AssetDropZone
+        variant={variant}
+        disabled={disabled}
+        onClick={handleZoneClick}
+        onDropFiles={handleUpload}
+      />
+    );
+
+    if (assets.length === 0 && uploads.length === 0) {
+      return dropZone('bar');
+    }
+
+    const uploadHandlers = {
+      disabled,
+      onCancel: cancel,
+      onRetry: handleRetry,
+      onRemove: (upload: FieldUpload) => dismiss(upload.key),
+    };
+
+    if (!multiple) {
+      // A replacement in flight, or one that failed, stands in for the current
+      // asset until it lands or is removed.
+      if (uploads.length > 0) {
+        return (
+          <Flex direction="column" alignItems="stretch" gap={2}>
+            {uploads.map((upload) => (
+              <UploadRow key={upload.key} upload={upload} {...uploadHandlers} />
+            ))}
+          </Flex>
+        );
+      }
+
+      return (
+        <AssetRow
+          asset={assets[0]}
+          disabled={disabled}
+          onCopyLink={handleCopyLink}
+          // The details dialog needs the library's folder tree, which needs read access.
+          onEdit={canRead ? setEditedAsset : undefined}
+          onRemove={handleRemove}
+        />
+      );
+    }
+
+    return (
+      <AssetCarousel renderDropZone={dropZone} layoutSize={layoutSize}>
+        {assets.map((asset) => (
+          <AssetCard
+            key={asset.id}
+            asset={asset}
+            disabled={disabled}
+            onCopyLink={handleCopyLink}
+            onEdit={canRead ? setEditedAsset : undefined}
+            onRemove={handleRemove}
+          />
+        ))}
+        {uploads.map((upload) => (
+          <UploadCard key={upload.key} upload={upload} {...uploadHandlers} />
+        ))}
+      </AssetCarousel>
+    );
   };
 
   return (
@@ -374,21 +453,7 @@ export const MediaLibraryInput = ({
         />
       </Flex>
 
-      <Flex direction="column" alignItems="stretch" gap={1}>
-        {assets.map((asset) => (
-          <AssetRow
-            key={asset.id}
-            asset={asset}
-            disabled={disabled}
-            onCopyLink={handleCopyLink}
-            // The details dialog needs the library's folder tree, which needs read access.
-            onEdit={canRead ? setEditedAsset : undefined}
-            onRemove={handleRemove}
-          />
-        ))}
-
-        <AssetDropZone disabled={disabled} onClick={handleZoneClick} onDropFiles={handleUpload} />
-      </Flex>
+      {renderValue()}
 
       <Field.Error />
       <Field.Hint />
