@@ -10,6 +10,7 @@ import migrateDeletedCTInWorkflows from './migrations/handle-deleted-ct-in-workf
 import reviewWorkflowsMiddlewares from './middlewares/review-workflows';
 
 import { getVisibleContentTypesUID, hasStageAttribute } from './utils/review-workflows';
+import { registerReviewWorkflowsEntitlements } from './entitlements';
 
 import {
   ENTITY_STAGE_ATTRIBUTE,
@@ -113,4 +114,6 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
 
   // Schema customization
   extendReviewWorkflowContentTypes({ strapi });
+
+  registerReviewWorkflowsEntitlements(strapi);
 };
