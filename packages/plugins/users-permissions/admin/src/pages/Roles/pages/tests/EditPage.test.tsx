@@ -9,11 +9,13 @@ import {
   screen,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { http, HttpResponse } from 'msw';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
+import { server } from '../../../../../tests/server';
 import { EditPage } from '../EditPage';
 
 const render = () => ({
@@ -35,7 +37,10 @@ const render = () => ({
           <DesignSystemProvider>
             <QueryClientProvider client={client}>
               <NotificationsProvider>
-                <MemoryRouter initialEntries={[`/settings/users-permissions/roles/1`]}>
+                <MemoryRouter
+                  initialEntries={[`/settings/users-permissions/roles/1`]}
+                  future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+                >
                   <Routes>{children}</Routes>
                 </MemoryRouter>
               </NotificationsProvider>
@@ -157,4 +162,105 @@ describe('Roles – EditPage', () => {
     expect(screen.getByText('POST')).toBeInTheDocument();
     expect(screen.getByText('/addresses')).toBeInTheDocument();
   });
+});
+
+it('saves a toggled action as enabled in the role permissions', async () => {
+  const save = vi.fn();
+  server.use(
+    http.put('*/users-permissions/roles/:roleId', async ({ request }) => {
+      save(await request.json());
+
+      return HttpResponse.json({ ok: true });
+    })
+  );
+  const { getByRole, queryByText, findByText, user } = render();
+  await waitForElementToBeRemoved(() => queryByText('Loading content.'));
+  await user.click(
+    getByRole('button', {
+      name: 'Address Define all allowed actions for the api::address plugin.',
+    })
+  );
+  await user.click(getByRole('checkbox', { name: 'create' }));
+  fireEvent.click(getByRole('button', { name: 'Save' }));
+  await findByText('Role edited');
+  expect(save).toHaveBeenCalledWith(
+    expect.objectContaining({
+      permissions: {
+        'api::address': { controllers: { address: { create: { enabled: true, policy: '' } } } },
+      },
+    })
+  );
+});
+
+it('saves every action of a controller as enabled after "Select all"', async () => {
+  const save = vi.fn();
+  server.use(
+    http.get('*/users-permissions/roles/:roleId', () =>
+      HttpResponse.json({
+        role: {
+          id: 1,
+          name: 'Authenticated',
+          description: 'Default role given to authenticated user.',
+          type: 'authenticated',
+          permissions: {
+            'api::address': {
+              controllers: {
+                address: {
+                  create: { enabled: true, policy: '' },
+                  delete: { enabled: false, policy: '' },
+                  find: { enabled: false, policy: '' },
+                },
+              },
+            },
+          },
+        },
+      })
+    ),
+    http.put('*/users-permissions/roles/:roleId', async ({ request }) => {
+      save(await request.json());
+
+      return HttpResponse.json({ ok: true });
+    })
+  );
+  const { getByRole, queryByText, findByText, user } = render();
+  await waitForElementToBeRemoved(() => queryByText('Loading content.'));
+  await user.click(
+    getByRole('button', {
+      name: 'Address Define all allowed actions for the api::address plugin.',
+    })
+  );
+  const selectAll = getByRole('checkbox', { name: 'Select all' });
+  expect(selectAll).toBePartiallyChecked();
+  await user.click(selectAll);
+  fireEvent.click(getByRole('button', { name: 'Save' }));
+  await findByText('Role edited');
+  expect(save).toHaveBeenCalledWith(
+    expect.objectContaining({
+      permissions: {
+        'api::address': {
+          controllers: {
+            address: {
+              create: { enabled: true, policy: '' },
+              delete: { enabled: true, policy: '' },
+              find: { enabled: true, policy: '' },
+            },
+          },
+        },
+      },
+    })
+  );
+});
+
+it('shows the error page when the role cannot be loaded', async () => {
+  server.use(
+    http.get('*/users-permissions/roles/:roleId', () =>
+      HttpResponse.json(
+        { error: { status: 404, name: 'NotFoundError', message: 'Not Found', details: {} } },
+        { status: 404 }
+      )
+    )
+  );
+  const { findByText, queryByRole } = render();
+  expect(await findByText('Whoops! Something went wrong. Please, try again.')).toBeInTheDocument();
+  expect(queryByRole('button', { name: 'Save' })).not.toBeInTheDocument();
 });

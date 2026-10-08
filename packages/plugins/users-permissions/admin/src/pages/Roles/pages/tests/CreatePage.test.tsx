@@ -4,11 +4,13 @@ import { DesignSystemProvider } from '@strapi/design-system';
 import { NotificationsProvider } from '@strapi/strapi/admin';
 import { fireEvent, render as renderRTL, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { http, HttpResponse } from 'msw';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
+import { server } from '../../../../../tests/server';
 import { CreatePage } from '../CreatePage';
 
 const render = () => ({
@@ -27,7 +29,10 @@ const render = () => ({
           <DesignSystemProvider>
             <QueryClientProvider client={client}>
               <NotificationsProvider>
-                <MemoryRouter initialEntries={[`/settings/users-permissions/roles/new`]}>
+                <MemoryRouter
+                  initialEntries={[`/settings/users-permissions/roles/new`]}
+                  future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+                >
                   <Routes>{children}</Routes>
                 </MemoryRouter>
               </NotificationsProvider>
@@ -109,5 +114,36 @@ describe('Roles – CreatePage', () => {
     fireEvent.click(getByRole('button', { name: 'Save' }));
 
     await findByText('Role created');
+  });
+});
+
+it('creates the role with the toggled action enabled', async () => {
+  const save = vi.fn();
+  server.use(
+    http.post('*/users-permissions/roles', async ({ request }) => {
+      save(await request.json());
+
+      return HttpResponse.json({ ok: true });
+    })
+  );
+  const { getByRole, user, findByRole, findByText } = render();
+  await findByRole('heading', { name: 'Permissions' });
+  await user.type(getByRole('textbox', { name: 'Name' }), 'Test role');
+  await user.type(getByRole('textbox', { name: 'Description' }), 'This is a test role');
+  await user.click(
+    getByRole('button', {
+      name: 'Address Define all allowed actions for the api::address plugin.',
+    })
+  );
+  await user.click(getByRole('checkbox', { name: 'create' }));
+  fireEvent.click(getByRole('button', { name: 'Save' }));
+  await findByText('Role created');
+  expect(save).toHaveBeenCalledWith({
+    name: 'Test role',
+    description: 'This is a test role',
+    users: [],
+    permissions: {
+      'api::address': { controllers: { address: { create: { enabled: true, policy: '' } } } },
+    },
   });
 });

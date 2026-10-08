@@ -92,3 +92,25 @@ it('reports a rejected settings update and retains the edited form', async () =>
   expect(await findByText('Settings could not be saved')).toBeInTheDocument();
   expect(getByRole('checkbox', { name: 'Enable sign-ups' })).toBeChecked();
 });
+
+it('shows the error page and a danger notification when the settings cannot be loaded', async () => {
+  server.use(
+    http.get('*/users-permissions/advanced', () =>
+      HttpResponse.json(
+        {
+          error: {
+            status: 500,
+            name: 'InternalServerError',
+            message: 'Internal Server Error',
+            details: {},
+          },
+        },
+        { status: 500 }
+      )
+    )
+  );
+  const { findByText, queryByRole } = render(<AdvancedSettingsPage />);
+  expect(await findByText('Whoops! Something went wrong. Please, try again.')).toBeInTheDocument();
+  expect((await findByText('An error occurred')).closest('[role="alert"]')).toBeInTheDocument();
+  expect(queryByRole('button', { name: 'Save' })).not.toBeInTheDocument();
+});
