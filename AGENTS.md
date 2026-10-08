@@ -15,7 +15,7 @@ packages/providers/  # Email + upload provider implementations
 packages/utils/      # Shared tooling: logger, eslint-config, tsconfig, vitest-config
 packages/cli/        # CLI tools: create-strapi-app, cloud-cli
 examples/            # Dev sandboxes only — not published, not for production fixes
-docs/                # Contributor documentation (also at contributor.strapi.io)
+docs/                # Contributor docs site (contributor.strapi.io); package docs mirror packages/ under docs/docs/packages/
 tests/               # Integration, E2E, and CLI test infrastructure
 ```
 
@@ -55,7 +55,7 @@ yarn ai:status  # read-only report: linked / missing / conflict / stale
 - **`Strapi` class** — The DI container and central hub. Accessed as a `strapi` parameter injected through the factory pattern (e.g. `createService(strapi)`). Never use `global.strapi` — always prefer proper dependency injection. Provides `strapi.documents`, `strapi.db`, `strapi.log`, etc. Lifecycle: Register → Bootstrap → Start → Destroy (`start()` calls `load()` internally, which runs register + bootstrap).
 - **Server / Admin split** — Koa.js HTTP server (`@strapi/strapi`) + React/Redux admin (`@strapi/admin`). Packages with both concerns export dual entry points: `strapi-server` (Node.js logic) and `strapi-admin` (UI components).
 - **Document Service** — The primary high-level API for content (`strapi.documents`). Replaced the legacy Entity Service. Always use this for reading/writing content — never raw DB queries unless you're working inside `@strapi/database` itself.
-- **Polymorphic (morph\*) relations** — Contributor doc: [docs/docs/docs/01-core/database/01-relations/polymorphic-relations.md](docs/docs/docs/01-core/database/01-relations/polymorphic-relations.md) (storage, DB populate, and how `getDeepPopulate` / relation traversal interact with `morphToOne` and join-based morphs).
+- **Polymorphic (morph\*) relations** — Contributor doc: [docs/docs/packages/core/database/01-relations/polymorphic-relations.md](docs/docs/packages/core/database/01-relations/polymorphic-relations.md) (storage, DB populate, and how `getDeepPopulate` / relation traversal interact with `morphToOne` and join-based morphs).
 - **Plugin system** — Plugins register routes, controllers, services, content types, and middleware via the same `strapi-server` / `strapi-admin` dual structure. Official plugins live in `packages/plugins/`.
 - **Content Types** — Defined using a JSON-based notation (not JSON Schema spec). Each content type has a `schema.json` file — see any `packages/core/content-manager/server/src/content-types/` for examples. The database layer auto-generates tables from them. Never write raw migrations for content type changes.
 - **EE / CE split** — Some features are Enterprise Edition only, gated at runtime. See EE toggles in the Testing section below.
@@ -171,7 +171,7 @@ yarn test:cli:update         # update snapshots
 E2E tests live in `tests/e2e/tests/` organized by domain (e.g. `admin`, `content-manager`, `i18n`).
 
 ```bash
-yarn playwright install                          # one-time browser install
+yarn playwright install chromium webkit          # one-time browser install
 yarn test:e2e --setup --concurrency=1            # run all domains sequentially
 yarn test:e2e --domains content-manager admin    # run specific domains only
 yarn test:e2e --concurrency=3                    # run 3 domains in parallel
@@ -260,3 +260,4 @@ yarn prettier:check # check only
 - **Workspace deps** — internal `packages/` deps reference each other with pinned semver versions (e.g. `"5.42.0"`), not `workspace:*`. The `workspace:*` protocol is only used in `examples/` apps and some root devDeps.
 - **Entity Service is deprecated** — always use the Document Service (`strapi.documents`) for content operations.
 - **Lifecycle phases** — `strapi.isLoaded` must be `true` before accessing services. Plugins and DB are not available until after the `load()` phase.
+- **Contributor docs** — Knowledge about how internals work lives in `docs/docs/packages/<repo path>/` (one folder per package, mirrors `packages/`) and `docs/docs/architecture/` (topics that cross packages). Read the page of a package before you change it. When you change behavior that a page describes, update the page or set `status: needs-review` in its frontmatter with a `review_notes` item. See [docs/AGENTS.md](docs/AGENTS.md) and the `contributor-docs` skill.
