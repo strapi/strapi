@@ -19,9 +19,11 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
 import * as yup from 'yup';
 
+import { SUPER_ADMIN_CODE } from '../../../../../../shared/utils/super-admin';
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useAuth } from '../../../../features/Auth';
 import { BackButton } from '../../../../features/BackButton';
 import { useNotification } from '../../../../features/Notifications';
 import { useTracking } from '../../../../features/Tracking';
@@ -70,6 +72,15 @@ const CreatePage = () => {
     _unstableFormatAPIError: formatAPIError,
     _unstableFormatValidationErrors: formatValidationErrors,
   } = useAPIErrorHandler();
+
+  /**
+   * An admin cannot grant a permission they do not hold themselves, so the permissions
+   * tree is restricted to the current user's own permissions unless they are a super admin.
+   */
+  const currentUserPermissions = useAuth('CreatePage', (state) => state.permissions);
+  const currentUser = useAuth('CreatePage', (state) => state.user);
+  const isCurrentUserSuperAdmin =
+    currentUser?.roles.some((role) => role.code === SUPER_ADMIN_CODE) ?? false;
 
   const { isLoading: isLoadingPermissionsLayout, currentData: permissionsLayout } =
     useGetRolePermissionLayoutQuery({
@@ -315,6 +326,7 @@ const CreatePage = () => {
                       ref={permissionsRef}
                       permissions={rolePermissions}
                       layout={permissionsLayout}
+                      userPermissions={isCurrentUserSuperAdmin ? undefined : currentUserPermissions}
                     />
                   </Box>
                 </Flex>

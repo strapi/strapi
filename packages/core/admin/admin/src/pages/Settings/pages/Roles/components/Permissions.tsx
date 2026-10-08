@@ -16,6 +16,7 @@ import { isObject } from '../../../../../utils/objects';
 import {
   PermissionsDataManagerContextValue,
   PermissionsDataManagerProvider,
+  getAllowedConditions,
 } from '../hooks/usePermissionsDataManager';
 import {
   createFieldPermissionChecker,
@@ -80,12 +81,28 @@ interface PermissionsProps {
   onLocaleValidationChange?: (hasErrors: boolean) => void;
   permissions?: Permission[];
   layout: PermissonContracts.GetAll.Response['data'];
+  /**
+   * The permissions of the user editing the form. When provided, checkboxes for permissions
+   * the user does not hold are disabled and bulk selections skip them.
+   */
   userPermissions?: AuthPermission[];
+  /**
+   * Admin tokens only: conditions are inherited from `userPermissions` when a permission is
+   * enabled and the conditions modal is read-only.
+   */
+  inheritConditions?: boolean;
 }
 
 const Permissions = React.forwardRef<PermissionsAPI, PermissionsProps>(
   (
-    { layout, isFormDisabled, onLocaleValidationChange, permissions = [], userPermissions },
+    {
+      layout,
+      isFormDisabled,
+      onLocaleValidationChange,
+      permissions = [],
+      userPermissions,
+      inheritConditions = false,
+    },
     api
   ) => {
     const [{ initialData, layouts, modifiedData }, dispatch] = React.useReducer(
@@ -154,9 +171,10 @@ const Permissions = React.forwardRef<PermissionsAPI, PermissionsProps>(
           rowName,
           value,
           userPermissions,
+          inheritConditions,
         });
       },
-      [userPermissions]
+      [userPermissions, inheritConditions]
     );
 
     const handleChangeCollectionTypeGlobalActionCheckbox = React.useCallback(
@@ -171,16 +189,17 @@ const Permissions = React.forwardRef<PermissionsAPI, PermissionsProps>(
           actionId,
           value,
           userPermissions,
+          inheritConditions,
         });
       },
-      [userPermissions]
+      [userPermissions, inheritConditions]
     );
 
     const handleChangeConditions = React.useCallback(
       (conditions: OnChangeConditionsAction['conditions']) => {
-        dispatch({ type: 'ON_CHANGE_CONDITIONS', conditions, userPermissions });
+        dispatch({ type: 'ON_CHANGE_CONDITIONS', conditions, inheritConditions });
       },
-      [userPermissions]
+      [inheritConditions]
     );
 
     const handleChangeSimpleCheckbox: PermissionsDataManagerContextValue['onChangeSimpleCheckbox'] =
@@ -191,9 +210,10 @@ const Permissions = React.forwardRef<PermissionsAPI, PermissionsProps>(
             keys: name,
             value,
             userPermissions,
+            inheritConditions,
           });
         },
-        [userPermissions]
+        [userPermissions, inheritConditions]
       );
 
     const handleChangeParentCheckbox: PermissionsDataManagerContextValue['onChangeParentCheckbox'] =
@@ -204,9 +224,10 @@ const Permissions = React.forwardRef<PermissionsAPI, PermissionsProps>(
             keys: name,
             value,
             userPermissions,
+            inheritConditions,
           });
         },
-        [userPermissions]
+        [userPermissions, inheritConditions]
       );
 
     return (
@@ -221,6 +242,7 @@ const Permissions = React.forwardRef<PermissionsAPI, PermissionsProps>(
         }
         onChangeCollectionTypeGlobalActionCheckbox={handleChangeCollectionTypeGlobalActionCheckbox}
         userPermissions={userPermissions}
+        inheritConditions={inheritConditions}
       >
         <Tabs.Root defaultValue={TAB_LABELS[0].id}>
           <Tabs.List
@@ -303,6 +325,7 @@ interface OnChangeCollectionTypeGlobalActionCheckboxAction {
   actionId: string;
   value: boolean;
   userPermissions?: AuthPermission[];
+  inheritConditions?: boolean;
 }
 
 interface OnChangeCollectionTypeRowLeftCheckboxAction {
@@ -312,12 +335,13 @@ interface OnChangeCollectionTypeRowLeftCheckboxAction {
   rowName: string;
   value: boolean;
   userPermissions?: AuthPermission[];
+  inheritConditions?: boolean;
 }
 
 interface OnChangeConditionsAction {
   type: 'ON_CHANGE_CONDITIONS';
   conditions: Record<string, ConditionForm>;
-  userPermissions?: AuthPermission[];
+  inheritConditions?: boolean;
 }
 
 interface OnChangeSimpleCheckboxAction {
@@ -325,6 +349,7 @@ interface OnChangeSimpleCheckboxAction {
   keys: string;
   value: boolean;
   userPermissions?: AuthPermission[];
+  inheritConditions?: boolean;
 }
 
 interface OnChangeToggleParentCheckbox {
@@ -332,6 +357,7 @@ interface OnChangeToggleParentCheckbox {
   keys: string;
   value: boolean;
   userPermissions?: AuthPermission[];
+  inheritConditions?: boolean;
 }
 
 interface ResetFormAction {
@@ -368,34 +394,47 @@ const buildInheritedConditionsFromExisting = (
   }, {});
 };
 
+/**
+ * Fill the conditions of a permission being enabled from the user's own conditions, so the
+ * result stays within what the server accepts (see `getAllowedConditions`).
+ * - Admin tokens (`inheritConditions`): conditions always mirror the user's (none when the
+ *   user holds the permission unconditionally).
+ * - Roles: only when the user holds the permission solely under conditions and none is
+ *   selected yet, so conditions picked in the modal are kept.
+ */
 const inheritConditionsAtPath = (
   data: unknown,
   pathToActionObject: string[],
   actionId: string,
   subject: string | null,
-  userPermissions: AuthPermission[] | undefined
+  userPermissions: AuthPermission[] | undefined,
+  inheritConditions: boolean | undefined
 ) => {
   if (userPermissions === undefined) {
     return;
   }
 
-  const matchingPermission = userPermissions.find(
-    (perm) => perm.action === actionId && perm.subject === subject
-  );
+  const obj = data as Record<string, unknown>;
+  const pathToConditions = [...pathToActionObject, 'conditions'];
+  const existingConditions = get(obj, pathToConditions, undefined);
+  const allowedConditions = getAllowedConditions(userPermissions, actionId, subject);
 
-  if (matchingPermission === undefined) {
-    return;
+  if (!inheritConditions) {
+    const hasSelectedConditions =
+      isObject(existingConditions) && Object.values(existingConditions).some(Boolean);
+
+    if (allowedConditions === undefined || hasSelectedConditions) {
+      return;
+    }
   }
 
-  const obj = data as Record<string, unknown>;
-  const existingConditions = get(obj, [...pathToActionObject, 'conditions'], undefined);
   const nextConditions = buildInheritedConditionsFromExisting(
     existingConditions,
-    matchingPermission.conditions ?? []
+    allowedConditions ?? []
   );
 
   if (nextConditions) {
-    set(obj, [...pathToActionObject, 'conditions'], nextConditions);
+    set(obj, pathToConditions, nextConditions);
   }
 };
 
@@ -404,7 +443,7 @@ const reducer = (state: State, action: Action) =>
   produce(state, (draftState) => {
     switch (action.type) {
       case 'ON_CHANGE_COLLECTION_TYPE_GLOBAL_ACTION_CHECKBOX': {
-        const { collectionTypeKind, actionId, value, userPermissions } = action;
+        const { collectionTypeKind, actionId, value, userPermissions, inheritConditions } = action;
         const pathToData = ['modifiedData', collectionTypeKind];
 
         Object.keys(get(state, pathToData)).forEach((collectionType) => {
@@ -428,7 +467,14 @@ const reducer = (state: State, action: Action) =>
             );
 
             if (value === true) {
-              inheritConditionsAtPath(updatedValues, [], actionId, collectionType, userPermissions);
+              inheritConditionsAtPath(
+                updatedValues,
+                [],
+                actionId,
+                collectionType,
+                userPermissions,
+                inheritConditions
+              );
             }
 
             if (value === false && updatedValues.conditions !== undefined) {
@@ -445,7 +491,14 @@ const reducer = (state: State, action: Action) =>
         break;
       }
       case 'ON_CHANGE_COLLECTION_TYPE_ROW_LEFT_CHECKBOX': {
-        const { pathToCollectionType, propertyName, rowName, value, userPermissions } = action;
+        const {
+          pathToCollectionType,
+          propertyName,
+          rowName,
+          value,
+          userPermissions,
+          inheritConditions,
+        } = action;
         let nextModifiedDataState = cloneDeep(state.modifiedData);
         const pathToModifiedDataCollectionType = pathToCollectionType.split('..');
 
@@ -465,71 +518,43 @@ const reducer = (state: State, action: Action) =>
               rowName,
             ];
 
+            // Undefined when there is no user permission restriction (super admin)
+            const checker = createFieldPermissionChecker(actionId, subject, userPermissions);
+
             if (!isObject(objValue)) {
-              if (userPermissions !== undefined && propertyName === 'fields') {
-                const hasPermission = userPermissions.some((perm) => {
-                  if (perm.action !== actionId || perm.subject !== subject) return false;
+              const hasPermission =
+                checker === undefined || checker(['properties', propertyName, rowName]);
 
-                  const fields = perm.properties?.fields;
-                  if (fields === null || fields === undefined) return true;
-                  if (Array.isArray(fields) && fields.length === 0) return false;
-
-                  return (
-                    Array.isArray(fields) &&
-                    fields.some((f) => rowName === f || rowName.startsWith(`${f}.`))
-                  );
-                });
-
-                if (hasPermission === true) {
-                  set(nextModifiedDataState, pathToDataToSet, value);
-                  if (value === true) {
-                    inheritConditionsAtPath(
-                      nextModifiedDataState,
-                      [...pathToModifiedDataCollectionType, actionId],
-                      actionId,
-                      subject,
-                      userPermissions
-                    );
-                  }
-                }
-              } else {
+              if (hasPermission) {
                 set(nextModifiedDataState, pathToDataToSet, value);
-                if (value === true && userPermissions !== undefined) {
+                if (value === true) {
                   inheritConditionsAtPath(
                     nextModifiedDataState,
                     [...pathToModifiedDataCollectionType, actionId],
                     actionId,
                     subject,
-                    userPermissions
+                    userPermissions,
+                    inheritConditions
                   );
                 }
               }
             } else {
               const permissionChecker =
-                userPermissions !== undefined && propertyName === 'fields'
-                  ? (path: string[]) => {
-                      const fullFieldPath = [rowName, ...path].join('.');
-                      const checker = createFieldPermissionChecker(
-                        actionId,
-                        subject,
-                        userPermissions
-                      );
-                      return checker === undefined
-                        ? true
-                        : checker(['properties', 'fields', fullFieldPath]);
-                    }
-                  : undefined;
+                checker === undefined
+                  ? undefined
+                  : (path: string[]) => checker(['properties', propertyName, rowName, ...path]);
 
               const updatedValue = updateValuesWithPermissions(objValue, value, permissionChecker);
 
               set(nextModifiedDataState, pathToDataToSet, updatedValue);
-              if (value === true && userPermissions !== undefined) {
+              if (value === true) {
                 inheritConditionsAtPath(
                   nextModifiedDataState,
                   [...pathToModifiedDataCollectionType, actionId],
                   actionId,
                   subject,
-                  userPermissions
+                  userPermissions,
+                  inheritConditions
                 );
               }
             }
@@ -547,7 +572,7 @@ const reducer = (state: State, action: Action) =>
       }
       case 'ON_CHANGE_CONDITIONS': {
         // In App Token context, conditions are inherited from the user's permissions and must be read-only.
-        if (action.userPermissions !== undefined) {
+        if (action.inheritConditions) {
           break;
         }
 
@@ -569,8 +594,8 @@ const reducer = (state: State, action: Action) =>
         const keysArray = action.keys.split('..');
         set(nextModifiedDataState, [...keysArray], action.value);
 
-        // In App Token context, when enabling a permission, inherit the user's conditions.
-        if (action.value === true && action.userPermissions !== undefined) {
+        // When enabling a permission, fill in the user's conditions if needed.
+        if (action.value === true) {
           const propertiesIndex = keysArray.indexOf('properties');
 
           if (propertiesIndex > 0) {
@@ -584,7 +609,8 @@ const reducer = (state: State, action: Action) =>
                 [root, subject, actionId],
                 actionId,
                 subject,
-                action.userPermissions
+                action.userPermissions,
+                action.inheritConditions
               );
             } else {
               const pathToActionObject = keysArray.slice(0, propertiesIndex);
@@ -593,7 +619,8 @@ const reducer = (state: State, action: Action) =>
                 pathToActionObject,
                 actionId,
                 null,
-                action.userPermissions
+                action.userPermissions,
+                action.inheritConditions
               );
             }
           }
@@ -642,7 +669,7 @@ const reducer = (state: State, action: Action) =>
        *
        */
       case 'ON_CHANGE_TOGGLE_PARENT_CHECKBOX': {
-        const { keys, value, userPermissions } = action;
+        const { keys, value, userPermissions, inheritConditions } = action;
         const pathToValue = keys.split('..');
         let nextModifiedDataState = cloneDeep(state.modifiedData);
         const oldValues = get(nextModifiedDataState, pathToValue, {});
@@ -676,20 +703,34 @@ const reducer = (state: State, action: Action) =>
 
         const updatedValues = updateValuesWithPermissions(oldValues, value, permissionChecker);
 
-        // In App Token context, when enabling, inherit conditions from the user's permissions.
-        if (value === true && userPermissions !== undefined) {
+        // When enabling, fill in the user's conditions if needed.
+        if (value === true) {
           const subjectForLookup =
             root === 'collectionTypes' || root === 'singleTypes' ? (subject ?? null) : null;
 
           if (actionId !== undefined && subjectForLookup !== null) {
-            inheritConditionsAtPath(updatedValues, [], actionId, subjectForLookup, userPermissions);
+            inheritConditionsAtPath(
+              updatedValues,
+              [],
+              actionId,
+              subjectForLookup,
+              userPermissions,
+              inheritConditions
+            );
           } else if (isObject(updatedValues)) {
             const updatedValuesObj = updatedValues as Record<string, unknown>;
 
             Object.keys(updatedValuesObj).forEach((key) => {
               const maybeActionObj = updatedValuesObj[key];
               if (isObject(maybeActionObj)) {
-                inheritConditionsAtPath(maybeActionObj, [], key, subjectForLookup, userPermissions);
+                inheritConditionsAtPath(
+                  maybeActionObj,
+                  [],
+                  key,
+                  subjectForLookup,
+                  userPermissions,
+                  inheritConditions
+                );
               }
             });
           }

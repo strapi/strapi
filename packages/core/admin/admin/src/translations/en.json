@@ -302,6 +302,7 @@
   "Settings.permissions.auditLogs.workflow.create": "Create workflow",
   "Settings.permissions.auditLogs.workflow.delete": "Delete workflow",
   "Settings.permissions.auditLogs.workflow.update": "Update workflow",
+  "Settings.permissions.cannot-grant-unheld": "You can't grant a permission you don't have yourself",
   "Settings.permissions.category": "Permissions settings for the {category}",
   "Settings.permissions.category.plugins": "Permissions settings for the {category} plugin",
   "Settings.permissions.conditions.anytime": "Anytime",
