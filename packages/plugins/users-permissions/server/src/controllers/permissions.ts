@@ -1,10 +1,11 @@
 import type { Context } from 'koa';
 import _ from 'lodash';
 import type { PluginContext } from '../types';
+import { createExtensibleController } from './create-extensible-controller';
 import { getService } from '../utils';
 
 /** Create controller actions for this Strapi instance. */
-export default ({ strapi }: PluginContext) => ({
+export default createExtensibleController(({ strapi }: PluginContext) => ({
   async getPermissions(ctx: Context) {
     const permissions = await getService(strapi, 'users-permissions').getActions();
 
@@ -24,4 +25,4 @@ export default ({ strapi }: PluginContext) => ({
 
     ctx.send({ routes });
   },
-});
+}));

@@ -4,6 +4,7 @@ import type { Core } from '@strapi/types';
 import _ from 'lodash';
 import { errors } from '@strapi/utils';
 import type { PluginContext, AdvancedSettings } from '../types';
+import { createExtensibleController } from './create-extensible-controller';
 import { getService } from '../utils';
 import { validateCreateUserBody, validateUpdateUserBody } from './validation/user';
 
@@ -31,7 +32,7 @@ const sanitizeQuery = async (strapi: Core.Strapi, query: Context['query'], ctx: 
 };
 
 /** Create controller actions for this Strapi instance. */
-export default ({ strapi }: PluginContext) => ({
+export default createExtensibleController(({ strapi }: PluginContext) => ({
   /**
    * Create a/an user record.
    * @return {Object}
@@ -209,4 +210,4 @@ export default ({ strapi }: PluginContext) => ({
 
     ctx.body = await sanitizeOutput(strapi, user, ctx);
   },
-});
+}));
