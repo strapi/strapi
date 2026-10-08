@@ -5,7 +5,11 @@ import type { ID } from '../types';
  * auto-increment id of a multi-row INSERT (`[insertId]`), while InnoDB assigns
  * the rest consecutively. Postgres and SQLite already return one id per row.
  */
-const idsFromInsertResult = (chunkResult: unknown, rowCount: number, useReturning: boolean): ID[] => {
+const idsFromInsertResult = (
+  chunkResult: unknown,
+  rowCount: number,
+  useReturning: boolean
+): ID[] => {
   const list = Array.isArray(chunkResult) ? chunkResult : [chunkResult];
   const ids = list.map((entry) => {
     if (entry && typeof entry === 'object' && 'id' in entry) {

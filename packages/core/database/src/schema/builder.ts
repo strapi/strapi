@@ -183,7 +183,11 @@ const createHelpers = (db: Database) => {
    * DROP TABLE ... CASCADE (used while force-migrating) removes foreign keys
    * on tables that are still being altered, after their metadata was loaded.
    */
-  const dropForeignKeyIfExists = async (runner: Knex, tableName: string, constraintName: string) => {
+  const dropForeignKeyIfExists = async (
+    runner: Knex,
+    tableName: string,
+    constraintName: string
+  ) => {
     const schemaName = db.getSchemaName();
     const qualified = schemaName ? `${schemaName}.${tableName}` : tableName;
     await runner.raw('ALTER TABLE ?? DROP CONSTRAINT IF EXISTS ??', [qualified, constraintName]);
