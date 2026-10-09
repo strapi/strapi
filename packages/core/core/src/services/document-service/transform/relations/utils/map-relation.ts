@@ -126,7 +126,7 @@ const traverseEntityRelations = async (
 ) => {
   const { includeMedia = false, ...traverseOptions } = options;
 
-  return traverseEntity(
+  return await traverseEntity(
     async (options, utils) => {
       const { attribute } = options;
 

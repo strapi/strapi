@@ -337,7 +337,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       transformParamsToQuery(uid)
     )(params || {});
 
-    return strapi.db.query(uid).findMany(query);
+    return await strapi.db.query(uid).findMany(query);
   }
 
   async function findFirst(params = {} as any) {
@@ -352,7 +352,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       transformParamsToQuery(uid)
     )(params);
 
-    return strapi.db.query(uid).findOne(query);
+    return await strapi.db.query(uid).findOne(query);
   }
 
   // TODO: do we really want to add filters on the findOne now that we have findFirst ?
@@ -371,7 +371,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       (query) => ({ ...query, where: { ...query.where, documentId } })
     )(params);
 
-    return strapi.db.query(uid).findOne(query);
+    return await strapi.db.query(uid).findOne(query);
   }
 
   async function deleteDocument(opts = {} as any) {
@@ -425,7 +425,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     emitEvent('entry.create', doc);
 
     if (hasDraftAndPublish && params.status === 'published') {
-      return publish({
+      return await publish({
         ...params,
         documentId: doc.documentId,
       }).then((doc) => doc.entries[0]);
@@ -490,7 +490,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
           pickSelectionParams({ ...queryParams, status: 'draft' }) as any
         );
 
-        return strapi.db.query(uid).findOne({ ...selectionQuery, where: { id: doc.id } });
+        return await strapi.db.query(uid).findOne({ ...selectionQuery, where: { id: doc.id } });
       }
     );
 
@@ -550,7 +550,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     }
 
     if (hasDraftAndPublish && updatedDraft && params.status === 'published') {
-      return publish({
+      return await publish({
         ...params,
         documentId,
       }).then((doc) => doc.entries[0]);
@@ -570,7 +570,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       transformParamsToQuery(uid)
     )(params);
 
-    return strapi.db.query(uid).count(query);
+    return await strapi.db.query(uid).count(query);
   }
 
   async function publish(opts = {} as any) {
@@ -766,7 +766,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
   }
 
   async function updateComponents(entry: any, data: any) {
-    return components.updateComponents(uid, entry, data);
+    return await components.updateComponents(uid, entry, data);
   }
 
   function omitComponentData(data: any) {
