@@ -377,11 +377,29 @@ describe('Role controller', () => {
         );
         const checkPermissionsCeiling = jest.fn(() => Promise.reject(forbiddenError));
         const { ctx, assignPermissions } = setup(checkPermissionsCeiling);
+        ctx.forbidden = jest.fn();
 
-        await expect(roleController.updatePermissions(ctx)).rejects.toBe(forbiddenError);
+        await roleController.updatePermissions(ctx);
 
+        // Answered by the controller so the message and details reach the client
+        expect(ctx.forbidden).toHaveBeenCalledWith(
+          'You cannot grant permissions you do not hold yourself',
+          { permissions: normalizedPermissions }
+        );
         expect(assignPermissions).not.toHaveBeenCalled();
         expect(ctx.body).toBeUndefined();
+      });
+
+      test('Rethrows errors other than a ForbiddenError', async () => {
+        const error = new Error('boom');
+        const checkPermissionsCeiling = jest.fn(() => Promise.reject(error));
+        const { ctx, assignPermissions } = setup(checkPermissionsCeiling);
+        ctx.forbidden = jest.fn();
+
+        await expect(roleController.updatePermissions(ctx)).rejects.toBe(error);
+
+        expect(ctx.forbidden).not.toHaveBeenCalled();
+        expect(assignPermissions).not.toHaveBeenCalled();
       });
     });
   });

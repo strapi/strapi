@@ -21,7 +21,7 @@ import type {
 } from '../../../shared/contracts/roles';
 import { AdminRole } from '../../../shared/contracts/shared';
 
-const { ApplicationError } = errors;
+const { ApplicationError, ForbiddenError } = errors;
 const { SUPER_ADMIN_CODE } = constants;
 
 export default {
@@ -166,7 +166,17 @@ export default {
       input.permissions
     )) as typeof input.permissions;
 
-    await roleService.checkPermissionsCeiling(ctx.state.user, role.id, normalizedPermissions);
+    try {
+      await roleService.checkPermissionsCeiling(ctx.state.user, role.id, normalizedPermissions);
+    } catch (error) {
+      // A ForbiddenError thrown from a controller is turned into a bare 403 by the auth
+      // middleware, so respond here to keep the message and the rejected permissions.
+      if (error instanceof ForbiddenError) {
+        return ctx.forbidden(error.message, error.details);
+      }
+
+      throw error;
+    }
 
     const permissions = await roleService.assignPermissions(role.id, normalizedPermissions);
 
