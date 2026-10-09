@@ -12,6 +12,7 @@ import type {
 } from './migration-builder';
 import { finalizeSchemaMutation, rollbackSchemaMutation } from './schema-mutation';
 import { getService } from '../utils';
+import { VALID_UID_TARGETS } from './constants';
 import { validateUpdateSchema } from '../controllers/validation/schema';
 import type { Schema as CTBSchema } from '../controllers/validation/schema';
 import type { AttributeRenameMigrationMode } from '../config';
@@ -75,6 +76,75 @@ const removeDeletedUIDTargetFieldsOnUpdates = (schema: CTBSchema) => {
         ) {
           properties.targetField = undefined;
         }
+      }
+    });
+  });
+};
+
+/**
+ * Composes ordered rename hops into an `origin -> final` name map
+ * (`title -> a, a -> heading` becomes `title -> heading`).
+ */
+const composeRenameHops = (hops: { oldName?: string; newName?: string }[]): Map<string, string> => {
+  const originByCurrentName = new Map<string, string>();
+
+  hops.forEach(({ oldName, newName }) => {
+    if (!oldName || !newName || oldName === newName) {
+      return;
+    }
+
+    const origin = originByCurrentName.get(oldName) ?? oldName;
+    originByCurrentName.delete(oldName);
+    originByCurrentName.set(newName, origin);
+  });
+
+  return new Map([...originByCurrentName].map(([final, origin]) => [origin, final]));
+};
+
+/**
+ * Keeps a uid field attached to its target when that target is renamed in this
+ * save. Must run before `removeDeletedUIDTargetFieldsOnUpdates`, which would
+ * otherwise treat the old name as a deleted field. A `targetField` that names
+ * an attribute of the payload is left alone: the caller already resolved it.
+ */
+const renameUIDTargetFieldsOnUpdates = (schema: CTBSchema) => {
+  schema.contentTypes.forEach((contentType) => {
+    if (contentType.action !== 'update' || !Array.isArray(contentType.renames)) {
+      return;
+    }
+
+    const finalNames = composeRenameHops(contentType.renames);
+
+    contentType.attributes.forEach((attribute) => {
+      if (attribute.action !== 'update') {
+        return;
+      }
+
+      const { properties } = attribute;
+
+      if (properties.type !== 'uid' || !properties.targetField) {
+        return;
+      }
+
+      const finalName = finalNames.get(properties.targetField);
+
+      if (
+        !finalName ||
+        contentType.attributes.some((attr) => attr.name === properties.targetField)
+      ) {
+        return;
+      }
+
+      const target = contentType.attributes.find((attr) => attr.name === finalName);
+
+      // A target that is no longer a string or text is left on the old name,
+      // so `removeDeletedUIDTargetFieldsOnUpdates` detaches the uid.
+      if (
+        target &&
+        target.action !== 'delete' &&
+        VALID_UID_TARGETS.some((type) => type === target.properties.type)
+      ) {
+        properties.targetField = finalName;
       }
     });
   });
@@ -485,6 +555,7 @@ export const updateSchema = async (schema: CTBSchema) => {
 
   // pre-process data
   removeEmptyDefaultsOnUpdates(schema);
+  renameUIDTargetFieldsOnUpdates(schema);
   removeDeletedUIDTargetFieldsOnUpdates(schema);
 
   const upsertedUids = new Map<string, ContentTypeKind>();
