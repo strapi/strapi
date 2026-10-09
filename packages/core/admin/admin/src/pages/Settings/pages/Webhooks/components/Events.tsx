@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import {
+  Box,
   Checkbox,
   Flex,
   RawTable as Table,
@@ -13,11 +14,15 @@ import {
   VisuallyHidden,
   Field,
   CheckboxProps,
+  useCollator,
 } from '@strapi/design-system';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { useField } from '../../../../../components/Form';
+import { useContentTypes } from '../../../../../hooks/useContentTypes';
+
+import type { ContentType } from '../../../../../../../shared/contracts/content-types';
 
 /* -------------------------------------------------------------------------------------------------
  * EventsRoot
@@ -198,15 +203,19 @@ const EventsBody = ({ providedEvents }: EventsBodyProps) => {
     <Tbody>
       {Object.entries(events).map(([event, value]) => {
         return (
-          <EventsRow
-            disabledEvents={disabledEvents}
-            key={event}
-            name={event}
-            events={value}
-            inputValue={formattedValue[event]}
-            handleSelect={handleSelect}
-            handleSelectAll={handleSelectAll}
-          />
+          <React.Fragment key={event}>
+            <EventsRow
+              disabledEvents={disabledEvents}
+              name={event}
+              events={value}
+              inputValue={formattedValue[event]}
+              handleSelect={handleSelect}
+              handleSelectAll={handleSelectAll}
+            />
+            {event === 'entry' && (
+              <EventsContentTypes events={value} selectedEvents={formattedValue[event]} />
+            )}
+          </React.Fragment>
         );
       })}
     </Tbody>
@@ -229,6 +238,105 @@ const getCEEvents = (): Required<Pick<EventsBodyProps, 'providedEvents'>>['provi
 };
 
 /* -------------------------------------------------------------------------------------------------
+ * EventsContentTypes
+ * -----------------------------------------------------------------------------------------------*/
+
+const DRAFT_AND_PUBLISH_EVENTS = ['entry.publish', 'entry.unpublish'];
+
+interface EventsContentTypesProps {
+  /**
+   * The entry events, one per column
+   */
+  events: string[];
+  /**
+   * The entry events selected for every content type
+   */
+  selectedEvents?: string[];
+}
+
+/**
+ * Lists the content types below the entry events, to select events for a single content type.
+ * The events selected for every content type are displayed as selected and can't be changed.
+ */
+const EventsContentTypes = ({ events, selectedEvents = [] }: EventsContentTypesProps) => {
+  const { locale } = useIntl();
+  const { isLoading, collectionTypes, singleTypes } = useContentTypes();
+  const { value = {}, onChange } = useField<Record<string, string[]>>('contentTypeEvents');
+
+  const formatter = useCollator(locale, {
+    sensitivity: 'base',
+  });
+
+  const toRows = (contentTypes: ContentType[]) =>
+    contentTypes
+      .map((contentType) => ({
+        uid: contentType.uid as string,
+        label: contentType.info.displayName,
+        unavailableEvents: contentType.options?.draftAndPublish ? [] : DRAFT_AND_PUBLISH_EVENTS,
+      }))
+      .sort((a, b) => formatter.compare(a.label, b.label));
+
+  const rows = [...toRows(collectionTypes), ...toRows(singleTypes)];
+
+  /**
+   * Content types saved on the webhook that are not listed above (e.g. deleted since then)
+   * are displayed with their uid, otherwise they could neither be seen nor removed.
+   */
+  const unlistedRows = isLoading
+    ? []
+    : Object.keys(value)
+        .filter((uid) => !rows.some((row) => row.uid === uid))
+        .map((uid) => ({ uid, label: uid, unavailableEvents: [] as string[] }));
+
+  const setEvents = (uid: string, uidEvents: string[]) => {
+    const contentTypeEvents = { ...value, [uid]: uidEvents };
+
+    if (uidEvents.length === 0) {
+      delete contentTypeEvents[uid];
+    }
+
+    onChange('contentTypeEvents', contentTypeEvents);
+  };
+
+  return (
+    <>
+      {[...rows, ...unlistedRows].map(({ uid, label, unavailableEvents }) => {
+        const ownEvents = value[uid] ?? [];
+        const availableEvents = events.filter((event) => !unavailableEvents.includes(event));
+        const selectableEvents = availableEvents.filter((event) => !selectedEvents.includes(event));
+
+        return (
+          <EventsRow
+            key={uid}
+            name={uid}
+            label={label}
+            events={events}
+            disabledEvents={[...unavailableEvents, ...selectedEvents]}
+            inputValue={availableEvents.filter(
+              (event) => selectedEvents.includes(event) || ownEvents.includes(event)
+            )}
+            handleSelect={(event, isSelected) => {
+              setEvents(
+                uid,
+                isSelected ? [...ownEvents, event] : ownEvents.filter((e) => e !== event)
+              );
+            }}
+            handleSelectAll={(_, isSelected) => {
+              setEvents(
+                uid,
+                isSelected
+                  ? Array.from(new Set([...ownEvents, ...selectableEvents]))
+                  : ownEvents.filter((event) => !selectableEvents.includes(event))
+              );
+            }}
+          />
+        );
+      })}
+    </>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
  * EventsRow
  * -----------------------------------------------------------------------------------------------*/
 
@@ -239,21 +347,30 @@ interface EventsRowProps {
   handleSelect: (name: string, value: boolean) => void;
   handleSelectAll: (name: string, value: boolean) => void;
   name: string;
+  /**
+   * Displayed instead of the name, for the rows nested below another one (e.g. a content type)
+   */
+  label?: string;
 }
 
 const EventsRow = ({
   disabledEvents = [],
   name,
+  label,
   events = [],
   inputValue = [],
   handleSelect,
   handleSelectAll,
 }: EventsRowProps) => {
   const { formatMessage } = useIntl();
+  const isNested = label !== undefined;
   const enabledCheckboxes = events.filter((event) => !disabledEvents.includes(event));
 
   const hasSomeCheckboxSelected = inputValue.length > 0;
-  const areAllCheckboxesSelected = inputValue.length === enabledCheckboxes.length;
+  // A disabled checkbox can't be selected by the user, so it doesn't prevent the row from being fully selected
+  const areAllCheckboxesSelected =
+    hasSomeCheckboxSelected &&
+    events.every((event) => inputValue.includes(event) || disabledEvents.includes(event));
 
   const onChangeAll: CheckboxProps['onCheckedChange'] = () => {
     const valueToSet = !areAllCheckboxesSelected;
@@ -266,21 +383,28 @@ const EventsRow = ({
   return (
     <Tr>
       <Td>
-        <Checkbox
-          aria-label={formatMessage({
-            id: 'global.select-all-entries',
-            defaultMessage: 'Select all entries',
-          })}
-          name={name}
-          checked={
-            hasSomeCheckboxSelected && !areAllCheckboxesSelected
-              ? 'indeterminate'
-              : areAllCheckboxesSelected
-          }
-          onCheckedChange={onChangeAll}
-        >
-          {removeHyphensAndTitleCase(name)}
-        </Checkbox>
+        <Box paddingLeft={isNested ? 6 : 0}>
+          <Checkbox
+            aria-label={
+              isNested
+                ? undefined
+                : formatMessage({
+                    id: 'global.select-all-entries',
+                    defaultMessage: 'Select all entries',
+                  })
+            }
+            name={name}
+            disabled={enabledCheckboxes.length === 0}
+            checked={
+              hasSomeCheckboxSelected && !areAllCheckboxesSelected
+                ? 'indeterminate'
+                : areAllCheckboxesSelected
+            }
+            onCheckedChange={onChangeAll}
+          >
+            {label ?? removeHyphensAndTitleCase(name)}
+          </Checkbox>
+        </Box>
       </Td>
 
       {events.map((event) => {
@@ -289,8 +413,8 @@ const EventsRow = ({
             <Flex width="100%" justifyContent="center">
               <Checkbox
                 disabled={disabledEvents.includes(event)}
-                aria-label={event}
-                name={event}
+                aria-label={isNested ? `${label}: ${event}` : event}
+                name={isNested ? `${name}.${event}` : event}
                 checked={inputValue.includes(event)}
                 onCheckedChange={(value) => handleSelect(event, !!value)}
               />
