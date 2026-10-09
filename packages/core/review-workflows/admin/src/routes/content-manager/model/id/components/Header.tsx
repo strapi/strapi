@@ -1,31 +1,18 @@
-import { unstable_useDocumentLayout as useDocumentLayout } from '@strapi/content-manager/strapi-admin';
 import { Flex } from '@strapi/design-system';
-import { useParams } from 'react-router-dom';
+
+import { useIsReviewWorkflowVisible } from '../hooks/useIsReviewWorkflowVisible';
 
 import { AssigneeSelect } from './AssigneeSelect';
 import { StageSelect } from './StageSelect';
 
-const Header = () => {
-  const {
-    slug = '',
-    id,
-    collectionType,
-  } = useParams<{
-    collectionType: string;
-    slug: string;
-    id: string;
-  }>();
+import type { DocumentActionProps } from '@strapi/content-manager/strapi-admin';
 
-  const {
-    edit: { options },
-  } = useDocumentLayout(slug);
+const Header = ({ activeTab }: Pick<DocumentActionProps, 'activeTab'>) => {
+  const isReviewWorkflowVisible = useIsReviewWorkflowVisible({
+    activeTab,
+  });
 
-  if (
-    !window.strapi.isEE ||
-    !options?.reviewWorkflows ||
-    (collectionType !== 'single-types' && !id) ||
-    id === 'create'
-  ) {
+  if (!isReviewWorkflowVisible) {
     return null;
   }
 
