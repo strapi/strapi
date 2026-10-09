@@ -2,6 +2,7 @@ import { isAIMetadataSupportedMime } from '../../../shared/constants';
 import { useGetUploadSettingsQuery } from '../services/settings';
 
 import { useAIMetadataAvailability } from './useAIMetadataAvailability';
+import { useMediaLibraryPermissions } from './useMediaLibraryPermissions';
 
 /**
  * Whether the replace flow will actually regenerate AI metadata, so the UI only
@@ -30,7 +31,10 @@ import { useAIMetadataAvailability } from './useAIMetadataAvailability';
  */
 export const useAIMetadataEnabled = (options?: { mime?: string | null }): boolean => {
   const isAIAvailable = useAIMetadataAvailability();
-  const { data: settings } = useGetUploadSettingsQuery();
+  // Without `plugin::upload.read` the request 403s, and AI metadata is moot
+  // anyway — a role that cannot read the library cannot generate it.
+  const { canRead } = useMediaLibraryPermissions();
+  const { data: settings } = useGetUploadSettingsQuery(undefined, { skip: !canRead });
 
   if (!isAIAvailable || !(settings?.data?.aiMetadata ?? false)) {
     return false;

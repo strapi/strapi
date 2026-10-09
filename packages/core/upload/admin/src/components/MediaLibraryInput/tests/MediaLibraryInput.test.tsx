@@ -1,0 +1,302 @@
+import { Form } from '@strapi/admin/strapi-admin';
+import { render, screen, waitFor, fireEvent, act } from '@tests/utils';
+
+import { MediaLibraryInput } from '../MediaLibraryInput';
+
+import type { File as AssetFile } from '../../../../../shared/contracts/files';
+
+const mockUploadFiles = jest.fn();
+
+jest.mock('../../../services/api', () => {
+  const actual = jest.requireActual('../../../services/api');
+
+  return {
+    ...actual,
+    useUploadFilesMutation: () => [mockUploadFiles],
+  };
+});
+
+/**
+ * The picker still opens the legacy dialog until the Content Manager gets its
+ * own. It pulls in cropperjs, which jsdom cannot parse.
+ */
+jest.mock('cropperjs/dist/cropper.css?raw', () => '', { virtual: true });
+
+const asset = (id: number, name: string): AssetFile =>
+  ({
+    id,
+    name,
+    mime: 'image/png',
+    ext: '.png',
+    url: `/uploads/${name}`,
+    hash: `hash_${id}`,
+    size: 10,
+    provider: 'local',
+    createdAt: '2026-01-01T00:00:00.000Z',
+    updatedAt: '2026-01-01T00:00:00.000Z',
+  }) as AssetFile;
+
+const renderInput = (
+  props: Partial<React.ComponentProps<typeof MediaLibraryInput>> = {},
+  initialValues: Record<string, unknown> = {}
+) =>
+  render(<MediaLibraryInput name="cover" label="Cover" {...props} />, {
+    renderOptions: {
+      wrapper: ({ children }) => (
+        <Form onSubmit={jest.fn()} method="POST" initialValues={initialValues}>
+          {children}
+        </Form>
+      ),
+    },
+  });
+
+const dropFiles = (files: globalThis.File[]) => {
+  const dropZone = screen.getByRole('button', {
+    name: /click to add an asset or drag and drop one in this area/i,
+  });
+
+  fireEvent.drop(dropZone, {
+    dataTransfer: { files, types: ['Files'] },
+  });
+};
+
+describe('<MediaLibraryInput /> (Content Manager)', () => {
+  beforeEach(() => {
+    mockUploadFiles.mockReset();
+  });
+
+  it('renders the drop zone and one row per asset already on the field', () => {
+    renderInput(
+      { attribute: { multiple: true } },
+      { cover: [asset(1, 'one.png'), asset(2, 'two.png')] }
+    );
+
+    expect(
+      screen.getByRole('button', {
+        name: /click to add an asset or drag and drop one in this area/i,
+      })
+    ).toBeInTheDocument();
+    expect(screen.getByText('one.png')).toBeInTheDocument();
+    expect(screen.getByText('two.png')).toBeInTheDocument();
+  });
+
+  it('uploads a dropped file to the Media Library root and adds it to the field', async () => {
+    mockUploadFiles.mockReturnValue({
+      unwrap: () => Promise.resolve([asset(9, 'dropped.png')]),
+    });
+
+    renderInput({ attribute: { multiple: true } });
+
+    dropFiles([new File(['x'], 'dropped.png', { type: 'image/png' })]);
+
+    await waitFor(() => expect(mockUploadFiles).toHaveBeenCalledTimes(1));
+
+    const { formData, totalFiles } = mockUploadFiles.mock.calls[0][0];
+    expect(totalFiles).toBe(1);
+
+    const fileInfo = JSON.parse(formData.get('fileInfo') as string);
+    // No current folder in an entry form: uploads land at the root.
+    expect(fileInfo).toEqual([
+      { name: 'dropped.png', caption: null, alternativeText: null, folder: null },
+    ]);
+
+    expect(await screen.findByText('dropped.png')).toBeInTheDocument();
+  });
+
+  it('keeps the assets already on the field when another one is uploaded', async () => {
+    mockUploadFiles.mockReturnValue({
+      unwrap: () => Promise.resolve([asset(9, 'dropped.png')]),
+    });
+
+    renderInput({ attribute: { multiple: true } }, { cover: [asset(1, 'one.png')] });
+
+    dropFiles([new File(['x'], 'dropped.png', { type: 'image/png' })]);
+
+    expect(await screen.findByText('dropped.png')).toBeInTheDocument();
+    expect(screen.getByText('one.png')).toBeInTheDocument();
+  });
+
+  it('refuses a file the field does not allow, and uploads nothing', async () => {
+    renderInput({ attribute: { multiple: true, allowedTypes: ['images'] } });
+
+    dropFiles([new File(['x'], 'notes.pdf', { type: 'application/pdf' })]);
+
+    expect(await screen.findByText(/You can't upload this type of file/)).toBeInTheDocument();
+    expect(mockUploadFiles).not.toHaveBeenCalled();
+  });
+
+  it('uploads the allowed files of a mixed drop and warns about the rest', async () => {
+    mockUploadFiles.mockReturnValue({
+      unwrap: () => Promise.resolve([asset(9, 'photo.png')]),
+    });
+
+    renderInput({ attribute: { multiple: true, allowedTypes: ['images'] } });
+
+    dropFiles([
+      new File(['x'], 'photo.png', { type: 'image/png' }),
+      new File(['x'], 'notes.pdf', { type: 'application/pdf' }),
+    ]);
+
+    await waitFor(() => expect(mockUploadFiles).toHaveBeenCalledTimes(1));
+
+    const fileInfo = JSON.parse(
+      mockUploadFiles.mock.calls[0][0].formData.get('fileInfo') as string
+    );
+    expect(fileInfo).toHaveLength(1);
+    expect(fileInfo[0].name).toBe('photo.png');
+
+    expect(await screen.findByText(/You can't upload this type of file/)).toBeInTheDocument();
+  });
+
+  it('keeps both batches when a second drop lands while the first is still uploading', async () => {
+    const deferred = () => {
+      let resolve!: (files: AssetFile[]) => void;
+      const promise = new Promise<AssetFile[]>((res) => {
+        resolve = res;
+      });
+      return { promise, resolve };
+    };
+
+    const first = deferred();
+    const second = deferred();
+    mockUploadFiles
+      .mockReturnValueOnce({ unwrap: () => first.promise })
+      .mockReturnValueOnce({ unwrap: () => second.promise });
+
+    renderInput({ attribute: { multiple: true } });
+
+    dropFiles([new File(['x'], 'first.png', { type: 'image/png' })]);
+    dropFiles([new File(['x'], 'second.png', { type: 'image/png' })]);
+
+    await waitFor(() => expect(mockUploadFiles).toHaveBeenCalledTimes(2));
+
+    await act(async () => {
+      first.resolve([asset(1, 'first.png')]);
+    });
+    await act(async () => {
+      second.resolve([asset(2, 'second.png')]);
+    });
+
+    expect(await screen.findByText('second.png')).toBeInTheDocument();
+    expect(screen.getByText('first.png')).toBeInTheDocument();
+  });
+
+  it('adds nothing when the upload resolves with no file', async () => {
+    mockUploadFiles.mockReturnValue({ unwrap: () => Promise.resolve([]) });
+
+    renderInput({ attribute: { multiple: true } });
+
+    dropFiles([new File(['x'], 'cancelled.png', { type: 'image/png' })]);
+
+    await waitFor(() => expect(mockUploadFiles).toHaveBeenCalledTimes(1));
+    expect(screen.queryByText('cancelled.png')).not.toBeInTheDocument();
+  });
+
+  it('refuses a multi-file drop on a single-value field, and uploads nothing', async () => {
+    renderInput({ attribute: { multiple: false } });
+
+    dropFiles([
+      new File(['x'], 'one.png', { type: 'image/png' }),
+      new File(['x'], 'two.png', { type: 'image/png' }),
+    ]);
+
+    expect(await screen.findByText('This field accepts only one file.')).toBeInTheDocument();
+    expect(mockUploadFiles).not.toHaveBeenCalled();
+  });
+
+  it('still uploads a single-file drop on a single-value field', async () => {
+    mockUploadFiles.mockReturnValue({
+      unwrap: () => Promise.resolve([asset(9, 'only.png')]),
+    });
+
+    renderInput({ attribute: { multiple: false } });
+
+    dropFiles([new File(['x'], 'only.png', { type: 'image/png' })]);
+
+    await waitFor(() => expect(mockUploadFiles).toHaveBeenCalledTimes(1));
+    expect(await screen.findByText('only.png')).toBeInTheDocument();
+  });
+
+  it('allows a multi-file drop on a multiple field', async () => {
+    mockUploadFiles.mockReturnValue({
+      unwrap: () => Promise.resolve([asset(1, 'one.png'), asset(2, 'two.png')]),
+    });
+
+    renderInput({ attribute: { multiple: true } });
+
+    dropFiles([
+      new File(['x'], 'one.png', { type: 'image/png' }),
+      new File(['x'], 'two.png', { type: 'image/png' }),
+    ]);
+
+    await waitFor(() => expect(mockUploadFiles).toHaveBeenCalledTimes(1));
+    expect(screen.queryByText('This field accepts only one file.')).not.toBeInTheDocument();
+  });
+
+  it('replaces the asset on a single-value field', async () => {
+    mockUploadFiles.mockReturnValue({
+      unwrap: () => Promise.resolve([asset(9, 'new.png')]),
+    });
+
+    renderInput({ attribute: { multiple: false } }, { cover: asset(1, 'old.png') });
+
+    dropFiles([new File(['x'], 'new.png', { type: 'image/png' })]);
+
+    expect(await screen.findByText('new.png')).toBeInTheDocument();
+    expect(screen.queryByText('old.png')).not.toBeInTheDocument();
+  });
+
+  it('removes an asset from the field', async () => {
+    const { user } = renderInput(
+      { attribute: { multiple: true } },
+      { cover: [asset(1, 'one.png'), asset(2, 'two.png')] }
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Remove one.png' }));
+
+    expect(screen.queryByText('one.png')).not.toBeInTheDocument();
+    expect(screen.getByText('two.png')).toBeInTheDocument();
+  });
+
+  it('uploads the files chosen from the hidden picker', async () => {
+    mockUploadFiles.mockReturnValue({
+      unwrap: () => Promise.resolve([asset(9, 'picked.png')]),
+    });
+
+    renderInput({ attribute: { multiple: true } });
+
+    // eslint-disable-next-line testing-library/no-node-access
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const file = new File(['x'], 'picked.png', { type: 'image/png' });
+
+    // jsdom's `files` is a plain stub, so a naive one would not reproduce the
+    // browser: there, `files` is live and assigning `value` empties it in place.
+    // Wiring the setter to clear the list is what makes this test able to fail.
+    const fileList: globalThis.File[] = [file];
+    Object.defineProperty(input, 'files', {
+      configurable: true,
+      get: () => fileList,
+    });
+    Object.defineProperty(input, 'value', {
+      configurable: true,
+      get: () => (fileList.length > 0 ? 'C:\\fakepath\\picked.png' : ''),
+      // Emptied in place, as the browser does: a handler that kept a reference
+      // to the list before the reset now sees it drained.
+      set: () => {
+        fileList.length = 0;
+      },
+    });
+    fireEvent.change(input);
+
+    await waitFor(() => expect(mockUploadFiles).toHaveBeenCalledTimes(1));
+    expect(await screen.findByText('picked.png')).toBeInTheDocument();
+  });
+
+  it('does not upload when the field is disabled', () => {
+    renderInput({ disabled: true, attribute: { multiple: true } });
+
+    dropFiles([new File(['x'], 'dropped.png', { type: 'image/png' })]);
+
+    expect(mockUploadFiles).not.toHaveBeenCalled();
+  });
+});
