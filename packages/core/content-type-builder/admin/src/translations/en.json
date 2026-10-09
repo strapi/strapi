@@ -145,8 +145,6 @@
   "form.attribute.condition.enum-change-warning": "The following fields have conditions that depend on this field: {fieldNames}. Changing or removing the enum values {values} will break these conditions. Do you want to proceed?",
   "form.attribute.condition.enum-change-warning-values": ". Changing or removing the enum values ",
   "form.attribute.condition.enum-change-warning-end": " will break these conditions. Do you want to proceed?",
-  "form.attribute.condition.field-change-warning": "The following fields have conditions that depend on this field: {fieldNames}. Renaming it will break these conditions. Do you want to proceed?",
-  "form.attribute.condition.field-change-warning-end": ". Renaming it will break these conditions. Do you want to proceed?",
   "form.attribute.rename-type-change-warning.title": "Existing data will be lost",
   "form.attribute.rename-type-change-warning.body": "You are renaming {oldName} to {newName} and changing it from {oldType} to {newType}. Strapi cannot preserve the existing data of this field when both change at once. The field will be recreated empty when you save.",
   "form.attribute.rename-type-change-warning.confirm": "Continue",

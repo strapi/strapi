@@ -619,20 +619,13 @@ type DragElementAboveOptions = {
   delay?: number;
 };
 
-type InnerDropSurfaceDragParams = DragElementAboveOptions & {
-  /** Prefix for thrown errors (e.g. `WebKit`, `Firefox`). */
-  browserLabel: string;
-  /** Run after `mouseup` — e.g. Firefox teardown so later clicks are not swallowed. */
-  afterMouseUp?: () => Promise<void>;
-};
-
 /**
- * WebKit + Firefox: drop targets use the inner row card (`:scope > *` index 1), same rect as react-dnd’s `objectRef`.
+ * WebKit: drop targets use the inner row card (`:scope > *` index 1), same rect as react-dnd’s `objectRef`.
  * Chromium keeps its own `<li>`-based path.
  */
-const dragElementAboveInnerDropSurface = async (
+const dragElementAboveWebKit = async (
   page: Page,
-  { source, target, steps = 5, delay = 20, browserLabel, afterMouseUp }: InnerDropSurfaceDragParams
+  { source, target, steps = 5, delay = 20 }: DragElementAboveOptions
 ) => {
   const hitTarget = target.locator(':scope > *').nth(1);
 
@@ -672,7 +665,7 @@ const dragElementAboveInnerDropSurface = async (
   if (!freshTargetBox || freshTargetBox.width === 0) {
     await page.mouse.up();
     throw new Error(
-      `${browserLabel}: drop surface bounding box could not be resolved after drag start (layout may still be settling).`
+      'WebKit: drop surface bounding box could not be resolved after drag start (layout may still be settling).'
     );
   }
   targetBox = freshTargetBox;
@@ -704,7 +697,6 @@ const dragElementAboveInnerDropSurface = async (
 
   await page.waitForTimeout(140);
   await page.mouse.up();
-  await afterMouseUp?.();
 };
 
 /**
@@ -769,30 +761,10 @@ const dragElementAboveChromium = async (page: Page, options: DragElementAboveOpt
   }
 };
 
-/** WebKit: same inner-card drag as Firefox; no post-`mouseup` hook. */
-const dragElementAboveWebKit = async (page: Page, options: DragElementAboveOptions) =>
-  dragElementAboveInnerDropSurface(page, { ...options, browserLabel: 'WebKit' });
-
-/** Firefox: inner-card drag + teardown so later UI clicks are not swallowed after HTML5 DnD. */
-const dragElementAboveFirefox = async (page: Page, options: DragElementAboveOptions) =>
-  dragElementAboveInnerDropSurface(page, {
-    ...options,
-    browserLabel: 'Firefox',
-    afterMouseUp: async () => {
-      await page.keyboard.press('Escape');
-      await page.waitForTimeout(100);
-      const vp = page.viewportSize();
-      if (vp) {
-        await page.mouse.move(Math.floor(vp.width / 2), Math.floor(vp.height / 2));
-      }
-    },
-  });
-
 /**
  * Smoothly drags a draggable element within a source <li> to just above a target <li>.
  *
- * Dispatches to {@link dragElementAboveChromium} or {@link dragElementAboveInnerDropSurface}
- * (WebKit / Firefox — shared logic; Firefox passes an `afterMouseUp` hook).
+ * Dispatches to {@link dragElementAboveChromium} or {@link dragElementAboveWebKit}.
  *
  * @param {object} page - The Playwright page instance.
  * @param {object} options - Options for the drag operation.
@@ -805,9 +777,6 @@ export const dragElementAbove = async (page: Page, options: DragElementAboveOpti
   const browserType = page.context().browser()?.browserType().name() ?? '';
   if (browserType === 'webkit') {
     return dragElementAboveWebKit(page, options);
-  }
-  if (browserType === 'firefox') {
-    return dragElementAboveFirefox(page, options);
   }
   if (browserType === 'chromium') {
     return dragElementAboveChromium(page, options);
