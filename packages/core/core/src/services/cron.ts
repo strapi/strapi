@@ -189,6 +189,11 @@ const createCronService = () => {
   ) => {
     const { Cron: CronCtor } = getCroner();
     const runner = createRunner(fn);
+    // Capture the logger now: Strapi.destroy() deletes global.strapi, and a
+    // job that was in-flight may reject afterwards. Resolving `strapi` at
+    // call time would throw a ReferenceError from this handler instead of
+    // logging the failure.
+    const log = strapi.log;
     const job = new CronCtor(
       pattern,
       {
@@ -198,7 +203,7 @@ const createCronService = () => {
         sloppyRanges: true,
         ...cronerOptions,
         catch(error: unknown) {
-          strapi.log.error(`Cron job "${jobLabel}" failed`, error);
+          log.error(`Cron job "${jobLabel}" failed`, error);
         },
       },
       runner.run
