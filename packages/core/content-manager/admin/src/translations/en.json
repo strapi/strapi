@@ -312,6 +312,8 @@
   "history.sidebar.title": "Versions",
   "history.sidebar.version-card.aria-label": "Version card",
   "history.sidebar.versionDescription": "{distanceToNow}{isAnonymous, select, true {} other { by {author}}}{isCurrent, select, true { <b>(current)</b>} other {}}",
+  "history.sidebar.versionDescriptionApiToken": "{distanceToNow} by API token: {actorName}{isCurrent, select, true { <b>(current)</b>} other {}}",
+  "history.sidebar.versionDescriptionEndUser": "{distanceToNow} by end user: {actorName}{isCurrent, select, true { <b>(current)</b>} other {}}",
   "history.sidebar.show-newer": "Show newer versions",
   "history.sidebar.show-older": "Show older versions",
   "history.version.subtitle": "{hasLocale, select, true {{subtitle}, in {locale}} other {{subtitle}}}",

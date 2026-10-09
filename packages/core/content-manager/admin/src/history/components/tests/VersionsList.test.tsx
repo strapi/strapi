@@ -66,4 +66,24 @@ describe('VersionsList', () => {
     await user.click(versions[0]);
     expect(await screen.findByText('?id=26')).toBeInTheDocument();
   });
+
+  it.each([
+    [{ type: 'api-token', token: { id: 1, name: 'Mobile app' } }, /by API token: Mobile app/i],
+    [{ type: 'end-user', user: { id: 2, username: 'jdoe' } }, /by end user: jdoe/i],
+  ] as const)('shows the %j actor when there is no admin author', async (actor, expectedText) => {
+    const [firstVersion] = mockHistoryVersionsData.historyVersions.data;
+    const versions = {
+      ...mockHistoryVersionsData.historyVersions,
+      data: [{ ...firstVersion, createdBy: undefined, actor }],
+    };
+
+    render(
+      // @ts-expect-error we don't need all the context
+      <HistoryProvider page={1} versions={versions}>
+        <VersionsList />
+      </HistoryProvider>
+    );
+
+    expect(await screen.findByText(expectedText)).toBeInTheDocument();
+  });
 });
