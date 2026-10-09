@@ -339,7 +339,7 @@ const cleanOrderColumns = async ({
         .connection(joinTableName)
         .select('id')
         .rowNumber('inv_order', inverseOrderColumnName, inverseJoinColumn.name)
-        .where(inverseJoinColumn.name, 'in', inverseRelIds)
+        .whereIn(inverseJoinColumn.name, inverseRelIds)
         .toSQL();
 
     switch (strapi.db.dialect.client) {
