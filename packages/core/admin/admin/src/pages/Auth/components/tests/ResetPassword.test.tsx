@@ -87,9 +87,9 @@ describe('ResetPassword', () => {
     });
 
     it.each([
-      ['PASSWORD123!', 'Password must contain at least 1 lowercase letter'],
-      ['password123!', 'Password must contain at least 1 uppercase letter'],
-      ['Password!!', 'Password must contain at least 1 number'],
+      ['PASSWORD123!', 'Password must contain at least one lowercase character'],
+      ['password123!', 'Password must contain at least one uppercase character'],
+      ['Password!!', 'Password must contain at least one number'],
     ])('should display the strength error for %s', async (password, expectedMessage) => {
       const { getByRole, findByText, getByLabelText, user } = render(<ResetPassword />, {
         initialEntries: [{ search: '?code=test' }],

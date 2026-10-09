@@ -5,6 +5,7 @@ import { getService } from '../utils';
 import actionDomain, { type Action } from '../domain/action';
 import { checkFieldsAreCorrectlyNested, checkFieldsDontHaveDuplicates } from './common-functions';
 import actions from '../domain/action/index';
+import { PASSWORD_MAX_BYTES } from '../services/password-policy';
 
 const { actionFields } = actions;
 
@@ -20,22 +21,50 @@ export const lastname = yup.string();
 
 export const username = yup.string().min(1);
 
+/**
+ * Checked against the password policy configured in the admin settings (see the
+ * `password-policy` service) at validation time, so a change applies to the next request.
+ * The bcrypt byte limit is enforced on top of it and is not configurable.
+ */
 export const password = yup
   .string()
-  .min(8)
-  // eslint-disable-next-line no-template-curly-in-string -- Yup interpolation placeholder
-  .test('required-byte-size', '${path} must be less than 73 bytes', function checkByteSize(value) {
-    if (!value) return true;
+  .test(
+    'required-byte-size',
+    // `\${path}` is the Yup interpolation placeholder, not a JS one
+    `\${path} must be less than ${PASSWORD_MAX_BYTES + 1} bytes`,
+    function checkByteSize(value) {
+      if (!value) return true;
 
-    const byteSize = new TextEncoder().encode(value).length;
-    return byteSize <= 72;
-  })
-  // eslint-disable-next-line no-template-curly-in-string -- Yup interpolation placeholder
-  .matches(/[a-z]/, '${path} must contain at least one lowercase character')
-  // eslint-disable-next-line no-template-curly-in-string -- Yup interpolation placeholder
-  .matches(/[A-Z]/, '${path} must contain at least one uppercase character')
-  // eslint-disable-next-line no-template-curly-in-string -- Yup interpolation placeholder
-  .matches(/\d/, '${path} must contain at least one number');
+      const byteSize = new TextEncoder().encode(value).length;
+      return byteSize <= PASSWORD_MAX_BYTES;
+    }
+  )
+  .test(
+    'password-policy',
+    // eslint-disable-next-line no-template-curly-in-string -- Yup interpolation placeholder
+    '${path} does not comply with the password policy',
+    async function checkPasswordPolicy(value) {
+      if (!value) return true;
+
+      const passwordPolicyService = getService('password-policy');
+      const policy = await passwordPolicyService.getPolicy();
+      const violations = passwordPolicyService.getViolations(value, policy);
+
+      if (violations.length === 0) {
+        return true;
+      }
+
+      // Report every broken rule at once, like the former chain of `.min()` / `.matches()` did
+      return new yup.ValidationError(
+        violations.map((violation) =>
+          // `\${path}` is the Yup interpolation placeholder, not a JS one
+          this.createError({ message: `\${path} ${violation.message}` })
+        ),
+        value,
+        this.path
+      );
+    }
+  );
 
 export const roles = yup.array(yup.strapiID()).min(1);
 

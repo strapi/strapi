@@ -8,6 +8,8 @@ import {
   type GetLicenseLimitInformation,
   GetGuidedTourMeta,
   type DebugDump,
+  type GetPasswordPolicy,
+  type UpdatePasswordPolicy,
 } from '../../../shared/contracts/admin';
 import { prefixFileUrlWithBackendUrl } from '../utils/urls';
 
@@ -23,7 +25,7 @@ interface ConfigurationLogo {
 
 const admin = adminApi
   .enhanceEndpoints({
-    addTagTypes: ['ProjectSettings', 'LicenseLimits', 'LicenseTrialTimeLeft'],
+    addTagTypes: ['ProjectSettings', 'LicenseLimits', 'LicenseTrialTimeLeft', 'PasswordPolicy'],
   })
   .injectEndpoints({
     endpoints: (builder) => ({
@@ -97,6 +99,30 @@ const admin = adminApi
         }),
         invalidatesTags: ['ProjectSettings'],
       }),
+      getPasswordPolicy: builder.query<GetPasswordPolicy.Response['data'], void>({
+        query: () => ({
+          url: '/admin/password-policy',
+          method: 'GET',
+        }),
+        transformResponse(res: GetPasswordPolicy.Response) {
+          return res.data;
+        },
+        providesTags: ['PasswordPolicy'],
+      }),
+      updatePasswordPolicy: builder.mutation<
+        UpdatePasswordPolicy.Response['data'],
+        UpdatePasswordPolicy.Request['body']
+      >({
+        query: (data) => ({
+          url: '/admin/password-policy',
+          method: 'PUT',
+          data,
+        }),
+        transformResponse(res: UpdatePasswordPolicy.Response) {
+          return res.data;
+        },
+        invalidatesTags: ['PasswordPolicy'],
+      }),
       getPlugins: builder.query<Plugins.Response, void>({
         query: () => ({
           url: '/admin/plugins',
@@ -148,6 +174,8 @@ const {
   useGetLicenseTrialTimeLeftQuery,
   useGetGuidedTourMetaQuery,
   useLazyGetDebugDumpQuery,
+  useGetPasswordPolicyQuery,
+  useUpdatePasswordPolicyMutation,
 } = admin;
 
 export {
@@ -161,6 +189,8 @@ export {
   useGetLicenseTrialTimeLeftQuery,
   useGetGuidedTourMetaQuery,
   useLazyGetDebugDumpQuery,
+  useGetPasswordPolicyQuery,
+  useUpdatePasswordPolicyMutation,
 };
 
 export type { ConfigurationLogo };

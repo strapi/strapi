@@ -11,6 +11,7 @@ import {
   validateUpdateProjectSettingsFiles,
   validateUpdateProjectSettingsImagesDimensions,
 } from '../validation/project-settings';
+import { validateUpdatePasswordPolicy } from '../validation/password-policy';
 import { getService } from '../utils';
 
 import type {
@@ -23,6 +24,8 @@ import type {
   UpdateProjectSettings,
   GetGuidedTourMeta,
   DebugDump,
+  GetPasswordPolicy,
+  UpdatePasswordPolicy,
 } from '../../../shared/contracts/admin';
 
 // Lazy: only resolved on first GET /admin/project-type request
@@ -100,6 +103,22 @@ export default {
       ...body,
       ...formatedFiles,
     }) satisfies Promise<UpdateProjectSettings.Response>;
+  },
+
+  async getPasswordPolicy() {
+    const data = await getService('password-policy').getPolicy();
+
+    return { data } satisfies GetPasswordPolicy.Response;
+  },
+
+  async updatePasswordPolicy(ctx: Context) {
+    const policy = validateUpdatePasswordPolicy(
+      ctx.request.body
+    ) as UpdatePasswordPolicy.Request['body'];
+
+    const data = await getService('password-policy').updatePolicy(policy);
+
+    return { data } satisfies UpdatePasswordPolicy.Response;
   },
 
   async telemetryProperties(ctx: Context) {

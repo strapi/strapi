@@ -3,6 +3,7 @@ import type { Permission } from '../features/Auth';
 type SettingsPermissions =
   | 'admin-tokens'
   | 'api-tokens'
+  | 'password-policy'
   | 'project-settings'
   | 'roles'
   | 'transfer-tokens'

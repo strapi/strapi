@@ -98,6 +98,11 @@ export const ADMIN_PERMISSIONS_CE = {
       read: [{ action: 'admin::project-settings.read', subject: null }],
       update: [{ action: 'admin::project-settings.update', subject: null }],
     },
+    'password-policy': {
+      main: [{ action: 'admin::password-policy.read', subject: null }],
+      read: [{ action: 'admin::password-policy.read', subject: null }],
+      update: [{ action: 'admin::password-policy.update', subject: null }],
+    },
     'debug-dump': {
       main: [{ action: 'admin::debug-dump.read', subject: null }],
       read: [{ action: 'admin::debug-dump.read', subject: null }],
@@ -222,6 +227,11 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
       // Init the search params directly
       to: '/settings/users?pageSize=10&page=1&sort=firstname',
       id: 'users',
+    },
+    {
+      intlLabel: { id: 'Settings.passwordPolicy.title', defaultMessage: 'Password policy' },
+      to: '/settings/password-policy',
+      id: 'password-policy',
     },
     {
       intlLabel: { id: 'Settings.adminTokens.title', defaultMessage: 'Admin Tokens' },

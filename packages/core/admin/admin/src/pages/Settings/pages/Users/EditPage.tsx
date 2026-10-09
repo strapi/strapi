@@ -17,6 +17,7 @@ import { BackButton } from '../../../../features/BackButton';
 import { useNotification } from '../../../../features/Notifications';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
+import { usePasswordPolicy } from '../../../../hooks/usePasswordPolicy';
 import { useRBAC } from '../../../../hooks/useRBAC';
 import { selectAdminPermissions } from '../../../../selectors';
 import { useAdminUsers, useUpdateUserMutation } from '../../../../services/users';
@@ -26,22 +27,25 @@ import { getDisplayName } from '../../../../utils/users';
 
 import { MagicLinkCE } from './components/MagicLinkCE';
 import { SelectRoles } from './components/SelectRoles';
-import { COMMON_USER_SCHEMA } from './utils/validation';
+import { createCommonUserSchema } from './utils/validation';
 
-const EDIT_VALIDATION_SCHEMA = yup.object().shape({
-  ...COMMON_USER_SCHEMA,
-  isActive: yup.bool(),
-  roles: yup
-    .array()
-    .min(1, {
-      id: translatedErrors.required.id,
-      defaultMessage: 'This field is required',
-    })
-    .required({
-      id: translatedErrors.required.id,
-      defaultMessage: 'This field is required',
-    }),
-});
+import type { PasswordSchema } from '../../../../utils/passwordPolicy';
+
+const getEditValidationSchema = (passwordSchema: PasswordSchema) =>
+  yup.object().shape({
+    ...createCommonUserSchema(passwordSchema),
+    isActive: yup.bool(),
+    roles: yup
+      .array()
+      .min(1, {
+        id: translatedErrors.required.id,
+        defaultMessage: 'This field is required',
+      })
+      .required({
+        id: translatedErrors.required.id,
+        defaultMessage: 'This field is required',
+      }),
+  });
 
 const fieldsToPick = ['email', 'firstname', 'lastname', 'username', 'isActive', 'roles'] as const;
 
@@ -51,6 +55,11 @@ const fieldsToPick = ['email', 'firstname', 'lastname', 'username', 'isActive', 
 
 const EditPage = () => {
   const { formatMessage } = useIntl();
+  const { schema: passwordSchema, hint: passwordHint } = usePasswordPolicy();
+  const validationSchema = React.useMemo(
+    () => getEditValidationSchema(passwordSchema),
+    [passwordSchema]
+  );
   const match = useMatch('/settings/users/:id');
   const id = match?.params?.id ?? '';
   const navigate = useNavigate();
@@ -179,7 +188,7 @@ const EditPage = () => {
         method="PUT"
         onSubmit={handleSubmit}
         initialValues={initialData}
-        validationSchema={EDIT_VALIDATION_SCHEMA}
+        validationSchema={validationSchema}
       >
         {({ isSubmitting, modified }) => {
           return (
@@ -251,6 +260,7 @@ const EditPage = () => {
                                   {...field}
                                   disabled={!canUpdate}
                                   label={formatMessage(label)}
+                                  hint={field.name === 'password' ? passwordHint : undefined}
                                   placeholder={
                                     'placeholder' in field
                                       ? formatMessage(field.placeholder)

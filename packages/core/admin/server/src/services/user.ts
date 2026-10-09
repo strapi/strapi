@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import _, { defaults } from 'lodash';
 
-import { arrays, errors, emitAudit } from '@strapi/utils';
+import { arrays, errors, emitAudit, yup } from '@strapi/utils';
 import type { Data } from '@strapi/types';
 import { createUser, hasSuperAdminRole } from '../domain/user';
 import {
@@ -219,11 +219,11 @@ const resetPasswordByEmail = async (email: string, password: string) => {
   }
 
   try {
-    await passwordValidator.validate(password);
-  } catch {
-    throw new ValidationError(
-      'Invalid password. Expected a minimum of 8 characters with at least one number and one uppercase letter'
-    );
+    await passwordValidator.label('The password').validate(password, { abortEarly: false });
+  } catch (error) {
+    const reasons = error instanceof yup.ValidationError ? `${error.errors.join('. ')}.` : '';
+
+    throw new ValidationError(`Invalid password. ${reasons}`.trim());
   }
 
   await updateById(user.id, { password });
