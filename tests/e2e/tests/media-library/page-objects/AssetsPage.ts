@@ -57,6 +57,15 @@ export class AssetsPage {
    * Open the New menu dropdown
    */
   async openNewMenu() {
+    // `New` is only rendered once RBAC has resolved, and the page paints before that. A spec
+    // that lands on the library — or reloads it — and opens this menu as its next move races
+    // the permission check, and loses on a loaded machine: the click burns the whole action
+    // timeout waiting for a button that is still a few hundred milliseconds away.
+    //
+    // `goto()` deliberately does not wait for it, so that a spec covering a role without
+    // `assets.create` fails fast instead of hanging. This is the caller that genuinely needs
+    // the affordance, so it is the one that waits.
+    await this.newButton.waitFor({ state: 'visible' });
     await this.newButton.click();
   }
 
