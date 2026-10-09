@@ -12,7 +12,10 @@ interface DeleteManyParams {
   entryDocumentId?: Modules.Documents.ID;
 }
 
-const deleteReleasesActionsAndUpdateReleaseStatus = async (params: DeleteManyParams) => {
+const deleteReleasesActionsAndUpdateReleaseStatus = async (
+  params: DeleteManyParams,
+  strapi: Core.Strapi
+) => {
   const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
     where: {
       actions: params,
@@ -25,7 +28,7 @@ const deleteReleasesActionsAndUpdateReleaseStatus = async (params: DeleteManyPar
 
   // We update the status of each release after delete the actions
   for (const release of releases) {
-    getService('release', { strapi }).updateReleaseStatus(release.id);
+    await getService('release', { strapi }).updateReleaseStatus(release.id);
   }
 };
 
@@ -48,11 +51,14 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
           if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
             const { where } = event.params;
 
-            deleteReleasesActionsAndUpdateReleaseStatus({
-              contentType: model.uid,
-              locale: where?.locale ?? null,
-              ...(where?.documentId && { entryDocumentId: where.documentId }),
-            });
+            await deleteReleasesActionsAndUpdateReleaseStatus(
+              {
+                contentType: model.uid,
+                locale: where?.locale ?? null,
+                ...(where?.documentId && { entryDocumentId: where.documentId }),
+              },
+              strapi
+            );
           }
         } catch (error) {
           // If an error happens we don't want to block the delete entry flow, but we log the error
@@ -64,8 +70,8 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
     });
 
     // We register middleware to handle ReleaseActions when changes on documents are made
-    strapi.documents.use(deleteActionsOnDelete);
-    strapi.documents.use(updateActionsOnUpdate);
+    strapi.documents.use(deleteActionsOnDelete(strapi));
+    strapi.documents.use(updateActionsOnUpdate(strapi));
 
     getService('scheduling', { strapi })
       .syncFromDatabase()
