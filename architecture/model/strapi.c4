@@ -188,9 +188,9 @@ model {
       users_permissions_strategy = component 'Users-permissions strategy' {
         summary 'Authenticates JWT users or applies public-role permissions.'
         description 'Authenticates JWT users or public role permissions and generates Content API abilities.'
-        technology 'JavaScript'
-        metadata { implementation 'packages/plugins/users-permissions/server/src/strategies/users-permissions.js' }
-        link https://github.com/strapi/strapi/tree/develop/packages/plugins/users-permissions/server/src/strategies/users-permissions.js 'Implementation'
+        technology 'TypeScript'
+        metadata { implementation 'packages/plugins/users-permissions/server/src/strategies/users-permissions.ts' }
+        link https://github.com/strapi/strapi/tree/develop/packages/plugins/users-permissions/server/src/strategies/users-permissions.ts 'Implementation'
       }
 
       core_api_layer = component 'Generated core API layer' {
