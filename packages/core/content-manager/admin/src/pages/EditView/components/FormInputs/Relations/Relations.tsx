@@ -625,6 +625,7 @@ const RelationsInput = ({
        *
        */
       onChange(relation);
+      setSearchParams({ _q: '', page: 1 });
     },
     [data, formatMessage, onChange, toggleNotification]
   );
