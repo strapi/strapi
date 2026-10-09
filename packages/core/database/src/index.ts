@@ -156,7 +156,9 @@ class Database {
       if (this.config.connection.client === 'sqlite') {
         await this.connection.raw('SELECT 1');
       } else {
-        await this.connection.client.acquireConnection();
+        // release it straight away, otherwise it holds a pool slot for the life of the process
+        const conn = await this.connection.client.acquireConnection();
+        await this.connection.client.releaseConnection(conn);
       }
     }
 
