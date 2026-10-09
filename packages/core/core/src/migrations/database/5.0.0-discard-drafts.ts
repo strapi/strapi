@@ -1284,6 +1284,125 @@ type ComponentHierarchyCaches = {
   parentDpCache: Map<string, boolean>;
 };
 
+const getParentInstanceCacheKey = (
+  componentUid: string,
+  componentId: number | string,
+  excludeUid: string | undefined
+) => `${componentUid}:${componentId}:${excludeUid ?? 'ALL'}`;
+
+/**
+ * Resolves the owning parent of every component instance in `componentRelations` up front, with
+ * one query per (potential parent join table, component type, id chunk) instead of one query per
+ * instance per potential parent table, and stores the answers in `caches.parentInstanceCache`.
+ *
+ * `findComponentParentInstance` then answers from the cache. The lookup order is unchanged: parent
+ * schemas are tried in `listComponentParentSchemas` order and the first table holding the instance
+ * wins. Instances found in no table are cached as `null`, exactly as the per-instance lookup would.
+ */
+async function prefetchComponentParentInstances(
+  trx: Knex,
+  identifiers: any,
+  componentRelations: Array<Record<string, any>>,
+  excludeUid: string | undefined,
+  caches: ComponentHierarchyCaches
+): Promise<void> {
+  const componentIdColumn = getComponentJoinColumnInverseName(identifiers);
+  const componentTypeColumn = getComponentTypeColumn(identifiers);
+  const entityIdColumn = getComponentJoinColumnEntityName(identifiers);
+
+  // keyed by the stringified id (as in the cache key), keeping the raw value for the query
+  const idsByComponentUid = new Map<string, Map<string, string | number>>();
+  for (const relation of componentRelations) {
+    const componentSchema = strapi.components[
+      relation[componentTypeColumn] as keyof typeof strapi.components
+    ] as any;
+    const componentId = relation[componentIdColumn];
+    if (!componentSchema || componentId == null) {
+      continue;
+    }
+
+    const ids = idsByComponentUid.get(componentSchema.uid) ?? new Map<string, string | number>();
+    ids.set(String(componentId), componentId);
+    idsByComponentUid.set(componentSchema.uid, ids);
+  }
+
+  for (const [componentUid, ids] of idsByComponentUid) {
+    let unresolved = Array.from(ids.keys()).filter(
+      (id) =>
+        !caches.parentInstanceCache.has(getParentInstanceCacheKey(componentUid, id, excludeUid))
+    );
+
+    const potentialParents = listComponentParentSchemas(componentUid).filter(
+      (schema) => schema.uid !== excludeUid
+    );
+
+    for (const parentSchema of potentialParents) {
+      if (unresolved.length === 0) {
+        break;
+      }
+
+      if (!parentSchema.collectionName) {
+        continue;
+      }
+
+      const parentJoinTableName = getComponentJoinTableName(
+        parentSchema.collectionName,
+        identifiers
+      );
+
+      try {
+        if (!(await ensureTableExists(trx, parentJoinTableName))) {
+          continue;
+        }
+      } catch {
+        continue;
+      }
+
+      const found = new Set<string>();
+      for (const idChunk of chunkArray(unresolved, getBatchSize(trx, 1000))) {
+        let rows: Array<Record<string, any>>;
+        try {
+          rows = await trx(parentJoinTableName)
+            .select(componentIdColumn, entityIdColumn)
+            .where(componentTypeColumn, componentUid)
+            .whereIn(
+              componentIdColumn,
+              idChunk.map((id) => ids.get(id)!)
+            )
+            .orderBy('id');
+        } catch {
+          // as with a failed per-instance lookup, these instances move on to the next table
+          continue;
+        }
+
+        for (const row of rows) {
+          const componentId = String(row[componentIdColumn]);
+          if (found.has(componentId)) {
+            continue;
+          }
+
+          found.add(componentId);
+          caches.parentInstanceCache.set(
+            getParentInstanceCacheKey(componentUid, componentId, excludeUid),
+            { uid: parentSchema.uid, parentId: row[entityIdColumn] }
+          );
+        }
+      }
+
+      if (found.size > 0) {
+        unresolved = unresolved.filter((id) => !found.has(id));
+      }
+    }
+
+    for (const componentId of unresolved) {
+      caches.parentInstanceCache.set(
+        getParentInstanceCacheKey(componentUid, componentId, excludeUid),
+        null
+      );
+    }
+  }
+}
+
 /**
  * Locates the owning entity (content type or component) for a given component instance.
  * This mirrors the document service logic we need in order to decide whether a relation
@@ -1297,7 +1416,7 @@ async function findComponentParentInstance(
   excludeUid: string | undefined,
   caches: ComponentHierarchyCaches
 ): Promise<ComponentParentInstance | null> {
-  const cacheKey = `${componentUid}:${componentId}:${excludeUid ?? 'ALL'}`;
+  const cacheKey = getParentInstanceCacheKey(componentUid, componentId, excludeUid);
   if (caches.parentInstanceCache.has(cacheKey)) {
     return caches.parentInstanceCache.get(cacheKey)!;
   }
@@ -3264,6 +3383,14 @@ async function copyComponentRelations({
       ancestorDpCache: new Map(),
       parentDpCache: new Map(),
     };
+
+    await prefetchComponentParentInstances(
+      trx,
+      identifiers,
+      componentRelations,
+      uid,
+      componentHierarchyCaches
+    );
 
     // Filter component relations: only propagate if component's parent in the component hierarchy doesn't have draft/publish
     // This matches discardDraft() behavior via shouldPropagateComponentRelationToNewVersion
