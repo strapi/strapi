@@ -1,7 +1,31 @@
 import execa from 'execa';
 import semver from 'semver';
 
+import type { PackageManager } from '../types';
+
 const installArguments = ['install'];
+
+/**
+ * Detects the package manager that invoked the CLI from `npm_config_user_agent`
+ * (e.g. `pnpm/9.1.0 …`, `nub/0.6.0 npm/? node/…`). nub reports its own agent
+ * ahead of the npm compatibility segment, so it is matched before the npm
+ * fallback. Returns `null` when no known package manager matches.
+ */
+export const getPackageManagerFromUserAgent = (userAgent: string): PackageManager | null => {
+  if (userAgent.startsWith('yarn')) {
+    return 'yarn';
+  }
+
+  if (userAgent.startsWith('pnpm')) {
+    return 'pnpm';
+  }
+
+  if (userAgent.startsWith('nub')) {
+    return 'nub';
+  }
+
+  return null;
+};
 
 type VersionedArgumentsMap = {
   [key: string]: string[]; // Maps semver ranges to argument arrays
@@ -28,6 +52,9 @@ const installArgumentsMap: {
   pnpm: {
     '*': [],
   },
+  nub: {
+    '*': [],
+  },
 };
 
 // Set environment variables for specific package managers, with full semver ranges
@@ -42,6 +69,9 @@ const installEnvMap: {
     '*': {},
   },
   pnpm: {
+    '*': {},
+  },
+  nub: {
     '*': {},
   },
 };
