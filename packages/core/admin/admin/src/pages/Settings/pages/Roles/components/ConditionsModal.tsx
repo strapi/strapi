@@ -300,6 +300,12 @@ const ActionRow = ({
       ? []
       : selectedValues.filter((conditionId) => allowedConditions.includes(conditionId));
 
+  // A permission carrying a condition the user cannot set is outside their ceiling: any change
+  // to it would be rejected (adding a condition broadens it), so the whole row is locked.
+  const isLocked =
+    allowedConditions !== undefined &&
+    selectedValues.some((conditionId) => !allowedConditions.includes(conditionId));
+
   const isOptionDisabled = (conditionId: string) => {
     if (allowedConditions === undefined) {
       return false;
@@ -309,10 +315,14 @@ const ActionRow = ({
     const isLastAllowedSelected =
       selectedAllowedValues.length === 1 && selectedAllowedValues[0] === conditionId;
 
-    return !allowedConditions.includes(conditionId) || isLastAllowedSelected;
+    return isLocked || !allowedConditions.includes(conditionId) || isLastAllowedSelected;
   };
 
   const handleChange: MultiSelectProps['onChange'] = (val = []) => {
+    if (isLocked) {
+      return;
+    }
+
     if (
       allowedConditions !== undefined &&
       selectedAllowedValues.length > 0 &&

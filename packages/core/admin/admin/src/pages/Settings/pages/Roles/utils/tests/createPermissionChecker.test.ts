@@ -1,6 +1,7 @@
 import {
   createFieldPermissionChecker,
   createDynamicActionPermissionChecker,
+  isPermissionHeld,
 } from '../createPermissionChecker';
 
 import type { Permission as AuthPermission } from '../../../../../../features/Auth';
@@ -278,5 +279,86 @@ describe('createDynamicActionPermissionChecker', () => {
       const check = createDynamicActionPermissionChecker(null, ACTION_ID, permissions)!;
       expect(check(['fields', 'title'])).toBe(true);
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Rules shared with the server ceiling
+// ---------------------------------------------------------------------------
+
+describe('isPermissionHeld', () => {
+  const READ = 'plugin::content-manager.explorer.read';
+
+  const permission = (properties: AuthPermission['properties']): AuthPermission => ({
+    action: READ,
+    subject: SUBJECT,
+    properties,
+  });
+
+  it('checks locales like fields', () => {
+    const permissions = [permission({ fields: ['title'], locales: ['en'] })];
+
+    expect(isPermissionHeld(permissions, READ, SUBJECT, 'locales', 'en')).toBe(true);
+    expect(isPermissionHeld(permissions, READ, SUBJECT, 'locales', 'fr')).toBe(false);
+  });
+
+  it('does not apply the nested field rule to locales', () => {
+    const permissions = [permission({ locales: ['en'] })];
+
+    expect(isPermissionHeld(permissions, READ, SUBJECT, 'locales', 'en.US')).toBe(false);
+  });
+
+  it('allows every locale when locales are null', () => {
+    const permissions = [permission({ locales: null })];
+
+    expect(isPermissionHeld(permissions, READ, SUBJECT, 'locales', 'fr')).toBe(true);
+  });
+
+  it('uses the union of the matching permissions', () => {
+    const permissions = [permission({ locales: ['en'] }), permission({ locales: ['fr'] })];
+
+    expect(isPermissionHeld(permissions, READ, SUBJECT, 'locales', 'fr')).toBe(true);
+    expect(isPermissionHeld(permissions, READ, SUBJECT, 'locales', 'de')).toBe(false);
+  });
+
+  it('ignores a permission with no fields, which grants nothing', () => {
+    expect(isPermissionHeld([permission({ fields: [] })], READ, SUBJECT)).toBe(false);
+    expect(
+      isPermissionHeld(
+        [permission({ fields: [] }), permission({ fields: ['title'] })],
+        READ,
+        SUBJECT,
+        'fields',
+        'title'
+      )
+    ).toBe(true);
+  });
+});
+
+describe('createFieldPermissionChecker — locales', () => {
+  it('checks the locale segment of a properties path', () => {
+    const permissions: AuthPermission[] = [
+      {
+        action: ACTION_ID,
+        subject: SUBJECT,
+        properties: { fields: ['title'], locales: ['en'] },
+      },
+    ];
+    const check = createFieldPermissionChecker(ACTION_ID, SUBJECT, permissions)!;
+
+    expect(check(['properties', 'locales', 'en'])).toBe(true);
+    expect(check(['properties', 'locales', 'fr'])).toBe(false);
+    expect(check(['properties', 'fields', 'title'])).toBe(true);
+    expect(check(['properties', 'fields', 'body'])).toBe(false);
+  });
+
+  it('checks locales when the action comes from the path', () => {
+    const permissions: AuthPermission[] = [
+      { action: ACTION_ID, subject: SUBJECT, properties: { locales: ['en'] } },
+    ];
+    const check = createDynamicActionPermissionChecker(SUBJECT, undefined, permissions)!;
+
+    expect(check([ACTION_ID, 'properties', 'locales', 'en'])).toBe(true);
+    expect(check([ACTION_ID, 'properties', 'locales', 'fr'])).toBe(false);
   });
 });

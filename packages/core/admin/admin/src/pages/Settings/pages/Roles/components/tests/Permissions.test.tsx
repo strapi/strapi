@@ -429,6 +429,57 @@ describe('Permissions — role editing with userPermissions (non super admin)', 
     expect(screen.getByRole('checkbox', { name: 'Select en Delete permission' })).not.toBeChecked();
   });
 
+  it('disables the locales the user does not hold and skips them when ticking the action', async () => {
+    const ref = React.createRef<PermissionsAPI>();
+    const layoutWithFrench: typeof layout = JSON.parse(JSON.stringify(layout));
+    layoutWithFrench.sections.collectionTypes.subjects[1].properties[1].children.push({
+      label: 'French (fr)',
+      value: 'fr',
+    });
+    const userPermissions = [
+      permission('plugin::content-manager.explorer.read', 'api::category.category', {
+        fields: ['name'],
+        locales: ['en'],
+      }),
+    ];
+
+    const { user } = render(
+      <Permissions
+        ref={ref}
+        layout={layoutWithFrench}
+        userPermissions={userPermissions}
+        isFormDisabled={false}
+      />
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Category' }));
+
+    const readEn = screen.getByRole('checkbox', { name: 'Select en Read permission' });
+    const readFr = screen.getByRole('checkbox', { name: 'Select fr Read permission' });
+
+    expect(readEn).toBeEnabled();
+    expect(readFr).toBeDisabled();
+
+    await user.hover(readFr);
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(UNHELD_TOOLTIP);
+
+    await user.click(screen.getByRole('checkbox', { name: 'Select Read category permission' }));
+
+    expect(readEn).toBeChecked();
+    expect(readFr).not.toBeChecked();
+
+    const sent = ref
+      .current!.getPermissions()
+      .permissionsToSend.find(
+        (perm) =>
+          perm.action === 'plugin::content-manager.explorer.read' &&
+          perm.subject === 'api::category.category'
+      );
+
+    expect(sent?.properties).toEqual({ fields: ['name'], locales: ['en'] });
+  });
+
   it('keeps the conditions modal editable', async () => {
     const userPermissions = [permission('plugin::i18n.locale.create')];
 
@@ -543,7 +594,44 @@ describe('Permissions — role editing with userPermissions (non super admin)', 
       expect(sent?.conditions).toEqual([IS_CREATOR]);
     });
 
-    it('only lets the user select conditions they hold and keeps out-of-scope ones', async () => {
+    it('only lets the user select conditions they hold', async () => {
+      const userPermissions = [permission(LOCALE_CREATE, null, {}, [IS_CREATOR, SAME_ROLE])];
+      const otherUserPermissions = [permission(LOCALE_CREATE, null, {}, [IS_CREATOR])];
+
+      const { user, unmount } = render(
+        <Permissions layout={layout} userPermissions={userPermissions} isFormDisabled={false} />
+      );
+
+      await openI18nLocales(user);
+      await user.click(screen.getByLabelText('Create'));
+      await openConditionOptions(user);
+
+      expect(screen.getByRole('option', { name: 'Has same role as creator' })).not.toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
+
+      unmount();
+
+      const { user: otherUser } = render(
+        <Permissions
+          layout={layout}
+          userPermissions={otherUserPermissions}
+          isFormDisabled={false}
+        />
+      );
+
+      await openI18nLocales(otherUser);
+      await otherUser.click(screen.getByLabelText('Create'));
+      await openConditionOptions(otherUser);
+
+      expect(screen.getByRole('option', { name: 'Has same role as creator' })).toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
+    });
+
+    it('locks the conditions of a permission carrying a condition the user does not hold', async () => {
       const ref = React.createRef<PermissionsAPI>();
       const userPermissions = [permission(LOCALE_CREATE, null, {}, [IS_CREATOR])];
       const rolePermissions = [
@@ -575,7 +663,9 @@ describe('Permissions — role editing with userPermissions (non super admin)', 
       const isCreator = screen.getByRole('option', { name: 'Is creator' });
       const sameRole = screen.getByRole('option', { name: 'Has same role as creator' });
 
-      expect(isCreator).not.toHaveAttribute('aria-disabled', 'true');
+      // Adding a held condition would broaden a permission the user does not hold
+      expect(isCreator).toHaveAttribute('aria-disabled', 'true');
+      expect(isCreator).not.toBeChecked();
       expect(sameRole).toHaveAttribute('aria-disabled', 'true');
       expect(sameRole).toBeChecked();
 
@@ -583,9 +673,7 @@ describe('Permissions — role editing with userPermissions (non super admin)', 
       await user.keyboard('[Escape]');
       await user.click(screen.getByRole('button', { name: 'Apply' }));
 
-      expect(findSent(ref, LOCALE_CREATE)?.conditions).toEqual(
-        expect.arrayContaining([IS_CREATOR, SAME_ROLE])
-      );
+      expect(findSent(ref, LOCALE_CREATE)?.conditions).toEqual([SAME_ROLE]);
     });
 
     it('does not let the user remove the last condition they hold', async () => {
