@@ -1,7 +1,7 @@
 import type * as Schema from '../../../../schema';
 
 import type * as UID from '../../../../uid';
-import type { If } from '../../../../utils';
+import type { Constants, If } from '../../../../utils';
 
 import type { ID, DocumentID } from './id';
 
@@ -31,6 +31,15 @@ type XManyInput = ShortHand[] | LongHand[] | null | PartialUpdate | FullUpdate;
 
 export type RelationInputValue<TRelationKind extends Schema.Attribute.RelationKind.Any> = If<
   Schema.Attribute.IsManyRelation<TRelationKind>,
+  XManyInput,
+  XOneInput
+>;
+
+/**
+ * Media attributes are relations to upload files, and accept the same input formats as relations
+ */
+export type MediaInputValue<TMultiple extends Constants.BooleanValue = Constants.False> = If<
+  TMultiple,
   XManyInput,
   XOneInput
 >;
