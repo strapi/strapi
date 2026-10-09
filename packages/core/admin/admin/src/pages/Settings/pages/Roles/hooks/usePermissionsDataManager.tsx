@@ -5,6 +5,7 @@ import { createContext } from '@radix-ui/react-context';
 
 import { Condition } from '../../../../../../../shared/contracts/permissions';
 import { Permission as AuthPermission } from '../../../../../features/Auth';
+import { isPermissionHeld } from '../utils/createPermissionChecker';
 
 import type {
   OnChangeCollectionTypeGlobalActionCheckboxAction,
@@ -38,7 +39,16 @@ export interface PermissionsDataManagerContextValue extends Pick<State, 'modifie
    * as opposed to only using `userPermissions` to gate which checkboxes can be ticked (roles).
    */
   inheritConditions: boolean;
-  checkUserHasPermission: (action: string, subject?: string | null, field?: string) => boolean;
+  /**
+   * Whether the user holds `action` on `subject` and, when given, the `value` of `property`
+   * (`fields` by default, e.g. a field path, or `locales` with a locale code).
+   */
+  checkUserHasPermission: (
+    action: string,
+    subject?: string | null,
+    value?: string,
+    property?: string
+  ) => boolean;
   /**
    * The conditions the user may set on `action` / `subject`, or `undefined` when they are not
    * restricted. See {@link getAllowedConditions}.
@@ -108,37 +118,9 @@ const PermissionsDataManagerProvider = ({
   onChangeCollectionTypeGlobalActionCheckbox,
 }: PermissionsDataManagerProviderProps) => {
   const checkUserHasPermission = React.useCallback(
-    (action: string, subject?: string | null, field?: string): boolean => {
-      if (userPermissions === undefined) {
-        return true;
-      }
-
-      const matchingPermission = userPermissions.find(
-        (perm) => perm.action === action && perm.subject === subject
-      );
-
-      if (matchingPermission === undefined) {
-        return false;
-      }
-
-      if (field === undefined) {
-        return true;
-      }
-
-      const fields = matchingPermission.properties?.fields;
-
-      if (fields === null || fields === undefined) {
-        return true;
-      }
-
-      if (Array.isArray(fields) === false || fields.length === 0) {
-        return false;
-      }
-
-      return fields.some(
-        (allowedField) => allowedField === field || field.startsWith(`${allowedField}.`)
-      );
-    },
+    (action: string, subject?: string | null, value?: string, property = 'fields'): boolean =>
+      userPermissions === undefined ||
+      isPermissionHeld(userPermissions, action, subject, property, value),
     [userPermissions]
   );
 

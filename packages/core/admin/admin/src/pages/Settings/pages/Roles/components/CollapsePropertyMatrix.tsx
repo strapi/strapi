@@ -232,8 +232,12 @@ const ActionRow = ({
 
               if (!isCollapsable) {
                 const checkboxValue = get(modifiedData, checkboxName, false);
-                const fieldPath = propertyName === 'fields' ? name : undefined;
-                const userHasPermission = checkUserHasPermission(actionId, subject, fieldPath);
+                const userHasPermission = checkUserHasPermission(
+                  actionId,
+                  subject,
+                  name,
+                  propertyName
+                );
 
                 return (
                   <Flex
@@ -275,8 +279,12 @@ const ActionRow = ({
               const data = get(modifiedData, checkboxName, {});
 
               const { hasAllActionsSelected, hasSomeActionsSelected } = getCheckboxState(data);
-              const fieldPath = propertyName === 'fields' ? name : undefined;
-              const userHasPermission = checkUserHasPermission(actionId, subject, fieldPath);
+              const userHasPermission = checkUserHasPermission(
+                actionId,
+                subject,
+                name,
+                propertyName
+              );
 
               return (
                 <Flex
@@ -518,12 +526,11 @@ const SubActionRow = ({
                       const checkboxValue = get(modifiedData, checkboxName, false);
 
                       if (!subChildrenForm) {
-                        const fieldPath =
-                          propertyName === 'fields' ? `${parentName}.${value}` : undefined;
                         const userHasPermission = checkUserHasPermission(
                           actionId,
                           subject,
-                          fieldPath
+                          `${parentName}.${value}`,
+                          propertyName
                         );
 
                         return (
@@ -565,12 +572,11 @@ const SubActionRow = ({
 
                       const { hasAllActionsSelected, hasSomeActionsSelected } =
                         getCheckboxState(checkboxValue);
-                      const fieldPath =
-                        propertyName === 'fields' ? `${parentName}.${value}` : undefined;
                       const userHasPermission = checkUserHasPermission(
                         actionId,
                         subject,
-                        fieldPath
+                        `${parentName}.${value}`,
+                        propertyName
                       );
 
                       return (
