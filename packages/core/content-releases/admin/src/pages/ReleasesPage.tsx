@@ -66,9 +66,7 @@ const RelativeTime = styled(BaseRelativeTime)`
   }
 `;
 
-// Every status needs an entry: a new status without a color fails to compile instead of
-// silently falling back to a default. Typed as the badge variants, the color scales a badge
-// can take, but rendered with their 100/200/600 shades rather than through `variant`.
+// `satisfies` makes a status without a color a compile error instead of a silent default
 const BADGE_COLOR_BY_STATUS = {
   ready: 'success',
   blocked: 'warning',

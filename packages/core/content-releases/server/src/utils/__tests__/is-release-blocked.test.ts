@@ -1,7 +1,5 @@
 import { isReleaseBlocked } from '../index';
 
-// One rule for the `blocked` status and for the check that rejects or fails a run: a release
-// is blocked exactly when a run of it would release nothing.
 describe('isReleaseBlocked', () => {
   test.each([
     // all_or_nothing: one entry that isn't publishable holds back the others

@@ -47,7 +47,6 @@ type StageRef = { id: Data.ID; name: string };
 
 type WorkflowWithRequiredStage = { stageRequiredToPublish?: StageRef | null } | null | undefined;
 
-// A draft read through the document service, with its review stage when it has one
 type DraftEntry = Modules.Documents.AnyDocument & { strapi_stage?: StageRef | null };
 
 export type PublishabilityOutcome = 'skipped_invalid' | 'skipped_not_approved';
@@ -63,7 +62,7 @@ export type EntryPublishability =
       publishable: false;
       outcome: PublishabilityOutcome;
       reason: PublishabilityReason;
-      /** What publishing the entry would throw: its message is the one a rejected release reports */
+      /** What publishing the entry would throw; a rejected release reports its message */
       error: Error;
     };
 
@@ -84,7 +83,6 @@ const getAssignedWorkflow = async (
 
 // Only the field paths and messages: the details also carry the submitted values
 const getValidationErrors = (error: Error) => {
-  // `instanceof` on a generic class types `details` as `any`: read it as `unknown` and check its shape
   const details: unknown = error instanceof errors.ValidationError ? error.details : null;
   const detailErrors: unknown[] =
     typeof details === 'object' &&
@@ -153,7 +151,6 @@ const computeEntryPublishability = async (
       publishedVersion
     );
   } catch (error) {
-    // Anything can be thrown: it's turned into an Error once, here
     validationError =
       error instanceof Error ? error : new errors.ValidationError('Entry is not valid');
   }
@@ -176,7 +173,6 @@ const computeEntryPublishability = async (
 
   return {
     publishable: false,
-    // Failing both checks counts as invalid
     outcome: validationError ? 'skipped_invalid' : 'skipped_not_approved',
     reason: {
       ...(validationError && { validation: { errors: getValidationErrors(validationError) } }),
@@ -191,9 +187,8 @@ const computeEntryPublishability = async (
 };
 
 /**
- * Whether a publish action's entry can be published right now: its draft passes publish
- * validation and, when its content type's workflow requires a stage to publish, it is at that
- * stage. Without review workflows (e.g. on a license without them) only validation applies.
+ * Whether a publish action's entry can be published now: its draft passes publish validation
+ * and, if its workflow requires a stage to publish, it is at that stage.
  */
 export const getEntryPublishability = async (
   contentTypeUid: UID.ContentType,
@@ -222,10 +217,8 @@ export const isEntryValid = async (
 type PublishActionRef = Pick<ReleaseAction, 'id' | 'contentType' | 'entryDocumentId' | 'locale'>;
 
 /**
- * Publishability of each publish action, read from its current draft, in the order given.
- * The deep populate and the workflow are looked up once per content type.
- *
- * Generic over the action type so callers get back their own actions, not a narrower shape.
+ * Publishability of each publish action from its current draft, in the order given. The deep
+ * populate and the workflow are looked up once per content type.
  */
 export const getPublishabilityForActions = async <TAction extends PublishActionRef>(
   actions: readonly TAction[],
@@ -274,15 +267,10 @@ export const getPublishabilityForActions = async <TAction extends PublishActionR
 };
 
 /**
- * Whether publishing the release now would release nothing, given how many of its entries
- * aren't publishable. Unpublish entries are always publishable.
- * - `all_or_nothing` (also a missing condition, on releases from before it existed): any entry
- *   that isn't publishable holds back every other one.
- * - `allow_partial`: entries that aren't publishable are left out, so only a release where no
- *   entry is publishable releases nothing.
- *
- * The one rule behind the `blocked` status and the check that rejects or fails a run, so a
- * release reads blocked exactly when a run of it would release nothing.
+ * Whether a run would release nothing. The single rule behind the `blocked` status and the
+ * publish-time check, so a release reads blocked exactly when a run would release nothing.
+ * - `all_or_nothing`, or missing (releases from before the condition): any entry not publishable.
+ * - `allow_partial`: every entry not publishable.
  */
 export const isReleaseBlocked = (
   releaseCondition: ReleaseCondition | null | undefined,
