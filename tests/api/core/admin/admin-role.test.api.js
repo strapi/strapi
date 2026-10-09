@@ -4,6 +4,7 @@ const _ = require('lodash');
 
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
+const { createUtils } = require('api-tests/utils');
 
 const data = {
   rolesWithUsers: [],
@@ -714,6 +715,193 @@ describe('Role CRUD End to End', () => {
           expect(permission.fields).toEqual(expect.arrayContaining([expect.any(String)]));
         }
       });
+    });
+  });
+
+  /**
+   * An admin who can update roles must not be able to grant a permission they do not hold
+   * themselves (action + subject, properties and conditions). Permissions a role already
+   * holds are preserved on save, and super admins are not restricted.
+   */
+  describe('Permissions ceiling', () => {
+    const READ_ACTION = 'plugin::content-manager.explorer.read';
+    const CREATE_ACTION = 'plugin::content-manager.explorer.create';
+    const SUBJECT = 'plugin::users-permissions.user';
+    const OUT_OF_SCOPE_ACTION = 'plugin::users-permissions.roles.update';
+
+    let utils;
+    let requesterRole;
+    let targetRole;
+    let requester;
+    let rqRequester;
+
+    const updateTargetRolePermissions = (request, permissions) =>
+      request({
+        url: `/admin/roles/${targetRole.id}/permissions`,
+        method: 'PUT',
+        body: { permissions },
+      });
+
+    const getTargetRolePermissions = async () => {
+      const res = await rq({ url: `/admin/roles/${targetRole.id}/permissions`, method: 'GET' });
+
+      return res.body.data;
+    };
+
+    beforeAll(async () => {
+      utils = createUtils(strapi);
+
+      // The requester can manage roles but only holds a restricted set of content permissions
+      requesterRole = await utils.createRole({
+        name: 'ceiling-requester-role',
+        description: 'Can update roles with a restricted set of content permissions',
+      });
+
+      await utils.assignPermissionsToRole(requesterRole.id, [
+        { action: 'admin::roles.read', subject: null, conditions: [], properties: {} },
+        { action: 'admin::roles.update', subject: null, conditions: [], properties: {} },
+        {
+          action: READ_ACTION,
+          subject: SUBJECT,
+          conditions: [],
+          properties: { fields: ['username', 'email'] },
+        },
+        {
+          action: CREATE_ACTION,
+          subject: SUBJECT,
+          conditions: ['admin::is-creator'],
+          properties: { fields: ['username'] },
+        },
+      ]);
+
+      targetRole = await utils.createRole({
+        name: 'ceiling-target-role',
+        description: 'Role edited by the requester',
+      });
+
+      requester = await utils.createUser({
+        email: 'ceiling-requester@strapi.io',
+        firstname: 'Ceiling',
+        lastname: 'Requester',
+        isActive: true,
+        roles: [requesterRole.id],
+      });
+
+      rqRequester = await createAuthRequest({ strapi, userInfo: { email: requester.email } });
+    });
+
+    afterAll(async () => {
+      await utils.deleteUserById(requester.id);
+      await utils.deleteRolesById([targetRole.id, requesterRole.id]);
+    });
+
+    test('Can grant permissions within the requester own permissions', async () => {
+      const res = await updateTargetRolePermissions(rqRequester, [
+        {
+          action: READ_ACTION,
+          subject: SUBJECT,
+          properties: { fields: ['username'] },
+          conditions: [],
+        },
+        {
+          action: CREATE_ACTION,
+          subject: SUBJECT,
+          properties: { fields: ['username'] },
+          conditions: ['admin::is-creator'],
+        },
+      ]);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data).toHaveLength(2);
+    });
+
+    test('Cannot grant permissions the requester does not hold', async () => {
+      const permissions = [
+        // action + subject the requester does not hold
+        { action: OUT_OF_SCOPE_ACTION, subject: null, properties: {}, conditions: [] },
+        // fields outside the requester's own fields
+        {
+          action: READ_ACTION,
+          subject: SUBJECT,
+          properties: { fields: ['username', 'provider'] },
+          conditions: [],
+        },
+        // the requester only holds this permission with a condition
+        {
+          action: CREATE_ACTION,
+          subject: SUBJECT,
+          properties: { fields: ['username'] },
+          conditions: [],
+        },
+      ];
+
+      const res = await updateTargetRolePermissions(rqRequester, permissions);
+
+      expect(res.statusCode).toBe(403);
+      expect(res.body).toMatchObject({
+        data: null,
+        error: {
+          status: 403,
+          name: 'ForbiddenError',
+          message: 'You cannot grant permissions you do not hold yourself',
+          details: { permissions },
+        },
+      });
+
+      // Nothing was written: the role still has the permissions granted in the previous test
+      const rolePermissions = await getTargetRolePermissions();
+      expect(rolePermissions).toHaveLength(2);
+      expect(rolePermissions.map(({ action }) => action).sort()).toEqual(
+        [CREATE_ACTION, READ_ACTION].sort()
+      );
+    });
+
+    test('Preserves permissions the role already holds, even if the requester does not hold them', async () => {
+      const outOfScopePermission = {
+        action: OUT_OF_SCOPE_ACTION,
+        subject: null,
+        properties: {},
+        conditions: [],
+      };
+      const inScopePermission = {
+        action: READ_ACTION,
+        subject: SUBJECT,
+        properties: { fields: ['username'] },
+        conditions: [],
+      };
+
+      // Super admins are not restricted
+      const superAdminRes = await updateTargetRolePermissions(rq, [
+        outOfScopePermission,
+        inScopePermission,
+      ]);
+      expect(superAdminRes.statusCode).toBe(200);
+
+      // Re-sending the out-of-scope permission unchanged is allowed
+      const unchangedRes = await updateTargetRolePermissions(rqRequester, [
+        outOfScopePermission,
+        inScopePermission,
+      ]);
+      expect(unchangedRes.statusCode).toBe(200);
+      expect(await getTargetRolePermissions()).toHaveLength(2);
+
+      // Changing it is not
+      const changedRes = await updateTargetRolePermissions(rqRequester, [
+        { ...outOfScopePermission, conditions: ['admin::is-creator'] },
+        inScopePermission,
+      ]);
+      expect(changedRes.statusCode).toBe(403);
+      expect(changedRes.body.error.details.permissions).toEqual([
+        { ...outOfScopePermission, conditions: ['admin::is-creator'] },
+      ]);
+
+      // Removing it is allowed
+      const removalRes = await updateTargetRolePermissions(rqRequester, [inScopePermission]);
+      expect(removalRes.statusCode).toBe(200);
+
+      const rolePermissions = await getTargetRolePermissions();
+      expect(rolePermissions).toHaveLength(1);
+      expect(rolePermissions[0]).toMatchObject(inScopePermission);
     });
   });
 });

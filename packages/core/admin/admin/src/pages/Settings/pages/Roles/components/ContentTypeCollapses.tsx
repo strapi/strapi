@@ -24,6 +24,7 @@ import { ConditionsButton } from './ConditionsButton';
 import { ConditionsModal } from './ConditionsModal';
 import { HiddenAction } from './HiddenAction';
 import { RowLabelWithCheckbox, RowLabelWithCheckboxProps } from './RowLabelWithCheckbox';
+import { UnheldPermissionTooltip } from './UnheldPermissionTooltip';
 
 /* -------------------------------------------------------------------------------------------------
  * ContentTypeCollapses
@@ -135,7 +136,7 @@ const Collapse = ({
     onChangeParentCheckbox,
     onChangeSimpleCheckbox,
     checkUserHasPermission,
-    userPermissions,
+    inheritConditions,
   } = usePermissionsDataManager();
   const [isConditionModalOpen, setIsConditionModalOpen] = React.useState(false);
 
@@ -219,27 +220,32 @@ const Collapse = ({
                           background="primary600"
                         />
                       )}
-                      <Checkbox
-                        disabled={isFormDisabled || !userHasPermission}
-                        name={checkboxName}
-                        aria-label={formatMessage(
-                          {
-                            id: `Settings.permissions.select-by-permission`,
-                            defaultMessage: 'Select {label} permission',
-                          },
-                          { label: `${permissionLabel} ${label}` }
-                        )}
-                        // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                        onCheckedChange={(value) => {
-                          onChangeParentCheckbox({
-                            target: {
-                              name: checkboxName,
-                              value: !!value,
+                      <UnheldPermissionTooltip
+                        isFormDisabled={isFormDisabled}
+                        userHasPermission={userHasPermission}
+                      >
+                        <Checkbox
+                          disabled={isFormDisabled || !userHasPermission}
+                          name={checkboxName}
+                          aria-label={formatMessage(
+                            {
+                              id: `Settings.permissions.select-by-permission`,
+                              defaultMessage: 'Select {label} permission',
                             },
-                          });
-                        }}
-                        checked={hasSomeActionsSelected ? 'indeterminate' : hasAllActionsSelected}
-                      />
+                            { label: `${permissionLabel} ${label}` }
+                          )}
+                          // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
+                          onCheckedChange={(value) => {
+                            onChangeParentCheckbox({
+                              target: {
+                                name: checkboxName,
+                                value: !!value,
+                              },
+                            });
+                          }}
+                          checked={hasSomeActionsSelected ? 'indeterminate' : hasAllActionsSelected}
+                        />
+                      </UnheldPermissionTooltip>
                     </Box>
                   </Cell>
                 );
@@ -259,20 +265,25 @@ const Collapse = ({
                       background="primary600"
                     />
                   )}
-                  <Checkbox
-                    disabled={isFormDisabled || !userHasPermission}
-                    name={checkboxName}
-                    // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                    onCheckedChange={(value) => {
-                      onChangeSimpleCheckbox({
-                        target: {
-                          name: checkboxName,
-                          value: !!value,
-                        },
-                      });
-                    }}
-                    checked={hasConditions ? 'indeterminate' : hasAllActionsSelected}
-                  />
+                  <UnheldPermissionTooltip
+                    isFormDisabled={isFormDisabled}
+                    userHasPermission={userHasPermission}
+                  >
+                    <Checkbox
+                      disabled={isFormDisabled || !userHasPermission}
+                      name={checkboxName}
+                      // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
+                      onCheckedChange={(value) => {
+                        onChangeSimpleCheckbox({
+                          target: {
+                            name: checkboxName,
+                            value: !!value,
+                          },
+                        });
+                      }}
+                      checked={hasConditions ? 'indeterminate' : hasAllActionsSelected}
+                    />
+                  </UnheldPermissionTooltip>
                 </Cell>
               );
             }
@@ -293,7 +304,7 @@ const Collapse = ({
             headerBreadCrumbs={[label, 'Settings.permissions.conditions.conditions']}
             actions={checkboxesActions}
             isFormDisabled={isFormDisabled}
-            isReadOnly={userPermissions !== undefined}
+            isReadOnly={inheritConditions}
             onClose={() => {
               setIsConditionModalOpen(false);
             }}

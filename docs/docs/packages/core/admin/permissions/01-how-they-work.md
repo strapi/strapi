@@ -148,3 +148,16 @@ The permissions are modified in the admin panel (on the [edit page](http://local
 | **conditions**       | List of the conditions that will be ran against an entry to determine whether the action on this entry is permitted or not | array  | -        | `['admin::is-creator']`                                       |
 
 A permission contains all needed information for the backend and the frontend to prevent users to perform non-permitted action.
+
+### Permission ceiling
+
+A user's permissions can act as a ceiling: the set of permissions they are allowed to hand on to someone else. The rules live in `server/src/domain/permission/ceiling.ts`. A requested permission is within the ceiling when:
+
+- the user holds a permission with the same `action` and `subject` (a held permission with `fields: []` grants nothing and does not count; requesting `fields: []` is always allowed for the same reason);
+- for every property the matching held permissions restrict (`fields`, `locales`, ...), the requested values are a subset of the union of the held values. A property that is unset or `null` on any matching held permission is unrestricted. A nested field is covered by its parent (`seo.title` by `seo`). Omitting a restricted property, or sending `null`, is rejected;
+- conditions are no broader than the held ones: anything goes if one matching held permission is unconditional, otherwise the requested conditions must be a non-empty subset of the union of the held conditions.
+
+Where it applies:
+
+- **Roles**: for every user except super admins. `PUT /admin/roles/:id/permissions` rejects permissions outside the requester's ceiling with a 403 listing them in `error.details.permissions`. Permissions the role already carries are not checked, so a requester can keep or remove them but not change them. The role editor disables the checkboxes and conditions the user cannot grant.
+- **Admin tokens**: a token cannot carry more than its owner holds. This check lives in `server/src/services/api-token.ts` (`enforceAdminPermissionsCeiling`) with its own rules: only `fields` are compared, conditions are inherited from the owner instead of chosen, out-of-ceiling permissions are rejected with a 400, and token permissions are re-clamped when the owner's roles change (`reconcileTokenPermissionsToUserCeiling`). It does not use `ceiling.ts` yet.

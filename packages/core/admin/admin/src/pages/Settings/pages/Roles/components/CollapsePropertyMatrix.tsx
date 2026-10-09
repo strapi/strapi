@@ -27,6 +27,7 @@ import { CollapseLabel } from './CollapseLabel';
 import { HiddenAction } from './HiddenAction';
 import { RequiredSign } from './RequiredSign';
 import { RowLabelWithCheckbox, RowLabelWithCheckboxProps } from './RowLabelWithCheckbox';
+import { UnheldPermissionTooltip } from './UnheldPermissionTooltip';
 
 /* -------------------------------------------------------------------------------------------------
  * CollapsePropertyMatrix
@@ -233,8 +234,12 @@ const ActionRow = ({
 
               if (!isCollapsable) {
                 const checkboxValue = get(modifiedData, checkboxName, false);
-                const fieldPath = propertyName === 'fields' ? name : undefined;
-                const userHasPermission = checkUserHasPermission(actionId, subject, fieldPath);
+                const userHasPermission = checkUserHasPermission(
+                  actionId,
+                  subject,
+                  name,
+                  propertyName
+                );
 
                 return (
                   <Flex
@@ -244,26 +249,31 @@ const ActionRow = ({
                     justifyContent="center"
                     alignItems="center"
                   >
-                    <Checkbox
-                      disabled={isFormDisabled || !userHasPermission}
-                      name={checkboxName.join('..')}
-                      aria-label={formatMessage(
-                        {
-                          id: `Settings.permissions.select-by-permission`,
-                          defaultMessage: 'Select {label} permission',
-                        },
-                        { label: `${name} ${label}` }
-                      )}
-                      onCheckedChange={(value) => {
-                        onChangeSimpleCheckbox({
-                          target: {
-                            name: checkboxName.join('..'),
-                            value: !!value,
+                    <UnheldPermissionTooltip
+                      isFormDisabled={isFormDisabled}
+                      userHasPermission={userHasPermission}
+                    >
+                      <Checkbox
+                        disabled={isFormDisabled || !userHasPermission}
+                        name={checkboxName.join('..')}
+                        aria-label={formatMessage(
+                          {
+                            id: `Settings.permissions.select-by-permission`,
+                            defaultMessage: 'Select {label} permission',
                           },
-                        });
-                      }}
-                      checked={checkboxValue}
-                    />
+                          { label: `${name} ${label}` }
+                        )}
+                        onCheckedChange={(value) => {
+                          onChangeSimpleCheckbox({
+                            target: {
+                              name: checkboxName.join('..'),
+                              value: !!value,
+                            },
+                          });
+                        }}
+                        checked={checkboxValue}
+                      />
+                    </UnheldPermissionTooltip>
                   </Flex>
                 );
               }
@@ -271,8 +281,12 @@ const ActionRow = ({
               const data = get(modifiedData, checkboxName, {});
 
               const { hasAllActionsSelected, hasSomeActionsSelected } = getCheckboxState(data);
-              const fieldPath = propertyName === 'fields' ? name : undefined;
-              const userHasPermission = checkUserHasPermission(actionId, subject, fieldPath);
+              const userHasPermission = checkUserHasPermission(
+                actionId,
+                subject,
+                name,
+                propertyName
+              );
 
               return (
                 <Flex
@@ -282,26 +296,31 @@ const ActionRow = ({
                   justifyContent="center"
                   alignItems="center"
                 >
-                  <Checkbox
-                    disabled={isFormDisabled || !userHasPermission}
-                    name={checkboxName.join('..')}
-                    onCheckedChange={(value) => {
-                      onChangeParentCheckbox({
-                        target: {
-                          name: checkboxName.join('..'),
-                          value: !!value,
+                  <UnheldPermissionTooltip
+                    isFormDisabled={isFormDisabled}
+                    userHasPermission={userHasPermission}
+                  >
+                    <Checkbox
+                      disabled={isFormDisabled || !userHasPermission}
+                      name={checkboxName.join('..')}
+                      onCheckedChange={(value) => {
+                        onChangeParentCheckbox({
+                          target: {
+                            name: checkboxName.join('..'),
+                            value: !!value,
+                          },
+                        });
+                      }}
+                      aria-label={formatMessage(
+                        {
+                          id: `Settings.permissions.select-by-permission`,
+                          defaultMessage: 'Select {label} permission',
                         },
-                      });
-                    }}
-                    aria-label={formatMessage(
-                      {
-                        id: `Settings.permissions.select-by-permission`,
-                        defaultMessage: 'Select {label} permission',
-                      },
-                      { label: `${name} ${label}` }
-                    )}
-                    checked={hasSomeActionsSelected ? 'indeterminate' : hasAllActionsSelected}
-                  />
+                        { label: `${name} ${label}` }
+                      )}
+                      checked={hasSomeActionsSelected ? 'indeterminate' : hasAllActionsSelected}
+                    />
+                  </UnheldPermissionTooltip>
                 </Flex>
               );
             })}
@@ -509,12 +528,11 @@ const SubActionRow = ({
                       const checkboxValue = get(modifiedData, checkboxName, false);
 
                       if (!subChildrenForm) {
-                        const fieldPath =
-                          propertyName === 'fields' ? `${parentName}.${value}` : undefined;
                         const userHasPermission = checkUserHasPermission(
                           actionId,
                           subject,
-                          fieldPath
+                          `${parentName}.${value}`,
+                          propertyName
                         );
 
                         return (
@@ -525,38 +543,42 @@ const SubActionRow = ({
                             justifyContent="center"
                             alignItems="center"
                           >
-                            <Checkbox
-                              disabled={isFormDisabled || !userHasPermission}
-                              name={checkboxName.join('..')}
-                              aria-label={formatMessage(
-                                {
-                                  id: `Settings.permissions.select-by-permission`,
-                                  defaultMessage: 'Select {label} permission',
-                                },
-                                { label: `${parentName} ${label} ${propertyLabel}` }
-                              )}
-                              onCheckedChange={(value) => {
-                                onChangeSimpleCheckbox({
-                                  target: {
-                                    name: checkboxName.join('..'),
-                                    value: !!value,
+                            <UnheldPermissionTooltip
+                              isFormDisabled={isFormDisabled}
+                              userHasPermission={userHasPermission}
+                            >
+                              <Checkbox
+                                disabled={isFormDisabled || !userHasPermission}
+                                name={checkboxName.join('..')}
+                                aria-label={formatMessage(
+                                  {
+                                    id: `Settings.permissions.select-by-permission`,
+                                    defaultMessage: 'Select {label} permission',
                                   },
-                                });
-                              }}
-                              checked={checkboxValue}
-                            />
+                                  { label: `${parentName} ${label} ${propertyLabel}` }
+                                )}
+                                onCheckedChange={(value) => {
+                                  onChangeSimpleCheckbox({
+                                    target: {
+                                      name: checkboxName.join('..'),
+                                      value: !!value,
+                                    },
+                                  });
+                                }}
+                                checked={checkboxValue}
+                              />
+                            </UnheldPermissionTooltip>
                           </Flex>
                         );
                       }
 
                       const { hasAllActionsSelected, hasSomeActionsSelected } =
                         getCheckboxState(checkboxValue);
-                      const fieldPath =
-                        propertyName === 'fields' ? `${parentName}.${value}` : undefined;
                       const userHasPermission = checkUserHasPermission(
                         actionId,
                         subject,
-                        fieldPath
+                        `${parentName}.${value}`,
+                        propertyName
                       );
 
                       return (
@@ -567,30 +589,35 @@ const SubActionRow = ({
                           justifyContent="center"
                           alignItems="center"
                         >
-                          <Checkbox
-                            key={propertyLabel}
-                            disabled={isFormDisabled || !userHasPermission}
-                            name={checkboxName.join('..')}
-                            aria-label={formatMessage(
-                              {
-                                id: `Settings.permissions.select-by-permission`,
-                                defaultMessage: 'Select {label} permission',
-                              },
-                              { label: `${parentName} ${label} ${propertyLabel}` }
-                            )}
-                            // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                            onCheckedChange={(value) => {
-                              onChangeParentCheckbox({
-                                target: {
-                                  name: checkboxName.join('..'),
-                                  value: !!value,
+                          <UnheldPermissionTooltip
+                            isFormDisabled={isFormDisabled}
+                            userHasPermission={userHasPermission}
+                          >
+                            <Checkbox
+                              key={propertyLabel}
+                              disabled={isFormDisabled || !userHasPermission}
+                              name={checkboxName.join('..')}
+                              aria-label={formatMessage(
+                                {
+                                  id: `Settings.permissions.select-by-permission`,
+                                  defaultMessage: 'Select {label} permission',
                                 },
-                              });
-                            }}
-                            checked={
-                              hasSomeActionsSelected ? 'indeterminate' : hasAllActionsSelected
-                            }
-                          />
+                                { label: `${parentName} ${label} ${propertyLabel}` }
+                              )}
+                              // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
+                              onCheckedChange={(value) => {
+                                onChangeParentCheckbox({
+                                  target: {
+                                    name: checkboxName.join('..'),
+                                    value: !!value,
+                                  },
+                                });
+                              }}
+                              checked={
+                                hasSomeActionsSelected ? 'indeterminate' : hasAllActionsSelected
+                              }
+                            />
+                          </UnheldPermissionTooltip>
                         </Flex>
                       );
                     }

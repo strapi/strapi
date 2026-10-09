@@ -5,7 +5,7 @@ import _, { omit, pick, differenceWith, differenceBy, isEqual } from 'lodash';
 import { dates, arrays, hooks as hooksUtils, errors } from '@strapi/utils';
 import type { Data } from '@strapi/types';
 
-import permissionDomain from '../domain/permission';
+import permissionDomain, { type CreatePermissionPayload } from '../domain/permission';
 import type { AdminUser, AdminRole, Permission } from '../../../shared/contracts/shared';
 import type { Action } from '../domain/action';
 
@@ -16,7 +16,7 @@ import { getService } from '../utils';
 const { SUPER_ADMIN_CODE, CONTENT_TYPE_SECTION } = roleConstants;
 
 const { createAsyncSeriesWaterfallHook } = hooksUtils;
-const { ApplicationError } = errors;
+const { ApplicationError, ForbiddenError } = errors;
 
 const hooks = {
   willResetSuperAdminPermissions: createAsyncSeriesWaterfallHook(),
@@ -385,6 +385,50 @@ const assignPermissions = async (
   return permissionsToReturn;
 };
 
+/**
+ * Make sure a user cannot grant a role permissions they do not hold themselves.
+ * Only permissions that are new to the role are checked: permissions the role already
+ * carries are preserved as they are, and removing them is always allowed.
+ * @param user - the admin user performing the update
+ * @param roleId - the role being updated
+ * @param permissions - the permissions requested for the role
+ */
+const checkPermissionsCeiling = async (
+  user: AdminUser,
+  roleId: Data.ID,
+  permissions: CreatePermissionPayload[] = []
+): Promise<void> => {
+  if (hasSuperAdminRole(user)) {
+    return;
+  }
+
+  const permissionService = getService('permission');
+
+  const userPermissions = await permissionService.findUserPermissions(user);
+
+  const existingPermissions = await permissionService.findMany({
+    where: { role: { id: roleId } },
+  });
+
+  const newPermissions = differenceWith(
+    permissions.map((permission) => permissionDomain.create(permission)),
+    existingPermissions,
+    arePermissionsEqual
+  );
+
+  const rejectedPermissions = newPermissions.filter(
+    (permission) => !permissionDomain.ceiling.isPermissionWithinCeiling(permission, userPermissions)
+  );
+
+  if (rejectedPermissions.length > 0) {
+    throw new ForbiddenError('You cannot grant permissions you do not hold yourself', {
+      permissions: rejectedPermissions.map((permission) =>
+        pick(permission, ['action', 'subject', 'properties', 'conditions'])
+      ),
+    });
+  }
+};
+
 const addPermissions = async (roleId: Data.ID, permissions: any) => {
   const { conditionProvider, createMany } = getService('permission');
   const { sanitizeConditions } = permissionDomain;
@@ -479,6 +523,7 @@ export default {
   displayWarningIfNoSuperAdmin,
   addPermissions,
   hasSuperAdminRole,
+  checkPermissionsCeiling,
   assignPermissions,
   resetSuperAdminPermissions,
   checkRolesIdForDeletion,

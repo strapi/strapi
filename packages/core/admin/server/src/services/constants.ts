@@ -1,10 +1,11 @@
 import { ContentApiApiToken } from '../../../shared/contracts/api-token';
+import { SUPER_ADMIN_CODE } from '../../../shared/utils/super-admin';
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
 const constants = {
   CONTENT_TYPE_SECTION: 'contentTypes',
-  SUPER_ADMIN_CODE: 'strapi-super-admin',
+  SUPER_ADMIN_CODE,
   EDITOR_CODE: 'strapi-editor',
   AUTHOR_CODE: 'strapi-author',
   READ_ACTION: 'plugin::content-manager.explorer.read',
