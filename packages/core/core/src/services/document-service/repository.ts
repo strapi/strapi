@@ -611,7 +611,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
         oldVersions: oldPublishedVersions,
       },
       {
-        shouldPropagateRelation: components.createComponentRelationFilter(),
+        filterRelationsToPropagate: components.createComponentRelationFilter(),
       }
     );
 
@@ -722,7 +722,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
         oldVersions: oldDrafts,
       },
       {
-        shouldPropagateRelation: components.createComponentRelationFilter(),
+        filterRelationsToPropagate: components.createComponentRelationFilter(),
       }
     );
 

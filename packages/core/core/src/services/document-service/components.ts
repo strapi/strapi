@@ -444,13 +444,94 @@ const assignComponentData = curry(
     Component relation handling for document operations
 ************************** */
 
+type ComponentParent = { uid: string; table: string; parentId: number | string };
+
+// Component instance ids are bound as query parameters, so look them up in batches that stay
+// well below the bind parameter limit of every supported database
+const PARENT_LOOKUP_BATCH_SIZE = 500;
+
+/**
+ * Find the parent entries of many instances of the same component.
+ *
+ * Given a component model, component instance ids, and the list of possible parent
+ * content types and components (those that can embed this component), this function
+ * checks each parent's *_cmps join table to see which instances it links to a parent.
+ * Parents are checked in order and the first one linking an instance is its parent.
+ *
+ * Each parent costs one query per batch of instances rather than one query per instance,
+ * and parents are no longer checked once every instance has been found.
+ *
+ * - Returns a map from component instance id (as a string) to its parent uid, parent table
+ *   name and parent id.
+ * - Instances without a parent are not in the map.
+ */
+const findComponentParents = async (
+  componentSchema: Schema.Component,
+  componentIds: (number | string)[],
+  parentSchemasForComponent: (Schema.ContentType | Schema.Component)[],
+  opts?: { trx?: any }
+): Promise<Map<string, ComponentParent>> => {
+  const parents = new Map<string, ComponentParent>();
+  if (!componentSchema?.uid) return parents;
+
+  const withTrx = (qb: any) => (opts?.trx ? qb.transacting(opts.trx) : qb);
+
+  // Use the exact same functions that create the columns
+  const identifiers = strapi.db.metadata.identifiers;
+  const entityIdColumn = getComponentJoinColumnEntityName(identifiers);
+  const componentIdColumn = getComponentJoinColumnInverseName(identifiers);
+  const componentTypeColumn = getComponentTypeColumn(identifiers);
+
+  let pendingIds = _.uniqBy(
+    componentIds.filter((id) => id !== undefined && id !== null),
+    String
+  );
+
+  for (const parent of parentSchemasForComponent) {
+    if (pendingIds.length === 0) break;
+    if (!parent.collectionName) continue;
+
+    // Use the exact same functions that create the tables
+    const joinTableName = getComponentJoinTableName(parent.collectionName, identifiers);
+
+    // The join table is registered as a model of its own (see createCompoLinkModel) and schema
+    // sync creates every registered model, so the metadata knows whether it exists without
+    // querying the database schema
+    if (!strapi.db.metadata.has(joinTableName)) continue;
+
+    for (const batch of _.chunk(pendingIds, PARENT_LOOKUP_BATCH_SIZE)) {
+      try {
+        const parentRows = await withTrx(strapi.db.getConnection(joinTableName))
+          .select(entityIdColumn, componentIdColumn)
+          .where(componentTypeColumn, componentSchema.uid)
+          .whereIn(componentIdColumn, batch);
+
+        for (const parentRow of parentRows) {
+          const componentId = String(parentRow[componentIdColumn]);
+
+          if (!parents.has(componentId)) {
+            parents.set(componentId, {
+              uid: parent.uid,
+              table: parent.collectionName,
+              parentId: parentRow[entityIdColumn],
+            });
+          }
+        }
+      } catch {
+        continue;
+      }
+    }
+
+    pendingIds = pendingIds.filter((id) => !parents.has(String(id)));
+  }
+
+  return parents;
+};
+
 /**
  * Find the parent entry of a component instance.
  *
- * Given a component model, a specific component instance id, and the list of
- * possible parent content types (those that can embed this component),
- * this function checks each parent's *_cmps join table to see if the component
- * instance is linked to a parent entity.
+ * Single-instance form of `findComponentParents`.
  *
  * - Returns the parent uid, parent table name, and parent id if found.
  * - Returns null if no parent relationship exists.
@@ -460,48 +541,15 @@ const findComponentParent = async (
   componentId: number | string,
   parentSchemasForComponent: (Schema.ContentType | Schema.Component)[],
   opts?: { trx?: any }
-): Promise<{ uid: string; table: string; parentId: number | string } | null> => {
-  if (!componentSchema?.uid) return null;
+): Promise<ComponentParent | null> => {
+  const parents = await findComponentParents(
+    componentSchema,
+    [componentId],
+    parentSchemasForComponent,
+    opts
+  );
 
-  const schemaBuilder = strapi.db.getSchemaConnection(opts?.trx);
-  const withTrx = (qb: any) => (opts?.trx ? qb.transacting(opts.trx) : qb);
-
-  for (const parent of parentSchemasForComponent) {
-    if (!parent.collectionName) continue;
-
-    // Use the exact same functions that create the tables
-    const identifiers = strapi.db.metadata.identifiers;
-    const joinTableName = getComponentJoinTableName(parent.collectionName, identifiers);
-
-    try {
-      const tableExists = await schemaBuilder.hasTable(joinTableName);
-      if (!tableExists) continue;
-
-      // Use the exact same functions that create the columns
-      const entityIdColumn = getComponentJoinColumnEntityName(identifiers);
-      const componentIdColumn = getComponentJoinColumnInverseName(identifiers);
-      const componentTypeColumn = getComponentTypeColumn(identifiers);
-
-      const parentRow = await withTrx(strapi.db.getConnection(joinTableName))
-        .where({
-          [componentIdColumn]: componentId,
-          [componentTypeColumn]: componentSchema.uid,
-        })
-        .first(entityIdColumn);
-
-      if (parentRow) {
-        return {
-          uid: parent.uid,
-          table: parent.collectionName,
-          parentId: parentRow[entityIdColumn],
-        };
-      }
-    } catch {
-      continue;
-    }
-  }
-
-  return null;
+  return parents.get(String(componentId)) ?? null;
 };
 
 /**
@@ -525,86 +573,109 @@ const getParentSchemasForComponent = (
 };
 
 /**
- * Determines if a component relation should be propagated to a new document version
- * when a document with draft and publish is updated.
+ * Finds which of the given component instances belong to an entry of a content type with
+ * draft and publish enabled, either directly or through parent components.
+ *
+ * Instances are resolved one nesting level at a time, so the number of queries depends on
+ * the schema rather than on the number of instances.
+ *
+ * - Returns the ids (as strings) of the instances owned by a draft and publish entry.
+ * - Instances without a parent, or owned by an entry without draft and publish, are not included.
  */
-const shouldPropagateComponentRelationToNewVersion = async (
-  componentRelation: Record<string, any>,
+const findInstancesOwnedByDraftAndPublishEntries = async (
   componentSchema: Schema.Component,
-  parentSchemasForComponent: (Schema.ContentType | Schema.Component)[],
+  componentIds: (number | string)[],
   trx: any
-): Promise<boolean> => {
-  // Get the component ID column name using the actual component model name
-  const componentIdColumn = strapi.db.metadata.identifiers.getJoinColumnAttributeIdName(
-    _.snakeCase(componentSchema.modelName)
-  );
+): Promise<Set<string>> => {
+  const ownedIds = new Set<string>();
 
-  const componentId = componentRelation[componentIdColumn] ?? componentRelation.parentId;
-
-  const parent = await findComponentParent(
-    componentSchema,
-    componentId,
-    parentSchemasForComponent,
-    { trx }
-  );
-
-  // Keep relation if component has no parent entry
-  if (!parent?.uid) {
-    return true;
+  const parentSchemas = getParentSchemasForComponent(componentSchema);
+  if (parentSchemas.length === 0) {
+    return ownedIds;
   }
 
-  if (strapi.components[parent.uid as UID.Component]) {
-    // If the parent is a component, we need to check its parents recursively
-    const parentComponentSchema = strapi.components[parent.uid as UID.Component];
-    const grandParentSchemas = getParentSchemasForComponent(parentComponentSchema);
-    return shouldPropagateComponentRelationToNewVersion(
-      parent,
-      parentComponentSchema,
-      grandParentSchemas,
+  const parents = await findComponentParents(componentSchema, componentIds, parentSchemas, {
+    trx,
+  });
+
+  // Instances nested in another component, grouped by that component and its instance id
+  const nestedInstances = new Map<
+    UID.Component,
+    Map<string, { parentId: number | string; componentIds: string[] }>
+  >();
+
+  for (const [componentId, parent] of parents) {
+    if (strapi.components[parent.uid as UID.Component]) {
+      const parentUid = parent.uid as UID.Component;
+      const parentKey = String(parent.parentId);
+
+      if (!nestedInstances.has(parentUid)) {
+        nestedInstances.set(parentUid, new Map());
+      }
+
+      const instancesByParent = nestedInstances.get(parentUid)!;
+      if (!instancesByParent.has(parentKey)) {
+        instancesByParent.set(parentKey, { parentId: parent.parentId, componentIds: [] });
+      }
+
+      instancesByParent.get(parentKey)!.componentIds.push(componentId);
+      continue;
+    }
+
+    if (strapi.contentTypes[parent.uid as UID.ContentType]?.options?.draftAndPublish) {
+      ownedIds.add(componentId);
+    }
+  }
+
+  // If the parent is a component, its own parents decide, so check them a level up
+  for (const [parentUid, instancesByParent] of nestedInstances) {
+    const ownedParentIds = await findInstancesOwnedByDraftAndPublishEntries(
+      strapi.components[parentUid],
+      Array.from(instancesByParent.values(), ({ parentId }) => parentId),
       trx
     );
+
+    for (const parentKey of ownedParentIds) {
+      instancesByParent.get(parentKey)?.componentIds.forEach((id) => ownedIds.add(id));
+    }
   }
 
-  const parentContentType = strapi.contentTypes[parent.uid as UID.ContentType];
-
-  // Keep relation if parent doesn't have draft & publish enabled
-  if (!parentContentType?.options?.draftAndPublish) {
-    return true;
-  }
-
-  // Discard relation if parent has draft & publish enabled
-  return false;
+  return ownedIds;
 };
 
 /**
  * Creates a filter function for component relations that can be passed to the generic
- * unidirectional relations utility
+ * unidirectional relations utility.
+ *
+ * A relation of a component instance is propagated to the new document version unless the
+ * instance belongs to an entry with draft and publish enabled: that entry's new version gets
+ * its own copy of the component.
  */
 const createComponentRelationFilter = () => {
   return async (
-    relation: Record<string, any>,
+    relations: Record<string, any>[],
     model: Schema.Component | Schema.ContentType,
     trx: any
-  ): Promise<boolean> => {
+  ): Promise<Record<string, any>[]> => {
     // Only apply component-specific filtering for components
-    if (model.modelType !== 'component') {
-      return true;
+    if (model.modelType !== 'component' || relations.length === 0) {
+      return relations;
     }
 
     const componentSchema = model as Schema.Component;
-    const parentSchemas = getParentSchemasForComponent(componentSchema);
 
-    // Exit if no draft & publish parent types exist
-    if (parentSchemas.length === 0) {
-      return true;
-    }
+    // Get the component ID column name using the actual component model name
+    const componentIdColumn = strapi.db.metadata.identifiers.getJoinColumnAttributeIdName(
+      _.snakeCase(componentSchema.modelName)
+    );
 
-    return shouldPropagateComponentRelationToNewVersion(
-      relation,
+    const ownedIds = await findInstancesOwnedByDraftAndPublishEntries(
       componentSchema,
-      parentSchemas,
+      relations.map((relation) => relation[componentIdColumn]),
       trx
     );
+
+    return relations.filter((relation) => !ownedIds.has(String(relation[componentIdColumn])));
   };
 };
 
