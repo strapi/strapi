@@ -141,8 +141,6 @@
   "form.attribute.condition.enum-change-warning": "Následující pole mají podmínky, které závisí na tomto poli: {fieldNames}. Změna nebo odstranění enum hodnot {values} tyto podmínky poruší. Chcete pokračovat?",
   "form.attribute.condition.enum-change-warning-values": ". Změna nebo odstranění enum hodnot ",
   "form.attribute.condition.enum-change-warning-end": " poruší tyto podmínky. Chcete pokračovat?",
-  "form.attribute.condition.field-change-warning": "Následující pole mají podmínky, které závisí na tomto poli: {fieldNames}. Přejmenování tohoto pole tyto podmínky poruší. Chcete pokračovat?",
-  "form.attribute.condition.field-change-warning-end": ". Přejmenování tohoto pole tyto podmínky poruší. Chcete pokračovat?",
   "form.button.add-components-to-dynamiczone": "Přidat komponenty do zóny",
   "form.button.add-field": "Přidat další pole",
   "form.button.add-first-field-to-created-component": "Přidat první pole do komponentu",

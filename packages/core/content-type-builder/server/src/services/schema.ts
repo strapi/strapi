@@ -80,6 +80,85 @@ const removeDeletedUIDTargetFieldsOnUpdates = (schema: CTBSchema) => {
   });
 };
 
+/**
+ * Composes the ordered rename hops of an updated type into an origin -> final
+ * name map (`a -> b, b -> c` gives `a -> c`).
+ */
+const composeRenames = (hops: { oldName?: string; newName?: string }[]): Map<string, string> => {
+  const originByName = new Map<string, string>();
+
+  hops.forEach(({ oldName, newName }) => {
+    if (!oldName || !newName || oldName === newName) {
+      return;
+    }
+
+    const origin = originByName.get(oldName) ?? oldName;
+    originByName.delete(oldName);
+    originByName.set(newName, origin);
+  });
+
+  return new Map([...originByName].map(([name, origin]) => [origin, name]));
+};
+
+/**
+ * Makes field conditions follow the renames of this save: a condition whose
+ * `var` still names the origin of a rename is pointed at the field's final name.
+ *
+ * A `var` that names an attribute of the saved type is left alone: the caller
+ * already rewrote it, or (in a swap) it cannot be told apart from one that was.
+ */
+const renameConditionVarsOnUpdates = (schema: CTBSchema) => {
+  type AttributeEntry = {
+    action?: string;
+    name?: string;
+    properties?: { conditions?: { visible?: Record<string, unknown> } };
+  };
+  type Entry = {
+    action?: string;
+    renames?: { oldName?: string; newName?: string }[];
+    attributes?: AttributeEntry[];
+  };
+
+  const entries = [
+    ...(schema.contentTypes as unknown as Entry[]),
+    ...(schema.components as unknown as Entry[]),
+  ];
+
+  entries.forEach((entry) => {
+    if (entry.action !== 'update' || !Array.isArray(entry.renames)) {
+      return;
+    }
+
+    const renames = composeRenames(entry.renames);
+    const savedAttributes = (entry.attributes ?? []).filter(
+      (attribute) => attribute.action !== 'delete'
+    );
+    const saved = new Set(savedAttributes.map((attribute) => attribute.name));
+
+    savedAttributes.forEach((attribute) => {
+      Object.values(attribute.properties?.conditions?.visible ?? {}).forEach((rule) => {
+        const fieldVar: unknown = Array.isArray(rule) ? rule[0] : undefined;
+
+        if (
+          typeof fieldVar !== 'object' ||
+          fieldVar === null ||
+          !('var' in fieldVar) ||
+          typeof fieldVar.var !== 'string' ||
+          saved.has(fieldVar.var)
+        ) {
+          return;
+        }
+
+        const finalName = renames.get(fieldVar.var);
+
+        if (finalName !== undefined && saved.has(finalName)) {
+          fieldVar.var = finalName;
+        }
+      });
+    });
+  });
+};
+
 interface CollectedRename {
   uid: string;
   oldName: string;
@@ -486,6 +565,7 @@ export const updateSchema = async (schema: CTBSchema) => {
   // pre-process data
   removeEmptyDefaultsOnUpdates(schema);
   removeDeletedUIDTargetFieldsOnUpdates(schema);
+  renameConditionVarsOnUpdates(schema);
 
   const upsertedUids = new Map<string, ContentTypeKind>();
   const deletedUids = new Set<string>();
