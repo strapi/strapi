@@ -20,43 +20,41 @@ describe('content-releases utils - isEntryValid', () => {
         validateEntityCreation: validate,
       },
       plugin: () => ({ service: () => undefined }),
+      // The entry has no published version
+      db: { query: () => ({ findOne: async () => null }) },
     }) as any;
 
   test('forwards strictRelations: true and the entry locale to the validator', async () => {
     const validate = jest.fn().mockResolvedValue({});
     const strapi = buildStrapi({ strictRelations: true, validate });
-    const entry = { id: 1, locale: 'en' };
+    const entry = { id: 1, documentId: 'article-1', locale: 'en' };
 
     await isEntryValid(contentTypeUid, entry, { strapi });
 
-    expect(validate).toHaveBeenCalledWith(
-      model,
-      entry,
-      { isDraft: false, locale: 'en', strictRelations: true },
-      entry
-    );
+    const [, , options] = validate.mock.calls[0];
+    expect(options).toEqual({ isDraft: false, locale: 'en', strictRelations: true });
   });
 
   test('forwards strictRelations: false when the flag is unset', async () => {
     const validate = jest.fn().mockResolvedValue({});
     const strapi = buildStrapi({ strictRelations: false, validate });
-    const entry = { id: 1 };
+    const entry = { id: 1, documentId: 'article-1' };
 
     await isEntryValid(contentTypeUid, entry, { strapi });
 
-    expect(validate).toHaveBeenCalledWith(
-      model,
-      entry,
-      { isDraft: false, locale: undefined, strictRelations: false },
-      entry
-    );
+    const [, , options] = validate.mock.calls[0];
+    expect(options).toEqual({ isDraft: false, locale: undefined, strictRelations: false });
   });
 
   test('returns false when validation throws (flag on, missing required relation)', async () => {
     const validate = jest.fn().mockRejectedValue(new Error('author must be defined.'));
     const strapi = buildStrapi({ strictRelations: true, validate });
 
-    const result = await isEntryValid(contentTypeUid, { id: 1 }, { strapi });
+    const result = await isEntryValid(
+      contentTypeUid,
+      { id: 1, documentId: 'article-1' },
+      { strapi }
+    );
 
     expect(result).toBe(false);
   });
@@ -65,7 +63,11 @@ describe('content-releases utils - isEntryValid', () => {
     const validate = jest.fn().mockResolvedValue({});
     const strapi = buildStrapi({ strictRelations: false, validate });
 
-    const result = await isEntryValid(contentTypeUid, { id: 1 }, { strapi });
+    const result = await isEntryValid(
+      contentTypeUid,
+      { id: 1, documentId: 'article-1' },
+      { strapi }
+    );
 
     expect(result).toBe(true);
   });

@@ -1,6 +1,6 @@
 import { setCreatorFields, errors, emitAudit } from '@strapi/utils';
 
-import type { Core, Struct, UID, Data } from '@strapi/types';
+import type { Core, Struct, Data } from '@strapi/types';
 
 import {
   ALLOWED_WEBHOOK_EVENTS,
@@ -19,8 +19,39 @@ import type {
 } from '../../../shared/contracts/releases';
 import type { ReleaseAction } from '../../../shared/contracts/release-actions';
 import type { UserInfo } from '../../../shared/types';
-import { getService, getPublishOrderForContentTypes } from '../utils';
+import {
+  getService,
+  getPublishOrderForContentTypes,
+  getPublishabilityForActions,
+  isReleaseBlocked,
+} from '../utils';
 import { getReleaseChanges } from '../audit-logs';
+
+type PublishTrigger = 'manual' | 'scheduled';
+
+type LockedRelease = Pick<Release, 'id' | 'name' | 'releasedAt' | 'status' | 'releaseCondition'>;
+
+interface RunCounts {
+  published: number;
+  unpublished: number;
+  failed: number;
+}
+
+type LockedPublishResult =
+  | {
+      kind: 'released';
+      release: Pick<Release, 'id' | 'name' | 'releasedAt' | 'status'>;
+      counts: RunCounts;
+    }
+  | {
+      kind: 'failed';
+      error: Error;
+      release: Pick<Release, 'id' | 'name'>;
+      // Partial when the error came after entries were released, and they stay released
+      status: 'partial' | 'failed';
+      counts: RunCounts;
+    }
+  | { kind: 'rejected'; error: Error };
 
 const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
   const dispatchWebhook = (
@@ -35,49 +66,42 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   /**
-   * Given a release id, it returns the actions formatted ready to be used to publish them.
-   * We split them by contentType and type (publish/unpublish) and extract only the documentIds and locales.
+   * Content types in relation dependency order (a relation's target before its source), then
+   * within each type publishes before unpublishes, each in the order they were added.
    */
-  const getFormattedActions = async (releaseId: Release['id']) => {
+  const getActionsInRunOrder = async (releaseId: Release['id']) => {
     const actions = (await strapi.db.query(RELEASE_ACTION_MODEL_UID).findMany({
       where: {
         release: {
           id: releaseId,
         },
       },
+      orderBy: { id: 'asc' },
     })) as ReleaseAction[];
 
-    if (actions.length === 0) {
-      throw new errors.ValidationError('No entries to publish');
+    const contentTypeUids = getPublishOrderForContentTypes(
+      actions.map((action) => action.contentType),
+      { strapi }
+    );
+
+    return contentTypeUids.flatMap((contentTypeUid) => [
+      ...actions.filter(
+        ({ contentType, type }) => contentType === contentTypeUid && type === 'publish'
+      ),
+      ...actions.filter(
+        ({ contentType, type }) => contentType === contentTypeUid && type === 'unpublish'
+      ),
+    ]);
+  };
+
+  const releaseEntry = async (action: ReleaseAction) => {
+    const params = { documentId: action.entryDocumentId, locale: action.locale };
+
+    if (action.type === 'publish') {
+      await strapi.documents(action.contentType).publish(params);
+    } else {
+      await strapi.documents(action.contentType).unpublish(params);
     }
-
-    /**
-     * We separate publish and unpublish actions, grouping them by contentType and extracting only their documentIds and locales.
-     */
-    const formattedActions: {
-      [key: UID.ContentType]: {
-        publish: { documentId: ReleaseAction['entryDocumentId']; locale?: string }[];
-        unpublish: { documentId: ReleaseAction['entryDocumentId']; locale?: string }[];
-      };
-    } = {};
-
-    for (const action of actions) {
-      const contentTypeUid: UID.ContentType = action.contentType;
-
-      if (!formattedActions[contentTypeUid]) {
-        formattedActions[contentTypeUid] = {
-          publish: [],
-          unpublish: [],
-        };
-      }
-
-      formattedActions[contentTypeUid][action.type].push({
-        documentId: action.entryDocumentId,
-        locale: action.locale,
-      });
-    }
-
-    return formattedActions;
   };
 
   return {
@@ -215,7 +239,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
         schedulingService.cancel(id);
       }
 
-      this.updateReleaseStatus(id);
+      await this.updateReleaseStatus(id);
 
       strapi.telemetry.send('didUpdateContentRelease');
 
@@ -295,28 +319,23 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
       return release;
     },
 
-    async publish(releaseId: PublishRelease.Request['params']['id']) {
-      const {
-        release,
-        error,
-        lockedRelease,
-      }: {
-        release: Pick<Release, 'id' | 'releasedAt' | 'status'> | null;
-        error: unknown;
-        lockedRelease: Pick<Release, 'id' | 'name'>;
-      } = await strapi.db.transaction(async ({ trx }) => {
+    async publish(
+      releaseId: PublishRelease.Request['params']['id'],
+      { trigger }: { trigger: PublishTrigger }
+    ) {
+      const result = await strapi.db.transaction(async ({ trx }): Promise<LockedPublishResult> => {
         /**
          * We lock the release in this transaction, so any other process trying to publish it will wait until this transaction is finished
          * In this transaction we don't care about rollback, becasue we want to persist the lock until the end and if it fails we want to change the release status to failed
          */
-        const lockedRelease = (await strapi.db
+        const lockedRelease: LockedRelease | undefined = await strapi.db
           ?.queryBuilder(RELEASE_MODEL_UID)
           .where({ id: releaseId })
-          .select(['id', 'name', 'releasedAt', 'status'])
+          .select(['id', 'name', 'releasedAt', 'status', 'releaseCondition'])
           .first()
           .transacting(trx)
           .forUpdate()
-          .execute()) as Pick<Release, 'id' | 'name' | 'releasedAt' | 'status'> | undefined;
+          .execute();
 
         if (!lockedRelease) {
           throw new errors.NotFoundError(`No release found for id ${releaseId}`);
@@ -330,43 +349,106 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
           throw new errors.ValidationError('Release failed to publish');
         }
 
+        const allowPartial = lockedRelease.releaseCondition === 'allow_partial';
+        // Released entries stay released even if the run then fails: the lock transaction commits
+        const counts: RunCounts = { published: 0, unpublished: 0, failed: 0 };
+
         try {
           strapi.log.info(`[Content Releases] Starting to publish release ${lockedRelease.name}`);
 
-          const formattedActions = await getFormattedActions(releaseId);
+          const actions = await getActionsInRunOrder(releaseId);
 
-          // Publish content types in dependency order so that when entity A has a relation
-          // to entity B, B is published first to keep this relation.
-          const contentTypeUids = getPublishOrderForContentTypes(
-            Object.keys(formattedActions) as UID.ContentType[],
+          // Checked before anything is written: a publish that fails validation halfway can
+          // already have removed the entry's published version
+          const checks = await getPublishabilityForActions(
+            actions.filter((action) => action.type === 'publish'),
             { strapi }
           );
+          const notPublishable = checks.flatMap(({ action, publishability }) =>
+            publishability.publishable ? [] : [{ action, error: publishability.error }]
+          );
+          const notPublishableIds = new Set(notPublishable.map(({ action }) => action.id));
 
-          await strapi.db.transaction(async () => {
-            for (const contentTypeUid of contentTypeUids) {
-              const contentType = contentTypeUid as UID.ContentType;
-              const { publish, unpublish } = formattedActions[contentType];
+          const firstNotPublishable = notPublishable.at(0);
 
-              // Serialize within a content type: concurrent publishes of related documents
-              // can race on shared join-table state (notably self-referential relations) and
-              // leave inconsistent FK rows when one branch deletes a row another branch is
-              // about to reference.
-              for (const params of publish) {
-                await strapi.documents(contentType).publish(params);
+          if (
+            firstNotPublishable &&
+            isReleaseBlocked(lockedRelease.releaseCondition, {
+              total: actions.length,
+              notPublishable: notPublishable.length,
+            })
+          ) {
+            if (trigger === 'manual') {
+              // Not a run: store the check's result so the status reads blocked, then reject
+              const publishableIds = checks.flatMap(({ action, publishability }) =>
+                publishability.publishable ? [action.id] : []
+              );
+              if (publishableIds.length > 0) {
+                await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
+                  where: { id: { $in: publishableIds } },
+                  data: { isEntryValid: true },
+                });
               }
+              await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
+                where: { id: { $in: [...notPublishableIds] } },
+                data: { isEntryValid: false },
+              });
+              await this.updateReleaseStatus(releaseId);
 
-              for (const params of unpublish) {
-                await strapi.documents(contentType).unpublish(params);
+              // Thrown after commit, so these writes are kept
+              return { kind: 'rejected', error: firstNotPublishable.error };
+            }
+
+            throw allowPartial
+              ? new errors.ValidationError('No entries were published')
+              : firstNotPublishable.error;
+          }
+
+          const releasable = actions.filter((action) => !notPublishableIds.has(action.id));
+          counts.failed = notPublishableIds.size;
+
+          // Serialized, also within a content type: concurrent publishes of related documents
+          // can race on shared join-table state (notably self-referential relations) and
+          // leave inconsistent FK rows when one branch deletes a row another branch is
+          // about to reference.
+          if (allowPartial) {
+            for (const action of releasable) {
+              try {
+                // Own savepoint: a failed publish has already removed the published version,
+                // which must come back. On Postgres it also keeps the transaction usable.
+                await strapi.db.savepoint(() => releaseEntry(action));
+                counts[action.type === 'publish' ? 'published' : 'unpublished'] += 1;
+              } catch (actionError) {
+                counts.failed += 1;
+                // Only the error's name: driver errors can carry row contents
+                strapi.log.warn(
+                  `[Content Releases] Release ${lockedRelease.name}: skipped an entry that failed to ${action.type} (${actionError instanceof Error ? actionError.name : 'Error'})`
+                );
               }
             }
-          });
+          } else {
+            // One savepoint for the whole run: the first error rolls back every entry before it
+            await strapi.db.savepoint(async () => {
+              for (const action of releasable) {
+                await releaseEntry(action);
+              }
+            });
+            counts.published = releasable.filter((action) => action.type === 'publish').length;
+            counts.unpublished = releasable.length - counts.published;
+          }
+
+          const releasedCount = counts.published + counts.unpublished;
+
+          if (actions.length > 0 && releasedCount === 0) {
+            throw new errors.ValidationError('No entries were published');
+          }
 
           const release = await strapi.db.query(RELEASE_MODEL_UID).update({
             where: {
               id: releaseId,
             },
             data: {
-              status: 'done',
+              status: releasedCount === actions.length ? 'done' : 'partial',
               releasedAt: new Date(),
             },
           });
@@ -378,55 +460,78 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
 
           strapi.telemetry.send('didPublishContentRelease');
 
-          return { release, error: null, lockedRelease };
-        } catch (error) {
+          return { kind: 'released', release, counts };
+        } catch (caught) {
+          // Anything can be thrown, even null
+          const error =
+            caught instanceof Error
+              ? caught
+              : new Error('Release publish failed', { cause: caught });
+
+          // We need to run the update in the same transaction because the release is locked.
+          // An error after entries were released leaves the run partial: they stay released.
+          const status = counts.published + counts.unpublished > 0 ? 'partial' : 'failed';
+
+          try {
+            await strapi.db
+              ?.queryBuilder(RELEASE_MODEL_UID)
+              .where({ id: releaseId })
+              .update(status === 'partial' ? { status, releasedAt: new Date() } : { status })
+              .transacting(trx)
+              .execute();
+          } catch {
+            // The transaction can't be written to anymore (on Postgres, a database error outside
+            // a savepoint aborts it): it rolls back, entries released by the run included
+            dispatchWebhook(ALLOWED_WEBHOOK_EVENTS.RELEASES_PUBLISH, { isPublished: false, error });
+            throw error;
+          }
+
+          // Sent once the outcome is written, so it never announces entries that get rolled back
           dispatchWebhook(ALLOWED_WEBHOOK_EVENTS.RELEASES_PUBLISH, {
-            isPublished: false,
+            isPublished: status === 'partial',
             error,
           });
 
-          // We need to run the update in the same transaction because the release is locked
-          await strapi.db
-            ?.queryBuilder(RELEASE_MODEL_UID)
-            .where({ id: releaseId })
-            .update({
-              status: 'failed',
-            })
-            .transacting(trx)
-            .execute();
-
           // At this point, we don't want to throw the error because if that happen we rollback the change in the release status
           // We want to throw the error after the transaction is finished, so we return the error
-          return {
-            release: null,
-            // A rejection can carry any value, even null: never mistake it for success
-            error: error ?? new Error('Release publish failed with an empty error'),
-            lockedRelease,
-          };
+          return { kind: 'failed', error, release: lockedRelease, status, counts };
         }
       });
 
-      // The 'failed' status is already committed, so this emit cannot be rolled back.
-      // Pre-flight rejections threw before the run and never reach it.
-      if (error !== null) {
-        await emitAudit({ strapi }, AUDITED_EVENTS.RELEASE_TRIGGER, {
-          releaseId: lockedRelease.id,
-          name: lockedRelease.name,
-          outcome: 'failure',
-          // The error's name and nothing else from it: driver errors can carry row
-          // contents in their properties
-          reason: error instanceof Error ? error.name : 'Error',
-        });
-
-        // Swallowing a non-Error throwable would report the publish as successful
-        if (error instanceof Error) {
-          throw error;
-        }
-        throw new Error('Release publish failed', { cause: error });
+      // A manual publish that would release nothing never ran: no failure to record
+      if (result.kind === 'rejected') {
+        throw result.error;
       }
 
-      // Counted after the publish, while the actions still exist.
-      // A count failure doesn't fail the committed publish: the error is returned.
+      // The 'failed' or 'partial' status is already committed, so this emit cannot be rolled back.
+      if (result.kind === 'failed') {
+        const { error, release, status, counts } = result;
+        // Only the error's name: driver errors can carry row contents
+        const event = { releaseId: release.id, name: release.name, reason: error.name };
+
+        await emitAudit(
+          { strapi },
+          AUDITED_EVENTS.RELEASE_TRIGGER,
+          status === 'partial'
+            ? { ...event, outcome: 'partial', ...counts }
+            : { ...event, outcome: 'failure' }
+        );
+
+        throw error;
+      }
+
+      const { release } = result;
+
+      await emitAudit({ strapi }, AUDITED_EVENTS.RELEASE_TRIGGER, {
+        releaseId: release.id,
+        name: release.name,
+        outcome: release.status === 'done' ? 'success' : 'partial',
+        ...result.counts,
+      });
+
+      // The response reports the release's entries, released or not. Counted after the publish,
+      // while the actions still exist. A count failure doesn't fail the committed publish: the
+      // error is returned.
       const releaseActionService = getService('release-action', { strapi });
       let counts = null;
       let countsError: Error | null = null;
@@ -441,19 +546,10 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
         counts = { published, unpublished };
       } catch (err) {
         countsError = err instanceof Error ? err : new Error(String(err), { cause: err });
-        strapi.log.error(
-          `Failed to count the entries for the release.trigger entry of release ${releaseId}`,
-          { error: countsError }
-        );
+        strapi.log.error(`Failed to count the entries of release ${releaseId}`, {
+          error: countsError,
+        });
       }
-
-      await emitAudit({ strapi }, AUDITED_EVENTS.RELEASE_TRIGGER, {
-        releaseId: lockedRelease.id,
-        name: lockedRelease.name,
-        outcome: 'success',
-        published: counts?.published,
-        unpublished: counts?.unpublished,
-      });
 
       return { release, counts, countsError };
     },
@@ -461,7 +557,11 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
     async updateReleaseStatus(releaseId: Release['id']) {
       const releaseActionService = getService('release-action', { strapi });
 
-      const [totalActions, invalidActions] = await Promise.all([
+      const releaseRead: Promise<Pick<Release, 'releaseCondition'> | null> = strapi.db
+        .query(RELEASE_MODEL_UID)
+        .findOne({ where: { id: releaseId }, select: ['releaseCondition'] });
+
+      const [totalActions, invalidActions, release] = await Promise.all([
         releaseActionService.countActions({
           filters: {
             release: releaseId,
@@ -473,28 +573,18 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
             isEntryValid: false,
           },
         }),
+        releaseRead,
       ]);
 
-      if (totalActions > 0) {
-        if (invalidActions > 0) {
-          return strapi.db.query(RELEASE_MODEL_UID).update({
-            where: {
-              id: releaseId,
-            },
-            data: {
-              status: 'blocked',
-            },
-          });
-        }
+      let status: Release['status'] = 'empty';
 
-        return strapi.db.query(RELEASE_MODEL_UID).update({
-          where: {
-            id: releaseId,
-          },
-          data: {
-            status: 'ready',
-          },
-        });
+      if (totalActions > 0) {
+        status = isReleaseBlocked(release?.releaseCondition, {
+          total: totalActions,
+          notPublishable: invalidActions,
+        })
+          ? 'blocked'
+          : 'ready';
       }
 
       return strapi.db.query(RELEASE_MODEL_UID).update({
@@ -502,7 +592,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
           id: releaseId,
         },
         data: {
-          status: 'empty',
+          status,
         },
       });
     },
