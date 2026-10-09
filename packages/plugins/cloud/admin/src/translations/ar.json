@@ -1,0 +1,20 @@
+{
+  "Plugin.name": "النشر",
+  "Homepage.title": "النشر باستخدام Strapi Cloud",
+  "Homepage.subTitle": "استضف مشروع Strapi على منصتنا السحابية المُدارة مع عمليات نشر مؤتمتة وشبكة توصيل محتوى (CDN) عالمية.",
+  "Homepage.features.cdn": "شبكة CDN عالمية",
+  "Homepage.features.pushToDeploy": "النشر عند الدفع (Push)",
+  "Homepage.features.customDomain": "نطاقات مخصصة",
+  "Homepage.deploy.title": "اختر طريقة النشر المفضلة لديك",
+  "Homepage.deploy.ariaLabel": "خيارات النشر",
+  "Homepage.deploy.git.badge": "موصى به",
+  "Homepage.deploy.git.title": "النشر على Strapi Cloud",
+  "Homepage.deploy.git.subTitle": "انشر مشروعًا من GitHub أو GitLab مباشرة داخل Strapi Cloud",
+  "Homepage.deploy.git.button": "النشر على Strapi Cloud",
+  "Homepage.deploy.cli.title": "النشر عبر واجهة سطر الأوامر (CLI)",
+  "Homepage.deploy.cli.subTitle": "استخدم سطر الأوامر لربط مشروعك بمشروع قائم على Strapi Cloud، وانشر تغييراتك مباشرة من واجهة سطر الأوامر.",
+  "Homepage.deploy.cli.ariaLabel": "مدير الحزم",
+  "Homepage.deploy.cli.copy": "نسخ",
+  "Homepage.deploy.cli.copySuccess": "تم نسخ الأمر إلى الحافظة",
+  "Homepage.deploy.documentation": "هل تواجه مشكلة؟ راجع التوثيق"
+}
