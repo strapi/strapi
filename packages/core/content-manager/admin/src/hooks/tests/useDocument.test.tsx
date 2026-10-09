@@ -5,7 +5,14 @@ import { http, HttpResponse } from 'msw';
 import { Route, Routes } from 'react-router-dom';
 
 import { mockData } from '../../../tests/mockData';
+import { createYupSchema } from '../../utils/validation';
 import { useDocument, useDoc } from '../useDocument';
+
+jest.mock('../../utils/validation', () => {
+  const actual = jest.requireActual('../../utils/validation');
+
+  return { ...actual, createYupSchema: jest.fn(actual.createYupSchema) };
+});
 
 describe('useDocument', () => {
   it('should return the document', async () => {
@@ -116,6 +123,26 @@ describe('useDocument', () => {
     ).toEqual({
       postal_code: 'postal_code must be a `string` type, but the final value was: `12`.',
     });
+  });
+
+  it('should build the validation schema lazily, once for every instance of the hook', async () => {
+    const args = {
+      collectionType: 'collection-types',
+      model: mockData.contentManager.contentType,
+      documentId: '12345',
+    };
+
+    const { result } = renderHook(() => [useDocument(args), useDocument(args)] as const);
+
+    await waitFor(() => expect(result.current[0].isLoading).toBe(false));
+
+    jest.mocked(createYupSchema).mockClear();
+
+    const [first, second] = result.current;
+    const document = { documentId: '12345', id: 1, postal_code: 12 };
+
+    expect(first.validate(document)).toEqual(second.validate(document));
+    expect(createYupSchema).toHaveBeenCalledTimes(1);
   });
 
   it('should throw the validate function if called before the schema has been loaded', async () => {

@@ -2,6 +2,10 @@
  * This hook doesn't use a context provider because we fetch directly from the server,
  * this sounds expensive but actually, it's really not. Because we have redux-toolkit-query
  * being a cache layer so if nothing invalidates the cache, we don't fetch again.
+ *
+ * The network is deduplicated, but the work done inside the hook is not: it can be mounted
+ * by hundreds of fields at once, so anything expensive it derives must be cached outside of
+ * the hook instance (see `getValidationSchema`).
  */
 
 import * as React from 'react';
@@ -44,6 +48,35 @@ type UseDocumentOpts = Parameters<typeof useGetDocumentQuery>[1];
 type Document = FindOne.Response['data'];
 
 type Schema = ContentType;
+
+type ValidationSchema = ReturnType<typeof createYupSchema>;
+
+// Building the yup schema of a model clones a schema for every nested component and dynamic
+// zone: on large models it takes seconds and gigabytes. `schema` and `components` identities
+// are shared across hook instances (see `useContentTypeSchema`), so build it once per pair,
+// and only when something actually validates.
+const validationSchemaCache = new WeakMap<
+  Schema,
+  WeakMap<ComponentsDictionary, ValidationSchema>
+>();
+
+const getValidationSchema = (schema: Schema, components: ComponentsDictionary) => {
+  let byComponents = validationSchemaCache.get(schema);
+
+  if (!byComponents) {
+    byComponents = new WeakMap();
+    validationSchemaCache.set(schema, byComponents);
+  }
+
+  let validationSchema = byComponents.get(components);
+
+  if (!validationSchema) {
+    validationSchema = createYupSchema(schema.attributes, components);
+    byComponents.set(components, validationSchema);
+  }
+
+  return validationSchema;
+};
 
 type UseDocument = (
   args: UseDocumentArgs,
@@ -179,21 +212,15 @@ const useDocument: UseDocument = (args, opts) => {
     }
   }, [toggleNotification, error, formatAPIError, args.collectionType]);
 
-  const validationSchema = React.useMemo(() => {
-    if (!schema) {
-      return null;
-    }
-
-    return createYupSchema(schema.attributes, components);
-  }, [schema, components]);
-
   const validate = React.useCallback(
     (document: Modules.Documents.AnyDocument): FormErrors | null => {
-      if (!validationSchema) {
+      if (!schema) {
         throw new Error(
           'There is no validation schema generated, this is likely due to the schema not being loaded yet.'
         );
       }
+
+      const validationSchema = getValidationSchema(schema, components);
 
       try {
         validationSchema.validateSync(document, { abortEarly: false, strict: true });
@@ -206,7 +233,7 @@ const useDocument: UseDocument = (args, opts) => {
         throw error;
       }
     },
-    [validationSchema]
+    [schema, components]
   );
 
   /**
