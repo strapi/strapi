@@ -25,13 +25,13 @@ const isLinkNode = (element: Element): element is Schema.Attribute.LinkInlineNod
   return element.type === 'link';
 };
 
-const ALLOWED_LINK_PROTOCOLS = new Set(['http:', 'https:', 'ftp:', 'mailto:', 'tel:']);
+const BLOCKED_LINK_PROTOCOLS = new Set(['javascript:', 'vbscript:', 'data:']);
 
 const isValidLink = (link: string) => {
   try {
     const url = new URL(link.startsWith('/') ? `https://strapi.io${link}` : link);
 
-    return ALLOWED_LINK_PROTOCOLS.has(url.protocol);
+    return !BLOCKED_LINK_PROTOCOLS.has(url.protocol);
   } catch {
     return false;
   }
@@ -39,7 +39,7 @@ const isValidLink = (link: string) => {
 
 const isValidAbsoluteLink = (link: string) => {
   try {
-    return ALLOWED_LINK_PROTOCOLS.has(new URL(link).protocol);
+    return !BLOCKED_LINK_PROTOCOLS.has(new URL(link).protocol);
   } catch {
     return false;
   }

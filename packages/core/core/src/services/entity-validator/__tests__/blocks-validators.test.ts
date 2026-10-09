@@ -264,28 +264,33 @@ describe('Blocks validator', () => {
       ).rejects.toThrow(errors.YupValidationError);
     });
 
-    it.each(['ftp://example.com', 'tel:+15555550123', '//example.com'])(
-      'accepts %s',
-      async (url) => {
-        const validator = strapiUtils.validateYupSchema(
-          Validators.blocks(
-            {
-              attr: { type: 'blocks' },
-            },
-            { isDraft: false }
-          )
-        );
-
-        const value = [
+    it.each([
+      'ftp://example.com',
+      'tel:+15555550123',
+      '//example.com',
+      'sms:+123456789',
+      'geo:37.786971,-122.399677',
+      'whatsapp://send?text=hi',
+      'myapp://deep/link',
+    ])('accepts %s', async (url) => {
+      const validator = strapiUtils.validateYupSchema(
+        Validators.blocks(
           {
-            type: 'paragraph',
-            children: [{ type: 'link', url, children: [{ type: 'text', text: 'Click me' }] }],
+            attr: { type: 'blocks' },
           },
-        ];
+          { isDraft: false }
+        )
+      );
 
-        await expect(validator(value)).resolves.toEqual(value);
-      }
-    );
+      const value = [
+        {
+          type: 'paragraph',
+          children: [{ type: 'link', url, children: [{ type: 'text', text: 'Click me' }] }],
+        },
+      ];
+
+      await expect(validator(value)).resolves.toEqual(value);
+    });
   });
   describe('Heading', () => {
     it('Should accept a valid paragraph schema', async () => {
