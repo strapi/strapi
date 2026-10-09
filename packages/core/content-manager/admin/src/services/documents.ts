@@ -23,6 +23,7 @@ import type {
   Unpublish,
   Update,
 } from '../../../shared/contracts/collection-types';
+import type { MoveDocument } from '../../../shared/contracts/custom-order';
 
 const documentApi = contentManagerApi.injectEndpoints({
   overrideExisting: true,
@@ -234,6 +235,28 @@ const documentApi = contentManagerApi.injectEndpoints({
           })) ?? []),
         ];
       },
+    }),
+    /**
+     * Places a document right before or after another one in the custom order
+     * of its collection type.
+     */
+    moveDocument: builder.mutation<
+      MoveDocument.Response,
+      MoveDocument.Params & {
+        body: MoveDocument.Request['body'];
+        params?: MoveDocument.Request['query'];
+      }
+    >({
+      query: ({ model, id, body, params }) => ({
+        url: `/content-manager/collection-types/${model}/${id}/actions/move`,
+        method: 'POST',
+        data: body,
+        config: {
+          params,
+        },
+      }),
+      invalidatesTags: (_result, error, { model }) =>
+        error ? [] : [{ type: 'Document', id: `${model}_LIST` }],
     }),
     getDraftRelationCount: builder.query<
       CountDraftRelations.Response,
@@ -553,12 +576,14 @@ const {
   useDeleteManyDocumentsMutation,
   useDiscardDocumentMutation,
   useGetAllDocumentsQuery,
+  useLazyGetAllDocumentsQuery,
   useGetDocumentsForValidationQuery,
   useLazyGetDocumentQuery,
   useGetDocumentQuery,
   useGetDraftRelationCountQuery,
   useLazyGetDraftRelationCountQuery,
   useGetManyDraftRelationCountQuery,
+  useMoveDocumentMutation,
   usePublishDocumentMutation,
   usePublishManyDocumentsMutation,
   useUpdateDocumentMutation,
@@ -574,12 +599,14 @@ export {
   useDeleteManyDocumentsMutation,
   useDiscardDocumentMutation,
   useGetAllDocumentsQuery,
+  useLazyGetAllDocumentsQuery,
   useGetDocumentsForValidationQuery,
   useLazyGetDocumentQuery,
   useGetDocumentQuery,
   useGetDraftRelationCountQuery,
   useLazyGetDraftRelationCountQuery,
   useGetManyDraftRelationCountQuery,
+  useMoveDocumentMutation,
   usePublishDocumentMutation,
   usePublishManyDocumentsMutation,
   useUpdateDocumentMutation,

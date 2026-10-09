@@ -1,7 +1,11 @@
 import { objects } from '@strapi/utils';
-import { has, get, mapValues } from 'lodash';
+import { has, get, mapValues, omit } from 'lodash';
 
 import { getService } from '../utils';
+import {
+  getService as getCustomOrderService,
+  isFeatureEnabled as isCustomOrderFeatureEnabled,
+} from '../custom-order/utils';
 import { createModelConfigurationSchema, validateKind } from './validation';
 
 const assocMainField = (metadata: any) =>
@@ -111,7 +115,24 @@ export default {
       });
     }
 
+    const customOrder = isCustomOrderFeatureEnabled(strapi)
+      ? getCustomOrderService(strapi, 'custom-order')
+      : null;
+
+    if (input.settings && 'customOrder' in input.settings) {
+      if (!customOrder) {
+        input.settings = omit(input.settings, 'customOrder');
+      } else if (input.settings.customOrder === true && !customOrder.isOrderable(uid)) {
+        return ctx.badRequest(null, {
+          name: 'validationError',
+          errors: ['settings.customOrder is only available on collection types'],
+        });
+      }
+    }
+
     const newConfiguration = await contentTypeService.updateConfiguration(contentType, input);
+
+    await customOrder?.applySettings(uid, newConfiguration.settings);
 
     await metricsService.sendDidConfigureListView(contentType, newConfiguration);
 
