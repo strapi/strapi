@@ -445,6 +445,135 @@ describe('Relations', () => {
     });
   });
 
+  it('shows an error when the saved relations fail to load', async () => {
+    server.use(
+      http.get('/content-manager/relations/:model/:id/:fieldName', () =>
+        HttpResponse.json(
+          {
+            data: null,
+            error: { status: 500, name: 'InternalServerError', message: 'Internal Server Error' },
+          },
+          { status: 500 }
+        )
+      )
+    );
+
+    render({});
+
+    expect(
+      await screen.findByText(
+        'Whoops! Something went wrong. Please, try again.',
+        {},
+        { timeout: 3000 }
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('shows an error instead of "No relations available" when the relation search fails', async () => {
+    server.use(
+      http.get('/content-manager/relations/:model/:fieldName', () =>
+        HttpResponse.json(
+          {
+            data: null,
+            error: { status: 500, name: 'InternalServerError', message: 'Internal Server Error' },
+          },
+          { status: 500 }
+        )
+      )
+    );
+
+    const { user } = render({});
+
+    await user.click(await screen.findByRole('combobox', { name: /relations/i }));
+
+    expect(
+      await screen.findByText(
+        'Whoops! Something went wrong. Please, try again.',
+        {},
+        { timeout: 3000 }
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByText('No relations available')).not.toBeInTheDocument();
+  });
+
+  describe('reopening the dropdown after selecting a relation', () => {
+    const mockCategorySearch = () => {
+      const searchQueries: string[] = [];
+
+      server.use(
+        http.get('/content-manager/relations/:model/:fieldName', ({ request }) => {
+          const params = new URL(request.url).searchParams;
+          const search = params.get('_q') ?? '';
+          const idsToOmit = [...params.entries()]
+            .filter(([key]) => key.startsWith('idsToOmit'))
+            .map(([, value]) => value);
+
+          searchQueries.push(search);
+
+          const results = [1, 2, 3]
+            .map((id) => ({
+              id,
+              documentId: `category-${id}`,
+              locale: 'en',
+              status: 'published',
+              name: `Category ${id}`,
+            }))
+            .filter((relation) => relation.name.includes(search))
+            .filter((relation) => !idsToOmit.includes(relation.id.toString()));
+
+          return HttpResponse.json({
+            results,
+            pagination: { page: 1, pageCount: 1, pageSize: 10, total: results.length },
+          });
+        })
+      );
+
+      return searchQueries;
+    };
+
+    // Waits past the search debounce, as a user would between two actions.
+    const waitForSearchDebounce = () => new Promise((resolve) => setTimeout(resolve, 500));
+
+    it('keeps the available relations', async () => {
+      const searchQueries = mockCategorySearch();
+      const { user } = render({
+        initialValues: { relations: { connect: [], disconnect: [] } },
+      });
+
+      const combobox = await screen.findByRole('combobox', { name: /relations/i });
+
+      await user.click(combobox);
+      await user.click(await screen.findByRole('option', { name: /Category 1/ }));
+
+      await waitForSearchDebounce();
+      await user.click(combobox);
+
+      expect(screen.queryByText('No relations available')).not.toBeInTheDocument();
+      expect(await screen.findByRole('option', { name: /Category 2/ })).toBeInTheDocument();
+      expect(searchQueries).not.toContain('Category 1');
+    });
+
+    it('keeps the available relations when the relation was found by searching', async () => {
+      mockCategorySearch();
+      const { user } = render({
+        initialValues: { relations: { connect: [], disconnect: [] } },
+      });
+
+      const combobox = await screen.findByRole('combobox', { name: /relations/i });
+
+      await user.click(combobox);
+      await user.type(combobox, 'Category 1');
+      await waitForSearchDebounce();
+      await user.click(await screen.findByRole('option', { name: /Category 1/ }));
+
+      await waitForSearchDebounce();
+      await user.click(combobox);
+
+      expect(screen.queryByText('No relations available')).not.toBeInTheDocument();
+      expect(await screen.findByRole('option', { name: /Category 2/ })).toBeInTheDocument();
+    });
+  });
+
   it('preserves the active locale when opening a non-localized nested relation in full page', async () => {
     const { user } = renderRelationNavigation({
       documentId: 'non-localized-intermediate',
