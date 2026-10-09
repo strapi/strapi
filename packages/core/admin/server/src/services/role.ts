@@ -1,4 +1,4 @@
-import _, { omit, pick, differenceWith, differenceBy, isEqual, uniq } from 'lodash';
+import _, { omit, pick, differenceWith, differenceBy, isEqual } from 'lodash';
 /* eslint-disable @typescript-eslint/no-explicit-any */ // TODO: TS - Use database parameters interface when they are ready
 /* eslint-disable @typescript-eslint/default-param-last */
 
@@ -385,95 +385,6 @@ const assignPermissions = async (
   return permissionsToReturn;
 };
 
-const hasNoFields = (permission: Permission): boolean => {
-  const fields = permission.properties?.fields;
-
-  return Array.isArray(fields) && fields.length === 0;
-};
-
-/**
- * Check whether a requested permission is covered by the permissions a user holds:
- * same action and subject, every property restricted to a subset of the user's own,
- * and conditions no broader than the user's own.
- */
-const isPermissionWithinCeiling = (
-  requested: Permission,
-  userPermissions: Permission[]
-): boolean => {
-  // The permission engine drops permissions with an empty `fields` list (access to no field),
-  // so requesting one grants nothing and holding one grants nothing.
-  if (hasNoFields(requested)) {
-    return true;
-  }
-
-  const requestedSubject = requested.subject ?? null;
-
-  const matchingPermissions = userPermissions.filter(
-    (permission) =>
-      permission.action === requested.action &&
-      (permission.subject ?? null) === requestedSubject &&
-      !hasNoFields(permission)
-  );
-
-  if (matchingPermissions.length === 0) {
-    return false;
-  }
-
-  // Properties: for every property the user is restricted on (e.g. fields, locales), the
-  // requested values must be a subset of the union of the user's values. A property that is
-  // unset / null on any matching user permission means "no restriction". An empty array means
-  // "no values": i18n enforces `locales: []` as `locale $in []` and only `null` as all locales,
-  // so an empty list adds nothing to the union.
-  const restrictedProperties = uniq(
-    matchingPermissions.flatMap((permission) => Object.keys(permission.properties ?? {}))
-  );
-
-  const propertiesWithinCeiling = restrictedProperties.every((property) => {
-    const userValues = matchingPermissions.map((permission) => permission.properties?.[property]);
-
-    if (userValues.some((values) => values === undefined || values === null)) {
-      return true;
-    }
-
-    const effectiveValues: string[] = uniq(
-      userValues.flatMap((values) => (Array.isArray(values) ? values : []))
-    );
-    const requestedValues = requested.properties?.[property];
-
-    // Omitting a property the user is restricted on would be broader than the user's own
-    if (!Array.isArray(requestedValues)) {
-      return false;
-    }
-
-    return requestedValues.every((value: string) =>
-      effectiveValues.some(
-        (allowed) => value === allowed || (property === 'fields' && value.startsWith(`${allowed}.`))
-      )
-    );
-  });
-
-  if (!propertiesWithinCeiling) {
-    return false;
-  }
-
-  // Conditions are OR-ed by the permission engine, so more conditions (or none) means broader.
-  // If the user holds the permission without conditions anything goes, otherwise the requested
-  // conditions must be a non-empty subset of the user's own.
-  const userConditions = matchingPermissions.map((permission) => permission.conditions ?? []);
-
-  if (userConditions.some((conditions) => conditions.length === 0)) {
-    return true;
-  }
-
-  const effectiveConditions = uniq(userConditions.flat());
-  const requestedConditions = requested.conditions ?? [];
-
-  return (
-    requestedConditions.length > 0 &&
-    requestedConditions.every((condition) => effectiveConditions.includes(condition))
-  );
-};
-
 /**
  * Make sure a user cannot grant a role permissions they do not hold themselves.
  * Only permissions that are new to the role are checked: permissions the role already
@@ -494,6 +405,7 @@ const checkPermissionsCeiling = async (
   const permissionService = getService('permission');
 
   const userPermissions = await permissionService.findUserPermissions(user);
+
   const existingPermissions = await permissionService.findMany({
     where: { role: { id: roleId } },
   });
@@ -505,7 +417,7 @@ const checkPermissionsCeiling = async (
   );
 
   const rejectedPermissions = newPermissions.filter(
-    (permission) => !isPermissionWithinCeiling(permission, userPermissions)
+    (permission) => !permissionDomain.ceiling.isPermissionWithinCeiling(permission, userPermissions)
   );
 
   if (rejectedPermissions.length > 0) {
