@@ -472,6 +472,55 @@ describe('Relations', () => {
     expect(screen.queryByText('No relations available')).not.toBeInTheDocument();
   });
 
+  it('keeps the available relations when the dropdown is reopened after selecting one', async () => {
+    const searchQueries: string[] = [];
+
+    server.use(
+      http.get('/content-manager/relations/:model/:fieldName', ({ request }) => {
+        const params = new URL(request.url).searchParams;
+        const search = params.get('_q') ?? '';
+        const idsToOmit = [...params.entries()]
+          .filter(([key]) => key.startsWith('idsToOmit'))
+          .map(([, value]) => value);
+
+        searchQueries.push(search);
+
+        const results = [1, 2, 3]
+          .map((id) => ({
+            id,
+            documentId: `category-${id}`,
+            locale: 'en',
+            status: 'published',
+            name: `Category ${id}`,
+          }))
+          .filter((relation) => relation.name.includes(search))
+          .filter((relation) => !idsToOmit.includes(relation.id.toString()));
+
+        return HttpResponse.json({
+          results,
+          pagination: { page: 1, pageCount: 1, pageSize: 10, total: results.length },
+        });
+      })
+    );
+
+    const { user } = render({
+      initialValues: { relations: { connect: [], disconnect: [] } },
+    });
+
+    const combobox = await screen.findByRole('combobox', { name: /relations/i });
+
+    await user.click(combobox);
+    await user.click(await screen.findByRole('option', { name: /Category 1/ }));
+
+    // Reopen after the search debounce, as a user would.
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    await user.click(combobox);
+
+    expect(screen.queryByText('No relations available')).not.toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: /Category 2/ })).toBeInTheDocument();
+    expect(searchQueries).not.toContain('Category 1');
+  });
+
   it('preserves the active locale when opening a non-localized nested relation in full page', async () => {
     const { user } = renderRelationNavigation({
       documentId: 'non-localized-intermediate',

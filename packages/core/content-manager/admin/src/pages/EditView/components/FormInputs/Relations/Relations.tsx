@@ -800,8 +800,12 @@ const RelationModalWithContext = ({
           }
           hasMoreItems={hasNextPage}
           loading={isLoadingSearchRelations || isLoadingPermissions}
-          onOpenChange={() => {
-            handleSearch(textValue ?? '');
+          onOpenChange={(isOpen) => {
+            // Selecting an option closes the list while `textValue` still holds its label.
+            // Searching on close would omit that option and cache an empty result.
+            if (isOpen) {
+              handleSearch(textValue ?? '');
+            }
           }}
           noOptionsMessage={() =>
             isSearchRelationsError
