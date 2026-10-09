@@ -339,11 +339,21 @@ const AssetPreview = ({ asset }: AssetPreviewProps) => {
       prefixFileUrlWithBackendUrl(formats?.thumbnail?.url) ?? prefixFileUrlWithBackendUrl(url);
     const mediaURL = rawMediaURL ? appendCacheBuster(rawMediaURL) : rawMediaURL;
 
+    // The thumbnail is a fixed 245×156 box, which is upscaled on HiDPI screens.
+    // Offer the `small` format as the 2x candidate; 1x screens keep the light
+    // thumbnail. `small` only exists for images larger than its breakpoint (and
+    // when responsive formats are enabled), so it is optional.
+    const rawHiDpiURL = formats?.thumbnail?.url
+      ? prefixFileUrlWithBackendUrl(formats?.small?.url)
+      : undefined;
+    const hiDpiURL = rawHiDpiURL ? appendCacheBuster(rawHiDpiURL) : undefined;
+
     if (mediaURL) {
       return (
         <PreviewContainer>
           <StyledImage
             src={mediaURL}
+            srcSet={hiDpiURL ? `${hiDpiURL} 2x` : undefined}
             alt={alternativeText || ''}
             // Only signed remote URLs need crossOrigin (cache collision with
             // the preview). Public/unsigned remote thumbnails must render
