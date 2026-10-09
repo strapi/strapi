@@ -284,7 +284,6 @@ export const expectedMetadataHashedResults = {
             complex_ord: {
               type: 'float',
               column: {
-                unsigned: true,
                 defaultTo: null,
               },
               columnName: 'complex_ord',
@@ -579,7 +578,6 @@ export const expectedMetadataHashedResults = {
             complex_ord: {
               type: 'float',
               column: {
-                unsigned: true,
                 defaultTo: null,
               },
               columnName: 'complex_ord',
@@ -587,7 +585,6 @@ export const expectedMetadataHashedResults = {
             inv_complex_ord: {
               type: 'float',
               column: {
-                unsigned: true,
                 defaultTo: null,
               },
               columnName: 'inv_complex_ord',
@@ -860,7 +857,6 @@ export const expectedMetadataHashedResults = {
             complex_ord: {
               type: 'float',
               column: {
-                unsigned: true,
                 defaultTo: null,
               },
               columnName: 'complex_ord',
@@ -1126,7 +1122,6 @@ export const expectedMetadataHashedResults = {
             complex_ord: {
               type: 'float',
               column: {
-                unsigned: true,
                 defaultTo: null,
               },
               columnName: 'complex_ord',
@@ -1397,7 +1392,6 @@ export const expectedMetadataHashedResults = {
           complex_ord: {
             type: 'float',
             column: {
-              unsigned: true,
               defaultTo: null,
             },
             columnName: 'complex_ord',

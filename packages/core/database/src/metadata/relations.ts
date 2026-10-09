@@ -280,9 +280,6 @@ const createMorphToMany = (
       },
       [ORDER]: {
         type: 'float',
-        column: {
-          unsigned: true,
-        },
       },
     },
     indexes: [
@@ -543,7 +540,6 @@ const createJoinTable = (
     metadataSchema.attributes[orderColumnName] = {
       type: 'float',
       column: {
-        unsigned: true,
         defaultTo: null,
       },
       columnName: orderColumnName,
@@ -561,7 +557,6 @@ const createJoinTable = (
     metadataSchema.attributes[inverseOrderColumnName] = {
       type: 'float',
       column: {
-        unsigned: true,
         defaultTo: null,
       },
       columnName: inverseOrderColumnName,
