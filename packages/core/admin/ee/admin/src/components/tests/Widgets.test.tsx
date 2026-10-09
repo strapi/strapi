@@ -108,4 +108,36 @@ describe('Homepage Widget Audit Logs', () => {
 
     expect(screen.getAllByText('Michael Scott')).toHaveLength(3);
   });
+
+  it('renders a dash when the audit log date is missing', () => {
+    jest.mocked(useGetAuditLogsQuery).mockReturnValue({
+      isLoading: false,
+      error: false,
+      data: {
+        results: [
+          {
+            action: 'entry.update',
+            date: null,
+            payload: {
+              model: 'tag',
+            },
+            id: 1,
+            user: {
+              id: 1,
+              email: 'ada@example.com',
+              displayName: 'Ada',
+            },
+          },
+        ],
+      },
+      refetch: jest.fn(),
+    });
+
+    render(<AuditLogsWidget />);
+
+    expect(screen.getByText('Update entry (tag)')).toBeInTheDocument();
+    expect(screen.getByText('-')).toHaveAttribute('aria-hidden', 'true');
+    expect(screen.queryByRole('time')).not.toBeInTheDocument();
+    expect(screen.queryByText(/years ago/i)).not.toBeInTheDocument();
+  });
 });

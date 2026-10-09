@@ -64,6 +64,21 @@ describe('AssignedWidget', () => {
     expect(screen.getByText("Couldn't load widget content.")).toBeInTheDocument();
   });
 
+  it('renders a dash when updatedAt is missing', () => {
+    (contentManager.useGetRecentlyAssignedDocumentsQuery as jest.Mock).mockReturnValue({
+      data: [{ ...mockDocuments[0], updatedAt: null }],
+      isLoading: false,
+      error: null,
+    });
+
+    render(<AssignedWidget />);
+
+    expect(screen.getByText('Test Document')).toBeInTheDocument();
+    expect(screen.getByText('-')).toHaveAttribute('aria-hidden', 'true');
+    expect(screen.queryByRole('time')).not.toBeInTheDocument();
+    expect(screen.queryByText(/years ago/i)).not.toBeInTheDocument();
+  });
+
   it('shows no data state', () => {
     (contentManager.useGetRecentlyAssignedDocumentsQuery as jest.Mock).mockReturnValue({
       data: [],
