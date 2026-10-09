@@ -12,6 +12,8 @@ const constants = {
   UPDATE_ACTION: 'plugin::content-manager.explorer.update',
   DELETE_ACTION: 'plugin::content-manager.explorer.delete',
   PUBLISH_ACTION: 'plugin::content-manager.explorer.publish',
+  // API, admin and transfer token `name` and `description` are `string` attributes, stored as varchar(255)
+  TOKEN_TEXT_MAX_LENGTH: 255,
   API_TOKEN_TYPE: {
     READ_ONLY: 'read-only',
     FULL_ACCESS: 'full-access',
