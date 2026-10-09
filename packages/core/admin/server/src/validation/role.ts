@@ -1,4 +1,5 @@
 import { yup, validateYupSchema } from '@strapi/utils';
+import { getService } from '../utils';
 
 const roleCreateSchema = yup
   .object()
@@ -21,7 +22,7 @@ const rolesDeleteSchema = yup
         'Roles deletion checks have failed',
         async function checkRolesDeletion(ids) {
           try {
-            await strapi.service('admin::role').checkRolesIdForDeletion(ids);
+            await getService('role').checkRolesIdForDeletion(ids);
           } catch (e) {
             // @ts-expect-error yup types
             return this.createError({ path: 'ids', message: e.message });
@@ -41,7 +42,7 @@ const roleDeleteSchema = yup
     'Role deletion checks have failed',
     async function checkRoleDeletion(id) {
       try {
-        await strapi.service('admin::role').checkRolesIdForDeletion([id]);
+        await getService('role').checkRolesIdForDeletion([id]);
       } catch (e) {
         // @ts-expect-error yup types
         return this.createError({ path: 'id', message: e.message });

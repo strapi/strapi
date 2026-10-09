@@ -54,7 +54,7 @@ const resolveMiddlewares = (
     }
 
     if (typeof item === 'string') {
-      const middlewareFactory = strapi.middleware(item);
+      const middlewareFactory = strapi.middleware<Core.MiddlewareFactory>(item);
 
       if (!middlewareFactory) {
         throw new Error(`Middleware ${item} not found.`);
@@ -72,7 +72,7 @@ const resolveMiddlewares = (
       const { name, resolve, config = {} } = item;
 
       if (name) {
-        const middlewareFactory = strapi.middleware(name);
+        const middlewareFactory = strapi.middleware<Core.MiddlewareFactory>(name);
         middlewares.push({
           name,
           handler:

@@ -90,6 +90,9 @@ export interface McpConfig {
   requestTimeoutMs?: number;
 }
 
+/**
+ * Input type of `config/server.ts`. Resolved contract: `ResolvedConfig.Server` in `@strapi/core`.
+ */
 export interface Server {
   // required
   host: string;

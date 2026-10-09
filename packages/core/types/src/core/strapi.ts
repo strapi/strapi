@@ -9,8 +9,83 @@ import type * as Schema from '../schema';
 import type * as UID from '../uid';
 
 import type { Container } from './container';
+import type {
+  ControllerLookup,
+  ControllerLookupUID,
+  ControllerMap,
+  RegisteredControllerUID,
+} from './controller';
+import type {
+  MiddlewareLookup,
+  MiddlewareLookupName,
+  MiddlewareMap,
+  RegisteredMiddlewareName,
+} from './middleware';
+import type { ApiMap, RegisteredApiName } from './module';
+import type { PluginMap, RegisteredPluginName } from './plugin';
+import type { PolicyLookup, PolicyLookupName, PolicyMap, RegisteredPolicyName } from './policy';
+import type { RegisteredServiceUID, ServiceLookup, ServiceLookupUID, ServiceMap } from './service';
+import type { SuggestedString } from '../utils/string';
+import type { IsStrict } from './strictness';
 
-export interface Strapi extends Container {
+/**
+ * Root lookups without strict mode: develop's signatures, so mocks such as `app.service = () => ({})`
+ * keep compiling and explicit type arguments stay rejected. Registered names are listed for completion.
+ */
+type LegacyLookups = {
+  service(
+    uid: SuggestedString<Extract<RegisteredServiceUID, UID.Service>, UID.Service>
+  ): Core.Service;
+  controller(
+    uid: SuggestedString<Extract<RegisteredControllerUID, UID.Controller>, UID.Controller>
+  ): Core.Controller;
+  policy(name: SuggestedString<RegisteredPolicyName>): Core.Policy;
+  middleware(name: SuggestedString<RegisteredMiddlewareName>): Core.MiddlewareFactory;
+  plugin(name: SuggestedString<RegisteredPluginName>): Core.Plugin;
+  api(name: SuggestedString<RegisteredApiName>): Core.Module;
+};
+
+/** Root lookups with strict mode: registered names resolve to their contracts. */
+type StrictLookups = {
+  /**
+   * Resolves the registered contract of `uid`. An explicit type argument (`service<MyService>(uid)`)
+   * wins over the registries, including for unregistered names.
+   */
+  service<T = unknown, TUID extends ServiceLookupUID = ServiceLookupUID>(
+    uid: TUID
+  ): ServiceLookup<TUID, NoInfer<T>>;
+  /**
+   * Resolves the registered contract of `uid`. An explicit type argument (`controller<MyController>(uid)`)
+   * wins over the registries, including for unregistered names.
+   */
+  controller<T = unknown, TUID extends ControllerLookupUID = ControllerLookupUID>(
+    uid: TUID
+  ): ControllerLookup<TUID, NoInfer<T>>;
+  /**
+   * Resolves the registered policy of the full name `name`, which receives its config contract.
+   * An explicit type argument (`policy<MyPolicy>(name)`) wins over the registries, including for
+   * unregistered names. Registered names are listed for completion.
+   */
+  policy<T = unknown, TName extends PolicyLookupName = PolicyLookupName>(
+    name: TName
+  ): PolicyLookup<TName, NoInfer<T>>;
+  /**
+   * Resolves the registered middleware of the full name `name`, a factory that receives its config
+   * contract. An explicit type argument (`middleware<MyFactory>(name)`) wins over the registries,
+   * including for unregistered names. Registered names are listed for completion.
+   */
+  middleware<T = unknown, TName extends MiddlewareLookupName = MiddlewareLookupName>(
+    name: TName
+  ): MiddlewareLookup<TName, NoInfer<T>>;
+  /** Plugins with registered contracts are listed for completion. */
+  plugin<TName extends SuggestedString<RegisteredPluginName>>(name: TName): Core.Plugin<TName>;
+  /** APIs with registered contracts are listed for completion. */
+  api<TName extends SuggestedString<RegisteredApiName>>(name: TName): Core.Module<`api::${TName}`>;
+};
+
+type Lookups = IsStrict extends false ? LegacyLookups : StrictLookups;
+
+export interface Strapi extends Container, Lookups {
   server: Modules.Server.Server;
   log: Logger;
   fs: StrapiFS;
@@ -109,24 +184,42 @@ export interface Strapi extends Container {
   components: Schema.Components;
   reload: Reloader;
   config: ConfigProvider;
-  services: Record<string, Core.Service>;
-  service(uid: UID.Service): Core.Service;
-  controllers: Record<string, Core.Controller>;
-  controller(uid: UID.Controller): Core.Controller;
+  /**
+   * Services keyed by UID. With strict types enabled, registered UIDs resolve to their contracts;
+   * other keys keep the legacy service.
+   */
+  services: ServiceMap;
+  /**
+   * Controllers keyed by UID. With strict types enabled, registered UIDs resolve to their contracts;
+   * other keys keep the legacy controller.
+   */
+  controllers: ControllerMap;
   contentTypes: Schema.ContentTypes;
   contentType<TContentTypeUID extends UID.ContentType>(
     name: TContentTypeUID
   ): Schema.ContentType<TContentTypeUID>;
-  policies: Record<string, Core.Policy>;
-  policy(name: string): Core.Policy;
-  middlewares: Record<string, Core.MiddlewareFactory>;
-  middleware(name: string): Core.MiddlewareFactory;
-  plugins: Record<string, Core.Plugin>;
-  plugin(name: string): Core.Plugin;
+  /**
+   * Policies keyed by UID. With strict types enabled, registered UIDs receive their config contract;
+   * other keys keep the legacy policy.
+   */
+  policies: PolicyMap;
+  /**
+   * Middlewares keyed by UID. With strict types enabled, registered UIDs receive their config
+   * contract; other keys keep the legacy factory.
+   */
+  middlewares: MiddlewareMap;
+  /**
+   * Plugins keyed by name. With strict types enabled, a plugin with registered contracts resolves to
+   * `Plugin<name>`, like `plugin(name)`; other names keep the legacy plugin.
+   */
+  plugins: PluginMap;
   hooks: Record<string, any>;
   hook(name: string): any;
-  apis: Record<string, Core.Module>;
-  api(name: string): Core.Module;
+  /**
+   * APIs keyed by name. With strict types enabled, an API with registered contracts resolves to
+   * `Module<'api::<name>'>`, like `api(name)`; other names keep the legacy module.
+   */
+  apis: ApiMap;
   auth: Modules.Auth.AuthenticationService;
   /** Content API: permissions, route map, sanitize/validate, and registration of extra query/input params (see addQueryParams, addInputParams). */
   contentAPI: Modules.ContentAPI.ContentApi;
@@ -209,8 +302,189 @@ export interface StrapiFS {
   appendFile(optPath: string | string[], data: string): void;
 }
 
-export interface ConfigProvider {
+/** Config namespaces that have a registered contract, e.g. `'plugin::my-plugin'`. */
+export type ConfigNamespace =
+  | keyof Strapi.Registries.AppConfigs
+  | keyof Strapi.Registries.PackageConfigs;
+
+/** Resolves application overrides before package defaults. */
+export type ConfigFor<TNamespace extends ConfigNamespace> =
+  TNamespace extends keyof Strapi.Registries.AppConfigs
+    ? Strapi.Registries.AppConfigs[TNamespace]
+    : TNamespace extends keyof Strapi.Registries.PackageConfigs
+      ? Strapi.Registries.PackageConfigs[TNamespace]
+      : never;
+
+/** `undefined` when `TValue` can be `null` or `undefined`: lodash `get` resolves through them to `undefined`. */
+type Nullish<TValue> = [Extract<TValue, null | undefined>] extends [never] ? never : undefined;
+
+/**
+ * The value at one path segment of `TValue`, or `never` when the segment does not exist.
+ * A numeric segment into an array resolves to the element or `undefined`, since the element may be absent.
+ */
+type SegmentValue<TValue, TSegment extends string> = TSegment extends keyof TValue
+  ? TValue[TSegment]
+  : TValue extends readonly (infer TElement)[]
+    ? TSegment extends `${number}`
+      ? TElement | undefined
+      : never
+    : never;
+
+/** The value at a dotted path such as `'a.b'` or `'items.0.port'` inside `TValue`, or `never` when the path does not exist. */
+type PathValue<TValue, TPath extends string> = TPath extends `${infer THead}.${infer TRest}`
+  ? [SegmentValue<NonNullable<TValue>, THead>] extends [never]
+    ? never
+    : PathValue<SegmentValue<NonNullable<TValue>, THead> | Nullish<TValue>, TRest>
+  : [SegmentValue<NonNullable<TValue>, TPath>] extends [never]
+    ? never
+    : SegmentValue<NonNullable<TValue>, TPath> | Nullish<TValue>;
+
+/**
+ * The value at a dotted path inside a registered config contract, e.g. `'providerOptions.localServer'`.
+ * Resolves to `TFallback` when the path is not part of the contract.
+ */
+export type ConfigPathValue<TNamespace extends ConfigNamespace, TPath extends string, TFallback> = [
+  PathValue<ConfigFor<TNamespace>, TPath>,
+] extends [never]
+  ? TFallback
+  : PathValue<ConfigFor<TNamespace>, TPath>;
+
+/** Any config path. Registered namespaces are listed for completion. */
+export type ConfigPath = SuggestedString<ConfigNamespace> | Exclude<PropertyPath, string>;
+
+/** `'<prefix><key>'` for each key of an object value. Arrays and primitives have no suggested keys. */
+type ChildPaths<TValue, TPrefix extends string> = TValue extends readonly unknown[]
+  ? never
+  : TValue extends object
+    ? `${TPrefix}${keyof TValue & string}`
+    : never;
+
+/** The part of a dotted path before its last dot: `'a.b'` for `'a.b.c'`, `''` for `'a'`. */
+type ParentPath<
+  TPath extends string,
+  TParent extends string = '',
+> = TPath extends `${infer THead}.${infer TRest}`
+  ? ParentPath<TRest, TParent extends '' ? THead : `${TParent}.${THead}`>
+  : TParent;
+
+/**
+ * Completion candidates for a partially typed dotted path inside `TValue`: the keys under the
+ * path's parent, e.g. `'init.debug'` for `'init.'` or `'init.de'`. Only the level being typed is
+ * computed, so large contracts do not expand into every nested path.
+ */
+export type ConfigPathSuggestion<TValue, TPath> = TPath extends string
+  ? ParentPath<TPath> extends infer TParent extends string
+    ? TParent extends ''
+      ? ChildPaths<NonNullable<TValue>, ''>
+      : ChildPaths<NonNullable<PathValue<TValue, TParent>>, `${TParent}.`>
+    : never
+  : never;
+
+/** Completion candidates for a partially typed path inside a registered namespace, e.g. `'plugin::sentry.dsn'`. */
+type ConfigGetPathSuggestion<TPath> =
+  TPath extends `${infer TNamespace extends ConfigNamespace}.${infer TKey}`
+    ? `${TNamespace}.${ConfigPathSuggestion<ConfigFor<TNamespace>, TKey>}`
+    : never;
+
+/**
+ * Resolves a config path against the registries: a registered namespace, or a dotted path inside one.
+ * Array paths, unregistered namespaces, unknown paths and the unresolved default path resolve to `T`.
+ */
+type ConfigLookup<TPath, T, TDefault = undefined> = IsStrict extends false
+  ? T
+  : [ConfigNamespace] extends [never]
+    ? T
+    : ConfigPath extends TPath
+      ? T
+      : TPath extends ConfigNamespace
+        ? ConfigWithDefault<ConfigFor<TPath>, TDefault>
+        : TPath extends `${infer TNamespace}.${infer TKey}`
+          ? TNamespace extends ConfigNamespace
+            ? ConfigPathLookup<TNamespace, TKey, T, TDefault>
+            : T
+          : T;
+
+/** Applies defaults only to known config paths, preserving contextual inference for other paths. */
+export type ConfigPathLookup<
+  TNamespace extends ConfigNamespace,
+  TPath extends string,
+  T,
+  TDefault,
+> = [ConfigPathValue<TNamespace, TPath, never>] extends [never]
+  ? T
+  : ConfigWithDefault<ConfigPathValue<TNamespace, TPath, never>, TDefault>;
+
+/** Replaces an absent config value while preserving null and defined values. */
+export type ConfigWithDefault<TValue, TDefault> = undefined extends TValue
+  ? Exclude<TValue, undefined> | TDefault
+  : TValue;
+
+/**
+ * Preserves primitive literal inference in default argument tuples without making objects readonly.
+ * The remaining members keep the constraint open to every config value, including unknown and void.
+ */
+export type ConfigDefaultValue =
+  | string
+  | number
+  | boolean
+  | bigint
+  | symbol
+  | NonNullable<unknown>
+  | null
+  | undefined
+  | void;
+
+/**
+ * `never` for paths inside a registered config namespace, so that they skip the legacy `get` overload.
+ * TODO @Nico An unknown path inside a registered namespace, e.g. `'server.nope'`, also skips it, so
+ * its default keeps a non-widening literal type. Rare, accepted for now.
+ */
+type LegacyConfigPath<TPath> = TPath extends ConfigNamespace | `${ConfigNamespace}.${string}`
+  ? never
+  : unknown;
+
+/**
+ * `get` without strict mode: develop's signature, so a default infers a widening literal, e.g.
+ * `let port = get('server.port', 1337)` is a `number`. A single signature keeps assigned
+ * implementations checked against the generic `T`. Config paths are listed for completion only with
+ * strict mode: listing them needs the path as a type parameter, which develop's signature has not.
+ */
+type LegacyConfigGetter = {
   get<T = unknown>(key: PropertyPath, defaultVal?: T): T;
+};
+
+/**
+ * `get` with strict mode. TODO @Nico TypeScript relates overloads with erased generics, so assigned
+ * implementations such as `config.get = () => ({})` are not checked against `T` in strict mode.
+ */
+type StrictConfigGetter = {
+  /** Reads a config value outside the registered namespaces, as without strict mode. */
+  get<T = unknown, TPath extends PropertyPath = PropertyPath>(
+    key: TPath & LegacyConfigPath<TPath>,
+    defaultVal?: T
+  ): T;
+  /**
+   * Reads a config value. A registered namespace, or a dotted path inside one, resolves to its contract.
+   * Editors list registered namespaces, then the keys under the path being typed.
+   *
+   * A defined default replaces `undefined` in the result; `null` values are preserved.
+   * The argument tuple tracks defaults that may be omitted; the intersection preserves legacy
+   * inference from their values. `NoInfer` prevents contextual return types from supplying a default
+   * that was never passed.
+   */
+  get<
+    T = unknown,
+    TPath extends ConfigPath = ConfigPath,
+    TArgs extends [] | [ConfigDefaultValue] = [] | [ConfigLookup<TPath, T> | undefined],
+  >(
+    key: TPath | ConfigGetPathSuggestion<TPath>,
+    ...args: TArgs & ([] | [defaultVal: ConfigLookup<TPath, T> | undefined])
+  ): ConfigLookup<TPath, T, NoInfer<TArgs[0]>>;
+};
+
+type ConfigGetter = IsStrict extends false ? LegacyConfigGetter : StrictConfigGetter;
+
+export interface ConfigProvider extends ConfigGetter {
   set(path: string, val: unknown): this;
   has(path: string): boolean;
   [key: string]: any;

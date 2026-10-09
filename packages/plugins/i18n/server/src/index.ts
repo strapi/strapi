@@ -5,6 +5,8 @@ import services from './services';
 import routes from './routes';
 import controllers from './controllers';
 
+export type * from './types';
+
 export default () => ({
   register,
   bootstrap,

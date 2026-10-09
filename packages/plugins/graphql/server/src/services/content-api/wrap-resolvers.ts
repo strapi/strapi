@@ -46,13 +46,13 @@ const parseMiddlewares = (resolverConfig: any, strapi: Core.Strapi): GraphQLMidd
       }
 
       if (typeof middleware === 'string') {
-        return strapi.middleware(middleware);
+        return strapi.middleware<Core.MiddlewareFactory>(middleware);
       }
 
       if (typeof middleware === 'object') {
         const { name, options = {} } = middleware;
 
-        return strapi.middleware(name)(options, { strapi });
+        return strapi.middleware<Core.MiddlewareFactory>(name)(options, { strapi });
       }
 
       throw new Error(

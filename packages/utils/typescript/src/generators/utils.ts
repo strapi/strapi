@@ -1,6 +1,7 @@
 import path from 'node:path';
 import assert from 'node:assert';
 import * as ts from 'typescript';
+import fs from 'node:fs/promises';
 import fse from 'fs-extra';
 import chalk from 'chalk';
 
@@ -8,6 +9,8 @@ const { factory } = ts;
 
 const MODULE_DECLARATION = '@strapi/strapi';
 const PUBLIC_NAMESPACE = 'Public';
+const GLOBAL_NAMESPACE = 'Strapi';
+const REGISTRIES_NAMESPACE = 'Registries';
 
 /**
  * Aggregate the given TypeScript nodes into a single string
@@ -72,10 +75,15 @@ export const format = async (content: string): Promise<string> => {
 
 /**
  * Generate the extension block for a shared component from strapi/strapi
+ *
+ * Without strict types, the block augments the `Public` namespace of `@strapi/strapi`, as in
+ * previous releases. With strict types, it augments the global `Strapi.Registries` namespace, the
+ * only schema registries strict mode reads.
  */
 export const generateSharedExtensionDefinition = (
   registry: string,
-  definitions: Array<{ uid: string; definition: ts.InterfaceDeclaration }>
+  definitions: Array<{ uid: string; definition: ts.InterfaceDeclaration }>,
+  { strict = false }: { strict?: boolean } = {}
 ): ts.ModuleDeclaration => {
   const properties = definitions.map(({ uid, definition }) =>
     factory.createPropertySignature(
@@ -87,6 +95,10 @@ export const generateSharedExtensionDefinition = (
       )
     )
   );
+
+  if (strict === true) {
+    return generateGlobalRegistryExtension(registry, properties);
+  }
 
   return factory.createModuleDeclaration(
     [factory.createModifier(ts.SyntaxKind.DeclareKeyword)],
@@ -112,6 +124,47 @@ export const generateSharedExtensionDefinition = (
       ),
     ]),
     ts.NodeFlags.ExportContext
+  );
+};
+
+/**
+ * `declare global { namespace Strapi { namespace Registries { interface <registry> { … } } } }`
+ */
+const generateGlobalRegistryExtension = (
+  registry: string,
+  properties: ts.PropertySignature[]
+): ts.ModuleDeclaration => {
+  const registryNamespace = factory.createModuleDeclaration(
+    undefined,
+    factory.createIdentifier(REGISTRIES_NAMESPACE),
+    factory.createModuleBlock(
+      properties.length > 0
+        ? [
+            factory.createInterfaceDeclaration(
+              undefined,
+              factory.createIdentifier(registry),
+              undefined,
+              undefined,
+              properties
+            ),
+          ]
+        : []
+    ),
+    ts.NodeFlags.Namespace
+  );
+
+  const strapiNamespace = factory.createModuleDeclaration(
+    undefined,
+    factory.createIdentifier(GLOBAL_NAMESPACE),
+    factory.createModuleBlock([registryNamespace]),
+    ts.NodeFlags.Namespace
+  );
+
+  return factory.createModuleDeclaration(
+    [factory.createModifier(ts.SyntaxKind.DeclareKeyword)],
+    factory.createIdentifier('global'),
+    factory.createModuleBlock([strapiNamespace]),
+    ts.NodeFlags.GlobalAugmentation
   );
 };
 
@@ -205,13 +258,31 @@ export const timer = () => {
   };
 };
 
+/**
+ * Resolve to `true` when the given path exists, `false` otherwise
+ */
+export const pathExists = async (target: string): Promise<boolean> => {
+  try {
+    await fs.access(target);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 export type Logger = ReturnType<typeof createLogger>;
 
 /**
- * Options passed to each artifact generator (content-types, components).
+ * Options passed to each artifact generator.
  */
 export interface GeneratorOptions {
   strapi: any;
   logger: Logger;
   pwd?: string;
+  appDir?: string;
+  /**
+   * Whether the application enables `typescript.strictTypes`. Schema generators then write the
+   * global `Strapi.Registries` form instead of the `Public` form.
+   */
+  strict?: boolean;
 }

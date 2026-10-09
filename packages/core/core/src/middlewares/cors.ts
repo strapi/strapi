@@ -70,7 +70,8 @@ export const matchOrigin = async (
   return normalizedOrigins.includes(requestOrigin) ? requestOrigin : '';
 };
 
-export const cors: Core.MiddlewareFactory<Config> = (config) => {
+// The options are merged over `defaults`, so every field is optional, including `origin`.
+export const cors: Core.MiddlewareFactory<Partial<Config>> = (config) => {
   const { origin, expose, maxAge, credentials, methods, headers, keepHeadersOnError } = {
     ...defaults,
     ...config,

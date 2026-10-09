@@ -758,7 +758,9 @@ export default {
       status: 'draft',
     });
 
-    const results = await Promise.all(documents.map(permissionChecker.sanitizeOutput));
+    const results = await Promise.all(
+      documents.map((document) => permissionChecker.sanitizeOutput(document))
+    );
 
     ctx.body = { results };
   },

@@ -2,7 +2,7 @@ import { defaultsDeep } from 'lodash';
 import koaStatic from 'koa-static';
 import type { Core } from '@strapi/types';
 
-type Config = koaStatic.Options;
+export type Config = koaStatic.Options;
 
 const defaults = {
   maxAge: 60000,

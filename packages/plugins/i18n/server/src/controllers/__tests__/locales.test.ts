@@ -264,6 +264,46 @@ describe('Locales', () => {
       expect(setIsDefault).not.toHaveBeenCalled();
       expect(setDefaultLocale).not.toHaveBeenCalled();
     });
+
+    test('returns not found when the locale disappears before the update', async () => {
+      const existingLocale = { name: 'Afrikaans (af)', code: 'af' };
+      const updates = { name: 'Afrikaans' };
+      const setDefaultLocale = jest.fn(() => Promise.resolve());
+
+      const setIsDefault = jest.fn();
+      const findById = jest.fn(() => existingLocale);
+      const update = jest.fn(() => Promise.resolve(null));
+      const notFound = jest.fn();
+      global.strapi = {
+        getModel: jest.fn(() => localeModel.schema),
+        contentAPI,
+        plugins: {
+          i18n: {
+            services: {
+              locales: {
+                findById,
+                setIsDefault,
+                setDefaultLocale,
+                update,
+              },
+            },
+          },
+        },
+      } as any;
+
+      const ctx: any = {
+        params: { id: 1 },
+        request: { body: { ...updates, isDefault: true } },
+        state: { user: { id: 1 } },
+        notFound,
+      };
+      await controller.updateLocale(ctx, async () => {});
+
+      expect(update).toHaveBeenCalledWith({ id: 1 }, { updatedBy: 1, ...updates });
+      expect(notFound).toHaveBeenCalledWith('locale.notFound');
+      expect(setDefaultLocale).not.toHaveBeenCalled();
+      expect(setIsDefault).not.toHaveBeenCalled();
+    });
   });
 
   describe('deleteLocale', () => {

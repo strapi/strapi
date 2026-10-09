@@ -3,6 +3,7 @@ import { defineConfig } from 'oxlint';
 import { back } from './back.ts';
 import { base } from './base.ts';
 import { front } from './front.ts';
+import { registries } from './registries.ts';
 import { tests } from './tests.ts';
 
 /**
@@ -22,10 +23,11 @@ import { tests } from './tests.ts';
  */
 export default defineConfig({
   ...base,
+  jsPlugins: [...base.jsPlugins, './plugins/registries.ts'],
   settings: {
     react: { version: '18' },
   },
-  overrides: [back, front, tests],
+  overrides: [back, front, tests, registries],
 });
 
-export { back, base, front, tests };
+export { back, base, front, registries, tests };

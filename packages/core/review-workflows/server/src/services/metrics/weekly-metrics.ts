@@ -39,6 +39,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     async sendMetrics() {
       const computedMetrics = await this.computeMetrics();
+      // TODO @Nico runtime bug, to report: the event expects 4 numbers, so telemetry receives the
+      // metrics object as `numberOfActiveWorkflows` and `undefined` for the other properties.
+      // @ts-expect-error -- kept as is until the bug is fixed
       metrics.sendDidSendReviewWorkflowPropertiesOnceAWeek(computedMetrics);
 
       const metricsInfoStored = await getMetricsStoreValue();

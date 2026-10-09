@@ -59,6 +59,10 @@ type DatabaseConnection<TClient extends Database.ClientKind> = {
   sqlite: SharedDatabaseConnection<'sqlite'> & { useNullAsDefault?: boolean };
 }[TClient] & { [key: string]: unknown };
 
+/**
+ * Input type, what applications write in `config/database.ts`.
+ * Resolved contract, what `strapi.config.get('database')` returns: `ResolvedConfig.Database` in `@strapi/core`.
+ */
 export interface Database<TClient extends Database.ClientKind = Database.ClientKind> {
   connection: DatabaseConnection<TClient>;
   settings?: {
