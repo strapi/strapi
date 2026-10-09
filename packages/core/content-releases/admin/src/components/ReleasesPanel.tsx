@@ -26,7 +26,7 @@ const Panel: PanelComponent = ({
   const { formatMessage, formatDate, formatTime } = useIntl();
 
   const { allowedActions } = useRBAC(PERMISSIONS);
-  const { canRead, canDeleteAction } = allowedActions;
+  const { canRead } = allowedActions;
 
   const response = useGetReleasesForEntryQuery(
     {
@@ -133,15 +133,13 @@ const Panel: PanelComponent = ({
                   )}
                 </Typography>
               )}
-              {canDeleteAction ? (
-                <ReleaseActionMenu.Root hasTriggerBorder>
-                  <ReleaseActionMenu.EditReleaseItem releaseId={release.id} />
-                  <ReleaseActionMenu.DeleteReleaseActionItem
-                    releaseId={release.id}
-                    actionId={release.actions[0].id}
-                  />
-                </ReleaseActionMenu.Root>
-              ) : null}
+              <ReleaseActionMenu.Root hasTriggerBorder>
+                <ReleaseActionMenu.EditReleaseItem releaseId={release.id} />
+                <ReleaseActionMenu.DeleteReleaseActionItem
+                  releaseId={release.id}
+                  actionId={release.actions[0].id}
+                />
+              </ReleaseActionMenu.Root>
             </Flex>
           </Flex>
         ))}
