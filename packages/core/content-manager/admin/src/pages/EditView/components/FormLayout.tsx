@@ -126,8 +126,32 @@ const useIdleMountQueue = () => {
  * LazyFormRow
  * -----------------------------------------------------------------------------------------------*/
 
+type Components = ReturnType<UseDocument>['components'];
+type Attribute = LayoutField['attribute'];
+
+/**
+ * Some inputs set a value when they mount: a required UID fetches its default value, and custom
+ * fields may set a default. Their rows are mounted with the page, as they always were, so that
+ * saving right after the page loads doesn't miss those values. Non-repeatable components are
+ * expanded by default, so the inputs they contain count too.
+ */
+const hasMountSideEffects = (attribute: Attribute, components: Components, depth = 0): boolean => {
+  if ((attribute.type === 'uid' && attribute.required) || 'customField' in attribute) {
+    return true;
+  }
+
+  if (attribute.type === 'component' && !attribute.repeatable && depth < 10) {
+    return Object.values(components[attribute.component]?.attributes ?? {}).some((nested) =>
+      hasMountSideEffects(nested as Attribute, components, depth + 1)
+    );
+  }
+
+  return false;
+};
+
 interface LazyFormRowProps {
   fields: Pick<LayoutField, 'name' | 'type'>[];
+  mountImmediately?: boolean;
   children: React.ReactNode;
 }
 
@@ -137,11 +161,11 @@ interface LazyFormRowProps {
  * upfront is what makes the edit view slow: the cost of the first render should depend on
  * the screen, not on the size of the model.
  */
-const LazyFormRow = ({ fields, children }: LazyFormRowProps) => {
+const LazyFormRow = ({ fields, mountImmediately = false, children }: LazyFormRowProps) => {
   const scheduleMount = React.useContext(IdleMountContext);
   const placeholderRef = React.useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = React.useState(
-    () => typeof IntersectionObserver === 'undefined'
+    () => mountImmediately || typeof IntersectionObserver === 'undefined'
   );
 
   // A field in error has to be mounted so the error is displayed and can receive the focus.
@@ -252,7 +276,11 @@ const FormLayout = React.memo(({ layout, document, hasBackground = true }: FormL
             const [field] = row;
 
             return (
-              <LazyFormRow key={field.name} fields={[field]}>
+              <LazyFormRow
+                key={field.name}
+                fields={[field]}
+                mountImmediately={hasMountSideEffects(field.attribute, document.components)}
+              >
                 <Grid.Root gap={4}>
                   <Grid.Item col={12} s={12} xs={12} direction="column" alignItems="stretch">
                     <InputRenderer
@@ -271,7 +299,13 @@ const FormLayout = React.memo(({ layout, document, hasBackground = true }: FormL
               <Flex direction="column" alignItems="stretch" gap={6}>
                 {panel.map((row, gridRowIndex) => {
                   return (
-                    <LazyFormRow key={gridRowIndex} fields={row}>
+                    <LazyFormRow
+                      key={gridRowIndex}
+                      fields={row}
+                      mountImmediately={row.some((field) =>
+                        hasMountSideEffects(field.attribute, document.components)
+                      )}
+                    >
                       <ResponsiveGridRoot gap={{ initial: 6, medium: 4 }}>
                         {row.map(({ size, ...field }) => {
                           return (
@@ -306,4 +340,4 @@ const FormLayout = React.memo(({ layout, document, hasBackground = true }: FormL
 
 FormLayout.displayName = 'FormLayout';
 
-export { FormLayout, FormLayoutProps };
+export { FormLayout, FormLayoutProps, hasMountSideEffects };
