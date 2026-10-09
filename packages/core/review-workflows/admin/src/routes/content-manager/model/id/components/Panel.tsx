@@ -1,35 +1,20 @@
-import { unstable_useDocumentLayout as useDocumentLayout } from '@strapi/content-manager/strapi-admin';
 import { Flex } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import { useParams } from 'react-router-dom';
+
+import { useIsReviewWorkflowVisible } from '../hooks/useIsReviewWorkflowVisible';
 
 import { AssigneeSelect } from './AssigneeSelect';
 import { StageSelect } from './StageSelect';
 
 import type { PanelComponent } from '@strapi/content-manager/strapi-admin';
 
-const Panel: PanelComponent = () => {
-  const {
-    slug = '',
-    id,
-    collectionType,
-  } = useParams<{
-    collectionType: string;
-    slug: string;
-    id: string;
-  }>();
-
-  const {
-    edit: { options },
-  } = useDocumentLayout(slug);
+const Panel: PanelComponent = ({ activeTab }) => {
+  const isReviewWorkflowVisible = useIsReviewWorkflowVisible({
+    activeTab,
+  });
   const { formatMessage } = useIntl();
 
-  if (
-    !window.strapi.isEE ||
-    !options?.reviewWorkflows ||
-    (collectionType !== 'single-types' && !id) ||
-    id === 'create'
-  ) {
+  if (!isReviewWorkflowVisible) {
     return null;
   }
 
