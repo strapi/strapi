@@ -9,12 +9,14 @@ import {
   Tooltip,
   Typography,
 } from '@strapi/design-system';
+import { Duplicate } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
-import { styled } from 'styled-components';
+import { css, styled } from 'styled-components';
 
 import { ComponentIcon } from '../../../../../components/ComponentIcon';
 import { resolvePreviewImageUrl } from '../../../../../utils/previewImage';
+import { getTranslation } from '../../../../../utils/translations';
 
 import type { Struct } from '@strapi/types';
 
@@ -29,6 +31,7 @@ interface ComponentCategoryProps {
   onAddComponent: (
     componentUid: string
   ) => React.MouseEventHandler<HTMLButtonElement> & React.MouseEventHandler<HTMLDivElement>;
+  onCopyComponent?: (componentUid: string) => React.MouseEventHandler<HTMLButtonElement>;
   variant?: Accordion.Variant;
 }
 
@@ -120,6 +123,7 @@ const ComponentCategory = ({
   components = [],
   variant = 'primary',
   onAddComponent,
+  onCopyComponent,
 }: ComponentCategoryProps) => {
   const { formatMessage } = useIntl();
 
@@ -138,37 +142,57 @@ const ComponentCategory = ({
             return (
               <ComponentBox
                 key={uid}
-                tag="button"
-                type="button"
                 background="neutral100"
                 justifyContent="center"
-                onClick={onAddComponent(uid)}
                 hasRadius
-                height="8.4rem"
                 shrink={0}
                 borderColor="neutral200"
+                direction="column"
+                alignItems="stretch"
               >
-                <Flex
-                  direction="column"
-                  gap={1}
-                  alignItems="center"
-                  justifyContent="center"
-                  width="100%"
-                  paddingLeft={2}
-                  paddingRight={2}
-                >
-                  <ComponentTileVisual
-                    previewUrl={previewUrl}
-                    icon={icon}
-                    displayName={displayName}
-                  />
+                <ComponentAddButton type="button" onClick={onAddComponent(uid)}>
+                  <Flex
+                    direction="column"
+                    gap={1}
+                    alignItems="center"
+                    justifyContent="center"
+                    width="100%"
+                    paddingLeft={2}
+                    paddingRight={2}
+                  >
+                    <ComponentTileVisual
+                      previewUrl={previewUrl}
+                      icon={icon}
+                      displayName={displayName}
+                    />
 
-                  <Tooltip label={formatMessage({ id: uid, defaultMessage: displayName ?? uid })}>
-                    <Typography variant="pi" fontWeight="bold" ellipsis width="100%">
-                      {formatMessage({ id: uid, defaultMessage: displayName ?? uid })}
-                    </Typography>
+                    <Tooltip label={formatMessage({ id: uid, defaultMessage: displayName ?? uid })}>
+                      <Typography variant="pi" fontWeight="bold" ellipsis width="100%">
+                        {formatMessage({ id: uid, defaultMessage: displayName ?? uid })}
+                      </Typography>
+                    </Tooltip>
+                  </Flex>
+                </ComponentAddButton>
+                {onCopyComponent && (
+                  <Tooltip
+                    label={formatMessage({
+                      id: getTranslation('components.copy-from-existing'),
+                      defaultMessage: 'Copy from existing',
+                    })}
+                    // below the tile, so the name of the component stays visible
+                    side="bottom"
+                  >
+                    <ComponentCopyButton type="button" onClick={onCopyComponent(uid)}>
+                      <Duplicate aria-hidden width="1.2rem" height="1.2rem" />
+                      <Typography variant="pi" fontWeight="bold">
+                        {formatMessage({
+                          id: getTranslation('components.copy-from-existing.short'),
+                          defaultMessage: 'Copy',
+                        })}
+                      </Typography>
+                    </ComponentCopyButton>
                   </Tooltip>
-                </Flex>
+                )}
               </ComponentBox>
             );
           })}
@@ -210,19 +234,72 @@ const Grid =
         }
       `;
 
-const ComponentBox = styled<FlexComponent<'button'>>(Flex)`
-  color: ${({ theme }) => theme.colors.neutral600};
+const ComponentBox = styled<FlexComponent>(Flex)`
+  /* keeps the background of the actions within the rounded corners */
+  overflow: hidden;
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: border-color 120ms ${(props) => props.theme.motion.easings.easeOutQuad};
+  }
+
+  &:focus-within,
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.primary200};
+  }
+`;
+
+/**
+ * A tile holds up to two actions, adding the component and copying it from another entry.
+ * Each one is highlighted on its own so it's clear which one is about to be triggered.
+ */
+const tileActionStyles = css`
+  width: 100%;
+  border: 0;
+  background: transparent;
   cursor: pointer;
 
   @media (prefers-reduced-motion: no-preference) {
-    transition: color 120ms ${(props) => props.theme.motion.easings.easeOutQuad};
+    transition:
+      background-color 120ms ${(props) => props.theme.motion.easings.easeOutQuad},
+      color 120ms ${(props) => props.theme.motion.easings.easeOutQuad};
   }
 
-  &:focus,
+  &:focus-visible,
   &:hover {
-    border: 1px solid ${({ theme }) => theme.colors.primary200};
     background: ${({ theme }) => theme.colors.primary100};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.primary600};
+    outline-offset: -2px;
+  }
+`;
+
+const ComponentAddButton = styled.button`
+  ${tileActionStyles}
+  /* 8.4rem tile (as without a copy action) minus the tile's 1px borders */
+  min-height: 8.2rem;
+  color: ${({ theme }) => theme.colors.neutral600};
+
+  &:focus-visible,
+  &:hover {
     color: ${({ theme }) => theme.colors.primary600};
+  }
+`;
+
+const ComponentCopyButton = styled.button`
+  ${tileActionStyles}
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: ${({ theme }) => theme.spaces[1]};
+  padding: ${({ theme }) => theme.spaces[1]} ${({ theme }) => theme.spaces[2]};
+  border-top: 1px solid ${({ theme }) => theme.colors.neutral200};
+  color: ${({ theme }) => theme.colors.primary600};
+
+  &:focus-visible,
+  &:hover {
+    color: ${({ theme }) => theme.colors.primary700};
   }
 `;
 

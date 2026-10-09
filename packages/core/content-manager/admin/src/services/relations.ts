@@ -32,6 +32,11 @@ type GetRelationsResponse =
       error: errors.ApplicationError | errors.YupValidationError;
     };
 
+/**
+ * The maximum page size the relations API accepts.
+ */
+const ALL_RELATIONS_PAGE_SIZE = 100;
+
 const relationsApi = contentManagerApi.injectEndpoints({
   endpoints: (build) => ({
     getRelations: build.query<
@@ -102,6 +107,47 @@ const relationsApi = contentManagerApi.injectEndpoints({
         } else {
           return response;
         }
+      },
+      providesTags: ['Relations'],
+    }),
+    /**
+     * Loads every existing relation of a field, in the order they're displayed.
+     * `getRelations` is paginated for the relations input, this one is meant for
+     * copying the relations of an entry.
+     */
+    getAllRelations: build.query<
+      RelResult[],
+      FindExisting.Params & {
+        params?: Omit<FindExisting.Request['query'], 'page' | 'pageSize'>;
+      }
+    >({
+      queryFn: async ({ model, id, targetField, params }, _api, _extraOpts, baseQuery) => {
+        const relations: RelResult[] = [];
+        let page = 1;
+        let pageCount = 1;
+
+        while (page <= pageCount) {
+          const res = await baseQuery({
+            url: `/content-manager/relations/${model}/${id}/${targetField}`,
+            method: 'GET',
+            config: {
+              params: { ...params, page, pageSize: ALL_RELATIONS_PAGE_SIZE },
+            },
+          });
+
+          if (res.error) {
+            return { error: res.error };
+          }
+
+          const { results = [], pagination } = res.data as FindExisting.Response;
+
+          relations.push(...results);
+          pageCount = pagination?.pageCount ?? 1;
+          page += 1;
+        }
+
+        // The API returns the latest relations first.
+        return { data: relations.toReversed() };
       },
       providesTags: ['Relations'],
     }),
@@ -195,7 +241,8 @@ const prepareTempKeys = (relations: RelResult[], existingRelations: RelationResu
   }));
 };
 
-const { useGetRelationsQuery, useLazySearchRelationsQuery } = relationsApi;
+const { useGetRelationsQuery, useLazyGetAllRelationsQuery, useLazySearchRelationsQuery } =
+  relationsApi;
 
-export { useGetRelationsQuery, useLazySearchRelationsQuery };
+export { useGetRelationsQuery, useLazyGetAllRelationsQuery, useLazySearchRelationsQuery };
 export type { RelationResult };
