@@ -138,7 +138,7 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
 
   return (
     <Modal.Root defaultOpen onOpenChange={onToggle}>
-      <Modal.Content>
+      <Modal.Content onInteractOutside={(event) => event.preventDefault()}>
         <Modal.Header>
           {/**
            * TODO: this is not semantically correct and should be amended.
