@@ -334,6 +334,20 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
 
           const formattedActions = await getFormattedActions(releaseId);
 
+          /**
+           * The cached isEntryValid flag is only refreshed when the acted-upon document
+           * goes through the document-service update lifecycle, so it can be stale when
+           * the entry changed through any other channel. Revalidate the actions so the
+           * release status cannot disagree with what publish will actually do.
+           */
+          const invalidActions = await getService('release-action', { strapi }).revalidateActions(
+            releaseId
+          );
+
+          if (invalidActions > 0) {
+            throw new errors.ValidationError('Release contains invalid entries');
+          }
+
           // Publish content types in dependency order so that when entity A has a relation
           // to entity B, B is published first to keep this relation.
           const contentTypeUids = getPublishOrderForContentTypes(
