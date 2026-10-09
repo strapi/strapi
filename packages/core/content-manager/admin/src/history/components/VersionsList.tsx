@@ -28,6 +28,30 @@ const BlueText = (children: React.ReactNode) => (
  * VersionAuthor
  * -----------------------------------------------------------------------------------------------*/
 
+const ACTOR_MESSAGES = {
+  'api-token': {
+    id: 'content-manager.history.sidebar.versionDescriptionApiToken',
+    defaultMessage:
+      '{distanceToNow} by API token: {actorName}{isCurrent, select, true { <b>(current)</b>} other {}}',
+  },
+  'end-user': {
+    id: 'content-manager.history.sidebar.versionDescriptionEndUser',
+    defaultMessage:
+      '{distanceToNow} by end user: {actorName}{isCurrent, select, true { <b>(current)</b>} other {}}',
+  },
+} as const;
+
+const getExternalActor = (actor: HistoryVersions.HistoryVersionActor | null | undefined) => {
+  switch (actor?.type) {
+    case 'api-token':
+      return { message: ACTOR_MESSAGES['api-token'], name: actor.token.name };
+    case 'end-user':
+      return { message: ACTOR_MESSAGES['end-user'], name: actor.user.username };
+    default:
+      return undefined;
+  }
+};
+
 const VersionAuthor = ({
   version,
   isCurrent,
@@ -36,6 +60,22 @@ const VersionAuthor = ({
   isCurrent: boolean;
 }) => {
   const { formatMessage } = useIntl();
+  const distanceToNow = <RelativeTime timestamp={new Date(version.createdAt)} />;
+  const externalActor = getExternalActor(version.actor);
+
+  if (!version.createdBy && externalActor) {
+    return (
+      <>
+        {formatMessage(externalActor.message, {
+          distanceToNow,
+          actorName: externalActor.name,
+          isCurrent,
+          b: BlueText,
+        })}
+      </>
+    );
+  }
+
   const author = version.createdBy && getDisplayName(version.createdBy);
   return (
     <>
@@ -46,7 +86,7 @@ const VersionAuthor = ({
             '{distanceToNow}{isAnonymous, select, true {} other { by {author}}}{isCurrent, select, true { <b>(current)</b>} other {}}',
         },
         {
-          distanceToNow: <RelativeTime timestamp={new Date(version.createdAt)} />,
+          distanceToNow,
           author,
           isAnonymous: !version.createdBy,
           isCurrent,

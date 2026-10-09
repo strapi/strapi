@@ -7,31 +7,42 @@ import { getService } from '../utils';
 import { FIELDS_TO_IGNORE, HISTORY_VERSION_UID } from '../constants';
 
 import type { CreateHistoryVersion } from '../../../../shared/contracts/history-versions';
+import { resolveHistoryOrigin } from '../origin';
+import type { RequestContext } from '../types';
 import { createServiceUtils } from './utils';
 
-/**
- * Filters out actions that should not create a history version.
- */
-const shouldCreateHistoryVersion = (
-  context: Modules.Documents.Middleware.Context
-): context is Modules.Documents.Middleware.Context & {
-  action: 'create' | 'update' | 'clone' | 'publish' | 'unpublish' | 'discardDraft';
+type RecordedAction = 'create' | 'update' | 'clone' | 'publish' | 'unpublish' | 'discardDraft';
+
+const isRecordedAction = (action: string): action is RecordedAction =>
+  ['create', 'update', 'clone', 'publish', 'unpublish', 'discardDraft'].includes(action);
+
+const isPublishRoute = (requestContext: RequestContext) =>
+  requestContext.state.route?.path?.endsWith('/actions/publish') === true;
+
+type RecordedContext = Modules.Documents.Middleware.Context & {
+  action: RecordedAction;
   contentType: UID.CollectionType;
-} => {
-  // Ignore requests that are not related to the content manager
-  if (!strapi.requestContext.get()?.request.url.startsWith('/content-manager')) {
+};
+
+const shouldCreateHistoryVersion = (
+  strapi: Core.Strapi,
+  context: Modules.Documents.Middleware.Context
+): context is RecordedContext => {
+  const requestContext = strapi.requestContext.get();
+
+  if (!requestContext) {
     return false;
   }
 
-  // NOTE: cannot do type narrowing with array includes
-  if (
-    context.action !== 'create' &&
-    context.action !== 'update' &&
-    context.action !== 'clone' &&
-    context.action !== 'publish' &&
-    context.action !== 'unpublish' &&
-    context.action !== 'discardDraft'
-  ) {
+  const origin = resolveHistoryOrigin(requestContext, {
+    isContentApiEnabled: strapi.config.get<boolean>('admin.history.contentApi', false),
+  });
+
+  if (origin === null) {
+    return false;
+  }
+
+  if (!isRecordedAction(context.action)) {
     return false;
   }
 
@@ -41,10 +52,7 @@ const shouldCreateHistoryVersion = (
    * To avoid this, we silence the update action during a publish request,
    * so that they only see the published version of the document in the history.
    */
-  if (
-    context.action === 'update' &&
-    strapi.requestContext.get()?.request.url.split('?')[0].endsWith('/actions/publish')
-  ) {
+  if (context.action === 'update' && isPublishRoute(requestContext)) {
     return false;
   }
 
@@ -61,7 +69,7 @@ const shouldCreateHistoryVersion = (
  * Used to determine if changes were made in the content type builder since a history version was created.
  * And therefore which fields can be restored and which cannot.
  */
-const getSchemas = (uid: UID.CollectionType) => {
+const getSchemas = (strapi: Core.Strapi, uid: UID.CollectionType) => {
   const attributesSchema = strapi.getModel(uid).attributes;
 
   // TODO: Handle nested components
@@ -99,6 +107,74 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
   const serviceUtils = createServiceUtils({ strapi });
   const { persistTablesWithPrefix } = strapi.service('admin::persist-tables');
 
+  const failOpen = async (
+    step: 'prepare' | 'insert',
+    uid: UID.CollectionType,
+    task: () => Promise<void>
+  ) => {
+    try {
+      await task();
+    } catch (error) {
+      strapi.log.error(`Failed to ${step} a history version for ${uid}`, error);
+      strapi.log.debug(error);
+    }
+  };
+
+  const recordVersions = async (
+    context: RecordedContext,
+    result: Modules.Documents.AnyDocument
+  ) => {
+    // On create/clone actions, the documentId is not available before creating the action is executed
+    const documentId =
+      context.action === 'create' || context.action === 'clone'
+        ? result.documentId
+        : context.params.documentId;
+
+    // Apply default locale if not available in the request
+    const defaultLocale = await serviceUtils.getDefaultLocale();
+    const locales = castArray(context.params?.locale || defaultLocale);
+    if (!locales.length) {
+      return;
+    }
+
+    // All schemas related to the content type
+    const uid = context.contentType.uid;
+    const schemas = getSchemas(strapi, uid);
+    const model = strapi.getModel(uid);
+
+    const isLocalizedContentType = serviceUtils.isLocalizedContentType(model);
+
+    // Find all affected entries
+    const localeEntries = await strapi.db.query(uid).findMany({
+      where: {
+        documentId,
+        ...(isLocalizedContentType ? { locale: { $in: locales } } : {}),
+        ...(contentTypes.hasDraftAndPublish(strapi.contentTypes[uid]) ? { publishedAt: null } : {}),
+      },
+      populate: serviceUtils.getDeepPopulate(uid, true /* use database syntax */),
+    });
+
+    await strapi.db.transaction(async ({ onCommit }) => {
+      // Defer the insert until the write is committed, so a rolled-back write leaves no version.
+      onCommit(() =>
+        failOpen('insert', uid, async () => {
+          for (const entry of localeEntries) {
+            const status = await serviceUtils.getVersionStatus(uid, entry);
+
+            await getService(strapi, 'history').createVersion({
+              contentType: uid,
+              data: omit(entry, FIELDS_TO_IGNORE) as Modules.Documents.AnyDocument,
+              relatedDocumentId: documentId,
+              locale: entry.locale,
+              status,
+              ...schemas,
+            });
+          }
+        })
+      );
+    });
+  };
+
   return {
     async bootstrap() {
       // Prevent initializing the service twice
@@ -110,63 +186,11 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
       await persistTablesWithPrefix('strapi_history_versions');
 
       strapi.documents.use(async (context, next) => {
-        const result = (await next()) as any;
+        const result = (await next()) as Modules.Documents.AnyDocument;
 
-        if (!shouldCreateHistoryVersion(context)) {
-          return result;
+        if (shouldCreateHistoryVersion(strapi, context)) {
+          await failOpen('prepare', context.contentType.uid, () => recordVersions(context, result));
         }
-
-        // On create/clone actions, the documentId is not available before creating the action is executed
-        const documentId =
-          context.action === 'create' || context.action === 'clone'
-            ? result.documentId
-            : context.params.documentId;
-
-        // Apply default locale if not available in the request
-        const defaultLocale = await serviceUtils.getDefaultLocale();
-        const locales = castArray(context.params?.locale || defaultLocale);
-        if (!locales.length) {
-          return result;
-        }
-
-        // All schemas related to the content type
-        const uid = context.contentType.uid;
-        const schemas = getSchemas(uid);
-        const model = strapi.getModel(uid);
-
-        const isLocalizedContentType = serviceUtils.isLocalizedContentType(model);
-
-        // Find all affected entries
-        const localeEntries = await strapi.db.query(uid).findMany({
-          where: {
-            documentId,
-            ...(isLocalizedContentType ? { locale: { $in: locales } } : {}),
-            ...(contentTypes.hasDraftAndPublish(strapi.contentTypes[uid])
-              ? { publishedAt: null }
-              : {}),
-          },
-          populate: serviceUtils.getDeepPopulate(uid, true /* use database syntax */),
-        });
-
-        await strapi.db.transaction(async ({ onCommit }) => {
-          // .createVersion() is executed asynchronously,
-          // onCommit prevents creating a history version
-          // when the transaction has already been committed
-          onCommit(async () => {
-            for (const entry of localeEntries) {
-              const status = await serviceUtils.getVersionStatus(uid, entry);
-
-              await getService(strapi, 'history').createVersion({
-                contentType: uid,
-                data: omit(entry, FIELDS_TO_IGNORE) as Modules.Documents.AnyDocument,
-                relatedDocumentId: documentId,
-                locale: entry.locale,
-                status,
-                ...schemas,
-              });
-            }
-          });
-        });
 
         return result;
       });
