@@ -1,5 +1,5 @@
 import * as utils from '@strapi/utils';
-import { pick } from 'lodash/fp';
+import { pick } from 'lodash';
 import type { Core } from '@strapi/types';
 import { getService } from '../utils';
 import { validateCreateLocaleInput, validateUpdateLocaleInput } from '../validation/locales';
@@ -40,7 +40,7 @@ const controller: Core.Controller = {
 
     const localeToPersist = setCreatorFields({ user })(formatLocale(localeToCreate));
 
-    const locale = await localesService.create(localeToPersist);
+    const locale = await localesService.create(localeToPersist, { isDefault: Boolean(isDefault) });
 
     if (isDefault) {
       await localesService.setDefaultLocale(locale);
@@ -67,7 +67,7 @@ const controller: Core.Controller = {
     }
 
     const allowedParams = ['name'];
-    const cleanUpdates = setCreatorFields({ user, isEdition: true })(pick(allowedParams, updates));
+    const cleanUpdates = setCreatorFields({ user, isEdition: true })(pick(updates, allowedParams));
 
     const updatedLocale = await localesService.update({ id }, cleanUpdates);
 

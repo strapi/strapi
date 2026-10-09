@@ -5,12 +5,12 @@
  * are used and validated/sanitized correctly throughout the content API pipeline.
  * Covers happy paths and error cases for extra query and body params.
  */
-const { values } = require('lodash/fp');
 
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
 const { z } = require('@strapi/utils');
+const internalZ = require('zod/v4');
 
 const resources = require('./resources');
 
@@ -23,11 +23,11 @@ let rq;
 let data;
 
 const addSchemas = () => {
-  for (const component of values(schemas.components)) {
+  for (const component of Object.values(schemas.components ?? {})) {
     builder.addComponent(component);
   }
 
-  builder.addContentTypes(values(schemas['content-types']));
+  builder.addContentTypes(Object.values(schemas['content-types'] ?? {}));
 };
 
 const addFixtures = () => {
@@ -79,20 +79,63 @@ describe('Content API – schemas from exported @strapi/utils z (Zod v4)', () =>
       expect(route.request?.query).toHaveProperty('exportedZodSearch');
     });
 
-    it('addInputParams accepts schema built with exported z and applyExtraParamsToRoutes succeeds', () => {
+    it('addInputParams composes and validates an exported z schema with an existing route schema', async () => {
       strapi.contentAPI.addInputParams({
-        exportedZodClientId: { schema: z.string().max(100).optional() },
+        exportedZodMetadata: {
+          schema: z.object({
+            clientId: z.string().trim().min(1),
+            enabled: z.boolean().default(true),
+          }),
+        },
       });
 
       const route = {
         path: '/api/documents',
         method: 'POST',
         info: { type: 'content-api' },
-        request: { body: { 'application/json': {} } },
+        request: {
+          body: {
+            'application/json': internalZ.object({
+              name: internalZ.string().min(1),
+            }),
+          },
+        },
       };
 
-      expect(() => strapi.contentAPI.applyExtraParamsToRoutes([route])).not.toThrow();
-      expect(route.request?.body?.['application/json']).toBeDefined();
+      strapi.contentAPI.applyExtraParamsToRoutes([route]);
+
+      const bodySchema = route.request.body['application/json'];
+      expect(
+        bodySchema.parse({
+          name: 'Document',
+          exportedZodMetadata: { clientId: '  client-1  ' },
+        })
+      ).toEqual({
+        name: 'Document',
+        exportedZodMetadata: { clientId: 'client-1', enabled: true },
+      });
+
+      const contentType = strapi.contentType('api::document.document');
+      await expect(
+        strapi.contentAPI.validate.input(
+          {
+            name: 'Document',
+            exportedZodMetadata: { clientId: 'client-1' },
+          },
+          contentType,
+          { strictParams: true, route }
+        )
+      ).resolves.not.toThrow();
+      await expect(
+        strapi.contentAPI.validate.input(
+          {
+            name: 'Document',
+            exportedZodMetadata: { clientId: '' },
+          },
+          contentType,
+          { strictParams: true, route }
+        )
+      ).rejects.toThrow();
     });
   });
 

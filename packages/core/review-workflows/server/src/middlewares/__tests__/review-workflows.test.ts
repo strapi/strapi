@@ -9,6 +9,26 @@ const strapiMock = {
 } as any;
 describe('Review workflows middlewares', () => {
   describe('contentTypeMiddleware', () => {
+    test.each(['PUT', 'POST'])('preserves the original options for a %s request', (method) => {
+      const options = Object.freeze({ draftAndPublish: true, reviewWorkflows: false });
+      const contentType = Object.freeze({ reviewWorkflows: true, options });
+      const ctx = { method, request: { body: { contentType } } };
+      const next = jest.fn();
+      strapiMock.server.router.use.mockImplementationOnce(
+        (route: string, callback: (ctx: unknown, next: () => void) => unknown) =>
+          callback(ctx, next)
+      );
+
+      reviewWorkflowsMiddlewares.contentTypeMiddleware(strapiMock);
+
+      expect(ctx.request.body.contentType).toEqual({
+        options: { draftAndPublish: true, reviewWorkflows: true },
+      });
+      expect(ctx.request.body.contentType.options).not.toBe(options);
+      expect(options.reviewWorkflows).toBe(false);
+      expect(next).toHaveBeenCalledTimes(1);
+    });
+
     test('Should add middleware to content-type-builder route', () => {
       const ctxMock = {
         method: 'PUT',

@@ -1,4 +1,3 @@
-import { isArray } from 'lodash/fp';
 import { contentTypes } from '@strapi/utils';
 import type { UID, Schema, Core } from '@strapi/types';
 
@@ -20,12 +19,12 @@ const getMainField = async (targetUid: UID.Schema): Promise<string> => {
 };
 
 /**
- * Returns the display label for a relation.
- * Matches the logic of the getRelationLabel function in the content-manager plugin.
+ * Returns the display label for a relation in form state.
+ * Empty configured values stay untranslated so the admin can provide its localized fallback.
  */
 const getRelationLabel = (relation: Record<string, unknown>, mainField: string): string => {
   const label = relation[mainField];
-  if (typeof label === 'string') return label;
+  if (label === null || typeof label === 'string') return label ?? '';
   return String(relation.documentId ?? '');
 };
 
@@ -104,7 +103,7 @@ const incrementInitialTempKey = (key?: string): string => {
  * Normalizes a value to an array: arrays pass through, single values become [value], null/undefined become [].
  */
 const normalizeToArray = (value: unknown): unknown[] => {
-  if (isArray(value)) return value;
+  if (Array.isArray(value)) return value;
   if (value) return [value];
   return [];
 };
@@ -238,14 +237,14 @@ const collectRelationsByUid = (
         const compSchema = (components[attribute.component] ?? {
           attributes: {},
         }) as Schema.Component;
-        if (attribute.repeatable && isArray(value)) {
+        if (attribute.repeatable && Array.isArray(value)) {
           for (const item of value as Record<string, unknown>[]) {
             collect(item, compSchema);
           }
         } else if (value) {
           collect(value as Record<string, unknown>, compSchema);
         }
-      } else if (attribute.type === 'dynamiczone' && isArray(value)) {
+      } else if (attribute.type === 'dynamiczone' && Array.isArray(value)) {
         for (const item of value as Record<string, unknown>[]) {
           const compUid = (item as any)?.__component as string;
           const compSchema = (components[compUid] ?? { attributes: {} }) as Schema.Component;
@@ -475,7 +474,7 @@ const processDocumentData = async (
       const compSchema = (components[attribute.component] || {
         attributes: {},
       }) as Schema.Component;
-      if (attribute.repeatable && isArray(value)) {
+      if (attribute.repeatable && Array.isArray(value)) {
         const tempKeys = generateInitialTempKeys(value.length);
         result[key] = await Promise.all(
           value.map(async (item: Record<string, unknown>, index: number) => {
@@ -497,7 +496,7 @@ const processDocumentData = async (
       continue;
     }
 
-    if (attribute.type === 'dynamiczone' && isArray(value)) {
+    if (attribute.type === 'dynamiczone' && Array.isArray(value)) {
       const tempKeys = generateInitialTempKeys(value.length);
       result[key] = await Promise.all(
         value.map(async (item: Record<string, unknown>, index: number) => {

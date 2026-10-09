@@ -61,6 +61,123 @@ describe('Admin Access Token Exchange', () => {
     });
   });
 
+  it('child refresh cookie still works after parent rotation (multi-tab recovery path)', async () => {
+    const rq = createRequest({ strapi });
+
+    const loginRes = await rq.post('/admin/login', { body: superAdmin.loginInfo });
+    expect(loginRes.statusCode).toBe(200);
+
+    const originalCookiePair = getCookie(loginRes, cookieName)!.split(';')[0];
+
+    const firstExchangeRes = await createRequest({ strapi }).post('/admin/access-token', {
+      headers: { Cookie: originalCookiePair },
+    });
+    expect(firstExchangeRes.statusCode).toBe(200);
+
+    const childCookiePair = getCookie(firstExchangeRes, cookieName)!.split(';')[0];
+    expect(childCookiePair).not.toBe(originalCookiePair);
+
+    // Parent replay is rejected (security fix).
+    const replayRes = await createRequest({ strapi }).post('/admin/access-token', {
+      headers: { Cookie: originalCookiePair },
+    });
+    expect(replayRes.statusCode).toBe(401);
+
+    // A tab that lost the race can still refresh using the shared child cookie.
+    const childExchangeRes = await createRequest({ strapi }).post('/admin/access-token', {
+      headers: { Cookie: childCookiePair },
+    });
+    expect(childExchangeRes.statusCode).toBe(200);
+    expect(childExchangeRes.body?.data?.token).toEqual(expect.any(String));
+  });
+
+  it('concurrent access-token with same parent: one wins, loser gets 401, child cookie still valid', async () => {
+    const rq = createRequest({ strapi });
+
+    const loginRes = await rq.post('/admin/login', { body: superAdmin.loginInfo });
+    expect(loginRes.statusCode).toBe(200);
+
+    const parentCookiePair = getCookie(loginRes, cookieName)!.split(';')[0];
+
+    const [firstRes, secondRes] = await Promise.all([
+      createRequest({ strapi }).post('/admin/access-token', {
+        headers: { Cookie: parentCookiePair },
+      }),
+      createRequest({ strapi }).post('/admin/access-token', {
+        headers: { Cookie: parentCookiePair },
+      }),
+    ]);
+
+    const statuses = [firstRes.statusCode, secondRes.statusCode].sort();
+    expect(statuses).toEqual([200, 401]);
+
+    const winner = firstRes.statusCode === 200 ? firstRes : secondRes;
+    const loser = firstRes.statusCode === 200 ? secondRes : firstRes;
+    expect(loser.statusCode).toBe(401);
+
+    const childCookiePair = getCookie(winner, cookieName)!.split(';')[0];
+    expect(childCookiePair).not.toBe(parentCookiePair);
+
+    // Simulates the client retry after 401: browser now shares the child cookie.
+    const recoveryRes = await createRequest({ strapi }).post('/admin/access-token', {
+      headers: { Cookie: childCookiePair },
+    });
+    expect(recoveryRes.statusCode).toBe(200);
+    expect(recoveryRes.body?.data?.token).toEqual(expect.any(String));
+  });
+
+  it('rejects a stale parent cookie on repeated access-token attempts (no replay window)', async () => {
+    const rq = createRequest({ strapi });
+
+    const loginRes = await rq.post('/admin/login', { body: superAdmin.loginInfo });
+    expect(loginRes.statusCode).toBe(200);
+
+    const parentCookiePair = getCookie(loginRes, cookieName)!.split(';')[0];
+
+    const firstExchangeRes = await createRequest({ strapi }).post('/admin/access-token', {
+      headers: { Cookie: parentCookiePair },
+    });
+    expect(firstExchangeRes.statusCode).toBe(200);
+
+    const replayAttempts = await Promise.all([
+      createRequest({ strapi }).post('/admin/access-token', {
+        headers: { Cookie: parentCookiePair },
+      }),
+      createRequest({ strapi }).post('/admin/access-token', {
+        headers: { Cookie: parentCookiePair },
+      }),
+    ]);
+
+    replayAttempts.forEach((res) => expect(res.statusCode).toBe(401));
+  });
+
+  it('returns 401 when replaying an already rotated refresh cookie', async () => {
+    const rq = createRequest({ strapi });
+
+    const loginRes = await rq.post('/admin/login', { body: superAdmin.loginInfo });
+    expect(loginRes.statusCode).toBe(200);
+
+    const refreshCookie = getCookie(loginRes, cookieName);
+    expect(refreshCookie).toBeDefined();
+
+    const originalCookiePair = refreshCookie!.split(';')[0];
+
+    const firstExchangeRes = await createRequest({ strapi }).post('/admin/access-token', {
+      headers: { Cookie: originalCookiePair },
+    });
+    expect(firstExchangeRes.statusCode).toBe(200);
+    expect(firstExchangeRes.body?.data?.token).toEqual(expect.any(String));
+
+    const rotatedCookie = getCookie(firstExchangeRes, cookieName);
+    expect(rotatedCookie).toBeDefined();
+    expect(rotatedCookie!.split(';')[0]).not.toBe(originalCookiePair);
+
+    const replayRes = await createRequest({ strapi }).post('/admin/access-token', {
+      headers: { Cookie: originalCookiePair },
+    });
+    expect(replayRes.statusCode).toBe(401);
+  });
+
   it('returns 401 for missing token (no cookie and no body)', async () => {
     const rq = createRequest({ strapi });
     const res = await rq.post('/admin/access-token');

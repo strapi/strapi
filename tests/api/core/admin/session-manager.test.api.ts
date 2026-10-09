@@ -356,7 +356,7 @@ describe('SessionManager API Integration', () => {
     });
 
     describe('generateAccessToken', () => {
-      it('should rotate refresh token and return same child on reuse', async () => {
+      it('should reject an already rotated refresh token on reuse', async () => {
         const { token: parentToken } = await strapi
           .sessionManager('admin')
           .generateRefreshToken(testUserId, testDeviceId);
@@ -365,16 +365,9 @@ describe('SessionManager API Integration', () => {
         const r1 = await strapi.sessionManager('admin').rotateRefreshToken(parentToken);
         expect('token' in r1).toBe(true);
         if ('token' in r1) {
-          const childToken1 = r1.token;
-          const childSession1 = r1.sessionId;
-
-          // Second rotation with the same parent should return the same child
+          // Second rotation with the same parent should be rejected.
           const r2 = await strapi.sessionManager('admin').rotateRefreshToken(parentToken);
-          expect('token' in r2).toBe(true);
-          if ('token' in r2) {
-            expect(r2.sessionId).toBe(childSession1);
-            expect(r2.token).toBe(childToken1);
-          }
+          expect(r2).toEqual({ error: 'invalid_refresh_token' });
         }
       });
 

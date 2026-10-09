@@ -10,11 +10,13 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const urlJoin = require('url-join');
 
-const { sanitize } = require('@strapi/utils');
-const { toNumber, getOr } = require('lodash/fp');
+const { sanitize, ALLOWED_QUERY_PARAM_KEYS } = require('@strapi/utils');
+const { pick, get, toNumber } = require('lodash');
 const { getService } = require('../utils');
 
 const USER_MODEL_UID = 'plugin::users-permissions.user';
+
+const pickAllowedQueryParams = (params) => pick(params, ALLOWED_QUERY_PARAM_KEYS);
 
 const getSessionManager = () => {
   const manager = strapi.sessionManager;
@@ -29,7 +31,11 @@ module.exports = ({ strapi }) => ({
    */
 
   count(params) {
-    return strapi.db.query(USER_MODEL_UID).count({ where: params });
+    const query = strapi
+      .get('query-params')
+      .transform(USER_MODEL_UID, pickAllowedQueryParams(params ?? {}));
+
+    return strapi.db.query(USER_MODEL_UID).count(query);
   },
 
   /**
@@ -46,7 +52,7 @@ module.exports = ({ strapi }) => ({
     for (const key in values) {
       if (attributes[key] && attributes[key].type === 'password') {
         // Check if a custom encryption.rounds has been set on the password attribute
-        const rounds = toNumber(getOr(10, 'encryption.rounds', attributes[key]));
+        const rounds = toNumber(get(attributes[key], 'encryption.rounds', 10));
         values[key] = await bcrypt.hash(values[key], rounds);
       }
     }
@@ -101,7 +107,9 @@ module.exports = ({ strapi }) => ({
    * @return {Promise}
    */
   fetch(id, params) {
-    const query = strapi.get('query-params').transform(USER_MODEL_UID, params ?? {});
+    const query = strapi
+      .get('query-params')
+      .transform(USER_MODEL_UID, pickAllowedQueryParams(params ?? {}));
 
     return strapi.db.query(USER_MODEL_UID).findOne({
       ...query,
@@ -124,7 +132,9 @@ module.exports = ({ strapi }) => ({
    * @return {Promise}
    */
   fetchAll(params) {
-    const query = strapi.get('query-params').transform(USER_MODEL_UID, params ?? {});
+    const query = strapi
+      .get('query-params')
+      .transform(USER_MODEL_UID, pickAllowedQueryParams(params ?? {}));
 
     return strapi.db.query(USER_MODEL_UID).findMany(query);
   },

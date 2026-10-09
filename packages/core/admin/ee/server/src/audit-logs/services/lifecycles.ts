@@ -1,7 +1,16 @@
 import type { Core, Modules } from '@strapi/types';
 
-const DEFAULT_RETENTION_DAYS = 90;
+import { getDisplayName } from '../utils';
 
+export const DEFAULT_RETENTION_DAYS = 90;
+
+/**
+ * Events audited before the payload standard; their stored shape is frozen for
+ * compatibility. Do not add events here: new events come through registerEvent().
+ * The event hub still emits user.create, user.update and user.delete; the audit log
+ * records them as admin-user.* (server/src/audit-logs/admin-users.ts).
+ * TODO: migrate the rest to the standard.
+ */
 const defaultEvents = [
   'entry.create',
   'entry.update',
@@ -14,9 +23,6 @@ const defaultEvents = [
   'media-folder.create',
   'media-folder.update',
   'media-folder.delete',
-  'user.create',
-  'user.update',
-  'user.delete',
   'admin.auth.success',
   'admin.logout',
   'content-type.create',
@@ -33,93 +39,253 @@ const defaultEvents = [
   'permission.delete',
 ];
 
-const getEventMap = (defaultEvents: any) => {
-  const getDefaultPayload = (...args: any) => args[0];
+/**
+ * Legacy events store the first emitted argument as-is; registered events store the
+ * standard shape built by their transformer.
+ */
+type EventRegistration =
+  | { kind: 'legacy' }
+  | {
+      kind: 'standard';
+      transform: Modules.AuditLogs.EventTransformer;
+      options: RegisterEventOptions;
+    };
 
-  // Use the default payload for all default events
-  return defaultEvents.reduce((acc: any, event: any) => {
-    acc[event] = getDefaultPayload;
-    return acc;
-  }, {} as any);
+export interface RegisterEventOptions {
+  /**
+   * Records the event when the request has no authenticated user, with an
+   * `unknown` actor and no user column. For actions taken from public admin
+   * forms (password reset, invitation). Off by default: an event with no user
+   * is dropped.
+   */
+  allowUnknownActor?: boolean;
+  /**
+   * Records the event with an `unknown` actor and no user column even when the request
+   * has an authenticated user. For events about a login that did not complete.
+   */
+  alwaysUnknownActor?: boolean;
+  /**
+   * Receives the arguments passed to eventHub.emit(); returning false keeps the
+   * event out of the audit log. Listeners on the event hub still receive it.
+   */
+  shouldRecord?: (...args: any[]) => boolean;
+}
+
+const getEventMap = (events: string[]) => {
+  return events.reduce(
+    (acc, event) => {
+      acc[event] = { kind: 'legacy' };
+      return acc;
+    },
+    {} as Record<string, EventRegistration>
+  );
 };
 
-const getRetentionDays = (strapi: Core.Strapi) => {
-  const featureConfig = strapi.ee.features.get('audit-logs');
-  const licenseRetentionDays =
-    typeof featureConfig === 'object' && featureConfig?.options?.retentionDays;
-  const userRetentionDays = strapi.config.get('admin.auditLogs.retentionDays');
+const getActor = (
+  systemOrigin: Modules.AuditLogs.SystemOrigin | undefined,
+  user: { id: string | number; email: string; firstname?: string; lastname?: string } | undefined
+): Modules.AuditLogs.Actor => {
+  if (systemOrigin) {
+    return { type: 'system' };
+  }
 
+  if (!user) {
+    return { type: 'unknown' };
+  }
+
+  // We copy the user data into the row so the history stays unchanged if the user
+  // changes later
+  return {
+    type: 'admin-user',
+    user: { id: user.id, email: user.email, name: getDisplayName(user) },
+  };
+};
+
+/**
+ * The retention the daily delete job applies, from the license's value and the admin override.
+ * Shared with the Plan card's resolver (../entitlements.ts) so the card shows this same figure.
+ */
+export const computeRetentionDays = (
+  licenseRetentionDays: unknown,
+  userRetentionDays: number | null | undefined
+): number => {
   // For enterprise plans, use 90 days by default, but allow users to override it
   if (licenseRetentionDays == null) {
     return userRetentionDays ?? DEFAULT_RETENTION_DAYS;
   }
 
+  // The registry can ship the value as a numeric string
+  const licenseDays = Number(licenseRetentionDays);
+
   // Allow users to override the license retention days, but not to increase it
-  if (userRetentionDays && userRetentionDays <= licenseRetentionDays) {
+  if (userRetentionDays && userRetentionDays <= licenseDays) {
     return userRetentionDays;
   }
 
   // User didn't provide a retention days value, use the license one
-  return licenseRetentionDays;
+  return licenseDays;
+};
+
+const getRetentionDays = (strapi: Core.Strapi) => {
+  const featureConfig = strapi.ee.features.get('audit-logs');
+
+  return computeRetentionDays(
+    typeof featureConfig === 'object' ? featureConfig?.options?.retentionDays : undefined,
+    strapi.config.get('admin.auditLogs.retentionDays')
+  );
 };
 
 /**
  * @description
- * Manages the lifecycle of audit logs. Accessible via strapi.get('audit-logs-lifecycles')
+ * Manages the lifecycle of audit logs. Accessible via strapi.get('audit-logs-lifecycle')
  */
 const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
   // Manage internal service state privately
   const state = {} as any;
   const auditLogsService = strapi.get('audit-logs');
 
-  // NOTE: providers should be able to replace getEventMap to add or remove events
   const eventMap = getEventMap(defaultEvents);
 
-  const processEvent = (name: string, ...args: any) => {
+  /**
+   * The system origins accepted from the execution context; anything else needs a
+   * user. Keyed on the type, so extending SystemOrigin without gating it here fails
+   * to compile.
+   */
+  const SYSTEM_ORIGIN_FLAGS: Record<Modules.AuditLogs.SystemOrigin, true> = {
+    scheduler: true,
+  };
+  const SYSTEM_ORIGINS = Object.keys(SYSTEM_ORIGIN_FLAGS);
+
+  const processEvent = async (name: string, ...args: any) => {
+    const registration = eventMap[name];
+
+    if (!registration) {
+      return null;
+    }
+
+    const rawEvent = args[0];
+
     const requestState = strapi.requestContext.get()?.state;
 
-    // Only audit admin-authenticated actions, plus MCP actions flagged via auditSource.
-    const isUsingAdminAuth = requestState?.route.info.type === 'admin';
+    const isUsingAdminAuth = requestState?.route?.info?.type === 'admin';
     const auditSource = requestState?.auditSource;
     const isMcpAdminAction = auditSource === 'mcp';
-    const user = requestState?.user;
-    if ((!isUsingAdminAuth && !isMcpAdminAction) || !user) {
+    const options: RegisterEventOptions =
+      registration.kind === 'standard' ? registration.options : {};
+    const user = options.alwaysUnknownActor ? undefined : requestState?.user;
+
+    const systemOrigin =
+      auditSource && SYSTEM_ORIGINS.includes(auditSource)
+        ? (auditSource as Modules.AuditLogs.SystemOrigin)
+        : undefined;
+
+    if (!systemOrigin && !isUsingAdminAuth && !isMcpAdminAction) {
       return null;
     }
 
-    const origin: Modules.AuditLogs.AuditSource = auditSource ?? 'admin';
+    const allowsUnknownActor =
+      options.allowUnknownActor === true || options.alwaysUnknownActor === true;
 
-    const getPayload = eventMap[name];
-
-    // Ignore the event if it's not in the map
-    if (!getPayload) {
+    if (!systemOrigin && !user && !allowsUnknownActor) {
       return null;
     }
 
-    // Ignore some events based on payload
-    // TODO: What does this ignore in upload? Why would we want to ignore anything?
-    const ignoredUids = ['plugin::upload.file', 'plugin::upload.folder'];
-    if (ignoredUids.includes(args[0]?.uid)) {
+    if (options.shouldRecord?.(...args) === false) {
       return null;
     }
 
-    return {
-      action: name,
-      date: new Date().toISOString(),
-      payload: { ...getPayload(...args), origin },
-      userId: user.id,
-    };
+    const origin: Modules.AuditLogs.AuditSource = systemOrigin ?? auditSource ?? 'admin-panel';
+    const date = new Date().toISOString();
+    // Scheduled actions have no user, so a null user is expected. The earlier audit
+    // entry that set the schedule records who did it. Events allowing an unknown actor
+    // have no user either.
+    const userId = user ? user.id : null;
+
+    if (registration.kind === 'legacy') {
+      // TODO: What does this ignore in upload? Why would we want to ignore anything?
+      const ignoredUids = ['plugin::upload.file', 'plugin::upload.folder'];
+      if (ignoredUids.includes(rawEvent?.uid)) {
+        return null;
+      }
+
+      return {
+        action: name,
+        date,
+        payload: { ...rawEvent, origin },
+        userId,
+      };
+    }
+
+    const actor = getActor(systemOrigin, user);
+
+    let shape: Modules.AuditLogs.EventShape | null = null;
+
+    try {
+      shape = await registration.transform(...args);
+    } catch (error) {
+      // If the transformer fails, we still keep the audit event: the row is saved
+      // with the subscriber's fields only.
+      strapi.log.error(`Failed to build the audit log payload for ${name}`, { error });
+    }
+
+    const {
+      action: _action,
+      date: _date,
+      actor: _actor,
+      origin: _origin,
+      ...rest
+    } = (shape ?? {}) as Record<string, unknown>;
+    const payload = shape
+      ? ({ action: name, date, actor, origin, ...rest } as Modules.AuditLogs.StoredPayload)
+      : { action: name, date, actor, origin };
+
+    return { action: name, date, payload, userId };
   };
 
   const handleEvent = async (name: string, ...args: any) => {
-    const processedEvent = processEvent(name, ...args);
+    try {
+      const processedEvent = await processEvent(name, ...args);
 
-    if (processedEvent) {
-      await auditLogsService.saveEvent(processedEvent);
+      if (processedEvent) {
+        await auditLogsService.saveEvent(processedEvent);
+      }
+    } catch (error) {
+      // Logged, not propagated: most emitters fire and forget (the document service
+      // emits entry.* from an unawaited onCommit callback), and a rejection with no
+      // one awaiting it takes the process down. Audit logging is therefore fail-open:
+      // the entry is lost and only this line records it.
+      strapi.log.error(`Failed to save the audit log entry for ${name}`, { error });
     }
   };
 
   return {
+    /**
+     * Adds an event to the list of audited events. Plugins register their own from
+     * their bootstrap; the transformer builds the audited shape
+     * ({resource, details, outcome}) from the arguments passed to eventHub.emit().
+     */
+    registerEvent<TDetails = unknown>(
+      name: string,
+      transform: Modules.AuditLogs.EventTransformer<TDetails>,
+      options: RegisterEventOptions = {}
+    ) {
+      if (eventMap[name]?.kind === 'legacy') {
+        throw new Error(
+          `Cannot register the audit log event "${name}": it is one of the built-in events, whose stored shape is frozen.`
+        );
+      }
+
+      if (eventMap[name]) {
+        strapi.log.warn(`The audit log event "${name}" was already registered and is replaced.`);
+      }
+
+      eventMap[name] = {
+        kind: 'standard',
+        transform: transform as Modules.AuditLogs.EventTransformer,
+        options,
+      };
+    },
+
     async register() {
       // Handle license being enabled
       if (!state.eeEnableUnsubscribe) {

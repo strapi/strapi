@@ -11,6 +11,11 @@ import auditLogsController from './audit-logs/controllers/audit-logs';
 import { createAuditLogsService } from './audit-logs/services/audit-logs';
 import { createAuditLogsLifecycleService } from './audit-logs/services/lifecycles';
 import { auditLog } from './audit-logs/content-types/audit-log';
+import { AUDIT_LOG_EXPORT_EVENT } from '../../../shared/utils/audit-log-export';
+import { registerTokenAuditEvents } from '../../../server/src/audit-logs/tokens';
+import { registerAdminUserAuditEvents } from '../../../server/src/audit-logs/admin-users';
+import { registerWebhookAuditEvents } from '../../../server/src/audit-logs/webhooks';
+import { registerAuthAuditEvents } from '../../../server/src/audit-logs/auth';
 
 const getAdminEE = () => {
   const eeAdmin = {
@@ -50,6 +55,19 @@ const getAdminEE = () => {
         // Register an internal audit logs lifecycle service
         const auditLogsLifecycle = createAuditLogsLifecycleService(strapi);
         strapi.add('audit-logs-lifecycle', auditLogsLifecycle);
+
+        auditLogsLifecycle.registerEvent(
+          AUDIT_LOG_EXPORT_EVENT,
+          (event: { filters?: unknown }) => ({
+            resource: { type: 'audit-log' },
+            details: { format: 'csv', filters: event?.filters ?? null },
+          })
+        );
+
+        registerTokenAuditEvents(auditLogsLifecycle);
+        registerAdminUserAuditEvents(auditLogsLifecycle);
+        registerWebhookAuditEvents(auditLogsLifecycle);
+        registerAuthAuditEvents(auditLogsLifecycle);
 
         await auditLogsLifecycle.register();
       }

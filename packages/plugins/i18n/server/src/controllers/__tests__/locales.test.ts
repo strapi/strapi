@@ -80,7 +80,10 @@ describe('Locales', () => {
       expect(setIsDefault).toHaveBeenCalledWith(locale);
       expect(setDefaultLocale).toHaveBeenCalledWith(locale);
       expect(findByCode).toHaveBeenCalledWith('af');
-      expect(create).toHaveBeenCalledWith({ createdBy: 1, updatedBy: 1, ...locale });
+      expect(create).toHaveBeenCalledWith(
+        { createdBy: 1, updatedBy: 1, ...locale },
+        { isDefault: true }
+      );
       expect(ctx.body).toMatchObject(expectedLocales);
     });
 
@@ -118,7 +121,10 @@ describe('Locales', () => {
 
       expect(setIsDefault).toHaveBeenCalledWith(locale);
       expect(findByCode).toHaveBeenCalledWith('af');
-      expect(create).toHaveBeenCalledWith({ createdBy: 1, updatedBy: 1, ...locale });
+      expect(create).toHaveBeenCalledWith(
+        { createdBy: 1, updatedBy: 1, ...locale },
+        { isDefault: false }
+      );
       expect(ctx.body).toMatchObject(expectedLocale);
     });
 

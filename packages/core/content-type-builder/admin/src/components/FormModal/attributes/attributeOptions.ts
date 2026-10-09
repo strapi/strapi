@@ -50,7 +50,8 @@ export const attributeOptions = {
     },
     description: {
       id: getTrad('form.attribute.item.privateField.description'),
-      defaultMessage: 'This field will not show up in the API response',
+      defaultMessage:
+        'This field will not show up in the API response. New private fields are also excluded from search.',
     },
   },
   regex: {

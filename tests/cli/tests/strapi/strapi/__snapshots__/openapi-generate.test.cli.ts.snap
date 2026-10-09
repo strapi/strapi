@@ -11834,6 +11834,32 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
         ],
       },
     },
+    "/config/reset-admin-fixture": {
+      "post": {
+        "operationId": "config/post/config_reset_admin_fixture",
+        "parameters": [],
+        "responses": {
+          "400": {
+            "description": "Bad request",
+          },
+          "401": {
+            "description": "Unauthorized",
+          },
+          "403": {
+            "description": "Forbidden",
+          },
+          "404": {
+            "description": "Not found",
+          },
+          "500": {
+            "description": "Internal server error",
+          },
+        },
+        "tags": [
+          "config",
+        ],
+      },
+    },
     "/config/resettransfertoken": {
       "post": {
         "operationId": "config/post/config_resettransfertoken",
@@ -27706,9 +27732,16 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": false,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "exclusiveMinimum": 0,
-              "maximum": 9007199254740991,
-              "type": "integer",
+              "anyOf": [
+                {
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991,
+                  "type": "integer",
+                },
+                {
+                  "type": "string",
+                },
+              ],
             },
             "x-strapi-serialize": "querystring",
           },
@@ -28786,9 +28819,16 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "exclusiveMinimum": 0,
-              "maximum": 9007199254740991,
-              "type": "integer",
+              "anyOf": [
+                {
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991,
+                  "type": "integer",
+                },
+                {
+                  "type": "string",
+                },
+              ],
             },
           },
         ],
@@ -28959,9 +28999,16 @@ exports[`openapi:generate should generate a spec describing i18n and users-permi
             "required": true,
             "schema": {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "exclusiveMinimum": 0,
-              "maximum": 9007199254740991,
-              "type": "integer",
+              "anyOf": [
+                {
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991,
+                  "type": "integer",
+                },
+                {
+                  "type": "string",
+                },
+              ],
             },
           },
           {

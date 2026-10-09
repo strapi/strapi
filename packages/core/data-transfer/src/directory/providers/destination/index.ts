@@ -54,6 +54,8 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
 
   #diagnostics?: IDiagnosticReporter;
 
+  #rolledBack = false;
+
   constructor(options: ILocalDirectoryDestinationProviderOptions) {
     this.options = options;
     this.#rootResolved = path.resolve(options.directory.path);
@@ -77,16 +79,22 @@ class LocalDirectoryDestinationProvider implements IDestinationProvider {
 
   async bootstrap(diagnostics: IDiagnosticReporter): Promise<void> {
     this.#diagnostics = diagnostics;
+    this.#rolledBack = false;
     this.#reportInfo('preparing directory export');
     await fs.mkdir(this.#rootResolved, { recursive: true });
     this.results.file = { path: this.#rootResolved };
   }
 
   async close() {
+    if (this.#rolledBack) {
+      return;
+    }
+
     await this.#writeMetadata();
   }
 
   async rollback(): Promise<void> {
+    this.#rolledBack = true;
     this.#reportInfo('rolling back');
     await fs.rm(this.#rootResolved, { recursive: true, force: true });
   }
