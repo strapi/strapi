@@ -66,6 +66,29 @@ describe('Role', () => {
       expect(dbCreate).toHaveBeenCalledWith({ data: input });
       expect(createdRole).toStrictEqual(input);
     });
+
+    test('Keeps the generated code within 255 characters for a long name', async () => {
+      const dbCreate = jest.fn(({ data }) => Promise.resolve(data));
+      const dbCount = jest.fn(() => Promise.resolve(0));
+
+      global.strapi = {
+        ...strapiMock,
+        db: { query: () => ({ create: dbCreate, count: dbCount }) },
+        eventHub: {
+          emit: jest.fn(),
+        },
+      } as any;
+
+      // A valid 255-character name: kebab-casing inserts a dash between letters and digits, so it grows to 425
+      const name = 'a1'.repeat(85) + 'b'.repeat(85);
+
+      const createdRole = await create({ name });
+
+      expect(createdRole.code.length).toBeLessThanOrEqual(255);
+      // The truncated prefix keeps its kebab-case shape and never leaves a dangling dash
+      expect(createdRole.code).toMatch(/^a-1-a-1-[a-z0-9-]*[a-z0-9]-[0-9a-z]+$/);
+      expect(createdRole.code).not.toContain('--');
+    });
   });
 
   describe('findOne', () => {
