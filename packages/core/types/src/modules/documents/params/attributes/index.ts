@@ -83,7 +83,7 @@ export type GetValues<TSchemaUID extends UID.Schema> = {
   {
     [TKey in Schema.OptionalAttributeNames<TSchemaUID>]?: GetValue<
       Schema.AttributeByName<TSchemaUID, TKey>
-    >;
+    > | null;
   } & {
     [TKey in Schema.RequiredAttributeNames<TSchemaUID>]-?: GetValue<
       Schema.AttributeByName<TSchemaUID, TKey>
