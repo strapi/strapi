@@ -17,6 +17,7 @@ import {
   Flex,
   IconButton,
   TextButton,
+  Tooltip,
   Typography,
   VisuallyHidden,
   useComposedRefs,
@@ -54,7 +55,12 @@ import {
 } from '../../../../../services/relations';
 import { type MainField } from '../../../../../utils/attributes';
 import { setIn } from '../../../../../utils/objects';
-import { getRelationLabel, getRelationThumbnail } from '../../../../../utils/relations';
+import {
+  type MediaRendition,
+  type RelationThumbnail as RelationThumbnailMedia,
+  getRelationLabel,
+  getRelationThumbnail,
+} from '../../../../../utils/relations';
 import { getTranslation } from '../../../../../utils/translations';
 import { prefixFileUrlWithBackendUrl } from '../../../../../utils/urls';
 import { DocumentStatus } from '../../DocumentStatus';
@@ -69,7 +75,7 @@ import type { Schema } from '@strapi/types';
  * -----------------------------------------------------------------------------------------------*/
 
 interface RelationThumbnailProps {
-  media: { url: string; alt: string } | undefined;
+  media: RelationThumbnailMedia | undefined;
   /**
    * The human readable name of the relation, used as the avatar text when the image cannot be loaded.
    */
@@ -89,8 +95,69 @@ const RelationThumbnail = ({ media, label, fallback = null }: RelationThumbnailP
 
   const alt = media.alt || label;
 
-  return <Avatar.Item src={src} alt={alt} fallback={alt} preview />;
+  return <ZoomableThumbnail src={src} alt={alt} zoom={media.zoom} />;
 };
+
+const ZOOM_MAX_SIZE = 320;
+
+/**
+ * Scales the rendition down to fit the zoom box, so the tooltip is laid out at its final size
+ * before the image has loaded. Smaller images are not upscaled.
+ */
+const fitZoomBox = ({ width, height }: MediaRendition) => {
+  if (!width || !height) {
+    return {};
+  }
+
+  const scale = Math.min(1, ZOOM_MAX_SIZE / width, ZOOM_MAX_SIZE / height);
+
+  return { width: Math.round(width * scale), height: Math.round(height * scale) };
+};
+
+interface ZoomableThumbnailProps {
+  src: string;
+  alt: string;
+  zoom: MediaRendition;
+}
+
+/**
+ * Replaces the design system's avatar preview, which only shows a 64px round crop: hovering the
+ * thumbnail shows the whole image. Like that preview, it only opens once the thumbnail has loaded.
+ */
+const ZoomableThumbnail = ({ src, alt, zoom }: ZoomableThumbnailProps) => {
+  const [isLoaded, setIsLoaded] = React.useState(false);
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  return (
+    <Tooltip
+      open={isOpen}
+      onOpenChange={(open) => setIsOpen(open && isLoaded)}
+      side="right"
+      delayDuration={200}
+      label={
+        <ZoomImage src={prefixFileUrlWithBackendUrl(zoom.url)} alt={alt} {...fitZoomBox(zoom)} />
+      }
+    >
+      <SquareAvatar
+        src={src}
+        alt={alt}
+        fallback={alt}
+        onLoadingStatusChange={(status) => setIsLoaded(status === 'loaded')}
+      />
+    </Tooltip>
+  );
+};
+
+const SquareAvatar = styled(Avatar.Item)`
+  border-radius: ${({ theme }) => theme.borderRadius};
+`;
+
+const ZoomImage = styled.img`
+  display: block;
+  max-width: ${ZOOM_MAX_SIZE}px;
+  max-height: ${ZOOM_MAX_SIZE}px;
+  object-fit: contain;
+`;
 
 /**
  * Remove a relation, whether it's been already saved or not.
@@ -156,7 +223,7 @@ type RelationPosition =
 interface Relation extends Pick<RelationResult, 'documentId' | 'id' | 'locale' | 'status'> {
   href: string;
   label: string;
-  media?: { url: string; alt: string };
+  media?: RelationThumbnailMedia;
   position?: RelationPosition;
   __temp_key__: string;
   apiData?: {

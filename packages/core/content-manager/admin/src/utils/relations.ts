@@ -24,16 +24,25 @@ const getRelationLabel = (relation: RelationResult, mainField?: MainField): stri
   return relation.documentId;
 };
 
+interface MediaRendition {
+  url: string;
+  width?: number | null;
+  height?: number | null;
+}
+
 interface RelationThumbnail {
   url: string;
   alt: string;
+  /**
+   * The rendition shown enlarged while the thumbnail is hovered.
+   */
+  zoom: MediaRendition;
 }
 
-interface MediaValue {
-  url: string;
+interface MediaValue extends MediaRendition {
   alternativeText?: string | null;
   mime?: string;
-  formats?: Record<string, { url: string } | undefined> | null;
+  formats?: Record<string, MediaRendition | undefined> | null;
 }
 
 const isMediaValue = (value: unknown): value is MediaValue => {
@@ -64,11 +73,16 @@ const getRelationThumbnail = (
     return undefined;
   }
 
+  // The medium format (750px) stays sharp at the zoom size on a 2x screen. An image too small
+  // to get one is served as is.
+  const zoom = media.formats?.medium ?? media;
+
   return {
     url: media.formats?.thumbnail?.url ?? media.url,
     alt: media.alternativeText ?? '',
+    zoom: { url: zoom.url, width: zoom.width, height: zoom.height },
   };
 };
 
 export { getRelationLabel, getRelationThumbnail };
-export type { RelationThumbnail };
+export type { MediaRendition, RelationThumbnail };

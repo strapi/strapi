@@ -82,6 +82,54 @@ describe('getRelationThumbnail', () => {
     expect(result).toEqual({
       url: '/uploads/thumbnail_image.jpg',
       alt: 'A product',
+      zoom: { url: '/uploads/image.jpg' },
+    });
+  });
+
+  it('should zoom on the medium format with its dimensions', () => {
+    const relation = {
+      documentId: 'abc',
+      id: 1,
+      coverImage: {
+        url: '/uploads/image.jpg',
+        width: 3000,
+        height: 2000,
+        alternativeText: 'A product',
+        mime: 'image/jpeg',
+        formats: {
+          thumbnail: { url: '/uploads/thumbnail_image.jpg', width: 234, height: 156 },
+          medium: { url: '/uploads/medium_image.jpg', width: 750, height: 500 },
+        },
+      },
+    } as RelationResult;
+
+    expect(getRelationThumbnail(relation, { name: 'coverImage' })?.zoom).toEqual({
+      url: '/uploads/medium_image.jpg',
+      width: 750,
+      height: 500,
+    });
+  });
+
+  it('should zoom on the original when the image is too small for a medium format', () => {
+    const relation = {
+      documentId: 'abc',
+      id: 1,
+      coverImage: {
+        url: '/uploads/image.jpg',
+        width: 600,
+        height: 400,
+        mime: 'image/jpeg',
+        formats: {
+          thumbnail: { url: '/uploads/thumbnail_image.jpg', width: 234, height: 156 },
+          small: { url: '/uploads/small_image.jpg', width: 500, height: 333 },
+        },
+      },
+    } as RelationResult;
+
+    expect(getRelationThumbnail(relation, { name: 'coverImage' })?.zoom).toEqual({
+      url: '/uploads/image.jpg',
+      width: 600,
+      height: 400,
     });
   });
 
@@ -101,6 +149,7 @@ describe('getRelationThumbnail', () => {
     expect(result).toEqual({
       url: '/uploads/image.jpg',
       alt: '',
+      zoom: { url: '/uploads/image.jpg' },
     });
   });
 
@@ -143,6 +192,7 @@ describe('getRelationThumbnail', () => {
     expect(result).toEqual({
       url: '/uploads/first.jpg',
       alt: 'First',
+      zoom: { url: '/uploads/first.jpg' },
     });
   });
 
@@ -186,6 +236,7 @@ describe('getRelationThumbnail', () => {
     expect(getRelationThumbnail(relation, { name: 'coverImage' })).toEqual({
       url: '/uploads/a.jpg',
       alt: '',
+      zoom: { url: '/uploads/a.jpg' },
     });
   });
 });
