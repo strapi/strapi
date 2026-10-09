@@ -11,5 +11,7 @@ export JWT_SECRET="aSecret"
 opts=($DB_OPTIONS)
 jestOptions=($JEST_OPTIONS)
 
+node --test tests/scripts/__tests__/resolve-database-config.test.js || exit 1
+node --test tests/api/utils/__tests__/raw-rows.test.js || exit 1
 yarn run test:generate-app:no-build --appPath=test-apps/api "${opts[@]}"
 yarn run test:api --no-generate-app "${jestOptions[@]}"

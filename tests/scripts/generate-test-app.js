@@ -2,39 +2,8 @@
 
 process.env.NODE_ENV = 'test';
 
-const yargs = require('yargs');
 const { cleanTestApp, generateTestApp, runTestApp } = require('../helpers/test-app');
-
-const databases = {
-  postgres: {
-    client: 'postgres',
-    connection: {
-      host: '127.0.0.1',
-      port: 5432,
-      database: 'strapi_test',
-      username: 'strapi',
-      password: 'strapi',
-      schema: 'myschema',
-    },
-  },
-  mysql: {
-    client: 'mysql',
-    connection: {
-      host: '127.0.0.1',
-      port: 3306,
-      database: 'strapi-test',
-      username: 'root',
-      password: 'root',
-    },
-  },
-  sqlite: {
-    client: 'sqlite',
-    connection: {
-      filename: './tmp/data.db',
-    },
-    useNullAsDefault: true,
-  },
-};
+const { createGenerateArgsParser, resolveDatabaseConfig } = require('./database-config');
 
 const main = async (database, appPath, opts) => {
   try {
@@ -50,51 +19,9 @@ const main = async (database, appPath, opts) => {
   }
 };
 
-// eslint-disable-next-line no-unused-expressions
-yargs
-  .command(
-    '$0 [databaseName]',
-    'Generate test app',
-    (yarg) => {
-      yarg.positional('databaseName', {
-        choices: Object.keys(databases),
-        default: 'sqlite',
-      });
+if (require.main === module) {
+  const argv = createGenerateArgsParser(process.argv.slice(2), { exitProcess: true }).parse();
+  const { run, appPath = 'test-apps/base', template } = argv;
 
-      yarg.boolean('run');
-
-      yarg.positional('appPath', {
-        type: 'string',
-        default: 'test-apps/base',
-      });
-
-      yarg.positional('template', {
-        type: 'string',
-        default: undefined,
-      });
-    },
-    (argv) => {
-      const { databaseName, run, appPath = 'test-apps/base', template } = argv;
-
-      if (databaseName) {
-        return main(databases[databaseName], appPath, { run, template });
-      }
-
-      return main(
-        {
-          client: argv.dbclient,
-          connection: {
-            host: argv.dbhost,
-            port: argv.dbport,
-            database: argv.dbname,
-            username: argv.dbusername,
-            password: argv.dbpassword,
-            filename: argv.dbfile,
-          },
-        },
-        appPath,
-        { run, template }
-      );
-    }
-  )
-  .help().argv;
+  main(resolveDatabaseConfig(argv), appPath, { run, template });
+}
