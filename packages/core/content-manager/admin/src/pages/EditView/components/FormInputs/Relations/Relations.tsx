@@ -724,6 +724,7 @@ const RelationModalWithContext = ({
   ...props
 }: RelationModalWithContextProps) => {
   const [textValue, setTextValue] = React.useState<string | undefined>('');
+  const relationOptionValuePrefix = `${React.useId()}-relation-option-`;
   const { formatMessage } = useIntl();
   const emptyLabel = formatMessage({
     id: 'content-manager.containers.empty-label',
@@ -812,7 +813,13 @@ const RelationModalWithContext = ({
           })}
           onLoadMore={handleLoadMore}
           textValue={textValue}
-          onChange={handleChange}
+          onChange={(value) => {
+            if (!value?.startsWith(relationOptionValuePrefix)) {
+              return;
+            }
+
+            handleChange(value.slice(relationOptionValuePrefix.length));
+          }}
           onTextValueChange={(text) => {
             setTextValue(text);
           }}
@@ -825,7 +832,11 @@ const RelationModalWithContext = ({
             const textValue = getRelationLabel(opt, mainField, emptyLabel);
 
             return (
-              <ComboboxOption key={opt.id} value={opt.id.toString()} textValue={textValue}>
+              <ComboboxOption
+                key={opt.id}
+                value={`${relationOptionValuePrefix}${opt.id}`}
+                textValue={textValue}
+              >
                 <Flex gap={2} justifyContent="space-between">
                   <Flex gap={2}>
                     <LinkIcon fill="neutral500" />
