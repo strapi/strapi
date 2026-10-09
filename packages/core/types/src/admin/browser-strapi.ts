@@ -1,25 +1,23 @@
-/// <reference types="vite/client" />
+import type { Features } from '../modules';
 
-import { type StrapiTheme } from '@strapi/design-system';
-
-import type { Modules } from '@strapi/types';
-
-declare module 'styled-components' {
-  export interface DefaultTheme extends StrapiTheme {}
-}
-
-interface BrowserStrapi {
+/**
+ * Shape of `window.strapi` in the admin panel.
+ *
+ * @internal First-party plumbing, not plugin API. Load the `Window` augmentation
+ * from `@strapi/types/globals-admin`.
+ */
+export interface BrowserStrapi {
   backendURL: string;
   isEE: boolean;
   future: {
-    isEnabled: (name: keyof NonNullable<Modules.Features.FeaturesConfig['future']>) => boolean;
+    isEnabled: (name: keyof NonNullable<Features.FeaturesConfig['future']>) => boolean;
   };
   /**
    * Permanent config flags from the project's `features` file. Separate from `features`
    * below, which carries EE licence feature names rather than configuration.
    */
   featureFlags: {
-    isEnabled: (name: keyof Omit<Modules.Features.FeaturesConfig, 'future'>) => boolean;
+    isEnabled: (name: keyof Omit<Features.FeaturesConfig, 'future'>) => boolean;
   };
   features: {
     SSO: 'sso';
@@ -43,10 +41,4 @@ interface BrowserStrapi {
   ai: {
     enabled: boolean;
   };
-}
-
-declare global {
-  interface Window {
-    strapi: BrowserStrapi;
-  }
 }
