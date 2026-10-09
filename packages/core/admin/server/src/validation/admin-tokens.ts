@@ -6,8 +6,8 @@ const adminTokenCreationSchema = yup
   .object()
   .shape({
     kind: yup.string().oneOf(['admin']).optional(),
-    name: yup.string().min(1).required(),
-    description: yup.string().optional(),
+    name: yup.string().min(1).max(constants.TOKEN_TEXT_MAX_LENGTH).required(),
+    description: yup.string().max(constants.TOKEN_TEXT_MAX_LENGTH).optional(),
     lifespan: yup.number().min(1).oneOf(Object.values(constants.API_TOKEN_LIFESPANS)).nullable(),
     adminPermissions: yup.array().of(permission),
     // adminUserOwner is set by the controller from ctx.state.user (full user object) or a strapiID from body
@@ -19,8 +19,8 @@ const adminTokenCreationSchema = yup
 const adminTokenUpdateSchema = yup
   .object()
   .shape({
-    name: yup.string().min(1).notNull(),
-    description: yup.string().nullable(),
+    name: yup.string().min(1).max(constants.TOKEN_TEXT_MAX_LENGTH).notNull(),
+    description: yup.string().max(constants.TOKEN_TEXT_MAX_LENGTH).nullable(),
     adminPermissions: yup.array().of(permission).nullable(),
   })
   .noUnknown()
