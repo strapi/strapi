@@ -227,7 +227,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           attribute.target === props.attribute.target
       ).length > 0;
 
-    const { data, isLoading, isFetching, refetch } = useGetRelationsQuery(
+    const { data, isLoading, isFetching, isError, refetch } = useGetRelationsQuery(
       {
         model,
         targetField,
@@ -430,6 +430,14 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           documentParams={currentDocumentMeta.params}
           mainField={props.mainField}
         />
+        {isError ? (
+          <Typography variant="pi" textColor="danger600">
+            {formatMessage({
+              id: 'anErrorOccurred',
+              defaultMessage: 'Whoops! Something went wrong. Please, try again.',
+            })}
+          </Typography>
+        ) : null}
       </Flex>
     );
   }

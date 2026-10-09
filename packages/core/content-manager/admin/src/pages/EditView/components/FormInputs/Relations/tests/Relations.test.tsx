@@ -445,6 +445,30 @@ describe('Relations', () => {
     });
   });
 
+  it('shows an error when the saved relations fail to load', async () => {
+    server.use(
+      http.get('/content-manager/relations/:model/:id/:fieldName', () =>
+        HttpResponse.json(
+          {
+            data: null,
+            error: { status: 500, name: 'InternalServerError', message: 'Internal Server Error' },
+          },
+          { status: 500 }
+        )
+      )
+    );
+
+    render({});
+
+    expect(
+      await screen.findByText(
+        'Whoops! Something went wrong. Please, try again.',
+        {},
+        { timeout: 3000 }
+      )
+    ).toBeInTheDocument();
+  });
+
   it('shows an error instead of "No relations available" when the relation search fails', async () => {
     server.use(
       http.get('/content-manager/relations/:model/:fieldName', () =>
