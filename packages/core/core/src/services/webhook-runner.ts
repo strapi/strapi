@@ -2,6 +2,7 @@
  * The event hub is Strapi's event control center.
  */
 
+import { createHmac } from 'crypto';
 import createdDebugger from 'debug';
 import _ from 'lodash';
 import type { Logger } from '@strapi/logger';
@@ -111,19 +112,51 @@ class WebhookRunner {
     }
   }
 
+  /**
+   * Build the signature headers for a delivery.
+   *
+   * When the webhook has a `secret`, the raw request body is signed with
+   * HMAC-SHA256 and returned as `X-Strapi-Signature-256: sha256=<hex>`
+   * (GitHub-style, algorithm-prefixed so the scheme can evolve later without a
+   * breaking change). The receiver recomputes the HMAC over the raw body it
+   * receives and compares it to the header to verify authenticity.
+   *
+   * Returns an empty object when no secret is configured, so unsigned webhooks
+   * keep their exact previous behaviour.
+   */
+  getSignatureHeaders(body: string, secret?: string): Record<string, string> {
+    if (!secret) {
+      return {};
+    }
+
+    const signature = createHmac('sha256', secret).update(body, 'utf8').digest('hex');
+
+    return {
+      'X-Strapi-Signature-256': `sha256=${signature}`,
+    };
+  }
+
   run(webhook: Webhook, event: string, info = {}) {
-    const { url, headers } = webhook;
+    const { url, headers, secret } = webhook;
+
+    // Serialize the body once so the exact bytes that are signed are the exact
+    // bytes that are sent. Re-serializing after signing could produce a payload
+    // whose signature no longer matches.
+    const body = JSON.stringify({
+      event,
+      createdAt: new Date(),
+      ...info,
+    });
 
     return this.fetch(url, {
       method: 'post',
-      body: JSON.stringify({
-        event,
-        createdAt: new Date(),
-        ...info,
-      }),
+      body,
       headers: {
         ...this.config.defaultHeaders,
         ...headers,
+        // Signature and Strapi-owned headers are merged last so a user-defined
+        // custom header can never override or spoof them.
+        ...this.getSignatureHeaders(body, secret),
         'X-Strapi-Event': event,
         'Content-Type': 'application/json',
       },
