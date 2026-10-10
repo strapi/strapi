@@ -26,6 +26,7 @@ declare global {
         REVIEW_WORKFLOWS: 'review-workflows';
         isEnabled: (featureName?: string) => boolean;
       };
+      isTrialLicense: boolean;
       flags: {
         promoteEE?: boolean;
         nps?: boolean;

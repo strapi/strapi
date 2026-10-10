@@ -6,5 +6,8 @@
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "types": []
   },
-  "include": ["./src/preview/controllers/previewScript.js"]
+  "include": [
+    "./src/preview/controllers/previewScript.js",
+    "../admin/src/preview/utils/constants.ts"
+  ]
 }
