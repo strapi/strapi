@@ -88,7 +88,14 @@ const defaultSanitizeFilters = curry((ctx: Context, filters: unknown) => {
     // enumerable keys (Date, RegExp, boxed primitives, etc.) are "empty" and would wrongly drop valid operands.
     traverseQueryFilters(({ key, value }, { remove }) => {
       const isEmptyPlainObject = isPlainObject(value) && isEmpty(value);
-      const isEmptyArrayOperand = Array.isArray(value) && value.length === 0;
+      const isEmptyArrayOperand = Array.isArray(value) && isEmpty(value);
+      // An empty `$in` matches nothing and an empty `$notIn` matches everything.
+      // Both are meaningful and must reach the query layer, otherwise the filter
+      // is silently dropped and the query returns all records.
+      if ((key === '$in' || key === '$notIn') && isEmptyArrayOperand) {
+        return;
+      }
+
       if (isEmptyPlainObject || isEmptyArrayOperand) {
         remove(key);
       }
