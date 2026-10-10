@@ -88,12 +88,11 @@ export default {
    * Create a new workflow
    */
   async create(ctx: Context) {
-    const { body, query } = ctx.request;
-    const { sanitizeCreateInput, sanitizeOutput, sanitizedQuery } = getWorkflowsPermissionChecker(
+    const { body } = ctx.request;
+    const { sanitizeCreateInput, sanitizeOutput } = getWorkflowsPermissionChecker(
       { strapi },
       ctx.state.userAbility
     );
-    const { populate } = await sanitizedQuery.create(query);
 
     const workflowBody = await validateWorkflowCreate(body.data);
 
@@ -101,7 +100,6 @@ export default {
     const createdWorkflow = await workflowService
       .create({
         data: await sanitizeCreateInput(workflowBody),
-        populate,
       })
       .then(formatWorkflowToAdmin);
 
@@ -115,13 +113,12 @@ export default {
    */
   async update(ctx: Context) {
     const { id } = ctx.params;
-    const { body, query } = ctx.request;
+    const { body } = ctx.request;
     const workflowService = getService('workflows');
-    const { sanitizeUpdateInput, sanitizeOutput, sanitizedQuery } = getWorkflowsPermissionChecker(
+    const { sanitizeUpdateInput, sanitizeOutput } = getWorkflowsPermissionChecker(
       { strapi },
       ctx.state.userAbility
     );
-    const { populate } = await sanitizedQuery.update(query);
     const workflowBody = await validateWorkflowUpdate(body.data);
 
     // Find if workflow exists
@@ -138,7 +135,6 @@ export default {
     const updatedWorkflow = await workflowService
       .update(workflow, {
         data: dataToUpdate,
-        populate,
       })
       .then(formatWorkflowToAdmin);
 
