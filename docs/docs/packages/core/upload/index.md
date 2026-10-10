@@ -27,7 +27,9 @@ The plugin declares two content types: `plugin::upload.file` and `plugin::upload
 
 ### Upload flow
 
-The controllers call `prepareUploadRequest` to validate the MIME types before any work starts. The `upload` service in `server/src/services/upload.ts` then builds the file info, optimizes images and checks the size limit. It sends the file to the provider service, which prefers `uploadStream` over `upload`. It saves the `plugin::upload.file` entry and emits a `media.create` event, or `media.update` and `media.delete` for the other actions. The option `concurrentUploadSize` sets how many files one request processes at the same time.
+The controllers call `prepareUploadRequest` to validate the MIME types before any work starts. The `upload` service in `server/src/services/upload.ts` then builds the file info, optimizes images and checks the size limit. For images, it prepares the original, thumbnail and responsive formats before starting provider writes. Once writes begin, the service waits for every operation to settle. If a provider write or the subsequent database create fails, it makes a best-effort attempt to remove the uploaded objects. It logs each operation's outcome when a provider batch partially fails. It saves the `plugin::upload.file` entry before emitting `media.create`; a post-commit event failure does not remove objects referenced by the database.
+
+Replacement keeps the existing provider key and URL behavior. Formats that the new file no longer needs are deleted only after the database update commits, and cleanup failures are logged without changing the committed replacement into a failed result. Deletion still cannot be transactional across arbitrary providers and the database: partial provider deletion is logged with per-object outcomes and leaves the database record in place for recovery. The option `concurrentUploadSize` sets how many files one request processes at the same time.
 
 ### MIME type validation
 

@@ -50,6 +50,10 @@ global.strapi = {
   },
   get: () => ({ transform: () => ({}) }),
   getModel: () => ({ attributes: {} }),
+  log: {
+    error: jest.fn(),
+    warn: jest.fn(),
+  },
   db: {
     query: () => ({
       findOne: dbFindOne,
@@ -89,6 +93,7 @@ describe('Upload service - replace()', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    dbUpdate.mockImplementation(async ({ data }: any) => data);
   });
 
   test('replacing an image with a non-image deletes the old generated formats', async () => {
@@ -115,6 +120,87 @@ describe('Upload service - replace()', () => {
     expect(providerMethods.delete).toHaveBeenCalledTimes(2);
     const deletedHashes = providerMethods.delete.mock.calls.map((c: any[]) => c[0].hash).sort();
     expect(deletedHashes).toEqual(['large_document_abc123', 'thumbnail_document_abc123']);
+  });
+
+  test('does not delete obsolete formats before the database update commits', async () => {
+    currentDbFile = {
+      id: 10,
+      hash: 'document_commit_order',
+      ext: '.png',
+      provider: PROVIDER,
+      formats: {
+        thumbnail: { hash: 'thumbnail_document_commit_order', ext: '.png' },
+      },
+    };
+
+    let commitUpdate!: (value: unknown) => void;
+    dbUpdate.mockImplementationOnce(
+      ({ data }: any) =>
+        new Promise((resolve) => {
+          commitUpdate = () => resolve(data);
+        })
+    );
+
+    const replacement = uploadService.replace(10, {
+      data: { fileInfo: {} as any },
+      file: inputFile() as any,
+    });
+
+    while (dbUpdate.mock.calls.length === 0) {
+      await new Promise<void>((resolve) => {
+        setImmediate(resolve);
+      });
+    }
+
+    expect(providerMethods.delete).not.toHaveBeenCalled();
+
+    commitUpdate(undefined);
+    await replacement;
+
+    expect(providerMethods.delete).toHaveBeenCalledWith(
+      expect.objectContaining({ hash: 'thumbnail_document_commit_order' })
+    );
+  });
+
+  // TODO(upload-atomicity): This captures the current post-commit best-effort cleanup. Revisit it
+  // when obsolete objects participate in an atomic or reconciled replacement flow.
+  test('does not fail a committed replace when obsolete format cleanup fails', async () => {
+    currentDbFile = {
+      id: 11,
+      hash: 'document_cleanup_failure',
+      ext: '.png',
+      provider: PROVIDER,
+      formats: {
+        thumbnail: { hash: 'thumbnail_document_cleanup_failure', ext: '.png' },
+      },
+    };
+
+    const cleanupError = new Error('storage cleanup failed');
+    providerMethods.delete.mockRejectedValueOnce(cleanupError);
+
+    await expect(
+      uploadService.replace(11, {
+        data: { fileInfo: {} as any },
+        file: inputFile() as any,
+      })
+    ).resolves.toEqual(expect.objectContaining({ hash: 'document_cleanup_failure' }));
+
+    expect(dbUpdate).toHaveBeenCalledTimes(1);
+    expect(global.strapi.log.error).toHaveBeenCalledWith(
+      'Failed to clean up one or more upload provider objects',
+      expect.objectContaining({
+        phase: 'post-commit-obsolete-format-cleanup',
+        assetId: 11,
+        databaseCommitted: true,
+        operations: expect.arrayContaining([
+          expect.objectContaining({
+            file: expect.objectContaining({ hash: 'thumbnail_document_cleanup_failure' }),
+            status: 'rejected',
+            error: cleanupError.message,
+          }),
+        ]),
+      })
+    );
   });
 
   test('replacing a formatless file with a non-image deletes nothing', async () => {
