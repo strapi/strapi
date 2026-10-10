@@ -1,4 +1,4 @@
-import type { Core, Data } from '@strapi/types';
+import type { Core, Data, UID } from '@strapi/types';
 import { async } from '@strapi/utils';
 import { merge, difference } from 'lodash';
 import { getService } from '../utils';
@@ -18,9 +18,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     .service('content-types');
   const stagesService = getService('stages', { strapi });
 
-  const updateContentTypeConfig = async (uid: any, reviewWorkflowOption: any) => {
+  const updateContentTypeConfig = async (uid: UID.ContentType, reviewWorkflowOption: boolean) => {
     // Merge options in the configuration as the configuration service use a destructuration merge which doesn't include nested objects
-    const modelConfig = await contentManagerContentTypeService.findConfiguration(uid);
+    const modelConfig = await contentManagerContentTypeService.findConfiguration({ uid });
 
     await contentManagerContentTypeService.updateConfiguration(
       { uid },
