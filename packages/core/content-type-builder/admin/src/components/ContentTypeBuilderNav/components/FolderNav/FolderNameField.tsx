@@ -142,7 +142,8 @@ export const FolderNameField = ({
   };
 
   const onNameInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') {
+    // IME の変換確定 Enter はフォルダ名の確定として扱わない。
+    if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
       event.preventDefault();
       commitFromEnter();
     }

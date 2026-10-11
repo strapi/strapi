@@ -58,7 +58,8 @@ export const ResizableTextArea = ({ value, onChange, onSubmit, placeholder }: Te
       return;
     }
 
-    if (e.key === 'Enter' && !e.shiftKey && onSubmit) {
+    // IME の変換確定 Enter は送信として扱わない。
+    if (e.key === 'Enter' && !e.nativeEvent.isComposing && !e.shiftKey && onSubmit) {
       e.preventDefault();
       onSubmit(e as unknown as React.FormEvent<HTMLFormElement>);
       // Ensure focus is maintained after submission using a small delay

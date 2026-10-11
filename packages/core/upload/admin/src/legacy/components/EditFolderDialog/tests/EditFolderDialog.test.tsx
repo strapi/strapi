@@ -1,7 +1,15 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { NotificationsProvider, adminApi } from '@strapi/admin/strapi-admin';
 import { DesignSystemProvider } from '@strapi/design-system';
-import { within, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+  within,
+  act,
+  createEvent,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
@@ -245,5 +253,86 @@ describe('EditFolderDialog', () => {
     expect(getByRole('combobox', { name: 'Location' })).toBeDisabled();
 
     expect(getByRole('button', { name: 'Create' })).toBeDisabled();
+  });
+  describe.each(['create', 'rename'])('%s keyboard handling', (mode) => {
+    const folder =
+      mode === 'rename'
+        ? {
+            id: 7,
+            name: 'Existing',
+            createdAt: '2026-01-01T00:00:00.000Z',
+            updatedAt: '2026-01-01T00:00:00.000Z',
+            pathId: 7,
+            path: '7',
+            parent: null,
+            type: 'folder',
+          }
+        : undefined;
+
+    function setupKeyboard() {
+      const editFolder = jest.fn().mockResolvedValue({});
+      (useEditFolder as jest.Mock).mockReturnValue({ editFolder, isLoading: false });
+      const onClose = jest.fn();
+      const { baseElement } = setup({ folder, onClose });
+      const name = getInput(baseElement, 'name')!;
+      fireEvent.change(name, { target: { value: '日本語' } });
+      return { editFolder, onClose, name, baseElement };
+    }
+
+    test('keeps the name and dialog open for IME confirmation, then submits once on Enter', async () => {
+      const { editFolder, onClose, name } = setupKeyboard();
+      const confirmation = createEvent.keyDown(name, {
+        key: 'Enter',
+        keyCode: 229,
+        isComposing: true,
+      });
+
+      fireEvent(name, confirmation);
+
+      expect(confirmation.defaultPrevented).toBe(false);
+      expect(editFolder).not.toHaveBeenCalled();
+      expect(onClose).not.toHaveBeenCalled();
+      expect(name).toHaveValue('日本語');
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+      const ordinaryEnter = createEvent.keyDown(name, {
+        key: 'Enter',
+        keyCode: 13,
+        isComposing: false,
+      });
+      fireEvent(name, ordinaryEnter);
+      expect(ordinaryEnter.defaultPrevented).toBe(true);
+      await waitFor(() => expect(editFolder).toHaveBeenCalledTimes(1));
+      expect(editFolder).toHaveBeenCalledWith({ name: '日本語', parent: null }, folder?.id);
+      await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+    });
+
+    test('preserves Shift+Enter submission', async () => {
+      const { editFolder, onClose, name } = setupKeyboard();
+      const shiftEnter = createEvent.keyDown(name, { key: 'Enter', keyCode: 13, shiftKey: true });
+      fireEvent(name, shiftEnter);
+      expect(shiftEnter.defaultPrevented).toBe(true);
+      await waitFor(() => expect(editFolder).toHaveBeenCalledTimes(1));
+      await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+    });
+
+    test('does not save on blur or cancel', async () => {
+      const { editFolder, onClose, name, baseElement } = setupKeyboard();
+      fireEvent.blur(name);
+      expect(editFolder).not.toHaveBeenCalled();
+      fireEvent.click(getButton(baseElement, 'cancel')!);
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(editFolder).not.toHaveBeenCalled();
+    });
+
+    test('closes without saving on Escape', async () => {
+      const { editFolder, onClose, name } = setupKeyboard();
+      act(() => {
+        (name as HTMLInputElement).focus();
+      });
+      fireEvent.keyDown(name, { key: 'Escape', keyCode: 27 });
+      expect(editFolder).not.toHaveBeenCalled();
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
   });
 });
