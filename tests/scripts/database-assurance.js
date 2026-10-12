@@ -17,7 +17,8 @@ const DBCLIENT_FLAG = '--dbclient';
 
 const IDENTITY_SQL = {
   postgres: 'SELECT current_database() AS database, version() AS version',
-  mysql: 'SELECT DATABASE() AS database, VERSION() AS version',
+  // MySQL 9 rejects an unquoted `database` alias (reserved word).
+  mysql: 'SELECT DATABASE() AS `database`, VERSION() AS `version`',
   // sqlite_version() does not name a database. `main` is filled in after the version check.
   sqlite: 'SELECT sqlite_version() AS version',
 };
