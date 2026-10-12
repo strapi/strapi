@@ -4,6 +4,7 @@ import omit from 'lodash/omit';
 import uniq from 'lodash/uniq';
 
 import { applyPrivateSearchDefault } from '../../utils/applyPrivateSearchDefault';
+import { getVisibleConditionEntries } from '../../utils/conditions';
 import { getRelationType } from '../../utils/getRelationType';
 import { makeUnique } from '../../utils/makeUnique';
 
@@ -425,6 +426,32 @@ const renameUIDTargetFields = (
         delete attribute.targetField;
       }
     }
+  });
+};
+
+/**
+ * Points the conditions of the type's other fields at the new name of a renamed
+ * field. Runs for every rename, recorded or not, so the conditions follow the
+ * field whether or not its data is preserved.
+ */
+const renameConditionVars = (
+  type: ContentType | Component,
+  previousAttribute: AnyAttribute,
+  newAttribute: AnyAttribute
+): void => {
+  const oldName = previousAttribute.name;
+  const newName = newAttribute?.name;
+  if (!newName || oldName === newName) {
+    return;
+  }
+
+  type.attributes.forEach((attribute) => {
+    getVisibleConditionEntries(attribute.conditions).forEach(({ fieldVar }) => {
+      if (fieldVar.var === oldName) {
+        fieldVar.var = newName;
+        setAttributeStatus(attribute, 'CHANGED');
+      }
+    });
   });
 };
 
@@ -890,6 +917,7 @@ const slice = createUndoRedoSlice(
           recordRename,
           declineRename,
         });
+        renameConditionVars(type, previousAttribute, attributeToSet as AnyAttribute);
 
         setAttributeAt(type, initialAttributeIndex, attributeToSet as AnyAttribute);
         renameUIDTargetFields(type, previousAttribute, attributeToSet as AnyAttribute);
@@ -984,6 +1012,7 @@ const slice = createUndoRedoSlice(
           declineRename,
         });
         renameUIDTargetFields(type, previousAttribute, attributeToSet as AnyAttribute);
+        renameConditionVars(type, previousAttribute, attributeToSet as AnyAttribute);
       },
       reloadPlugin: () => {
         return initialState;

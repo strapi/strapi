@@ -232,6 +232,8 @@
   "Settings.permissions.auditLogs.admin-user.password-reset.create": "Request password reset",
   "Settings.permissions.auditLogs.admin-user.password.update": "Update password",
   "Settings.permissions.auditLogs.admin-user.update": "Update user",
+  "Settings.permissions.auditLogs.admin.auth.autoRegistration": "SSO auto-registration",
+  "Settings.permissions.auditLogs.admin.auth.error": "Failed admin login",
   "Settings.permissions.auditLogs.admin.auth.success": "Admin login",
   "Settings.permissions.auditLogs.admin.logout": "Admin logout",
   "Settings.permissions.auditLogs.audit-log.export": "Export audit logs",
