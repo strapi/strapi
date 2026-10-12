@@ -358,55 +358,66 @@ describeOnCondition(edition === 'EE')('History API', () => {
     collectionTypeDocumentId = collectionTypeEntry.data.documentId;
     singleTypeDocumentId = singleTypeEntry.data.documentId;
 
-    // Update to create history versions for entries in different locales
-    await Promise.all([
-      updateEntry({
-        documentId: collectionTypeDocumentId,
-        uid: collectionTypeUid,
-        data: {
-          description: 'Hello',
-        },
-      }),
-      updateEntry({
-        documentId: collectionTypeDocumentId,
-        uid: collectionTypeUid,
-        locale: 'fr',
-        data: {
-          name: 'Produit 1',
-        },
-      }),
-      updateEntry({
-        documentId: collectionTypeDocumentId,
-        uid: collectionTypeUid,
-        locale: 'fr',
-        data: {
-          description: 'Coucou',
-        },
-      }),
-      updateEntry({
-        uid: singleTypeUid,
-        data: {
-          description: 'Wow, amazing!',
-        },
-        isCollectionType: false,
-      }),
-      updateEntry({
-        uid: singleTypeUid,
-        data: {
-          title: 'Bienvenue',
-        },
-        isCollectionType: false,
-        locale: 'fr',
-      }),
-      updateEntry({
-        uid: singleTypeUid,
-        data: {
-          description: 'Super',
-        },
-        isCollectionType: false,
-        locale: 'fr',
-      }),
-    ]);
+    // Create history versions in a fixed order. Parallel updates of one locale
+    // commit in any order on Postgres and MySQL, so the oldest version would
+    // not be stable.
+    const versionUpdates = [
+      () =>
+        updateEntry({
+          documentId: collectionTypeDocumentId,
+          uid: collectionTypeUid,
+          data: {
+            description: 'Hello',
+          },
+        }),
+      () =>
+        updateEntry({
+          documentId: collectionTypeDocumentId,
+          uid: collectionTypeUid,
+          locale: 'fr',
+          data: {
+            name: 'Produit 1',
+          },
+        }),
+      () =>
+        updateEntry({
+          documentId: collectionTypeDocumentId,
+          uid: collectionTypeUid,
+          locale: 'fr',
+          data: {
+            description: 'Coucou',
+          },
+        }),
+      () =>
+        updateEntry({
+          uid: singleTypeUid,
+          data: {
+            description: 'Wow, amazing!',
+          },
+          isCollectionType: false,
+        }),
+      () =>
+        updateEntry({
+          uid: singleTypeUid,
+          data: {
+            title: 'Bienvenue',
+          },
+          isCollectionType: false,
+          locale: 'fr',
+        }),
+      () =>
+        updateEntry({
+          uid: singleTypeUid,
+          data: {
+            description: 'Super',
+          },
+          isCollectionType: false,
+          locale: 'fr',
+        }),
+    ];
+    for (const update of versionUpdates) {
+      await update();
+    }
   });
 
   afterAll(async () => {
