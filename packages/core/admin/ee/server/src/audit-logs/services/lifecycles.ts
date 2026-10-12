@@ -2,7 +2,7 @@ import type { Core, Modules } from '@strapi/types';
 
 import { getDisplayName } from '../utils';
 
-const DEFAULT_RETENTION_DAYS = 90;
+export const DEFAULT_RETENTION_DAYS = 90;
 
 /**
  * Events audited before the payload standard; their stored shape is frozen for
@@ -59,6 +59,16 @@ export interface RegisterEventOptions {
    * is dropped.
    */
   allowUnknownActor?: boolean;
+  /**
+   * Records the event with an `unknown` actor and no user column even when the request
+   * has an authenticated user. For events about a login that did not complete.
+   */
+  alwaysUnknownActor?: boolean;
+  /**
+   * Receives the arguments passed to eventHub.emit(); returning false keeps the
+   * event out of the audit log. Listeners on the event hub still receive it.
+   */
+  shouldRecord?: (...args: any[]) => boolean;
 }
 
 const getEventMap = (events: string[]) => {
@@ -91,24 +101,38 @@ const getActor = (
   };
 };
 
-const getRetentionDays = (strapi: Core.Strapi) => {
-  const featureConfig = strapi.ee.features.get('audit-logs');
-  const licenseRetentionDays =
-    typeof featureConfig === 'object' && featureConfig?.options?.retentionDays;
-  const userRetentionDays = strapi.config.get('admin.auditLogs.retentionDays');
-
+/**
+ * The retention the daily delete job applies, from the license's value and the admin override.
+ * Shared with the Plan card's resolver (../entitlements.ts) so the card shows this same figure.
+ */
+export const computeRetentionDays = (
+  licenseRetentionDays: unknown,
+  userRetentionDays: number | null | undefined
+): number => {
   // For enterprise plans, use 90 days by default, but allow users to override it
   if (licenseRetentionDays == null) {
     return userRetentionDays ?? DEFAULT_RETENTION_DAYS;
   }
 
+  // The registry can ship the value as a numeric string
+  const licenseDays = Number(licenseRetentionDays);
+
   // Allow users to override the license retention days, but not to increase it
-  if (userRetentionDays && userRetentionDays <= licenseRetentionDays) {
+  if (userRetentionDays && userRetentionDays <= licenseDays) {
     return userRetentionDays;
   }
 
   // User didn't provide a retention days value, use the license one
-  return licenseRetentionDays;
+  return licenseDays;
+};
+
+const getRetentionDays = (strapi: Core.Strapi) => {
+  const featureConfig = strapi.ee.features.get('audit-logs');
+
+  return computeRetentionDays(
+    typeof featureConfig === 'object' ? featureConfig?.options?.retentionDays : undefined,
+    strapi.config.get('admin.auditLogs.retentionDays')
+  );
 };
 
 /**
@@ -146,7 +170,9 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
     const isUsingAdminAuth = requestState?.route?.info?.type === 'admin';
     const auditSource = requestState?.auditSource;
     const isMcpAdminAction = auditSource === 'mcp';
-    const user = requestState?.user;
+    const options: RegisterEventOptions =
+      registration.kind === 'standard' ? registration.options : {};
+    const user = options.alwaysUnknownActor ? undefined : requestState?.user;
 
     const systemOrigin =
       auditSource && SYSTEM_ORIGINS.includes(auditSource)
@@ -158,9 +184,13 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
     }
 
     const allowsUnknownActor =
-      registration.kind === 'standard' && registration.options.allowUnknownActor === true;
+      options.allowUnknownActor === true || options.alwaysUnknownActor === true;
 
     if (!systemOrigin && !user && !allowsUnknownActor) {
+      return null;
+    }
+
+    if (options.shouldRecord?.(...args) === false) {
       return null;
     }
 

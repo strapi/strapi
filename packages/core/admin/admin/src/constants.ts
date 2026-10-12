@@ -98,6 +98,10 @@ export const ADMIN_PERMISSIONS_CE = {
       read: [{ action: 'admin::project-settings.read', subject: null }],
       update: [{ action: 'admin::project-settings.update', subject: null }],
     },
+    'debug-dump': {
+      main: [{ action: 'admin::debug-dump.read', subject: null }],
+      read: [{ action: 'admin::debug-dump.read', subject: null }],
+    },
     plugins: {
       main: [{ action: 'admin::marketplace.read', subject: null }],
       read: [{ action: 'admin::marketplace.read', subject: null }],

@@ -10,15 +10,13 @@ import { Page } from '../../../../components/PageHelpers';
 import { useAppInfo } from '../../../../features/AppInfo';
 import { useConfiguration } from '../../../../features/Configuration';
 import { useTracking } from '../../../../features/Tracking';
-import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { useRBAC } from '../../../../hooks/useRBAC';
 import { selectAdminPermissions } from '../../../../selectors';
 
 import { LogoInput, LogoInputProps } from './components/LogoInput';
+import { PlanCard } from './components/PlanCard';
+import { SupportCard } from './components/SupportCard';
 import { DIMENSION, SIZE } from './utils/constants';
-
-const AdminSeatInfoCE = () => null;
-const AIUageDataCE = () => null;
 
 /* -------------------------------------------------------------------------------------------------
  * ApplicationInfoPage
@@ -38,29 +36,6 @@ const ApplicationInfoPage = () => {
   const nodeVersion = useAppInfo('ApplicationInfoPage', (state) => state.nodeVersion);
   const shouldUpdateStrapi = useAppInfo('ApplicationInfoPage', (state) => state.shouldUpdateStrapi);
   const strapiVersion = useAppInfo('ApplicationInfoPage', (state) => state.strapiVersion);
-
-  const AdminSeatInfo = useEnterprise(
-    AdminSeatInfoCE,
-    async () =>
-      (
-        await import(
-          '../../../../../../ee/admin/src/pages/SettingsPage/pages/ApplicationInfoPage/components/AdminSeatInfo'
-        )
-      ).AdminSeatInfoEE
-  );
-  const isAiEnabled = window.strapi.ai?.enabled !== false;
-  const AIUsageData = useEnterprise(
-    AIUageDataCE,
-    async () =>
-      (
-        await import(
-          '../../../../../../ee/admin/src/pages/SettingsPage/pages/ApplicationInfoPage/components/AIUsage'
-        )
-      ).AIUsage,
-    {
-      enabled: isAiEnabled,
-    }
-  );
 
   const {
     allowedActions: { canRead, canUpdate },
@@ -102,15 +77,6 @@ const ApplicationInfoPage = () => {
       auth: serverLogos.auth,
     });
   }, [serverLogos]);
-
-  // block rendering until the EE component is fully loaded
-  if (!AdminSeatInfo) {
-    return null;
-  }
-
-  if (!AIUsageData) {
-    return null;
-  }
 
   const isSaveDisabled =
     logos.auth.custom === serverLogos.auth.custom && logos.menu.custom === serverLogos.menu.custom;
@@ -196,38 +162,15 @@ const ApplicationInfoPage = () => {
                   <Grid.Item col={6} xs={12} direction="column" alignItems="start">
                     <Typography variant="sigma" textColor="neutral600" tag="dt">
                       {formatMessage({
-                        id: 'Settings.application.plan-title',
-                        defaultMessage: 'current plan',
-                      })}
-                    </Typography>
-                    <Flex gap={3} direction="column" alignItems="start" tag="dd">
-                      <Typography>{window.strapi.projectType}</Typography>
-                      <Link
-                        href="https://strapi.io/pricing-self-hosted"
-                        endIcon={<ExternalLink />}
-                        target="_blank"
-                      >
-                        {formatMessage({
-                          id: 'Settings.application.link-pricing',
-                          defaultMessage: 'See all pricing plans',
-                        })}
-                      </Link>
-                    </Flex>
-                  </Grid.Item>
-
-                  <Grid.Item col={6} xs={12} direction="column" alignItems="start">
-                    <Typography variant="sigma" textColor="neutral600" tag="dt">
-                      {formatMessage({
                         id: 'Settings.application.node-version',
                         defaultMessage: 'node version',
                       })}
                     </Typography>
                     <Typography tag="dd">{nodeVersion}</Typography>
                   </Grid.Item>
-                  <AdminSeatInfo />
-                  <AIUsageData />
                 </Grid.Root>
               </Flex>
+              <PlanCard />
               {canRead && (
                 <Box
                   hasRadius
@@ -290,6 +233,7 @@ const ApplicationInfoPage = () => {
                   </Grid.Root>
                 </Box>
               )}
+              <SupportCard />
             </Flex>
           </Layouts.Content>
         </form>
