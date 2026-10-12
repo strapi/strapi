@@ -34,7 +34,7 @@ describe('Default Service', () => {
         },
       };
 
-      const service = createService({ contentType });
+      const service = createService({ strapi: {} as any, contentType });
 
       expect(service).toBeInstanceOf(CollectionTypeService);
     });
@@ -42,7 +42,7 @@ describe('Default Service', () => {
 
   describe('Single Type', () => {
     test('Creates default actions', () => {
-      const service = createService({ contentType: singleType });
+      const service = createService({ strapi: {} as any, contentType: singleType });
       expect(service).toBeInstanceOf(SingleTypeService);
     });
 
@@ -68,9 +68,7 @@ describe('Default Service', () => {
           },
         };
 
-        global.strapi = strapi;
-
-        const service = createService({ contentType: singleType });
+        const service = createService({ strapi, contentType: singleType });
 
         const input = {};
         await service.createOrUpdate({ data: input });
@@ -98,9 +96,7 @@ describe('Default Service', () => {
           documents: jest.fn(() => documentService),
         };
 
-        global.strapi = strapi;
-
-        const service = createService({ contentType: singleType });
+        const service = createService({ strapi, contentType: singleType });
 
         const input = {};
         await service.createOrUpdate({ data: input });
@@ -132,9 +128,7 @@ describe('Default Service', () => {
           documents: jest.fn(() => documentService),
         };
 
-        global.strapi = strapi;
-
-        const service = createService({ contentType: singleType });
+        const service = createService({ strapi, contentType: singleType });
 
         await service.delete({});
 

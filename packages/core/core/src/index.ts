@@ -11,6 +11,12 @@ import type {
 export { default as compileStrapi } from './compile';
 export * as factories from './factories';
 export * as ai from './ai';
+export { CoreService } from './core-api/service/core-service';
+export { CollectionTypeService } from './core-api/service/collection-type';
+export { SingleTypeService } from './core-api/service/single-type';
+export { CoreController } from './core-api/controller/core-controller';
+export { CollectionTypeController } from './core-api/controller/collection-type';
+export { SingleTypeController } from './core-api/controller/single-type';
 
 export const createStrapi = (options: Partial<StrapiOptions> = {}): Core.Strapi => {
   const strapi = new Strapi({

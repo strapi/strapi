@@ -1,13 +1,15 @@
 import _ from 'lodash';
 import { getPaginationInfo } from '../pagination';
 
+let strapi: any;
+
 const maxLimit = 50;
 const defaultLimit = 20;
 
 describe('Pagination service', () => {
   describe('With maxLimit set globally', () => {
     beforeAll(() => {
-      global.strapi = {
+      strapi = {
         config: {
           get(path, defaultValue) {
             return _.get(this, path, defaultValue);
@@ -24,7 +26,7 @@ describe('Pagination service', () => {
 
     test('Uses default limit', () => {
       const pagination = undefined;
-      const paginationInfo = getPaginationInfo({ pagination });
+      const paginationInfo = getPaginationInfo(strapi, { pagination });
 
       expect(paginationInfo).toEqual({
         start: 0,
@@ -35,7 +37,7 @@ describe('Pagination service', () => {
     describe('Paged pagination', () => {
       test('Uses specified pageSize', () => {
         const pagination = { pageSize: 5 };
-        const paginationInfo = getPaginationInfo({ pagination });
+        const paginationInfo = getPaginationInfo(strapi, { pagination });
 
         expect(paginationInfo).toEqual({
           start: 0,
@@ -45,7 +47,7 @@ describe('Pagination service', () => {
 
       test('Uses maxLimit as pageSize', () => {
         const pagination = { pageSize: 999 };
-        const paginationInfo = getPaginationInfo({ pagination });
+        const paginationInfo = getPaginationInfo(strapi, { pagination });
 
         expect(paginationInfo).toEqual({
           start: 0,
@@ -55,7 +57,7 @@ describe('Pagination service', () => {
 
       test('Uses 1 as pageSize', () => {
         const pagination = { pageSize: 0 };
-        const paginationInfo = getPaginationInfo({ pagination });
+        const paginationInfo = getPaginationInfo(strapi, { pagination });
 
         expect(paginationInfo).toEqual({
           start: 0,
@@ -65,7 +67,7 @@ describe('Pagination service', () => {
 
       test('Uses 1 as pageSize', () => {
         const pagination = { pageSize: -1 };
-        const paginationInfo = getPaginationInfo({ pagination });
+        const paginationInfo = getPaginationInfo(strapi, { pagination });
 
         expect(paginationInfo).toEqual({
           start: 0,
@@ -75,7 +77,7 @@ describe('Pagination service', () => {
 
       test('Uses 1 as pageSize', () => {
         const pagination = { pageSize: -2 };
-        const paginationInfo = getPaginationInfo({ pagination });
+        const paginationInfo = getPaginationInfo(strapi, { pagination });
 
         expect(paginationInfo).toEqual({
           start: 0,
@@ -87,7 +89,7 @@ describe('Pagination service', () => {
     describe('Offset pagination', () => {
       test('Uses specified limit', () => {
         const pagination = { limit: 5 };
-        const paginationInfo = getPaginationInfo({ pagination });
+        const paginationInfo = getPaginationInfo(strapi, { pagination });
 
         expect(paginationInfo).toEqual({
           start: 0,
@@ -97,7 +99,7 @@ describe('Pagination service', () => {
 
       test('Uses maxLimit as limit', () => {
         const pagination = { limit: 999 };
-        const paginationInfo = getPaginationInfo({ pagination });
+        const paginationInfo = getPaginationInfo(strapi, { pagination });
 
         expect(paginationInfo).toEqual({
           start: 0,
@@ -107,7 +109,7 @@ describe('Pagination service', () => {
 
       test('Uses 1 as limit', () => {
         const pagination = { limit: 0 };
-        const paginationInfo = getPaginationInfo({ pagination });
+        const paginationInfo = getPaginationInfo(strapi, { pagination });
 
         expect(paginationInfo).toEqual({
           start: 0,
@@ -117,7 +119,7 @@ describe('Pagination service', () => {
 
       test('Uses maxLimit as limit', () => {
         const pagination = { limit: -1 };
-        const paginationInfo = getPaginationInfo({ pagination });
+        const paginationInfo = getPaginationInfo(strapi, { pagination });
 
         expect(paginationInfo).toEqual({
           start: 0,
@@ -127,7 +129,7 @@ describe('Pagination service', () => {
 
       test('Uses 1 as limit', () => {
         const pagination = { limit: -2 };
-        const paginationInfo = getPaginationInfo({ pagination });
+        const paginationInfo = getPaginationInfo(strapi, { pagination });
 
         expect(paginationInfo).toEqual({
           start: 0,
@@ -137,11 +139,11 @@ describe('Pagination service', () => {
     });
   });
 
-  // Setting global strapi api conf
+  // Strapi stub with api conf
 
   describe('With maxLimit undefined', () => {
     beforeAll(() => {
-      global.strapi = {
+      strapi = {
         config: {
           get(path, defaultValue) {
             return _.get(this, path, defaultValue);
@@ -158,7 +160,7 @@ describe('Pagination service', () => {
 
     test('Uses default limit', () => {
       const pagination = {};
-      const paginationInfo = getPaginationInfo({ pagination });
+      const paginationInfo = getPaginationInfo(strapi, { pagination });
 
       expect(paginationInfo).toEqual({
         start: 0,
@@ -169,7 +171,7 @@ describe('Pagination service', () => {
     describe('Paged pagination', () => {
       test('Uses specified pageSize', () => {
         const pagination = { pageSize: 5 };
-        const paginationInfo = getPaginationInfo({ pagination });
+        const paginationInfo = getPaginationInfo(strapi, { pagination });
 
         expect(paginationInfo).toEqual({
           start: 0,
@@ -179,7 +181,7 @@ describe('Pagination service', () => {
 
       test('Uses specified pageSize', () => {
         const pagination = { pageSize: 999 };
-        const paginationInfo = getPaginationInfo({ pagination });
+        const paginationInfo = getPaginationInfo(strapi, { pagination });
 
         expect(paginationInfo).toEqual({
           start: 0,
@@ -189,7 +191,7 @@ describe('Pagination service', () => {
 
       test('Uses 1 as pageSize', () => {
         const pagination = { pageSize: 0 };
-        const paginationInfo = getPaginationInfo({ pagination });
+        const paginationInfo = getPaginationInfo(strapi, { pagination });
 
         expect(paginationInfo).toEqual({
           start: 0,
@@ -199,7 +201,7 @@ describe('Pagination service', () => {
 
       test('Uses 1 as pageSize', () => {
         const pagination = { pageSize: -1 };
-        const paginationInfo = getPaginationInfo({ pagination });
+        const paginationInfo = getPaginationInfo(strapi, { pagination });
 
         expect(paginationInfo).toEqual({
           start: 0,
@@ -209,7 +211,7 @@ describe('Pagination service', () => {
 
       test('Uses 1 as pageSize', () => {
         const pagination = { pageSize: -2 };
-        const paginationInfo = getPaginationInfo({ pagination });
+        const paginationInfo = getPaginationInfo(strapi, { pagination });
 
         expect(paginationInfo).toEqual({
           start: 0,
@@ -221,7 +223,7 @@ describe('Pagination service', () => {
     describe('Offset pagination', () => {
       test('Uses specified limit', () => {
         const pagination = { limit: 5 };
-        const paginationInfo = getPaginationInfo({ pagination });
+        const paginationInfo = getPaginationInfo(strapi, { pagination });
 
         expect(paginationInfo).toEqual({
           start: 0,
@@ -231,7 +233,7 @@ describe('Pagination service', () => {
 
       test('Uses specified limit', () => {
         const pagination = { limit: 999 };
-        const paginationInfo = getPaginationInfo({ pagination });
+        const paginationInfo = getPaginationInfo(strapi, { pagination });
 
         expect(paginationInfo).toEqual({
           start: 0,
@@ -241,7 +243,7 @@ describe('Pagination service', () => {
 
       test('Uses 1 as limit', () => {
         const pagination = { limit: 0 };
-        const paginationInfo = getPaginationInfo({ pagination });
+        const paginationInfo = getPaginationInfo(strapi, { pagination });
 
         expect(paginationInfo).toEqual({
           start: 0,
@@ -251,7 +253,7 @@ describe('Pagination service', () => {
 
       test('Uses -1 as limit', () => {
         const pagination = { limit: -1 };
-        const paginationInfo = getPaginationInfo({ pagination });
+        const paginationInfo = getPaginationInfo(strapi, { pagination });
 
         expect(paginationInfo).toEqual({
           start: 0,
@@ -261,7 +263,7 @@ describe('Pagination service', () => {
 
       test('Uses 1 as limit', () => {
         const pagination = { limit: -2 };
-        const paginationInfo = getPaginationInfo({ pagination });
+        const paginationInfo = getPaginationInfo(strapi, { pagination });
 
         expect(paginationInfo).toEqual({
           start: 0,

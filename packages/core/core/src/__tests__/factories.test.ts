@@ -1,6 +1,8 @@
 import vm from 'node:vm';
 
 import { createCoreController, createCoreService } from '../factories';
+import { CollectionTypeController } from '../core-api/controller/collection-type';
+import { CollectionTypeService } from '../core-api/service/collection-type';
 
 const makeStrapi = (kind: 'collectionType' | 'singleType') =>
   ({
@@ -105,5 +107,94 @@ describe('createCoreService', () => {
     expect(await (service as any).custom()).toBe('custom');
     expect(service.find).toEqual(expect.any(Function));
     expect(service.getFetchParams({})).toEqual({ status: 'published' });
+  });
+});
+
+describe('core-api class subclasses', () => {
+  test('keeps a CollectionTypeController subclass and exposes only actions as own keys', async () => {
+    class TestController extends CollectionTypeController {
+      async find() {
+        return 'overridden';
+      }
+
+      async custom() {
+        return 'custom';
+      }
+    }
+
+    const strapi = makeStrapi('collectionType');
+    const instance = new TestController({ strapi, contentType: strapi.contentType() });
+
+    const controller = createCoreController(
+      'api::test.test' as any,
+      () => instance as any
+    )({
+      strapi,
+    });
+
+    expect(controller).toBe(instance);
+    expect(await controller.find({} as any, jest.fn())).toBe('overridden');
+    // No separate base controller: the helpers come from the class itself
+    expect(controller.sanitizeQuery).toBe(CollectionTypeController.prototype.sanitizeQuery);
+    expect(Object.keys(controller).sort()).toEqual(
+      ['create', 'custom', 'delete', 'find', 'findOne', 'update'].sort()
+    );
+  });
+
+  test('keeps a CollectionTypeService subclass and lets it call super', async () => {
+    class TestService extends CollectionTypeService {
+      getFetchParams(params = {}) {
+        return { ...super.getFetchParams(params), locale: 'fr' };
+      }
+    }
+
+    const strapi = makeStrapi('collectionType');
+    const instance = new TestService({ strapi, contentType: strapi.contentType() });
+
+    const service = createCoreService('api::test.test' as any, () => instance as any)({ strapi });
+
+    expect(service).toBe(instance);
+    // Left as is: no base service built, no method added
+    expect(Object.getOwnPropertyNames(service).sort()).toEqual(['contentType', 'strapi']);
+    expect(service.find).toBe(CollectionTypeService.prototype.find);
+    expect(service.getFetchParams({})).toEqual({ status: 'published', locale: 'fr' });
+  });
+});
+
+describe('core controller actions', () => {
+  // The router marks route types (content-api, admin) on the action function itself
+  test('are not shared between controllers', () => {
+    const strapi = makeStrapi('collectionType');
+
+    const first = createCoreController('api::first.first' as any)({ strapi });
+    const second = createCoreController('api::second.second' as any, () => {
+      return new CollectionTypeController({ strapi, contentType: strapi.contentType() }) as any;
+    })({ strapi });
+
+    expect(first.find).not.toBe(second.find);
+    expect(first.find).not.toBe(CollectionTypeController.prototype.find);
+    expect(second.find).not.toBe(CollectionTypeController.prototype.find);
+  });
+
+  test('call the helpers an object literal overrides', async () => {
+    const sanitizeOutput = jest.fn(async () => [{ id: 'sanitized by the literal' }]);
+    const strapi = {
+      ...makeStrapi('collectionType'),
+      config: { get: jest.fn() },
+      service: () => ({ find: async () => ({ results: [], pagination: {} }) }),
+      contentAPI: {
+        validate: { query: jest.fn() },
+        sanitize: { query: jest.fn(async () => ({})) },
+      },
+    } as any;
+
+    const controller = createCoreController('api::test.test' as any, { sanitizeOutput })({
+      strapi,
+    });
+
+    const response: any = await controller.find({ query: {}, state: {} } as any, jest.fn());
+
+    expect(sanitizeOutput).toHaveBeenCalled();
+    expect(response.data).toEqual([{ id: 'sanitized by the literal' }]);
   });
 });
