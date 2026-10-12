@@ -581,7 +581,13 @@ class Strapi extends Container implements Core.Strapi {
     // @ts-expect-error: Allow clean delete of global.strapi to allow re-instanciation
     delete global.strapi;
 
-    this.log.info('Strapi has been shut down');
+    const logger = this.log;
+    this.app = undefined;
+    this.isLoaded = false;
+    // Callers such as API tests still hold this object. Release the service
+    // map or every booted app stays in memory until the process exits.
+    this.release();
+    logger.info('Strapi has been shut down');
   }
 
   async runPluginsLifecycles(lifecycleName: 'register' | 'bootstrap' | 'destroy') {
