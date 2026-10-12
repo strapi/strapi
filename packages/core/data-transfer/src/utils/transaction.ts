@@ -24,7 +24,7 @@ export const createTransaction = (strapi: Core.Strapi): Transaction => {
     resume?.();
   });
 
-  strapi.db.transaction(async ({ trx, rollback }) => {
+  const settled = strapi.db.transaction(async ({ trx, rollback }) => {
     e.once('rollback', async () => {
       e.removeAllListeners('close');
       e.removeAllListeners('spawn');
@@ -64,6 +64,10 @@ export const createTransaction = (strapi: Core.Strapi): Transaction => {
     }
   });
 
+  // end() is the only waiter. Keep a rejection from becoming unhandled when a
+  // caller does not await it; close() still observes the same rejection.
+  settled.catch(() => undefined);
+
   return {
     async attach<T = undefined>(callback: TransactionCallback): Promise<T | undefined> {
       const uuid = randomUUID();
@@ -83,7 +87,10 @@ export const createTransaction = (strapi: Core.Strapi): Transaction => {
     },
 
     end() {
-      return e.emit('close');
+      // The transfer transaction commits only after this loop exits. Callers
+      // that read the database as soon as close() returns must wait for it.
+      e.emit('close');
+      return Promise.resolve(settled).then(() => undefined);
     },
 
     rollback() {
