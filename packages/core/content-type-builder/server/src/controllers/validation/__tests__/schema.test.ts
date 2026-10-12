@@ -337,6 +337,60 @@ describe('Schema', () => {
           validateUpdateSchema(schemaWithUid({ action: 'update', targetField: 'title' }))
         ).not.toThrow();
       });
+
+      test('ignores a deleted attribute with the target name on update', () => {
+        expect(() =>
+          validateUpdateSchema({
+            data: {
+              contentTypes: [
+                {
+                  action: 'update',
+                  uid: 'api::article.article',
+                  displayName: 'Article',
+                  draftAndPublish: false,
+                  kind: 'collectionType',
+                  renames: [{ oldName: 'heading', newName: 'title' }],
+                  attributes: [
+                    { action: 'delete', name: 'heading' },
+                    { action: 'update', name: 'title', properties: { type: 'string' } },
+                    {
+                      action: 'update',
+                      name: 'slug',
+                      properties: { type: 'uid', targetField: 'heading' },
+                    },
+                  ],
+                },
+              ],
+            },
+          })
+        ).not.toThrow();
+      });
+
+      test('accepts a uid whose target is deleted in the same update', () => {
+        expect(() =>
+          validateUpdateSchema({
+            data: {
+              contentTypes: [
+                {
+                  action: 'update',
+                  uid: 'api::article.article',
+                  displayName: 'Article',
+                  draftAndPublish: false,
+                  kind: 'collectionType',
+                  attributes: [
+                    { action: 'delete', name: 'heading' },
+                    {
+                      action: 'update',
+                      name: 'slug',
+                      properties: { type: 'uid', targetField: 'heading' },
+                    },
+                  ],
+                },
+              ],
+            },
+          })
+        ).not.toThrow();
+      });
     });
   });
 
