@@ -277,7 +277,7 @@ export const getBusyMessage = (state: {
   if (state.isCropCopying) {
     return {
       id: getTranslationKey('asset-details.crop.loading'),
-      defaultMessage: 'Saving the cropped copy…',
+      defaultMessage: 'Saving the copy…',
     };
   }
   if (state.isReplacing) {
@@ -868,7 +868,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
         error,
         formatMessage({
           id: getTranslationKey('asset-details.crop.error'),
-          defaultMessage: 'Failed to crop the file.',
+          defaultMessage: 'Failed to update the file.',
         })
       ),
     });
@@ -893,7 +893,7 @@ export const AssetDetails = ({ asset, closeDetails }: AssetDetailsProps) => {
       type: 'success',
       message: formatMessage({
         id: getTranslationKey('asset-details.crop.success'),
-        defaultMessage: 'File cropped.',
+        defaultMessage: 'File updated',
       }),
     });
   };

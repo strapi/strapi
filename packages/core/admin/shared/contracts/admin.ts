@@ -1,5 +1,5 @@
-import { Struct, UID } from '@strapi/types';
-import { errors } from '@strapi/utils';
+import type { Struct, UID } from '@strapi/types';
+import type { errors } from '@strapi/utils';
 import type { File } from 'formidable';
 
 export interface Logo {
@@ -65,6 +65,37 @@ export declare namespace UpdateProjectSettings {
     menuLogo: Partial<Logo>;
     authLogo: Partial<Logo>;
     error?: errors.ApplicationError | errors.YupValidationError;
+  }
+}
+
+/**
+ * /project-type - the edition, license and flags the admin boots with.
+ *
+ * Served by the CE controller and overridden by the EE one; both must satisfy
+ * this shape, and the admin builds `window.strapi` from it.
+ */
+export declare namespace GetProjectType {
+  export interface Request {
+    body: {};
+    query: {};
+  }
+  export interface Response {
+    data: {
+      isEE: boolean;
+      isTrial: boolean;
+      features: { name: string }[];
+      flags: {
+        promoteEE?: boolean;
+        nps?: boolean;
+        docLinks?: boolean;
+      };
+      ai: { enabled: boolean };
+      /** EE only — the license type. */
+      type?: string;
+      /** EE only — distinguishes the Growth plan from other Enterprise plans. */
+      planPriceId?: string;
+    };
+    error?: errors.ApplicationError;
   }
 }
 
@@ -211,11 +242,42 @@ export declare namespace GetLicenseLimitInformation {
       )[];
       isHostedOnStrapiCloud: boolean;
       licenseLimitStatus: unknown;
+      // Published as `number` / `string` since before the plan details landed, and read by plugins
+      // through useLicenseLimits. Both are null at runtime without a seat limit or a license, as
+      // they always were; widening them here would break those readers' builds.
       permittedSeats: number;
       shouldNotify: boolean;
       shouldStopCreate: boolean;
       type: string;
       isTrial: boolean;
+      seats: number | null;
+      subscriptionId: string | null;
+      expireAt: string | null;
+      licenseStatus: 'none' | 'active' | 'expired' | 'unknown';
+      planPriceId: string | null;
+      // ISO date string from the license registry (a timestamp is also accepted)
+      renewalDate: string | number | null;
+      planEntitlements: Array<{
+        feature: string;
+        available: boolean;
+        limits: Array<{ key: string; unit?: 'days' | 'count'; value: number | null }>;
+      }>;
+      licenseMode: 'online' | 'offline';
+      lastRegistrySyncAt: number | null;
+      nextRegistrySyncAt: number | null;
+      usingCachedLicense: boolean;
+      registrySyncError: string | null;
+      /**
+       * Why the last registry check failed. `unreachable` covers transport failures and
+       * unexpected responses; `rejected` means the registry answered and refused the
+       * license. Distinguishing them from `usingCachedLicense` alone is not possible for
+       * an instance that has never reached the registry and so has nothing cached.
+       */
+      registrySyncErrorKind: 'unreachable' | 'rejected' | null;
+      entitlements: Array<{
+        feature: string;
+        limits: Array<{ key: string; unit?: 'days' | 'count'; value: number | null }>;
+      }>;
     };
     error?: errors.ApplicationError;
   }
@@ -232,6 +294,59 @@ export declare namespace GetGuidedTourMeta {
       isFirstSuperAdminUser: boolean;
       schemas: Record<UID.ContentType, Struct.ContentTypeSchema>;
     };
+    error?: errors.ApplicationError;
+  }
+}
+
+/**
+ * /debug-dump - assemble a redacted diagnostic payload for Strapi Support
+ */
+export interface DebugDumpPayload {
+  dumpVersion: 1;
+  generatedAt: string;
+  strapi: {
+    version: string | null;
+    edition: 'EE' | 'CE';
+    projectType: string;
+    environment: string;
+    autoReload: boolean;
+  };
+  license?: {
+    licenseStatus: string;
+    type: string | null | undefined;
+    isTrial: boolean;
+    expireAt: string | null;
+    seats: number | null;
+    subscriptionId: string | null;
+    features: unknown[];
+    entitlements: unknown[];
+  };
+  system: {
+    nodeVersion: string;
+    os: { type: string; platform: string; arch: string; release: string };
+    isHostedOnStrapiCloud: boolean;
+  };
+  database: { client: string; schema?: string; displayName?: string };
+  plugins: string[];
+  providers: { upload: { name: unknown; isPrivate: boolean }; email: { name: unknown } };
+  contentModel: {
+    counts: { contentTypes: number; components: number };
+    contentTypes: unknown[];
+    components: unknown[];
+  };
+  customizations: unknown;
+  config: Record<string, unknown>;
+  packageJson: Record<string, unknown>;
+  env: Record<string, string | undefined>;
+}
+
+export declare namespace DebugDump {
+  export interface Request {
+    body: {};
+    query: {};
+  }
+  export interface Response {
+    data: DebugDumpPayload;
     error?: errors.ApplicationError;
   }
 }

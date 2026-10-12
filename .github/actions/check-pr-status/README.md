@@ -11,9 +11,11 @@ This action checks a PR labels and status to check that it is ready for merging.
 - `flag: 💥 Breaking change`
 - `flag: don't merge`
 
-2. The PR must have one and only one `source: *` label.
-3. The PR must have one and only one `pr: *` label.
-4. Community PRs must not target `main`.
+2. The PR must have one of the QA labels: `qa-done` or `qa-skipped`.
+3. The PR should have one and only one `source: *` label.
+4. The PR should have one and only one `pr: *` label.
+5. PRs targeting `develop` must have a milestone defined.
+6. Community PRs must not target `main`.
 
 ## Contributing
 

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 
 import { SubNav } from '@strapi/admin/strapi-admin';
 import { Box, Flex, IconButton, Loader, Typography } from '@strapi/design-system';
@@ -8,10 +8,12 @@ import { css, styled } from 'styled-components';
 
 import { TruncatedText } from '../../../../components/TruncatedText';
 import { useGetFolderStructureQuery } from '../../../../services/folders';
+import { isEventFromWithin } from '../../../../utils/isEventFromWithin';
 import { getTranslationKey } from '../../../../utils/translations';
 import { useAssetsDndOptional } from '../Dnd/AssetsDndProvider';
 import { useFolderTreeDroppable } from '../Dnd/useFolderTreeDroppable';
 
+import { FolderTreeRowMenu } from './FolderTreeRowMenu';
 import { useSpringLoadedExpand } from './useSpringLoadedExpand';
 
 import type { FolderNode } from '../../../../../../shared/contracts/folders';
@@ -28,18 +30,19 @@ const RowButton = styled.button<{
 }>`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => theme.spaces[2]};
+  // Matches the row's own gap, so Home — the one row whose icon sits inside
+  // this button rather than beside it — puts its label on the same line as a
+  // folder's.
+  gap: ${({ theme }) => theme.spaces[1]};
   width: 100%;
   min-height: 3.2rem;
-  padding: ${({ theme }) => `${theme.spaces[1]} ${theme.spaces[2]}`};
+  // No padding of its own: the row owns the inset, so the label lines up with
+  // the icon boxes instead of being pushed in by a second layer of spacing.
+  padding: 0;
   border: 0;
-  background: ${({ $isActive, $isValidDropTarget, theme }) => {
-    if ($isValidDropTarget) {
-      return theme.colors.primary100;
-    }
-
-    return $isActive ? theme.colors.primary100 : 'transparent';
-  }};
+  // The surface — hover, active, drop target — is painted by the row behind
+  // this, so it spans the chevron and the actions menu too, not just the label.
+  background: transparent;
   color: ${({ $isActive, theme }) =>
     $isActive ? theme.colors.primary700 : theme.colors.neutral800};
   border-radius: ${({ theme }) => theme.borderRadius};
@@ -61,16 +64,6 @@ const RowButton = styled.button<{
       outline-offset: -1px;
     `}
 
-  &:hover {
-    background: ${({ $isActive, $isValidDropTarget, theme }) => {
-      if ($isValidDropTarget) {
-        return theme.colors.primary100;
-      }
-
-      return $isActive ? theme.colors.primary100 : theme.colors.neutral100;
-    }};
-  }
-
   &:focus-visible {
     outline: 2px solid ${({ theme }) => theme.colors.primary600};
     outline-offset: -2px;
@@ -78,6 +71,7 @@ const RowButton = styled.button<{
 `;
 
 const TreeRow = styled(Flex)<{
+  $isActive?: boolean;
   $isValidDropTarget?: boolean;
   $isInvalidDropCursor?: boolean;
   $isMovePending?: boolean;
@@ -91,6 +85,14 @@ const TreeRow = styled(Flex)<{
   }};
   pointer-events: ${({ $isMovePending }) => ($isMovePending ? 'none' : 'auto')};
   border-radius: ${({ theme }) => theme.borderRadius};
+  background: ${({ $isActive, theme }) => ($isActive ? theme.colors.primary100 : 'transparent')};
+
+  // The whole row lights up, so pointing anywhere along it — chevron, label or
+  // the actions trigger — reads as one target.
+  &:hover {
+    background: ${({ $isActive, theme }) =>
+      $isActive ? theme.colors.primary100 : theme.colors.neutral100};
+  }
 
   ${({ $isValidDropTarget, theme }) =>
     $isValidDropTarget &&
@@ -98,6 +100,10 @@ const TreeRow = styled(Flex)<{
       background: ${theme.colors.primary100};
       outline: 1px dashed ${theme.colors.primary600};
       outline-offset: -1px;
+
+      &:hover {
+        background: ${theme.colors.primary100};
+      }
     `}
 `;
 
@@ -215,12 +221,50 @@ const NavList = styled.ul`
 const INDENT_PER_LEVEL_REM = 1.6;
 
 /**
+ * Breathing room between the row's highlight and the controls at either end.
+ * Asymmetric on purpose: the chevron reads as part of the indent, while the
+ * actions trigger sits closer to the edge so it stays out of the name's way.
+ */
+const ROW_INSET_LEFT_REM = 0.8;
+const ROW_INSET_RIGHT_REM = 0.4;
+
+/**
+ * Every icon in the rail occupies the same 24px box, whether or not it is a
+ * control: the chevron and the actions trigger are buttons, the home and folder
+ * marks are not. Sizing the box rather than the glyph is what keeps the labels
+ * on one vertical line across rows that mix the two.
+ */
+const IconSlot = styled(Flex)`
+  width: 2.4rem;
+  height: 2.4rem;
+  min-width: 2.4rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+`;
+
+/**
  * A leaf's chevron is present only to keep the folder names aligned, so it
  * should read as absent. The design system's disabled state is built for real
  * controls — a filled, bordered pill — which draws more attention than the
  * enabled chevron next to it. Doubled selector to outrank that rule.
  */
 const ChevronButton = styled(IconButton)`
+  // Square, so it and the actions trigger read as one pair of controls.
+  && {
+    width: 2.4rem;
+    height: 2.4rem;
+    min-width: 2.4rem;
+    min-height: 2.4rem;
+    padding: 0.4rem;
+  }
+
+  // The row paints its own hover, so the control needs a stronger one of its own
+  // to read as a separate target sitting on top of it.
+  &&:hover:not([aria-disabled='true']) {
+    background: ${({ theme }) => theme.colors.primary200};
+  }
+
   &&[aria-disabled='true'] {
     background: transparent;
     border-color: transparent;
@@ -235,6 +279,8 @@ const RotatingChevron = styled(ChevronDown)<{ $expanded: boolean }>`
 
 interface FolderTreeItemProps {
   node: FolderNode;
+  /** Its parent's id, so the actions can validate a move against the real parent. */
+  parentId: number | null;
   level: number;
   currentFolderId: number | null;
   showActiveFolder: boolean;
@@ -254,6 +300,7 @@ interface FolderTreeItemInnerProps extends Omit<FolderTreeItemProps, 'node'> {
 const FolderTreeItemInner = ({
   id,
   name,
+  parentId,
   folderChildren,
   level,
   currentFolderId,
@@ -266,7 +313,10 @@ const FolderTreeItemInner = ({
 }: FolderTreeItemInnerProps) => {
   const { formatMessage } = useIntl();
   const hasChildren = folderChildren.length > 0;
-  const isFolderExpanded = isExpanded(id);
+  // A folder keeps its entry in the expanded set after its last subfolder is
+  // moved away, so "expanded" has to mean "expanded *and* still has something to
+  // show" — otherwise the chevron stays rotated on what is now a leaf.
+  const isFolderExpanded = isExpanded(id) && hasChildren;
   const isActive = showActiveFolder && currentFolderId === id;
 
   const {
@@ -277,6 +327,11 @@ const FolderTreeItemInner = ({
   } = useFolderTreeDroppable({ id, name });
 
   const handleExpand = useCallback(() => onExpand(id), [id, onExpand]);
+
+  // Tree rows carry no selection, so a right-click always means "this folder" —
+  // none of the list's selection rules apply here.
+  const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
+  const rowButtonRef = useRef<HTMLButtonElement>(null);
 
   useSpringLoadedExpand({
     isOver,
@@ -290,12 +345,25 @@ const FolderTreeItemInner = ({
     <li>
       <TreeRow
         ref={setNodeRef}
+        data-native-context-menu
         alignItems="center"
-        paddingLeft={`${level * INDENT_PER_LEVEL_REM}rem`}
+        // Indent plus the row's own inset, so the chevron never sits flush
+        // against the edge of the highlight at any depth.
+        paddingLeft={`${level * INDENT_PER_LEVEL_REM + ROW_INSET_LEFT_REM}rem`}
+        paddingRight={`${ROW_INSET_RIGHT_REM}rem`}
         gap={1}
+        $isActive={isActive}
         $isValidDropTarget={showValidDropHighlight}
         $isInvalidDropCursor={showInvalidDropCursor}
         $isMovePending={isMovePending}
+        onContextMenu={(event: React.MouseEvent) => {
+          if (!isEventFromWithin(event)) {
+            return;
+          }
+
+          event.preventDefault();
+          setMenuPosition({ x: event.clientX, y: event.clientY });
+        }}
       >
         <ChevronButton
           label={
@@ -331,6 +399,7 @@ const FolderTreeItemInner = ({
 
         <Box flex="1" minWidth={0}>
           <RowButton
+            ref={rowButtonRef}
             type="button"
             $isActive={isActive}
             $isValidDropTarget={showValidDropHighlight}
@@ -346,6 +415,14 @@ const FolderTreeItemInner = ({
             </TruncatedText>
           </RowButton>
         </Box>
+
+        <FolderTreeRowMenu
+          folder={{ id, name }}
+          parentId={parentId}
+          menuPosition={menuPosition}
+          returnFocusTo={rowButtonRef.current}
+          onCloseMenu={() => setMenuPosition(null)}
+        />
       </TreeRow>
 
       {hasChildren && isFolderExpanded && (
@@ -354,6 +431,7 @@ const FolderTreeItemInner = ({
             <FolderTreeItem
               key={child.id ?? child.name}
               node={child}
+              parentId={id}
               level={level + 1}
               currentFolderId={currentFolderId}
               showActiveFolder={showActiveFolder}
@@ -397,7 +475,11 @@ interface FolderTreeProps {
    * */
   showActiveFolder?: boolean;
   onSelectFolder: (folderId: number | null) => void;
+  /** Rendered inside the sidebar, which it can listen on through `FOLDER_TREE_ROOT_SELECTOR`. */
+  backgroundContextMenu?: ReactNode;
 }
+
+export const FOLDER_TREE_ROOT_SELECTOR = '[data-folder-tree-root]';
 
 /**
  * Left-rail navigation for the Media Library. Fetches folder structure internally
@@ -420,6 +502,7 @@ export const FolderTree = ({
   currentFolderId,
   showActiveFolder = true,
   onSelectFolder,
+  backgroundContextMenu,
 }: FolderTreeProps) => {
   const { formatMessage } = useIntl();
   const { data: folderStructure = [], isLoading, isError } = useGetFolderStructureQuery();
@@ -443,11 +526,13 @@ export const FolderTree = ({
 
   return (
     <SubNav.Main
+      data-folder-tree-root
       aria-label={formatMessage({
         id: getTranslationKey('sidebar.tree.aria-label'),
         defaultMessage: 'Media library folders',
       })}
     >
+      {backgroundContextMenu}
       <SubNav.Header
         label={formatMessage({
           id: getTranslationKey('sidebar.title'),
@@ -456,23 +541,40 @@ export const FolderTree = ({
       />
 
       <SubNav.Content>
-        <Flex direction="column" alignItems="stretch" gap={1} padding={3}>
-          <RowButton
+        <Flex direction="column" alignItems="stretch" padding={3}>
+          {/* Same row wrapper as a folder, so Home highlights across its whole
+              width rather than only behind the label. */}
+          <TreeRow
             ref={setHomeDropRef}
-            type="button"
+            data-native-context-menu
+            alignItems="center"
+            // Level 0, so the indent contributes nothing — but the row's own
+            // inset still applies, exactly as it does for a top-level folder.
+            paddingLeft={`${ROW_INSET_LEFT_REM}rem`}
+            paddingRight={`${ROW_INSET_RIGHT_REM}rem`}
             $isActive={isHomeActive}
             $isValidDropTarget={showHomeValidDropHighlight}
             $isInvalidDropCursor={showHomeInvalidDropCursor}
             $isMovePending={isMovePending}
-            aria-current={isHomeActive ? 'page' : undefined}
-            onClick={() => onSelectFolder(null)}
-            data-testid="folder-tree-home"
           >
-            <House aria-hidden width="1.6rem" height="1.6rem" />
-            <Typography variant="omega" fontWeight={isHomeActive ? 'semiBold' : 'regular'}>
-              {homeLabel}
-            </Typography>
-          </RowButton>
+            <RowButton
+              type="button"
+              $isActive={isHomeActive}
+              $isValidDropTarget={showHomeValidDropHighlight}
+              $isInvalidDropCursor={showHomeInvalidDropCursor}
+              $isMovePending={isMovePending}
+              aria-current={isHomeActive ? 'page' : undefined}
+              onClick={() => onSelectFolder(null)}
+              data-testid="folder-tree-home"
+            >
+              <IconSlot>
+                <House aria-hidden width="1.6rem" height="1.6rem" />
+              </IconSlot>
+              <Typography variant="omega" fontWeight={isHomeActive ? 'semiBold' : 'regular'}>
+                {homeLabel}
+              </Typography>
+            </RowButton>
+          </TreeRow>
 
           <Box marginTop={4}>
             <Flex
@@ -482,9 +584,10 @@ export const FolderTree = ({
               paddingBottom={1}
               paddingLeft={2}
               paddingRight={2}
-              marginBottom={2}
             >
-              <FolderIcon aria-hidden width="1.6rem" height="1.6rem" fill="neutral500" />
+              <IconSlot>
+                <FolderIcon aria-hidden width="1.6rem" height="1.6rem" fill="neutral500" />
+              </IconSlot>
               <Typography
                 variant="sigma"
                 textColor="neutral600"
@@ -533,6 +636,8 @@ export const FolderTree = ({
                   <FolderTreeItem
                     key={node.id ?? node.name}
                     node={node}
+                    // Top of the tree — these sit at the library root.
+                    parentId={null}
                     level={0}
                     currentFolderId={currentFolderId}
                     showActiveFolder={showActiveFolder}

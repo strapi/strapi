@@ -1,6 +1,6 @@
 import type { Core, UID } from '@strapi/types';
 import { async, errors } from '@strapi/utils';
-import { map, pick, isEqual } from 'lodash/fp';
+import { pick, map, isEqual } from 'lodash';
 import type { StagePermission } from '../../../shared/contracts/review-workflows';
 import { STAGE_MODEL_UID, ENTITY_STAGE_ATTRIBUTE, ERRORS } from '../constants/workflows';
 import { getService } from '../utils';
@@ -13,7 +13,7 @@ interface PopulatedPermission {
 
 const { ApplicationError, ValidationError } = errors;
 const sanitizedStageFields = ['id', 'name', 'workflow', 'color'];
-const sanitizeStageFields = pick(sanitizedStageFields);
+const sanitizeStageFields = (stage: Record<string, unknown>) => pick(stage, sanitizedStageFields);
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const metrics = getService('workflow-metrics', { strapi });
@@ -211,7 +211,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         // Create the new stages
         const createdStages = await this.createMany(created, { fields: ['id'] });
         // Put all the newly created stages ids
-        const createdStagesIds = map('id', createdStages);
+        const createdStagesIds = map(createdStages, 'id');
 
         // Update the workflow stages
         await async.map(updated, (destStage: any) => {
@@ -278,7 +278,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         locale,
         // Stage doesn't have DP or i18n enabled, connecting it through the `id`
         // will be safer than relying on the `documentId` + `locale` + `status` transformation
-        data: { [ENTITY_STAGE_ATTRIBUTE]: pick(['id'], stage) },
+        data: { [ENTITY_STAGE_ATTRIBUTE]: pick(stage, ['id']) },
         populate: [ENTITY_STAGE_ATTRIBUTE],
       });
 
@@ -375,7 +375,7 @@ const normalizeStageForDiff = (stage: {
   fromPermissions?: unknown[];
   toPermissions?: unknown[];
 }) => ({
-  ...pick(['name', 'color'], stage),
+  ...pick(stage, ['name', 'color']),
   fromPermissions: stage.fromPermissions ?? [],
   toPermissions: stage.toPermissions ?? [],
 });

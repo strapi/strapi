@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Request } from '@playwright/test';
 import { login } from '../../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../../utils/dts-import';
 import { clickAndWait } from '../../../../utils/shared';
@@ -56,49 +56,74 @@ test.describe('Relations on the fly - Create a Relation inside a new component a
 
     const name = page.getByRole('textbox', { name: 'name' });
     await name.fill(productName);
-    const parentUpdate = page.waitForRequest(
-      (request) =>
+
+    // Connecting the newly created relation must never PUT the whole shop single-type to the
+    // server — that would silently persist the still-unsaved new component along with it.
+    const parentUpdates: string[] = [];
+    const trackParentUpdate = (request: Request) => {
+      if (
         request.method() === 'PUT' &&
         request.url().includes('/content-manager/single-types/api::shop.shop')
-    );
-    await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
-    const parentUpdateRequest = await parentUpdate;
-    const parentUpdateData = parentUpdateRequest.postDataJSON() as {
-      content: Array<{
-        __component: string;
-        title?: string;
-        products?: { connect?: Array<{ documentId?: unknown }> };
-      }>;
+      ) {
+        parentUpdates.push(request.url());
+      }
     };
-    expect(parentUpdateData.content).toHaveLength(componentCount + 1);
-    expect(parentUpdateData.content).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          __component: 'page-blocks.product-carousel',
-          title: carouselTitle,
-          products: expect.objectContaining({
-            connect: expect.arrayContaining([
-              expect.objectContaining({ documentId: expect.any(String) }),
-            ]),
-          }),
-        }),
-      ])
-    );
+    page.on('request', trackParentUpdate);
+    await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
     await expect(name).toHaveValue(productName);
     await expect(page.getByRole('status', { name: 'Draft' }).first()).toBeVisible();
-
     await expect(page.getByText('Edit a relation')).toBeVisible();
-    await clickAndWait(page, page.getByRole('button', { name: 'Close modal' }));
+    page.off('request', trackParentUpdate);
+    expect(parentUpdates).toEqual([]);
 
+    // The relation and the new component both show locally, still unsaved.
+    await clickAndWait(page, page.getByRole('button', { name: 'Close modal' }));
     await expect(page.getByRole('button', { name: productName })).toBeVisible();
     await expect(carouselTitleInput).toHaveValue(carouselTitle);
 
+    // Neither survives a reload on its own — the component and its relation are only persisted
+    // once the user explicitly saves the shop entry itself.
     await page.reload();
-    const productCarouselToggle = page.getByRole('button', {
+    await expect(
+      page.getByRole('button', { name: new RegExp(`Product carousel - ${carouselTitle}`) })
+    ).not.toBeVisible();
+
+    // Redo the same steps and this time explicitly save the parent to persist everything.
+    await clickAndWait(page, addComponentButton);
+    await clickAndWait(
+      page,
+      page
+        .getByText('Pick one component', { exact: true })
+        .locator('xpath=following::button[normalize-space(.)="Product carousel"][1]')
+    );
+    const newComponents = page
+      .getByRole('list')
+      .filter({ has: page.getByRole('button', { name: 'Product carousel - 23/24 kits' }) })
+      .getByRole('listitem');
+    const persistedCarousel = newComponents.nth(componentCount);
+    const persistedCarouselTitleInput = persistedCarousel.getByRole('textbox', { name: 'title' });
+    await persistedCarouselTitleInput.pressSequentially(carouselTitle);
+    await persistedCarouselTitleInput.blur();
+
+    await persistedCarousel.getByRole('combobox', { name: 'products' }).click();
+    await page.getByRole('option', { name: 'Create a relation' }).click();
+    await page.getByRole('textbox', { name: 'name' }).fill(productName);
+    await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
+    await expect(page.getByText('Edit a relation')).toBeVisible();
+    await clickAndWait(page, page.getByRole('button', { name: 'Close modal' }));
+
+    await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
+
+    // Check persistence from a fresh page rather than reloading this one: a second navigation of
+    // the same tab aborts WebKit's renderer (`Navigation::initializeForNewWindow`), which
+    // Playwright reports as "Page crashed".
+    const persistedPage = await page.context().newPage();
+    await persistedPage.goto(page.url());
+    const productCarouselToggle = persistedPage.getByRole('button', {
       name: new RegExp(`Product carousel - ${carouselTitle}`),
     });
     await expect(productCarouselToggle).toBeVisible();
-    await clickAndWait(page, productCarouselToggle);
-    await expect(page.getByRole('button', { name: productName })).toBeVisible();
+    await clickAndWait(persistedPage, productCarouselToggle);
+    await expect(persistedPage.getByRole('button', { name: productName })).toBeVisible();
   });
 });

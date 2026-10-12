@@ -5,6 +5,7 @@ import { Button, Dialog, Typography } from '@strapi/design-system';
 import { WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
+import { useApiErrorMessage } from '../../../hooks/useApiErrorMessage';
 import { useBulkDeleteItemsMutation } from '../../../services/assets';
 import { getTranslationKey } from '../../../utils/translations';
 
@@ -40,6 +41,7 @@ export const DeleteItemsDialog = ({
 }: DeleteItemsDialogProps) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
+  const getErrorMessage = useApiErrorMessage();
   const [bulkDeleteItems, { isLoading: isDeleting }] = useBulkDeleteItemsMutation();
 
   const count = target.fileIds.length + target.folderIds.length;
@@ -66,10 +68,13 @@ export const DeleteItemsDialog = ({
       // (Confirm again) or Cancel; only surface the error toast.
       toggleNotification({
         type: 'danger',
-        message: formatMessage({
-          id: getTranslationKey('list.bulk-actions.delete.error'),
-          defaultMessage: 'An error occurred while deleting the items.',
-        }),
+        message: getErrorMessage(
+          res.error,
+          formatMessage({
+            id: getTranslationKey('list.bulk-actions.delete.error'),
+            defaultMessage: 'An error occurred while deleting the items.',
+          })
+        ),
       });
       return;
     }

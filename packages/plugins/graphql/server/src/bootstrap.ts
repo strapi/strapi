@@ -1,4 +1,4 @@
-import { isEmpty, mergeWith, isArray, isObject, isFunction } from 'lodash/fp';
+import { mergeWith, isEmpty, isObject } from 'lodash';
 import { ApolloServer, type ApolloServerPlugin, type ApolloServerOptions } from '@apollo/server';
 import {
   ApolloServerPluginLandingPageLocalDefault,
@@ -14,12 +14,6 @@ import type { Options } from '@koa/cors';
 import type { BaseContext, DefaultContextExtends, DefaultStateExtends } from 'koa';
 
 import { formatGraphqlError } from './format-graphql-error';
-
-const merge = mergeWith((a, b) => {
-  if (isArray(a) && isArray(b)) {
-    return a.concat(b);
-  }
-});
 
 type StrapiGraphQLContext = BaseContext & {
   rootQueryArgsByPath?: Map<string | number, Record<string, unknown>>;
@@ -69,7 +63,9 @@ export const determineLandingPage = (
    * - undefined: default Apollo behavior (hide playground on production)
    * - a function that returns an Apollo plugin that implements renderLandingPage
    ** */
-  const configLandingPage = config('landingPage');
+  const configLandingPage = config<
+    boolean | ((strapi?: Core.Strapi) => ApolloServerPlugin | boolean)
+  >('landingPage');
 
   const isProduction = process.env.NODE_ENV === 'production';
 
@@ -126,7 +122,7 @@ export const determineLandingPage = (
   }
 
   // if user provided a landing page function, return that
-  if (isFunction(configLandingPage)) {
+  if (typeof configLandingPage === 'function') {
     return userLanding(configLandingPage);
   }
 
@@ -223,9 +219,16 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
     cache: 'bounded' as const,
   };
 
-  const serverConfig = merge(
+  const serverConfig = mergeWith(
+    {},
     defaultServerConfig,
-    config('apolloServer')
+    config('apolloServer'),
+    (a: unknown, b: unknown) => {
+      if (Array.isArray(a) && Array.isArray(b)) {
+        return a.concat(b);
+      }
+      return undefined;
+    }
   ) as ApolloServerOptions<StrapiGraphQLContext> & CustomOptions;
 
   // Create a new Apollo server

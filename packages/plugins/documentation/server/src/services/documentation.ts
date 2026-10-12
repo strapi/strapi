@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 import { produce } from 'immer';
 import type { Core } from '@strapi/types';
 
-import { builApiEndpointPath, buildComponentSchema } from './helpers';
+import { builApiEndpointPath, buildComponentSchema, getRelationTargetSchemaNames } from './helpers';
 import { getPluginsThatNeedDocumentation } from './utils/get-plugins-that-need-documentation';
 import { getService } from '../utils';
 
@@ -155,10 +155,16 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
         // Delete the mutateDocumentation key from the config so it doesn't end up in the spec
         delete draft['x-strapi-config'].mutateDocumentation;
 
+        const relationTargetSchemaNames = new Map(
+          apisThatNeedGeneratedDocumentation.flatMap((api) => [
+            ...getRelationTargetSchemaNames(api),
+          ])
+        );
+
         // Generate the documentation for each api and update the generatedDocumentation
         for (const api of apisThatNeedGeneratedDocumentation) {
           const newApiPath = builApiEndpointPath(api);
-          const generatedSchemas = buildComponentSchema(api);
+          const generatedSchemas = buildComponentSchema(api, relationTargetSchemaNames);
 
           if (generatedSchemas) {
             draft.components.schemas = { ...draft.components.schemas, ...generatedSchemas };

@@ -1,4 +1,4 @@
-import { has, propEq, isNil, isDate, isObject } from 'lodash/fp';
+import { isDate, isObject, has, matchesProperty } from 'lodash';
 import type { Struct } from '@strapi/types';
 import type { Context } from '../../types';
 
@@ -48,7 +48,7 @@ export default ({ strapi }: Context) => {
       const ROOT_LEVEL_OPERATORS = [operators.and, operators.or, operators.not];
 
       // Handle unwanted scenario where there is no filters defined
-      if (isNil(filters)) {
+      if (filters == null) {
         return {};
       }
 
@@ -63,7 +63,7 @@ export default ({ strapi }: Context) => {
       const { attributes } = contentType;
 
       const isAttribute = (attributeName: string) => {
-        return virtualScalarAttributes.includes(attributeName) || has(attributeName, attributes);
+        return virtualScalarAttributes.includes(attributeName) || has(attributes, attributeName);
       };
 
       for (const [key, value] of Object.entries(filters)) {
@@ -100,7 +100,7 @@ export default ({ strapi }: Context) => {
 
         // Handle the case where the key is not an attribute (operator, ...)
         else {
-          const rootLevelOperator = ROOT_LEVEL_OPERATORS.find(propEq('fieldName', key));
+          const rootLevelOperator = ROOT_LEVEL_OPERATORS.find(matchesProperty('fieldName', key));
 
           // If it's a root level operator (AND, NOT, OR, ...)
           if (rootLevelOperator) {

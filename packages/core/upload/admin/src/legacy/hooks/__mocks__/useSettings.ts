@@ -6,6 +6,7 @@ export const useSettings = jest.fn().mockReturnValue({
     responsiveDimensions: true,
     autoOrientation: true,
     aiMetadata: true,
+    aiMetadataAvailable: true,
   },
   error: null,
 });

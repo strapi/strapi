@@ -1,11 +1,11 @@
+import _ from 'lodash';
 import type { Context } from 'koa';
 
 import path from 'path';
 
-import { map, values, sumBy, pipe, flatMap, propEq } from 'lodash/fp';
-import _ from 'lodash';
 import { exists } from 'fs-extra';
 import { env } from '@strapi/utils';
+import type { Struct } from '@strapi/types';
 import {
   validateUpdateProjectSettings,
   validateUpdateProjectSettingsFiles,
@@ -16,11 +16,13 @@ import { getService } from '../utils';
 import type {
   Init,
   GetProjectSettings,
+  GetProjectType,
   Information,
   Plugins,
   TelemetryProperties,
   UpdateProjectSettings,
   GetGuidedTourMeta,
+  DebugDump,
 } from '../../../shared/contracts/admin';
 
 // Lazy: only resolved on first GET /admin/project-type request
@@ -46,9 +48,9 @@ export default {
 
   // NOTE: admin/ee/server overrides this controller, and adds the EE features
   // This returns an empty feature list for CE
-  async getProjectType() {
+  async getProjectType(): Promise<GetProjectType.Response> {
     const flags = strapi.config.get('admin.flags', {});
-    return { data: { isEE: false, features: [], flags, ai: { enabled: false } } };
+    return { data: { isEE: false, isTrial: false, features: [], flags, ai: { enabled: false } } };
   },
 
   async init() {
@@ -117,12 +119,9 @@ export default {
     const numberOfComponents = _.size(strapi.components);
 
     const getNumberOfDynamicZones = () => {
-      return pipe(
-        map('attributes'),
-        flatMap(values),
-        // @ts-expect-error lodash types
-        sumBy(propEq('type', 'dynamiczone'))
-      )(strapi.contentTypes as any);
+      return Object.values(strapi.contentTypes)
+        .flatMap((contentType: Struct.ContentTypeSchema) => Object.values(contentType.attributes))
+        .filter((attribute) => attribute.type === 'dynamiczone').length;
     };
 
     const getNumberOfFolders = async (): Promise<number> => {
@@ -172,6 +171,12 @@ export default {
         useYarn,
       },
     } satisfies Information.Response;
+  },
+
+  async debugDump() {
+    const data = await getService('debug-dump').generate();
+
+    return { data } satisfies DebugDump.Response;
   },
 
   async plugins(ctx: Context) {

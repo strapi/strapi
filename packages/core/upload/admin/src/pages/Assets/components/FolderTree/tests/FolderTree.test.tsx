@@ -1,5 +1,5 @@
 import { DndContext } from '@dnd-kit/core';
-import { fireEvent, render, screen } from '@tests/utils';
+import { fireEvent, render, screen, waitFor } from '@tests/utils';
 
 import { FolderTree } from '../FolderTree';
 
@@ -57,6 +57,92 @@ describe('FolderTree', () => {
     expect(screen.getByRole('heading', { name: 'Media library' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Home' })).toBeInTheDocument();
     expect(screen.getByText('Folders')).toBeInTheDocument();
+  });
+
+  it('unrotates the chevron when a folder loses its last subfolder', async () => {
+    const { user, rerender } = renderTree();
+
+    // Nested, so its parent has to be open before it is on screen.
+    await user.click(await screen.findByRole('button', { name: 'Expand Top A' }));
+    // Expand "Inner A1", which has one child.
+    await user.click(await screen.findByRole('button', { name: 'Expand Inner A1' }));
+    expect(screen.getByRole('button', { name: 'Collapse Inner A1' })).toHaveAttribute(
+      'aria-expanded',
+      'true'
+    );
+
+    // That child is moved away — the row is still in the expanded set, but has
+    // nothing left to show.
+    mockUseGetFolderStructureQuery.mockReturnValue({
+      data: [
+        {
+          id: 1,
+          name: 'Top A',
+          children: [
+            { id: 2, name: 'Inner A1', children: [] },
+            { id: 4, name: 'Inner A2', children: [] },
+          ],
+        },
+        { id: 5, name: 'Top B', children: [] },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+
+    rerender(
+      <DndContext>
+        <FolderTree currentFolderId={null} onSelectFolder={jest.fn()} />
+      </DndContext>
+    );
+
+    // Back to a leaf, and the chevron points at rest rather than staying turned
+    // down over an empty folder.
+    const leaf = await screen.findByRole('button', {
+      name: 'The folder Inner A1 has no subfolders',
+    });
+    // eslint-disable-next-line testing-library/no-node-access
+    const chevron = leaf.querySelector('svg') as SVGElement;
+
+    expect(window.getComputedStyle(chevron).transform).toBe('rotate(-90deg)');
+  });
+
+  it('offers the folder actions on a tree row, without Rename', async () => {
+    const { user } = renderTree();
+
+    await user.click((await screen.findAllByRole('button', { name: /Actions for/ }))[0]);
+
+    expect(
+      await screen.findByRole('menuitem', { name: 'Copy link to folder' })
+    ).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: 'Move to folder' })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: 'Delete folder' })).toBeInTheDocument();
+    // Renaming is a list affordance; the tree does not offer it.
+    expect(screen.queryByRole('menuitem', { name: 'Rename folder' })).not.toBeInTheDocument();
+  });
+
+  it('ignores a right-click inside the menu it opened', async () => {
+    renderTree();
+
+    fireEvent.contextMenu(screen.getByTestId('folder-tree-node-5'), { clientX: 10, clientY: 10 });
+    const item = await screen.findByRole('menuitem', { name: 'Delete folder' });
+
+    // The menu is portaled, but still bubbles through the row in the React tree.
+    // `true` means nothing called `preventDefault`.
+    expect(fireEvent.contextMenu(item, { clientX: 50, clientY: 50 })).toBe(true);
+    expect(screen.getAllByRole('menu')).toHaveLength(1);
+  });
+
+  it('gives focus back to the row when its right-click menu is closed with Escape', async () => {
+    const { user } = renderTree();
+    const row = screen.getByTestId('folder-tree-node-5');
+
+    fireEvent.contextMenu(row, { clientX: 10, clientY: 10 });
+    expect(await screen.findByRole('menu')).toBeInTheDocument();
+
+    await user.keyboard('{Escape}');
+
+    await waitFor(() => expect(screen.queryByRole('menu')).not.toBeInTheDocument());
+    await waitFor(() => expect(row).toHaveFocus());
   });
 
   it('renders the top-level folder rows', () => {

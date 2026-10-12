@@ -77,22 +77,30 @@ describeOnCondition(edition === 'EE')('Audit logs', () => {
     await builder.cleanup();
   });
 
-  test('Ignores non-audit-log events emitted to the eventHub', async () => {
-    const res = await rq({
-      method: 'POST',
-      url: '/admin/webhooks',
-      body: {
-        name: 'test',
-        url: 'https://strapi.io',
-        headers: {},
-        events: [],
-      },
+  test('Ignores admin requests that emit no audited event (webhook trigger)', async () => {
+    // Created through the store so that only the trigger request is under test.
+    const webhook = await strapi.get('webhookStore').createWebhook({
+      name: 'test',
+      url: 'https://example.com/hook',
+      headers: {},
+      events: [],
     });
+    // No network: the delivery itself is not what is under test.
+    const run = jest
+      .spyOn(strapi.get('webhookRunner'), 'run')
+      .mockResolvedValue({ statusCode: 200, message: 'ok' });
 
-    const { body } = await rq({ method: 'GET', url: '/admin/audit-logs' });
+    try {
+      const res = await rq({ method: 'POST', url: `/admin/webhooks/${webhook.id}/trigger` });
 
-    expect(res.statusCode).toBe(201);
-    expect(body.results.length).toBe(3);
+      const { body } = await rq({ method: 'GET', url: '/admin/audit-logs' });
+
+      expect(res.statusCode).toBe(200);
+      expect(run).toHaveBeenCalledTimes(1);
+      expect(body.results.length).toBe(3);
+    } finally {
+      run.mockRestore();
+    }
   });
 
   test('Ignores content-api requests', async () => {

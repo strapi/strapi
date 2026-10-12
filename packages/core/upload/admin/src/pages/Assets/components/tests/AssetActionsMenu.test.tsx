@@ -10,12 +10,6 @@ const mockToggleNotification = jest.fn();
 const mockCopy = jest.fn();
 const mockDeselect = jest.fn();
 const mockDownloadFile = jest.fn();
-const mockAIAvailability = jest.fn(() => true);
-
-jest.mock('@strapi/admin/strapi-admin/ee', () => ({
-  ...jest.requireActual('@strapi/admin/strapi-admin/ee'),
-  useAIAvailability: () => mockAIAvailability(),
-}));
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
@@ -60,6 +54,21 @@ const asset = {
 // fixture folders rather than filtering its own parent out.
 const dragData: DragFileData = { kind: 'file', id: 5, name: 'photo.png', folderId: null };
 
+const mockSettings = (aiMetadataAvailable: boolean) =>
+  server.use(
+    http.get('/upload/settings', () =>
+      HttpResponse.json({
+        data: {
+          sizeOptimization: true,
+          responsiveDimensions: true,
+          autoOrientation: true,
+          aiMetadata: true,
+          aiMetadataAvailable,
+        },
+      })
+    )
+  );
+
 const setup = (props: Partial<React.ComponentProps<typeof AssetActionsMenu>> = {}) =>
   render(<AssetActionsMenu asset={asset} dragData={dragData} {...props} />);
 
@@ -72,7 +81,6 @@ describe('AssetActionsMenu', () => {
     jest.clearAllMocks();
     mockCopy.mockResolvedValue(true);
     mockDownloadFile.mockResolvedValue(undefined);
-    mockAIAvailability.mockReturnValue(true);
   });
 
   // Radix's default `modal` menu marks the rest of the document `aria-hidden`
@@ -371,10 +379,10 @@ describe('AssetActionsMenu', () => {
     });
 
     // `GET /upload/settings` returns the stored `aiMetadata` toggle regardless
-    // of licensing, and it defaults to `true` — so without the EE availability
-    // gate the dialog promised AI metadata on plans that never generate it.
-    it('does not promise AI metadata when the license has no AI, despite the setting being on', async () => {
-      mockAIAvailability.mockReturnValue(false);
+    // of licensing, and it defaults to `true` — so without the provider gate the
+    // dialog promised AI metadata on plans that never generate it.
+    it('does not promise AI metadata when no provider is registered, despite the setting being on', async () => {
+      mockSettings(false);
       const { user } = setup();
 
       await openMenu(user);

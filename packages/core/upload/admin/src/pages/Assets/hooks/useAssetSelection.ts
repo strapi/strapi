@@ -47,6 +47,11 @@ export interface AssetSelection {
   selectRange: (orderedKeys: ItemKey[], targetKey: ItemKey) => void;
   /** Header checkbox — selects every rendered item (folders and assets). */
   selectAll: (orderedKeys: ItemKey[]) => void;
+  /**
+   * Replaces the selection with this one key, as a right-click on an unselected
+   * item does: what the menu then acts on is what the user can see is selected.
+   */
+  selectOnly: (key: ItemKey) => void;
   /** Row-level "..." menu — drops one key when its item leaves the list (move, delete). */
   deselect: (key: ItemKey) => void;
   /** Close button / folder navigation / list-identity changes. */
@@ -101,6 +106,14 @@ export const AssetSelectionProvider = ({
     [disabled]
   );
 
+  const selectOnly = useCallback(
+    (key: ItemKey) => {
+      if (disabled) return;
+      setState(selectAllState([key]));
+    },
+    [disabled]
+  );
+
   // No `disabled` guard, like `clear`: this only ever shrinks the selection, and a
   // disabled provider has nothing in it (every additive path is guarded).
   const deselect = useCallback((key: ItemKey) => setState((prev) => deselectState(prev, key)), []);
@@ -126,6 +139,7 @@ export const AssetSelectionProvider = ({
       toggle,
       selectRange,
       selectAll,
+      selectOnly,
       deselect,
       clear,
     }),
@@ -138,6 +152,7 @@ export const AssetSelectionProvider = ({
       toggle,
       selectRange,
       selectAll,
+      selectOnly,
       deselect,
       clear,
     ]

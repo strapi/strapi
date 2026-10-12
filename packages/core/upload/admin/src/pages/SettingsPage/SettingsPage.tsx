@@ -7,7 +7,6 @@ import {
   Layouts,
   ConfirmDialog,
 } from '@strapi/admin/strapi-admin';
-import { useAIAvailability } from '@strapi/admin/strapi-admin/ee';
 import {
   Box,
   Button,
@@ -31,8 +30,10 @@ import { AIMetadataJob } from '../../../../shared/contracts/ai-metadata-jobs';
 import { GetAIMetadataPendingCount, CreateAIMetadataJob } from '../../../../shared/contracts/files';
 import { UpdateSettings } from '../../../../shared/contracts/settings';
 import { PERMISSIONS } from '../../constants';
+import { useTracking } from '../../hooks/useTracking';
+import { useAIMetadataAvailability } from '../../legacy/hooks/useAIMetadataAvailability';
 import { useSettings } from '../../legacy/hooks/useSettings';
-import { useTracking } from '../../legacy/hooks/useTracking';
+import { useGetUploadSettingsQuery } from '../../services/settings';
 import { getTranslationKey } from '../../utils/translations';
 
 import { init } from './init';
@@ -157,11 +158,14 @@ export const SettingsPage = () => {
   const { put, post, get } = useFetchClient();
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = React.useState(false);
   const { trackUsage } = useTracking();
+  // Events read this cache. Saving must refresh it, or the next event still
+  // reports the value from before the save.
+  const { refetch: refetchUploadSettings } = useGetUploadSettingsQuery();
 
   const [{ initialData, modifiedData }, dispatch] = React.useReducer(reducer, initialState, init);
 
   const { data, isLoading, refetch } = useSettings();
-  const isAIAvailable = useAIAvailability();
+  const isAIAvailable = useAIMetadataAvailability();
 
   const { data: imageCountResponse, isLoading: isLoadingImagesWithoutMetadataCount } = useQuery<
     GetAIMetadataPendingCount.Response['data'],
@@ -203,6 +207,10 @@ export const SettingsPage = () => {
         '/upload/settings',
         body
       );
+
+      // Refresh before the form's own refetch reveals actions (such as
+      // retroactive generation) that emit a tracking event.
+      await refetchUploadSettings();
 
       return data;
     },

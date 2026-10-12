@@ -1,5 +1,5 @@
 import type { ReadStream } from 'node:fs';
-import { getOr } from 'lodash/fp';
+import { get } from 'lodash';
 import {
   S3Client,
   GetObjectCommand,
@@ -592,7 +592,7 @@ export default {
             Key: fileKey,
           }),
           {
-            expiresIn: getOr(15 * 60, ['params', 'signedUrlExpires'], config),
+            expiresIn: get(config, ['params', 'signedUrlExpires'], 15 * 60),
           }
         );
 
