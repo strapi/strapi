@@ -310,6 +310,108 @@ describe('transactions', () => {
     });
   });
 
+  describe('using a savepoint', () => {
+    const setKey = (key) =>
+      strapi.db.queryBuilder('strapi::core-store').update({ key }).where({ id: 1 }).execute();
+
+    const getKey = async () => {
+      const [row] = await strapi.db
+        .queryBuilder('strapi::core-store')
+        .select(['key'])
+        .where({ id: 1 })
+        .execute();
+
+      return row.key;
+    };
+
+    test('a failed savepoint rolls back only its own writes', async () => {
+      await strapi.db.transaction(async () => {
+        await setKey('before savepoint');
+
+        await expect(
+          strapi.db.savepoint(async () => {
+            await setKey('in savepoint');
+            throw new Error('test');
+          })
+        ).rejects.toThrow('test');
+
+        expect(await getKey()).toEqual('before savepoint');
+      });
+
+      expect(await getKey()).toEqual('before savepoint');
+    });
+
+    test('a released savepoint commits with the transaction', async () => {
+      const result = await strapi.db.transaction(() =>
+        strapi.db.savepoint(async () => {
+          await setKey('in savepoint');
+          return 'result';
+        })
+      );
+
+      expect(result).toEqual('result');
+      expect(await getKey()).toEqual('in savepoint');
+    });
+
+    test('the transaction stays usable after a database error in a savepoint', async () => {
+      await strapi.db.transaction(async () => {
+        await expect(
+          strapi.db.savepoint(async () => {
+            // The current transaction, here the savepoint's
+            const { get } = await strapi.db.transaction();
+            await strapi.db.connection
+              .raw('SELECT * FROM table_that_does_not_exist')
+              .transacting(get());
+          })
+          // Matched on the message: the driver's error class can come from another realm than
+          // the test's, which `toThrow` doesn't recognize as an error
+        ).rejects.toMatchObject({ message: expect.stringContaining('table_that_does_not_exist') });
+
+        // On Postgres, the error would otherwise abort the transaction
+        await setKey('after error');
+      });
+
+      expect(await getKey()).toEqual('after error');
+    });
+
+    test('commit callbacks of a failed savepoint are dropped, those of a released one kept', async () => {
+      const committed = [];
+      const rolledBack = [];
+
+      await strapi.db.transaction(async () => {
+        await strapi.db
+          .savepoint(() =>
+            strapi.db.transaction(({ onCommit, onRollback }) => {
+              onCommit(() => committed.push('failed'));
+              onRollback(() => rolledBack.push('failed'));
+              throw new Error('test');
+            })
+          )
+          .catch(() => {});
+
+        // Rolled back at the savepoint, not at the end of the transaction
+        expect(rolledBack).toEqual(['failed']);
+
+        await strapi.db.savepoint(() =>
+          strapi.db.transaction(({ onCommit }) => {
+            onCommit(() => committed.push('released'));
+          })
+        );
+
+        // Released callbacks wait for the transaction's commit
+        expect(committed).toEqual([]);
+      });
+
+      expect(committed).toEqual(['released']);
+    });
+
+    test('cannot be used outside a transaction', async () => {
+      await expect(strapi.db.savepoint(() => {})).rejects.toThrow(
+        'A savepoint can only be created inside a transaction'
+      );
+    });
+  });
+
   describe('using a transaction object', () => {
     test('commits successfully', async () => {
       const trx = await strapi.db.transaction();

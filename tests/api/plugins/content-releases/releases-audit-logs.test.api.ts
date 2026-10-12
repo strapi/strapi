@@ -2,6 +2,7 @@ import { describeOnCondition, createUtils } from 'api-tests/utils';
 import { createTestBuilder } from 'api-tests/builder';
 import { createStrapiInstance } from 'api-tests/strapi';
 import { createAuthRequest } from 'api-tests/request';
+import { errors } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
 /**
@@ -41,6 +42,8 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
   let rq: Awaited<ReturnType<typeof createAuthRequest>>;
   let utils: ReturnType<typeof createUtils>;
   let actingAdminId: number;
+  // Publishing one of these documents throws, through a test-only document middleware
+  const documentIdsFailingToPublish = new Set<string>();
 
   const actingAdmin = {
     email: 'releases-audit-actor@test.com',
@@ -146,6 +149,14 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
     actingAdminId = actor.id;
 
     rq = await createAuthRequest({ strapi, userInfo: actingAdmin });
+
+    strapi.documents.use((ctx, next) => {
+      if (ctx.action === 'publish' && documentIdsFailingToPublish.has(ctx.params?.documentId)) {
+        throw new errors.ValidationError('Test-only publish failure');
+      }
+
+      return next();
+    });
   });
 
   afterAll(async () => {
@@ -164,6 +175,7 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
     await strapi.db.query('plugin::content-releases.release-action').deleteMany();
     await strapi.db.query('plugin::content-releases.release').deleteMany();
     await clearAuditLogs();
+    documentIdsFailingToPublish.clear();
   });
 
   describe('release', () => {
@@ -215,14 +227,14 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
         body: {
           name: 'Condition change',
           timezone: 'Europe/Paris',
-          releaseCondition: 'partial',
+          releaseCondition: 'allow_partial',
         },
       });
       expect(res.statusCode).toBe(200);
 
       const log = await expectExactlyOneLog('release.update');
       expect(log.payload.details.changes).toEqual({
-        releaseCondition: { before: 'all_or_nothing', after: 'partial' },
+        releaseCondition: { before: 'all_or_nothing', after: 'allow_partial' },
       });
     });
 
@@ -352,9 +364,16 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
 
     it('records a failed trigger with only the error name', async () => {
       const release = await createRelease({ name: 'Fails to publish', timezone: 'Europe/Paris' });
+      const entry = await createEntry('fails-to-publish');
+      await rq({
+        url: `/content-releases/${release.id}/actions`,
+        method: 'POST',
+        body: releaseAction(entry.documentId),
+      });
+      documentIdsFailingToPublish.add(entry.documentId);
       await clearAuditLogs();
 
-      // Publishing a release with no entries fails inside the publish service
+      // The only entry fails to publish, so the run fails inside the publish service
       const res = await rq({ url: `/content-releases/${release.id}/publish`, method: 'POST' });
       expect(res.statusCode).toBe(400);
 
@@ -365,10 +384,41 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
         actor: actingActor(),
         resource: { type: 'release', id: release.id, name: 'Fails to publish' },
       });
-      // The error's name and nothing else from it: no message, no driver properties,
-      // and no entry counts, since a failed run is not atomic
+      // The error's name and nothing else from it: no message, no driver properties, and no
+      // entry counts, since a failed run released nothing
       expect(log.payload.details).toEqual({ reason: 'ValidationError' });
       expect(log.user.id).toBe(actingAdminId);
+    });
+
+    it('records an allow_partial run that left an entry out as partial, with what it released', async () => {
+      const release = await createRelease({
+        name: 'Partly published',
+        timezone: 'Europe/Paris',
+        releaseCondition: 'allow_partial',
+      });
+      const published = await createEntry('goes-out');
+      const failing = await createEntry('left-out');
+      for (const entry of [published, failing]) {
+        await rq({
+          url: `/content-releases/${release.id}/actions`,
+          method: 'POST',
+          body: releaseAction(entry.documentId),
+        });
+      }
+      documentIdsFailingToPublish.add(failing.documentId);
+      await clearAuditLogs();
+
+      const res = await rq({ url: `/content-releases/${release.id}/publish`, method: 'POST' });
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.status).toBe('partial');
+
+      const log = await expectExactlyOneLog('release.trigger');
+      expect(log.payload).toMatchObject({
+        outcome: 'partial',
+        resource: { type: 'release', id: release.id, name: 'Partly published' },
+      });
+      // What the run released, not every entry of the release
+      expect(log.payload.details).toEqual({ published: 1, unpublished: 0, failed: 1 });
     });
 
     it('records nothing for a publish attempt on an already published release', async () => {
@@ -465,12 +515,19 @@ describeOnCondition(edition === 'EE')('Releases in audit logs (api)', () => {
     });
 
     it('records a failed scheduled publish with a system actor', async () => {
-      // An empty release can be scheduled; publishing it fails inside the service
       const release = await createRelease({
         name: 'Scheduled to fail',
         timezone: 'Europe/Paris',
         scheduledAt: inFuture(60),
       });
+      const entry = await createEntry('scheduled-to-fail');
+      await rq({
+        url: `/content-releases/${release.id}/actions`,
+        method: 'POST',
+        body: releaseAction(entry.documentId),
+      });
+      // The only entry fails to publish, so the run fails inside the publish service
+      documentIdsFailingToPublish.add(entry.documentId);
       await clearAuditLogs();
 
       await expect(runScheduledJob(release.id)).rejects.toThrow();

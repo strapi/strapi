@@ -217,6 +217,16 @@ class Database {
     });
   }
 
+  /**
+   * Runs `cb` in a savepoint of the current transaction, so a failure undoes only `cb`'s writes.
+   * If `cb` throws, its writes are rolled back, the `onCommit` callbacks registered in it are
+   * dropped, and the error is rethrown; the transaction stays usable, on Postgres also after a
+   * database error. Throws if called outside a transaction.
+   */
+  savepoint<T>(cb: () => Promise<T> | T): Promise<T> {
+    return transactionCtx.savepoint(cb);
+  }
+
   getSchemaName(): string | undefined {
     return this.connection.client.connectionSettings.schema;
   }

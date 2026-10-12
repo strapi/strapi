@@ -35,7 +35,9 @@ const createSchedulingService = ({ strapi }: { strapi: Core.Strapi }) => {
             const releaseService = getService('release', { strapi });
 
             // The system context attributes this run and its entry.publish/unpublish events to the scheduler.
-            await runAsSystem({ strapi }, 'scheduler', () => releaseService.publish(releaseId));
+            await runAsSystem({ strapi }, 'scheduler', () =>
+              releaseService.publish(releaseId, { trigger: 'scheduled' })
+            );
           },
           options: scheduleDate,
         },
