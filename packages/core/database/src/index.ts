@@ -238,7 +238,21 @@ class Database {
   getConnection(tableName?: string): Knex | Knex.QueryBuilder {
     const schema = this.getSchemaName();
     const connection = tableName ? this.connection(tableName) : this.connection;
-    return schema ? connection.withSchema(schema) : connection;
+
+    if (!schema) {
+      return connection;
+    }
+
+    // knex.withSchema() returns a query builder. The no-arg connection is also
+    // used as a schema inspector (`db.getConnection().schema.hasTable`).
+    const query = connection.withSchema(schema);
+    if (!tableName) {
+      Object.defineProperty(query, 'schema', {
+        value: this.connection.schema.withSchema(schema),
+      });
+    }
+
+    return query;
   }
 
   // Returns basic info about the database connection
