@@ -567,9 +567,11 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
             release: releaseId,
           },
         }),
+        // Unpublish actions are always publishable, whatever validity an edit stored on them
         releaseActionService.countActions({
           filters: {
             release: releaseId,
+            type: 'publish',
             isEntryValid: false,
           },
         }),

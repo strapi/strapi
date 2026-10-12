@@ -1104,6 +1104,38 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
 
       expect((await getRelease(release.id)).status).toBe('ready');
     });
+
+    test('an unpublish entry whose draft became invalid does not block the release', async () => {
+      const toUnpublishId = await createProduct({ valid: true });
+      await strapi.documents(productUID).publish({ documentId: toUnpublishId });
+      const release = await createReleaseWithActions('all_or_nothing', [
+        { documentId: await createProduct({ valid: true }) },
+        { documentId: toUnpublishId, type: 'unpublish' },
+      ]);
+
+      // Editing an entry revalidates every action on it, unpublish ones included
+      await strapi
+        .documents(productUID)
+        .update({ documentId: toUnpublishId, data: { description: null } });
+      const unpublishAction = { release: { id: release.id }, entryDocumentId: toUnpublishId };
+      let action;
+      for (let attempt = 0; attempt < 20 && action?.isEntryValid !== false; attempt += 1) {
+        action = await strapi.db
+          .query('plugin::content-releases.release-action')
+          .findOne({ where: unpublishAction });
+      }
+      expect(action.isEntryValid).toBe(false);
+      // The edit recalculates the status without awaiting it: recalculate it here, settled
+      await strapi.plugin('content-releases').service('release').updateReleaseStatus(release.id);
+
+      expect((await getRelease(release.id)).status).toBe('ready');
+
+      const res = await publishManually(release.id);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.status).toBe('done');
+      expect(await hasPublishedVersion(productUID, toUnpublishId)).toBe(false);
+    });
   });
 
   describe('Publish Release with a release condition', () => {

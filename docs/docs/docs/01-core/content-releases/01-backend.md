@@ -208,7 +208,7 @@ packages/core/content-releases/server/src/services/scheduling.ts
 
 ### Release status update triggers:
 
-Each release has a `releaseCondition`: `all_or_nothing` (the default, and the value given to releases created before the field existed) or `allow_partial`. A publish entry is publishable when its draft passes publish validation and, if its content type's review workflow has a stage required to publish, the entry is at that stage. Without review workflows, only validation applies. Unpublish entries are always publishable. Each release action stores whether its entry was publishable when last checked (`isEntryValid`), and the status is derived from those values:
+Each release has a `releaseCondition`: `all_or_nothing` (the default, and the value given to releases created before the field existed) or `allow_partial`. A publish entry is publishable when its draft passes publish validation and, if its content type's review workflow has a stage required to publish, the entry is at that stage. Without review workflows, only validation applies. Unpublish entries are always publishable. Each release action stores whether its entry was publishable when last checked (`isEntryValid`), and the status is derived from the values of the publish actions. Editing an entry also rewrites `isEntryValid` on its unpublish actions, which the status ignores:
 
 - **Empty**: the release has no entries.
 - **Blocked**: publishing now would release nothing. With `all_or_nothing`, at least one entry is not publishable. With `allow_partial`, no entry is publishable.
