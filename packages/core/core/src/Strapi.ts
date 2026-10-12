@@ -586,7 +586,9 @@ class Strapi extends Container implements Core.Strapi {
     this.isLoaded = false;
     // Callers such as API tests still hold this object. Release the service
     // map or every booted app stays in memory until the process exits.
+    // In-flight audit listeners still log after the event hub is cleared.
     this.release();
+    this.add('logger', logger);
     logger.info('Strapi has been shut down');
   }
 
