@@ -18,7 +18,10 @@ api:
   - 'tests/scripts/run-api-tests.js'
   - 'tests/scripts/generate-test-app.js'
   - 'tests/scripts/database-config.js'
+  - 'tests/scripts/database-assurance.js'
+  - 'tests/scripts/verify-api-database-client.js'
   - 'tests/scripts/__tests__/resolve-database-config.test.js'
+  - 'tests/scripts/__tests__/database-assurance.test.js'
   - '.github/actions/run-api-tests/**'
   - 'tests/api/**'
 e2e:
