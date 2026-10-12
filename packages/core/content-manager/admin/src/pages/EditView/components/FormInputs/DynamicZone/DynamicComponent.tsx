@@ -30,7 +30,8 @@ import { InputRenderer, type InputRendererProps } from '../../InputRenderer';
 import type { ComponentPickerProps } from './ComponentPicker';
 
 interface DynamicComponentProps
-  extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel'>,
+  extends
+    Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel'>,
     Pick<ComponentPickerProps, 'dynamicComponentsByCategory'> {
   componentUid?: string;
   disabled?: boolean;
