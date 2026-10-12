@@ -715,6 +715,24 @@ describe('Filters', () => {
       expect(getAppliedFilterEntries()).toEqual(['filters[$and][0][isArchived][$eq]=true']);
     });
 
+    it('should not apply a filter after clearing the toggle', async () => {
+      const { user } = renderBoolean();
+
+      const toggle = await openWithIsArchived(user);
+      fireEvent.click(toggle);
+      fireEvent.click(await screen.findByRole('button', { name: 'Clear' }));
+      fireEvent.click(await screen.findByRole('button', { name: 'Add filter' }));
+
+      // the cleared submit is a no-op, so a follow-up submit is the only filter applied
+      await waitFor(() => expect(screen.getByRole('button', { name: 'Add filter' })).toBeEnabled());
+      fireEvent.click(toggle);
+      await waitFor(() => expect(toggle).toBeChecked());
+      fireEvent.click(screen.getByRole('button', { name: 'Add filter' }));
+
+      await screen.findByText('Is Archived $eq true');
+      expect(getAppliedFilterEntries()).toEqual(['filters[$and][0][isArchived][$eq]=true']);
+    });
+
     it('should open the edit form with the toggle matching the applied value', async () => {
       const { user } = renderBoolean('?filters[$and][0][isArchived][$eq]=false');
 

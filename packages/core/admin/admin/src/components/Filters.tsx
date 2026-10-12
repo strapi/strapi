@@ -194,10 +194,11 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
     const type = fieldOptions.mainField?.type ?? fieldOptions.type;
 
     /**
-     * A boolean toggle starts unset but renders as `false`, and `false` itself is falsy,
+     * An untouched boolean toggle is `undefined` but renders as `false`, and `false` itself is falsy,
      * so it has to be stringified before the emptiness check below.
+     * A cleared toggle (`null`) stays empty.
      */
-    const rawValue = data.value ?? (type === 'boolean' ? false : '');
+    const rawValue = data.value === undefined && type === 'boolean' ? false : (data.value ?? '');
     const value = FILTERS_WITH_NO_VALUE.includes(data.filter) ? 'true' : String(rawValue);
 
     if (!value) {
@@ -205,7 +206,7 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
     }
 
     if (onChange) {
-      onChange(data);
+      onChange({ ...data, value: rawValue });
     }
 
     /**
@@ -481,17 +482,21 @@ const AttributeTag = ({
 
   const type = mainField?.type ? mainField.type : filter.type;
 
+  const getEditValue = () => {
+    if (FILTERS_WITH_NO_VALUE.includes(operator)) {
+      return undefined;
+    }
+
+    // the query holds `'true'`/`'false'`, the toggle needs a real boolean
+    return type === 'boolean' ? value === 'true' : value;
+  };
+
   const handleEdit = () => {
     setEditingFilter({
       name,
       filter: operator,
       index,
-      value: FILTERS_WITH_NO_VALUE.includes(operator)
-        ? undefined
-        : // the query holds `'true'`/`'false'`, the toggle needs a real boolean
-          type === 'boolean'
-          ? value === 'true'
-          : value,
+      value: getEditValue(),
     });
     setOpen(true);
   };
