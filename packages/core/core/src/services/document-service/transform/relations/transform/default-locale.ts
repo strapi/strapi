@@ -15,7 +15,7 @@ const setDefaultLocaleToRelations = (data: Record<string, any>, uid: UID.Schema)
   }
 
   // Store the default locale to avoid multiple calls
-  let defaultLocale: string;
+  let defaultLocale: string | null = null;
 
   /**
    * Traverse the entity input data and set the default locale to relations

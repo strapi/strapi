@@ -1,20 +1,7 @@
+import { objects, providerFactory } from '@strapi/utils';
+import { pick, reject, merge, omit, get, curry } from 'lodash';
 import type { Utils } from '@strapi/types';
 
-import { providerFactory } from '@strapi/utils';
-import {
-  pipe,
-  set,
-  pick,
-  eq,
-  omit,
-  remove,
-  get,
-  uniq,
-  isArray,
-  map,
-  curry,
-  merge,
-} from 'lodash/fp';
 import { Permission } from '../../../../shared/contracts/shared';
 import { SanitizedPermission } from '../../../../shared/contracts/roles';
 
@@ -44,8 +31,8 @@ export const sanitizedPermissionFields = [
   'conditions',
 ] as const;
 
-export const sanitizePermissionFields: (p: Permission) => SanitizedPermission =
-  pick(sanitizedPermissionFields);
+export const sanitizePermissionFields: (p: Permission) => SanitizedPermission = (permission) =>
+  pick(permission, sanitizedPermissionFields);
 
 /**
  * Creates a permission with default values
@@ -66,10 +53,10 @@ const getDefaultPermission = () => ({
 export const addCondition = curry((condition: string, permission: Permission): Permission => {
   const { conditions } = permission;
   const newConditions = Array.isArray(conditions)
-    ? uniq(conditions.concat(condition))
+    ? [...new Set(conditions.concat(condition))]
     : [condition];
 
-  return set('conditions', newConditions, permission);
+  return { ...permission, conditions: newConditions };
 });
 
 /**
@@ -78,7 +65,10 @@ export const addCondition = curry((condition: string, permission: Permission): P
  * @param permission - The permission on which we want to remove the condition
  */
 export const removeCondition = curry((condition: string, permission: Permission): Permission => {
-  return set('conditions', remove(eq(condition), permission.conditions), permission);
+  return {
+    ...permission,
+    conditions: reject(permission.conditions, (value) => value === condition),
+  };
 });
 
 /**
@@ -88,7 +78,7 @@ export const removeCondition = curry((condition: string, permission: Permission)
  */
 export const getProperty = curry(
   (property: string, permission: Permission): Permission =>
-    get(`properties.${property}`, permission)
+    get(permission, `properties.${property}`)
 );
 
 /**
@@ -102,7 +92,7 @@ export const setProperty = (
   value: unknown,
   permission: Permission
 ): Permission => {
-  return set(`properties.${property}`, value, permission);
+  return objects.set(permission, `properties.${property}`, value);
 };
 
 /**
@@ -113,14 +103,14 @@ export const setProperty = (
 export const deleteProperty = <TProperty extends string>(
   property: TProperty,
   permission: Permission
-) => omit(`properties.${property}`, permission) as Omit<Permission, TProperty>;
+) => omit(permission, `properties.${property}` as string) as Omit<Permission, TProperty>;
 
 /**
  * Creates a new {@link Permission} object from raw attributes. Set default values for certain fields
  * @param  attributes
  */
 export const create = (attributes: CreatePermissionPayload) => {
-  return pipe(pick(permissionFields), merge(getDefaultPermission()))(attributes) as Permission;
+  return merge({}, getDefaultPermission(), pick(attributes, permissionFields)) as Permission;
 };
 
 /**
@@ -130,7 +120,7 @@ export const create = (attributes: CreatePermissionPayload) => {
  */
 export const sanitizeConditions = curry(
   (provider: Provider, permission: Permission): Permission => {
-    if (!isArray(permission.conditions)) {
+    if (!Array.isArray(permission.conditions)) {
       return permission;
     }
 
@@ -153,8 +143,8 @@ function toPermission<T extends CreatePermissionPayload>(payload: T): Permission
 function toPermission<T extends CreatePermissionPayload>(
   payload: T[] | T
 ): Permission[] | Permission {
-  if (isArray(payload)) {
-    return map((value) => create(value), payload);
+  if (Array.isArray(payload)) {
+    return Array.from(payload, (value) => create(value));
   }
 
   return create(payload);

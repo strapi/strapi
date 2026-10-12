@@ -37,6 +37,7 @@ import { COLLECTION_TYPES } from '../../../../../constants/collections';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { PERMISSIONS } from '../../../../../constants/plugin';
 import { DocumentRBAC, useDocumentRBAC } from '../../../../../features/DocumentRBAC';
+import { useContentTypeSchema } from '../../../../../hooks/useContentTypeSchema';
 import { useDebounce } from '../../../../../hooks/useDebounce';
 import { useDocument } from '../../../../../hooks/useDocument';
 import { type DocumentMeta, useDocumentContext } from '../../../../../hooks/useDocumentContext';
@@ -226,7 +227,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           attribute.target === props.attribute.target
       ).length > 0;
 
-    const { data, isLoading, isFetching } = useGetRelationsQuery(
+    const { data, isLoading, isFetching, isError, refetch } = useGetRelationsQuery(
       {
         model,
         targetField,
@@ -245,7 +246,21 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
     );
 
     const handleLoadMore = () => {
-      setCurrentPage((prev) => prev + 1);
+      /**
+       * The relations cache is shared by every instance of this field that targets the same
+       * document (e.g. the edit view and the same document opened again inside the relation
+       * modal), and another instance mounting resets it to page 1. Request the page that follows
+       * the one actually held by the cache rather than `currentPage + 1`, otherwise the pages in
+       * between would never be loaded.
+       */
+      const nextPage = (data?.pagination?.page ?? currentPage) + 1;
+
+      if (nextPage === currentPage) {
+        // Our query args already point at that page, so changing state would not fetch it
+        refetch();
+      } else {
+        setCurrentPage(nextPage);
+      }
     };
 
     const field = useField<RelationsFormValue>(props.name);
@@ -415,6 +430,14 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           documentParams={currentDocumentMeta.params}
           mainField={props.mainField}
         />
+        {isError ? (
+          <Typography variant="pi" textColor="danger600">
+            {formatMessage({
+              id: 'anErrorOccurred',
+              defaultMessage: 'Whoops! Something went wrong. Please, try again.',
+            })}
+          </Typography>
+        ) : null}
       </Flex>
     );
   }
@@ -530,7 +553,7 @@ const RelationsInput = ({
   const targetModel = props.attribute.targetModel;
 
   const searchParamsDebounced = useDebounce(searchParams, 300);
-  const [searchForTrigger, { data, isLoading }] = useLazySearchRelationsQuery();
+  const [searchForTrigger, { data, isLoading, isError }] = useLazySearchRelationsQuery();
 
   /**
    * Because we're using a lazy query, we need to trigger the search
@@ -610,6 +633,7 @@ const RelationsInput = ({
        *
        */
       onChange(relation);
+      setSearchParams({ _q: '', page: 1 });
     },
     [data, formatMessage, onChange, toggleNotification]
   );
@@ -661,6 +685,7 @@ const RelationsInput = ({
           hasNextPage={hasNextPage}
           isLoadingPermissions={isLoadingPermissions}
           isLoadingSearchRelations={isLoading}
+          isSearchRelationsError={isError}
           handleChange={handleChange}
           setSearchParams={setSearchParams}
           data={data}
@@ -682,6 +707,7 @@ interface RelationModalWithContextProps
   relation: DocumentMeta;
   hasNextPage: boolean;
   isLoadingSearchRelations: boolean;
+  isSearchRelationsError: boolean;
   isLoadingPermissions: boolean;
   handleChange: (relationId?: string) => void;
   data?: FindAvailable.Response;
@@ -700,6 +726,7 @@ const RelationModalWithContext = ({
   placeholder,
   hasNextPage,
   isLoadingSearchRelations,
+  isSearchRelationsError,
   isLoadingPermissions,
   handleChange,
   mainField,
@@ -715,12 +742,15 @@ const RelationModalWithContext = ({
     defaultMessage: 'Untitled',
   });
   const canCreate = useDocumentRBAC('RelationModalWrapper', (state) => state.canCreate);
+  const { schema: targetSchema } = useContentTypeSchema(relation.model);
+  const isTargetSingleType = targetSchema?.kind === 'singleType';
   const fieldRef = useFocusInputField<HTMLInputElement>(name);
   const componentUID = useComponent('RelationsField', (state) => state.uid);
   const getParentFormValues = useForm('RelationModalWrapper', (state) => state.getValues);
   const getParentFormValuesWithCurrentRelation = () => {
     return setIn(getParentFormValues(), name, fieldValue);
   };
+  const setParentFormValue = useForm('RelationModalWrapper', (state) => state.onChange);
 
   const handleLoadMore = () => {
     if (!data || !data.pagination) {
@@ -744,7 +774,7 @@ const RelationModalWithContext = ({
       {({ dispatch }) => (
         <Combobox
           ref={fieldRef}
-          creatable="visible"
+          creatable={isTargetSingleType ? false : 'visible'}
           creatableDisabled={!canCreate}
           createMessage={() =>
             formatMessage({
@@ -753,7 +783,7 @@ const RelationModalWithContext = ({
             })
           }
           onCreateOption={() => {
-            if (canCreate) {
+            if (canCreate && !isTargetSingleType) {
               dispatch({
                 type: 'GO_TO_RELATION',
                 payload: {
@@ -762,6 +792,7 @@ const RelationModalWithContext = ({
                   fieldToConnect: name,
                   fieldToConnectUID: componentUID,
                   getParentFormValues: getParentFormValuesWithCurrentRelation,
+                  setParentFormValue,
                 },
               });
             }
@@ -778,14 +809,23 @@ const RelationModalWithContext = ({
           }
           hasMoreItems={hasNextPage}
           loading={isLoadingSearchRelations || isLoadingPermissions}
-          onOpenChange={() => {
-            handleSearch(textValue ?? '');
+          onOpenChange={(isOpen) => {
+            // Selecting an option closes the list while `textValue` still holds its label.
+            // Searching on close would omit that option and cache an empty result.
+            if (isOpen) {
+              handleSearch(textValue ?? '');
+            }
           }}
           noOptionsMessage={() =>
-            formatMessage({
-              id: getTranslation('relation.notAvailable'),
-              defaultMessage: 'No relations available',
-            })
+            isSearchRelationsError
+              ? formatMessage({
+                  id: 'anErrorOccurred',
+                  defaultMessage: 'Whoops! Something went wrong. Please, try again.',
+                })
+              : formatMessage({
+                  id: getTranslation('relation.notAvailable'),
+                  defaultMessage: 'No relations available',
+                })
           }
           loadingMessage={formatMessage({
             id: getTranslation('relation.isLoading'),

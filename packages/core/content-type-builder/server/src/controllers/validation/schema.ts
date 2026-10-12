@@ -1,10 +1,11 @@
 import * as z from 'zod/v4';
 import { strings, validateZodSchema, contentTypes } from '@strapi/utils';
 import type { Struct, UID } from '@strapi/types';
-import { isArray, isNil, isNull, isNumber, isObject, isUndefined, snakeCase } from 'lodash/fp';
+import { isNumber, isObject, snakeCase } from 'lodash';
 
 import { isReservedAttributeName, isReservedModelName } from '../../services/builder';
 import { coreUids, typeKinds, VALID_UID_TARGETS } from '../../services/constants';
+import { isConfigurable } from '../../utils/attributes';
 
 import {
   CATEGORY_NAME_REGEX,
@@ -13,6 +14,7 @@ import {
   KEBAB_BASE_REGEX,
   NAME_REGEX,
 } from './common';
+import { contentStructureFileSchema, type ContentStructureFileInput } from './content-structure';
 
 type SchemaMeta =
   | {
@@ -94,28 +96,29 @@ type ContentTypeSchemaAction = {
   action: 'create' | 'update' | 'delete';
   draftAndPublish?: boolean;
   uid?: UID.ContentType;
+  renames?: Array<{ oldName: string; newName: string }>;
   attributes?: Array<{ action: 'create' | 'update' | 'delete'; name: string }>;
 };
 
+// The payload carries the full attribute list and the saved schema is built from
+// it, so the names that will be written are the payload attributes that are not
+// deleted. The rename hops do not decide what is saved. The one exception is
+// non-configurable attributes: the builder keeps them from the current schema
+// whatever the payload says, so they are always part of the saved schema.
 const getEffectiveAttributeNames = (contentType: ContentTypeSchemaAction): string[] => {
-  if (contentType.action === 'create') {
-    return (contentType.attributes ?? [])
+  const names = new Set(
+    (contentType.attributes ?? [])
       .filter((attribute) => attribute.action !== 'delete')
-      .map((attribute) => attribute.name);
-  }
+      .map((attribute) => attribute.name)
+  );
 
-  if (contentType.action !== 'update' || !contentType.uid) {
-    return [];
-  }
+  if (contentType.action === 'update' && contentType.uid) {
+    const existingAttributes = strapi.contentTypes[contentType.uid]?.attributes ?? {};
 
-  const existingContentType = strapi.contentTypes[contentType.uid];
-  const names = new Set(existingContentType ? Object.keys(existingContentType.attributes) : []);
-
-  for (const attribute of contentType.attributes ?? []) {
-    if (attribute.action === 'delete') {
-      names.delete(attribute.name);
-    } else if (attribute.action === 'create') {
-      names.add(attribute.name);
+    for (const [name, attribute] of Object.entries(existingAttributes)) {
+      if (!isConfigurable(attribute)) {
+        names.add(name);
+      }
     }
   }
 
@@ -148,8 +151,8 @@ export const maxLengthGreaterThanMinLength: SuperRefinement<Record<string, unkno
   ctx
 ) => {
   if (
-    !isNil(value.maxLength) &&
-    !isNil(value.minLength) &&
+    value.maxLength != null &&
+    value.minLength != null &&
     isNumber(value.maxLength) &&
     isNumber(value.minLength)
   ) {
@@ -164,7 +167,7 @@ export const maxLengthGreaterThanMinLength: SuperRefinement<Record<string, unkno
 };
 
 export const maxGreaterThanMin: SuperRefinement<Record<string, unknown>> = (value, ctx) => {
-  if (!isNil(value.max) && !isNil(value.min) && isNumber(value.max) && isNumber(value.min)) {
+  if (value.max != null && value.min != null && isNumber(value.max) && isNumber(value.min)) {
     if (value.max < value.min) {
       ctx.addIssue({
         code: 'custom',
@@ -185,7 +188,7 @@ const checkUserTarget: SuperRefinement<{
     return;
   }
 
-  if (isUndefined(value.target) || isUndefined(value.relation)) {
+  if (value.target === undefined || value.relation === undefined) {
     return;
   }
 
@@ -193,7 +196,7 @@ const checkUserTarget: SuperRefinement<{
 
   if (
     target === coreUids.STRAPI_USER &&
-    (!STRAPI_USER_RELATIONS.includes(relation) || !isUndefined(targetAttribute))
+    (!STRAPI_USER_RELATIONS.includes(relation) || targetAttribute !== undefined)
   ) {
     ctx.addIssue({
       code: 'custom',
@@ -208,7 +211,7 @@ const uidRefinement: SuperRefinement<{
   default?: unknown;
   targetField?: string | null;
 }> = (value, ctx) => {
-  if (!isNil(value.targetField) && !isNil(value.default)) {
+  if (value.targetField != null && value.default != null) {
     ctx.addIssue({
       code: 'custom',
       message: 'Cannot define a default UID if the targetField is set',
@@ -222,7 +225,7 @@ const enumRefinement: SuperRefinement<{
   default?: unknown;
   enum?: string[];
 }> = (value, ctx) => {
-  if (value.type === 'enumeration' && !isNil(value.default) && !isNil(value.enum)) {
+  if (value.type === 'enumeration' && value.default != null && value.enum != null) {
     if (value.default === '' || !value.enum.some((v) => v === value.default)) {
       ctx.addIssue({
         code: 'custom',
@@ -418,7 +421,7 @@ const jsonSchema = basePropertiesSchema.extend({
         return true;
       }
 
-      if (isNumber(value) || isNull(value) || isObject(value) || isArray(value)) {
+      if (isNumber(value) || value === null || isObject(value) || Array.isArray(value)) {
         return true;
       }
 
@@ -669,6 +672,38 @@ const updateAttributeSchema = (meta: SchemaMeta) =>
     properties: attributePropertiesSchema(meta),
   });
 
+// Ordered list of attribute rename hops performed by the user for a given
+// content-type / component, used to generate a data-preserving rename migration.
+// The order is significant: the migration replays each hop verbatim.
+// Names end up in generated migration code, so they are held to the attribute
+// name rules. The new name is held to the same reserved-name rules as a newly
+// created attribute. The old name only has to be a name an attribute can
+// legally carry today: `status` is reserved only while draft and publish is
+// enabled, and renaming it away is exactly how a type gets to enable it.
+const renameHopNameSchema = z.string().min(1).max(64).regex(NAME_REGEX);
+
+const renameHopOldNameSchema = renameHopNameSchema.refine(
+  (value) => !contentTypes.isReservedAttributeName(value, { draftAndPublish: false }),
+  'Attribute name is reserved'
+);
+
+const renameHopNewNameSchema = renameHopNameSchema.refine(
+  (value) => !isReservedAttributeName(value),
+  'Attribute name is reserved'
+);
+
+const renamesSchema = z
+  .array(
+    z
+      .object({
+        oldName: renameHopOldNameSchema,
+        newName: renameHopNewNameSchema,
+      })
+      .refine((hop) => hop.oldName !== hop.newName, 'A rename must change the attribute name')
+  )
+  .max(200)
+  .optional();
+
 const deleteAttributeSchema = z.object({
   action: z.literal('delete'),
   name: z.string(),
@@ -708,6 +743,7 @@ const createComponentSchema = baseComponentSchema.extend({
 const updateComponentSchema = baseComponentSchema.extend({
   action: z.literal('update'),
   category: categorySchema.optional(),
+  renames: renamesSchema,
   attributes: z
     .array(
       z.discriminatedUnion('action', [
@@ -783,6 +819,7 @@ const createCollectionTypeSchema = baseCreateContentTypeSchema.extend({
 
 const baseUpdateContentTypeSchema = baseContentTypeSchema.extend({
   action: z.literal('update'),
+  renames: renamesSchema,
 });
 
 const updateSingleTypeSchema = baseUpdateContentTypeSchema.extend({
@@ -850,6 +887,7 @@ const schemaSchema = z.object({
     )
     .optional()
     .default([]),
+  contentStructure: contentStructureFileSchema.optional(),
 });
 
 type CreateComponentType = z.infer<typeof createComponentSchema>;
@@ -870,6 +908,7 @@ export type Schema = {
     | UpdateCollectionType
     | DeleteContentType
   >;
+  contentStructure?: ContentStructureFileInput;
 };
 
 const updateSchemaInput = z.object(

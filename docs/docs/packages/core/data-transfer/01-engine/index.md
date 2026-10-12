@@ -1,0 +1,639 @@
+---
+title: Transfer Engine
+description: Conceptual guide to the data transfer engine
+---
+
+The transfer engine manages the data transfer process by facilitating communication between a source provider and a destination provider.
+
+:::caution
+**Destructive operation**: Importing or transferring data **into a Strapi instance** (via the [local](../02-providers/04-local-strapi/02-destination.md) or [remote](../02-providers/05-remote-strapi/03-destination.md) Strapi destination providers) uses the **restore** strategy by default. After bootstrap, init, and the integrity check pass, the engine runs `beforeTransfer()` on the destination, which clears existing destination records and media matching the transfer scope before new data is written. Exporting to a file does not modify a Strapi instance.
+:::
+
+## Architecture Overview
+
+```mermaid
+flowchart LR
+    subgraph Ops["Stream Operations"]
+        direction LR
+
+        subgraph ReadOps["Read Operations"]
+            direction TB
+            SR[Schema Read]
+            SR --> ER[Entity Read]
+            ER --> AR[Asset Read]
+            AR --> LR[Link Read]
+            LR --> CR[Config Read]
+        end
+
+        subgraph Sources["Source Providers"]
+            direction TB
+            RSP[Remote Source Provider]
+            RSP --> LSP[Local Source Provider]
+            LSP --> FSP[File Source Provider]
+            style Sources fill:#f0f0ff,stroke:#d0d0ff
+        end
+
+        subgraph Engine["Transfer Engine"]
+            direction TB
+            TE[Transfer Engine]
+            TE --> TF[Transform Stream]
+            TF --> PT[Progress Tracker]
+            style Engine fill:#f0f0ff,stroke:#d0d0ff
+        end
+
+        subgraph Dests["Destination Providers"]
+            direction TB
+            RDP[Remote Destination Provider]
+            RDP --> LDP[Local Destination Provider]
+            LDP --> FDP[File Destination Provider]
+            style Dests fill:#f0f0ff,stroke:#d0d0ff
+        end
+
+        subgraph WriteOps["Write Operations"]
+            direction TB
+            SW[Schema Write]
+            SW --> EW[Entity Write]
+            EW --> AW[Asset Write]
+            AW --> LW[Link Write]
+            LW --> CW[Config Write]
+        end
+
+        ReadOps --> Sources
+        Sources --> Engine
+        Engine --> Dests
+        Dests --> WriteOps
+    end
+
+    %% Styling
+    classDef provider fill:#fff0f0,stroke:#d0d0ff,color:black
+    classDef engine fill:#fff0f0,stroke:#d0d0ff,color:black
+    classDef stream fill:#c8ffc8,stroke:#a0ffa0,color:black
+    classDef ops fill:#f8f8f8,stroke:#e8e8e8,color:black
+
+    class RSP,LSP,FSP,RDP,LDP,FDP provider
+    class TE,TF,PT engine
+    class SR,ER,AR,LR,CR,SW,EW,AW,LW,CW stream
+    class ReadOps,WriteOps ops
+    style Ops fill:#f8f8f8,stroke:#e8e8e8
+```
+
+## Code location
+
+`packages/core/data-transfer/src/engine/index.ts`
+
+## The transfer process
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant TE as Transfer Engine
+    participant SP as Source Provider
+    participant DP as Destination Provider
+    participant DH as Diff Handler
+
+    rect rgb(230, 245, 230)
+        Note over Client,DP: 1️⃣ Bootstrap & Initialize Phase
+        Client->>+TE: Start Transfer
+        TE->>SP: Bootstrap
+        Note right of SP: Connect to files,<br/>databases, etc.
+        TE->>DP: Bootstrap
+        Note right of DP: Setup connections,<br/>prepare storage
+        TE->>SP: Get Metadata
+        SP-->>TE: Source Metadata
+        TE->>DP: Get Metadata
+        DP-->>TE: Destination Metadata
+    end
+
+    rect rgb(230, 240, 250)
+        Note over Client,DP: 2️⃣ Integrity Check Phase
+        TE->>TE: Version Strategy Check
+        Note right of TE: Compare Strapi versions
+        alt Version Mismatch
+            TE->>Client: Version Validation Error
+        end
+        TE->>SP: Get Schemas
+        SP-->>TE: Source Schemas
+        TE->>DP: Get Schemas
+        DP-->>TE: Destination Schemas
+        TE->>TE: Schema Strategy Check
+        alt Schema Differences
+            TE->>+DH: onSchemaDiff
+            Note right of DH: Resolve schema<br/>differences
+            alt Resolved
+                DH-->>-TE: Continue
+            else Unresolved
+                DH-->>TE: Schema Validation Error
+            end
+        end
+    end
+
+    rect rgb(240, 230, 230)
+        Note over Client,DP: Before Transfer (Restore)
+        TE->>DP: beforeTransfer
+        Note right of DP: Clear destination data<br/>matching transfer scope
+    end
+
+    rect rgb(245, 235, 250)
+        Note over Client,DP: 3️⃣ Data Transfer Phase
+
+        Note over TE,DP: Stage 1: Schemas
+        TE->>SP: Create Schemas ReadStream
+        TE->>DP: Create Schemas WriteStream
+        SP-->>DP: Stream Schema Data
+
+        Note over TE,DP: Stage 2: Entities
+        TE->>SP: Create Entities ReadStream
+        TE->>DP: Create Entities WriteStream
+        SP-->>DP: Stream Entity Data
+
+        Note over TE,DP: Stage 3: Assets
+        TE->>SP: Create Assets ReadStream
+        TE->>DP: Create Assets WriteStream
+        SP-->>DP: Stream Asset Files
+
+        Note over TE,DP: Stage 4: Links
+        TE->>SP: Create Links ReadStream
+        TE->>DP: Create Links WriteStream
+        SP-->>DP: Stream Relation Data
+
+        Note over TE,DP: Stage 5: Configuration
+        TE->>SP: Create Config ReadStream
+        TE->>DP: Create Config WriteStream
+        SP-->>DP: Stream Config Data
+    end
+
+    rect rgb(255, 240, 230)
+        Note over Client,DP: 4️⃣ Cleanup Phase
+        TE->>SP: Close
+        SP-->>TE: Closed
+        TE->>DP: Close
+        DP-->>TE: Closed
+        TE->>-Client: Transfer Complete
+    end
+```
+
+### Restore strategy and data loss
+
+When the destination is a Strapi instance and `strategy` is `restore` (the only supported conflict strategy today), the local destination provider prepares the instance during `beforeTransfer()` — **after** version and schema integrity checks pass and **before** any transfer stages run.
+
+In that step the provider may back up the local `uploads` folder, delete existing media files, and call `restore.deleteRecords()` to remove destination entities, internal models, and configuration records scoped by the `restore` options (see [Local Strapi destination restore options](../02-providers/04-local-strapi/02-destination.md)). The CLI builds those options from `--only` and `--exclude`; by default `admin::` content types are not cleared.
+
+This avoids ID conflicts during the `entities` and `links` stages, but it is **not a merge**: once the transfer completes successfully, pre-existing destination data in scope is replaced. If the transfer fails after `beforeTransfer()`, database changes run inside a transaction and may be rolled back; asset backup behavior is described in the destination provider documentation.
+
+**Supported workflow — content replace, keep destination config:** `--only content` (or `--exclude config`) replaces in-scope content on the destination while leaving core store and webhooks untouched. That is intentional restore scoping, not incremental sync. Incremental / merge sync remains a possible future product direction; designs should prefer opt-in strategies over changing restore defaults.
+
+### `--only` / `--exclude` deletion vs transfer matrix
+
+Stage presets:
+
+| Preset    | Stages          | Typical payload                                                  |
+| --------- | --------------- | ---------------------------------------------------------------- |
+| `content` | entities, links | Content-type rows (incl. media library DB records) and relations |
+| `files`   | assets          | Upload binaries under `public/uploads`                           |
+| `config`  | configuration   | Core store and webhooks                                          |
+
+Schemas always transfer with the CLI (independent of these presets).
+
+| Flags                     | Transferred                             | Pre-transfer wipe                                   | Destination preserved                                              |
+| ------------------------- | --------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------ |
+| (none)                    | content + files + config                | All transferable entities, assets, config           | Admin / ignored types only                                         |
+| `--only content`          | content                                 | User content types only (not core store / webhooks) | Config + upload binaries                                           |
+| `--only content,config`   | content + config                        | All transferable entities + config                  | Upload binaries                                                    |
+| `--exclude config`        | content + files                         | User content types only                             | Config (core store / webhooks)                                     |
+| `--exclude files`         | content + config                        | Entities + config (assets skipped)                  | Upload binaries; media library DB rows still transfer with content |
+| `--exclude media-library` | content (without upload types) + config | Entities except upload types + config               | Upload binaries + `plugin::upload.file` / `folder`                 |
+
+Content-type filters (`--only-content-types` / `--exclude-content-types`) further narrow the entities/links stream and restore wipe. When upload types are out of scope, the files stage is skipped automatically.
+
+When `--only` omits one or more of `content` / `files` / `config`, the CLI prints a dim clarity line listing stages that are not transferred so destination data for those stages is obviously preserved.
+
+A transfer starts by bootstrapping and initializing itself and the providers. That is the stage where providers attempt to make any necessary connections to files, databases, websockets, etc.
+
+After that, the integrity check between the source and destination is run, which validates the requirements set by the chosen schemaStrategy and versionStrategy.
+
+Note: Schema differences during this stage can be resolved programmatically by adding an `onSchemaDiff` handler. However, be aware that this interface is likely to change to a more generic engine handler (such as `engine.on('schemaDiff', handler)`) before this feature is stable.
+
+Source providers can then validate each included stage with `validateStage`. This validation runs before `beforeTransfer`, the point where a restore can begin changing destination data. Archive and directory imports use it to check that every included upload has valid matching sidecar metadata. An invalid archive therefore fails before destination content or files are changed. Asset validation is skipped when the files stage is excluded.
+
+Once the integrity and stage validation checks have passed, the transfer begins by opening streams from the source to the destination one stage at a time. The following is a list of the stages in the order they are run:
+
+1. schemas - content type schemas. Note: with all built-in Strapi destination providers, only the Strapi file provider makes use of this data
+2. entities - all entities (including components, dynamic zones, and media data but not media files) _without their relations_
+3. assets - the files from the /uploads folder
+4. links - the relations between entities
+5. configuration - the Strapi project configuration data
+
+### Media library vs upload binaries
+
+Strapi stores media in two parts that transfer on different stages:
+
+- **entities** stage — media library database records (`plugin::upload.file`, `plugin::upload.folder`) are transferred as part of `content`, along with other entities
+- **assets** stage — the binary files on disk under `public/uploads`
+
+The CLI `--exclude files` (or `--only` without `files`) skips only the **assets** stage. Media library records are still transferred unless you exclude them programmatically.
+
+To exclude upload content types from the entities stage, use entity and link transform filters:
+
+```typescript
+const UPLOAD_TYPES = ['plugin::upload.file', 'plugin::upload.folder'];
+
+const options = {
+  transforms: {
+    entities: [
+      {
+        filter(entity) {
+          return !UPLOAD_TYPES.includes(entity.type);
+        },
+      },
+    ],
+    links: [
+      {
+        filter(link) {
+          return !UPLOAD_TYPES.includes(link.left.type) && !UPLOAD_TYPES.includes(link.right.type);
+        },
+      },
+    ],
+  },
+};
+```
+
+When skipping the assets stage, sync upload binaries separately — for example with `rsync -avz public/uploads/ user@host:/path/to/strapi/public/uploads/`.
+
+Once all stages have been completed, the transfer waits for all providers to close and then emits a finish event and the transfer completes.
+
+If the transfer throws after bootstrap but before provider closing begins, the engine rolls back the destination provider and then closes both providers before rethrowing. This matters for programmatic callers: the local providers disable database lifecycles on bootstrap and only re-enable them on close, so a failure that skipped the close would leave the caller's Strapi instance with lifecycles off. Failures during rollback or failure-path cleanup are reported as warning diagnostics so they cannot mask the error that caused the transfer to fail.
+
+### Excluding content types from the CLI
+
+Export, import, and transfer accept `--exclude-content-types` and `--only-content-types` with comma-separated content type UIDs (for example `plugin::upload.file,plugin::upload.folder`). These filters apply to the **entities** and **links** stages:
+
+- Excluded types are omitted from the transfer stream and related links touching those types are skipped automatically.
+- On import/transfer restore, excluded types are not deleted on the destination before data is inserted.
+- `--only-content-types` limits transferred entities and links to the listed UIDs and scopes pre-transfer deletion to those types only.
+
+To skip upload binaries as well, combine with `--exclude files`, use `--exclude media-library`, or rely on automatic files-stage skipping when upload content types are out of scope. Programmatic transfers can use the same rules via entity and link transform filters.
+
+#### Excluding the media library (issue #25008)
+
+To omit **all** media — upload binaries and media library database records — use `--exclude media-library`. That preset expands to `--exclude files` plus both upload content types (`plugin::upload.file`, `plugin::upload.folder`).
+
+When upload content types are not in transfer scope (via `--exclude-content-types`, `--only-content-types`, or the `media-library` preset), the **files** stage is skipped automatically so export and import stay consistent.
+
+`--exclude files` alone only skips the **assets** stage; media library DB records still transfer unless you also exclude their content types (or use `media-library`).
+
+```bash
+# Export without media (matches the intent behind #25008)
+yarn strapi export --no-encrypt --exclude media-library
+
+# Import the same archive with matching filters
+yarn strapi import -f export_YYYYMMDDHHMMSS.tar --force --exclude media-library
+
+# Equivalent explicit form
+yarn strapi export --no-encrypt --exclude files \
+  --exclude-content-types plugin::upload.file,plugin::upload.folder
+```
+
+npm users: `npm run strapi export -- --no-encrypt --exclude media-library`
+
+## Setting up the transfer engine
+
+A transfer engine object is created by using `createTransferEngine`, which accepts a [source provider](../02-providers/01-source-providers.md), a [destination provider](../02-providers/02-destination-providers.md), and an options object.
+
+Note: By default, a transfer engine will transfer ALL data, including admin data, api tokens, etc. Transform filters must be used if you wish to exclude, as seen in the example below. A helper function called `isIgnoredContentType` is available from the CLI utils and is used by the import, export, and transfer commands to exclude content types that should not be transferred. All content types in the `admin::` namespace are automatically excluded by prefix, along with certain explicitly listed types (such as content releases). If you need to transfer admin data, you must implement your own engine transforms without this filter.
+
+```typescript
+const engine = createTransferEngine(source, destination, options);
+```
+
+### Engine Options
+
+An example using every available option:
+
+```typescript
+const options = {
+  versionStrategy: 'ignore', // see versionStragy documentation
+  schemaStrategy: 'strict', // see schemaStragey documentation
+  exclude: [], // exclude these classifications of data; see CLI documentation of `--exclude` for list
+  only: [], // transfer only these classifications of data; see CLI documentation of `--only` for list
+  throttle: 0, // add a delay of this many milliseconds between each item transferred
+
+  // the keys of `transforms` are the stage names for which they are run
+  transforms: {
+    links: [
+      {
+        // exclude all relations to ignored content types
+        filter(link) {
+          return !isIgnoredContentType(link.left.type) && !isIgnoredContentType(link.right.type);
+        },
+      },
+      // Note: map exists for links but is not recommended
+    ],
+    entities: [
+      {
+        // exclude all ignored content types (admin:: prefix and explicit list)
+        filter(entity) {
+          return !isIgnoredContentType(entity.type);
+        },
+      },
+      {
+        map(entity) {
+          // remove somePrivateField from privateThing entities
+          if (entity.type === 'api::privateThing.privateThing') {
+            entity.somePrivateField = undefined;
+          }
+
+          return entity;
+        },
+      },
+    ],
+  },
+};
+```
+
+#### versionStrategy
+
+The following `versionStrategy` values may be used:
+
+`'ignore'` - allow transfer between any versions of Strapi
+`'exact'` - require an exact version match (including tags such as -alpha and -beta)
+`'major'` - require only the semver major version to match (but allow minor, patch, and tag to differ)
+`'minor'` - require only the semver major and minor versions to match (but allow patch to differ)
+`'patch'` - require only the semver major, minor, and patch version to match (but allow tag differences such as -alpha and -beta)
+
+The default `versionStrategy` used when one is not provided is `'ignore'`.
+
+#### schemaStrategy
+
+The follow `schemaStrategy` values may be used:
+
+`'ignore'` - bypass schema validation (transfer will attempt to run but throw errors on incompatible data type inserts)
+`'strict'` - disallow mismatches that are expected to cause errors in the transfer, but allow certain non-data fields in the schema to differ
+`'exact'` - schema must be identical with no changes
+
+Note: The "strict" schema strategy is defined as "anything expected to cause errors in the transfer" and is the default method for the import, export, and transfer CLI commands. Therefore, the technical functionality will always be subject to change. If you need to find the definition for the current version of Strapi, see `packages/core/data-transfer/src/engine/validation/schemas/index.ts`
+
+The default `schemaStrategy` used when one is not provided is `'strict'`.
+
+##### Handling Schema differences
+
+When a schema diff is discovered with a given schemaStrategy, an error is throw. However, before throwing the error the engine checks to see if there are any schema diff handlers set via `engine.onSchemaDiff(handler)` which allows errors to be bypassed (for example, by prompting the user if they wish to proceed).
+
+A diff handler is an optionally asynchronous middleware function that accepts a `context` and a `next` parameter.
+
+`context` is an object of type `SchemaDiffHandlerContext`
+
+```typescript
+// type Diff can be found in /packages/core/data-transfer/src/utils/json.ts
+type SchemaDiffHandlerContext = {
+  ignoredDiffs: Record<string, Diff[]>;
+  diffs: Record<string, Diff[]>;
+  source: ISourceProvider;
+  destination: IDestinationProvider;
+};
+```
+
+`next` is a function that is called, passing the modified `context` object, to proceed to the next middleware function.
+
+```typescript
+const diffHandler = async (context, next) => {
+  const ignoreThese = {};
+  // loop through the diffs
+  Object.entries(context.diffs).forEach(([uid, diffs]) => {
+    for (const [i, diff] of diffs) {
+      // get the path of the diff in the schema
+      const path = [uid].concat(diff.path).join('.');
+
+      // Allow a diff on the country schema displayName
+      if (path === 'api::country.country.info.displayName') {
+        if (!isArray(context.ignoredDiffs[uid])) {
+          context.ignoredDiffs[uid] = [];
+        }
+        context.ignoredDiffs[uid][i] = diff;
+      }
+    }
+  });
+
+  return next(context);
+};
+
+engine.onSchemaDiff(diffHandler);
+```
+
+After all the schemaDiffHandler middlewares have been run, another diff is run between `context.ignoredDiffs` and `context.diffs` and any remaining diffs that have not been ignored are thrown as fatal errors and the engine will abort the transfer.
+
+### Progress Tracking events
+
+The transfer engine allows tracking the progress of your transfer either directly with the engine.progress.data object, or with listeners using the engine.progress.stream PassThrough stream. The engine.progress.data object definition is of type TransferProgress.
+
+Here is an example that logs a message at the beginning and end of each stage, as well as a message after each item has been transferred
+
+```typescript
+const progress = engine.progress.stream;
+
+progress.on(`stage::start`, ({ stage, data }) => {
+  console.log(`${stage} has started at ${data[stage].startTime}`);
+});
+
+progress.on('stage::finish', ({ stage, data }) => {
+  console.log(`${stage} has finished at ${data[stage].endTime}`);
+});
+
+progress.on('stage::progress', ({ stage, data }) => {
+  console.log('Transferred ${data[stage].bytes} bytes / ${data[stage].count} entities');
+});
+```
+
+Note: There is currently no way for a source provider to give a "total" number of records expected to be transferred, but it is expected in a future update.
+
+The following events are available:
+
+`stage::start` - at the start of each stage
+`stage::finish` - at the end of each stage
+`stage::progress` - after each entity in that stage has been transferred
+`stage::skip` - when an entire stage is skipped (eg, when 'only' or 'exclude' are used)
+`stage::error` - when there is an error thrown during a stage
+`transfer::init` - at the very beginning of engine.transfer()
+`transfer::start` - after bootstrapping and initializing the providers, when the transfer is about to start
+`transfer::finish` - when the transfer has finished
+`transfer::error` - when there is an error thrown during the transfer
+
+### Diagnostics events
+
+The engine includes a diagnostics reporter which can be used to listen for diagnostics information (debug messages, errors, etc).
+
+Here is an example for creating a diagnostics listener:
+
+```typescript
+// listener function
+const diagnosticListener: DiagnosticListener = (data: GenericDiagnostic) => {
+  // handle the diagnostics event, for example with custom logging
+};
+
+// add a generic listener
+engine.diagnostics.onDiagnostic(diagnosticsListener);
+
+// add an error listener
+engine.diagnostics.on('error', diagnosticListener);
+
+// add a warning listener
+engine.diagnostics.on('warning', diagnosticListener);
+```
+
+To emit your own diagnostics event:
+
+```typescript
+const event: ErrorDiagnostic = {
+  kind: 'error',
+  details: {
+    message: 'Your diagnostics message'
+    createdAt: new Date(),
+  },
+  name: 'yourError',
+  severity: 'fatal',
+  error: new Error('your error message')
+}
+
+engine.diagnostics.report(event);
+```
+
+Here is an excerpt of the relevant types used in the previous examples:
+
+```typescript
+// engine/diagnostic.ts
+// format of the data sent to the listener
+export type GenericDiagnostic<K extends DiagnosticKind, T = unknown> = {
+  kind: K;
+  details: {
+    message: string;
+    createdAt: Date;
+  } & T;
+};
+
+export type DiagnosticKind = 'error' | 'warning' | 'info';
+
+export type Diagnostic = ErrorDiagnostic | WarningDiagnostic | InfoDiagnostic;
+
+export type ErrorDiagnosticSeverity = 'fatal' | 'error' | 'silly';
+
+export type ErrorDiagnostic = GenericDiagnostic<
+  'error',
+  {
+    name: string;
+    severity: ErrorDiagnosticSeverity;
+    error: Error;
+  }
+>;
+
+export type WarningDiagnostic = GenericDiagnostic<
+  'warning',
+  {
+    origin?: string;
+  }
+>;
+
+export type InfoDiagnostic<T = unknown> = GenericDiagnostic<
+  'info',
+  {
+    params?: T;
+  }
+>;
+```
+
+### Transforms
+
+Transforms allow you to manipulate the data that is sent from the source before it reaches the destination.
+
+## Filter (excluding data)
+
+Filters can be used to exclude data sent from the source before it is streamed to the destination. They are methods that accept an entity, link, schema, etc and return `true` to keep the entity and `false` to remove it.
+
+Here is an example that filters out all entities with an id higher than 100:
+
+```typescript
+const options = {
+  ...otherOptions,
+  transforms: {
+    entities: [
+      {
+        // exclude all ignored content types (admin:: prefix and explicit list)
+        filter(entity) {
+          return !isIgnoredContentType(entity.type);
+        },
+      },
+      {
+        // exclude all entities with an id higher than 100
+        filter(entity) {
+          return Number(entity.id) <= 100;
+        },
+      },
+    ],
+    links: [
+      {
+        // exclude all relations to ignored content types
+        filter(link) {
+          return !isIgnoredContentType(link.left.type) && !isIgnoredContentType(link.right.type);
+        },
+      },
+      {
+        // remember to exclude links as well or else an error will be thrown when attempting to link an entity we filtered
+        filter(entity) {
+          return Number(link.left.id) <= 100 || Number(link.right.id) <= 100)
+        },
+      },
+    ],
+  },
+};
+```
+
+## Map (modifying data)
+
+Maps can be used to modify data sent from the source before it is streamed to the destination. They are methods that accept an entity, link, schema, etc and return the modified version of the object.
+
+This can be used, for example, to sanitize data between environments.
+
+Here is an example that removes a field called `somePrivateField` from a content type `privateThing`.
+
+```typescript
+const options = {
+  ...otherOptions,
+  transforms: {
+    entities: [
+      {
+        // exclude all ignored content types (admin:: prefix and explicit list)
+        filter(entity) {
+          return !isIgnoredContentType(entity.type);
+        },
+      },
+      {
+        map(entity) {
+          // remove somePrivateField from privateThing entities
+          if (entity.type === 'api::privateThing.privateThing') {
+            entity.somePrivateField = undefined;
+          }
+
+          return entity;
+        },
+      },
+    ],
+  },
+};
+```
+
+By mapping schemas as well as entities, it's even possible (although complex!) to modify data structures between source and destination.
+
+## Running a transfer
+
+Running a transfer simply involves calling the asynchronous engine.transfer() method.
+
+```typescript
+const engine = createTransferEngine(source, destination, options);
+try {
+  await engine.transfer();
+} catch (e) {
+  console.error('Something went wrong: ', e?.message);
+}
+```
+
+Be aware that engine.transfer() throws on any fatal errors it encounters.
+
+Note: The transfer engine (and the providers) current only support a single `engine.transfer()` and must be re-instantiated if intended to run multiple times. In the future it is expected to allow them to be used for multiple transfers in a row, but that usage is untested and will result in unpredictable behavior.

@@ -277,7 +277,7 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
                       label: filter.label,
                       value: filter.name,
                     })),
-                    placholder: formatMessage({
+                    placeholder: formatMessage({
                       id: 'app.utils.select-field',
                       defaultMessage: 'Select field',
                     }),

@@ -179,6 +179,26 @@ describe('relation subquery path (deleteMany / updateMany)', () => {
       1,
       { updated: ['UPDATED PUBLISHED'], untouched: ['Samuel UMTITI', 'Lucas HERNANDEZ'] },
     ],
+    [
+      '_q + relation where',
+      {
+        _q: 'LLORIS',
+        where: { related: { title: 'Category A' } },
+        data: { name: 'UPDATED Q' },
+      },
+      1,
+      { updated: ['UPDATED Q'], untouched: ['Samuel UMTITI', 'Lucas HERNANDEZ'] },
+    ],
+    [
+      'filters + relation where',
+      {
+        where: { related: { title: 'Category A' } },
+        filters: { name: 'Hugo LLORIS' },
+        data: { name: 'UPDATED FILTER' },
+      },
+      1,
+      { updated: ['UPDATED FILTER'], untouched: ['Samuel UMTITI', 'Lucas HERNANDEZ'] },
+    ],
   ])('updateMany: %s', async (_label, params, expectedUpdated, { updated, untouched }) => {
     const { db, connection } = makeDb();
     await setupTables(connection);

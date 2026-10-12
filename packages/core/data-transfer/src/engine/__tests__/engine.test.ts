@@ -1,7 +1,7 @@
 import path, { posix, win32 } from 'path';
 import os from 'os';
 import fs from 'fs-extra';
-import { cloneDeep, get, set } from 'lodash/fp';
+import { cloneDeep, get, set } from 'lodash';
 import { Readable, Writable } from 'stream-chain';
 import { pipeline } from 'stream/promises';
 import type { Struct } from '@strapi/types';
@@ -1041,12 +1041,12 @@ describe('Transfer engine', () => {
             const fakeSchemas = cloneDeep(schemas);
 
             const path = `attributes.createdAt.${attributeName}`;
-            const oldValue = get(path, fakeSchemas['api::homepage.homepage']);
+            const oldValue = get(fakeSchemas['api::homepage.homepage'], path);
 
             fakeSchemas['api::homepage.homepage'] = set(
+              fakeSchemas['api::homepage.homepage'],
               path,
-              transformValue(oldValue),
-              fakeSchemas['api::homepage.homepage']
+              transformValue(oldValue)
             );
 
             destination.getSchemas = jest.fn().mockResolvedValue(fakeSchemas);
@@ -1063,9 +1063,9 @@ describe('Transfer engine', () => {
         test(`Throws on regular attributes' properties`, () => {
           const destination = createDestination();
           const fakeSchemas = set(
+            cloneDeep(schemas),
             '["api::homepage.homepage"].attributes.createdAt.type',
-            'string',
-            cloneDeep(schemas)
+            'string'
           );
 
           destination.getSchemas = jest.fn().mockResolvedValue(fakeSchemas);

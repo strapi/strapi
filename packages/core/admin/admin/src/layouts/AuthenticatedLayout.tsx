@@ -10,20 +10,19 @@ import valid from 'semver/functions/valid';
 
 import { LazyOutlet } from '../components/LazyOutlet';
 import { LeftMenu } from '../components/LeftMenu';
-import { MediaLibraryBanner } from '../components/MediaLibraryBanner';
 import { NpsSurvey } from '../components/NpsSurvey';
 import { Page } from '../components/PageHelpers';
 import { PluginsInitializer } from '../components/PluginsInitializer';
 import { PrivateRoute } from '../components/PrivateRoute';
-import { UpsellBanner } from '../components/UpsellBanner';
+import { TopBanners } from '../components/TopBanners';
 import { AppInfoProvider } from '../features/AppInfo';
 import { useAuth } from '../features/Auth';
 import { useConfiguration } from '../features/Configuration';
-import { useStrapiApp } from '../features/StrapiApp';
-import { useTracking } from '../features/Tracking';
 import { useMenu } from '../hooks/useMenu';
 import { useInformationQuery } from '../services/admin';
 import { hashAdminUserEmail } from '../utils/users';
+
+import { useAuthenticatedAccessTracking } from './useAuthenticatedAccessTracking';
 
 const { version: strapiVersion } = packageInfo;
 
@@ -68,8 +67,6 @@ const AdminLayout = () => {
     });
   }, [userInfo]);
 
-  const { trackUsage } = useTracking();
-
   const {
     isLoading: isLoadingMenu,
     generalSectionLinks,
@@ -78,16 +75,8 @@ const AdminLayout = () => {
     burgerMobileNavigation,
   } = useMenu(checkLatestStrapiVersion(strapiVersion, tagName), appInfo?.currentEnvironment);
 
-  const getAllWidgets = useStrapiApp('TrackingProvider', (state) => state.widgets.getAll);
   const projectId = appInfo?.projectId;
-  React.useEffect(() => {
-    if (projectId) {
-      trackUsage('didAccessAuthenticatedAdministration', {
-        registeredWidgets: getAllWidgets().map((widget) => widget.uid),
-        projectId,
-      });
-    }
-  }, [projectId, getAllWidgets, trackUsage]);
+  useAuthenticatedAccessTracking(projectId);
 
   // We don't need to wait for the release query to be fetched before rendering the plugins
   // however, we need the appInfos and the permissions
@@ -134,8 +123,7 @@ const AdminLayout = () => {
                   large: '100%',
                 }}
               >
-                <UpsellBanner />
-                <MediaLibraryBanner />
+                <TopBanners />
                 {/*
                  * Top-level Suspense only — nested layouts (Settings, Content Manager) use
                  * LazyOutlet with useNavigation so in-app navigations show loading in the content

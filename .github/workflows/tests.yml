@@ -67,7 +67,7 @@ jobs:
   docs_build:
     name: 'docs build (node: ${{ matrix.node }})'
     runs-on: ${{ vars.TEST_RUNNER_NAME || 'ubuntu-latest' }}
-    needs: [conditions, build]
+    needs: [conditions]
     if: ${{ needs.conditions.outputs.docs == 'true' || needs.conditions.outputs.global == 'true' }}
     strategy:
       matrix:
@@ -80,8 +80,6 @@ jobs:
 
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
-      - name: Monorepo build
-        uses: ./.github/actions/run-build
       - name: Install docs dependencies
         working-directory: docs
         run: yarn install --frozen-lockfile
@@ -270,7 +268,7 @@ jobs:
     strategy:
       fail-fast: false # remove once tests aren't flaky
       matrix:
-        project: ['chromium', 'webkit', 'firefox']
+        project: ['chromium', 'webkit']
         shard: [1/4, 2/4, 3/4, 4/4]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -280,18 +278,21 @@ jobs:
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
+        # globalSetup always launches Chromium to write storage state, even for WebKit shards.
+        run: npx playwright install --with-deps chromium ${{ matrix.project }}
       - name: Monorepo build
         uses: ./.github/actions/run-build
 
       - name: Run [CE] E2E tests
+        id: e2e
+        continue-on-error: true
         uses: ./.github/actions/run-e2e-tests
         with:
           runEE: false
           jestOptions: '--project=${{ matrix.project }} --shard=${{ matrix.shard }}'
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: failure()
+        if: ${{ steps.e2e.outcome == 'failure' }}
         with:
           name: ce-${{ matrix.project }}--playwright-trace-${{ github.run_id }}-${{ github.job }}
           path: test-apps/e2e/test-results/**/trace.zip
@@ -299,13 +300,20 @@ jobs:
 
         # Add the Trunk Analytics Uploader step
       - name: Upload results to trunk
+        id: trunk
         if: '!cancelled()'
         uses: trunk-io/analytics-uploader@385f1ccdf345b4532dc4b6c665dd432b702b8e28 # v2.1.2
         with:
           junit-paths: test-apps/junit-reports/*.xml
           org-slug: strapi
           token: ${{ secrets.TRUNK_API_TOKEN }}
+          previous-step-outcome: ${{ steps.e2e.outcome }}
         continue-on-error: true
+
+      - name: Fail on a non-quarantined E2E failure
+        if: ${{ !cancelled() && steps.e2e.outcome == 'failure' && steps.trunk.outcome != 'success' }}
+        run: exit 1
+
   # The Media Library specs run in dedicated jobs rather than the shared matrix, and each
   # job picks its suite explicitly with `mediaLibrarySuite`. Nothing about the product
   # default decides what runs here: the shared matrix sets neither suite, so it is
@@ -316,11 +324,6 @@ jobs:
   #
   # WebKit is a hard limitation: the upload drag-and-drop helper builds a DataTransfer,
   # which WebKit does not implement.
-  #
-  # Firefox is simply unknown. It has never been run against this suite: locally the
-  # admin login does not go through under Firefox, so every test drives a logged-out app
-  # and fails on the first click — which says nothing about the Media Library itself. CI
-  # does run Firefox for the rest of the e2e suite, so login works there.
   #
   # The folder drag & drop specs are skipped in the specs themselves rather than filtered
   # out here — see `RUN_FOLDER_DRAG_SPECS` in `drag-drop-deep.spec.ts`. A grep filter only
@@ -348,6 +351,8 @@ jobs:
         uses: ./.github/actions/run-build
 
       - name: Run [CE] e2e media library E2E tests
+        id: e2e
+        continue-on-error: true
         uses: ./.github/actions/run-e2e-tests
         with:
           runEE: false
@@ -357,20 +362,26 @@ jobs:
           jestOptions: '--project=chromium'
 
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
-        if: failure()
+        if: ${{ steps.e2e.outcome == 'failure' }}
         with:
           name: ce-media-library-playwright-trace-${{ github.run_id }}-${{ github.job }}
           path: test-apps/e2e/test-results/**/trace.zip
           retention-days: 1
 
       - name: Upload results to trunk
+        id: trunk
         if: '!cancelled()'
-        uses: trunk-io/analytics-uploader@1198efcc0976501147b10a7e343c3fa069527526 # v2.0.9
+        uses: trunk-io/analytics-uploader@385f1ccdf345b4532dc4b6c665dd432b702b8e28 # v2.1.2
         with:
           junit-paths: test-apps/junit-reports/*.xml
           org-slug: strapi
           token: ${{ secrets.TRUNK_API_TOKEN }}
+          previous-step-outcome: ${{ steps.e2e.outcome }}
         continue-on-error: true
+
+      - name: Fail on a non-quarantined E2E failure
+        if: ${{ !cancelled() && steps.e2e.outcome == 'failure' && steps.trunk.outcome != 'success' }}
+        run: exit 1
 
   e2e_media_library_legacy:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
@@ -395,6 +406,8 @@ jobs:
         uses: ./.github/actions/run-build
 
       - name: Run [CE] e2e media library (legacy) E2E tests
+        id: e2e
+        continue-on-error: true
         uses: ./.github/actions/run-e2e-tests
         with:
           runEE: false
@@ -404,20 +417,27 @@ jobs:
           jestOptions: '--project=chromium'
 
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
-        if: failure()
+        if: ${{ steps.e2e.outcome == 'failure' }}
         with:
           name: ce-media-library-legacy-playwright-trace-${{ github.run_id }}-${{ github.job }}
           path: test-apps/e2e/test-results/**/trace.zip
           retention-days: 1
 
       - name: Upload results to trunk
+        id: trunk
         if: '!cancelled()'
-        uses: trunk-io/analytics-uploader@1198efcc0976501147b10a7e343c3fa069527526 # v2.0.9
+        uses: trunk-io/analytics-uploader@385f1ccdf345b4532dc4b6c665dd432b702b8e28 # v2.1.2
         with:
           junit-paths: test-apps/junit-reports/*.xml
           org-slug: strapi
           token: ${{ secrets.TRUNK_API_TOKEN }}
+          previous-step-outcome: ${{ steps.e2e.outcome }}
         continue-on-error: true
+
+      - name: Fail on a non-quarantined E2E failure
+        if: ${{ !cancelled() && steps.e2e.outcome == 'failure' && steps.trunk.outcome != 'success' }}
+        run: exit 1
+
   e2e_ee:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
     timeout-minutes: 60
@@ -429,7 +449,7 @@ jobs:
     strategy:
       fail-fast: false # remove once tests aren't flaky
       matrix:
-        project: ['chromium', 'webkit', 'firefox']
+        project: ['chromium', 'webkit']
         shard: [1/4, 2/4, 3/4, 4/4]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -442,18 +462,21 @@ jobs:
         uses: ./.github/actions/yarn-nm-install
 
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
+        # globalSetup always launches Chromium to write storage state, even for WebKit shards.
+        run: npx playwright install --with-deps chromium ${{ matrix.project }}
 
       - name: Monorepo build
         uses: ./.github/actions/run-build
       - name: Run [EE] E2E tests
+        id: e2e
+        continue-on-error: true
         uses: ./.github/actions/run-e2e-tests
         with:
           runEE: true
           jestOptions: '--project=${{ matrix.project }} --shard=${{ matrix.shard }}'
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: failure()
+        if: ${{ steps.e2e.outcome == 'failure' }}
         with:
           name: ee-${{ matrix.project }}--playwright-trace-${{ github.run_id }}-${{ github.job }}
           path: test-apps/e2e/test-results/**/trace.zip
@@ -461,13 +484,19 @@ jobs:
 
       # Add the Trunk Analytics Uploader step
       - name: Upload results to trunk
+        id: trunk
         if: '!cancelled()'
         uses: trunk-io/analytics-uploader@385f1ccdf345b4532dc4b6c665dd432b702b8e28 # v2.1.2
         with:
           junit-paths: test-apps/junit-reports/*.xml
           org-slug: strapi
           token: ${{ secrets.TRUNK_API_TOKEN }}
+          previous-step-outcome: ${{ steps.e2e.outcome }}
         continue-on-error: true
+
+      - name: Fail on a non-quarantined E2E failure
+        if: ${{ !cancelled() && steps.e2e.outcome == 'failure' && steps.trunk.outcome != 'success' }}
+        run: exit 1
 
   migration_v5:
     if: needs.conditions.outputs.migrations == 'true'

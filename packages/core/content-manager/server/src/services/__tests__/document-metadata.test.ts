@@ -8,11 +8,11 @@ const createService = (overrides: Record<string, unknown> = {}) => {
       pluginOptions: { i18n: { localized: true } },
       attributes: {},
     }),
-    plugin: () => ({
-      service: () => ({
-        getDefaultLocale: async () => 'en',
-      }),
-    }),
+    localization: {
+      isLocalizedContentType: () => true,
+      getDefaultLocale: async () => 'en',
+      getNonLocalizedAttributes: () => [],
+    },
     ...overrides,
   } as unknown as Parameters<typeof documentMetadataServiceFactory>[0]['strapi'];
 
@@ -22,7 +22,7 @@ const createService = (overrides: Record<string, unknown> = {}) => {
 describe('document-metadata service', () => {
   describe('getAvailableLocales', () => {
     /**
-     * Regression guard for CMS-540. The admin's
+     * Regression guard. The admin's
      * `useDocument.getInitialFormValues` inherits non-localized scalar/media
      * values from `meta.availableLocales[0]` when creating a new locale draft.
      * That selection is only meaningful if the default locale sits first —
@@ -80,7 +80,12 @@ describe('document-metadata service', () => {
 
     it('no-ops when the i18n plugin is unavailable', async () => {
       const service = createService({
-        plugin: () => undefined,
+        // Inert default of `strapi.localization` when no provider is registered
+        localization: {
+          isLocalizedContentType: () => false,
+          getDefaultLocale: async () => null,
+          getNonLocalizedAttributes: () => [],
+        },
       });
 
       const result = await service.getAvailableLocales(
@@ -97,13 +102,13 @@ describe('document-metadata service', () => {
 
     it('no-ops when getDefaultLocale throws', async () => {
       const service = createService({
-        plugin: () => ({
-          service: () => ({
-            async getDefaultLocale() {
-              throw new Error('boom');
-            },
-          }),
-        }),
+        localization: {
+          isLocalizedContentType: () => true,
+          async getDefaultLocale() {
+            throw new Error('boom');
+          },
+          getNonLocalizedAttributes: () => [],
+        },
       });
 
       const result = await service.getAvailableLocales(
@@ -131,6 +136,123 @@ describe('document-metadata service', () => {
       );
 
       expect(result?.map((entry) => entry.locale)).toEqual(['fr']);
+    });
+  });
+
+  describe('getMetadata non-localized fields', () => {
+    const localizedModel = {
+      uid: 'api::article.article',
+      options: {},
+      pluginOptions: { i18n: { localized: true } },
+      attributes: {
+        title: { type: 'string' },
+        body: { type: 'text' },
+        cover: { type: 'media' },
+        author: { type: 'relation', relation: 'manyToOne', target: 'api::author.author' },
+      },
+    };
+
+    const createServiceWithFindMany = (overrides: Record<string, unknown> = {}) => {
+      const findMany = jest.fn().mockResolvedValue([]);
+      const service = createService({
+        getModel: () => localizedModel,
+        get: () => ({ transform: (_uid: string, params: unknown) => params }),
+        db: { query: () => ({ findMany }) },
+        ...overrides,
+      });
+
+      return { service, findMany };
+    };
+
+    const paramsOf = (findMany: jest.Mock) => findMany.mock.calls[0][0];
+
+    it('selects non-localized scalar fields and populates non-localized media fields', async () => {
+      const { service, findMany } = createServiceWithFindMany({
+        localization: {
+          isLocalizedContentType: () => true,
+          getDefaultLocale: async () => 'en',
+          // `author` is not scalar nor media and `unknown` is not an attribute: both dropped
+          getNonLocalizedAttributes: () => ['title', 'cover', 'author', 'unknown'],
+        },
+      });
+
+      await service.getMetadata('api::article.article', {
+        id: 1,
+        documentId: 'doc-1',
+        locale: 'en',
+      });
+
+      const params = paramsOf(findMany);
+      expect(params.fields).toEqual([
+        'id',
+        'documentId',
+        'locale',
+        'updatedAt',
+        'createdAt',
+        'publishedAt',
+        'title',
+      ]);
+      expect(params.populate).toEqual({
+        cover: { populate: { folder: true } },
+        createdBy: { select: ['id', 'firstname', 'lastname', 'email'] },
+        updatedBy: { select: ['id', 'firstname', 'lastname', 'email'] },
+      });
+    });
+
+    const expectNoNonLocalizedFields = (findMany: jest.Mock) => {
+      const params = paramsOf(findMany);
+      expect(params.fields).toEqual([
+        'id',
+        'documentId',
+        'locale',
+        'updatedAt',
+        'createdAt',
+        'publishedAt',
+      ]);
+      expect(params.populate).toEqual({
+        createdBy: { select: ['id', 'firstname', 'lastname', 'email'] },
+        updatedBy: { select: ['id', 'firstname', 'lastname', 'email'] },
+      });
+    };
+
+    it('treats a stale localized flag as non-localized when no provider is registered', async () => {
+      const { service, findMany } = createServiceWithFindMany({
+        // Inert default of `strapi.localization` when no provider is registered
+        localization: {
+          isLocalizedContentType: () => false,
+          getDefaultLocale: async () => null,
+          getNonLocalizedAttributes: () => [],
+        },
+      });
+
+      const metadata = await service.getMetadata('api::article.article', {
+        id: 1,
+        documentId: 'doc-1',
+        locale: 'en',
+      });
+
+      expect(metadata).toEqual({ availableLocales: [], availableStatus: [], versions: [] });
+      expect(findMany).not.toHaveBeenCalled();
+    });
+
+    it('adds no non-localized fields when getNonLocalizedAttributes throws', async () => {
+      const { service, findMany } = createServiceWithFindMany({
+        localization: {
+          isLocalizedContentType: () => true,
+          getDefaultLocale: async () => 'en',
+          getNonLocalizedAttributes() {
+            throw new Error('boom');
+          },
+        },
+      });
+
+      await service.getMetadata('api::article.article', {
+        id: 1,
+        documentId: 'doc-1',
+        locale: 'en',
+      });
+
+      expectNoNonLocalizedFields(findMany);
     });
   });
 

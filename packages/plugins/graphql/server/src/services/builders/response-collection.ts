@@ -1,5 +1,5 @@
 import { objectType, nonNull } from 'nexus';
-import { defaultTo, prop, pipe, identity } from 'lodash/fp';
+import { defaultTo, identity } from 'lodash';
 import type { Schema } from '@strapi/types';
 import type { Context } from '../types';
 
@@ -27,7 +27,7 @@ export default ({ strapi }: Context) => {
 
           t.nonNull.list.field('nodes', {
             type: nonNull(typeName),
-            resolve: pipe(prop('nodes'), defaultTo([])),
+            resolve: (parent) => defaultTo(parent?.nodes, []),
           });
 
           t.nonNull.field('pageInfo', {
@@ -39,7 +39,7 @@ export default ({ strapi }: Context) => {
             t.nonNull.list.field('data', {
               deprecation: 'Use `nodes` field instead',
               type: nonNull(typeName),
-              resolve: pipe(prop('nodes'), defaultTo([])),
+              resolve: (parent) => defaultTo(parent?.nodes, []),
             });
 
             t.nonNull.field('meta', {
