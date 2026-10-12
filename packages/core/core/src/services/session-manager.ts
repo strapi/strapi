@@ -13,6 +13,11 @@ export interface SessionProvider {
     status?: SessionData['status'];
   }): Promise<SessionData[]>;
   updateBySessionId(sessionId: string, data: Partial<SessionData>): Promise<void>;
+  /**
+   * Atomically mark an active session rotated and point it at `childId`.
+   * Returns false when another request already claimed the session.
+   */
+  claimRotation(sessionId: string, childId: string): Promise<boolean>;
   deleteBySessionId(sessionId: string): Promise<void>;
   deleteExpired(): Promise<void>;
   deleteBy(criteria: { userId?: string; origin?: string; deviceId?: string }): Promise<void>;
@@ -109,6 +114,15 @@ class DatabaseSessionProvider implements SessionProvider {
 
   async updateBySessionId(sessionId: string, data: Partial<SessionData>): Promise<void> {
     await this.db.query(this.contentType).update({ where: { sessionId }, data });
+  }
+
+  async claimRotation(sessionId: string, childId: string): Promise<boolean> {
+    const result = await this.db.query(this.contentType).updateMany({
+      where: { sessionId, status: 'active' },
+      data: { status: 'rotated', childId },
+    });
+
+    return result?.count === 1;
   }
 
   async deleteBySessionId(sessionId: string): Promise<void> {
@@ -671,8 +685,14 @@ class SessionManager {
         return { error: 'max_window_elapsed' };
       }
 
-      // Create child token
+      // Claim the parent before inserting the child. Two overlapping exchanges
+      // otherwise both observe status=active and both return a new token.
       const childSessionId = this.generateSessionId();
+      const claimed = await this.provider.claimRotation(current.sessionId, childSessionId);
+      if (!claimed) {
+        return { error: 'invalid_refresh_token' };
+      }
+
       const childExpiresAt = new Date(now + idleLifespan * 1000);
 
       const childRecord = await this.provider.create({
@@ -704,11 +724,6 @@ class SessionManager {
         algorithm,
         noTimestamp: true,
         ...jwtSignOptions,
-      });
-
-      await this.provider.updateBySessionId(current.sessionId, {
-        status: 'rotated',
-        childId: childSessionId,
       });
 
       let absoluteExpiresAt;
