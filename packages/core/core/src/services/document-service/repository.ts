@@ -502,6 +502,12 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
   async function update(opts = {} as any) {
     const { documentId, ...params } = opts;
 
+    // Two requests can both observe "locale missing" and insert a second row.
+    // Lock the document's rows so the loser updates the row the winner created.
+    if (documentId) {
+      await strapi.db.queryBuilder(uid).select(['id']).where({ documentId }).forUpdate().execute();
+    }
+
     const queryParams = await async.pipe(
       validateParams,
       DP.filterDataPublishedAt,

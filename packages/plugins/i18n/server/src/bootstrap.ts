@@ -32,11 +32,19 @@ const registerModelsHooks = () => {
       getService('content-types');
     const attributesToPopulate = getNestedPopulateOfNonLocalizedAttributes(schema.uid);
 
-    // Get original data before the update to compare what actually changed
+    // Compare the draft of the locale being changed. An unscoped findOne can
+    // return the published row or another locale; Postgres does not keep
+    // SQLite's insertion order, so discard then looked unchanged and skipped
+    // syncing non-localized fields.
+    const locale = typeof context.params.locale === 'string' ? context.params.locale : undefined;
     const originalData =
       'documentId' in context.params && context.params.documentId
         ? await strapi.db.query(schema.uid).findOne({
-            where: { documentId: context.params.documentId },
+            where: {
+              documentId: context.params.documentId,
+              ...(locale ? { locale } : {}),
+              ...(schema.options?.draftAndPublish ? { publishedAt: { $null: true } } : {}),
+            },
             populate: attributesToPopulate,
           })
         : null;

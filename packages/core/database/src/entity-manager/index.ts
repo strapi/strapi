@@ -39,6 +39,7 @@ import {
   cleanOrderColumns,
 } from './regular-relations';
 import { idsFromInsertResult } from './inserted-ids';
+import { isDeadlockError } from '../transaction-context';
 import { relationsOrderer } from './relations-orderer';
 import type { Database } from '..';
 import type { Meta } from '../metadata';
@@ -448,14 +449,36 @@ export const createEntityManager = (db: Database): EntityManager => {
         await this.createQueryBuilder(uid).where({ id }).update(dataToUpdate).execute();
       }
 
-      const trx = await strapi.db.transaction();
-      try {
-        await this.updateRelations(uid, id, data, { transaction: trx.get() });
-        await trx.commit();
-      } catch (e) {
-        await trx.rollback();
+      // Relation order updates deadlock when two users share a role and both
+      // change it. Postgres and MySQL abort one transaction and require a retry.
+      const maxAttempts = 3;
+      let relationsUpdated = false;
+      let lastError: unknown;
+
+      for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+        const trx = await strapi.db.transaction();
+        try {
+          await this.updateRelations(uid, id, data, { transaction: trx.get() });
+          await trx.commit();
+          relationsUpdated = true;
+          break;
+        } catch (e) {
+          try {
+            await trx.rollback();
+          } catch {
+            // The deadlock already aborted the transaction.
+          }
+
+          lastError = e;
+          if (attempt === maxAttempts || !isDeadlockError(e)) {
+            break;
+          }
+        }
+      }
+
+      if (!relationsUpdated) {
         await this.createQueryBuilder(uid).where({ id }).update(entity).execute();
-        throw e;
+        throw lastError;
       }
 
       // TODO: do not trigger the findOne lifecycles ?
