@@ -145,7 +145,20 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     rq = await createAuthRequest({ strapi });
     rqContent = createContentAPIRequest({ strapi });
 
-    jest.useFakeTimers();
+    // Freeze Date for scheduledAt checks. Leave the timer functions real so the
+    // Postgres pool and release cron can acquire connections and shut down.
+    jest.useFakeTimers({
+      doNotFake: [
+        'setTimeout',
+        'clearTimeout',
+        'setInterval',
+        'clearInterval',
+        'setImmediate',
+        'clearImmediate',
+        'nextTick',
+        'queueMicrotask',
+      ],
+    });
     jest.setSystemTime(new Date('2024-01-01T00:00:00.000Z'));
 
     // Create products
