@@ -28,6 +28,23 @@ export interface Store {
 
 const storage = new AsyncLocalStorage<Store>();
 
+/**
+ * Commit hooks do database work after the transaction finishes (document
+ * events, history, audit logs). Waiting for them keeps that work on the
+ * caller's timeline so a later destroy does not abort it mid-query.
+ * Callbacks may register more hooks; drain until none remain.
+ */
+const runCallbacks = async (callbacks: Callback[] | undefined) => {
+  if (!callbacks) {
+    return;
+  }
+
+  while (callbacks.length > 0) {
+    const batch = callbacks.splice(0, callbacks.length);
+    await Promise.all(batch.map((cb) => Promise.resolve(cb())));
+  }
+};
+
 const transactionCtx = {
   async run<TCallback extends Callback>(trx: Knex.Transaction, cb: TCallback) {
     const store = storage.getStore();
@@ -64,13 +81,7 @@ const transactionCtx = {
     // Commit transaction
     await trx.commit();
 
-    if (!store?.commitCallbacks.length) {
-      return;
-    }
-
-    // Run callbacks
-    store.commitCallbacks.forEach((cb) => cb());
-    store.commitCallbacks = [];
+    await runCallbacks(store?.commitCallbacks);
   },
 
   async rollback(trx: Knex.Transaction) {
@@ -90,13 +101,7 @@ const transactionCtx = {
     // Rollback transaction
     await trx.rollback();
 
-    if (!store?.rollbackCallbacks.length) {
-      return;
-    }
-
-    // Run callbacks
-    store.rollbackCallbacks.forEach((cb) => cb());
-    store.rollbackCallbacks = [];
+    await runCallbacks(store?.rollbackCallbacks);
   },
 
   onCommit(cb: Callback) {
