@@ -85,55 +85,35 @@ const renameIndex = async (knex: Knex, db: Database, diff: IndexDiff) => {
 
   debug(`renaming index from ${full.indexName} to ${short.indexName}`);
 
-  // `knex` is already the migration transaction. A nested transaction that runs
-  // ALTER and then swallows "relation does not exist" still aborts that
-  // Postgres connection (and can lock MySQL). Schema sync creates the short
-  // name afterwards, so a missing long name is a no-op, not an error.
-  if (client === 'mysql' || client === 'mariadb') {
-    const [rows] = await knex.raw(
-      `SELECT 1 AS found
-       FROM information_schema.statistics
-       WHERE table_schema = database() AND table_name = ? AND index_name = ?
-       LIMIT 1`,
-      [full.tableName, full.indexName]
-    );
-    if (!Array.isArray(rows) || rows.length === 0) {
-      debug(`not renaming index ${full.indexName} because it does not exist`);
-      return;
-    }
-
-    await knex.raw('ALTER TABLE ?? RENAME INDEX ?? TO ??', [
-      full.tableName,
-      full.indexName,
-      short.indexName,
-    ]);
-    return;
+  // If schema creation has never actually run before, none of these will exist, and they will throw an error
+  // we have no way of running an "if exists" other than a per-dialect manual check, which we won't do
+  // because even if it fails for some other reason, the schema sync will recreate them anyway
+  // Therefore, we wrap this in a nested transaction (considering we are running this migration in a transaction)
+  // so that we can suppress the error
+  try {
+    await knex.transaction(async (trx) => {
+      if (client === 'mysql' || client === 'mariadb') {
+        await knex
+          .raw('ALTER TABLE ?? RENAME INDEX ?? TO ??', [
+            full.tableName,
+            full.indexName,
+            short.indexName,
+          ])
+          .transacting(trx);
+      } else if (client === 'pg' || client === 'postgres') {
+        await knex
+          .raw('ALTER INDEX ?? RENAME TO ??', [full.indexName, short.indexName])
+          .transacting(trx);
+      } else if (['sqlite', 'sqlite3', 'better-sqlite3'].includes(client as any)) {
+        // SQLite doesn't support renaming, so rather than trying to drop/recreate we'll let db sync handle it
+        debug(`SQLite does not support index renaming, not renaming index ${full.indexName}`);
+      } else {
+        debug(`No db client name matches, not renaming index ${full.indexName}`);
+      }
+    });
+  } catch (err) {
+    debug(`error creating index: ${JSON.stringify(err)}`);
   }
-
-  if (client === 'pg' || client === 'postgres') {
-    const existing = await knex.raw(
-      `SELECT 1 AS found
-       FROM pg_indexes
-       WHERE schemaname = current_schema() AND indexname = ?
-       LIMIT 1`,
-      [full.indexName]
-    );
-    if (!existing.rows?.length) {
-      debug(`not renaming index ${full.indexName} because it does not exist`);
-      return;
-    }
-
-    await knex.raw('ALTER INDEX ?? RENAME TO ??', [full.indexName, short.indexName]);
-    return;
-  }
-
-  if (['sqlite', 'sqlite3', 'better-sqlite3'].includes(client as string)) {
-    // SQLite doesn't support renaming, so rather than trying to drop/recreate we'll let db sync handle it
-    debug(`SQLite does not support index renaming, not renaming index ${full.indexName}`);
-    return;
-  }
-
-  debug(`No db client name matches, not renaming index ${full.indexName}`);
 };
 
 const findDiffs = (shortMap: Metadata) => {

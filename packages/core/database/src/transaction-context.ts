@@ -29,31 +29,6 @@ export interface Store {
 const storage = new AsyncLocalStorage<Store>();
 
 /**
- * One connection per transaction. Postgres and MySQL reject overlapping
- * queries on that connection, and the pool then fills with acquires that
- * never settle. Chain SQL for a transaction so parallel callers (populate,
- * counts) still share it safely. The queued task must not start another
- * exclusive query before it finishes, or the chain deadlocks.
- */
-const transactionQueues = new WeakMap<Knex.Transaction, Promise<unknown>>();
-
-const runExclusive = <T>(
-  trx: Knex.Transaction | null | undefined,
-  task: () => Promise<T>
-): Promise<T> => {
-  if (!trx) {
-    return task();
-  }
-
-  // Register before awaiting so two callers in the same tick cannot both pass.
-  const previous = transactionQueues.get(trx) ?? Promise.resolve();
-  const run = previous.catch(() => undefined).then(() => task());
-  transactionQueues.set(trx, run);
-
-  return run as Promise<T>;
-};
-
-/**
  * Commit hooks do database work after the transaction finishes (document
  * events, history, audit logs). Waiting for them keeps that work on the
  * caller's timeline so a later destroy does not abort it mid-query.
@@ -142,8 +117,6 @@ const transactionCtx = {
       store.rollbackCallbacks.push(cb);
     }
   },
-
-  runExclusive,
 };
 
 export { transactionCtx };

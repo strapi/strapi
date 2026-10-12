@@ -755,15 +755,11 @@ const createQueryBuilder = (
         const qb = this.getKnexQuery();
 
         const transaction = transactionCtx.get();
-        // Hold the transaction connection for this statement only. Populate and
-        // other follow-up queries take the same lock when they execute.
-        const rows = await transactionCtx.runExclusive(transaction, async () => {
-          if (transaction) {
-            qb.transacting(transaction);
-          }
+        if (transaction) {
+          qb.transacting(transaction);
+        }
 
-          return qb;
-        });
+        const rows = await qb;
 
         if (state.populate && rows != null) {
           await helpers.applyPopulate(_.castArray(rows), state.populate, {
