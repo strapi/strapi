@@ -214,7 +214,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
         schedulingService.cancel(id);
       }
 
-      this.updateReleaseStatus(id);
+      await this.updateReleaseStatus(id);
 
       strapi.telemetry.send('didUpdateContentRelease');
 
@@ -460,19 +460,18 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
     async updateReleaseStatus(releaseId: Release['id']) {
       const releaseActionService = getService('release-action', { strapi });
 
-      const [totalActions, invalidActions] = await Promise.all([
-        releaseActionService.countActions({
-          filters: {
-            release: releaseId,
-          },
-        }),
-        releaseActionService.countActions({
-          filters: {
-            release: releaseId,
-            isEntryValid: false,
-          },
-        }),
-      ]);
+      // These counts share the document transaction's single connection.
+      const totalActions = await releaseActionService.countActions({
+        filters: {
+          release: releaseId,
+        },
+      });
+      const invalidActions = await releaseActionService.countActions({
+        filters: {
+          release: releaseId,
+          isEntryValid: false,
+        },
+      });
 
       if (totalActions > 0) {
         if (invalidActions > 0) {

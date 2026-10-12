@@ -40,7 +40,7 @@ const updateActionsStatusAndUpdateReleaseStatus = async (
   });
 
   for (const release of releases) {
-    getService('release', { strapi }).updateReleaseStatus(release.id);
+    await getService('release', { strapi }).updateReleaseStatus(release.id);
   }
 };
 
@@ -56,7 +56,7 @@ const deleteActionsAndUpdateReleaseStatus = async (params: ReleaseActionsParams)
   });
 
   for (const release of releases) {
-    getService('release', { strapi }).updateReleaseStatus(release.id);
+    await getService('release', { strapi }).updateReleaseStatus(release.id);
   }
 };
 
@@ -79,7 +79,7 @@ const deleteActionsOnDelete: Middleware = async (ctx, next) => {
   }
 
   try {
-    deleteActionsAndUpdateReleaseStatus({
+    await deleteActionsAndUpdateReleaseStatus({
       contentType,
       entryDocumentId: documentId,
       ...(locale !== '*' && { locale }),
@@ -111,7 +111,7 @@ const updateActionsOnUpdate: Middleware = async (ctx, next) => {
   }
 
   try {
-    updateActionsStatusAndUpdateReleaseStatus(contentType, result);
+    await updateActionsStatusAndUpdateReleaseStatus(contentType, result);
   } catch (error) {
     strapi.log.error('Error while updating release actions after update', {
       error,
