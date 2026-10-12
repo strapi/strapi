@@ -429,6 +429,21 @@ describe('CTB | DataManager | reducer | rename tracking (EDIT_ATTRIBUTE)', () =>
       expect(getTargetField(state)).toBe('heading');
     });
 
+    it('points the uid at the new name when a string custom field is renamed', () => {
+      // Admin state keeps custom fields with their underlying type; only the
+      // request payload rewrites them to `type: 'customField'`.
+      const customField = 'plugin::color-picker.color';
+      const state = reducer(
+        buildState([
+          { name: 'title', type: 'string', customField, status: 'UNCHANGED' },
+          slug,
+        ] as AnyAttribute[]),
+        editName(uid, 'title', 'heading', { customField })
+      );
+
+      expect(getTargetField(state)).toBe('heading');
+    });
+
     it('follows the rename when the migration is not recorded or is declined', () => {
       const edit = (consent: { recordRename?: boolean; declineRename?: boolean }) =>
         reducer(

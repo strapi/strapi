@@ -4,8 +4,9 @@ import type { Struct, UID } from '@strapi/types';
 import { isNumber, isObject, snakeCase } from 'lodash';
 
 import { isReservedAttributeName, isReservedModelName } from '../../services/builder';
-import { coreUids, typeKinds, VALID_UID_TARGETS } from '../../services/constants';
+import { coreUids, typeKinds } from '../../services/constants';
 import { isConfigurable } from '../../utils/attributes';
+import { isValidUidTarget } from '../../utils/uid-target';
 
 import {
   CATEGORY_NAME_REGEX,
@@ -43,6 +44,7 @@ const verifyUidTargetField: SuperRefinement<
     name: string;
     properties?: {
       type: unknown;
+      customField?: unknown;
       targetField?: string | null;
     };
   }[]
@@ -65,9 +67,7 @@ const verifyUidTargetField: SuperRefinement<
             message: 'Target does not exist',
           });
         }
-      } else if (
-        !VALID_UID_TARGETS.some((validUIdTarget) => validUIdTarget === targetAttr.properties?.type)
-      ) {
+      } else if (!targetAttr.properties || !isValidUidTarget(targetAttr.properties)) {
         ctx.addIssue({
           code: 'custom',
           message: 'Invalid target type',

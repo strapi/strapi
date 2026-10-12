@@ -12,7 +12,7 @@ import type {
 } from './migration-builder';
 import { finalizeSchemaMutation, rollbackSchemaMutation } from './schema-mutation';
 import { getService } from '../utils';
-import { VALID_UID_TARGETS } from './constants';
+import { isValidUidTarget } from '../utils/uid-target';
 import { validateUpdateSchema } from '../controllers/validation/schema';
 import type { Schema as CTBSchema } from '../controllers/validation/schema';
 import type { AttributeRenameMigrationMode } from '../config';
@@ -72,7 +72,9 @@ const removeDeletedUIDTargetFieldsOnUpdates = (schema: CTBSchema) => {
         if (
           properties.type === 'uid' &&
           properties.targetField &&
-          !contentType.attributes.find((attr) => attr.name === properties.targetField)
+          !contentType.attributes.some(
+            (attr) => attr.action !== 'delete' && attr.name === properties.targetField
+          )
         ) {
           properties.targetField = undefined;
         }
@@ -162,9 +164,10 @@ const renameConditionVarsOnUpdates = (schema: CTBSchema) => {
 
 /**
  * Keeps a uid field attached to its target when that target is renamed in this
- * save. Must run before `removeDeletedUIDTargetFieldsOnUpdates`, which would
- * otherwise treat the old name as a deleted field. A `targetField` that names
- * an attribute of the payload is left alone: the caller already resolved it.
+ * save. A `targetField` that names a saved (non-deleted) attribute of the
+ * payload is left alone: the caller already resolved it. When the renamed
+ * target is not a string or text field (custom fields are resolved to their
+ * underlying type), the uid is detached.
  */
 const renameUIDTargetFieldsOnUpdates = (schema: CTBSchema) => {
   schema.contentTypes.forEach((contentType) => {
@@ -173,6 +176,8 @@ const renameUIDTargetFieldsOnUpdates = (schema: CTBSchema) => {
     }
 
     const finalNames = composeRenames(contentType.renames);
+    const savedAttributes = contentType.attributes.filter((attr) => attr.action !== 'delete');
+    const saved = new Set(savedAttributes.map((attr) => attr.name));
 
     contentType.attributes.forEach((attribute) => {
       if (attribute.action !== 'update') {
@@ -187,24 +192,14 @@ const renameUIDTargetFieldsOnUpdates = (schema: CTBSchema) => {
 
       const finalName = finalNames.get(properties.targetField);
 
-      if (
-        !finalName ||
-        contentType.attributes.some((attr) => attr.name === properties.targetField)
-      ) {
+      if (!finalName || saved.has(properties.targetField)) {
         return;
       }
 
-      const target = contentType.attributes.find((attr) => attr.name === finalName);
+      const target = savedAttributes.find((attr) => attr.name === finalName);
 
-      // A target that is no longer a string or text is left on the old name,
-      // so `removeDeletedUIDTargetFieldsOnUpdates` detaches the uid.
-      if (
-        target &&
-        target.action !== 'delete' &&
-        VALID_UID_TARGETS.some((type) => type === target.properties.type)
-      ) {
-        properties.targetField = finalName;
-      }
+      properties.targetField =
+        target && isValidUidTarget(target.properties) ? finalName : undefined;
     });
   });
 };
