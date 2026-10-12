@@ -91,19 +91,26 @@ const ConditionsModal = ({
 
       setState(
         produce((draft) => {
-          if (draft[name] === undefined) {
-            draft[name] = {};
+          // `values` is flat across categories. Store each id on its own category so
+          // submit cannot overwrite it with a stale bucket.
+          const nextCategories: Record<string, ConditionForm> = {};
+
+          for (const [categoryName, relatedConditions] of arrayOfOptionsGroupedByCategory) {
+            nextCategories[categoryName] = relatedConditions.reduce<ConditionForm>(
+              (categoryValues, condition) => {
+                categoryValues[condition.id] = Boolean(values[condition.id]);
+
+                return categoryValues;
+              },
+              {}
+            );
           }
 
-          if (draft[name].default === undefined) {
-            draft[name].default = {};
-          }
-
-          draft[name].default = values;
+          draft[name] = nextCategories;
         })
       );
     },
-    [isReadOnly]
+    [arrayOfOptionsGroupedByCategory, isReadOnly]
   );
 
   const handleSubmit = React.useCallback(() => {
