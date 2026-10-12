@@ -14,7 +14,53 @@ const ADMIN_SESSION_CHANNEL = 'strapi-admin-session';
 const ADMIN_SESSION_STORAGE_KEY = 'strapi.admin.session-change';
 const ADMIN_SESSION_MESSAGE_TYPE = 'session-change';
 
-const OWN_TAB_ID = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+let ephemeralIdFallback = 0;
+let ownTabId: string | undefined;
+
+/**
+ * Distinguish this document, and each storage ping, from other tabs.
+ * The value is not a credential and must not include the access token.
+ * `randomUUID` exists in browsers and in Node ≥ 19; admin tests run on Node ≥ 22.
+ * `getRandomValues` covers hosts that have Web Crypto without `randomUUID`.
+ * The counter is only for test shims that lack both, so importing this module
+ * during SSR does not throw.
+ */
+const createEphemeralId = (): string => {
+  const webCrypto = globalThis.crypto;
+
+  if (typeof webCrypto?.randomUUID === 'function') {
+    return webCrypto.randomUUID();
+  }
+
+  if (typeof webCrypto?.getRandomValues === 'function') {
+    const bytes = new Uint8Array(16);
+    webCrypto.getRandomValues(bytes);
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+
+    const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+
+    return [
+      hex.slice(0, 8),
+      hex.slice(8, 12),
+      hex.slice(12, 16),
+      hex.slice(16, 20),
+      hex.slice(20),
+    ].join('-');
+  }
+
+  ephemeralIdFallback += 1;
+
+  return `strapi-admin-${Date.now().toString(36)}-${ephemeralIdFallback.toString(36)}`;
+};
+
+const getOwnTabId = (): string => {
+  if (!ownTabId) {
+    ownTabId = createEphemeralId();
+  }
+
+  return ownTabId;
+};
 
 interface AdminSessionChangeMessage {
   type: typeof ADMIN_SESSION_MESSAGE_TYPE;
@@ -29,10 +75,7 @@ const notifyOtherTabsOfAdminSessionChange = (): void => {
   }
 
   try {
-    window.localStorage.setItem(
-      ADMIN_SESSION_STORAGE_KEY,
-      `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`
-    );
+    window.localStorage.setItem(ADMIN_SESSION_STORAGE_KEY, createEphemeralId());
   } catch {
     // Private mode and some tests disable storage. The in-tab refetch still runs.
   }
@@ -45,7 +88,7 @@ const notifyOtherTabsOfAdminSessionChange = (): void => {
     const channel = new BroadcastChannel(ADMIN_SESSION_CHANNEL);
     const message: AdminSessionChangeMessage = {
       type: ADMIN_SESSION_MESSAGE_TYPE,
-      tabId: OWN_TAB_ID,
+      tabId: getOwnTabId(),
     };
     channel.postMessage(message);
     channel.close();
@@ -65,7 +108,7 @@ const isForeignSessionChange = (data: unknown): boolean => {
   }
 
   // Missing tabId is treated as external. Our own publish always sets one.
-  return message.tabId !== OWN_TAB_ID;
+  return message.tabId !== getOwnTabId();
 };
 
 /**

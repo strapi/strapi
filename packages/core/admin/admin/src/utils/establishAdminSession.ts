@@ -34,18 +34,23 @@ const refreshAdminIdentity = (dispatch: Dispatch): void => {
   });
 };
 
-const drainRunningIdentityQueries = async (dispatch: Dispatch, generation: number) => {
+const drainRunningIdentityQueries = (dispatch: Dispatch, generation: number): Promise<void> => {
   const seen = new Set<ReturnType<typeof getRunningAdminIdentityQueries>[number]>();
 
-  for (;;) {
+  const settleWave = (): Promise<void> => {
     if (generation !== adminIdentityRefreshGeneration) {
-      return;
+      return Promise.resolve();
     }
 
     const running = getRunningAdminIdentityQueries(dispatch).filter((query) => !seen.has(query));
 
     if (running.length === 0) {
-      break;
+      if (generation !== adminIdentityRefreshGeneration) {
+        return Promise.resolve();
+      }
+
+      dispatch(adminApi.util.invalidateTags(['Me']));
+      return Promise.resolve();
     }
 
     for (const query of running) {
@@ -54,14 +59,17 @@ const drainRunningIdentityQueries = async (dispatch: Dispatch, generation: numbe
 
     // The two identity endpoints settle together. A later wave is only queries
     // that started while this wait was in progress; they would drop the invalidate.
-    await Promise.allSettled(running);
-  }
+    // allSettled keeps a rejected identity query from aborting the drain.
+    return Promise.allSettled(running).then(() => settleWave());
+  };
 
-  if (generation !== adminIdentityRefreshGeneration) {
-    return;
+  // The first snapshot stays synchronous, matching the previous async function
+  // up to its first await. A throw here still rejects the returned promise.
+  try {
+    return settleWave();
+  } catch (error) {
+    return Promise.reject(error);
   }
-
-  dispatch(adminApi.util.invalidateTags(['Me']));
 };
 
 /**
