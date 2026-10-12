@@ -1019,6 +1019,43 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       expect(publishRes.body.data.status).toBe('done');
     });
 
+    test('bulk deleting non-localized entries takes them out of their releases', async () => {
+      const keptId = await createProduct();
+      const deletedIds = [await createProduct(), await createProduct()];
+      const release = await createReleaseWithActions(
+        [keptId, ...deletedIds].map((entryDocumentId) => ({
+          contentType: productUID,
+          entryDocumentId,
+        }))
+      );
+      const emptiedRelease = await createReleaseWithActions([
+        { contentType: productUID, entryDocumentId: deletedIds[0] },
+      ]);
+
+      const deleteRes = await rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/${productUID}/actions/bulkDelete`,
+        body: { documentIds: deletedIds },
+      });
+      expect(deleteRes.statusCode).toBe(200);
+      expect(deleteRes.body.count).toBe(2);
+
+      await waitForActionCount(release.id, 1);
+      expect((await getActions(release.id))[0].entryDocumentId).toBe(keptId);
+
+      await waitForActionCount(emptiedRelease.id, 0);
+
+      let status;
+      for (let attempt = 0; attempt < 50 && status !== 'empty'; attempt += 1) {
+        const found = await rq({ method: 'GET', url: `/content-releases/${emptiedRelease.id}` });
+        status = found.body.data.status;
+        if (status !== 'empty') {
+          await new Promise((resolve) => setTimeout(resolve, 50));
+        }
+      }
+      expect(status).toBe('empty');
+    });
+
     test('deleting one locale of a localized entry only takes that locale out', async () => {
       const documentId = await createLocalizedArticle();
       const release = await createReleaseWithActions([
