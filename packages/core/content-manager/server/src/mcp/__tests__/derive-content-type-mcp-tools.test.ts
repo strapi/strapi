@@ -88,12 +88,11 @@ const makeFieldRestrictedAbility = (
 const mockUser = { id: 42 };
 const mockContext = { userAbility: makeUserAbility(), user: mockUser };
 
-const mockExtra: HandlerParams['extra'] = {
-  signal: new AbortController().signal,
+const mockExtra = {
   requestId: 'test-request-id',
-  sendNotification: jest.fn(),
-  sendRequest: jest.fn(),
-};
+  signal: new AbortController().signal,
+  _meta: undefined,
+} satisfies HandlerParams['extra'];
 
 const makePermissionChecker = (overrides: Record<string, jest.Mock> = {}) => ({
   cannot: {
@@ -1143,6 +1142,32 @@ describe('buildDataSchema', () => {
     expect(schema.safeParse({ tags: { set: null } }).success).toBe(true);
   });
 
+  it('xMany relation rejects { set: [...] } combined with connect or disconnect', () => {
+    const schema = buildDataSchema(
+      mockStrapi,
+      relationModel,
+      relationModel.attributes as TestAttrs
+    );
+    expect(schema.safeParse({ tags: { set: ['abc'], connect: ['def'] } }).success).toBe(false);
+    expect(schema.safeParse({ tags: { set: ['abc'], disconnect: ['def'] } }).success).toBe(false);
+    expect(
+      schema.safeParse({ tags: { set: ['abc'], connect: ['def'], disconnect: ['ghi'] } }).success
+    ).toBe(false);
+  });
+
+  it('xMany relation rejects { set: null } combined with connect or disconnect', () => {
+    const schema = buildDataSchema(
+      mockStrapi,
+      relationModel,
+      relationModel.attributes as TestAttrs
+    );
+    expect(schema.safeParse({ tags: { set: null, connect: ['def'] } }).success).toBe(false);
+    expect(schema.safeParse({ tags: { set: null, disconnect: ['def'] } }).success).toBe(false);
+    expect(
+      schema.safeParse({ tags: { set: null, connect: ['def'], disconnect: ['ghi'] } }).success
+    ).toBe(false);
+  });
+
   it('xMany relation accepts empty object {}', () => {
     const schema = buildDataSchema(
       mockStrapi,
@@ -1721,7 +1746,7 @@ const makeLocaleRestrictedPermissionChecker = (permittedLocales: string[]) => {
 };
 
 /**
- * Builds a mock strapi instance that reports the given uid as localized (i18n).
+ * Builds a mock strapi instance whose localization provider reports the given uid as localized.
  */
 const makeLocalizedStrapi = (uid: string): Core.Strapi =>
   ({
@@ -1731,10 +1756,16 @@ const makeLocalizedStrapi = (uid: string): Core.Strapi =>
         pluginOptions: { i18n: { localized: true } },
       },
     },
+    localization: {
+      isLocalizedContentType: jest.fn(
+        (model: { pluginOptions?: { i18n?: { localized?: boolean } } }) =>
+          model.pluginOptions?.i18n?.localized === true
+      ),
+    },
   }) as unknown as Core.Strapi;
 
 /**
- * Builds a mock strapi instance that reports the given uid as NOT localized.
+ * Builds a mock strapi instance whose localization provider reports the given uid as NOT localized.
  */
 const makeNonLocalizedStrapi = (uid: string): Core.Strapi =>
   ({
@@ -1743,6 +1774,12 @@ const makeNonLocalizedStrapi = (uid: string): Core.Strapi =>
       [uid]: {
         pluginOptions: {},
       },
+    },
+    localization: {
+      isLocalizedContentType: jest.fn(
+        (model: { pluginOptions?: { i18n?: { localized?: boolean } } }) =>
+          model.pluginOptions?.i18n?.localized === true
+      ),
     },
   }) as unknown as Core.Strapi;
 

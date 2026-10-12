@@ -17,6 +17,9 @@ declare global {
       future: {
         isEnabled: (name: keyof NonNullable<Modules.Features.FeaturesConfig['future']>) => boolean;
       };
+      featureFlags: {
+        isEnabled: (name: keyof Omit<Modules.Features.FeaturesConfig, 'future'>) => boolean;
+      };
       features: {
         SSO: 'sso';
         AUDIT_LOGS: 'audit-logs';

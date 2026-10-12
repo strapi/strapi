@@ -39,6 +39,7 @@ import {
   getComponentTypeColumn,
   getDzJoinTableName,
 } from '../../utils/transform-content-types-to-models';
+import { serializeJsonColumns } from './serialize-json-columns';
 
 type DocumentVersion = { documentId: string; locale: string };
 type Knex = Parameters<Migration['up']>[0];
@@ -1860,6 +1861,10 @@ async function cloneComponentInstance({
     );
   }
 
+  // mysql2 deserializes JSON columns on SELECT but knex does not re-serialize
+  // them on INSERT. Ensure any object values in JSON/blocks columns are stringified.
+  serializeJsonColumns(newComponentRow, componentMeta);
+
   let insertResult;
   if (supportsReturning(trx)) {
     try {
@@ -2040,9 +2045,8 @@ async function buildPublishedToDraftMap({
     return null;
   }
 
-  const i18nService = strapi.plugin('i18n')?.service('content-types');
   const contentType = strapi.contentTypes[uid as keyof typeof strapi.contentTypes] as any;
-  const isLocalized = i18nService?.isLocalizedContentType(contentType) ?? false;
+  const isLocalized = strapi.localization.isLocalizedContentType(contentType);
 
   const draftByDocumentId = new Map<string, (typeof draftEntries)[0]>();
   for (const draft of draftEntries) {

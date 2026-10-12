@@ -4,7 +4,7 @@ import axios, { AxiosResponse } from 'axios';
 
 import { Tours } from '../components/GuidedTour/Tours';
 import { useDeviceType } from '../hooks/useDeviceType';
-import { useInitQuery, useTelemetryPropertiesQuery } from '../services/admin';
+import { useInformationQuery, useInitQuery, useTelemetryPropertiesQuery } from '../services/admin';
 
 import { useAppInfo } from './AppInfo';
 import { useAuth } from './Auth';
@@ -17,11 +17,19 @@ export interface TelemetryProperties {
   numberOfAllContentTypes?: number;
   numberOfComponents?: number;
   numberOfDynamicZones?: number;
+  numberOfContentTypeFolders?: number;
 }
 
 export interface TrackingContextValue {
   uuid?: string | boolean;
   telemetryProperties?: TelemetryProperties;
+  strapiVersion?: string | null;
+  /**
+   * True once the version that `trackUsage` will attach is known, or the
+   * information request has failed. Callers that must send a single event
+   * wait for this so a later version update does not send the event again.
+   */
+  isStrapiVersionReady: boolean;
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -30,6 +38,7 @@ export interface TrackingContextValue {
 
 const TrackingContext = React.createContext<TrackingContextValue>({
   uuid: false,
+  isStrapiVersionReady: false,
 });
 
 /* -------------------------------------------------------------------------------------------------
@@ -49,8 +58,19 @@ const TrackingProvider = ({ children }: TrackingProviderProps) => {
   const { data } = useTelemetryPropertiesQuery(undefined, {
     skip: !initData?.uuid || !token,
   });
+  const versionQueryEnabled = Boolean(initData?.uuid && token);
+  const {
+    data: appInfo,
+    isLoading: isLoadingAppInfo,
+    isError: isInformationError,
+  } = useInformationQuery(undefined, {
+    skip: !versionQueryEnabled,
+  });
+  const strapiVersion = appInfo?.strapiVersion;
+  const isStrapiVersionReady =
+    Boolean(strapiVersion) || (versionQueryEnabled && isInformationError);
   React.useEffect(() => {
-    if (uuid && data) {
+    if (uuid && data && !isLoadingAppInfo) {
       const event = 'didInitializeAdministration';
       try {
         fetch(`${process.env.STRAPI_ANALYTICS_URL || 'https://analytics.strapi.io'}/api/v2/track`, {
@@ -64,6 +84,7 @@ const TrackingProvider = ({ children }: TrackingProviderProps) => {
               ...data,
               projectId: uuid,
               registeredWidgets: getAllWidgets().map((widget) => widget.uid),
+              version: strapiVersion,
             },
           }),
           headers: {
@@ -75,13 +96,15 @@ const TrackingProvider = ({ children }: TrackingProviderProps) => {
         // silence is golden
       }
     }
-  }, [data, uuid, getAllWidgets]);
+  }, [data, uuid, getAllWidgets, isLoadingAppInfo, strapiVersion]);
   const value = React.useMemo(
     () => ({
       uuid,
       telemetryProperties: data,
+      strapiVersion,
+      isStrapiVersionReady,
     }),
-    [uuid, data]
+    [uuid, data, strapiVersion, isStrapiVersionReady]
   );
 
   return <TrackingContext.Provider value={value}>{children}</TrackingContext.Provider>;
@@ -196,7 +219,8 @@ export interface EventWithoutProperties {
     | 'didLaunchGuidedtour'
     | 'didEditAICaption'
     | 'didEditAIAlternativeText'
-    | 'didGenerateMetadataRetroactively';
+    | 'didGenerateMetadataRetroactively'
+    | 'didActOnFolders';
 
   properties?: never;
 }
@@ -546,7 +570,7 @@ const useTracking = (): UseTrackingReturn => {
   const deviceType = useDeviceType();
   const deviceTypeRef = React.useRef(deviceType);
   deviceTypeRef.current = deviceType;
-  const { uuid, telemetryProperties } = React.useContext(TrackingContext);
+  const { uuid, telemetryProperties, strapiVersion } = React.useContext(TrackingContext);
   const userId = useAppInfo('useTracking', (state) => state.userId);
   const trackUsage = React.useCallback(
     async <TEvent extends TrackingEvent>(
@@ -568,6 +592,7 @@ const useTracking = (): UseTrackingReturn => {
                 ...telemetryProperties,
                 projectId: uuid,
                 projectType: window.strapi.projectType,
+                version: strapiVersion,
               },
             },
             {
@@ -586,10 +611,15 @@ const useTracking = (): UseTrackingReturn => {
 
       return null;
     },
-    [telemetryProperties, userId, uuid]
+    [strapiVersion, telemetryProperties, userId, uuid]
   );
 
   return { trackUsage };
 };
 
-export { TrackingProvider, useTracking };
+/**
+ * Internal readiness signal for events that must wait for the provider's version.
+ */
+const useStrapiVersionReady = () => React.useContext(TrackingContext).isStrapiVersionReady;
+
+export { TrackingProvider, useTracking, useStrapiVersionReady };

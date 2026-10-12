@@ -1,0 +1,55 @@
+views {
+  view database_persistence of strapi.server_runtime {
+    title '05 Code reference / Database / Queries relations and transactions'
+    description '''
+      **Audience:** contributors. **Question:** what happens below Document Service when entries are read or written?
+      These cards group responsibilities within @strapi/database. Repositories orchestrate entry/relation work and lifecycle hooks; query building uses metadata, populate and the active transaction before SQL execution. Arrows show dependencies, not a fixed call sequence.
+      Document Service owns document-level semantics above the entry layer. One operation may touch multiple entries and relation tables. Direct Knex work bypasses database lifecycle hooks; database hooks and document middleware are different extension points.
+      Database transactions do not include media-provider or webhook side effects. Open metadata for schema evolution or the database for persistent state.
+    '''
+    include
+      strapi.server_runtime.document_service with { navigateTo document_service_code },
+      strapi.server_runtime.db_repository,
+      strapi.server_runtime.db_lifecycles,
+      strapi.server_runtime.db_query_builder,
+      strapi.server_runtime.db_metadata with { navigateTo database_schema_evolution },
+      strapi.server_runtime.db_transactions,
+      strapi.server_runtime.db_connection,
+      strapi.database with { navigateTo application_state }
+    exclude * -> *
+    include
+      strapi.server_runtime.document_service -> strapi.server_runtime.db_repository,
+      strapi.server_runtime.db_repository -> strapi.server_runtime.db_lifecycles,
+      strapi.server_runtime.db_repository -> strapi.server_runtime.db_query_builder,
+      strapi.server_runtime.db_query_builder -> strapi.server_runtime.db_metadata,
+      strapi.server_runtime.db_query_builder -> strapi.server_runtime.db_transactions,
+      strapi.server_runtime.db_query_builder -> strapi.server_runtime.db_connection,
+      strapi.server_runtime.db_connection -> strapi.database
+    autoLayout TopBottom 50 35
+  }
+  view database_schema_evolution of strapi.server_runtime {
+    title '03 Engineering / Database / Startup schema evolution'
+    link ../backup_and_recovery/ 'Related: backup and recovery boundaries'
+    description '''
+      **Audience:** contributors and operators. **Question:** how do deployed definitions become database structure?
+      Bootstrap transforms loaded content types/components to database models and loads metadata. Schema synchronization runs pending migrations first when applicable, then compares desired metadata with the tracked schema and inspected database state. Changes can update tables, columns, indexes and relations.
+      Arrows describe data dependencies and orchestration, not exact timing. The stored snapshot records schema bookkeeping, not user content. Unchanged schema hashes can skip synchronization.
+      This is separate from deploying code and from transferring content. Existing data does not guarantee a reversible schema change; rehearse upgrades and recovery with a compatible application build. Content-type edits belong in definitions, not ad hoc SQL migrations.
+    '''
+    include
+      strapi.application_source.content_type_schema_files with { navigateTo content_type_builder_schema_change_flow },
+      strapi.server_runtime.db_metadata,
+      strapi.server_runtime.schema_sync,
+      strapi.server_runtime.db_migrations,
+      strapi.server_runtime.db_schema_snapshot,
+      strapi.database with { navigateTo application_state }
+    exclude * -> *
+    include
+      strapi.server_runtime.db_metadata -> strapi.application_source.content_type_schema_files,
+      strapi.server_runtime.schema_sync -> strapi.server_runtime.db_metadata,
+      strapi.server_runtime.schema_sync -> strapi.server_runtime.db_migrations,
+      strapi.server_runtime.schema_sync -> strapi.server_runtime.db_schema_snapshot,
+      strapi.server_runtime.schema_sync -> strapi.database
+    autoLayout LeftRight 65 40
+  }
+}

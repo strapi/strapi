@@ -15,8 +15,7 @@ export const createInternalMigrationProvider = (db: Database): InternalMigration
     storage: createStorage({ db, tableName: 'strapi_migrations_internal' }),
     logger: {
       info(message) {
-        // NOTE: only log internal migration in debug mode
-        db.logger.debug(transformLogMessage('info', message));
+        db.logger.info(transformLogMessage('info', message));
       },
     },
     getMigrations: async () =>

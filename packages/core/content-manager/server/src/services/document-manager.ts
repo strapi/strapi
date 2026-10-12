@@ -1,20 +1,21 @@
-import { omit, pipe } from 'lodash/fp';
+import { omit, flow } from 'lodash';
 
-import { contentTypes, errors, pagination } from '@strapi/utils';
+import { contentTypes, pagination } from '@strapi/utils';
 import type { Core, Modules, UID } from '@strapi/types';
 
 import { buildDeepPopulate, getDeepPopulate, getDeepPopulateDraftCount } from './utils/populate';
+import { EMPTY_DRAFT_RELATION_COUNTS } from './utils/draft-relations';
 import { sumDraftCounts } from './utils/draft';
 
 type DocService = Modules.Documents.ServiceInstance;
 type DocServiceParams<TAction extends keyof DocService> = Parameters<DocService[TAction]>[0];
 export type Document = Modules.Documents.Result<UID.ContentType>;
 
-const { ApplicationError } = errors;
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypes.constants;
 
-const omitPublishedAtField = omit(PUBLISHED_AT_ATTRIBUTE);
-const omitIdField = omit('id');
+const omitPublishedAtField = <T extends object>(document: T) =>
+  omit(document, PUBLISHED_AT_ATTRIBUTE);
+const omitIdField = <T extends object>(document: T) => omit(document, 'id');
 
 const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
   return {
@@ -96,7 +97,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       uid: UID.CollectionType,
       opts: Omit<DocServiceParams<'update'>, 'documentId'> = {} as any
     ) {
-      const publishData = pipe(omitPublishedAtField, omitIdField)(opts.data || {});
+      const publishData = flow(omitPublishedAtField, omitIdField)(opts.data || {});
       const populate = opts.populate ?? (await buildDeepPopulate(uid));
       const params = { ...opts, data: publishData, populate, status: 'draft' };
 
@@ -114,7 +115,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       const locale = body?.locale;
       const params = {
         // Ensure id and documentId are not copied to the clone
-        data: omit(['id', 'documentId'], body),
+        data: omit(body, ['id', 'documentId']),
         locale,
         populate,
       };
@@ -244,14 +245,12 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       const { populate, hasRelations } = getDeepPopulateDraftCount(uid);
 
       if (!hasRelations) {
-        return { unpublishedRelations: 0, draftM2mLinks: 0 };
+        return EMPTY_DRAFT_RELATION_COUNTS;
       }
 
       const document = await strapi.documents(uid).findOne({ documentId: id, populate, locale });
       if (!document) {
-        throw new ApplicationError(
-          `Unable to count draft relations, document with id ${id} and locale ${locale} not found`
-        );
+        return EMPTY_DRAFT_RELATION_COUNTS;
       }
 
       return sumDraftCounts(strapi, document, uid);

@@ -275,6 +275,28 @@ export declare namespace CreateFilesStream {
  * The final `stream:complete` event carries the same shape as CreateFilesStream.Response.
  */
 export declare namespace CreateFilesStreamEvents {
+  export interface FileFetchingEvent {
+    url: string;
+    index: number;
+    total: number;
+  }
+
+  /**
+   * Byte progress of the remote -> server temp file transfer, throttled server-side.
+   *
+   * `loadedBytes` / `totalBytes` rather than `loaded` / `total`: `total` already means
+   * "number of files in the batch" on the fetching and uploading events.
+   *
+   * `totalBytes` is `null` when the remote sent no usable `Content-Length` — consumers must
+   * leave the row indeterminate rather than invent a denominator.
+   */
+  export interface FileProgressEvent {
+    index: number;
+    loadedBytes: number;
+    totalBytes: number | null;
+    phase: 'fetch';
+  }
+
   export interface FileUploadingEvent {
     name: string;
     index: number;
@@ -300,6 +322,8 @@ export declare namespace CreateFilesStreamEvents {
   }
 
   export type SSEEventMap = {
+    'file:fetching': FileFetchingEvent;
+    'file:progress': FileProgressEvent;
     'file:uploading': FileUploadingEvent;
     'file:complete': FileCompleteEvent;
     'file:error': FileErrorEvent;

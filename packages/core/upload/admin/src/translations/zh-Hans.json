@@ -123,7 +123,7 @@
   "sort.updated_at_desc": "最近更新",
   "window.confirm.close-modal.file": "你确定吗？你的更改将会丢失",
   "window.confirm.close-modal.files": "你确定吗？你还有一些文件还没有被上传",
-  "apiError.FileTooBig": "上传的文件超过允许的最大资源大小",
+  "apiError.FileTooBig": "文件太大，无法上传。已超出服务器允许的最大请求大小",
   "upload.generic-error": "上传文件时发生错误",
   "bulk.select.label": "选择所有资源",
   "content.isLoading": "内容正在加载中",

@@ -18,6 +18,7 @@ import {
   useIsMobile,
   useClipboard,
   tours,
+  withEncodedUserParams,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -85,6 +86,7 @@ type ListViewQuery = {
   page?: string;
   pageSize?: string;
   sort?: string;
+  _q?: string;
 };
 
 const ListViewPage = () => {
@@ -231,9 +233,9 @@ const ListViewPage = () => {
         .map((s) => s.trim())
         .filter((s) => !/^status:(ASC|DESC)$/i.test(s))
         .join(',');
-      setQuery({ sort: cleaned || undefined }, 'push', true);
+      setQuery(withEncodedUserParams(query, { sort: cleaned || undefined }), 'push', true);
     }
-  }, [hasStatusFilter, query.sort, setQuery]);
+  }, [hasStatusFilter, query, setQuery]);
 
   const { data, error, isLoading, isFetching } = useGetAllDocumentsQuery(
     {
@@ -271,9 +273,13 @@ const ListViewPage = () => {
     }
   }, [pagination, formatMessage, query, navigate]);
 
-  const { canCreate } = useDocumentRBAC('ListViewPage', ({ canCreate }) => ({
-    canCreate,
-  }));
+  const { canCreate, isLoadingActionsRBAC } = useDocumentRBAC(
+    'ListViewPage',
+    ({ canCreate, isLoading }) => ({
+      canCreate,
+      isLoadingActionsRBAC: isLoading,
+    })
+  );
 
   const runHookWaterfall = useStrapiApp('ListViewPage', ({ runHookWaterfall }) => runHookWaterfall);
   /**
@@ -333,7 +339,7 @@ const ListViewPage = () => {
     model,
   ]);
 
-  if (isLoadingLayout || !isHydrated || isLoading) {
+  if (isLoadingLayout || !isHydrated || isLoading || isLoadingActionsRBAC) {
     return <Page.Loading />;
   }
 
@@ -621,6 +627,7 @@ const ListViewPage = () => {
               </Table.Root>
               <Pagination.Root
                 {...pagination}
+                defaultPageSize={list.settings.pageSize}
                 onPageSizeChange={() => trackUsage('willChangeNumberOfEntriesPerPage')}
               >
                 <Pagination.PageSize />
