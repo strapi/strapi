@@ -145,7 +145,7 @@ const LabelAction = ({ title, icon = 'earth' }: LabelActionProps) => {
   const Icon = icon === 'lock' ? Lock : Earth;
 
   return (
-    <Span tag="span" title={title}>
+    <Span tag="span">
       <VisuallyHidden tag="span">{formatMessage(title)}</VisuallyHidden>
       <Tooltip label={formatMessage(title)}>
         <Icon aria-hidden focusable={false} />

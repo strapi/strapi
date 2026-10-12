@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { isEmpty } from 'lodash/fp';
+import { isEmpty } from 'lodash';
 
 import {
   getSchemaExtendsTypeName,

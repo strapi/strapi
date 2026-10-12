@@ -1,5 +1,4 @@
 import _, { kebabCase } from 'lodash';
-import { trimChars, trimCharsEnd, trimCharsStart } from 'lodash/fp';
 import slugify from '@sindresorhus/slugify';
 
 const nameToSlug = (name: string, options: slugify.Options = { separator: '-' }) =>
@@ -28,15 +27,11 @@ const isKebabCase = (value: string) => /^([a-z][a-z0-9]*)(-[a-z0-9]+)*$/.test(va
 const startsWithANumber = (value: string) => /^[0-9]/.test(value);
 
 const joinBy = (joint: string, ...args: string[]) => {
-  const trim = trimChars(joint);
-  const trimEnd = trimCharsEnd(joint);
-  const trimStart = trimCharsStart(joint);
-
   return args.reduce((url, path, index) => {
     if (args.length === 1) return path;
-    if (index === 0) return trimEnd(path);
-    if (index === args.length - 1) return url + joint + trimStart(path);
-    return url + joint + trim(path);
+    if (index === 0) return _.trimEnd(path, joint);
+    if (index === args.length - 1) return url + joint + _.trimStart(path, joint);
+    return url + joint + _.trim(path, joint);
   }, '');
 };
 

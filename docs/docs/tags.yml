@@ -1,0 +1,55 @@
+# Tag vocabulary for the contributor docs. Keep it small (35 tags max) and cross-cutting.
+# Do not add tags that repeat a package folder name (`database`, `upload`...): the folder is the
+# navigation. Do not add statuses (`experimental`, `wip`): use the `status` frontmatter instead.
+backend:
+  label: Backend
+  description: Server-side code and design (Koa, services, database).
+cli:
+  label: CLI
+  description: Command line tools and commands.
+e2e:
+  label: E2E
+  permalink: /e2e
+  description: End-to-end tests with Playwright.
+enterprise-edition:
+  label: Enterprise Edition
+  description: Features and code paths gated by the Enterprise Edition license.
+frontend:
+  label: Frontend
+  description: Admin panel code and design (React, Redux, design system).
+hooks:
+  label: Hooks
+  description: React hooks of the admin panel and hook systems used to extend behavior.
+internal:
+  label: Internal
+  description: Private APIs that plugins and applications must not rely on.
+providers:
+  label: Providers
+  description: Pluggable providers (data transfer, upload, email).
+public-api:
+  label: Public API
+  description: APIs and types that are part of the supported public surface.
+rbac:
+  label: RBAC
+  description: Roles, permissions and the RBAC engine.
+relations:
+  label: Relations
+  description: Relations between documents, in the database and in the admin panel.
+security:
+  label: Security
+  description: Security defaults, validation and hardening.
+tech-design:
+  label: Tech design
+  description: Design documents that explain how a feature was built and why.
+telemetry:
+  label: Telemetry
+  description: Usage analytics sent from the server and the admin panel.
+testing:
+  label: Testing
+  description: Test strategy, infrastructure and how to write tests.
+type-system:
+  label: Type system
+  description: The TypeScript type system of Strapi (schemas, UIDs, registries).
+typescript:
+  label: TypeScript
+  description: TypeScript conventions and typing guidance.

@@ -1,6 +1,5 @@
 import path from 'path';
 
-import { omit } from 'lodash/fp';
 import { async, traverseEntity } from '@strapi/utils';
 
 import type { Schema, UID } from '@strapi/types';
@@ -328,22 +327,25 @@ const unsignImage = async (image: File, cache: SignCache = createSignCache()) =>
   }
 
   const names = getQueryParamNames(signedUrl);
-  const result: File = omit(['isUrlSigned'], {
+  const { isUrlSigned: _isUrlSigned, ...result }: File = {
     ...image,
     url: removeQueryParams(image.url ?? '', names),
-  });
+  };
 
   if (image.formats) {
     result.formats = Object.fromEntries(
-      getImageFormats(image).map(([key, format]) => [
-        key,
-        format && typeof format === 'object'
-          ? omit(['isUrlSigned'], {
-              ...format,
-              ...(format.url ? { url: removeQueryParams(format.url, names) } : {}),
-            })
-          : format,
-      ])
+      getImageFormats(image).map(([key, format]) => {
+        if (!format || typeof format !== 'object') {
+          return [key, format];
+        }
+
+        const { isUrlSigned: _formatIsUrlSigned, ...unsignedFormat } = {
+          ...format,
+          ...(format.url ? { url: removeQueryParams(format.url, names) } : {}),
+        };
+
+        return [key, unsignedFormat];
+      })
     );
   }
 

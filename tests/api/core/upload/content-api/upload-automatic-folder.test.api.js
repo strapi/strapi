@@ -7,7 +7,7 @@ const path = require('path');
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createContentAPIRequest, createAuthRequest } = require('api-tests/request');
-const { orderBy } = require('lodash/fp');
+const { orderBy } = require('lodash');
 
 const builder = createTestBuilder();
 const data = {
@@ -343,20 +343,21 @@ describe('Uploads folder', () => {
 
     test('Uploaded files with fileInfo', async () => {
       const fileInfo = orderBy(
+        [
+          {
+            name: 'file1',
+            alternativeText: 'file1',
+            caption: 'file1',
+          },
+          {
+            name: 'file2',
+            alternativeText: 'file2',
+            caption: 'file2',
+          },
+        ],
         'name',
         'asc'
-      )([
-        {
-          name: 'file1',
-          alternativeText: 'file1',
-          caption: 'file1',
-        },
-        {
-          name: 'file2',
-          alternativeText: 'file2',
-          caption: 'file2',
-        },
-      ]);
+      );
 
       const res = await rq({
         method: 'POST',

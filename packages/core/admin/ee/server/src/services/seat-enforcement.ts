@@ -1,28 +1,37 @@
-import { take, drop, map, prop, pick, reverse, isNil } from 'lodash/fp';
+import { pick, take, drop } from 'lodash';
+
 import { getService } from '../utils';
 import constants from '../../../../server/src/services/constants';
+import type { AdminUser } from '../../../../shared/contracts/shared';
 
 const { SUPER_ADMIN_CODE } = constants;
 
+type DisabledUser = Pick<AdminUser, 'id' | 'isActive'>;
+
 /**
- * Keeps the list of users disabled by the seat enforcement service
+ * Returns users disabled by seat enforcement, or an empty list when none are stored.
  */
-const getDisabledUserList = async () => {
-  return strapi.store.get({ type: 'ee', key: 'disabled_users' });
+const getDisabledUserList = async (): Promise<DisabledUser[]> => {
+  const disabledUsers = (await strapi.store.get({ type: 'ee', key: 'disabled_users' })) as
+    | DisabledUser[]
+    | null
+    | undefined;
+
+  return disabledUsers ?? [];
 };
 
 const enableMaximumUserCount = async (numberOfUsersToEnable: number) => {
-  const disabledUsers = (await getDisabledUserList()) as any;
-  const orderedDisabledUsers = reverse(disabledUsers);
+  const disabledUsers = await getDisabledUserList();
+  const orderedDisabledUsers = [...disabledUsers].reverse();
 
-  const usersToEnable = take(numberOfUsersToEnable, orderedDisabledUsers);
+  const usersToEnable = take(orderedDisabledUsers, numberOfUsersToEnable);
 
   await strapi.db.query('admin::user').updateMany({
-    where: { id: map(prop('id'), usersToEnable) },
+    where: { id: usersToEnable.map((user) => user?.id) },
     data: { isActive: true },
   });
 
-  const remainingDisabledUsers = drop(numberOfUsersToEnable, orderedDisabledUsers);
+  const remainingDisabledUsers = drop(orderedDisabledUsers, numberOfUsersToEnable);
 
   await strapi.store.set({
     type: 'ee',
@@ -32,7 +41,7 @@ const enableMaximumUserCount = async (numberOfUsersToEnable: number) => {
 };
 
 const disableUsersAboveLicenseLimit = async (numberOfUsersToDisable: number) => {
-  const currentlyDisabledUsers: any = (await getDisabledUserList()) ?? [];
+  const currentlyDisabledUsers = await getDisabledUserList();
 
   const usersToDisable = [];
   const nonSuperAdminUsersToDisable = await strapi.db.query('admin::user').findMany({
@@ -62,33 +71,35 @@ const disableUsersAboveLicenseLimit = async (numberOfUsersToDisable: number) => 
   }
 
   await strapi.db.query('admin::user').updateMany({
-    where: { id: map(prop('id'), usersToDisable) },
+    where: { id: usersToDisable.map((user) => user?.id) },
     data: { isActive: false },
   });
 
   await strapi.store.set({
     type: 'ee',
     key: 'disabled_users',
-    value: currentlyDisabledUsers.concat(map(pick(['id', 'isActive']), usersToDisable)),
+    value: currentlyDisabledUsers.concat(
+      usersToDisable.map((user) => pick(user, ['id', 'isActive']))
+    ),
   });
 };
 
 const syncDisabledUserRecords = async () => {
-  const disabledUsers = await strapi.store.get({ type: 'ee', key: 'disabled_users' });
+  const disabledUsers = await getDisabledUserList();
 
-  if (!disabledUsers) {
+  if (disabledUsers.length === 0) {
     return;
   }
 
   await strapi.db.query('admin::user').updateMany({
-    where: { id: map(prop('id'), disabledUsers) },
+    where: { id: Array.from(disabledUsers, (user) => user?.id) },
     data: { isActive: false },
   });
 };
 
 const seatEnforcementWorkflow = async () => {
   const adminSeats = strapi.ee.seats;
-  if (isNil(adminSeats)) {
+  if (adminSeats == null) {
     return;
   }
 

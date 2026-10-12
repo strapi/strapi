@@ -1,4 +1,4 @@
-import { defaultTo } from 'lodash/fp';
+import { defaultTo } from 'lodash';
 import { add } from 'date-fns';
 
 import type { Core } from '@strapi/types';
@@ -16,7 +16,7 @@ const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
 
 const getMetricsStoreValue = async (): Promise<MetricStoreValue> => {
   const value = await strapi.store.get({ type: 'plugin', name: 'upload', key: 'metrics' });
-  return defaultTo({}, value) as MetricStoreValue;
+  return defaultTo(value, {}) as MetricStoreValue;
 };
 const setMetricsStoreValue = (value: MetricStoreValue) =>
   strapi.store.set({ type: 'plugin', name: 'upload', key: 'metrics', value });
