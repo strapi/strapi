@@ -182,9 +182,12 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
 
     async publishMany(uid: UID.ContentType, documentIds: string[], locale?: string | string[]) {
       return strapi.db.transaction(async () => {
-        const results = await Promise.all(
-          documentIds.map((documentId) => this.publish(documentId, uid, { locale, populate: {} }))
-        );
+        // One transaction has one connection. Publishing in parallel overlaps
+        // queries on that connection and Postgres/MySQL then reject the action.
+        const results = [];
+        for (const documentId of documentIds) {
+          results.push(await this.publish(documentId, uid, { locale, populate: {} }));
+        }
 
         const publishedEntitiesCount = results.flat().filter(Boolean).length;
         return publishedEntitiesCount;
@@ -197,14 +200,14 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       opts: Omit<DocServiceParams<'unpublish'>, 'documentId'> = {} as any
     ) {
       const unpublishedEntries = await strapi.db.transaction(async () => {
-        return Promise.all(
-          documentIds.map((id) =>
-            strapi
-              .documents(uid)
-              .unpublish({ ...opts, documentId: id, populate: {} })
-              .then((result) => result?.entries)
-          )
-        );
+        const entries = [];
+        for (const id of documentIds) {
+          const result = await strapi
+            .documents(uid)
+            .unpublish({ ...opts, documentId: id, populate: {} });
+          entries.push(result?.entries);
+        }
+        return entries;
       });
 
       const unpublishedEntitiesCount = unpublishedEntries.flat().filter(Boolean).length;
