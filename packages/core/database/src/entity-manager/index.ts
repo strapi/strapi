@@ -170,7 +170,7 @@ const toAssocs = (data: Assocs) => {
   // connect/disconnect branch below, where it arrived without a `set` key and was
   // then indistinguishable from a delta payload — silently preserving the relation
   // instead of clearing it.
-  if (isRecord(data) && has('set', data) && data.set !== undefined) {
+  if (isRecord(data) && has(data, 'set') && data.set !== undefined) {
     return {
       set: data.set === null ? data.set : toIdArray(data.set),
     };
@@ -638,8 +638,8 @@ export const createEntityManager = (db: Database): EntityManager => {
             const isSingle =
               types.isRelationalAttribute(attribute) && isSingleRowMorphOne(attribute);
             const dataset = uniqBy(
-              'id',
-              isSingle ? (attachData ?? []).slice(-1) : (attachData ?? [])
+              isSingle ? (attachData ?? []).slice(-1) : (attachData ?? []),
+              'id'
             );
 
             const rows = dataset.map((data, idx) => {
@@ -909,10 +909,10 @@ export const createEntityManager = (db: Database): EntityManager => {
             // A partial update is a connect/disconnect delta payload (no `set` key),
             // which must modify only the listed relations — as opposed to a `set`/
             // scalar/array/null payload, which replaces the whole field. Gate on the
-            // payload *shape* (like regular joinTable relations at `!has('set', …)`),
+            // payload *shape* (like regular joinTable relations at `!has(…, 'set')`),
             // not on content, so that an empty delta (`{ connect: [] }` /
             // `{ disconnect: [] }`) is a no-op instead of wiping the field.
-            const isPartialUpdate = !has('set', cleanRelationData);
+            const isPartialUpdate = !has(cleanRelationData, 'set');
 
             if (isPartialUpdate) {
               // For single media a connect is last-wins and the field holds at most one
@@ -968,10 +968,10 @@ export const createEntityManager = (db: Database): EntityManager => {
                 // Dedup by id (see the create path): mixed scalar/object representations
                 // of the same file must produce exactly one physical row.
                 const connects = uniqBy(
-                  'id',
                   isSingle
                     ? (cleanRelationData.connect ?? []).slice(-1)
-                    : (cleanRelationData.connect ?? [])
+                    : (cleanRelationData.connect ?? []),
+                  'id'
                 );
 
                 // Query database to find the order of the last relation
@@ -1024,8 +1024,8 @@ export const createEntityManager = (db: Database): EntityManager => {
               // morphOne populate reads `order asc` + first — leave B observable with a
               // hidden C row, the same phantom-row defect the connect path guards against.
               const setData = uniqBy(
-                'id',
-                isSingle ? (cleanRelationData.set ?? []).slice(-1) : (cleanRelationData.set ?? [])
+                isSingle ? (cleanRelationData.set ?? []).slice(-1) : (cleanRelationData.set ?? []),
+                'id'
               );
 
               const rows = setData.map((data, idx) => ({
