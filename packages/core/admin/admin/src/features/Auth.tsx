@@ -23,7 +23,7 @@ import {
 import { normalizeAdminLocale } from '../translations/normalizeAdminLocale';
 import { subscribeToAdminSessionChanges } from '../utils/adminSessionSync';
 import { getOrCreateDeviceId } from '../utils/deviceId';
-import { establishAdminSession } from '../utils/establishAdminSession';
+import { establishAdminSession, refreshAdminIdentity } from '../utils/establishAdminSession';
 import {
   attemptTokenRefresh,
   getFetchClient,
@@ -404,6 +404,10 @@ const AuthProvider = ({
    * is already readable. Do not log out when the notice arrives without a
    * token — logout is the `isLoggedIn` removal above, and a cookie write that
    * is not visible yet must not end the new session.
+   *
+   * Use the same refresh as this tab's login. An invalidate while the previous
+   * bearer is still in flight is dropped, and that response would restore the
+   * previous user.
    */
   React.useEffect(() => {
     return subscribeToAdminSessionChanges(() => {
@@ -417,7 +421,7 @@ const AuthProvider = ({
         dispatch(setToken(nextToken));
       }
 
-      dispatch(adminApi.util.invalidateTags(['Me']));
+      refreshAdminIdentity(dispatch);
     });
   }, [dispatch, store]);
 

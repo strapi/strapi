@@ -116,10 +116,12 @@ const IdentityProbe = () => {
   const user = useAuth('IdentityProbe', (state) => state.user);
   const login = useAuth('IdentityProbe', (state) => state.login);
   const isLoading = useAuth('IdentityProbe', (state) => state.isLoading);
+  const token = useAuth('IdentityProbe', (state) => state.token);
 
   return (
     <div>
       <div data-testid="identity-loading">{String(isLoading)}</div>
+      <div data-testid="identity-token">{token ?? ''}</div>
       <div data-testid="identity-email">{user?.email ?? ''}</div>
       <div data-testid="identity-actions">
         {permissions.map((permission) => permission.action).join(',')}
@@ -169,6 +171,63 @@ const waitForUserB = async () => {
   await waitFor(() => expect(screen.getByTestId('identity-email')).toHaveTextContent(USER_B.email));
   expect(screen.getByTestId('identity-actions')).toHaveTextContent(PERMISSION_B.action);
   expect(screen.getByTestId('identity-actions')).not.toHaveTextContent(PERMISSION_A.action);
+};
+
+const bearer = (token: string) => `Bearer ${token}`;
+
+/**
+ * Keep the first bearer-A `getMe` / `getMyPermissions` responses pending.
+ * Warming user A until the screen settles lets those requests finish, which
+ * hides the race where invalidation is dropped while they are still running.
+ */
+const holdInFlightOldBearer = () => {
+  const authorizations: { me: Array<string | null>; permissions: Array<string | null> } = {
+    me: [],
+    permissions: [],
+  };
+  let released = false;
+  let releaseGate: () => void = () => {};
+  const gate = new Promise<void>((resolve) => {
+    releaseGate = () => {
+      if (!released) {
+        released = true;
+        resolve();
+      }
+    };
+  });
+
+  const identityResponse = (authorization: string | null, kind: 'me' | 'permissions') => {
+    const who = identityForAuthorization(authorization);
+
+    if (kind === 'me') {
+      return HttpResponse.json({ data: who === 'a' ? USER_A : USER_B });
+    }
+
+    return HttpResponse.json({
+      data: who === 'a' ? [PERMISSION_A] : [PERMISSION_B],
+    });
+  };
+
+  server.use(
+    http.get('/admin/users/me', async ({ request }) => {
+      const authorization = request.headers.get('Authorization');
+      authorizations.me.push(authorization);
+      if (authorization === bearer(TOKEN_A)) {
+        await gate;
+      }
+      return identityResponse(authorization, 'me');
+    }),
+    http.get('/admin/users/me/permissions', async ({ request }) => {
+      const authorization = request.headers.get('Authorization');
+      authorizations.permissions.push(authorization);
+      if (authorization === bearer(TOKEN_A)) {
+        await gate;
+      }
+      return identityResponse(authorization, 'permissions');
+    })
+  );
+
+  return { authorizations, release: releaseGate };
 };
 
 const renderIdentity = (ui: ReactElement = <IdentityProbe />) =>
@@ -307,6 +366,98 @@ describe('AuthProvider session identity', () => {
         value: originalBroadcastChannel,
       });
     }
+  });
+});
+
+describe('AuthProvider in-flight identity race', () => {
+  let releaseOldBearer: () => void = () => {};
+  let authorizations: { me: Array<string | null>; permissions: Array<string | null> } = {
+    me: [],
+    permissions: [],
+  };
+
+  beforeEach(() => {
+    window.localStorage.setItem('jwtToken', JSON.stringify(TOKEN_A));
+    window.localStorage.setItem('isLoggedIn', 'true');
+    const held = holdInFlightOldBearer();
+    releaseOldBearer = held.release;
+    authorizations = held.authorizations;
+  });
+
+  afterEach(() => {
+    releaseOldBearer();
+    window.localStorage.clear();
+    clearAuthCookie();
+  });
+
+  const waitForOldBearerInFlight = () =>
+    waitFor(() => {
+      expect({
+        me: authorizations.me,
+        permissions: authorizations.permissions,
+      }).toEqual({
+        me: [bearer(TOKEN_A)],
+        permissions: [bearer(TOKEN_A)],
+      });
+    });
+
+  const expectBearerBRefetch = () => {
+    expect(authorizations.me).toEqual([bearer(TOKEN_A), bearer(TOKEN_B)]);
+    expect(authorizations.permissions).toEqual([bearer(TOKEN_A), bearer(TOKEN_B)]);
+  };
+
+  it('refetches identity as the new user after login while old bearer requests are in flight', async () => {
+    server.use(
+      http.post('/admin/login', () =>
+        HttpResponse.json({
+          data: {
+            token: TOKEN_B,
+            user: USER_B,
+          },
+        })
+      )
+    );
+
+    const { user } = renderIdentity();
+
+    await waitForOldBearerInFlight();
+
+    await user.click(screen.getByRole('button', { name: 'login-as-b' }));
+
+    await waitFor(() => {
+      expect(window.localStorage.getItem('jwtToken')).toBe(JSON.stringify(TOKEN_B));
+    });
+    expect(authorizations.me).toEqual([bearer(TOKEN_A)]);
+    expect(authorizations.permissions).toEqual([bearer(TOKEN_A)]);
+
+    releaseOldBearer();
+
+    await waitForUserB();
+    expectBearerBRefetch();
+  });
+
+  it('refetches identity as the foreign session after old bearer requests are in flight', async () => {
+    renderIdentity();
+
+    await waitForOldBearerInFlight();
+
+    window.localStorage.setItem('jwtToken', JSON.stringify(TOKEN_B));
+    act(() => {
+      emitExternalSessionBroadcast();
+    });
+
+    // The foreign notice must be applied while bearer A is still pending.
+    // Releasing first lets the refetch succeed for the wrong reason.
+    await waitFor(() => {
+      expect(screen.getByTestId('identity-token')).toHaveTextContent(TOKEN_B);
+    });
+    expect(authorizations.me).toEqual([bearer(TOKEN_A)]);
+    expect(authorizations.permissions).toEqual([bearer(TOKEN_A)]);
+
+    releaseOldBearer();
+
+    await waitForUserB();
+    expectBearerBRefetch();
   });
 });
 
