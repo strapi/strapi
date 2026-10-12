@@ -112,6 +112,38 @@ const transactionCtx = {
       store.rollbackCallbacks.push(cb);
     }
   },
+
+  /**
+   * Runs `cb` in a savepoint of the current transaction, with its own commit and rollback
+   * callbacks. Once `cb` resolves, the savepoint is released and its callbacks wait for the
+   * outer transaction. If `cb` throws, only its writes are rolled back, its commit callbacks
+   * are dropped, its rollback callbacks run, and the error is rethrown.
+   */
+  async savepoint<T>(cb: () => Promise<T> | T): Promise<T> {
+    const parent = storage.getStore();
+    if (!parent?.trx) {
+      throw new Error('A savepoint can only be created inside a transaction');
+    }
+
+    // Knex runs a transaction started from a transaction as a savepoint
+    const trx = await parent.trx.transaction();
+    const store: Store = { trx, commitCallbacks: [], rollbackCallbacks: [] };
+
+    let result: T;
+    try {
+      result = await storage.run(store, cb);
+    } catch (error) {
+      await trx.rollback();
+      store.rollbackCallbacks.forEach((callback) => callback());
+      throw error;
+    }
+
+    await trx.commit();
+    parent.commitCallbacks.push(...store.commitCallbacks);
+    parent.rollbackCallbacks.push(...store.rollbackCallbacks);
+
+    return result;
+  },
 };
 
 export { transactionCtx };

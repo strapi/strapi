@@ -83,12 +83,17 @@ export const getReleaseChanges = (
   return changes;
 };
 
+/** A run that released entries: all of them (success) or only some (partial) */
 export interface TriggerDetails {
   published: number;
   unpublished: number;
+  /** Entries the run left out: not publishable, or their publish or unpublish threw */
   failed: number;
+  /** Only on a partial run that an error stopped after it released entries: the error's name */
+  reason?: string;
 }
 
+/** A run that released nothing: its writes were rolled back */
 export interface TriggerFailureDetails {
   /**
    * Only the error name is stored, capped in length. Error objects may contain
@@ -96,22 +101,12 @@ export interface TriggerFailureDetails {
    * arbitrary text in its name.
    */
   reason: string;
-  // A failed run is not atomic, so counts are not reported. Reserved for partial releases.
-  published?: number;
-  unpublished?: number;
-  failed?: number;
 }
 
 type TriggerEvent = ReleaseEvent &
   (
-    | { outcome: 'success'; published?: number; unpublished?: number }
-    | {
-        outcome: 'failure';
-        reason: string;
-        published?: number;
-        unpublished?: number;
-        failed?: number;
-      }
+    | ({ outcome: 'success' | 'partial' } & TriggerDetails)
+    | ({ outcome: 'failure' } & TriggerFailureDetails)
   );
 
 export interface SettingsUpdateDetails {
@@ -233,28 +228,18 @@ export const registerAuditEvents = (auditLogsLifecycle: AuditLogsLifecycle) => {
       const base = { resource: releaseResource(event), outcome: event.outcome };
 
       if (event.outcome === 'failure') {
-        return {
-          ...base,
-          details: {
-            reason: event.reason?.slice(0, MAX_REASON_LENGTH),
-            // Only when the emitter can attribute the counts.
-            ...(event.published != null && {
-              published: event.published,
-              unpublished: event.unpublished,
-              failed: event.failed,
-            }),
-          },
-        };
+        return { ...base, details: { reason: event.reason.slice(0, MAX_REASON_LENGTH) } };
       }
 
-      if (event.published != null && event.unpublished != null) {
-        return {
-          ...base,
-          details: { published: event.published, unpublished: event.unpublished, failed: 0 },
-        };
-      }
-
-      return base;
+      return {
+        ...base,
+        details: {
+          published: event.published,
+          unpublished: event.unpublished,
+          failed: event.failed,
+          ...(event.reason && { reason: event.reason.slice(0, MAX_REASON_LENGTH) }),
+        },
+      };
     }
   );
 

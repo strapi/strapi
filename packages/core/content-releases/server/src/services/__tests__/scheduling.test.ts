@@ -115,6 +115,30 @@ describe('Scheduling service', () => {
       expect(scheduledJobs.size).toBe(1);
       expect(strapiMock.cron.add).toHaveBeenCalledTimes(1);
     });
+
+    it('runs the release as a scheduled publish when the job fires', async () => {
+      const publish = jest.fn().mockResolvedValue({});
+      const strapiMock = {
+        ...baseStrapiMock,
+        db: {
+          query: jest.fn(() => ({
+            findOne: jest.fn().mockReturnValue({ id: 1 }),
+          })),
+        },
+        plugin: jest.fn(() => ({ service: jest.fn(() => ({ publish })) })),
+        requestContext: { run: jest.fn((_context, work) => work()) },
+      };
+
+      // @ts-expect-error Ignore missing properties
+      const schedulingService = createSchedulingService({ strapi: strapiMock });
+      await schedulingService.set('1', new Date());
+
+      // A scheduled run that would release nothing fails instead of being rejected like a manual one
+      const [[jobs]] = strapiMock.cron.add.mock.calls;
+      await jobs.publishRelease_1.task();
+
+      expect(publish).toHaveBeenCalledWith('1', { trigger: 'scheduled' });
+    });
   });
 
   describe('cancel', () => {

@@ -2,6 +2,7 @@ import {
   DEFAULT_RELEASE_CONDITION,
   RELEASE_ACTION_MODEL_UID,
   RELEASE_CONDITIONS,
+  RELEASE_STATUSES,
 } from '../../constants';
 
 export default {
@@ -38,7 +39,7 @@ export default {
     },
     status: {
       type: 'enumeration',
-      enum: ['ready', 'blocked', 'failed', 'done', 'empty'],
+      enum: [...RELEASE_STATUSES],
       required: true,
     },
     releaseCondition: {

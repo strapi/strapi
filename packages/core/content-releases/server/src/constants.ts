@@ -1,9 +1,13 @@
 export const RELEASE_MODEL_UID = 'plugin::content-releases.release';
 export const RELEASE_ACTION_MODEL_UID = 'plugin::content-releases.release-action';
 
-export const RELEASE_CONDITIONS = ['partial', 'all_or_nothing'] as const;
+export const RELEASE_CONDITIONS = ['allow_partial', 'all_or_nothing'] as const;
 export type ReleaseCondition = (typeof RELEASE_CONDITIONS)[number];
 export const DEFAULT_RELEASE_CONDITION = 'all_or_nothing' satisfies ReleaseCondition;
+
+// Planned (empty, ready, blocked) until a run, then frozen (done, partial, failed)
+export const RELEASE_STATUSES = ['ready', 'blocked', 'failed', 'done', 'partial', 'empty'] as const;
+export type ReleaseStatus = (typeof RELEASE_STATUSES)[number];
 
 export const ACTIONS = [
   {

@@ -16,6 +16,7 @@ import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
 import {
   Alert,
   Badge,
+  type BadgeProps,
   Box,
   Button,
   Divider,
@@ -65,25 +66,18 @@ const RelativeTime = styled(BaseRelativeTime)`
   }
 `;
 
+// `satisfies` makes a status without a color a compile error instead of a silent default
+const BADGE_COLOR_BY_STATUS = {
+  ready: 'success',
+  blocked: 'warning',
+  failed: 'danger',
+  done: 'primary',
+  partial: 'alternative',
+  empty: 'neutral',
+} satisfies Record<Release['status'], NonNullable<BadgeProps['variant']>>;
+
 const getBadgeProps = (status: Release['status']) => {
-  let color;
-  switch (status) {
-    case 'ready':
-      color = 'success';
-      break;
-    case 'blocked':
-      color = 'warning';
-      break;
-    case 'failed':
-      color = 'danger';
-      break;
-    case 'done':
-      color = 'primary';
-      break;
-    case 'empty':
-    default:
-      color = 'neutral';
-  }
+  const color = BADGE_COLOR_BY_STATUS[status];
 
   return {
     textColor: `${color}600`,

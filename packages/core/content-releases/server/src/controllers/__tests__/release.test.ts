@@ -4,6 +4,7 @@ const mockFindPage = jest.fn();
 const mockFindManyWithContentTypeEntryAttached = jest.fn();
 const mockFindManyWithoutContentTypeEntryAttached = jest.fn();
 const mockCountActions = jest.fn();
+const mockPublish = jest.fn();
 
 jest.mock('../../utils', () => ({
   getService: jest.fn(() => ({
@@ -13,6 +14,7 @@ jest.mock('../../utils', () => ({
     findManyWithoutContentTypeEntryAttached: mockFindManyWithoutContentTypeEntryAttached,
     countActions: mockCountActions,
     getContentTypesDataForActions: jest.fn(),
+    publish: mockPublish,
   })),
   getAllowedContentTypes: jest.fn(() => ['contentTypeA', 'contentTypeB']),
 }));
@@ -118,6 +120,23 @@ describe('Release controller', () => {
       expect(() => releaseController.update(ctx)).rejects.toThrow(
         'this field has unspecified keys: unknown'
       );
+    });
+  });
+
+  describe('publish', () => {
+    it('publishes the release as a manual publish', async () => {
+      mockPublish.mockResolvedValue({
+        release: { id: 1, status: 'done' },
+        counts: { published: 1, unpublished: 0 },
+        countsError: null,
+      });
+      const ctx = { params: { id: '1' } };
+
+      // A manual publish that would release nothing is rejected instead of failing the release
+      // @ts-expect-error partial context
+      await releaseController.publish(ctx);
+
+      expect(mockPublish).toHaveBeenCalledWith('1', { trigger: 'manual' });
     });
   });
 

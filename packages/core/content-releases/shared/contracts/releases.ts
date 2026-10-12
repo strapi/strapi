@@ -2,15 +2,15 @@ import { errors } from '@strapi/utils';
 import type { SanitizedAdminUser } from '@strapi/admin/strapi-admin';
 import type { Entity, UserInfo } from '../types';
 import type { ReleaseAction } from './release-actions';
-import type { ReleaseCondition } from '../../server/src/constants';
+import type { ReleaseCondition, ReleaseStatus } from '../../server/src/constants';
 
-export type { ReleaseCondition };
+export type { ReleaseCondition, ReleaseStatus };
 
 export interface Release extends Entity {
   name: string;
   releasedAt: string | null;
   scheduledAt: string | null;
-  status: 'ready' | 'blocked' | 'failed' | 'done' | 'empty';
+  status: ReleaseStatus;
   // We save scheduledAt always in UTC, but users can set the release in a different timezone to show that in the UI for everyone
   timezone: string | null;
   releaseCondition: ReleaseCondition;
