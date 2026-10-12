@@ -114,7 +114,10 @@ const authService = adminApi
         transformResponse(res: Login.Response) {
           return res.data;
         },
-        invalidatesTags: ['Me'],
+        // Do not invalidate `Me` here. This mutation fulfills before
+        // `establishAdminSession` stores the new token, so the refetch would
+        // still send the previous bearer token. RTK Query 1.9 then drops the
+        // invalidate that runs after the token is stored.
       }),
       logout: builder.mutation<void, { deviceId?: string } | void>({
         query: (body) => ({

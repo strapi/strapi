@@ -7,7 +7,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Login } from '../../../shared/contracts/authentication';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { createContext } from '../components/Context';
-import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
+import { useTypedDispatch, useTypedSelector, useTypedStore } from '../core/store/hooks';
 import { useStrapiApp } from '../features/StrapiApp';
 import { useQueryParams } from '../hooks/useQueryParams';
 import { useSessionKeepalive } from '../hooks/useSessionKeepalive';
@@ -21,6 +21,7 @@ import {
   useLogoutMutation,
 } from '../services/auth';
 import { normalizeAdminLocale } from '../translations/normalizeAdminLocale';
+import { subscribeToAdminSessionChanges } from '../utils/adminSessionSync';
 import { getOrCreateDeviceId } from '../utils/deviceId';
 import { establishAdminSession } from '../utils/establishAdminSession';
 import {
@@ -151,6 +152,7 @@ const AuthProvider = ({
 }: AuthProviderProps) => {
   const { formatMessage } = useIntl();
   const dispatch = useTypedDispatch();
+  const store = useTypedStore();
   const runRbacMiddleware = useStrapiApp('AuthProvider', (state) => state.rbac.run);
   const location = useLocation();
   const [{ rawQuery }] = useQueryParams();
@@ -395,6 +397,29 @@ const AuthProvider = ({
       window.removeEventListener('storage', handleUserStorageChange);
     };
   });
+
+  /**
+   * Another tab can switch the shared access token while this tab's `Me`
+   * cache still describes the previous user. Refresh only when the new token
+   * is already readable. Do not log out when the notice arrives without a
+   * token — logout is the `isLoggedIn` removal above, and a cookie write that
+   * is not visible yet must not end the new session.
+   */
+  React.useEffect(() => {
+    return subscribeToAdminSessionChanges(() => {
+      const nextToken = getStoredToken();
+      if (!nextToken) {
+        return;
+      }
+
+      const currentToken = store.getState().admin_app.token ?? null;
+      if (currentToken !== nextToken) {
+        dispatch(setToken(nextToken));
+      }
+
+      dispatch(adminApi.util.invalidateTags(['Me']));
+    });
+  }, [dispatch, store]);
 
   const login = React.useCallback<AuthContextValue['login']>(
     async ({ rememberMe, ...body }) => {

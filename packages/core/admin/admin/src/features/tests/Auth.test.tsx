@@ -1,8 +1,15 @@
+import type { ReactElement } from 'react';
+
 import { act, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
 import { useTypedDispatch } from '../../core/store/hooks';
 import { useSessionKeepalive } from '../../hooks/useSessionKeepalive';
+import {
+  ADMIN_SESSION_CHANNEL,
+  ADMIN_SESSION_MESSAGE_TYPE,
+  ADMIN_SESSION_STORAGE_KEY,
+} from '../../utils/adminSessionSync';
 import { establishAdminSession } from '../../utils/establishAdminSession';
 import {
   clearUnsavedChangesChecks,
@@ -45,20 +52,62 @@ const PERMISSION_B = {
   subject: null,
 };
 
-let currentUser: 'a' | 'b' = 'a';
+/**
+ * Identity is derived only from the bearer token. A refetch that still sends
+ * token A cannot satisfy assertions for user B.
+ */
+const identityForAuthorization = (authorization: string | null) => {
+  if (authorization === `Bearer ${TOKEN_B}`) {
+    return 'b' as const;
+  }
+
+  return 'a' as const;
+};
 
 const mockIdentityHandlers = () => {
   server.use(
-    http.get('/admin/users/me', () =>
-      HttpResponse.json({
-        data: currentUser === 'a' ? USER_A : USER_B,
-      })
-    ),
-    http.get('/admin/users/me/permissions', () =>
-      HttpResponse.json({
-        data: currentUser === 'a' ? [PERMISSION_A] : [PERMISSION_B],
-      })
-    )
+    http.get('/admin/users/me', ({ request }) => {
+      const who = identityForAuthorization(request.headers.get('Authorization'));
+
+      return HttpResponse.json({
+        data: who === 'a' ? USER_A : USER_B,
+      });
+    }),
+    http.get('/admin/users/me/permissions', ({ request }) => {
+      const who = identityForAuthorization(request.headers.get('Authorization'));
+
+      return HttpResponse.json({
+        data: who === 'a' ? [PERMISSION_A] : [PERMISSION_B],
+      });
+    })
+  );
+};
+
+const setAuthCookie = (token: string) => {
+  document.cookie = `jwtToken=${encodeURIComponent(token)}; Path=/admin`;
+};
+
+const clearAuthCookie = () => {
+  document.cookie = 'jwtToken=; Path=/admin; Expires=Thu, 01 Jan 1970 00:00:01 GMT';
+  document.cookie = 'jwtToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT';
+};
+
+/** What another document publishes after it has already written the new session. */
+const emitExternalSessionBroadcast = () => {
+  const channel = new BroadcastChannel(ADMIN_SESSION_CHANNEL);
+  channel.postMessage({
+    type: ADMIN_SESSION_MESSAGE_TYPE,
+    tabId: 'external-tab',
+  });
+  channel.close();
+};
+
+const emitExternalStorageSignal = () => {
+  window.dispatchEvent(
+    new StorageEvent('storage', {
+      key: ADMIN_SESSION_STORAGE_KEY,
+      newValue: `external-${Date.now()}`,
+    })
   );
 };
 
@@ -100,7 +149,6 @@ const EstablishSessionProbe = () => {
       <button
         type="button"
         onClick={() => {
-          currentUser = 'b';
           establishAdminSession(dispatch, { token: TOKEN_B });
         }}
       >
@@ -123,9 +171,15 @@ const waitForUserB = async () => {
   expect(screen.getByTestId('identity-actions')).not.toHaveTextContent(PERMISSION_A.action);
 };
 
+const renderIdentity = (ui: ReactElement = <IdentityProbe />) =>
+  render(ui, {
+    providerOptions: {
+      permissions: () => [],
+    },
+  });
+
 describe('AuthProvider session identity', () => {
   beforeEach(() => {
-    currentUser = 'a';
     window.localStorage.setItem('jwtToken', JSON.stringify(TOKEN_A));
     window.localStorage.setItem('isLoggedIn', 'true');
     mockIdentityHandlers();
@@ -133,28 +187,49 @@ describe('AuthProvider session identity', () => {
 
   afterEach(() => {
     window.localStorage.clear();
+    clearAuthCookie();
   });
 
-  it('refetches the current user and permissions after login without a page reload', async () => {
+  it('refetches warm identity with the new bearer token after password login', async () => {
     server.use(
-      http.post('/admin/login', () => {
-        currentUser = 'b';
-        return HttpResponse.json({
+      http.post('/admin/login', () =>
+        HttpResponse.json({
           data: {
             token: TOKEN_B,
             user: USER_B,
           },
-        });
-      })
+        })
+      )
     );
 
-    const { user } = render(<IdentityProbe />, {
-      providerOptions: {
-        permissions: () => [],
-      },
-    });
+    const { user } = renderIdentity();
 
     await waitForUserA();
+
+    await user.click(screen.getByRole('button', { name: 'login-as-b' }));
+
+    await waitForUserB();
+    expect(window.localStorage.getItem('jwtToken')).toBe(JSON.stringify(TOKEN_B));
+  });
+
+  it('loads identity after password login when no user was cached', async () => {
+    window.localStorage.removeItem('jwtToken');
+    window.localStorage.removeItem('isLoggedIn');
+
+    server.use(
+      http.post('/admin/login', () =>
+        HttpResponse.json({
+          data: {
+            token: TOKEN_B,
+            user: USER_B,
+          },
+        })
+      )
+    );
+
+    const { user } = renderIdentity();
+
+    expect(screen.getByTestId('identity-email')).toHaveTextContent('');
 
     await user.click(screen.getByRole('button', { name: 'login-as-b' }));
 
@@ -162,11 +237,7 @@ describe('AuthProvider session identity', () => {
   });
 
   it('refetches the current user and permissions after a new session is established without persist', async () => {
-    const { user } = render(<EstablishSessionProbe />, {
-      providerOptions: {
-        permissions: () => [],
-      },
-    });
+    const { user } = renderIdentity(<EstablishSessionProbe />);
 
     await waitForUserA();
 
@@ -174,6 +245,68 @@ describe('AuthProvider session identity', () => {
 
     await waitForUserB();
     expect(window.localStorage.getItem('jwtToken')).toBe(null);
+  });
+
+  it('refetches identity under the new persisted token when another tab changes the session', async () => {
+    renderIdentity();
+
+    await waitForUserA();
+
+    window.localStorage.setItem('jwtToken', JSON.stringify(TOKEN_B));
+    act(() => {
+      emitExternalSessionBroadcast();
+    });
+
+    await waitForUserB();
+  });
+
+  it('refetches identity under a cookie session when another tab drops the persisted token', async () => {
+    renderIdentity();
+
+    await waitForUserA();
+
+    window.localStorage.removeItem('jwtToken');
+    setAuthCookie(TOKEN_B);
+    act(() => {
+      emitExternalSessionBroadcast();
+    });
+
+    await waitForUserB();
+    expect(window.localStorage.getItem('jwtToken')).toBe(null);
+  });
+
+  it('refetches a cookie-only session from a storage signal when BroadcastChannel is unavailable', async () => {
+    const originalBroadcastChannel = globalThis.BroadcastChannel;
+    Object.defineProperty(globalThis, 'BroadcastChannel', {
+      configurable: true,
+      writable: true,
+      value: undefined,
+    });
+
+    window.localStorage.removeItem('jwtToken');
+    setAuthCookie(TOKEN_A);
+
+    try {
+      expect(typeof BroadcastChannel).toBe('undefined');
+
+      renderIdentity();
+
+      await waitForUserA();
+
+      setAuthCookie(TOKEN_B);
+      act(() => {
+        emitExternalStorageSignal();
+      });
+
+      await waitForUserB();
+      expect(window.localStorage.getItem('jwtToken')).toBe(null);
+    } finally {
+      Object.defineProperty(globalThis, 'BroadcastChannel', {
+        configurable: true,
+        writable: true,
+        value: originalBroadcastChannel,
+      });
+    }
   });
 });
 
