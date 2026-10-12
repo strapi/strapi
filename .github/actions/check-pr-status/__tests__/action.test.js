@@ -268,3 +268,25 @@ test('Test community PR may target a feature branch (stacked PR)', async () => {
 
   setFailed.mockRestore();
 });
+
+test('Test develop PR without a milestone is allowed', async () => {
+  github.context = {
+    payload: {
+      pull_request: {
+        base: {
+          ref: 'develop',
+        },
+        labels: [{ name: 'qa-done' }, { name: 'pr: enhancement' }, { name: 'source: core' }],
+        milestone: null,
+      },
+    },
+  };
+
+  const setFailed = jest.spyOn(core, 'setFailed');
+
+  await action();
+
+  expect(setFailed).not.toHaveBeenCalled();
+
+  setFailed.mockRestore();
+});
