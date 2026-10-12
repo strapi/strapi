@@ -46,7 +46,7 @@ import {
 import { relationsOrderer } from './relations-orderer';
 import type { Database } from '..';
 import type { Meta } from '../metadata';
-import type { ID } from '../types';
+import type { ID, RelationalAttribute, Relation } from '../types';
 import { EntityManager, Repository, Entity } from './types';
 
 export * from './types';
@@ -147,18 +147,15 @@ type Assocs =
     };
 
 /**
- * Media attributes are modelled as morph relations targeting the upload file model
- * (see transformAttribute in @strapi/core: `media` -> morphOne/morphMany on
- * `plugin::upload.file`). Single media is last-wins and holds at most one file.
- *
- * `morphOne` on its own is NOT a media marker — it is a generic inverse polymorphic
- * relation available to any content type — so last-wins truncation must be gated on
- * the upload target rather than on the relation kind.
+ * Single media is an inverse morphOne that must hold one join row. Core marks
+ * that attribute with `singleRow` in `transformAttribute`. A generic morphOne
+ * does not carry the flag, so last-wins truncation must not key off `morphOne`
+ * or the target UID.
  */
-const UPLOAD_FILE_UID = 'plugin::upload.file';
-
-const isSingleMediaAttribute = (attribute: { relation?: string; target?: string }) =>
-  attribute.relation === 'morphOne' && attribute.target === UPLOAD_FILE_UID;
+const isSingleRowMorphOne = (
+  attribute: RelationalAttribute
+): attribute is Relation.MorphOne & { singleRow: true } =>
+  attribute.relation === 'morphOne' && attribute.singleRow === true;
 
 const toAssocs = (data: Assocs) => {
   if (
@@ -638,22 +635,16 @@ export const createEntityManager = (db: Database): EntityManager => {
               continue;
             }
 
-            // Single media is last-wins and holds at most one file. Gate on the upload
-            // target, not on `morphOne`: `morphOne` is a generic inverse polymorphic
-            // relation that users can author against any content type. For a non-D&P
-            // source targeting a D&P model the Document Service deliberately expands one
-            // documentId into both the draft and published entity ids, so truncating a
-            // generic morphOne here would drop a legitimate row.
-            //
-            // Then deduplicate by target id before ordering/insert: toIdArray dedups with
-            // uniqWith(isEqual) *before* scalar and object entries are given a common
-            // shape, so `[B, { id: B }]` survives as two structurally different entries and
-            // would insert two identical morph rows — the join table has no composite
-            // uniqueness guard. Regular joinTable relations already guard this with
-            // uniqBy('id', ...); do the same here.
+            // Single media (`singleRow`) is last-wins. A generic morphOne must keep
+            // every row, including both draft and published ids the Document Service
+            // expands. Dedup by id after toIdArray: uniqWith(isEqual) runs before
+            // scalars and objects share a shape, so `[B, { id: B }]` would otherwise
+            // insert two identical join rows.
+            const isSingle =
+              types.isRelationalAttribute(attribute) && isSingleRowMorphOne(attribute);
             const dataset = uniqBy(
               'id',
-              isSingleMediaAttribute(attribute) ? (attachData ?? []).slice(-1) : (attachData ?? [])
+              isSingle ? (attachData ?? []).slice(-1) : (attachData ?? [])
             );
 
             const rows = dataset.map((data, idx) => {
@@ -913,9 +904,10 @@ export const createEntityManager = (db: Database): EntityManager => {
 
             const { idColumn, typeColumn } = morphColumn;
 
-            // Single *media* only — see isSingleMediaAttribute: a generic `morphOne`
-            // must keep every row the Document Service expanded for it.
-            const isSingle = isSingleMediaAttribute(attribute);
+            // Single media (`singleRow`) only. A generic morphOne must keep every
+            // row the Document Service expanded for it.
+            const isSingle =
+              types.isRelationalAttribute(attribute) && isSingleRowMorphOne(attribute);
             const hasConnect = !isEmpty(cleanRelationData.connect);
             const hasSet = !isEmpty(cleanRelationData.set);
 

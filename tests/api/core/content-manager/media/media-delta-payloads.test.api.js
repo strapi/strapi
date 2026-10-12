@@ -676,7 +676,7 @@ describe('CMS-1428 — media connect/disconnect delta payloads', () => {
   });
 
   describe('Non-media morphOne is never truncated', () => {
-    // Last-wins truncation is gated on the upload target, not on `relation === 'morphOne'`.
+    // Last-wins truncation is gated on the `singleRow` flag, not on `relation === 'morphOne'`.
     // A user-authored morphOne must keep every row written for it — notably the draft +
     // published entity rows the Document Service expands one documentId into.
     //
@@ -715,10 +715,13 @@ describe('CMS-1428 — media connect/disconnect delta payloads', () => {
   });
 
   describe('Connect dedup — heterogeneous representations of one file', () => {
-    // toIdArray dedups with uniqWith(isEqual) *before* scalar and object entries are given
-    // a common shape, so `[B, { id: B }]` survived as two structurally different entries.
-    // The morph join table has no composite uniqueness guard, so that inserted two
-    // identical rows. Every path now dedups by target id before insert.
+    // toIdArray dedups with uniqWith(isEqual) before scalar and object entries share a
+    // shape, so `[B, { id: B }]` is still two entries. The morph join table has no
+    // composite uniqueness guard. uniqBy('id') collapses them on the query-engine path.
+    //
+    // Content-manager writes go through the Document Service, which already gives both
+    // forms `{ id }` before the entity manager, so the REST cases below stay green even
+    // if that uniqBy is removed. The query-engine cases are the ones that lock it.
     test('create with { connect: [B, { id: B }] } on multiple media inserts one row', async () => {
       const create = await createEntry(
         MULTIPLE_UID,
@@ -775,6 +778,40 @@ describe('CMS-1428 — media connect/disconnect delta payloads', () => {
       const read = await getEntry(MULTIPLE_UID, documentId, ['gallery']);
       expect(read.body.data.gallery.map((f) => f.id)).toEqual([fileB]);
       expect(await countGalleryRows(id)).toBe(1);
+    });
+
+    test('query engine create with connect [B, { id: B }] inserts one row', async () => {
+      const created = await strapi.db.query(MULTIPLE_UID).create({
+        data: { gallery: { connect: [fileB, { id: fileB }] } },
+      });
+
+      expect(await countGalleryRows(created.id)).toBe(1);
+    });
+
+    test('query engine update connect [B, { id: B }] inserts one row', async () => {
+      const created = await strapi.db.query(MULTIPLE_UID).create({
+        data: { gallery: [fileA] },
+      });
+
+      await strapi.db.query(MULTIPLE_UID).update({
+        where: { id: created.id },
+        data: { gallery: { connect: [fileB, { id: fileB }] } },
+      });
+
+      expect(await countGalleryRows(created.id)).toBe(2);
+    });
+
+    test('query engine set [B, { id: B }] inserts one row', async () => {
+      const created = await strapi.db.query(MULTIPLE_UID).create({
+        data: { gallery: [fileA] },
+      });
+
+      await strapi.db.query(MULTIPLE_UID).update({
+        where: { id: created.id },
+        data: { gallery: { set: [fileB, { id: fileB }] } },
+      });
+
+      expect(await countGalleryRows(created.id)).toBe(1);
     });
   });
 });
