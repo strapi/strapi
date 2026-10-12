@@ -7,7 +7,7 @@ import { StageSelect } from './StageSelect';
 
 import type { DocumentActionProps } from '@strapi/content-manager/strapi-admin';
 
-const Header = ({ activeTab }: Pick<DocumentActionProps, 'activeTab'>) => {
+const Header = ({ activeTab = null }: Partial<Pick<DocumentActionProps, 'activeTab'>>) => {
   const isReviewWorkflowVisible = useIsReviewWorkflowVisible({
     activeTab,
   });
