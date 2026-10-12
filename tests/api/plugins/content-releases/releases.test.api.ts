@@ -29,6 +29,15 @@ const productModel = {
       type: 'string',
       required: true,
     },
+    // Checked at publish only: drafts skip unique and minimum length checks
+    sku: {
+      type: 'string',
+      unique: true,
+    },
+    code: {
+      type: 'string',
+      minLength: 3,
+    },
   },
 };
 
@@ -1187,6 +1196,99 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       expect(await hasPublishedVersion(productUID, publishedId)).toBe(false);
     });
 
+    test('allow_partial where every entry is released ends done', async () => {
+      const toPublishId = await createProduct({ valid: true });
+      const toUnpublishId = await createProduct({ valid: true });
+      await strapi.documents(productUID).publish({ documentId: toUnpublishId });
+
+      const release = await createReleaseWithActions('allow_partial', [
+        { documentId: toPublishId },
+        { documentId: toUnpublishId, type: 'unpublish' },
+      ]);
+
+      const res = await publishManually(release.id);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.status).toBe('done');
+
+      const found = await getRelease(release.id);
+      expect(found.status).toBe('done');
+      expect(found.releasedAt).not.toBeNull();
+      expect(await hasPublishedVersion(productUID, toPublishId)).toBe(true);
+      expect(await hasPublishedVersion(productUID, toUnpublishId)).toBe(false);
+    });
+
+    const createProductWithTakenSku = async (): Promise<string> => {
+      // Per test: a published value stays taken for the tests after it
+      const sku = `sku-${Math.random().toString(36).slice(2)}`;
+      const { data: holder } = await createEntry(productUID, {
+        name: 'Holds the sku',
+        description: 'Description',
+        sku,
+      });
+      await strapi.documents(productUID).publish({ documentId: holder.documentId });
+      const { data } = await createEntry(productUID, {
+        name: 'Same sku',
+        description: 'Description',
+        sku,
+      });
+
+      return data.documentId;
+    };
+
+    const createProductWithShortCode = async (): Promise<string> => {
+      const { data } = await createEntry(productUID, {
+        name: 'Short code',
+        description: 'Description',
+        code: 'ab',
+      });
+
+      return data.documentId;
+    };
+
+    test.each([
+      ['a unique value another published entry holds', createProductWithTakenSku],
+      ['a value shorter than its minimum length', createProductWithShortCode],
+    ])(
+      'allow_partial skips an entry with %s and publishes the others',
+      async (_, createSkipped) => {
+        const validId = await createProduct({ valid: true });
+        const skippedId = await createSkipped();
+        const release = await createReleaseWithActions('allow_partial', [
+          { documentId: skippedId },
+          { documentId: validId },
+        ]);
+
+        expect((await getRelease(release.id)).status).toBe('ready');
+
+        const res = await publishManually(release.id);
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data.status).toBe('partial');
+        expect(await hasPublishedVersion(productUID, validId)).toBe(true);
+        expect(await hasPublishedVersion(productUID, skippedId)).toBe(false);
+      }
+    );
+
+    test('allow_partial skips an entry that no longer exists', async () => {
+      const validId = await createProduct({ valid: true });
+      const vanishedId = await createProduct({ valid: true });
+      const release = await createReleaseWithActions('allow_partial', [
+        { documentId: vanishedId },
+        { documentId: validId },
+      ]);
+
+      // Removed without the hooks that take a deleted entry out of its releases, so its action
+      // stays and points at nothing
+      await strapi.db.query(productUID).delete({ where: { documentId: vanishedId } });
+
+      const res = await publishManually(release.id);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.status).toBe('partial');
+      expect(await hasPublishedVersion(productUID, validId)).toBe(true);
+    });
+
     test('allow_partial with no publishable entry: a manual publish is rejected and the release stays blocked', async () => {
       const invalidIds = [
         await createProduct({ valid: false }),
@@ -1243,6 +1345,40 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       const found = await getRelease(release.id);
       expect(found.status).toBe('failed');
       expect(await hasPublishedVersion(productUID, validId)).toBe(false);
+    });
+
+    test('a failed release publishes once its entries are fixed', async () => {
+      const validId = await createProduct({ valid: true });
+      const invalidId = await createProduct({ valid: false });
+      const release = await createReleaseWithActions('all_or_nothing', [
+        { documentId: validId },
+        { documentId: invalidId },
+      ]);
+
+      await expect(runScheduled(release.id)).rejects.toThrow(INVALID_PRODUCT_MESSAGE);
+      expect((await getRelease(release.id)).status).toBe('failed');
+
+      const fixRes = await rq({
+        method: 'PUT',
+        url: `/content-manager/collection-types/${productUID}/${invalidId}`,
+        body: { description: 'Fixed' },
+      });
+      expect(fixRes.statusCode).toBe(200);
+
+      // The update revalidates the entry's release actions without awaiting it: wait for the
+      // status it writes, so it can't overwrite the run's
+      let status;
+      for (let attempt = 0; attempt < 20 && status !== 'ready'; attempt += 1) {
+        status = (await getRelease(release.id)).status;
+      }
+      expect(status).toBe('ready');
+
+      const res = await publishManually(release.id);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.status).toBe('done');
+      expect(await hasPublishedVersion(productUID, validId)).toBe(true);
+      expect(await hasPublishedVersion(productUID, invalidId)).toBe(true);
     });
 
     test('all_or_nothing manual publish stores the validity it found, so out-of-date state reads blocked', async () => {
@@ -1401,6 +1537,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
 
     test('a manual publish of an allow_partial release with no entries ends done', async () => {
       const release = (await createRelease({ releaseCondition: 'allow_partial' })).body.data;
+      expect((await getRelease(release.id)).status).toBe('empty');
 
       const res = await publishManually(release.id);
 
