@@ -28,6 +28,39 @@ export interface Store {
 
 const storage = new AsyncLocalStorage<Store>();
 
+const isDeadlockError = (error: unknown) => {
+  const seen = new Set<unknown>();
+
+  const matches = (candidate: unknown): boolean => {
+    if (!candidate || typeof candidate !== 'object' || seen.has(candidate)) {
+      return false;
+    }
+
+    seen.add(candidate);
+    const current = candidate as {
+      code?: string;
+      errno?: number;
+      message?: string;
+      original?: unknown;
+      cause?: unknown;
+    };
+
+    if (
+      current.code === '40P01' ||
+      current.code === 'ER_LOCK_DEADLOCK' ||
+      current.errno === 1213 ||
+      current.message?.includes('deadlock detected') ||
+      current.message?.includes('Deadlock found')
+    ) {
+      return true;
+    }
+
+    return matches(current.original) || matches(current.cause);
+  };
+
+  return matches(error);
+};
+
 /**
  * Commit hooks do database work after the transaction finishes (document
  * events, history, audit logs). Waiting for them keeps that work on the
@@ -119,4 +152,4 @@ const transactionCtx = {
   },
 };
 
-export { transactionCtx };
+export { isDeadlockError, transactionCtx };
