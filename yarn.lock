@@ -10051,7 +10051,7 @@ __metadata:
     copyfiles: "npm:2.4.1"
     eslint-config-custom: "npm:5.57.0"
     fs-extra: "npm:11.3.4"
-    handlebars: "npm:4.7.9"
+    handlebars: "npm:4.7.10"
     jscodeshift: "npm:17.3.0"
     lodash: "npm:4.18.1"
     outdent: "npm:^0.8.0"
@@ -19721,7 +19721,25 @@ __metadata:
   languageName: node
   linkType: hard
 
-"handlebars@npm:4.7.9, handlebars@npm:^4.7.8":
+"handlebars@npm:4.7.10":
+  version: 4.7.10
+  resolution: "handlebars@npm:4.7.10"
+  dependencies:
+    minimist: "npm:^1.2.8"
+    neo-async: "npm:^2.6.2"
+    source-map: "npm:^0.6.1"
+    uglify-js: "npm:^3.1.4"
+    wordwrap: "npm:^1.0.0"
+  dependenciesMeta:
+    uglify-js:
+      optional: true
+  bin:
+    handlebars: bin/handlebars
+  checksum: 10c0/9b5573584ae5836172ae3f1502d9819568ba1b92ee83b81b18223beeb4c07486595e7b0fa633102beabc66ed06fe6e7da1dd9a9ea8c7072b9550b9a88809165c
+  languageName: node
+  linkType: hard
+
+"handlebars@npm:^4.7.8":
   version: 4.7.9
   resolution: "handlebars@npm:4.7.9"
   dependencies:
