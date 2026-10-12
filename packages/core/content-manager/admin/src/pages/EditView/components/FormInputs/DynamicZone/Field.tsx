@@ -8,7 +8,7 @@ import {
   useNotification,
 } from '@strapi/admin/strapi-admin';
 import { Box, Flex, VisuallyHidden } from '@strapi/design-system';
-import pipe from 'lodash/fp/pipe';
+import flow from 'lodash/flow';
 import { useIntl } from 'react-intl';
 
 import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
@@ -154,7 +154,7 @@ const DynamicZone = ({
       setAddComponentIsOpen(false);
 
       const form = createDefaultForm(schema, components);
-      const transformations = pipe(transformDocument(schema, components), (data) => ({
+      const transformations = flow(transformDocument(schema, components), (data) => ({
         ...data,
         __component: uid,
       }));

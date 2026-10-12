@@ -1,7 +1,7 @@
 import type { Core, Schema, Data } from '@strapi/types';
 
 import { traverseEntity } from '@strapi/utils';
-import { curry } from 'lodash/fp';
+import { curry } from 'lodash';
 
 import { getService } from '../../utils';
 

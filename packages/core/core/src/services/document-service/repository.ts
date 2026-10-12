@@ -1,4 +1,4 @@
-import { omit, assoc, curry, isEmpty, pick } from 'lodash/fp';
+import { curry, isEmpty, omit, pick } from 'lodash';
 
 import {
   async,
@@ -229,7 +229,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     });
     const withCount = parseWithCount(params.withCount);
 
-    const result = { ...omit(PAGINATION_KEYS, params) };
+    const result = { ...omit(params, PAGINATION_KEYS) };
     if (page !== undefined) result.page = page;
     if (pageSize !== undefined) result.pageSize = pageSize;
     if (start !== undefined) result.start = start;
@@ -251,7 +251,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       return params;
     }
 
-    return pick(ALLOWED_DOCUMENT_ROOT_PARAM_KEYS as unknown as string[], params) as Record<
+    return pick(params, ALLOWED_DOCUMENT_ROOT_PARAM_KEYS as unknown as string[]) as Record<
       string,
       unknown
     >;
@@ -368,7 +368,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       i18n.localeToLookup(contentType),
       transformParamsDocumentId(uid),
       transformParamsToQuery(uid),
-      (query) => assoc('where', { ...query.where, documentId }, query)
+      (query) => ({ ...query, where: { ...query.where, documentId } })
     )(params);
 
     return strapi.db.query(uid).findOne(query);
@@ -379,16 +379,16 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
 
     const lookupQuery = await async.pipe(
       validateParams,
-      omit('status'),
+      (value) => omit(value, 'status'),
       i18n.defaultLocale(contentType),
       i18n.multiLocaleToLookup(contentType),
       transformParamsToQuery(uid),
-      (query) => assoc('where', { ...query.where, documentId }, query)
+      (query) => ({ ...query, where: { ...query.where, documentId } })
     )(params);
 
     const selectionQuery = await async.pipe(
       validateParams,
-      omit('status'),
+      (value) => omit(value, 'status'),
       pickSelectionParams,
       transformParamsToQuery(uid)
     )(params);
@@ -462,7 +462,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       entriesToClone,
       async (entryToClone: Record<string, unknown>) => {
         const sourceEntryId = entryToClone.id as number;
-        const originalData = omit(['id', 'createdAt', 'updatedAt'], entryToClone) as Record<
+        const originalData = omit(entryToClone, ['id', 'createdAt', 'updatedAt']) as Record<
           string,
           unknown
         >;
@@ -472,7 +472,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
           contentType,
           (modelUid) => strapi.getModel(modelUid as UID.Schema)
         );
-        const dataWithDocumentId = assoc('documentId', newDocumentId, data);
+        const dataWithDocumentId = { ...data, documentId: newDocumentId };
         const doc = await entries.create({
           ...queryParams,
           data: dataWithDocumentId,
@@ -673,7 +673,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       i18n.defaultLocale(contentType),
       i18n.multiLocaleToLookup(contentType),
       transformParamsToQuery(uid),
-      (query) => assoc('where', { ...query.where, documentId, publishedAt: { $ne: null } }, query)
+      (query) => ({ ...query, where: { ...query.where, documentId, publishedAt: { $ne: null } } })
     )(params);
 
     // Delete all published versions

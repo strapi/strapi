@@ -1,5 +1,7 @@
 import { useTracking as useStrapiTracking, TrackingEvent } from '@strapi/admin/strapi-admin';
 
+import { getMediaLibraryVersion } from '../../utils/mediaLibraryVersion';
+
 import { useAIMetadataAvailability } from './useAIMetadataAvailability';
 import { useSettings } from './useSettings';
 
@@ -15,6 +17,7 @@ export const useTracking = () => {
     return trackStrapiUsage(event, {
       ...properties,
       ...(isAiAvailable ? { isAiMediaLibraryConfigured: Boolean(data?.aiMetadata) } : {}),
+      mediaLibraryVersion: getMediaLibraryVersion(),
     } as TEvent['properties']);
   };
 

@@ -376,5 +376,20 @@ describe('migration providers', () => {
 
       await sqlite.destroy();
     });
+
+    it('exposes createFileBuilder and forwards down to pending providers', async () => {
+      const { db, sqlite } = createTestDatabase({ migrationsDir: tempDir });
+      const provider = createMigrationsProvider(db);
+
+      expect(provider.createFileBuilder().hasChanges()).toBe(false);
+
+      const internalDown = jest.spyOn(provider.providers.internal, 'down').mockResolvedValue();
+      jest.spyOn(provider.providers.internal, 'shouldRun').mockResolvedValue(true);
+
+      await provider.down();
+      expect(internalDown).toHaveBeenCalledTimes(1);
+
+      await sqlite.destroy();
+    });
   });
 });

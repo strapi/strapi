@@ -117,7 +117,6 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
               'date-fns/formatISO',
               'highlight.js',
               'lodash/capitalize',
-              'lodash/fp',
               'lodash/groupBy',
               'lodash/has',
               'lodash/isNil',
