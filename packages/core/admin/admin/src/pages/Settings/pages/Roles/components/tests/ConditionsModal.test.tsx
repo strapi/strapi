@@ -40,15 +40,21 @@ const renderModal = ({
     [CUSTOM]: selected.includes(CUSTOM),
   };
 
-  const modifiedData = {
+  const modifiedData: PermissionsDataManagerContextValue['modifiedData'] = {
     collectionTypes: {
       'api::article.article': {
         'plugin::content-manager.explorer.read': {
+          properties: {
+            enabled: true,
+          },
           conditions,
         },
       },
     },
-  } as PermissionsDataManagerContextValue['modifiedData'];
+    plugins: {},
+    settings: {},
+    singleTypes: {},
+  };
 
   const view = render(
     <PermissionsDataManagerProvider
