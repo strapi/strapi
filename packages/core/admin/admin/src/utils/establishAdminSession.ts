@@ -42,7 +42,19 @@ const drainRunningIdentityQueries = (dispatch: Dispatch, generation: number): Pr
       return Promise.resolve();
     }
 
-    const running = getRunningAdminIdentityQueries(dispatch).filter((query) => !seen.has(query));
+    // Synchronous snapshot only. Returning the drain promise from this `try`
+    // would let it reject outside the catch.
+    let running: ReturnType<typeof getRunningAdminIdentityQueries> | undefined;
+    let snapshotError: unknown;
+    try {
+      running = getRunningAdminIdentityQueries(dispatch).filter((query) => !seen.has(query));
+    } catch (error) {
+      snapshotError = error;
+    }
+
+    if (running === undefined) {
+      return Promise.reject(snapshotError);
+    }
 
     if (running.length === 0) {
       if (generation !== adminIdentityRefreshGeneration) {
@@ -64,12 +76,8 @@ const drainRunningIdentityQueries = (dispatch: Dispatch, generation: number): Pr
   };
 
   // The first snapshot stays synchronous, matching the previous async function
-  // up to its first await. A throw here still rejects the returned promise.
-  try {
-    return settleWave();
-  } catch (error) {
-    return Promise.reject(error);
-  }
+  // up to its first await.
+  return settleWave();
 };
 
 /**
