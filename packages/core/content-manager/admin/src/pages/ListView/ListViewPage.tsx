@@ -51,6 +51,7 @@ import {
   usePersistentPartialQueryParams,
 } from '../../hooks/usePersistentQueryParams';
 import { usePrev } from '../../hooks/usePrev';
+import { useGetContentTypeConfigurationQuery } from '../../services/contentTypes';
 import { useGetAllDocumentsQuery } from '../../services/documents';
 import { buildValidParams } from '../../utils/api';
 import { getTranslation } from '../../utils/translations';
@@ -62,6 +63,11 @@ import { listViewFilters as Filters } from './components/Filters';
 import { TableActions } from './components/TableActions';
 import { CellContent, hasContent } from './components/TableCells/CellContent';
 import { ViewSettingsMenu } from './components/ViewSettingsMenu';
+import {
+  applyAttributeRenamesToFilters,
+  applyAttributeRenamesToHeaders,
+  applyAttributeRenamesToSort,
+} from './utils/applyAttributeRenames';
 
 import type { Modules } from '@strapi/types';
 
@@ -134,6 +140,18 @@ const ListViewPage = () => {
   );
   const { isHydrated } = usePersistentPartialQueryParams(persistentQueryConfigs);
 
+  const { currentData: configuration } = useGetContentTypeConfigurationQuery(model);
+  const attributeRenames = React.useMemo(
+    () => configuration?.contentType?.attributeRenames ?? {},
+    [configuration?.contentType?.attributeRenames]
+  );
+  /**
+   * The schema can be cached before this configuration response arrives. Dropping
+   * unknown column names in that window deletes a renamed field before its new
+   * name is known, and the browser cannot get it back.
+   */
+  const configurationReady = configuration?.contentType?.uid === model;
+
   const [displayedHeaderNames, setDisplayedHeaderNames] = useScopedPersistentState<string[] | null>(
     `STRAPI_LIST_VIEW_DISPLAYED_HEADERS:${model}`,
     null
@@ -192,18 +210,29 @@ const ListViewPage = () => {
   }, [displayedHeaderNames, handleResetHeaders, list.layout]);
 
   React.useEffect(() => {
-    if (!schema?.attributes) return;
+    if (!configurationReady || !schema?.attributes) return;
     if (!displayedHeaderNames || displayedHeaderNames.length === 0) return;
     if (schema.uid !== model) return;
 
-    const allowedDisplayHeaders = displayedHeaderNames.filter((header) =>
-      Object.keys(schema?.attributes).includes(header)
+    const nextHeaders = applyAttributeRenamesToHeaders(
+      displayedHeaderNames,
+      schema.attributes,
+      attributeRenames
     );
+    const headersChanged = nextHeaders.some((name, index) => name !== displayedHeaderNames[index]);
 
-    if (allowedDisplayHeaders.length !== displayedHeaderNames.length) {
-      handleSetHeaders(allowedDisplayHeaders);
+    if (headersChanged || nextHeaders.length !== displayedHeaderNames.length) {
+      handleSetHeaders(nextHeaders);
     }
-  }, [displayedHeaderNames, handleSetHeaders, model, schema?.attributes, schema?.uid]);
+  }, [
+    attributeRenames,
+    configurationReady,
+    displayedHeaderNames,
+    handleSetHeaders,
+    model,
+    schema?.attributes,
+    schema?.uid,
+  ]);
 
   const [{ query }, setQuery] = useQueryParams<ListViewQuery>({
     page: '1',
@@ -213,7 +242,66 @@ const ListViewPage = () => {
       : '',
   });
 
-  const params = React.useMemo(() => buildValidParams(query), [query]);
+  React.useEffect(() => {
+    if (!configurationReady || !schema?.attributes || schema.uid !== model) {
+      return;
+    }
+
+    const nextSort =
+      typeof query.sort === 'string'
+        ? applyAttributeRenamesToSort(query.sort, schema.attributes, attributeRenames)
+        : query.sort;
+    const nextFilters = query.filters
+      ? applyAttributeRenamesToFilters(query.filters, schema.attributes, attributeRenames)
+      : query.filters;
+    const sortChanged = nextSort !== query.sort;
+    const filtersChanged = JSON.stringify(nextFilters) !== JSON.stringify(query.filters);
+
+    if (!sortChanged && !filtersChanged) {
+      return;
+    }
+
+    setQuery(
+      withEncodedUserParams(query, {
+        ...(sortChanged ? { sort: nextSort } : {}),
+        ...(filtersChanged ? { filters: nextFilters } : {}),
+      }),
+      'push',
+      true
+    );
+  }, [
+    attributeRenames,
+    configurationReady,
+    model,
+    query,
+    schema?.attributes,
+    schema?.uid,
+    setQuery,
+  ]);
+
+  const params = React.useMemo(() => {
+    if (!configurationReady || !schema?.attributes || schema.uid !== model) {
+      return buildValidParams(query);
+    }
+
+    return buildValidParams({
+      ...query,
+      ...(typeof query.sort === 'string'
+        ? {
+            sort: applyAttributeRenamesToSort(query.sort, schema.attributes, attributeRenames),
+          }
+        : {}),
+      ...(query.filters
+        ? {
+            filters: applyAttributeRenamesToFilters(
+              query.filters,
+              schema.attributes,
+              attributeRenames
+            ),
+          }
+        : {}),
+    });
+  }, [attributeRenames, configurationReady, model, query, schema?.attributes, schema?.uid]);
   const hasAppliedFilters = (query.filters?.$and?.length ?? 0) > 0;
   const hasStatusFilter = Boolean(
     query.filters?.$and?.some(
