@@ -1,4 +1,4 @@
-import type { Core, Modules, UID } from '@strapi/types';
+import type { Core, UID } from '@strapi/types';
 import { async, errors } from '@strapi/utils';
 import { pick, map, isEqual } from 'lodash';
 import type { StagePermission } from '../../../shared/contracts/review-workflows';
@@ -255,7 +255,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * Update the stage of an entity
      */
     async updateEntity(
-      entityToUpdate: Modules.Documents.AnyDocument,
+      entityToUpdate: {
+        id: number | string;
+        documentId: string;
+        locale: string;
+        updatedAt: string;
+      },
       model: UID.ContentType,
       stageId: any
     ) {
