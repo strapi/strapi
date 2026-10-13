@@ -106,4 +106,44 @@ describe('rewriteContentManagerConfiguration', () => {
   it('does nothing for a model that was not part of the rename and has no configuration', () => {
     expect(rewriteContentManagerConfiguration(null, { allRenames: renames })).toBeNull();
   });
+
+  it('moves both metadatas when two attributes swap names', () => {
+    const next = rewriteContentManagerConfiguration(
+      {
+        metadatas: {
+          title: { edit: { label: 'Title label' }, list: { label: 'Title label' } },
+          slug: { edit: { label: 'slug' }, list: { label: 'Slug label' } },
+        },
+        layouts: {
+          list: ['title', 'slug'],
+          edit: [
+            [
+              { name: 'title', size: 6 },
+              { name: 'slug', size: 6 },
+            ],
+          ],
+        },
+      },
+      {
+        ownRenames: { title: 'slug', slug: 'title' },
+        allRenames: { 'api::product.product': { title: 'slug', slug: 'title' } },
+      }
+    );
+
+    expect(next?.metadatas?.slug).toMatchObject({
+      edit: { label: 'Title label' },
+      list: { label: 'Title label' },
+    });
+    expect(next?.metadatas?.title).toMatchObject({
+      edit: { label: 'title' },
+      list: { label: 'Slug label' },
+    });
+    expect(next?.layouts?.list).toEqual(['slug', 'title']);
+    expect(next?.layouts?.edit).toEqual([
+      [
+        { name: 'slug', size: 6 },
+        { name: 'title', size: 6 },
+      ],
+    ]);
+  });
 });

@@ -48,4 +48,24 @@ describe('saved list query', () => {
       )
     ).toEqual({ $and: [{ productName: { $contains: 'Cloud' } }, { price: { $gt: 10 } }] });
   });
+
+  it('does not rewrite a nested field with the parent content-type map', () => {
+    expect(
+      applyAttributeRenamesToFilters(
+        {
+          $and: [
+            { category: { internalName: { $eq: 'News' } } },
+            { internalName: { $contains: 'Cloud' } },
+          ],
+        },
+        { ...attributes, category: { type: 'relation' } },
+        renames
+      )
+    ).toEqual({
+      $and: [
+        { category: { internalName: { $eq: 'News' } } },
+        { productName: { $contains: 'Cloud' } },
+      ],
+    });
+  });
 });

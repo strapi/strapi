@@ -93,32 +93,51 @@ const replaceNames = (names: string[] | undefined, renames: Record<string, strin
   return next;
 };
 
+const movedMetadata = (metadata: FieldMetadata, from: string, to: string): FieldMetadata => {
+  if (from === to) {
+    return metadata;
+  }
+
+  return {
+    ...metadata,
+    edit: metadata.edit
+      ? { ...metadata.edit, label: metadata.edit.label === from ? to : metadata.edit.label }
+      : metadata.edit,
+    list: metadata.list
+      ? { ...metadata.list, label: metadata.list.label === from ? to : metadata.list.label }
+      : metadata.list,
+  };
+};
+
+/**
+ * One pass over the original metadata. Applying the map in place deletes one
+ * side of a swap (`title -> slug`, `slug -> title`), because the destination
+ * key is still occupied when the source is moved.
+ */
 const renameMetadata = (
   metadatas: Record<string, FieldMetadata>,
   renames: Record<string, string>
 ): Record<string, FieldMetadata> => {
-  const next: Record<string, FieldMetadata> = { ...metadatas };
+  const next: Record<string, FieldMetadata> = {};
 
-  for (const [from, to] of Object.entries(renames)) {
-    const metadata = next[from];
+  for (const [name, metadata] of Object.entries(metadatas)) {
+    const to = renames[name];
 
-    if (!metadata || from === to) {
+    if (!to || to === name || next[to]) {
       continue;
     }
 
-    if (!next[to]) {
-      next[to] = {
-        ...metadata,
-        edit: metadata.edit
-          ? { ...metadata.edit, label: metadata.edit.label === from ? to : metadata.edit.label }
-          : metadata.edit,
-        list: metadata.list
-          ? { ...metadata.list, label: metadata.list.label === from ? to : metadata.list.label }
-          : metadata.list,
-      };
+    next[to] = movedMetadata(metadata, name, to);
+  }
+
+  for (const [name, metadata] of Object.entries(metadatas)) {
+    const to = renames[name];
+
+    if ((to && to !== name) || next[name]) {
+      continue;
     }
 
-    delete next[from];
+    next[name] = metadata;
   }
 
   return next;

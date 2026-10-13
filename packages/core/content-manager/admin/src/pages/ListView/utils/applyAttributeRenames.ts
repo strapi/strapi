@@ -69,23 +69,32 @@ const applyAttributeRenamesToSort = (
 const applyAttributeRenamesToFilters = <T>(
   filters: T,
   attributes: Attributes,
-  renames: Renames
+  renames: Renames,
+  renameKeys = true
 ): T => {
-  if (Array.isArray(filters)) {
-    return filters.map((entry) => applyAttributeRenamesToFilters(entry, attributes, renames)) as T;
+  // Keys inside a field belong to a relation, a component, or an operator.
+  // The map is this content-type's attributes, so those keys stay as they are.
+  if (!renameKeys || !filters || typeof filters !== 'object') {
+    return filters;
   }
 
-  if (!filters || typeof filters !== 'object') {
-    return filters;
+  if (Array.isArray(filters)) {
+    return filters.map((entry) =>
+      applyAttributeRenamesToFilters(entry, attributes, renames, true)
+    ) as T;
   }
 
   const next: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(filters)) {
-    const name =
-      key.startsWith('$') || key === '_q' ? key : renamedName(key, attributes, renames) ?? key;
+    if (key.startsWith('$') || key === '_q') {
+      next[key] = applyAttributeRenamesToFilters(value, attributes, renames, true);
+      continue;
+    }
 
-    next[name] = applyAttributeRenamesToFilters(value, attributes, renames);
+    const name = renamedName(key, attributes, renames) ?? key;
+
+    next[name] = applyAttributeRenamesToFilters(value, attributes, renames, false);
   }
 
   return next as T;

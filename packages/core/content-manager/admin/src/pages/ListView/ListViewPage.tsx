@@ -18,6 +18,7 @@ import {
   useIsMobile,
   useClipboard,
   tours,
+  deepEncodeQueryValues,
   withEncodedUserParams,
 } from '@strapi/admin/strapi-admin';
 import {
@@ -264,7 +265,7 @@ const ListViewPage = () => {
     setQuery(
       withEncodedUserParams(query, {
         ...(sortChanged ? { sort: nextSort } : {}),
-        ...(filtersChanged ? { filters: nextFilters } : {}),
+        ...(filtersChanged ? { filters: deepEncodeQueryValues(nextFilters) } : {}),
       }),
       'push',
       true
