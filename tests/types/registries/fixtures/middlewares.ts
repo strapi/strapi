@@ -1,4 +1,5 @@
 import type { Core } from '@strapi/strapi';
+import type { RateLimitOptions } from '@strapi/email/strapi-server';
 
 // Bundled packages register every middleware they ship: `strapi::*` from `@strapi/core`, `admin::*`
 // from `@strapi/admin`, and plugin middlewares such as `plugin::email.rateLimit`.
@@ -63,6 +64,16 @@ declare const inline: Core.MiddlewareHandler;
   // @ts-expect-error The favicon config is checked.
   middlewares: [{ name: 'strapi::favicon', config: { path: 1 } }],
 }) satisfies Core.RouteConfigFor;
+({
+  middlewares: [
+    { name: 'admin::rateLimit', config: { interval: { min: 1 }, max: 3 } },
+    { name: 'plugin::email.rateLimit', config: { interval: 60000, prefixKey: 'email' } },
+  ],
+}) satisfies Core.RouteConfigFor;
+({
+  // @ts-expect-error Rate limit options are checked.
+  middlewares: [{ name: 'admin::rateLimit', config: { max: '3' } }],
+}) satisfies Core.RouteConfigFor;
 
 // `Core.RouteConfig` keeps develop's type: names are not checked.
 ({ middlewares: ['global::unregistered', inline] }) satisfies Core.RouteConfig;
@@ -86,7 +97,7 @@ const unregistered = strapi.middleware('global::unregistered');
 const dynamic = strapi.middleware(dynamicName);
 declare const checks: [
   Expect<Equal<typeof responseTime, Core.MiddlewareFactory<undefined>>>,
-  Expect<Equal<typeof emailRateLimit, Core.MiddlewareFactory<unknown>>>,
+  Expect<Equal<typeof emailRateLimit, Core.MiddlewareFactory<RateLimitOptions | undefined>>>,
   Expect<Equal<typeof mapped, Core.MiddlewareFactory<undefined>>>,
   Expect<Equal<typeof unregistered, unknown>>,
   Expect<Equal<typeof dynamic, unknown>>,

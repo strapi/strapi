@@ -1,4 +1,5 @@
 import type { HasPermissionsConfig } from './policies';
+import type { RateLimitOptions } from './rate-limit';
 import type * as ActionService from '../services/action';
 import type { AdminTokenService, ContentApiTokenService } from '../services/api-token';
 import type CEAuthService from '../services/auth';
@@ -24,6 +25,7 @@ import type EESeatEnforcementService from '../../../ee/server/src/services/seat-
 import type EEUserService from '../../../ee/server/src/services/user';
 
 export type * as Policies from './policies';
+export type { RateLimitOptions } from './rate-limit';
 
 /**
  * A service that the EE edition deep-merges over its CE implementation. CE code sees the CE members;
@@ -89,9 +91,8 @@ declare global {
       }
 
       interface PackageMiddlewares {
-        // TODO @Nico The factory spreads its config over the koa2-ratelimit options read from
-        // `admin.rateLimit`; type it once those options have a contract.
-        'admin::rateLimit': unknown;
+        // Spread over the options read from `admin.rateLimit`.
+        'admin::rateLimit': RateLimitOptions | undefined;
         'admin::data-transfer': undefined;
       }
     }
