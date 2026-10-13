@@ -91,6 +91,35 @@ describe('generate', () => {
     expect(await pathExists(generated('contentTypes.d.ts'))).toBe(true);
   });
 
+  test('with strict types off, writes only the content-types and components files', async () => {
+    const { root, strapi } = await createApp({
+      'plugins.d.ts': "import type {} from '@vendor/plugin/strapi-server';\n",
+      'strict.d.ts': '// stale',
+    });
+
+    // `getTypeArtifacts` in @strapi/strapi with `typescript.strictTypes` off
+    await generate({
+      strapi,
+      pwd: root,
+      artifacts: {
+        contentTypes: true,
+        components: true,
+        plugins: false,
+        services: false,
+        controllers: false,
+        policies: false,
+        middlewares: false,
+        strict: false,
+      },
+      logger: { silent: true },
+    });
+
+    expect((await fs.readdir(path.join(root, 'types', 'generated'))).sort()).toEqual([
+      'components.d.ts',
+      'contentTypes.d.ts',
+    ]);
+  });
+
   test('toggling strict types rewrites the schema registries in the same files', async () => {
     const { root, strapi, generated } = await createApp();
     strapi.contentTypes = {
