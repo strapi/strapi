@@ -10780,7 +10780,6 @@ __metadata:
     "@koa/cors": "npm:5.0.0"
     "@koa/router": "npm:12.0.2"
     "@strapi/database": "npm:5.58.0"
-    "@strapi/logger": "npm:5.58.0"
     "@strapi/permissions": "npm:5.58.0"
     "@strapi/utils": "npm:5.58.0"
     commander: "npm:8.3.0"
@@ -10825,6 +10824,7 @@ __metadata:
     typedoc-plugin-markdown: "npm:4.11.0"
     typescript: "npm:5.9.3"
     undici: "npm:8.12.3"
+    winston: "npm:3.10.0"
     zod: "npm:4.4.3"
   languageName: unknown
   linkType: soft
