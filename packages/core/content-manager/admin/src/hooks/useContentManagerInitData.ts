@@ -13,7 +13,7 @@ import { useIntl } from 'react-intl';
 
 import { COLLECTION_TYPES, SINGLE_TYPES } from '../constants/collections';
 import { HOOKS } from '../constants/hooks';
-import { AppState, initialState, resetInitialData, setInitialData } from '../modules/app';
+import { AppState, initialState, setInitialData } from '../modules/app';
 import { useTypedDispatch, useTypedSelector } from '../modules/hooks';
 import { useGetAllContentTypeSettingsQuery } from '../services/contentTypes';
 import { useGetInitialDataQuery } from '../services/init';
@@ -223,12 +223,6 @@ const useContentManagerInitData = (): AppState => {
     contentTypeSettingsQuery.data,
     toggleNotification,
   ]);
-
-  useEffect(() => {
-    if (isLoadingAuth) {
-      dispatch(resetInitialData());
-    }
-  }, [dispatch, isLoadingAuth]);
 
   if (isLoadingAuth || state.adminUserId !== adminUserId) {
     return { ...initialState };

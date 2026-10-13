@@ -1,4 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { adminApi } from '@strapi/admin/strapi-admin';
 
 import { GetInitData } from '../../../shared/contracts/init';
 
@@ -62,14 +63,16 @@ const appSlice = createSlice({
       state.fieldSizes = fieldSizes;
       state.isLoading = false;
     },
-    resetInitialData() {
+  },
+  extraReducers(builder) {
+    builder.addCase(adminApi.util.resetApiState, () => {
       return initialState;
-    },
+    });
   },
 });
 
 const { actions, reducer } = appSlice;
-const { resetInitialData, setInitialData } = actions;
+const { setInitialData } = actions;
 
-export { initialState, reducer, resetInitialData, setInitialData };
+export { initialState, reducer, setInitialData };
 export type { AppState };
