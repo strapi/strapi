@@ -152,6 +152,26 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
     }
   };
 
+  // What a run did, written in its lock transaction: each entry's outcome, then the release's
+  // status. A run that released entries also sets `releasedAt`
+  const recordRun = async (
+    releaseId: Release['id'],
+    {
+      status,
+      outcomes,
+    }: {
+      status: Extract<Release['status'], 'done' | 'partial' | 'failed'>;
+      outcomes: Map<ReleaseAction['id'], RecordedOutcome>;
+    }
+  ) => {
+    await recordOutcomes(outcomes);
+
+    return strapi.db.query(RELEASE_MODEL_UID).update({
+      where: { id: releaseId },
+      data: { status, ...(status !== 'failed' && { releasedAt: new Date() }) },
+    });
+  };
+
   return {
     async create(releaseData: CreateRelease.Request['body'], { user }: { user: UserInfo }) {
       const releaseWithCreatorFields = await setCreatorFields({ user })(releaseData);
@@ -526,16 +546,9 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
             throw new errors.ValidationError('No entries were published');
           }
 
-          await recordOutcomes(outcomes);
-
-          const release = await strapi.db.query(RELEASE_MODEL_UID).update({
-            where: {
-              id: releaseId,
-            },
-            data: {
-              status: releasedCount === actions.length ? 'done' : 'partial',
-              releasedAt: new Date(),
-            },
+          const release = await recordRun(releaseId, {
+            status: releasedCount === actions.length ? 'done' : 'partial',
+            outcomes,
           });
 
           dispatchWebhook(ALLOWED_WEBHOOK_EVENTS.RELEASES_PUBLISH, {
@@ -559,13 +572,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
 
           try {
             // In the transaction too: a run the database rolls back records nothing
-            await recordOutcomes(outcomes);
-            await strapi.db
-              ?.queryBuilder(RELEASE_MODEL_UID)
-              .where({ id: releaseId })
-              .update(status === 'partial' ? { status, releasedAt: new Date() } : { status })
-              .transacting(trx)
-              .execute();
+            await recordRun(releaseId, { status, outcomes });
           } catch {
             // The transaction can't be written to anymore (on Postgres, a database error outside
             // a savepoint aborts it): it rolls back, entries released by the run included

@@ -798,7 +798,11 @@ describe('Release service', () => {
 
     it('records an error after entries were released as partial everywhere: status, webhook and audit', async () => {
       mockExecute.mockReturnValueOnce({ id: 1, name: 'March', releasedAt: null });
-      const builderUpdate = jest.fn().mockReturnThis();
+      const releaseUpdate = jest
+        .fn()
+        // The entries went out, then writing the release's outcome failed
+        .mockRejectedValueOnce(new errors.ApplicationError('Write failed'))
+        .mockResolvedValue({});
       const strapiMock = {
         ...baseStrapiMock,
         eventHub: { emit: jest.fn() },
@@ -810,18 +814,8 @@ describe('Release service', () => {
               .mockReturnValue([
                 { id: 1, contentType: 'collectionType', type: 'publish', entryDocumentId: 'a' },
               ]),
-            // The entries went out, then writing the release's outcome failed
-            update: jest.fn().mockRejectedValue(new errors.ApplicationError('Write failed')),
+            update: releaseUpdate,
             updateMany: jest.fn(),
-          }),
-          queryBuilder: jest.fn().mockReturnValue({
-            select: jest.fn().mockReturnThis(),
-            where: jest.fn().mockReturnThis(),
-            first: jest.fn().mockReturnThis(),
-            transacting: jest.fn().mockReturnThis(),
-            forUpdate: jest.fn().mockReturnThis(),
-            execute: mockExecute,
-            update: builderUpdate,
           }),
         },
         contentTypes: { collectionType: { kind: 'collectionType' } },
@@ -833,9 +827,9 @@ describe('Release service', () => {
       await expect(releaseService.publish(1, { trigger: 'manual' })).rejects.toThrow(
         'Write failed'
       );
-      expect(builderUpdate).toHaveBeenCalledWith({
-        status: 'partial',
-        releasedAt: expect.any(Date),
+      expect(releaseUpdate).toHaveBeenLastCalledWith({
+        where: { id: 1 },
+        data: { status: 'partial', releasedAt: expect.any(Date) },
       });
       expect(strapiMock.eventHub.emit).toHaveBeenCalledWith(
         'releases.publish',
@@ -901,7 +895,7 @@ describe('Release service', () => {
         .fn()
         .mockResolvedValueOnce(undefined)
         .mockRejectedValueOnce(new errors.ValidationError('Publish failed'));
-      const builderUpdate = jest.fn().mockReturnThis();
+      const releaseUpdate = jest.fn();
       const strapiMock = {
         ...baseStrapiMock,
         eventHub: { emit: jest.fn() },
@@ -909,21 +903,12 @@ describe('Release service', () => {
         db: {
           ...baseStrapiMock.db,
           savepoint: jest.fn((cb: () => unknown) => cb()),
-          queryBuilder: jest.fn().mockReturnValue({
-            select: jest.fn().mockReturnThis(),
-            where: jest.fn().mockReturnThis(),
-            first: jest.fn().mockReturnThis(),
-            transacting: jest.fn().mockReturnThis(),
-            forUpdate: jest.fn().mockReturnThis(),
-            execute: mockExecute,
-            update: builderUpdate,
-          }),
           query: jest.fn().mockReturnValue({
             findMany: jest.fn().mockReturnValue([
               { id: 1, contentType: 'collectionType', type: 'publish', entryDocumentId: 'a' },
               { id: 2, contentType: 'collectionType', type: 'publish', entryDocumentId: 'b' },
             ]),
-            update: jest.fn(),
+            update: releaseUpdate,
             updateMany: jest.fn(),
           }),
         },
@@ -938,7 +923,7 @@ describe('Release service', () => {
       );
       // One savepoint for the run: the entry released before the error is rolled back with it
       expect(strapiMock.db.savepoint).toHaveBeenCalledTimes(1);
-      expect(builderUpdate).toHaveBeenCalledWith({ status: 'failed' });
+      expect(releaseUpdate).toHaveBeenCalledWith({ where: { id: 1 }, data: { status: 'failed' } });
       expect(strapiMock.eventHub.emit).toHaveBeenCalledWith(
         'releases.publish',
         expect.objectContaining({ isPublished: false })
@@ -1069,7 +1054,6 @@ describe('Release service', () => {
         update: jest.fn(),
       };
       const publish = jest.fn();
-      const builderUpdate = jest.fn().mockReturnThis();
       const strapiMock = {
         ...baseStrapiMock,
         eventHub: { emit: jest.fn() },
@@ -1084,15 +1068,6 @@ describe('Release service', () => {
           ...baseStrapiMock.db,
           savepoint: jest.fn((cb: () => unknown) => cb()),
           query: jest.fn().mockReturnValue(releaseQuery),
-          queryBuilder: jest.fn().mockReturnValue({
-            select: jest.fn().mockReturnThis(),
-            where: jest.fn().mockReturnThis(),
-            first: jest.fn().mockReturnThis(),
-            transacting: jest.fn().mockReturnThis(),
-            forUpdate: jest.fn().mockReturnThis(),
-            execute: mockExecute,
-            update: builderUpdate,
-          }),
         },
         contentTypes: { collectionType: { kind: 'collectionType' } },
       };
@@ -1107,7 +1082,8 @@ describe('Release service', () => {
       // Nothing written to the entries, and the release isn't marked as a run
       expect(strapiMock.db.savepoint).not.toHaveBeenCalled();
       expect(publish).not.toHaveBeenCalled();
-      expect(builderUpdate).not.toHaveBeenCalled();
+      // The only release write is the status the check stored
+      expect(releaseQuery.update).toHaveBeenCalledTimes(1);
       // The check's result is stored, so the status reads blocked
       expect(releaseQuery.updateMany).toHaveBeenCalledWith({
         where: { id: { $in: [1] } },
