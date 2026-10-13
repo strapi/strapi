@@ -1,5 +1,5 @@
-import { Box, Flex, IconButton, Typography } from '@strapi/design-system';
-import { Trash } from '@strapi/icons';
+import { Flex, IconButton, Typography } from '@strapi/design-system';
+import { Link, Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -84,6 +84,8 @@ const AssetThumbnail = ({ asset }: AssetThumbnailProps) => {
 interface AssetRowProps {
   asset: File;
   disabled?: boolean;
+  onCopyLink: (asset: File) => void;
+  onEdit: (asset: File) => void;
   onRemove: (asset: File) => void;
 }
 
@@ -92,7 +94,13 @@ interface AssetRowProps {
  * design also specifies are not here yet — while an upload runs, the global
  * progress dialog is what reports it.
  */
-export const AssetRow = ({ asset, disabled = false, onRemove }: AssetRowProps) => {
+export const AssetRow = ({
+  asset,
+  disabled = false,
+  onCopyLink,
+  onEdit,
+  onRemove,
+}: AssetRowProps) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -109,7 +117,34 @@ export const AssetRow = ({ asset, disabled = false, onRemove }: AssetRowProps) =
         <AssetThumbnail asset={asset} />
         <Name textColor="neutral800">{asset.name}</Name>
       </Flex>
-      <Box tag="span" shrink={0}>
+      <Flex tag="span" gap={1} shrink={0}>
+        <IconButton
+          variant="ghost"
+          onClick={() => onCopyLink(asset)}
+          label={formatMessage(
+            {
+              id: getTranslationKey('content-manager.input.actions.copy-link'),
+              defaultMessage: 'Copy link to {name}',
+            },
+            { name: asset.name }
+          )}
+        >
+          <Link />
+        </IconButton>
+        <IconButton
+          variant="ghost"
+          disabled={disabled}
+          onClick={() => onEdit(asset)}
+          label={formatMessage(
+            {
+              id: getTranslationKey('content-manager.input.actions.edit'),
+              defaultMessage: 'Edit {name}',
+            },
+            { name: asset.name }
+          )}
+        >
+          <Pencil />
+        </IconButton>
         <IconButton
           variant="ghost"
           disabled={disabled}
@@ -124,7 +159,7 @@ export const AssetRow = ({ asset, disabled = false, onRemove }: AssetRowProps) =
         >
           <Trash />
         </IconButton>
-      </Box>
+      </Flex>
     </Row>
   );
 };

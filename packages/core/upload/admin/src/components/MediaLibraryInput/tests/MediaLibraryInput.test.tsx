@@ -258,6 +258,40 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
     expect(screen.getByText('two.png')).toBeInTheDocument();
   });
 
+  it('copies the link to an asset', async () => {
+    const { user } = renderInput({}, { cover: asset(1, 'one.png') });
+
+    await user.click(screen.getByRole('button', { name: 'Copy link to one.png' }));
+
+    expect(await screen.findByText('Link copied.')).toBeInTheDocument();
+    expect(await navigator.clipboard.readText()).toMatch(/\/uploads\/one\.png$/);
+  });
+
+  it('opens the asset details when editing an asset', async () => {
+    const { user } = renderInput({}, { cover: asset(1, 'one.png') });
+
+    await user.click(screen.getByRole('button', { name: 'Edit one.png' }));
+
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
+  });
+
+  it('does not allow editing or removing an asset when the field is disabled', () => {
+    renderInput({ disabled: true }, { cover: asset(1, 'one.png') });
+
+    expect(screen.getByRole('button', { name: 'Edit one.png' })).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
+    expect(screen.getByRole('button', { name: 'Remove one.png' })).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
+    expect(screen.getByRole('button', { name: 'Copy link to one.png' })).not.toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
+  });
+
   it('uploads the files chosen from the hidden picker', async () => {
     mockUploadFiles.mockReturnValue({
       unwrap: () => Promise.resolve([asset(9, 'picked.png')]),

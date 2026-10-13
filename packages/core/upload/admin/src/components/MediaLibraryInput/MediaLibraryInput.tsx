@@ -1,6 +1,6 @@
 import { useRef, useState, type ChangeEvent, type ReactNode } from 'react';
 
-import { useField, useNotification } from '@strapi/admin/strapi-admin';
+import { useClipboard, useField, useNotification } from '@strapi/admin/strapi-admin';
 import { Field, Flex, VisuallyHidden } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
@@ -8,13 +8,18 @@ import { useAIMetadataEnabled } from '../../hooks/useAIMetadataEnabled';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { useTracking } from '../../hooks/useTracking';
 // Temporary: the Content Manager's own asset picker is not built on this stack
-// yet, so browsing the library still goes through the legacy dialog. Both
-// imports go when that modal lands.
+// yet, so browsing and editing the library still go through the legacy dialogs.
+// These imports go when that modal lands.
 import { AssetDialog } from '../../legacy/components/AssetDialog/AssetDialog';
+import {
+  EditAssetDialog,
+  type Asset as EditableAsset,
+} from '../../legacy/components/EditAssetDialog/EditAssetContent';
 import { EditFolderDialog } from '../../legacy/components/EditFolderDialog/EditFolderDialog';
 import { useUploadFilesMutation } from '../../services/api';
 import { useGetUploadSettingsQuery } from '../../services/settings';
 import { filterAllowedFiles, type AllowedMediaType } from '../../utils/allowedMediaTypes';
+import { prefixFileUrlWithBackendUrl } from '../../utils/files';
 import { getTranslationKey } from '../../utils/translations';
 import { typeFromMime } from '../../utils/typeFromMime';
 
@@ -76,15 +81,17 @@ export const MediaLibraryInput = ({
   const { onChange, value, error } = useField<File | File[] | null>(name);
   const { toggleNotification } = useNotification();
   const { trackUsage } = useTracking();
+  const { copy } = useClipboard();
 
   const [step, setStep] = useState<Step | undefined>(undefined);
   const [folderId, setFolderId] = useState<number | null>(null);
+  const [editedAsset, setEditedAsset] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [uploadFiles] = useUploadFilesMutation();
   // Echoes the app config; a missing payload (still loading) falls back to
   // sequential rather than outpacing what the server asked for.
-  const { canRead } = useMediaLibraryPermissions();
+  const { canRead, canUpdate, canCopyLink, canDownload } = useMediaLibraryPermissions();
   const { data: settings } = useGetUploadSettingsQuery(undefined, { skip: !canRead });
   const concurrency = settings?.data?.concurrentUploadRequests ?? 1;
   const isAiMetadataEnabled = useAIMetadataEnabled();
@@ -108,6 +115,52 @@ export const MediaLibraryInput = ({
 
   const handleRemove = (asset: File) => {
     setAssets(assets.filter((current) => current.id !== asset.id));
+  };
+
+  const handleCopyLink = async (asset: File) => {
+    const url = prefixFileUrlWithBackendUrl(asset.url);
+
+    if (!url) {
+      return;
+    }
+
+    const didCopy = await copy(url);
+
+    toggleNotification({
+      type: didCopy ? 'success' : 'danger',
+      message: formatMessage(
+        didCopy
+          ? {
+              id: getTranslationKey('asset-details.copy-link.success'),
+              defaultMessage: 'Link copied.',
+            }
+          : {
+              id: getTranslationKey('asset-details.copy-link.error'),
+              defaultMessage: 'Failed to copy the link.',
+            }
+      ),
+    });
+  };
+
+  const handleEditClose = (result?: EditableAsset | null | boolean) => {
+    const asset = editedAsset;
+    setEditedAsset(null);
+
+    if (!asset) {
+      return;
+    }
+
+    // `null` means the asset was deleted from the library from inside the dialog.
+    if (result === null) {
+      setAssets(assetsRef.current.filter((current) => current.id !== asset.id));
+      return;
+    }
+
+    if (result && typeof result !== 'boolean') {
+      setAssets(
+        assetsRef.current.map((current) => (current.id === asset.id ? (result as File) : current))
+      );
+    }
   };
 
   const handleSelect = (selectedAssets: File[]) => {
@@ -229,7 +282,14 @@ export const MediaLibraryInput = ({
 
       <Flex direction="column" alignItems="stretch" gap={1}>
         {assets.map((asset) => (
-          <AssetRow key={asset.id} asset={asset} disabled={disabled} onRemove={handleRemove} />
+          <AssetRow
+            key={asset.id}
+            asset={asset}
+            disabled={disabled}
+            onCopyLink={handleCopyLink}
+            onEdit={setEditedAsset}
+            onRemove={handleRemove}
+          />
         ))}
 
         <AssetDropZone
@@ -274,6 +334,18 @@ export const MediaLibraryInput = ({
             fileInputRef.current?.click();
           }}
           onChangeFolder={(nextFolderId) => setFolderId(nextFolderId)}
+        />
+      )}
+
+      {editedAsset && (
+        <EditAssetDialog
+          open
+          asset={editedAsset as EditableAsset}
+          canUpdate={canUpdate && !disabled}
+          canCopyLink={canCopyLink}
+          canDownload={canDownload}
+          trackedLocation={CONTENT_MANAGER_LOCATION}
+          onClose={handleEditClose}
         />
       )}
 
