@@ -2,6 +2,7 @@ import * as ts from 'typescript';
 import { sortBy } from 'lodash';
 
 import { models } from '../common';
+import { warnOnDuplicateInterfaceNames } from '../common/interface-names';
 import { emitDefinitions, format, generateSharedExtensionDefinition } from '../utils';
 import type { GeneratorOptions } from '../utils';
 
@@ -31,6 +32,10 @@ export const generateContentTypesDefinitions = async (
   }));
 
   options.logger.debug(`Found ${contentTypesDefinitions.length} content-types.`);
+  warnOnDuplicateInterfaceNames(
+    contentTypesDefinitions.map(({ uid }) => uid),
+    options.logger
+  );
 
   if (contentTypesDefinitions.length === 0) {
     return { output: NO_CONTENT_TYPE_PLACEHOLDER_COMMENT, stats: {} };
