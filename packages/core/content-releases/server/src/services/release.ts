@@ -141,7 +141,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
     }
 
     for (const [outcome, ids] of idsByOutcome) {
-      // Clears the reason an earlier run of the same release may have recorded
+      // Clears any reason stored before the run: the run's record replaces it
       await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
         where: { id: { $in: ids } },
         data: { outcome, reason: null },
@@ -656,9 +656,9 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
     async updateReleaseStatus(releaseId: Release['id']) {
       const releaseActionService = getService('release-action', { strapi });
 
-      const releaseRead: Promise<Pick<Release, 'releaseCondition'> | null> = strapi.db
+      const releaseRead: Promise<Pick<Release, 'releaseCondition' | 'status'> | null> = strapi.db
         .query(RELEASE_MODEL_UID)
-        .findOne({ where: { id: releaseId }, select: ['releaseCondition'] });
+        .findOne({ where: { id: releaseId }, select: ['releaseCondition', 'status'] });
 
       const [totalActions, invalidActions, release] = await Promise.all([
         releaseActionService.countActions({
@@ -676,6 +676,15 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
         }),
         releaseRead,
       ]);
+
+      // A failed release goes back to planned: what its run recorded no longer describes it, and
+      // a later run that throws before recording anything must not show it as its own
+      if (release?.status === 'failed') {
+        await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
+          where: { release: releaseId },
+          data: { outcome: null, reason: null },
+        });
+      }
 
       let status: Release['status'] = 'empty';
 

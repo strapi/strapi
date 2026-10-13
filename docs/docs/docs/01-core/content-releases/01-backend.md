@@ -269,7 +269,7 @@ Each entry of the run records what happened to it on its release action, returne
 | `skipped_error`        | publishing or unpublishing the entry threw an error other than a validation error                                                                                                  | `error.name`, never its message                                                                                                    |
 | `skipped_held`         | the entry was publishable, but an `all_or_nothing` run released nothing (at the check or after an error)                                                                           | `null`                                                                                                                             |
 
-An entry that fails both checks keeps both in its `reason`. The outcomes are written in the lock transaction with the release's status, and a later run of the same release replaces them. A run that records nothing leaves `outcome` empty: a manual publish rejected by the check (it didn't run), and a run the database rolls back.
+An entry that fails both checks keeps both in its `reason`. The outcomes are written in the lock transaction with the release's status. When a `failed` release goes back to planned (any change that recalculates its status), its outcomes and reasons are cleared, so a later run starts from none. A run that records nothing leaves `outcome` empty: a manual publish rejected by the check (it didn't run), and a run the database rolls back.
 
 The status written, the `releases.publish` webhook and the `release.trigger` audit event always agree:
 

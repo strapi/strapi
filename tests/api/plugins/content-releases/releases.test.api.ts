@@ -1424,6 +1424,11 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         status = (await getRelease(release.id)).status;
       }
       expect(status).toBe('ready');
+      // Back to planned: the failed run's outcomes no longer describe the release
+      const plannedActions = await getActionsByEntry(release.id);
+      for (const documentId of [validId, invalidId]) {
+        expect(plannedActions[documentId]).toMatchObject({ outcome: null, reason: null });
+      }
 
       const res = await publishManually(release.id);
 
@@ -1431,7 +1436,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       expect(res.body.data.status).toBe('done');
       expect(await hasPublishedVersion(productUID, validId)).toBe(true);
       expect(await hasPublishedVersion(productUID, invalidId)).toBe(true);
-      // The second run replaces what the first one recorded, reason included
+      // The second run records its own outcome
       expect((await getActionsByEntry(release.id))[invalidId]).toMatchObject({
         outcome: 'published',
         reason: null,
