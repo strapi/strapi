@@ -3,8 +3,10 @@ import type { Modules, Struct, UID } from '@strapi/types';
 import type { Configuration } from '../../../shared/contracts/content-types';
 import type { DocumentManagerService as DocumentManagerFactory } from '../services/document-manager';
 import type createDocumentMetadata from '../services/document-metadata';
+import type { DocumentVersion, GetMetadataOptions } from '../services/document-metadata';
 import type createComponentsService from '../services/components';
 import type createContentTypesService from '../services/content-types';
+import type { ConfigurationUpdate } from '../services/configuration';
 import type createDataMapperService from '../services/data-mapper';
 import type createPermissionService from '../services/permission';
 import type { createHomepageService } from '../homepage/services/homepage';
@@ -13,11 +15,64 @@ import type { createLifecyclesService } from '../history/services/lifecycles';
 import type { createPreviewService } from '../preview/services/preview';
 import type { createPreviewConfigService } from '../preview/services/preview-config';
 
-/** Existing document operations, including nullable lookups and optional clone results. */
-export type DocumentManagerService = ReturnType<DocumentManagerFactory>;
+type DocumentManagerImplementation = ReturnType<DocumentManagerFactory>;
+type FindLocalesOptions = Parameters<DocumentManagerImplementation['findLocales']>[2];
 
-/** Metadata operations shared by collection, single type and relation controllers. */
-export type DocumentMetadataService = ReturnType<typeof createDocumentMetadata>;
+/**
+ * Existing document operations, including nullable lookups and optional clone results.
+ * `findLocales` takes the populate value itself; the implementation keeps its published develop
+ * option type, which wraps it in `{ populate }`.
+ */
+export type DocumentManagerService = Omit<DocumentManagerImplementation, 'findLocales'> & {
+  findLocales(
+    id: Parameters<DocumentManagerImplementation['findLocales']>[0],
+    uid: Parameters<DocumentManagerImplementation['findLocales']>[1],
+    opts: Omit<FindLocalesOptions, 'populate'> & {
+      populate?: Modules.Documents.Params.Pick<UID.ContentType, 'populate'>['populate'];
+    }
+  ): ReturnType<DocumentManagerImplementation['findLocales']>;
+};
+
+type DocumentMetadataImplementation = ReturnType<typeof createDocumentMetadata>;
+
+/** A document version as the metadata service reads it: `locale` may be `null`. */
+export type MetadataDocumentVersion = Omit<DocumentVersion, 'locale' | 'localizations'> & {
+  locale?: string | null;
+  localizations?: MetadataDocumentVersion[];
+};
+
+/**
+ * Metadata operations shared by collection, single type and relation controllers. Versions may be
+ * partial, `locale` may be `null`, and statuses are the Content Manager ones. The implementation
+ * keeps its published develop types.
+ */
+export type DocumentMetadataService = Omit<
+  DocumentMetadataImplementation,
+  'getAvailableLocales' | 'getAvailableStatus' | 'getStatus' | 'getMetadata'
+> & {
+  getAvailableLocales(
+    uid: UID.ContentType,
+    version: Partial<MetadataDocumentVersion>,
+    allVersions: MetadataDocumentVersion[]
+  ): ReturnType<DocumentMetadataImplementation['getAvailableLocales']>;
+  getAvailableStatus(
+    version: Partial<MetadataDocumentVersion>,
+    allVersions: MetadataDocumentVersion[]
+  ): Partial<MetadataDocumentVersion> | undefined;
+  getStatus(
+    version: Partial<MetadataDocumentVersion>,
+    otherDocumentStatuses?: Partial<MetadataDocumentVersion>[]
+  ): 'published' | 'draft' | 'modified';
+  getMetadata(
+    uid: UID.ContentType,
+    version: Pick<MetadataDocumentVersion, 'documentId'> & Partial<MetadataDocumentVersion>,
+    options?: GetMetadataOptions
+  ): Promise<{
+    availableLocales: Awaited<ReturnType<DocumentMetadataImplementation['getAvailableLocales']>>;
+    availableStatus: Partial<MetadataDocumentVersion>[];
+    versions: MetadataDocumentVersion[];
+  }>;
+};
 
 /** Content types visible in the Content Manager folder navigation. */
 export type ContentStructureService = {
@@ -114,14 +169,75 @@ export type PermissionCheckerService = {
   create(options: { userAbility: Ability; model: string }): PermissionChecker;
 };
 
-/** Component models and their edit and list view configurations. */
-export type ComponentsService = ReturnType<typeof createComponentsService>;
+/** A content type or component as the Content Manager models it. */
+export type ContentManagerModel<TModel extends Struct.ComponentSchema | Struct.ContentTypeSchema> =
+  TModel & {
+    apiID: string;
+    isDisplayed: boolean;
+    attributes: Record<string, any>;
+  };
 
-/** Content type models and their edit and list view configurations. */
-export type ContentTypesService = ReturnType<typeof createContentTypesService>;
+type ComponentsImplementation = ReturnType<typeof createComponentsService>;
 
-/** Maps content type and component schemas to Content Manager models and DTOs. */
-export type DataMapperService = ReturnType<typeof createDataMapperService>;
+/**
+ * Component models and their edit and list view configurations. The implementation keeps its
+ * published develop types, where lookups through its untyped helper resolve to `unknown`/`any`.
+ */
+export type ComponentsService = Omit<
+  ComponentsImplementation,
+  'findAllComponents' | 'findComponent' | 'findComponentsConfigurations'
+> & {
+  findAllComponents(): ContentManagerModel<Struct.ComponentSchema>[];
+  findComponent(uid: UID.Component): ContentManagerModel<Struct.ComponentSchema> | undefined;
+  /** Content types and components both hold component attributes. */
+  findComponentsConfigurations(
+    model: Struct.ComponentSchema | Struct.ContentTypeSchema
+  ): ReturnType<ComponentsImplementation['findComponentsConfigurations']>;
+};
+
+type ContentTypesImplementation = ReturnType<typeof createContentTypesService>;
+
+/**
+ * Content type models and their edit and list view configurations. Configurations are read and
+ * written by UID alone, and updates may be partial: the store merges them. The implementation
+ * keeps its published develop parameter types.
+ */
+export type ContentTypesService = Omit<
+  ContentTypesImplementation,
+  | 'findAllContentTypes'
+  | 'findContentType'
+  | 'findDisplayedContentTypes'
+  | 'findContentTypesByKind'
+  | 'findConfiguration'
+  | 'updateConfiguration'
+> & {
+  findAllContentTypes(): ContentManagerModel<Struct.ContentTypeSchema>[];
+  findContentType(uid: UID.ContentType): ContentManagerModel<Struct.ContentTypeSchema> | undefined;
+  findDisplayedContentTypes(): ContentManagerModel<Struct.ContentTypeSchema>[];
+  findContentTypesByKind(kind: {
+    kind: Struct.ContentTypeKind | undefined;
+  }): ContentManagerModel<Struct.ContentTypeSchema>[];
+  findConfiguration(
+    contentType: Pick<Struct.ContentTypeSchema, 'uid'>
+  ): ReturnType<ContentTypesImplementation['findConfiguration']>;
+  updateConfiguration(
+    contentType: Pick<Struct.ContentTypeSchema, 'uid'>,
+    newConfiguration: Partial<ConfigurationUpdate>
+  ): ReturnType<ContentTypesImplementation['updateConfiguration']>;
+};
+
+/**
+ * Maps content type and component schemas to Content Manager models and DTOs. The implementation
+ * keeps its published develop parameter type, a component schema.
+ */
+export type DataMapperService = Omit<
+  ReturnType<typeof createDataMapperService>,
+  'toContentManagerModel'
+> & {
+  toContentManagerModel<TModel extends Struct.ComponentSchema | Struct.ContentTypeSchema>(
+    model: TModel
+  ): ContentManagerModel<TModel>;
+};
 
 /** Content Manager permission registration and configuration checks. */
 export type PermissionService = ReturnType<typeof createPermissionService>;

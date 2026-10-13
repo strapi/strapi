@@ -61,7 +61,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
    * Collects all component UIDs upfront, then loads configurations in a single
    * batch query instead of sequential queries per component.
    */
-  async findComponentsConfigurations(model: Struct.ComponentSchema | Struct.ContentTypeSchema) {
+  async findComponentsConfigurations(model: Struct.ComponentSchema) {
     // Cache on request state so the same request can reuse configs
     const requestState = strapi.requestContext?.get?.()?.state as
       { __componentsConfigurationsCache?: Map<string, Record<string, Configuration>> } | undefined;
@@ -69,7 +69,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
     const componentUids = new Set<UID.Component>();
 
-    const collectComponentUids = (schema: Struct.ComponentSchema | Struct.ContentTypeSchema) => {
+    const collectComponentUids = (schema: Struct.ComponentSchema) => {
       for (const key of Object.keys(schema.attributes)) {
         const attribute = schema.attributes[key];
 
