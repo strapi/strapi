@@ -286,6 +286,32 @@ describe('Plugin declaration generation', () => {
     expectTypecheck(output, ['local']);
   });
 
+  it('skips plugins that @strapi/strapi/strict-types loads, whatever their store path', async () => {
+    write('node_modules/@strapi/strapi/package.json', {
+      name: '@strapi/strapi',
+      exports: { './strict-types': { types: './strict-types.d.ts' } },
+      typesVersions: { '*': { 'strict-types': ['strict-types.d.ts'] } },
+    });
+    write(
+      'node_modules/@strapi/strapi/strict-types.d.ts',
+      '/// <reference types="@strapi/types/strict" preserve="true" />\n' +
+        '/// <reference types="@strapi/bundled/strapi-server" preserve="true" />\nexport {};\n'
+    );
+    dependencies['@strapi/strapi'] = '1.0.0';
+    install('bundled', '@strapi/bundled', {
+      directory: 'node_modules/.pnpm/@strapi+bundled@1.0.0_a1b2c3/node_modules/@strapi/bundled',
+      legacy: false,
+    });
+    delete dependencies['@strapi/bundled'];
+    install('local', '@vendor/local', { directory: 'src/plugins/local', legacy: false });
+    delete dependencies['@vendor/local'];
+
+    const { output, stats } = await generatePlugins();
+    expect(output).toBe("import type {} from '../../src/plugins/local/dist/server/index.d.ts';\n");
+    expect(output).not.toContain('.pnpm');
+    expect(stats.plugins).toBe(1);
+  });
+
   it('regenerates an empty module after the last typed plugin is removed', async () => {
     const plugin = install('removed', '@vendor/removed');
     const config = {
