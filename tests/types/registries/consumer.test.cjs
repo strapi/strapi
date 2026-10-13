@@ -172,6 +172,22 @@ test('published registry contracts reference declared dependencies', () => {
   }
 });
 
+test('published middleware configs do not need third-party @types packages', () => {
+  // Applications do not install `@types/koa-compress` or `@types/koa-static`, and `koa-favicon`
+  // ships no types.
+  for (const name of ['compression', 'public', 'favicon']) {
+    const filename = path.join(repository, 'packages/core/core/dist/middlewares', `${name}.d.ts`);
+    const { importedFiles } = ts.preProcessFile(fs.readFileSync(filename, 'utf8'));
+    for (const imported of importedFiles) {
+      assert.doesNotMatch(
+        imported.fileName,
+        /^koa-(?:compress|static|favicon)$/,
+        `${filename} imports ${imported.fileName}`
+      );
+    }
+  }
+});
+
 for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
   const options = { ...baseOptions, ...resolutionOptions };
   const compile = compiler(options);
