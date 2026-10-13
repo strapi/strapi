@@ -27,6 +27,7 @@ import {
   getService,
   getPublishOrderForContentTypes,
   getPublishabilityForActions,
+  getValidationErrors,
   isReleaseBlocked,
 } from '../utils';
 import { getReleaseChanges } from '../audit-logs';
@@ -48,6 +49,13 @@ interface RecordedOutcome {
 
 // Only the error's name: driver errors can carry row contents in their message
 const getErrorName = (error: unknown) => (error instanceof Error ? error.name : 'Error');
+
+// A validation error raised by the run (e.g. a unique clash between two of its entries) keeps
+// its field errors, like one found by the check before the run
+const getErrorOutcome = (error: unknown): RecordedOutcome =>
+  error instanceof errors.ValidationError
+    ? { outcome: 'skipped_invalid', reason: { validation: { errors: getValidationErrors(error) } } }
+    : { outcome: 'skipped_error', reason: { error: { name: getErrorName(error) } } };
 
 type LockedPublishResult =
   | {
@@ -133,9 +141,10 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
     }
 
     for (const [outcome, ids] of idsByOutcome) {
+      // Clears the reason an earlier run of the same release may have recorded
       await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
         where: { id: { $in: ids } },
-        data: { outcome },
+        data: { outcome, reason: null },
       });
     }
   };
@@ -502,10 +511,9 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
                 outcomes.set(action.id, { outcome, reason: null });
               } catch (actionError) {
                 counts.failed += 1;
-                const name = getErrorName(actionError);
-                outcomes.set(action.id, { outcome: 'skipped_error', reason: { error: { name } } });
+                outcomes.set(action.id, getErrorOutcome(actionError));
                 strapi.log.warn(
-                  `[Content Releases] Release ${lockedRelease.name}: skipped an entry that failed to ${action.type} (${name})`
+                  `[Content Releases] Release ${lockedRelease.name}: skipped an entry that failed to ${action.type} (${getErrorName(actionError)})`
                 );
               }
             }
@@ -522,10 +530,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
               });
             } catch (runError) {
               if (inFlight) {
-                outcomes.set(inFlight.id, {
-                  outcome: 'skipped_error',
-                  reason: { error: { name: getErrorName(runError) } },
-                });
+                outcomes.set(inFlight.id, getErrorOutcome(runError));
               }
               holdUnrecorded(actions, outcomes);
               throw runError;

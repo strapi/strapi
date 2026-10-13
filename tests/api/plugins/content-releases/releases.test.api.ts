@@ -124,6 +124,8 @@ const slugItemModel = {
 
 const INVALID_PRODUCT_MESSAGE =
   'description must be a `string` type, but the final value was: `null`.';
+// What a release action stores: the message without the value it ends with
+const INVALID_PRODUCT_RECORDED_MESSAGE = 'description must be a `string` type';
 
 describeOnCondition(edition === 'EE')('Content Releases API', () => {
   const builder = createTestBuilder();
@@ -1429,6 +1431,11 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       expect(res.body.data.status).toBe('done');
       expect(await hasPublishedVersion(productUID, validId)).toBe(true);
       expect(await hasPublishedVersion(productUID, invalidId)).toBe(true);
+      // The second run replaces what the first one recorded, reason included
+      expect((await getActionsByEntry(release.id))[invalidId]).toMatchObject({
+        outcome: 'published',
+        reason: null,
+      });
     });
 
     test('all_or_nothing manual publish stores the validity it found, so out-of-date state reads blocked', async () => {
@@ -1806,6 +1813,12 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         expect(await getPublishedSlug(firstId)).toBe('partial-contested');
         // Still online, as it was before the run
         expect(await getPublishedSlug(secondId)).toBe('partial-original');
+        expect((await getActionsByEntry(release.id))[secondId]).toMatchObject({
+          outcome: 'skipped_invalid',
+          reason: {
+            validation: { errors: [{ path: ['slug'], message: 'This attribute must be unique' }] },
+          },
+        });
       });
 
       test('all_or_nothing: an entry that fails the unique check at publish rolls the whole run back', async () => {
@@ -1827,6 +1840,16 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
           expect(await getPublishedSlug(secondId)).toBe('all-or-nothing-original');
           // The rolled-back publish of the first entry announces nothing
           expect(onEntryPublish).not.toHaveBeenCalled();
+          const actions = await getActionsByEntry(release.id);
+          expect(actions[secondId]).toMatchObject({
+            outcome: 'skipped_invalid',
+            reason: {
+              validation: {
+                errors: [{ path: ['slug'], message: 'This attribute must be unique' }],
+              },
+            },
+          });
+          expect(actions[firstId]).toMatchObject({ outcome: 'skipped_held', reason: null });
         } finally {
           stopListening();
         }
@@ -1873,7 +1896,9 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       const actions = await getActionsByEntry(release.id);
       expect(actions[invalidId].outcome).toBe('skipped_invalid');
       expect(actions[invalidId].reason).toEqual({
-        validation: { errors: [{ path: ['description'], message: INVALID_PRODUCT_MESSAGE }] },
+        validation: {
+          errors: [{ path: ['description'], message: INVALID_PRODUCT_RECORDED_MESSAGE }],
+        },
       });
     });
 
@@ -1964,7 +1989,9 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         expect(actions[documentId]).toMatchObject({
           outcome: 'skipped_invalid',
           reason: {
-            validation: { errors: [{ path: ['description'], message: INVALID_PRODUCT_MESSAGE }] },
+            validation: {
+              errors: [{ path: ['description'], message: INVALID_PRODUCT_RECORDED_MESSAGE }],
+            },
           },
         });
       }
@@ -2022,6 +2049,39 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         outcome: 'skipped_invalid',
         reason: recorded.reason,
       });
+    });
+
+    test('deleting an entry keeps its action in a release that ran, with what the run recorded', async () => {
+      const deletedId = await createProduct({ valid: false });
+      const ranRelease = await createReleaseWithActions('allow_partial', [
+        { documentId: deletedId },
+        { documentId: await createProduct({ valid: true }) },
+      ]);
+      expect((await publishManually(ranRelease.id)).statusCode).toBe(200);
+      // A planned release with the same entry shows when the deletion has been taken into account
+      const plannedRelease = await createReleaseWithActions('allow_partial', [
+        { documentId: deletedId },
+      ]);
+      const recorded = (await getActionsByEntry(ranRelease.id))[deletedId];
+
+      // All locales: deleting a single locale of a non-localized entry keeps its actions (EE-254)
+      await strapi.documents(productUID).delete({ documentId: deletedId, locale: '*' });
+
+      // The deletion removes release actions without awaiting it
+      let plannedActions = await getActionsByEntry(plannedRelease.id);
+      for (let attempt = 0; attempt < 20 && plannedActions[deletedId]; attempt += 1) {
+        plannedActions = await getActionsByEntry(plannedRelease.id);
+      }
+      expect(plannedActions[deletedId]).toBeUndefined();
+
+      const kept = (await getActionsByEntry(ranRelease.id))[deletedId];
+      expect(kept).toMatchObject({
+        outcome: 'skipped_invalid',
+        reason: recorded.reason,
+        entry: {},
+        status: null,
+      });
+      expect((await getRelease(ranRelease.id)).status).toBe('partial');
     });
   });
 

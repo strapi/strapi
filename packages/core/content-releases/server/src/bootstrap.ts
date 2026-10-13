@@ -12,15 +12,17 @@ interface DeleteManyParams {
   entryDocumentId?: Modules.Documents.ID;
 }
 
+// Only planned releases: a release that ran keeps the entry's action and what its run recorded
 const deleteReleasesActionsAndUpdateReleaseStatus = async (params: DeleteManyParams) => {
   const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
     where: {
+      releasedAt: null,
       actions: params,
     },
   });
 
   await strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({
-    where: params,
+    where: { ...params, release: { releasedAt: { $null: true } } },
   });
 
   // We update the status of each release after delete the actions

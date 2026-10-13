@@ -260,16 +260,16 @@ An error after the entries were released (writing the release's own status, for 
 
 Each entry of the run records what happened to it on its release action, returned by `GET /content-releases/:releaseId/actions`:
 
-| `outcome`              | When                                                                                                     | `reason`                                                                    |
-| ---------------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| `published`            | the entry was published                                                                                  | `null`                                                                      |
-| `unpublished`          | the entry was unpublished, also when it had no published version                                         | `null`                                                                      |
-| `skipped_invalid`      | the draft failed publish validation, whether or not it was also at the wrong stage                       | `validation.errors`: field `path` and `message`, never the submitted values |
-| `skipped_not_approved` | the entry wasn't at the stage required to publish                                                        | `stage`: the entry's stage and the required one                             |
-| `skipped_error`        | publishing or unpublishing the entry threw                                                               | `error.name`, never its message                                             |
-| `skipped_held`         | the entry was publishable, but an `all_or_nothing` run released nothing (at the check or after an error) | `null`                                                                      |
+| `outcome`              | When                                                                                                                                                                               | `reason`                                                                                                                           |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `published`            | the entry was published                                                                                                                                                            | `null`                                                                                                                             |
+| `unpublished`          | the entry was unpublished, also when it had no published version                                                                                                                   | `null`                                                                                                                             |
+| `skipped_invalid`      | the draft failed publish validation, whether or not it was also at the wrong stage, or publishing it raised a validation error (e.g. a unique clash with another entry of the run) | `validation.errors`: field `path` and `message`, without the error's `value`; a type-mismatch message loses the value it ends with |
+| `skipped_not_approved` | the entry wasn't at the stage required to publish                                                                                                                                  | `stage`: the entry's stage and the required one                                                                                    |
+| `skipped_error`        | publishing or unpublishing the entry threw an error other than a validation error                                                                                                  | `error.name`, never its message                                                                                                    |
+| `skipped_held`         | the entry was publishable, but an `all_or_nothing` run released nothing (at the check or after an error)                                                                           | `null`                                                                                                                             |
 
-An entry that fails both checks keeps both in its `reason`. The outcomes are written in the lock transaction with the release's status. A run that records nothing leaves `outcome` empty: a manual publish rejected by the check (it didn't run), and a run the database rolls back.
+An entry that fails both checks keeps both in its `reason`. The outcomes are written in the lock transaction with the release's status, and a later run of the same release replaces them. A run that records nothing leaves `outcome` empty: a manual publish rejected by the check (it didn't run), and a run the database rolls back.
 
 The status written, the `releases.publish` webhook and the `release.trigger` audit event always agree:
 
@@ -283,7 +283,7 @@ The counts are what the run released, and `failed` the entries it left out: not 
 
 #### Listening to events on entries:
 
-When an entry is updated or deleted, the status of all releases containing that entry is recalculated to reflect any changes in validity. An update rewrites `isEntryValid` only on the actions of releases that haven't run.
+When an entry is updated or deleted, the status of all releases containing that entry is recalculated to reflect any changes in validity. Only releases that haven't run are affected: an update rewrites `isEntryValid` and a deletion removes the entry's actions only there. A release that ran keeps the actions of deleted entries, with what the run recorded; `GET /content-releases/:releaseId/actions` returns them with an empty `entry` and a `null` `status`.
 
 ## Migrations
 
@@ -299,4 +299,4 @@ When a Content Type is deleted, delete all actions containing entries from that 
 
 ## Subscribing to Lifecycles Events
 
-When an entry is deleted delete all actions containing that entry.
+When an entry is deleted, delete the actions containing that entry in releases that haven't run.

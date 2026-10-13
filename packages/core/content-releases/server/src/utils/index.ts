@@ -83,8 +83,12 @@ const getAssignedWorkflow = async (
   });
 };
 
+// Strapi's type-mismatch message ends with the submitted value (`notType` in
+// `@strapi/utils`'s yup.ts): cut it off, the rest still names the field and the expected type
+const SUBMITTED_VALUE_SUFFIX = /, but the final value was: [\s\S]*$/;
+
 // Only the field paths and messages: the details also carry the submitted values
-const getValidationErrors = (error: Error) => {
+export const getValidationErrors = (error: Error) => {
   const details: unknown = error instanceof errors.ValidationError ? error.details : null;
   const detailErrors: unknown[] =
     typeof details === 'object' &&
@@ -101,7 +105,7 @@ const getValidationErrors = (error: Error) => {
 
     return {
       path: Array.isArray(path) ? path.map(String) : [],
-      message: typeof message === 'string' ? message : '',
+      message: typeof message === 'string' ? message.replace(SUBMITTED_VALUE_SUFFIX, '') : '',
     };
   });
 };

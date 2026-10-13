@@ -46,15 +46,17 @@ const updateActionsStatusAndUpdateReleaseStatus = async (
   }
 };
 
+// Only planned releases: a release that ran keeps the entry's action and what its run recorded
 const deleteActionsAndUpdateReleaseStatus = async (params: ReleaseActionsParams) => {
   const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
     where: {
+      releasedAt: null,
       actions: params,
     },
   });
 
   await strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({
-    where: params,
+    where: { ...params, release: { releasedAt: { $null: true } } },
   });
 
   for (const release of releases) {

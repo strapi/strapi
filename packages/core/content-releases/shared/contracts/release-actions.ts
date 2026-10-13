@@ -28,7 +28,7 @@ interface StageRef {
 
 /** Why the entry wasn't released: what the run saw, kept as it was */
 export interface ReleaseActionReason {
-  /** Field paths and messages only, never the submitted values */
+  /** Field paths and messages. Each error's `value` is dropped, and so is the value a type-mismatch message ends with */
   validation?: { errors: { path: string[]; message: string }[] };
   stage?: { entryStage: StageRef | null; requiredStage: StageRef };
   /** Only the error's name: its message can carry row contents */
