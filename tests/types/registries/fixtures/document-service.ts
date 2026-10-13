@@ -107,3 +107,9 @@ export type PublishedResult = Expect<HasKey<Article, 'publishedAt'>>;
 // Known gap (filters): filter values are not checked against the attribute type. This compiles,
 // so it is not an `@ts-expect-error` case.
 void articles.findMany({ filters: { views: { $eq: 'not a number' } } });
+
+// `use()` returns the function that removes the middleware, as at runtime.
+const removeMiddleware = app.documents.use(async (_context, next) => next());
+removeMiddleware satisfies () => void;
+// @ts-expect-error `use()` does not return the service, so calls cannot be chained.
+app.documents.use(async (_context, next) => next()).use(async (_context, next) => next());
