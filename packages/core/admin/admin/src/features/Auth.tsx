@@ -286,6 +286,14 @@ const AuthProvider = ({
     [handleCancelSessionLogout]
   );
 
+  const discardPendingLogout = React.useCallback(() => {
+    logoutGuardOpenRef.current = false;
+    logoutGuardReasonRef.current = 'voluntary';
+    pendingLogoutRef.current = null;
+    setIsSessionLogoutDialogOpen(false);
+    setSessionLogoutReason('voluntary');
+  }, []);
+
   const resyncToken = React.useCallback(
     (newToken: string) => {
       dispatch(setToken(newToken));
@@ -411,20 +419,36 @@ const AuthProvider = ({
    * Logout is handled by the `isLoggedIn` storage listener above.
    */
   React.useEffect(() => {
-    return subscribeToAdminSessionChanges(() => {
+    let disposed = false;
+
+    const reconcileSharedSession = () => {
+      if (disposed) {
+        return;
+      }
+
       const nextToken = getStoredToken();
       if (!nextToken) {
         return;
       }
 
       const currentToken = store.getState().admin_app.token ?? null;
-      if (currentToken !== nextToken) {
-        dispatch(setToken(nextToken));
+      if (currentToken === nextToken) {
+        return;
       }
 
+      discardPendingLogout();
+      dispatch(setToken(nextToken));
       resetAdminApiState(dispatch);
-    });
-  }, [dispatch, store]);
+    };
+
+    const unsubscribe = subscribeToAdminSessionChanges(reconcileSharedSession);
+    queueMicrotask(reconcileSharedSession);
+
+    return () => {
+      disposed = true;
+      unsubscribe();
+    };
+  }, [discardPendingLogout, dispatch, store]);
 
   const login = React.useCallback<AuthContextValue['login']>(
     async ({ rememberMe, ...body }) => {

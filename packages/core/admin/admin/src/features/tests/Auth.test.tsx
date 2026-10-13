@@ -468,6 +468,22 @@ describe('AuthProvider session identity', () => {
     await waitForUserB();
   });
 
+  it('reconciles a session replacement that happens before the subscription effect starts', async () => {
+    let replaced = false;
+    const ReplaceSessionDuringRender = () => {
+      if (!replaced) {
+        replaced = true;
+        window.localStorage.setItem('jwtToken', JSON.stringify(TOKEN_B));
+      }
+
+      return <IdentityProbe />;
+    };
+
+    renderIdentity(<ReplaceSessionDuringRender />);
+
+    await waitForUserB();
+  });
+
   it('refetches identity under a cookie session when another tab drops the persisted token', async () => {
     renderIdentity();
 
@@ -663,6 +679,25 @@ describe('AuthProvider', () => {
       });
 
       await waitFor(() => expect(screen.getByTestId('token')).toHaveTextContent('logged-out'));
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    });
+
+    it('discards a pending forced logout when another tab establishes a new session', async () => {
+      registerUnsavedChangesCheck('form', () => true);
+
+      render(<AuthProbe />);
+
+      act(() => {
+        getKeepaliveOptions().onSessionDead?.();
+      });
+      await screen.findByRole('alertdialog');
+
+      window.localStorage.setItem('jwtToken', JSON.stringify(TOKEN_B));
+      act(() => {
+        emitExternalSessionBroadcast();
+      });
+
+      await waitFor(() => expect(screen.getByTestId('token')).toHaveTextContent(TOKEN_B));
       expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
     });
   });
