@@ -45,11 +45,11 @@ const generatePropertyLiteralDefinitionFactory = (schema: Schema) => (key: strin
 /**
  * Generate an interface declaration for a given schema
  */
-export const generateSchemaDefinition = (schema: Schema): ts.InterfaceDeclaration => {
-  const { uid } = schema;
-
+export const generateSchemaDefinition = (
+  schema: Schema,
+  interfaceName: string = getSchemaInterfaceName(schema.uid)
+): ts.InterfaceDeclaration => {
   // Resolve the different interface names needed to declare the schema's interface
-  const interfaceName = getSchemaInterfaceName(uid);
   const parentType = getSchemaExtendsTypeName(schema);
 
   // Make sure the Struct namespace is imported

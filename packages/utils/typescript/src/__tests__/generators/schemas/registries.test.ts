@@ -143,6 +143,48 @@ describe('duplicate interface names', () => {
     expect(output.match(new RegExp(`export interface ${name} `, 'g'))).toHaveLength(2);
   });
 
+  test.each([
+    [
+      generateContentTypesDefinitions,
+      {
+        contentTypes: {
+          // Loaded out of order: names follow the UIDs' code unit order.
+          'api::foo.bar-baz': contentType('api::foo.bar-baz'),
+          'api::foo-bar.baz': contentType('api::foo-bar.baz'),
+          // Already uses the first suffix, which is then skipped.
+          'api::foo-bar.baz2': contentType('api::foo-bar.baz2'),
+        },
+      },
+      'ApiFooBarBaz',
+      ['api::foo-bar.baz', 'api::foo.bar-baz'],
+    ],
+    [
+      generateComponentsDefinitions,
+      {
+        components: {
+          'foo.bar-baz': component('foo.bar-baz', 'foo'),
+          'foo-bar.baz': component('foo-bar.baz', 'foo-bar'),
+          'foo-bar.baz2': component('foo-bar.baz2', 'foo-bar'),
+        },
+      },
+      'FooBarBaz',
+      ['foo-bar.baz', 'foo.bar-baz'],
+    ],
+  ] as const)(
+    'with strict types, rename the later colliding interfaces (%#)',
+    async (generator, strapi, name, [first, second]) => {
+      const logger = createLogger({ silent: true });
+      const { output } = await generator({ strapi, logger, strict: true });
+
+      expect(logger.warnings).toBe(1);
+      expect(output.match(new RegExp(`export interface ${name} `, 'g'))).toHaveLength(1);
+      expect(output.match(new RegExp(`export interface ${name}2 `, 'g'))).toHaveLength(1);
+      expect(output.match(new RegExp(`export interface ${name}3 `, 'g'))).toHaveLength(1);
+      expect(output).toContain(`'${first}': ${name};`);
+      expect(output).toContain(`'${second}': ${name}3;`);
+    }
+  );
+
   test('do not warn for distinct names', async () => {
     const logger = createLogger({ silent: true });
     await generateContentTypesDefinitions({ strapi: { contentTypes }, logger, strict: false });
