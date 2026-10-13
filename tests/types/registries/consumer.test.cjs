@@ -808,6 +808,13 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
     );
   });
 
+  test(`${resolution}: the Document Service types fields, filters and populate in strict mode`, () => {
+    assertClean(
+      compile(['settings.d.ts', 'document-service.ts']),
+      `${resolution}, Document Service on registered schemas`
+    );
+  });
+
   test(`${resolution}: strict registries without contracts accept template UIDs`, () => {
     const program = compile(['strict-empty.ts'], { types: ['@strapi/types/strict'] });
     assertClean(program, `${resolution}, strict registries without contracts`);
