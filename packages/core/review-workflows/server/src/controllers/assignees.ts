@@ -60,7 +60,12 @@ export default {
 
     await workflowService.assertContentTypeBelongsToWorkflow(model);
 
-    const updatedEntity = await assigneeService.updateEntityAssignee(entity, model, assigneeId);
+    const updatedEntity = await assigneeService.updateEntityAssignee(
+      // A document has the fields the service reads; its published parameter type is develop's.
+      entity as Parameters<typeof assigneeService.updateEntityAssignee>[0],
+      model,
+      assigneeId
+    );
 
     ctx.body = { data: await sanitizeOutput(updatedEntity) };
   },
