@@ -14,3 +14,11 @@ export const compareCodeUnits = (a: string, b: string) => {
 
   return 0;
 };
+
+/**
+ * Orders strings like `localeCompare` on an English or `C` locale machine, whatever the locale of
+ * the machine. The schema generators come from develop and use `localeCompare`: an explicit
+ * locale keeps their output where it was already stable, instead of reordering mixed-case or
+ * punctuated keys like `compareCodeUnits` would.
+ */
+export const compareEnglish = (a: string, b: string) => a.localeCompare(b, 'en');
