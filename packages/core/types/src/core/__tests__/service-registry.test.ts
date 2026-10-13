@@ -29,6 +29,8 @@ declare global {
         };
         'api::type-lab.greeting': { greet(value: number): number };
         'admin::type-lab': { greet(value: number): number };
+        // Outside the UID pattern: runtime never registers a service under this name.
+        'not-a-uid': { greet(value: number): number };
       }
 
       interface AppServices {
@@ -112,6 +114,8 @@ strapi.service<GreetingService>('plugin::type-lab.counter').greet('Nico') satisf
 strapi.service<GreetingService>('plugin::unregistered.greeting').missing();
 // @ts-expect-error The UID is still checked against the service UID shape.
 strapi.service<GreetingService>('not-a-uid');
+// @ts-expect-error A registry key outside the UID pattern is not a registered UID.
+strapi.service('not-a-uid');
 // A type annotation on the result does not replace the type argument.
 // @ts-expect-error `T` is not inferred from the annotation.
 const contextual: GreetingService = strapi.plugin('type-lab').service(dynamicService);
