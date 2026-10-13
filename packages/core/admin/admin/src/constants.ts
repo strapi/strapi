@@ -146,8 +146,10 @@ export const HOOKS = {
   MUTATE_SINGLE_TYPES_LINKS: 'Admin/CM/pages/App/mutate-single-types-links',
 };
 
-export interface SettingsMenuLink
-  extends Omit<StrapiAppSettingLink, 'Component' | 'permissions' | 'licenseOnly'> {
+export interface SettingsMenuLink extends Omit<
+  StrapiAppSettingLink,
+  'Component' | 'permissions' | 'licenseOnly'
+> {
   licenseOnly?: boolean;
 }
 

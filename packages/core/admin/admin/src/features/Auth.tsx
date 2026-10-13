@@ -43,11 +43,13 @@ import type {
 } from '../../../shared/contracts/shared';
 
 interface Permission
-  extends Pick<PermissionContract, 'action' | 'subject'>,
+  extends
+    Pick<PermissionContract, 'action' | 'subject'>,
     Partial<Omit<PermissionContract, 'action' | 'subject'>> {}
 
 interface User
-  extends Pick<SanitizedAdminUser, 'email' | 'firstname' | 'lastname' | 'username' | 'roles'>,
+  extends
+    Pick<SanitizedAdminUser, 'email' | 'firstname' | 'lastname' | 'username' | 'roles'>,
     Partial<Omit<SanitizedAdminUser, 'email' | 'firstname' | 'lastname' | 'username' | 'roles'>> {}
 
 interface AuthContextValue {
