@@ -5,6 +5,7 @@ import { kebabCase } from 'lodash';
 
 import { emitDefinitions, format, pathExists } from '../utils';
 import type { Logger } from '../utils';
+import { compareCodeUnits } from './compare';
 
 /**
  * Shared by the generators of application modules (services, controllers, policies, middlewares):
@@ -154,7 +155,7 @@ export const filterRegisteredSources = (
 
       return true;
     })
-    .sort((a, b) => a.uid.localeCompare(b.uid));
+    .sort((a, b) => compareCodeUnits(a.uid, b.uid));
 };
 
 /**
