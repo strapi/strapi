@@ -2,6 +2,7 @@ import * as ts from 'typescript';
 import { sortBy } from 'lodash';
 
 import { models } from '../common';
+import { warnOnDuplicateInterfaceNames } from '../common/interface-names';
 import { emitDefinitions, format, generateSharedExtensionDefinition } from '../utils';
 import type { GeneratorOptions } from '../utils';
 
@@ -31,6 +32,10 @@ export const generateComponentsDefinitions = async (
   }));
 
   options.logger.debug(`Found ${componentsDefinitions.length} components.`);
+  warnOnDuplicateInterfaceNames(
+    componentsDefinitions.map(({ uid }) => uid),
+    options.logger
+  );
 
   if (componentsDefinitions.length === 0) {
     return { output: NO_COMPONENT_PLACEHOLDER_COMMENT, stats: {} };
