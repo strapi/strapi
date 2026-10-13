@@ -26,3 +26,11 @@ app.plugin('graphql').service('utils').anything();
 
 declare const enabled: Strapi.Registries.Settings extends { strict: true } ? true : false;
 enabled satisfies true;
+// EE-only admin services do not exist in a CE runtime: their contract includes `undefined`.
+// @ts-expect-error The service may be undefined.
+void app.service('admin::persist-tables').persistTablesWithPrefix('prefix');
+// @ts-expect-error The service may be undefined.
+void app.service('admin::seat-enforcement').getDisabledUserList();
+app.service('admin::seat-enforcement')?.getDisabledUserList satisfies
+  | ((...args: never[]) => unknown)
+  | undefined;

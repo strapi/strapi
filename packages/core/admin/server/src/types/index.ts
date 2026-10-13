@@ -53,7 +53,8 @@ export type EnterpriseServices = {
  * Default contracts loaded with the admin server types.
  * The EE edition deep-merges `auth`, `user`, `role`, `passport` and `metrics` over their CE
  * implementation: their contracts are the CE shape plus the EE-only members as optional.
- * `persist-tables` and `seat-enforcement` only exist in EE; their callers run in EE-only features.
+ * `persist-tables` and `seat-enforcement` only exist in EE, so a CE runtime resolves them to
+ * `undefined`. EE-only features read them through helpers that drop `undefined`.
  */
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -75,10 +76,10 @@ declare global {
         'admin::metrics': EditionService<typeof CEMetricsService, typeof EEMetricsService>;
         'admin::passport': EditionService<typeof CEPassportService, typeof EEPassportService>;
         'admin::permission': typeof PermissionService;
-        'admin::persist-tables': typeof EEPersistTablesService;
+        'admin::persist-tables': typeof EEPersistTablesService | undefined;
         'admin::project-settings': typeof ProjectSettingsService;
         'admin::role': EditionService<typeof CERoleService, typeof EERoleService>;
-        'admin::seat-enforcement': typeof EESeatEnforcementService;
+        'admin::seat-enforcement': typeof EESeatEnforcementService | undefined;
         'admin::token': typeof TokenService;
         'admin::transfer': typeof TransferService;
         'admin::user': EditionService<typeof CEUserService, typeof EEUserService>;

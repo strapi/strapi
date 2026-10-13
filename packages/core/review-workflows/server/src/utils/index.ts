@@ -8,12 +8,15 @@ type ServiceName<TNamespace extends string> =
       : never
     : never;
 
-/** Retrieves a registered admin service, including application overrides. */
+/**
+ * Retrieves a registered admin service, including application overrides. Review Workflows only runs
+ * in EE, where the EE-only admin services, `undefined` in CE, are defined.
+ */
 export const getAdminService = <TName extends ServiceName<'admin::'>>(
   name: TName,
   { strapi }: { strapi: Core.Strapi } = { strapi: global.strapi }
-): Core.ServiceFor<`admin::${TName}`> => {
-  return strapi.service<Core.ServiceFor<`admin::${TName}`>>(`admin::${name}`);
+): NonNullable<Core.ServiceFor<`admin::${TName}`>> => {
+  return strapi.service<NonNullable<Core.ServiceFor<`admin::${TName}`>>>(`admin::${name}`);
 };
 
 /** Retrieves a registered Review Workflows service, including application overrides. */
