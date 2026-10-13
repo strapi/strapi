@@ -55,3 +55,13 @@ getService('unregistered').custom();
   // @ts-expect-error Route actions are checked against registered controller contracts.
   routes: [{ method: 'GET', path: '/', handler: 'init.getInitDta' }],
 }) satisfies Core.RouterInputFor<RegisteredControllers, 'plugin::content-manager'>;
+
+// Feature controllers are registered too. History only exists with the `cms-content-history` feature.
+strapi.controller('plugin::content-manager.homepage')
+  .getRecentDocuments satisfies Core.ControllerHandler;
+strapi.controller('plugin::content-manager.preview').getPreviewUrl satisfies Core.ControllerHandler;
+strapi.controller('plugin::content-manager.history-version')?.findMany satisfies
+  | Core.ControllerHandler
+  | undefined;
+// @ts-expect-error Registered feature controllers have no arbitrary actions.
+strapi.controller('plugin::content-manager.preview').missing();

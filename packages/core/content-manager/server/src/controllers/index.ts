@@ -21,7 +21,7 @@ export const coreControllers = {
   relations,
   'single-types': singleTypes,
   uid,
-} satisfies RegisteredControllers;
+} satisfies Omit<RegisteredControllers, 'history-version' | 'homepage' | 'preview'>;
 
 export default {
   ...coreControllers,
