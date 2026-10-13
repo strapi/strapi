@@ -1,15 +1,11 @@
-import * as ts from 'typescript';
-
 import {
   collectAppSources,
   emitRegistryDefinitions,
   filterRegisteredSources,
   generateInstanceHelperDefinition,
-  typeofImport,
+  instanceTypeOf,
 } from '../common/sources';
 import type { GeneratorOptions } from '../utils';
-
-const { factory } = ts;
 
 const REGISTRY = 'AppServices';
 const INSTANCE_HELPER = 'ServiceInstance';
@@ -36,6 +32,9 @@ export {};
  *     }
  *   }
  * }
+ *
+ * A JS source registers as `unknown`: without `allowJs` its import is an error type. So does a
+ * service module typed `any` or whose import no longer resolves.
  */
 export const generateServicesDefinitions = async (
   options: GeneratorOptions = {} as GeneratorOptions
@@ -64,7 +63,7 @@ export const generateServicesDefinitions = async (
       ),
     ],
     servicesDefinitions,
-    (source) => factory.createTypeReferenceNode(INSTANCE_HELPER, [typeofImport(source)])
+    instanceTypeOf(INSTANCE_HELPER, logger)
   );
 
   return { output, stats: {} };
