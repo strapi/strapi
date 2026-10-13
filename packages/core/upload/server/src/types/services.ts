@@ -1,4 +1,5 @@
 import type upload from '../services/upload';
+import type { UploadInputFile } from '../types';
 import type imageManipulation from '../services/image-manipulation';
 import type apiUploadFolder from '../services/api-upload-folder';
 import type provider from '../services/provider';
@@ -11,9 +12,44 @@ import type { createAIMetadataService } from '../services/ai-metadata';
 import type { createAIMetadataJobsService } from '../services/ai-metadata-jobs';
 import type { createAIMetadataProviderService } from '../services/ai-metadata-provider';
 
+type UploadServiceImplementation = ReturnType<typeof upload>;
+
+/**
+ * The registered `upload` service. The service reads only the {@link UploadInputFile} fields of the
+ * files it receives, so hand-built files are accepted too. The implementation keeps its published
+ * formidable `InputFile` parameters, which strict types would otherwise widen for every application.
+ */
+export type UploadService = Omit<
+  UploadServiceImplementation,
+  'upload' | 'replace' | 'formatFileInfo'
+> & {
+  upload(
+    input: { data: Record<string, unknown>; files: UploadInputFile[] },
+    opts?: Parameters<UploadServiceImplementation['upload']>[1]
+  ): ReturnType<UploadServiceImplementation['upload']>;
+  replace(
+    id: Parameters<UploadServiceImplementation['replace']>[0],
+    input: {
+      data: Parameters<UploadServiceImplementation['replace']>[1]['data'];
+      file: UploadInputFile;
+    },
+    opts?: Parameters<UploadServiceImplementation['replace']>[2]
+  ): ReturnType<UploadServiceImplementation['replace']>;
+  /** A missing name (formidable's nullable `originalFilename`) is rejected as an invalid name. */
+  formatFileInfo(
+    file: { filename: string | null | undefined; type: string; size: number },
+    ...rest: Parameters<UploadServiceImplementation['formatFileInfo']> extends [
+      unknown,
+      ...infer TRest,
+    ]
+      ? TRest
+      : never
+  ): ReturnType<UploadServiceImplementation['formatFileInfo']>;
+};
+
 /** Upload services by name, as registered by the plugin. */
 export type Services = {
-  upload: ReturnType<typeof upload>;
+  upload: UploadService;
   'image-manipulation': typeof imageManipulation;
   provider: ReturnType<typeof provider>;
   folder: typeof folder;
