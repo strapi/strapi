@@ -18,11 +18,11 @@ describe('typescript.strictTypes', () => {
     );
   });
 
-  test('always generates content-types, components and plugin declarations', () => {
+  test('generates only content-types and components when disabled', () => {
     expect(getTypeArtifacts(strapiWithConfig(undefined))).toEqual({
       contentTypes: true,
       components: true,
-      plugins: true,
+      plugins: false,
       services: false,
       controllers: false,
       policies: false,
