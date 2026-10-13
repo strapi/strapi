@@ -1,4 +1,4 @@
-import type { Logger } from '@strapi/logger';
+import type { Logger } from 'winston';
 import type { Database } from '@strapi/database';
 
 import type { PropertyPath } from 'lodash';
