@@ -120,6 +120,40 @@ const readBundledPackages = (
   return new Set();
 };
 
+const augmentsSettings = (node: ts.Node, namespaces: string[] = []): boolean => {
+  const currentNamespaces = ts.isModuleDeclaration(node)
+    ? [...namespaces, node.name.text]
+    : namespaces;
+  if (
+    ts.isInterfaceDeclaration(node) &&
+    node.name.text === 'Settings' &&
+    currentNamespaces.slice(-2).join('.') === 'Strapi.Registries'
+  ) {
+    return true;
+  }
+  return ts.forEachChild(node, (child) => augmentsSettings(child, currentNamespaces)) === true;
+};
+
+/**
+ * Why a plugin's server declaration opts its consumers in to strict types, if it does. Only the
+ * entry file is read: a leaking import deeper in the plugin's declarations is not reported.
+ */
+const readStrictOptIn = (declaration: string): string | undefined => {
+  const contents = ts.sys.readFile(declaration);
+  if (contents === undefined) {
+    return undefined;
+  }
+
+  const { importedFiles, typeReferenceDirectives } = ts.preProcessFile(contents, true);
+  const references = [...importedFiles, ...typeReferenceDirectives];
+  if (references.some(({ fileName }) => fileName === '@strapi/strapi/strict-types') === true) {
+    return 'imports @strapi/strapi/strict-types';
+  }
+
+  const source = ts.createSourceFile(declaration, contents, ts.ScriptTarget.Latest);
+  return augmentsSettings(source) === true ? 'augments Strapi.Registries.Settings' : undefined;
+};
+
 const relativeImport = (filename: string, containingFile: string) => {
   const relative = path.relative(path.dirname(containingFile), filename).split(path.sep).join('/');
   return relative.startsWith('../') ? relative : `./${relative}`;
@@ -222,6 +256,13 @@ export const generatePluginDefinitions = async (options: GeneratorOptions) => {
     }
 
     if (declaration !== undefined && specifier !== undefined) {
+      const strictOptIn = readStrictOptIn(declaration);
+      if (strictOptIn !== undefined) {
+        options.logger.warn(
+          `The server declaration of ${name} ${strictOptIn}, which turns strict types on for every application that installs it. Report it to the plugin author.`
+        );
+      }
+
       const identity = realpath(declaration);
       const previous = importsByDeclaration.get(identity);
       if (previous === undefined || specifier < previous) {

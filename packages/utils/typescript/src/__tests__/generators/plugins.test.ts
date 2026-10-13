@@ -312,6 +312,48 @@ describe('Plugin declaration generation', () => {
     expect(stats.plugins).toBe(1);
   });
 
+  it.each([
+    [
+      'imports @strapi/strapi/strict-types',
+      "import type {} from '@strapi/strapi/strict-types';\nexport {};\n",
+    ],
+    [
+      'augments Strapi.Registries.Settings',
+      'export {};\ndeclare global { namespace Strapi { namespace Registries { interface Settings { strict: true } } } }\n',
+    ],
+  ])('warns when a plugin server declaration %s', async (reason, declaration) => {
+    const plugin = install('leaky', '@vendor/leaky');
+    fs.writeFileSync(path.join(plugin.pathToPlugin, 'dist/server/index.d.ts'), declaration);
+    const logger = createLogger({ silent: true });
+    const warn = jest.spyOn(logger, 'warn');
+
+    const { output } = await generatePluginDefinitions({
+      strapi: strapi(),
+      appDir,
+      pwd: path.join(appDir, 'types/generated'),
+      logger,
+    });
+
+    expect(output).toBe("import type {} from '@vendor/leaky/strapi-server';\n");
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining(`leaky ${reason}`));
+  });
+
+  it('does not warn for plugin server declarations that only register contracts', async () => {
+    install('plain', '@vendor/plain');
+    const logger = createLogger({ silent: true });
+    const warn = jest.spyOn(logger, 'warn');
+
+    await generatePluginDefinitions({
+      strapi: strapi(),
+      appDir,
+      pwd: path.join(appDir, 'types/generated'),
+      logger,
+    });
+
+    expect(warn).not.toHaveBeenCalled();
+  });
+
   it('regenerates an empty module after the last typed plugin is removed', async () => {
     const plugin = install('removed', '@vendor/removed');
     const config = {
