@@ -3,8 +3,10 @@ import type { ReactElement } from 'react';
 import { act, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
 
+import { Page } from '../../components/PageHelpers';
 import { useTypedDispatch } from '../../core/store/hooks';
 import { useSessionKeepalive } from '../../hooks/useSessionKeepalive';
+import { useInitQuery } from '../../services/admin';
 import {
   ADMIN_SESSION_CHANNEL,
   ADMIN_SESSION_MESSAGE_TYPE,
@@ -50,6 +52,12 @@ const PERMISSION_A = {
 const PERMISSION_B = {
   action: 'admin::marketplace.read',
   subject: null,
+};
+
+const CONDITIONAL_PERMISSION = {
+  action: 'admin::roles.update',
+  subject: null,
+  conditions: ['is-author'],
 };
 
 /**
@@ -160,6 +168,12 @@ const EstablishSessionProbe = () => {
   );
 };
 
+const InitProbe = () => {
+  const { data } = useInitQuery();
+
+  return <div data-testid="has-admin">{String(data?.hasAdmin)}</div>;
+};
+
 const waitForUserA = async () => {
   await waitFor(() => expect(screen.getByTestId('identity-loading')).toHaveTextContent('false'));
   expect(screen.getByTestId('identity-email')).toHaveTextContent(USER_A.email);
@@ -177,8 +191,8 @@ const bearer = (token: string) => `Bearer ${token}`;
 
 /**
  * Keep the first bearer-A `getMe` / `getMyPermissions` responses pending.
- * Warming user A until the screen settles lets those requests finish, which
- * hides the race where invalidation is dropped while they are still running.
+ * This proves that a response started for the previous credential cannot
+ * repopulate the cache after the session changes.
  */
 const holdInFlightOldBearer = () => {
   const authorizations: { me: Array<string | null>; permissions: Array<string | null> } = {
@@ -271,6 +285,50 @@ describe('AuthProvider session identity', () => {
     expect(window.localStorage.getItem('jwtToken')).toBe(JSON.stringify(TOKEN_B));
   });
 
+  it('does not expose the previous identity while the new identity is loading', async () => {
+    let releaseIdentity: () => void = () => {};
+    const identityGate = new Promise<void>((resolve) => {
+      releaseIdentity = resolve;
+    });
+
+    server.use(
+      http.post('/admin/login', () =>
+        HttpResponse.json({
+          data: {
+            token: TOKEN_B,
+            user: USER_B,
+          },
+        })
+      ),
+      http.get('/admin/users/me', async ({ request }) => {
+        const who = identityForAuthorization(request.headers.get('Authorization'));
+        if (who === 'b') {
+          await identityGate;
+        }
+        return HttpResponse.json({ data: who === 'a' ? USER_A : USER_B });
+      }),
+      http.get('/admin/users/me/permissions', async ({ request }) => {
+        const who = identityForAuthorization(request.headers.get('Authorization'));
+        if (who === 'b') {
+          await identityGate;
+        }
+        return HttpResponse.json({ data: who === 'a' ? [PERMISSION_A] : [PERMISSION_B] });
+      })
+    );
+
+    const { user } = renderIdentity();
+    await waitForUserA();
+
+    await user.click(screen.getByRole('button', { name: 'login-as-b' }));
+
+    await waitFor(() => expect(screen.getByTestId('identity-loading')).toHaveTextContent('true'));
+    expect(screen.getByTestId('identity-email')).toBeEmptyDOMElement();
+    expect(screen.getByTestId('identity-actions')).toBeEmptyDOMElement();
+
+    releaseIdentity();
+    await waitForUserB();
+  });
+
   it('loads identity after password login when no user was cached', async () => {
     window.localStorage.removeItem('jwtToken');
     window.localStorage.removeItem('isLoggedIn');
@@ -304,6 +362,72 @@ describe('AuthProvider session identity', () => {
 
     await waitForUserB();
     expect(window.localStorage.getItem('jwtToken')).toBe(null);
+  });
+
+  it('retains the cached init response when the session changes', async () => {
+    let initRequests = 0;
+    server.use(
+      http.get('/admin/init', () => {
+        initRequests += 1;
+        return HttpResponse.json({ data: { hasAdmin: true } });
+      })
+    );
+
+    const { user } = renderIdentity(
+      <>
+        <EstablishSessionProbe />
+        <InitProbe />
+      </>
+    );
+
+    await waitForUserA();
+    await waitFor(() => expect(screen.getByTestId('has-admin')).toHaveTextContent('true'));
+
+    await user.click(screen.getByRole('button', { name: 'establish-session-b' }));
+
+    await waitForUserB();
+    expect(screen.getByTestId('has-admin')).toHaveTextContent('true');
+    expect(initRequests).toBe(1);
+  });
+
+  it('does not reuse a conditional permission result from the previous admin', async () => {
+    const checkedBearers: Array<string | null> = [];
+    server.use(
+      http.post('/admin/login', () =>
+        HttpResponse.json({
+          data: {
+            token: TOKEN_B,
+            user: USER_B,
+          },
+        })
+      ),
+      http.get('/admin/users/me/permissions', () =>
+        HttpResponse.json({ data: [CONDITIONAL_PERMISSION] })
+      ),
+      http.post('/admin/permissions/check', ({ request }) => {
+        const authorization = request.headers.get('Authorization');
+        checkedBearers.push(authorization);
+
+        return HttpResponse.json({ data: [authorization === bearer(TOKEN_A)] });
+      })
+    );
+
+    const { user } = renderIdentity(
+      <>
+        <IdentityProbe />
+        <Page.Protect permissions={[CONDITIONAL_PERMISSION]}>
+          <div>Conditionally protected content</div>
+        </Page.Protect>
+      </>
+    );
+
+    await screen.findByText('Conditionally protected content');
+
+    await user.click(screen.getByRole('button', { name: 'login-as-b' }));
+
+    await screen.findByText("You don't have the permissions to access that content");
+    expect(checkedBearers).toContain(bearer(TOKEN_A));
+    expect(checkedBearers).toContain(bearer(TOKEN_B));
   });
 
   it('refetches identity under the new persisted token when another tab changes the session', async () => {
@@ -393,17 +517,16 @@ describe('AuthProvider in-flight identity race', () => {
   const waitForOldBearerInFlight = () =>
     waitFor(() => {
       expect({
-        me: authorizations.me,
-        permissions: authorizations.permissions,
-      }).toEqual({
-        me: [bearer(TOKEN_A)],
-        permissions: [bearer(TOKEN_A)],
-      });
+        me: authorizations.me.includes(bearer(TOKEN_A)),
+        permissions: authorizations.permissions.includes(bearer(TOKEN_A)),
+      }).toEqual({ me: true, permissions: true });
     });
 
   const expectBearerBRefetch = () => {
-    expect(authorizations.me).toEqual([bearer(TOKEN_A), bearer(TOKEN_B)]);
-    expect(authorizations.permissions).toEqual([bearer(TOKEN_A), bearer(TOKEN_B)]);
+    expect({
+      me: authorizations.me.includes(bearer(TOKEN_B)),
+      permissions: authorizations.permissions.includes(bearer(TOKEN_B)),
+    }).toEqual({ me: true, permissions: true });
   };
 
   it('refetches identity as the new user after login while old bearer requests are in flight', async () => {
@@ -427,8 +550,8 @@ describe('AuthProvider in-flight identity race', () => {
     await waitFor(() => {
       expect(window.localStorage.getItem('jwtToken')).toBe(JSON.stringify(TOKEN_B));
     });
-    expect(authorizations.me).toEqual([bearer(TOKEN_A)]);
-    expect(authorizations.permissions).toEqual([bearer(TOKEN_A)]);
+
+    await waitFor(expectBearerBRefetch);
 
     releaseOldBearer();
 
@@ -446,13 +569,11 @@ describe('AuthProvider in-flight identity race', () => {
       emitExternalSessionBroadcast();
     });
 
-    // The foreign notice must be applied while bearer A is still pending.
-    // Releasing first lets the refetch succeed for the wrong reason.
     await waitFor(() => {
       expect(screen.getByTestId('identity-token')).toHaveTextContent(TOKEN_B);
     });
-    expect(authorizations.me).toEqual([bearer(TOKEN_A)]);
-    expect(authorizations.permissions).toEqual([bearer(TOKEN_A)]);
+
+    await waitFor(expectBearerBRefetch);
 
     releaseOldBearer();
 

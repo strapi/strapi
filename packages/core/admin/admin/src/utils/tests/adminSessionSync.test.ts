@@ -6,8 +6,6 @@ import {
   subscribeToAdminSessionChanges,
 } from '../adminSessionSync';
 
-const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
 const flush = () =>
   new Promise<void>((resolve) => {
     setImmediate(resolve);
@@ -15,24 +13,16 @@ const flush = () =>
 
 describe('adminSessionSync', () => {
   afterEach(() => {
+    jest.restoreAllMocks();
     window.localStorage.clear();
   });
 
-  it('writes a cryptographic id that does not include the access token', () => {
-    // A literal, not JSON.stringify of a credential. CodeQL treats that
-    // stringify result as clear-text storage of sensitive data.
+  it('does not retain the session-change signal', () => {
     window.localStorage.setItem('jwtToken', '"secret-admin-token"');
 
     notifyOtherTabsOfAdminSessionChange();
-    const first = window.localStorage.getItem(ADMIN_SESSION_STORAGE_KEY);
-    expect(first).toMatch(UUID_PATTERN);
-    expect(first).not.toContain('secret-admin-token');
-
-    notifyOtherTabsOfAdminSessionChange();
-    const second = window.localStorage.getItem(ADMIN_SESSION_STORAGE_KEY);
-    expect(second).toMatch(UUID_PATTERN);
-    expect(second).not.toBe(first);
-    expect(second).not.toContain('secret-admin-token');
+    expect(window.localStorage.getItem(ADMIN_SESSION_STORAGE_KEY)).toBeNull();
+    expect(window.localStorage.getItem('jwtToken')).toBe('"secret-admin-token"');
   });
 
   it('prefers globalThis.crypto.randomUUID when the host provides it', () => {
@@ -50,8 +40,7 @@ describe('adminSessionSync', () => {
       notifyOtherTabsOfAdminSessionChange();
 
       expect(randomUUID).toHaveBeenCalled();
-      expect(window.localStorage.getItem(ADMIN_SESSION_STORAGE_KEY)).toBe(generated);
-      expect(generated).not.toContain('secret-admin-token');
+      expect(window.localStorage.getItem(ADMIN_SESSION_STORAGE_KEY)).toBeNull();
     } finally {
       if (previous) {
         Object.defineProperty(globalThis.crypto, 'randomUUID', previous);
@@ -84,6 +73,7 @@ describe('adminSessionSync', () => {
 
   it('uses getRandomValues when randomUUID is unavailable', () => {
     const previous = Object.getOwnPropertyDescriptor(globalThis.crypto, 'randomUUID');
+    const getRandomValues = jest.spyOn(globalThis.crypto, 'getRandomValues');
 
     Object.defineProperty(globalThis.crypto, 'randomUUID', {
       configurable: true,
@@ -98,7 +88,8 @@ describe('adminSessionSync', () => {
 
         isolated.notifyOtherTabsOfAdminSessionChange();
 
-        expect(window.localStorage.getItem(ADMIN_SESSION_STORAGE_KEY)).toMatch(UUID_PATTERN);
+        expect(getRandomValues).toHaveBeenCalled();
+        expect(window.localStorage.getItem(ADMIN_SESSION_STORAGE_KEY)).toBeNull();
       });
     } finally {
       if (previous) {

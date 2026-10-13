@@ -76,6 +76,7 @@ const notifyOtherTabsOfAdminSessionChange = (): void => {
 
   try {
     window.localStorage.setItem(ADMIN_SESSION_STORAGE_KEY, createEphemeralId());
+    window.localStorage.removeItem(ADMIN_SESSION_STORAGE_KEY);
   } catch {
     // Private mode and some tests disable storage. The in-tab refetch still runs.
   }

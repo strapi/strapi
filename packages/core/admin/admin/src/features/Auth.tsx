@@ -12,6 +12,7 @@ import { useStrapiApp } from '../features/StrapiApp';
 import { useQueryParams } from '../hooks/useQueryParams';
 import { useSessionKeepalive } from '../hooks/useSessionKeepalive';
 import { getStoredToken, logout as logoutAction, setLocale, setToken } from '../reducer';
+import { resetAdminApiState } from '../services/admin';
 import { adminApi } from '../services/api';
 import {
   useGetMeQuery,
@@ -23,7 +24,7 @@ import {
 import { normalizeAdminLocale } from '../translations/normalizeAdminLocale';
 import { subscribeToAdminSessionChanges } from '../utils/adminSessionSync';
 import { getOrCreateDeviceId } from '../utils/deviceId';
-import { establishAdminSession, refreshAdminIdentity } from '../utils/establishAdminSession';
+import { establishAdminSession } from '../utils/establishAdminSession';
 import {
   attemptTokenRefresh,
   getFetchClient,
@@ -399,15 +400,9 @@ const AuthProvider = ({
   });
 
   /**
-   * Another tab can switch the shared access token while this tab's `Me`
-   * cache still describes the previous user. Refresh only when the new token
-   * is already readable. Do not log out when the notice arrives without a
-   * token — logout is the `isLoggedIn` removal above, and a cookie write that
-   * is not visible yet must not end the new session.
-   *
-   * Use the same refresh as this tab's login. An invalidate while the previous
-   * bearer is still in flight is dropped, and that response would restore the
-   * previous user.
+   * Another tab can replace the shared credential. Adopt the new token and
+   * clear data cached for the previous admin before rendering that session.
+   * Logout is handled by the `isLoggedIn` storage listener above.
    */
   React.useEffect(() => {
     return subscribeToAdminSessionChanges(() => {
@@ -421,7 +416,7 @@ const AuthProvider = ({
         dispatch(setToken(nextToken));
       }
 
-      refreshAdminIdentity(dispatch);
+      resetAdminApiState(dispatch);
     });
   }, [dispatch, store]);
 
@@ -547,7 +542,7 @@ const AuthProvider = ({
     [checkPermissions, rawQuery, runRbacMiddleware, user, userPermissions]
   );
 
-  const isLoading = isLoadingUser || isLoadingPermissions;
+  const isLoading = isLoadingUser || isLoadingPermissions || (Boolean(token) && !user);
 
   return (
     <>

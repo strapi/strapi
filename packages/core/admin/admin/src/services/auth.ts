@@ -19,9 +19,6 @@ import { type GetOwnPermissions, type GetMe, type UpdateMe } from '../../../shar
 
 import { adminApi } from './api';
 
-import type { Dispatch } from '../core/store/configure';
-import type { AnyAction, ThunkDispatch } from '@reduxjs/toolkit';
-
 const authService = adminApi
   .enhanceEndpoints({
     addTagTypes: ['User', 'Me', 'ProvidersOptions', 'Sessions'],
@@ -49,7 +46,6 @@ const authService = adminApi
         transformResponse(res: GetOwnPermissions.Response) {
           return res.data;
         },
-        providesTags: ['Me'],
       }),
       updateMe: builder.mutation<UpdateMe.Response['data'], UpdateMe.Request['body']>({
         query: (body) => ({
@@ -117,10 +113,6 @@ const authService = adminApi
         transformResponse(res: Login.Response) {
           return res.data;
         },
-        // Do not invalidate `Me` here. This mutation fulfills before
-        // `establishAdminSession` stores the new token, so the refetch would
-        // still send the previous bearer token. RTK Query 1.9 then drops the
-        // invalidate that runs after the token is stored.
       }),
       logout: builder.mutation<void, { deviceId?: string } | void>({
         query: (body) => ({
@@ -245,29 +237,6 @@ const authService = adminApi
     overrideExisting: true,
   });
 
-const IDENTITY_QUERY_ENDPOINTS = ['getMe', 'getMyPermissions'] as const;
-
-/**
- * `Store['dispatch']` is widened to plain actions because the store middleware
- * array is spread. The store still includes the thunk middleware, which is what
- * `getRunningQueryThunk` is documented to be dispatched with.
- */
-type IdentityThunkDispatch = ThunkDispatch<unknown, unknown, AnyAction>;
-
-/**
- * In-flight `getMe` / `getMyPermissions` promises, via RTK Query's public
- * `getRunningQueryThunk`. Empty when that endpoint has no request running.
- */
-const getRunningAdminIdentityQueries = (dispatch: Dispatch) => {
-  const thunkDispatch = dispatch as IdentityThunkDispatch;
-
-  return IDENTITY_QUERY_ENDPOINTS.flatMap((endpointName) => {
-    const running = thunkDispatch(authService.util.getRunningQueryThunk(endpointName, undefined));
-
-    return running ? [running] : [];
-  });
-};
-
 const {
   useCheckPermissionsQuery,
   useLazyCheckPermissionsQuery,
@@ -312,5 +281,4 @@ export {
   useGetProvidersQuery,
   useGetProviderOptionsQuery,
   useUpdateProviderOptionsMutation,
-  getRunningAdminIdentityQueries,
 };
