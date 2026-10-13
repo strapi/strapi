@@ -30,9 +30,9 @@ export type Action = {
   displayName: string;
 
   /**
-   * The main category of an action (only for the settings section)
+   * The main category of an action
    */
-  category?: string | undefined;
+  category: string;
 
   /**
    * The secondary category of an action (only for settings and plugins section)
@@ -81,12 +81,19 @@ export type Action = {
 export type CreateActionPayload = Utils.Intersect<
   [
     Utils.Object.PartialBy<
-      // Action Id is computed from the uid value
-      Omit<Action, 'actionId'>,
+      // Action Id is computed from the uid value, the category is read below
+      Omit<Action, 'actionId' | 'category'>,
       // Options is filled with default values
       'options'
     >,
-    { uid: string },
+    {
+      uid: string;
+      // Settings actions have a category, other sections may leave it out or pass `undefined`.
+      // TODO @Nico `Action.category` keeps develop's `string` while actions registered without one
+      // hold `undefined`. Making it `category?: string | undefined` narrows a published type, so it
+      // waits for strict-only action types or a major.
+      category?: string | undefined;
+    },
   ]
 >;
 
