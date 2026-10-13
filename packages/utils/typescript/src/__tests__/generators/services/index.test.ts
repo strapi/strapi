@@ -140,6 +140,69 @@ describe('generateServicesDefinitions', () => {
     expect(logger.warnings).toBe(1);
   });
 
+  test('registers a JS source as unknown, without importing it', async () => {
+    const { normalized } = await generate(
+      {
+        'src/api/article/services/article.ts': '',
+        'src/api/article/services/legacy.js': '',
+      },
+      ['api::article.article', 'api::article.legacy']
+    );
+
+    expect(normalized).toContain("'api::article.legacy': unknown");
+    expect(normalized).not.toContain("legacy')");
+  });
+
+  test('resolves a module typed any, or whose import does not resolve, to unknown', async () => {
+    const { root, strapi, pwd } = await createApp(
+      {
+        'src/api/article/services/article.ts': 'export default () => ({ find: () => 1 });',
+        'src/api/article/services/untyped.ts': 'declare const service: any;\nexport = service;',
+        'src/api/article/services/removed.ts': 'export default {};',
+      },
+      ['api::article.article', 'api::article.untyped', 'api::article.removed']
+    );
+    roots.push(root);
+
+    const { output } = await generateServicesDefinitions({
+      strapi,
+      pwd,
+      logger: createLogger({ silent: true }),
+    });
+    await outputFile(path.join(pwd, 'services.d.ts'), output);
+    // The source moved after generation: the generated import no longer resolves.
+    await fs.rm(path.join(root, 'src/api/article/services/removed.ts'));
+    await outputFile(
+      path.join(root, 'src/check.ts'),
+      [
+        'type Equal<T, U> = (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;',
+        'type Service<TUID extends keyof Strapi.Registries.AppServices> = Strapi.Registries.AppServices[TUID];',
+        'export const checks: [',
+        "  Equal<Service<'api::article.article'>, { find: () => number }>,",
+        "  Equal<Service<'api::article.untyped'>, unknown>,",
+        "  Equal<Service<'api::article.removed'>, unknown>,",
+        '] = [true, true, true];',
+      ].join('\n')
+    );
+
+    const program = ts.createProgram(
+      [path.join(pwd, 'services.d.ts'), path.join(root, 'src/check.ts')],
+      {
+        noEmit: true,
+        strict: true,
+        skipLibCheck: true,
+        types: [],
+        module: ts.ModuleKind.CommonJS,
+        moduleResolution: ts.ModuleResolutionKind.Node10,
+      }
+    );
+    expect(
+      ts
+        .getPreEmitDiagnostics(program)
+        .map((diagnostic) => ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'))
+    ).toEqual([]);
+  });
+
   test('sorts the entries by uid', async () => {
     const { output } = await generate(
       {
