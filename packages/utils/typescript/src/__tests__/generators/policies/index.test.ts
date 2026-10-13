@@ -267,6 +267,12 @@ describe('generatePoliciesDefinitions', () => {
     expect(output).toBe(`/*
  * The app doesn't have any policies yet.
  */
+
+export {};
 `);
+    // An empty file must still be a module, so that `import type {} from './policies'` compiles
+    expect(
+      ts.isExternalModule(ts.createSourceFile('policies.d.ts', output, ts.ScriptTarget.Latest))
+    ).toBe(true);
   });
 });

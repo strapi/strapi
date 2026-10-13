@@ -17,6 +17,8 @@ const INSTANCE_HELPER = 'ServiceInstance';
 const NO_SERVICE_PLACEHOLDER_COMMENT = `/*
  * The app doesn't have any services yet.
  */
+
+export {};
 `;
 
 /**

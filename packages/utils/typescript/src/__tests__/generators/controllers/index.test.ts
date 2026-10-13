@@ -1,6 +1,7 @@
 import os from 'node:os';
 import path from 'node:path';
 import fs from 'node:fs/promises';
+import * as ts from 'typescript';
 
 import { generateControllersDefinitions } from '../../../generators/controllers';
 import { createLogger } from '../../../generators/utils';
@@ -171,7 +172,13 @@ describe('generateControllersDefinitions', () => {
     expect(output).toBe(`/*
  * The app doesn't have any controllers yet.
  */
+
+export {};
 `);
+    // An empty file must still be a module, so that `import type {} from './controllers'` compiles
+    expect(
+      ts.isExternalModule(ts.createSourceFile('controllers.d.ts', output, ts.ScriptTarget.Latest))
+    ).toBe(true);
   });
 
   test('emits a placeholder when no api controller has a source file', async () => {

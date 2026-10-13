@@ -19,6 +19,8 @@ const HANDLER_CONFIG_HELPER = 'PolicyHandlerConfig';
 const NO_POLICY_PLACEHOLDER_COMMENT = `/*
  * The app doesn't have any policies yet.
  */
+
+export {};
 `;
 
 /**

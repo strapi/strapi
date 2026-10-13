@@ -1,6 +1,7 @@
 import os from 'node:os';
 import path from 'node:path';
 import fs from 'node:fs/promises';
+import * as ts from 'typescript';
 
 import { generateServicesDefinitions } from '../../../generators/services';
 import { createLogger } from '../../../generators/utils';
@@ -159,7 +160,13 @@ describe('generateServicesDefinitions', () => {
     expect(output).toBe(`/*
  * The app doesn't have any services yet.
  */
+
+export {};
 `);
+    // An empty file must still be a module, so that `import type {} from './services'` compiles
+    expect(
+      ts.isExternalModule(ts.createSourceFile('services.d.ts', output, ts.ScriptTarget.Latest))
+    ).toBe(true);
   });
 
   test('emits a placeholder when no api service has a source file', async () => {

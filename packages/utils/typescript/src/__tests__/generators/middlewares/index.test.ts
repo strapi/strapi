@@ -295,6 +295,12 @@ describe('generateMiddlewaresDefinitions', () => {
     expect(output).toBe(`/*
  * The app doesn't have any middlewares yet.
  */
+
+export {};
 `);
+    // An empty file must still be a module, so that `import type {} from './middlewares'` compiles
+    expect(
+      ts.isExternalModule(ts.createSourceFile('middlewares.d.ts', output, ts.ScriptTarget.Latest))
+    ).toBe(true);
   });
 });
