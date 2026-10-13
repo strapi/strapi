@@ -1,7 +1,11 @@
 import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
 
 import type { UID, Data, Core, Modules } from '@strapi/types';
-import type { ReleaseAction } from '../../../shared/contracts/release-actions';
+import type {
+  ReleaseAction,
+  ReleaseActionOutcome,
+  ReleaseActionReason,
+} from '../../../shared/contracts/release-actions';
 import type { ReleaseCondition } from '../constants';
 
 import type { SettingsService } from '../services/settings';
@@ -49,19 +53,17 @@ type WorkflowWithRequiredStage = { stageRequiredToPublish?: StageRef | null } | 
 
 type DraftEntry = Modules.Documents.AnyDocument & { strapi_stage?: StageRef | null };
 
-export type PublishabilityOutcome = 'skipped_invalid' | 'skipped_not_approved';
-
-export interface PublishabilityReason {
-  validation?: { errors: { path: string[]; message: string }[] };
-  stage?: { entryStage: StageRef | null; requiredStage: StageRef };
-}
+type PublishabilityOutcome = Extract<
+  ReleaseActionOutcome,
+  'skipped_invalid' | 'skipped_not_approved'
+>;
 
 export type EntryPublishability =
   | { publishable: true; outcome: null; reason: null; error: null }
   | {
       publishable: false;
       outcome: PublishabilityOutcome;
-      reason: PublishabilityReason;
+      reason: ReleaseActionReason;
       /** What publishing the entry would throw; a rejected release reports its message */
       error: Error;
     };
@@ -81,8 +83,12 @@ const getAssignedWorkflow = async (
   });
 };
 
+// Strapi's type-mismatch message ends with the submitted value (`notType` in
+// `@strapi/utils`'s yup.ts): cut it off, the rest still names the field and the expected type
+const SUBMITTED_VALUE_SUFFIX = /, but the final value was: [\s\S]*$/;
+
 // Only the field paths and messages: the details also carry the submitted values
-const getValidationErrors = (error: Error) => {
+export const getValidationErrors = (error: Error) => {
   const details: unknown = error instanceof errors.ValidationError ? error.details : null;
   const detailErrors: unknown[] =
     typeof details === 'object' &&
@@ -99,7 +105,7 @@ const getValidationErrors = (error: Error) => {
 
     return {
       path: Array.isArray(path) ? path.map(String) : [],
-      message: typeof message === 'string' ? message : '',
+      message: typeof message === 'string' ? message.replace(SUBMITTED_VALUE_SUFFIX, '') : '',
     };
   });
 };

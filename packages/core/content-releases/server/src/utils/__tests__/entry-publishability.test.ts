@@ -1,4 +1,4 @@
-import { errors } from '@strapi/utils';
+import { errors, yup } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
 import { getEntryPublishability, getPublishabilityForActions } from '../index';
@@ -80,6 +80,32 @@ describe('getEntryPublishability', () => {
       reason: { validation: { errors: [{ path: ['title'], message: 'title must be defined.' }] } },
       // Publishing it would throw this same error, so a rejected release keeps its message
       error: validationError,
+    });
+  });
+
+  test('a type-mismatch message is kept without the submitted value it ends with', async () => {
+    // The message Strapi's yup locale builds for a value of the wrong type
+    const yupError = await yup
+      .object({ count: yup.number() })
+      .validate({ count: 'secret' })
+      .then(
+        () => {
+          throw new Error('Expected a type mismatch');
+        },
+        (error: yup.ValidationError) => error
+      );
+    const strapi = buildStrapi({
+      validate: jest.fn().mockRejectedValue(new errors.YupValidationError(yupError)),
+    });
+
+    const result = await getEntryPublishability(
+      contentTypeUid,
+      { id: 1, documentId: 'a' },
+      { strapi }
+    );
+
+    expect(result.reason).toEqual({
+      validation: { errors: [{ path: ['count'], message: 'count must be a `number` type' }] },
     });
   });
 

@@ -28,11 +28,13 @@ const updateActionsStatusAndUpdateReleaseStatus = async (
 
   const entryStatus = await isEntryValid(contentType, entry, { strapi });
 
+  // Only planned releases: a release that ran keeps what its run recorded
   await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
     where: {
       contentType,
       entryDocumentId: entry.documentId,
       locale: entry.locale,
+      release: { releasedAt: { $null: true } },
     },
     data: {
       isEntryValid: entryStatus,
@@ -44,15 +46,17 @@ const updateActionsStatusAndUpdateReleaseStatus = async (
   }
 };
 
+// Only planned releases: a release that ran keeps the entry's action and what its run recorded
 const deleteActionsAndUpdateReleaseStatus = async (params: ReleaseActionsParams) => {
   const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
     where: {
+      releasedAt: null,
       actions: params,
     },
   });
 
   await strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({
-    where: params,
+    where: { ...params, release: { releasedAt: { $null: true } } },
   });
 
   for (const release of releases) {
