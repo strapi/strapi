@@ -2,11 +2,12 @@ import type { Context, Next } from 'koa';
 import { errors } from '@strapi/utils';
 import { get, isString } from 'lodash';
 import type { Core } from '@strapi/types';
-import type { RateLimitOptions } from '../types/rate-limit';
 
 const { RateLimitError } = errors;
 
-export default (config: RateLimitOptions | undefined, { strapi }: { strapi: Core.Strapi }) =>
+// `config` stays `any` in the published type, as on develop; the registered
+// `plugin::email.rateLimit` middleware contract types it as `RateLimitOptions | undefined`.
+export default (config: any, { strapi }: { strapi: Core.Strapi }) =>
   async (ctx: Context, next: Next) => {
     const pluginConfig = strapi.config.get('plugin::email') as any;
     const rateLimitConfig = {
