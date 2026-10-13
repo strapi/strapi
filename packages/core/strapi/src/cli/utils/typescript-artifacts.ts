@@ -4,8 +4,8 @@ import type { Core } from '@strapi/types';
 /**
  * Reads and validates the `typescript.strictTypes` flag.
  * false/undefined => legacy behaviour (only content-type and component definitions are generated),
- * true => also generate the application service, controller, policy and middleware contracts and the
- * bundled plugins opt-in.
+ * true => also generate the application service, controller, policy and middleware contracts, the
+ * bundled plugins opt-in and the optional plugins contracts.
  * Mirrors the validation of `api.documents.strictRelations` (see document-service/entries.ts).
  */
 export const isStrictTypesEnabled = (strapi: Core.Strapi): boolean => {
@@ -23,9 +23,10 @@ export const isStrictTypesEnabled = (strapi: Core.Strapi): boolean => {
 /**
  * Type artifacts to generate for the application.
  *
- * `plugins` loads the contracts of enabled plugins without enabling strict lookups, so it is always
- * generated. The strict artifacts are passed as `false` rather than left out when the flag is off,
- * so the generator removes a stale `services.d.ts` / `controllers.d.ts` / `policies.d.ts` /
+ * With the flag off, the output equals the legacy one: only content-type and component definitions.
+ * `plugins` loads the contracts of enabled optional plugins, so it is generated with the strict
+ * artifacts. They are passed as `false` rather than left out when the flag is off, so the generator
+ * removes a stale `plugins.d.ts` / `services.d.ts` / `controllers.d.ts` / `policies.d.ts` /
  * `middlewares.d.ts` / `strict.d.ts` left by a run with the flag on.
  */
 export const getTypeArtifacts = (strapi: Core.Strapi) => {
@@ -34,7 +35,7 @@ export const getTypeArtifacts = (strapi: Core.Strapi) => {
   return {
     contentTypes: true,
     components: true,
-    plugins: true,
+    plugins: strict,
     services: strict,
     controllers: strict,
     policies: strict,
