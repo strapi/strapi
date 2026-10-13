@@ -5,6 +5,7 @@ import { GetInitData } from '../../../shared/contracts/init';
 import type { ContentManagerLink } from '../hooks/useContentManagerInitData';
 
 interface AppState {
+  adminUserId?: string | number;
   collectionTypeLinks: ContentManagerLink[];
   components: GetInitData.Response['data']['components'];
   contentStructure?: GetInitData.Response['data']['contentStructure'];
@@ -15,6 +16,7 @@ interface AppState {
 }
 
 const initialState: AppState = {
+  adminUserId: undefined,
   collectionTypeLinks: [],
   components: [],
   contentStructure: undefined,
@@ -31,6 +33,7 @@ const appSlice = createSlice({
     setInitialData(
       state,
       action: PayloadAction<{
+        adminUserId?: AppState['adminUserId'];
         authorizedCollectionTypeLinks: AppState['collectionTypeLinks'];
         authorizedSingleTypeLinks: AppState['singleTypeLinks'];
         components: AppState['components'];
@@ -40,6 +43,7 @@ const appSlice = createSlice({
       }>
     ) {
       const {
+        adminUserId,
         authorizedCollectionTypeLinks,
         authorizedSingleTypeLinks,
         components,
@@ -47,6 +51,7 @@ const appSlice = createSlice({
         contentTypeSchemas,
         fieldSizes,
       } = action.payload;
+      state.adminUserId = adminUserId;
       state.collectionTypeLinks = authorizedCollectionTypeLinks.filter(
         ({ isDisplayed }) => isDisplayed
       );
@@ -57,11 +62,14 @@ const appSlice = createSlice({
       state.fieldSizes = fieldSizes;
       state.isLoading = false;
     },
+    resetInitialData() {
+      return initialState;
+    },
   },
 });
 
 const { actions, reducer } = appSlice;
-const { setInitialData } = actions;
+const { resetInitialData, setInitialData } = actions;
 
-export { reducer, setInitialData };
+export { initialState, reducer, resetInitialData, setInitialData };
 export type { AppState };
