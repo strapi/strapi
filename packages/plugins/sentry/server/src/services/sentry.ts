@@ -69,7 +69,11 @@ const createSentryService = (strapi: Core.Strapi) => {
         instance?.captureException(error);
       });
     },
-  } satisfies SentryService;
+  };
+
+  // Checked here rather than with `satisfies` on the literal, which would type `this` and change the
+  // published `init()` return type from develop's `any`.
+  service satisfies SentryService;
 
   return service;
 };
