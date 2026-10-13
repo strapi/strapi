@@ -185,6 +185,22 @@ function workspaceDirectories() {
   );
 }
 
+// Every `source` export condition names a file, so tools resolving sources do not fail.
+test('workspace export source conditions point to existing files', () => {
+  const sources = (value) =>
+    typeof value === 'object' && value !== null
+      ? Object.entries(value).flatMap(([key, entry]) =>
+          key === 'source' && typeof entry === 'string' ? [entry] : sources(entry)
+        )
+      : [];
+  for (const [name, directory] of workspaceDirectories()) {
+    const { exports } = readManifest(path.relative(repository, directory));
+    for (const source of sources(exports)) {
+      assert.ok(fs.existsSync(path.join(directory, source)), `${name} exports missing ${source}`);
+    }
+  }
+});
+
 // Workspace packages @strapi/strapi bundles, and @strapi/strapi itself.
 function bundledWorkspaces() {
   const workspaces = workspaceDirectories();
