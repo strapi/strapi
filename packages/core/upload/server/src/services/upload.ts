@@ -20,7 +20,7 @@ import { FILE_MODEL_UID, FOLDER_MODEL_UID, ALLOWED_WEBHOOK_EVENTS } from '../con
 import { getService } from '../utils';
 import { AUDITED_EVENTS, getUploadSettingsChanges, toAuditedFile } from '../audit-logs';
 
-import type { Config, File, UploadInputFile, UploadableFile, FileInfo } from '../types';
+import type { Config, File, InputFile, UploadableFile, FileInfo } from '../types';
 import type { ViewConfiguration } from '../controllers/validation/admin/configureView';
 import type { Settings } from '../controllers/validation/admin/settings';
 
@@ -77,7 +77,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   const createAndAssignTmpWorkingDirectoryToFiles = async (
-    files: UploadInputFile | UploadInputFile[]
+    files: InputFile | InputFile[]
   ): Promise<string> => {
     const tmpWorkingDirectory = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-upload-'));
 
@@ -133,8 +133,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   }
 
   async function formatFileInfo(
-    // `filename` accepts formidable's nullable `originalFilename`; a missing name is invalid.
-    { filename, type, size }: { filename: string | null | undefined; type: string; size: number },
+    { filename, type, size }: { filename: string; type: string; size: number },
     fileInfo: Partial<FileInfo> = {},
     metas: {
       refId?: ID;
@@ -147,7 +146,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     const fileService = getService('file');
     const imageManipulationService = getService('image-manipulation');
 
-    if (filename === null || filename === undefined || isValidFilename(filename) === false) {
+    if (!isValidFilename(filename)) {
       throw new ApplicationError('File name contains invalid characters');
     }
 
@@ -201,7 +200,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   }
 
   async function enhanceAndValidateFile(
-    file: UploadInputFile,
+    file: InputFile,
     fileInfo: FileInfo,
     metas?: Metas
   ): Promise<UploadableFile> {
@@ -252,7 +251,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       files,
     }: {
       data: Record<string, unknown>;
-      files: UploadInputFile[];
+      files: InputFile[];
     },
     opts?: CommonOptions
   ) {
@@ -267,7 +266,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const fileArray = Array.isArray(files) ? files : [files];
       const fileInfoArray = Array.isArray(fileInfo) ? fileInfo : [fileInfo];
 
-      const doUpload = async (file: UploadInputFile, fileInfo: FileInfo) => {
+      const doUpload = async (file: InputFile, fileInfo: FileInfo) => {
         const fileData = await enhanceAndValidateFile(file, fileInfo, metas);
         return uploadFileAndPersist(fileData, { user });
       };
@@ -485,7 +484,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
   async function replace(
     id: ID,
-    { data, file }: { data: { fileInfo: FileInfo } & Metas; file: UploadInputFile },
+    { data, file }: { data: { fileInfo: FileInfo } & Metas; file: InputFile },
     opts?: CommonOptions
   ) {
     const { user } = opts ?? {};
