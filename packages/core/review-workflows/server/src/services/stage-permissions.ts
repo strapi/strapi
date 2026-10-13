@@ -1,10 +1,12 @@
 import type { Core } from '@strapi/types';
-import type { Permission } from '@strapi/admin/strapi-admin';
 import { async, errors } from '@strapi/utils';
 import { getAdminService } from '../utils';
 import { STAGE_TRANSITION_UID, STAGE_MODEL_UID } from '../constants/workflows';
 
-/** A stage with its permissions populated with roles. */
+/**
+ * A stage with its permissions populated with roles, what `canTransitionToStageWithPermissions`
+ * reads. Its parameter keeps develop's inline type, so the published signature does not change.
+ */
 export type StageWithPermissions = {
   permissions?: { actionParameters?: { to?: number }; role?: { id: number } | number }[];
 };
@@ -25,6 +27,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return (requestState.user?.roles as { id: number; code: string }[] | undefined) ?? null;
   };
 
+  // `register` and `registerTo` publish develop's `Promise<any>`: the inferred admin permission type
+  // is not portable in the emitted declarations.
   return {
     async register({
       roleId,
@@ -34,7 +38,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       roleId: number;
       action: string;
       fromStage: number;
-    }): Promise<Permission[]> {
+    }): Promise<any> {
       if (!validActions.has(action)) {
         throw new ApplicationError(`Invalid action ${action}`);
       }
@@ -61,7 +65,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       roleId: number;
       action: string;
       toStage: number;
-    }): Promise<Permission[]> {
+    }): Promise<any> {
       if (!validActions.has(action)) {
         throw new ApplicationError(`Invalid action ${action}`);
       }
@@ -80,7 +84,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       return async.map(permissions, this.registerTo);
     },
     async unregister(permissions: { id: number }[]) {
-      const permissionIds = permissions.map((permission) => permission.id);
+      const permissionIds = permissions.map((permission) => permission?.id);
       await permissionService.deleteByIds(permissionIds);
     },
     can(action: string, fromStage: number) {
@@ -129,7 +133,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * Check if the current user can transition to a stage using pre-loaded permissions.
      * The stage must already have its permissions populated with roles.
      */
-    canTransitionToStageWithPermissions(stage: StageWithPermissions) {
+    canTransitionToStageWithPermissions(stage: {
+      permissions?: { actionParameters?: { to?: number }; role?: { id: number } | number }[];
+    }) {
       const userRoles = getUserRoles();
       if (!userRoles) {
         return false;

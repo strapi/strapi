@@ -1,4 +1,4 @@
-import type { Core, Modules, UID } from '@strapi/types';
+import type { Core, UID } from '@strapi/types';
 import { errors, emitAudit } from '@strapi/utils';
 import { ENTITY_ASSIGNEE_ATTRIBUTE } from '../constants/workflows';
 import { AUDITED_EVENTS } from '../audit-logs';
@@ -24,7 +24,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * Update the assignee of an entity
      */
     async updateEntityAssignee(
-      entityToUpdate: Modules.Documents.AnyDocument,
+      entityToUpdate: {
+        id: number | string;
+        documentId: string;
+        locale: string;
+        updatedAt: string;
+      },
       model: UID.ContentType,
       assigneeId: string | null
     ) {
