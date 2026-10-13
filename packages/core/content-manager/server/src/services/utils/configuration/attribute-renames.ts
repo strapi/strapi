@@ -154,7 +154,7 @@ const renameRelationMainFields = (
             ...metadata.edit,
             mainField:
               typeof metadata.edit.mainField === 'string'
-                ? (targetRenames[metadata.edit.mainField] ?? metadata.edit.mainField)
+                ? targetRenames[metadata.edit.mainField] ?? metadata.edit.mainField
                 : metadata.edit.mainField,
           }
         : metadata.edit,
@@ -163,7 +163,7 @@ const renameRelationMainFields = (
             ...metadata.list,
             mainField:
               typeof metadata.list.mainField === 'string'
-                ? (targetRenames[metadata.list.mainField] ?? metadata.list.mainField)
+                ? targetRenames[metadata.list.mainField] ?? metadata.list.mainField
                 : metadata.list.mainField,
           }
         : metadata.list,

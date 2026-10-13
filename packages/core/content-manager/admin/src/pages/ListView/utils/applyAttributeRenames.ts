@@ -83,7 +83,7 @@ const applyAttributeRenamesToFilters = <T>(
 
   for (const [key, value] of Object.entries(filters)) {
     const name =
-      key.startsWith('$') || key === '_q' ? key : (renamedName(key, attributes, renames) ?? key);
+      key.startsWith('$') || key === '_q' ? key : renamedName(key, attributes, renames) ?? key;
 
     next[name] = applyAttributeRenamesToFilters(value, attributes, renames);
   }
