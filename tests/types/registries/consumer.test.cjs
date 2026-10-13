@@ -350,6 +350,13 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
     );
   });
 
+  test(`${resolution}: action providers accept explicit undefined optional fields`, () => {
+    assertClean(
+      compile(['strapi-strict.d.ts', 'action-provider.ts']),
+      `${resolution}, action provider registration`
+    );
+  });
+
   test(`${resolution}: an empty middleware inventory accepts no name`, () => {
     assertClean(
       compile(['settings.d.ts', 'middlewares-empty.ts']),
@@ -745,6 +752,38 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
       }
     });
   }
+
+  // `baseOptions` already sets `exactOptionalPropertyTypes`. Strict-off fixtures and `strict.ts` read
+  // unregistered services through develop's index signatures, which this flag rejects by design.
+  test(`${resolution}: strict fixtures compile with noPropertyAccessFromIndexSignature`, () => {
+    for (const names of [
+      ['settings.d.ts', 'i18n-adoption.ts'],
+      ['settings.d.ts', 'content-manager-adoption.ts'],
+      ['settings.d.ts', 'config-defaults.ts'],
+      ['strapi-strict.d.ts', 'middlewares.ts'],
+      ['strapi-strict.d.ts', 'policy-namespaces.ts'],
+      ['settings.d.ts', 'policies-loose.d.ts', 'policies-loose.ts'],
+      ['strapi-strict.d.ts', 'upload-files.ts'],
+      ['strapi-strict.d.ts', 'action-provider.ts'],
+      ['settings.d.ts', 'schemas.ts'],
+      ['strapi-strict.d.ts', 'generated-strict.d.ts', 'common.ts', 'bundled-providers.ts'],
+      [
+        generatedSchemas(true),
+        'i18n.d.ts',
+        'sentry.d.ts',
+        'overrides.d.ts',
+        'policies.d.ts',
+        'settings.d.ts',
+        'common.ts',
+        'application.ts',
+      ],
+    ]) {
+      assertClean(
+        compile(names, { noPropertyAccessFromIndexSignature: true }),
+        `${resolution}, noPropertyAccessFromIndexSignature, ${names.join(', ')}`
+      );
+    }
+  });
 
   test(`${resolution}: compilerOptions.types can enable strict registries`, () => {
     const program = compile(
