@@ -4,12 +4,14 @@ import path from 'path';
 import { errors } from '@strapi/utils';
 
 import type { Core } from '@strapi/types';
+import type { RateLimitOptions } from '../types/rate-limit';
 
 const { RateLimitError } = errors;
 
-export default (config: any, { strapi }: { strapi: Core.Strapi }) =>
+export default (config: RateLimitOptions | undefined, { strapi }: { strapi: Core.Strapi }) =>
   async (ctx: Context, next: Next) => {
-    let rateLimitConfig = strapi.config.get('admin.rateLimit') as any;
+    // `@strapi/core` registers the `admin` config contract, and admin does not depend on it.
+    let rateLimitConfig = strapi.config.get<Core.Config.Admin['rateLimit']>('admin.rateLimit');
 
     if (!rateLimitConfig) {
       rateLimitConfig = {
