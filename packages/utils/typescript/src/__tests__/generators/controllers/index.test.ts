@@ -152,6 +152,19 @@ describe('generateControllersDefinitions', () => {
     expect(logger.warnings).toBe(1);
   });
 
+  test('registers a JS source as unknown, without importing it', async () => {
+    const { normalized } = await generate(
+      {
+        'src/api/article/controllers/article.ts': '',
+        'src/api/article/controllers/legacy.js': '',
+      },
+      ['api::article.article', 'api::article.legacy']
+    );
+
+    expect(normalized).toContain("'api::article.legacy': unknown");
+    expect(normalized).not.toContain("legacy')");
+  });
+
   test('sorts the entries by uid', async () => {
     const { output } = await generate(
       {

@@ -165,6 +165,21 @@ export const filterRegisteredSources = (
 export const isTypedSource = (source: AppModuleSource) => path.extname(source.file) === '.ts';
 
 /**
+ * The type a service or controller source registers: `<helper><typeof import('<source>')>`, or
+ * `unknown` for a JS source, whose import is an error type without `allowJs` (see `isTypedSource`).
+ */
+export const instanceTypeOf =
+  (helper: string, logger: Logger) =>
+  (source: AppModuleSource): ts.TypeNode => {
+    if (isTypedSource(source) === false) {
+      logger.debug(`${source.uid} has no TypeScript source, registering it as unknown`);
+      return factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword);
+    }
+
+    return factory.createTypeReferenceNode(helper, [typeofImport(source)]);
+  };
+
+/**
  * typeof import('<relative path to the source>')
  */
 export const typeofImport = (source: AppModuleSource) =>
@@ -190,7 +205,8 @@ export const withDocComment = <TNode extends ts.Node>(node: TNode, comment: stri
  * type of the default export when it is a factory, the default export itself otherwise. A module
  * without a default export registers nothing usable at runtime; with strict types enabled, an
  * unregistered uid resolves to `unknown`, so the helper does the same rather than claiming a
- * permissive contract for it.
+ * permissive contract for it. A module typed `any`, or whose import does not resolve, resolves to
+ * `unknown` too.
  */
 export const generateInstanceHelperDefinition = (name: string, comment: string) => {
   const unwrapFactory = factory.createConditionalTypeNode(
