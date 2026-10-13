@@ -62,7 +62,7 @@ export const ReviewWorkflowsListView = () => {
      *
      * If the current license does not have a limit (e.g. offline license):
      * allow the user to navigate to the create-view. In case they exceed the
-     * current hard-limit of 200 they will see an error thrown by the API.
+     * API's default limit of 200 they will see an error thrown by the API.
      */
 
     if (numberOfWorkflows && meta && meta?.workflowCount >= parseInt(numberOfWorkflows, 10)) {

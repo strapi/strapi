@@ -67,7 +67,6 @@ const validateWorkflowCreateSchema = yup.object().shape({
     // @ts-expect-error - add unique property into the yup namespace typing
     .uniqueProperty('name', 'Stage name must be unique')
     .min(1, 'Can not create a workflow without stages')
-    .max(200, 'Can not have more than 200 stages')
     .required('Can not create a workflow without stages'),
   contentTypes: validateContentTypes,
   stageRequiredToPublishName: yup.string().min(1).nullable(),
@@ -80,8 +79,7 @@ const validateWorkflowUpdateSchema = yup.object().shape({
     .of(stageObject)
     // @ts-expect-error - add unique property into the yup namespace typing
     .uniqueProperty('name', 'Stage name must be unique')
-    .min(1, 'Can not update a workflow without stages')
-    .max(200, 'Can not have more than 200 stages'),
+    .min(1, 'Can not update a workflow without stages'),
   contentTypes: validateContentTypes,
   stageRequiredToPublishName: yup.string().min(1).nullable(),
 });

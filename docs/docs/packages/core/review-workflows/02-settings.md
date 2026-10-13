@@ -15,7 +15,7 @@ is integrated with redux, so that all input components are controlled components
 ### License limits
 
 Most licenses have feature-based usage limits configured through Chargebee. These limits are exposed to the frontend through [`useLicenseLimits`](../admin/ee/hooks/use-license-limits.md).
-Offline licenses do not have these limits and therefore the endpoint does not return any. For offline licenses hard-coded limits apply: max. 200 workflows, max. 200 stages per workflow.
+Offline licenses do not have these limits and therefore the endpoint does not return any. The admin API then applies a default of 200 workflows and 200 stages per workflow. The default is not a cap: a license limit above or below it is enforced as is.
 
 The frontend as well as the admin API restrict actions on the settings pages in various ways (more below), if the license limits are about to exceed or already exceeded.
 
