@@ -1,4 +1,7 @@
+import type { RateLimitOptions } from './rate-limit';
 import type EmailService from '../services/email';
+
+export type { RateLimitOptions } from './rate-limit';
 
 /** Email services by name, as registered by the plugin. */
 export type Services = {
@@ -16,9 +19,8 @@ declare global {
       }
 
       interface PackageMiddlewares {
-        // TODO @Nico The factory spreads its config over the koa2-ratelimit options read from the
-        // `ratelimit` key of the plugin config; type it once those options have a contract.
-        'plugin::email.rateLimit': unknown;
+        // Spread over the options read from the `ratelimit` key of the plugin config.
+        'plugin::email.rateLimit': RateLimitOptions | undefined;
       }
     }
   }
