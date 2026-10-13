@@ -80,6 +80,46 @@ const resolveDeclaration = (
   return filename;
 };
 
+const packageNameOf = (specifier: string) => {
+  const segments = specifier.split('/');
+  return (specifier.startsWith('@') ? segments.slice(0, 2) : segments.slice(0, 1)).join('/');
+};
+
+/**
+ * Names of the packages `@strapi/strapi/strict-types` already loads. Their store path under a
+ * strict package manager layout is machine-local, so they must not be imported again.
+ */
+const readBundledPackages = (
+  containingFile: string,
+  compilerOptionsList: ts.CompilerOptions[]
+): Set<string> => {
+  for (const compilerOptions of compilerOptionsList) {
+    const mode = ts.getImpliedNodeFormatForFile(containingFile, undefined, ts.sys, compilerOptions);
+    const resolved = ts.resolveModuleName(
+      '@strapi/strapi/strict-types',
+      containingFile,
+      compilerOptions,
+      ts.sys,
+      undefined,
+      undefined,
+      mode
+    ).resolvedModule;
+    if (resolved === undefined) {
+      continue;
+    }
+
+    const contents = ts.sys.readFile(resolved.resolvedFileName);
+    if (contents === undefined) {
+      continue;
+    }
+
+    const { typeReferenceDirectives } = ts.preProcessFile(contents, false);
+    return new Set(typeReferenceDirectives.map(({ fileName }) => packageNameOf(fileName)));
+  }
+
+  return new Set();
+};
+
 const relativeImport = (filename: string, containingFile: string) => {
   const relative = path.relative(path.dirname(containingFile), filename).split(path.sep).join('/');
   return relative.startsWith('../') ? relative : `./${relative}`;
@@ -101,6 +141,7 @@ export const generatePluginDefinitions = async (options: GeneratorOptions) => {
   const enabledPlugins: Record<string, EnabledPlugin> = strapi.config.get('enabledPlugins', {});
   const dependencies: Record<string, unknown> = strapi.config.get('info.dependencies', {});
   const importsByDeclaration = new Map<string, string>();
+  const bundledPackages = readBundledPackages(containingFile, [compilerOptions, modernOptions]);
 
   for (const [name, plugin] of Object.entries(enabledPlugins).sort(([a], [b]) =>
     compareCodeUnits(a, b)
@@ -111,6 +152,12 @@ export const generatePluginDefinitions = async (options: GeneratorOptions) => {
       plugin.pathToPlugin === undefined ||
       ts.sys.directoryExists(plugin.pathToPlugin) === false
     ) {
+      continue;
+    }
+
+    const pluginPackageName = plugin.packageInfo?.name ?? plugin.info?.packageName;
+    if (pluginPackageName !== undefined && bundledPackages.has(pluginPackageName) === true) {
+      options.logger.debug(`Skipping ${name}: @strapi/strapi/strict-types loads its contracts.`);
       continue;
     }
 
