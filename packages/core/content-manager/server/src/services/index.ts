@@ -25,12 +25,15 @@ type RegisteredServiceFactories = {
 
 /**
  * Feature modules type their services as a loose `LoadedPlugin` map, and history only registers
- * its services when its feature is enabled: their factories are optional here.
+ * its services when its feature is enabled: they are not checked here.
  */
 type FeatureServiceName = 'history' | 'lifecycles' | 'preview' | 'preview-config';
 
-type RegisteredServices = Omit<RegisteredServiceFactories, FeatureServiceName> &
-  Partial<Pick<RegisteredServiceFactories, FeatureServiceName>>;
+/**
+ * Every registered service name has a factory. The factories keep their published develop types,
+ * which the registered contracts refine, so only the names are checked here.
+ */
+type RegisteredServiceNames = Exclude<keyof RegisteredServiceFactories, FeatureServiceName>;
 
 const services = {
   components,
@@ -48,6 +51,6 @@ const services = {
   ...(history.services ? history.services : {}),
   ...(preview.services ? preview.services : {}),
   ...homepage.services,
-} satisfies RegisteredServices & Record<string, unknown>;
+} satisfies Record<RegisteredServiceNames, unknown>;
 
 export default services;
