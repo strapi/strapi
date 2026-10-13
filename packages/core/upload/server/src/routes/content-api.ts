@@ -4,75 +4,74 @@ import { createContentApiRoutesFactory } from '@strapi/utils';
 import type { controllers } from '../controllers';
 import { UploadRouteValidator } from './validation';
 
-const createRoutes = createContentApiRoutesFactory(
-  (): Core.RouterInputFor<typeof controllers, 'plugin::upload'>['routes'] => {
-    const validator = new UploadRouteValidator(strapi);
+// The published type stays develop's `Core.RouterInput['routes']`; `satisfies` checks the literals.
+const createRoutes = createContentApiRoutesFactory((): Core.RouterInput['routes'] => {
+  const validator = new UploadRouteValidator(strapi);
 
-    return [
-      {
-        method: 'POST',
-        path: '/',
-        handler: 'content-api.upload',
-        request: {
-          query: { id: validator.fileIdOrDocumentId.optional() },
-          // Note: multipart/form-data is handled by Koa middleware, not Zod
-        },
-        response: z.union([validator.file, validator.files]),
+  return [
+    {
+      method: 'POST',
+      path: '/',
+      handler: 'content-api.upload',
+      request: {
+        query: { id: validator.fileIdOrDocumentId.optional() },
+        // Note: multipart/form-data is handled by Koa middleware, not Zod
       },
-      {
-        method: 'GET',
-        path: '/files',
-        handler: 'content-api.find',
-        request: {
-          query: {
-            fields: validator.queryFields.optional(),
-            populate: validator.queryPopulate.optional(),
-            sort: validator.querySort.optional(),
-            pagination: validator.pagination.optional(),
-            filters: validator.filters.optional(),
-          },
+      response: z.union([validator.file, validator.files]),
+    },
+    {
+      method: 'GET',
+      path: '/files',
+      handler: 'content-api.find',
+      request: {
+        query: {
+          fields: validator.queryFields.optional(),
+          populate: validator.queryPopulate.optional(),
+          sort: validator.querySort.optional(),
+          pagination: validator.pagination.optional(),
+          filters: validator.filters.optional(),
         },
-        response: validator.files,
       },
-      {
-        method: 'GET',
-        path: '/files/page',
-        handler: 'content-api.findPage',
-        request: {
-          query: {
-            fields: validator.queryFields.optional(),
-            populate: validator.queryPopulate.optional(),
-            sort: validator.querySort.optional(),
-            pagination: validator.pagination.optional(),
-            filters: validator.filters.optional(),
-          },
+      response: validator.files,
+    },
+    {
+      method: 'GET',
+      path: '/files/page',
+      handler: 'content-api.findPage',
+      request: {
+        query: {
+          fields: validator.queryFields.optional(),
+          populate: validator.queryPopulate.optional(),
+          sort: validator.querySort.optional(),
+          pagination: validator.pagination.optional(),
+          filters: validator.filters.optional(),
         },
-        response: validator.paginatedFiles,
       },
-      {
-        method: 'GET',
-        path: '/files/:id',
-        handler: 'content-api.findOne',
-        request: {
-          params: { id: validator.fileIdOrDocumentId },
-          query: {
-            fields: validator.queryFields.optional(),
-            populate: validator.queryPopulate.optional(),
-          },
+      response: validator.paginatedFiles,
+    },
+    {
+      method: 'GET',
+      path: '/files/:id',
+      handler: 'content-api.findOne',
+      request: {
+        params: { id: validator.fileIdOrDocumentId },
+        query: {
+          fields: validator.queryFields.optional(),
+          populate: validator.queryPopulate.optional(),
         },
-        response: validator.file,
       },
-      {
-        method: 'DELETE',
-        path: '/files/:id',
-        handler: 'content-api.destroy',
-        request: {
-          params: { id: validator.fileIdOrDocumentId },
-        },
-        response: validator.file,
+      response: validator.file,
+    },
+    {
+      method: 'DELETE',
+      path: '/files/:id',
+      handler: 'content-api.destroy',
+      request: {
+        params: { id: validator.fileIdOrDocumentId },
       },
-    ];
-  }
-);
+      response: validator.file,
+    },
+  ] satisfies Core.RouterInputFor<typeof controllers, 'plugin::upload'>['routes'];
+});
 
 export const routes = createRoutes;
