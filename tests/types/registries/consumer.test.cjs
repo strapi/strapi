@@ -185,6 +185,56 @@ function workspaceDirectories() {
   );
 }
 
+// Workspace packages @strapi/strapi bundles, and @strapi/strapi itself.
+function bundledWorkspaces() {
+  const workspaces = workspaceDirectories();
+  return [
+    '@strapi/strapi',
+    ...Object.keys(readManifest('packages/core/strapi').dependencies),
+  ].flatMap((name) => (workspaces.has(name) ? [[name, workspaces.get(name)]] : []));
+}
+
+// Whether a declaration file augments `Strapi.Registries.Settings`.
+function augmentsSettings(node, namespaces = []) {
+  const currentNamespaces = ts.isModuleDeclaration(node)
+    ? [...namespaces, node.name.text]
+    : namespaces;
+  if (
+    ts.isInterfaceDeclaration(node) &&
+    node.name.text === 'Settings' &&
+    currentNamespaces.slice(-2).join('.') === 'Strapi.Registries'
+  ) {
+    return true;
+  }
+  return ts.forEachChild(node, (child) => augmentsSettings(child, currentNamespaces)) === true;
+}
+
+test('bundled package declarations neither opt in to strict types nor augment Settings', () => {
+  for (const [name, directory] of bundledWorkspaces()) {
+    const dist = path.join(directory, 'dist');
+    if (fs.existsSync(dist) === false) continue;
+    for (const filename of declarations(dist)) {
+      const contents = fs.readFileSync(filename, 'utf8');
+      const { importedFiles, typeReferenceDirectives } = ts.preProcessFile(contents);
+      for (const reference of [...importedFiles, ...typeReferenceDirectives]) {
+        assert.notEqual(
+          reference.fileName,
+          '@strapi/strapi/strict-types',
+          `${filename} opts every consumer in to strict types`
+        );
+      }
+      // `@strapi/types` declares the base interface.
+      if (name === '@strapi/types') continue;
+      const source = ts.createSourceFile(filename, contents, ts.ScriptTarget.Latest);
+      assert.equal(
+        augmentsSettings(source),
+        false,
+        `${filename} augments Strapi.Registries.Settings`
+      );
+    }
+  }
+});
+
 // Source files of a workspace package that register contracts, tests excluded.
 function registersContracts(directory) {
   const visit = (current) =>
