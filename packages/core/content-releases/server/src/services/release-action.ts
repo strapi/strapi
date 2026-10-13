@@ -19,7 +19,15 @@ import type { Entity } from '../../../shared/types';
 import { getService, getDraftEntryValidStatus, getEntry, getEntryStatus } from '../utils';
 import type { WorkflowsService } from '../utils';
 
-const getGroupName = (queryValue: string) => {
+/**
+ * Query of a release actions page. The controller turns `groupBy` into `sort`: `type` for the
+ * `action` grouping, the grouped field otherwise.
+ */
+export type FindPageQuery = GetReleaseActions.Request['query'] & {
+  sort?: 'type' | 'contentType' | 'locale';
+};
+
+const getGroupName = (queryValue: string | undefined) => {
   switch (queryValue) {
     case 'contentType':
       return 'contentType.displayName';
@@ -157,7 +165,7 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
 
     async findPage(
       releaseId: GetReleaseActions.Request['params']['releaseId'],
-      query?: GetReleaseActions.Request['query']
+      query?: FindPageQuery
     ) {
       const release = await strapi.db.query(RELEASE_MODEL_UID).findOne({
         where: { id: releaseId },
@@ -210,7 +218,11 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
       };
     },
 
-    async groupActions(actions: ReleaseAction[], groupBy: ReleaseActionGroupBy) {
+    /** `groupBy` is the page query's `sort`, so the `action` grouping arrives as `type`. */
+    async groupActions(
+      actions: ReleaseAction[],
+      groupBy?: ReleaseActionGroupBy | FindPageQuery['sort']
+    ) {
       const contentTypeUids = actions.reduce<ReleaseAction['contentType'][]>((acc, action) => {
         if (!acc.includes(action.contentType)) {
           acc.push(action.contentType);
