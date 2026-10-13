@@ -11,6 +11,7 @@ import type { homepageService } from '../services/homepage';
 import type CEMetricsService from '../services/metrics';
 import type CEPassportService from '../services/passport';
 import type * as PermissionService from '../services/permission';
+import type { Action, CreateActionPayload } from '../domain/action';
 import type * as ProjectSettingsService from '../services/project-settings';
 import type CERoleService from '../services/role';
 import type * as TokenService from '../services/token';
@@ -39,6 +40,57 @@ type EditionService<TCE, TEE> = TCE & Partial<Omit<TEE, keyof TCE>>;
  * `strapi.service<EnterpriseServices['role']>('admin::role')`.
  */
 type EnterpriseService<TCE, TEE> = Omit<TCE, keyof TEE> & TEE;
+
+/**
+ * What an action provider receives in the registered contract. Settings actions have a category,
+ * other sections may leave it out or pass `undefined`, also under `exactOptionalPropertyTypes`.
+ * TODO @Nico The published `CreateActionPayload` and `Action` keep develop's required
+ * `category: string`, although actions registered without one hold `undefined`: widening them
+ * changes types applications see without strict types, so it waits for a major.
+ */
+type ActionProviderInput = Omit<CreateActionPayload, 'category'> & {
+  category?: string | undefined;
+};
+
+type ActionProvider = (typeof PermissionService)['actionProvider'];
+type PermissionsManager = ReturnType<(typeof PermissionService)['createPermissionsManager']>;
+type SectionsBuilder = (typeof PermissionService)['sectionsBuilder'];
+
+/**
+ * The `admin::permission` service as runtime calls it. The implementation keeps its published
+ * develop signatures: the action provider requires a category, permission queries take two
+ * arguments, and section hooks receive no arguments.
+ */
+type PermissionServiceContract = Omit<
+  typeof PermissionService,
+  'actionProvider' | 'createPermissionsManager' | 'sectionsBuilder'
+> & {
+  createPermissionsManager(
+    ...args: Parameters<(typeof PermissionService)['createPermissionsManager']>
+  ): Omit<PermissionsManager, 'addPermissionsQueryTo'> & {
+    /** The query defaults to `{}`, the action to the manager's action. */
+    addPermissionsQueryTo(
+      query?: object,
+      action?: unknown
+    ): ReturnType<PermissionsManager['addPermissionsQueryTo']>;
+  };
+  sectionsBuilder: Omit<SectionsBuilder, 'addHandler' | 'addMatcher'> & {
+    addHandler(
+      sectionName: string,
+      handler: (context: { action: Action; section: unknown }) => unknown
+    ): ReturnType<SectionsBuilder['addHandler']>;
+    addMatcher(
+      sectionName: string,
+      matcher: (action: Action) => unknown
+    ): ReturnType<SectionsBuilder['addMatcher']>;
+  };
+  actionProvider: Omit<ActionProvider, 'register' | 'registerMany'> & {
+    register(actionAttributes: ActionProviderInput): ReturnType<ActionProvider['register']>;
+    registerMany(
+      actionsAttributes: ActionProviderInput[]
+    ): ReturnType<ActionProvider['registerMany']>;
+  };
+};
 
 /** EE runtime shapes of the admin services that the EE edition extends. */
 export type EnterpriseServices = {
@@ -75,7 +127,7 @@ declare global {
         'admin::homepage': ReturnType<typeof homepageService>;
         'admin::metrics': EditionService<typeof CEMetricsService, typeof EEMetricsService>;
         'admin::passport': EditionService<typeof CEPassportService, typeof EEPassportService>;
-        'admin::permission': typeof PermissionService;
+        'admin::permission': PermissionServiceContract;
         'admin::persist-tables': typeof EEPersistTablesService | undefined;
         'admin::project-settings': typeof ProjectSettingsService;
         'admin::role': EditionService<typeof CERoleService, typeof EERoleService>;
