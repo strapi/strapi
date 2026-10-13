@@ -1,20 +1,19 @@
 import type { Core } from '@strapi/types';
 import { createContentApiRoutesFactory } from '@strapi/utils';
-import type controllers from '../controllers';
+import type { Controllers } from '../types/controllers';
 import { I18nLocaleRouteValidator } from './validation';
 
-const createContentApiRoutes = createContentApiRoutesFactory(
-  (): Core.RouterInputFor<typeof controllers, 'plugin::i18n'>['routes'] => {
-    const validator = new I18nLocaleRouteValidator(strapi);
-    return [
-      {
-        method: 'GET',
-        path: '/locales',
-        handler: 'locales.listLocales',
-        response: validator.locales,
-      },
-    ];
-  }
-);
+// The published type stays develop's `Core.RouterInput['routes']`; `satisfies` checks the literals.
+const createContentApiRoutes = createContentApiRoutesFactory((): Core.RouterInput['routes'] => {
+  const validator = new I18nLocaleRouteValidator(strapi);
+  return [
+    {
+      method: 'GET',
+      path: '/locales',
+      handler: 'locales.listLocales',
+      response: validator.locales,
+    },
+  ] satisfies Core.RouterInputFor<Controllers, 'plugin::i18n'>['routes'];
+});
 
 export default createContentApiRoutes;
