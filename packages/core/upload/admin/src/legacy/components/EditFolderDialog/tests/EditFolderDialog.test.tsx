@@ -279,33 +279,36 @@ describe('EditFolderDialog', () => {
       return { editFolder, onClose, name, baseElement };
     }
 
-    test('keeps the name and dialog open for IME confirmation, then submits once on Enter', async () => {
-      const { editFolder, onClose, name } = setupKeyboard();
-      const confirmation = createEvent.keyDown(name, {
-        key: 'Enter',
-        keyCode: 229,
-        isComposing: true,
-      });
+    test.each([229, 13])(
+      'keeps the name and dialog open for composing Enter (keyCode=%s), then submits once',
+      async (keyCode) => {
+        const { editFolder, onClose, name } = setupKeyboard();
+        const confirmation = createEvent.keyDown(name, {
+          key: 'Enter',
+          keyCode,
+          isComposing: true,
+        });
 
-      fireEvent(name, confirmation);
+        fireEvent(name, confirmation);
 
-      expect(confirmation.defaultPrevented).toBe(false);
-      expect(editFolder).not.toHaveBeenCalled();
-      expect(onClose).not.toHaveBeenCalled();
-      expect(name).toHaveValue('日本語');
-      expect(screen.getByRole('dialog')).toBeInTheDocument();
+        expect(confirmation.defaultPrevented).toBe(false);
+        expect(editFolder).not.toHaveBeenCalled();
+        expect(onClose).not.toHaveBeenCalled();
+        expect(name).toHaveValue('日本語');
+        expect(screen.getByRole('dialog')).toBeInTheDocument();
 
-      const ordinaryEnter = createEvent.keyDown(name, {
-        key: 'Enter',
-        keyCode: 13,
-        isComposing: false,
-      });
-      fireEvent(name, ordinaryEnter);
-      expect(ordinaryEnter.defaultPrevented).toBe(true);
-      await waitFor(() => expect(editFolder).toHaveBeenCalledTimes(1));
-      expect(editFolder).toHaveBeenCalledWith({ name: '日本語', parent: null }, folder?.id);
-      await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
-    });
+        const ordinaryEnter = createEvent.keyDown(name, {
+          key: 'Enter',
+          keyCode: 13,
+          isComposing: false,
+        });
+        fireEvent(name, ordinaryEnter);
+        expect(ordinaryEnter.defaultPrevented).toBe(true);
+        await waitFor(() => expect(editFolder).toHaveBeenCalledTimes(1));
+        expect(editFolder).toHaveBeenCalledWith({ name: '日本語', parent: null }, folder?.id);
+        await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+      }
+    );
 
     test('preserves Shift+Enter submission', async () => {
       const { editFolder, onClose, name } = setupKeyboard();

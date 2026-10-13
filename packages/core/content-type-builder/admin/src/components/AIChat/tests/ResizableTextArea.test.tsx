@@ -32,12 +32,16 @@ function setup({ initialValue = '日本語', clearOnSubmit = false, withSubmit =
 }
 
 describe('ResizableTextArea keyboard handling', () => {
-  test.each(['Enter', 'Process'])(
-    'preserves composing %s and submits once on ordinary Enter',
-    (key) => {
+  test.each([
+    { key: 'Enter', keyCode: 229 },
+    { key: 'Enter', keyCode: 13 },
+    { key: 'Process', keyCode: 229 },
+  ])(
+    'preserves composing $key (keyCode=$keyCode) and submits once on ordinary Enter',
+    ({ key, keyCode }) => {
       const { input, onSubmit } = setup();
       // 合成イベントによる回帰試験。実 OS IME や AI 通信の再現ではない。
-      const confirmation = createEvent.keyDown(input, { key, keyCode: 229, isComposing: true });
+      const confirmation = createEvent.keyDown(input, { key, keyCode, isComposing: true });
       fireEvent(input, confirmation);
       expect(confirmation.isTrusted).toBe(false);
       expect(confirmation.defaultPrevented).toBe(false);
@@ -60,17 +64,24 @@ describe('ResizableTextArea keyboard handling', () => {
     }
   );
 
-  test.each(['Enter', 'Process'])('does not let composing %s clear controlled input', (key) => {
-    // 親の消去コールバックを模した境界試験。実 ChatProvider は呼ばない。
-    const { input, onSubmit } = setup({ clearOnSubmit: true });
-    fireEvent.keyDown(input, { key, keyCode: 229, isComposing: true });
-    expect(onSubmit).not.toHaveBeenCalled();
-    expect(input).toHaveValue('日本語');
-    fireEvent.keyDown(input, { key: 'Enter', keyCode: 13, isComposing: false });
-    expect(onSubmit).toHaveBeenCalledTimes(1);
-    expect(onSubmit).toHaveBeenCalledWith('日本語');
-    expect(input).toHaveValue('');
-  });
+  test.each([
+    { key: 'Enter', keyCode: 229 },
+    { key: 'Enter', keyCode: 13 },
+    { key: 'Process', keyCode: 229 },
+  ])(
+    'does not let composing $key (keyCode=$keyCode) clear controlled input',
+    ({ key, keyCode }) => {
+      // 親の消去コールバックを模した境界試験。実 ChatProvider は呼ばない。
+      const { input, onSubmit } = setup({ clearOnSubmit: true });
+      fireEvent.keyDown(input, { key, keyCode, isComposing: true });
+      expect(onSubmit).not.toHaveBeenCalled();
+      expect(input).toHaveValue('日本語');
+      fireEvent.keyDown(input, { key: 'Enter', keyCode: 13, isComposing: false });
+      expect(onSubmit).toHaveBeenCalledTimes(1);
+      expect(onSubmit).toHaveBeenCalledWith('日本語');
+      expect(input).toHaveValue('');
+    }
+  );
 
   test.each([false, true])('leaves Shift+Enter unhandled when composing=%s', (isComposing) => {
     const { input, onSubmit } = setup();

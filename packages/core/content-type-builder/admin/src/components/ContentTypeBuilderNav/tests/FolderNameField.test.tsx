@@ -22,13 +22,17 @@ describe.each(['create', 'rename'])('FolderNameField %s keyboard handling', (mod
     return { input, onSubmit, onCancel };
   }
 
-  test.each(['Enter', 'Process'])(
-    'preserves composing %s, then accepts ordinary Enter once',
-    (key) => {
+  test.each([
+    { key: 'Enter', keyCode: 229 },
+    { key: 'Enter', keyCode: 13 },
+    { key: 'Process', keyCode: 229 },
+  ])(
+    'preserves composing $key (keyCode=$keyCode), then accepts ordinary Enter once',
+    ({ key, keyCode }) => {
       const { input, onSubmit, onCancel } = setup();
       fireEvent.change(input, { target: { value: '日本語' } });
       // 合成イベントによるハンドラ回帰試験。実 OS IME の再現ではない。
-      const confirmation = createEvent.keyDown(input, { key, keyCode: 229, isComposing: true });
+      const confirmation = createEvent.keyDown(input, { key, keyCode, isComposing: true });
       fireEvent(input, confirmation);
 
       expect(confirmation.isTrusted).toBe(false);
