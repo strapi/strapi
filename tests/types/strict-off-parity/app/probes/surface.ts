@@ -45,3 +45,4 @@ export type ProbeHandlers = {
 export type ProbeAdminServer = typeof adminServer;
 export type ProbeUploadServer = ReturnType<typeof uploadServer>;
 export type ProbeContentManagerServer = ReturnType<typeof contentManagerServer>;
+export type ProbeLookups = ReturnType<typeof import('./usage').pluginServices>;

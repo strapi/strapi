@@ -44,3 +44,11 @@ export function readConfig() {
 
   return { port, custom };
 }
+
+export function pluginServices() {
+  return {
+    permissionChecker: strapi.plugin('content-manager').service('permission-checker'),
+    upload: strapi.plugin('upload').service('upload'),
+    actionProvider: strapi.service('admin::permission').actionProvider,
+  };
+}
