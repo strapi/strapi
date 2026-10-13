@@ -36,6 +36,15 @@ const asset = (id: number, name: string): AssetFile =>
     updatedAt: '2026-01-01T00:00:00.000Z',
   }) as AssetFile;
 
+/** Like the mutation: each file reaches `onFileUploaded` once it has uploaded. */
+const mockUploadResolving = (files: AssetFile[]) =>
+  mockUploadFiles.mockImplementation(({ onFileUploaded }) => ({
+    unwrap: async () => {
+      files.forEach((file) => onFileUploaded(file));
+      return files;
+    },
+  }));
+
 const renderInput = (
   props: Partial<React.ComponentProps<typeof MediaLibraryInput>> = {},
   initialValues: Record<string, unknown> = {}
@@ -81,9 +90,7 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
   });
 
   it('uploads a dropped file to the Media Library root and adds it to the field', async () => {
-    mockUploadFiles.mockReturnValue({
-      unwrap: () => Promise.resolve([asset(9, 'dropped.png')]),
-    });
+    mockUploadResolving([asset(9, 'dropped.png')]);
 
     renderInput({ attribute: { multiple: true } });
 
@@ -104,9 +111,7 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
   });
 
   it('keeps the assets already on the field when another one is uploaded', async () => {
-    mockUploadFiles.mockReturnValue({
-      unwrap: () => Promise.resolve([asset(9, 'dropped.png')]),
-    });
+    mockUploadResolving([asset(9, 'dropped.png')]);
 
     renderInput({ attribute: { multiple: true } }, { cover: [asset(1, 'one.png')] });
 
@@ -126,9 +131,7 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
   });
 
   it('uploads the allowed files of a mixed drop and warns about the rest', async () => {
-    mockUploadFiles.mockReturnValue({
-      unwrap: () => Promise.resolve([asset(9, 'photo.png')]),
-    });
+    mockUploadResolving([asset(9, 'photo.png')]);
 
     renderInput({ attribute: { multiple: true, allowedTypes: ['images'] } });
 
@@ -149,19 +152,7 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
   });
 
   it('keeps both batches when a second drop lands while the first is still uploading', async () => {
-    const deferred = () => {
-      let resolve!: (files: AssetFile[]) => void;
-      const promise = new Promise<AssetFile[]>((res) => {
-        resolve = res;
-      });
-      return { promise, resolve };
-    };
-
-    const first = deferred();
-    const second = deferred();
-    mockUploadFiles
-      .mockReturnValueOnce({ unwrap: () => first.promise })
-      .mockReturnValueOnce({ unwrap: () => second.promise });
+    mockUploadFiles.mockReturnValue({ unwrap: () => new Promise(() => {}) });
 
     renderInput({ attribute: { multiple: true } });
 
@@ -170,19 +161,68 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
 
     await waitFor(() => expect(mockUploadFiles).toHaveBeenCalledTimes(2));
 
+    const [[firstCall], [secondCall]] = mockUploadFiles.mock.calls;
     await act(async () => {
-      first.resolve([asset(1, 'first.png')]);
+      firstCall.onFileUploaded(asset(1, 'first.png'));
     });
     await act(async () => {
-      second.resolve([asset(2, 'second.png')]);
+      secondCall.onFileUploaded(asset(2, 'second.png'));
     });
 
     expect(await screen.findByText('second.png')).toBeInTheDocument();
     expect(screen.getByText('first.png')).toBeInTheDocument();
   });
 
+  it('keeps every file when several finish before the field re-renders', async () => {
+    mockUploadFiles.mockReturnValue({ unwrap: () => new Promise(() => {}) });
+
+    renderInput({ attribute: { multiple: true } });
+
+    dropFiles([
+      new File(['x'], 'one.png', { type: 'image/png' }),
+      new File(['x'], 'two.png', { type: 'image/png' }),
+    ]);
+
+    await waitFor(() => expect(mockUploadFiles).toHaveBeenCalledTimes(1));
+
+    const { onFileUploaded } = mockUploadFiles.mock.calls[0][0];
+    await act(async () => {
+      onFileUploaded(asset(1, 'one.png'));
+      onFileUploaded(asset(2, 'two.png'));
+    });
+
+    expect(await screen.findByText('two.png')).toBeInTheDocument();
+    expect(screen.getByText('one.png')).toBeInTheDocument();
+  });
+
+  it('adds files a retry uploads after the upload call has resolved', async () => {
+    // Cancel all: the call resolves with only the file that finished before it.
+    mockUploadResolving([asset(1, 'a.png')]);
+
+    renderInput({ attribute: { multiple: true } });
+
+    dropFiles([
+      new File(['x'], 'a.png', { type: 'image/png' }),
+      new File(['x'], 'b.png', { type: 'image/png' }),
+      new File(['x'], 'c.png', { type: 'image/png' }),
+    ]);
+
+    expect(await screen.findByText('a.png')).toBeInTheDocument();
+
+    // Retry, from the progress dialog, uploads the cancelled files later.
+    const { onFileUploaded } = mockUploadFiles.mock.calls[0][0];
+    await act(async () => {
+      onFileUploaded(asset(2, 'b.png'));
+      onFileUploaded(asset(3, 'c.png'));
+    });
+
+    expect(await screen.findByText('c.png')).toBeInTheDocument();
+    expect(screen.getByText('b.png')).toBeInTheDocument();
+    expect(screen.getByText('a.png')).toBeInTheDocument();
+  });
+
   it('adds nothing when the upload resolves with no file', async () => {
-    mockUploadFiles.mockReturnValue({ unwrap: () => Promise.resolve([]) });
+    mockUploadResolving([]);
 
     renderInput({ attribute: { multiple: true } });
 
@@ -205,9 +245,7 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
   });
 
   it('still uploads a single-file drop on a single-value field', async () => {
-    mockUploadFiles.mockReturnValue({
-      unwrap: () => Promise.resolve([asset(9, 'only.png')]),
-    });
+    mockUploadResolving([asset(9, 'only.png')]);
 
     renderInput({ attribute: { multiple: false } });
 
@@ -218,9 +256,7 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
   });
 
   it('allows a multi-file drop on a multiple field', async () => {
-    mockUploadFiles.mockReturnValue({
-      unwrap: () => Promise.resolve([asset(1, 'one.png'), asset(2, 'two.png')]),
-    });
+    mockUploadResolving([asset(1, 'one.png'), asset(2, 'two.png')]);
 
     renderInput({ attribute: { multiple: true } });
 
@@ -234,9 +270,7 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
   });
 
   it('replaces the asset on a single-value field', async () => {
-    mockUploadFiles.mockReturnValue({
-      unwrap: () => Promise.resolve([asset(9, 'new.png')]),
-    });
+    mockUploadResolving([asset(9, 'new.png')]);
 
     renderInput({ attribute: { multiple: false } }, { cover: asset(1, 'old.png') });
 
@@ -293,9 +327,7 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
   });
 
   it('uploads the files chosen from the hidden picker', async () => {
-    mockUploadFiles.mockReturnValue({
-      unwrap: () => Promise.resolve([asset(9, 'picked.png')]),
-    });
+    mockUploadResolving([asset(9, 'picked.png')]);
 
     renderInput({ attribute: { multiple: true } });
 

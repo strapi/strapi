@@ -286,6 +286,71 @@ describe('uploadFiles worker pool', () => {
     });
   });
 
+  describe('retrying cancelled files', () => {
+    it('hands the retried files to the original caller', async () => {
+      const inFlight: Deferred[] = [];
+
+      mockUploadFileViaXHR.mockImplementation(
+        () =>
+          new Promise((resolve, reject) => {
+            const id = inFlight.length + 1;
+            inFlight.push({
+              resolve: () => resolve({ id, name: `uploaded-${id}` } as never),
+              reject,
+            });
+          })
+      );
+
+      const onFileUploaded = jest.fn();
+
+      const { result } = renderHook(
+        () => ({
+          upload: useUploadFilesMutation()[0],
+          retry: useRetryCancelledFilesMutation()[0],
+          dispatch: useTypedDispatch(),
+        }),
+        { providerOptions: { storeConfig } }
+      );
+
+      let upload: Promise<unknown>;
+      act(() => {
+        upload = result.current.upload({
+          formData: buildFormData(3),
+          totalFiles: 3,
+          concurrency: undefined,
+          generateAiMetadata: false,
+          onFileUploaded,
+        });
+      });
+
+      await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(1));
+      await settle(inFlight, 1);
+      await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(2));
+
+      await act(async () => {
+        abortUpload(1);
+        result.current.dispatch(cancelUpload());
+        inFlight[1].reject(new UploadAbortedError());
+      });
+      await act(async () => {
+        await upload!;
+      });
+
+      expect(onFileUploaded.mock.calls.map(([file]) => file.id)).toEqual([1]);
+
+      act(() => {
+        result.current.retry();
+      });
+
+      await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(3));
+      await settle(inFlight, 3);
+      await waitFor(() => expect(mockUploadFileViaXHR).toHaveBeenCalledTimes(4));
+      await settle(inFlight, 4);
+
+      expect(onFileUploaded.mock.calls.map(([file]) => file.id)).toEqual([1, 3, 4]);
+    });
+  });
+
   describe('a drop while a retry is still running', () => {
     it('queues behind the retry pool instead of running beside it', async () => {
       const inFlight: Deferred[] = [];

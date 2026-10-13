@@ -113,6 +113,13 @@ export const MediaLibraryInput = ({
     onChange(name, nextAssets[0] ?? null);
   };
 
+  const attachUploadedFile = (file: File) => {
+    const nextAssets = multiple ? [...assetsRef.current, file] : [file];
+    // Parallel uploads can finish before the next render refreshes the ref.
+    assetsRef.current = nextAssets;
+    setAssets(nextAssets);
+  };
+
   const handleRemove = (asset: File) => {
     setAssets(assets.filter((current) => current.id !== asset.id));
   };
@@ -245,18 +252,15 @@ export const MediaLibraryInput = ({
     );
 
     try {
-      const uploadedFiles = await uploadFiles({
+      // Attached per file rather than from the result: a Retry in the progress
+      // dialog uploads cancelled files after this call has already resolved.
+      await uploadFiles({
         formData,
         totalFiles: allowedFiles.length,
         concurrency,
         generateAiMetadata: Boolean(isAiMetadataEnabled),
+        onFileUploaded: attachUploadedFile,
       }).unwrap();
-
-      // A cancelled or wholly failed batch resolves with nothing to add; the
-      // progress dialog has already reported why.
-      if (uploadedFiles.length > 0) {
-        setAssets(multiple ? [...assetsRef.current, ...uploadedFiles] : [uploadedFiles[0]]);
-      }
     } catch {
       // Errors reach the user through the progress dialog, which the mutation
       // populates itself.

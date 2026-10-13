@@ -38,6 +38,11 @@ interface UploadFilesArgs {
   concurrency?: number;
   /** Whether AI metadata generation is enabled (EE AI available + `settings.aiMetadata`). */
   generateAiMetadata: boolean;
+  /**
+   * Called for each file of this call as it finishes uploading, including files
+   * a later retry uploads after the call itself has resolved.
+   */
+  onFileUploaded?: (file: UploadedFile) => void;
 }
 
 interface UploadFromUrlsArgs {
@@ -70,6 +75,7 @@ interface RootState {
 interface UploadEntry {
   file: File;
   fileInfo: UploadFileInfo;
+  onUploaded?: (file: UploadedFile) => void;
 }
 
 /**
@@ -322,6 +328,7 @@ const runUploadPool = async ({
           completedAt: Date.now(),
         })
       );
+      entry.onUploaded?.(file);
 
       // Not awaited: overlaps with the next file's upload and can't fail the batch.
       maybeGenerateMetadata({
@@ -641,7 +648,7 @@ const uploadApi = adminApi
        */
       uploadFiles: builder.mutation<UploadedFile[], UploadFilesArgs>({
         queryFn: async (
-          { formData, totalFiles, concurrency = 1, generateAiMetadata },
+          { formData, totalFiles, concurrency = 1, generateAiMetadata, onFileUploaded },
           { dispatch, getState }
         ) => {
           const token = (getState() as RootState).admin_app?.token;
@@ -659,6 +666,7 @@ const uploadApi = adminApi
               alternativeText: null,
               folder: null,
             },
+            onUploaded: onFileUploaded,
           }));
 
           const fileNames = entries.map((entry) => entry.fileInfo.name ?? entry.file.name);
