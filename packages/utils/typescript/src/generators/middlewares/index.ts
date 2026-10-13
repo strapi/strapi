@@ -19,6 +19,8 @@ const FACTORY_CONFIG_HELPER = 'MiddlewareFactoryConfig';
 const NO_MIDDLEWARE_PLACEHOLDER_COMMENT = `/*
  * The app doesn't have any middlewares yet.
  */
+
+export {};
 `;
 
 /**

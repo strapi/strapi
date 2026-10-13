@@ -18,6 +18,8 @@ const INSTANCE_HELPER = 'ControllerInstance';
 const NO_CONTROLLER_PLACEHOLDER_COMMENT = `/*
  * The app doesn't have any controllers yet.
  */
+
+export {};
 `;
 
 /**
