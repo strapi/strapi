@@ -280,7 +280,9 @@ export default {
     // synchronously so a broken service still surfaces as a 500; only a rejection of the
     // returned promise is caught here, since nothing else would handle it.
     Promise.resolve(getService('auth').forgotPassword(input)).catch((error: unknown) => {
-      strapi.log.error('Failed to process the forgot-password request', { error });
+      // destroy() deletes global.strapi. This rejection is not awaited, so it can
+      // surface after shutdown and must not take the process down.
+      global.strapi?.log.error('Failed to process the forgot-password request', { error });
     });
 
     ctx.status = 204;
