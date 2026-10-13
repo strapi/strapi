@@ -1,6 +1,7 @@
 import 'koa-body';
 import type { Context, Next } from 'koa';
 import type * as UID from '../uid';
+import type * as InternalUID from '../internal/uid';
 import type { SuggestedString } from '../utils/string';
 import type { IsStrict, RegisteredRecord } from './strictness';
 
@@ -27,10 +28,14 @@ export type ControllerLookup<TUID extends ControllerLookupUID, T> = UID.Controll
   ? T
   : ControllerFor<TUID>;
 
-/** Controller UIDs that have a registered contract. */
-export type RegisteredControllerUID =
-  | keyof Strapi.Registries.AppControllers
-  | keyof Strapi.Registries.PackageControllers;
+/**
+ * Controller UIDs that have a registered contract. Registry keys outside the UID pattern, such as a UID
+ * without its namespace, are ignored, so looking them up fails.
+ */
+export type RegisteredControllerUID = Extract<
+  keyof Strapi.Registries.AppControllers | keyof Strapi.Registries.PackageControllers,
+  InternalUID.Controller
+>;
 
 /** A UID accepted by `strapi.controller(uid)`. Registered UIDs are listed for completion. */
 export type ControllerLookupUID = SuggestedString<RegisteredControllerUID, UID.Controller>;

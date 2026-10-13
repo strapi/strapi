@@ -1,4 +1,5 @@
 import type * as UID from '../uid';
+import type * as InternalUID from '../internal/uid';
 import type { SuggestedString } from '../utils/string';
 import type { IsStrict, RegisteredRecord } from './strictness';
 
@@ -24,10 +25,14 @@ export type ServiceLookup<TUID extends ServiceLookupUID, T> = UID.Service extend
   ? T
   : ServiceFor<TUID>;
 
-/** Service UIDs that have a registered contract. */
-export type RegisteredServiceUID =
-  | keyof Strapi.Registries.AppServices
-  | keyof Strapi.Registries.PackageServices;
+/**
+ * Service UIDs that have a registered contract. Registry keys outside the UID pattern, such as a UID
+ * without its namespace, are ignored, so looking them up fails.
+ */
+export type RegisteredServiceUID = Extract<
+  keyof Strapi.Registries.AppServices | keyof Strapi.Registries.PackageServices,
+  InternalUID.Service
+>;
 
 /** A UID accepted by `strapi.service(uid)`. Registered UIDs are listed for completion. */
 export type ServiceLookupUID = SuggestedString<RegisteredServiceUID, UID.Service>;
