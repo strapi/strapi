@@ -12,7 +12,7 @@
  * @example
  * Here's how `DocumentServicePluginParams` can be used to define parameters for a fictional plugin "Internationalization":
  * ```typescript
- * declare module '@strapi/types' {
+ * declare module '@strapi/strapi' {
  *   export namespace Public {
  *     export interface DocumentServicePluginParams {
  *       'locale': string;
@@ -22,6 +22,8 @@
  * ```
  *
  * @remark This type needs to be reviewed since it's not augmented anywhere yet
+ *
+ * @deprecated Not augmented anywhere. Will be removed in the next major version.
  */
 export interface DocumentServicePluginParams {}
 
@@ -37,7 +39,7 @@ export interface DocumentServicePluginParams {}
  * @example
  * Here's how `EntityServicePluginParams` can be used to define parameters for a fictional plugin "Internationalization":
  * ```typescript
- * declare module '@strapi/types' {
+ * declare module '@strapi/strapi' {
  *   export namespace Public {
  *     export interface EntityServicePluginParams {
  *       'locale': string;
