@@ -146,7 +146,9 @@ const getComponents = async <TUID extends UID.Schema>(
     return {} as LoadedComponents<TUID>;
   }
 
-  return strapi.db.query(uid).load(entity, componentAttributes) as Promise<LoadedComponents<TUID>>;
+  return await (strapi.db.query(uid).load(entity, componentAttributes) as Promise<
+    LoadedComponents<TUID>
+  >);
 };
 
 /*
@@ -387,7 +389,7 @@ const createComponent = async <TUID extends UID.Component>(
   // Make sure we don't save the component with a pre-defined ID.
   const entryData = assignComponentData(schema, componentData, omit(data, 'id'));
 
-  return strapi.db.query(uid).create({ data: entryData });
+  return await strapi.db.query(uid).create({ data: entryData });
 };
 
 // components can have nested compos so this must be recursive
@@ -400,7 +402,7 @@ const updateComponent = async <TUID extends UID.Component>(
 
   const componentData = await updateComponents(uid, componentToUpdate, data);
 
-  return strapi.db.query(uid).update({
+  return await strapi.db.query(uid).update({
     where: {
       id: componentToUpdate.id,
     },
@@ -557,7 +559,7 @@ const shouldPropagateComponentRelationToNewVersion = async (
     // If the parent is a component, we need to check its parents recursively
     const parentComponentSchema = strapi.components[parent.uid as UID.Component];
     const grandParentSchemas = getParentSchemasForComponent(parentComponentSchema);
-    return shouldPropagateComponentRelationToNewVersion(
+    return await shouldPropagateComponentRelationToNewVersion(
       parent,
       parentComponentSchema,
       grandParentSchemas,
@@ -599,7 +601,7 @@ const createComponentRelationFilter = () => {
       return true;
     }
 
-    return shouldPropagateComponentRelationToNewVersion(
+    return await shouldPropagateComponentRelationToNewVersion(
       relation,
       componentSchema,
       parentSchemas,
