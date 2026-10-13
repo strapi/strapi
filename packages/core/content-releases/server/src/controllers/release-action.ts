@@ -16,6 +16,7 @@ import type {
 import { getService } from '../utils';
 import { RELEASE_ACTION_MODEL_UID } from '../constants';
 import { AlreadyOnReleaseError } from '../services/validation';
+import type { FindPageQuery } from '../services/release-action';
 
 const releaseActionController = {
   async create(ctx: Koa.Context) {
@@ -96,10 +97,9 @@ const releaseActionController = {
     ctx.query.sort = ctx.query.groupBy === 'action' ? 'type' : ctx.query.groupBy;
     delete ctx.query.groupBy;
 
-    // TODO @Nico tighten contract: the admin permissions manager returns sanitized queries as
-    // `unknown`, and `sort` holds `type` for the `action` grouping, which `groupActions` does not type.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const query = (await permissionsManager.sanitizeQuery(ctx.query)) as Record<string, any>;
+    // The admin permissions manager returns sanitized queries as `unknown`. Sanitizing keeps a
+    // subset of the validated query.
+    const query = (await permissionsManager.sanitizeQuery(ctx.query)) as FindPageQuery;
 
     const releaseActionService = getService('release-action', { strapi });
     const { results, pagination } = await releaseActionService.findPage(releaseId, {
