@@ -26,7 +26,10 @@ const composeAttributeRenames = (
   return composed;
 };
 
-const renamePath = (path: string | undefined, renames: Record<string, string>): string | undefined => {
+const renamePath = (
+  path: string | undefined,
+  renames: Record<string, string>
+): string | undefined => {
   if (!path) {
     return path;
   }

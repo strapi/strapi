@@ -9,7 +9,9 @@ describe('createContentManagerConfigurationRenamer', () => {
         `configuration_content_types::${PRODUCT}`,
         {
           settings: { mainField: 'internalName', defaultSortBy: 'internalName' },
-          metadatas: { internalName: { edit: { label: 'internalName' }, list: { label: 'internalName' } } },
+          metadatas: {
+            internalName: { edit: { label: 'internalName' }, list: { label: 'internalName' } },
+          },
           layouts: { list: ['internalName', 'price'], edit: [[{ name: 'internalName', size: 6 }]] },
         },
       ],

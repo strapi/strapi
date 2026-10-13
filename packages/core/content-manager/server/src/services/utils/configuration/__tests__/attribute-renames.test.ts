@@ -1,7 +1,4 @@
-import {
-  composeAttributeRenames,
-  rewriteContentManagerConfiguration,
-} from '../attribute-renames';
+import { composeAttributeRenames, rewriteContentManagerConfiguration } from '../attribute-renames';
 
 const configuration = {
   settings: {
@@ -33,14 +30,18 @@ const configuration = {
 
 describe('composeAttributeRenames', () => {
   it('chains a rename that happens before the browser opens the list', () => {
-    expect(composeAttributeRenames({ legacyName: 'internalName' }, { internalName: 'productName' })).toEqual({
+    expect(
+      composeAttributeRenames({ legacyName: 'internalName' }, { internalName: 'productName' })
+    ).toEqual({
       legacyName: 'productName',
       internalName: 'productName',
     });
   });
 
   it('drops an entry once a field is renamed back to that name', () => {
-    expect(composeAttributeRenames({ internalName: 'productName' }, { productName: 'internalName' })).toEqual({
+    expect(
+      composeAttributeRenames({ internalName: 'productName' }, { productName: 'internalName' })
+    ).toEqual({
       productName: 'internalName',
     });
   });
@@ -56,8 +57,15 @@ describe('rewriteContentManagerConfiguration', () => {
     });
 
     expect(next?.layouts?.list).toEqual(['id', 'productName', 'tagline', 'price']);
-    expect(next?.layouts?.edit).toEqual([[{ name: 'productName', size: 6 }], [{ name: 'tagline', size: 6 }]]);
-    expect(next?.settings).toMatchObject({ mainField: 'productName', defaultSortBy: 'productName', pageSize: 10 });
+    expect(next?.layouts?.edit).toEqual([
+      [{ name: 'productName', size: 6 }],
+      [{ name: 'tagline', size: 6 }],
+    ]);
+    expect(next?.settings).toMatchObject({
+      mainField: 'productName',
+      defaultSortBy: 'productName',
+      pageSize: 10,
+    });
     expect(next?.metadatas?.productName?.list).toMatchObject({ label: 'productName' });
     expect(next?.metadatas?.tagline?.list).toMatchObject({ label: 'Tagline' });
     expect(next?.metadatas?.internalName).toBeUndefined();

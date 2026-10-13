@@ -15,6 +15,10 @@ type AttributeRenames = Parameters<AttributeRenameHandler>[1];
 const configurationKey = (prefix: 'content_types' | 'components', uid: string) =>
   `configuration_${prefix}::${uid}`;
 
+const isStoredConfiguration = (value: unknown): value is StoredConfiguration => {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+};
+
 /**
  * Carries attribute renames into the Content Manager configuration and records
  * the old-to-new map for browsers that saved a column list under the old name.
@@ -53,9 +57,8 @@ const createContentManagerConfigurationRenamer = ({
 
     for (const model of models) {
       const key = configurationKey(model.prefix, model.uid);
-      const current = await store.get<StoredConfiguration | null>({ key });
-      const stored =
-        current && typeof current === 'object' && !Array.isArray(current) ? current : null;
+      const current = await store.get({ key });
+      const stored = isStoredConfiguration(current) ? current : null;
       const next = rewriteContentManagerConfiguration(stored, {
         attributes: model.attributes as Record<string, { type?: string; target?: string }>,
         ownRenames: renames[model.uid],
