@@ -76,9 +76,8 @@ export const removeCondition = curry((condition: string, permission: Permission)
  * @param property - The property to get
  * @param permission - The permission on which we want to access the property
  */
-export const getProperty = curry(
-  (property: string, permission: Permission): Permission =>
-    get(permission, `properties.${property}`)
+export const getProperty = curry((property: string, permission: Permission): Permission =>
+  get(permission, `properties.${property}`)
 );
 
 /**
