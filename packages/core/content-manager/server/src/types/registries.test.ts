@@ -1,8 +1,11 @@
 // Compile-only assertions. The server tsconfig includes this file; declaration builds exclude it.
 import type { Core, Modules } from '@strapi/types';
-import { getService } from '../utils';
 import type { RelationResult } from '../../../shared/contracts/relations';
 import type { RegisteredControllers } from './controllers';
+
+// Registered lookups, as applications with strict types make them.
+const getService = <TName extends string>(name: TName) =>
+  strapi.plugin('content-manager').service(name);
 
 const structure = getService('content-structure').getContentStructure();
 structure satisfies Promise<Modules.ContentStructure.ResolvedContentStructure | null>;
