@@ -14,6 +14,7 @@ import {
   ADMIN_SESSION_STORAGE_KEY,
 } from '../../utils/adminSessionSync';
 import { establishAdminSession } from '../../utils/establishAdminSession';
+import { triggerSessionExpired } from '../../utils/getFetchClient';
 import {
   clearUnsavedChangesChecks,
   registerUnsavedChangesCheck,
@@ -699,6 +700,19 @@ describe('AuthProvider', () => {
 
       await waitFor(() => expect(screen.getByTestId('token')).toHaveTextContent(TOKEN_B));
       expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+
+      act(() => {
+        triggerSessionExpired(TOKEN);
+      });
+      expect(screen.getByTestId('token')).toHaveTextContent(TOKEN_B);
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+
+      act(() => {
+        triggerSessionExpired(TOKEN_B);
+      });
+      expect(await screen.findByRole('alertdialog')).toHaveTextContent(
+        /session has ended and can't be resumed/i
+      );
     });
   });
 

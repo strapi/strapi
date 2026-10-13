@@ -69,7 +69,7 @@ const simpleQuery: BaseQueryFn<
         if (!isAuthPath(url)) {
           // Defer clearing auth state to AuthProvider so unsaved-change guards
           // can run before token removal (which unmounts edit forms).
-          triggerSessionExpired();
+          triggerSessionExpired(err.sessionToken);
         }
       }
 

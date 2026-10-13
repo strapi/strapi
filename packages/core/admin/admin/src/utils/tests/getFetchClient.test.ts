@@ -409,6 +409,8 @@ describe('getFetchClient', () => {
     });
 
     it('should throw original error if token refresh fails', async () => {
+      (window.localStorage.getItem as jest.Mock).mockReturnValue(JSON.stringify('token-a'));
+
       // First call returns 401
       (window.fetch as jest.Mock)
         .mockImplementationOnce(() =>
@@ -435,7 +437,10 @@ describe('getFetchClient', () => {
 
       const fetchClient = getFetchClient();
 
-      await expect(fetchClient.get('/api/test')).rejects.toThrow('Token expired');
+      await expect(fetchClient.get('/api/test')).rejects.toMatchObject({
+        message: 'Token expired',
+        sessionToken: 'token-a',
+      });
 
       // Original request plus one access-token attempt
       expect(window.fetch).toHaveBeenCalledTimes(2);
@@ -896,6 +901,20 @@ describe('getFetchClient', () => {
       resetSessionExpiredNotification();
       triggerSessionExpired();
 
+      expect(callback).toHaveBeenCalledTimes(2);
+    });
+
+    it('deduplicates one expired token without suppressing a newer session expiry', () => {
+      const callback = jest.fn();
+      setOnSessionExpired(callback);
+
+      triggerSessionExpired('token-a');
+      triggerSessionExpired();
+      triggerSessionExpired('token-a');
+      triggerSessionExpired('token-b');
+
+      expect(callback).toHaveBeenNthCalledWith(1, 'token-a');
+      expect(callback).toHaveBeenNthCalledWith(2, 'token-b');
       expect(callback).toHaveBeenCalledTimes(2);
     });
 

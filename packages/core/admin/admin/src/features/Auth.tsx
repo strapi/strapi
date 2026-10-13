@@ -368,14 +368,19 @@ const AuthProvider = ({
    * a stale page until they click something.
    */
   React.useEffect(() => {
-    setOnSessionExpired(() => {
+    setOnSessionExpired((expiredToken) => {
+      const currentToken = store.getState().admin_app.token ?? null;
+      if (expiredToken !== undefined && expiredToken !== currentToken) {
+        return;
+      }
+
       clearStateAndLogout();
     });
 
     return () => {
       setOnSessionExpired(null);
     };
-  }, [clearStateAndLogout]);
+  }, [clearStateAndLogout, store]);
 
   /**
    * Session keepalive around access-token expiry. The timer fires per-tab; the
@@ -437,6 +442,7 @@ const AuthProvider = ({
       }
 
       discardPendingLogout();
+      resetSessionExpiredNotification();
       dispatch(setToken(nextToken));
       resetAdminApiState(dispatch);
     };

@@ -5,25 +5,26 @@ import { hashAdminUserEmail } from '../utils/users';
 type AdminUser = Parameters<typeof hashAdminUserEmail>[0];
 
 const useHashedAdminUserId = (user: AdminUser) => {
-  const [userId, setUserId] = React.useState<string>();
+  const email = user?.email;
+  const [hashedUser, setHashedUser] = React.useState<{ email?: string; id?: string }>({});
 
   React.useEffect(() => {
     let current = true;
 
-    setUserId(undefined);
+    setHashedUser({ email });
 
     void hashAdminUserEmail(user).then((id) => {
       if (current && id) {
-        setUserId(id);
+        setHashedUser({ email, id });
       }
     });
 
     return () => {
       current = false;
     };
-  }, [user]);
+  }, [email, user]);
 
-  return userId;
+  return hashedUser.email === email ? hashedUser.id : undefined;
 };
 
 export { useHashedAdminUserId };
