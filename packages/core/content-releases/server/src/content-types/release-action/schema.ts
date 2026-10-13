@@ -43,5 +43,20 @@ export default {
     isEntryValid: {
       type: 'boolean',
     },
+    // What the run did with the entry. Null when no run recorded it.
+    outcome: {
+      type: 'enumeration',
+      enum: [
+        'published',
+        'unpublished',
+        'skipped_invalid',
+        'skipped_not_approved',
+        'skipped_error',
+        'skipped_held',
+      ],
+    },
+    reason: {
+      type: 'json',
+    },
   },
 };

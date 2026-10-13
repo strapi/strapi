@@ -208,7 +208,7 @@ packages/core/content-releases/server/src/services/scheduling.ts
 
 ### Release status update triggers:
 
-Each release has a `releaseCondition`: `all_or_nothing` (the default, and the value given to releases created before the field existed) or `allow_partial`. A publish entry is publishable when its draft passes publish validation and, if its content type's review workflow has a stage required to publish, the entry is at that stage. Without review workflows, only validation applies. Unpublish entries are always publishable. Each release action stores whether its entry was publishable when last checked (`isEntryValid`), and the status is derived from the values of the publish actions. Editing an entry also rewrites `isEntryValid` on its unpublish actions, which the status ignores:
+Each release has a `releaseCondition`: `all_or_nothing` (the default, and the value given to releases created before the field existed) or `allow_partial`. A publish entry is publishable when its draft passes publish validation and, if its content type's review workflow has a stage required to publish, the entry is at that stage. Without review workflows, only validation applies. Unpublish entries are always publishable. Each release action stores whether its entry was publishable when last checked (`isEntryValid`), and the status is derived from the values of the publish actions. Editing an entry also rewrites `isEntryValid` on its unpublish actions, which the status ignores. Only actions of releases that haven't run are rewritten: a release that ran keeps what its run saw.
 
 - **Empty**: the release has no entries.
 - **Blocked**: publishing now would release nothing. With `all_or_nothing`, at least one entry is not publishable. With `allow_partial`, no entry is publishable.
@@ -258,6 +258,19 @@ How a run ends:
 
 An error after the entries were released (writing the release's own status, for example) leaves the run "Partial": the entries stay released, and the request fails with the error.
 
+Each entry of the run records what happened to it on its release action, returned by `GET /content-releases/:releaseId/actions`:
+
+| `outcome`              | When                                                                                                                                                                               | `reason`                                                                                                                           |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `published`            | the entry was published                                                                                                                                                            | `null`                                                                                                                             |
+| `unpublished`          | the entry was unpublished, also when it had no published version                                                                                                                   | `null`                                                                                                                             |
+| `skipped_invalid`      | the draft failed publish validation, whether or not it was also at the wrong stage, or publishing it raised a validation error (e.g. a unique clash with another entry of the run) | `validation.errors`: field `path` and `message`, without the error's `value`; a type-mismatch message loses the value it ends with |
+| `skipped_not_approved` | the entry wasn't at the stage required to publish                                                                                                                                  | `stage`: the entry's stage and the required one                                                                                    |
+| `skipped_error`        | publishing or unpublishing the entry threw an error other than a validation error                                                                                                  | `error.name`, never its message                                                                                                    |
+| `skipped_held`         | the entry was publishable, but an `all_or_nothing` run released nothing (at the check or after an error)                                                                           | `null`                                                                                                                             |
+
+An entry that fails both checks keeps both in its `reason`. The outcomes are written in the lock transaction with the release's status. When a `failed` release goes back to planned (any change that recalculates its status), its outcomes and reasons are cleared, so a later run starts from none. A run that records nothing leaves `outcome` empty: a manual publish rejected by the check (it didn't run), and a run the database rolls back.
+
 The status written, the `releases.publish` webhook and the `release.trigger` audit event always agree:
 
 | Status  | Webhook `isPublished` | Audit `outcome` | Audit `details`                                                                |
@@ -270,7 +283,7 @@ The counts are what the run released, and `failed` the entries it left out: not 
 
 #### Listening to events on entries:
 
-When an entry is updated or deleted, the status of all releases containing that entry is recalculated to reflect any changes in validity.
+When an entry is updated or deleted, the status of all releases containing that entry is recalculated to reflect any changes in validity. Only releases that haven't run are affected: an update rewrites `isEntryValid` and a deletion removes the entry's actions only there. A release that ran keeps the actions of deleted entries, with what the run recorded; `GET /content-releases/:releaseId/actions` returns them with an empty `entry` and a `null` `status`.
 
 ## Migrations
 
@@ -286,4 +299,4 @@ When a Content Type is deleted, delete all actions containing entries from that 
 
 ## Subscribing to Lifecycles Events
 
-When an entry is deleted delete all actions containing that entry.
+When an entry is deleted, delete the actions containing that entry in releases that haven't run.

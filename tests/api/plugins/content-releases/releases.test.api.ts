@@ -102,6 +102,8 @@ const reviewItemModel = {
   kind: 'collectionType',
   attributes: {
     name: { type: 'string' },
+    // Checked at publish only: a draft can hold a code too short to publish
+    code: { type: 'string', minLength: 3 },
   },
 };
 
@@ -122,6 +124,8 @@ const slugItemModel = {
 
 const INVALID_PRODUCT_MESSAGE =
   'description must be a `string` type, but the final value was: `null`.';
+// What a release action stores: the message without the value it ends with
+const INVALID_PRODUCT_RECORDED_MESSAGE = 'description must be a `string` type';
 
 describeOnCondition(edition === 'EE')('Content Releases API', () => {
   const builder = createTestBuilder();
@@ -240,6 +244,22 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       .plugin('content-releases')
       .service('release')
       .publish(releaseId, { trigger: 'scheduled' });
+  };
+
+  // The release's actions as the admin reads them, by entry
+  const getActionsByEntry = async (releaseId) => {
+    const res = await rq({
+      method: 'GET',
+      url: `/content-releases/${releaseId}/actions`,
+      qs: { pageSize: 100 },
+    });
+    expect(res.statusCode).toBe(200);
+
+    return Object.fromEntries(
+      Object.values(res.body.data)
+        .flat()
+        .map((action: { entryDocumentId: string }) => [action.entryDocumentId, action])
+    );
   };
 
   beforeAll(async () => {
@@ -1404,6 +1424,11 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         status = (await getRelease(release.id)).status;
       }
       expect(status).toBe('ready');
+      // Back to planned: the failed run's outcomes no longer describe the release
+      const plannedActions = await getActionsByEntry(release.id);
+      for (const documentId of [validId, invalidId]) {
+        expect(plannedActions[documentId]).toMatchObject({ outcome: null, reason: null });
+      }
 
       const res = await publishManually(release.id);
 
@@ -1411,6 +1436,11 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       expect(res.body.data.status).toBe('done');
       expect(await hasPublishedVersion(productUID, validId)).toBe(true);
       expect(await hasPublishedVersion(productUID, invalidId)).toBe(true);
+      // The second run records its own outcome
+      expect((await getActionsByEntry(release.id))[invalidId]).toMatchObject({
+        outcome: 'published',
+        reason: null,
+      });
     });
 
     test('all_or_nothing manual publish stores the validity it found, so out-of-date state reads blocked', async () => {
@@ -1580,8 +1610,14 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     describe('with a required review stage', () => {
       let workflow;
 
-      const createReviewItem = async ({ approved }: { approved: boolean }): Promise<string> => {
-        const { data } = await createEntry(reviewItemUID, { name: 'Review item' });
+      const createReviewItem = async ({
+        approved,
+        code,
+      }: {
+        approved: boolean;
+        code?: string;
+      }): Promise<string> => {
+        const { data } = await createEntry(reviewItemUID, { name: 'Review item', code });
 
         if (approved) {
           const res = await rq({
@@ -1649,6 +1685,45 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         expect(found.status).toBe('blocked');
         expect(await hasPublishedVersion(reviewItemUID, approvedId)).toBe(false);
         expect(await hasPublishedVersion(reviewItemUID, notApprovedId)).toBe(false);
+      });
+
+      test('an entry not at the required stage is recorded as skipped_not_approved with its stage and the required one', async () => {
+        const notApprovedId = await createReviewItem({ approved: false });
+        const release = await createReleaseWithActions('allow_partial', [
+          { documentId: notApprovedId, contentType: reviewItemUID },
+          { documentId: await createReviewItem({ approved: true }), contentType: reviewItemUID },
+        ]);
+
+        expect((await publishManually(release.id)).statusCode).toBe(200);
+
+        const actions = await getActionsByEntry(release.id);
+        expect(actions[notApprovedId].outcome).toBe('skipped_not_approved');
+        expect(actions[notApprovedId].reason).toEqual({
+          stage: {
+            entryStage: { id: workflow.stages[0].id, name: 'Review' },
+            requiredStage: { id: workflow.stages[1].id, name: 'Done' },
+          },
+        });
+      });
+
+      test('an entry that is both invalid and not at the required stage is recorded as skipped_invalid, with both reasons', async () => {
+        const failsBothId = await createReviewItem({ approved: false, code: 'ab' });
+        const release = await createReleaseWithActions('allow_partial', [
+          { documentId: failsBothId, contentType: reviewItemUID },
+          { documentId: await createReviewItem({ approved: true }), contentType: reviewItemUID },
+        ]);
+
+        expect((await publishManually(release.id)).statusCode).toBe(200);
+
+        const actions = await getActionsByEntry(release.id);
+        expect(actions[failsBothId].outcome).toBe('skipped_invalid');
+        expect(actions[failsBothId].reason).toEqual({
+          validation: { errors: [{ path: ['code'], message: expect.any(String) }] },
+          stage: {
+            entryStage: { id: workflow.stages[0].id, name: 'Review' },
+            requiredStage: { id: workflow.stages[1].id, name: 'Done' },
+          },
+        });
       });
     });
 
@@ -1743,6 +1818,12 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         expect(await getPublishedSlug(firstId)).toBe('partial-contested');
         // Still online, as it was before the run
         expect(await getPublishedSlug(secondId)).toBe('partial-original');
+        expect((await getActionsByEntry(release.id))[secondId]).toMatchObject({
+          outcome: 'skipped_invalid',
+          reason: {
+            validation: { errors: [{ path: ['slug'], message: 'This attribute must be unique' }] },
+          },
+        });
       });
 
       test('all_or_nothing: an entry that fails the unique check at publish rolls the whole run back', async () => {
@@ -1764,10 +1845,248 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
           expect(await getPublishedSlug(secondId)).toBe('all-or-nothing-original');
           // The rolled-back publish of the first entry announces nothing
           expect(onEntryPublish).not.toHaveBeenCalled();
+          const actions = await getActionsByEntry(release.id);
+          expect(actions[secondId]).toMatchObject({
+            outcome: 'skipped_invalid',
+            reason: {
+              validation: {
+                errors: [{ path: ['slug'], message: 'This attribute must be unique' }],
+              },
+            },
+          });
+          expect(actions[firstId]).toMatchObject({ outcome: 'skipped_held', reason: null });
         } finally {
           stopListening();
         }
       });
+    });
+  });
+
+  describe('Entry outcomes', () => {
+    test('an entry the run publishes is recorded as published', async () => {
+      const documentId = await createProduct({ valid: true });
+      const release = await createReleaseWithActions('all_or_nothing', [{ documentId }]);
+
+      expect((await publishManually(release.id)).statusCode).toBe(200);
+
+      const actions = await getActionsByEntry(release.id);
+      expect(actions[documentId]).toMatchObject({ outcome: 'published', reason: null });
+    });
+
+    test('an unpublish entry is recorded as unpublished, even when it was not published', async () => {
+      const publishedId = await createProduct({ valid: true });
+      await strapi.documents(productUID).publish({ documentId: publishedId });
+      const neverPublishedId = await createProduct({ valid: true });
+      const release = await createReleaseWithActions('all_or_nothing', [
+        { documentId: publishedId, type: 'unpublish' },
+        { documentId: neverPublishedId, type: 'unpublish' },
+      ]);
+
+      expect((await publishManually(release.id)).statusCode).toBe(200);
+
+      const actions = await getActionsByEntry(release.id);
+      expect(actions[publishedId]).toMatchObject({ outcome: 'unpublished', reason: null });
+      expect(actions[neverPublishedId]).toMatchObject({ outcome: 'unpublished', reason: null });
+    });
+
+    test('an invalid entry is recorded as skipped_invalid with its field errors, without the submitted values', async () => {
+      const invalidId = await createProduct({ valid: false });
+      const release = await createReleaseWithActions('allow_partial', [
+        { documentId: invalidId },
+        { documentId: await createProduct({ valid: true }) },
+      ]);
+
+      expect((await publishManually(release.id)).statusCode).toBe(200);
+
+      const actions = await getActionsByEntry(release.id);
+      expect(actions[invalidId].outcome).toBe('skipped_invalid');
+      expect(actions[invalidId].reason).toEqual({
+        validation: {
+          errors: [{ path: ['description'], message: INVALID_PRODUCT_RECORDED_MESSAGE }],
+        },
+      });
+    });
+
+    test('an allow_partial entry that errors at publish is recorded as skipped_error with only the error name', async () => {
+      const failingId = await createProduct({ valid: true });
+      documentIdsFailingToPublish.add(failingId);
+
+      try {
+        const release = await createReleaseWithActions('allow_partial', [
+          { documentId: failingId },
+          { documentId: await createProduct({ valid: true }) },
+        ]);
+
+        expect((await publishManually(release.id)).statusCode).toBe(200);
+
+        const actions = await getActionsByEntry(release.id);
+        expect(actions[failingId].outcome).toBe('skipped_error');
+        // The test middleware throws a plain Error; its message must not be kept
+        expect(actions[failingId].reason).toEqual({ error: { name: 'Error' } });
+      } finally {
+        documentIdsFailingToPublish.delete(failingId);
+      }
+    });
+
+    test('a scheduled all_or_nothing run held back by an invalid entry records it as skipped_invalid and the others as skipped_held', async () => {
+      const validId = await createProduct({ valid: true });
+      const invalidId = await createProduct({ valid: false });
+      const toUnpublishId = await createProduct({ valid: true });
+      await strapi.documents(productUID).publish({ documentId: toUnpublishId });
+      const release = await createReleaseWithActions('all_or_nothing', [
+        { documentId: validId },
+        { documentId: invalidId },
+        { documentId: toUnpublishId, type: 'unpublish' },
+      ]);
+
+      await expect(runScheduled(release.id)).rejects.toThrow(INVALID_PRODUCT_MESSAGE);
+
+      const actions = await getActionsByEntry(release.id);
+      expect(actions[invalidId].outcome).toBe('skipped_invalid');
+      expect(actions[validId]).toMatchObject({ outcome: 'skipped_held', reason: null });
+      expect(actions[toUnpublishId]).toMatchObject({ outcome: 'skipped_held', reason: null });
+    });
+
+    test('an all_or_nothing run stopped by an error records the failing entry as skipped_error and the others as skipped_held', async () => {
+      const documentIds = [
+        await createProduct({ valid: true }),
+        await createProduct({ valid: true }),
+        await createProduct({ valid: true }),
+      ];
+      const [releasedBeforeId, failingId, notReachedId] = documentIds;
+      documentIdsFailingToPublish.add(failingId);
+
+      try {
+        const release = await createReleaseWithActions(
+          'all_or_nothing',
+          documentIds.map((documentId) => ({ documentId }))
+        );
+
+        expect((await publishManually(release.id)).statusCode).toBe(500);
+
+        const actions = await getActionsByEntry(release.id);
+        expect(actions[failingId]).toMatchObject({
+          outcome: 'skipped_error',
+          reason: { error: { name: 'Error' } },
+        });
+        // Rolled back with the run, so held back like the entry the run never reached
+        expect(actions[releasedBeforeId]).toMatchObject({ outcome: 'skipped_held', reason: null });
+        expect(actions[notReachedId]).toMatchObject({ outcome: 'skipped_held', reason: null });
+      } finally {
+        documentIdsFailingToPublish.delete(failingId);
+      }
+    });
+
+    test('a scheduled allow_partial run with no publishable entry records each entry with its own skip reason', async () => {
+      const invalidIds = [
+        await createProduct({ valid: false }),
+        await createProduct({ valid: false }),
+      ];
+      const release = await createReleaseWithActions(
+        'allow_partial',
+        invalidIds.map((documentId) => ({ documentId }))
+      );
+
+      await expect(runScheduled(release.id)).rejects.toThrow('No entries were published');
+
+      const actions = await getActionsByEntry(release.id);
+      for (const documentId of invalidIds) {
+        expect(actions[documentId]).toMatchObject({
+          outcome: 'skipped_invalid',
+          reason: {
+            validation: {
+              errors: [{ path: ['description'], message: INVALID_PRODUCT_RECORDED_MESSAGE }],
+            },
+          },
+        });
+      }
+    });
+
+    test('a rejected manual publish records no outcome: the release did not run', async () => {
+      const validId = await createProduct({ valid: true });
+      const invalidId = await createProduct({ valid: false });
+      const release = await createReleaseWithActions('all_or_nothing', [
+        { documentId: validId },
+        { documentId: invalidId },
+      ]);
+
+      expect((await publishManually(release.id)).statusCode).toBe(400);
+
+      const actions = await getActionsByEntry(release.id);
+      expect(actions[validId]).toMatchObject({ outcome: null, reason: null });
+      expect(actions[invalidId]).toMatchObject({ outcome: null, reason: null });
+    });
+
+    test('fixing a skipped entry after the run leaves what the run recorded unchanged', async () => {
+      const skippedId = await createProduct({ valid: false });
+      const ranRelease = await createReleaseWithActions('allow_partial', [
+        { documentId: skippedId },
+        { documentId: await createProduct({ valid: true }) },
+      ]);
+      expect((await publishManually(ranRelease.id)).statusCode).toBe(200);
+      // A planned release with the same entry shows when the fix has been taken into account
+      const plannedRelease = await createReleaseWithActions('allow_partial', [
+        { documentId: skippedId },
+      ]);
+      const recorded = (await getActionsByEntry(ranRelease.id))[skippedId];
+
+      const fixRes = await rq({
+        method: 'PUT',
+        url: `/content-manager/collection-types/${productUID}/${skippedId}`,
+        body: { description: 'Fixed' },
+      });
+      expect(fixRes.statusCode).toBe(200);
+
+      // The update revalidates release actions without awaiting it
+      let plannedAction;
+      for (let attempt = 0; attempt < 20 && !plannedAction?.isEntryValid; attempt += 1) {
+        plannedAction = (await getActionsByEntry(plannedRelease.id))[skippedId];
+      }
+      expect(plannedAction.isEntryValid).toBe(true);
+
+      const after = (await getActionsByEntry(ranRelease.id))[skippedId];
+      expect({
+        isEntryValid: after.isEntryValid,
+        outcome: after.outcome,
+        reason: after.reason,
+      }).toEqual({
+        isEntryValid: false,
+        outcome: 'skipped_invalid',
+        reason: recorded.reason,
+      });
+    });
+
+    test('deleting an entry keeps its action in a release that ran, with what the run recorded', async () => {
+      const deletedId = await createProduct({ valid: false });
+      const ranRelease = await createReleaseWithActions('allow_partial', [
+        { documentId: deletedId },
+        { documentId: await createProduct({ valid: true }) },
+      ]);
+      expect((await publishManually(ranRelease.id)).statusCode).toBe(200);
+      // A planned release with the same entry shows when the deletion has been taken into account
+      const plannedRelease = await createReleaseWithActions('allow_partial', [
+        { documentId: deletedId },
+      ]);
+      const recorded = (await getActionsByEntry(ranRelease.id))[deletedId];
+
+      // All locales: deleting a single locale of a non-localized entry keeps its actions (EE-254)
+      await strapi.documents(productUID).delete({ documentId: deletedId, locale: '*' });
+
+      // The deletion removes release actions without awaiting it
+      let plannedActions = await getActionsByEntry(plannedRelease.id);
+      for (let attempt = 0; attempt < 20 && plannedActions[deletedId]; attempt += 1) {
+        plannedActions = await getActionsByEntry(plannedRelease.id);
+      }
+      expect(plannedActions[deletedId]).toBeUndefined();
+
+      const kept = (await getActionsByEntry(ranRelease.id))[deletedId];
+      expect(kept).toMatchObject({
+        outcome: 'skipped_invalid',
+        reason: recorded.reason,
+        entry: {},
+        status: null,
+      });
+      expect((await getRelease(ranRelease.id)).status).toBe('partial');
     });
   });
 
