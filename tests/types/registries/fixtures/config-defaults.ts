@@ -123,3 +123,14 @@ app.plugin('default-semantics').config('port', '1337');
 app.config.get('plugin::default-semantics.options.enabled') satisfies boolean;
 // @ts-expect-error Plugin lookups also preserve undefined when no default was supplied.
 app.plugin('default-semantics').config('options.enabled') satisfies boolean;
+
+// Core namespaces without loader defaults are `undefined` when the app has no config file.
+const features = app.config.get('features');
+const middlewares = app.config.get('middlewares');
+const middlewaresWithDefault = app.config.get('middlewares', ['strapi::logger']);
+// @ts-expect-error `config/features.*` may be missing.
+void features.future;
+// @ts-expect-error `config/middlewares.*` may be missing.
+void middlewares.length;
+features?.future satisfies object | undefined;
+middlewaresWithDefault.length satisfies number;
