@@ -350,6 +350,7 @@ describe('Release service', () => {
               },
             ]),
             update: jest.fn().mockResolvedValue({ id: 1, name: 'March', status: 'done' }),
+            updateMany: jest.fn(),
           }),
         },
         entityService: {
@@ -450,6 +451,7 @@ describe('Release service', () => {
                   { contentType: ARTICLE_UID, type: 'publish', entryDocumentId: 'doc1' },
                   { contentType: CATEGORY_UID, type: 'publish', entryDocumentId: 'doc2' },
                 ]),
+                updateMany: jest.fn(),
               };
             }
             return {
@@ -539,6 +541,7 @@ describe('Release service', () => {
                   { contentType: ARTICLE_UID, type: 'publish', entryDocumentId: 'doc1' },
                   { contentType: CATEGORY_UID, type: 'publish', entryDocumentId: 'doc2' },
                 ]),
+                updateMany: jest.fn(),
               };
             }
             return {
@@ -612,6 +615,7 @@ describe('Release service', () => {
                   { contentType: PAGE_UID, type: 'publish', entryDocumentId: 'parentDoc' },
                   { contentType: PAGE_UID, type: 'publish', entryDocumentId: 'childDoc' },
                 ]),
+                updateMany: jest.fn(),
               };
             }
             return {
@@ -693,6 +697,7 @@ describe('Release service', () => {
               { id: 3, contentType: 'collectionType', type: 'unpublish', entryDocumentId: 'c' },
             ]),
             update: jest.fn().mockResolvedValue({ id: 1, name: 'March', status: 'done' }),
+            updateMany: jest.fn(),
           }),
         },
         contentTypes: { collectionType: { kind: 'collectionType' } },
@@ -763,6 +768,7 @@ describe('Release service', () => {
               }))
             ),
             update: jest.fn().mockResolvedValue({ id: 1, name: 'March', status: 'partial' }),
+            updateMany: jest.fn(),
           }),
         },
         contentTypes: { collectionType: { kind: 'collectionType' } },
@@ -806,6 +812,7 @@ describe('Release service', () => {
               ]),
             // The entries went out, then writing the release's outcome failed
             update: jest.fn().mockRejectedValue(new errors.ApplicationError('Write failed')),
+            updateMany: jest.fn(),
           }),
           queryBuilder: jest.fn().mockReturnValue({
             select: jest.fn().mockReturnThis(),
@@ -866,6 +873,7 @@ describe('Release service', () => {
                 { contentType: 'collectionType', type: 'publish', entry: { id: 1 } },
               ]),
             update: jest.fn().mockResolvedValue({ id: 1, name: 'March', status: 'done' }),
+            updateMany: jest.fn(),
           }),
         },
         contentTypes: { collectionType: { kind: 'collectionType' } },
@@ -916,6 +924,7 @@ describe('Release service', () => {
               { id: 2, contentType: 'collectionType', type: 'publish', entryDocumentId: 'b' },
             ]),
             update: jest.fn(),
+            updateMany: jest.fn(),
           }),
         },
         contentTypes: { collectionType: { kind: 'collectionType' } },
@@ -967,6 +976,7 @@ describe('Release service', () => {
                 { contentType: 'collectionType', type: 'publish', entry: { id: 1 } },
               ]),
             update: jest.fn().mockResolvedValue({ id: 1, name: 'March', status: 'done' }),
+            updateMany: jest.fn(),
           }),
         },
         contentTypes: { collectionType: { kind: 'collectionType' } },

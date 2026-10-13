@@ -1,4 +1,4 @@
-import type { Schema, Modules, UID, Struct } from '@strapi/types';
+import type { Schema, Modules, UID, Struct, Data } from '@strapi/types';
 import type { errors } from '@strapi/utils';
 import type { Release, Pagination } from './releases';
 import type { Entity } from '../types';
@@ -12,6 +12,29 @@ export type ReleaseActionEntry = Modules.Documents.AnyDocument & {
   locale?: string;
 };
 
+export type ReleaseActionOutcome =
+  | 'published'
+  | 'unpublished'
+  | 'skipped_invalid'
+  | 'skipped_not_approved'
+  | 'skipped_error'
+  // The entry was publishable, but an `all_or_nothing` run released nothing
+  | 'skipped_held';
+
+interface StageRef {
+  id: Data.ID;
+  name: string;
+}
+
+/** Why the entry wasn't released: what the run saw, kept as it was */
+export interface ReleaseActionReason {
+  /** Field paths and messages only, never the submitted values */
+  validation?: { errors: { path: string[]; message: string }[] };
+  stage?: { entryStage: StageRef | null; requiredStage: StageRef };
+  /** Only the error's name: its message can carry row contents */
+  error?: { name: string };
+}
+
 export interface ReleaseAction extends Entity {
   type: 'publish' | 'unpublish';
   entry: ReleaseActionEntry;
@@ -20,6 +43,8 @@ export interface ReleaseAction extends Entity {
   locale?: string;
   release: Release;
   isEntryValid: boolean;
+  outcome: ReleaseActionOutcome | null;
+  reason: ReleaseActionReason | null;
   status: 'draft' | 'published' | 'modified';
 }
 
@@ -37,6 +62,8 @@ export interface FormattedReleaseAction extends Entity {
   };
   release: Release;
   status: 'draft' | 'published' | 'modified';
+  outcome: ReleaseActionOutcome | null;
+  reason: ReleaseActionReason | null;
 }
 
 /**
