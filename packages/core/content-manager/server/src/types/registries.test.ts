@@ -65,3 +65,6 @@ strapi.controller('plugin::content-manager.history-version')?.findMany satisfies
   | undefined;
 // @ts-expect-error Registered feature controllers have no arbitrary actions.
 strapi.controller('plugin::content-manager.preview').missing();
+// History services only exist with the `cms-content-history` feature.
+// @ts-expect-error The service may be undefined.
+strapi.plugin('content-manager').service('history').findVersionsPage satisfies unknown;

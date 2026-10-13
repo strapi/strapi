@@ -17,9 +17,11 @@ declare global {
         'plugin::content-manager.content-structure': Services.ContentStructureService;
         'plugin::content-manager.content-types': Services.ContentTypesService;
         'plugin::content-manager.data-mapper': Services.DataMapperService;
-        'plugin::content-manager.history': Services.HistoryService;
+        // Registered only when the `cms-content-history` feature is enabled.
+        'plugin::content-manager.history': Services.HistoryService | undefined;
         'plugin::content-manager.homepage': Services.HomepageService;
-        'plugin::content-manager.lifecycles': Services.LifecyclesService;
+        // Registered only when the `cms-content-history` feature is enabled.
+        'plugin::content-manager.lifecycles': Services.LifecyclesService | undefined;
         'plugin::content-manager.permission': Services.PermissionService;
         'plugin::content-manager.permission-checker': Services.PermissionCheckerService;
         'plugin::content-manager.preview': Services.PreviewService;
