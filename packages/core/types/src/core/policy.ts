@@ -75,13 +75,24 @@ type PolicyReferenceName<TName extends RegisteredPolicyName, TNamespace extends 
         : never
       : never);
 
+/**
+ * The config a route reference passes, `unknown` when the registered config is `any`. A contract whose
+ * import does not resolve in the consumer is an error type: a conditional type over it is an error
+ * type too, which would accept any reference. Tuples keep the error type out of the checked and
+ * extends positions. Same guard as middleware references.
+ */
+type PolicyReferenceConfig<TConfig> = [0] extends [1 & TConfig] ? unknown : TConfig;
+
 /** A reference to a registered policy: its name alone only when its config is optional. */
-type RegisteredPolicyReference<TName extends RegisteredPolicyName, TNamespace extends string> =
-  undefined extends PolicyConfigFor<TName>
-    ?
-        | PolicyReferenceName<TName, TNamespace>
-        | { name: PolicyReferenceName<TName, TNamespace>; config?: PolicyConfigFor<TName> }
-    : { name: PolicyReferenceName<TName, TNamespace>; config: PolicyConfigFor<TName> };
+type RegisteredPolicyReference<
+  TName extends RegisteredPolicyName,
+  TNamespace extends string,
+  TConfig = PolicyReferenceConfig<PolicyConfigFor<TName>>,
+> = [undefined] extends [TConfig]
+  ?
+      | PolicyReferenceName<TName, TNamespace>
+      | { name: PolicyReferenceName<TName, TNamespace>; config?: TConfig }
+  : { name: PolicyReferenceName<TName, TNamespace>; config: TConfig };
 
 /** Any policy name. Registered names, and their relative forms in `TNamespace`, are listed for completion. */
 type SuggestedPolicyName<TNamespace extends string> = SuggestedString<

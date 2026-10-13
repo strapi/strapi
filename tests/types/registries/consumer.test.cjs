@@ -219,6 +219,13 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
     );
   });
 
+  test(`${resolution}: a loose policy config keeps references checked`, () => {
+    assertClean(
+      compile(['settings.d.ts', 'policies-loose.d.ts', 'policies-loose.ts']),
+      `${resolution}, policy configs typed any or unresolved`
+    );
+  });
+
   test(`${resolution}: an empty middleware inventory accepts no name`, () => {
     assertClean(
       compile(['settings.d.ts', 'middlewares-empty.ts']),
