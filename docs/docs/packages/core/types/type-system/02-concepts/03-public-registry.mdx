@@ -280,9 +280,10 @@ declare module '@strapi/strapi' {
 
 ###### Strict service contracts (`typescript.strictTypes`)
 
-With `strictTypes: true` in `config/typescript.ts` (typed on `Core.Config.TypeScript`, next to `autogenerate`), the same commands generate five more files, so that service, controller, policy and middleware lookups are checked against registered contracts:
+With `strictTypes: true` in `config/typescript.ts` (typed on `Core.Config.TypeScript`, next to `autogenerate`), the same commands generate six more files, so that service, controller, policy and middleware lookups are checked against registered contracts. Turning it off removes them, so the output equals the one without the flag:
 
 - `types/generated/strict.d.ts` holds `import type {} from '@strapi/strapi/strict-types'`. It enables strict mode for the whole program and loads the contracts of the plugins bundled with `@strapi/strapi`; optional plugins are loaded by `plugins.d.ts`. Going through `@strapi/strapi` keeps the application free of direct dependencies on the plugins, which it cannot resolve under a strict package manager layout such as pnpm's.
+- `types/generated/plugins.d.ts` imports the server declarations of the enabled optional plugins, such as `import type {} from '@strapi/plugin-sentry/strapi-server'`. Plugins that `@strapi/strapi/strict-types` already loads are left out, so the file holds no package manager store path.
 - `types/generated/services.d.ts` registers every `api::*` service of the application in the global `Strapi.Registries.AppServices`, typed from its source file.
 - `types/generated/controllers.d.ts` does the same for `api::*` controllers, in the global `Strapi.Registries.AppControllers`.
 - `types/generated/policies.d.ts` registers the config of every `global::*` and `api::*` policy in the global `Strapi.Registries.AppPolicies`.
