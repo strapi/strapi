@@ -3,6 +3,7 @@ import type * as Middleware from './middleware';
 import type { ServiceInstance } from './service-instance';
 import type { AnyDocument } from './result';
 import type { ComponentExtension } from './component-extension';
+import type { IsStrict } from '../../core/strictness';
 
 export * as Middleware from './middleware';
 export * as Params from './params';
@@ -29,6 +30,12 @@ export type Service = {
    *    if (!params.locale) params.locale = 'en'
    *    return next()
    *  })
+   *
+   * Returns a function that removes the middleware. With strict types disabled, the declared return
+   * type stays `Service`, as on develop, although runtime does not return the service.
    */
-  use: (cb: Middleware.Middleware) => Service;
+  use: (cb: Middleware.Middleware) => IsStrict extends false ? Service : RemoveMiddleware;
 };
+
+/** Removes a document service middleware added with `strapi.documents.use()`. */
+export type RemoveMiddleware = () => void;

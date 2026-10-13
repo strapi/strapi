@@ -147,3 +147,6 @@ declare const templateName: string;
 app.service(`api::${templateName}.${templateName}`);
 app.controller(`admin::${templateName}`);
 app.controller(`plugin::${templateName}.${templateName}`);
+
+// Develop declares `documents.use()` as returning the service.
+app.documents.use(async (_context, next) => next()).use(async (_context, next) => next());
