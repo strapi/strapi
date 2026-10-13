@@ -543,13 +543,15 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
 
         try {
           await attemptTokenRefresh(tokenUsedByFailedRequest);
-          // Retry - executeRequest will call getDefaultHeaders() again, picking up the new token
-          return await executeRequest();
         } catch {
           // If refresh fails, throw the original error
           error.sessionToken = tokenUsedByFailedRequest;
           throw error;
         }
+
+        // Retry outside the refresh catch so a second 401 is attributed to the
+        // refreshed token instead of the token used by the original request.
+        return executeRequest();
       }
       throw error;
     }

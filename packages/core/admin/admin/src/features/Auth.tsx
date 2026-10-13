@@ -253,6 +253,18 @@ const AuthProvider = ({
     runLogoutWithGuard(performGlobalLogout, 'session-dead');
   }, [performGlobalLogout, runLogoutWithGuard]);
 
+  const handleSessionDead = React.useCallback(
+    (expiredToken?: string | null) => {
+      const currentToken = store.getState().admin_app.token ?? null;
+      if (expiredToken !== undefined && expiredToken !== currentToken) {
+        return;
+      }
+
+      clearStateAndLogout();
+    },
+    [clearStateAndLogout, store]
+  );
+
   const handleConfirmSessionLogout = React.useCallback(() => {
     logoutGuardOpenRef.current = false;
     logoutGuardReasonRef.current = 'voluntary';
@@ -368,19 +380,12 @@ const AuthProvider = ({
    * a stale page until they click something.
    */
   React.useEffect(() => {
-    setOnSessionExpired((expiredToken) => {
-      const currentToken = store.getState().admin_app.token ?? null;
-      if (expiredToken !== undefined && expiredToken !== currentToken) {
-        return;
-      }
-
-      clearStateAndLogout();
-    });
+    setOnSessionExpired(handleSessionDead);
 
     return () => {
       setOnSessionExpired(null);
     };
-  }, [clearStateAndLogout, store]);
+  }, [handleSessionDead]);
 
   /**
    * Session keepalive around access-token expiry. The timer fires per-tab; the
@@ -393,7 +398,7 @@ const AuthProvider = ({
    */
   useSessionKeepalive({
     token,
-    onSessionDead: clearStateAndLogout,
+    onSessionDead: handleSessionDead,
     getStoredToken,
     onResync: resyncToken,
     getLastActivityAt,
@@ -426,7 +431,7 @@ const AuthProvider = ({
   React.useEffect(() => {
     let disposed = false;
 
-    const reconcileSharedSession = () => {
+    const reconcileSharedSession = (forceReset: boolean = false) => {
       if (disposed) {
         return;
       }
@@ -437,17 +442,19 @@ const AuthProvider = ({
       }
 
       const currentToken = store.getState().admin_app.token ?? null;
-      if (currentToken === nextToken) {
+      if (currentToken === nextToken && !forceReset) {
         return;
       }
 
       discardPendingLogout();
       resetSessionExpiredNotification();
-      dispatch(setToken(nextToken));
+      if (currentToken !== nextToken) {
+        dispatch(setToken(nextToken));
+      }
       resetAdminApiState(dispatch);
     };
 
-    const unsubscribe = subscribeToAdminSessionChanges(reconcileSharedSession);
+    const unsubscribe = subscribeToAdminSessionChanges(() => reconcileSharedSession(true));
     queueMicrotask(reconcileSharedSession);
 
     return () => {

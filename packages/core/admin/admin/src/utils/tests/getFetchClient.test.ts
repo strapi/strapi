@@ -1,6 +1,7 @@
 import {
   ADMIN_REFRESH_LOCK,
   attemptTokenRefresh,
+  FetchError,
   getFetchClient,
   refreshAccessToken,
   resetSessionExpiredNotification,
@@ -383,6 +384,48 @@ describe('getFetchClient', () => {
         'http://localhost:1337/admin/access-token',
         expect.objectContaining({ method: 'POST' })
       );
+    });
+
+    it('attributes a failed retry to the refreshed request instead of the original token', async () => {
+      (window.fetch as jest.Mock)
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 401,
+            ok: false,
+            json: () =>
+              Promise.resolve({
+                error: { message: 'Original token expired', status: 401 },
+              }),
+          })
+        )
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 200,
+            ok: true,
+            json: () => Promise.resolve({ data: { token: 'new-token' } }),
+          })
+        )
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 401,
+            ok: false,
+            json: () =>
+              Promise.resolve({
+                error: { message: 'Refreshed token rejected', status: 401 },
+              }),
+          })
+        );
+
+      const fetchClient = getFetchClient();
+
+      try {
+        await fetchClient.get('/api/test');
+        throw new Error('Expected the retried request to fail');
+      } catch (error) {
+        expect(error).toBeInstanceOf(FetchError);
+        expect(error).toMatchObject({ message: 'Refreshed token rejected' });
+        expect((error as FetchError).sessionToken).toBeUndefined();
+      }
     });
 
     it('should not refresh token for auth paths', async () => {

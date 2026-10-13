@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 
 import { SETTINGS_LINKS_CE, SettingsMenuLink } from '../constants';
 import { useAppInfo } from '../features/AppInfo';
-import { AuthContextValue, useAuth } from '../features/Auth';
+import { useAuth } from '../features/Auth';
 import { useStrapiApp } from '../features/StrapiApp';
 import { selectAdminPermissions } from '../selectors';
 import { PermissionMap } from '../types/permissions';
@@ -70,11 +70,12 @@ const useSettingsMenu = (): {
     'useSettingsMenu',
     (state) => state.checkUserHasPermissions
   );
+  const adminUserId = useAuth('useSettingsMenu', (state) => state.user?.id ?? state.user?.email);
   const shouldUpdateStrapi = useAppInfo('useSettingsMenu', (state) => state.shouldUpdateStrapi);
   const rawSettings = useStrapiApp('useSettingsMenu', (state) => state.settings);
   const settings = React.useMemo(() => normalizeSettings(rawSettings), [rawSettings]);
   const permissions = useSelector(selectAdminPermissions);
-  const resolvedPermissionCheckerRef = React.useRef<AuthContextValue['checkUserHasPermissions']>();
+  const resolvedAdminUserIdRef = React.useRef<typeof adminUserId>();
 
   /**
    * memoize the return value of this function to avoid re-computing it on every render
@@ -139,7 +140,7 @@ const useSettingsMenu = (): {
       const menuPermissions = await buildMenuPermissions(sections);
 
       if (!cancelled) {
-        resolvedPermissionCheckerRef.current = checkUserHasPermission;
+        resolvedAdminUserIdRef.current = adminUserId;
         setData((prev) => {
           return {
             ...prev,
@@ -194,9 +195,10 @@ const useSettingsMenu = (): {
     shouldUpdateStrapi,
     addPermissions,
     checkUserHasPermission,
+    adminUserId,
   ]);
 
-  if (resolvedPermissionCheckerRef.current !== checkUserHasPermission) {
+  if (resolvedAdminUserIdRef.current !== adminUserId) {
     return {
       isLoading: true,
       menu: [],

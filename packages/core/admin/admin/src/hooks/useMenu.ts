@@ -4,7 +4,7 @@ import { Cog, ShoppingCart, House } from '@strapi/icons';
 import cloneDeep from 'lodash/cloneDeep';
 
 import { useTypedSelector } from '../core/store/hooks';
-import { useAuth, AuthContextValue } from '../features/Auth';
+import { useAuth, type AuthContextValue } from '../features/Auth';
 import { StrapiAppContextValue, useStrapiApp } from '../features/StrapiApp';
 import { hideCloudDeployMenuLinkInProduction } from '../utils/widgetVisibility';
 
@@ -35,6 +35,7 @@ const useMenu = (shouldUpdateStrapi: boolean, currentEnvironment?: string) => {
     (state) => state.checkUserHasPermissions,
     true
   );
+  const adminUserId = useAuth('useMenu', (state) => state.user?.id ?? state.user?.email);
   const rawMenu = useStrapiApp('useMenu', (state) => state.menu);
   const menu = React.useMemo(() => normalizeMenuLinks(rawMenu), [rawMenu]);
   const permissions = useTypedSelector((state) => state.admin_app.permissions);
@@ -98,7 +99,7 @@ const useMenu = (shouldUpdateStrapi: boolean, currentEnvironment?: string) => {
     isLoading: true,
   });
   const generalSectionLinksRef = React.useRef(menuWithUserPermissions.generalSectionLinks);
-  const resolvedPermissionCheckerRef = React.useRef<AuthContextValue['checkUserHasPermissions']>();
+  const resolvedAdminUserIdRef = React.useRef<typeof adminUserId>();
 
   React.useEffect(() => {
     let cancelled = false;
@@ -116,7 +117,7 @@ const useMenu = (shouldUpdateStrapi: boolean, currentEnvironment?: string) => {
       );
 
       if (!cancelled) {
-        resolvedPermissionCheckerRef.current = checkUserHasPermissions;
+        resolvedAdminUserIdRef.current = adminUserId;
         setMenuWithUserPermissions((state) => ({
           ...state,
           generalSectionLinks: authorizedGeneralSectionLinks,
@@ -142,9 +143,10 @@ const useMenu = (shouldUpdateStrapi: boolean, currentEnvironment?: string) => {
     shouldUpdateStrapi,
     checkUserHasPermissions,
     currentEnvironment,
+    adminUserId,
   ]);
 
-  if (resolvedPermissionCheckerRef.current !== checkUserHasPermissions) {
+  if (resolvedAdminUserIdRef.current !== adminUserId) {
     return {
       ...menuWithUserPermissions,
       generalSectionLinks: [],

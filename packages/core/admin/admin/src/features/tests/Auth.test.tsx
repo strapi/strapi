@@ -1,12 +1,15 @@
 import type { ReactElement } from 'react';
 
-import { act, render, screen, server, waitFor } from '@tests/utils';
+import { act, fireEvent, render, screen, server, waitFor } from '@tests/utils';
 import { http, HttpResponse } from 'msw';
+import { useNavigate } from 'react-router-dom';
 
 import { Page } from '../../components/PageHelpers';
 import { useTypedDispatch } from '../../core/store/hooks';
+import { useMenu } from '../../hooks/useMenu';
 import { useRBAC } from '../../hooks/useRBAC';
 import { useSessionKeepalive } from '../../hooks/useSessionKeepalive';
+import { useSettingsMenu } from '../../hooks/useSettingsMenu';
 import { useInitQuery } from '../../services/admin';
 import {
   ADMIN_SESSION_CHANNEL,
@@ -181,6 +184,22 @@ const RbacProbe = () => {
 
   return (
     <div data-testid="rbac-result">{isLoading ? 'loading' : String(allowedActions.canUpdate)}</div>
+  );
+};
+
+const QueryStringMenuProbe = () => {
+  const navigate = useNavigate();
+  const mainMenu = useMenu(false);
+  const settingsMenu = useSettingsMenu();
+
+  return (
+    <>
+      <div data-testid="main-menu-loading">{String(mainMenu.isLoading)}</div>
+      <div data-testid="settings-menu-loading">{String(settingsMenu.isLoading)}</div>
+      <button type="button" onClick={() => navigate('?page=2')}>
+        change-query
+      </button>
+    </>
   );
 };
 
@@ -456,12 +475,54 @@ describe('AuthProvider session identity', () => {
     expect(checkedBearers).toContain(bearer(TOKEN_B));
   });
 
+  it('does not put permission-derived menus back into loading on a query-string change', async () => {
+    renderIdentity(
+      <>
+        <IdentityProbe />
+        <QueryStringMenuProbe />
+        <RbacProbe />
+      </>
+    );
+
+    await waitForUserA();
+    await waitFor(() => expect(screen.getByTestId('main-menu-loading')).toHaveTextContent('false'));
+    await waitFor(() =>
+      expect(screen.getByTestId('settings-menu-loading')).toHaveTextContent('false')
+    );
+    await waitFor(() => expect(screen.getByTestId('rbac-result')).toHaveTextContent('false'));
+
+    fireEvent.click(screen.getByRole('button', { name: 'change-query' }));
+
+    expect(screen.getByTestId('main-menu-loading')).toHaveTextContent('false');
+    expect(screen.getByTestId('settings-menu-loading')).toHaveTextContent('false');
+    expect(screen.getByTestId('rbac-result')).toHaveTextContent('false');
+  });
+
   it('refetches identity under the new persisted token when another tab changes the session', async () => {
     renderIdentity();
 
     await waitForUserA();
 
     window.localStorage.setItem('jwtToken', JSON.stringify(TOKEN_B));
+    act(() => {
+      emitExternalSessionBroadcast();
+    });
+
+    await waitForUserB();
+  });
+
+  it('resets cached identity when keepalive adopts the token before the session notice arrives', async () => {
+    renderIdentity();
+
+    await waitForUserA();
+
+    window.localStorage.setItem('jwtToken', JSON.stringify(TOKEN_B));
+    act(() => {
+      getKeepaliveOptions().onResync?.(TOKEN_B);
+    });
+    expect(screen.getByTestId('identity-token')).toHaveTextContent(TOKEN_B);
+    expect(screen.getByTestId('identity-email')).toHaveTextContent(USER_A.email);
+
     act(() => {
       emitExternalSessionBroadcast();
     });
@@ -663,7 +724,7 @@ describe('AuthProvider', () => {
       render(<AuthProbe />);
 
       act(() => {
-        getKeepaliveOptions().onSessionDead?.();
+        getKeepaliveOptions().onSessionDead?.(TOKEN);
       });
 
       const dialog = await screen.findByRole('alertdialog');
@@ -676,7 +737,7 @@ describe('AuthProvider', () => {
       render(<AuthProbe />);
 
       act(() => {
-        getKeepaliveOptions().onSessionDead?.();
+        getKeepaliveOptions().onSessionDead?.(TOKEN);
       });
 
       await waitFor(() => expect(screen.getByTestId('token')).toHaveTextContent('logged-out'));
@@ -689,7 +750,7 @@ describe('AuthProvider', () => {
       render(<AuthProbe />);
 
       act(() => {
-        getKeepaliveOptions().onSessionDead?.();
+        getKeepaliveOptions().onSessionDead?.(TOKEN);
       });
       await screen.findByRole('alertdialog');
 
@@ -699,6 +760,12 @@ describe('AuthProvider', () => {
       });
 
       await waitFor(() => expect(screen.getByTestId('token')).toHaveTextContent(TOKEN_B));
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+
+      act(() => {
+        getKeepaliveOptions().onSessionDead?.(TOKEN);
+      });
+      expect(screen.getByTestId('token')).toHaveTextContent(TOKEN_B);
       expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
 
       act(() => {
