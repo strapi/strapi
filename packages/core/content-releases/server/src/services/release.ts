@@ -162,7 +162,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   // What a run did, written in its lock transaction: each entry's outcome, then the release's
-  // status. A run that released entries also sets `releasedAt`
+  // status. Whatever the outcome, the run is over: `releasedAt` freezes the release
   const recordRun = async (
     releaseId: Release['id'],
     {
@@ -177,7 +177,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
 
     return strapi.db.query(RELEASE_MODEL_UID).update({
       where: { id: releaseId },
-      data: { status, ...(status !== 'failed' && { releasedAt: new Date() }) },
+      data: { status, releasedAt: new Date() },
     });
   };
 
@@ -656,11 +656,15 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
     async updateReleaseStatus(releaseId: Release['id']) {
       const releaseActionService = getService('release-action', { strapi });
 
-      const releaseRead: Promise<Pick<Release, 'releaseCondition' | 'status'> | null> = strapi.db
+      const release: Pick<Release, 'releaseCondition' | 'releasedAt'> | null = await strapi.db
         .query(RELEASE_MODEL_UID)
-        .findOne({ where: { id: releaseId }, select: ['releaseCondition', 'status'] });
+        .findOne({ where: { id: releaseId }, select: ['releaseCondition', 'releasedAt'] });
 
-      const [totalActions, invalidActions, release] = await Promise.all([
+      if (!release || release.releasedAt) {
+        return release;
+      }
+
+      const [totalActions, invalidActions] = await Promise.all([
         releaseActionService.countActions({
           filters: {
             release: releaseId,
@@ -674,22 +678,12 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
             isEntryValid: false,
           },
         }),
-        releaseRead,
       ]);
-
-      // A failed release goes back to planned: what its run recorded no longer describes it, and
-      // a later run that throws before recording anything must not show it as its own
-      if (release?.status === 'failed') {
-        await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
-          where: { release: releaseId },
-          data: { outcome: null, reason: null },
-        });
-      }
 
       let status: Release['status'] = 'empty';
 
       if (totalActions > 0) {
-        status = isReleaseBlocked(release?.releaseCondition, {
+        status = isReleaseBlocked(release.releaseCondition, {
           total: totalActions,
           notPublishable: invalidActions,
         })

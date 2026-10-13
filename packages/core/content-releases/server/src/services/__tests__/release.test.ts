@@ -923,7 +923,10 @@ describe('Release service', () => {
       );
       // One savepoint for the run: the entry released before the error is rolled back with it
       expect(strapiMock.db.savepoint).toHaveBeenCalledTimes(1);
-      expect(releaseUpdate).toHaveBeenCalledWith({ where: { id: 1 }, data: { status: 'failed' } });
+      expect(releaseUpdate).toHaveBeenCalledWith({
+        where: { id: 1 },
+        data: { status: 'failed', releasedAt: expect.any(Date) },
+      });
       expect(strapiMock.eventHub.emit).toHaveBeenCalledWith(
         'releases.publish',
         expect.objectContaining({ isPublished: false })
@@ -1099,6 +1102,67 @@ describe('Release service', () => {
       });
       // Not a run: no releases.publish webhook and no release.trigger audit event
       expect(strapiMock.eventHub.emit).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('updateReleaseStatus', () => {
+    const createStrapiMock = (release: unknown, counts: { total: number; invalid: number }) => {
+      const update = jest.fn();
+      const countActions = jest.fn(({ filters }) =>
+        filters.isEntryValid === false ? counts.invalid : counts.total
+      );
+
+      const strapiMock = {
+        ...baseStrapiMock,
+        plugin: jest.fn().mockReturnValue({ service: jest.fn().mockReturnValue({ countActions }) }),
+        db: {
+          query: jest
+            .fn()
+            .mockReturnValue({ findOne: jest.fn().mockResolvedValue(release), update }),
+        },
+      };
+
+      return { strapiMock, update, countActions };
+    };
+
+    it.each(['done', 'partial', 'failed'])(
+      'leaves a frozen %s release untouched, whatever happens to its entries',
+      async (status) => {
+        const { strapiMock, update, countActions } = createStrapiMock(
+          { releaseCondition: 'all_or_nothing', releasedAt: new Date(), status },
+          { total: 0, invalid: 0 }
+        );
+
+        // @ts-expect-error Ignore missing properties
+        const releaseService = createReleaseService({ strapi: strapiMock });
+        await releaseService.updateReleaseStatus(1);
+
+        expect(countActions).not.toHaveBeenCalled();
+        expect(update).not.toHaveBeenCalled();
+      }
+    );
+
+    it('recalculates the status of a planned release', async () => {
+      const { strapiMock, update } = createStrapiMock(
+        { releaseCondition: 'all_or_nothing', releasedAt: null },
+        { total: 3, invalid: 1 }
+      );
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+      await releaseService.updateReleaseStatus(1);
+
+      expect(update).toHaveBeenCalledWith({ where: { id: 1 }, data: { status: 'blocked' } });
+    });
+
+    it('does nothing for a release that no longer exists', async () => {
+      const { strapiMock, update } = createStrapiMock(null, { total: 3, invalid: 1 });
+
+      // @ts-expect-error Ignore missing properties
+      const releaseService = createReleaseService({ strapi: strapiMock });
+      await releaseService.updateReleaseStatus(1);
+
+      expect(update).not.toHaveBeenCalled();
     });
   });
 
