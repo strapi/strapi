@@ -1,4 +1,4 @@
-import type { Core, Schema, UID } from '@strapi/types';
+import type { Core, Modules, Schema, UID } from '@strapi/types';
 
 import { createAILocalizationsService, mergeUnsupportedFields } from '../ai-localizations';
 
@@ -622,7 +622,10 @@ describe('ai-localizations service', () => {
         const service = createAILocalizationsService({ strapi });
 
         await expect(
-          service.generateDocumentLocalizations({ model: MODEL, document: null })
+          service.generateDocumentLocalizations({
+            model: MODEL,
+            document: null as unknown as Modules.Documents.AnyDocument,
+          })
         ).resolves.toBeUndefined();
 
         expect(generateTranslations).not.toHaveBeenCalled();

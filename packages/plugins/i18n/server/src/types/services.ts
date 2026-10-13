@@ -164,5 +164,22 @@ export type FillFromLocaleService = {
   ): Promise<Record<string, unknown>>;
 };
 
-/** Existing permission action and engine hooks exposed by i18n. */
-export type PermissionsService = ReturnType<typeof permissions>;
+type PermissionsImplementation = ReturnType<typeof permissions>;
+
+/** A role permission as the locale normalization reads it. */
+export type LocalePermission = {
+  action: string;
+  subject?: string | null;
+  properties?: Record<string, unknown>;
+  [key: string]: unknown;
+};
+
+/**
+ * Existing permission action and engine hooks exposed by i18n. Locale normalization requires
+ * permissions with an action; the implementation keeps its published develop `any[]` types.
+ */
+export type PermissionsService = Omit<PermissionsImplementation, 'actions'> & {
+  actions: Omit<PermissionsImplementation['actions'], 'normalizeRolePermissionsLocales'> & {
+    normalizeRolePermissionsLocales(permissions: LocalePermission[]): Promise<LocalePermission[]>;
+  };
+};

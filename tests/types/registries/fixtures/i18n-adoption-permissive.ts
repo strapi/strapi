@@ -10,8 +10,11 @@ declare const getI18nService: typeof getService;
 
 declare const app: Core.Strapi;
 
+// The emitted helper keeps develop's type: it resolves the plugin's own implementations, with or
+// without strict types.
+// @ts-expect-error `sendDidInitializeEvent` takes no argument.
+getI18nService('metrics').sendDidInitializeEvent('unexpected');
 // Loading all i18n contracts does not opt applications into strictness.
-getI18nService('metrics').sendDidInitializeEvent('unexpected').anything();
 app.plugin('i18n').service('content-types').getValidLocale(123).anything();
 app.plugin('i18n').service('settings').setSettings({ aiLocalizations: 'yes' });
 app.service('plugin::i18n.ai-localization-jobs').getJobByDocument();
