@@ -15,6 +15,9 @@ export type PolicyHandler<TConfig = unknown> = (
   opts: { strapi: Strapi }
 ) => boolean | undefined;
 
+// TODO @Nico A registered policy (`Policy<{ role: string }>`) is not assignable to `Policy`
+// (`Policy<unknown>`): `cfg` is checked contravariantly. A method-shaped (bivariant) handler would fix
+// it, but it changes `PolicyHandler` with strict types off too, so it waits for a decision.
 export type Policy<TConfig = unknown> =
   | {
       name: string;
