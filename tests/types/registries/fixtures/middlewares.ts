@@ -42,6 +42,28 @@ declare const inline: Core.MiddlewareHandler;
   middlewares: [{ name: 'strapi::poweredBy', config: { poweredBy: 1 } }],
 }) satisfies Core.RouteConfigFor;
 
+// `strapi::compression`, `strapi::public` and `strapi::favicon` declare their own config types, so
+// they are checked without the third-party `@types` packages.
+({
+  middlewares: [
+    { name: 'strapi::compression', config: { threshold: '1kb', br: false } },
+    { name: 'strapi::public', config: { maxAge: 60000 } },
+    { name: 'strapi::favicon', config: { path: 'favicon.ico', maxAge: 86400000 } },
+  ],
+}) satisfies Core.RouteConfigFor;
+({
+  // @ts-expect-error The compression config is checked.
+  middlewares: [{ name: 'strapi::compression', config: { threshold: true } }],
+}) satisfies Core.RouteConfigFor;
+({
+  // @ts-expect-error The public config is checked.
+  middlewares: [{ name: 'strapi::public', config: { maxAge: '1m' } }],
+}) satisfies Core.RouteConfigFor;
+({
+  // @ts-expect-error The favicon config is checked.
+  middlewares: [{ name: 'strapi::favicon', config: { path: 1 } }],
+}) satisfies Core.RouteConfigFor;
+
 // `Core.RouteConfig` keeps develop's type: names are not checked.
 ({ middlewares: ['global::unregistered', inline] }) satisfies Core.RouteConfig;
 
