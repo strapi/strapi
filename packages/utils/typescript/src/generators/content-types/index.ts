@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 import { sortBy } from 'lodash';
 
 import { models } from '../common';
-import { warnOnDuplicateInterfaceNames } from '../common/interface-names';
+import { resolveInterfaceNames } from '../common/interface-names';
 import { emitDefinitions, format, generateSharedExtensionDefinition } from '../utils';
 import type { GeneratorOptions } from '../utils';
 
@@ -23,19 +23,21 @@ export const generateContentTypesDefinitions = async (
 
   const { contentTypes } = strapi;
 
-  const contentTypesDefinitions = sortBy(
-    Object.values<models.utils.Schema>(contentTypes ?? {}),
-    'uid'
-  ).map((contentType) => ({
+  const schemas = sortBy(Object.values<models.utils.Schema>(contentTypes ?? {}), 'uid');
+  const interfaceNames = resolveInterfaceNames(
+    schemas.map(({ uid }) => uid),
+    options.logger,
+    { strict }
+  );
+  const contentTypesDefinitions = schemas.map((contentType) => ({
     uid: contentType.uid,
-    definition: models.schema.generateSchemaDefinition(contentType),
+    definition: models.schema.generateSchemaDefinition(
+      contentType,
+      interfaceNames.get(contentType.uid)
+    ),
   }));
 
   options.logger.debug(`Found ${contentTypesDefinitions.length} content-types.`);
-  warnOnDuplicateInterfaceNames(
-    contentTypesDefinitions.map(({ uid }) => uid),
-    options.logger
-  );
 
   if (contentTypesDefinitions.length === 0) {
     return { output: NO_CONTENT_TYPE_PLACEHOLDER_COMMENT, stats: {} };
