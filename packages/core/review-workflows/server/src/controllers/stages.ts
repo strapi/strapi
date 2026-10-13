@@ -1,5 +1,6 @@
 import type { Context } from 'koa';
 import type { Core } from '@strapi/types';
+import type { Services as ContentManagerServices } from '@strapi/content-manager/strapi-server';
 
 import { async } from '@strapi/utils';
 import { getService } from '../utils';
@@ -11,13 +12,17 @@ import {
   STAGE_TRANSITION_UID,
 } from '../constants/workflows';
 
+type UserAbility = Parameters<
+  ContentManagerServices.PermissionCheckerService['create']
+>[0]['userAbility'];
+
 /**
  *
  * @param { Core.Strapi } strapi - Strapi instance
  * @param userAbility
  * @return { (Stage) => SanitizedStage }
  */
-function sanitizeStage({ strapi }: { strapi: Core.Strapi }, userAbility: unknown) {
+function sanitizeStage({ strapi }: { strapi: Core.Strapi }, userAbility: UserAbility) {
   const permissionChecker = strapi
     .plugin('content-manager')
     .service('permission-checker')
