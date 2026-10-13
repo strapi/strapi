@@ -1,5 +1,8 @@
 import type { Core } from '@strapi/types';
 import type relations from '../controllers/relations';
+import type { createHistoryVersionController } from '../history/controllers/history-version';
+import type { createHomepageController } from '../homepage/controllers/homepage';
+import type { createPreviewController } from '../preview/controllers/preview';
 
 /** Actions exposed by the Content Manager collection type controller. */
 export type CollectionTypesController = {
@@ -64,6 +67,15 @@ export type UIDController = {
   generateUID: Core.ControllerHandler;
   checkUIDAvailability: Core.ControllerHandler;
 };
+
+/** History version actions. Only registered when the `cms-content-history` feature is enabled. */
+export type HistoryVersionController = ReturnType<typeof createHistoryVersionController>;
+
+/** Homepage widget actions: recent and counted documents. */
+export type HomepageController = ReturnType<typeof createHomepageController>;
+
+/** Preview URL actions. */
+export type PreviewController = ReturnType<typeof createPreviewController>;
 
 /** Registered core controllers, keyed as they appear in the plugin's runtime map. */
 export type RegisteredControllers = {
