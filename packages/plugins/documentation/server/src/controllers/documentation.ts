@@ -178,7 +178,8 @@ export default {
     ctx.redirect(`${strapi.config.server.url}/documentation${querystring}`);
   },
 
-  async regenerateDoc(ctx: Koa.Context) {
+  // `any` as on develop's published type, built without the typed koa error helpers.
+  async regenerateDoc(ctx: Koa.Context): Promise<any> {
     const { version } = ctx.request.body;
 
     const service = getService('documentation');
@@ -202,7 +203,8 @@ export default {
     }
   },
 
-  async deleteDoc(ctx: Koa.Context) {
+  // `any` as on develop's published type, built without the typed koa error helpers.
+  async deleteDoc(ctx: Koa.Context): Promise<any> {
     const { version } = ctx.params;
 
     const service = getService('documentation');
@@ -226,7 +228,8 @@ export default {
     }
   },
 
-  async updateSettings(ctx: Koa.Context) {
+  // `any` as on develop's published type, built without the typed koa error helpers.
+  async updateSettings(ctx: Koa.Context): Promise<any> {
     const pluginStore = strapi.store({ type: 'plugin', name: 'documentation' });
 
     const data = await validation.validateSettings(ctx.request.body);
