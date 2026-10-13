@@ -322,9 +322,25 @@ export const MediaLibraryInput = ({
       const allowedFiles = uploadedFiles.filter((file) =>
         isMediaTypeAllowed(allowedTypes, file.mime)
       );
+      const notAttachedFiles = uploadedFiles.filter((file) => !allowedFiles.includes(file));
 
-      if (allowedFiles.length < uploadedFiles.length) {
-        notifyUnsupported();
+      if (notAttachedFiles.length > 0) {
+        toggleNotification({
+          type: 'warning',
+          timeout: 4000,
+          message: formatMessage(
+            {
+              id: getTranslationKey('content-manager.input.notification.not-attached'),
+              defaultMessage:
+                '{fileNames} {count, plural, one {was} other {were}} added to the Media Library, but this field only accepts {fileTypes}.',
+            },
+            {
+              fileNames: notAttachedFiles.map((file) => file.name).join(', '),
+              count: notAttachedFiles.length,
+              fileTypes: (allowedTypes ?? []).join(', '),
+            }
+          ),
+        });
       }
 
       if (allowedFiles.length > 0) {

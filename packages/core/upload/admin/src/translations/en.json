@@ -72,6 +72,7 @@
   "content-manager.input.actions.edit": "Edit {name}",
   "content-manager.input.actions.remove": "Remove {name}",
   "content-manager.input.notification.single-file": "This field accepts only one file.",
+  "content-manager.input.notification.not-attached": "{fileNames} {count, plural, one {was} other {were}} added to the Media Library, but this field only accepts {fileTypes}.",
   "content-manager.input.add-asset": "Add asset",
   "content-manager.input.add-asset.browse": "Browse library",
   "content-manager.input.add-asset.device": "Upload from device",

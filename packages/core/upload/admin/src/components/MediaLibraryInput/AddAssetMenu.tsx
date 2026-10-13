@@ -43,6 +43,13 @@ const AddAssetTrigger = styled(Menu.Trigger)`
     fill: ${({ theme }) => theme.colors.primary600};
   }
 
+  // The design system's disabled button is a bordered grey plate; this stays a
+  // greyed-out link instead.
+  &&[aria-disabled='true'] {
+    border-color: transparent;
+    background: transparent;
+  }
+
   &[aria-disabled='true'],
   &[aria-disabled='true'] span {
     color: ${({ theme }) => theme.colors.neutral500};
@@ -63,10 +70,10 @@ interface AddAssetMenuProps {
 /**
  * The field's "Add asset" menu, on the label row.
  *
- * Browsing needs only the read access that put the field on screen, so it is
- * always offered; the two upload entries need `assets.create` and disappear
- * without it. The trigger itself goes when nothing is left to offer, rather
- * than opening an empty menu.
+ * Browsing needs the Media Library's read permission, the two upload entries
+ * `assets.create`; each entry disappears without its permission, and the
+ * trigger itself goes when nothing is left to offer, rather than opening an
+ * empty menu.
  *
  * The drop zone below keeps working whatever this shows — it is a second way
  * in, not the only one.
@@ -78,11 +85,17 @@ export const AddAssetMenu = ({
   onUploadFromUrl,
 }: AddAssetMenuProps) => {
   const { formatMessage } = useIntl();
-  const { canCreate, isLoading } = useMediaLibraryPermissions();
+  const { canRead, canCreate, isLoading } = useMediaLibraryPermissions();
 
-  // `useRBAC` starts every instance at `isLoading: true` with the flags false,
-  // so reading them before it settles would flash a browse-only menu.
+  // `useRBAC` starts every instance at `isLoading: true` with the flags false.
+  // Until it settles, every entry shows but none can be picked: hiding them
+  // would flash a smaller menu, enabling them would lead to a 403.
+  const canBrowse = isLoading || canRead;
   const canUpload = isLoading || canCreate;
+
+  if (!canBrowse && !canUpload) {
+    return null;
+  }
 
   return (
     <Menu.Root>
@@ -94,23 +107,25 @@ export const AddAssetMenu = ({
       </AddAssetTrigger>
 
       <ActionsMenuContent popoverPlacement="bottom-end" zIndex={2} minWidth="22rem">
-        <Menu.Item startIcon={<Images />} onSelect={onBrowseLibrary}>
-          {formatMessage({
-            id: getTranslationKey('content-manager.input.add-asset.browse'),
-            defaultMessage: 'Browse library',
-          })}
-        </Menu.Item>
+        {canBrowse && (
+          <Menu.Item startIcon={<Images />} disabled={isLoading} onSelect={onBrowseLibrary}>
+            {formatMessage({
+              id: getTranslationKey('content-manager.input.add-asset.browse'),
+              defaultMessage: 'Browse library',
+            })}
+          </Menu.Item>
+        )}
 
         {canUpload && (
           <>
-            <Menu.Item startIcon={<Upload />} onSelect={onUploadFromDevice}>
+            <Menu.Item startIcon={<Upload />} disabled={isLoading} onSelect={onUploadFromDevice}>
               {formatMessage({
                 id: getTranslationKey('content-manager.input.add-asset.device'),
                 defaultMessage: 'Upload from device',
               })}
             </Menu.Item>
 
-            <Menu.Item startIcon={<Link />} onSelect={onUploadFromUrl}>
+            <Menu.Item startIcon={<Link />} disabled={isLoading} onSelect={onUploadFromUrl}>
               {formatMessage({
                 id: getTranslationKey('content-manager.input.add-asset.url'),
                 defaultMessage: 'Upload from URL',

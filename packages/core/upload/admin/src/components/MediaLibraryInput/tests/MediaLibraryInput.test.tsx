@@ -453,11 +453,8 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
       expect(screen.queryByRole('menuitem', { name: 'Upload from URL' })).not.toBeInTheDocument();
     });
 
-    it('keeps the upload paths while permissions are still loading', async () => {
-      // `useRBAC` starts at isLoading with every flag false; reading them then
-      // would flash a browse-only menu.
-      mockPermissions.isLoading = true;
-      mockPermissions.canCreate = false;
+    it('offers upload only when the user cannot read the Media Library', async () => {
+      mockPermissions.canRead = false;
       const { user } = renderInput({ attribute: { multiple: true } });
 
       await openMenu(user);
@@ -465,6 +462,33 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
       expect(
         await screen.findByRole('menuitem', { name: 'Upload from device' })
       ).toBeInTheDocument();
+      expect(screen.queryByRole('menuitem', { name: 'Browse library' })).not.toBeInTheDocument();
+    });
+
+    it('hides the trigger when the user can neither read nor create', () => {
+      mockPermissions.canRead = false;
+      mockPermissions.canCreate = false;
+      renderInput({ attribute: { multiple: true } });
+
+      expect(screen.queryByRole('button', { name: 'Add asset' })).not.toBeInTheDocument();
+    });
+
+    it('shows every entry disabled while permissions are still loading', async () => {
+      // `useRBAC` starts at isLoading with every flag false.
+      mockPermissions.isLoading = true;
+      mockPermissions.canRead = false;
+      mockPermissions.canCreate = false;
+      const { user } = renderInput({ attribute: { multiple: true } });
+
+      await openMenu(user);
+
+      for (const name of ['Browse library', 'Upload from device', 'Upload from URL']) {
+        // eslint-disable-next-line no-await-in-loop
+        expect(await screen.findByRole('menuitem', { name })).toHaveAttribute(
+          'aria-disabled',
+          'true'
+        );
+      }
     });
 
     it('opens the device file picker from "Upload from device"', async () => {
@@ -528,10 +552,40 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
     it('disables the trigger on a disabled field', () => {
       renderInput({ disabled: true, attribute: { multiple: true } });
 
-      expect(screen.getByRole('button', { name: 'Add asset' })).toHaveAttribute(
-        'aria-disabled',
-        'true'
-      );
+      const trigger = screen.getByRole('button', { name: 'Add asset' });
+      expect(trigger).toHaveAttribute('aria-disabled', 'true');
+
+      // Still a greyed-out link, not the design system's grey button.
+      const style = window.getComputedStyle(trigger);
+      expect(style.backgroundColor).toBe('transparent');
+      expect(style.borderColor).toBe('transparent');
+    });
+
+    it('says a URL file the field does not accept was added to the library', async () => {
+      mockUploadFromUrls.mockReturnValue({
+        unwrap: () =>
+          Promise.resolve({
+            data: [asset(9, 'photo.png'), { ...asset(10, 'notes.pdf'), mime: 'application/pdf' }],
+            errors: [],
+          }),
+      });
+
+      const { user } = renderInput({ attribute: { multiple: true, allowedTypes: ['images'] } });
+
+      await openMenu(user);
+      await user.click(await screen.findByRole('menuitem', { name: 'Upload from URL' }));
+      fireEvent.change(await screen.findByRole('textbox'), {
+        target: { value: 'https://example.com/photo.png\nhttps://example.com/notes.pdf' },
+      });
+      fireEvent.submit(screen.getByRole('button', { name: 'Upload' }).closest('form')!);
+
+      expect(
+        await screen.findByText(
+          'notes.pdf was added to the Media Library, but this field only accepts images.'
+        )
+      ).toBeInTheDocument();
+      expect(screen.getByText('photo.png')).toBeInTheDocument();
+      expect(screen.queryByText(/You can't upload this type of file/)).not.toBeInTheDocument();
     });
   });
 
