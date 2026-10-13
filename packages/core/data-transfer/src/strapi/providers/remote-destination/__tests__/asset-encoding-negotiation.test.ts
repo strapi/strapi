@@ -110,8 +110,7 @@ describe('Remote destination asset-encoding negotiation', () => {
     const streamItem = streamBatches
       .flat()
       .find((i) => (i as { action: string }).action === 'stream') as
-      | { encoding?: string; data?: unknown }
-      | undefined;
+      { encoding?: string; data?: unknown } | undefined;
     expect(streamItem?.encoding).toBe('base64');
     expect(typeof streamItem?.data).toBe('string');
 
@@ -132,8 +131,7 @@ describe('Remote destination asset-encoding negotiation', () => {
     const streamItem = streamBatches
       .flat()
       .find((i) => (i as { action: string }).action === 'stream') as
-      | { encoding?: string; data?: { type?: string; data?: number[] } }
-      | undefined;
+      { encoding?: string; data?: { type?: string; data?: number[] } } | undefined;
 
     expect(streamItem?.encoding).toBeUndefined();
     expect(streamItem?.data).toEqual({ type: 'Buffer', data: [1, 2, 3] });

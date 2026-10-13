@@ -37,8 +37,10 @@ const formatAdminUserName = (
  * Table
  * -----------------------------------------------------------------------------------------------*/
 
-interface TableProps
-  extends Pick<TableImpl.Props<SanitizedTransferToken | ApiToken>, 'headers' | 'isLoading'> {
+interface TableProps extends Pick<
+  TableImpl.Props<SanitizedTransferToken | ApiToken>,
+  'headers' | 'isLoading'
+> {
   onConfirmDelete: (id: Data.ID) => void;
   permissions: {
     canRead: boolean;
