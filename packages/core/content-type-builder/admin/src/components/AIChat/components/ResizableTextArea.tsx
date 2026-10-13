@@ -58,7 +58,7 @@ export const ResizableTextArea = ({ value, onChange, onSubmit, placeholder }: Te
       return;
     }
 
-    // IME の変換確定 Enter は送信として扱わない。
+    // Do not submit when Enter confirms an IME composition.
     if (e.key === 'Enter' && !e.nativeEvent.isComposing && !e.shiftKey && onSubmit) {
       e.preventDefault();
       onSubmit(e as unknown as React.FormEvent<HTMLFormElement>);

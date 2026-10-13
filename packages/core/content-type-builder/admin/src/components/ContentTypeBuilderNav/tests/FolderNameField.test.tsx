@@ -31,7 +31,7 @@ describe.each(['create', 'rename'])('FolderNameField %s keyboard handling', (mod
     ({ key, keyCode }) => {
       const { input, onSubmit, onCancel } = setup();
       fireEvent.change(input, { target: { value: '日本語' } });
-      // 合成イベントによるハンドラ回帰試験。実 OS IME の再現ではない。
+      // Synthetic handler regression test; not a native OS IME reproduction.
       const confirmation = createEvent.keyDown(input, { key, keyCode, isComposing: true });
       fireEvent(input, confirmation);
 

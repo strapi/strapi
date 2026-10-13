@@ -40,7 +40,7 @@ describe('ResizableTextArea keyboard handling', () => {
     'preserves composing $key (keyCode=$keyCode) and submits once on ordinary Enter',
     ({ key, keyCode }) => {
       const { input, onSubmit } = setup();
-      // 合成イベントによる回帰試験。実 OS IME や AI 通信の再現ではない。
+      // Synthetic handler regression test; not a native OS IME or AI request reproduction.
       const confirmation = createEvent.keyDown(input, { key, keyCode, isComposing: true });
       fireEvent(input, confirmation);
       expect(confirmation.isTrusted).toBe(false);
@@ -71,7 +71,7 @@ describe('ResizableTextArea keyboard handling', () => {
   ])(
     'does not let composing $key (keyCode=$keyCode) clear controlled input',
     ({ key, keyCode }) => {
-      // 親の消去コールバックを模した境界試験。実 ChatProvider は呼ばない。
+      // Model the parent's input-clearing callback without invoking the real ChatProvider.
       const { input, onSubmit } = setup({ clearOnSubmit: true });
       fireEvent.keyDown(input, { key, keyCode, isComposing: true });
       expect(onSubmit).not.toHaveBeenCalled();
@@ -95,7 +95,7 @@ describe('ResizableTextArea keyboard handling', () => {
     expect(event.defaultPrevented).toBe(false);
     expect(onSubmit).not.toHaveBeenCalled();
     expect(input).toHaveValue('日本語');
-    // jsdom は既定の改行挿入をしないため、変更通知の保持だけを別に試す。
+    // Verify controlled value updates separately: jsdom does not insert a newline by default.
     fireEvent.change(input, { target: { value: '日本語\n次の行' } });
     expect(input).toHaveValue('日本語\n次の行');
     expect(onSubmit).not.toHaveBeenCalled();

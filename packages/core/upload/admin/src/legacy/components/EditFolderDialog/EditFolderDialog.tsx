@@ -88,7 +88,7 @@ export const EditFolderContent = ({
   const handleKeyDown =
     (handleSubmit: (event: React.FormEvent<HTMLFormElement>) => void) =>
     (event: React.KeyboardEvent<HTMLFormElement>) => {
-      // IME の変換確定 Enter はフォルダの保存として扱わない。
+      // Do not save the folder when Enter confirms an IME composition.
       if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
         if (event.target instanceof HTMLInputElement) {
           handleSubmit(event);
