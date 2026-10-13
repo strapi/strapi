@@ -6,6 +6,18 @@ export type InputFile = FormidableFile & {
   provider?: string;
 };
 
+/**
+ * A file the upload service accepts: the fields it reads. A formidable file matches, and so does a
+ * hand-built one, e.g. from a seed script.
+ */
+export type UploadInputFile = {
+  filepath: string;
+  size: number;
+  originalFilename?: string | null | undefined;
+  mimetype?: string | null | undefined;
+  tmpWorkingDirectory?: string | undefined;
+};
+
 export interface FocalPoint {
   x: number;
   y: number;

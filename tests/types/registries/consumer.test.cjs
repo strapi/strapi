@@ -226,6 +226,13 @@ for (const [resolution, resolutionOptions] of Object.entries(resolutions)) {
     );
   });
 
+  test(`${resolution}: the upload service accepts hand-built files`, () => {
+    assertClean(
+      compile(['strapi-strict.d.ts', 'upload-files.ts']),
+      `${resolution}, hand-built upload files`
+    );
+  });
+
   test(`${resolution}: an empty middleware inventory accepts no name`, () => {
     assertClean(
       compile(['settings.d.ts', 'middlewares-empty.ts']),

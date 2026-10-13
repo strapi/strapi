@@ -15,11 +15,10 @@ export type EmailService = {
 
 /**
  * `plugin::upload.upload`, see `@strapi/upload` `server/src/services/upload.ts`.
- * `filename` is nullable here because the admin forwards formidable's nullable `originalFilename`,
- * which upload types as `string`.
+ * `filename` takes formidable's nullable `originalFilename`, as upload does: a missing name is
+ * rejected at runtime.
  */
 export type UploadService<TFileInfo> = {
-  // TODO @Nico tighten contract: upload's formatFileInfo requires a filename; the admin can pass null.
   formatFileInfo(file: {
     filename: string | null;
     type: string | null;
