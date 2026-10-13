@@ -80,10 +80,14 @@ export type PermissionCheckerAction =
   | 'unpublish'
   | 'discard';
 
-// TODO @Nico tighten contract: sanitizers forward the admin permissions manager's `unknown` results,
-// which callers use as documents and queries.
+// TODO @Nico tighten contract: output and input sanitizers forward the admin permissions manager's
+// `unknown` results, which callers use as non-null documents. A document type needs null handling
+// at about 19 controller and MCP call sites.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Sanitized = any;
+
+/** A request query, without the fields and populate the ability does not permit. */
+type SanitizedQuery = Record<string, unknown>;
 
 /** A permission check, with a shortcut for each Content Manager action. */
 type PermissionCheck = ((action: string, entity?: unknown, field?: string) => boolean) &
@@ -96,14 +100,14 @@ export type PermissionChecker = {
   /** Whether the entity is needed to evaluate the action, because a rule has conditions. */
   requiresEntity: ((action: string) => boolean) & Record<PermissionCheckerAction, () => boolean>;
   sanitizeOutput(data: unknown, options?: { action?: string }): Promise<Sanitized>;
-  sanitizeQuery(query: unknown, options?: { action?: string }): Promise<Sanitized>;
+  sanitizeQuery(query: unknown, options?: { action?: string }): Promise<SanitizedQuery>;
   sanitizeCreateInput(data: unknown): Promise<Sanitized>;
   sanitizeUpdateInput(entity: unknown): (data: unknown) => Promise<Sanitized>;
   validateQuery(query: unknown, options?: { action?: string }): Promise<unknown>;
   validateInput(action: string, data: unknown, entity?: unknown): Promise<unknown>;
   /** Sanitizes a query, then restricts it to what the ability permits. */
-  sanitizedQuery: ((query: unknown, options?: { action?: string }) => Promise<Sanitized>) &
-    Record<PermissionCheckerAction, (query: unknown) => Promise<Sanitized>>;
+  sanitizedQuery: ((query: unknown, options?: { action?: string }) => Promise<SanitizedQuery>) &
+    Record<PermissionCheckerAction, (query: unknown) => Promise<SanitizedQuery>>;
 };
 
 export type PermissionCheckerService = {
