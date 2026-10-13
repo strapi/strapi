@@ -38,10 +38,7 @@ const createSectionBuilder = () => {
      * @param  sectionName - The name of the section
      * @param  handler - The handler to register
      */
-    addHandler(
-      sectionName: string,
-      handler: (context: { action: Action; section: unknown }) => unknown
-    ) {
+    addHandler(sectionName: string, handler: () => unknown) {
       if (state.sections.has(sectionName)) {
         state.sections.get(sectionName).hooks.handlers.register(handler);
       }
@@ -55,7 +52,7 @@ const createSectionBuilder = () => {
      * @param matcher - The handler to register
 
      */
-    addMatcher(sectionName: string, matcher: (action: Action) => unknown) {
+    addMatcher(sectionName: string, matcher: () => unknown) {
       if (state.sections.has(sectionName)) {
         state.sections.get(sectionName).hooks.matchers.register(matcher);
       }

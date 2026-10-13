@@ -84,7 +84,8 @@ export default {
       }
     }
 
-    const user = await getService('user').findOne(id, null);
+    // `null` skips population. `findOne` keeps its published `string[]` parameter, as on develop.
+    const user = await getService('user').findOne(id, null as unknown as string[]);
 
     if (!(await hasAdminSeatsAvaialble()) && !user.isActive && data.isActive) {
       throw new ForbiddenError('License seat limit reached. You cannot active this user');
