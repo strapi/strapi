@@ -551,7 +551,14 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
 
         // Retry outside the refresh catch so a second 401 is attributed to the
         // refreshed token instead of the token used by the original request.
-        return executeRequest();
+        try {
+          return await executeRequest();
+        } catch (retryError) {
+          if (isFetchError(retryError) && retryError.status === 401) {
+            retryError.sessionToken = getRequestToken();
+          }
+          throw retryError;
+        }
       }
       throw error;
     }

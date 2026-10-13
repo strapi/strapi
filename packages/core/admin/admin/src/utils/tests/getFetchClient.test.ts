@@ -386,7 +386,7 @@ describe('getFetchClient', () => {
       );
     });
 
-    it('attributes a failed retry to the refreshed request instead of the original token', async () => {
+    it('attributes a failed retry to the refreshed token instead of the original token', async () => {
       (window.fetch as jest.Mock)
         .mockImplementationOnce(() =>
           Promise.resolve({
@@ -424,7 +424,7 @@ describe('getFetchClient', () => {
       } catch (error) {
         expect(error).toBeInstanceOf(FetchError);
         expect(error).toMatchObject({ message: 'Refreshed token rejected' });
-        expect((error as FetchError).sessionToken).toBeUndefined();
+        expect((error as FetchError).sessionToken).toBe('new-token');
       }
     });
 
