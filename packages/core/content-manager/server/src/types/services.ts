@@ -1,3 +1,4 @@
+import type { Ability } from '@casl/ability';
 import type { Modules, Struct, UID } from '@strapi/types';
 import type { Configuration } from '../../../shared/contracts/content-types';
 import type { DocumentManagerService as DocumentManagerFactory } from '../services/document-manager';
@@ -106,8 +107,7 @@ export type PermissionChecker = {
 };
 
 export type PermissionCheckerService = {
-  // TODO @Nico tighten contract: `userAbility` is a CASL `Ability`; some callers hold it untyped.
-  create(options: { userAbility: unknown; model: string }): PermissionChecker;
+  create(options: { userAbility: Ability; model: string }): PermissionChecker;
 };
 
 /** Component models and their edit and list view configurations. */

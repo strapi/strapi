@@ -1,6 +1,7 @@
 import type { Context } from 'koa';
 
 import type { Core } from '@strapi/types';
+import type { Services as ContentManagerServices } from '@strapi/content-manager/strapi-server';
 import { async } from '@strapi/utils';
 
 import type { StagePermission } from '../../../shared/contracts/review-workflows';
@@ -8,13 +9,20 @@ import { getService } from '../utils';
 import { validateWorkflowCreate, validateWorkflowUpdate } from '../validation/review-workflows';
 import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../constants/workflows';
 
+type UserAbility = Parameters<
+  ContentManagerServices.PermissionCheckerService['create']
+>[0]['userAbility'];
+
 /**
  *
  * @param { Core.Strapi } strapi - Strapi instance
  * @param userAbility
  * @return { PermissionChecker }
  */
-function getWorkflowsPermissionChecker({ strapi }: { strapi: Core.Strapi }, userAbility: unknown) {
+function getWorkflowsPermissionChecker(
+  { strapi }: { strapi: Core.Strapi },
+  userAbility: UserAbility
+) {
   return strapi
     .plugin('content-manager')
     .service('permission-checker')
