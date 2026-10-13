@@ -239,6 +239,54 @@ The opening fence is never closed, as in issue #28031.`
     );
   });
 
+  it('accepts later sections when an unclosed fence is followed by a closed one', () => {
+    const body = VALID_ISSUE_BODY.replace(
+      'Locally this appears to be working fine, on Cloud we are seeing issues when opening a content item.',
+      `\`\`\`ts
+export default () => ({
+  sessions: { httpOnly: true },
+});`
+    ).replace(
+      'We are unable to reproduce locally at all, only on our Cloud hosted instance.',
+      `Run this:
+
+\`\`\`bash
+curl -i http://localhost:1337/api/auth/local/register
+\`\`\``
+    );
+
+    const result = validateIssueTemplate(body);
+    assert.equal(result.valid, true, result.missingItems.join(', '));
+    assert.match(parseIssueSections(body).get('Steps to Reproduce') ?? '', /curl/);
+    assert.equal(
+      parseIssueSections(body).get('Expected Behavior'),
+      'No error, and content item opens'
+    );
+  });
+
+  it('keeps a closed fence from ending the section that contains it', () => {
+    const body = VALID_ISSUE_BODY.replace(
+      'We are unable to reproduce locally at all, only on our Cloud hosted instance.',
+      `\`\`\`
+### Expected Behavior
+shown inside a closed fence
+\`\`\`
+
+1. Do the actual step`
+    );
+
+    const result = validateIssueTemplate(body);
+    assert.equal(result.valid, true, result.missingItems.join(', '));
+    assert.match(
+      parseIssueSections(body).get('Steps to Reproduce') ?? '',
+      /1\. Do the actual step/
+    );
+    assert.equal(
+      parseIssueSections(body).get('Expected Behavior'),
+      'No error, and content item opens'
+    );
+  });
+
   it('ignores ### headers and [x] checkboxes inside fenced code blocks', () => {
     const body = `${VALID_ISSUE_BODY}
 
@@ -331,6 +379,26 @@ _No response_
     const result = validateIssueTemplate(body);
     assert.equal(result.valid, false);
     assert.ok(result.missingItems.some((item) => item.includes('checkbox')));
+  });
+
+  it('rejects checked boxes in a closed fence that starts with a form heading', () => {
+    const body = VALID_ISSUE_BODY.replace(
+      `- [x] I have checked the existing [issues](https://github.com/strapi/strapi/issues) for duplicates.
+- [x] I agree to follow this project's [Code of Conduct](https://github.com/strapi/strapi/blob/develop/CODE_OF_CONDUCT.md).`,
+      `- [ ] I have checked the existing issues for duplicates.
+- [ ] I agree to follow this project's Code of Conduct.
+
+\`\`\`markdown
+### Bug Description
+- [x] I have checked the existing issues for duplicates.
+- [x] I agree to follow this project's Code of Conduct.
+\`\`\``
+    );
+
+    const result = validateIssueTemplate(body);
+    assert.equal(result.valid, false);
+    assert.ok(result.missingItems.some((item) => item.includes('checkbox')));
+    assert.deepEqual(getCheckedBoxLines(body), []);
   });
 
   it('throws when GITHUB_TOKEN is missing', () => {

@@ -71,6 +71,33 @@ function isFormSectionHeader(line: string): boolean {
   return FORM_SECTION_HEADERS.has(normalizeHeader(line.slice(4)));
 }
 
+function countFenceMarkersUntilNextFormHeader(lines: string[], startIndex: number): number {
+  let count = 0;
+
+  for (let index = startIndex + 1; index < lines.length; index += 1) {
+    const line = lines[index];
+
+    if (isFormSectionHeader(line)) {
+      break;
+    }
+
+    if (line.trim().startsWith('```')) {
+      count += 1;
+    }
+  }
+
+  return count;
+}
+
+/** A form heading ends an open fence when fence markers before the next heading are balanced. */
+function formHeaderEndsOpenFence(lines: string[], index: number, inFence: boolean): boolean {
+  if (!inFence || !isFormSectionHeader(lines[index])) {
+    return false;
+  }
+
+  return countFenceMarkersUntilNextFormHeader(lines, index) % 2 === 0;
+}
+
 const REQUIRED_CHECKBOXES = [
   {
     id: 'duplicateCheck',
@@ -105,8 +132,10 @@ export function parseIssueSections(body: string): Map<string, string> {
     sections.set(key, currentContent.join('\n').trim());
   };
 
-  for (const line of lines) {
-    if (inFence && isFormSectionHeader(line)) {
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+
+    if (formHeaderEndsOpenFence(lines, index, inFence)) {
       inFence = false;
     }
 
@@ -149,10 +178,13 @@ export function isPlaceholderContent(content: string): boolean {
 
 export function getCheckedBoxLines(body: string): string[] {
   const checkedLines: string[] = [];
+  const lines = body.split('\n');
   let inFence = false;
 
-  for (const line of body.split('\n')) {
-    if (inFence && isFormSectionHeader(line)) {
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+
+    if (formHeaderEndsOpenFence(lines, index, inFence)) {
       inFence = false;
     }
 
