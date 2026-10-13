@@ -4,6 +4,7 @@ import omit from 'lodash/omit';
 import uniq from 'lodash/uniq';
 
 import { applyPrivateSearchDefault } from '../../utils/applyPrivateSearchDefault';
+import { getVisibleConditionEntries } from '../../utils/conditions';
 import { getRelationType } from '../../utils/getRelationType';
 import { makeUnique } from '../../utils/makeUnique';
 
@@ -174,8 +175,7 @@ type CreateComponentSchemaPayload = {
 };
 
 type FolderAssignmentPayload =
-  | { targetGroupId: string | null }
-  | { newFolderId: string; newFolderName: string };
+  { targetGroupId: string | null } | { newFolderId: string; newFolderName: string };
 
 type CreateSchemaPayload = {
   uid: string;
@@ -395,6 +395,63 @@ const applyRenameConsent = (
   if (shouldRecordRename) {
     recordRename(type, previousAttribute, newAttribute);
   }
+};
+
+const UID_TARGET_TYPES = ['string', 'text'];
+
+/**
+ * Keeps uid fields attached to a field when it is renamed, whether or not the
+ * rename is recorded as a data-preserving hop. A rename that also turns the
+ * field into a type a uid cannot target detaches the uid, as deleting it would.
+ */
+const renameUIDTargetFields = (
+  type: ContentType | Component,
+  previousAttribute: AnyAttribute,
+  newAttribute: AnyAttribute
+): void => {
+  const oldName = previousAttribute.name;
+  const newName = newAttribute?.name;
+  if (!newName || oldName === newName) {
+    return;
+  }
+
+  const isValidTarget = UID_TARGET_TYPES.includes(newAttribute.type);
+
+  type.attributes.forEach((attribute) => {
+    if (attribute.type === 'uid' && attribute.targetField === oldName) {
+      if (isValidTarget) {
+        attribute.targetField = newName;
+      } else {
+        delete attribute.targetField;
+      }
+    }
+  });
+};
+
+/**
+ * Points the conditions of the type's other fields at the new name of a renamed
+ * field. Runs for every rename, recorded or not, so the conditions follow the
+ * field whether or not its data is preserved.
+ */
+const renameConditionVars = (
+  type: ContentType | Component,
+  previousAttribute: AnyAttribute,
+  newAttribute: AnyAttribute
+): void => {
+  const oldName = previousAttribute.name;
+  const newName = newAttribute?.name;
+  if (!newName || oldName === newName) {
+    return;
+  }
+
+  type.attributes.forEach((attribute) => {
+    getVisibleConditionEntries(attribute.conditions).forEach(({ fieldVar }) => {
+      if (fieldVar.var === oldName) {
+        fieldVar.var = newName;
+        setAttributeStatus(attribute, 'CHANGED');
+      }
+    });
+  });
 };
 
 const setAttributeAt = (type: ContentType | Component, index: number, attribute: AnyAttribute) => {
@@ -859,8 +916,10 @@ const slice = createUndoRedoSlice(
           recordRename,
           declineRename,
         });
+        renameConditionVars(type, previousAttribute, attributeToSet as AnyAttribute);
 
         setAttributeAt(type, initialAttributeIndex, attributeToSet as AnyAttribute);
+        renameUIDTargetFields(type, previousAttribute, attributeToSet as AnyAttribute);
 
         if (previousAttribute.type !== attributeToSet.type) {
           return;
@@ -951,6 +1010,8 @@ const slice = createUndoRedoSlice(
           recordRename,
           declineRename,
         });
+        renameUIDTargetFields(type, previousAttribute, attributeToSet as AnyAttribute);
+        renameConditionVars(type, previousAttribute, attributeToSet as AnyAttribute);
       },
       reloadPlugin: () => {
         return initialState;

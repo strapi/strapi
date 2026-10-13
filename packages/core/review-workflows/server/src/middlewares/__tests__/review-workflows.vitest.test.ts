@@ -1,9 +1,10 @@
+import { describe, expect, test, vi } from 'vitest';
 import reviewWorkflowsMiddlewares from '../review-workflows';
 
 const strapiMock = {
   server: {
     router: {
-      use: jest.fn(),
+      use: vi.fn(),
     },
   },
 } as any;
@@ -13,7 +14,7 @@ describe('Review workflows middlewares', () => {
       const options = Object.freeze({ draftAndPublish: true, reviewWorkflows: false });
       const contentType = Object.freeze({ reviewWorkflows: true, options });
       const ctx = { method, request: { body: { contentType } } };
-      const next = jest.fn();
+      const next = vi.fn();
       strapiMock.server.router.use.mockImplementationOnce(
         (route: string, callback: (ctx: unknown, next: () => void) => unknown) =>
           callback(ctx, next)
