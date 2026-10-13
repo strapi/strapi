@@ -220,6 +220,25 @@ describe('issue-template-check', () => {
     assert.deepEqual(plans, [{ number: 123, action: 'remove_label' }]);
   });
 
+  it('accepts later form sections when an earlier fence is left unclosed (issue #28031)', () => {
+    const body = VALID_ISSUE_BODY.replace(
+      'Locally this appears to be working fine, on Cloud we are seeing issues when opening a content item.',
+      `\`\`\`ts
+export default () => ({
+  sessions: { httpOnly: true },
+});
+
+The opening fence is never closed, as in issue #28031.`
+    );
+
+    const result = validateIssueTemplate(body);
+    assert.equal(result.valid, true, result.missingItems.join(', '));
+    assert.equal(
+      parseIssueSections(body).get('Steps to Reproduce'),
+      'We are unable to reproduce locally at all, only on our Cloud hosted instance.'
+    );
+  });
+
   it('ignores ### headers and [x] checkboxes inside fenced code blocks', () => {
     const body = `${VALID_ISSUE_BODY}
 

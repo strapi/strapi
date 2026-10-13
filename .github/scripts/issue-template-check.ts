@@ -51,6 +51,26 @@ function canonicalSectionTitle(header: string): string {
   return REQUIRED_SECTION_LOOKUP.get(normalizeHeader(header)) ?? header.trim();
 }
 
+/** Headings from BUG_REPORT.yml, plus the Checklist alias accepted for paraphrased reports. */
+const FORM_SECTION_HEADERS = new Set<string>([
+  ...REQUIRED_SECTION_LOOKUP.keys(),
+  'reproduction url',
+  'logs',
+  'code snippets',
+  'media',
+  'additional information',
+  'confirmation checklist',
+  'checklist',
+]);
+
+function isFormSectionHeader(line: string): boolean {
+  if (!line.startsWith('### ')) {
+    return false;
+  }
+
+  return FORM_SECTION_HEADERS.has(normalizeHeader(line.slice(4)));
+}
+
 const REQUIRED_CHECKBOXES = [
   {
     id: 'duplicateCheck',
@@ -86,6 +106,10 @@ export function parseIssueSections(body: string): Map<string, string> {
   };
 
   for (const line of lines) {
+    if (inFence && isFormSectionHeader(line)) {
+      inFence = false;
+    }
+
     if (line.trim().startsWith('```')) {
       inFence = !inFence;
       if (currentHeader !== null) {
@@ -128,6 +152,10 @@ export function getCheckedBoxLines(body: string): string[] {
   let inFence = false;
 
   for (const line of body.split('\n')) {
+    if (inFence && isFormSectionHeader(line)) {
+      inFence = false;
+    }
+
     if (line.trim().startsWith('```')) {
       inFence = !inFence;
       continue;
