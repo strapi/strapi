@@ -36,7 +36,11 @@ declare global {
         'plugin::content-manager.collection-types': Controllers.CollectionTypesController;
         'plugin::content-manager.components': Controllers.ComponentsController;
         'plugin::content-manager.content-types': Controllers.ContentTypesController;
+        // Registered only when the `cms-content-history` feature is enabled.
+        'plugin::content-manager.history-version': Controllers.HistoryVersionController | undefined;
+        'plugin::content-manager.homepage': Controllers.HomepageController;
         'plugin::content-manager.init': Controllers.InitController;
+        'plugin::content-manager.preview': Controllers.PreviewController;
         'plugin::content-manager.relations': Controllers.RelationsController;
         'plugin::content-manager.single-types': Controllers.SingleTypesController;
         'plugin::content-manager.uid': Controllers.UIDController;
