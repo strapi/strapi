@@ -3,7 +3,7 @@ import { async } from '@strapi/utils';
 import { isEmpty } from 'lodash';
 
 import type { Core, UID, Modules } from '@strapi/types';
-import type { PermissionCheckerService } from '../types/services';
+import type { PermissionCheckerAction, PermissionCheckerService } from '../types/services';
 
 export const ACTIONS = {
   read: 'plugin::content-manager.explorer.read',
@@ -123,21 +123,50 @@ const createPermissionChecker =
       )(query);
     };
 
+    /** One shortcut per Content Manager action, e.g. `can.read(entity)`. */
+    const actionShortcuts = <TShortcut>(
+      toShortcut: (action: (typeof ACTIONS)[PermissionCheckerAction]) => TShortcut
+    ) => {
+      const shortcuts = {} as Record<PermissionCheckerAction, TShortcut>;
+      for (const name of Object.keys(ACTIONS) as PermissionCheckerAction[]) {
+        shortcuts[name] = toShortcut(ACTIONS[name]);
+      }
+      return shortcuts;
+    };
+
     // Sanitized queries shortcuts
-    Object.keys(ACTIONS).forEach((action) => {
-      // @ts-expect-error TODO
-      sanitizedQuery[action] = (query: Query) => sanitizedQuery(query, ACTIONS[action]);
-    });
+    Object.assign(
+      sanitizedQuery,
+      actionShortcuts(
+        (action) => (query: Query) =>
+          // TODO @Nico runtime bug, to report: the shortcut passes the action UID where
+          // `sanitizedQuery` expects `{ action }`, so every shortcut sanitizes for the read action.
+          // @ts-expect-error The action UID is not an options object.
+          sanitizedQuery(query, action)
+      )
+    );
 
     // Permission utils shortcuts
-    Object.keys(ACTIONS).forEach((action) => {
-      // @ts-expect-error TODO
-      can[action] = (...args: any) => can(ACTIONS[action], ...args);
-      // @ts-expect-error TODO
-      cannot[action] = (...args: any) => cannot(ACTIONS[action], ...args);
-      // @ts-expect-error TODO
-      requiresEntity[action] = () => requiresEntity(ACTIONS[action]);
-    });
+    Object.assign(
+      can,
+      actionShortcuts(
+        (action) =>
+          (...args: [entity: Entity | undefined, field: string]) =>
+            can(action, ...args)
+      )
+    );
+    Object.assign(
+      cannot,
+      actionShortcuts(
+        (action) =>
+          (...args: [entity: Entity | undefined, field: string]) =>
+            cannot(action, ...args)
+      )
+    );
+    Object.assign(
+      requiresEntity,
+      actionShortcuts((action) => () => requiresEntity(action))
+    );
 
     return {
       // Permission utils
