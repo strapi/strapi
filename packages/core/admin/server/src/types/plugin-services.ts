@@ -10,7 +10,8 @@ export type EmailService = {
     emailOptions: Record<string, unknown>,
     emailTemplate: unknown,
     data: Record<string, unknown>
-  ): Promise<unknown>;
+    // `any` as on develop: `auth.forgotPassword` returns this result in its published type.
+  ): Promise<any>;
 };
 
 /**
