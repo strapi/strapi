@@ -70,6 +70,8 @@
     "@strapi/database": "5.58.0",
     "@strapi/permissions": "5.58.0",
     "@strapi/utils": "5.58.0",
+    "@types/koa": "2.15.2",
+    "@types/koa__router": "12.0.0",
     "commander": "8.3.0",
     "croner": "10.0.1",
     "json-logic-js": "2.0.5",
@@ -81,8 +83,6 @@
   "devDependencies": {
     "@types/jest": "29.5.2",
     "@types/json-logic-js": "2.0.8",
-    "@types/koa": "2.15.2",
-    "@types/koa__router": "12.0.0",
     "@types/node": "20.19.41",
     "eslint-config-custom": "5.58.0",
     "lodash": "4.18.1",
