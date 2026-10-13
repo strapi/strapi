@@ -1,9 +1,12 @@
 import type { Core } from '@strapi/types';
+import { describe, expect, it, vi } from 'vitest';
 import weeklyMetrics from '../weekly-metrics';
 
-const find = jest.fn();
+const { find } = vi.hoisted(() => ({
+  find: vi.fn(),
+}));
 
-jest.mock('../../../utils', () => ({
+vi.mock('../../../utils', () => ({
   getService: (name: string) => (name === 'workflows' ? { find } : {}),
 }));
 
