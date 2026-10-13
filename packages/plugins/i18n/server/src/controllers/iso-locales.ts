@@ -1,7 +1,7 @@
-import type { IsoLocalesController } from '../types/controllers';
+import type { Core } from '@strapi/types';
 import { getService } from '../utils';
 
-const controller: IsoLocalesController = {
+const controller: Core.Controller = {
   listIsoLocales(ctx) {
     const isoLocalesService = getService('iso-locales');
 

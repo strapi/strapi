@@ -30,3 +30,12 @@ export type AILocalizationJobsController = {
   getJobForCollectionType: Core.ControllerHandler;
   getJobForSingleType: Core.ControllerHandler;
 };
+
+/** The controller contracts by name, as in the plugin's controllers map. Used to check the routes. */
+export type Controllers = {
+  'ai-localization-jobs': AILocalizationJobsController;
+  'content-types': ContentTypesController;
+  'iso-locales': IsoLocalesController;
+  locales: LocalesController;
+  settings: SettingsController;
+};
