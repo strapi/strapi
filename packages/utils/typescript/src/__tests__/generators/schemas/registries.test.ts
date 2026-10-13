@@ -96,3 +96,58 @@ describe.each(generators)('%s generator', (_, generator, strapi) => {
     expect(output).not.toContain('declare');
   });
 });
+
+describe('duplicate interface names', () => {
+  const contentType = (uid: string) => ({
+    uid,
+    modelType: 'contentType',
+    kind: 'collectionType',
+    info: { singularName: 'baz', pluralName: 'bazs', displayName: 'Baz' },
+    attributes: { title: { type: 'string' } },
+  });
+  const component = (uid: string, category: string) => ({
+    uid,
+    modelType: 'component',
+    category,
+    info: { displayName: 'Baz' },
+    attributes: { title: { type: 'string' } },
+  });
+
+  test.each([
+    [
+      generateContentTypesDefinitions,
+      {
+        contentTypes: {
+          'api::foo-bar.baz': contentType('api::foo-bar.baz'),
+          'api::foo.bar-baz': contentType('api::foo.bar-baz'),
+        },
+      },
+      'ApiFooBarBaz',
+    ],
+    [
+      generateComponentsDefinitions,
+      {
+        components: {
+          'foo-bar.baz': component('foo-bar.baz', 'foo-bar'),
+          'foo.bar-baz': component('foo.bar-baz', 'foo'),
+        },
+      },
+      'FooBarBaz',
+    ],
+  ] as const)('warn without renaming the interfaces (%#)', async (generator, strapi, name) => {
+    const logger = createLogger({ silent: true });
+    const { output } = await generator({ strapi, logger, strict: false });
+
+    expect(logger.warnings).toBe(1);
+    // The names are unchanged: both declarations keep the shared name.
+    expect(output.match(new RegExp(`export interface ${name} `, 'g'))).toHaveLength(2);
+  });
+
+  test('do not warn for distinct names', async () => {
+    const logger = createLogger({ silent: true });
+    await generateContentTypesDefinitions({ strapi: { contentTypes }, logger, strict: false });
+    await generateComponentsDefinitions({ strapi: { components }, logger, strict: false });
+
+    expect(logger.warnings).toBe(0);
+  });
+});
