@@ -329,7 +329,7 @@ const register = async ({
 /**
  * Find one user
  */
-const findOne = async (id: Data.ID, populate: string[] | null = ['roles']) => {
+const findOne = async (id: Data.ID, populate = ['roles']) => {
   return strapi.db.query('admin::user').findOne({ where: { id }, populate });
 };
 

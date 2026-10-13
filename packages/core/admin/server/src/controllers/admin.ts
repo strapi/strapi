@@ -5,7 +5,7 @@ import path from 'path';
 
 import { exists } from 'fs-extra';
 import { env } from '@strapi/utils';
-import type { Struct } from '@strapi/types';
+import type { Schema, Struct } from '@strapi/types';
 import {
   validateUpdateProjectSettings,
   validateUpdateProjectSettingsFiles,
@@ -218,7 +218,9 @@ export default {
     return {
       data: {
         isFirstSuperAdminUser,
-        schemas: strapi.contentTypes,
+        // Annotated so the published declaration resolves per application, not with this package's
+        // strict types.
+        schemas: strapi.contentTypes as Schema.ContentTypes,
       },
     } satisfies GetGuidedTourMeta.Response;
   },
