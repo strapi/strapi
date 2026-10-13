@@ -20,6 +20,8 @@ declare global {
       interface AppControllers {
         'plugin::controller-lab.items': LabController;
         'api::controller-lab.items': LabController;
+        // Outside the UID pattern: runtime never registers a controller under this name.
+        'not-a-uid': LabController;
       }
     }
   }
@@ -104,3 +106,6 @@ strapi.api('unregistered').controller<LabController>('items').list satisfies Con
 // @ts-expect-error `T` is not inferred from the annotation, for API lookups either.
 const contextualApi: LabController = strapi.api('controller-lab').controller('unregistered');
 contextualApi satisfies unknown;
+
+// @ts-expect-error A registry key outside the UID pattern is not a registered UID.
+strapi.controller('not-a-uid');
