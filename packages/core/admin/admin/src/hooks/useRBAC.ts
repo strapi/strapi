@@ -55,6 +55,8 @@ const useRBAC = (
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<unknown>();
   const [data, setData] = React.useState<Record<string, boolean>>();
+  const [checkedAdminUserId, setCheckedAdminUserId] = React.useState<string | number>();
+  const permissionCheckIdRef = React.useRef(0);
 
   const warnOnce = React.useMemo(() => once(console.warn), []);
 
@@ -88,23 +90,30 @@ const useRBAC = (
     (state) => state.checkUserHasPermissions,
     true
   );
+  const adminUserId = useAuth('useRBAC', (state) => state.user?.id ?? state.user?.email);
 
   const permssionsChecked = usePrev(actualPermissionsToCheck);
   const contextChecked = usePrev(rawQueryContext);
+  const permissionCheckerChecked = usePrev(checkUserHasPermissions);
+  const previousAdminUserId = usePrev(adminUserId);
 
   React.useEffect(() => {
     if (
       !isEqual(permssionsChecked, actualPermissionsToCheck) ||
       // TODO: also run this when the query context changes
-      contextChecked !== rawQueryContext
+      contextChecked !== rawQueryContext ||
+      permissionCheckerChecked !== checkUserHasPermissions ||
+      previousAdminUserId !== adminUserId
     ) {
       setIsLoading(true);
       setData(undefined);
       setError(undefined);
+      setCheckedAdminUserId(undefined);
+      const permissionCheckId = ++permissionCheckIdRef.current;
 
       checkUserHasPermissions(actualPermissionsToCheck, passedPermissions, rawQueryContext)
         .then((res) => {
-          if (res) {
+          if (res && permissionCheckId === permissionCheckIdRef.current) {
             setData(
               res.reduce<Record<string, boolean>>((acc, permission) => {
                 return {
@@ -116,19 +125,27 @@ const useRBAC = (
           }
         })
         .catch((err) => {
-          setError(err);
+          if (permissionCheckId === permissionCheckIdRef.current) {
+            setError(err);
+          }
         })
         .finally(() => {
-          setIsLoading(false);
+          if (permissionCheckId === permissionCheckIdRef.current) {
+            setCheckedAdminUserId(adminUserId);
+            setIsLoading(false);
+          }
         });
     }
   }, [
+    adminUserId,
     actualPermissionsToCheck,
     checkUserHasPermissions,
     passedPermissions,
     permissionsToCheck,
     permssionsChecked,
     contextChecked,
+    permissionCheckerChecked,
+    previousAdminUserId,
     rawQueryContext,
   ]);
 
@@ -138,7 +155,7 @@ const useRBAC = (
    */
   const allowedActions = Object.entries({
     ...defaultAllowedActions,
-    ...data,
+    ...(checkedAdminUserId === adminUserId ? data : undefined),
   }).reduce((acc, [name, allowed]) => {
     acc[`can${capitalise(name)}`] = allowed;
 
@@ -148,7 +165,7 @@ const useRBAC = (
   return {
     allowedActions,
     permissions: actualPermissionsToCheck,
-    isLoading: isLoading || isLoadingAuth,
+    isLoading: isLoading || isLoadingAuth || checkedAdminUserId !== adminUserId,
     error,
   };
 };

@@ -167,7 +167,11 @@ const AuthProvider = ({
 
   const token = useTypedSelector((state) => state.admin_app.token ?? null);
 
-  const { data: user, isLoading: isLoadingUser } = useGetMeQuery(undefined, {
+  const {
+    data: user,
+    isLoading: isLoadingUser,
+    isError: isUserError,
+  } = useGetMeQuery(undefined, {
     /**
      * If there's no token, we don't try to fetch
      * the user data because it will fail.
@@ -542,7 +546,8 @@ const AuthProvider = ({
     [checkPermissions, rawQuery, runRbacMiddleware, user, userPermissions]
   );
 
-  const isLoading = isLoadingUser || isLoadingPermissions || (Boolean(token) && !user);
+  const isLoading =
+    isLoadingUser || isLoadingPermissions || (Boolean(token) && !user && !isUserError);
 
   return (
     <>

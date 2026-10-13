@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 
 import { SETTINGS_LINKS_CE, SettingsMenuLink } from '../constants';
 import { useAppInfo } from '../features/AppInfo';
-import { useAuth } from '../features/Auth';
+import { AuthContextValue, useAuth } from '../features/Auth';
 import { useStrapiApp } from '../features/StrapiApp';
 import { selectAdminPermissions } from '../selectors';
 import { PermissionMap } from '../types/permissions';
@@ -74,6 +74,7 @@ const useSettingsMenu = (): {
   const rawSettings = useStrapiApp('useSettingsMenu', (state) => state.settings);
   const settings = React.useMemo(() => normalizeSettings(rawSettings), [rawSettings]);
   const permissions = useSelector(selectAdminPermissions);
+  const resolvedPermissionCheckerRef = React.useRef<AuthContextValue['checkUserHasPermissions']>();
 
   /**
    * memoize the return value of this function to avoid re-computing it on every render
@@ -113,6 +114,8 @@ const useSettingsMenu = (): {
   );
 
   React.useEffect(() => {
+    let cancelled = false;
+
     const getData = async () => {
       interface MenuLinkPermission {
         hasPermission: boolean;
@@ -135,26 +138,29 @@ const useSettingsMenu = (): {
 
       const menuPermissions = await buildMenuPermissions(sections);
 
-      setData((prev) => {
-        return {
-          ...prev,
-          isLoading: false,
-          menu: sections.map((section, sectionIndex) => ({
-            ...section,
-            links: section.links.map((link, linkIndex) => {
-              const permission = menuPermissions.find(
-                (permission) =>
-                  permission.sectionIndex === sectionIndex && permission.linkIndex === linkIndex
-              );
+      if (!cancelled) {
+        resolvedPermissionCheckerRef.current = checkUserHasPermission;
+        setData((prev) => {
+          return {
+            ...prev,
+            isLoading: false,
+            menu: sections.map((section, sectionIndex) => ({
+              ...section,
+              links: section.links.map((link, linkIndex) => {
+                const permission = menuPermissions.find(
+                  (permission) =>
+                    permission.sectionIndex === sectionIndex && permission.linkIndex === linkIndex
+                );
 
-              return {
-                ...link,
-                isDisplayed: Boolean(permission?.hasPermission),
-              };
-            }),
-          })),
-        };
-      });
+                return {
+                  ...link,
+                  isDisplayed: Boolean(permission?.hasPermission),
+                };
+              }),
+            })),
+          };
+        });
+      }
     };
 
     const { global, ...otherSections } = settings;
@@ -176,7 +182,11 @@ const useSettingsMenu = (): {
       ...Object.values(otherSections),
     ]);
 
-    getData();
+    void getData();
+
+    return () => {
+      cancelled = true;
+    };
   }, [
     adminLinks,
     globalLinks,
@@ -185,6 +195,13 @@ const useSettingsMenu = (): {
     addPermissions,
     checkUserHasPermission,
   ]);
+
+  if (resolvedPermissionCheckerRef.current !== checkUserHasPermission) {
+    return {
+      isLoading: true,
+      menu: [],
+    };
+  }
 
   return {
     isLoading,

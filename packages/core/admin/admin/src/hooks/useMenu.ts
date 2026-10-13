@@ -98,8 +98,11 @@ const useMenu = (shouldUpdateStrapi: boolean, currentEnvironment?: string) => {
     isLoading: true,
   });
   const generalSectionLinksRef = React.useRef(menuWithUserPermissions.generalSectionLinks);
+  const resolvedPermissionCheckerRef = React.useRef<AuthContextValue['checkUserHasPermissions']>();
 
   React.useEffect(() => {
+    let cancelled = false;
+
     async function applyMenuPermissions() {
       const authorizedPluginSectionLinks = await getPluginSectionLinks(
         menu,
@@ -112,18 +115,25 @@ const useMenu = (shouldUpdateStrapi: boolean, currentEnvironment?: string) => {
         checkUserHasPermissions
       );
 
-      setMenuWithUserPermissions((state) => ({
-        ...state,
-        generalSectionLinks: authorizedGeneralSectionLinks,
-        pluginsSectionLinks: hideCloudDeployMenuLinkInProduction(
-          authorizedPluginSectionLinks,
-          currentEnvironment
-        ),
-        isLoading: false,
-      }));
+      if (!cancelled) {
+        resolvedPermissionCheckerRef.current = checkUserHasPermissions;
+        setMenuWithUserPermissions((state) => ({
+          ...state,
+          generalSectionLinks: authorizedGeneralSectionLinks,
+          pluginsSectionLinks: hideCloudDeployMenuLinkInProduction(
+            authorizedPluginSectionLinks,
+            currentEnvironment
+          ),
+          isLoading: false,
+        }));
+      }
     }
 
-    applyMenuPermissions();
+    void applyMenuPermissions();
+
+    return () => {
+      cancelled = true;
+    };
   }, [
     setMenuWithUserPermissions,
     generalSectionLinksRef,
@@ -133,6 +143,15 @@ const useMenu = (shouldUpdateStrapi: boolean, currentEnvironment?: string) => {
     checkUserHasPermissions,
     currentEnvironment,
   ]);
+
+  if (resolvedPermissionCheckerRef.current !== checkUserHasPermissions) {
+    return {
+      ...menuWithUserPermissions,
+      generalSectionLinks: [],
+      pluginsSectionLinks: [],
+      isLoading: true,
+    };
+  }
 
   return menuWithUserPermissions;
 };

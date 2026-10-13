@@ -5,6 +5,7 @@ import { http, HttpResponse } from 'msw';
 
 import { Page } from '../../components/PageHelpers';
 import { useTypedDispatch } from '../../core/store/hooks';
+import { useRBAC } from '../../hooks/useRBAC';
 import { useSessionKeepalive } from '../../hooks/useSessionKeepalive';
 import { useInitQuery } from '../../services/admin';
 import {
@@ -172,6 +173,14 @@ const InitProbe = () => {
   const { data } = useInitQuery();
 
   return <div data-testid="has-admin">{String(data?.hasAdmin)}</div>;
+};
+
+const RbacProbe = () => {
+  const { allowedActions, isLoading } = useRBAC([CONDITIONAL_PERMISSION]);
+
+  return (
+    <div data-testid="rbac-result">{isLoading ? 'loading' : String(allowedActions.canUpdate)}</div>
+  );
 };
 
 const waitForUserA = async () => {
@@ -353,6 +362,19 @@ describe('AuthProvider session identity', () => {
     await waitForUserB();
   });
 
+  it('stops loading when the current-user request fails', async () => {
+    server.use(
+      http.get('/admin/users/me', () =>
+        HttpResponse.json({ error: { message: 'identity failed' } }, { status: 500 })
+      )
+    );
+
+    renderIdentity();
+
+    await waitFor(() => expect(screen.getByTestId('identity-loading')).toHaveTextContent('false'));
+    expect(screen.getByTestId('identity-email')).toBeEmptyDOMElement();
+  });
+
   it('refetches the current user and permissions after a new session is established without persist', async () => {
     const { user } = renderIdentity(<EstablishSessionProbe />);
 
@@ -418,14 +440,17 @@ describe('AuthProvider session identity', () => {
         <Page.Protect permissions={[CONDITIONAL_PERMISSION]}>
           <div>Conditionally protected content</div>
         </Page.Protect>
+        <RbacProbe />
       </>
     );
 
     await screen.findByText('Conditionally protected content');
+    await waitFor(() => expect(screen.getByTestId('rbac-result')).toHaveTextContent('true'));
 
     await user.click(screen.getByRole('button', { name: 'login-as-b' }));
 
     await screen.findByText("You don't have the permissions to access that content");
+    await waitFor(() => expect(screen.getByTestId('rbac-result')).toHaveTextContent('false'));
     expect(checkedBearers).toContain(bearer(TOKEN_A));
     expect(checkedBearers).toContain(bearer(TOKEN_B));
   });
