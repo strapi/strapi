@@ -6,8 +6,6 @@ import type { Core } from '@strapi/types';
  * Loader defaults: none. `loadConfiguration` (`src/configuration/index.ts`) has no `middlewares`
  * entry in `defaultConfig`, and the value is a list, so no field can be marked required.
  * `src/services/server/register-middlewares.ts` passes its default list to `get` instead.
- *
- * TODO @Nico Without `config/middlewares.*`, `get('middlewares')` returns `undefined`;
- * this type does not say so. Decide at the `PackageConfigs` level for all no-default namespaces.
+ * Without `config/middlewares.*`, `get('middlewares')` returns `undefined`.
  */
-export type Middlewares = Core.Config.Middlewares;
+export type Middlewares = Core.Config.Middlewares | undefined;
