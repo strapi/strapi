@@ -172,6 +172,73 @@ test('published registry contracts reference declared dependencies', () => {
   }
 });
 
+// Workspace package directories by package name.
+function workspaceDirectories() {
+  return new Map(
+    ['packages/core', 'packages/plugins', 'packages/utils', 'packages/cli'].flatMap((parent) =>
+      fs
+        .readdirSync(path.join(repository, parent))
+        .map((name) => path.join(repository, parent, name))
+        .filter((directory) => fs.existsSync(path.join(directory, 'package.json')))
+        .map((directory) => [readManifest(path.relative(repository, directory)).name, directory])
+    )
+  );
+}
+
+// Source files of a workspace package that register contracts, tests excluded.
+function registersContracts(directory) {
+  const visit = (current) =>
+    fs.readdirSync(current, { withFileTypes: true }).some((entry) => {
+      const filename = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        return ['node_modules', 'dist', '__tests__', 'tests'].includes(entry.name) === false
+          ? visit(filename)
+          : false;
+      }
+      return (
+        /\.tsx?$/.test(entry.name) &&
+        /interface Package(?:Services|Controllers|Policies|Middlewares|Configs)\b/.test(
+          fs.readFileSync(filename, 'utf8')
+        )
+      );
+    });
+  return ['src', 'server'].some(
+    (name) => fs.existsSync(path.join(directory, name)) && visit(path.join(directory, name))
+  );
+}
+
+test('@strapi/strapi/strict-types loads exactly the bundled packages that register contracts', () => {
+  const workspaces = workspaceDirectories();
+  const strictTypes = fs.readFileSync(
+    path.join(repository, 'packages/core/strapi/strict-types.d.ts'),
+    'utf8'
+  );
+  const listed = ts
+    .preProcessFile(strictTypes)
+    .typeReferenceDirectives.map(({ fileName }) => fileName.split('/').slice(0, 2).join('/'))
+    // `@strapi/types/strict` is the opt-in, not a provider.
+    .filter((name) => name !== '@strapi/types');
+  const bundled = Object.keys(readManifest('packages/core/strapi').dependencies).filter(
+    (name) => name !== '@strapi/types' && workspaces.has(name)
+  );
+
+  for (const name of bundled) {
+    if (registersContracts(workspaces.get(name)) === true) {
+      assert.ok(listed.includes(name), `${name} registers contracts but strict-types omits it`);
+    }
+  }
+  for (const name of listed) {
+    assert.ok(
+      bundled.includes(name),
+      `strict-types lists ${name}, which @strapi/strapi does not bundle`
+    );
+    assert.ok(
+      registersContracts(workspaces.get(name)) === true,
+      `strict-types lists ${name}, which registers no contract`
+    );
+  }
+});
+
 test('published middleware configs do not need third-party @types packages', () => {
   // Applications do not install `@types/koa-compress` or `@types/koa-static`, and `koa-favicon`
   // ships no types.
