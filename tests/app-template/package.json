@@ -14,7 +14,7 @@
     "@strapi/data-transfer": "latest",
     "@strapi/plugin-users-permissions": "latest",
     "@strapi/strapi": "latest",
-    "better-sqlite3": "12.8.0",
+    "better-sqlite3": "12.11.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.30.4",
