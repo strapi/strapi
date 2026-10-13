@@ -661,7 +661,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
         .findOne({ where: { id: releaseId }, select: ['releaseCondition', 'releasedAt'] });
 
       if (!release || release.releasedAt) {
-        return release;
+        return;
       }
 
       const [totalActions, invalidActions] = await Promise.all([
@@ -691,13 +691,10 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
           : 'ready';
       }
 
-      return strapi.db.query(RELEASE_MODEL_UID).update({
-        where: {
-          id: releaseId,
-        },
-        data: {
-          status,
-        },
+      // Conditional write: a run holding the lock may freeze the release after the read above
+      await strapi.db.query(RELEASE_MODEL_UID).updateMany({
+        where: { id: releaseId, releasedAt: null },
+        data: { status },
       });
     },
   };

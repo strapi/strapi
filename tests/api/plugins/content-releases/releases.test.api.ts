@@ -1572,6 +1572,9 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
 
       test('keeps its status when an entry gets fixed, and cannot be published again', async () => {
         const { release, invalidId } = await createFailedRelease();
+        const plannedRelease = await createReleaseWithActions('all_or_nothing', [
+          { documentId: invalidId },
+        ]);
 
         const fixRes = await rq({
           method: 'PUT',
@@ -1580,11 +1583,18 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         });
         expect(fixRes.statusCode).toBe(200);
 
+        let plannedValid = false;
+        for (let attempt = 0; attempt < 20 && !plannedValid; attempt += 1) {
+          plannedValid = (await getActionsByEntry(plannedRelease.id))[invalidId].isEntryValid;
+        }
+        expect(plannedValid).toBe(true);
+
         await strapi.plugin('content-releases').service('release').updateReleaseStatus(release.id);
 
         expect((await getRelease(release.id)).status).toBe('failed');
         expect((await getActionsByEntry(release.id))[invalidId]).toMatchObject({
           outcome: 'skipped_invalid',
+          isEntryValid: false,
         });
 
         const res = await publishManually(release.id);
