@@ -3,6 +3,7 @@ import * as ts from 'typescript';
 
 import { emitDefinitions, format } from '../utils';
 import type { GeneratorOptions } from '../utils';
+import { compareCodeUnits } from '../common/compare';
 
 type EnabledPlugin = {
   enabled: boolean;
@@ -102,7 +103,7 @@ export const generatePluginDefinitions = async (options: GeneratorOptions) => {
   const importsByDeclaration = new Map<string, string>();
 
   for (const [name, plugin] of Object.entries(enabledPlugins).sort(([a], [b]) =>
-    a.localeCompare(b)
+    compareCodeUnits(a, b)
   )) {
     if (
       plugin.enabled !== true ||
@@ -121,7 +122,7 @@ export const generatePluginDefinitions = async (options: GeneratorOptions) => {
     ]);
     const candidates = [...packageNames]
       .filter((packageName): packageName is string => typeof packageName === 'string')
-      .sort()
+      .sort(compareCodeUnits)
       .map((packageName) => `${packageName}/strapi-server`);
 
     let declaration: string | undefined;
@@ -182,7 +183,7 @@ export const generatePluginDefinitions = async (options: GeneratorOptions) => {
     }
   }
 
-  const imports = [...importsByDeclaration.values()].sort();
+  const imports = [...importsByDeclaration.values()].sort(compareCodeUnits);
   options.logger.debug(`Found ${imports.length} plugin server declarations.`);
 
   const definitions = imports.map((specifier) =>
