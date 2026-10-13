@@ -32,7 +32,7 @@ export type Action = {
   /**
    * The main category of an action (only for the settings section)
    */
-  category?: string;
+  category?: string | undefined;
 
   /**
    * The secondary category of an action (only for settings and plugins section)
