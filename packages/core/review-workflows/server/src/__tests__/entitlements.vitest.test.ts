@@ -1,7 +1,8 @@
+import { describe, expect, it, vi } from 'vitest';
 import { registerReviewWorkflowsEntitlements } from '../entitlements';
 
 const resolveWith = (feature: unknown) => {
-  const register = jest.fn();
+  const register = vi.fn();
   registerReviewWorkflowsEntitlements({ ee: { entitlements: { register } } } as any);
 
   const [{ feature: name, limits }] = register.mock.calls[0];
