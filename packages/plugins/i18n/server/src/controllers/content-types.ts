@@ -3,14 +3,14 @@ import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
 import type { Core, Data, UID } from '@strapi/types';
 import type { FillFromLocale } from '../../../shared/contracts/content-manager';
 import { getService } from '../utils';
+import { getStrapi } from '../utils/strapi-ref';
 import {
   validateGetNonLocalizedAttributesInput,
   validateFillFromLocaleInput,
 } from '../validation/content-types';
 
-// TODO @Nico Controllers stay plain objects and read the global `strapi`: user extensions patch
-// `plugin.controllers.<name>.<action>` on the raw plugin object before core resolves factories, so a
-// factory would break them (see __tests__/plugin-shape.test.ts).
+// Controllers stay plain objects: user extensions patch `plugin.controllers.<name>.<action>` in
+// place (see __tests__/plugin-shape.test.ts), so actions read `strapi` at call time.
 
 const { ApplicationError } = errors;
 
@@ -24,6 +24,7 @@ const getFirstLevelPath = (paths: string[]) => paths.map((path) => path.split('.
 
 const controller = {
   async getNonLocalizedAttributes(ctx) {
+    const strapi = getStrapi();
     const { user, userAbility } = ctx.state;
     const body = ctx.request.body as any;
     const { model, id, locale } = body;
@@ -115,6 +116,7 @@ const controller = {
   },
 
   async getFillFromLocaleData(ctx) {
+    const strapi = getStrapi();
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
 

@@ -2,11 +2,12 @@ import type { Core } from '@strapi/types';
 import { isEmpty } from 'lodash';
 
 import { getService } from '../../utils';
+import { getStrapi } from '../../utils/strapi-ref';
 
 // TODO @Nico `localesPropertyHandler` is registered into the admin sections builder, which admin
-// keeps at module level and never clears: it outlives a Strapi instance. It reads the global
-// `strapi` at call time, so a handler registered by a destroyed instance serves the one that booted
-// after it in the same process (see __tests__/cross-instance-hooks.test.ts).
+// keeps at module level and never clears: it outlives a Strapi instance. It reads `getStrapi()` at
+// call time, so a handler registered by a destroyed instance serves the one that booted after it in
+// the same process (see __tests__/cross-instance-hooks.test.ts).
 
 /**
  * Handler for the permissions layout (sections builder)
@@ -16,6 +17,7 @@ import { getService } from '../../utils';
  * @return {Promise<void>}
  */
 const localesPropertyHandler = async ({ action, section }: any) => {
+  const strapi = getStrapi();
   const { actionProvider } = strapi.service('admin::permission');
 
   const localesService = getService('locales', { strapi });

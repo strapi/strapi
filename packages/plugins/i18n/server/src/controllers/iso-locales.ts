@@ -1,12 +1,13 @@
 import type { Core } from '@strapi/types';
 import { getService } from '../utils';
+import { getStrapi } from '../utils/strapi-ref';
 
-// TODO @Nico Controllers stay plain objects and read the global `strapi`: user extensions patch
-// `plugin.controllers.<name>.<action>` on the raw plugin object before core resolves factories, so a
-// factory would break them (see __tests__/plugin-shape.test.ts).
+// Controllers stay plain objects: user extensions patch `plugin.controllers.<name>.<action>` in
+// place (see __tests__/plugin-shape.test.ts), so actions read `strapi` at call time.
 
 const controller: Core.Controller = {
   listIsoLocales(ctx) {
+    const strapi = getStrapi();
     const isoLocalesService = getService('iso-locales', { strapi });
 
     ctx.body = isoLocalesService.getIsoLocales();

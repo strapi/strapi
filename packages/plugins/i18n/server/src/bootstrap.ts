@@ -2,6 +2,7 @@ import type { Core, Schema } from '@strapi/types';
 import { isEqual } from 'lodash';
 import { registerAuditEvents } from './audit-logs';
 import { getService } from './utils';
+import { bindStrapi } from './utils/strapi-ref';
 
 const registerModelsHooks = ({ strapi }: { strapi: Core.Strapi }) => {
   strapi.db.lifecycles.subscribe({
@@ -86,6 +87,8 @@ const registerModelsHooks = ({ strapi }: { strapi: Core.Strapi }) => {
 };
 
 export default async ({ strapi }: { strapi: Core.Strapi }) => {
+  bindStrapi(strapi);
+
   const { sendDidInitializeEvent } = getService('metrics', { strapi });
   const { initDefaultLocale } = getService('locales', { strapi });
   const { sectionsBuilder, actions, engine } = getService('permissions', { strapi });

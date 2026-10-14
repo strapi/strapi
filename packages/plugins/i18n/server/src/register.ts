@@ -6,8 +6,11 @@ import graphqlProvider from './graphql';
 import { getService } from './utils';
 import { aiLocalizationJob } from './models/ai-localization-job';
 import { createLocalizationProvider } from './localization';
+import { bindStrapi } from './utils/strapi-ref';
 
 export default async ({ strapi }: { strapi: Core.Strapi }) => {
+  bindStrapi(strapi);
+
   strapi.localization.register(createLocalizationProvider(strapi));
   strapi.get('models').add(aiLocalizationJob);
 

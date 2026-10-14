@@ -2,12 +2,12 @@ import * as utils from '@strapi/utils';
 import { pick } from 'lodash';
 import type { Core } from '@strapi/types';
 import { getService } from '../utils';
+import { getStrapi } from '../utils/strapi-ref';
 import { validateCreateLocaleInput, validateUpdateLocaleInput } from '../validation/locales';
 import { formatLocale } from '../domain/locale';
 
-// TODO @Nico Controllers stay plain objects and read the global `strapi`: user extensions patch
-// `plugin.controllers.<name>.<action>` on the raw plugin object before core resolves factories, so a
-// factory would break them (see __tests__/plugin-shape.test.ts).
+// Controllers stay plain objects: user extensions patch `plugin.controllers.<name>.<action>` in
+// place (see __tests__/plugin-shape.test.ts), so actions read `strapi` at call time.
 
 const { setCreatorFields } = utils;
 const { ApplicationError } = utils.errors;
@@ -20,6 +20,7 @@ const sanitizeLocale = ({ strapi }: { strapi: Core.Strapi }, locale: any) => {
 
 const controller: Core.Controller = {
   async listLocales(ctx) {
+    const strapi = getStrapi();
     const localesService = getService('locales', { strapi });
 
     const locales = await localesService.find();
@@ -29,6 +30,7 @@ const controller: Core.Controller = {
   },
 
   async createLocale(ctx) {
+    const strapi = getStrapi();
     const { user } = ctx.state;
     const body = ctx.request.body as any;
     const { isDefault, ...localeToCreate } = body;
@@ -56,6 +58,7 @@ const controller: Core.Controller = {
   },
 
   async updateLocale(ctx) {
+    const strapi = getStrapi();
     const { user } = ctx.state;
     const { id } = ctx.params;
     const body = ctx.request.body as any;
@@ -85,6 +88,7 @@ const controller: Core.Controller = {
   },
 
   async deleteLocale(ctx) {
+    const strapi = getStrapi();
     const { id } = ctx.params;
 
     const localesService = getService('locales', { strapi });

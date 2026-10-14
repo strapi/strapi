@@ -10,8 +10,9 @@ import { createAILocalizationsService } from './ai-localizations';
 import { createAITranslationsService } from './ai-translations';
 import { createAILocalizationJobsService } from './ai-localization-jobs';
 import { createFillFromLocaleService } from './fill-from-locale';
+import { bindOnInstantiate } from '../utils/strapi-ref';
 
-export default {
+export default bindOnInstantiate({
   permissions,
   metrics,
   localizations,
@@ -24,4 +25,4 @@ export default {
   'ai-localization-jobs': createAILocalizationJobsService,
   settings: createSettingsService,
   'fill-from-locale': createFillFromLocaleService,
-};
+});

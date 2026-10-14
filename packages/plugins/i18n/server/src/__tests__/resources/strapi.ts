@@ -1,5 +1,6 @@
 import type { Core } from '@strapi/types';
 import createPluginServer from '../../index';
+import { resetStrapiBinding } from '../../utils/strapi-ref';
 
 type UnknownRecord = Record<string, unknown>;
 type Factory = (params: { strapi: Core.Strapi }) => unknown;
@@ -74,6 +75,8 @@ export const createStrapi = (mock: UnknownRecord, options: CreateStrapiOptions =
   mock.plugins = { ...plugins, i18n: { services } };
 
   global.strapi = strapi;
+  // A new instance: forget the one a previous test bound through a service factory
+  resetStrapiBinding();
 
   return { strapi, pluginServer, services };
 };

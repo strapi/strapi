@@ -1,5 +1,6 @@
 import type { Core } from '@strapi/types';
 import { getService } from '../../utils';
+import { getStrapi } from '../../utils/strapi-ref';
 
 /**
  * @typedef {object} WillRegisterPermissionContext
@@ -9,9 +10,9 @@ import { getService } from '../../utils';
  */
 
 // TODO @Nico `willRegisterPermission` is registered into the admin permission engine hooks, which
-// admin keeps at module level and never clears: they outlive a Strapi instance. It reads the global
-// `strapi` at call time, so a handler registered by a destroyed instance serves the one that booted
-// after it in the same process (see __tests__/cross-instance-hooks.test.ts).
+// admin keeps at module level and never clears: they outlive a Strapi instance. It reads
+// `getStrapi()` at call time, so a handler registered by a destroyed instance serves the one that
+// booted after it in the same process (see __tests__/cross-instance-hooks.test.ts).
 
 /**
  * Locales property handler for the permission engine
@@ -19,6 +20,7 @@ import { getService } from '../../utils';
  * @param {WillRegisterPermissionContext} context
  */
 const willRegisterPermission = (context: any) => {
+  const strapi = getStrapi();
   const { permission, condition, user } = context;
   const { subject, properties } = permission;
 

@@ -1,6 +1,7 @@
 import type { Core } from '@strapi/types';
 import { get } from 'lodash';
 import { getService } from '../../utils';
+import { getStrapi } from '../../utils/strapi-ref';
 
 const actions = [
   {
@@ -64,10 +65,12 @@ const addLocalesPropertyIfNeeded = ({ value: action }: any) => {
 
 // TODO @Nico The handlers below are registered into admin hooks (`actionProvider.hooks`, role
 // `hooks`) that admin keeps at module level and never clears: they outlive a Strapi instance. They
-// read the global `strapi` at call time, so a handler registered by a destroyed instance serves the
-// one that booted after it in the same process (see __tests__/cross-instance-hooks.test.ts).
+// read `getStrapi()` at call time, so a handler registered by a destroyed instance serves the one
+// that booted after it in the same process (see __tests__/cross-instance-hooks.test.ts).
 
 const shouldApplyLocalesPropertyToSubject = ({ property, subject }: any) => {
+  const strapi = getStrapi();
+
   if (property === 'locales') {
     const model = strapi.getModel(subject);
 
@@ -78,6 +81,7 @@ const shouldApplyLocalesPropertyToSubject = ({ property, subject }: any) => {
 };
 
 const addAllLocalesToPermissions = async (permissions: any) => {
+  const strapi = getStrapi();
   const { actionProvider } = strapi.service('admin::permission');
   const { find: findAllLocales } = getService('locales', { strapi });
 
@@ -123,6 +127,7 @@ const needsLocalesPatch = (properties: Record<string, unknown> = {}) => {
 };
 
 const normalizeRolePermissionsLocales = async (permissions: any[]): Promise<any[]> => {
+  const strapi = getStrapi();
   const { isLocalizedContentType } = getService('content-types', { strapi });
   const { actionProvider } = strapi.service('admin::permission');
   const defaultLocale = await getService('locales', { strapi }).getDefaultLocale();
