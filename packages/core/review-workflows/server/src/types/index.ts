@@ -30,16 +30,24 @@ declare global {
   namespace Strapi {
     // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace Registries {
+      // Registered only when the `review-workflows` EE feature is enabled, so a CE application, or a
+      // license without the feature, resolves them to `undefined`.
+      // TODO @Nico Redesign as a real opt-in to licensed features, so applications that have the
+      // feature can drop `undefined`, instead of every application seeing it.
       interface PackageServices {
-        'plugin::review-workflows.assignees': Services['assignees'];
-        'plugin::review-workflows.document-service-middlewares': Services['document-service-middlewares'];
-        'plugin::review-workflows.homepage': Services['homepage'];
-        'plugin::review-workflows.stage-permissions': Services['stage-permissions'];
-        'plugin::review-workflows.stages': Services['stages'];
-        'plugin::review-workflows.validation': Services['validation'];
-        'plugin::review-workflows.workflow-metrics': Services['workflow-metrics'];
-        'plugin::review-workflows.workflow-weekly-metrics': Services['workflow-weekly-metrics'];
-        'plugin::review-workflows.workflows': Services['workflows'];
+        'plugin::review-workflows.assignees': Services['assignees'] | undefined;
+        'plugin::review-workflows.document-service-middlewares':
+          | Services['document-service-middlewares']
+          | undefined;
+        'plugin::review-workflows.homepage': Services['homepage'] | undefined;
+        'plugin::review-workflows.stage-permissions': Services['stage-permissions'] | undefined;
+        'plugin::review-workflows.stages': Services['stages'] | undefined;
+        'plugin::review-workflows.validation': Services['validation'] | undefined;
+        'plugin::review-workflows.workflow-metrics': Services['workflow-metrics'] | undefined;
+        'plugin::review-workflows.workflow-weekly-metrics':
+          | Services['workflow-weekly-metrics']
+          | undefined;
+        'plugin::review-workflows.workflows': Services['workflows'] | undefined;
       }
     }
   }
