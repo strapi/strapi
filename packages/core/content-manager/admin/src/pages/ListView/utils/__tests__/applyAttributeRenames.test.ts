@@ -56,6 +56,12 @@ describe('saved list query', () => {
     ).toEqual({ $and: [{ productName: { $contains: 'Cloud' } }, { price: { $gt: 10 } }] });
   });
 
+  it('keeps a filter key that is neither a current attribute nor a rename', () => {
+    expect(
+      applyAttributeRenamesToFilters({ gone: { $eq: 'x' }, _q: 'cloud' }, attributes, renames)
+    ).toEqual({ gone: { $eq: 'x' }, _q: 'cloud' });
+  });
+
   it('does not rewrite a nested field with the parent content-type map', () => {
     expect(
       applyAttributeRenamesToFilters(

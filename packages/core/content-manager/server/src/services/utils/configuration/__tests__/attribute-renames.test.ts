@@ -45,6 +45,12 @@ describe('composeAttributeRenames', () => {
       productName: 'internalName',
     });
   });
+
+  it('keeps the previous map when no new rename is passed', () => {
+    expect(composeAttributeRenames({ internalName: 'productName' })).toEqual({
+      internalName: 'productName',
+    });
+  });
 });
 
 describe('rewriteContentManagerConfiguration', () => {
@@ -188,5 +194,56 @@ describe('rewriteContentManagerConfiguration', () => {
         { name: 'title', size: 6 },
       ],
     ]);
+  });
+
+  it('renames metadata that only has an edit or a list side', () => {
+    const next = rewriteContentManagerConfiguration(
+      {
+        metadatas: {
+          onlyEdit: { edit: { label: 'onlyEdit' } },
+          onlyList: { list: { label: 'onlyList' } },
+        },
+      },
+      {
+        ownRenames: { onlyEdit: 'onlyEditNext', onlyList: 'onlyListNext' },
+        allRenames: {
+          'api::product.product': { onlyEdit: 'onlyEditNext', onlyList: 'onlyListNext' },
+        },
+      }
+    );
+
+    expect(next?.metadatas?.onlyEditNext?.edit).toEqual({ label: 'onlyEditNext' });
+    expect(next?.metadatas?.onlyEditNext?.list).toBeUndefined();
+    expect(next?.metadatas?.onlyListNext?.list).toEqual({ label: 'onlyListNext' });
+    expect(next?.metadatas?.onlyListNext?.edit).toBeUndefined();
+  });
+
+  it('leaves relation display fields that are not renamed and skips relations with nothing to apply', () => {
+    const next = rewriteContentManagerConfiguration(
+      {
+        metadatas: {
+          author: { list: { mainField: 'title' } },
+          notes: { edit: { mainField: 'title' }, list: { mainField: 1 } },
+        },
+        layouts: { edit: [[{ name: 'tagline', size: 6 }]] },
+      },
+      {
+        attributes: {
+          author: { type: 'relation', target: 'api::product.product' },
+          notes: { type: 'relation', target: 'api::product.product' },
+          missingMeta: { type: 'relation', target: 'api::product.product' },
+          dangling: { type: 'relation' },
+          plain: { type: 'string' },
+        },
+        allRenames: renames,
+      }
+    );
+
+    expect(next?.metadatas?.author?.list?.mainField).toBe('title');
+    expect(next?.metadatas?.notes?.edit?.mainField).toBe('title');
+    expect(next?.metadatas?.notes?.list?.mainField).toBe(1);
+    expect(next?.metadatas?.missingMeta).toBeUndefined();
+    expect(next?.layouts?.edit).toEqual([[{ name: 'tagline', size: 6 }]]);
+    expect(next?.layouts?.list).toBeUndefined();
   });
 });

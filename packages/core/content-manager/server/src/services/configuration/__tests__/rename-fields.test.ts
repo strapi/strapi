@@ -94,4 +94,22 @@ describe('createContentManagerConfigurationRenamer', () => {
 
     expect(set).not.toHaveBeenCalled();
   });
+
+  it('does nothing when the rename map is empty', async () => {
+    const set = jest.fn();
+    const strapi = {
+      contentTypes: {
+        [PRODUCT]: { attributes: { productName: { type: 'string' } } },
+      },
+      components: {},
+      store: () => ({
+        get: async () => null,
+        set,
+      }),
+    };
+
+    await createContentManagerConfigurationRenamer({ strapi: strapi as any })({} as any, {});
+
+    expect(set).not.toHaveBeenCalled();
+  });
 });

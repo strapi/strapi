@@ -48,8 +48,8 @@ const renamePath = (
 };
 
 type FieldMetadata = {
-  edit?: { label?: string; mainField?: string; [key: string]: unknown };
-  list?: { label?: string; mainField?: string; [key: string]: unknown };
+  edit?: { label?: string; mainField?: unknown; [key: string]: unknown };
+  list?: { label?: string; mainField?: unknown; [key: string]: unknown };
 };
 
 type StoredConfiguration = {
@@ -75,11 +75,11 @@ type RelationAttribute = {
   targetModel?: string;
 };
 
-const replaceNames = (names: string[] | undefined, renames: Record<string, string>): string[] => {
+const replaceNames = (names: string[], renames: Record<string, string>): string[] => {
   const seen = new Set<string>();
   const next: string[] = [];
 
-  for (const name of names ?? []) {
+  for (const name of names) {
     const renamed = renames[name] ?? name;
 
     if (seen.has(renamed)) {
@@ -94,10 +94,6 @@ const replaceNames = (names: string[] | undefined, renames: Record<string, strin
 };
 
 const movedMetadata = (metadata: FieldMetadata, from: string, to: string): FieldMetadata => {
-  if (from === to) {
-    return metadata;
-  }
-
   return {
     ...metadata,
     edit: metadata.edit
