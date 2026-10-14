@@ -1,0 +1,548 @@
+/* Package graph. Group colors come from `--pkg-color` (see custom.css, `data-pkg-group`). */
+
+.explorer {
+  --graph-canvas-height: clamp(520px, calc(100vh - 160px), 960px);
+  --graph-canvas: #fafaf9;
+  --graph-dependency: #4945ff;
+  --graph-dependent: #d97706;
+  --graph-edge: #a8a6a0;
+  --graph-edge-dimmed: #e4e3df;
+  --graph-focus-ring: rgb(73 69 255 / 22%);
+  --graph-radius: 12px;
+
+  margin-bottom: 2rem;
+}
+
+:global([data-theme='dark']) .explorer {
+  --graph-canvas: #171719;
+  --graph-dependency: #7b79ff;
+  --graph-dependent: #f59e0b;
+  --graph-edge: #6d6c68;
+  --graph-edge-dimmed: #34342f;
+  --graph-focus-ring: rgb(123 121 255 / 30%);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.swatch {
+  flex: none;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 3px;
+  background: var(--pkg-color);
+}
+
+/* Toolbar */
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.search {
+  position: relative;
+  flex: 1 1 16rem;
+  max-width: 24rem;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 8px;
+  background: var(--ifm-background-surface-color);
+  color: var(--ifm-font-color-base);
+  font: inherit;
+  font-size: 0.875rem;
+}
+
+.searchInput:focus {
+  border-color: var(--ifm-color-primary);
+  outline: 3px solid var(--graph-focus-ring);
+}
+
+.suggestions {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  right: 0;
+  left: 0;
+  margin: 0;
+  padding: 4px;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 10px;
+  background: var(--ifm-background-surface-color);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 14%);
+  list-style: none;
+}
+
+.suggestion {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.suggestionActive {
+  background: var(--ifm-color-emphasis-200);
+}
+
+.suggestionName {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.8rem;
+}
+
+.suggestionPath {
+  margin-left: auto;
+  color: var(--ifm-color-emphasis-600);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.segmented {
+  display: inline-flex;
+  overflow: hidden;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 8px;
+}
+
+.segment,
+.reset {
+  padding: 0.4rem 0.75rem;
+  border: 0;
+  background: var(--ifm-background-surface-color);
+  color: var(--ifm-color-emphasis-800);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8rem;
+}
+
+.segment + .segment {
+  border-left: 1px solid var(--ifm-color-emphasis-300);
+}
+
+.segmentActive {
+  background: var(--ifm-color-primary-contrast-background);
+  color: var(--ifm-color-primary-contrast-foreground);
+  font-weight: 600;
+}
+
+.reset {
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 8px;
+}
+
+.segment:hover,
+.reset:hover {
+  color: var(--ifm-color-primary);
+}
+
+.edgeToggles {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 0.85rem;
+}
+
+.edgeLegend,
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.toggle {
+  cursor: pointer;
+}
+
+.edgeSample {
+  display: inline-block;
+  width: 22px;
+  border-top: 2px solid var(--ifm-color-emphasis-600);
+}
+
+.edgeSampleDev {
+  border-top-style: dashed;
+}
+
+.edgeSamplePeer {
+  border-top-style: dotted;
+}
+
+/* Group filter and legend */
+
+.groups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  border: 0;
+}
+
+.groupToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0.65rem;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 999px;
+  background: var(--ifm-background-surface-color);
+  cursor: pointer;
+  font-size: 0.8rem;
+  user-select: none;
+}
+
+.groupToggle input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.groupToggle:has(input:focus-visible) {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+}
+
+.groupHidden {
+  color: var(--ifm-color-emphasis-600);
+}
+
+.groupHidden .swatch {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--pkg-color);
+}
+
+.groupCount {
+  color: var(--ifm-color-emphasis-600);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Canvas */
+
+.canvas,
+.fallback {
+  position: relative;
+  height: var(--graph-canvas-height);
+  overflow: hidden;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: var(--graph-radius);
+  background: var(--graph-canvas);
+}
+
+.canvas :global(.react-flow) {
+  --xy-background-color: var(--graph-canvas);
+  --xy-minimap-background-color: var(--ifm-background-surface-color);
+}
+
+.minimap {
+  overflow: hidden;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 8px;
+}
+
+@media (max-width: 768px) {
+  .minimap {
+    display: none;
+  }
+}
+
+.hint {
+  margin: 0.5rem 0 0;
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.8rem;
+}
+
+.fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.fallback p {
+  margin: 0;
+}
+
+.fallbackHint {
+  font-size: 0.85rem;
+}
+
+/* Nodes */
+
+.node {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  box-sizing: border-box;
+  padding: 0 12px 0 16px;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 10px;
+  background: var(--ifm-background-surface-color);
+  box-shadow:
+    inset 4px 0 0 var(--pkg-color),
+    0 1px 2px rgb(0 0 0 / 6%);
+  color: var(--ifm-font-color-base);
+  cursor: pointer;
+  transition:
+    opacity 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.node:hover {
+  border-color: var(--ifm-color-primary);
+}
+
+.node .handle {
+  width: 1px;
+  min-width: 0;
+  height: 1px;
+  min-height: 0;
+  border: 0;
+  opacity: 0;
+}
+
+.nodeName {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nodeMeta {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: var(--ifm-color-emphasis-700);
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.nodeStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.nodeStatus::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--status-color);
+}
+
+.status-stub {
+  --status-color: var(--ifm-color-emphasis-500);
+}
+
+.status-draft {
+  --status-color: var(--ifm-color-info);
+}
+
+.status-needs-review {
+  --status-color: var(--ifm-color-warning);
+}
+
+.status-documented {
+  --status-color: var(--ifm-color-success);
+}
+
+.status-missing {
+  --status-color: var(--ifm-color-danger);
+}
+
+.emphasis-focus {
+  border-color: var(--ifm-color-primary);
+  box-shadow:
+    inset 4px 0 0 var(--pkg-color),
+    0 0 0 4px var(--graph-focus-ring),
+    0 8px 20px rgb(0 0 0 / 14%);
+}
+
+.emphasis-dependency {
+  border-color: var(--graph-dependency);
+}
+
+.emphasis-dependent {
+  border-color: var(--graph-dependent);
+}
+
+.emphasis-dimmed {
+  opacity: 0.25;
+}
+
+/* Details panel */
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: min(300px, calc(100vw - 4rem));
+  max-height: calc(var(--graph-canvas-height) - 2rem);
+  overflow-y: auto;
+  padding: 0.9rem 1rem 1rem;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: var(--graph-radius);
+  background: var(--ifm-background-surface-color);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 14%);
+  color: var(--ifm-font-color-base);
+  font-size: 0.85rem;
+}
+
+.panel p {
+  margin: 0;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.panelGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.panelClose {
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ifm-color-emphasis-700);
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.panelClose:hover {
+  background: var(--ifm-color-emphasis-200);
+}
+
+.panel .panelName {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.panelTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.panelTag {
+  padding: 0 0.5em;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 999px;
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.75rem;
+  line-height: 1.6;
+}
+
+.panel .panelDescription {
+  color: var(--ifm-color-emphasis-800);
+}
+
+.panel .panelTransitive {
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.78rem;
+}
+
+.panelSection {
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.panel .panelSectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.35rem;
+  font-weight: 700;
+}
+
+.legend-dependency,
+.legend-dependent {
+  width: 14px;
+  height: 0;
+  border-top: 2px solid var(--graph-dependency);
+}
+
+.legend-dependent {
+  border-top-color: var(--graph-dependent);
+}
+
+.panelCount {
+  padding: 0 0.45em;
+  border-radius: 999px;
+  background: var(--ifm-color-emphasis-200);
+  font-size: 0.72rem;
+}
+
+.panel .panelEmpty {
+  color: var(--ifm-color-emphasis-600);
+}
+
+.panelList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.panelItem {
+  padding: 0.1rem 0.4rem;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ifm-link-color);
+  cursor: pointer;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.75rem;
+}
+
+.panelItem:hover {
+  border-color: var(--ifm-color-primary);
+  background: var(--ifm-color-emphasis-100);
+}
+
+.panelLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+}

@@ -14,6 +14,8 @@ export const actionTypes = {
   'user.update': 'Update user',
   'user.delete': 'Delete user',
   'admin.auth.success': 'Admin login',
+  'admin.auth.error': 'Failed admin login',
+  'admin.auth.autoRegistration': 'SSO auto-registration',
   'admin.logout': 'Admin logout',
   'content-type.create': 'Create content type',
   'content-type.update': 'Update content type',

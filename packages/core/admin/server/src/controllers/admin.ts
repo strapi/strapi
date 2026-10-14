@@ -22,6 +22,7 @@ import type {
   TelemetryProperties,
   UpdateProjectSettings,
   GetGuidedTourMeta,
+  DebugDump,
 } from '../../../shared/contracts/admin';
 
 // Lazy: only resolved on first GET /admin/project-type request
@@ -126,8 +127,7 @@ export default {
     const getNumberOfFolders = async (): Promise<number> => {
       try {
         const contentStructure = strapi.get('content-structure') as
-          | { countGroups?: () => Promise<number> }
-          | undefined;
+          { countGroups?: () => Promise<number> } | undefined;
 
         return (await contentStructure?.countGroups?.()) ?? 0;
       } catch {
@@ -170,6 +170,12 @@ export default {
         useYarn,
       },
     } satisfies Information.Response;
+  },
+
+  async debugDump() {
+    const data = await getService('debug-dump').generate();
+
+    return { data } satisfies DebugDump.Response;
   },
 
   async plugins(ctx: Context) {

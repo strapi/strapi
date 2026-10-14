@@ -6,8 +6,7 @@ import { useGetAssetsQuery, useGenerateAiMetadataMutation } from '../assets';
 
 describe('future assets service - getAssets filter shape', () => {
   let lastRequestParams:
-    | { _q?: string; filters?: { $and?: Array<{ folder?: { id: unknown } }> } }
-    | undefined;
+    { _q?: string; filters?: { $and?: Array<{ folder?: { id: unknown } }> } } | undefined;
 
   beforeEach(() => {
     lastRequestParams = undefined;
