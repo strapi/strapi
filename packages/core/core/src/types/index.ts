@@ -35,6 +35,16 @@ declare global {
         middlewares: ResolvedConfig.Middlewares;
         features: ResolvedConfig.Features;
         typescript: ResolvedConfig.TypeScript;
+        // Set at startup, with no config file.
+        launchedAt: ResolvedConfig.LaunchedAt;
+        autoReload: ResolvedConfig.AutoReload;
+        environment: ResolvedConfig.Environment;
+        uuid: ResolvedConfig.Uuid;
+        installId: ResolvedConfig.InstallId;
+        packageJsonStrapi: ResolvedConfig.PackageJsonStrapi;
+        info: ResolvedConfig.Info;
+        dirs: ResolvedConfig.Dirs;
+        enabledPlugins: ResolvedConfig.EnabledPlugins;
       }
 
       /**
