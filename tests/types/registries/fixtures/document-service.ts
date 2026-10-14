@@ -95,6 +95,12 @@ void articles.findMany({ status: 'archived' });
 void articles.create({ data: { views: 1 } });
 void articles.create({ data: { title: 'Title', views: 1 } });
 
+// `update` takes `status`, as at runtime: `published` publishes the updated draft.
+void articles.update({ documentId: 'a', data: { views: 1 }, status: 'published' });
+void articles.update({ documentId: 'a', data: { views: 1 }, status: 'draft' });
+// @ts-expect-error `status` is `draft` or `published`.
+void articles.update({ documentId: 'a', status: 'archived' });
+
 // Known gap (Required): a required attribute stays optional and nullable in results.
 // @ts-expect-error
 export type RequiredTitle = Expect<Equal<Article['title'], string>>;
