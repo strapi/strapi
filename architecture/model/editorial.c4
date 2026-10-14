@@ -4,9 +4,9 @@ model {
       summary 'Enterprise feature: registers middleware that can block publication until an entry reaches its required stage.'
       description 'Loaded only when the review-workflows feature is enabled; bootstrap registers its publish-stage middleware with strapi.documents.'
       technology '@strapi/review-workflows'
-      link https://github.com/strapi/strapi/blob/develop/packages/core/review-workflows/server/src/index.ts#L10 'Enterprise feature gate'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/review-workflows/server/src/index.ts#L19 'Enterprise feature gate'
       link https://github.com/strapi/strapi/blob/develop/packages/core/review-workflows/server/src/bootstrap.ts#L55 'Document middleware registration'
-      link https://github.com/strapi/strapi/blob/develop/packages/core/review-workflows/server/src/services/document-service-middleware.ts#L129 'Publish-stage check'
+      link https://github.com/strapi/strapi/blob/develop/packages/core/review-workflows/server/src/services/document-service-middleware.ts#L149 'Publish-stage check'
     }
 
     release_service = component 'Content release service and scheduler' {
