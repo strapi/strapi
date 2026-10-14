@@ -122,6 +122,8 @@ declare const documentParamChecks: [
   // Methods take `lookup`.
   Expect<Equal<FindManyParams['lookup'], Record<string, unknown> | undefined>>,
   Expect<Equal<PublishParams['lookup'], Record<string, unknown> | undefined>>,
+  // `clone` may resolve to `null`.
+  Expect<Equal<null extends Awaited<ReturnType<Documents['clone']>> ? true : false, true>>,
 ];
 documentParamChecks satisfies unknown;
 
