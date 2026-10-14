@@ -97,6 +97,19 @@ function normalizePath(text, checkout, app) {
     .join('<checkout>');
 }
 
+// The equivalence checks with the generated schema types they read.
+function equivalenceFiles(app) {
+  const list = (directory) =>
+    fs.existsSync(directory)
+      ? fs
+          .readdirSync(directory)
+          .sort()
+          .map((name) => path.join(directory, name))
+      : [];
+
+  return [...list(path.join(app, 'types/generated')), ...list(path.join(app, 'equivalence'))];
+}
+
 function createProgram(ts, app, rootNames) {
   const configPath = path.join(app, 'tsconfig.json');
   const { config } = ts.readConfigFile(configPath, ts.sys.readFile);
@@ -296,7 +309,7 @@ function collect(checkout, label) {
         'diagnostics.txt': formatDiagnostics(ts, program, checkout, app),
         'equivalence.txt': formatDiagnostics(
           ts,
-          createProgram(ts, app, [path.join(app, 'equivalence/index.ts')]),
+          createProgram(ts, app, equivalenceFiles(app)),
           checkout,
           app
         ),
