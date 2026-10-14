@@ -1,6 +1,5 @@
 import { mapValues, omit } from 'lodash';
 import { idArg, nonNull } from 'nexus';
-import type * as Nexus from 'nexus';
 import { hasSort, pagination } from '@strapi/utils';
 import type { Core, Struct } from '@strapi/types';
 
@@ -18,7 +17,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     getContentTypeArgs(
       contentType: Struct.Schema,
       { multiple = true, isNested = false }: ContentTypeArgsOptions = {}
-    ): Nexus.core.ArgsRecord | undefined {
+    ) {
       const { naming } = getService('utils');
       const { args } = getService('internals');
 
@@ -66,7 +65,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           };
         }
 
-        const params: Nexus.core.ArgsRecord = {
+        const params: Record<string, unknown> = {
           filters: naming.getFiltersInputTypeName(contentType),
           pagination: args.PaginationArg,
           sort: args.SortArg,
@@ -81,7 +80,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       // Single Types
       if (kind === 'singleType') {
-        const params: Nexus.core.ArgsRecord = {};
+        const params: Record<string, unknown> = {};
 
         if (!isNested) {
           Object.assign(params, publicationArgs);
@@ -127,7 +126,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       {
         contentType,
         usePagination = false,
-      }: { contentType: Struct.ContentTypeSchema | Struct.ComponentSchema; usePagination?: boolean }
+      }: { contentType: Struct.ContentTypeSchema; usePagination?: boolean }
     ) {
       const { mappers } = getService('utils');
       const { config } = strapi.plugin('graphql');

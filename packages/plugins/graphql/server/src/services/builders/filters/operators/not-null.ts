@@ -7,7 +7,7 @@ export default () => ({
 
   strapiOperator: '$notNull',
 
-  add(t: Nexus.blocks.InputDefinitionBlock<string>) {
+  add(t: Nexus.blocks.ObjectDefinitionBlock<string>) {
     t.boolean(NOT_NULL_FIELD_NAME);
   },
 });
