@@ -1,4 +1,4 @@
-import type { Modules } from '@strapi/types';
+import type { Core, Modules } from '@strapi/types';
 import { errors } from '@strapi/utils';
 
 import { ENTITY_STAGE_ATTRIBUTE } from '../constants/workflows';
@@ -9,11 +9,17 @@ type Middleware = Modules.Documents.Middleware.Middleware;
 
 /**
  * Get the stage information of an entity
+ * @param {Core.Strapi} strapi - Strapi instance
  * @param {String} uid
  * @param {Number} id
  * @returns {Object}
  */
-const getEntityStage = async (uid: any, id: any, params: any) => {
+const getEntityStage = async (
+  { strapi }: { strapi: Core.Strapi },
+  uid: any,
+  id: any,
+  params: any
+) => {
   const entity = await strapi.documents(uid).findOne({
     ...params,
     documentId: id,
@@ -33,123 +39,145 @@ const getEntityStage = async (uid: any, id: any, params: any) => {
 /**
  * Ensures the entity is assigned to the default workflow stage
  */
-const assignStageOnCreate: Middleware = async (ctx, next) => {
-  if (ctx.action !== 'create' && ctx.action !== 'clone') {
+const assignStageOnCreate =
+  ({ strapi }: { strapi: Core.Strapi }): Middleware =>
+  async (ctx, next) => {
+    if (ctx.action !== 'create' && ctx.action !== 'clone') {
+      return next();
+    }
+
+    /**
+     * Content types can have assigned workflows,
+     * if the CT has one, assign a default value to the stage attribute if it's not present
+     */
+    const workflow = await getService('workflows', { strapi }).getAssignedWorkflow(
+      ctx.contentType.uid,
+      {
+        populate: 'stages',
+      }
+    );
+
+    if (!workflow) {
+      return next();
+    }
+
+    const data = ctx.params.data as Record<string, any>;
+
+    // Assign the default stage if the entity doesn't have one
+    if (ctx.params?.data && data[ENTITY_STAGE_ATTRIBUTE] == null) {
+      data[ENTITY_STAGE_ATTRIBUTE] = { id: workflow.stages[0].id };
+    }
+
     return next();
-  }
+  };
 
-  /**
-   * Content types can have assigned workflows,
-   * if the CT has one, assign a default value to the stage attribute if it's not present
-   */
-  const workflow = await getService('workflows').getAssignedWorkflow(ctx.contentType.uid, {
-    populate: 'stages',
-  });
+const handleStageOnUpdate =
+  ({ strapi }: { strapi: Core.Strapi }): Middleware =>
+  async (ctx, next) => {
+    if (ctx.action !== 'update') {
+      return next();
+    }
 
-  if (!workflow) {
-    return next();
-  }
+    const { documentId } = ctx.params;
+    const data = ctx.params.data as any;
 
-  const data = ctx.params.data as Record<string, any>;
+    if (data?.[ENTITY_STAGE_ATTRIBUTE] == null) {
+      delete data?.[ENTITY_STAGE_ATTRIBUTE];
+      return next();
+    }
 
-  // Assign the default stage if the entity doesn't have one
-  if (ctx.params?.data && data[ENTITY_STAGE_ATTRIBUTE] == null) {
-    data[ENTITY_STAGE_ATTRIBUTE] = { id: workflow.stages[0].id };
-  }
+    /**
+     * Get last stage of the entity
+     */
+    const previousStage = await getEntityStage(
+      { strapi },
+      ctx.contentType.uid,
+      documentId,
+      ctx.params
+    );
 
-  return next();
-};
+    const result = await next();
 
-const handleStageOnUpdate: Middleware = async (ctx, next) => {
-  if (ctx.action !== 'update') {
-    return next();
-  }
+    if (!result) {
+      return result;
+    }
 
-  const { documentId } = ctx.params;
-  const data = ctx.params.data as any;
+    // @ts-expect-error - Property 'strapi_stage' does not exist on type ...
+    const updatedStage = result?.[ENTITY_STAGE_ATTRIBUTE];
 
-  if (data?.[ENTITY_STAGE_ATTRIBUTE] == null) {
-    delete data?.[ENTITY_STAGE_ATTRIBUTE];
-    return next();
-  }
+    // Stage might be null if field is not populated
+    if (updatedStage && previousStage?.id && previousStage.id !== updatedStage.id) {
+      const model = strapi.getModel(ctx.contentType.uid);
 
-  /**
-   * Get last stage of the entity
-   */
-  const previousStage = await getEntityStage(ctx.contentType.uid, documentId, ctx.params);
-
-  const result = await next();
-
-  if (!result) {
-    return result;
-  }
-
-  // @ts-expect-error - Property 'strapi_stage' does not exist on type ...
-  const updatedStage = result?.[ENTITY_STAGE_ATTRIBUTE];
-
-  // Stage might be null if field is not populated
-  if (updatedStage && previousStage?.id && previousStage.id !== updatedStage.id) {
-    const model = strapi.getModel(ctx.contentType.uid);
-
-    strapi.eventHub.emit(WORKFLOW_UPDATE_STAGE, {
-      model: model.modelName,
-      uid: model.uid,
-      // TODO v6: Rename to "entry", which is what is used for regular CRUD updates
-      entity: {
-        // @ts-expect-error - Property 'id' does not exist on type 'number'
-        id: result?.id,
-        documentId,
-        // @ts-expect-error - Property 'locale' does not exist on type 'number'
-        locale: result?.locale,
-        status: 'draft',
-      },
-      workflow: {
-        id: previousStage.workflow.id,
-        stages: {
-          from: {
-            id: previousStage.id,
-            name: previousStage.name,
-          },
-          to: {
-            id: updatedStage.id,
-            name: updatedStage.name,
+      strapi.eventHub.emit(WORKFLOW_UPDATE_STAGE, {
+        model: model.modelName,
+        uid: model.uid,
+        // TODO v6: Rename to "entry", which is what is used for regular CRUD updates
+        entity: {
+          // @ts-expect-error - Property 'id' does not exist on type 'number'
+          id: result?.id,
+          documentId,
+          // @ts-expect-error - Property 'locale' does not exist on type 'number'
+          locale: result?.locale,
+          status: 'draft',
+        },
+        workflow: {
+          id: previousStage.workflow.id,
+          stages: {
+            from: {
+              id: previousStage.id,
+              name: previousStage.name,
+            },
+            to: {
+              id: updatedStage.id,
+              name: updatedStage.name,
+            },
           },
         },
-      },
-    });
-  }
+      });
+    }
 
-  return next();
-};
+    return next();
+  };
 
 /**
  * Check if the entity is at the required stage before publish
  */
-const checkStageBeforePublish: Middleware = async (ctx, next) => {
-  if (ctx.action !== 'publish') {
+const checkStageBeforePublish =
+  ({ strapi }: { strapi: Core.Strapi }): Middleware =>
+  async (ctx, next) => {
+    if (ctx.action !== 'publish') {
+      return next();
+    }
+
+    const workflow = await getService('workflows', { strapi }).getAssignedWorkflow(
+      ctx.contentType.uid,
+      {
+        populate: 'stageRequiredToPublish',
+      }
+    );
+
+    if (!workflow || !workflow.stageRequiredToPublish) {
+      return next();
+    }
+
+    const { documentId } = ctx.params;
+    const entryStage = await getEntityStage(
+      { strapi },
+      ctx.contentType.uid,
+      documentId,
+      ctx.params
+    );
+
+    if (entryStage.id !== workflow.stageRequiredToPublish.id) {
+      throw new errors.ValidationError('Entry is not at the required stage to publish');
+    }
+
     return next();
-  }
+  };
 
-  const workflow = await getService('workflows').getAssignedWorkflow(ctx.contentType.uid, {
-    populate: 'stageRequiredToPublish',
-  });
-
-  if (!workflow || !workflow.stageRequiredToPublish) {
-    return next();
-  }
-
-  const { documentId } = ctx.params;
-  const entryStage = await getEntityStage(ctx.contentType.uid, documentId, ctx.params);
-
-  if (entryStage.id !== workflow.stageRequiredToPublish.id) {
-    throw new errors.ValidationError('Entry is not at the required stage to publish');
-  }
-
-  return next();
-};
-
-export default () => ({
-  assignStageOnCreate,
-  handleStageOnUpdate,
-  checkStageBeforePublish,
+export default ({ strapi }: { strapi: Core.Strapi }) => ({
+  assignStageOnCreate: assignStageOnCreate({ strapi }),
+  handleStageOnUpdate: handleStageOnUpdate({ strapi }),
+  checkStageBeforePublish: checkStageBeforePublish({ strapi }),
 });

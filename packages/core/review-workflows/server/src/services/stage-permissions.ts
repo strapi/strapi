@@ -7,8 +7,8 @@ const { ApplicationError } = errors;
 const validActions = [STAGE_TRANSITION_UID];
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
-  const roleService = getAdminService('role');
-  const permissionService = getAdminService('permission');
+  const roleService = getAdminService('role', { strapi });
+  const permissionService = getAdminService('permission', { strapi });
 
   const getUserRoles = () => {
     const requestState = strapi.requestContext.get()?.state;

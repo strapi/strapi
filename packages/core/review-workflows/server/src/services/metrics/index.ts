@@ -1,5 +1,9 @@
 import '@strapi/types';
 
+// TODO @Nico This service stays a plain object and reads the global `strapi`: user extensions patch
+// `plugin.services['workflow-metrics'].<fn>` on the raw plugin object before core resolves factories,
+// so a factory would break them (see __tests__/plugin-shape.vitest.test.ts).
+
 export const sendDidCreateStage = async () => {
   strapi.telemetry.send('didCreateStage', {});
 };
