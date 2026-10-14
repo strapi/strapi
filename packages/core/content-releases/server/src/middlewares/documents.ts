@@ -1,15 +1,39 @@
-import type { Modules, UID } from '@strapi/types';
+import type { Modules, Schema, UID } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
 import { RELEASE_MODEL_UID, RELEASE_ACTION_MODEL_UID } from '../constants';
 import { getService, isEntryValid } from '../utils';
 
 type Middleware = Modules.Documents.Middleware.Middleware;
 
-interface ReleaseActionsParams {
+type LocaleFilter = { locale?: string | null | { $in: string[] } };
+
+interface ReleaseActionsParams extends LocaleFilter {
   contentType: UID.ContentType;
   entryDocumentId?: Modules.Documents.ID;
-  locale?: string;
 }
+
+/**
+ * The locales a document delete removed, as a filter on release actions. Resolved the way the
+ * document service resolves the `locale` param of a delete.
+ */
+const getDeletedLocalesFilter = async (
+  contentType: Schema.ContentType,
+  locale: unknown
+): Promise<LocaleFilter> => {
+  if (!strapi.localization.isLocalizedContentType(contentType) || locale === '*') {
+    return {};
+  }
+
+  if (Array.isArray(locale)) {
+    return { locale: { $in: locale } };
+  }
+
+  if (typeof locale === 'string' && locale !== '') {
+    return { locale };
+  }
+
+  return { locale: await strapi.localization.getDefaultLocale() };
+};
 
 const updateActionsStatusAndUpdateReleaseStatus = async (
   contentType: UID.ContentType,
@@ -82,7 +106,7 @@ const deleteActionsOnDelete: Middleware = async (ctx, next) => {
     deleteActionsAndUpdateReleaseStatus({
       contentType,
       entryDocumentId: documentId,
-      ...(locale !== '*' && { locale }),
+      ...(await getDeletedLocalesFilter(ctx.contentType, locale)),
     });
   } catch (error) {
     strapi.log.error('Error while deleting release actions after delete', {
