@@ -50,7 +50,8 @@ const middlewareConfigSchema = yup.array().of(
  * Register middlewares in router
  */
 const registerApplicationMiddlewares = async (strapi: Core.Strapi) => {
-  // TODO @Nico `Core.Config.Middlewares` accepts handler functions, which the validation below rejects.
+  // TODO @Nico Without strict types, `Core.Config.Middlewares` still accepts handler functions, which
+  // the validation below rejects (strict types reject them). Narrowing it for everyone waits for a major.
   const middlewareConfig = strapi.config.get('middlewares', defaultConfig);
 
   await validateMiddlewareConfig(middlewareConfig);

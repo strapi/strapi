@@ -1,3 +1,4 @@
+import type * as Core from '..';
 import type { ControllerHandler } from '../controller';
 import type { Middleware, MiddlewareFactory, MiddlewareHandler } from '../middleware';
 import type { Module } from '../module';
@@ -180,3 +181,17 @@ declare const mapChecks: [
 mapChecks satisfies unknown;
 // @ts-expect-error Registered factories receive their config contract.
 cache({ ttl: 1 }, { strapi });
+
+// The global middlewares config accepts names and config objects, not handlers: runtime rejects
+// them when Strapi starts.
+const middlewaresConfig: Core.Config.Middlewares = [
+  'strapi::logger',
+  { name: 'strapi::cors', config: {} },
+  { resolve: './src/middlewares/custom' },
+];
+middlewaresConfig satisfies unknown;
+const handlerConfig: Core.Config.Middlewares = [
+  // @ts-expect-error A handler function is not a valid global middleware entry.
+  async (_ctx: unknown, next: () => unknown) => next(),
+];
+handlerConfig satisfies unknown;
