@@ -517,6 +517,138 @@ describe('Permissions — role editing with userPermissions (non super admin)', 
     expect(screen.queryByRole('button', { name: 'Apply' })).not.toBeInTheDocument();
   });
 
+  describe('combinations held on separate permissions', () => {
+    const READ = 'plugin::content-manager.explorer.read';
+    const CATEGORY = 'api::category.category';
+    const IS_CREATOR = 'admin::is-creator';
+
+    // Category with two fields and two locales
+    const layoutWithDescriptionAndFrench: typeof layout = JSON.parse(JSON.stringify(layout));
+    layoutWithDescriptionAndFrench.sections.collectionTypes.subjects[1].properties[0].children.push(
+      { label: 'description', value: 'description', required: false }
+    );
+    layoutWithDescriptionAndFrench.sections.collectionTypes.subjects[1].properties[1].children.push(
+      { label: 'French (fr)', value: 'fr' }
+    );
+
+    const findSentRead = (ref: React.RefObject<PermissionsAPI>) =>
+      ref
+        .current!.getPermissions()
+        .permissionsToSend.find((perm) => perm.action === READ && perm.subject === CATEGORY);
+
+    it('does not let the user combine the fields of one permission with the locales of another', async () => {
+      const ref = React.createRef<PermissionsAPI>();
+      const userPermissions = [
+        permission(READ, CATEGORY, { fields: ['name'], locales: ['en'] }),
+        permission(READ, CATEGORY, { fields: ['description'], locales: ['fr'] }),
+      ];
+
+      const { user } = render(
+        <Permissions
+          ref={ref}
+          layout={layoutWithDescriptionAndFrench}
+          userPermissions={userPermissions}
+          isFormDisabled={false}
+        />
+      );
+
+      await user.click(screen.getByRole('button', { name: 'Category' }));
+
+      // The checkbox is re-mounted when its tooltip wrapper comes and goes, so query it each time
+      const readCheckbox = (label: string) =>
+        screen.getByRole('checkbox', { name: `Select ${label} Read permission` });
+
+      // Nothing ticked yet: every held value can be picked
+      expect(readCheckbox('fr')).toBeEnabled();
+
+      await user.click(readCheckbox('name'));
+
+      expect(readCheckbox('en')).toBeEnabled();
+      expect(readCheckbox('fr')).toBeDisabled();
+      expect(readCheckbox('description')).toBeEnabled();
+
+      await user.hover(readCheckbox('fr'));
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(UNHELD_TOOLTIP);
+
+      await user.click(readCheckbox('en'));
+
+      expect(readCheckbox('description')).toBeDisabled();
+      expect(findSentRead(ref)?.properties).toEqual({ fields: ['name'], locales: ['en'] });
+
+      // Unticking opens the other combination up again: with only `en` left, `fr` can join it
+      // (a locale on its own grants nothing) but `description` still cannot
+      await user.click(readCheckbox('name'));
+
+      expect(readCheckbox('fr')).toBeEnabled();
+      expect(readCheckbox('description')).toBeDisabled();
+
+      await user.click(readCheckbox('en'));
+
+      expect(readCheckbox('description')).toBeEnabled();
+    });
+
+    it('ticks one held combination when selecting a whole action', async () => {
+      const ref = React.createRef<PermissionsAPI>();
+      const userPermissions = [
+        permission(READ, CATEGORY, { fields: ['name'], locales: ['en'] }),
+        permission(READ, CATEGORY, { fields: ['description'], locales: ['fr'] }),
+      ];
+
+      const { user } = render(
+        <Permissions
+          ref={ref}
+          layout={layoutWithDescriptionAndFrench}
+          userPermissions={userPermissions}
+          isFormDisabled={false}
+        />
+      );
+
+      await user.click(screen.getByRole('button', { name: 'Category' }));
+      await user.click(screen.getByRole('checkbox', { name: 'Select Read category permission' }));
+
+      expect(screen.getByRole('checkbox', { name: 'Select name Read permission' })).toBeChecked();
+      expect(screen.getByRole('checkbox', { name: 'Select en Read permission' })).toBeChecked();
+      expect(
+        screen.getByRole('checkbox', { name: 'Select description Read permission' })
+      ).not.toBeChecked();
+      expect(screen.getByRole('checkbox', { name: 'Select fr Read permission' })).not.toBeChecked();
+
+      expect(findSentRead(ref)?.properties).toEqual({ fields: ['name'], locales: ['en'] });
+    });
+
+    it('fills in the condition once a field held only with that condition is ticked', async () => {
+      const ref = React.createRef<PermissionsAPI>();
+      const userPermissions = [
+        permission(READ, CATEGORY, { fields: ['name'] }),
+        permission(READ, CATEGORY, { fields: ['description'] }, [IS_CREATOR]),
+      ];
+
+      const { user } = render(
+        <Permissions
+          ref={ref}
+          layout={layoutWithDescriptionAndFrench}
+          userPermissions={userPermissions}
+          isFormDisabled={false}
+        />
+      );
+
+      await user.click(screen.getByRole('button', { name: 'Category' }));
+
+      await user.click(screen.getByRole('checkbox', { name: 'Select name Read permission' }));
+
+      // Held unconditionally: no condition is forced
+      expect(findSentRead(ref)?.conditions).toEqual([]);
+
+      await user.click(
+        screen.getByRole('checkbox', { name: 'Select description Read permission' })
+      );
+
+      // `description` is only held under the condition, so it is applied to the whole permission
+      expect(findSentRead(ref)?.properties.fields).toEqual(['name', 'description']);
+      expect(findSentRead(ref)?.conditions).toEqual([IS_CREATOR]);
+    });
+  });
+
   describe('conditions', () => {
     const IS_CREATOR = 'admin::is-creator';
     const SAME_ROLE = 'admin::has-same-role-as-creator';

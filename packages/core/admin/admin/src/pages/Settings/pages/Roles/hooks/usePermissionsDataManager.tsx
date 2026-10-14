@@ -5,7 +5,14 @@ import { createContext } from '@radix-ui/react-context';
 
 import { Condition } from '../../../../../../../shared/contracts/permissions';
 import { Permission as AuthPermission } from '../../../../../features/Auth';
-import { isPermissionHeld } from '../utils/createPermissionChecker';
+import {
+  canTick,
+  findActionForm,
+  getActionSelection,
+  getAllowedConditions,
+  isPermissionHeld,
+  isValueSelected,
+} from '../utils/createPermissionChecker';
 
 import type {
   OnChangeCollectionTypeGlobalActionCheckboxAction,
@@ -40,8 +47,9 @@ export interface PermissionsDataManagerContextValue extends Pick<State, 'modifie
    */
   inheritConditions: boolean;
   /**
-   * Whether the user holds `action` on `subject` and, when given, the `value` of `property`
-   * (`fields` by default, e.g. a field path, or `locales` with a locale code).
+   * Whether the user may tick `action` on `subject` and, when given, the `value` of `property`
+   * (`fields` by default, e.g. a field path, or `locales` with a locale code) next to what is
+   * already ticked for that action. A ticked value stays enabled so it can be unticked.
    */
   checkUserHasPermission: (
     action: string,
@@ -50,46 +58,12 @@ export interface PermissionsDataManagerContextValue extends Pick<State, 'modifie
     property?: string
   ) => boolean;
   /**
-   * The conditions the user may set on `action` / `subject`, or `undefined` when they are not
-   * restricted. See {@link getAllowedConditions}.
+   * The conditions the user may set on `action` / `subject` given what is ticked, or
+   * `undefined` when they are not restricted. See `getAllowedConditions` in
+   * `utils/createPermissionChecker.ts`.
    */
   getAllowedConditions: (action: string, subject: string | null) => string[] | undefined;
 }
-
-/**
- * Conditions are OR-ed by the permission engine, so the server only lets a user grant a
- * permission with conditions no broader than their own: anything goes if one of their matching
- * permissions has no conditions, otherwise a non-empty subset of the union of their conditions.
- *
- * Returns `undefined` when the user is not restricted (super admin, or holds the permission
- * without conditions), otherwise the union of the user's conditions for that action and subject.
- */
-export const getAllowedConditions = (
-  userPermissions: AuthPermission[] | undefined,
-  action: string,
-  subject: string | null
-): string[] | undefined => {
-  if (userPermissions === undefined) {
-    return undefined;
-  }
-
-  const matchingPermissions = userPermissions.filter((perm) => {
-    const fields = perm.properties?.fields;
-
-    // A permission with no fields grants nothing (the permission engine drops it)
-    return (
-      perm.action === action &&
-      (perm.subject ?? null) === subject &&
-      !(Array.isArray(fields) && fields.length === 0)
-    );
-  });
-
-  if (matchingPermissions.some((perm) => !perm.conditions || perm.conditions.length === 0)) {
-    return undefined;
-  }
-
-  return [...new Set(matchingPermissions.flatMap((perm) => perm.conditions ?? []))];
-};
 
 const [PermissionsDataManagerProviderRaw, usePermissionsDataManagerContext] =
   createContext<PermissionsDataManagerContextValue>('PermissionsDataManager');
@@ -118,16 +92,35 @@ const PermissionsDataManagerProvider = ({
   onChangeCollectionTypeGlobalActionCheckbox,
 }: PermissionsDataManagerProviderProps) => {
   const checkUserHasPermission = React.useCallback(
-    (action: string, subject?: string | null, value?: string, property = 'fields'): boolean =>
-      userPermissions === undefined ||
-      isPermissionHeld(userPermissions, action, subject, property, value),
-    [userPermissions]
+    (action: string, subject?: string | null, value?: string, property = 'fields'): boolean => {
+      if (userPermissions === undefined) {
+        return true;
+      }
+
+      if (value === undefined || value === '') {
+        return isPermissionHeld(userPermissions, action, subject);
+      }
+
+      const selection = getActionSelection(findActionForm(modifiedData, subject, action));
+
+      if (isValueSelected(selection, property, value)) {
+        return isPermissionHeld(userPermissions, action, subject, property, value);
+      }
+
+      return canTick(userPermissions, action, subject, selection, property, value);
+    },
+    [userPermissions, modifiedData]
   );
 
   const getAllowedConditionsForUser = React.useCallback(
     (action: string, subject: string | null) =>
-      getAllowedConditions(userPermissions, action, subject),
-    [userPermissions]
+      getAllowedConditions(
+        userPermissions,
+        action,
+        subject,
+        getActionSelection(findActionForm(modifiedData, subject, action))
+      ),
+    [userPermissions, modifiedData]
   );
 
   return (

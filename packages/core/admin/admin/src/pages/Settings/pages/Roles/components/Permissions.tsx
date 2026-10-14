@@ -16,11 +16,12 @@ import { isObject } from '../../../../../utils/objects';
 import {
   PermissionsDataManagerContextValue,
   PermissionsDataManagerProvider,
-  getAllowedConditions,
 } from '../hooks/usePermissionsDataManager';
 import {
-  createFieldPermissionChecker,
-  createDynamicActionPermissionChecker,
+  createBulkPermissionChecker,
+  createSubjectBulkPermissionChecker,
+  getActionSelection,
+  getAllowedConditions,
 } from '../utils/createPermissionChecker';
 import { difference } from '../utils/difference';
 import {
@@ -396,10 +397,11 @@ const buildInheritedConditionsFromExisting = (
 
 /**
  * Fill the conditions of a permission being enabled from the user's own conditions, so the
- * result stays within what the server accepts (see `getAllowedConditions`).
+ * result stays within what the server accepts (see `getAllowedConditions`, which looks at what
+ * is ticked for the action after the update).
  * - Admin tokens (`inheritConditions`): conditions always mirror the user's (none when the
- *   user holds the permission unconditionally).
- * - Roles: only when the user holds the permission solely under conditions and none is
+ *   user holds the selection unconditionally).
+ * - Roles: only when the user holds the selection solely under conditions and none is
  *   selected yet, so conditions picked in the modal are kept.
  */
 const inheritConditionsAtPath = (
@@ -417,7 +419,13 @@ const inheritConditionsAtPath = (
   const obj = data as Record<string, unknown>;
   const pathToConditions = [...pathToActionObject, 'conditions'];
   const existingConditions = get(obj, pathToConditions, undefined);
-  const allowedConditions = getAllowedConditions(userPermissions, actionId, subject);
+  const actionForm = pathToActionObject.length === 0 ? obj : get(obj, pathToActionObject);
+  const allowedConditions = getAllowedConditions(
+    userPermissions,
+    actionId,
+    subject,
+    getActionSelection(actionForm)
+  );
 
   if (!inheritConditions) {
     const hasSelectedConditions =
@@ -454,11 +462,15 @@ const reducer = (state: State, action: Action) =>
           );
 
           if (collectionTypeActionData) {
-            const subjectPermissionChecker = createFieldPermissionChecker(
-              actionId,
-              collectionType,
-              userPermissions
-            );
+            const subjectPermissionChecker = createBulkPermissionChecker({
+              userPermissions,
+              action: actionId,
+              subject: collectionType,
+              actionForm: collectionTypeActionData,
+              scope: collectionTypeActionData,
+              scopePath: [],
+              value,
+            });
 
             let updatedValues = updateValuesWithPermissions(
               collectionTypeActionData,
@@ -519,11 +531,18 @@ const reducer = (state: State, action: Action) =>
             ];
 
             // Undefined when there is no user permission restriction (super admin)
-            const checker = createFieldPermissionChecker(actionId, subject, userPermissions);
+            const checker = createBulkPermissionChecker({
+              userPermissions,
+              action: actionId,
+              subject,
+              actionForm: objToUpdate[actionId],
+              scope: objValue,
+              scopePath: ['properties', propertyName, rowName],
+              value,
+            });
 
             if (!isObject(objValue)) {
-              const hasPermission =
-                checker === undefined || checker(['properties', propertyName, rowName]);
+              const hasPermission = checker === undefined || checker([]);
 
               if (hasPermission) {
                 set(nextModifiedDataState, pathToDataToSet, value);
@@ -539,12 +558,7 @@ const reducer = (state: State, action: Action) =>
                 }
               }
             } else {
-              const permissionChecker =
-                checker === undefined
-                  ? undefined
-                  : (path: string[]) => checker(['properties', propertyName, rowName, ...path]);
-
-              const updatedValue = updateValuesWithPermissions(objValue, value, permissionChecker);
+              const updatedValue = updateValuesWithPermissions(objValue, value, checker);
 
               set(nextModifiedDataState, pathToDataToSet, updatedValue);
               if (value === true) {
@@ -695,11 +709,23 @@ const reducer = (state: State, action: Action) =>
           }
         }
 
-        const permissionChecker = createDynamicActionPermissionChecker(
-          subject,
-          actionId,
-          userPermissions
-        );
+        const permissionChecker =
+          actionId === undefined
+            ? createSubjectBulkPermissionChecker({
+                userPermissions,
+                subject,
+                subjectForm: oldValues,
+                value,
+              })
+            : createBulkPermissionChecker({
+                userPermissions,
+                action: actionId,
+                subject,
+                actionForm: get(nextModifiedDataState, pathToValue.slice(0, 3)),
+                scope: oldValues,
+                scopePath: pathToValue.slice(3),
+                value,
+              });
 
         const updatedValues = updateValuesWithPermissions(oldValues, value, permissionChecker);
 
