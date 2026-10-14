@@ -1,4 +1,5 @@
 import type * as UID from '../../../uid';
+import type { IsStrict } from '../../../core/strictness';
 import type * as Params from '../params/document-engine';
 
 import type { Result } from '.';
@@ -34,13 +35,26 @@ export type Create<
   TParams extends Params.Create<TContentTypeUID>,
 > = Promise<Result<TContentTypeUID, TParams>>;
 
+/**
+ * The result of `clone`. With strict types, it is never `null`: the service always resolves to the
+ * new document ID and the cloned entries. When nothing matches the source document, `entries` is
+ * empty and `documentId` is `undefined` (the ID is read from the first cloned entry). Without strict
+ * types, develop's type.
+ */
 export type Clone<
   TContentTypeUID extends UID.ContentType,
   TParams extends Params.Clone<TContentTypeUID>,
-> = Promise<{
-  documentId: ID;
-  entries: Result<TContentTypeUID, TParams>[];
-} | null>;
+> = Promise<
+  IsStrict extends false
+    ? {
+        documentId: ID;
+        entries: Result<TContentTypeUID, TParams>[];
+      } | null
+    : {
+        documentId: ID | undefined;
+        entries: Result<TContentTypeUID, TParams>[];
+      }
+>;
 
 export type Update<
   TContentTypeUID extends UID.ContentType,

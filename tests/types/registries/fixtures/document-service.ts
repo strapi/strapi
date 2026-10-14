@@ -101,6 +101,14 @@ void articles.update({ documentId: 'a', data: { views: 1 }, status: 'draft' });
 // @ts-expect-error `status` is `draft` or `published`.
 void articles.update({ documentId: 'a', status: 'archived' });
 
+// `clone` never resolves to `null`; without a source entry, `documentId` is `undefined`.
+const cloned = articles.clone({ documentId: 'a' });
+declare const cloneChecks: [
+  Expect<Equal<Awaited<typeof cloned>['documentId'], Data.DocumentID | undefined>>,
+  Expect<Equal<null extends Awaited<typeof cloned> ? true : false, false>>,
+];
+cloneChecks satisfies unknown;
+
 // The Document Service builds `lookup` itself and every method rejects one from the caller.
 // @ts-expect-error `lookup` is internal.
 void articles.findMany({ lookup: { locale: 'fr' } });
