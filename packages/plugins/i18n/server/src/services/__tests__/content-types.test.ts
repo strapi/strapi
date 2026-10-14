@@ -1,15 +1,33 @@
-import type { Struct } from '@strapi/types';
+import type { Core, Struct } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import contentTypesServiceFactory from '../content-types';
 
-const {
+// Typed with the `{ strapi }` argument core passes to service factories.
+const createContentTypesService: (deps: {
+  strapi: Core.Strapi;
+}) => ReturnType<typeof contentTypesServiceFactory> = contentTypesServiceFactory;
+
+let {
   isLocalizedContentType,
   getValidLocale,
   getNonLocalizedAttributes,
   copyNonLocalizedAttributes,
   fillNonLocalizedAttributes,
   getNestedPopulateOfNonLocalizedAttributes,
-} = contentTypesServiceFactory();
+} = createContentTypesService({ strapi: {} as Core.Strapi });
+
+// Sets the mock as the global `strapi` and rebuilds the service with that same mock.
+const setStrapi = (strapi: Core.Strapi) => {
+  global.strapi = strapi;
+  ({
+    isLocalizedContentType,
+    getValidLocale,
+    getNonLocalizedAttributes,
+    copyNonLocalizedAttributes,
+    fillNonLocalizedAttributes,
+    getNestedPopulateOfNonLocalizedAttributes,
+  } = createContentTypesService({ strapi }));
+};
 
 const { ApplicationError } = errors;
 
@@ -143,7 +161,7 @@ describe('content-types service', () => {
   describe('getValidLocale', () => {
     test('set default locale if the provided one is nil', async () => {
       const getDefaultLocale = jest.fn(() => Promise.resolve('en'));
-      global.strapi = {
+      setStrapi({
         plugins: {
           i18n: {
             services: {
@@ -153,7 +171,7 @@ describe('content-types service', () => {
             },
           },
         },
-      } as any;
+      } as any);
       const locale = await getValidLocale(null);
 
       expect(locale).toBe('en');
@@ -161,7 +179,7 @@ describe('content-types service', () => {
 
     test('set locale to the provided one if it exists', async () => {
       const findByCode = jest.fn(() => Promise.resolve('en'));
-      global.strapi = {
+      setStrapi({
         plugins: {
           i18n: {
             services: {
@@ -171,7 +189,7 @@ describe('content-types service', () => {
             },
           },
         },
-      } as any;
+      } as any);
       const locale = await getValidLocale('en');
 
       expect(locale).toBe('en');
@@ -179,7 +197,7 @@ describe('content-types service', () => {
 
     test("throw if provided locale doesn't exist", async () => {
       const findByCode = jest.fn(() => Promise.resolve(undefined));
-      global.strapi = {
+      setStrapi({
         plugins: {
           i18n: {
             services: {
@@ -189,7 +207,7 @@ describe('content-types service', () => {
             },
           },
         },
-      } as any;
+      } as any);
       try {
         await getValidLocale('en');
       } catch (e: any) {
@@ -297,11 +315,11 @@ describe('content-types service', () => {
         },
       };
 
-      global.strapi = {
+      setStrapi({
         components: {
           compo: compoModel,
         },
-      } as any;
+      } as any);
 
       const model = {
         attributes: {
@@ -389,7 +407,7 @@ describe('content-types service', () => {
       };
 
       const getModel = jest.fn(() => modelDef);
-      global.strapi = { getModel } as any;
+      setStrapi({ getModel } as any);
 
       fillNonLocalizedAttributes(entry, relatedEntry, { model: 'model' });
 
@@ -476,7 +494,7 @@ describe('content-types service', () => {
           },
         })[model];
 
-      global.strapi = { getModel } as any;
+      setStrapi({ getModel } as any);
     });
 
     test('Populate component, dz and media and not relations', () => {

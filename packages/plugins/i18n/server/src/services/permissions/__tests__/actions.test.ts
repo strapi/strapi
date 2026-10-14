@@ -1,4 +1,11 @@
-import actionsService from '../actions';
+import type { Core } from '@strapi/types';
+
+import permissionsService from '../../permissions';
+
+// Typed with the `{ strapi }` argument core passes to service factories.
+const createPermissionsService: (deps: {
+  strapi: Core.Strapi;
+}) => ReturnType<typeof permissionsService> = permissionsService;
 
 const mockGetService = jest.fn();
 
@@ -7,6 +14,8 @@ jest.mock('../../../utils', () => ({
 }));
 
 describe('i18n permissions actions', () => {
+  let actionsService: ReturnType<typeof permissionsService>['actions'];
+
   const localizedModel = {
     uid: 'api::article.article',
     pluginOptions: { i18n: { localized: true } },
@@ -58,6 +67,8 @@ describe('i18n permissions actions', () => {
           },
         },
       } as any;
+
+      ({ actions: actionsService } = createPermissionsService({ strapi: global.strapi }));
     });
 
     test('fills in default locale for permissions with empty locales', async () => {
@@ -178,6 +189,8 @@ describe('i18n permissions actions', () => {
           error: jest.fn(),
         },
       } as any;
+
+      ({ actions: actionsService } = createPermissionsService({ strapi: global.strapi }));
 
       return { update };
     };

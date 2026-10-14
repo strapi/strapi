@@ -1,8 +1,11 @@
+import type { Core } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import controller from '../content-types';
 import ctServiceFactory from '../../services/content-types';
 
-const ctService = ctServiceFactory();
+// Typed with the `{ strapi }` argument core passes to service factories.
+const createCtService: (deps: { strapi: Core.Strapi }) => ReturnType<typeof ctServiceFactory> =
+  ctServiceFactory;
 
 const { ApplicationError } = errors;
 
@@ -46,7 +49,7 @@ describe('i18n - Controller - content-types', () => {
           }
         },
         plugins: {
-          i18n: { services: { 'content-types': ctService } },
+          i18n: { services: {} },
           'content-manager': contentManagerPlugin,
         },
         admin: {
@@ -54,6 +57,10 @@ describe('i18n - Controller - content-types', () => {
         },
         db: {},
       } as any;
+
+      global.strapi.plugins.i18n.services['content-types'] = createCtService({
+        strapi: global.strapi,
+      });
     });
 
     test('model not localized', async () => {

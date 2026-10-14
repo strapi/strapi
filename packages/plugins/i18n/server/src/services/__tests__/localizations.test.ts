@@ -1,12 +1,17 @@
-import type { Schema } from '@strapi/types';
+import type { Core, Schema } from '@strapi/types';
 
 import localizationsService from '../localizations';
 import localesService from '../locales';
 import contentTypesService from '../content-types';
 
-const { syncNonLocalizedAttributes } = localizationsService();
-const locales = localesService();
-const contentTypes = contentTypesService();
+type Deps = { strapi: Core.Strapi };
+
+// Typed with the `{ strapi }` argument core passes to service factories.
+const createLocalizations: (deps: Deps) => ReturnType<typeof localizationsService> =
+  localizationsService;
+const createLocales: (deps: Deps) => ReturnType<typeof localesService> = localesService;
+const createContentTypes: (deps: Deps) => ReturnType<typeof contentTypesService> =
+  contentTypesService;
 
 const model = {
   uid: 'test-model',
@@ -60,10 +65,7 @@ const allLocalizedModel = {
 global.strapi = {
   plugins: {
     i18n: {
-      services: {
-        locales,
-        'content-types': contentTypes,
-      },
+      services: {},
     },
   },
   db: {
@@ -83,6 +85,13 @@ global.strapi = {
     }
   ),
 } as any;
+
+Object.assign(global.strapi.plugins.i18n.services, {
+  locales: createLocales({ strapi: global.strapi }),
+  'content-types': createContentTypes({ strapi: global.strapi }),
+});
+
+const { syncNonLocalizedAttributes } = createLocalizations({ strapi: global.strapi });
 
 const findMany = jest.fn(() => [{ id: 1, locale: 'fr' }]);
 const update = jest.fn();

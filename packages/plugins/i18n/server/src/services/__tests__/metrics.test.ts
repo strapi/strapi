@@ -1,7 +1,16 @@
+import type { Core } from '@strapi/types';
+
 import metricsLoader from '../metrics';
 import contentTypeService from '../content-types';
 
-const { isLocalizedContentType } = contentTypeService();
+type Deps = { strapi: Core.Strapi };
+
+// Typed with the `{ strapi }` argument core passes to service factories.
+const createMetrics: (deps: Deps) => ReturnType<typeof metricsLoader> = metricsLoader;
+const createContentTypes: (deps: Deps) => ReturnType<typeof contentTypeService> =
+  contentTypeService;
+
+const { isLocalizedContentType } = createContentTypes({ strapi: {} as Core.Strapi });
 
 describe('Metrics', () => {
   test('sendDidInitializeEvent', async () => {
@@ -39,7 +48,7 @@ describe('Metrics', () => {
       },
     } as any;
 
-    const { sendDidInitializeEvent } = metricsLoader();
+    const { sendDidInitializeEvent } = createMetrics({ strapi: global.strapi });
 
     await sendDidInitializeEvent();
 
@@ -85,7 +94,7 @@ describe('Metrics', () => {
       },
     } as any;
 
-    const { sendDidUpdateI18nLocalesEvent } = metricsLoader();
+    const { sendDidUpdateI18nLocalesEvent } = createMetrics({ strapi: global.strapi });
 
     await sendDidUpdateI18nLocalesEvent();
 
