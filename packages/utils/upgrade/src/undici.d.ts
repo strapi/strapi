@@ -10,3 +10,17 @@ declare module 'undici/lib/dispatcher/dispatcher1-wrapper.js' {
 
   export default Dispatcher1Wrapper;
 }
+
+declare module 'undici/lib/dispatcher/dispatcher.js' {
+  import { Dispatcher } from 'undici';
+
+  export default Dispatcher;
+}
+
+declare module 'undici/lib/api/api-connect.js' {
+  import type { Dispatcher } from 'undici';
+
+  const connect: Dispatcher['connect'];
+
+  export default connect;
+}

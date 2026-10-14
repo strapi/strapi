@@ -8,6 +8,8 @@ import { packageManager } from '@strapi/utils';
 /* eslint-disable import/extensions -- required by the ESM build: undici has no exports map */
 import ProxyAgent from 'undici/lib/dispatcher/proxy-agent.js';
 import Dispatcher1Wrapper from 'undici/lib/dispatcher/dispatcher1-wrapper.js';
+import Dispatcher from 'undici/lib/dispatcher/dispatcher.js';
+import connect from 'undici/lib/api/api-connect.js';
 /* eslint-enable import/extensions */
 import * as constants from './constants';
 import { isLiteralSemVer } from '../version';
@@ -15,6 +17,10 @@ import { isLiteralSemVer } from '../version';
 import type { Package as PackageInterface, NPMPackage, NPMPackageVersion } from './types';
 import type { Version } from '../version';
 import { Logger } from '../logger';
+
+// undici's main entry adds connect() to every dispatcher. ProxyAgent needs it to open the CONNECT
+// tunnel used for https targets such as the npm registry, so add it here since the entry is skipped.
+Dispatcher.prototype.connect ??= connect;
 
 const proxyUrl = process.env.HTTP_PROXY || process.env.HTTPS_PROXY;
 // Wrapped so Node's built-in fetch (bundling its own undici) can use an undici 8 dispatcher

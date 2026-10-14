@@ -5,7 +5,13 @@ import type { Core, Modules } from '@strapi/types';
 /* eslint-disable import/extensions -- required by the ESM build: undici has no exports map */
 import ProxyAgent from 'undici/lib/dispatcher/proxy-agent.js';
 import Dispatcher1Wrapper from 'undici/lib/dispatcher/dispatcher1-wrapper.js';
+import Dispatcher from 'undici/lib/dispatcher/dispatcher.js';
+import connect from 'undici/lib/api/api-connect.js';
 /* eslint-enable import/extensions */
+
+// undici's main entry adds connect() to every dispatcher. ProxyAgent needs it to open the CONNECT
+// tunnel used for https targets, so add it here since the main entry is skipped.
+Dispatcher.prototype.connect ??= connect;
 
 // TODO: once core Node exposes a stable way to create a ProxyAgent we will use that instead of undici
 
@@ -13,13 +19,22 @@ interface StrapiFetchOptions {
   logs?: boolean;
 }
 
+const isStream = (body: RequestInit['body']) =>
+  body instanceof ReadableStream ||
+  (typeof body === 'object' && body !== null && Symbol.asyncIterator in body);
+
 // Node's built-in fetch adds its own Content-Length, and undici 8 dispatchers reject the duplicated
 // header (https://github.com/nodejs/undici/issues/5500), so drop the caller's one when proxying.
+// A stream body has no length of its own and keeps the header, otherwise it would be sent chunked.
 // TODO: remove once https://github.com/nodejs/undici/pull/5502 is released and installed
 const withoutContentLength = (
   input: Parameters<Fetch>[0],
   init?: RequestInit
 ): RequestInit | undefined => {
+  if (isStream(init?.body)) {
+    return init;
+  }
+
   const headers = new Headers(
     init?.headers ?? (input instanceof Request ? input.headers : undefined)
   );
