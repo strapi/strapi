@@ -14,7 +14,7 @@ import homepage from '../homepage';
 import customOrder from '../custom-order';
 
 /** Controllers of the core Content Manager routes, without the history, preview and homepage features. */
-export const coreControllers = {
+const coreControllers = {
   'collection-types': collectionTypes,
   components,
   'content-types': contentTypes,
