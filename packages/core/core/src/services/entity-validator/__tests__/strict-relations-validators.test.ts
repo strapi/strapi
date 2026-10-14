@@ -290,6 +290,19 @@ describe('Entity validator - strictRelations', () => {
       ).rejects.toMatchObject({ name: 'ValidationError' });
     });
 
+    // A null `set` beside a connect is not a clear. Released behaviour applies the
+    // connect, so a required update must keep accepting it.
+    test('strict + non-draft + { set: null, connect: [id] } → passes', async () => {
+      global.strapi.getModel = () => requiredRelationModel;
+
+      const data = await entityValidator.validateEntityUpdate(
+        requiredRelationModel,
+        { author: { set: null, connect: [1] } },
+        { strictRelations: true }
+      );
+      expect(data).toEqual({ author: { set: null, connect: [1] } });
+    });
+
     // Behaviour 1: a bare `{ connect: [] }` on UPDATE adds nothing and removes nothing,
     // so it can't be what empties a required field → treated as a no-op that passes.
     // (The admin CM can emit this when it diffs an unchanged relation field.)

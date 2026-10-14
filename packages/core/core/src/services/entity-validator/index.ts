@@ -252,10 +252,12 @@ const hasRelationValue = (value: unknown): boolean => {
     const connect = (value as { connect?: unknown }).connect;
     const set = (value as { set?: unknown }).set;
 
-    // `{ set: null }` with no `connect` is an explicit clear, same as `{ set: [] }`.
-    // `isNil` skips a null `set`, and the leftover object would then count as a value,
-    // so a required field would accept a payload the entity manager deletes.
-    if (has(value, 'set') && isNil(set) && isNil(connect)) {
+    // `{ set: null }` alone is an explicit clear, same as `{ set: [] }`. `isNil`
+    // skips a null `set`, and the leftover object would then count as a value.
+    // A null `set` next to `connect` or `disconnect` is not a clear: the entity
+    // manager ignores that null and runs the delta, matching released behaviour.
+    const disconnect = (value as { disconnect?: unknown }).disconnect;
+    if (has(value, 'set') && isNil(set) && isNil(connect) && isNil(disconnect)) {
       return false;
     }
 

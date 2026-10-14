@@ -714,6 +714,22 @@ describe('media connect/disconnect delta payloads', () => {
       expect(read.body.data.gallery).toEqual([]);
       expect(await countGalleryRows(id)).toBe(0);
     });
+
+    // A null `set` combined with connect is the released behaviour: the null is
+    // ignored and the connect runs. It must not clear the field.
+    test('{ set: null, connect: [B] } swaps the cover to B', async () => {
+      const { id, documentId } = await createWithCover();
+
+      const update = await updateEntry(
+        SINGLE_UID,
+        documentId,
+        { cover: { set: null, connect: [fileB] } },
+        { populate: ['cover'] }
+      );
+      expect(update.statusCode).toBe(200);
+      expect((await readCover(documentId)).id).toBe(fileB);
+      expect(await countJoinRows(id, 'cover')).toBe(1);
+    });
   });
 
   describe('Non-media morphOne is never truncated', () => {
@@ -926,6 +942,53 @@ describe('media connect/disconnect delta payloads', () => {
       expect(update.statusCode).toBe(200);
       expect(await readRelationDocumentIds('tags', documentId)).toEqual([]);
       expect(await countLinks('tags', id)).toBe(0);
+    });
+
+    test('{ set: null, connect: [B] } on a oneToOne applies the connect', async () => {
+      const res = await createEntry(HOLDER_UID, {
+        pick: { connect: [{ documentId: targetA }] },
+      });
+      expect(res.statusCode).toBe(201);
+      const { id, documentId } = res.body.data;
+
+      const update = await updateEntry(HOLDER_UID, documentId, {
+        pick: { set: null, connect: [{ documentId: targetB }] },
+      });
+      expect(update.statusCode).toBe(200);
+      expect(await readRelationDocumentIds('pick', documentId)).toEqual([targetB]);
+      expect(await countLinks('pick', id)).toBe(1);
+    });
+
+    test('{ set: null, connect: [C] } on a manyToMany adds C', async () => {
+      const res = await createEntry(HOLDER_UID, {
+        tags: { connect: [{ documentId: targetA }, { documentId: targetB }] },
+      });
+      expect(res.statusCode).toBe(201);
+      const { id, documentId } = res.body.data;
+
+      const update = await updateEntry(HOLDER_UID, documentId, {
+        tags: { set: null, connect: [{ documentId: targetC }] },
+      });
+      expect(update.statusCode).toBe(200);
+      expect(await readRelationDocumentIds('tags', documentId)).toEqual(
+        expect.arrayContaining([targetA, targetB, targetC])
+      );
+      expect(await countLinks('tags', id)).toBe(3);
+    });
+
+    test('{ set: null, disconnect: [A] } on a manyToMany removes only A', async () => {
+      const res = await createEntry(HOLDER_UID, {
+        tags: { connect: [{ documentId: targetA }, { documentId: targetB }] },
+      });
+      expect(res.statusCode).toBe(201);
+      const { id, documentId } = res.body.data;
+
+      const update = await updateEntry(HOLDER_UID, documentId, {
+        tags: { set: null, disconnect: [{ documentId: targetA }] },
+      });
+      expect(update.statusCode).toBe(200);
+      expect(await readRelationDocumentIds('tags', documentId)).toEqual([targetB]);
+      expect(await countLinks('tags', id)).toBe(1);
     });
   });
 

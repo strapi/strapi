@@ -165,15 +165,22 @@ const toAssocs = (data: Assocs) => {
     };
   }
 
-  // Check for the `set` key by presence, not truthiness: `{ set: null }` is a valid
-  // "clear this field" payload. A truthiness check let it fall through to the
-  // connect/disconnect branch below, where it arrived without a `set` key and was
-  // then indistinguishable from a delta payload — silently preserving the relation
-  // instead of clearing it.
+  // `{ set: null }` alone is a clear. Check the key by presence, not truthiness:
+  // a truthiness check let it fall through and look like an empty delta, so the
+  // relation was preserved.
+  //
+  // A null `set` sent together with `connect` or `disconnect` stays on that delta
+  // path. Released Strapi ignored the null because it is falsy and applied the
+  // delta; callers can already be depending on that. A non-null `set` still wins.
   if (isRecord(data) && has(data, 'set') && data.set !== undefined) {
-    return {
-      set: data.set === null ? data.set : toIdArray(data.set),
-    };
+    const nullSetWithDelta =
+      data.set === null && (has(data, 'connect') || has(data, 'disconnect'));
+
+    if (!nullSetWithDelta) {
+      return {
+        set: data.set === null ? data.set : toIdArray(data.set),
+      };
+    }
   }
 
   return {
