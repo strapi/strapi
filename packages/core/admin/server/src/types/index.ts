@@ -24,6 +24,7 @@ import type EEPersistTablesService from '../../../ee/server/src/services/persist
 import type EERoleService from '../../../ee/server/src/services/role';
 import type EESeatEnforcementService from '../../../ee/server/src/services/seat-enforcement';
 import type EEUserService from '../../../ee/server/src/services/user';
+import type { AdminRole } from '../../../shared/contracts/shared';
 
 export type * as Policies from './policies';
 export type { RateLimitOptions } from './rate-limit';
@@ -40,6 +41,17 @@ type EditionService<TCE, TEE> = TCE & Partial<Omit<TEE, keyof TCE>>;
  * `strapi.service<EnterpriseServices['role']>('admin::role')`.
  */
 type EnterpriseService<TCE, TEE> = Omit<TCE, keyof TEE> & TEE;
+
+/**
+ * The `admin::role` service as runtime calls it: `findOne` resolves to `null` when no role matches.
+ * The implementation keeps develop's published `Promise<AdminRole>`.
+ */
+type RoleService<TService extends { findOne: (...args: never[]) => unknown }> = Omit<
+  TService,
+  'findOne'
+> & {
+  findOne(...args: Parameters<(typeof CERoleService)['findOne']>): Promise<AdminRole | null>;
+};
 
 /**
  * What an action provider receives in the registered contract. Settings actions have a category,
@@ -97,7 +109,7 @@ export type EnterpriseServices = {
   auth: EnterpriseService<typeof CEAuthService, typeof EEAuthService>;
   metrics: EnterpriseService<typeof CEMetricsService, typeof EEMetricsService>;
   passport: EnterpriseService<typeof CEPassportService, typeof EEPassportService>;
-  role: EnterpriseService<typeof CERoleService, typeof EERoleService>;
+  role: RoleService<EnterpriseService<typeof CERoleService, typeof EERoleService>>;
   user: EnterpriseService<typeof CEUserService, typeof EEUserService>;
 };
 
@@ -130,7 +142,7 @@ declare global {
         'admin::permission': PermissionServiceContract;
         'admin::persist-tables': typeof EEPersistTablesService | undefined;
         'admin::project-settings': typeof ProjectSettingsService;
-        'admin::role': EditionService<typeof CERoleService, typeof EERoleService>;
+        'admin::role': RoleService<EditionService<typeof CERoleService, typeof EERoleService>>;
         'admin::seat-enforcement': typeof EESeatEnforcementService | undefined;
         'admin::token': typeof TokenService;
         'admin::transfer': typeof TransferService;
