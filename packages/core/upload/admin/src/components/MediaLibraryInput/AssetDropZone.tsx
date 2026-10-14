@@ -13,13 +13,12 @@ import { getTranslationKey } from '../../utils/translations';
  */
 export type ZoneVariant = 'bar' | 'tile' | 'stacked';
 
-const Zone = styled.button<{ $isDragging: boolean; $variant: ZoneVariant }>`
+const Zone = styled.div<{ $isDragging: boolean; $variant: ZoneVariant }>`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.spaces[4]};
   width: 100%;
   border-radius: ${({ theme }) => theme.borderRadius};
-  cursor: pointer;
   text-align: ${({ $variant }) => ($variant === 'bar' ? 'start' : 'center')};
 
   ${({ $variant, theme }) =>
@@ -48,13 +47,8 @@ const Zone = styled.button<{ $isDragging: boolean; $variant: ZoneVariant }>`
     background: ${theme.colors.primary100};
   `}
 
-  &[aria-disabled='true'] {
+  &[data-disabled='true'] {
     cursor: not-allowed;
-  }
-
-  &:focus-visible {
-    outline: 2px solid ${({ theme }) => theme.colors.primary600};
-    outline-offset: 2px;
   }
 `;
 
@@ -70,12 +64,14 @@ const IconFrame = styled(Flex)`
 interface AssetDropZoneProps {
   variant?: ZoneVariant;
   disabled?: boolean;
-  onClick: () => void;
   onDropFiles: (files: globalThis.File[]) => void;
 }
 
 /**
- * The field's own drop target. Deliberately not the Media Library page's
+ * The field's own drop target. It only takes drops: browsing and picking files
+ * go through the "Add asset" menu, so the field has one way in, not two.
+ *
+ * Deliberately not the Media Library page's
  * `UploadDropZoneProvider`: that one covers a whole route and paints a
  * full-surface overlay, where this has to stay inside one field on a form that
  * may hold several of them.
@@ -83,7 +79,6 @@ interface AssetDropZoneProps {
 export const AssetDropZone = ({
   variant = 'bar',
   disabled = false,
-  onClick,
   onDropFiles,
 }: AssetDropZoneProps) => {
   const { formatMessage } = useIntl();
@@ -138,11 +133,9 @@ export const AssetDropZone = ({
 
   return (
     <Zone
-      type="button"
       $isDragging={isDragging}
       $variant={variant}
-      aria-disabled={disabled}
-      onClick={() => !disabled && onClick()}
+      data-disabled={disabled}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}

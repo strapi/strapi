@@ -131,7 +131,7 @@ const renderInput = (
     },
   });
 
-const getDropZone = () => screen.getByRole('button', { name: 'Drag & drop an asset here' });
+const getDropZone = () => screen.getByText('Drag & drop an asset here');
 
 const dropFiles = (files: globalThis.File[]) => {
   fireEvent.drop(getDropZone(), {
@@ -205,9 +205,7 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
       expect(screen.getByText('one.png')).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Copy link to one.png' })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Remove one.png' })).toBeInTheDocument();
-      expect(
-        screen.queryByRole('button', { name: 'Drag & drop an asset here' })
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText('Drag & drop an asset here')).not.toBeInTheDocument();
     });
 
     it('shows the upload in progress, then the uploaded asset', async () => {
@@ -345,6 +343,16 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
       );
     });
 
+    it('keeps the disabled actions as bare icons, not grey plates', () => {
+      renderInput({ disabled: true }, { cover: asset(1, 'one.png') });
+
+      for (const name of ['Edit one.png', 'Remove one.png']) {
+        const style = window.getComputedStyle(screen.getByRole('button', { name }));
+        expect(style.backgroundColor).toBe('transparent');
+        expect(style.borderColor).toBe('transparent');
+      }
+    });
+
     it('removes the asset', async () => {
       const { user } = renderInput({}, { cover: asset(1, 'one.png') });
 
@@ -378,35 +386,17 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
       expect(await screen.findByRole('menuitem', { name: 'Remove' })).toBeInTheDocument();
       expect(screen.queryByRole('menuitem', { name: 'Edit' })).not.toBeInTheDocument();
     });
+  });
 
-    it('opens the device picker instead of the library when the drop zone is clicked', async () => {
-      const click = jest.spyOn(HTMLInputElement.prototype, 'click').mockImplementation(() => {});
-      const { user } = renderInput();
+  it('opens nothing when the drop zone is clicked', async () => {
+    const click = jest.spyOn(HTMLInputElement.prototype, 'click').mockImplementation(() => {});
+    const { user } = renderInput();
 
-      await user.click(getDropZone());
+    await user.click(getDropZone());
 
-      expect(click).toHaveBeenCalledTimes(1);
-      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-      click.mockRestore();
-    });
-
-    it('explains the missing access on click without upload access either', async () => {
-      mockPermissions.canCreate = false;
-      const click = jest.spyOn(HTMLInputElement.prototype, 'click').mockImplementation(() => {});
-      const { user } = renderInput();
-
-      await user.click(getDropZone());
-
-      expect(click).not.toHaveBeenCalled();
-      expect(await screen.findByRole('dialog')).toHaveTextContent(
-        "You don't have the permissions to access that content"
-      );
-
-      await user.click(screen.getByRole('button', { name: 'Cancel' }));
-
-      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
-      click.mockRestore();
-    });
+    expect(click).not.toHaveBeenCalled();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    click.mockRestore();
   });
 
   describe('multiple field', () => {
@@ -718,10 +708,10 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
 
       for (const name of ['Browse library', 'Upload from device', 'Upload from URL']) {
         // eslint-disable-next-line no-await-in-loop
-        expect(await screen.findByRole('menuitem', { name })).toHaveAttribute(
-          'aria-disabled',
-          'true'
-        );
+        const item = await screen.findByRole('menuitem', { name });
+        expect(item).toHaveAttribute('aria-disabled', 'true');
+        // neutral500: the label greys out along with its icon.
+        expect(window.getComputedStyle(item).color).toBe('rgb(142, 142, 169)');
       }
     });
 
