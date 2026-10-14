@@ -19,14 +19,18 @@ export const getAdminService = <TName extends ServiceName<'admin::'>>(
   return strapi.service<NonNullable<Core.ServiceFor<`admin::${TName}`>>>(`admin::${name}`);
 };
 
-/** Retrieves a registered Review Workflows service, including application overrides. */
+/**
+ * Retrieves a registered Review Workflows service, including application overrides. The plugin
+ * code only runs with the `review-workflows` feature, where its services, `undefined` otherwise,
+ * are defined.
+ */
 export const getService = <TName extends ServiceName<'plugin::review-workflows.'>>(
   name: TName,
   { strapi } = { strapi: global.strapi }
-): Core.ServiceFor<`plugin::review-workflows.${TName}`> => {
+): NonNullable<Core.ServiceFor<`plugin::review-workflows.${TName}`>> => {
   return strapi
     .plugin('review-workflows')
-    .service<Core.ServiceFor<`plugin::review-workflows.${TName}`>>(name);
+    .service<NonNullable<Core.ServiceFor<`plugin::review-workflows.${TName}`>>>(name);
 };
 
 export default {
