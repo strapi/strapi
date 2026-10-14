@@ -25,9 +25,7 @@ type Query = {
 const createPermissionChecker =
   (strapi: Core.Strapi) =>
   ({ userAbility, model }: { userAbility: Ability; model: string }) => {
-    // `any`, as the untyped lookup was on develop: the sanitizers and validators below publish its
-    // results as `any`. The registered contract types them.
-    const permissionsManager: any = strapi
+    const permissionsManager = strapi
       .service('admin::permission')
       .createPermissionsManager({ ability: userAbility, model });
 
