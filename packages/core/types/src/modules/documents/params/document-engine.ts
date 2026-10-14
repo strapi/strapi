@@ -1,7 +1,11 @@
 import type * as UID from '../../../uid';
+import type { IsStrict } from '../../../core/strictness';
 
-import { Pick } from '.';
+import { Pick, type Kind } from '.';
 import { ID } from '..';
+
+/** `TKind` with strict types only: without them, the method params stay as on develop. */
+type StrictKind<TKind extends Kind> = IsStrict extends false ? never : TKind;
 
 /**
  * Document Service specific method params
@@ -74,9 +78,14 @@ export type Clone<TContentTypeUID extends UID.ContentType> = Pick<
   documentId: ID;
 };
 
+/**
+ * With strict types, `update` also takes `status`, as at runtime. The draft is updated in every case;
+ * with draft and publish, `status: 'published'` then publishes it and resolves to the published
+ * entry. The core service's `update` always passes it.
+ */
 export type Update<TContentTypeUID extends UID.ContentType> = Pick<
   TContentTypeUID,
-  'data:partial' | 'fields' | 'populate' | 'locale:string' | 'lookup'
+  'data:partial' | 'fields' | 'populate' | 'locale:string' | 'lookup' | StrictKind<'status'>
 > & {
   documentId: ID;
 };

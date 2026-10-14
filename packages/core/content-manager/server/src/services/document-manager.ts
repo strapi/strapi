@@ -99,7 +99,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
     ) {
       const publishData = flow(omitPublishedAtField, omitIdField)(opts.data || {});
       const populate = opts.populate ?? (await buildDeepPopulate(uid));
-      const params = { ...opts, data: publishData, populate, status: 'draft' };
+      const params = { ...opts, data: publishData, populate, status: 'draft' as const };
 
       return strapi.documents(uid).update({ ...params, documentId: id });
     },
