@@ -10,7 +10,7 @@ export type Configuration = {
   typeDefs?: string;
   resolvers?: object;
   resolversConfig?: object;
-  plugins?: Nexus.core.NexusPlugin[];
+  plugins?: Nexus.PluginConfig[];
 };
 
 export type ConfigurationFactory = (options: {
@@ -24,7 +24,7 @@ export type Extension = {
   typeDefs: string[];
   resolvers: object;
   resolversConfig: object;
-  plugins: Nexus.core.NexusPlugin[];
+  plugins: Nexus.PluginConfig[];
 };
 
 const getDefaultState = (): Extension => ({

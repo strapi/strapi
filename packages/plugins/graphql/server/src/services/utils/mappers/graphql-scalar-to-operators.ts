@@ -1,19 +1,16 @@
-import { mapValues } from 'lodash';
+import { mapValues, get } from 'lodash';
 import type { Context } from '../../types';
 
 export default ({ strapi }: Context) => ({
   graphqlScalarToOperators(graphqlScalar: string) {
-    const { GRAPHQL_SCALAR_OPERATORS } = strapi.plugin('graphql').service('constants');
-    const { operators } = strapi.plugin('graphql').service('builders').filters;
-    type Operator = (typeof operators)[keyof typeof operators];
-    const operatorsByName: Record<string, Operator> = operators;
+    // Untyped, as the lookups were on develop: the published return type stays develop's.
+    const { GRAPHQL_SCALAR_OPERATORS } = strapi.plugin('graphql').service<any>('constants');
+    const { operators } = strapi.plugin('graphql').service<any>('builders').filters;
 
-    const associations: Record<string, Operator[]> = mapValues(
-      GRAPHQL_SCALAR_OPERATORS,
-      (operatorNames: readonly string[]) =>
-        operatorNames.map((operatorName) => operatorsByName[operatorName])
+    const associations = mapValues(GRAPHQL_SCALAR_OPERATORS, (operatorNames: string[]) =>
+      operatorNames.map((operatorName) => operators[operatorName])
     );
 
-    return associations[graphqlScalar] as Operator[] | undefined;
+    return get(associations, graphqlScalar);
   },
 });
