@@ -50,7 +50,8 @@ export interface FieldChange<T = string | number | boolean | null> {
  * The subscriber adds action, date, actor and origin.
  */
 export interface EventShape<TDetails = unknown, TResource extends Resource = Resource> {
-  resource: TResource;
+  // Absent when there is no known resource, e.g. a failed login for an unknown account.
+  resource?: TResource;
   details?: TDetails;
   // Only present when the action can fail (e.g. publish).
   outcome?: Outcome;
