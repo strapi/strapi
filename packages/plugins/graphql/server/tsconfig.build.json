@@ -1,12 +1,9 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": ["./tsconfig.json", "tsconfig/declarations.json"],
   "compilerOptions": {
     "rootDir": "../",
     "outDir": "../dist",
-    "noEmit": false,
-    // Declarations are emitted without the strict types opt-in, so inferred types resolve as
-    // applications without strict types see them. `test:ts` checks the sources with it.
-    "types": ["node"]
+    "noEmit": false
   },
   "include": ["./src"],
   "exclude": ["**/*.test.ts", "./src/registries.ts"]

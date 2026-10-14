@@ -15,6 +15,21 @@ Strapi's server packages type-check in strict mode. The shared `tsconfig/server.
 loads only the switch, `@strapi/types/strict`. It does not load `@strapi/strapi/strict-types`,
 which is the application entry. No published source imports the switch.
 
+Published declarations are emitted **without** the switch. Each server package's
+`tsconfig.build.json` extends `["./tsconfig.json", "tsconfig/declarations.json"]`, and the second
+preset resets `types` to `["node", "jest"]`. Inferred types in `dist/**/*.d.ts` then resolve as
+applications without strict mode see them, instead of freezing strict-mode results (registered
+contracts, strict lookups). Package sources must therefore compile in both modes:
+
+- Root lookups (`strapi.service()`, `strapi.controller()`, `strapi.middleware()`,
+  `strapi.policy()`) take a type argument only in strict mode. Cast the result instead:
+  `strapi.service(uid) as MyService`. Plugin-scoped lookups (`strapi.plugin(name).service<T>()`)
+  are generic in both modes.
+- Packages whose `registries.ts` imports `@strapi/strapi/strict-types` (plugins) exclude it from
+  `tsconfig.build.json`, since it turns strict mode on.
+- `yarn test:ts` keeps checking the sources in strict mode, and the strict-off parity helper
+  (`tests/types/strict-off-parity`) compares the published types with develop.
+
 A package's own contracts come from its `src/` directory. A package that looks up another
 package's services, controllers, policies, or config loads that package's contracts from
 `server/src/registries.ts`:

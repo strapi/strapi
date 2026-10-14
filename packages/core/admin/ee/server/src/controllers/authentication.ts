@@ -24,7 +24,9 @@ const providerAuthenticationFlow = compose([
 
 export default {
   async getProviders(ctx: Context) {
-    const { providerRegistry } = strapi.service<EnterpriseServices['passport']>('admin::passport');
+    const { providerRegistry } = strapi.service(
+      'admin::passport'
+    ) as EnterpriseServices['passport'];
 
     ctx.body = providerRegistry.getAll().map(toProviderDTO);
   },
@@ -68,7 +70,9 @@ export default {
       params: { provider: providerName },
     } = ctx;
 
-    const { providerRegistry } = strapi.service<EnterpriseServices['passport']>('admin::passport');
+    const { providerRegistry } = strapi.service(
+      'admin::passport'
+    ) as EnterpriseServices['passport'];
 
     if (!providerRegistry.has(providerName)) {
       throw new ValidationError(`Invalid provider supplied: ${providerName}`);
