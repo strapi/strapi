@@ -131,6 +131,23 @@ names. A package that registers policies or middlewares registers all of them.
   Type generation registers application middlewares (`global::*`, `api::*`) in `AppMiddlewares`
   (`types/generated/middlewares.d.ts`).
 
+### Hook contracts
+
+`Strapi.Registries.Hooks` maps a hook UID to the hook's contract: its kind and the context its
+handlers receive, e.g. `Core.AsyncParallelHook<Core.ContentTypesSyncContext>`. It is additive, with
+no `Package*` and `App*` pair: any code can replace a hook at runtime (`set` overwrites it, `extend`
+wraps it), but the package that calls the hook builds the context, so nobody else can change it.
+
+- The package that sets and calls a hook registers it. Applications register their own hooks in the
+  same registry; type generation does not, because hooks are set in code, not loaded from files.
+- With strict types, `strapi.hook(uid)` and `strapi.hooks[uid]` resolve a registered UID to its
+  contract, and any other UID to `unknown`. `strapi.get('hooks')` resolves to
+  `Core.StrictHooksRegistry`: `set`, `add` and `extend` accept only a hook of the registered
+  contract for a registered UID, and any hook otherwise.
+- `@strapi/types` registers the `strapi::content-types.beforeSync` and `afterSync` hooks of the
+  Strapi instance in `packages/core/types/src/core/hook.ts`, so packages that depend only on
+  `@strapi/types` see them.
+
 ## Keeping types unchanged without strict mode
 
 A type in `@strapi/types` or `@strapi/strapi` that behaves differently in strict mode resolves

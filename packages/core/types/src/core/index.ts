@@ -3,6 +3,7 @@ export * as CoreAPI from './core-api';
 
 export * from './container';
 export * from './controller';
+export * from './hook';
 export * from './commands';
 export * from './middleware';
 export * from './policy';

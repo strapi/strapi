@@ -263,7 +263,7 @@ function registersContracts(directory) {
       }
       return (
         /\.tsx?$/.test(entry.name) &&
-        /interface Package(?:Services|Controllers|Policies|Middlewares|Configs)\b/.test(
+        /interface (?:Package(?:Services|Controllers|Policies|Middlewares|Configs)|Hooks)\b/.test(
           fs.readFileSync(filename, 'utf8')
         )
       );
