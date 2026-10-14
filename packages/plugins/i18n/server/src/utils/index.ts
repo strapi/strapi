@@ -27,14 +27,14 @@ type S = {
   'fill-from-locale': ReturnType<typeof createFillFromLocaleService>;
 };
 
-const getCoreStore = ({ strapi }: { strapi: Core.Strapi } = { strapi: global.strapi }) => {
+const getCoreStore = ({ strapi }: { strapi: Core.Strapi }) => {
   return strapi.store({ type: 'plugin', name: 'i18n' });
 };
 
 // retrieve a local service
 const getService = <T extends keyof S>(
   name: T,
-  { strapi }: { strapi: Core.Strapi } = { strapi: global.strapi }
+  { strapi }: { strapi: Core.Strapi }
 ): S[T] extends (...args: any) => any ? ReturnType<S[T]> : S[T] => {
   return strapi.plugin('i18n').service(name);
 };
