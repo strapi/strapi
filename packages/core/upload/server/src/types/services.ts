@@ -1,5 +1,5 @@
 import type upload from '../services/upload';
-import type { UploadInputFile } from '../types';
+import type { Config, UploadInputFile } from '../types';
 import type imageManipulation from '../services/image-manipulation';
 import type apiUploadFolder from '../services/api-upload-folder';
 import type provider from '../services/provider';
@@ -47,6 +47,18 @@ export type UploadService = Omit<
   ): ReturnType<UploadServiceImplementation['formatFileInfo']>;
 };
 
+/**
+ * `strapi.config.get('plugin::upload')`: the plugin config merged with its defaults. `breakpoints`
+ * defaults to the responsive image sizes when it is not set.
+ */
+export type UploadConfig = Omit<Config, 'providerOptions'> & {
+  /** `localServer` holds the `koa-static` options of the local provider's files route. */
+  providerOptions: Record<string, unknown> & { localServer?: Record<string, unknown> };
+  enabled: boolean;
+  sizeLimit: number;
+  breakpoints?: Record<string, number>;
+};
+
 /** Upload services by name, as registered by the plugin. */
 export type Services = {
   upload: UploadService;
@@ -69,6 +81,10 @@ declare global {
   namespace Strapi {
     // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace Registries {
+      interface PackageConfigs {
+        'plugin::upload': UploadConfig;
+      }
+
       interface PackageServices {
         'plugin::upload.aiMetadata': Services['aiMetadata'];
         'plugin::upload.aiMetadataJobs': Services['aiMetadataJobs'];
