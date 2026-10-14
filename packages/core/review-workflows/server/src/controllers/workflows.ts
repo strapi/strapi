@@ -6,6 +6,7 @@ import { async } from '@strapi/utils';
 
 import type { StagePermission } from '../../../shared/contracts/review-workflows';
 import { getService } from '../utils';
+import type { Services } from '../types';
 import { validateWorkflowCreate, validateWorkflowUpdate } from '../validation/review-workflows';
 import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../constants/workflows';
 
@@ -105,7 +106,8 @@ export default {
 
     const workflowBody = await validateWorkflowCreate(body.data);
 
-    const workflowService = getService('workflows');
+    // Typed with the plugin's own service type, so the bug marker below holds with or without strict types.
+    const workflowService = getService('workflows') as Services['workflows'];
     const createdWorkflow = await workflowService
       .create({
         data: await sanitizeCreateInput(workflowBody),

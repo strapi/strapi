@@ -24,9 +24,9 @@ const hasAdminSeatsAvaialble = async () => {
     return true;
   }
 
-  const userCount = await strapi
-    .service<EnterpriseServices['user']>('admin::user')
-    .getCurrentActiveUserCount();
+  const userCount = await (
+    strapi.service('admin::user') as EnterpriseServices['user']
+  ).getCurrentActiveUserCount();
 
   if (userCount < permittedSeats) {
     return true;
