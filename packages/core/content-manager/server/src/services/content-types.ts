@@ -37,9 +37,8 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
 
   findDisplayedContentTypes() {
     return this.findAllContentTypes().filter(
-      // TODO
-      // @ts-expect-error should be resolved from data-mapper types
-      ({ isDisplayed }: { isDisplayed: boolean }) => isDisplayed === true
+      // The models are `unknown` without strict types, as on develop.
+      (contentType) => (contentType as { isDisplayed: boolean }).isDisplayed === true
     );
   },
 
