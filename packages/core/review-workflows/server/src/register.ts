@@ -13,6 +13,7 @@ import reviewWorkflowsMiddlewares from './middlewares/review-workflows';
 
 import { getVisibleContentTypesUID, hasStageAttribute } from './utils/review-workflows';
 import { registerReviewWorkflowsEntitlements } from './entitlements';
+import { bindStrapi } from './utils/strapi-ref';
 
 import {
   ENTITY_STAGE_ATTRIBUTE,
@@ -104,6 +105,8 @@ function persistRWOnDowngrade({ strapi }: { strapi: Core.Strapi }) {
 }
 
 export default async ({ strapi }: { strapi: Core.Strapi }) => {
+  bindStrapi(strapi);
+
   // Data Migrations
   strapi.hook('strapi::content-types.afterSync').register(persistRWOnDowngrade({ strapi }));
   strapi

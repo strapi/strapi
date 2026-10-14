@@ -7,8 +7,9 @@ import reviewWorkflowsMetrics from './metrics';
 import reviewWorkflowsWeeklyMetrics from './metrics/weekly-metrics';
 import documentServiceMiddleware from './document-service-middleware';
 import homepage from '../homepage';
+import { bindOnInstantiate } from '../utils/strapi-ref';
 
-export default {
+export default bindOnInstantiate({
   workflows,
   stages,
   'stage-permissions': stagePermissions,
@@ -18,4 +19,4 @@ export default {
   'workflow-metrics': reviewWorkflowsMetrics,
   'workflow-weekly-metrics': reviewWorkflowsWeeklyMetrics,
   ...homepage.services,
-};
+});

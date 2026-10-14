@@ -3,6 +3,7 @@ import type { Core } from '@strapi/types';
 
 import { async } from '@strapi/utils';
 import { getService } from '../utils';
+import { getStrapi } from '../utils/strapi-ref';
 import { validateUpdateStageOnEntity, validateLocale } from '../validation/review-workflows';
 import {
   STAGE_MODEL_UID,
@@ -10,9 +11,8 @@ import {
   STAGE_TRANSITION_UID,
 } from '../constants/workflows';
 
-// TODO @Nico Controllers stay plain objects and read the global `strapi`: user extensions patch
-// `plugin.controllers.<name>.<action>` on the raw plugin object before core resolves factories, so a
-// factory would break them (see __tests__/plugin-shape.vitest.test.ts).
+// Controllers stay plain objects: user extensions patch `plugin.controllers.<name>.<action>` in
+// place (see __tests__/plugin-shape.vitest.test.ts), so actions read `strapi` at call time.
 
 /**
  *
@@ -34,6 +34,7 @@ export default {
    * List all stages
    */
   async find(ctx: Context) {
+    const strapi = getStrapi();
     const { workflow_id: workflowId } = ctx.params;
     const { populate } = ctx.query;
     const stagesService = getService('stages', { strapi });
@@ -52,6 +53,7 @@ export default {
    * Get one stage
    */
   async findById(ctx: Context) {
+    const strapi = getStrapi();
     const { id, workflow_id: workflowId } = ctx.params;
     const { populate } = ctx.query;
     const stagesService = getService('stages', { strapi });
@@ -81,6 +83,7 @@ export default {
    * @returns {Promise<void>} A promise that resolves when the entity's stage has been updated.
    */
   async updateEntity(ctx: Context) {
+    const strapi = getStrapi();
     const stagesService = getService('stages', { strapi });
     const stagePermissions = getService('stage-permissions', { strapi });
     const workflowService = getService('workflows', { strapi });
@@ -144,6 +147,7 @@ export default {
    * @throws {ApplicationError} If review workflows is not activated on the specified model UID.
    */
   async listAvailableStages(ctx: Context) {
+    const strapi = getStrapi();
     const stagePermissions = getService('stage-permissions', { strapi });
     const workflowService = getService('workflows', { strapi });
 

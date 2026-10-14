@@ -5,12 +5,12 @@ import { async } from '@strapi/utils';
 
 import type { StagePermission } from '../../../shared/contracts/review-workflows';
 import { getService } from '../utils';
+import { getStrapi } from '../utils/strapi-ref';
 import { validateWorkflowCreate, validateWorkflowUpdate } from '../validation/review-workflows';
 import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../constants/workflows';
 
-// TODO @Nico Controllers stay plain objects and read the global `strapi`: user extensions patch
-// `plugin.controllers.<name>.<action>` on the raw plugin object before core resolves factories, so a
-// factory would break them (see __tests__/plugin-shape.vitest.test.ts).
+// Controllers stay plain objects: user extensions patch `plugin.controllers.<name>.<action>` in
+// place (see __tests__/plugin-shape.vitest.test.ts), so actions read `strapi` at call time.
 
 /**
  *
@@ -92,6 +92,7 @@ export default {
    * Create a new workflow
    */
   async create(ctx: Context) {
+    const strapi = getStrapi();
     const { body, query } = ctx.request;
     const { sanitizeCreateInput, sanitizeOutput, sanitizedQuery } = getWorkflowsPermissionChecker(
       { strapi },
@@ -118,6 +119,7 @@ export default {
    * Update a workflow
    */
   async update(ctx: Context) {
+    const strapi = getStrapi();
     const { id } = ctx.params;
     const { body, query } = ctx.request;
     const workflowService = getService('workflows', { strapi });
@@ -156,6 +158,7 @@ export default {
    * Delete a workflow
    */
   async delete(ctx: Context) {
+    const strapi = getStrapi();
     const { id } = ctx.params;
     const { query } = ctx.request;
     const workflowService = getService('workflows', { strapi });
@@ -183,6 +186,7 @@ export default {
    * List all workflows
    */
   async find(ctx: Context) {
+    const strapi = getStrapi();
     const { query } = ctx.request;
     const workflowService = getService('workflows', { strapi });
     const { sanitizeOutput, sanitizedQuery } = getWorkflowsPermissionChecker(

@@ -1,41 +1,40 @@
-import '@strapi/types';
+import { getStrapi } from '../../utils/strapi-ref';
 
-// TODO @Nico This service stays a plain object and reads the global `strapi`: user extensions patch
-// `plugin.services['workflow-metrics'].<fn>` on the raw plugin object before core resolves factories,
-// so a factory would break them (see __tests__/plugin-shape.vitest.test.ts).
+// Stays a plain object: user extensions patch `plugin.services['workflow-metrics'].<fn>` in place
+// (see __tests__/plugin-shape.vitest.test.ts), so `strapi` is read at call time.
 
 export const sendDidCreateStage = async () => {
-  strapi.telemetry.send('didCreateStage', {});
+  getStrapi().telemetry.send('didCreateStage', {});
 };
 
 export const sendDidEditStage = async () => {
-  strapi.telemetry.send('didEditStage', {});
+  getStrapi().telemetry.send('didEditStage', {});
 };
 
 export const sendDidDeleteStage = async () => {
-  strapi.telemetry.send('didDeleteStage', {});
+  getStrapi().telemetry.send('didDeleteStage', {});
 };
 
 export const sendDidChangeEntryStage = async () => {
-  strapi.telemetry.send('didChangeEntryStage', {});
+  getStrapi().telemetry.send('didChangeEntryStage', {});
 };
 
 export const sendDidCreateWorkflow = async (
   workflowId: string,
   hasRequiredStageToPublish: boolean
 ) => {
-  strapi.telemetry.send('didCreateWorkflow', { workflowId, hasRequiredStageToPublish });
+  getStrapi().telemetry.send('didCreateWorkflow', { workflowId, hasRequiredStageToPublish });
 };
 
 export const sendDidEditWorkflow = async (
   workflowId: string,
   hasRequiredStageToPublish: boolean
 ) => {
-  strapi.telemetry.send('didEditWorkflow', { workflowId, hasRequiredStageToPublish });
+  getStrapi().telemetry.send('didEditWorkflow', { workflowId, hasRequiredStageToPublish });
 };
 
 export const sendDidEditAssignee = async (fromId: any, toId: any) => {
-  strapi.telemetry.send('didEditAssignee', { from: fromId, to: toId });
+  getStrapi().telemetry.send('didEditAssignee', { from: fromId, to: toId });
 };
 
 export type WeeklyMetrics = {
@@ -51,7 +50,7 @@ export const sendDidSendReviewWorkflowPropertiesOnceAWeek = async ({
   maxStagesCount,
   activatedContentTypes,
 }: WeeklyMetrics) => {
-  await strapi.telemetry.send('didSendReviewWorkflowPropertiesOnceAWeek', {
+  await getStrapi().telemetry.send('didSendReviewWorkflowPropertiesOnceAWeek', {
     groupProperties: {
       numberOfActiveWorkflows,
       avgStagesCount,

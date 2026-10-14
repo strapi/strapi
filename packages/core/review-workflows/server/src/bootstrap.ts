@@ -6,6 +6,7 @@ import defaultStages from './constants/default-stages.json';
 import defaultWorkflow from './constants/default-workflow.json';
 import webhookEvents from './constants/webhook-events';
 import { registerAuditEvents } from './audit-logs';
+import { bindStrapi } from './utils/strapi-ref';
 
 /**
  * Initialize the default workflow if there is no workflow in the database
@@ -41,6 +42,8 @@ const registerWebhookEvents = async ({ strapi }: { strapi: Core.Strapi }) =>
   );
 
 export default async ({ strapi }: { strapi: Core.Strapi }) => {
+  bindStrapi(strapi);
+
   // Permissions
   const { actionProvider } = getAdminService('permission', { strapi });
   await actionProvider.registerMany(actions.reviewWorkflows);
