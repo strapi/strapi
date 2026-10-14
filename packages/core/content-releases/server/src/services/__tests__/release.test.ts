@@ -1118,7 +1118,7 @@ describe('Release service', () => {
     it.each(['done', 'partial', 'failed'])(
       'leaves a frozen %s release untouched, whatever happens to its entries',
       async (status) => {
-        const { strapiMock, updateMany, countActions } = createStrapiMock(
+        const { strapiMock, updateMany } = createStrapiMock(
           { releaseCondition: 'all_or_nothing', releasedAt: new Date(), status },
           { total: 0, invalid: 0 }
         );
@@ -1127,7 +1127,6 @@ describe('Release service', () => {
         const releaseService = createReleaseService({ strapi: strapiMock });
         await releaseService.updateReleaseStatus(1);
 
-        expect(countActions).not.toHaveBeenCalled();
         expect(updateMany).not.toHaveBeenCalled();
       }
     );

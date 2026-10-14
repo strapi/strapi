@@ -70,8 +70,8 @@ type LockedPublishResult =
     }
   | { kind: 'rejected'; error: Error };
 
-const toError = (caught: unknown) =>
-  caught instanceof Error ? caught : new Error('Release publish failed', { cause: caught });
+const toError = (caught: unknown, message = 'Release publish failed') =>
+  caught instanceof Error ? caught : new Error(message, { cause: caught });
 
 const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
   const dispatchWebhook = (
@@ -402,8 +402,8 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
     ) {
       const result = await strapi.db.transaction(async ({ trx }): Promise<LockedPublishResult> => {
         /**
-         * We lock the release in this transaction, so any other process trying to publish it will wait until this transaction is finished
-         * In this transaction we don't care about rollback, becasue we want to persist the lock until the end and if it fails we want to change the release status to failed
+         * The release is locked for the whole run: another publish of it waits until this transaction ends.
+         * The run's own failures are recorded as failed (recordFailedRun); any other error rolls everything back.
          */
         const lockedRelease: LockedRelease | undefined = await strapi.db
           ?.queryBuilder(RELEASE_MODEL_UID)
@@ -564,8 +564,6 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
             outcomes,
           });
 
-          strapi.telemetry.send('didPublishContentRelease');
-
           return { kind: 'released', release, counts };
         } catch (caught) {
           throw toError(caught);
@@ -596,6 +594,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
       const { release } = result;
 
       dispatchWebhook(ALLOWED_WEBHOOK_EVENTS.RELEASES_PUBLISH, { isPublished: true, release });
+      strapi.telemetry.send('didPublishContentRelease');
 
       await emitAudit({ strapi }, AUDITED_EVENTS.RELEASE_TRIGGER, {
         releaseId: release.id,
@@ -620,7 +619,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
         ]);
         counts = { published, unpublished };
       } catch (err) {
-        countsError = err instanceof Error ? err : new Error(String(err), { cause: err });
+        countsError = toError(err, String(err));
         strapi.log.error(`Failed to count the entries of release ${releaseId}`, {
           error: countsError,
         });
@@ -632,15 +631,13 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
     async updateReleaseStatus(releaseId: Release['id']) {
       const releaseActionService = getService('release-action', { strapi });
 
-      const release: Pick<Release, 'releaseCondition' | 'releasedAt'> | null = await strapi.db
-        .query(RELEASE_MODEL_UID)
-        .findOne({ where: { id: releaseId }, select: ['releaseCondition', 'releasedAt'] });
+      const releaseRead: Promise<Pick<Release, 'releaseCondition' | 'releasedAt'> | null> =
+        strapi.db
+          .query(RELEASE_MODEL_UID)
+          .findOne({ where: { id: releaseId }, select: ['releaseCondition', 'releasedAt'] });
 
-      if (!release || release.releasedAt) {
-        return;
-      }
-
-      const [totalActions, invalidActions] = await Promise.all([
+      const [release, totalActions, invalidActions] = await Promise.all([
+        releaseRead,
         releaseActionService.countActions({
           filters: {
             release: releaseId,
@@ -655,6 +652,10 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
           },
         }),
       ]);
+
+      if (!release || release.releasedAt) {
+        return;
+      }
 
       let status: Release['status'] = 'empty';
 

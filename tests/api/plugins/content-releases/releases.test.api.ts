@@ -140,6 +140,16 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
   // transaction: Postgres aborts the transaction, SQLite and MySQL only fail the statement
   const documentIdsFailingInDatabase = new Set<string>();
   const failNextActionQuery: { kind: 'findMany' | 'updateMany' | null } = { kind: null };
+  let unsubscribeFailingActionQueries: () => void;
+
+  const failInDatabase = async () => {
+    if (!strapi.db.inTransaction()) {
+      throw new Error('failInDatabase is meant to run inside a release run');
+    }
+
+    const { get } = await strapi.db.transaction();
+    await strapi.db.connection.raw('SELECT * FROM table_that_does_not_exist').transacting(get());
+  };
 
   const createRelease = async (params: Partial<CreateRelease.Request['body']> = {}) => {
     return rq({
@@ -278,11 +288,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       }
 
       if (ctx.action === 'publish' && documentIdsFailingInDatabase.has(ctx.params?.documentId)) {
-        // Nested in the run, so this is the run's transaction
-        const { get } = await strapi.db.transaction();
-        await strapi.db.connection
-          .raw('SELECT * FROM table_that_does_not_exist')
-          .transacting(get());
+        await failInDatabase();
       }
 
       return next();
@@ -294,11 +300,9 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       }
 
       failNextActionQuery.kind = null;
-
-      const { get } = await strapi.db.transaction();
-      await strapi.db.connection.raw('SELECT * FROM table_that_does_not_exist').transacting(get());
+      await failInDatabase();
     };
-    strapi.db.lifecycles.subscribe({
+    unsubscribeFailingActionQueries = strapi.db.lifecycles.subscribe({
       models: ['plugin::content-releases.release-action'],
       beforeFindMany: () => failIfArmed('findMany'),
       beforeUpdateMany: () => failIfArmed('updateMany'),
@@ -325,6 +329,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
 
   afterAll(async () => {
     jest.useRealTimers();
+    unsubscribeFailingActionQueries?.();
 
     await strapi.destroy();
     await builder.cleanup();
@@ -1620,6 +1625,27 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
           expect(publishEvents).toHaveLength(0);
         }
       );
+
+      test('a scheduled run stopped by the check whose Failed write fails rolls back too', async () => {
+        const release = await createReleaseWithActions('all_or_nothing', [
+          { documentId: await createProduct({ valid: true }) },
+          { documentId: await createProduct({ valid: false }) },
+        ]);
+        const onPublishEvent = jest.fn();
+        const stopListening = strapi.eventHub.on('releases.publish', onPublishEvent);
+
+        failNextActionQuery.kind = 'updateMany';
+
+        try {
+          await expect(runScheduled(release.id)).rejects.toThrow();
+        } finally {
+          failNextActionQuery.kind = null;
+          stopListening();
+        }
+
+        expect(await getRelease(release.id)).toMatchObject({ status: 'blocked', releasedAt: null });
+        expect(onPublishEvent).not.toHaveBeenCalled();
+      });
 
       test('a manual publish rejected by the check whose write fails stays blocked', async () => {
         const validId = await createProduct({ valid: true });
