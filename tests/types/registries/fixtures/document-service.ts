@@ -101,6 +101,30 @@ void articles.update({ documentId: 'a', data: { views: 1 }, status: 'draft' });
 // @ts-expect-error `status` is `draft` or `published`.
 void articles.update({ documentId: 'a', status: 'archived' });
 
+// The Document Service builds `lookup` itself and every method rejects one from the caller.
+// @ts-expect-error `lookup` is internal.
+void articles.findMany({ lookup: { locale: 'fr' } });
+// @ts-expect-error `lookup` is internal.
+void articles.findFirst({ lookup: { locale: 'fr' } });
+// @ts-expect-error `lookup` is internal.
+void articles.findOne({ documentId: 'a', lookup: { locale: 'fr' } });
+// @ts-expect-error `lookup` is internal.
+void articles.count({ lookup: { locale: 'fr' } });
+// @ts-expect-error `lookup` is internal.
+void articles.create({ data: { title: 'Title' }, lookup: { locale: 'fr' } });
+// @ts-expect-error `lookup` is internal.
+void articles.update({ documentId: 'a', lookup: { locale: 'fr' } });
+// @ts-expect-error `lookup` is internal.
+void articles.clone({ documentId: 'a', lookup: { locale: 'fr' } });
+// @ts-expect-error `lookup` is internal.
+void articles.delete({ documentId: 'a', lookup: { locale: 'fr' } });
+// @ts-expect-error `lookup` is internal.
+void articles.publish({ documentId: 'a', lookup: { locale: 'fr' } });
+// @ts-expect-error `lookup` is internal.
+void articles.unpublish({ documentId: 'a', lookup: { locale: 'fr' } });
+// @ts-expect-error `lookup` is internal.
+void articles.discardDraft({ documentId: 'a', lookup: { locale: 'fr' } });
+
 // Known gap (Required): a required attribute stays optional and nullable in results.
 // @ts-expect-error
 export type RequiredTitle = Expect<Equal<Article['title'], string>>;
