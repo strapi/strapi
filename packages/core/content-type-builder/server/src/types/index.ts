@@ -5,6 +5,7 @@ import type * as ComponentsService from '../services/components';
 import type { createContentStructureService } from '../services/content-structure';
 import type * as ContentTypesService from '../services/content-types';
 import type * as SchemaService from '../services/schema';
+import type { ContentTypeBuilderConfig } from '../config';
 
 /** Content-Type Builder services by name, as registered by the plugin. */
 export type Services = {
@@ -23,6 +24,11 @@ declare global {
   namespace Strapi {
     // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace Registries {
+      /** The plugin config merged with its defaults. */
+      interface PackageConfigs {
+        'plugin::content-type-builder': ContentTypeBuilderConfig;
+      }
+
       interface PackageServices {
         'plugin::content-type-builder.api-handler': Services['api-handler'];
         'plugin::content-type-builder.builder': Services['builder'];
