@@ -35,7 +35,8 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
       if (!getService('aiMetadataProvider').hasProvider()) {
         return false;
       }
-      const settings: Settings = await strapi.plugin('upload').service('upload').getSettings();
+      // Bootstrap stores default settings, so the nullable store read is treated as present.
+      const settings = (await strapi.plugin('upload').service('upload').getSettings()) as Settings;
       return settings.aiMetadata ?? true;
     },
 
@@ -290,7 +291,7 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       const images = await fetchImagesAsBlobs(
         imageInputFiles,
-        strapi.config.get('server.absoluteUrl'),
+        strapi.config.get<string>('server.absoluteUrl'),
         strapi.log
       );
 

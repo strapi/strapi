@@ -10,6 +10,7 @@ import {
 import type { Schema } from './utils';
 import { attributeToPropertySignature } from './attributes';
 import { addImport } from '../imports';
+import { compareEnglish } from '../compare';
 
 const { factory } = ts;
 
@@ -20,7 +21,7 @@ const generateAttributePropertySignature = (schema: Schema): ts.PropertySignatur
   const { attributes } = schema;
 
   const properties = Object.entries(attributes)
-    .sort((a, b) => a[0].localeCompare(b[0]))
+    .sort((a, b) => compareEnglish(a[0], b[0]))
     .map(([attributeName, attribute]) => {
       return attributeToPropertySignature(schema, attributeName, attribute);
     });
@@ -45,11 +46,11 @@ const generatePropertyLiteralDefinitionFactory = (schema: Schema) => (key: strin
 /**
  * Generate an interface declaration for a given schema
  */
-export const generateSchemaDefinition = (schema: Schema): ts.InterfaceDeclaration => {
-  const { uid } = schema;
-
+export const generateSchemaDefinition = (
+  schema: Schema,
+  interfaceName: string = getSchemaInterfaceName(schema.uid)
+): ts.InterfaceDeclaration => {
   // Resolve the different interface names needed to declare the schema's interface
-  const interfaceName = getSchemaInterfaceName(uid);
   const parentType = getSchemaExtendsTypeName(schema);
 
   // Make sure the Struct namespace is imported

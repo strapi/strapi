@@ -1,9 +1,11 @@
-import '@strapi/types';
+import type { Core } from '@strapi/types';
+import type {} from '../types';
 
 import type { DocumentManagerService } from '../services/document-manager';
 import type DocumentMetadata from '../services/document-metadata';
 import type contentStructure from '../services/content-structure';
 
+/** Develop's helper map: the published declarations, built without strict types, use it. */
 type Services = {
   'content-structure': typeof contentStructure;
   'document-manager': DocumentManagerService;
@@ -11,8 +13,16 @@ type Services = {
   [key: string]: any;
 };
 
-const getService = <TName extends keyof Services>(name: TName): ReturnType<Services[TName]> => {
-  return strapi.plugin('content-manager').service(name as string);
+/**
+ * With strict types, the registered contract, including application overrides. Without them, as on
+ * develop, so the declarations emitted from inferred types stay the same.
+ */
+type ServiceOf<TName extends string> = Strapi.Registries.Settings extends { strict: true }
+  ? Core.ServiceFor<`plugin::content-manager.${TName}`>
+  : ReturnType<Services[TName]>;
+
+const getService = <TName extends string>(name: TName): ServiceOf<TName> => {
+  return strapi.plugin('content-manager').service<ServiceOf<TName>>(name);
 };
 
 export { getService };

@@ -7,6 +7,7 @@ import { validateUserUpdateInput } from '../../../../server/src/validation/user'
 import { normalizeEmail } from '../../../../server/src/utils/normalize-email';
 import { getService } from '../utils';
 import { isSsoLocked } from '../utils/sso-lock';
+import type { EnterpriseServices } from '../../../../server/src/types';
 
 const { ApplicationError, ForbiddenError } = errors;
 
@@ -23,7 +24,9 @@ const hasAdminSeatsAvaialble = async () => {
     return true;
   }
 
-  const userCount = await strapi.service('admin::user').getCurrentActiveUserCount();
+  const userCount = await (
+    strapi.service('admin::user') as EnterpriseServices['user']
+  ).getCurrentActiveUserCount();
 
   if (userCount < permittedSeats) {
     return true;
@@ -81,7 +84,8 @@ export default {
       }
     }
 
-    const user = await getService('user').findOne(id, null);
+    // `null` skips population. `findOne` keeps its published `string[]` parameter, as on develop.
+    const user = await getService('user').findOne(id, null as unknown as string[]);
 
     if (!(await hasAdminSeatsAvaialble()) && !user.isActive && data.isActive) {
       throw new ForbiddenError('License seat limit reached. You cannot active this user');

@@ -33,6 +33,9 @@ export interface DocumentsProp {
   strictRelations?: boolean;
 }
 
+/**
+ * Input type of the `api` config, what applications write in `config/api.ts`. Resolved contract: `ResolvedConfig.Api` in `@strapi/core`.
+ */
 export interface Api {
   responses?: ResponsesProp;
   rest?: RestProp;

@@ -1,8 +1,10 @@
 import type { Core } from '@strapi/types';
 import * as z from 'zod/v4';
 import { createContentApiRoutesFactory } from '@strapi/utils';
+import type { controllers } from '../controllers';
 import { UploadRouteValidator } from './validation';
 
+// The published type stays develop's `Core.RouterInput['routes']`; `satisfies` checks the literals.
 const createRoutes = createContentApiRoutesFactory((): Core.RouterInput['routes'] => {
   const validator = new UploadRouteValidator(strapi);
 
@@ -69,7 +71,7 @@ const createRoutes = createContentApiRoutesFactory((): Core.RouterInput['routes'
       },
       response: validator.file,
     },
-  ];
+  ] satisfies Core.RouterInputFor<typeof controllers, 'plugin::upload'>['routes'];
 });
 
 export const routes = createRoutes;

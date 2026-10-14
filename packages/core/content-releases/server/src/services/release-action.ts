@@ -1,6 +1,7 @@
 import { errors, async } from '@strapi/utils';
 
 import type { Core, Internal, Modules, UID, Data } from '@strapi/types';
+import type { Services as ContentManagerServices } from '@strapi/content-manager/strapi-server';
 
 import _ from 'lodash';
 
@@ -17,8 +18,18 @@ import type {
 } from '../../../shared/contracts/release-actions';
 import type { Entity } from '../../../shared/types';
 import { getService, getDraftEntryValidStatus, getEntry, getEntryStatus } from '../utils';
+import type { WorkflowsService } from '../utils';
 
-const getGroupName = (queryValue: string) => {
+/**
+ * Query of a release actions page. The controller turns `groupBy` into `sort`: `type` for the
+ * `action` grouping, the grouped field otherwise. The registered `release-action` contract accepts
+ * it; the implementation keeps its published develop parameter types.
+ */
+export type FindPageQuery = GetReleaseActions.Request['query'] & {
+  sort?: 'type' | 'contentType' | 'locale';
+};
+
+const getGroupName = (queryValue: string | undefined) => {
   switch (queryValue) {
     case 'contentType':
       return 'contentType.displayName';
@@ -180,10 +191,11 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
         });
 
       // For each contentType on the release, we create a custom populate object for nested relations
-      const populateBuilderService = strapi.plugin('content-manager').service('populate-builder');
+      const populateBuilderService = strapi
+        .plugin('content-manager')
+        .service<ContentManagerServices.PopulateBuilderService>('populate-builder');
 
       const actionsWithEntry = await async.map(actions, async (action: ReleaseAction) => {
-        // @ts-expect-error - Core.Service type is not a function
         const populate = await populateBuilderService(action.contentType)
           .populateDeep(Infinity)
           .build();
@@ -250,7 +262,9 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
         return acc;
       }, []);
 
-      const workflowsService = strapi.plugin('review-workflows').service('workflows');
+      const workflowsService = strapi
+        .plugin('review-workflows')
+        .service<WorkflowsService>('workflows');
 
       const contentTypeModelsMap = await async.reduce(contentTypeUids)(
         async (

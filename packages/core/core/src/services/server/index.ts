@@ -17,9 +17,10 @@ const healthCheck: Core.MiddlewareHandler = async (ctx) => {
 
 const createServer = (strapi: Core.Strapi): Modules.Server.Server => {
   const app = createKoaApp({
-    proxy: strapi.config.get('server.proxy.koa'),
-    proxyIpHeader: strapi.config.get('server.proxy.ipHeader'),
-    maxIpsCount: strapi.config.get('server.proxy.maxIpsCount'),
+    // `server.proxy` may be a boolean, so these paths are not part of its contract.
+    proxy: strapi.config.get<boolean>('server.proxy.koa'),
+    proxyIpHeader: strapi.config.get<string>('server.proxy.ipHeader'),
+    maxIpsCount: strapi.config.get<number>('server.proxy.maxIpsCount'),
     keys: strapi.config.get('server.app.keys'),
   });
 

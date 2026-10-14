@@ -11,6 +11,17 @@ import { createAITranslationsService } from './ai-translations';
 import { createAILocalizationJobsService } from './ai-localization-jobs';
 import { createFillFromLocaleService } from './fill-from-locale';
 
+import type {} from '../types';
+
+/** Names of the registered i18n services. */
+type RegisteredNames = keyof Strapi.Registries.PackageServices extends infer TUID
+  ? TUID extends `plugin::i18n.${infer TName}`
+    ? TName
+    : never
+  : never;
+
+// Every registered service has an implementation. Only the names are checked: the implementations keep
+// their published develop types, which the registered contracts refine.
 export default {
   permissions,
   metrics,
@@ -24,4 +35,4 @@ export default {
   'ai-localization-jobs': createAILocalizationJobsService,
   settings: createSettingsService,
   'fill-from-locale': createFillFromLocaleService,
-};
+} satisfies Record<RegisteredNames, unknown>;

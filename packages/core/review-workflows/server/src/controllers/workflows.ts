@@ -1,12 +1,18 @@
 import type { Context } from 'koa';
 
 import type { Core } from '@strapi/types';
+import type { Services as ContentManagerServices } from '@strapi/content-manager/strapi-server';
 import { async } from '@strapi/utils';
 
 import type { StagePermission } from '../../../shared/contracts/review-workflows';
 import { getService } from '../utils';
+import type { Services } from '../types';
 import { validateWorkflowCreate, validateWorkflowUpdate } from '../validation/review-workflows';
 import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../constants/workflows';
+
+type UserAbility = Parameters<
+  ContentManagerServices.PermissionCheckerService['create']
+>[0]['userAbility'];
 
 /**
  *
@@ -14,7 +20,10 @@ import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../constants/workflows';
  * @param userAbility
  * @return { PermissionChecker }
  */
-function getWorkflowsPermissionChecker({ strapi }: { strapi: Core.Strapi }, userAbility: unknown) {
+function getWorkflowsPermissionChecker(
+  { strapi }: { strapi: Core.Strapi },
+  userAbility: UserAbility
+) {
   return strapi
     .plugin('content-manager')
     .service('permission-checker')
@@ -97,10 +106,13 @@ export default {
 
     const workflowBody = await validateWorkflowCreate(body.data);
 
-    const workflowService = getService('workflows');
+    // Typed with the plugin's own service type, so the bug marker below holds with or without strict types.
+    const workflowService = getService('workflows') as Services['workflows'];
     const createdWorkflow = await workflowService
       .create({
         data: await sanitizeCreateInput(workflowBody),
+        // TODO @Nico runtime bug, to report: `workflows.create` replaces `populate` with its own.
+        // @ts-expect-error -- kept as is until the bug is fixed
         populate,
       })
       .then(formatWorkflowToAdmin);

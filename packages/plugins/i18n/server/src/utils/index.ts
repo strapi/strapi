@@ -1,3 +1,4 @@
+import type { Core } from '@strapi/types';
 import type { LocaleService } from '../services/locales';
 import type { PermissionsService } from '../services/permissions';
 import type { ContentTypesService } from '../services/content-types';
@@ -30,11 +31,21 @@ const getCoreStore = () => {
   return strapi.store({ type: 'plugin', name: 'i18n' });
 };
 
+type DevelopService<T extends keyof S> = S[T] extends (...args: any) => any
+  ? ReturnType<S[T]>
+  : S[T];
+
+/**
+ * With strict types, the registered contract, including application overrides. Without them, as on
+ * develop, so the declarations emitted from inferred types stay the same.
+ */
+type ServiceOf<T extends keyof S> = Strapi.Registries.Settings extends { strict: true }
+  ? Core.ServiceFor<`plugin::i18n.${T}`>
+  : DevelopService<T>;
+
 // retrieve a local service
-const getService = <T extends keyof S>(
-  name: T
-): S[T] extends (...args: any) => any ? ReturnType<S[T]> : S[T] => {
-  return strapi.plugin('i18n').service(name);
+const getService = <T extends keyof S>(name: T): ServiceOf<T> => {
+  return strapi.plugin('i18n').service<ServiceOf<T>>(name);
 };
 
 export { getService, getCoreStore };

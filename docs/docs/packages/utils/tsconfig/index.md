@@ -16,6 +16,8 @@ Provides reusable TypeScript configurations for the Strapi monorepo. Extends `@t
 
 - **Base config**: Enables strict mode, declaration maps, and ESNext modules. Extends Node 20 preset from @tsconfig/node20. See [base.json](https://github.com/strapi/strapi/tree/develop/packages/utils/tsconfig).
 - **Client config**: Additional configuration for client-side code.
+- **Server config** (`server.json`): server packages type-check with the strict types switch (`@strapi/types/strict`).
+- **Declarations config** (`declarations.json`): extended last by server packages' `tsconfig.build.json`, it resets `types` to `node` and `jest`, so published declarations are emitted without the strict types switch. See [TypeScript](../../../contributing/05-typescript.md).
 - **Consumed by**: Core packages (`@strapi/database`, `@strapi/core`, `@strapi/permissions`), plugins, and providers extend these configs in their `tsconfig.build.json`.
 
 ## Related

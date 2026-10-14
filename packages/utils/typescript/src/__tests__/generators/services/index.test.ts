@@ -1,0 +1,243 @@
+import os from 'node:os';
+import path from 'node:path';
+import fs from 'node:fs/promises';
+import * as ts from 'typescript';
+
+import { generateServicesDefinitions } from '../../../generators/services';
+import { createLogger } from '../../../generators/utils';
+
+// prettier is loaded through a dynamic import that jest cannot run; the formatting is not under test
+jest.mock('../../../generators/utils', () => ({
+  ...jest.requireActual('../../../generators/utils'),
+  format: jest.fn(async (content: string) => content),
+}));
+
+// Compare on the printed structure rather than on prettier's line breaks
+const normalize = (content: string) => content.replace(/\s+/g, ' ').replace(/;/g, '');
+
+const outputFile = async (file: string, content: string) => {
+  await fs.mkdir(path.dirname(file), { recursive: true });
+  await fs.writeFile(file, content);
+};
+
+const createApp = async (files: Record<string, string>, services: string[]) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'strapi-typegen-services-'));
+
+  for (const [file, content] of Object.entries(files)) {
+    await outputFile(path.join(root, file), content);
+  }
+
+  const strapi = {
+    dirs: { app: { api: path.join(root, 'src', 'api') } },
+    services: Object.fromEntries(services.map((uid) => [uid, {}])),
+  };
+
+  return { root, strapi, pwd: path.join(root, 'types', 'generated') };
+};
+
+describe('generateServicesDefinitions', () => {
+  const roots: string[] = [];
+
+  afterEach(async () => {
+    await Promise.all(roots.splice(0).map((root) => fs.rm(root, { recursive: true, force: true })));
+  });
+
+  const generate = async (files: Record<string, string>, services: string[]) => {
+    const { root, strapi, pwd } = await createApp(files, services);
+    roots.push(root);
+
+    const logger = createLogger({ silent: true });
+    const { output } = await generateServicesDefinitions({ strapi, pwd, logger });
+
+    return { output, normalized: normalize(output), logger };
+  };
+
+  test('registers api services in the global AppServices registry', async () => {
+    const { normalized } = await generate(
+      {
+        'src/api/article/services/article.ts': '',
+        'src/api/article/services/randomArticleGenerator.ts': '',
+        'src/api/category/services/category.ts': '',
+      },
+      ['api::article.article', 'api::article.random-article-generator', 'api::category.category']
+    );
+
+    // The file must be a module for the global augmentation to be allowed
+    expect(normalized).toContain('export {}');
+    expect(normalized).toContain(
+      'declare global { namespace Strapi { namespace Registries { interface AppServices {'
+    );
+    // Registries are global: no module augmentation of @strapi/strapi is involved
+    expect(normalized).not.toContain('declare module');
+
+    expect(normalized).toContain(
+      "'api::article.article': ServiceInstance<typeof import('../../src/api/article/services/article')>"
+    );
+    expect(normalized).toContain(
+      "'api::article.random-article-generator': ServiceInstance<typeof import('../../src/api/article/services/randomArticleGenerator')>"
+    );
+    expect(normalized).toContain(
+      "'api::category.category': ServiceInstance<typeof import('../../src/api/category/services/category')>"
+    );
+  });
+
+  test('resolves the instance type from the default export, falling back to unknown', async () => {
+    const { normalized } = await generate({ 'src/api/article/services/article.ts': '' }, [
+      'api::article.article',
+    ]);
+
+    expect(normalized).toContain(
+      'type ServiceInstance<TModule> = TModule extends { default: infer TExport } ? TExport extends (...args: any[]) => infer TInstance ? TInstance : TExport : unknown'
+    );
+  });
+
+  test('only emits services registered at runtime', async () => {
+    const { output } = await generate(
+      {
+        'src/api/article/services/article.ts': '',
+        'src/api/article/services/excluded.ts': '',
+        'src/api/draft/services/draft.ts': '',
+      },
+      ['api::article.article', 'plugin::upload.upload', 'admin::user']
+    );
+
+    expect(output).toContain("'api::article.article'");
+    expect(output).not.toContain('excluded');
+    expect(output).not.toContain('draft');
+    expect(output).not.toContain('plugin::');
+    expect(output).not.toContain('admin::');
+  });
+
+  test('ignores declaration files, non source files and hidden directories', async () => {
+    const { output } = await generate(
+      {
+        'src/api/article/services/article.ts': '',
+        'src/api/article/services/article.d.ts': '',
+        'src/api/article/services/README.md': '',
+        'src/api/article/services/schema.json': '{}',
+        'src/api/.hidden/services/hidden.ts': '',
+      },
+      ['api::article.article', 'api::article.readme', 'api::article.schema', 'api::hidden.hidden']
+    );
+
+    expect(output.match(/'api::article\.article'/g)).toHaveLength(1);
+    expect(output).not.toContain('README');
+    expect(output).not.toContain('schema');
+    expect(output).not.toContain('hidden');
+  });
+
+  test('prefers the TypeScript source when several files resolve to the same uid', async () => {
+    const { output, logger } = await generate(
+      {
+        'src/api/article/services/article.js': '',
+        'src/api/article/services/article.ts': '',
+      },
+      ['api::article.article']
+    );
+
+    expect(output).toContain("typeof import('../../src/api/article/services/article')");
+    expect(output.match(/'api::article\.article'/g)).toHaveLength(1);
+    expect(logger.warnings).toBe(1);
+  });
+
+  test('registers a JS source as unknown, without importing it', async () => {
+    const { normalized } = await generate(
+      {
+        'src/api/article/services/article.ts': '',
+        'src/api/article/services/legacy.js': '',
+      },
+      ['api::article.article', 'api::article.legacy']
+    );
+
+    expect(normalized).toContain("'api::article.legacy': unknown");
+    expect(normalized).not.toContain("legacy')");
+  });
+
+  test('resolves a module typed any, or whose import does not resolve, to unknown', async () => {
+    const { root, strapi, pwd } = await createApp(
+      {
+        'src/api/article/services/article.ts': 'export default () => ({ find: () => 1 });',
+        'src/api/article/services/untyped.ts': 'declare const service: any;\nexport = service;',
+        'src/api/article/services/removed.ts': 'export default {};',
+      },
+      ['api::article.article', 'api::article.untyped', 'api::article.removed']
+    );
+    roots.push(root);
+
+    const { output } = await generateServicesDefinitions({
+      strapi,
+      pwd,
+      logger: createLogger({ silent: true }),
+    });
+    await outputFile(path.join(pwd, 'services.d.ts'), output);
+    // The source moved after generation: the generated import no longer resolves.
+    await fs.rm(path.join(root, 'src/api/article/services/removed.ts'));
+    await outputFile(
+      path.join(root, 'src/check.ts'),
+      [
+        'type Equal<T, U> = (<V>() => V extends T ? 1 : 2) extends <V>() => V extends U ? 1 : 2 ? true : false;',
+        'type Service<TUID extends keyof Strapi.Registries.AppServices> = Strapi.Registries.AppServices[TUID];',
+        'export const checks: [',
+        "  Equal<Service<'api::article.article'>, { find: () => number }>,",
+        "  Equal<Service<'api::article.untyped'>, unknown>,",
+        "  Equal<Service<'api::article.removed'>, unknown>,",
+        '] = [true, true, true];',
+      ].join('\n')
+    );
+
+    const program = ts.createProgram(
+      [path.join(pwd, 'services.d.ts'), path.join(root, 'src/check.ts')],
+      {
+        noEmit: true,
+        strict: true,
+        skipLibCheck: true,
+        types: [],
+        module: ts.ModuleKind.CommonJS,
+        moduleResolution: ts.ModuleResolutionKind.Node10,
+      }
+    );
+    expect(
+      ts
+        .getPreEmitDiagnostics(program)
+        .map((diagnostic) => ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'))
+    ).toEqual([]);
+  });
+
+  test('sorts the entries by uid', async () => {
+    const { output } = await generate(
+      {
+        'src/api/zebra/services/zebra.ts': '',
+        'src/api/article/services/article.ts': '',
+      },
+      ['api::zebra.zebra', 'api::article.article']
+    );
+
+    expect(output.indexOf("'api::article.article'")).toBeLessThan(
+      output.indexOf("'api::zebra.zebra'")
+    );
+  });
+
+  test('emits a placeholder when the app has no services', async () => {
+    const { output } = await generate({}, ['plugin::upload.upload']);
+
+    expect(output).toBe(`/*
+ * The app doesn't have any services yet.
+ */
+
+export {};
+`);
+    // An empty file must still be a module, so that `import type {} from './services'` compiles
+    expect(
+      ts.isExternalModule(ts.createSourceFile('services.d.ts', output, ts.ScriptTarget.Latest))
+    ).toBe(true);
+  });
+
+  test('emits a placeholder when no api service has a source file', async () => {
+    const { output } = await generate(
+      { 'src/api/article/content-types/article/schema.json': '{}' },
+      ['api::article.article']
+    );
+
+    expect(output).toContain("The app doesn't have any services yet.");
+  });
+});

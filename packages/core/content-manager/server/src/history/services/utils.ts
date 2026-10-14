@@ -172,13 +172,13 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
 
     return computeRetentionDays(
       typeof featureConfig === 'object' ? featureConfig?.options?.retentionDays : undefined,
-      strapi.config.get('admin.history.retentionDays')
+      strapi.config.get<number | null | undefined>('admin.history.retentionDays')
     );
   };
 
   const getVersionStatus = async (
     contentTypeUid: HistoryVersions.CreateHistoryVersion['contentType'],
-    document: Modules.Documents.AnyDocument | null
+    document: Modules.Documents.AnyDocument
   ) => {
     const documentMetadataService = strapi.plugin('content-manager').service('document-metadata');
     const meta = await documentMetadataService.getMetadata(contentTypeUid, document);

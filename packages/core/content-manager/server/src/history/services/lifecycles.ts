@@ -97,7 +97,10 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   const serviceUtils = createServiceUtils({ strapi });
-  const { persistTablesWithPrefix } = strapi.service('admin::persist-tables');
+  // History is an EE feature, where the EE-only `persist-tables` service is defined.
+  const { persistTablesWithPrefix } = strapi.service('admin::persist-tables') as NonNullable<
+    Core.ServiceFor<'admin::persist-tables'>
+  >;
 
   return {
     async bootstrap() {
