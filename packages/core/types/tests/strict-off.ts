@@ -326,3 +326,11 @@ declare const modulePolicyChecks: [
   Expect<Equal<Core.Plugin<'legacy'>, Core.Plugin>>,
 ];
 modulePolicyChecks satisfies unknown;
+
+// Without strict types, the global middlewares config accepts handlers as on develop.
+const middlewaresConfig: Core.Config.Middlewares = [
+  'strapi::logger',
+  { name: 'strapi::cors', config: {} },
+  async (_ctx, next) => next(),
+];
+middlewaresConfig satisfies unknown;
