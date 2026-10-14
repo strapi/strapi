@@ -20,7 +20,7 @@ export const getService = <TName extends ServiceName>(
   name: TName,
   { strapi }: { strapi: Core.Strapi } = { strapi: global.strapi }
 ): EEService<TName> => {
-  return strapi.service<EEService<TName>>(`admin::${name}`);
+  return strapi.service(`admin::${name}`) as EEService<TName>;
 };
 
 export default {

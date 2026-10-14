@@ -16,7 +16,7 @@ export const getAdminService = <TName extends ServiceName<'admin::'>>(
   name: TName,
   { strapi }: { strapi: Core.Strapi } = { strapi: global.strapi }
 ): NonNullable<Core.ServiceFor<`admin::${TName}`>> => {
-  return strapi.service<NonNullable<Core.ServiceFor<`admin::${TName}`>>>(`admin::${name}`);
+  return strapi.service(`admin::${name}`) as NonNullable<Core.ServiceFor<`admin::${TName}`>>;
 };
 
 /**
