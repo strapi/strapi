@@ -67,11 +67,11 @@ type LockedPublishResult =
       kind: 'failed';
       error: Error;
       release: Pick<Release, 'id' | 'name'>;
-      // Partial when the error came after entries were released, and they stay released
-      status: 'partial' | 'failed';
-      counts: RunCounts;
     }
   | { kind: 'rejected'; error: Error };
+
+const toError = (caught: unknown) =>
+  caught instanceof Error ? caught : new Error('Release publish failed', { cause: caught });
 
 const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
   const dispatchWebhook = (
@@ -427,10 +427,16 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
         }
 
         const allowPartial = lockedRelease.releaseCondition === 'allow_partial';
-        // Released entries stay released even if the run then fails: the lock transaction commits
+        // What the run released and left out, for the audit event
         const counts: RunCounts = { published: 0, unpublished: 0, failed: 0 };
         // Written with the release's final status, in the lock transaction
         const outcomes = new Map<ReleaseAction['id'], RecordedOutcome>();
+
+        const recordFailedRun = async (runError: unknown): Promise<LockedPublishResult> => {
+          await recordRun(releaseId, { status: 'failed', outcomes });
+
+          return { kind: 'failed', error: toError(runError), release: lockedRelease };
+        };
 
         try {
           strapi.log.info(`[Content Releases] Starting to publish release ${lockedRelease.name}`);
@@ -488,9 +494,11 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
               holdUnrecorded(actions, outcomes);
             }
 
-            throw allowPartial
-              ? new errors.ValidationError('No entries were published')
-              : firstNotPublishable.error;
+            return await recordFailedRun(
+              allowPartial
+                ? new errors.ValidationError('No entries were published')
+                : firstNotPublishable.error
+            );
           }
 
           const releasable = actions.filter((action) => !notPublishableIds.has(action.id));
@@ -533,7 +541,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
                 outcomes.set(inFlight.id, getErrorOutcome(runError));
               }
               holdUnrecorded(actions, outcomes);
-              throw runError;
+              return await recordFailedRun(runError);
             }
             counts.published = releasable.filter((action) => action.type === 'publish').length;
             counts.unpublished = releasable.length - counts.published;
@@ -548,7 +556,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
           const releasedCount = counts.published + counts.unpublished;
 
           if (actions.length > 0 && releasedCount === 0) {
-            throw new errors.ValidationError('No entries were published');
+            return await recordFailedRun(new errors.ValidationError('No entries were published'));
           }
 
           const release = await recordRun(releaseId, {
@@ -556,44 +564,11 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
             outcomes,
           });
 
-          dispatchWebhook(ALLOWED_WEBHOOK_EVENTS.RELEASES_PUBLISH, {
-            isPublished: true,
-            release,
-          });
-
           strapi.telemetry.send('didPublishContentRelease');
 
           return { kind: 'released', release, counts };
         } catch (caught) {
-          // Anything can be thrown, even null
-          const error =
-            caught instanceof Error
-              ? caught
-              : new Error('Release publish failed', { cause: caught });
-
-          // We need to run the update in the same transaction because the release is locked.
-          // An error after entries were released leaves the run partial: they stay released.
-          const status = counts.published + counts.unpublished > 0 ? 'partial' : 'failed';
-
-          try {
-            // In the transaction too: a run the database rolls back records nothing
-            await recordRun(releaseId, { status, outcomes });
-          } catch {
-            // The transaction can't be written to anymore (on Postgres, a database error outside
-            // a savepoint aborts it): it rolls back, entries released by the run included
-            dispatchWebhook(ALLOWED_WEBHOOK_EVENTS.RELEASES_PUBLISH, { isPublished: false, error });
-            throw error;
-          }
-
-          // Sent once the outcome is written, so it never announces entries that get rolled back
-          dispatchWebhook(ALLOWED_WEBHOOK_EVENTS.RELEASES_PUBLISH, {
-            isPublished: status === 'partial',
-            error,
-          });
-
-          // At this point, we don't want to throw the error because if that happen we rollback the change in the release status
-          // We want to throw the error after the transaction is finished, so we return the error
-          return { kind: 'failed', error, release: lockedRelease, status, counts };
+          throw toError(caught);
         }
       });
 
@@ -602,24 +577,25 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
         throw result.error;
       }
 
-      // The 'failed' or 'partial' status is already committed, so this emit cannot be rolled back.
+      // Webhook and audit only once the outcome is committed: a run that rolled back sends neither
       if (result.kind === 'failed') {
-        const { error, release, status, counts } = result;
-        // Only the error's name: driver errors can carry row contents
-        const event = { releaseId: release.id, name: release.name, reason: error.name };
+        const { error, release } = result;
 
-        await emitAudit(
-          { strapi },
-          AUDITED_EVENTS.RELEASE_TRIGGER,
-          status === 'partial'
-            ? { ...event, outcome: 'partial', ...counts }
-            : { ...event, outcome: 'failure' }
-        );
+        dispatchWebhook(ALLOWED_WEBHOOK_EVENTS.RELEASES_PUBLISH, { isPublished: false, error });
+
+        await emitAudit({ strapi }, AUDITED_EVENTS.RELEASE_TRIGGER, {
+          releaseId: release.id,
+          name: release.name,
+          outcome: 'failure',
+          reason: error.name,
+        });
 
         throw error;
       }
 
       const { release } = result;
+
+      dispatchWebhook(ALLOWED_WEBHOOK_EVENTS.RELEASES_PUBLISH, { isPublished: true, release });
 
       await emitAudit({ strapi }, AUDITED_EVENTS.RELEASE_TRIGGER, {
         releaseId: release.id,

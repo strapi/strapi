@@ -800,7 +800,7 @@ describe('Release service', () => {
       });
     });
 
-    it('records an error after entries were released as partial everywhere: status, webhook and audit', async () => {
+    it('rolls the run back when writing its result fails: nothing recorded, sent or audited', async () => {
       mockExecute.mockReturnValueOnce({ id: 1, name: 'March', releasedAt: null });
       const releaseUpdate = jest
         .fn()
@@ -831,23 +831,12 @@ describe('Release service', () => {
       await expect(releaseService.publish(1, { trigger: 'manual' })).rejects.toThrow(
         'Write failed'
       );
-      expect(releaseUpdate).toHaveBeenLastCalledWith({
+      expect(releaseUpdate).toHaveBeenCalledTimes(1);
+      expect(releaseUpdate).toHaveBeenCalledWith({
         where: { id: 1 },
-        data: { status: 'partial', releasedAt: expect.any(Date) },
+        data: { status: 'done', releasedAt: expect.any(Date) },
       });
-      expect(strapiMock.eventHub.emit).toHaveBeenCalledWith(
-        'releases.publish',
-        expect.objectContaining({ isPublished: true })
-      );
-      expect(strapiMock.eventHub.emit).toHaveBeenCalledWith('release.trigger', {
-        releaseId: 1,
-        name: 'March',
-        outcome: 'partial',
-        reason: 'ApplicationError',
-        published: 1,
-        unpublished: 0,
-        failed: 0,
-      });
+      expect(strapiMock.eventHub.emit).not.toHaveBeenCalled();
     });
 
     it('keeps the success entry when the counts fail', async () => {
@@ -983,7 +972,7 @@ describe('Release service', () => {
       expect(strapiMock.log.error).toHaveBeenCalled();
     });
 
-    it('reports a non-Error throwable as a failed publish', async () => {
+    it('rolls back a read that fails, as an Error, even when a non-Error was thrown', async () => {
       mockExecute.mockReturnValueOnce({ id: 1, name: 'March', releasedAt: null });
       const strapiMock = {
         ...baseStrapiMock,
@@ -1004,10 +993,8 @@ describe('Release service', () => {
       await expect(releaseService.publish(1, { trigger: 'manual' })).rejects.toThrow(
         'Release publish failed'
       );
-      expect(strapiMock.eventHub.emit).toHaveBeenCalledWith(
-        'release.trigger',
-        expect.objectContaining({ outcome: 'failure', reason: 'Error' })
-      );
+      expect(strapiMock.db.query().update).not.toHaveBeenCalled();
+      expect(strapiMock.eventHub.emit).not.toHaveBeenCalled();
     });
 
     it('records nothing for an attempt on an already published release', async () => {

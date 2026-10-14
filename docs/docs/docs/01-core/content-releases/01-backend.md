@@ -260,7 +260,7 @@ How a run ends:
 - Some entries released and some not (an `allow_partial` run that skipped entries): "Partial", with `releasedAt` set.
 - No entry released (an `allow_partial` run whose entries all failed, or an `all_or_nothing` run stopped by an error): "Failed", with `releasedAt` set, and the request fails. The release leaves Pending and can't be published again: its entries go out in a new release.
 
-An error after the entries were released (writing the release's own status, for example) leaves the run "Partial": the entries stay released, and the request fails with the error.
+A run either records its outcome or doesn't happen. Only the failures the run decides are recorded as "Failed" (a scheduled run stopped by the check, an `all_or_nothing` run stopped by an entry error, an `allow_partial` run where every entry failed). Any other error (reading the entries, writing the result, the writes of a rejected manual publish) rolls the whole transaction back, the entries it released included: the request fails, the release stays as it was, and no webhook or audit event is sent. A scheduled release whose run rolled back is left to the overdue sweep.
 
 Each entry of the run records what happened to it on its release action, returned by `GET /content-releases/:releaseId/actions`:
 
@@ -277,13 +277,13 @@ An entry that fails both checks keeps both in its `reason`. The outcomes are wri
 
 The status written, the `releases.publish` webhook and the `release.trigger` audit event always agree:
 
-| Status  | Webhook `isPublished` | Audit `outcome` | Audit `details`                                                                |
-| ------- | --------------------- | --------------- | ------------------------------------------------------------------------------ |
-| Done    | `true`                | `success`       | `published`, `unpublished`, `failed: 0`                                        |
-| Partial | `true`                | `partial`       | `published`, `unpublished`, `failed`, and `reason` if an error stopped the run |
-| Failed  | `false`               | `failure`       | `reason`: the error's name                                                     |
+| Status  | Webhook `isPublished` | Audit `outcome` | Audit `details`                         |
+| ------- | --------------------- | --------------- | --------------------------------------- |
+| Done    | `true`                | `success`       | `published`, `unpublished`, `failed: 0` |
+| Partial | `true`                | `partial`       | `published`, `unpublished`, `failed`    |
+| Failed  | `false`               | `failure`       | `reason`: the error's name              |
 
-The counts are what the run released, and `failed` the entries it left out: not publishable, or their publish or unpublish threw. A failed run sends the webhook once its status is written. Entry errors are rolled back with their savepoint, so on Postgres they don't abort the transaction; an error outside a savepoint that does (writing the status after a database error) rolls back the whole run and the status write with it: the webhook then has `isPublished: false`, and the release keeps its previous status.
+The counts are what the run released, and `failed` the entries it left out: not publishable, or their publish or unpublish threw. The webhook and the audit event are sent once the outcome is committed. Entry errors are rolled back with their savepoint, so on Postgres they don't abort the transaction; any other error rolls back the whole run, as above.
 
 #### Listening to events on entries:
 
