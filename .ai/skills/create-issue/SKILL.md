@@ -42,6 +42,7 @@ Map every `body` field of `BUG_REPORT.yml` to markdown:
 - Write one `### <label>` section per field, with the exact `label` text. Each `input` is its own section: `Package Manager` and `Package Manager Version` are two sections.
 - For a `dropdown` field, use one of its `options` values.
 - Fill every required field. If a value is unknown, write `[NEEDS INPUT]` and ask the user before you publish.
+- For an optional field with no value, write `_No response_`, as the issue form does.
 - Write the `checkboxes` field (`Confirmation Checklist`) as checked `- [x]` lines, with the option labels copied from the template:
 
   ```md
@@ -61,7 +62,11 @@ Run the same check as CI, from anywhere in the repository:
 node --experimental-strip-types --no-warnings --input-type=module -e "import { readFileSync } from 'node:fs'; import { validateIssueTemplate } from '$(git rev-parse --show-toplevel)/.github/scripts/issue-template-check.ts'; const r = validateIssueTemplate(readFileSync(process.argv[1], 'utf8')); console.log(JSON.stringify(r)); process.exit(r.valid ? 0 : 1);" <draft-path>
 ```
 
-Exit `0` prints `{"valid":true,"missingItems":[]}`. On exit `1`, fix every item in `missingItems` and run the check again. Never publish a draft that fails.
+Exit `0` prints `{"valid":true,"missingItems":[]}`. On exit `1`, fix every item in `missingItems` and run the check again.
+
+The check accepts `[NEEDS INPUT]` as a value. Also run `grep -n 'NEEDS INPUT' <draft-path>`: any match means the draft fails.
+
+Never publish a draft that fails.
 
 ### 5. Review and publish
 
