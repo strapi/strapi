@@ -4,6 +4,10 @@ import { getService } from '../utils';
 import { validateUpdateAssigneeOnEntity, validateLocale } from '../validation/review-workflows';
 import { ENTITY_STAGE_ATTRIBUTE, STAGE_TRANSITION_UID } from '../constants/workflows';
 
+// TODO @Nico Controllers stay plain objects and read the global `strapi`: user extensions patch
+// `plugin.controllers.<name>.<action>` on the raw plugin object before core resolves factories, so a
+// factory would break them (see __tests__/plugin-shape.vitest.test.ts).
+
 export default {
   /**
    * Updates an entity's assignee.
@@ -19,9 +23,9 @@ export default {
    * @returns {Promise<void>} A promise that resolves when the entity's assignee has been updated.
    */
   async updateEntity(ctx: Context) {
-    const assigneeService = getService('assignees');
-    const workflowService = getService('workflows');
-    const stagePermissions = getService('stage-permissions');
+    const assigneeService = getService('assignees', { strapi });
+    const workflowService = getService('workflows', { strapi });
+    const stagePermissions = getService('stage-permissions', { strapi });
 
     const { model_uid: model, id: documentId } = ctx.params;
     const locale = (await validateLocale(ctx.request.query?.locale)) ?? undefined;

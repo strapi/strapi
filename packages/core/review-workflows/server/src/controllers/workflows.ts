@@ -8,6 +8,10 @@ import { getService } from '../utils';
 import { validateWorkflowCreate, validateWorkflowUpdate } from '../validation/review-workflows';
 import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../constants/workflows';
 
+// TODO @Nico Controllers stay plain objects and read the global `strapi`: user extensions patch
+// `plugin.controllers.<name>.<action>` on the raw plugin object before core resolves factories, so a
+// factory would break them (see __tests__/plugin-shape.vitest.test.ts).
+
 /**
  *
  * @param { Core.Strapi } strapi - Strapi instance
@@ -95,9 +99,9 @@ export default {
     );
     const { populate } = await sanitizedQuery.create(query);
 
-    const workflowBody = await validateWorkflowCreate(body.data);
+    const workflowBody = await validateWorkflowCreate({ strapi }, body.data);
 
-    const workflowService = getService('workflows');
+    const workflowService = getService('workflows', { strapi });
     const createdWorkflow = await workflowService
       .create({
         data: await sanitizeCreateInput(workflowBody),
@@ -116,13 +120,13 @@ export default {
   async update(ctx: Context) {
     const { id } = ctx.params;
     const { body, query } = ctx.request;
-    const workflowService = getService('workflows');
+    const workflowService = getService('workflows', { strapi });
     const { sanitizeUpdateInput, sanitizeOutput, sanitizedQuery } = getWorkflowsPermissionChecker(
       { strapi },
       ctx.state.userAbility
     );
     const { populate } = await sanitizedQuery.update(query);
-    const workflowBody = await validateWorkflowUpdate(body.data);
+    const workflowBody = await validateWorkflowUpdate({ strapi }, body.data);
 
     // Find if workflow exists
     const workflow = await workflowService.findById(id, { populate: WORKFLOW_POPULATE });
@@ -154,7 +158,7 @@ export default {
   async delete(ctx: Context) {
     const { id } = ctx.params;
     const { query } = ctx.request;
-    const workflowService = getService('workflows');
+    const workflowService = getService('workflows', { strapi });
     const { sanitizeOutput, sanitizedQuery } = getWorkflowsPermissionChecker(
       { strapi },
       ctx.state.userAbility
@@ -180,7 +184,7 @@ export default {
    */
   async find(ctx: Context) {
     const { query } = ctx.request;
-    const workflowService = getService('workflows');
+    const workflowService = getService('workflows', { strapi });
     const { sanitizeOutput, sanitizedQuery } = getWorkflowsPermissionChecker(
       { strapi },
       ctx.state.userAbility

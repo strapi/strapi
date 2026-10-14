@@ -10,6 +10,10 @@ import {
   STAGE_TRANSITION_UID,
 } from '../constants/workflows';
 
+// TODO @Nico Controllers stay plain objects and read the global `strapi`: user extensions patch
+// `plugin.controllers.<name>.<action>` on the raw plugin object before core resolves factories, so a
+// factory would break them (see __tests__/plugin-shape.vitest.test.ts).
+
 /**
  *
  * @param { Core.Strapi } strapi - Strapi instance
@@ -32,7 +36,7 @@ export default {
   async find(ctx: Context) {
     const { workflow_id: workflowId } = ctx.params;
     const { populate } = ctx.query;
-    const stagesService = getService('stages');
+    const stagesService = getService('stages', { strapi });
     const sanitizer = sanitizeStage({ strapi }, ctx.state.userAbility);
 
     const stages = await stagesService.find({
@@ -50,7 +54,7 @@ export default {
   async findById(ctx: Context) {
     const { id, workflow_id: workflowId } = ctx.params;
     const { populate } = ctx.query;
-    const stagesService = getService('stages');
+    const stagesService = getService('stages', { strapi });
     const sanitizer = sanitizeStage({ strapi }, ctx.state.userAbility);
 
     const stage = await stagesService.findById(id, {
@@ -77,9 +81,9 @@ export default {
    * @returns {Promise<void>} A promise that resolves when the entity's stage has been updated.
    */
   async updateEntity(ctx: Context) {
-    const stagesService = getService('stages');
-    const stagePermissions = getService('stage-permissions');
-    const workflowService = getService('workflows');
+    const stagesService = getService('stages', { strapi });
+    const stagePermissions = getService('stage-permissions', { strapi });
+    const workflowService = getService('workflows', { strapi });
 
     const { model_uid: modelUID, id: documentId } = ctx.params;
     const { body, query = {} } = ctx.request;
@@ -140,8 +144,8 @@ export default {
    * @throws {ApplicationError} If review workflows is not activated on the specified model UID.
    */
   async listAvailableStages(ctx: Context) {
-    const stagePermissions = getService('stage-permissions');
-    const workflowService = getService('workflows');
+    const stagePermissions = getService('stage-permissions', { strapi });
+    const workflowService = getService('workflows', { strapi });
 
     const { model_uid: modelUID, id: documentId } = ctx.params;
     const { query = {} } = ctx.request;

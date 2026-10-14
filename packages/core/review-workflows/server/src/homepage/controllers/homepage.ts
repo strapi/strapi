@@ -1,7 +1,7 @@
 import type { Core } from '@strapi/types';
 import type { GetRecentlyAssignedDocuments } from '../../../../shared/contracts/homepage';
 
-const createHomepageController = () => {
+const createHomepageController = ({ strapi }: { strapi: Core.Strapi }) => {
   const homepageService = strapi.plugin('review-workflows').service('homepage');
 
   return {

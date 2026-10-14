@@ -1,4 +1,5 @@
 /* eslint-disable func-names */
+import type { Core } from '@strapi/types';
 import { yup, validateYupSchema } from '@strapi/utils';
 import { hasStageAttribute } from '../utils/review-workflows';
 import { STAGE_TRANSITION_UID } from '../constants/workflows';
@@ -34,57 +35,58 @@ const validateUpdateStageOnEntitySchema = yup
   })
   .required();
 
-const validateContentTypes = yup.array().of(
-  yup
-    .string()
-    .test({
-      name: 'content-type-exists',
-      message: (value) => `Content type ${value.originalValue} does not exist`,
-      test(uid: any) {
-        // Warning; we use the strapi global - to avoid that, it would need to refactor how
-        // we generate validation function by using a factory with the strapi instance as parameter.
-        return !!strapi.getModel(uid);
-      },
-    })
-    .test({
-      name: 'content-type-review-workflow-enabled',
-      message: (value) =>
-        `Content type ${value.originalValue} does not have review workflow enabled`,
-      test(uid: any) {
-        const model = strapi.getModel(uid);
+const getContentTypesSchema = ({ strapi }: { strapi: Core.Strapi }) =>
+  yup.array().of(
+    yup
+      .string()
+      .test({
+        name: 'content-type-exists',
+        message: (value) => `Content type ${value.originalValue} does not exist`,
+        test(uid: any) {
+          return !!strapi.getModel(uid);
+        },
+      })
+      .test({
+        name: 'content-type-review-workflow-enabled',
+        message: (value) =>
+          `Content type ${value.originalValue} does not have review workflow enabled`,
+        test(uid: any) {
+          const model = strapi.getModel(uid);
 
-        // It's not a valid content type if it doesn't have the stage attribute
-        return hasStageAttribute(model);
-      },
-    })
-);
+          // It's not a valid content type if it doesn't have the stage attribute
+          return hasStageAttribute(model);
+        },
+      })
+  );
 
-const validateWorkflowCreateSchema = yup.object().shape({
-  name: yup.string().max(255).min(1, 'Workflow name can not be empty').required(),
-  stages: yup
-    .array()
-    .of(stageObject)
-    // @ts-expect-error - add unique property into the yup namespace typing
-    .uniqueProperty('name', 'Stage name must be unique')
-    .min(1, 'Can not create a workflow without stages')
-    .max(200, 'Can not have more than 200 stages')
-    .required('Can not create a workflow without stages'),
-  contentTypes: validateContentTypes,
-  stageRequiredToPublishName: yup.string().min(1).nullable(),
-});
+const getWorkflowCreateSchema = ({ strapi }: { strapi: Core.Strapi }) =>
+  yup.object().shape({
+    name: yup.string().max(255).min(1, 'Workflow name can not be empty').required(),
+    stages: yup
+      .array()
+      .of(stageObject)
+      // @ts-expect-error - add unique property into the yup namespace typing
+      .uniqueProperty('name', 'Stage name must be unique')
+      .min(1, 'Can not create a workflow without stages')
+      .max(200, 'Can not have more than 200 stages')
+      .required('Can not create a workflow without stages'),
+    contentTypes: getContentTypesSchema({ strapi }),
+    stageRequiredToPublishName: yup.string().min(1).nullable(),
+  });
 
-const validateWorkflowUpdateSchema = yup.object().shape({
-  name: yup.string().max(255).min(1, 'Workflow name can not be empty'),
-  stages: yup
-    .array()
-    .of(stageObject)
-    // @ts-expect-error - add unique property into the yup namespace typing
-    .uniqueProperty('name', 'Stage name must be unique')
-    .min(1, 'Can not update a workflow without stages')
-    .max(200, 'Can not have more than 200 stages'),
-  contentTypes: validateContentTypes,
-  stageRequiredToPublishName: yup.string().min(1).nullable(),
-});
+const getWorkflowUpdateSchema = ({ strapi }: { strapi: Core.Strapi }) =>
+  yup.object().shape({
+    name: yup.string().max(255).min(1, 'Workflow name can not be empty'),
+    stages: yup
+      .array()
+      .of(stageObject)
+      // @ts-expect-error - add unique property into the yup namespace typing
+      .uniqueProperty('name', 'Stage name must be unique')
+      .min(1, 'Can not update a workflow without stages')
+      .max(200, 'Can not have more than 200 stages'),
+    contentTypes: getContentTypesSchema({ strapi }),
+    stageRequiredToPublishName: yup.string().min(1).nullable(),
+  });
 
 const validateUpdateAssigneeOnEntitySchema = yup
   .object()
@@ -95,12 +97,14 @@ const validateUpdateAssigneeOnEntitySchema = yup
 
 const validateLocaleSchema = yup.string().nullable();
 
-export const validateWorkflowCreate = validateYupSchema(validateWorkflowCreateSchema);
+export const validateWorkflowCreate = ({ strapi }: { strapi: Core.Strapi }, body: unknown) =>
+  validateYupSchema(getWorkflowCreateSchema({ strapi }))(body);
 export const validateUpdateStageOnEntity = validateYupSchema(validateUpdateStageOnEntitySchema);
 export const validateUpdateAssigneeOnEntity = validateYupSchema(
   validateUpdateAssigneeOnEntitySchema
 );
-export const validateWorkflowUpdate = validateYupSchema(validateWorkflowUpdateSchema);
+export const validateWorkflowUpdate = ({ strapi }: { strapi: Core.Strapi }, body: unknown) =>
+  validateYupSchema(getWorkflowUpdateSchema({ strapi }))(body);
 export const validateLocale = validateYupSchema(validateLocaleSchema);
 
 export default {
