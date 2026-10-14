@@ -52,13 +52,17 @@ declare global {
   namespace Strapi {
     // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace Registries {
+      // Registered only when the `cms-content-releases` EE feature is enabled, so a CE application, or a
+      // license without the feature, resolves them to `undefined`.
+      // TODO @Nico Redesign as a real opt-in to licensed features, so applications that have the
+      // feature can drop `undefined`, instead of every application seeing it.
       interface PackageServices {
-        'plugin::content-releases.homepage': Services['homepage'];
-        'plugin::content-releases.release': Services['release'];
-        'plugin::content-releases.release-action': Services['release-action'];
-        'plugin::content-releases.release-validation': Services['release-validation'];
-        'plugin::content-releases.scheduling': Services['scheduling'];
-        'plugin::content-releases.settings': Services['settings'];
+        'plugin::content-releases.homepage': Services['homepage'] | undefined;
+        'plugin::content-releases.release': Services['release'] | undefined;
+        'plugin::content-releases.release-action': Services['release-action'] | undefined;
+        'plugin::content-releases.release-validation': Services['release-validation'] | undefined;
+        'plugin::content-releases.scheduling': Services['scheduling'] | undefined;
+        'plugin::content-releases.settings': Services['settings'] | undefined;
       }
     }
   }
