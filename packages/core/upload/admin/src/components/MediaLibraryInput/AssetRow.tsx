@@ -85,7 +85,7 @@ interface AssetRowProps {
   asset: File;
   disabled?: boolean;
   onCopyLink: (asset: File) => void;
-  onEdit: (asset: File) => void;
+  onEdit?: (asset: File) => void;
   onRemove: (asset: File) => void;
 }
 
@@ -131,20 +131,22 @@ export const AssetRow = ({
         >
           <Link />
         </IconButton>
-        <IconButton
-          variant="ghost"
-          disabled={disabled}
-          onClick={() => onEdit(asset)}
-          label={formatMessage(
-            {
-              id: getTranslationKey('content-manager.input.actions.edit'),
-              defaultMessage: 'Edit {name}',
-            },
-            { name: asset.name }
-          )}
-        >
-          <Pencil />
-        </IconButton>
+        {onEdit && (
+          <IconButton
+            variant="ghost"
+            disabled={disabled}
+            onClick={() => onEdit(asset)}
+            label={formatMessage(
+              {
+                id: getTranslationKey('content-manager.input.actions.edit'),
+                defaultMessage: 'Edit {name}',
+              },
+              { name: asset.name }
+            )}
+          >
+            <Pencil />
+          </IconButton>
+        )}
         <IconButton
           variant="ghost"
           disabled={disabled}

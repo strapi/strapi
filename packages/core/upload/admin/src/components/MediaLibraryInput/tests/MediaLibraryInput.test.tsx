@@ -16,6 +16,19 @@ jest.mock('../../../services/api', () => {
   };
 });
 
+const mockPermissions = {
+  isLoading: false,
+  canRead: true,
+  canCreate: true,
+  canUpdate: true,
+  canDownload: true,
+  canCopyLink: true,
+};
+
+jest.mock('../../../hooks/useMediaLibraryPermissions', () => ({
+  useMediaLibraryPermissions: () => mockPermissions,
+}));
+
 /**
  * The picker still opens the legacy dialog until the Content Manager gets its
  * own. It pulls in cropperjs, which jsdom cannot parse.
@@ -72,6 +85,7 @@ const dropFiles = (files: globalThis.File[]) => {
 describe('<MediaLibraryInput /> (Content Manager)', () => {
   beforeEach(() => {
     mockUploadFiles.mockReset();
+    Object.assign(mockPermissions, { canRead: true, canCreate: true });
   });
 
   it('renders the drop zone and one row per asset already on the field', () => {
@@ -324,6 +338,50 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
       'aria-disabled',
       'true'
     );
+  });
+
+  describe('without read access to the Media Library', () => {
+    beforeEach(() => {
+      mockPermissions.canRead = false;
+    });
+
+    it('does not offer to edit an asset', () => {
+      renderInput({}, { cover: asset(1, 'one.png') });
+
+      expect(screen.queryByRole('button', { name: 'Edit one.png' })).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Remove one.png' })).toBeInTheDocument();
+    });
+
+    it('opens the device picker instead of the library when the drop zone is clicked', async () => {
+      const click = jest.spyOn(HTMLInputElement.prototype, 'click').mockImplementation(() => {});
+      const { user } = renderInput();
+
+      await user.click(
+        screen.getByRole('button', {
+          name: /click to add an asset or drag and drop one in this area/i,
+        })
+      );
+
+      expect(click).toHaveBeenCalledTimes(1);
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      click.mockRestore();
+    });
+
+    it('does nothing on click without upload access either', async () => {
+      mockPermissions.canCreate = false;
+      const click = jest.spyOn(HTMLInputElement.prototype, 'click').mockImplementation(() => {});
+      const { user } = renderInput();
+
+      await user.click(
+        screen.getByRole('button', {
+          name: /click to add an asset or drag and drop one in this area/i,
+        })
+      );
+
+      expect(click).not.toHaveBeenCalled();
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      click.mockRestore();
+    });
   });
 
   it('uploads the files chosen from the hidden picker', async () => {

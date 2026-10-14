@@ -91,7 +91,7 @@ export const MediaLibraryInput = ({
   const [uploadFiles] = useUploadFilesMutation();
   // Echoes the app config; a missing payload (still loading) falls back to
   // sequential rather than outpacing what the server asked for.
-  const { canRead, canUpdate, canCopyLink, canDownload } = useMediaLibraryPermissions();
+  const { canRead, canCreate, canUpdate, canCopyLink, canDownload } = useMediaLibraryPermissions();
   const { data: settings } = useGetUploadSettingsQuery(undefined, { skip: !canRead });
   const concurrency = settings?.data?.concurrentUploadRequests ?? 1;
   const isAiMetadataEnabled = useAIMetadataEnabled();
@@ -267,6 +267,15 @@ export const MediaLibraryInput = ({
     }
   };
 
+  // Without read access the library browser has nothing to show.
+  const handleZoneClick = () => {
+    if (canRead) {
+      setStep('browse');
+    } else if (canCreate) {
+      fileInputRef.current?.click();
+    }
+  };
+
   const handleFileInputChange = async (event: ChangeEvent<HTMLInputElement>) => {
     // Copied before the reset, not after: `event.target.files` is the input's
     // live FileList, and clearing `value` empties it in place. Reading it
@@ -291,16 +300,13 @@ export const MediaLibraryInput = ({
             asset={asset}
             disabled={disabled}
             onCopyLink={handleCopyLink}
-            onEdit={setEditedAsset}
+            // The details dialog needs the library's folder tree, which needs read access.
+            onEdit={canRead ? setEditedAsset : undefined}
             onRemove={handleRemove}
           />
         ))}
 
-        <AssetDropZone
-          disabled={disabled}
-          onClick={() => setStep('browse')}
-          onDropFiles={handleUpload}
-        />
+        <AssetDropZone disabled={disabled} onClick={handleZoneClick} onDropFiles={handleUpload} />
       </Flex>
 
       <Field.Error />
