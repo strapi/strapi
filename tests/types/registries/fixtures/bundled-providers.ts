@@ -36,6 +36,14 @@ app.service('admin::role').ssoCheckRolesIdForDeletion([]);
 // @ts-expect-error Unregistered services resolve to `unknown`.
 app.plugin('graphql').service('utils').anything();
 
+// The hooks of the Strapi instance are registered by `@strapi/types`.
+app.hook('strapi::content-types.afterSync').register(({ oldContentTypes }) => {
+  // @ts-expect-error The saved schemas are missing before the first saved start.
+  Object.keys(oldContentTypes);
+});
+// @ts-expect-error Unregistered hooks resolve to `unknown`.
+app.hook('plugin::unregistered.hook').register(() => {});
+
 declare const enabled: Strapi.Registries.Settings extends { strict: true } ? true : false;
 enabled satisfies true;
 // EE-only admin services do not exist in a CE runtime: their contract includes `undefined`.

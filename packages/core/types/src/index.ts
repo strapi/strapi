@@ -144,6 +144,20 @@ declare global {
       interface AppMiddlewares {}
 
       /**
+       * Server hook contracts keyed by hook UID (e.g. `'strapi::content-types.beforeSync'`), read by
+       * `strapi.hook(uid)`, `strapi.hooks` and the hooks registry (`strapi.get('hooks')`).
+       * The package that sets a hook and calls it registers its contract: the hook kind and the
+       * context its handlers receive (e.g. `Core.AsyncParallelHook<TContext>`).
+       *
+       * Additive only, with no `Package*` and `App*` pair. Any code can replace a hook at runtime
+       * (`set` overwrites it, `extend` wraps it), but the context is built by the single caller, so an
+       * application cannot change what a package's hook passes. Applications and plugins register the
+       * hooks they create and call. Redeclaring a UID with another contract is a type error.
+       */
+      // eslint-disable-next-line @typescript-eslint/no-empty-interface
+      interface Hooks {}
+
+      /**
        * Content-type schemas keyed by UID, read in strict mode instead of `Public.ContentTypeSchemas`.
        * Type generation is the only producer: it writes `types/generated/contentTypes.d.ts`.
        * Applications do not override schemas, so there is no `Package*` and `App*` pair.

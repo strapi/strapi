@@ -1,12 +1,10 @@
 import { contentTypes as contentTypesUtils, async } from '@strapi/utils';
-import type { Schema } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 import { getBatchToDiscard } from './database/5.0.0-discard-drafts';
 
-export interface Input {
-  oldContentTypes: Record<string, Schema.ContentType>;
-  contentTypes: Record<string, Schema.ContentType>;
-}
+/** The context of the `strapi::content-types.beforeSync` and `afterSync` hooks. */
+export type Input = Core.ContentTypesSyncContext;
 
 /**
  * Enable draft and publish for content types.
