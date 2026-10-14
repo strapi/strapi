@@ -1,7 +1,7 @@
 import type { ControllerHandler } from '../controller';
 import type { Module } from '../module';
 import type { Plugin } from '../plugin';
-import type { Policy, PolicyHandler } from '../policy';
+import type { Policy, PolicyContext, PolicyHandler } from '../policy';
 import type { RouteConfigFor, RouteInput } from '../route';
 import type { RouterInputFor } from '../router';
 import type { Strapi as StrapiInstance } from '../strapi';
@@ -256,3 +256,12 @@ apiLookupChecks satisfies unknown;
 // @ts-expect-error `T` is not inferred from the annotation, for API lookups either.
 const apiContextual: LabPolicy = strapi.api('policy-lab').policy('unregistered');
 apiContextual satisfies unknown;
+
+// With strict types, a registered policy is assignable to `Policy`, and calls still check the config.
+declare const registeredPolicy: Policy<{ role: string }>;
+const policies: Policy[] = [registeredPolicy, strapi.policy('plugin::policy-lab.hasRole')];
+policies satisfies unknown;
+if (typeof registeredPolicy === 'function') {
+  // @ts-expect-error The config contract is still checked on calls.
+  registeredPolicy({} as PolicyContext, { role: 1 }, { strapi });
+}
