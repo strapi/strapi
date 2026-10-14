@@ -15,7 +15,7 @@ describe('createYupSchema email attribute', () => {
   const attributes = { email: { type: 'email' } } as const;
 
   // Drafts skip the server's email format check, so a stored draft can hold any string. Bulk
-  // Publish and the release screens validate stored entries as published as soon as they open.
+  // Publish and the release screens validate stored entries as soon as they open.
   // The linear `.email()` is applied globally: in the browser by the admin entry, here by
   // `@strapi/utils`, which this package's test setup loads. This guards the schema path; the
   // admin's own tests guard the browser wiring.

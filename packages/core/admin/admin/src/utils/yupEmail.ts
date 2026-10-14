@@ -21,14 +21,15 @@ const defaultEmailMessage = () => {
   return tests[tests.length - 1].OPTIONS.message;
 };
 
+export function email(
+  this: yup.StringSchema,
+  message: Parameters<yup.StringSchema['email']>[0] = defaultEmailMessage()
+) {
+  return this.matches(EMAIL_REGEX, { name: 'email', message, excludeEmptyString: true });
+}
+
 /**
  * Applied when the admin entry loads, before any plugin builds a schema, so every `.email()` in
  * the admin panel uses the linear pattern.
  */
-yup.addMethod(
-  yup.string,
-  'email',
-  function email(message: Parameters<yup.StringSchema['email']>[0] = defaultEmailMessage()) {
-    return this.matches(EMAIL_REGEX, { name: 'email', message, excludeEmptyString: true });
-  }
-);
+yup.addMethod(yup.string, 'email', email);

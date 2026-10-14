@@ -1,10 +1,33 @@
-import { EMAIL_REGEX as SERVER_EMAIL_REGEX } from '@strapi/utils';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import * as yup from 'yup';
 
-import { EMAIL_REGEX } from '../yupEmail';
+import { EMAIL_REGEX, email } from '../yupEmail';
+
+// The server's pattern, read as text. Importing `@strapi/utils` would also run its own `.email()`
+// override on the same yup, and these tests could then pass without the admin's.
+const readServerRegex = () => {
+  const source = readFileSync(
+    path.join(__dirname, '../../../../../utils/src/email-regex.ts'),
+    'utf8'
+  );
+  const literal = source
+    .split('\n')
+    .map((line) => line.trim())
+    .find((line) => line.startsWith('/^'));
+
+  if (!literal) {
+    throw new Error('EMAIL_REGEX literal not found in @strapi/utils');
+  }
+
+  const lastSlash = literal.lastIndexOf('/');
+
+  return {
+    source: literal.slice(1, lastSlash),
+    flags: literal.slice(lastSlash + 1).replace(/;$/, ''),
+  };
+};
 
 const isValidEmail = (value: string) => yup.string().email().isValidSync(value);
 
@@ -32,10 +55,16 @@ describe('yup string().email() in the admin', () => {
     expect(firstStatement).toBe("import './utils/yupEmail';");
   });
 
+  test('replaces yup string().email()', () => {
+    expect(yup.StringSchema.prototype.email).toBe(email);
+  });
+
   test('uses the same regex as the server', () => {
+    const server = readServerRegex();
+
     expect(EMAIL_REGEX).toBeInstanceOf(RegExp);
-    expect(EMAIL_REGEX.source).toBe(SERVER_EMAIL_REGEX.source);
-    expect(EMAIL_REGEX.flags).toBe(SERVER_EMAIL_REGEX.flags);
+    expect(EMAIL_REGEX.source).toBe(server.source);
+    expect(EMAIL_REGEX.flags).toBe(server.flags);
   });
 
   test.each([
