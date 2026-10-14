@@ -21,6 +21,7 @@ import type {
   MiddlewareMap,
   RegisteredMiddlewareName,
 } from './middleware';
+import type { HookFor, HookLookupUID, HookMap, StrictHooksRegistry } from './hook';
 import type { ApiMap, RegisteredApiName } from './module';
 import type { PluginMap, RegisteredPluginName } from './plugin';
 import type { PolicyLookup, PolicyLookupName, PolicyMap, RegisteredPolicyName } from './policy';
@@ -43,6 +44,7 @@ type LegacyLookups = {
   middleware(name: SuggestedString<RegisteredMiddlewareName>): Core.MiddlewareFactory;
   plugin(name: SuggestedString<RegisteredPluginName>): Core.Plugin;
   api(name: SuggestedString<RegisteredApiName>): Core.Module;
+  hook(name: string): any;
 };
 
 /** Root lookups with strict mode: registered names resolve to their contracts. */
@@ -81,11 +83,29 @@ type StrictLookups = {
   plugin<TName extends SuggestedString<RegisteredPluginName>>(name: TName): Core.Plugin<TName>;
   /** APIs with registered contracts are listed for completion. */
   api<TName extends SuggestedString<RegisteredApiName>>(name: TName): Core.Module<`api::${TName}`>;
+  /**
+   * Resolves the registered contract of the hook `name`, whose handlers receive the context its caller
+   * passes. An unregistered name resolves to `unknown`: the runtime returns `undefined` when no hook is
+   * set under it. Registered names are listed for completion.
+   */
+  hook<TName extends HookLookupUID>(name: TName): HookFor<TName>;
 };
 
 type Lookups = IsStrict extends false ? LegacyLookups : StrictLookups;
 
-export interface Strapi extends Container, Lookups {
+/**
+ * The container with strict types: `get('hooks')` resolves to the hooks registry, whose `set` and
+ * `extend` keep the registered hook contracts. Other names, and calls with an explicit type argument,
+ * keep the container's signature.
+ */
+type StrictContainer = Omit<Container, 'get'> & {
+  get(name: 'hooks'): StrictHooksRegistry;
+  get<T = any>(name: string, args?: unknown): T;
+};
+
+type StrapiContainer = IsStrict extends false ? Container : StrictContainer;
+
+export interface Strapi extends StrapiContainer, Lookups {
   server: Modules.Server.Server;
   log: Logger;
   fs: StrapiFS;
@@ -212,8 +232,11 @@ export interface Strapi extends Container, Lookups {
    * `Plugin<name>`, like `plugin(name)`; other names keep the legacy plugin.
    */
   plugins: PluginMap;
-  hooks: Record<string, any>;
-  hook(name: string): any;
+  /**
+   * Hooks keyed by UID. With strict types enabled, registered UIDs resolve to their contracts; other
+   * keys resolve to `unknown`.
+   */
+  hooks: HookMap;
   /**
    * APIs keyed by name. With strict types enabled, an API with registered contracts resolves to
    * `Module<'api::<name>'>`, like `api(name)`; other names keep the legacy module.
@@ -303,8 +326,7 @@ export interface StrapiFS {
 
 /** Config namespaces that have a registered contract, e.g. `'plugin::my-plugin'`. */
 export type ConfigNamespace =
-  | keyof Strapi.Registries.AppConfigs
-  | keyof Strapi.Registries.PackageConfigs;
+  keyof Strapi.Registries.AppConfigs | keyof Strapi.Registries.PackageConfigs;
 
 /** Resolves application overrides before package defaults. */
 export type ConfigFor<TNamespace extends ConfigNamespace> =
@@ -423,15 +445,7 @@ export type ConfigWithDefault<TValue, TDefault> = undefined extends TValue
  * The remaining members keep the constraint open to every config value, including unknown and void.
  */
 export type ConfigDefaultValue =
-  | string
-  | number
-  | boolean
-  | bigint
-  | symbol
-  | NonNullable<unknown>
-  | null
-  | undefined
-  | void;
+  string | number | boolean | bigint | symbol | NonNullable<unknown> | null | undefined | void;
 
 /**
  * `never` for paths inside a registered config namespace, so that they skip the legacy `get` overload.

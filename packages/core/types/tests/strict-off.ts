@@ -111,6 +111,19 @@ declare const mapChecks: [
 ];
 mapChecks satisfies unknown;
 
+// Hooks keep develop's types, even for the hooks registered by `@strapi/types`.
+declare const hookStrapi: Core.Strapi;
+const hook = hookStrapi.hook('strapi::content-types.beforeSync');
+const hooksRegistry = hookStrapi.get('hooks');
+declare const hookChecks: [
+  Expect<Equal<Core.Strapi['hooks'], Record<string, any>>>,
+  Expect<Equal<Core.Strapi['hook'], (name: string) => any>>,
+  Expect<Equal<Core.Strapi['get'], Core.Container['get']>>,
+  Expect<Equal<typeof hook, any>>,
+  Expect<Equal<typeof hooksRegistry, any>>,
+];
+hookChecks satisfies unknown;
+
 declare const strapi: Core.Strapi;
 strapi.service('plugin::legacy.example').anything();
 strapi.plugin('legacy').service('example').anything();
