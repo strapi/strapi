@@ -1,4 +1,4 @@
-import type { Core, Schema, Struct, UID } from '../src';
+import type { Core, Modules, Schema, Struct, UID } from '../src';
 import type * as Internal from '../src/internal';
 import type { IsStrict } from '../src/core/strictness';
 
@@ -110,6 +110,14 @@ declare const mapChecks: [
   Expect<Equal<Core.Strapi['middlewares']['plugin::legacy.timer'], Core.MiddlewareFactory>>,
 ];
 mapChecks satisfies unknown;
+
+// Document Service params keep develop's types.
+type HasParam<TParams, TKey extends string> = TKey extends keyof TParams ? true : false;
+declare const documentParamChecks: [
+  // `update` takes no `status`.
+  Expect<Equal<HasParam<Modules.Documents.ServiceParams['update'], 'status'>, false>>,
+];
+documentParamChecks satisfies unknown;
 
 // Hooks keep develop's types, even for the hooks registered by `@strapi/types`.
 declare const hookStrapi: Core.Strapi;
