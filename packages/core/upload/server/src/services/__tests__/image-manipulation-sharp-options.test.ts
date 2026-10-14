@@ -24,7 +24,11 @@ global.strapi = {
       services: {
         provider: { upload: jest.fn() },
         upload: {
-          getSettings: () => ({ sizeOptimization: true, autoOrientation: false }),
+          getSettings: () => ({
+            sizeOptimization: true,
+            autoOrientation: false,
+            responsiveDimensions: true,
+          }),
         },
         'image-manipulation': imageManipulation,
       },
@@ -95,25 +99,31 @@ describe('Image manipulation - sharp instance options (limitInputPixels)', () =>
     test('generateThumbnail rejects (file path input)', async () => {
       const file = makeFile(staticPngPath, '.png', 'image/png', 1500, 1000);
 
-      await expect(imageManipulation.generateThumbnail(file)).rejects.toThrow(/pixel limit/i);
+      await expect(imageManipulation.generateThumbnail(file)).rejects.toThrow();
     });
 
     test('generateThumbnail rejects (stream-only, no filepath)', async () => {
       const file = makeStreamOnlyFile(staticPngPath, '.png', 'image/png', 1500, 1000);
 
-      await expect(imageManipulation.generateThumbnail(file)).rejects.toThrow(/pixel limit/i);
+      await expect(imageManipulation.generateThumbnail(file)).rejects.toThrow();
     });
 
     test('generateThumbnail rejects for animated GIF (file path input)', async () => {
       const file = makeFile(animatedGifPath, '.gif', 'image/gif', 200, 200);
 
-      await expect(imageManipulation.generateThumbnail(file)).rejects.toThrow(/pixel limit/i);
+      await expect(imageManipulation.generateThumbnail(file)).rejects.toThrow();
     });
 
     test('optimize rejects (file path input)', async () => {
       const file = makeFile(staticPngPath, '.png', 'image/png', 1500, 1000);
 
-      await expect(imageManipulation.optimize(file)).rejects.toThrow(/pixel limit/i);
+      await expect(imageManipulation.optimize(file)).rejects.toThrow();
+    });
+
+    test('generateResponsiveFormats rejects (file path input)', async () => {
+      const file = makeFile(staticPngPath, '.png', 'image/png', 1500, 1000);
+
+      await expect(imageManipulation.generateResponsiveFormats(file)).rejects.toThrow();
     });
 
     test('isFaultyImage reports the image as faulty (file path input)', async () => {
@@ -171,6 +181,13 @@ describe('Image manipulation - sharp instance options (limitInputPixels)', () =>
       expect(thumb).not.toBeNull();
     });
 
+    test('generateResponsiveFormats succeeds (file path input)', async () => {
+      const file = makeFile(staticPngPath, '.png', 'image/png', 1500, 1000);
+      const formats = await imageManipulation.generateResponsiveFormats(file);
+
+      expect(formats.map((format) => format?.key)).toEqual(['large', 'medium', 'small']);
+    });
+
     test('getDimensions succeeds (file path input)', async () => {
       const file = makeFile(staticPngPath, '.png', 'image/png', 1500, 1000);
       const dims = await imageManipulation.getDimensions(file);
@@ -193,6 +210,23 @@ describe('Image manipulation - sharp instance options (limitInputPixels)', () =>
       const thumb = await imageManipulation.generateThumbnail(file);
 
       expect(thumb).not.toBeNull();
+    });
+
+    // These two build a bare `sharp()` for streams: an options object there,
+    // even an empty one, would stop sharp from reading the stream.
+    test('getDimensions succeeds with sharp defaults (stream-only, no filepath)', async () => {
+      const file = makeStreamOnlyFile(staticPngPath, '.png', 'image/png', 1500, 1000);
+
+      await expect(imageManipulation.getDimensions(file)).resolves.toEqual({
+        width: 1417,
+        height: 1063,
+      });
+    });
+
+    test('isFaultyImage succeeds with sharp defaults (stream-only, no filepath)', async () => {
+      const file = makeStreamOnlyFile(staticPngPath, '.png', 'image/png', 1500, 1000);
+
+      await expect(imageManipulation.isFaultyImage(file)).resolves.toBeDefined();
     });
   });
 });

@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { join } from 'path';
-import sharp, { type Metadata, type ResizeOptions } from 'sharp';
+import sharp, { type Metadata, type ResizeOptions, type SharpOptions } from 'sharp';
 import crypto from 'crypto';
 import { strings, file as fileUtils } from '@strapi/utils';
 
@@ -20,11 +20,10 @@ const { bytesToKbytes } = fileUtils;
  * Global settings (`cache`, `concurrency`) are applied once in the plugin register phase.
  * Returns `undefined` when nothing is configured so bare stream pipelines can use `sharp()`.
  */
-const getSharpOptions = (): sharp.SharpOptions | undefined => {
-  const { limitInputPixels } =
-    strapi.config.get<Config['sharp']>('plugin::upload.sharp', {}) ?? {};
+const getSharpOptions = (): SharpOptions | undefined => {
+  const { limitInputPixels } = strapi.config.get<Config['sharp']>('plugin::upload.sharp', {}) ?? {};
 
-  if (limitInputPixels === undefined) {
+  if (limitInputPixels == null) {
     return undefined;
   }
 
