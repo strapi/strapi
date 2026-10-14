@@ -7,6 +7,28 @@ import type createInternals from '../services/internals';
 import type createTypeRegistry from '../services/type-registry';
 import type createUtils from '../services/utils';
 
+/**
+ * `strapi.config.get('plugin::graphql')`: the plugin config merged with its defaults
+ * (`server/src/config/default-config.ts`). The other keys are optional.
+ */
+export type GraphQLConfig = {
+  shadowCRUD: boolean;
+  endpoint: string;
+  subscriptions: boolean;
+  /** `-1` for no limit. */
+  maxLimit: number;
+  apolloServer: Record<string, unknown>;
+  /** From `STRAPI_GRAPHQL_V4_COMPATIBILITY_MODE` when the config does not set it. */
+  v4CompatibilityMode: boolean | string;
+  defaultLimit?: number;
+  depthLimit?: number;
+  playgroundAlways?: boolean;
+  /** A function receives the Strapi instance and returns an Apollo plugin or a boolean. */
+  landingPage?: boolean | ((strapi?: never) => unknown);
+  generateArtifacts?: boolean;
+  artifacts?: { schema?: string | boolean; typegen?: string | boolean };
+};
+
 /** GraphQL services by name, as registered by the plugin. */
 export type Services = {
   builders: ReturnType<typeof createBuilders>;
@@ -25,6 +47,10 @@ declare global {
   namespace Strapi {
     // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace Registries {
+      interface PackageConfigs {
+        'plugin::graphql': GraphQLConfig;
+      }
+
       interface PackageServices {
         'plugin::graphql.builders': Services['builders'];
         'plugin::graphql.constants': Services['constants'];
