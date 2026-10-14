@@ -9,7 +9,11 @@ import { Release } from '../../../shared/contracts/releases';
 import { ReleaseAction } from '../../../shared/contracts/release-actions';
 
 interface Input {
-  oldContentTypes: Record<string, Schema.ContentType>;
+  /**
+   * The schemas saved at the previous start: `undefined` when the core store table does not exist yet,
+   * `null` when it has no saved schemas.
+   */
+  oldContentTypes: Record<string, Schema.ContentType> | null | undefined;
   contentTypes: Record<string, Schema.ContentType>;
 }
 
