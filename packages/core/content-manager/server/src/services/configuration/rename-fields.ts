@@ -32,8 +32,13 @@ const createContentManagerConfigurationRenamer = ({
 }: {
   strapi: Core.Strapi;
 }): AttributeRenameHandler => {
-  return async (_trx, renames: AttributeRenames) => {
+  return async (trx, renames: AttributeRenames) => {
     if (Object.keys(renames).length === 0) {
+      return;
+    }
+
+    // Fresh database: the table is created by schema sync after the migrations.
+    if (!(await strapi.db.getSchemaConnection(trx).hasTable('strapi_core_store_settings'))) {
       return;
     }
 

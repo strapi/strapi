@@ -2,6 +2,18 @@ import { createContentManagerConfigurationRenamer } from '../rename-fields';
 
 const PRODUCT = 'api::product.product';
 
+const trx = 'trx' as any;
+
+const coreStoreTable = (hasTable = true) => {
+  const hasTableMock = jest.fn(async () => hasTable);
+  return {
+    hasTableMock,
+    db: {
+      getSchemaConnection: jest.fn(() => ({ hasTable: hasTableMock })),
+    },
+  };
+};
+
 describe('createContentManagerConfigurationRenamer', () => {
   it('writes the renamed configuration and leaves an unrelated model untouched', async () => {
     const stored = new Map<string, unknown>([
@@ -29,9 +41,10 @@ describe('createContentManagerConfigurationRenamer', () => {
         get: async ({ key }: { key: string }) => stored.get(key) ?? null,
         set,
       }),
+      ...coreStoreTable(),
     };
 
-    await createContentManagerConfigurationRenamer({ strapi: strapi as any })({} as any, {
+    await createContentManagerConfigurationRenamer({ strapi: strapi as any })(trx, {
       [PRODUCT]: { internalName: 'productName' },
     });
 
@@ -55,9 +68,10 @@ describe('createContentManagerConfigurationRenamer', () => {
         get: async () => ['not-a-configuration'],
         set,
       }),
+      ...coreStoreTable(),
     };
 
-    await createContentManagerConfigurationRenamer({ strapi: strapi as any })({} as any, {
+    await createContentManagerConfigurationRenamer({ strapi: strapi as any })(trx, {
       'basic.seo': { metaTitle: 'title' },
     });
 
@@ -86,9 +100,10 @@ describe('createContentManagerConfigurationRenamer', () => {
         get: async () => current,
         set,
       }),
+      ...coreStoreTable(),
     };
 
-    await createContentManagerConfigurationRenamer({ strapi: strapi as any })({} as any, {
+    await createContentManagerConfigurationRenamer({ strapi: strapi as any })(trx, {
       [PRODUCT]: { internalName: 'productName' },
     });
 
@@ -110,6 +125,29 @@ describe('createContentManagerConfigurationRenamer', () => {
 
     await createContentManagerConfigurationRenamer({ strapi: strapi as any })({} as any, {});
 
+    expect(set).not.toHaveBeenCalled();
+  });
+
+  it('does nothing on a fresh database', async () => {
+    const get = jest.fn();
+    const set = jest.fn();
+    const { db, hasTableMock } = coreStoreTable(false);
+    const strapi = {
+      contentTypes: {
+        [PRODUCT]: { attributes: { productName: { type: 'string' } } },
+      },
+      components: {},
+      store: () => ({ get, set }),
+      db,
+    };
+
+    await createContentManagerConfigurationRenamer({ strapi: strapi as any })(trx, {
+      [PRODUCT]: { internalName: 'productName' },
+    });
+
+    expect(db.getSchemaConnection).toHaveBeenCalledWith(trx);
+    expect(hasTableMock).toHaveBeenCalledWith('strapi_core_store_settings');
+    expect(get).not.toHaveBeenCalled();
     expect(set).not.toHaveBeenCalled();
   });
 });
