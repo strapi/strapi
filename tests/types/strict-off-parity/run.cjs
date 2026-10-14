@@ -8,7 +8,9 @@
 //   1. `strapi ts:generate-types` runs with that checkout's CLI, and `types/generated/*` is kept;
 //   2. the application is type checked with that checkout's TypeScript, and its diagnostics are kept;
 //   3. every type exported by `app/probes/surface.ts` is printed, with every Strapi-declared type
-//      it reaches (members, signatures, union members, type arguments).
+//      it reaches (members, signatures, union members, type arguments);
+//   4. `app/equivalence` (types that print differently but are mutually assignable) is type checked
+//      in its own program.
 // The three outputs of both checkouts are diffed. Build both checkouts first.
 //
 // Usage: node tests/types/strict-off-parity/run.cjs --baseline <checkout> [--head <checkout>]
@@ -95,13 +97,13 @@ function normalizePath(text, checkout, app) {
     .join('<checkout>');
 }
 
-function createProgram(ts, app) {
+function createProgram(ts, app, rootNames) {
   const configPath = path.join(app, 'tsconfig.json');
   const { config } = ts.readConfigFile(configPath, ts.sys.readFile);
   const parsed = ts.parseJsonConfigFileContent(config, ts.sys, app);
 
   return ts.createProgram({
-    rootNames: parsed.fileNames,
+    rootNames: rootNames ?? parsed.fileNames,
     options: { ...parsed.options, noEmit: true, incremental: false },
   });
 }
@@ -292,6 +294,12 @@ function collect(checkout, label) {
           Object.entries(generated).map(([name, content]) => [`generated/${name}`, content])
         ),
         'diagnostics.txt': formatDiagnostics(ts, program, checkout, app),
+        'equivalence.txt': formatDiagnostics(
+          ts,
+          createProgram(ts, app, [path.join(app, 'equivalence/index.ts')]),
+          checkout,
+          app
+        ),
         'surface.txt': dumpSurface(ts, program, checkout, app),
       },
     };

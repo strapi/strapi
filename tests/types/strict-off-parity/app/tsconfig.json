@@ -14,5 +14,14 @@
     "noImplicitThis": true
   },
   "include": ["./", "src/**/*.json"],
-  "exclude": ["node_modules/", "build/", "dist/", ".cache/", ".tmp/", ".strapi/", "src/admin/"]
+  "exclude": [
+    "node_modules/",
+    "build/",
+    "dist/",
+    ".cache/",
+    ".tmp/",
+    ".strapi/",
+    "src/admin/",
+    "equivalence/"
+  ]
 }
