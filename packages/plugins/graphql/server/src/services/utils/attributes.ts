@@ -8,10 +8,12 @@ export default ({ strapi }: Context) => {
    * @param {object} attribute
    * @return {boolean}
    */
-  const isStrapiScalar = (attribute: Pick<Schema.Attribute.AnyAttribute, 'type'>) => {
-    const { STRAPI_SCALARS } = strapi.plugin('graphql').service('constants');
-
-    return (STRAPI_SCALARS as readonly string[]).includes(attribute.type);
+  const isStrapiScalar = (attribute: Schema.Attribute.AnyAttribute) => {
+    // Untyped, as the lookup was on develop: the published return type stays develop's `any`.
+    return strapi
+      .plugin('graphql')
+      .service<any>('constants')
+      .STRAPI_SCALARS.includes(attribute.type);
   };
 
   /**
@@ -19,11 +21,11 @@ export default ({ strapi }: Context) => {
    * @param {object} attribute
    * @return {boolean}
    */
-  // Only the type is read: filter operators pass `{ type }` for a GraphQL scalar name.
-  const isGraphQLScalar = (attribute: { type: string }) => {
-    const { GRAPHQL_SCALARS } = strapi.plugin('graphql').service('constants');
-
-    return (GRAPHQL_SCALARS as readonly string[]).includes(attribute.type);
+  const isGraphQLScalar = (attribute: Schema.Attribute.AnyAttribute) => {
+    return strapi
+      .plugin('graphql')
+      .service<any>('constants')
+      .GRAPHQL_SCALARS.includes(attribute.type);
   };
 
   /**
