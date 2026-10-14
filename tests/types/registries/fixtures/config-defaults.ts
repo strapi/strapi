@@ -49,7 +49,7 @@ const explicitTupleDefault = app.config.get<
 const pluginExplicitTupleDefault = app
   .plugin('default-semantics')
   .config<unknown, 'port', [] | [number]>('port');
-const fallbackBoolean = app.config.get('uuid', false);
+const fallbackBoolean = app.config.get('unregistered.flag', false);
 const fallbackString = app.config.get('unregistered.label', 'fallback');
 const fallbackNumber = app.config.get('unregistered.limit', 42);
 const pluginFallbackBoolean = app.plugin('unregistered').config('enabled', false);
@@ -134,3 +134,12 @@ void features.future;
 void middlewares.length;
 features?.future satisfies object | undefined;
 middlewaresWithDefault.length satisfies number;
+
+// Root keys set at startup are registered too.
+app.config.get('environment') satisfies string;
+app.config.get('autoReload') satisfies boolean;
+app.config.get('info.strapi') satisfies string;
+app.config.get('dirs.app.root') satisfies string;
+const uuid = app.config.get('uuid');
+// @ts-expect-error `package.json` may have no `strapi.uuid`.
+uuid satisfies string;
