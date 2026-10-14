@@ -113,9 +113,15 @@ mapChecks satisfies unknown;
 
 // Document Service params keep develop's types.
 type HasParam<TParams, TKey extends string> = TKey extends keyof TParams ? true : false;
+type Documents = Modules.Documents.ServiceInstance<UID.ContentType>;
+type FindManyParams = NonNullable<Parameters<Documents['findMany']>[0]>;
+type PublishParams = Parameters<Modules.Documents.DraftAndPublishExtension['publish']>[0];
 declare const documentParamChecks: [
   // `update` takes no `status`.
   Expect<Equal<HasParam<Modules.Documents.ServiceParams['update'], 'status'>, false>>,
+  // Methods take `lookup`.
+  Expect<Equal<FindManyParams['lookup'], Record<string, unknown> | undefined>>,
+  Expect<Equal<PublishParams['lookup'], Record<string, unknown> | undefined>>,
 ];
 documentParamChecks satisfies unknown;
 

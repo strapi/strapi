@@ -1,41 +1,52 @@
 import type * as Utils from '../../utils';
 import type * as UID from '../../uid';
+import type { IsStrict } from '../../core/strictness';
 
 import type { IsDraftAndPublishEnabled } from './draft-and-publish';
 import type * as Params from './params/document-engine';
 import type * as Result from './result/document-engine';
 
+/**
+ * The params of a Document Service method. With strict types, `lookup` is typed `undefined`: the
+ * service builds the lookup itself, from `status` and `locale`, and every method rejects one from the
+ * caller (a truthy `lookup` throws `ValidationError("Invalid params: 'lookup'")`). Without strict
+ * types, the params themselves, as on develop.
+ */
+type MethodParams<TParams> = IsStrict extends false ? TParams : TParams & { lookup?: undefined };
+
 export type ServiceInstance<TContentTypeUID extends UID.ContentType = UID.ContentType> = {
-  findMany<const TParams extends Params.FindMany<TContentTypeUID>>(
+  findMany<const TParams extends MethodParams<Params.FindMany<TContentTypeUID>>>(
     params?: TParams
   ): Result.FindMany<TContentTypeUID, TParams>;
 
-  findFirst<const TParams extends Params.FindFirst<TContentTypeUID>>(
+  findFirst<const TParams extends MethodParams<Params.FindFirst<TContentTypeUID>>>(
     params?: TParams
   ): Result.FindFirst<TContentTypeUID, TParams>;
 
-  findOne<const TParams extends Params.FindOne<TContentTypeUID>>(
+  findOne<const TParams extends MethodParams<Params.FindOne<TContentTypeUID>>>(
     params: TParams
   ): Result.FindOne<TContentTypeUID, TParams>;
 
-  delete<const TParams extends Params.Delete<TContentTypeUID>>(
+  delete<const TParams extends MethodParams<Params.Delete<TContentTypeUID>>>(
     params: TParams
   ): Result.Delete<TContentTypeUID, TParams>;
 
-  create<const TParams extends Params.Create<TContentTypeUID>>(
+  create<const TParams extends MethodParams<Params.Create<TContentTypeUID>>>(
     params: TParams
   ): Result.Create<TContentTypeUID, TParams>;
 
-  update<const TParams extends Params.Update<TContentTypeUID>>(
+  update<const TParams extends MethodParams<Params.Update<TContentTypeUID>>>(
     params: TParams
   ): Result.Update<TContentTypeUID, TParams>;
 
-  count<const TParams extends Params.Count<TContentTypeUID>>(params: TParams): Result.Count;
+  count<const TParams extends MethodParams<Params.Count<TContentTypeUID>>>(
+    params: TParams
+  ): Result.Count;
 
   /**
    * @internal
    */
-  clone<const TParams extends Params.Clone<TContentTypeUID>>(
+  clone<const TParams extends MethodParams<Params.Clone<TContentTypeUID>>>(
     params: TParams
   ): Result.Clone<TContentTypeUID, TParams>;
 } & Utils.If<
@@ -59,21 +70,21 @@ export interface DraftAndPublishExtension<
   /**
    * Publishes the current draft for the given document ID.
    */
-  publish<const TParams extends Params.Publish<TContentTypeUID>>(
+  publish<const TParams extends MethodParams<Params.Publish<TContentTypeUID>>>(
     params: TParams
   ): Result.Publish<TContentTypeUID, TParams>;
 
   /**
    * Unpublishes a document for the given document ID.
    */
-  unpublish<const TParams extends Params.Unpublish<TContentTypeUID>>(
+  unpublish<const TParams extends MethodParams<Params.Unpublish<TContentTypeUID>>>(
     params: TParams
   ): Result.Unpublish<TContentTypeUID, TParams>;
 
   /**
    * Discards the draft entry for the given document ID and params.
    */
-  discardDraft<const TParams extends Params.DiscardDraft<TContentTypeUID>>(
+  discardDraft<const TParams extends MethodParams<Params.DiscardDraft<TContentTypeUID>>>(
     params: TParams
   ): Result.DiscardDraft<TContentTypeUID, TParams>;
 }
