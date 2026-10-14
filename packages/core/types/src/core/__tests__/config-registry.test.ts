@@ -229,7 +229,11 @@ strapi.config.get<number>('server.port', '1337');
 strapi.plugin('config-lab').config<number>('limit', '1337');
 const legacyPlugin: Plugin = strapi.plugin('config-lab');
 legacyPlugin.config<number>('limit') satisfies number;
-const contextual: { port: number } = strapi.config.get('server');
+// Like service lookups, an annotation does not supply `T`: pass it as a type argument.
+// @ts-expect-error `T` is not inferred from the annotation.
+const contextualInferred: { port: number } = strapi.config.get('server');
+contextualInferred satisfies unknown;
+const contextual = strapi.config.get<{ port: number }>('server');
 const unregisteredPathWithDefault = strapi.config.get('server.port', 1337);
 unregisteredPathWithDefault satisfies number;
 const dynamicDefault = strapi.config.get(dynamicKey, 1337);
@@ -241,7 +245,8 @@ pluginDynamicDefault satisfies number;
 unknownPathDefault satisfies number;
 pluginUnknownPathDefault satisfies number;
 
-// Unregistered defaults preserve primitive literals while objects and arrays remain mutable.
+// Unregistered defaults widen primitive literals, like develop's `let` inference, and objects and
+// arrays remain mutable.
 const fallbackBoolean = strapi.config.get('uuid', false);
 const fallbackString = strapi.config.get('unregistered.label', 'fallback');
 const fallbackNumber = strapi.config.get('unregistered.limit', 42);
@@ -257,12 +262,12 @@ pluginFallbackObject.enabled = true;
 fallbackArray.push('second');
 pluginFallbackArray.push('second');
 declare const fallbackChecks: [
-  Expect<Equal<typeof fallbackBoolean, false>>,
-  Expect<Equal<typeof fallbackString, 'fallback'>>,
-  Expect<Equal<typeof fallbackNumber, 42>>,
-  Expect<Equal<typeof pluginFallbackBoolean, false>>,
-  Expect<Equal<typeof pluginFallbackString, 'fallback'>>,
-  Expect<Equal<typeof pluginFallbackNumber, 42>>,
+  Expect<Equal<typeof fallbackBoolean, boolean>>,
+  Expect<Equal<typeof fallbackString, string>>,
+  Expect<Equal<typeof fallbackNumber, number>>,
+  Expect<Equal<typeof pluginFallbackBoolean, boolean>>,
+  Expect<Equal<typeof pluginFallbackString, string>>,
+  Expect<Equal<typeof pluginFallbackNumber, number>>,
   Expect<Equal<typeof fallbackObject, { enabled: boolean }>>,
   Expect<Equal<typeof pluginFallbackObject, { enabled: boolean }>>,
   Expect<Equal<typeof fallbackArray, string[]>>,
@@ -275,10 +280,14 @@ const forwardPluginDefault = <T>(key: string, value: T): T =>
 forwardDefault<void>('unregistered', undefined) satisfies void;
 forwardPluginDefault<unknown>('unregistered', undefined) satisfies unknown;
 
-// Generic helpers that forward a config path keep inferring from their declared return type.
+// Generic helpers that forward a config path pass their return type as the type argument.
 const getLabConfig = <TKey extends keyof LabConfig>(key: TKey): LabConfig[TKey] =>
-  strapi.plugin('unregistered').config(key);
+  strapi.plugin('unregistered').config<LabConfig[TKey]>(key);
 getLabConfig('limit') satisfies number;
+const getLabConfigInferred = <TKey extends keyof LabConfig>(key: TKey): LabConfig[TKey] =>
+  // @ts-expect-error Without the type argument, the lookup is not assignable to the return type.
+  strapi.plugin('unregistered').config(key);
+getLabConfigInferred satisfies unknown;
 
 // Implementations and mocks written against the permissive signature still type check.
 const provider: ConfigProvider = {

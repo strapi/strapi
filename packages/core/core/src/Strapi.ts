@@ -283,7 +283,7 @@ class Strapi extends Container implements Core.Strapi {
 
     const logger = createLogger({
       level: 'http', // Strapi defaults to level 'http'
-      ...config.get('logger'), // DEPRECATED
+      ...config.get<Record<string, unknown> | undefined>('logger'), // DEPRECATED
       ...config.get('server.logger.config'),
     });
 

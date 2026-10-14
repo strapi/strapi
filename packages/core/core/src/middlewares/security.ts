@@ -63,7 +63,8 @@ export const security: Core.MiddlewareFactory<Config> =
     // if apollo graphql playground is enabled, add exceptions for it
     if (strapi.plugin('graphql')?.service<GraphQLUtilsService>('utils').playground.isEnabled()) {
       const { config: gqlConfig } = strapi.plugin('graphql');
-      specialPaths.push(gqlConfig('endpoint'));
+      // Core does not load the GraphQL contracts, an optional plugin.
+      specialPaths.push(gqlConfig<string>('endpoint'));
 
       directives['script-src'].push(`https: 'unsafe-inline'`);
       directives['img-src'].push(`'apollo-server-landing-page.cdn.apollographql.com'`);

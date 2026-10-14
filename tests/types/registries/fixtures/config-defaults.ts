@@ -61,7 +61,7 @@ const fallbackObject = app.config.get('unregistered.options', { enabled: false }
 const pluginFallbackArray = app.plugin('unregistered').config('labels', ['first']);
 fallbackObject.enabled = true;
 pluginFallbackArray.push('second');
-// Unregistered defaults infer widening literals, as before registries, so mutable use sites compile.
+// Unregistered defaults widen primitive literals (the result type is `NoInfer`), so mutable use sites compile.
 let reassignedPort = app.config.get('server.port', 1337);
 reassignedPort = 4000;
 let reassignedPluginPort = app.plugin('unregistered').config('port', 1337);
@@ -96,12 +96,12 @@ declare const checks: [
   Expect<Equal<typeof pluginOptionalSpreadDefault, number | null | undefined>>,
   Expect<Equal<typeof explicitTupleDefault, number | null | undefined>>,
   Expect<Equal<typeof pluginExplicitTupleDefault, number | null | undefined>>,
-  Expect<Equal<typeof fallbackBoolean, false>>,
-  Expect<Equal<typeof fallbackString, 'fallback'>>,
-  Expect<Equal<typeof fallbackNumber, 42>>,
-  Expect<Equal<typeof pluginFallbackBoolean, false>>,
-  Expect<Equal<typeof pluginFallbackString, 'fallback'>>,
-  Expect<Equal<typeof pluginFallbackNumber, 42>>,
+  Expect<Equal<typeof fallbackBoolean, boolean>>,
+  Expect<Equal<typeof fallbackString, string>>,
+  Expect<Equal<typeof fallbackNumber, number>>,
+  Expect<Equal<typeof pluginFallbackBoolean, boolean>>,
+  Expect<Equal<typeof pluginFallbackString, string>>,
+  Expect<Equal<typeof pluginFallbackNumber, number>>,
   Expect<Equal<typeof fallbackObject, { enabled: boolean }>>,
   Expect<Equal<typeof pluginFallbackArray, string[]>>,
 ];
