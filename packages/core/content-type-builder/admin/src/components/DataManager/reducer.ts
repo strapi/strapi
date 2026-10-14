@@ -397,7 +397,7 @@ const applyRenameConsent = (
   }
 };
 
-const UID_TARGET_TYPES = ['string', 'text'];
+const UID_TARGET_TYPES = new Set(['string', 'text']);
 
 /**
  * Keeps uid fields attached to a field when it is renamed, whether or not the
@@ -415,7 +415,7 @@ const renameUIDTargetFields = (
     return;
   }
 
-  const isValidTarget = UID_TARGET_TYPES.includes(newAttribute.type);
+  const isValidTarget = UID_TARGET_TYPES.has(newAttribute.type);
 
   type.attributes.forEach((attribute) => {
     if (attribute.type === 'uid' && attribute.targetField === oldName) {
