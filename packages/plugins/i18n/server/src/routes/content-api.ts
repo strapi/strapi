@@ -3,7 +3,7 @@ import { createContentApiRoutesFactory } from '@strapi/utils';
 import { I18nLocaleRouteValidator } from './validation';
 
 const createContentApiRoutes = createContentApiRoutesFactory((): Core.RouterInput['routes'] => {
-  const validator = new I18nLocaleRouteValidator(strapi);
+  const validator = new I18nLocaleRouteValidator();
   return [
     {
       method: 'GET',

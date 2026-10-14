@@ -1,4 +1,3 @@
-import type { Core } from '@strapi/types';
 import * as z from 'zod/v4';
 
 /**
@@ -6,12 +5,6 @@ import * as z from 'zod/v4';
  *
  */
 export class I18nLocaleRouteValidator {
-  protected readonly _strapi: Core.Strapi;
-
-  public constructor(strapi: Core.Strapi) {
-    this._strapi = strapi;
-  }
-
   /**
    * Generates a validation schema for a single locale.
    *
