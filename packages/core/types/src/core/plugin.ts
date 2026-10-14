@@ -164,7 +164,7 @@ type StrictPluginMiddlewareGetter<TName extends string> = {
 
 type StrictPluginConfigGetter<TName extends string> = {
   /** Reads the config of a plugin without a registered contract, as without strict mode. */
-  config<T = unknown>(key: LegacyPluginConfigPath<TName>, defaultVal?: T): T;
+  config<T = unknown>(key: LegacyPluginConfigPath<TName>, defaultVal?: T): NoInfer<T>;
   /**
    * Reads a key or dotted path of the plugin config. A registered contract resolves the value type.
    * Editors list its top-level keys, then the keys under the path being typed.
@@ -178,7 +178,7 @@ type StrictPluginConfigGetter<TName extends string> = {
   >(
     key: TKey | PluginConfigPathSuggestion<TName, TKey>,
     ...args: TArgs & ([] | [defaultVal: PluginConfigLookup<TName, TKey, T> | undefined])
-  ): PluginConfigLookup<TName, TKey, T, NoInfer<TArgs[0]>>;
+  ): PluginConfigLookup<TName, TKey, NoInfer<T>, NoInfer<TArgs[0]>>;
 };
 
 /**
