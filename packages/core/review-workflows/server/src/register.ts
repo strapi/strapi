@@ -62,7 +62,9 @@ function extendReviewWorkflowContentTypes({ strapi }: { strapi: Core.Strapi }) {
  *            It was decided in V4 & V5 to not expose them in CE (as they pollute the CTs) but it's not worth given the complexity this needs
  */
 function persistRWOnDowngrade({ strapi }: { strapi: Core.Strapi }) {
-  const { removePersistedTablesWithSuffix, persistTables } = getAdminService('persist-tables');
+  const { removePersistedTablesWithSuffix, persistTables } = getAdminService('persist-tables', {
+    strapi,
+  });
 
   return async ({ contentTypes }: { contentTypes: Record<UID.ContentType, any> }) => {
     const getStageTableToPersist = (contentTypeUID: UID.ContentType) => {
@@ -106,12 +108,12 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   strapi.hook('strapi::content-types.afterSync').register(persistRWOnDowngrade({ strapi }));
   strapi
     .hook('strapi::content-types.afterSync')
-    .register(migrateReviewWorkflowStagesColor)
-    .register(migrateReviewWorkflowStagesRoles)
-    .register(migrateReviewWorkflowStagesTransferToRoles)
-    .register(migrateReviewWorkflowName)
-    .register(migrateWorkflowsContentTypes)
-    .register(migrateDeletedCTInWorkflows);
+    .register(migrateReviewWorkflowStagesColor({ strapi }))
+    .register(migrateReviewWorkflowStagesRoles({ strapi }))
+    .register(migrateReviewWorkflowStagesTransferToRoles({ strapi }))
+    .register(migrateReviewWorkflowName({ strapi }))
+    .register(migrateWorkflowsContentTypes({ strapi }))
+    .register(migrateDeletedCTInWorkflows({ strapi }));
 
   // Middlewares
   reviewWorkflowsMiddlewares.contentTypeMiddleware(strapi);
