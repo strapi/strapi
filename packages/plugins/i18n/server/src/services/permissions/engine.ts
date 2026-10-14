@@ -1,3 +1,4 @@
+import type { Core } from '@strapi/types';
 import { getService } from '../../utils';
 
 /**
@@ -6,6 +7,11 @@ import { getService } from '../../utils';
  * @property {object} user
  * @property {object} condition
  */
+
+// TODO @Nico `willRegisterPermission` is registered into the admin permission engine hooks, which
+// admin keeps at module level and never clears: they outlive a Strapi instance. It reads the global
+// `strapi` at call time, so a handler registered by a destroyed instance serves the one that booted
+// after it in the same process (see __tests__/cross-instance-hooks.test.ts).
 
 /**
  * Locales property handler for the permission engine
@@ -23,7 +29,7 @@ const willRegisterPermission = (context: any) => {
   }
 
   const { locales } = properties || {};
-  const { isLocalizedContentType } = getService('content-types');
+  const { isLocalizedContentType } = getService('content-types', { strapi });
 
   // If there is no subject defined, ignore the permission
   if (!subject) {
@@ -49,13 +55,17 @@ const willRegisterPermission = (context: any) => {
   });
 };
 
-const registerI18nPermissionsHandlers = () => {
-  const { engine } = strapi.service('admin::permission');
+const createEngineService = ({ strapi }: { strapi: Core.Strapi }) => {
+  const registerI18nPermissionsHandlers = () => {
+    const { engine } = strapi.service('admin::permission');
 
-  engine.hooks['before-register.permission'].register(willRegisterPermission);
+    engine.hooks['before-register.permission'].register(willRegisterPermission);
+  };
+
+  return {
+    willRegisterPermission,
+    registerI18nPermissionsHandlers,
+  };
 };
 
-export default {
-  willRegisterPermission,
-  registerI18nPermissionsHandlers,
-};
+export default createEngineService;

@@ -1,6 +1,12 @@
+import type { Core } from '@strapi/types';
 import { isEmpty } from 'lodash';
 
 import { getService } from '../../utils';
+
+// TODO @Nico `localesPropertyHandler` is registered into the admin sections builder, which admin
+// keeps at module level and never clears: it outlives a Strapi instance. It reads the global
+// `strapi` at call time, so a handler registered by a destroyed instance serves the one that booted
+// after it in the same process (see __tests__/cross-instance-hooks.test.ts).
 
 /**
  * Handler for the permissions layout (sections builder)
@@ -12,7 +18,7 @@ import { getService } from '../../utils';
 const localesPropertyHandler = async ({ action, section }: any) => {
   const { actionProvider } = strapi.service('admin::permission');
 
-  const localesService = getService('locales');
+  const localesService = getService('locales', { strapi });
   const locales = await localesService.setIsDefault(await localesService.find());
 
   // Do not add the locales property if there is none registered
@@ -40,14 +46,18 @@ const localesPropertyHandler = async ({ action, section }: any) => {
   }
 };
 
-const registerLocalesPropertyHandler = () => {
-  const { sectionsBuilder } = strapi.service('admin::permission');
+const createSectionsBuilderService = ({ strapi }: { strapi: Core.Strapi }) => {
+  const registerLocalesPropertyHandler = () => {
+    const { sectionsBuilder } = strapi.service('admin::permission');
 
-  sectionsBuilder.addHandler('singleTypes', localesPropertyHandler);
-  sectionsBuilder.addHandler('collectionTypes', localesPropertyHandler);
+    sectionsBuilder.addHandler('singleTypes', localesPropertyHandler);
+    sectionsBuilder.addHandler('collectionTypes', localesPropertyHandler);
+  };
+
+  return {
+    localesPropertyHandler,
+    registerLocalesPropertyHandler,
+  };
 };
 
-export default {
-  localesPropertyHandler,
-  registerLocalesPropertyHandler,
-};
+export default createSectionsBuilderService;

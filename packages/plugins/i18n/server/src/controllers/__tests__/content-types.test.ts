@@ -1,11 +1,6 @@
-import type { Core } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import controller from '../content-types';
-import ctServiceFactory from '../../services/content-types';
-
-// Typed with the `{ strapi }` argument core passes to service factories.
-const createCtService: (deps: { strapi: Core.Strapi }) => ReturnType<typeof ctServiceFactory> =
-  ctServiceFactory;
+import createCtService from '../../services/content-types';
 
 const { ApplicationError } = errors;
 

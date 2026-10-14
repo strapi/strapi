@@ -1,17 +1,8 @@
-import type { Core, Schema } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 
-import localizationsService from '../localizations';
-import localesService from '../locales';
-import contentTypesService from '../content-types';
-
-type Deps = { strapi: Core.Strapi };
-
-// Typed with the `{ strapi }` argument core passes to service factories.
-const createLocalizations: (deps: Deps) => ReturnType<typeof localizationsService> =
-  localizationsService;
-const createLocales: (deps: Deps) => ReturnType<typeof localesService> = localesService;
-const createContentTypes: (deps: Deps) => ReturnType<typeof contentTypesService> =
-  contentTypesService;
+import createLocalizations from '../localizations';
+import createLocales from '../locales';
+import createContentTypes from '../content-types';
 
 const model = {
   uid: 'test-model',

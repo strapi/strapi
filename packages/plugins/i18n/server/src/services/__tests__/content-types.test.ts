@@ -1,11 +1,6 @@
 import type { Core, Struct } from '@strapi/types';
 import { errors } from '@strapi/utils';
-import contentTypesServiceFactory from '../content-types';
-
-// Typed with the `{ strapi }` argument core passes to service factories.
-const createContentTypesService: (deps: {
-  strapi: Core.Strapi;
-}) => ReturnType<typeof contentTypesServiceFactory> = contentTypesServiceFactory;
+import createContentTypesService from '../content-types';
 
 let {
   isLocalizedContentType,

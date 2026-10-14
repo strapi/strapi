@@ -1,3 +1,4 @@
+import type { Core } from '@strapi/types';
 import { get } from 'lodash';
 import { getService } from '../../utils';
 
@@ -61,11 +62,16 @@ const addLocalesPropertyIfNeeded = ({ value: action }: any) => {
     : ['locales'];
 };
 
+// TODO @Nico The handlers below are registered into admin hooks (`actionProvider.hooks`, role
+// `hooks`) that admin keeps at module level and never clears: they outlive a Strapi instance. They
+// read the global `strapi` at call time, so a handler registered by a destroyed instance serves the
+// one that booted after it in the same process (see __tests__/cross-instance-hooks.test.ts).
+
 const shouldApplyLocalesPropertyToSubject = ({ property, subject }: any) => {
   if (property === 'locales') {
     const model = strapi.getModel(subject);
 
-    return getService('content-types').isLocalizedContentType(model);
+    return getService('content-types', { strapi }).isLocalizedContentType(model);
   }
 
   return true;
@@ -73,7 +79,7 @@ const shouldApplyLocalesPropertyToSubject = ({ property, subject }: any) => {
 
 const addAllLocalesToPermissions = async (permissions: any) => {
   const { actionProvider } = strapi.service('admin::permission');
-  const { find: findAllLocales } = getService('locales');
+  const { find: findAllLocales } = getService('locales', { strapi });
 
   const allLocales = await findAllLocales();
   const allLocalesCode = allLocales.map((locale) => locale?.code);
@@ -117,9 +123,9 @@ const needsLocalesPatch = (properties: Record<string, unknown> = {}) => {
 };
 
 const normalizeRolePermissionsLocales = async (permissions: any[]): Promise<any[]> => {
-  const { isLocalizedContentType } = getService('content-types');
+  const { isLocalizedContentType } = getService('content-types', { strapi });
   const { actionProvider } = strapi.service('admin::permission');
-  const defaultLocale = await getService('locales').getDefaultLocale();
+  const defaultLocale = await getService('locales', { strapi }).getDefaultLocale();
 
   return Promise.all(
     permissions.map(async (permission) => {
@@ -155,126 +161,133 @@ const normalizeRolePermissionsLocales = async (permissions: any[]): Promise<any[
   );
 };
 
-/**
- * Repairs role permissions on content types that just had i18n enabled in this sync.
- * Only patches permissions where `properties.locales` is missing or `[]`; leaves `null` alone.
- * Safe to run at `afterSync` time because it does not depend on the actionProvider.
- */
-const repairPermissionsForNewlyLocalizedTypes = async ({
-  oldContentTypes,
-  contentTypes,
-}: {
-  oldContentTypes: Record<string, any> | null | undefined;
-  contentTypes: Record<string, any>;
-}) => {
-  if (!oldContentTypes) {
-    return;
-  }
-
-  const { isLocalizedContentType } = getService('content-types');
-
-  const newlyLocalizedUids = Object.keys(contentTypes).filter(
-    (uid) =>
-      oldContentTypes[uid] &&
-      !isLocalizedContentType(oldContentTypes[uid]) &&
-      isLocalizedContentType(contentTypes[uid])
-  );
-
-  if (newlyLocalizedUids.length === 0) {
-    return;
-  }
-
-  try {
-    const defaultLocaleCode = await getService('locales').getDefaultLocale();
-    if (!defaultLocaleCode) {
+const createActionsService = ({ strapi }: { strapi: Core.Strapi }) => {
+  /**
+   * Repairs role permissions on content types that just had i18n enabled in this sync.
+   * Only patches permissions where `properties.locales` is missing or `[]`; leaves `null` alone.
+   * Safe to run at `afterSync` time because it does not depend on the actionProvider.
+   */
+  const repairPermissionsForNewlyLocalizedTypes = async ({
+    oldContentTypes,
+    contentTypes,
+  }: {
+    oldContentTypes: Record<string, any> | null | undefined;
+    contentTypes: Record<string, any>;
+  }) => {
+    if (!oldContentTypes) {
       return;
     }
 
-    const permissionService = strapi.service('admin::permission');
-    const allPermissions = await permissionService.findMany({
-      where: { subject: { $in: newlyLocalizedUids } },
-    });
+    const { isLocalizedContentType } = getService('content-types', { strapi });
 
-    const results = await Promise.allSettled(
-      allPermissions
-        .filter((permission: any) => needsLocalesPatch(permission.properties))
-        .map((permission: any) =>
-          strapi.db.query('admin::permission').update({
-            where: { id: permission.id },
-            data: {
-              properties: { ...permission.properties, locales: [defaultLocaleCode] },
-            },
-          })
-        )
+    const newlyLocalizedUids = Object.keys(contentTypes).filter(
+      (uid) =>
+        oldContentTypes[uid] &&
+        !isLocalizedContentType(oldContentTypes[uid]) &&
+        isLocalizedContentType(contentTypes[uid])
     );
 
-    results
-      .filter((r): r is PromiseRejectedResult => r.status === 'rejected')
-      .forEach((r) =>
-        strapi.log.error(
-          'Failed to patch i18n permission during newly-localized type repair.',
-          r.reason
-        )
+    if (newlyLocalizedUids.length === 0) {
+      return;
+    }
+
+    try {
+      const defaultLocaleCode = await getService('locales', { strapi }).getDefaultLocale();
+      if (!defaultLocaleCode) {
+        return;
+      }
+
+      const permissionService = strapi.service('admin::permission');
+      const allPermissions = await permissionService.findMany({
+        where: { subject: { $in: newlyLocalizedUids } },
+      });
+
+      const results = await Promise.allSettled(
+        allPermissions
+          .filter((permission: any) => needsLocalesPatch(permission.properties))
+          .map((permission: any) =>
+            strapi.db.query('admin::permission').update({
+              where: { id: permission.id },
+              data: {
+                properties: { ...permission.properties, locales: [defaultLocaleCode] },
+              },
+            })
+          )
       );
-  } catch (error) {
-    strapi.log.error('Failed to repair i18n permissions for newly localized content types.', error);
-  }
-};
 
-const syncSuperAdminPermissionsWithLocales = async () => {
-  const roleService = strapi.service('admin::role');
-  const permissionService = strapi.service('admin::permission');
+      results
+        .filter((r): r is PromiseRejectedResult => r.status === 'rejected')
+        .forEach((r) =>
+          strapi.log.error(
+            'Failed to patch i18n permission during newly-localized type repair.',
+            r.reason
+          )
+        );
+    } catch (error) {
+      strapi.log.error(
+        'Failed to repair i18n permissions for newly localized content types.',
+        error
+      );
+    }
+  };
 
-  const superAdminRole = await roleService.getSuperAdmin();
+  const syncSuperAdminPermissionsWithLocales = async () => {
+    const roleService = strapi.service('admin::role');
+    const permissionService = strapi.service('admin::permission');
 
-  if (!superAdminRole) {
-    return;
-  }
+    const superAdminRole = await roleService.getSuperAdmin();
 
-  const superAdminPermissions = await permissionService.findMany({
-    where: {
-      role: {
-        id: superAdminRole.id,
+    if (!superAdminRole) {
+      return;
+    }
+
+    const superAdminPermissions = await permissionService.findMany({
+      where: {
+        role: {
+          id: superAdminRole.id,
+        },
       },
-    },
-  });
+    });
 
-  const newSuperAdminPermissions = await addAllLocalesToPermissions(superAdminPermissions);
+    const newSuperAdminPermissions = await addAllLocalesToPermissions(superAdminPermissions);
 
-  await roleService.assignPermissions(superAdminRole.id, newSuperAdminPermissions);
+    await roleService.assignPermissions(superAdminRole.id, newSuperAdminPermissions);
+  };
+
+  const registerI18nActions = async () => {
+    const { actionProvider } = strapi.service('admin::permission');
+
+    await actionProvider.registerMany(actions);
+  };
+
+  const registerI18nActionsHooks = () => {
+    const { actionProvider } = strapi.service('admin::permission');
+    const { hooks } = strapi.service('admin::role');
+
+    actionProvider.hooks.appliesPropertyToSubject.register(shouldApplyLocalesPropertyToSubject);
+    hooks.willResetSuperAdminPermissions.register(addAllLocalesToPermissions);
+    hooks.willValidateUpdatePermissions.register(normalizeRolePermissionsLocales);
+  };
+
+  const updateActionsProperties = () => {
+    const { actionProvider } = strapi.service('admin::permission');
+
+    // Register the transformation for every new action
+    actionProvider.hooks.willRegister.register(addLocalesPropertyIfNeeded);
+
+    // Handle already registered actions
+    actionProvider.values().forEach((action: any) => addLocalesPropertyIfNeeded({ value: action }));
+  };
+
+  return {
+    actions,
+    registerI18nActions,
+    registerI18nActionsHooks,
+    updateActionsProperties,
+    syncSuperAdminPermissionsWithLocales,
+    repairPermissionsForNewlyLocalizedTypes,
+    normalizeRolePermissionsLocales,
+  };
 };
 
-const registerI18nActions = async () => {
-  const { actionProvider } = strapi.service('admin::permission');
-
-  await actionProvider.registerMany(actions);
-};
-
-const registerI18nActionsHooks = () => {
-  const { actionProvider } = strapi.service('admin::permission');
-  const { hooks } = strapi.service('admin::role');
-
-  actionProvider.hooks.appliesPropertyToSubject.register(shouldApplyLocalesPropertyToSubject);
-  hooks.willResetSuperAdminPermissions.register(addAllLocalesToPermissions);
-  hooks.willValidateUpdatePermissions.register(normalizeRolePermissionsLocales);
-};
-
-const updateActionsProperties = () => {
-  const { actionProvider } = strapi.service('admin::permission');
-
-  // Register the transformation for every new action
-  actionProvider.hooks.willRegister.register(addLocalesPropertyIfNeeded);
-
-  // Handle already registered actions
-  actionProvider.values().forEach((action: any) => addLocalesPropertyIfNeeded({ value: action }));
-};
-
-export default {
-  actions,
-  registerI18nActions,
-  registerI18nActionsHooks,
-  updateActionsProperties,
-  syncSuperAdminPermissionsWithLocales,
-  repairPermissionsForNewlyLocalizedTypes,
-  normalizeRolePermissionsLocales,
-};
+export default createActionsService;

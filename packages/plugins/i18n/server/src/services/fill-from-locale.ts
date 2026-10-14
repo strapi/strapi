@@ -8,7 +8,10 @@ const TEMP_KEY_DIGITS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrs
  * Returns the main display field for a model (e.g. title, name).
  * Uses content-manager configuration when available, falls back to first string attribute or 'id'.
  */
-const getMainField = async (targetUid: UID.Schema): Promise<string> => {
+const getMainField = async (
+  { strapi }: { strapi: Core.Strapi },
+  targetUid: UID.Schema
+): Promise<string> => {
   const contentManagerContentTypeService = strapi
     .plugin('content-manager')
     .service('content-types');
@@ -120,6 +123,7 @@ const isValidRelation = (
  * Maps relations from the source locale to target locale (batched for better performance).
  */
 const resolveRelationsForLocaleBatch = async (
+  { strapi }: { strapi: Core.Strapi },
   relations: Array<{ documentId: string; id?: number; locale?: string }>,
   targetUid: UID.Schema,
   targetLocale: string
@@ -165,6 +169,7 @@ const resolveRelationsForLocaleBatch = async (
  * Builds the where clause for relation queries: documentIds + locales (when target model is localized).
  */
 const buildWhereForRelations = (
+  { strapi }: { strapi: Core.Strapi },
   relations: Array<{ documentId: string; locale?: string }>,
   documentIds: string[],
   targetUid: UID.Schema
@@ -263,6 +268,7 @@ const collectRelationsByUid = (
  * locale mapping, permissions, status, and labels.
  */
 const resolveAllRelationsBatched = async (
+  { strapi }: { strapi: Core.Strapi },
   relationsByUid: RelationsByUid,
   targetLocale: string,
   userAbility: any
@@ -283,7 +289,7 @@ const resolveAllRelationsBatched = async (
         return;
       }
 
-      const mainField = await getMainField(targetUid as UID.Schema);
+      const mainField = await getMainField({ strapi }, targetUid as UID.Schema);
       const validRels = allRels.filter(isValidRelation);
 
       if (validRels.length === 0) {
@@ -294,6 +300,7 @@ const resolveAllRelationsBatched = async (
       // Deduplicate by documentId before querying
       const uniqueRels = [...new Map(validRels.map((r) => [r.documentId, r])).values()];
       const resolvedList = await resolveRelationsForLocaleBatch(
+        { strapi },
         uniqueRels,
         targetUid as UID.Schema,
         targetLocale
@@ -318,7 +325,12 @@ const resolveAllRelationsBatched = async (
       }
 
       const documentIds = [...new Set(resolvedEntries.map((r) => r.documentId))];
-      const where = buildWhereForRelations(resolvedEntries, documentIds, targetUid as UID.Schema);
+      const where = buildWhereForRelations(
+        { strapi },
+        resolvedEntries,
+        documentIds,
+        targetUid as UID.Schema
+      );
 
       const [allStatusEntries, labelEntries] = await Promise.all([
         contentTypes.hasDraftAndPublish(strapi.getModel(targetUid as UID.Schema))
@@ -568,7 +580,12 @@ export const createFillFromLocaleService = ({ strapi }: { strapi: Core.Strapi })
       });
 
       const relsByUid = collectRelationsByUid(document, schema, components);
-      const preResolved = await resolveAllRelationsBatched(relsByUid, targetLocale, userAbility);
+      const preResolved = await resolveAllRelationsBatched(
+        { strapi },
+        relsByUid,
+        targetLocale,
+        userAbility
+      );
       return processDocumentData(document, schema, components, preResolved);
     },
   };

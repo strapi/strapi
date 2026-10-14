@@ -8,7 +8,7 @@ import { getService } from '../../utils';
 const LOCALIZATION_FIELDS = ['locale', 'localizations'];
 
 const sanitize = ({ strapi }: { strapi: Core.Strapi }) => {
-  const { isLocalizedContentType } = getService('content-types');
+  const { isLocalizedContentType } = getService('content-types', { strapi });
 
   /**
    * Sanitizes localization fields of a given entity based on its schema.

@@ -139,15 +139,15 @@ const mergeUnsupportedFields = async (
 };
 
 const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
-  const aiLocalizationJobsService = getService('ai-localization-jobs');
+  const aiLocalizationJobsService = getService('ai-localization-jobs', { strapi });
 
   return {
     // Async to avoid changing the signature later (there will be a db check in the future)
     async isEnabled() {
-      if (getService('ai-translations').hasProvider() === false) {
+      if (getService('ai-translations', { strapi }).hasProvider() === false) {
         return false;
       }
-      const settings = getService('settings');
+      const settings = getService('settings', { strapi });
       const aiSettings = await settings.getSettings();
       return aiSettings?.aiLocalizations === true;
     },
@@ -170,10 +170,12 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
       }
 
       const schema = strapi.getModel(model);
-      const localeService = getService('locales');
+      const localeService = getService('locales', { strapi });
 
       // No localizations needed for content types with i18n disabled
-      const isLocalizedContentType = getService('content-types').isLocalizedContentType(schema);
+      const isLocalizedContentType = getService('content-types', { strapi }).isLocalizedContentType(
+        schema
+      );
       if (!isLocalizedContentType) {
         return;
       }
@@ -295,7 +297,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       let aiResult: GenerateTranslationsResult;
       try {
-        aiResult = await getService('ai-translations').generateTranslations({
+        aiResult = await getService('ai-translations', { strapi }).generateTranslations({
           sourceLocale: document.locale,
           targetLocales,
           content: translateableContent,

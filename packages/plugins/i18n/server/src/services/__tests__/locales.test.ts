@@ -1,11 +1,6 @@
 import type { Core } from '@strapi/types';
 
-import localesServiceFactory from '../locales';
-
-// Typed with the `{ strapi }` argument core passes to service factories.
-const createLocalesService: (deps: {
-  strapi: Core.Strapi;
-}) => ReturnType<typeof localesServiceFactory> = localesServiceFactory;
+import createLocalesService from '../locales';
 
 let localesService = createLocalesService({ strapi: {} as Core.Strapi });
 

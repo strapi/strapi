@@ -1,11 +1,4 @@
-import type { Core } from '@strapi/types';
-
-import permissionsService from '../../permissions';
-
-// Typed with the `{ strapi }` argument core passes to service factories.
-const createPermissionsService: (deps: {
-  strapi: Core.Strapi;
-}) => ReturnType<typeof permissionsService> = permissionsService;
+import createPermissionsService from '../../permissions';
 
 const mockGetService = jest.fn();
 
@@ -14,7 +7,7 @@ jest.mock('../../../utils', () => ({
 }));
 
 describe('localesPropertyHandler', () => {
-  let sectionsBuilder: ReturnType<typeof permissionsService>['sectionsBuilder'];
+  let sectionsBuilder: ReturnType<typeof createPermissionsService>['sectionsBuilder'];
   const appliesToProperty = jest.fn();
   const locales = [
     { name: 'English', code: 'en' },

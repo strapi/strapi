@@ -1,11 +1,12 @@
-import i18nActionsService from './permissions/actions';
-import sectionsBuilderService from './permissions/sections-builder';
-import engineService from './permissions/engine';
+import type { Core } from '@strapi/types';
+import createActionsService from './permissions/actions';
+import createSectionsBuilderService from './permissions/sections-builder';
+import createEngineService from './permissions/engine';
 
-const permissions = () => ({
-  actions: i18nActionsService,
-  sectionsBuilder: sectionsBuilderService,
-  engine: engineService,
+const permissions = ({ strapi }: { strapi: Core.Strapi }) => ({
+  actions: createActionsService({ strapi }),
+  sectionsBuilder: createSectionsBuilderService({ strapi }),
+  engine: createEngineService({ strapi }),
 });
 
 type PermissionsService = typeof permissions;

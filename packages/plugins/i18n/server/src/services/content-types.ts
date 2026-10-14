@@ -1,6 +1,6 @@
 import { get, has, cloneDeep, pick } from 'lodash';
 import { errors, contentTypes as contentTypeUtils } from '@strapi/utils';
-import type { Struct } from '@strapi/types';
+import type { Core, Struct } from '@strapi/types';
 import { getService } from '../utils';
 
 const {
@@ -16,193 +16,195 @@ const hasLocalizedOption = (modelOrAttribute: any) => {
   return get(modelOrAttribute, 'pluginOptions.i18n.localized') === true;
 };
 
-const getValidLocale = async (locale: any) => {
-  const localesService = getService('locales');
+const contentTypes = ({ strapi }: { strapi: Core.Strapi }) => {
+  const getValidLocale = async (locale: any) => {
+    const localesService = getService('locales', { strapi });
 
-  if (locale == null) {
-    return localesService.getDefaultLocale();
-  }
+    if (locale == null) {
+      return localesService.getDefaultLocale();
+    }
 
-  const foundLocale = await localesService.findByCode(locale);
-  if (!foundLocale) {
-    throw new ApplicationError('Locale not found');
-  }
+    const foundLocale = await localesService.findByCode(locale);
+    if (!foundLocale) {
+      throw new ApplicationError('Locale not found');
+    }
 
-  return locale;
-};
+    return locale;
+  };
 
-/**
- * Returns whether an attribute is localized or not
- * @param {*} attribute
- * @returns
- */
-const isLocalizedAttribute = (attribute: any) => {
-  return (
-    hasLocalizedOption(attribute) ||
-    isRelationalAttribute(attribute) ||
-    isTypedAttribute(attribute, 'uid')
-  );
-};
+  /**
+   * Returns whether an attribute is localized or not
+   * @param {*} attribute
+   * @returns
+   */
+  const isLocalizedAttribute = (attribute: any) => {
+    return (
+      hasLocalizedOption(attribute) ||
+      isRelationalAttribute(attribute) ||
+      isTypedAttribute(attribute, 'uid')
+    );
+  };
 
-/**
- * Returns whether a model is localized or not
- * @param {*} model
- * @returns
- */
-const isLocalizedContentType = (model: any) => {
-  return hasLocalizedOption(model);
-};
+  /**
+   * Returns whether a model is localized or not
+   * @param {*} model
+   * @returns
+   */
+  const isLocalizedContentType = (model: any) => {
+    return hasLocalizedOption(model);
+  };
 
-/**
- * Returns the list of attribute names that are not localized
- * @param {object} model
- * @returns {string[]}
- */
-const getNonLocalizedAttributes = (model: any) => {
-  return getVisibleAttributes(model).filter(
-    (attrName) => !isLocalizedAttribute(model.attributes[attrName])
-  );
-};
+  /**
+   * Returns the list of attribute names that are not localized
+   * @param {object} model
+   * @returns {string[]}
+   */
+  const getNonLocalizedAttributes = (model: any) => {
+    return getVisibleAttributes(model).filter(
+      (attrName) => !isLocalizedAttribute(model.attributes[attrName])
+    );
+  };
 
-const removeId = (value: any) => {
-  if (typeof value === 'object' && has(value, 'id')) {
-    delete value.id;
-  }
-};
+  const removeId = (value: any) => {
+    if (typeof value === 'object' && has(value, 'id')) {
+      delete value.id;
+    }
+  };
 
-const removeIds = (model: Struct.ComponentSchema | Struct.ContentTypeSchema) => (entry: any) =>
-  removeIdsMut(model, cloneDeep(entry));
+  const removeIds = (model: Struct.ComponentSchema | Struct.ContentTypeSchema) => (entry: any) =>
+    removeIdsMut(model, cloneDeep(entry));
 
-const removeIdsMut = (
-  model: Struct.ComponentSchema | Struct.ContentTypeSchema,
-  entry: any
-): Record<string, any> => {
-  if (entry == null) {
-    return entry as unknown as Record<string, any>;
-  }
+  const removeIdsMut = (
+    model: Struct.ComponentSchema | Struct.ContentTypeSchema,
+    entry: any
+  ): Record<string, any> => {
+    if (entry == null) {
+      return entry as unknown as Record<string, any>;
+    }
 
-  removeId(entry);
+    removeId(entry);
 
-  for (const [attrName, attr] of Object.entries(model.attributes)) {
-    const value = entry[attrName];
-    if (attr.type === 'dynamiczone' && Array.isArray(value)) {
-      value.forEach((compo) => {
-        if (has(compo, '__component')) {
-          const model = strapi.components[compo.__component];
-          removeIdsMut(model, compo);
+    for (const [attrName, attr] of Object.entries(model.attributes)) {
+      const value = entry[attrName];
+      if (attr.type === 'dynamiczone' && Array.isArray(value)) {
+        value.forEach((compo) => {
+          if (has(compo, '__component')) {
+            const model = strapi.components[compo.__component];
+            removeIdsMut(model, compo);
+          }
+        });
+      } else if (attr.type === 'component') {
+        const model = strapi.components[attr.component];
+        if (Array.isArray(value)) {
+          value.forEach((compo) => removeIdsMut(model, compo));
+        } else {
+          removeIdsMut(model, value);
         }
-      });
-    } else if (attr.type === 'component') {
-      const model = strapi.components[attr.component];
-      if (Array.isArray(value)) {
-        value.forEach((compo) => removeIdsMut(model, compo));
-      } else {
-        removeIdsMut(model, value);
       }
     }
-  }
 
-  return entry;
-};
+    return entry;
+  };
 
-/**
- * Returns a copy of an entry picking only its non localized attributes
- * @param {object} model
- * @param {object} entry
- * @returns {object}
- */
-const copyNonLocalizedAttributes = (
-  model: Struct.ComponentSchema | Struct.ContentTypeSchema,
-  entry: any
-) => {
-  const nonLocalizedAttributes = getNonLocalizedAttributes(model);
+  /**
+   * Returns a copy of an entry picking only its non localized attributes
+   * @param {object} model
+   * @param {object} entry
+   * @returns {object}
+   */
+  const copyNonLocalizedAttributes = (
+    model: Struct.ComponentSchema | Struct.ContentTypeSchema,
+    entry: any
+  ) => {
+    const nonLocalizedAttributes = getNonLocalizedAttributes(model);
 
-  return removeIds(model)(pick(entry, nonLocalizedAttributes));
-};
+    return removeIds(model)(pick(entry, nonLocalizedAttributes));
+  };
 
-/**
- * Returns the list of attribute names that are localized
- * @param {object} model
- * @returns {string[]}
- */
-const getLocalizedAttributes = (model: any) => {
-  return getVisibleAttributes(model).filter((attrName) =>
-    isLocalizedAttribute(model.attributes[attrName])
-  );
-};
+  /**
+   * Returns the list of attribute names that are localized
+   * @param {object} model
+   * @returns {string[]}
+   */
+  const getLocalizedAttributes = (model: any) => {
+    return getVisibleAttributes(model).filter((attrName) =>
+      isLocalizedAttribute(model.attributes[attrName])
+    );
+  };
 
-/**
- * Fill non localized fields of an entry if there are nil
- * @param {Object} entry entry to fill
- * @param {Object} relatedEntry values used to fill
- * @param {Object} options
- * @param {Object} options.model corresponding model
- */
-const fillNonLocalizedAttributes = (entry: any, relatedEntry: any, { model }: any) => {
-  if (relatedEntry == null) {
-    return;
-  }
-
-  const modelDef = strapi.getModel(model);
-  const relatedEntryCopy = copyNonLocalizedAttributes(modelDef, relatedEntry);
-
-  for (const [field, value] of Object.entries(relatedEntryCopy)) {
-    if (entry[field] == null) {
-      entry[field] = value;
+  /**
+   * Fill non localized fields of an entry if there are nil
+   * @param {Object} entry entry to fill
+   * @param {Object} relatedEntry values used to fill
+   * @param {Object} options
+   * @param {Object} options.model corresponding model
+   */
+  const fillNonLocalizedAttributes = (entry: any, relatedEntry: any, { model }: any) => {
+    if (relatedEntry == null) {
+      return;
     }
-  }
-};
 
-/**
- * build the populate param to
- * @param {String} modelUID uid of the model, could be of a content-type or a component
- */
-const getNestedPopulateOfNonLocalizedAttributes = (modelUID: any): string[] => {
-  const schema = strapi.getModel(modelUID);
-  const scalarAttributes = getScalarAttributes(schema);
-  const nonLocalizedAttributes = getNonLocalizedAttributes(schema);
+    const modelDef = strapi.getModel(model);
+    const relatedEntryCopy = copyNonLocalizedAttributes(modelDef, relatedEntry);
 
-  const allAttributes = [...scalarAttributes, ...nonLocalizedAttributes];
-  if (schema.modelType === 'component') {
-    // When called recursively on a non localized component we
-    // need to explicitly populate that components relations
-    allAttributes.push(...getRelationalAttributes(schema));
-  }
+    for (const [field, value] of Object.entries(relatedEntryCopy)) {
+      if (entry[field] == null) {
+        entry[field] = value;
+      }
+    }
+  };
 
-  const currentAttributesToPopulate = allAttributes.filter((value, index, self) => {
-    return self.indexOf(value) === index && self.lastIndexOf(value) === index;
-  });
+  /**
+   * build the populate param to
+   * @param {String} modelUID uid of the model, could be of a content-type or a component
+   */
+  const getNestedPopulateOfNonLocalizedAttributes = (modelUID: any): string[] => {
+    const schema = strapi.getModel(modelUID);
+    const scalarAttributes = getScalarAttributes(schema);
+    const nonLocalizedAttributes = getNonLocalizedAttributes(schema);
 
-  const attributesToPopulate = [...currentAttributesToPopulate];
-  for (const attrName of currentAttributesToPopulate) {
-    const attr = schema.attributes[attrName];
-    if (attr.type === 'component') {
-      const nestedPopulate = getNestedPopulateOfNonLocalizedAttributes(attr.component).map(
-        (nestedAttr) => `${attrName}.${nestedAttr}`
-      );
-      attributesToPopulate.push(...nestedPopulate);
-    } else if (attr.type === 'dynamiczone') {
-      attr.components.forEach((componentName) => {
-        const nestedPopulate = getNestedPopulateOfNonLocalizedAttributes(componentName).map(
+    const allAttributes = [...scalarAttributes, ...nonLocalizedAttributes];
+    if (schema.modelType === 'component') {
+      // When called recursively on a non localized component we
+      // need to explicitly populate that components relations
+      allAttributes.push(...getRelationalAttributes(schema));
+    }
+
+    const currentAttributesToPopulate = allAttributes.filter((value, index, self) => {
+      return self.indexOf(value) === index && self.lastIndexOf(value) === index;
+    });
+
+    const attributesToPopulate = [...currentAttributesToPopulate];
+    for (const attrName of currentAttributesToPopulate) {
+      const attr = schema.attributes[attrName];
+      if (attr.type === 'component') {
+        const nestedPopulate = getNestedPopulateOfNonLocalizedAttributes(attr.component).map(
           (nestedAttr) => `${attrName}.${nestedAttr}`
         );
         attributesToPopulate.push(...nestedPopulate);
-      });
+      } else if (attr.type === 'dynamiczone') {
+        attr.components.forEach((componentName) => {
+          const nestedPopulate = getNestedPopulateOfNonLocalizedAttributes(componentName).map(
+            (nestedAttr) => `${attrName}.${nestedAttr}`
+          );
+          attributesToPopulate.push(...nestedPopulate);
+        });
+      }
     }
-  }
 
-  return attributesToPopulate;
+    return attributesToPopulate;
+  };
+
+  return {
+    isLocalizedContentType,
+    getValidLocale,
+    getLocalizedAttributes,
+    getNonLocalizedAttributes,
+    copyNonLocalizedAttributes,
+    fillNonLocalizedAttributes,
+    getNestedPopulateOfNonLocalizedAttributes,
+  };
 };
-
-const contentTypes = () => ({
-  isLocalizedContentType,
-  getValidLocale,
-  getLocalizedAttributes,
-  getNonLocalizedAttributes,
-  copyNonLocalizedAttributes,
-  fillNonLocalizedAttributes,
-  getNestedPopulateOfNonLocalizedAttributes,
-});
 
 type ContentTypesService = typeof contentTypes;
 
