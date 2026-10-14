@@ -118,7 +118,8 @@ export default ({ strapi }: Context) => {
 
         // Conditional clauses
         for (const operator of rootLevelOperators()) {
-          operator.add(t, filtersTypeName);
+          // Operators keep develop's published `ObjectDefinitionBlock` parameter; they only add fields.
+          operator.add(t as unknown as Nexus.blocks.ObjectDefinitionBlock<string>, filtersTypeName);
         }
       },
     });
