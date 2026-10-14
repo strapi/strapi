@@ -102,7 +102,6 @@ async function checkServiceContracts() {
   permissions.actions.normalizeRolePermissionsLocales([{ subject: 'api::page.page' }]);
   // @ts-expect-error Sanitization requires an entity, not a scalar.
   plugin.service('sanitize').sanitizeLocalizationFields(schema, 123);
-  // @ts-expect-error The emitted helper keeps develop's type, which resolves the plugin's own services.
   getI18nService('metrics').applicationMetric();
   // @ts-expect-error Application overrides retain the helper's method argument checks.
   getI18nService('metrics').sendDidInitializeEvent('unexpected');
