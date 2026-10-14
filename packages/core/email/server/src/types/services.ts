@@ -1,7 +1,16 @@
 import type { RateLimitOptions } from './rate-limit';
 import type EmailService from '../services/email';
+import type { EmailConfig } from '../types';
 
 export type { RateLimitOptions } from './rate-limit';
+
+/**
+ * `strapi.config.get('plugin::email')`: the plugin config merged with its defaults, and the
+ * `ratelimit` options the `rateLimit` middleware merges with `{ enabled: true }`.
+ */
+export type EmailPluginConfig = EmailConfig & {
+  ratelimit?: RateLimitOptions & { enabled?: boolean };
+};
 
 /** Email services by name, as registered by the plugin. */
 export type Services = {
@@ -16,6 +25,10 @@ declare global {
     namespace Registries {
       interface PackageServices {
         'plugin::email.email': Services['email'];
+      }
+
+      interface PackageConfigs {
+        'plugin::email': EmailPluginConfig;
       }
 
       interface PackageMiddlewares {
