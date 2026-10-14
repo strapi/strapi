@@ -1,13 +1,10 @@
 import type { Core } from '@strapi/types';
 
-export const getAdminService = (
-  name: string,
-  { strapi }: { strapi: Core.Strapi } = { strapi: global.strapi }
-) => {
+export const getAdminService = (name: string, { strapi }: { strapi: Core.Strapi }) => {
   return strapi.service(`admin::${name}`);
 };
 
-export const getService = (name: string, { strapi } = { strapi: global.strapi }) => {
+export const getService = (name: string, { strapi }: { strapi: Core.Strapi }) => {
   return strapi.plugin('review-workflows').service(name);
 };
 
