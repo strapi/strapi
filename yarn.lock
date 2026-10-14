@@ -10261,6 +10261,8 @@ __metadata:
     react-router-dom: "npm:6.30.6"
     styled-components: "npm:6.4.1"
     swagger-ui-dist: "npm:4.19.0"
+    vitest: "catalog:"
+    vitest-config: "npm:5.57.0"
     yaml: "npm:1.10.3"
     yup: "npm:0.32.9"
   peerDependencies:

@@ -1,9 +1,10 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import cleanSchemaAttributes from '../clean-schema-attributes';
 
 describe('Documentation plugin | clean schema attributes', () => {
   beforeEach(() => {
     global.strapi = {
-      contentType: jest.fn((uid) => {
+      contentType: vi.fn((uid) => {
         if (uid === 'api::author.author') {
           return {
             attributes: {
@@ -72,7 +73,7 @@ describe('Documentation plugin | clean schema attributes', () => {
 
   it('uses a canonical schema reference for a fully connected relation graph', () => {
     const targets = ['api::a.a', 'api::b.b', 'api::c.c', 'api::d.d'];
-    const contentType = jest.fn((uid: string) => ({
+    const contentType = vi.fn((uid: string) => ({
       attributes: Object.fromEntries(
         targets
           .filter((target) => target !== uid)
@@ -100,7 +101,7 @@ describe('Documentation plugin | clean schema attributes', () => {
 
   it('uses the finite id and documentId fallback for an ungenerated relation target', () => {
     global.strapi = {
-      contentType: jest.fn((uid) => {
+      contentType: vi.fn((uid) => {
         if (uid === 'api::a.a') {
           return {
             attributes: {
@@ -149,7 +150,7 @@ describe('Documentation plugin | clean schema attributes', () => {
           },
         },
       },
-      contentType: jest.fn(() => ({
+      contentType: vi.fn(() => ({
         attributes: {
           name: { type: 'string' },
         },
@@ -174,7 +175,7 @@ describe('Documentation plugin | clean schema attributes', () => {
   });
 
   it('does not look up an ungenerated relation target', () => {
-    const contentType = jest.fn(() => {
+    const contentType = vi.fn(() => {
       throw new Error('target lookup failed');
     });
 
