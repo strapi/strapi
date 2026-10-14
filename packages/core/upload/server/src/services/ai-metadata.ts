@@ -291,7 +291,7 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       const images = await fetchImagesAsBlobs(
         imageInputFiles,
-        strapi.config.get('server.absoluteUrl'),
+        strapi.config.get<string>('server.absoluteUrl'),
         strapi.log
       );
 
