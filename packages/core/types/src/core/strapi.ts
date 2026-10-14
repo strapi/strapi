@@ -464,7 +464,7 @@ type StrictConfigGetter = {
   get<T = unknown, TPath extends PropertyPath = PropertyPath>(
     key: TPath & LegacyConfigPath<TPath>,
     defaultVal?: T
-  ): T;
+  ): NoInfer<T>;
   /**
    * Reads a config value. A registered namespace, or a dotted path inside one, resolves to its contract.
    * Editors list registered namespaces, then the keys under the path being typed.
@@ -481,7 +481,7 @@ type StrictConfigGetter = {
   >(
     key: TPath | ConfigGetPathSuggestion<TPath>,
     ...args: TArgs & ([] | [defaultVal: ConfigLookup<TPath, T> | undefined])
-  ): ConfigLookup<TPath, T, NoInfer<TArgs[0]>>;
+  ): ConfigLookup<TPath, NoInfer<T>, NoInfer<TArgs[0]>>;
 };
 
 type ConfigGetter = IsStrict extends false ? LegacyConfigGetter : StrictConfigGetter;
