@@ -15,16 +15,32 @@ export type PolicyHandler<TConfig = unknown> = (
   opts: { strapi: Strapi }
 ) => boolean | undefined;
 
-// TODO @Nico A registered policy (`Policy<{ role: string }>`) is not assignable to `Policy`
-// (`Policy<unknown>`): `cfg` is checked contravariantly. A method-shaped (bivariant) handler would fix
-// it, but it changes `PolicyHandler` with strict types off too, so it waits for a decision.
+/**
+ * The handler of a policy with strict types: declared as a method, whose parameters TypeScript
+ * compares bivariantly, so a policy registered with a config contract (`Policy<{ role: string }>`)
+ * is assignable to `Policy` (`Policy<unknown>`). Calls still check the config.
+ */
+type StrictPolicyHandler<TConfig> = {
+  handler(ctx: PolicyContext, cfg: TConfig, opts: { strapi: Strapi }): boolean | undefined;
+}['handler'];
+
+/** The handler of a policy: develop's without strict types, {@link StrictPolicyHandler} with them. */
+type PolicyHandlerFor<TConfig> = IsStrict extends false
+  ? PolicyHandler<TConfig>
+  : StrictPolicyHandler<TConfig>;
+
+/**
+ * A policy: a handler, or an object with a name, an optional validator and a handler. Without strict
+ * types, develop's type: `cfg` is checked contravariantly, so a `Policy<{ role: string }>` is not
+ * assignable to `Policy`.
+ */
 export type Policy<TConfig = unknown> =
   | {
       name: string;
       validator?: (config: unknown) => boolean;
-      handler: PolicyHandler<TConfig>;
+      handler: PolicyHandlerFor<TConfig>;
     }
-  | PolicyHandler<TConfig>;
+  | PolicyHandlerFor<TConfig>;
 
 /** Policy UIDs that have a registered config contract. */
 export type RegisteredPolicyName =

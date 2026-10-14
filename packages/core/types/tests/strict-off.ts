@@ -334,3 +334,9 @@ const middlewaresConfig: Core.Config.Middlewares = [
   async (_ctx, next) => next(),
 ];
 middlewaresConfig satisfies unknown;
+
+// Without strict types, policies keep develop's contravariant config check.
+declare const rolePolicy: Core.Policy<{ role: string }>;
+// @ts-expect-error A policy that needs a config is not assignable to `Policy<unknown>`.
+const anyConfigPolicy: Core.Policy = rolePolicy;
+anyConfigPolicy satisfies unknown;
