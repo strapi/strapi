@@ -109,7 +109,11 @@ export const MediaLibraryInput = ({
   const [uploadFromUrls] = useUploadFromUrlsMutation();
   // Echoes the app config; a missing payload (still loading) falls back to
   // sequential rather than outpacing what the server asked for.
-  const { canRead, canUpdate, canCopyLink, canDownload } = useMediaLibraryPermissions();
+  const { isLoading, canRead, canCreate, canUpdate, canCopyLink, canDownload } =
+    useMediaLibraryPermissions();
+  // Not while permissions load: `useRBAC` starts with every flag false, and an
+  // upload sent before it settles can end in a 403.
+  const canUpload = !isLoading && canCreate;
   const { data: settings } = useGetUploadSettingsQuery(undefined, { skip: !canRead });
   const concurrency = settings?.data?.concurrentUploadRequests ?? 1;
   const isAiMetadataEnabled = useAIMetadataEnabled();
@@ -236,7 +240,7 @@ export const MediaLibraryInput = ({
   };
 
   const handleUpload = (files: globalThis.File[]) => {
-    if (disabled || files.length === 0) {
+    if (disabled || !canUpload || files.length === 0) {
       return;
     }
 
@@ -372,7 +376,11 @@ export const MediaLibraryInput = ({
 
   const renderValue = () => {
     const dropZone = (variant: ZoneVariant) => (
-      <AssetDropZone variant={variant} disabled={disabled} onDropFiles={handleUpload} />
+      <AssetDropZone
+        variant={variant}
+        disabled={disabled || !canUpload}
+        onDropFiles={handleUpload}
+      />
     );
 
     if (assets.length === 0 && uploads.length === 0) {
@@ -497,7 +505,6 @@ export const MediaLibraryInput = ({
       {step === 'create-folder' && (
         <EditFolderDialog open onClose={() => setStep('browse')} parentFolderId={folderId} />
       )}
-
 
       <ImportFromUrlDialog
         open={isUrlDialogOpen}

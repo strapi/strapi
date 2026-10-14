@@ -820,4 +820,34 @@ describe('<MediaLibraryInput /> (Content Manager)', () => {
 
     expect(mockUploadFileViaXHR).not.toHaveBeenCalled();
   });
+
+  describe.each([
+    ['without upload access', { canCreate: false }],
+    ['while permissions are still loading', { isLoading: true, canCreate: false }],
+  ])('%s', (_, permissions) => {
+    beforeEach(() => {
+      Object.assign(mockPermissions, permissions);
+    });
+
+    it('refuses a drop, and uploads nothing', () => {
+      renderInput({ attribute: { multiple: true } });
+
+      const dataTransfer = { files: [image('dropped.png')], types: ['Files'], dropEffect: '' };
+      fireEvent.dragOver(getDropZone(), { dataTransfer });
+      dropFiles([image('dropped.png')]);
+
+      // The no-drop cursor, and no `drop` from a real browser.
+      expect(dataTransfer.dropEffect).toBe('none');
+      expect(mockUploadFileViaXHR).not.toHaveBeenCalled();
+    });
+  });
+
+  it('accepts a drop once the user can upload', () => {
+    renderInput({ attribute: { multiple: true } });
+
+    const dataTransfer = { files: [image('dropped.png')], types: ['Files'], dropEffect: '' };
+    fireEvent.dragOver(getDropZone(), { dataTransfer });
+
+    expect(dataTransfer.dropEffect).toBe('copy');
+  });
 });
