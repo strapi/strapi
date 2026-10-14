@@ -26,7 +26,7 @@ export default function createEventHub(): EventHub {
     if (listeners.has(eventName)) {
       // Iterate over a copy so that a listener removed during the emit (e.g. a once() listener)
       // does not make the loop skip the next listener
-      for (const listener of [...listeners.get(eventName)]) {
+      for (const listener of listeners.get(eventName).slice()) {
         await listener(...args);
       }
     }
