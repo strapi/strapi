@@ -275,7 +275,9 @@ Each entry of the run records what happened to it on its release action, returne
 
 An entry that fails both checks keeps both in its `reason`. The outcomes are written in the lock transaction with the release's status. A release runs once: its outcomes are never rewritten afterwards, a `failed` release included. A run that records nothing leaves `outcome` empty: a manual publish rejected by the check (it didn't run), and a run the database rolls back.
 
-The status written, the `releases.publish` webhook and the `release.trigger` audit event always agree:
+The run also stores its totals on the release, with its status: `totalPublishedEntries` and `totalUnpublishedEntries` count the entries recorded as `published` and `unpublished`, and `totalSkippedEntries` every other entry of the run, whatever the reason (each entry keeps its own `outcome` and `reason`). The three always add up to the release's entries when it ran: a "Failed" release has 0 published and every entry skipped. `GET /content-releases/:id` and `GET /content-releases` return them on each release, and `POST /content-releases/:id/publish` returns them in its `meta` too, with `totalEntries` their sum. They stay `null` until the release runs: a release that is still planned, including after a manual publish rejected by the check, and a release that ran before the totals existed.
+
+The status written, the `releases.publish` webhook and the `release.trigger` audit event always agree. The webhook's `release` is the release as the run left it, with its totals, also when it failed:
 
 | Status  | Webhook `isPublished` | Audit `outcome` | Audit `details`                         |
 | ------- | --------------------- | --------------- | --------------------------------------- |
@@ -283,7 +285,7 @@ The status written, the `releases.publish` webhook and the `release.trigger` aud
 | Partial | `true`                | `partial`       | `published`, `unpublished`, `failed`    |
 | Failed  | `false`               | `failure`       | `reason`: the error's name              |
 
-The counts are what the run released, and `failed` the entries it left out: not publishable, or their publish or unpublish threw. The webhook and the audit event are sent once the outcome is committed. Entry errors are rolled back with their savepoint, so on Postgres they don't abort the transaction; any other error rolls back the whole run, as above.
+The audit counts are the release's totals, `failed` being `totalSkippedEntries`: the entries the run left out, not publishable, or their publish or unpublish threw. The webhook and the audit event are sent once the outcome is committed. Entry errors are rolled back with their savepoint, so on Postgres they don't abort the transaction; any other error rolls back the whole run, as above.
 
 #### Listening to events on entries:
 

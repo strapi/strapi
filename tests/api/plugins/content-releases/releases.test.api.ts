@@ -1215,10 +1215,21 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
 
         expect(res.statusCode).toBe(200);
         expect(res.body.data.status).toBe('partial');
+        expect(res.body.meta).toEqual({
+          totalEntries: 10,
+          totalPublishedEntries: 7,
+          totalUnpublishedEntries: 0,
+          totalSkippedEntries: 3,
+        });
 
         const found = await getRelease(release.id);
         expect(found.status).toBe('partial');
         expect(found.releasedAt).not.toBeNull();
+        expect(found).toMatchObject({
+          totalPublishedEntries: 7,
+          totalUnpublishedEntries: 0,
+          totalSkippedEntries: 3,
+        });
 
         for (const documentId of validIds) {
           expect(await hasPublishedVersion(productUID, documentId)).toBe(true);
@@ -1267,6 +1278,12 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
 
       expect(res.statusCode).toBe(200);
       expect(res.body.data.status).toBe('partial');
+      expect(res.body.meta).toEqual({
+        totalEntries: 3,
+        totalPublishedEntries: 0,
+        totalUnpublishedEntries: 1,
+        totalSkippedEntries: 2,
+      });
       expect(await hasPublishedVersion(productUID, publishedId)).toBe(false);
     });
 
@@ -1284,6 +1301,12 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
 
       expect(res.statusCode).toBe(200);
       expect(res.body.data.status).toBe('done');
+      expect(res.body.meta).toEqual({
+        totalEntries: 2,
+        totalPublishedEntries: 1,
+        totalUnpublishedEntries: 1,
+        totalSkippedEntries: 0,
+      });
 
       const found = await getRelease(release.id);
       expect(found.status).toBe('done');
@@ -1381,6 +1404,11 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       const found = await getRelease(release.id);
       expect(found.status).toBe('blocked');
       expect(found.releasedAt).toBeNull();
+      expect(found).toMatchObject({
+        totalPublishedEntries: null,
+        totalUnpublishedEntries: null,
+        totalSkippedEntries: null,
+      });
       for (const documentId of invalidIds) {
         expect(await hasPublishedVersion(productUID, documentId)).toBe(false);
       }
@@ -1401,8 +1429,44 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       const found = await getRelease(release.id);
       expect(found.status).toBe('failed');
       expect(found.releasedAt).not.toBeNull();
+      expect(found).toMatchObject({
+        totalPublishedEntries: 0,
+        totalUnpublishedEntries: 0,
+        totalSkippedEntries: 2,
+      });
       for (const documentId of invalidIds) {
         expect(await hasPublishedVersion(productUID, documentId)).toBe(false);
+      }
+    });
+
+    test('allow_partial where every entry fails at publish ends failed, with every entry skipped', async () => {
+      const failingIds = [
+        await createProduct({ valid: true }),
+        await createProduct({ valid: true }),
+      ];
+      failingIds.forEach((documentId) => documentIdsFailingToPublish.add(documentId));
+
+      try {
+        const release = await createReleaseWithActions(
+          'allow_partial',
+          failingIds.map((documentId) => ({ documentId }))
+        );
+
+        const res = await publishManually(release.id);
+
+        expect(res.statusCode).toBe(400);
+        expect(res.body.error.message).toBe('No entries were published');
+
+        const found = await getRelease(release.id);
+        expect(found.status).toBe('failed');
+        expect(found.releasedAt).not.toBeNull();
+        expect(found).toMatchObject({
+          totalPublishedEntries: 0,
+          totalUnpublishedEntries: 0,
+          totalSkippedEntries: 2,
+        });
+      } finally {
+        failingIds.forEach((documentId) => documentIdsFailingToPublish.delete(documentId));
       }
     });
 
@@ -1419,6 +1483,11 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       const found = await getRelease(release.id);
       expect(found.status).toBe('failed');
       expect(found.releasedAt).not.toBeNull();
+      expect(found).toMatchObject({
+        totalPublishedEntries: 0,
+        totalUnpublishedEntries: 0,
+        totalSkippedEntries: 2,
+      });
       expect(await hasPublishedVersion(productUID, validId)).toBe(false);
     });
 
@@ -1474,6 +1543,11 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         const found = await getRelease(release.id);
         expect(found.status).toBe('failed');
         expect(found.releasedAt).not.toBeNull();
+        expect(found).toMatchObject({
+          totalPublishedEntries: 0,
+          totalUnpublishedEntries: 0,
+          totalSkippedEntries: 5,
+        });
 
         // The two entries published before the error are rolled back with the run
         for (const documentId of documentIds) {
@@ -1534,7 +1608,16 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         expect(await hasPublishedVersion(productUID, publishedId)).toBe(true);
         expect(await hasPublishedVersion(productUID, failingId)).toBe(false);
         expect(onPublishEvent).toHaveBeenCalledTimes(1);
-        expect(onPublishEvent.mock.calls[0][0].isPublished).toBe(true);
+        expect(onPublishEvent.mock.calls[0][0]).toMatchObject({
+          isPublished: true,
+          release: {
+            id: release.id,
+            status: 'partial',
+            totalPublishedEntries: 1,
+            totalUnpublishedEntries: 0,
+            totalSkippedEntries: 1,
+          },
+        });
       } finally {
         stopListening();
         documentIdsFailingInDatabase.delete(failingId);
@@ -1562,7 +1645,16 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
         expect(found.releasedAt).not.toBeNull();
         expect(await hasPublishedVersion(productUID, publishedFirstId)).toBe(false);
         expect(onPublishEvent).toHaveBeenCalledTimes(1);
-        expect(onPublishEvent.mock.calls[0][0].isPublished).toBe(false);
+        expect(onPublishEvent.mock.calls[0][0]).toMatchObject({
+          isPublished: false,
+          release: {
+            id: release.id,
+            status: 'failed',
+            totalPublishedEntries: 0,
+            totalUnpublishedEntries: 0,
+            totalSkippedEntries: 2,
+          },
+        });
       } finally {
         stopListening();
         documentIdsFailingInDatabase.delete(failingId);
@@ -1739,7 +1831,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       });
     });
 
-    test('deleting an entry of a done release leaves it done', async () => {
+    test('deleting an entry of a done release leaves it done, with its totals', async () => {
       const documentIds = [
         await createProduct({ valid: true }),
         await createProduct({ valid: true }),
@@ -1758,7 +1850,12 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
 
       await strapi.plugin('content-releases').service('release').updateReleaseStatus(release.id);
 
-      expect((await getRelease(release.id)).status).toBe('done');
+      expect(await getRelease(release.id)).toMatchObject({
+        status: 'done',
+        totalPublishedEntries: 2,
+        totalUnpublishedEntries: 0,
+        totalSkippedEntries: 0,
+      });
     });
 
     test('a scheduled run of a release with no entries ends done', async () => {
@@ -1779,6 +1876,12 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
 
       expect(res.statusCode).toBe(200);
       expect(res.body.data.status).toBe('done');
+      expect(res.body.meta).toEqual({
+        totalEntries: 0,
+        totalPublishedEntries: 0,
+        totalUnpublishedEntries: 0,
+        totalSkippedEntries: 0,
+      });
     });
 
     describe('with a required review stage', () => {
@@ -2277,6 +2380,46 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       expect(res.statusCode).toBe(200);
       expect(res.body.data.length).toBe(2);
       expect(res.body.meta.pendingReleasesCount).toBe(2);
+    });
+
+    test('lists each release with what its run did, and empty totals for a planned one', async () => {
+      const ranRelease = await createReleaseWithActions('allow_partial', [
+        { documentId: await createProduct({ valid: true }) },
+        { documentId: await createProduct({ valid: false }) },
+      ]);
+      expect((await publishManually(ranRelease.id)).statusCode).toBe(200);
+      const plannedRelease = await createReleaseWithActions('allow_partial', [
+        { documentId: await createProduct({ valid: true }) },
+      ]);
+
+      // Released releases from earlier tests stay listed: only read this one from the done tab
+      const [doneRes, pendingRes] = await Promise.all([
+        rq({
+          method: 'GET',
+          url: '/content-releases',
+          qs: { filters: { id: ranRelease.id, releasedAt: { $notNull: true } } },
+        }),
+        rq({ method: 'GET', url: '/content-releases?filters[releasedAt][$notNull]=false' }),
+      ]);
+
+      expect(doneRes.statusCode).toBe(200);
+      expect(doneRes.body.data).toEqual([
+        expect.objectContaining({
+          id: ranRelease.id,
+          totalPublishedEntries: 1,
+          totalUnpublishedEntries: 0,
+          totalSkippedEntries: 1,
+        }),
+      ]);
+      expect(pendingRes.statusCode).toBe(200);
+      expect(pendingRes.body.data).toEqual([
+        expect.objectContaining({
+          id: plannedRelease.id,
+          totalPublishedEntries: null,
+          totalUnpublishedEntries: null,
+          totalSkippedEntries: null,
+        }),
+      ]);
     });
 
     test('Find many releases with an entry attached', async () => {
