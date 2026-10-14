@@ -40,6 +40,10 @@ Core reads `isLocalizedContentType` and `getDefaultLocale` from this plugin to s
 
 `bootstrap` registers the settings actions `plugin::i18n.locale.create`, `read`, `update` and `delete`. It also adds a `locales` property to the actions of content types. Handlers on the admin role service add all locales to the super admin permissions. A lifecycle subscriber on the locale model syncs those permissions after a locale is created or deleted. The admin routes manage locales, settings and AI localization jobs, and serve ISO locales and Content Manager helper data. One Content API route, `GET /locales`, lists the locales. A router middleware in `register` checks the `locale` on `POST` and `PUT` to the Content Manager collection and single type routes.
 
+The `locales`, `iso-locales`, `content-types` and `settings` controllers stay plain objects so that user extensions can patch `plugin.controllers.<name>.<action>`. They read the global `strapi` and pass it explicitly to `getService`. `register`, `bootstrap`, their middlewares, the GraphQL extension, the `ai-localization-jobs` controller and all services, including the `actions` and `sectionsBuilder` parts of the `permissions` service, receive the injected `strapi`.
+
+The handlers that `bootstrap` registers into admin's role hooks, action provider, permission engine and sections builder are module-level functions, not built with the injected `strapi`. Admin keeps those registries at module level and never clears their hooks, so a handler outlives the instance that registered it. Each handler reads the global `strapi` at call time, so after an instance is destroyed and another one boots in the same process, the handlers serve the new instance.
+
 ### Admin injection
 
 [`admin/src/index.ts`](https://github.com/strapi/strapi/blob/develop/packages/plugins/i18n/admin/src/index.ts) works through the Content Manager and Content-Type Builder plugin APIs.

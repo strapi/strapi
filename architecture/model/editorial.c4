@@ -22,7 +22,7 @@ model {
       summary 'Bundled i18n support adds locale fields; localization remains optional for each content type.'
       description 'The i18n plugin adds locale and localization fields to content types. For a type that is not localized, those fields remain private.'
       technology '@strapi/i18n'
-      link https://github.com/strapi/strapi/blob/develop/packages/plugins/i18n/server/src/register.ts#L49 'Content-type localization fields'
+      link https://github.com/strapi/strapi/blob/develop/packages/plugins/i18n/server/src/register.ts#L51 'Content-type localization fields'
       link https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/document-service/internationalization.ts#L16 'Document Service locale selection'
     }
   }
