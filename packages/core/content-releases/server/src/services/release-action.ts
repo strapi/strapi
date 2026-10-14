@@ -1,6 +1,7 @@
 import { errors, async } from '@strapi/utils';
 
 import type { Core, Internal, Modules, UID, Data } from '@strapi/types';
+import type { Services as ContentManagerServices } from '@strapi/content-manager/strapi-server';
 
 import _ from 'lodash';
 
@@ -190,7 +191,9 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
         });
 
       // For each contentType on the release, we create a custom populate object for nested relations
-      const populateBuilderService = strapi.plugin('content-manager').service('populate-builder');
+      const populateBuilderService = strapi
+        .plugin('content-manager')
+        .service<ContentManagerServices.PopulateBuilderService>('populate-builder');
 
       const actionsWithEntry = await async.map(actions, async (action: ReleaseAction) => {
         const populate = await populateBuilderService(action.contentType)

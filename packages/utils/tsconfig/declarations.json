@@ -1,0 +1,9 @@
+{
+  "$schema": "http://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    // Extended last by `tsconfig.build.json` files: published declarations are emitted without the
+    // strict types opt-in (`@strapi/types/strict`), so inferred types resolve as applications without
+    // strict types see them. Package type checks (`tsconfig.json`) keep it.
+    "types": ["node", "jest"]
+  }
+}
