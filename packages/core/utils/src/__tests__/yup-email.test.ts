@@ -1,10 +1,14 @@
+import vm from 'node:vm';
 import { yup } from '..';
 
 const isValidEmail = (value: string) => yup.string().email().isValidSync(value);
 
-const timed = (fn: () => void) => {
+// Runs `fn` with a hard time limit and returns how long it took. A backtracking regex is
+// synchronous and Jest can't interrupt it, so a regression would hang the job instead of failing.
+// The vm timeout stops it mid-match and throws.
+const timedWithLimit = (limitMs: number, fn: () => void) => {
   const start = process.hrtime.bigint();
-  fn();
+  vm.runInNewContext('fn()', { fn }, { timeout: limitMs });
   return Number(process.hrtime.bigint() - start) / 1e6;
 };
 
@@ -14,7 +18,7 @@ describe('yup string().email()', () => {
     ['an unterminated quoted local part', `"${'x'.repeat(28)}`],
   ])('rejects %s without backtracking', (_, value) => {
     let result = true;
-    const duration = timed(() => {
+    const duration = timedWithLimit(1000, () => {
       result = isValidEmail(value);
     });
 
@@ -23,7 +27,7 @@ describe('yup string().email()', () => {
   });
 
   test('stays fast on very long input', () => {
-    const duration = timed(() => {
+    const duration = timedWithLimit(2000, () => {
       isValidEmail(`a@${'a.'.repeat(50_000)}!`);
       isValidEmail(`"${'x'.repeat(100_000)}`);
     });
@@ -77,5 +81,32 @@ describe('yup string().email()', () => {
 
   test('keeps the default error message', () => {
     expect(() => yup.string().email().validateSync('nope')).toThrow('this must be a valid email');
+  });
+
+  describe('with a custom locale', () => {
+    // eslint-disable-next-line no-template-curly-in-string
+    const defaultMessage = '${path} must be a valid email';
+
+    afterEach(() => {
+      yup.setLocale({ string: { email: defaultMessage } });
+    });
+
+    test('uses the locale message when none is passed', () => {
+      // eslint-disable-next-line no-template-curly-in-string
+      yup.setLocale({ string: { email: '${path} is not an email address' } });
+
+      expect(() => yup.string().email().validateSync('nope')).toThrow(
+        'this is not an email address'
+      );
+    });
+
+    test('prefers an explicit message over the locale', () => {
+      // eslint-disable-next-line no-template-curly-in-string
+      yup.setLocale({ string: { email: '${path} is not an email address' } });
+
+      expect(() => yup.string().email('custom message').validateSync('nope')).toThrow(
+        'custom message'
+      );
+    });
   });
 });
