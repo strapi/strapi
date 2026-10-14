@@ -17,7 +17,7 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   strapi
     .hook('strapi::content-types.afterSync')
     .register(({ oldContentTypes, contentTypes }: any) =>
-      getService('permissions').actions.repairPermissionsForNewlyLocalizedTypes({
+      getService('permissions', { strapi }).actions.repairPermissionsForNewlyLocalizedTypes({
         oldContentTypes,
         contentTypes,
       })
@@ -53,7 +53,7 @@ const addContentManagerLocaleMiddleware = (strapi: Core.Strapi) => {
  * @param {Strapi} strapi
  */
 const extendContentTypes = (strapi: Core.Strapi) => {
-  const { isLocalizedContentType } = getService('content-types');
+  const { isLocalizedContentType } = getService('content-types', { strapi });
 
   Object.values(strapi.contentTypes).forEach((contentType) => {
     const { attributes } = contentType;

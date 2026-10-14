@@ -1,18 +1,18 @@
-import type { Schema } from '@strapi/types';
+import type { Core, Schema } from '@strapi/types';
 import { isEqual } from 'lodash';
 import { registerAuditEvents } from './audit-logs';
 import { getService } from './utils';
 
-const registerModelsHooks = () => {
+const registerModelsHooks = ({ strapi }: { strapi: Core.Strapi }) => {
   strapi.db.lifecycles.subscribe({
     models: ['plugin::i18n.locale'],
 
     async afterCreate() {
-      await getService('permissions').actions.syncSuperAdminPermissionsWithLocales();
+      await getService('permissions', { strapi }).actions.syncSuperAdminPermissionsWithLocales();
     },
 
     async afterDelete() {
-      await getService('permissions').actions.syncSuperAdminPermissionsWithLocales();
+      await getService('permissions', { strapi }).actions.syncSuperAdminPermissionsWithLocales();
     },
   });
 
@@ -23,13 +23,15 @@ const registerModelsHooks = () => {
       return next();
     }
 
-    if (!getService('content-types').isLocalizedContentType(schema)) {
+    if (!getService('content-types', { strapi }).isLocalizedContentType(schema)) {
       return next();
     }
 
     // Build a populate array for all non localized fields within the schema
-    const { getNestedPopulateOfNonLocalizedAttributes, copyNonLocalizedAttributes } =
-      getService('content-types');
+    const { getNestedPopulateOfNonLocalizedAttributes, copyNonLocalizedAttributes } = getService(
+      'content-types',
+      { strapi }
+    );
     const attributesToPopulate = getNestedPopulateOfNonLocalizedAttributes(schema.uid);
 
     // Get original data before the update to compare what actually changed
@@ -73,17 +75,20 @@ const registerModelsHooks = () => {
       });
 
     if (shouldSync) {
-      await getService('localizations').syncNonLocalizedAttributes(populatedResult, schema);
+      await getService('localizations', { strapi }).syncNonLocalizedAttributes(
+        populatedResult,
+        schema
+      );
     }
 
     return result;
   });
 };
 
-export default async () => {
-  const { sendDidInitializeEvent } = getService('metrics');
-  const { initDefaultLocale } = getService('locales');
-  const { sectionsBuilder, actions, engine } = getService('permissions');
+export default async ({ strapi }: { strapi: Core.Strapi }) => {
+  const { sendDidInitializeEvent } = getService('metrics', { strapi });
+  const { initDefaultLocale } = getService('locales', { strapi });
+  const { sectionsBuilder, actions, engine } = getService('permissions', { strapi });
 
   // Data
   await initDefaultLocale();
@@ -100,7 +105,7 @@ export default async () => {
   engine.registerI18nPermissionsHandlers();
 
   // Hooks & Models
-  registerModelsHooks();
+  registerModelsHooks({ strapi });
 
   // Absent in CE, without the audit-logs license, or when disabled by config;
   // get() throws for services that were never added, so probe first.
@@ -110,13 +115,13 @@ export default async () => {
 
   // AI Localizations
   if (strapi.ai.admin.isAvailable()) {
-    const aiTranslations = getService('ai-translations');
+    const aiTranslations = getService('ai-translations', { strapi });
 
     if (!aiTranslations.hasProvider() && strapi.ai.admin.isStrapiManagedAiEnabled()) {
       aiTranslations.registerStrapiManagedProvider();
     }
 
-    getService('ai-localizations').setupMiddleware();
+    getService('ai-localizations', { strapi }).setupMiddleware();
   }
 
   sendDidInitializeEvent();

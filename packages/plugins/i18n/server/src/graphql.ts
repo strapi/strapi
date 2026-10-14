@@ -30,8 +30,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     });
 
     extensionService.use(({ nexus, typeRegistry }: any) => {
-      const i18nLocaleArgPlugin = getI18nLocaleArgPlugin({ nexus, typeRegistry });
-      const i18nLocaleScalar = getLocaleScalar({ nexus });
+      const i18nLocaleArgPlugin = getI18nLocaleArgPlugin({ strapi, nexus, typeRegistry });
+      const i18nLocaleScalar = getLocaleScalar({ strapi, nexus });
       return {
         plugins: [i18nLocaleArgPlugin],
         types: [i18nLocaleScalar],
@@ -46,7 +46,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   },
 });
 
-const getLocaleScalar = ({ nexus }: any) => {
+const getLocaleScalar = ({ strapi, nexus }: { strapi: Core.Strapi; nexus: any }) => {
   const { service: getI18NService } = strapi.plugin('i18n');
 
   const locales = getI18NService('iso-locales').getIsoLocales();
@@ -75,7 +75,15 @@ const getLocaleScalar = ({ nexus }: any) => {
   });
 };
 
-const getI18nLocaleArgPlugin = ({ nexus, typeRegistry }: any) => {
+const getI18nLocaleArgPlugin = ({
+  strapi,
+  nexus,
+  typeRegistry,
+}: {
+  strapi: Core.Strapi;
+  nexus: any;
+  typeRegistry: any;
+}) => {
   const { service: getI18NService } = strapi.plugin('i18n');
 
   const { isLocalizedContentType } = getI18NService('content-types');

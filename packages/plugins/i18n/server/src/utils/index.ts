@@ -1,3 +1,4 @@
+import type { Core } from '@strapi/types';
 import type { LocaleService } from '../services/locales';
 import type { PermissionsService } from '../services/permissions';
 import type { ContentTypesService } from '../services/content-types';
@@ -26,13 +27,14 @@ type S = {
   'fill-from-locale': ReturnType<typeof createFillFromLocaleService>;
 };
 
-const getCoreStore = () => {
+const getCoreStore = ({ strapi }: { strapi: Core.Strapi } = { strapi: global.strapi }) => {
   return strapi.store({ type: 'plugin', name: 'i18n' });
 };
 
 // retrieve a local service
 const getService = <T extends keyof S>(
-  name: T
+  name: T,
+  { strapi }: { strapi: Core.Strapi } = { strapi: global.strapi }
 ): S[T] extends (...args: any) => any ? ReturnType<S[T]> : S[T] => {
   return strapi.plugin('i18n').service(name);
 };
