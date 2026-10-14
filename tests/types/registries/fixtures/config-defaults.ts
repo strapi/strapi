@@ -1,4 +1,6 @@
 import type { Core } from '@strapi/strapi';
+// Generated `plugins.d.ts` loads the declarations of the JavaScript users-permissions plugin.
+import type {} from '@strapi/plugin-users-permissions/strapi-server';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -143,3 +145,7 @@ app.config.get('dirs.app.root') satisfies string;
 const uuid = app.config.get('uuid');
 // @ts-expect-error `package.json` may have no `strapi.uuid`.
 uuid satisfies string;
+
+// JavaScript plugins register their config through declaration files.
+app.config.get('plugin::users-permissions.jwtManagement') satisfies 'legacy-support' | 'refresh';
+app.plugin('users-permissions').config('sessions.accessTokenLifespan') satisfies number;
