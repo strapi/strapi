@@ -36,6 +36,13 @@ describe('applyAttributeRenamesToHeaders', () => {
 });
 
 describe('saved list query', () => {
+  it('keeps a sort entry that is not a renamed field', () => {
+    expect(applyAttributeRenamesToSort('price,gone:DESC', attributes, renames)).toBe(
+      'price,gone:DESC'
+    );
+    expect(applyAttributeRenamesToFilters(null, attributes, renames)).toBeNull();
+  });
+
   it('renames the sort field and a filter key', () => {
     expect(applyAttributeRenamesToSort('internalName:ASC', attributes, renames)).toBe(
       'productName:ASC'

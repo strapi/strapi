@@ -107,6 +107,49 @@ describe('rewriteContentManagerConfiguration', () => {
     expect(rewriteContentManagerConfiguration(null, { allRenames: renames })).toBeNull();
   });
 
+  it('renames a dotted settings path and a relation targetModel', () => {
+    const next = rewriteContentManagerConfiguration(
+      {
+        settings: { mainField: 'seo.title', defaultSortBy: '' },
+        metadatas: {
+          author: { list: { mainField: 'internalName' } },
+          notes: { edit: { mainField: 1 } },
+        },
+        layouts: { list: ['seo', 'seo'] },
+      },
+      {
+        attributes: {
+          title: { type: 'string' },
+          author: { type: 'relation', targetModel: 'api::product.product' },
+          notes: { type: 'relation', target: 'api::product.product' },
+        },
+        ownRenames: { seo: 'summary' },
+        allRenames: {
+          ...renames,
+          'api::article.article': { seo: 'summary' },
+        },
+      }
+    );
+
+    expect(next?.settings).toMatchObject({ mainField: 'summary.title', defaultSortBy: '' });
+    expect(next?.metadatas?.author?.list?.mainField).toBe('productName');
+    expect(next?.metadatas?.notes?.edit?.mainField).toBe(1);
+    expect(next?.layouts?.list).toEqual(['summary']);
+    expect(next?.attributeRenames).toEqual({ seo: 'summary' });
+  });
+
+  it('keeps the latest name when a field is renamed back', () => {
+    const next = rewriteContentManagerConfiguration(
+      { attributeRenames: { internalName: 'productName' } },
+      {
+        ownRenames: { productName: 'internalName' },
+        allRenames: { 'api::product.product': { productName: 'internalName' } },
+      }
+    );
+
+    expect(next?.attributeRenames).toEqual({ productName: 'internalName' });
+  });
+
   it('moves both metadatas when two attributes swap names', () => {
     const next = rewriteContentManagerConfiguration(
       {
