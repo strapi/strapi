@@ -1,16 +1,20 @@
 import type { Core } from '@strapi/types';
+import type { AILocalizationJobsController } from '../types/controllers';
 
-const createAILocalizationJobsController = ({ strapi }: { strapi: Core.Strapi }) => {
-  const getService = (name: string) => strapi.plugin('i18n').service(name);
-  const aiLocalizationJobsService = getService('ai-localization-jobs');
+const createAILocalizationJobsController = ({
+  strapi,
+}: {
+  strapi: Core.Strapi;
+}): AILocalizationJobsController => {
+  const aiLocalizationJobsService = strapi.plugin('i18n').service('ai-localization-jobs');
 
   return {
     /**
      * Get a job for a singleType using the contentType
      * There is only 1 job per contentType
      */
-    async getJobForSingleType(ctx: any) {
-      const aiLocalizationsService = getService('ai-localizations');
+    async getJobForSingleType(ctx) {
+      const aiLocalizationsService = strapi.plugin('i18n').service('ai-localizations');
       if ((await aiLocalizationsService.isEnabled()) === false) {
         return ctx.notFound();
       }
@@ -36,8 +40,8 @@ const createAILocalizationJobsController = ({ strapi }: { strapi: Core.Strapi })
      * Get a job for a collectionType using the documentId
      * There is only 1 job per documentId
      */
-    async getJobForCollectionType(ctx: any) {
-      const aiLocalizationsService = getService('ai-localizations');
+    async getJobForCollectionType(ctx) {
+      const aiLocalizationsService = strapi.plugin('i18n').service('ai-localizations');
       if ((await aiLocalizationsService.isEnabled()) === false) {
         return ctx.notFound();
       }

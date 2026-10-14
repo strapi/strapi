@@ -18,7 +18,7 @@ const NO_COMPONENT_PLACEHOLDER_COMMENT = `/*
 export const generateComponentsDefinitions = async (
   options: GeneratorOptions = {} as GeneratorOptions
 ) => {
-  const { strapi } = options;
+  const { strapi, strict = false } = options;
 
   const { components } = strapi;
 
@@ -59,7 +59,7 @@ export const generateComponentsDefinitions = async (
     ...formattedSchemasDefinitions,
 
     // Global
-    generateSharedExtensionDefinition('ComponentSchemas', componentsDefinitions),
+    generateSharedExtensionDefinition('ComponentSchemas', componentsDefinitions, { strict }),
   ];
 
   const output = emitDefinitions(allDefinitions);

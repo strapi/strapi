@@ -18,7 +18,7 @@ const NO_CONTENT_TYPE_PLACEHOLDER_COMMENT = `/*
 export const generateContentTypesDefinitions = async (
   options: GeneratorOptions = {} as GeneratorOptions
 ) => {
-  const { strapi } = options;
+  const { strapi, strict = false } = options;
 
   const { contentTypes } = strapi;
 
@@ -59,7 +59,7 @@ export const generateContentTypesDefinitions = async (
     ...formattedSchemasDefinitions,
 
     // Global
-    generateSharedExtensionDefinition('ContentTypeSchemas', contentTypesDefinitions),
+    generateSharedExtensionDefinition('ContentTypeSchemas', contentTypesDefinitions, { strict }),
   ];
 
   const output = emitDefinitions(allDefinitions);

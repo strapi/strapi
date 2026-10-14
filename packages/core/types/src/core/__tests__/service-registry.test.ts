@@ -1,0 +1,220 @@
+import type * as PublicRegistries from '../../public/registries';
+import type { Controller } from '../controller';
+import type { Module } from '../module';
+import type { Plugin } from '../plugin';
+import type { ServiceFor } from '../service';
+import type { Strapi as StrapiInstance } from '../strapi';
+
+// @ts-expect-error Service contract registries are global, not part of the Public registries.
+type BarrelRegistry = PublicRegistries.PackageServices;
+declare const barrelRegistry: BarrelRegistry;
+barrelRegistry satisfies unknown;
+
+type GreetingService = {
+  greet(name: string): Promise<string>;
+};
+
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Strapi {
+    // eslint-disable-next-line @typescript-eslint/no-namespace
+    namespace Registries {
+      interface PackageServices {
+        'plugin::type-lab.greeting': {
+          greet(value: number): number;
+          defaultOnly(): void;
+        };
+        'plugin::type-lab.counter': {
+          count(): number;
+        };
+        'api::type-lab.greeting': { greet(value: number): number };
+        'admin::type-lab': { greet(value: number): number };
+      }
+
+      interface AppServices {
+        'plugin::type-lab.greeting': GreetingService;
+        'api::type-lab.greeting': GreetingService;
+        'admin::type-lab': GreetingService;
+      }
+    }
+  }
+}
+
+// Existing registry declarations must not opt applications into stricter lookups.
+declare module '../../public/registries' {
+  interface Services {
+    'plugin::legacy.greeting': GreetingService;
+  }
+}
+
+declare const strapi: StrapiInstance;
+declare const dynamicPlugin: string;
+declare const dynamicService: string;
+declare const patternServiceName: `greeting-${string}`;
+declare const wideService: ServiceFor<string>;
+declare const patternService: ServiceFor<`plugin::${string}.greeting`>;
+
+strapi.service('api::type-lab.greeting').greet('Nico') satisfies Promise<string>;
+strapi.service('admin::type-lab').greet('Nico') satisfies Promise<string>;
+strapi.service('plugin::type-lab.greeting').greet('Nico') satisfies Promise<string>;
+strapi.plugin('type-lab').service('greeting').greet('Nico') satisfies Promise<string>;
+
+// @ts-expect-error Registered contracts reject incorrect method arguments.
+strapi.service('plugin::type-lab.greeting').greet(123);
+// @ts-expect-error Registered contracts reject nonexistent members.
+strapi.service('api::type-lab.greeting').missing();
+// @ts-expect-error Plugin lookups preserve the registered method arguments.
+strapi.plugin('type-lab').service('greeting').greet(123);
+// @ts-expect-error Plugin lookups preserve the registered return type.
+strapi.plugin('type-lab').service('greeting').greet('Nico') satisfies Promise<number>;
+// @ts-expect-error Plugin lookups do not inherit the permissive service index signature.
+strapi.plugin('type-lab').service('greeting').missing();
+
+/** `true` only for `unknown`: `any` and every other type give `false`. */
+declare function exactlyUnknown<T>(
+  value: T
+): [unknown] extends [T] ? (0 extends 1 & T ? false : true) : false;
+
+// Unregistered names resolve to `unknown`, including names only declared in `Public.Services`.
+// Callers pass a type argument to use them.
+exactlyUnknown(strapi.service('plugin::legacy.greeting')) satisfies true;
+exactlyUnknown(strapi.service('plugin::unregistered.greeting')) satisfies true;
+exactlyUnknown(strapi.service('api::unregistered.greeting')) satisfies true;
+exactlyUnknown(strapi.plugin('legacy').service('greeting')) satisfies true;
+exactlyUnknown(strapi.plugin('type-lab').service('unregistered')) satisfies true;
+// @ts-expect-error Unregistered literal names expose no members.
+strapi.service('plugin::unregistered.greeting').missing();
+// @ts-expect-error Plugin-scoped unregistered literal names expose no members.
+strapi.plugin('type-lab').service('unregistered').missing();
+
+// Dynamic names cannot be validated, so they resolve to `unknown` too.
+exactlyUnknown(wideService) satisfies true;
+exactlyUnknown(patternService) satisfies true;
+exactlyUnknown(strapi.service(dynamicService as `plugin::${string}.${string}`)) satisfies true;
+exactlyUnknown(strapi.plugin(dynamicPlugin).service('greeting')) satisfies true;
+exactlyUnknown(strapi.plugin('type-lab').service(dynamicService)) satisfies true;
+exactlyUnknown(strapi.plugin('type-lab').service(patternServiceName)) satisfies true;
+
+// Preserve explicit generic overrides and contextual inference on permissive lookups.
+strapi.plugin('type-lab').service<GreetingService>('greeting').greet('Nico');
+strapi.plugin('unregistered').service<GreetingService>('greeting').greet('Nico');
+strapi.plugin('type-lab').service<GreetingService>('unregistered').greet('Nico');
+// Full UID lookups accept the same explicit generic escape hatch, even for unregistered names.
+strapi
+  .service<GreetingService>('plugin::unregistered.greeting')
+  .greet('Nico') satisfies Promise<string>;
+strapi
+  .service<GreetingService>('api::unregistered.greeting')
+  .greet('Nico') satisfies Promise<string>;
+// The explicit generic wins over a registered contract.
+strapi.service<GreetingService>('plugin::type-lab.counter').greet('Nico') satisfies Promise<string>;
+// @ts-expect-error The explicit contract is not widened by the permissive service index signature.
+strapi.service<GreetingService>('plugin::unregistered.greeting').missing();
+// @ts-expect-error The UID is still checked against the service UID shape.
+strapi.service<GreetingService>('not-a-uid');
+// A type annotation on the result does not replace the type argument.
+// @ts-expect-error `T` is not inferred from the annotation.
+const contextual: GreetingService = strapi.plugin('type-lab').service(dynamicService);
+// @ts-expect-error `T` is not inferred from the annotation, for a dynamic plugin either.
+const contextualDynamic: GreetingService = strapi.plugin(dynamicPlugin).service('greeting');
+// @ts-expect-error `T` is not inferred from the annotation, for a full UID either.
+const contextualUid: GreetingService = strapi.service('plugin::unregistered.greeting');
+const legacyPlugin: Plugin = strapi.plugin('type-lab');
+// @ts-expect-error `T` is not inferred from the annotation, for the default `Plugin` either.
+const contextualLegacy: GreetingService = legacyPlugin.service('greeting');
+contextual satisfies unknown;
+contextualDynamic satisfies unknown;
+contextualUid satisfies unknown;
+contextualLegacy satisfies unknown;
+// Generic helpers that forward a service name pass their return type as the type argument.
+type LabServices = { greeting: GreetingService; unregistered: GreetingService };
+const getUnregisteredService = <TName extends keyof LabServices>(name: TName): LabServices[TName] =>
+  strapi.plugin('unregistered').service<LabServices[TName]>(name);
+const getRegisteredService = <TName extends keyof LabServices>(name: TName): LabServices[TName] =>
+  strapi.plugin('type-lab').service<LabServices[TName]>(name);
+const getServiceInferred = <TName extends keyof LabServices>(name: TName): LabServices[TName] =>
+  // @ts-expect-error Without the type argument, the lookup is not assignable to the return type.
+  strapi.plugin('unregistered').service(name);
+getServiceInferred satisfies unknown;
+getUnregisteredService('greeting').greet('Nico') satisfies Promise<string>;
+getRegisteredService('unregistered').greet('Nico') satisfies Promise<string>;
+
+// A conditional return type needs the explicit generic too.
+type LabServiceFactories = { greeting: () => GreetingService };
+type LabServiceInstance<TName extends keyof LabServiceFactories> = ReturnType<
+  LabServiceFactories[TName]
+>;
+const getRegisteredFactoryService = <TName extends keyof LabServiceFactories>(
+  name: TName
+): LabServiceInstance<TName> => strapi.plugin('type-lab').service<LabServiceInstance<TName>>(name);
+const getRegisteredFactoryServiceInferred = <TName extends keyof LabServiceFactories>(
+  name: TName
+): LabServiceInstance<TName> =>
+  // @ts-expect-error Without the explicit generic, the deferred lookup is not assignable.
+  strapi.plugin('type-lab').service(name);
+getRegisteredFactoryService('greeting').greet('Nico') satisfies Promise<string>;
+getRegisteredFactoryServiceInferred('greeting').greet('Nico') satisfies Promise<string>;
+// @ts-expect-error Assigned functions are checked against the generic signature, as before registries.
+legacyPlugin.service = () => ({ greet: () => 'Nico' });
+
+// Parameterizing Plugin must preserve its explicitly declared Module members.
+strapi.plugin('type-lab').config<number>('limit') satisfies number;
+strapi.plugin('type-lab').contentTypes satisfies Module['contentTypes'];
+strapi.plugin('type-lab').controller<Controller>('example') satisfies Controller;
+strapi.log.info('typed service registry');
+strapi.documents satisfies StrapiInstance['documents'];
+strapi.db satisfies StrapiInstance['db'];
+
+// Defaults are available when the application has not supplied an override.
+strapi.service('plugin::type-lab.counter').count() satisfies number;
+strapi.plugin('type-lab').service('counter').count() satisfies number;
+// @ts-expect-error Default contracts reject nonexistent methods.
+strapi.plugin('type-lab').service('counter').missing();
+// @ts-expect-error Default return types are checked through full UID lookup.
+strapi.service('plugin::type-lab.counter').count() satisfies string;
+
+// An override replaces the default contract rather than intersecting signatures.
+// The existing greeting checks above establish the application's string signature.
+// @ts-expect-error Methods from the replaced default are not retained.
+strapi.service('plugin::type-lab.greeting').defaultOnly();
+// @ts-expect-error Plugin-scoped lookup also drops the replaced default methods.
+strapi.plugin('type-lab').service('greeting').defaultOnly();
+
+// Separate declarations merge into one registry: every augmentation contributes its keys.
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Strapi {
+    // eslint-disable-next-line @typescript-eslint/no-namespace
+    namespace Registries {
+      interface PackageServices {
+        'plugin::type-lab-other.counter': { total(): number };
+      }
+    }
+  }
+}
+strapi.service('plugin::type-lab-other.counter').total() satisfies number;
+strapi.service('plugin::type-lab.counter').count() satisfies number;
+// @ts-expect-error Merged defaults stay strict.
+strapi.service('plugin::type-lab-other.counter').missing();
+
+// The global `strapi` instance resolves through the same registries.
+globalThis.strapi.service('plugin::type-lab.greeting').greet('Nico') satisfies Promise<string>;
+
+// API module lookups resolve registered names relative to the API, like plugin lookups.
+strapi.api('type-lab').service('greeting').greet('Nico') satisfies Promise<string>;
+// @ts-expect-error API lookups use the registered contract.
+strapi.api('type-lab').service('greeting').missing();
+exactlyUnknown(strapi.api('type-lab').service('unregistered')) satisfies true;
+exactlyUnknown(strapi.api('unregistered').service('greeting')) satisfies true;
+exactlyUnknown(strapi.api('type-lab').service(dynamicService)) satisfies true;
+exactlyUnknown(strapi.api(dynamicPlugin).service('greeting')) satisfies true;
+strapi.api('type-lab').service<LabServices['greeting']>('unregistered').greet('Nico');
+// The explicit generic wins over a registered contract.
+strapi.api('type-lab').service<{ count(): number }>('greeting').count() satisfies number;
+// @ts-expect-error `T` is not inferred from the annotation, for API lookups either.
+const contextualApi: GreetingService = strapi.api('type-lab').service('unregistered');
+contextualApi satisfies unknown;
+// Modules other than APIs, such as `strapi.admin`, keep the legacy lookups.
+strapi.admin.service('type-lab').anything();
+const contextualAdmin: GreetingService = strapi.admin.service('type-lab');
+contextualAdmin satisfies GreetingService;
