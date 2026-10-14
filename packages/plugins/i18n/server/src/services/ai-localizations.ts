@@ -1,4 +1,5 @@
 import type { Core, Modules, Schema, UID } from '@strapi/types';
+import type { Services as ContentManagerServices } from '@strapi/content-manager/strapi-server';
 import { traverseEntity } from '@strapi/utils';
 import { getService } from '../utils';
 import type { GenerateTranslationsResult } from './ai-translations';
@@ -314,7 +315,9 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
       }
 
       // Use populate-builder service for deep populate to fetch all nested fields
-      const populateBuilderService = strapi.plugin('content-manager').service('populate-builder');
+      const populateBuilderService = strapi
+        .plugin('content-manager')
+        .service<ContentManagerServices.PopulateBuilderService>('populate-builder');
       const deepPopulate = await populateBuilderService(model).populateDeep(Infinity).build();
       const getModelBound = strapi.getModel.bind(strapi);
 

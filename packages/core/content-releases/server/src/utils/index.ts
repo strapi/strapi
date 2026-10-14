@@ -1,6 +1,7 @@
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
 
 import type { UID, Data, Core } from '@strapi/types';
+import type { Services as ContentManagerServices } from '@strapi/content-manager/strapi-server';
 
 import type { Services } from '../types';
 import type { Stage } from '../../../shared/contracts/release-actions';
@@ -62,7 +63,9 @@ export const getDraftEntryValidStatus = async (
   { contentType, documentId, locale }: Action,
   { strapi }: { strapi: Core.Strapi }
 ) => {
-  const populateBuilderService = strapi.plugin('content-manager').service('populate-builder');
+  const populateBuilderService = strapi
+    .plugin('content-manager')
+    .service<ContentManagerServices.PopulateBuilderService>('populate-builder');
   const populate = await populateBuilderService(contentType).populateDeep(Infinity).build();
 
   const entry = await getEntry({ contentType, documentId, locale, populate }, { strapi });
