@@ -772,6 +772,13 @@ describe('Role CRUD End to End', () => {
           conditions: ['admin::is-creator'],
           properties: { fields: ['username'] },
         },
+        // Held next to the unconditional read above, on another field and with a condition
+        {
+          action: READ_ACTION,
+          subject: SUBJECT,
+          conditions: ['admin::is-creator'],
+          properties: { fields: ['provider'] },
+        },
       ]);
 
       targetRole = await utils.createRole({
@@ -854,6 +861,51 @@ describe('Role CRUD End to End', () => {
       expect(rolePermissions.map(({ action }) => action).sort()).toEqual(
         [CREATE_ACTION, READ_ACTION].sort()
       );
+    });
+
+    test('Cannot combine the fields of one held permission with the conditions of another', async () => {
+      // `provider` is only held with a condition; the unconditional read on other fields does not lift it
+      const unconditionalProvider = {
+        action: READ_ACTION,
+        subject: SUBJECT,
+        properties: { fields: ['provider'] },
+        conditions: [],
+      };
+      const unconditionalMixed = {
+        action: READ_ACTION,
+        subject: SUBJECT,
+        properties: { fields: ['username', 'provider'] },
+        conditions: [],
+      };
+
+      for (const permission of [unconditionalProvider, unconditionalMixed]) {
+        const res = await updateTargetRolePermissions(rqRequester, [permission]);
+
+        expect(res.statusCode).toBe(403);
+        expect(res.body.error.details.permissions).toEqual([permission]);
+      }
+
+      // Under the condition, every field is covered by one held permission or the other
+      const conditionalRes = await updateTargetRolePermissions(rqRequester, [
+        {
+          action: READ_ACTION,
+          subject: SUBJECT,
+          properties: { fields: ['username', 'provider'] },
+          conditions: ['admin::is-creator'],
+        },
+      ]);
+      expect(conditionalRes.statusCode).toBe(200);
+
+      // A union on fields alone is still fine
+      const sameDimensionRes = await updateTargetRolePermissions(rqRequester, [
+        {
+          action: READ_ACTION,
+          subject: SUBJECT,
+          properties: { fields: ['username', 'email'] },
+          conditions: [],
+        },
+      ]);
+      expect(sameDimensionRes.statusCode).toBe(200);
     });
 
     test('Preserves permissions the role already holds, even if the requester does not hold them', async () => {
