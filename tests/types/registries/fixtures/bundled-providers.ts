@@ -14,14 +14,21 @@ app.plugin('email').service('email').sendTemplatedEmail satisfies (...args: neve
 app.plugin('content-type-builder').service('content-types') satisfies object;
 // EE-feature plugins register their services only with the feature: they may be undefined.
 app.plugin('review-workflows').service('workflows')?.getAssignedWorkflow satisfies
-  | ((...args: never[]) => unknown)
-  | undefined;
+  ((...args: never[]) => unknown) | undefined;
 app.plugin('content-releases').service('release')?.findPage satisfies
-  | ((...args: never[]) => unknown)
-  | undefined;
+  ((...args: never[]) => unknown) | undefined;
 // @ts-expect-error The service may be undefined.
 app.plugin('content-releases').service('release').findPage satisfies unknown;
 app.service('admin::role').getSuperAdmin satisfies (...args: never[]) => unknown;
+// No role may match: `findOne` resolves to `null`.
+void app
+  .service('admin::role')
+  .findOne({ id: 1 })
+  .then((role) => {
+    // @ts-expect-error The role may be null.
+    role.code satisfies string;
+    role?.code satisfies string | undefined;
+  });
 // EE-only members stay optional on the shared contract.
 // @ts-expect-error `ssoCheckRolesIdForDeletion` only exists in EE.
 app.service('admin::role').ssoCheckRolesIdForDeletion([]);
@@ -37,5 +44,4 @@ void app.service('admin::persist-tables').persistTablesWithPrefix('prefix');
 // @ts-expect-error The service may be undefined.
 void app.service('admin::seat-enforcement').getDisabledUserList();
 app.service('admin::seat-enforcement')?.getDisabledUserList satisfies
-  | ((...args: never[]) => unknown)
-  | undefined;
+  ((...args: never[]) => unknown) | undefined;
