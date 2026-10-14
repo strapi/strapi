@@ -1,8 +1,7 @@
 import type { Core } from '@strapi/types';
+import { getService } from '../utils';
 
 const createAILocalizationJobsController = ({ strapi }: { strapi: Core.Strapi }) => {
-  // `any`, as the untyped lookup was on develop: the published controller types stay the same.
-  const getService = (name: string) => strapi.plugin('i18n').service<any>(name);
   const aiLocalizationJobsService = getService('ai-localization-jobs');
 
   return {
